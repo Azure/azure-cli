@@ -19,6 +19,20 @@ def add_commands(top_level_parser):
         
         parser = top_level_parser.add_parser(mod.COMMAND_NAME, help=mod.COMMAND_HELP)
         mod.add_commands(parser)
+        
+        valid = False
+        try:
+            mod.execute
+            valid = True
+        except AttributeError:
+            try:
+                mod.dispatch.execute
+                valid = True
+            except AttributeError:
+                pass
+        assert valid, "Module {} has no 'execute()' or command dispatcher".format(
+            mod.__name__
+        )
 
 def process_command(args):
     # service will be the azure.cli.commands.<service> module to import
@@ -33,7 +47,12 @@ def process_command(args):
     except ImportError:
         raise RuntimeError(RC.UNKNOWN_SERVICE.format(service))
     
-    mod.execute(args)
+    try:
+        execute = mod.execute
+    except AttributeError:
+        execute = mod.dispatch.execute
+    
+    return execute(args)
 
 class CommandDispatcher(object):
     def __init__(self, command_name):
@@ -49,8 +68,19 @@ class CommandDispatcher(object):
         
         self.commands[func_or_name.__name__] = func_or_name
         return func_or_name
+    
+    def no_command(self):
+        '''Displays a message when no command is available.
         
+        Override this function with an argument parser's `print_help`
+        method to display help.
+        '''
+        raise RuntimeError(RC.NO_COMMAND_GIVEN)
+    
     def execute(self, args):
-        command = getattr(args, self.command_name)
+        command = getattr(args, self.command_name, None)
+        if not command:
+            self.no_command()
+            return
         logging.debug("Dispatching to '%s'", command)
         return self.commands[command](args)
