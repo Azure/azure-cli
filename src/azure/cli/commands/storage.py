@@ -18,7 +18,13 @@ def add_commands(parser):
 @dispatch
 def checkname(args):
     '''Performs the 'checkname' command'''
+    from azure.mgmt.storage import StorageManagementClient, StorageManagementClientConfiguration
     
     logging.info('''smc = StorageManagementClient(StorageManagementClientConfiguration())
 smc.storage_accounts.check_name_availability({account_name!r})
 '''.format_map(vars(args)))
+    
+    smc = StorageManagementClient(StorageManagementClientConfiguration())
+    logging.warn(smc.storage_accounts.check_name_availability(args.account_name))
+    
+    

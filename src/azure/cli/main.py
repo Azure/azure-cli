@@ -1,15 +1,11 @@
 import logging
 
 from ._argparse import ArgumentParser
-from ._config import get_config
 from ._logging import configure_logging
 from ._util import import_module
 
 __author__ = "Microsoft Corporation <python@microsoft.com>"
 __version__ = "2016.2.4"
-
-# The API version of a particular azure-cli package is fixed.
-API_VERSION = '2016-02-04'
 
 # TODO: detect language and load correct resources
 RC = import_module('azure.cli.resources-en_US')
@@ -25,6 +21,8 @@ def main(argv):
         fromfile_prefix_chars='@',
     )
 
+    parser.add_argument('--api-version', help=RC.API_VERSION_HELP)
+
     services = parser.add_subparsers(
         title=RC.SERVICES,
         help=RC.SERVICES_HELP,
@@ -38,6 +36,12 @@ def main(argv):
     if not args.service:
         parser.print_help()
         return 1
+    
+    if args.api_version:
+        logging.debug('Using api version %s', args.api_version)
+        # TODO: Force use of specified version
+        # Probably by extending azure.__path__ to load the correct version of azure.mgmt
+        pass
     
     try:
         process_command(args)

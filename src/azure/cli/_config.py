@@ -13,4 +13,3 @@ def get_config():
         cfg.read(os.path.expanduser('~/azure.ini'))
         _loaded_config = cfg
     return _loaded_config
-
