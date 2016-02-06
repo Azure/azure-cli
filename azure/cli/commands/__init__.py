@@ -1,26 +1,56 @@
 import logging
 
-from azure.cli.main import RC
+from ..main import RC
+from .._util import import_module
 
-def add_commands(create_parser):
-    from .storage import add_storage_commands
-    storage_parser = create_parser(RC.STORAGE_COMMAND, help=RC.STORAGE_COMMAND_HELP)
-    storage_commands = storage_parser.add_subparsers(dest='command')
-    add_storage_commands(storage_commands.add_parser)
+COMMAND_MODULES = [
+    'login',
+    'storage',
+]
+
+MODULE_PREFIX = __package__ + '.'
+
+def add_commands(top_level_parser):
+    from .._util import import_module
+    for module in COMMAND_MODULES:
+        logging.debug("Adding commands from '%s'", module)
+        mod = import_module(MODULE_PREFIX + module)
+        logging.debug(" - source: '%s'", mod.__file__)
+        
+        parser = top_level_parser.add_parser(mod.COMMAND_NAME, help=mod.COMMAND_HELP)
+        mod.add_commands(parser)
 
 def process_command(args):
-    if args.service == 'storage':
-        import azure.cli.commands.storage as cmd
-    elif args.service == 'spam':
-        import azure.cli.commands.spam as cmd
-    else:
-        logging.error(RC.UNKNOWN_SERVICE.format(args.service))
-        return
+    # service will be the azure.cli.commands.<service> module to import
+    service = (args.service or '').lower()
     
+    if not service:
+        raise RuntimeError(RC.UNKNOWN_SERVICE.format(''))
+    
+    logging.debug("Importing '%s%s' for command", MODULE_PREFIX, service)
     try:
-        func = getattr(cmd, args.command.lower())
-    except AttributeError:
-        logging.error(RC.UNKNOWN_COMMAND.format(args.service, args.command))
-        return
+        mod = import_module(MODULE_PREFIX + service)
+    except ImportError:
+        raise RuntimeError(RC.UNKNOWN_SERVICE.format(service))
     
-    func(args)
+    mod.execute(args)
+
+class CommandDispatcher(object):
+    def __init__(self, command_name):
+        self.command_name = command_name
+        self.commands = {}
+    
+    def __call__(self, func_or_name):
+        if isinstance(func_or_name, str):
+            def decorate(func):
+                self.commands[func_or_name] = func
+                return func
+            return decorate
+        
+        self.commands[func_or_name.__name__] = func_or_name
+        return func_or_name
+        
+    def execute(self, args):
+        command = getattr(args, self.command_name)
+        logging.debug("Dispatching to '%s'", command)
+        return self.commands[command](args)
