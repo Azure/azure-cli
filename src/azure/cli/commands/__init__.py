@@ -3,6 +3,7 @@ import logging
 from ..main import RC
 from .._util import import_module
 
+# TODO: Alternatively, simply scan the directory for all modules
 COMMAND_MODULES = [
     'login',
     'storage',
@@ -11,7 +12,6 @@ COMMAND_MODULES = [
 MODULE_PREFIX = __package__ + '.'
 
 def add_commands(top_level_parser):
-    from .._util import import_module
     for module in COMMAND_MODULES:
         logging.debug("Adding commands from '%s'", module)
         mod = import_module(MODULE_PREFIX + module)
