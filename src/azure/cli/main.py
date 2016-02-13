@@ -1,4 +1,5 @@
 import logging
+import os
 
 from ._argparse import ArgumentParser
 from ._logging import configure_logging
@@ -15,36 +16,16 @@ def main(argv):
     # need to worry about parsing them elsewhere
     argv = configure_logging(argv)
     
-    parser = ArgumentParser(
-        prog=RC.PROG,
-        description=RC.DESCRIPTION,
-        fromfile_prefix_chars='@',
-    )
+    import azure.cli.commands as commands
+    parser = ArgumentParser()
+    # TODO: detect language
+    parser.doc_source = os.path.dirname(commands.__file__)
+    parser.doc_suffix = '.en_US.txt'
 
-    parser.add_argument('--api-version', help=RC.API_VERSION_HELP)
-
-    services = parser.add_subparsers(
-        title=RC.SERVICES,
-        help=RC.SERVICES_HELP,
-        dest='service',
-    )
-    
-    from .commands import add_commands, process_command
-    callbacks = add_commands(services)
-    
-    args = parser.parse_args(argv)
-    if not args.service:
-        parser.print_help()
-        return 1
-    
-    if args.api_version:
-        logging.debug('Using api version %s', args.api_version)
-        # TODO: Force use of specified version
-        # Probably by extending azure.__path__ to load the correct version of azure.mgmt
-        pass
+    commands.add_to_parser(parser)
     
     try:
-        process_command(args)
+        parser.execute(argv)
     except RuntimeError as ex:
         logging.error(ex.args[0])
         return ex.args[1] if len(ex.args) >= 2 else -1
