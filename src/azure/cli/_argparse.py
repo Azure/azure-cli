@@ -1,5 +1,6 @@
 from __future__ import print_function
 import json
+import logging
 import os
 import sys
 
@@ -99,10 +100,12 @@ class ArgumentParser(object):
         it = _iter_args(args, all_global_args)
 
         m = self.noun_map
+        nouns = []
         n = next(it, '')
         while n:
             try:
                 m = m[n.lower()]
+                nouns.append(n.lower())
             except LookupError:
                 if '$args' not in m:
                     show_usage = True
@@ -117,9 +120,9 @@ class ArgumentParser(object):
             show_usage = True
         
         if show_completions:
-            return self.display_completions(nouns, m, arguments, out)
+            return self.display_completions(nouns, m, args, out)
         if show_usage:
-            return self.display_usage(nouns, m, arguments, out)
+            return self.display_usage(nouns, m, args, out)
 
         parsed = Arguments()
         while n:
@@ -151,13 +154,14 @@ class ArgumentParser(object):
                 print(f.read(), file=out, flush=True)
         except OSError:
             # TODO: Behave better when no docs available
-            raise
+            print('No documentation available', file=out, flush=True)
+            logging.debug('Expected documentation at %s', doc_file)
 
     def display_completions(self, nouns, noun_map, arguments, out=sys.stdout):
         completions = [k for k in noun_map if not k.startswith('$')]
 
-        args = noun_map.get('$args')
-        if args:
-            completions.extend(n for n, v in args if n)
+        kwargs = noun_map.get('$kwargs')
+        if kwargs:
+            completions.extend('--' + a for a in kwargs if a)
 
         print('\n'.join(sorted(completions)), file=out, flush=True)
