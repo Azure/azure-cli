@@ -1,0 +1,57 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{938454f7-93bd-41a7-84b2-3c89d64b969d}</ProjectGuid>
+    <ProjectHome>src\</ProjectHome>
+    <StartupFile />
+    <SearchPath />
+    <WorkingDirectory>.</WorkingDirectory>
+    <OutputPath>.</OutputPath>
+    <ProjectTypeGuids>{888888a0-9f3d-457c-b088-3a5042f75d52}</ProjectTypeGuids>
+    <LaunchProvider>Standard Python launcher</LaunchProvider>
+    <InterpreterId>{1dd9c42b-5980-42ce-a2c3-46d3bf0eede4}</InterpreterId>
+    <InterpreterVersion>3.5</InterpreterVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'" />
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'" />
+  <PropertyGroup>
+    <VisualStudioVersion Condition=" '$(VisualStudioVersion)' == '' ">10.0</VisualStudioVersion>
+    <PtvsTargetsFile>$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets</PtvsTargetsFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="azure\cli\commands\login.py" />
+    <Compile Include="azure\cli\commands\storage.py" />
+    <Compile Include="azure\cli\commands\__init__.py" />
+    <Compile Include="azure\cli\main.py" />
+    <Compile Include="azure\cli\resources-en_US.py" />
+    <Compile Include="azure\cli\_argparse.py" />
+    <Compile Include="azure\cli\_config.py" />
+    <Compile Include="azure\cli\_logging.py" />
+    <Compile Include="azure\cli\_util.py" />
+    <Compile Include="azure\cli\__init__.py" />
+    <Compile Include="azure\cli\__main__.py" />
+    <Compile Include="azure\__init__.py" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="azure" />
+    <Folder Include="azure\cli" />
+    <Folder Include="azure\cli\commands" />
+  </ItemGroup>
+  <ItemGroup>
+    <Interpreter Include="..\env\">
+      <Id>{1dd9c42b-5980-42ce-a2c3-46d3bf0eede4}</Id>
+      <BaseInterpreter>{2af0f10d-7135-4994-9156-5d01c9c11b7e}</BaseInterpreter>
+      <Version>3.5</Version>
+      <Description>env (Python 3.5)</Description>
+      <InterpreterPath>Scripts\python.exe</InterpreterPath>
+      <WindowsInterpreterPath>Scripts\pythonw.exe</WindowsInterpreterPath>
+      <LibraryPath>Lib\</LibraryPath>
+      <PathEnvironmentVariable>PYTHONPATH</PathEnvironmentVariable>
+      <Architecture>X86</Architecture>
+    </Interpreter>
+  </ItemGroup>
+  <Import Project="$(PtvsTargetsFile)" Condition="Exists($(PtvsTargetsFile))" />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets" Condition="!Exists($(PtvsTargetsFile))" />
+</Project>
