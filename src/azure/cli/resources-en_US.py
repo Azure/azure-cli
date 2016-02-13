@@ -1,8 +1,7 @@
+LOCALE = 'en_US'
 
 PROG = 'azure'
 DESCRIPTION = "Azure Command-Line Tools"
-
-API_VERSION_HELP = "specify the API version set to use (yyyy-mm-dd)"
 
 SERVICES = "services"
 SERVICES_HELP = "select the service"
