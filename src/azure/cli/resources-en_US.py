@@ -1,19 +1,9 @@
 LOCALE = 'en_US'
 
-PROG = 'azure'
+PROG = 'az'
 DESCRIPTION = "Azure Command-Line Tools"
 
-SERVICES = "services"
-SERVICES_HELP = "select the service"
+MISSING_ARGUMENT = 'argument {0} was not provided'
 
-COMMANDS = "commands"
-
-UNKNOWN_SERVICE = "unrecognized service '{0}'"
-UNKNOWN_COMMAND = "{0} service does not support command '{1}'"
-NO_COMMAND_GIVEN = "no command specified"
-
-STORAGE_COMMAND_HELP = "provides storage operations"
-LOGIN_COMMAND_HELP = "helps you log in"
-
-USERNAME_METAVAR = '<username>'
-NAME_METAVAR = '<name>'
+ENTER_USERNAME = 'Enter username: '
+ENTER_PASSWORD_FOR = 'Enter password for {}: '

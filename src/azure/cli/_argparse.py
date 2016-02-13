@@ -4,6 +4,12 @@ import logging
 import os
 import sys
 
+class IncorrectUsageError(Exception):
+    '''Raised when a command is incorrectly used and the usage should be
+    displayed to the user.
+    '''
+    pass
+
 class Arguments(dict):
     def __init__(self, source=None):
         self.positional = []
@@ -24,8 +30,8 @@ class Arguments(dict):
             return self[key]
         except LookupError:
             pass
-        raise AttributeError(key)
-
+        from .main import RC
+        raise IncorrectUsageError(RC.MISSING_ARGUMENT.format(key))
 
 def _split_argspec(spec):
     nouns, args, kwargs = [], [], {}
@@ -67,7 +73,8 @@ def _iter_args(args, skip):
 
 
 class ArgumentParser(object):
-    def __init__(self):
+    def __init__(self, prog):
+        self.prog = prog
         self.noun_map = {
             '$doc': 'azure-cli',
         }
@@ -88,6 +95,7 @@ class ArgumentParser(object):
                 '$doc': full_name
             })
             full_name += '.'
+        m['$spec'] = spec
         m['$args'] = args
         m['$kwargs'] = kwargs
         m['$handler'] = handler
@@ -120,34 +128,50 @@ class ArgumentParser(object):
             show_usage = True
         
         if show_completions:
-            return self.display_completions(nouns, m, args, out)
+            return self._display_completions(nouns, m, args, out)
         if show_usage:
-            return self.display_usage(nouns, m, args, out)
+            return self._display_usage(nouns, m, args, out)
 
         parsed = Arguments()
         while n:
             next_n = next(it, '')
 
-            key_n = n.lower().strip('-')
-            expected_value = expected_kwargs.get(key_n)
-            if expected_value is True:
-                # Arg with no value
-                parsed.add_from_dotted(key_n, True)
-            elif not n.startswith('-'):
+            if n.startswith('-'):
+                key_n = n.lower().strip('-')
+                expected_value = expected_kwargs.get(key_n)
+                if expected_value is True:
+                    # Arg with no value
+                    parsed.add_from_dotted(key_n, True)
+                elif expected_value is not None or (next_n and not next_n.startswith('-')):
+                    # Arg with a value
+                    parsed.add_from_dotted(key_n, next_n)
+                    next_n = next(it, '')
+                else:
+                    # Unknown arg
+                    parsed.add_from_dotted(key_n, True)
+            else:
                 # Positional arg
                 parsed.positional.append(n)
-            elif expected_value is not None or (next_n and not next_n.startswith('-')):
-                # Arg with a value
-                parsed.add_from_dotted(key_n, next_n)
-                next_n = next(it, '')
-            else:
-                # Unknown arg
-                parsed.add_from_dotted(key_n, True)
             n = next_n
 
-        return handler(parsed)
+        try:
+            return handler(parsed)
+        except IncorrectUsageError as ex:
+            print(str(ex), file=out)
+            return self.display_usage(nouns, m, args, out)
 
-    def display_usage(self, nouns, noun_map, arguments, out=sys.stdout):
+    def _display_usage(self, nouns, noun_map, arguments, out=sys.stdout):
+        spec = ' '.join(noun_map.get('$spec') or nouns)
+        print('    {} {}'.format(self.prog, spec), file=out)
+        print(file=out, flush=True)
+        
+        subnouns = sorted(k for k in noun_map if not k.startswith('$'))
+        if subnouns:
+            print('Subcommands', file=out)
+            for n in subnouns:
+                print('    {}'.format(n), file=out)
+            print(file=out, flush=True)
+
         doc_file = os.path.join(self.doc_source, noun_map['$doc'] + self.doc_suffix)
         try:
             with open(doc_file, 'r') as f:
@@ -157,7 +181,7 @@ class ArgumentParser(object):
             print('No documentation available', file=out, flush=True)
             logging.debug('Expected documentation at %s', doc_file)
 
-    def display_completions(self, nouns, noun_map, arguments, out=sys.stdout):
+    def _display_completions(self, nouns, noun_map, arguments, out=sys.stdout):
         completions = [k for k in noun_map if not k.startswith('$')]
 
         kwargs = noun_map.get('$kwargs')
