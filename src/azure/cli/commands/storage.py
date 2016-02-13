@@ -1,11 +1,16 @@
 import logging
-from ..main import RC
+from ..main import RC, CONFIG, SESSION
 from ..commands import command
 
 @command('storage test <pos> --bool --arg <value>')
 def test(args):
-    print(args.positional)
-    print(args)
+    print('test', args.positional)
+    print('test', args)
+
+@command('storage test subtest')
+def subtest(args):
+    print('subtest', args.positional)
+    print('subtest', args)
 
 @command('storage account check --account-name <name>')
 def checkname(args):

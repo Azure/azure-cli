@@ -1,22 +1,22 @@
 import logging
-from azure.cli.main import RC
-
-COMMAND_NAME = 'login'
-COMMAND_HELP = RC.LOGIN_COMMAND_HELP
+from ..main import RC, CONFIG, SESSION
+from ..commands import command
 
 def add_commands(parser):
     parser.add_argument('--user', '-u', metavar=RC.USERNAME_METAVAR)
 
-def execute(args):
-    user = args.user
+@command('login --user <username>')
+def login(args):
+    user = args.get('user') or SESSION.get('user') or CONFIG.get('user')
     if not user:
-        # TODO: move string to RC
-        user = input('Enter username: ')
+        user = input(RC.ENTER_USERNAME)
     
-    # INFO: Deliberately delay imports for startup performance
     import getpass
-    # TODO: move string to RC
-    password = getpass.getpass('Enter password for {}: '.format(user))
+    password = getpass.getpass(RC.ENTER_PASSWORD_FOR.format(user))
     
     logging.info('''credentials = UserCredential({!r}, {!r})
 '''.format(user, password))
+
+    # TODO: get and cache token rather than user/password
+    SESSION['user'] = user
+    SESSION['password'] = password
