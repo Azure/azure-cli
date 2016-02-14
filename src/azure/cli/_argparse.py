@@ -30,33 +30,7 @@ class Arguments(dict):
             return self[key]
         except LookupError:
             pass
-        from .main import RC
-        raise IncorrectUsageError(RC.MISSING_ARGUMENT.format(key))
-
-def _split_argspec(spec):
-    nouns, args, kwargs = [], [], {}
-    it = iter(spec)
-    n = next(it, None)
-    while n:
-        if n.startswith(('-', '<')):
-            break
-        nouns.append(n)
-        n = next(it, None)
-
-    while n:
-        next_n = next(it, None)
-        if n.startswith('-'):
-            key_n = n.lower().strip('-')
-            if next_n and not next_n.startswith('-'):
-                kwargs[key_n] = next_n.strip('<> ')
-                next_n = next(it, None)
-            else:
-                kwargs[key_n] = True
-        else:
-            args.append(n.strip('<> '))
-        n = next_n
-
-    return nouns, args, kwargs
+        raise IncorrectUsageError(_("Argument {0} is required").format(key))
 
 def _iter_args(args, skip):
     for a in args:
@@ -85,8 +59,8 @@ class ArgumentParser(object):
         self.doc_source = './'
         self.doc_suffix = '.txt'
 
-    def add_command(self, spec, handler):
-        nouns, args, kwargs = _split_argspec(spec)
+    def add_command(self, handler, name=None, description=None, args=None):
+        nouns = (name or handler.__name__).split()
         full_name = ''
         m = self.noun_map
         for n in nouns:
@@ -95,10 +69,30 @@ class ArgumentParser(object):
                 '$doc': full_name
             })
             full_name += '.'
-        m['$spec'] = spec
-        m['$args'] = args
-        m['$kwargs'] = kwargs
+        m['$description'] = description or handler.__doc__
         m['$handler'] = handler
+
+        m['$args'] = []
+        m['$kwargs'] = kw = {}
+        m['$argdoc'] = ad = []
+        for spec, desc in (args or []):
+            if not spec.startswith('-'):
+                m['$args'].append(spec.strip('<> '))
+                ad.append((spec, desc))
+                continue
+
+            aliases = spec.split()
+            if aliases[-1].startswith('-'):
+                v = True
+            else:
+                v = aliases.pop().strip('<> ')
+            kw.update({a: v for a in aliases})
+            ad.append(('/'.join(aliases), desc))
+
+        # args are added in reverse order, so reverse our lists
+        m['$args'].reverse()
+        ad.reverse()
+
 
     def execute(self, args, out=sys.stdout):
         show_usage = any(a in self.help_args for a in args)
@@ -137,8 +131,9 @@ class ArgumentParser(object):
             next_n = next(it, '')
 
             if n.startswith('-'):
-                key_n = n.lower().strip('-')
+                key_n = n.lower()
                 expected_value = expected_kwargs.get(key_n)
+                key_n = key_n.strip('-')
                 if expected_value is True:
                     # Arg with no value
                     parsed.add_from_dotted(key_n, True)
@@ -170,6 +165,14 @@ class ArgumentParser(object):
             print('Subcommands', file=out)
             for n in subnouns:
                 print('    {}'.format(n), file=out)
+            print(file=out, flush=True)
+        
+        argdoc = noun_map.get('$argdoc')
+        if argdoc:
+            print('Arguments', file=out)
+            maxlen = max(len(a) for a, d in argdoc)
+            for a, d in argdoc:
+                print('    {0:<{1}} - {2}'.format(a, maxlen, d), file=out)
             print(file=out, flush=True)
 
         doc_file = os.path.join(self.doc_source, noun_map['$doc'] + self.doc_suffix)

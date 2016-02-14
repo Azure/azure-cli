@@ -6,6 +6,12 @@ import time
 from codecs import open
 
 class Session(collections.abc.MutableMapping):
+    '''A simple dict-like class that is backed by a JSON file.
+
+    All direct modifications will save the file. Indirect modifications should
+    be followed by a call to `save_with_retry` or `save`.
+    '''
+
     def __init__(self):
         self.filename = None
         self.data = {}
@@ -38,8 +44,11 @@ class Session(collections.abc.MutableMapping):
         else:
             self.save()
 
+    def get(self, key, default=None):
+        return self.data.get(key, default)
+
     def __getitem__(self, key):
-        return self.data[key]
+        return self.data.setdefault(key, {})
 
     def __setitem__(self, key, value):
         self.data[key] = value
