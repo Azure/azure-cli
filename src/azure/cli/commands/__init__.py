@@ -1,6 +1,5 @@
 import logging
 
-from ..main import RC
 from .._argparse import IncorrectUsageError
 
 # TODO: Alternatively, simply scan the directory for all modules
@@ -9,14 +8,28 @@ COMMAND_MODULES = [
     'storage',
 ]
 
-_COMMANDS = []
+_COMMANDS = {}
 
-def command(args):
+def command(name):
     def add_command(handler):
-        _COMMANDS.append((args.split(), handler))
-        logging.debug('Added %s as "%s"', handler, args)
+        _COMMANDS.setdefault(handler, {})['name'] = name
+        logging.debug('Added %s as command "%s"', handler, name)
         return handler
     return add_command
+
+def description(description):
+    def add_description(handler):
+        _COMMANDS.setdefault(handler, {})['description'] = description
+        logging.debug('Added description "%s" to %s', description, handler)
+        return handler
+    return add_description
+
+def option(spec, description=None):
+    def add_option(handler):
+        _COMMANDS.setdefault(handler, {}).setdefault('args', []).append((spec, description))
+        logging.debug('Added option "%s" to %s', spec, handler)
+        return handler
+    return add_option
 
 def add_to_parser(parser, command=None):
     '''Loads commands into the parser
@@ -41,5 +54,5 @@ def add_to_parser(parser, command=None):
             __import__('azure.cli.commands.' + mod)
         loaded = True
 
-    for args, handler in _COMMANDS:
-        parser.add_command(args, handler)
+    for handler, info in _COMMANDS.items():
+        parser.add_command(handler, **info)

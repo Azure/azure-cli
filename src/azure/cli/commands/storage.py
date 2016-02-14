@@ -1,8 +1,11 @@
 import logging
-from ..main import RC, CONFIG, SESSION
-from ..commands import command
+from ..main import CONFIG, SESSION
+from ..commands import command, option
 
-@command('storage test <pos> --bool --arg <value>')
+@command('storage test')
+@option('<pos>')
+@option('--bool')
+@option('--arg <value>')
 def test(args):
     print('test', args.positional)
     print('test', args)
@@ -12,7 +15,8 @@ def subtest(args):
     print('subtest', args.positional)
     print('subtest', args)
 
-@command('storage account check --account-name <name>')
+@command('storage account check')
+@option('--account-name <name>')
 def checkname(args):
     from azure.mgmt.storage import StorageManagementClient, StorageManagementClientConfiguration
     

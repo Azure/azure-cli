@@ -1,5 +1,8 @@
+import gettext
 import logging
 import os
+
+gettext.install("az", os.path.join(os.path.abspath(__file__), '..', 'locale'))
 
 from ._argparse import ArgumentParser
 from ._logging import configure_logging
@@ -8,9 +11,6 @@ from ._util import import_module
 
 __author__ = "Microsoft Corporation <python@microsoft.com>"
 __version__ = "2016.2.4"
-
-# TODO: detect language and load correct resources
-RC = import_module('azure.cli.resources-en_US')
 
 # CONFIG provides external configuration options
 CONFIG = Session()
@@ -24,7 +24,7 @@ def main(args):
 
     configure_logging(args, CONFIG)
 
-    parser = ArgumentParser(RC.PROG)
+    parser = ArgumentParser("az")
 
     import azure.cli.commands as commands
     parser.doc_source = os.path.dirname(commands.__file__)
@@ -46,3 +46,5 @@ def main(args):
     except RuntimeError as ex:
         logging.error(ex.args[0])
         return ex.args[1] if len(ex.args) >= 2 else -1
+    except KeyboardInterrupt:
+        return -1

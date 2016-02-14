@@ -1,22 +1,71 @@
 import logging
-from ..main import RC, CONFIG, SESSION
-from ..commands import command
+from ..main import CONFIG, SESSION
+from ..commands import command, description, option
 
-def add_commands(parser):
-    parser.add_argument('--user', '-u', metavar=RC.USERNAME_METAVAR)
+PII_WARNING_TEXT = _(
+    'If you choose to continue, Azure command-line interface will cache your '
+    'authentication information. Note that this sensitive information will be stored in '
+    'plain text on the file system of your computer at {}. Ensure that you take suitable '
+    'precautions to protect your computer from unauthorized access in order to minimize the '
+    'risk of that information being disclosed.'
+    '\nDo you wish to continue: (y/n) '
+)
 
-@command('login --user <username>')
+@command('login')
+@description('logs you in')
+@option('-u --username <username>', _('user name or service principal ID. If multifactor authentication is required, '
+                                      'you will be prompted to use the login command without parameters for '
+                                      'interactive support.'))
+@option('-e --environment <environment>', _('Environment to authenticate against, such as AzureChinaCloud; '
+                                            'must support active directory.'))
+@option('-p --password <password>', _('user password or service principal secret, will prompt if not given.'))
+@option('--service-principal', _('If given, log in as a service principal rather than a user.'))
+@option('--certificate-file <certificateFile>', _('A PEM encoded certificate private key file.'))
+@option('--thumbprint <thumbprint>', _('A hex encoded thumbprint of the certificate.')) 
+@option('--tenant <tenant>', _('Tenant domain or ID to log into.')) 
+@option('-q --quiet', _('do not prompt for confirmation of PII storage.')) 
 def login(args):
-    user = args.get('user') or SESSION.get('user') or CONFIG.get('user')
-    if not user:
-        user = input(RC.ENTER_USERNAME)
-    
-    import getpass
-    password = getpass.getpass(RC.ENTER_PASSWORD_FOR.format(user))
-    
-    logging.info('''credentials = UserCredential({!r}, {!r})
-'''.format(user, password))
+    username = args.get('username') or args.get('u')
+    interactive = bool(username)
 
-    # TODO: get and cache token rather than user/password
-    SESSION['user'] = user
-    SESSION['password'] = password
+    environment_name = args.get('environment') or args.get('e') or 'AzureCloud'
+    environment = CONFIG['environments'].get(environment_name)
+    if not environment:
+        raise RuntimeError(_('Unknown environment {0}').format(environment_name))
+
+    tenant = args.get('tenant')
+    if args.get('service-principal') and not tenant:
+        tenant = input(_('Tenant: '))
+
+    # TODO: PII warning
+
+    password = args.get('password') or args.get('p')
+    require_password = not args.get('service-principal') or not args.get('certificate-file')
+    if not interactive and require_password and not password:
+        import getpass
+        password = getpass.getpass(_('Password: '))
+
+    if not require_password:
+        password = {
+            'certificateFile': args['certificate-file'],
+            'thumbprint': args.thumbprint,
+        }
+
+    if not interactive:
+        # TODO: Remove cached token
+        SESSION.pop(username + '_token', None)
+
+    # TODO: Perform login
+    token = ''
+
+    SESSION[username + '_token'] = token
+
+    # TODO: Get subscriptions
+    subscriptions = ['not-a-real-subscription']
+    if not subscriptions:
+        raise RuntimeError(_("No subscriptions found for this account"))
+
+    active_subscription = subscriptions[0]
+
+    logging.info(_('Setting subscription %s as default'), active_subscription)
+    SESSION['active_subscription'] = active_subscription
