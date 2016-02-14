@@ -13,22 +13,22 @@ PII_WARNING_TEXT = _(
 
 @command('login')
 @description('logs you in')
-@option('-u --username <username>', _('user name or service principal ID. If multifactor authentication is required, '
+@option('--username -u <username>', _('user name or service principal ID. If multifactor authentication is required, '
                                       'you will be prompted to use the login command without parameters for '
                                       'interactive support.'))
-@option('-e --environment <environment>', _('Environment to authenticate against, such as AzureChinaCloud; '
+@option('--environment -e <environment>', _('Environment to authenticate against, such as AzureChinaCloud; '
                                             'must support active directory.'))
-@option('-p --password <password>', _('user password or service principal secret, will prompt if not given.'))
+@option('--password -p <password>', _('user password or service principal secret, will prompt if not given.'))
 @option('--service-principal', _('If given, log in as a service principal rather than a user.'))
 @option('--certificate-file <certificateFile>', _('A PEM encoded certificate private key file.'))
 @option('--thumbprint <thumbprint>', _('A hex encoded thumbprint of the certificate.')) 
 @option('--tenant <tenant>', _('Tenant domain or ID to log into.')) 
-@option('-q --quiet', _('do not prompt for confirmation of PII storage.')) 
-def login(args):
-    username = args.get('username') or args.get('u')
+@option('--quiet -q', _('do not prompt for confirmation of PII storage.')) 
+def login(args, unexpected):
+    username = args.get('username')
     interactive = bool(username)
 
-    environment_name = args.get('environment') or args.get('e') or 'AzureCloud'
+    environment_name = args.get('environment') or 'AzureCloud'
     environment = CONFIG['environments'].get(environment_name)
     if not environment:
         raise RuntimeError(_('Unknown environment {0}').format(environment_name))
@@ -39,7 +39,7 @@ def login(args):
 
     # TODO: PII warning
 
-    password = args.get('password') or args.get('p')
+    password = args.get('password')
     require_password = not args.get('service-principal') or not args.get('certificate-file')
     if not interactive and require_password and not password:
         import getpass
