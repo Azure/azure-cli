@@ -60,6 +60,25 @@ class ArgumentParser(object):
         self.doc_suffix = '.txt'
 
     def add_command(self, handler, name=None, description=None, args=None):
+        '''Registers a command that may be parsed by this parser.
+
+        `handler` is the function to call with two `Arguments` objects.
+        All recognized arguments will appear on the first; all others on the
+        second. Accessing a missing argument as an attribute will raise
+        `IncorrectUsageError` that typically displays the command help.
+        Accessing a missing argument as an index or using `get` behaves like a
+        dictionary.
+
+        `name` is a space-separated list of names identifying the command.
+
+        `description` is a short piece of help text to display in usage info.
+
+        `args` is a list of (spec, description) tuples. Each spec is either the
+        name of a positional argument, or an ``'--argument -a <variable>'``
+        string listing one or more argument names and an optional variable name.
+        When multiple names are specified, the first is always used as the
+        name on `Arguments`.
+        '''
         nouns = (name or handler.__name__).split()
         full_name = ''
         m = self.noun_map
@@ -82,11 +101,12 @@ class ArgumentParser(object):
                 continue
 
             aliases = spec.split()
+            target = aliases[0].strip('-')
             if aliases[-1].startswith('-'):
                 v = True
             else:
                 v = aliases.pop().strip('<> ')
-            kw.update({a: v for a in aliases})
+            kw.update({a: (target, v) for a in aliases})
             ad.append(('/'.join(aliases), desc))
 
         # args are added in reverse order, so reverse our lists
@@ -94,9 +114,27 @@ class ArgumentParser(object):
         ad.reverse()
 
 
-    def execute(self, args, out=sys.stdout):
-        show_usage = any(a in self.help_args for a in args)
-        show_completions = any(a in self.complete_args for a in args)
+    def execute(self, args, show_usage=False, show_completions=False, out=sys.stdout):
+        '''Parses `args` and invokes the associated handler.
+
+        The handler is passed an `Arguments` object with all arguments other
+        than those in `self.help_args`, `self.complete_args` and
+        `self.global_args`.
+
+        Arguments that are 
+
+        If `show_usage` is ``True`` or any of `self.help_args` has been provided
+        then usage information will be displayed instead of executing the
+        command.
+
+        If `show_completions` is ``True`` or any of `self.complete_args` has
+        been provided then raw information about the likely arguments will be
+        provided.
+        '''
+        if not show_usage:
+            show_usage = any(a in self.help_args for a in args)
+        if not show_completions:
+            show_completions = any(a in self.complete_args for a in args)
 
         all_global_args = self.help_args | self.complete_args | self.global_args
         it = _iter_args(args, all_global_args)
@@ -127,30 +165,35 @@ class ArgumentParser(object):
             return self._display_usage(nouns, m, args, out)
 
         parsed = Arguments()
+        others = Arguments()
         while n:
             next_n = next(it, '')
 
             if n.startswith('-'):
                 key_n = n.lower()
-                expected_value = expected_kwargs.get(key_n)
+                target_value = expected_kwargs.get(key_n)
                 key_n = key_n.strip('-')
-                if expected_value is True:
-                    # Arg with no value
-                    parsed.add_from_dotted(key_n, True)
-                elif expected_value is not None or (next_n and not next_n.startswith('-')):
-                    # Arg with a value
-                    parsed.add_from_dotted(key_n, next_n)
-                    next_n = next(it, '')
-                else:
+                if target_value is None:
                     # Unknown arg
-                    parsed.add_from_dotted(key_n, True)
+                    if next_n:
+                        others.add_from_dotted(key_n, next_n)
+                        next_n = next(it, '')
+                    else:
+                        others.add_from_dotted(key_n, True)
+                elif target_value[1] is True:
+                    # Arg with no value
+                    parsed.add_from_dotted(target_value[0], True)
+                else:
+                    # Arg with a value
+                    parsed.add_from_dotted(target_value[0], next_n)
+                    next_n = next(it, '')
             else:
                 # Positional arg
                 parsed.positional.append(n)
             n = next_n
 
         try:
-            return handler(parsed)
+            return handler(parsed, others)
         except IncorrectUsageError as ex:
             print(str(ex), file=out)
             return self.display_usage(nouns, m, args, out)

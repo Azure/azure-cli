@@ -6,18 +6,18 @@ from ..commands import command, option
 @option('<pos>')
 @option('--bool')
 @option('--arg <value>')
-def test(args):
+def test(args, unexpected):
     print('test', args.positional)
     print('test', args)
 
 @command('storage test subtest')
-def subtest(args):
+def subtest(args, unexpected):
     print('subtest', args.positional)
     print('subtest', args)
 
 @command('storage account check')
 @option('--account-name <name>')
-def checkname(args):
+def checkname(args, unexpected):
     from azure.mgmt.storage import StorageManagementClient, StorageManagementClientConfiguration
     
     logging.info('''smc = StorageManagementClient(StorageManagementClientConfiguration())
