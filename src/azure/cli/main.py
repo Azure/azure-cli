@@ -9,9 +9,6 @@ from ._logging import configure_logging
 from ._session import Session
 from ._util import import_module
 
-__author__ = "Microsoft Corporation <python@microsoft.com>"
-__version__ = "2016.2.4"
-
 # CONFIG provides external configuration options
 CONFIG = Session()
 
