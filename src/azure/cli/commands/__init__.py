@@ -55,4 +55,6 @@ def add_to_parser(parser, command=None):
         loaded = True
 
     for handler, info in _COMMANDS.items():
+        # args have probably been added in reverse order
+        info.setdefault('args', []).reverse()
         parser.add_command(handler, **info)
