@@ -4,6 +4,13 @@ import logging
 import os
 import sys
 
+# Named arguments are prefixed with one of these strings
+ARG_PREFIXES = sorted(('-', '--', '/'), key=len, reverse=True)
+
+# Values are separated from argument name with one or more of these characters
+# or a space
+ARG_SEPARATORS = ':='
+
 class IncorrectUsageError(Exception):
     '''Raised when a command is incorrectly used and the usage should be
     displayed to the user.
@@ -32,18 +39,22 @@ class Arguments(dict):
             pass
         raise IncorrectUsageError(_("Argument {0} is required").format(key))
 
-def _iter_args(args, skip):
-    for a in args:
-        a1, a2 = a, None
-        if '=' in a1:
-            a1, _, a2 = a1.partition('=')
-        elif ':' in a1:
-            a1, _, a2 = a1.partition(':')
+def _read_arg(string):
+    for prefix in ARG_PREFIXES:
+        if string.startswith(prefix):
+            a1, a2 = string, None
+            indices = sorted((a1.find(sep), sep) for sep in ARG_SEPARATORS)
+            sep = next((i[1] for i in indices if i[0] > len(prefix)), None)
+            if sep:
+                a1, _, a2 = a1.partition(sep)
+            return a1[len(prefix):].lower(), a2
+    return None, None
 
-        if a1 and a1 not in skip:
-            yield a1
-            if a2:
-                yield a2
+def _index(string, char, default=sys.maxsize):
+    try:
+        return string.index(char)
+    except ValueError:
+        return default
 
 
 class ArgumentParser(object):
@@ -95,33 +106,28 @@ class ArgumentParser(object):
         m['$kwargs'] = kw = {}
         m['$argdoc'] = ad = []
         for spec, desc in (args or []):
-            if not spec.startswith('-'):
+            if not any(spec.startswith(p) for p in ARG_PREFIXES):
                 m['$args'].append(spec.strip('<> '))
                 ad.append((spec, desc))
                 continue
 
             aliases = spec.split()
-            target = aliases[0].strip('-')
-            if aliases[-1].startswith('-'):
+            if any(aliases[-1].startswith(p) for p in ARG_PREFIXES):
                 v = True
             else:
                 v = aliases.pop().strip('<> ')
-            kw.update({a: (target, v) for a in aliases})
+            target, _ = _read_arg(aliases[0])
+            kw.update({_read_arg(a)[0]: (target, v) for a in aliases})
             ad.append(('/'.join(aliases), desc))
-
-        # args are added in reverse order, so reverse our lists
-        m['$args'].reverse()
-        ad.reverse()
 
 
     def execute(self, args, show_usage=False, show_completions=False, out=sys.stdout):
         '''Parses `args` and invokes the associated handler.
 
-        The handler is passed an `Arguments` object with all arguments other
+        The handler is passed two `Arguments` objects with all arguments other
         than those in `self.help_args`, `self.complete_args` and
-        `self.global_args`.
-
-        Arguments that are 
+        `self.global_args`. The first contains arguments that were defined by
+        the handler spec, while the second contains all other arguments.
 
         If `show_usage` is ``True`` or any of `self.help_args` has been provided
         then usage information will be displayed instead of executing the
@@ -137,7 +143,9 @@ class ArgumentParser(object):
             show_completions = any(a in self.complete_args for a in args)
 
         all_global_args = self.help_args | self.complete_args | self.global_args
-        it = _iter_args(args, all_global_args)
+        def not_global(a):
+            return a.lstrip('-/') not in all_global_args
+        it = filter(not_global, args)
 
         m = self.noun_map
         nouns = []
@@ -169,24 +177,25 @@ class ArgumentParser(object):
         while n:
             next_n = next(it, '')
 
-            if n.startswith('-'):
-                key_n = n.lower()
+            key_n, value = _read_arg(n)
+            if key_n:
                 target_value = expected_kwargs.get(key_n)
-                key_n = key_n.strip('-')
                 if target_value is None:
-                    # Unknown arg
-                    if next_n:
-                        others.add_from_dotted(key_n, next_n)
-                        next_n = next(it, '')
-                    else:
-                        others.add_from_dotted(key_n, True)
+                    # Unknown arg always takes an argument.
+                    if value is None:
+                        value, next_n = next_n, next(it, '')
+                    others.add_from_dotted(key_n, value)
                 elif target_value[1] is True:
                     # Arg with no value
+                    if value is not None:
+                        print(_("argument '{0}' does not take a value").format(key_n), file=out)
+                        return self._display_usage(nouns, m, args, out)
                     parsed.add_from_dotted(target_value[0], True)
                 else:
                     # Arg with a value
-                    parsed.add_from_dotted(target_value[0], next_n)
-                    next_n = next(it, '')
+                    if value is None:
+                        value, next_n = next_n, next(it, '')
+                    parsed.add_from_dotted(target_value[0], value)
             else:
                 # Positional arg
                 parsed.positional.append(n)

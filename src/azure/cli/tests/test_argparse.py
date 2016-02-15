@@ -1,9 +1,19 @@
-import azure.cli.main
 import unittest
+import logging
 
-from azure.cli._argparse import ArgumentParser, _iter_args, IncorrectUsageError
+from azure.cli._argparse import ArgumentParser, IncorrectUsageError
 
 class Test_argparse(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        # Ensure initialization has occurred correctly
+        import azure.cli.main
+        logging.basicConfig(level=logging.DEBUG)
+
+    @classmethod
+    def tearDownClass(cls):
+        logging.shutdown()
+
     def test_nouns(self):
         p = ArgumentParser('test')
         res = [False, False, False]
@@ -30,9 +40,20 @@ class Test_argparse(unittest.TestCase):
         self.assertTrue(res.arg)
         self.assertSequenceEqual(res.positional, ['x'])
 
-        res, other = p.execute('n1 -a:x'.split())
+        # Should recognize args with alternate prefix
+        res, other = p.execute('n1 /a'.split())
         self.assertTrue(res.arg)
-        self.assertSequenceEqual(res.positional, ['x'])
+        res, other = p.execute('n1 /arg'.split())
+        self.assertTrue(res.arg)
+
+        # Should not recognize "------a"
+        res, other = p.execute('n1 ------a'.split())
+        self.assertNotIn('arg', res)
+        # First two '--' match, so '----a' is added to dict
+        self.assertIn('----a', other)
+
+        res = p.execute('n1 -a:x'.split())
+        self.assertIsNone(res)
 
         res, other = p.execute('n1 -b -a x'.split())
         self.assertEquals(res.b, '-a')
