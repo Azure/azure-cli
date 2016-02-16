@@ -1,9 +1,7 @@
-import gettext
 import os
 
-gettext.install("az", os.path.join(os.path.abspath(__file__), '..', 'locale'))
-
 from ._argparse import ArgumentParser
+from ._locale import install as locale_install
 from ._logging import configure_logging, logging
 from ._session import Session
 
@@ -12,6 +10,11 @@ CONFIG = Session()
 
 # SESSION provides read-write session variables
 SESSION = Session()
+
+# Load the user's preferred locale from their configuration
+LOCALE = CONFIG.get('locale', 'en-US')
+locale_install(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'locale', LOCALE))
+
 
 def main(args):
     CONFIG.load(os.path.expanduser('~/az.json'))
@@ -22,9 +25,6 @@ def main(args):
     parser = ArgumentParser("az")
 
     import azure.cli.commands as commands
-    parser.doc_source = os.path.dirname(commands.__file__)
-    # TODO: detect language
-    parser.doc_suffix = '.en_US.txt'
 
     # Find the first noun on the command line and only load commands from that
     # module to improve startup time.

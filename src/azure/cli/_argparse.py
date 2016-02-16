@@ -3,6 +3,7 @@ import json
 import os
 import sys
 
+from ._locale import get_file as locale_get_file
 from ._logging import logging
 
 # Named arguments are prefixed with one of these strings
@@ -63,14 +64,11 @@ class ArgumentParser(object):
     def __init__(self, prog):
         self.prog = prog
         self.noun_map = {
-            '$doc': 'azure-cli',
+            '$doc': 'azure-cli.txt',
         }
         self.help_args = { '--help', '-h' }
         self.complete_args = { '--complete' }
         self.global_args = { '--verbose', '--debug' }
-
-        self.doc_source = './'
-        self.doc_suffix = '.txt'
 
     def add_command(self, handler, name=None, description=None, args=None):
         '''Registers a command that may be parsed by this parser.
@@ -98,7 +96,7 @@ class ArgumentParser(object):
         for n in nouns:
             full_name += n
             m = m.setdefault(n.lower(), {
-                '$doc': full_name
+                '$doc': full_name + ".txt"
             })
             full_name += '.'
         m['$description'] = description or handler.__doc__
@@ -234,7 +232,7 @@ class ArgumentParser(object):
                 print('    {0:<{1}} - {2}'.format(a, maxlen, d), file=out)
             print(file=out, flush=True)
 
-        doc_file = os.path.join(self.doc_source, noun_map['$doc'] + self.doc_suffix)
+        doc_file = locale_get_file(noun_map['$doc'])
         try:
             with open(doc_file, 'r') as f:
                 print(f.read(), file=out, flush=True)
