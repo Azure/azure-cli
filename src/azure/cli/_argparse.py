@@ -1,8 +1,9 @@
 from __future__ import print_function
 import json
-import logging
 import os
 import sys
+
+from ._logging import logging
 
 # Named arguments are prefixed with one of these strings
 ARG_PREFIXES = sorted(('-', '--', '/'), key=len, reverse=True)
@@ -37,6 +38,7 @@ class Arguments(dict):
             return self[key]
         except LookupError:
             pass
+        logging.debug('Argument %s is required', key)
         raise IncorrectUsageError(_("Argument {0} is required").format(key))
 
 def _read_arg(string):
@@ -142,7 +144,7 @@ class ArgumentParser(object):
         if not show_completions:
             show_completions = any(a in self.complete_args for a in args)
 
-        all_global_args = self.help_args | self.complete_args | self.global_args
+        all_global_args = set(a.lstrip('-/') for a in self.help_args | self.complete_args | self.global_args)
         def not_global(a):
             return a.lstrip('-/') not in all_global_args
         it = filter(not_global, args)
@@ -165,6 +167,7 @@ class ArgumentParser(object):
             expected_kwargs = m['$kwargs']
             handler = m['$handler']
         except LookupError:
+            logging.debug('Missing data for noun %s', n)
             show_usage = True
         
         if show_completions:
@@ -201,11 +204,15 @@ class ArgumentParser(object):
                 parsed.positional.append(n)
             n = next_n
 
+        old_stdout = sys.stdout
         try:
+            sys.stdout = out
             return handler(parsed, others)
         except IncorrectUsageError as ex:
             print(str(ex), file=out)
             return self.display_usage(nouns, m, args, out)
+        finally:
+            sys.stdout = old_stdout
 
     def _display_usage(self, nouns, noun_map, arguments, out=sys.stdout):
         spec = ' '.join(noun_map.get('$spec') or nouns)

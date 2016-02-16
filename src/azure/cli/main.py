@@ -1,13 +1,11 @@
 import gettext
-import logging
 import os
 
 gettext.install("az", os.path.join(os.path.abspath(__file__), '..', 'locale'))
 
 from ._argparse import ArgumentParser
-from ._logging import configure_logging
+from ._logging import configure_logging, logging
 from ._session import Session
-from ._util import import_module
 
 # CONFIG provides external configuration options
 CONFIG = Session()

@@ -1,4 +1,4 @@
-import logging
+from .._logging import logging
 from ..main import CONFIG, SESSION
 from ..commands import command, description, option
 
