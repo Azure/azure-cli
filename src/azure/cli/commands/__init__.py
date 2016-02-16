@@ -1,6 +1,5 @@
-import logging
-
 from .._argparse import IncorrectUsageError
+from .._logging import logging
 
 # TODO: Alternatively, simply scan the directory for all modules
 COMMAND_MODULES = [
