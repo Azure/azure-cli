@@ -5,4 +5,4 @@ APIs.
 '''
 
 __author__ = "Microsoft Corporation <python@microsoft.com>"
-__version__ = "2016.2.4"
+__version__ = "0.0.1"
