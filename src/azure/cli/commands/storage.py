@@ -1,7 +1,8 @@
-from ..main import CONFIG, SESSION
+﻿from ..main import CONFIG, SESSION
 from .._logging import logging
 from .._util import TableOutput
 from ..commands import command, description, option
+from .._profile import Profile
 
 @command('storage account list')
 @description('List storage accounts')
@@ -11,17 +12,11 @@ def list_accounts(args, unexpected):
     from azure.mgmt.storage import StorageManagementClient, StorageManagementClientConfiguration
     from azure.mgmt.storage.models import StorageAccount
     from msrestazure.azure_active_directory import UserPassCredentials
-    
-    username = ''   # TODO: get username somehow
-    password = ''   # TODO: get password somehow
 
-    logging.code('''smc = StorageManagementClient(StorageManagementClientConfiguration(
-    credentials=UserPassCredentials(%r, %r),
-    subscription_id=%r
-)''', username, password, args.subscription)
+    profile = Profile()
+    #credentials, subscription_id = profile.get_credentials()
     smc = StorageManagementClient(StorageManagementClientConfiguration(
-        credentials=UserPassCredentials(username, password),
-        subscription_id=args.subscription,
+        *profile.get_credentials(),
     ))
 
     group = args.get('resource-group')
