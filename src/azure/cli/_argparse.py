@@ -215,14 +215,16 @@ class ArgumentParser(object):
     def _display_usage(self, nouns, noun_map, arguments, out=sys.stdout):
         spec = ' '.join(noun_map.get('$spec') or nouns)
         print('    {} {}'.format(self.prog, spec), file=out)
-        print(file=out, flush=True)
+        print(file=out)
+        out.flush()
         
         subnouns = sorted(k for k in noun_map if not k.startswith('$'))
         if subnouns:
             print('Subcommands', file=out)
             for n in subnouns:
                 print('    {}'.format(n), file=out)
-            print(file=out, flush=True)
+            print(file=out)
+            out.flush()
         
         argdoc = noun_map.get('$argdoc')
         if argdoc:
@@ -230,15 +232,18 @@ class ArgumentParser(object):
             maxlen = max(len(a) for a, d in argdoc)
             for a, d in argdoc:
                 print('    {0:<{1}} - {2}'.format(a, maxlen, d), file=out)
-            print(file=out, flush=True)
+            print(file=out)
+            out.flush()
 
         doc_file = locale_get_file(noun_map['$doc'])
         try:
             with open(doc_file, 'r') as f:
-                print(f.read(), file=out, flush=True)
-        except OSError:
+                print(f.read(), file=out)
+                f.flush()
+        except (OSError, IOError):
             # TODO: Behave better when no docs available
-            print('No documentation available', file=out, flush=True)
+            print('No documentation available', file=out)
+            out.flush()
             logging.debug('Expected documentation at %s', doc_file)
 
     def _display_completions(self, nouns, noun_map, arguments, out=sys.stdout):
@@ -248,4 +253,5 @@ class ArgumentParser(object):
         if kwargs:
             completions.extend('--' + a for a in kwargs if a)
 
-        print('\n'.join(sorted(completions)), file=out, flush=True)
+        print('\n'.join(sorted(completions)), file=out)
+        out.flush()
