@@ -8,6 +8,11 @@ class Test_argparse(unittest.TestCase):
     def setUpClass(cls):
         # Ensure initialization has occurred correctly
         import azure.cli.main
+        logging.basicConfig(level=logging.DEBUG)
+
+    @classmethod
+    def tearDownClass(cls):
+        logging.shutdown()
 
     def test_nouns(self):
         p = ArgumentParser('test')

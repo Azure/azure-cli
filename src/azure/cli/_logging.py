@@ -6,11 +6,21 @@ __all__ = ['logging', 'configure_logging']
 _CODE_LEVEL = _logging.INFO + 1
 
 class Logger(_logging.Logger):
+    INFO = _logging.INFO
+    WARN = _logging.WARN
+    DEBUG = _logging.DEBUG
+
     def __init__(self, name, level = _logging.NOTSET):
         super(Logger, self).__init__(name, level)
 
     def code(self, msg, *args):
         self._log(_CODE_LEVEL, msg, args)
+
+    def basicConfig(self, level):
+        _logging.basicConfig(level = level)
+
+    def shutdown(self):
+        _logging.shutdown()
 
 logging = Logger('az', _logging.WARNING)
 
