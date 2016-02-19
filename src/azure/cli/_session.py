@@ -1,11 +1,11 @@
-import collections.abc
+import collections
 import json
 import os
 import time
 
 from codecs import open
 
-class Session(collections.abc.MutableMapping):
+class Session(collections.MutableMapping):
     '''A simple dict-like class that is backed by a JSON file.
 
     All direct modifications will save the file. Indirect modifications should
