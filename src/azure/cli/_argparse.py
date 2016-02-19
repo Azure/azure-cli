@@ -145,7 +145,7 @@ class ArgumentParser(object):
         all_global_args = set(a.lstrip('-/') for a in self.help_args | self.complete_args | self.global_args)
         def not_global(a):
             return a.lstrip('-/') not in all_global_args
-        it = filter(not_global, args)
+        it = filter(not_global, args).__iter__()
 
         m = self.noun_map
         nouns = []
