@@ -4,6 +4,8 @@ from .._logging import logger
 # TODO: Alternatively, simply scan the directory for all modules
 COMMAND_MODULES = [
     'login',
+    'logout',
+    'account',
     'storage',
 ]
 
