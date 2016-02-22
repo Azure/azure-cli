@@ -1,18 +1,19 @@
 import unittest
 
 from azure.cli._argparse import ArgumentParser, IncorrectUsageError
-from azure.cli._logging import logging
+from azure.cli._logging import logging, _logging
+
 
 class Test_argparse(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         # Ensure initialization has occurred correctly
         import azure.cli.main
-        logging.basicConfig(level=logging.DEBUG)
+        _logging.basicConfig(level=_logging.DEBUG)
 
     @classmethod
     def tearDownClass(cls):
-        logging.shutdown()
+        _logging.shutdown()
 
     def test_nouns(self):
         p = ArgumentParser('test')
