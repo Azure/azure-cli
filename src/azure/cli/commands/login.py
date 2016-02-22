@@ -3,9 +3,9 @@
 from msrestazure.azure_active_directory import UserPassCredentials
 
 from .._logging import logging
-from .._profile import Profile
 from .._util import TableOutput
 from ..commands import command, description, option
+import azure.cli._profile as profile
 
 CLIENT_ID = '04b07795-8ddb-461a-bbee-02f9e1bf7b46'
 
@@ -22,6 +22,7 @@ def login(args, unexpected):
         password = getpass.getpass(_('Password: '))
 
     credentials = UserPassCredentials(username, password, client_id=CLIENT_ID)
+    profile.set_access_token(credentials.token['access_token'])
     client = SubscriptionClient(SubscriptionClientConfiguration(credentials))
     subscriptions = client.subscriptions.list()
 
@@ -36,14 +37,14 @@ def login(args, unexpected):
         subscription['name'] = s.display_name
         subscription['state'] = s.state
         subscription['user'] = username
+        subscription['active'] = False
         consolidated.append(subscription)
 
-    profile = Profile()
-    profile.update(consolidated, credentials.token['access_token'])
+    profile.set_subscriptions(consolidated, consolidated[0])
 
     #TODO, replace with JSON display
     with TableOutput() as to:
-        for subscription in consolidated:
+        for subscription in profile.get_subscriptions():
             to.cell('Name', subscription['name'])
             to.cell('Active', bool(subscription['active']))
             to.cell('User', subscription['user'])
