@@ -4,7 +4,7 @@ import os
 import sys
 
 from ._locale import get_file as locale_get_file
-from ._logging import logging
+from ._logging import logger
 
 # Named arguments are prefixed with one of these strings
 ARG_PREFIXES = sorted(('-', '--', '/'), key=len, reverse=True)
@@ -39,7 +39,7 @@ class Arguments(dict):
             return self[key]
         except LookupError:
             pass
-        logging.debug('Argument %s is required', key)
+        logger.debug('Argument %s is required', key)
         raise IncorrectUsageError(_("Argument {0} is required").format(key))
 
 def _read_arg(string):
@@ -165,7 +165,7 @@ class ArgumentParser(object):
             expected_kwargs = m['$kwargs']
             handler = m['$handler']
         except LookupError:
-            logging.debug('Missing data for noun %s', n)
+            logger.debug('Missing data for noun %s', n)
             show_usage = True
         
         if show_completions:
@@ -239,7 +239,7 @@ class ArgumentParser(object):
         except OSError:
             # TODO: Behave better when no docs available
             print('No documentation available', file=out, flush=True)
-            logging.debug('Expected documentation at %s', doc_file)
+            logger.debug('Expected documentation at %s', doc_file)
 
     def _display_completions(self, nouns, noun_map, arguments, out=sys.stdout):
         completions = [k for k in noun_map if not k.startswith('$')]

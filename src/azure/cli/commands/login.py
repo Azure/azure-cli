@@ -2,7 +2,7 @@
                                               SubscriptionClientConfiguration
 from msrestazure.azure_active_directory import UserPassCredentials
 
-from .._logging import logging
+from .._logging import logger
 from .._profile import Profile
 from .._util import TableOutput
 from ..commands import command, description, option

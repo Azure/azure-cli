@@ -1,5 +1,5 @@
 ﻿from ..main import CONFIG, SESSION
-from .._logging import logging
+from .._logging import logger
 from .._util import TableOutput
 from ..commands import command, description, option
 from .._profile import Profile
@@ -41,6 +41,6 @@ def checkname(args, unexpected):
     from azure.mgmt.storage import StorageManagementClient, StorageManagementClientConfiguration
     
     smc = StorageManagementClient(StorageManagementClientConfiguration())
-    logging.warn(smc.storage_accounts.check_name_availability(args.account_name))
+    logger.warn(smc.storage_accounts.check_name_availability(args.account_name))
     
     
