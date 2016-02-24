@@ -3,27 +3,7 @@ import sys
 
 __all__ = ['logging', 'configure_logging']
 
-_CODE_LEVEL = _logging.INFO + 1
-
-class Logger(_logging.Logger):
-    def __init__(self, name, level = _logging.NOTSET):
-        super(Logger, self).__init__(name, level)
-
-    def code(self, msg, *args):
-        self._log(_CODE_LEVEL, msg, args)
-
-logging = Logger('az', _logging.WARNING)
-
-class PyFileFormatter(_logging.Formatter):
-    def __init__(self):
-        super(PyFileFormatter, self).__init__('# %(levelname)s: %(message)s')
-        self.info_style = _logging.PercentStyle('%(message)s')
-
-    def format(self, record):
-        assert isinstance(record, _logging.LogRecord)
-        if record.levelno == _CODE_LEVEL:
-            return record.getMessage()
-        return super(PyFileFormatter, self).format(record)
+logger = _logging.Logger('az', _logging.WARNING)
 
 def _arg_name(arg):
     a = arg.lstrip('-/')
@@ -65,18 +45,12 @@ def configure_logging(argv, config):
     # Configure the console output handler
     stderr_handler = _logging.StreamHandler(sys.stderr)
     stderr_handler.formatter = _logging.Formatter('%(levelname)s: %(message)s')
-    logging.level = stderr_handler.level = level
-    logging.handlers.append(stderr_handler)
+    logger.level = stderr_handler.level = level
+    logger.handlers.append(stderr_handler)
 
-    if logfile and logfile.lower().endswith('.py'):
-        # Configure a handler that logs code to a Python script
-        py_handler = _logging.StreamHandler(open(logfile, 'w', encoding='utf-8'))
-        py_handler.formatter = PyFileFormatter()
-        py_handler.level = level if level == _logging.DEBUG else _logging.INFO
-        logging.handlers.append(py_handler)
-    elif logfile:
+    if logfile:
         # Configure the handler that logs code to a text file
         log_handler = _logging.StreamHandler(open(logfile, 'w', encoding='utf-8'))
         log_handler.formatter = _logging.Formatter('[%(levelname)s:%(asctime)s] %(message)s')
         log_handler.level = level if level == _logging.DEBUG else _logging.INFO
-        logging.handlers.append(log_handler)
+        logger.handlers.append(log_handler)

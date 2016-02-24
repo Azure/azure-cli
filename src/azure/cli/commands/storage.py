@@ -1,5 +1,5 @@
 ﻿from ..main import CONFIG, SESSION
-from .._logging import logging
+from .._logging import logger
 from .._util import TableOutput
 from ..commands import command, description, option
 from .._profile import Profile
@@ -21,10 +21,8 @@ def list_accounts(args, unexpected):
 
     group = args.get('resource-group')
     if group:
-        logging.code('accounts = smc.storage_accounts.list_by_resource_group(%r)', group)
         accounts = smc.storage_accounts.list_by_resource_group(group)
     else:
-        logging.code('accounts = smc.storage_accounts.list()')
         accounts = smc.storage_accounts.list()
 
     with TableOutput() as to:
@@ -42,11 +40,7 @@ def list_accounts(args, unexpected):
 def checkname(args, unexpected):
     from azure.mgmt.storage import StorageManagementClient, StorageManagementClientConfiguration
     
-    logging.code('''smc = StorageManagementClient(StorageManagementClientConfiguration())
-smc.storage_accounts.check_name_availability({0.account_name!r})
-'''.format(args))
-    
     smc = StorageManagementClient(StorageManagementClientConfiguration())
-    logging.warn(smc.storage_accounts.check_name_availability(args.account_name))
+    logger.warn(smc.storage_accounts.check_name_availability(args.account_name))
     
     
