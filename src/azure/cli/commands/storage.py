@@ -3,6 +3,7 @@ from .._logging import logging
 from .._util import TableOutput
 from ..commands import command, description, option
 from .._profile import Profile
+import azure.cli._debug as _debug
 
 @command('storage account list')
 @description('List storage accounts')
@@ -18,6 +19,7 @@ def list_accounts(args, unexpected):
     smc = StorageManagementClient(StorageManagementClientConfiguration(
         *profile.get_credentials()
     ))
+    _debug.allow_debug_connection(smc)
 
     group = args.get('resource-group')
     if group:

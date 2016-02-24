@@ -6,6 +6,7 @@ from .._logging import logging
 from .._profile import Profile
 from .._util import TableOutput
 from ..commands import command, description, option
+import azure.cli._debug as _debug
 
 CLIENT_ID = '04b07795-8ddb-461a-bbee-02f9e1bf7b46'
 
@@ -21,8 +22,9 @@ def login(args, unexpected):
         import getpass
         password = getpass.getpass(_('Password: '))
 
-    credentials = UserPassCredentials(username, password, client_id=CLIENT_ID)
+    credentials = UserPassCredentials(username, password, client_id=CLIENT_ID, verify=_debug.should_allow_debug_connection())
     client = SubscriptionClient(SubscriptionClientConfiguration(credentials))
+    _debug.allow_debug_connection(client)
     subscriptions = client.subscriptions.list()
 
     if not subscriptions:
