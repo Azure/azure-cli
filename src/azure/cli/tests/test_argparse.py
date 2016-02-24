@@ -1,7 +1,9 @@
 import unittest
 
 from azure.cli._argparse import ArgumentParser, IncorrectUsageError
-from azure.cli._logging import logging
+from azure.cli._logging import logger
+import logging
+
 
 class Test_argparse(unittest.TestCase):
     @classmethod
