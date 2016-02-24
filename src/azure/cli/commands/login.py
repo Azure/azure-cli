@@ -2,6 +2,8 @@
                                               SubscriptionClientConfiguration
 from msrestazure.azure_active_directory import UserPassCredentials
 
+from msrest import Serializer
+
 from .._logging import logging
 from .._profile import Profile
 from .._util import TableOutput
@@ -28,10 +30,12 @@ def login(args, unexpected):
     if not subscriptions:
         raise RuntimeError(_("No subscriptions found for this account"))
 
+    serializable = Serializer().serialize_data(subscriptions, "[Subscription]")
+
     #keep useful properties and not json serializable 
     consolidated = []
     for s in subscriptions:
-        subscription = {};
+        subscription = {}
         subscription['id'] = s.id.split('/')[-1]
         subscription['name'] = s.display_name
         subscription['state'] = s.state
@@ -41,12 +45,4 @@ def login(args, unexpected):
     profile = Profile()
     profile.update(consolidated, credentials.token['access_token'])
 
-    #TODO, replace with JSON display
-    with TableOutput() as to:
-        for subscription in consolidated:
-            to.cell('Name', subscription['name'])
-            to.cell('Active', bool(subscription['active']))
-            to.cell('User', subscription['user'])
-            to.cell('Subscription Id', subscription['id'])
-            to.cell('State', subscription['state'])
-            to.end_row()
+    return serializable
