@@ -244,7 +244,7 @@ class ArgumentParser(object):
             # TODO: Behave better when no docs available
             print('No documentation available', file=out)
             out.flush()
-            logging.debug('Expected documentation at %s', doc_file)
+            logger.debug('Expected documentation at %s', doc_file)
 
     def _display_completions(self, nouns, noun_map, arguments, out=sys.stdout):
         completions = [k for k in noun_map if not k.startswith('$')]
