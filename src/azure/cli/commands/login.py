@@ -5,7 +5,7 @@ from azure.mgmt.resource.subscriptions import SubscriptionClient, \
 from .._profile import Profile
 from .._util import TableOutput
 from ..commands import command, description, option
-import azure.cli._debug as _debug
+from .._debug import should_disable_connection_verify
 
 CLIENT_ID = '04b07795-8ddb-461a-bbee-02f9e1bf7b46'
 
@@ -21,7 +21,7 @@ def login(args, unexpected):
         import getpass
         password = getpass.getpass(_('Password: '))
 
-    credentials = UserPassCredentials(username, password, client_id=CLIENT_ID, verify=not(_debug.should_disable_connection_verify()))
+    credentials = UserPassCredentials(username, password, client_id=CLIENT_ID, verify=not should_disable_connection_verify())
     client = SubscriptionClient(SubscriptionClientConfiguration(credentials))
     subscriptions = client.subscriptions.list()
 
