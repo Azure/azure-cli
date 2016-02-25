@@ -1,8 +1,8 @@
 from ..main import SESSION
-from .._logging import logging
+from .._logging import logger
 from .._util import TableOutput
 from ..commands import command, description, option
-from .._profile import Profile
+from ._command_creation import get_service_client
 
 @command('storage account list')
 @description(_('List storage accounts'))
@@ -13,10 +13,7 @@ def list_accounts(args, unexpected):
     from azure.mgmt.storage.models import StorageAccount
     from msrestazure.azure_active_directory import UserPassCredentials
 
-    profile = Profile()
-    smc = StorageManagementClient(StorageManagementClientConfiguration(
-        *profile.get_login_credentials(),
-    ))
+    smc = get_service_client(StorageManagementClient, StorageManagementClientConfiguration)
 
     group = args.get('resource-group')
     if group:
@@ -39,7 +36,7 @@ def list_accounts(args, unexpected):
 def checkname(args, unexpected):
     from azure.mgmt.storage import StorageManagementClient, StorageManagementClientConfiguration
     
-    smc = StorageManagementClient(StorageManagementClientConfiguration())
+    smc = get_service_client(StorageManagementClient, StorageManagementClientConfiguration)
     logger.warn(smc.storage_accounts.check_name_availability(args.account_name))
     
     
