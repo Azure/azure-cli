@@ -21,7 +21,7 @@ def login(args, unexpected):
         import getpass
         password = getpass.getpass(_('Password: '))
 
-    credentials = UserPassCredentials(username, password, client_id=CLIENT_ID, verify=_debug.should_allow_debug_connection())
+    credentials = UserPassCredentials(username, password, client_id=CLIENT_ID, verify=not(_debug.should_disable_connection_verify()))
     client = SubscriptionClient(SubscriptionClientConfiguration(credentials))
     subscriptions = client.subscriptions.list()
 
