@@ -4,7 +4,7 @@ from ._argparse import ArgumentParser
 from ._locale import install as locale_install
 from ._logging import configure_logging, logger
 from ._session import Session
-from ._output import OutputFormats, OutputProducer
+from ._output import OutputProducer
 
 # CONFIG provides external configuration options
 CONFIG = Session()

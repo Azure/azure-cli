@@ -5,7 +5,6 @@ from azure.mgmt.resource.subscriptions import SubscriptionClient, \
 from msrest import Serializer
 
 from .._profile import Profile
-from .._util import TableOutput
 from ..commands import command, description, option
 
 CLIENT_ID = '04b07795-8ddb-461a-bbee-02f9e1bf7b46'
@@ -32,7 +31,6 @@ def login(args, unexpected):
     serializable = Serializer().serialize_data(subscriptions, "[Subscription]")
 
     #keep useful properties and not json serializable 
-
     profile = Profile()
     consolidated = Profile.normalize_properties(username, subscriptions)
     profile.set_subscriptions(consolidated, credentials.token['access_token'])
