@@ -5,6 +5,7 @@ from .._logging import logging
 COMMAND_MODULES = [
     'login',
     'storage',
+    'generated',
 ]
 
 _COMMANDS = {}
