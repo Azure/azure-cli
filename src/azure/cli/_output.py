@@ -1,94 +1,115 @@
-"""
-Manage output for the CLI
-"""
+from __future__ import print_function, unicode_literals
+
 import sys
 import json
 
-from enum import Enum
+try:
+    # Python 3
+    from io import StringIO
+except ImportError:
+    # Python 2
+    from StringIO import StringIO
 
-from azure.cli._util import TableOutput, TextOutput
+class OutputFormatException(Exception):
+    pass
 
-class OutputFormats(Enum):
-    """
-    The output formats supported by this module
-    """
-    JSON = 1
-    TABLE = 2
-    TEXT = 3
+def format_json(obj):
+    input_dict = obj.__dict__ if hasattr(obj, '__dict__') else obj
+    return json.dumps(input_dict, indent=2, sort_keys=True, separators=(',', ': '))
+
+def format_table(obj):
+    obj_list = obj if isinstance(obj, list) else [obj]
+    to = TableOutput()
+    try:
+        for item in obj_list:
+            for item_key in sorted(item):
+                to.cell(item_key, item[item_key])
+            to.end_row()
+        return to.dump()
+    except TypeError:
+        return ''
+
+def format_text(obj):
+    obj_list = obj if isinstance(obj, list) else [obj]
+    to = TextOutput()
+    try:
+        for item in obj_list:
+            for item_key in sorted(item):
+                to.add(item_key, item[item_key])
+        return to.dump()
+    except TypeError:
+        return ''
 
 class OutputProducer(object):
-    """
-    Produce output for the CLI
-    """
     
-    def __init__(self, format=OutputFormats.JSON, file=sys.stdout):
-        """Constructor.
-        
-        Keyword arguments:
-        format -- the output format to use
-        file   -- the file object to use when printing
-        """
-        if format not in OutputFormats:
-            raise OutputFormatException("Unknown format {0}".format(format))
-        self.format = format
-        # get the formatter
-        if self.format is OutputFormats.JSON:
-            self.formatter = JSONFormatter()
-        elif self.format is OutputFormats.TABLE:
-            self.formatter = TableFormatter()
-        elif self.format is OutputFormats.TEXT:
-            self.formatter = TextFormatter()
+    def __init__(self, formatter=format_json, file=sys.stdout):
+        self.formatter = formatter
         self.file = file
 
     def out(self, obj):
         print(self.formatter(obj), file=self.file)
 
-class JSONFormatter(object):
+class TableOutput(object):
+    def __init__(self):
+        self._rows = [{}]
+        self._columns = {}
+        self._column_order = []
+
+    def dump(self):
+        if len(self._rows) == 1:
+            return
+        
+        with StringIO() as io:
+            cols = [(c, self._columns[c]) for c in self._column_order]
+            io.write(' | '.join(c.center(w) for c, w in cols))
+            io.write('\n')
+            io.write('-|-'.join('-' * w for c, w in cols))
+            io.write('\n')
+            for r in self._rows[:-1]:
+                io.write(' | '.join(r[c].ljust(w) for c, w in cols))
+                io.write('\n')
+            return io.getvalue()
+
+    @property
+    def any_rows(self):
+        return len(self._rows) > 1
+
+    def cell(self, name, value):
+        n = str(name)
+        v = str(value)
+        max_width = self._columns.get(n)
+        if max_width is None:
+            self._column_order.append(n)
+            max_width = len(n)
+        self._rows[-1][n] = v
+        self._columns[n] = max(max_width, len(v))
+
+    def end_row(self):
+        self._rows.append({})
+
+class TextOutput(object):
 
     def __init__(self):
-        # can pass in configuration if needed
-        pass
-        
-    def __call__(self, obj):
-        input_dict = obj.__dict__ if hasattr(obj, '__dict__') else obj
-        return json.dumps(input_dict, indent=4, sort_keys=True)
+        self.identifiers = {}
+    
+    def add(self, identifier, value):
+        if identifier in self.identifiers:
+            self.identifiers[identifier].append(value)
+        else:
+            self.identifiers[identifier] = [value]
 
-class TableFormatter(object):
+    def dump(self):
+        with StringIO() as io:
+            for id in sorted(self.identifiers):
+                io.write(id.upper())
+                io.write('\t')
+                for col in self.identifiers[id]:
+                    if isinstance(col, str):
+                        io.write(col)
+                    else:
+                        # TODO: Handle complex objects
+                        io.write("null")
+                    io.write('\t')
+                io.write('\n')
+            return io.getvalue()
 
-    def __init__(self):
-        # can pass in configuration if needed
-        pass
-        
-    def __call__(self, obj):
-        obj_list = obj if isinstance(obj, list) else [obj]
-        with TableOutput() as to:
-            try:
-                for item in obj_list:
-                    for item_key in sorted(item):
-                        to.cell(item_key, item[item_key])
-                    to.end_row()
-                return to.dump()
-            except TypeError:
-                return ''
-
-class TextFormatter(object):
-
-    def __init__(self):
-        # can pass in configuration if needed
-        pass
-        
-    def __call__(self, obj):
-        obj_list = obj if isinstance(obj, list) else [obj]
-        with TextOutput() as to:
-            try:
-                for item in obj_list:
-                    for item_key in sorted(item):
-                        to.add(item_key, item[item_key])
-                return to.dump()
-            except TypeError:
-                return ''
-
-class OutputFormatException(Exception):
-    """The output format specified is not recognized.
-    """
-    pass
