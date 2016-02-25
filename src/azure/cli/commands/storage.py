@@ -1,5 +1,5 @@
 from ..main import SESSION
-from .._logging import logging
+from .._logging import logger
 from .._util import TableOutput
 from ..commands import command, description, option
 from .._profile import Profile

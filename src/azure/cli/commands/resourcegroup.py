@@ -12,7 +12,7 @@ def list_groups(args, unexpected):
     from azure.mgmt.resource.resources import ResourceManagementClient, ResourceManagementClientConfiguration
     from azure.mgmt.resource.resources.models import ResourceGroup, ResourceGroupFilter
 
-    rmc = ResourceManagementClient(ResourceManagementClientConfiguration(*Profile().get_credentials()))
+    rmc = ResourceManagementClient(ResourceManagementClientConfiguration(*Profile().get_login_credentials()))
 
     # TODO: waiting on Python Azure SDK bug fixes
     #group_filter = ResourceGroupFilter(args.get('tag-name'), args.get('tag-value'))
