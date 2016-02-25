@@ -2,7 +2,7 @@ import os
 
 from ._argparse import ArgumentParser
 from ._locale import install as locale_install
-from ._logging import configure_logging, logging
+from ._logging import configure_logging, logger
 from ._session import Session
 from ._output import OutputFormats, OutputProducer
 
@@ -44,7 +44,7 @@ def main(args):
         if result:
             OutputProducer().out(result)
     except RuntimeError as ex:
-        logging.error(ex.args[0])
+        logger.error(ex.args[0])
         return ex.args[1] if len(ex.args) >= 2 else -1
     except KeyboardInterrupt:
         return -1

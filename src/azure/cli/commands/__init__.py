@@ -1,9 +1,11 @@
 from .._argparse import IncorrectUsageError
-from .._logging import logging
+from .._logging import logger
 
 # TODO: Alternatively, simply scan the directory for all modules
 COMMAND_MODULES = [
     'login',
+    'logout',
+    'account',
     'storage',
 ]
 
@@ -12,21 +14,21 @@ _COMMANDS = {}
 def command(name):
     def add_command(handler):
         _COMMANDS.setdefault(handler, {})['name'] = name
-        logging.debug('Added %s as command "%s"', handler, name)
+        logger.debug('Added %s as command "%s"', handler, name)
         return handler
     return add_command
 
 def description(description):
     def add_description(handler):
         _COMMANDS.setdefault(handler, {})['description'] = description
-        logging.debug('Added description "%s" to %s', description, handler)
+        logger.debug('Added description "%s" to %s', description, handler)
         return handler
     return add_description
 
 def option(spec, description=None):
     def add_option(handler):
         _COMMANDS.setdefault(handler, {}).setdefault('args', []).append((spec, description))
-        logging.debug('Added option "%s" to %s', spec, handler)
+        logger.debug('Added option "%s" to %s', spec, handler)
         return handler
     return add_option
 
