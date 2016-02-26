@@ -1,6 +1,9 @@
 import os
 import unittest
-from unittest.mock import MagicMock
+try:
+    from unittest.mock import MagicMock
+except ImportError:
+    from mock import MagicMock
 
 from azure.cli._argparse import ArgumentParser, IncorrectUsageError
 from azure.cli._logging import logger
