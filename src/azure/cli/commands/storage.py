@@ -15,7 +15,7 @@ def list_accounts(args, unexpected):
 
     profile = Profile()
     smc = StorageManagementClient(StorageManagementClientConfiguration(
-        *profile.get_login_credentials(),
+        *profile.get_login_credentials()
     ))
 
     group = args.get('resource-group')
