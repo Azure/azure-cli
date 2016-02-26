@@ -6,7 +6,6 @@ from .._profile import Profile
 
 @command('storage account list')
 @description(_('List storage accounts'))
-@option('--foo -f <bar>', _('fake'), required=True)
 @option('--resource-group -g <resourceGroup>', _('the resource group name'))
 @option('--subscription -s <id>', _('the subscription id'))
 def list_accounts(args, unexpected):
