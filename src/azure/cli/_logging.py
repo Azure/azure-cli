@@ -1,7 +1,7 @@
 import logging as _logging
 import sys
 
-__all__ = ['logging', 'configure_logging']
+__all__ = ['logger', 'configure_logging']
 
 logger = _logging.Logger('az', _logging.WARNING)
 
