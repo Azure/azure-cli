@@ -2,8 +2,9 @@
 from azure.mgmt.resource.subscriptions import SubscriptionClient, \
                                               SubscriptionClientConfiguration
 
+from msrest import Serializer
+
 from .._profile import Profile
-from .._util import TableOutput
 from ..commands import command, description, option
 from .._debug import should_disable_connection_verify
 
@@ -28,18 +29,11 @@ def login(args, unexpected):
     if not subscriptions:
         raise RuntimeError(_('No subscriptions found for this account.'))
 
-    #keep useful properties and not json serializable 
+    serializable = Serializer().serialize_data(subscriptions, "[Subscription]")
 
+    #keep useful properties and not json serializable 
     profile = Profile()
     consolidated = Profile.normalize_properties(username, subscriptions)
     profile.set_subscriptions(consolidated, credentials.token['access_token'])
 
-    with TableOutput() as to:
-        for subscription in consolidated:
-            to.cell('Name', subscription['name'])
-            to.cell('Active', bool(subscription['active']))
-            to.cell('User', subscription['user'])
-            to.cell('Subscription Id', subscription['id'])
-            to.cell('State', subscription['state'])
-            to.end_row()
-
+    return serializable
