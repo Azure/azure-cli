@@ -1,11 +1,12 @@
 from ..main import SESSION
-from .._logging import logging
+from .._logging import logger
 from .._util import TableOutput
 from ..commands import command, description, option
 from .._profile import Profile
 
 @command('storage account list')
 @description(_('List storage accounts'))
+@option('--foo -f <bar>', _('fake'), required=True)
 @option('--resource-group -g <resourceGroup>', _('the resource group name'))
 @option('--subscription -s <id>', _('the subscription id'))
 def list_accounts(args, unexpected):
