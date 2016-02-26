@@ -202,7 +202,8 @@ class ArgumentParser(object):
                 parsed.positional.append(n)
             n = next_n
 
-        required_args = [x for x, _, req in expected_kwargs.values() if req]
+        # TODO: "unused" below can't be called _ because of a conflict with the loc function
+        required_args = [x for x, unused, req in expected_kwargs.values() if req]
         for a in required_args:
             try:
                 parsed[a]
