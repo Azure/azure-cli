@@ -1,6 +1,6 @@
+from msrest import Serializer
+
 from ..main import SESSION
-from .._logging import logging
-from .._util import TableOutput
 from ..commands import command, description, option
 from .._profile import Profile
 
@@ -24,15 +24,8 @@ def list_accounts(args, unexpected):
     else:
         accounts = smc.storage_accounts.list()
 
-    with TableOutput() as to:
-        for acc in accounts:
-            assert isinstance(acc, StorageAccount)
-            to.cell('Name', acc.name)
-            to.cell('Type', acc.account_type)
-            to.cell('Location', acc.location)
-            to.end_row()
-        if not to.any_rows:
-            print('No storage accounts defined')
+    serializable = Serializer().serialize_data(accounts, "[StorageAccount]")
+    return serializable
 
 @command('storage account check')
 @option('--account-name <name>')
