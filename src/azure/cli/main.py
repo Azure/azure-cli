@@ -4,6 +4,7 @@ from ._argparse import ArgumentParser
 from ._locale import install as locale_install
 from ._logging import configure_logging, logger
 from ._session import Session
+from ._output import OutputProducer
 
 # CONFIG provides external configuration options
 CONFIG = Session()
@@ -37,7 +38,11 @@ def main(args):
         commands.add_to_parser(parser)
     
     try:
-        parser.execute(args)
+        result = parser.execute(args)
+        # Commands can return a dictionary/list of results
+        # If they do, we print the results.
+        if result:
+            OutputProducer().out(result)
     except RuntimeError as ex:
         logger.error(ex.args[0])
         return ex.args[1] if len(ex.args) >= 2 else -1
