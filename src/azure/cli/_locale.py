@@ -16,7 +16,8 @@ def install(locale_dir):
     
     translations = dict(mapping)
     def _(key):
-        return translations.get(key) or '<NO_TRANSLATION:{}>'.format(key)
+        # no warning for unlocalized strings right now because we are currently not localizing
+        return translations.get(key) or key
     _.locale_dir = locale_dir
     
     __builtins__['_'] = _
