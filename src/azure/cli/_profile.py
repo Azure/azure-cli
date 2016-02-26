@@ -12,7 +12,7 @@ class Profile(object):
         consolidated = []
         for s in subscriptions:
             consolidated.append({
-                'id': s.id.split('/')[-1],
+                'id': s.id.rpartition('/')[2],
                 'name': s.display_name,
                 'state': s.state,
                 'user': user,
