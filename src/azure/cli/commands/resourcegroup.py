@@ -1,4 +1,5 @@
-from .._util import TableOutput
+from msrest import Serializer
+
 from ..commands import command, description, option
 from .._profile import Profile
 
@@ -19,14 +20,5 @@ def list_groups(args, unexpected):
     #groups = rmc.resource_groups.list(filter=None, top=args.get('top'))
     groups = rmc.resource_groups.list()
 
-    with TableOutput() as to:
-        for grp in groups:
-            assert isinstance(grp, ResourceGroup)
-            to.cell('Name', grp.name)
-            to.cell('Type', grp.properties)
-            to.cell('Location', grp.location)
-            to.cell('Tags', grp.tags)
-            to.end_row()
-        if not to.any_rows:
-            print('No resource groups defined')
-
+    serializable = Serializer().serialize_data(groups, "[ResourceGroup]")
+    return serializable
