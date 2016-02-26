@@ -36,7 +36,7 @@ class Test_argparse(unittest.TestCase):
 
     def test_args(self):
         p = ArgumentParser('test')
-        p.add_command(lambda a, b: (a, b), 'n1', args=[('--arg -a', ''), ('-b <v>', '')])
+        p.add_command(lambda a, b: (a, b), 'n1', args=[('--arg -a', '', False), ('-b <v>', '', False)])
 
         res, other = p.execute('n1 -a x'.split())
         self.assertTrue(res.arg)
@@ -69,7 +69,7 @@ class Test_argparse(unittest.TestCase):
 
     def test_unexpected_args(self):
         p = ArgumentParser('test')
-        p.add_command(lambda a, b: (a, b), 'n1', args=[('-a', '')])
+        p.add_command(lambda a, b: (a, b), 'n1', args=[('-a', '', False)])
 
         res, other = p.execute('n1 -b=2'.split())
         self.assertFalse(res)
@@ -83,6 +83,17 @@ class Test_argparse(unittest.TestCase):
         self.assertFalse(res)
         self.assertEqual('2', other.b.c.d)
         self.assertEqual('3', other.b.c.e)
+
+    def test_required_args(self):
+        p = ArgumentParser('test')
+        p.add_command(lambda a, b: (a, b), 'n1', args=[('--arg -a', '', True), ('-b <v>', '', False)])
+
+        res, other = p.execute('n1 -a x'.split())
+        self.assertTrue(res.arg)
+        self.assertSequenceEqual(res.positional, ['x'])
+
+        self.assertIsNone(p.execute('n1 -b x'.split()))
+
 
 if __name__ == '__main__':
     unittest.main()
