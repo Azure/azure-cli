@@ -7,6 +7,7 @@ COMMAND_MODULES = [
     'logout',
     'account',
     'storage',
+    'resourcegroup'
 ]
 
 _COMMANDS = {}
