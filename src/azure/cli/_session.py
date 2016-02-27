@@ -30,7 +30,7 @@ class Session(collections.MutableMapping):
                     self.save()
             with open(self.filename, 'r', encoding='utf-8-sig') as f:
                 self.data = json.load(f)
-        except OSError:
+        except (OSError, IOError):
             self.save()
 
     def save(self):
