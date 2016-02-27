@@ -51,12 +51,24 @@ _auto_command._operation_builder("vm",
                     (azure.mgmt.compute.operations.VirtualMachineImagesOperations.list_skus, '[VirtualMachineImageResource]'),
                     ])
 
-# TODO: VM UsageOperations
-
-# TODO: VM SizeOperations
+_auto_command._operation_builder("vm",
+                   "usage",
+                   "usage",
+                    _compute_client_factory,
+                    [
+                    (azure.mgmt.compute.operations.UsageOperations.list, '[Usage]'),
+                    ])
 
 _auto_command._operation_builder("vm",
-                   "operations",
+                   "size",
+                   "virtual_machine_sizes",
+                    _compute_client_factory,
+                    [
+                    (azure.mgmt.compute.operations.VirtualMachineSizesOperations.list, '[VirtualMachineSize]'),
+                    ])
+
+_auto_command._operation_builder("vm",
+                   "",
                    "virtual_machines",
                     _compute_client_factory,
                     [
@@ -72,25 +84,36 @@ _auto_command._operation_builder("vm",
                     (azure.mgmt.compute.operations.VirtualMachinesOperations.start, None),
                     ])
 
-if False:
-    _auto_command._operation_builder("vm",
-                   "scaleset",
-                   "virtual_machine_scalesets",
-                    _compute_client_factory,
-                    [
-                    (azure.mgmt.compute.operations.VirtualMachineScaleSetsOperations.deallocate, None),
-                    (azure.mgmt.compute.operations.VirtualMachineScaleSetsOperations.delete, None),
-                    (azure.mgmt.compute.operations.VirtualMachineScaleSetsOperations.get, 'VirtualMachineScaleSet'),
-                    (azure.mgmt.compute.operations.VirtualMachineScaleSetsOperations.delete_instances, None), 
-                    (azure.mgmt.compute.operations.VirtualMachineScaleSetsOperations.get_instance_view, 'VirtualMachineScaleSetInstanceView'),
-                    (azure.mgmt.compute.operations.VirtualMachineScaleSetsOperations.list, '[VirtualMachineScaleSet]'),
-                    (azure.mgmt.compute.operations.VirtualMachineScaleSetsOperations.list_all, '[VirtualMachineScaleSet]'),
-                    (azure.mgmt.compute.operations.VirtualMachineScaleSetsOperations.list_skus, '[VirtualMachineScaleSet]'),
-                    (azure.mgmt.compute.operations.VirtualMachineScaleSetsOperations.power_off, None),
-                    (azure.mgmt.compute.operations.VirtualMachineScaleSetsOperations.restart, None),
-                    (azure.mgmt.compute.operations.VirtualMachineScaleSetsOperations.start, None),
-                    (azure.mgmt.compute.operations.VirtualMachineScaleSetsOperations.update_instances, None),
-                    ])
+_auto_command._operation_builder("vm",
+                "scaleset",
+                "virtual_machine_scale_sets",
+                _compute_client_factory,
+                [
+                (azure.mgmt.compute.operations.VirtualMachineScaleSetsOperations.deallocate, None),
+                (azure.mgmt.compute.operations.VirtualMachineScaleSetsOperations.delete, None),
+                (azure.mgmt.compute.operations.VirtualMachineScaleSetsOperations.get, 'VirtualMachineScaleSet'),
+                (azure.mgmt.compute.operations.VirtualMachineScaleSetsOperations.delete_instances, None), 
+                (azure.mgmt.compute.operations.VirtualMachineScaleSetsOperations.get_instance_view, 'VirtualMachineScaleSetInstanceView'),
+                (azure.mgmt.compute.operations.VirtualMachineScaleSetsOperations.list, '[VirtualMachineScaleSet]'),
+                (azure.mgmt.compute.operations.VirtualMachineScaleSetsOperations.list_all, '[VirtualMachineScaleSet]'),
+                (azure.mgmt.compute.operations.VirtualMachineScaleSetsOperations.list_skus, '[VirtualMachineScaleSet]'),
+                (azure.mgmt.compute.operations.VirtualMachineScaleSetsOperations.power_off, None),
+                (azure.mgmt.compute.operations.VirtualMachineScaleSetsOperations.restart, None),
+                (azure.mgmt.compute.operations.VirtualMachineScaleSetsOperations.start, None),
+                (azure.mgmt.compute.operations.VirtualMachineScaleSetsOperations.update_instances, None),
+                ])
 
-
-# TODO: VirtualMachineScaleSetVMsOperations
+_auto_command._operation_builder("vm",
+                "vmscaleset",
+                "virtual_machine_scale_set_vms",
+                _compute_client_factory,
+                [
+                (azure.mgmt.compute.operations.VirtualMachineScaleSetVMsOperations.deallocate, None),
+                (azure.mgmt.compute.operations.VirtualMachineScaleSetVMsOperations.delete, None),
+                (azure.mgmt.compute.operations.VirtualMachineScaleSetVMsOperations.get, None),
+                (azure.mgmt.compute.operations.VirtualMachineScaleSetVMsOperations.get_instance_view, 'VirtualMachineScaleSetVMInstanceView'),
+                (azure.mgmt.compute.operations.VirtualMachineScaleSetVMsOperations.list, '[VirtualMachineScaleSetVM]'),
+                (azure.mgmt.compute.operations.VirtualMachineScaleSetVMsOperations.power_off, None),
+                (azure.mgmt.compute.operations.VirtualMachineScaleSetVMsOperations.restart, None),
+                (azure.mgmt.compute.operations.VirtualMachineScaleSetVMsOperations.start, None),
+                ])

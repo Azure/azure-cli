@@ -4,6 +4,7 @@ from msrest import Serializer
 from ..main import CONFIG, SESSION
 from ..commands import command, description, option
 from .._logging import logger
+from azure.cli._argparse import IncorrectUsageError
 
 def _decorate_command(name, func):
     return command(name)(func)
@@ -24,11 +25,16 @@ def _make_func(client_factory, member_name, return_type_name, unbound_func):
                 return {}
             return Serializer().serialize_data(result, return_type_name)
         except TypeError as e:
-            logger.warn(e)
+            # TODO: Evaluate required/missing parameters and provide specific
+            # usage for missing params...
+            raise IncorrectUsageError(e)
 
     return call_client
     
 def _option_description(op, arg):
+    """Pull out parameter help from doccomments of the command
+    """
+    # TODO: We are currently doing this for every option/argument. We should do it (at most) once for a given command...    
     return ' '.join([l.split(':')[-1] for l in inspect.getdoc(op).splitlines() if l.startswith(':param') and l.find(arg + ':') != -1])
 
 def _operation_builder(package_name, resource_type, member_name, client_type, operations):

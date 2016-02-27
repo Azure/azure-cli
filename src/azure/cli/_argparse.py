@@ -208,7 +208,7 @@ class ArgumentParser(object):
             return handler(parsed, others)
         except IncorrectUsageError as ex:
             print(str(ex), file=out)
-            return self.display_usage(nouns, m, args, out)
+            return self._display_usage(nouns, m, args, out)
         finally:
             sys.stdout = old_stdout
 
