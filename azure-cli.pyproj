@@ -14,6 +14,8 @@
     <LaunchProvider>Standard Python launcher</LaunchProvider>
     <InterpreterId>{1dd9c42b-5980-42ce-a2c3-46d3bf0eede4}</InterpreterId>
     <InterpreterVersion>3.5</InterpreterVersion>
+    <CommandLineArguments>vm extensions get</CommandLineArguments>
+    <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'" />
   <PropertyGroup Condition="'$(Configuration)' == 'Release'" />
@@ -22,10 +24,15 @@
     <PtvsTargetsFile>$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets</PtvsTargetsFile>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="az.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="azure\cli\commands\account.py" />
     <Compile Include="azure\cli\commands\login.py" />
     <Compile Include="azure\cli\commands\logout.py" />
     <Compile Include="azure\cli\commands\storage.py" />
+    <Compile Include="azure\cli\commands\vm.py" />
+    <Compile Include="azure\cli\commands\_auto_command.py" />
     <Compile Include="azure\cli\commands\__init__.py" />
     <Compile Include="azure\cli\main.py" />
     <Compile Include="azure\cli\tests\test_argparse.py">
@@ -43,6 +50,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="azure\cli\_logging.py" />
+    <Compile Include="azure\cli\_output.py" />
     <Compile Include="azure\cli\_profile.py" />
     <Compile Include="azure\cli\_session.py">
       <SubType>Code</SubType>
