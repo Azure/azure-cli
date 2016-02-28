@@ -6,6 +6,7 @@ COMMAND_MODULES = [
     'account',
     'login',
     'logout',
+    'network',
     'resourcegroup',
     'storage',
     'vm',
