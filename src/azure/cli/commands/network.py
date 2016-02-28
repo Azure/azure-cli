@@ -70,7 +70,7 @@ _auto_command._operation_builder("network",
 
 # LoadBalancersOperations
 _auto_command._operation_builder("network",
-                   "loadbalancer",
+                   "lb",
                    "load_balancers",
                     _network_client_factory,
                     [
