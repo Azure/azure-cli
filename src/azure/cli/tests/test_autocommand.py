@@ -1,7 +1,7 @@
 import logging
 import unittest
 
-from azure.cli.commands._auto_command import _decorate_command, _decorate_option, _decorate_description, _operation_builder
+from azure.cli.commands._auto_command import _decorate_command, _decorate_option, _decorate_description, operation_builder
 from azure.cli.commands import _COMMANDS
 
 class Test_autocommand(unittest.TestCase):
