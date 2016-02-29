@@ -1,7 +1,6 @@
 import os
 
 from ._argparse import ArgumentParser
-from ._locale import install as locale_install
 from ._logging import configure_logging, logger
 from ._session import Session
 from ._output import OutputProducer
@@ -12,16 +11,17 @@ CONFIG = Session()
 # SESSION provides read-write session variables
 SESSION = Session()
 
-# Load the user's preferred locale from their configuration
-LOCALE = CONFIG.get('locale', 'en-US')
-locale_install(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'locale', LOCALE))
-
-
 def main(args):
     CONFIG.load(os.path.expanduser('~/az.json'))
     SESSION.load(os.path.expanduser('~/az.sess'), max_age=3600)
 
     configure_logging(args, CONFIG)
+
+    from ._locale import install as locale_install
+    locale_install(os.path.join(os.path.dirname(os.path.abspath(__file__)), 
+                                'locale', 
+                                CONFIG.get('locale', 'en-US')))
+
 
     parser = ArgumentParser("az")
 

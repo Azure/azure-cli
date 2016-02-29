@@ -8,7 +8,7 @@ try:
     from io import StringIO
 except ImportError:
     # Python 2
-    from StringIO import StringIO
+    from StringIO import StringIO #pylint: disable=import-error
 
 class OutputFormatException(Exception):
     pass
@@ -40,9 +40,9 @@ def format_text(obj):
     except TypeError:
         return ''
 
-class OutputProducer(object):
+class OutputProducer(object): #pylint: disable=too-few-public-methods 
     
-    def __init__(self, formatter=format_json, file=sys.stdout):
+    def __init__(self, formatter=format_json, file=sys.stdout): #pylint: disable=redefined-builtin
         self.formatter = formatter
         self.file = file
 
@@ -100,14 +100,14 @@ class TextOutput(object):
 
     def dump(self):
         with StringIO() as io:
-            for id in sorted(self.identifiers):
-                io.write(id.upper())
+            for identifier in sorted(self.identifiers):
+                io.write(identifier.upper())
                 io.write('\t')
-                for col in self.identifiers[id]:
+                for col in self.identifiers[identifier]:
                     if isinstance(col, str):
                         io.write(col)
                     else:
-                        # TODO: Handle complex objects
+                        # TODO: Need to handle complex objects
                         io.write("null")
                     io.write('\t')
                 io.write('\n')
