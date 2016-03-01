@@ -25,8 +25,8 @@ ENV AZURECLITEMP /tmp/azure-cli
 ENV PYTHONPATH $PYTHONPATH:$AZURECLITEMP/src
 ENV PATH $PATH:$AZURECLITEMP
 
-RUN mkdir -p $AZURECLITEMP && \
-    cp src $AZURECLITEMP -R
+RUN mkdir -p $AZURECLITEMP
+ADD src $AZURECLITEMP/src
 
 RUN echo '#!/bin/bash'>$AZURECLITEMP/az && \
     echo 'python -m azure.cli "$@"'>>$AZURECLITEMP/az && \
