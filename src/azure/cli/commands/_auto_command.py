@@ -1,7 +1,26 @@
 import inspect
+import sys
+import time
 from msrest import Serializer
 from ..commands import command, description, option
 from azure.cli._argparse import IncorrectUsageError
+from msrest.exceptions import ClientException
+
+class LongRunningOperation(object):
+
+    def __init__(self, start_msg = '', finish_msg = '', poll_interval_ms=100.0):
+        self.start_msg = start_msg
+        self.finish_msg = finish_msg
+        self.poll_interval_ms = poll_interval_ms
+
+    def __call__(self, poller):
+        print(self.start_msg, file=sys.stderr)
+
+        while not poller.done():
+            print('.', end='', flush=True, file=sys.stderr)
+            time.sleep(self.poll_interval_ms / 1000.0)
+        result = poller.result()
+        print(self.finish_msg, file=sys.stderr)
 
 def _decorate_command(name, func):
     return command(name)(func)
@@ -12,19 +31,27 @@ def _decorate_description(desc, func):
 def _decorate_option(spec, descr, func):
     return option(spec, descr)(func)
 
-def _make_func(client_factory, member_name, return_type_name, unbound_func):
+def _make_func(client_factory, member_name, return_type_or_func, unbound_func):
     def call_client(args, unexpected): #pylint: disable=unused-argument
         client = client_factory()
         ops_instance = getattr(client, member_name)
         try:
             result = unbound_func(ops_instance, **args)
-            if not return_type_name:
+            if hasattr(return_type_or_func, '__call__'):
+                return return_type_or_func(result)            
+            if isinstance(return_type_or_func, str):
+                return Serializer().serialize_data(result, return_type_or_func)
+            if not return_type_or_func:
                 return {}
-            return Serializer().serialize_data(result, return_type_name)
         except TypeError as exception:
             # TODO: Evaluate required/missing parameters and provide specific
             # usage for missing params...
             raise IncorrectUsageError(exception)
+        except ClientException as client_exception:
+            # TODO: Better error handling for cloud exceptions...
+            message = getattr(client_exception, 'message', client_exception)
+            print(message, file=sys.stderr)
+
 
     return call_client
 
@@ -40,7 +67,7 @@ EXCLUDED_PARAMS = frozenset(['self', 'raw', 'custom_headers', 'operation_config'
 
 def operation_builder(package_name, resource_type, member_name, client_type, operations):
     for operation, return_type_name in operations:
-        opname = operation.__name__
+        opname = operation.__name__.replace('_', '-')
         func = _make_func(client_type, member_name, return_type_name, operation)
         func = _decorate_command(' '.join([package_name, resource_type, opname]), func)
 

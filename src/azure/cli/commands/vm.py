@@ -89,7 +89,7 @@ _auto_command.operation_builder("vm",
                                     (VirtualMachinesOperations.list_available_sizes, '[VirtualMachineSize]'),
                                     (VirtualMachinesOperations.power_off, None),
                                     (VirtualMachinesOperations.restart, None),
-                                    (VirtualMachinesOperations.start, None),
+                                    (VirtualMachinesOperations.start, _auto_command.LongRunningOperation('Starting VM', 'VM Started')),
                                 ])
 
 _auto_command.operation_builder("vm",
