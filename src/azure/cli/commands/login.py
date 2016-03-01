@@ -22,9 +22,9 @@ def login(args, unexpected): #pylint: disable=unused-argument
         import getpass
         password = getpass.getpass(L('Password: '))
 
-    credentials = UserPassCredentials(username, 
-                                      password, 
-                                      client_id=CLIENT_ID, 
+    credentials = UserPassCredentials(username,
+                                      password,
+                                      client_id=CLIENT_ID,
                                       verify=not should_disable_connection_verify())
     client = SubscriptionClient(SubscriptionClientConfiguration(credentials))
     subscriptions = client.subscriptions.list()
@@ -34,7 +34,7 @@ def login(args, unexpected): #pylint: disable=unused-argument
 
     serializable = Serializer().serialize_data(subscriptions, "[Subscription]")
 
-    #keep useful properties and not json serializable 
+    #keep useful properties and not json serializable
     profile = Profile()
     consolidated = Profile.normalize_properties(username, subscriptions)
     profile.set_subscriptions(consolidated, credentials.token['access_token'])

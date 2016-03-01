@@ -1,4 +1,4 @@
-from msrest import Serializer
+﻿from msrest import Serializer
 from ..commands import command, description, option
 from ._command_creation import get_service_client
 from .._logging  import logger
@@ -8,7 +8,7 @@ from .._locale import L
 @description(L('List storage accounts'))
 @option('--resource-group -g <resourceGroup>', L('the resource group name'))
 @option('--subscription -s <id>', L('the subscription id'))
-def list_accounts(args, unexpected): #pylint: disable=unused-argument 
+def list_accounts(args, unexpected): #pylint: disable=unused-argument
     from azure.mgmt.storage import StorageManagementClient, StorageManagementClientConfiguration
     from azure.mgmt.storage.models import StorageAccount
     from msrestazure.azure_active_directory import UserPassCredentials
@@ -26,7 +26,7 @@ def list_accounts(args, unexpected): #pylint: disable=unused-argument
 
 @command('storage account check')
 @option('--account-name <name>')
-def checkname(args, unexpected): #pylint: disable=unused-argument 
+def checkname(args, unexpected): #pylint: disable=unused-argument
     from azure.mgmt.storage import StorageManagementClient, StorageManagementClientConfiguration
     smc = get_service_client(StorageManagementClient, StorageManagementClientConfiguration)
     logger.warning(smc.storage_accounts.check_name_availability(args.account_name))
