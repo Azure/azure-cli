@@ -1,4 +1,4 @@
-from __future__ import print_function
+﻿from __future__ import print_function
 import sys
 
 from ._locale import L, get_file as locale_get_file
@@ -69,9 +69,9 @@ class ArgumentParser(object):
         self.global_args = {'--verbose', '--debug'}
 
     def add_command(self,
-                    handler, 
-                    name=None, 
-                    description=None, 
+                    handler,
+                    name=None,
+                    description=None,
                     args=None):
         '''Registers a command that may be parsed by this parser.
 
@@ -124,9 +124,9 @@ class ArgumentParser(object):
 
 
     def execute(self,
-                args, 
-                show_usage=False, 
-                show_completions=False, 
+                args,
+                show_usage=False,
+                show_completions=False,
                 out=sys.stdout):
         '''Parses `args` and invokes the associated handler.
 
@@ -173,7 +173,7 @@ class ArgumentParser(object):
         except LookupError:
             logger.debug('Missing data for noun %s', n)
             show_usage = True
-        
+
         if show_completions:
             return ArgumentParser._display_completions(m, out)
         if show_usage:
@@ -195,7 +195,7 @@ class ArgumentParser(object):
                 elif target_value[1] is True:
                     # Arg with no value
                     if value is not None:
-                        print(L("argument '{0}' does not take a value").format(key_n), 
+                        print(L("argument '{0}' does not take a value").format(key_n),
                               file=out)
                         return self._display_usage(nouns, m, out)
                     parsed.add_from_dotted(target_value[0], True)
@@ -219,12 +219,12 @@ class ArgumentParser(object):
         finally:
             sys.stdout = old_stdout
 
-    def _display_usage(self, nouns, noun_map, out=sys.stdout):            
+    def _display_usage(self, nouns, noun_map, out=sys.stdout):
         spec = ' '.join(noun_map.get('$spec') or nouns)
         print('    {} {}'.format(self.prog, spec), file=out)
         print(file=out)
         out.flush()
-        
+
         subnouns = sorted(k for k in noun_map if not k.startswith('$'))
         if subnouns:
             print('Subcommands', file=out)
@@ -232,7 +232,7 @@ class ArgumentParser(object):
                 print('    {}'.format(n), file=out)
             print(file=out)
             out.flush()
-        
+
         argdoc = noun_map.get('$argdoc')
         if argdoc:
             print('Arguments', file=out)

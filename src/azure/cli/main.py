@@ -1,4 +1,4 @@
-import os
+﻿import os
 
 from ._argparse import ArgumentParser
 from ._logging import configure_logging, logger
@@ -18,8 +18,8 @@ def main(args):
     configure_logging(args, CONFIG)
 
     from ._locale import install as locale_install
-    locale_install(os.path.join(os.path.dirname(os.path.abspath(__file__)), 
-                                'locale', 
+    locale_install(os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                'locale',
                                 CONFIG.get('locale', 'en-US')))
 
 
@@ -36,7 +36,7 @@ def main(args):
     else:
         # No noun found, so load all commands.
         commands.add_to_parser(parser)
-    
+
     try:
         result = parser.execute(args)
         # Commands can return a dictionary/list of results

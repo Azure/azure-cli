@@ -1,4 +1,4 @@
-from __future__ import print_function, unicode_literals
+﻿from __future__ import print_function, unicode_literals
 
 import sys
 import json
@@ -40,8 +40,8 @@ def format_text(obj):
     except TypeError:
         return ''
 
-class OutputProducer(object): #pylint: disable=too-few-public-methods 
-    
+class OutputProducer(object): #pylint: disable=too-few-public-methods
+
     def __init__(self, formatter=format_json, file=sys.stdout): #pylint: disable=redefined-builtin
         self.formatter = formatter
         self.file = file
@@ -58,7 +58,7 @@ class TableOutput(object):
     def dump(self):
         if len(self._rows) == 1:
             return
-        
+
         with StringIO() as io:
             cols = [(c, self._columns[c]) for c in self._column_order]
             io.write(' | '.join(c.center(w) for c, w in cols))
@@ -91,7 +91,7 @@ class TextOutput(object):
 
     def __init__(self):
         self.identifiers = {}
-    
+
     def add(self, identifier, value):
         if identifier in self.identifiers:
             self.identifiers[identifier].append(value)
