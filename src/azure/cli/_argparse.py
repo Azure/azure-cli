@@ -169,7 +169,7 @@ class ArgumentParser(object):
             show_usage = True
         
         if show_completions:
-            return self._display_completions(nouns, m, args, out)
+            return self._display_completions(nouns, m, n, args, out)
         if show_usage:
             return self._display_usage(nouns, m, args, out)
 
@@ -246,12 +246,22 @@ class ArgumentParser(object):
             out.flush()
             logger.debug('Expected documentation at %s', doc_file)
 
-    def _display_completions(self, nouns, noun_map, arguments, out=sys.stdout):
-        completions = [k for k in noun_map if not k.startswith('$')]
+    def _display_completions(self, nouns, noun_map, commands, arguments, out=sys.stdout):
+        arguments.remove('--complete')
 
-        kwargs = noun_map.get('$kwargs')
-        if kwargs:
-            completions.extend('--' + a for a in kwargs if a)
+        command_candidates = set([k for k in noun_map if not k.startswith('$')])
+        if command_candidates and not arguments[-1].startswith('-'):
+            command_candidates = set([c for c in command_candidates if c.startswith(arguments[-1])])
 
-        print('\n'.join(sorted(completions)), file=out)
+        kwargs = noun_map.get('$kwargs') or []
+        args_candidates = set('--' + a for a in kwargs if a)
+        
+        if arguments[-1].startswith('-') and not arguments[-1] in args_candidates:
+            args_candidates = set([c for c in args_candidates if c.startswith(arguments[-1])])
+        else:
+            args_candidates = args_candidates.difference(arguments)
+
+        candidates = command_candidates.union(args_candidates)
+        
+        print('\n'.join(sorted(candidates)), file=out)
         out.flush()
