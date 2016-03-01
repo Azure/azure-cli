@@ -1,6 +1,6 @@
-﻿from msrest.authentication import BasicTokenAuthentication
+﻿import collections
+from msrest.authentication import BasicTokenAuthentication
 from .main import CONFIG
-import collections
 
 class Profile(object):
 
@@ -37,10 +37,9 @@ class Profile(object):
             for s in subscriptions:
                 s['active'] = False
 
-            if new_active_one:
-                new_active_one['active'] = True
-            else:
-                new_subscriptions[0]['active'] = True
+            if not new_active_one:
+                new_active_one = new_subscriptions[0]
+            new_active_one['active'] = True
         else:
             new_subscriptions[0]['active'] = True
 
