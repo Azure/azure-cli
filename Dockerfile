@@ -21,11 +21,13 @@ RUN apt-get update -qq && \
     pip install cryptography && \
     pip install pyopenssl ndg-httpsclient pyasn1
 
-ENV PYTHONPATH ./src:$PYTHONPATH
+ENV PYTHONPATH $PYTHONPATH:/root/azure-cli/src
+ENV PATH $PATH:/root/azure-cli
 
-RUN echo '#!/bin/bash'>./az && \
-    echo 'python -m azure.cli "$@"'>>./az && \
-    chmod +x ./az && \
-    ./az
+RUN echo `pwd` && \
+    echo '#!/bin/bash'>~/azure-cli/az && \
+    echo 'python ~/azure-cli/src/azure/cli/__main__.py "$@"'>>~/azure-cli/az && \
+    chmod +x ~/azure-cli/az && \
+    az
 
 ENV EDITOR vim
