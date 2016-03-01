@@ -21,7 +21,7 @@ RUN apt-get update -qq && \
     pip install cryptography && \
     pip install pyopenssl ndg-httpsclient pyasn1
 
-ENV PYTHONPATH ./src:PYTHONPATH
+ENV PYTHONPATH ./src:$PYTHONPATH
 
 RUN echo '#!/bin/bash'>./az && \
     echo 'python -m azure.cli "$@"'>>./az && \
