@@ -255,9 +255,13 @@ class ArgumentParser(object):
 
         kwargs = noun_map.get('$kwargs') or []
         args_candidates = set('--' + a for a in kwargs if a)
-        
-        if arguments[-1].startswith('-') and not arguments[-1] in args_candidates:
-            args_candidates = set([c for c in args_candidates if c.startswith(arguments[-1])])
+        if arguments[-1].startswith('-'):
+            # TODO: We don't have enough metadata about the command to do parameter value 
+            # completion (yet). This should only apply to value arguments, not flag arguments
+            if arguments[-1] in args_candidates:
+                args_candidates = set()
+            else:
+                args_candidates = set([c for c in args_candidates if c.startswith(arguments[-1])])
         else:
             args_candidates = args_candidates.difference(arguments)
 
