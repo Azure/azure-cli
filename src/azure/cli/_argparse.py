@@ -122,7 +122,8 @@ class ArgumentParser(object):
             kw.update({_read_arg(a)[0]: (target, v, req) for a in aliases})
             ad.append(('/'.join(aliases), desc, req))
 
-
+    #pylint: disable=too-many-branches
+    #pylint: disable=too-many-statements
     def execute(self,
                 args,
                 show_usage=False,
@@ -173,7 +174,7 @@ class ArgumentParser(object):
         except LookupError:
             logger.debug('Missing data for noun %s', n)
             show_usage = True
-        
+
         if show_completions:
             return ArgumentParser._display_completions(m, out)
         if show_usage:
@@ -233,7 +234,7 @@ class ArgumentParser(object):
         print('    {} {}'.format(self.prog, spec), file=out)
         print(file=out)
         out.flush()
-        
+
         subnouns = sorted(k for k in noun_map if not k.startswith('$'))
         if subnouns:
             print('Subcommands', file=out)
@@ -241,13 +242,14 @@ class ArgumentParser(object):
                 print('    {}'.format(n), file=out)
             print(file=out)
             out.flush()
-        
+
         argdoc = noun_map.get('$argdoc')
         if argdoc:
             print('Arguments', file=out)
             maxlen = max(len(a) for a, d, r in argdoc)
             for a, d, r in argdoc:
-                print('    {0:<{1}} - {2} {3}'.format(a, maxlen, d, L("[Required]") if r else ""), file=out)
+                print('    {0:<{1}} - {2} {3}'.format(a, maxlen, d, L("[Required]") if r else ""),
+                      file=out)
             print(file=out)
             out.flush()
 
