@@ -264,15 +264,16 @@ class ArgumentParser(object):
             out.flush()
             logger.debug('Expected documentation at %s', doc_file)
 
-    def _display_completions(self, noun_map, arguments, out=sys.stdout): # pylint: disable=no-self-use
-        arguments.remove('--complete')
+    def _display_completions(self, noun_map, arguments, out=sys.stdout):
+        for a in self.complete_args:
+            arguments.remove(a)
 
         command_candidates = set([k for k in noun_map if not k.startswith('$')])
         if command_candidates and not arguments[-1].startswith('-'):
             command_candidates = set([c for c in command_candidates if c.startswith(arguments[-1])])
 
         kwargs = noun_map.get('$kwargs') or []
-        args_candidates = set('--' + a for a in kwargs if a)
+        args_candidates = set(('--' if len(a) > 1 else '-') + a for a in kwargs)
         if arguments[-1].startswith('-'):
             # TODO: We don't have enough metadata about the command to do parameter value
             # completion (yet). This should only apply to value arguments, not flag arguments
