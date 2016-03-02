@@ -28,9 +28,10 @@ def description(description_text):
         return handler
     return add_description
 
-def option(spec, description_text=None):
+def option(spec, description_text=None, required=False):
     def add_option(handler):
-        _COMMANDS.setdefault(handler, {}).setdefault('args', []).append((spec, description_text))
+        _COMMANDS.setdefault(handler, {}).setdefault('args', []) \
+            .append((spec, description_text, required))
         logger.debug('Added option "%s" to %s', spec, handler)
         return handler
     return add_option
