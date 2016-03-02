@@ -1,9 +1,17 @@
+﻿try:
+    # on Python2, we like to use the module "StringIO" rather "io" so to 
+    # avoid "print" errors like: TypeError: string argument expected, got 'str'
+    from StringIO import StringIO
+except ImportError:
+    # Python 3
+    from io import StringIO
+
 import unittest
 
 from azure.cli._argparse import ArgumentParser, IncorrectUsageError
 from azure.cli._logging import logger
 import logging
-
+import azure.cli._util as util
 
 class Test_argparse(unittest.TestCase):
     @classmethod
@@ -93,6 +101,33 @@ class Test_argparse(unittest.TestCase):
         self.assertSequenceEqual(res.positional, ['x'])
 
         self.assertIsNone(p.execute('n1 -b x'.split()))
+
+    def test_args_completion(self):
+        p = ArgumentParser('test')
+        p.add_command(lambda a, b: (a, b), 'n1', args=[('--arg -a', '', True), ('-b <v>', '', False)])
+        io = StringIO()
+
+        p.execute('n1 - --complete'.split(), 
+                               show_usage=False,
+                               show_completions=True,
+                               out=io)
+        candidates = util.normalize_newlines(io.getvalue())
+        self.assertEqual(candidates, '--arg\n-a\n-b\n')
+
+        io = StringIO()
+        p.execute('n1 --a --complete'.split(), 
+                               show_usage=False,
+                               out=io)
+        candidates = util.normalize_newlines(io.getvalue())
+        self.assertEqual(candidates, '--arg\n')
+
+        io = StringIO()
+        p.execute('n --a --complete'.split(), 
+                               show_usage=False,
+                               show_completions=True,
+                               out=io)
+        candidates = util.normalize_newlines(io.getvalue())
+        self.assertEqual(candidates, 'n1\n')
 
 
 if __name__ == '__main__':
