@@ -1,3 +1,4 @@
+from .._locale import L
 from azure.mgmt.compute import ComputeManagementClient, ComputeManagementClientConfiguration
 from azure.mgmt.compute.operations import (AvailabilitySetsOperations,
                                            VirtualMachineExtensionImagesOperations,
@@ -10,13 +11,13 @@ from azure.mgmt.compute.operations import (AvailabilitySetsOperations,
                                            VirtualMachineScaleSetVMsOperations)
 
 from ._command_creation import get_service_client
-from ..commands import _auto_command
+from ..commands._auto_command import build_operation, LongRunningOperation
 
 def _compute_client_factory():
     return get_service_client(ComputeManagementClient, ComputeManagementClientConfiguration)
 
 # pylint: disable=line-too-long
-_auto_command.operation_builder("vm",
+build_operation("vm",
                                 "availabilityset",
                                 "availability_sets",
                                 _compute_client_factory,
@@ -28,7 +29,7 @@ _auto_command.operation_builder("vm",
                                 ])
 
 
-_auto_command.operation_builder("vm",
+build_operation("vm",
                                 "machineextensionimages",
                                 "virtual_machine_extension_images",
                                 _compute_client_factory,
@@ -38,7 +39,7 @@ _auto_command.operation_builder("vm",
                                     (VirtualMachineExtensionImagesOperations.list_versions, '[VirtualMachineImageResource]'),
                                 ])
 
-_auto_command.operation_builder("vm",
+build_operation("vm",
                                 "extensions",
                                 "virtual_machine_extensions",
                                 _compute_client_factory,
@@ -47,7 +48,7 @@ _auto_command.operation_builder("vm",
                                     (VirtualMachineExtensionsOperations.get, 'VirtualMachineExtension'),
                                 ])
 
-_auto_command.operation_builder("vm",
+build_operation("vm",
                                 "image",
                                 "virtual_machine_images",
                                 _compute_client_factory,
@@ -59,7 +60,7 @@ _auto_command.operation_builder("vm",
                                     (VirtualMachineImagesOperations.list_skus, '[VirtualMachineImageResource]'),
                                 ])
 
-_auto_command.operation_builder("vm",
+build_operation("vm",
                                 "usage",
                                 "usage",
                                 _compute_client_factory,
@@ -67,7 +68,7 @@ _auto_command.operation_builder("vm",
                                     (UsageOperations.list, '[Usage]'),
                                 ])
 
-_auto_command.operation_builder("vm",
+build_operation("vm",
                                 "size",
                                 "virtual_machine_sizes",
                                 _compute_client_factory,
@@ -75,7 +76,7 @@ _auto_command.operation_builder("vm",
                                     (VirtualMachineSizesOperations.list, '[VirtualMachineSize]'),
                                 ])
 
-_auto_command.operation_builder("vm",
+build_operation("vm",
                                 "",
                                 "virtual_machines",
                                 _compute_client_factory,
@@ -89,10 +90,10 @@ _auto_command.operation_builder("vm",
                                     (VirtualMachinesOperations.list_available_sizes, '[VirtualMachineSize]'),
                                     (VirtualMachinesOperations.power_off, None),
                                     (VirtualMachinesOperations.restart, None),
-                                    (VirtualMachinesOperations.start, _auto_command.LongRunningOperation('Starting VM', 'VM Started')),
+                    (VirtualMachinesOperations.start, LongRunningOperation(L('Starting VM'), L('VM Started'))),
                                 ])
 
-_auto_command.operation_builder("vm",
+build_operation("vm",
                                 "scaleset",
                                 "virtual_machine_scale_sets",
                                 _compute_client_factory,
@@ -111,7 +112,7 @@ _auto_command.operation_builder("vm",
                                     (VirtualMachineScaleSetsOperations.update_instances, None),
                                 ])
 
-_auto_command.operation_builder("vm",
+build_operation("vm",
                                 "vmscaleset",
                                 "virtual_machine_scale_set_vms",
                                 _compute_client_factory,
