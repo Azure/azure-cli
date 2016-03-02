@@ -7,7 +7,7 @@ from msrest.exceptions import ClientException
 from azure.cli._argparse import IncorrectUsageError
 from ..commands import command, description, option
 
-class LongRunningOperation(object): #pylint: disable=too-few-public-methods 
+class LongRunningOperation(object): #pylint: disable=too-few-public-methods
 
     progress_file = sys.stderr
 
