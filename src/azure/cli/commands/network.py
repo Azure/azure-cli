@@ -41,7 +41,7 @@ build_operation("network",
                     (ApplicationGatewaysOperations.list, '[ApplicationGateway]'),
                     (ApplicationGatewaysOperations.list_all, '[ApplicationGateway]'),
                     (ApplicationGatewaysOperations.start, None),
-    (ApplicationGatewaysOperations.stop, LongRunningOperation(L('Starting application gateway'), L('Application gateway started'))),
+                    (ApplicationGatewaysOperations.stop, LongRunningOperation(L('Starting application gateway'), L('Application gateway started'))),
                 ])
 
 # ExpressRouteCircuitAuthorizationsOperations
