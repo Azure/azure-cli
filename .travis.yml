@@ -7,4 +7,6 @@ install:
   - pip install -r requirements.txt
 script: 
   - export PYTHONPATH=$PATHONPATH:./src
+  - python -m azure.cli
+  - pylint src/azure
   - python -m unittest discover -s src/azure/cli/tests
