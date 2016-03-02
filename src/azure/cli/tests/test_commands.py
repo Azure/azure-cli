@@ -16,10 +16,10 @@ except ImportError:
 
 from azure.cli.main import main as cli
 
-from command_specs import *
+from command_specs import TEST_SPECS
 
 logging.basicConfig()
-vcr_log = logging.getLogger("vcr")
+vcr_log = logging.getLogger('vcr')
 vcr_log.setLevel(logging.ERROR)
 
 VCR_CASSETTE_DIR = os.path.join(os.path.dirname(__file__), 'recordings')
@@ -60,26 +60,19 @@ class TestSequenceMeta(type):
 
     def __new__(mcs, name, bases, dict):
 
-        def gen_test(test_name, args_string, expected_result):
+        def gen_test(test_name, command, expected_result):
             @my_vcr.use_cassette('%s.yaml'%test_name, filter_headers=FILTER_HEADERS)
             def test(self):
                 with StringIO() as io:
-                    cli(args_string.split(), file=io)
+                    cli(command.split(), file=io)
                     self.assertEqual(io.getvalue(), expected_result)
             return test
 
-        def load_test_specs():
-            test_specs = []
-            test_spec_modules = [(key, sys.modules[key]) for key in sys.modules if key.startswith('command_specs.test_spec')]
-            for mname, m in test_spec_modules:
-                test_specs.append((mname, m.SPEC))
-            return test_specs
-
-        for module_name, test_specs in load_test_specs():
-            for tname, cmd_args, expected_result in test_specs:
-                test_name = "test_%s" % tname
-                full_test_name = "%s.%s"%(module_name, test_name)
-                dict[test_name] = gen_test(full_test_name, cmd_args, expected_result)
+        for module_name, test_specs in TEST_SPECS:
+            for test_spec_item in test_specs:
+                test_name = 'test_%s' % test_spec_item['test_name']
+                full_test_name = '%s.%s'%(module_name, test_name)
+                dict[test_name] = gen_test(full_test_name, test_spec_item['command'], test_spec_item['expected_result'])
         return type.__new__(mcs, name, bases, dict)
 
 @add_metaclass(TestSequenceMeta)
