@@ -7,7 +7,7 @@ except ImportError:
     import collections
 
 
-from codecs import open
+from codecs import open as codecs_open
 
 class Session(collections.MutableMapping):
     '''A simple dict-like class that is backed by a JSON file.
@@ -28,14 +28,14 @@ class Session(collections.MutableMapping):
                 st = os.stat(self.filename)
                 if st.st_mtime + max_age < time.clock():
                     self.save()
-            with open(self.filename, 'r', encoding='utf-8-sig') as f:
+            with codecs_open(self.filename, 'r', encoding='utf-8-sig') as f:
                 self.data = json.load(f)
         except (OSError, IOError):
             self.save()
 
     def save(self):
         if self.filename:
-            with open(self.filename, 'w', encoding='utf-8-sig') as f:
+            with codecs_open(self.filename, 'w', encoding='utf-8-sig') as f:
                 json.dump(self.data, f)
 
     def save_with_retry(self, retries=5):

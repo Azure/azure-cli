@@ -1,9 +1,7 @@
-from __future__ import print_function
-import json
-import os
+﻿from __future__ import print_function
 import sys
 
-from ._locale import get_file as locale_get_file
+from ._locale import L, get_file as locale_get_file
 from ._logging import logger
 
 # Named arguments are prefixed with one of these strings
@@ -20,7 +18,7 @@ class IncorrectUsageError(Exception):
     pass
 
 class Arguments(dict):
-    def __init__(self, source=None):
+    def __init__(self, source=None): #pylint: disable=super-init-not-called
         self.positional = []
         if source:
             self.update(source)
@@ -40,7 +38,7 @@ class Arguments(dict):
         except LookupError:
             pass
         logger.debug('Argument %s is required', key)
-        raise IncorrectUsageError(_("Argument {0} is required").format(key))
+        raise IncorrectUsageError(L('Argument {0} is required').format(key))
 
 def _read_arg(string):
     for prefix in ARG_PREFIXES:
@@ -66,11 +64,15 @@ class ArgumentParser(object):
         self.noun_map = {
             '$doc': 'azure-cli.txt',
         }
-        self.help_args = { '--help', '-h' }
-        self.complete_args = { '--complete' }
-        self.global_args = { '--verbose', '--debug' }
+        self.help_args = {'--help', '-h'}
+        self.complete_args = {'--complete'}
+        self.global_args = {'--verbose', '--debug'}
 
-    def add_command(self, handler, name=None, description=None, args=None):
+    def add_command(self,
+                    handler,
+                    name=None,
+                    description=None,
+                    args=None):
         '''Registers a command that may be parsed by this parser.
 
         `handler` is the function to call with two `Arguments` objects.
@@ -105,7 +107,7 @@ class ArgumentParser(object):
         m['$args'] = []
         m['$kwargs'] = kw = {}
         m['$argdoc'] = ad = []
-        for spec, desc in (args or []):
+        for spec, desc in args or []:
             if not any(spec.startswith(p) for p in ARG_PREFIXES):
                 m['$args'].append(spec.strip('<> '))
                 ad.append((spec, desc))
@@ -121,7 +123,11 @@ class ArgumentParser(object):
             ad.append(('/'.join(aliases), desc))
 
 
-    def execute(self, args, show_usage=False, show_completions=False, out=sys.stdout):
+    def execute(self,
+                args,
+                show_usage=False,
+                show_completions=False,
+                out=sys.stdout):
         '''Parses `args` and invokes the associated handler.
 
         The handler is passed two `Arguments` objects with all arguments other
@@ -142,10 +148,11 @@ class ArgumentParser(object):
         if not show_completions:
             show_completions = any(a in self.complete_args for a in args)
 
-        all_global_args = set(a.lstrip('-/') for a in self.help_args | self.complete_args | self.global_args)
+        all_global_args = set(
+            a.lstrip('-/') for a in self.help_args | self.complete_args | self.global_args)
         def not_global(a):
             return a.lstrip('-/') not in all_global_args
-        it = filter(not_global, args).__iter__()
+        it = filter(not_global, args).__iter__() #pylint: disable=bad-builtin
 
         m = self.noun_map
         nouns = []
@@ -161,17 +168,16 @@ class ArgumentParser(object):
             n = next(it, '')
 
         try:
-            expected_args = m['$args']
             expected_kwargs = m['$kwargs']
             handler = m['$handler']
         except LookupError:
             logger.debug('Missing data for noun %s', n)
             show_usage = True
-        
+
         if show_completions:
-            return self._display_completions(nouns, m, n, args, out)
+            return self._display_completions(m, args, out)
         if show_usage:
-            return self._display_usage(nouns, m, args, out)
+            return self._display_usage(nouns, m, out)
 
         parsed = Arguments()
         others = Arguments()
@@ -189,8 +195,9 @@ class ArgumentParser(object):
                 elif target_value[1] is True:
                     # Arg with no value
                     if value is not None:
-                        print(_("argument '{0}' does not take a value").format(key_n), file=out)
-                        return self._display_usage(nouns, m, args, out)
+                        print(L("argument '{0}' does not take a value").format(key_n),
+                              file=out)
+                        return self._display_usage(nouns, m, out)
                     parsed.add_from_dotted(target_value[0], True)
                 else:
                     # Arg with a value
@@ -208,16 +215,16 @@ class ArgumentParser(object):
             return handler(parsed, others)
         except IncorrectUsageError as ex:
             print(str(ex), file=out)
-            return self._display_usage(nouns, m, args, out)
+            return self._display_usage(nouns, m, out)
         finally:
             sys.stdout = old_stdout
 
-    def _display_usage(self, nouns, noun_map, arguments, out=sys.stdout):
+    def _display_usage(self, nouns, noun_map, out=sys.stdout):
         spec = ' '.join(noun_map.get('$spec') or nouns)
         print('    {} {}'.format(self.prog, spec), file=out)
         print(file=out)
         out.flush()
-        
+
         subnouns = sorted(k for k in noun_map if not k.startswith('$'))
         if subnouns:
             print('Subcommands', file=out)
@@ -225,7 +232,7 @@ class ArgumentParser(object):
                 print('    {}'.format(n), file=out)
             print(file=out)
             out.flush()
-        
+
         argdoc = noun_map.get('$argdoc')
         if argdoc:
             print('Arguments', file=out)
@@ -246,7 +253,7 @@ class ArgumentParser(object):
             out.flush()
             logger.debug('Expected documentation at %s', doc_file)
 
-    def _display_completions(self, nouns, noun_map, commands, arguments, out=sys.stdout):
+    def _display_completions(self, noun_map, arguments, out=sys.stdout): # pylint: disable=no-self-use
         arguments.remove('--complete')
 
         command_candidates = set([k for k in noun_map if not k.startswith('$')])
@@ -256,7 +263,7 @@ class ArgumentParser(object):
         kwargs = noun_map.get('$kwargs') or []
         args_candidates = set('--' + a for a in kwargs if a)
         if arguments[-1].startswith('-'):
-            # TODO: We don't have enough metadata about the command to do parameter value 
+            # TODO: We don't have enough metadata about the command to do parameter value
             # completion (yet). This should only apply to value arguments, not flag arguments
             if arguments[-1] in args_candidates:
                 args_candidates = set()
@@ -266,6 +273,6 @@ class ArgumentParser(object):
             args_candidates = args_candidates.difference(arguments)
 
         candidates = command_candidates.union(args_candidates)
-        
+
         print('\n'.join(sorted(candidates)), file=out)
         out.flush()
