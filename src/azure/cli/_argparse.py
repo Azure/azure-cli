@@ -107,10 +107,10 @@ class ArgumentParser(object):
         m['$args'] = []
         m['$kwargs'] = kw = {}
         m['$argdoc'] = ad = []
-        for spec, desc in args or []:
+        for spec, desc, req in args or []:
             if not any(spec.startswith(p) for p in ARG_PREFIXES):
                 m['$args'].append(spec.strip('<> '))
-                ad.append((spec, desc))
+                ad.append((spec, desc, req))
                 continue
 
             aliases = spec.split()
@@ -119,10 +119,12 @@ class ArgumentParser(object):
             else:
                 v = aliases.pop().strip('<> ')
             target, _ = _read_arg(aliases[0])
-            kw.update({_read_arg(a)[0]: (target, v) for a in aliases})
-            ad.append(('/'.join(aliases), desc))
+            kw.update({_read_arg(a)[0]: (target, v, req) for a in aliases})
+            ad.append(('/'.join(aliases), desc, req))
 
-
+    #pylint: disable=too-many-branches
+    #pylint: disable=too-many-statements
+    #pylint: disable=too-many-locals
     def execute(self,
                 args,
                 show_usage=False,
@@ -209,6 +211,14 @@ class ArgumentParser(object):
                 parsed.positional.append(n)
             n = next_n
 
+        required_args = [x for x, _, req in expected_kwargs.values() if req]
+        for a in required_args:
+            try:
+                parsed[a]
+            except KeyError:
+                print(L("Missing required argument {}".format(a)))
+                return self._display_usage(nouns, m, out)
+
         old_stdout = sys.stdout
         try:
             sys.stdout = out
@@ -236,9 +246,10 @@ class ArgumentParser(object):
         argdoc = noun_map.get('$argdoc')
         if argdoc:
             print('Arguments', file=out)
-            maxlen = max(len(a) for a, d in argdoc)
-            for a, d in argdoc:
-                print('    {0:<{1}} - {2}'.format(a, maxlen, d), file=out)
+            maxlen = max(len(a) for a, d, r in argdoc)
+            for a, d, r in argdoc:
+                print('    {0:<{1}} - {2} {3}'.format(a, maxlen, d, L("[Required]") if r else ""),
+                      file=out)
             print(file=out)
             out.flush()
 
