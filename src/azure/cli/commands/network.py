@@ -20,6 +20,9 @@ from azure.mgmt.network.operations import (ApplicationGatewaysOperations,
 
 from ._command_creation import get_service_client
 from ..commands import _auto_command
+from ..commands import command, description, option
+from msrest import Serializer
+
 
 def _network_client_factory():
     return get_service_client(NetworkManagementClient, NetworkManagementClientConfiguration)
@@ -239,10 +242,6 @@ _auto_command.operation_builder("network",
                                     (VirtualNetworksOperations.list, '[VirtualNetwork]'),
                                     (VirtualNetworksOperations.list_all, '[VirtualNetwork]'),
                                 ])
-from msrest import Serializer
-
-from ..commands import command, description, option
-from ._command_creation import get_service_client
 
 @command('network vnet create')
 @description(_('Create or update a virtual network (VNet)'))
