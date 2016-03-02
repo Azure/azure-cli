@@ -1,6 +1,8 @@
-SPEC = [
-["network_usage_list", "network usage list --location westus",
-"""[
+spec = [
+    {
+        'test_name': 'network_usage_list',
+        'command': 'network usage list --location westus',
+        'expected_result': """[
   {
     "currentValue": 6,
     "limit": 50,
@@ -74,5 +76,9 @@ SPEC = [
     "unit": "Count"
   }
 ]
-"""],
+"""
+    },
 ]
+
+from . import TEST_SPECS
+TEST_SPECS.append((locals()['__name__'], spec))

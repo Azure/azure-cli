@@ -1,6 +1,8 @@
-SPEC = [
-["vm_usage_list_westus", "vm usage list --location westus",
-"""[
+spec = [
+    {
+        'test_name': 'vm_usage_list_westus',
+        'command': 'vm usage list --location westus',
+        'expected_result': """[
   {
     "currentValue": 0,
     "limit": 2000,
@@ -38,5 +40,9 @@ SPEC = [
     "unit": "Count"
   }
 ]
-"""],
+"""
+    },
 ]
+
+from . import TEST_SPECS
+TEST_SPECS.append((locals()['__name__'], spec))
