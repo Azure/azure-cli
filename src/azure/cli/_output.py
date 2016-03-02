@@ -1,4 +1,4 @@
-from __future__ import print_function, unicode_literals
+﻿from __future__ import print_function, unicode_literals
 
 import sys
 import json
@@ -8,7 +8,7 @@ try:
     from io import StringIO
 except ImportError:
     # Python 2
-    from StringIO import StringIO
+    from StringIO import StringIO #pylint: disable=import-error
 
 class OutputFormatException(Exception):
     pass
@@ -40,9 +40,9 @@ def format_text(obj):
     except TypeError:
         return ''
 
-class OutputProducer(object):
-    
-    def __init__(self, formatter=format_json, file=sys.stdout):
+class OutputProducer(object): #pylint: disable=too-few-public-methods
+
+    def __init__(self, formatter=format_json, file=sys.stdout): #pylint: disable=redefined-builtin
         self.formatter = formatter
         self.file = file
 
@@ -58,7 +58,7 @@ class TableOutput(object):
     def dump(self):
         if len(self._rows) == 1:
             return
-        
+
         with StringIO() as io:
             cols = [(c, self._columns[c]) for c in self._column_order]
             io.write(' | '.join(c.center(w) for c, w in cols))
@@ -91,7 +91,7 @@ class TextOutput(object):
 
     def __init__(self):
         self.identifiers = {}
-    
+
     def add(self, identifier, value):
         if identifier in self.identifiers:
             self.identifiers[identifier].append(value)
@@ -100,14 +100,14 @@ class TextOutput(object):
 
     def dump(self):
         with StringIO() as io:
-            for id in sorted(self.identifiers):
-                io.write(id.upper())
+            for identifier in sorted(self.identifiers):
+                io.write(identifier.upper())
                 io.write('\t')
-                for col in self.identifiers[id]:
+                for col in self.identifiers[identifier]:
                     if isinstance(col, str):
                         io.write(col)
                     else:
-                        # TODO: Handle complex objects
+                        # TODO: Need to handle complex objects
                         io.write("null")
                     io.write('\t')
                 io.write('\n')
