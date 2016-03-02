@@ -1,26 +1,38 @@
+from __future__ import print_function
 import inspect
 import sys
 import time
 from msrest import Serializer
-from ..commands import command, description, option
-from azure.cli._argparse import IncorrectUsageError
 from msrest.exceptions import ClientException
+from azure.cli._argparse import IncorrectUsageError
+from ..commands import command, description, option
 
-class LongRunningOperation(object):
+class LongRunningOperation(object): #pylint: disable=too-few-public-methods
 
-    def __init__(self, start_msg = '', finish_msg = '', poll_interval_ms=100.0):
+    progress_file = sys.stderr
+
+    def __init__(self, start_msg='', finish_msg='', poll_interval_ms=1000.0):
         self.start_msg = start_msg
         self.finish_msg = finish_msg
         self.poll_interval_ms = poll_interval_ms
 
     def __call__(self, poller):
-        print(self.start_msg, file=sys.stderr)
+        print(self.start_msg, file=self.progress_file)
 
-        while not poller.done():
-            print('.', end='', flush=True, file=sys.stderr)
-            time.sleep(self.poll_interval_ms / 1000.0)
-        result = poller.result()
-        print(self.finish_msg, file=sys.stderr)
+        succeeded = False
+        try:
+            while not poller.done():
+                if self.progress_file:
+                    print('.', end='', flush=True, file=self.progress_file)
+                time.sleep(self.poll_interval_ms / 1000.0)
+            result = poller.result()
+            succeeded = True
+            return result
+        finally:
+            # Ensure that we get a newline after the dots...
+            if self.progress_file:
+                print(file=self.progress_file)
+                print(self.finish_msg if succeeded else '', file=self.progress_file)
 
 def _decorate_command(name, func):
     return command(name)(func)
@@ -37,12 +49,12 @@ def _make_func(client_factory, member_name, return_type_or_func, unbound_func):
         ops_instance = getattr(client, member_name)
         try:
             result = unbound_func(ops_instance, **args)
-            if hasattr(return_type_or_func, '__call__'):
-                return return_type_or_func(result)            
-            if isinstance(return_type_or_func, str):
-                return Serializer().serialize_data(result, return_type_or_func)
             if not return_type_or_func:
                 return {}
+            if callable(return_type_or_func):
+                return return_type_or_func(result)
+            if isinstance(return_type_or_func, str):
+                return Serializer().serialize_data(result, return_type_or_func)
         except TypeError as exception:
             # TODO: Evaluate required/missing parameters and provide specific
             # usage for missing params...
@@ -65,7 +77,7 @@ def _option_description(operation, arg):
 
 EXCLUDED_PARAMS = frozenset(['self', 'raw', 'custom_headers', 'operation_config'])
 
-def operation_builder(package_name, resource_type, member_name, client_type, operations):
+def build_operation(package_name, resource_type, member_name, client_type, operations):
     for operation, return_type_name in operations:
         opname = operation.__name__.replace('_', '-')
         func = _make_func(client_type, member_name, return_type_name, operation)
