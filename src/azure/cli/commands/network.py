@@ -246,12 +246,12 @@ build_operation("network",
                                 ])
 
 @command('network vnet create')
-@description(_('Create or update a virtual network (VNet)'))
-@option('--resource-group -g <resourceGroup>', _('the resource group name')) #required
-@option('--name -n <vnetName>', _('the VNet name')) #required
-@option('--location -l <location>', _('the VNet location')) #required
-@option('--address-space -a <vnetAddressSpace>', _('the VNet address-space in CIDR notation')) #required
-@option('--dns-servers -d <dnsServers>', _('the VNet DNS servers'))
+@description(L('Create or update a virtual network (VNet)'))
+@option('--resource-group -g <resourceGroup>', L('the resource group name')) #required
+@option('--name -n <vnetName>', L('the VNet name')) #required
+@option('--location -l <location>', L('the VNet location')) #required
+@option('--address-space -a <vnetAddressSpace>', L('the VNet address-space in CIDR notation')) #required
+@option('--dns-servers -d <dnsServers>', L('the VNet DNS servers'))
 def create_update_vnet(args, unexpected):
     from azure.mgmt.network import NetworkManagementClient, NetworkManagementClientConfiguration
     from azure.mgmt.network.models import VirtualNetwork, AddressSpace, DhcpOptions
@@ -271,15 +271,16 @@ def create_update_vnet(args, unexpected):
     return Serializer().serialize_data(poller.result(), "VirtualNetwork")
 
 @command('network subnet create')
-@description(_('Create or update a virtual network (VNet) subnet'))
-@option('--resource-group -g <resourceGroup>', _('the the resource group name')) #required
-@option('--name -n <subnetName>', _('the the subnet name')) #required
-@option('--vnet -v <vnetName>', _('the name of the subnet vnet')) #required
-@option('--address-prefix -a <addressPrefix>', _('the the address prefix in CIDR format')) #required
-@option('--ip-name -ipn <name>', _('the IP address configuration name')) 
-@option('--ip-private-address -ippr <ipAddress>', _('the private IP address')) 
-@option('--ip-allocation-method -ipa <allocationMethod>', _('the IP address allocation method')) 
-@option('--ip-public-address -ippu <ipAddress>', _('the public IP address')) 
+@description(L('Create or update a virtual network (VNet) subnet'))
+@option('--resource-group -g <resourceGroup>', L('the the resource group name')) #required
+@option('--name -n <subnetName>', L('the the subnet name')) #required
+@option('--vnet -v <vnetName>', L('the name of the subnet vnet')) #required
+@option('--address-prefix -a <addressPrefix>', L('the the address prefix in CIDR format')) #required
+# TODO: setting the IPConfiguration fails, will contact owning team
+#@option('--ip-name -ipn <name>', L('the IP address configuration name')) 
+#@option('--ip-private-address -ippa <ipAddress>', L('the private IP address')) 
+#@option('--ip-allocation-method -ipam <allocationMethod>', L('the IP address allocation method')) 
+#@option('--ip-public-address -ipa <ipAddress>', L('the public IP address')) 
 def create_update_subnet(args, unexpected):
     from azure.mgmt.network import NetworkManagementClient, NetworkManagementClientConfiguration
     from azure.mgmt.network.models import Subnet, IPConfiguration
@@ -288,20 +289,22 @@ def create_update_subnet(args, unexpected):
     vnet = args.get('vnet')
     name = args.get('name')
     address_prefix = args.get('address-prefix')
-    ip_name = args.get('ip-name')
-    ip_private_address = args.get('ip-private-address')
-    ip_allocation_method = args.get('ip-allocation-method')
-    ip_public_address = args.get('ip-public-address')
+    # TODO: setting the IPConfiguration fails, will contact owning team
+    #ip_name = args.get('ip-name')
+    #ip_private_address = args.get('ip-private-address')
+    #ip_allocation_method = args.get('ip-allocation-method')
+    #ip_public_address = args.get('ip-public-address')
 
-    ip_configuration = None
-                            #IPConfiguration(subnet = name, 
-                            #            name = ip_name,
-                            #            private_ip_address = ip_private_address,
-                            #            private_ip_allocation_method = ip_allocation_method,
-                            #            public_ip_address = ip_public_address)
+    # TODO: setting the IPConfiguration fails, will contact owning team
+    #ip_configuration = IPConfiguration(subnet = name, 
+    #                                    name = ip_name,
+    #                                    private_ip_address = ip_private_address,
+    #                                    private_ip_allocation_method = ip_allocation_method,
+    #                                    public_ip_address = ip_public_address)
 
     subnet_settings = Subnet(name = name, 
                              address_prefix = address_prefix)
+                             # TODO: setting the IPConfiguration fails, will contact owning team
                              #ip_configurations = [ip_configuration])
 
     smc = get_service_client(NetworkManagementClient, NetworkManagementClientConfiguration)
