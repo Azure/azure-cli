@@ -1,4 +1,4 @@
-import logging as _logging
+﻿import logging as _logging
 import sys
 
 __all__ = ['logger', 'configure_logging']
@@ -13,7 +13,7 @@ def _arg_name(arg):
 
 def configure_logging(argv, config):
     level = _logging.WARNING
-    
+
     # Load logging info from config
     if config.get('verbose'):
         level = _logging.INFO
