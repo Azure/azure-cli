@@ -215,8 +215,8 @@ class ArgumentParser(object):
             try:
                 parsed[a]
             except KeyError:
-                print(_("Missing required argument {}".format(a)))
-                return self._display_usage(nouns, m, args, out)
+                print(L("Missing required argument {}".format(a)))
+                return self._display_usage(nouns, m, out)
 
         old_stdout = sys.stdout
         try:
@@ -247,7 +247,7 @@ class ArgumentParser(object):
             print('Arguments', file=out)
             maxlen = max(len(a) for a, d, r in argdoc)
             for a, d, r in argdoc:
-                print('    {0:<{1}} - {2} {3}'.format(a, maxlen, d, _("[Required]") if r else ""), file=out)
+                print('    {0:<{1}} - {2} {3}'.format(a, maxlen, d, L("[Required]") if r else ""), file=out)
             print(file=out)
             out.flush()
 
