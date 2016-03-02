@@ -47,7 +47,7 @@ class Test_autocommand(unittest.TestCase):
         self.assertIsNotNone(registered_command)
         self.assertEqual(registered_command['name'], command_name)
         self.assertEqual(len(registered_command['args']), 1)
-        self.assertEqual(registered_command['args'][0], (spec, desc))
+        self.assertEqual(registered_command['args'][0], (spec, desc, False))
 
     def test_load_test_commands(self):
         import sys
