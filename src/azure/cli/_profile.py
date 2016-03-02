@@ -1,6 +1,6 @@
-﻿from msrest.authentication import BasicTokenAuthentication
+﻿import collections
+from msrest.authentication import BasicTokenAuthentication
 from .main import CONFIG
-import collections
 
 class Profile(object):
 
@@ -37,10 +37,9 @@ class Profile(object):
             for s in subscriptions:
                 s['active'] = False
 
-            if new_active_one:
-                new_active_one['active'] = True
-            else:
-                new_subscriptions[0]['active'] = True
+            if not new_active_one:
+                new_active_one = new_subscriptions[0]
+            new_active_one['active'] = True
         else:
             new_subscriptions[0]['active'] = True
 
@@ -60,20 +59,20 @@ class Profile(object):
             raise ValueError('Please run "account set" to select active account.')
 
         return BasicTokenAuthentication(
-            {'access_token': active[0]['access_token']}), active[0]['id'] 
+            {'access_token': active[0]['access_token']}), active[0]['id']
 
     def set_active_subscription(self, subscription_id_or_name):
         subscriptions = self.load_subscriptions()
-        
+
         subscription_id_or_name = subscription_id_or_name.lower()
-        result = [x for x in subscriptions 
-                  if subscription_id_or_name == x['id'].lower() or 
+        result = [x for x in subscriptions
+                  if subscription_id_or_name == x['id'].lower() or
                   subscription_id_or_name == x['name'].lower()]
 
         if len(result) != 1:
             raise ValueError('The subscription of "{}" does not exist or has more than'
                              ' one match.'.format(subscription_id_or_name))
-        
+
         for s in subscriptions:
             s['active'] = False
         result[0]['active'] = True
@@ -91,7 +90,7 @@ class Profile(object):
             subscriptions[0]['active'] = True
 
         self._save_subscriptions(subscriptions)
-        
+
     def load_subscriptions(self):
         return self._storage.get('subscriptions') or []
 
