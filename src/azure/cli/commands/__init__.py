@@ -1,12 +1,15 @@
-from .._argparse import IncorrectUsageError
+﻿from .._argparse import IncorrectUsageError
 from .._logging import logger
 
 # TODO: Alternatively, simply scan the directory for all modules
 COMMAND_MODULES = [
+    'account',
     'login',
     'logout',
-    'account',
+    'network',
+    'resourcegroup',
     'storage',
+    'vm',
 ]
 
 _COMMANDS = {}
@@ -18,21 +21,21 @@ def command(name):
         return handler
     return add_command
 
-def description(description):
+def description(description_text):
     def add_description(handler):
-        _COMMANDS.setdefault(handler, {})['description'] = description
-        logger.debug('Added description "%s" to %s', description, handler)
+        _COMMANDS.setdefault(handler, {})['description'] = description_text
+        logger.debug('Added description "%s" to %s', description_text, handler)
         return handler
     return add_description
 
-def option(spec, description=None, required=False):
+def option(spec, description_text=None, required=False):
     def add_option(handler):
-        _COMMANDS.setdefault(handler, {}).setdefault('args', []).append((spec, description, required))
+        _COMMANDS.setdefault(handler, {}).setdefault('args', []).append((spec, description_text, required))
         logger.debug('Added option "%s" to %s', spec, handler)
         return handler
     return add_option
 
-def add_to_parser(parser, command=None):
+def add_to_parser(parser, command_name=None):
     '''Loads commands into the parser
 
     When `command` is specified, only commands from that module will be loaded.
@@ -42,9 +45,9 @@ def add_to_parser(parser, command=None):
     # Importing the modules is sufficient to invoke the decorators. Then we can
     # get all of the commands from the _COMMANDS variable.
     loaded = False
-    if command:
+    if command_name:
         try:
-            __import__('azure.cli.commands.' + command)
+            __import__('azure.cli.commands.' + command_name)
             loaded = True
         except ImportError:
             # Unknown command - we'll load all below
