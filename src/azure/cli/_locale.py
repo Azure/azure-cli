@@ -1,11 +1,16 @@
-import os.path
+﻿import os.path
+from codecs import open as codecs_open
 
-from codecs import open
+_translations = dict()
+_locale_dir = ''
+
+def L(key):
+    return _translations.get(key) or '<NO_TRANSLATION:{}>'.format(key)
 
 def install(locale_dir):
     mapping = []
-    
-    with open(os.path.join(locale_dir, "messages.txt"), 'r', encoding='utf-8-sig') as f:
+
+    with codecs_open(os.path.join(locale_dir, "messages.txt"), 'r', encoding='utf-8-sig') as f:
         for i in f:
             if not i or i.startswith('#') or not i.strip():
                 continue
@@ -13,18 +18,14 @@ def install(locale_dir):
                 mapping.append((i[5:].strip(), None))
             else:
                 mapping[-1] = (mapping[-1][0], i.strip())
-    
-    translations = dict(mapping)
-    def _(key):
-        return translations.get(key) or '<NO_TRANSLATION:{}>'.format(key)
-    _.locale_dir = locale_dir
-    
-    __builtins__['_'] = _
+
+    globals()['_translations'] = dict(mapping)
+    globals()['_locale_dir'] = locale_dir
 
 def get_file(name):
     try:
-        src = _.locale_dir
+        src = _locale_dir
     except (NameError, AttributeError):
         raise RuntimeError("localizations not installed")
-    
+
     return os.path.join(src, name)
