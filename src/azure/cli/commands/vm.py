@@ -89,7 +89,7 @@ build_operation("vm",
                     (VirtualMachinesOperations.list_all, '[VirtualMachine]'),
                     (VirtualMachinesOperations.list_available_sizes, '[VirtualMachineSize]'),
                     (VirtualMachinesOperations.power_off, None),
-                    (VirtualMachinesOperations.restart, None),
+                    (VirtualMachinesOperations.restart, LongRunningOperation(L('Restarting VM'), L('VM Restarted'))),
                     (VirtualMachinesOperations.start, LongRunningOperation(L('Starting VM'), L('VM Started'))),
                 ])
 
