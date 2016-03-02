@@ -1,7 +1,9 @@
 import logging
 import unittest
 
-from azure.cli.commands._auto_command import _decorate_command, _decorate_option, _decorate_description, _operation_builder
+from azure.cli.commands._auto_command import (_decorate_command, 
+                                              _decorate_option)
+
 from azure.cli.commands import _COMMANDS
 
 class Test_autocommand(unittest.TestCase):
@@ -23,8 +25,8 @@ class Test_autocommand(unittest.TestCase):
         # Run test code
         _decorate_command(command_name, testfunc)
 
-        # Verify         
-        registered_command =_COMMANDS.get(testfunc, None)
+        # Verify
+        registered_command = _COMMANDS.get(testfunc, None)
         self.assertIsNotNone(registered_command)
         self.assertFalse('args' in registered_command.keys())
         self.assertEqual(registered_command['name'], command_name)
@@ -39,9 +41,9 @@ class Test_autocommand(unittest.TestCase):
         spec = '--tre <tre>'
         desc = 'Kronor'
         func = _decorate_option(spec, desc, func)
-        
+
         # Verify
-        registered_command =_COMMANDS.get(testfunc, None)
+        registered_command = _COMMANDS.get(testfunc, None)
         self.assertIsNotNone(registered_command)
         self.assertEqual(registered_command['name'], command_name)
         self.assertEqual(len(registered_command['args']), 1)
