@@ -36,7 +36,7 @@ build_operation("network",
                     (ApplicationGatewaysOperations.get, 'ApplicationGateway'),
                     (ApplicationGatewaysOperations.list, '[ApplicationGateway]'),
                     (ApplicationGatewaysOperations.list_all, '[ApplicationGateway]'),
-                    (ApplicationGatewaysOperations.start, LongRunningOperation(L('Starting  application gateway'), L('Application gateway started'))),
+                    (ApplicationGatewaysOperations.start, LongRunningOperation(L('Starting application gateway'), L('Application gateway started'))),
                     (ApplicationGatewaysOperations.stop, LongRunningOperation(L('Stopping application gateway'), L('Application gateway stopped'))),
                 ])
 
