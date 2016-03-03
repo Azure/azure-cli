@@ -19,12 +19,6 @@ from azure.mgmt.network.operations import (ApplicationGatewaysOperations,
                                            VirtualNetworkGatewayConnectionsOperations,
                                            VirtualNetworkGatewaysOperations,
                                            VirtualNetworksOperations)
-from azure.mgmt.network.models import (AddressSpace,
-                                       DhcpOptions,
-                                       # TODO: setting the IPConfiguration fails
-                                       #IPConfiguration,
-                                       Subnet,
-                                       VirtualNetwork)
 
 from ._command_creation import get_service_client
 from ..commands._auto_command import build_operation, LongRunningOperation
@@ -254,22 +248,25 @@ build_operation("network",
 @option('--resource-group -g <resourceGroup>', L('the resource group name'), required=True)
 @option('--name -n <vnetName>', L('the VNet name'), required=True)
 @option('--location -l <location>', L('the VNet location'), required=True)
-@option('--address-space -a <vnetAddressSpace>', L('the VNet address-space in CIDR notation'), required=True)
+@option('--address-space -a <vnetAddressSpace>', L('the VNet address-space in CIDR notation or multiple address-spaces, quoted and space-seperated'), required=True)
 @option('--dns-servers -d <dnsServers>', L('the VNet DNS servers'))
 def create_update_vnet(args, unexpected): #pylint: disable=unused-argument
+    from azure.mgmt.network.models import AddressSpace, DhcpOptions, VirtualNetwork
+
     resource_group = args.get('resource-group')
     name = args.get('name')
     location = args.get('location')
-    address_space = AddressSpace(address_prefixes=[args.get('address-space')])
+    address_space = AddressSpace(address_prefixes=args.get('address-space').split())
     dhcp_options = DhcpOptions(dns_servers=args.get('dns-servers'))
 
     vnet_settings = VirtualNetwork(location=location,
                                    address_space=address_space,
                                    dhcp_options=dhcp_options)
 
-    smc = get_service_client(NetworkManagementClient, NetworkManagementClientConfiguration)
+    op = LongRunningOperation('Creating virtual network', 'Virtual network created')
+    smc = _network_client_factory()
     poller = smc.virtual_networks.create_or_update(resource_group, name, vnet_settings)
-    return Serializer().serialize_data(poller.result(), "VirtualNetwork")
+    return Serializer().serialize_data(op(poller), 'VirtualNetwork')
 
 @command('network subnet create')
 @description(L('Create or update a virtual network (VNet) subnet'))
@@ -283,6 +280,11 @@ def create_update_vnet(args, unexpected): #pylint: disable=unused-argument
 #@option('--ip-allocation-method -ipam <allocationMethod>', L('the IP address allocation method'))
 #@option('--ip-public-address -ipa <ipAddress>', L('the public IP address'))
 def create_update_subnet(args, unexpected): #pylint: disable=unused-argument
+    from azure.mgmt.network.models import (Subnet,
+                                           # TODO: setting the IPConfiguration fails
+                                           #IPConfiguration,
+                                          )
+
     resource_group = args.get('resource-group')
     vnet = args.get('vnet')
     name = args.get('name')
@@ -305,8 +307,9 @@ def create_update_subnet(args, unexpected): #pylint: disable=unused-argument
                              # TODO: setting the IPConfiguration fails, will contact owning team
                              #ip_configurations = [ip_configuration])
 
-    smc = get_service_client(NetworkManagementClient, NetworkManagementClientConfiguration)
+    op = LongRunningOperation('Creating subnet', 'Subnet created')
+    smc = _network_client_factory()
     poller = smc.subnets.create_or_update(resource_group, vnet, name, subnet_settings)
-    return Serializer().serialize_data(poller.result(), "Subnet")
+    return Serializer().serialize_data(op(poller), 'Subnet')
 
 
