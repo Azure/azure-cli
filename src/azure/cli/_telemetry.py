@@ -1,5 +1,7 @@
 from applicationinsights import TelemetryClient
 from applicationinsights.exceptions import enable
+import getpass
+import hashlib
 import azure.cli as cli
 
 # event, exception, Trace, metric, message
@@ -15,7 +17,7 @@ class Telemetry(object): # pylint:disable=too-few-public-methods
 
         Telemetry.client.context.application.id = 'Azure CLI'
         Telemetry.client.context.application.ver = cli.__version__
-        #Telemetry.client.context.user.id = TODO: get user ID somehow or does AI do it server-side?
+        Telemetry.client.context.user.id = hash(getpass.getuser())
 
         enable(instrumentation_key)
 
