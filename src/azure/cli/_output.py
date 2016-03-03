@@ -2,6 +2,7 @@
 
 import sys
 import json
+import re
 
 try:
     # Python 3
@@ -40,14 +41,75 @@ def format_text(obj):
     except TypeError:
         return ''
 
+def format_list(obj):
+    lo = ListOutput()
+    return lo.dump(obj)
+
 class OutputProducer(object): #pylint: disable=too-few-public-methods
 
-    def __init__(self, formatter=format_json, file=sys.stdout): #pylint: disable=redefined-builtin
+    def __init__(self, formatter=format_list, file=sys.stdout): #pylint: disable=redefined-builtin
         self.formatter = formatter
         self.file = file
 
     def out(self, obj):
         print(self.formatter(obj), file=self.file)
+
+class ListOutput(object): #pylint: disable=too-few-public-methods
+
+    def __init__(self):
+        self._formatted_keys_cache = {}
+
+    @staticmethod
+    def _get_max_key_len(keys):
+        return len(max(keys, key=len)) if keys else 0
+
+    @staticmethod
+    def _sort_key_func(key, item):
+        # we want dictionaries to be last so use ASCII char 126 ~ to
+        # prefix dictionary key names.
+        return '~'+key if isinstance(item[key], dict) else key
+
+    def _get_formatted_key(self, key):
+        def _format_key(key):
+            words = [word for word in re.split('([A-Z][^A-Z]*)', key) if word]
+            return ' '.join(words).title()
+
+        try:
+            return self._formatted_keys_cache[key]
+        except KeyError:
+            self._formatted_keys_cache[key] = _format_key(key)
+            return self._formatted_keys_cache[key]
+
+    def _dump_object(self, io, item, indent):
+        # get the formatted keys for this item
+        # skip dicts because those will be handled recursively later.
+        item_f_keys = {k: self._get_formatted_key(k) for k in item if not isinstance(item[k], dict)}
+        key_width = ListOutput._get_max_key_len(item_f_keys.values())
+        for key in sorted(item, key=lambda x: ListOutput._sort_key_func(x, item)):
+            if isinstance(item[key], dict):
+                # complex object
+                io.write('\n')
+                io.write('\t' * (indent+1))
+                io.write(self._get_formatted_key(key).upper())
+                io.write('\n')
+                if item[key]:
+                    self._dump_object(io, item[key], indent+1)
+                else:
+                    io.write('\t' * (indent+1))
+                    io.write('None')
+                    io.write('\n')
+            else:
+                # non-complex so write it
+                io.write('\t' * indent)
+                io.write('%s : %s' % (self._get_formatted_key(key).ljust(key_width), item[key]))
+                io.write('\n')
+
+    def dump(self, data):
+        with StringIO() as io:
+            for item in sorted(data, key=lambda x: sorted(x.keys())):
+                self._dump_object(io, item, 0)
+                io.write('\n')
+            return io.getvalue()
 
 class TableOutput(object):
     def __init__(self):
