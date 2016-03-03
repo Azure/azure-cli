@@ -249,7 +249,7 @@ build_operation("network",
 @option('--name -n <vnetName>', L('the VNet name'), required=True)
 @option('--location -l <location>', L('the VNet location'), required=True)
 @option('--address-space -a <vnetAddressSpace>', L('the VNet address-space in CIDR notation or multiple address-spaces, quoted and space-seperated'), required=True)
-@option('--dns-servers -d <dnsServers>', L('the VNet DNS servers'))
+@option('--dns-servers -d <dnsServers>', L('the VNet DNS servers, quoted and space-seperated'))
 def create_update_vnet(args, unexpected): #pylint: disable=unused-argument
     from azure.mgmt.network.models import AddressSpace, DhcpOptions, VirtualNetwork
 
@@ -257,7 +257,7 @@ def create_update_vnet(args, unexpected): #pylint: disable=unused-argument
     name = args.get('name')
     location = args.get('location')
     address_space = AddressSpace(address_prefixes=args.get('address-space').split())
-    dhcp_options = DhcpOptions(dns_servers=args.get('dns-servers'))
+    dhcp_options = DhcpOptions(dns_servers=args.get('dns-servers').split())
 
     vnet_settings = VirtualNetwork(location=location,
                                    address_space=address_space,
