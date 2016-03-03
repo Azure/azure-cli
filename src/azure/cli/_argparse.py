@@ -3,6 +3,7 @@ import sys
 
 from ._locale import L, get_file as locale_get_file
 from ._logging import logger
+from ._telemetry import telemetry_log_event
 
 # Named arguments are prefixed with one of these strings
 ARG_PREFIXES = sorted(('-', '--', '/'), key=len, reverse=True)
@@ -222,6 +223,11 @@ class ArgumentParser(object):
         old_stdout = sys.stdout
         try:
             sys.stdout = out
+            try:
+                telemetry_log_event("Command Executing", {"CommandName": handler.__name__})
+            except Exception(e):
+                #pass
+                raise e
             return handler(parsed, others)
         except IncorrectUsageError as ex:
             print(str(ex), file=out)

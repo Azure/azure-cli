@@ -4,6 +4,7 @@ from ._argparse import ArgumentParser
 from ._logging import configure_logging, logger
 from ._session import Session
 from ._output import OutputProducer
+from ._telemetry import Telemetry, user_agrees_to_telemetry
 
 # CONFIG provides external configuration options
 CONFIG = Session()
@@ -16,6 +17,9 @@ def main(args):
     SESSION.load(os.path.expanduser('~/az.sess'), max_age=3600)
 
     configure_logging(args, CONFIG)
+
+    if user_agrees_to_telemetry():
+        Telemetry.init_telemetry()
 
     from ._locale import install as locale_install
     locale_install(os.path.join(os.path.dirname(os.path.abspath(__file__)),
