@@ -4,6 +4,7 @@ import sys
 from ._locale import L, get_file as locale_get_file
 from ._logging import logger
 from ._telemetry import telemetry_log_event
+from ._performance import PerfTimer
 
 # Named arguments are prefixed with one of these strings
 ARG_PREFIXES = sorted(('-', '--', '/'), key=len, reverse=True)
@@ -178,8 +179,10 @@ class ArgumentParser(object):
             show_usage = True
 
         if show_completions:
+            telemetry_log_event("Show Completions", {"CommandName": " ".join(nouns)})
             return self._display_completions(m, args, out)
         if show_usage:
+            telemetry_log_event("Show Usage", {"CommandName": " ".join(nouns)})
             return self._display_usage(nouns, m, out)
 
         parsed = Arguments()
@@ -223,13 +226,13 @@ class ArgumentParser(object):
         old_stdout = sys.stdout
         try:
             sys.stdout = out
-            try:
-                telemetry_log_event("Command Executing", {"CommandName": handler.__name__})
-            except Exception(e):
-                #pass
-                raise e
-            return handler(parsed, others)
+            with PerfTimer():
+                result = handler(parsed, others)
+            telemetry_log_event("Command Finished", {"CommandName": " ".join(nouns)},
+                                {"ExecutionTime": PerfTimer.last_measured_milliseconds()})
+            return result
         except IncorrectUsageError as ex:
+            telemetry_log_event("Incorrect Usage", {"CommandName": " ".join(nouns)})
             print(str(ex), file=out)
             return self._display_usage(nouns, m, out)
         finally:

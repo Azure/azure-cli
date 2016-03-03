@@ -1,7 +1,6 @@
+import getpass
 from applicationinsights import TelemetryClient
 from applicationinsights.exceptions import enable
-import getpass
-import hashlib
 import azure.cli as cli
 
 # event, exception, Trace, metric, message
@@ -22,10 +21,17 @@ class Telemetry(object): # pylint:disable=too-few-public-methods
         enable(instrumentation_key)
 
 def user_agrees_to_telemetry():
-    # TODO: agreement
+    # TODO: agreement, needs to take Y/N from the command line
+    # and needs a "skip" param to not show (for scripts)
     return True
 
 def telemetry_log_event(name, properties=None, measurements=None):
-    Telemetry.client.track_event(name, properties, measurements)
-    Telemetry.client.flush()
+    try:
+        if Telemetry.client is None:
+            return
+        Telemetry.client.track_event(name, properties, measurements)
+        Telemetry.client.flush()
+    except Exception as e:
+        #pass
+        raise e
 
