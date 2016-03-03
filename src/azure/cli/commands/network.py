@@ -30,7 +30,6 @@ from ._command_creation import get_service_client
 from ..commands._auto_command import build_operation, LongRunningOperation
 from ..commands import command, description, option
 
-
 def _network_client_factory():
     return get_service_client(NetworkManagementClient, NetworkManagementClientConfiguration)
 
@@ -252,10 +251,10 @@ build_operation("network",
 
 @command('network vnet create')
 @description(L('Create or update a virtual network (VNet)'))
-@option('--resource-group -g <resourceGroup>', L('the resource group name')) #required
-@option('--name -n <vnetName>', L('the VNet name')) #required
-@option('--location -l <location>', L('the VNet location')) #required
-@option('--address-space -a <vnetAddressSpace>', L('the VNet address-space in CIDR notation')) #required
+@option('--resource-group -g <resourceGroup>', L('the resource group name'), required=True)
+@option('--name -n <vnetName>', L('the VNet name'), required=True)
+@option('--location -l <location>', L('the VNet location'), required=True)
+@option('--address-space -a <vnetAddressSpace>', L('the VNet address-space in CIDR notation'), required=True)
 @option('--dns-servers -d <dnsServers>', L('the VNet DNS servers'))
 def create_update_vnet(args, unexpected): #pylint: disable=unused-argument
     resource_group = args.get('resource-group')
@@ -274,10 +273,10 @@ def create_update_vnet(args, unexpected): #pylint: disable=unused-argument
 
 @command('network subnet create')
 @description(L('Create or update a virtual network (VNet) subnet'))
-@option('--resource-group -g <resourceGroup>', L('the the resource group name')) #required
-@option('--name -n <subnetName>', L('the the subnet name')) #required
-@option('--vnet -v <vnetName>', L('the name of the subnet vnet')) #required
-@option('--address-prefix -a <addressPrefix>', L('the the address prefix in CIDR format')) #required
+@option('--resource-group -g <resourceGroup>', L('the the resource group name'), required=True)
+@option('--name -n <subnetName>', L('the the subnet name'), required=True)
+@option('--vnet -v <vnetName>', L('the name of the subnet vnet'), required=True)
+@option('--address-prefix -a <addressPrefix>', L('the the address prefix in CIDR format'), required=True)
 # TODO: setting the IPConfiguration fails, will contact owning team
 #@option('--ip-name -ipn <name>', L('the IP address configuration name'))
 #@option('--ip-private-address -ippa <ipAddress>', L('the private IP address'))
