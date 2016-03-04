@@ -35,3 +35,5 @@ def telemetry_log_event(name, properties=None, measurements=None):
         #pass
         raise e
 
+def telemetry_log_performance(name, properties=None):
+    telemetry_log_event("Perf: "+name, properties)
