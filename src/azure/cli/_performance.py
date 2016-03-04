@@ -1,21 +1,16 @@
 import time
+from ._telemetry import telemetry_log_performance
 
 class PerfTimer(object): # pylint:disable=too-few-public-methods
-    _last_result = 0
-
-    def __init__(self, *args, **kwargs):
+    def __init__(self, event_name, properties):
+        self.event_name = event_name
+        self.properties = properties
         self.start = 0
-        self.end = 0
-        super(PerfTimer, self).__init__(*args, **kwargs)
+        super(PerfTimer, self).__init__()
 
-    def __enter__(self):
-        self.start = time.time()
-        return self
+    def total_milliseconds(self):
+        return (time.time() - self.start) * 1000
 
-    def __exit__(self, *args):
-        self.end = time.time()
-        PerfTimer._last_result = (self.end - self.start) * 1000
-
-    @staticmethod
-    def last_measured_milliseconds():
-        return PerfTimer._last_result
+    def store_perf_data(self):
+        self.properties["Milliseconds"] = self.total_milliseconds()
+        telemetry_log_performance(self.event_name, self.properties)

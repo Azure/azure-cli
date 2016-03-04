@@ -226,10 +226,9 @@ class ArgumentParser(object):
         old_stdout = sys.stdout
         try:
             sys.stdout = out
-            with PerfTimer():
-                result = handler(parsed, others)
-            telemetry_log_event("Command Finished", {"CommandName": " ".join(nouns)},
-                                {"ExecutionTime": PerfTimer.last_measured_milliseconds()})
+            p = PerfTimer("Command Execution", {"CommandName": " ".join(nouns)})
+            result = handler(parsed, others)
+            p.store_perf_data()
             return result
         except IncorrectUsageError as ex:
             telemetry_log_event("Incorrect Usage", {"CommandName": " ".join(nouns)})
