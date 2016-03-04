@@ -7,7 +7,7 @@ RUN apt-get update -qq && \
       jq && \
     rm -rf /var/lib/apt/lists/*
 
-RUN pip3 install azure==2.0.0a1
+RUN pip3 install azure==2.0.0rc1
 
 ENV AZURECLITEMP /opt/azure-cli
 ENV PYTHONPATH $PYTHONPATH:$AZURECLITEMP/src
