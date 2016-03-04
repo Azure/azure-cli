@@ -1,13 +1,21 @@
-FROM ubuntu:15.10
+FROM ubuntu:14.04
 
 RUN apt-get update -qq && \
     apt-get install -qqy --no-install-recommends\
-      python3-pip \
+      build-essential \
+      curl \
+      ca-certificates \
+      python-pip \
+      libffi-dev \
+      libssl-dev \
+      python-dev \
       vim \
       jq && \
-    rm -rf /var/lib/apt/lists/*
-
-RUN pip3 install azure==2.0.0a1
+    rm -rf /var/lib/apt/lists/* && \
+    pip install azure==2.0.0a1 && \
+    pip install --upgrade requests && \
+    pip install cryptography && \
+    pip install pyopenssl ndg-httpsclient pyasn1
 
 ENV AZURECLITEMP /opt/azure-cli
 ENV PYTHONPATH $PYTHONPATH:$AZURECLITEMP/src
@@ -19,7 +27,6 @@ COPY az.completion.sh $AZURECLITEMP/
 COPY az $AZURECLITEMP/
 
 RUN chmod +x $AZURECLITEMP/az
-RUN ln /usr/bin/python3 /usr/bin/python
 RUN echo "source $AZURECLITEMP/az.completion.sh" >> ~/.bashrc
 RUN az
 
