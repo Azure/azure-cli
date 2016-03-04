@@ -4,12 +4,7 @@ import sys
 import json
 import re
 
-try:
-    # Python 3
-    from io import StringIO
-except ImportError:
-    # Python 2
-    from StringIO import StringIO #pylint: disable=import-error
+from six import StringIO
 
 class OutputFormatException(Exception):
     pass
@@ -42,8 +37,9 @@ def format_text(obj):
         return ''
 
 def format_list(obj):
+    obj_list = obj if isinstance(obj, list) else [obj]
     lo = ListOutput()
-    return lo.dump(obj)
+    return lo.dump(obj_list)
 
 class OutputProducer(object): #pylint: disable=too-few-public-methods
 
@@ -56,6 +52,9 @@ class OutputProducer(object): #pylint: disable=too-few-public-methods
 
 class ListOutput(object): #pylint: disable=too-few-public-methods
 
+    # Match the capital letters in a camel case string
+    FORMAT_KEYS_PATTERN = re.compile('([A-Z][^A-Z]*)')
+
     def __init__(self):
         self._formatted_keys_cache = {}
 
@@ -65,13 +64,18 @@ class ListOutput(object): #pylint: disable=too-few-public-methods
 
     @staticmethod
     def _sort_key_func(key, item):
-        # we want dictionaries to be last so use ASCII char 126 ~ to
-        # prefix dictionary key names.
-        return '~'+key if isinstance(item[key], dict) else key
+        # We want dictionaries to be last so use ASCII char 126 ~ to
+        # prefix dictionary and list key names.
+        if isinstance(item[key], dict):
+            return '~~'+key
+        elif isinstance(item[key], list):
+            return '~'+key
+        else:
+            return key
 
     def _get_formatted_key(self, key):
         def _format_key(key):
-            words = [word for word in re.split('([A-Z][^A-Z]*)', key) if word]
+            words = [word for word in re.split(ListOutput.FORMAT_KEYS_PATTERN, key) if word]
             return ' '.join(words).title()
 
         try:
@@ -80,36 +84,56 @@ class ListOutput(object): #pylint: disable=too-few-public-methods
             self._formatted_keys_cache[key] = _format_key(key)
             return self._formatted_keys_cache[key]
 
-    def _dump_object(self, io, item, indent):
-        # get the formatted keys for this item
-        # skip dicts because those will be handled recursively later.
-        item_f_keys = {k: self._get_formatted_key(k) for k in item if not isinstance(item[k], dict)}
-        key_width = ListOutput._get_max_key_len(item_f_keys.values())
-        for key in sorted(item, key=lambda x: ListOutput._sort_key_func(x, item)):
-            if isinstance(item[key], dict):
-                # complex object
-                io.write('\n')
-                io.write('\t' * (indent+1))
-                io.write(self._get_formatted_key(key).upper())
-                io.write('\n')
-                if item[key]:
-                    self._dump_object(io, item[key], indent+1)
-                else:
-                    io.write('\t' * (indent+1))
-                    io.write('None')
+    @staticmethod
+    def _dump_line(io, line, indent):
+        io.write('  ' * indent)
+        io.write(line)
+        io.write('\n')
+
+    def _dump_object(self, io, obj, indent):
+        if isinstance(obj, list):
+            for array_item in obj:
+                self._dump_object(io, array_item, indent+1)
+        elif isinstance(obj, dict):
+            # Get the formatted keys for this item
+            # Skip dicts/lists because those will be handled recursively later.
+            # We use this object to calc key width and don't want to dicts/lists in this.
+            obj_fk = {k: self._get_formatted_key(k)
+                      for k in obj if not isinstance(obj[k], dict) and not isinstance(obj[k], list)}
+            key_width = ListOutput._get_max_key_len(obj_fk.values())
+            for key in sorted(obj, key=lambda x: ListOutput._sort_key_func(x, obj)):
+                if isinstance(obj[key], dict):
+                    # complex object
                     io.write('\n')
-            else:
-                # non-complex so write it
-                io.write('\t' * indent)
-                io.write('%s : %s' % (self._get_formatted_key(key).ljust(key_width), item[key]))
-                io.write('\n')
+                    ListOutput._dump_line(io, self._get_formatted_key(key).upper(), indent+1)
+                    if obj[key]:
+                        self._dump_object(io, obj[key], indent+1)
+                    else:
+                        ListOutput._dump_line(io, 'None', indent+1)
+                elif isinstance(obj[key], list):
+                    # list object
+                    io.write('\n')
+                    ListOutput._dump_line(io, self._get_formatted_key(key).upper(), indent+1)
+                    if obj[key]:
+                        for array_item in obj[key]:
+                            self._dump_object(io, array_item, indent+1)
+                    else:
+                        ListOutput._dump_line(io, 'None', indent+1)
+                else:
+                    # non-complex so write it
+                    line = '%s : %s' % (self._get_formatted_key(key).ljust(key_width), obj[key])
+                    ListOutput._dump_line(io, line, indent)
+        else:
+            ListOutput._dump_line(io, obj, indent)
 
     def dump(self, data):
-        with StringIO() as io:
-            for item in sorted(data, key=lambda x: sorted(x.keys())):
-                self._dump_object(io, item, 0)
-                io.write('\n')
-            return io.getvalue()
+        io = StringIO()
+        for obj in data:
+            self._dump_object(io, obj, 0)
+            io.write('\n')
+        result = io.getvalue()
+        io.close()
+        return result
 
 class TableOutput(object):
     def __init__(self):
@@ -121,16 +145,18 @@ class TableOutput(object):
         if len(self._rows) == 1:
             return
 
-        with StringIO() as io:
-            cols = [(c, self._columns[c]) for c in self._column_order]
-            io.write(' | '.join(c.center(w) for c, w in cols))
+        io = StringIO()
+        cols = [(c, self._columns[c]) for c in self._column_order]
+        io.write(' | '.join(c.center(w) for c, w in cols))
+        io.write('\n')
+        io.write('-|-'.join('-' * w for c, w in cols))
+        io.write('\n')
+        for r in self._rows[:-1]:
+            io.write(' | '.join(r[c].ljust(w) for c, w in cols))
             io.write('\n')
-            io.write('-|-'.join('-' * w for c, w in cols))
-            io.write('\n')
-            for r in self._rows[:-1]:
-                io.write(' | '.join(r[c].ljust(w) for c, w in cols))
-                io.write('\n')
-            return io.getvalue()
+        result = io.getvalue()
+        io.close()
+        return result
 
     @property
     def any_rows(self):
@@ -161,17 +187,19 @@ class TextOutput(object):
             self.identifiers[identifier] = [value]
 
     def dump(self):
-        with StringIO() as io:
-            for identifier in sorted(self.identifiers):
-                io.write(identifier.upper())
+        io = StringIO()
+        for identifier in sorted(self.identifiers):
+            io.write(identifier.upper())
+            io.write('\t')
+            for col in self.identifiers[identifier]:
+                if isinstance(col, str):
+                    io.write(col)
+                else:
+                    # TODO: Need to handle complex objects
+                    io.write("null")
                 io.write('\t')
-                for col in self.identifiers[identifier]:
-                    if isinstance(col, str):
-                        io.write(col)
-                    else:
-                        # TODO: Need to handle complex objects
-                        io.write("null")
-                    io.write('\t')
-                io.write('\n')
-            return io.getvalue()
+            io.write('\n')
+        result = io.getvalue()
+        io.close()
+        return result
 
