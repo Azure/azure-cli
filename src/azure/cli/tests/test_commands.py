@@ -6,6 +6,10 @@ import vcr
 import logging
 
 from six import add_metaclass
+try:
+    import unittest.mock as mock
+except ImportError:
+    import mock
 
 try:
     # Python 3
@@ -49,7 +53,6 @@ def before_record_response(response):
     remove_entries(response['headers'], FILTER_HEADERS)
     return response
 
-
 my_vcr = vcr.VCR(
     cassette_library_dir=VCR_CASSETTE_DIR,
     before_record_request=before_record_request,
@@ -59,15 +62,20 @@ my_vcr = vcr.VCR(
 class TestSequenceMeta(type):
 
     def __new__(mcs, name, bases, dict):
-
+    
         def gen_test(test_name, command, expected_result):
+        
+            def load_subscriptions_mock(self):
+                return [{"id": "00000000-0000-0000-0000-000000000000", "user": "example@example.com", "access_token": "access_token", "state": "Enabled", "name": "Example", "active": True}];
+        
+            @mock.patch('azure.cli._profile.Profile.load_subscriptions', load_subscriptions_mock)
             @my_vcr.use_cassette('%s.yaml'%test_name, filter_headers=FILTER_HEADERS)
             def test(self):
                 with StringIO() as io:
                     cli(command.split(), file=io)
                     self.assertEqual(io.getvalue(), expected_result)
             return test
-
+            
         for module_name, test_specs in TEST_SPECS:
             for test_spec_item in test_specs:
                 test_name = 'test_%s' % test_spec_item['test_name']
