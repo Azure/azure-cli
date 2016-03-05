@@ -93,7 +93,7 @@ class ListOutput(object): #pylint: disable=too-few-public-methods
     def _dump_object(self, io, obj, indent):
         if isinstance(obj, list):
             for array_item in obj:
-                self._dump_object(io, array_item, indent+1)
+                self._dump_object(io, array_item, indent)
         elif isinstance(obj, dict):
             # Get the formatted keys for this item
             # Skip dicts/lists because those will be handled recursively later.
@@ -102,26 +102,15 @@ class ListOutput(object): #pylint: disable=too-few-public-methods
                       for k in obj if not isinstance(obj[k], dict) and not isinstance(obj[k], list)}
             key_width = ListOutput._get_max_key_len(obj_fk.values())
             for key in sorted(obj, key=lambda x: ListOutput._sort_key_func(x, obj)):
-                if isinstance(obj[key], dict):
+                if isinstance(obj[key], dict) or isinstance(obj[key], list):
                     # complex object
                     io.write('\n')
                     ListOutput._dump_line(io, self._get_formatted_key(key).upper(), indent+1)
-                    if obj[key]:
-                        self._dump_object(io, obj[key], indent+1)
-                    else:
-                        ListOutput._dump_line(io, 'None', indent+1)
-                elif isinstance(obj[key], list):
-                    # list object
-                    io.write('\n')
-                    ListOutput._dump_line(io, self._get_formatted_key(key).upper(), indent+1)
-                    if obj[key]:
-                        for array_item in obj[key]:
-                            self._dump_object(io, array_item, indent+1)
-                    else:
-                        ListOutput._dump_line(io, 'None', indent+1)
+                    self._dump_object(io, obj[key] if obj[key] else 'None', indent+1)
                 else:
                     # non-complex so write it
-                    line = '%s : %s' % (self._get_formatted_key(key).ljust(key_width), obj[key])
+                    line = '%s : %s' % (self._get_formatted_key(key).ljust(key_width),
+                                        'None' if obj[key] is None else obj[key])
                     ListOutput._dump_line(io, line, indent)
         else:
             ListOutput._dump_line(io, obj, indent)
