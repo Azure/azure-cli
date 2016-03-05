@@ -23,7 +23,8 @@ class LongRunningOperation(object): #pylint: disable=too-few-public-methods
         try:
             while not poller.done():
                 if self.progress_file:
-                    print('.', end='', flush=True, file=self.progress_file)
+                    print('.', end='', file=self.progress_file)
+                    self.progress_file.flush()
                 time.sleep(self.poll_interval_ms / 1000.0)
             result = poller.result()
             succeeded = True
