@@ -5,18 +5,11 @@ import re
 import vcr
 import logging
 
-from six import add_metaclass
+from six import add_metaclass, StringIO
 try:
     import unittest.mock as mock
 except ImportError:
     import mock
-
-try:
-    # Python 3
-    from io import StringIO
-except ImportError:
-    # Python 2
-    from StringIO import StringIO
 
 from azure.cli.main import main as cli
 
@@ -67,13 +60,15 @@ class TestSequenceMeta(type):
         
             def load_subscriptions_mock(self):
                 return [{"id": "00000000-0000-0000-0000-000000000000", "user": "example@example.com", "access_token": "access_token", "state": "Enabled", "name": "Example", "active": True}];
-        
+
             @mock.patch('azure.cli._profile.Profile.load_subscriptions', load_subscriptions_mock)
             @my_vcr.use_cassette('%s.yaml'%test_name, filter_headers=FILTER_HEADERS)
             def test(self):
-                with StringIO() as io:
-                    cli(command.split(), file=io)
-                    self.assertEqual(io.getvalue(), expected_result)
+                io = StringIO()
+                cli(command.split(), file=io)
+                actual_result = io.getvalue()
+                io.close()
+                self.assertEqual(actual_result, expected_result)
             return test
             
         for module_name, test_specs in TEST_SPECS:
