@@ -231,7 +231,7 @@ class ArgumentParser(object):
                 output_format = others['output']
                 del others['output']
             else:
-                print(L("Invalid output format '{}' specified".format(others['output'])))
+                print(L("Invalid output format '{}'".format(others['output'])))
                 return ArgumentParserResult(self._display_usage(nouns, m, out))
 
         old_stdout = sys.stdout

@@ -72,8 +72,8 @@ class Test_autocommand(unittest.TestCase):
         p = ArgumentParser('automcommandtest')
         add_to_parser(p, 'test')
 
-        cmd_res = p.execute(command_name.split(' ') + '--tre wombat'.split(' '))
-        self.assertEqual(cmd_res.result, func)
+        cmd_result = p.execute(command_name.split(' ') + '--tre wombat'.split(' '))
+        self.assertEqual(cmd_result.result, func)
 
 if __name__ == '__main__':
     unittest.main()
