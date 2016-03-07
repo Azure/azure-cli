@@ -5,7 +5,8 @@ _translations = dict()
 _locale_dir = ''
 
 def L(key):
-    return _translations.get(key) or '<NO_TRANSLATION:{}>'.format(key)
+    # Not localizing for now, so don't print an error message if text is un-localized
+    return key
 
 def install(locale_dir):
     mapping = []

@@ -1,36 +1,9 @@
-﻿from msrest import Serializer
+from msrest import Serializer
 from ..commands import command, description, option
 from ._command_creation import get_service_client
 from .._argparse import IncorrectUsageError
 from .._logging  import logger
 from .._locale import L
-
-@command('storage account list')
-@description(L('List storage accounts'))
-@option('--resource-group -g <resourceGroup>', L('the resource group name'))
-@option('--subscription -s <id>', L('the subscription id'))
-def list_accounts(args, unexpected): #pylint: disable=unused-argument
-    from azure.mgmt.storage import StorageManagementClient, StorageManagementClientConfiguration
-    from azure.mgmt.storage.models import StorageAccount
-    from msrestazure.azure_active_directory import UserPassCredentials
-
-    smc = get_service_client(StorageManagementClient, StorageManagementClientConfiguration)
-
-    group = args.get('resource-group')
-    if group:
-        accounts = smc.storage_accounts.list_by_resource_group(group)
-    else:
-        accounts = smc.storage_accounts.list()
-
-    serializable = Serializer().serialize_data(accounts, "[StorageAccount]")
-    return serializable
-
-@command('storage account check')
-@option('--account-name -an <name>')
-def checkname(args, unexpected): #pylint: disable=unused-argument
-    from azure.mgmt.storage import StorageManagementClient, StorageManagementClientConfiguration
-    smc = get_service_client(StorageManagementClient, StorageManagementClientConfiguration)
-    logger.warning(smc.storage_accounts.check_name_availability(args.account_name))
 
 @command('storage blob blockblob create')
 @option('--account-name -an <name>', required=True)
@@ -89,21 +62,3 @@ def list_blobs(args, unexpected): #pylint: disable=unused-argument
 
     blobs = block_blob_service.list_blobs(args.get('container'))
     return Serializer().serialize_data(blobs.items, "[Blob]")
-
-@command('storage file create')
-@option('--account-name -an <name>', required=True)
-@option('--account-key -ak <key>', required=True)
-@option('--share-name -sn <setting>', required=True)
-@option('--file-name -fn <setting>', required=True)
-@option('--local-file-name -lfn <setting>', required=True)
-@option('--directory-name -dn <setting>')
-def storage_file_create(args, unexpected): #pylint: disable=unused-argument
-    from azure.storage.file import FileService
-
-    file_service = FileService(account_name=args.get('account-name'),
-                               account_key=args.get('account-key'))
-
-    file_service.create_file_from_path(args.get('share-name'), 
-                                       args.get('directory-name'), 
-                                       args.get('file-name'),
-                                       args.get('local-file-name'))
