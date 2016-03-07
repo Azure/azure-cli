@@ -9,6 +9,8 @@ COMMAND_MODULES = [
     'network',
     'resourcegroup',
     'storage',
+    'storage-blob',
+    'storage-file',
     'vm',
 ]
 
