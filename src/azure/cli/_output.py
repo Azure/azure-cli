@@ -42,12 +42,22 @@ def format_text(obj):
 
 class OutputProducer(object): #pylint: disable=too-few-public-methods
 
+    format_dict = {
+        'json': format_json,
+        'table': format_table,
+        'text': format_text
+    }
+
     def __init__(self, formatter=format_json, file=sys.stdout): #pylint: disable=redefined-builtin
         self.formatter = formatter
         self.file = file
 
     def out(self, obj):
         print(self.formatter(obj), file=self.file)
+
+    @staticmethod
+    def get_formatter(format_type):
+        return OutputProducer.format_dict.get(format_type, format_json)
 
 class TableOutput(object):
     def __init__(self):
