@@ -124,7 +124,7 @@ class ArgumentParser(object):
             else:
                 v = aliases.pop().strip('<> ')
             target, _ = _read_arg(aliases[0])
-            kw.update({_read_arg(a)[0]: (target, v, req) for a in aliases})
+            kw.update({_read_arg(a)[0]: (target, v, req, aliases) for a in aliases})
             ad.append(('/'.join(aliases), desc, req))
 
     #pylint: disable=too-many-branches
@@ -217,7 +217,7 @@ class ArgumentParser(object):
                 parsed.positional.append(n)
             n = next_n
 
-        required_args = [x for x, _, req in expected_kwargs.values() if req]
+        required_args = [x for x, _, req, _ in expected_kwargs.values() if req]
         for a in required_args:
             try:
                 parsed[a]
@@ -279,24 +279,35 @@ class ArgumentParser(object):
             logger.debug('Expected documentation at %s', doc_file)
 
     def _display_completions(self, noun_map, arguments, out=sys.stdout):
+
         for a in self.complete_args:
             arguments.remove(a)
 
         command_candidates = set([k for k in noun_map if not k.startswith('$')])
-        if command_candidates and not arguments[-1].startswith('-'):
-            command_candidates = set([c for c in command_candidates if c.startswith(arguments[-1])])
+
+        last_arg = arguments[-1]
+        if command_candidates and not last_arg.startswith('-'):
+            command_candidates = set([c for c in command_candidates if c.startswith(last_arg)])
 
         kwargs = noun_map.get('$kwargs') or []
-        args_candidates = set(('--' if len(a) > 1 else '-') + a for a in kwargs)
-        if arguments[-1].startswith('-'):
+        args_candidates = set()
+        arguments_set = set(arguments)
+
+        #handle a messy part, that if a short name is used, then the long name should
+        #be excluded. Say, for '-a/--arg', if '-a' is used in command, '--arg' should
+        #not in the candidate list.
+        for a in kwargs:
+            alias = kwargs[a][3]
+            if not [x for x in alias if x in arguments_set]:
+                args_candidates.update(set(alias))
+
+        if last_arg.startswith('-'):
             # TODO: We don't have enough metadata about the command to do parameter value
             # completion (yet). This should only apply to value arguments, not flag arguments
-            if arguments[-1] in args_candidates:
+            if last_arg in args_candidates:
                 args_candidates = set()
             else:
-                args_candidates = set([c for c in args_candidates if c.startswith(arguments[-1])])
-        else:
-            args_candidates = args_candidates.difference(arguments)
+                args_candidates = set([c for c in args_candidates if c.startswith(last_arg)])
 
         candidates = command_candidates.union(args_candidates)
 
