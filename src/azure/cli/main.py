@@ -38,12 +38,12 @@ def main(args):
         commands.add_to_parser(parser)
 
     try:
-        cmd_res = parser.execute(args)
+        cmd_result = parser.execute(args)
         # Commands can return a dictionary/list of results
         # If they do, we print the results.
-        if cmd_res.result:
-            formatter = OutputProducer.get_formatter(cmd_res.output_format)
-            OutputProducer(formatter=formatter).out(cmd_res.result)
+        if cmd_result.result:
+            formatter = OutputProducer.get_formatter(cmd_result.output_format)
+            OutputProducer(formatter=formatter).out(cmd_result.result)
     except RuntimeError as ex:
         logger.error(ex.args[0])
         return ex.args[1] if len(ex.args) >= 2 else -1
