@@ -3,6 +3,7 @@ import sys
 
 from ._locale import L, get_file as locale_get_file
 from ._logging import logger
+from ._output import OutputProducer
 
 # Named arguments are prefixed with one of these strings
 ARG_PREFIXES = sorted(('-', '--', '/'), key=len, reverse=True)
@@ -57,6 +58,10 @@ def _index(string, char, default=sys.maxsize):
     except ValueError:
         return default
 
+class ArgumentParserResult(object):  #pylint: disable=too-few-public-methods
+    def __init__(self, result, output_format=None):
+        self.result = result
+        self.output_format = output_format
 
 class ArgumentParser(object):
     def __init__(self, prog):
@@ -125,6 +130,7 @@ class ArgumentParser(object):
     #pylint: disable=too-many-branches
     #pylint: disable=too-many-statements
     #pylint: disable=too-many-locals
+    #pylint: disable=too-many-return-statements
     def execute(self,
                 args,
                 show_usage=False,
@@ -177,9 +183,9 @@ class ArgumentParser(object):
             show_usage = True
 
         if show_completions:
-            return self._display_completions(m, args, out)
+            return ArgumentParserResult(self._display_completions(m, args, out))
         if show_usage:
-            return self._display_usage(nouns, m, out)
+            return ArgumentParserResult(self._display_usage(nouns, m, out))
 
         parsed = Arguments()
         others = Arguments()
@@ -199,7 +205,7 @@ class ArgumentParser(object):
                     if value is not None:
                         print(L("argument '{0}' does not take a value").format(key_n),
                               file=out)
-                        return self._display_usage(nouns, m, out)
+                        return ArgumentParserResult(self._display_usage(nouns, m, out))
                     parsed.add_from_dotted(target_value[0], True)
                 else:
                     # Arg with a value
@@ -217,15 +223,24 @@ class ArgumentParser(object):
                 parsed[a]
             except KeyError:
                 print(L("Missing required argument {}".format(a)))
-                return self._display_usage(nouns, m, out)
+                return ArgumentParserResult(self._display_usage(nouns, m, out))
+
+        output_format = None
+        if others and 'output' in others:
+            if others['output'] in OutputProducer.format_dict:
+                output_format = others['output']
+                del others['output']
+            else:
+                print(L("Invalid output format '{}' specified".format(others['output'])))
+                return ArgumentParserResult(self._display_usage(nouns, m, out))
 
         old_stdout = sys.stdout
         try:
             sys.stdout = out
-            return handler(parsed, others)
+            return ArgumentParserResult(handler(parsed, others), output_format)
         except IncorrectUsageError as ex:
             print(str(ex), file=out)
-            return self._display_usage(nouns, m, out)
+            return ArgumentParserResult(self._display_usage(nouns, m, out))
         finally:
             sys.stdout = old_stdout
 
@@ -264,15 +279,16 @@ class ArgumentParser(object):
             out.flush()
             logger.debug('Expected documentation at %s', doc_file)
 
-    def _display_completions(self, noun_map, arguments, out=sys.stdout): # pylint: disable=no-self-use
-        arguments.remove('--complete')
+    def _display_completions(self, noun_map, arguments, out=sys.stdout):
+        for a in self.complete_args:
+            arguments.remove(a)
 
         command_candidates = set([k for k in noun_map if not k.startswith('$')])
         if command_candidates and not arguments[-1].startswith('-'):
             command_candidates = set([c for c in command_candidates if c.startswith(arguments[-1])])
 
         kwargs = noun_map.get('$kwargs') or []
-        args_candidates = set('--' + a for a in kwargs if a)
+        args_candidates = set(('--' if len(a) > 1 else '-') + a for a in kwargs)
         if arguments[-1].startswith('-'):
             # TODO: We don't have enough metadata about the command to do parameter value
             # completion (yet). This should only apply to value arguments, not flag arguments
