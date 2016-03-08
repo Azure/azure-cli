@@ -227,7 +227,7 @@ class ArgumentParser(object):
 
         try:
             output_format = others.pop('output') if others else None
-            if output_format and output_format not in OutputProducer.format_dict:
+            if output_format is not None and output_format not in OutputProducer.format_dict:
                 print(L("Invalid output format '{}'".format(output_format)))
                 return ArgumentParserResult(self._display_usage(nouns, m, out))
         except KeyError:
