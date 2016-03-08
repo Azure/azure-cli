@@ -10,11 +10,11 @@ from azure.mgmt.compute.operations import (AvailabilitySetsOperations,
                                            VirtualMachineScaleSetsOperations,
                                            VirtualMachineScaleSetVMsOperations)
 
-from ._command_creation import get_service_client
+from ._command_creation import get_mgmt_service_client
 from ..commands._auto_command import build_operation, LongRunningOperation
 
 def _compute_client_factory():
-    return get_service_client(ComputeManagementClient, ComputeManagementClientConfiguration)
+    return get_mgmt_service_client(ComputeManagementClient, ComputeManagementClientConfiguration)
 
 # pylint: disable=line-too-long
 build_operation("vm",
