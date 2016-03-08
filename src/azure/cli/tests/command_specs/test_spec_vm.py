@@ -1,7 +1,7 @@
 spec = [
     {
         'test_name': 'vm_usage_list_westus',
-        'command': 'vm usage list --location westus',
+        'command': 'vm usage list --location westus --output json',
         'expected_result': """[
   {
     "currentValue": 0,
