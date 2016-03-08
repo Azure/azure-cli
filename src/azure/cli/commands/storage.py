@@ -39,12 +39,12 @@ def checkname(args, unexpected): #pylint: disable=unused-argument
 @option('--blob-name -bn <name>', required=True)
 @option('--upload-from -uf <file>', required=True)
 @option('--container.public-access -cpa <none, blob, container>')
-@option('--content-settings.type -cst <type>')
-@option('--content-settings.disposition -csd <setting>')
-@option('--content-settings.encoding -cse <setting>')
-@option('--content-settings.language -csl <setting>')
-@option('--content-settings.md5 -csm <setting>')
-@option('--content-settings.cache-control -cscc <setting>')
+@option('--content.type -cst <type>')
+@option('--content.disposition -csd <setting>')
+@option('--content.encoding -cse <setting>')
+@option('--content.language -csl <setting>')
+@option('--content.md5 -csm <setting>')
+@option('--content.cache-control -cscc <setting>')
 def create_block_blob(args, unexpected): #pylint: disable=unused-argument
     from azure.storage.blob import BlockBlobService, PublicAccess, ContentSettings
 
@@ -68,13 +68,12 @@ def create_block_blob(args, unexpected): #pylint: disable=unused-argument
         args.get('container'),
         args.get('blob-name'),
         args.get('upload-from'),
-        content_settings=ContentSettings(content_type=args.get('content-settings.type'), 
-                                         content_disposition=args.get('content-settings.disposition'),
-                                         content_encoding=args.get('content-settings.encoding'),
-                                         content_language=args.get('content-settings.language'),
-                                         content_md5=args.get('content-settings.md5'),
-                                         cache_control=args.get('content-settings.cache-control')
-                                         )
+        content_settings=ContentSettings(content_type=args.get('content.type'),
+                                         content_disposition=args.get('content.disposition'),
+                                         content_encoding=args.get('content.encoding'),
+                                         content_language=args.get('content.language'),
+                                         content_md5=args.get('content.md5'),
+                                         cache_control=args.get('content.cache-control'))
         )
 
 @command('storage blob list')
@@ -103,7 +102,7 @@ def storage_file_create(args, unexpected): #pylint: disable=unused-argument
     file_service = FileService(account_name=args.get('account-name'),
                                account_key=args.get('account-key'))
 
-    file_service.create_file_from_path(args.get('share-name'), 
-                                       args.get('directory-name'), 
+    file_service.create_file_from_path(args.get('share-name'),
+                                       args.get('directory-name'),
                                        args.get('file-name'),
                                        args.get('local-file-name'))
