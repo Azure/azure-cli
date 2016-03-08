@@ -225,14 +225,13 @@ class ArgumentParser(object):
                 print(L("Missing required argument {}".format(a)))
                 return ArgumentParserResult(self._display_usage(nouns, m, out))
 
-        output_format = None
-        if others and 'output' in others:
-            if others['output'] in OutputProducer.format_dict:
-                output_format = others['output']
-                del others['output']
-            else:
-                print(L("Invalid output format '{}' specified".format(others['output'])))
+        try:
+            output_format = others.pop('output') if others else None
+            if output_format is not None and output_format not in OutputProducer.format_dict:
+                print(L("Invalid output format '{}'".format(output_format)))
                 return ArgumentParserResult(self._display_usage(nouns, m, out))
+        except KeyError:
+            output_format = None
 
         old_stdout = sys.stdout
         try:
