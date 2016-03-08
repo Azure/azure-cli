@@ -113,32 +113,29 @@ class Test_argparse(unittest.TestCase):
 
         self.assertIsNone(p.execute('n1 -b x'.split()).result)
 
-    def test_args_completion(self):
+    def test_specify_output_format(self):
         p = ArgumentParser('test')
         p.add_command(lambda a, b: (a, b), 'n1', args=[('--arg -a', '', True), ('-b <v>', '', False)])
-        io = StringIO()
 
-        p.execute('n1 - --complete'.split(), 
-                               show_usage=False,
-                               show_completions=True,
-                               out=io)
-        candidates = util.normalize_newlines(io.getvalue())
-        self.assertEqual(candidates, '--arg\n-a\n-b\n')
+        cmd_res = p.execute('n1 -a x'.split())
+        self.assertEqual(cmd_res.output_format, None)
 
-        io = StringIO()
-        p.execute('n1 --a --complete'.split(), 
-                               show_usage=False,
-                               out=io)
-        candidates = util.normalize_newlines(io.getvalue())
-        self.assertEqual(candidates, '--arg\n')
+        cmd_res = p.execute('n1 -a x --output json'.split())
+        self.assertEqual(cmd_res.output_format, 'json')
 
-        io = StringIO()
-        p.execute('n --a --complete'.split(), 
-                               show_usage=False,
-                               show_completions=True,
-                               out=io)
-        candidates = util.normalize_newlines(io.getvalue())
-        self.assertEqual(candidates, 'n1\n')
+        cmd_res = p.execute('n1 -a x --output table'.split())
+        self.assertEqual(cmd_res.output_format, 'table')
+
+        cmd_res = p.execute('n1 -a x --output text'.split())
+        self.assertEqual(cmd_res.output_format, 'text')
+
+        # Invalid format
+        cmd_res = p.execute('n1 -a x --output unknown'.split())
+        self.assertEqual(cmd_res.output_format, None)
+
+        # Invalid format
+        cmd_res = p.execute('n1 -a x --output'.split())
+        self.assertEqual(cmd_res.output_format, None)
 
     def test_specify_output_format(self):
         p = ArgumentParser('test')
@@ -163,6 +160,70 @@ class Test_argparse(unittest.TestCase):
         # Invalid format
         cmd_result = p.execute('n1 -a x --output'.split())
         self.assertEqual(cmd_result.output_format, None)
+
+    def test_args_completion(self):
+        p = ArgumentParser('test')
+        p.add_command(lambda a, b: (a, b), 'n1', args=[('--arg -a', '', True), ('-b <v>', '', False)])
+
+        # Can't use "with StringIO() as ...", as Python2/StringIO doesn't have __exit__.
+        io = StringIO()
+        p.execute('n1 - --complete'.split(), 
+                               show_usage=False,
+                               show_completions=True,
+                               out=io)
+        candidates = util.normalize_newlines(io.getvalue())
+        io.close()
+        self.assertEqual(candidates, '--arg\n-a\n-b\n')
+        
+        #matching '--arg for '--a'
+        io=StringIO()
+        p.execute('n1 --a --complete'.split(), 
+                               show_usage=False,
+                               out=io)
+        candidates = util.normalize_newlines(io.getvalue())
+        io.close()
+        self.assertEqual(candidates, '--arg\n')
+
+        #matching 'n1' for 'n'
+        io = StringIO()
+        p.execute('n --complete'.split(), 
+                               show_usage=False,
+                               show_completions=True,
+                               out=io)
+        candidates = util.normalize_newlines(io.getvalue())
+        io.close()
+        self.assertEqual(candidates, 'n1\n')
+
+        #if --arg is used, then both '-a' and "--arg" should not be in the 
+        #candidate list 
+        io = StringIO()
+        p.execute('n1 --arg hello - --complete'.split(), 
+                               show_usage=False,
+                               show_completions=True,
+                               out=io)
+        candidates = util.normalize_newlines(io.getvalue())
+        io.close()
+        self.assertEqual(candidates, '-b\n')
+
+        #if all argument are used, candidate list is empty 
+        io = StringIO()
+        p.execute('n1 -a -b --complete'.split(), 
+                               show_usage=False,
+                               show_completions=True,
+                               out=io)
+        candidates = util.normalize_newlines(io.getvalue())
+        io.close()
+        self.assertEqual(candidates, '\n')
+
+        #if at parameter value level, get nothing for N.Y.I.
+        io = StringIO()
+        p.execute('n1 -a --complete'.split(), 
+                               show_usage=False,
+                               show_completions=True,
+                               out=io)
+        candidates = util.normalize_newlines(io.getvalue())
+        io.close()
+        self.assertEqual(candidates, '\n')
 
 if __name__ == '__main__':
     unittest.main()
