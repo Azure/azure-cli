@@ -1,7 +1,6 @@
 from msrest import Serializer
 from ..commands import command, description
 from ._command_creation import get_service_client
-from .._profile import Profile
 
 @command('resource group list')
 @description('List resource groups')
