@@ -46,38 +46,38 @@ class Test_argparse(unittest.TestCase):
         p = ArgumentParser('test')
         p.add_command(lambda a, b: (a, b), 'n1', args=[('--arg -a', '', False), ('-b <v>', '', False)])
 
-        cmd_res = p.execute('n1 -a x'.split())
-        res, other = cmd_res.result
+        cmd_result = p.execute('n1 -a x'.split())
+        res, other = cmd_result.result
         self.assertTrue(res.arg)
         self.assertSequenceEqual(res.positional, ['x'])
 
         # Should recognize args with alternate prefix
-        cmd_res = p.execute('n1 /a'.split())
-        res, other = cmd_res.result
+        cmd_result = p.execute('n1 /a'.split())
+        res, other = cmd_result.result
         self.assertTrue(res.arg)
-        cmd_res = p.execute('n1 /arg'.split())
-        res, other = cmd_res.result
+        cmd_result = p.execute('n1 /arg'.split())
+        res, other = cmd_result.result
         self.assertTrue(res.arg)
 
         # Should not recognize "------a"
-        cmd_res = p.execute('n1 ------a'.split())
-        res, other = cmd_res.result
+        cmd_result = p.execute('n1 ------a'.split())
+        res, other = cmd_result.result
         self.assertNotIn('arg', res)
         # First two '--' match, so '----a' is added to dict
         self.assertIn('----a', other)
 
-        cmd_res = p.execute('n1 -a:x'.split())
-        res = cmd_res.result
+        cmd_result = p.execute('n1 -a:x'.split())
+        res = cmd_result.result
         self.assertIsNone(res)
 
-        cmd_res = p.execute('n1 -b -a x'.split())
-        res, other = cmd_res.result
+        cmd_result = p.execute('n1 -b -a x'.split())
+        res, other = cmd_result.result
         self.assertEqual(res.b, '-a')
         self.assertSequenceEqual(res.positional, ['x'])
         self.assertRaises(IncorrectUsageError, lambda: res.arg)
 
-        cmd_res = p.execute('n1 -b:-a x'.split())
-        res, other = cmd_res.result
+        cmd_result = p.execute('n1 -b:-a x'.split())
+        res, other = cmd_result.result
         self.assertEqual(res.b, '-a')
         self.assertSequenceEqual(res.positional, ['x'])
         self.assertRaises(IncorrectUsageError, lambda: res.arg)
@@ -86,18 +86,18 @@ class Test_argparse(unittest.TestCase):
         p = ArgumentParser('test')
         p.add_command(lambda a, b: (a, b), 'n1', args=[('-a', '', False)])
 
-        cmd_res = p.execute('n1 -b=2'.split())
-        res, other = cmd_res.result
+        cmd_result = p.execute('n1 -b=2'.split())
+        res, other = cmd_result.result
         self.assertFalse(res)
         self.assertEqual('2', other.b)
 
-        cmd_res = p.execute('n1 -b.c.d=2'.split())
-        res, other = cmd_res.result
+        cmd_result = p.execute('n1 -b.c.d=2'.split())
+        res, other = cmd_result.result
         self.assertFalse(res)
         self.assertEqual('2', other.b.c.d)
 
-        cmd_res = p.execute('n1 -b.c.d 2 -b.c.e:3'.split())
-        res, other = cmd_res.result
+        cmd_result = p.execute('n1 -b.c.d 2 -b.c.e:3'.split())
+        res, other = cmd_result.result
         self.assertFalse(res)
         self.assertEqual('2', other.b.c.d)
         self.assertEqual('3', other.b.c.e)
@@ -106,8 +106,8 @@ class Test_argparse(unittest.TestCase):
         p = ArgumentParser('test')
         p.add_command(lambda a, b: (a, b), 'n1', args=[('--arg -a', '', True), ('-b <v>', '', False)])
 
-        cmd_res = p.execute('n1 -a x'.split())
-        res, other = cmd_res.result
+        cmd_result = p.execute('n1 -a x'.split())
+        res, other = cmd_result.result
         self.assertTrue(res.arg)
         self.assertSequenceEqual(res.positional, ['x'])
 
@@ -144,25 +144,25 @@ class Test_argparse(unittest.TestCase):
         p = ArgumentParser('test')
         p.add_command(lambda a, b: (a, b), 'n1', args=[('--arg -a', '', True), ('-b <v>', '', False)])
 
-        cmd_res = p.execute('n1 -a x'.split())
-        self.assertEqual(cmd_res.output_format, None)
+        cmd_result = p.execute('n1 -a x'.split())
+        self.assertEqual(cmd_result.output_format, None)
 
-        cmd_res = p.execute('n1 -a x --output json'.split())
-        self.assertEqual(cmd_res.output_format, 'json')
+        cmd_result = p.execute('n1 -a x --output json'.split())
+        self.assertEqual(cmd_result.output_format, 'json')
 
-        cmd_res = p.execute('n1 -a x --output table'.split())
-        self.assertEqual(cmd_res.output_format, 'table')
+        cmd_result = p.execute('n1 -a x --output table'.split())
+        self.assertEqual(cmd_result.output_format, 'table')
 
-        cmd_res = p.execute('n1 -a x --output text'.split())
-        self.assertEqual(cmd_res.output_format, 'text')
-
-        # Invalid format
-        cmd_res = p.execute('n1 -a x --output unknown'.split())
-        self.assertEqual(cmd_res.output_format, None)
+        cmd_result = p.execute('n1 -a x --output text'.split())
+        self.assertEqual(cmd_result.output_format, 'text')
 
         # Invalid format
-        cmd_res = p.execute('n1 -a x --output'.split())
-        self.assertEqual(cmd_res.output_format, None)
+        cmd_result = p.execute('n1 -a x --output unknown'.split())
+        self.assertEqual(cmd_result.output_format, None)
+
+        # Invalid format
+        cmd_result = p.execute('n1 -a x --output'.split())
+        self.assertEqual(cmd_result.output_format, None)
 
 if __name__ == '__main__':
     unittest.main()
