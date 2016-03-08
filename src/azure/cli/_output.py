@@ -43,12 +43,23 @@ def format_list(obj):
 
 class OutputProducer(object): #pylint: disable=too-few-public-methods
 
-    def __init__(self, formatter=format_list, file=sys.stdout): #pylint: disable=redefined-builtin
+    format_dict = {
+        'json': format_json,
+        'table': format_table,
+        'text': format_text,
+        'list': format_list
+    }
+
+    def __init__(self, formatter=format_json, file=sys.stdout): #pylint: disable=redefined-builtin
         self.formatter = formatter
         self.file = file
 
     def out(self, obj):
         print(self.formatter(obj), file=self.file)
+
+    @staticmethod
+    def get_formatter(format_type):
+        return OutputProducer.format_dict.get(format_type, format_list)
 
 class ListOutput(object): #pylint: disable=too-few-public-methods
 
