@@ -30,9 +30,9 @@ OSX/Ubuntu (bash):
 . <clone root>/env/bin/activate
 ```
 
-+	Install the latest autorest generated azure sdk.
++	Install the dependencies including the latest autorest generated azure sdk.
 ```Shell
-python –m pip install azure==2.0.0a1
+pip install -r requirements.txt
 ```
 +	Add <clone root>\src to your PYTHONPATH environment variable:
 
@@ -43,6 +43,11 @@ set PYTHONPATH=<clone root>\src;%PYTHONPATH%
 OSX/Ubuntu (bash):
 ```Shell
 export PYTHONPATH=<clone root>/src:${PYTHONPATH}
+```
++ Hook-up tab completion
+Open Bash/zsh window and run
+```
+source ./az.completion.sh
 ```
 
 ##Configuring your IDE
