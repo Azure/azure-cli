@@ -1,14 +1,7 @@
 from __future__ import print_function
 
 import unittest
-
-try:
-    # on Python2, we like to use the module "StringIO" rather "io" so to 
-    # avoid "print" errors like: TypeError: string argument expected, got 'str'
-    from StringIO import StringIO
-except ImportError:
-    # Python 3
-    from io import StringIO
+from six import StringIO
 
 from azure.cli._output import (OutputProducer, OutputFormatException, format_json, format_table, format_list, format_text,
                                 ListOutput)
