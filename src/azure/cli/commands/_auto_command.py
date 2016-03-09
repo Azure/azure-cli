@@ -23,8 +23,7 @@ class LongRunningOperation(object): #pylint: disable=too-few-public-methods
         try:
             while not poller.done():
                 if self.progress_file:
-                    print('.', end='', file=self.progress_file)
-                    self.progress_file.flush()
+                    print('.', end='', flush=True, file=self.progress_file)
                 time.sleep(self.poll_interval_ms / 1000.0)
             result = poller.result()
             succeeded = True
@@ -44,18 +43,26 @@ def _decorate_description(desc, func):
 def _decorate_option(spec, descr, func):
     return option(spec, descr)(func)
 
-def _make_func(client_factory, member_name, return_type_or_func, unbound_func):
+def _get_member(obj, path):
+    """Recursively walk down the dot-separated path
+    to get child item. 
+
+    Ex. a.b.c would get the property 'c' of property 'b' of the
+        object a
+    """
+    for segment in path.split('.'):
+        obj = getattr(obj, segment)
+    return obj
+
+def _make_func(client_factory, member_path, return_type_or_func, unbound_func):
     def call_client(args, unexpected): #pylint: disable=unused-argument
         client = client_factory()
-        ops_instance = getattr(client, member_name)
+        ops_instance = _get_member(client, member_path)
         try:
             result = unbound_func(ops_instance, **args)
-            if not return_type_or_func:
+            if not return_type_name:
                 return {}
-            if callable(return_type_or_func):
-                return return_type_or_func(result)
-            if isinstance(return_type_or_func, str):
-                return Serializer().serialize_data(result, return_type_or_func)
+            return Serializer().serialize_data(result, return_type_name)
         except TypeError as exception:
             # TODO: Evaluate required/missing parameters and provide specific
             # usage for missing params...
@@ -78,11 +85,11 @@ def _option_description(operation, arg):
 
 EXCLUDED_PARAMS = frozenset(['self', 'raw', 'custom_headers', 'operation_config'])
 
-def build_operation(package_name, resource_type, member_name, client_type, operations):
+def build_operation(command_name, member_path, client_type, operations):
     for operation, return_type_name in operations:
         opname = operation.__name__.replace('_', '-')
-        func = _make_func(client_type, member_name, return_type_name, operation)
-        func = _decorate_command(' '.join([package_name, resource_type, opname]), func)
+        func = _make_func(client_type, member_path, return_type_name, operation)
+        func = _decorate_command(' '.join([command_name, opname]), func)
 
         args = []
         try:
@@ -96,3 +103,5 @@ def build_operation(package_name, resource_type, member_name, client_type, opera
         for arg in [a for a in args if not a in EXCLUDED_PARAMS]:
             spec = '--%s <%s>' % (arg, arg)
             func = _decorate_option(spec, _option_description(operation, arg), func=func)
+
+
