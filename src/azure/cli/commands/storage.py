@@ -35,8 +35,8 @@ def checkname(args, unexpected): #pylint: disable=unused-argument
 
 # TODO: update this once enums are supported in commands first-class (task #115175885)
 public_access_types = {'none': None,
-                        'blob': PublicAccess.Blob,
-                        'container': PublicAccess.Container}
+                       'blob': PublicAccess.Blob,
+                       'container': PublicAccess.Container}
 public_access_string = ' | '.join(public_access_types)
 
 @command('storage blob blockblob create')
@@ -61,7 +61,8 @@ def create_block_blob(args, unexpected): #pylint: disable=unused-argument
     try:
         public_access = public_access_types[args.get('container.public-access')]
     except KeyError:
-        raise IncorrectUsageError(L('container.public-access must be: {}'.format(public_access_string)))
+        raise IncorrectUsageError(L('container.public-access must be: {}'
+                                    .format(public_access_string)))
 
     block_blob_service.create_container(args.get('container-name'), public_access=public_access)
 
@@ -82,7 +83,7 @@ def create_block_blob(args, unexpected): #pylint: disable=unused-argument
 @option('--account-key -ak <key>', required=True)
 @option('--container -c <name>', required=True)
 def list_blobs(args, unexpected): #pylint: disable=unused-argument
-    from azure.storage.blob import BlockBlobService, PublicAccess, ContentSettings
+    from azure.storage.blob import BlockBlobService, ContentSettings
 
     block_blob_service = get_data_service_client(BlockBlobService, args.get('account-name'),
                                                  args.get('account-key'))
@@ -101,7 +102,7 @@ def storage_file_create(args, unexpected): #pylint: disable=unused-argument
     from azure.storage.file import FileService
 
     file_service = get_data_service_client(FileService, args.get('account-name'),
-                                                 args.get('account-key'))
+                                           args.get('account-key'))
 
     file_service.create_file_from_path(args.get('share-name'),
                                        args.get('directory-name'),
