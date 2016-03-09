@@ -10,8 +10,8 @@ from ..commands import command, description, option
 
 EXCLUDED_PARAMS = frozenset(['self', 'raw', 'custom_headers', 'operation_config'])
 GLOBALPARAMALIASES = {
-        'resource_group_name': '--resourcegroup --rg <resourcegroupname>'
-    }
+    'resource_group_name': '--resourcegroup --rg <resourcegroupname>'
+}
 
 
 
@@ -31,7 +31,8 @@ class LongRunningOperation(object): #pylint: disable=too-few-public-methods
         try:
             while not poller.done():
                 if self.progress_file:
-                    print('.', end='', flush=True, file=self.progress_file)
+                    print('.', end='', file=self.progress_file)
+                    self.progress_file.flush()
                 time.sleep(self.poll_interval_ms / 1000.0)
             result = poller.result()
             succeeded = True
@@ -53,7 +54,7 @@ def _decorate_option(spec, descr, target, func):
 
 def _get_member(obj, path):
     """Recursively walk down the dot-separated path
-    to get child item. 
+    to get child item.
 
     Ex. a.b.c would get the property 'c' of property 'b' of the
         object a
@@ -93,7 +94,8 @@ def _option_description(operation, arg):
     return ' '.join(l.split(':')[-1] for l in inspect.getdoc(operation).splitlines()
                     if l.startswith(':param') and arg + ':' in l)
 
-def build_operation(command_name, member_path, client_type, operations, paramaliases=GLOBALPARAMALIASES):
+def build_operation(command_name, member_path, client_type, operations, #pylint: disable=dangerous-default-value
+                    paramaliases=GLOBALPARAMALIASES):
     for operation, return_type_name in operations:
         opname = operation.__name__.replace('_', '-')
         func = _make_func(client_type, member_path, return_type_name, operation)
@@ -110,4 +112,5 @@ def build_operation(command_name, member_path, client_type, operations, paramali
 
         for arg in [a for a in args if not a in EXCLUDED_PARAMS]:
             spec = paramaliases.get(arg, '--%s <%s>' % (arg, arg))
-            func = _decorate_option(spec, _option_description(operation, arg), target=arg, func=func)
+            func = _decorate_option(spec, _option_description(operation, arg),
+                                    target=arg, func=func)
