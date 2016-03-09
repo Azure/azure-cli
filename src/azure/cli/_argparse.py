@@ -279,37 +279,26 @@ class ArgumentParser(object):
             logger.debug('Expected documentation at %s', doc_file)
 
     def _display_completions(self, noun_map, arguments, out=sys.stdout):
-
         for a in self.complete_args:
             arguments.remove(a)
 
-        command_candidates = set([k for k in noun_map if not k.startswith('$')])
-
-        last_arg = arguments[-1]
-        if command_candidates and not last_arg.startswith('-'):
-            command_candidates = set([c for c in command_candidates if c.startswith(last_arg)])
-
         kwargs = noun_map.get('$kwargs') or []
-        args_candidates = set()
-        arguments_set = set(arguments)
+        last_arg = arguments[-1]
+        args_candidates = []
 
-        #handle a messy part, that if a short name is used, then the long name should
-        #be excluded. Say, for '-a/--arg', if '-a' is used in command, '--arg' should
-        #not in the candidate list.
+        arguments_set = set(arguments)
         for a in kwargs:
             alias = kwargs[a][3]
+            #check whether the arg has been used already
             if not [x for x in alias if x in arguments_set]:
-                args_candidates.update(set(alias))
+                args_candidates.extend(alias)
 
-        if last_arg.startswith('-'):
-            # TODO: We don't have enough metadata about the command to do parameter value
-            # completion (yet). This should only apply to value arguments, not flag arguments
-            if last_arg in args_candidates:
-                args_candidates = set()
-            else:
-                args_candidates = set([c for c in args_candidates if c.startswith(last_arg)])
+        if last_arg.startswith('-') and (last_arg in args_candidates):
+            print('\n', file=out) # TODO: parameter value completion is N.Y.I
+        else:
+            subcommand_candidates = [k for k in noun_map if not k.startswith('$')]
+            candidates = subcommand_candidates + args_candidates
+            matches = [k for k in candidates if k.startswith(last_arg)]
+            print('\n'.join(sorted(set(matches))), file=out)
 
-        candidates = command_candidates.union(args_candidates)
-
-        print('\n'.join(sorted(candidates)), file=out)
         out.flush()
