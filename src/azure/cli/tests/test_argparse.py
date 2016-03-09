@@ -1,12 +1,5 @@
-﻿try:
-    # on Python2, we like to use the module "StringIO" rather "io" so to 
-    # avoid "print" errors like: TypeError: string argument expected, got 'str'
-    from StringIO import StringIO
-except ImportError:
-    # Python 3
-    from io import StringIO
-
-import unittest
+﻿import unittest
+from six import StringIO
 
 from azure.cli._argparse import ArgumentParser, IncorrectUsageError
 from azure.cli._logging import logger
