@@ -7,6 +7,14 @@ from msrest.exceptions import ClientException
 from azure.cli._argparse import IncorrectUsageError
 from ..commands import command, description, option
 
+
+EXCLUDED_PARAMS = frozenset(['self', 'raw', 'custom_headers', 'operation_config'])
+GLOBALPARAMALIASES = {
+        'resource_group_name': '--resourcegroup --rg <resourcegroupname>'
+    }
+
+
+
 class LongRunningOperation(object): #pylint: disable=too-few-public-methods
 
     progress_file = sys.stderr
@@ -40,8 +48,8 @@ def _decorate_command(name, func):
 def _decorate_description(desc, func):
     return description(desc)(func)
 
-def _decorate_option(spec, descr, func):
-    return option(spec, descr)(func)
+def _decorate_option(spec, descr, target, func):
+    return option(spec, descr, target=target)(func)
 
 def _get_member(obj, path):
     """Recursively walk down the dot-separated path
@@ -60,9 +68,12 @@ def _make_func(client_factory, member_path, return_type_or_func, unbound_func):
         ops_instance = _get_member(client, member_path)
         try:
             result = unbound_func(ops_instance, **args)
-            if not return_type_name:
+            if not return_type_or_func:
                 return {}
-            return Serializer().serialize_data(result, return_type_name)
+            if callable(return_type_or_func):
+                return return_type_or_func(result)
+            if isinstance(return_type_or_func, str):
+                return Serializer().serialize_data(result, return_type_or_func)
         except TypeError as exception:
             # TODO: Evaluate required/missing parameters and provide specific
             # usage for missing params...
@@ -71,7 +82,6 @@ def _make_func(client_factory, member_path, return_type_or_func, unbound_func):
             # TODO: Better error handling for cloud exceptions...
             message = getattr(client_exception, 'message', client_exception)
             print(message, file=sys.stderr)
-
 
     return call_client
 
@@ -83,9 +93,7 @@ def _option_description(operation, arg):
     return ' '.join(l.split(':')[-1] for l in inspect.getdoc(operation).splitlines()
                     if l.startswith(':param') and arg + ':' in l)
 
-EXCLUDED_PARAMS = frozenset(['self', 'raw', 'custom_headers', 'operation_config'])
-
-def build_operation(command_name, member_path, client_type, operations):
+def build_operation(command_name, member_path, client_type, operations, paramaliases=GLOBALPARAMALIASES):
     for operation, return_type_name in operations:
         opname = operation.__name__.replace('_', '-')
         func = _make_func(client_type, member_path, return_type_name, operation)
@@ -101,7 +109,5 @@ def build_operation(command_name, member_path, client_type, operations):
             args = sig.args
 
         for arg in [a for a in args if not a in EXCLUDED_PARAMS]:
-            spec = '--%s <%s>' % (arg, arg)
-            func = _decorate_option(spec, _option_description(operation, arg), func=func)
-
-
+            spec = paramaliases.get(arg, '--%s <%s>' % (arg, arg))
+            func = _decorate_option(spec, _option_description(operation, arg), target=arg, func=func)
