@@ -57,17 +57,17 @@ class Test_autocommand(unittest.TestCase):
         # sneaky trick to avoid loading any command modules...
         sys.modules['azure.cli.commands.test'] = sys
 
-        command_name = 'da command with one arg and unexpected'
+        command_name = 'da command with one arg and unexpected with target'
         def testfunc(args, _):
             # Check that the argument passing actually works...
-            self.assertEqual(args['tre'], 'wombat')
+            self.assertEqual(args['alternatetarget'], 'wombat')
             return testfunc
 
         # Run test code
         func = _decorate_command(command_name, testfunc)
         spec = '--tre <tre>'
         desc = 'Kronor'
-        func = _decorate_option(spec, desc, None, func)
+        func = _decorate_option(spec, desc, 'alternatetarget', func)
 
         p = ArgumentParser('automcommandtest')
         add_to_parser(p, 'test')
