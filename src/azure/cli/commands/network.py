@@ -21,7 +21,7 @@ from azure.mgmt.network.operations import (ApplicationGatewaysOperations,
                                            VirtualNetworksOperations)
 
 from ._command_creation import get_service_client
-from ..commands._auto_command import build_operation, LongRunningOperation, GLOBALPARAMALIASES 
+from ..commands._auto_command import build_operation, LongRunningOperation, GLOBALPARAMALIASES
 from ..commands import command, description, option
 
 def _network_client_factory():
