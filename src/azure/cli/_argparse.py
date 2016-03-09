@@ -124,7 +124,7 @@ class ArgumentParser(object):
             else:
                 v = aliases.pop().strip('<> ')
             if not target:
-            target, _ = _read_arg(aliases[0])
+                target, _ = _read_arg(aliases[0])
             kw.update({_read_arg(a)[0]: (target, v, req, aliases) for a in aliases})
             ad.append(('/'.join(aliases), desc, req))
 

@@ -40,14 +40,14 @@ class Test_autocommand(unittest.TestCase):
         func = _decorate_command(command_name, testfunc)
         spec = '--tre <tre>'
         desc = 'Kronor'
-        func = _decorate_option(spec, desc, func)
+        func = _decorate_option(spec, desc, None, func)
 
         # Verify
         registered_command = _COMMANDS.get(testfunc, None)
         self.assertIsNotNone(registered_command)
         self.assertEqual(registered_command['name'], command_name)
         self.assertEqual(len(registered_command['args']), 1)
-        self.assertEqual(registered_command['args'][0], (spec, desc, False))
+        self.assertEqual(registered_command['args'][0], (spec, desc, False, None))
 
     def test_load_test_commands(self):
         import sys
@@ -67,7 +67,7 @@ class Test_autocommand(unittest.TestCase):
         func = _decorate_command(command_name, testfunc)
         spec = '--tre <tre>'
         desc = 'Kronor'
-        func = _decorate_option(spec, desc, func)
+        func = _decorate_option(spec, desc, None, func)
 
         p = ArgumentParser('automcommandtest')
         add_to_parser(p, 'test')

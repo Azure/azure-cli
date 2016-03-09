@@ -44,7 +44,7 @@ class Test_argparse(unittest.TestCase):
 
     def test_args(self):
         p = ArgumentParser('test')
-        p.add_command(lambda a, b: (a, b), 'n1', args=[('--arg -a', '', False), ('-b <v>', '', False)])
+        p.add_command(lambda a, b: (a, b), 'n1', args=[('--arg -a', '', False, None), ('-b <v>', '', False, None)])
 
         cmd_result = p.execute('n1 -a x'.split())
         res, other = cmd_result.result
@@ -84,7 +84,7 @@ class Test_argparse(unittest.TestCase):
 
     def test_unexpected_args(self):
         p = ArgumentParser('test')
-        p.add_command(lambda a, b: (a, b), 'n1', args=[('-a', '', False)])
+        p.add_command(lambda a, b: (a, b), 'n1', args=[('-a', '', False, None)])
 
         cmd_result = p.execute('n1 -b=2'.split())
         res, other = cmd_result.result
@@ -104,7 +104,7 @@ class Test_argparse(unittest.TestCase):
 
     def test_required_args(self):
         p = ArgumentParser('test')
-        p.add_command(lambda a, b: (a, b), 'n1', args=[('--arg -a', '', True), ('-b <v>', '', False)])
+        p.add_command(lambda a, b: (a, b), 'n1', args=[('--arg -a', '', True, None), ('-b <v>', '', False, None)])
 
         cmd_result = p.execute('n1 -a x'.split())
         res, other = cmd_result.result
@@ -139,7 +139,7 @@ class Test_argparse(unittest.TestCase):
 
     def test_specify_output_format(self):
         p = ArgumentParser('test')
-        p.add_command(lambda a, b: (a, b), 'n1', args=[('--arg -a', '', True), ('-b <v>', '', False)])
+        p.add_command(lambda a, b: (a, b), 'n1', args=[('--arg -a', '', True, None), ('-b <v>', '', False, None)])
 
         cmd_result = p.execute('n1 -a x'.split())
         self.assertEqual(cmd_result.output_format, None)
@@ -163,7 +163,7 @@ class Test_argparse(unittest.TestCase):
 
     def test_args_completion(self):
         p = ArgumentParser('test')
-        p.add_command(lambda a, b: (a, b), 'n1', args=[('--arg -a', '', True), ('-b <v>', '', False)])
+        p.add_command(lambda a, b: (a, b), 'n1', args=[('--arg -a', '', True, None), ('-b <v>', '', False, None)])
 
         # Can't use "with StringIO() as ...", as Python2/StringIO doesn't have __exit__.
         io = StringIO()
