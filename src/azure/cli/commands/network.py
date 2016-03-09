@@ -21,16 +21,20 @@ from azure.mgmt.network.operations import (ApplicationGatewaysOperations,
                                            VirtualNetworksOperations)
 
 from ._command_creation import get_service_client
-from ..commands._auto_command import build_operation, LongRunningOperation
+from ..commands._auto_command import build_operation, LongRunningOperation, PARAMALIASES
 from ..commands import command, description, option
 
 def _network_client_factory():
     return get_service_client(NetworkManagementClient, NetworkManagementClientConfiguration)
 
+PARAMALIASES.update({
+    'virtualnetworkname': 'name',
+    'loadbalancername': 'name'
+    })
+
 # pylint: disable=line-too-long
 # Application gateways
-build_operation("network",
-                "appgateway",
+build_operation("network appgateway",
                 "application_gateways",
                 _network_client_factory,
                 [
@@ -43,8 +47,7 @@ build_operation("network",
                 ])
 
 # ExpressRouteCircuitAuthorizationsOperations
-build_operation("network",
-                "expressroutecircuitauth",
+build_operation("network expressroutecircuitauth",
                 "express_route_circuit_authorizations",
                 _network_client_factory,
                 [
@@ -54,8 +57,7 @@ build_operation("network",
                 ])
 
 # ExpressRouteCircuitPeeringsOperations
-build_operation("network",
-                "expressroutecircuitpeering",
+build_operation("network expressroutecircuitpeering",
                 "express_route_circuit_peerings",
                 _network_client_factory,
                 [
@@ -65,8 +67,7 @@ build_operation("network",
                 ])
 
 # ExpressRouteCircuitsOperations
-build_operation("network",
-                "expressroutecircuit",
+build_operation("network expressroutecircuit",
                 "express_route_circuits",
                 _network_client_factory,
                 [
@@ -80,8 +81,7 @@ build_operation("network",
                 ])
 
 # ExpressRouteServiceProvidersOperations
-build_operation("network",
-                "expressroutesp",
+build_operation("network expressroutesp",
                 "express_route_service_providers",
                 _network_client_factory,
                 [
@@ -89,8 +89,7 @@ build_operation("network",
                 ])
 
 # LoadBalancersOperations
-build_operation("network",
-                "lb",
+build_operation("network lb",
                 "load_balancers",
                 _network_client_factory,
                 [
@@ -101,8 +100,7 @@ build_operation("network",
                 ])
 
 # LocalNetworkGatewaysOperations
-build_operation("network",
-                "localgateways",
+build_operation("network localgateways",
                 "local_network_gateways",
                 _network_client_factory,
                 [
@@ -113,8 +111,7 @@ build_operation("network",
 
 
 # NetworkInterfacesOperations
-build_operation("network",
-                "nic",
+build_operation("network nic",
                 "network_interfaces",
                 _network_client_factory,
                 [
@@ -128,8 +125,7 @@ build_operation("network",
                 ])
 
 # NetworkSecurityGroupsOperations
-build_operation("network",
-                "securitygroup",
+build_operation("network securitygroup",
                 "network_security_groups",
                 _network_client_factory,
                 [
@@ -140,8 +136,7 @@ build_operation("network",
                 ])
 
 # PublicIPAddressesOperations
-build_operation("network",
-                "publicipaddress",
+build_operation("network publicipaddress",
                 "public_ip_addresses",
                 _network_client_factory,
                 [
@@ -152,8 +147,7 @@ build_operation("network",
                 ])
 
 # RouteTablesOperations
-build_operation("network",
-                "routetable",
+build_operation("network routetable",
                 "route_tables",
                 _network_client_factory,
                 [
@@ -164,8 +158,7 @@ build_operation("network",
                 ])
 
 # RoutesOperations
-build_operation("network",
-                "routeoperation",
+build_operation("network routeoperation",
                 "routes",
                 _network_client_factory,
                 [
@@ -175,8 +168,7 @@ build_operation("network",
                 ])
 
 # SecurityRulesOperations
-build_operation("network",
-                "securityrules",
+build_operation("network securityrules",
                 "security_rules",
                 _network_client_factory,
                 [
@@ -186,8 +178,7 @@ build_operation("network",
                 ])
 
 # SubnetsOperations
-build_operation("network",
-                "subnet",
+build_operation("network subnet",
                 "subnets",
                 _network_client_factory,
                 [
@@ -197,8 +188,7 @@ build_operation("network",
                 ])
 
 # UsagesOperations
-build_operation("network",
-                "usage",
+build_operation("network usage",
                 "usages",
                 _network_client_factory,
                 [
@@ -206,8 +196,7 @@ build_operation("network",
                 ])
 
 # VirtualNetworkGatewayConnectionsOperations
-build_operation("network",
-                "vnetgatewayconnection",
+build_operation("networ vnetgatewayconnection",
                 "virtual_network_gateway_connections",
                 _network_client_factory,
                 [
@@ -220,8 +209,7 @@ build_operation("network",
                 ])
 
 # VirtualNetworkGatewaysOperations
-build_operation("network",
-                "vnetgateway",
+build_operation("network vnetgateway",
                 "virtual_network_gateways",
                 _network_client_factory,
                 [
@@ -232,8 +220,7 @@ build_operation("network",
                 ])
 
 # VirtualNetworksOperations
-build_operation("network",
-                "vnet",
+build_operation("network vnet",
                 "virtual_networks",
                 _network_client_factory,
                 [
