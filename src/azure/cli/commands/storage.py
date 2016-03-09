@@ -1,5 +1,4 @@
-﻿from msrest import Serializer
-from ..commands import command, description, option
+﻿from ..commands import command, description, option
 from ._command_creation import get_service_client
 from .._logging  import logger
 from .._locale import L
@@ -21,8 +20,7 @@ def list_accounts(args, unexpected): #pylint: disable=unused-argument
     else:
         accounts = smc.storage_accounts.list()
 
-    serializable = Serializer().serialize_data(accounts, "[StorageAccount]")
-    return serializable
+    return list(accounts)
 
 @command('storage account check')
 @option('--account-name <name>')

@@ -2,7 +2,7 @@ from __future__ import print_function
 import inspect
 import sys
 import time
-from msrest import Serializer
+from msrest.paging import Paged
 from msrest.exceptions import ClientException
 from azure.cli._argparse import IncorrectUsageError
 from ..commands import command, description, option
@@ -55,7 +55,7 @@ def _make_func(client_factory, member_name, return_type_or_func, unbound_func):
             if callable(return_type_or_func):
                 return return_type_or_func(result)
             if isinstance(return_type_or_func, str):
-                return Serializer().serialize_data(result, return_type_or_func)
+                return list(result) if isinstance(result, Paged) else result
         except TypeError as exception:
             # TODO: Evaluate required/missing parameters and provide specific
             # usage for missing params...

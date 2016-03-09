@@ -1,4 +1,3 @@
-from msrest import Serializer
 from .._locale import L
 from azure.mgmt.network import NetworkManagementClient, NetworkManagementClientConfiguration
 from azure.mgmt.network.operations import (ApplicationGatewaysOperations,
@@ -266,7 +265,7 @@ def create_update_vnet(args, unexpected): #pylint: disable=unused-argument
     op = LongRunningOperation('Creating virtual network', 'Virtual network created')
     smc = _network_client_factory()
     poller = smc.virtual_networks.create_or_update(resource_group, name, vnet_settings)
-    return Serializer().serialize_data(op(poller), 'VirtualNetwork')
+    return op(poller)
 
 @command('network subnet create')
 @description(L('Create or update a virtual network (VNet) subnet'))
@@ -310,6 +309,6 @@ def create_update_subnet(args, unexpected): #pylint: disable=unused-argument
     op = LongRunningOperation('Creating subnet', 'Subnet created')
     smc = _network_client_factory()
     poller = smc.subnets.create_or_update(resource_group, vnet, name, subnet_settings)
-    return Serializer().serialize_data(op(poller), 'Subnet')
+    return op(poller)
 
 
