@@ -137,30 +137,6 @@ class Test_argparse(unittest.TestCase):
         cmd_res = p.execute('n1 -a x --output'.split())
         self.assertEqual(cmd_res.output_format, None)
 
-    def test_specify_output_format(self):
-        p = ArgumentParser('test')
-        p.add_command(lambda a, b: (a, b), 'n1', args=[('--arg -a', '', True), ('-b <v>', '', False)])
-
-        cmd_result = p.execute('n1 -a x'.split())
-        self.assertEqual(cmd_result.output_format, None)
-
-        cmd_result = p.execute('n1 -a x --output json'.split())
-        self.assertEqual(cmd_result.output_format, 'json')
-
-        cmd_result = p.execute('n1 -a x --output table'.split())
-        self.assertEqual(cmd_result.output_format, 'table')
-
-        cmd_result = p.execute('n1 -a x --output text'.split())
-        self.assertEqual(cmd_result.output_format, 'text')
-
-        # Invalid format
-        cmd_result = p.execute('n1 -a x --output unknown'.split())
-        self.assertEqual(cmd_result.output_format, None)
-
-        # Invalid format
-        cmd_result = p.execute('n1 -a x --output'.split())
-        self.assertEqual(cmd_result.output_format, None)
-
     def test_args_completion(self):
         p = ArgumentParser('test')
         p.add_command(lambda a, b: (a, b), 'n1', args=[('--arg -a', '', True), ('-b <v>', '', False)])
