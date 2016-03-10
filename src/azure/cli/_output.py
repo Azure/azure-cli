@@ -66,7 +66,9 @@ class OutputProducer(object): #pylint: disable=too-few-public-methods
         def to_camelcase(s):
             return re.sub(OutputProducer.KEYS_CAMELCASE_PATTERN, lambda x: x.group(1).upper(), s)
 
-        if isinstance(obj, list):
+        if isinstance(obj, dict):
+            return {k: OutputProducer.todict(v) for (k, v) in obj.items()}
+        elif isinstance(obj, list):
             return [OutputProducer.todict(a) for a in obj]
         elif isinstance(obj, Enum):
             return obj.value
