@@ -212,7 +212,7 @@ build_operation("network usage",
                 PARAMALIASES)
 
 # VirtualNetworkGatewayConnectionsOperations
-build_operation("networ vnetgatewayconnection",
+build_operation("network vnetgatewayconnection",
                 "virtual_network_gateway_connections",
                 _network_client_factory,
                 [
