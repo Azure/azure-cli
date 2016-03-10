@@ -216,7 +216,7 @@ class TextOutput(object):
                     # TODO: Need to handle complex objects
                     io.write("null")
                 else:
-                    io.write(col)
+                    io.write(str(col))
                 io.write('\t')
             io.write('\n')
         result = io.getvalue()
