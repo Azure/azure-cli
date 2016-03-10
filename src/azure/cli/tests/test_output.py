@@ -72,9 +72,8 @@ Id     : 0b1f6472
         self.assertEqual(util.normalize_newlines(self.io.getvalue()), util.normalize_newlines(
 """Active : None
 Id     : 0b1f6472
-
-  HOSTS
-  None
+Hosts  :
+   None
 
 
 """))
@@ -114,14 +113,13 @@ server
         output_producer = OutputProducer(formatter=format_list, file=self.io)
         output_producer.out({'active': True, 'id': '0b1f6472', 'myarray': ['1', '2', '3', '4']})
         self.assertEqual(util.normalize_newlines(self.io.getvalue()), util.normalize_newlines(
-"""Active : True
-Id     : 0b1f6472
-
-  MYARRAY
-  1
-  2
-  3
-  4
+"""Active  : True
+Id      : 0b1f6472
+Myarray :
+   1
+   2
+   3
+   4
 
 
 """))

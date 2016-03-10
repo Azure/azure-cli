@@ -3,8 +3,8 @@
 import sys
 import json
 import re
-from enum import Enum
 from datetime import datetime
+from enum import Enum
 from six import StringIO
 
 class OutputFormatException(Exception):
@@ -46,11 +46,11 @@ class OutputProducer(object): #pylint: disable=too-few-public-methods
 
     format_dict = {
         'json': format_json,
-        # 'table': format_table,
-        # 'text': format_text,
+        'table': format_table,
+        'text': format_text,
         'list': format_list
     }
-    
+
     KEYS_CAMELCASE_PATTERN = re.compile('(?!^)_([a-zA-Z])')
 
     def __init__(self, formatter=format_list, file=sys.stdout): #pylint: disable=redefined-builtin
@@ -73,7 +73,10 @@ class OutputProducer(object): #pylint: disable=too-few-public-methods
         elif isinstance(obj, datetime):
             return obj.isoformat()
         elif hasattr(obj, '__dict__'):
-            return dict([(to_camelcase(k), OutputProducer.todict(v)) for k, v in obj.__dict__.iteritems() if not callable(v) and not k.startswith('_') and getattr(obj, k) is not None])
+            return dict([(to_camelcase(k), OutputProducer.todict(v))
+                         for k, v in obj.__dict__.items()
+                         if not callable(v) and not k.startswith('_')
+                         and getattr(obj, k) is not None])
         else:
             return obj
 
@@ -106,7 +109,6 @@ class ListOutput(object): #pylint: disable=too-few-public-methods
 
     def _get_formatted_key(self, key):
         def _format_key(key):
-            # return ' '.join(key.split('_')).title()
             words = [word for word in re.split(ListOutput.FORMAT_KEYS_PATTERN, key) if word]
             return ' '.join(words).title()
 
@@ -127,11 +129,7 @@ class ListOutput(object): #pylint: disable=too-few-public-methods
             for array_item in obj:
                 self._dump_object(io, array_item, indent)
         elif isinstance(obj, dict):
-            # Get the formatted keys for this item
-            # Skip dicts/lists because those will be handled recursively later.
-            # We use this object to calc key width and don't want to include dicts/lists in this.
-            obj_fk = {k: self._get_formatted_key(k)
-                      for k in obj if not isinstance(obj[k], dict) and not isinstance(obj[k], list)}
+            obj_fk = {k: self._get_formatted_key(k) for k in obj}
             key_width = ListOutput._get_max_key_len(obj_fk.values())
             for key in sorted(obj, key=lambda x: ListOutput._sort_key_func(x, obj)):
                 if isinstance(obj[key], dict) or isinstance(obj[key], list):
@@ -173,7 +171,7 @@ class TableOutput(object):
         io.write('-|-'.join('-' * w for c, w in cols))
         io.write('\n')
         for r in self._rows[:-1]:
-            io.write(' | '.join(r[c].ljust(w) for c, w in cols))
+            io.write(' | '.join(r.get(c, '-').ljust(w) for c, w in cols))
             io.write('\n')
         result = io.getvalue()
         io.close()
@@ -213,11 +211,11 @@ class TextOutput(object):
             io.write(identifier.upper())
             io.write('\t')
             for col in self.identifiers[identifier]:
-                if isinstance(col, str):
-                    io.write(col)
-                else:
+                if isinstance(col, (list, dict)):
                     # TODO: Need to handle complex objects
                     io.write("null")
+                else:
+                    io.write(col)
                 io.write('\t')
             io.write('\n')
         result = io.getvalue()
