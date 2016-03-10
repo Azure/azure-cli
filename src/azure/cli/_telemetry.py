@@ -3,37 +3,32 @@ from applicationinsights import TelemetryClient
 from applicationinsights.exceptions import enable
 import azure.cli as cli
 
-# event, exception, Trace, metric, message
+client = {}
 
-class Telemetry(object): # pylint:disable=too-few-public-methods
-    client = None
-
-    @staticmethod
-    def init_telemetry():
+def init_telemetry():
+    try:
         instrumentation_key = 'eb6e9d3a-b6ee-41a6-804f-70e152fdfc36'
 
-        Telemetry.client = TelemetryClient(instrumentation_key)
+        global client #pylint: disable=global-statement
+        client = TelemetryClient(instrumentation_key)
 
-        Telemetry.client.context.application.id = 'Azure CLI'
-        Telemetry.client.context.application.ver = cli.__version__
-        Telemetry.client.context.user.id = hash(getpass.getuser())
+        client.context.application.id = 'Azure CLI'
+        client.context.application.ver = cli.__version__
+        client.context.user.id = hash(getpass.getuser())
 
         enable(instrumentation_key)
+    except Exception: #pylint: disable=broad-except
+        # Never fail the command because of telemetry
+        pass
 
 def user_agrees_to_telemetry():
     # TODO: agreement, needs to take Y/N from the command line
     # and needs a "skip" param to not show (for scripts)
     return True
 
-def telemetry_log_event(name, properties=None, measurements=None):
+def telemetry_flush():
     try:
-        if Telemetry.client is None:
-            return
-        Telemetry.client.track_event(name, properties, measurements)
-        Telemetry.client.flush()
-    except Exception as e:
-        #pass
-        raise e
-
-def telemetry_log_performance(name, properties=None):
-    telemetry_log_event("Perf: "+name, properties)
+        client.flush()
+    except Exception: #pylint: disable=broad-except
+        # Never fail the command because of telemetry
+        pass
