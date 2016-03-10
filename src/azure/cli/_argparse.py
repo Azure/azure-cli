@@ -3,8 +3,8 @@ import sys
 
 from ._locale import L, get_file as locale_get_file
 from ._logging import logger
+from ._output import OutputProducer
 from ._telemetry import telemetry_log_event
-from ._performance import PerfTimer
 
 # Named arguments are prefixed with one of these strings
 ARG_PREFIXES = sorted(('-', '--', '/'), key=len, reverse=True)
@@ -59,6 +59,10 @@ def _index(string, char, default=sys.maxsize):
     except ValueError:
         return default
 
+class ArgumentParserResult(object):  #pylint: disable=too-few-public-methods
+    def __init__(self, result, output_format=None):
+        self.result = result
+        self.output_format = output_format
 
 class ArgumentParser(object):
     def __init__(self, prog):
@@ -109,7 +113,7 @@ class ArgumentParser(object):
         m['$args'] = []
         m['$kwargs'] = kw = {}
         m['$argdoc'] = ad = []
-        for spec, desc, req in args or []:
+        for spec, desc, req, target in args or []:
             if not any(spec.startswith(p) for p in ARG_PREFIXES):
                 m['$args'].append(spec.strip('<> '))
                 ad.append((spec, desc, req))
@@ -120,13 +124,15 @@ class ArgumentParser(object):
                 v = True
             else:
                 v = aliases.pop().strip('<> ')
+            if not target:
             target, _ = _read_arg(aliases[0])
-            kw.update({_read_arg(a)[0]: (target, v, req) for a in aliases})
+            kw.update({_read_arg(a)[0]: (target, v, req, aliases) for a in aliases})
             ad.append(('/'.join(aliases), desc, req))
 
     #pylint: disable=too-many-branches
     #pylint: disable=too-many-statements
     #pylint: disable=too-many-locals
+    #pylint: disable=too-many-return-statements
     def execute(self,
                 args,
                 show_usage=False,
@@ -179,11 +185,9 @@ class ArgumentParser(object):
             show_usage = True
 
         if show_completions:
-            telemetry_log_event("Show Completions", {"CommandName": " ".join(nouns)})
-            return self._display_completions(m, args, out)
+            return ArgumentParserResult(self._display_completions(m, args, out))
         if show_usage:
-            telemetry_log_event("Show Usage", {"CommandName": " ".join(nouns)})
-            return self._display_usage(nouns, m, out)
+            return ArgumentParserResult(self._display_usage(nouns, m, out))
 
         parsed = Arguments()
         others = Arguments()
@@ -203,7 +207,7 @@ class ArgumentParser(object):
                     if value is not None:
                         print(L("argument '{0}' does not take a value").format(key_n),
                               file=out)
-                        return self._display_usage(nouns, m, out)
+                        return ArgumentParserResult(self._display_usage(nouns, m, out))
                     parsed.add_from_dotted(target_value[0], True)
                 else:
                     # Arg with a value
@@ -215,25 +219,30 @@ class ArgumentParser(object):
                 parsed.positional.append(n)
             n = next_n
 
-        required_args = [x for x, _, req in expected_kwargs.values() if req]
+        required_args = [x for x, _, req, _ in expected_kwargs.values() if req]
         for a in required_args:
             try:
                 parsed[a]
             except KeyError:
                 print(L("Missing required argument {}".format(a)))
-                return self._display_usage(nouns, m, out)
+                return ArgumentParserResult(self._display_usage(nouns, m, out))
+
+        try:
+            output_format = others.pop('output') if others else None
+            if output_format is not None and output_format not in OutputProducer.format_dict:
+                print(L("Invalid output format '{}'".format(output_format)))
+                return ArgumentParserResult(self._display_usage(nouns, m, out))
+        except KeyError:
+            output_format = None
 
         old_stdout = sys.stdout
         try:
             sys.stdout = out
-            p = PerfTimer("Command Execution", {"CommandName": " ".join(nouns)})
-            result = handler(parsed, others)
-            p.store_perf_data()
-            return result
+            return ArgumentParserResult(handler(parsed, others), output_format)
         except IncorrectUsageError as ex:
             telemetry_log_event("Incorrect Usage", {"CommandName": " ".join(nouns)})
             print(str(ex), file=out)
-            return self._display_usage(nouns, m, out)
+            return ArgumentParserResult(self._display_usage(nouns, m, out))
         finally:
             sys.stdout = old_stdout
 
@@ -272,26 +281,27 @@ class ArgumentParser(object):
             out.flush()
             logger.debug('Expected documentation at %s', doc_file)
 
-    def _display_completions(self, noun_map, arguments, out=sys.stdout): # pylint: disable=no-self-use
-        arguments.remove('--complete')
-
-        command_candidates = set([k for k in noun_map if not k.startswith('$')])
-        if command_candidates and not arguments[-1].startswith('-'):
-            command_candidates = set([c for c in command_candidates if c.startswith(arguments[-1])])
+    def _display_completions(self, noun_map, arguments, out=sys.stdout):
+        for a in self.complete_args:
+            arguments.remove(a)
 
         kwargs = noun_map.get('$kwargs') or []
-        args_candidates = set('--' + a for a in kwargs if a)
-        if arguments[-1].startswith('-'):
-            # TODO: We don't have enough metadata about the command to do parameter value
-            # completion (yet). This should only apply to value arguments, not flag arguments
-            if arguments[-1] in args_candidates:
-                args_candidates = set()
-            else:
-                args_candidates = set([c for c in args_candidates if c.startswith(arguments[-1])])
+        last_arg = arguments[-1]
+        args_candidates = []
+
+        arguments_set = set(arguments)
+        for a in kwargs:
+            alias = kwargs[a][3]
+            #check whether the arg has been used already
+            if not [x for x in alias if x in arguments_set]:
+                args_candidates.extend(alias)
+
+        if last_arg.startswith('-') and (last_arg in args_candidates):
+            print('\n', file=out) # TODO: parameter value completion is N.Y.I
         else:
-            args_candidates = args_candidates.difference(arguments)
+            subcommand_candidates = [k for k in noun_map if not k.startswith('$')]
+            candidates = subcommand_candidates + args_candidates
+            matches = [k for k in candidates if k.startswith(last_arg)]
+            print('\n'.join(sorted(set(matches))), file=out)
 
-        candidates = command_candidates.union(args_candidates)
-
-        print('\n'.join(sorted(candidates)), file=out)
         out.flush()

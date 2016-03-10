@@ -40,14 +40,14 @@ class Test_autocommand(unittest.TestCase):
         func = _decorate_command(command_name, testfunc)
         spec = '--tre <tre>'
         desc = 'Kronor'
-        func = _decorate_option(spec, desc, func)
+        func = _decorate_option(spec, desc, None, func)
 
         # Verify
         registered_command = _COMMANDS.get(testfunc, None)
         self.assertIsNotNone(registered_command)
         self.assertEqual(registered_command['name'], command_name)
         self.assertEqual(len(registered_command['args']), 1)
-        self.assertEqual(registered_command['args'][0], (spec, desc, False))
+        self.assertEqual(registered_command['args'][0], (spec, desc, False, None))
 
     def test_load_test_commands(self):
         import sys
@@ -57,23 +57,23 @@ class Test_autocommand(unittest.TestCase):
         # sneaky trick to avoid loading any command modules...
         sys.modules['azure.cli.commands.test'] = sys
 
-        command_name = 'da command with one arg and unexpected'
+        command_name = 'da command with one arg and unexpected with target'
         def testfunc(args, _):
             # Check that the argument passing actually works...
-            self.assertEqual(args['tre'], 'wombat')
+            self.assertEqual(args['alternatetarget'], 'wombat')
             return testfunc
 
         # Run test code
         func = _decorate_command(command_name, testfunc)
         spec = '--tre <tre>'
         desc = 'Kronor'
-        func = _decorate_option(spec, desc, func)
+        func = _decorate_option(spec, desc, 'alternatetarget', func)
 
         p = ArgumentParser('automcommandtest')
         add_to_parser(p, 'test')
 
-        result = p.execute(command_name.split(' ') + '--tre wombat'.split(' '))
-        self.assertEqual(result, func)
+        cmd_result = p.execute(command_name.split(' ') + '--tre wombat'.split(' '))
+        self.assertEqual(cmd_result.result, func)
 
 if __name__ == '__main__':
     unittest.main()

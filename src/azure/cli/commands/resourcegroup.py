@@ -1,6 +1,5 @@
-from msrest import Serializer
 from ..commands import command, description
-from .._profile import Profile
+from ._command_creation import get_mgmt_service_client
 
 @command('resource group list')
 @description('List resource groups')
@@ -13,12 +12,10 @@ def list_groups(args, unexpected): #pylint: disable=unused-argument
                                               ResourceManagementClientConfiguration
     from azure.mgmt.resource.resources.models import ResourceGroup, ResourceGroupFilter
 
-    rmc = ResourceManagementClient(
-        ResourceManagementClientConfiguration(*Profile().get_login_credentials()))
+    rmc = get_mgmt_service_client(ResourceManagementClient, ResourceManagementClientConfiguration)
 
     # TODO: waiting on Python Azure SDK bug fixes
     #group_filter = ResourceGroupFilter(args.get('tag-name'), args.get('tag-value'))
     #groups = rmc.resource_groups.list(filter=None, top=args.get('top'))
     groups = rmc.resource_groups.list()
-    serializable = Serializer().serialize_data(groups, "[ResourceGroup]")
-    return serializable
+    return list(groups)
