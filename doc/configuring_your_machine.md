@@ -43,9 +43,9 @@ The Azure Python CLI projects sources are located on GitHub (https://github.com/
   ```Shell
   export PYTHONPATH=<clone root>/src:${PYTHONPATH}
   ```
-7.  Setup tab completion.
+7.  Setup tab completion (OSX/Ubuntu ONLY).
 
-  Open Bash/zsh window and run:
+  Open Bash or zsh window and run:
   
   ```Shell
   source ./az.completion.sh
