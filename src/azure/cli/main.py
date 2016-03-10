@@ -1,4 +1,5 @@
 ﻿import os
+import sys
 
 from ._argparse import ArgumentParser
 from ._logging import configure_logging, logger
@@ -12,7 +13,7 @@ CONFIG = Session()
 # SESSION provides read-write session variables
 SESSION = Session()
 
-def main(args):
+def main(args, file=sys.stdout): #pylint: disable=redefined-builtin
     CONFIG.load(os.path.expanduser('~/az.json'))
     SESSION.load(os.path.expanduser('~/az.sess'), max_age=3600)
 
@@ -42,11 +43,12 @@ def main(args):
         commands.add_to_parser(parser)
 
     try:
-        result = parser.execute(args)
+        cmd_result = parser.execute(args)
         # Commands can return a dictionary/list of results
         # If they do, we print the results.
-        if result:
-            OutputProducer().out(result)
+        if cmd_result.result:
+            formatter = OutputProducer.get_formatter(cmd_result.output_format)
+            OutputProducer(formatter=formatter, file=file).out(cmd_result.result)
     except RuntimeError as ex:
         logger.error(ex.args[0])
         return ex.args[1] if len(ex.args) >= 2 else -1

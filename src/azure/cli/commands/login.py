@@ -1,5 +1,4 @@
-﻿from msrest import Serializer
-from msrestazure.azure_active_directory import UserPassCredentials
+﻿from msrestazure.azure_active_directory import UserPassCredentials
 from azure.mgmt.resource.subscriptions import SubscriptionClient, \
                                               SubscriptionClientConfiguration
 
@@ -32,11 +31,9 @@ def login(args, unexpected): #pylint: disable=unused-argument
     if not subscriptions:
         raise RuntimeError(L('No subscriptions found for this account.'))
 
-    serializable = Serializer().serialize_data(subscriptions, "[Subscription]")
-
     #keep useful properties and not json serializable
     profile = Profile()
     consolidated = Profile.normalize_properties(username, subscriptions)
     profile.set_subscriptions(consolidated, credentials.token['access_token'])
 
-    return serializable
+    return list(subscriptions)
