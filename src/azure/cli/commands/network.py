@@ -1,4 +1,3 @@
-from msrest import Serializer
 from .._locale import L
 from azure.mgmt.network import NetworkManagementClient, NetworkManagementClientConfiguration
 from azure.mgmt.network.operations import (ApplicationGatewaysOperations,
@@ -20,17 +19,22 @@ from azure.mgmt.network.operations import (ApplicationGatewaysOperations,
                                            VirtualNetworkGatewaysOperations,
                                            VirtualNetworksOperations)
 
-from ._command_creation import get_service_client
-from ..commands._auto_command import build_operation, LongRunningOperation
+from ._command_creation import get_mgmt_service_client
+from ..commands._auto_command import build_operation, LongRunningOperation, GLOBALPARAMALIASES
 from ..commands import command, description, option
 
 def _network_client_factory():
-    return get_service_client(NetworkManagementClient, NetworkManagementClientConfiguration)
+    return get_mgmt_service_client(NetworkManagementClient, NetworkManagementClientConfiguration)
+
+PARAMALIASES = GLOBALPARAMALIASES.copy()
+PARAMALIASES.update({
+    'virtual_network_name': '--name <virtualNetworkName>',
+    'load_balancer_name': '--name <loadBalancerName>'
+    })
 
 # pylint: disable=line-too-long
 # Application gateways
-build_operation("network",
-                "appgateway",
+build_operation("network appgateway",
                 "application_gateways",
                 _network_client_factory,
                 [
@@ -40,33 +44,33 @@ build_operation("network",
                     (ApplicationGatewaysOperations.list_all, '[ApplicationGateway]'),
                     (ApplicationGatewaysOperations.start, LongRunningOperation(L('Starting application gateway'), L('Application gateway started'))),
                     (ApplicationGatewaysOperations.stop, LongRunningOperation(L('Stopping application gateway'), L('Application gateway stopped'))),
-                ])
+                ],
+                PARAMALIASES)
 
 # ExpressRouteCircuitAuthorizationsOperations
-build_operation("network",
-                "expressroutecircuitauth",
+build_operation("network expressroutecircuitauth",
                 "express_route_circuit_authorizations",
                 _network_client_factory,
                 [
                     (ExpressRouteCircuitAuthorizationsOperations.delete, LongRunningOperation(L('Deleting express route authorization'), L('Express route authorization deleted'))),
                     (ExpressRouteCircuitAuthorizationsOperations.get, 'ExpressRouteCircuitAuthorization'),
                     (ExpressRouteCircuitAuthorizationsOperations.list, '[ExpressRouteCircuitAuthorization]'),
-                ])
+                ],
+                PARAMALIASES)
 
 # ExpressRouteCircuitPeeringsOperations
-build_operation("network",
-                "expressroutecircuitpeering",
+build_operation("network expressroutecircuitpeering",
                 "express_route_circuit_peerings",
                 _network_client_factory,
                 [
                     (ExpressRouteCircuitPeeringsOperations.delete, LongRunningOperation(L('Deleting express route circuit peering'), L('Express route circuit peering deleted'))),
                     (ExpressRouteCircuitPeeringsOperations.get, 'ExpressRouteCircuitPeering'),
                     (ExpressRouteCircuitPeeringsOperations.list, '[ExpressRouteCircuitPeering]'),
-                ])
+                ],
+                PARAMALIASES)
 
 # ExpressRouteCircuitsOperations
-build_operation("network",
-                "expressroutecircuit",
+build_operation("network expressroutecircuit",
                 "express_route_circuits",
                 _network_client_factory,
                 [
@@ -77,20 +81,20 @@ build_operation("network",
                     (ExpressRouteCircuitsOperations.list_stats, '[ExpressRouteCircuitStats]'),
                     (ExpressRouteCircuitsOperations.list, '[ExpressRouteCircuit]'),
                     (ExpressRouteCircuitsOperations.list_all, '[ExpressRouteCircuit]'),
-                ])
+                ],
+                PARAMALIASES)
 
 # ExpressRouteServiceProvidersOperations
-build_operation("network",
-                "expressroutesp",
+build_operation("network expressroutesp",
                 "express_route_service_providers",
                 _network_client_factory,
                 [
                     (ExpressRouteServiceProvidersOperations.list, '[ExpressRouteServiceProvider]'),
-                ])
+                ],
+                PARAMALIASES)
 
 # LoadBalancersOperations
-build_operation("network",
-                "lb",
+build_operation("network lb",
                 "load_balancers",
                 _network_client_factory,
                 [
@@ -98,23 +102,23 @@ build_operation("network",
                     (LoadBalancersOperations.get, 'LoadBalancer'),
                     (LoadBalancersOperations.list_all, '[LoadBalancer]'),
                     (LoadBalancersOperations.list, '[LoadBalancer]'),
-                ])
+                ],
+                PARAMALIASES)
 
 # LocalNetworkGatewaysOperations
-build_operation("network",
-                "localgateways",
+build_operation("network localgateways",
                 "local_network_gateways",
                 _network_client_factory,
                 [
                     (LocalNetworkGatewaysOperations.get, 'LocalNetworkGateway'),
                     (LocalNetworkGatewaysOperations.delete, LongRunningOperation(L('Deleting local network gateway'), L('Local network gateway deleted'))),
                     (LocalNetworkGatewaysOperations.list, '[LocalNetworkGateway]'),
-                ])
+                ],
+                PARAMALIASES)
 
 
 # NetworkInterfacesOperations
-build_operation("network",
-                "nic",
+build_operation("network nic",
                 "network_interfaces",
                 _network_client_factory,
                 [
@@ -125,11 +129,11 @@ build_operation("network",
                     (NetworkInterfacesOperations.get_virtual_machine_scale_set_network_interface, 'NetworkInterface'),
                     (NetworkInterfacesOperations.list_all, '[NetworkInterface]'),
                     (NetworkInterfacesOperations.list, '[NetworkInterface]'),
-                ])
+                ],
+                PARAMALIASES)
 
 # NetworkSecurityGroupsOperations
-build_operation("network",
-                "securitygroup",
+build_operation("network securitygroup",
                 "network_security_groups",
                 _network_client_factory,
                 [
@@ -137,11 +141,11 @@ build_operation("network",
                     (NetworkSecurityGroupsOperations.delete, 'NetworkSecurityGroup'),
                     (NetworkSecurityGroupsOperations.list_all, '[NetworkSecurityGroup]'),
                     (NetworkSecurityGroupsOperations.list, '[NetworkSecurityGroup]'),
-                ])
+                ],
+                PARAMALIASES)
 
 # PublicIPAddressesOperations
-build_operation("network",
-                "publicipaddress",
+build_operation("network publicipaddress",
                 "public_ip_addresses",
                 _network_client_factory,
                 [
@@ -149,11 +153,11 @@ build_operation("network",
                     (PublicIPAddressesOperations.get, 'PublicIPAddress'),
                     (PublicIPAddressesOperations.list_all, '[PublicIPAddress]'),
                     (PublicIPAddressesOperations.list, '[PublicIPAddress]'),
-                ])
+                ],
+                PARAMALIASES)
 
 # RouteTablesOperations
-build_operation("network",
-                "routetable",
+build_operation("network routetable",
                 "route_tables",
                 _network_client_factory,
                 [
@@ -161,53 +165,53 @@ build_operation("network",
                     (RouteTablesOperations.get, 'RouteTable'),
                     (RouteTablesOperations.list, '[RouteTable]'),
                     (RouteTablesOperations.list_all, '[RouteTable]'),
-                ])
+                ],
+                PARAMALIASES)
 
 # RoutesOperations
-build_operation("network",
-                "routeoperation",
+build_operation("network routeoperation",
                 "routes",
                 _network_client_factory,
                 [
                     (RoutesOperations.delete, LongRunningOperation(L('Deleting route'), L('Route deleted'))),
                     (RoutesOperations.get, 'Route'),
                     (RoutesOperations.list, '[Route]'),
-                ])
+                ],
+                PARAMALIASES)
 
 # SecurityRulesOperations
-build_operation("network",
-                "securityrules",
+build_operation("network securityrules",
                 "security_rules",
                 _network_client_factory,
                 [
                     (SecurityRulesOperations.delete, LongRunningOperation(L('Deleting security rule'), L('Security rule deleted'))),
                     (SecurityRulesOperations.get, 'SecurityRule'),
                     (SecurityRulesOperations.list, '[SecurityRule]'),
-                ])
+                ],
+                PARAMALIASES)
 
 # SubnetsOperations
-build_operation("network",
-                "subnet",
+build_operation("network subnet",
                 "subnets",
                 _network_client_factory,
                 [
                     (SubnetsOperations.delete, LongRunningOperation(L('Deleting subnet'), L('Subnet deleted'))),
                     (SubnetsOperations.get, 'Subnet'),
                     (SubnetsOperations.list, '[Subnet]'),
-                ])
+                ],
+                PARAMALIASES)
 
 # UsagesOperations
-build_operation("network",
-                "usage",
+build_operation("network usage",
                 "usages",
                 _network_client_factory,
                 [
                     (UsagesOperations.list, '[Usage]'),
-                ])
+                ],
+                PARAMALIASES)
 
 # VirtualNetworkGatewayConnectionsOperations
-build_operation("network",
-                "vnetgatewayconnection",
+build_operation("network vnetgatewayconnection",
                 "virtual_network_gateway_connections",
                 _network_client_factory,
                 [
@@ -217,11 +221,11 @@ build_operation("network",
                     (VirtualNetworkGatewayConnectionsOperations.list, '[VirtualNetworkGatewayConnection]'),
                     (VirtualNetworkGatewayConnectionsOperations.reset_shared_key, 'ConnectionResetSharedKey'),
                     (VirtualNetworkGatewayConnectionsOperations.set_shared_key, 'ConnectionSharedKey'),
-                ])
+                ],
+                PARAMALIASES)
 
 # VirtualNetworkGatewaysOperations
-build_operation("network",
-                "vnetgateway",
+build_operation("network vnetgateway",
                 "virtual_network_gateways",
                 _network_client_factory,
                 [
@@ -229,11 +233,11 @@ build_operation("network",
                     (VirtualNetworkGatewaysOperations.get, 'VirtualNetworkGateway'),
                     (VirtualNetworkGatewaysOperations.list, '[VirtualNetworkGateway]'),
                     (VirtualNetworkGatewaysOperations.reset, 'VirtualNetworkGateway'),
-                ])
+                ],
+                PARAMALIASES)
 
 # VirtualNetworksOperations
-build_operation("network",
-                "vnet",
+build_operation("network vnet",
                 "virtual_networks",
                 _network_client_factory,
                 [
@@ -241,7 +245,8 @@ build_operation("network",
                     (VirtualNetworksOperations.get, 'VirtualNetwork'),
                     (VirtualNetworksOperations.list, '[VirtualNetwork]'),
                     (VirtualNetworksOperations.list_all, '[VirtualNetwork]'),
-                ])
+                ],
+                PARAMALIASES)
 
 @command('network vnet create')
 @description(L('Create or update a virtual network (VNet)'))
@@ -266,7 +271,7 @@ def create_update_vnet(args, unexpected): #pylint: disable=unused-argument
     op = LongRunningOperation('Creating virtual network', 'Virtual network created')
     smc = _network_client_factory()
     poller = smc.virtual_networks.create_or_update(resource_group, name, vnet_settings)
-    return Serializer().serialize_data(op(poller), 'VirtualNetwork')
+    return op(poller)
 
 @command('network subnet create')
 @description(L('Create or update a virtual network (VNet) subnet'))
@@ -310,6 +315,6 @@ def create_update_subnet(args, unexpected): #pylint: disable=unused-argument
     op = LongRunningOperation('Creating subnet', 'Subnet created')
     smc = _network_client_factory()
     poller = smc.subnets.create_or_update(resource_group, vnet, name, subnet_settings)
-    return Serializer().serialize_data(op(poller), 'Subnet')
+    return op(poller)
 
 
