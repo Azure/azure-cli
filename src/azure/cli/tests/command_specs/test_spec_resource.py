@@ -342,7 +342,8 @@ spec = [
     "name": "clutst10658",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst10658Destination",
@@ -350,7 +351,8 @@ spec = [
     "name": "clutst10658Destination",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst11617",
@@ -358,7 +360,8 @@ spec = [
     "name": "clutst11617",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst12131",
@@ -366,7 +369,8 @@ spec = [
     "name": "clutst12131",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst14273",
@@ -374,7 +378,8 @@ spec = [
     "name": "clutst14273",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst15898",
@@ -382,7 +387,8 @@ spec = [
     "name": "clutst15898",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst16319",
@@ -390,7 +396,8 @@ spec = [
     "name": "clutst16319",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst16367",
@@ -398,7 +405,8 @@ spec = [
     "name": "clutst16367",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst16424",
@@ -406,7 +414,8 @@ spec = [
     "name": "clutst16424",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst16599",
@@ -414,7 +423,8 @@ spec = [
     "name": "clutst16599",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst18253",
@@ -422,7 +432,8 @@ spec = [
     "name": "clutst18253",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst18832",
@@ -430,7 +441,8 @@ spec = [
     "name": "clutst18832",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst19840",
@@ -438,7 +450,8 @@ spec = [
     "name": "clutst19840",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst19876",
@@ -446,7 +459,8 @@ spec = [
     "name": "clutst19876",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst19910",
@@ -454,7 +468,8 @@ spec = [
     "name": "clutst19910",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst20217",
@@ -462,7 +477,8 @@ spec = [
     "name": "clutst20217",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst22301",
@@ -470,7 +486,8 @@ spec = [
     "name": "clutst22301",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst24285",
@@ -478,7 +495,8 @@ spec = [
     "name": "clutst24285",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst25492",
@@ -486,7 +504,8 @@ spec = [
     "name": "clutst25492",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst25492Destination",
@@ -494,7 +513,8 @@ spec = [
     "name": "clutst25492Destination",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst28055",
@@ -502,7 +522,8 @@ spec = [
     "name": "clutst28055",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst28400",
@@ -510,7 +531,8 @@ spec = [
     "name": "clutst28400",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst28769",
@@ -518,7 +540,8 @@ spec = [
     "name": "clutst28769",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst29085",
@@ -526,7 +549,8 @@ spec = [
     "name": "clutst29085",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst29333",
@@ -534,7 +558,8 @@ spec = [
     "name": "clutst29333",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst30089",
@@ -542,7 +567,8 @@ spec = [
     "name": "clutst30089",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst31207",
@@ -550,7 +576,8 @@ spec = [
     "name": "clutst31207",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst31335",
@@ -558,7 +585,8 @@ spec = [
     "name": "clutst31335",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst32303",
@@ -566,7 +594,8 @@ spec = [
     "name": "clutst32303",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst34632",
@@ -574,7 +603,8 @@ spec = [
     "name": "clutst34632",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst37223",
@@ -582,7 +612,8 @@ spec = [
     "name": "clutst37223",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst38483",
@@ -590,7 +621,8 @@ spec = [
     "name": "clutst38483",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst39112",
@@ -598,7 +630,8 @@ spec = [
     "name": "clutst39112",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst40026",
@@ -606,7 +639,8 @@ spec = [
     "name": "clutst40026",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst41390",
@@ -614,7 +648,8 @@ spec = [
     "name": "clutst41390",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst42144",
@@ -622,7 +657,8 @@ spec = [
     "name": "clutst42144",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst42144Destination",
@@ -630,7 +666,8 @@ spec = [
     "name": "clutst42144Destination",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst43083",
@@ -638,7 +675,8 @@ spec = [
     "name": "clutst43083",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst43810",
@@ -646,7 +684,8 @@ spec = [
     "name": "clutst43810",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst43963",
@@ -654,7 +693,8 @@ spec = [
     "name": "clutst43963",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst44249",
@@ -662,7 +702,8 @@ spec = [
     "name": "clutst44249",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst44935",
@@ -670,7 +711,8 @@ spec = [
     "name": "clutst44935",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst45773",
@@ -678,7 +720,8 @@ spec = [
     "name": "clutst45773",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst47034",
@@ -686,7 +729,8 @@ spec = [
     "name": "clutst47034",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst48178",
@@ -694,7 +738,8 @@ spec = [
     "name": "clutst48178",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst50877",
@@ -702,7 +747,8 @@ spec = [
     "name": "clutst50877",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst50926",
@@ -710,7 +756,8 @@ spec = [
     "name": "clutst50926",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst52016",
@@ -718,7 +765,8 @@ spec = [
     "name": "clutst52016",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst53369",
@@ -726,7 +774,8 @@ spec = [
     "name": "clutst53369",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst54011",
@@ -745,7 +794,8 @@ spec = [
     "name": "clutst55339",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst55642",
@@ -753,7 +803,8 @@ spec = [
     "name": "clutst55642",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst56010",
@@ -761,7 +812,8 @@ spec = [
     "name": "clutst56010",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst56010Destination",
@@ -769,7 +821,8 @@ spec = [
     "name": "clutst56010Destination",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst57974",
@@ -777,7 +830,8 @@ spec = [
     "name": "clutst57974",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst59108",
@@ -785,7 +839,8 @@ spec = [
     "name": "clutst59108",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst59926",
@@ -793,7 +848,8 @@ spec = [
     "name": "clutst59926",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst60612",
@@ -801,7 +857,8 @@ spec = [
     "name": "clutst60612",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst62393",
@@ -809,7 +866,8 @@ spec = [
     "name": "clutst62393",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst62671",
@@ -817,7 +875,8 @@ spec = [
     "name": "clutst62671",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst63961",
@@ -825,7 +884,8 @@ spec = [
     "name": "clutst63961",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst64118",
@@ -833,7 +893,8 @@ spec = [
     "name": "clutst64118",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst64902",
@@ -841,7 +902,8 @@ spec = [
     "name": "clutst64902",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst65563",
@@ -849,7 +911,8 @@ spec = [
     "name": "clutst65563",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst65944",
@@ -857,7 +920,8 @@ spec = [
     "name": "clutst65944",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst68622",
@@ -865,7 +929,8 @@ spec = [
     "name": "clutst68622",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst69042",
@@ -873,7 +938,8 @@ spec = [
     "name": "clutst69042",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst72034",
@@ -881,7 +947,8 @@ spec = [
     "name": "clutst72034",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst72937",
@@ -889,7 +956,8 @@ spec = [
     "name": "clutst72937",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst73017",
@@ -897,7 +965,8 @@ spec = [
     "name": "clutst73017",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst73226",
@@ -905,7 +974,8 @@ spec = [
     "name": "clutst73226",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst73623",
@@ -913,7 +983,8 @@ spec = [
     "name": "clutst73623",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst74333",
@@ -921,7 +992,8 @@ spec = [
     "name": "clutst74333",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst74607",
@@ -929,7 +1001,8 @@ spec = [
     "name": "clutst74607",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst75011",
@@ -937,7 +1010,8 @@ spec = [
     "name": "clutst75011",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst76021",
@@ -945,7 +1019,8 @@ spec = [
     "name": "clutst76021",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst76811",
@@ -953,7 +1028,8 @@ spec = [
     "name": "clutst76811",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst77155",
@@ -961,7 +1037,8 @@ spec = [
     "name": "clutst77155",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst78595",
@@ -969,7 +1046,8 @@ spec = [
     "name": "clutst78595",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst81406",
@@ -977,7 +1055,8 @@ spec = [
     "name": "clutst81406",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst82639",
@@ -985,7 +1064,8 @@ spec = [
     "name": "clutst82639",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst82782",
@@ -993,7 +1073,8 @@ spec = [
     "name": "clutst82782",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst83830",
@@ -1001,7 +1082,8 @@ spec = [
     "name": "clutst83830",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst84001",
@@ -1009,7 +1091,8 @@ spec = [
     "name": "clutst84001",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst84215",
@@ -1017,7 +1100,8 @@ spec = [
     "name": "clutst84215",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst84761",
@@ -1025,7 +1109,8 @@ spec = [
     "name": "clutst84761",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst85399",
@@ -1033,7 +1118,8 @@ spec = [
     "name": "clutst85399",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst86517",
@@ -1041,7 +1127,8 @@ spec = [
     "name": "clutst86517",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst86564",
@@ -1049,7 +1136,8 @@ spec = [
     "name": "clutst86564",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst86711",
@@ -1057,7 +1145,8 @@ spec = [
     "name": "clutst86711",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst88326",
@@ -1065,7 +1154,8 @@ spec = [
     "name": "clutst88326",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst88434",
@@ -1073,7 +1163,8 @@ spec = [
     "name": "clutst88434",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst88867",
@@ -1081,7 +1172,8 @@ spec = [
     "name": "clutst88867",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst89058",
@@ -1089,7 +1181,8 @@ spec = [
     "name": "clutst89058",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst89058Destination",
@@ -1097,7 +1190,8 @@ spec = [
     "name": "clutst89058Destination",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst89757",
@@ -1105,7 +1199,8 @@ spec = [
     "name": "clutst89757",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst89757Destination",
@@ -1113,7 +1208,8 @@ spec = [
     "name": "clutst89757Destination",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst90450",
@@ -1121,7 +1217,8 @@ spec = [
     "name": "clutst90450",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst90450Destination",
@@ -1129,7 +1226,8 @@ spec = [
     "name": "clutst90450Destination",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst92020",
@@ -1137,7 +1235,8 @@ spec = [
     "name": "clutst92020",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst92142",
@@ -1145,7 +1244,8 @@ spec = [
     "name": "clutst92142",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst93247",
@@ -1153,7 +1253,8 @@ spec = [
     "name": "clutst93247",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst95104",
@@ -1161,7 +1262,8 @@ spec = [
     "name": "clutst95104",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst96863",
@@ -1169,7 +1271,8 @@ spec = [
     "name": "clutst96863",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst96978",
@@ -1177,7 +1280,8 @@ spec = [
     "name": "clutst96978",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst97385",
@@ -1185,7 +1289,8 @@ spec = [
     "name": "clutst97385",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst98032",
@@ -1193,7 +1298,8 @@ spec = [
     "name": "clutst98032",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst98129",
@@ -1201,7 +1307,8 @@ spec = [
     "name": "clutst98129",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst98581",
@@ -1209,7 +1316,17 @@ spec = [
     "name": "clutst98581",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
+  },
+  {
+    "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/Default-ApplicationInsights-CentralUS",
+    "location": "centralus",
+    "name": "Default-ApplicationInsights-CentralUS",
+    "properties": {
+      "provisioningState": "Succeeded"
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/Default-Networking",
@@ -1217,7 +1334,8 @@ spec = [
     "name": "Default-Networking",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/Default-NotificationHubs-WestUS",
@@ -1225,7 +1343,8 @@ spec = [
     "name": "Default-NotificationHubs-WestUS",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/Default-ServiceBus-WestUS",
@@ -1233,7 +1352,8 @@ spec = [
     "name": "Default-ServiceBus-WestUS",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/Default-SQL-WestUS",
@@ -1241,7 +1361,8 @@ spec = [
     "name": "Default-SQL-WestUS",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/Default-Storage-WestUS",
@@ -1249,7 +1370,8 @@ spec = [
     "name": "Default-Storage-WestUS",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/Default-Web-WestUS",
@@ -1257,7 +1379,8 @@ spec = [
     "name": "Default-Web-WestUS",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/destanko-test1",
@@ -1265,7 +1388,8 @@ spec = [
     "name": "destanko-test1",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/destanko-test1233333",
@@ -1273,7 +1397,8 @@ spec = [
     "name": "destanko-test1233333",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/foozap01",
@@ -1281,7 +1406,8 @@ spec = [
     "name": "foozap01",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/ppppp2",
@@ -1307,7 +1433,8 @@ spec = [
     "name": "r1",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/testrg15109",
@@ -1342,7 +1469,8 @@ spec = [
     "name": "testrg8559",
     "properties": {
       "provisioningState": "Succeeded"
-    }
+    },
+    "tags": null
   },
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/xplattestadla7278",
@@ -1637,6 +1765,15 @@ spec = [
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/xTestResource9737",
     "location": "westus",
     "name": "xTestResource9737",
+    "properties": {
+      "provisioningState": "Succeeded"
+    },
+    "tags": {}
+  },
+  {
+    "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/ygvmgroup",
+    "location": "westus",
+    "name": "ygvmgroup",
     "properties": {
       "provisioningState": "Succeeded"
     },

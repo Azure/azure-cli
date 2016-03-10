@@ -3,7 +3,8 @@
 import sys
 import json
 import re
-
+from datetime import datetime
+from enum import Enum
 from six import StringIO
 
 class OutputFormatException(Exception):
@@ -50,12 +51,35 @@ class OutputProducer(object): #pylint: disable=too-few-public-methods
         'list': format_list
     }
 
-    def __init__(self, formatter=format_json, file=sys.stdout): #pylint: disable=redefined-builtin
+    KEYS_CAMELCASE_PATTERN = re.compile('(?!^)_([a-zA-Z])')
+
+    def __init__(self, formatter=format_list, file=sys.stdout): #pylint: disable=redefined-builtin
         self.formatter = formatter
         self.file = file
 
     def out(self, obj):
+        obj = OutputProducer.todict(obj)
         print(self.formatter(obj), file=self.file)
+
+    @staticmethod
+    def todict(obj):
+        def to_camelcase(s):
+            return re.sub(OutputProducer.KEYS_CAMELCASE_PATTERN, lambda x: x.group(1).upper(), s)
+
+        if isinstance(obj, dict):
+            return {k: OutputProducer.todict(v) for (k, v) in obj.items()}
+        elif isinstance(obj, list):
+            return [OutputProducer.todict(a) for a in obj]
+        elif isinstance(obj, Enum):
+            return obj.value
+        elif isinstance(obj, datetime):
+            return obj.isoformat()
+        elif hasattr(obj, '__dict__'):
+            return dict([(to_camelcase(k), OutputProducer.todict(v))
+                         for k, v in obj.__dict__.items()
+                         if not callable(v) and not k.startswith('_')])
+        else:
+            return obj
 
     @staticmethod
     def get_formatter(format_type):
@@ -97,7 +121,7 @@ class ListOutput(object): #pylint: disable=too-few-public-methods
 
     @staticmethod
     def _dump_line(io, line, indent):
-        io.write('  ' * indent)
+        io.write('   ' * indent)
         io.write(line)
         io.write('\n')
 
@@ -106,17 +130,13 @@ class ListOutput(object): #pylint: disable=too-few-public-methods
             for array_item in obj:
                 self._dump_object(io, array_item, indent)
         elif isinstance(obj, dict):
-            # Get the formatted keys for this item
-            # Skip dicts/lists because those will be handled recursively later.
-            # We use this object to calc key width and don't want to dicts/lists in this.
-            obj_fk = {k: self._get_formatted_key(k)
-                      for k in obj if not isinstance(obj[k], dict) and not isinstance(obj[k], list)}
+            obj_fk = {k: self._get_formatted_key(k) for k in obj}
             key_width = ListOutput._get_max_key_len(obj_fk.values())
             for key in sorted(obj, key=lambda x: ListOutput._sort_key_func(x, obj)):
                 if isinstance(obj[key], dict) or isinstance(obj[key], list):
                     # complex object
-                    io.write('\n')
-                    ListOutput._dump_line(io, self._get_formatted_key(key).upper(), indent+1)
+                    line = '%s :' % (self._get_formatted_key(key).ljust(key_width))
+                    ListOutput._dump_line(io, line, indent)
                     self._dump_object(io, obj[key] if obj[key] else 'None', indent+1)
                 else:
                     # non-complex so write it
@@ -152,7 +172,7 @@ class TableOutput(object):
         io.write('-|-'.join('-' * w for c, w in cols))
         io.write('\n')
         for r in self._rows[:-1]:
-            io.write(' | '.join(r[c].ljust(w) for c, w in cols))
+            io.write(' | '.join(r.get(c, '-').ljust(w) for c, w in cols))
             io.write('\n')
         result = io.getvalue()
         io.close()
@@ -192,11 +212,11 @@ class TextOutput(object):
             io.write(identifier.upper())
             io.write('\t')
             for col in self.identifiers[identifier]:
-                if isinstance(col, str):
-                    io.write(col)
-                else:
+                if isinstance(col, (list, dict)):
                     # TODO: Need to handle complex objects
                     io.write("null")
+                else:
+                    io.write(col)
                 io.write('\t')
             io.write('\n')
         result = io.getvalue()
