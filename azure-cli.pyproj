@@ -33,15 +33,10 @@
     <Compile Include="azure\cli\commands\_command_creation.py" />
     <Compile Include="azure\cli\commands\__init__.py" />
     <Compile Include="azure\cli\main.py" />
-    <Compile Include="azure\cli\tests\command_specs\test_spec_network.py" />
-    <Compile Include="azure\cli\tests\command_specs\test_spec_resource.py" />
-    <Compile Include="azure\cli\tests\command_specs\test_spec_vm.py" />
-    <Compile Include="azure\cli\tests\command_specs\__init__.py" />
     <Compile Include="azure\cli\tests\test_argparse.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="azure\cli\tests\test_autocommand.py" />
-    <Compile Include="azure\cli\tests\test_commands.py" />
     <Compile Include="azure\cli\tests\test_connection_verify.py" />
     <Compile Include="azure\cli\tests\test_output.py" />
     <Compile Include="azure\cli\_locale.py" />
@@ -62,8 +57,6 @@
     <Folder Include="azure\cli" />
     <Folder Include="azure\cli\commands" />
     <Folder Include="azure\cli\tests\" />
-    <Folder Include="azure\cli\tests\command_specs\" />
-    <Folder Include="azure\cli\tests\recordings\" />
   </ItemGroup>
   <ItemGroup>
     <Interpreter Include="..\env\">
@@ -77,12 +70,6 @@
       <PathEnvironmentVariable>PYTHONPATH</PathEnvironmentVariable>
       <Architecture>X86</Architecture>
     </Interpreter>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="azure\cli\tests\recordings\command_specs.test_spec_network.test_network_usage_list.yaml" />
-    <Content Include="azure\cli\tests\recordings\command_specs.test_spec_resource.test_resource_group_list.yaml" />
-    <Content Include="azure\cli\tests\recordings\command_specs.test_spec_vm.test_vm_usage_list_westus.yaml" />
-    <Content Include="azure\cli\tests\recordings\README.rst" />
   </ItemGroup>
   <Import Project="$(PtvsTargetsFile)" Condition="Exists($(PtvsTargetsFile))" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets" Condition="!Exists($(PtvsTargetsFile))" />

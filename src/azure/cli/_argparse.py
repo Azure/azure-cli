@@ -112,7 +112,7 @@ class ArgumentParser(object):
         m['$args'] = []
         m['$kwargs'] = kw = {}
         m['$argdoc'] = ad = []
-        for spec, desc, req in args or []:
+        for spec, desc, req, target in args or []:
             if not any(spec.startswith(p) for p in ARG_PREFIXES):
                 m['$args'].append(spec.strip('<> '))
                 ad.append((spec, desc, req))
@@ -123,7 +123,8 @@ class ArgumentParser(object):
                 v = True
             else:
                 v = aliases.pop().strip('<> ')
-            target, _ = _read_arg(aliases[0])
+            if not target:
+                target, _ = _read_arg(aliases[0])
             kw.update({_read_arg(a)[0]: (target, v, req, aliases) for a in aliases})
             ad.append(('/'.join(aliases), desc, req))
 
