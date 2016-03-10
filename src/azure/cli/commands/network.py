@@ -19,12 +19,12 @@ from azure.mgmt.network.operations import (ApplicationGatewaysOperations,
                                            VirtualNetworkGatewaysOperations,
                                            VirtualNetworksOperations)
 
-from ._command_creation import get_service_client
+from ._command_creation import get_mgmt_service_client
 from ..commands._auto_command import build_operation, LongRunningOperation
 from ..commands import command, description, option
 
 def _network_client_factory():
-    return get_service_client(NetworkManagementClient, NetworkManagementClientConfiguration)
+    return get_mgmt_service_client(NetworkManagementClient, NetworkManagementClientConfiguration)
 
 # pylint: disable=line-too-long
 # Application gateways
