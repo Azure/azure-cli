@@ -16,10 +16,6 @@ from ..commands._auto_command import build_operation, LongRunningOperation
 def _compute_client_factory():
     return get_mgmt_service_client(ComputeManagementClient, ComputeManagementClientConfiguration)
 
-# TODO: Remove when [#115382979] has been resolved
-from azure.mgmt.compute.models import VirtualMachineExtension # pylint: disable=wrong-import-position
-VirtualMachineExtension._validation['location']['required'] = False # pylint: disable=protected-access
-
 # pylint: disable=line-too-long
 build_operation("vm",
                 "availabilityset",
