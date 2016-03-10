@@ -74,6 +74,8 @@ class OutputProducer(object): #pylint: disable=too-few-public-methods
             return obj.value
         elif isinstance(obj, datetime):
             return obj.isoformat()
+        elif hasattr(obj, '_asdict'):
+            return OutputProducer.todict(obj._asdict())
         elif hasattr(obj, '__dict__'):
             return dict([(to_camelcase(k), OutputProducer.todict(v))
                          for k, v in obj.__dict__.items()
