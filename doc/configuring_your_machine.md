@@ -43,7 +43,8 @@ The Azure Python CLI projects sources are located on GitHub (https://github.com/
   ```Shell
   export PYTHONPATH=<clone root>/src:${PYTHONPATH}
   ```
-7.  Hook-up tab completion
+7.  Setup tab completion.
+
   Open Bash/zsh window and run:
   
   ```Shell
@@ -52,12 +53,13 @@ The Azure Python CLI projects sources are located on GitHub (https://github.com/
 
 ##Configuring your IDE
 ####Visual Studio (Windows only)
-1.	Install Python Tools for Visual Studio. As of 2/18/2016, the current version (PTVS 2.2) can be found here.
+1.	Install Python Tools for Visual Studio. As of 2/18/2016, the current version (PTVS 2.2) can be found at http://microsoft.github.io/PTVS/.
 2.	Open the azure-cli.pyproj project
 You should now be able to launch your project by pressing F5/start debugging
 
 ####Visual Studio Code (Any platform)
 Experimental steps – still haven’t been able to get virtual environments to work well with VSCode
+
 1.	Install VS Code
 2.	Install (one of) the python extension(s) (https://marketplace.visualstudio.com/items?itemName=donjayamanne.python)
 Debugging should now work (including stepping and setting breakpoints). 
@@ -65,7 +67,7 @@ Debugging should now work (including stepping and setting breakpoints).
 The repo has a launch.json file that will launch the version of Python that is first on your path. 
 
 ##Running CLI
-####Command line:
+####Command line
 1.  Activate your virtual environment if not already done
 
   #####Windows:
@@ -84,12 +86,13 @@ The repo has a launch.json file that will launch the version of Python that is f
   ```
 
 ##Running Unit Tests:
-####Command line:
-  #####Windows:
+####Command line
+#####Windows:
   ```BatchFile
   <clone root>\src\python -m unittest discover -s src\azure\cli\tests
   ``` 
-####VS Code:
+####VS Code
   Under construction...
+  
 ####Visual Studio
-  Under construction...
+  Select `Test > Windows > Test Explorer` and click `Run All` in the Test Explorer pane.
