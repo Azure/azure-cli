@@ -1,4 +1,3 @@
-import sys
 import unittest
 from six import StringIO
 
@@ -60,7 +59,7 @@ class Test_argparse(unittest.TestCase):
         # First two '--' match, so '----a' is added to dict
         self.assertIn('----a', other)
 
-        cmd_result = p.execute('n1 -a:x'.split(), out=sys.stdout)
+        cmd_result = p.execute('n1 -a:x'.split())
         res = cmd_result.result
         self.assertIsNone(res)
 
@@ -105,7 +104,7 @@ class Test_argparse(unittest.TestCase):
         self.assertTrue(res.arg)
         self.assertSequenceEqual(res.positional, ['x'])
 
-        self.assertIsNone(p.execute('n1 -b x'.split(), out=sys.stdout).result)
+        self.assertIsNone(p.execute('n1 -b x'.split()).result)
 
     def test_specify_output_format(self):
         p = ArgumentParser('test')
@@ -124,11 +123,11 @@ class Test_argparse(unittest.TestCase):
         self.assertEqual(cmd_res.output_format, 'text')
 
         # Invalid format
-        cmd_res = p.execute('n1 -a x --output unknown'.split(), out=sys.stdout)
+        cmd_res = p.execute('n1 -a x --output unknown'.split())
         self.assertEqual(cmd_res.output_format, None)
 
         # Invalid format
-        cmd_res = p.execute('n1 -a x --output'.split(), out=sys.stdout)
+        cmd_res = p.execute('n1 -a x --output'.split())
         self.assertEqual(cmd_res.output_format, None)
 
     def test_args_completion(self):
