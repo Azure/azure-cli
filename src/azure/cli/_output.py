@@ -77,8 +77,7 @@ class OutputProducer(object): #pylint: disable=too-few-public-methods
         elif hasattr(obj, '__dict__'):
             return dict([(to_camelcase(k), OutputProducer.todict(v))
                          for k, v in obj.__dict__.items()
-                         if not callable(v) and not k.startswith('_')
-                         and getattr(obj, k) is not None])
+                         if not callable(v) and not k.startswith('_')])
         else:
             return obj
 
