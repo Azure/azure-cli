@@ -88,8 +88,9 @@ The repo has a launch.json file that will launch the version of Python that is f
 ##Running Unit Tests:
 ####Command line
 #####Windows:
+  Provided your PYTHONPATH was set correcltly, from `<clone root>` run:
   ```BatchFile
-  <clone root>\src\python -m unittest discover -s src\azure\cli\tests
+  python -m unittest discover -s src\azure\cli\tests
   ``` 
 ####VS Code
   Under construction...
