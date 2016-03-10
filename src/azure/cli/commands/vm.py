@@ -21,8 +21,7 @@ from azure.mgmt.compute.models import VirtualMachineExtension # pylint: disable=
 VirtualMachineExtension._validation['location']['required'] = False # pylint: disable=protected-access
 
 # pylint: disable=line-too-long
-build_operation("vm",
-                "availabilityset",
+build_operation("vm availabilityset",
                 "availability_sets",
                 _compute_client_factory,
                 [
@@ -33,8 +32,7 @@ build_operation("vm",
                 ])
 
 
-build_operation("vm",
-                "machineextensionimages",
+build_operation("vm machineextensionimage",
                 "virtual_machine_extension_images",
                 _compute_client_factory,
                 [
@@ -43,8 +41,7 @@ build_operation("vm",
                     (VirtualMachineExtensionImagesOperations.list_versions, '[VirtualMachineImageResource]'),
                 ])
 
-build_operation("vm",
-                "extensions",
+build_operation("vm extension",
                 "virtual_machine_extensions",
                 _compute_client_factory,
                 [
@@ -52,8 +49,7 @@ build_operation("vm",
                     (VirtualMachineExtensionsOperations.get, 'VirtualMachineExtension'),
                 ])
 
-build_operation("vm",
-                "image",
+build_operation("vm image",
                 "virtual_machine_images",
                 _compute_client_factory,
                 [
@@ -64,16 +60,14 @@ build_operation("vm",
                     (VirtualMachineImagesOperations.list_skus, '[VirtualMachineImageResource]'),
                 ])
 
-build_operation("vm",
-                "usage",
+build_operation("vm usage",
                 "usage",
                 _compute_client_factory,
                 [
                     (UsageOperations.list, '[Usage]'),
                 ])
 
-build_operation("vm",
-                "size",
+build_operation("vm size",
                 "virtual_machine_sizes",
                 _compute_client_factory,
                 [
@@ -81,7 +75,6 @@ build_operation("vm",
                 ])
 
 build_operation("vm",
-                "",
                 "virtual_machines",
                 _compute_client_factory,
                 [
@@ -97,8 +90,7 @@ build_operation("vm",
                     (VirtualMachinesOperations.start, LongRunningOperation(L('Starting VM'), L('VM Started'))),
                 ])
 
-build_operation("vm",
-                "scaleset",
+build_operation("vm scaleset",
                 "virtual_machine_scale_sets",
                 _compute_client_factory,
                 [
@@ -116,8 +108,7 @@ build_operation("vm",
                     (VirtualMachineScaleSetsOperations.update_instances, LongRunningOperation(L('Updating VM scale set instances'), L('VM scale set instances updated'))),
                 ])
 
-build_operation("vm",
-                "vmscaleset",
+build_operation("vm scalesetvm",
                 "virtual_machine_scale_set_vms",
                 _compute_client_factory,
                 [
