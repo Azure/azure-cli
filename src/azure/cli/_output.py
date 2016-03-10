@@ -62,7 +62,7 @@ class OutputProducer(object): #pylint: disable=too-few-public-methods
         print(self.formatter(obj), file=self.file)
 
     @staticmethod
-    def todict(obj):
+    def todict(obj): #pylint: disable=too-many-return-statements
         def to_camelcase(s):
             return re.sub(OutputProducer.KEYS_CAMELCASE_PATTERN, lambda x: x.group(1).upper(), s)
 
