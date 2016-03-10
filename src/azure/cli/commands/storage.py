@@ -1,5 +1,4 @@
-﻿from msrest import Serializer
-from azure.storage.blob import PublicAccess
+﻿from azure.storage.blob import PublicAccess
 from ..commands import command, description, option
 from ._command_creation import get_mgmt_service_client, get_data_service_client
 from .._argparse import IncorrectUsageError
@@ -23,8 +22,7 @@ def list_accounts(args, unexpected): #pylint: disable=unused-argument
     else:
         accounts = smc.storage_accounts.list()
 
-    serializable = Serializer().serialize_data(accounts, '[StorageAccount]')
-    return serializable
+    return list(accounts)
 
 @command('storage account check')
 @option('--account-name -an <name>')
@@ -89,7 +87,7 @@ def list_blobs(args, unexpected): #pylint: disable=unused-argument
                                                  args.get('account-key'))
 
     blobs = block_blob_service.list_blobs(args.get('container'))
-    return Serializer().serialize_data(blobs.items, '[Blob]')
+    return blobs.items
 
 @command('storage file create')
 @option('--account-name -an <name>', required=True)

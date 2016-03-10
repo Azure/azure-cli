@@ -1,4 +1,3 @@
-from msrest import Serializer
 from ..commands import command, description
 from ._command_creation import get_mgmt_service_client
 
@@ -19,5 +18,4 @@ def list_groups(args, unexpected): #pylint: disable=unused-argument
     #group_filter = ResourceGroupFilter(args.get('tag-name'), args.get('tag-value'))
     #groups = rmc.resource_groups.list(filter=None, top=args.get('top'))
     groups = rmc.resource_groups.list()
-    serializable = Serializer().serialize_data(groups, "[ResourceGroup]")
-    return serializable
+    return list(groups)
