@@ -57,7 +57,7 @@ def create_block_blob(args, unexpected): #pylint: disable=unused-argument
                                                  args.get('account-key'))
 
     try:
-        public_access = public_access_types[args.get('container.public-access')]
+        public_access = public_access_types[args.get('container.public-access')] if args.get('container.public-access') else None
     except KeyError:
         raise IncorrectUsageError(L('container.public-access must be: {}'
                                     .format(public_access_string)))
