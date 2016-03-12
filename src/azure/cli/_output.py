@@ -7,6 +7,8 @@ from datetime import datetime
 from enum import Enum
 from six import StringIO
 
+from .main import EVENT_DISPATCHER
+
 class OutputFormatException(Exception):
     pass
 
@@ -59,7 +61,9 @@ class OutputProducer(object): #pylint: disable=too-few-public-methods
 
     def out(self, obj):
         obj = OutputProducer.todict(obj)
-        print(self.formatter(obj), file=self.file)
+        event_data = {'result': obj}
+        EVENT_DISPATCHER.raise_event(EVENT_DISPATCHER.TRANSFORM_RESULT, event_data)
+        print(self.formatter(event_data['result']), file=self.file)
 
     @staticmethod
     def todict(obj):
