@@ -4,6 +4,7 @@ import sys
 from ._locale import L, get_file as locale_get_file
 from ._logging import logger
 from ._output import OutputProducer
+from .main import EVENT_DISPATCHER
 
 # Named arguments are prefixed with one of these strings
 ARG_PREFIXES = sorted(('-', '--', '/'), key=len, reverse=True)
@@ -237,7 +238,21 @@ class ArgumentParser(object):
         old_stdout = sys.stdout
         try:
             sys.stdout = out
-            return ArgumentParserResult(handler(parsed, others), output_format)
+            event_data = {
+                'handler': handler,
+                'command_metadata': m,
+                'args': parsed,
+                'unexpected': others
+                }
+
+            # Let any event handlers that want to modify/munge the parameters do so...
+            EVENT_DISPATCHER.raise_event(EVENT_DISPATCHER.PARSING_PARAMETERS, event_data)
+
+            # Let any event handlers that want to know that we are about to execute do their
+            # thing...
+            EVENT_DISPATCHER.raise_event(EVENT_DISPATCHER.EXECUTING_COMMAND, event_data)
+
+            return ArgumentParserResult(event_data['handler'](parsed, others), output_format)
         except IncorrectUsageError as ex:
             print(str(ex), file=out)
             return ArgumentParserResult(self._display_usage(nouns, m, out))
