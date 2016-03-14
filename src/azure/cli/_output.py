@@ -62,7 +62,7 @@ class OutputProducer(object): #pylint: disable=too-few-public-methods
         print(self.formatter(obj), file=self.file)
 
     @staticmethod
-    def todict(obj):
+    def todict(obj): #pylint: disable=too-many-return-statements
         def to_camelcase(s):
             return re.sub(OutputProducer.KEYS_CAMELCASE_PATTERN, lambda x: x.group(1).upper(), s)
 
@@ -74,6 +74,8 @@ class OutputProducer(object): #pylint: disable=too-few-public-methods
             return obj.value
         elif isinstance(obj, datetime):
             return obj.isoformat()
+        elif hasattr(obj, '_asdict'):
+            return OutputProducer.todict(obj._asdict())
         elif hasattr(obj, '__dict__'):
             return dict([(to_camelcase(k), OutputProducer.todict(v))
                          for k, v in obj.__dict__.items()
