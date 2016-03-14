@@ -136,7 +136,7 @@ class ArgumentParser(object):
                 args,
                 show_usage=False,
                 show_completions=False,
-                out=sys.stdout):
+                out=None):
         '''Parses `args` and invokes the associated handler.
 
         The handler is passed two `Arguments` objects with all arguments other
@@ -151,7 +151,11 @@ class ArgumentParser(object):
         If `show_completions` is ``True`` or any of `self.complete_args` has
         been provided then raw information about the likely arguments will be
         provided.
+
+        If `out` is not specified, we default to sys.stdout.
         '''
+        out = sys.stdout if out is None else out
+
         if not show_usage:
             show_usage = any(a in self.help_args for a in args)
         if not show_completions:
