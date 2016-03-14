@@ -10,6 +10,7 @@ COMMAND_MODULES = [
     'resourcegroup',
     'storage',
     'vm',
+    'keyvault',
 ]
 
 _COMMANDS = {}
