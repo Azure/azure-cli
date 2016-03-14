@@ -1,8 +1,8 @@
-import sys
+﻿import sys
 
 import azure.cli.main
 
-from ._telemetry import init_telemetry, user_agrees_to_telemetry, telemetry_flush
+from azure.cli._telemetry import init_telemetry, user_agrees_to_telemetry, telemetry_flush
 
 try:
     try:
