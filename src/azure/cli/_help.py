@@ -6,8 +6,10 @@ from yaml import load, dump
 
 from ._output import OutputProducer, TableOutput, format_table, format_list, format_unordered_list
 
-__all__ = ['print_detailed_help', 'GroupHelpFile', 'CommandHelpFile']
+__all__ = ['print_detailed_help', 'print_welcome_message', 'GroupHelpFile', 'CommandHelpFile']
 
+def print_welcome_message():
+    print('\nWelcome to the cool new Azure CLI!\n\nHere are the base commands:\n')
 
 def print_detailed_help(help_file, out=sys.stdout):  # TODO: wire up out to print statements
     _print_header(help_file)
@@ -43,7 +45,7 @@ def _print_arguments(help_file):
         indent = 1
         _printIndent('{0}{1}{2}{3}'.format(p.name,
                                         ' [Required]' if p.required else '',
-                                        get_column_indent(p.name, max_name_length),
+                                        _get_column_indent(p.name, max_name_length),
                                         ': ' + p.short_summary if p.short_summary else ''),
                      indent)
     
@@ -163,7 +165,7 @@ def _printIndent(str, indent=0):
     tw = textwrap.TextWrapper(initial_indent = "    "*indent, subsequent_indent = "    "*indent)
     print(tw.fill(str))
 
-def get_column_indent(text, max_name_length):
+def _get_column_indent(text, max_name_length):
     return ' '*(max_name_length - len(text))
 
 def _load_help_file(delimiters):
