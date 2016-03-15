@@ -63,6 +63,7 @@ class OutputProducer(object): #pylint: disable=too-few-public-methods
         obj = OutputProducer.todict(obj)
         event_data = {'result': obj}
         EVENT_DISPATCHER.raise_event(EVENT_DISPATCHER.TRANSFORM_RESULT, event_data)
+        EVENT_DISPATCHER.raise_event(EVENT_DISPATCHER.FILTER_RESULT, event_data)
         print(self.formatter(event_data['result']), file=self.file)
 
     @staticmethod

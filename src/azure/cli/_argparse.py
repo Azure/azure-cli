@@ -74,6 +74,11 @@ class ArgumentParser(object):
         self.complete_args = {'--complete'}
         self.global_args = {'--verbose', '--debug'}
 
+    def add_global_param(spec, desc):
+        # TODO: Keep track of all global args to allow help
+        # and statement completion to pick them up
+        pass
+
     def add_command(self,
                     handler,
                     name=None,
