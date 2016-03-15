@@ -177,7 +177,6 @@ class ArgumentParser(object):
                 nouns.append(n.lower())
             except LookupError:
                 if '$args' not in m:
-                    #show_usage = True
                     print(L('\nCommand "{0}" not found, names starting with "{0}":\n'.format(n)))
                     args.append('--complete')
                     show_completions = True
