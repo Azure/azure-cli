@@ -42,11 +42,6 @@ def format_list(obj):
     lo = ListOutput()
     return lo.dump(obj_list)
 
-def format_unordered_list(obj):
-    obj_list = obj if isinstance(obj, list) else [obj]
-    lo = ListOutput()
-    return lo.dump(obj_list, should_sort=False)
-
 class OutputProducer(object): #pylint: disable=too-few-public-methods
 
     format_dict = {
@@ -132,22 +127,19 @@ class ListOutput(object): #pylint: disable=too-few-public-methods
         io.write(line)
         io.write('\n')
 
-    def _dump_object(self, io, obj, indent, should_sort=True):
+    def _dump_object(self, io, obj, indent):
         if isinstance(obj, list):
             for array_item in obj:
-                self._dump_object(io, array_item, indent, should_sort)
+                self._dump_object(io, array_item, indent)
         elif isinstance(obj, dict):
             obj_fk = {k: self._get_formatted_key(k) for k in obj}
             key_width = ListOutput._get_max_key_len(obj_fk.values())
-            keys = sorted(obj, key=lambda x: ListOutput._sort_key_func(x, obj)) \
-                          if should_sort \
-                          else obj
-            for key in keys:
+            for key in sorted(obj, key=lambda x: ListOutput._sort_key_func(x, obj)):
                 if isinstance(obj[key], dict) or isinstance(obj[key], list):
                     # complex object
                     line = '%s :' % (self._get_formatted_key(key).ljust(key_width))
                     ListOutput._dump_line(io, line, indent)
-                    self._dump_object(io, obj[key] if obj[key] else 'None', indent+1, should_sort)
+                    self._dump_object(io, obj[key] if obj[key] else 'None', indent+1)
                 else:
                     # non-complex so write it
                     line = '%s : %s' % (self._get_formatted_key(key).ljust(key_width),
@@ -156,10 +148,10 @@ class ListOutput(object): #pylint: disable=too-few-public-methods
         else:
             ListOutput._dump_line(io, obj, indent)
 
-    def dump(self, data, should_sort=True):
+    def dump(self, data):
         io = StringIO()
         for obj in data:
-            self._dump_object(io, obj, 0, should_sort)
+            self._dump_object(io, obj, 0)
             io.write('\n')
         result = io.getvalue()
         io.close()

@@ -197,7 +197,7 @@ class ArgumentParser(object):
             logger.debug('Missing data for noun %s', n)
             if not show_completions and not show_usage:
                 args.append('--complete')
-                show_full_completions = not show_completions
+                show_full_completions = True
                 print(L('Available commands:\n'))
             show_completions = True
             
