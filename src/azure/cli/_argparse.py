@@ -256,42 +256,9 @@ class ArgumentParser(object):
         delimiters = noun_map['$doc'][:-4]
 
         doc = GroupHelpFile(delimiters, subnouns) if len(subnouns) > 0 else CommandHelpFile(delimiters, argdoc)
+        doc.load_from_file()
         print_detailed_help(doc)
         return
-
-        spec = ' '.join(noun_map.get('$spec') or nouns)
-        print('    {} {}'.format(self.prog, spec), file=out)
-        print(file=out)
-        out.flush()
-
-        subnouns = sorted(k for k in noun_map if not k.startswith('$'))
-        if subnouns:
-            print('Subcommands', file=out)
-            for n in subnouns:
-                print('    {}'.format(n), file=out)
-            print(file=out)
-            out.flush()
-
-        argdoc = noun_map.get('$argdoc')
-        if argdoc:
-            print('Arguments', file=out)
-            maxlen = max(len(a) for a, d, r in argdoc)
-            for a, d, r in argdoc:
-                print('    {0:<{1}} - {2} {3}'.format(a, maxlen, d, L("[Required]") if r else ""),
-                      file=out)
-            print(file=out)
-            out.flush()
-
-        doc_file = locale_get_file(noun_map['$doc'])
-        try:
-            with open(doc_file, 'r') as f:
-                print(f.read(), file=out)
-                f.flush()
-        except (OSError, IOError):
-            # TODO: Behave better when no docs available
-            print('No documentation available', file=out)
-            out.flush()
-            logger.debug('Expected documentation at %s', doc_file)
 
     def _display_completions(self, noun_map, arguments, out=sys.stdout):
         for a in self.complete_args:
