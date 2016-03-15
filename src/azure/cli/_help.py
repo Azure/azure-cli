@@ -38,70 +38,101 @@ def print_detailed_help(help_file, out=sys.stdout):  # TODO: wire up out to prin
 
 class HelpFile(object):
     def __init__(self, delimiters):
-        self._delimiters = delimiters
-        self._data = {}
+        self.delimiters = delimiters
+        self.name = delimiters.split('.')[-1]
+        self.command = delimiters.replace('.', ' ')
+        self.type = ''
+        self.short_summary = ''
+        self.long_summary = ''
 
-    @property
-    def name(self):
-        return self._delimiters.split('.')[-1]
+    def load_from_file(self):
+        _load_from_data(_load_help_file(self.delimiters))
 
-    @property
-    def command(self):
-        return self._delimiters.replace('.', ' ')
+    @classmethod
+    def _load_from_data(cls, data):
+        self.type = data['type']
+        self.short_summary = data['short-summary']
+        self.long_summary = data['long-summary']
 
-    @property
-    def type(self):
-        t = self._data.get('type')
-        if t != 'command' and t != 'group':
-            raise HelpAuthoringException('help file type must be "command" or "group"')
-        return t
 
-    @property
-    def short_summary(self):
-        return self._data.get('short-summary')
+class GroupHelpFile(HelpFile):
+    def __init__(self, delimiters, child_names):
+        super(GroupHelpFile, self).__init__(delimiters)
+        self.type = 'group'
+        self.children = [HelpFile('{0}.{1}'.format(self.delimiters, n)) for n in child_names]
 
-    @property
-    def long_summary(self):
-        return self._data.get('long-summary')
+    @classmethod
+    def load_from_data(cls, data):
+        super()._load_from_data(data)
 
-    @property
-    def parameters(self):
-        return [HelpParameter(x) for x in self._data.get('parameters')]
+        child_helps = [GroupHelpFile(child.delimiters, []) for child in cls.children]
+        loaded_children = []
+        for child in cls.children:
+            file = [h for h in child_helps if h.name == child.name]
+            loaded_children.append(file[0] if len(file) > 0 else child)
+        cls.children = loaded_children
 
-    @property
-    def children(self):
-        return [HelpFile(d) for d in _load_child_delimiters(self._delimiters)]
 
-    def load_saved_data(self):
-        self._data = _load_help_file(delimiters)
+class CommandHelpFile(HelpFile):
+    def __init__(self, delimiters, argdoc):
+        super(CommandHelpFile, self).__init__(delimiters)
+        self.type = 'command'
+        self.parameters = [HelpParameter(a, r) for a, _, r in argdoc]
+
+    @classmethod
+    def load_from_data(cls, data):
+        super()._load_from_data(data)
+
+        loaded_params = []
+        for param in cls.parameters:
+            if data.get(param.name):
+                loaded_params.append(data[param.name])
+            else:
+                raise HelpAuthoringException('Missing param help for {0}'.format(param.name))
+        cls.parameters = loaded_params
+
+    #def load_saved_data(self):
+    #    data = _load_help_file(self.delimiters)
+    #    self.name = _get_data_value(data, 'name')
+    #    self.type = _get_data_value(data, 'type')
+    #    self.short_summary = _get_data_value(data, 'short-summary')
+    #    self.long_summary = _get_data_value(data, 'long-summary')
+    #    self.command = self.name.replace('.', ' ')
+
+    #    file_params = {HelpParameter(x).name: HelpParameter(x) for x in data.get('parameters')}
+    #    for param in self.parameters:
+    #        if file_params.get(param.name):
+    #            param.copy_from(file_params.pop(param.name))
+    #    if len(file_params) != 0:
+    #        raise HelpAuthoringException('unmatched parameters in help file: ' + ', '.join(file_params.keys))
+
+    #    file_children = {HelpFile(d).name: HelpFile(d) for d in _load_child_delimiters(self._delimiters)}
+    #    for child in file_children:
+    #        if file_children.get(child.name):
+    #            child.copy_from(file_children.pop(child.name))
+    #    if len(file_children
+
 
 class HelpParameter(object):
-    def __init__(self, _data):
-        self._data = _data
+    def __init__(self, param_name, required):
+        self.name = param_name
+        self.required = required
+        self.type = ''
+        self.short_summary = ''
+        self.long_summary = ''
+        self.value_sources = ''
 
-    @property
-    def name(self):
-        return self._data.get('name')
+    def update_from_data(self, data):
+        if self.name != data.get('name'):
+            raise HelpAuthoringException("mismatched name {0} vs. {1}".format(self.name, data.get('name')))
 
-    @property
-    def required(self):
-        return bool(self._data.get('required'))
+        if self.name != data.get('required'):
+            raise HelpAuthoringException("mismatched required {0} vs. {1}".format(self.required, data.get('required')))
 
-    @property
-    def short_summary(self):
-        return self._data.get('short-summary')
-
-    @property
-    def long_summary(self):
-        return self._data.get('long-summary')
-
-    @property
-    def type(self):
-        return self._data.get('type')
-
-    @property
-    def value_sources(self):
-        return self._data.get('populator-commands')
+        self.type = _data.get('type')
+        self.short_summary = _data.get('short-summary')
+        self.long_summary = _data.get('long-summary')
+        self.value_sources = _data.get('populator-commands')
 
 
 def _printIndent(str, indent=0):
