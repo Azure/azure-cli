@@ -160,8 +160,9 @@ class ArgumentParser(object):
 
         if len(args) == 0:
             print_welcome_message()
-            args.append('--complete')
-            show_completions = True
+            if not show_completions:
+                args.append('--complete')
+                show_completions = True
             show_full_completions = True
 
         if not show_usage:
@@ -185,8 +186,9 @@ class ArgumentParser(object):
             except LookupError:
                 if '$args' not in m:
                     print(L('\nCommand "{0}" not found, names starting with "{0}":\n'.format(n)))
-                    args.append('--complete')
-                    show_completions = True
+                    if not show_completions:
+                        args.append('--complete')
+                        show_completions = True
                 break
             n = next(it, '')
 
@@ -196,7 +198,9 @@ class ArgumentParser(object):
         except LookupError:
             logger.debug('Missing data for noun %s', n)
             if not show_completions and not show_usage:
-                args.append('--complete')
+                if not show_completions:
+                    args.append('--complete')
+                    show_completions = True
                 show_full_completions = True
                 print(L('Available commands:\n'))
             show_completions = True
@@ -243,7 +247,7 @@ class ArgumentParser(object):
                 parsed[a]
             except KeyError:
                 print(L('Missing required argument "{}"'.format(a)))
-                return ArgumentParserResult("")
+                return ArgumentParserResult(None)
 
         try:
             output_format = others.pop('output') if others else None
