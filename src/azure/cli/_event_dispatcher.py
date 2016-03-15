@@ -15,6 +15,7 @@ class EventDispatcher:
     VALIDATING_PARAMETERS = 'ValidatingParameters'
     EXECUTING_COMMAND = 'ExecutingCommand'
     TRANSFORM_RESULT = 'TransformResult'
+    FILTER_RESULT = 'FilterResult'
 
     def __init__(self):
         self._handlers = defaultdict(lambda: [])

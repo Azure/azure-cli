@@ -9,6 +9,7 @@ def _enable_experimental_handlers(name, event_data):
         event_data['args'].remove('--experimental')
         EVENT_DISPATCHER.register(EVENT_DISPATCHER.REGISTER_GLOBAL_PARAMETERS, id_filter)
         EVENT_DISPATCHER.register(EVENT_DISPATCHER.REGISTER_GLOBAL_PARAMETERS, generate_skeleton)
+        EVENT_DISPATCHER.register(EVENT_DISPATCHER.REGISTER_GLOBAL_PARAMETERS, use_skeleton)
     except ValueError:
         pass
 
@@ -38,12 +39,14 @@ def generate_skeleton(name, event_data):
             didn't actually want to run the command but rather
             get a skeleton that can later be used as input
             """
+            def skeleton_generator(parsed, unexpected):
+                # TODO: Use the command definition to 
+                # generate an appropriate skeleton...
+                print(event_data)
+                return parsed
+
             event_data['handler'] = skeleton_generator
 
-        def skeleton_generator(parsed, unexpected):
-            # TODO: Use the command definition to 
-            # generate an appropriate skeleton...
-            return parsed
 
         event_data['args'].remove('--generate-skeleton')
         EVENT_DISPATCHER.register(EVENT_DISPATCHER.EXECUTING_COMMAND, switcheroo)
