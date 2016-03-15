@@ -29,7 +29,7 @@ def register(event_dispatcher):
         except ValueError:
             pass
 
-    def generate_skeleton(_, event_data):
+    def generate_skeleton(_, event_data): #pylint: disable=unused-variable
         try:
             def switcheroo(_, event_data):
                 """We replace the handler for the command
@@ -40,7 +40,6 @@ def register(event_dispatcher):
                 def skeleton_generator(parsed, _):
                     # TODO: Use the command definition to
                     # generate an appropriate skeleton...
-                    print(event_data)
                     return parsed
 
                 event_data['handler'] = skeleton_generator

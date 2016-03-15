@@ -1,6 +1,6 @@
 from collections import defaultdict
 
-class EventDispatcher:
+class EventDispatcher(object):
     """Register for and raise events.
 
     During the execution of a command, a set of events are raised
