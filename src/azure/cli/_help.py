@@ -6,58 +6,71 @@ from yaml import load, dump
 
 from ._output import OutputProducer, TableOutput, format_table, format_list, format_unordered_list
 
+__all__ = ['print_detailed_help', 'GroupHelpFile', 'CommandHelpFile']
+
+
 def print_detailed_help(help_file, out=sys.stdout):  # TODO: wire up out to print statements
+    _print_header(help_file)
+
+    print('Arguments' if help_file.type == 'command' else 'Sub-Commands')
+
+    if help_file.type == 'command':
+        _print_arguments(help_file)
+    elif help_file.type == 'group':
+        _print_groups(help_file)
+
+    if len(help_file.examples) > 0:
+        _print_examples(help_file)
+
+def _print_header(help_file):
     indent = 0
     print('')
     _printIndent('{0}{1}'.format(help_file.command, ': ' + help_file.short_summary
                                  if help_file.short_summary
                                  else ''), 
                  indent)
-
+    
     indent = 1
     _printIndent('{0}'.format(help_file.long_summary), indent)
     print('')
 
-    indent = 0
-    _printIndent('Arguments'
-                 if help_file.type == 'command'
-                 else 'Sub-Commands', indent)
-
-    if help_file.type == 'command':
-        if len(help_file.parameters) == 0:
-            _printIndent('none', indent)
-        max_name_length = max(len(p.name) for p in help_file.parameters)
-        for p in help_file.parameters:
-            indent = 1
-            _printIndent('{0}{1}{2}{3}'.format(p.name,
-                                            ' [Required]' if p.required else '',
-                                            get_column_indent(p.name, max_name_length),
-                                            ': ' + p.short_summary if p.short_summary else ''), 
-                         indent)
-
-            indent = 2
-            _printIndent('{0}'.format(p.long_summary), indent)
-
-            if p.value_sources:
-                _printIndent("Values from: {0}".format(', '.join(p.value_sources)), indent)
-            print('')
-
-    if help_file.type == 'group':
+def _print_arguments(help_file):
+    indent = 1
+    if len(help_file.parameters) == 0:
+        _printIndent('none', indent)
+    max_name_length = max(len(p.name) for p in help_file.parameters)
+    for p in help_file.parameters:
         indent = 1
-        for c in help_file.children:
-            _printIndent('{0}{1}'.format(c.name, ': ' + c.short_summary if c.short_summary else ''), indent)
+        _printIndent('{0}{1}{2}{3}'.format(p.name,
+                                        ' [Required]' if p.required else '',
+                                        get_column_indent(p.name, max_name_length),
+                                        ': ' + p.short_summary if p.short_summary else ''),
+                     indent)
+    
+        indent = 2
+        _printIndent('{0}'.format(p.long_summary), indent)
+    
+        if p.value_sources:
+            _printIndent("Values from: {0}".format(', '.join(p.value_sources)), indent)
         print('')
+    return indent
 
-    if len(help_file.examples) > 0:
-        indent = 0
-        _printIndent('Examples', indent)
+def _print_groups(help_file):
+    indent = 1
+    for c in help_file.children:
+        _printIndent('{0}{1}'.format(c.name, ': ' + c.short_summary if c.short_summary else ''), indent)
+    print('')
 
-        for e in help_file.examples:
-            indent = 1
-            _printIndent('{0}'.format(e.name), indent)
-
-            indent = 2
-            _printIndent('{0}'.format(e.text), indent)
+def _print_examples(help_file):
+    indent = 0
+    _printIndent('Examples', indent)
+    
+    for e in help_file.examples:
+        indent = 1
+        _printIndent('{0}'.format(e.name), indent)
+    
+        indent = 2
+        _printIndent('{0}'.format(e.text), indent)
 
 
 class HelpFile(object):
