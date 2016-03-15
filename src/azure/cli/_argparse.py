@@ -177,7 +177,10 @@ class ArgumentParser(object):
                 nouns.append(n.lower())
             except LookupError:
                 if '$args' not in m:
-                    show_usage = True
+                    #show_usage = True
+                    print(L('\nCommand "{0}" not found, names starting with "{0}":\n'.format(n)))
+                    args.append('--complete')
+                    show_completions = True
                 break
             n = next(it, '')
 
@@ -228,8 +231,8 @@ class ArgumentParser(object):
             try:
                 parsed[a]
             except KeyError:
-                print(L("Missing required argument {}".format(a)))
-                return ArgumentParserResult(self._display_usage(nouns, m, out))
+                print(L('Missing required argument "{}"'.format(a)))
+                return ArgumentParserResult("")
 
         try:
             output_format = others.pop('output') if others else None

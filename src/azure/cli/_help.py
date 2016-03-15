@@ -9,21 +9,31 @@ from ._output import OutputProducer, TableOutput, format_table, format_list, for
 def print_detailed_help(help_file, out=sys.stdout):  # TODO: wire up out to print statements
     indent = 0
     print('')
-    _printIndent('{0}{1}'.format(help_file.command, ': ' + help_file.short_summary if help_file.short_summary else ''), indent)
+    _printIndent('{0}{1}'.format(help_file.command, ': ' + help_file.short_summary
+                                 if help_file.short_summary
+                                 else ''), 
+                 indent)
 
     indent = 1
     _printIndent('{0}'.format(help_file.long_summary), indent)
     print('')
 
     indent = 0
-    _printIndent('Arguments' if help_file.type == 'command' else 'Sub-Commands', indent) 
+    _printIndent('Arguments'
+                 if help_file.type == 'command'
+                 else 'Sub-Commands', indent)
 
     if help_file.type == 'command':
         if len(help_file.parameters) == 0:
             _printIndent('none', indent)
+        max_name_length = max(len(p.name) for p in help_file.parameters)
         for p in help_file.parameters:
             indent = 1
-            _printIndent('{0}{1}'.format(p.name, ': ' + p.short_summary if p.short_summary else ''), indent)
+            _printIndent('{0}{1}{2}{3}'.format(p.name,
+                                            ' [Required]' if p.required else '',
+                                            get_column_indent(p.name, max_name_length),
+                                            ': ' + p.short_summary if p.short_summary else ''), 
+                         indent)
 
             indent = 2
             _printIndent('{0}'.format(p.long_summary), indent)
@@ -139,6 +149,9 @@ class HelpExample(object):
 def _printIndent(str, indent=0):
     tw = textwrap.TextWrapper(initial_indent = "    "*indent, subsequent_indent = "    "*indent)
     print(tw.fill(str))
+
+def get_column_indent(text, max_name_length):
+    return ' '*(max_name_length - len(text))
 
 def _load_help_file(delimiters):
     s = """
