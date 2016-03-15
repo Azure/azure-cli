@@ -1,20 +1,20 @@
 import sys
 import textwrap
-from collections import OrderedDict
+from yaml import load
 
-from yaml import load, dump
+from ._locale import L
 
-from ._output import OutputProducer, TableOutput, format_table, format_list, format_unordered_list
 
 __all__ = ['print_detailed_help', 'print_welcome_message', 'GroupHelpFile', 'CommandHelpFile']
 
 def print_welcome_message():
-    print('\nWelcome to the cool new Azure CLI!\n\nHere are the base commands:\n')
+    print L('\nWelcome to the cool new Azure CLI!\n\nHere are the base commands:\n')
 
-def print_detailed_help(help_file, out=sys.stdout):  # TODO: wire up out to print statements
+# TODO: wire up out to print statements
+def print_detailed_help(help_file, out=sys.stdout): #pylint: disable=unused-argument
     _print_header(help_file)
 
-    print('Arguments' if help_file.type == 'command' else 'Sub-Commands')
+    print L('Arguments') if help_file.type == 'command' else L('Sub-Commands')
 
     if help_file.type == 'command':
         _print_arguments(help_file)
@@ -26,15 +26,16 @@ def print_detailed_help(help_file, out=sys.stdout):  # TODO: wire up out to prin
 
 def _print_header(help_file):
     indent = 0
-    print('')
-    _printIndent('{0}{1}'.format(help_file.command, ': ' + help_file.short_summary
+    print ''
+    _printIndent('{0}{1}'.format(help_file.command,
+                                 ': ' + help_file.short_summary
                                  if help_file.short_summary
-                                 else ''), 
+                                 else ''),
                  indent)
-    
+
     indent = 1
     _printIndent('{0}'.format(help_file.long_summary), indent)
-    print('')
+    print ''
 
 def _print_arguments(help_file):
     indent = 1
@@ -44,38 +45,40 @@ def _print_arguments(help_file):
     for p in help_file.parameters:
         indent = 1
         _printIndent('{0}{1}{2}{3}'.format(p.name,
-                                        ' [Required]' if p.required else '',
-                                        _get_column_indent(p.name, max_name_length),
-                                        ': ' + p.short_summary if p.short_summary else ''),
+                                           ' ' + L('[Required]') if p.required else '',
+                                           _get_column_indent(p.name, max_name_length),
+                                           ': ' + p.short_summary if p.short_summary else ''),
                      indent)
-    
+
         indent = 2
         _printIndent('{0}'.format(p.long_summary), indent)
-    
+
         if p.value_sources:
-            _printIndent("Values from: {0}".format(', '.join(p.value_sources)), indent)
-        print('')
+            _printIndent(L("Values from: {0}").format(', '.join(p.value_sources)), indent)
+        print ''
     return indent
 
 def _print_groups(help_file):
     indent = 1
     for c in help_file.children:
-        _printIndent('{0}{1}'.format(c.name, ': ' + c.short_summary if c.short_summary else ''), indent)
-    print('')
+        _printIndent('{0}{1}'.format(c.name,
+                                     ': ' + c.short_summary if c.short_summary else ''),
+                     indent)
+    print ''
 
 def _print_examples(help_file):
     indent = 0
-    _printIndent('Examples', indent)
-    
+    _printIndent(L('Examples'), indent)
+
     for e in help_file.examples:
         indent = 1
         _printIndent('{0}'.format(e.name), indent)
-    
+
         indent = 2
         _printIndent('{0}'.format(e.text), indent)
 
 
-class HelpFile(object):
+class HelpFile(object): #pylint: disable=too-few-public-methods
     def __init__(self, delimiters):
         self.delimiters = delimiters
         self.name = delimiters.split('.')[-1]
@@ -97,7 +100,7 @@ class HelpFile(object):
         self.examples = [HelpExample(d) for d in data['examples']]
 
 
-class GroupHelpFile(HelpFile):
+class GroupHelpFile(HelpFile): #pylint: disable=too-few-public-methods
     def __init__(self, delimiters, child_names):
         super(GroupHelpFile, self).__init__(delimiters)
         self.type = 'group'
@@ -109,12 +112,12 @@ class GroupHelpFile(HelpFile):
         child_helps = [GroupHelpFile(child.delimiters, []) for child in self.children]
         loaded_children = []
         for child in self.children:
-            file = [h for h in child_helps if h.name == child.name]
-            loaded_children.append(file[0] if len(file) > 0 else child)
+            child_help = [h for h in child_helps if h.name == child.name]
+            loaded_children.append(child_help[0] if len(child_help) > 0 else child)
         self.children = loaded_children
 
 
-class CommandHelpFile(HelpFile):
+class CommandHelpFile(HelpFile): #pylint: disable=too-few-public-methods
     def __init__(self, delimiters, argdoc):
         super(CommandHelpFile, self).__init__(delimiters)
         self.type = 'command'
@@ -135,7 +138,7 @@ class CommandHelpFile(HelpFile):
         self.parameters = loaded_params
 
 
-class HelpParameter(object):
+class HelpParameter(object): #pylint: disable=too-few-public-methods
     def __init__(self, param_name, required):
         self.name = param_name
         self.required = required
@@ -146,24 +149,29 @@ class HelpParameter(object):
 
     def update_from_data(self, data):
         if self.name != data.get('name'):
-            raise HelpAuthoringException("mismatched name {0} vs. {1}".format(self.name, data.get('name')))
+            raise HelpAuthoringException("mismatched name {0} vs. {1}"
+                                         .format(self.name,
+                                                 data.get('name')))
 
         if self.required != data.get('required', False):
-            raise HelpAuthoringException("mismatched required {0} vs. {1}, {2}".format(self.required, data.get('required'), data.get('name')))
+            raise HelpAuthoringException("mismatched required {0} vs. {1}, {2}"
+                                         .format(self.required,
+                                                 data.get('required'),
+                                                 data.get('name')))
 
         self.type = data.get('type')
         self.short_summary = data.get('short-summary')
         self.long_summary = data.get('long-summary')
         self.value_sources = data.get('populator-commands')
 
-class HelpExample(object):
+class HelpExample(object): #pylint: disable=too-few-public-methods
     def __init__(self, _data):
         self.name = _data['name']
         self.text = _data['text']
 
-def _printIndent(str, indent=0):
-    tw = textwrap.TextWrapper(initial_indent = "    "*indent, subsequent_indent = "    "*indent)
-    print(tw.fill(str))
+def _printIndent(s, indent=0):
+    tw = textwrap.TextWrapper(initial_indent="    "*indent, subsequent_indent="    "*indent)
+    print tw.fill(s)
 
 def _get_column_indent(text, max_name_length):
     return ' '*(max_name_length - len(text))
