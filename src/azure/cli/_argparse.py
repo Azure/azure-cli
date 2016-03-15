@@ -1,7 +1,7 @@
 ﻿from __future__ import print_function
 import sys
 
-from ._help import GroupHelpFile, CommandHelpFile, print_detailed_help
+from ._help import GroupHelpFile, CommandHelpFile, print_detailed_help, print_welcome_message
 from ._locale import L, get_file as locale_get_file
 from ._logging import logger
 from ._output import OutputProducer
@@ -156,6 +156,13 @@ class ArgumentParser(object):
         If `out` is not specified, we default to sys.stdout.
         '''
         out = sys.stdout if out is None else out
+        show_full_completions = False
+
+        if len(args) == 0:
+            print_welcome_message()
+            args.append('--complete')
+            show_completions = True
+            show_full_completions = True
 
         if not show_usage:
             show_usage = any(a in self.help_args for a in args)
@@ -188,12 +195,17 @@ class ArgumentParser(object):
             handler = m['$handler']
         except LookupError:
             logger.debug('Missing data for noun %s', n)
-            show_usage = True
+            if not show_completions and not show_usage:
+                args.append('--complete')
+                show_full_completions = not show_completions
+                print(L('Available commands:\n'))
+            show_completions = True
+            
 
-        if show_completions:
-            return ArgumentParserResult(self._display_completions(m, args, out))
         if show_usage:
             return ArgumentParserResult(self._display_usage(nouns, m, out))
+        if show_completions:
+            return ArgumentParserResult(self._display_completions(m, args, show_full_completions, out))
 
         parsed = Arguments()
         others = Arguments()
@@ -262,12 +274,12 @@ class ArgumentParser(object):
         print_detailed_help(doc)
         return
 
-    def _display_completions(self, noun_map, arguments, out=sys.stdout):
+    def _display_completions(self, noun_map, arguments, show_all=False, out=sys.stdout):
         for a in self.complete_args:
             arguments.remove(a)
 
         kwargs = noun_map.get('$kwargs') or []
-        last_arg = arguments[-1]
+        last_arg = arguments[-1] if len(arguments) > 0 else ''
         args_candidates = []
 
         arguments_set = set(arguments)
@@ -282,7 +294,10 @@ class ArgumentParser(object):
         else:
             subcommand_candidates = [k for k in noun_map if not k.startswith('$')]
             candidates = subcommand_candidates + args_candidates
-            matches = [k for k in candidates if k.startswith(last_arg)]
+            matches = [k for k in candidates if k.startswith(last_arg)] \
+                if not show_all \
+                else candidates
+
             print('\n'.join(sorted(set(matches))), file=out)
 
         out.flush()
