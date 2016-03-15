@@ -1,6 +1,7 @@
 ﻿from __future__ import print_function
 import sys
 
+from ._help import HelpFile, print_detailed_help
 from ._locale import L, get_file as locale_get_file
 from ._logging import logger
 from ._output import OutputProducer
@@ -249,6 +250,11 @@ class ArgumentParser(object):
             sys.stdout = old_stdout
 
     def _display_usage(self, nouns, noun_map, out=sys.stdout):
+        doc = HelpFile(noun_map['$doc'][:-4])
+        if doc:
+            print_detailed_help(doc)
+            return
+
         spec = ' '.join(noun_map.get('$spec') or nouns)
         print('    {} {}'.format(self.prog, spec), file=out)
         print(file=out)
