@@ -2,7 +2,7 @@
 import sys
 
 from ._help import GroupHelpFile, CommandHelpFile, print_detailed_help, print_welcome_message
-from ._locale import L, get_file as locale_get_file
+from ._locale import L
 from ._logging import logger
 from ._output import OutputProducer
 
@@ -200,12 +200,12 @@ class ArgumentParser(object):
                 show_full_completions = True
                 print(L('Available commands:\n'))
             show_completions = True
-            
 
         if show_usage:
-            return ArgumentParserResult(self._display_usage(nouns, m, out))
+            return ArgumentParserResult(self._display_usage(m, out))
         if show_completions:
-            return ArgumentParserResult(self._display_completions(m, args, show_full_completions, out))
+            return ArgumentParserResult(
+                self._display_completions(m, args, show_full_completions, out))
 
         parsed = Arguments()
         others = Arguments()
@@ -225,7 +225,7 @@ class ArgumentParser(object):
                     if value is not None:
                         print(L("argument '{0}' does not take a value").format(key_n),
                               file=out)
-                        return ArgumentParserResult(self._display_usage(nouns, m, out))
+                        return ArgumentParserResult(self._display_usage(m, out))
                     parsed.add_from_dotted(target_value[0], True)
                 else:
                     # Arg with a value
@@ -249,7 +249,7 @@ class ArgumentParser(object):
             output_format = others.pop('output') if others else None
             if output_format is not None and output_format not in OutputProducer.format_dict:
                 print(L("Invalid output format '{}'".format(output_format)))
-                return ArgumentParserResult(self._display_usage(nouns, m, out))
+                return ArgumentParserResult(self._display_usage(m, out))
         except KeyError:
             output_format = None
 
@@ -259,19 +259,20 @@ class ArgumentParser(object):
             return ArgumentParserResult(handler(parsed, others), output_format)
         except IncorrectUsageError as ex:
             print(str(ex), file=out)
-            return ArgumentParserResult(self._display_usage(nouns, m, out))
+            return ArgumentParserResult(self._display_usage(m, out))
         finally:
             sys.stdout = old_stdout
 
-    def _display_usage(self, nouns, noun_map, out=sys.stdout):
-        spec = ' '.join(noun_map.get('$spec') or nouns)
+    def _display_usage(self, noun_map, out=sys.stdout): #pylint: disable=no-self-use
         subnouns = sorted(k for k in noun_map if not k.startswith('$'))
         argdoc = noun_map.get('$argdoc')
         delimiters = noun_map['$doc'][:-4]
 
-        doc = GroupHelpFile(delimiters, subnouns) if len(subnouns) > 0 else CommandHelpFile(delimiters, argdoc)
+        doc = GroupHelpFile(delimiters, subnouns) \
+              if len(subnouns) > 0 \
+              else CommandHelpFile(delimiters, argdoc)
         doc.load_from_file()
-        print_detailed_help(doc)
+        print_detailed_help(doc, out)
         return
 
     def _display_completions(self, noun_map, arguments, show_all=False, out=sys.stdout):
