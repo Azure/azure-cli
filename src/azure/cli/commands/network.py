@@ -279,38 +279,16 @@ def create_update_vnet(args, unexpected): #pylint: disable=unused-argument
 @option('--name -n <subnetName>', L('the the subnet name'), required=True)
 @option('--vnet -v <vnetName>', L('the name of the subnet vnet'), required=True)
 @option('--address-prefix -a <addressPrefix>', L('the the address prefix in CIDR format'), required=True)
-# TODO: setting the IPConfiguration fails, will contact owning team
-#@option('--ip-name -ipn <name>', L('the IP address configuration name'))
-#@option('--ip-private-address -ippa <ipAddress>', L('the private IP address'))
-#@option('--ip-allocation-method -ipam <allocationMethod>', L('the IP address allocation method'))
-#@option('--ip-public-address -ipa <ipAddress>', L('the public IP address'))
 def create_update_subnet(args, unexpected): #pylint: disable=unused-argument
-    from azure.mgmt.network.models import (Subnet,
-                                           # TODO: setting the IPConfiguration fails
-                                           #IPConfiguration,
-                                          )
+    from azure.mgmt.network.models import Subnet
 
     resource_group = args.get('resource-group')
     vnet = args.get('vnet')
     name = args.get('name')
     address_prefix = args.get('address-prefix')
-    # TODO: setting the IPConfiguration fails, will contact owning team
-    #ip_name = args.get('ip-name')
-    #ip_private_address = args.get('ip-private-address')
-    #ip_allocation_method = args.get('ip-allocation-method')
-    #ip_public_address = args.get('ip-public-address')
-
-    # TODO: setting the IPConfiguration fails, will contact owning team
-    #ip_configuration = IPConfiguration(subnet = name,
-    #                                    name = ip_name,
-    #                                    private_ip_address = ip_private_address,
-    #                                    private_ip_allocation_method = ip_allocation_method,
-    #                                    public_ip_address = ip_public_address)
 
     subnet_settings = Subnet(name=name,
                              address_prefix=address_prefix)
-                             # TODO: setting the IPConfiguration fails, will contact owning team
-                             #ip_configurations = [ip_configuration])
 
     op = LongRunningOperation('Creating subnet', 'Subnet created')
     smc = _network_client_factory()

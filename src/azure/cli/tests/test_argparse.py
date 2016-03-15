@@ -1,4 +1,4 @@
-import unittest
+﻿import unittest
 from six import StringIO
 
 from azure.cli._argparse import ArgumentParser, IncorrectUsageError
@@ -97,14 +97,20 @@ class Test_argparse(unittest.TestCase):
 
     def test_required_args(self):
         p = ArgumentParser('test')
-        p.add_command(lambda a, b: (a, b), 'n1', args=[('--arg -a', '', True, None), ('-b <v>', '', False, None)])
+        p.add_command(lambda a, b: (a, b), 
+                      'n1', args=[('--arg -a', '', True, None), 
+                                  ('-b <v>', '', False, None)])
 
         cmd_result = p.execute('n1 -a x'.split())
         res, other = cmd_result.result
         self.assertTrue(res.arg)
         self.assertSequenceEqual(res.positional, ['x'])
 
-        self.assertIsNone(p.execute('n1 -b x'.split()).result)
+        io = StringIO()
+        cmd_result = p.execute('n1 -b x'.split(), out=io)
+        self.assertIsNone(cmd_result.result)
+        self.assertTrue(io.getvalue().startswith("Missing required argument 'arg'"))
+        io.close()
 
     def test_specify_output_format(self):
         p = ArgumentParser('test')
@@ -123,8 +129,11 @@ class Test_argparse(unittest.TestCase):
         self.assertEqual(cmd_result.output_format, 'text')
 
         # Invalid format
-        cmd_result = p.execute('n1 -a x --output unknown'.split())
-        self.assertEqual(cmd_result.output_format, None)
+        io = StringIO()
+        cmd_res = p.execute('n1 -a x --output unknown'.split(), out=io)
+        self.assertIsNone(cmd_res.output_format)
+        self.assertTrue(io.getvalue().startswith("Invalid output format 'unknown'"))
+        io.close()
 
         # Invalid format
         cmd_result = p.execute('n1 -a x --output'.split())
