@@ -1,14 +1,16 @@
 def register(event_dispatcher):
-    @event_dispatcher.event_handler(event_dispatcher.REGISTER_GLOBAL_PARAMETERS)
     def _enable_experimental_handlers(_, event_data):
         """The user can opt in to experimental event handlers by
         passing an --experimental flag on the command line
         """
         try:
             event_data['args'].remove('--experimental')
-            event_dispatcher.register(event_dispatcher.REGISTER_GLOBAL_PARAMETERS, id_filter)
-            event_dispatcher.register(event_dispatcher.REGISTER_GLOBAL_PARAMETERS, generate_skeleton)
-            event_dispatcher.register(event_dispatcher.REGISTER_GLOBAL_PARAMETERS, use_skeleton)
+            event_dispatcher.register(event_dispatcher.REGISTER_GLOBAL_PARAMETERS,
+                                      id_filter)
+            event_dispatcher.register(event_dispatcher.REGISTER_GLOBAL_PARAMETERS,
+                                      generate_skeleton)
+            event_dispatcher.register(event_dispatcher.REGISTER_GLOBAL_PARAMETERS,
+                                      use_skeleton)
         except ValueError:
             pass
 
@@ -62,6 +64,5 @@ def register(event_dispatcher):
         except ValueError:
             pass
 
-    def file_argument(_, event_data): # pylint: disable=unused-argument
-        # TODO: read from file
-        pass
+    event_dispatcher.register(event_dispatcher.REGISTER_GLOBAL_PARAMETERS,
+                              _enable_experimental_handlers)

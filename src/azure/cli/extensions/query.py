@@ -1,5 +1,4 @@
 def register(event_dispatcher):
-    @event_dispatcher.event_handler(event_dispatcher.REGISTER_GLOBAL_PARAMETERS)
     def handle_query_parameter(_, event_data):
         try:
             args = event_data['args']
@@ -14,3 +13,4 @@ def register(event_dispatcher):
             pass
         except ValueError:
             pass
+    event_dispatcher.register(event_dispatcher.REGISTER_GLOBAL_PARAMETERS, handle_query_parameter)
