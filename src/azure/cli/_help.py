@@ -132,9 +132,11 @@ class CommandHelpFile(HelpFile): #pylint: disable=too-few-public-methods
             loaded_param = next((n for n in data['parameters'] if n['name'] == param.name), None)
             if loaded_param:
                 param.update_from_data(loaded_param)
-                loaded_params.append(param)
-            else:
-                raise HelpAuthoringException('Missing param help for {0}'.format(param.name))
+            loaded_params.append(param)
+
+        extra_param = next((p for p in data['parameters'] if p['name'] not in [lp.name for lp in loaded_params]), None)
+        if extra_param:
+            raise HelpAuthoringException('Extra help param {0}'.format(extra_param['name']))
         self.parameters = loaded_params
 
 
@@ -192,10 +194,6 @@ def _load_help_file(delimiters):
           populator-commands: 
               - az vm list
               - default
-        - name: --password/-p
-          type: string
-          short-summary: one line partial sentence
-          long-summary: paragraph(s)
         - name: --service-principal
           type: string
           short-summary: one line partial sentence
