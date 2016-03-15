@@ -227,13 +227,13 @@ class ArgumentParser(object):
             try:
                 parsed[a]
             except KeyError:
-                print(L("Missing required argument {}".format(a)))
+                print(L("Missing required argument '{}'.".format(a)), file=out)
                 return ArgumentParserResult(self._display_usage(nouns, m, out))
 
         try:
             output_format = others.pop('output') if others else None
             if output_format is not None and output_format not in OutputProducer.format_dict:
-                print(L("Invalid output format '{}'".format(output_format)))
+                print(L("Invalid output format '{}'.".format(output_format)), file=out)
                 return ArgumentParserResult(self._display_usage(nouns, m, out))
         except KeyError:
             output_format = None
