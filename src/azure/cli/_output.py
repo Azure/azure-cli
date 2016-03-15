@@ -7,7 +7,7 @@ from datetime import datetime
 from enum import Enum
 from six import StringIO
 
-from .main import EVENT_DISPATCHER
+from azure.cli.extensions import EVENT_DISPATCHER
 
 class OutputFormatException(Exception):
     pass

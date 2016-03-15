@@ -2,7 +2,7 @@ from collections import defaultdict
 
 class EventDispatcher:
     """Register for and raise events.
-    
+
     During the execution of a command, a set of events are raised
     that allow extensions to change the flow of actions.
 
@@ -19,13 +19,13 @@ class EventDispatcher:
 
     def __init__(self):
         self._handlers = defaultdict(lambda: [])
-    
+
     def raise_event(self, name, event_data):
         for func in self._handlers[name]:
             func(name, event_data)
-    
+
     def register(self, name, handler):
-        '''Register a callable that will be called when the 
+        '''Register a callable that will be called when the
         event `name` is raised.
 
         param: name: The name of the event
@@ -34,13 +34,13 @@ class EventDispatcher:
           event_data: `dict` with event specific data.
         '''
         self._handlers[name].append(handler)
-        
+
     def event_handler(self, name):
-        '''Any function decorated by @event_handler will 
+        '''Any function decorated by @event_handler will
         be registered as a handler for the given event name
         '''
         def wrapper(func):
-             self.register(name, func)
-             return func
+            self.register(name, func)
+            return func
         return wrapper
 

@@ -4,7 +4,7 @@ import sys
 from ._locale import L, get_file as locale_get_file
 from ._logging import logger
 from ._output import OutputProducer
-from .main import EVENT_DISPATCHER
+from azure.cli.extensions import EVENT_DISPATCHER
 
 # Named arguments are prefixed with one of these strings
 ARG_PREFIXES = sorted(('-', '--', '/'), key=len, reverse=True)
@@ -74,7 +74,7 @@ class ArgumentParser(object):
         self.complete_args = {'--complete'}
         self.global_args = {'--verbose', '--debug'}
 
-    def add_global_param(spec, desc):
+    def add_global_param(self, spec, desc):
         # TODO: Keep track of all global args to allow help
         # and statement completion to pick them up
         pass
