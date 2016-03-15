@@ -8,13 +8,13 @@ from ._locale import L
 __all__ = ['print_detailed_help', 'print_welcome_message', 'GroupHelpFile', 'CommandHelpFile']
 
 def print_welcome_message():
-    print L('\nWelcome to the cool new Azure CLI!\n\nHere are the base commands:\n')
+    _printIndent(L('\nWelcome to the cool new Azure CLI!\n\nHere are the base commands:\n'))
 
 # TODO: wire up out to print statements
 def print_detailed_help(help_file, out=sys.stdout): #pylint: disable=unused-argument
     _print_header(help_file)
 
-    print L('Arguments') if help_file.type == 'command' else L('Sub-Commands')
+    _printIndent(L('Arguments') if help_file.type == 'command' else L('Sub-Commands'))
 
     if help_file.type == 'command':
         _print_arguments(help_file)
@@ -26,7 +26,7 @@ def print_detailed_help(help_file, out=sys.stdout): #pylint: disable=unused-argu
 
 def _print_header(help_file):
     indent = 0
-    print ''
+    _printIndent('')
     _printIndent('{0}{1}'.format(help_file.command,
                                  ': ' + help_file.short_summary
                                  if help_file.short_summary
@@ -35,7 +35,7 @@ def _print_header(help_file):
 
     indent = 1
     _printIndent('{0}'.format(help_file.long_summary), indent)
-    print ''
+    _printIndent('')
 
 def _print_arguments(help_file):
     indent = 1
@@ -55,7 +55,7 @@ def _print_arguments(help_file):
 
         if p.value_sources:
             _printIndent(L("Values from: {0}").format(', '.join(p.value_sources)), indent)
-        print ''
+        _printIndent('')
     return indent
 
 def _print_groups(help_file):
@@ -64,7 +64,7 @@ def _print_groups(help_file):
         _printIndent('{0}{1}'.format(c.name,
                                      ': ' + c.short_summary if c.short_summary else ''),
                      indent)
-    print ''
+    _printIndent('')
 
 def _print_examples(help_file):
     indent = 0
@@ -134,7 +134,9 @@ class CommandHelpFile(HelpFile): #pylint: disable=too-few-public-methods
                 param.update_from_data(loaded_param)
             loaded_params.append(param)
 
-        extra_param = next((p for p in data['parameters'] if p['name'] not in [lp.name for lp in loaded_params]), None)
+        extra_param = next((p for p in data['parameters']
+                            if p['name'] not in [lp.name for lp in loaded_params]),
+                           None)
         if extra_param:
             raise HelpAuthoringException('Extra help param {0}'.format(extra_param['name']))
         self.parameters = loaded_params
