@@ -1,16 +1,11 @@
 ﻿import os
 import sys
 
-from ._event_dispatcher import EventDispatcher
-# EVENT_DISPATCHER provides notifications at different
-# stages in the command execution
-EVENT_DISPATCHER = EventDispatcher()
-
 from ._argparse import ArgumentParser
 from ._logging import configure_logging, logger
 from ._session import Session
 from ._output import OutputProducer
-import azure.cli.extensions
+from azure.cli.extensions import EVENT_DISPATCHER
 
 # CONFIG provides external configuration options
 CONFIG = Session()
@@ -21,7 +16,7 @@ SESSION = Session()
 def main(args, file=sys.stdout): #pylint: disable=redefined-builtin
     CONFIG.load(os.path.expanduser('~/az.json'))
     SESSION.load(os.path.expanduser('~/az.sess'), max_age=3600)
-    
+
     configure_logging(args, CONFIG)
 
     from ._locale import install as locale_install
@@ -29,7 +24,8 @@ def main(args, file=sys.stdout): #pylint: disable=redefined-builtin
                                 'locale',
                                 CONFIG.get('locale', 'en-US')))
 
-    EVENT_DISPATCHER.raise_event(EVENT_DISPATCHER.REGISTER_GLOBAL_PARAMETERS, event_data = { 'args': args })
+    EVENT_DISPATCHER.raise_event(EVENT_DISPATCHER.REGISTER_GLOBAL_PARAMETERS,
+                                 event_data={'args': args})
     parser = ArgumentParser("az")
 
     import azure.cli.commands as commands
