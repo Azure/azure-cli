@@ -12,7 +12,9 @@ def list_subscriptions(args, unexpected): #pylint: disable=unused-argument
 
 @command('account set')
 @description(L('Set the current subscription'))
-@option('--subscription-id -n <subscription-id>', L('Subscription Id, unique name also works.'))
+@option('--subscription-id -n <subscription-id>',
+        L('Subscription Id, unique name also works.'),
+        required=True)
 def set_active_subscription(args, unexpected): #pylint: disable=unused-argument
     subscription_id = args.get('subscription-id')
     if not id:
