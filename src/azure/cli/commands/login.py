@@ -11,7 +11,9 @@ CLIENT_ID = '04b07795-8ddb-461a-bbee-02f9e1bf7b46'
 
 @command('login')
 @description(L('log in to an Azure subscription using Active Directory Organization Id'))
-@option('--username -u <username>', L('organization Id or service principal. Microsoft Account is not yet supported.'), required=True)
+@option('--username -u <username>',
+        L('organization Id or service principal. Microsoft Account is not yet supported.'),
+        required=True)
 @option('--password -p <password>', L('user password or client secret, will prompt if not given.'))
 @option('--service-principal', L('the credential represents a service principal.'))
 @option('--tenant -t <tenant>', L('the tenant associated with the service principal.'))
