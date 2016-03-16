@@ -28,7 +28,7 @@ def register(event_dispatcher):
             try:
                 if str.startswith(value, '@'):
                     args[name] = load_file(value[1:])
-            except (TypeError, FileNotFoundError):
+            except (TypeError):
                 pass
 
     def generate_skeleton(_, event_data): #pylint: disable=unused-variable
