@@ -179,7 +179,7 @@ Myarray :
         expected = [{'a': 'b'}]
         self.assertEqual(actual, expected)
 
-    def test_out_todict__obj(self):
+    def test_out_todict_obj(self):
         MyObject = namedtuple('MyObject', 'a b')
         input = MyObject('x', 'y')
         actual = OutputProducer.todict(input)

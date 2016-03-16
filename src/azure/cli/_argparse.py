@@ -142,7 +142,7 @@ class ArgumentParser(object):
                 args,
                 show_usage=False,
                 show_completions=False,
-                out=sys.stdout):
+                out=None):
         '''Parses `args` and invokes the associated handler.
 
         The handler is passed two `Arguments` objects with all arguments other
@@ -157,7 +157,11 @@ class ArgumentParser(object):
         If `show_completions` is ``True`` or any of `self.complete_args` has
         been provided then raw information about the likely arguments will be
         provided.
+
+        If `out` is not specified, we default to sys.stdout.
         '''
+        out = sys.stdout if out is None else out
+
         if not show_usage:
             show_usage = any(a in self.help_args for a in args)
         if not show_completions:
@@ -229,13 +233,13 @@ class ArgumentParser(object):
             try:
                 parsed[a]
             except KeyError:
-                print(L("Missing required argument {}".format(a)))
+                print(L("Missing required argument '{}'.".format(a)), file=out)
                 return ArgumentParserResult(self._display_usage(nouns, m, out))
 
         try:
             output_format = others.pop('output') if others else None
             if output_format is not None and output_format not in OutputProducer.format_dict:
-                print(L("Invalid output format '{}'".format(output_format)))
+                print(L("Invalid output format '{}'.".format(output_format)), file=out)
                 return ArgumentParserResult(self._display_usage(nouns, m, out))
         except KeyError:
             output_format = None
