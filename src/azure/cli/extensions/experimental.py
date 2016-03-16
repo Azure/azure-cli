@@ -6,28 +6,30 @@ def register(event_dispatcher):
         try:
             event_data['args'].remove('--experimental')
             event_dispatcher.register(event_dispatcher.REGISTER_GLOBAL_PARAMETERS,
-                                      id_filter)
-            event_dispatcher.register(event_dispatcher.REGISTER_GLOBAL_PARAMETERS,
                                       generate_skeleton)
             event_dispatcher.register(event_dispatcher.REGISTER_GLOBAL_PARAMETERS,
                                       use_skeleton)
+            event_dispatcher.register(event_dispatcher.PARSING_PARAMETERS,
+                                      file_argument_value)
         except ValueError:
             pass
 
-    def id_filter(_, event_data):
-        """Filter to only return the Id property
-        from the result.
+    def file_argument_value(_, event_data):
+        """Replace provided parameter value with value from file
+        if the parameter value starts with a '@'
         """
-        try:
-            event_data['args'].remove('--id-only')
-            def filter_output(_, event_data):
-                import jmespath
-                event_data['result'] = jmespath.search('[*].id', event_data['result'])
-            event_dispatcher.register(event_dispatcher.TRANSFORM_RESULT, filter_output)
-        except IndexError:
-            pass
-        except ValueError:
-            pass
+        def load_file(path):
+            with open(path, 'r') as f:
+                return f.read()
+
+        args = event_data['args']
+        for name in args.keys():
+            value = args[name]
+            try:
+                if str.startswith(value, '@'):
+                    args[name] = load_file(value[1:])
+            except (TypeError, FileNotFoundError):
+                pass
 
     def generate_skeleton(_, event_data): #pylint: disable=unused-variable
         try:
