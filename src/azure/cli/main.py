@@ -5,6 +5,7 @@ from ._argparse import ArgumentParser
 from ._logging import configure_logging, logger
 from ._session import Session
 from ._output import OutputProducer
+from azure.cli.extensions import event_dispatcher
 
 # CONFIG provides external configuration options
 CONFIG = Session()
@@ -23,7 +24,8 @@ def main(args, file=sys.stdout): #pylint: disable=redefined-builtin
                                 'locale',
                                 CONFIG.get('locale', 'en-US')))
 
-
+    event_dispatcher.raise_event(event_dispatcher.REGISTER_GLOBAL_PARAMETERS,
+                                 event_data={'args': args})
     parser = ArgumentParser("az")
 
     import azure.cli.commands as commands
@@ -50,3 +52,4 @@ def main(args, file=sys.stdout): #pylint: disable=redefined-builtin
         return ex.args[1] if len(ex.args) >= 2 else -1
     except KeyboardInterrupt:
         return -1
+
