@@ -3,75 +3,111 @@ Setting up your development environment
 The Azure Python CLI projects sources are located on GitHub (https://github.com/Azure/azure-cli/). In order to contribute to the project, you are expected to: 
 -	Have a GitHub account. For Microsoft contributors, follow the guidelines on https://opensourcehub.microsoft.com/ to create, configure and link your account
 -	Fork the  https://github.com/Azure/azure-cli/ repository into your private GitHub account
--	Create pull requests against the httips://github.com/azure/azure-cli repository to get your code changes merged into the project repository.
+-	Create pull requests against the https://github.com/azure/azure-cli repository to get your code changes merged into the project repository.
+
+##Docker Setup
+If you have not previously done so, configure your Docker client engine [here](https://docs.docker.com/engine/installation/).
+
+Then:
++ Log in to Docker with credentials from [secure notebook](https://microsoft.sharepoint.com/teams/azuresdk/adx/secure/_layouts/15/WopiFrame.aspx?sourcedoc=%7b22a574d3-9ec2-4ec6-87d1-6a7e78968634%7d&action=edit&wd=target%28%2F%20%2FCredentials.one%7Ca1d4455c-8cca-4ca0-9bfc-bea7467a45bb%2FRBAC%20Testing%20in%20Prod%7Ca46189d9-367b-482e-af70-cdafd8a0a705%2F%29).
++ Run `docker pull azuresdk/azure-cli-python:latest`
++ Run `docker run -i -t azuresdk/azure-cli-python:latest`
+
+##Docker Setup
+
++ Log in to Docker with credentials from [secure notebook](https://microsoft.sharepoint.com/teams/azuresdk/adx/secure/_layouts/15/WopiFrame.aspx?sourcedoc=%7b22a574d3-9ec2-4ec6-87d1-6a7e78968634%7d&action=edit&wd=target%28%2F%20%2FCredentials.one%7Ca1d4455c-8cca-4ca0-9bfc-bea7467a45bb%2FRBAC%20Testing%20in%20Prod%7Ca46189d9-367b-482e-af70-cdafd8a0a705%2F%29).
++ Run `docker pull azuresdk/azure-cli-python:latest`
++ Run `docker run -i -t azuresdk/azure-cli-python:latest`
 
 ##Preparing your machine
-+	Install Python 3.5.x from http://python.org. Please note that the version of Python that comes preinstalled on OSX is 2.7. 
-+	Clone your repository and check out the master branch
-+	Create a new virtual environment “env” for Python 3.5 in the root of your clone. You can do this by running:
+1.	Install Python 3.5.x from http://python.org. Please note that the version of Python that comes preinstalled on OSX is 2.7. 
+2.	Clone your repository and check out the master branch.
+3.	Create a new virtual environment “env” for Python 3.5 in the root of your clone. You can do this by running:
 
-Windows
-```BatchFile
-python.exe -m venv <clone root>\env
-```
-OSX/Ubuntu
-```Shell 
-python –m venv <clone root>/env
-```
+  #####Windows
+  ```BatchFile
+  python -m venv <clone root>\env
+  ```
+  #####OSX/Ubuntu (bash)
+  ```Shell
+  python –m venv <clone root>/env
+  ```
+4.  Activate the env virtual environment by running:
 
-+	Activate the env virtual environment by running:
+  #####Windows
+  ```BatchFile
+  <clone root>\env\scripts\activate.bat
+  ```
+  #####OSX/Ubuntu (bash)
+  ```Shell
+  . <clone root>/env/bin/activate
+  ```
 
-Windows:
-```BatchFile
-<clone root>\env\scripts\activate.bat
-```
-OSX/Ubuntu (bash):
-```Shell
-. <clone root>/env/bin/activate
-```
+5.	Install the dependencies including the latest autorest generated Azure SDK.
+  ```Shell
+  pip install -r requirements.txt
+  ```
+6.  Add `<clone root>\src` to your PYTHONPATH environment variable:
 
-+	Install the dependencies including the latest autorest generated azure sdk.
-```Shell
-pip install -r requirements.txt
-```
-+	Add <clone root>\src to your PYTHONPATH environment variable:
+  #####Windows
+  ```BatchFile
+  set PYTHONPATH=<clone root>\src;%PYTHONPATH%
+  ```
+  #####OSX/Ubuntu (bash)
+  ```Shell
+  export PYTHONPATH=<clone root>/src:${PYTHONPATH}
+  ```
+7.  Setup tab completion (OSX/Ubuntu ONLY).
 
-Windows:
-```BatchFile
-set PYTHONPATH=<clone root>\src;%PYTHONPATH%
-```
-OSX/Ubuntu (bash):
-```Shell
-export PYTHONPATH=<clone root>/src:${PYTHONPATH}
-```
-+ Hook-up tab completion
-Open Bash/zsh window and run
-```
-source ./az.completion.sh
-```
+  Open Bash or zsh window and run:
+  
+  ```Shell
+  source ./az.completion.sh
+  ```
 
 ##Configuring your IDE
-###Visual Studio (Windows only)
-+	Install Python Tools for Visual Studio. As of 2/18/2016, the current version (PTVS 2.2) can be found here.
-+	Open the azure-cli.pyproj project
+####Visual Studio (Windows only)
+1.	Install Python Tools for Visual Studio. As of 2/18/2016, the current version (PTVS 2.2) can be found at http://microsoft.github.io/PTVS/.
+2.	Open the azure-cli.pyproj project
 You should now be able to launch your project by pressing F5/start debugging
 
-###Visual Studio Code (Any platform)
+####Visual Studio Code (Any platform)
 Experimental steps – still haven’t been able to get virtual environments to work well with VSCode
-+	Install VS Code
-+	Install (one of) the python extension(s) (https://marketplace.visualstudio.com/items?itemName=donjayamanne.python)
+
+1.	Install VS Code
+2.	Install (one of) the python extension(s) (https://marketplace.visualstudio.com/items?itemName=donjayamanne.python)
 Debugging should now work (including stepping and setting breakpoints). 
 
 The repo has a launch.json file that will launch the version of Python that is first on your path. 
 
-##Running unit tests:
+##Running CLI
+####Command line
+1.  Activate your virtual environment if not already done
 
-###Command line:
-If you have configured your PYTHONPATH correctly (see above), you should be able to run all unit tests by executing python -m unittest from your <clone root>/src directory. 
+  #####Windows:
+  ```BatchFile
+  <clone root>\env\scripts\activate.bat
+  ```
+2.  Invoke the CLI using:
 
-###VS Code:
-<Working on it>
+  #####Windows:
+  ```BatchFile
+  <clone root>\az.bat [commands]
+  ```
+  which is equivalent to the following:
+  ```BatchFile
+  <clone root>\src\python -m azure.cli [commands]
+  ```
 
-###Visual Studio
-<Working on it>
-
+##Running Unit Tests:
+####Command line
+#####Windows:
+  Provided your PYTHONPATH was set correcltly, from `<clone root>` run:
+  ```BatchFile
+  python -m unittest discover -s src\azure\cli\tests
+  ``` 
+####VS Code
+  Under construction...
+  
+####Visual Studio
+  Select `Test > Windows > Test Explorer` and click `Run All` in the Test Explorer pane.
