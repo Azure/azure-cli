@@ -4,6 +4,7 @@ import sys
 from ._locale import L, get_file as locale_get_file
 from ._logging import logger
 from ._output import OutputProducer
+from azure.cli.extensions import event_dispatcher
 
 # Named arguments are prefixed with one of these strings
 ARG_PREFIXES = sorted(('-', '--', '/'), key=len, reverse=True)
@@ -72,6 +73,11 @@ class ArgumentParser(object):
         self.help_args = {'--help', '-h'}
         self.complete_args = {'--complete'}
         self.global_args = {'--verbose', '--debug'}
+
+    def add_global_param(self, spec, desc):
+        # TODO: Keep track of all global args to allow help
+        # and statement completion to pick them up
+        pass
 
     def add_command(self,
                     handler,
@@ -241,7 +247,21 @@ class ArgumentParser(object):
         old_stdout = sys.stdout
         try:
             sys.stdout = out
-            return ArgumentParserResult(handler(parsed, others), output_format)
+            event_data = {
+                'handler': handler,
+                'command_metadata': m,
+                'args': parsed,
+                'unexpected': others
+                }
+
+            # Let any event handlers that want to modify/munge the parameters do so...
+            event_dispatcher.raise_event(event_dispatcher.PARSING_PARAMETERS, event_data)
+
+            # Let any event handlers that want to know that we are about to execute do their
+            # thing...
+            event_dispatcher.raise_event(event_dispatcher.EXECUTING_COMMAND, event_data)
+
+            return ArgumentParserResult(event_data['handler'](parsed, others), output_format)
         except IncorrectUsageError as ex:
             print(str(ex), file=out)
             return ArgumentParserResult(self._display_usage(nouns, m, out))

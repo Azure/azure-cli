@@ -65,6 +65,7 @@ CLASSIFIERS = [
 DEPENDENCIES = [
     'azure-mgmt==0.20.2',
     'azure-storage==0.20.3',
+    'jmespath==0.9.0',
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
@@ -84,6 +85,7 @@ setup(
     packages=[
         'azure.cli',
         'azure.cli.commands',
+        'azure.cli.extensions',
     ],
     install_requires=DEPENDENCIES,
 )
