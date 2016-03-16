@@ -129,10 +129,6 @@ class ArgumentParser(object):
             kw.update({_read_arg(a)[0]: (target, v, req, aliases) for a in aliases})
             ad.append(('/'.join(aliases), desc, req))
 
-    #pylint: disable=too-many-branches
-    #pylint: disable=too-many-statements
-    #pylint: disable=too-many-locals
-    #pylint: disable=too-many-return-statements
     def execute(self,
                 args,
                 show_usage=False,
@@ -156,55 +152,64 @@ class ArgumentParser(object):
         If `out` is not specified, we default to sys.stdout.
         '''
         out = sys.stdout if out is None else out
-        show_full_completions = False
-
-        if len(args) == 0:
-            print_welcome_message()
-            show_completions = True
-            show_full_completions = True
 
         if not show_usage:
             show_usage = any(a in self.help_args for a in args)
         if not show_completions:
             show_completions = any(a in self.complete_args for a in args)
 
+        try:
+            it = self._get_args_itr(args)
+            m, n = self._get_noun_map(args, it, out)
+
+            if show_usage:
+                return ArgumentParserResult(self._display_usage(m, out))
+            if show_completions:
+                return ArgumentParserResult(
+                    self._display_completions(m, args, out))
+
+            if len(args) == 0:
+                print_welcome_message()
+                self._display_children(m, args, out)
+                return ArgumentParserResult(None)
+
+            expected_kwargs, handler = self._get_noun_data(m, n, args)
+
+            others, parsed = self._parse_nouns(expected_kwargs, it, m, n, out)
+
+            self._handle_required_args(expected_kwargs, parsed, out)
+
+            output_format = self._get_output_format(m, others, out)
+        except (ArgParseFinished, ArgParseError):
+            return ArgumentParserResult(None)
+
+        return self._execute(m, out, handler, parsed, others, output_format)
+
+    def _get_args_itr(self, args):
         all_global_args = set(
             a.lstrip('-/') for a in self.help_args | self.complete_args | self.global_args)
         def not_global(a):
             return a.lstrip('-/') not in all_global_args
         it = filter(not_global, args).__iter__() #pylint: disable=bad-builtin
+        return it
 
+    def _get_noun_map(self, args, it, out):
         m = self.noun_map
-        nouns = []
         n = next(it, '')
         while n:
             try:
                 m = m[n.lower()]
-                nouns.append(n.lower())
             except LookupError:
                 if '$args' not in m:
                     print(L('\nCommand "{0}" not found, names starting with "{0}":\n'.format(n)),
                           file=sys.stderr)
-                    show_completions = True
+                    self._display_completions(m, args, out=out)
+                    raise ArgParseFinished()
                 break
             n = next(it, '')
+        return m, n
 
-        try:
-            expected_kwargs = m['$kwargs']
-            handler = m['$handler']
-        except LookupError:
-            logger.debug('Missing data for noun %s', n)
-            if not show_completions and not show_usage:
-                show_full_completions = True
-                print(L('Available commands:\n'))
-            show_completions = True
-
-        if show_usage:
-            return ArgumentParserResult(self._display_usage(m, out))
-        if show_completions:
-            return ArgumentParserResult(
-                self._display_completions(m, args, show_full_completions, out))
-
+    def _parse_nouns(self, expected_kwargs, it, m, n, out): #pylint: disable=too-many-arguments
         parsed = Arguments()
         others = Arguments()
         while n:
@@ -223,7 +228,8 @@ class ArgumentParser(object):
                     if value is not None:
                         print(L("argument '{0}' does not take a value").format(key_n),
                               file=out)
-                        return ArgumentParserResult(self._display_usage(m, out))
+                        self._display_usage(m)
+                        raise ArgParseFinished()
                     parsed.add_from_dotted(target_value[0], True)
                 else:
                     # Arg with a value
@@ -234,23 +240,41 @@ class ArgumentParser(object):
                 # Positional arg
                 parsed.positional.append(n)
             n = next_n
+        return others, parsed
 
+    def _get_noun_data(self, m, n, args):
+        try:
+            expected_kwargs = m['$kwargs']
+            handler = m['$handler']
+        except LookupError:
+            logger.debug('Missing data for noun %s', n)
+            self._display_children(m, args, out=sys.stderr)
+            raise ArgParseFinished()
+        return expected_kwargs, handler
+
+    @staticmethod
+    def _handle_required_args(expected_kwargs, parsed, out):
         required_args = [x for x, _, req, _ in expected_kwargs.values() if req]
         for a in required_args:
             try:
                 parsed[a]
             except KeyError:
-                print(L("Missing required argument '{}'.".format(a)), file=out)
-                return ArgumentParserResult(None)
+                msg = L("Missing required argument '{}'.".format(a))
+                print(msg, file=out)
+                raise ArgParseError(msg)
 
+    def _get_output_format(self, m, others, out):
         try:
             output_format = others.pop('output') if others else None
             if output_format is not None and output_format not in OutputProducer.format_dict:
                 print(L("Invalid output format '{}'.".format(output_format)), file=out)
-                return ArgumentParserResult(self._display_usage(m, out))
+                self._display_usage(m)
+                raise ArgParseFinished()
         except KeyError:
             output_format = None
+        return output_format
 
+    def _execute(self, m, out, handler, parsed, others, output_format): #pylint: disable=too-many-arguments
         old_stdout = sys.stdout
         try:
             sys.stdout = out
@@ -272,9 +296,20 @@ class ArgumentParser(object):
               else CommandHelpFile(delimiters, argdoc)
         doc.load_from_file()
         print_detailed_help(doc, out)
-        return
 
-    def _display_completions(self, noun_map, arguments, show_all=False, out=sys.stdout):
+    def _display_completions(self, noun_map, arguments, out=sys.stdout):
+        nouns = self._get_noun_matches(arguments, noun_map, out)
+        last_arg = arguments[-1] if len(arguments) > 0 else ''
+        matches = [k for k in nouns if k.startswith(last_arg)]
+        print('\n'.join(sorted(set(matches))), file=out)
+        out.flush()
+
+    def _display_children(self, noun_map, arguments, out=sys.stdout):
+        nouns = self._get_noun_matches(arguments, noun_map, out)
+        print('\n'.join(sorted(set(nouns))), file=out)
+        out.flush()
+
+    def _get_noun_matches(self, arguments, noun_map, out):
         for a in self.complete_args:
             try:
                 arguments.remove(a)
@@ -294,13 +329,14 @@ class ArgumentParser(object):
 
         if last_arg.startswith('-') and (last_arg in args_candidates):
             print('\n', file=out) # TODO: parameter value completion is N.Y.I
+            return []
         else:
             subcommand_candidates = [k for k in noun_map if not k.startswith('$')]
             candidates = subcommand_candidates + args_candidates
-            matches = [k for k in candidates if k.startswith(last_arg)] \
-                if not show_all \
-                else candidates
+            return candidates
 
-            print('\n'.join(sorted(set(matches))), file=out)
+class ArgParseError(Exception):
+    pass
 
-        out.flush()
+class ArgParseFinished(Exception):
+    pass
