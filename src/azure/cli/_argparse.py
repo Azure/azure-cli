@@ -160,9 +160,7 @@ class ArgumentParser(object):
 
         if len(args) == 0:
             print_welcome_message()
-            if not show_completions:
-                args.append('--complete')
-                show_completions = True
+            show_completions = True
             show_full_completions = True
 
         if not show_usage:
@@ -185,10 +183,9 @@ class ArgumentParser(object):
                 nouns.append(n.lower())
             except LookupError:
                 if '$args' not in m:
-                    print(L('\nCommand "{0}" not found, names starting with "{0}":\n'.format(n)))
-                    if not show_completions:
-                        args.append('--complete')
-                        show_completions = True
+                    print(L('\nCommand "{0}" not found, names starting with "{0}":\n'.format(n)),
+                          file=sys.stderr)
+                    show_completions = True
                 break
             n = next(it, '')
 
@@ -198,9 +195,6 @@ class ArgumentParser(object):
         except LookupError:
             logger.debug('Missing data for noun %s', n)
             if not show_completions and not show_usage:
-                if not show_completions:
-                    args.append('--complete')
-                    show_completions = True
                 show_full_completions = True
                 print(L('Available commands:\n'))
             show_completions = True
@@ -267,7 +261,8 @@ class ArgumentParser(object):
         finally:
             sys.stdout = old_stdout
 
-    def _display_usage(self, noun_map, out=sys.stdout): #pylint: disable=no-self-use
+    @staticmethod
+    def _display_usage(noun_map, out=sys.stdout):
         subnouns = sorted(k for k in noun_map if not k.startswith('$'))
         argdoc = noun_map.get('$argdoc')
         delimiters = noun_map['$doc'][:-4]
@@ -281,7 +276,10 @@ class ArgumentParser(object):
 
     def _display_completions(self, noun_map, arguments, show_all=False, out=sys.stdout):
         for a in self.complete_args:
-            arguments.remove(a)
+            try:
+                arguments.remove(a)
+            except ValueError:
+                pass
 
         kwargs = noun_map.get('$kwargs') or []
         last_arg = arguments[-1] if len(arguments) > 0 else ''

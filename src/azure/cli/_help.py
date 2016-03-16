@@ -9,7 +9,12 @@ from ._locale import L
 __all__ = ['print_detailed_help', 'print_welcome_message', 'GroupHelpFile', 'CommandHelpFile']
 
 def print_welcome_message():
-    _printIndent(L('\nWelcome to the cool new Azure CLI!\n\nHere are the base commands:\n'))
+    print(L('     /\\                        \n'
+            '    /  \\    _____   _ _ __ ___ \n'
+            '   / /\ \\  |_  / | | | \'__/ _ \\\n' #pylint: disable=anomalous-backslash-in-string
+            '  / ____ \\  / /| |_| | | |  __/\n'
+            ' /_/    \\_\\/___|\\__,_|_|  \\___|\n'))
+    print(L('\nWelcome to the cool new Azure CLI!\n\nHere are the base commands:\n'))
 
 # TODO: wire up out to print statements
 def print_detailed_help(help_file, out=sys.stdout): #pylint: disable=unused-argument
