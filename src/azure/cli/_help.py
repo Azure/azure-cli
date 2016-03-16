@@ -175,7 +175,8 @@ class HelpExample(object): #pylint: disable=too-few-public-methods
 
 def _printIndent(s, indent=0):
     tw = textwrap.TextWrapper(initial_indent="    "*indent, subsequent_indent="    "*indent)
-    print tw.fill(s)
+    # Print was a statement in 2.7, but is a function in 3.5.  This call works for both.
+    print(tw.fill(s)) #pylint: disable=superfluous-parens
 
 def _get_column_indent(text, max_name_length):
     return ' '*(max_name_length - len(text))
