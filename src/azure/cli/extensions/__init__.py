@@ -7,3 +7,4 @@ event_dispatcher = EventDispatcher()
 
 register_query(event_dispatcher)
 register_transform(event_dispatcher)
+register_transform(register_experimental)
