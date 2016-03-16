@@ -7,8 +7,6 @@ RUN apt-get update -qq && \
       jq && \
     rm -rf /var/lib/apt/lists/*
 
-RUN pip3 install azure==2.0.0rc1
-
 ENV AZURECLITEMP /opt/azure-cli
 ENV PYTHONPATH $PYTHONPATH:$AZURECLITEMP/src
 ENV PATH $PATH:$AZURECLITEMP
@@ -16,7 +14,10 @@ ENV PATH $PATH:$AZURECLITEMP
 RUN mkdir -p $AZURECLITEMP
 COPY src $AZURECLITEMP/src
 COPY az.completion.sh $AZURECLITEMP/
+COPY requirements.txt $AZURECLITEMP/
 COPY az $AZURECLITEMP/
+
+RUN pip3 install -r $AZURECLITEMP/requirements.txt
 
 RUN chmod +x $AZURECLITEMP/az
 RUN ln /usr/bin/python3 /usr/bin/python
