@@ -1,8 +1,9 @@
 ﻿from ._event_dispatcher import EventDispatcher
 from .query import register as register_query
 from .transform import register as register_transform
+from .experimental import register as register_experimental
 
-EVENT_DISPATCHER = EventDispatcher()
+event_dispatcher = EventDispatcher()
 
-register_query(EVENT_DISPATCHER)
-register_transform(EVENT_DISPATCHER)
+register_query(event_dispatcher)
+register_transform(event_dispatcher)
