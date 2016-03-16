@@ -4,13 +4,13 @@ from .._logging import logger
 # TODO: Alternatively, simply scan the directory for all modules
 COMMAND_MODULES = [
     'account',
+    'keyvault',
     'login',
     'logout',
     'network',
     'resourcegroup',
     'storage',
     'vm',
-    'keyvault',
 ]
 
 _COMMANDS = {}
