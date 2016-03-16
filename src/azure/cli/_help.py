@@ -191,7 +191,7 @@ def _load_help_file(delimiters):
     parameters: 
         - name: --username/-u
           type: string
-          required: false
+          required: True
           short-summary: one line partial sentence
           long-summary: text, markdown, etc.
           populator-commands: 
