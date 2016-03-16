@@ -2,7 +2,6 @@
 from ..commands import command, description, option
 from ._command_creation import get_mgmt_service_client, get_data_service_client
 from .._argparse import IncorrectUsageError
-from .._logging  import logger
 from .._locale import L
 
 @command('storage account list')
@@ -25,11 +24,12 @@ def list_accounts(args, unexpected): #pylint: disable=unused-argument
     return list(accounts)
 
 @command('storage account check')
-@option('--account-name -an <name>')
+@option('--account-name -an <name>', required=True)
 def checkname(args, unexpected): #pylint: disable=unused-argument
     from azure.mgmt.storage import StorageManagementClient, StorageManagementClientConfiguration
     smc = get_mgmt_service_client(StorageManagementClient, StorageManagementClientConfiguration)
-    logger.warning(smc.storage_accounts.check_name_availability(args.account_name))
+    availability = smc.storage_accounts.check_name_availability(args.get('account-name'))
+    return availability
 
 # TODO: update this once enums are supported in commands first-class (task #115175885)
 public_access_types = {'none': None,
@@ -57,7 +57,9 @@ def create_block_blob(args, unexpected): #pylint: disable=unused-argument
                                                  args.get('account-key'))
 
     try:
-        public_access = public_access_types[args.get('container.public-access')]
+        public_access = public_access_types[args.get('container.public-access')] \
+                                            if args.get('container.public-access') \
+                                            else None
     except KeyError:
         raise IncorrectUsageError(L('container.public-access must be: {}'
                                     .format(public_access_string)))
