@@ -13,10 +13,11 @@ from .._locale import L
         L('user object ID from an AD user or Service Principal'),
         required=True)
 @option('--keys-permissions -kp <value>',
-        L('values (quoted, space-seperated): all | create | import | update | get | list | delete | backup '
-          '| restore | encrypt | decrypt | wrapkey | unwrapkey | sign | verify, default: all'))
-@option('--secrets-permissions -sp <value>', L('values (quoted, space-seperated): all | get | set | list | delete, '
-                                              'default: all'))
+        L('values (quoted, space-seperated): all | create | import | update | get | list | delete'
+          ' | backup | restore | encrypt | decrypt | wrapkey | unwrapkey | sign | verify, '
+          'default: all'))
+@option('--secrets-permissions -sp <value>', L('values (quoted, space-seperated): all | get | set'
+                                               ' | list | delete, default: all'))
 @option('--sku-name <value>', L('values: standard | premium, default: standard'))
 @option('--enable-vault-for-deployment -ed', L('enable VM deployment'))
 @option('--enable-vault-for-disk-encryption -ee', L('enable disk encryption'))
@@ -34,28 +35,25 @@ def create_update_keyvault(args, unexpected): #pylint: disable=unused-argument
         'keyVaultName': {'value': args.get('name')},
         }
 
-    if args.get('keys-permissions'):
-        parameters.setdefault('keysPermissions',
-                              {'value': args.get('keys-permissions').split()})
+    if 'keys-permissions' in args:
+        parameters['keysPermissions'] = {'value': args['keys-permissions'].split()}
 
-    if args.get('secrets-permissions'):
-        parameters.setdefault('secretsPermissions',
-                              {'value': args.get('secrets-permissions').split()})
+    if 'secrets-permissions' in args:
+        parameters['secretsPermissions'] = {'value': args['secrets-permissions'].split()}
 
-    if args.get('sku-name'):
-        parameters.setdefault('skuName', {'value': args.get('sku-name').split()})
+    if 'sku-name' in args:
+        parameters['skuName'] = {'value': args['sku-name']}
 
-    if args.get('enable-vault-for-deployment'):
-        parameters.setdefault('enableVaultForDeployment',
-                              {'value': args.get('enable-vault-for-deployment')})
+    if 'enable-vault-for-deployment' in args:
+        parameters['enableVaultForDeployment'] = {'value': args['enable-vault-for-deployment']}
 
-    if args.get('enable-vault-for-disk-encryption'):
-        parameters.setdefault('enableVaultForDiskEncryption',
-                              {'value': args.get('enable-vault-for-disk-encryption')})
+    if 'enable-vault-for-disk-encryption' in args:
+        parameters['enableVaultForDiskEncryption'] = {'value':
+                                                      args['enable-vault-for-disk-encryption']}
 
-    if args.get('enabled-for-template-deployment'):
-        parameters.setdefault('enabledForTemplateDeployment',
-                              {'value': args.get('enabled-for-template-deployment')})
+    if 'enabled-for-template-deployment' in args:
+        parameters['enabledForTemplateDeployment'] = {'value':
+                                                      args['enabled-for-template-deployment']}
 
     template_url = ('https://raw.githubusercontent.com/azure/azure-quickstart-templates/'
                     'master/101-key-vault-create/azuredeploy.json')
