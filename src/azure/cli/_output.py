@@ -7,6 +7,8 @@ from datetime import datetime
 from enum import Enum
 from six import StringIO
 
+from azure.cli.extensions import event_dispatcher
+
 class OutputFormatException(Exception):
     pass
 
@@ -59,7 +61,10 @@ class OutputProducer(object): #pylint: disable=too-few-public-methods
 
     def out(self, obj):
         obj = OutputProducer.todict(obj)
-        print(self.formatter(obj), file=self.file)
+        event_data = {'result': obj}
+        event_dispatcher.raise_event(event_dispatcher.TRANSFORM_RESULT, event_data)
+        event_dispatcher.raise_event(event_dispatcher.FILTER_RESULT, event_data)
+        print(self.formatter(event_data['result']), file=self.file)
 
     @staticmethod
     def todict(obj): #pylint: disable=too-many-return-statements
