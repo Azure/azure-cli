@@ -8,19 +8,20 @@ from .._locale import L
 @option('--resource-group -g <resourceGroup>', L('the resource group name'), required=True)
 @option('--name -n <keyVaultName>', L('the Key Vault name'), required=True)
 @option('--location -l <location>', L('the Key Vault location'), required=True)
-@option('--tenantId -t <tenantId>', L('the Key Vault tenant'), required=True)
-@option('--objectId -o <objectId>',
-        L('user object ID, AD user or Service Principal'),
+@option('--tenant-id -t <tenantId>', L('the Key Vault tenant'), required=True)
+@option('--object-id -o <objectId>',
+        L('user object ID from an AD user or Service Principal'),
         required=True)
-@option('--keysPermissions -kp <value>',
-        L('values: all | create | import | update | get | list | delete | backup '
+@option('--keys-permissions -kp <value>',
+        L('values (quoted, space-seperated): all | create | import | update | get | list | delete | backup '
           '| restore | encrypt | decrypt | wrapkey | unwrapkey | sign | verify, default: all'))
-@option('--secretsPermissions -sp <value>', L('values: all | get | set | list | delete, '
+@option('--secrets-permissions -sp <value>', L('values (quoted, space-seperated): all | get | set | list | delete, '
                                               'default: all'))
-@option('--skuName <value>', L('values: standard | premium, default: standard'))
-@option('--enableVaultForDeployment -ed', L('enable VM deployment'))
-@option('--enableVaultForDiskEncryption -ee', L('enable disk encryption'))
-@option('--enabledForTemplateDeployment -et', L('enable template deployment'))
+@option('--sku-name <value>', L('values: standard | premium, default: standard'))
+@option('--enable-vault-for-deployment -ed', L('enable VM deployment'))
+@option('--enable-vault-for-disk-encryption -ee', L('enable disk encryption'))
+@option('--enabled-for-template-deployment -et', L('enable template deployment'))
+@option('--deployment-mode -dp <value>', L('values: Complete | Incremental, default: Incremental'))
 def create_update_keyvault(args, unexpected): #pylint: disable=unused-argument
     from azure.mgmt.resource.resources import (ResourceManagementClientConfiguration,
                                                ResourceManagementClient)
@@ -28,26 +29,40 @@ def create_update_keyvault(args, unexpected): #pylint: disable=unused-argument
 
     parameters = {
         'location': {'value': args.get('location')},
-        'tenantId': {'value': args.get('tenantId')},
-        'objectId': {'value': args.get('objectId')},
+        'tenantId': {'value': args.get('tenant-id')},
+        'objectId': {'value': args.get('object-id')},
         'keyVaultName': {'value': args.get('name')},
-        'keysPermissions': {'value': [args.get('keysPermissions')
-                                      if args.get('keysPermissions')
-                                      else 'All']},
-        'secretsPermissions': {'value': [args.get('secretsPermissions')
-                                         if args.get('secretsPermissions')
-                                         else 'All']},
-        'skuName': {'value': args.get('skuName') if args.get('skuName') else 'Standard'},
-        'enableVaultForDeployment': {'value': bool(args.get('enableVaultForDeployment'))},
-        'enableVaultForDiskEncryption': {'value': bool(args.get('enableVaultForDiskEncryption'))},
-        'enabledForTemplateDeployment': {'value': bool(args.get('enabledForTemplateDeployment'))},
         }
+
+    if args.get('keys-permissions'):
+        parameters.setdefault('keysPermissions',
+                              {'value': args.get('keys-permissions').split()})
+
+    if args.get('secrets-permissions'):
+        parameters.setdefault('secretsPermissions',
+                              {'value': args.get('secrets-permissions').split()})
+
+    if args.get('sku-name'):
+        parameters.setdefault('skuName', {'value': args.get('sku-name').split()})
+
+    if args.get('enable-vault-for-deployment'):
+        parameters.setdefault('enableVaultForDeployment',
+                              {'value': args.get('enable-vault-for-deployment')})
+
+    if args.get('enable-vault-for-disk-encryption'):
+        parameters.setdefault('enableVaultForDiskEncryption',
+                              {'value': args.get('enable-vault-for-disk-encryption')})
+
+    if args.get('enabled-for-template-deployment'):
+        parameters.setdefault('enabledForTemplateDeployment',
+                              {'value': args.get('enabled-for-template-deployment')})
 
     template_url = ('https://raw.githubusercontent.com/azure/azure-quickstart-templates/'
                     'master/101-key-vault-create/azuredeploy.json')
+
     properties = DeploymentProperties(template_link=ParametersLink(template_url),
                                       parameters=parameters,
-                                      mode='Complete')
+                                      mode=args.get('deployment-mode', 'Incremental'))
 
     op = LongRunningOperation('Creating Key Vault', 'Key Vault created')
     smc = get_mgmt_service_client(ResourceManagementClient, ResourceManagementClientConfiguration)
