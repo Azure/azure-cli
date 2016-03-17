@@ -296,7 +296,6 @@ class ArgumentParser(object):
               if len(subnouns) > 0 \
               else CommandHelpFile(delimiters, argdoc)
         doc.load(noun_map)
-        #doc.load_from_file()
         print_detailed_help(doc, out)
 
     def _display_completions(self, noun_map, arguments, out=sys.stdout):
