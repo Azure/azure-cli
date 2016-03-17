@@ -58,6 +58,7 @@ DEPENDENCIES = [
     'applicationinsights',
     'azure==2.0.0rc1',
     'six',
+    'jmespath',
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
@@ -82,6 +83,7 @@ setup(
     packages=[
         'azure.cli',
         'azure.cli.commands',
+        'azure.cli.extensions',
     ],
     package_data={'azure.cli': ['locale/**/*.txt']},
     install_requires=DEPENDENCIES,
