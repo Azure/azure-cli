@@ -107,8 +107,9 @@ class ArgumentParser(object):
                 '$doc': full_name + ".txt"
             })
             full_name += '.'
-        m['$description'] = description or handler.__doc__
+        m['$description'] = description
         m['$handler'] = handler
+        m['$doctext'] = handler.__doc__
 
         m['$args'] = []
         m['$kwargs'] = kw = {}
@@ -169,7 +170,7 @@ class ArgumentParser(object):
                     self._display_completions(m, args, out))
 
             if len(args) == 0:
-                print_welcome_message()
+                print_welcome_message(out)
                 self._display_children(m, args, out)
                 return ArgumentParserResult(None)
 
@@ -294,7 +295,8 @@ class ArgumentParser(object):
         doc = GroupHelpFile(delimiters, subnouns) \
               if len(subnouns) > 0 \
               else CommandHelpFile(delimiters, argdoc)
-        doc.load_from_file()
+        doc.load(noun_map)
+        #doc.load_from_file()
         print_detailed_help(doc, out)
 
     def _display_completions(self, noun_map, arguments, out=sys.stdout):
