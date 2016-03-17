@@ -24,7 +24,7 @@ VERSION = '0.0.1'
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
-    with open('azure/cli/__init__.py', 'r', encoding='utf-8') as f:
+    with open('src/azure/cli/__init__.py', 'r', encoding='utf-8') as f:
         content = f.read()
 except OSError:
     pass
@@ -42,6 +42,8 @@ else:
 # https://pypi.python.org/pypi?%3Aaction=list_classifiers
 CLASSIFIERS = [
     'Development Status :: 3 - Alpha',
+    'Intended Audience :: Developers',
+    'Intended Audience :: System Administrators',
     'Programming Language :: Python',
     'Programming Language :: Python :: 2',
     'Programming Language :: Python :: 2.7',
@@ -52,19 +54,11 @@ CLASSIFIERS = [
     #'License :: OSI Approved :: MIT License',
 ]
 
-# The azure-mgmt requirement should always be pinned to ensure
-# that installing a specific azure-cli version will target the
-# expected Azure API versions
-#
-# Alternatively, the more specific requirements such as
-# azure-mgmt-resource may be specified in place of the roll-up
-# packages.
-#
-# Common azure package dependencies will be pulled in by these
-# references, so do not specify azure-common or -nspkg here.
 DEPENDENCIES = [
-    'azure-mgmt==0.20.2',
-    'azure-storage==0.20.3',
+    'applicationinsights',
+    'azure==2.0.0rc1',
+    'six',
+    'jmespath',
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
@@ -77,13 +71,20 @@ setup(
     long_description=README,
     license='TBD',
     author='Microsoft Corporation',
-    author_email='SOMEBODY@microsoft.com',
+    author_email='azpycli@microsoft.com',
     url='https://github.com/Azure/azure-cli',
     classifiers=CLASSIFIERS,
-    zip_safe=False,
+    scripts=[
+        'az',
+        'az.completion.sh',
+        'az.bat',
+    ],
+    package_dir = {'':'src'},
     packages=[
         'azure.cli',
         'azure.cli.commands',
+        'azure.cli.extensions',
     ],
+    package_data={'azure.cli': ['locale/**/*.txt']},
     install_requires=DEPENDENCIES,
 )
