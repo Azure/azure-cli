@@ -1,7 +1,7 @@
 from __future__ import print_function
 import sys
 import textwrap
-from yaml import load
+import yaml
 
 from ._locale import L
 from ._help_files import _load_help_file
@@ -11,15 +11,19 @@ __all__ = ['print_detailed_help', 'print_welcome_message', 'GroupHelpFile', 'Com
 _out = sys.stdout
 
 def print_welcome_message(out=sys.stdout):
-    _printIndent(L('     /\\                        \n'
-                   '    /  \\    _____   _ _ __ ___ \n'
-                   '   / /\ \\  |_  / | | | \'__/ _ \\\n' #pylint: disable=anomalous-backslash-in-string
-                   '  / ____ \\  / /| |_| | | |  __/\n'
-                   ' /_/    \\_\\/___|\\__,_|_|  \\___|\n'))
+    global _out #pylint: disable=global-statement
+    _out = out
+    _printIndent(L(r"""
+     /\                        
+    /  \    _____   _ _ __ ___ 
+   / /\ \  |_  / | | | \'__/ _ \
+  / ____ \  / /| |_| | | |  __/
+ /_/    \_\/___|\__,_|_|  \___|
+"""))
     _printIndent(L('\nWelcome to the cool new Azure CLI!\n\nHere are the base commands:\n'))
 
 def print_detailed_help(help_file, out=sys.stdout): #pylint: disable=unused-argument
-    global _out
+    global _out #pylint: disable=global-statement
     _out = out
     _print_header(help_file)
 
@@ -226,7 +230,7 @@ def _get_column_indent(text, max_name_length):
     return ' '*(max_name_length - len(text))
 
 def _load_help_file_from_string(text):
-    return load(text) if text else None
+    return yaml.load(text) if text else None
 
 class HelpAuthoringException(Exception):
     pass

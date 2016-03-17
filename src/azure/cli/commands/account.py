@@ -4,7 +4,7 @@ from .._locale import L
 
 @command('account list')
 @description(L('List the imported subscriptions.'))
-def list_subscriptions(args, unexpected): #pylint: disable=unused-argument'
+def list_subscriptions(args, unexpected): #pylint: disable=unused-argument
     """
     type: command
     long-summary: |
@@ -30,7 +30,7 @@ def set_active_subscription(args, unexpected): #pylint: disable=unused-argument
     long-summary: |
         this module.... kjsdflkj... klsfkj paragraph1
         this module.... kjsdflkj... klsfkj paragraph2
-    parameters: 
+    parameters:
     examples:
         - name: foo example
           text: example details
