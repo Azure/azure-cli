@@ -4,20 +4,23 @@ import textwrap
 from yaml import load
 
 from ._locale import L
-
+from ._help_files import _load_help_file
 
 __all__ = ['print_detailed_help', 'print_welcome_message', 'GroupHelpFile', 'CommandHelpFile']
 
-def print_welcome_message():
+_out = sys.stdout
+
+def print_welcome_message(out=sys.stdout):
     print(L('     /\\                        \n'
             '    /  \\    _____   _ _ __ ___ \n'
             '   / /\ \\  |_  / | | | \'__/ _ \\\n' #pylint: disable=anomalous-backslash-in-string
             '  / ____ \\  / /| |_| | | |  __/\n'
-            ' /_/    \\_\\/___|\\__,_|_|  \\___|\n'))
-    print(L('\nWelcome to the cool new Azure CLI!\n\nHere are the base commands:\n'))
+            ' /_/    \\_\\/___|\\__,_|_|  \\___|\n'), file=out)
+    print(L('\nWelcome to the cool new Azure CLI!\n\nHere are the base commands:\n'), file=out)
 
-# TODO: wire up out to print statements
 def print_detailed_help(help_file, out=sys.stdout): #pylint: disable=unused-argument
+    global _out
+    _out = out
     _print_header(help_file)
 
     _printIndent(L('Arguments') if help_file.type == 'command' else L('Sub-Commands'))
@@ -40,11 +43,17 @@ def _print_header(help_file):
                  indent)
 
     indent = 1
-    _printIndent('{0}'.format(help_file.long_summary), indent)
+    if help_file.long_summary:
+        _printIndent('{0}'.format(help_file.long_summary), indent)
     _printIndent('')
 
 def _print_arguments(help_file):
     indent = 1
+    if not help_file.parameters:
+        _printIndent('None', indent)
+        _printIndent('')
+        return
+
     if len(help_file.parameters) == 0:
         _printIndent('none', indent)
     max_name_length = max(len(p.name) for p in help_file.parameters)
@@ -94,16 +103,36 @@ class HelpFile(object): #pylint: disable=too-few-public-methods
         self.long_summary = ''
         self.examples = ''
 
-    def load_from_file(self):
+    def _load_from_file(self):
         file_data = _load_help_file(self.delimiters)
         if file_data:
             self._load_from_data(file_data)
 
+    def load(self, noun_map):
+        self.short_summary = noun_map.get('$description', '')
+        file_data = _load_help_file_from_string(noun_map.get('$doctext', None))
+        if file_data:
+            self._load_from_data(file_data)
+        else:
+            self._load_from_file()
+
     def _load_from_data(self, data):
-        self.type = data['type']
-        self.short_summary = data['short-summary']
-        self.long_summary = data['long-summary']
-        self.examples = [HelpExample(d) for d in data['examples']]
+        if not data:
+            return
+
+        if isinstance(data, str):
+            self.long_summary = data
+            return
+
+        self.type = data.get('type')
+
+        if 'short-summary' in data:
+            self.short_summary = data['short-summary']
+
+        self.long_summary = data.get('long-summary')
+
+        if 'examples' in data:
+            self.examples = [HelpExample(d) for d in data['examples']]
 
 
 class GroupHelpFile(HelpFile): #pylint: disable=too-few-public-methods
@@ -127,10 +156,13 @@ class CommandHelpFile(HelpFile): #pylint: disable=too-few-public-methods
     def __init__(self, delimiters, argdoc):
         super(CommandHelpFile, self).__init__(delimiters)
         self.type = 'command'
-        self.parameters = [HelpParameter(a, r) for a, _, r in argdoc]
+        self.parameters = [HelpParameter(a, d, r) for a, d, r in argdoc]
 
     def _load_from_data(self, data):
         super(CommandHelpFile, self)._load_from_data(data)
+
+        if isinstance(data, str) or not self.parameters or not data.get('parameters'):
+            return
 
         loaded_params = []
         loaded_param = {}
@@ -149,11 +181,11 @@ class CommandHelpFile(HelpFile): #pylint: disable=too-few-public-methods
 
 
 class HelpParameter(object): #pylint: disable=too-few-public-methods
-    def __init__(self, param_name, required):
+    def __init__(self, param_name, description, required):
         self.name = param_name
         self.required = required
         self.type = ''
-        self.short_summary = ''
+        self.short_summary = description
         self.long_summary = ''
         self.value_sources = ''
 
@@ -174,83 +206,22 @@ class HelpParameter(object): #pylint: disable=too-few-public-methods
         self.long_summary = data.get('long-summary')
         self.value_sources = data.get('populator-commands')
 
+
 class HelpExample(object): #pylint: disable=too-few-public-methods
     def __init__(self, _data):
         self.name = _data['name']
         self.text = _data['text']
 
+
 def _printIndent(s, indent=0):
     tw = textwrap.TextWrapper(initial_indent="    "*indent, subsequent_indent="    "*indent)
-    print(tw.fill(s), file=sys.stdout)
+    print(tw.fill(s), file=_out)
 
 def _get_column_indent(text, max_name_length):
     return ' '*(max_name_length - len(text))
 
-def _load_help_file(delimiters):
-    s = """
-    type: command
-    short-summary: this module does xyz one-line or so
-    long-summary: |
-        this module.... kjsdflkj... klsfkj paragraph1
-        this module.... kjsdflkj... klsfkj paragraph2
-    parameters: 
-        - name: --username/-u
-          type: string
-          required: True
-          short-summary: one line partial sentence
-          long-summary: text, markdown, etc.
-          populator-commands: 
-              - az vm list
-              - default
-        - name: --service-principal
-          type: string
-          short-summary: one line partial sentence
-          long-summary: paragraph(s)
-        - name: --tenant/-t
-          type: string
-          short-summary: one line partial sentence
-          long-summary: paragraph(s)
-    examples:
-        - name: foo example
-          text: example details
-
-    """ if delimiters == 'login' \
-    else ''
-
-    if s == '' and delimiters == 'account':
-        s = """
-        type: group
-        short-summary: this module does xyz one-line or so
-        long-summary: |
-            this module.... kjsdflkj... klsfkj paragraph1
-            this module.... kjsdflkj... klsfkj paragraph2
-        parameters: 
-            - name: --username/-u
-              type: string
-              required: false
-              short-summary: one line partial sentence
-              long-summary: text, markdown, etc.
-              populator-commands: 
-                  - az vm list
-                  - default
-            - name: --password/-p
-              type: string
-              short-summary: one line partial sentence
-              long-summary: paragraph(s)
-            - name: --service-principal
-              type: string
-              short-summary: one line partial sentence
-              long-summary: paragraph(s)
-            - name: --tenant/-t
-              type: string
-              short-summary: one line partial sentence
-              long-summary: paragraph(s)
-        examples:
-            - name: foo example
-              text: example details
-    """
-
-    return load(s)
+def _load_help_file_from_string(text):
+    return load(text) if text else None
 
 class HelpAuthoringException(Exception):
     pass
