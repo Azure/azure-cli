@@ -48,6 +48,11 @@ def configure_logging(argv, config):
     logger.level = stderr_handler.level = level
     logger.handlers.append(stderr_handler)
 
+    msrest_logger = _logging.getLogger('msrest')
+    msrest_logger.level = level
+    logger.handlers.append(msrest_logger)
+    _logging.basicConfig(level=level)
+
     if logfile:
         # Configure the handler that logs code to a text file
         log_handler = _logging.StreamHandler(open(logfile, 'w', encoding='utf-8'))
