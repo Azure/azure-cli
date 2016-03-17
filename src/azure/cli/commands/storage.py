@@ -73,24 +73,36 @@ def list_account_keys(args, unexpected): #pylint: disable=unused-argument
     result = smc.storage_accounts.list_keys(args.get('resource-group'), args.get('account-name'))
     return result
 
+# TODO: update this once enums are supported in commands first-class (task #115175885)
+key_values = ['key1', 'key2']
+key_values_string = ' | '.join(key_values)
+
 @command('storage account keys renew')
-@description(L('Regenerate a key for a storage account.'))
+@description(L('Regenerate one or both keys for a storage account.'))
 @option(RESOURCE_GROUP_DEF, L(RESOURCE_GROUP_DESC), required=True)
 @option(STORAGE_ACCOUNT_DEF, L(STORAGE_ACCOUNT_DESC), required=True)
-@option('--primary -p', L('renew the primary key'))
-@option('--secondary -s', L('renew the secondary key'))
+@option('--key -y <key>', L('renew a specific key. Values %s' % key_values_string))
 def renew_account_keys(args, unexpected): #pylint: disable=unused-argument
     from azure.mgmt.storage import StorageManagementClient, StorageManagementClientConfiguration
     smc = get_mgmt_service_client(StorageManagementClient, StorageManagementClientConfiguration)
-    key_name = 'key1' if args.get('primary') is not None else None
+
+    key_name = args.get('key')
+    resource_group = args.get('resource-group')
+    account_name = args.get('account-name')
+
     if not key_name:
-        key_name = 'key2' if args.get('secondary') is not None else None
-    if not key_name:
-        raise ValueError('Must specify a key to renew')
-    result = smc.storage_accounts.regenerate_key(
-        resource_group_name=args.get('resource-group'),
-        account_name=args.get('account-name'),
-        key_name=key_name)
+        for key in key_values:
+            result = smc.storage_accounts.regenerate_key(
+                resource_group_name=resource_group,
+                account_name=account_name,
+                key_name=key)
+    elif key_name in key_values:
+        result = smc.storage_accounts.regenerate_key(
+            resource_group_name=resource_group,
+            account_name=account_name,
+            key_name=key_name)
+    else:
+        raise ValueError(L('Unrecognized key value: %s' % key_name))
     return result
 
 @command('storage account usage show')
@@ -98,31 +110,30 @@ def renew_account_keys(args, unexpected): #pylint: disable=unused-argument
 def show_account_usage(args, unexpected): #pylint: disable=unused-argument
     from azure.mgmt.storage import StorageManagementClient, StorageManagementClientConfiguration
     smc = get_mgmt_service_client(StorageManagementClient, StorageManagementClientConfiguration)
-    # TODO: format is not great. Keys are alphabetical instead of a more logical order
-    result = {'subscription':smc.usage.config.subscription_id}
     for item in smc.usage.list():
         if item.name.value == 'StorageAccounts':
-            result['used'] = item.current_value
-            result['limit'] = item.limit
-            break
-    return result
+            return item
+    return None
 
 @command('storage account connectionstring show')
 @description(L('Show the connection string for a storage account.'))
 @option(RESOURCE_GROUP_DEF, L(RESOURCE_GROUP_DESC), required=True)
 @option(STORAGE_ACCOUNT_DEF, L(STORAGE_ACCOUNT_DESC))
-@option('--use-http <useHttp>', L('use http as the default endpoint protocol'))
+@option('--use-http', L('use http as the default endpoint protocol'))
 def show_storage_connection_string(args, unexpected): #pylint: disable=unused-argument
-    import json
     from azure.mgmt.storage import StorageManagementClient, StorageManagementClientConfiguration
     smc = get_mgmt_service_client(StorageManagementClient, StorageManagementClientConfiguration)
+
     endpoint_protocol = 'http' if args.get('use-http') is not None else 'https'
     storage_account = _resolve_storage_account(args)
     keys = smc.storage_accounts.list_keys(args.get('resource-group'), storage_account)
+
     connection_string = 'DefaultEndpointsProtocol=%s;AccountName=%s;AccountKey=%s' % (
-        endpoint_protocol, storage_account, keys.key1) #pylint: disable=no-member
-    results = {'ConnectionString':connection_string}
-    return results
+        endpoint_protocol,
+        storage_account,
+        keys.key1) #pylint: disable=no-member
+
+    return {'ConnectionString':connection_string}
 
 @command('storage container create')
 @description(L('Create a storage container.'))
@@ -179,7 +190,6 @@ def list_containers(args, unexpected): #pylint: disable=unused-argument
                                   _resolve_storage_account_key(args),
                                   _resolve_connection_string(args))
     results = bbs.list_containers(args.get('prefix'))
-    # TODO: summarize the list? Right now, simply return the data.
     return results
 
 @command('storage container show')
