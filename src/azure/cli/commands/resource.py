@@ -42,8 +42,11 @@ def show_resource(args, unexpected):
     rmc = get_mgmt_service_client(ResourceManagementClient, ResourceManagementClientConfiguration)
 
     full_type = args.get('resource-type').split('/')
-    provider_namespace = full_type[0]
-    resource_type = full_type[1]
+    try:
+        provider_namespace = full_type[0]
+        resource_type = full_type[1]
+    except IndexError:
+        raise IncorrectUsageError('Parameter --resource-type must be in <namespace>/<type> format.')
     
     api_version = _resolve_api_version(args, rmc)
     if not api_version:
@@ -73,7 +76,51 @@ def show_resource(args, unexpected):
 #@option('--no-tags', L('removes all existing tags'))
 #@option('--subscription <subscription>', L('the subscription identifier'))
 def set_resource(args, unexpected):
-    return _create_or_update(args, unexpected)
+    from azure.mgmt.resource.resources.models import GenericResource
+
+    rmc = get_mgmt_service_client(ResourceManagementClient, ResourceManagementClientConfiguration)
+
+    resource_group = args.get('resource-group')
+    resource_name = args.get('name')
+    parent = args.get('parent', '')
+    full_type = args.get('resource-type').split('/')
+    try:
+        provider_namespace = full_type[0]
+        resource_type = full_type[1]
+    except IndexError:
+        raise IncorrectUsageError('Parameter --resource-type must be in <namespace>/<type> format.')
+
+    api_version = _resolve_api_version(args, rmc)
+    if not api_version:
+        raise ValueError(L('API version is required and could not be resolved for resource %s' % full_type))
+
+    resource = rmc.resources.get(
+            resource_group_name=resource_group,
+            resource_name=resource_name,
+            resource_provider_namespace=provider_namespace,
+            resource_type=resource_type,
+            api_version=api_version,
+            parent_resource_path=parent)
+
+    try:
+        properties = json.loads(args.get('properties'))
+    except JSONDecodeError as ex:
+        raise ValueError(L('Invalid JSON property format.'))
+
+    parameters = GenericResource(resource.location,
+                                 tags=args.get('tags'),
+                                 properties=properties) 
+
+    results = rmc.resources.create_or_update(
+        resource_group_name=resource_group,
+        resource_name=resource_name,
+        resource_provider_namespace=provider_namespace,
+        resource_type=resource_type,
+        api_version=api_version,
+        parent_resource_path=parent,
+        parameters=parameters
+    )
+    return results
 
 @command('resource create')
 @description(L('Creates a resource in a resource group'))
@@ -82,25 +129,23 @@ def set_resource(args, unexpected):
 @option('--resource-type -r <resourceType>', L('the resource type in format: <provider-namespace>/<type>'), required=True)
 @option('--location -l <location>', L('the location where the resource will be created'), required=True)
 @option('--api-version -o <apiVersion>', L('the API version of the resource provider'))
-@option('--parent <parent>', L('the name of the parent resource (if needed), in <parent-type>/<parent-name> format'))
+@option('--parent <parent>', L('the name of the parent resource (if needed), in <type>/<name> format'))
 @option('--properties -p <properties>', L('a JSON-formatted string containing properties'))
 @option('--tags -t <tags>', L('Tags to assign to the resource. Can be multiple. In the format of \'name=value\'.' \
     + ' Name is required and value is optional. For example, -t tag1=value1;tag2'))
 # TODO: carried over from Node parameter list
 #@option('--subscription <subscription>', L('the subscription identifier'))
 def create_resource(args, unexpected):
-    return _create_or_update(args, unexpected)
-
-def _create_or_update(args, unexpected):
     from azure.mgmt.resource.resources.models import GenericResource
 
     rmc = get_mgmt_service_client(ResourceManagementClient, ResourceManagementClientConfiguration)
-    full_type = args.get('resource-type').split('/')
-    
     location = args.get('location')
-    if not location:
-        # TODO: retrieve resource and get location from there? Default for now.
-        location = 'West US'
+    full_type = args.get('resource-type').split('/')
+    try:
+        provider_namespace = full_type[0]
+        resource_type = full_type[1]
+    except IndexError:
+        raise IncorrectUsageError('Parameter --resource-type must be in <namespace>/<type> format.')
 
     try:
         properties = json.loads(args.get('properties'))
@@ -108,7 +153,7 @@ def _create_or_update(args, unexpected):
         raise ValueError(L('Invalid JSON property format.'))
 
     parameters = GenericResource(location,
-                                 tags=args.get('tags') or None,
+                                 tags=args.get('tags'),
                                  properties=properties) 
 
     api_version = _resolve_api_version(args, rmc)
@@ -118,14 +163,14 @@ def _create_or_update(args, unexpected):
     results = rmc.resources.create_or_update(
         resource_group_name=args.get('resource-group'),
         resource_name=args.get('name'),
-        resource_provider_namespace=full_type[0],
-        resource_type=full_type[1],
+        resource_provider_namespace=provider_namespace,
+        resource_type=resource_type,
         api_version=api_version,
-        parent_resource_path=args.get('parent') or '',
+        parent_resource_path=args.get('parent', ''),
         parameters=parameters
     )
     return results
-
+    
 def _resolve_api_version(args, rmc):
     api_version = args.get('api-version')
     if api_version:
@@ -134,16 +179,24 @@ def _resolve_api_version(args, rmc):
     # if api-version not supplied, attempt to resolve using provider namespace
     parent = args.get('parent')
     full_type = args.get('resource-type').split('/')
-    provider_namespace = full_type[0]
-    if parent:
-        parent_type = parent.split('/')[0]
-        resource_type = "%s/%s" % (parent_type, full_type[1])
-    else:
+    try:
+        provider_namespace = full_type[0]
         resource_type = full_type[1]
+    except IndexError:
+        raise IncorrectUsageError('Parameter --resource-type must be in <namespace>/<type> format.')
+
+    if parent:
+        try:
+            parent_type = parent.split('/')[0]
+        except IndexError:
+            raise IncorrectUsageError('Parameter --parent must be in <type>/<name> format.')
+            
+        resource_type = "%s/%s" % (parent_type, resource_type)
+    else:
+        resource_type = resource_type
     provider = rmc.providers.get(provider_namespace)
     for t in provider.resource_types:
         if t.resource_type == resource_type:
-            print(t.api_versions)
             api_version = t.api_versions[0]
             break
     return api_version
