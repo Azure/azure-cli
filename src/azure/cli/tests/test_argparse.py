@@ -170,7 +170,7 @@ class Test_argparse(unittest.TestCase):
                                out=io)
         candidates = util.normalize_newlines(io.getvalue())
         io.close()
-        self.assertEqual(candidates, 'n1\n')
+        self.assertEqual(True, candidates.endswith('n1\n'))
 
         #if --arg is used, then both '-a' and "--arg" should not be in the 
         #candidate list 

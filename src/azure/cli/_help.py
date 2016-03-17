@@ -11,12 +11,12 @@ __all__ = ['print_detailed_help', 'print_welcome_message', 'GroupHelpFile', 'Com
 _out = sys.stdout
 
 def print_welcome_message(out=sys.stdout):
-    print(L('     /\\                        \n'
-            '    /  \\    _____   _ _ __ ___ \n'
-            '   / /\ \\  |_  / | | | \'__/ _ \\\n' #pylint: disable=anomalous-backslash-in-string
-            '  / ____ \\  / /| |_| | | |  __/\n'
-            ' /_/    \\_\\/___|\\__,_|_|  \\___|\n'), file=out)
-    print(L('\nWelcome to the cool new Azure CLI!\n\nHere are the base commands:\n'), file=out)
+    _printIndent(L('     /\\                        \n'
+                   '    /  \\    _____   _ _ __ ___ \n'
+                   '   / /\ \\  |_  / | | | \'__/ _ \\\n' #pylint: disable=anomalous-backslash-in-string
+                   '  / ____ \\  / /| |_| | | |  __/\n'
+                   ' /_/    \\_\\/___|\\__,_|_|  \\___|\n'))
+    _printIndent(L('\nWelcome to the cool new Azure CLI!\n\nHere are the base commands:\n'))
 
 def print_detailed_help(help_file, out=sys.stdout): #pylint: disable=unused-argument
     global _out
@@ -124,7 +124,8 @@ class HelpFile(object): #pylint: disable=too-few-public-methods
             self.long_summary = data
             return
 
-        self.type = data.get('type')
+        if 'type' in data:
+            self.type = data['type']
 
         if 'short-summary' in data:
             self.short_summary = data['short-summary']
@@ -214,8 +215,12 @@ class HelpExample(object): #pylint: disable=too-few-public-methods
 
 
 def _printIndent(s, indent=0):
-    tw = textwrap.TextWrapper(initial_indent="    "*indent, subsequent_indent="    "*indent)
-    print(tw.fill(s), file=_out)
+    tw = textwrap.TextWrapper(initial_indent="    "*indent,
+                              subsequent_indent="    "*indent,
+                              replace_whitespace=False)
+    paragraphs = s.split('\n')
+    for p in paragraphs:
+        print(tw.fill(p), file=_out)
 
 def _get_column_indent(text, max_name_length):
     return ' '*(max_name_length - len(text))

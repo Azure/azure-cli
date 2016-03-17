@@ -174,7 +174,7 @@ class ArgumentParser(object):
                 self._display_children(m, args, out)
                 return ArgumentParserResult(None)
 
-            expected_kwargs, handler = self._get_noun_data(m, n, args)
+            expected_kwargs, handler = self._get_noun_data(m, n, args, out)
 
             others, parsed = self._parse_nouns(expected_kwargs, it, m, n, out)
 
@@ -203,7 +203,7 @@ class ArgumentParser(object):
             except LookupError:
                 if '$args' not in m:
                     print(L('\nCommand "{0}" not found, names starting with "{0}":\n'.format(n)),
-                          file=sys.stderr)
+                          file=out)
                     self._display_completions(m, args, out=out)
                     raise ArgParseFinished()
                 break
@@ -243,13 +243,13 @@ class ArgumentParser(object):
             n = next_n
         return others, parsed
 
-    def _get_noun_data(self, m, n, args):
+    def _get_noun_data(self, m, n, args, out):
         try:
             expected_kwargs = m['$kwargs']
             handler = m['$handler']
         except LookupError:
             logger.debug('Missing data for noun %s', n)
-            self._display_children(m, args, out=sys.stderr)
+            self._display_children(m, args, out=out)
             raise ArgParseFinished()
         return expected_kwargs, handler
 
