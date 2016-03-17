@@ -1,7 +1,7 @@
 Microsoft Azure Command-Line Tools
 ==================================
 
-This is the Microsoft Azure Service Bus Runtime Client Library.
+This is the Microsoft Azure CLI.
 
 This package has [not] been tested [much] with Python 2.7, 3.4 and 3.5.
 
