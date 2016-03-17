@@ -16,7 +16,7 @@ def init_telemetry():
         client.context.application.ver = cli.__version__
         client.context.user.id = hash(getpass.getuser())
 
-        #enable(instrumentation_key)
+        enable(instrumentation_key)
     except Exception: #pylint: disable=broad-except
         # Never fail the command because of telemetry
         pass
