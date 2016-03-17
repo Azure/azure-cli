@@ -1,28 +1,34 @@
 import json
 from json import JSONDecodeError
 
+from .._argparse import IncorrectUsageError
 from ..commands import command, description, option
 from ._command_creation import get_mgmt_service_client
 from .._locale import L
-    
+
 from azure.mgmt.resource.resources import (ResourceManagementClient,
                                            ResourceManagementClientConfiguration)
 
 @command('resource group list')
-@description(L('List resource groups'))
-# TODO: waiting on Python Azure SDK bug fixes
-# @option('--tag-name -g <tagName>', L('the resource group's tag name'))
-# @option('--tag-value -g <tagValue>', L('the resource group's tag value'))
-# @option('--top -g <number>', L('Top N resource groups to retrieve'))
+@description('List resource groups')
+@option('--tag-name -tn <tagName>', L("the resource group's tag name"))
+@option('--tag-value -tv <tagValue>', L("the resource group's tag value"))
+@option('--top -t <number>', L('Top N resource groups to retrieve'))
 def list_groups(args, unexpected): #pylint: disable=unused-argument
     from azure.mgmt.resource.resources.models import ResourceGroup, ResourceGroupFilter
 
     rmc = get_mgmt_service_client(ResourceManagementClient, ResourceManagementClientConfiguration)
 
-    # TODO: waiting on Python Azure SDK bug fixes
-    #group_filter = ResourceGroupFilter(args.get('tag-name'), args.get('tag-value'))
-    #groups = rmc.resource_groups.list(filter=None, top=args.get('top'))
-    groups = rmc.resource_groups.list()
+    filters = []
+    if args.get('tag-name'):
+        filters.append("tagname eq '{}'".format(args.get('tag-name')))
+    if args.get('tag-value'):
+        filters.append("tagvalue eq '{}'".format(args.get('tag-value')))
+
+    filter_text = ' and '.join(filters) if len(filters) > 0 else None
+
+    # TODO: top param doesn't work in SDK [bug #115521665]
+    groups = rmc.resource_groups.list(filter=filter_text, top=args.get('top'))
     return list(groups)
 
 @command('resource show')
@@ -41,7 +47,7 @@ def show_resource(args, unexpected):
     
     api_version = _resolve_api_version(args, rmc)
     if not api_version:
-        raise ValueError(L('API version is required and could not be resolved for resource %s' % full_type))
+        raise IncorrectUsageError(L('API version is required and could not be resolved for resource %s' % full_type))
 
     results = rmc.resources.get(
         resource_group_name=args.get('resource-group'),
@@ -49,7 +55,7 @@ def show_resource(args, unexpected):
         resource_provider_namespace=provider_namespace,
         resource_type=resource_type,
         api_version=api_version,
-        parent_resource_path=args.get('parent') or ''
+        parent_resource_path=args.get('parent', '')
     )
     return results
 
@@ -99,8 +105,7 @@ def _create_or_update(args, unexpected):
     try:
         properties = json.loads(args.get('properties'))
     except JSONDecodeError as ex:
-        print(L('Invalid property format. Please use: "{\\"foo\\":\\"bar\\"}"'))
-        return None
+        raise ValueError(L('Invalid JSON property format.'))
 
     parameters = GenericResource(location,
                                  tags=args.get('tags') or None,
@@ -138,6 +143,7 @@ def _resolve_api_version(args, rmc):
     provider = rmc.providers.get(provider_namespace)
     for t in provider.resource_types:
         if t.resource_type == resource_type:
+            print(t.api_versions)
             api_version = t.api_versions[0]
             break
     return api_version
