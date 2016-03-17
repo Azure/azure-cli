@@ -9,7 +9,7 @@ The Azure Python CLI projects sources are located on GitHub (https://github.com/
 If you have not previously done so, configure your Docker client engine [here](https://docs.docker.com/engine/installation/).
 
 Then:
-+ Log in to Docker (contact the team for credentials).
++ Run `docker login` (contact the team for credentials).
 + Run `docker pull azuresdk/azure-cli-python:latest`
 + Run `docker run -i -t azuresdk/azure-cli-python:latest`
 
