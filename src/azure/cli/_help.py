@@ -189,10 +189,10 @@ class HelpParameter(object): #pylint: disable=too-few-public-methods
     def __init__(self, param_name, description, required):
         self.name = param_name
         self.required = required
-        self.type = ''
+        self.type = 'string'
         self.short_summary = description
         self.long_summary = ''
-        self.value_sources = ''
+        self.value_sources = []
 
     def update_from_data(self, data):
         if self.name != data.get('name'):

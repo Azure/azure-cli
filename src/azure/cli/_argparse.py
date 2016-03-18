@@ -2,6 +2,7 @@
 import sys
 
 from ._help import GroupHelpFile, CommandHelpFile, print_detailed_help, print_welcome_message
+from ._helpdocgen import generate_help
 from ._locale import L
 from ._logging import logger
 from ._output import OutputProducer
@@ -69,11 +70,12 @@ class ArgumentParser(object):
     def __init__(self, prog):
         self.prog = prog
         self.noun_map = {
-            '$doc': 'azure-cli.txt',
+            '$full_name': 'azure-cli',
         }
         self.help_args = {'--help', '-h'}
         self.complete_args = {'--complete'}
         self.global_args = {'--verbose', '--debug'}
+        self.genhelp_args = {'--genhelp'}
 
     def add_global_param(self, spec, desc):
         # TODO: Keep track of all global args to allow help
@@ -110,7 +112,7 @@ class ArgumentParser(object):
         for n in nouns:
             full_name += n
             m = m.setdefault(n.lower(), {
-                '$doc': full_name + ".txt"
+                '$full_name': full_name
             })
             full_name += '.'
         m['$description'] = description
@@ -165,9 +167,18 @@ class ArgumentParser(object):
         if not show_completions:
             show_completions = any(a in self.complete_args for a in args)
 
+        generate_help_files = any(a in self.genhelp_args for a in args)
+        if generate_help_files:
+            for a in self.genhelp_args:
+                args.remove(a)
+
         try:
             it = self._get_args_itr(args)
             m, n = self._get_noun_map(args, it, out)
+
+            if generate_help_files:
+                generate_help(m)
+                return ArgumentParserResult(None)
 
             if show_usage:
                 return ArgumentParserResult(self._display_usage(m, out))
@@ -310,7 +321,7 @@ class ArgumentParser(object):
     def _display_usage(noun_map, out=sys.stdout):
         subnouns = sorted(k for k in noun_map if not k.startswith('$'))
         argdoc = noun_map.get('$argdoc')
-        delimiters = noun_map['$doc'][:-4]
+        delimiters = noun_map['$full_name']
 
         doc = GroupHelpFile(delimiters, subnouns) \
               if len(subnouns) > 0 \
