@@ -1,8 +1,13 @@
 ﻿from os import environ
+
 from azure.storage.blob import PublicAccess
+from azure.mgmt.storage import StorageManagementClient, StorageManagementClientConfiguration
+from azure.mgmt.storage.operations import StorageAccountsOperations
+
+from .._argparse import IncorrectUsageError
 from ..commands import command, description, option
 from ._command_creation import get_mgmt_service_client, get_data_service_client
-from .._argparse import IncorrectUsageError
+from ..commands._auto_command import build_operation
 from .._locale import L
 
 # PARAMETER CONSTANTS
@@ -25,12 +30,24 @@ STORAGE_CONNECTION_STRING_DESC = 'the storage connection string'
 CONTAINER_DEF = '--container-name -c <containerName>'
 CONTAINER_DESC = 'the name of the container'
 
-# COMMANDS
+def _storage_client_factory():
+    return get_mgmt_service_client(StorageManagementClient, StorageManagementClientConfiguration)
+
+# ACCOUNT COMMANDS
+
+build_operation('storage account',
+                'storage_accounts',
+                _storage_client_factory,
+                [
+                    (StorageAccountsOperations.check_name_availability, 'Result'),
+                    (StorageAccountsOperations.delete, None),
+                    (StorageAccountsOperations.get_properties, 'StorageAccount'),
+                    (StorageAccountsOperations.list_keys, '[StorageAccountKeys]')
+                ])
 
 @command('storage account list')
 @description(L('List storage accounts.'))
 @option(RESOURCE_GROUP_DEF, L(RESOURCE_GROUP_DESC))
-@option(SUBSCRIPTION_DEF, L(SUBSCRIPTION_DESC))
 def list_accounts(args, unexpected): #pylint: disable=unused-argument
     from azure.mgmt.storage import StorageManagementClient, StorageManagementClientConfiguration
     from azure.mgmt.storage.models import StorageAccount
@@ -43,41 +60,11 @@ def list_accounts(args, unexpected): #pylint: disable=unused-argument
         accounts = smc.storage_accounts.list()
     return list(accounts)
 
-@command('storage account check')
-@description(L('Check whether an account name is valid and not in use.'))
-@option(STORAGE_ACCOUNT_DEF, L(STORAGE_ACCOUNT_DESC), required=True)
-def checkname(args, unexpected): #pylint: disable=unused-argument
-    from azure.mgmt.storage import StorageManagementClient, StorageManagementClientConfiguration
-    smc = get_mgmt_service_client(StorageManagementClient, StorageManagementClientConfiguration)
-    availability = smc.storage_accounts.check_name_availability(args.get('account-name'))
-    return availability
-
-@command('storage account show')
-@description(L('Show details of a storage account.'))
-@option(RESOURCE_GROUP_DEF, L(RESOURCE_GROUP_DESC), required=True)
-@option(STORAGE_ACCOUNT_DEF, L(STORAGE_ACCOUNT_DESC), required=True)
-def show_account(args, unexpected): #pylint: disable=unused-argument
-    from azure.mgmt.storage import StorageManagementClient, StorageManagementClientConfiguration
-    smc = get_mgmt_service_client(StorageManagementClient, StorageManagementClientConfiguration)
-    result = smc.storage_accounts.get_properties(args.get('resource-group'),
-                                                 args.get('account-name'))
-    return result
-
-@command('storage account keys list')
-@description(L('List the keys for a storage account.'))
-@option(RESOURCE_GROUP_DEF, L(RESOURCE_GROUP_DESC), required=True)
-@option(STORAGE_ACCOUNT_DEF, L(STORAGE_ACCOUNT_DESC), required=True)
-def list_account_keys(args, unexpected): #pylint: disable=unused-argument
-    from azure.mgmt.storage import StorageManagementClient, StorageManagementClientConfiguration
-    smc = get_mgmt_service_client(StorageManagementClient, StorageManagementClientConfiguration)
-    result = smc.storage_accounts.list_keys(args.get('resource-group'), args.get('account-name'))
-    return result
-
 # TODO: update this once enums are supported in commands first-class (task #115175885)
 key_values = ['key1', 'key2']
 key_values_string = ' | '.join(key_values)
 
-@command('storage account keys renew')
+@command('storage account renew-keys')
 @description(L('Regenerate one or both keys for a storage account.'))
 @option(RESOURCE_GROUP_DEF, L(RESOURCE_GROUP_DESC), required=True)
 @option(STORAGE_ACCOUNT_DEF, L(STORAGE_ACCOUNT_DESC), required=True)
@@ -135,13 +122,15 @@ def show_storage_connection_string(args, unexpected): #pylint: disable=unused-ar
 
     return {'ConnectionString':connection_string}
 
+# CONTAINER COMMANDS
+
 @command('storage container create')
 @description(L('Create a storage container.'))
 @option(CONTAINER_DEF, L(CONTAINER_DESC), required=True)
 @option(STORAGE_ACCOUNT_DEF, L(STORAGE_ACCOUNT_DESC))
 @option(STORAGE_KEY_DEF, L(STORAGE_KEY_DESC))
 @option(STORAGE_CONNECTION_STRING_DEF, L(STORAGE_CONNECTION_STRING_DESC))
-# TODO: Add connection string, permission parameters
+# TODO: Add permission parameter
 def create_container(args, unexpected): #pylint: disable=unused-argument
     from azure.storage.blob import BlockBlobService, ContentSettings
     bbs = get_data_service_client(BlockBlobService,
@@ -158,7 +147,7 @@ def create_container(args, unexpected): #pylint: disable=unused-argument
 @option(STORAGE_ACCOUNT_DEF, L(STORAGE_ACCOUNT_DESC))
 @option(STORAGE_KEY_DEF, L(STORAGE_KEY_DESC))
 @option(STORAGE_CONNECTION_STRING_DEF, L(STORAGE_CONNECTION_STRING_DESC))
-@option('--quiet <quiet>', L('supress delete confirmation prompt'))
+@option('--quiet', L('supress delete confirmation prompt'))
 def delete_container(args, unexpected): #pylint: disable=unused-argument
     from azure.storage.blob import BlockBlobService, ContentSettings
     bbs = get_data_service_client(BlockBlobService,
