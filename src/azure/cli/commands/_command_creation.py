@@ -1,7 +1,6 @@
 ﻿from .._profile import Profile
 import azure.cli._debug as _debug
 import azure.cli as cli
-from .._logging import logger
 
 def get_mgmt_service_client(client_type, config_type):
     profile = Profile()
