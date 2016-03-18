@@ -210,6 +210,13 @@ def _resolve_api_version(args, rmc):
     provider = rmc.providers.get(provider_namespace)
     for t in provider.resource_types:
         if t.resource_type == resource_type:
-            api_version = t.api_versions[0]
-            break
-    return api_version
+            # Return first non-preview version
+            for version in t.api_version:
+                if not version.find('preview'):
+                    return version
+            # No non-preview version found. Take first preview version
+            try:
+                return t.api_version[0]
+            except IndexError:
+                return None
+    return None
