@@ -43,10 +43,12 @@ def print_description_list(help_files, out=sys.stdout):
 
     indent = 1
     max_name_length = max(len(f.name) for f in help_files)
-    for file in help_files:
-        _printIndent('{0}{1}{2}'.format(file.name,
-                                        _get_column_indent(file.name, max_name_length),
-                                      ': ' + file.short_summary if file.short_summary else ''),
+    for help_file in help_files:
+        _printIndent('{0}{1}{2}'.format(help_file.name,
+                                        _get_column_indent(help_file.name, max_name_length),
+                                        ': ' + help_file.short_summary \
+                                            if help_file.short_summary \
+                                            else ''),
                      indent)
 
 def _print_header(help_file):

@@ -341,16 +341,16 @@ class ArgumentParser(object):
         nouns = self._get_noun_matches(arguments, noun_map, out)
 
         help_files = []
-        for noun in nouns:
+        for noun in sorted(nouns):
             args = '{0} {1}'.format(' '.join(arguments), noun).split(' ') \
                 if arguments \
                 else [noun]
 
             it = self._get_args_itr(args)
-            m, n = self._get_noun_map(args, it, out)
-            file = HelpFile(m['$full_name'])
-            file.load(m)
-            help_files.append(file)
+            m, _ = self._get_noun_map(args, it, out)
+            help_file = HelpFile(m['$full_name'])
+            help_file.load(m)
+            help_files.append(help_file)
 
         print_description_list(help_files, out)
         out.flush()
