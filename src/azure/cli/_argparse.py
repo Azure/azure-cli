@@ -1,7 +1,8 @@
 ﻿from __future__ import print_function
 import sys
 
-from ._help import GroupHelpFile, CommandHelpFile, print_detailed_help, print_welcome_message
+from ._help import (GroupHelpFile, CommandHelpFile, HelpFile, print_detailed_help,
+                    print_welcome_message, print_description_list)
 from ._helpdocgen import generate_help
 from ._locale import L
 from ._logging import logger
@@ -338,7 +339,20 @@ class ArgumentParser(object):
 
     def _display_children(self, noun_map, arguments, out=sys.stdout):
         nouns = self._get_noun_matches(arguments, noun_map, out)
-        print('\n'.join(sorted(set(nouns))), file=out)
+
+        help_files = []
+        for noun in nouns:
+            args = '{0} {1}'.format(' '.join(arguments), noun).split(' ') \
+                if arguments \
+                else [noun]
+
+            it = self._get_args_itr(args)
+            m, n = self._get_noun_map(args, it, out)
+            file = HelpFile(m['$full_name'])
+            file.load(m)
+            help_files.append(file)
+
+        print_description_list(help_files, out)
         out.flush()
 
     def _get_noun_matches(self, arguments, noun_map, out):

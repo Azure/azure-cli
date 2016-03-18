@@ -37,6 +37,18 @@ def print_detailed_help(help_file, out=sys.stdout): #pylint: disable=unused-argu
     if len(help_file.examples) > 0:
         _print_examples(help_file)
 
+def print_description_list(help_files, out=sys.stdout):
+    global _out #pylint: disable=global-statement
+    _out = out
+
+    indent = 1
+    max_name_length = max(len(f.name) for f in help_files)
+    for file in help_files:
+        _printIndent('{0}{1}{2}'.format(file.name,
+                                        _get_column_indent(file.name, max_name_length),
+                                      ': ' + file.short_summary if file.short_summary else ''),
+                     indent)
+
 def _print_header(help_file):
     indent = 0
     _printIndent('')
@@ -107,11 +119,6 @@ class HelpFile(object): #pylint: disable=too-few-public-methods
         self.long_summary = ''
         self.examples = ''
 
-    def _load_from_file(self):
-        file_data = _load_help_file(self.delimiters)
-        if file_data:
-            self._load_from_data(file_data)
-
     def load(self, noun_map):
         self.short_summary = noun_map.get('$description', '')
         file_data = _load_help_file_from_string(noun_map.get('$doctext', None))
@@ -119,6 +126,11 @@ class HelpFile(object): #pylint: disable=too-few-public-methods
             self._load_from_data(file_data)
         else:
             self._load_from_file()
+
+    def _load_from_file(self):
+        file_data = _load_help_file(self.delimiters)
+        if file_data:
+            self._load_from_data(file_data)
 
     def _load_from_data(self, data):
         if not data:
