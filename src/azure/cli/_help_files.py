@@ -6,7 +6,7 @@ def _load_help_file(delimiters):
                 short-summary: this module does xyz one-line or so
                 long-summary: |
                     this module.... kjsdflkj... klsfkj paragraph1
-                    this module.... kjsdflkj... klsfkj paragraph2                
+                    this module.... kjsdflkj... klsfkj paragraph2
                 examples:
                     - name: foo example
                       text: example details
@@ -50,7 +50,7 @@ def _load_help_file(delimiters):
                        required: false
                        short-summary: one line partial sentence
                        long-summary: text, markdown, etc.
-                       populator-commands: 
+                       populator-commands:
                            - az vm list
                            - default
                      - name: --password/-p
