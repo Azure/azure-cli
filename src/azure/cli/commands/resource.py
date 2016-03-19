@@ -13,7 +13,6 @@ from azure.mgmt.resource.resources import (ResourceManagementClient,
 @description('List resource groups')
 @option('--tag-name -tn <tagName>', L("the resource group's tag name"))
 @option('--tag-value -tv <tagValue>', L("the resource group's tag value"))
-@option('--top -t <number>', L('Top N resource groups to retrieve'))
 def list_groups(args, unexpected): #pylint: disable=unused-argument
     from azure.mgmt.resource.resources.models import ResourceGroup, ResourceGroupFilter
 
@@ -26,9 +25,8 @@ def list_groups(args, unexpected): #pylint: disable=unused-argument
         filters.append("tagvalue eq '{}'".format(args.get('tag-value')))
 
     filter_text = ' and '.join(filters) if len(filters) > 0 else None
-
-    # TODO: top param doesn't work in SDK [bug #115521665]
-    groups = rmc.resource_groups.list(filter=filter_text, top=args.get('top'))
+    
+    groups = rmc.resource_groups.list(filter=filter_text)
     return list(groups)
 
 @command('resource show')
