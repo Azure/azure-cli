@@ -13,24 +13,24 @@ _out = sys.stdout
 def print_welcome_message(out=sys.stdout):
     global _out #pylint: disable=global-statement
     _out = out
-    _printIndent(L(r"""
+    _print_indent(L(r"""
      /\                        
     /  \    _____   _ _ __ ___ 
    / /\ \  |_  / | | | \'__/ _ \
   / ____ \  / /| |_| | | |  __/
  /_/    \_\/___|\__,_|_|  \___|
 """))
-    _printIndent(L('\nWelcome to the cool new Azure CLI!\n\nHere are the base commands:\n'))
+    _print_indent(L('\nWelcome to the cool new Azure CLI!\n\nHere are the base commands:\n'))
 
 def print_detailed_help(help_file, out=sys.stdout): #pylint: disable=unused-argument
     global _out #pylint: disable=global-statement
     _out = out
     _print_header(help_file)
 
-    _printIndent(L('Arguments') if help_file.type == 'command' else L('Sub-Commands'))
+    _print_indent(L('Arguments') if help_file.type == 'command' else L('Sub-Commands'))
 
     if help_file.type == 'command':
-        _print_arguments(help_file)
+        print_arguments(help_file)
     elif help_file.type == 'group':
         _print_groups(help_file)
 
@@ -44,71 +44,72 @@ def print_description_list(help_files, out=sys.stdout):
     indent = 1
     max_name_length = max(len(f.name) for f in help_files)
     for help_file in help_files:
-        _printIndent('{0}{1}{2}'.format(help_file.name,
-                                        _get_column_indent(help_file.name, max_name_length),
-                                        ': ' + help_file.short_summary \
-                                            if help_file.short_summary \
-                                            else ''),
-                     indent)
+        _print_indent('{0}{1}{2}'.format(help_file.name,
+                                         _get_column_indent(help_file.name, max_name_length),
+                                         ': ' + help_file.short_summary \
+                                             if help_file.short_summary \
+                                             else ''),
+                      indent)
 
-def _print_header(help_file):
-    indent = 0
-    _printIndent('')
-    _printIndent('{0}{1}'.format(help_file.command,
-                                 ': ' + help_file.short_summary
-                                 if help_file.short_summary
-                                 else ''),
-                 indent)
-
-    indent = 1
-    if help_file.long_summary:
-        _printIndent('{0}'.format(help_file.long_summary), indent)
-    _printIndent('')
-
-def _print_arguments(help_file):
+def print_arguments(help_file):
     indent = 1
     if not help_file.parameters:
-        _printIndent('None', indent)
-        _printIndent('')
+        _print_indent('None', indent)
+        _print_indent('')
         return
 
     if len(help_file.parameters) == 0:
-        _printIndent('none', indent)
+        _print_indent('none', indent)
     max_name_length = max(len(p.name) for p in help_file.parameters)
     for p in help_file.parameters:
         indent = 1
-        _printIndent('{0}{1}{2}{3}'.format(p.name,
-                                           ' ' + L('[Required]') if p.required else '',
-                                           _get_column_indent(p.name, max_name_length),
-                                           ': ' + p.short_summary if p.short_summary else ''),
-                     indent)
+        _print_indent('{0}{1}{2}{3}'.format(p.name,
+                                            ' ' + L('[Required]') if p.required else '',
+                                            _get_column_indent(p.name, max_name_length),
+                                            ': ' + p.short_summary if p.short_summary else ''),
+                        indent)
 
         indent = 2
-        _printIndent('{0}'.format(p.long_summary), indent)
+        if p.long_summary:
+            _print_indent('{0}'.format(p.long_summary), indent)
 
         if p.value_sources:
-            _printIndent(L("Values from: {0}").format(', '.join(p.value_sources)), indent)
-        _printIndent('')
+            _print_indent(L("Values from: {0}").format(', '.join(p.value_sources)), indent)
+        _print_indent('')
     return indent
+
+def _print_header(help_file):
+    indent = 0
+    _print_indent('')
+    _print_indent('{0}{1}'.format(help_file.command,
+                                  ': ' + help_file.short_summary
+                                  if help_file.short_summary
+                                  else ''),
+                  indent)
+
+    indent = 1
+    if help_file.long_summary:
+        _print_indent('{0}'.format(help_file.long_summary), indent)
+    _print_indent('')
 
 def _print_groups(help_file):
     indent = 1
     for c in help_file.children:
-        _printIndent('{0}{1}'.format(c.name,
-                                     ': ' + c.short_summary if c.short_summary else ''),
-                     indent)
-    _printIndent('')
+        _print_indent('{0}{1}'.format(c.name,
+                                      ': ' + c.short_summary if c.short_summary else ''),
+                      indent)
+    _print_indent('')
 
 def _print_examples(help_file):
     indent = 0
-    _printIndent(L('Examples'), indent)
+    _print_indent(L('Examples'), indent)
 
     for e in help_file.examples:
         indent = 1
-        _printIndent('{0}'.format(e.name), indent)
+        _print_indent('{0}'.format(e.name), indent)
 
         indent = 2
-        _printIndent('{0}'.format(e.text), indent)
+        _print_indent('{0}'.format(e.text), indent)
 
 
 class HelpFile(object): #pylint: disable=too-few-public-methods
@@ -232,10 +233,11 @@ class HelpExample(object): #pylint: disable=too-few-public-methods
         self.text = _data['text']
 
 
-def _printIndent(s, indent=0):
+def _print_indent(s, indent=0):
     tw = textwrap.TextWrapper(initial_indent="    "*indent,
                               subsequent_indent="    "*indent,
-                              replace_whitespace=False)
+                              replace_whitespace=False,
+                              width=100)
     paragraphs = s.split('\n')
     for p in paragraphs:
         print(tw.fill(p), file=_out)

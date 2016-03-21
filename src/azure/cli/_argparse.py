@@ -83,9 +83,10 @@ class ArgumentParser(object):
         # and statement completion to pick them up
         pass
 
-    def add_command(self,
+    def add_command(self, #pylint: disable=too-many-arguments
                     handler,
                     name=None,
+                    accepts_unexpected_args=False,
                     description=None,
                     args=None):
         '''Registers a command that may be parsed by this parser.
@@ -119,6 +120,7 @@ class ArgumentParser(object):
         m['$description'] = description
         m['$handler'] = handler
         m['$doctext'] = handler.__doc__
+        m['$accepts_unexpected_args'] = accepts_unexpected_args
 
         m['$args'] = []
         m['$kwargs'] = kw = {}
@@ -273,14 +275,18 @@ class ArgumentParser(object):
 
     @staticmethod
     def _handle_required_args(expected_kwargs, parsed, out):
-        required_args = [x for x, _, req, _ in expected_kwargs.values() if req]
+        required_args = ['{0}/{1}'.format(names[0], names[1])
+                         for _, _, req, names in expected_kwargs.values() if req]
+        required_args = sorted(list(set(required_args)))
+        missing_arg = False
         for a in required_args:
             try:
                 parsed[a]
             except KeyError:
-                msg = L("Missing required argument '{}'.".format(a))
-                print(msg, file=out)
-                raise ArgParseError(msg)
+                missing_arg = True
+                print(L('Missing required argument: {}'.format(a)), file=out)
+        if missing_arg:
+            raise ArgParseError(L('Missing required argument(s)'))
 
     def _get_output_format(self, m, others, out):
         try:
@@ -293,7 +299,8 @@ class ArgumentParser(object):
             output_format = None
         return output_format
 
-    def _execute(self, m, out, handler, parsed, others, output_format): #pylint: disable=too-many-arguments
+    @staticmethod
+    def _execute(m, out, handler, parsed, others, output_format): #pylint: disable=too-many-arguments
         old_stdout = sys.stdout
         try:
             sys.stdout = out
@@ -303,6 +310,10 @@ class ArgumentParser(object):
                 'args': parsed,
                 'unexpected': others
                 }
+
+            if not m['$accepts_unexpected_args'] and len(others) > 0:
+                print(L('\nUnexpected parameter(s): {0}').format(', '.join(others)), file=out)
+                raise IncorrectUsageError()
 
             # Let any event handlers that want to modify/munge the parameters do so...
             event_dispatcher.raise_event(event_dispatcher.PARSING_PARAMETERS, event_data)
@@ -314,7 +325,7 @@ class ArgumentParser(object):
             return ArgumentParserResult(event_data['handler'](parsed, others), output_format)
         except IncorrectUsageError as ex:
             print(str(ex), file=out)
-            return ArgumentParserResult(self._display_usage(m, out))
+            return ArgumentParserResult(None)
         finally:
             sys.stdout = old_stdout
 
@@ -329,6 +340,7 @@ class ArgumentParser(object):
               else CommandHelpFile(delimiters, argdoc)
         doc.load(noun_map)
         print_detailed_help(doc, out)
+
 
     def _display_completions(self, noun_map, arguments, out=sys.stdout):
         nouns = self._get_noun_matches(arguments, noun_map, out)
