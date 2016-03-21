@@ -222,10 +222,9 @@ def create_block_blob(args, unexpected): #pylint: disable=unused-argument
     bbs.create_container(args.get('container-name'), public_access=public_access)
 
     # show dot indicator of upload progress (one for every 10%)
-    current_progress = 0
+    current_progress = {'val':0}
     def update_progress(current, total):
-        nonlocal current_progress
-        current_progress = _update_progress(current, total, current_progress)
+        current_progress['val'] = _update_progress(current, total, current_progress['val'])
 
     sys.stdout.write('Uploading: ')
     sys.stdout.flush()
@@ -302,10 +301,9 @@ def download_blob(args, unexpected): #pylint: disable=unused-argument
     download_to = args.get('download-to')
 
     # show dot indicator of download progress (one for every 10%)
-    current_progress = 0
+    current_progress = {'val':0}
     def update_progress(current, total):
-        nonlocal current_progress
-        current_progress = _update_progress(current, total, current_progress)
+        current_progress['val'] = _update_progress(current, total, current_progress['val'])
 
     sys.stdout.write('Downloading: ')
     sys.stdout.flush()
