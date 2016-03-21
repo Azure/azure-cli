@@ -5,7 +5,7 @@ from .._locale import L
 @description(L('How to deploy and ARM template using Azure CLI.'))
 def deploy_template_help(args, unexpected): #pylint: disable=unused-argument
     indent = 1
-    print(L('''
+    print(L("""
 ***********************
 ARM Template Deployment
 ***********************
@@ -17,4 +17,4 @@ Could this be helpful?  Let us know!
 2. Second Step
 
 And you're done!
-'''))
+"""))
