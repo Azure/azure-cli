@@ -83,6 +83,20 @@ def create_block_blob(args, unexpected): #pylint: disable=unused-argument
 @option('--account-key -ak <key>', required=True)
 @option('--container -c <name>', required=True)
 def list_blobs(args, unexpected): #pylint: disable=unused-argument
+    """
+    The delete applicationgateway operation deletes the specified
+    applicationgateway.
+
+    :param resource_group_name: The name of the resource group.
+    :type resource_group_name: str
+    :param application_gateway_name: The name of the applicationgateway.
+    :type application_gateway_name: str
+    :param dict custom_headers: headers that will be added to the request
+    :param boolean raw: returns the direct response alongside the
+     deserialized response
+	    :rtype: None
+	    :rtype: msrest.pipeline.ClientRawResponse if raw=True
+    """
     from azure.storage.blob import BlockBlobService, ContentSettings
 
     block_blob_service = get_data_service_client(BlockBlobService, args.get('account-name'),
