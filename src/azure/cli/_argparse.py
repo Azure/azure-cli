@@ -86,9 +86,9 @@ class ArgumentParser(object):
     def add_command(self, #pylint: disable=too-many-arguments
                     handler,
                     name=None,
-                    accepts_unexpected_args=False,
                     description=None,
-                    args=None):
+                    args=None,
+                    accepts_unexpected_args=False):
         '''Registers a command that may be parsed by this parser.
 
         `handler` is the function to call with two `Arguments` objects.
@@ -275,8 +275,7 @@ class ArgumentParser(object):
 
     @staticmethod
     def _handle_required_args(expected_kwargs, parsed, out):
-        required_args = ['{0}/{1}'.format(names[0], names[1])
-                         for _, _, req, names in expected_kwargs.values() if req]
+        required_args = [a for a, _, req, _ in expected_kwargs.values() if req]
         required_args = sorted(list(set(required_args)))
         missing_arg = False
         for a in required_args:
@@ -284,7 +283,10 @@ class ArgumentParser(object):
                 parsed[a]
             except KeyError:
                 missing_arg = True
-                print(L('Missing required argument: {}'.format(a)), file=out)
+                full_name = ['{0}/{1}'.format(names[0], names[1])
+                             for arg, _, req, names in expected_kwargs.values() if arg == a][0]
+                print(L('Missing required argument: {}'.format(full_name)),
+                      file=out)
         if missing_arg:
             raise ArgParseError(L('Missing required argument(s)'))
 

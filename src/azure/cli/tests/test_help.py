@@ -156,7 +156,6 @@ Arguments
 
     --foobar3/-fb3: the foobar3
 
-
 '''
         self.assertEqual(s, io.getvalue())
         io.close()
@@ -282,9 +281,7 @@ n1
 Arguments
     --arg/-a
 
-
     -b
-
 
 '''
 

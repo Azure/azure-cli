@@ -67,7 +67,7 @@ def print_arguments(help_file):
                                             ' ' + L('[Required]') if p.required else '',
                                             _get_column_indent(p.name, max_name_length),
                                             ': ' + p.short_summary if p.short_summary else ''),
-                        indent)
+                      indent)
 
         indent = 2
         if p.long_summary:
