@@ -1,6 +1,3 @@
-import json
-from json import JSONDecodeError
-
 from .._argparse import IncorrectUsageError
 from ..commands import command, description, option
 from ._command_creation import get_mgmt_service_client
