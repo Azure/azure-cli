@@ -246,7 +246,10 @@ def _get_column_indent(text, max_name_length):
     return ' '*(max_name_length - len(text))
 
 def _load_help_file_from_string(text):
-    return yaml.load(text) if text else None
+    try:
+        return yaml.load(text) if text else None
+    except Exception: #pylint: disable=broad-except
+        return text
 
 class HelpAuthoringException(Exception):
     pass
