@@ -1,12 +1,11 @@
 from ..commands import command, description
 from .._locale import L
-from .._help import _print_indent
 
-@command('taskhelp deploy_arm_template')
+@command('taskhelp deploy-arm-template')
 @description(L('How to deploy and ARM template using Azure CLI.'))
 def deploy_template_help(args, unexpected): #pylint: disable=unused-argument
     indent = 1
-    _print_indent(L('''
+    print(L('''
 ***********************
 ARM Template Deployment
 ***********************
@@ -18,5 +17,4 @@ Could this be helpful?  Let us know!
 2. Second Step
 
 And you're done!
-'''), indent)
-    return 5
+'''))
