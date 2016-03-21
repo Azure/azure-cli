@@ -4,7 +4,7 @@ from .._help import _print_indent
 
 @command('taskhelp deploy_arm_template')
 @description(L('How to deploy and ARM template using Azure CLI.'))
-def logout(args, unexpected): #pylint: disable=unused-argument
+def deploy_template_help(args, unexpected): #pylint: disable=unused-argument
     indent = 1
     _print_indent(L('''
 ***********************
@@ -19,3 +19,4 @@ Could this be helpful?  Let us know!
 
 And you're done!
 '''), indent)
+    return 5
