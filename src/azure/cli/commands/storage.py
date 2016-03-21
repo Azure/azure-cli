@@ -48,7 +48,7 @@ key_values_string = ' | '.join(key_values)
 @description(L('Regenerate one or both keys for a storage account.'))
 @option('--resource-group -g <resourceGroup>', L('the resource group name'), required=True)
 @option('--account-name -n <accountName>', L('the storage account name'), required=True)
-@option('--key -y <key>', L('renew a specific key. Values %s' % key_values_string))
+@option('--key -y <key>', L('renew a specific key. Values {}'.format(key_values_string)))
 def renew_account_keys(args, unexpected): #pylint: disable=unused-argument
     smc = _storage_client_factory()
 
@@ -68,7 +68,7 @@ def renew_account_keys(args, unexpected): #pylint: disable=unused-argument
             account_name=account_name,
             key_name=key_name)
     else:
-        raise ValueError(L('Unrecognized key value: %s' % key_name))
+        raise ValueError(L('Unrecognized key value: {}'.format(key_name)))
     return result
 
 @command('storage account usage show')
@@ -92,7 +92,7 @@ def show_storage_connection_string(args, unexpected): #pylint: disable=unused-ar
     storage_account = _resolve_storage_account(args)
     keys = smc.storage_accounts.list_keys(args.get('resource-group'), storage_account)
 
-    connection_string = 'DefaultEndpointsProtocol=%s;AccountName=%s;AccountKey=%s' % (
+    connection_string = 'DefaultEndpointsProtocol={};AccountName={};AccountKey={}'.format(
         endpoint_protocol,
         storage_account,
         keys.key1) #pylint: disable=no-member
@@ -101,20 +101,34 @@ def show_storage_connection_string(args, unexpected): #pylint: disable=unused-ar
 
 # CONTAINER COMMANDS
 
+# TODO: update this once enums are supported in commands first-class (task #115175885)
+public_access_types = {'none': None,
+                       'blob': PublicAccess.Blob,
+                       'container': PublicAccess.Container}
+public_access_string = ' | '.join(public_access_types)
+
 @command('storage container create')
 @description(L('Create a storage container.'))
 @option('--container-name -c <containerName>', L('the name of the container'), required=True)
 @option('--account-name -n <accountName>', L('the storage account name'))
 @option('--account-key -k <accountKey>', L('the storage account key'))
 @option('--connection-string -t <connectionString>', L('the storage connection string'))
-# TODO: Add permission parameter
+@option('--public-access -p <accessType>', 'Values: {}'.format(public_access_string))
 def create_container(args, unexpected): #pylint: disable=unused-argument
     from azure.storage.blob import BlockBlobService, ContentSettings
     bbs = get_data_service_client(BlockBlobService,
                                   _resolve_storage_account(args),
                                   _resolve_storage_account_key(args),
                                   _resolve_connection_string(args))
-    if not bbs.create_container(args.get('container-name')):
+    try:
+        public_access = public_access_types[args.get('container.public-access')] \
+                                            if args.get('container.public-access') \
+                                            else None
+    except KeyError:
+        raise IncorrectUsageError(L('public-access must be: {}'
+                                    .format(public_access_string)))
+
+    if not bbs.create_container(args.get('container-name'), public_access=public_access):
         raise RuntimeError(L('Container creation failed.'))
 
 @command('storage container delete')
@@ -134,7 +148,7 @@ def delete_container(args, unexpected): #pylint: disable=unused-argument
     prompt_for_delete = args.get('force') is None
 
     if prompt_for_delete:
-        ans = input('Really delete %s? [Y/n] ' % container_name)
+        ans = input('Really delete {}? [Y/n] '.format(container_name))
         if not ans or ans[0].lower() != 'y':
             return 0
 
@@ -171,13 +185,7 @@ def show_container(args, unexpected): #pylint: disable=unused-argument
     result = bbs.get_container_properties(args.get('container-name'))
     return result
 
-# BLOCK BLOB COMMANDS
-
-# TODO: update this once enums are supported in commands first-class (task #115175885)
-public_access_types = {'none': None,
-                       'blob': PublicAccess.Blob,
-                       'container': PublicAccess.Container}
-public_access_string = ' | '.join(public_access_types)
+# BLOB COMMANDS
 
 @command('storage blob upload-block-blob')
 @description(L('Upload a block blob to a container.'))
