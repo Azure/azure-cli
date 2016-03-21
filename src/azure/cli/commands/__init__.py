@@ -9,17 +9,14 @@ COMMAND_MODULES = [
     'network',
     'resourcegroup',
     'storage',
-    'taskhelp',
     'vm',
 ]
 
 _COMMANDS = {}
 
-def command(name, accepts_unexpected_args=False):
+def command(name):
     def add_command(handler):
-        cmd = _COMMANDS.setdefault(handler, {})
-        cmd['name'] = name
-        cmd['accepts_unexpected_args'] = accepts_unexpected_args
+        _COMMANDS.setdefault(handler, {})['name'] = name
         logger.debug('Added %s as command "%s"', handler, name)
         return handler
     return add_command
