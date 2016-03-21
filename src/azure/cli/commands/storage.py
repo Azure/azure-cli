@@ -3,6 +3,7 @@ import sys
 
 from azure.storage.blob import PublicAccess
 from azure.mgmt.storage import StorageManagementClient, StorageManagementClientConfiguration
+from azure.mgmt.storage.models import AccountType
 from azure.mgmt.storage.operations import StorageAccountsOperations
 
 from .._argparse import IncorrectUsageError
@@ -99,6 +100,81 @@ def show_storage_connection_string(args, unexpected): #pylint: disable=unused-ar
 
     return {'ConnectionString':connection_string}
 
+# TODO: update this once enums are supported in commands first-class (task #115175885)
+storage_account_types = {'Standard_LRS': AccountType.standard_lrs,
+                         'Standard_ZRS': AccountType.standard_zrs,
+                         'Standard_GRS': AccountType.standard_grs,
+                         'Standard_RAGRS': AccountType.standard_ragrs,
+                         'Premium_LRS': AccountType.premium_lrs}
+storage_account_type_string = ' | '.join(storage_account_types)
+
+@command('storage account create')
+@description(L('Create a storage account.'))
+@option('--resource-group -g <resourceGroup>', L('the resource group name'), required=True)
+@option('--account-name -n <accountName>', L('the storage account name'), required=True)
+@option('--location -l <location>', L('location in which to create the storage account'), required=True)
+@option('--type -t <type>', L('Values: {}'.format(storage_account_type_string)), required=True)
+@option('--tags <tags>', L('storage account tags. Tags are key=value pairs separated with semicolon(;)'))
+def set_container(args, unexpected): #pylint: disable=unused-argument
+    from azure.mgmt.storage.models import StorageAccountCreateParameters
+
+    smc = _storage_client_factory()
+
+    resource_group = args.get('resource-group')
+    account_name = args.get('account-name')
+
+    try:
+        account_type = storage_account_types[args.get('type')] if args.get('type') else None
+    except KeyError:
+        raise IncorrectUsageError(L('type must be: {}'
+                                    .format(storage_account_type_string)))
+
+    tags = dict() if args.get('tags') else None
+    for tag in args.get('tags').split(';'):
+        tag_components = tag.split('=')
+        try:
+            tags[tag_components[0]] = tag_components[1]
+        except IndexError:
+            pass
+    params = StorageAccountCreateParameters(args.get('location'),
+                                            account_type,
+                                            tags)
+
+    return smc.storage_accounts.create(resource_group, account_name, params)   
+
+@command('storage account set')
+@description(L('Update storage account property (only one at a time).'))
+@option('--resource-group -g <resourceGroup>', L('the resource group name'), required=True)
+@option('--account-name -n <accountName>', L('the storage account name'), required=True)
+@option('--type -t <type>', L('Values: {}'.format(storage_account_type_string)))
+@option('--tags <tags>', L('storage account tags. Tags are key=value pairs separated with semicolon(;)'))
+@option('--custom-domain <customDomain>', L('the custom domain name'))
+@option('--subdomain', L('use indirect CNAME validation'))
+def set_container(args, unexpected): #pylint: disable=unused-argument
+    from azure.mgmt.storage.models import StorageAccountUpdateParameters, CustomDomain
+
+    smc = _storage_client_factory()
+
+    resource_group = args.get('resource-group')
+    account_name = args.get('account-name')
+    try:
+        account_type = storage_account_types[args.get('type')] if args.get('type') else None
+    except KeyError:
+        raise IncorrectUsageError(L('type must be: {}'
+                                    .format(storage_account_type_string)))
+    tags = dict() if args.get('tags') else None
+    if tags:
+        for tag in args.get('tags').split(';'):
+            tag_components = tag.split('=')
+            try:
+                tags[tag_components[0]] = tag_components[1]
+            except IndexError:
+                pass
+    domain = CustomDomain(args.get('custom-domain'), use_sub_domain=args.get('subdomain')) if args.get('custom-domain') else None
+    params = StorageAccountUpdateParameters(tags, account_type, domain)
+
+    return smc.storage_accounts.update(resource_group, account_name, params)
+
 # CONTAINER COMMANDS
 
 # TODO: update this once enums are supported in commands first-class (task #115175885)
@@ -113,7 +189,7 @@ public_access_string = ' | '.join(public_access_types)
 @option('--account-name -n <accountName>', L('the storage account name'))
 @option('--account-key -k <accountKey>', L('the storage account key'))
 @option('--connection-string -t <connectionString>', L('the storage connection string'))
-@option('--public-access -p <accessType>', 'Values: {}'.format(public_access_string))
+@option('--public-access -p <accessType>', L('Values: {}'.format(public_access_string)))
 def create_container(args, unexpected): #pylint: disable=unused-argument
     from azure.storage.blob import BlockBlobService, ContentSettings
     bbs = get_data_service_client(BlockBlobService,
@@ -169,6 +245,7 @@ def list_containers(args, unexpected): #pylint: disable=unused-argument
                                   _resolve_connection_string(args))
     results = bbs.list_containers(args.get('prefix'))
     return results
+
 
 @command('storage container show')
 @description(L('Show details of a storage container'))
