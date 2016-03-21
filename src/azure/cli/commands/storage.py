@@ -121,8 +121,8 @@ def create_container(args, unexpected): #pylint: disable=unused-argument
                                   _resolve_storage_account_key(args),
                                   _resolve_connection_string(args))
     try:
-        public_access = public_access_types[args.get('container.public-access')] \
-                                            if args.get('container.public-access') \
+        public_access = public_access_types[args.get('public-access')] \
+                                            if args.get('public-access') \
                                             else None
     except KeyError:
         raise IncorrectUsageError(L('public-access must be: {}'
@@ -186,6 +186,7 @@ def show_container(args, unexpected): #pylint: disable=unused-argument
     return result
 
 # BLOB COMMANDS
+# TODO: Evaluate for removing hand-authored commands in favor of auto-commands (task ##115068835)
 
 @command('storage blob upload-block-blob')
 @description(L('Upload a block blob to a container.'))
@@ -339,6 +340,7 @@ def storage_file_create(args, unexpected): #pylint: disable=unused-argument
 
 # HELPER METHODS
 
+# TODO: Remove once these parameters are supported first-class by @option (task #116054675)
 def _resolve_storage_account(args):
     return args.get('account-name') or environ.get('AZURE_STORAGE_ACCOUNT')
 
