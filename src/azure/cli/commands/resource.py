@@ -25,7 +25,7 @@ def list_groups(args, unexpected): #pylint: disable=unused-argument
         filters.append("tagvalue eq '{}'".format(args.get('tag-value')))
 
     filter_text = ' and '.join(filters) if len(filters) > 0 else None
-    
+
     groups = rmc.resource_groups.list(filter=filter_text)
     return list(groups)
 
@@ -51,7 +51,8 @@ def show_resource(args, unexpected): #pylint: disable=unused-argument
     api_version = _resolve_api_version(args, rmc)
     if not api_version:
         raise IncorrectUsageError(
-            L('API version is required and could not be resolved for resource %s' % full_type))
+            L('API version is required and could not be resolved for resource {}'
+              .format(full_type)))
 
     results = rmc.resources.get(
         resource_group_name=args.get('resource-group'),
@@ -79,7 +80,6 @@ def show_resource(args, unexpected): #pylint: disable=unused-argument
         + ' Name is required and value is optional. For example, -t tag1=value1;tag2'))
 # TODO: carried over from Node parameter list
 #@option('--no-tags', L('removes all existing tags'))
-#@option('--subscription <subscription>', L('the subscription identifier'))
 def set_resource(args, unexpected): #pylint: disable=unused-argument
     from azure.mgmt.resource.resources.models import GenericResource
 
@@ -97,8 +97,8 @@ def set_resource(args, unexpected): #pylint: disable=unused-argument
 
     api_version = _resolve_api_version(args, rmc)
     if not api_version:
-        raise ValueError(L('API version is required and could not be resolved for resource %s. '
-                           + 'Please specify using option --api-version or -o' % full_type))
+        raise ValueError(L('API version is required and could not be resolved for resource {} '
+                           .format(full_type) + 'Please specify using option --api-version or -o'))
 
     resource = rmc.resources.get(
         resource_group_name=resource_group,
@@ -143,8 +143,6 @@ def set_resource(args, unexpected): #pylint: disable=unused-argument
 @option('--tags -t <tags>',
         L('Tags to assign to the resource. Can be multiple. In the format of \'name=value\'.' \
           + ' Name is required and value is optional. For example, -t tag1=value1;tag2'))
-# TODO: carried over from Node parameter list
-#@option('--subscription <subscription>', L('the subscription identifier'))
 def create_resource(args, unexpected): #pylint: disable=unused-argument
     from azure.mgmt.resource.resources.models import GenericResource
 
@@ -168,8 +166,8 @@ def create_resource(args, unexpected): #pylint: disable=unused-argument
 
     api_version = _resolve_api_version(args, rmc)
     if not api_version:
-        raise ValueError(L('API version is required and could not be resolved for resource %s. '
-                           + 'Please specify using option --api-version or -o' % full_type))
+        raise ValueError(L('API version is required and could not be resolved for resource {}. '
+                           .format(full_type) + 'Please specify using option --api-version or -o'))
 
     results = rmc.resources.create_or_update(
         resource_group_name=args.get('resource-group'),
@@ -202,19 +200,19 @@ def _resolve_api_version(args, rmc):
         except IndexError:
             raise IncorrectUsageError('Parameter --parent must be in <type>/<name> format.')
 
-        resource_type = "%s/%s" % (parent_type, resource_type)
+        resource_type = "{}/{}".format(parent_type, resource_type)
     else:
         resource_type = resource_type
     provider = rmc.providers.get(provider_namespace)
     for t in provider.resource_types:
         if t.resource_type == resource_type:
             # Return first non-preview version
-            for version in t.api_version:
+            for version in t.api_versions:
                 if not version.find('preview'):
                     return version
             # No non-preview version found. Take first preview version
             try:
-                return t.api_version[0]
+                return t.api_versions[0]
             except IndexError:
                 return None
     return None
