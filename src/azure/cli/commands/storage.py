@@ -1,5 +1,6 @@
 ﻿from os import environ
 import sys
+from six.moves import input #pylint: disable=redefined-builtin
 
 from azure.storage.blob import PublicAccess
 from azure.mgmt.storage import StorageManagementClient, StorageManagementClientConfiguration
@@ -11,6 +12,7 @@ from ..commands import command, description, option
 from ._command_creation import get_mgmt_service_client, get_data_service_client
 from ..commands._auto_command import build_operation
 from .._locale import L
+
 
 def _storage_client_factory():
     return get_mgmt_service_client(StorageManagementClient, StorageManagementClientConfiguration)
@@ -299,10 +301,9 @@ def create_block_blob(args, unexpected): #pylint: disable=unused-argument
     bbs.create_container(args.get('container-name'), public_access=public_access)
 
     # show dot indicator of upload progress (one for every 10%)
-    current_progress = 0
+    current_progress = {'val':0}
     def update_progress(current, total):
-        nonlocal current_progress
-        current_progress = _update_progress(current, total, current_progress)
+        current_progress['val'] = _update_progress(current, total, current_progress['val'])
 
     sys.stdout.write('Uploading: ')
     sys.stdout.flush()
@@ -318,7 +319,7 @@ def create_block_blob(args, unexpected): #pylint: disable=unused-argument
                                          content_md5=args.get('content.md5'),
                                          cache_control=args.get('content.cache-control'))
         )
-    print(' Done!')
+    sys.stdout.write(' Done!\n')
     return blob
 
 @command('storage blob list')
@@ -379,10 +380,9 @@ def download_blob(args, unexpected): #pylint: disable=unused-argument
     download_to = args.get('download-to')
 
     # show dot indicator of download progress (one for every 10%)
-    current_progress = 0
+    current_progress = {'val':0}
     def update_progress(current, total):
-        nonlocal current_progress
-        current_progress = _update_progress(current, total, current_progress)
+        current_progress['val'] = _update_progress(current, total, current_progress['val'])
 
     sys.stdout.write('Downloading: ')
     sys.stdout.flush()
@@ -390,7 +390,7 @@ def download_blob(args, unexpected): #pylint: disable=unused-argument
                          blob_name,
                          download_to,
                          progress_callback=update_progress)
-    print(' Done!')
+    sys.stdout.write(' Done!\n')
 
 # FILE COMMANDS
 
