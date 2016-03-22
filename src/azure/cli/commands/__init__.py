@@ -14,6 +14,7 @@ class Command(object):
     def __init__(self, name, func, **kwargs):
         self.name = name
         self.func = func
+        self.description = kwargs.pop('description', None)
         self.options = kwargs.pop('options', [])
 
 class Option(dict):
