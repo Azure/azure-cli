@@ -198,9 +198,14 @@ class ArgumentParser(object):
 
             others, parsed = self._parse_nouns(expected_kwargs, it, m, n, out)
 
+            output_format = self._get_output_format(m, others, out)
+
+            bad_args_passed = self._handle_bad_args(m, others, out)
+
             self._handle_required_args(expected_kwargs, parsed, out)
 
-            output_format = self._get_output_format(m, others, out)
+            if bad_args_passed:
+                raise ArgParseError()
         except (ArgParseFinished, ArgParseError):
             return ArgumentParserResult(None)
 
@@ -290,6 +295,13 @@ class ArgumentParser(object):
         if missing_arg:
             raise ArgParseError(L('Missing required argument(s)'))
 
+    def _handle_bad_args(self, m, others, out):
+        bad_args_passed = False
+        if not m['$accepts_unexpected_args'] and len(others) > 0:
+            print(L('\nUnexpected parameter(s): {0}\n').format(', '.join(others)), file=out)
+            bad_args_passed = True
+        return bad_args_passed
+
     def _get_output_format(self, m, others, out):
         try:
             output_format = others.pop('output') if others else None
@@ -313,10 +325,6 @@ class ArgumentParser(object):
                 'unexpected': others
                 }
 
-            if not m['$accepts_unexpected_args'] and len(others) > 0:
-                print(L('\nUnexpected parameter(s): {0}').format(', '.join(others)), file=out)
-                raise IncorrectUsageError()
-
             # Let any event handlers that want to modify/munge the parameters do so...
             event_dispatcher.raise_event(event_dispatcher.PARSING_PARAMETERS, event_data)
 
@@ -331,8 +339,7 @@ class ArgumentParser(object):
         finally:
             sys.stdout = old_stdout
 
-    @staticmethod
-    def _display_usage(noun_map, out=sys.stdout):
+    def _display_usage(self, noun_map, out=sys.stdout):
         subnouns = sorted(k for k in noun_map if not k.startswith('$'))
         argdoc = noun_map.get('$argdoc')
         delimiters = noun_map['$full_name']
@@ -341,6 +348,15 @@ class ArgumentParser(object):
               if len(subnouns) > 0 \
               else CommandHelpFile(delimiters, argdoc)
         doc.load(noun_map)
+
+        if isinstance(doc, GroupHelpFile):
+            for child in doc.children:
+                args = delimiters.split('.')
+                args.append(child.name)
+                it = self._get_args_itr(args)
+                m, _ = self._get_noun_map(args, it, out)
+                child.load(m)
+
         print_detailed_help(doc, out)
 
 

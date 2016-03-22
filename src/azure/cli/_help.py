@@ -60,20 +60,25 @@ def print_arguments(help_file):
 
     if len(help_file.parameters) == 0:
         _print_indent('none', indent)
-    max_name_length = max(len(p.name) for p in help_file.parameters)
+    required_tag = L(' [Required]')
+    max_name_length = max(len(p.name) + 11 if p.required else 0 for p in help_file.parameters)
     for p in help_file.parameters:
         indent = 1
+        required_text = required_tag if p.required else ''
         _print_indent('{0}{1}{2}{3}'.format(p.name,
-                                            ' ' + L('[Required]') if p.required else '',
-                                            _get_column_indent(p.name, max_name_length),
+                                            required_text,
+                                            _get_column_indent(p.name + required_text,
+                                                               max_name_length),
                                             ': ' + p.short_summary if p.short_summary else ''),
-                      indent)
+                      indent,
+                      max_name_length + indent*4 + 2)
 
         indent = 2
         if p.long_summary:
-            _print_indent('{0}'.format(p.long_summary), indent)
+            _print_indent('{0}'.format(p.long_summary.rstrip()), indent)
 
         if p.value_sources:
+            _print_indent('')
             _print_indent(L("Values from: {0}").format(', '.join(p.value_sources)), indent)
         _print_indent('')
     return indent
@@ -81,6 +86,7 @@ def print_arguments(help_file):
 def _print_header(help_file):
     indent = 0
     _print_indent('')
+    _print_indent(L('Command') if help_file.type == 'command' else L('Group'), indent)
     _print_indent('{0}{1}'.format(help_file.command,
                                   ': ' + help_file.short_summary
                                   if help_file.short_summary
@@ -90,7 +96,8 @@ def _print_header(help_file):
     indent = 1
     if help_file.long_summary:
         _print_indent('{0}'.format(help_file.long_summary), indent)
-    _print_indent('')
+    else:
+        _print_indent('')
 
 def _print_groups(help_file):
     indent = 1
@@ -167,8 +174,8 @@ class GroupHelpFile(HelpFile): #pylint: disable=too-few-public-methods
         child_helps = [GroupHelpFile(child.delimiters, []) for child in self.children]
         loaded_children = []
         for child in self.children:
-            child_help = [h for h in child_helps if h.name == child.name]
-            loaded_children.append(child_help[0] if len(child_help) > 0 else child)
+            child_help = next((h for h in child_helps if h.name == child.name), None)
+            loaded_children.append(child_help if child_help else child)
         self.children = loaded_children
 
 
@@ -233,9 +240,11 @@ class HelpExample(object): #pylint: disable=too-few-public-methods
         self.text = _data['text']
 
 
-def _print_indent(s, indent=0):
-    tw = textwrap.TextWrapper(initial_indent="    "*indent,
-                              subsequent_indent="    "*indent,
+def _print_indent(s, indent=0, subsequent_spaces=-1):
+    tw = textwrap.TextWrapper(initial_indent='    '*indent,
+                              subsequent_indent=('    '*indent
+                                                 if subsequent_spaces == -1
+                                                 else ' '*subsequent_spaces),
                               replace_whitespace=False,
                               width=100)
     paragraphs = s.split('\n')
