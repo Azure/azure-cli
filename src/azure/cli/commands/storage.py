@@ -74,7 +74,7 @@ def renew_account_keys(args, unexpected): #pylint: disable=unused-argument
         raise ValueError(L('Unrecognized key value: {}'.format(key_name)))
     return result
 
-@command('storage account usage show')
+@command('storage account usage')
 @description(L('Show the current count and limit of the storage accounts under the subscription.'))
 def show_account_usage(args, unexpected): #pylint: disable=unused-argument
     smc = _storage_client_factory()
@@ -83,7 +83,7 @@ def show_account_usage(args, unexpected): #pylint: disable=unused-argument
             return item
     return None
 
-@command('storage account connectionstring show')
+@command('storage account connection-string')
 @description(L('Show the connection string for a storage account.'))
 @option('--resource-group -g <resourceGroup>', L('the resource group name'), required=True)
 @option('--account-name -n <accountName>', L('the storage account name'))
