@@ -57,7 +57,8 @@ def show_resource(args, unexpected): #pylint: disable=unused-argument
         resource_provider_namespace=provider_namespace,
         resource_type=resource_type,
         api_version=api_version,
-        parent_resource_path=args.get('parent', '')
+        parent_resource_path=args.get('parent', ''),
+        custom_headers={'Accept': 'application/json'}
     )
     return results
 
