@@ -1,5 +1,5 @@
 ﻿from os import environ
-import sys
+from six import print_
 from six.moves import input #pylint: disable=redefined-builtin
 
 from azure.storage.blob import PublicAccess
@@ -73,16 +73,13 @@ def renew_account_keys(args, unexpected): #pylint: disable=unused-argument
         raise ValueError(L('Unrecognized key value: {}'.format(key_name)))
     return result
 
-@command('storage account usage show')
+@command('storage account usage')
 @description(L('Show the current count and limit of the storage accounts under the subscription.'))
 def show_account_usage(args, unexpected): #pylint: disable=unused-argument
     smc = _storage_client_factory()
-    for item in smc.usage.list():
-        if item.name.value == 'StorageAccounts':
-            return item
-    return None
+    return next((x for x in smc.usage.list() if x.name.value == 'StorageAccounts'), None)
 
-@command('storage account connectionstring show')
+@command('storage account connection-string')
 @description(L('Show the connection string for a storage account.'))
 @option('--resource-group -g <resourceGroup>', L('the resource group name'), required=True)
 @option('--account-name -n <accountName>', L('the storage account name'))
@@ -90,7 +87,7 @@ def show_account_usage(args, unexpected): #pylint: disable=unused-argument
 def show_storage_connection_string(args, unexpected): #pylint: disable=unused-argument
     smc = _storage_client_factory()
 
-    endpoint_protocol = 'http' if args.get('use-http') is not None else 'https'
+    endpoint_protocol = 'http' if args.get('use-http') else 'https'
     storage_account = _resolve_storage_account(args)
     keys = smc.storage_accounts.list_keys(args.get('resource-group'), storage_account)
 
@@ -214,8 +211,8 @@ def create_block_blob(args, unexpected): #pylint: disable=unused-argument
                                   _resolve_connection_string(args))
 
     try:
-        public_access = public_access_types[args.get('container.public-access')] \
-                                            if args.get('container.public-access') \
+        public_access = public_access_types[args.get('public-access')] \
+                                            if args.get('public-access') \
                                             else None
     except KeyError:
         raise IncorrectUsageError(L('container.public-access must be: {}'
@@ -228,21 +225,25 @@ def create_block_blob(args, unexpected): #pylint: disable=unused-argument
     def update_progress(current, total):
         current_progress['val'] = _update_progress(current, total, current_progress['val'])
 
-    sys.stdout.write('Uploading: ')
-    sys.stdout.flush()
-    blob = bbs.create_blob_from_path(
-        args.get('container-name'),
-        args.get('blob-name'),
-        args.get('upload-from'),
-        progress_callback=update_progress,
-        content_settings=ContentSettings(content_type=args.get('content.type'),
-                                         content_disposition=args.get('content.disposition'),
-                                         content_encoding=args.get('content.encoding'),
-                                         content_language=args.get('content.language'),
-                                         content_md5=args.get('content.md5'),
-                                         cache_control=args.get('content.cache-control'))
-        )
-    sys.stdout.write(' Done!\n')
+    print_('Uploading: ', end='', flush=True)
+    try:
+        blob = bbs.create_blob_from_path(
+            args.get('container-name'),
+            args.get('blob-name'),
+            args.get('upload-from'),
+            progress_callback=update_progress,
+            content_settings=ContentSettings(content_type=args.get('content.type'),
+                                             content_disposition=args.get('content.disposition'),
+                                             content_encoding=args.get('content.encoding'),
+                                             content_language=args.get('content.language'),
+                                             content_md5=args.get('content.md5'),
+                                             cache_control=args.get('content.cache-control'))
+            )
+    except FileNotFoundError as ex:
+        print_(' ERROR: {}'.format(ex))
+        return
+
+    print_(' Done!')
     return blob
 
 @command('storage blob list')
@@ -307,13 +308,12 @@ def download_blob(args, unexpected): #pylint: disable=unused-argument
     def update_progress(current, total):
         current_progress['val'] = _update_progress(current, total, current_progress['val'])
 
-    sys.stdout.write('Downloading: ')
-    sys.stdout.flush()
+    print_('Downloading: ', end='', flush=True)
     bbs.get_blob_to_path(container_name,
                          blob_name,
                          download_to,
                          progress_callback=update_progress)
-    sys.stdout.write(' Done!\n')
+    print_(' Done!')
 
 # FILE COMMANDS
 
@@ -352,8 +352,7 @@ def _resolve_connection_string(args):
 
 def _update_progress(current, total, current_progress):
     if total:
-        progress = int(current * 10 / total)
-        for _ in range(progress - current_progress):
-            sys.stdout.write('.')
-            sys.stdout.flush()
-        return progress
+        steps = 10
+        num_steps = int(current * steps / total) - current_progress
+        print_('.' * num_steps, end='', flush=True)
+        return current_progress + num_steps
