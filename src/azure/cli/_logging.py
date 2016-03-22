@@ -48,9 +48,7 @@ def configure_logging(argv, config):
     logger.level = stderr_handler.level = level
     logger.handlers.append(stderr_handler)
 
-    msrest_logger = _logging.getLogger('msrest')
-    msrest_logger.level = level
-    logger.handlers.append(msrest_logger)
+    # Set logging level for all loggers
     _logging.basicConfig(level=level)
 
     if logfile:
