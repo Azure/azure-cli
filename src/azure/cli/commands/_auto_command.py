@@ -4,16 +4,14 @@ import sys
 import time
 from msrest.paging import Paged
 from msrest.exceptions import ClientException
-from azure.cli._argparse import IncorrectUsageError
-from ..commands import command, description, option
+from azure.cli.parser import IncorrectUsageError
+from ..commands import CommandTable, Command, Option
 
 
 EXCLUDED_PARAMS = frozenset(['self', 'raw', 'custom_headers', 'operation_config'])
 GLOBALPARAMALIASES = {
     'resource_group_name': '--resourcegroup --rg <resourcegroupname>'
 }
-
-
 
 class LongRunningOperation(object): #pylint: disable=too-few-public-methods
 
@@ -42,15 +40,6 @@ class LongRunningOperation(object): #pylint: disable=too-few-public-methods
             if self.progress_file:
                 print(file=self.progress_file)
                 print(self.finish_msg if succeeded else '', file=self.progress_file)
-
-def _decorate_command(name, func):
-    return command(name)(func)
-
-def _decorate_description(desc, func):
-    return description(desc)(func)
-
-def _decorate_option(spec, descr, target, func):
-    return option(spec, descr, target=target)(func)
 
 def _get_member(obj, path):
     """Recursively walk down the dot-separated path
@@ -94,13 +83,12 @@ def _option_description(operation, arg):
     return ' '.join(l.split(':')[-1] for l in inspect.getdoc(operation).splitlines()
                     if l.startswith(':param') and arg + ':' in l)
 
-def build_operation(command_name, member_path, client_type, operations, #pylint: disable=dangerous-default-value
+def build_operation(command_table, command_name, member_path, client_type, operations, #pylint: disable=dangerous-default-value
                     paramaliases=GLOBALPARAMALIASES):
     for operation, return_type_name in operations:
         opname = operation.__name__.replace('_', '-')
         func = _make_func(client_type, member_path, return_type_name, operation)
-        func = _decorate_command(' '.join([command_name, opname]), func)
-
+        
         args = []
         try:
             # only supported in python3 - falling back to argspec if not available
@@ -110,7 +98,12 @@ def build_operation(command_name, member_path, client_type, operations, #pylint:
             sig = inspect.getargspec(operation) #pylint: disable=deprecated-method
             args = sig.args
 
+        options = []
         for arg in [a for a in args if not a in EXCLUDED_PARAMS]:
-            spec = paramaliases.get(arg, '--%s <%s>' % (arg, arg))
-            func = _decorate_option(spec, _option_description(operation, arg),
-                                    target=arg, func=func)
+            options.append(Option('--' + arg, 
+                                  metavar=arg,
+                                  required=True,
+                                  help=_option_description(operation, arg)))
+
+        command_table[func] = Command(' '.join([command_name, opname]), func, options=options)
+
