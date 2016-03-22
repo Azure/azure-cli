@@ -83,8 +83,6 @@ def _resolve_api_version(args, rmc):
             raise IncorrectUsageError('Parameter --parent must be in <type>/<name> format.')
 
         resource_type = "{}/{}".format(parent_type, resource_type)
-    else:
-        resource_type = resource_type
     provider = rmc.providers.get(provider_namespace)
     for t in provider.resource_types:
         if t.resource_type == resource_type:
