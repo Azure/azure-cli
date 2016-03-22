@@ -35,8 +35,8 @@ class AzCliCommandParser(argparse.ArgumentParser):
             session.raise_event('AzCliCommandParser.SubparserCreated',
                                 {'parser': command_parser, 'metadata': metadata})
             for arg in metadata.options:
-                command_parser.add_argument(*arg.name.split(),
-                                            **arg)
+                command_parser.add_argument(*arg[0],
+                                            **arg[1])
             command_parser.set_defaults(func=handler)
 
     def _get_subparser(self, path):
@@ -56,7 +56,7 @@ class AzCliCommandParser(argparse.ArgumentParser):
                 # add a subparser if one doesn't exist
                 grandparent_subparser = self.subparsers[tuple(path[0:length - 1])]
                 new_parser = grandparent_subparser.add_parser(path[length - 1])
-                
+
                 # Due to http://bugs.python.org/issue9253, we have to give the subparser
                 # a destination and set it to requried in order to get a meaningful error
                 parent_subparser = new_parser.add_subparsers(dest='subcommand')
