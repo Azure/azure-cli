@@ -310,7 +310,7 @@ Arguments
         io = StringIO()
         cmd_result = p.execute('group1'.split(), out=io)
         self.assertIsNone(cmd_result.result)
-        s = '    group2\n    group3\n'
+        s = 'Group\n    group1\n\nSub-Commands\n    group2\n    group3\n'
         self.assertEqual(s, io.getvalue())
         io.close()
 
