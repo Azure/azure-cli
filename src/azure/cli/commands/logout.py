@@ -7,9 +7,8 @@ command_table = CommandTable()
 def get_command_table():
     return command_table
 
-#@command_table.description(L('Log out from Azure subscription using Active Directory.'))
 @command_table.option('--username -u', dest='username', help=L('User name used to log out from Azure Active Directory.'))
-@command_table.command('logout')
+@command_table.command('logout', description=L('Log out from Azure subscription using Active Directory.'))
 def logout(args, unexpected): #pylint: disable=unused-argument
     username = args.get('username')
     if not username:

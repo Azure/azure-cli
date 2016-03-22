@@ -15,13 +15,12 @@ def get_command_table():
     return command_table
 
 
-#@description(L('log in to an Azure subscription using Active Directory Organization Id'))
 @command_table.option('--username -u', dest='username', required=True, 
                       help=L('organization Id or service principal. Microsoft Account is not yet supported.'))
 @command_table.option('--password -p', help=L('user password or client secret, will prompt if not given.'))
 @command_table.option('--service-principal', help=L('the credential represents a service principal.'))
 @command_table.option('--tenant -t', help=L('the tenant associated with the service principal.'))
-@command_table.command('login')
+@command_table.command('login', description=L('log in to an Azure subscription using Active Directory Organization Id'))
 def login(args, unexpected): #pylint: disable=unused-argument
     username = args.get('username')
 

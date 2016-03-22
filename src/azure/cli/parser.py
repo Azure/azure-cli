@@ -31,7 +31,7 @@ class AzCliCommandParser(argparse.ArgumentParser):
             # To work around http://bugs.python.org/issue9253, we artificially add any new
             # parsers we add to the "choices" section of the subparser.
             subparser.choices[command_name] = command_name
-            command_parser = subparser.add_parser(command_name, parents=self.parents)
+            command_parser = subparser.add_parser(command_name, description=metadata.description, parents=self.parents)
             session.raise_event('AzCliCommandParser.SubparserCreated',
                                 {'parser': command_parser, 'metadata': metadata})
             for arg in metadata.options:
