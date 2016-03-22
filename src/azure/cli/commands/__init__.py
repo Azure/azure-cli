@@ -1,54 +1,61 @@
-﻿from .._argparse import IncorrectUsageError
-from .._logging import logger
-
-# TODO: Alternatively, simply scan the directory for all modules
+﻿# TODO: Alternatively, simply scan the directory for all modules
 COMMAND_MODULES = [
     'account',
     'login',
     'logout',
     'network',
-    'resourcegroup',
-    'storage',
+#    'resourcegroup',
+#    'storage',
     'vm',
 ]
 
-_COMMANDS = {}
+class Command(object):
 
-def command(name):
-    def add_command(handler):
-        _COMMANDS.setdefault(handler, {})['name'] = name
-        logger.debug('Added %s as command "%s"', handler, name)
-        return handler
-    return add_command
+    def __init__(self, name, func, **kwargs):
+        self.name = name
+        self.func = func
+        self.options = kwargs.pop('options', [])
 
-def description(description_text):
-    def add_description(handler):
-        _COMMANDS.setdefault(handler, {})['description'] = description_text
-        logger.debug('Added description "%s" to %s', description_text, handler)
-        return handler
-    return add_description
+class Option(dict):
+    def __init__(self, name, **kwargs):
+        super(Option, self).__init__()
+        self.name = name
+        self.update(kwargs)
 
-def option(spec, description_text=None, required=False, target=None):
-    def add_option(handler):
-        _COMMANDS.setdefault(handler, {}).setdefault('args', []) \
-            .append((spec, description_text, required, target))
-        logger.debug('Added option "%s" to %s', spec, handler)
-        return handler
-    return add_option
+class CommandTable(dict):
 
-def add_to_parser(parser, command_name=None):
+    def __init__(self):
+        super(CommandTable, self).__init__(self)
+
+    def command(self, name, **kwargs):
+        def wrapper(func):
+            self[func] = Command(name, func, **kwargs)
+            return func
+        return wrapper
+
+    def option(self, name, **kwargs):
+        def wrapper(func):
+            self[func].options.append(Option(name, **kwargs))
+            return func
+        return wrapper
+
+def get_command_table(command_name):
+    module = __import__('azure.cli.commands.' + command_name)
+    for part in ('cli.commands.' + command_name).split('.'):
+        module = getattr(module, part)
+
+    return module.get_command_table()
+
+def add_to_parser(parser, session, command_name=None):
     '''Loads commands into the parser
 
     When `command` is specified, only commands from that module will be loaded.
     If the module is not found, all commands are loaded.
     '''
-
-    # Importing the modules is sufficient to invoke the decorators. Then we can
-    # get all of the commands from the _COMMANDS variable.
     loaded = False
     if command_name:
         try:
-            __import__('azure.cli.commands.' + command_name)
+            parser.load_command_table(session, get_command_table(command_name))
             loaded = True
         except ImportError:
             # Unknown command - we'll load all below
@@ -56,10 +63,5 @@ def add_to_parser(parser, command_name=None):
 
     if not loaded:
         for mod in COMMAND_MODULES:
-            __import__('azure.cli.commands.' + mod)
+            parser.load_command_table(session, get_command_table(mod))
         loaded = True
-
-    for handler, info in _COMMANDS.items():
-        # args have probably been added in reverse order
-        info.setdefault('args', []).reverse()
-        parser.add_command(handler, **info)

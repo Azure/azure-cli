@@ -3,20 +3,25 @@ from azure.mgmt.resource.subscriptions import (SubscriptionClient,
                                                SubscriptionClientConfiguration)
 
 from .._profile import Profile
-from ..commands import command, description, option
+from ..commands import CommandTable
 from .._debug import should_disable_connection_verify
 from .._locale import L
 
 CLIENT_ID = '04b07795-8ddb-461a-bbee-02f9e1bf7b46'
 
-@command('login')
-@description(L('log in to an Azure subscription using Active Directory Organization Id'))
-@option('--username -u <username>',
-        True, #required option
-        L('organization Id or service principal. Microsoft Account is not yet supported.'))
-@option('--password -p <password>', L('user password or client secret, will prompt if not given.'))
-@option('--service-principal', L('the credential represents a service principal.'))
-@option('--tenant -t <tenant>', L('the tenant associated with the service principal.'))
+command_table = CommandTable()
+
+def get_command_table():
+    return command_table
+
+
+#@description(L('log in to an Azure subscription using Active Directory Organization Id'))
+@command_table.option('--username -u', dest='username', required=True, 
+                      help=L('organization Id or service principal. Microsoft Account is not yet supported.'))
+@command_table.option('--password -p', help=L('user password or client secret, will prompt if not given.'))
+@command_table.option('--service-principal', help=L('the credential represents a service principal.'))
+@command_table.option('--tenant -t', help=L('the tenant associated with the service principal.'))
+@command_table.command('login')
 def login(args, unexpected): #pylint: disable=unused-argument
     username = args.get('username')
 
