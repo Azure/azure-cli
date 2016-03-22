@@ -95,9 +95,8 @@ def _print_header(help_file):
 
     indent = 1
     if help_file.long_summary:
-        _print_indent('{0}'.format(help_file.long_summary), indent)
-    else:
-        _print_indent('')
+        _print_indent('{0}'.format(help_file.long_summary.rstrip()), indent)
+    _print_indent('')
 
 def _print_groups(help_file):
     indent = 1

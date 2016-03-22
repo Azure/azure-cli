@@ -352,10 +352,13 @@ class ArgumentParser(object):
 
         if isinstance(doc, GroupHelpFile):
             for child in doc.children:
-                args = delimiters.split('.')
+                args = delimiters.split('.') if delimiters != 'azure-cli' else []
                 args.append(child.name)
+                child.command = ' '.join(args)
+                child.delimiters = '.'.join(args)
                 it = self._get_args_itr(args)
                 m, _ = self._get_noun_map(args, it, out)
+
                 child.load(m)
 
         print_detailed_help(doc, out)
@@ -370,6 +373,12 @@ class ArgumentParser(object):
 
     def _display_children(self, noun_map, arguments, out=sys.stdout):
         nouns = self._get_noun_matches(arguments, noun_map, out)
+
+        group_help = HelpFile(noun_map['$full_name'])
+        group_help.load(noun_map)
+        print(L('Group'), file=out)
+        print_description_list([group_help], out)
+        print(L('\nSub-Commands'), file=out)
 
         help_files = []
         for noun in sorted(nouns):
