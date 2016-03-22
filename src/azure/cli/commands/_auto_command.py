@@ -100,8 +100,8 @@ def build_operation(command_table, command_name, member_path, client_type, opera
 
         options = []
         for arg in [a for a in args if not a in EXCLUDED_PARAMS]:
-            options.append(Option('--' + arg, 
-                                  metavar=arg,
+            options.append(Option('--' + arg.replace('_', '-'), 
+                                  metavar=arg.replace('_', '-').upper(),
                                   required=True,
                                   help=_option_description(operation, arg)))
 
