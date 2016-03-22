@@ -28,8 +28,11 @@ def _load_help_file(delimiters):
                           - default
                     - name: --service-principal
                       type: string
-                      short-summary: one line partial sentence
-                      long-summary: paragraph(s)
+                      short-summary: one line partial sentence, except that this one is a little bit longer than one line, how do we handle line wrapping?
+                      long-summary: |
+                        paragraph(s)
+                        paragraph(s)
+                        This is a long paragraph with text that wraps down to the next line.  The text is broken up by the wrap method after 100 chars.
                     - name: --tenant/-t
                       type: string
                       short-summary: one line partial sentence
