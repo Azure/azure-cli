@@ -1,4 +1,5 @@
-﻿from os import environ
+﻿from errno import ENOENT
+from os import environ
 from six import print_
 from six.moves import input #pylint: disable=redefined-builtin
 
@@ -114,11 +115,7 @@ public_access_string = ' | '.join(public_access_types)
 @option('--connection-string -t <connectionString>', L('the storage connection string'))
 @option('--public-access -p <accessType>', 'Values: {}'.format(public_access_string))
 def create_container(args, unexpected): #pylint: disable=unused-argument
-    from azure.storage.blob import BlockBlobService, ContentSettings
-    bbs = get_data_service_client(BlockBlobService,
-                                  _resolve_storage_account(args),
-                                  _resolve_storage_account_key(args),
-                                  _resolve_connection_string(args))
+    bbs = _get_blob_service_client(args)
     try:
         public_access = public_access_types[args.get('public-access')] \
                                             if args.get('public-access') \
@@ -138,11 +135,7 @@ def create_container(args, unexpected): #pylint: disable=unused-argument
 @option('--connection-string -t <connectionString>', L('the storage connection string'))
 @option('--force -f', L('supress delete confirmation prompt'))
 def delete_container(args, unexpected): #pylint: disable=unused-argument
-    from azure.storage.blob import BlockBlobService, ContentSettings
-    bbs = get_data_service_client(BlockBlobService,
-                                  _resolve_storage_account(args),
-                                  _resolve_storage_account_key(args),
-                                  _resolve_connection_string(args))
+    bbs = _get_blob_service_client(args)
     container_name = args.get('container-name')
     prompt_for_delete = args.get('force') is None
 
@@ -161,11 +154,7 @@ def delete_container(args, unexpected): #pylint: disable=unused-argument
 @option('--connection-string -t <connectionString>', L('the storage connection string'))
 @option('--prefix -p <prefix>', L('container name prefix to filter by'))
 def list_containers(args, unexpected): #pylint: disable=unused-argument
-    from azure.storage.blob import BlockBlobService, ContentSettings
-    bbs = get_data_service_client(BlockBlobService,
-                                  _resolve_storage_account(args),
-                                  _resolve_storage_account_key(args),
-                                  _resolve_connection_string(args))
+    bbs = _get_blob_service_client(args)
     results = bbs.list_containers(args.get('prefix'))
     return results
 
@@ -176,11 +165,7 @@ def list_containers(args, unexpected): #pylint: disable=unused-argument
 @option('--account-key -k <accountKey>', L('the storage account key'))
 @option('--connection-string -t <connectionString>', L('the storage connection string'))
 def show_container(args, unexpected): #pylint: disable=unused-argument
-    from azure.storage.blob import BlockBlobService, ContentSettings
-    bbs = get_data_service_client(BlockBlobService,
-                                  _resolve_storage_account(args),
-                                  _resolve_storage_account_key(args),
-                                  _resolve_connection_string(args))
+    bbs = _get_blob_service_client(args)
     result = bbs.get_container_properties(args.get('container-name'))
     return result
 
@@ -203,13 +188,8 @@ def show_container(args, unexpected): #pylint: disable=unused-argument
 @option('--content.md5 -csm <md5>')
 @option('--content.cache-control -cscc <cacheControl>')
 def create_block_blob(args, unexpected): #pylint: disable=unused-argument
-    from azure.storage.blob import BlockBlobService, ContentSettings
-
-    bbs = get_data_service_client(BlockBlobService,
-                                  _resolve_storage_account(args),
-                                  _resolve_storage_account_key(args),
-                                  _resolve_connection_string(args))
-
+    from azure.storage.blob import ContentSettings
+    bbs = _get_blob_service_client(args)
     try:
         public_access = public_access_types[args.get('public-access')] \
                                             if args.get('public-access') \
@@ -239,9 +219,12 @@ def create_block_blob(args, unexpected): #pylint: disable=unused-argument
                                              content_md5=args.get('content.md5'),
                                              cache_control=args.get('content.cache-control'))
             )
-    except FileNotFoundError as ex:
-        print_(' ERROR: {}'.format(ex))
-        return
+    except OSError as ex:
+        if ex.errno == ENOENT:
+            print_(' ERROR: {}'.format(ex))
+            return
+        else:
+            raise
 
     print_(' Done!')
     return blob
@@ -254,11 +237,7 @@ def create_block_blob(args, unexpected): #pylint: disable=unused-argument
 @option('--connection-string -t <connectionString>', L('the storage connection string'))
 @option('--prefix -p <prefix>', L('blob name prefix to filter by'))
 def list_blobs(args, unexpected): #pylint: disable=unused-argument
-    from azure.storage.blob import BlockBlobService, ContentSettings
-    bbs = get_data_service_client(BlockBlobService,
-                                  _resolve_storage_account(args),
-                                  _resolve_storage_account_key(args),
-                                  _resolve_connection_string(args))
+    bbs = _get_blob_service_client(args)
     blobs = bbs.list_blobs(args.get('container-name'),
                            prefix=args.get('prefix'))
     return list(blobs.items)
@@ -268,11 +247,7 @@ def list_blobs(args, unexpected): #pylint: disable=unused-argument
 @option('--container-name -c <containerName>', L('the name of the container'), required=True)
 @option('--blob-name -bn <name>', L('the name of the blob'), required=True)
 def delete_blob(args, unexpected): #pylint: disable=unused-argument
-    from azure.storage.blob import BlockBlobService, ContentSettings
-    bbs = get_data_service_client(BlockBlobService,
-                                  _resolve_storage_account(args),
-                                  _resolve_storage_account_key(args),
-                                  _resolve_connection_string(args))
+    bbs = _get_blob_service_client(args)
     return bbs.delete_blob(args.get('container-name'), args.get('blob-name'))
 
 @command('storage blob show')
@@ -280,11 +255,7 @@ def delete_blob(args, unexpected): #pylint: disable=unused-argument
 @option('--container-name -c <containerName>', L('the name of the container'), required=True)
 @option('--blob-name -bn <name>', L('the name of the blob'), required=True)
 def show_blob(args, unexpected): #pylint: disable=unused-argument
-    from azure.storage.blob import BlockBlobService, ContentSettings
-    bbs = get_data_service_client(BlockBlobService,
-                                  _resolve_storage_account(args),
-                                  _resolve_storage_account_key(args),
-                                  _resolve_connection_string(args))
+    bbs = _get_blob_service_client(args)
     return bbs.get_blob_properties(args.get('container-name'), args.get('blob-name'))
 
 @command('storage blob download')
@@ -293,12 +264,7 @@ def show_blob(args, unexpected): #pylint: disable=unused-argument
 @option('--blob-name -bn <name>', L('the name of the blob'), required=True)
 @option('--download-to -dt <path>', L('the file path to download to'), required=True)
 def download_blob(args, unexpected): #pylint: disable=unused-argument
-    from azure.storage.blob import BlockBlobService, ContentSettings
-
-    bbs = get_data_service_client(BlockBlobService,
-                                  _resolve_storage_account(args),
-                                  _resolve_storage_account_key(args),
-                                  _resolve_connection_string(args))
+    bbs = _get_blob_service_client(args)
     container_name = args.get('container-name')
     blob_name = args.get('blob-name')
     download_to = args.get('download-to')
@@ -326,19 +292,27 @@ def download_blob(args, unexpected): #pylint: disable=unused-argument
 @option('--account-key -k <accountKey>', L('the storage account key'))
 @option('--container-name -c <containerName>', L('the name of the container'), required=True)
 def storage_file_create(args, unexpected): #pylint: disable=unused-argument
-    from azure.storage.file import FileService
-
-    file_service = get_data_service_client(FileService,
-                                           _resolve_storage_account(args),
-                                           _resolve_storage_account_key(args),
-                                           _resolve_connection_string(args))
-
-    file_service.create_file_from_path(args.get('share-name'),
-                                       args.get('directory-name'),
-                                       args.get('file-name'),
-                                       args.get('local-file-name'))
+    fsc = _get_file_service_client(args)
+    fsc.create_file_from_path(args.get('share-name'),
+                              args.get('directory-name'),
+                              args.get('file-name'),
+                              args.get('local-file-name'))
 
 # HELPER METHODS
+
+def _get_blob_service_client(args):
+    from azure.storage.blob import BlockBlobService
+    return get_data_service_client(BlockBlobService,
+                                   _resolve_storage_account(args),
+                                   _resolve_storage_account_key(args),
+                                   _resolve_connection_string(args))
+
+def _get_file_service_client(args):
+    from azure.storage.file import FileService
+    return get_data_service_client(FileService,
+                                   _resolve_storage_account(args),
+                                   _resolve_storage_account_key(args),
+                                   _resolve_connection_string(args))
 
 # TODO: Remove once these parameters are supported first-class by @option (task #116054675)
 def _resolve_storage_account(args):
