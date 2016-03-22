@@ -60,7 +60,7 @@ class Test_argparse(unittest.TestCase):
         io = StringIO()
         cmd_result = p.execute('n1 -h'.split(), out=io)
         self.assertIsNone(cmd_result.result)
-        self.assertEqual(True, io.getvalue().startswith('\nn1\n    long description'))
+        self.assertEqual(True, io.getvalue().startswith('\nCommand\nn1\n    long description'))
         io.close()
 
     def test_help_long_description_and_short_description(self):
@@ -77,7 +77,7 @@ class Test_argparse(unittest.TestCase):
         io = StringIO()
         cmd_result = p.execute('n1 -h'.split(), out=io)
         self.assertIsNone(cmd_result.result)
-        self.assertEqual(True, io.getvalue().startswith('\nn1: short description\n    long description'))
+        self.assertEqual(True, io.getvalue().startswith('\nCommand\nn1: short description\n    long description'))
         io.close()
 
     def test_help_docstring_description_overrides_short_description(self):
@@ -94,7 +94,7 @@ class Test_argparse(unittest.TestCase):
         io = StringIO()
         cmd_result = p.execute('n1 -h'.split(), out=io)
         self.assertIsNone(cmd_result.result)
-        self.assertEqual(True, io.getvalue().startswith('\nn1: docstring summary'))
+        self.assertEqual(True, 'n1: docstring summary' in io.getvalue())
         io.close()
 
     def test_help_long_description_multi_line(self):
@@ -112,7 +112,9 @@ class Test_argparse(unittest.TestCase):
         io = StringIO()
         cmd_result = p.execute('n1 -h'.split(), out=io)
         self.assertIsNone(cmd_result.result)
-        self.assertEqual(True, io.getvalue().startswith('\nn1\n    line1\n    line2'))
+        print('VALUE: ' + io.getvalue())
+
+        self.assertEqual(True, io.getvalue().startswith('\nCommand\nn1\n    line1\n    line2'))
         io.close()
 
     def test_help_params_documentations(self):
@@ -144,17 +146,19 @@ class Test_argparse(unittest.TestCase):
         cmd_result = p.execute('n1 -h'.split(), out=io)
         self.assertIsNone(cmd_result.result)
         s = '''
+Command
 n1
 
 Arguments
-    --foobar/-fb  : one line partial sentence
+    --foobar/-fb             : one line partial sentence
         text, markdown, etc.
+
         Values from: az vm list, default
 
     --foobar2/-fb2 [Required]: one line partial sentence
         paragraph(s)
 
-    --foobar3/-fb3: the foobar3
+    --foobar3/-fb3           : the foobar3
 
 '''
         self.assertEqual(s, io.getvalue())
@@ -195,14 +199,15 @@ Arguments
         cmd_result = p.execute('n1 -h'.split(), out=io)
         self.assertIsNone(cmd_result.result)
         s = '''
+Command
 n1: this module does xyz one-line or so
     this module.... kjsdflkj... klsfkj paragraph1
     this module.... kjsdflkj... klsfkj paragraph2
 
-
 Arguments
-    --foobar/-fb  : one line partial sentence
+    --foobar/-fb             : one line partial sentence
         text, markdown, etc.
+
         Values from: az vm list, default
 
     --foobar2/-fb2 [Required]: one line partial sentence
@@ -276,6 +281,7 @@ Examples
         self.assertIsNone(cmd_result.result)
 
         s = '''
+Command
 n1
 
 Arguments
@@ -316,13 +322,12 @@ Arguments
 
         io = StringIO()
         cmd_result = p.execute('test_group1 test_group2 --help'.split(), out=io)
-        print('VALUE: ' + io.getvalue())
         self.assertIsNone(cmd_result.result)
         s = '''
+Group
 test_group1 test_group2: this module does xyz one-line or so
     this module.... kjsdflkj... klsfkj paragraph1
     this module.... kjsdflkj... klsfkj paragraph2
-
 
 Sub-Commands
     n1

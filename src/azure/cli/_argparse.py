@@ -295,7 +295,8 @@ class ArgumentParser(object):
         if missing_arg:
             raise ArgParseError(L('Missing required argument(s)'))
 
-    def _handle_bad_args(self, m, others, out):
+    @staticmethod
+    def _handle_bad_args(m, others, out):
         bad_args_passed = False
         if not m['$accepts_unexpected_args'] and len(others) > 0:
             print(L('\nUnexpected parameter(s): {0}\n').format(', '.join(others)), file=out)
