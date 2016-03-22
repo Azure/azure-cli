@@ -5,7 +5,7 @@ import time
 from msrest.paging import Paged
 from msrest.exceptions import ClientException
 from azure.cli.parser import IncorrectUsageError
-from ..commands import CommandTable, Command, Option
+from ..commands import CommandTable, Command
 
 
 EXCLUDED_PARAMS = frozenset(['self', 'raw', 'custom_headers', 'operation_config'])
@@ -13,6 +13,20 @@ GLOBALPARAMALIASES = {
     'resource_group_name': '--resourcegroup --rg <resourcegroupname>'
 }
 
+COMMON_PARAMETERS = {
+    'resource_group_name': (['--resourcegroup', '--rg'], {
+        'dest': 'resource_group_name', # TODO: Duplication of value (same as key)
+        'metavar': 'RESOURCE GROUP',
+        'help': 'COMMON - Name of resource group',
+        'required': True
+    }),
+    'vm_name': (['--name', '-n'], {
+        'metavar': 'VM NAME',
+        'dest': 'vm_name',
+        'help': 'COMMON - Name of virtual machine',
+        'required': True
+    })
+}
 class LongRunningOperation(object): #pylint: disable=too-few-public-methods
 
     progress_file = sys.stderr
@@ -57,6 +71,7 @@ def _make_func(client_factory, member_path, return_type_or_func, unbound_func):
         client = client_factory()
         ops_instance = _get_member(client, member_path)
         try:
+            print(args)
             result = unbound_func(ops_instance, **args)
             if not return_type_or_func:
                 return {}
@@ -100,10 +115,12 @@ def build_operation(command_table, command_name, member_path, client_type, opera
 
         options = []
         for arg in [a for a in args if not a in EXCLUDED_PARAMS]:
-            options.append(Option('--' + arg.replace('_', '-'), 
-                                  metavar=arg.replace('_', '-').upper(),
-                                  required=True,
-                                  help=_option_description(operation, arg)))
+            common_param = COMMON_PARAMETERS.get(arg, (['--' + arg.replace('_', '-')],{
+                'metavar': arg.replace('_', '-').upper(),
+                'required': True,
+                'help': _option_description(operation, arg)
+            }))
+            options.append(common_param)
 
         command_table[func] = Command(' '.join([command_name, opname]), func, options=options)
 
