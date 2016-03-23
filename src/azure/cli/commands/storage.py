@@ -1,6 +1,5 @@
-﻿from errno import ENOENT
+﻿from __future__ import print_function
 from os import environ
-from six import print_
 from six.moves import input #pylint: disable=redefined-builtin
 
 from azure.storage.blob import PublicAccess
@@ -56,23 +55,18 @@ key_values_string = ' | '.join(key_values)
 def renew_account_keys(args, unexpected): #pylint: disable=unused-argument
     smc = _storage_client_factory()
 
-    key_name = args.get('key')
     resource_group = args.get('resource-group')
     account_name = args.get('account-name')
-
-    if not key_name:
-        for key in key_values:
+    key_name = args.get('key')
+    if key_name and key_name not in key_values:
+        raise ValueError(L('Unrecognized key value: {}'.format(key_name)))
+    else:
+        for key in [key_name] if key_name else key_values:
             result = smc.storage_accounts.regenerate_key(
                 resource_group_name=resource_group,
                 account_name=account_name,
                 key_name=key)
-    elif key_name in key_values:
-        result = smc.storage_accounts.regenerate_key(
-            resource_group_name=resource_group,
-            account_name=account_name,
-            key_name=key_name)
-    else:
-        raise ValueError(L('Unrecognized key value: {}'.format(key_name)))
+
     return result
 
 @command('storage account usage')
@@ -283,34 +277,18 @@ def create_block_blob(args, unexpected): #pylint: disable=unused-argument
 
     bbs.create_container(args.get('container-name'), public_access=public_access)
 
-    # show dot indicator of upload progress (one for every 10%)
-    current_progress = {'val':0}
-    def update_progress(current, total):
-        current_progress['val'] = _update_progress(current, total, current_progress['val'])
-
-    print_('Uploading: ', end='', flush=True)
-    try:
-        blob = bbs.create_blob_from_path(
-            args.get('container-name'),
-            args.get('blob-name'),
-            args.get('upload-from'),
-            progress_callback=update_progress,
-            content_settings=ContentSettings(content_type=args.get('content.type'),
-                                             content_disposition=args.get('content.disposition'),
-                                             content_encoding=args.get('content.encoding'),
-                                             content_language=args.get('content.language'),
-                                             content_md5=args.get('content.md5'),
-                                             cache_control=args.get('content.cache-control'))
-            )
-    except OSError as ex:
-        if ex.errno == ENOENT:
-            print_(' ERROR: {}'.format(ex))
-            return
-        else:
-            raise
-
-    print_(' Done!')
-    return blob
+    return bbs.create_blob_from_path(
+        args.get('container-name'),
+        args.get('blob-name'),
+        args.get('upload-from'),
+        progress_callback=_update_progress,
+        content_settings=ContentSettings(content_type=args.get('content.type'),
+                                         content_disposition=args.get('content.disposition'),
+                                         content_encoding=args.get('content.encoding'),
+                                         content_language=args.get('content.language'),
+                                         content_md5=args.get('content.md5'),
+                                         cache_control=args.get('content.cache-control'))
+        )
 
 @command('storage blob list')
 @command(L('List all blobs in a container.'))
@@ -362,16 +340,10 @@ def download_blob(args, unexpected): #pylint: disable=unused-argument
     download_to = args.get('download-to')
 
     # show dot indicator of download progress (one for every 10%)
-    current_progress = {'val':0}
-    def update_progress(current, total):
-        current_progress['val'] = _update_progress(current, total, current_progress['val'])
-
-    print_('Downloading: ', end='', flush=True)
     bbs.get_blob_to_path(container_name,
                          blob_name,
                          download_to,
-                         progress_callback=update_progress)
-    print_(' Done!')
+                         progress_callback=_update_progress)
 
 # SHARE COMMANDS
 
@@ -544,9 +516,13 @@ def _resolve_storage_account_key(args):
 def _resolve_connection_string(args):
     return args.get('connection-string') or environ.get('AZURE_STORAGE_CONNECTION_STRING')
 
-def _update_progress(current, total, current_progress):
+def _update_progress(current, total):
     if total:
-        steps = 10
-        num_steps = int(current * steps / total) - current_progress
-        print_('.' * num_steps, end='', flush=True)
-        return current_progress + num_steps
+        message = 'Percent complete: %'
+        num_format = 'xxx.x'
+        num_decimals = len(num_format.split('.', maxsplit=1)[1]) if '.' in num_format else 0
+        format_string = '{:.%sf}' % num_decimals
+        percent_done = format_string.format(current * 100 / total)
+        padding = len(num_format) - len(percent_done)
+        message += (' ' * padding) + percent_done
+        print('\b' * len(message) + message, end='', flush=True)
