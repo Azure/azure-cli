@@ -223,6 +223,16 @@ def delete_container(args, unexpected): #pylint: disable=unused-argument
     if not bbs.delete_container(container_name):
         raise RuntimeError(L('Container deletion failed.'))
 
+@command('storage container exists')
+@description(L('Check if a storage container exists.'))
+@option('--container-name -c <containerName>', L('the name of the container'), required=True)
+@option('--account-name -n <accountName>', L('the storage account name'))
+@option('--account-key -k <accountKey>', L('the storage account key'))
+@option('--connection-string -t <connectionString>', L('the storage connection string'))
+def exists_container(args, unexpected): #pylint: disable=unused-argument
+    bbs = _get_blob_service_client(args)
+    return str(bbs.exists(container_name=args.get('container-name')))
+
 @command('storage container list')
 @description(L('List storage containers.'))
 @option('--account-name -n <accountName>', L('the storage account name'))
@@ -234,7 +244,6 @@ def list_containers(args, unexpected): #pylint: disable=unused-argument
     results = bbs.list_containers(args.get('prefix'))
     return results
 
-
 @command('storage container show')
 @description(L('Show details of a storage container'))
 @option('--container-name -c <containerName>', L('the name of the container'), required=True)
@@ -243,8 +252,85 @@ def list_containers(args, unexpected): #pylint: disable=unused-argument
 @option('--connection-string -t <connectionString>', L('the storage connection string'))
 def show_container(args, unexpected): #pylint: disable=unused-argument
     bbs = _get_blob_service_client(args)
-    result = bbs.get_container_properties(args.get('container-name'))
-    return result
+    return bbs.get_container_properties(args.get('container-name'))
+
+# TODO: update this once enums are supported in commands first-class (task #115175885)
+lease_duration_values = {'15':15, '60':60, 'infinite':-1}
+lease_duration_values_string = ' | '.join(lease_duration_values)
+
+@command('storage container lease acquire')
+@description(L('Acquire a lock on a container for delete operations.'))
+@option('--container-name -c <containerName>', L('the name of the container'), required=True)
+@option('--lease-duration --ld <leaseDuration>',
+        L('Values: {}'.format(lease_duration_values_string)), required=True)
+@option('--proposed-lease-id --plid <id>', L('proposed lease id in GUID format'))
+@option('--account-name -n <accountName>', L('the storage account name'))
+@option('--account-key -k <accountKey>', L('the storage account key'))
+@option('--connection-string -t <connectionString>', L('the storage connection string'))
+def acquire_container_lease(args, unexpected): #pylint: disable=unused-argument
+    bbs = _get_blob_service_client(args)
+    lease_duration = args.get('lease-duration')
+    if lease_duration not in lease_duration_values:
+        raise ValueError('Valid durations are: {}'.format(lease_duration_values_string))
+
+    return bbs.acquire_container_lease(container_name=args.get('container-name'),
+                                       lease_duration=lease_duration_values[lease_duration],
+                                       proposed_lease_id=args.get('proposed-lease-id'))
+
+@command('storage container lease renew')
+@description(L('Renew a lock on a container for delete operations.'))
+@option('--container-name -c <containerName>', L('the name of the container'), required=True)
+@option('--lease-id --lid <id>', L('lease id to renew in GUID format'))
+@option('--account-name -n <accountName>', L('the storage account name'))
+@option('--account-key -k <accountKey>', L('the storage account key'))
+@option('--connection-string -t <connectionString>', L('the storage connection string'))
+def renew_container_lease(args, unexpected): #pylint: disable=unused-argument
+    bbs = _get_blob_service_client(args)
+    return bbs.renew_container_lease(container_name=args.get('container-name'),
+                                     lease_id=args.get('lease-id'))
+
+@command('storage container lease release')
+@description(L('Release a lock on a container for delete operations.'))
+@option('--container-name -c <containerName>', L('the name of the container'), required=True)
+@option('--lease-id --lid <id>', L('lease id in GUID format to release'), required=True)
+@option('--account-name -n <accountName>', L('the storage account name'))
+@option('--account-key -k <accountKey>', L('the storage account key'))
+@option('--connection-string -t <connectionString>', L('the storage connection string'))
+def release_container_lease(args, unexpected): #pylint: disable=unused-argument
+    bbs = _get_blob_service_client(args)
+    bbs.release_container_lease(container_name=args.get('container-name'),
+                                lease_id=args.get('lease-id'))
+
+@command('storage container lease change')
+@description(L('Change the lease id for a container lease.'))
+@option('--container-name -c <containerName>', L('the name of the container'), required=True)
+@option('--lease-id --lid <leaseId>', L('the lease id to change'), required=True)
+@option('--proposed-lease-id --plid <id>', L('proposed lease id in GUID format'))
+@option('--account-name -n <accountName>', L('the storage account name'))
+@option('--account-key -k <accountKey>', L('the storage account key'))
+@option('--connection-string -t <connectionString>', L('the storage connection string'))
+def change_container_lease(args, unexpected): #pylint: disable=unused-argument
+    bbs = _get_blob_service_client(args)
+    return bbs.change_container_lease(container_name=args.get('container-name'),
+                                      lease_id=args.get('lease-id'),
+                                      proposed_lease_id=args.get('proposed-lease-id'))
+
+@command('storage container lease break')
+@description(L('Break a lock on a container for delete operations.'))
+@option('--container-name -c <containerName>', L('the name of the container'), required=True)
+@option('--lease-break-period --lbp <period>',
+        L('Values: {}'.format(lease_duration_values_string)), required=True)
+@option('--account-name -n <accountName>', L('the storage account name'))
+@option('--account-key -k <accountKey>', L('the storage account key'))
+@option('--connection-string -t <connectionString>', L('the storage connection string'))
+def break_container_lease(args, unexpected): #pylint: disable=unused-argument
+    bbs = _get_blob_service_client(args)
+    lease_break_period = args.get('lease-break-period')
+    if lease_break_period not in lease_duration_values:
+        raise ValueError('Valid durations are: {}'.format(lease_duration_values_string))
+
+    bbs.break_container_lease(container_name=args.get('container-name'),
+                              lease_break_period=lease_break_period)
 
 # BLOB COMMANDS
 # TODO: Evaluate for removing hand-authored commands in favor of auto-commands (task ##115068835)
@@ -306,13 +392,25 @@ def list_blobs(args, unexpected): #pylint: disable=unused-argument
 @command('storage blob delete')
 @description(L('Delete a blob from a container.'))
 @option('--container-name -c <containerName>', L('the name of the container'), required=True)
-@option('--blob-name -bn <name>', L('the name of the blob'), required=True)
+@option('--blob-name -b <blobName>', L('the name of the blob'), required=True)
 @option('--account-name -n <accountName>', L('the storage account name'))
 @option('--account-key -k <accountKey>', L('the storage account key'))
 @option('--connection-string -t <connectionString>', L('the storage connection string'))
 def delete_blob(args, unexpected): #pylint: disable=unused-argument
     bbs = _get_blob_service_client(args)
     return bbs.delete_blob(args.get('container-name'), args.get('blob-name'))
+
+@command('storage blob exists')
+@description(L('Check if a blob exists.'))
+@option('--container-name -c <containerName>', L('the name of the container'), required=True)
+@option('--blob-name -b <blobName>', L('the name of the blob'), required=True)
+@option('--account-name -n <accountName>', L('the storage account name'))
+@option('--account-key -k <accountKey>', L('the storage account key'))
+@option('--connection-string -t <connectionString>', L('the storage connection string'))
+def exists_blob(args, unexpected): #pylint: disable=unused-argument
+    bbs = _get_blob_service_client(args)
+    return str(bbs.exists(container_name=args.get('container-name'),
+                          blob_name=args.get('blob-name')))
 
 @command('storage blob show')
 @description(L('Show properties of the specified blob.'))
@@ -348,7 +446,7 @@ def download_blob(args, unexpected): #pylint: disable=unused-argument
 # SHARE COMMANDS
 
 @command('storage share exists')
-@description(L('Query if a file share exists.'))
+@description(L('Check if a file share exists.'))
 @option('--share-name -s <shareName>', L('the file share name'), required=True)
 @option('--account-name -n <accountName>', L('the storage account name'))
 @option('--account-key -k <accountKey>', L('the storage account key'))
@@ -358,14 +456,27 @@ def exist_share(args, unexpected): #pylint: disable=unused-argument
     return str(fsc.exists(share_name=args.get('share-name')))
 
 @command('storage share list')
-@description(L('List file shares.'))
+@description(L('List file shares within a storage account.'))
 @option('--account-name -n <accountName>', L('the storage account name'))
 @option('--account-key -k <accountKey>', L('the storage account key'))
 @option('--connection-string -t <connectionString>', L('the storage connection string'))
 @option('--prefix -p <prefix>', L('share name prefix to filter by'))
 def list_shares(args, unexpected): #pylint: disable=unused-argument
     fsc = _get_file_service_client(args)
-    return fsc.list_shares(prefix=args.get('prefix'))
+    return list(fsc.list_shares(prefix=args.get('prefix')))
+
+@command('storage share contents')
+@description(L('List files and directories inside a share path.'))
+@option('--share-name -s <shareName>', L('the file share name'), required=True)
+@option('--directory-name -d <directoryName>', L('share subdirectory path to examine'))
+@option('--account-name -n <accountName>', L('the storage account name'))
+@option('--account-key -k <accountKey>', L('the storage account key'))
+@option('--connection-string -t <connectionString>', L('the storage connection string'))
+def list_files(args, unexpected): #pylint: disable=unused-argument
+    fsc = _get_file_service_client(args)
+    return list(fsc.list_directories_and_files(
+        args.get('share-name'),
+        directory_name=args.get('directory-name')))
 
 @command('storage share create')
 @description(L('Create a new file share.'))
@@ -392,7 +503,7 @@ def delete_share(args, unexpected): #pylint: disable=unused-argument
 # DIRECTORY COMMANDS
 
 @command('storage directory exists')
-@description(L('Query if a directory exists.'))
+@description(L('Check if a directory exists.'))
 @option('--share-name -s <shareName>', L('the file share name'), required=True)
 @option('--directory-name -d <directoryName>', L('the directory name'), required=True)
 @option('--account-name -n <accountName>', L('the storage account name'))
@@ -402,19 +513,6 @@ def exist_directory(args, unexpected): #pylint: disable=unused-argument
     fsc = _get_file_service_client(args)
     return str(fsc.exists(share_name=args.get('share-name'),
                           directory_name=args.get('directory-name')))
-
-@command('storage directory list')
-@description(L('List files and directories within a share.'))
-@option('--share-name -s <shareName>', L('the file share name'), required=True)
-@option('--directory-name -d <directoryName>', L('directory to examine (default: all)'))
-@option('--account-name -n <accountName>', L('the storage account name'))
-@option('--account-key -k <accountKey>', L('the storage account key'))
-@option('--connection-string -t <connectionString>', L('the storage connection string'))
-def list_directories(args, unexpected): #pylint: disable=unused-argument
-    fsc = _get_file_service_client(args)
-    return fsc.list_directories_and_files(
-        args.get('share-name'),
-        directory_name=args.get('directory-name'))
 
 @command('storage directory create')
 @description(L('Create a directory within a share.'))
@@ -446,8 +544,23 @@ def delete_directory(args, unexpected): #pylint: disable=unused-argument
 
 # FILE COMMANDS
 
+@command('storage file download')
+@option('--share-name -s <shareName>', L('the file share name'), required=True)
+@option('--file-name -f <fileName>', L('the file name'), required=True)
+@option('--local-file-name -lfn <path>', L('the path to the local file'), required=True)
+@option('--directory-name -d <directoryName>', L('the directory name'))
+@option('--account-name -n <accountName>', L('the storage account name'))
+@option('--account-key -k <accountKey>', L('the storage account key'))
+def storage_file_download(args, unexpected): #pylint: disable=unused-argument
+    fsc = _get_file_service_client(args)
+    fsc.get_file_to_path(args.get('share-name'),
+                         args.get('directory-name'),
+                         args.get('file-name'),
+                         args.get('local-file-name'),
+                         progress_callback=_update_progress)
+
 @command('storage file exists')
-@description(L('Query if a file exists.'))
+@description(L('Check if a file exists.'))
 @option('--share-name -s <shareName>', L('the file share name'), required=True)
 @option('--directory-name -d <directoryName>', L('the directory to delete'), required=True)
 @option('--file-name -f <fileName>', L('the file name'), required=True)
@@ -464,31 +577,28 @@ def exist_file(args, unexpected): #pylint: disable=unused-argument
 @option('--share-name -s <shareName>', L('the file share name'), required=True)
 @option('--file-name -f <fileName>', L('the file name'), required=True)
 @option('--local-file-name -lfn <path>', L('the path to the local file'), required=True)
-@option('--directory-name -d <directoryName>', L('the directory name'), required=True)
+@option('--directory-name -d <directoryName>', L('the directory name'))
 @option('--account-name -n <accountName>', L('the storage account name'))
 @option('--account-key -k <accountKey>', L('the storage account key'))
-@option('--container-name -c <containerName>', L('the name of the container'), required=True)
 def storage_file_upload(args, unexpected): #pylint: disable=unused-argument
     fsc = _get_file_service_client(args)
-    if not fsc.create_file_from_path(args.get('share-name'),
-                                     args.get('directory-name'),
-                                     args.get('file-name'),
-                                     args.get('local-file-name')):
-        raise RuntimeError(L('File upload failed.'))
+    fsc.create_file_from_path(args.get('share-name'),
+                              args.get('directory-name'),
+                              args.get('file-name'),
+                              args.get('local-file-name'),
+                              progress_callback=_update_progress)
 
 @command('storage file delete')
 @option('--share-name -s <shareName>', L('the file share name'), required=True)
 @option('--file-name -f <fileName>', L('the file name'), required=True)
-@option('--directory-name -d <directoryName>', L('the directory name'), required=True)
+@option('--directory-name -d <directoryName>', L('the directory name'))
 @option('--account-name -n <accountName>', L('the storage account name'))
 @option('--account-key -k <accountKey>', L('the storage account key'))
-@option('--container-name -c <containerName>', L('the name of the container'), required=True)
 def storage_file_delete(args, unexpected): #pylint: disable=unused-argument
     fsc = _get_file_service_client(args)
-    if not fsc.delete_file(args.get('share-name'),
+    fsc.delete_file(args.get('share-name'),
                     args.get('directory-name'),
-                    args.get('file-name')):
-        raise RuntimeError(L('File deletion failed.'))
+                    args.get('file-name'))
 
 # HELPER METHODS
 
