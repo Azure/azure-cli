@@ -1,5 +1,4 @@
 import unittest
-import unittest
 try:
     from unittest.mock import MagicMock
 except ImportError:
