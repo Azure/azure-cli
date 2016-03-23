@@ -1,7 +1,9 @@
+import argparse
 from .parser import AzCliCommandParser
 import argcomplete
 import logging
 from ._event_dispatcher import EventDispatcher
+import azure.cli.extensions
 
 class Session(EventDispatcher):
 
@@ -17,8 +19,13 @@ class Application(object):
 
     def __init__(self, session=None):
         self.session = session or Session()
+
+        # Register presence of and handlers for global parameters
         self.session.register('GlobalParser.Created', self._register_builtin_arguments)
         self.session.register('CommandParser.Parsed', self._handle_builtin_arguments)
+
+        # Let other extensions make their presence known
+        azure.cli.extensions.register_extensions(self)
 
         self.global_parser = AzCliCommandParser(prog='az', add_help=False)
         self.session.raise_event('GlobalParser.Created', self.global_parser)
@@ -47,18 +54,18 @@ class Application(object):
             args = self.parser.parse_args(argv)
             self.session.raise_event('CommandParser.Parsed', args)
 
-            # Consider - we are using any args that start wit an underscore (_) as 'private' arguments and
-            # remove them from the arguments that we pass to the actual function. This does not feel quite
-            # right. 
-            params = dict([(key, value) for key, value in args.__dict__.items() if not key.startswith('_')])
+            # Consider - we are using any args that start with an underscore (_) as 'private'
+            # arguments and remove them from the arguments that we pass to the actual function.
+            # This does not feel quite right. 
+            params = dict([(key, value)
+                           for key, value in args.__dict__.items() if not key.startswith('_')])
             result = args.func(params, {}) # TODO: Unexpected parameters passed in?
             return result
         except Exception as e:
             print(e)
 
     def _register_builtin_arguments(self, name, parser):
-        #parser.add_argument('--subscription', dest='_subscription_id')
-        parser.add_argument('--query', dest='_jmespath_query', metavar='QUERY STRING')
+        parser.add_argument('--subscription', dest='_subscription_id', help=argparse.SUPPRESS)
         parser.add_argument('--output', '-o', dest='_output_format', choices=['list', 'json'])
 
     def _handle_builtin_arguments(self, name, args):
