@@ -112,7 +112,7 @@ storage_account_type_string = ' | '.join(storage_account_types)
         L('Values: {}'.format(storage_account_type_string)), required=True)
 @option('--tags <tags>',
         L('storage account tags. Tags are key=value pairs separated with semicolon(;)'))
-def set_container(args, unexpected): #pylint: disable=unused-argument
+def create_account(args, unexpected): #pylint: disable=unused-argument
     from azure.mgmt.storage.models import StorageAccountCreateParameters
 
     smc = _storage_client_factory()
@@ -125,17 +125,9 @@ def set_container(args, unexpected): #pylint: disable=unused-argument
     except KeyError:
         raise IncorrectUsageError(L('type must be: {}'
                                     .format(storage_account_type_string)))
-
-    tags = dict() if args.get('tags') else None
-    for tag in args.get('tags').split(';'):
-        tag_components = tag.split('=')
-        try:
-            tags[tag_components[0]] = tag_components[1]
-        except IndexError:
-            pass
     params = StorageAccountCreateParameters(args.get('location'),
                                             account_type,
-                                            tags)
+                                            _resolve_tags(args))
 
     return smc.storage_accounts.create(resource_group, account_name, params)
 
@@ -155,23 +147,13 @@ def set_account(args, unexpected): #pylint: disable=unused-argument
 
     resource_group = args.get('resource-group')
     account_name = args.get('account-name')
+    domain = args.get('custom-domain')
     try:
         account_type = storage_account_types[args.get('type')] if args.get('type') else None
     except KeyError:
         raise IncorrectUsageError(L('type must be: {}'
                                     .format(storage_account_type_string)))
-    tags = dict() if args.get('tags') else None
-    if tags:
-        for tag in args.get('tags').split(';'):
-            tag_components = tag.split('=')
-            try:
-                tags[tag_components[0]] = tag_components[1]
-            except IndexError:
-                pass
-    domain = CustomDomain(
-        args.get('custom-domain'),
-        use_sub_domain=args.get('subdomain')) if args.get('custom-domain') else None
-    params = StorageAccountUpdateParameters(tags, account_type, domain)
+    params = StorageAccountUpdateParameters(_resolve_tags(args), account_type, domain)
 
     return smc.storage_accounts.update(resource_group, account_name, params)
 
@@ -280,7 +262,7 @@ def acquire_container_lease(args, unexpected): #pylint: disable=unused-argument
 @command('storage container lease renew')
 @description(L('Renew a lock on a container for delete operations.'))
 @option('--container-name -c <containerName>', L('the name of the container'), required=True)
-@option('--lease-id --lid <id>', L('lease id to renew in GUID format'))
+@option('--lease-id --lid <id>', L('lease id to renew in GUID format'), required=True)
 @option('--account-name -n <accountName>', L('the storage account name'))
 @option('--account-key -k <accountKey>', L('the storage account key'))
 @option('--connection-string -t <connectionString>', L('the storage connection string'))
@@ -330,7 +312,7 @@ def break_container_lease(args, unexpected): #pylint: disable=unused-argument
         raise ValueError('Valid durations are: {}'.format(lease_duration_values_string))
 
     bbs.break_container_lease(container_name=args.get('container-name'),
-                              lease_break_period=lease_break_period)
+                              lease_break_period=lease_duration_values[lease_break_period])
 
 # BLOB COMMANDS
 # TODO: Evaluate for removing hand-authored commands in favor of auto-commands (task ##115068835)
@@ -562,8 +544,8 @@ def storage_file_download(args, unexpected): #pylint: disable=unused-argument
 @command('storage file exists')
 @description(L('Check if a file exists.'))
 @option('--share-name -s <shareName>', L('the file share name'), required=True)
-@option('--directory-name -d <directoryName>', L('the directory to delete'), required=True)
 @option('--file-name -f <fileName>', L('the file name'), required=True)
+@option('--directory-name -d <directoryName>', L('subdirectory path to the file'))
 @option('--account-name -n <accountName>', L('the storage account name'))
 @option('--account-key -k <accountKey>', L('the storage account key'))
 @option('--connection-string -t <connectionString>', L('the storage connection string'))
@@ -615,6 +597,19 @@ def _get_file_service_client(args):
                                    _resolve_storage_account(args),
                                    _resolve_storage_account_key(args),
                                    _resolve_connection_string(args))
+
+def _resolve_tags(args):
+    tag_string = args.get('tags')
+    if tag_string:
+        tags = dict()
+        for tag in tag_string.split(';'):
+            comps = tag.split('=', 1)
+            key = comps[0]
+            value = comps[1] if len(comps) > 1 else ''
+            tags[key] = value
+    else:
+        tags = None
+    return tags
 
 # TODO: Remove once these parameters are supported first-class by @option (task #116054675)
 def _resolve_storage_account(args):
