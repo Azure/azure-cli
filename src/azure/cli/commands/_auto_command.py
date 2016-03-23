@@ -5,7 +5,7 @@ import time
 from msrest.paging import Paged
 from msrest.exceptions import ClientException
 from azure.cli.parser import IncorrectUsageError
-from ..commands import CommandTable, Command
+from ..commands import CommandTable
 
 
 EXCLUDED_PARAMS = frozenset(['self', 'raw', 'custom_headers', 'operation_config'])
@@ -14,19 +14,20 @@ GLOBALPARAMALIASES = {
 }
 
 COMMON_PARAMETERS = {
-    'resource_group_name': (['--resourcegroup', '--rg'], {
-        'dest': 'resource_group_name', # TODO: Duplication of value (same as key)
+    'resource_group_name': {
+        'name': ['--resourcegroup', '--rg'],
         'metavar': 'RESOURCE GROUP',
-        'help': 'COMMON - Name of resource group',
+        'help': 'Name of resource group',
         'required': True
-    }),
-    'vm_name': (['--name', '-n'], {
+    },
+    'vm_name': {
+        'name': ['--name', '-n'],
         'metavar': 'VM NAME',
-        'dest': 'vm_name',
-        'help': 'COMMON - Name of virtual machine',
+        'help': 'Name of virtual machine',
         'required': True
-    })
+    }
 }
+
 class LongRunningOperation(object): #pylint: disable=too-few-public-methods
 
     progress_file = sys.stderr
@@ -115,12 +116,19 @@ def build_operation(command_table, command_name, member_path, client_type, opera
 
         options = []
         for arg in [a for a in args if not a in EXCLUDED_PARAMS]:
-            common_param = COMMON_PARAMETERS.get(arg, (['--' + arg.replace('_', '-')],{
-                'metavar': arg.replace('_', '-').upper(),
+            common_param = COMMON_PARAMETERS.get(arg, {
+                'name': ['--' + arg.replace('_', '-')],
                 'required': True,
                 'help': _option_description(operation, arg)
-            }))
+            }).copy() # We need to make a copy to allow consumers to mutate the value
+                      # retreived from the common parameters without polluting future
+                      # use...
+            common_param['dest'] = common_param.get('dest', arg)
             options.append(common_param)
 
-        command_table[func] = Command(' '.join([command_name, opname]), func, options=options)
+        command_table[func] = {
+            'name': ' '.join([command_name, opname]), 
+            'handler': func, 
+            'options': options
+            }
 

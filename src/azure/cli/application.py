@@ -46,6 +46,10 @@ class Application(object):
         try:
             args = self.parser.parse_args(argv)
             self.session.raise_event('CommandParser.Parsed', args)
+
+            # Consider - we are using any args that start wit an underscore (_) as 'private' arguments and
+            # remove them from the arguments that we pass to the actual function. This does not feel quite
+            # right. 
             params = dict([(key, value) for key, value in args.__dict__.items() if not key.startswith('_')])
             result = args.func(params, {}) # TODO: Unexpected parameters passed in?
             return result
@@ -60,5 +64,6 @@ class Application(object):
     def _handle_builtin_arguments(self, name, args):
         try:
             self.session.output_format = args._output_format
+            del(args._output_format)
         except Exception:
             pass
