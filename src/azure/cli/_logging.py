@@ -48,6 +48,9 @@ def configure_logging(argv, config):
     logger.level = stderr_handler.level = level
     logger.handlers.append(stderr_handler)
 
+    # Set logging level for all loggers
+    _logging.basicConfig(level=level)
+
     if logfile:
         # Configure the handler that logs code to a text file
         log_handler = _logging.StreamHandler(open(logfile, 'w', encoding='utf-8'))
