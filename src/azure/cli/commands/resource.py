@@ -37,7 +37,6 @@ def list_groups(args, unexpected): #pylint: disable=unused-argument
         L('the name of the parent resource (if needed), in <parent-type>/<parent-name> format'))
 def show_resource(args, unexpected): #pylint: disable=unused-argument
     rmc = get_mgmt_service_client(ResourceManagementClient, ResourceManagementClientConfiguration)
-
     full_type = args.get('resource-type').split('/')
     try:
         provider_namespace = full_type[0]
@@ -84,15 +83,16 @@ def _resolve_api_version(args, rmc):
 
         resource_type = "{}/{}".format(parent_type, resource_type)
     provider = rmc.providers.get(provider_namespace)
-    for t in provider.resource_types:
-        if t.resource_type == resource_type:
-            # Return first non-preview version
-            for version in t.api_versions:
-                if not version.find('preview'):
-                    return version
-            # No non-preview version found. Take first preview version
-            try:
-                return t.api_versions[0]
-            except IndexError:
-                return None
+
+    rt = [t for t in provider.resource_types if t.resource_type == resource_type]
+    if len(rt) == 1:
+        # get the non-preview versions
+        npv = [v for v in rt[0].api_versions if "preview" not in v]
+        if npv:
+            return npv[0]
+        # No non-preview version found. Take first preview version
+        try:
+            return rt[0].api_versions[0]
+        except IndexError:
+            return None
     return None

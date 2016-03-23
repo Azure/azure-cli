@@ -15,8 +15,7 @@
     <InterpreterId>{1dd9c42b-5980-42ce-a2c3-46d3bf0eede4}</InterpreterId>
     <InterpreterVersion>3.5</InterpreterVersion>
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
-    <CommandLineArguments>
-    </CommandLineArguments>
+    <CommandLineArguments>resource show -g TravisTestResourceGroup -n testserver23456 -r Microsoft.Sql/servers</CommandLineArguments>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'" />
   <PropertyGroup Condition="'$(Configuration)' == 'Release'" />
@@ -46,6 +45,9 @@
     <Compile Include="azure\cli\tests\command_specs\test_spec_resource.py" />
     <Compile Include="azure\cli\tests\command_specs\test_spec_vm.py" />
     <Compile Include="azure\cli\tests\command_specs\__init__.py" />
+    <Compile Include="azure\cli\tests\test_api_check.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="azure\cli\tests\test_argparse.py">
       <SubType>Code</SubType>
     </Compile>
