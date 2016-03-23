@@ -54,23 +54,18 @@ key_values_string = ' | '.join(key_values)
 def renew_account_keys(args, unexpected): #pylint: disable=unused-argument
     smc = _storage_client_factory()
 
-    key_name = args.get('key')
     resource_group = args.get('resource-group')
     account_name = args.get('account-name')
-
-    if not key_name:
-        for key in key_values:
+    key_name = args.get('key')
+    if key_name and key_name not in key_values:
+        raise ValueError(L('Unrecognized key value: {}'.format(key_name)))
+    else:
+        for key in [key_name] if key_name else key_values:
             result = smc.storage_accounts.regenerate_key(
                 resource_group_name=resource_group,
                 account_name=account_name,
                 key_name=key)
-    elif key_name in key_values:
-        result = smc.storage_accounts.regenerate_key(
-            resource_group_name=resource_group,
-            account_name=account_name,
-            key_name=key_name)
-    else:
-        raise ValueError(L('Unrecognized key value: {}'.format(key_name)))
+
     return result
 
 @command('storage account usage')
