@@ -26,17 +26,17 @@ class AzCliCommandParser(argparse.ArgumentParser):
             self.subparsers = {(): sp}
 
         for handler, metadata in command_table.items():
-            subparser = self._get_subparser(metadata.name.split())
-            command_name = metadata.name.split()[-1]
+            subparser = self._get_subparser(metadata['name'].split())
+            command_name = metadata['name'].split()[-1]
             # To work around http://bugs.python.org/issue9253, we artificially add any new
             # parsers we add to the "choices" section of the subparser.
             subparser.choices[command_name] = command_name
-            command_parser = subparser.add_parser(command_name, description=metadata.description, parents=self.parents)
+            command_parser = subparser.add_parser(command_name, description=metadata.get('description'), parents=self.parents)
             session.raise_event('AzCliCommandParser.SubparserCreated',
                                 {'parser': command_parser, 'metadata': metadata})
-            for arg in metadata.options:
-                command_parser.add_argument(*arg[0],
-                                            **arg[1])
+            for arg in metadata['options']:
+                command_parser.add_argument(*arg.pop('name'),
+                                            **arg)
             command_parser.set_defaults(func=handler)
 
     def _get_subparser(self, path):
