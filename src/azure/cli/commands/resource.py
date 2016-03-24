@@ -84,15 +84,8 @@ def _resolve_api_version(args, rmc):
         resource_type = "{}/{}".format(parent_type, resource_type)
     provider = rmc.providers.get(provider_namespace)
 
-    rt = [t for t in provider.resource_types if t.resource_type == resource_type]
+    rt = [t for t in provider.resource_types if t.resource_type == resource_type and t.api_versions]
     if len(rt) == 1:
-        # get the non-preview versions
         npv = [v for v in rt[0].api_versions if "preview" not in v]
-        if npv:
-            return npv[0]
-        # No non-preview version found. Take first preview version
-        try:
-            return rt[0].api_versions[0]
-        except IndexError:
-            return None
+        return npv[0] if npv else rt[0].api_versions[0]
     return None
