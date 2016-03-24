@@ -7,7 +7,11 @@ from ._event_dispatcher import EventDispatcher
 import azure.cli.extensions
 
 class Session(EventDispatcher):
-
+    """The session object tracks session specific data such
+    as output formats, log settings as well as providing an
+    event dispatch mechanism that allows us to make modifications
+    during the execution of a command
+    """
     def __init__(self):
         super(Session, self).__init__()
         self.log = logging.getLogger('az')
