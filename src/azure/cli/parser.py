@@ -63,7 +63,3 @@ class AzCliCommandParser(argparse.ArgumentParser):
                 parent_subparser.required = True
                 self.subparsers[tuple(path[0:length])] = parent_subparser
         return parent_subparser
-
-    def xxx_error(self, message):
-        # TODO: Do something more useful here...
-        raise ValueError(message)
