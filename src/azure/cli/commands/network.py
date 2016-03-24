@@ -20,7 +20,7 @@ from azure.mgmt.network.operations import (ApplicationGatewaysOperations,
                                            VirtualNetworksOperations)
 
 from ._command_creation import get_mgmt_service_client
-from ..commands._auto_command import build_operation, LongRunningOperation, GLOBALPARAMALIASES
+from ..commands._auto_command import build_operation, LongRunningOperation
 from ..commands import CommandTable
 
 def get_command_table():
@@ -31,11 +31,6 @@ command_table = CommandTable()
 def _network_client_factory():
     return get_mgmt_service_client(NetworkManagementClient, NetworkManagementClientConfiguration)
 
-PARAMALIASES = GLOBALPARAMALIASES.copy()
-PARAMALIASES.update({
-    'virtual_network_name': '--name <virtualNetworkName>',
-    'load_balancer_name': '--name <loadBalancerName>'
-    })
 
 # pylint: disable=line-too-long
 # Application gateways
@@ -50,8 +45,7 @@ build_operation(command_table,
                     (ApplicationGatewaysOperations.list_all, '[ApplicationGateway]'),
                     (ApplicationGatewaysOperations.start, LongRunningOperation(L('Starting application gateway'), L('Application gateway started'))),
                     (ApplicationGatewaysOperations.stop, LongRunningOperation(L('Stopping application gateway'), L('Application gateway stopped'))),
-                ],
-                PARAMALIASES)
+                ])
 
 # ExpressRouteCircuitAuthorizationsOperations
 build_operation(command_table,
@@ -62,8 +56,7 @@ build_operation(command_table,
                     (ExpressRouteCircuitAuthorizationsOperations.delete, LongRunningOperation(L('Deleting express route authorization'), L('Express route authorization deleted'))),
                     (ExpressRouteCircuitAuthorizationsOperations.get, 'ExpressRouteCircuitAuthorization'),
                     (ExpressRouteCircuitAuthorizationsOperations.list, '[ExpressRouteCircuitAuthorization]'),
-                ],
-                PARAMALIASES)
+                ])
 
 # ExpressRouteCircuitPeeringsOperations
 build_operation(command_table,
@@ -74,8 +67,7 @@ build_operation(command_table,
                     (ExpressRouteCircuitPeeringsOperations.delete, LongRunningOperation(L('Deleting express route circuit peering'), L('Express route circuit peering deleted'))),
                     (ExpressRouteCircuitPeeringsOperations.get, 'ExpressRouteCircuitPeering'),
                     (ExpressRouteCircuitPeeringsOperations.list, '[ExpressRouteCircuitPeering]'),
-                ],
-                PARAMALIASES)
+                ])
 
 # ExpressRouteCircuitsOperations
 build_operation(command_table,
@@ -90,8 +82,7 @@ build_operation(command_table,
                     (ExpressRouteCircuitsOperations.list_stats, '[ExpressRouteCircuitStats]'),
                     (ExpressRouteCircuitsOperations.list, '[ExpressRouteCircuit]'),
                     (ExpressRouteCircuitsOperations.list_all, '[ExpressRouteCircuit]'),
-                ],
-                PARAMALIASES)
+                ])
 
 # ExpressRouteServiceProvidersOperations
 build_operation(command_table,
@@ -100,8 +91,7 @@ build_operation(command_table,
                 _network_client_factory,
                 [
                     (ExpressRouteServiceProvidersOperations.list, '[ExpressRouteServiceProvider]'),
-                ],
-                PARAMALIASES)
+                ])
 
 # LoadBalancersOperations
 build_operation(command_table,
@@ -113,8 +103,7 @@ build_operation(command_table,
                     (LoadBalancersOperations.get, 'LoadBalancer'),
                     (LoadBalancersOperations.list_all, '[LoadBalancer]'),
                     (LoadBalancersOperations.list, '[LoadBalancer]'),
-                ],
-                PARAMALIASES)
+                ])
 
 # LocalNetworkGatewaysOperations
 build_operation(command_table,
@@ -125,8 +114,7 @@ build_operation(command_table,
                     (LocalNetworkGatewaysOperations.get, 'LocalNetworkGateway'),
                     (LocalNetworkGatewaysOperations.delete, LongRunningOperation(L('Deleting local network gateway'), L('Local network gateway deleted'))),
                     (LocalNetworkGatewaysOperations.list, '[LocalNetworkGateway]'),
-                ],
-                PARAMALIASES)
+                ])
 
 
 # NetworkInterfacesOperations
@@ -142,8 +130,7 @@ build_operation(command_table,
                     (NetworkInterfacesOperations.get_virtual_machine_scale_set_network_interface, 'NetworkInterface'),
                     (NetworkInterfacesOperations.list_all, '[NetworkInterface]'),
                     (NetworkInterfacesOperations.list, '[NetworkInterface]'),
-                ],
-                PARAMALIASES)
+                ])
 
 # NetworkSecurityGroupsOperations
 build_operation(command_table,
@@ -155,8 +142,7 @@ build_operation(command_table,
                     (NetworkSecurityGroupsOperations.delete, 'NetworkSecurityGroup'),
                     (NetworkSecurityGroupsOperations.list_all, '[NetworkSecurityGroup]'),
                     (NetworkSecurityGroupsOperations.list, '[NetworkSecurityGroup]'),
-                ],
-                PARAMALIASES)
+                ])
 
 # PublicIPAddressesOperations
 build_operation(command_table,
@@ -168,8 +154,7 @@ build_operation(command_table,
                     (PublicIPAddressesOperations.get, 'PublicIPAddress'),
                     (PublicIPAddressesOperations.list_all, '[PublicIPAddress]'),
                     (PublicIPAddressesOperations.list, '[PublicIPAddress]'),
-                ],
-                PARAMALIASES)
+                ])
 
 # RouteTablesOperations
 build_operation(command_table,
@@ -181,8 +166,7 @@ build_operation(command_table,
                     (RouteTablesOperations.get, 'RouteTable'),
                     (RouteTablesOperations.list, '[RouteTable]'),
                     (RouteTablesOperations.list_all, '[RouteTable]'),
-                ],
-                PARAMALIASES)
+                ])
 
 # RoutesOperations
 build_operation(command_table,
@@ -193,8 +177,7 @@ build_operation(command_table,
                     (RoutesOperations.delete, LongRunningOperation(L('Deleting route'), L('Route deleted'))),
                     (RoutesOperations.get, 'Route'),
                     (RoutesOperations.list, '[Route]'),
-                ],
-                PARAMALIASES)
+                ])
 
 # SecurityRulesOperations
 build_operation(command_table,
@@ -205,8 +188,7 @@ build_operation(command_table,
                     (SecurityRulesOperations.delete, LongRunningOperation(L('Deleting security rule'), L('Security rule deleted'))),
                     (SecurityRulesOperations.get, 'SecurityRule'),
                     (SecurityRulesOperations.list, '[SecurityRule]'),
-                ],
-                PARAMALIASES)
+                ])
 
 # SubnetsOperations
 build_operation(command_table,
@@ -217,8 +199,7 @@ build_operation(command_table,
                     (SubnetsOperations.delete, LongRunningOperation(L('Deleting subnet'), L('Subnet deleted'))),
                     (SubnetsOperations.get, 'Subnet'),
                     (SubnetsOperations.list, '[Subnet]'),
-                ],
-                PARAMALIASES)
+                ])
 
 # UsagesOperations
 build_operation(command_table,
@@ -227,8 +208,7 @@ build_operation(command_table,
                 _network_client_factory,
                 [
                     (UsagesOperations.list, '[Usage]'),
-                ],
-                PARAMALIASES)
+                ])
 
 # VirtualNetworkGatewayConnectionsOperations
 build_operation(command_table,
@@ -242,8 +222,7 @@ build_operation(command_table,
                     (VirtualNetworkGatewayConnectionsOperations.list, '[VirtualNetworkGatewayConnection]'),
                     (VirtualNetworkGatewayConnectionsOperations.reset_shared_key, 'ConnectionResetSharedKey'),
                     (VirtualNetworkGatewayConnectionsOperations.set_shared_key, 'ConnectionSharedKey'),
-                ],
-                PARAMALIASES)
+                ])
 
 # VirtualNetworkGatewaysOperations
 build_operation(command_table,
@@ -255,8 +234,7 @@ build_operation(command_table,
                     (VirtualNetworkGatewaysOperations.get, 'VirtualNetworkGateway'),
                     (VirtualNetworkGatewaysOperations.list, '[VirtualNetworkGateway]'),
                     (VirtualNetworkGatewaysOperations.reset, 'VirtualNetworkGateway'),
-                ],
-                PARAMALIASES)
+                ])
 
 # VirtualNetworksOperations
 build_operation(command_table,
@@ -268,8 +246,7 @@ build_operation(command_table,
                     (VirtualNetworksOperations.get, 'VirtualNetwork'),
                     (VirtualNetworksOperations.list, '[VirtualNetwork]'),
                     (VirtualNetworksOperations.list_all, '[VirtualNetwork]'),
-                ],
-                PARAMALIASES)
+                ])
 
 #@description(L('Create or update a virtual network (VNet)'))
 @command_table.option('--resource-group -g', help=L('the resource group name'), required=True)

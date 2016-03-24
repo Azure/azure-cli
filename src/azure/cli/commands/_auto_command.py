@@ -7,11 +7,9 @@ from msrest.exceptions import ClientException
 from azure.cli.parser import IncorrectUsageError
 from ..commands import CommandTable
 
+from argcomplete import warn
 
 EXCLUDED_PARAMS = frozenset(['self', 'raw', 'custom_headers', 'operation_config'])
-GLOBALPARAMALIASES = {
-    'resource_group_name': '--resourcegroup --rg <resourcegroupname>'
-}
 
 COMMON_PARAMETERS = {
     'resource_group_name': {
@@ -20,10 +18,10 @@ COMMON_PARAMETERS = {
         'help': 'Name of resource group',
         'required': True
     },
-    'vm_name': {
-        'name': ['--name', '-n'],
-        'metavar': 'VM NAME',
-        'help': 'Name of virtual machine',
+    'location': {
+        'name': ['--location', '-l'],
+        'metavar': 'LOCATION',
+        'help': 'Location',
         'required': True
     }
 }
@@ -98,12 +96,11 @@ def _option_description(operation, arg):
     return ' '.join(l.split(':')[-1] for l in inspect.getdoc(operation).splitlines()
                     if l.startswith(':param') and arg + ':' in l)
 
-def build_operation(command_table, command_name, member_path, client_type, operations, #pylint: disable=dangerous-default-value
-                    paramaliases=GLOBALPARAMALIASES):
+def build_operation(command_table, command_name, member_path, client_type, operations):
     for operation, return_type_name in operations:
         opname = operation.__name__.replace('_', '-')
         func = _make_func(client_type, member_path, return_type_name, operation)
-        
+
         args = []
         try:
             # only supported in python3 - falling back to argspec if not available
@@ -126,8 +123,8 @@ def build_operation(command_table, command_name, member_path, client_type, opera
             options.append(common_param)
 
         command_table[func] = {
-            'name': ' '.join([command_name, opname]), 
-            'handler': func, 
+            'name': ' '.join([command_name, opname]),
+            'handler': func,
             'options': options
             }
 

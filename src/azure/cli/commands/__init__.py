@@ -12,9 +12,9 @@ COMMAND_MODULES = [
 ]
 
 class CommandTable(dict):
-    """A command table is a dictionary of func -> {name, 
-                                                   func, 
-                                                   **kwargs} 
+    """A command table is a dictionary of func -> {name,
+                                                   func,
+                                                   **kwargs}
     objects.
 
     The `name` is the space separated name - i.e. 'az vm list'

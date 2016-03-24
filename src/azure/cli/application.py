@@ -1,4 +1,5 @@
 import argparse
+import logging
 from .parser import AzCliCommandParser
 import argcomplete
 import logging
@@ -11,9 +12,6 @@ class Session(EventDispatcher):
         super(Session, self).__init__()
         self.log = logging.getLogger('az')
         self.output_format = 'list'
-
-    def command_loader(self, argv):
-        pass
 
 class Application(object):
 
@@ -32,7 +30,7 @@ class Application(object):
 
         self.parser = AzCliCommandParser(prog='az', parents=[self.global_parser])
         self.session.raise_event('CommandParser.Created', self.parser)
-        
+
     def load_commands(self, argv):
         import azure.cli.commands as commands
 
@@ -50,19 +48,16 @@ class Application(object):
         argcomplete.autocomplete(self.parser)
 
     def execute(self, argv):
-        try:
-            args = self.parser.parse_args(argv)
-            self.session.raise_event('CommandParser.Parsed', args)
+        args = self.parser.parse_args(argv)
+        self.session.raise_event('CommandParser.Parsed', args)
 
-            # Consider - we are using any args that start with an underscore (_) as 'private'
-            # arguments and remove them from the arguments that we pass to the actual function.
-            # This does not feel quite right. 
-            params = dict([(key, value)
-                           for key, value in args.__dict__.items() if not key.startswith('_')])
-            result = args.func(params, {}) # TODO: Unexpected parameters passed in?
-            return result
-        except Exception as e:
-            print(e)
+        # Consider - we are using any args that start with an underscore (_) as 'private'
+        # arguments and remove them from the arguments that we pass to the actual function.
+        # This does not feel quite right.
+        params = dict([(key, value)
+                       for key, value in args.__dict__.items() if not key.startswith('_')])
+        result = args.func(params, {}) # TODO: Unexpected parameters passed in?
+        return result
 
     def _register_builtin_arguments(self, name, parser):
         parser.add_argument('--subscription', dest='_subscription_id', help=argparse.SUPPRESS)
@@ -70,7 +65,7 @@ class Application(object):
 
     def _handle_builtin_arguments(self, name, args):
         try:
-            self.session.output_format = args._output_format
-            del(args._output_format)
+            self.session.output_format = args._output_format #pylint: disable=protected-access
+            del args._output_format
         except Exception:
             pass
