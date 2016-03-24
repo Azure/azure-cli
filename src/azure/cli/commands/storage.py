@@ -122,7 +122,7 @@ def create_account(args, unexpected): #pylint: disable=unused-argument
     account_name = args.get('account-name')
 
     try:
-        account_type = storage_account_types[args.get('type')] if args.get('type') else None
+        account_type = storage_account_types[args.get('type')]
     except KeyError:
         raise IncorrectUsageError(L('type must be: {}'
                                     .format(storage_account_type_string)))
@@ -130,7 +130,7 @@ def create_account(args, unexpected): #pylint: disable=unused-argument
                                             account_type,
                                             _resolve_tags(args))
 
-    return smc.storage_accounts.create(resource_group, account_name, params)
+    return smc.storage_accounts.create(resource_group, account_name, params)    
 
 @command('storage account set')
 @description(L('Update storage account property (only one at a time).'))
@@ -237,9 +237,11 @@ def show_container(args, unexpected): #pylint: disable=unused-argument
     bbs = _get_blob_service_client(args)
     return bbs.get_container_properties(args.get('container-name'))
 
-# TODO: update this once enums are supported in commands first-class (task #115175885)
-lease_duration_values = {'15':15, '60':60, 'infinite':-1}
-lease_duration_values_string = ' | '.join(lease_duration_values)
+lease_duration_values = {'min':15, 'max':60, 'infinite':-1}
+lease_duration_values_string = 'Between {} and {} seconds. ({} for infinite)'.format(
+    lease_duration_values['min'],
+    lease_duration_values['max'],
+    lease_duration_values['infinite'])
 
 @command('storage container lease acquire')
 @description(L('Acquire a lock on a container for delete operations.'))
@@ -252,12 +254,13 @@ lease_duration_values_string = ' | '.join(lease_duration_values)
 @option('--connection-string -t <connectionString>', L('the storage connection string'))
 def acquire_container_lease(args, unexpected): #pylint: disable=unused-argument
     bbs = _get_blob_service_client(args)
-    lease_duration = args.get('lease-duration')
-    if lease_duration not in lease_duration_values:
-        raise ValueError('Valid durations are: {}'.format(lease_duration_values_string))
+    try:
+        lease_duration = int(args.get('lease-duration'))
+    except ValueError:
+        raise IncorrectUsageError('lease-duration must be: {}'.format(lease_duration_values_string))
 
     return bbs.acquire_container_lease(container_name=args.get('container-name'),
-                                       lease_duration=lease_duration_values[lease_duration],
+                                       lease_duration=lease_duration,
                                        proposed_lease_id=args.get('proposed-lease-id'))
 
 @command('storage container lease renew')
@@ -308,12 +311,13 @@ def change_container_lease(args, unexpected): #pylint: disable=unused-argument
 @option('--connection-string -t <connectionString>', L('the storage connection string'))
 def break_container_lease(args, unexpected): #pylint: disable=unused-argument
     bbs = _get_blob_service_client(args)
-    lease_break_period = args.get('lease-break-period')
-    if lease_break_period not in lease_duration_values:
-        raise ValueError('Valid durations are: {}'.format(lease_duration_values_string))
+    try:
+        lease_break_period = int(args.get('lease-break-period'))
+    except ValueError:
+        raise ValueError('lease-break-period must be: {}'.format(lease_duration_values_string))
 
     bbs.break_container_lease(container_name=args.get('container-name'),
-                              lease_break_period=lease_duration_values[lease_break_period])
+                              lease_break_period=lease_break_period)
 
 # BLOB COMMANDS
 # TODO: Evaluate for removing hand-authored commands in favor of auto-commands (task ##115068835)
