@@ -17,7 +17,8 @@ def register(event_dispatcher):
             elif isinstance(obj, dict):
                 try:
                     if 'resourceGroup' not in obj:
-                        obj['resourceGroup'] = parse_id(obj['id'])['resource-group']
+                        if obj['id']:
+                            obj['resourceGroup'] = parse_id(obj['id'])['resource-group']
                 except (KeyError, IndexError):
                     pass
                 for item_key in obj:
