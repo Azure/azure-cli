@@ -1,5 +1,6 @@
 ﻿from __future__ import print_function
 from os import environ
+from sys import stderr
 from six.moves import input #pylint: disable=redefined-builtin
 
 from azure.storage.blob import PublicAccess
@@ -305,4 +306,4 @@ def _update_progress(current, total):
         percent_done = format_string.format(current * 100 / total)
         padding = len(num_format) - len(percent_done)
         message += (' ' * padding) + percent_done
-        print('\b' * len(message) + message, end='', flush=True)
+        print('\b' * len(message) + message, end='', file=stderr, flush=True)
