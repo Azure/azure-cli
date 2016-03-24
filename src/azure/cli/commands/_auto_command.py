@@ -72,7 +72,6 @@ def _make_func(client_factory, member_path, return_type_or_func, unbound_func):
         client = client_factory()
         ops_instance = _get_member(client, member_path)
         try:
-            print(args)
             result = unbound_func(ops_instance, **args)
             if not return_type_or_func:
                 return {}
