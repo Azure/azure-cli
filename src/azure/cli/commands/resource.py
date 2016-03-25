@@ -1,15 +1,19 @@
 from .._argparse import IncorrectUsageError
-from ..commands import command, description, option
+from ..commands import CommandTable
 from ._command_creation import get_mgmt_service_client
 from .._locale import L
 
 from azure.mgmt.resource.resources import (ResourceManagementClient,
                                            ResourceManagementClientConfiguration)
 
-@command('resource group list')
-@description('List resource groups')
-@option('--tag-name -tn <tagName>', L("the resource group's tag name"))
-@option('--tag-value -tv <tagValue>', L("the resource group's tag value"))
+command_table = CommandTable()
+
+def get_command_table():
+    return command_table
+
+@command_table.option('--tag-name -tn', help=L("the resource group's tag name"))
+@command_table.option('--tag-value -tv', help=L("the resource group's tag value"))
+@command_table.command('resource group list', description=L('List resource groups'))
 def list_groups(args, unexpected): #pylint: disable=unused-argument
     from azure.mgmt.resource.resources.models import ResourceGroup, ResourceGroupFilter
 

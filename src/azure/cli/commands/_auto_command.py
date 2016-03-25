@@ -5,26 +5,11 @@ import time
 from msrest.paging import Paged
 from msrest.exceptions import ClientException
 from azure.cli.parser import IncorrectUsageError
-from ..commands import CommandTable
+from ..commands import CommandTable, COMMON_PARAMETERS
 
 from argcomplete import warn
 
 EXCLUDED_PARAMS = frozenset(['self', 'raw', 'custom_headers', 'operation_config'])
-
-COMMON_PARAMETERS = {
-    'resource_group_name': {
-        'name': ['--resourcegroup', '--rg'],
-        'metavar': 'RESOURCE GROUP',
-        'help': 'Name of resource group',
-        'required': True
-    },
-    'location': {
-        'name': ['--location', '-l'],
-        'metavar': 'LOCATION',
-        'help': 'Location',
-        'required': True
-    }
-}
 
 class LongRunningOperation(object): #pylint: disable=too-few-public-methods
 
@@ -113,7 +98,7 @@ def build_operation(command_table, command_name, member_path, client_type, opera
         options = []
         for arg in [a for a in args if not a in EXCLUDED_PARAMS]:
             common_param = COMMON_PARAMETERS.get(arg, {
-                'name': ['--' + arg.replace('_', '-')],
+                'name': '--' + arg.replace('_', '-'),
                 'required': True,
                 'help': _option_description(operation, arg)
             }).copy() # We need to make a copy to allow consumers to mutate the value

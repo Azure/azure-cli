@@ -21,7 +21,7 @@ class AzCliCommandParser(argparse.ArgumentParser):
         # If we haven't already added a subparser, we
         # better do it.
         if not self.subparsers:
-            sp = self.add_subparsers(dest='_command_package')
+            sp = self.add_subparsers(dest='_command_package', metavar='COMMAND')
             sp.required = True
             self.subparsers = {(): sp}
 
@@ -35,7 +35,8 @@ class AzCliCommandParser(argparse.ArgumentParser):
             session.raise_event('AzCliCommandParser.SubparserCreated',
                                 {'parser': command_parser, 'metadata': metadata})
             for arg in metadata['options']:
-                command_parser.add_argument(*arg.pop('name'),
+                names = arg.pop('name').split()
+                command_parser.add_argument(*names,
                                             **arg)
             command_parser.set_defaults(func=handler)
 
