@@ -18,30 +18,33 @@ def _generate_help(noun_map):
 
     old_stdout = sys.stdout
 
-    for noun in [n for n in noun_map if not n.startswith('$')]:
-        properties = noun_map[noun]
+    try:
+        for noun in [n for n in noun_map if not n.startswith('$')]:
+            properties = noun_map[noun]
 
-        delimiters = properties['$full_name']
-        file_path = os.path.join(_help_location, delimiters + '.rst')
-        mode = 'w+' if not os.path.exists(file_path) else 'w'
-        sys.stdout = open(file_path, mode)
+            delimiters = properties['$full_name']
+            file_path = os.path.join(_help_location, delimiters + '.rst')
+            mode = 'w+' if not os.path.exists(file_path) else 'w'
+            sys.stdout = open(file_path, mode)
 
-        if '$kwargs' in properties:
-            cmd_file = CommandHelpFile(delimiters, properties['$argdoc'])
-            cmd_file.load(properties)
-            _handle_command(cmd_file)
-        else:
-            subnouns = [n for n in properties if not n.startswith('$')]
-            grp_file = GroupHelpFile(delimiters, subnouns)
-            grp_file.load(properties)
-            _handle_group(grp_file)
+            if '$kwargs' in properties:
+                cmd_file = CommandHelpFile(delimiters, properties['$argdoc'])
+                cmd_file.load(properties)
+                _handle_command(cmd_file)
+            else:
+                subnouns = [n for n in properties if not n.startswith('$')]
+                grp_file = GroupHelpFile(delimiters, subnouns)
+                grp_file.load(properties)
+                _handle_group(grp_file)
 
-            for n in properties:
-                _generate_help({n: properties[n]})
+                for n in properties:
+                    _generate_help({n: properties[n]})
 
-        sys.stdout.close()
+            sys.stdout.close()
+    finally:
+        sys.stdout = old_stdout
 
-    sys.stdout = old_stdout
+    print('Help generated at {}'.format(_help_location))
 
 def _handle_command(doc):
     _print_summary(doc)
