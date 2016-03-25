@@ -7,7 +7,7 @@ COMMAND_MODULES = [
     'login',
     'logout',
     'network',
-    'resourcegroup',
+    'resource',
     'storage',
     'taskhelp',
     'vm',
