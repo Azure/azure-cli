@@ -59,9 +59,22 @@ class TestSequenceMeta(type):
         def gen_test(test_name, command, expected_result):
         
             def load_subscriptions_mock(self):
-                return [{"id": "00000000-0000-0000-0000-000000000000", "user": "example@example.com", "access_token": "access_token", "state": "Enabled", "name": "Example", "active": True}];
+                return [{
+                    "id": "00000000-0000-0000-0000-000000000000", 
+                    "user": {
+                        "name": "example@example.com", 
+                        "type": "user"
+                        },
+                    "state": "Enabled", 
+                    "name": "Example", 
+                    "tenantId": "123",
+                    "isDefault": True}]
 
-            @mock.patch('azure.cli._profile.Profile.load_subscriptions', load_subscriptions_mock)
+            def get_user_access_token_mock(_, _1, _2):
+                return 'top-secret-token-for-you'
+
+            @mock.patch('azure.cli._profile.Profile.load_cached_subscriptions', load_subscriptions_mock)
+            @mock.patch('azure.cli._profile.CredsCache.retrieve_token_for_user',get_user_access_token_mock)
             @my_vcr.use_cassette('%s.yaml'%test_name, filter_headers=FILTER_HEADERS)
             def test(self):
                 io = StringIO()
