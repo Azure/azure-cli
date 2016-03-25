@@ -1,5 +1,5 @@
-from .._argparse import IncorrectUsageError
-from ..commands import CommandTable
+from ..parser import IncorrectUsageError
+from ..commands import CommandTable, COMMON_PARAMETERS
 from ._command_creation import get_mgmt_service_client
 from .._locale import L
 
@@ -30,15 +30,17 @@ def list_groups(args, unexpected): #pylint: disable=unused-argument
     groups = rmc.resource_groups.list(filter=filter_text)
     return list(groups)
 
-@command('resource show')
-@description(L('Show details of a specific resource in a resource group or subscription'))
-@option('--resource-group -g <resourceGroup>', L('the resource group name'), required=True)
-@option('--name -n <name>', L('the resource name'), required=True)
-@option('--resource-type -r <resourceType>',
-        L('the resource type in format: <provider-namespace>/<type>'), required=True)
-@option('--api-version -o <apiVersion>', L('the API version of the resource provider'))
-@option('--parent <parent>',
-        L('the name of the parent resource (if needed), in <parent-type>/<parent-name> format'))
+@command_table.command('resource show')
+@command_table.description(
+    L('Show details of a specific resource in a resource group or subscription'))
+@command_table.option(**COMMON_PARAMETERS['resource_group_name'])
+@command_table.option('--name -n', help=L('the resource name'), required=True)
+@command_table.option('--resource-type -r',
+                      help=L('the resource type in format: <provider-namespace>/<type>'),
+                      required=True)
+@command_table.option('--api-version -o', help=L('the API version of the resource provider'))
+@command_table.option('--parent',
+                      help=L('the name of the parent resource (if needed), in <parent-type>/<parent-name> format'))
 def show_resource(args, unexpected): #pylint: disable=unused-argument
     rmc = get_mgmt_service_client(ResourceManagementClient, ResourceManagementClientConfiguration)
 
