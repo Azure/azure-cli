@@ -76,6 +76,7 @@ setup(
     author='Microsoft Corporation',
     author_email='azpycli@microsoft.com',
     url='https://github.com/Azure/azure-cli',
+    zip_safe=False,
     classifiers=CLASSIFIERS,
     scripts=[
         'az',
