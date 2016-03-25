@@ -1,6 +1,6 @@
-﻿from .._profile import Profile
-from ..commands import command, description, option
-from .._locale import L
+from azure.cli._profile import Profile
+from azure.cli.commands import command, description, option
+from azure.cli._locale import L
 
 @command('logout')
 @description(L('Log out from Azure subscription using Active Directory.'))

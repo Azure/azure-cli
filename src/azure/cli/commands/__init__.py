@@ -1,16 +1,10 @@
-﻿from .._argparse import IncorrectUsageError
+﻿from pip import get_installed_distributions
+
+from .._argparse import IncorrectUsageError
 from .._logging import logger
 
-# TODO: Alternatively, simply scan the directory for all modules
-COMMAND_MODULES = [
-    'account',
-    'login',
-    'logout',
-    'network',
-    'resource',
-    'storage',
-    'vm',
-]
+# Find our command modules, they start with 'azure-cli-'
+INSTALLED_COMMAND_MODULES = [dist.key.replace('azure-cli-', '') for dist in get_installed_distributions(local_only=False) if dist.key.startswith('azure-cli-')]
 
 _COMMANDS = {}
 
@@ -48,15 +42,16 @@ def add_to_parser(parser, command_name=None):
     loaded = False
     if command_name:
         try:
-            __import__('azure.cli.commands.' + command_name)
+            # Try and load the installed command module
+            __import__('azure.cli.command_modules.'+command_name)
             loaded = True
         except ImportError:
-            # Unknown command - we'll load all below
+            # Unknown command - we'll load all installed modules below
             pass
 
     if not loaded:
-        for mod in COMMAND_MODULES:
-            __import__('azure.cli.commands.' + mod)
+        for installed_mods in INSTALLED_COMMAND_MODULES:
+            __import__('azure.cli.command_modules.'+installed_mods)
         loaded = True
 
     for handler, info in _COMMANDS.items():

@@ -1,4 +1,4 @@
-﻿from __future__ import print_function
+from __future__ import print_function
 from os import environ
 from sys import stderr
 from six.moves import input #pylint: disable=redefined-builtin
@@ -7,11 +7,11 @@ from azure.storage.blob import PublicAccess
 from azure.mgmt.storage import StorageManagementClient, StorageManagementClientConfiguration
 from azure.mgmt.storage.operations import StorageAccountsOperations
 
-from .._argparse import IncorrectUsageError
-from ..commands import command, description, option
-from ._command_creation import get_mgmt_service_client, get_data_service_client
-from ..commands._auto_command import build_operation
-from .._locale import L
+from azure.cli._argparse import IncorrectUsageError
+from azure.cli.commands import command, description, option
+from azure.cli.commands._command_creation import get_mgmt_service_client, get_data_service_client
+from azure.cli.commands._auto_command import build_operation
+from azure.cli._locale import L
 
 
 def _storage_client_factory():

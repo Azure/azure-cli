@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env python
+#!/usr/bin/env python
 
 #-------------------------------------------------------------------------
 # Copyright (c) Microsoft.  All rights reserved.
@@ -15,28 +15,10 @@
 # limitations under the License.
 #--------------------------------------------------------------------------
 
-from __future__ import print_function
 from codecs import open
 from setuptools import setup
 
 VERSION = '0.0.3.dev0'
-
-# If we have source, validate that our version numbers match
-# This should prevent uploading releases with mismatched versions.
-try:
-    with open('src/azure/cli/__init__.py', 'r', encoding='utf-8') as f:
-        content = f.read()
-except OSError:
-    pass
-else:
-    import re, sys
-    m = re.search(r'__version__\s*=\s*[\'"](.+?)[\'"]', content)
-    if not m:
-        print('Could not find __version__ in azure/cli/__init__.py')
-        sys.exit(1)
-    if m.group(1) != VERSION:
-        print('Expected __version__ = "{}"; found "{}"'.format(VERSION, m.group(1)))
-        sys.exit(1)
 
 # The full list of classifiers is available at
 # https://pypi.python.org/pypi?%3Aaction=list_classifiers
@@ -55,20 +37,15 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
-    'applicationinsights',
-    'msrest',
-    'six',
-    'jmespath',
-    'pip',
-    # 'azure-cli-components==0.0.3.dev0',
-    # 'azure-cli-login==0.0.3.dev0',
+    'azure-cli',
+    'azure==2.0.0rc1',
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
     README = f.read()
 
 setup(
-    name='azure-cli',
+    name='azure-cli-storage',
     version=VERSION,
     description='Microsoft Azure Command-Line Tools',
     long_description=README,
@@ -77,24 +54,9 @@ setup(
     author_email='azpycli@microsoft.com',
     url='https://github.com/Azure/azure-cli',
     classifiers=CLASSIFIERS,
-    scripts=[
-        'az',
-        'az.completion.sh',
-        'az.bat',
-    ],
-    package_dir = {'':'src'},
+    namespace_packages = ['azure.cli.command_modules'],
     packages=[
-        'azure',
-        'azure.cli',
-        'azure.cli.commands',
-        'azure.cli.command_modules',
-        'azure.cli.extensions',
+        'azure.cli.command_modules.storage',
     ],
-    package_data={'azure.cli': ['locale/**/*.txt']},
     install_requires=DEPENDENCIES,
-    extras_require={
-        ':python_version < "3.4"': [
-            'enum34',
-        ],
-    },
 )

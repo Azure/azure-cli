@@ -1,7 +1,7 @@
-from .._argparse import IncorrectUsageError
-from ..commands import command, description, option
-from ._command_creation import get_mgmt_service_client
-from .._locale import L
+from azure.cli._argparse import IncorrectUsageError
+from azure.cli.commands import command, description, option
+from azure.cli.commands._command_creation import get_mgmt_service_client
+from azure.cli._locale import L
 
 from azure.mgmt.resource.resources import (ResourceManagementClient,
                                            ResourceManagementClientConfiguration)

@@ -1,4 +1,3 @@
-from .._locale import L
 from azure.mgmt.network import NetworkManagementClient, NetworkManagementClientConfiguration
 from azure.mgmt.network.operations import (ApplicationGatewaysOperations,
                                            ExpressRouteCircuitAuthorizationsOperations,
@@ -19,9 +18,10 @@ from azure.mgmt.network.operations import (ApplicationGatewaysOperations,
                                            VirtualNetworkGatewaysOperations,
                                            VirtualNetworksOperations)
 
-from ._command_creation import get_mgmt_service_client
-from ..commands._auto_command import build_operation, LongRunningOperation, GLOBALPARAMALIASES
-from ..commands import command, description, option
+from azure.cli._locale import L
+from azure.cli.commands._command_creation import get_mgmt_service_client
+from azure.cli.commands._auto_command import build_operation, LongRunningOperation, GLOBALPARAMALIASES
+from azure.cli.commands import command, description, option
 
 def _network_client_factory():
     return get_mgmt_service_client(NetworkManagementClient, NetworkManagementClientConfiguration)
@@ -294,5 +294,3 @@ def create_update_subnet(args, unexpected): #pylint: disable=unused-argument
     smc = _network_client_factory()
     poller = smc.subnets.create_or_update(resource_group, vnet, name, subnet_settings)
     return op(poller)
-
-
