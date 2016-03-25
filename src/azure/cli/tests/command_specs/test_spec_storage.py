@@ -1,7 +1,11 @@
 definition = [
     {
-        'test_name': 'resource_group_list',
-        'command': 'resource group list --output json'
+        'test_name': 'storage_account_usage',
+        'command': 'storage account usage',
+    }
+    ,{
+        'test_name': 'storage_account_list',
+        'command': 'storage account list'
     }
 ]
 
