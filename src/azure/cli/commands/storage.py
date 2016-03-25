@@ -130,7 +130,7 @@ def create_account(args, unexpected): #pylint: disable=unused-argument
                                             account_type,
                                             _resolve_tags(args))
 
-    return smc.storage_accounts.create(resource_group, account_name, params)    
+    return smc.storage_accounts.create(resource_group, account_name, params)
 
 @command('storage account set')
 @description(L('Update storage account property (only one at a time).'))
@@ -605,15 +605,10 @@ def _get_file_service_client(args):
 
 def _resolve_tags(args):
     tag_string = args.get('tags')
-    if tag_string:
-        tags = dict()
-        for tag in tag_string.split(';'):
-            comps = tag.split('=', 1)
-            key = comps[0]
-            value = comps[1] if len(comps) > 1 else ''
-            tags[key] = value
-    else:
-        tags = None
+    kv_tags = [x for x in tag_string.split(';') if '=' in x]     # key-value tags
+    s_tags = [x for x in tag_string.split(';') if '=' not in x]  # single value tags
+    tags = dict(x.split('=') for x in kv_tags)
+    tags.update(dict((x, '') for x in s_tags))
     return tags
 
 # TODO: Remove once these parameters are supported first-class by @option (task #116054675)
