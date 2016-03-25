@@ -20,7 +20,7 @@ def _load_help_file(delimiters):
                 parameters: 
                     - name: --username/-u
                       type: string
-                      required: True
+                      required: False
                       short-summary: one line partial sentence
                       long-summary: text, markdown, etc.
                       populator-commands: 
