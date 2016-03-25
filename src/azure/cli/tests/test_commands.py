@@ -1,4 +1,5 @@
 import os
+import json
 import sys
 import unittest
 import re
@@ -13,13 +14,14 @@ except ImportError:
 
 from azure.cli.main import main as cli
 
-from command_specs import TEST_SPECS
+from command_specs import TEST_DEF
 
 logging.basicConfig()
 vcr_log = logging.getLogger('vcr')
 vcr_log.setLevel(logging.ERROR)
 
 VCR_CASSETTE_DIR = os.path.join(os.path.dirname(__file__), 'recordings')
+EXPECTED_RESULTS_PATH = VCR_CASSETTE_DIR + '\\expected_results.res'
 
 FILTER_HEADERS = [
     'authorization',
@@ -55,27 +57,72 @@ my_vcr = vcr.VCR(
 class TestSequenceMeta(type):
 
     def __new__(mcs, name, bases, dict):
-    
+
+        def _record_expected_result(test_name, command):
+            """ Runs the command and allows user to save the result as the expected result."""
+            print('*** RECORDING RESULT FOR {}'.format(test_name))
+            io = StringIO()
+            cli(command.split(), file=io)
+            actual_result = io.getvalue()
+            print(actual_result)
+            ans = input('Save result for command: \'{}\'? [Y/n]: '.format(command))
+            if ans and ans.lower()[0] == 'n':
+                result = None
+            else:
+                TEST_EXPECTED[test_name] = actual_result
+                with open(EXPECTED_RESULTS_PATH, 'w') as file:
+                    json.dump(TEST_EXPECTED, file, indent=4, sort_keys=True)
+                result = actual_result
+            io.close()
+            return result
+
         def gen_test(test_name, command, expected_result):
-        
+
+            if not expected_result:
+                def null_test(self):
+                    self.fail('No expected result provided for {}.'.format(test_name))
+                return null_test
+
             def load_subscriptions_mock(self):
                 return [{"id": "00000000-0000-0000-0000-000000000000", "user": "example@example.com", "access_token": "access_token", "state": "Enabled", "name": "Example", "active": True}];
 
-            @mock.patch('azure.cli._profile.Profile.load_subscriptions', load_subscriptions_mock)
-            @my_vcr.use_cassette('%s.yaml'%test_name, filter_headers=FILTER_HEADERS)
-            def test(self):
+            def _test_impl(self):
                 io = StringIO()
                 cli(command.split(), file=io)
                 actual_result = io.getvalue()
                 io.close()
                 self.assertEqual(actual_result, expected_result)
-            return test
-            
-        for module_name, test_specs in TEST_SPECS:
-            for test_spec_item in test_specs:
-                test_name = 'test_%s' % test_spec_item['test_name']
-                full_test_name = '%s.%s'%(module_name, test_name)
-                dict[test_name] = gen_test(full_test_name, test_spec_item['command'], test_spec_item['expected_result'])
+
+            cassette_path = '{}.yaml'.format(test_name)
+            if os.path.isfile(cassette_path):
+                # if cassette present, apply subscription patch
+                @mock.patch('azure.cli._profile.Profile.load_subscriptions', load_subscriptions_mock)
+                @my_vcr.use_cassette(cassette_path, filter_headers=FILTER_HEADERS)
+                def test(self):
+                    _test_impl(self)
+                return test
+            else:
+                # do not patch subscription if you need to record the intial cassette
+                @my_vcr.use_cassette(cassette_path, filter_headers=FILTER_HEADERS)
+                def test(self):
+                    _test_impl(self)
+                return test
+        
+        try:
+            with open(EXPECTED_RESULTS_PATH, 'r') as file:
+                TEST_EXPECTED = json.loads(file.read())
+        except FileNotFoundError:
+            TEST_EXPECTED = {}
+
+        for test_path, test_def in TEST_DEF:
+            test_name = 'test_{}'.format(test_def['test_name'])
+            command = test_def['command']
+            try:
+                expected_result = TEST_EXPECTED[test_path]
+            except KeyError:
+                expected_result = _record_expected_result(test_path, command)
+
+            dict[test_name] = gen_test(test_path, command, expected_result)
         return type.__new__(mcs, name, bases, dict)
 
 @add_metaclass(TestSequenceMeta)
