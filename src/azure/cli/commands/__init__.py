@@ -1,4 +1,4 @@
-﻿from collections import namedtuple
+﻿from collections import defaultdict
 
 # TODO: Alternatively, simply scan the directory for all modules
 COMMAND_MODULES = [
@@ -6,12 +6,28 @@ COMMAND_MODULES = [
     'login',
     'logout',
     'network',
-    'resourcegroup',
-#    'storage',
+    'resource',
+    'storage',
     'vm',
 ]
 
-class CommandTable(dict):
+COMMON_PARAMETERS = {
+    'resource_group_name': {
+        'name': '--resourcegroup --rg',
+        'metavar': 'RESOURCE GROUP',
+        'help': 'Name of resource group',
+        'required': True
+    },
+    'location': {
+        'name': '--location -l',
+        'metavar': 'LOCATION',
+        'help': 'Location',
+        'required': True
+    }
+}
+
+
+class CommandTable(defaultdict):
     """A command table is a dictionary of func -> {name,
                                                    func,
                                                    **kwargs}
@@ -23,23 +39,25 @@ class CommandTable(dict):
     ArgumentParser.add_parser.
     """
     def __init__(self):
-        super(CommandTable, self).__init__(self)
+        super(CommandTable, self).__init__(lambda: {'options': []})
 
     def command(self, name, **kwargs):
         def wrapper(func):
-            self[func] = {
-                'name': name,
-                'handler': func,
-                'options': []
-                }
+            self[func]['name'] = name
             self[func].update(kwargs)
+            return func
+        return wrapper
+
+    def description(self, description):
+        def wrapper(func):
+            self[func]['description'] = description
             return func
         return wrapper
 
     def option(self, name, **kwargs):
         def wrapper(func):
             opt = dict(kwargs)
-            opt['name'] = name.split()
+            opt['name'] = name
             self[func]['options'].append(opt)
             return func
         return wrapper
