@@ -4,7 +4,9 @@ from .._argparse import IncorrectUsageError
 from .._logging import logger
 
 # Find our command modules, they start with 'azure-cli-'
-INSTALLED_COMMAND_MODULES = [dist.key.replace('azure-cli-', '') for dist in get_installed_distributions(local_only=False) if dist.key.startswith('azure-cli-')]
+INSTALLED_COMMAND_MODULES = [dist.key.replace('azure-cli-', '')
+                             for dist in get_installed_distributions(local_only=False)
+                             if dist.key.startswith('azure-cli-')]
 
 _COMMANDS = {}
 
