@@ -15,7 +15,7 @@ class AzCliCommandParser(argparse.ArgumentParser):
         self.subparsers = {}
         self.parents = kwargs.get('parents', None)
 
-    def load_command_table(self, session, command_table):
+    def load_command_table(self, command_table):
         """Load a command table into our parser.
         """
         # If we haven't already added a subparser, we
@@ -31,11 +31,10 @@ class AzCliCommandParser(argparse.ArgumentParser):
             # To work around http://bugs.python.org/issue9253, we artificially add any new
             # parsers we add to the "choices" section of the subparser.
             subparser.choices[command_name] = command_name
-            command_parser = subparser.add_parser(command_name, description=metadata.get('description'),
+            command_parser = subparser.add_parser(command_name,
+                                                  description=metadata.get('description'),
                                                   parents=self.parents, conflict_handler='resolve')
-            session.raise_event('AzCliCommandParser.SubparserCreated',
-                                {'parser': command_parser, 'metadata': metadata})
-            for arg in metadata['options']:
+            for arg in metadata['arguments']:
                 names = arg.pop('name').split()
                 command_parser.add_argument(*names,
                                             **arg)

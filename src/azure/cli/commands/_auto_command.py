@@ -5,9 +5,7 @@ import time
 from msrest.paging import Paged
 from msrest.exceptions import ClientException
 from azure.cli.parser import IncorrectUsageError
-from ..commands import CommandTable, COMMON_PARAMETERS
-
-from argcomplete import warn
+from ..commands import COMMON_PARAMETERS
 
 EXCLUDED_PARAMS = frozenset(['self', 'raw', 'custom_headers', 'operation_config'])
 
@@ -51,7 +49,7 @@ def _get_member(obj, path):
     return obj
 
 def _make_func(client_factory, member_path, return_type_or_func, unbound_func):
-    def call_client(args, unexpected): #pylint: disable=unused-argument
+    def call_client(args):
         client = client_factory()
         ops_instance = _get_member(client, member_path)
         try:
@@ -110,6 +108,6 @@ def build_operation(command_table, command_name, member_path, client_type, opera
         command_table[func] = {
             'name': ' '.join([command_name, opname]),
             'handler': func,
-            'options': options
+            'arguments': options
             }
 

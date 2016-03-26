@@ -3,8 +3,6 @@
 import sys
 import json
 import re
-from datetime import datetime
-from enum import Enum
 from six import StringIO
 
 class OutputFormatException(Exception):
@@ -51,40 +49,13 @@ class OutputProducer(object): #pylint: disable=too-few-public-methods
         'list': format_list
     }
 
-    KEYS_CAMELCASE_PATTERN = re.compile('(?!^)_([a-zA-Z])')
-
     def __init__(self, formatter=format_list, file=sys.stdout): #pylint: disable=redefined-builtin
         self.formatter = formatter
         self.file = file
 
-    def out(self, session, obj):
-        obj = OutputProducer.todict(obj)
-        event_data = {'result': obj}
-        session.raise_event(session.TRANSFORM_RESULT, event_data)
-        session.raise_event(session.FILTER_RESULT, event_data)
-        print(self.formatter(event_data['result']), file=self.file)
+    def out(self, obj):
+        print(self.formatter(obj), file=self.file)
 
-    @staticmethod
-    def todict(obj): #pylint: disable=too-many-return-statements
-        def to_camelcase(s):
-            return re.sub(OutputProducer.KEYS_CAMELCASE_PATTERN, lambda x: x.group(1).upper(), s)
-
-        if isinstance(obj, dict):
-            return {k: OutputProducer.todict(v) for (k, v) in obj.items()}
-        elif isinstance(obj, list):
-            return [OutputProducer.todict(a) for a in obj]
-        elif isinstance(obj, Enum):
-            return obj.value
-        elif isinstance(obj, datetime):
-            return obj.isoformat()
-        elif hasattr(obj, '_asdict'):
-            return OutputProducer.todict(obj._asdict())
-        elif hasattr(obj, '__dict__'):
-            return dict([(to_camelcase(k), OutputProducer.todict(v))
-                         for k, v in obj.__dict__.items()
-                         if not callable(v) and not k.startswith('_')])
-        else:
-            return obj
 
     @staticmethod
     def get_formatter(format_type):

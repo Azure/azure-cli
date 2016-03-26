@@ -13,7 +13,7 @@ COMMAND_MODULES = [
 
 COMMON_PARAMETERS = {
     'resource_group_name': {
-        'name': '--resourcegroup --rg',
+        'name': '--resourcegroup -g',
         'metavar': 'RESOURCE GROUP',
         'help': 'Name of resource group',
         'required': True
@@ -39,7 +39,7 @@ class CommandTable(defaultdict):
     ArgumentParser.add_parser.
     """
     def __init__(self):
-        super(CommandTable, self).__init__(lambda: {'options': []})
+        super(CommandTable, self).__init__(lambda: {'arguments': []})
 
     def command(self, name, **kwargs):
         def wrapper(func):
@@ -58,19 +58,19 @@ class CommandTable(defaultdict):
         def wrapper(func):
             opt = dict(kwargs)
             opt['name'] = name
-            self[func]['options'].append(opt)
+            self[func]['arguments'].append(opt)
             return func
         return wrapper
 
-def get_command_table(command_name):
+def _get_command_table(command_name):
     module = __import__('azure.cli.commands.' + command_name)
     for part in ('cli.commands.' + command_name).split('.'):
         module = getattr(module, part)
 
     return module.get_command_table()
 
-def add_to_parser(parser, session, module_name=None):
-    '''Loads commands into the parser
+def get_command_table(module_name=None):
+    '''Loads command table(s)
 
     When `module_name` is specified, only commands from that module will be loaded.
     If the module is not found, all commands are loaded.
@@ -78,13 +78,15 @@ def add_to_parser(parser, session, module_name=None):
     loaded = False
     if module_name:
         try:
-            parser.load_command_table(session, get_command_table(module_name))
+            command_table = _get_command_table(module_name)
             loaded = True
         except ImportError:
             # Unknown command - we'll load all below
             pass
 
     if not loaded:
+        command_table = {}
         for mod in COMMAND_MODULES:
-            parser.load_command_table(session, get_command_table(mod))
+            command_table.update(_get_command_table(mod))
         loaded = True
+    return command_table

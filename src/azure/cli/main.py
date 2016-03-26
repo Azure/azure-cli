@@ -1,7 +1,6 @@
 ﻿import os
 import sys
 
-from .parser import AzCliCommandParser
 from .application import Application
 
 from ._logging import configure_logging, logger
@@ -26,14 +25,14 @@ def main(args, file=sys.stdout): #pylint: disable=redefined-builtin
                                 CONFIG.get('locale', 'en-US')))
 
     app = Application()
-    app.load_commands(args)
+    app.load_commands()
     try:
         cmd_result = app.execute(args)
         # Commands can return a dictionary/list of results
         # If they do, we print the results.
         if cmd_result:
-            formatter = OutputProducer.get_formatter(app.session.output_format)
-            OutputProducer(formatter=formatter, file=file).out(app.session, cmd_result)
+            formatter = OutputProducer.get_formatter(app.configuration.output_format)
+            OutputProducer(formatter=formatter, file=file).out(cmd_result)
     except RuntimeError as ex:
         logger.error(ex.args[0])
         return ex.args[1] if len(ex.args) >= 2 else -1
