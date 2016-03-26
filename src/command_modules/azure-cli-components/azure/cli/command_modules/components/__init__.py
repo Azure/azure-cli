@@ -7,7 +7,9 @@ from azure.cli._locale import L
 @command('components list')
 @description(L('List the installed components.'))
 def list_components(args, unexpected): #pylint: disable=unused-argument
-    return sorted(["%s (%s)" % (dist.key.replace('azure-cli-', ''), dist.version) for dist in pip.get_installed_distributions(local_only=False) if dist.key.startswith('azure-cli-')])
+    return sorted(["%s (%s)" % (dist.key.replace('azure-cli-', ''), dist.version)
+                   for dist in pip.get_installed_distributions(local_only=False)
+                   if dist.key.startswith('azure-cli-')])
 
 # @command('components check')
 # @description(L('Check a component for an update'))
@@ -46,7 +48,8 @@ def list_components(args, unexpected): #pylint: disable=unused-argument
 #         raise RuntimeError("Component already installed.")
 #     except ImportError:
 #         version_no = '=='+args.get('version') if args.get('version') else ''
-#         pip.main(['install', '--quiet', '--isolated', '--disable-pip-version-check', 'azure-cli-'+component_name+version_no,
+#         pip.main(['install', '--quiet', '--isolated', '--disable-pip-version-check',
+#                   'azure-cli-'+component_name+version_no,
 #         '--extra-index-url', 'http://40.112.211.51:8080/', '--trusted-host', '40.112.211.51'])
 
 # @command('components update')
@@ -58,7 +61,8 @@ def list_components(args, unexpected): #pylint: disable=unused-argument
 #         raise RuntimeError("Specify a component name.")
 #     try:
 #         __import__('azure.cli.command_modules.'+component_name+'.__main__')
-#         pip.main(['install', '--quiet', '--isolated', '--disable-pip-version-check', '--upgrade', 'azure-cli-'+component_name,
+#         pip.main(['install', '--quiet', '--isolated', '--disable-pip-version-check',
+#                   '--upgrade', 'azure-cli-'+component_name,
 #         '--extra-index-url', 'http://40.112.211.51:8080/', '--trusted-host', '40.112.211.51'])
 #     except ImportError:
 #         raise RuntimeError("Component not installed.")
