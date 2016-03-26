@@ -1,15 +1,19 @@
 import pip
 from azure.cli.commands import command, description, option
 from azure.cli._locale import L
+from azure.cli._argparse import IncorrectUsageError
+
+COMPONENT_PREFIX = 'azure-cli-'
 
 # TODO:: Support installing/removing of a specific version
 
 @command('components list')
 @description(L('List the installed components.'))
 def list_components(args, unexpected): #pylint: disable=unused-argument
-    return sorted(["%s (%s)" % (dist.key.replace('azure-cli-', ''), dist.version)
+    components = sorted(["%s (%s)" % (dist.key.replace(COMPONENT_PREFIX, ''), dist.version)
                    for dist in pip.get_installed_distributions(local_only=False)
-                   if dist.key.startswith('azure-cli-')])
+                   if dist.key.startswith(COMPONENT_PREFIX)])
+    print('\n'.join(components))
 
 # @command('components check')
 # @description(L('Check a component for an update'))
@@ -67,16 +71,16 @@ def list_components(args, unexpected): #pylint: disable=unused-argument
 #     except ImportError:
 #         raise RuntimeError("Component not installed.")
 
-# @command('components remove')
-# @description(L('Remove a component'))
-# @option('--name -n <name>', required=True)
-# def remove_component(args, unexpected): #pylint: disable=unused-argument
-#     component_name = args.get('name')
-#     if not component_name:
-#         raise RuntimeError("Specify a component name.")
-#     try:
-#         __import__('azure.cli.command_modules.'+component_name+'.__main__')
-#         # The component is installed so we can uninstall it
-#         pip.main(['uninstall', '--quiet', '--isolated', '--yes', 'azure-cli-'+component_name])
-#     except ImportError:
-#         raise RuntimeError("Component not installed.")
+@command('components remove')
+@description(L('Remove a component'))
+@option('--name -n <name>', required=True)
+def remove_component(args, unexpected): #pylint: disable=unused-argument
+    component_name = args.get('name')
+    if not component_name:
+        raise IncorrectUsageError(L('Specify a component name.'))
+    found = [dist for dist in pip.get_installed_distributions(local_only=False)
+            if dist.key==COMPONENT_PREFIX+component_name]
+    if found:
+        pip.main(['uninstall', '--quiet', '--isolated', '--yes', '--disable-pip-version-check', COMPONENT_PREFIX+component_name])
+    else:
+        raise RuntimeError(L("Component not installed."))
