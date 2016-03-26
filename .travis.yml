@@ -9,5 +9,6 @@ install:
 script: 
   - export PYTHONPATH=$PATHONPATH:./src
   - python -m azure.cli
-  - pylint src/azure
+  - pylint -r n src/azure
+  - python scripts/pylint-command-modules.py
   - python -m unittest discover -s src/azure/cli/tests --buffer
