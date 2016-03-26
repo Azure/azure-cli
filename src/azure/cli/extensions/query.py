@@ -1,19 +1,24 @@
-def register(event_dispatcher):
-    def register_global_parameter(self, parser):
+def register(application):
+    def register_global_parameter(parser):
         # Let the program know that we are adding a parameter --query
-        parser.add_argument('--query', dest='_jmespath_query', metavar='JMESPATH', help='JMESPath query string. See http://jmespath.org/ for more information and examples.')
+        parser.add_argument('--query', dest='_jmespath_query', metavar='JMESPATH',
+                            help='JMESPath query string. See http://jmespath.org/ for more information and examples.') # pylint: disable=line-too-long
 
-    def handle_query_parameter(_, args):
+    def handle_query_parameter(args):
         # Of there is a query specified on the command line, we'll take care of that!
-        query_value = args._jmespath_query
-        del(args._jmespath_query)
+        try:
+            query_value = args._jmespath_query #  pylint: disable=protected-access
+            del args._jmespath_query
 
-        if query_value:
-            def filter_output(_, event_data):
-                import jmespath
-                event_data['result'] = jmespath.search(query_value, event_data['result'])
+            if query_value:
+                def filter_output(event_data):
+                    import jmespath
+                    event_data['result'] = jmespath.search(query_value, event_data['result'])
 
-            event_dispatcher.register(event_dispatcher.FILTER_RESULT, filter_output)
+                application.register(application.FILTER_RESULT, filter_output)
 
-    event_dispatcher.register('GlobalParser.Created', register_global_parameter)
-    event_dispatcher.register('CommandParser.Parsed', handle_query_parameter)
+        except AttributeError:
+            pass
+
+    application.register(application.GLOBAL_PARSER_CREATED, register_global_parameter)
+    application.register(application.COMMAND_PARSER_PARSED, handle_query_parameter)

@@ -7,7 +7,6 @@ from azure.storage.blob import PublicAccess
 from azure.mgmt.storage import StorageManagementClient, StorageManagementClientConfiguration
 from azure.mgmt.storage.operations import StorageAccountsOperations
 
-from ..parser import IncorrectUsageError
 from ..commands import CommandTable, COMMON_PARAMETERS as GLOBAL_COMMON_PARAMETERS
 from ._command_creation import get_mgmt_service_client, get_data_service_client
 from ..commands._auto_command import build_operation
@@ -23,31 +22,39 @@ def extend_parameter(parameter_metadata, **kwargs):
 COMMON_PARAMETERS = GLOBAL_COMMON_PARAMETERS.copy()
 COMMON_PARAMETERS.update({
     'account-name': {
-       'name': '--account-name -n', 
-       'help': L('the storage account name'), 
-       'required': not environ.get('AZURE_STORAGE_ACCOUNT'),
-       'default': environ.get('AZURE_STORAGE_ACCOUNT')
+        'name': '--account-name -n',
+        'help': L('the storage account name'),
+        # While account name *may* actually be required if the environment variable hasn't been
+        # specified, it is only required unless the connection string has been specified
+        'required': False,
+        'default': environ.get('AZURE_STORAGE_ACCOUNT')
     },
-    'optional_resource_group_name': extend_parameter(GLOBAL_COMMON_PARAMETERS['resource_group_name'], required=False),
+    'optional_resource_group_name':
+        extend_parameter(GLOBAL_COMMON_PARAMETERS['resource_group_name'], required=False),
     'account_key': {
-       'name': '--account-key -k', 
-       'help': L('the storage account key'),
-       'required': not environ.get('AZURE_STORAGE_ACCESS_KEY'),
-       'default': environ.get('AZURE_STORAGE_ACCESS_KEY')
+        'name': '--account-key -k',
+        'help': L('the storage account key'),
+        # While account key *may* actually be required if the environment variable hasn't been
+        # specified, it is only required unless the connection string has been specified
+        'required': False,
+        'default': environ.get('AZURE_STORAGE_ACCESS_KEY')
     },
     'blob-name': {
         'name': '--blob-name -bn',
-        'help': L('the name of the blob'), 
+        'help': L('the name of the blob'),
         'required': True
     },
     'container-name': {
         'name': '--container-name -c',
         'required': True
-    }, 
+    },
     'connection-string': {
         'name': '--connection-string -t',
         'help': L('the storage connection string'),
-        'required': not environ.get('AZURE_STORAGE_CONNECTION_STRING'),
+        # You can either specify connection string or name/key. There is no convenient way
+        # to express this kind of relationship in argparse...
+        # TODO: Move to exclusive group
+        'required': False,
         'default': environ.get('AZURE_STORAGE_CONNECTION_STRING')
     }
 })
@@ -73,7 +80,7 @@ build_operation(command_table,
 
 @command_table.command('storage account list', description=L('List storage accounts.'))
 @command_table.option(**COMMON_PARAMETERS['optional_resource_group_name'])
-def list_accounts(args, unexpected): #pylint: disable=unused-argument
+def list_accounts(args):
     from azure.mgmt.storage.models import StorageAccount
     from msrestazure.azure_active_directory import UserPassCredentials
     smc = _storage_client_factory()
@@ -88,9 +95,9 @@ def list_accounts(args, unexpected): #pylint: disable=unused-argument
 @command_table.description(L('Regenerate one or both keys for a storage account.'))
 @command_table.option(**COMMON_PARAMETERS['resource_group_name'])
 @command_table.option(**COMMON_PARAMETERS['account-name'])
-@command_table.option('--key -y', default=['key1', 'key2'], 
+@command_table.option('--key -y', default=['key1', 'key2'],
                       choices=['key1', 'key2'], help=L('Key to renew'))
-def renew_account_keys(args, unexpected): #pylint: disable=unused-argument
+def renew_account_keys(args):
     smc = _storage_client_factory()
     for key in args.get('key'):
         result = smc.storage_accounts.regenerate_key(
@@ -103,7 +110,7 @@ def renew_account_keys(args, unexpected): #pylint: disable=unused-argument
 @command_table.command('storage account usage')
 @command_table.description(
     L('Show the current count and limit of the storage accounts under the subscription.'))
-def show_account_usage(args, unexpected): #pylint: disable=unused-argument
+def show_account_usage(_):
     smc = _storage_client_factory()
     return next((x for x in smc.usage.list() if x.name.value == 'StorageAccounts'), None)
 
@@ -113,10 +120,10 @@ def show_account_usage(args, unexpected): #pylint: disable=unused-argument
 @command_table.option(**COMMON_PARAMETERS['account-name'])
 @command_table.option('--use-http', action='store_const', const='http', default='https',
                       help=L('use http as the default endpoint protocol'))
-def show_storage_connection_string(args, unexpected): #pylint: disable=unused-argument
+def show_storage_connection_string(args):
     smc = _storage_client_factory()
 
-    endpoint_protocol = args.get('use-http') 
+    endpoint_protocol = args.get('use-http')
     storage_account = args.get('account-name')
     keys = smc.storage_accounts.list_keys(args.get('resource_group_name'), storage_account)
 
@@ -138,9 +145,9 @@ public_access_types = {'none': None,
 @command_table.option(**COMMON_PARAMETERS['account-name'])
 @command_table.option(**COMMON_PARAMETERS['account_key'])
 @command_table.option(**COMMON_PARAMETERS['connection-string'])
-@command_table.option('--public-access -p', default=None, choices=public_access_types.keys(), 
+@command_table.option('--public-access -p', default=None, choices=public_access_types.keys(),
                       type=lambda x: public_access_types[x])
-def create_container(args, unexpected): #pylint: disable=unused-argument
+def create_container(args):
     bbs = _get_blob_service_client(args)
     public_access = args.get('public-access')
 
@@ -154,7 +161,7 @@ def create_container(args, unexpected): #pylint: disable=unused-argument
 @command_table.option(**COMMON_PARAMETERS['account_key'])
 @command_table.option(**COMMON_PARAMETERS['connection-string'])
 @command_table.option('--force -f', help=L('supress delete confirmation prompt'))
-def delete_container(args, unexpected): #pylint: disable=unused-argument
+def delete_container(args):
     bbs = _get_blob_service_client(args)
     container_name = args.get('container-name')
     prompt_for_delete = args.get('force') is None
@@ -173,7 +180,7 @@ def delete_container(args, unexpected): #pylint: disable=unused-argument
 @command_table.option(**COMMON_PARAMETERS['account_key'])
 @command_table.option(**COMMON_PARAMETERS['connection-string'])
 @command_table.option('--prefix -p', help=L('container name prefix to filter by'))
-def list_containers(args, unexpected): #pylint: disable=unused-argument
+def list_containers(args):
     bbs = _get_blob_service_client(args)
     results = bbs.list_containers(args.get('prefix'))
     return results
@@ -184,7 +191,7 @@ def list_containers(args, unexpected): #pylint: disable=unused-argument
 @command_table.option(**COMMON_PARAMETERS['account-name'])
 @command_table.option(**COMMON_PARAMETERS['account_key'])
 @command_table.option(**COMMON_PARAMETERS['connection-string'])
-def show_container(args, unexpected): #pylint: disable=unused-argument
+def show_container(args):
     bbs = _get_blob_service_client(args)
     result = bbs.get_container_properties(args.get('container-name'))
     return result
@@ -200,7 +207,8 @@ def show_container(args, unexpected): #pylint: disable=unused-argument
 @command_table.option(**COMMON_PARAMETERS['account-name'])
 @command_table.option(**COMMON_PARAMETERS['account_key'])
 @command_table.option(**COMMON_PARAMETERS['connection-string'])
-@command_table.option('--container.public-access -cpa', default=None, choices=public_access_types.keys(), 
+@command_table.option('--container.public-access -cpa', default=None,
+                      choices=public_access_types.keys(),
                       type=lambda x: public_access_types[x])
 @command_table.option('--content.type -cst')
 @command_table.option('--content.disposition -csd')
@@ -208,7 +216,7 @@ def show_container(args, unexpected): #pylint: disable=unused-argument
 @command_table.option('--content.language -csl')
 @command_table.option('--content.md5 -csm')
 @command_table.option('--content.cache-control -cscc')
-def create_block_blob(args, unexpected): #pylint: disable=unused-argument
+def create_block_blob(args):
     from azure.storage.blob import ContentSettings
     bbs = _get_blob_service_client(args)
     public_access = args.get('container.public-access')
@@ -234,7 +242,7 @@ def create_block_blob(args, unexpected): #pylint: disable=unused-argument
 @command_table.option(**COMMON_PARAMETERS['account_key'])
 @command_table.option(**COMMON_PARAMETERS['connection-string'])
 @command_table.option('--prefix -p', help=L('blob name prefix to filter by'))
-def list_blobs(args, unexpected): #pylint: disable=unused-argument
+def list_blobs(args):
     bbs = _get_blob_service_client(args)
     blobs = bbs.list_blobs(args.get('container-name'),
                            prefix=args.get('prefix'))
@@ -244,7 +252,7 @@ def list_blobs(args, unexpected): #pylint: disable=unused-argument
 @command_table.description(L('Delete a blob from a container.'))
 @command_table.option(**COMMON_PARAMETERS['container-name'])
 @command_table.option(**COMMON_PARAMETERS['blob-name'])
-def delete_blob(args, unexpected): #pylint: disable=unused-argument
+def delete_blob(args):
     bbs = _get_blob_service_client(args)
     return bbs.delete_blob(args.get('container-name'), args.get('blob-name'))
 
@@ -252,7 +260,7 @@ def delete_blob(args, unexpected): #pylint: disable=unused-argument
 @command_table.description(L('Show properties of the specified blob.'))
 @command_table.option(**COMMON_PARAMETERS['container-name'])
 @command_table.option(**COMMON_PARAMETERS['blob-name'])
-def show_blob(args, unexpected): #pylint: disable=unused-argument
+def show_blob(args):
     bbs = _get_blob_service_client(args)
     return bbs.get_blob_properties(args.get('container-name'), args.get('blob-name'))
 
@@ -261,7 +269,7 @@ def show_blob(args, unexpected): #pylint: disable=unused-argument
 @command_table.option(**COMMON_PARAMETERS['container-name'])
 @command_table.option(**COMMON_PARAMETERS['blob-name'])
 @command_table.option('--download-to -dt', help=L('the file path to download to'), required=True)
-def download_blob(args, unexpected): #pylint: disable=unused-argument
+def download_blob(args):
     bbs = _get_blob_service_client(args)
 
     # show dot indicator of download progress (one for every 10%)
@@ -280,7 +288,7 @@ def download_blob(args, unexpected): #pylint: disable=unused-argument
 @command_table.option(**COMMON_PARAMETERS['account-name'])
 @command_table.option(**COMMON_PARAMETERS['account_key'])
 @command_table.option(**COMMON_PARAMETERS['container-name'])
-def storage_file_create(args, unexpected): #pylint: disable=unused-argument
+def storage_file_create(args):
     fsc = _get_file_service_client(args)
     fsc.create_file_from_path(args.get('share-name'),
                               args.get('directory-name'),
@@ -292,16 +300,16 @@ def storage_file_create(args, unexpected): #pylint: disable=unused-argument
 def _get_blob_service_client(args):
     from azure.storage.blob import BlockBlobService
     return get_data_service_client(BlockBlobService,
-                                   args['storage-account'],
-                                   args['storage-account-key'],
-                                   args['connection-string'])
+                                   args.get('storage-account', None),
+                                   args.get('storage-account-key', None),
+                                   args.get('connection-string', None))
 
 def _get_file_service_client(args):
     from azure.storage.file import FileService
     return get_data_service_client(FileService,
-                                   args['storage-account'],
-                                   args['storage-account-key'],
-                                   args['connection-string'])
+                                   args.get('storage-account', None),
+                                   args.get('storage-account-key', None),
+                                   args.get('connection-string', None))
 
 def _update_progress(current, total):
     if total:

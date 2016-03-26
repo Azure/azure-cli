@@ -14,7 +14,7 @@ def get_command_table():
 @command_table.option('--tag-name -tn', help=L("the resource group's tag name"))
 @command_table.option('--tag-value -tv', help=L("the resource group's tag value"))
 @command_table.command('resource group list', description=L('List resource groups'))
-def list_groups(args, unexpected): #pylint: disable=unused-argument
+def list_groups(args):
     from azure.mgmt.resource.resources.models import ResourceGroup, ResourceGroupFilter
 
     rmc = get_mgmt_service_client(ResourceManagementClient, ResourceManagementClientConfiguration)
@@ -40,8 +40,8 @@ def list_groups(args, unexpected): #pylint: disable=unused-argument
                       required=True)
 @command_table.option('--api-version -o', help=L('the API version of the resource provider'))
 @command_table.option('--parent',
-                      help=L('the name of the parent resource (if needed), in <parent-type>/<parent-name> format'))
-def show_resource(args, unexpected): #pylint: disable=unused-argument
+                      help=L('the name of the parent resource (if needed), in <parent-type>/<parent-name> format')) # pylint: disable=line-too-long
+def show_resource(args):
     rmc = get_mgmt_service_client(ResourceManagementClient, ResourceManagementClientConfiguration)
 
     full_type = args.get('resource-type').split('/')

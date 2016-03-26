@@ -255,7 +255,7 @@ build_operation(command_table,
 @command_table.option('--address-space -a', metavar='ADDRESS SPACE', help=L('the VNet address-space in CIDR notation or multiple address-spaces, quoted and space-separated'), required=True)
 @command_table.option('--dns-servers -d', metavar='DNS SERVERS', help=L('the VNet DNS servers, quoted and space-separated'))
 @command_table.command('network vnet create')
-def create_update_vnet(args, unexpected): #pylint: disable=unused-argument
+def create_update_vnet(args):
     from azure.mgmt.network.models import AddressSpace, DhcpOptions, VirtualNetwork
 
     resource_group = args.get('resource-group')
@@ -279,7 +279,7 @@ def create_update_vnet(args, unexpected): #pylint: disable=unused-argument
 @command_table.option('--vnet -v', help=L('the name of the subnet vnet'), required=True)
 @command_table.option('--address-prefix -a', help=L('the the address prefix in CIDR format'), required=True)
 @command_table.command('network subnet create')
-def create_update_subnet(args, unexpected): #pylint: disable=unused-argument
+def create_update_subnet(args):
     from azure.mgmt.network.models import Subnet
 
     resource_group = args.get('resource-group')

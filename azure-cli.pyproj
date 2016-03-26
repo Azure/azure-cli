@@ -15,8 +15,7 @@
     <InterpreterId>{1dd9c42b-5980-42ce-a2c3-46d3bf0eede4}</InterpreterId>
     <InterpreterVersion>3.5</InterpreterVersion>
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
-    <CommandLineArguments>
-    </CommandLineArguments>
+    <CommandLineArguments>vm list-all --query "[].name"</CommandLineArguments>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'" />
   <PropertyGroup Condition="'$(Configuration)' == 'Release'" />
@@ -36,7 +35,6 @@
     <Compile Include="azure\cli\commands\_auto_command.py" />
     <Compile Include="azure\cli\commands\_command_creation.py" />
     <Compile Include="azure\cli\commands\__init__.py" />
-    <Compile Include="azure\cli\extensions\experimental.py" />
     <Compile Include="azure\cli\extensions\query.py">
       <SubType>Code</SubType>
     </Compile>
@@ -48,15 +46,11 @@
     <Compile Include="azure\cli\tests\command_specs\test_spec_vm.py" />
     <Compile Include="azure\cli\tests\command_specs\__init__.py" />
     <Compile Include="azure\cli\parser.py" />
-    <Compile Include="azure\cli\tests\test_argparse.py">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="azure\cli\tests\test_autocommand.py" />
     <Compile Include="azure\cli\tests\test_commands.py" />
     <Compile Include="azure\cli\tests\test_connection_verify.py" />
     <Compile Include="azure\cli\tests\test_output.py" />
     <Compile Include="azure\cli\_debug.py" />
-    <Compile Include="azure\cli\_event_dispatcher.py" />
     <Compile Include="azure\cli\_locale.py" />
     <Compile Include="azure\cli\tests\test_profile.py" />
     <Compile Include="azure\cli\_logging.py" />

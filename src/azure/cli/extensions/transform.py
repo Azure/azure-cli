@@ -1,8 +1,7 @@
 import re
 
 def register(event_dispatcher):
-    @event_dispatcher.event_handler(event_dispatcher.TRANSFORM_RESULT)
-    def resource_group_transform(_, event_data): # pylint: disable=unused-variable
+    def resource_group_transform(event_data):
         def parse_id(strid):
             parsed = {}
             parts = re.split('/', strid)
@@ -25,3 +24,4 @@ def register(event_dispatcher):
                     add_resource_group(obj[item_key])
 
         add_resource_group(event_data['result'])
+    event_dispatcher.register('TransformResult', resource_group_transform)
