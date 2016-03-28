@@ -96,10 +96,11 @@ The repo has a launch.json file that will launch the version of Python that is f
 ##Running Unit Tests:
 ####Command line
 #####Windows:
-  Provided your PYTHONPATH was set correcltly, from `<clone root>` run:
+  Provided your PYTHONPATH was set correctly, from `<clone root>\src` run:
   ```BatchFile
-  python -m unittest discover -s src\azure\cli\tests
+  python -m unittest discover -s azure\cli\tests [-q]
   ``` 
+Use -q to automatically fail any tests which do not have an expected result recorded. Omit -q to permit recording of expected results for tests which don't have them.
 ####VS Code
   Under construction...
   
