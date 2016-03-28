@@ -1,3 +1,4 @@
+from __future__ import print_function
 import pip
 from six.moves import input #pylint: disable=redefined-builtin
 
@@ -11,15 +12,15 @@ COMPONENT_PREFIX = 'azure-cli-'
 @description(L('List the installed components.'))
 def list_components(args, unexpected): #pylint: disable=unused-argument
     components = sorted(["%s (%s)" % (dist.key.replace(COMPONENT_PREFIX, ''), dist.version)
-                   for dist in pip.get_installed_distributions(local_only=False)
-                   if dist.key.startswith(COMPONENT_PREFIX)])
+                         for dist in pip.get_installed_distributions(local_only=False)
+                         if dist.key.startswith(COMPONENT_PREFIX)])
     print('\n'.join(components))
 
 def _install_or_update(component_name, version, link, private, upgrade=False):
     if not component_name:
         raise IncorrectUsageError(L('Specify a component name.'))
     found = bool([dist for dist in pip.get_installed_distributions(local_only=False)
-                  if dist.key==COMPONENT_PREFIX+component_name])
+                  if dist.key == COMPONENT_PREFIX+component_name])
     if found and not upgrade:
         raise RuntimeError("Component already installed.")
     else:
@@ -31,8 +32,10 @@ def _install_or_update(component_name, version, link, private, upgrade=False):
         if link:
             pkg_index_options += ['--find-links', link]
         if private:
-            pkg_index_options += ['--extra-index-url', 'http://40.112.211.51:8080/', '--trusted-host', '40.112.211.51']
-        pip.main(['install'] + options + [COMPONENT_PREFIX + component_name+version_no] + pkg_index_options)
+            pkg_index_options += ['--extra-index-url', 'http://40.112.211.51:8080/',
+                                  '--trusted-host', '40.112.211.51']
+        pip.main(['install'] + options + [COMPONENT_PREFIX + component_name+version_no]
+                 + pkg_index_options)
 
 @command('components install')
 @description(L('Install a component'))
@@ -44,7 +47,8 @@ file:// url that's a directory,then look for \
 archives in the directory listing."))
 @option('--private -p', L('Get from the project private PyPI server'))
 def install_component(args, unexpected): #pylint: disable=unused-argument
-    _install_or_update(args.get('name'), args.get('version'), args.get('link'), args.get('private'), upgrade=False)
+    _install_or_update(args.get('name'), args.get('version'), args.get('link'),
+                       args.get('private'), upgrade=False)
 
 @command('components update')
 @description(L('Update a component'))
@@ -65,10 +69,12 @@ file:// url that's a directory,then look for \
 archives in the directory listing."))
 @option('--private -p', L('Get from the project private PyPI server'))
 def update_all_components(args, unexpected): #pylint: disable=unused-argument
-    component_names = [dist.key.replace(COMPONENT_PREFIX, '') for dist in pip.get_installed_distributions(local_only=False)
-                   if dist.key.startswith(COMPONENT_PREFIX)]
+    component_names = [dist.key.replace(COMPONENT_PREFIX, '')
+                       for dist in pip.get_installed_distributions(local_only=False)
+                       if dist.key.startswith(COMPONENT_PREFIX)]
     for component_name in component_names:
-        _install_or_update(component_name, None, args.get('link'), args.get('private'), upgrade=True)
+        _install_or_update(component_name, None, args.get('link'),
+                           args.get('private'), upgrade=True)
 
 @command('components remove')
 @description(L('Remove a component'))
@@ -80,12 +86,13 @@ def remove_component(args, unexpected): #pylint: disable=unused-argument
     if not component_name:
         raise IncorrectUsageError(L('Specify a component name.'))
     found = bool([dist for dist in pip.get_installed_distributions(local_only=False)
-                  if dist.key==COMPONENT_PREFIX+component_name])
+                  if dist.key == COMPONENT_PREFIX+component_name])
     if found:
         if prompt_for_delete:
             ans = input("Really delete '{}'? [Y/n] ".format(component_name))
             if not ans or ans[0].lower() != 'y':
                 return
-        pip.main(['uninstall', '--quiet', '--isolated', '--yes', '--disable-pip-version-check', COMPONENT_PREFIX+component_name])
+        pip.main(['uninstall', '--quiet', '--isolated', '--yes',
+                  '--disable-pip-version-check', COMPONENT_PREFIX+component_name])
     else:
         raise RuntimeError(L("Component not installed."))

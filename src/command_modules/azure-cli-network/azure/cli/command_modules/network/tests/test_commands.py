@@ -59,7 +59,7 @@ class TestSequenceMeta(type):
         def gen_test(test_name, command, expected_result):
         
             def load_subscriptions_mock(self):
-                return [{"id": "00000000-0000-0000-0000-000000000000", "user": "example@example.com", "access_token": "access_token", "state": "Enabled", "name": "Example", "active": True}];
+                return [{"id": "00000000-0000-0000-0000-000000000000", "user": "example@example.com", "access_token": "access_token", "state": "Enabled", "name": "Example", "active": True}]
 
             @mock.patch('azure.cli._profile.Profile.load_subscriptions', load_subscriptions_mock)
             @my_vcr.use_cassette('%s.yaml'%test_name, filter_headers=FILTER_HEADERS)
