@@ -60,15 +60,16 @@ class TestSequenceMeta(type):
 
         def _record_expected_result(test_name, command):
             """ Runs the command and allows user to save the result as the expected result."""
-            print('*** RECORDING RESULT FOR {}'.format(test_name))
             io = StringIO()
             cli(command.split(), file=io)
             actual_result = io.getvalue()
-            print(actual_result)
+            header = '| RECORDED RESULT FOR {} |'.format(test_name) 
+            print('-' * len(header), file=sys.stderr)
+            print(header, file=sys.stderr)
+            print('-' * len(header) + '\n', file=sys.stderr)
+            print(actual_result, file=sys.stderr)
             ans = input('Save result for command: \'{}\'? [Y/n]: '.format(command))
-            if ans and ans.lower()[0] == 'n':
-                result = None
-            else:
+            if ans and ans.lower()[0] == 'y':
                 TEST_EXPECTED[test_name] = actual_result
                 with open(EXPECTED_RESULTS_PATH, 'w') as file:
                     json.dump(TEST_EXPECTED, file, indent=4, sort_keys=True)
@@ -120,7 +121,9 @@ class TestSequenceMeta(type):
             try:
                 expected_result = TEST_EXPECTED[test_path]
             except KeyError:
-                expected_result = _record_expected_result(test_path, command)
+                is_quiet = list(set(['-q', '--quiet']) & set(sys.argv))
+                expected_result = (_record_expected_result(test_path, command)
+                    if not is_quiet else None)
 
             dict[test_name] = gen_test(test_path, command, expected_result)
         return type.__new__(mcs, name, bases, dict)
