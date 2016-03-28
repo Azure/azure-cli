@@ -13,7 +13,7 @@ class Configuration(object): # pylint: disable=too-few-public-methods
     as output formats, available commands etc.
     """
     def __init__(self, argv=None):
-        self.argv = argv or sys.argv
+        self.argv = argv or sys.argv[1:]
         self.log = logging.getLogger('az')
         self.output_format = 'list'
 
