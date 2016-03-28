@@ -12,14 +12,14 @@ COMPONENT_PREFIX = 'azure-cli-'
 @description(L('List the installed components.'))
 def list_components(args, unexpected): #pylint: disable=unused-argument
     components = sorted(["%s (%s)" % (dist.key.replace(COMPONENT_PREFIX, ''), dist.version)
-                         for dist in pip.get_installed_distributions(local_only=False)
+                         for dist in pip.get_installed_distributions(local_only=True)
                          if dist.key.startswith(COMPONENT_PREFIX)])
     print('\n'.join(components))
 
 def _install_or_update(component_name, version, link, private, upgrade=False):
     if not component_name:
         raise IncorrectUsageError(L('Specify a component name.'))
-    found = bool([dist for dist in pip.get_installed_distributions(local_only=False)
+    found = bool([dist for dist in pip.get_installed_distributions(local_only=True)
                   if dist.key == COMPONENT_PREFIX+component_name])
     if found and not upgrade:
         raise RuntimeError("Component already installed.")
@@ -70,7 +70,7 @@ archives in the directory listing."))
 @option('--private -p', L('Get from the project private PyPI server'))
 def update_all_components(args, unexpected): #pylint: disable=unused-argument
     component_names = [dist.key.replace(COMPONENT_PREFIX, '')
-                       for dist in pip.get_installed_distributions(local_only=False)
+                       for dist in pip.get_installed_distributions(local_only=True)
                        if dist.key.startswith(COMPONENT_PREFIX)]
     for component_name in component_names:
         _install_or_update(component_name, None, args.get('link'),
@@ -85,7 +85,7 @@ def remove_component(args, unexpected): #pylint: disable=unused-argument
     prompt_for_delete = args.get('force') is None
     if not component_name:
         raise IncorrectUsageError(L('Specify a component name.'))
-    found = bool([dist for dist in pip.get_installed_distributions(local_only=False)
+    found = bool([dist for dist in pip.get_installed_distributions(local_only=True)
                   if dist.key == COMPONENT_PREFIX+component_name])
     if found:
         if prompt_for_delete:
