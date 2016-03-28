@@ -1,6 +1,6 @@
 import os
 import unittest
-from azure.cli.utils.test_commands import CommandTestGenerator
+from azure.cli.utils.command_test_util import CommandTestGenerator
 from command_specs import TEST_SPECS
 
 class TestCommands(unittest.TestCase):

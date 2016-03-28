@@ -60,8 +60,8 @@ DEPENDENCIES = [
     'six',
     'jmespath',
     'pip',
-    # 'azure-cli-components==0.0.3.dev0',
-    # 'azure-cli-login==0.0.3.dev0',
+    'azure-cli-components',
+    'azure-cli-login',
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
