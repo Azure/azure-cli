@@ -23,12 +23,7 @@ print("Running tests on each one.")
 failed_modules = []
 skipped_modules = []
 
-# It runs through all the modules
-# If pylint fails on a module, we modify success to False and carry on
-# so we show all errors in all modules.
 for (name, fullpath) in all_command_modules:
-    # print(name)
-    # path_to_module = os.path.join(fullpath, 'azure', 'cli', 'command_modules')
     path_to_module = os.path.join(fullpath, 'azure', 'cli', 'command_modules', name.replace(COMMAND_MODULE_PREFIX, ''), 'tests')
     if not os.path.isdir(path_to_module):
         skipped_modules.append(name)

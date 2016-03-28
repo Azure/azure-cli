@@ -22,9 +22,6 @@ print("Installing each one.")
 
 failed_modules = []
 
-# It runs through all the modules
-# If pylint fails on a module, we modify success to False and carry on
-# so we show all errors in all modules.
 for (name, fullpath) in all_command_modules:
     path_to_module = os.path.join(fullpath)
     try:
