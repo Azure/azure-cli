@@ -1,4 +1,4 @@
-spec = [
+TEST_SPECS = [
     {
         'test_name': 'resource_group_list',
         'command': 'resource group list --output json',
@@ -1783,6 +1783,3 @@ spec = [
 """
     },
 ]
-
-from . import TEST_SPECS
-TEST_SPECS.append((locals()['__name__'], spec))

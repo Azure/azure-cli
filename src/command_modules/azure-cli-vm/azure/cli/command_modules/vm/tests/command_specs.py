@@ -1,4 +1,4 @@
-spec = [
+TEST_SPECS = [
     {
         'test_name': 'vm_usage_list_westus',
         'command': 'vm usage list --location westus --output json',
@@ -43,6 +43,3 @@ spec = [
 """
     },
 ]
-
-from . import TEST_SPECS
-TEST_SPECS.append((locals()['__name__'], spec))
