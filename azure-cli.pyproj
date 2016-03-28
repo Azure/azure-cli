@@ -17,6 +17,8 @@
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
     <CommandLineArguments>
     </CommandLineArguments>
+    <InterpreterArguments>
+    </InterpreterArguments>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'" />
   <PropertyGroup Condition="'$(Configuration)' == 'Release'" />
@@ -42,9 +44,9 @@
     <Compile Include="azure\cli\extensions\transform.py" />
     <Compile Include="azure\cli\extensions\__init__.py" />
     <Compile Include="azure\cli\main.py" />
-    <Compile Include="azure\cli\tests\command_specs\test_spec_storage_account.py" />
     <Compile Include="azure\cli\tests\command_specs\test_spec_network.py" />
     <Compile Include="azure\cli\tests\command_specs\test_spec_resource.py" />
+    <Compile Include="azure\cli\tests\command_specs\test_spec_storage.py" />
     <Compile Include="azure\cli\tests\command_specs\test_spec_vm.py" />
     <Compile Include="azure\cli\tests\command_specs\__init__.py" />
     <Compile Include="azure\cli\tests\test_argparse.py">
@@ -80,6 +82,7 @@
     <Folder Include="azure\cli\extensions\" />
     <Folder Include="azure\cli\tests\" />
     <Folder Include="azure\cli\tests\command_specs\" />
+    <Folder Include="azure\cli\tests\recordings\" />
   </ItemGroup>
   <ItemGroup>
     <Interpreter Include="..\env\">
@@ -93,6 +96,17 @@
       <PathEnvironmentVariable>PYTHONPATH</PathEnvironmentVariable>
       <Architecture>X86</Architecture>
     </Interpreter>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="azure\cli\tests\recordings\command_specs.test_spec_network.network_usage_list.yaml" />
+    <Content Include="azure\cli\tests\recordings\command_specs.test_spec_resource.resource_group_list.yaml" />
+    <Content Include="azure\cli\tests\recordings\command_specs.test_spec_storage.storage_account_check_name.yaml" />
+    <Content Include="azure\cli\tests\recordings\command_specs.test_spec_storage.storage_account_list.yaml" />
+    <Content Include="azure\cli\tests\recordings\command_specs.test_spec_storage.storage_account_list_keys.yaml" />
+    <Content Include="azure\cli\tests\recordings\command_specs.test_spec_storage.storage_account_usage.yaml" />
+    <Content Include="azure\cli\tests\recordings\command_specs.test_spec_vm.vm_usage_list_westus.yaml" />
+    <Content Include="azure\cli\tests\recordings\expected_results.res" />
+    <Content Include="azure\cli\tests\recordings\README.rst" />
   </ItemGroup>
   <Import Project="$(PtvsTargetsFile)" Condition="Exists($(PtvsTargetsFile))" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets" Condition="!Exists($(PtvsTargetsFile))" />

@@ -1,4 +1,5 @@
 ﻿from __future__ import print_function
+from datetime import datetime, timezone
 from os import environ
 from sys import stderr
 from six.moves import input #pylint: disable=redefined-builtin
@@ -128,7 +129,7 @@ def create_account(args, unexpected): #pylint: disable=unused-argument
                                     .format(storage_account_type_string)))
     params = StorageAccountCreateParameters(args.get('location'),
                                             account_type,
-                                            _resolve_tags(args))
+                                            _parse_dict(args, 'tags'))
 
     return smc.storage_accounts.create(resource_group, account_name, params)
 
@@ -154,7 +155,7 @@ def set_account(args, unexpected): #pylint: disable=unused-argument
     except KeyError:
         raise IncorrectUsageError(L('type must be: {}'
                                     .format(storage_account_type_string)))
-    params = StorageAccountUpdateParameters(_resolve_tags(args), account_type, domain)
+    params = StorageAccountUpdateParameters(_parse_dict(args, 'tags'), account_type, domain)
 
     return smc.storage_accounts.update(resource_group, account_name, params)
 
@@ -173,6 +174,9 @@ public_access_string = ' | '.join(public_access_types)
 @option('--account-key -k <accountKey>', L('the storage account key'))
 @option('--connection-string -t <connectionString>', L('the storage connection string'))
 @option('--public-access -p <accessType>', L('Values: {}'.format(public_access_string)))
+@option('--metadata -m <metaData>', L('dict of key=value pairs (separated by ;)'))
+@option('--fail-on-exist', L('operation fails if container already exists'))
+@option('--timeout <seconds>')
 def create_container(args, unexpected): #pylint: disable=unused-argument
     bbs = _get_blob_service_client(args)
     try:
@@ -183,8 +187,15 @@ def create_container(args, unexpected): #pylint: disable=unused-argument
         raise IncorrectUsageError(L('public-access must be: {}'
                                     .format(public_access_string)))
 
-    if not bbs.create_container(args.get('container-name'), public_access=public_access):
-        raise RuntimeError(L('Container creation failed.'))
+    metadata = _parse_dict(args, 'metadata', allow_singles=False)
+
+    if not bbs.create_container(
+        container_name=args.get('container-name'),
+        public_access=public_access,
+        metadata=metadata,
+        fail_on_exist=True if args.get('fail-on-exist') else False,
+        timeout=_parse_int(args, 'timeout')):
+            raise RuntimeError(L('Container creation failed.'))
 
 @command('storage container delete')
 @description(L('Delete a storage container.'))
@@ -193,18 +204,30 @@ def create_container(args, unexpected): #pylint: disable=unused-argument
 @option('--account-key -k <accountKey>', L('the storage account key'))
 @option('--connection-string -t <connectionString>', L('the storage connection string'))
 @option('--force -f', L('supress delete confirmation prompt'))
+@option('--fail-not-exist', L('operation fails if container does not exist'))
+@option('--lease-id <id>', L('delete only if lease is ID active and matches'))
+@option('--if-modified-since <dateTime>', L('delete only if container modified since ' + \
+    'supplied UTC datetime'))
+@option('--in-unmodified-since <dateTime>', L('delete only if container has not been modified' + \
+    'since supplied UTC datetime'))
+@option('--timeout <seconds>')
 def delete_container(args, unexpected): #pylint: disable=unused-argument
     bbs = _get_blob_service_client(args)
     container_name = args.get('container-name')
-    prompt_for_delete = args.get('force') is None
 
-    if prompt_for_delete:
+    if args.get('force') is None:
         ans = input('Really delete {}? [Y/n] '.format(container_name))
         if not ans or ans[0].lower() != 'y':
             return 0
 
-    if not bbs.delete_container(container_name):
-        raise RuntimeError(L('Container deletion failed.'))
+    if not bbs.delete_container(
+        container_name=container_name,
+        fail_not_exist=True if args.get('fail-not-exist') else False,
+        lease_id=args.get('lease-id'),
+        if_unmodified_since=_parse_datetime(args, 'if-unmodified-since'),
+        if_modified_since=_parse_datetime(args, 'if-modified-since'),
+        timeout=_parse_int(args, 'timeout')):
+            raise RuntimeError(L('Container deletion failed.'))
 
 @command('storage container exists')
 @description(L('Check if a storage container exists.'))
@@ -212,9 +235,14 @@ def delete_container(args, unexpected): #pylint: disable=unused-argument
 @option('--account-name -n <accountName>', L('the storage account name'))
 @option('--account-key -k <accountKey>', L('the storage account key'))
 @option('--connection-string -t <connectionString>', L('the storage connection string'))
+@option('--snapshot <datetime>', L('UTC datetime value which specifies a snapshot'))
+@option('--timeout <seconds>')
 def exists_container(args, unexpected): #pylint: disable=unused-argument
     bbs = _get_blob_service_client(args)
-    return str(bbs.exists(container_name=args.get('container-name')))
+    return str(bbs.exists(
+        container_name=args.get('container-name'),
+        snapshot=_parse_datetime(args, 'snapshot'),
+        timeout=_parse_int(args, 'timeout')))
 
 @command('storage container list')
 @description(L('List storage containers.'))
@@ -222,10 +250,18 @@ def exists_container(args, unexpected): #pylint: disable=unused-argument
 @option('--account-key -k <accountKey>', L('the storage account key'))
 @option('--connection-string -t <connectionString>', L('the storage connection string'))
 @option('--prefix -p <prefix>', L('container name prefix to filter by'))
+@option('--num-results <num>')
+@option('--include-metadata')
+@option('--marker <marker>', L('continuation token for enumerating additional results'))
+@option('--timeout <seconds>')
 def list_containers(args, unexpected): #pylint: disable=unused-argument
     bbs = _get_blob_service_client(args)
-    results = bbs.list_containers(args.get('prefix'))
-    return results
+    return bbs.list_containers(
+        prefix=args.get('prefix'),
+        num_results=_parse_int(args, 'num-results'),
+        include_metadata=True if args.get('include-metadata') else False,
+        marker=args.get('marker'),
+        timeout=_parse_int(args, 'timeout'))
 
 @command('storage container show')
 @description(L('Show details of a storage container'))
@@ -233,9 +269,14 @@ def list_containers(args, unexpected): #pylint: disable=unused-argument
 @option('--account-name -n <accountName>', L('the storage account name'))
 @option('--account-key -k <accountKey>', L('the storage account key'))
 @option('--connection-string -t <connectionString>', L('the storage connection string'))
+@option('--lease-id <id>', L('delete only if lease is ID active and matches'))
+@option('--timeout <seconds>')
 def show_container(args, unexpected): #pylint: disable=unused-argument
     bbs = _get_blob_service_client(args)
-    return bbs.get_container_properties(args.get('container-name'))
+    return bbs.get_container_properties(
+        container_name=args.get('container-name'),
+        lease_id=args.get('lease-id'),
+        timeout=_parse_int(args, 'timeout'))
 
 lease_duration_values = {'min':15, 'max':60, 'infinite':-1}
 lease_duration_values_string = 'Between {} and {} seconds. ({} for infinite)'.format(
@@ -603,13 +644,35 @@ def _get_file_service_client(args):
                                    _resolve_storage_account_key(args),
                                    _resolve_connection_string(args))
 
-def _resolve_tags(args):
-    tag_string = args.get('tags')
-    kv_tags = [x for x in tag_string.split(';') if '=' in x]     # key-value tags
-    s_tags = [x for x in tag_string.split(';') if '=' not in x]  # single value tags
-    tags = dict(x.split('=') for x in kv_tags)
-    tags.update(dict((x, '') for x in s_tags))
-    return tags
+DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S'
+def _parse_datetime(args, key):
+    # TODO This should handle timezone
+    datestring = args.get(key)
+    if not datestring:
+        return None
+    time = datetime.strptime(datestring, DATETIME_FORMAT)
+    return time 
+
+def _parse_dict(args, key, allow_singles=True):
+    """ Parses dictionaries passed in as argument strings in key=value;key=value format.
+    If 'allow_singles' is set to False, single tags will be ignored."""
+    string_val = args.get(key)
+    if not string_val:
+        return None
+    kv_list = [x for x in string_val.split(';') if '=' in x]     # key-value pairs
+    result = dict(x.split('=') for x in kv_list)    
+    if allow_singles:
+        s_list = [x for x in string_val.split(';') if '=' not in x]  # single values
+        result.update(dict((x, '') for x in s_list))
+    return result
+
+def _parse_int(args, key):
+    try:
+        str_val = args.get('timeout')
+        int_val = int(str_val) if str_val else None
+    except ValueError:
+        int_val = None
+    return int_val
 
 # TODO: Remove once these parameters are supported first-class by @option (task #116054675)
 def _resolve_storage_account(args):
