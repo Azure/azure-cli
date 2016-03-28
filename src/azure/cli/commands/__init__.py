@@ -8,6 +8,7 @@ COMMAND_MODULES = [
     'network',
     'resource',
     'storage',
+    'taskhelp',
     'vm',
 ]
 
