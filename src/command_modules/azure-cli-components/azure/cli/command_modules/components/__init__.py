@@ -89,25 +89,3 @@ def remove_component(args, unexpected): #pylint: disable=unused-argument
         pip.main(['uninstall', '--quiet', '--isolated', '--yes', '--disable-pip-version-check', COMPONENT_PREFIX+component_name])
     else:
         raise RuntimeError(L("Component not installed."))
-
-# @command('components check')
-# @description(L('Check a component for an update'))
-# @option('--name -n <name>')
-# def check_component(args, unexpected): #pylint: disable=unused-argument
-
-#     component_name = args.get('name')
-#     if not component_name:
-#         # Show all
-#         pip.main(['list', '--pre', '--outdated', '--isolated',
-#         '--trusted-host', '40.112.211.51',
-#         '--extra-index-url', 'http://40.112.211.51:8080/'])
-#     else:
-#         try:
-#             __import__('azure.cli.command_modules.'+component_name+'.__main__')
-#             # Check for updates
-#             pip.main(['list', '--pre', '--outdated', '--isolated',
-#             '--trusted-host', '40.112.211.51',
-#             '--find-links', 'http://40.112.211.51:8080/simple/azure-cli-'+component_name])
-#         except ImportError:
-#             raise RuntimeError("Component not installed.")
-
