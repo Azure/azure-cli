@@ -93,7 +93,7 @@ setup(
     package_data={'azure.cli': ['locale/**/*.txt']},
     install_requires=DEPENDENCIES,
     extras_require={
-        ":python_version<'3.4'": [
+        "python_version < '3.4'": [
             'enum34',
         ],
     },
