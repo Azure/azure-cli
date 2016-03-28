@@ -1,6 +1,6 @@
 from __future__ import print_function
-from ..commands import command, description
-from .._locale import L
+from azure.cli.commands import command, description
+from azure.cli._locale import L
 
 @command('taskhelp deploy-arm-template')
 @description(L('How to deploy and ARM template using Azure CLI.'))
