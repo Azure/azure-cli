@@ -69,6 +69,7 @@ class TestSequenceMeta(type):
             print('-' * len(header) + '\n', file=sys.stderr)
             print(actual_result, file=sys.stderr)
             ans = input('Save result for command: \'{}\'? [Y/n]: '.format(command))
+            result = None
             if ans and ans.lower()[0] == 'y':
                 TEST_EXPECTED[test_name] = actual_result
                 with open(EXPECTED_RESULTS_PATH, 'w') as file:
@@ -121,9 +122,9 @@ class TestSequenceMeta(type):
             try:
                 expected_result = TEST_EXPECTED[test_path]
             except KeyError:
-                is_quiet = list(set(['-q', '--quiet']) & set(sys.argv))
+                is_buffered = list(set(['--buffer']) & set(sys.argv))
                 expected_result = (_record_expected_result(test_path, command)
-                    if not is_quiet else None)
+                    if not is_buffered else None)
 
             dict[test_name] = gen_test(test_path, command, expected_result)
         return type.__new__(mcs, name, bases, dict)
