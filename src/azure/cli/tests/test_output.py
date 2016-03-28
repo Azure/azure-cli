@@ -149,50 +149,5 @@ Myarray :
         lo._get_formatted_key('locationIdState')
         self.assertEqual(lo._formatted_keys_cache, {'locationIdState': 'Location Id State'})
 
-    def test_out_todict_none(self):
-        input = None
-        actual = OutputProducer.todict(input)
-        expected = None
-        self.assertEqual(actual, expected)
-
-    def test_out_todict_dict_empty(self):
-        input = {}
-        actual = OutputProducer.todict(input)
-        expected = {}
-        self.assertEqual(actual, expected)
-
-    def test_out_todict_dict(self):
-        input = {'a': 'b'}
-        actual = OutputProducer.todict(input)
-        expected = {'a': 'b'}
-        self.assertEqual(actual, expected)
-
-    def test_out_todict_list(self):
-        input = [{'a': 'b'}]
-        actual = OutputProducer.todict(input)
-        expected = [{'a': 'b'}]
-        self.assertEqual(actual, expected)
-
-    def test_out_todict_list(self):
-        input = [{'a': 'b'}]
-        actual = OutputProducer.todict(input)
-        expected = [{'a': 'b'}]
-        self.assertEqual(actual, expected)
-
-    def test_out_todict_obj(self):
-        MyObject = namedtuple('MyObject', 'a b')
-        input = MyObject('x', 'y')
-        actual = OutputProducer.todict(input)
-        expected = {'a': 'x', 'b': 'y'}
-        self.assertEqual(actual, expected)
-
-    def test_out_todict_dict_with_obj(self):
-        MyObject = namedtuple('MyObject', 'a b')
-        mo = MyObject('x', 'y')
-        input = {'a': mo}
-        actual = OutputProducer.todict(input)
-        expected = {'a': {'a': 'x', 'b': 'y'}}
-        self.assertEqual(actual, expected)
-
 if __name__ == '__main__':
     unittest.main()

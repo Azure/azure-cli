@@ -95,23 +95,24 @@ class Application(object):
         self._event_handlers[name].append(handler)
 
     KEYS_CAMELCASE_PATTERN = re.compile('(?!^)_([a-zA-Z])')
-    def todict(self, obj): #pylint: disable=too-many-return-statements
+    @classmethod
+    def todict(cls, obj): #pylint: disable=too-many-return-statements
 
         def to_camelcase(s):
-            return re.sub(Application.KEYS_CAMELCASE_PATTERN, lambda x: x.group(1).upper(), s)
+            return re.sub(cls.KEYS_CAMELCASE_PATTERN, lambda x: x.group(1).upper(), s)
 
         if isinstance(obj, dict):
-            return {k: self.todict(v) for (k, v) in obj.items()}
+            return {k: cls.todict(v) for (k, v) in obj.items()}
         elif isinstance(obj, list):
-            return [self.todict(a) for a in obj]
+            return [cls.todict(a) for a in obj]
         elif isinstance(obj, Enum):
             return obj.value
         elif isinstance(obj, datetime):
             return obj.isoformat()
         elif hasattr(obj, '_asdict'):
-            return self.todict(obj._asdict())
+            return cls.todict(obj._asdict())
         elif hasattr(obj, '__dict__'):
-            return dict([(to_camelcase(k), self.todict(v))
+            return dict([(to_camelcase(k), cls.todict(v))
                          for k, v in obj.__dict__.items()
                          if not callable(v) and not k.startswith('_')])
         else:
