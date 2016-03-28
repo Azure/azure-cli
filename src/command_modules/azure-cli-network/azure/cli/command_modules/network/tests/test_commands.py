@@ -71,11 +71,9 @@ class TestSequenceMeta(type):
                 self.assertEqual(actual_result, expected_result)
             return test
             
-        for module_name, test_specs in TEST_SPECS:
-            for test_spec_item in test_specs:
-                test_name = 'test_%s' % test_spec_item['test_name']
-                full_test_name = '%s.%s'%(module_name, test_name)
-                dict[test_name] = gen_test(full_test_name, test_spec_item['command'], test_spec_item['expected_result'])
+        for test_spec_item in TEST_SPECS:
+            test_name = 'test_%s' % test_spec_item['test_name']
+            dict[test_name] = gen_test(test_name, test_spec_item['command'], test_spec_item['expected_result'])
         return type.__new__(mcs, name, bases, dict)
 
 @add_metaclass(TestSequenceMeta)
