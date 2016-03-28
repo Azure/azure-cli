@@ -13,7 +13,7 @@ class AzCliCommandParser(argparse.ArgumentParser):
     def __init__(self, **kwargs):
         super(AzCliCommandParser, self).__init__(**kwargs)
         self.subparsers = {}
-        self.parents = kwargs.get('parents', None)
+        self.parents = kwargs.get('parents', [])
 
     def load_command_table(self, command_table):
         """Load a command table into our parser.
