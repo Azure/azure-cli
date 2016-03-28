@@ -6,7 +6,8 @@ python:
   - "3.5-dev" # 3.5 development branch
 install:
   - pip install -r requirements.txt
-  - python scripts/install_command_modules.py
+  - pip install -e . # Install the CLI as a package
+  - python scripts/install_command_modules.py # Install the command modules as packages
 script: 
   - export PYTHONPATH=$PATHONPATH:./src
   - python -m azure.cli
