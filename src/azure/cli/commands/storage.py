@@ -208,7 +208,7 @@ def create_container(args, unexpected): #pylint: disable=unused-argument
 @option('--lease-id <id>', L('delete only if lease is ID active and matches'))
 @option('--if-modified-since <dateTime>', L('delete only if container modified since ' + \
     'supplied UTC datetime'))
-@option('--in-unmodified-since <dateTime>', L('delete only if container has not been modified' + \
+@option('--in-unmodified-since <dateTime>', L('delete only if container has not been modified ' + \
     'since supplied UTC datetime'))
 @option('--timeout <seconds>')
 def delete_container(args, unexpected): #pylint: disable=unused-argument
@@ -293,6 +293,11 @@ lease_duration_values_string = 'Between {} and {} seconds. ({} for infinite)'.fo
 @option('--account-name -n <accountName>', L('the storage account name'))
 @option('--account-key -k <accountKey>', L('the storage account key'))
 @option('--connection-string -t <connectionString>', L('the storage connection string'))
+@option('--if-modified-since <dateTime>', L('delete only if container modified since ' + \
+    'supplied UTC datetime'))
+@option('--in-unmodified-since <dateTime>', L('delete only if container has not been modified ' + \
+    'since supplied UTC datetime'))
+@option('--timeout <seconds>')
 def acquire_container_lease(args, unexpected): #pylint: disable=unused-argument
     bbs = _get_blob_service_client(args)
     try:
@@ -300,9 +305,13 @@ def acquire_container_lease(args, unexpected): #pylint: disable=unused-argument
     except ValueError:
         raise IncorrectUsageError('lease-duration must be: {}'.format(lease_duration_values_string))
 
-    return bbs.acquire_container_lease(container_name=args.get('container-name'),
-                                       lease_duration=lease_duration,
-                                       proposed_lease_id=args.get('proposed-lease-id'))
+    return bbs.acquire_container_lease(
+        container_name=args.get('container-name'),
+        lease_duration=lease_duration,
+        proposed_lease_id=args.get('proposed-lease-id'),
+        if_modified_since=_parse_int(args, 'if-modified-since'),
+        if_unmodified_since=_parse_int(args, 'if-unmodified-since',
+        timeout=True if args.get('timeout') else False))
 
 @command('storage container lease renew')
 @description(L('Renew a lock on a container for delete operations.'))
@@ -311,10 +320,19 @@ def acquire_container_lease(args, unexpected): #pylint: disable=unused-argument
 @option('--account-name -n <accountName>', L('the storage account name'))
 @option('--account-key -k <accountKey>', L('the storage account key'))
 @option('--connection-string -t <connectionString>', L('the storage connection string'))
+@option('--if-modified-since <dateTime>', L('delete only if container modified since ' + \
+    'supplied UTC datetime'))
+@option('--in-unmodified-since <dateTime>', L('delete only if container has not been modified ' + \
+    'since supplied UTC datetime'))
+@option('--timeout <seconds>')
 def renew_container_lease(args, unexpected): #pylint: disable=unused-argument
     bbs = _get_blob_service_client(args)
-    return bbs.renew_container_lease(container_name=args.get('container-name'),
-                                     lease_id=args.get('lease-id'))
+    return bbs.renew_container_lease(
+        container_name=args.get('container-name'),
+        lease_id=args.get('lease-id'),
+        if_modified_since=_parse_int(args, 'if-modified-since'),
+        if_unmodified_since=_parse_int(args, 'if-unmodified-since',
+        timeout=True if args.get('timeout') else False))
 
 @command('storage container lease release')
 @description(L('Release a lock on a container for delete operations.'))
@@ -323,10 +341,19 @@ def renew_container_lease(args, unexpected): #pylint: disable=unused-argument
 @option('--account-name -n <accountName>', L('the storage account name'))
 @option('--account-key -k <accountKey>', L('the storage account key'))
 @option('--connection-string -t <connectionString>', L('the storage connection string'))
+@option('--if-modified-since <dateTime>', L('delete only if container modified since ' + \
+    'supplied UTC datetime'))
+@option('--in-unmodified-since <dateTime>', L('delete only if container has not been modified ' + \
+    'since supplied UTC datetime'))
+@option('--timeout <seconds>')
 def release_container_lease(args, unexpected): #pylint: disable=unused-argument
     bbs = _get_blob_service_client(args)
-    bbs.release_container_lease(container_name=args.get('container-name'),
-                                lease_id=args.get('lease-id'))
+    bbs.release_container_lease(
+        container_name=args.get('container-name'),
+        lease_id=args.get('lease-id'),
+        if_modified_since=_parse_int(args, 'if-modified-since'),
+        if_unmodified_since=_parse_int(args, 'if-unmodified-since',
+        timeout=True if args.get('timeout') else False))
 
 @command('storage container lease change')
 @description(L('Change the lease id for a container lease.'))
@@ -336,11 +363,20 @@ def release_container_lease(args, unexpected): #pylint: disable=unused-argument
 @option('--account-name -n <accountName>', L('the storage account name'))
 @option('--account-key -k <accountKey>', L('the storage account key'))
 @option('--connection-string -t <connectionString>', L('the storage connection string'))
+@option('--if-modified-since <dateTime>', L('delete only if container modified since ' + \
+    'supplied UTC datetime'))
+@option('--in-unmodified-since <dateTime>', L('delete only if container has not been modified ' + \
+    'since supplied UTC datetime'))
+@option('--timeout <seconds>')
 def change_container_lease(args, unexpected): #pylint: disable=unused-argument
     bbs = _get_blob_service_client(args)
-    return bbs.change_container_lease(container_name=args.get('container-name'),
-                                      lease_id=args.get('lease-id'),
-                                      proposed_lease_id=args.get('proposed-lease-id'))
+    return bbs.change_container_lease(
+        container_name=args.get('container-name'),
+        lease_id=args.get('lease-id'),
+        proposed_lease_id=args.get('proposed-lease-id'),
+        if_modified_since=_parse_int(args, 'if-modified-since'),
+        if_unmodified_since=_parse_int(args, 'if-unmodified-since',
+        timeout=True if args.get('timeout') else False))
 
 @command('storage container lease break')
 @description(L('Break a lock on a container for delete operations.'))
@@ -350,6 +386,11 @@ def change_container_lease(args, unexpected): #pylint: disable=unused-argument
 @option('--account-name -n <accountName>', L('the storage account name'))
 @option('--account-key -k <accountKey>', L('the storage account key'))
 @option('--connection-string -t <connectionString>', L('the storage connection string'))
+@option('--if-modified-since <dateTime>', L('delete only if container modified since ' + \
+    'supplied UTC datetime'))
+@option('--in-unmodified-since <dateTime>', L('delete only if container has not been modified ' + \
+    'since supplied UTC datetime'))
+@option('--timeout <seconds>')
 def break_container_lease(args, unexpected): #pylint: disable=unused-argument
     bbs = _get_blob_service_client(args)
     try:
@@ -357,8 +398,12 @@ def break_container_lease(args, unexpected): #pylint: disable=unused-argument
     except ValueError:
         raise ValueError('lease-break-period must be: {}'.format(lease_duration_values_string))
 
-    bbs.break_container_lease(container_name=args.get('container-name'),
-                              lease_break_period=lease_break_period)
+    bbs.break_container_lease(
+        container_name=args.get('container-name'),
+        lease_break_period=lease_break_period,
+        if_modified_since=_parse_int(args, 'if-modified-since'),
+        if_unmodified_since=_parse_int(args, 'if-unmodified-since',
+        timeout=True if args.get('timeout') else False))
 
 # BLOB COMMANDS
 # TODO: Evaluate for removing hand-authored commands in favor of auto-commands (task ##115068835)
@@ -392,9 +437,9 @@ def create_block_blob(args, unexpected): #pylint: disable=unused-argument
     bbs.create_container(args.get('container-name'), public_access=public_access)
 
     return bbs.create_blob_from_path(
-        args.get('container-name'),
-        args.get('blob-name'),
-        args.get('upload-from'),
+        container_name=args.get('container-name'),
+        blob_name=args.get('blob-name'),
+        file_path=args.get('upload-from'),
         progress_callback=_update_progress,
         content_settings=ContentSettings(content_type=args.get('content.type'),
                                          content_disposition=args.get('content.disposition'),
@@ -411,10 +456,23 @@ def create_block_blob(args, unexpected): #pylint: disable=unused-argument
 @option('--account-key -k <accountKey>', L('the storage account key'))
 @option('--connection-string -t <connectionString>', L('the storage connection string'))
 @option('--prefix -p <prefix>', L('blob name prefix to filter by'))
+
+@option('--num-results <num>')
+@option('--include <stuff>', L('specifies one or more additional datasets to include '\
+    + 'in the response. Unsupported this release'))
+@option('--delimiter <value>', L('Unsupported this release'))
+@option('--marker <marker>', L('continuation token for enumerating additional results'))
+@option('--timeout <seconds>')
 def list_blobs(args, unexpected): #pylint: disable=unused-argument
     bbs = _get_blob_service_client(args)
-    blobs = bbs.list_blobs(args.get('container-name'),
-                           prefix=args.get('prefix'))
+    blobs = bbs.list_blobs(
+        container_name=args.get('container-name'),
+        prefix=args.get('prefix'),
+        num_results=_parse_int(args, 'num-results'),
+        include=None,
+        delimiter=None,
+        marker=args.get('marker'),
+        timeout=_parse_int(args, 'timeout'))
     return list(blobs.items)
 
 @command('storage blob delete')
@@ -435,10 +493,15 @@ def delete_blob(args, unexpected): #pylint: disable=unused-argument
 @option('--account-name -n <accountName>', L('the storage account name'))
 @option('--account-key -k <accountKey>', L('the storage account key'))
 @option('--connection-string -t <connectionString>', L('the storage connection string'))
+@option('--snapshot <datetime>', L('UTC datetime value which specifies a snapshot'))
+@option('--timeout <seconds>')
 def exists_blob(args, unexpected): #pylint: disable=unused-argument
     bbs = _get_blob_service_client(args)
-    return str(bbs.exists(container_name=args.get('container-name'),
-                          blob_name=args.get('blob-name')))
+    return str(bbs.exists(
+        container_name=args.get('container-name'),
+        blob_name=args.get('blob-name')),
+        snapshot=_parse_datetime(args, 'snapshot'),
+        timeout=_parse_int(args, 'timeout'))
 
 @command('storage blob show')
 @description(L('Show properties of the specified blob.'))
@@ -464,8 +527,6 @@ def download_blob(args, unexpected): #pylint: disable=unused-argument
     container_name = args.get('container-name')
     blob_name = args.get('blob-name')
     download_to = args.get('download-to')
-
-    # show dot indicator of download progress (one for every 10%)
     bbs.get_blob_to_path(container_name,
                          blob_name,
                          download_to,
