@@ -37,7 +37,10 @@ class Test_argparse(unittest.TestCase):
 
     def test_args(self):
         p = ArgumentParser('test')
-        p.add_command(lambda a, b: (a, b), 'n1', args=[('--arg -a', '', False, None), ('-b <v>', '', False, None)])
+        p.add_command(lambda a, b: (a, b),
+                      'n1',
+                      accepts_unexpected_args=True,
+                      args=[('--arg -a', '', False, None), ('-b <v>', '', False, None)])
 
         cmd_result = p.execute('n1 -a x'.split())
         res, other = cmd_result.result
@@ -77,7 +80,10 @@ class Test_argparse(unittest.TestCase):
 
     def test_unexpected_args(self):
         p = ArgumentParser('test')
-        p.add_command(lambda a, b: (a, b), 'n1', args=[('-a', '', False, None)])
+        p.add_command(lambda a, b: (a, b),
+                      'n1',
+                      accepts_unexpected_args=True,
+                      args=[('-a', '', False, None)])
 
         cmd_result = p.execute('n1 -b=2'.split())
         res, other = cmd_result.result
@@ -97,9 +103,10 @@ class Test_argparse(unittest.TestCase):
 
     def test_required_args(self):
         p = ArgumentParser('test')
-        p.add_command(lambda a, b: (a, b), 
-                      'n1', args=[('--arg -a', '', True, None), 
-                                  ('-b <v>', '', False, None)])
+        p.add_command(lambda a, b: (a, b),
+                      'n1',
+                      accepts_unexpected_args=True,
+                      args=[('--arg -a', '', True, None), ('-b <v>', '', False, None)])
 
         cmd_result = p.execute('n1 -a x'.split())
         res, other = cmd_result.result
@@ -109,12 +116,15 @@ class Test_argparse(unittest.TestCase):
         io = StringIO()
         cmd_result = p.execute('n1 -b x'.split(), out=io)
         self.assertIsNone(cmd_result.result)
-        self.assertTrue(io.getvalue().startswith("Missing required argument 'arg'"))
+        self.assertTrue(io.getvalue().startswith("Missing required argument: --arg/-a"))
         io.close()
 
     def test_specify_output_format(self):
         p = ArgumentParser('test')
-        p.add_command(lambda a, b: (a, b), 'n1', args=[('--arg -a', '', True, None), ('-b <v>', '', False, None)])
+        p.add_command(lambda a, b: (a, b),
+                      'n1',
+                      accepts_unexpected_args=True,
+                      args=[('--arg -a', '', True, None), ('-b <v>', '', False, None)])
 
         cmd_result = p.execute('n1 -a x'.split())
         self.assertEqual(cmd_result.output_format, None)
@@ -170,7 +180,7 @@ class Test_argparse(unittest.TestCase):
                                out=io)
         candidates = util.normalize_newlines(io.getvalue())
         io.close()
-        self.assertEqual(candidates, 'n1\n')
+        self.assertEqual(True, candidates.endswith('n1\n'))
 
         #if --arg is used, then both '-a' and "--arg" should not be in the 
         #candidate list 
