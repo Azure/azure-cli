@@ -58,40 +58,42 @@ class TestSequenceMeta(type):
 
     def __new__(mcs, name, bases, dict):
 
-        def _record_expected_result(test_name, command):
-            """ Runs the command and allows user to save the result as the expected result."""
-            io = StringIO()
-            cli(command.split(), file=io)
-            actual_result = io.getvalue()
-            header = '| RECORDED RESULT FOR {} |'.format(test_name) 
-            print('-' * len(header), file=sys.stderr)
-            print(header, file=sys.stderr)
-            print('-' * len(header) + '\n', file=sys.stderr)
-            print(actual_result, file=sys.stderr)
-            ans = input('Save result for command: \'{}\'? [Y/n]: '.format(command))
-            result = None
-            if ans and ans.lower()[0] == 'y':
-                TEST_EXPECTED[test_name] = actual_result
-                with open(EXPECTED_RESULTS_PATH, 'w') as file:
-                    json.dump(TEST_EXPECTED, file, indent=4, sort_keys=True)
-                result = actual_result
-            io.close()
-            return result
-
         def gen_test(test_name, command, expected_result):
 
             if not expected_result:
-                def null_test(self):
-                    self.fail('No expected result provided for {}.'.format(test_name))
-                return null_test
+                # buffer flag signals automatically fail
+                is_buffered = list(set(['--buffer']) & set(sys.argv))
+                if is_buffered:
+                    def null_test(self):
+                        self.fail('No expected result provided for {}.'.format(test_name))
+                    return null_test
 
             def load_subscriptions_mock(self):
                 return [{"id": "00000000-0000-0000-0000-000000000000", "user": "example@example.com", "access_token": "access_token", "state": "Enabled", "name": "Example", "active": True}];
 
-            def _test_impl(self):
+            def _test_impl(self, expected_result):
+                """ Test implementation, augmented with prompted recording of expected result
+                if not provided. """
                 io = StringIO()
                 cli(command.split(), file=io)
                 actual_result = io.getvalue()
+                if not expected_result:
+                    header = '| RECORDED RESULT FOR {} |'.format(test_name) 
+                    print('-' * len(header), file=sys.stderr)
+                    print(header, file=sys.stderr)
+                    print('-' * len(header) + '\n', file=sys.stderr)
+                    print(actual_result, file=sys.stderr)
+                    ans = input('Save result for command: \'{}\'? [Y/n]: '.format(command))
+                    result = None
+                    if ans and ans.lower()[0] == 'y':
+                        # update and save the expected_results.res file
+                        TEST_EXPECTED[test_name] = actual_result
+                        with open(EXPECTED_RESULTS_PATH, 'w') as file:
+                            json.dump(TEST_EXPECTED, file, indent=4, sort_keys=True)
+                        expected_result = actual_result
+                    else:
+                        # recorded result was wrong. Discard the result and the .yaml cassette
+                        expected_result = None
                 io.close()
                 self.assertEqual(actual_result, expected_result)
 
@@ -101,13 +103,13 @@ class TestSequenceMeta(type):
                 @mock.patch('azure.cli._profile.Profile.load_subscriptions', load_subscriptions_mock)
                 @my_vcr.use_cassette(cassette_path, filter_headers=FILTER_HEADERS)
                 def test(self):
-                    _test_impl(self)
+                    _test_impl(self, expected_result)
                 return test
             else:
                 # do not patch subscription if you need to record the intial cassette
                 @my_vcr.use_cassette(cassette_path, filter_headers=FILTER_HEADERS)
                 def test(self):
-                    _test_impl(self)
+                    _test_impl(self, expected_result)
                 return test
         
         try:
@@ -122,9 +124,8 @@ class TestSequenceMeta(type):
             try:
                 expected_result = TEST_EXPECTED[test_path]
             except KeyError:
-                is_buffered = list(set(['--buffer']) & set(sys.argv))
-                expected_result = (_record_expected_result(test_path, command)
-                    if not is_buffered else None)
+                # option to record during the test
+                expected_result = None
 
             dict[test_name] = gen_test(test_path, command, expected_result)
         return type.__new__(mcs, name, bases, dict)
