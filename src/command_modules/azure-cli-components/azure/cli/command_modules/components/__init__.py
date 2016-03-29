@@ -6,6 +6,8 @@ from azure.cli.commands import command, description, option
 from azure.cli._locale import L
 from azure.cli._argparse import IncorrectUsageError
 
+from update_checker import check_for_component_update, UpdateCheckError
+
 CLI_PACKAGE_NAME = 'azure-cli'
 COMPONENT_PREFIX = 'azure-cli-'
 
@@ -100,8 +102,15 @@ def install_component(args, unexpected): #pylint: disable=unused-argument
     found = bool([dist for dist in pip.get_installed_distributions(local_only=True)
                   if dist.key == COMPONENT_PREFIX+component_name])
     if found:
-        # TODO Check for updates to the component here
-        print("Checking component "+component_name+" for updates...")
+        try:
+            result = check_for_component_update(component_name, private)
+            if result['update_available']:
+                print("Update available.")
+            else:
+                print("Component is up-to-date.")
+            print("Current version: {}. Latest version: {}.".format(result['current_version'], result['latest_version']))
+        except UpdateCheckError as err:
+            raise RuntimeError(L("Unable to check for updates. {}".format(err)))
     else:
         raise RuntimeError(L("Component not installed."))
 
