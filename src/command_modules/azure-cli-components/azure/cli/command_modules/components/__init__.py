@@ -6,6 +6,7 @@ from azure.cli.commands import command, description, option
 from azure.cli._locale import L
 from azure.cli._argparse import IncorrectUsageError
 
+CLI_PACKAGE_NAME = 'azure-cli'
 COMPONENT_PREFIX = 'azure-cli-'
 
 @command('components list')
@@ -60,6 +61,17 @@ archives in the directory listing."))
 @option('--private -p', L('Get from the project private PyPI server'))
 def update_component(args, unexpected): #pylint: disable=unused-argument
     _install_or_update(args.get('name'), None, args.get('link'), args.get('private'), upgrade=True)
+
+@command('components update self')
+@description(L('Update the CLI'))
+@option('--private -p', L('Get from the project private PyPI server'))
+def update_self(args, unexpected): #pylint: disable=unused-argument
+    pkg_index_options = []
+    if args.get('private'):
+        pkg_index_options += ['--extra-index-url', 'http://40.112.211.51:8080/',
+                                '--trusted-host', '40.112.211.51']
+    pip.main(['install', '--quiet', '--isolated', '--disable-pip-version-check', '--upgrade']
+              + [CLI_PACKAGE_NAME] + pkg_index_options)
 
 @command('components update all')
 @description(L('Update all components'))
