@@ -3,6 +3,7 @@ __all__ = [
     'test_spec_resource',
     'test_spec_vm',
     'test_spec_storage',
+    'test_spec_account'
 ]
 
 # Declare test definitions in the definition portion of each test file
