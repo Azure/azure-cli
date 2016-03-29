@@ -88,6 +88,23 @@ def update_all_components(args, unexpected): #pylint: disable=unused-argument
         _install_or_update(component_name, None, args.get('link'),
                            args.get('private'), upgrade=True)
 
+@command('components check')
+@description(L('Check a component for an update'))
+@option('--name -n <name>', L('Name of component to remove'), required=True)
+@option('--private -p', L('Look for updates from the project private PyPI server'))
+def install_component(args, unexpected): #pylint: disable=unused-argument
+    component_name = args.get('name')
+    private = args.get('private')
+    if not component_name:
+        raise IncorrectUsageError(L('Specify a component name.'))
+    found = bool([dist for dist in pip.get_installed_distributions(local_only=True)
+                  if dist.key == COMPONENT_PREFIX+component_name])
+    if found:
+        # TODO Check for updates to the component here
+        print("Checking component "+component_name+" for updates...")
+    else:
+        raise RuntimeError(L("Component not installed."))
+
 @command('components remove')
 @description(L('Remove a component'))
 @option('--name -n <name>', L('Name of component to remove'), required=True)
