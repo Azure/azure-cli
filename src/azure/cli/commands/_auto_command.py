@@ -79,7 +79,7 @@ def _option_description(operation, arg):
     return ' '.join(l.split(':')[-1] for l in inspect.getdoc(operation).splitlines()
                     if l.startswith(':param') and arg + ':' in l)
 
-def build_operation(command_table, command_name, member_path, client_type, operations):
+def build_operation(command_name, member_path, client_type, operations, command_table):
     for operation, return_type_name in operations:
         opname = operation.__name__.replace('_', '-')
         func = _make_func(client_type, member_path, return_type_name, operation)
@@ -100,7 +100,7 @@ def build_operation(command_table, command_name, member_path, client_type, opera
                 'required': True,
                 'help': _option_description(operation, arg)
             }).copy() # We need to make a copy to allow consumers to mutate the value
-                      # retreived from the common parameters without polluting future
+                      # retrieved from the common parameters without polluting future
                       # use...
             common_param['dest'] = common_param.get('dest', arg)
             options.append(common_param)

@@ -15,10 +15,8 @@ from .._locale import L
 
 command_table = CommandTable()
 
-def get_command_table(): # pylint:disable=duplicate-code
-    return command_table
-
-
+@command_table.command('login')
+@command_table.description(L('log in to an Azure subscription using Active Directory Organization Id')) # pylint: disable=line-too-long
 @command_table.option('--username -u',
                       help=L('organization Id or service principal. Microsoft Account is not yet supported.')) # pylint: disable=line-too-long
 @command_table.option('--password -p',
@@ -26,8 +24,6 @@ def get_command_table(): # pylint:disable=duplicate-code
 @command_table.option('--service-principal',
                       help=L('the credential represents a service principal.'))
 @command_table.option('--tenant -t', help=L('the tenant associated with the service principal.'))
-@command_table.command('login',
-                       description=L('log in to an Azure subscription using Active Directory Organization Id')) # pylint: disable=line-too-long
 def login(args):
     interactive = False
 

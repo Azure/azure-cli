@@ -63,12 +63,12 @@ class CommandTable(defaultdict):
             return func
         return wrapper
 
-def _get_command_table(command_name):
-    module = __import__('azure.cli.commands.' + command_name)
-    for part in ('cli.commands.' + command_name).split('.'):
+def _get_command_table(module_name):
+    module = __import__('azure.cli.commands.' + module_name)
+    for part in ('cli.commands.' + module_name).split('.'):
         module = getattr(module, part)
 
-    return module.get_command_table()
+    return module.command_table
 
 def get_command_table(module_name=None):
     '''Loads command table(s)
