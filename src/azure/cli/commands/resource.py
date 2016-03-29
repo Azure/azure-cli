@@ -50,6 +50,7 @@ def show_resource(args, unexpected): #pylint: disable=unused-argument
             L('API version is required and could not be resolved for resource {}'
               .format(full_type)))
 
+    # TODO: Remove custom header when Python SDK fixed. (#116536429)
     results = rmc.resources.get(
         resource_group_name=args.get('resource-group'),
         resource_name=args.get('name'),
