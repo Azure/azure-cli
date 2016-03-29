@@ -21,7 +21,7 @@ vcr_log = logging.getLogger('vcr')
 vcr_log.setLevel(logging.ERROR)
 
 VCR_CASSETTE_DIR = os.path.join(os.path.dirname(__file__), 'recordings')
-EXPECTED_RESULTS_PATH = VCR_CASSETTE_DIR + '\\expected_results.res'
+EXPECTED_RESULTS_PATH = os.path.join(VCR_CASSETTE_DIR, 'expected_results.res')
 
 FILTER_HEADERS = [
     'authorization',
