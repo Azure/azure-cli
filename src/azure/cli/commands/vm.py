@@ -24,7 +24,7 @@ build_operation("vm availabilityset",
                     AutoCommandDefinition(AvailabilitySetsOperations.delete, None),
                     AutoCommandDefinition(AvailabilitySetsOperations.get, 'AvailabilitySet'),
                     AutoCommandDefinition(AvailabilitySetsOperations.list, '[AvailabilitySet]'),
-                    AutoCommandDefinition(AvailabilitySetsOperations.list_available_sizes, '[VirtualMachineSize]')
+                    AutoCommandDefinition(AvailabilitySetsOperations.list_available_sizes, '[VirtualMachineSize]', 'list-sizes')
                 ])
 
 
@@ -80,7 +80,7 @@ build_operation("vm",
                     AutoCommandDefinition(VirtualMachinesOperations.get, 'VirtualMachine'),
                     AutoCommandDefinition(VirtualMachinesOperations.list, '[VirtualMachine]'),
                     AutoCommandDefinition(VirtualMachinesOperations.list_all, '[VirtualMachine]'),
-                    AutoCommandDefinition(VirtualMachinesOperations.list_available_sizes, '[VirtualMachineSize]'),
+                    AutoCommandDefinition(VirtualMachinesOperations.list_available_sizes, '[VirtualMachineSize]', 'list-sizes'),
                     AutoCommandDefinition(VirtualMachinesOperations.power_off, LongRunningOperation(L('Powering off VM'), L('VM powered off'))),
                     AutoCommandDefinition(VirtualMachinesOperations.restart, LongRunningOperation(L('Restarting VM'), L('VM Restarted'))),
                     AutoCommandDefinition(VirtualMachinesOperations.start, LongRunningOperation(L('Starting VM'), L('VM Started'))),
