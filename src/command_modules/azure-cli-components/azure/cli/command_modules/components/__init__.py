@@ -6,7 +6,7 @@ from azure.cli.commands import command, description, option
 from azure.cli._locale import L
 from azure.cli._argparse import IncorrectUsageError
 
-from update_checker import check_for_component_update, UpdateCheckError
+from azure.cli.utils.update_checker import check_for_component_update, UpdateCheckError
 
 CLI_PACKAGE_NAME = 'azure-cli'
 COMPONENT_PREFIX = 'azure-cli-'

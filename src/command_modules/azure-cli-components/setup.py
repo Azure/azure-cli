@@ -39,7 +39,6 @@ CLASSIFIERS = [
 DEPENDENCIES = [
     'azure-cli',
     'pip',
-    'requests',
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:

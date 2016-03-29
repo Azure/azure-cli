@@ -12,7 +12,7 @@ def _get_latest_version_private(pkg_name):
     """Check for an update to the component from project private PyPI server"""
     response = requests.get('http://40.112.211.51:8080/simple/'+pkg_name)
     if response.status_code != 200:
-        raise UpdateCheckError('PyPI returned status code {}.'.format(response.status_code))
+        raise UpdateCheckError('Private PyPI returned status code {}.'.format(response.status_code))
     # Parse the package links from the response
     pattern_package_links = re.compile(r'href=[\'"]?([^#\'" >]+)')
     package_links = re.findall(pattern_package_links, response.text)
