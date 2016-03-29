@@ -6,4 +6,4 @@ APIs.
 __import__('pkg_resources').declare_namespace(__name__)
 
 __author__ = "Microsoft Corporation <python@microsoft.com>"
-__version__ = "0.0.3.dev0"
+__version__ = "0.0.3"
