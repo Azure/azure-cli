@@ -44,13 +44,19 @@ def format_list(obj):
     lo = ListOutput()
     return lo.dump(obj_list)
 
+def format_tsv(obj):
+    obj_list = obj if isinstance(obj, list) else [obj]
+    tsvo = TsvOutput()
+    return tsvo.dump(obj_list)
+
 class OutputProducer(object): #pylint: disable=too-few-public-methods
 
     format_dict = {
         'json': format_json,
         'table': format_table,
         'text': format_text,
-        'list': format_list
+        'list': format_list,
+        'tsv': format_tsv,
     }
 
     KEYS_CAMELCASE_PATTERN = re.compile('(?!^)_([a-zA-Z])')
@@ -230,3 +236,32 @@ class TextOutput(object):
         io.close()
         return result
 
+class TsvOutput(object):
+
+    def _dump_obj(self, data, stream):
+        if isinstance(data, list):
+            stream.write(str(len(data)))
+        elif isinstance(data, dict):
+            pass
+        else:
+            stream.write(data)
+
+    def _dump_row(self, data, stream):
+        if isinstance(data, dict):
+            separator = ''
+            for _, value in data.items():
+                stream.write(separator)
+                self._dump_obj(value, stream)
+                separator = '\t'
+        else:
+            self._dump_obj(data, stream)
+
+    def dump(self, data):
+        io = StringIO()
+        for item in data:
+            self._dump_row(item, io)
+            io.write('\n')
+
+        result = io.getvalue()
+        io.close()
+        return result
