@@ -60,14 +60,6 @@ class TestSequenceMeta(type):
 
         def gen_test(test_name, command, expected_result):
 
-            if not expected_result:
-                # buffer flag signals automatically fail
-                is_buffered = list(set(['--buffer']) & set(sys.argv))
-                if is_buffered:
-                    def null_test(self):
-                        self.fail('No expected result provided for {}.'.format(test_name))
-                    return null_test
-
             def load_subscriptions_mock(self):
                 return [{"id": "00000000-0000-0000-0000-000000000000", "user": "example@example.com", "access_token": "access_token", "state": "Enabled", "name": "Example", "active": True}];
 
@@ -97,21 +89,43 @@ class TestSequenceMeta(type):
                 io.close()
                 self.assertEqual(actual_result, expected_result)
 
-            cassette_path = '{}.yaml'.format(test_name)
-            if os.path.isfile(cassette_path):
-                # if cassette present, apply subscription patch
+            cassette_path = os.path.join(VCR_CASSETTE_DIR, '{}.yaml'.format(test_name))
+            cassette_found = os.path.isfile(cassette_path)
+
+            # if no yaml, any expected result is invalid and must be rerecorded
+            expected_result = None if not cassette_found else expected_result
+            
+            # if no expected result, yaml file should be discarded and rerecorded
+            if cassette_found and not expected_result:
+                os.remove(cassette_path)
+                cassette_found = os.path.isfile(cassette_path)
+
+            if cassette_found and expected_result:
+                # playback mode - can be fully automated
                 @mock.patch('azure.cli._profile.Profile.load_subscriptions', load_subscriptions_mock)
                 @my_vcr.use_cassette(cassette_path, filter_headers=FILTER_HEADERS)
                 def test(self):
                     _test_impl(self, expected_result)
                 return test
-            else:
-                # do not patch subscription if you need to record the intial cassette
+            elif not cassette_found and not expected_result:
+                # recording needed
+                # if buffer specified and recording needed, automatically fail
+                is_buffered = list(set(['--buffer']) & set(sys.argv))
+                if is_buffered:
+                    def null_test(self):
+                        self.fail('No recorded result provided for {}.'.format(test_name))
+                    return null_test                
+
                 @my_vcr.use_cassette(cassette_path, filter_headers=FILTER_HEADERS)
                 def test(self):
                     _test_impl(self, expected_result)
                 return test
-        
+            else:
+                # yaml file failed to delete or bug exists
+                raise RuntimeError('Unable to generate test for {} due to inconsistent data. ' \
+                    + 'Please manually remove the associated .yaml cassette and/or the test\'s ' \
+                    + 'entry in expected_results.res and try again.')
+
         try:
             with open(EXPECTED_RESULTS_PATH, 'r') as file:
                 TEST_EXPECTED = json.loads(file.read())
