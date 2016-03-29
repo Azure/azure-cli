@@ -71,15 +71,17 @@ from setuptools.command.install import install
 import pip
 def _post_install(dir):
     from subprocess import check_call
+    # Upgrade/update will install if it doesn't exist.
+    # We do this so these components are updated when the user updates the CLI.
     if INSTALL_FROM_PUBLIC:
-        pip.main(['install', 'azure-cli-components', '--disable-pip-version-check'])
-        check_call(['az', 'components', 'install', '-n', 'login'])
+        pip.main(['install', '--upgrade', 'azure-cli-components', '--disable-pip-version-check'])
+        check_call(['az', 'components', 'update', '-n', 'login'])
     else:
         # use private PyPI server.
-        pip.main(['install', 'azure-cli-components', '--extra-index-url',
+        pip.main(['install', '--upgrade', 'azure-cli-components', '--extra-index-url',
                 'http://40.112.211.51:8080/', '--trusted-host', '40.112.211.51',
                 '--disable-pip-version-check'])
-        check_call(['az', 'components', 'install', '-n', 'login', '-p'])
+        check_call(['az', 'components', 'update', '-n', 'login', '-p'])
 
 class OnInstall(install):
     def run(self):
