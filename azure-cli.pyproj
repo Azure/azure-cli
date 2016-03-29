@@ -15,8 +15,7 @@
     <InterpreterId>{1dd9c42b-5980-42ce-a2c3-46d3bf0eede4}</InterpreterId>
     <InterpreterVersion>3.5</InterpreterVersion>
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
-    <CommandLineArguments>
-    </CommandLineArguments>
+    <CommandLineArguments>storage container list-containers</CommandLineArguments>
     <InterpreterArguments>
     </InterpreterArguments>
   </PropertyGroup>
@@ -47,7 +46,7 @@
     <Compile Include="azure\cli\main.py" />
     <Compile Include="azure\cli\tests\command_specs\test_spec_network.py" />
     <Compile Include="azure\cli\tests\command_specs\test_spec_resource.py" />
-    <Compile Include="azure\cli\tests\command_specs\test_spec_storage.py" />
+    <Compile Include="azure\cli\tests\command_specs\test_spec_storage_account.py" />
     <Compile Include="azure\cli\tests\command_specs\test_spec_vm.py" />
     <Compile Include="azure\cli\tests\command_specs\__init__.py" />
     <Compile Include="azure\cli\tests\test_argparse.py">
@@ -103,14 +102,6 @@
     </Interpreter>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="azure\cli\tests\recordings\command_specs.test_spec_network.network_usage_list.yaml" />
-    <Content Include="azure\cli\tests\recordings\command_specs.test_spec_resource.resource_group_list.yaml" />
-    <Content Include="azure\cli\tests\recordings\command_specs.test_spec_storage.storage_account_check_name.yaml" />
-    <Content Include="azure\cli\tests\recordings\command_specs.test_spec_storage.storage_account_list.yaml" />
-    <Content Include="azure\cli\tests\recordings\command_specs.test_spec_storage.storage_account_list_keys.yaml" />
-    <Content Include="azure\cli\tests\recordings\command_specs.test_spec_storage.storage_account_usage.yaml" />
-    <Content Include="azure\cli\tests\recordings\command_specs.test_spec_vm.vm_usage_list_westus.yaml" />
-    <Content Include="azure\cli\tests\recordings\expected_results.res" />
     <Content Include="azure\cli\tests\recordings\README.rst" />
   </ItemGroup>
   <Import Project="$(PtvsTargetsFile)" Condition="Exists($(PtvsTargetsFile))" />
