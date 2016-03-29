@@ -12,7 +12,7 @@ from azure.mgmt.storage.operations import StorageAccountsOperations
 from .._argparse import IncorrectUsageError
 from ..commands import command, description, option
 from ._command_creation import get_mgmt_service_client, get_data_service_client
-from ..commands._auto_command import build_operation
+from ..commands._auto_command import build_operation, AutoCommandDefinition
 from .._locale import L
 
 
@@ -25,10 +25,13 @@ build_operation('storage account',
                 'storage_accounts',
                 _storage_client_factory,
                 [
-                    (StorageAccountsOperations.check_name_availability, 'Result'),
-                    (StorageAccountsOperations.delete, None),
-                    (StorageAccountsOperations.get_properties, 'StorageAccount'),
-                    (StorageAccountsOperations.list_keys, '[StorageAccountKeys]')
+                    AutoCommandDefinition(
+                        StorageAccountsOperations.check_name_availability, 'Result', 'check-name'),
+                    AutoCommandDefinition(StorageAccountsOperations.delete, None),
+                    AutoCommandDefinition(
+                        StorageAccountsOperations.get_properties, 'StorageAccount', 'show'),
+                    AutoCommandDefinition(
+                        StorageAccountsOperations.list_keys, '[StorageAccountKeys]')
                 ])
 
 @command('storage account list')

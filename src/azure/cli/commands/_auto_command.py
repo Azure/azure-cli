@@ -13,7 +13,12 @@ GLOBALPARAMALIASES = {
     'resource_group_name': '--resourcegroup --rg <resourcegroupname>'
 }
 
+class AutoCommandDefinition(object): #pylint: disable=too-few-public-methods
 
+    def __init__(self, operation, return_type, command_alias=None):
+        self.operation = operation
+        self.return_type = return_type
+        self.opname = command_alias if command_alias else operation.__name__.replace('_', '-')
 
 class LongRunningOperation(object): #pylint: disable=too-few-public-methods
 
@@ -96,21 +101,20 @@ def _option_description(operation, arg):
 
 def build_operation(command_name, member_path, client_type, operations, #pylint: disable=dangerous-default-value
                     paramaliases=GLOBALPARAMALIASES):
-    for operation, return_type_name in operations:
-        opname = operation.__name__.replace('_', '-')
-        func = _make_func(client_type, member_path, return_type_name, operation)
-        func = _decorate_command(' '.join([command_name, opname]), func)
+    for op in operations:
+        func = _make_func(client_type, member_path, op.return_type, op.operation)
+        func = _decorate_command(' '.join([command_name, op.opname]), func)
 
         args = []
         try:
             # only supported in python3 - falling back to argspec if not available
-            sig = inspect.signature(operation)
+            sig = inspect.signature(op.operation)
             args = sig.parameters
         except AttributeError:
-            sig = inspect.getargspec(operation) #pylint: disable=deprecated-method
+            sig = inspect.getargspec(op.operation) #pylint: disable=deprecated-method
             args = sig.args
 
         for arg in [a for a in args if not a in EXCLUDED_PARAMS]:
             spec = paramaliases.get(arg, '--%s <%s>' % (arg, arg))
-            func = _decorate_option(spec, _option_description(operation, arg),
+            func = _decorate_option(spec, _option_description(op.operation, arg),
                                     target=arg, func=func)
