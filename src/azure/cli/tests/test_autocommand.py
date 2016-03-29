@@ -1,7 +1,7 @@
 import logging
 import unittest
 
-from azure.cli.commands._auto_command import (build_operation)
+from azure.cli.commands._auto_command import build_operation
 
 class Test_autocommand(unittest.TestCase):
     @classmethod
