@@ -62,6 +62,7 @@ DEPENDENCIES = [
     'jmespath',
     'pip',
     'pyyaml',
+    'requests',
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
