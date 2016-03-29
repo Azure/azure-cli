@@ -1,5 +1,5 @@
 ﻿from __future__ import print_function
-from datetime import datetime, timezone
+from datetime import datetime
 from os import environ
 from sys import stderr
 from six.moves import input #pylint: disable=redefined-builtin
@@ -190,12 +190,12 @@ def create_container(args, unexpected): #pylint: disable=unused-argument
     metadata = _parse_dict(args, 'metadata', allow_singles=False)
 
     if not bbs.create_container(
-        container_name=args.get('container-name'),
-        public_access=public_access,
-        metadata=metadata,
-        fail_on_exist=True if args.get('fail-on-exist') else False,
-        timeout=_parse_int(args, 'timeout')):
-            raise RuntimeError(L('Container creation failed.'))
+            container_name=args.get('container-name'),
+            public_access=public_access,
+            metadata=metadata,
+            fail_on_exist=True if args.get('fail-on-exist') else False,
+            timeout=_parse_int(args, 'timeout')):
+        raise RuntimeError(L('Container creation failed.'))
 
 @command('storage container delete')
 @description(L('Delete a storage container.'))
@@ -221,13 +221,13 @@ def delete_container(args, unexpected): #pylint: disable=unused-argument
             return 0
 
     if not bbs.delete_container(
-        container_name=container_name,
-        fail_not_exist=True if args.get('fail-not-exist') else False,
-        lease_id=args.get('lease-id'),
-        if_unmodified_since=_parse_datetime(args, 'if-unmodified-since'),
-        if_modified_since=_parse_datetime(args, 'if-modified-since'),
-        timeout=_parse_int(args, 'timeout')):
-            raise RuntimeError(L('Container deletion failed.'))
+            container_name=container_name,
+            fail_not_exist=True if args.get('fail-not-exist') else False,
+            lease_id=args.get('lease-id'),
+            if_unmodified_since=_parse_datetime(args, 'if-unmodified-since'),
+            if_modified_since=_parse_datetime(args, 'if-modified-since'),
+            timeout=_parse_int(args, 'timeout')):
+        raise RuntimeError(L('Container deletion failed.'))
 
 @command('storage container exists')
 @description(L('Check if a storage container exists.'))
@@ -310,8 +310,8 @@ def acquire_container_lease(args, unexpected): #pylint: disable=unused-argument
         lease_duration=lease_duration,
         proposed_lease_id=args.get('proposed-lease-id'),
         if_modified_since=_parse_int(args, 'if-modified-since'),
-        if_unmodified_since=_parse_int(args, 'if-unmodified-since',
-        timeout=True if args.get('timeout') else False))
+        if_unmodified_since=_parse_int(args, 'if-unmodified-since'),
+        timeout=True if args.get('timeout') else False)
 
 @command('storage container lease renew')
 @description(L('Renew a lock on a container for delete operations.'))
@@ -331,8 +331,8 @@ def renew_container_lease(args, unexpected): #pylint: disable=unused-argument
         container_name=args.get('container-name'),
         lease_id=args.get('lease-id'),
         if_modified_since=_parse_int(args, 'if-modified-since'),
-        if_unmodified_since=_parse_int(args, 'if-unmodified-since',
-        timeout=True if args.get('timeout') else False))
+        if_unmodified_since=_parse_int(args, 'if-unmodified-since'),
+        timeout=True if args.get('timeout') else False)
 
 @command('storage container lease release')
 @description(L('Release a lock on a container for delete operations.'))
@@ -352,8 +352,8 @@ def release_container_lease(args, unexpected): #pylint: disable=unused-argument
         container_name=args.get('container-name'),
         lease_id=args.get('lease-id'),
         if_modified_since=_parse_int(args, 'if-modified-since'),
-        if_unmodified_since=_parse_int(args, 'if-unmodified-since',
-        timeout=True if args.get('timeout') else False))
+        if_unmodified_since=_parse_int(args, 'if-unmodified-since'),
+        timeout=True if args.get('timeout') else False)
 
 @command('storage container lease change')
 @description(L('Change the lease id for a container lease.'))
@@ -375,8 +375,8 @@ def change_container_lease(args, unexpected): #pylint: disable=unused-argument
         lease_id=args.get('lease-id'),
         proposed_lease_id=args.get('proposed-lease-id'),
         if_modified_since=_parse_int(args, 'if-modified-since'),
-        if_unmodified_since=_parse_int(args, 'if-unmodified-since',
-        timeout=True if args.get('timeout') else False))
+        if_unmodified_since=_parse_int(args, 'if-unmodified-since'),
+        timeout=True if args.get('timeout') else False)
 
 @command('storage container lease break')
 @description(L('Break a lock on a container for delete operations.'))
@@ -402,8 +402,8 @@ def break_container_lease(args, unexpected): #pylint: disable=unused-argument
         container_name=args.get('container-name'),
         lease_break_period=lease_break_period,
         if_modified_since=_parse_int(args, 'if-modified-since'),
-        if_unmodified_since=_parse_int(args, 'if-unmodified-since',
-        timeout=True if args.get('timeout') else False))
+        if_unmodified_since=_parse_int(args, 'if-unmodified-since'),
+        timeout=True if args.get('timeout') else False)
 
 # BLOB COMMANDS
 # TODO: Evaluate for removing hand-authored commands in favor of auto-commands (task ##115068835)
@@ -499,9 +499,9 @@ def exists_blob(args, unexpected): #pylint: disable=unused-argument
     bbs = _get_blob_service_client(args)
     return str(bbs.exists(
         container_name=args.get('container-name'),
-        blob_name=args.get('blob-name')),
+        blob_name=args.get('blob-name'),
         snapshot=_parse_datetime(args, 'snapshot'),
-        timeout=_parse_int(args, 'timeout'))
+        timeout=_parse_int(args, 'timeout')))
 
 @command('storage blob show')
 @description(L('Show properties of the specified blob.'))
@@ -712,7 +712,7 @@ def _parse_datetime(args, key):
     if not datestring:
         return None
     time = datetime.strptime(datestring, DATETIME_FORMAT)
-    return time 
+    return time
 
 def _parse_dict(args, key, allow_singles=True):
     """ Parses dictionaries passed in as argument strings in key=value;key=value format.
@@ -721,7 +721,7 @@ def _parse_dict(args, key, allow_singles=True):
     if not string_val:
         return None
     kv_list = [x for x in string_val.split(';') if '=' in x]     # key-value pairs
-    result = dict(x.split('=') for x in kv_list)    
+    result = dict(x.split('=') for x in kv_list)
     if allow_singles:
         s_list = [x for x in string_val.split(';') if '=' not in x]  # single values
         result.update(dict((x, '') for x in s_list))
@@ -729,7 +729,7 @@ def _parse_dict(args, key, allow_singles=True):
 
 def _parse_int(args, key):
     try:
-        str_val = args.get('timeout')
+        str_val = args.get(key)
         int_val = int(str_val) if str_val else None
     except ValueError:
         int_val = None
