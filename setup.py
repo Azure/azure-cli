@@ -20,6 +20,7 @@ from codecs import open
 from setuptools import setup
 
 VERSION = '0.0.3.dev0'
+INSTALL_FROM_PUBLIC = False
 
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
@@ -66,6 +67,26 @@ DEPENDENCIES = [
 with open('README.rst', 'r', encoding='utf-8') as f:
     README = f.read()
 
+from setuptools.command.install import install
+import pip
+def _post_install(dir):
+    from subprocess import check_call
+    if INSTALL_FROM_PUBLIC:
+        pip.main(['install', 'azure-cli-components', '--disable-pip-version-check'])
+        check_call(['az', 'components', 'install', '-n', 'login'])
+    else:
+        # use private PyPI server.
+        pip.main(['install', 'azure-cli-components', '--extra-index-url',
+                'http://40.112.211.51:8080/', '--trusted-host', '40.112.211.51',
+                '--disable-pip-version-check'])
+        check_call(['az', 'components', 'install', '-n', 'login', '-p'])
+
+class OnInstall(install):
+    def run(self):
+        install.run(self)
+        self.execute(_post_install, (self.install_lib,),
+                     msg="Running post install task")
+
 setup(
     name='azure-cli',
     version=VERSION,
@@ -97,4 +118,5 @@ setup(
             'enum34',
         ],
     },
+    cmdclass={'install': OnInstall},
 )
