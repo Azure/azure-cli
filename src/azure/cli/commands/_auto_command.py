@@ -59,6 +59,8 @@ def _get_member(obj, path):
     Ex. a.b.c would get the property 'c' of property 'b' of the
         object a
     """
+    if not path:
+        return obj
     for segment in path.split('.'):
         obj = getattr(obj, segment)
     return obj
@@ -95,7 +97,7 @@ def _option_description(operation, arg):
                     if l.startswith(':param') and arg + ':' in l)
 
 def build_operation(command_name, member_path, client_type, operations, #pylint: disable=dangerous-default-value
-                    paramaliases=GLOBALPARAMALIASES):
+                    paramaliases=GLOBALPARAMALIASES, default_params=None):
     for operation, return_type_name in operations:
         opname = operation.__name__.replace('_', '-')
         func = _make_func(client_type, member_path, return_type_name, operation)

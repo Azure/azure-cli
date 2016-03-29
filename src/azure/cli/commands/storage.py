@@ -4,7 +4,7 @@ from os import environ
 from sys import stderr
 from six.moves import input #pylint: disable=redefined-builtin
 
-from azure.storage.blob import PublicAccess
+from azure.storage.blob import PublicAccess, BlockBlobService
 from azure.mgmt.storage import StorageManagementClient, StorageManagementClientConfiguration
 from azure.mgmt.storage.models import AccountType
 from azure.mgmt.storage.operations import StorageAccountsOperations
@@ -161,73 +161,95 @@ def set_account(args, unexpected): #pylint: disable=unused-argument
 
 # CONTAINER COMMANDS
 
+def _blob_data_service_factory():
+    import sys
+    args = sys.argv
+    # TODO: Attempt to resolve account name/key or connection string from args, not just environ
+    return get_data_service_client(BlockBlobService,
+                                   environ.get('AZURE_STORAGE_ACCOUNT'),
+                                   environ.get('AZURE_STORAGE_ACCOUNT_KEY'),
+                                   environ.get('AZURE_STORAGE_CONNECTION_STRING'))
+
+build_operation('storage container', None, _blob_data_service_factory,
+                [
+                    (BlockBlobService.list_containers, '[Container]'),
+                    (BlockBlobService.delete_container, 'None'),
+                    (BlockBlobService.get_container_properties, '[ContainerProperties]'),
+                    (BlockBlobService.create_container, 'None')
+                ],
+                default_params=[
+                    ('--account-name -n', L('the storage account name')),
+                    ('--account-key -k', L('the storage account key')),
+                    ('--connection-string -t', L('the storage account connection string'))
+                ])
+
 # TODO: update this once enums are supported in commands first-class (task #115175885)
 public_access_types = {'none': None,
                        'blob': PublicAccess.Blob,
                        'container': PublicAccess.Container}
 public_access_string = ' | '.join(public_access_types)
 
-@command('storage container create')
-@description(L('Create a storage container.'))
-@option('--container-name -c <containerName>', L('the name of the container'), required=True)
-@option('--account-name -n <accountName>', L('the storage account name'))
-@option('--account-key -k <accountKey>', L('the storage account key'))
-@option('--connection-string -t <connectionString>', L('the storage connection string'))
-@option('--public-access -p <accessType>', L('Values: {}'.format(public_access_string)))
-@option('--metadata -m <metaData>', L('dict of key=value pairs (separated by ;)'))
-@option('--fail-on-exist', L('operation fails if container already exists'))
-@option('--timeout <seconds>')
-def create_container(args, unexpected): #pylint: disable=unused-argument
-    bbs = _get_blob_service_client(args)
-    try:
-        public_access = public_access_types[args.get('public-access')] \
-                                            if args.get('public-access') \
-                                            else None
-    except KeyError:
-        raise IncorrectUsageError(L('public-access must be: {}'
-                                    .format(public_access_string)))
+#@command('storage container create')
+#@description(L('Create a storage container.'))
+#@option('--container-name -c <containerName>', L('the name of the container'), required=True)
+#@option('--account-name -n <accountName>', L('the storage account name'))
+#@option('--account-key -k <accountKey>', L('the storage account key'))
+#@option('--connection-string -t <connectionString>', L('the storage connection string'))
+#@option('--public-access -p <accessType>', L('Values: {}'.format(public_access_string)))
+#@option('--metadata -m <metaData>', L('dict of key=value pairs (separated by ;)'))
+#@option('--fail-on-exist', L('operation fails if container already exists'))
+#@option('--timeout <seconds>')
+#def create_container(args, unexpected): #pylint: disable=unused-argument
+#    bbs = _get_blob_service_client(args)
+#    try:
+#        public_access = public_access_types[args.get('public-access')] \
+#                                            if args.get('public-access') \
+#                                            else None
+#    except KeyError:
+#        raise IncorrectUsageError(L('public-access must be: {}'
+#                                    .format(public_access_string)))
 
-    metadata = _parse_dict(args, 'metadata', allow_singles=False)
+#    metadata = _parse_dict(args, 'metadata', allow_singles=False)
 
-    if not bbs.create_container(
-            container_name=args.get('container-name'),
-            public_access=public_access,
-            metadata=metadata,
-            fail_on_exist=True if args.get('fail-on-exist') else False,
-            timeout=_parse_int(args, 'timeout')):
-        raise RuntimeError(L('Container creation failed.'))
+#    if not bbs.create_container(
+#            container_name=args.get('container-name'),
+#            public_access=public_access,
+#            metadata=metadata,
+#            fail_on_exist=True if args.get('fail-on-exist') else False,
+#            timeout=_parse_int(args, 'timeout')):
+#        raise RuntimeError(L('Container creation failed.'))
 
-@command('storage container delete')
-@description(L('Delete a storage container.'))
-@option('--container-name -c <containerName>', L('the name of the container'), required=True)
-@option('--account-name -n <accountName>', L('the storage account name'))
-@option('--account-key -k <accountKey>', L('the storage account key'))
-@option('--connection-string -t <connectionString>', L('the storage connection string'))
-@option('--force -f', L('supress delete confirmation prompt'))
-@option('--fail-not-exist', L('operation fails if container does not exist'))
-@option('--lease-id <id>', L('delete only if lease is ID active and matches'))
-@option('--if-modified-since <dateTime>', L('delete only if container modified since ' + \
-    'supplied UTC datetime'))
-@option('--in-unmodified-since <dateTime>', L('delete only if container has not been modified ' + \
-    'since supplied UTC datetime'))
-@option('--timeout <seconds>')
-def delete_container(args, unexpected): #pylint: disable=unused-argument
-    bbs = _get_blob_service_client(args)
-    container_name = args.get('container-name')
+#@command('storage container delete')
+#@description(L('Delete a storage container.'))
+#@option('--container-name -c <containerName>', L('the name of the container'), required=True)
+#@option('--account-name -n <accountName>', L('the storage account name'))
+#@option('--account-key -k <accountKey>', L('the storage account key'))
+#@option('--connection-string -t <connectionString>', L('the storage connection string'))
+#@option('--force -f', L('supress delete confirmation prompt'))
+#@option('--fail-not-exist', L('operation fails if container does not exist'))
+#@option('--lease-id <id>', L('delete only if lease is ID active and matches'))
+#@option('--if-modified-since <dateTime>', L('delete only if container modified since ' + \
+#    'supplied UTC datetime'))
+#@option('--in-unmodified-since <dateTime>', L('delete only if container has not been modified ' + \
+#    'since supplied UTC datetime'))
+#@option('--timeout <seconds>')
+#def delete_container(args, unexpected): #pylint: disable=unused-argument
+#    bbs = _get_blob_service_client(args)
+#    container_name = args.get('container-name')
 
-    if args.get('force') is None:
-        ans = input('Really delete {}? [Y/n] '.format(container_name))
-        if not ans or ans[0].lower() != 'y':
-            return 0
+#    if args.get('force') is None:
+#        ans = input('Really delete {}? [Y/n] '.format(container_name))
+#        if not ans or ans[0].lower() != 'y':
+#            return 0
 
-    if not bbs.delete_container(
-            container_name=container_name,
-            fail_not_exist=True if args.get('fail-not-exist') else False,
-            lease_id=args.get('lease-id'),
-            if_unmodified_since=_parse_datetime(args, 'if-unmodified-since'),
-            if_modified_since=_parse_datetime(args, 'if-modified-since'),
-            timeout=_parse_int(args, 'timeout')):
-        raise RuntimeError(L('Container deletion failed.'))
+#    if not bbs.delete_container(
+#            container_name=container_name,
+#            fail_not_exist=True if args.get('fail-not-exist') else False,
+#            lease_id=args.get('lease-id'),
+#            if_unmodified_since=_parse_datetime(args, 'if-unmodified-since'),
+#            if_modified_since=_parse_datetime(args, 'if-modified-since'),
+#            timeout=_parse_int(args, 'timeout')):
+#        raise RuntimeError(L('Container deletion failed.'))
 
 @command('storage container exists')
 @description(L('Check if a storage container exists.'))
@@ -244,39 +266,39 @@ def exists_container(args, unexpected): #pylint: disable=unused-argument
         snapshot=_parse_datetime(args, 'snapshot'),
         timeout=_parse_int(args, 'timeout')))
 
-@command('storage container list')
-@description(L('List storage containers.'))
-@option('--account-name -n <accountName>', L('the storage account name'))
-@option('--account-key -k <accountKey>', L('the storage account key'))
-@option('--connection-string -t <connectionString>', L('the storage connection string'))
-@option('--prefix -p <prefix>', L('container name prefix to filter by'))
-@option('--num-results <num>')
-@option('--include-metadata')
-@option('--marker <marker>', L('continuation token for enumerating additional results'))
-@option('--timeout <seconds>')
-def list_containers(args, unexpected): #pylint: disable=unused-argument
-    bbs = _get_blob_service_client(args)
-    return bbs.list_containers(
-        prefix=args.get('prefix'),
-        num_results=_parse_int(args, 'num-results'),
-        include_metadata=True if args.get('include-metadata') else False,
-        marker=args.get('marker'),
-        timeout=_parse_int(args, 'timeout'))
+#@command('storage container list')
+#@description(L('List storage containers.'))
+#@option('--account-name -n <accountName>', L('the storage account name'))
+#@option('--account-key -k <accountKey>', L('the storage account key'))
+#@option('--connection-string -t <connectionString>', L('the storage connection string'))
+#@option('--prefix -p <prefix>', L('container name prefix to filter by'))
+#@option('--num-results <num>')
+#@option('--include-metadata')
+#@option('--marker <marker>', L('continuation token for enumerating additional results'))
+#@option('--timeout <seconds>')
+#def list_containers(args, unexpected): #pylint: disable=unused-argument
+#    bbs = _get_blob_service_client(args)
+#    return bbs.list_containers(
+#        prefix=args.get('prefix'),
+#        num_results=_parse_int(args, 'num-results'),
+#        include_metadata=True if args.get('include-metadata') else False,
+#        marker=args.get('marker'),
+#        timeout=_parse_int(args, 'timeout'))
 
-@command('storage container show')
-@description(L('Show details of a storage container'))
-@option('--container-name -c <containerName>', L('the name of the container'), required=True)
-@option('--account-name -n <accountName>', L('the storage account name'))
-@option('--account-key -k <accountKey>', L('the storage account key'))
-@option('--connection-string -t <connectionString>', L('the storage connection string'))
-@option('--lease-id <id>', L('delete only if lease is ID active and matches'))
-@option('--timeout <seconds>')
-def show_container(args, unexpected): #pylint: disable=unused-argument
-    bbs = _get_blob_service_client(args)
-    return bbs.get_container_properties(
-        container_name=args.get('container-name'),
-        lease_id=args.get('lease-id'),
-        timeout=_parse_int(args, 'timeout'))
+#@command('storage container show')
+#@description(L('Show details of a storage container'))
+#@option('--container-name -c <containerName>', L('the name of the container'), required=True)
+#@option('--account-name -n <accountName>', L('the storage account name'))
+#@option('--account-key -k <accountKey>', L('the storage account key'))
+#@option('--connection-string -t <connectionString>', L('the storage connection string'))
+#@option('--lease-id <id>', L('delete only if lease is ID active and matches'))
+#@option('--timeout <seconds>')
+#def show_container(args, unexpected): #pylint: disable=unused-argument
+#    bbs = _get_blob_service_client(args)
+#    return bbs.get_container_properties(
+#        container_name=args.get('container-name'),
+#        lease_id=args.get('lease-id'),
+#        timeout=_parse_int(args, 'timeout'))
 
 lease_duration_values = {'min':15, 'max':60, 'infinite':-1}
 lease_duration_values_string = 'Between {} and {} seconds. ({} for infinite)'.format(
@@ -690,13 +712,6 @@ def storage_file_delete(args, unexpected): #pylint: disable=unused-argument
                     args.get('file-name'))
 
 # HELPER METHODS
-
-def _get_blob_service_client(args):
-    from azure.storage.blob import BlockBlobService
-    return get_data_service_client(BlockBlobService,
-                                   _resolve_storage_account(args),
-                                   _resolve_storage_account_key(args),
-                                   _resolve_connection_string(args))
 
 def _get_file_service_client(args):
     from azure.storage.file import FileService
