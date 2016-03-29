@@ -56,6 +56,7 @@ CLASSIFIERS = [
 
 DEPENDENCIES = [
     'applicationinsights',
+    'argcomplete',
     'azure==2.0.0rc1',
     'six',
     'jmespath',

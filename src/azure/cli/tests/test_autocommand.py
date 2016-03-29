@@ -33,11 +33,11 @@ class Test_autocommand(unittest.TestCase):
 
     def test_raw_register_command(self):
         command_table = {}
-        build_operation(command_table,
-                        "test autocommand",
+        build_operation("test autocommand",
                         "",
                         None,
-                        [(Test_autocommand.sample_vm_get, None)])
+                        [(Test_autocommand.sample_vm_get, None)],
+                        command_table)
 
         self.assertEqual(len(command_table), 1, 'We expect exactly one command in the command table')
         command_metadata = list(command_table.values())[0]

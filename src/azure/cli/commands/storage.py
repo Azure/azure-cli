@@ -59,16 +59,12 @@ COMMON_PARAMETERS.update({
     }
 })
 
-def get_command_table():
-    return command_table
-
 def _storage_client_factory():
     return get_mgmt_service_client(StorageManagementClient, StorageManagementClientConfiguration)
 
 # ACCOUNT COMMANDS
 
-build_operation(command_table,
-                'storage account',
+build_operation('storage account',
                 'storage_accounts',
                 _storage_client_factory,
                 [
@@ -76,7 +72,8 @@ build_operation(command_table,
                     (StorageAccountsOperations.delete, None),
                     (StorageAccountsOperations.get_properties, 'StorageAccount'),
                     (StorageAccountsOperations.list_keys, '[StorageAccountKeys]')
-                ])
+                ],
+                command_table)
 
 @command_table.command('storage account list', description=L('List storage accounts.'))
 @command_table.option(**COMMON_PARAMETERS['optional_resource_group_name'])

@@ -19,12 +19,8 @@ def _compute_client_factory():
 
 command_table = CommandTable()
 
-def get_command_table():
-    return command_table
-
 # pylint: disable=line-too-long
-build_operation(command_table,
-                "vm availabilityset",
+build_operation("vm availabilityset",
                 "availability_sets",
                 _compute_client_factory,
                 [
@@ -32,30 +28,30 @@ build_operation(command_table,
                     (AvailabilitySetsOperations.get, 'AvailabilitySet'),
                     (AvailabilitySetsOperations.list, '[AvailabilitySet]'),
                     (AvailabilitySetsOperations.list_available_sizes, '[VirtualMachineSize]')
-                ])
+                ],
+                command_table)
 
 
-build_operation(command_table,
-                "vm machineextensionimage",
+build_operation("vm machineextensionimage",
                 "virtual_machine_extension_images",
                 _compute_client_factory,
                 [
                     (VirtualMachineExtensionImagesOperations.get, 'VirtualMachineExtensionImage'),
                     (VirtualMachineExtensionImagesOperations.list_types, '[VirtualMachineImageResource]'),
                     (VirtualMachineExtensionImagesOperations.list_versions, '[VirtualMachineImageResource]'),
-                ])
+                ],
+                command_table)
 
-build_operation(command_table,
-                "vm extension",
+build_operation("vm extension",
                 "virtual_machine_extensions",
                 _compute_client_factory,
                 [
                     (VirtualMachineExtensionsOperations.delete, LongRunningOperation(L('Deleting VM extension'), L('VM extension deleted'))),
                     (VirtualMachineExtensionsOperations.get, 'VirtualMachineExtension'),
-                ])
+                ],
+                command_table)
 
-build_operation(command_table,
-                "vm image",
+build_operation("vm image",
                 "virtual_machine_images",
                 _compute_client_factory,
                 [
@@ -64,26 +60,26 @@ build_operation(command_table,
                     (VirtualMachineImagesOperations.list_offers, '[VirtualMachineImageResource]'),
                     (VirtualMachineImagesOperations.list_publishers, '[VirtualMachineImageResource]'),
                     (VirtualMachineImagesOperations.list_skus, '[VirtualMachineImageResource]'),
-                ])
+                ],
+                command_table)
 
-build_operation(command_table,
-                "vm usage",
+build_operation("vm usage",
                 "usage",
                 _compute_client_factory,
                 [
                     (UsageOperations.list, '[Usage]'),
-                ])
+                ],
+                command_table)
 
-build_operation(command_table,
-                "vm size",
+build_operation("vm size",
                 "virtual_machine_sizes",
                 _compute_client_factory,
                 [
                     (VirtualMachineSizesOperations.list, '[VirtualMachineSize]'),
-                ])
+                ],
+                command_table)
 
-build_operation(command_table,
-                "vm",
+build_operation("vm",
                 "virtual_machines",
                 _compute_client_factory,
                 [
@@ -97,10 +93,10 @@ build_operation(command_table,
                     (VirtualMachinesOperations.power_off, LongRunningOperation(L('Powering off VM'), L('VM powered off'))),
                     (VirtualMachinesOperations.restart, LongRunningOperation(L('Restarting VM'), L('VM Restarted'))),
                     (VirtualMachinesOperations.start, LongRunningOperation(L('Starting VM'), L('VM Started'))),
-                ])
+                ],
+                command_table)
 
-build_operation(command_table,
-                "vm scaleset",
+build_operation("vm scaleset",
                 "virtual_machine_scale_sets",
                 _compute_client_factory,
                 [
@@ -116,10 +112,10 @@ build_operation(command_table,
                     (VirtualMachineScaleSetsOperations.restart, LongRunningOperation(L('Restarting VM scale set'), L('VM scale set restarted'))),
                     (VirtualMachineScaleSetsOperations.start, LongRunningOperation(L('Starting VM scale set'), L('VM scale set started'))),
                     (VirtualMachineScaleSetsOperations.update_instances, LongRunningOperation(L('Updating VM scale set instances'), L('VM scale set instances updated'))),
-                ])
+                ],
+                command_table)
 
-build_operation(command_table,
-                "vm scalesetvm",
+build_operation("vm scalesetvm",
                 "virtual_machine_scale_set_vms",
                 _compute_client_factory,
                 [
@@ -131,5 +127,6 @@ build_operation(command_table,
                     (VirtualMachineScaleSetVMsOperations.power_off, LongRunningOperation(L('Powering off VM scale set VMs'), L('VM scale set VMs powered off'))),
                     (VirtualMachineScaleSetVMsOperations.restart, LongRunningOperation(L('Restarting VM scale set VMs'), L('VM scale set VMs restarted'))),
                     (VirtualMachineScaleSetVMsOperations.start, LongRunningOperation(L('Starting VM scale set VMs'), L('VM scale set VMs started'))),
-                ])
+                ],
+                command_table)
 

@@ -8,12 +8,9 @@ from azure.mgmt.resource.resources import (ResourceManagementClient,
 
 command_table = CommandTable()
 
-def get_command_table():
-    return command_table
-
+@command_table.command('resource group list', description=L('List resource groups'))
 @command_table.option('--tag-name -tn', help=L("the resource group's tag name"))
 @command_table.option('--tag-value -tv', help=L("the resource group's tag value"))
-@command_table.command('resource group list', description=L('List resource groups'))
 def list_groups(args):
     from azure.mgmt.resource.resources.models import ResourceGroup, ResourceGroupFilter
 
