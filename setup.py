@@ -55,11 +55,12 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
+    'adal==0.2.0', #from internal index server.
     'applicationinsights',
     'azure==2.0.0rc1',
-    'six',
     'jmespath',
-    'adal==0.2.0' #from internal index server.
+    'pyyaml',
+    'six',
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
