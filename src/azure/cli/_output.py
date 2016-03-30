@@ -242,7 +242,10 @@ class TsvOutput(object):
         if isinstance(data, list):
             stream.write(str(len(data)))
         elif isinstance(data, dict):
-            pass
+            # We need to print something to avoid mismatching
+            # number of columns if the value is None for some instances
+            # and a dictionary value in other...
+            stream.write('{object}')
         else:
             stream.write(data)
 
