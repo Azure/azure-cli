@@ -1,12 +1,7 @@
-def _register_global_parameter(parser):
-    # Let the program know that we are adding a parameter --query
-    parser.add_argument('--query', dest='_jmespath_query', metavar='JMESPATH',
-                        help='JMESPath query string. See http://jmespath.org/ for more information and examples.') # pylint: disable=line-too-long
+import collections
 
-
-def register(application):
-    def handle_query_parameter(args):
-        # If there is a query specified on the command line, we'll take care of that!
+def register(event_dispatcher):
+    def handle_query_parameter(_, event_data):
         try:
             query_value = args._jmespath_query #  pylint: disable=protected-access
             del args._jmespath_query
@@ -14,7 +9,8 @@ def register(application):
             if query_value:
                 def filter_output(event_data):
                     import jmespath
-                    event_data['result'] = jmespath.search(query_value, event_data['result'])
+                    event_data['result'] = jmespath.search(query_value, event_data['result'],
+                                                           jmespath.Options(collections.OrderedDict))
                 application.register(application.FILTER_RESULT, filter_output)
 
         except AttributeError:
