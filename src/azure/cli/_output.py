@@ -3,6 +3,7 @@
 import sys
 import json
 import re
+from collections import OrderedDict
 from datetime import datetime
 from enum import Enum
 from six import StringIO
@@ -46,8 +47,7 @@ def format_list(obj):
 
 def format_tsv(obj):
     obj_list = obj if isinstance(obj, list) else [obj]
-    tsvo = TsvOutput()
-    return tsvo.dump(obj_list)
+    return TsvOutput.dump(obj_list)
 
 class OutputProducer(object): #pylint: disable=too-few-public-methods
 
@@ -254,7 +254,10 @@ class TsvOutput(object): #pylint: disable=too-few-public-methods
     def _dump_row(data, stream):
         if isinstance(data, dict):
             separator = ''
-            for _, value in data.items():
+            # Iterate through the items either sorted by key value (if dict) or in the order
+            # they were added (in the cases of an ordered dict) in order to make the output
+            # stable
+            for _, value in data.items() if isinstance(data, OrderedDict) else sorted(data.items()):
                 stream.write(separator)
                 TsvOutput._dump_obj(value, stream)
                 separator = '\t'
