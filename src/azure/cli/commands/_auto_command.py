@@ -57,7 +57,9 @@ def build_operation(command_name,
                     command_table,
                     common_parameters=None):
 
-    common_parameters = common_parameters or COMMON_PARAMETERS
+    merged_common_parameters = COMMON_PARAMETERS.copy()
+    merged_common_parameters.update(common_parameters or {})
+
     for operation, return_type_name in operations:
         opname = operation.__name__.replace('_', '-')
         func = _make_func(client_type, member_path, return_type_name, operation)
@@ -73,7 +75,7 @@ def build_operation(command_name,
 
         options = []
         for arg in [a for a in args if not a in EXCLUDED_PARAMS]:
-            common_param = common_parameters.get(arg, {
+            common_param = merged_common_parameters.get(arg, {
                 'name': '--' + arg.replace('_', '-'),
                 'required': True,
                 'help': _option_description(operation, arg)

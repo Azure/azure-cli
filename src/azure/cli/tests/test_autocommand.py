@@ -52,5 +52,37 @@ class Test_autocommand(unittest.TestCase):
             existing = [arg for arg in command_metadata['arguments'] if arg['name'] == probe['name']][0]
             self.assertDictContainsSubset(probe, existing)
 
+    def test_register_command_with_alias(self):
+        command_table = {}
+
+        VM_SPECIFIC_PARAMS= {
+            'vm_name': {
+                'name': '--wonky-name -n',
+                'metavar': 'VMNAME',
+                'help': 'Name of the virtual machine',
+                'required': False
+            }
+        }
+        build_operation("test autocommand",
+                        "",
+                        None,
+                        [(Test_autocommand.sample_vm_get, None)],
+                        command_table,
+                        VM_SPECIFIC_PARAMS
+                        )
+
+        self.assertEqual(len(command_table), 1, 'We expect exactly one command in the command table')
+        command_metadata = list(command_table.values())[0]
+        self.assertEqual(command_metadata['name'], 'test autocommand sample-vm-get', 'Unexpected command name...')
+        self.assertEqual(len(command_metadata['arguments']), 3, 'We expected exactly 3 arguments')
+        some_expected_arguments = [
+            { 'name': '--resourcegroup -g', 'dest': 'resource_group_name', 'required': True},
+            { 'name': '--wonky-name -n', 'dest': 'vm_name', 'required': False},
+            ]
+
+        for probe in some_expected_arguments:
+            existing = [arg for arg in command_metadata['arguments'] if arg['name'] == probe['name']][0]
+            self.assertDictContainsSubset(probe, existing)
+
 if __name__ == '__main__':
     unittest.main()
