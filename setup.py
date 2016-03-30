@@ -57,11 +57,11 @@ CLASSIFIERS = [
 
 DEPENDENCIES = [
     'applicationinsights',
-    'msrest',
-    'six',
     'jmespath',
+    'msrest',
     'pip',
     'pyyaml',
+    'six',
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
