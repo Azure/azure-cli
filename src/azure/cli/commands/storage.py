@@ -164,11 +164,25 @@ def set_account(args, unexpected): #pylint: disable=unused-argument
 def _blob_data_service_factory():
     import sys
     args = sys.argv
-    # TODO: Attempt to resolve account name/key or connection string from args, not just environ
-    return get_data_service_client(BlockBlobService,
-                                   environ.get('AZURE_STORAGE_ACCOUNT'),
-                                   environ.get('AZURE_STORAGE_ACCOUNT_KEY'),
-                                   environ.get('AZURE_STORAGE_CONNECTION_STRING'))
+
+    def _resolve_arg(key, envkey):
+        value = None
+        if key in args:
+            index = args.index(key)
+            try:
+                value = args[index + 1]
+            except IndexError:
+                value = None
+            # TODO: Validate the value to
+        else:
+            value = environ.get(envkey)
+        return value
+
+    return get_data_service_client(
+        BlockBlobService,
+        _resolve_arg('--account-name', 'AZURE_STORAGE_ACCOUNT'),
+        _resolve_arg('--account-key', 'AZURE_STORAGE_ACCOUNT_KEY'),
+        _resolve_arg('--connection-string', 'AZURE_STORAGE_CONNECTION_STRING')) 
 
 build_operation('storage container', None, _blob_data_service_factory,
                 [
@@ -178,9 +192,9 @@ build_operation('storage container', None, _blob_data_service_factory,
                     (BlockBlobService.create_container, 'None')
                 ],
                 default_params=[
-                    ('--account-name -n', L('the storage account name')),
-                    ('--account-key -k', L('the storage account key')),
-                    ('--connection-string -t', L('the storage account connection string'))
+                    ('--account-name -n <accountName>', L('the storage account name')),
+                    ('--account-key -k <accountKey>', L('the storage account key')),
+                    ('--connection-string -t <connectionString>', L('the storage account connection string'))
                 ])
 
 # TODO: update this once enums are supported in commands first-class (task #115175885)

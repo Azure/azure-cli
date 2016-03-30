@@ -6,6 +6,7 @@ from msrest.paging import Paged
 from msrest.exceptions import ClientException
 from azure.cli._argparse import IncorrectUsageError
 from ..commands import command, description, option
+from .._logging import logger
 
 
 EXCLUDED_PARAMS = frozenset(['self', 'raw', 'custom_headers', 'operation_config'])
@@ -116,3 +117,9 @@ def build_operation(command_name, member_path, client_type, operations, #pylint:
             spec = paramaliases.get(arg, '--%s <%s>' % (arg, arg))
             func = _decorate_option(spec, _option_description(operation, arg),
                                     target=arg, func=func)
+        if default_params:
+            for arg in default_params:
+                if len(arg) != 2:
+                    logger.warning('{} is in invalid format. Should be: (spec, description)'.format(str(arg)))
+                    continue
+                func = _decorate_option(arg[0], arg[1], target=None, func=func)
