@@ -10,6 +10,50 @@ from .._logging import logger
 
 EXCLUDED_PARAMS = frozenset(['self', 'raw', 'custom_headers', 'operation_config'])
 
+class AutoCommandDefinition(object): #pylint: disable=too-few-public-methods
+
+    def __init__(self, operation, return_type, command_alias=None):
+        self.operation = operation
+        self.return_type = return_type
+        self.opname = command_alias if command_alias else operation.__name__.replace('_', '-')
+
+class LongRunningOperation(object): #pylint: disable=too-few-public-methods
+
+    progress_file = sys.stderr
+
+    def __init__(self, start_msg='', finish_msg='', poll_interval_ms=1000.0):
+        self.start_msg = start_msg
+        self.finish_msg = finish_msg
+        self.poll_interval_ms = poll_interval_ms
+
+    def __call__(self, poller):
+        print(self.start_msg, file=self.progress_file)
+
+        succeeded = False
+        try:
+            while not poller.done():
+                if self.progress_file:
+                    print('.', end='', file=self.progress_file)
+                    self.progress_file.flush()
+                time.sleep(self.poll_interval_ms / 1000.0)
+            result = poller.result()
+            succeeded = True
+            return result
+        finally:
+            # Ensure that we get a newline after the dots...
+            if self.progress_file:
+                print(file=self.progress_file)
+                print(self.finish_msg if succeeded else '', file=self.progress_file)
+
+def _decorate_command(name, func):
+    return command(name)(func)
+
+def _decorate_description(desc, func):
+    return description(desc)(func)
+
+def _decorate_option(spec, descr, target, func):
+    return option(spec, descr, target=target)(func)
+
 def _get_member(obj, path):
     """Recursively walk down the dot-separated path
     to get child item.
@@ -63,22 +107,24 @@ def build_operation(command_name,
                     common_parameters=None):
 
     common_parameters = common_parameters or COMMON_PARAMETERS
-    for operation, return_type_name in operations:
-        opname = operation.__name__.replace('_', '-')
-        func = _make_func(client_type, member_path, return_type_name, operation)
-        func = _decorate_command(' '.join([command_name, opname]), func)
+    for op in operations:
+        func = _make_func(client_type, member_path, op.return_type_name, op.operation)
+        func = _decorate_command(' '.join([command_name, op.opname]), func)
 
         args = []
         try:
             # only supported in python3 - falling back to argspec if not available
-            sig = inspect.signature(operation)
+            sig = inspect.signature(op.operation)
             args = sig.parameters
         except AttributeError:
-            sig = inspect.getargspec(operation) #pylint: disable=deprecated-method
+            sig = inspect.getargspec(op.operation) #pylint: disable=deprecated-method
             args = sig.args
 
         options = []
         for arg in [a for a in args if not a in EXCLUDED_PARAMS]:
+            #spec = paramaliases.get(arg, '--%s <%s>' % (arg, arg))
+            #func = _decorate_option(spec, _option_description(op.operation, arg),
+            #                        target=arg, func=func)
             common_param = common_parameters.get(arg, {
                 'name': '--' + arg.replace('_', '-'),
                 'required': True,
