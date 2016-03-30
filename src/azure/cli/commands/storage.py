@@ -58,6 +58,11 @@ COMMON_PARAMETERS.update({
         # TODO: Move to exclusive group
         'required': False,
         'default': environ.get('AZURE_STORAGE_CONNECTION_STRING')
+    },
+    'timeout': {
+        'name': '--timeout',
+        'help': L('Timeout in seconds'),
+        'required': False,
     }
 })
 
@@ -209,9 +214,9 @@ public_access_types = {'none': None,
 @command_table.option(**COMMON_PARAMETERS['connection-string'])
 @command_table.option('--public-access -p', default=None, choices=public_access_types.keys(),
                       type=lambda x: public_access_types[x])
-@command_table.option('--metadata -m', L('dict of key=value pairs (separated by ;)'))
-@command_table.option('--fail-on-exist', L('operation fails if container already exists'), action='store_true')
-@command_table.option('--timeout')
+@command_table.option('--metadata -m', help=L('dict of key=value pairs (separated by ;)'))
+@command_table.option('--fail-on-exist', help=L('operation fails if container already exists'), action='store_true')
+@command_table.option(**COMMON_PARAMETERS['timeout'])
 def create_container(args):
     bbs = _get_blob_service_client(args)
     public_access = args.get('public-access')
@@ -226,14 +231,6 @@ def create_container(args):
             timeout=_parse_int(args, 'timeout')):
         raise RuntimeError(L('Container creation failed.'))
 
-@command('storage container delete')
-@description(L('Delete a storage container.'))
-@option('--container-name -c <containerName>', L('the name of the container'), required=True)
-@option('--account-name -n <accountName>', L('the storage account name'))
-@option('--account-key -k <accountKey>', L('the storage account key'))
-@option('--connection-string -t <connectionString>', L('the storage connection string'))
-@option('--force -f', L('supress delete confirmation prompt'))
-def delete_container(args, unexpected): #pylint: disable=unused-argument
 @command_table.command('storage container delete')
 @command_table.description(L('Delete a storage container.'))
 @command_table.option(**COMMON_PARAMETERS['container-name'])
@@ -241,13 +238,13 @@ def delete_container(args, unexpected): #pylint: disable=unused-argument
 @command_table.option(**COMMON_PARAMETERS['account_key'])
 @command_table.option(**COMMON_PARAMETERS['connection-string'])
 @command_table.option('--force -f', help=L('supress delete confirmation prompt'))
-@command_table.option('--fail-not-exist', L('operation fails if container does not exist'))
-@command_table.option('--lease-id <id>', L('delete only if lease is ID active and matches'))
-@command_table.option('--if-modified-since <dateTime>', L('delete only if container modified since ' + \
+@command_table.option('--fail-not-exist', help=L('operation fails if container does not exist'))
+@command_table.option('--lease-id <id>', help=L('delete only if lease is ID active and matches'))
+@command_table.option('--if-modified-since', help=L('delete only if container modified since ' + \
     'supplied UTC datetime'))
 @command_table.option('--in-unmodified-since <dateTime>', L('delete only if container has not been modified ' + \
     'since supplied UTC datetime'))
-@command_table.option('--timeout <seconds>')
+@command_table.option(**COMMON_PARAMETERS['timeout'])
 def delete_container(args):
     bbs = _get_blob_service_client(args)
     container_name = args.get('container-name')
@@ -281,17 +278,16 @@ def exists_container(args, unexpected): #pylint: disable=unused-argument
         snapshot=_parse_datetime(args, 'snapshot'),
         timeout=_parse_int(args, 'timeout')))
 
-@option('--num-results <num>')
-@option('--include-metadata')
-@option('--marker <marker>', L('continuation token for enumerating additional results'))
-@option('--timeout <seconds>')
-def list_containers(args, unexpected): #pylint: disable=unused-argument
 @command_table.command('storage container list')
 @command_table.description(L('List storage containers.'))
 @command_table.option(**COMMON_PARAMETERS['account-name'])
 @command_table.option(**COMMON_PARAMETERS['account_key'])
 @command_table.option(**COMMON_PARAMETERS['connection-string'])
 @command_table.option('--prefix -p', help=L('container name prefix to filter by'))
+@command_table.option('--num-results <num>')
+@command_table.option('--include-metadata')
+@command_table.option('--marker <marker>', L('continuation token for enumerating additional results'))
+@command_table.option(**COMMON_PARAMETERS['timeout'])
 def list_containers(args):
     bbs = _get_blob_service_client(args)
     return bbs.list_containers(
@@ -301,15 +297,14 @@ def list_containers(args):
         marker=args.get('marker'),
         timeout=_parse_int(args, 'timeout'))
 
-@option('--lease-id <id>', L('delete only if lease is ID active and matches'))
-@option('--timeout <seconds>')
-def show_container(args, unexpected): #pylint: disable=unused-argument
 @command_table.command('storage container show')
 @command_table.description(L('Show details of a storage container'))
 @command_table.option(**COMMON_PARAMETERS['container-name'])
 @command_table.option(**COMMON_PARAMETERS['account-name'])
 @command_table.option(**COMMON_PARAMETERS['account_key'])
 @command_table.option(**COMMON_PARAMETERS['connection-string'])
+@command_table.option('--lease-id <id>', L('delete only if lease is ID active and matches'))
+@command_table.option(**COMMON_PARAMETERS['timeout'])
 def show_container(args):
     bbs = _get_blob_service_client(args)
     return bbs.get_container_properties(
@@ -323,21 +318,21 @@ lease_duration_values_string = 'Between {} and {} seconds. ({} for infinite)'.fo
     lease_duration_values['max'],
     lease_duration_values['infinite'])
 
-@command('storage container lease acquire')
-@description(L('Acquire a lock on a container for delete operations.'))
-@option('--container-name -c <containerName>', L('the name of the container'), required=True)
-@option('--lease-duration --ld <leaseDuration>',
-        L('Values: {}'.format(lease_duration_values_string)), required=True)
-@option('--proposed-lease-id --plid <id>', L('proposed lease id in GUID format'))
-@option('--account-name -n <accountName>', L('the storage account name'))
-@option('--account-key -k <accountKey>', L('the storage account key'))
-@option('--connection-string -t <connectionString>', L('the storage connection string'))
-@option('--if-modified-since <dateTime>', L('delete only if container modified since ' + \
+@command_table.command('storage container lease acquire')
+@command_table.description(L('Acquire a lock on a container for delete operations.'))
+@command_table.option(**COMMON_PARAMETERS['container-name'])
+@command_table.option('--lease-duration --ld',
+        help=L('Values: {}'.format(lease_duration_values_string)), required=True)
+@command_table.option('--proposed-lease-id --plid', help=L('proposed lease id in GUID format'))
+@command_table.option(**COMMON_PARAMETERS['account-name'])
+@command_table.option(**COMMON_PARAMETERS['account-key'])
+@command_table.option(**COMMON_PARAMETERS['accountconnection-string'])
+@command_table.option('--if-modified-since', help=L('delete only if container modified since ' + \
     'supplied UTC datetime'))
-@option('--in-unmodified-since <dateTime>', L('delete only if container has not been modified ' + \
-    'since supplied UTC datetime'))
-@option('--timeout <seconds>')
-def acquire_container_lease(args, unexpected): #pylint: disable=unused-argument
+@command_table.option('--in-unmodified-since', help=L('delete only if container has not been ' + \
+    'modified since supplied UTC datetime'))
+@command_table.option(**COMMON_PARAMETERS['timeout'])
+def acquire_container_lease(args): #pylint: disable=unused-argument
     bbs = _get_blob_service_client(args)
     try:
         lease_duration = int(args.get('lease-duration'))
@@ -352,14 +347,14 @@ def acquire_container_lease(args, unexpected): #pylint: disable=unused-argument
         if_unmodified_since=_parse_int(args, 'if-unmodified-since'),
         timeout=True if args.get('timeout') else False)
 
-@command('storage container lease renew')
-@description(L('Renew a lock on a container for delete operations.'))
-@option('--container-name -c <containerName>', L('the name of the container'), required=True)
-@option('--lease-id --lid <id>', L('lease id to renew in GUID format'), required=True)
-@option('--account-name -n <accountName>', L('the storage account name'))
-@option('--account-key -k <accountKey>', L('the storage account key'))
-@option('--connection-string -t <connectionString>', L('the storage connection string'))
-@option('--if-modified-since <dateTime>', L('delete only if container modified since ' + \
+@command_table.command('storage container lease renew')
+@command_table.description(L('Renew a lock on a container for delete operations.'))
+@command_table.option(**COMMON_PARAMETERS['container-name'])
+@command_table.option('--lease-id --lid <id>', L('lease id to renew in GUID format'), required=True)
+@command_table.option('--account-name -n <accountName>', L('the storage account name'))
+@command_table.option('--account-key -k <accountKey>', L('the storage account key'))
+@command_table.option('--connection-string -t <connectionString>', L('the storage connection string'))
+@command_table.option('--if-modified-since <dateTime>', L('delete only if container modified since ' + \
     'supplied UTC datetime'))
 @option('--in-unmodified-since <dateTime>', L('delete only if container has not been modified ' + \
     'since supplied UTC datetime'))

@@ -1,6 +1,11 @@
 import collections
 
-def register(event_dispatcher):
+def _register_global_parameter(parser):
+    # Let the program know that we are adding a parameter --query
+    parser.add_argument('--query', dest='_jmespath_query', metavar='JMESPATH',
+                        help='JMESPath query string. See http://jmespath.org/ for more information and examples.') # pylint: disable=line-too-long
+
+def register(application):
     def handle_query_parameter(_, event_data):
         try:
             query_value = args._jmespath_query #  pylint: disable=protected-access
