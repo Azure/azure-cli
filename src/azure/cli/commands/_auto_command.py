@@ -1,41 +1,12 @@
 from __future__ import print_function
 import inspect
 import sys
-import time
 from msrest.paging import Paged
 from msrest.exceptions import ClientException
 from azure.cli.parser import IncorrectUsageError
 from ..commands import COMMON_PARAMETERS
 
 EXCLUDED_PARAMS = frozenset(['self', 'raw', 'custom_headers', 'operation_config'])
-
-class LongRunningOperation(object): #pylint: disable=too-few-public-methods
-
-    progress_file = sys.stderr
-
-    def __init__(self, start_msg='', finish_msg='', poll_interval_ms=1000.0):
-        self.start_msg = start_msg
-        self.finish_msg = finish_msg
-        self.poll_interval_ms = poll_interval_ms
-
-    def __call__(self, poller):
-        print(self.start_msg, file=self.progress_file)
-
-        succeeded = False
-        try:
-            while not poller.done():
-                if self.progress_file:
-                    print('.', end='', file=self.progress_file)
-                    self.progress_file.flush()
-                time.sleep(self.poll_interval_ms / 1000.0)
-            result = poller.result()
-            succeeded = True
-            return result
-        finally:
-            # Ensure that we get a newline after the dots...
-            if self.progress_file:
-                print(file=self.progress_file)
-                print(self.finish_msg if succeeded else '', file=self.progress_file)
 
 def _get_member(obj, path):
     """Recursively walk down the dot-separated path
@@ -79,7 +50,14 @@ def _option_description(operation, arg):
     return ' '.join(l.split(':')[-1] for l in inspect.getdoc(operation).splitlines()
                     if l.startswith(':param') and arg + ':' in l)
 
-def build_operation(command_name, member_path, client_type, operations, command_table):
+def build_operation(command_name,
+                    member_path,
+                    client_type,
+                    operations,
+                    command_table,
+                    common_parameters=None):
+
+    common_parameters = common_parameters or COMMON_PARAMETERS
     for operation, return_type_name in operations:
         opname = operation.__name__.replace('_', '-')
         func = _make_func(client_type, member_path, return_type_name, operation)
@@ -95,7 +73,7 @@ def build_operation(command_name, member_path, client_type, operations, command_
 
         options = []
         for arg in [a for a in args if not a in EXCLUDED_PARAMS]:
-            common_param = COMMON_PARAMETERS.get(arg, {
+            common_param = common_parameters.get(arg, {
                 'name': '--' + arg.replace('_', '-'),
                 'required': True,
                 'help': _option_description(operation, arg)

@@ -1,4 +1,7 @@
-﻿from collections import defaultdict
+﻿from __future__ import print_function
+import sys
+import time
+from collections import defaultdict
 
 # TODO: Alternatively, simply scan the directory for all modules
 COMMAND_MODULES = [
@@ -27,6 +30,32 @@ COMMON_PARAMETERS = {
     }
 }
 
+class LongRunningOperation(object): #pylint: disable=too-few-public-methods
+
+    progress_file = sys.stderr
+
+    def __init__(self, start_msg='', finish_msg='', poll_interval_ms=1000.0):
+        self.start_msg = start_msg
+        self.finish_msg = finish_msg
+        self.poll_interval_ms = poll_interval_ms
+
+    def __call__(self, poller):
+        print(self.start_msg, file=self.progress_file)
+        succeeded = False
+        try:
+            while not poller.done():
+                if self.progress_file:
+                    print('.', end='', file=self.progress_file)
+                    self.progress_file.flush()
+                time.sleep(self.poll_interval_ms / 1000.0)
+            result = poller.result()
+            succeeded = True
+            return result
+        finally:
+            # Ensure that we get a newline after the dots...
+            if self.progress_file:
+                print(file=self.progress_file)
+                print(self.finish_msg if succeeded else '', file=self.progress_file)
 
 class CommandTable(defaultdict):
     """A command table is a dictionary of func -> {name,
