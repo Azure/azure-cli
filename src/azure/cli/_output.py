@@ -3,6 +3,7 @@
 import sys
 import json
 import re
+from collections import OrderedDict
 from six import StringIO
 
 class OutputFormatException(Exception):
@@ -40,13 +41,18 @@ def format_list(obj):
     lo = ListOutput()
     return lo.dump(obj_list)
 
+def format_tsv(obj):
+    obj_list = obj if isinstance(obj, list) else [obj]
+    return TsvOutput.dump(obj_list)
+
 class OutputProducer(object): #pylint: disable=too-few-public-methods
 
     format_dict = {
         'json': format_json,
         'table': format_table,
         'text': format_text,
-        'list': format_list
+        'list': format_list,
+        'tsv': format_tsv,
     }
 
     def __init__(self, formatter=format_list, file=sys.stdout): #pylint: disable=redefined-builtin
@@ -199,3 +205,41 @@ class TextOutput(object):
         io.close()
         return result
 
+class TsvOutput(object): #pylint: disable=too-few-public-methods
+
+    @staticmethod
+    def _dump_obj(data, stream):
+        if isinstance(data, list):
+            stream.write(str(len(data)))
+        elif isinstance(data, dict):
+            # We need to print something to avoid mismatching
+            # number of columns if the value is None for some instances
+            # and a dictionary value in other...
+            stream.write('{object}')
+        else:
+            stream.write(data)
+
+    @staticmethod
+    def _dump_row(data, stream):
+        if isinstance(data, dict):
+            separator = ''
+            # Iterate through the items either sorted by key value (if dict) or in the order
+            # they were added (in the cases of an ordered dict) in order to make the output
+            # stable
+            for _, value in data.items() if isinstance(data, OrderedDict) else sorted(data.items()):
+                stream.write(separator)
+                TsvOutput._dump_obj(value, stream)
+                separator = '\t'
+        else:
+            TsvOutput._dump_obj(data, stream)
+
+    @staticmethod
+    def dump(data):
+        io = StringIO()
+        for item in data:
+            TsvOutput._dump_row(item, io)
+            io.write('\n')
+
+        result = io.getvalue()
+        io.close()
+        return result
