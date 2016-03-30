@@ -11,8 +11,8 @@ from azure.mgmt.compute.operations import (AvailabilitySetsOperations,
                                            VirtualMachineScaleSetVMsOperations)
 
 from ._command_creation import get_mgmt_service_client
-from ..commands._auto_command import build_operation, LongRunningOperation
-from ..commands import CommandTable
+from ..commands._auto_command import build_operation
+from ..commands import CommandTable, LongRunningOperation
 
 def _compute_client_factory():
     return get_mgmt_service_client(ComputeManagementClient, ComputeManagementClientConfiguration)
