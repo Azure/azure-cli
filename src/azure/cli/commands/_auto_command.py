@@ -97,6 +97,7 @@ def _option_description(operation, arg):
     return ' '.join(l.split(':')[-1] for l in inspect.getdoc(operation).splitlines()
                     if l.startswith(':param') and arg + ':' in l)
 
+#pylint: disable=too-many-arguments
 def build_operation(command_name, member_path, client_type, operations, #pylint: disable=dangerous-default-value
                     paramaliases=GLOBALPARAMALIASES, extra_args=None):
     for operation, return_type_name in operations:
@@ -120,6 +121,7 @@ def build_operation(command_name, member_path, client_type, operations, #pylint:
         if extra_args:
             for arg in extra_args:
                 if len(arg) != 2:
-                    logger.warning('{} is in invalid format. Should be: (spec, description)'.format(str(arg)))
+                    logger.warning('%s is in invalid format. Should be: (spec, description)',
+                                   (str(arg)))
                     continue
                 func = _decorate_option(arg[0], arg[1], target=None, func=func)

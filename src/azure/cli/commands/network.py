@@ -23,7 +23,7 @@ from ._command_creation import get_mgmt_service_client
 from ..commands._auto_command import build_operation, LongRunningOperation, GLOBALPARAMALIASES
 from ..commands import command, description, option
 
-def _network_client_factory(*args):
+def _network_client_factory(*args): # pylint: disable=unused-argument
     return get_mgmt_service_client(NetworkManagementClient, NetworkManagementClientConfiguration)
 
 PARAMALIASES = GLOBALPARAMALIASES.copy()
