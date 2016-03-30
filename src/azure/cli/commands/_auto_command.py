@@ -6,7 +6,6 @@ from msrest.paging import Paged
 from msrest.exceptions import ClientException
 from azure.cli.parser import IncorrectUsageError
 from ..commands import COMMON_PARAMETERS
-from azure.cli._argparse import IncorrectUsageError
 from ..commands import command, description, option
 from .._logging import logger
 
