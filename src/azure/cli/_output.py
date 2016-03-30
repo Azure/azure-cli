@@ -104,7 +104,7 @@ class ListOutput(object): #pylint: disable=too-few-public-methods
     @staticmethod
     def _dump_line(io, line, indent):
         io.write('   ' * indent)
-        io.write(line)
+        io.write(str(line))
         io.write('\n')
 
     def _dump_object(self, io, obj, indent):

@@ -6,6 +6,9 @@ from msrest.paging import Paged
 from msrest.exceptions import ClientException
 from azure.cli.parser import IncorrectUsageError
 from ..commands import COMMON_PARAMETERS
+from azure.cli._argparse import IncorrectUsageError
+from ..commands import command, description, option
+from .._logging import logger
 
 EXCLUDED_PARAMS = frozenset(['self', 'raw', 'custom_headers', 'operation_config'])
 
@@ -44,13 +47,15 @@ def _get_member(obj, path):
     Ex. a.b.c would get the property 'c' of property 'b' of the
         object a
     """
+    if not path:
+        return obj
     for segment in path.split('.'):
         obj = getattr(obj, segment)
     return obj
 
 def _make_func(client_factory, member_path, return_type_or_func, unbound_func):
     def call_client(args):
-        client = client_factory()
+        client = client_factory(args)
         ops_instance = _get_member(client, member_path)
         try:
             result = unbound_func(ops_instance, **args)
@@ -79,10 +84,13 @@ def _option_description(operation, arg):
     return ' '.join(l.split(':')[-1] for l in inspect.getdoc(operation).splitlines()
                     if l.startswith(':param') and arg + ':' in l)
 
-def build_operation(command_name, member_path, client_type, operations, command_table):
+#pylint: disable=too-many-arguments
+def build_operation(command_name, member_path, client_type, operations, #pylint: disable=dangerous-default-value
+                    paramaliases=GLOBALPARAMALIASES, extra_args=None):
     for operation, return_type_name in operations:
         opname = operation.__name__.replace('_', '-')
         func = _make_func(client_type, member_path, return_type_name, operation)
+        func = _decorate_command(' '.join([command_name, opname]), func)
 
         args = []
         try:
@@ -111,3 +119,10 @@ def build_operation(command_name, member_path, client_type, operations, command_
             'arguments': options
             }
 
+        if extra_args:
+            for arg in extra_args:
+                if len(arg) != 2:
+                    logger.warning('%s is in invalid format. Should be: (spec, description)',
+                                   (str(arg)))
+                    continue
+                func = _decorate_option(arg[0], arg[1], target=None, func=func)

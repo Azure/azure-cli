@@ -14,7 +14,7 @@ from ._command_creation import get_mgmt_service_client
 from ..commands._auto_command import build_operation, LongRunningOperation
 from ..commands import CommandTable
 
-def _compute_client_factory():
+def _compute_client_factory(*args): # pylint: disable=unused-argument
     return get_mgmt_service_client(ComputeManagementClient, ComputeManagementClientConfiguration)
 
 command_table = CommandTable()

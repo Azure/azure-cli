@@ -25,7 +25,7 @@ from ..commands import CommandTable
 
 command_table = CommandTable()
 
-def _network_client_factory():
+def _network_client_factory(*args): # pylint: disable=unused-argument
     return get_mgmt_service_client(NetworkManagementClient, NetworkManagementClientConfiguration)
 
 
