@@ -23,7 +23,7 @@ from ._command_creation import get_mgmt_service_client
 from ..commands._auto_command import build_operation, LongRunningOperation, GLOBALPARAMALIASES
 from ..commands import command, description, option
 
-def _network_client_factory():
+def _network_client_factory(*args):
     return get_mgmt_service_client(NetworkManagementClient, NetworkManagementClientConfiguration)
 
 PARAMALIASES = GLOBALPARAMALIASES.copy()

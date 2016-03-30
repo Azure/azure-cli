@@ -68,7 +68,7 @@ def _get_member(obj, path):
 
 def _make_func(client_factory, member_path, return_type_or_func, unbound_func):
     def call_client(args, unexpected): #pylint: disable=unused-argument
-        client = client_factory()
+        client = client_factory(args)
         ops_instance = _get_member(client, member_path)
         try:
             result = unbound_func(ops_instance, **args)
@@ -98,7 +98,7 @@ def _option_description(operation, arg):
                     if l.startswith(':param') and arg + ':' in l)
 
 def build_operation(command_name, member_path, client_type, operations, #pylint: disable=dangerous-default-value
-                    paramaliases=GLOBALPARAMALIASES, default_params=None):
+                    paramaliases=GLOBALPARAMALIASES, extra_args=None):
     for operation, return_type_name in operations:
         opname = operation.__name__.replace('_', '-')
         func = _make_func(client_type, member_path, return_type_name, operation)
@@ -117,8 +117,8 @@ def build_operation(command_name, member_path, client_type, operations, #pylint:
             spec = paramaliases.get(arg, '--%s <%s>' % (arg, arg))
             func = _decorate_option(spec, _option_description(operation, arg),
                                     target=arg, func=func)
-        if default_params:
-            for arg in default_params:
+        if extra_args:
+            for arg in extra_args:
                 if len(arg) != 2:
                     logger.warning('{} is in invalid format. Should be: (spec, description)'.format(str(arg)))
                     continue
