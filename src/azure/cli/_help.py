@@ -42,7 +42,7 @@ def print_description_list(help_files, out=sys.stdout):
     _out = out
 
     indent = 1
-    max_name_length = max(len(f.name) for f in help_files)
+    max_name_length = max(len(f.name) for f in help_files) if help_files else 0
     for help_file in help_files:
         _print_indent('{0}{1}{2}'.format(help_file.name,
                                          _get_column_indent(help_file.name, max_name_length),
