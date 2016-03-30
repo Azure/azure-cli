@@ -236,9 +236,10 @@ class TextOutput(object):
         io.close()
         return result
 
-class TsvOutput(object):
+class TsvOutput(object): #pylint: disable=too-few-public-methods
 
-    def _dump_obj(self, data, stream):
+    @staticmethod
+    def _dump_obj(data, stream):
         if isinstance(data, list):
             stream.write(str(len(data)))
         elif isinstance(data, dict):
@@ -249,20 +250,22 @@ class TsvOutput(object):
         else:
             stream.write(data)
 
-    def _dump_row(self, data, stream):
+    @staticmethod
+    def _dump_row(data, stream):
         if isinstance(data, dict):
             separator = ''
             for _, value in data.items():
                 stream.write(separator)
-                self._dump_obj(value, stream)
+                TsvOutput._dump_obj(value, stream)
                 separator = '\t'
         else:
-            self._dump_obj(data, stream)
+            TsvOutput._dump_obj(data, stream)
 
-    def dump(self, data):
+    @staticmethod
+    def dump(data):
         io = StringIO()
         for item in data:
-            self._dump_row(item, io)
+            TsvOutput._dump_row(item, io)
             io.write('\n')
 
         result = io.getvalue()
