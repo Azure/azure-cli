@@ -10,7 +10,7 @@ from azure.mgmt.storage.operations import StorageAccountsOperations
 
 from ..commands import CommandTable, COMMON_PARAMETERS as GLOBAL_COMMON_PARAMETERS
 from ._command_creation import get_mgmt_service_client, get_data_service_client
-from ..commands._auto_command import build_operation
+from ..commands._auto_command import build_operation, AutoCommandDefinition
 from .._locale import L
 
 command_table = CommandTable()
@@ -95,10 +95,13 @@ build_operation('storage account',
                 'storage_accounts',
                 _storage_client_factory,
                 [
-                    (StorageAccountsOperations.check_name_availability, 'Result'),
-                    (StorageAccountsOperations.delete, None),
-                    (StorageAccountsOperations.get_properties, 'StorageAccount'),
-                    (StorageAccountsOperations.list_keys, '[StorageAccountKeys]')
+                    AutoCommandDefinition(
+                        StorageAccountsOperations.check_name_availability, 'Result', 'check-name'),
+                    AutoCommandDefinition(StorageAccountsOperations.delete, None),
+                    AutoCommandDefinition(
+                        StorageAccountsOperations.get_properties, 'StorageAccount', 'show'),
+                    AutoCommandDefinition(
+                        StorageAccountsOperations.list_keys, '[StorageAccountKeys]')
                 ],
                 command_table)
 
@@ -124,10 +127,10 @@ def list_accounts(args):
 def renew_account_keys(args):
     smc = _storage_client_factory()
     for key in args.get('key'):
-        result = smc.storage_accounts.regenerate_key(
+            result = smc.storage_accounts.regenerate_key(
             resource_group_name=args.get('resource_group_name'),
             account_name=args.get('account-name'),
-            key_name=key)
+                key_name=key)
     return result
 
 @command_table.command('storage account usage')
@@ -169,7 +172,7 @@ storage_account_type_string = ' | '.join(storage_account_types)
 @command_table.option(**COMMON_PARAMETERS['resource_group_name'])
 @command_table.option(**COMMON_PARAMETERS['account-name'])
 @command_table.option('--location -l <location>',
-                      L('location in which to create the storage account'), required=True)
+        L('location in which to create the storage account'), required=True)
 @command_table.option('--type -t <type>',
                       L('Values: {}'.format(storage_account_type_string)),
                       choices=storage_account_types.keys(), type=lambda x: storage_account_types[x],
@@ -199,7 +202,7 @@ def create_account(args):
 @command_table.option('--type -t <type>', L('Values: {}'.format(storage_account_type_string)),
                       choices=storage_account_types.keys(), type=lambda x: storage_account_types[x])
 @command_table.option('--tags <tags>',
-                      L('storage account tags. Tags are key=value pairs separated with semicolon(;)'))
+        L('storage account tags. Tags are key=value pairs separated with semicolon(;)'))
 @command_table.option('--custom-domain <customDomain>', L('the custom domain name'))
 @command_table.option('--subdomain', L('use indirect CNAME validation'))
 def set_account(args):
@@ -221,11 +224,12 @@ def set_account(args):
 
 build_operation('storage container', None, _blob_data_service_factory,
                 [
-                    (BlockBlobService.list_containers, '[Container]'),
-                    (BlockBlobService.delete_container, 'None'),
-                    (BlockBlobService.get_container_properties, '[ContainerProperties]'),
-                    (BlockBlobService.create_container, 'None')
+                    AutoCommandDefinition(BlockBlobService.list_containers, '[Container]'),
+                    AutoCommandDefinition(BlockBlobService.delete_container, 'None'),
+                    AutoCommandDefinition(BlockBlobService.get_container_properties, '[ContainerProperties]'),
+                    AutoCommandDefinition(BlockBlobService.create_container, 'None')
                 ],
+                command_table,
                 extra_args=STORAGE_DATA_CLIENT_ARGS)
 
 # TODO: update this once enums are supported in commands first-class (task #115175885)
@@ -313,10 +317,11 @@ lease_duration_values_string = 'Between {} and {} seconds. ({} for infinite)'.fo
 
 build_operation('storage container lease', None, _blob_data_service_factory,
                 [
-                    (BlockBlobService.renew_container_lease, 'None'),
-                    (BlockBlobService.release_container_lease, 'None'),
-                    (BlockBlobService.change_container_lease, 'LeaseId')
+                    AutoCommandDefinition(BlockBlobService.renew_container_lease, 'None'),
+                    AutoCommandDefinition(BlockBlobService.release_container_lease, 'None'),
+                    AutoCommandDefinition(BlockBlobService.change_container_lease, 'LeaseId')
                 ],
+                command_table,
                 extra_args=STORAGE_DATA_CLIENT_ARGS)
 
 @command_table.command('storage container lease acquire')
@@ -378,11 +383,12 @@ def break_container_lease(args):
 
 build_operation('storage blob', None, _blob_data_service_factory,
                 [
-                    (BlockBlobService.list_blobs, '[Blob]'),
-                    (BlockBlobService.delete_blob, 'None'),
-                    (BlockBlobService.exists, 'Boolean'),
-                    (BlockBlobService.get_blob_properties, 'BlobProperties')
+                    AutoCommandDefinition(BlockBlobService.list_blobs, '[Blob]'),
+                    AutoCommandDefinition(BlockBlobService.delete_blob, 'None'),
+                    AutoCommandDefinition(BlockBlobService.exists, 'Boolean'),
+                    AutoCommandDefinition(BlockBlobService.get_blob_properties, 'BlobProperties')
                 ],
+                command_table,
                 extra_args=STORAGE_DATA_CLIENT_ARGS)
 
 @command_table.command('storage blob upload-block-blob')
