@@ -100,7 +100,8 @@ The repo has a launch.json file that will launch the version of Python that is f
   ```BatchFile
   python -m unittest discover -s azure\cli\tests [--buffer]
   ``` 
-Use of --buffer will automatically fail any tests which do not have an expected result recorded. Use without --buffer to permit recording of expected results for tests which don't have them.
+Use of `--buffer` will automatically fail any VCR-style tests which do not have an expected result recorded. Omit `--buffer` to permit recording of tests. To re-record any tests, you can either remove the test's entry from the `expected_results.res` file or remove the corresponding `<test>.yaml` VCR cassette and re-run without `--buffer`.
+
 ####VS Code
   Under construction...
   
