@@ -124,11 +124,10 @@ def list_accounts(args):
 def renew_account_keys(args):
     smc = _storage_client_factory()
     for key in args.get('key'):
-            result = smc.storage_accounts.regenerate_key(
+        result = smc.storage_accounts.regenerate_key(
             resource_group_name=args.get('resource_group_name'),
             account_name=args.get('account-name'),
-                key_name=key)
-
+            key_name=key)
     return result
 
 @command_table.command('storage account usage')
@@ -155,7 +154,6 @@ def show_storage_connection_string(args):
         endpoint_protocol,
         storage_account,
         keys.key1) #pylint: disable=no-member
-
     return {'ConnectionString':connection_string}
 
 # TODO: update this once enums are supported in commands first-class (task #115175885)
@@ -166,24 +164,24 @@ storage_account_types = {'Standard_LRS': AccountType.standard_lrs,
                          'Premium_LRS': AccountType.premium_lrs}
 storage_account_type_string = ' | '.join(storage_account_types)
 
-@command('storage account create')
-@description(L('Create a storage account.'))
-@option('--resource-group -g <resourceGroup>', L('the resource group name'), required=True)
-@option('--account-name -n <accountName>', L('the storage account name'), required=True)
-@option('--location -l <location>',
-        L('location in which to create the storage account'), required=True)
-@option('--type -t <type>',
-        L('Values: {}'.format(storage_account_type_string)), required=True)
-@option('--tags <tags>',
+@command_table.command('storage account create')
+@command_table.description(L('Create a storage account.'))
+@command_table.option(**COMMON_PARAMETERS['resource_group_name'])
+@command_table.option(**COMMON_PARAMETERS['account-name'])
+@command_table.option('--location -l <location>',
+                      L('location in which to create the storage account'), required=True)
+@command_table.option('--type -t <type>',
+                      L('Values: {}'.format(storage_account_type_string)),
+                      choices=storage_account_types.keys(), type=lambda x: storage_account_types[x],
+                      required=True)
+@command_table.option('--tags <tags>',
         L('storage account tags. Tags are key=value pairs separated with semicolon(;)'))
-def create_account(args, unexpected): #pylint: disable=unused-argument
+def create_account(args):
     from azure.mgmt.storage.models import StorageAccountCreateParameters
-
     smc = _storage_client_factory()
 
     resource_group = args.get('resource-group')
     account_name = args.get('account-name')
-
     try:
         account_type = storage_account_types[args.get('type')]
     except KeyError:
@@ -192,21 +190,20 @@ def create_account(args, unexpected): #pylint: disable=unused-argument
     params = StorageAccountCreateParameters(args.get('location'),
                                             account_type,
                                             _parse_dict(args, 'tags'))
-
     return smc.storage_accounts.create(resource_group, account_name, params)
 
-@command('storage account set')
-@description(L('Update storage account property (only one at a time).'))
-@option('--resource-group -g <resourceGroup>', L('the resource group name'), required=True)
-@option('--account-name -n <accountName>', L('the storage account name'), required=True)
-@option('--type -t <type>', L('Values: {}'.format(storage_account_type_string)))
-@option('--tags <tags>',
-        L('storage account tags. Tags are key=value pairs separated with semicolon(;)'))
-@option('--custom-domain <customDomain>', L('the custom domain name'))
-@option('--subdomain', L('use indirect CNAME validation'))
-def set_account(args, unexpected): #pylint: disable=unused-argument
+@command_table.command('storage account set')
+@command_table.description(L('Update storage account property (only one at a time).'))
+@command_table.option(**COMMON_PARAMETERS['resource_group_name'])
+@command_table.option(**COMMON_PARAMETERS['account-name'])
+@command_table.option('--type -t <type>', L('Values: {}'.format(storage_account_type_string)),
+                      choices=storage_account_types.keys(), type=lambda x: storage_account_types[x])
+@command_table.option('--tags <tags>',
+                      L('storage account tags. Tags are key=value pairs separated with semicolon(;)'))
+@command_table.option('--custom-domain <customDomain>', L('the custom domain name'))
+@command_table.option('--subdomain', L('use indirect CNAME validation'))
+def set_account(args):
     from azure.mgmt.storage.models import StorageAccountUpdateParameters, CustomDomain
-
     smc = _storage_client_factory()
 
     resource_group = args.get('resource-group')
@@ -218,7 +215,6 @@ def set_account(args, unexpected): #pylint: disable=unused-argument
         raise IncorrectUsageError(L('type must be: {}'
                                     .format(storage_account_type_string)))
     params = StorageAccountUpdateParameters(_parse_dict(args, 'tags'), account_type, domain)
-
     return smc.storage_accounts.update(resource_group, account_name, params)
 
 # CONTAINER COMMANDS
@@ -236,6 +232,7 @@ build_operation('storage container', None, _blob_data_service_factory,
 public_access_types = {'none': None,
                        'blob': PublicAccess.Blob,
                        'container': PublicAccess.Container}
+
 @command_table.command('storage container create')
 @command_table.description(L('Create a storage container.'))
 @command_table.option(**COMMON_PARAMETERS['container-name'])
@@ -245,14 +242,13 @@ public_access_types = {'none': None,
 @command_table.option('--public-access -p', default=None, choices=public_access_types.keys(),
                       type=lambda x: public_access_types[x])
 @command_table.option('--metadata -m', help=L('dict of key=value pairs (separated by ;)'))
-@command_table.option('--fail-on-exist', help=L('operation fails if container already exists'), action='store_true')
+@command_table.option('--fail-on-exist',
+                      help=L('operation fails if container already exists'), action='store_true')
 @command_table.option(**COMMON_PARAMETERS['timeout'])
 def create_container(args):
     bbs = _get_blob_service_client(args)
     public_access = args.get('public-access')
-
     metadata = _parse_dict(args, 'metadata', allow_singles=False)
-
     if not bbs.create_container(
             container_name=args.get('container-name'),
             public_access=public_access,
@@ -272,8 +268,8 @@ def create_container(args):
 @command_table.option('--lease-id <id>', help=L('delete only if lease is ID active and matches'))
 @command_table.option('--if-modified-since', help=L('delete only if container modified since ' + \
     'supplied UTC datetime'))
-@command_table.option('--in-unmodified-since <dateTime>', L('delete only if container has not been modified ' + \
-    'since supplied UTC datetime'))
+@command_table.option('--in-unmodified-since <dateTime>', L('delete only if container has not been ' + \
+    'modifie since supplied UTC datetime'))
 @command_table.option(**COMMON_PARAMETERS['timeout'])
 def delete_container(args):
     bbs = _get_blob_service_client(args)
@@ -293,15 +289,15 @@ def delete_container(args):
             timeout=_parse_int(args, 'timeout')):
         raise RuntimeError(L('Container deletion failed.'))
 
-@command('storage container exists')
-@description(L('Check if a storage container exists.'))
-@option('--container-name -c <containerName>', L('the name of the container'), required=True)
-@option('--account-name -n <accountName>', L('the storage account name'))
-@option('--account-key -k <accountKey>', L('the storage account key'))
-@option('--connection-string -t <connectionString>', L('the storage connection string'))
-@option('--snapshot <datetime>', L('UTC datetime value which specifies a snapshot'))
-@option('--timeout <seconds>')
-def exists_container(args, unexpected): #pylint: disable=unused-argument
+@command_table.command('storage container exists')
+@command_table.description(L('Check if a storage container exists.'))
+@command_table.option(**COMMON_PARAMETERS['container-name'])
+@command_table.option(**COMMON_PARAMETERS['account-name'])
+@command_table.option(**COMMON_PARAMETERS['account_key'])
+@command_table.option(**COMMON_PARAMETERS['connection-string'])
+@command_table.option('--snapshot <datetime>', L('UTC datetime value which specifies a snapshot'))
+@command_table.option(**COMMON_PARAMETERS['timeout'])
+def exists_container(args):
     bbs = _blob_data_service_factory(args)
     return str(bbs.exists(
         container_name=args.get('container-name'),
@@ -330,14 +326,14 @@ build_operation('storage container lease', None, _blob_data_service_factory,
         help=L('Values: {}'.format(lease_duration_values_string)), required=True)
 @command_table.option('--proposed-lease-id --plid', help=L('proposed lease id in GUID format'))
 @command_table.option(**COMMON_PARAMETERS['account-name'])
-@command_table.option(**COMMON_PARAMETERS['account-key'])
-@command_table.option(**COMMON_PARAMETERS['accountconnection-string'])
+@command_table.option(**COMMON_PARAMETERS['account_key'])
+@command_table.option(**COMMON_PARAMETERS['connection-string'])
 @command_table.option('--if-modified-since', help=L('delete only if container modified since ' + \
     'supplied UTC datetime'))
 @command_table.option('--in-unmodified-since', help=L('delete only if container has not been ' + \
     'modified since supplied UTC datetime'))
 @command_table.option(**COMMON_PARAMETERS['timeout'])
-def acquire_container_lease(args): #pylint: disable=unused-argument
+def acquire_container_lease(args):
     bbs = _blob_data_service_factory(args)
     try:
         lease_duration = int(args.get('lease-duration'))
@@ -352,20 +348,20 @@ def acquire_container_lease(args): #pylint: disable=unused-argument
         if_unmodified_since=_parse_int(args, 'if-unmodified-since'),
         timeout=True if args.get('timeout') else False)
 
-@command('storage container lease break')
-@description(L('Break a lock on a container for delete operations.'))
-@option('--container-name -c <containerName>', L('the name of the container'), required=True)
-@option('--lease-break-period --lbp <period>',
+@command_table.command('storage container lease break')
+@command_table.description(L('Break a lock on a container for delete operations.'))
+@command_table.option(**COMMON_PARAMETERS['container-name'])
+@command_table.option('--lease-break-period --lbp <period>',
         L('Values: {}'.format(lease_duration_values_string)), required=True)
-@option('--account-name -n <accountName>', L('the storage account name'))
-@option('--account-key -k <accountKey>', L('the storage account key'))
-@option('--connection-string -t <connectionString>', L('the storage connection string'))
-@option('--if-modified-since <dateTime>', L('delete only if container modified since ' + \
+@command_table.option(**COMMON_PARAMETERS['account-name'])
+@command_table.option(**COMMON_PARAMETERS['account_key'])
+@command_table.option(**COMMON_PARAMETERS['connection-string'])
+@command_table.option('--if-modified-since <dateTime>', L('delete only if container modified since ' + \
     'supplied UTC datetime'))
-@option('--in-unmodified-since <dateTime>', L('delete only if container has not been modified ' + \
+@command_table.option('--in-unmodified-since <dateTime>', L('delete only if container has not been modified ' + \
     'since supplied UTC datetime'))
-@option('--timeout <seconds>')
-def break_container_lease(args, unexpected): #pylint: disable=unused-argument
+@command_table.option(**COMMON_PARAMETERS['timeout'])
+def break_container_lease(args):
     bbs = _blob_data_service_factory(args)
     try:
         lease_break_period = int(args.get('lease-break-period'))
@@ -512,97 +508,97 @@ def download_blob(args):
 
 # SHARE COMMANDS
 
-@command('storage share exists')
-@description(L('Check if a file share exists.'))
-@option('--share-name -s <shareName>', L('the file share name'), required=True)
-@option('--account-name -n <accountName>', L('the storage account name'))
-@option('--account-key -k <accountKey>', L('the storage account key'))
-@option('--connection-string -t <connectionString>', L('the storage connection string'))
-def exist_share(args, unexpected): #pylint: disable=unused-argument
+@command_table.command('storage share exists')
+@command_table.description(L('Check if a file share exists.'))
+@command_table.option('--share-name -s <shareName>', L('the file share name'), required=True)
+@command_table.option(**COMMON_PARAMETERS['account-name'])
+@command_table.option(**COMMON_PARAMETERS['account_key'])
+@command_table.option(**COMMON_PARAMETERS['connection-string'])
+def exist_share(args):
     fsc = _get_file_service_client(args)
     return str(fsc.exists(share_name=args.get('share-name')))
 
-@command('storage share list')
-@description(L('List file shares within a storage account.'))
-@option('--account-name -n <accountName>', L('the storage account name'))
-@option('--account-key -k <accountKey>', L('the storage account key'))
-@option('--connection-string -t <connectionString>', L('the storage connection string'))
-@option('--prefix -p <prefix>', L('share name prefix to filter by'))
-def list_shares(args, unexpected): #pylint: disable=unused-argument
+@command_table.command('storage share list')
+@command_table.description(L('List file shares within a storage account.'))
+@command_table.option(**COMMON_PARAMETERS['account-name'])
+@command_table.option(**COMMON_PARAMETERS['account_key'])
+@command_table.option(**COMMON_PARAMETERS['connection-string'])
+@command_table.option('--prefix -p <prefix>', L('share name prefix to filter by'))
+def list_shares(args):
     fsc = _get_file_service_client(args)
     return list(fsc.list_shares(prefix=args.get('prefix')))
 
-@command('storage share contents')
-@description(L('List files and directories inside a share path.'))
-@option('--share-name -s <shareName>', L('the file share name'), required=True)
-@option('--directory-name -d <directoryName>', L('share subdirectory path to examine'))
-@option('--account-name -n <accountName>', L('the storage account name'))
-@option('--account-key -k <accountKey>', L('the storage account key'))
-@option('--connection-string -t <connectionString>', L('the storage connection string'))
-def list_files(args, unexpected): #pylint: disable=unused-argument
+@command_table.command('storage share contents')
+@command_table.description(L('List files and directories inside a share path.'))
+@command_table.option('--share-name -s <shareName>', L('the file share name'), required=True)
+@command_table.option('--directory-name -d <directoryName>', L('share subdirectory path to examine'))
+@command_table.option(**COMMON_PARAMETERS['account-name'])
+@command_table.option(**COMMON_PARAMETERS['account_key'])
+@command_table.option(**COMMON_PARAMETERS['connection-string'])
+def list_files(args):
     fsc = _get_file_service_client(args)
     return list(fsc.list_directories_and_files(
         args.get('share-name'),
         directory_name=args.get('directory-name')))
 
-@command('storage share create')
-@description(L('Create a new file share.'))
-@option('--share-name -s <shareName>', L('the file share name'), required=True)
-@option('--account-name -n <accountName>', L('the storage account name'))
-@option('--account-key -k <accountKey>', L('the storage account key'))
-@option('--connection-string -t <connectionString>', L('the storage connection string'))
-def create_share(args, unexpected): #pylint: disable=unused-argument
+@command_table.command('storage share create')
+@command_table.description(L('Create a new file share.'))
+@command_table.option('--share-name -s <shareName>', L('the file share name'), required=True)
+@command_table.option(**COMMON_PARAMETERS['account-name'])
+@command_table.option(**COMMON_PARAMETERS['account_key'])
+@command_table.option(**COMMON_PARAMETERS['connection-string'])
+def create_share(args):
     fsc = _get_file_service_client(args)
     if not fsc.create_share(args.get('share-name')):
         raise RuntimeError(L('Share creation failed.'))
 
-@command('storage share delete')
-@description(L('Create a new file share.'))
-@option('--share-name -s <shareName>', L('the file share name'), required=True)
-@option('--account-name -n <accountName>', L('the storage account name'))
-@option('--account-key -k <accountKey>', L('the storage account key'))
-@option('--connection-string -t <connectionString>', L('the storage connection string'))
-def delete_share(args, unexpected): #pylint: disable=unused-argument
+@command_table.command('storage share delete')
+@command_table.description(L('Create a new file share.'))
+@command_table.option('--share-name -s <shareName>', L('the file share name'), required=True)
+@command_table.option(**COMMON_PARAMETERS['account-name'])
+@command_table.option(**COMMON_PARAMETERS['account_key'])
+@command_table.option(**COMMON_PARAMETERS['connection-string'])
+def delete_share(args):
     fsc = _get_file_service_client(args)
     if not fsc.delete_share(args.get('share-name')):
         raise RuntimeError(L('Share deletion failed.'))
 
 # DIRECTORY COMMANDS
 
-@command('storage directory exists')
-@description(L('Check if a directory exists.'))
-@option('--share-name -s <shareName>', L('the file share name'), required=True)
-@option('--directory-name -d <directoryName>', L('the directory name'), required=True)
-@option('--account-name -n <accountName>', L('the storage account name'))
-@option('--account-key -k <accountKey>', L('the storage account key'))
-@option('--connection-string -t <connectionString>', L('the storage connection string'))
-def exist_directory(args, unexpected): #pylint: disable=unused-argument
+@command_table.command('storage directory exists')
+@command_table.description(L('Check if a directory exists.'))
+@command_table.option('--share-name -s <shareName>', L('the file share name'), required=True)
+@command_table.option('--directory-name -d <directoryName>', L('the directory name'), required=True)
+@command_table.option(**COMMON_PARAMETERS['account-name'])
+@command_table.option(**COMMON_PARAMETERS['account_key'])
+@command_table.option(**COMMON_PARAMETERS['connection-string'])
+def exist_directory(args):
     fsc = _get_file_service_client(args)
     return str(fsc.exists(share_name=args.get('share-name'),
                           directory_name=args.get('directory-name')))
 
-@command('storage directory create')
-@description(L('Create a directory within a share.'))
-@option('--share-name -s <shareName>', L('the file share name'), required=True)
-@option('--directory-name -d <directoryName>', L('the directory to create'), required=True)
-@option('--account-name -n <accountName>', L('the storage account name'))
-@option('--account-key -k <accountKey>', L('the storage account key'))
-@option('--connection-string -t <connectionString>', L('the storage connection string'))
-def create_directory(args, unexpected): #pylint: disable=unused-argument
+@command_table.command('storage directory create')
+@command_table.description(L('Create a directory within a share.'))
+@command_table.option('--share-name -s <shareName>', L('the file share name'), required=True)
+@command_table.option('--directory-name -d <directoryName>', L('the directory to create'), required=True)
+@command_table.option(**COMMON_PARAMETERS['account-name'])
+@command_table.option(**COMMON_PARAMETERS['account_key'])
+@command_table.option(**COMMON_PARAMETERS['connection-string'])
+def create_directory(args):
     fsc = _get_file_service_client(args)
     if not fsc.create_directory(
             share_name=args.get('share-name'),
             directory_name=args.get('directory-name')):
         raise RuntimeError(L('Directory creation failed.'))
 
-@command('storage directory delete')
-@description(L('Delete a directory within a share.'))
-@option('--share-name -s <shareName>', L('the file share name'), required=True)
-@option('--directory-name -d <directoryName>', L('the directory to delete'), required=True)
-@option('--account-name -n <accountName>', L('the storage account name'))
-@option('--account-key -k <accountKey>', L('the storage account key'))
-@option('--connection-string -t <connectionString>', L('the storage connection string'))
-def delete_directory(args, unexpected): #pylint: disable=unused-argument
+@command_table.command('storage directory delete')
+@command_table.description(L('Delete a directory within a share.'))
+@command_table.option('--share-name -s <shareName>', L('the file share name'), required=True)
+@command_table.option('--directory-name -d <directoryName>', L('the directory to delete'), required=True)
+@command_table.option(**COMMON_PARAMETERS['account-name'])
+@command_table.option(**COMMON_PARAMETERS['account_key'])
+@command_table.option(**COMMON_PARAMETERS['connection-string'])
+def delete_directory(args):
     fsc = _get_file_service_client(args)
     if not fsc.delete_directory(
             share_name=args.get('share-name'),
@@ -611,14 +607,15 @@ def delete_directory(args, unexpected): #pylint: disable=unused-argument
 
 # FILE COMMANDS
 
-@command('storage file download')
-@option('--share-name -s <shareName>', L('the file share name'), required=True)
-@option('--file-name -f <fileName>', L('the file name'), required=True)
-@option('--local-file-name -lfn <path>', L('the path to the local file'), required=True)
-@option('--directory-name -d <directoryName>', L('the directory name'))
-@option('--account-name -n <accountName>', L('the storage account name'))
-@option('--account-key -k <accountKey>', L('the storage account key'))
-def storage_file_download(args, unexpected): #pylint: disable=unused-argument
+@command_table.command('storage file download')
+@command_table.option('--share-name -s <shareName>', L('the file share name'), required=True)
+@command_table.option('--file-name -f <fileName>', L('the file name'), required=True)
+@command_table.option('--local-file-name -lfn <path>', L('the path to the local file'), required=True)
+@command_table.option('--directory-name -d <directoryName>', L('the directory name'))
+@command_table.option(**COMMON_PARAMETERS['account-name'])
+@command_table.option(**COMMON_PARAMETERS['account_key'])
+@command_table.option(**COMMON_PARAMETERS['connection-string'])
+def storage_file_download(args):
     fsc = _get_file_service_client(args)
     fsc.get_file_to_path(args.get('share-name'),
                          args.get('directory-name'),
@@ -626,37 +623,29 @@ def storage_file_download(args, unexpected): #pylint: disable=unused-argument
                          args.get('local-file-name'),
                          progress_callback=_update_progress)
 
-@command('storage file exists')
-@description(L('Check if a file exists.'))
-@option('--share-name -s <shareName>', L('the file share name'), required=True)
-@option('--file-name -f <fileName>', L('the file name'), required=True)
-@option('--directory-name -d <directoryName>', L('subdirectory path to the file'))
-@option('--account-name -n <accountName>', L('the storage account name'))
-@option('--account-key -k <accountKey>', L('the storage account key'))
-@option('--connection-string -t <connectionString>', L('the storage connection string'))
-def exist_file(args, unexpected): #pylint: disable=unused-argument
+@command_table.command('storage file exists')
+@command_table.description(L('Check if a file exists.'))
+@command_table.option('--share-name -s <shareName>', L('the file share name'), required=True)
+@command_table.option('--file-name -f <fileName>', L('the file name'), required=True)
+@command_table.option('--directory-name -d <directoryName>', L('subdirectory path to the file'))
+@command_table.option(**COMMON_PARAMETERS['account-name'])
+@command_table.option(**COMMON_PARAMETERS['account_key'])
+@command_table.option(**COMMON_PARAMETERS['connection-string'])
+def exist_file(args):
     fsc = _get_file_service_client(args)
     return str(fsc.exists(share_name=args.get('share-name'),
                           directory_name=args.get('directory-name'),
                           file_name=args.get('file-name')))
 
-@command('storage file upload')
-@option('--share-name -s <shareName>', L('the file share name'), required=True)
-@option('--file-name -f <fileName>', L('the file name'), required=True)
-@option('--local-file-name -lfn <path>', L('the path to the local file'), required=True)
-@option('--directory-name -d <directoryName>', L('the directory name'))
-@option('--account-name -n <accountName>', L('the storage account name'))
-@option('--account-key -k <accountKey>', L('the storage account key'))
-def storage_file_upload(args, unexpected): #pylint: disable=unused-argument
-@command_table.command('storage file create')
-@command_table.option('--share-name -sn', required=True)
-@command_table.option('--file-name -fn', required=True)
-@command_table.option('--local-file-name -lfn', required=True)
-@command_table.option('--directory-name -dn')
+@command_table.command('storage file upload')
+@command_table.option('--share-name --sn', required=True)
+@command_table.option('--file-name --fn', required=True)
+@command_table.option('--local-file-name --lfn', required=True)
+@command_table.option('--directory-name --dn')
 @command_table.option(**COMMON_PARAMETERS['account-name'])
 @command_table.option(**COMMON_PARAMETERS['account_key'])
 @command_table.option(**COMMON_PARAMETERS['container-name'])
-def storage_file_create(args):
+def storage_file_upload(args):
     fsc = _get_file_service_client(args)
     fsc.create_file_from_path(args.get('share-name'),
                               args.get('directory-name'),
@@ -664,13 +653,14 @@ def storage_file_create(args):
                               args.get('local-file-name'),
                               progress_callback=_update_progress)
 
-@command('storage file delete')
-@option('--share-name -s <shareName>', L('the file share name'), required=True)
-@option('--file-name -f <fileName>', L('the file name'), required=True)
-@option('--directory-name -d <directoryName>', L('the directory name'))
-@option('--account-name -n <accountName>', L('the storage account name'))
-@option('--account-key -k <accountKey>', L('the storage account key'))
-def storage_file_delete(args, unexpected): #pylint: disable=unused-argument
+@command_table.command('storage file delete')
+@command_table.option('--share-name -s <shareName>', L('the file share name'), required=True)
+@command_table.option('--file-name -f <fileName>', L('the file name'), required=True)
+@command_table.option('--directory-name -d <directoryName>', L('the directory name'))
+@command_table.option(**COMMON_PARAMETERS['account-name'])
+@command_table.option(**COMMON_PARAMETERS['account_key'])
+@command_table.option(**COMMON_PARAMETERS['connection-string'])
+def storage_file_delete(args):
     fsc = _get_file_service_client(args)
     fsc.delete_file(args.get('share-name'),
                     args.get('directory-name'),
@@ -686,6 +676,7 @@ def _get_file_service_client(args):
                                    _resolve_connection_string(args))
 
 DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S'
+
 def _parse_datetime(args, key):
     # TODO This should handle timezone
     datestring = args.get(key)
