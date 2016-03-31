@@ -5,6 +5,7 @@ from sys import stderr
 from six.moves import input # pylint: disable=redefined-builtin
 
 from azure.storage.blob import PublicAccess, BlockBlobService
+from azure.storage.file import FileService
 from azure.mgmt.storage import StorageManagementClient, StorageManagementClientConfiguration
 from azure.mgmt.storage.models import AccountType
 from azure.mgmt.storage.operations import StorageAccountsOperations
@@ -242,6 +243,8 @@ def set_account(args):
     params = StorageAccountUpdateParameters(_parse_dict(args, 'tags'), account_type, domain)
     return smc.storage_accounts.update(resource_group, account_name, params)
 
+#### BLOB COMMANDS ################################################################################
+
 # CONTAINER COMMANDS
 
 build_operation(
@@ -470,7 +473,36 @@ def download_blob(args):
                          args.get('download-to'),
                          progress_callback=_update_progress)
 
+#### FILE COMMANDS ################################################################################
+
+def _file_data_service_factory(*args):
+    def _resolve_arg(key, envkey):
+        try:
+            value = args[0][key]
+            args[0].pop(key, None)
+        except (IndexError, KeyError):
+            value = environ.get(envkey)
+        return value
+    return get_data_service_client(
+        FileService,
+        _resolve_arg('account-name', 'AZURE_STORAGE_ACCOUNT'),
+        _resolve_arg('account-key', 'AZURE_STORAGE_ACCOUNT_KEY'),
+        _resolve_arg('connection-string', 'AZURE_STORAGE_CONNECTION_STRING'))
+
 # SHARE COMMANDS
+
+build_operation(
+    'storage share',
+    None,
+    _file_data_service_factory,
+    [
+        AutoCommandDefinition(FileService.list_shares, '[Share]', 'list'),
+        AutoCommandDefinition(FileService.list_directories_and_files,
+                              '[ShareContents]', 'contents'),
+        AutoCommandDefinition(FileService.create_share, 'Boolean', 'create'),
+        AutoCommandDefinition(FileService.delete_share, 'Boolean', 'delete')
+    ],
+    command_table, None, STORAGE_DATA_CLIENT_ARGS)
 
 @command_table.command('storage share exists')
 @command_table.description(L('Check if a file share exists.'))
@@ -479,55 +511,20 @@ def download_blob(args):
 @command_table.option(**COMMON_PARAMETERS['account-key'])
 @command_table.option(**COMMON_PARAMETERS['connection-string'])
 def exist_share(args):
-    fsc = _get_file_service_client(args)
+    fsc = _file_data_service_factory(args)
     return str(fsc.exists(share_name=args.get('share-name')))
 
-@command_table.command('storage share list')
-@command_table.description(L('List file shares within a storage account.'))
-@command_table.option(**COMMON_PARAMETERS['account-name'])
-@command_table.option(**COMMON_PARAMETERS['account-key'])
-@command_table.option(**COMMON_PARAMETERS['connection-string'])
-@command_table.option('--prefix -p', help=L('share name prefix to filter by'))
-def list_shares(args):
-    fsc = _get_file_service_client(args)
-    return list(fsc.list_shares(prefix=args.get('prefix')))
-
-@command_table.command('storage share contents')
-@command_table.description(L('List files and directories inside a share path.'))
-@command_table.option(**COMMON_PARAMETERS['share-name'])
-@command_table.option('--directory-name -d', help=L('share subdirectory path to examine'))
-@command_table.option(**COMMON_PARAMETERS['account-name'])
-@command_table.option(**COMMON_PARAMETERS['account-key'])
-@command_table.option(**COMMON_PARAMETERS['connection-string'])
-def list_files(args):
-    fsc = _get_file_service_client(args)
-    return list(fsc.list_directories_and_files(
-        args.get('share-name'),
-        directory_name=args.get('directory-name')))
-
-@command_table.command('storage share create')
-@command_table.description(L('Create a new file share.'))
-@command_table.option(**COMMON_PARAMETERS['share-name'])
-@command_table.option(**COMMON_PARAMETERS['account-name'])
-@command_table.option(**COMMON_PARAMETERS['account-key'])
-@command_table.option(**COMMON_PARAMETERS['connection-string'])
-def create_share(args):
-    fsc = _get_file_service_client(args)
-    if not fsc.create_share(args.get('share-name')):
-        raise RuntimeError(L('Share creation failed.'))
-
-@command_table.command('storage share delete')
-@command_table.description(L('Create a new file share.'))
-@command_table.option(**COMMON_PARAMETERS['share-name'])
-@command_table.option(**COMMON_PARAMETERS['account-name'])
-@command_table.option(**COMMON_PARAMETERS['account-key'])
-@command_table.option(**COMMON_PARAMETERS['connection-string'])
-def delete_share(args):
-    fsc = _get_file_service_client(args)
-    if not fsc.delete_share(args.get('share-name')):
-        raise RuntimeError(L('Share deletion failed.'))
-
 # DIRECTORY COMMANDS
+
+build_operation(
+    'storage directory',
+    None,
+    _file_data_service_factory,
+    [
+        AutoCommandDefinition(FileService.create_directory, 'Boolean', 'create'),
+        AutoCommandDefinition(FileService.delete_directory, 'Boolean', 'delete')
+    ],
+    command_table, None, STORAGE_DATA_CLIENT_ARGS)
 
 @command_table.command('storage directory exists')
 @command_table.description(L('Check if a directory exists.'))
@@ -537,39 +534,20 @@ def delete_share(args):
 @command_table.option(**COMMON_PARAMETERS['account-key'])
 @command_table.option(**COMMON_PARAMETERS['connection-string'])
 def exist_directory(args):
-    fsc = _get_file_service_client(args)
+    fsc = _file_data_service_factory(args)
     return str(fsc.exists(share_name=args.get('share-name'),
                           directory_name=args.get('directory-name')))
 
-@command_table.command('storage directory create')
-@command_table.description(L('Create a directory within a share.'))
-@command_table.option(**COMMON_PARAMETERS['share-name'])
-@command_table.option('--directory-name -d', help=L('the directory to create'), required=True)
-@command_table.option(**COMMON_PARAMETERS['account-name'])
-@command_table.option(**COMMON_PARAMETERS['account-key'])
-@command_table.option(**COMMON_PARAMETERS['connection-string'])
-def create_directory(args):
-    fsc = _get_file_service_client(args)
-    if not fsc.create_directory(
-            share_name=args.get('share-name'),
-            directory_name=args.get('directory-name')):
-        raise RuntimeError(L('Directory creation failed.'))
-
-@command_table.command('storage directory delete')
-@command_table.description(L('Delete a directory within a share.'))
-@command_table.option(**COMMON_PARAMETERS['share-name'])
-@command_table.option('--directory-name -d', help=L('the directory to delete'), required=True)
-@command_table.option(**COMMON_PARAMETERS['account-name'])
-@command_table.option(**COMMON_PARAMETERS['account-key'])
-@command_table.option(**COMMON_PARAMETERS['connection-string'])
-def delete_directory(args):
-    fsc = _get_file_service_client(args)
-    if not fsc.delete_directory(
-            share_name=args.get('share-name'),
-            directory_name=args.get('directory-name')):
-        raise RuntimeError(L('Directory deletion failed.'))
-
 # FILE COMMANDS
+
+build_operation(
+    'storage file',
+    None,
+    _file_data_service_factory,
+    [
+        AutoCommandDefinition(FileService.delete_file, 'Boolean', 'delete'),
+    ],
+    command_table, None, STORAGE_DATA_CLIENT_ARGS)
 
 @command_table.command('storage file download')
 @command_table.option(**COMMON_PARAMETERS['share-name'])
@@ -580,7 +558,7 @@ def delete_directory(args):
 @command_table.option(**COMMON_PARAMETERS['account-key'])
 @command_table.option(**COMMON_PARAMETERS['connection-string'])
 def storage_file_download(args):
-    fsc = _get_file_service_client(args)
+    fsc = _file_data_service_factory(args)
     fsc.get_file_to_path(args.get('share-name'),
                          args.get('directory-name'),
                          args.get('file-name'),
@@ -596,7 +574,7 @@ def storage_file_download(args):
 @command_table.option(**COMMON_PARAMETERS['account-key'])
 @command_table.option(**COMMON_PARAMETERS['connection-string'])
 def exist_file(args):
-    fsc = _get_file_service_client(args)
+    fsc = _file_data_service_factory(args)
     return str(fsc.exists(share_name=args.get('share-name'),
                           directory_name=args.get('directory-name'),
                           file_name=args.get('file-name')))
@@ -610,34 +588,14 @@ def exist_file(args):
 @command_table.option(**COMMON_PARAMETERS['account-key'])
 @command_table.option(**COMMON_PARAMETERS['container-name'])
 def storage_file_upload(args):
-    fsc = _get_file_service_client(args)
+    fsc = _file_data_service_factory(args)
     fsc.create_file_from_path(args.get('share-name'),
                               args.get('directory-name'),
                               args.get('file-name'),
                               args.get('local-file-name'),
                               progress_callback=_update_progress)
 
-@command_table.command('storage file delete')
-@command_table.option(**COMMON_PARAMETERS['share-name'])
-@command_table.option('--file-name -f', help=L('the file name to delete'), required=True)
-@command_table.option('--directory-name -d', help=L('the directory name'))
-@command_table.option(**COMMON_PARAMETERS['account-name'])
-@command_table.option(**COMMON_PARAMETERS['account-key'])
-@command_table.option(**COMMON_PARAMETERS['connection-string'])
-def storage_file_delete(args):
-    fsc = _get_file_service_client(args)
-    fsc.delete_file(args.get('share-name'),
-                    args.get('directory-name'),
-                    args.get('file-name'))
-
 # HELPER METHODS
-
-def _get_file_service_client(args):
-    from azure.storage.file import FileService
-    return get_data_service_client(FileService,
-                                   _resolve_storage_account(args),
-                                   _resolve_storage_account_key(args),
-                                   _resolve_connection_string(args))
 
 DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S'
 
