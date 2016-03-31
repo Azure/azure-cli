@@ -253,7 +253,7 @@ build_operation(
                               '[ContainerProperties]', 'show'),
         AutoCommandDefinition(BlockBlobService.create_container, 'None', 'create')
     ],
-    command_table, common_parameters=STORAGE_DATA_CLIENT_ARGS)
+    command_table, None, STORAGE_DATA_CLIENT_ARGS)
 
 # TODO: update this once enums are supported in commands first-class (task #115175885)
 public_access_types = {'none': None,
@@ -347,7 +347,7 @@ build_operation('storage container lease', None, _blob_data_service_factory,
                     AutoCommandDefinition(BlockBlobService.change_container_lease,
                                           'LeaseId', 'change')
                 ],
-                command_table, common_parameters=STORAGE_DATA_CLIENT_ARGS)
+                command_table, None, STORAGE_DATA_CLIENT_ARGS)
 
 @command_table.command('storage container lease acquire')
 @command_table.description(L('Acquire a lock on a container for delete operations.'))
@@ -411,7 +411,7 @@ build_operation('storage blob', None, _blob_data_service_factory,
                     AutoCommandDefinition(BlockBlobService.get_blob_properties,
                                           'BlobProperties', 'show')
                 ],
-                command_table, common_parameters=STORAGE_DATA_CLIENT_ARGS)
+                command_table, None, STORAGE_DATA_CLIENT_ARGS)
 
 @command_table.command('storage blob upload-block-blob')
 @command_table.description(L('Upload a block blob to a container.'))

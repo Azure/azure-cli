@@ -14,8 +14,8 @@ def _decorate_command(command_table, name, func):
 def _decorate_description(command_table, desc, func):
     return command_table.description(desc)(func)
 
-def _decorate_option(command_table, spec, descr, func):
-    return command_table.option(spec, help=descr)(func)
+def _decorate_option(command_table, func, name, **kwargs):
+    return command_table.option(name, kwargs=kwargs['kwargs'])(func)
 
 def _get_member(obj, path):
     """Recursively walk down the dot-separated path
@@ -67,7 +67,8 @@ def build_operation(command_name,
                     client_type,
                     operations,
                     command_table,
-                    common_parameters=None):
+                    common_parameters=None,
+                    extra_parameters=None):
 
     merged_common_parameters = COMMON_PARAMETERS.copy()
     merged_common_parameters.update(common_parameters or {})
@@ -103,6 +104,6 @@ def build_operation(command_name,
             'arguments': options
             }
 
-        if common_parameters:
-            for item in common_parameters.values():
-                func = _decorate_option(command_table, item['name'], item['help'], func=func)
+        if extra_parameters:
+            for item in extra_parameters.values():
+                func = _decorate_option(command_table, func, item['name'], kwargs=item)
