@@ -38,9 +38,9 @@ class Application(object):
     COMMAND_PARSER_LOADED = 'CommandParser.Loaded'
     COMMAND_PARSER_PARSED = 'CommandParser.Parsed'
 
-    def __init__(self, configuration=None):
+    def __init__(self, configuration):
         self._event_handlers = defaultdict(lambda: [])
-        self.configuration = configuration or Configuration()
+        self.configuration = configuration
 
         # Register presence of and handlers for global parameters
         self.register(self.GLOBAL_PARSER_CREATED, Application._register_builtin_arguments)
