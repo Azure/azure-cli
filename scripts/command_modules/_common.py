@@ -9,9 +9,11 @@ COMMAND_MODULE_PREFIX = 'azure-cli-'
 def get_all_command_modules():
     # The prefix for the command module folders
     PATH_TO_COMMAND_MODULES = os.path.abspath(os.path.join(os.path.abspath(__file__), '..', '..', '..', 'src' , 'command_modules'))
-    all_command_modules = [(name, os.path.join(PATH_TO_COMMAND_MODULES, name))
-                            for name in os.listdir(PATH_TO_COMMAND_MODULES)
-                            if name.startswith(COMMAND_MODULE_PREFIX) and os.path.isdir(os.path.join(PATH_TO_COMMAND_MODULES, name))]
+    all_command_modules = []
+    for name in os.listdir(PATH_TO_COMMAND_MODULES):
+        full_module_path = os.path.join(PATH_TO_COMMAND_MODULES, name)
+        if name.startswith(COMMAND_MODULE_PREFIX) and os.path.isdir(full_module_path):
+            all_command_modules += [(name, full_module_path)]
     print(str(len(all_command_modules))+" command module(s) found...")
     print([name for name, fullpath in all_command_modules])
     return all_command_modules
