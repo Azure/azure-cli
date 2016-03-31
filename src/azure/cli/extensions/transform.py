@@ -4,14 +4,14 @@ def register(application):
     application.register(application.TRANSFORM_RESULT, _resource_group_transform)
 
 def _parse_id(strid):
-        parsed = {}
-        parts = re.split('/', strid)
-        if parts[3] != 'resourceGroups':
-            raise KeyError()
+    parsed = {}
+    parts = re.split('/', strid)
+    if parts[3] != 'resourceGroups':
+        raise KeyError()
 
-        parsed['resource-group'] = parts[4]
-        parsed['name'] = parts[8]
-        return parsed
+    parsed['resource-group'] = parts[4]
+    parsed['name'] = parts[8]
+    return parsed
 
 def _add_resource_group(obj):
     if isinstance(obj, list):

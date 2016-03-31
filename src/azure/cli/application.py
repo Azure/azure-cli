@@ -126,7 +126,8 @@ class Application(object):
     @staticmethod
     def _register_builtin_arguments(parser):
         parser.add_argument('--subscription', dest='_subscription_id', help=argparse.SUPPRESS)
-        parser.add_argument('--output', '-o', dest='_output_format', choices=['list', 'json', 'tsv'],
+        parser.add_argument('--output', '-o', dest='_output_format',
+                            choices=['list', 'json', 'tsv'],
                             help=argparse.SUPPRESS)
 
     def _handle_builtin_arguments(self, args):
