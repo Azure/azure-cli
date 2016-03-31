@@ -8,12 +8,6 @@ from ..commands import COMMON_PARAMETERS
 
 EXCLUDED_PARAMS = frozenset(['self', 'raw', 'custom_headers', 'operation_config'])
 
-def _decorate_command(command_table, name, func):
-    return command_table.command(name)(func)
-
-def _decorate_description(command_table, desc, func):
-    return command_table.description(desc)(func)
-
 def _decorate_option(command_table, func, name, **kwargs):
     return command_table.option(name, kwargs=kwargs['kwargs'])(func)
 
@@ -105,5 +99,5 @@ def build_operation(command_name,
             }
 
         if extra_parameters:
-            for item in extra_parameters.values():
+            for item in extra_parameters.values() or []:
                 func = _decorate_option(command_table, func, item['name'], kwargs=item)
