@@ -217,7 +217,7 @@ class TsvOutput(object): #pylint: disable=too-few-public-methods
             # and a dictionary value in other...
             stream.write('{object}')
         else:
-            stream.write(data)
+            stream.write(str(data))
 
     @staticmethod
     def _dump_row(data, stream):
