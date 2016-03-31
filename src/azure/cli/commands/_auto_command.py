@@ -5,54 +5,18 @@ from msrest.paging import Paged
 from msrest.exceptions import ClientException
 from azure.cli.parser import IncorrectUsageError
 from ..commands import COMMON_PARAMETERS
-from ..commands import command, description, option
 from .._logging import logger
 
 EXCLUDED_PARAMS = frozenset(['self', 'raw', 'custom_headers', 'operation_config'])
 
-class AutoCommandDefinition(object): #pylint: disable=too-few-public-methods
+def _decorate_command(command_table, name, func):
+    return command_table.command(name)(func)
 
-    def __init__(self, operation, return_type, command_alias=None):
-        self.operation = operation
-        self.return_type = return_type
-        self.opname = command_alias if command_alias else operation.__name__.replace('_', '-')
+def _decorate_description(command_table, desc, func):
+    return command_table.description(desc)(func)
 
-class LongRunningOperation(object): #pylint: disable=too-few-public-methods
-
-    progress_file = sys.stderr
-
-    def __init__(self, start_msg='', finish_msg='', poll_interval_ms=1000.0):
-        self.start_msg = start_msg
-        self.finish_msg = finish_msg
-        self.poll_interval_ms = poll_interval_ms
-
-    def __call__(self, poller):
-        print(self.start_msg, file=self.progress_file)
-
-        succeeded = False
-        try:
-            while not poller.done():
-                if self.progress_file:
-                    print('.', end='', file=self.progress_file)
-                    self.progress_file.flush()
-                time.sleep(self.poll_interval_ms / 1000.0)
-            result = poller.result()
-            succeeded = True
-            return result
-        finally:
-            # Ensure that we get a newline after the dots...
-            if self.progress_file:
-                print(file=self.progress_file)
-                print(self.finish_msg if succeeded else '', file=self.progress_file)
-
-def _decorate_command(name, func):
-    return command(name)(func)
-
-def _decorate_description(desc, func):
-    return description(desc)(func)
-
-def _decorate_option(spec, descr, target, func):
-    return option(spec, descr, target=target)(func)
+def _decorate_option(command_table, spec, descr, target, func):
+    return command_table.option(spec, descr, target=target)(func)
 
 def _get_member(obj, path):
     """Recursively walk down the dot-separated path
@@ -109,7 +73,7 @@ def build_operation(command_name,
     common_parameters = common_parameters or COMMON_PARAMETERS
     for op in operations:
         func = _make_func(client_type, member_path, op.return_type_name, op.operation)
-        func = _decorate_command(' '.join([command_name, op.opname]), func)
+        func = _decorate_command(command_table, ' '.join([command_name, op.opname]), func)
 
         args = []
         try:
@@ -128,7 +92,7 @@ def build_operation(command_name,
             common_param = common_parameters.get(arg, {
                 'name': '--' + arg.replace('_', '-'),
                 'required': True,
-                'help': _option_description(operation, arg)
+                'help': _option_description(op.operation, arg)
             }).copy() # We need to make a copy to allow consumers to mutate the value
                       # retrieved from the common parameters without polluting future
                       # use...
@@ -136,7 +100,7 @@ def build_operation(command_name,
             options.append(common_param)
 
         command_table[func] = {
-            'name': ' '.join([command_name, opname]),
+            'name': ' '.join([command_name, op.opname]),
             'handler': func,
             'arguments': options
             }
@@ -147,4 +111,4 @@ def build_operation(command_name,
                     logger.warning('%s is in invalid format. Should be: (spec, description)',
                                    (str(arg)))
                     continue
-                func = _decorate_option(arg[0], arg[1], target=None, func=func)
+                func = _decorate_option(command_table, arg[0], arg[1], target=None, func=func)
