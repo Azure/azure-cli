@@ -1,7 +1,7 @@
 ﻿import os
 import sys
 
-from .application import Application
+from .application import Application, Configuration
 
 from ._logging import configure_logging, logger
 from ._session import Session
@@ -24,7 +24,8 @@ def main(args, file=sys.stdout): #pylint: disable=redefined-builtin
                                 'locale',
                                 CONFIG.get('locale', 'en-US')))
 
-    app = Application()
+    config = Configuration(args)
+    app = Application(config)
     app.load_commands()
     try:
         cmd_result = app.execute(args)

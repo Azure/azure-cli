@@ -70,10 +70,12 @@ def build_operation(command_name,
                     command_table,
                     common_parameters=None):
 
-    common_parameters = common_parameters or COMMON_PARAMETERS
+    merged_common_parameters = COMMON_PARAMETERS.copy()
+    merged_common_parameters.update(common_parameters or {})
+
     for op in operations:
+        opname = op.opname
         func = _make_func(client_type, member_path, op.return_type_name, op.operation)
-        func = _decorate_command(command_table, ' '.join([command_name, op.opname]), func)
 
         args = []
         try:
@@ -86,10 +88,7 @@ def build_operation(command_name,
 
         options = []
         for arg in [a for a in args if not a in EXCLUDED_PARAMS]:
-            #spec = paramaliases.get(arg, '--%s <%s>' % (arg, arg))
-            #func = _decorate_option(spec, _option_description(op.operation, arg),
-            #                        target=arg, func=func)
-            common_param = common_parameters.get(arg, {
+            common_param = merged_common_parameters.get(arg, {
                 'name': '--' + arg.replace('_', '-'),
                 'required': True,
                 'help': _option_description(op.operation, arg)

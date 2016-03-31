@@ -5,7 +5,7 @@ from six import StringIO
 from collections import namedtuple
 
 from azure.cli._output import (OutputProducer, OutputFormatException, format_json, format_table, format_list, format_text,
-                                ListOutput)
+                                format_tsv, ListOutput)
 import azure.cli._util as util
 
 class TestOutput(unittest.TestCase):
@@ -148,6 +148,41 @@ Myarray :
         self.assertEqual(lo._formatted_keys_cache, {})
         lo._get_formatted_key('locationIdState')
         self.assertEqual(lo._formatted_keys_cache, {'locationIdState': 'Location Id State'})
+
+    # TSV output tests
+    def test_output_format_dict(self):
+        obj = {}
+        obj['A'] = 1
+        obj['B'] = 2
+        result = format_tsv(obj)
+        self.assertEquals(result, '1\t2\n')
+
+    def test_output_format_dict_sort(self):
+        obj = {}
+        obj['B'] = 1
+        obj['A'] = 2
+        result = format_tsv(obj)
+        self.assertEquals(result, '2\t1\n')
+
+    def test_output_format_ordereddict_not_sorted(self):
+        from collections import OrderedDict
+        obj = OrderedDict()
+        obj['B'] = 1
+        obj['A'] = 2
+        result = format_tsv(obj)
+        self.assertEquals(result, '1\t2\n')
+
+    def test_output_format_ordereddict_list_not_sorted(self):
+        from collections import OrderedDict
+        obj1 = OrderedDict()
+        obj1['B'] = 1
+        obj1['A'] = 2
+
+        obj2 = OrderedDict()
+        obj2['A'] = 3
+        obj2['B'] = 4
+        result = format_tsv([obj1, obj2])
+        self.assertEquals(result, '1\t2\n3\t4\n')
 
 if __name__ == '__main__':
     unittest.main()
