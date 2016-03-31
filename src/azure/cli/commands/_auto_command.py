@@ -74,8 +74,8 @@ def build_operation(command_name,
     merged_common_parameters.update(common_parameters or {})
 
     for op in operations:
-        opname = op.opname
-        func = _make_func(client_type, member_path, op.return_type_name, op.operation)
+
+        func = _make_func(client_type, member_path, op.return_type, op.operation)
 
         args = []
         try:

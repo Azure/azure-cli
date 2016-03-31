@@ -16,7 +16,7 @@ COMMAND_MODULES = [
 ]
 
 COMMON_PARAMETERS = {
-    'resource_group_name': {
+    'resource-group-name': {
         'name': '--resourcegroup -g',
         'metavar': 'RESOURCE GROUP',
         'help': 'Name of resource group',
