@@ -1,7 +1,7 @@
 import unittest
 from six import StringIO
 from collections import namedtuple
-from azure.cli.application import Application
+from azure.cli.application import Application, Configuration
 
 class TestApplication(unittest.TestCase):
 
@@ -73,7 +73,8 @@ class TestApplication(unittest.TestCase):
         def other_handler(args):
             self.assertEqual(args, 'secret sauce')
 
-        app = Application()
+        config = Configuration([])
+        app = Application(config)
 
         app.raise_event('was_handler_called', handler_called)
         self.assertFalse(handler_called[0], "Raising event with no handlers registered somehow failed...")

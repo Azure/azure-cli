@@ -12,7 +12,7 @@ class Configuration(object): # pylint: disable=too-few-public-methods
     """The configuration object tracks session specific data such
     as output formats, available commands etc.
     """
-    def __init__(self, argv=None):
+    def __init__(self, argv):
         self.argv = argv or sys.argv[1:]
         self.log = logging.getLogger('az')
         self.output_format = 'list'
@@ -38,9 +38,9 @@ class Application(object):
     COMMAND_PARSER_LOADED = 'CommandParser.Loaded'
     COMMAND_PARSER_PARSED = 'CommandParser.Parsed'
 
-    def __init__(self, configuration=None):
+    def __init__(self, configuration):
         self._event_handlers = defaultdict(lambda: [])
-        self.configuration = configuration or Configuration()
+        self.configuration = configuration
 
         # Register presence of and handlers for global parameters
         self.register(self.GLOBAL_PARSER_CREATED, Application._register_builtin_arguments)
@@ -126,7 +126,8 @@ class Application(object):
     @staticmethod
     def _register_builtin_arguments(parser):
         parser.add_argument('--subscription', dest='_subscription_id', help=argparse.SUPPRESS)
-        parser.add_argument('--output', '-o', dest='_output_format', choices=['list', 'json'],
+        parser.add_argument('--output', '-o', dest='_output_format',
+                            choices=['list', 'json', 'tsv'],
                             help=argparse.SUPPRESS)
 
     def _handle_builtin_arguments(self, args):
