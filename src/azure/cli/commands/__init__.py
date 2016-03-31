@@ -1,4 +1,6 @@
-﻿from pip import get_installed_distributions
+﻿from importlib import import_module
+
+from pip import get_installed_distributions
 
 from .._argparse import IncorrectUsageError
 from .._logging import logger
@@ -47,7 +49,7 @@ def add_to_parser(parser, command_name=None):
     if command_name:
         try:
             # Try and load the installed command module
-            __import__('azure.cli.command_modules.'+command_name)
+            import_module('azure.cli.command_modules.'+command_name)
             loaded = True
         except ImportError:
             # Unknown command - we'll load all installed modules below
@@ -55,8 +57,7 @@ def add_to_parser(parser, command_name=None):
 
     if not loaded:
         for installed_mods in INSTALLED_COMMAND_MODULES:
-            __import__('azure.cli.command_modules.'+installed_mods)
-        loaded = True
+            import_module('azure.cli.command_modules.'+installed_mods)
 
     for handler, info in _COMMANDS.items():
         # args have probably been added in reverse order
