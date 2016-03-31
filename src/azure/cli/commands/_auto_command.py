@@ -5,7 +5,6 @@ from msrest.paging import Paged
 from msrest.exceptions import ClientException
 from azure.cli.parser import IncorrectUsageError
 from ..commands import COMMON_PARAMETERS
-from .._logging import logger
 
 EXCLUDED_PARAMS = frozenset(['self', 'raw', 'custom_headers', 'operation_config'])
 
