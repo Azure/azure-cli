@@ -12,7 +12,7 @@ from azure.mgmt.compute.operations import (AvailabilitySetsOperations,
 
 from ._command_creation import get_mgmt_service_client
 from ..commands._auto_command import build_operation
-from ..commands import CommandTable, LongRunningOperation, AutoCommandDefintion
+from ..commands import CommandTable, LongRunningOperation, AutoCommandDefinition
 
 def _compute_client_factory(*args): # pylint: disable=unused-argument
     return get_mgmt_service_client(ComputeManagementClient, ComputeManagementClientConfiguration)
