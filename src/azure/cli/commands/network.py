@@ -20,8 +20,8 @@ from azure.mgmt.network.operations import (ApplicationGatewaysOperations,
                                            VirtualNetworksOperations)
 
 from ._command_creation import get_mgmt_service_client
-from ..commands._auto_command import build_operation
-from ..commands import CommandTable, LongRunningOperation, AutoCommandDefinition
+from ..commands._auto_command import build_operation, AutoCommandDefinition
+from ..commands import CommandTable, LongRunningOperation
 
 command_table = CommandTable()
 

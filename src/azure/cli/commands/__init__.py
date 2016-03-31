@@ -30,13 +30,6 @@ COMMON_PARAMETERS = {
     }
 }
 
-class AutoCommandDefinition(object): #pylint: disable=too-few-public-methods
-
-    def __init__(self, operation, return_type, command_alias=None):
-        self.operation = operation
-        self.return_type = return_type
-        self.opname = command_alias if command_alias else operation.__name__.replace('_', '-')
-
 class LongRunningOperation(object): #pylint: disable=too-few-public-methods
 
     progress_file = sys.stderr

@@ -12,8 +12,8 @@ from azure.mgmt.storage.operations import StorageAccountsOperations
 
 from azure.cli.parser import IncorrectUsageError
 
-from ..commands import (CommandTable, AutoCommandDefinition,
-                        COMMON_PARAMETERS as GLOBAL_COMMON_PARAMETERS)
+from ..commands import CommandTable, COMMON_PARAMETERS as GLOBAL_COMMON_PARAMETERS
+from ._auto_command import AutoCommandDefinition
 from ._command_creation import get_mgmt_service_client, get_data_service_client
 from ..commands._auto_command import build_operation
 from .._locale import L

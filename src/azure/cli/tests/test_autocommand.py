@@ -2,7 +2,8 @@ import logging
 import unittest
 
 from azure.cli.commands._auto_command import build_operation
-from azure.cli.commands import CommandTable, AutoCommandDefinition
+from azure.cli.commands import CommandTable
+from azure.cli.commands._auto_command import AutoCommandDefinition
 
 class Test_autocommand(unittest.TestCase):
     @classmethod

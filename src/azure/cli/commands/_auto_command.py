@@ -8,6 +8,13 @@ from ..commands import COMMON_PARAMETERS
 
 EXCLUDED_PARAMS = frozenset(['self', 'raw', 'custom_headers', 'operation_config'])
 
+class AutoCommandDefinition(object): #pylint: disable=too-few-public-methods
+
+    def __init__(self, operation, return_type, command_alias=None):
+        self.operation = operation
+        self.return_type = return_type
+        self.opname = command_alias if command_alias else operation.__name__.replace('_', '-')
+
 def _decorate_option(command_table, func, name, **kwargs):
     return command_table.option(name, kwargs=kwargs['kwargs'])(func)
 
@@ -18,10 +25,12 @@ def _get_member(obj, path):
     Ex. a.b.c would get the property 'c' of property 'b' of the
         object a
     """
-    if not path:
-        return obj
+    path = path or ''
     for segment in path.split('.'):
-        obj = getattr(obj, segment)
+        try:
+            obj = getattr(obj, segment)
+        except AttributeError:
+            pass
     return obj
 
 def _make_func(client_factory, member_path, return_type_or_func, unbound_func):
