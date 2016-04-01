@@ -1,5 +1,7 @@
 import re
 import requests
+import imp
+import pip
 from pip import get_installed_distributions
 from pip._vendor.packaging import version as packaging_version
 
@@ -41,6 +43,9 @@ def _get_latest_version_public(pkg_name):
     return sorted_versions[-1] if sorted_versions else None
 
 def _get_current_version(pkg_name):
+    # workaround for getting up-to-date distributions
+    # https://github.com/pypa/pip/issues/2695#issuecomment-96380041
+    pip.utils.pkg_resources = imp.reload(pip.utils.pkg_resources)
     current_dist = [dist for dist in get_installed_distributions(local_only=True)
                     if dist.key == pkg_name]
     if not current_dist:

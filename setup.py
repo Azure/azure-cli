@@ -19,7 +19,7 @@ from __future__ import print_function
 from codecs import open
 from setuptools import setup
 
-VERSION = '0.0.10'
+VERSION = '0.0.18'
 INSTALL_FROM_PUBLIC = False
 
 # If we have source, validate that our version numbers match
