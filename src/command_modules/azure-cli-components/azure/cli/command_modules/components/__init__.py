@@ -71,9 +71,9 @@ def update_self(args, unexpected): #pylint: disable=unused-argument
     pkg_index_options = []
     if args.get('private'):
         pkg_index_options += ['--extra-index-url', 'http://40.112.211.51:8080/',
-                                '--trusted-host', '40.112.211.51']
+                              '--trusted-host', '40.112.211.51']
     pip.main(['install', '--quiet', '--isolated', '--disable-pip-version-check', '--upgrade']
-              + [CLI_PACKAGE_NAME] + pkg_index_options)
+             + [CLI_PACKAGE_NAME] + pkg_index_options)
 
 @command('components update all')
 @description(L('Update all components'))
@@ -94,7 +94,7 @@ def update_all_components(args, unexpected): #pylint: disable=unused-argument
 @description(L('Check a component for an update'))
 @option('--name -n <name>', L('Name of component to remove'), required=True)
 @option('--private -p', L('Look for updates from the project private PyPI server'))
-def install_component(args, unexpected): #pylint: disable=unused-argument
+def check_component(args, unexpected): #pylint: disable=unused-argument
     component_name = args.get('name')
     private = args.get('private')
     if not component_name:
@@ -108,7 +108,8 @@ def install_component(args, unexpected): #pylint: disable=unused-argument
                 print("Update available.")
             else:
                 print("Component is up-to-date.")
-            print("Current version: {}. Latest version: {}.".format(result['current_version'], result['latest_version']))
+            print("Current version: {}. Latest version: {}.".format(result['current_version'],
+                                                                    result['latest_version']))
         except UpdateCheckError as err:
             raise RuntimeError(L("Unable to check for updates. {}".format(err)))
     else:

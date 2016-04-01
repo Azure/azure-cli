@@ -1,5 +1,5 @@
-import requests
 import re
+import requests
 from pip import get_installed_distributions
 from pip._vendor.packaging import version as packaging_version
 
@@ -38,7 +38,7 @@ def _get_latest_version_public(pkg_name):
     if not response_json or not response_json['releases']:
         raise UpdateCheckError('Unable to get version info from PyPI.')
     parsed_versions = [packaging_version.parse(v) for v in response_json['releases']
-                if not packaging_version.parse(v).is_prerelease]
+                       if not packaging_version.parse(v).is_prerelease]
     sorted_versions = sorted(parsed_versions)
     # latest version is last in sorted list
     return sorted_versions[-1] if sorted_versions else None
