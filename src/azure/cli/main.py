@@ -1,4 +1,6 @@
-﻿import os
+﻿from __future__ import print_function
+
+import os
 import sys
 from datetime import datetime, timedelta
 
@@ -6,6 +8,7 @@ from ._argparse import ArgumentParser
 from ._logging import configure_logging, logger
 from ._session import Session
 from ._output import OutputProducer
+from ._util import should_use_private_pypi
 from azure.cli.extensions import event_dispatcher
 
 from azure.cli.utils.update_checker import check_for_cli_update, UpdateCheckError
@@ -31,8 +34,10 @@ def _should_check_for_update(config_key, now):
 def _save_update_data(config_key, now, update_info):
     CONFIG[config_key] = {
         'last_checked': now.strftime(UPDATE_CHECK_DATE_FORMAT),
-        'latest_version': str(update_info['latest_version']) if update_info['latest_version'] else None,
-        'current_version': str(update_info['current_version']) if update_info['current_version'] else None,
+        'latest_version': str(update_info['latest_version'])
+                          if update_info['latest_version'] else None,
+        'current_version': str(update_info['current_version'])
+                           if update_info['current_version'] else None,
         'update_available': update_info['update_available'],
     }
 
@@ -41,11 +46,17 @@ def _check_for_cli_update():
     now = datetime.now()
     if not _should_check_for_update(config_key, now):
         return
-    # TODO:: CREATE ENV VAR TO SET THIS TO TRUE
-    update_info = check_for_cli_update(private=True)
-    _save_update_data(config_key, now, update_info)
-    if update_info['update_available']:
-        print("Current version of CLI {}. Version {} is available. Update with `az components update self`".format(update_info['current_version'], update_info['latest_version']))
+    try:
+        use_private = should_use_private_pypi()
+        update_info = check_for_cli_update(private=use_private)
+        _save_update_data(config_key, now, update_info)
+        if update_info['update_available']:
+            print("Current version of CLI {}. Version {} is available. \
+            Update with `az components update self{}`"
+                  .format(update_info['current_version'], update_info['latest_version'],
+                          ' -p' if use_private else ''))
+    except UpdateCheckError as err:
+        logger.info('Unable to check for updates. ' + str(err))
 
 def main(args, file=sys.stdout): #pylint: disable=redefined-builtin
     CONFIG.load(os.path.expanduser('~/az.json'))
