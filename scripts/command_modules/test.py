@@ -9,7 +9,7 @@ dev_null_file = open(os.devnull, 'w')
 from _common import get_all_command_modules, exec_command, print_summary, COMMAND_MODULE_PREFIX
 
 all_command_modules = get_all_command_modules()
-print("Running tests on each one.")
+print("Running tests on command modules.")
 
 failed_module_names = []
 skipped_modules = []
