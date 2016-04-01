@@ -98,15 +98,18 @@ def build_operation(command_name,
 
         options = []
         for arg in [a for a in args if not a in EXCLUDED_PARAMS]:
+            default = args[arg].default
+            # TODO: Add action here if a boolean default value exists to create a flag
+            
             common_param = merged_common_parameters.get(arg, {
                 'name': '--' + arg.replace('_', '-'),
-                'required': args[arg].default == inspect.Parameter.empty,
+                'required': default == inspect.Parameter.empty,
+                'default': default if default != inspect.Parameter.empty else None,
                 'help': _option_description(op.operation, arg)
             }).copy() # We need to make a copy to allow consumers to mutate the value
                       # retrieved from the common parameters without polluting future
                       # use...
             common_param['dest'] = common_param.get('dest', arg)
-            # TODO: Add action here if a boolean default value exists to create a flag
             options.append(common_param)
 
         command_table[func] = {
