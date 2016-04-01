@@ -1,5 +1,6 @@
 ﻿import os
 import sys
+from datetime import datetime, timedelta
 
 from ._argparse import ArgumentParser
 from ._logging import configure_logging, logger
@@ -7,11 +8,44 @@ from ._session import Session
 from ._output import OutputProducer
 from azure.cli.extensions import event_dispatcher
 
+from azure.cli.utils.update_checker import check_for_cli_update, UpdateCheckError
+
 # CONFIG provides external configuration options
 CONFIG = Session()
 
 # SESSION provides read-write session variables
 SESSION = Session()
+
+UPDATE_CHECK_DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
+DAYS_BETWEEN_UPDATE_CHECK = 7
+
+def _should_check_for_update(config_key, now):
+    config_data = CONFIG.get(config_key)
+    if not config_data:
+        return True
+    last_checked = datetime.strptime(config_data['last_checked'], UPDATE_CHECK_DATE_FORMAT)
+    expiry = last_checked + timedelta(days=DAYS_BETWEEN_UPDATE_CHECK)
+    # prev check not expired yet and there wasn't an update available from our previous check
+    return False if  expiry >= now and not config_data['update_available'] else True
+
+def _save_update_data(config_key, now, update_info):
+    CONFIG[config_key] = {
+        'last_checked': now.strftime(UPDATE_CHECK_DATE_FORMAT),
+        'latest_version': str(update_info['latest_version']) if update_info['latest_version'] else None,
+        'current_version': str(update_info['current_version']) if update_info['current_version'] else None,
+        'update_available': update_info['update_available'],
+    }
+
+def _check_for_cli_update():
+    config_key = 'update_check_cli'
+    now = datetime.now()
+    if not _should_check_for_update(config_key, now):
+        return
+    # TODO:: CREATE ENV VAR TO SET THIS TO TRUE
+    update_info = check_for_cli_update(private=True)
+    _save_update_data(config_key, now, update_info)
+    if update_info['update_available']:
+        print("Current version of CLI {}. Version {} is available. Update with `az components update self`".format(update_info['current_version'], update_info['latest_version']))
 
 def main(args, file=sys.stdout): #pylint: disable=redefined-builtin
     CONFIG.load(os.path.expanduser('~/az.json'))
@@ -47,6 +81,7 @@ def main(args, file=sys.stdout): #pylint: disable=redefined-builtin
         if cmd_result.result:
             formatter = OutputProducer.get_formatter(cmd_result.output_format)
             OutputProducer(formatter=formatter, file=file).out(cmd_result.result)
+        _check_for_cli_update()
     except RuntimeError as ex:
         logger.error(ex.args[0])
         return ex.args[1] if len(ex.args) >= 2 else -1
