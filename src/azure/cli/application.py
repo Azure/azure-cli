@@ -70,7 +70,7 @@ class Application(object):
         params = dict([(key, value)
                        for key, value in args.__dict__.items() if not key.startswith('_')])
         params.pop('subcommand', None)
-        func = params.pop('func', None)
+        params.pop('func', None)
 
         # TODO: Remove this conversion code once internal key references are updated (#116797761)
         converted_params = {}
