@@ -104,9 +104,9 @@ def _blob_data_service_factory(*args):
 
     return get_data_service_client(
         BlockBlobService,
-        _resolve_arg('account_name', 'AZURE_STORAGE_ACCOUNT'),
-        _resolve_arg('account_key', 'AZURE_STORAGE_ACCOUNT_KEY'),
-        _resolve_arg('connection_string', 'AZURE_STORAGE_CONNECTION_STRING'))
+        _resolve_arg('account-name', 'AZURE_STORAGE_ACCOUNT'),
+        _resolve_arg('account-key', 'AZURE_STORAGE_ACCOUNT_KEY'),
+        _resolve_arg('connection-string', 'AZURE_STORAGE_CONNECTION_STRING'))
 
 # ACCOUNT COMMANDS
 
@@ -559,16 +559,6 @@ def _parse_int(args, key):
     except ValueError:
         int_val = None
     return int_val
-
-# TODO: Remove once these parameters are supported first-class by @option (task #116054675)
-def _resolve_storage_account(args):
-    return args.get('account-name') or environ.get('AZURE_STORAGE_ACCOUNT')
-
-def _resolve_storage_account_key(args):
-    return args.get('account-key') or environ.get('AZURE_STORAGE_ACCESS_KEY')
-
-def _resolve_connection_string(args):
-    return args.get('connection-string') or environ.get('AZURE_STORAGE_CONNECTION_STRING')
 
 def _update_progress(current, total):
     if total:
