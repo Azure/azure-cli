@@ -37,6 +37,8 @@ def _make_func(client_factory, member_path, return_type_or_func, unbound_func):
     def call_client(args):
         client = client_factory(args)
         ops_instance = _get_member(client, member_path)
+        args.pop('func', None)
+        args.pop('subcommand', None)
         try:
             result = unbound_func(ops_instance, **args)
             if not return_type_or_func:
@@ -93,12 +95,13 @@ def build_operation(command_name,
         for arg in [a for a in args if not a in EXCLUDED_PARAMS]:
             common_param = merged_common_parameters.get(arg, {
                 'name': '--' + arg.replace('_', '-'),
-                'required': True,
+                'required': args[arg].default == inspect.Parameter.empty,
                 'help': _option_description(op.operation, arg)
             }).copy() # We need to make a copy to allow consumers to mutate the value
                       # retrieved from the common parameters without polluting future
                       # use...
             common_param['dest'] = common_param.get('dest', arg)
+            # TODO: Add action here if a boolean default value exists to create a flag
             options.append(common_param)
 
         command_table[func] = {
