@@ -18,7 +18,7 @@
 from codecs import open
 from setuptools import setup
 
-VERSION = '0.0.3'
+VERSION = '0.0.2'
 
 # The full list of classifiers is available at
 # https://pypi.python.org/pypi?%3Aaction=list_classifiers
@@ -46,7 +46,7 @@ with open('README.rst', 'r', encoding='utf-8') as f:
     README = f.read()
 
 setup(
-    name='azure-cli-login',
+    name='azure-cli-profile',
     version=VERSION,
     description='Microsoft Azure Command-Line Tools',
     long_description=README,
@@ -57,7 +57,7 @@ setup(
     classifiers=CLASSIFIERS,
     namespace_packages = ['azure.cli.command_modules'],
     packages=[
-        'azure.cli.command_modules.login',
+        'azure.cli.command_modules.profile',
     ],
     install_requires=DEPENDENCIES,
 )

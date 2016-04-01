@@ -7,11 +7,11 @@ python:
 install:
   - pip install -r requirements.txt
   - pip install -e . # Install the CLI as a package
-  - python scripts/install_command_modules.py # Install the command modules as packages
+  - python scripts/command_modules/install.py # Install the command modules as packages
 script: 
   - export PYTHONPATH=$PATHONPATH:./src
   - python -m azure.cli
   - pylint -r n src/azure
-  - python scripts/pylint_command_modules.py
+  - python scripts/command_modules/pylint.py
   - python -m unittest discover -s src/azure/cli/tests --buffer
-  - python scripts/test_command_modules.py
+  - python scripts/command_modules/test.py

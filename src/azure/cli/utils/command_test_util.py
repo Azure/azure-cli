@@ -49,7 +49,7 @@ class CommandTestGenerator(object):
                          "active": True}]
 
             @mock.patch('azure.cli._profile.Profile.load_subscriptions', load_subscriptions_mock)
-            @self.my_vcr.use_cassette('%s.yaml'%test_name,
+            @self.my_vcr.use_cassette(test_name + '.yaml',
                                       filter_headers=CommandTestGenerator.FILTER_HEADERS)
             def test(self):
                 io = StringIO()
@@ -60,7 +60,7 @@ class CommandTestGenerator(object):
             return test
 
         for test_spec_item in self.test_specs:
-            test_name = 'test_%s' % test_spec_item['test_name']
+            test_name = 'test_' + test_spec_item['test_name']
             test_functions[test_name] = gen_test(test_name, test_spec_item['command'],
                                                  test_spec_item['expected_result'])
         return test_functions
@@ -73,9 +73,7 @@ class CommandTestGenerator(object):
 
     @staticmethod
     def before_record_response(response):
-        def remove_entries(the_dict, entries):
-            for key in entries:
-                if key in the_dict:
-                    del the_dict[key]
-        remove_entries(response['headers'], CommandTestGenerator.FILTER_HEADERS)
+        for key in CommandTestGenerator.FILTER_HEADERS:
+            if key in response['headers']:
+                del response['headers'][key]
         return response

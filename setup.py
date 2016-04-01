@@ -19,7 +19,7 @@ from __future__ import print_function
 from codecs import open
 from setuptools import setup
 
-VERSION = '0.0.3'
+VERSION = '0.0.5'
 INSTALL_FROM_PUBLIC = False
 
 # If we have source, validate that our version numbers match
@@ -57,12 +57,12 @@ CLASSIFIERS = [
 
 DEPENDENCIES = [
     'applicationinsights',
-    'msrest',
-    'six',
     'jmespath',
+    'msrest',
     'pip',
     'pyyaml',
     'requests',
+    'six',
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
@@ -76,13 +76,13 @@ def _post_install(dir):
     # We do this so these components are updated when the user updates the CLI.
     if INSTALL_FROM_PUBLIC:
         pip.main(['install', '--upgrade', 'azure-cli-components', '--disable-pip-version-check'])
-        check_call(['az', 'components', 'update', '-n', 'login'])
+        check_call(['az', 'components', 'update', '-n', 'profile'])
     else:
         # use private PyPI server.
         pip.main(['install', '--upgrade', 'azure-cli-components', '--extra-index-url',
                 'http://40.112.211.51:8080/', '--trusted-host', '40.112.211.51',
                 '--disable-pip-version-check'])
-        check_call(['az', 'components', 'update', '-n', 'login', '-p'])
+        check_call(['az', 'components', 'update', '-n', 'profile', '-p'])
 
 class OnInstall(install):
     def run(self):

@@ -1,4 +1,5 @@
 from __future__ import print_function
+
 from msrest.authentication import BasicTokenAuthentication
 from adal import (acquire_token_with_username_password,
                   acquire_token_with_client_credentials,
@@ -9,9 +10,9 @@ from azure.mgmt.resource.subscriptions import (SubscriptionClient,
 
 from azure.cli._profile import Profile
 from azure.cli.commands import command, description, option
+from azure.cli._locale import L
 #TODO: update adal-python to support it
 #from azure.cli._debug import should_disable_connection_verify
-from azure.cli._locale import L
 
 @command('login')
 @description(L('log in to an Azure subscription using Active Directory Organization Id'))
@@ -70,3 +71,6 @@ def login(args, unexpected): #pylint: disable=unused-argument
 
 def _get_authority_url(tenant=None):
     return 'https://login.microsoftonline.com/{}'.format(tenant or 'common')
+
+
+
