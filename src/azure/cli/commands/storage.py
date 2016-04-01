@@ -2,7 +2,6 @@
 from datetime import datetime
 from os import environ
 from sys import stderr
-from six.moves import input # pylint: disable=redefined-builtin
 
 from azure.storage.blob import PublicAccess, BlockBlobService
 from azure.storage.file import FileService
@@ -82,6 +81,7 @@ COMMON_PARAMETERS.update({
         'name': '--timeout',
         'help': L('timeout in seconds'),
         'required': False,
+        'type': int
     }
 })
 
@@ -97,17 +97,16 @@ STORAGE_DATA_CLIENT_ARGS = {
 def _blob_data_service_factory(*args):
     def _resolve_arg(key, envkey):
         try:
-            value = args[0][key]
-            args[0].pop(key, None)
+            value = args[0].pop(key, None)
         except (IndexError, KeyError):
             value = environ.get(envkey)
         return value
 
     return get_data_service_client(
         BlockBlobService,
-        _resolve_arg('account-name', 'AZURE_STORAGE_ACCOUNT'),
-        _resolve_arg('account-key', 'AZURE_STORAGE_ACCOUNT_KEY'),
-        _resolve_arg('connection-string', 'AZURE_STORAGE_CONNECTION_STRING'))
+        _resolve_arg('account_name', 'AZURE_STORAGE_ACCOUNT'),
+        _resolve_arg('account_key', 'AZURE_STORAGE_ACCOUNT_KEY'),
+        _resolve_arg('connection_string', 'AZURE_STORAGE_CONNECTION_STRING'))
 
 # ACCOUNT COMMANDS
 
@@ -170,7 +169,7 @@ def show_storage_connection_string(args):
 
     endpoint_protocol = args.get('use-http')
     storage_account = args.get('account-name')
-    keys = smc.storage_accounts.list_keys(args.get('resource-group-name'), storage_account)
+    keys = smc.storage_accounts.list_keys(args.get('resourcegroup'), storage_account)
 
     connection_string = 'DefaultEndpointsProtocol={};AccountName={};AccountKey={}'.format(
         endpoint_protocol,
@@ -184,7 +183,6 @@ storage_account_types = {'Standard_LRS': AccountType.standard_lrs,
                          'Standard_GRS': AccountType.standard_grs,
                          'Standard_RAGRS': AccountType.standard_ragrs,
                          'Premium_LRS': AccountType.premium_lrs}
-storage_account_type_string = ' | '.join(storage_account_types)
 
 @command_table.command('storage account create')
 @command_table.description(L('Create a storage account.'))
@@ -192,7 +190,6 @@ storage_account_type_string = ' | '.join(storage_account_types)
 @command_table.option(**COMMON_PARAMETERS['account-name'])
 @command_table.option(**COMMON_PARAMETERS['location'])
 @command_table.option('--type',
-                      help=L('Values: {}'.format(storage_account_type_string)),
                       choices=storage_account_types.keys(),
                       type=lambda x: storage_account_types[x],
                       required=True)
@@ -205,11 +202,7 @@ def create_account(args):
 
     resource_group = args.get('resource-group')
     account_name = args.get('account-name')
-    try:
-        account_type = storage_account_types[args.get('type')]
-    except KeyError:
-        raise IncorrectUsageError(L('type must be: {}'
-                                    .format(storage_account_type_string)))
+    account_type = storage_account_types[args.get('type')]
     params = StorageAccountCreateParameters(args.get('location'),
                                             account_type,
                                             _parse_dict(args, 'tags'))
@@ -220,7 +213,6 @@ def create_account(args):
 @command_table.option(**COMMON_PARAMETERS['resource-group-name'])
 @command_table.option(**COMMON_PARAMETERS['account-name'])
 @command_table.option('--type',
-                      help=L('Values: {}'.format(storage_account_type_string)),
                       choices=storage_account_types.keys(),
                       type=lambda x: storage_account_types[x])
 @command_table.option('--tags',
@@ -235,11 +227,8 @@ def set_account(args):
     resource_group = args.get('resource-group')
     account_name = args.get('account-name')
     domain = args.get('custom-domain')
-    try:
-        account_type = storage_account_types[args.get('type')] if args.get('type') else None
-    except KeyError:
-        raise IncorrectUsageError(L('type must be: {}'
-                                    .format(storage_account_type_string)))
+    account_type = storage_account_types[args.get('type')] if args.get('type') else None
+
     params = StorageAccountUpdateParameters(_parse_dict(args, 'tags'), account_type, domain)
     return smc.storage_accounts.update(resource_group, account_name, params)
 
@@ -262,62 +251,6 @@ build_operation(
 public_access_types = {'none': None,
                        'blob': PublicAccess.Blob,
                        'container': PublicAccess.Container}
-public_access_string = ' | '.join(public_access_types)
-
-@command_table.command('storage container create')
-@command_table.description(L('Create a storage container.'))
-@command_table.option(**COMMON_PARAMETERS['container-name'])
-@command_table.option(**COMMON_PARAMETERS['account-name'])
-@command_table.option(**COMMON_PARAMETERS['account-key'])
-@command_table.option(**COMMON_PARAMETERS['connection-string'])
-@command_table.option('--public-access', default=None, choices=public_access_types.keys(),
-                      type=lambda x: public_access_types[x],
-                      help=L('Values: {}'.format(public_access_string)))
-@command_table.option('--metadata', help=L('dict of key=value pairs (separated by ;)'))
-@command_table.option('--fail-on-exist',
-                      help=L('operation fails if container already exists'), action='store_true')
-@command_table.option(**COMMON_PARAMETERS['timeout'])
-def create_container(args):
-    bbs = _blob_data_service_factory(args)
-    public_access = args.get('public-access')
-    metadata = _parse_dict(args, 'metadata', allow_singles=False)
-    if not bbs.create_container(
-            container_name=args.get('container-name'),
-            public_access=public_access,
-            metadata=metadata,
-            fail_on_exist=args.get('fail-on-exist'),
-            timeout=_parse_int(args, 'timeout')):
-        raise RuntimeError(L('Container creation failed.'))
-
-@command_table.command('storage container delete')
-@command_table.description(L('Delete a storage container.'))
-@command_table.option(**COMMON_PARAMETERS['container-name'])
-@command_table.option(**COMMON_PARAMETERS['account-name'])
-@command_table.option(**COMMON_PARAMETERS['account-key'])
-@command_table.option(**COMMON_PARAMETERS['connection-string'])
-@command_table.option('--force -f', help=L('supress delete confirmation prompt'))
-@command_table.option('--fail-not-exist', help=L('operation fails if container does not exist'))
-@command_table.option('--lease-id', help=L('delete only if lease is ID active and matches'))
-@command_table.option(**COMMON_PARAMETERS['if-modified-since'])
-@command_table.option(**COMMON_PARAMETERS['if-unmodified-since'])
-@command_table.option(**COMMON_PARAMETERS['timeout'])
-def delete_container(args):
-    bbs = _blob_data_service_factory(args)
-    container_name = args.get('container-name')
-
-    if args.get('force') is None:
-        ans = input('Really delete {}? [Y/n] '.format(container_name))
-        if not ans or ans[0].lower() != 'y':
-            return 0
-
-    if not bbs.delete_container(
-            container_name=container_name,
-            fail_not_exist=True if args.get('fail-not-exist') else False,
-            lease_id=args.get('lease-id'),
-            if_unmodified_since=_parse_datetime(args, 'if-unmodified-since'),
-            if_modified_since=_parse_datetime(args, 'if-modified-since'),
-            timeout=_parse_int(args, 'timeout')):
-        raise RuntimeError(L('Container deletion failed.'))
 
 @command_table.command('storage container exists')
 @command_table.description(L('Check if a storage container exists.'))
@@ -333,8 +266,7 @@ def exists_container(args):
     return str(bbs.exists(
         container_name=args.get('container-name'),
         snapshot=_parse_datetime(args, 'snapshot'),
-        timeout=_parse_int(args, 'timeout')))
-
+        timeout=args.get('timeout')))
 
 lease_duration_values = {'min':15, 'max':60, 'infinite':-1}
 lease_duration_values_string = 'Between {} and {} seconds. ({} for infinite)'.format(

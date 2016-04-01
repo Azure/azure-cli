@@ -37,7 +37,8 @@ def list_groups(args):
                       required=True)
 @command_table.option('--api-version -o', help=L('the API version of the resource provider'))
 @command_table.option('--parent',
-                      help=L('the name of the parent resource (if needed), in <parent-type>/<parent-name> format')) # pylint: disable=line-too-long
+                      help=L('the name of the parent resource (if needed), ' + \
+                      'in <parent-type>/<parent-name> format'))
 def show_resource(args):
     rmc = get_mgmt_service_client(ResourceManagementClient, ResourceManagementClientConfiguration)
 

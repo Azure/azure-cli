@@ -53,10 +53,7 @@ class Test_autocommand(unittest.TestCase):
             ]
 
         for probe in some_expected_arguments:
-            try:
-                existing = [arg for arg in command_metadata['arguments'] if arg['name'] == probe['name']][0]
-            except IndexError as ex:
-                self.fail(ex)
+            existing = [arg for arg in command_metadata['arguments'] if arg['name'] == probe['name']][0]
             self.assertDictContainsSubset(probe, existing)
 
     def test_autocommand_with_parameter_alias(self):
