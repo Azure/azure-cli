@@ -9,8 +9,6 @@ from azure.mgmt.storage import StorageManagementClient, StorageManagementClientC
 from azure.mgmt.storage.models import AccountType
 from azure.mgmt.storage.operations import StorageAccountsOperations
 
-from azure.cli.parser import IncorrectUsageError
-
 from ..commands import CommandTable, COMMON_PARAMETERS as GLOBAL_COMMON_PARAMETERS
 from ._auto_command import AutoCommandDefinition
 from ._command_creation import get_mgmt_service_client, get_data_service_client
@@ -298,7 +296,6 @@ build_operation('storage container lease', None, _blob_data_service_factory,
 @command_table.option(**COMMON_PARAMETERS['timeout'])
 def acquire_container_lease(args):
     bbs = _blob_data_service_factory(args)
-    test = args.get('lease-duration')
     return bbs.acquire_container_lease(
         container_name=args.get('container-name'),
         lease_duration=args.get('lease-duration'),
@@ -363,14 +360,9 @@ build_operation('storage blob', None, _blob_data_service_factory,
 def create_block_blob(args):
     from azure.storage.blob import ContentSettings
     bbs = _blob_data_service_factory(args)
-    try:
-        public_access = public_access_types[args.get('public-access')] \
-                                            if args.get('public-access') \
-                                            else None
-    except KeyError:
-        raise IncorrectUsageError(L('container.public-access must be: {}'
-                                    .format(public_access_string)))
-
+    public_access = public_access_types[args.get('public-access')] \
+                                        if args.get('public-access') \
+                                        else None
     bbs.create_container(args.get('container-name'), public_access=public_access)
 
     return bbs.create_blob_from_path(
