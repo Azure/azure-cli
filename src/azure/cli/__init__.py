@@ -7,4 +7,4 @@ import pkg_resources
 pkg_resources.declare_namespace(__name__)
 
 __author__ = "Microsoft Corporation <python@microsoft.com>"
-__version__ = "0.0.10"
+__version__ = "0.0.18"
