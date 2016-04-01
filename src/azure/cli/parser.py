@@ -21,7 +21,7 @@ class AzCliCommandParser(argparse.ArgumentParser):
         # If we haven't already added a subparser, we
         # better do it.
         if not self.subparsers:
-            sp = self.add_subparsers(dest='_command_package', metavar='COMMAND')
+            sp = self.add_subparsers(dest='_command_package')
             sp.required = True
             self.subparsers = {(): sp}
 
