@@ -83,6 +83,7 @@
     <Folder Include="azure\cli\extensions\" />
     <Folder Include="azure\cli\tests\" />
     <Folder Include="azure\cli\tests\command_specs\" />
+    <Folder Include="azure\cli\tests\recordings\" />
   </ItemGroup>
   <ItemGroup>
     <Interpreter Include="..\env\">
@@ -96,6 +97,9 @@
       <PathEnvironmentVariable>PYTHONPATH</PathEnvironmentVariable>
       <Architecture>X86</Architecture>
     </Interpreter>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="azure\cli\tests\recordings\README.rst" />
   </ItemGroup>
   <Import Project="$(PtvsTargetsFile)" Condition="Exists($(PtvsTargetsFile))" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets" Condition="!Exists($(PtvsTargetsFile))" />
