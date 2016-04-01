@@ -1,4 +1,4 @@
-Setting up your development environment
+﻿Setting up your development environment
 ========================================
 The Azure Python CLI projects sources are located on GitHub (https://github.com/Azure/azure-cli/). In order to contribute to the project, you are expected to: 
 -	Have a GitHub account. For Microsoft contributors, follow the guidelines on https://opensourcehub.microsoft.com/ to create, configure and link your account
@@ -96,10 +96,12 @@ The repo has a launch.json file that will launch the version of Python that is f
 ##Running Unit Tests:
 ####Command line
 #####Windows:
-  Provided your PYTHONPATH was set correcltly, from `<clone root>` run:
+  Provided your PYTHONPATH was set correctly, from `<clone root>\src` run:
   ```BatchFile
-  python -m unittest discover -s src\azure\cli\tests
+  python -m unittest discover -s azure\cli\tests [--buffer]
   ``` 
+Use of `--buffer` will automatically fail any VCR-style tests which do not have an expected result recorded. Omit `--buffer` to permit recording of tests. To re-record any tests, you can either remove the test's entry from the `expected_results.res` file or remove the corresponding `<test>.yaml` VCR cassette and re-run without `--buffer`.
+
 ####VS Code
   Under construction...
   
