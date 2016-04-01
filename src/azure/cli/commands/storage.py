@@ -71,7 +71,7 @@ COMMON_PARAMETERS.update({
         'required': False,
     },
     'optional-resource-group-name':
-        extend_parameter(GLOBAL_COMMON_PARAMETERS['resource-group-name'], required=False),
+        extend_parameter(GLOBAL_COMMON_PARAMETERS['resource_group_name'], required=False),
     'share-name': {
         'name': '--share-name',
         'help': L('the name of the file share'),
@@ -129,7 +129,7 @@ def list_accounts(args):
     from azure.mgmt.storage.models import StorageAccount
     from msrestazure.azure_active_directory import UserPassCredentials
     smc = _storage_client_factory()
-    group = args.get('resource-group-name')
+    group = args.get('resourcegroup')
     if group:
         accounts = smc.storage_accounts.list_by_resource_group(group)
     else:
@@ -138,7 +138,7 @@ def list_accounts(args):
 
 @command_table.command('storage account renew-keys')
 @command_table.description(L('Regenerate one or both keys for a storage account.'))
-@command_table.option(**COMMON_PARAMETERS['resource-group-name'])
+@command_table.option(**COMMON_PARAMETERS['resource_group_name'])
 @command_table.option(**COMMON_PARAMETERS['account-name'])
 @command_table.option('--key -y', default=['key1', 'key2'],
                       choices=['key1', 'key2'], help=L('Key to renew'))
@@ -146,7 +146,7 @@ def renew_account_keys(args):
     smc = _storage_client_factory()
     for key in args.get('key'):
         result = smc.storage_accounts.regenerate_key(
-            resource_group_name=args.get('resource-group-name'),
+            resource_group_name=args.get('resourcegroup'),
             account_name=args.get('account-name'),
             key_name=key)
     return result
@@ -160,7 +160,7 @@ def show_account_usage(_):
 
 @command_table.command('storage account connection-string')
 @command_table.description(L('Show the connection string for a storage account.'))
-@command_table.option(**COMMON_PARAMETERS['resource-group-name'])
+@command_table.option(**COMMON_PARAMETERS['resource_group_name'])
 @command_table.option(**COMMON_PARAMETERS['account-name'])
 @command_table.option('--use-http', action='store_const', const='http', default='https',
                       help=L('use http as the default endpoint protocol'))
@@ -186,12 +186,11 @@ storage_account_types = {'Standard_LRS': AccountType.standard_lrs,
 
 @command_table.command('storage account create')
 @command_table.description(L('Create a storage account.'))
-@command_table.option(**COMMON_PARAMETERS['resource-group-name'])
+@command_table.option(**COMMON_PARAMETERS['resource_group_name'])
 @command_table.option(**COMMON_PARAMETERS['account-name'])
 @command_table.option(**COMMON_PARAMETERS['location'])
 @command_table.option('--type',
                       choices=storage_account_types.keys(),
-                      type=lambda x: storage_account_types[x],
                       required=True)
 @command_table.option('--tags',
                       help=L('storage account tags. Tags are key=value pairs separated ' + \
@@ -200,7 +199,7 @@ def create_account(args):
     from azure.mgmt.storage.models import StorageAccountCreateParameters
     smc = _storage_client_factory()
 
-    resource_group = args.get('resource-group')
+    resource_group = args.get('resourcegroup')
     account_name = args.get('account-name')
     account_type = storage_account_types[args.get('type')]
     params = StorageAccountCreateParameters(args.get('location'),
@@ -210,7 +209,7 @@ def create_account(args):
 
 @command_table.command('storage account set')
 @command_table.description(L('Update storage account property (only one at a time).'))
-@command_table.option(**COMMON_PARAMETERS['resource-group-name'])
+@command_table.option(**COMMON_PARAMETERS['resource_group_name'])
 @command_table.option(**COMMON_PARAMETERS['account-name'])
 @command_table.option('--type',
                       choices=storage_account_types.keys(),
@@ -224,7 +223,7 @@ def set_account(args):
     from azure.mgmt.storage.models import StorageAccountUpdateParameters, CustomDomain
     smc = _storage_client_factory()
 
-    resource_group = args.get('resource-group')
+    resource_group = args.get('resourcegroup')
     account_name = args.get('account-name')
     domain = args.get('custom-domain')
     account_type = storage_account_types[args.get('type')] if args.get('type') else None
@@ -289,7 +288,7 @@ build_operation('storage container lease', None, _blob_data_service_factory,
 @command_table.option(**COMMON_PARAMETERS['container-name'])
 @command_table.option('--lease-duration',
                       help=L('Values: {}'.format(lease_duration_values_string)),
-                      required=True)
+                      type=int, required=True)
 @command_table.option('--proposed-lease-id', help=L('proposed lease id in GUID format'))
 @command_table.option(**COMMON_PARAMETERS['account-name'])
 @command_table.option(**COMMON_PARAMETERS['account-key'])
@@ -299,18 +298,14 @@ build_operation('storage container lease', None, _blob_data_service_factory,
 @command_table.option(**COMMON_PARAMETERS['timeout'])
 def acquire_container_lease(args):
     bbs = _blob_data_service_factory(args)
-    try:
-        lease_duration = int(args.get('lease-duration'))
-    except ValueError:
-        raise IncorrectUsageError('lease-duration must be: {}'.format(lease_duration_values_string))
-
+    test = args.get('lease-duration')
     return bbs.acquire_container_lease(
         container_name=args.get('container-name'),
-        lease_duration=lease_duration,
+        lease_duration=args.get('lease-duration'),
         proposed_lease_id=args.get('proposed-lease-id'),
         if_modified_since=_parse_int(args, 'if-modified-since'),
         if_unmodified_since=_parse_int(args, 'if-unmodified-since'),
-        timeout=True if args.get('timeout') else False)
+        timeout=args.get('timeout'))
 
 @command_table.command('storage container lease break')
 @command_table.description(L('Break a lock on a container for delete operations.'))
@@ -334,7 +329,7 @@ def break_container_lease(args):
         lease_break_period=lease_break_period,
         if_modified_since=_parse_int(args, 'if-modified-since'),
         if_unmodified_since=_parse_int(args, 'if-unmodified-since'),
-        timeout=True if args.get('timeout') else False)
+        timeout=args.get('timeout'))
 
 # BLOB COMMANDS
 
