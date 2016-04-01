@@ -48,7 +48,7 @@ class Test_autocommand(unittest.TestCase):
         self.assertEqual(command_metadata['name'], 'test autocommand sample-vm-get', 'Unexpected command name...')
         self.assertEqual(len(command_metadata['arguments']), 3, 'We expected exactly 3 arguments')
         some_expected_arguments = [
-            {'name': '--resource-group-name', 'dest': 'resource_group_name', 'required': True},
+            {'name': '--resourcegroup -g', 'dest': 'resource_group_name', 'required': True},
             {'name': '--vm-name', 'dest': 'vm_name', 'required': True},
             ]
 
@@ -81,7 +81,7 @@ class Test_autocommand(unittest.TestCase):
         self.assertEqual(command_metadata['name'], 'test autocommand sample-vm-get', 'Unexpected command name...')
         self.assertEqual(len(command_metadata['arguments']), 3, 'We expected exactly 3 arguments')
         some_expected_arguments = [
-            {'name': '--resource-group-name', 'dest': 'resource_group_name', 'required': True},
+            {'name': '--resourcegroup -g', 'dest': 'resource_group_name', 'required': True},
             {'name': '--wonky-name -n', 'dest': 'vm_name', 'required': False},
             ]
 
@@ -114,7 +114,7 @@ class Test_autocommand(unittest.TestCase):
         self.assertEqual(command_metadata['name'], 'test autocommand sample-vm-get', 'Unexpected command name...')
         self.assertEqual(len(command_metadata['arguments']), 4, 'We expected exactly 4 arguments')
         some_expected_arguments = [
-            {'name': '--resource-group-name', 'dest': 'resource_group_name', 'required': True},
+            {'name': '--resourcegroup -g', 'dest': 'resource_group_name', 'required': True},
             {'name': '--vm-name', 'dest': 'vm_name', 'required': True},
             {'name': '--added-param', 'required': True},
             ]
