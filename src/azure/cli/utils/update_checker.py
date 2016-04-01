@@ -21,7 +21,6 @@ def _get_latest_version_private(pkg_name):
     search_end = '.tar.gz'
     pattern_version = re.compile('%s(.*)%s' % (search_start, search_end))
     versions = [re.search(pattern_version, pl).group(1) for pl in package_links]
-    # Parse the versions so they can be sorted
     parsed_versions = [packaging_version.parse(v) for v in versions
                        if not packaging_version.parse(v).is_prerelease]
     sorted_versions = sorted(parsed_versions)
@@ -30,7 +29,6 @@ def _get_latest_version_private(pkg_name):
 
 def _get_latest_version_public(pkg_name):
     """Check for an update to the component from PyPI"""
-    # TODO This hasn't been tested fully since our packages aren't on PyPI
     response = requests.get('https://pypi.python.org/pypi/{0}/json'.format(pkg_name))
     if response.status_code != 200:
         raise UpdateCheckError('PyPI returned status code {}.'.format(response.status_code))
@@ -40,7 +38,6 @@ def _get_latest_version_public(pkg_name):
     parsed_versions = [packaging_version.parse(v) for v in response_json['releases']
                        if not packaging_version.parse(v).is_prerelease]
     sorted_versions = sorted(parsed_versions)
-    # latest version is last in sorted list
     return sorted_versions[-1] if sorted_versions else None
 
 def _get_current_version(pkg_name):
