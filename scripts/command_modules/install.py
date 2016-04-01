@@ -7,7 +7,7 @@ from _common import get_all_command_modules, exec_command, print_summary
 dev_null_file = open(os.devnull, 'w')
 
 all_command_modules = get_all_command_modules()
-print("Installing each one.")
+print("Installing command modules.")
 
 failed_module_names = []
 for name, fullpath in all_command_modules:

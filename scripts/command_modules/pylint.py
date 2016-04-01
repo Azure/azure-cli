@@ -5,7 +5,7 @@ import os
 from _common import get_all_command_modules, exec_command, print_summary
 
 all_command_modules = get_all_command_modules()
-print("Running pylint on each one.")
+print("Running pylint on command modules.")
 
 failed_module_names = []
 for name, fullpath in all_command_modules:
