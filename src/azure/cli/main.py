@@ -1,11 +1,11 @@
 ﻿import os
 import sys
 
-from ._argparse import ArgumentParser
+from .application import Application, Configuration
+
 from ._logging import configure_logging, logger
 from ._session import Session
 from ._output import OutputProducer
-from azure.cli.extensions import event_dispatcher
 
 # CONFIG provides external configuration options
 CONFIG = Session()
@@ -24,29 +24,16 @@ def main(args, file=sys.stdout): #pylint: disable=redefined-builtin
                                 'locale',
                                 CONFIG.get('locale', 'en-US')))
 
-    event_dispatcher.raise_event(event_dispatcher.REGISTER_GLOBAL_PARAMETERS,
-                                 event_data={'args': args})
-    parser = ArgumentParser("az")
-
-    import azure.cli.commands as commands
-
-    # Find the first noun on the command line and only load commands from that
-    # module to improve startup time.
-    for a in args:
-        if not a.startswith('-'):
-            commands.add_to_parser(parser, a)
-            break
-    else:
-        # No noun found, so load all commands.
-        commands.add_to_parser(parser)
-
+    config = Configuration(args)
+    app = Application(config)
+    app.load_commands()
     try:
-        cmd_result = parser.execute(args)
+        cmd_result = app.execute(args)
         # Commands can return a dictionary/list of results
         # If they do, we print the results.
-        if cmd_result.result:
-            formatter = OutputProducer.get_formatter(cmd_result.output_format)
-            OutputProducer(formatter=formatter, file=file).out(cmd_result.result)
+        if cmd_result:
+            formatter = OutputProducer.get_formatter(app.configuration.output_format)
+            OutputProducer(formatter=formatter, file=file).out(cmd_result)
     except RuntimeError as ex:
         logger.error(ex.args[0])
         return ex.args[1] if len(ex.args) >= 2 else -1

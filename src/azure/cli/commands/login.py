@@ -8,19 +8,23 @@ from azure.mgmt.resource.subscriptions import (SubscriptionClient,
                                                SubscriptionClientConfiguration)
 
 from .._profile import Profile
-from ..commands import command, description, option
+from ..commands import CommandTable
 #TODO: update adal-python to support it
 #from .._debug import should_disable_connection_verify
 from .._locale import L
 
-@command('login')
-@description(L('log in to an Azure subscription using Active Directory Organization Id'))
-@option('--username -u <username>',
-        L('organization Id or service principal. Microsoft Account is not yet supported.'))
-@option('--password -p <password>', L('user password or client secret, will prompt if not given.'))
-@option('--service-principal', L('the credential represents a service principal.'))
-@option('--tenant -t <tenant>', L('the tenant associated with the service principal.'))
-def login(args, unexpected): #pylint: disable=unused-argument
+command_table = CommandTable()
+
+@command_table.command('login')
+@command_table.description(L('log in to an Azure subscription using Active Directory Organization Id')) # pylint: disable=line-too-long
+@command_table.option('--username -u',
+                      help=L('organization Id or service principal. Microsoft Account is not yet supported.')) # pylint: disable=line-too-long
+@command_table.option('--password -p',
+                      help=L('user password or client secret, will prompt if not given.'))
+@command_table.option('--service-principal',
+                      help=L('the credential represents a service principal.'))
+@command_table.option('--tenant -t', help=L('the tenant associated with the service principal.'))
+def login(args):
     interactive = False
 
     username = args.get('username')
