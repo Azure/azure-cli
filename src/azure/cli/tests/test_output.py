@@ -37,6 +37,12 @@ class TestOutput(unittest.TestCase):
 }
 """))
 
+    def test_out_boolean_valid(self):
+        output_producer = OutputProducer(formatter=format_list, file=self.io)
+        output_producer.out(True)
+        self.assertEqual(util.normalize_newlines(self.io.getvalue()),
+                         util.normalize_newlines("""True\n\n\n"""))
+
     def test_out_table_valid(self):
         output_producer = OutputProducer(formatter=format_table, file=self.io)
         output_producer.out({'active': True, 'id': '0b1f6472'})
