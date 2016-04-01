@@ -45,7 +45,7 @@ class TestParser(unittest.TestCase):
         args = parser.parse_args('sub-command the-second-name'.split())
         self.assertIs(args.func, test_handler2)
 
-        AzCliCommandParser.error = VerifyError(self, "the following arguments are required: subcommand")
+        AzCliCommandParser.error = VerifyError(self,)
         parser.parse_args('sub-command'.split())
         self.assertTrue(AzCliCommandParser.error.called)
 
@@ -67,7 +67,7 @@ class TestParser(unittest.TestCase):
         args = parser.parse_args('test command --req yep'.split())
         self.assertIs(args.func, test_handler)
 
-        AzCliCommandParser.error = VerifyError(self, "the following arguments are required: --req")
+        AzCliCommandParser.error = VerifyError(self)
         parser.parse_args('test command'.split())
         self.assertTrue(AzCliCommandParser.error.called)
 
@@ -95,14 +95,14 @@ class TestParser(unittest.TestCase):
 
 class VerifyError(object):
 
-    def __init__(self, test, msg=None):
+    def __init__(self, test, substr=None):
         self.test = test
-        self.message = msg
+        self.substr= substr
         self.called = False
 
-    def __call__(self, msg):
-        if self.message:
-            self.test.assertEqual(msg, self.message)
+    def __call__(self, message):
+        if self.substr:
+            self.test.assertTrue(message.find(self.substr) >= 0)
         self.called = True
 
 if __name__ == '__main__':
