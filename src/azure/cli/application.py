@@ -69,7 +69,16 @@ class Application(object):
         # This does not feel quite right.
         params = dict([(key, value)
                        for key, value in args.__dict__.items() if not key.startswith('_')])
-        result = args.func(params)
+        params.pop('subcommand', None)
+        func = params.pop('func', None)
+
+        # TODO: Remove this conversion code once internal key references are updated (#116797761)
+        converted_params = {}
+        for key in params.keys():
+            converted_key = key.replace('_', '-')
+            converted_params[converted_key] = params[key]
+
+        result = args.func(converted_params)
 
         result = self.todict(result)
         event_data = {'result': result}
