@@ -5,7 +5,7 @@ from six import StringIO
 from collections import namedtuple
 
 from azure.cli._output import (OutputProducer, OutputFormatException, format_json, format_table, format_list, format_text,
-                                ListOutput)
+                                format_tsv, ListOutput)
 import azure.cli._util as util
 
 class TestOutput(unittest.TestCase):
@@ -36,6 +36,12 @@ class TestOutput(unittest.TestCase):
   "id": "0b1f6472"
 }
 """))
+
+    def test_out_boolean_valid(self):
+        output_producer = OutputProducer(formatter=format_list, file=self.io)
+        output_producer.out(True)
+        self.assertEqual(util.normalize_newlines(self.io.getvalue()),
+                         util.normalize_newlines("""True\n\n\n"""))
 
     def test_out_table_valid(self):
         output_producer = OutputProducer(formatter=format_table, file=self.io)
@@ -149,50 +155,40 @@ Myarray :
         lo._get_formatted_key('locationIdState')
         self.assertEqual(lo._formatted_keys_cache, {'locationIdState': 'Location Id State'})
 
-    def test_out_todict_none(self):
-        input = None
-        actual = OutputProducer.todict(input)
-        expected = None
-        self.assertEqual(actual, expected)
+    # TSV output tests
+    def test_output_format_dict(self):
+        obj = {}
+        obj['A'] = 1
+        obj['B'] = 2
+        result = format_tsv(obj)
+        self.assertEquals(result, '1\t2\n')
 
-    def test_out_todict_dict_empty(self):
-        input = {}
-        actual = OutputProducer.todict(input)
-        expected = {}
-        self.assertEqual(actual, expected)
+    def test_output_format_dict_sort(self):
+        obj = {}
+        obj['B'] = 1
+        obj['A'] = 2
+        result = format_tsv(obj)
+        self.assertEquals(result, '2\t1\n')
 
-    def test_out_todict_dict(self):
-        input = {'a': 'b'}
-        actual = OutputProducer.todict(input)
-        expected = {'a': 'b'}
-        self.assertEqual(actual, expected)
+    def test_output_format_ordereddict_not_sorted(self):
+        from collections import OrderedDict
+        obj = OrderedDict()
+        obj['B'] = 1
+        obj['A'] = 2
+        result = format_tsv(obj)
+        self.assertEquals(result, '1\t2\n')
 
-    def test_out_todict_list(self):
-        input = [{'a': 'b'}]
-        actual = OutputProducer.todict(input)
-        expected = [{'a': 'b'}]
-        self.assertEqual(actual, expected)
+    def test_output_format_ordereddict_list_not_sorted(self):
+        from collections import OrderedDict
+        obj1 = OrderedDict()
+        obj1['B'] = 1
+        obj1['A'] = 2
 
-    def test_out_todict_list(self):
-        input = [{'a': 'b'}]
-        actual = OutputProducer.todict(input)
-        expected = [{'a': 'b'}]
-        self.assertEqual(actual, expected)
-
-    def test_out_todict_obj(self):
-        MyObject = namedtuple('MyObject', 'a b')
-        input = MyObject('x', 'y')
-        actual = OutputProducer.todict(input)
-        expected = {'a': 'x', 'b': 'y'}
-        self.assertEqual(actual, expected)
-
-    def test_out_todict_dict_with_obj(self):
-        MyObject = namedtuple('MyObject', 'a b')
-        mo = MyObject('x', 'y')
-        input = {'a': mo}
-        actual = OutputProducer.todict(input)
-        expected = {'a': {'a': 'x', 'b': 'y'}}
-        self.assertEqual(actual, expected)
+        obj2 = OrderedDict()
+        obj2['A'] = 3
+        obj2['B'] = 4
+        result = format_tsv([obj1, obj2])
+        self.assertEquals(result, '1\t2\n3\t4\n')
 
 if __name__ == '__main__':
     unittest.main()
