@@ -41,7 +41,7 @@ def _check_for_cli_update(CONFIG):
         _save_update_data(CONFIG, config_key, now, update_info)
         if update_info['update_available']:
             print("Current version of CLI {}. Version {} is available. \
-Update with 'az components update self{}'"
+Update with 'az components update-self{}'"
                   .format(update_info['current_version'], update_info['latest_version'],
                           ' -p' if use_private else ''))
     except UpdateCheckError as err:
