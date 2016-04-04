@@ -113,10 +113,10 @@ def check_component(args):
             result = check_for_component_update(component_name, private)
             if result['update_available']:
                 print("Update available.")
+                print("Current version: {}. Latest version: {}.".format(result['current_version'],
+                                                                        result['latest_version']))
             else:
                 print("Component is up-to-date.")
-            print("Current version: {}. Latest version: {}.".format(result['current_version'],
-                                                                    result['latest_version']))
         except UpdateCheckError as err:
             raise RuntimeError(L("Unable to check for updates. {}".format(err)))
     else:
