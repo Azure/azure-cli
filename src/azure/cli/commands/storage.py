@@ -149,15 +149,17 @@ def list_accounts(args):
         accounts = smc.storage_accounts.list()
     return list(accounts)
 
+key_options = ['key1', 'key2']
 @command_table.command('storage account renew-keys')
 @command_table.description(L('Regenerate one or both keys for a storage account.'))
 @command_table.option(**COMMON_PARAMETERS['resource_group_name'])
 @command_table.option(**COMMON_PARAMETERS['account_name'])
 @command_table.option('--key -y', default=['key1', 'key2'],
-                      choices=['key1', 'key2'], help=L('Key to renew'))
+                      choices=key_options, help=L('Key to renew'))
 def renew_account_keys(args):
     smc = storage_client_factory()
-    for key in args.get('key'):
+    keys_to_renew = [k for k in key_options if args.get('key') == k] or key_options
+    for key in keys_to_renew:
         result = smc.storage_accounts.regenerate_key(
             resource_group_name=args.get('resourcegroup'),
             account_name=args.get('account_name'),
