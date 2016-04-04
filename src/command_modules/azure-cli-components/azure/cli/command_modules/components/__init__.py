@@ -47,7 +47,8 @@ def _install_or_update(component_name, version, link, private, upgrade=False):
 for links to archives. If a local path or \
 file:// url that's a directory,then look for \
 archives in the directory listing."))
-@command_table.option('--private -p', help=L('Get from the project private PyPI server'))
+@command_table.option('--private -p', action='store_true',
+                      help=L('Get from the project private PyPI server'))
 def install_component(args):
     _install_or_update(args.get('name'), args.get('version'), args.get('link'),
                        args.get('private'), upgrade=False)
@@ -59,7 +60,8 @@ def install_component(args):
 for links to archives. If a local path or \
 file:// url that's a directory,then look for \
 archives in the directory listing."))
-@command_table.option('--private -p', help=L('Get from the project private PyPI server'))
+@command_table.option('--private -p', action='store_true',
+                      help=L('Get from the project private PyPI server'))
 def update_component(args):
     _install_or_update(args.get('name'), None, args.get('link'), args.get('private'), upgrade=True)
 
@@ -69,7 +71,8 @@ def update_component(args):
 for links to archives. If a local path or \
 file:// url that's a directory,then look for \
 archives in the directory listing."))
-@command_table.option('--private -p', help=L('Get from the project private PyPI server'))
+@command_table.option('--private -p', action='store_true',
+                      help=L('Get from the project private PyPI server'))
 def update_all_components(args):
     component_names = [dist.key.replace(COMPONENT_PREFIX, '')
                        for dist in pip.get_installed_distributions(local_only=True)
@@ -81,7 +84,8 @@ def update_all_components(args):
 @command_table.command('components remove')
 @command_table.description(L('Remove a component'))
 @command_table.option('--name -n', help=L('Name of component to remove'), required=True)
-@command_table.option('--force -f', help=L('supress delete confirmation prompt'))
+@command_table.option('--force -f', action='store_true',
+                      help=L('supress delete confirmation prompt'))
 def remove_component(args):
     component_name = args.get('name')
     prompt_for_delete = args.get('force') is None
