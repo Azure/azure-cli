@@ -68,7 +68,7 @@ archives in the directory listing."))
 def update_component(args):
     _install_or_update(args.get('name'), None, args.get('link'), args.get('private'), upgrade=True)
 
-@command_table.command('components update self')
+@command_table.command('components update-self')
 @command_table.description(L('Update the CLI'))
 @command_table.option('--private -p', action='store_true',
                       help=L('Get from the project private PyPI server'))
@@ -80,7 +80,7 @@ def update_self(args):
     pip.main(['install', '--quiet', '--isolated', '--disable-pip-version-check', '--upgrade']
              + [CLI_PACKAGE_NAME] + pkg_index_options)
 
-@command_table.command('components update all')
+@command_table.command('components update-all')
 @command_table.description(L('Update all components'))
 @command_table.option('--link -l', help=L("If a url or path to an html file, then parse \
 for links to archives. If a local path or \
