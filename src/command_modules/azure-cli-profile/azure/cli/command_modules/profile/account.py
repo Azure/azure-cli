@@ -1,11 +1,14 @@
 from azure.cli._profile import Profile
 from azure.cli.commands import CommandTable
 from azure.cli._locale import L
+from .command_tables import COMMAND_TABLES
 
 command_table = CommandTable()
 
+COMMAND_TABLES.append(command_table)
+
 @command_table.command('account list', description=L('List the imported subscriptions.'))
-def list_subscriptions(args):
+def list_subscriptions(args):  #pylint: disable=unused-argument
     """
     type: command
     long-summary: |
@@ -43,6 +46,3 @@ def set_active_subscription(args):
 
     profile = Profile()
     profile.set_active_subscription(subscription_id)
-
-from . import COMMAND_TABLES
-COMMAND_TABLES.append(command_table)

@@ -14,7 +14,11 @@ from azure.cli._locale import L
 #TODO: update adal-python to support it
 #from azure.cli._debug import should_disable_connection_verify
 
+from .command_tables import COMMAND_TABLES
+
 command_table = CommandTable()
+
+COMMAND_TABLES.append(command_table)
 
 @command_table.command('login')
 @command_table.description(L('log in to an Azure subscription using Active Directory Organization Id')) # pylint: disable=line-too-long
@@ -75,7 +79,3 @@ def login(args):
 
 def _get_authority_url(tenant=None):
     return 'https://login.microsoftonline.com/{}'.format(tenant or 'common')
-
-from . import COMMAND_TABLES
-COMMAND_TABLES.append(command_table)
-

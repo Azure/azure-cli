@@ -1,6 +1,6 @@
-spec = [
+TEST_SPECS = [
     {
-        'test_name': 'test_storage_account_list',
+        'test_name': 'storage_account_list',
         'command': 'storage account list',
         'expected_result': """Account Type           : Standard_LRS
 Creation Time          : 2016-03-03T23:07:20.837674+00:00
@@ -402,6 +402,3 @@ Tags                   :
 """
     }
 ]
-
-from . import TEST_SPECS
-TEST_SPECS.append((locals()['__name__'], spec))
