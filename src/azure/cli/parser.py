@@ -38,9 +38,10 @@ class AzCliCommandParser(argparse.ArgumentParser):
                 try:
                     names = arg.pop('name').split()
                     command_parser.add_argument(*names, **arg)
-                    print('  OK {}'.format(metadata['name']))
-                except KeyError as ex:
-                    print('ARGUMENTS MISSING NAME KEY!!! - {}'.format(metadata['name']))
+                    # print('  OK {}'.format(metadata['name']))
+                except KeyError:
+                    # print('ARGUMENTS MISSING NAME KEY!!! - {}'.format(metadata['name']))
+                    pass
             command_parser.set_defaults(func=handler)
 
     def _get_subparser(self, path):

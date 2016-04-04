@@ -249,10 +249,10 @@ build_operation(
     'storage container', None, blob_data_service_factory,
     [
         AutoCommandDefinition(BlockBlobService.list_containers, '[Container]', 'list'),
-        AutoCommandDefinition(BlockBlobService.delete_container, 'None', 'delete'),
+        AutoCommandDefinition(BlockBlobService.delete_container, None, 'delete'),
         AutoCommandDefinition(BlockBlobService.get_container_properties,
                               '[ContainerProperties]', 'show'),
-        AutoCommandDefinition(BlockBlobService.create_container, 'None', 'create')
+        AutoCommandDefinition(BlockBlobService.create_container, None, 'create')
     ],
     command_table, None, STORAGE_DATA_CLIENT_ARGS)
 
@@ -285,9 +285,9 @@ lease_duration_values_string = 'Between {} and {} seconds. ({} for infinite)'.fo
 
 build_operation('storage container lease', None, blob_data_service_factory,
                 [
-                    AutoCommandDefinition(BlockBlobService.renew_container_lease, 'None', 'renew'),
+                    AutoCommandDefinition(BlockBlobService.renew_container_lease, None, 'renew'),
                     AutoCommandDefinition(BlockBlobService.release_container_lease,
-                                          'None', 'release'),
+                                          None, 'release'),
                     AutoCommandDefinition(BlockBlobService.change_container_lease,
                                           'LeaseId', 'change')
                 ],
@@ -341,7 +341,7 @@ def break_container_lease(args):
 build_operation('storage blob', None, blob_data_service_factory,
                 [
                     AutoCommandDefinition(BlockBlobService.list_blobs, '[Blob]', 'list'),
-                    AutoCommandDefinition(BlockBlobService.delete_blob, 'None', 'delete'),
+                    AutoCommandDefinition(BlockBlobService.delete_blob, None, 'delete'),
                     AutoCommandDefinition(BlockBlobService.exists, 'Boolean', 'exists'),
                     AutoCommandDefinition(BlockBlobService.get_blob_properties,
                                           'BlobProperties', 'show')
