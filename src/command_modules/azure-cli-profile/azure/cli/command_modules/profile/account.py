@@ -43,3 +43,6 @@ def set_active_subscription(args):
 
     profile = Profile()
     profile.set_active_subscription(subscription_id)
+
+from . import COMMAND_TABLES
+COMMAND_TABLES.append(command_table)

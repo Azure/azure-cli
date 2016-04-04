@@ -12,3 +12,6 @@ command_table = CommandTable()
 def logout(args):
     profile = Profile()
     profile.logout(args['username'])
+
+from . import COMMAND_TABLES
+COMMAND_TABLES.append(command_table)
