@@ -1,7 +1,7 @@
 ﻿from __future__ import print_function
 import sys
 import time
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
 
 # TODO: Alternatively, simply scan the directory for all modules
 COMMAND_MODULES = [
@@ -119,4 +119,6 @@ def get_command_table(module_name=None):
         for mod in COMMAND_MODULES:
             command_table.update(_get_command_table(mod))
         loaded = True
-    return command_table
+
+    ordered_commands = OrderedDict(sorted(command_table.items(), key=lambda item: item[1]['name']))
+    return ordered_commands
