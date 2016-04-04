@@ -70,7 +70,8 @@ def update_component(args):
 
 @command_table.command('components update self')
 @command_table.description(L('Update the CLI'))
-@command_table.option('--private -p', action='store_true', L('Get from the project private PyPI server'))
+@command_table.option('--private -p', action='store_true',
+                      help=L('Get from the project private PyPI server'))
 def update_self(args):
     pkg_index_options = []
     if args.get('private'):
@@ -97,8 +98,9 @@ def update_all_components(args):
 
 @command_table.command('components check')
 @command_table.description(L('Check a component for an update'))
-@command_table.option('--name -n <name>', L('Name of component to remove'), required=True)
-@command_table.option('--private -p', action='store_true', L('Look for updates from the project private PyPI server'))
+@command_table.option('--name -n', help=L('Name of component to remove'), required=True)
+@command_table.option('--private -p', action='store_true',
+                      help=L('Look for updates from the project private PyPI server'))
 def check_component(args):
     component_name = args.get('name')
     private = args.get('private')

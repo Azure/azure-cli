@@ -1,6 +1,6 @@
 import re
-import requests
 import imp
+import requests
 import pip
 from pip import get_installed_distributions
 from pip._vendor.packaging import version as packaging_version
