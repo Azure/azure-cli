@@ -76,5 +76,6 @@ def login(args):
 def _get_authority_url(tenant=None):
     return 'https://login.microsoftonline.com/{}'.format(tenant or 'common')
 
-
+from . import COMMAND_TABLES
+COMMAND_TABLES.append(command_table)
 
