@@ -68,10 +68,10 @@ class TestSequenceMeta(type):
                 if not provided. """
                 io = StringIO()
 
-                #header = '| BEGGINING TEST FOR {} |'.format(test_name) 
-                #print('\n' + ('-' * len(header)), file=sys.stderr)
-                #print(header, file=sys.stderr)
-                #print('-' * len(header) + '\n', file=sys.stderr)                
+                header = '| BEGGINING TEST FOR {} |'.format(test_name) 
+                print('\n' + ('-' * len(header)), file=sys.stderr)
+                print(header, file=sys.stderr)
+                print('-' * len(header) + '\n', file=sys.stderr)                
 
                 cli(command.split(), file=io)
                 actual_result = io.getvalue()

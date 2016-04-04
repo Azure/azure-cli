@@ -179,8 +179,8 @@ def show_account_usage(_):
                       help=L('use http as the default endpoint protocol'))
 def show_storage_connection_string(args):
     smc = storage_client_factory()
-    endpoint_protocol = args.get('use-http')
-    storage_account = args.get('account-name')
+    endpoint_protocol = args.get('use_http')
+    storage_account = args.get('account_name')
     keys = smc.storage_accounts.list_keys(args.get('resourcegroup'), storage_account)
 
     connection_string = 'DefaultEndpointsProtocol={};AccountName={};AccountKey={}'.format(
