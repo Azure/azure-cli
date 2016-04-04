@@ -1,15 +1,19 @@
 from __future__ import print_function
+import os
 
 import collections
 from datetime import datetime, timedelta
 from .._logging import logger
-from .._util import should_use_private_pypi
 from azure.cli.utils.update_checker import check_for_cli_update, UpdateCheckError
 
 data = collections.namedtuple('Data', 'disable_version_check')
 
 UPDATE_CHECK_DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
 DAYS_BETWEEN_UPDATE_CHECK = 7
+AZURE_CLI_UPDATE_CHECK_USE_PRIVATE = "AZURE_CLI_UPDATE_CHECK_USE_PRIVATE"
+
+def should_use_private_pypi():
+    return bool(os.environ.get(AZURE_CLI_UPDATE_CHECK_USE_PRIVATE))
 
 def _should_check_for_update(CONFIG, config_key, now):
     config_data = CONFIG.get(config_key)
