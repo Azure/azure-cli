@@ -5,7 +5,7 @@ from azure.cli._locale import L
 command_table = CommandTable()
 
 @command_table.command('account list', description=L('List the imported subscriptions.'))
-def list_subscriptions(args, unexpected): #pylint: disable=unused-argument
+def list_subscriptions(args):
     """
     type: command
     long-summary: |
