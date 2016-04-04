@@ -12,7 +12,7 @@ command_table = CommandTable()
 
 @command_table.command('components list')
 @command_table.description(L('List the installed components.'))
-def list_components(args):
+def list_components(args): #pylint: disable=unused-argument
     components = sorted(["%s (%s)" % (dist.key.replace(COMPONENT_PREFIX, ''), dist.version)
                          for dist in pip.get_installed_distributions(local_only=True)
                          if dist.key.startswith(COMPONENT_PREFIX)])

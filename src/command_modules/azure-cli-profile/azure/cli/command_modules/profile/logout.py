@@ -2,7 +2,11 @@ from azure.cli._profile import Profile
 from azure.cli.commands import CommandTable
 from azure.cli._locale import L
 
+from .command_tables import COMMAND_TABLES
+
 command_table = CommandTable()
+
+COMMAND_TABLES.append(command_table)
 
 @command_table.command('logout',
                        description=L('Log out from Azure subscription using Active Directory.'))
@@ -12,6 +16,3 @@ command_table = CommandTable()
 def logout(args):
     profile = Profile()
     profile.logout(args['username'])
-
-from . import COMMAND_TABLES
-COMMAND_TABLES.append(command_table)
