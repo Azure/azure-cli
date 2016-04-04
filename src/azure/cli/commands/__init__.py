@@ -2,7 +2,7 @@ from __future__ import print_function
 import sys
 import time
 from importlib import import_module
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
 from pip import get_installed_distributions
 
 # Find our command modules, they start with 'azure-cli-'
@@ -114,4 +114,6 @@ def get_command_table(module_name=None):
         for mod in INSTALLED_COMMAND_MODULES:
             command_table.update(_get_command_table(mod))
         loaded = True
-    return command_table
+
+    ordered_commands = OrderedDict(sorted(command_table.items(), key=lambda item: item[1]['name']))
+    return ordered_commands
