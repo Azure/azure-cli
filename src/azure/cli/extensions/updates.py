@@ -62,8 +62,8 @@ def register(application):
         data.disable_version_check = bool(args._disable_version_check) # pylint: disable=protected-access
 
     def handle_update_checking(_):
-        from azure.cli.main import CONFIG
         if not data.disable_version_check: # pylint: disable=no-member
+            from azure.cli.main import CONFIG
             _check_for_cli_update(CONFIG)
 
     # Register our global parameter
