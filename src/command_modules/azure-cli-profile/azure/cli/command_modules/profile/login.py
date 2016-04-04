@@ -9,19 +9,27 @@ from azure.mgmt.resource.subscriptions import (SubscriptionClient,
                                                SubscriptionClientConfiguration)
 
 from azure.cli._profile import Profile
-from azure.cli.commands import command, description, option
+from azure.cli.commands import CommandTable
 from azure.cli._locale import L
 #TODO: update adal-python to support it
 #from azure.cli._debug import should_disable_connection_verify
 
-@command('login')
-@description(L('log in to an Azure subscription using Active Directory Organization Id'))
-@option('--username -u <username>',
-        L('organization Id or service principal. Microsoft Account is not yet supported.'))
-@option('--password -p <password>', L('user password or client secret, will prompt if not given.'))
-@option('--service-principal', L('the credential represents a service principal.'))
-@option('--tenant -t <tenant>', L('the tenant associated with the service principal.'))
-def login(args, unexpected): #pylint: disable=unused-argument
+from .command_tables import COMMAND_TABLES
+
+command_table = CommandTable()
+
+COMMAND_TABLES.append(command_table)
+
+@command_table.command('login')
+@command_table.description(L('log in to an Azure subscription using Active Directory Organization Id')) # pylint: disable=line-too-long
+@command_table.option('--username -u',
+                      help=L('organization Id or service principal. Microsoft Account is not yet supported.')) # pylint: disable=line-too-long
+@command_table.option('--password -p',
+                      help=L('user password or client secret, will prompt if not given.'))
+@command_table.option('--service-principal',
+                      help=L('the credential represents a service principal.'))
+@command_table.option('--tenant -t', help=L('the tenant associated with the service principal.'))
+def login(args):
     interactive = False
 
     username = args.get('username')
@@ -71,6 +79,3 @@ def login(args, unexpected): #pylint: disable=unused-argument
 
 def _get_authority_url(tenant=None):
     return 'https://login.microsoftonline.com/{}'.format(tenant or 'common')
-
-
-

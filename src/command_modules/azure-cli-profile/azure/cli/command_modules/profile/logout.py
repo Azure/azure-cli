@@ -1,14 +1,18 @@
 from azure.cli._profile import Profile
-from azure.cli.commands import command, description, option
+from azure.cli.commands import CommandTable
 from azure.cli._locale import L
 
-@command('logout')
-@description(L('Log out from Azure subscription using Active Directory.'))
-@option('--username -u <username>', L('User name used to log out from Azure Active Directory.'))
-def logout(args, unexpected): #pylint: disable=unused-argument
-    username = args.get('username')
-    if not username:
-        raise ValueError(L('Please provide a valid username to logout.'))
+from .command_tables import COMMAND_TABLES
 
+command_table = CommandTable()
+
+COMMAND_TABLES.append(command_table)
+
+@command_table.command('logout',
+                       description=L('Log out from Azure subscription using Active Directory.'))
+@command_table.option('--username -u',
+                      help=L('User name used to log out from Azure Active Directory.'),
+                      required=True)
+def logout(args):
     profile = Profile()
-    profile.logout(username)
+    profile.logout(args['username'])

@@ -232,6 +232,29 @@ Primary Endpoints      :
 Tags                   :
    None
 
+Account Type           : Standard_LRS
+Creation Time          : 2016-03-25T20:48:28.341265+00:00
+Custom Domain          : None
+Id                     : /subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/ecvm1458938841925rg/providers/Microsoft.Storage/storageAccounts/ecvm1458938841925sa
+Last Geo Failover Time : None
+Location               : southeastasia
+Name                   : ecvm1458938841925sa
+Primary Location       : southeastasia
+Provisioning State     : Succeeded
+Resource Group         : ecvm1458938841925rg
+Secondary Endpoints    : None
+Secondary Location     : None
+Status Of Primary      : Available
+Status Of Secondary    : None
+Type                   : Microsoft.Storage/storageAccounts
+Primary Endpoints      :
+   Blob  : https://ecvm1458938841925sa.blob.core.windows.net/
+   File  : https://ecvm1458938841925sa.file.core.windows.net/
+   Queue : https://ecvm1458938841925sa.queue.core.windows.net/
+   Table : https://ecvm1458938841925sa.table.core.windows.net/
+Tags                   :
+   None
+
 Account Type           : Standard_RAGRS
 Creation Time          : 2016-03-05T00:25:04.704573+00:00
 Custom Domain          : None
@@ -374,29 +397,6 @@ Primary Endpoints      :
    Table : https://xplatstoragext4633.table.core.windows.net/
 Tags                   :
    None
-
-
-"""
-    },
-    {
-        'test_name': 'storage_account_usage',
-        'command': 'storage account usage',
-        'expected_result': """Current Value : 16
-Limit         : 100
-Unit          : Count
-Name          :
-   Localized Value : Storage Accounts
-   Value           : StorageAccounts
-
-
-"""
-    },
-    {
-        'test_name': 'storage_account_check',
-        'command': 'storage account check-name-availability --name travisteststorageaccount',
-        'expected_result': """Message        : None
-Name Available : True
-Reason         : None
 
 
 """
