@@ -28,15 +28,17 @@ def _parse_datetime(string):
     date_format = '%Y-%m-%d %H:%M:%S'
     return datetime.strptime(string, date_format)
 
-def _parse_dict(args, key, allow_singles=True):
-    """ Parses dictionaries passed in as argument strings in key=value;key=value format.
-    If 'allow_singles' is set to False, single tags will be ignored."""
-    string_val = args.get(key)
-    if not string_val:
-        return None
-    kv_list = [x for x in string_val.split(';') if '=' in x]     # key-value pairs
-    result = dict(x.split('=') for x in kv_list)
-    if allow_singles:
+def _parse_key_value_pairs(string):
+    result = None
+    if string:
+        kv_list = [x for x in string.split(';') if '=' in x]     # key-value pairs
+        result = dict(x.split('=') for x in kv_list)
+    return result
+
+def _parse_tags(string):
+    result = None
+    if string:
+        result = _parse_key_value_pairs(string)
         s_list = [x for x in string_val.split(';') if '=' not in x]  # single values
         result.update(dict((x, '') for x in s_list))
     return result
@@ -154,12 +156,12 @@ key_options = ['key1', 'key2']
 @command_table.description(L('Regenerate one or both keys for a storage account.'))
 @command_table.option(**COMMON_PARAMETERS['resource_group_name'])
 @command_table.option(**COMMON_PARAMETERS['account_name'])
-@command_table.option('--key -y', default=['key1', 'key2'],
+@command_table.option('--key -y', default=key_options,
                       choices=key_options, help=L('Key to renew'))
 def renew_account_keys(args):
     smc = storage_client_factory()
-    keys_to_renew = [k for k in key_options if args.get('key') == k] or key_options
-    for key in keys_to_renew:
+    keys_to_renew = args.get('key')
+    for key in keys_to_renew if isinstance(keys_to_renew, list) else [args.get('key')]:
         result = smc.storage_accounts.regenerate_key(
             resource_group_name=args.get('resourcegroup'),
             account_name=args.get('account_name'),
@@ -204,7 +206,7 @@ storage_account_types = {'Standard_LRS': AccountType.standard_lrs,
 @command_table.option(**COMMON_PARAMETERS['account_name'])
 @command_table.option(**COMMON_PARAMETERS['location'])
 @command_table.option('--type', choices=storage_account_types.keys(), required=True)
-@command_table.option('--tags',
+@command_table.option('--tags', type=_parse_tags,
                       help=L('storage account tags. Tags are key=value pairs separated ' + \
                       'with a semicolon(;)'))
 def create_account(args):
@@ -216,7 +218,7 @@ def create_account(args):
     account_type = storage_account_types[args.get('type')]
     params = StorageAccountCreateParameters(args.get('location'),
                                             account_type,
-                                            _parse_dict(args, 'tags'))
+                                            args.get('tags'))
     return smc.storage_accounts.create(resource_group, account_name, params)
 
 @command_table.command('storage account set')
@@ -226,7 +228,7 @@ def create_account(args):
 @command_table.option('--type',
                       choices=storage_account_types.keys(),
                       type=lambda x: storage_account_types[x])
-@command_table.option('--tags',
+@command_table.option('--tags', type=_parse_tags,
                       help=L('storage account tags. Tags are key=value pairs separated ' + \
                       'with a semicolon(;)'))
 @command_table.option('--custom-domain', help=L('the custom domain name'))
@@ -240,7 +242,7 @@ def set_account(args):
     domain = args.get('custom_domain')
     account_type = storage_account_types[args.get('type')] if args.get('type') else None
 
-    params = StorageAccountUpdateParameters(_parse_dict(args, 'tags'), account_type, domain)
+    params = StorageAccountUpdateParameters(args.get('tags'), account_type, domain)
     return smc.storage_accounts.update(resource_group, account_name, params)
 
 #### BLOB COMMANDS ################################################################################

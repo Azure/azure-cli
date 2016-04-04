@@ -108,13 +108,13 @@ def build_operation(command_name,
                 default = arg_defaults[arg] if arg in arg_defaults else None
                 required = False if default else True
 
-            # TODO: Add action here if a boolean default value exists to create a flag
-
+            action = 'store_' + str(not default).lower() if type(default) == bool else None
             common_param = merged_common_parameters.get(arg, {
                 'name': '--' + arg.replace('_', '-'),
                 'required': required,
                 'default': default,
-                'help': _option_description(op.operation, arg)
+                'help': _option_description(op.operation, arg),
+                'action': action
             }).copy() # We need to make a copy to allow consumers to mutate the value
                       # retrieved from the common parameters without polluting future
                       # use...
