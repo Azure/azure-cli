@@ -92,9 +92,6 @@ class CommandTable(defaultdict):
 
 def _get_command_table(module_name):
     module = import_module('azure.cli.command_modules.' + module_name)
-    for part in ('cli.command_modules.' + module_name).split('.'):
-        module = getattr(module, part)
-
     return module.command_table
 
 def get_command_table(module_name=None):
