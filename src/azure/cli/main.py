@@ -10,7 +10,6 @@ from ._logging import configure_logging, logger
 from ._session import Session
 from ._output import OutputProducer
 from ._util import should_use_private_pypi
-from azure.cli.extensions import event_dispatcher
 
 from azure.cli.utils.update_checker import check_for_cli_update, UpdateCheckError
 
