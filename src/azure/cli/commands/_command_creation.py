@@ -53,11 +53,3 @@ def _get_data_service_client(service_type, account_name, account_key, connection
                           connection_string=connection_string)
     # TODO: enable Fiddler and user agent (task #115270703, #115270881)
     return client
-
-# TODO Remove this if argparse default handles environment variables
-#def _resolve_arg(key, envkey):
-#    try:
-#        value = args[0].pop(key, None)
-#    except (IndexError, KeyError):
-#        value = environ.get(envkey)
-#    return value
