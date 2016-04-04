@@ -12,31 +12,31 @@ definition = [
     },
     {
         'test_name': 'storage_account_check_name',
-        'command': 'storage account check-name-availability --name teststorageomega'
+        'command': 'storage account check-name --name teststorageomega'
     },
     {
         'test_name': 'storage_account_list_keys',
-        'command': 'storage account list-keys --rg {} --account_name {}'
+        'command': 'storage account list-keys -g {} --account-name {}'
             .format(RESOURCE_GROUP_NAME, STORAGE_ACCOUNT_NAME)
     },
     {
         'test_name': 'storage_account_show',
-        'command': 'storage account get-properties --rg {} --account_name {}'
+        'command': 'storage account show --resourcegroup {} --account-name {}'
             .format(RESOURCE_GROUP_NAME, STORAGE_ACCOUNT_NAME)
     },
     {
         'test_name': 'storage_account_connection_string',
-        'command': 'storage account connection-string -g {} -n {} --use-http'
+        'command': 'storage account connection-string -g {} --account-name {} --use-http'
             .format(RESOURCE_GROUP_NAME, STORAGE_ACCOUNT_NAME)
     },
     {
         'test_name': 'storage_account_renew_keys_both',
-        'command': 'storage account renew-keys -g {} -n {}'
+        'command': 'storage account renew-keys -g {} --account-name {}'
             .format(RESOURCE_GROUP_NAME, STORAGE_ACCOUNT_NAME)
     },
     {
         'test_name': 'storage_account_renew_keys_one',
-        'command': 'storage account renew-keys -g {} -n {} --key key1'
+        'command': 'storage account renew-keys -g {} --account-name {} --key key1'
             .format(RESOURCE_GROUP_NAME, STORAGE_ACCOUNT_NAME)
     }
 ]
