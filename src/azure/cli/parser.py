@@ -37,9 +37,8 @@ class AzCliCommandParser(argparse.ArgumentParser):
             for arg in metadata['arguments']:
                 # must copy the arg to avoid stripping name out of the arg and making it
                 # unusable for future test cycles
-                arg_copy = arg.copy()
-                names = arg_copy.pop('name').split()
-                command_parser.add_argument(*names, **arg_copy)
+                names = arg.get('name').split()
+                command_parser.add_argument(*names, **{k:v for k, v in arg.items() if k != 'name'})
             command_parser.set_defaults(func=handler)
 
     def _get_subparser(self, path):
