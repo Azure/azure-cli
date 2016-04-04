@@ -6,7 +6,7 @@ command_table = CommandTable()
 
 @command_table.command('taskhelp deploy-arm-template')
 @command_table.description(L('How to deploy and ARM template using Azure CLI.'))
-def deploy_template_help(args, unexpected): #pylint: disable=unused-argument
+def deploy_template_help(args):
     print(L("""
 ***********************
 ARM Template Deployment
