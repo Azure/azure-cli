@@ -1,7 +1,7 @@
 TEST_SPECS = [
     {
         'test_name': 'resource_group_list',
-        'command': 'resource group list --output json',
+        'command': 'resource group list --output json --disable-version-check',
         'expected_result': """[
   {
     "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/armclistorageGroup1131",
