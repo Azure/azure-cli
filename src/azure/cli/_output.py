@@ -4,11 +4,7 @@ import sys
 import json
 import re
 from collections import OrderedDict
-from datetime import datetime
-from enum import Enum
 from six import StringIO
-
-from azure.cli.extensions import event_dispatcher
 
 class OutputFormatException(Exception):
     pass
@@ -59,40 +55,13 @@ class OutputProducer(object): #pylint: disable=too-few-public-methods
         'tsv': format_tsv,
     }
 
-    KEYS_CAMELCASE_PATTERN = re.compile('(?!^)_([a-zA-Z])')
-
     def __init__(self, formatter=format_list, file=sys.stdout): #pylint: disable=redefined-builtin
         self.formatter = formatter
         self.file = file
 
     def out(self, obj):
-        obj = OutputProducer.todict(obj)
-        event_data = {'result': obj}
-        event_dispatcher.raise_event(event_dispatcher.TRANSFORM_RESULT, event_data)
-        event_dispatcher.raise_event(event_dispatcher.FILTER_RESULT, event_data)
-        print(self.formatter(event_data['result']), file=self.file)
+        print(self.formatter(obj), file=self.file)
 
-    @staticmethod
-    def todict(obj): #pylint: disable=too-many-return-statements
-        def to_camelcase(s):
-            return re.sub(OutputProducer.KEYS_CAMELCASE_PATTERN, lambda x: x.group(1).upper(), s)
-
-        if isinstance(obj, dict):
-            return {k: OutputProducer.todict(v) for (k, v) in obj.items()}
-        elif isinstance(obj, list):
-            return [OutputProducer.todict(a) for a in obj]
-        elif isinstance(obj, Enum):
-            return obj.value
-        elif isinstance(obj, datetime):
-            return obj.isoformat()
-        elif hasattr(obj, '_asdict'):
-            return OutputProducer.todict(obj._asdict())
-        elif hasattr(obj, '__dict__'):
-            return dict([(to_camelcase(k), OutputProducer.todict(v))
-                         for k, v in obj.__dict__.items()
-                         if not callable(v) and not k.startswith('_')])
-        else:
-            return obj
 
     @staticmethod
     def get_formatter(format_type):
@@ -135,7 +104,7 @@ class ListOutput(object): #pylint: disable=too-few-public-methods
     @staticmethod
     def _dump_line(io, line, indent):
         io.write('   ' * indent)
-        io.write(line)
+        io.write(str(line))
         io.write('\n')
 
     def _dump_object(self, io, obj, indent):
@@ -248,7 +217,7 @@ class TsvOutput(object): #pylint: disable=too-few-public-methods
             # and a dictionary value in other...
             stream.write('{object}')
         else:
-            stream.write(data)
+            stream.write(str(data))
 
     @staticmethod
     def _dump_row(data, stream):
