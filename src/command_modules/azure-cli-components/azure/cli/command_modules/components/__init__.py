@@ -12,7 +12,7 @@ command_table = CommandTable()
 
 @command_table.command('components list')
 @command_table.description(L('List the installed components.'))
-def list_components(args, unexpected): #pylint: disable=unused-argument
+def list_components(args):
     components = sorted(["%s (%s)" % (dist.key.replace(COMPONENT_PREFIX, ''), dist.version)
                          for dist in pip.get_installed_distributions(local_only=True)
                          if dist.key.startswith(COMPONENT_PREFIX)])
@@ -41,36 +41,36 @@ def _install_or_update(component_name, version, link, private, upgrade=False):
 
 @command_table.command('components install')
 @command_table.description(L('Install a component'))
-@command_table.option('--name -n <name>', help=L('Name of component to install'), required=True)
-@command_table.option('--version <version>', help=L('Component version (otherwise latest)'))
-@command_table.option('--link -l <url>', help=L("If a url or path to an html file, then parse \
+@command_table.option('--name -n', help=L('Name of component to install'), required=True)
+@command_table.option('--version', help=L('Component version (otherwise latest)'))
+@command_table.option('--link -l', help=L("If a url or path to an html file, then parse \
 for links to archives. If a local path or \
 file:// url that's a directory,then look for \
 archives in the directory listing."))
 @command_table.option('--private -p', help=L('Get from the project private PyPI server'))
-def install_component(args, unexpected): #pylint: disable=unused-argument
+def install_component(args):
     _install_or_update(args.get('name'), args.get('version'), args.get('link'),
                        args.get('private'), upgrade=False)
 
 @command_table.command('components update')
 @command_table.description(L('Update a component'))
-@command_table.option('--name -n <name>', help=L('Name of component to install'), required=True)
-@command_table.option('--link -l <url>', help=L("If a url or path to an html file, then parse \
+@command_table.option('--name -n', help=L('Name of component to install'), required=True)
+@command_table.option('--link -l', help=L("If a url or path to an html file, then parse \
 for links to archives. If a local path or \
 file:// url that's a directory,then look for \
 archives in the directory listing."))
 @command_table.option('--private -p', help=L('Get from the project private PyPI server'))
-def update_component(args, unexpected): #pylint: disable=unused-argument
+def update_component(args):
     _install_or_update(args.get('name'), None, args.get('link'), args.get('private'), upgrade=True)
 
 @command_table.command('components update all')
 @command_table.description(L('Update all components'))
-@command_table.option('--link -l <url>', help=L("If a url or path to an html file, then parse \
+@command_table.option('--link -l', help=L("If a url or path to an html file, then parse \
 for links to archives. If a local path or \
 file:// url that's a directory,then look for \
 archives in the directory listing."))
 @command_table.option('--private -p', help=L('Get from the project private PyPI server'))
-def update_all_components(args, unexpected): #pylint: disable=unused-argument
+def update_all_components(args):
     component_names = [dist.key.replace(COMPONENT_PREFIX, '')
                        for dist in pip.get_installed_distributions(local_only=True)
                        if dist.key.startswith(COMPONENT_PREFIX)]
@@ -80,9 +80,9 @@ def update_all_components(args, unexpected): #pylint: disable=unused-argument
 
 @command_table.command('components remove')
 @command_table.description(L('Remove a component'))
-@command_table.option('--name -n <name>', help=L('Name of component to remove'), required=True)
+@command_table.option('--name -n', help=L('Name of component to remove'), required=True)
 @command_table.option('--force -f', help=L('supress delete confirmation prompt'))
-def remove_component(args, unexpected): #pylint: disable=unused-argument
+def remove_component(args):
     component_name = args.get('name')
     prompt_for_delete = args.get('force') is None
     if not component_name:
