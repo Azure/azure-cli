@@ -2,14 +2,16 @@ from __future__ import print_function
 import pip
 from six.moves import input #pylint: disable=redefined-builtin
 
-from azure.cli.commands import command, description, option
+from azure.cli.parser import IncorrectUsageError
+from azure.cli.commands import CommandTable, COMMON_PARAMETERS
 from azure.cli._locale import L
-from azure.cli._argparse import IncorrectUsageError
 
 COMPONENT_PREFIX = 'azure-cli-'
 
-@command('components list')
-@description(L('List the installed components.'))
+command_table = CommandTable()
+
+@command_table.command('components list')
+@command_table.description(L('List the installed components.'))
 def list_components(args, unexpected): #pylint: disable=unused-argument
     components = sorted(["%s (%s)" % (dist.key.replace(COMPONENT_PREFIX, ''), dist.version)
                          for dist in pip.get_installed_distributions(local_only=True)
@@ -37,37 +39,37 @@ def _install_or_update(component_name, version, link, private, upgrade=False):
         pip.main(['install'] + options + [COMPONENT_PREFIX + component_name+version_no]
                  + pkg_index_options)
 
-@command('components install')
-@description(L('Install a component'))
-@option('--name -n <name>', L('Name of component to install'), required=True)
-@option('--version <version>', L('Component version (otherwise latest)'))
-@option('--link -l <url>', L("If a url or path to an html file, then parse \
+@command_table.command('components install')
+@command_table.description(L('Install a component'))
+@command_table.option('--name -n <name>', help=L('Name of component to install'), required=True)
+@command_table.option('--version <version>', help=L('Component version (otherwise latest)'))
+@command_table.option('--link -l <url>', help=L("If a url or path to an html file, then parse \
 for links to archives. If a local path or \
 file:// url that's a directory,then look for \
 archives in the directory listing."))
-@option('--private -p', L('Get from the project private PyPI server'))
+@command_table.option('--private -p', help=L('Get from the project private PyPI server'))
 def install_component(args, unexpected): #pylint: disable=unused-argument
     _install_or_update(args.get('name'), args.get('version'), args.get('link'),
                        args.get('private'), upgrade=False)
 
-@command('components update')
-@description(L('Update a component'))
-@option('--name -n <name>', L('Name of component to install'), required=True)
-@option('--link -l <url>', L("If a url or path to an html file, then parse \
+@command_table.command('components update')
+@command_table.description(L('Update a component'))
+@command_table.option('--name -n <name>', help=L('Name of component to install'), required=True)
+@command_table.option('--link -l <url>', help=L("If a url or path to an html file, then parse \
 for links to archives. If a local path or \
 file:// url that's a directory,then look for \
 archives in the directory listing."))
-@option('--private -p', L('Get from the project private PyPI server'))
+@command_table.option('--private -p', help=L('Get from the project private PyPI server'))
 def update_component(args, unexpected): #pylint: disable=unused-argument
     _install_or_update(args.get('name'), None, args.get('link'), args.get('private'), upgrade=True)
 
-@command('components update all')
-@description(L('Update all components'))
-@option('--link -l <url>', L("If a url or path to an html file, then parse \
+@command_table.command('components update all')
+@command_table.description(L('Update all components'))
+@command_table.option('--link -l <url>', help=L("If a url or path to an html file, then parse \
 for links to archives. If a local path or \
 file:// url that's a directory,then look for \
 archives in the directory listing."))
-@option('--private -p', L('Get from the project private PyPI server'))
+@command_table.option('--private -p', help=L('Get from the project private PyPI server'))
 def update_all_components(args, unexpected): #pylint: disable=unused-argument
     component_names = [dist.key.replace(COMPONENT_PREFIX, '')
                        for dist in pip.get_installed_distributions(local_only=True)
@@ -76,10 +78,10 @@ def update_all_components(args, unexpected): #pylint: disable=unused-argument
         _install_or_update(component_name, None, args.get('link'),
                            args.get('private'), upgrade=True)
 
-@command('components remove')
-@description(L('Remove a component'))
-@option('--name -n <name>', L('Name of component to remove'), required=True)
-@option('--force -f', L('supress delete confirmation prompt'))
+@command_table.command('components remove')
+@command_table.description(L('Remove a component'))
+@command_table.option('--name -n <name>', help=L('Name of component to remove'), required=True)
+@command_table.option('--force -f', help=L('supress delete confirmation prompt'))
 def remove_component(args, unexpected): #pylint: disable=unused-argument
     component_name = args.get('name')
     prompt_for_delete = args.get('force') is None

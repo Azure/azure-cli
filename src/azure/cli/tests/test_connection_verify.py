@@ -5,7 +5,7 @@ try:
 except ImportError:
     from mock import MagicMock
 
-from azure.cli._argparse import ArgumentParser, IncorrectUsageError
+from azure.cli.parser import IncorrectUsageError
 from azure.cli._logging import logger
 import logging
 import azure.cli._debug as _debug

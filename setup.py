@@ -57,6 +57,8 @@ CLASSIFIERS = [
 
 DEPENDENCIES = [
     'applicationinsights',
+    'argcomplete',
+    'azure==2.0.0rc1',
     'jmespath',
     'msrest',
     'pip',

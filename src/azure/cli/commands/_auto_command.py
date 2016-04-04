@@ -1,56 +1,22 @@
 from __future__ import print_function
 import inspect
 import sys
-import time
 from msrest.paging import Paged
 from msrest.exceptions import ClientException
-from azure.cli._argparse import IncorrectUsageError
-from ..commands import command, description, option
-
+from azure.cli.parser import IncorrectUsageError
+from ..commands import COMMON_PARAMETERS
 
 EXCLUDED_PARAMS = frozenset(['self', 'raw', 'custom_headers', 'operation_config'])
-GLOBALPARAMALIASES = {
-    'resource_group_name': '--resourcegroup --rg <resourcegroupname>'
-}
 
+class AutoCommandDefinition(object): #pylint: disable=too-few-public-methods
 
+    def __init__(self, operation, return_type, command_alias=None):
+        self.operation = operation
+        self.return_type = return_type
+        self.opname = command_alias if command_alias else operation.__name__.replace('_', '-')
 
-class LongRunningOperation(object): #pylint: disable=too-few-public-methods
-
-    progress_file = sys.stderr
-
-    def __init__(self, start_msg='', finish_msg='', poll_interval_ms=1000.0):
-        self.start_msg = start_msg
-        self.finish_msg = finish_msg
-        self.poll_interval_ms = poll_interval_ms
-
-    def __call__(self, poller):
-        print(self.start_msg, file=self.progress_file)
-
-        succeeded = False
-        try:
-            while not poller.done():
-                if self.progress_file:
-                    print('.', end='', file=self.progress_file)
-                    self.progress_file.flush()
-                time.sleep(self.poll_interval_ms / 1000.0)
-            result = poller.result()
-            succeeded = True
-            return result
-        finally:
-            # Ensure that we get a newline after the dots...
-            if self.progress_file:
-                print(file=self.progress_file)
-                print(self.finish_msg if succeeded else '', file=self.progress_file)
-
-def _decorate_command(name, func):
-    return command(name)(func)
-
-def _decorate_description(desc, func):
-    return description(desc)(func)
-
-def _decorate_option(spec, descr, target, func):
-    return option(spec, descr, target=target)(func)
+def _decorate_option(command_table, func, name, **kwargs):
+    return command_table.option(name, kwargs=kwargs['kwargs'])(func)
 
 def _get_member(obj, path):
     """Recursively walk down the dot-separated path
@@ -59,16 +25,27 @@ def _get_member(obj, path):
     Ex. a.b.c would get the property 'c' of property 'b' of the
         object a
     """
+    path = path or ''
     for segment in path.split('.'):
-        obj = getattr(obj, segment)
+        try:
+            obj = getattr(obj, segment)
+        except AttributeError:
+            pass
     return obj
 
 def _make_func(client_factory, member_path, return_type_or_func, unbound_func):
-    def call_client(args, unexpected): #pylint: disable=unused-argument
-        client = client_factory()
+    def call_client(args):
+        client = client_factory(args)
         ops_instance = _get_member(client, member_path)
+
+        # TODO: Remove this conversion code once internal key references are updated (#116797761)
+        converted_params = {}
+        for key in args.keys():
+            converted_key = key.replace('-', '_')
+            converted_params[converted_key] = args[key]
+
         try:
-            result = unbound_func(ops_instance, **args)
+            result = unbound_func(ops_instance, **converted_params)
             if not return_type_or_func:
                 return {}
             if callable(return_type_or_func):
@@ -94,23 +71,61 @@ def _option_description(operation, arg):
     return ' '.join(l.split(':')[-1] for l in inspect.getdoc(operation).splitlines()
                     if l.startswith(':param') and arg + ':' in l)
 
-def build_operation(command_name, member_path, client_type, operations, #pylint: disable=dangerous-default-value
-                    paramaliases=GLOBALPARAMALIASES):
-    for operation, return_type_name in operations:
-        opname = operation.__name__.replace('_', '-')
-        func = _make_func(client_type, member_path, return_type_name, operation)
-        func = _decorate_command(' '.join([command_name, opname]), func)
+#pylint: disable=too-many-arguments
+def build_operation(command_name,
+                    member_path,
+                    client_type,
+                    operations,
+                    command_table,
+                    common_parameters=None,
+                    extra_parameters=None):
+
+    merged_common_parameters = COMMON_PARAMETERS.copy()
+    merged_common_parameters.update(common_parameters or {})
+
+    for op in operations:
+
+        func = _make_func(client_type, member_path, op.return_type, op.operation)
 
         args = []
         try:
             # only supported in python3 - falling back to argspec if not available
-            sig = inspect.signature(operation)
+            sig = inspect.signature(op.operation)
             args = sig.parameters
         except AttributeError:
-            sig = inspect.getargspec(operation) #pylint: disable=deprecated-method
+            sig = inspect.getargspec(op.operation) #pylint: disable=deprecated-method
             args = sig.args
 
+        options = []
         for arg in [a for a in args if not a in EXCLUDED_PARAMS]:
-            spec = paramaliases.get(arg, '--%s <%s>' % (arg, arg))
-            func = _decorate_option(spec, _option_description(operation, arg),
-                                    target=arg, func=func)
+            try:
+                # this works in python3
+                default = args[arg].default
+                required = default == inspect.Parameter.empty # pylint: disable=no-member
+            except TypeError:
+                arg_defaults = dict(zip(sig.args[-len(sig.defaults):], sig.defaults))
+                default = arg_defaults[arg] if arg in arg_defaults else None
+                required = False if default else True
+
+            # TODO: Add action here if a boolean default value exists to create a flag
+
+            common_param = merged_common_parameters.get(arg, {
+                'name': '--' + arg.replace('_', '-'),
+                'required': required,
+                'default': default,
+                'help': _option_description(op.operation, arg)
+            }).copy() # We need to make a copy to allow consumers to mutate the value
+                      # retrieved from the common parameters without polluting future
+                      # use...
+            common_param['dest'] = common_param.get('dest', arg)
+            options.append(common_param)
+
+        command_table[func] = {
+            'name': ' '.join([command_name, op.opname]),
+            'handler': func,
+            'arguments': options
+            }
+
+        if extra_parameters:
+            for item in extra_parameters.values() or []:
+                func = _decorate_option(command_table, func, item['name'], kwargs=item)
