@@ -120,11 +120,11 @@ def build_operation(command_name,
                       # use...
             common_param['dest'] = common_param.get('dest', arg)
             options.append(common_param)
-        
+
         # append any 'extra' args needed (for example to obtain a client) that aren't required
         # by the SDK.
         for arg in extra_parameters.values():
-            options.append(arg)
+            options.append(arg.copy())
 
         command_table[func] = {
             'name': ' '.join([command_name, op.opname]),

@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import os
 import json
 import sys
@@ -67,11 +69,6 @@ class TestSequenceMeta(type):
                 """ Test implementation, augmented with prompted recording of expected result
                 if not provided. """
                 io = StringIO()
-
-                header = '| BEGGINING TEST FOR {} |'.format(test_name) 
-                print('\n' + ('-' * len(header)), file=sys.stderr)
-                print(header, file=sys.stderr)
-                print('-' * len(header) + '\n', file=sys.stderr)                
 
                 cli(command.split(), file=io)
                 actual_result = io.getvalue()
