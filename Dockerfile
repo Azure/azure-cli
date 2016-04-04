@@ -22,6 +22,6 @@ RUN pip3 install -r $AZURECLITEMP/requirements.txt
 RUN chmod +x $AZURECLITEMP/az
 RUN ln /usr/bin/python3 /usr/bin/python
 RUN echo "source $AZURECLITEMP/az.completion.sh" >> ~/.bashrc
-RUN az
+RUN az --help
 
 ENV EDITOR vim

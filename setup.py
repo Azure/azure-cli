@@ -19,7 +19,7 @@ from __future__ import print_function
 from codecs import open
 from setuptools import setup
 
-VERSION = '0.0.18'
+VERSION = '0.0.20'
 INSTALL_FROM_PUBLIC = False
 
 # If we have source, validate that our version numbers match
@@ -57,11 +57,12 @@ CLASSIFIERS = [
 
 DEPENDENCIES = [
     'applicationinsights',
+    'argcomplete',
+    'azure==2.0.0rc1',
     'jmespath',
     'msrest',
     'pip',
     'pyyaml',
-    'requests',
     'six',
 ]
 
@@ -72,17 +73,15 @@ from setuptools.command.install import install
 import pip
 def _post_install(dir):
     from subprocess import check_call
-    # Upgrade/update will install if it doesn't exist.
-    # We do this so these components are updated when the user updates the CLI.
     if INSTALL_FROM_PUBLIC:
-        pip.main(['install', '--upgrade', 'azure-cli-components', '--disable-pip-version-check'])
-        check_call(['az', 'components', 'update', '-n', 'profile'])
+        pip.main(['install', 'azure-cli-components', '--disable-pip-version-check'])
+        check_call(['az', 'components', 'install', '-n', 'profile'])
     else:
         # use private PyPI server.
-        pip.main(['install', '--upgrade', 'azure-cli-components', '--extra-index-url',
+        pip.main(['install', 'azure-cli-components', '--extra-index-url',
                 'http://40.112.211.51:8080/', '--trusted-host', '40.112.211.51',
                 '--disable-pip-version-check'])
-        check_call(['az', 'components', 'update', '-n', 'profile', '-p'])
+        check_call(['az', 'components', 'install', '-n', 'profile', '-p'])
 
 class OnInstall(install):
     def run(self):
@@ -113,7 +112,6 @@ setup(
         'azure.cli.commands',
         'azure.cli.command_modules',
         'azure.cli.extensions',
-        'azure.cli.utils',
     ],
     package_data={'azure.cli': ['locale/**/*.txt']},
     install_requires=DEPENDENCIES,
