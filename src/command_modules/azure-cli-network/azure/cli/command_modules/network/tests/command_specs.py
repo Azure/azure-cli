@@ -1,7 +1,7 @@
 TEST_SPECS = [
     {
         'test_name': 'network_usage_list',
-        'command': 'network usage list --location westus --output json --disable-version-check',
+        'command': 'network usage list --location westus --output json',
         'expected_result': """[
   {
     "currentValue": 6,

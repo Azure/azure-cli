@@ -33,7 +33,6 @@ class Application(object):
 
     TRANSFORM_RESULT = 'Application.TransformResults'
     FILTER_RESULT = 'Application.FilterResults'
-    COMMAND_FINISHED = 'Application.CommandFinished'
     GLOBAL_PARSER_CREATED = 'GlobalParser.Created'
     COMMAND_PARSER_CREATED = 'CommandParser.Created'
     COMMAND_PARSER_LOADED = 'CommandParser.Loaded'

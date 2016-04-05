@@ -1,7 +1,7 @@
 TEST_SPECS = [
     {
         'test_name': 'storage_account_list',
-        'command': 'storage account list --disable-version-check',
+        'command': 'storage account list',
         'expected_result': """Account Type           : Standard_LRS
 Creation Time          : 2016-03-03T23:07:20.837674+00:00
 Custom Domain          : None
