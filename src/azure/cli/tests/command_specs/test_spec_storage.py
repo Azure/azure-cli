@@ -69,8 +69,8 @@ load_test_definitions(
         },
         {
             'test_name': 'storage_container_lease_acquire',
-            'command': 'storage container lease acquire --lease-duration 60 -c testcontainer1234 --proposed-lease-id {}'
-                .format(PROPOSED_LEASE_ID)
+            'command': 'storage container lease acquire --lease-duration 60 -c testcontainer1234 --if-unmodified-since {} --proposed-lease-id {}'
+                .format('2016-04-01_12:00:00', PROPOSED_LEASE_ID)
         },
         {
             'test_name': 'storage_container_lease_renew',

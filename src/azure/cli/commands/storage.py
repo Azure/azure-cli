@@ -25,7 +25,7 @@ def extend_parameter(parameter_metadata, **kwargs):
     return modified_parameter_metadata
 
 def _parse_datetime(string):
-    date_format = '%Y-%m-%d %H:%M:%S'
+    date_format = '%Y-%m-%d_%H:%M:%S'
     return datetime.strptime(string, date_format)
 
 def _parse_key_value_pairs(string):
@@ -99,13 +99,13 @@ COMMON_PARAMETERS.update({
     },
     'if_modified_since': {
         'name': '--if-modified-since',
-        'help': L('alter only if modified since supplied UTC datetime'),
+        'help': L('alter only if modified since supplied UTC datetime ("Y-m-d_H:M:S")'),
         'type': _parse_datetime,
         'required': False,
     },
     'if_unmodified_since': {
         'name': '--if-unmodified-since',
-        'help': L('alter only if unmodified since supplied UTC datetime'),
+        'help': L('alter only if unmodified since supplied UTC datetime ("Y-m-d_H:M:S")'),
         'type': _parse_datetime,
         'required': False,
     },
