@@ -47,12 +47,12 @@ def _update_progress(current, total):
     if total:
         message = 'Percent complete: %'
         num_format = 'xxx.x'
-        num_decimals = len(num_format.split('.', maxsplit=1)[1]) if '.' in num_format else 0
+        num_decimals = len(num_format.split('.', 1)[1]) if '.' in num_format else 0
         format_string = '{:.%sf}' % num_decimals
         percent_done = format_string.format(current * 100 / total)
         padding = len(num_format) - len(percent_done)
         message += (' ' * padding) + percent_done
-        print('\b' * len(message) + message, end='', file=stderr, flush=True)
+        print('\b' * len(message) + message, end='', file=stderr)
 
 COMMON_PARAMETERS = GLOBAL_COMMON_PARAMETERS.copy()
 COMMON_PARAMETERS.update({
@@ -353,7 +353,6 @@ build_operation('storage blob', None, blob_data_service_factory,
                 [
                     AutoCommandDefinition(BlockBlobService.list_blobs, '[Blob]', 'list'),
                     AutoCommandDefinition(BlockBlobService.delete_blob, None, 'delete'),
-                    AutoCommandDefinition(BlockBlobService.exists, 'Boolean', 'exists'),
                     AutoCommandDefinition(BlockBlobService.get_blob_properties,
                                           'BlobProperties', 'show')
                 ],
@@ -400,6 +399,9 @@ def create_block_blob(args):
 @command_table.option(**COMMON_PARAMETERS['container_name'])
 @command_table.option(**COMMON_PARAMETERS['blob_name'])
 @command_table.option('--download-to', help=L('the file path to download to'), required=True)
+@command_table.option(**COMMON_PARAMETERS['account_name'])
+@command_table.option(**COMMON_PARAMETERS['account_key'])
+@command_table.option(**COMMON_PARAMETERS['connection_string'])
 def download_blob(args):
     bbs = blob_data_service_factory(args)
 
@@ -408,6 +410,24 @@ def download_blob(args):
                          args.get('blob_name'),
                          args.get('download_to'),
                          progress_callback=_update_progress)
+
+@command_table.command('storage blob exists')
+@command_table.description(L('Check if a storage blob exists.'))
+@command_table.option(**COMMON_PARAMETERS['container_name'])
+@command_table.option(**COMMON_PARAMETERS['blob_name'])
+@command_table.option(**COMMON_PARAMETERS['account_name'])
+@command_table.option(**COMMON_PARAMETERS['account_key'])
+@command_table.option(**COMMON_PARAMETERS['connection_string'])
+@command_table.option('--snapshot', type=_parse_datetime,
+                      help=L('UTC datetime value which specifies a snapshot'))
+@command_table.option(**COMMON_PARAMETERS['timeout'])
+def exists_container(args):
+    bbs = blob_data_service_factory(args)
+    return str(bbs.exists(
+        blob_name=args.get('blob_name'),
+        container_name=args.get('container_name'),
+        snapshot=args.get('snapshot'),
+        timeout=args.get('timeout')))
 
 #### FILE COMMANDS ################################################################################
 

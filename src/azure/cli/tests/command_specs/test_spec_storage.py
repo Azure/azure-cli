@@ -1,5 +1,7 @@
 from . import TEST_DEF, load_test_definitions
 
+import os
+
 RESOURCE_GROUP_NAME = 'travistestresourcegroup'
 STORAGE_ACCOUNT_NAME = 'travistestresourcegr3014'
 PROPOSED_LEASE_ID = 'abcdabcd-abcd-abcd-abcd-abcdabcdabcd'
@@ -91,7 +93,33 @@ load_test_definitions(
             'command': 'storage container lease release --container-name testcontainer1234 --lease-id {}'
                 .format(CHANGED_LEASE_ID)
         },
-        # STORAGE BLOB TESTS  
+        # STORAGE BLOB TESTS
+        {
+            'test_name': 'storage_blob_upload_block_blob',
+            'command': 'storage blob upload-block-blob -b testblob1 -c testcontainer1234 --upload-from {}'
+                .format(os.path.join(os.getcwd(), 'README.rst'))
+        },
+        {
+            'test_name': 'storage_blob_download',
+            'command': 'storage blob download -b testblob1 -c testcontainer1234 --download-to {}'
+                .format(os.path.join(os.getcwd(), 'test.rst'))
+        },
+        {
+            'test_name': 'storage_blob_exists',
+            'command': 'storage blob exists -b testblob1 -c testcontainer1234'
+        },
+        {
+            'test_name': 'storage_blob_list',
+            'command': 'storage blob list --container-name testcontainer1234'
+        },
+        {
+            'test_name': 'storage_blob_show',
+            'command': 'storage blob show --container-name testcontainer1234 --blob-name testblob1'
+        },
+        {
+            'test_name': 'storage_blob_delete',
+            'command': 'storage blob delete --container-name testcontainer1234 --blob-name testblob1'
+        },
         # STORAGE SHARE TESTS
         # STORAGE DIRECTORY TESTS
         # STORAGE FILE TESTS      
