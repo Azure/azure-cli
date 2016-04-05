@@ -16,11 +16,15 @@
 #--------------------------------------------------------------------------
 
 from __future__ import print_function
+import os
 from codecs import open
 from setuptools import setup
 
 VERSION = '0.0.20'
 INSTALL_FROM_PUBLIC = False
+
+PRIVATE_PYPI_URL = os.environ.get('AZURE_CLI_PRIVATE_PYPI_URL')
+PRIVATE_PYPI_HOST = os.environ.get('AZURE_CLI_PRIVATE_PYPI_HOST')
 
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
@@ -79,7 +83,7 @@ def _post_install(dir):
     else:
         # use private PyPI server.
         pip.main(['install', 'azure-cli-components', '--extra-index-url',
-                'http://40.112.211.51:8080/', '--trusted-host', '40.112.211.51',
+                PRIVATE_PYPI_URL, '--trusted-host', PRIVATE_PYPI_HOST,
                 '--disable-pip-version-check'])
         check_call(['az', 'components', 'install', '-n', 'profile', '-p'])
 
