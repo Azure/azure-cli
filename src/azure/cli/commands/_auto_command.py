@@ -108,7 +108,7 @@ def build_operation(command_name,
                 default = arg_defaults[arg] if arg in arg_defaults else None
                 required = False if default else True
 
-            action = 'store_' + str(not default).lower() if type(default) == bool else None
+            action = 'store_' + str(not default).lower() if isinstance(default, bool) else None
             common_param = merged_common_parameters.get(arg, {
                 'name': '--' + arg.replace('_', '-'),
                 'required': required,
