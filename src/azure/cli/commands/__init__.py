@@ -113,7 +113,6 @@ def get_command_table(module_name=None):
         command_table = {}
         for mod in INSTALLED_COMMAND_MODULES:
             command_table.update(_get_command_table(mod))
-        loaded = True
 
     ordered_commands = OrderedDict(sorted(command_table.items(), key=lambda item: item[1]['name']))
     return ordered_commands
