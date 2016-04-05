@@ -34,7 +34,6 @@ def main(args, file=sys.stdout): #pylint: disable=redefined-builtin
         if cmd_result:
             formatter = OutputProducer.get_formatter(app.configuration.output_format)
             OutputProducer(formatter=formatter, file=file).out(cmd_result)
-        app.raise_event(Application.COMMAND_FINISHED, cmd_result)
     except RuntimeError as ex:
         logger.error(ex.args[0])
         return ex.args[1] if len(ex.args) >= 2 else -1
