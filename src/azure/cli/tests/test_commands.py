@@ -72,7 +72,7 @@ class TestSequenceMeta(type):
 
                 cli(command.split(), file=io)
                 actual_result = io.getvalue()
-                if not expected_result:
+                if expected_result == None:
                     header = '| RECORDED RESULT FOR {} |'.format(test_name) 
                     print('-' * len(header), file=sys.stderr)
                     print(header, file=sys.stderr)
@@ -99,18 +99,18 @@ class TestSequenceMeta(type):
             expected_result = None if not cassette_found else expected_result
             
             # if no expected result, yaml file should be discarded and rerecorded
-            if cassette_found and not expected_result:
+            if cassette_found and expected_result == None:
                 os.remove(cassette_path)
                 cassette_found = os.path.isfile(cassette_path)
 
-            if cassette_found and expected_result:
+            if cassette_found and expected_result != None:
                 # playback mode - can be fully automated
                 @mock.patch('azure.cli._profile.Profile.load_subscriptions', load_subscriptions_mock)
                 @my_vcr.use_cassette(cassette_path, filter_headers=FILTER_HEADERS)
                 def test(self):
                     _test_impl(self, expected_result)
                 return test
-            elif not cassette_found and not expected_result:
+            elif not cassette_found and expected_result == None:
                 # recording needed
                 # if buffer specified and recording needed, automatically fail
                 is_buffered = list(set(['--buffer']) & set(sys.argv))

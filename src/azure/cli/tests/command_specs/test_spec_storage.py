@@ -2,6 +2,8 @@ from . import TEST_DEF, load_test_definitions
 
 RESOURCE_GROUP_NAME = 'travistestresourcegroup'
 STORAGE_ACCOUNT_NAME = 'travistestresourcegr3014'
+PROPOSED_LEASE_ID = 'abcdabcd-abcd-abcd-abcd-abcdabcdabcd'
+CHANGED_LEASE_ID = 'dcbadcba-dcba-dcba-dcba-dcbadcbadcba'
 
 load_test_definitions(
     package_name=locals()['__name__'],
@@ -48,6 +50,46 @@ load_test_definitions(
         {
             'test_name': 'storage_container_list',
             'command': 'storage container list'
+        },
+        {
+            'test_name': 'storage_container_create',
+            'command': 'storage container create --container-name testcontainer01 --fail-on-exist'
+        },
+        {
+            'test_name': 'storage_container_delete',
+            'command': 'storage container delete --container-name testcontainer01 --fail-not-exist'
+        },
+        {
+            'test_name': 'storage_container_exist',
+            'command': 'storage container exists --container-name testcontainer01'
+        },
+        {
+            'test_name': 'storage_container_show',
+            'command': 'storage container show --container-name testcontainer1234'
+        },
+        {
+            'test_name': 'storage_container_lease_acquire',
+            'command': 'storage container lease acquire --lease-duration 60 -c testcontainer1234 --proposed-lease-id {}'
+                .format(PROPOSED_LEASE_ID)
+        },
+        {
+            'test_name': 'storage_container_lease_renew',
+            'command': 'storage container lease renew --container-name testcontainer1234 --lease-id {}'
+                .format(PROPOSED_LEASE_ID)
+        },
+        {
+            'test_name': 'storage_container_lease_change',
+            'command': 'storage container lease change --container-name testcontainer1234 --lease-id {} --proposed-lease-id {}'
+                .format(PROPOSED_LEASE_ID, CHANGED_LEASE_ID)
+        },
+        {
+            'test_name': 'storage_container_lease_break',
+            'command': 'storage container lease break --container-name testcontainer1234 --lease-break-period 30'
+        },
+        {
+            'test_name': 'storage_container_lease_release',
+            'command': 'storage container lease release --container-name testcontainer1234 --lease-id {}'
+                .format(CHANGED_LEASE_ID)
         },
         # STORAGE BLOB TESTS  
         # STORAGE SHARE TESTS
