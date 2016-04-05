@@ -138,11 +138,7 @@ class TestSequenceMeta(type):
         for test_path, test_def in TEST_DEF:
             test_name = 'test_{}'.format(test_def['test_name'])
             command = test_def['command']
-            try:
-                expected_result = TEST_EXPECTED[test_path]
-            except KeyError:
-                # option to record during the test
-                expected_result = None
+            expected_result = TEST_EXPECTED.get(test_path, None)
 
             dict[test_name] = gen_test(test_path, command, expected_result)
         return type.__new__(mcs, name, bases, dict)

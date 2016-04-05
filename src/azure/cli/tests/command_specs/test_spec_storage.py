@@ -49,6 +49,30 @@ load_test_definitions(
             'test_name': 'storage_container_list',
             'command': 'storage container list'
         },
+        # EXAMPLE MULTI-STEP TEST
+        {
+            'test_name': 'storage_container_create',
+            'steps': [
+                {
+                    # needed to ensure test not sabotaged because you set a different connection-string
+                    'command': 'storage account connection-string -g {} --account-name {}',
+                    'result_key': 'ConnectionString', # key in the response JSON
+                    'set_env_var': 'AZURE_STORAGE_CONNECTION_STRING'
+                },
+                {
+                    # ensure container does NOT exist
+                    'command': 'storage container delete --container-name deletemecontainer'
+                },
+                {
+                    # fail if it already exists (this is the target of the test)
+                    'command': 'storage container create --container-name deletemecontainer --fail-on-exist'
+                },
+                {
+                    # verify the container exists (especially since last step succeeds silently)
+                    'command': 'storage container exists --container-name deletemecontainer'
+                }
+            ]
+        }
         # STORAGE BLOB TESTS  
         # STORAGE SHARE TESTS
         # STORAGE DIRECTORY TESTS
