@@ -227,7 +227,7 @@ def create_account(args):
 @command_table.option(**COMMON_PARAMETERS['account_name'])
 @command_table.option('--type',
                       choices=storage_account_types.keys(),
-                      type=lambda x: storage_account_types[x])
+                      type=lambda x: storage_account_types.get(x, ValueError))
 @command_table.option('--tags', type=_parse_tags,
                       help=L('storage account tags. Tags are key=value pairs separated ' + \
                       'with a semicolon(;)'))
@@ -362,7 +362,7 @@ build_operation('storage blob', None, blob_data_service_factory,
 @command_table.option(**COMMON_PARAMETERS['connection_string'])
 @command_table.option('--container.public-access', default=None,
                       choices=public_access_types.keys(),
-                      type=lambda x: public_access_types[x])
+                      type=lambda x: public_access_types.get(x, ValueError))
 @command_table.option('--content.type')
 @command_table.option('--content.disposition')
 @command_table.option('--content.encoding')
