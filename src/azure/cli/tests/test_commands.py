@@ -132,7 +132,7 @@ class TestSequenceMeta(type):
         try:
             with open(EXPECTED_RESULTS_PATH, 'r') as file:
                 TEST_EXPECTED = json.loads(file.read())
-        except FileNotFoundError:
+        except EnvironmentError:
             TEST_EXPECTED = {}
 
         for test_path, test_def in TEST_DEF:
