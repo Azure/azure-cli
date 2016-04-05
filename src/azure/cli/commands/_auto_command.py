@@ -106,7 +106,7 @@ def build_operation(command_name,
             except TypeError:
                 arg_defaults = dict(zip(sig.args[-len(sig.defaults):], sig.defaults))
                 default = arg_defaults[arg] if arg in arg_defaults else None
-                required = False if default else True
+                required = arg not in arg_defaults
 
             action = 'store_' + str(not default).lower() if isinstance(default, bool) else None
             common_param = merged_common_parameters.get(arg, {
