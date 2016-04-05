@@ -1,9 +1,12 @@
+import os
 import re
 import imp
 import requests
 import pip
 from pip import get_installed_distributions
 from pip._vendor.packaging import version as packaging_version
+
+PRIVATE_PYPI_URL = os.environ.get('AZURE_CLI_PRIVATE_PYPI_URL')
 
 class UpdateCheckError(Exception):
     '''Raised when there is an error attempting to check for update(s)
@@ -12,7 +15,7 @@ class UpdateCheckError(Exception):
 
 def _get_latest_version_private(pkg_name):
     """Check for an update to the component from project private PyPI server"""
-    response = requests.get('http://40.112.211.51:8080/simple/'+pkg_name)
+    response = requests.get(PRIVATE_PYPI_URL + '/simple/' + pkg_name)
     if response.status_code != 200:
         raise UpdateCheckError('Private PyPI returned status code {}.'.format(response.status_code))
     # Parse the package links from the response
