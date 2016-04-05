@@ -1,4 +1,5 @@
 from __future__ import print_function
+import os
 import pip
 from six.moves import input #pylint: disable=redefined-builtin
 
@@ -8,21 +9,23 @@ from azure.cli._locale import L
 
 COMPONENT_PREFIX = 'azure-cli-'
 
+PRIVATE_PYPI_URL = os.environ.get('AZURE_CLI_PRIVATE_PYPI_URL')
+PRIVATE_PYPI_HOST = os.environ.get('AZURE_CLI_PRIVATE_PYPI_HOST')
+
 command_table = CommandTable()
 
 @command_table.command('component list')
 @command_table.description(L('List the installed components.'))
 def list_components(args): #pylint: disable=unused-argument
-    components = sorted(["%s (%s)" % (dist.key.replace(COMPONENT_PREFIX, ''), dist.version)
-                         for dist in pip.get_installed_distributions(local_only=True)
-                         if dist.key.startswith(COMPONENT_PREFIX)])
-    print('\n'.join(components))
+    return sorted([{'name': dist.key.replace(COMPONENT_PREFIX, ''), 'version': dist.version}
+                   for dist in pip.get_installed_distributions(local_only=True)
+                   if dist.key.startswith(COMPONENT_PREFIX)], key=lambda x: x['name'])
 
 def _install_or_update(component_name, version, link, private, upgrade=False):
     if not component_name:
         raise IncorrectUsageError(L('Specify a component name.'))
     found = bool([dist for dist in pip.get_installed_distributions(local_only=True)
-                  if dist.key == COMPONENT_PREFIX+component_name])
+                  if dist.key == COMPONENT_PREFIX + component_name])
     if found and not upgrade:
         raise RuntimeError("Component already installed.")
     else:
@@ -34,8 +37,8 @@ def _install_or_update(component_name, version, link, private, upgrade=False):
         if link:
             pkg_index_options += ['--find-links', link]
         if private:
-            pkg_index_options += ['--extra-index-url', 'http://40.112.211.51:8080/',
-                                  '--trusted-host', '40.112.211.51']
+            pkg_index_options += ['--extra-index-url', PRIVATE_PYPI_URL,
+                                  '--trusted-host', PRIVATE_PYPI_HOST]
         pip.main(['install'] + options + [COMPONENT_PREFIX + component_name+version_no]
                  + pkg_index_options)
 
@@ -89,8 +92,6 @@ def update_all_components(args):
 def remove_component(args):
     component_name = args.get('name')
     prompt_for_delete = args.get('force') is None
-    if not component_name:
-        raise IncorrectUsageError(L('Specify a component name.'))
     found = bool([dist for dist in pip.get_installed_distributions(local_only=True)
                   if dist.key == COMPONENT_PREFIX+component_name])
     if found:
