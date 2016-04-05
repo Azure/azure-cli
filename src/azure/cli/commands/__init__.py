@@ -6,6 +6,7 @@ from collections import defaultdict, OrderedDict
 # TODO: Alternatively, simply scan the directory for all modules
 COMMAND_MODULES = [
     'account',
+    'keyvault',
     'login',
     'logout',
     'network',
