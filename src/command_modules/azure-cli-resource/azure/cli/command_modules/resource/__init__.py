@@ -66,6 +66,45 @@ def show_resource(args):
     )
     return results
 
+@command_table.command('resource list', description=L('List resources'))
+@command_table.option('--location -l', help=L("Resource location"))
+@command_table.option('--resource-type -r', help=L("Resource type"))
+@command_table.option('--tag -t',
+                      help=L("Filter by tag in the format of <tagname> or <tagname>=<tagvalue>"))
+@command_table.option('--name -n', help=L("Name of resource"))
+def list_resources(args):
+    rmc = get_mgmt_service_client(ResourceManagementClient, ResourceManagementClientConfiguration)
+
+    # Build up OData filter string from parameters
+    filters = []
+    
+    location = args.get('location')
+    if location:
+        filters.append("location eq '%s'" % location)
+
+    resource_type = args.get('resource-type')
+    if resource_type:
+        filters.append("resourceType eq '%s'" % resource_type)
+
+    name = args.get('name')
+    if name:
+        filters.append("name eq '%s'" % name)
+
+    tag_name_value = (args.get('tag') or '').split('=')
+    if tag_name_value[0]:
+        if name or location:
+            raise IncorrectUsageError('you cannot use the tagname or tagvalue filters with other filters')
+        tag_name = tag_name_value[0]
+        if tag_name[-1] == '*':
+            filters.append("startswith(tagname, '%s')" % tag_name[0:-1])
+        else:
+            filters.append("tagname eq '%s'" % tag_name_value[0])
+            if len(tag_name_value) == 2:
+                filters.append("tagvalue eq '%s'" % tag_name_value[1])
+
+    resources = rmc.resources.list(' and '.join(filters))
+    return list(resources)
+
 def _resolve_api_version(args, rmc):
     api_version = args.get('api-version')
     if api_version:
