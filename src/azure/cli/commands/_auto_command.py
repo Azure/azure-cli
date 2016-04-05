@@ -82,6 +82,7 @@ def build_operation(command_name,
 
     merged_common_parameters = COMMON_PARAMETERS.copy()
     merged_common_parameters.update(common_parameters or {})
+    extra_parameters = extra_parameters or {}
 
     for op in operations:
 
@@ -105,27 +106,28 @@ def build_operation(command_name,
             except TypeError:
                 arg_defaults = dict(zip(sig.args[-len(sig.defaults):], sig.defaults))
                 default = arg_defaults[arg] if arg in arg_defaults else None
-                required = False if default else True
+                required = arg not in arg_defaults
 
-            # TODO: Add action here if a boolean default value exists to create a flag
-
+            action = 'store_' + str(not default).lower() if isinstance(default, bool) else None
             common_param = merged_common_parameters.get(arg, {
                 'name': '--' + arg.replace('_', '-'),
                 'required': required,
                 'default': default,
-                'help': _option_description(op.operation, arg)
+                'help': _option_description(op.operation, arg),
+                'action': action
             }).copy() # We need to make a copy to allow consumers to mutate the value
                       # retrieved from the common parameters without polluting future
                       # use...
             common_param['dest'] = common_param.get('dest', arg)
             options.append(common_param)
 
+        # append any 'extra' args needed (for example to obtain a client) that aren't required
+        # by the SDK.
+        for arg in extra_parameters.values():
+            options.append(arg.copy())
+
         command_table[func] = {
             'name': ' '.join([command_name, op.opname]),
             'handler': func,
             'arguments': options
             }
-
-        if extra_parameters:
-            for item in extra_parameters.values() or []:
-                func = _decorate_option(command_table, func, item['name'], kwargs=item)

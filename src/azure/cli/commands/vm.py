@@ -1,5 +1,4 @@
 from .._locale import L
-from azure.mgmt.compute import ComputeManagementClient, ComputeManagementClientConfiguration
 from azure.mgmt.compute.operations import (AvailabilitySetsOperations,
                                            VirtualMachineExtensionImagesOperations,
                                            VirtualMachineExtensionsOperations,
@@ -10,19 +9,16 @@ from azure.mgmt.compute.operations import (AvailabilitySetsOperations,
                                            VirtualMachineScaleSetsOperations,
                                            VirtualMachineScaleSetVMsOperations)
 
-from ._command_creation import get_mgmt_service_client
+from ._command_creation import compute_client_factory
 from ..commands._auto_command import build_operation, AutoCommandDefinition
 from ..commands import CommandTable, LongRunningOperation
-
-def _compute_client_factory(*args): # pylint: disable=unused-argument
-    return get_mgmt_service_client(ComputeManagementClient, ComputeManagementClientConfiguration)
 
 command_table = CommandTable()
 
 # pylint: disable=line-too-long
 build_operation("vm availabilityset",
                 "availability_sets",
-                _compute_client_factory,
+                compute_client_factory,
                 [
                     AutoCommandDefinition(AvailabilitySetsOperations.delete, None),
                     AutoCommandDefinition(AvailabilitySetsOperations.get, 'AvailabilitySet'),
@@ -34,7 +30,7 @@ build_operation("vm availabilityset",
 
 build_operation("vm machineextensionimage",
                 "virtual_machine_extension_images",
-                _compute_client_factory,
+                compute_client_factory,
                 [
                     AutoCommandDefinition(VirtualMachineExtensionImagesOperations.get, 'VirtualMachineExtensionImage'),
                     AutoCommandDefinition(VirtualMachineExtensionImagesOperations.list_types, '[VirtualMachineImageResource]'),
@@ -44,7 +40,7 @@ build_operation("vm machineextensionimage",
 
 build_operation("vm extension",
                 "virtual_machine_extensions",
-                _compute_client_factory,
+                compute_client_factory,
                 [
                     AutoCommandDefinition(VirtualMachineExtensionsOperations.delete, LongRunningOperation(L('Deleting VM extension'), L('VM extension deleted'))),
                     AutoCommandDefinition(VirtualMachineExtensionsOperations.get, 'VirtualMachineExtension'),
@@ -53,7 +49,7 @@ build_operation("vm extension",
 
 build_operation("vm image",
                 "virtual_machine_images",
-                _compute_client_factory,
+                compute_client_factory,
                 [
                     AutoCommandDefinition(VirtualMachineImagesOperations.get, 'VirtualMachineImage'),
                     AutoCommandDefinition(VirtualMachineImagesOperations.list, '[VirtualMachineImageResource]'),
@@ -65,7 +61,7 @@ build_operation("vm image",
 
 build_operation("vm usage",
                 "usage",
-                _compute_client_factory,
+                compute_client_factory,
                 [
                     AutoCommandDefinition(UsageOperations.list, '[Usage]'),
                 ],
@@ -73,7 +69,7 @@ build_operation("vm usage",
 
 build_operation("vm size",
                 "virtual_machine_sizes",
-                _compute_client_factory,
+                compute_client_factory,
                 [
                     AutoCommandDefinition(VirtualMachineSizesOperations.list, '[VirtualMachineSize]'),
                 ],
@@ -81,7 +77,7 @@ build_operation("vm size",
 
 build_operation("vm",
                 "virtual_machines",
-                _compute_client_factory,
+                compute_client_factory,
                 [
                     AutoCommandDefinition(VirtualMachinesOperations.delete, LongRunningOperation(L('Deleting VM'), L('VM Deleted'))),
                     AutoCommandDefinition(VirtualMachinesOperations.deallocate, LongRunningOperation(L('Deallocating VM'), L('VM Deallocated'))),
@@ -98,7 +94,7 @@ build_operation("vm",
 
 build_operation("vm scaleset",
                 "virtual_machine_scale_sets",
-                _compute_client_factory,
+                compute_client_factory,
                 [
                     AutoCommandDefinition(VirtualMachineScaleSetsOperations.deallocate, LongRunningOperation(L('Deallocating VM scale set'), L('VM scale set deallocated'))),
                     AutoCommandDefinition(VirtualMachineScaleSetsOperations.delete, LongRunningOperation(L('Deleting VM scale set'), L('VM scale set deleted'))),
@@ -117,7 +113,7 @@ build_operation("vm scaleset",
 
 build_operation("vm scalesetvm",
                 "virtual_machine_scale_set_vms",
-                _compute_client_factory,
+                compute_client_factory,
                 [
                     AutoCommandDefinition(VirtualMachineScaleSetVMsOperations.deallocate, LongRunningOperation(L('Deallocating VM scale set VMs'), L('VM scale set VMs deallocated'))),
                     AutoCommandDefinition(VirtualMachineScaleSetVMsOperations.delete, LongRunningOperation(L('Deleting VM scale set VMs'), L('VM scale set VMs deleted'))),

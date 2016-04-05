@@ -5,26 +5,58 @@ from sys import stderr
 
 from azure.storage.blob import PublicAccess, BlockBlobService
 from azure.storage.file import FileService
-from azure.mgmt.storage import StorageManagementClient, StorageManagementClientConfiguration
 from azure.mgmt.storage.models import AccountType
 from azure.mgmt.storage.operations import StorageAccountsOperations
 
 from ..commands import CommandTable, COMMON_PARAMETERS as GLOBAL_COMMON_PARAMETERS
 from ._auto_command import AutoCommandDefinition
-from ._command_creation import get_mgmt_service_client, get_data_service_client
+from ._command_creation import (storage_client_factory, file_data_service_factory,
+                                blob_data_service_factory)
 from ..commands._auto_command import build_operation
 from .._locale import L
 
 command_table = CommandTable()
+
+# HELPER METHODS
 
 def extend_parameter(parameter_metadata, **kwargs):
     modified_parameter_metadata = parameter_metadata.copy()
     modified_parameter_metadata.update(kwargs)
     return modified_parameter_metadata
 
+def _parse_datetime(string):
+    date_format = '%Y-%m-%d %H:%M:%S'
+    return datetime.strptime(string, date_format)
+
+def _parse_key_value_pairs(string):
+    result = None
+    if string:
+        kv_list = [x for x in string.split(';') if '=' in x]     # key-value pairs
+        result = dict(x.split('=') for x in kv_list)
+    return result
+
+def _parse_tags(string):
+    result = None
+    if string:
+        result = _parse_key_value_pairs(string)
+        s_list = [x for x in string.split(';') if '=' not in x]  # single values
+        result.update(dict((x, '') for x in s_list))
+    return result
+
+def _update_progress(current, total):
+    if total:
+        message = 'Percent complete: %'
+        num_format = 'xxx.x'
+        num_decimals = len(num_format.split('.', maxsplit=1)[1]) if '.' in num_format else 0
+        format_string = '{:.%sf}' % num_decimals
+        percent_done = format_string.format(current * 100 / total)
+        padding = len(num_format) - len(percent_done)
+        message += (' ' * padding) + percent_done
+        print('\b' * len(message) + message, end='', file=stderr, flush=True)
+
 COMMON_PARAMETERS = GLOBAL_COMMON_PARAMETERS.copy()
 COMMON_PARAMETERS.update({
-    'account-key': {
+    'account_key': {
         'name': '--account-key -k',
         'help': L('the storage account key'),
         # While account key *may* actually be required if the environment variable hasn't been
@@ -32,7 +64,7 @@ COMMON_PARAMETERS.update({
         'required': False,
         'default': environ.get('AZURE_STORAGE_ACCESS_KEY')
     },
-    'account-name': {
+    'account_name': {
         'name': '--account-name -n',
         'help': L('the storage account name'),
         # While account name *may* actually be required if the environment variable hasn't been
@@ -40,16 +72,23 @@ COMMON_PARAMETERS.update({
         'required': False,
         'default': environ.get('AZURE_STORAGE_ACCOUNT')
     },
-    'blob-name': {
+    'account_name_required': {
+        # this is used only to obtain the connection string. Thus, the env variable default
+        # does not apply and this is a required parameter
+        'name': '--account-name -n',
+        'help': L('the storage account name'),
+        'required': True
+    },
+    'blob_name': {
         'name': '--blob-name -b',
         'help': L('the name of the blob'),
         'required': True
     },
-    'container-name': {
+    'container_name': {
         'name': '--container-name -c',
         'required': True
     },
-    'connection-string': {
+    'connection_string': {
         'name': '--connection-string',
         'help': L('the storage connection string'),
         # You can either specify connection string or name/key. There is no convenient way
@@ -58,19 +97,21 @@ COMMON_PARAMETERS.update({
         'required': False,
         'default': environ.get('AZURE_STORAGE_CONNECTION_STRING')
     },
-    'if-modified-since': {
+    'if_modified_since': {
         'name': '--if-modified-since',
         'help': L('alter only if modified since supplied UTC datetime'),
+        'type': _parse_datetime,
         'required': False,
     },
-    'if-unmodified-since': {
+    'if_unmodified_since': {
         'name': '--if-unmodified-since',
         'help': L('alter only if unmodified since supplied UTC datetime'),
+        'type': _parse_datetime,
         'required': False,
     },
-    'optional-resource-group-name':
+    'optional_resource_group_name':
         extend_parameter(GLOBAL_COMMON_PARAMETERS['resource_group_name'], required=False),
-    'share-name': {
+    'share_name': {
         'name': '--share-name',
         'help': L('the name of the file share'),
         'required': True,
@@ -83,35 +124,18 @@ COMMON_PARAMETERS.update({
     }
 })
 
-def _storage_client_factory(*args): # pylint: disable=unused-argument
-    return get_mgmt_service_client(StorageManagementClient, StorageManagementClientConfiguration)
-
 STORAGE_DATA_CLIENT_ARGS = {
-    'account-name': COMMON_PARAMETERS['account-name'],
-    'account-key': COMMON_PARAMETERS['account-key'],
-    'connection-string': COMMON_PARAMETERS['connection-string'],
+    'account_name': COMMON_PARAMETERS['account_name'],
+    'account_key': COMMON_PARAMETERS['account_key'],
+    'connection_string': COMMON_PARAMETERS['connection_string'],
 }
-
-def _blob_data_service_factory(*args):
-    def _resolve_arg(key, envkey):
-        try:
-            value = args[0].pop(key, None)
-        except (IndexError, KeyError):
-            value = environ.get(envkey)
-        return value
-
-    return get_data_service_client(
-        BlockBlobService,
-        _resolve_arg('account-name', 'AZURE_STORAGE_ACCOUNT'),
-        _resolve_arg('account-key', 'AZURE_STORAGE_ACCOUNT_KEY'),
-        _resolve_arg('connection-string', 'AZURE_STORAGE_CONNECTION_STRING'))
 
 # ACCOUNT COMMANDS
 
 build_operation(
     'storage account',
     'storage_accounts',
-    _storage_client_factory,
+    storage_client_factory,
     [
         AutoCommandDefinition(StorageAccountsOperations.check_name_availability,
                               'Result', 'check-name'),
@@ -122,11 +146,11 @@ build_operation(
     command_table)
 
 @command_table.command('storage account list', description=L('List storage accounts.'))
-@command_table.option(**COMMON_PARAMETERS['optional-resource-group-name'])
+@command_table.option(**COMMON_PARAMETERS['optional_resource_group_name'])
 def list_accounts(args):
     from azure.mgmt.storage.models import StorageAccount
     from msrestazure.azure_active_directory import UserPassCredentials
-    smc = _storage_client_factory()
+    smc = storage_client_factory()
     group = args.get('resourcegroup')
     if group:
         accounts = smc.storage_accounts.list_by_resource_group(group)
@@ -134,18 +158,20 @@ def list_accounts(args):
         accounts = smc.storage_accounts.list()
     return list(accounts)
 
+key_options = ['key1', 'key2']
 @command_table.command('storage account renew-keys')
 @command_table.description(L('Regenerate one or both keys for a storage account.'))
 @command_table.option(**COMMON_PARAMETERS['resource_group_name'])
-@command_table.option(**COMMON_PARAMETERS['account-name'])
-@command_table.option('--key -y', default=['key1', 'key2'],
-                      choices=['key1', 'key2'], help=L('Key to renew'))
+@command_table.option(**COMMON_PARAMETERS['account_name'])
+@command_table.option('--key -y', default=key_options,
+                      choices=key_options, help=L('Key to renew'))
 def renew_account_keys(args):
-    smc = _storage_client_factory()
-    for key in args.get('key'):
+    smc = storage_client_factory()
+    keys_to_renew = args.get('key')
+    for key in keys_to_renew if isinstance(keys_to_renew, list) else [args.get('key')]:
         result = smc.storage_accounts.regenerate_key(
             resource_group_name=args.get('resourcegroup'),
-            account_name=args.get('account-name'),
+            account_name=args.get('account_name'),
             key_name=key)
     return result
 
@@ -153,20 +179,19 @@ def renew_account_keys(args):
 @command_table.description(
     L('Show the current count and limit of the storage accounts under the subscription.'))
 def show_account_usage(_):
-    smc = _storage_client_factory()
+    smc = storage_client_factory()
     return next((x for x in smc.usage.list() if x.name.value == 'StorageAccounts'), None)
 
 @command_table.command('storage account connection-string')
 @command_table.description(L('Show the connection string for a storage account.'))
 @command_table.option(**COMMON_PARAMETERS['resource_group_name'])
-@command_table.option(**COMMON_PARAMETERS['account-name'])
+@command_table.option(**COMMON_PARAMETERS['account_name_required'])
 @command_table.option('--use-http', action='store_const', const='http', default='https',
                       help=L('use http as the default endpoint protocol'))
 def show_storage_connection_string(args):
-    smc = _storage_client_factory()
-
-    endpoint_protocol = args.get('use-http')
-    storage_account = args.get('account-name')
+    smc = storage_client_factory()
+    endpoint_protocol = args.get('use_http')
+    storage_account = args.get('account_name')
     keys = smc.storage_accounts.list_keys(args.get('resourcegroup'), storage_account)
 
     connection_string = 'DefaultEndpointsProtocol={};AccountName={};AccountKey={}'.format(
@@ -185,48 +210,46 @@ storage_account_types = {'Standard_LRS': AccountType.standard_lrs,
 @command_table.command('storage account create')
 @command_table.description(L('Create a storage account.'))
 @command_table.option(**COMMON_PARAMETERS['resource_group_name'])
-@command_table.option(**COMMON_PARAMETERS['account-name'])
+@command_table.option(**COMMON_PARAMETERS['account_name'])
 @command_table.option(**COMMON_PARAMETERS['location'])
-@command_table.option('--type',
-                      choices=storage_account_types.keys(),
-                      required=True)
-@command_table.option('--tags',
+@command_table.option('--type', choices=storage_account_types.keys(), required=True)
+@command_table.option('--tags', type=_parse_tags,
                       help=L('storage account tags. Tags are key=value pairs separated ' + \
                       'with a semicolon(;)'))
 def create_account(args):
     from azure.mgmt.storage.models import StorageAccountCreateParameters
-    smc = _storage_client_factory()
+    smc = storage_client_factory()
 
     resource_group = args.get('resourcegroup')
-    account_name = args.get('account-name')
+    account_name = args.get('account_name')
     account_type = storage_account_types[args.get('type')]
     params = StorageAccountCreateParameters(args.get('location'),
                                             account_type,
-                                            _parse_dict(args, 'tags'))
+                                            args.get('tags'))
     return smc.storage_accounts.create(resource_group, account_name, params)
 
 @command_table.command('storage account set')
 @command_table.description(L('Update storage account property (only one at a time).'))
 @command_table.option(**COMMON_PARAMETERS['resource_group_name'])
-@command_table.option(**COMMON_PARAMETERS['account-name'])
+@command_table.option(**COMMON_PARAMETERS['account_name'])
 @command_table.option('--type',
                       choices=storage_account_types.keys(),
-                      type=lambda x: storage_account_types[x])
-@command_table.option('--tags',
+                      type=lambda x: storage_account_types.get(x, ValueError))
+@command_table.option('--tags', type=_parse_tags,
                       help=L('storage account tags. Tags are key=value pairs separated ' + \
                       'with a semicolon(;)'))
 @command_table.option('--custom-domain', help=L('the custom domain name'))
 @command_table.option('--subdomain', help=L('use indirect CNAME validation'))
 def set_account(args):
     from azure.mgmt.storage.models import StorageAccountUpdateParameters, CustomDomain
-    smc = _storage_client_factory()
+    smc = storage_client_factory()
 
     resource_group = args.get('resourcegroup')
-    account_name = args.get('account-name')
-    domain = args.get('custom-domain')
+    account_name = args.get('account_name')
+    domain = args.get('custom_domain')
     account_type = storage_account_types[args.get('type')] if args.get('type') else None
 
-    params = StorageAccountUpdateParameters(_parse_dict(args, 'tags'), account_type, domain)
+    params = StorageAccountUpdateParameters(args.get('tags'), account_type, domain)
     return smc.storage_accounts.update(resource_group, account_name, params)
 
 #### BLOB COMMANDS ################################################################################
@@ -234,13 +257,13 @@ def set_account(args):
 # CONTAINER COMMANDS
 
 build_operation(
-    'storage container', None, _blob_data_service_factory,
+    'storage container', None, blob_data_service_factory,
     [
         AutoCommandDefinition(BlockBlobService.list_containers, '[Container]', 'list'),
-        AutoCommandDefinition(BlockBlobService.delete_container, 'None', 'delete'),
+        AutoCommandDefinition(BlockBlobService.delete_container, None, 'delete'),
         AutoCommandDefinition(BlockBlobService.get_container_properties,
                               '[ContainerProperties]', 'show'),
-        AutoCommandDefinition(BlockBlobService.create_container, 'None', 'create')
+        AutoCommandDefinition(BlockBlobService.create_container, None, 'create')
     ],
     command_table, None, STORAGE_DATA_CLIENT_ARGS)
 
@@ -251,18 +274,18 @@ public_access_types = {'none': None,
 
 @command_table.command('storage container exists')
 @command_table.description(L('Check if a storage container exists.'))
-@command_table.option(**COMMON_PARAMETERS['container-name'])
-@command_table.option(**COMMON_PARAMETERS['account-name'])
-@command_table.option(**COMMON_PARAMETERS['account-key'])
-@command_table.option(**COMMON_PARAMETERS['connection-string'])
-@command_table.option('--snapshot',
+@command_table.option(**COMMON_PARAMETERS['container_name'])
+@command_table.option(**COMMON_PARAMETERS['account_name'])
+@command_table.option(**COMMON_PARAMETERS['account_key'])
+@command_table.option(**COMMON_PARAMETERS['connection_string'])
+@command_table.option('--snapshot', type=_parse_datetime,
                       help=L('UTC datetime value which specifies a snapshot'))
 @command_table.option(**COMMON_PARAMETERS['timeout'])
 def exists_container(args):
-    bbs = _blob_data_service_factory(args)
+    bbs = blob_data_service_factory(args)
     return str(bbs.exists(
-        container_name=args.get('container-name'),
-        snapshot=_parse_datetime(args, 'snapshot'),
+        container_name=args.get('container_name'),
+        snapshot=args.get('snapshot'),
         timeout=args.get('timeout')))
 
 lease_duration_values = {'min':15, 'max':60, 'infinite':-1}
@@ -271,11 +294,11 @@ lease_duration_values_string = 'Between {} and {} seconds. ({} for infinite)'.fo
     lease_duration_values['max'],
     lease_duration_values['infinite'])
 
-build_operation('storage container lease', None, _blob_data_service_factory,
+build_operation('storage container lease', None, blob_data_service_factory,
                 [
-                    AutoCommandDefinition(BlockBlobService.renew_container_lease, 'None', 'renew'),
+                    AutoCommandDefinition(BlockBlobService.renew_container_lease, None, 'renew'),
                     AutoCommandDefinition(BlockBlobService.release_container_lease,
-                                          'None', 'release'),
+                                          None, 'release'),
                     AutoCommandDefinition(BlockBlobService.change_container_lease,
                                           'LeaseId', 'change')
                 ],
@@ -283,57 +306,53 @@ build_operation('storage container lease', None, _blob_data_service_factory,
 
 @command_table.command('storage container lease acquire')
 @command_table.description(L('Acquire a lock on a container for delete operations.'))
-@command_table.option(**COMMON_PARAMETERS['container-name'])
+@command_table.option(**COMMON_PARAMETERS['container_name'])
 @command_table.option('--lease-duration',
                       help=L('Values: {}'.format(lease_duration_values_string)),
                       type=int, required=True)
 @command_table.option('--proposed-lease-id', help=L('proposed lease id in GUID format'))
-@command_table.option(**COMMON_PARAMETERS['account-name'])
-@command_table.option(**COMMON_PARAMETERS['account-key'])
-@command_table.option(**COMMON_PARAMETERS['connection-string'])
-@command_table.option(**COMMON_PARAMETERS['if-modified-since'])
-@command_table.option(**COMMON_PARAMETERS['if-unmodified-since'])
+@command_table.option(**COMMON_PARAMETERS['account_name'])
+@command_table.option(**COMMON_PARAMETERS['account_key'])
+@command_table.option(**COMMON_PARAMETERS['connection_string'])
+@command_table.option(**COMMON_PARAMETERS['if_modified_since'])
+@command_table.option(**COMMON_PARAMETERS['if_unmodified_since'])
 @command_table.option(**COMMON_PARAMETERS['timeout'])
 def acquire_container_lease(args):
-    bbs = _blob_data_service_factory(args)
+    bbs = blob_data_service_factory(args)
     return bbs.acquire_container_lease(
-        container_name=args.get('container-name'),
-        lease_duration=args.get('lease-duration'),
-        proposed_lease_id=args.get('proposed-lease-id'),
-        if_modified_since=_parse_int(args, 'if-modified-since'),
-        if_unmodified_since=_parse_int(args, 'if-unmodified-since'),
+        container_name=args.get('container_name'),
+        lease_duration=args.get('lease_duration'),
+        proposed_lease_id=args.get('proposed_lease_id'),
+        if_modified_since=args.get('if_modified_since'),
+        if_unmodified_since=args.get('if_unmodified_since'),
         timeout=args.get('timeout'))
 
 @command_table.command('storage container lease break')
 @command_table.description(L('Break a lock on a container for delete operations.'))
-@command_table.option(**COMMON_PARAMETERS['container-name'])
-@command_table.option('--lease-break-period',
+@command_table.option(**COMMON_PARAMETERS['container_name'])
+@command_table.option('--lease-break-period', type=int,
                       help=L('Values: {}'.format(lease_duration_values_string)), required=True)
-@command_table.option(**COMMON_PARAMETERS['account-name'])
-@command_table.option(**COMMON_PARAMETERS['account-key'])
-@command_table.option(**COMMON_PARAMETERS['connection-string'])
-@command_table.option(**COMMON_PARAMETERS['if-modified-since'])
-@command_table.option(**COMMON_PARAMETERS['if-unmodified-since'])
+@command_table.option(**COMMON_PARAMETERS['account_name'])
+@command_table.option(**COMMON_PARAMETERS['account_key'])
+@command_table.option(**COMMON_PARAMETERS['connection_string'])
+@command_table.option(**COMMON_PARAMETERS['if_modified_since'])
+@command_table.option(**COMMON_PARAMETERS['if_unmodified_since'])
 @command_table.option(**COMMON_PARAMETERS['timeout'])
 def break_container_lease(args):
-    bbs = _blob_data_service_factory(args)
-    try:
-        lease_break_period = int(args.get('lease-break-period'))
-    except ValueError:
-        raise ValueError('lease-break-period must be: {}'.format(lease_duration_values_string))
+    bbs = blob_data_service_factory(args)
     bbs.break_container_lease(
-        container_name=args.get('container-name'),
-        lease_break_period=lease_break_period,
-        if_modified_since=_parse_int(args, 'if-modified-since'),
-        if_unmodified_since=_parse_int(args, 'if-unmodified-since'),
+        container_name=args.get('container_name'),
+        lease_break_period=args.get('lease_break_period'),
+        if_modified_since=args.get('if_modified_since'),
+        if_unmodified_since=args.get('if_unmodified_since'),
         timeout=args.get('timeout'))
 
 # BLOB COMMANDS
 
-build_operation('storage blob', None, _blob_data_service_factory,
+build_operation('storage blob', None, blob_data_service_factory,
                 [
                     AutoCommandDefinition(BlockBlobService.list_blobs, '[Blob]', 'list'),
-                    AutoCommandDefinition(BlockBlobService.delete_blob, 'None', 'delete'),
+                    AutoCommandDefinition(BlockBlobService.delete_blob, None, 'delete'),
                     AutoCommandDefinition(BlockBlobService.exists, 'Boolean', 'exists'),
                     AutoCommandDefinition(BlockBlobService.get_blob_properties,
                                           'BlobProperties', 'show')
@@ -342,15 +361,15 @@ build_operation('storage blob', None, _blob_data_service_factory,
 
 @command_table.command('storage blob upload-block-blob')
 @command_table.description(L('Upload a block blob to a container.'))
-@command_table.option(**COMMON_PARAMETERS['container-name'])
-@command_table.option(**COMMON_PARAMETERS['blob-name'])
+@command_table.option(**COMMON_PARAMETERS['container_name'])
+@command_table.option(**COMMON_PARAMETERS['blob_name'])
 @command_table.option('--upload-from', required=True)
-@command_table.option(**COMMON_PARAMETERS['account-name'])
-@command_table.option(**COMMON_PARAMETERS['account-key'])
-@command_table.option(**COMMON_PARAMETERS['connection-string'])
+@command_table.option(**COMMON_PARAMETERS['account_name'])
+@command_table.option(**COMMON_PARAMETERS['account_key'])
+@command_table.option(**COMMON_PARAMETERS['connection_string'])
 @command_table.option('--container.public-access', default=None,
                       choices=public_access_types.keys(),
-                      type=lambda x: public_access_types[x])
+                      type=lambda x: public_access_types.get(x, ValueError))
 @command_table.option('--content.type')
 @command_table.option('--content.disposition')
 @command_table.option('--content.encoding')
@@ -359,16 +378,14 @@ build_operation('storage blob', None, _blob_data_service_factory,
 @command_table.option('--content.cache-control')
 def create_block_blob(args):
     from azure.storage.blob import ContentSettings
-    bbs = _blob_data_service_factory(args)
-    public_access = public_access_types[args.get('public-access')] \
-                                        if args.get('public-access') \
-                                        else None
-    bbs.create_container(args.get('container-name'), public_access=public_access)
+    bbs = blob_data_service_factory(args)
+    bbs.create_container(args.get('container_name'),
+                         public_access=args.get('public_access'))
 
     return bbs.create_blob_from_path(
-        container_name=args.get('container-name'),
-        blob_name=args.get('blob-name'),
-        file_path=args.get('upload-from'),
+        container_name=args.get('container_name'),
+        blob_name=args.get('blob_name'),
+        file_path=args.get('upload_from'),
         progress_callback=_update_progress,
         content_settings=ContentSettings(content_type=args.get('content.type'),
                                          content_disposition=args.get('content.disposition'),
@@ -380,40 +397,24 @@ def create_block_blob(args):
 
 @command_table.command('storage blob download')
 @command_table.description(L('Download the specified blob.'))
-@command_table.option(**COMMON_PARAMETERS['container-name'])
-@command_table.option(**COMMON_PARAMETERS['blob-name'])
+@command_table.option(**COMMON_PARAMETERS['container_name'])
+@command_table.option(**COMMON_PARAMETERS['blob_name'])
 @command_table.option('--download-to', help=L('the file path to download to'), required=True)
 def download_blob(args):
-    bbs = _blob_data_service_factory(args)
+    bbs = blob_data_service_factory(args)
 
     # show dot indicator of download progress (one for every 10%)
-    bbs.get_blob_to_path(args.get('container-name'),
-                         args.get('blob-name'),
-                         args.get('download-to'),
+    bbs.get_blob_to_path(args.get('container_name'),
+                         args.get('blob_name'),
+                         args.get('download_to'),
                          progress_callback=_update_progress)
 
 #### FILE COMMANDS ################################################################################
 
-def _file_data_service_factory(*args):
-    def _resolve_arg(key, envkey):
-        try:
-            value = args[0][key]
-            args[0].pop(key, None)
-        except (IndexError, KeyError):
-            value = environ.get(envkey)
-        return value
-    return get_data_service_client(
-        FileService,
-        _resolve_arg('account-name', 'AZURE_STORAGE_ACCOUNT'),
-        _resolve_arg('account-key', 'AZURE_STORAGE_ACCOUNT_KEY'),
-        _resolve_arg('connection-string', 'AZURE_STORAGE_CONNECTION_STRING'))
-
 # SHARE COMMANDS
 
 build_operation(
-    'storage share',
-    None,
-    _file_data_service_factory,
+    'storage share', None, file_data_service_factory,
     [
         AutoCommandDefinition(FileService.list_shares, '[Share]', 'list'),
         AutoCommandDefinition(FileService.list_directories_and_files,
@@ -425,20 +426,18 @@ build_operation(
 
 @command_table.command('storage share exists')
 @command_table.description(L('Check if a file share exists.'))
-@command_table.option(**COMMON_PARAMETERS['share-name'])
-@command_table.option(**COMMON_PARAMETERS['account-name'])
-@command_table.option(**COMMON_PARAMETERS['account-key'])
-@command_table.option(**COMMON_PARAMETERS['connection-string'])
+@command_table.option(**COMMON_PARAMETERS['share_name'])
+@command_table.option(**COMMON_PARAMETERS['account_name'])
+@command_table.option(**COMMON_PARAMETERS['account_key'])
+@command_table.option(**COMMON_PARAMETERS['connection_string'])
 def exist_share(args):
-    fsc = _file_data_service_factory(args)
-    return str(fsc.exists(share_name=args.get('share-name')))
+    fsc = file_data_service_factory(args)
+    return str(fsc.exists(share_name=args.get('share_name')))
 
 # DIRECTORY COMMANDS
 
 build_operation(
-    'storage directory',
-    None,
-    _file_data_service_factory,
+    'storage directory', None, file_data_service_factory,
     [
         AutoCommandDefinition(FileService.create_directory, 'Boolean', 'create'),
         AutoCommandDefinition(FileService.delete_directory, 'Boolean', 'delete')
@@ -447,113 +446,67 @@ build_operation(
 
 @command_table.command('storage directory exists')
 @command_table.description(L('Check if a directory exists.'))
-@command_table.option(**COMMON_PARAMETERS['share-name'])
+@command_table.option(**COMMON_PARAMETERS['share_name'])
 @command_table.option('--directory-name -d', help=L('the directory name'), required=True)
-@command_table.option(**COMMON_PARAMETERS['account-name'])
-@command_table.option(**COMMON_PARAMETERS['account-key'])
-@command_table.option(**COMMON_PARAMETERS['connection-string'])
+@command_table.option(**COMMON_PARAMETERS['account_name'])
+@command_table.option(**COMMON_PARAMETERS['account_key'])
+@command_table.option(**COMMON_PARAMETERS['connection_string'])
 def exist_directory(args):
-    fsc = _file_data_service_factory(args)
-    return str(fsc.exists(share_name=args.get('share-name'),
-                          directory_name=args.get('directory-name')))
+    fsc = file_data_service_factory(args)
+    return str(fsc.exists(share_name=args.get('share_name'),
+                          directory_name=args.get('directory_name')))
 
 # FILE COMMANDS
 
 build_operation(
-    'storage file',
-    None,
-    _file_data_service_factory,
+    'storage file', None, file_data_service_factory,
     [
         AutoCommandDefinition(FileService.delete_file, 'Boolean', 'delete'),
     ],
     command_table, None, STORAGE_DATA_CLIENT_ARGS)
 
 @command_table.command('storage file download')
-@command_table.option(**COMMON_PARAMETERS['share-name'])
+@command_table.option(**COMMON_PARAMETERS['share_name'])
 @command_table.option('--file-name -f', help=L('the file name'), required=True)
 @command_table.option('--local-file-name', help=L('the path to the local file'), required=True)
 @command_table.option('--directory-name -d', help=L('the directory name'))
-@command_table.option(**COMMON_PARAMETERS['account-name'])
-@command_table.option(**COMMON_PARAMETERS['account-key'])
-@command_table.option(**COMMON_PARAMETERS['connection-string'])
+@command_table.option(**COMMON_PARAMETERS['account_name'])
+@command_table.option(**COMMON_PARAMETERS['account_key'])
+@command_table.option(**COMMON_PARAMETERS['connection_string'])
 def storage_file_download(args):
-    fsc = _file_data_service_factory(args)
-    fsc.get_file_to_path(args.get('share-name'),
-                         args.get('directory-name'),
-                         args.get('file-name'),
-                         args.get('local-file-name'),
+    fsc = file_data_service_factory(args)
+    fsc.get_file_to_path(args.get('share_name'),
+                         args.get('directory_name'),
+                         args.get('file_name'),
+                         args.get('local_file_name'),
                          progress_callback=_update_progress)
 
 @command_table.command('storage file exists')
 @command_table.description(L('Check if a file exists.'))
-@command_table.option(**COMMON_PARAMETERS['share-name'])
+@command_table.option(**COMMON_PARAMETERS['share_name'])
 @command_table.option('--file-name -f', help=L('the file name to check'), required=True)
 @command_table.option('--directory-name -d', help=L('subdirectory path to the file'))
-@command_table.option(**COMMON_PARAMETERS['account-name'])
-@command_table.option(**COMMON_PARAMETERS['account-key'])
-@command_table.option(**COMMON_PARAMETERS['connection-string'])
+@command_table.option(**COMMON_PARAMETERS['account_name'])
+@command_table.option(**COMMON_PARAMETERS['account_key'])
+@command_table.option(**COMMON_PARAMETERS['connection_string'])
 def exist_file(args):
-    fsc = _file_data_service_factory(args)
-    return str(fsc.exists(share_name=args.get('share-name'),
-                          directory_name=args.get('directory-name'),
-                          file_name=args.get('file-name')))
+    fsc = file_data_service_factory(args)
+    return str(fsc.exists(share_name=args.get('share_name'),
+                          directory_name=args.get('directory_name'),
+                          file_name=args.get('file_name')))
 
 @command_table.command('storage file upload')
-@command_table.option(**COMMON_PARAMETERS['share-name'])
+@command_table.option(**COMMON_PARAMETERS['share_name'])
 @command_table.option('--file-name -f', help=L('the destination file name'), required=True)
 @command_table.option('--local-file-name', help=L('the file name to upload'), required=True)
 @command_table.option('--directory-name -d', help=L('the destination directory to upload to'))
-@command_table.option(**COMMON_PARAMETERS['account-name'])
-@command_table.option(**COMMON_PARAMETERS['account-key'])
-@command_table.option(**COMMON_PARAMETERS['container-name'])
+@command_table.option(**COMMON_PARAMETERS['account_name'])
+@command_table.option(**COMMON_PARAMETERS['account_key'])
+@command_table.option(**COMMON_PARAMETERS['container_name'])
 def storage_file_upload(args):
-    fsc = _file_data_service_factory(args)
-    fsc.create_file_from_path(args.get('share-name'),
-                              args.get('directory-name'),
-                              args.get('file-name'),
-                              args.get('local-file-name'),
+    fsc = file_data_service_factory(args)
+    fsc.create_file_from_path(args.get('share_name'),
+                              args.get('directory_name'),
+                              args.get('file_name'),
+                              args.get('local_file_name'),
                               progress_callback=_update_progress)
-
-# HELPER METHODS
-
-DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S'
-
-def _parse_datetime(args, key):
-    # TODO This should handle timezone
-    datestring = args.get(key)
-    if not datestring:
-        return None
-    time = datetime.strptime(datestring, DATETIME_FORMAT)
-    return time
-
-def _parse_dict(args, key, allow_singles=True):
-    """ Parses dictionaries passed in as argument strings in key=value;key=value format.
-    If 'allow_singles' is set to False, single tags will be ignored."""
-    string_val = args.get(key)
-    if not string_val:
-        return None
-    kv_list = [x for x in string_val.split(';') if '=' in x]     # key-value pairs
-    result = dict(x.split('=') for x in kv_list)
-    if allow_singles:
-        s_list = [x for x in string_val.split(';') if '=' not in x]  # single values
-        result.update(dict((x, '') for x in s_list))
-    return result
-
-def _parse_int(args, key):
-    try:
-        str_val = args.get(key)
-        int_val = int(str_val) if str_val else None
-    except ValueError:
-        int_val = None
-    return int_val
-
-def _update_progress(current, total):
-    if total:
-        message = 'Percent complete: %'
-        num_format = 'xxx.x'
-        num_decimals = len(num_format.split('.', maxsplit=1)[1]) if '.' in num_format else 0
-        format_string = '{:.%sf}' % num_decimals
-        percent_done = format_string.format(current * 100 / total)
-        padding = len(num_format) - len(percent_done)
-        message += (' ' * padding) + percent_done
-        print('\b' * len(message) + message, end='', file=stderr, flush=True)

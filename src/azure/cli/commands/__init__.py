@@ -86,10 +86,7 @@ class CommandTable(defaultdict):
 
     def option(self, name, **kwargs):
         def wrapper(func):
-            try:
-                opt = dict(kwargs['kwargs'])
-            except KeyError:
-                opt = dict(kwargs)
+            opt = dict(kwargs)
             opt['name'] = name
             self[func]['arguments'].append(opt)
             return func
