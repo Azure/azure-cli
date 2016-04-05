@@ -56,7 +56,7 @@ load_test_definitions(
     ],
     env_variables = {
         'AZURE_STORAGE_CONNECTION_STRING':('DefaultEndpointsProtocol=https;' +
-                                           'AccountName=travistestresourcegr3014;' +
-                                           'AccountKey=blahblah').format(RESOURCE_GROUP_NAME)
+                                           'AccountName={};' +
+                                           'AccountKey=blahblah').format(STORAGE_ACCOUNT_NAME)
     }
 )
