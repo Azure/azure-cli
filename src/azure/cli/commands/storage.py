@@ -39,7 +39,7 @@ def _parse_tags(string):
     result = None
     if string:
         result = _parse_key_value_pairs(string)
-        s_list = [x for x in string_val.split(';') if '=' not in x]  # single values
+        s_list = [x for x in string.split(';') if '=' not in x]  # single values
         result.update(dict((x, '') for x in s_list))
     return result
 
