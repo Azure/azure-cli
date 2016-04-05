@@ -10,7 +10,7 @@ COMPONENT_PREFIX = 'azure-cli-'
 
 command_table = CommandTable()
 
-@command_table.command('components list')
+@command_table.command('component list')
 @command_table.description(L('List the installed components.'))
 def list_components(args): #pylint: disable=unused-argument
     components = sorted(["%s (%s)" % (dist.key.replace(COMPONENT_PREFIX, ''), dist.version)
@@ -39,7 +39,7 @@ def _install_or_update(component_name, version, link, private, upgrade=False):
         pip.main(['install'] + options + [COMPONENT_PREFIX + component_name+version_no]
                  + pkg_index_options)
 
-@command_table.command('components install')
+@command_table.command('component install')
 @command_table.description(L('Install a component'))
 @command_table.option('--name -n', help=L('Name of component to install'), required=True)
 @command_table.option('--version', help=L('Component version (otherwise latest)'))
@@ -53,7 +53,7 @@ def install_component(args):
     _install_or_update(args.get('name'), args.get('version'), args.get('link'),
                        args.get('private'), upgrade=False)
 
-@command_table.command('components update')
+@command_table.command('component update')
 @command_table.description(L('Update a component'))
 @command_table.option('--name -n', help=L('Name of component to install'), required=True)
 @command_table.option('--link -l', help=L("If a url or path to an html file, then parse \
@@ -65,7 +65,7 @@ archives in the directory listing."))
 def update_component(args):
     _install_or_update(args.get('name'), None, args.get('link'), args.get('private'), upgrade=True)
 
-@command_table.command('components update all')
+@command_table.command('component update-all')
 @command_table.description(L('Update all components'))
 @command_table.option('--link -l', help=L("If a url or path to an html file, then parse \
 for links to archives. If a local path or \
@@ -81,7 +81,7 @@ def update_all_components(args):
         _install_or_update(component_name, None, args.get('link'),
                            args.get('private'), upgrade=True)
 
-@command_table.command('components remove')
+@command_table.command('component remove')
 @command_table.description(L('Remove a component'))
 @command_table.option('--name -n', help=L('Name of component to remove'), required=True)
 @command_table.option('--force -f', action='store_true',
