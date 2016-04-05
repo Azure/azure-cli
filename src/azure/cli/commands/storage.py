@@ -72,6 +72,13 @@ COMMON_PARAMETERS.update({
         'required': False,
         'default': environ.get('AZURE_STORAGE_ACCOUNT')
     },
+    'account_name_required': {
+        # this is used only to obtain the connection string. Thus, the env variable default
+        # does not apply and this is a required parameter
+        'name': '--account-name -n',
+        'help': L('the storage account name'),
+        'required': True
+    },
     'blob_name': {
         'name': '--blob-name -b',
         'help': L('the name of the blob'),
@@ -178,7 +185,7 @@ def show_account_usage(_):
 @command_table.command('storage account connection-string')
 @command_table.description(L('Show the connection string for a storage account.'))
 @command_table.option(**COMMON_PARAMETERS['resource_group_name'])
-@command_table.option(**COMMON_PARAMETERS['account_name'])
+@command_table.option(**COMMON_PARAMETERS['account_name_required'])
 @command_table.option('--use-http', action='store_const', const='http', default='https',
                       help=L('use http as the default endpoint protocol'))
 def show_storage_connection_string(args):
