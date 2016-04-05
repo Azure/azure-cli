@@ -4,6 +4,9 @@ import unittest
 from azure.cli.commands._auto_command import build_operation
 from azure.cli.commands import CommandTable
 from azure.cli.commands._auto_command import AutoCommandDefinition
+from azure.cli.main import main as cli
+
+from six import StringIO
 
 class Test_autocommand(unittest.TestCase):
     @classmethod
@@ -16,7 +19,7 @@ class Test_autocommand(unittest.TestCase):
     def tearDownClass(cls):
         logging.shutdown()
 
-    def sample_vm_get(self, resource_group_name, vm_name, expand=None, custom_headers={}, raw=False, **operation_config):
+    def sample_vm_get(self, resource_group_name, vm_name, opt_param=None, expand=None, custom_headers={}, raw=False, **operation_config):
         """
         The operation to get a virtual machine.
 
@@ -24,6 +27,8 @@ class Test_autocommand(unittest.TestCase):
         :type resource_group_name: str
         :param vm_name: The name of the virtual machine.
         :type vm_name: str
+        :param opt_param: Used to verify auto-command correctly identifies optional params
+        :type opt_param: object
         :param expand: The expand expression to apply on the operation.
         :type expand: str
         :param dict custom_headers: headers that will be added to the request
@@ -46,7 +51,7 @@ class Test_autocommand(unittest.TestCase):
         self.assertEqual(len(command_table), 1, 'We expect exactly one command in the command table')
         command_metadata = list(command_table.values())[0]
         self.assertEqual(command_metadata['name'], 'test autocommand sample-vm-get', 'Unexpected command name...')
-        self.assertEqual(len(command_metadata['arguments']), 3, 'We expected exactly 3 arguments')
+        self.assertEqual(len(command_metadata['arguments']), 4, 'We expected exactly 4 arguments')
         some_expected_arguments = [
             {'name': '--resourcegroup -g', 'dest': 'resource_group_name', 'required': True},
             {'name': '--vm-name', 'dest': 'vm_name', 'required': True},
@@ -79,7 +84,7 @@ class Test_autocommand(unittest.TestCase):
         self.assertEqual(len(command_table), 1, 'We expect exactly one command in the command table')
         command_metadata = list(command_table.values())[0]
         self.assertEqual(command_metadata['name'], 'test autocommand sample-vm-get', 'Unexpected command name...')
-        self.assertEqual(len(command_metadata['arguments']), 3, 'We expected exactly 3 arguments')
+        self.assertEqual(len(command_metadata['arguments']), 4, 'We expected exactly 4 arguments')
         some_expected_arguments = [
             {'name': '--resourcegroup -g', 'dest': 'resource_group_name', 'required': True},
             {'name': '--wonky-name -n', 'dest': 'vm_name', 'required': False},
@@ -112,7 +117,7 @@ class Test_autocommand(unittest.TestCase):
         self.assertEqual(len(command_table), 1, 'We expect exactly one command in the command table')
         command_metadata = list(command_table.values())[0]
         self.assertEqual(command_metadata['name'], 'test autocommand sample-vm-get', 'Unexpected command name...')
-        self.assertEqual(len(command_metadata['arguments']), 4, 'We expected exactly 4 arguments')
+        self.assertEqual(len(command_metadata['arguments']), 5, 'We expected exactly 5 arguments')
         some_expected_arguments = [
             {'name': '--resourcegroup -g', 'dest': 'resource_group_name', 'required': True},
             {'name': '--vm-name', 'dest': 'vm_name', 'required': True},
@@ -137,6 +142,25 @@ class Test_autocommand(unittest.TestCase):
         self.assertEqual(len(command_table), 1, 'We expect exactly one command in the command table')
         command_metadata = list(command_table.values())[0]
         self.assertEqual(command_metadata['name'], 'test autocommand woot', 'Unexpected command name...')
+
+    def test_autocommand_optional_parameter(self):
+        command_table = CommandTable()
+        build_operation("test autocommand",
+                        "",
+                        None,
+                        [
+                            AutoCommandDefinition(Test_autocommand.sample_vm_get, None)
+                        ],
+                        command_table)
+
+        self.assertEqual(len(command_table), 1, 'We expect exactly one command in the command table')
+        command_metadata = list(command_table.values())[0]
+        some_expected_arguments = [
+            {'name': '--opt-param', 'required': False},
+            ]
+        for probe in some_expected_arguments:
+            existing = [arg for arg in command_metadata['arguments'] if arg['name'] == probe['name']][0]
+            self.assertDictContainsSubset(probe, existing)
 
 if __name__ == '__main__':
     unittest.main()
