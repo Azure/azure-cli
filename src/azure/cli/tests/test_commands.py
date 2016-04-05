@@ -16,7 +16,7 @@ except ImportError:
 
 from azure.cli.main import main as cli
 
-from command_specs import TEST_DEF
+from command_specs import TEST_DEF, ENV_VARIABLES
 
 logging.basicConfig()
 vcr_log = logging.getLogger('vcr')
@@ -145,7 +145,17 @@ class TestSequenceMeta(type):
 
 @add_metaclass(TestSequenceMeta)
 class TestCommands(unittest.TestCase):
-    pass
+    @classmethod
+    def setUpClass(cls):
+        # use default environment variables if not currently set in the system
+        vars = ENV_VARIABLES.keys() if ENV_VARIABLES else []
+        for var in vars:
+            if not os.environ.get(var, None):
+                os.environ[var] = str(ENV_VARIABLES[var])
+
+    @classmethod
+    def tearDownClass(cls):
+        pass
 
 if __name__ == '__main__':
     unittest.main()
