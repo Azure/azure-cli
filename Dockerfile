@@ -1,10 +1,15 @@
 FROM ubuntu:15.10
 
+#install *-dev packages below so cryptography package can install
 RUN apt-get update -qq && \
     apt-get install -qqy --no-install-recommends\
       python3-pip \
       vim \
-      jq && \
+      jq \
+      build-essential \
+      libssl-dev \
+      libffi-dev \
+      python3-dev && \
     rm -rf /var/lib/apt/lists/*
 
 ENV AZURECLITEMP /opt/azure-cli
