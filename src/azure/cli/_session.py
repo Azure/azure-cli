@@ -16,9 +16,10 @@ class Session(collections.MutableMapping):
     be followed by a call to `save_with_retry` or `save`.
     '''
 
-    def __init__(self):
+    def __init__(self, encoding=None):
         self.filename = None
         self.data = {}
+        self._encoding = encoding if encoding else 'utf-8-sig'
 
     def load(self, filename, max_age=0):
         self.filename = filename
@@ -28,14 +29,14 @@ class Session(collections.MutableMapping):
                 st = os.stat(self.filename)
                 if st.st_mtime + max_age < time.clock():
                     self.save()
-            with codecs_open(self.filename, 'r', encoding='utf-8-sig') as f:
+            with codecs_open(self.filename, 'r', encoding=self._encoding) as f:
                 self.data = json.load(f)
         except (OSError, IOError):
             self.save()
 
     def save(self):
         if self.filename:
-            with codecs_open(self.filename, 'w', encoding='utf-8-sig') as f:
+            with codecs_open(self.filename, 'w', encoding=self._encoding) as f:
                 json.dump(self.data, f)
 
     def save_with_retry(self, retries=5):
