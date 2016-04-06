@@ -12,7 +12,7 @@
     <OutputPath>.</OutputPath>
     <ProjectTypeGuids>{888888a0-9f3d-457c-b088-3a5042f75d52}</ProjectTypeGuids>
     <LaunchProvider>Standard Python launcher</LaunchProvider>
-    <InterpreterId>{1dd9c42b-5980-42ce-a2c3-46d3bf0eede4}</InterpreterId>
+    <InterpreterId>{54f4b6dc-0859-46dc-99bb-b275c9d0aca3}</InterpreterId>
     <InterpreterVersion>3.5</InterpreterVersion>
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
     <CommandLineArguments>
@@ -26,14 +26,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="azure\cli\application.py" />
-    <Compile Include="azure\cli\commands\account.py" />
-    <Compile Include="azure\cli\commands\login.py" />
-    <Compile Include="azure\cli\commands\logout.py" />
-    <Compile Include="azure\cli\commands\network.py" />
-    <Compile Include="azure\cli\commands\resource.py" />
-    <Compile Include="azure\cli\commands\storage.py" />
-    <Compile Include="azure\cli\commands\taskhelp.py" />
-    <Compile Include="azure\cli\commands\vm.py" />
     <Compile Include="azure\cli\commands\_auto_command.py" />
     <Compile Include="azure\cli\commands\_command_creation.py" />
     <Compile Include="azure\cli\commands\__init__.py" />
@@ -43,24 +35,18 @@
     <Compile Include="azure\cli\extensions\transform.py" />
     <Compile Include="azure\cli\extensions\__init__.py" />
     <Compile Include="azure\cli\main.py" />
-    <Compile Include="azure\cli\tests\command_specs\test_spec_network.py" />
-    <Compile Include="azure\cli\tests\command_specs\test_spec_resource.py" />
-    <Compile Include="azure\cli\tests\command_specs\test_spec_storage_account.py" />
-    <Compile Include="azure\cli\tests\command_specs\test_spec_vm.py" />
-    <Compile Include="azure\cli\tests\command_specs\__init__.py" />
-    <Compile Include="azure\cli\tests\test_api_check.py">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="azure\cli\tests\test_argparse.py">
+    <Compile Include="azure\cli\tests\test_add_resourcegroup_transform.py" />
+    <Compile Include="command_modules\azure-cli-resource\azure\cli\command_modules\resource\tests\test_api_check.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="azure\cli\parser.py" />
     <Compile Include="azure\cli\tests\test_parser.py" />
     <Compile Include="azure\cli\tests\test_autocommand.py" />
-    <Compile Include="azure\cli\tests\test_commands.py" />
     <Compile Include="azure\cli\tests\test_connection_verify.py" />
     <Compile Include="azure\cli\tests\test_application.py" />
     <Compile Include="azure\cli\tests\test_output.py" />
+    <Compile Include="azure\cli\utils\command_test_util.py" />
+    <Compile Include="azure\cli\utils\__init__.py" />
     <Compile Include="azure\cli\_azure_env.py" />
     <Compile Include="azure\cli\_debug.py" />
     <Compile Include="azure\cli\tests\test_help.py" />
@@ -83,11 +69,12 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="azure\__init__.py" />
-    <Compile Include="command_modules\azure-cli-components\azure\cli\command_modules\components\__init__.py" />
-    <Compile Include="command_modules\azure-cli-components\azure\cli\command_modules\__init__.py" />
-    <Compile Include="command_modules\azure-cli-components\azure\cli\__init__.py" />
-    <Compile Include="command_modules\azure-cli-components\azure\__init__.py" />
     <Compile Include="command_modules\azure-cli-components\setup.py" />
+    <Compile Include="command_modules\azure-cli-component\azure\cli\command_modules\component\__init__.py" />
+    <Compile Include="command_modules\azure-cli-component\azure\cli\command_modules\__init__.py" />
+    <Compile Include="command_modules\azure-cli-component\azure\cli\__init__.py" />
+    <Compile Include="command_modules\azure-cli-component\azure\__init__.py" />
+    <Compile Include="command_modules\azure-cli-component\setup.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\tests\command_specs.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\tests\test_commands.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\__init__.py" />
@@ -137,8 +124,7 @@
     <Folder Include="azure\cli\commands" />
     <Folder Include="azure\cli\extensions\" />
     <Folder Include="azure\cli\tests\" />
-    <Folder Include="azure\cli\tests\command_specs\" />
-    <Folder Include="azure\cli\tests\recordings\" />
+    <Folder Include="azure\cli\utils\" />
     <Folder Include="command_modules\" />
     <Folder Include="command_modules\azure-cli-components\" />
     <Folder Include="command_modules\azure-cli-components\azure\" />
@@ -146,6 +132,16 @@
     <Folder Include="command_modules\azure-cli-components\azure\cli\command_modules\" />
     <Folder Include="command_modules\azure-cli-components\azure\cli\command_modules\components\" />
     <Folder Include="command_modules\azure-cli-components\azure_cli_components.egg-info\" />
+    <Folder Include="command_modules\azure-cli-component\" />
+    <Folder Include="command_modules\azure-cli-component\azure\" />
+    <Folder Include="command_modules\azure-cli-component\azure\cli\" />
+    <Folder Include="command_modules\azure-cli-component\azure\cli\command_modules\" />
+    <Folder Include="command_modules\azure-cli-component\azure\cli\command_modules\component\" />
+    <Folder Include="command_modules\azure-cli-component\azure\cli\command_modules\component\__pycache__\" />
+    <Folder Include="command_modules\azure-cli-component\azure\cli\command_modules\__pycache__\" />
+    <Folder Include="command_modules\azure-cli-component\azure\cli\__pycache__\" />
+    <Folder Include="command_modules\azure-cli-component\azure\__pycache__\" />
+    <Folder Include="command_modules\azure-cli-component\azure_cli_component.egg-info\" />
     <Folder Include="command_modules\azure-cli-network\" />
     <Folder Include="command_modules\azure-cli-network\azure\" />
     <Folder Include="command_modules\azure-cli-network\azure\cli\" />
@@ -190,24 +186,6 @@
     <Folder Include="command_modules\azure-cli-vm\azure_cli_vm.egg-info\" />
   </ItemGroup>
   <ItemGroup>
-    <Interpreter Include="..\env\">
-      <Id>{1dd9c42b-5980-42ce-a2c3-46d3bf0eede4}</Id>
-      <BaseInterpreter>{2af0f10d-7135-4994-9156-5d01c9c11b7e}</BaseInterpreter>
-      <Version>3.5</Version>
-      <Description>env (Python 3.5)</Description>
-      <InterpreterPath>Scripts\python.exe</InterpreterPath>
-      <WindowsInterpreterPath>Scripts\pythonw.exe</WindowsInterpreterPath>
-      <LibraryPath>Lib\</LibraryPath>
-      <PathEnvironmentVariable>PYTHONPATH</PathEnvironmentVariable>
-      <Architecture>X86</Architecture>
-    </Interpreter>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="azure\cli\tests\recordings\README.rst" />
-    <Content Include="command_modules\azure-cli-components\azure\cli\command_modules\components\__init__.pyc" />
-    <Content Include="command_modules\azure-cli-components\azure\cli\command_modules\__init__.pyc" />
-    <Content Include="command_modules\azure-cli-components\azure\cli\__init__.pyc" />
-    <Content Include="command_modules\azure-cli-components\azure\__init__.pyc" />
     <Content Include="command_modules\azure-cli-components\azure_cli_components.egg-info\dependency_links.txt" />
     <Content Include="command_modules\azure-cli-components\azure_cli_components.egg-info\namespace_packages.txt" />
     <Content Include="command_modules\azure-cli-components\azure_cli_components.egg-info\PKG-INFO" />
@@ -216,6 +194,20 @@
     <Content Include="command_modules\azure-cli-components\azure_cli_components.egg-info\top_level.txt" />
     <Content Include="command_modules\azure-cli-components\README.rst" />
     <Content Include="command_modules\azure-cli-components\requirements.txt" />
+    <Content Include="command_modules\azure-cli-component\azure\cli\command_modules\component\__pycache__\__init__.cpython-35.pyc" />
+    <Content Include="command_modules\azure-cli-component\azure\cli\command_modules\__pycache__\__init__.cpython-35.pyc" />
+    <Content Include="command_modules\azure-cli-component\azure\cli\__init__.pyc" />
+    <Content Include="command_modules\azure-cli-component\azure\cli\__pycache__\__init__.cpython-35.pyc" />
+    <Content Include="command_modules\azure-cli-component\azure\__init__.pyc" />
+    <Content Include="command_modules\azure-cli-component\azure\__pycache__\__init__.cpython-35.pyc" />
+    <Content Include="command_modules\azure-cli-component\azure_cli_component.egg-info\dependency_links.txt" />
+    <Content Include="command_modules\azure-cli-component\azure_cli_component.egg-info\namespace_packages.txt" />
+    <Content Include="command_modules\azure-cli-component\azure_cli_component.egg-info\PKG-INFO" />
+    <Content Include="command_modules\azure-cli-component\azure_cli_component.egg-info\requires.txt" />
+    <Content Include="command_modules\azure-cli-component\azure_cli_component.egg-info\SOURCES.txt" />
+    <Content Include="command_modules\azure-cli-component\azure_cli_component.egg-info\top_level.txt" />
+    <Content Include="command_modules\azure-cli-component\README.rst" />
+    <Content Include="command_modules\azure-cli-component\requirements.txt" />
     <Content Include="command_modules\azure-cli-network\azure\cli\command_modules\network\tests\command_specs.pyc" />
     <Content Include="command_modules\azure-cli-network\azure\cli\command_modules\network\tests\recordings\test_network_usage_list.yaml" />
     <Content Include="command_modules\azure-cli-network\azure\cli\command_modules\network\tests\test_commands.pyc" />
@@ -233,13 +225,7 @@
     <Content Include="command_modules\azure-cli-network\requirements.txt" />
     <Content Include="command_modules\azure-cli-profile\README.rst" />
     <Content Include="command_modules\azure-cli-profile\requirements.txt" />
-    <Content Include="command_modules\azure-cli-resource\azure\cli\command_modules\resource\tests\command_specs.pyc" />
     <Content Include="command_modules\azure-cli-resource\azure\cli\command_modules\resource\tests\recordings\test_resource_group_list.yaml" />
-    <Content Include="command_modules\azure-cli-resource\azure\cli\command_modules\resource\tests\test_commands.pyc" />
-    <Content Include="command_modules\azure-cli-resource\azure\cli\command_modules\resource\__init__.pyc" />
-    <Content Include="command_modules\azure-cli-resource\azure\cli\command_modules\__init__.pyc" />
-    <Content Include="command_modules\azure-cli-resource\azure\cli\__init__.pyc" />
-    <Content Include="command_modules\azure-cli-resource\azure\__init__.pyc" />
     <Content Include="command_modules\azure-cli-resource\azure_cli_resource.egg-info\dependency_links.txt" />
     <Content Include="command_modules\azure-cli-resource\azure_cli_resource.egg-info\namespace_packages.txt" />
     <Content Include="command_modules\azure-cli-resource\azure_cli_resource.egg-info\PKG-INFO" />
@@ -251,8 +237,6 @@
     <Content Include="command_modules\azure-cli-storage\azure\cli\command_modules\storage\tests\recordings\test_storage_account_check.yaml" />
     <Content Include="command_modules\azure-cli-storage\azure\cli\command_modules\storage\tests\recordings\test_storage_account_list.yaml" />
     <Content Include="command_modules\azure-cli-storage\azure\cli\command_modules\storage\tests\recordings\test_storage_account_usage.yaml" />
-    <Content Include="command_modules\azure-cli-storage\azure\cli\command_modules\storage\__init__.pyc" />
-    <Content Include="command_modules\azure-cli-storage\azure\cli\command_modules\__init__.pyc" />
     <Content Include="command_modules\azure-cli-storage\azure\cli\__init__.pyc" />
     <Content Include="command_modules\azure-cli-storage\azure\__init__.pyc" />
     <Content Include="command_modules\azure-cli-storage\azure_cli_storage.egg-info\dependency_links.txt" />
@@ -280,6 +264,19 @@
     <Content Include="command_modules\azure-cli-vm\azure_cli_vm.egg-info\top_level.txt" />
     <Content Include="command_modules\azure-cli-vm\README.rst" />
     <Content Include="command_modules\azure-cli-vm\requirements.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Interpreter Include="..\env\">
+      <Id>{54f4b6dc-0859-46dc-99bb-b275c9d0aca3}</Id>
+      <BaseInterpreter>{2af0f10d-7135-4994-9156-5d01c9c11b7e}</BaseInterpreter>
+      <Version>3.5</Version>
+      <Description>env (Python 3.5)</Description>
+      <InterpreterPath>Scripts\python.exe</InterpreterPath>
+      <WindowsInterpreterPath>Scripts\pythonw.exe</WindowsInterpreterPath>
+      <LibraryPath>Lib\</LibraryPath>
+      <PathEnvironmentVariable>PYTHONPATH</PathEnvironmentVariable>
+      <Architecture>X86</Architecture>
+    </Interpreter>
   </ItemGroup>
   <Import Project="$(PtvsTargetsFile)" Condition="Exists($(PtvsTargetsFile))" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets" Condition="!Exists($(PtvsTargetsFile))" />
