@@ -12,8 +12,10 @@ from azure.cli.utils.update_checker import check_for_component_update, UpdateChe
 CLI_PACKAGE_NAME = 'azure-cli'
 COMPONENT_PREFIX = 'azure-cli-'
 
-PRIVATE_PYPI_URL = os.environ.get('AZURE_CLI_PRIVATE_PYPI_URL')
-PRIVATE_PYPI_HOST = os.environ.get('AZURE_CLI_PRIVATE_PYPI_HOST')
+PRIVATE_PYPI_URL_ENV_NAME = 'AZURE_CLI_PRIVATE_PYPI_URL'
+PRIVATE_PYPI_URL = os.environ.get(PRIVATE_PYPI_URL_ENV_NAME)
+PRIVATE_PYPI_HOST_ENV_NAME = 'AZURE_CLI_PRIVATE_PYPI_HOST'
+PRIVATE_PYPI_HOST = os.environ.get(PRIVATE_PYPI_HOST_ENV_NAME)
 
 command_table = CommandTable()
 
@@ -40,6 +42,10 @@ def _install_or_update(component_name, version, link, private, upgrade=False):
         if link:
             pkg_index_options += ['--find-links', link]
         if private:
+            if not PRIVATE_PYPI_URL:
+                raise RuntimeError('{} environment variable not set.'.format(PRIVATE_PYPI_URL_ENV_NAME))
+            if not PRIVATE_PYPI_HOST:
+                raise RuntimeError('{} environment variable not set.'.format(PRIVATE_PYPI_HOST_ENV_NAME))
             pkg_index_options += ['--extra-index-url', PRIVATE_PYPI_URL,
                                   '--trusted-host', PRIVATE_PYPI_HOST]
         pip.main(['install'] + options + [COMPONENT_PREFIX + component_name+version_no]
@@ -78,6 +84,10 @@ def update_component(args):
 def update_self(args):
     pkg_index_options = []
     if args.get('private'):
+        if not PRIVATE_PYPI_URL:
+            raise RuntimeError('{} environment variable not set.'.format(PRIVATE_PYPI_URL_ENV_NAME))
+        if not PRIVATE_PYPI_HOST:
+            raise RuntimeError('{} environment variable not set.'.format(PRIVATE_PYPI_HOST_ENV_NAME))
         pkg_index_options += ['--extra-index-url', PRIVATE_PYPI_URL,
                               '--trusted-host', PRIVATE_PYPI_HOST]
     pip.main(['install', '--quiet', '--isolated', '--disable-pip-version-check', '--upgrade']

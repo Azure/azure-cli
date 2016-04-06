@@ -23,8 +23,10 @@ from setuptools import setup
 VERSION = '0.0.32'
 INSTALL_FROM_PUBLIC = False
 
-PRIVATE_PYPI_URL = os.environ.get('AZURE_CLI_PRIVATE_PYPI_URL')
-PRIVATE_PYPI_HOST = os.environ.get('AZURE_CLI_PRIVATE_PYPI_HOST')
+PRIVATE_PYPI_URL_ENV_NAME = 'AZURE_CLI_PRIVATE_PYPI_URL'
+PRIVATE_PYPI_URL = os.environ.get(PRIVATE_PYPI_URL_ENV_NAME)
+PRIVATE_PYPI_HOST_ENV_NAME = 'AZURE_CLI_PRIVATE_PYPI_HOST'
+PRIVATE_PYPI_HOST = os.environ.get(PRIVATE_PYPI_HOST_ENV_NAME)
 
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
@@ -85,8 +87,11 @@ def _post_install(dir):
         pip.main(['install', '--upgrade', 'azure-cli-component', '--disable-pip-version-check'])
         check_call(['az', 'component', 'update', '-n', 'profile'])
     else:
-        
         # use private PyPI server.
+        if not PRIVATE_PYPI_URL:
+            raise RuntimeError('{} environment variable not set.'.format(PRIVATE_PYPI_URL_ENV_NAME))
+        if not PRIVATE_PYPI_HOST:
+            raise RuntimeError('{} environment variable not set.'.format(PRIVATE_PYPI_HOST_ENV_NAME))
         pip.main(['install', '--upgrade', 'azure-cli-component', '--extra-index-url',
                 PRIVATE_PYPI_URL, '--trusted-host', PRIVATE_PYPI_HOST,
                 '--disable-pip-version-check'])
