@@ -51,6 +51,23 @@ load_test_definitions(
             'command': 'storage account renew-keys -g {} --account-name {} --key key1'
                 .format(RESOURCE_GROUP_NAME, STORAGE_ACCOUNT_NAME)
         },
+        # TODO: This plays back at essentially the same speed as the actual command.
+        #{
+        #    'test_name': 'storage_account_create',
+        #    'command': 'storage account create --type Standard_LRS -l westus -g travistestresourcegroup --account-name teststorageaccount02'
+        #},
+        {
+            'test_name': 'storage_account_set_tags',
+            'command': 'storage account set -g travistestresourcegroup -n teststorageaccount02 --tags foo=bar;cat'
+        },
+        {
+            'test_name': 'storage_account_set_type',
+            'command': 'storage account set -g travistestresourcegroup -n teststorageaccount02 --type Standard_GRS'
+        },
+        {
+            'test_name': 'storage_account_delete',
+            'command': 'storage account delete -g travistestresourcegroup --account-name teststorageaccount01'
+        },
         # STORAGE CONTAINER TESTS
         {
             'test_name': 'storage_container_list',
@@ -132,12 +149,10 @@ load_test_definitions(
             'test_name': 'storage_share_create_simple',
             'command': 'storage share create --share-name testshare02 --fail-on-exist'
         },
-        # TODO: Switch to hand authored command or see if there's a way for autocommand to properly
-        # handle metadata.
-        #{
-        #    'test_name': 'storage_share_create_with_metadata',
-        #    'command': 'storage share create --share-name testshare03 --fail-on-exist --metadata foo=bar;cat=hat'
-        #},
+        {
+            'test_name': 'storage_share_create_with_metadata',
+            'command': 'storage share create --share-name testshare03 --fail-on-exist --metadata foo=bar;cat=hat'
+        },
         {
             'test_name': 'storage_share_exists',
             'command': 'storage share exists --share-name testshare01'
@@ -163,11 +178,10 @@ load_test_definitions(
             'test_name': 'storage_directory_create_simple',
             'command': 'storage directory create --share-name testshare01 --directory-name tempdir01 --fail-on-exist'
         },
-        # TODO: Make autocommand work with metadata or replace with hand authored command
-        #{
-        #    'test_name': 'storage_directory_create_with_metadata',
-        #    'command': 'storage directory create --share-name testshare01 --directory-name tempdir02 --fail-on-exist --metadata foo=bar;cat=hat'
-        #},
+        {
+            'test_name': 'storage_directory_create_with_metadata',
+            'command': 'storage directory create --share-name testshare01 --directory-name tempdir02 --fail-on-exist --metadata foo=bar;cat=hat'
+        },
         {
             'test_name': 'storage_directory_delete',
             'command': 'storage directory delete --share-name testshare01 --directory-name tempdir01 --fail-not-exist'
