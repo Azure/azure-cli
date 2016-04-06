@@ -6,8 +6,12 @@ python:
   - "3.5-dev" # 3.5 development branch
 install:
   - pip install -r requirements.txt
+  - pip install -e . # Install the CLI as a package
+  - python scripts/command_modules/install.py # Install the command modules as packages
 script: 
   - export PYTHONPATH=$PATHONPATH:./src
   - python -m azure.cli -h
-  - pylint src/azure
+  - pylint -r n src/azure
+  - python scripts/command_modules/pylint.py
   - python -m unittest discover -s src/azure/cli/tests --buffer
+  - python scripts/command_modules/test.py
