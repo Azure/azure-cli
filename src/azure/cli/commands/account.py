@@ -5,7 +5,7 @@ from .._locale import L
 command_table = CommandTable()
 
 @command_table.command('account list', description=L('List the imported subscriptions.'))
-def list_subscriptions(args, unexpected): #pylint: disable=unused-argument
+def list_subscriptions(_):
     """
     type: command
     long-summary: |
@@ -17,7 +17,7 @@ def list_subscriptions(args, unexpected): #pylint: disable=unused-argument
           text: example details
     """
     profile = Profile()
-    subscriptions = profile.load_subscriptions()
+    subscriptions = profile.load_cached_subscriptions()
 
     return subscriptions
 
