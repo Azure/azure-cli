@@ -72,13 +72,7 @@ class Application(object):
         params.pop('subcommand', None)
         params.pop('func', None)
 
-        # TODO: Remove this conversion code once internal key references are updated (#116797761)
-        converted_params = {}
-        for key in params.keys():
-            converted_key = key.replace('_', '-')
-            converted_params[converted_key] = params[key]
-
-        result = args.func(converted_params)
+        result = args.func(params)
 
         result = self.todict(result)
         event_data = {'result': result}

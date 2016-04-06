@@ -1,0 +1,232 @@
+from . import TEST_DEF, load_test_definitions
+
+import os
+
+RESOURCE_GROUP_NAME = 'travistestresourcegroup'
+STORAGE_ACCOUNT_NAME = 'travistestresourcegr3014'
+PROPOSED_LEASE_ID = 'abcdabcd-abcd-abcd-abcd-abcdabcdabcd'
+CHANGED_LEASE_ID = 'dcbadcba-dcba-dcba-dcba-dcbadcbadcba'
+# TODO: This breaks TravisCI but allows you to not put README.rst in the /src folder
+#CLI_ROOT_DIR = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
+CLI_ROOT_DIR = os.getcwd()
+
+load_test_definitions(
+    package_name=locals()['__name__'],
+    definition = [
+        # STORAGE ACCOUNT TESTS
+        {
+            'test_name': 'storage_account_check_name',
+            'command': 'storage account check-name --name teststorageomega'
+        },
+        {
+            'test_name': 'storage_account_list',
+            'command': 'storage account list'
+        },
+        {
+            'test_name': 'storage_account_show',
+            'command': 'storage account show --resourcegroup {} --account-name {}'
+                .format(RESOURCE_GROUP_NAME, STORAGE_ACCOUNT_NAME)
+        },
+        {
+            'test_name': 'storage_account_usage',
+            'command': 'storage account usage',
+        },
+        {
+            'test_name': 'storage_account_connection_string',
+            'command': 'storage account connection-string -g {} --account-name {} --use-http'
+                .format(RESOURCE_GROUP_NAME, STORAGE_ACCOUNT_NAME)
+        },
+        {
+            'test_name': 'storage_account_list_keys',
+            'command': 'storage account list-keys -g {} --account-name {}'
+                .format(RESOURCE_GROUP_NAME, STORAGE_ACCOUNT_NAME)
+        },
+        {
+            'test_name': 'storage_account_renew_keys_both',
+            'command': 'storage account renew-keys -g {} --account-name {}'
+                .format(RESOURCE_GROUP_NAME, STORAGE_ACCOUNT_NAME)
+        },
+        {
+            'test_name': 'storage_account_renew_keys_one',
+            'command': 'storage account renew-keys -g {} --account-name {} --key key1'
+                .format(RESOURCE_GROUP_NAME, STORAGE_ACCOUNT_NAME)
+        },
+        # TODO: This plays back at essentially the same speed as the actual command.
+        #{
+        #    'test_name': 'storage_account_create',
+        #    'command': 'storage account create --type Standard_LRS -l westus -g travistestresourcegroup --account-name teststorageaccount02'
+        #},
+        {
+            'test_name': 'storage_account_set_tags',
+            'command': 'storage account set -g travistestresourcegroup -n teststorageaccount02 --tags foo=bar;cat'
+        },
+        {
+            'test_name': 'storage_account_set_type',
+            'command': 'storage account set -g travistestresourcegroup -n teststorageaccount02 --type Standard_GRS'
+        },
+        {
+            'test_name': 'storage_account_delete',
+            'command': 'storage account delete -g travistestresourcegroup --account-name teststorageaccount01'
+        },
+        # STORAGE CONTAINER TESTS
+        {
+            'test_name': 'storage_container_list',
+            'command': 'storage container list'
+        },
+        {
+            'test_name': 'storage_container_create',
+            'command': 'storage container create --container-name testcontainer01 --fail-on-exist'
+        },
+        {
+            'test_name': 'storage_container_delete',
+            'command': 'storage container delete --container-name testcontainer01 --fail-not-exist'
+        },
+        {
+            'test_name': 'storage_container_exist',
+            'command': 'storage container exists --container-name testcontainer01'
+        },
+        {
+            'test_name': 'storage_container_show',
+            'command': 'storage container show --container-name testcontainer1234'
+        },
+        {
+            'test_name': 'storage_container_lease_acquire',
+            'command': 'storage container lease acquire --lease-duration 60 -c testcontainer1234 --if-unmodified-since {} --proposed-lease-id {}'
+                .format('2016-04-01_12:00:00', PROPOSED_LEASE_ID)
+        },
+        {
+            'test_name': 'storage_container_lease_renew',
+            'command': 'storage container lease renew --container-name testcontainer1234 --lease-id {}'
+                .format(PROPOSED_LEASE_ID)
+        },
+        {
+            'test_name': 'storage_container_lease_change',
+            'command': 'storage container lease change --container-name testcontainer1234 --lease-id {} --proposed-lease-id {}'
+                .format(PROPOSED_LEASE_ID, CHANGED_LEASE_ID)
+        },
+        {
+            'test_name': 'storage_container_lease_break',
+            'command': 'storage container lease break --container-name testcontainer1234 --lease-break-period 30'
+        },
+        {
+            'test_name': 'storage_container_lease_release',
+            'command': 'storage container lease release --container-name testcontainer1234 --lease-id {}'
+                .format(CHANGED_LEASE_ID)
+        },
+        # STORAGE BLOB TESTS
+        {
+            'test_name': 'storage_blob_upload_block_blob',
+            'command': 'storage blob upload-block-blob -b testblob1 -c testcontainer1234 --upload-from {}'
+                .format(os.path.join(CLI_ROOT_DIR, 'README.rst'))
+        },
+        {
+            'test_name': 'storage_blob_download',
+            'command': 'storage blob download -b testblob1 -c testcontainer1234 --download-to {}'
+                .format(os.path.join(CLI_ROOT_DIR, 'test.rst'))
+        },
+        {
+            'test_name': 'storage_blob_exists',
+            'command': 'storage blob exists -b testblob1 -c testcontainer1234'
+        },
+        {
+            'test_name': 'storage_blob_list',
+            'command': 'storage blob list --container-name testcontainer1234'
+        },
+        {
+            'test_name': 'storage_blob_show',
+            'command': 'storage blob show --container-name testcontainer1234 --blob-name testblob1'
+        },
+        {
+            'test_name': 'storage_blob_delete',
+            'command': 'storage blob delete --container-name testcontainer1234 --blob-name testblob1'
+        },
+        # STORAGE SHARE TESTS
+        {
+            'test_name': 'storage_share_list',
+            'command': 'storage share list'
+        },
+        {
+            'test_name': 'storage_share_create_simple',
+            'command': 'storage share create --share-name testshare02 --fail-on-exist'
+        },
+        {
+            'test_name': 'storage_share_create_with_metadata',
+            'command': 'storage share create --share-name testshare03 --fail-on-exist --metadata foo=bar;cat=hat'
+        },
+        {
+            'test_name': 'storage_share_exists',
+            'command': 'storage share exists --share-name testshare01'
+        },
+        {
+            'test_name': 'storage_share_contents',
+            'command': 'storage share contents --share-name testshare01'
+        },
+        {
+            'test_name': 'storage_share_contents_with_subdirectory',
+            'command': 'storage share contents --share-name testshare01 --directory-name testdir1'
+        },
+        {
+            'test_name': 'storage_share_delete',
+            'command': 'storage share delete --share-name testshare02 --fail-not-exist'
+        },
+        # STORAGE DIRECTORY TESTS
+        {
+            'test_name': 'storage_directory_exists',
+            'command': 'storage directory exists --share-name testshare01 --directory-name testdir1'
+        },
+        {
+            'test_name': 'storage_directory_create_simple',
+            'command': 'storage directory create --share-name testshare01 --directory-name tempdir01 --fail-on-exist'
+        },
+        {
+            'test_name': 'storage_directory_create_with_metadata',
+            'command': 'storage directory create --share-name testshare01 --directory-name tempdir02 --fail-on-exist --metadata foo=bar;cat=hat'
+        },
+        {
+            'test_name': 'storage_directory_delete',
+            'command': 'storage directory delete --share-name testshare01 --directory-name tempdir01 --fail-not-exist'
+        },
+        # STORAGE FILE TESTS
+        {
+            'test_name': 'storage_file_upload_simple',
+            'command': 'storage file upload --share-name testshare01 --local-file-name {} --file-name testfile01.rst'
+                .format(os.path.join(CLI_ROOT_DIR, 'README.rst'))
+        },
+        {
+            'test_name': 'storage_file_upload_with_subdir',
+            'command': 'storage file upload --share-name testshare01 --local-file-name {} --file-name testfile02.rst --directory-name testdir1'
+                .format(os.path.join(CLI_ROOT_DIR, 'README.rst'))
+        },
+        {
+            'test_name': 'storage_file_exists_simple',
+            'command': 'storage file exists --share-name testshare01 --file-name testfile01.rst'
+        },
+        {
+            'test_name': 'storage_file_exists_with_subdir',
+            'command': 'storage file exists --share-name testshare01 --directory-name testdir1 --file-name testfile02.rst'
+        },
+        {
+            'test_name': 'storage_file_download_simple',
+            'command': 'storage file download --share-name testshare01 --file-name testfile01.rst --local-file-name {}'
+                .format(os.path.join(CLI_ROOT_DIR, 'test.rst'))
+        },
+        {
+            'test_name': 'storage_file_download_with_subdir',
+            'command': 'storage file download --share-name testshare01 --directory-name testdir1 --file-name testfile02.rst --local-file-name {}'
+                .format(os.path.join(CLI_ROOT_DIR, 'test2.rst'))
+        },
+        {
+            'test_name': 'storage_file_delete_simple',
+            'command': 'storage file delete --share-name testshare01 --file-name testfile01.rst'
+        },
+        {
+            'test_name': 'storage_file_delete_with_subdir',
+            'command': 'storage file delete --share-name testshare01 --directory-name testdir1 --file-name testfile02.rst'
+        },
+    ],
+    env_variables = {
+        'AZURE_STORAGE_CONNECTION_STRING':('DefaultEndpointsProtocol=https;' +
+                                           'AccountName={};' +
+                                           'AccountKey=blahblah').format(STORAGE_ACCOUNT_NAME)
+    }
+)
