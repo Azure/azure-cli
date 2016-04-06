@@ -45,7 +45,7 @@ with open('README.rst', 'r', encoding='utf-8') as f:
     README = f.read()
 
 setup(
-    name='azure-cli-components',
+    name='azure-cli-component',
     version=VERSION,
     description='Microsoft Azure Command-Line Tools',
     long_description=README,
@@ -56,7 +56,7 @@ setup(
     classifiers=CLASSIFIERS,
     namespace_packages = ['azure.cli.command_modules'],
     packages=[
-        'azure.cli.command_modules.components',
+        'azure.cli.command_modules.component',
     ],
     install_requires=DEPENDENCIES,
 )
