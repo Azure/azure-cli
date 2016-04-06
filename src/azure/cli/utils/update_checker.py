@@ -6,7 +6,8 @@ import pip
 from pip import get_installed_distributions
 from pip._vendor.packaging import version as packaging_version
 
-PRIVATE_PYPI_URL = os.environ.get('AZURE_CLI_PRIVATE_PYPI_URL')
+PRIVATE_PYPI_URL_ENV_NAME = 'AZURE_CLI_PRIVATE_PYPI_URL'
+PRIVATE_PYPI_URL = os.environ.get(PRIVATE_PYPI_URL_ENV_NAME)
 
 class UpdateCheckError(Exception):
     '''Raised when there is an error attempting to check for update(s)
@@ -15,6 +16,8 @@ class UpdateCheckError(Exception):
 
 def _get_latest_version_private(pkg_name):
     """Check for an update to the component from project private PyPI server"""
+    if not PRIVATE_PYPI_URL:
+        raise UpdateCheckError('{} environment variable not set.'.format(PRIVATE_PYPI_URL_ENV_NAME))
     response = requests.get(PRIVATE_PYPI_URL + '/simple/' + pkg_name)
     if response.status_code != 200:
         raise UpdateCheckError('Private PyPI returned status code {}.'.format(response.status_code))
