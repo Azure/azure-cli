@@ -6,7 +6,9 @@ RESOURCE_GROUP_NAME = 'travistestresourcegroup'
 STORAGE_ACCOUNT_NAME = 'travistestresourcegr3014'
 PROPOSED_LEASE_ID = 'abcdabcd-abcd-abcd-abcd-abcdabcdabcd'
 CHANGED_LEASE_ID = 'dcbadcba-dcba-dcba-dcba-dcbadcbadcba'
-CLI_ROOT_DIR = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
+# TODO: This breaks TravisCI but allows you to not put README.rst in the /src folder
+#CLI_ROOT_DIR = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
+CLI_ROOT_DIR = os.getcwd()
 
 load_test_definitions(
     package_name=locals()['__name__'],
