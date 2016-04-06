@@ -43,9 +43,11 @@ def _install_or_update(component_name, version, link, private, upgrade=False):
             pkg_index_options += ['--find-links', link]
         if private:
             if not PRIVATE_PYPI_URL:
-                raise RuntimeError('{} environment variable not set.'.format(PRIVATE_PYPI_URL_ENV_NAME))
+                raise RuntimeError('{} environment variable not set.'
+                                   .format(PRIVATE_PYPI_URL_ENV_NAME))
             if not PRIVATE_PYPI_HOST:
-                raise RuntimeError('{} environment variable not set.'.format(PRIVATE_PYPI_HOST_ENV_NAME))
+                raise RuntimeError('{} environment variable not set.'
+                                   .format(PRIVATE_PYPI_HOST_ENV_NAME))
             pkg_index_options += ['--extra-index-url', PRIVATE_PYPI_URL,
                                   '--trusted-host', PRIVATE_PYPI_HOST]
         pip.main(['install'] + options + [COMPONENT_PREFIX + component_name+version_no]
@@ -85,9 +87,11 @@ def update_self(args):
     pkg_index_options = []
     if args.get('private'):
         if not PRIVATE_PYPI_URL:
-            raise RuntimeError('{} environment variable not set.'.format(PRIVATE_PYPI_URL_ENV_NAME))
+            raise RuntimeError('{} environment variable not set.'
+                               .format(PRIVATE_PYPI_URL_ENV_NAME))
         if not PRIVATE_PYPI_HOST:
-            raise RuntimeError('{} environment variable not set.'.format(PRIVATE_PYPI_HOST_ENV_NAME))
+            raise RuntimeError('{} environment variable not set.'
+                               .format(PRIVATE_PYPI_HOST_ENV_NAME))
         pkg_index_options += ['--extra-index-url', PRIVATE_PYPI_URL,
                               '--trusted-host', PRIVATE_PYPI_HOST]
     pip.main(['install', '--quiet', '--isolated', '--disable-pip-version-check', '--upgrade']
