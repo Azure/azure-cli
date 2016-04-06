@@ -16,10 +16,15 @@
 #--------------------------------------------------------------------------
 
 from __future__ import print_function
+import os
 from codecs import open
 from setuptools import setup
 
-VERSION = '0.0.1'
+VERSION = '0.0.20'
+INSTALL_FROM_PUBLIC = False
+
+PRIVATE_PYPI_URL = os.environ.get('AZURE_CLI_PRIVATE_PYPI_URL')
+PRIVATE_PYPI_HOST = os.environ.get('AZURE_CLI_PRIVATE_PYPI_HOST')
 
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
@@ -60,12 +65,34 @@ DEPENDENCIES = [
     'argcomplete',
     'azure==2.0.0rc1',
     'jmespath',
+    'msrest',
+    'pip',
     'pyyaml',
     'six',
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
     README = f.read()
+
+from setuptools.command.install import install
+import pip
+def _post_install(dir):
+    from subprocess import check_call
+    if INSTALL_FROM_PUBLIC:
+        pip.main(['install', 'azure-cli-component', '--disable-pip-version-check'])
+        check_call(['az', 'component', 'install', '-n', 'profile'])
+    else:
+        # use private PyPI server.
+        pip.main(['install', 'azure-cli-component', '--extra-index-url',
+                PRIVATE_PYPI_URL, '--trusted-host', PRIVATE_PYPI_HOST,
+                '--disable-pip-version-check'])
+        check_call(['az', 'component', 'install', '-n', 'profile', '-p'])
+
+class OnInstall(install):
+    def run(self):
+        install.run(self)
+        self.execute(_post_install, (self.install_lib,),
+                     msg="Running post install task")
 
 setup(
     name='azure-cli',
@@ -76,6 +103,7 @@ setup(
     author='Microsoft Corporation',
     author_email='azpycli@microsoft.com',
     url='https://github.com/Azure/azure-cli',
+    zip_safe=False,
     classifiers=CLASSIFIERS,
     scripts=[
         'az',
@@ -84,10 +112,18 @@ setup(
     ],
     package_dir = {'':'src'},
     packages=[
+        'azure',
         'azure.cli',
         'azure.cli.commands',
+        'azure.cli.command_modules',
         'azure.cli.extensions',
     ],
     package_data={'azure.cli': ['locale/**/*.txt']},
     install_requires=DEPENDENCIES,
+    extras_require={
+        "python_version < '3.4'": [
+            'enum34',
+        ],
+    },
+    cmdclass={'install': OnInstall},
 )

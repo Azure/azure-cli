@@ -1,19 +1,14 @@
-﻿from __future__ import print_function
+from __future__ import print_function
 import sys
 import time
+from importlib import import_module
 from collections import defaultdict, OrderedDict
+from pip import get_installed_distributions
 
-# TODO: Alternatively, simply scan the directory for all modules
-COMMAND_MODULES = [
-    'account',
-    'login',
-    'logout',
-    'network',
-    'resource',
-    'storage',
-    'taskhelp',
-    'vm',
-]
+# Find our command modules, they start with 'azure-cli-'
+INSTALLED_COMMAND_MODULES = [dist.key.replace('azure-cli-', '')
+                             for dist in get_installed_distributions(local_only=True)
+                             if dist.key.startswith('azure-cli-')]
 
 COMMON_PARAMETERS = {
     'resource_group_name': {
@@ -96,10 +91,7 @@ class CommandTable(defaultdict):
         return wrapper
 
 def _get_command_table(module_name):
-    module = __import__('azure.cli.commands.' + module_name)
-    for part in ('cli.commands.' + module_name).split('.'):
-        module = getattr(module, part)
-
+    module = import_module('azure.cli.command_modules.' + module_name)
     return module.command_table
 
 def get_command_table(module_name=None):
@@ -114,14 +106,13 @@ def get_command_table(module_name=None):
             command_table = _get_command_table(module_name)
             loaded = True
         except ImportError:
-            # Unknown command - we'll load all below
+            # Unknown command - we'll load all installed modules below
             pass
 
     if not loaded:
         command_table = {}
-        for mod in COMMAND_MODULES:
+        for mod in INSTALLED_COMMAND_MODULES:
             command_table.update(_get_command_table(mod))
-        loaded = True
 
     ordered_commands = OrderedDict(sorted(command_table.items(), key=lambda item: item[1]['name']))
     return ordered_commands
