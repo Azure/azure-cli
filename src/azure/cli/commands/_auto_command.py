@@ -38,14 +38,8 @@ def _make_func(client_factory, member_path, return_type_or_func, unbound_func):
         client = client_factory(args)
         ops_instance = _get_member(client, member_path)
 
-        # TODO: Remove this conversion code once internal key references are updated (#116797761)
-        converted_params = {}
-        for key in args.keys():
-            converted_key = key.replace('-', '_')
-            converted_params[converted_key] = args[key]
-
         try:
-            result = unbound_func(ops_instance, **converted_params)
+            result = unbound_func(ops_instance, **args)
             if not return_type_or_func:
                 return {}
             if callable(return_type_or_func):

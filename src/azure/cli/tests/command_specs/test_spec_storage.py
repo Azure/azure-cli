@@ -6,6 +6,7 @@ RESOURCE_GROUP_NAME = 'travistestresourcegroup'
 STORAGE_ACCOUNT_NAME = 'travistestresourcegr3014'
 PROPOSED_LEASE_ID = 'abcdabcd-abcd-abcd-abcd-abcdabcdabcd'
 CHANGED_LEASE_ID = 'dcbadcba-dcba-dcba-dcba-dcbadcbadcba'
+CLI_ROOT_DIR = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
 
 load_test_definitions(
     package_name=locals()['__name__'],
@@ -97,12 +98,12 @@ load_test_definitions(
         {
             'test_name': 'storage_blob_upload_block_blob',
             'command': 'storage blob upload-block-blob -b testblob1 -c testcontainer1234 --upload-from {}'
-                .format(os.path.join(os.getcwd(), 'README.rst'))
+                .format(os.path.join(CLI_ROOT_DIR, 'README.rst'))
         },
         {
             'test_name': 'storage_blob_download',
             'command': 'storage blob download -b testblob1 -c testcontainer1234 --download-to {}'
-                .format(os.path.join(os.getcwd(), 'test.rst'))
+                .format(os.path.join(CLI_ROOT_DIR, 'test.rst'))
         },
         {
             'test_name': 'storage_blob_exists',
@@ -121,8 +122,92 @@ load_test_definitions(
             'command': 'storage blob delete --container-name testcontainer1234 --blob-name testblob1'
         },
         # STORAGE SHARE TESTS
+        {
+            'test_name': 'storage_share_list',
+            'command': 'storage share list'
+        },
+        {
+            'test_name': 'storage_share_create_simple',
+            'command': 'storage share create --share-name testshare02 --fail-on-exist'
+        },
+        # TODO: Switch to hand authored command or see if there's a way for autocommand to properly
+        # handle metadata.
+        #{
+        #    'test_name': 'storage_share_create_with_metadata',
+        #    'command': 'storage share create --share-name testshare03 --fail-on-exist --metadata foo=bar;cat=hat'
+        #},
+        {
+            'test_name': 'storage_share_exists',
+            'command': 'storage share exists --share-name testshare01'
+        },
+        {
+            'test_name': 'storage_share_contents',
+            'command': 'storage share contents --share-name testshare01'
+        },
+        {
+            'test_name': 'storage_share_contents_with_subdirectory',
+            'command': 'storage share contents --share-name testshare01 --directory-name testdir1'
+        },
+        {
+            'test_name': 'storage_share_delete',
+            'command': 'storage share delete --share-name testshare02 --fail-not-exist'
+        },
         # STORAGE DIRECTORY TESTS
-        # STORAGE FILE TESTS      
+        {
+            'test_name': 'storage_directory_exists',
+            'command': 'storage directory exists --share-name testshare01 --directory-name testdir1'
+        },
+        {
+            'test_name': 'storage_directory_create_simple',
+            'command': 'storage directory create --share-name testshare01 --directory-name tempdir01 --fail-on-exist'
+        },
+        # TODO: Make autocommand work with metadata or replace with hand authored command
+        #{
+        #    'test_name': 'storage_directory_create_with_metadata',
+        #    'command': 'storage directory create --share-name testshare01 --directory-name tempdir02 --fail-on-exist --metadata foo=bar;cat=hat'
+        #},
+        {
+            'test_name': 'storage_directory_delete',
+            'command': 'storage directory delete --share-name testshare01 --directory-name tempdir01 --fail-not-exist'
+        },
+        # STORAGE FILE TESTS
+        {
+            'test_name': 'storage_file_upload_simple',
+            'command': 'storage file upload --share-name testshare01 --local-file-name {} --file-name testfile01.rst'
+                .format(os.path.join(CLI_ROOT_DIR, 'README.rst'))
+        },
+        {
+            'test_name': 'storage_file_upload_with_subdir',
+            'command': 'storage file upload --share-name testshare01 --local-file-name {} --file-name testfile02.rst --directory-name testdir1'
+                .format(os.path.join(CLI_ROOT_DIR, 'README.rst'))
+        },
+        {
+            'test_name': 'storage_file_exists_simple',
+            'command': 'storage file exists --share-name testshare01 --file-name testfile01.rst'
+        },
+        {
+            'test_name': 'storage_file_exists_with_subdir',
+            'command': 'storage file exists --share-name testshare01 --directory-name testdir1 --file-name testfile02.rst'
+        },
+        {
+            'test_name': 'storage_file_download_simple',
+            'command': 'storage file download --share-name testshare01 --file-name testfile01.rst --local-file-name {}'
+                .format(os.path.join(CLI_ROOT_DIR, 'test.rst'))
+        },
+        {
+            'test_name': 'storage_file_download_with_subdir',
+            'command': 'storage file download --share-name testshare01 --directory-name testdir1 --file-name testfile02.rst --local-file-name {}'
+                .format(os.path.join(CLI_ROOT_DIR, 'test2.rst'))
+        },
+        # TODO: The --directory-name . should be removed when the SDK is updated.
+        {
+            'test_name': 'storage_file_delete_simple',
+            'command': 'storage file delete --share-name testshare01 --file-name testfile01.rst --directory-name .'
+        },
+        {
+            'test_name': 'storage_file_delete_with_subdir',
+            'command': 'storage file delete --share-name testshare01 --directory-name testdir1 --file-name testfile02.rst'
+        },
     ],
     env_variables = {
         'AZURE_STORAGE_CONNECTION_STRING':('DefaultEndpointsProtocol=https;' +
