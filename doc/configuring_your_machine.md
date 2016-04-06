@@ -37,9 +37,9 @@ Then:
   . <clone root>/env/bin/activate
   ```
 
-5.	Install the dependencies including the latest autorest generated Azure SDK.
+5.	Install the dependencies and load the command modules as local packages using pip.
   ```Shell
-  pip install -r requirements.txt
+  python scripts/dev_setup.py
   ```
 6.  Add `<clone root>\src` to your PYTHONPATH environment variable:
 
