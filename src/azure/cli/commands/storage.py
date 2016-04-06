@@ -8,7 +8,8 @@ from azure.storage.file import FileService
 from azure.mgmt.storage.models import AccountType
 from azure.mgmt.storage.operations import StorageAccountsOperations
 
-from ..commands import CommandTable, COMMON_PARAMETERS as GLOBAL_COMMON_PARAMETERS
+from ..commands import (CommandTable, LongRunningOperation,
+                        COMMON_PARAMETERS as GLOBAL_COMMON_PARAMETERS)
 from ._auto_command import AutoCommandDefinition
 from ._command_creation import get_mgmt_service_client, get_data_service_client
 from ..commands._auto_command import build_operation
@@ -128,12 +129,25 @@ COMMON_PARAMETERS.update({
         'type': _parse_datetime,
         'required': False,
     },
+    'metadata': {
+        'name': '--metadata',
+        'metavar': 'METADATA',
+        'type': _parse_key_value_pairs,
+        'help': L('metadata in "a=b;c=d" format')
+    },
     'optional_resource_group_name':
         extend_parameter(GLOBAL_COMMON_PARAMETERS['resource_group_name'], required=False),
     'share_name': {
         'name': '--share-name',
         'help': L('the name of the file share'),
         'required': True,
+    },
+    'tags' : {
+        'name': '--tags',
+        'metavar': 'TAGS',
+        'help': L('individual and/or key/value pair tags in "a=b;c" format'),
+        'required': False,
+        'type': _parse_tags
     },
     'timeout': {
         'name': '--timeout',
@@ -229,12 +243,10 @@ storage_account_types = {'Standard_LRS': AccountType.standard_lrs,
 @command_table.command('storage account create')
 @command_table.description(L('Create a storage account.'))
 @command_table.option(**COMMON_PARAMETERS['resource_group_name'])
-@command_table.option(**COMMON_PARAMETERS['account_name'])
+@command_table.option(**COMMON_PARAMETERS['account_name_required'])
 @command_table.option(**COMMON_PARAMETERS['location'])
 @command_table.option('--type', choices=storage_account_types.keys(), required=True)
-@command_table.option('--tags', type=_parse_tags,
-                      help=L('storage account tags. Tags are key=value pairs separated ' + \
-                      'with a semicolon(;)'))
+@command_table.option(**COMMON_PARAMETERS['tags'])
 def create_account(args):
     from azure.mgmt.storage.models import StorageAccountCreateParameters
     smc = _storage_client_factory()
@@ -245,18 +257,18 @@ def create_account(args):
     params = StorageAccountCreateParameters(args.get('location'),
                                             account_type,
                                             args.get('tags'))
-    return smc.storage_accounts.create(resource_group, account_name, params)
+
+    op = LongRunningOperation('Creating storage account', 'Storage account created')
+    poller = smc.storage_accounts.create(resource_group, account_name, params)
+    return op(poller)
 
 @command_table.command('storage account set')
 @command_table.description(L('Update storage account property (only one at a time).'))
 @command_table.option(**COMMON_PARAMETERS['resource_group_name'])
-@command_table.option(**COMMON_PARAMETERS['account_name'])
+@command_table.option(**COMMON_PARAMETERS['account_name_required'])
 @command_table.option('--type',
-                      choices=storage_account_types.keys(),
-                      type=lambda x: storage_account_types.get(x, ValueError))
-@command_table.option('--tags', type=_parse_tags,
-                      help=L('storage account tags. Tags are key=value pairs separated ' + \
-                      'with a semicolon(;)'))
+                      choices=storage_account_types.keys())
+@command_table.option(**COMMON_PARAMETERS['tags'])
 @command_table.option('--custom-domain', help=L('the custom domain name'))
 @command_table.option('--subdomain', help=L('use indirect CNAME validation'))
 def set_account(args):
@@ -461,7 +473,11 @@ build_operation(
         AutoCommandDefinition(FileService.create_share, 'Boolean', 'create'),
         AutoCommandDefinition(FileService.delete_share, 'Boolean', 'delete')
     ],
-    command_table, None, STORAGE_DATA_CLIENT_ARGS)
+    command_table,
+    {
+        'metadata': COMMON_PARAMETERS['metadata']
+    },
+    STORAGE_DATA_CLIENT_ARGS)
 
 @command_table.command('storage share exists')
 @command_table.description(L('Check if a file share exists.'))
@@ -481,7 +497,11 @@ build_operation(
         AutoCommandDefinition(FileService.create_directory, 'Boolean', 'create'),
         AutoCommandDefinition(FileService.delete_directory, 'Boolean', 'delete')
     ],
-    command_table, None, STORAGE_DATA_CLIENT_ARGS)
+    command_table,
+    {
+        'metadata': COMMON_PARAMETERS['metadata']
+    },
+    STORAGE_DATA_CLIENT_ARGS)
 
 @command_table.command('storage directory exists')
 @command_table.description(L('Check if a directory exists.'))
