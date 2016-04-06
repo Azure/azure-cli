@@ -1,7 +1,7 @@
-from ..parser import IncorrectUsageError
-from ..commands import CommandTable, COMMON_PARAMETERS
-from ._command_creation import get_mgmt_service_client
-from .._locale import L
+from azure.cli.parser import IncorrectUsageError
+from azure.cli.commands import CommandTable, COMMON_PARAMETERS
+from azure.cli.commands._command_creation import get_mgmt_service_client
+from azure.cli._locale import L
 
 command_table = CommandTable()
 

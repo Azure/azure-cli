@@ -1,10 +1,14 @@
-from .._profile import Profile
-from ..commands import CommandTable
+from azure.cli._profile import Profile
+from azure.cli.commands import CommandTable
+from azure.cli._locale import L
 #TODO: update adal-python to support it
-#from .._debug import should_disable_connection_verify
-from .._locale import L
+#from azure.cli._debug import should_disable_connection_verify
+
+from .command_tables import COMMAND_TABLES
 
 command_table = CommandTable()
+
+COMMAND_TABLES.append(command_table)
 
 @command_table.command('login')
 @command_table.description(L('log in to an Azure subscription using Active Directory Organization Id')) # pylint: disable=line-too-long
