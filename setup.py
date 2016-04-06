@@ -60,6 +60,7 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
+    'adal==0.2.1', #from internal index server.
     'applicationinsights',
     'argcomplete',
     'azure==2.0.0rc1',
