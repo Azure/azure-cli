@@ -20,16 +20,15 @@ command_table = CommandTable()
 @command_table.command('component list')
 @command_table.description(L('List the installed components.'))
 def list_components(args): #pylint: disable=unused-argument
-    components = sorted(["%s (%s)" % (dist.key.replace(COMPONENT_PREFIX, ''), dist.version)
-                         for dist in pip.get_installed_distributions(local_only=True)
-                         if dist.key.startswith(COMPONENT_PREFIX)])
-    print('\n'.join(components))
+    return sorted([{'name': dist.key.replace(COMPONENT_PREFIX, ''), 'version': dist.version}
+                   for dist in pip.get_installed_distributions(local_only=True)
+                   if dist.key.startswith(COMPONENT_PREFIX)], key=lambda x: x['name'])
 
 def _install_or_update(component_name, version, link, private, upgrade=False):
     if not component_name:
         raise IncorrectUsageError(L('Specify a component name.'))
     found = bool([dist for dist in pip.get_installed_distributions(local_only=True)
-                  if dist.key == COMPONENT_PREFIX+component_name])
+                  if dist.key == COMPONENT_PREFIX + component_name])
     if found and not upgrade:
         raise RuntimeError("Component already installed.")
     else:

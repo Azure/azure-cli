@@ -7,6 +7,10 @@ from ._logging import configure_logging, logger
 from ._session import Session
 from ._output import OutputProducer
 
+#ACCOUNT contains subscriptions information
+# this file will be shared with azure-xplat-cli, which assumes ascii
+ACCOUNT = Session('ascii')
+
 # CONFIG provides external configuration options
 CONFIG = Session()
 
@@ -14,8 +18,12 @@ CONFIG = Session()
 SESSION = Session()
 
 def main(args, file=sys.stdout): #pylint: disable=redefined-builtin
-    CONFIG.load(os.path.expanduser('~/az.json'))
-    SESSION.load(os.path.expanduser('~/az.sess'), max_age=3600)
+    azure_folder = os.path.expanduser('~/.azure')
+    if not os.path.exists(azure_folder):
+        os.makedirs(azure_folder)
+    ACCOUNT.load(os.path.join(azure_folder, 'azureProfile.json'))
+    CONFIG.load(os.path.join(azure_folder, 'az.json'))
+    SESSION.load(os.path.join(azure_folder, 'az.sess'), max_age=3600)
 
     configure_logging(args, CONFIG)
 

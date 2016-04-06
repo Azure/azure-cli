@@ -60,6 +60,7 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
+    'adal==0.2.1', #from internal index server.
     'applicationinsights',
     'argcomplete',
     'azure==2.0.0rc1',
@@ -81,15 +82,15 @@ def _post_install(dir):
     # Upgrade/update will install if it doesn't exist.
     # We do this so these components are updated when the user updates the CLI.
     if INSTALL_FROM_PUBLIC:
-        pip.main(['install', '--upgrade', 'azure-cli-components', '--disable-pip-version-check'])
-        check_call(['az', 'components', 'update', '-n', 'profile', '--disable-version-check'])
+        pip.main(['install', '--upgrade', 'azure-cli-component', '--disable-pip-version-check'])
+        check_call(['az', 'component', 'update', '-n', 'profile'])
     else:
         
         # use private PyPI server.
-        pip.main(['install', '--upgrade', 'azure-cli-components', '--extra-index-url',
+        pip.main(['install', '--upgrade', 'azure-cli-component', '--extra-index-url',
                 PRIVATE_PYPI_URL, '--trusted-host', PRIVATE_PYPI_HOST,
                 '--disable-pip-version-check'])
-        check_call(['az', 'components', 'update', '-n', 'profile', '-p', '--disable-version-check'])
+        check_call(['az', 'component', 'update', '-n', 'profile', '-p'])
 
 class OnInstall(install):
     def run(self):

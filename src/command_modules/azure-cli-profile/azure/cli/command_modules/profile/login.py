@@ -1,13 +1,3 @@
-from __future__ import print_function
-
-from msrest.authentication import BasicTokenAuthentication
-from adal import (acquire_token_with_username_password,
-                  acquire_token_with_client_credentials,
-                  acquire_user_code,
-                  acquire_token_with_device_code)
-from azure.mgmt.resource.subscriptions import (SubscriptionClient,
-                                               SubscriptionClientConfiguration)
-
 from azure.cli._profile import Profile
 from azure.cli.commands import CommandTable
 from azure.cli._locale import L
@@ -27,12 +17,14 @@ COMMAND_TABLES.append(command_table)
 @command_table.option('--password -p',
                       help=L('user password or client secret, will prompt if not given.'))
 @command_table.option('--service-principal',
+                      action='store_true',
                       help=L('the credential represents a service principal.'))
 @command_table.option('--tenant -t', help=L('the tenant associated with the service principal.'))
 def login(args):
     interactive = False
 
     username = args.get('username')
+    password = None
     if username:
         password = args.get('password')
         if not password:
@@ -41,41 +33,14 @@ def login(args):
     else:
         interactive = True
 
+    is_service_principal = args.get('service-principal')
     tenant = args.get('tenant')
-    authority = _get_authority_url(tenant)
-    if interactive:
-        user_code = acquire_user_code(authority)
-        print(user_code['message'])
-        credentials = acquire_token_with_device_code(authority, user_code)
-        username = credentials['userId']
-    else:
-        if args.get('service-principal'):
-            if not tenant:
-                raise ValueError(L('Please supply tenant using "--tenant"'))
 
-            credentials = acquire_token_with_client_credentials(
-                authority,
-                username,
-                password)
-        else:
-            credentials = acquire_token_with_username_password(
-                authority,
-                username,
-                password)
-
-    token_credential = BasicTokenAuthentication({'access_token': credentials['accessToken']})
-    client = SubscriptionClient(SubscriptionClientConfiguration(token_credential))
-    subscriptions = client.subscriptions.list()
-
-    if not subscriptions:
-        raise RuntimeError(L('No subscriptions found for this account.'))
-
-    #keep useful properties and not json serializable
     profile = Profile()
-    consolidated = Profile.normalize_properties(username, subscriptions)
-    profile.set_subscriptions(consolidated, credentials['accessToken'])
-
+    subscriptions = profile.find_subscriptions_on_login(
+        interactive,
+        username,
+        password,
+        is_service_principal,
+        tenant)
     return list(subscriptions)
-
-def _get_authority_url(tenant=None):
-    return 'https://login.microsoftonline.com/{}'.format(tenant or 'common')
