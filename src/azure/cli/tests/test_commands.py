@@ -59,11 +59,23 @@ my_vcr = vcr.VCR(
 class TestSequenceMeta(type):
 
     def __new__(mcs, name, bases, dict):
-
+    
         def gen_test(test_name, command, expected_result):
-
+        
             def load_subscriptions_mock(self):
-                return [{"id": "00000000-0000-0000-0000-000000000000", "user": "example@example.com", "access_token": "access_token", "state": "Enabled", "name": "Example", "active": True}];
+                return [{
+                    "id": "00000000-0000-0000-0000-000000000000", 
+                    "user": {
+                        "name": "example@example.com", 
+                        "type": "user"
+                        },
+                    "state": "Enabled", 
+                    "name": "Example", 
+                    "tenantId": "123",
+                    "isDefault": True}]
+
+            def get_user_access_token_mock(_, _1, _2):
+                return 'top-secret-token-for-you'
 
             def _test_impl(self, expected_result):
                 """ Test implementation, augmented with prompted recording of expected result
@@ -105,7 +117,8 @@ class TestSequenceMeta(type):
 
             if cassette_found and expected_result != None:
                 # playback mode - can be fully automated
-                @mock.patch('azure.cli._profile.Profile.load_subscriptions', load_subscriptions_mock)
+                @mock.patch('azure.cli._profile.Profile.load_cached_subscriptions', load_subscriptions_mock)
+                @mock.patch('azure.cli._profile.CredsCache.retrieve_token_for_user',get_user_access_token_mock)
                 @my_vcr.use_cassette(cassette_path, filter_headers=FILTER_HEADERS)
                 def test(self):
                     _test_impl(self, expected_result)
@@ -122,12 +135,12 @@ class TestSequenceMeta(type):
                 @my_vcr.use_cassette(cassette_path, filter_headers=FILTER_HEADERS)
                 def test(self):
                     _test_impl(self, expected_result)
-                return test
             else:
                 # yaml file failed to delete or bug exists
                 raise RuntimeError('Unable to generate test for {} due to inconsistent data. ' \
                     + 'Please manually remove the associated .yaml cassette and/or the test\'s ' \
                     + 'entry in expected_results.res and try again.')
+            return test
 
         try:
             with open(EXPECTED_RESULTS_PATH, 'r') as file:
@@ -139,7 +152,7 @@ class TestSequenceMeta(type):
             test_name = 'test_{}'.format(test_def['test_name'])
             command = test_def['command']
             expected_result = TEST_EXPECTED.get(test_path, None)
-
+            
             dict[test_name] = gen_test(test_path, command, expected_result)
         return type.__new__(mcs, name, bases, dict)
 
