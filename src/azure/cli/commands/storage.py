@@ -522,7 +522,7 @@ def exist_file(args):
 @command_table.option('--directory-name -d', help=L('the destination directory to upload to'))
 @command_table.option(**COMMON_PARAMETERS['account_name'])
 @command_table.option(**COMMON_PARAMETERS['account_key'])
-@command_table.option(**COMMON_PARAMETERS['container_name'])
+@command_table.option(**COMMON_PARAMETERS['connection_string'])
 def storage_file_upload(args):
     fsc = file_data_service_factory(args)
     fsc.create_file_from_path(args.get('share_name'),
