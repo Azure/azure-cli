@@ -18,17 +18,21 @@ from azure.mgmt.network.operations import (ApplicationGatewaysOperations,
                                            VirtualNetworkGatewaysOperations,
                                            VirtualNetworksOperations)
 
-from ._command_creation import network_client_factory
+from ._command_creation import get_mgmt_service_client
 from ..commands._auto_command import build_operation, AutoCommandDefinition
 from ..commands import CommandTable, LongRunningOperation
 
 command_table = CommandTable()
 
+def _network_client_factory(*args): # pylint: disable=unused-argument
+    from azure.mgmt.network import NetworkManagementClient, NetworkManagementClientConfiguration
+    return get_mgmt_service_client(NetworkManagementClient, NetworkManagementClientConfiguration)
+
 # pylint: disable=line-too-long
 # Application gateways
 build_operation("network appgateway",
                 "application_gateways",
-                network_client_factory,
+                _network_client_factory,
                 [
                     AutoCommandDefinition(ApplicationGatewaysOperations.delete, LongRunningOperation(L('Deleting application gateway'), L('Application gateway deleted'))),
                     AutoCommandDefinition(ApplicationGatewaysOperations.get, 'ApplicationGateway'),
@@ -42,7 +46,7 @@ build_operation("network appgateway",
 # ExpressRouteCircuitAuthorizationsOperations
 build_operation("network expressroutecircuitauth",
                 "express_route_circuit_authorizations",
-                network_client_factory,
+                _network_client_factory,
                 [
                     AutoCommandDefinition(ExpressRouteCircuitAuthorizationsOperations.delete, LongRunningOperation(L('Deleting express route authorization'), L('Express route authorization deleted'))),
                     AutoCommandDefinition(ExpressRouteCircuitAuthorizationsOperations.get, 'ExpressRouteCircuitAuthorization'),
@@ -53,7 +57,7 @@ build_operation("network expressroutecircuitauth",
 # ExpressRouteCircuitPeeringsOperations
 build_operation("network expressroutecircuitpeering",
                 "express_route_circuit_peerings",
-                network_client_factory,
+                _network_client_factory,
                 [
                     AutoCommandDefinition(ExpressRouteCircuitPeeringsOperations.delete, LongRunningOperation(L('Deleting express route circuit peering'), L('Express route circuit peering deleted'))),
                     AutoCommandDefinition(ExpressRouteCircuitPeeringsOperations.get, 'ExpressRouteCircuitPeering'),
@@ -64,7 +68,7 @@ build_operation("network expressroutecircuitpeering",
 # ExpressRouteCircuitsOperations
 build_operation("network expressroutecircuit",
                 "express_route_circuits",
-                network_client_factory,
+                _network_client_factory,
                 [
                     AutoCommandDefinition(ExpressRouteCircuitsOperations.delete, LongRunningOperation(L('Deleting express route circuit'), L('Express route circuit deleted'))),
                     AutoCommandDefinition(ExpressRouteCircuitsOperations.get, 'ExpressRouteCircuit'),
@@ -79,7 +83,7 @@ build_operation("network expressroutecircuit",
 # ExpressRouteServiceProvidersOperations
 build_operation("network expressroutesp",
                 "express_route_service_providers",
-                network_client_factory,
+                _network_client_factory,
                 [
                     AutoCommandDefinition(ExpressRouteServiceProvidersOperations.list, '[ExpressRouteServiceProvider]'),
                 ],
@@ -88,7 +92,7 @@ build_operation("network expressroutesp",
 # LoadBalancersOperations
 build_operation("network lb",
                 "load_balancers",
-                network_client_factory,
+                _network_client_factory,
                 [
                     AutoCommandDefinition(LoadBalancersOperations.delete, LongRunningOperation(L('Deleting load balancer'), L('Load balancer deleted'))),
                     AutoCommandDefinition(LoadBalancersOperations.get, 'LoadBalancer'),
@@ -100,7 +104,7 @@ build_operation("network lb",
 # LocalNetworkGatewaysOperations
 build_operation("network localgateways",
                 "local_network_gateways",
-                network_client_factory,
+                _network_client_factory,
                 [
                     AutoCommandDefinition(LocalNetworkGatewaysOperations.get, 'LocalNetworkGateway'),
                     AutoCommandDefinition(LocalNetworkGatewaysOperations.delete, LongRunningOperation(L('Deleting local network gateway'), L('Local network gateway deleted'))),
@@ -112,7 +116,7 @@ build_operation("network localgateways",
 # NetworkInterfacesOperations
 build_operation("network nic",
                 "network_interfaces",
-                network_client_factory,
+                _network_client_factory,
                 [
                     AutoCommandDefinition(NetworkInterfacesOperations.delete, LongRunningOperation(L('Deleting network interface'), L('Network interface deleted'))),
                     AutoCommandDefinition(NetworkInterfacesOperations.get, 'NetworkInterface'),
@@ -127,7 +131,7 @@ build_operation("network nic",
 # NetworkSecurityGroupsOperations
 build_operation("network securitygroup",
                 "network_security_groups",
-                network_client_factory,
+                _network_client_factory,
                 [
                     AutoCommandDefinition(NetworkSecurityGroupsOperations.delete, LongRunningOperation(L('Deleting network security group'), L('Network security group deleted'))),
                     AutoCommandDefinition(NetworkSecurityGroupsOperations.delete, 'NetworkSecurityGroup'),
@@ -139,7 +143,7 @@ build_operation("network securitygroup",
 # PublicIPAddressesOperations
 build_operation("network publicipaddress",
                 "public_ip_addresses",
-                network_client_factory,
+                _network_client_factory,
                 [
                     AutoCommandDefinition(PublicIPAddressesOperations.delete, LongRunningOperation(L('Deleting public IP address'), L('Public IP address deleted'))),
                     AutoCommandDefinition(PublicIPAddressesOperations.get, 'PublicIPAddress'),
@@ -151,7 +155,7 @@ build_operation("network publicipaddress",
 # RouteTablesOperations
 build_operation("network routetable",
                 "route_tables",
-                network_client_factory,
+                _network_client_factory,
                 [
                     AutoCommandDefinition(RouteTablesOperations.delete, LongRunningOperation(L('Deleting route table'), L('Route table deleted'))),
                     AutoCommandDefinition(RouteTablesOperations.get, 'RouteTable'),
@@ -163,7 +167,7 @@ build_operation("network routetable",
 # RoutesOperations
 build_operation("network routeoperation",
                 "routes",
-                network_client_factory,
+                _network_client_factory,
                 [
                     AutoCommandDefinition(RoutesOperations.delete, LongRunningOperation(L('Deleting route'), L('Route deleted'))),
                     AutoCommandDefinition(RoutesOperations.get, 'Route'),
@@ -174,7 +178,7 @@ build_operation("network routeoperation",
 # SecurityRulesOperations
 build_operation("network securityrules",
                 "security_rules",
-                network_client_factory,
+                _network_client_factory,
                 [
                     AutoCommandDefinition(SecurityRulesOperations.delete, LongRunningOperation(L('Deleting security rule'), L('Security rule deleted'))),
                     AutoCommandDefinition(SecurityRulesOperations.get, 'SecurityRule'),
@@ -185,7 +189,7 @@ build_operation("network securityrules",
 # SubnetsOperations
 build_operation("network subnet",
                 "subnets",
-                network_client_factory,
+                _network_client_factory,
                 [
                     AutoCommandDefinition(SubnetsOperations.delete, LongRunningOperation(L('Deleting subnet'), L('Subnet deleted'))),
                     AutoCommandDefinition(SubnetsOperations.get, 'Subnet'),
@@ -196,7 +200,7 @@ build_operation("network subnet",
 # UsagesOperations
 build_operation("network usage",
                 "usages",
-                network_client_factory,
+                _network_client_factory,
                 [
                     AutoCommandDefinition(UsagesOperations.list, '[Usage]'),
                 ],
@@ -205,7 +209,7 @@ build_operation("network usage",
 # VirtualNetworkGatewayConnectionsOperations
 build_operation("network vnetgatewayconnection",
                 "virtual_network_gateway_connections",
-                network_client_factory,
+                _network_client_factory,
                 [
                     AutoCommandDefinition(VirtualNetworkGatewayConnectionsOperations.delete, LongRunningOperation(L('Deleting virtual network gateway connection'), L('Virtual network gateway connection deleted'))),
                     AutoCommandDefinition(VirtualNetworkGatewayConnectionsOperations.get, 'VirtualNetworkGatewayConnection'),
@@ -219,7 +223,7 @@ build_operation("network vnetgatewayconnection",
 # VirtualNetworkGatewaysOperations
 build_operation("network vnetgateway",
                 "virtual_network_gateways",
-                network_client_factory,
+                _network_client_factory,
                 [
                     AutoCommandDefinition(VirtualNetworkGatewaysOperations.delete, LongRunningOperation(L('Deleting virtual network gateway'), L('Virtual network gateway deleted'))),
                     AutoCommandDefinition(VirtualNetworkGatewaysOperations.get, 'VirtualNetworkGateway'),
@@ -231,7 +235,7 @@ build_operation("network vnetgateway",
 # VirtualNetworksOperations
 build_operation("network vnet",
                 "virtual_networks",
-                network_client_factory,
+                _network_client_factory,
                 [
                     AutoCommandDefinition(VirtualNetworksOperations.delete, LongRunningOperation(L('Deleting virtual network'), L('Virtual network deleted'))),
                     AutoCommandDefinition(VirtualNetworksOperations.get, 'VirtualNetwork'),
@@ -261,7 +265,7 @@ def create_update_vnet(args):
                                    dhcp_options=dhcp_options)
 
     op = LongRunningOperation('Creating virtual network', 'Virtual network created')
-    smc = network_client_factory()
+    smc = _network_client_factory()
     poller = smc.virtual_networks.create_or_update(resource_group, name, vnet_settings)
     return op(poller)
 
@@ -283,6 +287,6 @@ def create_update_subnet(args):
                              address_prefix=address_prefix)
 
     op = LongRunningOperation('Creating subnet', 'Subnet created')
-    smc = network_client_factory()
+    smc = _network_client_factory()
     poller = smc.subnets.create_or_update(resource_group, vnet, name, subnet_settings)
     return op(poller)

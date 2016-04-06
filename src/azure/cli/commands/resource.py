@@ -1,9 +1,14 @@
 from ..parser import IncorrectUsageError
 from ..commands import CommandTable, COMMON_PARAMETERS
-from ._command_creation import resource_client_factory
+from ._command_creation import get_mgmt_service_client
 from .._locale import L
 
 command_table = CommandTable()
+
+def _resource_client_factory(*args): # pylint: disable=unused-argument
+    from azure.mgmt.resource.resources import (ResourceManagementClient,
+                                               ResourceManagementClientConfiguration)
+    return get_mgmt_service_client(ResourceManagementClient, ResourceManagementClientConfiguration)
 
 @command_table.command('resource group list', description=L('List resource groups'))
 @command_table.option('--tag-name -tn', help=L("the resource group's tag name"))
@@ -11,7 +16,7 @@ command_table = CommandTable()
 def list_groups(args):
     from azure.mgmt.resource.resources.models import ResourceGroup, ResourceGroupFilter
 
-    rmc = resource_client_factory(args)
+    rmc = _resource_client_factory(args)
 
     filters = []
     if args.get('tag_name'):
@@ -37,7 +42,7 @@ def list_groups(args):
                       help=L('the name of the parent resource (if needed), ' + \
                       'in <parent-type>/<parent-name> format'))
 def show_resource(args):
-    rmc = resource_client_factory(args)
+    rmc = _resource_client_factory(args)
 
     full_type = args.get('resource_type').split('/')
     try:
