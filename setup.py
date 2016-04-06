@@ -79,14 +79,14 @@ import pip
 def _post_install(dir):
     from subprocess import check_call
     if INSTALL_FROM_PUBLIC:
-        pip.main(['install', 'azure-cli-components', '--disable-pip-version-check'])
-        check_call(['az', 'components', 'install', '-n', 'profile'])
+        pip.main(['install', 'azure-cli-component', '--disable-pip-version-check'])
+        check_call(['az', 'component', 'install', '-n', 'profile'])
     else:
         # use private PyPI server.
-        pip.main(['install', 'azure-cli-components', '--extra-index-url',
+        pip.main(['install', 'azure-cli-component', '--extra-index-url',
                 PRIVATE_PYPI_URL, '--trusted-host', PRIVATE_PYPI_HOST,
                 '--disable-pip-version-check'])
-        check_call(['az', 'components', 'install', '-n', 'profile', '-p'])
+        check_call(['az', 'component', 'install', '-n', 'profile', '-p'])
 
 class OnInstall(install):
     def run(self):
