@@ -421,7 +421,7 @@ def download_blob(args):
 @command_table.option('--snapshot', type=_parse_datetime,
                       help=L('UTC datetime value which specifies a snapshot'))
 @command_table.option(**COMMON_PARAMETERS['timeout'])
-def exists_container(args):
+def exists_blob(args):
     bbs = blob_data_service_factory(args)
     return str(bbs.exists(
         blob_name=args.get('blob_name'),
