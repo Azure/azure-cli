@@ -201,10 +201,9 @@ load_test_definitions(
             'command': 'storage file download --share-name testshare01 --directory-name testdir1 --file-name testfile02.rst --local-file-name {}'
                 .format(os.path.join(CLI_ROOT_DIR, 'test2.rst'))
         },
-        # TODO: The --directory-name . should be removed when the SDK is updated.
         {
             'test_name': 'storage_file_delete_simple',
-            'command': 'storage file delete --share-name testshare01 --file-name testfile01.rst --directory-name .'
+            'command': 'storage file delete --share-name testshare01 --file-name testfile01.rst'
         },
         {
             'test_name': 'storage_file_delete_with_subdir',
