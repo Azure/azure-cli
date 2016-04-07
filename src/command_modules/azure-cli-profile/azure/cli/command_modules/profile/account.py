@@ -2,6 +2,7 @@ from azure.cli._profile import Profile
 from azure.cli.commands import CommandTable
 from azure.cli._locale import L
 from .command_tables import COMMAND_TABLES
+from azure.cli._logging import logger
 
 command_table = CommandTable()
 
@@ -21,7 +22,8 @@ def list_subscriptions(_):
     """
     profile = Profile()
     subscriptions = profile.load_cached_subscriptions()
-
+    if not subscriptions:
+        logger.warning('Please run "az login" to access your accounts.')
     return subscriptions
 
 @command_table.command('account set')
