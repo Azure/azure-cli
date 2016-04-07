@@ -7,10 +7,15 @@ from azure.cli.parser import IncorrectUsageError
 from azure.cli.commands import CommandTable, COMMON_PARAMETERS
 from azure.cli._locale import L
 
+from azure.cli.utils.update_checker import check_for_component_update, UpdateCheckError
+
+CLI_PACKAGE_NAME = 'azure-cli'
 COMPONENT_PREFIX = 'azure-cli-'
 
-PRIVATE_PYPI_URL = os.environ.get('AZURE_CLI_PRIVATE_PYPI_URL')
-PRIVATE_PYPI_HOST = os.environ.get('AZURE_CLI_PRIVATE_PYPI_HOST')
+PRIVATE_PYPI_URL_ENV_NAME = 'AZURE_CLI_PRIVATE_PYPI_URL'
+PRIVATE_PYPI_URL = os.environ.get(PRIVATE_PYPI_URL_ENV_NAME)
+PRIVATE_PYPI_HOST_ENV_NAME = 'AZURE_CLI_PRIVATE_PYPI_HOST'
+PRIVATE_PYPI_HOST = os.environ.get(PRIVATE_PYPI_HOST_ENV_NAME)
 
 command_table = CommandTable()
 
@@ -37,6 +42,12 @@ def _install_or_update(component_name, version, link, private, upgrade=False):
         if link:
             pkg_index_options += ['--find-links', link]
         if private:
+            if not PRIVATE_PYPI_URL:
+                raise RuntimeError('{} environment variable not set.'
+                                   .format(PRIVATE_PYPI_URL_ENV_NAME))
+            if not PRIVATE_PYPI_HOST:
+                raise RuntimeError('{} environment variable not set.'
+                                   .format(PRIVATE_PYPI_HOST_ENV_NAME))
             pkg_index_options += ['--extra-index-url', PRIVATE_PYPI_URL,
                                   '--trusted-host', PRIVATE_PYPI_HOST]
         pip.main(['install'] + options + [COMPONENT_PREFIX + component_name+version_no]
@@ -68,6 +79,24 @@ archives in the directory listing."))
 def update_component(args):
     _install_or_update(args.get('name'), None, args.get('link'), args.get('private'), upgrade=True)
 
+@command_table.command('component update-self')
+@command_table.description(L('Update the CLI'))
+@command_table.option('--private -p', action='store_true',
+                      help=L('Get from the project private PyPI server'))
+def update_self(args):
+    pkg_index_options = []
+    if args.get('private'):
+        if not PRIVATE_PYPI_URL:
+            raise RuntimeError('{} environment variable not set.'
+                               .format(PRIVATE_PYPI_URL_ENV_NAME))
+        if not PRIVATE_PYPI_HOST:
+            raise RuntimeError('{} environment variable not set.'
+                               .format(PRIVATE_PYPI_HOST_ENV_NAME))
+        pkg_index_options += ['--extra-index-url', PRIVATE_PYPI_URL,
+                              '--trusted-host', PRIVATE_PYPI_HOST]
+    pip.main(['install', '--quiet', '--isolated', '--disable-pip-version-check', '--upgrade']
+             + [CLI_PACKAGE_NAME] + pkg_index_options)
+
 @command_table.command('component update-all')
 @command_table.description(L('Update all components'))
 @command_table.option('--link -l', help=L("If a url or path to an html file, then parse \
@@ -83,6 +112,25 @@ def update_all_components(args):
     for component_name in component_names:
         _install_or_update(component_name, None, args.get('link'),
                            args.get('private'), upgrade=True)
+
+@command_table.command('component check')
+@command_table.description(L('Check a component for an update'))
+@command_table.option('--name -n', help=L('Name of component to remove'), required=True)
+@command_table.option('--private -p', action='store_true',
+                      help=L('Look for updates from the project private PyPI server'))
+def check_component(args):
+    component_name = args.get('name')
+    private = args.get('private')
+    found = bool([dist for dist in pip.get_installed_distributions(local_only=True)
+                  if dist.key == COMPONENT_PREFIX+component_name])
+    if not found:
+        raise RuntimeError(L("Component not installed."))
+    update_status = check_for_component_update(component_name, private)
+    result = {}
+    result['currentVersion'] = str(update_status['current_version'])
+    result['latestVersion'] = str(update_status['latest_version'])
+    result['updateAvailable'] = update_status['update_available']
+    return result
 
 @command_table.command('component remove')
 @command_table.description(L('Remove a component'))
