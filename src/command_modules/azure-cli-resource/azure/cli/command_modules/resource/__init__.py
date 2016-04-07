@@ -36,7 +36,7 @@ def list_groups(args):
                       help=L('the resource type in format: <provider-namespace>/<type>'),
                       required=True)
 @command_table.option('--api-version -o', help=L('the API version of the resource provider'))
-@command_table.option('--parent',
+@command_table.option('--parent', default='',
                       help=L('the name of the parent resource (if needed), ' + \
                       'in <parent-type>/<parent-name> format'))
 def show_resource(args):
@@ -53,16 +53,13 @@ def show_resource(args):
         raise IncorrectUsageError(
             L('API version is required and could not be resolved for resource {}'
               .format(full_type)))
-
-    # TODO: Remove custom header when Python SDK fixed. (#116536429)
     results = rmc.resources.get(
-        resource_group_name=args.get('resource-group'),
+        resource_group_name=args.get('resourcegroup'),
         resource_name=args.get('name'),
         resource_provider_namespace=provider_namespace,
         resource_type=resource_type,
         api_version=api_version,
-        parent_resource_path=args.get('parent', ''),
-        custom_headers={'Accept': 'application/json'}
+        parent_resource_path=args.get('parent', '')
     )
     return results
 
