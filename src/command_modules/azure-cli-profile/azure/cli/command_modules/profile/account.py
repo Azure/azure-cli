@@ -26,8 +26,11 @@ def list_subscriptions(_):
 
 @command_table.command('account set')
 @command_table.description(L('Set the current subscription'))
-@command_table.option('--subscription-id -n', metavar='SUBSCRIPTION_ID', dest='subscription_id',
-                      help=L('Subscription Id, unique name also works.'))
+@command_table.option('--subscription-name-or-id -n',
+                      metavar='SUBSCRIPTION_NAME_OR_ID',
+                      dest='subscription_name_or_id',
+                      help=L('Subscription Id, unique name also works.'),
+                      required=True)
 def set_active_subscription(args):
     """
     type: command
@@ -40,9 +43,9 @@ def set_active_subscription(args):
         - name: foo example
           text: example details
     """
-    subscription_id = args.get('subscription-id')
+    subscription_name_or_id = args.get('subscription-name-or-id')
     if not id:
         raise ValueError(L('Please provide subscription id or unique name.'))
 
     profile = Profile()
-    profile.set_active_subscription(subscription_id)
+    profile.set_active_subscription(subscription_name_or_id)
