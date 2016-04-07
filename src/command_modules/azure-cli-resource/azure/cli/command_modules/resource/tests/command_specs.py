@@ -1,11 +1,11 @@
-from . import TEST_DEF, load_test_definitions
+# AZURE CLI RESOURCE TEST DEFINITIONS
 
-load_test_definitions(
-    package_name=locals()['__name__'],
-    definition = [
-        {
-            'test_name': 'resource_group_list',
-            'command': 'resource group list --output json'
-        }
-    ]
-)
+ENV_VAR = {}
+
+TEST_DEF = [
+    {
+        'test_name': 'resource_group_list',
+        'command': 'resource group list --output json'
+    }
+]
+

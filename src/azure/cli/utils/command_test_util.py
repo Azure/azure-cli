@@ -32,7 +32,6 @@ class CommandTestGenerator(object):
 
     def __init__(self, vcr_cassette_dir, test_def, env_var=None):
         self.test_def = test_def
-        self.expected_results_path = os.path.join(vcr_cassette_dir, 'expected_results.res')
         self.vcr_cassette_dir = vcr_cassette_dir
         logging.basicConfig()
         logging.getLogger('vcr').setLevel(logging.ERROR)
@@ -49,9 +48,7 @@ class CommandTestGenerator(object):
 
     def generate_tests(self):
 
-        test_functions = {}
-
-        def gen_test(test_path, command):
+        def gen_test(test_name, command):
 
             def load_subscriptions_mock(self): #pylint: disable=unused-argument
                 return [{
@@ -68,15 +65,15 @@ class CommandTestGenerator(object):
             def get_user_access_token_mock(_, _1, _2): #pylint: disable=unused-argument
                 return 'top-secret-token-for-you'
 
-            def _test_impl(self, expected_result):
+            def _test_impl(self, expected, expected_results, expected_results_path):
                 """ Test implementation, augmented with prompted recording of expected result
                 if not provided. """
                 io = StringIO()
 
                 cli(command.split(), file=io)
                 actual_result = io.getvalue()
-                if expected_result is None:
-                    header = '| RECORDED RESULT FOR {} |'.format(test_path)
+                if expected is None:
+                    header = '| RECORDED RESULT FOR {} |'.format(test_name)
                     print('-' * len(header), file=sys.stderr)
                     print(header, file=sys.stderr)
                     print('-' * len(header) + '\n', file=sys.stderr)
@@ -84,29 +81,39 @@ class CommandTestGenerator(object):
                     ans = input('Save result for command: \'{}\'? [Y/n]: '.format(command))
                     if ans and ans.lower()[0] == 'y':
                         # update and save the expected_results.res file
-                        TEST_EXPECTED[test_path] = actual_result
-                        with open(self.expected_results_path, 'w') as file:
-                            json.dump(TEST_EXPECTED, file, indent=4, sort_keys=True)
-                        expected_result = actual_result
+                        expected_results[test_name] = actual_result
+                        expected = actual_result
                     else:
-                        # recorded result was wrong. Discard the result and the .yaml cassette
-                        expected_result = None
-                io.close()
-                self.assertEqual(actual_result, expected_result)
+                        # recorded result was wrong. Discard any existing result
+                        expected = None
+                        expected_results.pop(test_name, None)
 
-            expected_result = self.expected_results.get(test_path, None)
+                    # save changes to expected_results.res
+                    with open(expected_results_path, 'w') as file:
+                        json.dump(expected_results, file, indent=4, sort_keys=True)
+
+                io.close()
+                self.assertEqual(actual_result, expected)
+
+            expected_results_path = os.path.join(self.vcr_cassette_dir, 'expected_results.res')
+            try:
+                with open(expected_results_path, 'r') as file:
+                    expected_results = json.loads(file.read())
+            except EnvironmentError:
+                expected_results = {}
+            expected = expected_results.get(test_name, None)
 
             # if no yaml, any expected result is invalid and must be rerecorded
-            cassette_path = os.path.join(self.vcr_cassette_dir, '{}.yaml'.format(test_path))
+            cassette_path = os.path.join(self.vcr_cassette_dir, '{}.yaml'.format(test_name))
             cassette_found = os.path.isfile(cassette_path)
-            expected_result = None if not cassette_found else expected_result
+            expected = None if not cassette_found else expected
 
             # if no expected result, yaml file should be discarded and rerecorded
-            if cassette_found and expected_result is None:
+            if cassette_found and expected is None:
                 os.remove(cassette_path)
                 cassette_found = os.path.isfile(cassette_path)
 
-            if cassette_found and expected_result is not None:
+            if cassette_found and expected is not None:
                 # playback mode - can be fully automated
                 @mock.patch('azure.cli._profile.Profile.load_cached_subscriptions',
                             load_subscriptions_mock)
@@ -115,21 +122,21 @@ class CommandTestGenerator(object):
                 @self.my_vcr.use_cassette(cassette_path,
                                           filter_headers=CommandTestGenerator.FILTER_HEADERS)
                 def test(self):
-                    _test_impl(self, expected_result)
+                    _test_impl(self, expected, expected_results, expected_results_path)
                 return test
-            elif not cassette_found and expected_result is None:
+            elif not cassette_found and expected is None:
                 # recording needed
                 # if buffer specified and recording needed, automatically fail
                 is_buffered = list(set(['--buffer']) & set(sys.argv))
                 if is_buffered:
                     def null_test(self):
-                        self.fail('No recorded result provided for {}.'.format(test_path))
+                        self.fail('No recorded result provided for {}.'.format(test_name))
                     return null_test
 
                 @self.my_vcr.use_cassette(cassette_path,
                                           filter_headers=CommandTestGenerator.FILTER_HEADERS)
                 def test(self):
-                    _test_impl(self, expected_result)
+                    _test_impl(self, expected, expected_results, expected_results_path)
             else:
                 # yaml file failed to delete or bug exists
                 raise RuntimeError('Unable to generate test for {} due to inconsistent data. ' \
@@ -137,17 +144,11 @@ class CommandTestGenerator(object):
                     + 'entry in expected_results.res and try again.')
             return test
 
-        try:
-            with open(self.expected_results_path, 'r') as file:
-                self.expected_results = json.loads(file.read())
-        except EnvironmentError:
-            self.expected_results = {}
-        
-        print('EXPECTED RESULTS: {}'.format(self.expected_results))
-        for test_path, test_def in self.test_def:
+        test_functions = {}
+        for test_def in self.test_def:
             test_name = 'test_{}'.format(test_def['test_name'])
             command = test_def['command']
-            test_functions[test_name] = gen_test(test_path, command)
+            test_functions[test_name] = gen_test(test_name, command)
         return test_functions
 
     @staticmethod
