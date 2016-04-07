@@ -17,7 +17,8 @@ for name, fullpath in all_command_modules:
         skipped_modules.append(name)
         continue
     print(path_to_module)
-    success = exec_command("python -m unittest discover -s " + path_to_module + " --buffer")
+    success = exec_command("python -m unittest discover -s " + path_to_module)
+    #success = exec_command("python -m unittest discover -s " + path_to_module + " --buffer")
     if not success:
         failed_module_names.append(name)
 
