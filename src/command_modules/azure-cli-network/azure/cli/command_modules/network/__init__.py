@@ -255,11 +255,11 @@ build_operation("network vnet",
 def create_update_vnet(args):
     from azure.mgmt.network.models import AddressSpace, DhcpOptions, VirtualNetwork
 
-    resource_group = args.get('resource-group')
+    resource_group = args.get('resource_group')
     name = args.get('name')
     location = args.get('location')
-    address_space = AddressSpace(address_prefixes=args.get('address-space').split())
-    dhcp_options = DhcpOptions(dns_servers=args.get('dns-servers').split())
+    address_space = AddressSpace(address_prefixes=args.get('address_space').split())
+    dhcp_options = DhcpOptions(dns_servers=args.get('dns_servers').split())
 
     vnet_settings = VirtualNetwork(location=location,
                                    address_space=address_space,
@@ -279,10 +279,10 @@ def create_update_vnet(args):
 def create_update_subnet(args):
     from azure.mgmt.network.models import Subnet
 
-    resource_group = args.get('resource-group')
+    resource_group = args.get('resource_group')
     vnet = args.get('vnet')
     name = args.get('name')
-    address_prefix = args.get('address-prefix')
+    address_prefix = args.get('address_prefix')
 
     subnet_settings = Subnet(name=name,
                              address_prefix=address_prefix)
