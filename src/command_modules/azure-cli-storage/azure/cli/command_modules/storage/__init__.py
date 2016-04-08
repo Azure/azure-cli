@@ -10,7 +10,7 @@ from azure.mgmt.storage.models import AccountType
 from azure.mgmt.storage.operations import StorageAccountsOperations
 
 from azure.cli.commands import (CommandTable, LongRunningOperation,
-                        COMMON_PARAMETERS as GLOBAL_COMMON_PARAMETERS)
+                                COMMON_PARAMETERS as GLOBAL_COMMON_PARAMETERS)
 from azure.cli.commands._command_creation import get_mgmt_service_client, get_data_service_client
 from azure.cli.commands._auto_command import build_operation, AutoCommandDefinition
 from azure.cli._locale import L
@@ -20,7 +20,6 @@ command_table = CommandTable()
 # FACTORIES
 
 def _storage_client_factory(*args): # pylint: disable=unused-argument
-    from azure.mgmt.storage import StorageManagementClient, StorageManagementClientConfiguration
     return get_mgmt_service_client(StorageManagementClient, StorageManagementClientConfiguration)
 
 def _file_data_service_factory(*args):
