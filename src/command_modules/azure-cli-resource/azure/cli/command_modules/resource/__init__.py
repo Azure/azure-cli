@@ -6,8 +6,8 @@ from azure.cli._locale import L
 command_table = CommandTable()
 
 def _resource_client_factory(*args): # pylint: disable=unused-argument
-from azure.mgmt.resource.resources import (ResourceManagementClient,
-                                           ResourceManagementClientConfiguration)
+    from azure.mgmt.resource.resources import (ResourceManagementClient,
+                                               ResourceManagementClientConfiguration)
     return get_mgmt_service_client(ResourceManagementClient, ResourceManagementClientConfiguration)
 
 @command_table.command('resource group list', description=L('List resource groups'))
@@ -67,13 +67,13 @@ def show_resource(args):
     return results
 
 def _resolve_api_version(args, rmc):
-    api_version = args.get('api_version')
+    api_version = args.get('api-version')
     if api_version:
         return api_version
 
     # if api-version not supplied, attempt to resolve using provider namespace
     parent = args.get('parent')
-    full_type = args.get('resource_type').split('/')
+    full_type = args.get('resource-type').split('/')
     try:
         provider_namespace = full_type[0]
         resource_type = full_type[1]
