@@ -18,23 +18,23 @@ ENV_VAR = {
 
 TEST_DEF = [
     # STORAGE ACCOUNT TESTS
-    #{
-    #    'test_name': 'storage_account_check_name',
-    #    'command': 'storage account check-name --name teststorageomega'
-    #},
-    #{
-    #    'test_name': 'storage_account_list',
-    #    'command': 'storage account list'
-    #},
-    #{
-    #    'test_name': 'storage_account_show',
-    #    'command': 'storage account show --resourcegroup {} --account-name {}'
-    #        .format(RESOURCE_GROUP_NAME, STORAGE_ACCOUNT_NAME)
-    #},
-    #{
-    #    'test_name': 'storage_account_usage',
-    #    'command': 'storage account usage',
-    #},
+    {
+        'test_name': 'storage_account_check_name',
+        'command': 'storage account check-name --name teststorageomega'
+    },
+    {
+        'test_name': 'storage_account_list',
+        'command': 'storage account list'
+    },
+    {
+        'test_name': 'storage_account_show',
+        'command': 'storage account show --resourcegroup {} --account-name {}'
+            .format(RESOURCE_GROUP_NAME, STORAGE_ACCOUNT_NAME)
+    },
+    {
+        'test_name': 'storage_account_usage',
+        'command': 'storage account usage',
+    },
     #{
     #    'test_name': 'storage_account_connection_string',
     #    'command': 'storage account connection-string -g {} --account-name {} --use-http'
@@ -52,7 +52,7 @@ TEST_DEF = [
     #},
     #{
     #    'test_name': 'storage_account_renew_keys_one',
-    #    'command': 'storage account renew-keys -g {} --account-name {} --key key1'
+    #    'command': 'storage account renew-keys -g {} --account-name {} --key key2'
     #        .format(RESOURCE_GROUP_NAME, STORAGE_ACCOUNT_NAME)
     #},
     ## TODO: This plays back at essentially the same speed as the actual command.
