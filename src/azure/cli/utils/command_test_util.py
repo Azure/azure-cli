@@ -11,6 +11,7 @@ except ImportError:
     import mock
 
 from six import StringIO
+from six.moves import input #pylint: disable=redefined-builtin
 import vcr
 
 from azure.cli.main import main as cli
@@ -68,8 +69,8 @@ class CommandTestGenerator(object):
             def _get_expected_results_from_file(recording_dir):
                 expected_results_path = os.path.join(recording_dir, 'expected_results.res')
                 try:
-                    with open(expected_results_path, 'r') as file:
-                        expected_results = json.loads(file.read())
+                    with open(expected_results_path, 'r') as f:
+                        expected_results = json.loads(f.read())
                 except EnvironmentError:
                     expected_results = {}
                 return expected_results
@@ -81,8 +82,8 @@ class CommandTestGenerator(object):
 
             def _save_expected_results_file(recording_dir, expected_results):
                 expected_results_path = os.path.join(recording_dir, 'expected_results.res')
-                with open(expected_results_path, 'w') as file:
-                    json.dump(expected_results, file, indent=4, sort_keys=True)            
+                with open(expected_results_path, 'w') as f:
+                    json.dump(expected_results, f, indent=4, sort_keys=True)
 
             def _test_impl(self, test_name, expected, recording_dir):
                 """ Test implementation, augmented with prompted recording of expected result
@@ -111,7 +112,7 @@ class CommandTestGenerator(object):
 
             expected_results = _get_expected_results_from_file(recording_dir)
             expected = expected_results.get(test_name, None)
-            
+
             # if no yaml, any expected result is invalid and must be rerecorded
             cassette_path = os.path.join(self.recording_dir, '{}.yaml'.format(test_name))
             cassette_found = os.path.isfile(cassette_path)
