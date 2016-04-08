@@ -326,15 +326,15 @@ class CredsCache(object):
         self.adal_token_cache = adal.TokenCache(json.dumps(real_token))
         return self.adal_token_cache
 
-    def save_service_principal_cred(self, client_id, secret, tenant):
+    def save_service_principal_cred(self, service_principal_id, secret, tenant):
         entry = {
-            _SERVICE_PRINCIPAL_ID: client_id,
+            _SERVICE_PRINCIPAL_ID: service_principal_id,
             _SERVICE_PRINCIPAL_TENANT: tenant,
             _ACCESS_TOKEN: secret
             }
 
         matched = [x for x in self._service_principal_creds
-                   if client_id == x[_SERVICE_PRINCIPAL_ID] and
+                   if service_principal_id == x[_SERVICE_PRINCIPAL_ID] and
                    tenant == x[_SERVICE_PRINCIPAL_TENANT]]
         state_changed = False
         if matched:
