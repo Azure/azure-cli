@@ -3,8 +3,21 @@ from __future__ import print_function
 import os
 import sys
 import fileinput
+import pip
+import imp
 
-from _common import get_all_command_modules, exec_command, print_summary
+from _common import get_all_command_modules, exec_command, print_summary, COMMAND_MODULE_PREFIX
+
+PRIVATE_PYPI_URL_ENV_NAME = 'AZURE_CLI_PRIVATE_PYPI_URL'
+PRIVATE_PYPI_URL = os.environ.get(PRIVATE_PYPI_URL_ENV_NAME)
+PRIVATE_PYPI_HOST_ENV_NAME = 'AZURE_CLI_PRIVATE_PYPI_HOST'
+PRIVATE_PYPI_HOST = os.environ.get(PRIVATE_PYPI_HOST_ENV_NAME)
+
+include_private_pypi = PRIVATE_PYPI_URL and PRIVATE_PYPI_HOST
+
+def print_heading(heading, file=None):
+    print('=' * len(heading), file=file)
+    print(heading + '\n', file=file)
 
 def set_version(path_to_setup):
     for i, line in enumerate(fileinput.input(path_to_setup, inplace=1)):
@@ -12,17 +25,19 @@ def set_version(path_to_setup):
 
 all_command_modules = get_all_command_modules()
 
-# Build the packages
+# STEP 1:: Build the packages
 
-print('Building CLI package...')
+print_heading('Building CLI package...')
 PATH_TO_CLI_PACKAGE = os.path.abspath(os.path.join(os.path.abspath(__file__), '..', '..', '..'))
+path_to_setup = PATH_TO_CLI_PACKAGE+'/setup.py'
+set_version(path_to_setup)
 success = exec_command('python setup.py sdist', cwd=PATH_TO_CLI_PACKAGE)
 if not success:
-    print('Error building CLI!', file=sys.stderr)
+    print_heading('Error building CLI!', file=sys.stderr)
     sys.exit(1)
-print('Built CLI package.')
+print_heading('Built CLI package.')
 
-print('Building command package(s)...')
+print_heading('Building command package(s)...')
 failed_module_names = []
 for name, fullpath in all_command_modules:
     path_to_setup = fullpath+'/setup.py'
@@ -34,51 +49,58 @@ for name, fullpath in all_command_modules:
         failed_module_names.append(name)
 
 if failed_module_names:
-    print('Error building command packages!', file=sys.stderr)
+    print_heading('Error building command packages!', file=sys.stderr)
     # exits script if there are failed modules
     print_summary(failed_module_names)
+print_heading('Built command package(s).')
 
-print('Built command package(s).')
+# STEP 2:: Install the packages
 
-
-## TODO Make dynamic
-success = exec_command('pip install http://40.112.211.51:8080/packages/adal-0.2.1.zip')
-if not success:
-    print('Error installing ADAL!', file=sys.stderr)
-    sys.exit(1)
-
-# Install the packages
-print('Installing CLI package...')
+print_heading('Installing CLI package...')
 cli_package_dir = os.path.join(PATH_TO_CLI_PACKAGE, 'dist')
-success = exec_command('pip install azure-cli --find-links file://{}'.format(cli_package_dir))
+cmd = 'pip install azure-cli --find-links file://{}'.format(cli_package_dir)
+cmd += ' --extra-index-url {} --trusted-host {}'.format(PRIVATE_PYPI_URL, PRIVATE_PYPI_HOST) if include_private_pypi else ''
+success = exec_command(cmd)
 if not success:
-    print('Error installing CLI!', file=sys.stderr)
+    print_heading('Error installing CLI!', file=sys.stderr)
     sys.exit(1)
-print('Installed CLI package.')
+print_heading('Installed CLI package.')
 
-print('Installing command package(s)...')
+print_heading('Installing command package(s)...')
 failed_module_names = []
 for name, fullpath in all_command_modules:
     package_dir = os.path.join(fullpath, 'dist')
-    success = exec_command('pip install {} --find-links file://{}'.format(name, package_dir))
+    cmd = 'pip install {} --find-links file://{}'.format(name, package_dir)
+    cmd += ' --extra-index-url {} --trusted-host {}'.format(PRIVATE_PYPI_URL, PRIVATE_PYPI_HOST) if include_private_pypi else ''
+    success = exec_command(cmd)
     if not success:
         failed_module_names.append(name)
 
 if failed_module_names:
-    print('Error installing command packages!', file=sys.stderr)
+    print_heading('Error installing command packages!', file=sys.stderr)
     # exits script if there are failed modules
     print_summary(failed_module_names)
 
-print('Installed command package(s).')
+print_heading('Installed command package(s).')
 
-# Validate the installation
+# STEP 3:: Validate the installation
 
+success = exec_command('az --help')
+if not success:
+    print_heading('Error running the CLI!', file=sys.stderr)
+    sys.exit(1)
 
+pip.utils.pkg_resources = imp.reload(pip.utils.pkg_resources)
+installed_command_modules = [dist.key for dist in pip.get_installed_distributions(local_only=True)
+                             if dist.key.startswith(COMMAND_MODULE_PREFIX)]
 
+print('Installed command modules', installed_command_modules)
 
-failed_module_names = []
-for name, fullpath in all_command_modules:
-    if not success:
-        failed_module_names.append(name)
+missing_modules = set([name for name, fullpath in all_command_modules]) - set(installed_command_modules)
 
-print_summary(failed_module_names)
+if missing_modules:
+    print_heading('Error: The following modules were not installed successfully', file=sys.stderr)
+    print(missing_modules, file=sys.stderr)
+    sys.exit(1)
+
+print_heading('OK')
