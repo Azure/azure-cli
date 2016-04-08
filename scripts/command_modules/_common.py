@@ -18,11 +18,11 @@ def get_all_command_modules():
     print([name for name, fullpath in all_command_modules])
     return all_command_modules
 
-def exec_command(command, stdout=None):
+def exec_command(command, cwd=None, stdout=None):
     '''Returns True in the command was executed successfully'''
     try:
         print(command)
-        check_call(command, stdout=stdout, shell=True)
+        check_call(command, stdout=stdout, cwd=cwd, shell=True)
         return True
     except CalledProcessError as err:
         print(err, file=sys.stderr)
