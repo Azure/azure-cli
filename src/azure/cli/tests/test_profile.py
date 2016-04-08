@@ -226,26 +226,181 @@ class Test_Profile(unittest.TestCase):
         self.assertEqual(mock_read_cred_file.call_count, 1)
         self.assertEqual(mock_persist_creds.call_count, 1)
 
-    def test_find_subscriptions_thru_username_password(self):
-        finder = SubscriptionFinder(lambda _,_2:AuthenticationContextStub(Test_Profile), 
+    @mock.patch('adal.AuthenticationContext', autospec=True)
+    def test_find_subscriptions_thru_username_password(self, mock_auth_context):
+        mock_auth_context.acquire_token_with_username_password.return_value = self.token_entry1
+        mock_auth_context.acquire_token.return_value = self.token_entry1
+        mock_arm_client = mock.MagicMock()
+        mock_arm_client.tenants.list.return_value = [TenantStub(self.tenant_id)]
+        mock_arm_client.subscriptions.list.return_value = [self.subscription1]
+        finder = SubscriptionFinder(lambda _,_2: mock_auth_context, 
                                     None,
-                                    lambda _: ArmClientStub(Test_Profile))
-        subs = finder.find_from_user_account('foo', 'bar')
-        self.assertEqual([self.subscription1], subs)
+                                    lambda _: mock_arm_client)
 
-    def test_find_through_interactive_flow(self):
-        finder = SubscriptionFinder(lambda _,_2:AuthenticationContextStub(Test_Profile), 
+        #action
+        subs = finder.find_from_user_account(self.user1, 'bar')
+
+        #assert
+        self.assertEqual([self.subscription1], subs)
+        mock_auth_context.acquire_token_with_username_password.assert_called_once_with(
+            'https://management.core.windows.net/', self.user1, 'bar', mock.ANY)
+        mock_auth_context.acquire_token.assert_called_once_with(
+            'https://management.core.windows.net/', self.user1, mock.ANY)
+
+    @mock.patch('adal.AuthenticationContext', autospec=True)
+    def test_find_subscriptions_through_interactive_flow(self, mock_auth_context):
+        test_nonsense_code = {'message':'magic code for you'}
+        mock_auth_context.acquire_user_code.return_value = test_nonsense_code
+        mock_auth_context.acquire_token_with_device_code.return_value = self.token_entry1
+        mock_arm_client = mock.MagicMock()
+        mock_arm_client.tenants.list.return_value = [TenantStub(self.tenant_id)]
+        mock_arm_client.subscriptions.list.return_value = [self.subscription1]
+        finder = SubscriptionFinder(lambda _,_2: mock_auth_context, 
                                     None,
-                                    lambda _: ArmClientStub(Test_Profile))
+                                    lambda _: mock_arm_client)
+        
+        #action
         subs = finder.find_through_interactive_flow()
+        
+        #assert
         self.assertEqual([self.subscription1], subs)
-
-    def test_find_from_service_principal_id(self):
-        finder = SubscriptionFinder(lambda _,_2:AuthenticationContextStub(Test_Profile), 
+        mock_auth_context.acquire_user_code.assert_called_once_with(
+            'https://management.core.windows.net/', mock.ANY)
+        mock_auth_context.acquire_token_with_device_code.assert_called_once_with(
+            'https://management.core.windows.net/', test_nonsense_code, mock.ANY)
+        mock_auth_context.acquire_token.assert_called_once_with(
+            'https://management.core.windows.net/', self.user1, mock.ANY)
+    
+    @mock.patch('adal.AuthenticationContext', autospec=True)
+    def test_find_subscriptions_from_service_principal_id(self, mock_auth_context):
+        mock_auth_context.acquire_token_with_client_credentials.return_value = self.token_entry1
+        mock_arm_client = mock.MagicMock()
+        mock_arm_client.subscriptions.list.return_value = [self.subscription1]
+        finder = SubscriptionFinder(lambda _,_2:mock_auth_context, 
                                     None,
-                                    lambda _: ArmClientStub(Test_Profile))
+                                    lambda _: mock_arm_client)
+        #action
         subs = finder.find_from_service_principal_id('my app', 'my secret', self.tenant_id)
+
+        #assert
         self.assertEqual([self.subscription1], subs)
+        mock_arm_client.tenants.list.assert_not_called()
+        mock_auth_context.acquire_token.assert_not_called()
+        mock_auth_context.acquire_token_with_client_credentials.assert_called_once_with(
+            'https://management.core.windows.net/', 'my app', 'my secret')
+
+    @mock.patch('azure.cli._profile._read_file_content', autospec=True)
+    def test_credscache_load_tokens_and_sp_creds(self, mock_read_file):
+        test_sp = {
+            "servicePrincipalId": "myapp",
+            "servicePrincipalTenant": "mytenant",
+            "accessToken": "Secret"
+        } 
+        mock_read_file.return_value = json.dumps([self.token_entry1, test_sp])
+
+        #action
+        creds_cache = CredsCache()
+
+        #assert
+        token_entries = [entry for _, entry in creds_cache.adal_token_cache.read_items()]
+        self.assertEqual(token_entries, [self.token_entry1])
+        self.assertEqual(creds_cache._service_principal_creds,[test_sp])
+
+    @mock.patch('azure.cli._profile._read_file_content', autospec=True)
+    @mock.patch('azure.cli._profile.codecs_open', autospec=True)
+    def test_credscache_add_new_sp_creds(self, mock_open_for_write, mock_read_file):
+        test_sp = {
+            "servicePrincipalId": "myapp",
+            "servicePrincipalTenant": "mytenant",
+            "accessToken": "Secret"
+        }
+        test_sp2 = {
+            "servicePrincipalId": "myapp2",
+            "servicePrincipalTenant": "mytenant2",
+            "accessToken": "Secret2"
+        }
+        mock_open_for_write.return_value = FileHandleStub()
+        mock_read_file.return_value = json.dumps([self.token_entry1, test_sp])
+        creds_cache = CredsCache()
+
+        #action
+        creds_cache.save_service_principal_cred(
+            test_sp2['servicePrincipalId'],
+            test_sp2['accessToken'],
+            test_sp2['servicePrincipalTenant'])
+
+        #assert
+        token_entries = [entry for _, entry in creds_cache.adal_token_cache.read_items()]
+        self.assertEqual(token_entries, [self.token_entry1])
+        self.assertEqual(creds_cache._service_principal_creds,[test_sp, test_sp2])
+        mock_open_for_write.assert_called_with(mock.ANY, 'w', encoding='ascii')
+
+    @mock.patch('azure.cli._profile._read_file_content', autospec=True)
+    @mock.patch('azure.cli._profile.codecs_open', autospec=True)
+    def test_credscache_remove_creds(self, mock_open_for_write, mock_read_file):
+        test_sp = {
+            "servicePrincipalId": "myapp",
+            "servicePrincipalTenant": "mytenant",
+            "accessToken": "Secret"
+        }
+        mock_open_for_write.return_value = FileHandleStub()
+        mock_read_file.return_value = json.dumps([self.token_entry1, test_sp])
+        creds_cache = CredsCache()
+        
+        #action #1, logout a user
+        creds_cache.remove_cached_creds(self.user1)
+        
+        #assert #1
+        token_entries = [entry for _, entry in creds_cache.adal_token_cache.read_items()]
+        self.assertEqual(token_entries, [])
+
+        #action #2 logout a service principal
+        creds_cache.remove_cached_creds('myapp')
+
+        #assert #2
+        self.assertEqual(creds_cache._service_principal_creds,[])
+
+        mock_open_for_write.assert_called_with(mock.ANY, 'w', encoding='ascii')
+        self.assertEqual(mock_open_for_write.call_count, 2)
+
+    @mock.patch('azure.cli._profile._read_file_content', autospec=True)
+    @mock.patch('azure.cli._profile.codecs_open', autospec=True)
+    @mock.patch('adal.AuthenticationContext', autospec=True)
+    def test_credscache_new_token_added_by_adal(self, mock_adal_auth_context, mock_open_for_write, mock_read_file):
+        token_entry2 = {
+            "accessToken": "new token",
+            "userId": self.user1
+        }
+        def acquire_token_side_effect(*args):
+            creds_cache.adal_token_cache.has_state_changed = True
+            return token_entry2
+        def get_auth_context(authority, **kwargs):
+            mock_adal_auth_context.cache = kwargs['cache']
+            return mock_adal_auth_context
+
+        mock_adal_auth_context.acquire_token.side_effect = acquire_token_side_effect
+        mock_open_for_write.return_value = FileHandleStub()
+        mock_read_file.return_value = json.dumps([self.token_entry1])
+        creds_cache = CredsCache(auth_ctx_factory=get_auth_context)
+        token = creds_cache.retrieve_token_for_user(self.user1, self.tenant_id)
+        
+        #action
+        mock_adal_auth_context.acquire_token.assert_called_once_with(
+             'https://management.core.windows.net/',
+             self.user1,
+             mock.ANY)
+
+        #assert
+        mock_open_for_write.assert_called_with(mock.ANY, 'w', encoding='ascii')
+        self.assertEqual(token, 'new token')
+
+class FileHandleStub:
+    def write(self, content):
+        pass
+    def __enter__(self):
+        return self
+    def __exit__(self, _2, _3, _4):
+        pass
 
 class SubscriptionStub:
     def __init__(self, id, display_name, state, tenant_id):
@@ -254,47 +409,9 @@ class SubscriptionStub:
        self.state = state
        self.tenant_id = tenant_id
 
-class AuthenticationContextStub:
-    def __init__(self, test_profile_cls, return_token1=True):
-        #we need to reference some pre-defined test artifacts in Test_Profile
-        self._test_profile_cls = test_profile_cls
-        if not return_token1:
-            raise ValueError('Please update to return other test tokens')
-
-    def acquire_token_with_username_password(self, _, _2, _3, _4):
-        return self._test_profile_cls.token_entry1
-
-    def acquire_token_with_device_code(self, _, _2, _3):
-        return self._test_profile_cls.token_entry1
-
-    def acquire_token_with_client_credentials(self, _, _2, _3):
-        return self._test_profile_cls.token_entry1
-
-    def acquire_token(self, _, _2, _3):
-        return self._test_profile_cls.token_entry1
-
-    def acquire_user_code(self, _, _2):
-        return {'message': 'secret code for you'}
-
-class ArmClientStub:
-    class TenantStub:
-        def __init__(self, tenant_id):
-            self.tenant_id = tenant_id
-
-    class OperationsStub:
-        def __init__(self, list_result):
-            self._list_result = list_result
-
-        def list(self):
-            return self._list_result
-
-    def __init__(self, test_profile_cls, use_tenant1_and_subscription1=True):
-        self._test_profile_cls = test_profile_cls
-        if use_tenant1_and_subscription1:
-            self.tenants = ArmClientStub.OperationsStub([ArmClientStub.TenantStub(test_profile_cls.tenant_id)])    
-            self.subscriptions = ArmClientStub.OperationsStub([test_profile_cls.subscription1])
-        else:
-            raise ValueError('Please update to return other test subscriptions')
+class TenantStub:
+    def __init__(self, tenant_id):
+        self.tenant_id = tenant_id
 
 if __name__ == '__main__':
     unittest.main()
