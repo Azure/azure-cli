@@ -22,19 +22,19 @@ command_table = CommandTable()
 def _storage_client_factory(*args): # pylint: disable=unused-argument
     return get_mgmt_service_client(StorageManagementClient, StorageManagementClientConfiguration)
 
-def _file_data_service_factory(*args):
+def _file_data_service_factory(args):
     return get_data_service_client(
         FileService,
-        args[0].pop('account_name', None),
-        args[0].pop('account_key', None),
-        args[0].pop('connection_string', None))
+        args.pop('account_name', None),
+        args.pop('account_key', None),
+        args.pop('connection_string', None))
 
-def _blob_data_service_factory(*args):
+def _blob_data_service_factory(args):
     return get_data_service_client(
         BlockBlobService,
-        args[0].pop('account_name', None),
-        args[0].pop('account_key', None),
-        args[0].pop('connection_string', None))
+        args.pop('account_name', None),
+        args.pop('account_key', None),
+        args.pop('connection_string', None))
 
 # HELPER METHODS
 
@@ -470,7 +470,9 @@ build_operation(
         AutoCommandDefinition(FileService.list_directories_and_files,
                               '[ShareContents]', 'contents'),
         AutoCommandDefinition(FileService.create_share, 'Boolean', 'create'),
-        AutoCommandDefinition(FileService.delete_share, 'Boolean', 'delete')
+        AutoCommandDefinition(FileService.delete_share, 'Boolean', 'delete'),
+        AutoCommandDefinition(FileService.get_share_metadata, 'Metadata', 'show-metadata'),
+        AutoCommandDefinition(FileService.set_share_metadata, None, 'set-metadata')
     ],
     command_table,
     {
@@ -494,7 +496,9 @@ build_operation(
     'storage directory', None, _file_data_service_factory,
     [
         AutoCommandDefinition(FileService.create_directory, 'Boolean', 'create'),
-        AutoCommandDefinition(FileService.delete_directory, 'Boolean', 'delete')
+        AutoCommandDefinition(FileService.delete_directory, 'Boolean', 'delete'),
+        AutoCommandDefinition(FileService.get_directory_metadata, 'Metadata', 'show-metadata'),
+        AutoCommandDefinition(FileService.set_directory_metadata, None, 'set-metadata')
     ],
     command_table,
     {
