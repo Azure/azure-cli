@@ -55,7 +55,7 @@ TEST_DEF = [
         'command': 'storage account renew-keys -g {} --account-name {} --key key2'
             .format(RESOURCE_GROUP_NAME, STORAGE_ACCOUNT_NAME)
     },
-    # TODO: This plays back at essentially the same speed as the actual command.
+    # TODO: Enable when item #117262541 is complete
     #{
     #    'test_name': 'storage_account_create',
     #    'command': 'storage account create --type Standard_LRS -l westus -g travistestresourcegroup --account-name teststorageaccount04'
