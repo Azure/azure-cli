@@ -44,7 +44,7 @@ class CommandTestGenerator(object):
         # use default environment variables if not currently set in the system
         env_var = env_var or {}
         for var in env_var.keys():
-            if not os.environ.get(var, None):
+            if not os.environ.get(var):
                 os.environ[var] = str(env_var[var])
 
     def generate_tests(self):
@@ -139,8 +139,7 @@ class CommandTestGenerator(object):
             elif not cassette_found and expected is None:
                 # recording needed
                 # if buffer specified and recording needed, automatically fail
-                is_buffered = list(set(['--buffer']) & set(sys.argv))
-                if is_buffered:
+                if '--buffer' in sys.argv:
                     def null_test(self):
                         self.fail('No recorded result provided for {}.'.format(test_name))
                     return null_test

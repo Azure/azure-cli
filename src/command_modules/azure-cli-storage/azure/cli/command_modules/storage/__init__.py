@@ -200,7 +200,7 @@ key_options = ['key1', 'key2']
 def renew_account_keys(args):
     smc = _storage_client_factory()
     keys_to_renew = args.get('key')
-    for key in keys_to_renew if isinstance(keys_to_renew, list) else [args.get('key')]:
+    for key in keys_to_renew if isinstance(keys_to_renew, list) else [keys_to_renew]:
         result = smc.storage_accounts.regenerate_key(
             resource_group_name=args.get('resourcegroup'),
             account_name=args.get('account_name'),

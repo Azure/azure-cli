@@ -22,7 +22,7 @@ TEST_DEF = [
 ]
 ```
 
-Simply add your new entries and run all tests. The test driver will automatically detect the new tests and run the command, show you the output, and query if it is correct. If so, it will save the HTTP recording into a YAML file, as well as the raw output into a dictionary called `expected_results.res`. When the test is replayed, as long at the test has an entry in `expected_results.res` and a corresponding .yaml file, the test will proceed automatically. If either the entry or the .yaml file are missing, the test will be re-recorded.
+Simply add your new entries and run all tests. The test driver will automatically detect the new tests and run the command, show you the output, and query if it is correct. If so, it will save the HTTP recording into a YAML file, as well as the raw output into a dictionary called `expected_results.res`. When the test is replayed, as long as the test has an entry in `expected_results.res` and a corresponding .yaml file, the test will proceed automatically. If either the entry or the .yaml file are missing, the test will be re-recorded.
 
 If the tests are run on TravisCI, any tests which cannot be replayed will automatically fail. 
 
@@ -30,7 +30,7 @@ If the tests are run on TravisCI, any tests which cannot be replayed will automa
 
 Many tests, for example those which simply retrieve information, can simply be played back, verified and recorded.
 
-Other tests, such as create and delete scenarios, may require additional commands to set up for recording, or may require additional commands to verify the proper operation of a command. For example, several create commands output nothing on success. Thus, you'll find yourself staring at nothing with a propmpt asking if that is the expected response.
+Other tests, such as create and delete scenarios, may require additional commands to set up for recording, or may require additional commands to verify the proper operation of a command. For example, several create commands output nothing on success. Thus, you'll find yourself staring at nothing with a prompt asking if that is the expected response.
 
 For these scenarios, I recommend having a second shell open, from which you can run any setup commands and then run any commands you need to verify the proper operation of the command in order to answer the prompt.
 
