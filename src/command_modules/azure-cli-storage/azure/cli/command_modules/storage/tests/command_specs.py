@@ -153,11 +153,10 @@ TEST_DEF = [
         'test_name': 'storage_share_create_simple',
         'command': 'storage share create --share-name testshare02 --fail-on-exist'
     },
-    # TODO: Metadata doesn't fail...but it doesn't take either...
-    #{
-    #    'test_name': 'storage_share_create_with_metadata',
-    #    'command': 'storage share create --share-name testshare03 --fail-on-exist --metadata foo=bar;cat=hat'
-    #},
+    {
+        'test_name': 'storage_share_create_with_metadata',
+        'command': 'storage share create --share-name testshare03 --fail-on-exist --metadata foo=bar;cat=hat'
+    },
     {
         'test_name': 'storage_share_exists',
         'command': 'storage share exists --share-name testshare01'
@@ -174,6 +173,18 @@ TEST_DEF = [
         'test_name': 'storage_share_delete',
         'command': 'storage share delete --share-name testshare02 --fail-not-exist'
     },
+    {
+        'test_name': 'storage_share_set_metadata',
+        'command': 'storage share set-metadata --share-name testshare01 --metadata a=b;c=d'
+    },
+    {
+        'test_name': 'storage_share_show_metadata',
+        'command': 'storage share show-metadata --share-name testshare01'
+    },
+    {
+        'test_name': 'storage_share_clear_metadata',
+        'command': 'storage share set-metadata --share-name testshare01'
+    },
     # STORAGE DIRECTORY TESTS
     {
         'test_name': 'storage_directory_exists',
@@ -183,14 +194,25 @@ TEST_DEF = [
         'test_name': 'storage_directory_create_simple',
         'command': 'storage directory create --share-name testshare01 --directory-name tempdir01 --fail-on-exist'
     },
-    # TODO: Metadata doesn't fail...but it doesn't take either...
-    #{
-    #    'test_name': 'storage_directory_create_with_metadata',
-    #    'command': 'storage directory create --share-name testshare01 --directory-name tempdir02 --fail-on-exist --metadata foo=bar;cat=hat'
-    #},
+    {
+        'test_name': 'storage_directory_create_with_metadata',
+        'command': 'storage directory create --share-name testshare01 --directory-name tempdir02 --fail-on-exist --metadata foo=bar;cat=hat'
+    },
     {
         'test_name': 'storage_directory_delete',
         'command': 'storage directory delete --share-name testshare01 --directory-name tempdir01 --fail-not-exist'
+    },
+    {
+        'test_name': 'storage_directory_set_metadata',
+        'command': 'storage directory set-metadata --share-name testshare01 --directory-name testdir1 --metadata a=b;c=d'
+    },
+    {
+        'test_name': 'storage_directory_show_metadata',
+        'command': 'storage directory show-metadata --share-name testshare01 --directory-name testdir1'
+    },
+    {
+        'test_name': 'storage_directory_clear_metadata',
+        'command': 'storage directory set-metadata --share-name testshare01 --directory-name testdir1'
     },
     # STORAGE FILE TESTS
     {
@@ -228,5 +250,5 @@ TEST_DEF = [
     {
         'test_name': 'storage_file_delete_with_subdir',
         'command': 'storage file delete --share-name testshare01 --directory-name testdir1 --file-name testfile02.rst'
-    },
+    }
 ]

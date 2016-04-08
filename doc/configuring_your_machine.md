@@ -93,14 +93,32 @@ The repo has a launch.json file that will launch the version of Python that is f
   <clone root>\src\python -m azure.cli [commands]
   ```
 
-##Running Unit Tests:
+##Running Tests:
 ####Command line
 #####Windows:
-  Provided your PYTHONPATH was set correctly, from `<clone root>\src` run:
+  Provided your PYTHONPATH was set correctly, you can run the tests from your `<root clone>` directory.
+
+  To test the core of the CLI:
   ```BatchFile
-  python -m unittest discover -s azure\cli\tests [--buffer]
-  ``` 
-Use of `--buffer` will automatically fail any VCR-style tests which do not have an expected result recorded. Omit `--buffer` to permit recording of tests. To re-record any tests, you can either remove the test's entry from the `expected_results.res` file or remove the corresponding `<test>.yaml` VCR cassette and re-run without `--buffer`.
+  python -m unittest discover -s src/azure/cli/tests
+  ```
+ 
+  To test the command modules:
+  ```BatchFile
+  python scripts/command_modules/test.py
+  ```
+
+  To check or pylint errors in the core of the CLI:
+  ```BatchFile
+  pylint src/azure
+  ```
+
+  To check the command modules for pylint errors:
+  ```Batch
+  python scripts/command_modules/pylint.py
+  ```
+
+  Additionally, you can run pylint tests for the core CLI and all command modules using the `lintall.bat` script, and run tests for the core CLI and all command modules using the `testall.bat` script.
 
 ####VS Code
   Under construction...
