@@ -12,7 +12,7 @@
     <OutputPath>.</OutputPath>
     <ProjectTypeGuids>{888888a0-9f3d-457c-b088-3a5042f75d52}</ProjectTypeGuids>
     <LaunchProvider>Standard Python launcher</LaunchProvider>
-    <InterpreterId>{1dd9c42b-5980-42ce-a2c3-46d3bf0eede4}</InterpreterId>
+    <InterpreterId>{54f4b6dc-0859-46dc-99bb-b275c9d0aca3}</InterpreterId>
     <InterpreterVersion>3.5</InterpreterVersion>
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
     <CommandLineArguments>
@@ -36,6 +36,10 @@
     <Compile Include="azure\cli\extensions\transform.py" />
     <Compile Include="azure\cli\extensions\__init__.py" />
     <Compile Include="azure\cli\main.py" />
+    <Compile Include="azure\cli\tests\test_add_resourcegroup_transform.py" />
+    <Compile Include="command_modules\azure-cli-resource\azure\cli\command_modules\resource\tests\test_api_check.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="azure\cli\parser.py" />
     <Compile Include="azure\cli\tests\test_add_resourcegroup_transform.py" />
     <Compile Include="azure\cli\tests\test_parser.py" />
@@ -177,6 +181,19 @@
     <Content Include="command_modules\azure-cli-storage\requirements.txt" />
     <Content Include="command_modules\azure-cli-taskhelp\requirements.txt" />
     <Content Include="command_modules\azure-cli-vm\requirements.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Interpreter Include="..\env\">
+      <Id>{54f4b6dc-0859-46dc-99bb-b275c9d0aca3}</Id>
+      <BaseInterpreter>{2af0f10d-7135-4994-9156-5d01c9c11b7e}</BaseInterpreter>
+      <Version>3.5</Version>
+      <Description>env (Python 3.5)</Description>
+      <InterpreterPath>Scripts\python.exe</InterpreterPath>
+      <WindowsInterpreterPath>Scripts\pythonw.exe</WindowsInterpreterPath>
+      <LibraryPath>Lib\</LibraryPath>
+      <PathEnvironmentVariable>PYTHONPATH</PathEnvironmentVariable>
+      <Architecture>X86</Architecture>
+    </Interpreter>
   </ItemGroup>
   <Import Project="$(PtvsTargetsFile)" Condition="Exists($(PtvsTargetsFile))" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets" Condition="!Exists($(PtvsTargetsFile))" />
