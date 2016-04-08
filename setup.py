@@ -23,6 +23,8 @@ from setuptools import setup
 VERSION = '0.0.32'
 INSTALL_FROM_PUBLIC = False
 
+DISABLE_POST_INSTALL = os.environ.get('AZURE_CLI_DISABLE_POST_INSTALL')
+
 PRIVATE_PYPI_URL_ENV_NAME = 'AZURE_CLI_PRIVATE_PYPI_URL'
 PRIVATE_PYPI_URL = os.environ.get(PRIVATE_PYPI_URL_ENV_NAME)
 PRIVATE_PYPI_HOST_ENV_NAME = 'AZURE_CLI_PRIVATE_PYPI_HOST'
@@ -100,8 +102,9 @@ def _post_install(dir):
 class OnInstall(install):
     def run(self):
         install.run(self)
-        self.execute(_post_install, (self.install_lib,),
-                     msg="Running post install task")
+        if not DISABLE_POST_INSTALL:
+            self.execute(_post_install, (self.install_lib,),
+                         msg="Running post install task")
 
 setup(
     name='azure-cli',
