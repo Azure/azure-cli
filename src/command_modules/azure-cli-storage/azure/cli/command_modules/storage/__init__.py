@@ -177,6 +177,14 @@ build_operation(
     ],
     command_table)
 
+build_operation(
+    'storage account', None, _blob_data_service_factory,
+    [
+        AutoCommandDefinition(BlockBlobService.generate_account_shared_access_signature,
+                              'String', 'generate-sas')
+    ],
+    command_table, None, STORAGE_DATA_CLIENT_ARGS)
+
 @command_table.command('storage account list', description=L('List storage accounts.'))
 @command_table.option(**COMMON_PARAMETERS['optional_resource_group_name'])
 def list_accounts(args):
