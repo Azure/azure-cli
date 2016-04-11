@@ -19,7 +19,7 @@ command_table = CommandTable()
 
 # FACTORIES
 
-def _storage_client_factory(*args): # pylint: disable=unused-argument
+def _storage_client_factory(_):
     return get_mgmt_service_client(StorageManagementClient, StorageManagementClientConfiguration)
 
 def _file_data_service_factory(args):
@@ -65,13 +65,10 @@ def _parse_tags(string):
 def _update_progress(current, total):
     if total:
         message = 'Percent complete: %'
-        num_format = 'xxx.x'
-        num_decimals = len(num_format.split('.', 1)[1]) if '.' in num_format else 0
-        format_string = '{:.%sf}' % num_decimals
-        percent_done = format_string.format(current * 100 / total)
-        padding = len(num_format) - len(percent_done)
-        message += (' ' * padding) + percent_done
+        percent_done = current * 100 / total
+        message += '{: >5.1f}'.format(percent_done)
         print('\b' * len(message) + message, end='', file=stderr)
+        stderr.flush()
 
 COMMON_PARAMETERS = GLOBAL_COMMON_PARAMETERS.copy()
 COMMON_PARAMETERS.update({
@@ -190,7 +187,7 @@ build_operation(
 def list_accounts(args):
     from azure.mgmt.storage.models import StorageAccount
     from msrestazure.azure_active_directory import UserPassCredentials
-    smc = _storage_client_factory()
+    smc = _storage_client_factory({})
     group = args.get('resourcegroup')
     if group:
         accounts = smc.storage_accounts.list_by_resource_group(group)
@@ -206,7 +203,7 @@ key_options = ['key1', 'key2']
 @command_table.option('--key -y', default=key_options,
                       choices=key_options, help=L('Key to renew'))
 def renew_account_keys(args):
-    smc = _storage_client_factory()
+    smc = _storage_client_factory({})
     keys_to_renew = args.get('key')
     for key in keys_to_renew if isinstance(keys_to_renew, list) else [keys_to_renew]:
         result = smc.storage_accounts.regenerate_key(
@@ -219,7 +216,7 @@ def renew_account_keys(args):
 @command_table.description(
     L('Show the current count and limit of the storage accounts under the subscription.'))
 def show_account_usage(_):
-    smc = _storage_client_factory()
+    smc = _storage_client_factory({})
     return next((x for x in smc.usage.list() if x.name.value == 'StorageAccounts'), None)
 
 @command_table.command('storage account connection-string')
@@ -229,7 +226,7 @@ def show_account_usage(_):
 @command_table.option('--use-http', action='store_const', const='http', default='https',
                       help=L('use http as the default endpoint protocol'))
 def show_storage_connection_string(args):
-    smc = _storage_client_factory()
+    smc = _storage_client_factory({})
     endpoint_protocol = args.get('use_http')
     storage_account = args.get('account_name')
     keys = smc.storage_accounts.list_keys(args.get('resourcegroup'), storage_account)
@@ -256,7 +253,7 @@ storage_account_types = {'Standard_LRS': AccountType.standard_lrs,
 @command_table.option(**COMMON_PARAMETERS['tags'])
 def create_account(args):
     from azure.mgmt.storage.models import StorageAccountCreateParameters
-    smc = _storage_client_factory()
+    smc = _storage_client_factory({})
 
     resource_group = args.get('resourcegroup')
     account_name = args.get('account_name')
@@ -280,7 +277,7 @@ def create_account(args):
 @command_table.option('--subdomain', help=L('use indirect CNAME validation'))
 def set_account(args):
     from azure.mgmt.storage.models import StorageAccountUpdateParameters, CustomDomain
-    smc = _storage_client_factory()
+    smc = _storage_client_factory({})
 
     resource_group = args.get('resourcegroup')
     account_name = args.get('account_name')

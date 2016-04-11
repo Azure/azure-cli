@@ -5,7 +5,7 @@ from azure.cli._locale import L
 
 command_table = CommandTable()
 
-def _resource_client_factory(*args): # pylint: disable=unused-argument
+def _resource_client_factory(_):
     from azure.mgmt.resource.resources import (ResourceManagementClient,
                                                ResourceManagementClientConfiguration)
     return get_mgmt_service_client(ResourceManagementClient, ResourceManagementClientConfiguration)
