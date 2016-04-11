@@ -3,10 +3,12 @@ from azure.cli.commands import CommandTable, COMMON_PARAMETERS
 from azure.cli.commands._command_creation import get_mgmt_service_client
 from azure.cli._locale import L
 
-from azure.mgmt.resource.resources import (ResourceManagementClient,
-                                           ResourceManagementClientConfiguration)
-
 command_table = CommandTable()
+
+def _resource_client_factory(_):
+    from azure.mgmt.resource.resources import (ResourceManagementClient,
+                                               ResourceManagementClientConfiguration)
+    return get_mgmt_service_client(ResourceManagementClient, ResourceManagementClientConfiguration)
 
 @command_table.command('resource group list', description=L('List resource groups'))
 @command_table.option('--tag-name -tn', help=L("the resource group's tag name"))
@@ -14,13 +16,13 @@ command_table = CommandTable()
 def list_groups(args):
     from azure.mgmt.resource.resources.models import ResourceGroup, ResourceGroupFilter
 
-    rmc = get_mgmt_service_client(ResourceManagementClient, ResourceManagementClientConfiguration)
+    rmc = _resource_client_factory(args)
 
     filters = []
-    if args.get('tag-name'):
-        filters.append("tagname eq '{}'".format(args.get('tag-name')))
-    if args.get('tag-value'):
-        filters.append("tagvalue eq '{}'".format(args.get('tag-value')))
+    if args.get('tag_name'):
+        filters.append("tagname eq '{}'".format(args.get('tag_name')))
+    if args.get('tag_value'):
+        filters.append("tagvalue eq '{}'".format(args.get('tag_value')))
 
     filter_text = ' and '.join(filters) if len(filters) > 0 else None
 
@@ -40,8 +42,9 @@ def list_groups(args):
                       help=L('the name of the parent resource (if needed), ' + \
                       'in <parent-type>/<parent-name> format'))
 def show_resource(args):
-    rmc = get_mgmt_service_client(ResourceManagementClient, ResourceManagementClientConfiguration)
-    full_type = args.get('resource-type').split('/')
+    rmc = _resource_client_factory(args)
+
+    full_type = args.get('resource_type').split('/')
     try:
         provider_namespace = full_type[0]
         resource_type = full_type[1]
