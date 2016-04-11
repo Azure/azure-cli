@@ -25,7 +25,7 @@ from azure.cli._locale import L
 
 command_table = CommandTable()
 
-def _network_client_factory(*_):
+def _network_client_factory(_):
     return get_mgmt_service_client(NetworkManagementClient, NetworkManagementClientConfiguration)
 
 
@@ -266,7 +266,7 @@ def create_update_vnet(args):
                                    dhcp_options=dhcp_options)
 
     op = LongRunningOperation('Creating virtual network', 'Virtual network created')
-    smc = _network_client_factory()
+    smc = _network_client_factory({})
     poller = smc.virtual_networks.create_or_update(resource_group, name, vnet_settings)
     return op(poller)
 
@@ -288,6 +288,6 @@ def create_update_subnet(args):
                              address_prefix=address_prefix)
 
     op = LongRunningOperation('Creating subnet', 'Subnet created')
-    smc = _network_client_factory()
+    smc = _network_client_factory({})
     poller = smc.subnets.create_or_update(resource_group, vnet, name, subnet_settings)
     return op(poller)
