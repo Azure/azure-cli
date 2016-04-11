@@ -1,6 +1,7 @@
 ## Runs pylint on the command modules ##
 from __future__ import print_function
 import os
+import sys
 
 from _common import get_all_command_modules, exec_command, print_summary
 
@@ -15,3 +16,6 @@ for name, fullpath in all_command_modules:
         failed_module_names.append(name)
 
 print_summary(failed_module_names)
+
+if failed_module_names:
+    sys.exit(1)
