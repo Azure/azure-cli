@@ -37,7 +37,6 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
-    'azure-cli',
     'azure==2.0.0rc1',
 ]
 
