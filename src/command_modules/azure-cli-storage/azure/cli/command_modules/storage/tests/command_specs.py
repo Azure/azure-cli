@@ -8,7 +8,8 @@ PROPOSED_LEASE_ID = 'abcdabcd-abcd-abcd-abcd-abcdabcdabcd'
 CHANGED_LEASE_ID = 'dcbadcba-dcba-dcba-dcba-dcbadcbadcba'
 # TODO: This breaks TravisCI but allows you do not have to put README.rst in the /src folder
 # CLI_ROOT_DIR = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
-CLI_ROOT_DIR = os.getcwd()
+# CLI_ROOT_DIR = os.getcwd()
+TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 ENV_VAR = {
     'AZURE_STORAGE_CONNECTION_STRING':('DefaultEndpointsProtocol=https;' +
@@ -121,12 +122,12 @@ TEST_DEF = [
     {
         'test_name': 'storage_blob_upload_block_blob',
         'command': 'storage blob upload-block-blob -b testblob1 -c testcontainer1234 --upload-from {}'
-            .format(os.path.join(CLI_ROOT_DIR, 'README.rst'))
+            .format(os.path.join(TEST_DIR, 'testfile.rst'))
     },
     {
         'test_name': 'storage_blob_download',
         'command': 'storage blob download -b testblob1 -c testcontainer1234 --download-to {}'
-            .format(os.path.join(CLI_ROOT_DIR, 'test.rst'))
+            .format(os.path.join(TEST_DIR, 'download-blob.rst'))
     },
     {
         'test_name': 'storage_blob_exists',
@@ -218,7 +219,7 @@ TEST_DEF = [
     {
         'test_name': 'storage_file_upload_simple',
         'command': 'storage file upload --share-name testshare01 --local-file-name {} --file-name testfile01.rst'
-            .format(os.path.join(CLI_ROOT_DIR, 'README.rst'))
+            .format(os.path.join(TEST_DIR, 'testfile.rst'))
     },
     {
         'test_name': 'storage_file_exists_simple',
@@ -227,7 +228,7 @@ TEST_DEF = [
     {
         'test_name': 'storage_file_download_simple',
         'command': 'storage file download --share-name testshare01 --file-name testfile01.rst --local-file-name {}'
-            .format(os.path.join(CLI_ROOT_DIR, 'test.rst'))
+            .format(os.path.join(TEST_DIR, 'download-file.rst'))
     },
     {
         'test_name': 'storage_file_delete_simple',
@@ -236,7 +237,7 @@ TEST_DEF = [
     {
         'test_name': 'storage_file_upload_with_subdir',
         'command': 'storage file upload --share-name testshare01 --local-file-name {} --file-name testfile02.rst --directory-name testdir1'
-            .format(os.path.join(CLI_ROOT_DIR, 'README.rst'))
+            .format(os.path.join(TEST_DIR, 'testfile.rst'))
     },
     {
         'test_name': 'storage_file_exists_with_subdir',
@@ -245,7 +246,7 @@ TEST_DEF = [
     {
         'test_name': 'storage_file_download_with_subdir',
         'command': 'storage file download --share-name testshare01 --directory-name testdir1 --file-name testfile02.rst --local-file-name {}'
-            .format(os.path.join(CLI_ROOT_DIR, 'test2.rst'))
+            .format(os.path.join(TEST_DIR, 'download-file-with-subdir.rst'))
     },
     {
         'test_name': 'storage_file_delete_with_subdir',
