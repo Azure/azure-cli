@@ -5,6 +5,7 @@ from sys import stderr
 
 from azure.storage.blob import PublicAccess, BlockBlobService
 from azure.storage.file import FileService
+from azure.storage import CloudStorageAccount
 from azure.mgmt.storage import StorageManagementClient, StorageManagementClientConfiguration
 from azure.mgmt.storage.models import AccountType
 from azure.mgmt.storage.operations import StorageAccountsOperations
@@ -32,6 +33,12 @@ def _file_data_service_factory(args):
 def _blob_data_service_factory(args):
     return get_data_service_client(
         BlockBlobService,
+        args.pop('account_name', None),
+        args.pop('account_key', None),
+        args.pop('connection_string', None))
+
+def _cloud_storage_account_service_factory(args):
+    return CloudStorageAccount(
         args.pop('account_name', None),
         args.pop('account_key', None),
         args.pop('connection_string', None))
@@ -174,10 +181,9 @@ build_operation(
     command_table)
 
 build_operation(
-    'storage account', None, _blob_data_service_factory,
+    'storage account', None, _cloud_storage_account_service_factory,
     [
-        # TODO Replace with more generic "CloudStorageAccount" method... ?
-        AutoCommandDefinition(BlockBlobService.generate_account_shared_access_signature,
+        AutoCommandDefinition(CloudStorageAccount.generate_shared_access_signature,
                               'String', 'generate-sas')
     ],
     command_table, None, STORAGE_DATA_CLIENT_ARGS)

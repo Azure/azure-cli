@@ -40,17 +40,17 @@ TEST_DEF = [
     },
     {
         'test_name': 'storage_account_list_keys',
-        'command': 'storage account list-keys -g {} --account-name {}'
+        'command': 'storage account keys list -g {} --account-name {}'
             .format(RESOURCE_GROUP_NAME, STORAGE_ACCOUNT_NAME)
     },
     {
         'test_name': 'storage_account_renew_keys_both',
-        'command': 'storage account renew-keys -g {} --account-name {}'
+        'command': 'storage account keys renew -g {} --account-name {}'
             .format(RESOURCE_GROUP_NAME, STORAGE_ACCOUNT_NAME)
     },
     {
         'test_name': 'storage_account_renew_keys_one',
-        'command': 'storage account renew-keys -g {} --account-name {} --key key2'
+        'command': 'storage account keys renew -g {} --account-name {} --key key2'
             .format(RESOURCE_GROUP_NAME, STORAGE_ACCOUNT_NAME)
     },
     # TODO: Enable when item #117262541 is complete
