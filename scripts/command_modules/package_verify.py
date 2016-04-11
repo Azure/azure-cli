@@ -31,7 +31,7 @@ print_heading('Building CLI package...')
 PATH_TO_CLI_PACKAGE = os.path.abspath(os.path.join(os.path.abspath(__file__), '..', '..', '..'))
 path_to_setup = PATH_TO_CLI_PACKAGE+'/setup.py'
 set_version(path_to_setup)
-success = exec_command('python setup.py sdist', cwd=PATH_TO_CLI_PACKAGE)
+success = exec_command('python -m python setup.py sdist', cwd=PATH_TO_CLI_PACKAGE)
 if not success:
     print_heading('Error building CLI!', file=sys.stderr)
     sys.exit(1)
@@ -44,7 +44,7 @@ for name, fullpath in all_command_modules:
     # give package a high version no. so when we install, we install this one
     # and not a version from PyPI
     set_version(path_to_setup)
-    success = exec_command('python setup.py sdist', cwd=fullpath)
+    success = exec_command('python -m python setup.py sdist', cwd=fullpath)
     if not success:
         failed_module_names.append(name)
 
@@ -58,7 +58,7 @@ print_heading('Built command package(s).')
 
 print_heading('Installing CLI package...')
 cli_package_dir = os.path.join(PATH_TO_CLI_PACKAGE, 'dist')
-cmd = 'pip install azure-cli --find-links file://{}'.format(cli_package_dir)
+cmd = 'python -m pip install azure-cli --find-links file://{}'.format(cli_package_dir)
 cmd += ' --extra-index-url {} --trusted-host {}'.format(PRIVATE_PYPI_URL, PRIVATE_PYPI_HOST) if include_private_pypi else ''
 success = exec_command(cmd)
 if not success:
@@ -70,7 +70,7 @@ print_heading('Installing command package(s)...')
 failed_module_names = []
 for name, fullpath in all_command_modules:
     package_dir = os.path.join(fullpath, 'dist')
-    cmd = 'pip install {} --find-links file://{}'.format(name, package_dir)
+    cmd = 'python -m pip install {} --find-links file://{}'.format(name, package_dir)
     cmd += ' --extra-index-url {} --trusted-host {}'.format(PRIVATE_PYPI_URL, PRIVATE_PYPI_HOST) if include_private_pypi else ''
     success = exec_command(cmd)
     if not success:
