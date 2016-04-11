@@ -55,6 +55,7 @@ class Test_autocommand(unittest.TestCase):
         some_expected_arguments = [
             {'name': '--resourcegroup -g', 'dest': 'resource_group_name', 'required': True},
             {'name': '--vm-name', 'dest': 'vm_name', 'required': True},
+            {'name': '--opt-param', 'required': False},
             ]
 
         for probe in some_expected_arguments:
@@ -142,25 +143,6 @@ class Test_autocommand(unittest.TestCase):
         self.assertEqual(len(command_table), 1, 'We expect exactly one command in the command table')
         command_metadata = list(command_table.values())[0]
         self.assertEqual(command_metadata['name'], 'test autocommand woot', 'Unexpected command name...')
-
-    def test_autocommand_optional_parameter(self):
-        command_table = CommandTable()
-        build_operation("test autocommand",
-                        "",
-                        None,
-                        [
-                            AutoCommandDefinition(Test_autocommand.sample_vm_get, None)
-                        ],
-                        command_table)
-
-        self.assertEqual(len(command_table), 1, 'We expect exactly one command in the command table')
-        command_metadata = list(command_table.values())[0]
-        some_expected_arguments = [
-            {'name': '--opt-param', 'required': False},
-            ]
-        for probe in some_expected_arguments:
-            existing = [arg for arg in command_metadata['arguments'] if arg['name'] == probe['name']][0]
-            self.assertDictContainsSubset(probe, existing)
 
 if __name__ == '__main__':
     unittest.main()
