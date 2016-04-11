@@ -31,7 +31,7 @@ print_heading('Building CLI package...')
 PATH_TO_CLI_PACKAGE = os.path.abspath(os.path.join(os.path.abspath(__file__), '..', '..', '..'))
 path_to_setup = PATH_TO_CLI_PACKAGE+'/setup.py'
 set_version(path_to_setup)
-success = exec_command('python -m python setup.py sdist', cwd=PATH_TO_CLI_PACKAGE)
+success = exec_command('python setup.py sdist', cwd=PATH_TO_CLI_PACKAGE)
 if not success:
     print_heading('Error building CLI!', file=sys.stderr)
     sys.exit(1)
@@ -44,7 +44,7 @@ for name, fullpath in all_command_modules:
     # give package a high version no. so when we install, we install this one
     # and not a version from PyPI
     set_version(path_to_setup)
-    success = exec_command('python -m python setup.py sdist', cwd=fullpath)
+    success = exec_command('python setup.py sdist', cwd=fullpath)
     if not success:
         failed_module_names.append(name)
 
