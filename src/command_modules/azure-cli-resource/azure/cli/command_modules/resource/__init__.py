@@ -3,10 +3,12 @@ from azure.cli.commands import CommandTable, COMMON_PARAMETERS
 from azure.cli.commands._command_creation import get_mgmt_service_client
 from azure.cli._locale import L
 
-from azure.mgmt.resource.resources import (ResourceManagementClient,
-                                           ResourceManagementClientConfiguration)
-
 command_table = CommandTable()
+
+def _resource_client_factory(_):
+    from azure.mgmt.resource.resources import (ResourceManagementClient,
+                                               ResourceManagementClientConfiguration)
+    return get_mgmt_service_client(ResourceManagementClient, ResourceManagementClientConfiguration)
 
 @command_table.command('resource group list', description=L('List resource groups'))
 @command_table.option('--tag-name -tn', help=L("the resource group's tag name"))
@@ -14,13 +16,13 @@ command_table = CommandTable()
 def list_groups(args):
     from azure.mgmt.resource.resources.models import ResourceGroup, ResourceGroupFilter
 
-    rmc = get_mgmt_service_client(ResourceManagementClient, ResourceManagementClientConfiguration)
+    rmc = _resource_client_factory(args)
 
     filters = []
-    if args.get('tag-name'):
-        filters.append("tagname eq '{}'".format(args.get('tag-name')))
-    if args.get('tag-value'):
-        filters.append("tagvalue eq '{}'".format(args.get('tag-value')))
+    if args.get('tag_name'):
+        filters.append("tagname eq '{}'".format(args.get('tag_name')))
+    if args.get('tag_value'):
+        filters.append("tagvalue eq '{}'".format(args.get('tag_value')))
 
     filter_text = ' and '.join(filters) if len(filters) > 0 else None
 
@@ -36,13 +38,13 @@ def list_groups(args):
                       help=L('the resource type in format: <provider-namespace>/<type>'),
                       required=True)
 @command_table.option('--api-version -o', help=L('the API version of the resource provider'))
-@command_table.option('--parent',
+@command_table.option('--parent', default='',
                       help=L('the name of the parent resource (if needed), ' + \
                       'in <parent-type>/<parent-name> format'))
 def show_resource(args):
-    rmc = get_mgmt_service_client(ResourceManagementClient, ResourceManagementClientConfiguration)
+    rmc = _resource_client_factory(args)
 
-    full_type = args.get('resource-type').split('/')
+    full_type = args.get('resource_type').split('/')
     try:
         provider_namespace = full_type[0]
         resource_type = full_type[1]
@@ -54,9 +56,8 @@ def show_resource(args):
         raise IncorrectUsageError(
             L('API version is required and could not be resolved for resource {}'
               .format(full_type)))
-
     results = rmc.resources.get(
-        resource_group_name=args.get('resource-group'),
+        resource_group_name=args.get('resourcegroup'),
         resource_name=args.get('name'),
         resource_provider_namespace=provider_namespace,
         resource_type=resource_type,
@@ -86,18 +87,12 @@ def _resolve_api_version(args, rmc):
             raise IncorrectUsageError('Parameter --parent must be in <type>/<name> format.')
 
         resource_type = "{}/{}".format(parent_type, resource_type)
-    else:
-        resource_type = resource_type
     provider = rmc.providers.get(provider_namespace)
-    for t in provider.resource_types:
-        if t.resource_type == resource_type:
-            # Return first non-preview version
-            for version in t.api_versions:
-                if not version.find('preview'):
-                    return version
-            # No non-preview version found. Take first preview version
-            try:
-                return t.api_versions[0]
-            except IndexError:
-                return None
+
+    rt = [t for t in provider.resource_types if t.resource_type == resource_type]
+    if not rt:
+        raise IncorrectUsageError('Resource type {} not found.'.format(full_type))
+    if len(rt) == 1 and rt[0].api_versions:
+        npv = [v for v in rt[0].api_versions if "preview" not in v]
+        return npv[0] if npv else rt[0].api_versions[0]
     return None

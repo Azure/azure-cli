@@ -1,4 +1,4 @@
-Setting up your development environment
+﻿Setting up your development environment
 ========================================
 The Azure Python CLI projects sources are located on GitHub (https://github.com/Azure/azure-cli/). In order to contribute to the project, you are expected to: 
 -	Have a GitHub account. For Microsoft contributors, follow the guidelines on https://opensourcehub.microsoft.com/ to create, configure and link your account
@@ -93,13 +93,33 @@ The repo has a launch.json file that will launch the version of Python that is f
   <clone root>\src\python -m azure.cli [commands]
   ```
 
-##Running Unit Tests:
+##Running Tests:
 ####Command line
 #####Windows:
-  Provided your PYTHONPATH was set correcltly, from `<clone root>` run:
+  Provided your PYTHONPATH was set correctly, you can run the tests from your `<root clone>` directory.
+
+  To test the core of the CLI:
   ```BatchFile
-  python -m unittest discover -s src\azure\cli\tests
-  ``` 
+  python -m unittest discover -s src/azure/cli/tests
+  ```
+ 
+  To test the command modules:
+  ```BatchFile
+  python scripts/command_modules/test.py
+  ```
+
+  To check or pylint errors in the core of the CLI:
+  ```BatchFile
+  pylint src/azure
+  ```
+
+  To check the command modules for pylint errors:
+  ```Batch
+  python scripts/command_modules/pylint.py
+  ```
+
+  Additionally, you can run pylint tests for the core CLI and all command modules using the `lintall.bat` script, and run tests for the core CLI and all command modules using the `testall.bat` script.
+
 ####VS Code
   Under construction...
   
