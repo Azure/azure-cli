@@ -177,6 +177,7 @@ build_operation(
 build_operation(
     'storage account', None, _blob_data_service_factory,
     [
+        # TODO Replace with more generic "CloudStorageAccount" method... ?
         AutoCommandDefinition(BlockBlobService.generate_account_shared_access_signature,
                               'String', 'generate-sas')
     ],
@@ -298,7 +299,25 @@ build_operation(
         AutoCommandDefinition(BlockBlobService.delete_container, None, 'delete'),
         AutoCommandDefinition(BlockBlobService.get_container_properties,
                               '[ContainerProperties]', 'show'),
-        AutoCommandDefinition(BlockBlobService.create_container, None, 'create')
+        AutoCommandDefinition(BlockBlobService.create_container, None, 'create'),
+        AutoCommandDefinition(BlockBlobService.generate_container_shared_access_signature,
+                              'String', 'generate-sas')
+    ],
+    command_table, None, STORAGE_DATA_CLIENT_ARGS)
+
+build_operation(
+    'storage container acl', None, _blob_data_service_factory,
+    [
+        AutoCommandDefinition(BlockBlobService.set_container_acl, 'Something?', 'set'),
+        AutoCommandDefinition(BlockBlobService.get_container_acl, 'Something?', 'get'),
+    ],
+    command_table, None, STORAGE_DATA_CLIENT_ARGS)
+
+build_operation(
+    'storage container metadata', None, _blob_data_service_factory,
+    [
+        AutoCommandDefinition(BlockBlobService.set_container_metadata, 'Something?', 'set'),
+        AutoCommandDefinition(BlockBlobService.get_container_metadata, 'Something?', 'get'),
     ],
     command_table, None, STORAGE_DATA_CLIENT_ARGS)
 
@@ -331,56 +350,60 @@ lease_duration_values_string = 'Between {} and {} seconds. ({} for infinite)'.fo
 
 build_operation('storage container lease', None, _blob_data_service_factory,
                 [
+                    AutoCommandDefinition(BlockBlobService.acquire_container_lease,
+                                          'String', 'acquire'),
                     AutoCommandDefinition(BlockBlobService.renew_container_lease, None, 'renew'),
                     AutoCommandDefinition(BlockBlobService.release_container_lease,
                                           None, 'release'),
                     AutoCommandDefinition(BlockBlobService.change_container_lease,
-                                          'LeaseId', 'change')
+                                          'LeaseId', 'change'),
+                    AutoCommandDefinition(BlockBlobService.break_container_lease,
+                                          'Something?', 'break')
                 ],
                 command_table, None, STORAGE_DATA_CLIENT_ARGS)
 
-@command_table.command('storage container lease acquire')
-@command_table.description(L('Acquire a lock on a container for delete operations.'))
-@command_table.option(**COMMON_PARAMETERS['container_name'])
-@command_table.option('--lease-duration',
-                      help=L('Values: {}'.format(lease_duration_values_string)),
-                      type=int, required=True)
-@command_table.option('--proposed-lease-id', help=L('proposed lease id in GUID format'))
-@command_table.option(**COMMON_PARAMETERS['account_name'])
-@command_table.option(**COMMON_PARAMETERS['account_key'])
-@command_table.option(**COMMON_PARAMETERS['connection_string'])
-@command_table.option(**COMMON_PARAMETERS['if_modified_since'])
-@command_table.option(**COMMON_PARAMETERS['if_unmodified_since'])
-@command_table.option(**COMMON_PARAMETERS['timeout'])
-def acquire_container_lease(args):
-    bbs = _blob_data_service_factory(args)
-    return bbs.acquire_container_lease(
-        container_name=args.get('container_name'),
-        lease_duration=args.get('lease_duration'),
-        proposed_lease_id=args.get('proposed_lease_id'),
-        if_modified_since=args.get('if_modified_since'),
-        if_unmodified_since=args.get('if_unmodified_since'),
-        timeout=args.get('timeout'))
+#@command_table.command('storage container lease acquire')
+#@command_table.description(L('Acquire a lock on a container for delete operations.'))
+#@command_table.option(**COMMON_PARAMETERS['container_name'])
+#@command_table.option('--lease-duration',
+#                      help=L('Values: {}'.format(lease_duration_values_string)),
+#                      type=int, required=True)
+#@command_table.option('--proposed-lease-id', help=L('proposed lease id in GUID format'))
+#@command_table.option(**COMMON_PARAMETERS['account_name'])
+#@command_table.option(**COMMON_PARAMETERS['account_key'])
+#@command_table.option(**COMMON_PARAMETERS['connection_string'])
+#@command_table.option(**COMMON_PARAMETERS['if_modified_since'])
+#@command_table.option(**COMMON_PARAMETERS['if_unmodified_since'])
+#@command_table.option(**COMMON_PARAMETERS['timeout'])
+#def acquire_container_lease(args):
+#    bbs = _blob_data_service_factory(args)
+#    return bbs.acquire_container_lease(
+#        container_name=args.get('container_name'),
+#        lease_duration=args.get('lease_duration'),
+#        proposed_lease_id=args.get('proposed_lease_id'),
+#        if_modified_since=args.get('if_modified_since'),
+#        if_unmodified_since=args.get('if_unmodified_since'),
+#        timeout=args.get('timeout'))
 
-@command_table.command('storage container lease break')
-@command_table.description(L('Break a lock on a container for delete operations.'))
-@command_table.option(**COMMON_PARAMETERS['container_name'])
-@command_table.option('--lease-break-period', type=int,
-                      help=L('Values: {}'.format(lease_duration_values_string)), required=True)
-@command_table.option(**COMMON_PARAMETERS['account_name'])
-@command_table.option(**COMMON_PARAMETERS['account_key'])
-@command_table.option(**COMMON_PARAMETERS['connection_string'])
-@command_table.option(**COMMON_PARAMETERS['if_modified_since'])
-@command_table.option(**COMMON_PARAMETERS['if_unmodified_since'])
-@command_table.option(**COMMON_PARAMETERS['timeout'])
-def break_container_lease(args):
-    bbs = _blob_data_service_factory(args)
-    bbs.break_container_lease(
-        container_name=args.get('container_name'),
-        lease_break_period=args.get('lease_break_period'),
-        if_modified_since=args.get('if_modified_since'),
-        if_unmodified_since=args.get('if_unmodified_since'),
-        timeout=args.get('timeout'))
+#@command_table.command('storage container lease break')
+#@command_table.description(L('Break a lock on a container for delete operations.'))
+#@command_table.option(**COMMON_PARAMETERS['container_name'])
+#@command_table.option('--lease-break-period', type=int,
+#                      help=L('Values: {}'.format(lease_duration_values_string)), required=True)
+#@command_table.option(**COMMON_PARAMETERS['account_name'])
+#@command_table.option(**COMMON_PARAMETERS['account_key'])
+#@command_table.option(**COMMON_PARAMETERS['connection_string'])
+#@command_table.option(**COMMON_PARAMETERS['if_modified_since'])
+#@command_table.option(**COMMON_PARAMETERS['if_unmodified_since'])
+#@command_table.option(**COMMON_PARAMETERS['timeout'])
+#def break_container_lease(args):
+#    bbs = _blob_data_service_factory(args)
+#    bbs.break_container_lease(
+#        container_name=args.get('container_name'),
+#        lease_break_period=args.get('lease_break_period'),
+#        if_modified_since=args.get('if_modified_since'),
+#        if_unmodified_since=args.get('if_unmodified_since'),
+#        timeout=args.get('timeout'))
 
 # BLOB COMMANDS
 
@@ -388,10 +411,42 @@ build_operation('storage blob', None, _blob_data_service_factory,
                 [
                     AutoCommandDefinition(BlockBlobService.list_blobs, '[Blob]', 'list'),
                     AutoCommandDefinition(BlockBlobService.delete_blob, None, 'delete'),
-                    AutoCommandDefinition(BlockBlobService.get_blob_properties,
-                                          'BlobProperties', 'show')
+                    AutoCommandDefinition(BlockBlobService.generate_blob_shared_access_signature,
+                                          'String', 'generate-sas'),
+                    AutoCommandDefinition(BlockBlobService.make_blob_url, 'URL', 'url'),
+                    AutoCommandDefinition(BlockBlobService.snapshot_blob, 'Something?', 'snapshot')
                 ],
                 command_table, None, STORAGE_DATA_CLIENT_ARGS)
+
+build_operation('storage blob service-properties', None, _blob_data_service_factory,
+                [
+                    AutoCommandDefinition(BlockBlobService.get_blob_service_properties,
+                                          '[Properties]', 'get'),
+                    AutoCommandDefinition(BlockBlobService.set_blob_service_properties,
+                                          'Something?', 'set')
+                ],
+                command_table, None, STORAGE_DATA_CLIENT_ARGS)
+
+build_operation('storage blob metadata', None, _blob_data_service_factory,
+                [
+                    AutoCommandDefinition(BlockBlobService.get_blob_metadata,
+                                          'Metadata', 'get'),
+                    AutoCommandDefinition(BlockBlobService.set_blob_metadata,
+                                          'Something?', 'set')
+                ],
+                command_table,
+                {
+                    'metadata': COMMON_PARAMETERS['metadata']
+                },
+                STORAGE_DATA_CLIENT_ARGS)
+
+build_operation('storage blob properties', None, _blob_data_service_factory,
+                [
+                    AutoCommandDefinition(BlockBlobService.get_blob_properties,
+                                          '[Properties]', 'get'),
+                    AutoCommandDefinition(BlockBlobService.set_blob_properties,
+                                          'Something?', 'set')
+                ], None, STORAGE_DATA_CLIENT_ARGS)
 
 @command_table.command('storage blob upload-block-blob')
 @command_table.description(L('Upload a block blob to a container.'))
@@ -464,6 +519,25 @@ def exists_blob(args):
         snapshot=args.get('snapshot'),
         timeout=args.get('timeout')))
 
+build_operation('storage blob lease', None, _blob_data_service_factory,
+                [
+                    AutoCommandDefinition(BlockBlobService.acquire_blob_lease, 'String', 'acquire'),
+                    AutoCommandDefinition(BlockBlobService.renew_blob_lease, None, 'renew'),
+                    AutoCommandDefinition(BlockBlobService.release_blob_lease,
+                                          None, 'release'),
+                    AutoCommandDefinition(BlockBlobService.change_blob_lease,
+                                          'LeaseId', 'change'),
+                    AutoCommandDefinition(BlockBlobService.break_blob_lease, 'Something?', 'break')
+                ],
+                command_table, None, STORAGE_DATA_CLIENT_ARGS)
+
+build_operation('storage blob copy', None, _blob_data_service_factory,
+                [
+                    AutoCommandDefinition(BlockBlobService.copy_blob, 'Something?', 'start'),
+                    AutoCommandDefinition(BlockBlobService.abort_copy_blob, None, 'cancel'),
+                ],
+                command_table, None, STORAGE_DATA_CLIENT_ARGS)
+
 #### FILE COMMANDS ################################################################################
 
 # SHARE COMMANDS
@@ -476,14 +550,38 @@ build_operation(
                               '[ShareContents]', 'contents'),
         AutoCommandDefinition(FileService.create_share, 'Boolean', 'create'),
         AutoCommandDefinition(FileService.delete_share, 'Boolean', 'delete'),
-        AutoCommandDefinition(FileService.get_share_metadata, 'Metadata', 'show-metadata'),
-        AutoCommandDefinition(FileService.set_share_metadata, None, 'set-metadata')
+        AutoCommandDefinition(FileService.generate_share_shared_access_signature,
+                              'Sometihng?', 'generate-sas'),
+        AutoCommandDefinition(FileService.get_share_stats, 'Something?', 'stats')
+    ], command_table, None, STORAGE_DATA_CLIENT_ARGS)
+
+build_operation(
+    'storage share metadata', None, _file_data_service_factory,
+    [
+        AutoCommandDefinition(FileService.get_share_metadata, 'Metadata', 'get'),
+        AutoCommandDefinition(FileService.set_share_metadata, None, 'set')
     ],
     command_table,
     {
         'metadata': COMMON_PARAMETERS['metadata']
     },
     STORAGE_DATA_CLIENT_ARGS)
+
+build_operation('storage share properties', None, _file_data_service_factory,
+                [
+                    AutoCommandDefinition(FileService.get_share_properties,
+                                          '[Properties]', 'get'),
+                    AutoCommandDefinition(FileService.set_share_properties,
+                                          'Something?', 'set')
+                ], None, STORAGE_DATA_CLIENT_ARGS)
+
+build_operation(
+    'storage share acl', None, _file_data_service_factory,
+    [
+        AutoCommandDefinition(FileService.set_container_acl, 'Something?', 'set'),
+        AutoCommandDefinition(FileService.get_container_acl, 'Something?', 'get'),
+    ],
+    command_table, None, STORAGE_DATA_CLIENT_ARGS)
 
 @command_table.command('storage share exists')
 @command_table.description(L('Check if a file share exists.'))
@@ -529,6 +627,10 @@ build_operation(
     'storage file', None, _file_data_service_factory,
     [
         AutoCommandDefinition(FileService.delete_file, 'Boolean', 'delete'),
+        AutoCommandDefinition(FileService.resize_file, 'Something?', 'resize'),
+        AutoCommandDefinition(FileService.make_file_url, 'URL', 'url'),
+        AutoCommandDefinition(FileService.generate_file_shared_access_signature,
+                              'String', 'generate-sas')
     ],
     command_table,
     {
@@ -539,6 +641,34 @@ build_operation(
         }
     },
     STORAGE_DATA_CLIENT_ARGS)
+
+build_operation(
+    'storage file metadata', None, _file_data_service_factory,
+    [
+        AutoCommandDefinition(FileService.get_file_metadata, 'Metadata', 'get'),
+        AutoCommandDefinition(FileService.set_file_metadata, None, 'set')
+    ],
+    command_table,
+    {
+        'metadata': COMMON_PARAMETERS['metadata']
+    },
+    STORAGE_DATA_CLIENT_ARGS)
+
+build_operation('storage file properties', None, _file_data_service_factory,
+                [
+                    AutoCommandDefinition(FileService.get_file_properties,
+                                          '[Properties]', 'get'),
+                    AutoCommandDefinition(FileService.set_file_properties,
+                                          'Something?', 'set')
+                ], None, STORAGE_DATA_CLIENT_ARGS)
+
+build_operation('storage file service-properties', None, _file_data_service_factory,
+                [
+                    AutoCommandDefinition(FileService.get_file_service_properties,
+                                          '[Properties]', 'get'),
+                    AutoCommandDefinition(FileService.set_file_service_properties,
+                                          'Something?', 'set')
+                ], None, STORAGE_DATA_CLIENT_ARGS)
 
 @command_table.command('storage file download')
 @command_table.option(**COMMON_PARAMETERS['share_name'])
@@ -585,3 +715,10 @@ def storage_file_upload(args):
                               args.get('file_name'),
                               args.get('local_file_name'),
                               progress_callback=_update_progress)
+
+build_operation('storage file copy', None, _file_data_service_factory,
+                [
+                    AutoCommandDefinition(FileService.copy_file, 'Something?', 'start'),
+                    AutoCommandDefinition(FileService.abort_copy_file, None, 'cancel'),
+                ],
+                command_table, None, STORAGE_DATA_CLIENT_ARGS)
