@@ -35,6 +35,5 @@ def print_summary(failed_modules):
     if failed_modules:
         print(str(len(failed_modules))+" module(s) FAILED...", file=sys.stderr)
         print("Failed modules: " + ', '.join(failed_modules), file=sys.stderr)
-        sys.exit(1)
     else:
         print("OK")

@@ -25,7 +25,7 @@ all_command_modules = get_all_command_modules()
 
 print_heading('Building CLI package...')
 PATH_TO_CLI_PACKAGE = os.path.abspath(os.path.join(os.path.abspath(__file__), '..', '..', '..'))
-path_to_setup = PATH_TO_CLI_PACKAGE+'/setup.py'
+path_to_setup = os.path.join(PATH_TO_CLI_PACKAGE, 'setup.py')
 set_version(path_to_setup)
 success = exec_command('python setup.py sdist', cwd=PATH_TO_CLI_PACKAGE)
 if not success:
@@ -36,7 +36,7 @@ print_heading('Built CLI package.')
 print_heading('Building command package(s)...')
 failed_module_names = []
 for name, fullpath in all_command_modules:
-    path_to_setup = fullpath+'/setup.py'
+    path_to_setup = os.path.join(fullpath, 'setup.py')
     # give package a high version no. so when we install, we install this one
     # and not a version from PyPI
     set_version(path_to_setup)
@@ -46,15 +46,15 @@ for name, fullpath in all_command_modules:
 
 if failed_module_names:
     print_heading('Error building command packages!', file=sys.stderr)
-    # exits script if there are failed modules
     print_summary(failed_module_names)
+    sys.exit(1)
 print_heading('Built command package(s).')
 
 # STEP 2:: Install the packages
 
 print_heading('Installing CLI package...')
 cli_package_dir = os.path.join(PATH_TO_CLI_PACKAGE, 'dist')
-cmd = 'pip install azure-cli --find-links file://{}'.format(cli_package_dir, LIBS_DIR)
+cmd = 'pip install azure-cli --find-links file://{}'.format(cli_package_dir)
 cmd += ' --find-links file://{}'.format(LIBS_DIR) if INCLUDE_LOCAL_LIBS else ''
 success = exec_command(cmd)
 if not success:
@@ -75,7 +75,7 @@ for name, fullpath in all_command_modules:
 if failed_module_names:
     print_heading('Error installing command packages!', file=sys.stderr)
     print_summary(failed_module_names)
-
+    sys.exit(1)
 print_heading('Installed command package(s).')
 
 # STEP 3:: Validate the installation
