@@ -19,7 +19,7 @@ command_table = CommandTable()
 
 # FACTORIES
 
-def _storage_client_factory(*args): # pylint: disable=unused-argument
+def _storage_client_factory(*_):
     return get_mgmt_service_client(StorageManagementClient, StorageManagementClientConfiguration)
 
 def _file_data_service_factory(args):
@@ -65,13 +65,10 @@ def _parse_tags(string):
 def _update_progress(current, total):
     if total:
         message = 'Percent complete: %'
-        num_format = 'xxx.x'
-        num_decimals = len(num_format.split('.', 1)[1]) if '.' in num_format else 0
-        format_string = '{:.%sf}' % num_decimals
-        percent_done = format_string.format(current * 100 / total)
-        padding = len(num_format) - len(percent_done)
-        message += (' ' * padding) + percent_done
+        percent_done = current * 100 / total
+        message += '{: >5.1f}'.format(percent_done)
         print('\b' * len(message) + message, end='', file=stderr)
+        stderr.flush()
 
 COMMON_PARAMETERS = GLOBAL_COMMON_PARAMETERS.copy()
 COMMON_PARAMETERS.update({

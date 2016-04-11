@@ -25,7 +25,7 @@ from azure.cli._locale import L
 
 command_table = CommandTable()
 
-def _network_client_factory(*args): # pylint: disable=unused-argument
+def _network_client_factory(*_):
     return get_mgmt_service_client(NetworkManagementClient, NetworkManagementClientConfiguration)
 
 

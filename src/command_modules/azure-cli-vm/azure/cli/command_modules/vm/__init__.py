@@ -14,7 +14,7 @@ from azure.cli.commands._auto_command import build_operation, AutoCommandDefinit
 from azure.cli.commands import CommandTable, LongRunningOperation
 from azure.cli._locale import L
 
-def _compute_client_factory(*args): # pylint: disable=unused-argument
+def _compute_client_factory(*_):
     return get_mgmt_service_client(ComputeManagementClient, ComputeManagementClientConfiguration)
 
 command_table = CommandTable()
