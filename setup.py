@@ -21,7 +21,6 @@ from codecs import open
 from setuptools import setup
 
 VERSION = '0.0.32'
-INSTALL_FROM_PUBLIC = False
 
 DISABLE_POST_INSTALL = os.environ.get('AZURE_CLI_DISABLE_POST_INSTALL')
 
@@ -29,6 +28,8 @@ PRIVATE_PYPI_URL_ENV_NAME = 'AZURE_CLI_PRIVATE_PYPI_URL'
 PRIVATE_PYPI_URL = os.environ.get(PRIVATE_PYPI_URL_ENV_NAME)
 PRIVATE_PYPI_HOST_ENV_NAME = 'AZURE_CLI_PRIVATE_PYPI_HOST'
 PRIVATE_PYPI_HOST = os.environ.get(PRIVATE_PYPI_HOST_ENV_NAME)
+
+INSTALL_FROM_PRIVATE = bool(PRIVATE_PYPI_URL and PRIVATE_PYPI_HOST)
 
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
@@ -85,10 +86,7 @@ def _post_install(dir):
     from subprocess import check_call
     # Upgrade/update will install if it doesn't exist.
     # We do this so these components are updated when the user updates the CLI.
-    if INSTALL_FROM_PUBLIC:
-        pip.main(['install', '--upgrade', 'azure-cli-component', '--disable-pip-version-check'])
-        check_call(['az', 'component', 'update', '-n', 'profile'])
-    else:
+    if INSTALL_FROM_PRIVATE:
         # use private PyPI server.
         if not PRIVATE_PYPI_URL:
             raise RuntimeError('{} environment variable not set.'.format(PRIVATE_PYPI_URL_ENV_NAME))
@@ -98,6 +96,9 @@ def _post_install(dir):
                 PRIVATE_PYPI_URL, '--trusted-host', PRIVATE_PYPI_HOST,
                 '--disable-pip-version-check'])
         check_call(['az', 'component', 'update', '-n', 'profile', '-p'])
+    else:
+        pip.main(['install', '--upgrade', 'azure-cli-component', '--disable-pip-version-check'])
+        check_call(['az', 'component', 'update', '-n', 'profile'])
 
 class OnInstall(install):
     def run(self):

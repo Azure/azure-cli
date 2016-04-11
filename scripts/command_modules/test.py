@@ -16,8 +16,11 @@ for name, fullpath in all_command_modules:
     if not os.path.isdir(path_to_module):
         skipped_modules.append(name)
         continue
-    print(path_to_module)
-    success = exec_command("python -m unittest discover -s " + path_to_module + " --buffer")
+    command = "python -m unittest discover -s " + path_to_module
+    # append --buffer when running on CI to ensure any unrecorded tests fail instead of hang
+    if os.environ.get('CONTINUOUS_INTEGRATION') and os.environ.get('TRAVIS'):
+        command += " --buffer"
+    success = exec_command(command)
     if not success:
         failed_module_names.append(name)
 

@@ -1,12 +1,17 @@
-import logging
-import re
+from __future__ import print_function
 
+import json
+import logging
+import os
+import re
+import sys
 try:
     import unittest.mock as mock
 except ImportError:
     import mock
 
 from six import StringIO
+from six.moves import input #pylint: disable=redefined-builtin
 import vcr
 
 from azure.cli.main import main as cli
@@ -26,19 +31,25 @@ class CommandTestGenerator(object):
         'x-ms-served-by',
     ]
 
-    def __init__(self, vcr_cassette_dir, test_specs):
-        self.test_specs = test_specs
+    def __init__(self, recording_dir, test_def, env_var):
+        self.test_def = test_def
+        self.recording_dir = recording_dir
         logging.basicConfig()
         logging.getLogger('vcr').setLevel(logging.ERROR)
         self.my_vcr = vcr.VCR(
-            cassette_library_dir=vcr_cassette_dir,
+            cassette_library_dir=recording_dir,
             before_record_request=CommandTestGenerator.before_record_request,
             before_record_response=CommandTestGenerator.before_record_response
         )
+        # use default environment variables if not currently set in the system
+        env_var = env_var or {}
+        for var in env_var.keys():
+            if not os.environ.get(var):
+                os.environ[var] = str(env_var[var])
 
     def generate_tests(self):
-        test_functions = {}
-        def gen_test(test_name, command, expected_result):
+
+        def gen_test(test_name, command, recording_dir):
 
             def load_subscriptions_mock(self): #pylint: disable=unused-argument
                 return [{
@@ -55,24 +66,100 @@ class CommandTestGenerator(object):
             def get_user_access_token_mock(_, _1, _2): #pylint: disable=unused-argument
                 return 'top-secret-token-for-you'
 
-            @mock.patch('azure.cli._profile.Profile.load_cached_subscriptions',
-                        load_subscriptions_mock)
-            @mock.patch('azure.cli._profile.CredsCache.retrieve_token_for_user',
-                        get_user_access_token_mock)
-            @self.my_vcr.use_cassette(test_name + '.yaml',
-                                      filter_headers=CommandTestGenerator.FILTER_HEADERS)
-            def test(self):
+            def _get_expected_results_from_file(recording_dir):
+                expected_results_path = os.path.join(recording_dir, 'expected_results.res')
+                try:
+                    with open(expected_results_path, 'r') as f:
+                        expected_results = json.loads(f.read())
+                except EnvironmentError:
+                    expected_results = {}
+                return expected_results
+
+            def _remove_expected_result(test_name, recording_dir):
+                expected_results = _get_expected_results_from_file(recording_dir)
+                expected_results.pop(test_name, None)
+                _save_expected_results_file(recording_dir, expected_results)
+
+            def _save_expected_results_file(recording_dir, expected_results):
+                expected_results_path = os.path.join(recording_dir, 'expected_results.res')
+                with open(expected_results_path, 'w') as f:
+                    json.dump(expected_results, f, indent=4, sort_keys=True)
+
+            def _test_impl(self, test_name, expected, recording_dir):
+                """ Test implementation, augmented with prompted recording of expected result
+                if not provided. """
                 io = StringIO()
                 cli(command.split(), file=io)
                 actual_result = io.getvalue()
+                if expected is None:
+                    expected_results = _get_expected_results_from_file(recording_dir)
+                    header = '| RECORDED RESULT FOR {} |'.format(test_name)
+                    print('-' * len(header), file=sys.stderr)
+                    print(header, file=sys.stderr)
+                    print('-' * len(header) + '\n', file=sys.stderr)
+                    print(actual_result, file=sys.stderr)
+                    ans = input('Save result for command: \'{}\'? [Y/n]: '.format(command))
+                    if ans and ans.lower()[0] == 'y':
+                        expected_results[test_name] = actual_result
+                        expected = actual_result
+                        _save_expected_results_file(recording_dir, expected_results)
+                    else:
+                        _remove_expected_result(test_name, recording_dir)
+                        expected = None
+
                 io.close()
-                self.assertEqual(actual_result, expected_result)
+                self.assertEqual(actual_result, expected)
+
+            expected_results = _get_expected_results_from_file(recording_dir)
+            expected = expected_results.get(test_name, None)
+
+            # if no yaml, any expected result is invalid and must be rerecorded
+            cassette_path = os.path.join(self.recording_dir, '{}.yaml'.format(test_name))
+            cassette_found = os.path.isfile(cassette_path)
+            if not cassette_found:
+                _remove_expected_result(test_name, recording_dir)
+                expected = None
+
+            # if no expected result, yaml file should be discarded and rerecorded
+            if cassette_found and expected is None:
+                os.remove(cassette_path)
+                cassette_found = os.path.isfile(cassette_path)
+
+            if cassette_found and expected is not None:
+                # playback mode - can be fully automated
+                @mock.patch('azure.cli._profile.Profile.load_cached_subscriptions',
+                            load_subscriptions_mock)
+                @mock.patch('azure.cli._profile.CredsCache.retrieve_token_for_user',
+                            get_user_access_token_mock)
+                @self.my_vcr.use_cassette(cassette_path,
+                                          filter_headers=CommandTestGenerator.FILTER_HEADERS)
+                def test(self):
+                    _test_impl(self, test_name, expected, recording_dir)
+                return test
+            elif not cassette_found and expected is None:
+                # recording needed
+                # if buffer specified and recording needed, automatically fail
+                if '--buffer' in sys.argv:
+                    def null_test(self):
+                        self.fail('No recorded result provided for {}.'.format(test_name))
+                    return null_test
+
+                @self.my_vcr.use_cassette(cassette_path,
+                                          filter_headers=CommandTestGenerator.FILTER_HEADERS)
+                def test(self):
+                    _test_impl(self, test_name, expected, recording_dir)
+            else:
+                # yaml file failed to delete or bug exists
+                raise RuntimeError('Unable to generate test for {} due to inconsistent data. ' \
+                    + 'Please manually remove the associated .yaml cassette and/or the test\'s ' \
+                    + 'entry in expected_results.res and try again.')
             return test
 
-        for test_spec_item in self.test_specs:
-            test_name = 'test_' + test_spec_item['test_name']
-            test_functions[test_name] = gen_test(test_name, test_spec_item['command'],
-                                                 test_spec_item['expected_result'])
+        test_functions = {}
+        for test_def in self.test_def:
+            test_name = 'test_{}'.format(test_def['test_name'])
+            command = test_def['command']
+            test_functions[test_name] = gen_test(test_name, command, self.recording_dir)
         return test_functions
 
     @staticmethod
