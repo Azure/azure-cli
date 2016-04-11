@@ -169,8 +169,7 @@ build_operation(
         AutoCommandDefinition(StorageAccountsOperations.check_name_availability,
                               'Result', 'check-name'),
         AutoCommandDefinition(StorageAccountsOperations.delete, None),
-        AutoCommandDefinition(StorageAccountsOperations.get_properties, 'StorageAccount', 'show'),
-        AutoCommandDefinition(StorageAccountsOperations.list_keys, '[StorageAccountKeys]')
+        AutoCommandDefinition(StorageAccountsOperations.get_properties, 'StorageAccount', 'show')
     ],
     command_table)
 
@@ -196,8 +195,17 @@ def list_accounts(args):
         accounts = smc.storage_accounts.list()
     return list(accounts)
 
+build_operation(
+    'storage account keys',
+    'storage_accounts',
+    _storage_client_factory,
+    [
+        AutoCommandDefinition(StorageAccountsOperations.list_keys, '[StorageAccountKeys]', 'list')
+    ],
+    command_table)
+
 key_options = ['key1', 'key2']
-@command_table.command('storage account renew-keys')
+@command_table.command('storage account keys renew')
 @command_table.description(L('Regenerate one or both keys for a storage account.'))
 @command_table.option(**COMMON_PARAMETERS['resource_group_name'])
 @command_table.option(**COMMON_PARAMETERS['account_name'])
@@ -446,7 +454,8 @@ build_operation('storage blob properties', None, _blob_data_service_factory,
                                           '[Properties]', 'get'),
                     AutoCommandDefinition(BlockBlobService.set_blob_properties,
                                           'Something?', 'set')
-                ], None, STORAGE_DATA_CLIENT_ARGS)
+                ],
+                command_table, None, STORAGE_DATA_CLIENT_ARGS)
 
 @command_table.command('storage blob upload-block-blob')
 @command_table.description(L('Upload a block blob to a container.'))
@@ -573,15 +582,14 @@ build_operation('storage share properties', None, _file_data_service_factory,
                                           '[Properties]', 'get'),
                     AutoCommandDefinition(FileService.set_share_properties,
                                           'Something?', 'set')
-                ], None, STORAGE_DATA_CLIENT_ARGS)
+                ], command_table, None, STORAGE_DATA_CLIENT_ARGS)
 
 build_operation(
     'storage share acl', None, _file_data_service_factory,
     [
-        AutoCommandDefinition(FileService.set_container_acl, 'Something?', 'set'),
-        AutoCommandDefinition(FileService.get_container_acl, 'Something?', 'get'),
-    ],
-    command_table, None, STORAGE_DATA_CLIENT_ARGS)
+        AutoCommandDefinition(FileService.set_share_acl, 'Something?', 'set'),
+        AutoCommandDefinition(FileService.get_share_acl, 'Something?', 'get'),
+    ], command_table, None, STORAGE_DATA_CLIENT_ARGS)
 
 @command_table.command('storage share exists')
 @command_table.description(L('Check if a file share exists.'))
@@ -600,8 +608,13 @@ build_operation(
     [
         AutoCommandDefinition(FileService.create_directory, 'Boolean', 'create'),
         AutoCommandDefinition(FileService.delete_directory, 'Boolean', 'delete'),
-        AutoCommandDefinition(FileService.get_directory_metadata, 'Metadata', 'show-metadata'),
-        AutoCommandDefinition(FileService.set_directory_metadata, None, 'set-metadata')
+    ], command_table, None, STORAGE_DATA_CLIENT_ARGS)
+
+build_operation(
+    'storage directory metadata', None, _file_data_service_factory,
+    [
+        AutoCommandDefinition(FileService.get_directory_metadata, 'Metadata', 'get'),
+        AutoCommandDefinition(FileService.set_directory_metadata, None, 'set')
     ],
     command_table,
     {
@@ -660,7 +673,7 @@ build_operation('storage file properties', None, _file_data_service_factory,
                                           '[Properties]', 'get'),
                     AutoCommandDefinition(FileService.set_file_properties,
                                           'Something?', 'set')
-                ], None, STORAGE_DATA_CLIENT_ARGS)
+                ], command_table, None, STORAGE_DATA_CLIENT_ARGS)
 
 build_operation('storage file service-properties', None, _file_data_service_factory,
                 [
@@ -668,7 +681,7 @@ build_operation('storage file service-properties', None, _file_data_service_fact
                                           '[Properties]', 'get'),
                     AutoCommandDefinition(FileService.set_file_service_properties,
                                           'Something?', 'set')
-                ], None, STORAGE_DATA_CLIENT_ARGS)
+                ], command_table, None, STORAGE_DATA_CLIENT_ARGS)
 
 @command_table.command('storage file download')
 @command_table.option(**COMMON_PARAMETERS['share_name'])
