@@ -1,404 +1,252 @@
-TEST_SPECS = [
+# AZURE CLI STORAGE TEST DEFINITIONS
+
+import os
+
+RESOURCE_GROUP_NAME = 'travistestresourcegroup'
+STORAGE_ACCOUNT_NAME = 'travistestresourcegr3014'
+PROPOSED_LEASE_ID = 'abcdabcd-abcd-abcd-abcd-abcdabcdabcd'
+CHANGED_LEASE_ID = 'dcbadcba-dcba-dcba-dcba-dcbadcbadcba'
+TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
+
+ENV_VAR = {
+    'AZURE_STORAGE_CONNECTION_STRING':('DefaultEndpointsProtocol=https;' +
+                                        'AccountName={};' +
+                                        'AccountKey=blahblah').format(STORAGE_ACCOUNT_NAME)
+}
+
+TEST_DEF = [
+    # STORAGE ACCOUNT TESTS
+    {
+        'test_name': 'storage_account_check_name',
+        'command': 'storage account check-name --name teststorageomega'
+    },
     {
         'test_name': 'storage_account_list',
-        'command': 'storage account list',
-        'expected_result': """Account Type           : Standard_LRS
-Creation Time          : 2016-03-03T23:07:20.837674+00:00
-Custom Domain          : None
-Id                     : /subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/default-applicationinsights-centralus/providers/Microsoft.Storage/storageAccounts/appinsightsstorage2016
-Last Geo Failover Time : None
-Location               : centralus
-Name                   : appinsightsstorage2016
-Primary Location       : centralus
-Provisioning State     : Succeeded
-Resource Group         : default-applicationinsights-centralus
-Secondary Endpoints    : None
-Secondary Location     : None
-Status Of Primary      : Available
-Status Of Secondary    : None
-Type                   : Microsoft.Storage/storageAccounts
-Primary Endpoints      :
-   Blob  : https://appinsightsstorage2016.blob.core.windows.net/
-   File  : https://appinsightsstorage2016.file.core.windows.net/
-   Queue : https://appinsightsstorage2016.queue.core.windows.net/
-   Table : https://appinsightsstorage2016.table.core.windows.net/
-Tags                   :
-   None
-
-Account Type           : Standard_LRS
-Creation Time          : 2016-03-07T04:09:26.379536+00:00
-Custom Domain          : None
-Id                     : /subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/ygvmgroup/providers/Microsoft.Storage/storageAccounts/cli0816b4e1a25171aa14573
-Last Geo Failover Time : None
-Location               : westus
-Name                   : cli0816b4e1a25171aa14573
-Primary Location       : westus
-Provisioning State     : Succeeded
-Resource Group         : ygvmgroup
-Secondary Endpoints    : None
-Secondary Location     : None
-Status Of Primary      : Available
-Status Of Secondary    : None
-Type                   : Microsoft.Storage/storageAccounts
-Primary Endpoints      :
-   Blob  : https://cli0816b4e1a25171aa14573.blob.core.windows.net/
-   File  : https://cli0816b4e1a25171aa14573.file.core.windows.net/
-   Queue : https://cli0816b4e1a25171aa14573.queue.core.windows.net/
-   Table : https://cli0816b4e1a25171aa14573.table.core.windows.net/
-Tags                   :
-   None
-
-Account Type           : Standard_LRS
-Creation Time          : 2016-03-07T04:18:40.989042+00:00
-Custom Domain          : None
-Id                     : /subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/ygvmgroup/providers/Microsoft.Storage/storageAccounts/cli65f4f2b090a22ac614573
-Last Geo Failover Time : None
-Location               : westus
-Name                   : cli65f4f2b090a22ac614573
-Primary Location       : westus
-Provisioning State     : Succeeded
-Resource Group         : ygvmgroup
-Secondary Endpoints    : None
-Secondary Location     : None
-Status Of Primary      : Available
-Status Of Secondary    : None
-Type                   : Microsoft.Storage/storageAccounts
-Primary Endpoints      :
-   Blob  : https://cli65f4f2b090a22ac614573.blob.core.windows.net/
-   File  : https://cli65f4f2b090a22ac614573.file.core.windows.net/
-   Queue : https://cli65f4f2b090a22ac614573.queue.core.windows.net/
-   Table : https://cli65f4f2b090a22ac614573.table.core.windows.net/
-Tags                   :
-   None
-
-Account Type           : Standard_LRS
-Creation Time          : 2016-03-07T04:45:44.904553+00:00
-Custom Domain          : None
-Id                     : /subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/ygvmgroup/providers/Microsoft.Storage/storageAccounts/clie22217d8c158bd9e14573
-Last Geo Failover Time : None
-Location               : westus
-Name                   : clie22217d8c158bd9e14573
-Primary Location       : westus
-Provisioning State     : Succeeded
-Resource Group         : ygvmgroup
-Secondary Endpoints    : None
-Secondary Location     : None
-Status Of Primary      : Available
-Status Of Secondary    : None
-Type                   : Microsoft.Storage/storageAccounts
-Primary Endpoints      :
-   Blob  : https://clie22217d8c158bd9e14573.blob.core.windows.net/
-   File  : https://clie22217d8c158bd9e14573.file.core.windows.net/
-   Queue : https://clie22217d8c158bd9e14573.queue.core.windows.net/
-   Table : https://clie22217d8c158bd9e14573.table.core.windows.net/
-Tags                   :
-   None
-
-Account Type           : Standard_GRS
-Creation Time          : 2016-01-20T23:24:46.225618+00:00
-Custom Domain          : None
-Id                     : /subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst40026/providers/Microsoft.Storage/storageAccounts/clutst20236sto
-Last Geo Failover Time : None
-Location               : westus
-Name                   : clutst20236sto
-Primary Location       : westus
-Provisioning State     : Succeeded
-Resource Group         : clutst40026
-Secondary Endpoints    : None
-Secondary Location     : eastus
-Status Of Primary      : Available
-Status Of Secondary    : Available
-Type                   : Microsoft.Storage/storageAccounts
-Primary Endpoints      :
-   Blob  : https://clutst20236sto.blob.core.windows.net/
-   File  : https://clutst20236sto.file.core.windows.net/
-   Queue : https://clutst20236sto.queue.core.windows.net/
-   Table : https://clutst20236sto.table.core.windows.net/
-Tags                   :
-   None
-
-Account Type           : Standard_GRS
-Creation Time          : 2016-01-21T02:32:09.401535+00:00
-Custom Domain          : None
-Id                     : /subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst41390/providers/Microsoft.Storage/storageAccounts/clutst24982sto
-Last Geo Failover Time : None
-Location               : westus
-Name                   : clutst24982sto
-Primary Location       : westus
-Provisioning State     : Succeeded
-Resource Group         : clutst41390
-Secondary Endpoints    : None
-Secondary Location     : eastus
-Status Of Primary      : Available
-Status Of Secondary    : Available
-Type                   : Microsoft.Storage/storageAccounts
-Primary Endpoints      :
-   Blob  : https://clutst24982sto.blob.core.windows.net/
-   File  : https://clutst24982sto.file.core.windows.net/
-   Queue : https://clutst24982sto.queue.core.windows.net/
-   Table : https://clutst24982sto.table.core.windows.net/
-Tags                   :
-   None
-
-Account Type           : Standard_GRS
-Creation Time          : 2016-01-20T23:11:54.956920+00:00
-Custom Domain          : None
-Id                     : /subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst74333/providers/Microsoft.Storage/storageAccounts/clutst68029sto
-Last Geo Failover Time : None
-Location               : westus
-Name                   : clutst68029sto
-Primary Location       : westus
-Provisioning State     : Succeeded
-Resource Group         : clutst74333
-Secondary Endpoints    : None
-Secondary Location     : eastus
-Status Of Primary      : Available
-Status Of Secondary    : Available
-Type                   : Microsoft.Storage/storageAccounts
-Primary Endpoints      :
-   Blob  : https://clutst68029sto.blob.core.windows.net/
-   File  : https://clutst68029sto.file.core.windows.net/
-   Queue : https://clutst68029sto.queue.core.windows.net/
-   Table : https://clutst68029sto.table.core.windows.net/
-Tags                   :
-   None
-
-Account Type           : Standard_GRS
-Creation Time          : 2016-01-24T04:30:40.942489+00:00
-Custom Domain          : None
-Id                     : /subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst86517/providers/Microsoft.Storage/storageAccounts/clutst74246sto
-Last Geo Failover Time : None
-Location               : westus
-Name                   : clutst74246sto
-Primary Location       : westus
-Provisioning State     : Succeeded
-Resource Group         : clutst86517
-Secondary Endpoints    : None
-Secondary Location     : eastus
-Status Of Primary      : Available
-Status Of Secondary    : Available
-Type                   : Microsoft.Storage/storageAccounts
-Primary Endpoints      :
-   Blob  : https://clutst74246sto.blob.core.windows.net/
-   File  : https://clutst74246sto.file.core.windows.net/
-   Queue : https://clutst74246sto.queue.core.windows.net/
-   Table : https://clutst74246sto.table.core.windows.net/
-Tags                   :
-   None
-
-Account Type           : Standard_GRS
-Creation Time          : 2016-01-20T23:06:56.384289+00:00
-Custom Domain          : None
-Id                     : /subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst29333/providers/Microsoft.Storage/storageAccounts/clutst79708sto
-Last Geo Failover Time : None
-Location               : westus
-Name                   : clutst79708sto
-Primary Location       : westus
-Provisioning State     : Succeeded
-Resource Group         : clutst29333
-Secondary Endpoints    : None
-Secondary Location     : eastus
-Status Of Primary      : Available
-Status Of Secondary    : Available
-Type                   : Microsoft.Storage/storageAccounts
-Primary Endpoints      :
-   Blob  : https://clutst79708sto.blob.core.windows.net/
-   File  : https://clutst79708sto.file.core.windows.net/
-   Queue : https://clutst79708sto.queue.core.windows.net/
-   Table : https://clutst79708sto.table.core.windows.net/
-Tags                   :
-   None
-
-Account Type           : Standard_LRS
-Creation Time          : 2016-01-27T19:19:44.825146+00:00
-Custom Domain          : None
-Id                     : /subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/destanko-test1/providers/Microsoft.Storage/storageAccounts/destanko123
-Last Geo Failover Time : None
-Location               : westus
-Name                   : destanko123
-Primary Location       : westus
-Provisioning State     : Succeeded
-Resource Group         : destanko-test1
-Secondary Endpoints    : None
-Secondary Location     : None
-Status Of Primary      : Available
-Status Of Secondary    : None
-Type                   : Microsoft.Storage/storageAccounts
-Primary Endpoints      :
-   Blob  : https://destanko123.blob.core.windows.net/
-   File  : https://destanko123.file.core.windows.net/
-   Queue : https://destanko123.queue.core.windows.net/
-   Table : https://destanko123.table.core.windows.net/
-Tags                   :
-   None
-
-Account Type           : Standard_LRS
-Creation Time          : 2016-03-25T20:48:28.341265+00:00
-Custom Domain          : None
-Id                     : /subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/ecvm1458938841925rg/providers/Microsoft.Storage/storageAccounts/ecvm1458938841925sa
-Last Geo Failover Time : None
-Location               : southeastasia
-Name                   : ecvm1458938841925sa
-Primary Location       : southeastasia
-Provisioning State     : Succeeded
-Resource Group         : ecvm1458938841925rg
-Secondary Endpoints    : None
-Secondary Location     : None
-Status Of Primary      : Available
-Status Of Secondary    : None
-Type                   : Microsoft.Storage/storageAccounts
-Primary Endpoints      :
-   Blob  : https://ecvm1458938841925sa.blob.core.windows.net/
-   File  : https://ecvm1458938841925sa.file.core.windows.net/
-   Queue : https://ecvm1458938841925sa.queue.core.windows.net/
-   Table : https://ecvm1458938841925sa.table.core.windows.net/
-Tags                   :
-   None
-
-Account Type           : Standard_RAGRS
-Creation Time          : 2016-03-05T00:25:04.704573+00:00
-Custom Domain          : None
-Id                     : /subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/r1/providers/Microsoft.Storage/storageAccounts/stoga2016
-Last Geo Failover Time : None
-Location               : centralus
-Name                   : stoga2016
-Primary Location       : centralus
-Provisioning State     : Succeeded
-Resource Group         : r1
-Secondary Location     : eastus2
-Status Of Primary      : Available
-Status Of Secondary    : Available
-Type                   : Microsoft.Storage/storageAccounts
-Primary Endpoints      :
-   Blob  : https://stoga2016.blob.core.windows.net/
-   File  : https://stoga2016.file.core.windows.net/
-   Queue : https://stoga2016.queue.core.windows.net/
-   Table : https://stoga2016.table.core.windows.net/
-Secondary Endpoints    :
-   Blob  : https://stoga2016-secondary.blob.core.windows.net/
-   File  : None
-   Queue : https://stoga2016-secondary.queue.core.windows.net/
-   Table : https://stoga2016-secondary.table.core.windows.net/
-Tags                   :
-   None
-
-Account Type           : Standard_LRS
-Creation Time          : 2016-03-15T23:03:02.798406+00:00
-Custom Domain          : None
-Id                     : /subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/travistestresourcegroup/providers/Microsoft.Storage/storageAccounts/travistestresourcegr3014
-Last Geo Failover Time : None
-Location               : westus
-Name                   : travistestresourcegr3014
-Primary Location       : westus
-Provisioning State     : Succeeded
-Resource Group         : travistestresourcegroup
-Secondary Endpoints    : None
-Secondary Location     : None
-Status Of Primary      : Available
-Status Of Secondary    : None
-Type                   : Microsoft.Storage/storageAccounts
-Primary Endpoints      :
-   Blob  : https://travistestresourcegr3014.blob.core.windows.net/
-   File  : https://travistestresourcegr3014.file.core.windows.net/
-   Queue : https://travistestresourcegr3014.queue.core.windows.net/
-   Table : https://travistestresourcegr3014.table.core.windows.net/
-Tags                   :
-   Magic : cat
-   Woot  : doot
-
-Account Type           : Standard_LRS
-Creation Time          : 2016-02-29T12:20:49.272057+00:00
-Custom Domain          : None
-Id                     : /subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/xplattestgvmdocker6705/providers/Microsoft.Storage/storageAccounts/xplatstdocker7379
-Last Geo Failover Time : None
-Location               : eastus
-Name                   : xplatstdocker7379
-Primary Location       : eastus
-Provisioning State     : Succeeded
-Resource Group         : xplattestgvmdocker6705
-Secondary Endpoints    : None
-Secondary Location     : None
-Status Of Primary      : Available
-Status Of Secondary    : None
-Type                   : Microsoft.Storage/storageAccounts
-Primary Endpoints      :
-   Blob  : https://xplatstdocker7379.blob.core.windows.net/
-   File  : https://xplatstdocker7379.file.core.windows.net/
-   Queue : https://xplatstdocker7379.queue.core.windows.net/
-   Table : https://xplatstdocker7379.table.core.windows.net/
-Tags                   :
-   None
-
-Account Type           : Standard_LRS
-Creation Time          : 2016-02-18T16:05:59.465716+00:00
-Custom Domain          : None
-Id                     : /subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/xplattestgvmdocker2951/providers/Microsoft.Storage/storageAccounts/xplatstdocker8501
-Last Geo Failover Time : None
-Location               : eastus
-Name                   : xplatstdocker8501
-Primary Location       : eastus
-Provisioning State     : Succeeded
-Resource Group         : xplattestgvmdocker2951
-Secondary Endpoints    : None
-Secondary Location     : None
-Status Of Primary      : Available
-Status Of Secondary    : None
-Type                   : Microsoft.Storage/storageAccounts
-Primary Endpoints      :
-   Blob  : https://xplatstdocker8501.blob.core.windows.net/
-   File  : https://xplatstdocker8501.file.core.windows.net/
-   Queue : https://xplatstdocker8501.queue.core.windows.net/
-   Table : https://xplatstdocker8501.table.core.windows.net/
-Tags                   :
-   None
-
-Account Type           : Standard_LRS
-Creation Time          : 2016-02-29T08:05:22.187272+00:00
-Custom Domain          : None
-Id                     : /subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/xplattestgextension5940/providers/Microsoft.Storage/storageAccounts/xplatstoragext2929
-Last Geo Failover Time : None
-Location               : eastus
-Name                   : xplatstoragext2929
-Primary Location       : eastus
-Provisioning State     : Succeeded
-Resource Group         : xplattestgextension5940
-Secondary Endpoints    : None
-Secondary Location     : None
-Status Of Primary      : Available
-Status Of Secondary    : None
-Type                   : Microsoft.Storage/storageAccounts
-Primary Endpoints      :
-   Blob  : https://xplatstoragext2929.blob.core.windows.net/
-   File  : https://xplatstoragext2929.file.core.windows.net/
-   Queue : https://xplatstoragext2929.queue.core.windows.net/
-   Table : https://xplatstoragext2929.table.core.windows.net/
-Tags                   :
-   None
-
-Account Type           : Standard_LRS
-Creation Time          : 2016-01-21T23:39:02.480290+00:00
-Custom Domain          : None
-Id                     : /subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/xplattestgextension9085/providers/Microsoft.Storage/storageAccounts/xplatstoragext4633
-Last Geo Failover Time : None
-Location               : southeastasia
-Name                   : xplatstoragext4633
-Primary Location       : southeastasia
-Provisioning State     : Succeeded
-Resource Group         : xplattestgextension9085
-Secondary Endpoints    : None
-Secondary Location     : None
-Status Of Primary      : Available
-Status Of Secondary    : None
-Type                   : Microsoft.Storage/storageAccounts
-Primary Endpoints      :
-   Blob  : https://xplatstoragext4633.blob.core.windows.net/
-   File  : https://xplatstoragext4633.file.core.windows.net/
-   Queue : https://xplatstoragext4633.queue.core.windows.net/
-   Table : https://xplatstoragext4633.table.core.windows.net/
-Tags                   :
-   None
-
-
-"""
+        'command': 'storage account list'
+    },
+    {
+        'test_name': 'storage_account_show',
+        'command': 'storage account show --resourcegroup {} --account-name {}'
+            .format(RESOURCE_GROUP_NAME, STORAGE_ACCOUNT_NAME)
+    },
+    {
+        'test_name': 'storage_account_usage',
+        'command': 'storage account usage',
+    },
+    {
+        'test_name': 'storage_account_connection_string',
+        'command': 'storage account connection-string -g {} --account-name {} --use-http'
+            .format(RESOURCE_GROUP_NAME, STORAGE_ACCOUNT_NAME)
+    },
+    {
+        'test_name': 'storage_account_list_keys',
+        'command': 'storage account list-keys -g {} --account-name {}'
+            .format(RESOURCE_GROUP_NAME, STORAGE_ACCOUNT_NAME)
+    },
+    {
+        'test_name': 'storage_account_renew_keys_both',
+        'command': 'storage account renew-keys -g {} --account-name {}'
+            .format(RESOURCE_GROUP_NAME, STORAGE_ACCOUNT_NAME)
+    },
+    {
+        'test_name': 'storage_account_renew_keys_one',
+        'command': 'storage account renew-keys -g {} --account-name {} --key key2'
+            .format(RESOURCE_GROUP_NAME, STORAGE_ACCOUNT_NAME)
+    },
+    # TODO: Enable when item #117262541 is complete
+    #{
+    #    'test_name': 'storage_account_create',
+    #    'command': 'storage account create --type Standard_LRS -l westus -g travistestresourcegroup --account-name teststorageaccount04'
+    #},
+    {
+        'test_name': 'storage_account_set_tags',
+        'command': 'storage account set -g travistestresourcegroup -n teststorageaccount02 --tags foo=bar;cat'
+    },
+    {
+        'test_name': 'storage_account_set_type',
+        'command': 'storage account set -g travistestresourcegroup -n teststorageaccount02 --type Standard_LRS'
+    },
+    {
+        'test_name': 'storage_account_delete',
+        'command': 'storage account delete -g travistestresourcegroup --account-name teststorageaccount04'
+    },
+    # STORAGE CONTAINER TESTS
+    {
+        'test_name': 'storage_container_list',
+        'command': 'storage container list'
+    },
+    {
+        'test_name': 'storage_container_create',
+        'command': 'storage container create --container-name testcontainer01 --fail-on-exist'
+    },
+    {
+        'test_name': 'storage_container_exist',
+        'command': 'storage container exists --container-name testcontainer01'
+    },
+    {
+        'test_name': 'storage_container_show',
+        'command': 'storage container show --container-name testcontainer01'
+    },
+    {
+        'test_name': 'storage_container_lease_acquire',
+        'command': 'storage container lease acquire --lease-duration 60 -c testcontainer01 --if-modified-since {} --proposed-lease-id {}'
+            .format('2016-04-08_12:00:00', PROPOSED_LEASE_ID)
+    },
+    {
+        'test_name': 'storage_container_lease_renew',
+        'command': 'storage container lease renew --container-name testcontainer01 --lease-id {}'
+            .format(PROPOSED_LEASE_ID)
+    },
+    {
+        'test_name': 'storage_container_lease_change',
+        'command': 'storage container lease change --container-name testcontainer01 --lease-id {} --proposed-lease-id {}'
+            .format(PROPOSED_LEASE_ID, CHANGED_LEASE_ID)
+    },
+    {
+        'test_name': 'storage_container_lease_break',
+        'command': 'storage container lease break --container-name testcontainer01 --lease-break-period 30'
+    },
+    {
+        'test_name': 'storage_container_lease_release',
+        'command': 'storage container lease release --container-name testcontainer01 --lease-id {}'
+            .format(CHANGED_LEASE_ID)
+    },
+    {
+        'test_name': 'storage_container_delete',
+        'command': 'storage container delete --container-name testcontainer01 --fail-not-exist'
+    },
+    # STORAGE BLOB TESTS
+    {
+        'test_name': 'storage_blob_upload_block_blob',
+        'command': 'storage blob upload-block-blob -b testblob1 -c testcontainer1234 --upload-from {}'
+            .format(os.path.join(TEST_DIR, 'testfile.rst'))
+    },
+    {
+        'test_name': 'storage_blob_download',
+        'command': 'storage blob download -b testblob1 -c testcontainer1234 --download-to {}'
+            .format(os.path.join(TEST_DIR, 'download-blob.rst'))
+    },
+    {
+        'test_name': 'storage_blob_exists',
+        'command': 'storage blob exists -b testblob1 -c testcontainer1234'
+    },
+    {
+        'test_name': 'storage_blob_list',
+        'command': 'storage blob list --container-name testcontainer1234'
+    },
+    {
+        'test_name': 'storage_blob_show',
+        'command': 'storage blob show --container-name testcontainer1234 --blob-name testblob1'
+    },
+    {
+        'test_name': 'storage_blob_delete',
+        'command': 'storage blob delete --container-name testcontainer1234 --blob-name testblob1'
+    },
+    # STORAGE SHARE TESTS
+    {
+        'test_name': 'storage_share_list',
+        'command': 'storage share list'
+    },
+    {
+        'test_name': 'storage_share_create_simple',
+        'command': 'storage share create --share-name testshare02 --fail-on-exist'
+    },
+    {
+        'test_name': 'storage_share_create_with_metadata',
+        'command': 'storage share create --share-name testshare03 --fail-on-exist --metadata foo=bar;cat=hat'
+    },
+    {
+        'test_name': 'storage_share_exists',
+        'command': 'storage share exists --share-name testshare01'
+    },
+    {
+        'test_name': 'storage_share_contents',
+        'command': 'storage share contents --share-name testshare01'
+    },
+    {
+        'test_name': 'storage_share_contents_with_subdirectory',
+        'command': 'storage share contents --share-name testshare01 --directory-name testdir1'
+    },
+    {
+        'test_name': 'storage_share_delete',
+        'command': 'storage share delete --share-name testshare02 --fail-not-exist'
+    },
+    {
+        'test_name': 'storage_share_set_metadata',
+        'command': 'storage share set-metadata --share-name testshare01 --metadata a=b;c=d'
+    },
+    {
+        'test_name': 'storage_share_show_metadata',
+        'command': 'storage share show-metadata --share-name testshare01'
+    },
+    {
+        'test_name': 'storage_share_clear_metadata',
+        'command': 'storage share set-metadata --share-name testshare01'
+    },
+    # STORAGE DIRECTORY TESTS
+    {
+        'test_name': 'storage_directory_exists',
+        'command': 'storage directory exists --share-name testshare01 --directory-name testdir1'
+    },
+    {
+        'test_name': 'storage_directory_create_simple',
+        'command': 'storage directory create --share-name testshare01 --directory-name tempdir01 --fail-on-exist'
+    },
+    {
+        'test_name': 'storage_directory_create_with_metadata',
+        'command': 'storage directory create --share-name testshare01 --directory-name tempdir02 --fail-on-exist --metadata foo=bar;cat=hat'
+    },
+    {
+        'test_name': 'storage_directory_delete',
+        'command': 'storage directory delete --share-name testshare01 --directory-name tempdir01 --fail-not-exist'
+    },
+    {
+        'test_name': 'storage_directory_set_metadata',
+        'command': 'storage directory set-metadata --share-name testshare01 --directory-name testdir1 --metadata a=b;c=d'
+    },
+    {
+        'test_name': 'storage_directory_show_metadata',
+        'command': 'storage directory show-metadata --share-name testshare01 --directory-name testdir1'
+    },
+    {
+        'test_name': 'storage_directory_clear_metadata',
+        'command': 'storage directory set-metadata --share-name testshare01 --directory-name testdir1'
+    },
+    # STORAGE FILE TESTS
+    {
+        'test_name': 'storage_file_upload_simple',
+        'command': 'storage file upload --share-name testshare01 --local-file-name {} --file-name testfile01.rst'
+            .format(os.path.join(TEST_DIR, 'testfile.rst'))
+    },
+    {
+        'test_name': 'storage_file_exists_simple',
+        'command': 'storage file exists --share-name testshare01 --file-name testfile01.rst'
+    },
+    {
+        'test_name': 'storage_file_download_simple',
+        'command': 'storage file download --share-name testshare01 --file-name testfile01.rst --local-file-name {}'
+            .format(os.path.join(TEST_DIR, 'download-file.rst'))
+    },
+    {
+        'test_name': 'storage_file_delete_simple',
+        'command': 'storage file delete --share-name testshare01 --file-name testfile01.rst'
+    },
+    {
+        'test_name': 'storage_file_upload_with_subdir',
+        'command': 'storage file upload --share-name testshare01 --local-file-name {} --file-name testfile02.rst --directory-name testdir1'
+            .format(os.path.join(TEST_DIR, 'testfile.rst'))
+    },
+    {
+        'test_name': 'storage_file_exists_with_subdir',
+        'command': 'storage file exists --share-name testshare01 --directory-name testdir1 --file-name testfile02.rst'
+    },
+    {
+        'test_name': 'storage_file_download_with_subdir',
+        'command': 'storage file download --share-name testshare01 --directory-name testdir1 --file-name testfile02.rst --local-file-name {}'
+            .format(os.path.join(TEST_DIR, 'download-file-with-subdir.rst'))
+    },
+    {
+        'test_name': 'storage_file_delete_with_subdir',
+        'command': 'storage file delete --share-name testshare01 --directory-name testdir1 --file-name testfile02.rst'
     }
 ]
