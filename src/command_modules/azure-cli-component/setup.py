@@ -37,7 +37,6 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
-    'azure-cli',
     'pip',
 ]
 

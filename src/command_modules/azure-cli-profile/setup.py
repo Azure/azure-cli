@@ -37,7 +37,6 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
-    'azure-cli',
     'azure==2.0.0rc1',
     'adal==0.2.1', #from internal index server.
 ]
