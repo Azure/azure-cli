@@ -8,12 +8,8 @@ import imp
 
 from _common import get_all_command_modules, exec_command, print_summary, COMMAND_MODULE_PREFIX
 
-PRIVATE_PYPI_URL_ENV_NAME = 'AZURE_CLI_PRIVATE_PYPI_URL'
-PRIVATE_PYPI_URL = os.environ.get(PRIVATE_PYPI_URL_ENV_NAME)
-PRIVATE_PYPI_HOST_ENV_NAME = 'AZURE_CLI_PRIVATE_PYPI_HOST'
-PRIVATE_PYPI_HOST = os.environ.get(PRIVATE_PYPI_HOST_ENV_NAME)
-
-include_private_pypi = PRIVATE_PYPI_URL and PRIVATE_PYPI_HOST
+LIBS_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..', '..', '..', 'libs'))
+INCLUDE_LOCAL_LIBS = os.environ.get('AZURE_CLI_INCLUDE_LOCAL_LIBS')
 
 def print_heading(heading, file=None):
     print('=' * len(heading), file=file)
@@ -58,8 +54,8 @@ print_heading('Built command package(s).')
 
 print_heading('Installing CLI package...')
 cli_package_dir = os.path.join(PATH_TO_CLI_PACKAGE, 'dist')
-cmd = 'pip install azure-cli --find-links file://{}'.format(cli_package_dir)
-cmd += ' --extra-index-url {} --trusted-host {}'.format(PRIVATE_PYPI_URL, PRIVATE_PYPI_HOST) if include_private_pypi else ''
+cmd = 'pip install azure-cli --find-links file://{}'.format(cli_package_dir, LIBS_DIR)
+cmd += ' --find-links file://{}'.format(LIBS_DIR) if INCLUDE_LOCAL_LIBS else ''
 success = exec_command(cmd)
 if not success:
     print_heading('Error installing CLI!', file=sys.stderr)
@@ -71,14 +67,13 @@ failed_module_names = []
 for name, fullpath in all_command_modules:
     package_dir = os.path.join(fullpath, 'dist')
     cmd = 'pip install {} --find-links file://{}'.format(name, package_dir)
-    cmd += ' --extra-index-url {} --trusted-host {}'.format(PRIVATE_PYPI_URL, PRIVATE_PYPI_HOST) if include_private_pypi else ''
+    cmd += ' --find-links file://{}'.format(LIBS_DIR) if INCLUDE_LOCAL_LIBS else ''
     success = exec_command(cmd)
     if not success:
         failed_module_names.append(name)
 
 if failed_module_names:
     print_heading('Error installing command packages!', file=sys.stderr)
-    # exits script if there are failed modules
     print_summary(failed_module_names)
 
 print_heading('Installed command package(s).')
