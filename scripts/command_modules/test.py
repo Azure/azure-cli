@@ -25,5 +25,9 @@ for name, fullpath in all_command_modules:
         failed_module_names.append(name)
 
 print_summary(failed_module_names)
+
+if failed_module_names:
+    sys.exit(1)
+
 if skipped_modules:
     print("Modules skipped as no test dir found:", ', '.join(skipped_modules), file=sys.stderr)
