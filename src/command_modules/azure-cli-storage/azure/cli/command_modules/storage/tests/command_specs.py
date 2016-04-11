@@ -135,8 +135,8 @@ TEST_DEF = [
         'command': 'storage blob list --container-name testcontainer1234'
     },
     {
-        'test_name': 'storage_blob_show',
-        'command': 'storage blob show --container-name testcontainer1234 --blob-name testblob1'
+        'test_name': 'storage_blob_properties_get',
+        'command': 'storage blob properties get --container-name testcontainer1234 --blob-name testblob1'
     },
     {
         'test_name': 'storage_blob_delete',
@@ -173,15 +173,15 @@ TEST_DEF = [
     },
     {
         'test_name': 'storage_share_set_metadata',
-        'command': 'storage share set-metadata --share-name testshare01 --metadata a=b;c=d'
+        'command': 'storage share metadata set --share-name testshare01 --metadata a=b;c=d'
     },
     {
         'test_name': 'storage_share_show_metadata',
-        'command': 'storage share show-metadata --share-name testshare01'
+        'command': 'storage share metadata get --share-name testshare01'
     },
     {
         'test_name': 'storage_share_clear_metadata',
-        'command': 'storage share set-metadata --share-name testshare01'
+        'command': 'storage share metadata set --share-name testshare01'
     },
     # STORAGE DIRECTORY TESTS
     {
@@ -202,15 +202,15 @@ TEST_DEF = [
     },
     {
         'test_name': 'storage_directory_set_metadata',
-        'command': 'storage directory set-metadata --share-name testshare01 --directory-name testdir1 --metadata a=b;c=d'
+        'command': 'storage directory metadata set --share-name testshare01 --directory-name testdir1 --metadata a=b;c=d'
     },
     {
         'test_name': 'storage_directory_show_metadata',
-        'command': 'storage directory show-metadata --share-name testshare01 --directory-name testdir1'
+        'command': 'storage directory metadata get --share-name testshare01 --directory-name testdir1'
     },
     {
         'test_name': 'storage_directory_clear_metadata',
-        'command': 'storage directory set-metadata --share-name testshare01 --directory-name testdir1'
+        'command': 'storage directory metadata set --share-name testshare01 --directory-name testdir1'
     },
     # STORAGE FILE TESTS
     {
