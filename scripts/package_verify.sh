@@ -3,8 +3,7 @@ set -e
 export PYTHONPATH=
 virtualenv package-verify-env
 export AZURE_CLI_DISABLE_POST_INSTALL=1
-export AZURE_CLI_PRIVATE_PYPI_URL=http://40.112.211.51:8080
-export AZURE_CLI_PRIVATE_PYPI_HOST=40.112.211.51
+export AZURE_CLI_INCLUDE_LOCAL_LIBS=1
 . package-verify-env/bin/activate
 python scripts/command_modules/package_verify.py
 deactivate
