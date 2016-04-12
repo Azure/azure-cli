@@ -1,3 +1,4 @@
+import time
 from azure.mgmt.network import NetworkManagementClient, NetworkManagementClientConfiguration
 from azure.mgmt.network.operations import (ApplicationGatewaysOperations,
                                            ExpressRouteCircuitAuthorizationsOperations,
@@ -246,28 +247,29 @@ build_operation("network vnet",
                 command_table)
 
 @command_table.command('network vnet create')
-@command_table.description(L('Create or update a virtual network (VNet)'))
-@command_table.option('--resource-group -g', help=L('the resource group name'), required=True)
-@command_table.option('--name -n', help=L('the VNet name'), required=True)
-@command_table.option('--location -l', help=L('the VNet location'), required=True)
-@command_table.option('--address-space -a', metavar='ADDRESS SPACE', help=L('the VNet address-space in CIDR notation or multiple address-spaces, quoted and space-separated'), required=True)
-@command_table.option('--dns-servers -d', metavar='DNS SERVERS', help=L('the VNet DNS servers, quoted and space-separated'))
-def create_update_vnet(args):
-    from azure.mgmt.network.models import AddressSpace, DhcpOptions, VirtualNetwork
+@command_table.description(L('Create a new virtual network.'))
+@command_table.option('--resource-group -g', help=L('the the resource group name'), required=True)
+@command_table.option('--virtualNetworkPrefix',
+        help=L('IP address prefix for the virtual network.'))
+@command_table.option('--subnetName',
+        help=L('Name of the subnet.'))
+@command_table.option('--subnetPrefix',
+        help=L('IP address for the subnet.'))
+@command_table.option('--virtualNetworkName',
+        help=L('Name of the virtual network.'), required=True)
+def create_vnet(args):
+    from azure.cli.command_modules.network.mgmt.lib import ResourceManagementClient, ResourceManagementClientConfiguration
 
-    resource_group = args.get('resource_group')
-    name = args.get('name')
-    location = args.get('location')
-    address_space = AddressSpace(address_prefixes=args.get('address_space').split())
-    dhcp_options = DhcpOptions(dns_servers=args.get('dns_servers').split())
+    smc = get_mgmt_service_client(ResourceManagementClient, ResourceManagementClientConfiguration)
 
-    vnet_settings = VirtualNetwork(location=location,
-                                   address_space=address_space,
-                                   dhcp_options=dhcp_options)
+    poller = smc.vnet.create_or_update(resource_group_name=args.get('resource_group'),
+                                       deployment_name='deployment' + str(time.time()),
+                                       deployment_parameter_virtual_network_prefix_value=args.get('virtualNetworkPrefix'),
+                                       deployment_parameter_subnet_name_value=args.get('subnetName'),
+                                       deployment_parameter_subnet_prefix_value=args.get('subnetPrefix'),
+                                       deployment_parameter_virtual_network_name_value=args.get('virtualNetworkName'))
 
     op = LongRunningOperation('Creating virtual network', 'Virtual network created')
-    smc = _network_client_factory({})
-    poller = smc.virtual_networks.create_or_update(resource_group, name, vnet_settings)
     return op(poller)
 
 @command_table.command('network subnet create')
