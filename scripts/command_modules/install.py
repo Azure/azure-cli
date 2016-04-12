@@ -10,7 +10,7 @@ print("Installing command modules.")
 
 failed_module_names = []
 for name, fullpath in all_command_modules:
-    success = exec_command("pip install -e "+fullpath)
+    success = exec_command("python -m pip install -e "+fullpath)
     if not success:
         failed_module_names.append(name)
 
