@@ -219,7 +219,7 @@ build_operation(
         AutoCommandDefinition(BlockBlobService.set_container_metadata, 'Something?', 'set'),
         AutoCommandDefinition(BlockBlobService.get_container_metadata, 'Something?', 'get'),
     ],
-    command_table, None, STORAGE_DATA_CLIENT_ARGS)
+    command_table, params.METADATA_AUTOCOMMAND_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
 # TODO: update this once enums are supported in commands first-class (task #115175885)
 public_access_types = {'none': None,
@@ -260,50 +260,7 @@ build_operation('storage container lease', None, _blob_data_service_factory,
                     AutoCommandDefinition(BlockBlobService.break_container_lease,
                                           'Something?', 'break')
                 ],
-                command_table, None, STORAGE_DATA_CLIENT_ARGS)
-
-#@command_table.command('storage container lease acquire')
-#@command_table.description(L('Acquire a lock on a container for delete operations.'))
-#@command_table.option(**COMMON_PARAMETERS['container_name'])
-#@command_table.option('--lease-duration',
-#                      help=L('Values: {}'.format(lease_duration_values_string)),
-#                      type=int, required=True)
-#@command_table.option('--proposed-lease-id', help=L('proposed lease id in GUID format'))
-#@command_table.option(**COMMON_PARAMETERS['account_name'])
-#@command_table.option(**COMMON_PARAMETERS['account_key'])
-#@command_table.option(**COMMON_PARAMETERS['connection_string'])
-#@command_table.option(**COMMON_PARAMETERS['if_modified_since'])
-#@command_table.option(**COMMON_PARAMETERS['if_unmodified_since'])
-#@command_table.option(**COMMON_PARAMETERS['timeout'])
-#def acquire_container_lease(args):
-#    bbs = _blob_data_service_factory(args)
-#    return bbs.acquire_container_lease(
-#        container_name=args.get('container_name'),
-#        lease_duration=args.get('lease_duration'),
-#        proposed_lease_id=args.get('proposed_lease_id'),
-#        if_modified_since=args.get('if_modified_since'),
-#        if_unmodified_since=args.get('if_unmodified_since'),
-#        timeout=args.get('timeout'))
-
-#@command_table.command('storage container lease break')
-#@command_table.description(L('Break a lock on a container for delete operations.'))
-#@command_table.option(**COMMON_PARAMETERS['container_name'])
-#@command_table.option('--lease-break-period', type=int,
-#                      help=L('Values: {}'.format(lease_duration_values_string)), required=True)
-#@command_table.option(**COMMON_PARAMETERS['account_name'])
-#@command_table.option(**COMMON_PARAMETERS['account_key'])
-#@command_table.option(**COMMON_PARAMETERS['connection_string'])
-#@command_table.option(**COMMON_PARAMETERS['if_modified_since'])
-#@command_table.option(**COMMON_PARAMETERS['if_unmodified_since'])
-#@command_table.option(**COMMON_PARAMETERS['timeout'])
-#def break_container_lease(args):
-#    bbs = _blob_data_service_factory(args)
-#    bbs.break_container_lease(
-#        container_name=args.get('container_name'),
-#        lease_break_period=args.get('lease_break_period'),
-#        if_modified_since=args.get('if_modified_since'),
-#        if_unmodified_since=args.get('if_unmodified_since'),
-#        timeout=args.get('timeout'))
+                command_table, params.LEASE_AUTOCOMMAND_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
 # BLOB COMMANDS
 
@@ -334,11 +291,7 @@ build_operation('storage blob metadata', None, _blob_data_service_factory,
                     AutoCommandDefinition(BlockBlobService.set_blob_metadata,
                                           'Something?', 'set')
                 ],
-                command_table,
-                {
-                    'metadata': COMMON_PARAMETERS['metadata']
-                },
-                STORAGE_DATA_CLIENT_ARGS)
+                command_table, params.METADATA_AUTOCOMMAND_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
 build_operation('storage blob properties', None, _blob_data_service_factory,
                 [
@@ -430,7 +383,7 @@ build_operation('storage blob lease', None, _blob_data_service_factory,
                                           'LeaseId', 'change'),
                     AutoCommandDefinition(BlockBlobService.break_blob_lease, 'Something?', 'break')
                 ],
-                command_table, None, STORAGE_DATA_CLIENT_ARGS)
+                command_table, params.LEASE_AUTOCOMMAND_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
 build_operation('storage blob copy', None, _blob_data_service_factory,
                 [
@@ -462,11 +415,7 @@ build_operation(
         AutoCommandDefinition(FileService.get_share_metadata, 'Metadata', 'get'),
         AutoCommandDefinition(FileService.set_share_metadata, None, 'set')
     ],
-    command_table,
-    {
-        'metadata': COMMON_PARAMETERS['metadata']
-    },
-    STORAGE_DATA_CLIENT_ARGS)
+    command_table, params.METADATA_AUTOCOMMAND_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
 build_operation('storage share properties', None, _file_data_service_factory,
                 [
@@ -508,11 +457,7 @@ build_operation(
         AutoCommandDefinition(FileService.get_directory_metadata, 'Metadata', 'get'),
         AutoCommandDefinition(FileService.set_directory_metadata, None, 'set')
     ],
-    command_table,
-    {
-        'metadata': COMMON_PARAMETERS['metadata']
-    },
-    STORAGE_DATA_CLIENT_ARGS)
+    command_table, params.METADATA_AUTOCOMMAND_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
 @command_table.command('storage directory exists')
 @command_table.description(L('Check if a directory exists.'))
@@ -553,11 +498,7 @@ build_operation(
         AutoCommandDefinition(FileService.get_file_metadata, 'Metadata', 'get'),
         AutoCommandDefinition(FileService.set_file_metadata, None, 'set')
     ],
-    command_table,
-    {
-        'metadata': COMMON_PARAMETERS['metadata']
-    },
-    STORAGE_DATA_CLIENT_ARGS)
+    command_table, params.METADATA_AUTOCOMMAND_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
 build_operation('storage file properties', None, _file_data_service_factory,
                 [

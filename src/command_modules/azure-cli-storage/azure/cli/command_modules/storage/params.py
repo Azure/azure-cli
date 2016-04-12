@@ -86,6 +86,11 @@ COMMON_PARAMETERS.update({
         'type': _parse_datetime,
         'required': False,
     },
+    'lease_id': {
+        'name': '--lease-id',
+        'metavar': 'LEASE ID',
+        'help': L('Lease ID in GUID format.')        
+    },
     'metadata': {
         'name': '--metadata',
         'metavar': 'METADATA',
@@ -120,4 +125,26 @@ STORAGE_DATA_CLIENT_ARGS = {
     'account_name': COMMON_PARAMETERS['account_name'],
     'account_key': COMMON_PARAMETERS['account_key'],
     'connection_string': COMMON_PARAMETERS['connection_string'],
+}
+
+# COMMON PARAMETER AUTOCOMMAND MASKS
+
+LEASE_AUTOCOMMAND_ALIASES = {
+    'lease_id': COMMON_PARAMETERS['lease_id']
+}
+
+METADATA_AUTOCOMMAND_ALIASES = {
+    'metadata': COMMON_PARAMETERS['metadata']
+}
+
+COPY_AUTOCOMMAND_ALIASES = {
+}
+
+PROPERTIES_AUTOCOMMAND_ALIASES = {
+}
+
+SERVICE_PROPERTIES_AUTOCOMMAND_ALIASES = {
+}
+
+ACL_AUTOCOMMAND_ALIASES = {
 }
