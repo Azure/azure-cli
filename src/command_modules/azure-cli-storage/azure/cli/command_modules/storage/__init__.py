@@ -1,5 +1,4 @@
 from __future__ import print_function
-from datetime import datetime
 from os import environ
 from sys import stderr
 
@@ -15,7 +14,7 @@ from azure.cli.commands._command_creation import get_mgmt_service_client, get_da
 from azure.cli.commands._auto_command import build_operation, AutoCommandDefinition
 from azure.cli._locale import L
 
-from .params import COMMON_PARAMETERS, STORAGE_DATA_CLIENT_ARGS, _parse_datetime
+from .params import PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS, _parse_datetime
 
 command_table = CommandTable()
 
@@ -52,7 +51,7 @@ def _update_progress(current, total):
         print('\b' * len(message) + message, end='', file=stderr)
         stderr.flush()
 
-# ACCOUNT COMMANDS
+#### ACCOUNT COMMANDS #############################################################################
 
 build_operation(
     'storage account',
@@ -63,8 +62,7 @@ build_operation(
                               'Result', 'check-name'),
         AutoCommandDefinition(StorageAccountsOperations.delete, None),
         AutoCommandDefinition(StorageAccountsOperations.get_properties, 'StorageAccount', 'show')
-    ],
-    command_table)
+    ], command_table, PARAMETER_ALIASES)
 
 build_operation(
     'storage account', None, _cloud_storage_account_service_factory,
@@ -75,7 +73,7 @@ build_operation(
     command_table, None, STORAGE_DATA_CLIENT_ARGS)
 
 @command_table.command('storage account list', description=L('List storage accounts.'))
-@command_table.option(**COMMON_PARAMETERS['optional_resource_group_name'])
+@command_table.option(**PARAMETER_ALIASES['optional_resource_group_name'])
 def list_accounts(args):
     from azure.mgmt.storage.models import StorageAccount
     from msrestazure.azure_active_directory import UserPassCredentials
@@ -93,14 +91,13 @@ build_operation(
     _storage_client_factory,
     [
         AutoCommandDefinition(StorageAccountsOperations.list_keys, '[StorageAccountKeys]', 'list')
-    ],
-    command_table)
+    ], command_table, PARAMETER_ALIASES)
 
 key_options = ['key1', 'key2']
 @command_table.command('storage account keys renew')
 @command_table.description(L('Regenerate one or both keys for a storage account.'))
-@command_table.option(**COMMON_PARAMETERS['resource_group_name'])
-@command_table.option(**COMMON_PARAMETERS['account_name'])
+@command_table.option(**PARAMETER_ALIASES['resource_group_name'])
+@command_table.option(**PARAMETER_ALIASES['account_name'])
 @command_table.option('--key -y', default=key_options,
                       choices=key_options, help=L('Key to renew'))
 def renew_account_keys(args):
@@ -122,8 +119,8 @@ def show_account_usage(_):
 
 @command_table.command('storage account connection-string')
 @command_table.description(L('Show the connection string for a storage account.'))
-@command_table.option(**COMMON_PARAMETERS['resource_group_name'])
-@command_table.option(**COMMON_PARAMETERS['account_name_required'])
+@command_table.option(**PARAMETER_ALIASES['resource_group_name'])
+@command_table.option(**PARAMETER_ALIASES['account_name_required'])
 @command_table.option('--use-http', action='store_const', const='http', default='https',
                       help=L('use http as the default endpoint protocol'))
 def show_storage_connection_string(args):
@@ -147,11 +144,11 @@ storage_account_types = {'Standard_LRS': AccountType.standard_lrs,
 
 @command_table.command('storage account create')
 @command_table.description(L('Create a storage account.'))
-@command_table.option(**COMMON_PARAMETERS['resource_group_name'])
-@command_table.option(**COMMON_PARAMETERS['account_name_required'])
-@command_table.option(**COMMON_PARAMETERS['location'])
+@command_table.option(**PARAMETER_ALIASES['resource_group_name'])
+@command_table.option(**PARAMETER_ALIASES['account_name_required'])
+@command_table.option(**PARAMETER_ALIASES['location'])
 @command_table.option('--type', choices=storage_account_types.keys(), required=True)
-@command_table.option(**COMMON_PARAMETERS['tags'])
+@command_table.option(**PARAMETER_ALIASES['tags'])
 def create_account(args):
     from azure.mgmt.storage.models import StorageAccountCreateParameters
     smc = _storage_client_factory({})
@@ -169,11 +166,11 @@ def create_account(args):
 
 @command_table.command('storage account set')
 @command_table.description(L('Update storage account property (only one at a time).'))
-@command_table.option(**COMMON_PARAMETERS['resource_group_name'])
-@command_table.option(**COMMON_PARAMETERS['account_name_required'])
+@command_table.option(**PARAMETER_ALIASES['resource_group_name'])
+@command_table.option(**PARAMETER_ALIASES['account_name_required'])
 @command_table.option('--type',
                       choices=storage_account_types.keys())
-@command_table.option(**COMMON_PARAMETERS['tags'])
+@command_table.option(**PARAMETER_ALIASES['tags'])
 @command_table.option('--custom-domain', help=L('the custom domain name'))
 @command_table.option('--subdomain', help=L('use indirect CNAME validation'))
 def set_account(args):
@@ -202,24 +199,21 @@ build_operation(
         AutoCommandDefinition(BlockBlobService.create_container, None, 'create'),
         AutoCommandDefinition(BlockBlobService.generate_container_shared_access_signature,
                               'String', 'generate-sas')
-    ],
-    command_table, None, STORAGE_DATA_CLIENT_ARGS)
+    ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
 build_operation(
     'storage container acl', None, _blob_data_service_factory,
     [
         AutoCommandDefinition(BlockBlobService.set_container_acl, 'Something?', 'set'),
         AutoCommandDefinition(BlockBlobService.get_container_acl, 'Something?', 'get'),
-    ],
-    command_table, None, STORAGE_DATA_CLIENT_ARGS)
+    ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
 build_operation(
     'storage container metadata', None, _blob_data_service_factory,
     [
         AutoCommandDefinition(BlockBlobService.set_container_metadata, 'Something?', 'set'),
         AutoCommandDefinition(BlockBlobService.get_container_metadata, 'Something?', 'get'),
-    ],
-    command_table, params.METADATA_AUTOCOMMAND_ALIASES, STORAGE_DATA_CLIENT_ARGS)
+    ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
 # TODO: update this once enums are supported in commands first-class (task #115175885)
 public_access_types = {'none': None,
@@ -228,13 +222,13 @@ public_access_types = {'none': None,
 
 @command_table.command('storage container exists')
 @command_table.description(L('Check if a storage container exists.'))
-@command_table.option(**COMMON_PARAMETERS['container_name'])
-@command_table.option(**COMMON_PARAMETERS['account_name'])
-@command_table.option(**COMMON_PARAMETERS['account_key'])
-@command_table.option(**COMMON_PARAMETERS['connection_string'])
+@command_table.option(**PARAMETER_ALIASES['container_name'])
+@command_table.option(**PARAMETER_ALIASES['account_name'])
+@command_table.option(**PARAMETER_ALIASES['account_key'])
+@command_table.option(**PARAMETER_ALIASES['connection_string'])
 @command_table.option('--snapshot', type=_parse_datetime,
                       help=L('UTC datetime value which specifies a snapshot'))
-@command_table.option(**COMMON_PARAMETERS['timeout'])
+@command_table.option(**PARAMETER_ALIASES['timeout'])
 def exists_container(args):
     bbs = _blob_data_service_factory(args)
     return str(bbs.exists(
@@ -248,68 +242,58 @@ lease_duration_values_string = 'Between {} and {} seconds. ({} for infinite)'.fo
     lease_duration_values['max'],
     lease_duration_values['infinite'])
 
-build_operation('storage container lease', None, _blob_data_service_factory,
-                [
-                    AutoCommandDefinition(BlockBlobService.acquire_container_lease,
-                                          'String', 'acquire'),
-                    AutoCommandDefinition(BlockBlobService.renew_container_lease, None, 'renew'),
-                    AutoCommandDefinition(BlockBlobService.release_container_lease,
-                                          None, 'release'),
-                    AutoCommandDefinition(BlockBlobService.change_container_lease,
-                                          'LeaseId', 'change'),
-                    AutoCommandDefinition(BlockBlobService.break_container_lease,
-                                          'Something?', 'break')
-                ],
-                command_table, params.LEASE_AUTOCOMMAND_ALIASES, STORAGE_DATA_CLIENT_ARGS)
+build_operation(
+    'storage container lease', None, _blob_data_service_factory,
+    [
+        AutoCommandDefinition(BlockBlobService.acquire_container_lease, 'String', 'acquire'),
+        AutoCommandDefinition(BlockBlobService.renew_container_lease, None, 'renew'),
+        AutoCommandDefinition(BlockBlobService.release_container_lease, None, 'release'),
+        AutoCommandDefinition(BlockBlobService.change_container_lease, 'LeaseId', 'change'),
+        AutoCommandDefinition(BlockBlobService.break_container_lease, 'Something?', 'break')
+    ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
 # BLOB COMMANDS
 
-build_operation('storage blob', None, _blob_data_service_factory,
-                [
-                    AutoCommandDefinition(BlockBlobService.list_blobs, '[Blob]', 'list'),
-                    AutoCommandDefinition(BlockBlobService.delete_blob, None, 'delete'),
-                    AutoCommandDefinition(BlockBlobService.generate_blob_shared_access_signature,
-                                          'String', 'generate-sas'),
-                    AutoCommandDefinition(BlockBlobService.make_blob_url, 'URL', 'url'),
-                    AutoCommandDefinition(BlockBlobService.snapshot_blob, 'Something?', 'snapshot')
-                ],
-                command_table, None, STORAGE_DATA_CLIENT_ARGS)
+build_operation(
+    'storage blob', None, _blob_data_service_factory,
+    [
+        AutoCommandDefinition(BlockBlobService.list_blobs, '[Blob]', 'list'),
+        AutoCommandDefinition(BlockBlobService.delete_blob, None, 'delete'),
+        AutoCommandDefinition(BlockBlobService.generate_blob_shared_access_signature,
+                                'String', 'generate-sas'),
+        AutoCommandDefinition(BlockBlobService.make_blob_url, 'URL', 'url'),
+        AutoCommandDefinition(BlockBlobService.snapshot_blob, 'Something?', 'snapshot')
+    ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
-build_operation('storage blob service-properties', None, _blob_data_service_factory,
-                [
-                    AutoCommandDefinition(BlockBlobService.get_blob_service_properties,
-                                          '[Properties]', 'get'),
-                    AutoCommandDefinition(BlockBlobService.set_blob_service_properties,
-                                          'Something?', 'set')
-                ],
-                command_table, None, STORAGE_DATA_CLIENT_ARGS)
+build_operation(
+    'storage blob service-properties', None, _blob_data_service_factory,
+    [
+        AutoCommandDefinition(BlockBlobService.get_blob_service_properties, '[Properties]', 'get'),
+        AutoCommandDefinition(BlockBlobService.set_blob_service_properties, 'Something?', 'set')
+    ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
-build_operation('storage blob metadata', None, _blob_data_service_factory,
-                [
-                    AutoCommandDefinition(BlockBlobService.get_blob_metadata,
-                                          'Metadata', 'get'),
-                    AutoCommandDefinition(BlockBlobService.set_blob_metadata,
-                                          'Something?', 'set')
-                ],
-                command_table, params.METADATA_AUTOCOMMAND_ALIASES, STORAGE_DATA_CLIENT_ARGS)
+build_operation(
+    'storage blob metadata', None, _blob_data_service_factory,
+    [
+        AutoCommandDefinition(BlockBlobService.get_blob_metadata, 'Metadata', 'get'),
+        AutoCommandDefinition(BlockBlobService.set_blob_metadata, 'Something?', 'set')
+    ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
-build_operation('storage blob properties', None, _blob_data_service_factory,
-                [
-                    AutoCommandDefinition(BlockBlobService.get_blob_properties,
-                                          '[Properties]', 'get'),
-                    AutoCommandDefinition(BlockBlobService.set_blob_properties,
-                                          'Something?', 'set')
-                ],
-                command_table, None, STORAGE_DATA_CLIENT_ARGS)
+build_operation(
+    'storage blob properties', None, _blob_data_service_factory,
+    [
+        AutoCommandDefinition(BlockBlobService.get_blob_properties, '[Properties]', 'get'),
+        AutoCommandDefinition(BlockBlobService.set_blob_properties, 'Something?', 'set')
+    ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
 @command_table.command('storage blob upload-block-blob')
 @command_table.description(L('Upload a block blob to a container.'))
-@command_table.option(**COMMON_PARAMETERS['container_name'])
-@command_table.option(**COMMON_PARAMETERS['blob_name'])
+@command_table.option(**PARAMETER_ALIASES['container_name'])
+@command_table.option(**PARAMETER_ALIASES['blob_name'])
 @command_table.option('--upload-from', required=True)
-@command_table.option(**COMMON_PARAMETERS['account_name'])
-@command_table.option(**COMMON_PARAMETERS['account_key'])
-@command_table.option(**COMMON_PARAMETERS['connection_string'])
+@command_table.option(**PARAMETER_ALIASES['account_name'])
+@command_table.option(**PARAMETER_ALIASES['account_key'])
+@command_table.option(**PARAMETER_ALIASES['connection_string'])
 @command_table.option('--container.public-access', default=None,
                       choices=public_access_types.keys(),
                       type=lambda x: public_access_types.get(x, ValueError))
@@ -340,12 +324,12 @@ def create_block_blob(args):
 
 @command_table.command('storage blob download')
 @command_table.description(L('Download the specified blob.'))
-@command_table.option(**COMMON_PARAMETERS['container_name'])
-@command_table.option(**COMMON_PARAMETERS['blob_name'])
+@command_table.option(**PARAMETER_ALIASES['container_name'])
+@command_table.option(**PARAMETER_ALIASES['blob_name'])
 @command_table.option('--download-to', help=L('the file path to download to'), required=True)
-@command_table.option(**COMMON_PARAMETERS['account_name'])
-@command_table.option(**COMMON_PARAMETERS['account_key'])
-@command_table.option(**COMMON_PARAMETERS['connection_string'])
+@command_table.option(**PARAMETER_ALIASES['account_name'])
+@command_table.option(**PARAMETER_ALIASES['account_key'])
+@command_table.option(**PARAMETER_ALIASES['connection_string'])
 def download_blob(args):
     bbs = _blob_data_service_factory(args)
 
@@ -357,14 +341,14 @@ def download_blob(args):
 
 @command_table.command('storage blob exists')
 @command_table.description(L('Check if a storage blob exists.'))
-@command_table.option(**COMMON_PARAMETERS['container_name'])
-@command_table.option(**COMMON_PARAMETERS['blob_name'])
-@command_table.option(**COMMON_PARAMETERS['account_name'])
-@command_table.option(**COMMON_PARAMETERS['account_key'])
-@command_table.option(**COMMON_PARAMETERS['connection_string'])
+@command_table.option(**PARAMETER_ALIASES['container_name'])
+@command_table.option(**PARAMETER_ALIASES['blob_name'])
+@command_table.option(**PARAMETER_ALIASES['account_name'])
+@command_table.option(**PARAMETER_ALIASES['account_key'])
+@command_table.option(**PARAMETER_ALIASES['connection_string'])
 @command_table.option('--snapshot', type=_parse_datetime,
                       help=L('UTC datetime value which specifies a snapshot'))
-@command_table.option(**COMMON_PARAMETERS['timeout'])
+@command_table.option(**PARAMETER_ALIASES['timeout'])
 def exists_blob(args):
     bbs = _blob_data_service_factory(args)
     return str(bbs.exists(
@@ -373,24 +357,22 @@ def exists_blob(args):
         snapshot=args.get('snapshot'),
         timeout=args.get('timeout')))
 
-build_operation('storage blob lease', None, _blob_data_service_factory,
-                [
-                    AutoCommandDefinition(BlockBlobService.acquire_blob_lease, 'String', 'acquire'),
-                    AutoCommandDefinition(BlockBlobService.renew_blob_lease, None, 'renew'),
-                    AutoCommandDefinition(BlockBlobService.release_blob_lease,
-                                          None, 'release'),
-                    AutoCommandDefinition(BlockBlobService.change_blob_lease,
-                                          'LeaseId', 'change'),
-                    AutoCommandDefinition(BlockBlobService.break_blob_lease, 'Something?', 'break')
-                ],
-                command_table, params.LEASE_AUTOCOMMAND_ALIASES, STORAGE_DATA_CLIENT_ARGS)
+build_operation(
+    'storage blob lease', None, _blob_data_service_factory,
+    [
+        AutoCommandDefinition(BlockBlobService.acquire_blob_lease, 'String', 'acquire'),
+        AutoCommandDefinition(BlockBlobService.renew_blob_lease, None, 'renew'),
+        AutoCommandDefinition(BlockBlobService.release_blob_lease, None, 'release'),
+        AutoCommandDefinition(BlockBlobService.change_blob_lease, 'LeaseId', 'change'),
+        AutoCommandDefinition(BlockBlobService.break_blob_lease, 'Something?', 'break')
+    ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
-build_operation('storage blob copy', None, _blob_data_service_factory,
-                [
-                    AutoCommandDefinition(BlockBlobService.copy_blob, 'Something?', 'start'),
-                    AutoCommandDefinition(BlockBlobService.abort_copy_blob, None, 'cancel'),
-                ],
-                command_table, None, STORAGE_DATA_CLIENT_ARGS)
+build_operation(
+    'storage blob copy', None, _blob_data_service_factory,
+    [
+        AutoCommandDefinition(BlockBlobService.copy_blob, 'Something?', 'start'),
+        AutoCommandDefinition(BlockBlobService.abort_copy_blob, None, 'cancel'),
+    ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
 #### FILE COMMANDS ################################################################################
 
@@ -407,37 +389,35 @@ build_operation(
         AutoCommandDefinition(FileService.generate_share_shared_access_signature,
                               'Sometihng?', 'generate-sas'),
         AutoCommandDefinition(FileService.get_share_stats, 'Something?', 'stats')
-    ], command_table, None, STORAGE_DATA_CLIENT_ARGS)
+    ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
 build_operation(
     'storage share metadata', None, _file_data_service_factory,
     [
         AutoCommandDefinition(FileService.get_share_metadata, 'Metadata', 'get'),
         AutoCommandDefinition(FileService.set_share_metadata, None, 'set')
-    ],
-    command_table, params.METADATA_AUTOCOMMAND_ALIASES, STORAGE_DATA_CLIENT_ARGS)
+    ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
-build_operation('storage share properties', None, _file_data_service_factory,
-                [
-                    AutoCommandDefinition(FileService.get_share_properties,
-                                          '[Properties]', 'get'),
-                    AutoCommandDefinition(FileService.set_share_properties,
-                                          'Something?', 'set')
-                ], command_table, None, STORAGE_DATA_CLIENT_ARGS)
+build_operation(
+    'storage share properties', None, _file_data_service_factory,
+    [
+        AutoCommandDefinition(FileService.get_share_properties, '[Properties]', 'get'),
+        AutoCommandDefinition(FileService.set_share_properties, 'Something?', 'set')
+    ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
 build_operation(
     'storage share acl', None, _file_data_service_factory,
     [
         AutoCommandDefinition(FileService.set_share_acl, 'Something?', 'set'),
         AutoCommandDefinition(FileService.get_share_acl, 'Something?', 'get'),
-    ], command_table, None, STORAGE_DATA_CLIENT_ARGS)
+    ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
 @command_table.command('storage share exists')
 @command_table.description(L('Check if a file share exists.'))
-@command_table.option(**COMMON_PARAMETERS['share_name'])
-@command_table.option(**COMMON_PARAMETERS['account_name'])
-@command_table.option(**COMMON_PARAMETERS['account_key'])
-@command_table.option(**COMMON_PARAMETERS['connection_string'])
+@command_table.option(**PARAMETER_ALIASES['share_name'])
+@command_table.option(**PARAMETER_ALIASES['account_name'])
+@command_table.option(**PARAMETER_ALIASES['account_key'])
+@command_table.option(**PARAMETER_ALIASES['connection_string'])
 def exist_share(args):
     fsc = _file_data_service_factory(args)
     return str(fsc.exists(share_name=args.get('share_name')))
@@ -449,23 +429,22 @@ build_operation(
     [
         AutoCommandDefinition(FileService.create_directory, 'Boolean', 'create'),
         AutoCommandDefinition(FileService.delete_directory, 'Boolean', 'delete'),
-    ], command_table, None, STORAGE_DATA_CLIENT_ARGS)
+    ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
 build_operation(
     'storage directory metadata', None, _file_data_service_factory,
     [
         AutoCommandDefinition(FileService.get_directory_metadata, 'Metadata', 'get'),
         AutoCommandDefinition(FileService.set_directory_metadata, None, 'set')
-    ],
-    command_table, params.METADATA_AUTOCOMMAND_ALIASES, STORAGE_DATA_CLIENT_ARGS)
+    ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
 @command_table.command('storage directory exists')
 @command_table.description(L('Check if a directory exists.'))
-@command_table.option(**COMMON_PARAMETERS['share_name'])
+@command_table.option(**PARAMETER_ALIASES['share_name'])
 @command_table.option('--directory-name -d', help=L('the directory name'), required=True)
-@command_table.option(**COMMON_PARAMETERS['account_name'])
-@command_table.option(**COMMON_PARAMETERS['account_key'])
-@command_table.option(**COMMON_PARAMETERS['connection_string'])
+@command_table.option(**PARAMETER_ALIASES['account_name'])
+@command_table.option(**PARAMETER_ALIASES['account_key'])
+@command_table.option(**PARAMETER_ALIASES['connection_string'])
 def exist_directory(args):
     fsc = _file_data_service_factory(args)
     return str(fsc.exists(share_name=args.get('share_name'),
@@ -481,49 +460,37 @@ build_operation(
         AutoCommandDefinition(FileService.make_file_url, 'URL', 'url'),
         AutoCommandDefinition(FileService.generate_file_shared_access_signature,
                               'String', 'generate-sas')
-    ],
-    command_table,
-    {
-        'directory_name': {
-            'name': '--directory-name -d',
-            'help': L('the directory to delete'),
-            'required': False
-        }
-    },
-    STORAGE_DATA_CLIENT_ARGS)
+    ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
 build_operation(
     'storage file metadata', None, _file_data_service_factory,
     [
         AutoCommandDefinition(FileService.get_file_metadata, 'Metadata', 'get'),
         AutoCommandDefinition(FileService.set_file_metadata, None, 'set')
-    ],
-    command_table, params.METADATA_AUTOCOMMAND_ALIASES, STORAGE_DATA_CLIENT_ARGS)
+    ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
-build_operation('storage file properties', None, _file_data_service_factory,
-                [
-                    AutoCommandDefinition(FileService.get_file_properties,
-                                          '[Properties]', 'get'),
-                    AutoCommandDefinition(FileService.set_file_properties,
-                                          'Something?', 'set')
-                ], command_table, None, STORAGE_DATA_CLIENT_ARGS)
+build_operation(
+    'storage file properties', None, _file_data_service_factory,
+    [
+        AutoCommandDefinition(FileService.get_file_properties, '[Properties]', 'get'),
+        AutoCommandDefinition(FileService.set_file_properties, 'Something?', 'set')
+    ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
-build_operation('storage file service-properties', None, _file_data_service_factory,
-                [
-                    AutoCommandDefinition(FileService.get_file_service_properties,
-                                          '[Properties]', 'get'),
-                    AutoCommandDefinition(FileService.set_file_service_properties,
-                                          'Something?', 'set')
-                ], command_table, None, STORAGE_DATA_CLIENT_ARGS)
+build_operation(
+    'storage file service-properties', None, _file_data_service_factory,
+    [
+        AutoCommandDefinition(FileService.get_file_service_properties, '[Properties]', 'get'),
+        AutoCommandDefinition(FileService.set_file_service_properties, 'Something?', 'set')
+    ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
 @command_table.command('storage file download')
-@command_table.option(**COMMON_PARAMETERS['share_name'])
+@command_table.option(**PARAMETER_ALIASES['share_name'])
 @command_table.option('--file-name -f', help=L('the file name'), required=True)
 @command_table.option('--local-file-name', help=L('the path to the local file'), required=True)
 @command_table.option('--directory-name -d', help=L('the directory name'))
-@command_table.option(**COMMON_PARAMETERS['account_name'])
-@command_table.option(**COMMON_PARAMETERS['account_key'])
-@command_table.option(**COMMON_PARAMETERS['connection_string'])
+@command_table.option(**PARAMETER_ALIASES['account_name'])
+@command_table.option(**PARAMETER_ALIASES['account_key'])
+@command_table.option(**PARAMETER_ALIASES['connection_string'])
 def storage_file_download(args):
     fsc = _file_data_service_factory(args)
     fsc.get_file_to_path(args.get('share_name'),
@@ -534,12 +501,12 @@ def storage_file_download(args):
 
 @command_table.command('storage file exists')
 @command_table.description(L('Check if a file exists.'))
-@command_table.option(**COMMON_PARAMETERS['share_name'])
+@command_table.option(**PARAMETER_ALIASES['share_name'])
 @command_table.option('--file-name -f', help=L('the file name to check'), required=True)
 @command_table.option('--directory-name -d', help=L('subdirectory path to the file'))
-@command_table.option(**COMMON_PARAMETERS['account_name'])
-@command_table.option(**COMMON_PARAMETERS['account_key'])
-@command_table.option(**COMMON_PARAMETERS['connection_string'])
+@command_table.option(**PARAMETER_ALIASES['account_name'])
+@command_table.option(**PARAMETER_ALIASES['account_key'])
+@command_table.option(**PARAMETER_ALIASES['connection_string'])
 def exist_file(args):
     fsc = _file_data_service_factory(args)
     return str(fsc.exists(share_name=args.get('share_name'),
@@ -547,13 +514,13 @@ def exist_file(args):
                           file_name=args.get('file_name')))
 
 @command_table.command('storage file upload')
-@command_table.option(**COMMON_PARAMETERS['share_name'])
+@command_table.option(**PARAMETER_ALIASES['share_name'])
 @command_table.option('--file-name -f', help=L('the destination file name'), required=True)
 @command_table.option('--local-file-name', help=L('the file name to upload'), required=True)
 @command_table.option('--directory-name -d', help=L('the destination directory to upload to'))
-@command_table.option(**COMMON_PARAMETERS['account_name'])
-@command_table.option(**COMMON_PARAMETERS['account_key'])
-@command_table.option(**COMMON_PARAMETERS['connection_string'])
+@command_table.option(**PARAMETER_ALIASES['account_name'])
+@command_table.option(**PARAMETER_ALIASES['account_key'])
+@command_table.option(**PARAMETER_ALIASES['connection_string'])
 def storage_file_upload(args):
     fsc = _file_data_service_factory(args)
     fsc.create_file_from_path(args.get('share_name'),
@@ -562,9 +529,9 @@ def storage_file_upload(args):
                               args.get('local_file_name'),
                               progress_callback=_update_progress)
 
-build_operation('storage file copy', None, _file_data_service_factory,
-                [
-                    AutoCommandDefinition(FileService.copy_file, 'Something?', 'start'),
-                    AutoCommandDefinition(FileService.abort_copy_file, None, 'cancel'),
-                ],
-                command_table, None, STORAGE_DATA_CLIENT_ARGS)
+build_operation(
+    'storage file copy', None, _file_data_service_factory,
+    [
+        AutoCommandDefinition(FileService.copy_file, 'Something?', 'start'),
+        AutoCommandDefinition(FileService.abort_copy_file, None, 'cancel'),
+    ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)

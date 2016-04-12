@@ -1,3 +1,4 @@
+from datetime import datetime
 from os import environ
 
 from azure.cli.commands import COMMON_PARAMETERS as GLOBAL_COMMON_PARAMETERS
@@ -31,8 +32,8 @@ def _parse_tags(string):
 
 # BASIC PARAMETER CONFIGURATION
 
-COMMON_PARAMETERS = GLOBAL_COMMON_PARAMETERS.copy()
-COMMON_PARAMETERS.update({
+PARAMETER_ALIASES = GLOBAL_COMMON_PARAMETERS.copy()
+PARAMETER_ALIASES.update({
     'account_key': {
         'name': '--account-key -k',
         'help': L('the storage account key'),
@@ -122,29 +123,7 @@ COMMON_PARAMETERS.update({
 # SUPPLEMENTAL (EXTRA) PARAMETER SETS
 
 STORAGE_DATA_CLIENT_ARGS = {
-    'account_name': COMMON_PARAMETERS['account_name'],
-    'account_key': COMMON_PARAMETERS['account_key'],
-    'connection_string': COMMON_PARAMETERS['connection_string'],
-}
-
-# COMMON PARAMETER AUTOCOMMAND MASKS
-
-LEASE_AUTOCOMMAND_ALIASES = {
-    'lease_id': COMMON_PARAMETERS['lease_id']
-}
-
-METADATA_AUTOCOMMAND_ALIASES = {
-    'metadata': COMMON_PARAMETERS['metadata']
-}
-
-COPY_AUTOCOMMAND_ALIASES = {
-}
-
-PROPERTIES_AUTOCOMMAND_ALIASES = {
-}
-
-SERVICE_PROPERTIES_AUTOCOMMAND_ALIASES = {
-}
-
-ACL_AUTOCOMMAND_ALIASES = {
+    'account_name': PARAMETER_ALIASES['account_name'],
+    'account_key': PARAMETER_ALIASES['account_key'],
+    'connection_string': PARAMETER_ALIASES['connection_string'],
 }
