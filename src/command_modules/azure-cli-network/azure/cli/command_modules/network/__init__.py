@@ -250,13 +250,13 @@ build_operation("network vnet",
 @command_table.description(L('Create a new virtual network.'))
 @command_table.option('--resource-group -g', help=L('the the resource group name'), required=True)
 @command_table.option('--virtualNetworkPrefix',
-        help=L('IP address prefix for the virtual network.'))
+                      help=L('IP address prefix for the virtual network.'))
 @command_table.option('--subnetName',
-        help=L('Name of the subnet.'))
+                      help=L('Name of the subnet.'))
 @command_table.option('--subnetPrefix',
-        help=L('IP address for the subnet.'))
+                      help=L('IP address for the subnet.'))
 @command_table.option('--virtualNetworkName',
-        help=L('Name of the virtual network.'), required=True)
+                      help=L('Name of the virtual network.'), required=True)
 def create_vnet(args):
     from azure.cli.command_modules.network.mgmt.lib import ResourceManagementClient, ResourceManagementClientConfiguration
 
