@@ -7,6 +7,7 @@ import logging
 from enum import Enum
 from .parser import AzCliCommandParser
 import azure.cli.extensions
+import azure.cli._help
 
 class Configuration(object): # pylint: disable=too-few-public-methods
     """The configuration object tracks session specific data such
@@ -37,6 +38,7 @@ class Application(object):
     COMMAND_PARSER_CREATED = 'CommandParser.Created'
     COMMAND_PARSER_LOADED = 'CommandParser.Loaded'
     COMMAND_PARSER_PARSED = 'CommandParser.Parsed'
+    WELCOME_REQUESTED = 'Help.WelcomeRequested'
 
     def __init__(self, configuration):
         self._event_handlers = defaultdict(lambda: [])
@@ -47,6 +49,9 @@ class Application(object):
         self.register(self.COMMAND_PARSER_LOADED, Application._enable_autocomplete)
         self.register(self.COMMAND_PARSER_PARSED, self._handle_builtin_arguments)
 
+        #register help
+        azure.cli._help.register(self) #pylint: disable=protected-access
+
         # Let other extensions make their presence known
         azure.cli.extensions.register_extensions(self)
 
@@ -55,12 +60,18 @@ class Application(object):
 
         self.parser = AzCliCommandParser(prog='az', parents=[self.global_parser])
         self.raise_event(self.COMMAND_PARSER_CREATED, self.parser)
+        self.command_table = {}
 
     def load_commands(self):
-        self.parser.load_command_table(self.configuration.get_command_table())
+        self.command_table = self.configuration.get_command_table()
+        self.parser.load_command_table(self.command_table)
         self.raise_event(self.COMMAND_PARSER_LOADED, self.parser)
 
     def execute(self, argv):
+        if len(argv) == 0:
+            self.raise_event(self.WELCOME_REQUESTED, (argv, self.command_table))
+            return None
+
         args = self.parser.parse_args(argv)
         self.raise_event(self.COMMAND_PARSER_PARSED, args)
 

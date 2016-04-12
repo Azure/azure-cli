@@ -10,9 +10,18 @@ __all__ = ['print_detailed_help', 'print_welcome_message', 'GroupHelpFile', 'Com
 
 _out = sys.stdout
 
-def print_welcome_message(out=sys.stdout):
-    global _out #pylint: disable=global-statement
-    _out = out
+def register(app):
+    app.register(app.WELCOME_REQUESTED, show_welcome)
+
+def show_welcome(data):
+    _, cmd_table = data
+
+    print_welcome_message()
+
+    help_file = GroupHelpFile('', cmd_table)
+    print_description_list(help_file.children)
+
+def print_welcome_message():
     _print_indent(L(r"""
      /\                        
     /  \    _____   _ _ __ ___ 
@@ -43,7 +52,7 @@ def print_description_list(help_files, out=sys.stdout):
 
     indent = 1
     max_name_length = max(len(f.name) for f in help_files) if help_files else 0
-    for help_file in help_files:
+    for help_file in sorted(help_files, key=lambda h: h.name):
         _print_indent('{0}{1}{2}'.format(help_file.name,
                                          _get_column_indent(help_file.name, max_name_length),
                                          ': ' + help_file.short_summary \
@@ -162,21 +171,17 @@ class HelpFile(object): #pylint: disable=too-few-public-methods
 
 
 class GroupHelpFile(HelpFile): #pylint: disable=too-few-public-methods
-    def __init__(self, delimiters, child_names):
+    def __init__(self, delimiters, cmd_table):
         super(GroupHelpFile, self).__init__(delimiters)
         self.type = 'group'
-        self.children = [HelpFile('{0}.{1}'.format(self.delimiters, n)) for n in child_names]
 
-    def _load_from_data(self, data):
-        super(GroupHelpFile, self)._load_from_data(data)
+        cmd_table = _reduce_to_children(cmd_table, delimiters.split())
 
-        child_helps = [GroupHelpFile(child.delimiters, []) for child in self.children]
-        loaded_children = []
-        for child in self.children:
-            child_help = next((h for h in child_helps if h.name == child.name), None)
-            loaded_children.append(child_help if child_help else child)
-        self.children = loaded_children
-
+        self.children = []
+        for f in cmd_table:
+            metadata = cmd_table[f]
+            self.children.append(HelpFile(metadata['name']))
+            self.children[-1].load({f: metadata})
 
 class CommandHelpFile(HelpFile): #pylint: disable=too-few-public-methods
     def __init__(self, delimiters, argdoc):
@@ -238,6 +243,39 @@ class HelpExample(object): #pylint: disable=too-few-public-methods
         self.name = _data['name']
         self.text = _data['text']
 
+def _reduce_to_descendants_plus_self(cmd_table, argv):
+    d = {}
+    exact_match_fn = next((f for f in cmd_table if cmd_table[f]['name'] == ' '.join(argv)), None)
+    if exact_match_fn:
+        d[exact_match_fn] = cmd_table[exact_match_fn]
+        return d
+
+    return {f: cmd_table[f] for f in cmd_table
+            if _list_starts_with(cmd_table[f]['name'].split(), argv)}
+
+def _reduce_to_children(cmd_table, argv):
+    d = _reduce_to_descendants_plus_self(cmd_table, argv)
+
+    # add fake keys to the dict so we can represent groups, which are not backed by objects
+    children = {}
+    num_args = len(argv)
+    for f in d:
+        delimiters = d[f]['name'].split()
+        if num_args >= len(delimiters):
+            continue
+        child_name = delimiters[num_args]
+        child_name_is_command = len(delimiters) == num_args + 1
+        children[child_name] = {'name': ' '.join(delimiters[:num_args + 1])}
+        if child_name_is_command:
+            children[child_name]['description'] = d[f].get('description', '')
+            children[child_name]['arguments'] = d[f].get('arguments', '')
+
+    return children
+
+def _list_starts_with(container_list, contained_list):
+    if len(contained_list) > len(container_list):
+        return False
+    return container_list[:len(contained_list)] == contained_list
 
 def _print_indent(s, indent=0, subsequent_spaces=-1):
     tw = textwrap.TextWrapper(initial_indent='    '*indent,
