@@ -22,7 +22,8 @@ def exec_command(command, cwd=None, stdout=None):
     '''Returns True in the command was executed successfully'''
     try:
         print(command)
-        check_call(command, stdout=stdout, cwd=cwd, shell=True)
+        command_list = command if isinstance(command, list) else command.split()
+        check_call(command_list, stdout=stdout, cwd=cwd)
         return True
     except CalledProcessError as err:
         print(err, file=sys.stderr)
