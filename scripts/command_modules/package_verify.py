@@ -54,7 +54,7 @@ print_heading('Built command package(s).')
 
 print_heading('Installing CLI package...')
 cli_package_dir = os.path.join(PATH_TO_CLI_PACKAGE, 'dist')
-cmd = 'pip install azure-cli --find-links file://{}'.format(cli_package_dir)
+cmd = 'python -m pip install azure-cli --find-links file://{}'.format(cli_package_dir)
 cmd += ' --find-links file://{}'.format(LIBS_DIR) if INCLUDE_LOCAL_LIBS else ''
 success = exec_command(cmd)
 if not success:
@@ -66,7 +66,7 @@ print_heading('Installing command package(s)...')
 failed_module_names = []
 for name, fullpath in all_command_modules:
     package_dir = os.path.join(fullpath, 'dist')
-    cmd = 'pip install {} --find-links file://{}'.format(name, package_dir)
+    cmd = 'python -m pip install {} --find-links file://{}'.format(name, package_dir)
     cmd += ' --find-links file://{}'.format(LIBS_DIR) if INCLUDE_LOCAL_LIBS else ''
     success = exec_command(cmd)
     if not success:
