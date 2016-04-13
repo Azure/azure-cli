@@ -22,6 +22,12 @@ COMMON_PARAMETERS = {
         'metavar': 'LOCATION',
         'help': 'Location',
         'required': True
+    },
+    'deployment_name': {
+        'name': '--deployment-name',
+        'metavar': 'DEPLOYMENT NAME',
+        'help': 'Name of the resource deployment',
+        'required': False
     }
 }
 

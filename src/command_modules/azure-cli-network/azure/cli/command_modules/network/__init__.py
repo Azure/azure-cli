@@ -19,16 +19,19 @@ from azure.mgmt.network.operations import (ApplicationGatewaysOperations,
                                            VirtualNetworkGatewaysOperations,
                                            VirtualNetworksOperations)
 
+from azure.cli.command_modules.network.mgmt.lib import (ResourceManagementClient as VNetClient,
+                                                        ResourceManagementClientConfiguration as VNetClientConfig)
+from azure.cli.command_modules.network.mgmt.lib.operations import VNetOperations
+
 from azure.cli.commands._command_creation import get_mgmt_service_client
 from azure.cli.commands._auto_command import build_operation, AutoCommandDefinition
-from azure.cli.commands import CommandTable, LongRunningOperation
+from azure.cli.commands import CommandTable, LongRunningOperation, COMMON_PARAMETERS
 from azure.cli._locale import L
 
 command_table = CommandTable()
 
 def _network_client_factory(_):
     return get_mgmt_service_client(NetworkManagementClient, NetworkManagementClientConfiguration)
-
 
 # pylint: disable=line-too-long
 # Application gateways
@@ -246,35 +249,53 @@ build_operation("network vnet",
                 ],
                 command_table)
 
-@command_table.command('network vnet create')
-@command_table.description(L('Create a new virtual network.'))
-@command_table.option('--resource-group -g', help=L('the the resource group name'), required=True)
-@command_table.option('--virtualNetworkPrefix',
-                      help=L('IP address prefix for the virtual network.'))
-@command_table.option('--subnetName',
-                      help=L('Name of the subnet.'))
-@command_table.option('--subnetPrefix',
-                      help=L('IP address for the subnet.'))
-@command_table.option('--virtualNetworkName',
-                      help=L('Name of the virtual network.'), required=True)
-def create_vnet(args):
-    from azure.cli.command_modules.network.mgmt.lib import ResourceManagementClient, ResourceManagementClientConfiguration
+VNET_SPECIFIC_PARAMS= {
+            'deployment_parameter_virtual_network_name_value': {
+                'name': '--vnet-name',
+                'metavar': 'SUBNETPREFIX',
+                'help': 'Name for the virtual network.',
+                'required': True
+            },
+            'deployment_parameter_virtual_network_prefix_value': {
+                'name': '--vnet-prefix',
+                'metavar': 'VNETPREFIX',
+                'help': 'IP address prefix for the virtual network.',
+                'required': False
+            },
+            'deployment_parameter_subnet_name_value': {
+                'name': '--subnet-name',
+                'metavar': 'SUBNETNAME',
+                'help': 'Name for the subnet.',
+                'required': False
+            },
+            'deployment_parameter_subnet_prefix_value': {
+                'name': '--subnet-prefix',
+                'metavar': 'SUBNETPREFIX',
+                'help': 'IP address prefix for the subnet.',
+                'required': False
+            },
+            'deployment_name': {
+                'name': '--deployment-nane',
+                'metavar': 'DEPLOYMENTNAME',
+                'help': 'Name of the ARM deployment.',
+                'required': False,
+                'default': 'deployment' + str(time.time())
+            },
+        }
 
-    smc = get_mgmt_service_client(ResourceManagementClient, ResourceManagementClientConfiguration)
-
-    poller = smc.vnet.create_or_update(resource_group_name=args.get('resource_group'),
-                                       deployment_name='deployment' + str(time.time()),
-                                       deployment_parameter_virtual_network_prefix_value=args.get('virtualNetworkPrefix'),
-                                       deployment_parameter_subnet_name_value=args.get('subnetName'),
-                                       deployment_parameter_subnet_prefix_value=args.get('subnetPrefix'),
-                                       deployment_parameter_virtual_network_name_value=args.get('virtualNetworkName'))
-
-    op = LongRunningOperation('Creating virtual network', 'Virtual network created')
-    return op(poller)
+build_operation('network vnet',
+                'virtual_networks',
+                lambda _: get_mgmt_service_client(VNetClient, VNetClientConfig),
+                [
+                    AutoCommandDefinition(VNetOperations.create,
+                                          LongRunningOperation(L('Creating virtual network'), L('Virtual network created')))
+                ],
+                command_table,
+                VNET_SPECIFIC_PARAMS)
 
 @command_table.command('network subnet create')
 @command_table.description(L('Create or update a virtual network (VNet) subnet'))
-@command_table.option('--resource-group -g', help=L('the the resource group name'), required=True)
+@command_table.option(**COMMON_PARAMETERS['resource_group_name'])
 @command_table.option('--name -n', help=L('the the subnet name'), required=True)
 @command_table.option('--vnet -v', help=L('the name of the subnet vnet'), required=True)
 @command_table.option('--address-prefix -a', help=L('the the address prefix in CIDR format'), required=True)
