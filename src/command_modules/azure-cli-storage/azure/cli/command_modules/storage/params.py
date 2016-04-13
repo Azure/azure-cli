@@ -1,5 +1,9 @@
 from datetime import datetime
 from os import environ
+import re
+
+from azure.storage.models import ResourceTypes, Services
+from azure.storage.blob.models import ContainerPermissions
 
 from azure.cli.commands import COMMON_PARAMETERS as GLOBAL_COMMON_PARAMETERS
 from azure.cli._locale import L
@@ -11,18 +15,52 @@ def extend_parameter(parameter_metadata, **kwargs):
     modified_parameter_metadata.update(kwargs)
     return modified_parameter_metadata
 
+def _parse_container_permission(string):
+    ''' Validates that permission string contains only a combination
+    of (r)ead, (w)rite, (d)elete, (l)ist. '''
+    if set(string) - set("rwdl"):
+        raise ValueError
+    return ContainerPermissions(_str=''.join(set(string)))
+
 def _parse_datetime(string):
+    ''' Validates UTC datettime in format 'Y-m-d_H:M:S'. '''
     date_format = '%Y-%m-%d_%H:%M:%S'
     return datetime.strptime(string, date_format)
 
+def _parse_ip_range(string):
+    ''' Validates an IP address or IP address range. '''
+    ip_format = "\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}"
+    if not re.match("^{}$".format(ip_format), string):
+        if not re.match("^{}-{}$".format(ip_format, ip_format), string):
+            raise ValueError
+    return string
+
 def _parse_key_value_pairs(string):
+    ''' Validates key-value pairs in the following format: a=b;c=d '''
     result = None
     if string:
         kv_list = [x for x in string.split(';') if '=' in x]     # key-value pairs
         result = dict(x.split('=') for x in kv_list)
     return result
 
+def _parse_resource_types(string):
+    ''' Validates that resource types string contains only a combination
+    of (s)ervice, (c)ontainer, (o)bject '''
+    if set(string) - set("sco"):
+        raise ValueError
+    return ResourceTypes(_str=''.join(set(string)))
+
+def _parse_services(string):
+    ''' Validates that services string contains only a combination
+    of (b)lob, (q)ueue, (t)able, (f)ile '''
+    if set(string) - set("bqtf"):
+        raise ValueError
+    return Services(_str=''.join(set(string)))
+    
+
 def _parse_tags(string):
+    ''' Validates the string containers only key-value pairs and single
+    tags in the format: a=b;c '''
     result = None
     if string:
         result = _parse_key_value_pairs(string)
@@ -75,6 +113,11 @@ PARAMETER_ALIASES.update({
         'required': False,
         'default': environ.get('AZURE_STORAGE_CONNECTION_STRING')
     },
+    'expiry': {
+        'name': '--expiry',
+        'help': L('expiration UTC datetime of SAS token ("Y-m-d_H:M:S")'),
+        'type': _parse_datetime
+    },
     'if_modified_since': {
         'name': '--if-modified-since',
         'help': L('alter only if modified since supplied UTC datetime ("Y-m-d_H:M:S")'),
@@ -86,6 +129,12 @@ PARAMETER_ALIASES.update({
         'help': L('alter only if unmodified since supplied UTC datetime ("Y-m-d_H:M:S")'),
         'type': _parse_datetime,
         'required': False,
+    },
+    'ip': {
+        'name': '--ip',
+        'help': L('specifies the IP address or range of IP addresses from which to accept ' + \
+                  'requests.'),
+        'type': _parse_ip_range
     },
     'lease_id': {
         'name': '--lease-id',
@@ -100,10 +149,32 @@ PARAMETER_ALIASES.update({
     },
     'optional_resource_group_name':
         extend_parameter(GLOBAL_COMMON_PARAMETERS['resource_group_name'], required=False),
+    'permission': {
+        'name': '--permission',
+        'help': L('permissions granted: (r)ead (w)rite (d)elete (l)ist. Can be combined.'),
+        'metavar': 'PERMISSION',
+        # TODO: This will be problematic because the other sas types take different permissions
+        'type': _parse_container_permission
+    },
+    'resource_types': {
+        'name': '--resource-types',
+        'help': L('the resource types the SAS is applicable for. Allowed values: (s)ervice (c)ontainer (o)bject. Can be combined.'),
+        'type': _parse_resource_types
+    },
+    'services': {
+        'name': '--services',
+        'help': L('the storage services the SAS is applicable for. Allowed values: (b)lob (f)ile (q)ueue (t)able. Can be combined.'),
+        'type': _parse_services
+    },
     'share_name': {
         'name': '--share-name',
         'help': L('the name of the file share'),
         'required': True,
+    },
+    'start': {
+        'name': '--start',
+        'help': L('start UTC datetime of SAS token ("Y-m-d_H:M:S"). Defaults to time of request.'),
+        'type': _parse_datetime
     },
     'tags' : {
         'name': '--tags',
