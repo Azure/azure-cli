@@ -31,7 +31,7 @@ class VNetOperations(object):
 
         self.config = config
 
-    def create_or_update(
+    def create(
             self, resource_group_name, deployment_name, content_version=None, deployment_parameter_virtual_network_prefix_value=None, deployment_parameter_subnet_prefix_value=None, deployment_parameter_virtual_network_name_value=None, deployment_parameter_subnet_name_value=None, custom_headers={}, raw=False, **operation_config):
         """
         Create a named template deployment using a template.
