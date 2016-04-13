@@ -14,7 +14,8 @@ from azure.cli.commands._command_creation import get_mgmt_service_client, get_da
 from azure.cli.commands._auto_command import build_operation, AutoCommandDefinition
 from azure.cli._locale import L
 
-from .params import PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS, _parse_datetime
+from ._params import PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS
+from ._validators import *
 
 command_table = CommandTable()
 
@@ -28,20 +29,29 @@ def _file_data_service_factory(args):
         FileService,
         args.pop('account_name', None),
         args.pop('account_key', None),
-        args.pop('connection_string', None))
+        connection_string=args.pop('connection_string', None),
+        sas_token=args.pop('sas_token', None))
 
 def _blob_data_service_factory(args):
     return get_data_service_client(
         BlockBlobService,
         args.pop('account_name', None),
         args.pop('account_key', None),
-        args.pop('connection_string', None))
+        connection_string=args.pop('connection_string', None),
+        sas_token=args.pop('sas_token', None))
 
 def _cloud_storage_account_service_factory(args):
-    return CloudStorageAccount(
-        args.pop('account_name', None),
-        args.pop('account_key', None),
-        args.pop('connection_string', None))
+    account_name = args.pop('account_name', None)
+    account_key = args.pop('account_key', None)
+    sas_token = args.pop('sas_token', None)
+    connection_string = args.pop('connection_string', None)
+    if connection_string:
+        # CloudStorageAccount doesn't accept connection string directly, so we must parse
+        # out the account name and key manually
+        conn_dict = validate_key_value_pairs(connection_string)
+        account_name = conn_dict['AccountName']
+        account_key = conn_dict['AccountKey']
+    return CloudStorageAccount(account_name, account_key, sas_token)
 
 def _update_progress(current, total):
     if total:
@@ -221,7 +231,7 @@ public_access_types = {'none': None,
 @command_table.option(**PARAMETER_ALIASES['account_name'])
 @command_table.option(**PARAMETER_ALIASES['account_key'])
 @command_table.option(**PARAMETER_ALIASES['connection_string'])
-@command_table.option('--snapshot', type=_parse_datetime,
+@command_table.option('--snapshot', type=validate_datetime,
                       help=L('UTC datetime value which specifies a snapshot'))
 @command_table.option(**PARAMETER_ALIASES['timeout'])
 def exists_container(args):
@@ -341,7 +351,7 @@ def download_blob(args):
 @command_table.option(**PARAMETER_ALIASES['account_name'])
 @command_table.option(**PARAMETER_ALIASES['account_key'])
 @command_table.option(**PARAMETER_ALIASES['connection_string'])
-@command_table.option('--snapshot', type=_parse_datetime,
+@command_table.option('--snapshot', type=validate_datetime,
                       help=L('UTC datetime value which specifies a snapshot'))
 @command_table.option(**PARAMETER_ALIASES['timeout'])
 def exists_blob(args):
