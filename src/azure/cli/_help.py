@@ -10,12 +10,7 @@ __all__ = ['print_detailed_help', 'print_welcome_message', 'GroupHelpFile', 'Com
 
 _out = sys.stdout
 
-def register(app):
-    app.register(app.WELCOME_REQUESTED, show_welcome)
-
-def show_welcome(data):
-    _, cmd_table = data
-
+def show_welcome(cmd_table):
     print_welcome_message()
 
     help_file = GroupHelpFile('', cmd_table)

@@ -7,7 +7,7 @@ import logging
 from enum import Enum
 from .parser import AzCliCommandParser
 import azure.cli.extensions
-import azure.cli._help
+import azure.cli._help as _help
 
 class Configuration(object): # pylint: disable=too-few-public-methods
     """The configuration object tracks session specific data such
@@ -49,9 +49,6 @@ class Application(object):
         self.register(self.COMMAND_PARSER_LOADED, Application._enable_autocomplete)
         self.register(self.COMMAND_PARSER_PARSED, self._handle_builtin_arguments)
 
-        #register help
-        azure.cli._help.register(self) #pylint: disable=protected-access
-
         # Let other extensions make their presence known
         azure.cli.extensions.register_extensions(self)
 
@@ -69,7 +66,7 @@ class Application(object):
 
     def execute(self, argv):
         if len(argv) == 0:
-            self.raise_event(self.WELCOME_REQUESTED, (argv, self.command_table))
+            _help.show_welcome(self.command_table)
             return None
 
         args = self.parser.parse_args(argv)
