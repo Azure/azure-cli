@@ -38,7 +38,6 @@ class Application(object):
     COMMAND_PARSER_CREATED = 'CommandParser.Created'
     COMMAND_PARSER_LOADED = 'CommandParser.Loaded'
     COMMAND_PARSER_PARSED = 'CommandParser.Parsed'
-    WELCOME_REQUESTED = 'Help.WelcomeRequested'
 
     def __init__(self, configuration):
         self._event_handlers = defaultdict(lambda: [])
