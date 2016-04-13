@@ -116,6 +116,18 @@ TEST_DEF = [
         'test_name': 'storage_container_delete',
         'command': 'storage container delete --container-name testcontainer01 --fail-not-exist'
     },
+    {
+        'test_name': 'storage_container_metadata_set',
+        'command': 'storage container metadata set -c testcontainer1234 --metadata foo=bar;moo=bak;'
+    },
+    {
+        'test_name': 'storage_container_metadata_get',
+        'command': 'storage container metadata get -c testcontainer1234'
+    },
+    {
+        'test_name': 'storage_container_metadata_reset',
+        'command': 'storage container metadata set -c testcontainer1234'
+    },
     # STORAGE BLOB TESTS
     {
         'test_name': 'storage_blob_upload_block_blob',

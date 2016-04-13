@@ -12,9 +12,11 @@ def get_mgmt_service_client(client_type, config_type):
 
     return client
 
-def get_data_service_client(service_type, account_name, account_key, connection_string=None):
+def get_data_service_client(service_type, account_name, account_key, connection_string=None,
+                            sas_token=None):
     client = service_type(account_name=account_name,
                           account_key=account_key,
-                          connection_string=connection_string)
+                          connection_string=connection_string,
+                          sas_token=sas_token)
     # TODO: enable Fiddler and user agent (task #115270703, #115270881)
     return client
