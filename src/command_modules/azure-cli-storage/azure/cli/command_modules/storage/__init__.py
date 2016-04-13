@@ -54,9 +54,7 @@ def _update_progress(current, total):
 #### ACCOUNT COMMANDS #############################################################################
 
 build_operation(
-    'storage account',
-    'storage_accounts',
-    _storage_client_factory,
+    'storage account', 'storage_accounts', _storage_client_factory,
     [
         AutoCommandDefinition(StorageAccountsOperations.check_name_availability,
                               'Result', 'check-name'),
@@ -69,8 +67,7 @@ build_operation(
     [
         AutoCommandDefinition(CloudStorageAccount.generate_shared_access_signature,
                               'String', 'generate-sas')
-    ],
-    command_table, None, STORAGE_DATA_CLIENT_ARGS)
+    ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
 @command_table.command('storage account list', description=L('List storage accounts.'))
 @command_table.option(**PARAMETER_ALIASES['optional_resource_group_name'])
@@ -86,9 +83,7 @@ def list_accounts(args):
     return list(accounts)
 
 build_operation(
-    'storage account keys',
-    'storage_accounts',
-    _storage_client_factory,
+    'storage account keys', 'storage_accounts', _storage_client_factory,
     [
         AutoCommandDefinition(StorageAccountsOperations.list_keys, '[StorageAccountKeys]', 'list')
     ], command_table, PARAMETER_ALIASES)
