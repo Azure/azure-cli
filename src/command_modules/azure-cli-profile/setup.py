@@ -37,7 +37,6 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
-    'azure-cli',
     'azure==2.0.0rc1',
     'adal==0.2.1', #from internal index server.
 ]
@@ -55,7 +54,11 @@ setup(
     author_email='azpycli@microsoft.com',
     url='https://github.com/Azure/azure-cli',
     classifiers=CLASSIFIERS,
-    namespace_packages = ['azure.cli.command_modules'],
+    namespace_packages = [
+        'azure',
+        'azure.cli',
+        'azure.cli.command_modules',
+    ],
     packages=[
         'azure.cli.command_modules.profile',
     ],

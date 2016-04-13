@@ -124,8 +124,8 @@ setup(
         'az.bat',
     ],
     package_dir = {'':'src'},
+    namespace_packages = ['azure'],
     packages=[
-        'azure',
         'azure.cli',
         'azure.cli.commands',
         'azure.cli.command_modules',
