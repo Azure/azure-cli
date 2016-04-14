@@ -175,8 +175,9 @@ class GroupHelpFile(HelpFile): #pylint: disable=too-few-public-methods
         self.children = []
         for f in cmd_table:
             metadata = cmd_table[f]
-            self.children.append(HelpFile(metadata['name']))
-            self.children[-1].load({f: metadata})
+            child = HelpFile(metadata['name'])
+            child.load({f: metadata})
+            self.children.append(child)
 
 class CommandHelpFile(HelpFile): #pylint: disable=too-few-public-methods
     def __init__(self, delimiters, argdoc):
