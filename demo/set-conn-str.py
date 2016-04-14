@@ -1,27 +1,29 @@
 #!/usr/bin/env python
 
-import os
-from sys import argv, stdout
-from azure.cli.main import main as cli
-from six import StringIO
+from __future__ import print_function
 
-def run(command, file=stdout):
-    cli(command.split(), file=file)
+import os
+from subprocess import check_output
+from sys import argv, stdout
 
 RSGRP = "travistestresourcegroup"
 STACC = "travistestresourcegr3014"
 
-io = StringIO()
-run('storage account connection-string -g {} -n {}'.format(RSGRP, STACC), file=io)
-connection_string = io.getvalue().replace('Connection String : ', '')
+def run(command):
+    command = command.replace('az ', '', 1)
+    cmd = 'python -m azure.cli {}'.format(command)
+    print(cmd)
+    out = check_output(cmd)
+    return str(out)
+
+out = run('az storage account connection-string -g {} -n {}'.format(RSGRP, STACC))
+connection_string = out.replace('Connection String : ', '')
 os.environ['AZURE_STORAGE_CONNECTION_STRING'] = str(connection_string)
 
 print('\n=== Listing storage containers... ===')
-run('storage container list', file=io)
-print(io.getvalue())
+print(run('az storage container list'))
 
 print('\n=== Listing storage shares... ===')
-run('storage container list', file=io)
-print(io.getvalue())
+print(run('az storage container list'))
 
 exit(0)
