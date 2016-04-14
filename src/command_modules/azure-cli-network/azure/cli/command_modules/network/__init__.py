@@ -252,7 +252,7 @@ build_operation("network vnet",
 VNET_SPECIFIC_PARAMS= {
             'deployment_parameter_virtual_network_name_value': {
                 'name': '--vnet-name',
-                'metavar': 'SUBNETPREFIX',
+                'metavar': 'VNETNAME',
             },
             'deployment_parameter_virtual_network_prefix_value': {
                 'name': '--vnet-prefix',

@@ -47,14 +47,19 @@
             "required": true,
             "type": "string",
             "description": "The name of the resource group. The name is case insensitive.",
-            "pattern": "^[-\\w\\._]+$"
+            "pattern": "^[-\\w\\._]+$",
+            "minLength": 1,
+            "maxLength": 64
           },
           {
             "name": "deploymentName",
             "in": "path",
             "required": true,
             "type": "string",
-            "description": "The name of the deployment."
+            "description": "The name of the deployment.",
+            "pattern": "^[-\\w\\._]+$",
+            "minLength": 1,
+            "maxLength": 64
           },
           {
             "name": "parameters",
@@ -175,6 +180,11 @@
           "type": "object",
           "$ref": "#/definitions/DeploymentParameter_subnetName",
           "x-ms-client-flatten": true
+        },
+        "location": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_location",
+          "x-ms-client-flatten": true
         }
       },
       "required": [
@@ -186,6 +196,7 @@
         "value": {
           "type": "string",
           "description": "IP address prefix for the virtual network.",
+          "pattern": "^[\\d\\./]+$",
           "x-ms-client-name": "virtualNetworkPrefix"
         }
       }
@@ -194,7 +205,8 @@
       "properties": {
         "value": {
           "type": "string",
-          "description": "IP address prefix for the subnet."
+          "description": "IP address prefix for the subnet.",
+          "pattern": "^[\\d\\./]+$"
         }
       }
     },
@@ -202,7 +214,10 @@
       "properties": {
         "value": {
           "type": "string",
-          "description": "Name of the virtual network."
+          "description": "Name of the virtual network.",
+          "pattern": "^[-\\w\\._]+$",
+          "minLength": 2,
+          "maxLength": 80
         }
       }
     },
@@ -210,7 +225,18 @@
       "properties": {
         "value": {
           "type": "string",
-          "description": "Name of the subnet."
+          "description": "Name of the subnet.",
+          "pattern": "^[-\\w\\._]+$",
+          "minLength": 2,
+          "maxLength": 80
+        }
+      }
+    },
+    "DeploymentParameter_location": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "Location of the virtual network."
         }
       }
     },
