@@ -32,7 +32,7 @@ class VNetOperations(object):
         self.config = config
 
     def create(
-            self, resource_group_name, deployment_name, content_version=None, deployment_parameter_virtual_network_prefix_value=None, deployment_parameter_subnet_prefix_value=None, deployment_parameter_virtual_network_name_value=None, deployment_parameter_subnet_name_value=None, custom_headers={}, raw=False, **operation_config):
+            self, resource_group_name, deployment_name, content_version=None, deployment_parameter_virtual_network_prefix_value=None, deployment_parameter_subnet_prefix_value=None, deployment_parameter_virtual_network_name_value=None, deployment_parameter_subnet_name_value=None, deployment_parameter_location_value=None, custom_headers={}, raw=False, **operation_config):
         """
         Create a named template deployment using a template.
 
@@ -55,19 +55,22 @@ class VNetOperations(object):
         :type deployment_parameter_virtual_network_name_value: str
         :param deployment_parameter_subnet_name_value: Name of the subnet.
         :type deployment_parameter_subnet_name_value: str
+        :param deployment_parameter_location_value: Location of the virtual
+         network.
+        :type deployment_parameter_location_value: str
         :param dict custom_headers: headers that will be added to the request
         :param boolean raw: returns the direct response alongside the
          deserialized response
         :rtype: DeploymentExtended
         :rtype: msrest.pipeline.ClientRawResponse if raw=True
         """
-        parameters = models.DeploymentVNet(content_version=content_version, deployment_parameter_virtual_network_prefix_value=deployment_parameter_virtual_network_prefix_value, deployment_parameter_subnet_prefix_value=deployment_parameter_subnet_prefix_value, deployment_parameter_virtual_network_name_value=deployment_parameter_virtual_network_name_value, deployment_parameter_subnet_name_value=deployment_parameter_subnet_name_value)
+        parameters = models.DeploymentVNet(content_version=content_version, deployment_parameter_virtual_network_prefix_value=deployment_parameter_virtual_network_prefix_value, deployment_parameter_subnet_prefix_value=deployment_parameter_subnet_prefix_value, deployment_parameter_virtual_network_name_value=deployment_parameter_virtual_network_name_value, deployment_parameter_subnet_name_value=deployment_parameter_subnet_name_value, deployment_parameter_location_value=deployment_parameter_location_value)
 
         # Construct URL
         url = '/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Resources/deployments/{deploymentName}'
         path_format_arguments = {
-            'resourceGroupName': self._serialize.url("resource_group_name", resource_group_name, 'str', pattern='^[-\w\._]+$'),
-            'deploymentName': self._serialize.url("deployment_name", deployment_name, 'str'),
+            'resourceGroupName': self._serialize.url("resource_group_name", resource_group_name, 'str', max_length=64, min_length=1, pattern='^[-\w\._]+$'),
+            'deploymentName': self._serialize.url("deployment_name", deployment_name, 'str', max_length=64, min_length=1, pattern='^[-\w\._]+$'),
             'subscriptionId': self._serialize.url("self.config.subscription_id", self.config.subscription_id, 'str')
         }
         url = self._client.format_url(url, **path_format_arguments)
