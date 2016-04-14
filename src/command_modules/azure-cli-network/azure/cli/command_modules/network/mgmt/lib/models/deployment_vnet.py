@@ -14,7 +14,7 @@ class DeploymentVNet(Model):
     Deployment operation parameters.
 
     :param str uri: URI referencing the template. Default value:
-     "https://azuretemplatedeploy.blob.core.windows.net/templatehost/CreateVNet/azuredeploy.json"
+     "https://azuretemplatehost.blob.core.windows.net/templatehost/CreateVNet/azuredeploy.json"
      .
     :param str content_version: If included it must match the ContentVersion
      in the template.
@@ -52,7 +52,7 @@ class DeploymentVNet(Model):
     }
 
     def __init__(self, content_version=None, deployment_parameter_virtual_network_prefix_value=None, deployment_parameter_subnet_prefix_value=None, deployment_parameter_virtual_network_name_value=None, deployment_parameter_subnet_name_value=None, deployment_parameter_location_value=None, **kwargs):
-        self.uri = "https://azuretemplatedeploy.blob.core.windows.net/templatehost/CreateVNet/azuredeploy.json"
+        self.uri = "https://azuretemplatehost.blob.core.windows.net/templatehost/CreateVNet/azuredeploy.json"
         self.content_version = content_version
         self.deployment_parameter_virtual_network_prefix_value = deployment_parameter_virtual_network_prefix_value
         self.deployment_parameter_subnet_prefix_value = deployment_parameter_subnet_prefix_value
