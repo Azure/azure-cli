@@ -14,7 +14,7 @@ def run(command):
     cmd = 'python -m azure.cli {}'.format(command)
     print(cmd)
     out = check_output(cmd)
-    return str(out)
+    return out.decode('utf-8')
 
 out = run('az storage account connection-string -g {} -n {}'.format(RSGRP, STACC))
 connection_string = out.replace('Connection String : ', '')
