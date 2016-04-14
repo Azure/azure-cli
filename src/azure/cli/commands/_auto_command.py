@@ -6,7 +6,8 @@ from msrest.exceptions import ClientException
 from azure.cli.parser import IncorrectUsageError
 from ..commands import COMMON_PARAMETERS
 
-EXCLUDED_PARAMS = frozenset(['self', 'raw', 'custom_headers', 'operation_config'])
+EXCLUDED_PARAMS = frozenset(['self', 'raw', 'custom_headers', 'operation_config',
+                             'content_version'])
 
 class AutoCommandDefinition(object): #pylint: disable=too-few-public-methods
 
@@ -103,15 +104,17 @@ def build_operation(command_name,
                 required = arg not in arg_defaults
 
             action = 'store_' + str(not default).lower() if isinstance(default, bool) else None
-            common_param = merged_common_parameters.get(arg, {
-                'name': '--' + arg.replace('_', '-'),
-                'required': required,
-                'default': default,
-                'help': _option_description(op.operation, arg),
-                'action': action
-            }).copy() # We need to make a copy to allow consumers to mutate the value
-                      # retrieved from the common parameters without polluting future
-                      # use...
+            common_param = merged_common_parameters.get(arg, {})
+            common_param['name'] = common_param.get('name', '--' + arg.replace('_', '-'))
+            common_param['required'] = common_param.get('required', required)
+            common_param['default'] = common_param.get('default', default)
+            common_param['help'] = common_param.get('help', _option_description(op.operation, arg))
+            common_param['action'] = common_param.get('action', action)
+
+            # We need to make a copy to allow consumers to mutate the value
+            # retrieved from the common parameters without polluting future
+            # use...
+            common_param = common_param.copy()
             common_param['dest'] = common_param.get('dest', arg)
             options.append(common_param)
 

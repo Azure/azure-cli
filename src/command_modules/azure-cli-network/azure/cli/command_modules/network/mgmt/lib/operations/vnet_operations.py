@@ -44,13 +44,16 @@ class VNetOperations(object):
         :param content_version: If included it must match the ContentVersion
          in the template.
         :type content_version: str
-        :param deployment_parameter_virtual_network_prefix_value:
+        :param deployment_parameter_virtual_network_prefix_value: IP address
+         prefix for the virtual network.
         :type deployment_parameter_virtual_network_prefix_value: str
-        :param deployment_parameter_subnet_prefix_value:
+        :param deployment_parameter_subnet_prefix_value: IP address prefix
+         for the subnet.
         :type deployment_parameter_subnet_prefix_value: str
-        :param deployment_parameter_virtual_network_name_value:
+        :param deployment_parameter_virtual_network_name_value: Name of the
+         virtual network.
         :type deployment_parameter_virtual_network_name_value: str
-        :param deployment_parameter_subnet_name_value:
+        :param deployment_parameter_subnet_name_value: Name of the subnet.
         :type deployment_parameter_subnet_name_value: str
         :param dict custom_headers: headers that will be added to the request
         :param boolean raw: returns the direct response alongside the

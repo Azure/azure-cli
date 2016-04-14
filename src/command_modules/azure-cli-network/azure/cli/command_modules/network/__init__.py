@@ -253,34 +253,19 @@ VNET_SPECIFIC_PARAMS= {
             'deployment_parameter_virtual_network_name_value': {
                 'name': '--vnet-name',
                 'metavar': 'SUBNETPREFIX',
-                'help': 'Name for the virtual network.',
-                'required': True
             },
             'deployment_parameter_virtual_network_prefix_value': {
                 'name': '--vnet-prefix',
                 'metavar': 'VNETPREFIX',
-                'help': 'IP address prefix for the virtual network.',
-                'required': False
             },
             'deployment_parameter_subnet_name_value': {
                 'name': '--subnet-name',
                 'metavar': 'SUBNETNAME',
-                'help': 'Name for the subnet.',
-                'required': False
             },
             'deployment_parameter_subnet_prefix_value': {
                 'name': '--subnet-prefix',
                 'metavar': 'SUBNETPREFIX',
-                'help': 'IP address prefix for the subnet.',
-                'required': False
-            },
-            'deployment_name': {
-                'name': '--deployment-nane',
-                'metavar': 'DEPLOYMENTNAME',
-                'help': 'Name of the ARM deployment.',
-                'required': False,
-                'default': 'deployment' + str(time.time())
-            },
+            }
         }
 
 build_operation('network vnet',
