@@ -10,16 +10,6 @@ COMMAND_TABLES.append(command_table)
 
 @command_table.command('account list', description=L('List the imported subscriptions.'))
 def list_subscriptions(_):
-    """
-    type: command
-    long-summary: |
-        this module.... kjsdflkj... klsfkj paragraph1
-        this module.... kjsdflkj... klsfkj paragraph2
-    parameters:
-    examples:
-        - name: foo example
-          text: example details
-    """
     profile = Profile()
     subscriptions = profile.load_cached_subscriptions()
     if not subscriptions:
@@ -34,17 +24,6 @@ def list_subscriptions(_):
                       help=L('Subscription Id, unique name also works.'),
                       required=True)
 def set_active_subscription(args):
-    """
-    type: command
-    short-summary: this module does xyz one-line or so
-    long-summary: |
-        this module.... kjsdflkj... klsfkj paragraph1
-        this module.... kjsdflkj... klsfkj paragraph2
-    parameters:
-    examples:
-        - name: foo example
-          text: example details
-    """
     subscription_name_or_id = args.get('subscription-name-or-id')
     if not id:
         raise ValueError(L('Please provide subscription id or unique name.'))

@@ -10,6 +10,31 @@ __all__ = ['print_detailed_help', 'print_welcome_message', 'GroupHelpFile', 'Com
 
 _out = sys.stdout
 
+def show_help(nouns, cmd_table):
+    cmd_table = _reduce_to_descendants_plus_self(cmd_table, nouns)
+
+    is_found = len(cmd_table) > 0
+    assert is_found, 'Could not find command: {0}'.format(' '.join(nouns))
+    is_command = len(cmd_table) == 1
+    is_group = not is_command
+
+    if is_group:
+        cmd_table = _reduce_to_children(cmd_table, nouns)
+
+    delimiters = ' '.join(nouns)
+    help_file = CommandHelpFile(delimiters, cmd_table) \
+        if is_command and _get_single_metadata(cmd_table)['name'] == delimiters \
+        else GroupHelpFile(delimiters, cmd_table)
+
+    if is_command:
+        help_file.load(cmd_table)
+
+    if len(nouns) == 0:
+        print('\nSpecial intro help for az')
+        help_file.command = 'az'
+
+    print_detailed_help(help_file)
+
 def show_welcome(cmd_table):
     print_welcome_message()
 
@@ -65,7 +90,7 @@ def print_arguments(help_file):
     if len(help_file.parameters) == 0:
         _print_indent('none', indent)
     required_tag = L(' [Required]')
-    max_name_length = max(len(p.name) + 11 if p.required else 0 for p in help_file.parameters)
+    max_name_length = max(len(p.name) + (11 if p.required else 0) for p in help_file.parameters)
     for p in help_file.parameters:
         indent = 1
         required_text = required_tag if p.required else ''
@@ -91,22 +116,28 @@ def _print_header(help_file):
     indent = 0
     _print_indent('')
     _print_indent(L('Command') if help_file.type == 'command' else L('Group'), indent)
+
+    indent = 1
     _print_indent('{0}{1}'.format(help_file.command,
                                   ': ' + help_file.short_summary
                                   if help_file.short_summary
                                   else ''),
                   indent)
 
-    indent = 1
+    indent = 2
     if help_file.long_summary:
         _print_indent('{0}'.format(help_file.long_summary.rstrip()), indent)
     _print_indent('')
 
 def _print_groups(help_file):
     indent = 1
-    for c in help_file.children:
-        _print_indent('{0}{1}'.format(c.name,
-                                      ': ' + c.short_summary if c.short_summary else ''),
+    max_name_length = max(len(c.name) for c in help_file.children) \
+        if len(help_file.children) > 0 \
+        else 0
+    for c in sorted(help_file.children, key=lambda h: h.name):
+        _print_indent('{0}{1}{2}'.format(c.name,
+                                         _get_column_indent(c.name, max_name_length),
+                                         ': ' + c.short_summary if c.short_summary else ''),
                       indent)
     _print_indent('')
 
@@ -125,16 +156,22 @@ def _print_examples(help_file):
 class HelpFile(object): #pylint: disable=too-few-public-methods
     def __init__(self, delimiters):
         self.delimiters = delimiters
-        self.name = delimiters.split('.')[-1]
-        self.command = delimiters.replace('.', ' ')
+        self.name = delimiters.split()[-1] if len(delimiters) > 0 else delimiters
+        self.command = delimiters
         self.type = ''
         self.short_summary = ''
         self.long_summary = ''
         self.examples = ''
 
-    def load(self, noun_map):
-        self.short_summary = noun_map.get('$description', '')
-        file_data = _load_help_file_from_string(noun_map.get('$doctext', None))
+    def load(self, cmd_table):
+        file_data = {}
+        is_found = len(cmd_table) == 1
+        assert is_found, 'Expected 1 command: {0}'.format(delimiters)
+        fn = next(k for k in cmd_table.keys())
+
+        self.short_summary = cmd_table[fn].get('description', '')
+        if not isinstance(fn, str):
+            file_data = _load_help_file_from_string(fn.__doc__)
         if file_data:
             self._load_from_data(file_data)
         else:
@@ -175,15 +212,20 @@ class GroupHelpFile(HelpFile): #pylint: disable=too-few-public-methods
         self.children = []
         for f in cmd_table:
             metadata = cmd_table[f]
-            child = HelpFile(metadata['name'])
-            child.load({f: metadata})
-            self.children.append(child)
+            self.children.append(HelpFile(metadata['name']))
+            self.children[-1].load({f: metadata})
 
 class CommandHelpFile(HelpFile): #pylint: disable=too-few-public-methods
-    def __init__(self, delimiters, argdoc):
+    def __init__(self, delimiters, cmd_table):
         super(CommandHelpFile, self).__init__(delimiters)
         self.type = 'command'
-        self.parameters = [HelpParameter(a, d, r) for a, d, r in argdoc]
+
+        metadata = _get_single_metadata(cmd_table)
+        self.parameters = []
+
+        for arg in metadata['arguments']:
+            self.parameters.append(HelpParameter(arg['name'], arg.get('help'),
+                                                 required=arg.get('required')))
 
     def _load_from_data(self, data):
         super(CommandHelpFile, self)._load_from_data(data)
@@ -292,6 +334,10 @@ def _load_help_file_from_string(text):
         return yaml.load(text) if text else None
     except Exception: #pylint: disable=broad-except
         return text
+
+def _get_single_metadata(cmd_table):
+    assert len(cmd_table) == 1
+    return next(metadata for _, metadata in cmd_table.items())
 
 class HelpAuthoringException(Exception):
     pass
