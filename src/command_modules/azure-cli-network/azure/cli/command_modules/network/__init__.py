@@ -249,6 +249,7 @@ build_operation("network vnet",
                 ],
                 command_table)
 
+# BUG: we are waiting on autorest to support this rename (https://github.com/Azure/autorest/issues/941)
 VNET_SPECIFIC_PARAMS= {
             'deployment_parameter_virtual_network_name_value': {
                 'name': '--vnet-name',
