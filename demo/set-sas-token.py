@@ -11,6 +11,8 @@ STACC = "travistestresourcegr3014"
 
 def cmd(command):
     """ Accepts a command line command as a string and returns stdout in UTF-8 format """
+    if os.name == 'nt':
+        command = command.replace('az', 'az.bat')
     return check_output([str(x) for x in command.split()]).decode('utf-8')
 
 # get storage account connection string
