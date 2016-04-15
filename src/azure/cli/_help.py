@@ -1,4 +1,5 @@
 from __future__ import print_function
+import inspect
 import sys
 import textwrap
 import yaml
@@ -10,10 +11,10 @@ __all__ = ['print_detailed_help', 'print_welcome_message', 'GroupHelpFile', 'Com
 
 _out = sys.stdout
 
-def show_welcome(cmd_table):
+def show_welcome(parser):
     print_welcome_message()
 
-    help_file = GroupHelpFile('', cmd_table)
+    help_file = GroupHelpFile('', parser)
     print_description_list(help_file.children)
 
 def print_welcome_message():
@@ -132,9 +133,9 @@ class HelpFile(object): #pylint: disable=too-few-public-methods
         self.long_summary = ''
         self.examples = ''
 
-    def load(self, noun_map):
-        self.short_summary = noun_map.get('$description', '')
-        file_data = _load_help_file_from_string(noun_map.get('$doctext', None))
+    def load(self, options):
+        self.short_summary = options.description
+        file_data = _load_help_file_from_string(inspect.getdoc(options._defaults.get('func')))
         if file_data:
             self._load_from_data(file_data)
         else:
@@ -166,17 +167,14 @@ class HelpFile(object): #pylint: disable=too-few-public-methods
 
 
 class GroupHelpFile(HelpFile): #pylint: disable=too-few-public-methods
-    def __init__(self, delimiters, cmd_table):
+    def __init__(self, delimiters, parser):
         super(GroupHelpFile, self).__init__(delimiters)
         self.type = 'group'
 
-        cmd_table = _reduce_to_children(cmd_table, delimiters.split())
-
         self.children = []
-        for f in cmd_table:
-            metadata = cmd_table[f]
-            child = HelpFile(metadata['name'])
-            child.load({f: metadata})
+        for cmd, options in parser.choices.items():
+            child = HelpFile(cmd)
+            child.load(options)
             self.children.append(child)
 
 class CommandHelpFile(HelpFile): #pylint: disable=too-few-public-methods
@@ -238,35 +236,6 @@ class HelpExample(object): #pylint: disable=too-few-public-methods
     def __init__(self, _data):
         self.name = _data['name']
         self.text = _data['text']
-
-def _reduce_to_descendants_plus_self(cmd_table, argv):
-    d = {}
-    exact_match_fn = next((f for f in cmd_table if cmd_table[f]['name'] == ' '.join(argv)), None)
-    if exact_match_fn:
-        d[exact_match_fn] = cmd_table[exact_match_fn]
-        return d
-
-    return {f: cmd_table[f] for f in cmd_table
-            if _list_starts_with(cmd_table[f]['name'].split(), argv)}
-
-def _reduce_to_children(cmd_table, argv):
-    d = _reduce_to_descendants_plus_self(cmd_table, argv)
-
-    # add fake keys to the dict so we can represent groups, which are not backed by objects
-    children = {}
-    num_args = len(argv)
-    for f in d:
-        delimiters = d[f]['name'].split()
-        if num_args >= len(delimiters):
-            continue
-        child_name = delimiters[num_args]
-        child_name_is_command = len(delimiters) == num_args + 1
-        children[child_name] = {'name': ' '.join(delimiters[:num_args + 1])}
-        if child_name_is_command:
-            children[child_name]['description'] = d[f].get('description', '')
-            children[child_name]['arguments'] = d[f].get('arguments', '')
-
-    return children
 
 def _list_starts_with(container_list, contained_list):
     if len(contained_list) > len(container_list):
