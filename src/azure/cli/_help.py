@@ -12,17 +12,9 @@ __all__ = ['print_detailed_help', 'print_welcome_message', 'GroupHelpFile', 'Com
 
 _out = sys.stdout
 
-class HelpAction(argparse.Action):
-    def __call__(self, parser, namespace, values, option_string=None):
-        nouns = parser.prog.split()[1:]
-        subparser = parser.subparsers[tuple(nouns)]
-        show_help(nouns, subparser)
-        parser.exit()
-
-
 def show_help(nouns, parser):
     #TODO: parser.subparsers[('storage', 'container')].choices['create']._defaults['func']
-    is_group = not hasattr(parser, '_defaults') or not parser._defaults.get('func')
+    is_group = not hasattr(parser, '_defaults') or not parser._defaults.get('func') # pylint: disable=protected-access
     is_command = not is_group
 
     delimiters = ' '.join(nouns)
@@ -30,8 +22,7 @@ def show_help(nouns, parser):
         if is_command \
         else GroupHelpFile(delimiters, parser)
 
-    if is_command:
-        help_file.load(parser)
+    help_file.load(parser)
 
     if len(nouns) == 0:
         print('\nSpecial intro help for az')
@@ -95,13 +86,13 @@ def print_arguments(help_file):
         _print_indent('none', indent)
     required_tag = L(' [Required]')
     max_name_length = max(len(p.name) + (11 if p.required else 0) for p in help_file.parameters)
-    for p in help_file.parameters:
+    for p in sorted(help_file.parameters, key=lambda p: str(not p.required) + p.name):
         indent = 1
         required_text = required_tag if p.required else ''
         _print_indent('{0}{1}{2}{3}'.format(p.name,
-                                            required_text,
                                             _get_column_indent(p.name + required_text,
                                                                max_name_length),
+                                            required_text,
                                             ': ' + p.short_summary if p.short_summary else ''),
                       indent,
                       max_name_length + indent*4 + 2)
@@ -113,7 +104,6 @@ def print_arguments(help_file):
         if p.value_sources:
             _print_indent('')
             _print_indent(L("Values from: {0}").format(', '.join(p.value_sources)), indent)
-        _print_indent('')
     return indent
 
 def _print_header(help_file):
@@ -141,7 +131,7 @@ def _print_groups(help_file):
     for c in sorted(help_file.children, key=lambda h: h.name):
         _print_indent('{0}{1}{2}'.format(c.name,
                                          _get_column_indent(c.name, max_name_length),
-                                      ': ' + c.short_summary if c.short_summary else ''),
+                                         ': ' + c.short_summary if c.short_summary else ''),
                       indent)
     _print_indent('')
 
@@ -168,17 +158,11 @@ class HelpFile(object): #pylint: disable=too-few-public-methods
         self.examples = ''
 
     def load(self, options):
-        self.short_summary = options.description
-        file_data = _load_help_file_from_string(inspect.getdoc(options._defaults.get('func')))
-    #def load(self, cmd_table):
-    #    file_data = {}
-    #    is_found = len(cmd_table) == 1
-    #    assert is_found, 'Expected 1 command: {0}'.format(delimiters)
-    #    fn = next(k for k in cmd_table.keys())
+        self.short_summary = options.description if hasattr(options, 'description') else None
+        file_data = (_load_help_file_from_string(inspect.getdoc(options._defaults.get('func'))) # pylint: disable=protected-access
+                     if hasattr(options, '_defaults')
+                     else None)
 
-    #    self.short_summary = cmd_table[fn].get('description', '')
-    #    if not isinstance(fn, str):
-    #        file_data = _load_help_file_from_string(fn.__doc__)
         if file_data:
             self._load_from_data(file_data)
         else:
@@ -215,8 +199,9 @@ class GroupHelpFile(HelpFile): #pylint: disable=too-few-public-methods
         self.type = 'group'
 
         self.children = []
-        for cmd, options in parser.choices.items():
-            child = HelpFile(cmd)
+        for options in parser.choices.values():
+            delimiters = ' '.join(options.prog.split()[1:])
+            child = HelpFile(delimiters)
             child.load(options)
             self.children.append(child)
 
@@ -227,9 +212,10 @@ class CommandHelpFile(HelpFile): #pylint: disable=too-few-public-methods
 
         self.parameters = []
 
-        for action in [a for a in parser._actions if a.help != argparse.SUPPRESS]:
-            self.parameters.append(HelpParameter('/'.join(sorted(action.option_strings)), action.help,
-                                                 required=False)) # TODO
+        for action in [a for a in parser._actions if a.help != argparse.SUPPRESS]: # pylint: disable=protected-access
+            self.parameters.append(HelpParameter('/'.join(sorted(action.option_strings)),
+                                                 action.help,
+                                                 required=action.required))
 
     def _load_from_data(self, data):
         super(CommandHelpFile, self)._load_from_data(data)

@@ -1,5 +1,4 @@
 import argparse
-import azure.cli._help as _help
 
 class IncorrectUsageError(Exception):
     '''Raised when a command is incorrectly used and the usage should be
@@ -17,36 +16,6 @@ class AzCliCommandParser(argparse.ArgumentParser):
         super(AzCliCommandParser, self).__init__(**kwargs)
         self.subparsers = {}
         self.parents = kwargs.get('parents', [])
-
-    #def format_help(self):
-    #    nouns = self.prog.split()[1:]
-    #    try:
-    #        subparser = self.subparsers[tuple(nouns)]
-    #    except KeyError:
-    #        subparser = self.subparsers[tuple(nouns[:-1])]
-    #        subparser = subparser.choices[nouns[-1]]
-    #    _help.show_help(nouns, subparser)
-
-        #nouns_key = None
-        #subparser = None
-        #for i in range(0, len(argv)):
-        #    try:
-        #        nouns_key = tuple(argv[:len(argv)-i])
-        #        subparser = self.parser.subparsers[nouns_key]
-        #        break
-        #    except KeyError:
-        #        pass
-
-        #nouns = list(nouns_key)
-        #try:
-        #    command_name = argv[len(nouns)]
-        #    nouns += command_name
-        #    subparser = subparser.choices[command_name]
-        #except IndexError:
-        #    pass
-
-        #_help.show_help(nouns, subparser)
-        #return None
 
     def load_command_table(self, command_table):
         """Load a command table into our parser.
