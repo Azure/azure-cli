@@ -18,8 +18,6 @@ class DeploymentVM(Model):
      .
     :param str content_version: If included it must match the ContentVersion
      in the template.
-    :param str deployment_parameter__artifacts_location_value: The container
-     URI of the template.
     :param str deployment_parameter_os_publisher_value: The OS publisher of
      the OS image.
     :param str deployment_parameter_admin_password_value: Password for the
@@ -55,7 +53,6 @@ class DeploymentVM(Model):
     _attribute_map = {
         'uri': {'key': 'properties.templateLink.uri', 'type': 'str'},
         'content_version': {'key': 'properties.templateLink.contentVersion', 'type': 'str'},
-        'deployment_parameter__artifacts_location_value': {'key': 'properties.parameters._artifactsLocation.value', 'type': 'str'},
         'deployment_parameter_os_publisher_value': {'key': 'properties.parameters.osPublisher.value', 'type': 'str'},
         'deployment_parameter_admin_password_value': {'key': 'properties.parameters.adminPassword.value', 'type': 'str'},
         'deployment_parameter_ip_address_type_value': {'key': 'properties.parameters.ipAddressType.value', 'type': 'str'},
@@ -72,10 +69,9 @@ class DeploymentVM(Model):
         'mode': {'key': 'properties.mode', 'type': 'str'},
     }
 
-    def __init__(self, content_version=None, deployment_parameter__artifacts_location_value=None, deployment_parameter_os_publisher_value=None, deployment_parameter_admin_password_value=None, deployment_parameter_ip_address_type_value=None, deployment_parameter_storage_type_value=None, deployment_parameter_size_value=None, deployment_parameter_admin_username_value=None, deployment_parameter_dns_name_for_public_ip_value=None, deployment_parameter_ip_address_prefix_value=None, deployment_parameter_virtual_machine_name_value=None, deployment_parameter_subnet_prefix_value=None, deployment_parameter_os_sku_value=None, deployment_parameter_os_offer_value=None, deployment_parameter_os_version_value=None, **kwargs):
+    def __init__(self, content_version=None, deployment_parameter_os_publisher_value=None, deployment_parameter_admin_password_value=None, deployment_parameter_ip_address_type_value=None, deployment_parameter_storage_type_value=None, deployment_parameter_size_value=None, deployment_parameter_admin_username_value=None, deployment_parameter_dns_name_for_public_ip_value=None, deployment_parameter_ip_address_prefix_value=None, deployment_parameter_virtual_machine_name_value=None, deployment_parameter_subnet_prefix_value=None, deployment_parameter_os_sku_value=None, deployment_parameter_os_offer_value=None, deployment_parameter_os_version_value=None, **kwargs):
         self.uri = "https://azuretemplatehost.blob.core.windows.net/templatehost/CreateVM/azuredeploy.json"
         self.content_version = content_version
-        self.deployment_parameter__artifacts_location_value = deployment_parameter__artifacts_location_value
         self.deployment_parameter_os_publisher_value = deployment_parameter_os_publisher_value
         self.deployment_parameter_admin_password_value = deployment_parameter_admin_password_value
         self.deployment_parameter_ip_address_type_value = deployment_parameter_ip_address_type_value

@@ -32,7 +32,7 @@ class VMOperations(object):
         self.config = config
 
     def create_or_update(
-            self, resource_group_name, deployment_name, content_version=None, deployment_parameter__artifacts_location_value=None, deployment_parameter_os_publisher_value=None, deployment_parameter_admin_password_value=None, deployment_parameter_ip_address_type_value=None, deployment_parameter_storage_type_value=None, deployment_parameter_size_value=None, deployment_parameter_admin_username_value=None, deployment_parameter_dns_name_for_public_ip_value=None, deployment_parameter_ip_address_prefix_value=None, deployment_parameter_virtual_machine_name_value=None, deployment_parameter_subnet_prefix_value=None, deployment_parameter_os_sku_value=None, deployment_parameter_os_offer_value=None, deployment_parameter_os_version_value=None, custom_headers={}, raw=False, **operation_config):
+            self, resource_group_name, deployment_name, content_version=None, deployment_parameter_os_publisher_value=None, deployment_parameter_admin_password_value=None, deployment_parameter_ip_address_type_value=None, deployment_parameter_storage_type_value=None, deployment_parameter_size_value=None, deployment_parameter_admin_username_value=None, deployment_parameter_dns_name_for_public_ip_value=None, deployment_parameter_ip_address_prefix_value=None, deployment_parameter_virtual_machine_name_value=None, deployment_parameter_subnet_prefix_value=None, deployment_parameter_os_sku_value=None, deployment_parameter_os_offer_value=None, deployment_parameter_os_version_value=None, custom_headers={}, raw=False, **operation_config):
         """
         Create a named template deployment using a template.
 
@@ -44,9 +44,6 @@ class VMOperations(object):
         :param content_version: If included it must match the ContentVersion
          in the template.
         :type content_version: str
-        :param deployment_parameter__artifacts_location_value: The container
-         URI of the template.
-        :type deployment_parameter__artifacts_location_value: str
         :param deployment_parameter_os_publisher_value: The OS publisher of
          the OS image.
         :type deployment_parameter_os_publisher_value: str
@@ -89,7 +86,7 @@ class VMOperations(object):
         :rtype: DeploymentExtended
         :rtype: msrest.pipeline.ClientRawResponse if raw=True
         """
-        parameters = models.DeploymentVM(content_version=content_version, deployment_parameter__artifacts_location_value=deployment_parameter__artifacts_location_value, deployment_parameter_os_publisher_value=deployment_parameter_os_publisher_value, deployment_parameter_admin_password_value=deployment_parameter_admin_password_value, deployment_parameter_ip_address_type_value=deployment_parameter_ip_address_type_value, deployment_parameter_storage_type_value=deployment_parameter_storage_type_value, deployment_parameter_size_value=deployment_parameter_size_value, deployment_parameter_admin_username_value=deployment_parameter_admin_username_value, deployment_parameter_dns_name_for_public_ip_value=deployment_parameter_dns_name_for_public_ip_value, deployment_parameter_ip_address_prefix_value=deployment_parameter_ip_address_prefix_value, deployment_parameter_virtual_machine_name_value=deployment_parameter_virtual_machine_name_value, deployment_parameter_subnet_prefix_value=deployment_parameter_subnet_prefix_value, deployment_parameter_os_sku_value=deployment_parameter_os_sku_value, deployment_parameter_os_offer_value=deployment_parameter_os_offer_value, deployment_parameter_os_version_value=deployment_parameter_os_version_value)
+        parameters = models.DeploymentVM(content_version=content_version, deployment_parameter_os_publisher_value=deployment_parameter_os_publisher_value, deployment_parameter_admin_password_value=deployment_parameter_admin_password_value, deployment_parameter_ip_address_type_value=deployment_parameter_ip_address_type_value, deployment_parameter_storage_type_value=deployment_parameter_storage_type_value, deployment_parameter_size_value=deployment_parameter_size_value, deployment_parameter_admin_username_value=deployment_parameter_admin_username_value, deployment_parameter_dns_name_for_public_ip_value=deployment_parameter_dns_name_for_public_ip_value, deployment_parameter_ip_address_prefix_value=deployment_parameter_ip_address_prefix_value, deployment_parameter_virtual_machine_name_value=deployment_parameter_virtual_machine_name_value, deployment_parameter_subnet_prefix_value=deployment_parameter_subnet_prefix_value, deployment_parameter_os_sku_value=deployment_parameter_os_sku_value, deployment_parameter_os_offer_value=deployment_parameter_os_offer_value, deployment_parameter_os_version_value=deployment_parameter_os_version_value)
 
         # Construct URL
         url = '/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Resources/deployments/{deploymentName}'
