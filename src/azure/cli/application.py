@@ -167,7 +167,8 @@ class Application(object):
     def _register_builtin_arguments(parser):
         parser.add_argument('--subscription', dest='_subscription_id', help=argparse.SUPPRESS)
         parser.add_argument('--output', '-o', dest='_output_format',
-                            choices=['list', 'json', 'tsv'])
+                            choices=['list', 'json', 'tsv'],
+                            help='Output format of type "list", "json" or "tsv"')
 
     def _handle_builtin_arguments(self, args):
         self.configuration.output_format = args._output_format #pylint: disable=protected-access
