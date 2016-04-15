@@ -20,7 +20,8 @@ from azure.mgmt.network.operations import (ApplicationGatewaysOperations,
                                            VirtualNetworksOperations)
 
 from azure.cli.command_modules.network.mgmt.lib import (ResourceManagementClient as VNetClient,
-                                                        ResourceManagementClientConfiguration as VNetClientConfig)
+                                                        ResourceManagementClientConfiguration
+                                                        as VNetClientConfig)
 from azure.cli.command_modules.network.mgmt.lib.operations import VNetOperations
 
 from azure.cli.commands._command_creation import get_mgmt_service_client
@@ -250,24 +251,24 @@ build_operation("network vnet",
                 command_table)
 
 # BUG: we are waiting on autorest to support this rename (https://github.com/Azure/autorest/issues/941)
-VNET_SPECIFIC_PARAMS= {
-            'deployment_parameter_virtual_network_name_value': {
-                'name': '--vnet-name',
-                'metavar': 'VNETNAME',
-            },
-            'deployment_parameter_virtual_network_prefix_value': {
-                'name': '--vnet-prefix',
-                'metavar': 'VNETPREFIX',
-            },
-            'deployment_parameter_subnet_name_value': {
-                'name': '--subnet-name',
-                'metavar': 'SUBNETNAME',
-            },
-            'deployment_parameter_subnet_prefix_value': {
-                'name': '--subnet-prefix',
-                'metavar': 'SUBNETPREFIX',
-            }
-        }
+VNET_SPECIFIC_PARAMS = {
+    'deployment_parameter_virtual_network_name_value': {
+        'name': '--vnet-name',
+        'metavar': 'VNETNAME',
+    },
+    'deployment_parameter_virtual_network_prefix_value': {
+        'name': '--vnet-prefix',
+        'metavar': 'VNETPREFIX',
+    },
+    'deployment_parameter_subnet_name_value': {
+        'name': '--subnet-name',
+        'metavar': 'SUBNETNAME',
+    },
+    'deployment_parameter_subnet_prefix_value': {
+        'name': '--subnet-prefix',
+        'metavar': 'SUBNETPREFIX',
+    }
+}
 
 build_operation('network vnet',
                 'virtual_networks',
