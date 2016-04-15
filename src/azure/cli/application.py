@@ -56,16 +56,15 @@ class Application(object):
 
         self.parser = AzCliCommandParser(prog='az', parents=[self.global_parser])
         self.raise_event(self.COMMAND_PARSER_CREATED, self.parser)
-        self.command_table = {}
-
-    def load_commands(self):
-        self.command_table = self.configuration.get_command_table()
-        self.parser.load_command_table(self.command_table)
-        self.raise_event(self.COMMAND_PARSER_LOADED, self.parser)
 
     def execute(self, argv):
+        command_table = self.configuration.get_command_table()
+        self.parser.load_command_table(command_table)
+        self.raise_event(self.COMMAND_PARSER_LOADED, self.parser)
+
         if len(argv) == 0:
-            _help.show_welcome(self.command_table)
+            subparser = next(value for key, value in self.parser.subparsers.items() if not key)
+            _help.show_welcome(subparser)
             return None
 
         args = self.parser.parse_args(argv)
