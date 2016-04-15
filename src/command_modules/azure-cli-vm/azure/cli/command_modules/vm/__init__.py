@@ -138,10 +138,6 @@ build_operation("vm scalesetvm",
 
 # BUG: waiting on https://github.com/Azure/azure-cli/issues/115 to remove these specific params
 VM_SPECIFIC_PARAMS = {
-    'deployment_parameter__artifacts_location_value': {
-        'name': '--_artifacts_location',
-        'help': argparse.SUPPRESS
-    },
     'deployment_parameter_os_publisher_value': {
         'name': '--os-publisher',
         'metavar': 'OSPUBLISHER',
