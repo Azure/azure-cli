@@ -1,4 +1,5 @@
 from __future__ import print_function
+import argparse
 import inspect
 import sys
 import textwrap
@@ -11,24 +12,26 @@ __all__ = ['print_detailed_help', 'print_welcome_message', 'GroupHelpFile', 'Com
 
 _out = sys.stdout
 
-def show_help(nouns, cmd_table):
-    cmd_table = _reduce_to_descendants_plus_self(cmd_table, nouns)
+class HelpAction(argparse.Action):
+    def __call__(self, parser, namespace, values, option_string=None):
+        nouns = parser.prog.split()[1:]
+        subparser = parser.subparsers[tuple(nouns)]
+        show_help(nouns, subparser)
+        parser.exit()
 
-    is_found = len(cmd_table) > 0
-    assert is_found, 'Could not find command: {0}'.format(' '.join(nouns))
-    is_command = len(cmd_table) == 1
-    is_group = not is_command
 
-    if is_group:
-        cmd_table = _reduce_to_children(cmd_table, nouns)
+def show_help(nouns, parser):
+    #TODO: parser.subparsers[('storage', 'container')].choices['create']._defaults['func']
+    is_group = not hasattr(parser, '_defaults') or not parser._defaults.get('func')
+    is_command = not is_group
 
     delimiters = ' '.join(nouns)
-    help_file = CommandHelpFile(delimiters, cmd_table) \
-        if is_command and _get_single_metadata(cmd_table)['name'] == delimiters \
-        else GroupHelpFile(delimiters, cmd_table)
+    help_file = CommandHelpFile(delimiters, parser) \
+        if is_command \
+        else GroupHelpFile(delimiters, parser)
 
     if is_command:
-        help_file.load(cmd_table)
+        help_file.load(parser)
 
     if len(nouns) == 0:
         print('\nSpecial intro help for az')
@@ -218,16 +221,15 @@ class GroupHelpFile(HelpFile): #pylint: disable=too-few-public-methods
             self.children.append(child)
 
 class CommandHelpFile(HelpFile): #pylint: disable=too-few-public-methods
-    def __init__(self, delimiters, cmd_table):
+    def __init__(self, delimiters, parser):
         super(CommandHelpFile, self).__init__(delimiters)
         self.type = 'command'
 
-        metadata = _get_single_metadata(cmd_table)
         self.parameters = []
 
-        for arg in metadata['arguments']:
-            self.parameters.append(HelpParameter(arg['name'], arg.get('help'),
-                                                 required=arg.get('required')))
+        for action in [a for a in parser._actions if a.help != argparse.SUPPRESS]:
+            self.parameters.append(HelpParameter('/'.join(sorted(action.option_strings)), action.help,
+                                                 required=False)) # TODO
 
     def _load_from_data(self, data):
         super(CommandHelpFile, self)._load_from_data(data)

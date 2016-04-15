@@ -62,10 +62,41 @@ class Application(object):
         self.parser.load_command_table(command_table)
         self.raise_event(self.COMMAND_PARSER_LOADED, self.parser)
 
+        az_subparser = self.parser.subparsers[tuple()]
+
         if len(argv) == 0:
-            subparser = next(value for key, value in self.parser.subparsers.items() if not key)
-            _help.show_welcome(subparser)
+            _help.show_welcome(az_subparser)
             return None
+
+        if '-h' in argv or '--help' in argv:
+            nouns_key = None
+            subparser = None
+            found = False
+            for i in range(0, len(argv)):
+                try:
+                    nouns_key = tuple(argv[:len(argv)-i])
+                    subparser = self.parser.subparsers[nouns_key]
+                    found = True
+                    break
+                except KeyError:
+                    pass
+
+            if found:
+                nouns = list(nouns_key)
+            else:
+                nouns = []
+                subparser = az_subparser
+
+            try:
+                command_name = argv[len(nouns)]
+                subparser = subparser.choices[command_name]
+                nouns.append(command_name)
+            except KeyError:
+                pass
+
+            _help.show_help(nouns, subparser)
+            return None
+
 
         args = self.parser.parse_args(argv)
         self.raise_event(self.COMMAND_PARSER_PARSED, args)
