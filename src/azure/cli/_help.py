@@ -1,4 +1,5 @@
 from __future__ import print_function
+import inspect
 import sys
 import textwrap
 import yaml
@@ -35,10 +36,10 @@ def show_help(nouns, cmd_table):
 
     print_detailed_help(help_file)
 
-def show_welcome(cmd_table):
+def show_welcome(parser):
     print_welcome_message()
 
-    help_file = GroupHelpFile('', cmd_table)
+    help_file = GroupHelpFile('', parser)
     print_description_list(help_file.children)
 
 def print_welcome_message():
@@ -137,7 +138,7 @@ def _print_groups(help_file):
     for c in sorted(help_file.children, key=lambda h: h.name):
         _print_indent('{0}{1}{2}'.format(c.name,
                                          _get_column_indent(c.name, max_name_length),
-                                         ': ' + c.short_summary if c.short_summary else ''),
+                                      ': ' + c.short_summary if c.short_summary else ''),
                       indent)
     _print_indent('')
 
@@ -163,15 +164,18 @@ class HelpFile(object): #pylint: disable=too-few-public-methods
         self.long_summary = ''
         self.examples = ''
 
-    def load(self, cmd_table):
-        file_data = {}
-        is_found = len(cmd_table) == 1
-        assert is_found, 'Expected 1 command: {0}'.format(delimiters)
-        fn = next(k for k in cmd_table.keys())
+    def load(self, options):
+        self.short_summary = options.description
+        file_data = _load_help_file_from_string(inspect.getdoc(options._defaults.get('func')))
+    #def load(self, cmd_table):
+    #    file_data = {}
+    #    is_found = len(cmd_table) == 1
+    #    assert is_found, 'Expected 1 command: {0}'.format(delimiters)
+    #    fn = next(k for k in cmd_table.keys())
 
-        self.short_summary = cmd_table[fn].get('description', '')
-        if not isinstance(fn, str):
-            file_data = _load_help_file_from_string(fn.__doc__)
+    #    self.short_summary = cmd_table[fn].get('description', '')
+    #    if not isinstance(fn, str):
+    #        file_data = _load_help_file_from_string(fn.__doc__)
         if file_data:
             self._load_from_data(file_data)
         else:
@@ -203,17 +207,15 @@ class HelpFile(object): #pylint: disable=too-few-public-methods
 
 
 class GroupHelpFile(HelpFile): #pylint: disable=too-few-public-methods
-    def __init__(self, delimiters, cmd_table):
+    def __init__(self, delimiters, parser):
         super(GroupHelpFile, self).__init__(delimiters)
         self.type = 'group'
 
-        cmd_table = _reduce_to_children(cmd_table, delimiters.split())
-
         self.children = []
-        for f in cmd_table:
-            metadata = cmd_table[f]
-            self.children.append(HelpFile(metadata['name']))
-            self.children[-1].load({f: metadata})
+        for cmd, options in parser.choices.items():
+            child = HelpFile(cmd)
+            child.load(options)
+            self.children.append(child)
 
 class CommandHelpFile(HelpFile): #pylint: disable=too-few-public-methods
     def __init__(self, delimiters, cmd_table):
@@ -280,40 +282,6 @@ class HelpExample(object): #pylint: disable=too-few-public-methods
     def __init__(self, _data):
         self.name = _data['name']
         self.text = _data['text']
-
-def _reduce_to_descendants_plus_self(cmd_table, argv):
-    d = {}
-    exact_match_fn = next((f for f in cmd_table if cmd_table[f]['name'] == ' '.join(argv)), None)
-    if exact_match_fn:
-        d[exact_match_fn] = cmd_table[exact_match_fn]
-        return d
-
-    return {f: cmd_table[f] for f in cmd_table
-            if _list_starts_with(cmd_table[f]['name'].split(), argv)}
-
-def _reduce_to_children(cmd_table, argv):
-    d = _reduce_to_descendants_plus_self(cmd_table, argv)
-
-    # add fake keys to the dict so we can represent groups, which are not backed by objects
-    children = {}
-    num_args = len(argv)
-    for f in d:
-        delimiters = d[f]['name'].split()
-        if num_args >= len(delimiters):
-            continue
-        child_name = delimiters[num_args]
-        child_name_is_command = len(delimiters) == num_args + 1
-        children[child_name] = {'name': ' '.join(delimiters[:num_args + 1])}
-        if child_name_is_command:
-            children[child_name]['description'] = d[f].get('description', '')
-            children[child_name]['arguments'] = d[f].get('arguments', '')
-
-    return children
-
-def _list_starts_with(container_list, contained_list):
-    if len(contained_list) > len(container_list):
-        return False
-    return container_list[:len(contained_list)] == contained_list
 
 def _print_indent(s, indent=0, subsequent_spaces=-1):
     tw = textwrap.TextWrapper(initial_indent='    '*indent,
