@@ -237,11 +237,6 @@ class HelpExample(object): #pylint: disable=too-few-public-methods
         self.name = _data['name']
         self.text = _data['text']
 
-def _list_starts_with(container_list, contained_list):
-    if len(contained_list) > len(container_list):
-        return False
-    return container_list[:len(contained_list)] == contained_list
-
 def _print_indent(s, indent=0, subsequent_spaces=-1):
     tw = textwrap.TextWrapper(initial_indent='    '*indent,
                               subsequent_indent=('    '*indent
