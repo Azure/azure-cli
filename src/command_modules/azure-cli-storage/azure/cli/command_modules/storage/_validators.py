@@ -11,10 +11,22 @@ def validate_container_permission(string):
         raise ValueError
     return ContainerPermissions(_str=''.join(set(string)))
 
-def validate_datetime(string):
+def validate_datetime_as_string(string):
     ''' Validates UTC datettime in format '%Y-%m-%d\'T\'%H:%M\'Z\''. '''
     date_format = '%Y-%m-%dT%H:%MZ'
     return datetime.strptime(string, date_format).strftime(date_format)
+
+def validate_datetime(string):
+    ''' Validates UTC datettime in format '%Y-%m-%d\'T\'%H:%M\'Z\''. '''
+    date_format = '%Y-%m-%dT%H:%MZ'
+    return datetime.strptime(string, date_format)
+
+def validate_lease_duration(string):
+    ''' Validates that duration falls between 15 and 60 or -1 '''
+    int_val = int(string)
+    if (int_val < 15 and int_val != -1) or int_val > 60:
+        raise ValueError
+    return int_val
 
 def validate_id(string):
     if len(string) > 64:

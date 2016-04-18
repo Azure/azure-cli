@@ -19,11 +19,15 @@ from azure.cli.main import main as cli
 
 # SCRIPT METHODS
 
-def cmd(command):
+def cmd(command, file_=None):
     """ Accepts a command line command as a string and returns stdout in UTF-8 format """
-    io = StringIO()
-    cli(command.split(), file=io)
-    return io.getvalue()
+    output = StringIO()
+    cli(command.split(), file=output)
+    result = output.getvalue().strip()
+    if file_:
+        file_.write('\n== {} ==\n{}'.format(command, result))
+    output.close()
+    return result
 
 def set_env(key, val):
     """ set environment variable """

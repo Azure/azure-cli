@@ -7,6 +7,7 @@ import sys
 from six import StringIO
 
 from azure.cli.utils.command_test_util import cmd, set_env, pop_env
+from azure.common import AzureHttpError
 
 RESOURCE_GROUP_NAME = 'travistestresourcegroup'
 STORAGE_ACCOUNT_NAME = 'travistestresourcegr3014'
@@ -41,6 +42,45 @@ def _file_exists(share_name, dir_name, file_name):
         .format(share_name, dir_name, file_name))
     return True if res == 'True' else False
 
+def storage_container_scenario():
+    container = 'testcontainer01'
+    proposed_lease_id = 'abcdabcd-abcd-abcd-abcd-abcdabcdabcd'
+    new_lease_id = 'dcbadcba-dcba-dcba-dcba-dcbadcbadcba'
+    date = '2016-04-08T12:00Z'
+    io = StringIO()
+    _get_connection_string()
+    cmd('storage container delete --container-name {}'.format(container), io)
+    if cmd('storage container exists --container-name {}'.format(container), io) == 'False':
+        try:
+            # this will fail if the container is being delete. Wait some time and rerecord.
+            cmd('storage container create --container-name {} --fail-on-exist'.format(container), io)
+        except AzureHttpError as ex:
+            return(ex)
+        cmd('storage container exists --container-name {}'.format(container), io)
+        cmd('storage container show --container-name {}'.format(container), io)
+        cmd('storage container list', io)
+        cmd('storage container metadata set -c {} --metadata foo=bar;moo=bak;'
+            .format(container), io)
+        cmd('storage container metadata get -c {}'.format(container), io)
+        cmd('storage container metadata set -c {}'.format(container), io) # reset metadata
+        cmd('storage container metadata get -c {}'.format(container), io)
+        cmd('storage container lease acquire --lease-duration 60 -c {} --if-modified-since {} --proposed-lease-id {}'.format(container, date, proposed_lease_id), io)
+        cmd('storage container show --container-name {}'.format(container), io)
+        cmd('storage container lease change --container-name {} --lease-id {} --proposed-lease-id {}'.format(container, proposed_lease_id, new_lease_id), io)
+        cmd('storage container lease renew --container-name {} --lease-id {}'.format(container, new_lease_id), io)
+        cmd('storage container show --container-name {}'.format(container), io)        
+        cmd('storage container lease break --container-name {} --lease-break-period 30'.format(container), io)
+        cmd('storage container show --container-name {}'.format(container), io)
+        cmd('storage container lease release --container-name {} --lease-id {}'.format(container, new_lease_id), io)
+        cmd('storage container show --container-name {}'.format(container), io)
+        cmd('storage container delete --container-name {} --fail-not-exist'.format(container), io)
+        cmd('storage container exists --container-name {}'.format(container), io)
+    else:
+        io.write('Unable to establish pre-conditions. Test FAILED.')
+    result = io.getvalue()
+    io.close()
+    return result
+
 def storage_file_upload_with_subdir():
     _get_connection_string()
     share_name = 'testshare01'
@@ -63,6 +103,7 @@ def storage_file_upload_with_subdir():
     else:
         result = 'File already exists. Preconditions failed.'
     return result
+
 
 TEST_DEF = [
     # STORAGE ACCOUNT TESTS
@@ -122,22 +163,25 @@ TEST_DEF = [
     },
     # STORAGE CONTAINER TESTS
     {
-        'test_name': 'storage_container_list',
-        'command': 'storage container list'
-    },
-    {
-        'test_name': 'storage_container_create',
-        'command': 'storage container create --container-name testcontainer01 --fail-on-exist'
-    },
-    {
-        'test_name': 'storage_container_exist',
-        'command': 'storage container exists --container-name testcontainer01'
-    },
-    {
-        'test_name': 'storage_container_show',
-        'command': 'storage container show --container-name testcontainer01'
-    },
-    # TODO: Recently converted to autocommand--need some work before this tests will pass again
+        'test_name': 'storage_container',
+        'script': storage_container_scenario
+    },   
+    #{
+    #    'test_name': 'storage_container_list',
+    #    'command': 'storage container list'
+    #},
+    #{
+    #    'test_name': 'storage_container_create',
+    #    'command': 'storage container create --container-name testcontainer01 --fail-on-exist'
+    #},
+    #{
+    #    'test_name': 'storage_container_exist',
+    #    'command': 'storage container exists --container-name testcontainer01'
+    #},
+    #{
+    #    'test_name': 'storage_container_show',
+    #    'command': 'storage container show --container-name testcontainer01'
+    #},
     #{
     #    'test_name': 'storage_container_lease_acquire',
     #    'command': 'storage container lease acquire --lease-duration 60 -c testcontainer01 --if-modified-since {} --proposed-lease-id {}'
@@ -162,22 +206,22 @@ TEST_DEF = [
     #    'command': 'storage container lease release --container-name testcontainer01 --lease-id {}'
     #        .format(CHANGED_LEASE_ID)
     #},
-    {
-        'test_name': 'storage_container_delete',
-        'command': 'storage container delete --container-name testcontainer01 --fail-not-exist'
-    },
-    {
-        'test_name': 'storage_container_metadata_set',
-        'command': 'storage container metadata set -c testcontainer1234 --metadata foo=bar;moo=bak;'
-    },
-    {
-        'test_name': 'storage_container_metadata_get',
-        'command': 'storage container metadata get -c testcontainer1234'
-    },
-    {
-        'test_name': 'storage_container_metadata_reset',
-        'command': 'storage container metadata set -c testcontainer1234'
-    },
+    #{
+    #    'test_name': 'storage_container_delete',
+    #    'command': 'storage container delete --container-name testcontainer01 --fail-not-exist'
+    #},
+    #{
+    #    'test_name': 'storage_container_metadata_set',
+    #    'command': 'storage container metadata set -c testcontainer1234 --metadata foo=bar;moo=bak;'
+    #},
+    #{
+    #    'test_name': 'storage_container_metadata_get',
+    #    'command': 'storage container metadata get -c testcontainer1234'
+    #},
+    #{
+    #    'test_name': 'storage_container_metadata_reset',
+    #    'command': 'storage container metadata set -c testcontainer1234'
+    #},
     # STORAGE BLOB TESTS
     {
         'test_name': 'storage_blob_upload_block_blob',
@@ -295,10 +339,10 @@ TEST_DEF = [
     #    'test_name': 'storage_file_delete_simple',
     #    'command': 'storage file delete --share-name testshare01 --file-name testfile01.rst'
     #},
-    {
-        'test_name': 'storage_file_upload_with_subdir',
-        'script': storage_file_upload_with_subdir
-    },
+    #{
+    #    'test_name': 'storage_file_upload_with_subdir',
+    #    'script': storage_file_upload_with_subdir
+    #},
     {
         'test_name': 'storage_file_exists_with_subdir',
         'command': 'storage file exists --share-name testshare01 --directory-name testdir1 --file-name testfile02.rst'
