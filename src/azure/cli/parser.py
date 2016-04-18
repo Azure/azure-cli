@@ -1,4 +1,5 @@
 import argparse
+import azure.cli._help as _help
 
 class IncorrectUsageError(Exception):
     '''Raised when a command is incorrectly used and the usage should be
@@ -11,7 +12,6 @@ class AzCliCommandParser(argparse.ArgumentParser):
     Azure CLI utility.
     """
     def __init__(self, **kwargs):
-        kwargs['add_help'] = False
         super(AzCliCommandParser, self).__init__(**kwargs)
         self.subparsers = {}
         self.parents = kwargs.get('parents', [])
@@ -56,8 +56,7 @@ class AzCliCommandParser(argparse.ArgumentParser):
                 # subcmd2 and so on), we know we can always back up one step and
                 # add a subparser if one doesn't exist
                 grandparent_subparser = self.subparsers[tuple(path[0:length - 1])]
-                new_parser = grandparent_subparser.add_parser(path[length - 1],
-                                                              parents=self.parents)
+                new_parser = grandparent_subparser.add_parser(path[length - 1])
 
                 # Due to http://bugs.python.org/issue9253, we have to give the subparser
                 # a destination and set it to required in order to get a meaningful error
@@ -65,3 +64,12 @@ class AzCliCommandParser(argparse.ArgumentParser):
                 parent_subparser.required = True
                 self.subparsers[tuple(path[0:length])] = parent_subparser
         return parent_subparser
+
+    def format_help(self):
+        is_group = not self._defaults.get('func')
+        _help.show_help(self.prog.split()[1:],
+                        (self._actions[-1] #pylint: disable=protected-access
+                         if is_group
+                         else self),
+                         is_group)
+        self.exit()

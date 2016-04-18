@@ -45,7 +45,6 @@ class Application(object):
 
         # Register presence of and handlers for global parameters
         self.register(self.GLOBAL_PARSER_CREATED, Application._register_builtin_arguments)
-        self.register(self.GLOBAL_PARSER_CREATED, Application._register_help)
         self.register(self.COMMAND_PARSER_LOADED, Application._enable_autocomplete)
         self.register(self.COMMAND_PARSER_PARSED, self._handle_builtin_arguments)
 
@@ -55,7 +54,7 @@ class Application(object):
         self.global_parser = AzCliCommandParser(prog='az', add_help=False)
         self.raise_event(self.GLOBAL_PARSER_CREATED, self.global_parser)
 
-        self.parser = AzCliCommandParser(prog='az', parents=[self.global_parser], add_help=False)
+        self.parser = AzCliCommandParser(prog='az', parents=[self.global_parser])
         self.raise_event(self.COMMAND_PARSER_CREATED, self.parser)
 
     def execute(self, argv):
@@ -139,11 +138,6 @@ class Application(object):
         parser.add_argument('--output', '-o', dest='_output_format',
                             choices=['list', 'json', 'tsv'],
                             help='Output format of type "list", "json" or "tsv"')
-
-    @staticmethod
-    def _register_help(parser):
-        parser.add_argument('--help', '-h', action=_help.HelpAction,
-                            help='Show help and exit', nargs=0)
 
     def _handle_builtin_arguments(self, args):
         self.configuration.output_format = args._output_format #pylint: disable=protected-access
