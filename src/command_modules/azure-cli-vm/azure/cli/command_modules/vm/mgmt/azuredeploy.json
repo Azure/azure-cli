@@ -27,7 +27,7 @@
       "type": "string",
       "minLength": 1,
       "metadata": {
-        "description": "The VM name that is displayed in the portal."
+        "description": "The VM resource name."
       }
     },
     "os": {
@@ -98,7 +98,7 @@
     },
     "virtualNetworkName": {
       "type": "string",
-      "defaultValue": "[concat('MyVNET', uniqueString(parameters('dnsNameForPublicIP')))]",
+      "defaultValue": "[concat(parameters('virtualMachineName'), 'VNET', uniqueString(parameters('dnsNameForPublicIP')))]",
       "metadata": {
         "description": "Name of virtual network to add VM to."
       }

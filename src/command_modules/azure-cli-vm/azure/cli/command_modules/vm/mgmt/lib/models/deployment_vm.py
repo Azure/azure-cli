@@ -26,7 +26,8 @@ class DeploymentVM(Model):
      IP address allocation.
     :param str deployment_parameter_storage_type_value: The VM storage type.
     :param str deployment_parameter_size_value: The VM Size that should be
-     created.
+     created.  Values: standard_A0-standard_A7, standard_D1-standard_D4,
+     standard_D11-standard_D14
     :param str deployment_parameter_admin_username_value: Username for the
      Virtual Machine.
     :param str deployment_parameter_dns_name_for_public_ip_value: Globally
