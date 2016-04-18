@@ -71,5 +71,5 @@ class AzCliCommandParser(argparse.ArgumentParser):
                         (self._actions[-1] #pylint: disable=protected-access
                          if is_group
                          else self),
-                         is_group)
+                        is_group)
         self.exit()
