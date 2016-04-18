@@ -14,8 +14,9 @@ _out = sys.stdout
 
 class HelpAction(argparse.Action): #pylint: disable=too-few-public-methods
     def __call__(self, parser, namespace, values, option_string=None):
+        is_group = parser.conflict_handler == 'error'
         show_help(parser.prog.split()[1:], (parser._actions[-1] #pylint: disable=protected-access
-                                            if parser.conflict_handler == 'error'
+                                            if is_group
                                             else parser))
         parser.exit()
 
