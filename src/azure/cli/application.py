@@ -142,7 +142,7 @@ class Application(object):
 
     @staticmethod
     def _register_help(parser):
-        parser.add_argument('--help', '-h', action=_help.HelpAction, nargs=0)
+        parser.add_argument('--help', '-h', action=_help.HelpAction, help='Show help and exit', nargs=0)
 
     def _handle_builtin_arguments(self, args):
         self.configuration.output_format = args._output_format #pylint: disable=protected-access
