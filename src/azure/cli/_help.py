@@ -1,4 +1,5 @@
 from __future__ import print_function
+import inspect
 import sys
 import textwrap
 import yaml
@@ -10,9 +11,13 @@ __all__ = ['print_detailed_help', 'print_welcome_message', 'GroupHelpFile', 'Com
 
 _out = sys.stdout
 
-def print_welcome_message(out=sys.stdout):
-    global _out #pylint: disable=global-statement
-    _out = out
+def show_welcome(parser):
+    print_welcome_message()
+
+    help_file = GroupHelpFile('', parser)
+    print_description_list(help_file.children)
+
+def print_welcome_message():
     _print_indent(L(r"""
      /\                        
     /  \    _____   _ _ __ ___ 
@@ -43,7 +48,7 @@ def print_description_list(help_files, out=sys.stdout):
 
     indent = 1
     max_name_length = max(len(f.name) for f in help_files) if help_files else 0
-    for help_file in help_files:
+    for help_file in sorted(help_files, key=lambda h: h.name):
         _print_indent('{0}{1}{2}'.format(help_file.name,
                                          _get_column_indent(help_file.name, max_name_length),
                                          ': ' + help_file.short_summary \
@@ -128,9 +133,10 @@ class HelpFile(object): #pylint: disable=too-few-public-methods
         self.long_summary = ''
         self.examples = ''
 
-    def load(self, noun_map):
-        self.short_summary = noun_map.get('$description', '')
-        file_data = _load_help_file_from_string(noun_map.get('$doctext', None))
+    def load(self, options):
+        self.short_summary = options.description
+        file_data = _load_help_file_from_string(
+            inspect.getdoc(options._defaults.get('func'))) #pylint: disable=protected-access
         if file_data:
             self._load_from_data(file_data)
         else:
@@ -162,21 +168,15 @@ class HelpFile(object): #pylint: disable=too-few-public-methods
 
 
 class GroupHelpFile(HelpFile): #pylint: disable=too-few-public-methods
-    def __init__(self, delimiters, child_names):
+    def __init__(self, delimiters, parser):
         super(GroupHelpFile, self).__init__(delimiters)
         self.type = 'group'
-        self.children = [HelpFile('{0}.{1}'.format(self.delimiters, n)) for n in child_names]
 
-    def _load_from_data(self, data):
-        super(GroupHelpFile, self)._load_from_data(data)
-
-        child_helps = [GroupHelpFile(child.delimiters, []) for child in self.children]
-        loaded_children = []
-        for child in self.children:
-            child_help = next((h for h in child_helps if h.name == child.name), None)
-            loaded_children.append(child_help if child_help else child)
-        self.children = loaded_children
-
+        self.children = []
+        for cmd, options in parser.choices.items():
+            child = HelpFile(cmd)
+            child.load(options)
+            self.children.append(child)
 
 class CommandHelpFile(HelpFile): #pylint: disable=too-few-public-methods
     def __init__(self, delimiters, argdoc):
@@ -237,7 +237,6 @@ class HelpExample(object): #pylint: disable=too-few-public-methods
     def __init__(self, _data):
         self.name = _data['name']
         self.text = _data['text']
-
 
 def _print_indent(s, indent=0, subsequent_spaces=-1):
     tw = textwrap.TextWrapper(initial_indent='    '*indent,
