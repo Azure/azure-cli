@@ -13,6 +13,7 @@ class AzCliCommandParser(argparse.ArgumentParser):
     cmd_table = {}
 
     def __init__(self, **kwargs):
+        kwargs['add_help'] = False
         super(AzCliCommandParser, self).__init__(**kwargs)
         self.subparsers = {}
         self.parents = kwargs.get('parents', [])
@@ -58,7 +59,8 @@ class AzCliCommandParser(argparse.ArgumentParser):
                 # subcmd2 and so on), we know we can always back up one step and
                 # add a subparser if one doesn't exist
                 grandparent_subparser = self.subparsers[tuple(path[0:length - 1])]
-                new_parser = grandparent_subparser.add_parser(path[length - 1])
+                new_parser = grandparent_subparser.add_parser(path[length - 1],
+                                                              parents=self.parents)
 
                 # Due to http://bugs.python.org/issue9253, we have to give the subparser
                 # a destination and set it to required in order to get a meaningful error

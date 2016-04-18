@@ -12,8 +12,14 @@ __all__ = ['print_detailed_help', 'print_welcome_message', 'GroupHelpFile', 'Com
 
 _out = sys.stdout
 
+class HelpAction(argparse.Action): #pylint: disable=too-few-public-methods
+    def __call__(self, parser, namespace, values, option_string=None):
+        show_help(parser.prog.split()[1:], (parser._actions[-1] #pylint: disable=protected-access
+                                            if parser.conflict_handler == 'error'
+                                            else parser))
+        parser.exit()
+
 def show_help(nouns, parser):
-    #TODO: parser.subparsers[('storage', 'container')].choices['create']._defaults['func']
     is_group = not hasattr(parser, '_defaults') or not parser._defaults.get('func') # pylint: disable=protected-access
     is_command = not is_group
 
