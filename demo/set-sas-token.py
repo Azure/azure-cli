@@ -15,16 +15,24 @@ def cmd(command):
         command = command.replace('az', 'az.bat')
     return check_output([str(x) for x in command.split()]).decode('utf-8')
 
+def set_env(key, val):
+    """ set environment variable """
+    os.environ[key] = val
+
+def pop_env(key):
+    """ pop environment variable or None """
+    return os.environ.pop(key, None)
+
 # get storage account connection string
 out = cmd('az storage account connection-string -g {} -n {}'.format(RSGRP, STACC))
 connection_string = out.replace('Connection String : ', '')
-os.environ['AZURE_STORAGE_CONNECTION_STRING'] = connection_string
+set_env('AZURE_STORAGE_CONNECTION_STRING', connection_string)
 
 sas_token = cmd('az storage account generate-sas --services b --resource-types sco --permission rwdl --expiry 2017-01-01T00:00Z'
           .format(connection_string)).strip()
-os.environ.pop('AZURE_STORAGE_CONNECTION_STRING', None)
-os.environ['AZURE_STORAGE_ACCOUNT'] = STACC
-os.environ['AZURE_SAS_TOKEN'] = sas_token
+pop_env('AZURE_STORAGE_CONNECTION_STRING')
+set_env('AZURE_STORAGE_ACCOUNT', STACC)
+set_env('AZURE_SAS_TOKEN', sas_token)
 
 print('\n=== Listing storage containers...===')
 print(cmd('az storage container list'))
