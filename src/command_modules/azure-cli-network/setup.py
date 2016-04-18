@@ -60,6 +60,8 @@ setup(
     ],
     packages=[
         'azure.cli.command_modules.network',
+        'azure.cli.command_modules.network.mgmt',
+        'azure.cli.command_modules.network.mgmt.lib',
     ],
     install_requires=DEPENDENCIES,
 )
