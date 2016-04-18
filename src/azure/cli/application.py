@@ -57,31 +57,25 @@ class Application(object):
         self.parser = AzCliCommandParser(prog='az', parents=[self.global_parser])
         self.raise_event(self.COMMAND_PARSER_CREATED, self.parser)
 
-    def execute(self, argv):
-        command_table = self.configuration.get_command_table()
-        self.parser.load_command_table(command_table)
-        self.raise_event(self.COMMAND_PARSER_LOADED, self.parser)
-
+    def handle_help(self, argv):
         az_subparser = self.parser.subparsers[tuple()]
 
         if len(argv) == 0:
             _help.show_welcome(az_subparser)
-            return None
+            return True
 
         if '-h' in argv or '--help' in argv:
             nouns_key = None
             subparser = None
-            found = False
             for i in range(0, len(argv)):
                 try:
                     nouns_key = tuple(argv[:len(argv)-i])
                     subparser = self.parser.subparsers[nouns_key]
-                    found = True
                     break
                 except KeyError:
                     pass
 
-            if found:
+            if subparser:
                 nouns = list(nouns_key)
             else:
                 nouns = []
@@ -95,11 +89,21 @@ class Application(object):
                 pass
 
             _help.show_help(nouns, subparser)
+            return True
+
+        return False
+
+    def execute(self, argv):
+        command_table = self.configuration.get_command_table()
+        self.parser.load_command_table(command_table)
+        self.raise_event(self.COMMAND_PARSER_LOADED, self.parser)
+
+        if self.handle_help(argv):
             return None
 
-
         args = self.parser.parse_args(argv)
-        self.raise_event(self.COMMAND_PARSER_PARSED, args)
+        if self.parser.argument_error:
+            self.parser.exit(3)
 
         # Consider - we are using any args that start with an underscore (_) as 'private'
         # arguments and remove them from the arguments that we pass to the actual function.

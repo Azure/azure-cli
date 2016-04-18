@@ -1,4 +1,6 @@
+from __future__ import print_function
 import argparse
+import sys
 
 class IncorrectUsageError(Exception):
     '''Raised when a command is incorrectly used and the usage should be
@@ -11,6 +13,8 @@ class AzCliCommandParser(argparse.ArgumentParser):
     Azure CLI utility.
     """
     cmd_table = {}
+    argument_error = False
+    usage_shown = False
 
     def __init__(self, **kwargs):
         super(AzCliCommandParser, self).__init__(**kwargs)
@@ -67,4 +71,15 @@ class AzCliCommandParser(argparse.ArgumentParser):
                 self.subparsers[tuple(path[0:length])] = parent_subparser
         return parent_subparser
 
+    def format_usage(self):
+        return '\n{0}help: use --help for more information\n\n'.format(super(AzCliCommandParser, self).format_usage())
 
+    def error(self, message):
+        if 'required' in message or 'unrecognized' in message:
+            if not AzCliCommandParser.usage_shown:
+                self.print_usage(file=sys.stderr)
+                AzCliCommandParser.usage_shown = True
+            AzCliCommandParser.argument_error = True
+            print(message, file=sys.stderr)
+        else:
+            super(AzCliCommandParser, self).error(message)
