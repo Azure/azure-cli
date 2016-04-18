@@ -3,7 +3,9 @@ from os import environ
 from azure.cli.commands import COMMON_PARAMETERS as GLOBAL_COMMON_PARAMETERS
 from azure.cli._locale import L
 
-from ._validators import *
+from ._validators import (
+    validate_container_permission, validate_datetime, validate_id, validate_ip_range,
+    validate_key_value_pairs, validate_resource_types, validate_services, validate_tags)
 
 # HELPER METHODS
 
@@ -103,7 +105,7 @@ PARAMETER_ALIASES.update({
     'lease_id': {
         'name': '--lease-id',
         'metavar': 'LEASE ID',
-        'help': L('Lease ID in GUID format.')        
+        'help': L('Lease ID in GUID format.')
     },
     'metadata': {
         'name': '--metadata',
@@ -123,12 +125,12 @@ PARAMETER_ALIASES.update({
     'public_access': {
         'name': '--public-access',
         'metavar': 'SPECIFIERS',
-        'choices': ['blob','container']
-        #'type': validate_public_access
+        'choices': ['blob', 'container']
     },
     'resource_types': {
         'name': '--resource-types',
-        'help': L('the resource types the SAS is applicable for. Allowed values: (s)ervice (c)ontainer (o)bject. Can be combined.'),
+        'help': L('the resource types the SAS is applicable for. Allowed values: (s)ervice ' + \
+                  '(c)ontainer (o)bject. Can be combined.'),
         'type': validate_resource_types
     },
     'sas_token': {
@@ -139,7 +141,8 @@ PARAMETER_ALIASES.update({
     },
     'services': {
         'name': '--services',
-        'help': L('the storage services the SAS is applicable for. Allowed values: (b)lob (f)ile (q)ueue (t)able. Can be combined.'),
+        'help': L('the storage services the SAS is applicable for. Allowed values: (b)lob ' + \
+                  '(f)ile (q)ueue (t)able. Can be combined.'),
         'type': validate_services
     },
     'share_name': {
@@ -150,8 +153,7 @@ PARAMETER_ALIASES.update({
     'signed_identifiers': {
         'name': '--signed-identifiers',
         'help': L(''),
-        'metavar': 'IDENTIFIERS',
-        'type': validate_signed_identifiers
+        'metavar': 'IDENTIFIERS'
     },
     'start': {
         'name': '--start',

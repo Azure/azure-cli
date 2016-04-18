@@ -1,9 +1,8 @@
 from datetime import datetime
 import re
-from urllib.parse import unquote
 
-from azure.storage.models import ResourceTypes, Services, AccessPolicy
-from azure.storage.blob.models import ContainerPermissions, PublicAccess
+from azure.storage.models import ResourceTypes, Services
+from azure.storage.blob.models import ContainerPermissions
 
 def validate_container_permission(string):
     ''' Validates that permission string contains only a combination
@@ -23,7 +22,7 @@ def validate_id(string):
 
 def validate_ip_range(string):
     ''' Validates an IP address or IP address range. '''
-    ip_format = "\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}"
+    ip_format = r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}'
     if not re.match("^{}$".format(ip_format), string):
         if not re.match("^{}-{}$".format(ip_format, ip_format), string):
             raise ValueError
@@ -36,10 +35,6 @@ def validate_key_value_pairs(string):
         kv_list = [x for x in string.split(';') if '=' in x]     # key-value pairs
         result = dict(x.split('=', 1) for x in kv_list)
     return result
-
-def validate_public_access(string):
-    # TODO: Implement if required.
-    pass
 
 def validate_resource_types(string):
     ''' Validates that resource types string contains only a combination
@@ -54,10 +49,6 @@ def validate_services(string):
     if set(string) - set("bqtf"):
         raise ValueError
     return Services(_str=''.join(set(string)))
-
-def validate_signed_identifiers(string):
-    # TODO: Implement if required
-    pass
 
 def validate_tags(string):
     ''' Validates the string containers only key-value pairs and single

@@ -15,7 +15,7 @@ from azure.cli.commands._auto_command import build_operation, AutoCommandDefinit
 from azure.cli._locale import L
 
 from ._params import PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS
-from ._validators import *
+from ._validators import validate_datetime, validate_key_value_pairs
 
 command_table = CommandTable()
 
@@ -265,7 +265,7 @@ build_operation(
         AutoCommandDefinition(BlockBlobService.list_blobs, '[Blob]', 'list'),
         AutoCommandDefinition(BlockBlobService.delete_blob, None, 'delete'),
         AutoCommandDefinition(BlockBlobService.generate_blob_shared_access_signature,
-                                'String', 'generate-sas'),
+                              'String', 'generate-sas'),
         AutoCommandDefinition(BlockBlobService.make_blob_url, 'URL', 'url'),
         AutoCommandDefinition(BlockBlobService.snapshot_blob, 'Something?', 'snapshot')
     ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)

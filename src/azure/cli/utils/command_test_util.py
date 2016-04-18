@@ -5,7 +5,6 @@ import json
 import logging
 import os
 import re
-from subprocess import check_output
 import sys
 try:
     import unittest.mock as mock
@@ -109,7 +108,7 @@ class CommandTestGenerator(object):
                 io = StringIO()
                 if expected is None:
                     print('\n === RECORDING: {} ==='.format(test_name), file=sys.stderr)
-                if type(action) is str:
+                if isinstance(action, str):
                     cli(action.split(), file=io)
                     actual_result = io.getvalue()
                 else:
@@ -185,9 +184,9 @@ class CommandTestGenerator(object):
             if command:
                 test_functions[test_name] = gen_test(test_name, command, self.recording_dir)
                 continue
-            callable = test_def.get('script', None)
-            if callable:
-                test_functions[test_name] = gen_test(test_name, callable, self.recording_dir)
+            func = test_def.get('script', None)
+            if func:
+                test_functions[test_name] = gen_test(test_name, func, self.recording_dir)
                 continue
         return test_functions
 
