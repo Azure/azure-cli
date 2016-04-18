@@ -68,7 +68,7 @@ class AzCliCommandParser(argparse.ArgumentParser):
     def format_help(self):
         is_group = not self._defaults.get('func')
         _help.show_help(self.prog.split()[1:],
-                        (self._actions[-1] #pylint: disable=protected-access
+                        (self._actions[-1]
                          if is_group
                          else self),
                         is_group)
