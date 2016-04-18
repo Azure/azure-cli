@@ -72,12 +72,8 @@ def build_operation(command_name,
                     client_type,
                     operations,
                     command_table,
-                    common_parameters=None,
+                    custom_parameters=None,
                     extra_parameters=None):
-
-    merged_common_parameters = COMMON_PARAMETERS.copy()
-    merged_common_parameters.update(common_parameters or {})
-    extra_parameters = extra_parameters or {}
 
     for op in operations:
 
@@ -104,24 +100,29 @@ def build_operation(command_name,
                 required = arg not in arg_defaults
 
             action = 'store_' + str(not default).lower() if isinstance(default, bool) else None
-            common_param = merged_common_parameters.get(arg, {})
-            common_param['name'] = common_param.get('name', '--' + arg.replace('_', '-'))
-            common_param['required'] = common_param.get('required', required)
-            common_param['default'] = common_param.get('default', default)
-            common_param['help'] = common_param.get('help', _option_description(op.operation, arg))
-            common_param['action'] = common_param.get('action', action)
+
+            parameter = {
+                'name': '--' + arg.replace('_', '-'),
+                'required': required,
+                'default': default,
+                'dest': arg,
+                'help': _option_description(op.operation, arg),
+                'action': action
+            }
+            parameter.update(COMMON_PARAMETERS.get(arg, {}))
+            if custom_parameters:
+                parameter.update(custom_parameters.get(arg, {}))
 
             # We need to make a copy to allow consumers to mutate the value
             # retrieved from the common parameters without polluting future
             # use...
-            common_param = common_param.copy()
-            common_param['dest'] = common_param.get('dest', arg)
-            options.append(common_param)
+            options.append(parameter.copy())
 
         # append any 'extra' args needed (for example to obtain a client) that aren't required
         # by the SDK.
-        for arg in extra_parameters.values():
-            options.append(arg.copy())
+        if extra_parameters:
+            for arg in extra_parameters.values():
+                options.append(arg.copy())
 
         command_table[func] = {
             'name': ' '.join([command_name, op.opname]),
