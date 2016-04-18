@@ -131,7 +131,7 @@ def _print_groups(help_file):
     for c in sorted(help_file.children, key=lambda h: h.name):
         _print_indent('{0}{1}{2}'.format(c.name,
                                          _get_column_indent(c.name, max_name_length),
-                                         ': ' + c.short_summary if c.short_summary else ''),
+                                      ': ' + c.short_summary if c.short_summary else ''),
                       indent)
     _print_indent('')
 
