@@ -135,7 +135,8 @@ class HelpFile(object): #pylint: disable=too-few-public-methods
 
     def load(self, options):
         self.short_summary = options.description
-        file_data = _load_help_file_from_string(inspect.getdoc(options._defaults.get('func')))
+        file_data = _load_help_file_from_string(
+            inspect.getdoc(options._defaults.get('func'))) #pylint: disable=protected-access
         if file_data:
             self._load_from_data(file_data)
         else:
