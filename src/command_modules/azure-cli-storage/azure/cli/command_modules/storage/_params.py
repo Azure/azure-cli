@@ -4,8 +4,9 @@ from azure.cli.commands import COMMON_PARAMETERS as GLOBAL_COMMON_PARAMETERS
 from azure.cli._locale import L
 
 from ._validators import (
-    validate_container_permission, validate_datetime, validate_id, validate_ip_range,
-    validate_key_value_pairs, validate_resource_types, validate_services, validate_tags)
+    validate_container_permission, validate_datetime, validate_datetime_as_string, validate_id,
+    validate_ip_range, validate_key_value_pairs, validate_resource_types, validate_services,
+    validate_tags, validate_lease_duration)
 
 # HELPER METHODS
 
@@ -76,12 +77,12 @@ PARAMETER_ALIASES.update({
     },
     'expiry': {
         'name': '--expiry',
-        'help': L('expiration UTC datetime of SAS token ("Y-m-d_H:M:S")'),
-        'type': validate_datetime
+        'help': L('expiration UTC datetime of SAS token (Y-m-d\'T\'H:M\'Z\')'),
+        'type': validate_datetime_as_string
     },
     'if_modified_since': {
         'name': '--if-modified-since',
-        'help': L('alter only if modified since supplied UTC datetime ("Y-m-d_H:M:S")'),
+        'help': L('alter only if modified since supplied UTC datetime (Y-m-d\'T\'H:M\'Z\')'),
         'type': validate_datetime,
         'required': False,
     },
@@ -92,7 +93,7 @@ PARAMETER_ALIASES.update({
     },
     'if_unmodified_since': {
         'name': '--if-unmodified-since',
-        'help': L('alter only if unmodified since supplied UTC datetime ("Y-m-d_H:M:S")'),
+        'help': L('alter only if unmodified since supplied UTC datetime (Y-m-d\'T\'H:M\'Z\')'),
         'type': validate_datetime,
         'required': False,
     },
@@ -102,10 +103,22 @@ PARAMETER_ALIASES.update({
                   'requests.'),
         'type': validate_ip_range
     },
+    'lease_break_period': {
+        'name': '--lease-break-period',
+        'metavar': 'DURATION',
+        'help': L('break period. 15-60 seconds or -1 for infinite.'),
+        'type': validate_lease_duration
+    },
+    'lease_duration': {
+        'name': '--lease-duration',
+        'metavar': 'DURATION',
+        'help': L('lease duration. 15-60 seconds or -1 for infinite.'),
+        'type': validate_lease_duration
+    },
     'lease_id': {
         'name': '--lease-id',
-        'metavar': 'LEASE ID',
-        'help': L('Lease ID in GUID format.')
+        'metavar': 'ID',
+        'help': L('lease ID in GUID format.')
     },
     'metadata': {
         'name': '--metadata',
@@ -157,8 +170,9 @@ PARAMETER_ALIASES.update({
     },
     'start': {
         'name': '--start',
-        'help': L('start UTC datetime of SAS token ("Y-m-d_H:M:S"). Defaults to time of request.'),
-        'type': validate_datetime
+        'help': L('start UTC datetime of SAS token (Y-m-d\'T\'H:M\'Z\'). Defaults to time ' + \
+                  'of request.'),
+        'type': validate_datetime_as_string
     },
     'tags' : {
         'name': '--tags',
