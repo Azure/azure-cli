@@ -12,6 +12,18 @@ def extend_parameter(parameter_metadata, **kwargs):
     modified_parameter_metadata.update(kwargs)
     return modified_parameter_metadata
 
+def get_account_name(string):
+    return string if string != 'query' else environ.get('AZURE_STORAGE_ACCOUNT')
+
+def get_account_key(string):
+    return string if string != 'query' else environ.get('AZURE_STORAGE_KEY')
+
+def get_connection_string(string):
+    return string if string != 'query' else environ.get('AZURE_STORAGE_CONNECTION_STRING')
+
+def get_sas_token(string):
+    return string if string != 'query' else environ.get('AZURE_SAS_TOKEN')
+
 # BASIC PARAMETER CONFIGURATION
 
 PARAMETER_ALIASES = GLOBAL_COMMON_PARAMETERS.copy()
@@ -22,7 +34,8 @@ PARAMETER_ALIASES.update({
         # While account key *may* actually be required if the environment variable hasn't been
         # specified, it is only required unless the connection string has been specified
         'required': False,
-        'default': environ.get('AZURE_STORAGE_ACCESS_KEY')
+        'type': get_account_key,
+        'default': 'query'
     },
     'account_name': {
         'name': '--account-name -n',
@@ -30,7 +43,8 @@ PARAMETER_ALIASES.update({
         # While account name *may* actually be required if the environment variable hasn't been
         # specified, it is only required unless the connection string has been specified
         'required': False,
-        'default': environ.get('AZURE_STORAGE_ACCOUNT')
+        'type': get_account_name,
+        'default': 'query'
     },
     'account_name_required': {
         # this is used only to obtain the connection string. Thus, the env variable default
@@ -54,8 +68,9 @@ PARAMETER_ALIASES.update({
         # You can either specify connection string or name/key. There is no convenient way
         # to express this kind of relationship in argparse...
         # TODO: Move to exclusive group
+        'type': get_connection_string,
         'required': False,
-        'default': environ.get('AZURE_STORAGE_CONNECTION_STRING')
+        'default': 'query'
     },
     'expiry': {
         'name': '--expiry',
@@ -119,7 +134,8 @@ PARAMETER_ALIASES.update({
     'sas_token': {
         'name': '--sas-token',
         'help': L('a shared access signature token'),
-        'default': environ.get('AZURE_SAS_TOKEN')
+        'type': get_sas_token,
+        'default': 'query'
     },
     'services': {
         'name': '--services',
