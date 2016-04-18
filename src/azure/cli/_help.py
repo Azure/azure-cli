@@ -12,15 +12,6 @@ __all__ = ['print_detailed_help', 'print_welcome_message', 'GroupHelpFile', 'Com
 
 _out = sys.stdout
 
-class HelpAction(argparse.Action): #pylint: disable=too-few-public-methods
-    def __call__(self, parser, namespace, values, option_string=None):
-        is_group = parser.conflict_handler == 'error'
-        show_help(parser.prog.split()[1:], (parser._actions[-1] #pylint: disable=protected-access
-                                            if is_group
-                                            else parser),
-                  is_group)
-        parser.exit()
-
 def show_help(nouns, parser, is_group):
     delimiters = ' '.join(nouns)
     help_file = CommandHelpFile(delimiters, parser) \
