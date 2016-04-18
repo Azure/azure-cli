@@ -1,9 +1,11 @@
 from __future__ import print_function
 
+import collections
 import json
 import logging
 import os
 import re
+from subprocess import check_output
 import sys
 try:
     import unittest.mock as mock
@@ -15,6 +17,22 @@ from six.moves import input #pylint: disable=redefined-builtin
 import vcr
 
 from azure.cli.main import main as cli
+
+# SCRIPT METHODS
+
+def cmd(command):
+    """ Accepts a command line command as a string and returns stdout in UTF-8 format """
+    io = StringIO()
+    cli(command.split(), file=io)
+    return io.getvalue()
+
+def set_env(key, val):
+    """ set environment variable """
+    os.environ[key] = val
+
+def pop_env(key):
+    """ pop environment variable or None """
+    return os.environ.pop(key, None)
 
 class CommandTestGenerator(object):
 
@@ -49,7 +67,7 @@ class CommandTestGenerator(object):
 
     def generate_tests(self):
 
-        def gen_test(test_name, command, recording_dir):
+        def gen_test(test_name, action, recording_dir):
 
             def load_subscriptions_mock(self): #pylint: disable=unused-argument
                 return [{
@@ -89,16 +107,21 @@ class CommandTestGenerator(object):
                 """ Test implementation, augmented with prompted recording of expected result
                 if not provided. """
                 io = StringIO()
-                cli(command.split(), file=io)
-                actual_result = io.getvalue()
+                if expected is None:
+                    print('\n === RECORDING: {} ==='.format(test_name), file=sys.stderr)
+                if type(action) is str:
+                    cli(action.split(), file=io)
+                    actual_result = io.getvalue()
+                else:
+                    actual_result = action()
                 if expected is None:
                     expected_results = _get_expected_results_from_file(recording_dir)
                     header = '| RECORDED RESULT FOR {} |'.format(test_name)
-                    print('-' * len(header), file=sys.stderr)
+                    print('\n' + ('-' * len(header)), file=sys.stderr)
                     print(header, file=sys.stderr)
                     print('-' * len(header) + '\n', file=sys.stderr)
                     print(actual_result, file=sys.stderr)
-                    ans = input('Save result for command: \'{}\'? [Y/n]: '.format(command))
+                    ans = input('Save result for \'{}\'? [Y/n]: '.format(test_name))
                     if ans and ans.lower()[0] == 'y':
                         expected_results[test_name] = actual_result
                         expected = actual_result
@@ -155,11 +178,17 @@ class CommandTestGenerator(object):
                     + 'entry in expected_results.res and try again.')
             return test
 
-        test_functions = {}
+        test_functions = collections.OrderedDict()
         for test_def in self.test_def:
             test_name = 'test_{}'.format(test_def['test_name'])
-            command = test_def['command']
-            test_functions[test_name] = gen_test(test_name, command, self.recording_dir)
+            command = test_def.get('command', None)
+            if command:
+                test_functions[test_name] = gen_test(test_name, command, self.recording_dir)
+                continue
+            callable = test_def.get('script', None)
+            if callable:
+                test_functions[test_name] = gen_test(test_name, callable, self.recording_dir)
+                continue
         return test_functions
 
     @staticmethod

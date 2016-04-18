@@ -1,6 +1,12 @@
 # AZURE CLI STORAGE TEST DEFINITIONS
 
+import collections
 import os
+import sys
+
+from six import StringIO
+
+from azure.cli.utils.command_test_util import cmd, set_env, pop_env
 
 RESOURCE_GROUP_NAME = 'travistestresourcegroup'
 STORAGE_ACCOUNT_NAME = 'travistestresourcegr3014'
@@ -13,6 +19,50 @@ ENV_VAR = {
                                         'AccountName={};' +
                                         'AccountKey=blahblah').format(STORAGE_ACCOUNT_NAME)
 }
+
+def _get_connection_string():
+    out = cmd('storage account connection-string -g {} -n {}'
+        .format(RESOURCE_GROUP_NAME, STORAGE_ACCOUNT_NAME))
+    connection_string = out.replace('Connection String : ', '')
+    set_env('AZURE_STORAGE_CONNECTION_STRING', connection_string)
+
+def _create_test_share(share_name):
+    if cmd('storage share exists --share-name {}'.format(share_name)) == 'False':
+        cmd('storage share create --share-name {}'.format(share_name))
+
+def _create_test_dir(share_name, dir_name):
+    if cmd('storage directory exists --share-name {} --directory-name {}'
+        .format(share_name, dir_name)) == 'False':
+            cmd('storage directory create --share-name {} --directory-name {}'
+                .format(share_name, dir_name))
+
+def _file_exists(share_name, dir_name, file_name):
+    res = cmd('storage file exists --share-name {} --directory-name {} --file-name {}' 
+        .format(share_name, dir_name, file_name))
+    return True if res == 'True' else False
+
+def storage_file_upload_with_subdir():
+    _get_connection_string()
+    share_name = 'testshare01'
+    dir_name = 'testdir1'
+    file_name = 'testfile02.rst'
+    local_file_name = 'testfile.rst'
+    # ensure the share and dir exists and that the file does not
+    _create_test_share(share_name)
+    _create_test_dir(share_name, dir_name)
+    if _file_exists(share_name, dir_name, file_name):
+        cmd('storage file delete --share-name {} --directory-name {} --file-name {}'
+            .format(share_name, dir_name, file_name))
+    # upload the file and verify it exists
+    result = ''
+    if not _file_exists(share_name, dir_name, file_name):
+        cmd('storage file upload --share-name {}  --directory-name {} --file-name {} --local-file-name {}'
+            .format(share_name, dir_name, file_name, os.path.join(TEST_DIR, local_file_name)))
+        result = cmd('storage file exists --share-name {} --directory-name {} --file-name {}'.
+            format(share_name, dir_name, file_name))
+    else:
+        result = 'File already exists. Preconditions failed.'
+    return result
 
 TEST_DEF = [
     # STORAGE ACCOUNT TESTS
@@ -226,11 +276,11 @@ TEST_DEF = [
         'command': 'storage directory metadata set --share-name testshare01 --directory-name testdir1'
     },
     # STORAGE FILE TESTS
-    {
-        'test_name': 'storage_file_upload_simple',
-        'command': 'storage file upload --share-name testshare01 --local-file-name {} --file-name testfile01.rst'
-            .format(os.path.join(TEST_DIR, 'testfile.rst'))
-    },
+    #{
+    #    'test_name': 'storage_file_upload_simple',
+    #    'command': 'storage file upload --share-name testshare01 --local-file-name {} --file-name testfile01.rst'
+    #        .format(os.path.join(TEST_DIR, 'testfile.rst'))
+    #},
     {
         'test_name': 'storage_file_exists_simple',
         'command': 'storage file exists --share-name testshare01 --file-name testfile01.rst'
@@ -247,8 +297,7 @@ TEST_DEF = [
     #},
     {
         'test_name': 'storage_file_upload_with_subdir',
-        'command': 'storage file upload --share-name testshare01 --local-file-name {} --file-name testfile02.rst --directory-name testdir1'
-            .format(os.path.join(TEST_DIR, 'testfile.rst'))
+        'script': storage_file_upload_with_subdir
     },
     {
         'test_name': 'storage_file_exists_with_subdir',
