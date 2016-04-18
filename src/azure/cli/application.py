@@ -45,6 +45,7 @@ class Application(object):
 
         # Register presence of and handlers for global parameters
         self.register(self.GLOBAL_PARSER_CREATED, Application._register_builtin_arguments)
+        self.register(self.GLOBAL_PARSER_CREATED, Application._register_help)
         self.register(self.COMMAND_PARSER_LOADED, Application._enable_autocomplete)
         self.register(self.COMMAND_PARSER_PARSED, self._handle_builtin_arguments)
 
@@ -54,51 +55,17 @@ class Application(object):
         self.global_parser = AzCliCommandParser(prog='az', add_help=False)
         self.raise_event(self.GLOBAL_PARSER_CREATED, self.global_parser)
 
-        self.parser = AzCliCommandParser(prog='az', parents=[self.global_parser])
+        self.parser = AzCliCommandParser(prog='az', parents=[self.global_parser], add_help=False)
         self.raise_event(self.COMMAND_PARSER_CREATED, self.parser)
-
-    def handle_help(self, argv):
-        az_subparser = self.parser.subparsers[tuple()]
-
-        if len(argv) == 0:
-            _help.show_welcome(az_subparser)
-            return True
-
-        if '-h' in argv or '--help' in argv:
-            nouns_key = None
-            subparser = None
-            for i in range(0, len(argv)):
-                try:
-                    nouns_key = tuple(argv[:len(argv)-i])
-                    subparser = self.parser.subparsers[nouns_key]
-                    break
-                except KeyError:
-                    pass
-
-            if subparser:
-                nouns = list(nouns_key)
-            else:
-                nouns = []
-                subparser = az_subparser
-
-            try:
-                command_name = argv[len(nouns)]
-                subparser = subparser.choices[command_name]
-                nouns.append(command_name)
-            except KeyError:
-                pass
-
-            _help.show_help(nouns, subparser)
-            return True
-
-        return False
 
     def execute(self, argv):
         command_table = self.configuration.get_command_table()
         self.parser.load_command_table(command_table)
         self.raise_event(self.COMMAND_PARSER_LOADED, self.parser)
 
-        if self.handle_help(argv):
+        if len(argv) == 0:
+            az_subparser = self.parser.subparsers[tuple()]
+            _help.show_welcome(az_subparser)
             return None
 
         args = self.parser.parse_args(argv)
@@ -173,6 +140,10 @@ class Application(object):
         parser.add_argument('--output', '-o', dest='_output_format',
                             choices=['list', 'json', 'tsv'],
                             help='Output format of type "list", "json" or "tsv"')
+
+    @staticmethod
+    def _register_help(parser):
+        parser.add_argument('--help', '-h', action=_help.HelpAction, nargs=0)
 
     def _handle_builtin_arguments(self, args):
         self.configuration.output_format = args._output_format #pylint: disable=protected-access
