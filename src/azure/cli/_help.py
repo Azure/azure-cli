@@ -17,16 +17,14 @@ class HelpAction(argparse.Action): #pylint: disable=too-few-public-methods
         is_group = parser.conflict_handler == 'error'
         show_help(parser.prog.split()[1:], (parser._actions[-1] #pylint: disable=protected-access
                                             if is_group
-                                            else parser))
+                                            else parser),
+                  is_group)
         parser.exit()
 
-def show_help(nouns, parser):
-    is_group = not hasattr(parser, '_defaults') or not parser._defaults.get('func') # pylint: disable=protected-access
-    is_command = not is_group
-
+def show_help(nouns, parser, is_group):
     delimiters = ' '.join(nouns)
     help_file = CommandHelpFile(delimiters, parser) \
-        if is_command \
+        if not is_group \
         else GroupHelpFile(delimiters, parser)
 
     help_file.load(parser)

@@ -63,9 +63,8 @@ class Application(object):
         self.parser.load_command_table(command_table)
         self.raise_event(self.COMMAND_PARSER_LOADED, self.parser)
 
-        az_subparser = self.parser.subparsers[tuple()]
-
         if len(argv) == 0:
+            az_subparser = self.parser.subparsers[tuple()]
             _help.show_welcome(az_subparser)
             return None
 

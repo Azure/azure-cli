@@ -10,8 +10,6 @@ class AzCliCommandParser(argparse.ArgumentParser):
     """ArgumentParser implementation specialized for the
     Azure CLI utility.
     """
-    cmd_table = {}
-
     def __init__(self, **kwargs):
         kwargs['add_help'] = False
         super(AzCliCommandParser, self).__init__(**kwargs)
@@ -21,7 +19,6 @@ class AzCliCommandParser(argparse.ArgumentParser):
     def load_command_table(self, command_table):
         """Load a command table into our parser.
         """
-        AzCliCommandParser.cmd_table = command_table
         # If we haven't already added a subparser, we
         # better do it.
         if not self.subparsers:
@@ -68,5 +65,3 @@ class AzCliCommandParser(argparse.ArgumentParser):
                 parent_subparser.required = True
                 self.subparsers[tuple(path[0:length])] = parent_subparser
         return parent_subparser
-
-
