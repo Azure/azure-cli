@@ -67,8 +67,8 @@ class Application(object):
             _help.show_welcome(subparser)
             return None
 
-        if  argv[0].lower() == 'help':
-            argv[0] = '--help'
+        if argv[-1].lower() == 'help':
+            argv[-1] = '--help'
 
         args = self.parser.parse_args(argv)
         self.raise_event(self.COMMAND_PARSER_PARSED, args)
