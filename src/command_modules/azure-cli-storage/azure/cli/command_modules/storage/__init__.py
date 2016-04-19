@@ -457,6 +457,13 @@ def exist_directory(args):
 
 # FILE COMMANDS
 
+FILE_PARAM_ALIASES = PARAMETER_ALIASES.copy()
+FILE_PARAM_ALIASES.update({
+    'directory_name': {
+        'name': '--directory-name',
+        'required': False
+    }
+})
 build_operation(
     'storage file', None, _file_data_service_factory,
     [
@@ -465,7 +472,7 @@ build_operation(
         AutoCommandDefinition(FileService.make_file_url, 'URL', 'url'),
         AutoCommandDefinition(FileService.generate_file_shared_access_signature,
                               'String', 'generate-sas')
-    ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
+    ], command_table, FILE_PARAM_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
 build_operation(
     'storage file metadata', None, _file_data_service_factory,
