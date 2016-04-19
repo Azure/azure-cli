@@ -6,7 +6,8 @@ from msrest.exceptions import ClientException
 from azure.cli.parser import IncorrectUsageError
 from ..commands import COMMON_PARAMETERS
 
-EXCLUDED_PARAMS = frozenset(['self', 'raw', 'custom_headers', 'operation_config'])
+EXCLUDED_PARAMS = frozenset(['self', 'raw', 'custom_headers', 'operation_config',
+                             'content_version'])
 
 class AutoCommandDefinition(object): #pylint: disable=too-few-public-methods
 

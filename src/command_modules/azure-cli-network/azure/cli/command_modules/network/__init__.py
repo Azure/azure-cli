@@ -1,4 +1,3 @@
-import argparse
 import time
 from azure.mgmt.network import NetworkManagementClient, NetworkManagementClientConfiguration
 from azure.mgmt.network.operations import (ApplicationGatewaysOperations,
@@ -268,10 +267,6 @@ VNET_SPECIFIC_PARAMS = {
     'deployment_parameter_subnet_prefix_value': {
         'name': '--subnet-prefix',
         'metavar': 'SUBNETPREFIX',
-    },
-    'content_version': {
-        'name': '--content-version',
-        'help': argparse.SUPPRESS
     }
 }
 
