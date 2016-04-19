@@ -80,7 +80,7 @@ print_heading('Installed command package(s).')
 
 # STEP 3:: Validate the installation
 
-success = exec_command('az --help')
+success = exec_command('az')
 if not success:
     print_heading('Error running the CLI!', file=sys.stderr)
     sys.exit(1)
