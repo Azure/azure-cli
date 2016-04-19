@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 #
 # This script will install the CLI into a directory and create an executable
 # at a specified file path that is the entry point into the CLI.
@@ -10,14 +11,15 @@
 #     AZURE_CLI_PACKAGE_VERSION   - The version of the CLI and its command packages to install
 #     AZURE_CLI_PRIVATE_PYPI_URL  - The URL to a PyPI server to include as an index for pip
 #     AZURE_CLI_PRIVATE_PYPI_HOST - The IP address/hostname of the PyPI server
-# 
+#
+from __future__ import print_function
 import os
 import sys
 import platform
 import stat
 import tarfile
 import tempfile
-from subprocess import check_call, CalledProcessError
+from subprocess import check_call
 try:
     # Attempt to load python 3 module
     from urllib.request import urlretrieve
@@ -64,21 +66,21 @@ def exec_command(command, cwd=None, env=None):
 def create_tmp_dir():
     return tempfile.mkdtemp()
 
-def create_dir(dir):
-    if not os.path.isdir(dir):
-        os.makedirs(dir)
+def create_dir(directory):
+    if not os.path.isdir(directory):
+        os.makedirs(directory)
 
 def create_virtualenv(tmp_dir, version, install_dir):
     file_name = 'virtualenv-'+version+'.tar.gz'
     download_location = os.path.join(tmp_dir, file_name)
-    file, headers = urlretrieve('https://pypi.python.org/packages/source/v/virtualenv/'+file_name, download_location)
-    package_tar = tarfile.open(file)
+    downloaded_file, _ = urlretrieve('https://pypi.python.org/packages/source/v/virtualenv/'+file_name,
+                                     download_location)
+    package_tar = tarfile.open(downloaded_file)
     package_tar.extractall(path=tmp_dir)
     package_tar.close()
     virtualenv_dir_name = 'virtualenv-'+version
-    wd = os.path.join(tmp_dir, virtualenv_dir_name)
-    exec_command('{0} virtualenv.py --python {0} {1}'.format(sys.executable, install_dir), cwd=wd)
-
+    working_dir = os.path.join(tmp_dir, virtualenv_dir_name)
+    exec_command('{0} virtualenv.py --python {0} {1}'.format(sys.executable, install_dir), cwd=working_dir)
 
 def get_pip_install_command(module_name, path_to_pip):
     version = '==' + PACKAGE_VERSION if PACKAGE_VERSION else ''
@@ -107,13 +109,13 @@ def install_cli(install_dir):
 def create_executable(exec_filename, install_location, environment_name):
     exec_dir = os.path.dirname(exec_filename)
     create_dir(exec_dir)
-    f = open(exec_filename, 'w')
-    f.write(AZ_DISPATCH_TEMPLATE.format(
-                                        install_location=install_location,
-                                        environment_name=environment_name,
-                                        envs_dir_name=ENVS_DIR_NAME,
-                                        bin_dir_name=BIN_DIR_NAME))
-    f.close()
+    exec_file = open(exec_filename, 'w')
+    exec_file.write(AZ_DISPATCH_TEMPLATE.format(
+        install_location=install_location,
+        environment_name=environment_name,
+        envs_dir_name=ENVS_DIR_NAME,
+        bin_dir_name=BIN_DIR_NAME))
+    exec_file.close()
     cur_stat = os.stat(exec_filename)
     os.chmod(exec_filename, cur_stat.st_mode | stat.S_IEXEC)
 
@@ -128,13 +130,15 @@ def verify_executable_overwrite(exec_filename):
     return True
 
 def get_install_location():
-    install_location = prompt_input('Where would you like to install? (default {}): '.format(DEFAULT_INSTALL_LOCATION)) or DEFAULT_INSTALL_LOCATION
+    prompt_message = 'Where would you like to install? (default {}): '.format(DEFAULT_INSTALL_LOCATION)
+    install_location = prompt_input(prompt_message) or DEFAULT_INSTALL_LOCATION
     install_location = os.path.expanduser(install_location)
     print("We will install at '{}'.".format(install_location))
     return install_location
 
 def get_exec_filename():
-    exec_filename = prompt_input('Where would you like to place the executable? (default {}): '.format(DEFAULT_EXEC_FILENAME)) or DEFAULT_EXEC_FILENAME
+    prompt_message = 'Where would you like to place the executable? (default {}): '.format(DEFAULT_EXEC_FILENAME)
+    exec_filename = prompt_input(prompt_message) or DEFAULT_EXEC_FILENAME
     exec_filename = os.path.expanduser(exec_filename)
     print("The executable will be '{}'.".format(exec_filename))
     return exec_filename
