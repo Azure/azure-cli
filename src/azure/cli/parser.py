@@ -12,9 +12,10 @@ class AzCliCommandParser(argparse.ArgumentParser):
     Azure CLI utility.
     """
     def __init__(self, **kwargs):
-        super(AzCliCommandParser, self).__init__(**kwargs)
         self.subparsers = {}
         self.parents = kwargs.get('parents', [])
+        self.help_file = kwargs.pop('help_file', None)
+        super(AzCliCommandParser, self).__init__(**kwargs)
 
     def load_command_table(self, command_table):
         """Load a command table into our parser.
@@ -34,11 +35,12 @@ class AzCliCommandParser(argparse.ArgumentParser):
             subparser.choices[command_name] = command_name
             command_parser = subparser.add_parser(command_name,
                                                   description=metadata.get('description'),
-                                                  parents=self.parents, conflict_handler='resolve')
+                                                  parents=self.parents, conflict_handler='resolve',
+                                                  help_file=metadata.get('help_file'))
             for arg in metadata['arguments']:
                 names = arg.get('name').split()
                 command_parser.add_argument(*names, **{k:v for k, v in arg.items() if k != 'name'})
-            command_parser.set_defaults(func=handler, help_file=metadata.get('help_file'))
+            command_parser.set_defaults(func=handler)
 
     def _get_subparser(self, path):
         """For each part of the path, walk down the tree of
