@@ -156,7 +156,7 @@ class HelpFile(object): #pylint: disable=too-few-public-methods
 
     def load(self, options):
         self.short_summary = getattr(options, 'description', None)
-        file_data = (_load_help_file_from_string(inspect.getdoc(options._defaults.get('func'))) # pylint: disable=protected-access
+        file_data = (_load_help_file_from_string(options._defaults.get('help_file')) # pylint: disable=protected-access
                      if hasattr(options, '_defaults')
                      else None)
 
