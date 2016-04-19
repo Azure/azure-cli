@@ -7,7 +7,7 @@ helps = {'test_group1 test_group2': """
                 this module.... kjsdflkj... klsfkj paragraph2
             examples:
                 - name: foo example
-                    text: example details
+                  text: example details
             """
         }
 

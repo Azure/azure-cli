@@ -1,6 +1,5 @@
 from __future__ import print_function
 import argparse
-import inspect
 import sys
 import textwrap
 import yaml
@@ -81,7 +80,8 @@ def print_arguments(help_file):
     if len(help_file.parameters) == 0:
         _print_indent('none', indent)
     required_tag = L(' [Required]')
-    max_name_length = max(len(p.name) + (11 if p.required else 0) for p in help_file.parameters)
+    max_name_length = max(len(p.name) + (len(required_tag) if p.required else 0)
+                          for p in help_file.parameters)
     for p in sorted(help_file.parameters, key=lambda p: str(not p.required) + p.name):
         indent = 1
         required_text = required_tag if p.required else ''
@@ -107,14 +107,14 @@ def _print_header(help_file):
     _print_indent('')
     _print_indent(L('Command') if help_file.type == 'command' else L('Group'), indent)
 
-    indent = 1
+    indent += 1
     _print_indent('{0}{1}'.format(help_file.command,
                                   ': ' + help_file.short_summary
                                   if help_file.short_summary
                                   else ''),
                   indent)
 
-    indent = 2
+    indent += 1
     if help_file.long_summary:
         _print_indent('{0}'.format(help_file.long_summary.rstrip()), indent)
     _print_indent('')
@@ -154,8 +154,8 @@ class HelpFile(object): #pylint: disable=too-few-public-methods
         self.examples = ''
 
     def load(self, options):
-        self.short_summary = options.description if hasattr(options, 'description') else None
-        file_data = (_load_help_file_from_string(inspect.getdoc(options._defaults.get('func'))) # pylint: disable=protected-access
+        self.short_summary = getattr(options, 'description', None)
+        file_data = (_load_help_file_from_string(options.help_file)
                      if hasattr(options, '_defaults')
                      else None)
 

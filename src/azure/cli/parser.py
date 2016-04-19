@@ -17,9 +17,10 @@ class AzCliCommandParser(argparse.ArgumentParser):
     usage_shown = False
 
     def __init__(self, **kwargs):
-        super(AzCliCommandParser, self).__init__(**kwargs)
         self.subparsers = {}
         self.parents = kwargs.get('parents', [])
+        self.help_file = kwargs.pop('help_file', None)
+        super(AzCliCommandParser, self).__init__(**kwargs)
 
     def load_command_table(self, command_table):
         """Load a command table into our parser.
@@ -39,7 +40,8 @@ class AzCliCommandParser(argparse.ArgumentParser):
             subparser.choices[command_name] = command_name
             command_parser = subparser.add_parser(command_name,
                                                   description=metadata.get('description'),
-                                                  parents=self.parents, conflict_handler='resolve')
+                                                  parents=self.parents, conflict_handler='resolve',
+                                                  help_file=metadata.get('help_file'))
             for arg in metadata['arguments']:
                 names = arg.get('name').split()
                 command_parser.add_argument(*names, **{k:v for k, v in arg.items() if k != 'name'})
@@ -86,7 +88,7 @@ class AzCliCommandParser(argparse.ArgumentParser):
     def format_help(self):
         is_group = not self._defaults.get('func')
         _help.show_help(self.prog.split()[1:],
-                        (self._actions[-1] #pylint: disable=protected-access
+                        (self._actions[-1]
                          if is_group
                          else self),
                          is_group)
