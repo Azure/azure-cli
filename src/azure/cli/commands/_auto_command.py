@@ -1,6 +1,5 @@
 from __future__ import print_function
 import inspect
-import sys
 from msrest.paging import Paged
 from msrest.exceptions import ClientException
 from azure.cli.parser import IncorrectUsageError
@@ -47,13 +46,10 @@ def _make_func(client_factory, member_path, return_type_or_func, unbound_func):
             if isinstance(return_type_or_func, str):
                 return list(result) if isinstance(result, Paged) else result
         except TypeError as exception:
-            # TODO: Evaluate required/missing parameters and provide specific
-            # usage for missing params...
             raise IncorrectUsageError(exception)
         except ClientException as client_exception:
-            # TODO: Better error handling for cloud exceptions...
             message = getattr(client_exception, 'message', client_exception)
-            print(message, file=sys.stderr)
+            raise RuntimeError(message)
 
     return call_client
 
