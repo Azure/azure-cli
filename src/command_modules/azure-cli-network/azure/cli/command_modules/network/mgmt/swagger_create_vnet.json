@@ -105,6 +105,9 @@
           "x-ms-client-flatten": true
         }
       },
+	  "required": [
+        "properties"
+      ],
       "description": "Deployment operation parameters."
     },
     "DeploymentProperties_VNet": {
@@ -164,7 +167,6 @@
           "type": "object",
           "$ref": "#/definitions/DeploymentParameter_virtualNetworkPrefix",
           "x-ms-client-flatten": true,
-          "x-ms-client-name": "virtualNetworkPrefix"
         },
         "subnetPrefix": {
           "type": "object",
@@ -206,7 +208,8 @@
         "value": {
           "type": "string",
           "description": "IP address prefix for the subnet.",
-          "pattern": "^[\\d\\./]+$"
+          "pattern": "^[\\d\\./]+$",
+		  "x-ms-client-name": "subnetPrefix"
         }
       }
     },
@@ -217,9 +220,13 @@
           "description": "Name of the virtual network.",
           "pattern": "^[-\\w\\._]+$",
           "minLength": 2,
-          "maxLength": 80
-        }
+          "maxLength": 80,
+		  "x-ms-client-name": "virtualNetworkName"
       }
+    },
+	  "required": [
+        "value"
+      ]
     },
     "DeploymentParameter_subnetName": {
       "properties": {
@@ -228,7 +235,8 @@
           "description": "Name of the subnet.",
           "pattern": "^[-\\w\\._]+$",
           "minLength": 2,
-          "maxLength": 80
+          "maxLength": 80,
+		  "x-ms-client-name": "subnetName"
         }
       }
     },
@@ -236,7 +244,8 @@
       "properties": {
         "value": {
           "type": "string",
-          "description": "Location of the virtual network."
+          "description": "Location of the virtual network.",
+		  "x-ms-client-name": "location"
         }
       }
     },
