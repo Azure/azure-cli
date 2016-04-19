@@ -63,8 +63,8 @@ class Application(object):
         self.raise_event(self.COMMAND_PARSER_LOADED, self.parser)
 
         if len(argv) == 0:
-            subparser = next(value for key, value in self.parser.subparsers.items() if not key)
-            _help.show_welcome(subparser)
+            az_subparser = self.parser.subparsers[tuple()]
+            _help.show_welcome(az_subparser)
             return None
 
         args = self.parser.parse_args(argv)
@@ -136,7 +136,8 @@ class Application(object):
     def _register_builtin_arguments(parser):
         parser.add_argument('--subscription', dest='_subscription_id', help=argparse.SUPPRESS)
         parser.add_argument('--output', '-o', dest='_output_format',
-                            choices=['list', 'json', 'tsv'])
+                            choices=['list', 'json', 'tsv'],
+                            help='Output format of type "list", "json" or "tsv"')
 
     def _handle_builtin_arguments(self, args):
         self.configuration.output_format = args._output_format #pylint: disable=protected-access
