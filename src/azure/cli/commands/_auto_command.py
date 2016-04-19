@@ -93,13 +93,20 @@ def build_operation(command_name,
             try:
                 # this works in python3
                 default = args[arg].default
-                required = default == inspect.Parameter.empty # pylint: disable=no-member
+                required = default == inspect.Parameter.empty #pylint: disable=no-member
             except TypeError:
                 arg_defaults = dict(zip(sig.args[-len(sig.defaults):], sig.defaults))
                 default = arg_defaults.get(arg)
                 required = arg not in arg_defaults
 
             action = 'store_' + str(not default).lower() if isinstance(default, bool) else None
+
+            try:
+                default = (default
+                           if default != inspect._empty #pylint: disable=protected-access, no-member
+                           else None)
+            except AttributeError:
+                pass
 
             parameter = {
                 'name': '--' + arg.replace('_', '-'),
