@@ -392,7 +392,7 @@ build_operation(
         AutoCommandDefinition(FileService.create_share, 'Boolean', 'create'),
         AutoCommandDefinition(FileService.delete_share, 'Boolean', 'delete'),
         AutoCommandDefinition(FileService.generate_share_shared_access_signature,
-                              'Sometihng?', 'generate-sas'),
+                              'Something?', 'generate-sas'),
         AutoCommandDefinition(FileService.get_share_stats, 'Something?', 'stats')
     ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 

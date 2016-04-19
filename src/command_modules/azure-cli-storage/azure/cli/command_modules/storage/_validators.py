@@ -7,8 +7,9 @@ from azure.storage.blob.models import ContainerPermissions
 def validate_container_permission(string):
     ''' Validates that permission string contains only a combination
     of (r)ead, (w)rite, (d)elete, (l)ist. '''
-    if set(string) - set("rwdl"):
-        raise ValueError
+    if set(string) - set('rwdl'):
+        raise ValueError('valid values are (r)ead, (w)rite, (d)elete, (l)ist or a combination ' + \
+                         'thereof (ex: rw)')
     return ContainerPermissions(_str=''.join(set(string)))
 
 def validate_datetime_as_string(string):
