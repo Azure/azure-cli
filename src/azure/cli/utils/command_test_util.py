@@ -19,23 +19,46 @@ from azure.cli.main import main as cli
 
 # SCRIPT METHODS
 
-def cmd(command, file_=None):
-    """ Accepts a command line command as a string and returns stdout in UTF-8 format """
-    output = StringIO()
-    cli(command.split(), file=output)
-    result = output.getvalue().strip()
-    if file_:
-        file_.write('\n== {} ==\n{}'.format(command, result))
-    output.close()
-    return result
+class CommandTestScriptRunner(object):
 
-def set_env(key, val):
-    """ set environment variable """
-    os.environ[key] = val
+    def __init__(self):
+        self.display = StringIO()
+        self.raw = StringIO()
 
-def pop_env(key):
-    """ pop environment variable or None """
-    return os.environ.pop(key, None)
+    def rec(self, command):
+        ''' Run a command and save the output as part of the expected results. This will also
+        save the output to a display file so you can see the command, followed by its output
+        in order to determine if the output is acceptable. '''
+        output = StringIO()
+        cli(command.split(), file=output)
+        result = output.getvalue().strip()
+        self.display.write('\n\n== {} ==\n\n{}'.format(command, result))
+        self.raw.write('{}'.format(result))
+        output.close()
+        return result
+
+    def get(self, command): #pylint: disable=no-self-use
+        ''' Run a command without recording the output as part of expected results. Useful if you
+        need to run a command for automated verification. '''
+        output = StringIO()
+        cli(command.split(), file=output)
+        result = output.getvalue().strip()
+        output.close()
+        return result
+
+    def set_env(self, key, val): #pylint: disable=no-self-use
+        os.environ[key] = val
+
+    def pop_env(self, key): #pylint: disable=no-self-use
+        return os.environ.pop(key, None)
+
+    def close(self):
+        self.display.close()
+        self.raw.close()
+
+    def write(self, string):
+        self.display.write('\n{}'.format(string))
+        self.raw.write(string)
 
 class CommandTestGenerator(object):
 
@@ -115,15 +138,18 @@ class CommandTestGenerator(object):
                 if isinstance(action, str):
                     cli(action.split(), file=io)
                     actual_result = io.getvalue()
+                    display_result = actual_result
                 else:
-                    actual_result = action()
+                    test_runner = action()
+                    actual_result = test_runner.raw.getvalue()
+                    display_result = test_runner.display.getvalue()
                 if expected is None:
                     expected_results = _get_expected_results_from_file(recording_dir)
                     header = '| RECORDED RESULT FOR {} |'.format(test_name)
                     print('\n' + ('-' * len(header)), file=sys.stderr)
                     print(header, file=sys.stderr)
                     print('-' * len(header) + '\n', file=sys.stderr)
-                    print(actual_result, file=sys.stderr)
+                    print(display_result, file=sys.stderr)
                     ans = input('Save result for \'{}\'? [Y/n]: '.format(test_name))
                     if ans and ans.lower()[0] == 'y':
                         expected_results[test_name] = actual_result
@@ -184,14 +210,12 @@ class CommandTestGenerator(object):
         test_functions = collections.OrderedDict()
         for test_def in self.test_def:
             test_name = 'test_{}'.format(test_def['test_name'])
-            command = test_def.get('command', None)
+            command = test_def.get('command')
+            func = test_def.get('script')
             if command:
                 test_functions[test_name] = gen_test(test_name, command, self.recording_dir)
-                continue
-            func = test_def.get('script', None)
-            if func:
+            elif func:
                 test_functions[test_name] = gen_test(test_name, func, self.recording_dir)
-                continue
         return test_functions
 
     @staticmethod
