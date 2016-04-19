@@ -120,10 +120,7 @@ def build_operation(command_name,
             if custom_parameters:
                 parameter.update(custom_parameters.get(arg, {}))
 
-            # We need to make a copy to allow consumers to mutate the value
-            # retrieved from the common parameters without polluting future
-            # use...
-            options.append(parameter.copy())
+            options.append(parameter)
 
         # append any 'extra' args needed (for example to obtain a client) that aren't required
         # by the SDK.
