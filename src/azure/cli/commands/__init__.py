@@ -1,6 +1,7 @@
 from __future__ import print_function
 import sys
 import time
+import random
 from importlib import import_module
 from collections import defaultdict, OrderedDict
 from pip import get_installed_distributions
@@ -27,7 +28,7 @@ COMMON_PARAMETERS = {
         'name': '--deployment-name',
         'metavar': 'DEPLOYMENTNAME',
         'help': 'Name of the resource deployment',
-        'default': 'deployment' + str(time.time()),
+        'default': 'deployment' + str(time.time()) + str(random.randint(0, 10000000)),
         'required': False
     }
 }
