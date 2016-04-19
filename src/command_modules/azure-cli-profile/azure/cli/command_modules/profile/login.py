@@ -33,7 +33,7 @@ def login(args):
     else:
         interactive = True
 
-    is_service_principal = args.get('service-principal')
+    is_service_principal = args.get('service_principal')
     tenant = args.get('tenant')
 
     profile = Profile()
