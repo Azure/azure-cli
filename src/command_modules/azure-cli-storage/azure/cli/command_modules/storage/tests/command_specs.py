@@ -42,6 +42,28 @@ def _file_exists(share_name, dir_name, file_name):
         .format(share_name, dir_name, file_name))
     return True if res == 'True' else False
 
+def storage_account_scenario():
+    account = STORAGE_ACCOUNT_NAME
+    rg = RESOURCE_GROUP_NAME
+    io = StringIO()
+    cmd('storage account check-name --name teststorageomega', io)
+    cmd('storage account check-name --name {}'.format(account), io)
+    cmd('storage account list', io)
+    cmd('storage account show --resourcegroup {} --account-name {}'.format(rg, account), io)
+    cmd('storage account usage', io)
+    cmd('storage account connection-string -g {} --account-name {} --use-http'.format(rg, account), io)
+    cmd('storage account keys list -g {} --account-name {}'.format(rg, account), io)
+    cmd('storage account keys renew -g {} --account-name {}'.format(rg, account), io)
+    cmd('storage account keys renew -g {} --account-name {} --key key2'.format(rg, account), io)
+    cmd('storage account set -g {} -n {} --tags foo=bar;cat'.format(rg, account), io)
+    # TODO: This should work like other tag commands--no value to clear
+    cmd('storage account set -g {} -n {} --tags none='.format(rg, account), io)
+    cmd('storage account set -g {} -n {} --type Standard_GRS'.format(rg, account), io)
+    cmd('storage account set -g {} -n {} --type Standard_LRS'.format(rg, account), io)
+    result = io.getvalue()
+    io.close()
+    return result
+
 def storage_container_scenario():
     container = 'testcontainer01'
     proposed_lease_id = 'abcdabcd-abcd-abcd-abcd-abcdabcdabcd'
@@ -49,18 +71,23 @@ def storage_container_scenario():
     date = '2016-04-08T12:00Z'
     io = StringIO()
     _get_connection_string()
-    cmd('storage container delete --container-name {}'.format(container), io)
-    if cmd('storage container exists --container-name {}'.format(container), io) == 'False':
+    sas_token = cmd('storage account generate-sas --services b --resource-types sco --permission rwdl --expiry 2017-01-01T00:00Z')
+    set_env('AZURE_SAS_TOKEN', sas_token)
+    set_env('AZURE_STORAGE_ACCOUNT', STORAGE_ACCOUNT_NAME)
+    pop_env('AZURE_STORAGE_CONNECTION_STRING')
+    cmd('storage container delete --container-name {}'.format(container))
+    if cmd('storage container exists --container-name {}'.format(container)) == 'False':
         try:
-            # this will fail if the container is being delete. Wait some time and rerecord.
+            # fail fast if the container is being deleted. Wait some time and rerecord.
             cmd('storage container create --container-name {} --fail-on-exist'.format(container), io)
         except AzureHttpError as ex:
             return(ex)
-        cmd('storage container exists --container-name {}'.format(container), io)
         cmd('storage container show --container-name {}'.format(container), io)
         cmd('storage container list', io)
-        cmd('storage container metadata set -c {} --metadata foo=bar;moo=bak;'
-            .format(container), io)
+        # TODO: After a successful create--this command should not fail!!!
+        #if cmd('storage container exists --container-name {}'.format(container), io) != 'True':
+        #    raise FileNotFoundError('Container not found after successful create command!')
+        cmd('storage container metadata set -c {} --metadata foo=bar;moo=bak;'.format(container), io)
         cmd('storage container metadata get -c {}'.format(container), io)
         cmd('storage container metadata set -c {}'.format(container), io) # reset metadata
         cmd('storage container metadata get -c {}'.format(container), io)
@@ -81,82 +108,129 @@ def storage_container_scenario():
     io.close()
     return result
 
-def storage_file_upload_with_subdir():
+def storage_blob_scenario():
+    container = "testcontainer01"
+    blob = "testblob1"
+    dest_file = os.path.join(TEST_DIR, 'download-blob.rst')
+    io = StringIO()
     _get_connection_string()
-    share_name = 'testshare01'
-    dir_name = 'testdir1'
-    file_name = 'testfile02.rst'
-    local_file_name = 'testfile.rst'
-    # ensure the share and dir exists and that the file does not
-    _create_test_share(share_name)
-    _create_test_dir(share_name, dir_name)
-    if _file_exists(share_name, dir_name, file_name):
-        cmd('storage file delete --share-name {} --directory-name {} --file-name {}'
-            .format(share_name, dir_name, file_name))
-    # upload the file and verify it exists
-    result = ''
-    if not _file_exists(share_name, dir_name, file_name):
-        cmd('storage file upload --share-name {}  --directory-name {} --file-name {} --local-file-name {}'
-            .format(share_name, dir_name, file_name, os.path.join(TEST_DIR, local_file_name)))
-        result = cmd('storage file exists --share-name {} --directory-name {} --file-name {}'.
-            format(share_name, dir_name, file_name))
+    if cmd('storage blob exists -b {} -c {}'.format(blob, container)) == 'True':
+        cmd('storage blob delete --container-name {} --blob-name {}'.format(container, blob))
+    if cmd('storage blob exists -b {} -c {}'.format(blob, container)) == 'False':
+        cmd('storage blob upload-block-blob -b {} -c {} --upload-from {}'.format(blob, container, os.path.join(TEST_DIR, 'testfile.rst'), io))
+        cmd('storage blob download -b {} -c {} --download-to {}'.format(blob, container, dest_file), io)
+        if os.path.isfile(dest_file):
+            os.remove(dest_file)
+        else:
+            io.write('\nDownload failed. Test failed!')
+        cmd('storage blob exists -b {} -c {}'.format(blob, container), io)
+        cmd('storage blob list --container-name {}'.format(container), io)
+        cmd('storage blob properties get --container-name {} --blob-name {}'.format(container, blob), io)
+        cmd('storage blob delete --container-name {} --blob-name {}'.format(container, blob), io)
+        cmd('storage blob exists -b {} -c {}'.format(blob, container), io)
     else:
-        result = 'File already exists. Preconditions failed.'
+        io.write('Unable to establish pre-conditions. Test FAILED.')
+    result = io.getvalue()
+    io.close()
     return result
 
+def storage_share_scenario():
+    share1 = 'testshare01'
+    share2 = 'testshare02'
+    io = StringIO()
+    _get_connection_string()
+
+    # setup - do not record
+    cmd('storage share delete --share-name {}'.format(share1))
+    cmd('storage share delete --share-name {}'.format(share2))
+
+    try:
+        cmd('storage share create --share-name {} --fail-on-exist'.format(share1), io)
+        cmd('storage share create --share-name {} --fail-on-exist --metadata foo=bar;cat=hat'.format(share2), io)
+    except AzureHttpError as ex:
+        return(ex)
+    cmd('storage share exists --share-name {}'.format(share1), io)    
+    cmd('storage share metadata get --share-name {}'.format(share2), io)
+    cmd('storage share list', io)
+
+    # verify metadata can be set, queried, and cleared
+    cmd('storage share metadata set --share-name {} --metadata a=b;c=d'.format(share1), io)
+    cmd('storage share metadata get --share-name {}'.format(share1), io)
+    cmd('storage share metadata set --share-name {}'.format(share1), io)
+    cmd('storage share metadata get --share-name {}'.format(share1), io)
+
+    _storage_file_scenario(share1, io)
+    _storage_directory_scenario(share1, io)
+
+    cmd('storage share delete --share-name {} --fail-not-exist'.format(share1), io)
+    cmd('storage share delete --share-name {} --fail-not-exist'.format(share2), io)
+    result = io.getvalue()
+    io.close()
+    return result
+
+def _storage_directory_scenario(share, io):
+    dir = 'testdir01'
+    cmd('storage directory create --share-name {} --directory-name {} --fail-on-exist'.format(share, dir), io)
+    cmd('storage directory exists --share-name {} --directory-name {}'.format(share, dir), io)
+    cmd('storage directory metadata set --share-name {} --directory-name {} --metadata a=b;c=d'.format(share, dir), io)
+    cmd('storage directory metadata get --share-name {} --directory-name {}'.format(share, dir), io)
+    cmd('storage directory metadata set --share-name {} --directory-name {}'.format(share, dir), io)
+    cmd('storage directory metadata get --share-name {} --directory-name {}'.format(share, dir), io)
+    _storage_file_in_subdir_scenario(share, dir, io)
+    cmd('storage directory delete --share-name {} --directory-name {} --fail-not-exist'.format(share, dir), io)
+    cmd('storage directory exists --share-name {} --directory-name {}'.format(share, dir), io)
+
+    # verify a directory can be created with metadata and then delete
+    dir = 'testdir02'
+    cmd('storage directory create --share-name {} --directory-name {} --fail-on-exist --metadata foo=bar;cat=hat'.format(share, dir), io)
+    cmd('storage directory metadata get --share-name {} --directory-name {}'.format(share, dir), io)
+    cmd('storage directory delete --share-name {} --directory-name {} --fail-not-exist'.format(share, dir), io)
+
+def _storage_file_scenario(share, io):
+    source_file = os.path.join(TEST_DIR, 'testfile.rst')
+    dest_file = os.path.join(TEST_DIR, 'download_test.rst')
+    filename = 'testfile.rst'
+    cmd('storage file upload --share-name {} --local-file-name {} --file-name {}'.format(share, source_file, filename), io)
+    cmd('storage file exists --share-name {} --file-name {}'.format(share, filename), io)
+    if os.path.isfile(dest_file):
+        os.remove(dest_file)
+    cmd('storage file download --share-name {} --file-name {} --local-file-name {}'.format(share, filename, dest_file), io)
+    if os.path.isfile(dest_file):
+        os.remove(dest_file)
+    else:
+        io.write('\nDownload failed. Test failed!')
+    cmd('storage share contents --share-name {}'.format(share), io)
+    cmd('storage file delete --share-name {} --file-name {}'.format(share, filename), io)
+    cmd('storage file exists --share-name {} --file-name {}'.format(share, filename), io)
+
+def _storage_file_in_subdir_scenario(share, dir, io):
+    source_file = os.path.join(TEST_DIR, 'testfile.rst')
+    dest_file = os.path.join(TEST_DIR, 'download_test.rst')
+    filename = 'testfile.rst'
+    cmd('storage file upload --share-name {} --directory-name {} --local-file-name {} --file-name {}'.format(share, dir, source_file, filename), io)
+    cmd('storage file exists --share-name {} --directory-name {} --file-name {}'.format(share, dir, filename), io)
+    if os.path.isfile(dest_file):    
+        os.remove(dest_file)
+    cmd('storage file download --share-name {} --directory-name {} --file-name {} --local-file-name {}'.format(share, dir, filename, dest_file), io)
+    if os.path.isfile(dest_file):
+        os.remove(dest_file)
+    else:
+        io.write('\nDownload failed. Test failed!')
+    cmd('storage share contents --share-name {} --directory-name {}'.format(share, dir), io)
+    cmd('storage file delete --share-name {} --directory-name {} --file-name {}'.format(share, dir, filename), io)
+    cmd('storage file exists --share-name {} --file-name {}'.format(share, filename), io)
 
 TEST_DEF = [
     # STORAGE ACCOUNT TESTS
     {
-        'test_name': 'storage_account_check_name',
-        'command': 'storage account check-name --name teststorageomega'
-    },
-    {
-        'test_name': 'storage_account_list',
-        'command': 'storage account list'
-    },
-    {
-        'test_name': 'storage_account_show',
-        'command': 'storage account show --resourcegroup {} --account-name {}'
-            .format(RESOURCE_GROUP_NAME, STORAGE_ACCOUNT_NAME)
-    },
-    {
-        'test_name': 'storage_account_usage',
-        'command': 'storage account usage',
-    },
-    {
-        'test_name': 'storage_account_connection_string',
-        'command': 'storage account connection-string -g {} --account-name {} --use-http'
-            .format(RESOURCE_GROUP_NAME, STORAGE_ACCOUNT_NAME)
-    },
-    {
-        'test_name': 'storage_account_list_keys',
-        'command': 'storage account keys list -g {} --account-name {}'
-            .format(RESOURCE_GROUP_NAME, STORAGE_ACCOUNT_NAME)
-    },
-    {
-        'test_name': 'storage_account_renew_keys_both',
-        'command': 'storage account keys renew -g {} --account-name {}'
-            .format(RESOURCE_GROUP_NAME, STORAGE_ACCOUNT_NAME)
-    },
-    {
-        'test_name': 'storage_account_renew_keys_one',
-        'command': 'storage account keys renew -g {} --account-name {} --key key2'
-            .format(RESOURCE_GROUP_NAME, STORAGE_ACCOUNT_NAME)
+        'test_name': 'storage_account',
+        'script': storage_account_scenario
     },
     # TODO: Enable when item #117262541 is complete
     #{
     #    'test_name': 'storage_account_create',
     #    'command': 'storage account create --type Standard_LRS -l westus -g travistestresourcegroup --account-name teststorageaccount04'
     #},
-    {
-        'test_name': 'storage_account_set_tags',
-        'command': 'storage account set -g travistestresourcegroup -n teststorageaccount02 --tags foo=bar;cat'
-    },
-    {
-        'test_name': 'storage_account_set_type',
-        'command': 'storage account set -g travistestresourcegroup -n teststorageaccount02 --type Standard_LRS'
-    },
     {
         'test_name': 'storage_account_delete',
         'command': 'storage account delete -g travistestresourcegroup --account-name teststorageaccount04'
@@ -165,195 +239,15 @@ TEST_DEF = [
     {
         'test_name': 'storage_container',
         'script': storage_container_scenario
-    },   
-    #{
-    #    'test_name': 'storage_container_list',
-    #    'command': 'storage container list'
-    #},
-    #{
-    #    'test_name': 'storage_container_create',
-    #    'command': 'storage container create --container-name testcontainer01 --fail-on-exist'
-    #},
-    #{
-    #    'test_name': 'storage_container_exist',
-    #    'command': 'storage container exists --container-name testcontainer01'
-    #},
-    #{
-    #    'test_name': 'storage_container_show',
-    #    'command': 'storage container show --container-name testcontainer01'
-    #},
-    #{
-    #    'test_name': 'storage_container_lease_acquire',
-    #    'command': 'storage container lease acquire --lease-duration 60 -c testcontainer01 --if-modified-since {} --proposed-lease-id {}'
-    #        .format('2016-04-08_12:00:00', PROPOSED_LEASE_ID)
-    #},
-    #{
-    #    'test_name': 'storage_container_lease_renew',
-    #    'command': 'storage container lease renew --container-name testcontainer01 --lease-id {}'
-    #        .format(PROPOSED_LEASE_ID)
-    #},
-    #{
-    #    'test_name': 'storage_container_lease_change',
-    #    'command': 'storage container lease change --container-name testcontainer01 --lease-id {} --proposed-lease-id {}'
-    #        .format(PROPOSED_LEASE_ID, CHANGED_LEASE_ID)
-    #},
-    #{
-    #    'test_name': 'storage_container_lease_break',
-    #    'command': 'storage container lease break --container-name testcontainer01 --lease-break-period 30'
-    #},
-    #{
-    #    'test_name': 'storage_container_lease_release',
-    #    'command': 'storage container lease release --container-name testcontainer01 --lease-id {}'
-    #        .format(CHANGED_LEASE_ID)
-    #},
-    #{
-    #    'test_name': 'storage_container_delete',
-    #    'command': 'storage container delete --container-name testcontainer01 --fail-not-exist'
-    #},
-    #{
-    #    'test_name': 'storage_container_metadata_set',
-    #    'command': 'storage container metadata set -c testcontainer1234 --metadata foo=bar;moo=bak;'
-    #},
-    #{
-    #    'test_name': 'storage_container_metadata_get',
-    #    'command': 'storage container metadata get -c testcontainer1234'
-    #},
-    #{
-    #    'test_name': 'storage_container_metadata_reset',
-    #    'command': 'storage container metadata set -c testcontainer1234'
-    #},
+    },
     # STORAGE BLOB TESTS
     {
-        'test_name': 'storage_blob_upload_block_blob',
-        'command': 'storage blob upload-block-blob -b testblob1 -c testcontainer1234 --upload-from {}'
-            .format(os.path.join(TEST_DIR, 'testfile.rst'))
-    },
-    {
-        'test_name': 'storage_blob_download',
-        'command': 'storage blob download -b testblob1 -c testcontainer1234 --download-to {}'
-            .format(os.path.join(TEST_DIR, 'download-blob.rst'))
-    },
-    {
-        'test_name': 'storage_blob_exists',
-        'command': 'storage blob exists -b testblob1 -c testcontainer1234'
-    },
-    {
-        'test_name': 'storage_blob_list',
-        'command': 'storage blob list --container-name testcontainer1234'
-    },
-    {
-        'test_name': 'storage_blob_properties_get',
-        'command': 'storage blob properties get --container-name testcontainer1234 --blob-name testblob1'
-    },
-    {
-        'test_name': 'storage_blob_delete',
-        'command': 'storage blob delete --container-name testcontainer1234 --blob-name testblob1'
+        'test_name': 'storage_blob',
+        'script': storage_blob_scenario
     },
     # STORAGE SHARE TESTS
     {
-        'test_name': 'storage_share_list',
-        'command': 'storage share list'
-    },
-    {
-        'test_name': 'storage_share_create_simple',
-        'command': 'storage share create --share-name testshare02 --fail-on-exist'
-    },
-    {
-        'test_name': 'storage_share_create_with_metadata',
-        'command': 'storage share create --share-name testshare03 --fail-on-exist --metadata foo=bar;cat=hat'
-    },
-    {
-        'test_name': 'storage_share_exists',
-        'command': 'storage share exists --share-name testshare01'
-    },
-    {
-        'test_name': 'storage_share_contents',
-        'command': 'storage share contents --share-name testshare01'
-    },
-    {
-        'test_name': 'storage_share_contents_with_subdirectory',
-        'command': 'storage share contents --share-name testshare01 --directory-name testdir1'
-    },
-    {
-        'test_name': 'storage_share_delete',
-        'command': 'storage share delete --share-name testshare02 --fail-not-exist'
-    },
-    {
-        'test_name': 'storage_share_set_metadata',
-        'command': 'storage share metadata set --share-name testshare01 --metadata a=b;c=d'
-    },
-    {
-        'test_name': 'storage_share_show_metadata',
-        'command': 'storage share metadata get --share-name testshare01'
-    },
-    {
-        'test_name': 'storage_share_clear_metadata',
-        'command': 'storage share metadata set --share-name testshare01'
-    },
-    # STORAGE DIRECTORY TESTS
-    {
-        'test_name': 'storage_directory_exists',
-        'command': 'storage directory exists --share-name testshare01 --directory-name testdir1'
-    },
-    {
-        'test_name': 'storage_directory_create_simple',
-        'command': 'storage directory create --share-name testshare01 --directory-name tempdir01 --fail-on-exist'
-    },
-    {
-        'test_name': 'storage_directory_create_with_metadata',
-        'command': 'storage directory create --share-name testshare01 --directory-name tempdir02 --fail-on-exist --metadata foo=bar;cat=hat'
-    },
-    {
-        'test_name': 'storage_directory_delete',
-        'command': 'storage directory delete --share-name testshare01 --directory-name tempdir01 --fail-not-exist'
-    },
-    {
-        'test_name': 'storage_directory_set_metadata',
-        'command': 'storage directory metadata set --share-name testshare01 --directory-name testdir1 --metadata a=b;c=d'
-    },
-    {
-        'test_name': 'storage_directory_show_metadata',
-        'command': 'storage directory metadata get --share-name testshare01 --directory-name testdir1'
-    },
-    {
-        'test_name': 'storage_directory_clear_metadata',
-        'command': 'storage directory metadata set --share-name testshare01 --directory-name testdir1'
-    },
-    # STORAGE FILE TESTS
-    #{
-    #    'test_name': 'storage_file_upload_simple',
-    #    'command': 'storage file upload --share-name testshare01 --local-file-name {} --file-name testfile01.rst'
-    #        .format(os.path.join(TEST_DIR, 'testfile.rst'))
-    #},
-    {
-        'test_name': 'storage_file_exists_simple',
-        'command': 'storage file exists --share-name testshare01 --file-name testfile01.rst'
-    },
-    {
-        'test_name': 'storage_file_download_simple',
-        'command': 'storage file download --share-name testshare01 --file-name testfile01.rst --local-file-name {}'
-            .format(os.path.join(TEST_DIR, 'download-file.rst'))
-    },
-    # TODO: For simple delete, directory is not required...
-    #{
-    #    'test_name': 'storage_file_delete_simple',
-    #    'command': 'storage file delete --share-name testshare01 --file-name testfile01.rst'
-    #},
-    #{
-    #    'test_name': 'storage_file_upload_with_subdir',
-    #    'script': storage_file_upload_with_subdir
-    #},
-    {
-        'test_name': 'storage_file_exists_with_subdir',
-        'command': 'storage file exists --share-name testshare01 --directory-name testdir1 --file-name testfile02.rst'
-    },
-    {
-        'test_name': 'storage_file_download_with_subdir',
-        'command': 'storage file download --share-name testshare01 --directory-name testdir1 --file-name testfile02.rst --local-file-name {}'
-            .format(os.path.join(TEST_DIR, 'download-file-with-subdir.rst'))
-    },
-    {
-        'test_name': 'storage_file_delete_with_subdir',
-        'command': 'storage file delete --share-name testshare01 --directory-name testdir1 --file-name testfile02.rst'
+        'test_name': 'storage_share',
+        'script': storage_share_scenario
     }
 ]
