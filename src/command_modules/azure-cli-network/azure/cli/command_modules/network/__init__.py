@@ -267,6 +267,10 @@ VNET_SPECIFIC_PARAMS = {
     'deployment_parameter_subnet_prefix_value': {
         'name': '--subnet-prefix',
         'metavar': 'SUBNETPREFIX',
+    },
+    'deployment_parameter_location_value': {
+        'name': '--location',
+        'metavar': 'LOCATION',
     }
 }
 
