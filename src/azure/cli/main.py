@@ -34,7 +34,6 @@ def main(args, file=sys.stdout): #pylint: disable=redefined-builtin
 
     config = Configuration(args)
     app = Application(config)
-    app.load_commands()
     try:
         cmd_result = app.execute(args)
         # Commands can return a dictionary/list of results

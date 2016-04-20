@@ -1,6 +1,7 @@
 from __future__ import print_function
 import sys
 import time
+import random
 from importlib import import_module
 from collections import defaultdict, OrderedDict
 from pip import get_installed_distributions
@@ -13,7 +14,7 @@ INSTALLED_COMMAND_MODULES = [dist.key.replace('azure-cli-', '')
 COMMON_PARAMETERS = {
     'resource_group_name': {
         'name': '--resourcegroup -g',
-        'metavar': 'RESOURCE GROUP',
+        'metavar': 'RESOURCEGROUP',
         'help': 'Name of resource group',
         'required': True
     },
@@ -22,6 +23,13 @@ COMMON_PARAMETERS = {
         'metavar': 'LOCATION',
         'help': 'Location',
         'required': True
+    },
+    'deployment_name': {
+        'name': '--deployment-name',
+        'metavar': 'DEPLOYMENTNAME',
+        'help': 'Name of the resource deployment',
+        'default': 'azurecli' + str(time.time()) + str(random.randint(0, 10000000)),
+        'required': False
     }
 }
 
@@ -76,6 +84,12 @@ class CommandTable(defaultdict):
     def description(self, description):
         def wrapper(func):
             self[func]['description'] = description
+            return func
+        return wrapper
+
+    def help(self, help_file):
+        def wrapper(func):
+            self[func]['help_file'] = help_file
             return func
         return wrapper
 
