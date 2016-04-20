@@ -271,7 +271,7 @@ VNET_SPECIFIC_PARAMS = {
 }
 
 build_operation('network vnet',
-                'virtual_networks',
+                'vnet',
                 lambda _: get_mgmt_service_client(VNetClient, VNetClientConfig),
                 [
                     AutoCommandDefinition(VNetOperations.create,
