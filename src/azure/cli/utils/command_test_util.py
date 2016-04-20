@@ -17,49 +17,6 @@ import vcr
 
 from azure.cli.main import main as cli
 
-# SCRIPT METHODS
-
-class CommandTestScriptRunner(object):
-
-    def __init__(self):
-        self.display = StringIO()
-        self.raw = StringIO()
-
-    def rec(self, command):
-        ''' Run a command and save the output as part of the expected results. This will also
-        save the output to a display file so you can see the command, followed by its output
-        in order to determine if the output is acceptable. '''
-        output = StringIO()
-        cli(command.split(), file=output)
-        result = output.getvalue().strip()
-        self.display.write('\n\n== {} ==\n\n{}'.format(command, result))
-        self.raw.write('{}'.format(result))
-        output.close()
-        return result
-
-    def get(self, command): #pylint: disable=no-self-use
-        ''' Run a command without recording the output as part of expected results. Useful if you
-        need to run a command for automated verification. '''
-        output = StringIO()
-        cli(command.split(), file=output)
-        result = output.getvalue().strip()
-        output.close()
-        return result
-
-    def set_env(self, key, val): #pylint: disable=no-self-use
-        os.environ[key] = val
-
-    def pop_env(self, key): #pylint: disable=no-self-use
-        return os.environ.pop(key, None)
-
-    def close(self):
-        self.display.close()
-        self.raw.close()
-
-    def write(self, string):
-        self.display.write('\n{}'.format(string))
-        self.raw.write(string)
-
 class CommandTestGenerator(object):
 
     FILTER_HEADERS = [
@@ -139,10 +96,15 @@ class CommandTestGenerator(object):
                     cli(action.split(), file=io)
                     actual_result = io.getvalue()
                     display_result = actual_result
+                    auto_validated = False
+                    fail = False
                 else:
-                    test_runner = action()
-                    actual_result = test_runner.raw.getvalue()
-                    display_result = test_runner.display.getvalue()
+                    test_runner = action
+                    test_runner.run_test()
+                    actual_result = test_runner.raw_result
+                    display_result = test_runner.display_result
+                    auto_validated = test_runner.auto
+                    fail = test_runner.fail
                 if expected is None:
                     expected_results = _get_expected_results_from_file(recording_dir)
                     header = '| RECORDED RESULT FOR {} |'.format(test_name)
@@ -150,14 +112,19 @@ class CommandTestGenerator(object):
                     print(header, file=sys.stderr)
                     print('-' * len(header) + '\n', file=sys.stderr)
                     print(display_result, file=sys.stderr)
-                    ans = input('Save result for \'{}\'? [Y/n]: '.format(test_name))
-                    if ans and ans.lower()[0] == 'y':
+                    if not auto_validated and not fail:
+                        ans = input('Save result for \'{}\'? [Y/n]: '.format(test_name))
+                        fail = False if ans and ans.lower()[0] == 'y' else True
+
+                    if not fail:
+                        print('*** SAVING TEST {} ***'.format(test_name), file=sys.stderr)
+                        expected_results = _get_expected_results_from_file(recording_dir)
                         expected_results[test_name] = actual_result
                         expected = actual_result
                         _save_expected_results_file(recording_dir, expected_results)
                     else:
+                        print('*** TEST {} FAILED ***'.format(test_name), file=sys.stderr)
                         _remove_expected_result(test_name, recording_dir)
-                        expected = None
 
                 io.close()
                 self.assertEqual(actual_result, expected)
