@@ -20,7 +20,16 @@ To install via cURL on Linux, Unix and OS X, type:
 
 Note: This will install the latest nightly builds.
 
-If you get errors on install with cffi or cryptography such as the examples below,
+**Errors on install with cffi or cryptography:**
+
+If you get errors on install on **OS X**, upgrade pip by typing:
+
+.. code:: shell
+
+    pip install --upgrade --force-reinstall pip
+
+
+If you get errors on install on **Debian or Ubuntu** such as the examples below,
 install libssl-dev, libffi-dev and python3-dev by typing:
 
 .. code:: shell
@@ -34,7 +43,7 @@ install libssl-dev, libffi-dev and python3-dev by typing:
 .. code:: shell
 
     Downloading cffi-1.5.2.tar.gz (388kB)
-      100% |################################| 389kB 3.9MB/s 
+      100% |################################| 389kB 3.9MB/s
       Complete output from command python setup.py egg_info:
     
           No working compiler found, or bogus compiler options
@@ -54,6 +63,8 @@ install libssl-dev, libffi-dev and python3-dev by typing:
     error: command 'x86_64-linux-gnu-gcc' failed with exit status 1
     
     Failed building wheel for cryptography
+
+`See Stack Overflow question - Failed to install Python Cryptography package with PIP and setup.py <http://stackoverflow.com/questions/22073516/failed-to-install-python-cryptography-package-with-pip-and-setup-py>`__
 
 
 Download Package
