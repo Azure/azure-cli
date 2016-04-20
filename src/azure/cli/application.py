@@ -42,6 +42,7 @@ class Application(object):
     def __init__(self, configuration):
         self._event_handlers = defaultdict(lambda: [])
         self.configuration = configuration
+        self.command_table = None
 
         # Register presence of and handlers for global parameters
         self.register(self.GLOBAL_PARSER_CREATED, Application._register_builtin_arguments)
@@ -57,10 +58,14 @@ class Application(object):
         self.parser = AzCliCommandParser(prog='az', parents=[self.global_parser])
         self.raise_event(self.COMMAND_PARSER_CREATED, self.parser)
 
-    def execute(self, argv):
-        command_table = self.configuration.get_command_table()
-        self.parser.load_command_table(command_table)
+    def load_commands(self, cmd_table=None):
+        self.command_table = cmd_table if cmd_table else self.configuration.get_command_table()
+        self.parser.load_command_table(self.command_table)
         self.raise_event(self.COMMAND_PARSER_LOADED, self.parser)
+
+    def execute(self, argv):
+        if not self.command_table:
+            self.load_commands()
 
         if len(argv) == 0:
             az_subparser = self.parser.subparsers[tuple()]
