@@ -26,7 +26,7 @@ install libssl-dev, libffi-dev and python3-dev by typing:
 .. code:: shell
 
     sudo apt-get update
-    sudo apt-get install -y libssl-dev libffi-dev python3-dev
+    sudo apt-get install -y build-essential libssl-dev libffi-dev python3-dev
 
 
 **Example Errors**
