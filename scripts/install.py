@@ -19,7 +19,7 @@ import platform
 import stat
 import tarfile
 import tempfile
-from subprocess import check_call
+from subprocess import check_call, CalledProcessError
 try:
     # Attempt to load python 3 module
     from urllib.request import urlretrieve
@@ -44,6 +44,14 @@ try:
     check_call([PATH_TO_PYTHON, '-m', 'azure.cli'] + sys.argv[1:])
 except CalledProcessError as err:
     sys.exit(err.returncode)
+"""
+
+CLI_INSTALL_FAIL_MESSAGE = """
+---
+Installation failed
+---
+Visit https://github.com/Azure/azure-cli/blob/master/README.rst for information on possible causes of the error.
+---
 """
 
 DEFAULT_INSTALL_LOCATION = os.path.join(os.path.sep, 'usr', 'local', 'az')
@@ -155,7 +163,12 @@ def main():
     env_dir = os.path.join(install_location, ENVS_DIR_NAME, environment_name)
     create_dir(env_dir)
     create_virtualenv(tmp_dir, VIRTUALENV_VERSION, env_dir)
-    install_cli(env_dir)
+    try:
+        install_cli(env_dir)
+    except CalledProcessError as err:
+        print(err, file=sys.stderr)
+        print(CLI_INSTALL_FAIL_MESSAGE, file=sys.stderr)
+        sys.exit(err.returncode)
     create_executable(exec_filename, install_location, environment_name)
     print("Installation successful.")
     print("Run the CLI with {} --help".format(exec_filename))
