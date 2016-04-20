@@ -98,24 +98,21 @@ def install_cli(install_dir):
     path_to_pip = os.path.join(install_dir, BIN_DIR_NAME, 'pip')
     exec_command(get_pip_install_command('azure-cli', path_to_pip),
                  env=dict(os.environ, AZURE_CLI_DISABLE_POST_INSTALL='1'))
-    exec_command(get_pip_install_command('azure-cli-component', path_to_pip))
-    exec_command(get_pip_install_command('azure-cli-profile', path_to_pip))
-    exec_command(get_pip_install_command('azure-cli-storage', path_to_pip))
-    exec_command(get_pip_install_command('azure-cli-vm', path_to_pip))
-    exec_command(get_pip_install_command('azure-cli-network', path_to_pip))
-    exec_command(get_pip_install_command('azure-cli-resource', path_to_pip))
-    exec_command(get_pip_install_command('azure-cli-taskhelp', path_to_pip))
+    modules_to_install = ['azure-cli-component', 'azure-cli-profile', 'azure-cli-storage',
+                          'azure-cli-vm', 'azure-cli-network', 'azure-cli-resource',
+                          'azure-cli-taskhelp']
+    for module_name in modules_to_install:
+        exec_command(get_pip_install_command(module_name, path_to_pip))
 
 def create_executable(exec_filename, install_location, environment_name):
     exec_dir = os.path.dirname(exec_filename)
     create_dir(exec_dir)
-    exec_file = open(exec_filename, 'w')
-    exec_file.write(AZ_DISPATCH_TEMPLATE.format(
-        install_location=install_location,
-        environment_name=environment_name,
-        envs_dir_name=ENVS_DIR_NAME,
-        bin_dir_name=BIN_DIR_NAME))
-    exec_file.close()
+    with open(exec_filename, 'w') as exec_file:
+        exec_file.write(AZ_DISPATCH_TEMPLATE.format(
+                        install_location=install_location,
+                        environment_name=environment_name,
+                        envs_dir_name=ENVS_DIR_NAME,
+                        bin_dir_name=BIN_DIR_NAME))
     cur_stat = os.stat(exec_filename)
     os.chmod(exec_filename, cur_stat.st_mode | stat.S_IEXEC)
 
@@ -140,6 +137,7 @@ def get_exec_filename():
     prompt_message = 'Where would you like to place the executable? (default {}): '.format(DEFAULT_EXEC_FILENAME)
     exec_filename = prompt_input(prompt_message) or DEFAULT_EXEC_FILENAME
     exec_filename = os.path.expanduser(exec_filename)
+    exec_filename = os.path.realpath(exec_filename)
     print("The executable will be '{}'.".format(exec_filename))
     return exec_filename
 
@@ -159,6 +157,7 @@ def main():
     create_virtualenv(tmp_dir, VIRTUALENV_VERSION, env_dir)
     install_cli(env_dir)
     create_executable(exec_filename, install_location, environment_name)
+    print("Installation successful.")
     print("Run the CLI with {} --help".format(exec_filename))
 
 if __name__ == '__main__':
