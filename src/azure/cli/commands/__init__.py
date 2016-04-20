@@ -79,6 +79,12 @@ class CommandTable(defaultdict):
             return func
         return wrapper
 
+    def help(self, help_file):
+        def wrapper(func):
+            self[func]['help_file'] = help_file
+            return func
+        return wrapper
+
     def option(self, name, **kwargs):
         def wrapper(func):
             opt = dict(kwargs)

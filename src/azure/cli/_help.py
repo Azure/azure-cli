@@ -1,5 +1,5 @@
 from __future__ import print_function
-import inspect
+import argparse
 import sys
 import textwrap
 import yaml
@@ -10,6 +10,20 @@ from ._help_files import _load_help_file
 __all__ = ['print_detailed_help', 'print_welcome_message', 'GroupHelpFile', 'CommandHelpFile']
 
 _out = sys.stdout
+
+def show_help(nouns, parser, is_group):
+    delimiters = ' '.join(nouns)
+    help_file = CommandHelpFile(delimiters, parser) \
+        if not is_group \
+        else GroupHelpFile(delimiters, parser)
+
+    help_file.load(parser)
+
+    if len(nouns) == 0:
+        print('\nSpecial intro help for az')
+        help_file.command = 'az'
+
+    print_detailed_help(help_file)
 
 def show_welcome(parser):
     print_welcome_message()
@@ -66,14 +80,15 @@ def print_arguments(help_file):
     if len(help_file.parameters) == 0:
         _print_indent('none', indent)
     required_tag = L(' [Required]')
-    max_name_length = max(len(p.name) + 11 if p.required else 0 for p in help_file.parameters)
-    for p in help_file.parameters:
+    max_name_length = max(len(p.name) + (len(required_tag) if p.required else 0)
+                          for p in help_file.parameters)
+    for p in sorted(help_file.parameters, key=lambda p: str(not p.required) + p.name):
         indent = 1
         required_text = required_tag if p.required else ''
         _print_indent('{0}{1}{2}{3}'.format(p.name,
-                                            required_text,
                                             _get_column_indent(p.name + required_text,
                                                                max_name_length),
+                                            required_text,
                                             ': ' + p.short_summary if p.short_summary else ''),
                       indent,
                       max_name_length + indent*4 + 2)
@@ -85,29 +100,34 @@ def print_arguments(help_file):
         if p.value_sources:
             _print_indent('')
             _print_indent(L("Values from: {0}").format(', '.join(p.value_sources)), indent)
-        _print_indent('')
     return indent
 
 def _print_header(help_file):
     indent = 0
     _print_indent('')
     _print_indent(L('Command') if help_file.type == 'command' else L('Group'), indent)
+
+    indent += 1
     _print_indent('{0}{1}'.format(help_file.command,
                                   ': ' + help_file.short_summary
                                   if help_file.short_summary
                                   else ''),
                   indent)
 
-    indent = 1
+    indent += 1
     if help_file.long_summary:
         _print_indent('{0}'.format(help_file.long_summary.rstrip()), indent)
     _print_indent('')
 
 def _print_groups(help_file):
     indent = 1
-    for c in help_file.children:
-        _print_indent('{0}{1}'.format(c.name,
-                                      ': ' + c.short_summary if c.short_summary else ''),
+    max_name_length = max(len(c.name) for c in help_file.children) \
+        if len(help_file.children) > 0 \
+        else 0
+    for c in sorted(help_file.children, key=lambda h: h.name):
+        _print_indent('{0}{1}{2}'.format(c.name,
+                                         _get_column_indent(c.name, max_name_length),
+                                         ': ' + c.short_summary if c.short_summary else ''),
                       indent)
     _print_indent('')
 
@@ -126,17 +146,19 @@ def _print_examples(help_file):
 class HelpFile(object): #pylint: disable=too-few-public-methods
     def __init__(self, delimiters):
         self.delimiters = delimiters
-        self.name = delimiters.split('.')[-1]
-        self.command = delimiters.replace('.', ' ')
+        self.name = delimiters.split()[-1] if len(delimiters) > 0 else delimiters
+        self.command = delimiters
         self.type = ''
         self.short_summary = ''
         self.long_summary = ''
         self.examples = ''
 
     def load(self, options):
-        self.short_summary = options.description
-        file_data = _load_help_file_from_string(
-            inspect.getdoc(options._defaults.get('func'))) #pylint: disable=protected-access
+        self.short_summary = getattr(options, 'description', None)
+        file_data = (_load_help_file_from_string(options.help_file)
+                     if hasattr(options, '_defaults')
+                     else None)
+
         if file_data:
             self._load_from_data(file_data)
         else:
@@ -173,16 +195,23 @@ class GroupHelpFile(HelpFile): #pylint: disable=too-few-public-methods
         self.type = 'group'
 
         self.children = []
-        for cmd, options in parser.choices.items():
-            child = HelpFile(cmd)
+        for options in parser.choices.values():
+            delimiters = ' '.join(options.prog.split()[1:])
+            child = HelpFile(delimiters)
             child.load(options)
             self.children.append(child)
 
 class CommandHelpFile(HelpFile): #pylint: disable=too-few-public-methods
-    def __init__(self, delimiters, argdoc):
+    def __init__(self, delimiters, parser):
         super(CommandHelpFile, self).__init__(delimiters)
         self.type = 'command'
-        self.parameters = [HelpParameter(a, d, r) for a, d, r in argdoc]
+
+        self.parameters = []
+
+        for action in [a for a in parser._actions if a.help != argparse.SUPPRESS]: # pylint: disable=protected-access
+            self.parameters.append(HelpParameter('/'.join(sorted(action.option_strings)),
+                                                 action.help,
+                                                 required=action.required))
 
     def _load_from_data(self, data):
         super(CommandHelpFile, self)._load_from_data(data)
@@ -257,6 +286,10 @@ def _load_help_file_from_string(text):
         return yaml.load(text) if text else None
     except Exception: #pylint: disable=broad-except
         return text
+
+def _get_single_metadata(cmd_table):
+    assert len(cmd_table) == 1
+    return next(metadata for _, metadata in cmd_table.items())
 
 class HelpAuthoringException(Exception):
     pass
