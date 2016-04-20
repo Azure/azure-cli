@@ -7,6 +7,7 @@ import logging
 from enum import Enum
 from .parser import AzCliCommandParser
 import azure.cli.extensions
+import azure.cli._help as _help
 
 class Configuration(object): # pylint: disable=too-few-public-methods
     """The configuration object tracks session specific data such
@@ -56,11 +57,16 @@ class Application(object):
         self.parser = AzCliCommandParser(prog='az', parents=[self.global_parser])
         self.raise_event(self.COMMAND_PARSER_CREATED, self.parser)
 
-    def load_commands(self):
-        self.parser.load_command_table(self.configuration.get_command_table())
+    def execute(self, argv):
+        command_table = self.configuration.get_command_table()
+        self.parser.load_command_table(command_table)
         self.raise_event(self.COMMAND_PARSER_LOADED, self.parser)
 
-    def execute(self, argv):
+        if len(argv) == 0:
+            az_subparser = self.parser.subparsers[tuple()]
+            _help.show_welcome(az_subparser)
+            return None
+
         args = self.parser.parse_args(argv)
         self.raise_event(self.COMMAND_PARSER_PARSED, args)
 
@@ -130,7 +136,8 @@ class Application(object):
     def _register_builtin_arguments(parser):
         parser.add_argument('--subscription', dest='_subscription_id', help=argparse.SUPPRESS)
         parser.add_argument('--output', '-o', dest='_output_format',
-                            choices=['list', 'json', 'tsv'])
+                            choices=['list', 'json', 'tsv'],
+                            help='Output format of type "list", "json" or "tsv"')
 
     def _handle_builtin_arguments(self, args):
         self.configuration.output_format = args._output_format #pylint: disable=protected-access
