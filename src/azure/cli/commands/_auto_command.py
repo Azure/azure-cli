@@ -5,7 +5,8 @@ from msrest.exceptions import ClientException
 from azure.cli.parser import IncorrectUsageError
 from ..commands import COMMON_PARAMETERS
 
-EXCLUDED_PARAMS = frozenset(['self', 'raw', 'custom_headers', 'operation_config'])
+EXCLUDED_PARAMS = frozenset(['self', 'raw', 'custom_headers', 'operation_config',
+                             'content_version'])
 
 class AutoCommandDefinition(object): #pylint: disable=too-few-public-methods
 
@@ -67,12 +68,8 @@ def build_operation(command_name,
                     client_type,
                     operations,
                     command_table,
-                    common_parameters=None,
+                    custom_parameters=None,
                     extra_parameters=None):
-
-    merged_common_parameters = COMMON_PARAMETERS.copy()
-    merged_common_parameters.update(common_parameters or {})
-    extra_parameters = extra_parameters or {}
 
     for op in operations:
 
@@ -92,29 +89,40 @@ def build_operation(command_name,
             try:
                 # this works in python3
                 default = args[arg].default
-                required = default == inspect.Parameter.empty # pylint: disable=no-member
+                required = default == inspect.Parameter.empty #pylint: disable=no-member
             except TypeError:
                 arg_defaults = dict(zip(sig.args[-len(sig.defaults):], sig.defaults))
                 default = arg_defaults.get(arg)
                 required = arg not in arg_defaults
 
             action = 'store_' + str(not default).lower() if isinstance(default, bool) else None
-            common_param = merged_common_parameters.get(arg, {
+
+            try:
+                default = (default
+                           if default != inspect._empty #pylint: disable=protected-access, no-member
+                           else None)
+            except AttributeError:
+                pass
+
+            parameter = {
                 'name': '--' + arg.replace('_', '-'),
                 'required': required,
                 'default': default,
+                'dest': arg,
                 'help': _option_description(op.operation, arg),
                 'action': action
-            }).copy() # We need to make a copy to allow consumers to mutate the value
-                      # retrieved from the common parameters without polluting future
-                      # use...
-            common_param['dest'] = common_param.get('dest', arg)
-            options.append(common_param)
+            }
+            parameter.update(COMMON_PARAMETERS.get(arg, {}))
+            if custom_parameters:
+                parameter.update(custom_parameters.get(arg, {}))
+
+            options.append(parameter)
 
         # append any 'extra' args needed (for example to obtain a client) that aren't required
         # by the SDK.
-        for arg in extra_parameters.values():
-            options.append(arg.copy())
+        if extra_parameters:
+            for arg in extra_parameters.values():
+                options.append(arg.copy())
 
         command_table[func] = {
             'name': ' '.join([command_name, op.opname]),
