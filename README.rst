@@ -20,6 +20,8 @@ To install via cURL on Linux, Unix and OS X, type:
 
 Note: This will install the latest nightly builds.
 
+**Errors on install with cffi or cryptography:**
+
 If you get errors on install on **OS X**, upgrade pip by typing:
 
 .. code:: shell
