@@ -1,3 +1,4 @@
+from azure.mgmt.compute.models import DataDisk, VirtualHardDisk
 from azure.mgmt.compute.models.compute_management_client_enums import DiskCreateOptionTypes
 from azure.cli._locale import L
 from azure.cli.commands import CommandTable, COMMON_PARAMETERS, LongRunningOperation
@@ -8,8 +9,6 @@ def _compute_client_factory(_):
     return get_mgmt_service_client(ComputeManagementClient, ComputeManagementClientConfiguration)
 
 command_table = CommandTable()
-
-from azure.mgmt.compute.models import DataDisk, VirtualHardDisk
 
 def min_max(min_value, max_value, value_type=int):
     '''Converter/validator for range type values. Intended use is as the type parameter
@@ -26,6 +25,22 @@ def min_max(min_value, max_value, value_type=int):
     setattr(validate, '__name__', 'range (%s - %s)' % (str(min_value), str(max_value)))
     return validate
 
+LUN_PARAMETER = {
+    'name': '--lun',
+    'dest': 'lun', 
+    'help': '0-based logical unit number (LUN) of disk. Maximum value depend on the Virtual Machine size',
+    'type': int, 
+    'required': True
+    }
+
+DISKSIZE_PARAMETER = {
+    'name': '--disksize',
+    'dest': 'disksize',
+    'help': 'Size of disk (Gb)',
+    'type': min_max(1, 1023),
+    'default': 1023
+    }
+
 def vm_getter(args):
     ''' Retreive a VM based on the `args` passed in.
     '''
@@ -36,7 +51,7 @@ def vm_getter(args):
 def vm_setter(args, instance, start_msg, end_msg):
     '''Update the given Virtual Machine instance
     '''
-    instance .resources = None # Issue: https://github.com/Azure/autorest/issues/934
+    instance.resources = None # Issue: https://github.com/Azure/autorest/issues/934
     client = _compute_client_factory(args)
     poller = client.virtual_machines.create_or_update(
         resource_group_name=args.get('resourcegroup'),
@@ -71,10 +86,9 @@ def patches_vm(start_msg, finish_msg):
 
 @command_table.command('vm disk attach-new',
                        help=L('Attach a new disk to an existing Virtual Machine'))
-@command_table.option('--lun', dest='lun', type=int, required=True)
+@command_table.option(**LUN_PARAMETER)
 @command_table.option('--diskname', dest='name', help='Disk name', required=True)
-@command_table.option('--disksize', dest='disksize', help='Size of disk (Gb)',
-                      type=min_max(1, 1023), default=1023)
+@command_table.option(**DISKSIZE_PARAMETER)
 @command_table.option('--vhd', required=True, type=VirtualHardDisk)
 @patches_vm('Attaching disk', 'Disk attached')
 def _vm_disk_attach_new(args, instance):
@@ -87,11 +101,10 @@ def _vm_disk_attach_new(args, instance):
 
 @command_table.command('vm disk attach-existing',
                        help=L('Attach an existing disk to an existing Virtual Machine'))
-@command_table.option('--lun', dest='lun', type=int, required=True)
+@command_table.option(**LUN_PARAMETER)
 @command_table.option('--diskname', dest='name', help='Disk name', required=True)
 @command_table.option('--vhd', required=True, type=VirtualHardDisk)
-@command_table.option('--disksize', dest='disksize', help='Size of disk (Gb)',
-                      type=min_max(1, 1023), default=1023)
+@command_table.option(**DISKSIZE_PARAMETER)
 @patches_vm('Attaching disk', 'Disk attached')
 def _vm_disk_attach_existing(args, instance):
     # TODO: figure out size of existing disk instead of making the default value 1023
@@ -107,13 +120,12 @@ def _vm_disk_attach_existing(args, instance):
 @patches_vm('Detaching disk', 'Disk detached')
 def _vm_disk_detach(args, instance):
     instance.resources = None # Issue: https://github.com/Azure/autorest/issues/934
-    disk = next(iter(([d for d in instance.storage_profile.data_disks
-                       if d.name == args.get('name')])))
-    if disk:
+    try:
+        disk = next(d for d in instance.storage_profile.data_disks
+                    if d.name == args.get('name'))
         instance.storage_profile.data_disks.remove(disk)
-    else:
+    except StopIteration:
         raise RuntimeError("No disk with the name '%s' found" % args.get('name'))
-
 
 #
 # Composite convenience commands for the CLI
@@ -131,7 +143,7 @@ def _parse_rg_name(strid):
 @command_table.command('vm get-ip-addresses')
 @command_table.option('-g --resource_group_name', required=False)
 @command_table.option('-n --vm-name', required=False)
-def _vm_network_list(args):
+def _vm_get_ip_addresses(args):
     from azure.mgmt.network import NetworkManagementClient, NetworkManagementClientConfiguration
 
     # We start by getting NICs as they are the smack in the middle of all data that we
