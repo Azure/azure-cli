@@ -69,6 +69,8 @@ def _update_progress(current, total):
         message += '{: >5.1f}'.format(percent_done)
         print('\b' * len(message) + message, end='', file=stderr)
         stderr.flush()
+        if current == total:
+            print('')
 
 COMMON_PARAMETERS = GLOBAL_COMMON_PARAMETERS.copy()
 COMMON_PARAMETERS.update({

@@ -160,6 +160,11 @@
     },
     "VMParameters": {
       "properties": {
+        "os": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_os",
+          "x-ms-client-flatten": true
+        },
         "osPublisher": {
           "type": "object",
           "$ref": "#/definitions/DeploymentParameter_osPublisher",
@@ -238,6 +243,14 @@
         "virtualMachineName"
       ]
     },
+    "DeploymentParameter_os": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "Common OS choices."
+        }
+      }
+    },
     "DeploymentParameter_ipAddressType": {
       "properties": {
         "value": {
@@ -298,7 +311,8 @@
       "properties": {
         "value": {
           "type": "string",
-          "description": "The VM storage type."
+          "description": "The VM storage type.",
+          "x-ms-client-name": "storageType"
         }
       }
     },
