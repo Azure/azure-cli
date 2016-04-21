@@ -1,0 +1,324 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "adminUsername": {
+      "type": "string",
+      "minLength": 1,
+      "metadata": {
+        "description": "Username for the Virtual Machine."
+      }
+    },
+    "adminPassword": {
+      "type": "securestring",
+      "minLength": 1,
+      "metadata": {
+        "description": "Password for the Virtual Machine."
+      }
+    },
+    "dnsNameForPublicIP": {
+      "type": "string",
+      "minLength": 1,
+      "metadata": {
+        "description": "Globally unique DNS Name for the Public IP used to access the Virtual Machine."
+      }
+    },
+    "virtualMachineName": {
+      "type": "string",
+      "minLength": 1,
+      "metadata": {
+        "description": "The VM resource name."
+      }
+    },
+    "os": {
+      "type": "string",
+      "defaultValue": "WinServer 2012 R2",
+      "allowedValues": [
+        "Ubuntu 14.04",
+        "Ubuntu 15.10",
+        "WinServer 2012 R2",
+        "Custom"
+      ],
+      "metadata": {
+        "description": "Common OS choices.  Choose 'Custom' to specify an image with the osPublisher, osOffer, osSKU, and osVersion parameters."
+      }
+    },
+    "osPublisher": {
+      "type": "string",
+      "defaultValue": "MicrosoftWindowsServer",
+      "metadata": {
+        "description": "The OS publisher of the OS image."
+      }
+    },
+    "osOffer": {
+      "type": "string",
+      "defaultValue": "WindowsServer",
+      "metadata": {
+        "description": "The OS Offer to install."
+      }
+    },
+    "osSKU": {
+      "type": "string",
+      "defaultValue": "2012-R2-Datacenter",
+      "metadata": {
+        "description": "The OS SKU to install."
+      }
+    },
+    "osVersion": {
+      "type": "string",
+      "defaultValue": "latest",
+      "metadata": {
+        "description": "The OS version to install."
+      }
+    },
+    "size": {
+      "type": "string",
+      "defaultValue": "Standard_A2",
+      "metadata": {
+        "description": "The VM Size that should be created."
+      }
+    },
+    "storageType": {
+      "type": "string",
+      "defaultValue": "Standard_LRS",
+      "metadata": {
+        "description": "The VM storage type."
+      }
+    },
+    "newOrExistingVNet": {
+      "type": "string",
+      "defaultValue": "new",
+      "allowedValues": [
+        "new",
+        "existing"
+      ],
+      "metadata": {
+        "description": "Whether to use an existing VNet or create a new one."
+      }
+    },
+    "virtualNetworkName": {
+      "type": "string",
+      "defaultValue": "[concat(parameters('virtualMachineName'), 'VNET', uniqueString(parameters('dnsNameForPublicIP')))]",
+      "metadata": {
+        "description": "Name of virtual network to add VM to."
+      }
+    },
+    "virtualNetworkIpAddressType": {
+      "type": "string",
+      "defaultValue": "Dynamic",
+      "allowedValues": [
+        "Dynamic",
+        "Static"
+      ],
+      "metadata": {
+        "description": "Dynamic or Static IP address allocation."
+      }
+    },
+    "virtualNetworkIpAddressPrefix": {
+      "type": "string",
+      "defaultValue": "10.0.0.0/16",
+      "metadata": {
+        "description": "The IP address prefix."
+      }
+    },
+    "subnetIpAddressPrefix": {
+      "type": "string",
+      "defaultValue": "10.0.0.0/24",
+      "metadata": {
+        "description": "The subnet address type."
+      }
+    },
+    "subnetName": {
+      "type": "string",
+      "defaultValue": "Subnet1",
+      "metadata": {
+        "description": "The subnet name."
+      }
+    },
+    "_artifactsLocation": {
+      "type": "string",
+      "defaultValue": "https://azuretemplatehost.blob.core.windows.net/templatehost/CreateVM",
+      "metadata": {
+        "description": "Container URI of of the template."
+      }
+    }
+  },
+  "variables": {
+    "imagePublishers": {
+      "Ubuntu 14.04": "Canonical",
+      "Ubuntu 15.10": "Canonical",
+      "WinServer 2012 R2": "MicrosoftWindowsServer",
+      "Custom": "[parameters('osPublisher')]"
+    },
+    "imageOffers": {
+      "Ubuntu 14.04": "UbuntuServer",
+      "Ubuntu 15.10": "UbuntuServer",
+      "WinServer 2012 R2": "WindowsServer",
+      "Custom": "[parameters('osOffer')]"
+    },
+    "imageSkus": {
+      "Ubuntu 14.04": "14.04.4-DAILY-LTS",
+      "Ubuntu 15.10": "15.10",
+      "WinServer 2012 R2": "2012-R2-Datacenter",
+      "Custom": "[parameters('osSKU')]"
+    },
+    "imageVersions": {
+      "Ubuntu 14.04": "14.04.201603140",
+      "Ubuntu 15.10": "15.10.201603290",
+      "WinServer 2012 R2": "latest",
+      "Custom": "[parameters('osVersion')]"
+    },
+    "OSDiskName": "osdiskimage",
+    "nicName": "[concat('MyVMNic', uniqueString(parameters('dnsNameForPublicIP')))]",
+    "vnetAddressPrefix": "[parameters('virtualNetworkIpAddressPrefix')]",
+    "subnetName": "[parameters('subnetName')]",
+    "subnetAddressPrefix": "[parameters('subnetIpAddressPrefix')]",
+    "vhdStorageType": "[parameters('storageType')]",
+    "publicIPAddressName": "[concat('myPublicIP', uniqueString(parameters('dnsNameForPublicIP')))]",
+    "publicvirtualNetworkIpAddressType": "[parameters('virtualNetworkIpAddressType')]",
+    "vhdStorageContainerName": "vhds",
+    "vmName": "[parameters('virtualMachineName')]",
+    "vmSize": "[parameters('size')]",
+    "vnetName": "[parameters('virtualNetworkName')]",
+    "vnetId": "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]",
+    "subnetRef": "[concat(variables('vnetId'), '/subnets/', variables('subnetName'))]",
+    "vhdStorageName": "[concat('vhdstorage', uniqueString(parameters('dnsNameForPublicIP')))]",
+    "vnetTemplateFilePaths": {
+      "new": "nested_templates/NewVNet.json",
+      "existing": "nested_templates/ExistingVNet.json"
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "name": "[variables('vhdStorageName')]",
+      "apiVersion": "2015-06-15",
+      "location": "[resourceGroup().location]",
+      "tags": {
+        "displayName": "StorageAccount"
+      },
+      "properties": {
+        "accountType": "[variables('vhdStorageType')]"
+      }
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Network/publicIPAddresses",
+      "name": "[variables('publicIPAddressName')]",
+      "location": "[resourceGroup().location]",
+      "tags": {
+        "displayName": "PublicIPAddress"
+      },
+      "properties": {
+        "publicIPAllocationMethod": "[variables('publicvirtualNetworkIpAddressType')]",
+        "dnsSettings": {
+          "domainNameLabel": "[parameters('dnsNameForPublicIP')]"
+        }
+      }
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "[variables('nicName')]",
+      "location": "[resourceGroup().location]",
+      "tags": {
+        "displayName": "NetworkInterface"
+      },
+      "dependsOn": [
+        "[concat('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressName'))]",
+        "[concat('Microsoft.Resources/deployments/', 'VirtualNetwork')]"
+      ],
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "[concat('ipconfig1', uniqueString(parameters('dnsNameForPublicIP')))]",
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressName'))]"
+              },
+              "subnet": {
+                "id": "[variables('subnetRef')]"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Compute/virtualMachines",
+      "name": "[variables('vmName')]",
+      "location": "[resourceGroup().location]",
+      "tags": {
+        "displayName": "VirtualMachine"
+      },
+      "dependsOn": [
+        "[concat('Microsoft.Storage/storageAccounts/', variables('vhdStorageName'))]",
+        "[concat('Microsoft.Network/networkInterfaces/', variables('nicName'))]"
+      ],
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[variables('vmSize')]"
+        },
+        "osProfile": {
+          "computerName": "[variables('vmName')]",
+          "adminUsername": "[parameters('adminUsername')]",
+          "adminPassword": "[parameters('adminPassword')]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "[variables('imagePublishers')[parameters('os')]]",
+            "offer": "[variables('imageOffers')[parameters('os')]]",
+            "sku": "[variables('imageSkus')[parameters('os')]]",
+            "version": "[variables('imageVersions')[parameters('os')]]"
+          },
+          "osDisk": {
+            "name": "[concat('osdisk', uniqueString(parameters('dnsNameForPublicIP')))]",
+            "vhd": {
+              "uri": "[concat('http://', variables('vhdStorageName'), '.blob.core.windows.net/', variables('vhdStorageContainerName'), '/', variables('OSDiskName'), '.vhd')]"
+            },
+            "caching": "ReadWrite",
+            "createOption": "FromImage"
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('nicName'))]"
+            }
+          ]
+        }
+      },
+      "resources": [
+
+      ]
+    },
+    {
+      "name": "VirtualNetwork",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "dependsOn": [ ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(parameters('_artifactsLocation'), '/', variables('vnetTemplateFilePaths')[parameters('newOrExistingVNet')])]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "vnetName": { "value": "[variables('vnetName')]" },
+          "vnetIpAddressType": { "value": "[parameters('virtualNetworkIpAddressType')]" },
+          "vnetIpAddressPrefix": { "value": "[variables('vnetAddressPrefix')]" },
+          "subnetIpAddressPrefix": { "value": "[variables('subnetAddressPrefix')]" },
+          "subnetName": { "value": "[variables('subnetName')]" }
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "NewVM": {
+      "type": "object",
+      "value": "[reference(variables('vmName'))]"
+    }
+  }
+}
