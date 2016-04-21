@@ -211,11 +211,6 @@
           "$ref": "#/definitions/DeploymentParameter_virtualMachineName",
           "x-ms-client-flatten": true
         },
-        "subnetPrefix": {
-          "type": "object",
-          "$ref": "#/definitions/DeploymentParameter_subnetPrefix",
-          "x-ms-client-flatten": true
-        },
         "osSKU": {
           "type": "object",
           "$ref": "#/definitions/DeploymentParameter_osSKU",
@@ -244,6 +239,41 @@
         "sshKeyPath": {
           "type": "object",
           "$ref": "#/definitions/DeploymentParameter_sshKeyPath",
+          "x-ms-client-flatten": true
+        },
+        "addToAvailabilitySet": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_addToAvailabilitySet",
+          "x-ms-client-flatten": true
+        },
+        "availabilitySetId": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_availabilitySetId",
+          "x-ms-client-flatten": true
+        },
+        "subnetName": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_subnetName",
+          "x-ms-client-flatten": true
+        },
+        "virtualNetworkName": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_virtualNetworkName",
+          "x-ms-client-flatten": true
+        },
+        "newOrExistingVNet": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_newOrExistingVNet",
+          "x-ms-client-flatten": true
+        },
+        "virtualNetworkIpAddressType": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_virtualNetworkIpAddressType",
+          "x-ms-client-flatten": true
+        },
+        "subnetIpAddressPrefix": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_subnetIpAddressPrefix",
           "x-ms-client-flatten": true
         }
       },
@@ -339,11 +369,51 @@
         }
       }
     },
-    "DeploymentParameter_subnetPrefix": {
+    "DeploymentParameter_subnetName": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "The subnet name."
+        }
+      }
+    },
+    "DeploymentParameter_virtualNetworkName": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "Name of virtual network to add VM to."
+        }
+      }
+    },
+    "DeploymentParameter_newOrExistingVNet": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "Whether to use an existing VNet or create a new one."
+        }
+      }
+    },
+    "DeploymentParameter_virtualNetworkIpAddressType": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "Dynamic or Static IP address allocation."
+        }
+      }
+    },
+    "DeploymentParameter_subnetIpAddressPrefix": {
       "properties": {
         "value": {
           "type": "string",
           "description": "The subnet address type."
+        }
+      }
+    },
+    "DeploymentParameter_virtualNetworkIpAddressPrefix": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "description":  "IP address prefixe for the virtual network."
         }
       }
     },
@@ -396,6 +466,26 @@
         "value": {
           "type": "string",
           "description": "The VM file path to save the SSh key to."
+        }
+      }
+    },
+    "DeploymentParameter_addToAvailabilitySet": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "Whether or not to add the VM to an availability set.",
+          "enum": [
+            "none",
+            "existing"
+          ]
+        }
+      }
+    },
+    "DeploymentParameter_availabilitySetId": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "ID of the availability set the VM should be added to."
         }
       }
     },
