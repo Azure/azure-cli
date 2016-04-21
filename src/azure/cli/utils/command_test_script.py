@@ -9,41 +9,37 @@ from six import StringIO
 from azure.cli.main import main as cli
 from azure.cli.parser import IncorrectUsageError
 
-class CommandTestScript(object):
+class CommandTestScript(object): #pylint: disable=too-many-instance-attributes
 
-    def __init__(self):
+    def __init__(self, set_up, test_body, tear_down):
         self._display = StringIO()
         self._raw = StringIO()
         self.display_result = ''
         self.raw_result = ''
         self.auto = True
         self.fail = False
-
-    def set_up(self):
-        pass
+        self.set_up = set_up
+        if hasattr(test_body, '__call__'):
+            self.test_body = test_body
+        else:
+            raise TypeError('test_body must be callable')
+        self.tear_down = tear_down
 
     def run_test(self):
         try:
-            self.set_up()
+            if hasattr(self.set_up, '__call__'):
+                self.set_up()
             self.test_body()
         except Exception: #pylint: disable=broad-except
             traceback.print_exc(file=self._display)
             self.fail = True
         finally:
-            self.tear_down()
-            self._tear_down()
-
-    def test_body(self):
-        raise NotImplementedError()
-
-    def tear_down(self):
-        pass
-
-    def _tear_down(self):
-        self.display_result = self._display.getvalue()
-        self.raw_result = self._raw.getvalue()
-        self._display.close()
-        self._raw.close()
+            if hasattr(self.tear_down, '__call__'):
+                self.tear_down()
+            self.display_result = self._display.getvalue()
+            self.raw_result = self._raw.getvalue()
+            self._display.close()
+            self._raw.close()
 
     def rec(self, command):
         ''' Run a command and save the output as part of the expected results. This will also

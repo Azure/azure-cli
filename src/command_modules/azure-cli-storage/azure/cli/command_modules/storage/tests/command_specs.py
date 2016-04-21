@@ -28,12 +28,6 @@ def _get_connection_string(runner):
 
 class StorageAccountScenarioTest(CommandTestScript):
 
-    def __init__(self):
-        super(StorageAccountScenarioTest, self).__init__()
-
-    def set_up(self):
-        pass
-
     def test_body(self):
         account = STORAGE_ACCOUNT_NAME
         rg = RESOURCE_GROUP_NAME
@@ -58,14 +52,11 @@ class StorageAccountScenarioTest(CommandTestScript):
                {'accountType': 'Standard_GRS'})
         s.run('storage account set -g {} -n {} --type Standard_LRS'.format(rg, account))
 
-    def tear_down(self):
-        pass
+    def __init__(self):
+        super(StorageAccountScenarioTest, self).__init__(None, self.test_body, None)
 
 class StorageBlobScenarioTest(CommandTestScript):
 
-    def __init__(self):
-        super(StorageBlobScenarioTest, self).__init__()
-        
     def set_up(self):
         self.container = 'testcontainer01'
         self.blob = 'testblob1'
@@ -77,6 +68,8 @@ class StorageBlobScenarioTest(CommandTestScript):
         _get_connection_string(self)
         # TODO: 'exists' does not seem to work with a SAS token.
         #sas_token = self.run('storage account generate-sas --services b --resource-types sco --permission rwdl --expiry 2017-01-01T00:00Z')
+        #sas_token = self.run('storage container generate-sas --permission rwdl --expiry 2017-01-01T00:00Z -c {}'.format(container))
+        #print('TOKEN: {}'.format(sas_token))
         #self.set_env('AZURE_SAS_TOKEN', sas_token)
         #self.set_env('AZURE_STORAGE_ACCOUNT', STORAGE_ACCOUNT_NAME)
         #self.pop_env('AZURE_STORAGE_CONNECTION_STRING')
@@ -140,10 +133,10 @@ class StorageBlobScenarioTest(CommandTestScript):
     def tear_down(self):
         self.run('storage container delete --container-name {}'.format(self.container))
 
-class StorageFileScenarioTest(CommandTestScript):
-   
     def __init__(self):
-        super(StorageFileScenarioTest, self).__init__()
+        super(StorageBlobScenarioTest, self).__init__(self.set_up, self.test_body, self.tear_down)
+
+class StorageFileScenarioTest(CommandTestScript):
 
     def set_up(self):
         self.share1 = 'testshare01'
@@ -232,6 +225,9 @@ class StorageFileScenarioTest(CommandTestScript):
     def tear_down(self):
         self.run('storage share delete --share-name {} --fail-not-exist'.format(self.share1))
         self.run('storage share delete --share-name {} --fail-not-exist'.format(self.share2))
+
+    def __init__(self):
+        super(StorageFileScenarioTest, self).__init__(self.set_up, self.test_body, self.tear_down)
 
 TEST_DEF = [
     # STORAGE ACCOUNT TESTS
