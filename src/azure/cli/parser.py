@@ -1,7 +1,7 @@
 from __future__ import print_function
 import argparse
-import azure.cli._help as _help
 import sys
+import azure.cli._help as _help
 
 class IncorrectUsageError(Exception):
     '''Raised when a command is incorrectly used and the usage should be
@@ -73,7 +73,8 @@ class AzCliCommandParser(argparse.ArgumentParser):
         return parent_subparser
 
     def format_usage(self):
-        return '\n{0}help: use --help for more information\n\n'.format(super(AzCliCommandParser, self).format_usage())
+        return '\n{0}help: use --help for more information\n\n' \
+            .format(super(AzCliCommandParser, self).format_usage())
 
     def error(self, message):
         if 'required' in message or 'unrecognized' in message:
@@ -91,5 +92,5 @@ class AzCliCommandParser(argparse.ArgumentParser):
                         (self._actions[-1]
                          if is_group
                          else self),
-                         is_group)
+                        is_group)
         self.exit()
