@@ -1,8 +1,8 @@
 from __future__ import print_function
 from os import environ
-from sys import stderr
+from sys import stderr, modules
 
-from azure.storage.blob import PublicAccess, BlockBlobService
+from azure.storage.blob import PublicAccess, BlockBlobService, AppendBlobService, PageBlobService
 from azure.storage.file import FileService
 from azure.storage import CloudStorageAccount
 from azure.mgmt.storage import StorageManagementClient, StorageManagementClientConfiguration
@@ -15,7 +15,7 @@ from azure.cli.commands._auto_command import build_operation, AutoCommandDefinit
 from azure.cli._locale import L
 
 from ._params import PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS
-from ._validators import validate_datetime, validate_key_value_pairs
+from ._validators import (validate_datetime, validate_key_value_pairs)
 
 command_table = CommandTable()
 
@@ -33,8 +33,10 @@ def _file_data_service_factory(args):
         sas_token=args.pop('sas_token', None))
 
 def _blob_data_service_factory(args):
+    type = args.get('type')
+    blob_service = getattr(modules[__name__], '{}BlobService'.format(type))
     return get_data_service_client(
-        BlockBlobService,
+        blob_service,
         args.pop('account_name', None),
         args.pop('account_key', None),
         connection_string=args.pop('connection_string', None),
@@ -293,11 +295,17 @@ build_operation(
         AutoCommandDefinition(BlockBlobService.set_blob_properties, 'Propeties', 'set')
     ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
-@command_table.command('storage blob upload-block-blob')
-@command_table.description(L('Upload a block blob to a container.'))
+blob_types = ['Block', 'Page', 'Append']
+blob_types_str = ' '.join(blob_types)
+
+@command_table.command('storage blob upload')
+@command_table.description(L('Upload a blob to a container.'))
 @command_table.option(**PARAMETER_ALIASES['container_name'])
 @command_table.option(**PARAMETER_ALIASES['blob_name'])
-@command_table.option('--upload-from', required=True)
+@command_table.option('--type', required=True, choices=blob_types,
+                      help=L('type of blob to upload ({})'.format(blob_types_str)))
+@command_table.option('--upload-from', required=True,
+                      help=L('local path to upload from'))
 @command_table.option(**PARAMETER_ALIASES['account_name'])
 @command_table.option(**PARAMETER_ALIASES['account_key'])
 @command_table.option(**PARAMETER_ALIASES['connection_string'])
@@ -312,22 +320,46 @@ build_operation(
 @command_table.option('--content.cache-control')
 def create_block_blob(args):
     from azure.storage.blob import ContentSettings
-    bbs = _blob_data_service_factory(args)
-    bbs.create_container(args.get('container_name'),
-                         public_access=args.get('public_access'))
+    type = args.get('type')
+    bds = _blob_data_service_factory(args)
+    container_name = args.get('container_name')
+    blob_name = args.get('blob_name')
+    file_path = args.get('upload_from')
+    content_settings = ContentSettings(
+        content_type=args.get('content.type'),
+        content_disposition=args.get('content.disposition'),
+        content_encoding=args.get('content.encoding'),
+        content_language=args.get('content.language'),
+        content_md5=args.get('content.md5'),
+        cache_control=args.get('content.cache-control')
+    )
 
-    return bbs.create_blob_from_path(
-        container_name=args.get('container_name'),
-        blob_name=args.get('blob_name'),
-        file_path=args.get('upload_from'),
-        progress_callback=_update_progress,
-        content_settings=ContentSettings(content_type=args.get('content.type'),
-                                         content_disposition=args.get('content.disposition'),
-                                         content_encoding=args.get('content.encoding'),
-                                         content_language=args.get('content.language'),
-                                         content_md5=args.get('content.md5'),
-                                         cache_control=args.get('content.cache-control'))
+    def upload_append_blob():
+        if not bds.exists(container_name, blob_name):
+            bds.create_blob(
+                container_name=container_name,
+                blob_name=blob_name,
+                content_settings=content_settings)
+        return bds.append_blob_from_path(
+            container_name=container_name,
+            blob_name=blob_name,
+            file_path=file_path,
+            progress_callback=_update_progress
         )
+
+    def upload_block_or_page_blob():
+        return bds.create_blob_from_path(
+            container_name=container_name,
+            blob_name=blob_name,
+            file_path=file_path,
+            progress_callback=_update_progress,
+            content_settings=content_settings
+        )
+
+    if type == 'Append':
+        return upload_append_blob()
+    elif type == 'Block' or type == 'Page':
+        return upload_block_or_page_blob()
 
 @command_table.command('storage blob download')
 @command_table.description(L('Download the specified blob.'))
