@@ -140,7 +140,7 @@ build_operation("network securitygroup",
                 _network_client_factory,
                 [
                     AutoCommandDefinition(NetworkSecurityGroupsOperations.delete, LongRunningOperation(L('Deleting network security group'), L('Network security group deleted'))),
-                    AutoCommandDefinition(NetworkSecurityGroupsOperations.delete, 'NetworkSecurityGroup'),
+                    AutoCommandDefinition(NetworkSecurityGroupsOperations.get, 'NetworkSecurityGroup'),
                     AutoCommandDefinition(NetworkSecurityGroupsOperations.list_all, '[NetworkSecurityGroup]'),
                     AutoCommandDefinition(NetworkSecurityGroupsOperations.list, '[NetworkSecurityGroup]'),
                 ],
