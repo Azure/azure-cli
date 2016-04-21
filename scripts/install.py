@@ -122,7 +122,7 @@ def prompt_input(message):
 def verify_executable_overwrite(exec_filename):
     if os.path.isfile(exec_filename):
         ans = prompt_input("'{}' exists! Overwrite? [y/n]: ".format(exec_filename))
-        if ans and ans.lower() != 'y':
+        if ans is not None and ans.lower() != 'y':
             return False
     return True
 
