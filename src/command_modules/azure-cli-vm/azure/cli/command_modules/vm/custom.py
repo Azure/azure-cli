@@ -1,3 +1,4 @@
+from argparse import ArgumentError
 from azure.mgmt.compute.models import DataDisk, VirtualHardDisk
 from azure.mgmt.compute.models.compute_management_client_enums import DiskCreateOptionTypes
 from azure.cli._locale import L
@@ -10,20 +11,26 @@ def _compute_client_factory(_):
 
 command_table = CommandTable()
 
-def min_max(min_value, max_value, value_type=int):
+class MinMaxValue(object):
     '''Converter/validator for range type values. Intended use is as the type parameter
     for argparse options
     '''
-    def validate(strvalue):
-        value = value_type(strvalue)
-        if value < min or value > max:
-            raise ValueError(message='Value must be between %s and %s' % (str(min_value), str(max_value)))
+    def __init__(self, min_value, max_value, value_type=int):
+        self.min_value = min_value
+        self.max_value = max_value
+        self.value_type = value_type
+
+    def __call__(self, strvalue):
+        value = self.value_type(strvalue)
+        if value < self.min_value or value > self.max_value:
+            raise ValueError()
         return value
 
-    # As argparse uses the name of the type parameter in error messages, we make sure that
-    # our validation parser presents itself with a better name than 'validator'
-    setattr(validate, '__name__', 'range (%s - %s)' % (str(min_value), str(max_value)))
-    return validate
+    def __repr__(self):
+        '''Used by argparse to display error messages
+        '''
+        return 'value. Valid values: %s - %s, given' % (str(self.min_value), str(self.max_value))
+
 
 LUN_PARAMETER = {
     'name': '--lun',
@@ -37,7 +44,7 @@ DISKSIZE_PARAMETER = {
     'name': '--disksize',
     'dest': 'disksize',
     'help': 'Size of disk (Gb)',
-    'type': min_max(1, 1023),
+    'type': MinMaxValue(1, 1023),
     'default': 1023
     }
 
