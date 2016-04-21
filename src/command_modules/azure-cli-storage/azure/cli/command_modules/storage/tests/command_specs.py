@@ -26,6 +26,31 @@ def _get_connection_string(runner):
     connection_string = out.replace('Connection String : ', '')
     runner.set_env('AZURE_STORAGE_CONNECTION_STRING', connection_string)
 
+#class TestScenarioTest(CommandTestScript):
+#    def __init__(self):
+#        super(TestScenarioTest, self).__init__()
+
+#    def set_up(self):
+#        self.container = 'testcontainer02'
+#        self.rg = RESOURCE_GROUP_NAME
+#        _get_connection_string(self)
+#        self.run('storage container delete --container-name {}'.format(self.container))
+#        if self.run('storage container exists --container-name {}'.format(self.container)) == 'True':
+#            raise RuntimeError('Failed to delete already pre-existing container {}. Unable to continue test.'.format(self.container))
+
+#    def test_body(self):
+#        s = self
+#        container = s.container
+#        rg = s.rg
+#        s.run('storage container create --container-name {} --fail-on-exist'.format(container))                
+#        s.test('storage container show --container-name {}'.format(container), {'name': container})
+#        print(s.run('storage container exists --container-name {}'.format(container)))
+#        s.test('storage container exists --container-name {}'.format(container), True)
+
+#    def tear_down(self):
+#        self.run('storage container delete --container-name {}'.format(self.container))
+  
+
 class StorageAccountScenarioTest(CommandTestScript):
 
     def __init__(self):
@@ -81,29 +106,24 @@ class StorageBlobScenarioTest(CommandTestScript):
         self.pop_env('AZURE_STORAGE_CONNECTION_STRING')
         self.run('storage container delete --container-name {}'.format(self.container))
         if self.run('storage container exists --container-name {}'.format(self.container)) == 'True':
-            raise RuntimeError('Failed to delete already pre-existing container {}. Unable to continue test.'.format(self.container))
+            raise RuntimeError('Failed to delete pre-existing container {}. Unable to continue test.'.format(self.container))
 
     def _storage_blob_scenario(self):
         s = self
         container = s.container
         blob = s.blob
         dest_file = s.dest_file
-        if s.run('storage blob exists -b {} -c {}'.format(blob, container)) == 'True':
-            s.run('storage blob delete --container-name {} --blob-name {}'.format(container, blob))
-        if s.run('storage blob exists -b {} -c {}'.format(blob, container)) == 'False':
-            s.run('storage blob upload-block-blob -b {} -c {} --upload-from {}'.format(blob, container, os.path.join(TEST_DIR, 'testfile.rst')))
-            s.run('storage blob download -b {} -c {} --download-to {}'.format(blob, container, dest_file))
-            if os.path.isfile(dest_file):
-                os.remove(dest_file)
-            else:
-                raise RuntimeError('Download failed. Test failed!')
-            s.rec('storage blob exists -b {} -c {}'.format(blob, container))
-            s.rec('storage blob list --container-name {}'.format(container))
-            s.rec('storage blob properties get --container-name {} --blob-name {}'.format(container, blob))
-            s.rec('storage blob delete --container-name {} --blob-name {}'.format(container, blob))
-            s.test('storage blob exists -b {} -c {}'.format(blob, container), False)
+        s.run('storage blob upload-block-blob -b {} -c {} --upload-from {}'.format(blob, container, os.path.join(TEST_DIR, 'testfile.rst')))
+        s.run('storage blob download -b {} -c {} --download-to {}'.format(blob, container, dest_file))
+        if os.path.isfile(dest_file):
+            os.remove(dest_file)
         else:
-            s.print_('Failed to delete already existing blob {}. Unable to continue test.'.format(container))    
+            raise RuntimeError('Download failed. Test failed!')
+        s.test('storage blob exists -b {} -c {}'.format(blob, container), True)
+        s.rec('storage blob list --container-name {}'.format(container))
+        s.rec('storage blob properties get --container-name {} --blob-name {}'.format(container, blob))
+        s.run('storage blob delete --container-name {} --blob-name {}'.format(container, blob))
+        s.test('storage blob exists -b {} -c {}'.format(blob, container), False)
 
     def test_body(self):
         s = self
@@ -112,14 +132,15 @@ class StorageBlobScenarioTest(CommandTestScript):
         proposed_lease_id = s.proposed_lease_id
         new_lease_id = s.new_lease_id
         date = s.date
-        s.run('storage container create --container-name {} --fail-on-exist'.format(container))                
+        s.test('storage container create --container-name {} --fail-on-exist'.format(container), True)
         s.test('storage container show --container-name {}'.format(container), {'name': container})
+        # TODO: This does not work in a script
+        #s.test('storage container exists --container-name {}'.format(container), True)
         s.rec('storage container list')
         s.run('storage container metadata set -c {} --metadata foo=bar;moo=bak;'.format(container))
         s.test('storage container metadata get -c {}'.format(container), {'foo': 'bar', 'moo': 'bak'})
         s.run('storage container metadata set -c {}'.format(container)) # reset metadata
         s.test('storage container metadata get -c {}'.format(container), None)
-        # TODO: Because 'exists' isn't working... blob scenarios are failing...
         #s._storage_blob_scenario()
         
         # test lease operations
@@ -136,12 +157,9 @@ class StorageBlobScenarioTest(CommandTestScript):
         s.run('storage container lease release --container-name {} --lease-id {}'.format(container, new_lease_id))
         s.test('storage container show --container-name {}'.format(container),
                 {'properties': {'lease': {'duration': None, 'state': 'available', 'status': 'unlocked'}}})
-
-        # TODO: After a successful create--this command should not fail!!!
-        #s.test('storage container exists --container-name {}'.format(container), True)
-
+        
         # verify delete operation
-        s.run('storage container delete --container-name {} --fail-not-exist'.format(container))
+        s.test('storage container delete --container-name {} --fail-not-exist'.format(container), True)
         s.test('storage container exists --container-name {}'.format(container), False)
 
     def tear_down(self):
@@ -163,7 +181,7 @@ class StorageFileScenarioTest(CommandTestScript):
         s = self
         dir = 'testdir01'
         s.test('storage directory create --share-name {} --directory-name {} --fail-on-exist'.format(share, dir), True)
-        s.rec('storage directory exists --share-name {} --directory-name {}'.format(share, dir))
+        s.test('storage directory exists --share-name {} --directory-name {}'.format(share, dir), True)
         s.run('storage directory metadata set --share-name {} --directory-name {} --metadata a=b;c=d'.format(share, dir))
         s.test('storage directory metadata get --share-name {} --directory-name {}'.format(share, dir),
                {'a': 'b', 'c': 'd'})
@@ -186,8 +204,7 @@ class StorageFileScenarioTest(CommandTestScript):
         filename = 'testfile.rst'
         s = self
         s.run('storage file upload --share-name {} --local-file-name {} --file-name {}'.format(share, source_file, filename))
-        #TODO: Exists commands!!!
-        #s.test('storage file exists --share-name {} --file-name {}'.format(share, filename), True)
+        s.test('storage file exists --share-name {} --file-name {}'.format(share, filename), True)
         if os.path.isfile(dest_file):
             os.remove(dest_file)
         s.run('storage file download --share-name {} --file-name {} --local-file-name {}'.format(share, filename, dest_file))
@@ -205,8 +222,7 @@ class StorageFileScenarioTest(CommandTestScript):
         filename = 'testfile.rst'
         s = self
         s.run('storage file upload --share-name {} --directory-name {} --local-file-name {} --file-name {}'.format(share, dir, source_file, filename))
-        #TODO: Storage file exists
-        #s.test('storage file exists --share-name {} --directory-name {} --file-name {}'.format(share, dir, filename), True)
+        s.test('storage file exists --share-name {} --directory-name {} --file-name {}'.format(share, dir, filename), True)
         if os.path.isfile(dest_file):    
             os.remove(dest_file)
         s.run('storage file download --share-name {} --directory-name {} --file-name {} --local-file-name {}'.format(share, dir, filename, dest_file))
@@ -224,8 +240,7 @@ class StorageFileScenarioTest(CommandTestScript):
         share2 = s.share2
         s.test('storage share create --share-name {} --fail-on-exist'.format(share1), True)
         s.test('storage share create --share-name {} --fail-on-exist --metadata foo=bar;cat=hat'.format(share2), True)
-        # TODO: exists command should not fail after share is created!
-        #s.test('storage share exists --share-name {}'.format(share1), True)
+        s.test('storage share exists --share-name {}'.format(share1), True)
         s.test('storage share metadata get --share-name {}'.format(share2), {'cat': 'hat', 'foo': 'bar'})
         # TODO: Would need to enable behavior if a dictionary contains a list...
         s.rec('storage share list')
@@ -267,5 +282,10 @@ TEST_DEF = [
     {
         'test_name': 'storage_file',
         'script': StorageFileScenarioTest()
-    }
+    },
+    # TEST SCENARIO TEST (REMOVE)
+    #{
+    #    'test_name': 'mystical_test',
+    #    'script': TestScenarioTest()
+    #}
 ]

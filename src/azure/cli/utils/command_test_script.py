@@ -85,8 +85,14 @@ class CommandTestScript(object):
         result = output.getvalue().strip()
         self._raw.write(result)
         if isinstance(checks, bool):
-            bool_val = result.lower() in ('yes', 'true', 't', '1')
-            assert bool_val == checks
+            result_val = str(result).lower().replace('"', '')
+            bool_val = result_val in ('yes', 'true', 't', '1')
+            try:
+                assert bool_val == checks
+            except AssertionError as ex:
+                print('COMMAND FAILED: {}'.format(command))
+                print("EXPECTED: {} ACTUAL: {} RESULT: {}".format(checks, result_val, bool_val))
+                raise ex
         elif isinstance(checks, dict):
             json_val = json.loads(result)
             _check_json(json_val, checks)

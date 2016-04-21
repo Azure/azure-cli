@@ -198,10 +198,10 @@ build_operation(
     'storage container', None, _blob_data_service_factory,
     [
         AutoCommandDefinition(BlockBlobService.list_containers, '[Container]', 'list'),
-        AutoCommandDefinition(BlockBlobService.delete_container, None, 'delete'),
+        AutoCommandDefinition(BlockBlobService.delete_container, 'Bool', 'delete'),
         AutoCommandDefinition(BlockBlobService.get_container_properties,
                               '[ContainerProperties]', 'show'),
-        AutoCommandDefinition(BlockBlobService.create_container, None, 'create'),
+        AutoCommandDefinition(BlockBlobService.create_container, 'Bool', 'create'),
         AutoCommandDefinition(BlockBlobService.generate_container_shared_access_signature,
                               'String', 'generate-sas')
     ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
@@ -209,15 +209,15 @@ build_operation(
 build_operation(
     'storage container acl', None, _blob_data_service_factory,
     [
-        AutoCommandDefinition(BlockBlobService.set_container_acl, 'Something?', 'set'),
-        AutoCommandDefinition(BlockBlobService.get_container_acl, 'Something?', 'get'),
+        AutoCommandDefinition(BlockBlobService.set_container_acl, 'Result', 'set'),
+        AutoCommandDefinition(BlockBlobService.get_container_acl, 'Result', 'get'),
     ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
 build_operation(
     'storage container metadata', None, _blob_data_service_factory,
     [
-        AutoCommandDefinition(BlockBlobService.set_container_metadata, 'Something?', 'set'),
-        AutoCommandDefinition(BlockBlobService.get_container_metadata, 'Something?', 'get'),
+        AutoCommandDefinition(BlockBlobService.set_container_metadata, 'Result', 'set'),
+        AutoCommandDefinition(BlockBlobService.get_container_metadata, 'Metadata', 'get'),
     ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
 # TODO: update this once enums are supported in commands first-class (task #115175885)
@@ -236,10 +236,10 @@ public_access_types = {'none': None,
 @command_table.option(**PARAMETER_ALIASES['timeout'])
 def exists_container(args):
     bbs = _blob_data_service_factory(args)
-    return str(bbs.exists(
+    return bbs.exists(
         container_name=args.get('container_name'),
         snapshot=args.get('snapshot'),
-        timeout=args.get('timeout')))
+        timeout=args.get('timeout'))
 
 lease_duration_values = {'min':15, 'max':60, 'infinite':-1}
 lease_duration_values_string = 'Between {} and {} seconds. ({} for infinite)'.format(
@@ -356,11 +356,11 @@ def download_blob(args):
 @command_table.option(**PARAMETER_ALIASES['timeout'])
 def exists_blob(args):
     bbs = _blob_data_service_factory(args)
-    return str(bbs.exists(
+    return bbs.exists(
         blob_name=args.get('blob_name'),
         container_name=args.get('container_name'),
         snapshot=args.get('snapshot'),
-        timeout=args.get('timeout')))
+        timeout=args.get('timeout'))
 
 build_operation(
     'storage blob lease', None, _blob_data_service_factory,
@@ -425,7 +425,7 @@ build_operation(
 @command_table.option(**PARAMETER_ALIASES['connection_string'])
 def exist_share(args):
     fsc = _file_data_service_factory(args)
-    return str(fsc.exists(share_name=args.get('share_name')))
+    return fsc.exists(share_name=args.get('share_name'))
 
 # DIRECTORY COMMANDS
 
@@ -452,8 +452,8 @@ build_operation(
 @command_table.option(**PARAMETER_ALIASES['connection_string'])
 def exist_directory(args):
     fsc = _file_data_service_factory(args)
-    return str(fsc.exists(share_name=args.get('share_name'),
-                          directory_name=args.get('directory_name')))
+    return fsc.exists(share_name=args.get('share_name'),
+                      directory_name=args.get('directory_name'))
 
 # FILE COMMANDS
 
@@ -521,9 +521,9 @@ def storage_file_download(args):
 @command_table.option(**PARAMETER_ALIASES['connection_string'])
 def exist_file(args):
     fsc = _file_data_service_factory(args)
-    return str(fsc.exists(share_name=args.get('share_name'),
-                          directory_name=args.get('directory_name'),
-                          file_name=args.get('file_name')))
+    return fsc.exists(share_name=args.get('share_name'),
+                      directory_name=args.get('directory_name'),
+                      file_name=args.get('file_name'))
 
 @command_table.command('storage file upload')
 @command_table.option(**PARAMETER_ALIASES['share_name'])
