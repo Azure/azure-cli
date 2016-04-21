@@ -1,4 +1,3 @@
-from argparse import ArgumentError
 from azure.mgmt.compute.models import DataDisk, VirtualHardDisk
 from azure.mgmt.compute.models.compute_management_client_enums import DiskCreateOptionTypes
 from azure.cli._locale import L
@@ -11,7 +10,7 @@ def _compute_client_factory(_):
 
 command_table = CommandTable()
 
-class MinMaxValue(object):
+class MinMaxValue(object): # pylint disable=too-few-public-methods
     '''Converter/validator for range type values. Intended use is as the type parameter
     for argparse options
     '''
@@ -34,8 +33,8 @@ class MinMaxValue(object):
 
 LUN_PARAMETER = {
     'name': '--lun',
-    'dest': 'lun', 
-    'help': '0-based logical unit number (LUN) of disk. Maximum value depend on the Virtual Machine size',
+    'dest': 'lun',
+    'help': '0-based logical unit number (LUN). Max value depend on the Virtual Machine size',
     'type': int, 
     'required': True
     }
