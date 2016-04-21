@@ -76,7 +76,7 @@ build_operation(
     'storage account', None, _cloud_storage_account_service_factory,
     [
         AutoCommandDefinition(CloudStorageAccount.generate_shared_access_signature,
-                              'String', 'generate-sas')
+                              'SAS', 'generate-sas')
     ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
 @command_table.command('storage account list', description=L('List storage accounts.'))
@@ -200,23 +200,23 @@ build_operation(
         AutoCommandDefinition(BlockBlobService.list_containers, '[Container]', 'list'),
         AutoCommandDefinition(BlockBlobService.delete_container, 'Bool', 'delete'),
         AutoCommandDefinition(BlockBlobService.get_container_properties,
-                              '[ContainerProperties]', 'show'),
+                              'ContainerProperties', 'show'),
         AutoCommandDefinition(BlockBlobService.create_container, 'Bool', 'create'),
         AutoCommandDefinition(BlockBlobService.generate_container_shared_access_signature,
-                              'String', 'generate-sas')
+                              'SAS', 'generate-sas')
     ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
 build_operation(
     'storage container acl', None, _blob_data_service_factory,
     [
-        AutoCommandDefinition(BlockBlobService.set_container_acl, 'Result', 'set'),
-        AutoCommandDefinition(BlockBlobService.get_container_acl, 'Result', 'get'),
+        AutoCommandDefinition(BlockBlobService.set_container_acl, 'StoredAccessPolicy', 'set'),
+        AutoCommandDefinition(BlockBlobService.get_container_acl, '[StoredAccessPolicy]', 'get'),
     ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
 build_operation(
     'storage container metadata', None, _blob_data_service_factory,
     [
-        AutoCommandDefinition(BlockBlobService.set_container_metadata, 'Result', 'set'),
+        AutoCommandDefinition(BlockBlobService.set_container_metadata, 'Properties', 'set'),
         AutoCommandDefinition(BlockBlobService.get_container_metadata, 'Metadata', 'get'),
     ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
@@ -250,11 +250,11 @@ lease_duration_values_string = 'Between {} and {} seconds. ({} for infinite)'.fo
 build_operation(
     'storage container lease', None, _blob_data_service_factory,
     [
-        AutoCommandDefinition(BlockBlobService.acquire_container_lease, 'String', 'acquire'),
-        AutoCommandDefinition(BlockBlobService.renew_container_lease, None, 'renew'),
+        AutoCommandDefinition(BlockBlobService.acquire_container_lease, 'LeaseID', 'acquire'),
+        AutoCommandDefinition(BlockBlobService.renew_container_lease, 'LeaseID', 'renew'),
         AutoCommandDefinition(BlockBlobService.release_container_lease, None, 'release'),
-        AutoCommandDefinition(BlockBlobService.change_container_lease, 'LeaseId', 'change'),
-        AutoCommandDefinition(BlockBlobService.break_container_lease, 'Something?', 'break')
+        AutoCommandDefinition(BlockBlobService.change_container_lease, None, 'change'),
+        AutoCommandDefinition(BlockBlobService.break_container_lease, 'Int', 'break')
     ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
 # BLOB COMMANDS
@@ -265,30 +265,32 @@ build_operation(
         AutoCommandDefinition(BlockBlobService.list_blobs, '[Blob]', 'list'),
         AutoCommandDefinition(BlockBlobService.delete_blob, None, 'delete'),
         AutoCommandDefinition(BlockBlobService.generate_blob_shared_access_signature,
-                              'String', 'generate-sas'),
+                              'SAS', 'generate-sas'),
         AutoCommandDefinition(BlockBlobService.make_blob_url, 'URL', 'url'),
-        AutoCommandDefinition(BlockBlobService.snapshot_blob, 'Something?', 'snapshot')
+        AutoCommandDefinition(BlockBlobService.snapshot_blob, 'SnapshotProperties', 'snapshot')
     ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
 build_operation(
     'storage blob service-properties', None, _blob_data_service_factory,
     [
-        AutoCommandDefinition(BlockBlobService.get_blob_service_properties, '[Properties]', 'get'),
-        AutoCommandDefinition(BlockBlobService.set_blob_service_properties, 'Something?', 'set')
+        AutoCommandDefinition(BlockBlobService.get_blob_service_properties,
+                              '[ServiceProperties]', 'get'),
+        AutoCommandDefinition(BlockBlobService.set_blob_service_properties,
+                              'ServiceProperties', 'set')
     ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
 build_operation(
     'storage blob metadata', None, _blob_data_service_factory,
     [
         AutoCommandDefinition(BlockBlobService.get_blob_metadata, 'Metadata', 'get'),
-        AutoCommandDefinition(BlockBlobService.set_blob_metadata, 'Something?', 'set')
+        AutoCommandDefinition(BlockBlobService.set_blob_metadata, 'Metadata', 'set')
     ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
 build_operation(
     'storage blob properties', None, _blob_data_service_factory,
     [
-        AutoCommandDefinition(BlockBlobService.get_blob_properties, '[Properties]', 'get'),
-        AutoCommandDefinition(BlockBlobService.set_blob_properties, 'Something?', 'set')
+        AutoCommandDefinition(BlockBlobService.get_blob_properties, 'Properties', 'get'),
+        AutoCommandDefinition(BlockBlobService.set_blob_properties, 'Propeties', 'set')
     ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
 @command_table.command('storage blob upload-block-blob')
@@ -365,17 +367,17 @@ def exists_blob(args):
 build_operation(
     'storage blob lease', None, _blob_data_service_factory,
     [
-        AutoCommandDefinition(BlockBlobService.acquire_blob_lease, 'String', 'acquire'),
-        AutoCommandDefinition(BlockBlobService.renew_blob_lease, None, 'renew'),
+        AutoCommandDefinition(BlockBlobService.acquire_blob_lease, 'LeaseID', 'acquire'),
+        AutoCommandDefinition(BlockBlobService.renew_blob_lease, 'LeaseID', 'renew'),
         AutoCommandDefinition(BlockBlobService.release_blob_lease, None, 'release'),
-        AutoCommandDefinition(BlockBlobService.change_blob_lease, 'LeaseId', 'change'),
-        AutoCommandDefinition(BlockBlobService.break_blob_lease, 'Something?', 'break')
+        AutoCommandDefinition(BlockBlobService.change_blob_lease, None, 'change'),
+        AutoCommandDefinition(BlockBlobService.break_blob_lease, 'Int', 'break')
     ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
 build_operation(
     'storage blob copy', None, _blob_data_service_factory,
     [
-        AutoCommandDefinition(BlockBlobService.copy_blob, 'Something?', 'start'),
+        AutoCommandDefinition(BlockBlobService.copy_blob, 'CopyOperationProperties', 'start'),
         AutoCommandDefinition(BlockBlobService.abort_copy_blob, None, 'cancel'),
     ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
@@ -392,29 +394,29 @@ build_operation(
         AutoCommandDefinition(FileService.create_share, 'Boolean', 'create'),
         AutoCommandDefinition(FileService.delete_share, 'Boolean', 'delete'),
         AutoCommandDefinition(FileService.generate_share_shared_access_signature,
-                              'Something?', 'generate-sas'),
-        AutoCommandDefinition(FileService.get_share_stats, 'Something?', 'stats')
+                              'SAS', 'generate-sas'),
+        AutoCommandDefinition(FileService.get_share_stats, 'ShareStats', 'stats')
     ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
 build_operation(
     'storage share metadata', None, _file_data_service_factory,
     [
         AutoCommandDefinition(FileService.get_share_metadata, 'Metadata', 'get'),
-        AutoCommandDefinition(FileService.set_share_metadata, None, 'set')
+        AutoCommandDefinition(FileService.set_share_metadata, 'Metadata', 'set')
     ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
 build_operation(
     'storage share properties', None, _file_data_service_factory,
     [
-        AutoCommandDefinition(FileService.get_share_properties, '[Properties]', 'get'),
-        AutoCommandDefinition(FileService.set_share_properties, 'Something?', 'set')
+        AutoCommandDefinition(FileService.get_share_properties, 'Properties', 'get'),
+        AutoCommandDefinition(FileService.set_share_properties, 'Properties', 'set')
     ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
 build_operation(
     'storage share acl', None, _file_data_service_factory,
     [
-        AutoCommandDefinition(FileService.set_share_acl, 'Something?', 'set'),
-        AutoCommandDefinition(FileService.get_share_acl, 'Something?', 'get'),
+        AutoCommandDefinition(FileService.set_share_acl, '[StoredAccessPolicy]', 'set'),
+        AutoCommandDefinition(FileService.get_share_acl, 'StoredAccessPolicy', 'get'),
     ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
 @command_table.command('storage share exists')
@@ -440,7 +442,7 @@ build_operation(
     'storage directory metadata', None, _file_data_service_factory,
     [
         AutoCommandDefinition(FileService.get_directory_metadata, 'Metadata', 'get'),
-        AutoCommandDefinition(FileService.set_directory_metadata, None, 'set')
+        AutoCommandDefinition(FileService.set_directory_metadata, 'Metadata', 'set')
     ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
 @command_table.command('storage directory exists')
@@ -468,31 +470,31 @@ build_operation(
     'storage file', None, _file_data_service_factory,
     [
         AutoCommandDefinition(FileService.delete_file, 'Boolean', 'delete'),
-        AutoCommandDefinition(FileService.resize_file, 'Something?', 'resize'),
+        AutoCommandDefinition(FileService.resize_file, 'Result', 'resize'),
         AutoCommandDefinition(FileService.make_file_url, 'URL', 'url'),
         AutoCommandDefinition(FileService.generate_file_shared_access_signature,
-                              'String', 'generate-sas')
+                              'SAS', 'generate-sas')
     ], command_table, FILE_PARAM_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
 build_operation(
     'storage file metadata', None, _file_data_service_factory,
     [
         AutoCommandDefinition(FileService.get_file_metadata, 'Metadata', 'get'),
-        AutoCommandDefinition(FileService.set_file_metadata, None, 'set')
+        AutoCommandDefinition(FileService.set_file_metadata, 'Metadata', 'set')
     ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
 build_operation(
     'storage file properties', None, _file_data_service_factory,
     [
-        AutoCommandDefinition(FileService.get_file_properties, '[Properties]', 'get'),
-        AutoCommandDefinition(FileService.set_file_properties, 'Something?', 'set')
+        AutoCommandDefinition(FileService.get_file_properties, 'Properties', 'get'),
+        AutoCommandDefinition(FileService.set_file_properties, 'Properties', 'set')
     ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
 build_operation(
     'storage file service-properties', None, _file_data_service_factory,
     [
-        AutoCommandDefinition(FileService.get_file_service_properties, '[Properties]', 'get'),
-        AutoCommandDefinition(FileService.set_file_service_properties, 'Something?', 'set')
+        AutoCommandDefinition(FileService.get_file_service_properties, 'ServiceProperties', 'get'),
+        AutoCommandDefinition(FileService.set_file_service_properties, 'ServiceProperties', 'set')
     ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
 @command_table.command('storage file download')
@@ -544,6 +546,6 @@ def storage_file_upload(args):
 build_operation(
     'storage file copy', None, _file_data_service_factory,
     [
-        AutoCommandDefinition(FileService.copy_file, 'Something?', 'start'),
+        AutoCommandDefinition(FileService.copy_file, 'CopyOperationPropeties', 'start'),
         AutoCommandDefinition(FileService.abort_copy_file, None, 'cancel'),
     ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
