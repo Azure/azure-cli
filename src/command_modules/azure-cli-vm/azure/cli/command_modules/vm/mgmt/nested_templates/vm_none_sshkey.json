@@ -31,10 +31,16 @@
     },
     "storageType": {
       "type": "string"
+    },
+    "sshKeyValue": {
+      "type": "string"
+    },
+    "sshKeyPath": {
+      "type": "string"
     }
   },
   "variables": {
-    "imagePublisher": "[parameters('osPublisher')",
+    "imagePublisher": "[parameters('osPublisher')]",
     "imageOffer": "[parameters('osOffer')]",
     "imageSku": "[parameters('osSKU')]",
     "imageVersion": "[parameters('osVersion')]",
@@ -44,7 +50,7 @@
     "vhdStorageName": "[concat('vhdstorage', uniqueString(parameters('dnsNameForPublicIP')))]",
     "vhdStorageType": "[parameters('storageType')]",
     "vhdStorageContainerName": "vhds",
-    "nicName": "[concat('MyVMNic', uniqueString(parameters('dnsNameForPublicIP')))]"
+    "nicName": "[concat('MyVMNic', uniqueString(parameters('dnsNameForPublicIP')))]",
   },
   "resources": [
     {
@@ -63,7 +69,18 @@
         "osProfile": {
           "computerName": "[variables('vmName')]",
           "adminUsername": "[parameters('adminUsername')]",
-          "adminPassword": "[parameters('adminPassword')]"
+          "adminPassword": "[parameters('adminPassword')]",
+          "linuxConfiguration": {
+            "disablePasswordAuthentication": true,
+            "ssh": {
+              "publicKeys": [
+                {
+                  "keyData": "[parameters('sshKeyValue')]",
+                  "path": "[parameters('sshKeyPath')]"
+                }
+              ]
+            }
+          }
         },
         "storageProfile": {
           "imageReference": {

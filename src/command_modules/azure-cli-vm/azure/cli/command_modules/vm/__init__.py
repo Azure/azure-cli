@@ -148,8 +148,7 @@ VM_SPECIFIC_PARAMS = {
     },
     'deployment_parameter_admin_password_value': {
         'name': '--admin-password',
-        'metavar': 'ADMINPASSWORD',
-        'required': True
+        'metavar': 'ADMINPASSWORD'
     },
     'deployment_parameter_ip_address_type_value': {
         'name': '--ip-address-type',
@@ -197,6 +196,18 @@ VM_SPECIFIC_PARAMS = {
     'deployment_parameter_os_version_value': {
         'name': '--os-version',
         'metavar': 'OSVERSION',
+    },
+    'deployment_parameter_authentication_method_value': {
+        'name': '--authentication-method',
+        'metavar': 'AUTHMETHOD',
+    },
+    'deployment_parameter_ssh_key_value_value': {
+        'name': '--ssh-key-value',
+        'metavar': 'SSHKEY',
+    },
+    'deployment_parameter_ssh_key_path_value': {
+        'name': '--ssh-key-path',
+        'metavar': 'SSHPATH',
     }
 }
 

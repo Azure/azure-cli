@@ -32,7 +32,7 @@ class VMOperations(object):
         self.config = config
 
     def create_or_update(
-            self, resource_group_name, deployment_name, content_version=None, deployment_parameter_os_value=None, deployment_parameter_os_publisher_value=None, deployment_parameter_admin_password_value=None, deployment_parameter_ip_address_type_value=None, deployment_parameter_storage_type_value=None, deployment_parameter_size_value=None, deployment_parameter_admin_username_value=None, deployment_parameter_dns_name_for_public_ip_value=None, deployment_parameter_ip_address_prefix_value=None, deployment_parameter_virtual_machine_name_value=None, deployment_parameter_subnet_prefix_value=None, deployment_parameter_os_sku_value=None, deployment_parameter_os_offer_value=None, deployment_parameter_os_version_value=None, custom_headers={}, raw=False, **operation_config):
+            self, resource_group_name, deployment_name, content_version=None, deployment_parameter_os_value=None, deployment_parameter_os_publisher_value=None, deployment_parameter_admin_password_value=None, deployment_parameter_ip_address_type_value=None, deployment_parameter_storage_type_value=None, deployment_parameter_size_value=None, deployment_parameter_admin_username_value=None, deployment_parameter_dns_name_for_public_ip_value=None, deployment_parameter_ip_address_prefix_value=None, deployment_parameter_virtual_machine_name_value=None, deployment_parameter_subnet_prefix_value=None, deployment_parameter_os_sku_value=None, deployment_parameter_os_offer_value=None, deployment_parameter_os_version_value=None, deployment_parameter_authentication_method_value=None, deployment_parameter_ssh_key_value_value=None, deployment_parameter_ssh_key_path_value=None, custom_headers={}, raw=False, **operation_config):
         """
         Create a named template deployment using a template.
 
@@ -53,7 +53,7 @@ class VMOperations(object):
          Virtual Machine.
         :type deployment_parameter_admin_password_value: str
         :param deployment_parameter_ip_address_type_value: Dynamic or Static
-         IP address allocation.
+         IP address allocation. Possible values include: 'Dynamic', 'Static'
         :type deployment_parameter_ip_address_type_value: str
         :param deployment_parameter_storage_type_value: The VM storage type.
         :type deployment_parameter_storage_type_value: str
@@ -83,13 +83,24 @@ class VMOperations(object):
         :param deployment_parameter_os_version_value: The OS version to
          install.
         :type deployment_parameter_os_version_value: str
+        :param deployment_parameter_authentication_method_value: The VM
+         authentication type.  Password is available on Windows and Linux.
+         SSH is only available on Linux. Possible values include:
+         'password', 'sshkey'
+        :type deployment_parameter_authentication_method_value: str
+        :param deployment_parameter_ssh_key_value_value: The string value for
+         an SSH public key.
+        :type deployment_parameter_ssh_key_value_value: str
+        :param deployment_parameter_ssh_key_path_value: The VM file path to
+         save the SSh key to.
+        :type deployment_parameter_ssh_key_path_value: str
         :param dict custom_headers: headers that will be added to the request
         :param boolean raw: returns the direct response alongside the
          deserialized response
         :rtype: DeploymentExtended
         :rtype: msrest.pipeline.ClientRawResponse if raw=True
         """
-        parameters = models.DeploymentVM(content_version=content_version, deployment_parameter_os_value=deployment_parameter_os_value, deployment_parameter_os_publisher_value=deployment_parameter_os_publisher_value, deployment_parameter_admin_password_value=deployment_parameter_admin_password_value, deployment_parameter_ip_address_type_value=deployment_parameter_ip_address_type_value, deployment_parameter_storage_type_value=deployment_parameter_storage_type_value, deployment_parameter_size_value=deployment_parameter_size_value, deployment_parameter_admin_username_value=deployment_parameter_admin_username_value, deployment_parameter_dns_name_for_public_ip_value=deployment_parameter_dns_name_for_public_ip_value, deployment_parameter_ip_address_prefix_value=deployment_parameter_ip_address_prefix_value, deployment_parameter_virtual_machine_name_value=deployment_parameter_virtual_machine_name_value, deployment_parameter_subnet_prefix_value=deployment_parameter_subnet_prefix_value, deployment_parameter_os_sku_value=deployment_parameter_os_sku_value, deployment_parameter_os_offer_value=deployment_parameter_os_offer_value, deployment_parameter_os_version_value=deployment_parameter_os_version_value)
+        parameters = models.DeploymentVM(content_version=content_version, deployment_parameter_os_value=deployment_parameter_os_value, deployment_parameter_os_publisher_value=deployment_parameter_os_publisher_value, deployment_parameter_admin_password_value=deployment_parameter_admin_password_value, deployment_parameter_ip_address_type_value=deployment_parameter_ip_address_type_value, deployment_parameter_storage_type_value=deployment_parameter_storage_type_value, deployment_parameter_size_value=deployment_parameter_size_value, deployment_parameter_admin_username_value=deployment_parameter_admin_username_value, deployment_parameter_dns_name_for_public_ip_value=deployment_parameter_dns_name_for_public_ip_value, deployment_parameter_ip_address_prefix_value=deployment_parameter_ip_address_prefix_value, deployment_parameter_virtual_machine_name_value=deployment_parameter_virtual_machine_name_value, deployment_parameter_subnet_prefix_value=deployment_parameter_subnet_prefix_value, deployment_parameter_os_sku_value=deployment_parameter_os_sku_value, deployment_parameter_os_offer_value=deployment_parameter_os_offer_value, deployment_parameter_os_version_value=deployment_parameter_os_version_value, deployment_parameter_authentication_method_value=deployment_parameter_authentication_method_value, deployment_parameter_ssh_key_value_value=deployment_parameter_ssh_key_value_value, deployment_parameter_ssh_key_path_value=deployment_parameter_ssh_key_path_value)
 
         # Construct URL
         url = '/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Resources/deployments/{deploymentName}'
