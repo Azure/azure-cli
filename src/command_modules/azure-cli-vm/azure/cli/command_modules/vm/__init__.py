@@ -208,7 +208,35 @@ VM_SPECIFIC_PARAMS = {
     'deployment_parameter_ssh_key_path_value': {
         'name': '--ssh-key-path',
         'metavar': 'SSHPATH',
-    }
+    },
+    'deployment_parameter_add_to_availability_set_value': {
+        'name': '--add-to-availability-set',
+        'metavar': 'AVAILSETTYPE',
+    },
+    'deployment_parameter_availability_set_id_value': {
+        'name': '--availability-set-name',
+        'metavar': 'AVAILSETNAME',
+    },
+    'deployment_parameter_new_or_existing_vnet_value': {
+        'name': '--new-or-existing-vnet',
+        'metavar': 'VNET',
+    },
+    'deployment_parameter_subnet_ip_address_prefix_value': {
+        'name': '--subnet-ip-prefix',
+        'metavar': 'SUBNETPREFIX',
+    },
+    'deployment_parameter_subnet_name_value': {
+        'name': '--subnet-name',
+        'metavar': 'NAME',
+    },
+    'deployment_parameter_virtual_network_ip_address_type_value': {
+        'name': '--vnet-ip-address-type',
+        'metavar': 'ADDRESSTYPE',
+    },
+    'deployment_parameter_virtual_network_name_value': {
+        'name': '--vnet-name',
+        'metavar': 'NAME',
+    },
 }
 
 build_operation('vm',

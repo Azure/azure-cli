@@ -142,14 +142,14 @@
         "existing"
       ],
       "metadata": {
-        "description": "An existing availability set to add this VM to."
+        "description": "Flag to add the VM to an existing availability set."
       }
     },
     "availabilitySetId": {
       "type": "string",
       "defaultValue": "",
       "metadata": {
-        "description": "An existing availability set to add this VM to."
+        "description": "Existing availability set for the VM."
       }
     },
     "authenticationMethod": {
@@ -165,11 +165,17 @@
     },
     "sshKeyValue": {
       "type": "string",
-      "defaultValue": ""
+      "defaultValue": "",
+      "metadata": {
+        "description": "SSH key file data."
+      }
     },
     "sshKeyPath": {
       "type": "string",
-      "defaultValue": "[concat('/home/',parameters('adminUsername'),'/.ssh/authorized_keys')]"
+      "defaultValue": "[concat('/home/',parameters('adminUsername'),'/.ssh/authorized_keys')]",
+      "metadata": {
+        "description": "VM file path for SSH key."
+      }
     },
     "_artifactsLocation": {
       "type": "string",
@@ -218,7 +224,7 @@
     "vnetId": "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]",
     "subnetRef": "[concat(variables('vnetId'), '/subnets/', variables('subnetName'))]",
     "vhdStorageName": "[concat('vhdstorage', uniqueString(parameters('dnsNameForPublicIP')))]",
-    "availSetId": "[parameters('availabilitySetId')]",
+    "availSetId": "[resourceId('Microsoft.Compute/availabilitySets', parameters('availabilitySetId'))]",
     "vnetTemplateFilePaths": {
       "new": "nested_templates/NewVNet.json",
       "existing": "nested_templates/ExistingVNet.json"
@@ -327,7 +333,8 @@
           "size": { "value": "[variables('vmSize')]" },
           "storageType": { "value": "[variables('vhdStorageType')]" },
           "sshKeyValue": { "value": "[parameters('sshKeyValue')]" },
-          "sshKeyPath": { "value": "[parameters('sshKeyPath')]" }
+          "sshKeyPath": { "value": "[parameters('sshKeyPath')]" },
+          "availabilitySetId": { "value": "[variables('availSetId')]" }
         }
       }
     }

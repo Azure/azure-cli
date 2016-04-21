@@ -37,8 +37,6 @@ class DeploymentVM(Model):
      prefix.
     :param str deployment_parameter_virtual_machine_name_value: The VM name
      that is displayed in the portal.
-    :param str deployment_parameter_subnet_prefix_value: The subnet address
-     type.
     :param str deployment_parameter_os_sku_value: The OS SKU to install.
     :param str deployment_parameter_os_offer_value: The OS Offer to install.
     :param str deployment_parameter_os_version_value: The OS version to
@@ -50,6 +48,20 @@ class DeploymentVM(Model):
      an SSH public key.
     :param str deployment_parameter_ssh_key_path_value: The VM file path to
      save the SSh key to.
+    :param str deployment_parameter_add_to_availability_set_value: Whether or
+     not to add the VM to an availability set. Possible values include:
+     'none', 'existing'
+    :param str deployment_parameter_availability_set_id_value: ID of the
+     availability set the VM should be added to.
+    :param str deployment_parameter_subnet_name_value: The subnet name.
+    :param str deployment_parameter_virtual_network_name_value: Name of
+     virtual network to add VM to.
+    :param str deployment_parameter_new_or_existing_vnet_value: Whether to
+     use an existing VNet or create a new one.
+    :param str deployment_parameter_virtual_network_ip_address_type_value:
+     Dynamic or Static IP address allocation.
+    :param str deployment_parameter_subnet_ip_address_prefix_value: The
+     subnet address type.
     :param str mode: Gets or sets the deployment mode. Default value:
      "Incremental" .
     """ 
@@ -72,17 +84,23 @@ class DeploymentVM(Model):
         'deployment_parameter_dns_name_for_public_ip_value': {'key': 'properties.parameters.dnsNameForPublicIP.value', 'type': 'str'},
         'deployment_parameter_ip_address_prefix_value': {'key': 'properties.parameters.ipAddressPrefix.value', 'type': 'str'},
         'deployment_parameter_virtual_machine_name_value': {'key': 'properties.parameters.virtualMachineName.value', 'type': 'str'},
-        'deployment_parameter_subnet_prefix_value': {'key': 'properties.parameters.subnetPrefix.value', 'type': 'str'},
         'deployment_parameter_os_sku_value': {'key': 'properties.parameters.osSKU.value', 'type': 'str'},
         'deployment_parameter_os_offer_value': {'key': 'properties.parameters.osOffer.value', 'type': 'str'},
         'deployment_parameter_os_version_value': {'key': 'properties.parameters.osVersion.value', 'type': 'str'},
         'deployment_parameter_authentication_method_value': {'key': 'properties.parameters.authenticationMethod.value', 'type': 'str'},
         'deployment_parameter_ssh_key_value_value': {'key': 'properties.parameters.sshKeyValue.value', 'type': 'str'},
         'deployment_parameter_ssh_key_path_value': {'key': 'properties.parameters.sshKeyPath.value', 'type': 'str'},
+        'deployment_parameter_add_to_availability_set_value': {'key': 'properties.parameters.addToAvailabilitySet.value', 'type': 'str'},
+        'deployment_parameter_availability_set_id_value': {'key': 'properties.parameters.availabilitySetId.value', 'type': 'str'},
+        'deployment_parameter_subnet_name_value': {'key': 'properties.parameters.subnetName.value', 'type': 'str'},
+        'deployment_parameter_virtual_network_name_value': {'key': 'properties.parameters.virtualNetworkName.value', 'type': 'str'},
+        'deployment_parameter_new_or_existing_vnet_value': {'key': 'properties.parameters.newOrExistingVNet.value', 'type': 'str'},
+        'deployment_parameter_virtual_network_ip_address_type_value': {'key': 'properties.parameters.virtualNetworkIpAddressType.value', 'type': 'str'},
+        'deployment_parameter_subnet_ip_address_prefix_value': {'key': 'properties.parameters.subnetIpAddressPrefix.value', 'type': 'str'},
         'mode': {'key': 'properties.mode', 'type': 'str'},
     }
 
-    def __init__(self, content_version=None, deployment_parameter_os_value=None, deployment_parameter_os_publisher_value=None, deployment_parameter_admin_password_value=None, deployment_parameter_ip_address_type_value=None, deployment_parameter_storage_type_value=None, deployment_parameter_size_value=None, deployment_parameter_admin_username_value=None, deployment_parameter_dns_name_for_public_ip_value=None, deployment_parameter_ip_address_prefix_value=None, deployment_parameter_virtual_machine_name_value=None, deployment_parameter_subnet_prefix_value=None, deployment_parameter_os_sku_value=None, deployment_parameter_os_offer_value=None, deployment_parameter_os_version_value=None, deployment_parameter_authentication_method_value=None, deployment_parameter_ssh_key_value_value=None, deployment_parameter_ssh_key_path_value=None, **kwargs):
+    def __init__(self, content_version=None, deployment_parameter_os_value=None, deployment_parameter_os_publisher_value=None, deployment_parameter_admin_password_value=None, deployment_parameter_ip_address_type_value=None, deployment_parameter_storage_type_value=None, deployment_parameter_size_value=None, deployment_parameter_admin_username_value=None, deployment_parameter_dns_name_for_public_ip_value=None, deployment_parameter_ip_address_prefix_value=None, deployment_parameter_virtual_machine_name_value=None, deployment_parameter_os_sku_value=None, deployment_parameter_os_offer_value=None, deployment_parameter_os_version_value=None, deployment_parameter_authentication_method_value=None, deployment_parameter_ssh_key_value_value=None, deployment_parameter_ssh_key_path_value=None, deployment_parameter_add_to_availability_set_value=None, deployment_parameter_availability_set_id_value=None, deployment_parameter_subnet_name_value=None, deployment_parameter_virtual_network_name_value=None, deployment_parameter_new_or_existing_vnet_value=None, deployment_parameter_virtual_network_ip_address_type_value=None, deployment_parameter_subnet_ip_address_prefix_value=None, **kwargs):
         self.uri = "https://azuretemplatehost.blob.core.windows.net/templatehost/CreateVM/azuredeploy.json"
         self.content_version = content_version
         self.deployment_parameter_os_value = deployment_parameter_os_value
@@ -95,11 +113,17 @@ class DeploymentVM(Model):
         self.deployment_parameter_dns_name_for_public_ip_value = deployment_parameter_dns_name_for_public_ip_value
         self.deployment_parameter_ip_address_prefix_value = deployment_parameter_ip_address_prefix_value
         self.deployment_parameter_virtual_machine_name_value = deployment_parameter_virtual_machine_name_value
-        self.deployment_parameter_subnet_prefix_value = deployment_parameter_subnet_prefix_value
         self.deployment_parameter_os_sku_value = deployment_parameter_os_sku_value
         self.deployment_parameter_os_offer_value = deployment_parameter_os_offer_value
         self.deployment_parameter_os_version_value = deployment_parameter_os_version_value
         self.deployment_parameter_authentication_method_value = deployment_parameter_authentication_method_value
         self.deployment_parameter_ssh_key_value_value = deployment_parameter_ssh_key_value_value
         self.deployment_parameter_ssh_key_path_value = deployment_parameter_ssh_key_path_value
+        self.deployment_parameter_add_to_availability_set_value = deployment_parameter_add_to_availability_set_value
+        self.deployment_parameter_availability_set_id_value = deployment_parameter_availability_set_id_value
+        self.deployment_parameter_subnet_name_value = deployment_parameter_subnet_name_value
+        self.deployment_parameter_virtual_network_name_value = deployment_parameter_virtual_network_name_value
+        self.deployment_parameter_new_or_existing_vnet_value = deployment_parameter_new_or_existing_vnet_value
+        self.deployment_parameter_virtual_network_ip_address_type_value = deployment_parameter_virtual_network_ip_address_type_value
+        self.deployment_parameter_subnet_ip_address_prefix_value = deployment_parameter_subnet_ip_address_prefix_value
         self.mode = "Incremental"

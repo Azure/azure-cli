@@ -2,25 +2,120 @@
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "vnetName": {
+    "adminUsername": {
       "type": "string"
     },
-    "vnetIpAddressType": {
+    "adminPassword": {
+      "type": "securestring"
+    },
+    "dnsNameForPublicIP": {
       "type": "string"
     },
-    "vnetIpAddressPrefix": {
+    "virtualMachineName": {
       "type": "string"
     },
-    "subnetIpAddressPrefix": {
+    "osPublisher": {
       "type": "string"
     },
-    "subnetName": {
+    "osOffer": {
+      "type": "string"
+    },
+    "osSKU": {
+      "type": "string"
+    },
+    "osVersion": {
+      "type": "string"
+    },
+    "size": {
+      "type": "string"
+    },
+    "storageType": {
+      "type": "string"
+    },
+    "sshKeyValue": {
+      "type": "string"
+    },
+    "sshKeyPath": {
+      "type": "string"
+    },
+    "availabilitySetId": {
       "type": "string"
     }
   },
   "variables": {
+    "imagePublisher": "[parameters('osPublisher')]",
+    "imageOffer": "[parameters('osOffer')]",
+    "imageSku": "[parameters('osSKU')]",
+    "imageVersion": "[parameters('osVersion')]",
+    "OSDiskName": "osdiskimage",
+    "vmName": "[parameters('virtualMachineName')]",
+    "vmSize": "[parameters('size')]",
+    "vhdStorageName": "[concat('vhdstorage', uniqueString(parameters('dnsNameForPublicIP')))]",
+    "vhdStorageType": "[parameters('storageType')]",
+    "vhdStorageContainerName": "vhds",
+    "nicName": "[concat('MyVMNic', uniqueString(parameters('dnsNameForPublicIP')))]",
   },
   "resources": [
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Compute/virtualMachines",
+      "name": "[variables('vmName')]",
+      "location": "[resourceGroup().location]",
+      "tags": {
+        "displayName": "VirtualMachine"
+      },
+      "dependsOn": [ ],
+      "properties": {
+        "availabilitySet": {
+          "id": "[parameters('availabilitySetId')]"
+        },
+        "hardwareProfile": {
+          "vmSize": "[variables('vmSize')]"
+        },
+        "osProfile": {
+          "computerName": "[variables('vmName')]",
+          "adminUsername": "[parameters('adminUsername')]",
+          "adminPassword": "[parameters('adminPassword')]",
+          "linuxConfiguration": {
+            "disablePasswordAuthentication": true,
+            "ssh": {
+              "publicKeys": [
+                {
+                  "keyData": "[parameters('sshKeyValue')]",
+                  "path": "[parameters('sshKeyPath')]"
+                }
+              ]
+            }
+          }
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "[variables('imagePublisher')]",
+            "offer": "[variables('imageOffer')]",
+            "sku": "[variables('imageSku')]",
+            "version": "[variables('imageVersion')]"
+          },
+          "osDisk": {
+            "name": "[concat('osdisk', uniqueString(parameters('dnsNameForPublicIP')))]",
+            "vhd": {
+              "uri": "[concat('http://', variables('vhdStorageName'), '.blob.core.windows.net/', variables('vhdStorageContainerName'), '/', variables('OSDiskName'), '.vhd')]"
+            },
+            "caching": "ReadWrite",
+            "createOption": "FromImage"
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('nicName'))]"
+            }
+          ]
+        }
+      },
+      "resources": [
+
+      ]
+    }
   ],
   "outputs": {
   }
