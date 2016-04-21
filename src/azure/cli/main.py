@@ -46,7 +46,7 @@ def main(args, file=sys.stdout): #pylint: disable=redefined-builtin
         return ex.args[1] if len(ex.args) >= 2 else -1
     except KeyboardInterrupt:
         return -1
-    except Exception as ex:
+    except Exception as ex: # pylint: disable=broad-except
         logger.error(ex)
         return -1
 
