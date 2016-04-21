@@ -60,7 +60,7 @@ class OutputProducer(object): #pylint: disable=too-few-public-methods
         self.file = file
 
     def out(self, obj):
-        print(self.formatter(obj), file=self.file)
+        print(self.formatter(obj), file=self.file, end='')
 
 
     @staticmethod
@@ -215,7 +215,7 @@ class TsvOutput(object): #pylint: disable=too-few-public-methods
             # We need to print something to avoid mismatching
             # number of columns if the value is None for some instances
             # and a dictionary value in other...
-            stream.write('{object}')
+            stream.write('')
         else:
             stream.write(str(data))
 
@@ -236,9 +236,12 @@ class TsvOutput(object): #pylint: disable=too-few-public-methods
     @staticmethod
     def dump(data):
         io = StringIO()
+        first_line = True
         for item in data:
+            if not first_line:
+                io.write('\n')
             TsvOutput._dump_row(item, io)
-            io.write('\n')
+            first_line = False
 
         result = io.getvalue()
         io.close()
