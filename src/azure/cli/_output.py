@@ -221,12 +221,24 @@ class TsvOutput(object): #pylint: disable=too-few-public-methods
 
     @staticmethod
     def _dump_row(data, stream):
-        if isinstance(data, dict):
-            separator = ''
+        separator = ''
+        if isinstance(data, dict) or isinstance(data, list):
+            if isinstance(data, OrderedDict):
+                values = data.values()
+            elif isinstance(data, dict):
+                values = [item[1] for item in sorted(data.items())]
+            else:
+                values = data
+
             # Iterate through the items either sorted by key value (if dict) or in the order
             # they were added (in the cases of an ordered dict) in order to make the output
             # stable
             for _, value in data.items() if isinstance(data, OrderedDict) else sorted(data.items()):
+                stream.write(separator)
+                TsvOutput._dump_obj(value, stream)
+                separator = '\t'
+        elif isinstance(data, list):
+            for value in data:
                 stream.write(separator)
                 TsvOutput._dump_obj(value, stream)
                 separator = '\t'
