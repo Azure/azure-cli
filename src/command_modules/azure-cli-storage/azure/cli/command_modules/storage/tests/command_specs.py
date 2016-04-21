@@ -26,31 +26,6 @@ def _get_connection_string(runner):
     connection_string = out.replace('Connection String : ', '')
     runner.set_env('AZURE_STORAGE_CONNECTION_STRING', connection_string)
 
-#class TestScenarioTest(CommandTestScript):
-#    def __init__(self):
-#        super(TestScenarioTest, self).__init__()
-
-#    def set_up(self):
-#        self.container = 'testcontainer02'
-#        self.rg = RESOURCE_GROUP_NAME
-#        _get_connection_string(self)
-#        self.run('storage container delete --container-name {}'.format(self.container))
-#        if self.run('storage container exists --container-name {}'.format(self.container)) == 'True':
-#            raise RuntimeError('Failed to delete already pre-existing container {}. Unable to continue test.'.format(self.container))
-
-#    def test_body(self):
-#        s = self
-#        container = s.container
-#        rg = s.rg
-#        s.run('storage container create --container-name {} --fail-on-exist'.format(container))                
-#        s.test('storage container show --container-name {}'.format(container), {'name': container})
-#        print(s.run('storage container exists --container-name {}'.format(container)))
-#        s.test('storage container exists --container-name {}'.format(container), True)
-
-#    def tear_down(self):
-#        self.run('storage container delete --container-name {}'.format(self.container))
-  
-
 class StorageAccountScenarioTest(CommandTestScript):
 
     def __init__(self):
@@ -100,10 +75,11 @@ class StorageBlobScenarioTest(CommandTestScript):
         self.dest_file = os.path.join(TEST_DIR, 'download-blob.rst')
         self.date = '2016-04-08T12:00Z'
         _get_connection_string(self)
-        sas_token = self.run('storage account generate-sas --services b --resource-types sco --permission rwdl --expiry 2017-01-01T00:00Z')
-        self.set_env('AZURE_SAS_TOKEN', sas_token)
-        self.set_env('AZURE_STORAGE_ACCOUNT', STORAGE_ACCOUNT_NAME)
-        self.pop_env('AZURE_STORAGE_CONNECTION_STRING')
+        # TODO: 'exists' does not seem to work with a SAS token.
+        #sas_token = self.run('storage account generate-sas --services b --resource-types sco --permission rwdl --expiry 2017-01-01T00:00Z')
+        #self.set_env('AZURE_SAS_TOKEN', sas_token)
+        #self.set_env('AZURE_STORAGE_ACCOUNT', STORAGE_ACCOUNT_NAME)
+        #self.pop_env('AZURE_STORAGE_CONNECTION_STRING')
         self.run('storage container delete --container-name {}'.format(self.container))
         if self.run('storage container exists --container-name {}'.format(self.container)) == 'True':
             raise RuntimeError('Failed to delete pre-existing container {}. Unable to continue test.'.format(self.container))
@@ -133,15 +109,14 @@ class StorageBlobScenarioTest(CommandTestScript):
         new_lease_id = s.new_lease_id
         date = s.date
         s.test('storage container create --container-name {} --fail-on-exist'.format(container), True)
+        s.test('storage container exists --container-name {}'.format(container), True)
         s.test('storage container show --container-name {}'.format(container), {'name': container})
-        # TODO: This does not work in a script
-        #s.test('storage container exists --container-name {}'.format(container), True)
         s.rec('storage container list')
         s.run('storage container metadata set -c {} --metadata foo=bar;moo=bak;'.format(container))
         s.test('storage container metadata get -c {}'.format(container), {'foo': 'bar', 'moo': 'bak'})
         s.run('storage container metadata set -c {}'.format(container)) # reset metadata
         s.test('storage container metadata get -c {}'.format(container), None)
-        #s._storage_blob_scenario()
+        s._storage_blob_scenario()
         
         # test lease operations
         s.run('storage container lease acquire --lease-duration 60 -c {} --if-modified-since {} --proposed-lease-id {}'.format(container, date, proposed_lease_id))
@@ -283,9 +258,4 @@ TEST_DEF = [
         'test_name': 'storage_file',
         'script': StorageFileScenarioTest()
     },
-    # TEST SCENARIO TEST (REMOVE)
-    #{
-    #    'test_name': 'mystical_test',
-    #    'script': TestScenarioTest()
-    #}
 ]
