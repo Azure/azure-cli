@@ -11,7 +11,6 @@
     },
     "adminPassword": {
       "type": "securestring",
-      "minLength": 1,
       "metadata": {
         "description": "Password for the Virtual Machine."
       }
@@ -158,11 +157,19 @@
       "defaultValue": "password",
       "allowedValues": [
         "password",
-        "publickey"
+        "sshkey"
       ],
       "metadata": {
-        "description": "An existing availability set to add this VM to."
+        "description": "Authentication method: password-only or add ssh-keys (Linux-only)."
       }
+    },
+    "sshKeyValue": {
+      "type": "string",
+      "defaultValue": ""
+    },
+    "sshKeyPath": {
+      "type": "string",
+      "defaultValue": "[concat('/home/',parameters('adminUsername'),'/.ssh/authorized_keys')]"
     },
     "_artifactsLocation": {
       "type": "string",
@@ -295,7 +302,7 @@
       }
     },
     {
-      "name": "VM",
+      "name": "[concat('VM', variables('vmName'))]",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
       "dependsOn": [
@@ -318,7 +325,9 @@
           "osSKU": { "value": "[variables('imageSkus')[parameters('os')]]" },
           "osVersion": { "value": "[variables('imageVersions')[parameters('os')]]" },
           "size": { "value": "[variables('vmSize')]" },
-          "storageType": { "value": "[variables('vhdStorageType')]" }
+          "storageType": { "value": "[variables('vhdStorageType')]" },
+          "sshKeyValue": { "value": "[parameters('sshKeyValue')]" },
+          "sshKeyPath": { "value": "[parameters('sshKeyPath')]" }
         }
       }
     }
@@ -326,7 +335,7 @@
   "outputs": {
     "NewVM": {
       "type": "object",
-      "value": "[reference('VM')]"
+      "value": "[reference(concat('VM', variables('vmName')))]"
     }
   }
 }

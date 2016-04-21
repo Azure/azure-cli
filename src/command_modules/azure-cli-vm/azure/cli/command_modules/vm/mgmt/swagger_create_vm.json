@@ -179,10 +179,6 @@
           "type": "object",
           "$ref": "#/definitions/DeploymentParameter_ipAddressType",
           "default": "Dynamic",
-          "enum": [
-            "Dynamic",
-            "Static"
-          ],
           "x-ms-client-flatten": true
         },
         "storageType": {
@@ -234,6 +230,21 @@
           "type": "object",
           "$ref": "#/definitions/DeploymentParameter_osVersion",
           "x-ms-client-flatten": true
+        },
+        "authenticationMethod": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_authenticationMethod",
+          "x-ms-client-flatten": true
+        },
+        "sshKeyValue": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_sshKeyValue",
+          "x-ms-client-flatten": true
+        },
+        "sshKeyPath": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_sshKeyPath",
+          "x-ms-client-flatten": true
         }
       },
       "required": [
@@ -255,7 +266,11 @@
       "properties": {
         "value": {
           "type": "string",
-          "description": "Dynamic or Static IP address allocation."
+          "description": "Dynamic or Static IP address allocation.",
+          "enum": [
+            "Dynamic",
+            "Static"
+          ]
         }
       }
     },
@@ -353,6 +368,34 @@
         "value": {
           "type": "string",
           "description": "The VM Size that should be created.  Values: standard_A0-standard_A7, standard_D1-standard_D4, standard_D11-standard_D14"
+        }
+      }
+    },
+    "DeploymentParameter_authenticationMethod": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "The VM authentication type.  Password is available on Windows and Linux.  SSH is only available on Linux.",
+          "enum": [
+            "password",
+            "sshkey"
+          ]
+        }
+      }
+    },
+    "DeploymentParameter_sshKeyValue": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "The string value for an SSH public key."
+        }
+      }
+    },
+    "DeploymentParameter_sshKeyPath": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "The VM file path to save the SSh key to."
         }
       }
     },

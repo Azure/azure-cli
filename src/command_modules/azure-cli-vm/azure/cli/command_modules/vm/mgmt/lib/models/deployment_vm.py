@@ -24,7 +24,7 @@ class DeploymentVM(Model):
     :param str deployment_parameter_admin_password_value: Password for the
      Virtual Machine.
     :param str deployment_parameter_ip_address_type_value: Dynamic or Static
-     IP address allocation.
+     IP address allocation. Possible values include: 'Dynamic', 'Static'
     :param str deployment_parameter_storage_type_value: The VM storage type.
     :param str deployment_parameter_size_value: The VM Size that should be
      created.  Values: standard_A0-standard_A7, standard_D1-standard_D4,
@@ -43,6 +43,13 @@ class DeploymentVM(Model):
     :param str deployment_parameter_os_offer_value: The OS Offer to install.
     :param str deployment_parameter_os_version_value: The OS version to
      install.
+    :param str deployment_parameter_authentication_method_value: The VM
+     authentication type.  Password is available on Windows and Linux.  SSH
+     is only available on Linux. Possible values include: 'password', 'sshkey'
+    :param str deployment_parameter_ssh_key_value_value: The string value for
+     an SSH public key.
+    :param str deployment_parameter_ssh_key_path_value: The VM file path to
+     save the SSh key to.
     :param str mode: Gets or sets the deployment mode. Default value:
      "Incremental" .
     """ 
@@ -69,10 +76,13 @@ class DeploymentVM(Model):
         'deployment_parameter_os_sku_value': {'key': 'properties.parameters.osSKU.value', 'type': 'str'},
         'deployment_parameter_os_offer_value': {'key': 'properties.parameters.osOffer.value', 'type': 'str'},
         'deployment_parameter_os_version_value': {'key': 'properties.parameters.osVersion.value', 'type': 'str'},
+        'deployment_parameter_authentication_method_value': {'key': 'properties.parameters.authenticationMethod.value', 'type': 'str'},
+        'deployment_parameter_ssh_key_value_value': {'key': 'properties.parameters.sshKeyValue.value', 'type': 'str'},
+        'deployment_parameter_ssh_key_path_value': {'key': 'properties.parameters.sshKeyPath.value', 'type': 'str'},
         'mode': {'key': 'properties.mode', 'type': 'str'},
     }
 
-    def __init__(self, content_version=None, deployment_parameter_os_value=None, deployment_parameter_os_publisher_value=None, deployment_parameter_admin_password_value=None, deployment_parameter_ip_address_type_value=None, deployment_parameter_storage_type_value=None, deployment_parameter_size_value=None, deployment_parameter_admin_username_value=None, deployment_parameter_dns_name_for_public_ip_value=None, deployment_parameter_ip_address_prefix_value=None, deployment_parameter_virtual_machine_name_value=None, deployment_parameter_subnet_prefix_value=None, deployment_parameter_os_sku_value=None, deployment_parameter_os_offer_value=None, deployment_parameter_os_version_value=None, **kwargs):
+    def __init__(self, content_version=None, deployment_parameter_os_value=None, deployment_parameter_os_publisher_value=None, deployment_parameter_admin_password_value=None, deployment_parameter_ip_address_type_value=None, deployment_parameter_storage_type_value=None, deployment_parameter_size_value=None, deployment_parameter_admin_username_value=None, deployment_parameter_dns_name_for_public_ip_value=None, deployment_parameter_ip_address_prefix_value=None, deployment_parameter_virtual_machine_name_value=None, deployment_parameter_subnet_prefix_value=None, deployment_parameter_os_sku_value=None, deployment_parameter_os_offer_value=None, deployment_parameter_os_version_value=None, deployment_parameter_authentication_method_value=None, deployment_parameter_ssh_key_value_value=None, deployment_parameter_ssh_key_path_value=None, **kwargs):
         self.uri = "https://azuretemplatehost.blob.core.windows.net/templatehost/CreateVM/azuredeploy.json"
         self.content_version = content_version
         self.deployment_parameter_os_value = deployment_parameter_os_value
@@ -89,4 +99,7 @@ class DeploymentVM(Model):
         self.deployment_parameter_os_sku_value = deployment_parameter_os_sku_value
         self.deployment_parameter_os_offer_value = deployment_parameter_os_offer_value
         self.deployment_parameter_os_version_value = deployment_parameter_os_version_value
+        self.deployment_parameter_authentication_method_value = deployment_parameter_authentication_method_value
+        self.deployment_parameter_ssh_key_value_value = deployment_parameter_ssh_key_value_value
+        self.deployment_parameter_ssh_key_path_value = deployment_parameter_ssh_key_path_value
         self.mode = "Incremental"
