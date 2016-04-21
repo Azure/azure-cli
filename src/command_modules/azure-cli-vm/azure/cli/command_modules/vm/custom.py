@@ -10,7 +10,7 @@ def _compute_client_factory(_):
 
 command_table = CommandTable()
 
-class MinMaxValue(object): # pylint disable=too-few-public-methods
+class MinMaxValue(object): # pylint: disable=too-few-public-methods
     '''Converter/validator for range type values. Intended use is as the type parameter
     for argparse options
     '''
@@ -35,7 +35,7 @@ LUN_PARAMETER = {
     'name': '--lun',
     'dest': 'lun',
     'help': '0-based logical unit number (LUN). Max value depend on the Virtual Machine size',
-    'type': int, 
+    'type': int,
     'required': True
     }
 
