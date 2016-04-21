@@ -138,6 +138,10 @@ build_operation("vm scalesetvm",
 
 # BUG: waiting on https://github.com/Azure/azure-cli/issues/115 to remove these specific params
 VM_SPECIFIC_PARAMS = {
+    'deployment_parameter_os_value': {
+        'name': '--os',
+        'metavar': 'OS',
+    },
     'deployment_parameter_os_publisher_value': {
         'name': '--os-publisher',
         'metavar': 'OSPUBLISHER',
@@ -197,7 +201,7 @@ VM_SPECIFIC_PARAMS = {
 }
 
 build_operation('vm',
-                'virtual_machine',
+                'vm',
                 lambda _: get_mgmt_service_client(VMClient, VMClientConfig),
                 [
                     AutoCommandDefinition(VMOperations.create_or_update,

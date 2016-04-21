@@ -135,6 +135,35 @@
         "description": "The subnet name."
       }
     },
+    "addToAvailabilitySet": {
+      "type": "string",
+      "defaultValue": "none",
+      "allowedValues": [
+        "none",
+        "existing"
+      ],
+      "metadata": {
+        "description": "An existing availability set to add this VM to."
+      }
+    },
+    "availabilitySetId": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "An existing availability set to add this VM to."
+      }
+    },
+    "authenticationMethod": {
+      "type": "string",
+      "defaultValue": "password",
+      "allowedValues": [
+        "password",
+        "publickey"
+      ],
+      "metadata": {
+        "description": "An existing availability set to add this VM to."
+      }
+    },
     "_artifactsLocation": {
       "type": "string",
       "defaultValue": "https://azuretemplatehost.blob.core.windows.net/templatehost/CreateVM",
@@ -168,7 +197,6 @@
       "WinServer 2012 R2": "latest",
       "Custom": "[parameters('osVersion')]"
     },
-    "OSDiskName": "osdiskimage",
     "nicName": "[concat('MyVMNic', uniqueString(parameters('dnsNameForPublicIP')))]",
     "vnetAddressPrefix": "[parameters('virtualNetworkIpAddressPrefix')]",
     "subnetName": "[parameters('subnetName')]",
@@ -183,6 +211,7 @@
     "vnetId": "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]",
     "subnetRef": "[concat(variables('vnetId'), '/subnets/', variables('subnetName'))]",
     "vhdStorageName": "[concat('vhdstorage', uniqueString(parameters('dnsNameForPublicIP')))]",
+    "availSetId": "[parameters('availabilitySetId')]",
     "vnetTemplateFilePaths": {
       "new": "nested_templates/NewVNet.json",
       "existing": "nested_templates/ExistingVNet.json"
@@ -246,55 +275,6 @@
       }
     },
     {
-      "apiVersion": "2015-06-15",
-      "type": "Microsoft.Compute/virtualMachines",
-      "name": "[variables('vmName')]",
-      "location": "[resourceGroup().location]",
-      "tags": {
-        "displayName": "VirtualMachine"
-      },
-      "dependsOn": [
-        "[concat('Microsoft.Storage/storageAccounts/', variables('vhdStorageName'))]",
-        "[concat('Microsoft.Network/networkInterfaces/', variables('nicName'))]"
-      ],
-      "properties": {
-        "hardwareProfile": {
-          "vmSize": "[variables('vmSize')]"
-        },
-        "osProfile": {
-          "computerName": "[variables('vmName')]",
-          "adminUsername": "[parameters('adminUsername')]",
-          "adminPassword": "[parameters('adminPassword')]"
-        },
-        "storageProfile": {
-          "imageReference": {
-            "publisher": "[variables('imagePublishers')[parameters('os')]]",
-            "offer": "[variables('imageOffers')[parameters('os')]]",
-            "sku": "[variables('imageSkus')[parameters('os')]]",
-            "version": "[variables('imageVersions')[parameters('os')]]"
-          },
-          "osDisk": {
-            "name": "[concat('osdisk', uniqueString(parameters('dnsNameForPublicIP')))]",
-            "vhd": {
-              "uri": "[concat('http://', variables('vhdStorageName'), '.blob.core.windows.net/', variables('vhdStorageContainerName'), '/', variables('OSDiskName'), '.vhd')]"
-            },
-            "caching": "ReadWrite",
-            "createOption": "FromImage"
-          }
-        },
-        "networkProfile": {
-          "networkInterfaces": [
-            {
-              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('nicName'))]"
-            }
-          ]
-        }
-      },
-      "resources": [
-
-      ]
-    },
-    {
       "name": "VirtualNetwork",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
@@ -313,12 +293,40 @@
           "subnetName": { "value": "[variables('subnetName')]" }
         }
       }
+    },
+    {
+      "name": "VM",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "dependsOn": [
+        "[concat('Microsoft.Storage/storageAccounts/', variables('vhdStorageName'))]",
+        "[concat('Microsoft.Network/networkInterfaces/', variables('nicName'))]"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(parameters('_artifactsLocation'), '/nested_templates/vm_', parameters('addToAvailabilitySet'), '_', parameters('authenticationMethod'), '.json')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "adminUsername": { "value": "[parameters('adminUsername')]" },
+          "adminPassword": { "value": "[parameters('adminPassword')]" },
+          "dnsNameForPublicIP": { "value": "[parameters('dnsNameForPublicIP')]" },
+          "virtualMachineName": { "value": "[variables('vmName')]" },
+          "osPublisher": { "value": "[variables('imagePublishers')[parameters('os')]]" },
+          "osOffer": { "value": "[variables('imageOffers')[parameters('os')]]" },
+          "osSKU": { "value": "[variables('imageSkus')[parameters('os')]]" },
+          "osVersion": { "value": "[variables('imageVersions')[parameters('os')]]" },
+          "size": { "value": "[variables('vmSize')]" },
+          "storageType": { "value": "[variables('vhdStorageType')]" }
+        }
+      }
     }
   ],
   "outputs": {
     "NewVM": {
       "type": "object",
-      "value": "[reference(variables('vmName'))]"
+      "value": "[reference('VM')]"
     }
   }
 }
