@@ -69,6 +69,8 @@ def show_resource(args):
 def _list_resources_odata_filter_builder(args):
     '''Build up OData filter string from parameters
     '''
+
+    filters = []
     location = args.get('location')
     if location:
         filters.append("location eq '%s'" % location)
@@ -81,28 +83,25 @@ def _list_resources_odata_filter_builder(args):
     if name:
         filters.append("name eq '%s'" % name)
 
-    tags = args.get('tags', ())
-    if tags and (name or location):
+    tag = args.get('tag') or ''
+    if tag and (name or location):
         raise IncorrectUsageError('you cannot use the tagname or tagvalue filters with other filters')
-    
-    filters = []
-    for tag in tags:
-        tag_name_value = tag.split('=')
-        tag_name = tag_name_value[0]
-        if tag_name[-1] == '*':
-            filters.append("startswith(tagname, '%s')" % tag_name[0:-1])
-        else:
-            filters.append("tagname eq '%s'" % tag_name_value[0])
-            if len(tag_name_value) == 2:
-                filters.append("tagvalue eq '%s'" % tag_name_value[1])
+
+    tag_name_value = tag.split('=')
+    tag_name = tag_name_value[0]
+    if tag_name[-1] == '*':
+        filters.append("startswith(tagname, '%s')" % tag_name[0:-1])
+    else:
+        filters.append("tagname eq '%s'" % tag_name_value[0])
+        if len(tag_name_value) == 2:
+            filters.append("tagvalue eq '%s'" % tag_name_value[1])
     return ' and '.join(filters)
 
 @command_table.command('resource list', description=L('List resources'))
 @command_table.option('--location -l', help=L("Resource location"))
 @command_table.option('--resource-type -r', help=L("Resource type"))
-@command_table.option('--tags -t',
-                      help=L("Filter by tag in the format of <tagname> or <tagname>=<tagvalue>"),
-                      nargs='+')
+@command_table.option('--tag -t',
+                      help=L("Filter by tag in the format of <tagname> or <tagname>=<tagvalue>"))
 @command_table.option('--name -n', help=L("Name of resource"))
 def list_resources(args):
     ''' EXAMPLES:
