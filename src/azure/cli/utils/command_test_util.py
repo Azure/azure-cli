@@ -1,5 +1,6 @@
 from __future__ import print_function
 
+import collections
 import json
 import logging
 import os
@@ -49,7 +50,7 @@ class CommandTestGenerator(object):
 
     def generate_tests(self):
 
-        def gen_test(test_name, command, recording_dir):
+        def gen_test(test_name, action, recording_dir):
 
             def load_subscriptions_mock(self): #pylint: disable=unused-argument
                 return [{
@@ -89,23 +90,41 @@ class CommandTestGenerator(object):
                 """ Test implementation, augmented with prompted recording of expected result
                 if not provided. """
                 io = StringIO()
-                cli(command.split(), file=io)
-                actual_result = io.getvalue()
+                if expected is None:
+                    print('\n === RECORDING: {} ==='.format(test_name), file=sys.stderr)
+                if isinstance(action, str):
+                    cli(action.split(), file=io)
+                    actual_result = io.getvalue()
+                    display_result = actual_result
+                    auto_validated = False
+                    fail = False
+                else:
+                    test_runner = action
+                    test_runner.run_test()
+                    actual_result = test_runner.raw_result
+                    display_result = test_runner.display_result
+                    auto_validated = test_runner.auto
+                    fail = test_runner.fail
                 if expected is None:
                     expected_results = _get_expected_results_from_file(recording_dir)
                     header = '| RECORDED RESULT FOR {} |'.format(test_name)
-                    print('-' * len(header), file=sys.stderr)
+                    print('\n' + ('-' * len(header)), file=sys.stderr)
                     print(header, file=sys.stderr)
                     print('-' * len(header) + '\n', file=sys.stderr)
-                    print(actual_result, file=sys.stderr)
-                    ans = input('Save result for command: \'{}\'? [Y/n]: '.format(command))
-                    if ans and ans.lower()[0] == 'y':
+                    print(display_result, file=sys.stderr)
+                    if not auto_validated and not fail:
+                        ans = input('Save result for \'{}\'? [Y/n]: '.format(test_name))
+                        fail = False if ans and ans.lower()[0] == 'y' else True
+
+                    if not fail:
+                        print('*** SAVING TEST {} ***'.format(test_name), file=sys.stderr)
+                        expected_results = _get_expected_results_from_file(recording_dir)
                         expected_results[test_name] = actual_result
                         expected = actual_result
                         _save_expected_results_file(recording_dir, expected_results)
                     else:
+                        print('*** TEST {} FAILED ***'.format(test_name), file=sys.stderr)
                         _remove_expected_result(test_name, recording_dir)
-                        expected = None
 
                 io.close()
                 self.assertEqual(actual_result, expected)
@@ -155,11 +174,15 @@ class CommandTestGenerator(object):
                     + 'entry in expected_results.res and try again.')
             return test
 
-        test_functions = {}
+        test_functions = collections.OrderedDict()
         for test_def in self.test_def:
             test_name = 'test_{}'.format(test_def['test_name'])
-            command = test_def['command']
-            test_functions[test_name] = gen_test(test_name, command, self.recording_dir)
+            command = test_def.get('command')
+            func = test_def.get('script')
+            if command:
+                test_functions[test_name] = gen_test(test_name, command, self.recording_dir)
+            elif func:
+                test_functions[test_name] = gen_test(test_name, func, self.recording_dir)
         return test_functions
 
     @staticmethod
