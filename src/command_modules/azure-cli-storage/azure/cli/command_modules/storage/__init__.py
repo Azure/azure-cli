@@ -34,6 +34,8 @@ def _file_data_service_factory(args):
 
 def _blob_data_service_factory(args):
     type = args.get('type')
+    if not type:
+        type = 'Block'
     blob_service = getattr(modules[__name__], '{}BlobService'.format(type))
     return get_data_service_client(
         blob_service,
@@ -320,8 +322,8 @@ blob_types_str = ' '.join(blob_types)
 @command_table.option('--content.cache-control')
 def create_block_blob(args):
     from azure.storage.blob import ContentSettings
-    type = args.get('type')
     bds = _blob_data_service_factory(args)
+    type = args.get('type')
     container_name = args.get('container_name')
     blob_name = args.get('blob_name')
     file_path = args.get('upload_from')

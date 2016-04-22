@@ -59,11 +59,9 @@ class StorageBlobScenarioTest(CommandTestScript):
 
     def set_up(self):
         self.container = 'testcontainer01'
-        self.blob = 'testblob1'
         self.rg = RESOURCE_GROUP_NAME
         self.proposed_lease_id = 'abcdabcd-abcd-abcd-abcd-abcdabcdabcd'
         self.new_lease_id = 'dcbadcba-dcba-dcba-dcba-dcbadcbadcba'
-        self.dest_file = os.path.join(TEST_DIR, 'download-blob.rst')
         self.date = '2016-04-08T12:00Z'
         _get_connection_string(self)
         # TODO: 'exists' does not seem to work with a SAS token.
@@ -80,15 +78,23 @@ class StorageBlobScenarioTest(CommandTestScript):
     def _storage_blob_scenario(self):
         s = self
         container = s.container
-        blob = s.blob
-        dest_file = s.dest_file
-        s.run('storage blob upload-block-blob -b {} -c {} --upload-from {}'.format(blob, container, os.path.join(TEST_DIR, 'testfile.rst')))
+        block_blob = 'testblockblob'
+        page_blob = 'testpageblob'
+        append_blob = 'testappendblob'
+        blob = block_blob
+        dest_file = os.path.join(TEST_DIR, 'download-blob.rst')
+        s.run('storage blob upload -b {} -c {} --type Block --upload-from {}'.format(block_blob, container, os.path.join(TEST_DIR, 'testfile.rst')))
+        s.test('storage blob exists -b {} -c {}'.format(block_blob, container), True)
+        #s.run('storage blob upload -b {} -c {} --type Page --upload-from {}'.format(page_blob, container, os.path.join(TEST_DIR, 'testfile.rst')))
+        #s.test('storage blob exists -b {} -c {}'.format(page_blob, container), True)
+        s.run('storage blob upload -b {} -c {} --type Append --upload-from {}'.format(append_blob, container, os.path.join(TEST_DIR, 'testfile.rst')))
+        s.run('storage blob upload -b {} -c {} --type Append --upload-from {}'.format(append_blob, container, os.path.join(TEST_DIR, 'testfile.rst')))
+        s.test('storage blob exists -b {} -c {}'.format(append_blob, container), True)
         s.run('storage blob download -b {} -c {} --download-to {}'.format(blob, container, dest_file))
         if os.path.isfile(dest_file):
             os.remove(dest_file)
         else:
             raise RuntimeError('Download failed. Test failed!')
-        s.test('storage blob exists -b {} -c {}'.format(blob, container), True)
         s.rec('storage blob list --container-name {}'.format(container))
         s.rec('storage blob properties get --container-name {} --blob-name {}'.format(container, blob))
         s.run('storage blob delete --container-name {} --blob-name {}'.format(container, blob))
