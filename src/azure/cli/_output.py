@@ -227,7 +227,7 @@ class TsvOutput(object): #pylint: disable=too-few-public-methods
             if isinstance(data, OrderedDict):
                 values = data.values()
             elif isinstance(data, dict):
-                values = [value for key, value in sorted(data.items())]
+                values = [value for _, value in sorted(data.items())]
             else:
                 values = data
 
