@@ -101,6 +101,13 @@ class CommandTable(defaultdict):
             return func
         return wrapper
 
+    def option_set(self, options):
+        def wrapper(func):
+            for opt in options:
+                self[func]['arguments'].append(opt)
+            return func
+        return wrapper
+
 def _get_command_table(module_name):
     module = import_module('azure.cli.command_modules.' + module_name)
     return module.command_table

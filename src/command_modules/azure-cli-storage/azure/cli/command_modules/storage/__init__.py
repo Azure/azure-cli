@@ -232,9 +232,7 @@ public_access_types = {'none': None,
 @command_table.command('storage container exists')
 @command_table.description(L('Check if a storage container exists.'))
 @command_table.option(**PARAMETER_ALIASES['container_name'])
-@command_table.option(**PARAMETER_ALIASES['account_name'])
-@command_table.option(**PARAMETER_ALIASES['account_key'])
-@command_table.option(**PARAMETER_ALIASES['connection_string'])
+@command_table.option_set(STORAGE_DATA_CLIENT_ARGS)
 @command_table.option('--snapshot', type=validate_datetime,
                       help=L('UTC datetime value which specifies a snapshot'))
 @command_table.option(**PARAMETER_ALIASES['timeout'])
@@ -308,9 +306,7 @@ blob_types_str = ' '.join(blob_types)
                       help=L('type of blob to upload ({})'.format(blob_types_str)))
 @command_table.option('--upload-from', required=True,
                       help=L('local path to upload from'))
-@command_table.option(**PARAMETER_ALIASES['account_name'])
-@command_table.option(**PARAMETER_ALIASES['account_key'])
-@command_table.option(**PARAMETER_ALIASES['connection_string'])
+@command_table.option_set(STORAGE_DATA_CLIENT_ARGS)
 @command_table.option('--container.public-access', default=None,
                       choices=public_access_types.keys(),
                       type=lambda x: public_access_types.get(x, ValueError))
@@ -368,9 +364,7 @@ def create_block_blob(args):
 @command_table.option(**PARAMETER_ALIASES['container_name'])
 @command_table.option(**PARAMETER_ALIASES['blob_name'])
 @command_table.option('--download-to', help=L('the file path to download to'), required=True)
-@command_table.option(**PARAMETER_ALIASES['account_name'])
-@command_table.option(**PARAMETER_ALIASES['account_key'])
-@command_table.option(**PARAMETER_ALIASES['connection_string'])
+@command_table.option_set(STORAGE_DATA_CLIENT_ARGS)
 def download_blob(args):
     bbs = _blob_data_service_factory(args)
 
@@ -384,9 +378,7 @@ def download_blob(args):
 @command_table.description(L('Check if a storage blob exists.'))
 @command_table.option(**PARAMETER_ALIASES['container_name'])
 @command_table.option(**PARAMETER_ALIASES['blob_name'])
-@command_table.option(**PARAMETER_ALIASES['account_name'])
-@command_table.option(**PARAMETER_ALIASES['account_key'])
-@command_table.option(**PARAMETER_ALIASES['connection_string'])
+@command_table.option_set(STORAGE_DATA_CLIENT_ARGS)
 @command_table.option('--snapshot', type=validate_datetime,
                       help=L('UTC datetime value which specifies a snapshot'))
 @command_table.option(**PARAMETER_ALIASES['timeout'])
@@ -456,9 +448,7 @@ build_operation(
 @command_table.command('storage share exists')
 @command_table.description(L('Check if a file share exists.'))
 @command_table.option(**PARAMETER_ALIASES['share_name'])
-@command_table.option(**PARAMETER_ALIASES['account_name'])
-@command_table.option(**PARAMETER_ALIASES['account_key'])
-@command_table.option(**PARAMETER_ALIASES['connection_string'])
+@command_table.option_set(STORAGE_DATA_CLIENT_ARGS)
 def exist_share(args):
     fsc = _file_data_service_factory(args)
     return fsc.exists(share_name=args.get('share_name'))
@@ -483,9 +473,7 @@ build_operation(
 @command_table.description(L('Check if a directory exists.'))
 @command_table.option(**PARAMETER_ALIASES['share_name'])
 @command_table.option('--directory-name -d', help=L('the directory name'), required=True)
-@command_table.option(**PARAMETER_ALIASES['account_name'])
-@command_table.option(**PARAMETER_ALIASES['account_key'])
-@command_table.option(**PARAMETER_ALIASES['connection_string'])
+@command_table.option_set(STORAGE_DATA_CLIENT_ARGS)
 def exist_directory(args):
     fsc = _file_data_service_factory(args)
     return fsc.exists(share_name=args.get('share_name'),
@@ -536,9 +524,7 @@ build_operation(
 @command_table.option('--file-name -f', help=L('the file name'), required=True)
 @command_table.option('--local-file-name', help=L('the path to the local file'), required=True)
 @command_table.option('--directory-name -d', help=L('the directory name'))
-@command_table.option(**PARAMETER_ALIASES['account_name'])
-@command_table.option(**PARAMETER_ALIASES['account_key'])
-@command_table.option(**PARAMETER_ALIASES['connection_string'])
+@command_table.option_set(STORAGE_DATA_CLIENT_ARGS)
 def storage_file_download(args):
     fsc = _file_data_service_factory(args)
     fsc.get_file_to_path(args.get('share_name'),
@@ -552,9 +538,7 @@ def storage_file_download(args):
 @command_table.option(**PARAMETER_ALIASES['share_name'])
 @command_table.option('--file-name -f', help=L('the file name to check'), required=True)
 @command_table.option('--directory-name -d', help=L('subdirectory path to the file'))
-@command_table.option(**PARAMETER_ALIASES['account_name'])
-@command_table.option(**PARAMETER_ALIASES['account_key'])
-@command_table.option(**PARAMETER_ALIASES['connection_string'])
+@command_table.option_set(STORAGE_DATA_CLIENT_ARGS)
 def exist_file(args):
     fsc = _file_data_service_factory(args)
     return fsc.exists(share_name=args.get('share_name'),
@@ -566,9 +550,7 @@ def exist_file(args):
 @command_table.option('--file-name -f', help=L('the destination file name'), required=True)
 @command_table.option('--local-file-name', help=L('the file name to upload'), required=True)
 @command_table.option('--directory-name -d', help=L('the destination directory to upload to'))
-@command_table.option(**PARAMETER_ALIASES['account_name'])
-@command_table.option(**PARAMETER_ALIASES['account_key'])
-@command_table.option(**PARAMETER_ALIASES['connection_string'])
+@command_table.option_set(STORAGE_DATA_CLIENT_ARGS)
 def storage_file_upload(args):
     fsc = _file_data_service_factory(args)
     fsc.create_file_from_path(args.get('share_name'),
