@@ -10,8 +10,8 @@ from azure.mgmt.compute.operations import (AvailabilitySetsOperations,
                                            VirtualMachineScaleSetsOperations,
                                            VirtualMachineScaleSetVMsOperations)
 
-from azure.cli.command_modules.vm.mgmt.lib import (ResourceManagementClient as VMClient,
-                                                   ResourceManagementClientConfiguration
+from azure.cli.command_modules.vm.mgmt.lib import (VMCreationClient as VMClient,
+                                                   VMCreationClientConfiguration
                                                    as VMClientConfig)
 from azure.cli.command_modules.vm.mgmt.lib.operations import VMOperations
 
