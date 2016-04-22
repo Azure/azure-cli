@@ -214,14 +214,14 @@ build_operation(
     'storage container acl', None, _blob_data_service_factory,
     [
         AutoCommandDefinition(BlockBlobService.set_container_acl, 'StoredAccessPolicy', 'set'),
-        AutoCommandDefinition(BlockBlobService.get_container_acl, '[StoredAccessPolicy]', 'get'),
+        AutoCommandDefinition(BlockBlobService.get_container_acl, '[StoredAccessPolicy]', 'show'),
     ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
 build_operation(
     'storage container metadata', None, _blob_data_service_factory,
     [
         AutoCommandDefinition(BlockBlobService.set_container_metadata, 'Properties', 'set'),
-        AutoCommandDefinition(BlockBlobService.get_container_metadata, 'Metadata', 'get'),
+        AutoCommandDefinition(BlockBlobService.get_container_metadata, 'Metadata', 'show'),
     ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
 # TODO: update this once enums are supported in commands first-class (task #115175885)
@@ -278,7 +278,7 @@ build_operation(
     'storage blob service-properties', None, _blob_data_service_factory,
     [
         AutoCommandDefinition(BlockBlobService.get_blob_service_properties,
-                              '[ServiceProperties]', 'get'),
+                              '[ServiceProperties]', 'show'),
         AutoCommandDefinition(BlockBlobService.set_blob_service_properties,
                               'ServiceProperties', 'set')
     ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
@@ -286,14 +286,14 @@ build_operation(
 build_operation(
     'storage blob metadata', None, _blob_data_service_factory,
     [
-        AutoCommandDefinition(BlockBlobService.get_blob_metadata, 'Metadata', 'get'),
+        AutoCommandDefinition(BlockBlobService.get_blob_metadata, 'Metadata', 'show'),
         AutoCommandDefinition(BlockBlobService.set_blob_metadata, 'Metadata', 'set')
     ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
 build_operation(
     'storage blob properties', None, _blob_data_service_factory,
     [
-        AutoCommandDefinition(BlockBlobService.get_blob_properties, 'Properties', 'get'),
+        AutoCommandDefinition(BlockBlobService.get_blob_properties, 'Properties', 'show'),
         AutoCommandDefinition(BlockBlobService.set_blob_properties, 'Propeties', 'set')
     ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
@@ -435,14 +435,14 @@ build_operation(
 build_operation(
     'storage share metadata', None, _file_data_service_factory,
     [
-        AutoCommandDefinition(FileService.get_share_metadata, 'Metadata', 'get'),
+        AutoCommandDefinition(FileService.get_share_metadata, 'Metadata', 'show'),
         AutoCommandDefinition(FileService.set_share_metadata, 'Metadata', 'set')
     ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
 build_operation(
     'storage share properties', None, _file_data_service_factory,
     [
-        AutoCommandDefinition(FileService.get_share_properties, 'Properties', 'get'),
+        AutoCommandDefinition(FileService.get_share_properties, 'Properties', 'show'),
         AutoCommandDefinition(FileService.set_share_properties, 'Properties', 'set')
     ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
@@ -450,7 +450,7 @@ build_operation(
     'storage share acl', None, _file_data_service_factory,
     [
         AutoCommandDefinition(FileService.set_share_acl, '[StoredAccessPolicy]', 'set'),
-        AutoCommandDefinition(FileService.get_share_acl, 'StoredAccessPolicy', 'get'),
+        AutoCommandDefinition(FileService.get_share_acl, 'StoredAccessPolicy', 'show'),
     ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
 @command_table.command('storage share exists')
@@ -475,7 +475,7 @@ build_operation(
 build_operation(
     'storage directory metadata', None, _file_data_service_factory,
     [
-        AutoCommandDefinition(FileService.get_directory_metadata, 'Metadata', 'get'),
+        AutoCommandDefinition(FileService.get_directory_metadata, 'Metadata', 'show'),
         AutoCommandDefinition(FileService.set_directory_metadata, 'Metadata', 'set')
     ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
@@ -513,21 +513,21 @@ build_operation(
 build_operation(
     'storage file metadata', None, _file_data_service_factory,
     [
-        AutoCommandDefinition(FileService.get_file_metadata, 'Metadata', 'get'),
+        AutoCommandDefinition(FileService.get_file_metadata, 'Metadata', 'show'),
         AutoCommandDefinition(FileService.set_file_metadata, 'Metadata', 'set')
     ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
 build_operation(
     'storage file properties', None, _file_data_service_factory,
     [
-        AutoCommandDefinition(FileService.get_file_properties, 'Properties', 'get'),
+        AutoCommandDefinition(FileService.get_file_properties, 'Properties', 'show'),
         AutoCommandDefinition(FileService.set_file_properties, 'Properties', 'set')
     ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
 build_operation(
     'storage file service-properties', None, _file_data_service_factory,
     [
-        AutoCommandDefinition(FileService.get_file_service_properties, 'ServiceProperties', 'get'),
+        AutoCommandDefinition(FileService.get_file_service_properties, 'ServiceProperties', 'show'),
         AutoCommandDefinition(FileService.set_file_service_properties, 'ServiceProperties', 'set')
     ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
