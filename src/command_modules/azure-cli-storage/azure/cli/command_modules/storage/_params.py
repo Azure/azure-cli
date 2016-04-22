@@ -5,8 +5,9 @@ from azure.cli._locale import L
 
 from ._validators import (
     validate_container_permission, validate_datetime, validate_datetime_as_string, validate_id,
+    validate_container_permission, validate_datetime, validate_id,
     validate_ip_range, validate_key_value_pairs, validate_resource_types, validate_services,
-    validate_tags, validate_lease_duration)
+    validate_tags, validate_lease_duration, validate_quota)
 
 # HELPER METHODS
 
@@ -75,6 +76,9 @@ PARAMETER_ALIASES.update({
         'required': False,
         'default': 'query'
     },
+    'directory_name': {
+        'name': '--directory-name -d'
+    },
     'expiry': {
         'name': '--expiry',
         'help': L('expiration UTC datetime of SAS token (Y-m-d\'T\'H:M\'Z\')'),
@@ -140,6 +144,10 @@ PARAMETER_ALIASES.update({
         'metavar': 'SPECIFIERS',
         'choices': ['blob', 'container']
     },
+    'quota': {
+        'name': '--quota',
+        'type': validate_quota
+    },
     'resource_types': {
         'name': '--resource-types',
         'help': L('the resource types the SAS is applicable for. Allowed values: (s)ervice ' + \
@@ -159,7 +167,7 @@ PARAMETER_ALIASES.update({
         'type': validate_services
     },
     'share_name': {
-        'name': '--share-name',
+        'name': '--share-name -s',
         'help': L('the name of the file share'),
         'required': True,
     },
