@@ -65,7 +65,7 @@ class StorageBlobScenarioTest(CommandTestScript):
         self.date = '2016-04-08T12:00Z'
         _get_connection_string(self)
         # TODO: 'exists' does not seem to work with a SAS token.
-        #sas_token = self.run('storage account generate-sas --services b --resource-types sco --permission rwdl --expiry 2017-01-01T00:00Z')
+        #sas_token = self.run('storage account generate-sas --services b --resource-types sco --permission rwdl --expiry 2017-01-01t00:00z')
         #sas_token = self.run('storage container generate-sas --permission rwdl --expiry 2017-01-01T00:00Z -c {}'.format(container))
         #print('TOKEN: {}'.format(sas_token))
         #self.set_env('AZURE_SAS_TOKEN', sas_token)
@@ -96,7 +96,7 @@ class StorageBlobScenarioTest(CommandTestScript):
         else:
             raise RuntimeError('Download failed. Test failed!')
         s.rec('storage blob list --container-name {}'.format(container))
-        s.rec('storage blob properties get --container-name {} --blob-name {}'.format(container, blob))
+        s.rec('storage blob properties show --container-name {} --blob-name {}'.format(container, blob))
         s.run('storage blob delete --container-name {} --blob-name {}'.format(container, blob))
         s.test('storage blob exists -b {} -c {}'.format(blob, container), False)
 
@@ -112,9 +112,9 @@ class StorageBlobScenarioTest(CommandTestScript):
         s.test('storage container show --container-name {}'.format(container), {'name': container})
         s.rec('storage container list')
         s.run('storage container metadata set -c {} --metadata foo=bar;moo=bak;'.format(container))
-        s.test('storage container metadata get -c {}'.format(container), {'foo': 'bar', 'moo': 'bak'})
+        s.test('storage container metadata show -c {}'.format(container), {'foo': 'bar', 'moo': 'bak'})
         s.run('storage container metadata set -c {}'.format(container)) # reset metadata
-        s.test('storage container metadata get -c {}'.format(container), None)
+        s.test('storage container metadata show -c {}'.format(container), None)
         s._storage_blob_scenario()
         
         # test lease operations
@@ -157,10 +157,10 @@ class StorageFileScenarioTest(CommandTestScript):
         s.test('storage directory create --share-name {} --directory-name {} --fail-on-exist'.format(share, dir), True)
         s.test('storage directory exists --share-name {} --directory-name {}'.format(share, dir), True)
         s.run('storage directory metadata set --share-name {} --directory-name {} --metadata a=b;c=d'.format(share, dir))
-        s.test('storage directory metadata get --share-name {} --directory-name {}'.format(share, dir),
+        s.test('storage directory metadata show --share-name {} --directory-name {}'.format(share, dir),
                {'a': 'b', 'c': 'd'})
         s.run('storage directory metadata set --share-name {} --directory-name {}'.format(share, dir))
-        s.test('storage directory metadata get --share-name {} --directory-name {}'.format(share, dir), None)
+        s.test('storage directory metadata show --share-name {} --directory-name {}'.format(share, dir), None)
         s._storage_file_in_subdir_scenario(share, dir)
         s.test('storage directory delete --share-name {} --directory-name {} --fail-not-exist'.format(share, dir), True)
         s.test('storage directory exists --share-name {} --directory-name {}'.format(share, dir), False)
@@ -168,7 +168,7 @@ class StorageFileScenarioTest(CommandTestScript):
         # verify a directory can be created with metadata and then delete
         dir = 'testdir02'
         s.test('storage directory create --share-name {} --directory-name {} --fail-on-exist --metadata foo=bar;cat=hat'.format(share, dir), True)
-        s.test('storage directory metadata get --share-name {} --directory-name {}'.format(share, dir),
+        s.test('storage directory metadata show --share-name {} --directory-name {}'.format(share, dir),
                {'cat': 'hat', 'foo': 'bar'})
         s.test('storage directory delete --share-name {} --directory-name {} --fail-not-exist'.format(share, dir), True)
 
@@ -215,15 +215,15 @@ class StorageFileScenarioTest(CommandTestScript):
         s.test('storage share create --share-name {} --fail-on-exist'.format(share1), True)
         s.test('storage share create --share-name {} --fail-on-exist --metadata foo=bar;cat=hat'.format(share2), True)
         s.test('storage share exists --share-name {}'.format(share1), True)
-        s.test('storage share metadata get --share-name {}'.format(share2), {'cat': 'hat', 'foo': 'bar'})
+        s.test('storage share metadata show --share-name {}'.format(share2), {'cat': 'hat', 'foo': 'bar'})
         # TODO: Would need to enable behavior if a dictionary contains a list...
         s.rec('storage share list')
 
         # verify metadata can be set, queried, and cleared
         s.run('storage share metadata set --share-name {} --metadata a=b;c=d'.format(share1))
-        s.test('storage share metadata get --share-name {}'.format(share1), {'a': 'b', 'c': 'd'})
+        s.test('storage share metadata show --share-name {}'.format(share1), {'a': 'b', 'c': 'd'})
         s.run('storage share metadata set --share-name {}'.format(share1))
-        s.test('storage share metadata get --share-name {}'.format(share1), None)
+        s.test('storage share metadata show --share-name {}'.format(share1), None)
 
         self._storage_file_scenario(share1)
         self._storage_directory_scenario(share1)
