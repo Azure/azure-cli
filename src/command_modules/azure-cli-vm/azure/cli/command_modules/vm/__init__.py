@@ -136,109 +136,6 @@ build_operation("vm scalesetvm",
                 ],
                 command_table)
 
-# BUG: waiting on https://github.com/Azure/azure-cli/issues/115 to remove these specific params
-VM_SPECIFIC_PARAMS = {
-    'deployment_parameter_os_value': {
-        'name': '--os',
-        'metavar': 'OS',
-    },
-    'deployment_parameter_os_publisher_value': {
-        'name': '--os-publisher',
-        'metavar': 'OSPUBLISHER',
-    },
-    'deployment_parameter_admin_password_value': {
-        'name': '--admin-password',
-        'metavar': 'ADMINPASSWORD'
-    },
-    'deployment_parameter_ip_address_type_value': {
-        'name': '--ip-address-type',
-        'metavar': 'IPADDRESSTYPE',
-    },
-    'deployment_parameter_storage_type_value': {
-        'name': '--storage-type',
-        'metavar': 'STORAGETYPE',
-    },
-    'deployment_parameter_size_value': {
-        'name': '--size',
-        'metavar': 'SIZE',
-    },
-    'deployment_parameter_admin_username_value': {
-        'name': '--admin-username',
-        'metavar': 'ADMINUSERNAME',
-        'required': True
-    },
-    'deployment_parameter_dns_name_for_public_ip_value': {
-        'name': '--dns-name-for-public-ip',
-        'metavar': 'DNSNAMEFORPUBLICIP',
-        'required': True
-    },
-    'deployment_parameter_ip_address_prefix_value': {
-        'name': '--ip-address-prefix',
-        'metavar': 'IPADDRESSPREFIX',
-    },
-    'deployment_parameter_virtual_machine_name_value': {
-        'name': '--virtual-machine-name',
-        'metavar': 'VIRTUALMACHINENAME',
-        'required': True
-    },
-    'deployment_parameter_subnet_prefix_value': {
-        'name': '--subnet-prefix',
-        'metavar': 'SUBNETPREFIX',
-    },
-    'deployment_parameter_os_sku_value': {
-        'name': '--os-sku',
-        'metavar': 'OSSKU',
-    },
-    'deployment_parameter_os_offer_value': {
-        'name': '--os-offer',
-        'metavar': 'OSOFFER',
-    },
-    'deployment_parameter_os_version_value': {
-        'name': '--os-version',
-        'metavar': 'OSVERSION',
-    },
-    'deployment_parameter_authentication_method_value': {
-        'name': '--authentication-method',
-        'metavar': 'AUTHMETHOD',
-    },
-    'deployment_parameter_ssh_key_value_value': {
-        'name': '--ssh-key-value',
-        'metavar': 'SSHKEY',
-    },
-    'deployment_parameter_ssh_key_path_value': {
-        'name': '--ssh-key-path',
-        'metavar': 'SSHPATH',
-    },
-    'deployment_parameter_add_to_availability_set_value': {
-        'name': '--add-to-availability-set',
-        'metavar': 'AVAILSETTYPE',
-    },
-    'deployment_parameter_availability_set_id_value': {
-        'name': '--availability-set-name',
-        'metavar': 'AVAILSETNAME',
-    },
-    'deployment_parameter_new_or_existing_vnet_value': {
-        'name': '--new-or-existing-vnet',
-        'metavar': 'VNET',
-    },
-    'deployment_parameter_subnet_ip_address_prefix_value': {
-        'name': '--subnet-ip-prefix',
-        'metavar': 'SUBNETPREFIX',
-    },
-    'deployment_parameter_subnet_name_value': {
-        'name': '--subnet-name',
-        'metavar': 'NAME',
-    },
-    'deployment_parameter_virtual_network_ip_address_type_value': {
-        'name': '--vnet-ip-address-type',
-        'metavar': 'ADDRESSTYPE',
-    },
-    'deployment_parameter_virtual_network_name_value': {
-        'name': '--vnet-name',
-        'metavar': 'NAME',
-    },
-}
-
 build_operation('vm',
                 'vm',
                 lambda _: get_mgmt_service_client(VMClient, VMClientConfig),
@@ -247,5 +144,4 @@ build_operation('vm',
                                           LongRunningOperation(L('Creating virtual machine'), L('Virtual machine created')),
                                           'create')
                 ],
-                command_table,
-                VM_SPECIFIC_PARAMS)
+                command_table)
