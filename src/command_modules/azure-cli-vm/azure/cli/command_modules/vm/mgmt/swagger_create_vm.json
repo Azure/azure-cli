@@ -1,7 +1,7 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "ResourceManagementClient",
+    "title": "VMCreationClient",
     "version": "2015-11-01"
   },
   "host": "management.azure.com",
@@ -39,7 +39,7 @@
           "VM"
         ],
         "operationId": "VM_CreateOrUpdate",
-        "description": "Create a named template deployment using a template.",
+        "description": "Create or update a virtual machine.",
         "parameters": [
           {
             "name": "resourceGroupName",
@@ -201,11 +201,6 @@
           "$ref": "#/definitions/DeploymentParameter_dnsNameForPublicIP",
           "x-ms-client-flatten": true
         },
-        "ipAddressPrefix": {
-          "type": "object",
-          "$ref": "#/definitions/DeploymentParameter_ipAddressPrefix",
-          "x-ms-client-flatten": true
-        },
         "virtualMachineName": {
           "type": "object",
           "$ref": "#/definitions/DeploymentParameter_virtualMachineName",
@@ -288,7 +283,8 @@
       "properties": {
         "value": {
           "type": "string",
-          "description": "Common OS choices."
+          "description": "Common OS choices.",
+          "x-ms-client-name": "os"
         }
       }
     },
@@ -300,7 +296,8 @@
           "enum": [
             "Dynamic",
             "Static"
-          ]
+          ],
+          "x-ms-client-name": "ipAddressType"
         }
       }
     },
@@ -308,7 +305,8 @@
       "properties": {
         "value": {
           "type": "string",
-          "description": "The OS Offer to install."
+          "description": "The OS Offer to install.",
+          "x-ms-client-name": "osOffer"
         }
       }
     },
@@ -316,31 +314,44 @@
       "properties": {
         "value": {
           "type": "string",
-          "description": "Username for the Virtual Machine."
+          "description": "Username for the Virtual Machine.",
+          "x-ms-client-name": "adminUserName"
         }
-      }
+      },
+      "required": [
+        "value"
+      ]
     },
     "DeploymentParameter_virtualMachineName": {
       "properties": {
         "value": {
           "type": "string",
-          "description": "The VM name that is displayed in the portal."
+          "description": "The Virtual Machine name.",
+          "x-ms-client-name": "name"
         }
-      }
+      },
+      "required": [
+        "value"
+      ]
     },
     "DeploymentParameter_adminPassword": {
       "properties": {
         "value": {
           "type": "string",
-          "description": "Password for the Virtual Machine."
+          "description": "Password for the Virtual Machine.",
+          "x-ms-client-name": "adminPassword"
         }
-      }
+      },
+      "required": [
+        "value"
+      ]
     },
     "DeploymentParameter_osSKU": {
       "properties": {
         "value": {
           "type": "string",
-          "description": "The OS SKU to install."
+          "description": "The OS SKU to install.",
+          "x-ms-client-name": "osSku"
         }
       }
     },
@@ -348,7 +359,8 @@
       "properties": {
         "value": {
           "type": "string",
-          "description": "The OS publisher of the OS image."
+          "description": "The OS publisher of the OS image.",
+          "x-ms-client-name": "osPublisher"
         }
       }
     },
@@ -365,7 +377,8 @@
       "properties": {
         "value": {
           "type": "string",
-          "description": "The OS version to install."
+          "description": "The OS version to install.",
+          "x-ms-client-name": "osVersion"
         }
       }
     },
@@ -373,7 +386,8 @@
       "properties": {
         "value": {
           "type": "string",
-          "description": "The subnet name."
+          "description": "The subnet name.",
+          "x-ms-client-name": "subnetName"
         }
       }
     },
@@ -381,7 +395,8 @@
       "properties": {
         "value": {
           "type": "string",
-          "description": "Name of virtual network to add VM to."
+          "description": "Name of virtual network to add VM to.",
+          "x-ms-client-name": "vnetName"
         }
       }
     },
@@ -389,7 +404,8 @@
       "properties": {
         "value": {
           "type": "string",
-          "description": "Whether to use an existing VNet or create a new one."
+          "description": "Whether to use an existing VNet or create a new one.",
+          "x-ms-client-name": "newOrExistingVNet"
         }
       }
     },
@@ -397,7 +413,8 @@
       "properties": {
         "value": {
           "type": "string",
-          "description": "Dynamic or Static IP address allocation."
+          "description": "Dynamic or Static IP address allocation.",
+          "x-ms-client-name": "vnetIpAddressType"
         }
       }
     },
@@ -405,7 +422,8 @@
       "properties": {
         "value": {
           "type": "string",
-          "description": "The subnet address type."
+          "description": "The subnet address prefix.",
+          "x-ms-client-name": "subnetIpAddressPrefix"
         }
       }
     },
@@ -413,7 +431,8 @@
       "properties": {
         "value": {
           "type": "string",
-          "description":  "IP address prefixe for the virtual network."
+          "description": "IP address prefixe for the virtual network.",
+          "x-ms-client-name": "vnetIpAddressPrefix"
         }
       }
     },
@@ -421,23 +440,20 @@
       "properties": {
         "value": {
           "type": "string",
-          "description": "Globally unique DNS Name for the Public IP used to access the Virtual Machine."
+          "description": "Globally unique DNS Name for the Public IP used to access the Virtual Machine.",
+          "x-ms-client-name": "dnsNameForPublicIP"
         }
-      }
-    },
-    "DeploymentParameter_ipAddressPrefix": {
-      "properties": {
-        "value": {
-          "type": "string",
-          "description": "The IP address prefix."
-        }
-      }
+      },
+      "required": [
+        "value"
+      ]
     },
     "DeploymentParameter_size": {
       "properties": {
         "value": {
           "type": "string",
-          "description": "The VM Size that should be created.  Values: standard_A0-standard_A7, standard_D1-standard_D4, standard_D11-standard_D14"
+          "description": "The VM Size that should be created.  Values: standard_A0-standard_A7, standard_D1-standard_D4, standard_D11-standard_D14",
+          "x-ms-client-name": "size"
         }
       }
     },
@@ -449,7 +465,8 @@
           "enum": [
             "password",
             "sshkey"
-          ]
+          ],
+          "x-ms-client-name": "authMethod"
         }
       }
     },
@@ -457,7 +474,8 @@
       "properties": {
         "value": {
           "type": "string",
-          "description": "The string value for an SSH public key."
+          "description": "The string value for an SSH public key.",
+          "x-ms-client-name": "sshKeyValue"
         }
       }
     },
@@ -465,7 +483,8 @@
       "properties": {
         "value": {
           "type": "string",
-          "description": "The VM file path to save the SSh key to."
+          "description": "The VM file path to save the SSh key to.",
+          "x-ms-client-name": "sshKeyPath"
         }
       }
     },
@@ -477,7 +496,8 @@
           "enum": [
             "none",
             "existing"
-          ]
+          ],
+          "x-ms-client-name": "addToAvailabilitySet"
         }
       }
     },
@@ -485,7 +505,8 @@
       "properties": {
         "value": {
           "type": "string",
-          "description": "ID of the availability set the VM should be added to."
+          "description": "ID of the availability set the VM should be added to.",
+          "x-ms-client-name": "availabilitySetId"
         }
       }
     },

@@ -70,7 +70,7 @@ def _update_progress(current, total):
         print('\b' * len(message) + message, end='', file=stderr)
         stderr.flush()
         if current == total:
-            print('')
+            print('', file=stderr)
 
 COMMON_PARAMETERS = GLOBAL_COMMON_PARAMETERS.copy()
 COMMON_PARAMETERS.update({
