@@ -64,13 +64,10 @@ class StorageBlobScenarioTest(CommandTestScript):
         self.new_lease_id = 'dcbadcba-dcba-dcba-dcba-dcbadcbadcba'
         self.date = '2016-04-08T12:00Z'
         _get_connection_string(self)
-        # TODO: 'exists' does not seem to work with a SAS token.
-        #sas_token = self.run('storage account generate-sas --services b --resource-types sco --permission rwdl --expiry 2017-01-01t00:00z')
-        #sas_token = self.run('storage container generate-sas --permission rwdl --expiry 2017-01-01T00:00Z -c {}'.format(container))
-        #print('TOKEN: {}'.format(sas_token))
-        #self.set_env('AZURE_SAS_TOKEN', sas_token)
-        #self.set_env('AZURE_STORAGE_ACCOUNT', STORAGE_ACCOUNT_NAME)
-        #self.pop_env('AZURE_STORAGE_CONNECTION_STRING')
+        sas_token = self.run('storage account generate-sas --services b --resource-types sco --permission rwdl --expiry 2017-01-01t00:00z')
+        self.set_env('AZURE_SAS_TOKEN', sas_token)
+        self.set_env('AZURE_STORAGE_ACCOUNT', STORAGE_ACCOUNT_NAME)
+        self.pop_env('AZURE_STORAGE_CONNECTION_STRING')
         self.run('storage container delete --container-name {}'.format(self.container))
         if self.run('storage container exists --container-name {}'.format(self.container)) == 'True':
             raise RuntimeError('Failed to delete pre-existing container {}. Unable to continue test.'.format(self.container))
@@ -148,6 +145,10 @@ class StorageFileScenarioTest(CommandTestScript):
         self.share1 = 'testshare01'
         self.share2 = 'testshare02'
         _get_connection_string(self)
+        sas_token = self.run('storage account generate-sas --services f --resource-types sco --permission rwdl --expiry 2017-01-01t00:00z')
+        self.set_env('AZURE_SAS_TOKEN', sas_token)
+        self.set_env('AZURE_STORAGE_ACCOUNT', STORAGE_ACCOUNT_NAME)
+        self.pop_env('AZURE_STORAGE_CONNECTION_STRING')
         self.run('storage share delete --share-name {}'.format(self.share1))
         self.run('storage share delete --share-name {}'.format(self.share2))
 

@@ -191,9 +191,9 @@ PARAMETER_ALIASES.update({
 
 # SUPPLEMENTAL (EXTRA) PARAMETER SETS
 
-STORAGE_DATA_CLIENT_ARGS = {
-    'account_name': PARAMETER_ALIASES['account_name'],
-    'account_key': PARAMETER_ALIASES['account_key'],
-    'connection_string': PARAMETER_ALIASES['connection_string'],
-    'sas_token': PARAMETER_ALIASES['sas_token']
-}
+STORAGE_DATA_CLIENT_ARGS = [
+    PARAMETER_ALIASES['account_name'],
+    PARAMETER_ALIASES['account_key'],
+    PARAMETER_ALIASES['connection_string'],
+    PARAMETER_ALIASES['sas_token']
+]
