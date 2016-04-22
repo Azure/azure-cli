@@ -12,6 +12,10 @@
 #     AZURE_CLI_PRIVATE_PYPI_URL  - The URL to a PyPI server to include as an index for pip
 #     AZURE_CLI_PRIVATE_PYPI_HOST - The IP address/hostname of the PyPI server
 #
+# Tab completion info
+#    Call this script with the url to the completion setup script as an argument (i.e. sys.argv[1])
+#    This script will download the setup file and then execute it.
+
 from __future__ import print_function
 import os
 import sys
@@ -34,22 +38,17 @@ except NameError:
     # Python 3 doesn't have raw_input
     pass
 
-AZ_DISPATCH_TEMPLATE = """#!/usr/bin/env python
-import os
-import sys
-from subprocess import check_call, CalledProcessError
-ENVIRONMENT_NAME = os.environ.get('AZURE_CLI_ENVIRONMENT_NAME') or '{environment_name}'
-PATH_TO_PYTHON = os.path.join('{install_location}', '{envs_dir_name}', ENVIRONMENT_NAME, '{bin_dir_name}', 'python')
-try:
-    check_call([PATH_TO_PYTHON, '-m', 'azure.cli'] + sys.argv[1:])
-except CalledProcessError as err:
-    sys.exit(err.returncode)
+AZ_DISPATCH_TEMPLATE = """#!/usr/bin/env bash
+ENVIRONMENT_NAME=${{AZURE_CLI_ENVIRONMENT_NAME:-{environment_name}}}
+PATH_TO_PYTHON={install_dir}/{envs_dir_name}/$ENVIRONMENT_NAME/{bin_dir_name}/python
+$PATH_TO_PYTHON -m azure.cli "$@"
 """
 
-DEFAULT_INSTALL_LOCATION = os.path.join(os.path.sep, 'usr', 'local', 'az')
-DEFAULT_EXEC_FILENAME = os.path.join(os.path.sep, 'usr', 'local', 'bin', 'az')
+DEFAULT_INSTALL_DIR = os.path.join(os.path.sep, 'usr', 'local', 'az')
+DEFAULT_EXEC_DIR = os.path.join(os.path.sep, 'usr', 'local', 'bin')
 VIRTUALENV_VERSION = '15.0.0'
 BIN_DIR_NAME = 'Scripts' if platform.system() == 'Windows' else 'bin'
+EXECUTABLE_NAME = 'az'
 ENVS_DIR_NAME = 'envs'
 DEFAULT_ENVIRONMENT_NAME = 'default'
 
@@ -59,7 +58,7 @@ PRIVATE_PYPI_URL = os.environ.get('AZURE_CLI_PRIVATE_PYPI_URL')
 PRIVATE_PYPI_HOST = os.environ.get('AZURE_CLI_PRIVATE_PYPI_HOST')
 
 def exec_command(command, cwd=None, env=None):
-    print('Executing: '+command)
+    print('Executing: '+str(command))
     command_list = command if isinstance(command, list) else command.split()
     check_call(command_list, cwd=cwd, env=env)
 
@@ -104,17 +103,18 @@ def install_cli(install_dir):
     for module_name in modules_to_install:
         exec_command(get_pip_install_command(module_name, path_to_pip))
 
-def create_executable(exec_filename, install_location, environment_name):
-    exec_dir = os.path.dirname(exec_filename)
+def create_executable(exec_dir, install_dir, environment_name):
     create_dir(exec_dir)
+    exec_filename = os.path.join(exec_dir, EXECUTABLE_NAME)
     with open(exec_filename, 'w') as exec_file:
         exec_file.write(AZ_DISPATCH_TEMPLATE.format(
-                        install_location=install_location,
+                        install_dir=install_dir,
                         environment_name=environment_name,
                         envs_dir_name=ENVS_DIR_NAME,
                         bin_dir_name=BIN_DIR_NAME))
     cur_stat = os.stat(exec_filename)
     os.chmod(exec_filename, cur_stat.st_mode | stat.S_IEXEC)
+    return exec_filename
 
 def prompt_input(message):
     return None if DISABLE_PROMPTS else input(message)
@@ -122,43 +122,51 @@ def prompt_input(message):
 def verify_executable_overwrite(exec_filename):
     if os.path.isfile(exec_filename):
         ans = prompt_input("'{}' exists! Overwrite? [y/n]: ".format(exec_filename))
-        if ans and ans.lower() != 'y':
+        if ans is not None and ans.lower() != 'y':
             return False
     return True
 
-def get_install_location():
-    prompt_message = 'Where would you like to install? (default {}): '.format(DEFAULT_INSTALL_LOCATION)
-    install_location = prompt_input(prompt_message) or DEFAULT_INSTALL_LOCATION
-    install_location = os.path.expanduser(install_location)
-    print("We will install at '{}'.".format(install_location))
-    return install_location
+def get_install_dir():
+    prompt_message = 'In what directory would you like to place the install? (default {}): '.format(DEFAULT_INSTALL_DIR)
+    install_dir = prompt_input(prompt_message) or DEFAULT_INSTALL_DIR
+    install_dir = os.path.realpath(os.path.expanduser(install_dir))
+    print("We will install at '{}'.".format(install_dir))
+    return install_dir
 
-def get_exec_filename():
-    prompt_message = 'Where would you like to place the executable? (default {}): '.format(DEFAULT_EXEC_FILENAME)
-    exec_filename = prompt_input(prompt_message) or DEFAULT_EXEC_FILENAME
-    exec_filename = os.path.expanduser(exec_filename)
-    exec_filename = os.path.realpath(exec_filename)
-    print("The executable will be '{}'.".format(exec_filename))
-    return exec_filename
+def get_exec_dir():
+    prompt_message = 'In what directory would you like to place the executable? (default {}): '.format(DEFAULT_EXEC_DIR)
+    exec_dir = prompt_input(prompt_message) or DEFAULT_EXEC_DIR
+    exec_dir = os.path.realpath(os.path.expanduser(exec_dir))
+    print("The executable will be in '{}'.".format(exec_dir))
+    return exec_dir
 
 def get_environment_name():
     return os.environ.get('AZURE_CLI_ENVIRONMENT_NAME') or DEFAULT_ENVIRONMENT_NAME
 
+def handle_tab_completion(completion_script_url, tmp_dir, install_dir):
+    ans = prompt_input('Enable shell/tab completion? [y/n]: ')
+    if ans is not None and ans.lower() == 'y':
+        path_to_completion_script = os.path.join(tmp_dir, 'completion_script')
+        urlretrieve(completion_script_url, path_to_completion_script)
+        check_call(['python', path_to_completion_script, install_dir])
+
 def main():
     tmp_dir = create_tmp_dir()
-    install_location = get_install_location()
-    exec_filename = get_exec_filename()
-    if not verify_executable_overwrite(exec_filename):
-        print("Installation cancelled.")
-        sys.exit(1)
+    install_dir = get_install_dir()
+    exec_dir = get_exec_dir()
     environment_name = get_environment_name()
-    env_dir = os.path.join(install_location, ENVS_DIR_NAME, environment_name)
+    env_dir = os.path.join(install_dir, ENVS_DIR_NAME, environment_name)
     create_dir(env_dir)
     create_virtualenv(tmp_dir, VIRTUALENV_VERSION, env_dir)
     install_cli(env_dir)
-    create_executable(exec_filename, install_location, environment_name)
+    exec_filepath = create_executable(exec_dir, install_dir, environment_name)
+    try:
+        completion_script_url = sys.argv[1]
+        handle_tab_completion(completion_script_url, tmp_dir, install_dir)
+    except IndexError:
+        pass
     print("Installation successful.")
-    print("Run the CLI with {} --help".format(exec_filename))
+    print("Run the CLI with {} --help".format(exec_filepath))
 
 if __name__ == '__main__':
     main()
