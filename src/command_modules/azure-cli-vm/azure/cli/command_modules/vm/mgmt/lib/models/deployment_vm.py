@@ -26,9 +26,6 @@ class DeploymentVM(Model):
     :type os_publisher: str
     :param admin_password: Password for the Virtual Machine.
     :type admin_password: str
-    :param ip_address_type: Dynamic or Static IP address allocation. Possible
-     values include: 'Dynamic', 'Static'
-    :type ip_address_type: str
     :param storage_type: The VM storage type.
     :type storage_type: str
     :param size: The VM Size that should be created.  Values:
@@ -93,7 +90,6 @@ class DeploymentVM(Model):
         'os': {'key': 'properties.parameters.os.value', 'type': 'str'},
         'os_publisher': {'key': 'properties.parameters.osPublisher.value', 'type': 'str'},
         'admin_password': {'key': 'properties.parameters.adminPassword.value', 'type': 'str'},
-        'ip_address_type': {'key': 'properties.parameters.ipAddressType.value', 'type': 'str'},
         'storage_type': {'key': 'properties.parameters.storageType.value', 'type': 'str'},
         'size': {'key': 'properties.parameters.size.value', 'type': 'str'},
         'admin_user_name': {'key': 'properties.parameters.adminUsername.value', 'type': 'str'},
@@ -115,13 +111,12 @@ class DeploymentVM(Model):
         'mode': {'key': 'properties.mode', 'type': 'str'},
     }
 
-    def __init__(self, admin_password, admin_user_name, dns_name_for_public_ip, name, content_version=None, os=None, os_publisher=None, ip_address_type=None, storage_type=None, size=None, os_sku=None, os_offer=None, os_version=None, auth_method=None, ssh_key_value=None, ssh_key_path=None, add_to_availability_set=None, availability_set_id=None, subnet_name=None, vnet_name=None, new_or_existing_vnet=None, vnet_ip_address_type=None, subnet_ip_address_prefix=None):
+    def __init__(self, admin_password, admin_user_name, dns_name_for_public_ip, name, content_version=None, os=None, os_publisher=None, storage_type=None, size=None, os_sku=None, os_offer=None, os_version=None, auth_method=None, ssh_key_value=None, ssh_key_path=None, add_to_availability_set=None, availability_set_id=None, subnet_name=None, vnet_name=None, new_or_existing_vnet=None, vnet_ip_address_type=None, subnet_ip_address_prefix=None):
         self.uri = "https://azuretemplatehost.blob.core.windows.net/templatehost/CreateVM/azuredeploy.json"
         self.content_version = content_version
         self.os = os
         self.os_publisher = os_publisher
         self.admin_password = admin_password
-        self.ip_address_type = ip_address_type
         self.storage_type = storage_type
         self.size = size
         self.admin_user_name = admin_user_name
