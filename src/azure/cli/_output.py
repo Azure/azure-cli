@@ -11,7 +11,7 @@ class OutputFormatException(Exception):
 
 def format_json(obj):
     input_dict = obj.__dict__ if hasattr(obj, '__dict__') else obj
-    return json.dumps(input_dict, indent=2, sort_keys=True, separators=(',', ': '))
+    return json.dumps(input_dict, indent=2, sort_keys=True, separators=(',', ': ')) + '\n'
 
 def format_table(obj):
     obj_list = obj if isinstance(obj, list) else [obj]
@@ -133,6 +133,7 @@ class ListOutput(object): #pylint: disable=too-few-public-methods
         for obj in data:
             self._dump_object(io, obj, 0)
             io.write('\n')
+        io.write('\n')
         result = io.getvalue()
         io.close()
         return result
