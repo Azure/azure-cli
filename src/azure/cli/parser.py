@@ -13,7 +13,8 @@ class AzCliCommandParser(argparse.ArgumentParser):
     """ArgumentParser implementation specialized for the
     Azure CLI utility.
     """
-    argument_error = False
+    ARGUMENT_ERROR_CODE = 3
+
     usage_shown = False
 
     def __init__(self, **kwargs):
@@ -73,18 +74,17 @@ class AzCliCommandParser(argparse.ArgumentParser):
         return parent_subparser
 
     def format_usage(self):
-        return '\n{0}help: use --help for more information\n\n' \
-            .format(super(AzCliCommandParser, self).format_usage())
+        if not AzCliCommandParser.usage_shown:
+            AzCliCommandParser.usage_shown = True
+            return '\n{0}help: use --help for more information\n\n' \
+                .format(super(AzCliCommandParser, self).format_usage())
+        return None
 
     def error(self, message):
-        if 'required' in message or 'unrecognized' in message:
-            if not AzCliCommandParser.usage_shown:
-                self.print_usage(file=sys.stderr)
-                AzCliCommandParser.usage_shown = True
-            AzCliCommandParser.argument_error = True
-            print(message, file=sys.stderr)
-        else:
-            super(AzCliCommandParser, self).error(message)
+        #if 'required' in message or 'unrecognized' in message:
+        #    print(message, file=sys.stderr)
+        #    self.exit(AzCliCommandParser.ARGUMENT_ERROR_CODE)
+        super(AzCliCommandParser, self).error(message)
 
     def format_help(self):
         is_group = not self._defaults.get('func')

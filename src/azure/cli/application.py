@@ -67,9 +67,16 @@ class Application(object):
             _help.show_welcome(az_subparser)
             return None
 
-        args = self.parser.parse_args(argv)
-        if self.parser.argument_error:
-            self.parser.exit(3)
+        try:
+            args = self.parser.parse_args(argv)
+        except SystemExit as se:
+            #if se.code == AzCliCommandParser.ARGUMENT_ERROR_CODE:
+            #    for c in command_table.values():
+            #        for a in c['arguments']:
+            #            a['required'] = False
+            #    self.parser.load_command_table(command_table)
+            #    self.parser.parse_args(argv)
+            self.parser.exit(se.code)
 
         # Consider - we are using any args that start with an underscore (_) as 'private'
         # arguments and remove them from the arguments that we pass to the actual function.
