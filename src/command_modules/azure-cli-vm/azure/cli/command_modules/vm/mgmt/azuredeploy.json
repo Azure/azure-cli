@@ -311,12 +311,15 @@
           "vnetIpAddressPrefix": { "value": "[variables('vnetAddressPrefix')]" },
           "subnetIpAddressPrefix": { "value": "[variables('subnetAddressPrefix')]" },
           "subnetName": { "value": "[variables('subnetName')]" },
-          "location": { "value": "[parameters('location')]"}
+          "location": { "value": "[parameters('location')]" }
         }
       }
     },
     {
       "name": "[concat('VM', variables('vmName'))]",
+      "tags": {
+        "displayName": "VirtualMachine"
+      },
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
       "dependsOn": [
@@ -349,9 +352,13 @@
     }
   ],
   "outputs": {
-    "NewVM": {
+    "NewVMNic": {
       "type": "object",
-      "value": "[reference(concat('VM', variables('vmName')))]"
+      "value": "[reference(variables('nicName'))]"
+    },
+    "NewVMPublicIPAddress": {
+      "type": "object",
+      "value": "[reference(variables('publicIPAddressName'))]"
     }
   }
 }
