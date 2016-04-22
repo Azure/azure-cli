@@ -16,6 +16,9 @@
     },
     "subnetName": {
       "type": "string"
+    },
+    "location": {
+      "type": "string"
     }
   },
   "variables": {
@@ -29,7 +32,7 @@
     {
       "name": "[variables('NewVNetName')]",
       "type": "Microsoft.Network/virtualNetworks",
-      "location": "[resourceGroup().location]",
+      "location": "[parameters('location')]",
       "apiVersion": "2015-06-15",
       "dependsOn": [ ],
       "tags": {
