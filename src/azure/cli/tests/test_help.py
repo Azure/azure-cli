@@ -1,5 +1,8 @@
 from __future__ import print_function
 import unittest
+import logging
+import mock
+import sys
 from six import StringIO
 
 from azure.cli._logging import logger
@@ -7,9 +10,6 @@ from azure.cli.parser import AzCliCommandParser
 from azure.cli.application import Application, Configuration
 from azure.cli.commands import CommandTable
 import azure.cli._help_files
-import logging
-import mock
-import sys
 import azure.cli._util as util
 from azure.cli._help import HelpAuthoringException
 
