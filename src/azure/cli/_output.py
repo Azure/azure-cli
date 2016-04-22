@@ -233,7 +233,7 @@ class TsvOutput(object): #pylint: disable=too-few-public-methods
             # Iterate through the items either sorted by key value (if dict) or in the order
             # they were added (in the cases of an ordered dict) in order to make the output
             # stable
-            for _, value in data.items() if isinstance(data, OrderedDict) else sorted(data.items()):
+            for value in values:
                 stream.write(separator)
                 TsvOutput._dump_obj(value, stream)
                 separator = '\t'
