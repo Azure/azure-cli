@@ -2,7 +2,8 @@
 # 
 # Bash script to install the Azure CLI
 #
-INSTALL_SCRIPT_URL=http://azure-cli-nightly.cloudapp.net/install.py
+INSTALL_SCRIPT_URL="http://azure-cli-nightly.cloudapp.net/install.py"
+COMPLETION_SCRIPT_URL="http://azure-cli-nightly.cloudapp.net/setup_completion.py"
 _TTY=/dev/tty
 
 install_script=$(mktemp -t azure_cli_install_tmp_XXXX) || exit
@@ -12,8 +13,8 @@ chmod 775 $install_script
 echo "Running install script."
 
 if [[ -z "$AZURE_CLI_DISABLE_PROMPTS" && -t 1 ]]; then
-    $install_script < $_TTY
+    $install_script $COMPLETION_SCRIPT_URL < $_TTY
 else
     export AZURE_CLI_DISABLE_PROMPTS=1
-    $install_script
+    $install_script $COMPLETION_SCRIPT_URL
 fi
