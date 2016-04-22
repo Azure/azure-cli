@@ -66,23 +66,14 @@ def show_resource(args):
     )
     return results
 
-@command_table.command('resource list', description=L('List resources'))
-@command_table.option('--location -l', help=L("Resource location"))
-@command_table.option('--resource-type -r', help=L("Resource type"))
-@command_table.option('--tag -t',
-                      help=L("Filter by tag in the format of <tagname> or <tagname>=<tagvalue>"))
-@command_table.option('--name -n', help=L("Name of resource"))
-def list_resources(args):
-    rmc = get_mgmt_service_client(ResourceManagementClient, ResourceManagementClientConfiguration)
-
-    # Build up OData filter string from parameters
-    filters = []
-    
+def _list_resources_odata_filter_builder(args):
+    '''Build up OData filter string from parameters
+    '''
     location = args.get('location')
     if location:
         filters.append("location eq '%s'" % location)
 
-    resource_type = args.get('resource-type')
+    resource_type = args.get('resource_type')
     if resource_type:
         filters.append("resourceType eq '%s'" % resource_type)
 
@@ -90,10 +81,13 @@ def list_resources(args):
     if name:
         filters.append("name eq '%s'" % name)
 
-    tag_name_value = (args.get('tag') or '').split('=')
-    if tag_name_value[0]:
-        if name or location:
-            raise IncorrectUsageError('you cannot use the tagname or tagvalue filters with other filters')
+    tags = args.get('tags', ())
+    if tags and (name or location):
+        raise IncorrectUsageError('you cannot use the tagname or tagvalue filters with other filters')
+    
+    filters = []
+    for tag in tags:
+        tag_name_value = tag.split('=')
         tag_name = tag_name_value[0]
         if tag_name[-1] == '*':
             filters.append("startswith(tagname, '%s')" % tag_name[0:-1])
@@ -101,8 +95,27 @@ def list_resources(args):
             filters.append("tagname eq '%s'" % tag_name_value[0])
             if len(tag_name_value) == 2:
                 filters.append("tagvalue eq '%s'" % tag_name_value[1])
+    return ' and '.join(filters)
 
-    resources = rmc.resources.list(' and '.join(filters))
+@command_table.command('resource list', description=L('List resources'))
+@command_table.option('--location -l', help=L("Resource location"))
+@command_table.option('--resource-type -r', help=L("Resource type"))
+@command_table.option('--tags -t',
+                      help=L("Filter by tag in the format of <tagname> or <tagname>=<tagvalue>"),
+                      nargs='+')
+@command_table.option('--name -n', help=L("Name of resource"))
+def list_resources(args):
+    ''' EXAMPLES:
+            az resource list --location westus
+            az resource list --name thename
+            az resource list --name thename --location westus
+            az resource list --tag something
+            az resource list --tag some*
+            az resource list --tag something=else
+    '''
+    rmc = _resource_client_factory(args)
+    odata_filter = _list_resources_odata_filter_builder(args)
+    resources = rmc.resources.list(filter=odata_filter)
     return list(resources)
 
 def _resolve_api_version(args, rmc):
