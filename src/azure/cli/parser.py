@@ -81,9 +81,9 @@ class AzCliCommandParser(argparse.ArgumentParser):
         return None
 
     def error(self, message):
-        #if 'required' in message or 'unrecognized' in message:
-        #    print(message, file=sys.stderr)
-        #    self.exit(AzCliCommandParser.ARGUMENT_ERROR_CODE)
+        if 'required' in message or 'unrecognized' in message:
+            print(message, file=sys.stderr)
+            self.exit(AzCliCommandParser.ARGUMENT_ERROR_CODE)
         super(AzCliCommandParser, self).error(message)
 
     def format_help(self):

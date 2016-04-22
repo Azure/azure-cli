@@ -69,13 +69,14 @@ class Application(object):
 
         try:
             args = self.parser.parse_args(argv)
+            self.raise_event(self.COMMAND_PARSER_PARSED, args)
         except SystemExit as se:
-            #if se.code == AzCliCommandParser.ARGUMENT_ERROR_CODE:
-            #    for c in command_table.values():
-            #        for a in c['arguments']:
-            #            a['required'] = False
-            #    self.parser.load_command_table(command_table)
-            #    self.parser.parse_args(argv)
+            if se.code == AzCliCommandParser.ARGUMENT_ERROR_CODE:
+                for c in command_table.values():
+                    for a in c['arguments']:
+                        a['required'] = False
+                self.parser.load_command_table(command_table)
+                self.parser.parse_args(argv)
             self.parser.exit(se.code)
 
         # Consider - we are using any args that start with an underscore (_) as 'private'
