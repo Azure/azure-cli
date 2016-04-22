@@ -32,7 +32,7 @@ class VMOperations(object):
         self.config = config
 
     def create_or_update(
-            self, resource_group_name, deployment_name, admin_password, admin_user_name, dns_name_for_public_ip, name, content_version=None, os=None, os_publisher=None, ip_address_type=None, storage_type=None, size=None, os_sku=None, os_offer=None, os_version=None, auth_method=None, ssh_key_value=None, ssh_key_path=None, add_to_availability_set=None, availability_set_id=None, subnet_name=None, vnet_name=None, new_or_existing_vnet=None, vnet_ip_address_type=None, subnet_ip_address_prefix=None, custom_headers={}, raw=False, **operation_config):
+            self, resource_group_name, deployment_name, admin_password, admin_user_name, dns_name_for_public_ip, name, content_version=None, os=None, os_publisher=None, storage_type=None, size=None, os_sku=None, os_offer=None, os_version=None, auth_method=None, ssh_key_value=None, ssh_key_path=None, add_to_availability_set=None, availability_set_id=None, subnet_name=None, vnet_name=None, new_or_existing_vnet=None, vnet_ip_address_type=None, subnet_ip_address_prefix=None, custom_headers={}, raw=False, **operation_config):
         """
         Create or update a virtual machine.
 
@@ -57,9 +57,6 @@ class VMOperations(object):
         :type os: str
         :param os_publisher: The OS publisher of the OS image.
         :type os_publisher: str
-        :param ip_address_type: Dynamic or Static IP address allocation.
-         Possible values include: 'Dynamic', 'Static'
-        :type ip_address_type: str
         :param storage_type: The VM storage type.
         :type storage_type: str
         :param size: The VM Size that should be created.  Values:
@@ -107,7 +104,7 @@ class VMOperations(object):
         :rtype: :class:`ClientRawResponse<msrest.pipeline.ClientRawResponse>`
          if raw=true
         """
-        parameters = models.DeploymentVM(content_version=content_version, os=os, os_publisher=os_publisher, admin_password=admin_password, ip_address_type=ip_address_type, storage_type=storage_type, size=size, admin_user_name=admin_user_name, dns_name_for_public_ip=dns_name_for_public_ip, name=name, os_sku=os_sku, os_offer=os_offer, os_version=os_version, auth_method=auth_method, ssh_key_value=ssh_key_value, ssh_key_path=ssh_key_path, add_to_availability_set=add_to_availability_set, availability_set_id=availability_set_id, subnet_name=subnet_name, vnet_name=vnet_name, new_or_existing_vnet=new_or_existing_vnet, vnet_ip_address_type=vnet_ip_address_type, subnet_ip_address_prefix=subnet_ip_address_prefix)
+        parameters = models.DeploymentVM(content_version=content_version, os=os, os_publisher=os_publisher, admin_password=admin_password, storage_type=storage_type, size=size, admin_user_name=admin_user_name, dns_name_for_public_ip=dns_name_for_public_ip, name=name, os_sku=os_sku, os_offer=os_offer, os_version=os_version, auth_method=auth_method, ssh_key_value=ssh_key_value, ssh_key_path=ssh_key_path, add_to_availability_set=add_to_availability_set, availability_set_id=availability_set_id, subnet_name=subnet_name, vnet_name=vnet_name, new_or_existing_vnet=new_or_existing_vnet, vnet_ip_address_type=vnet_ip_address_type, subnet_ip_address_prefix=subnet_ip_address_prefix)
 
         # Construct URL
         url = '/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Resources/deployments/{deploymentName}'
