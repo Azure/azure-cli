@@ -88,16 +88,16 @@ class StorageBlobScenarioTest(CommandTestScript):
         s.rec('storage blob service-properties show')
 
         # test block blob upload
-        s.run('storage blob upload -b {} -c {} --type Block --upload-from {}'.format(block_blob, container, os.path.join(TEST_DIR, 'testfile.rst')))
+        s.run('storage blob upload -b {} -c {} --type block --upload-from {}'.format(block_blob, container, os.path.join(TEST_DIR, 'testfile.rst')))
         s.test('storage blob exists -b {} -c {}'.format(block_blob, container), True)
 
-        # TODO: test page blob upload
-        #s.run('storage blob upload -b {} -c {} --type Page --upload-from {}'.format(page_blob, container, os.path.join(TEST_DIR, 'testfile.rst')))
-        #s.test('storage blob exists -b {} -c {}'.format(page_blob, container), True)
+        # test page blob upload
+        s.run('storage blob upload -b {} -c {} --type page --upload-from {}'.format(page_blob, container, os.path.join(TEST_DIR, 'testfile.rst')))
+        s.test('storage blob exists -b {} -c {}'.format(page_blob, container), True)
 
         # test append blob upload
-        s.run('storage blob upload -b {} -c {} --type Append --upload-from {}'.format(append_blob, container, os.path.join(TEST_DIR, 'testfile.rst')))
-        s.run('storage blob upload -b {} -c {} --type Append --upload-from {}'.format(append_blob, container, os.path.join(TEST_DIR, 'testfile.rst')))
+        s.run('storage blob upload -b {} -c {} --type append --upload-from {}'.format(append_blob, container, os.path.join(TEST_DIR, 'testfile.rst')))
+        s.run('storage blob upload -b {} -c {} --type append --upload-from {}'.format(append_blob, container, os.path.join(TEST_DIR, 'testfile.rst')))
         s.test('storage blob exists -b {} -c {}'.format(append_blob, container), True)
 
         blob_url = 'https://{}.blob.core.windows.net/{}/{}'.format(STORAGE_ACCOUNT_NAME, container, blob)
@@ -108,14 +108,14 @@ class StorageBlobScenarioTest(CommandTestScript):
         s.run('storage blob metadata set -b {} -c {}'.format(blob, container))
         s.test('storage blob metadata show -b {} -c {}'.format(blob, container), None)
 
+        s.rec('storage blob list --container-name {}'.format(container))
+        s.test('storage blob show --container-name {} --blob-name {}'.format(container, block_blob),
+               {'name': block_blob, 'properties': {'blobType': 'BlockBlob'}})
         s.run('storage blob download -b {} -c {} --download-to {}'.format(blob, container, dest_file))
         if os.path.isfile(dest_file):
             os.remove(dest_file)
         else:
             raise RuntimeError('Download failed. Test failed!')
-        s.rec('storage blob list --container-name {}'.format(container))
-        s.test('storage blob show --container-name {} --blob-name {}'.format(container, block_blob),
-               {'name': block_blob, 'properties': {'blobType': 'BlockBlob'}})
 
         # test lease operations
         s.run('storage blob lease acquire --lease-duration 60 -b {} -c {} --if-modified-since {} --proposed-lease-id {}'.format(blob, container, date, proposed_lease_id))

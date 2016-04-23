@@ -97,14 +97,14 @@ class Test_autocommand(unittest.TestCase):
 
     def test_autocommand_with_extra_parameters(self):
         command_table = CommandTable()
-        NEW_PARAMETERS= {
-            'new-param': {
+        NEW_PARAMETERS= [
+            {
                 'name': '--added-param',
                 'metavar': 'ADDED',
                 'help': 'Just added this right now!',
                 'required': True
             }
-        }
+        ]
         build_operation("test autocommand",
                         "",
                         None,
