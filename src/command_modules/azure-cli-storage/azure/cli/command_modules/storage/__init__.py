@@ -1,5 +1,5 @@
 from __future__ import print_function
-from os import environ
+import os
 from sys import stderr, modules
 
 from azure.storage.blob import PublicAccess, BlockBlobService, AppendBlobService, PageBlobService
@@ -35,8 +35,8 @@ def _file_data_service_factory(args):
 def _blob_data_service_factory(args):
     type = args.get('type')
     if not type:
-        type = 'Block'
-    blob_service = getattr(modules[__name__], '{}BlobService'.format(type))
+        type = 'block'
+    blob_service = getattr(modules[__name__], '{}BlobService'.format(type.capitalize()))
     return get_data_service_client(
         blob_service,
         args.pop('account_name', None),
@@ -289,7 +289,7 @@ build_operation(
         AutoCommandDefinition(BlockBlobService.set_blob_metadata, 'Metadata', 'set')
     ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
-blob_types = ['Block', 'Page', 'Append']
+blob_types = ['block', 'page', 'append']
 blob_types_str = ' '.join(blob_types)
 
 @command_table.command('storage blob upload')
@@ -339,7 +339,7 @@ def create_block_blob(args):
             progress_callback=_update_progress
         )
 
-    def upload_block_or_page_blob():
+    def upload_block_blob():
         return bds.create_blob_from_path(
             container_name=container_name,
             blob_name=blob_name,
@@ -348,10 +348,28 @@ def create_block_blob(args):
             content_settings=content_settings
         )
 
-    if type == 'Append':
-        return upload_append_blob()
-    elif type == 'Block' or type == 'Page':
-        return upload_block_or_page_blob()
+    def upload_page_blob():
+        fsize = os.path.getsize(file_path)
+        mod = fsize % 512
+        if mod:
+            with open(file_path, 'wb') as f:
+                padding = 512 - mod - 1
+                f.seek(fsize + padding)
+                f.write(str.encode('\0'))
+        return bds.create_blob_from_path(
+            container_name=container_name,
+            blob_name=blob_name,
+            file_path=file_path,
+            progress_callback=_update_progress,
+            content_settings=content_settings
+        )        
+    
+    type_func = {
+        'append': upload_append_blob,
+        'block': upload_block_blob,
+        'page': upload_page_blob
+    }
+    return type_func[type]()
 
 @command_table.command('storage blob download')
 @command_table.description(L('Download the specified blob.'))
