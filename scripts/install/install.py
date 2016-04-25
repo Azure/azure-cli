@@ -119,13 +119,6 @@ def create_executable(exec_dir, install_dir, environment_name):
 def prompt_input(message):
     return None if DISABLE_PROMPTS else input(message)
 
-def verify_executable_overwrite(exec_filename):
-    if os.path.isfile(exec_filename):
-        ans = prompt_input("'{}' exists! Overwrite? [y/N]: ".format(exec_filename))
-        if ans is not None and ans.lower() != 'y':
-            return False
-    return True
-
 def get_install_dir():
     prompt_message = 'In what directory would you like to place the install? (default {}): '.format(DEFAULT_INSTALL_DIR)
     install_dir = prompt_input(prompt_message) or DEFAULT_INSTALL_DIR
