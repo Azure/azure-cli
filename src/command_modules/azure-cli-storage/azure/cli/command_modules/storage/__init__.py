@@ -1,6 +1,7 @@
 from __future__ import print_function
 import os
 import shutil
+import subprocess
 from sys import stderr, modules
 
 from azure.storage.blob import PublicAccess, BlockBlobService, AppendBlobService, PageBlobService
@@ -467,6 +468,31 @@ build_operation(
 def exist_share(args):
     fsc = _file_data_service_factory(args)
     return fsc.exists(share_name=args.get('share_name'))
+
+@command_table.command('storage share mount')
+@command_table.description(L('Mount an SMB file share.'))
+@command_table.option(**PARAMETER_ALIASES['share_name'])
+@command_table.option('--drive', required=True, help=L('the desired drive letter identified'))
+@command_table.option(**PARAMETER_ALIASES['account_name'])
+@command_table.option(**PARAMETER_ALIASES['account_key'])
+def mount_share(args):
+    drive = args.get('drive')
+    share_name = args.get('share_name')
+    account_name = args.get('account_name')
+    account_key = args.get('account_key')
+    if os.name == 'nt':
+        # TODO: Do some stuff on Windows!!
+        #command = 'cmdkey /add:{}.file.core.windows.net /user:{} /pass:{}'.format(
+        #    account_name, account_name, account_key)
+        #subprocess.call(command.split())
+        command = 'net use {}: \\\\{}.file.core.windows.net\\{} {} /user:{}'.format(
+            drive, account_name, share_name, account_key, account_name)
+        print(command)
+        subprocess.call(command.split())
+    elif os.name == 'posix':
+        # TODO: Do some stuff on Linux!!
+        pass
+    return 'banoodle {}'.format(os.name)
 
 # DIRECTORY COMMANDS
 
