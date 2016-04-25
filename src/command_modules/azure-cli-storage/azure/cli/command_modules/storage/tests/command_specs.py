@@ -27,13 +27,40 @@ def _get_connection_string(runner):
     connection_string = out.replace('Connection String : ', '')
     runner.set_env('AZURE_STORAGE_CONNECTION_STRING', connection_string)
 
-class StorageAccountScenarioTest(CommandTestScript):
+class LongRunningOperationTest(CommandTestScript):
+    def set_up(self):
+        pass
 
     def test_body(self):
         account = STORAGE_ACCOUNT_NAME
         rg = RESOURCE_GROUP_NAME
         s = self
-        s.test('storage account check-name --name teststorageomega', {'nameAvailable': True})
+        s.rec('storage account create --type Standard_LRS -l westus -n {} -g {}'.format(
+            STORAGE_ACCOUNT_NAME, RESOURCE_GROUP_NAME))
+
+    def tear_down(self):
+        self.run('storage account delete -g {} -n {}'.format(
+            RESOURCE_GROUP_NAME, STORAGE_ACCOUNT_NAME))
+
+    def __init__(self):
+        super(LongRunningOperationTest, self).__init__(
+            self.set_up, self.test_body, self.tear_down)
+
+class StorageAccountScenarioTest(CommandTestScript):
+
+    def set_up(self):
+        self.run('storage account delete -g {} -n {}'.format(
+            RESOURCE_GROUP_NAME, STORAGE_ACCOUNT_NAME))
+        result = json.loads(self.run('storage account check-name --name {} -o json'.format(STORAGE_ACCOUNT_NAME)))
+        if not result['nameAvailable']:
+            raise RuntimeError('Failed to delete pre-existing storage account {}. Unable to continue test.'.format(STORAGE_ACCOUNT_NAME))
+
+    def test_body(self):
+        account = STORAGE_ACCOUNT_NAME
+        rg = RESOURCE_GROUP_NAME
+        s = self
+        s.rec('storage account create --type Standard_LRS -l westus -n {} -g {}'.format(
+            STORAGE_ACCOUNT_NAME, RESOURCE_GROUP_NAME))
         s.test('storage account check-name --name {}'.format(account),
                {'nameAvailable': False, 'reason': 'AlreadyExists'})
         s.rec('storage account list -g {}'.format(rg))
@@ -52,9 +79,17 @@ class StorageAccountScenarioTest(CommandTestScript):
         s.test('storage account set -g {} -n {} --type Standard_GRS'.format(rg, account),
                {'accountType': 'Standard_GRS'})
         s.run('storage account set -g {} -n {} --type Standard_LRS'.format(rg, account))
+        s.run('storage account delete -g {} -n {}'.format(
+            RESOURCE_GROUP_NAME, STORAGE_ACCOUNT_NAME))
+        s.test('storage account check-name --name {}'.format(STORAGE_ACCOUNT_NAME), {'nameAvailable': True})
+
+    def tear_down(self):
+        self.run('storage account delete -g {} -n {}'.format(
+            RESOURCE_GROUP_NAME, STORAGE_ACCOUNT_NAME))
 
     def __init__(self):
-        super(StorageAccountScenarioTest, self).__init__(None, self.test_body, None)
+        super(StorageAccountScenarioTest, self).__init__(
+            self.set_up, self.test_body, self.tear_down)
 
 class StorageBlobScenarioTest(CommandTestScript):
 
@@ -301,28 +336,20 @@ class StorageFileScenarioTest(CommandTestScript):
         super(StorageFileScenarioTest, self).__init__(self.set_up, self.test_body, self.tear_down)
 
 TEST_DEF = [
-    # STORAGE ACCOUNT TESTS
-    {
-        'test_name': 'storage_account',
-        'script': StorageAccountScenarioTest()
-    },
-    # TODO: Enable when item #117262541 is complete
     #{
-    #    'test_name': 'storage_account_create',
-    #    'command': 'storage account create --type Standard_LRS -l westus -g travistestresourcegroup --account-name teststorageaccount04'
+    #    'test_name': 'storage_account',
+    #    'script': StorageAccountScenarioTest()
+    #},
+    #{
+    #    'test_name': 'storage_blob',
+    #    'script': StorageBlobScenarioTest()
+    #},
+    #{
+    #    'test_name': 'storage_file',
+    #    'script': StorageFileScenarioTest()
     #},
     {
-        'test_name': 'storage_account_delete',
-        'command': 'storage account delete -g travistestresourcegroup --account-name teststorageaccount04'
-    },
-    # STORAGE CONTAINER TESTS
-    {
-        'test_name': 'storage_blob',
-        'script': StorageBlobScenarioTest()
-    },
-    # STORAGE SHARE TESTS
-    {
-        'test_name': 'storage_file',
-        'script': StorageFileScenarioTest()
-    },
+        'test_name': 'storage_lro',
+        'script': LongRunningOperationTest()
+    }
 ]
