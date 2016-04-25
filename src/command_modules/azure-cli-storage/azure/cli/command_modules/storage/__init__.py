@@ -3,6 +3,7 @@ import os
 import shutil
 import subprocess
 from sys import stderr, modules
+import tempfile
 
 from azure.storage.blob import PublicAccess, BlockBlobService, AppendBlobService, PageBlobService
 from azure.storage.file import FileService
@@ -17,7 +18,7 @@ from azure.cli.commands._auto_command import build_operation, AutoCommandDefinit
 from azure.cli._locale import L
 
 from ._params import PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS
-from ._validators import (validate_key_value_pairs)
+from ._validators import validate_key_value_pairs
 
 command_table = CommandTable()
 
@@ -38,7 +39,7 @@ def _blob_data_service_factory(args):
     blob_type = args.get('type')
     if not blob_type:
         blob_type = 'block'
-    blob_service = getattr(modules[__name__], '{}BlobService'.format(type.capitalize()))
+    blob_service = getattr(modules[__name__], '{}BlobService'.format(blob_type.capitalize()))
     return get_data_service_client(
         blob_service,
         args.pop('account_name', None),
@@ -351,17 +352,19 @@ def upload_blob(args):
         )
 
     def upload_page_blob():
+        temp_file_path = None
         fsize = os.path.getsize(file_path)
         path = file_path
         mod = fsize % 512
         if mod:
-            temp_file = 'temppageblob.temp'
-            shutil.copyfile(file_path, temp_file)
-            with open(temp_file, 'r+b') as stream:
+            (fd, temp_file_path) = tempfile.mkstemp()
+            os.fdopen(fd, 'r').close()
+            shutil.copyfile(file_path, temp_file_path)
+            with open(temp_file_path, 'r+b') as stream:
                 padding = 512 - mod
                 stream.seek(fsize + padding - 1)
                 stream.write(str.encode('\0'))
-            path = temp_file
+            path = temp_file_path
         result = bds.create_blob_from_path(
             container_name=container_name,
             blob_name=blob_name,
@@ -369,8 +372,8 @@ def upload_blob(args):
             progress_callback=_update_progress,
             content_settings=content_settings
         )
-        if os.path.isfile(temp_file):
-            os.remove(temp_file)
+        if temp_file_path and os.path.isfile(temp_file_path):
+            os.remove(temp_file_path)
         return result
 
     type_func = {
