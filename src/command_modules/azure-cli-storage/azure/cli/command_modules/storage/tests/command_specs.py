@@ -232,7 +232,7 @@ class StorageFileScenarioTest(CommandTestScript):
         else:
             raise RuntimeError('\nDownload failed. Test failed!')
 
-        # test resize command        
+        # test resize command
         s.run('storage file resize -s {} --file-name {} --content-length 1234'.format(share, filename))
         s.test('storage file show -s {} --file-name {}'.format(share, filename), {'properties': {'contentLength': 1234}})
 
