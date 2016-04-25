@@ -113,7 +113,7 @@ class CommandTestGenerator(object):
                     print('-' * len(header) + '\n', file=sys.stderr)
                     print(display_result, file=sys.stderr)
                     if not auto_validated and not fail:
-                        ans = input('Save result for \'{}\'? [Y/n]: '.format(test_name))
+                        ans = input('Save result for \'{}\'? [y/N]: '.format(test_name))
                         fail = False if ans and ans.lower()[0] == 'y' else True
 
                     if not fail:

@@ -121,7 +121,7 @@ def prompt_input(message):
 
 def verify_executable_overwrite(exec_filename):
     if os.path.isfile(exec_filename):
-        ans = prompt_input("'{}' exists! Overwrite? [y/n]: ".format(exec_filename))
+        ans = prompt_input("'{}' exists! Overwrite? [y/N]: ".format(exec_filename))
         if ans is not None and ans.lower() != 'y':
             return False
     return True
@@ -144,7 +144,7 @@ def get_environment_name():
     return os.environ.get('AZURE_CLI_ENVIRONMENT_NAME') or DEFAULT_ENVIRONMENT_NAME
 
 def handle_tab_completion(completion_script_url, tmp_dir, install_dir):
-    ans = prompt_input('Enable shell/tab completion? [y/n]: ')
+    ans = prompt_input('Enable shell/tab completion? [y/N]: ')
     if ans is not None and ans.lower() == 'y':
         path_to_completion_script = os.path.join(tmp_dir, 'completion_script')
         urlretrieve(completion_script_url, path_to_completion_script)
