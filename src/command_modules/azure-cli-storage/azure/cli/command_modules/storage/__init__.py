@@ -1,5 +1,6 @@
 from __future__ import print_function
 import os
+import shutil
 from sys import stderr, modules
 
 from azure.storage.blob import PublicAccess, BlockBlobService, AppendBlobService, PageBlobService
@@ -33,9 +34,9 @@ def _file_data_service_factory(args):
         sas_token=args.pop('sas_token', None))
 
 def _blob_data_service_factory(args):
-    type = args.get('type')
-    if not type:
-        type = 'block'
+    blob_type = args.get('type')
+    if not blob_type:
+        blob_type = 'block'
     blob_service = getattr(modules[__name__], '{}BlobService'.format(type.capitalize()))
     return get_data_service_client(
         blob_service,
@@ -310,10 +311,10 @@ blob_types_str = ' '.join(blob_types)
 @command_table.option('--content.language')
 @command_table.option('--content.md5')
 @command_table.option('--content.cache-control')
-def create_block_blob(args):
+def upload_blob(args):
     from azure.storage.blob import ContentSettings
     bds = _blob_data_service_factory(args)
-    type = args.get('type')
+    blob_type = args.get('type')
     container_name = args.get('container_name')
     blob_name = args.get('blob_name')
     file_path = args.get('upload_from')
@@ -350,26 +351,33 @@ def create_block_blob(args):
 
     def upload_page_blob():
         fsize = os.path.getsize(file_path)
+        path = file_path
         mod = fsize % 512
         if mod:
-            with open(file_path, 'wb') as f:
-                padding = 512 - mod - 1
-                f.seek(fsize + padding)
-                f.write(str.encode('\0'))
-        return bds.create_blob_from_path(
+            temp_file = 'temppageblob.temp'
+            shutil.copyfile(file_path, temp_file)
+            with open(temp_file, 'r+b') as stream:
+                padding = 512 - mod
+                stream.seek(fsize + padding - 1)
+                stream.write(str.encode('\0'))
+            path = temp_file
+        result = bds.create_blob_from_path(
             container_name=container_name,
             blob_name=blob_name,
-            file_path=file_path,
+            file_path=path,
             progress_callback=_update_progress,
             content_settings=content_settings
-        )        
-    
+        )
+        if os.path.isfile(temp_file):
+            os.remove(temp_file)
+        return result
+
     type_func = {
         'append': upload_append_blob,
         'block': upload_block_blob,
         'page': upload_page_blob
     }
-    return type_func[type]()
+    return type_func[blob_type]()
 
 @command_table.command('storage blob download')
 @command_table.description(L('Download the specified blob.'))

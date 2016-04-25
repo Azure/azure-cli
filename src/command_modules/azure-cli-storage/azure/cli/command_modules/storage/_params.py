@@ -5,7 +5,6 @@ from azure.cli._locale import L
 
 from ._validators import (
     validate_container_permission, validate_datetime, validate_datetime_as_string, validate_id,
-    validate_container_permission, validate_datetime, validate_id,
     validate_ip_range, validate_key_value_pairs, validate_resource_types, validate_services,
     validate_tags, validate_lease_duration, validate_quota)
 
