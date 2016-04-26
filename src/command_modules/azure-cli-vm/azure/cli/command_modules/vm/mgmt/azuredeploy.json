@@ -275,9 +275,6 @@
   "resources": [
     {
       "name": "[parameters('storageAccountName')]",
-      "tags": {
-        "displayName": "StorageAccount"
-      },
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
       "dependsOn": [ ],
@@ -289,8 +286,6 @@
         },
         "parameters": {
           "storageAccountName": { "value": "[parameters('storageAccountName')]" },
-          "storageContainerName": { "value": "[parameters('storageContainerName')]" },
-          "osDiskName": { "value": "[parameters('osDiskName')]" },
           "location": { "value": "[parameters('location')]" },
           "vhdStorageType": { "value": "[variables('vhdStorageType')]" }
         }
@@ -363,9 +358,6 @@
     },
     {
       "name": "[concat('VM', variables('vmName'))]",
-      "tags": {
-        "displayName": "VirtualMachine"
-      },
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
       "dependsOn": [
