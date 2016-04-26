@@ -38,7 +38,7 @@ CLASSIFIERS = [
 
 DEPENDENCIES = [
     'azure==2.0.0rc1',
-    'adal==0.2.1', #from internal index server.
+    'adal==0.2.2', #from libs/adal-*.zip
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
