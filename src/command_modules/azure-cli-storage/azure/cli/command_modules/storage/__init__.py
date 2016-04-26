@@ -1,8 +1,6 @@
 from __future__ import print_function
 import os
-import shutil
 from sys import stderr, modules
-import tempfile
 
 from azure.storage.blob import PublicAccess, BlockBlobService, AppendBlobService, PageBlobService
 from azure.storage.file import FileService
@@ -353,28 +351,24 @@ def upload_blob(args):
         )
 
     def upload_page_blob():
-        temp_file_path = None
         fsize = os.path.getsize(file_path)
-        path = file_path
         mod = fsize % 512
         if mod:
-            (fd, temp_file_path) = tempfile.mkstemp()
-            os.fdopen(fd, 'r').close()
-            shutil.copyfile(file_path, temp_file_path)
-            with open(temp_file_path, 'r+b') as stream:
+            with open(file_path, 'r+b') as stream:
                 padding = 512 - mod
                 stream.seek(fsize + padding - 1)
                 stream.write(str.encode('\0'))
-            path = temp_file_path
         result = bds.create_blob_from_path(
             container_name=container_name,
             blob_name=blob_name,
-            file_path=path,
+            file_path=file_path,
             progress_callback=_update_progress,
             content_settings=content_settings
         )
-        if temp_file_path and os.path.isfile(temp_file_path):
-            os.remove(temp_file_path)
+        if mod:
+            with open(file_path, 'r+b') as stream:
+                stream.seek(fsize)
+                stream.truncate()
         return result
 
     type_func = {
