@@ -37,9 +37,7 @@ def _file_data_service_factory(args):
 
 def _blob_data_service_factory(args):
     blob_type = args.get('type')
-    if not blob_type:
-        blob_type = 'block'
-    blob_service = getattr(modules[__name__], '{}BlobService'.format(blob_type.capitalize()))
+    blob_service = blob_types.get(blob_type, BlockBlobService)
     return get_data_service_client(
         blob_service,
         args.pop('account_name', None),
@@ -292,14 +290,18 @@ build_operation(
         AutoCommandDefinition(BlockBlobService.set_blob_metadata, 'Metadata', 'set')
     ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
-blob_types = ['block', 'page', 'append']
-blob_types_str = ' '.join(blob_types)
+blob_types = {
+    'block': BlockBlobService,
+    'page': PageBlobService,
+    'append': AppendBlobService
+}
+blob_types_str = ' '.join(blob_types.keys())
 
 @command_table.command('storage blob upload')
 @command_table.description(L('Upload a blob to a container.'))
 @command_table.option(**PARAMETER_ALIASES['container_name'])
 @command_table.option(**PARAMETER_ALIASES['blob_name'])
-@command_table.option('--type', required=True, choices=blob_types,
+@command_table.option('--type', required=True, choices=blob_types.keys(),
                       help=L('type of blob to upload ({})'.format(blob_types_str)))
 @command_table.option('--upload-from', required=True,
                       help=L('local path to upload from'))
