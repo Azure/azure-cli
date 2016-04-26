@@ -1,7 +1,7 @@
-from azure.mgmt.compute.models import DataDisk, VirtualHardDisk
+from azure.mgmt.compute.models import DataDisk
 from azure.mgmt.compute.models.compute_management_client_enums import DiskCreateOptionTypes
 from azure.cli._locale import L
-from azure.cli.commands import (CommandTable, LongRunningOperation, extend_parameter)
+from azure.cli.commands import CommandTable, LongRunningOperation
 from azure.cli.commands._command_creation import get_mgmt_service_client
 from azure.mgmt.compute import ComputeManagementClient, ComputeManagementClientConfiguration
 

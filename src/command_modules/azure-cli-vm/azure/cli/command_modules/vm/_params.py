@@ -1,6 +1,4 @@
-from os import environ
-
-from azure.mgmt.compute.models import DataDisk, VirtualHardDisk
+from azure.mgmt.compute.models import VirtualHardDisk
 
 from azure.cli.commands import (COMMON_PARAMETERS as GLOBAL_COMMON_PARAMETERS, extend_parameter)
 from azure.cli._locale import L
@@ -24,7 +22,8 @@ PARAMETER_ALIASES.update({
     'lun': {
         'name': '--lun',
         'dest': 'lun',
-        'help': L('0-based logical unit number (LUN). Max value depend on the Virtual Machine size'),
+        'help': L('0-based logical unit number (LUN). Max value depend on the Virtual ' + \
+                  'Machine size'),
         'type': int,
         'required': True
     },
