@@ -1,8 +1,6 @@
 from __future__ import print_function
 import os
-import shutil
 from sys import stderr, modules
-import tempfile
 
 from azure.storage.blob import PublicAccess, BlockBlobService, AppendBlobService, PageBlobService
 from azure.storage.file import FileService
