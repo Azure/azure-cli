@@ -9,7 +9,9 @@ from azure.mgmt.storage import StorageManagementClient, StorageManagementClientC
 from azure.mgmt.storage.models import AccountType
 from azure.mgmt.storage.operations import StorageAccountsOperations
 
-from azure.cli.commands import (CommandTable, LongRunningOperation)
+from azure.cli.commands import (CommandTable,
+                                LongRunningOperation,
+                                RESOURCE_GROUP_ARG_NAME)
 from azure.cli.commands._command_creation import get_mgmt_service_client, get_data_service_client
 from azure.cli.commands._auto_command import build_operation, AutoCommandDefinition
 from azure.cli._locale import L
@@ -87,7 +89,7 @@ def list_accounts(args):
     from azure.mgmt.storage.models import StorageAccount
     from msrestazure.azure_active_directory import UserPassCredentials
     smc = _storage_client_factory({})
-    group = args.get('resourcegroup')
+    group = args.get(RESOURCE_GROUP_ARG_NAME)
     if group:
         accounts = smc.storage_accounts.list_by_resource_group(group)
     else:
@@ -112,7 +114,7 @@ def renew_account_keys(args):
     keys_to_renew = args.get('key')
     for key in keys_to_renew if isinstance(keys_to_renew, list) else [keys_to_renew]:
         result = smc.storage_accounts.regenerate_key(
-            resource_group_name=args.get('resourcegroup'),
+            resource_group_name=args.get(RESOURCE_GROUP_ARG_NAME),
             account_name=args.get('account_name'),
             key_name=key)
     return result
@@ -134,7 +136,8 @@ def show_storage_connection_string(args):
     smc = _storage_client_factory({})
     endpoint_protocol = args.get('use_http')
     storage_account = args.get('account_name')
-    keys = smc.storage_accounts.list_keys(args.get('resourcegroup'), storage_account)
+    keys = smc.storage_accounts.list_keys(args.get(RESOURCE_GROUP_ARG_NAME),
+                                          storage_account)
 
     connection_string = 'DefaultEndpointsProtocol={};AccountName={};AccountKey={}'.format(
         endpoint_protocol,
@@ -160,7 +163,7 @@ def create_account(args):
     from azure.mgmt.storage.models import StorageAccountCreateParameters
     smc = _storage_client_factory({})
 
-    resource_group = args.get('resourcegroup')
+    resource_group = args.get(RESOURCE_GROUP_ARG_NAME)
     account_name = args.get('account_name')
     account_type = storage_account_types[args.get('type')]
     params = StorageAccountCreateParameters(args.get('location'),
@@ -184,7 +187,7 @@ def set_account(args):
     from azure.mgmt.storage.models import StorageAccountUpdateParameters, CustomDomain
     smc = _storage_client_factory({})
 
-    resource_group = args.get('resourcegroup')
+    resource_group = args.get(RESOURCE_GROUP_ARG_NAME)
     account_name = args.get('account_name')
     domain = args.get('custom_domain')
     account_type = storage_account_types[args.get('type')] if args.get('type') else None
