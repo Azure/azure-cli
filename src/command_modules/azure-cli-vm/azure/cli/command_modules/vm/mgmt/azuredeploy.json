@@ -77,6 +77,38 @@
         "description": "The VM Size that should be created."
       }
     },
+    "newOrExistingStorageAccount": {
+      "type": "string",
+      "defaultValue": "new",
+      "allowedValues": [
+        "new",
+        "existing"
+      ],
+      "metadata": {
+        "description": "Whether to use an existing storage account or create a new one."
+      }
+    },
+    "storageAccountName": {
+      "type": "string",
+      "defaultValue": "[concat('vhdstorage', uniqueString(parameters('dnsNameForPublicIP')))]",
+      "metadata": {
+        "description": "Name of storage account for the VM OS disk."
+      }
+    },
+    "storageContainerName": {
+      "type": "string",
+      "defaultValue": "vhds",
+      "metadata": {
+        "description": "Name of storage container for the VM OS disk."
+      }
+    },
+    "osDiskName": {
+      "type": "string",
+      "defaultValue": "osdiskimage",
+      "metadata": {
+        "description": "Name of storage VHD for the VM OS disk."
+      }
+    },
     "storageType": {
       "type": "string",
       "defaultValue": "Standard_LRS",
@@ -230,7 +262,10 @@
     "vnetName": "[parameters('virtualNetworkName')]",
     "vnetId": "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]",
     "subnetRef": "[concat(variables('vnetId'), '/subnets/', variables('subnetName'))]",
-    "vhdStorageName": "[concat('vhdstorage', uniqueString(parameters('dnsNameForPublicIP')))]",
+    "storageAccountTemplateFilePaths": {
+      "new": "nested_templates/NewStorageAccount.json",
+      "existing": "nested_templates/ExistingStorageAccount.json"
+    },
     "availSetId": "[resourceId('Microsoft.Compute/availabilitySets', parameters('availabilitySetId'))]",
     "vnetTemplateFilePaths": {
       "new": "nested_templates/NewVNet.json",
@@ -239,15 +274,26 @@
   },
   "resources": [
     {
-      "type": "Microsoft.Storage/storageAccounts",
-      "name": "[variables('vhdStorageName')]",
-      "apiVersion": "2015-06-15",
-      "location": "[parameters('location')]",
+      "name": "[parameters('storageAccountName')]",
       "tags": {
         "displayName": "StorageAccount"
       },
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "dependsOn": [ ],
       "properties": {
-        "accountType": "[variables('vhdStorageType')]"
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(parameters('_artifactsLocation'), '/', variables('storageAccountTemplateFilePaths')[parameters('newOrExistingStorageAccount')])]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "storageAccountName": { "value": "[parameters('storageAccountName')]" },
+          "storageContainerName": { "value": "[parameters('storageContainerName')]" },
+          "osDiskName": { "value": "[parameters('osDiskName')]" },
+          "location": { "value": "[parameters('location')]" },
+          "vhdStorageType": { "value": "[variables('vhdStorageType')]" }
+        }
       }
     },
     {
@@ -323,7 +369,7 @@
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
       "dependsOn": [
-        "[concat('Microsoft.Storage/storageAccounts/', variables('vhdStorageName'))]",
+        "[concat('Microsoft.Resources/deployments/', parameters('storageAccountName'))]",
         "[concat('Microsoft.Network/networkInterfaces/', variables('nicName'))]"
       ],
       "properties": {
@@ -343,6 +389,9 @@
           "osVersion": { "value": "[variables('imageVersions')[parameters('os')]]" },
           "size": { "value": "[variables('vmSize')]" },
           "storageType": { "value": "[variables('vhdStorageType')]" },
+          "storageAccountName": { "value": "[parameters('storageAccountName')]" },
+          "storageContainerName": { "value": "[parameters('storageContainerName')]" },
+          "osDiskName": { "value": "[parameters('osDiskName')]" },
           "sshKeyValue": { "value": "[parameters('sshKeyValue')]" },
           "sshKeyPath": { "value": "[parameters('sshKeyPath')]" },
           "availabilitySetId": { "value": "[variables('availSetId')]" },
