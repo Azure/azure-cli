@@ -65,7 +65,7 @@
     "vhdStorageName": "[parameters('storageAccountName')]",
     "vhdStorageType": "[parameters('storageType')]",
     "vhdStorageContainerName": "[parameters('storageContainerName')]",
-    "nicName": "[concat('MyVMNic', uniqueString(parameters('dnsNameForPublicIP')))]"
+    "nicName": "[concat('VMNic', parameters('VirtualMachineName'))]"
   },
   "resources": [
     {
@@ -130,6 +130,6 @@
     }
   ],
   "outputs": {
-    
+
   }
 }

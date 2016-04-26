@@ -90,7 +90,7 @@
     },
     "storageAccountName": {
       "type": "string",
-      "defaultValue": "[concat('vhdstorage', uniqueString(parameters('dnsNameForPublicIP')))]",
+      "defaultValue": "[concat('vhdstorage', uniqueString(parameters('VirtualMachineName')))]",
       "metadata": {
         "description": "Name of storage account for the VM OS disk."
       }
@@ -129,7 +129,7 @@
     },
     "virtualNetworkName": {
       "type": "string",
-      "defaultValue": "[concat(parameters('virtualMachineName'), 'VNET', uniqueString(parameters('dnsNameForPublicIP')))]",
+      "defaultValue": "[concat(parameters('virtualMachineName'), 'VNET', parameters('VirtualMachineName'))]",
       "metadata": {
         "description": "Name of virtual network to add VM to."
       }
@@ -249,16 +249,18 @@
       "WinServer 2012 R2": "latest",
       "Custom": "[parameters('osVersion')]"
     },
-    "nicName": "[concat('MyVMNic', uniqueString(parameters('dnsNameForPublicIP')))]",
+    "vnetDeploymentName": "[concat('VNet', variables('vmName'))]",
+    "nicName": "[concat('VMNic', parameters('VirtualMachineName'))]",
     "vnetAddressPrefix": "[parameters('virtualNetworkIpAddressPrefix')]",
     "subnetName": "[parameters('subnetName')]",
     "subnetAddressPrefix": "[parameters('subnetIpAddressPrefix')]",
     "vhdStorageType": "[parameters('storageType')]",
-    "publicIPAddressName": "[concat('myPublicIP', uniqueString(parameters('dnsNameForPublicIP')))]",
+    "publicIPAddressName": "[concat('PublicIP', parameters('VirtualMachineName'))]",
     "publicvirtualNetworkIpAddressType": "[parameters('virtualNetworkIpAddressType')]",
     "vhdStorageContainerName": "vhds",
     "vmName": "[parameters('virtualMachineName')]",
     "vmSize": "[parameters('size')]",
+    "vmDeploymentName": "[concat('VM', variables('vmName'))]",
     "vnetName": "[parameters('virtualNetworkName')]",
     "vnetId": "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]",
     "subnetRef": "[concat(variables('vnetId'), '/subnets/', variables('subnetName'))]",
@@ -266,6 +268,7 @@
       "new": "nested_templates/NewStorageAccount.json",
       "existing": "nested_templates/ExistingStorageAccount.json"
     },
+    "storageDeploymentName": "[concat(parameters('storageAccountName'), variables('vmName'))]",
     "availSetId": "[resourceId('Microsoft.Compute/availabilitySets', parameters('availabilitySetId'))]",
     "vnetTemplateFilePaths": {
       "new": "nested_templates/NewVNet.json",
@@ -274,7 +277,7 @@
   },
   "resources": [
     {
-      "name": "[parameters('storageAccountName')]",
+      "name": "[variables('storageDeploymentName')]",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
       "dependsOn": [ ],
@@ -316,12 +319,12 @@
       },
       "dependsOn": [
         "[concat('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressName'))]",
-        "[concat('Microsoft.Resources/deployments/', 'VirtualNetwork')]"
+        "[concat('Microsoft.Resources/deployments/', variables('vnetDeploymentName'))]"
       ],
       "properties": {
         "ipConfigurations": [
           {
-            "name": "[concat('ipconfig1', uniqueString(parameters('dnsNameForPublicIP')))]",
+            "name": "[concat('ipconfig', parameters('VirtualMachineName'))]",
             "properties": {
               "privateIPAllocationMethod": "Dynamic",
               "publicIPAddress": {
@@ -336,7 +339,7 @@
       }
     },
     {
-      "name": "VirtualNetwork",
+      "name": "[variables('vnetDeploymentName')]",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
       "dependsOn": [ ],
@@ -357,11 +360,11 @@
       }
     },
     {
-      "name": "[concat('VM', variables('vmName'))]",
+      "name": "[variables('vmDeploymentName')]",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
       "dependsOn": [
-        "[concat('Microsoft.Resources/deployments/', parameters('storageAccountName'))]",
+        "[concat('Microsoft.Resources/deployments/', variables('storageDeploymentName'))]",
         "[concat('Microsoft.Network/networkInterfaces/', variables('nicName'))]"
       ],
       "properties": {
