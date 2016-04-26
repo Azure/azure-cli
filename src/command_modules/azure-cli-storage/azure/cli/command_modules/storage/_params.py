@@ -21,7 +21,7 @@ def parse_connection_string():
         cs_dict = validate_key_value_pairs(value)
         os.environ['AZURE_STORAGE_ACCOUNT'] = cs_dict['AccountName']
         os.environ['AZURE_STORAGE_KEY'] = cs_dict['AccountKey']
-    
+
 def get_account_name(string):
     if string != 'query':
         return string
@@ -37,10 +37,10 @@ def get_account_key(string):
         return os.environ.get('AZURE_STORAGE_KEY')
 
 def get_connection_string(string):
-    return string if string != 'query' else environ.get('AZURE_STORAGE_CONNECTION_STRING')
+    return string if string != 'query' else os.environ.get('AZURE_STORAGE_CONNECTION_STRING')
 
 def get_sas_token(string):
-    return string if string != 'query' else environ.get('AZURE_SAS_TOKEN')
+    return string if string != 'query' else os.environ.get('AZURE_SAS_TOKEN')
 
 # BASIC PARAMETER CONFIGURATION
 
