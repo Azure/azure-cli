@@ -9,42 +9,35 @@ class TestCommands(unittest.TestCase):
 
 recording_dir = os.path.join(os.path.dirname(__file__), 'recordings')
 
-def _truncate_long_running_operation(data):
-    lro_item = data[0]
-    for item in data[1:]:
+def _truncate_long_running_operation(data, lro_item):
+    interactions = data['interactions']
+    lro_index = interactions.index(lro_item)
+    for item in interactions[(lro_index+1):]:
         method = item['request'].get('method')
         code = item['response']['status'].get('code')
         if method == 'GET' and code == 202:
-            print('METHOD: {} CODE: {} - IGNORING PART OF LRO'.format(method, code))
-            data.remove(item)
-        elif method == 'GET' and code == 200:
-            print('METHOD: {} CODE: {} - FINAL RESULT OF LRO!'.format(method, code))
+            interactions.remove(item)
+        elif method == 'GET' and code != 202:
             lro_item['response'] = item['response']
-            data.remove(item)
+            interactions.remove(item)
             return
 
 def _shorten_long_running_operations(test_name):
-    ''' In each YAML file, look for PUT requests with a code 202 response.
-    These should be followed by a series of GET requests that finally end in a code 200 response.
-    Replace the reponse of the intial PUT with the final code 200 response and delete all of the
-    interim requests. '''
-    print('Time compressing long running operations for {}...'.format(test_name))
+    ''' Speeds up playback of tests that originally required HTTP polling by replacing the initial
+    request with the eventual response. '''
     yaml_path = os.path.join(recording_dir, '{}.yaml'.format(test_name))
+    if not os.path.isfile(yaml_path):
+        return
+
     with open(yaml_path, 'r+b') as f:
-        data = yaml.load(f)['interactions']
-        processed = []
-        for item in data:
+        data = yaml.load(f)
+        for item in data['interactions']:
             method = item['request'].get('method')
             code = item['response']['status'].get('code')
             if method == 'PUT' and code == 202:
-                print('METHOD: {} CODE: {} - TRUNCATE!!!'.format(method, code))
-                _truncate_long_running_operation(data)
-            else:
-                print('METHOD: {} CODE: {} - OK Move to Processed'.format(method, code))
-                processed.append(item)
-                data.remove(item)
+                _truncate_long_running_operation(data, item)
         f.seek(0)
-        f.write(yaml.dump(data))
+        f.write(bytes(yaml.dump(data), 'utf-8'))
         f.truncate()
 
 generator = CommandTestGenerator(recording_dir, TEST_DEF, ENV_VAR)
