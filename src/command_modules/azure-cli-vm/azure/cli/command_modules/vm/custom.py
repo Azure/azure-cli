@@ -58,12 +58,10 @@ def patches_vm(start_msg, finish_msg):
 @command_table.command('vm list', description=L('List Virtual Machines.'))
 @command_table.option(**PARAMETER_ALIASES['optional_resource_group_name'])
 def list_vm(args):
-    ccf = _compute_client_factory({})
+    ccf = _compute_client_factory(args)
     group = args.get('resourcegroup')
-    if group:
-        vm_list = ccf.virtual_machines.list(resource_group_name=group)
-    else:
-        vm_list = ccf.virtual_machines.list_all()
+    vm_list = ccf.virtual_machines.list(resource_group_name=group) if group else \
+              ccf.virtual_machines.list_all()
     return list(vm_list)
 
 @command_table.command('vm disk attach-new',
