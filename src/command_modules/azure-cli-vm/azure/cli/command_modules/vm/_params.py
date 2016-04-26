@@ -22,7 +22,7 @@ PARAMETER_ALIASES.update({
     'lun': {
         'name': '--lun',
         'dest': 'lun',
-        'help': L('0-based logical unit number (LUN). Max value depend on the Virtual ' + \
+        'help': L('0-based logical unit number (LUN). Max value depends on the Virtual ' + \
                   'Machine size'),
         'type': int,
         'required': True
