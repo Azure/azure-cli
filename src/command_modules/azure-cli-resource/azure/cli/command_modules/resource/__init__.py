@@ -71,6 +71,11 @@ def _list_resources_odata_filter_builder(args):
     '''
 
     filters = []
+
+    name = args.get('name')
+    if name:
+        filters.append("name eq '%s'" % name)
+
     location = args.get('location')
     if location:
         filters.append("location eq '%s'" % location)
@@ -79,22 +84,19 @@ def _list_resources_odata_filter_builder(args):
     if resource_type:
         filters.append("resourceType eq '%s'" % resource_type)
 
-    name = args.get('name')
-    if name:
-        filters.append("name eq '%s'" % name)
-
     tag = args.get('tag') or ''
     if tag and (name or location):
         raise IncorrectUsageError('you cannot use the tagname or tagvalue filters with other filters')
 
     tag_name_value = tag.split('=')
     tag_name = tag_name_value[0]
-    if tag_name[-1] == '*':
-        filters.append("startswith(tagname, '%s')" % tag_name[0:-1])
-    else:
-        filters.append("tagname eq '%s'" % tag_name_value[0])
-        if len(tag_name_value) == 2:
-            filters.append("tagvalue eq '%s'" % tag_name_value[1])
+    if tag_name:
+        if tag_name[-1] == '*':
+            filters.append("startswith(tagname, '%s')" % tag_name[0:-1])
+        else:
+            filters.append("tagname eq '%s'" % tag_name_value[0])
+            if len(tag_name_value) == 2:
+                filters.append("tagvalue eq '%s'" % tag_name_value[1])
     return ' and '.join(filters)
 
 @command_table.command('resource list', description=L('List resources'))
