@@ -13,7 +13,7 @@ INSTALLED_COMMAND_MODULES = [dist.key.replace('azure-cli-', '')
 
 COMMON_PARAMETERS = {
     'resource_group_name': {
-        'name': '--resourcegroup -g',
+        'name': '--resource-group -g',
         'metavar': 'RESOURCEGROUP',
         'help': 'Name of resource group',
         'required': True
