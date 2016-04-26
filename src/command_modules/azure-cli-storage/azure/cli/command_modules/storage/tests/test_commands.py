@@ -16,8 +16,10 @@ def _truncate_long_running_operation(data, lro_item):
         method = item['request'].get('method')
         code = item['response']['status'].get('code')
         if method == 'GET' and code == 202:
+            print('\t\tMETHOD: {} CODE: {} Discarding!'.format(method, code))
             interactions.remove(item)
         elif method == 'GET' and code != 202:
+            print('\t\tMETHOD: {} CODE: {} Updating LRO with eventual response.'.format(method, code))
             lro_item['response'] = item['response']
             interactions.remove(item)
             return
@@ -28,14 +30,17 @@ def _shorten_long_running_operations(test_name):
     yaml_path = os.path.join(recording_dir, '{}.yaml'.format(test_name))
     if not os.path.isfile(yaml_path):
         return
-
+    print('\n** Shortening LRO for test {} **\n'.format(test_name))
     with open(yaml_path, 'r+b') as f:
         data = yaml.load(f)
         for item in data['interactions']:
             method = item['request'].get('method')
             code = item['response']['status'].get('code')
             if method == 'PUT' and code == 202:
+                print('\tMETHOD: {} CODE: {} Submitted for truncation!'.format(method, code))
                 _truncate_long_running_operation(data, item)
+            else:
+                print('\tMETHOD: {} CODE: {} Keeping unaltered'.format(method, code))
         f.seek(0)
         f.write(bytes(yaml.dump(data), 'utf-8'))
         f.truncate()
