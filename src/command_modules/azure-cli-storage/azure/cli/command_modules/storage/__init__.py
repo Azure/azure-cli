@@ -472,7 +472,7 @@ def exist_share(args):
 @command_table.command('storage share mount')
 @command_table.description(L('Mount an SMB file share.'))
 @command_table.option(**PARAMETER_ALIASES['share_name'])
-@command_table.option('--drive', required=True, help=L('the desired drive letter identified'))
+@command_table.option('--drive', required=True, help=L('the desired drive letter (Windows only)'))
 @command_table.option(**PARAMETER_ALIASES['account_name'])
 @command_table.option(**PARAMETER_ALIASES['account_key'])
 def mount_share(args):
@@ -481,17 +481,20 @@ def mount_share(args):
     account_name = args.get('account_name')
     account_key = args.get('account_key')
     if os.name == 'nt':
-        # TODO: Do some stuff on Windows!!
-        #command = 'cmdkey /add:{}.file.core.windows.net /user:{} /pass:{}'.format(
-        #    account_name, account_name, account_key)
-        #subprocess.call(command.split())
-        command = 'net use {}: \\\\{}.file.core.windows.net\\{} {} /user:{}'.format(
-            drive, account_name, share_name, account_key, account_name)
-        print(command)
+        command = 'cmdkey /add:{}.file.core.windows.net /user:{} /pass:{}'.format(
+            account_name, account_name, account_key)
+        subprocess.call(command.split())
+        command = 'net use {}: \\\\{}.file.core.windows.net\\{}'.format(
+            drive, account_name, share_name)
         subprocess.call(command.split())
     elif os.name == 'posix':
-        # TODO: Do some stuff on Linux!!
-        pass
+        if subprocess.call('apt show cifs-utils'.split()):
+            subprocess.call('sudo apt-get install cifs-utils'.split())
+        subprocess.call('mkdir share_name'.split())
+        command = 'sudo mount -t cifs //{}.file.core.windows.net/{} ./{} ' + \
+                  '-o vers=3.0,username={},password={},dir_mode=0777,file_mode=0777'
+        command.format(account_name, share_name, share_name, account_name, account_key)
+        subprocess.call(command.split())
     return 'banoodle {}'.format(os.name)
 
 # DIRECTORY COMMANDS
