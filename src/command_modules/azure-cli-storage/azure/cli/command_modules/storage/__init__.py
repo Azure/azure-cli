@@ -1,6 +1,6 @@
 from __future__ import print_function
 import os
-from sys import stderr, modules
+from sys import stderr
 
 from azure.storage.blob import PublicAccess, BlockBlobService, AppendBlobService, PageBlobService
 from azure.storage.file import FileService
