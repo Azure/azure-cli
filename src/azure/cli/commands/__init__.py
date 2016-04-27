@@ -33,6 +33,11 @@ COMMON_PARAMETERS = {
     }
 }
 
+def extend_parameter(parameter_metadata, **kwargs):
+    modified_parameter_metadata = parameter_metadata.copy()
+    modified_parameter_metadata.update(kwargs)
+    return modified_parameter_metadata
+
 class LongRunningOperation(object): #pylint: disable=too-few-public-methods
 
     progress_file = sys.stderr
