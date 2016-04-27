@@ -350,31 +350,10 @@ def upload_blob(args):
             content_settings=content_settings
         )
 
-    def upload_page_blob():
-        fsize = os.path.getsize(file_path)
-        mod = fsize % 512
-        if mod:
-            with open(file_path, 'r+b') as stream:
-                padding = 512 - mod
-                stream.seek(fsize + padding - 1)
-                stream.write(str.encode('\0'))
-        result = bds.create_blob_from_path(
-            container_name=container_name,
-            blob_name=blob_name,
-            file_path=file_path,
-            progress_callback=_update_progress,
-            content_settings=content_settings
-        )
-        if mod:
-            with open(file_path, 'r+b') as stream:
-                stream.seek(fsize)
-                stream.truncate()
-        return result
-
     type_func = {
         'append': upload_append_blob,
         'block': upload_block_blob,
-        'page': upload_page_blob
+        'page': upload_block_blob  # same implementation
     }
     return type_func[blob_type]()
 

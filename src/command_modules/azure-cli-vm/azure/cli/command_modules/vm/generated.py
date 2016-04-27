@@ -14,6 +14,8 @@ from azure.cli.commands._auto_command import build_operation, AutoCommandDefinit
 from azure.cli.commands import CommandTable, LongRunningOperation
 from azure.cli._locale import L
 
+from ._params import PARAMETER_ALIASES
+
 command_table = CommandTable()
 
 def _compute_client_factory(_):
@@ -29,7 +31,7 @@ build_operation("vm availabilityset",
                     AutoCommandDefinition(AvailabilitySetsOperations.list, '[AvailabilitySet]'),
                     AutoCommandDefinition(AvailabilitySetsOperations.list_available_sizes, '[VirtualMachineSize]', 'list-sizes')
                 ],
-                command_table)
+                command_table, PARAMETER_ALIASES)
 
 
 build_operation("vm machineextensionimage",
@@ -40,7 +42,7 @@ build_operation("vm machineextensionimage",
                     AutoCommandDefinition(VirtualMachineExtensionImagesOperations.list_types, '[VirtualMachineImageResource]'),
                     AutoCommandDefinition(VirtualMachineExtensionImagesOperations.list_versions, '[VirtualMachineImageResource]'),
                 ],
-                command_table)
+                command_table, PARAMETER_ALIASES)
 
 build_operation("vm extension",
                 "virtual_machine_extensions",
@@ -49,7 +51,7 @@ build_operation("vm extension",
                     AutoCommandDefinition(VirtualMachineExtensionsOperations.delete, LongRunningOperation(L('Deleting VM extension'), L('VM extension deleted'))),
                     AutoCommandDefinition(VirtualMachineExtensionsOperations.get, 'VirtualMachineExtension'),
                 ],
-                command_table)
+                command_table, PARAMETER_ALIASES)
 
 build_operation("vm image",
                 "virtual_machine_images",
@@ -61,7 +63,7 @@ build_operation("vm image",
                     AutoCommandDefinition(VirtualMachineImagesOperations.list_publishers, '[VirtualMachineImageResource]'),
                     AutoCommandDefinition(VirtualMachineImagesOperations.list_skus, '[VirtualMachineImageResource]'),
                 ],
-                command_table)
+                command_table, PARAMETER_ALIASES)
 
 build_operation("vm usage",
                 "usage",
@@ -69,7 +71,7 @@ build_operation("vm usage",
                 [
                     AutoCommandDefinition(UsageOperations.list, '[Usage]'),
                 ],
-                command_table)
+                command_table, PARAMETER_ALIASES)
 
 build_operation("vm size",
                 "virtual_machine_sizes",
@@ -77,7 +79,7 @@ build_operation("vm size",
                 [
                     AutoCommandDefinition(VirtualMachineSizesOperations.list, '[VirtualMachineSize]'),
                 ],
-                command_table)
+                command_table, PARAMETER_ALIASES)
 
 build_operation("vm",
                 "virtual_machines",
@@ -87,14 +89,12 @@ build_operation("vm",
                     AutoCommandDefinition(VirtualMachinesOperations.deallocate, LongRunningOperation(L('Deallocating VM'), L('VM Deallocated'))),
                     AutoCommandDefinition(VirtualMachinesOperations.generalize, None),
                     AutoCommandDefinition(VirtualMachinesOperations.get, 'VirtualMachine'),
-                    AutoCommandDefinition(VirtualMachinesOperations.list, '[VirtualMachine]'),
-                    AutoCommandDefinition(VirtualMachinesOperations.list_all, '[VirtualMachine]'),
                     AutoCommandDefinition(VirtualMachinesOperations.list_available_sizes, '[VirtualMachineSize]', 'list-sizes'),
                     AutoCommandDefinition(VirtualMachinesOperations.power_off, LongRunningOperation(L('Powering off VM'), L('VM powered off'))),
                     AutoCommandDefinition(VirtualMachinesOperations.restart, LongRunningOperation(L('Restarting VM'), L('VM Restarted'))),
                     AutoCommandDefinition(VirtualMachinesOperations.start, LongRunningOperation(L('Starting VM'), L('VM Started'))),
                 ],
-                command_table)
+                command_table, PARAMETER_ALIASES)
 
 build_operation("vm scaleset",
                 "virtual_machine_scale_sets",
@@ -113,7 +113,7 @@ build_operation("vm scaleset",
                     AutoCommandDefinition(VirtualMachineScaleSetsOperations.start, LongRunningOperation(L('Starting VM scale set'), L('VM scale set started'))),
                     AutoCommandDefinition(VirtualMachineScaleSetsOperations.update_instances, LongRunningOperation(L('Updating VM scale set instances'), L('VM scale set instances updated'))),
                 ],
-                command_table)
+                command_table, PARAMETER_ALIASES)
 
 build_operation("vm scalesetvm",
                 "virtual_machine_scale_set_vms",
@@ -128,4 +128,4 @@ build_operation("vm scalesetvm",
                     AutoCommandDefinition(VirtualMachineScaleSetVMsOperations.restart, LongRunningOperation(L('Restarting VM scale set VMs'), L('VM scale set VMs restarted'))),
                     AutoCommandDefinition(VirtualMachineScaleSetVMsOperations.start, LongRunningOperation(L('Starting VM scale set VMs'), L('VM scale set VMs started'))),
                 ],
-                command_table)
+                command_table, PARAMETER_ALIASES)
