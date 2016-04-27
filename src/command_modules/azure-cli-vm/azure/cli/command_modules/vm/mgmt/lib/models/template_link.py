@@ -13,10 +13,13 @@ class TemplateLink(Model):
     """
     Entity representing the reference to the template.
 
-    :param uri: URI referencing the template. Default value:
+    Variables are only populated by the server, and will be ignored when
+    sending a request.
+
+    :ivar uri: URI referencing the template. Default value:
      "https://azuretemplatehost.blob.core.windows.net/templatehost/CreateVM/azuredeploy.json"
      .
-    :type uri: str
+    :vartype uri: str
     :param content_version: If included it must match the ContentVersion in
      the template.
     :type content_version: str
@@ -31,6 +34,7 @@ class TemplateLink(Model):
         'content_version': {'key': 'contentVersion', 'type': 'str'},
     }
 
+    uri = "https://azuretemplatehost.blob.core.windows.net/templatehost/CreateVM/azuredeploy.json"
+
     def __init__(self, content_version=None):
-        self.uri = "https://azuretemplatehost.blob.core.windows.net/templatehost/CreateVM/azuredeploy.json"
         self.content_version = content_version

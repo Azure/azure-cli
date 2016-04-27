@@ -192,7 +192,7 @@ class Profile(object):
                 username_or_sp_id)
 
         return BasicTokenAuthentication(
-            {'access_token': access_token}), active_account[_SUBSCRIPTION_ID]
+            {'access_token': access_token}), str(active_account[_SUBSCRIPTION_ID])
 
 
 class SubscriptionFinder(object):
