@@ -86,7 +86,8 @@ def _list_resources_odata_filter_builder(args):
 
     tag = args.get('tag') or ''
     if tag and (name or location):
-        raise IncorrectUsageError('you cannot use the tagname or tagvalue filters with other filters')
+        raise IncorrectUsageError(
+            'you cannot use the tagname or tagvalue filters with other filters')
 
     tag_name_value = tag.split('=')
     tag_name = tag_name_value[0]
