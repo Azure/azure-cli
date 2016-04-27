@@ -3,7 +3,6 @@ if False:
     from six import StringIO
 
     from azure.cli.parser import ArgumentParser, IncorrectUsageError
-    from azure.cli._logging import logger
     from azure.cli.commands import command, description, option
     import azure.cli._help_files
     import logging
