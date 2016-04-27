@@ -486,7 +486,7 @@ def mount_share(args):
         subprocess.call(command.split())
         command = 'net use {}: \\\\{}.file.core.windows.net\\{}'.format(
             drive, account_name, share_name)
-        subprocess.call(command.split())
+        exit_code = subprocess.call(command.split())
     elif os.name == 'posix':
         if subprocess.call('apt show cifs-utils'.split()):
             subprocess.call('sudo apt-get install cifs-utils'.split())
@@ -494,8 +494,8 @@ def mount_share(args):
         command = 'sudo mount -t cifs //{}.file.core.windows.net/{} ./{} ' + \
                   '-o vers=3.0,username={},password={},dir_mode=0777,file_mode=0777'
         command.format(account_name, share_name, share_name, account_name, account_key)
-        subprocess.call(command.split())
-    return 'banoodle {}'.format(os.name)
+        exit_code = subprocess.call(command.split())
+    return {'result': exit_code}
 
 # DIRECTORY COMMANDS
 
