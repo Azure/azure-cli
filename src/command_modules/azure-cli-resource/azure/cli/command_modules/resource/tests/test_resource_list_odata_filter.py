@@ -59,7 +59,7 @@ class TestListResources(unittest.TestCase):
     def test_tag_and_name_fails(self):
         args = {
             'tag': 'foo=bar',
-            'name': 'will not work'
+            'name': 'should not work'
             }
         with self.assertRaises(IncorrectUsageError):
             filter = _list_resources_odata_filter_builder(args)
