@@ -3,7 +3,6 @@ from datetime import datetime
 import sys
 import re
 import argparse
-import logging
 from enum import Enum
 from .parser import AzCliCommandParser
 import azure.cli.extensions
@@ -15,7 +14,6 @@ class Configuration(object): # pylint: disable=too-few-public-methods
     """
     def __init__(self, argv):
         self.argv = argv or sys.argv[1:]
-        self.log = logging.getLogger('az')
         self.output_format = 'list'
 
     def get_command_table(self):
@@ -138,6 +136,8 @@ class Application(object):
         parser.add_argument('--output', '-o', dest='_output_format',
                             choices=['list', 'json', 'tsv'],
                             help='Output format of type "list", "json" or "tsv"')
+        # The arguments for verbosity don't get parsed by argparse but we add it here for help.
+        parser.add_argument('-v', '--verbose', action="count", dest='_log_verbosity', help='Logging verbosity. Can be used up to 2 times.')
 
     def _handle_builtin_arguments(self, args):
         self.configuration.output_format = args._output_format #pylint: disable=protected-access

@@ -2,7 +2,9 @@ from azure.cli._profile import Profile
 from azure.cli.commands import CommandTable
 from azure.cli._locale import L
 from .command_tables import COMMAND_TABLES
-from azure.cli._logging import logger
+import azure.cli._logging as _logging
+
+logger = _logging.getAzLogger(__name__)
 
 command_table = CommandTable()
 
