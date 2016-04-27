@@ -1,6 +1,6 @@
 from os import environ
 
-from azure.cli.commands import COMMON_PARAMETERS as GLOBAL_COMMON_PARAMETERS
+from azure.cli.commands import (COMMON_PARAMETERS as GLOBAL_COMMON_PARAMETERS, extend_parameter)
 from azure.cli._locale import L
 
 from ._validators import (
@@ -9,11 +9,6 @@ from ._validators import (
     validate_tags, validate_lease_duration, validate_quota)
 
 # HELPER METHODS
-
-def extend_parameter(parameter_metadata, **kwargs):
-    modified_parameter_metadata = parameter_metadata.copy()
-    modified_parameter_metadata.update(kwargs)
-    return modified_parameter_metadata
 
 def get_account_name(string):
     return string if string != 'query' else environ.get('AZURE_STORAGE_ACCOUNT')
