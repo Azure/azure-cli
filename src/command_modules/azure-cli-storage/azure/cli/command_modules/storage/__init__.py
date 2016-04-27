@@ -15,6 +15,7 @@ from azure.cli.commands import (CommandTable, LongRunningOperation)
 from azure.cli.commands._command_creation import get_mgmt_service_client, get_data_service_client
 from azure.cli.commands._auto_command import build_operation, AutoCommandDefinition
 from azure.cli._locale import L
+from azure.cli.parser import IncorrectUsageError
 
 from ._params import PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS
 from ._validators import validate_key_value_pairs
@@ -470,9 +471,15 @@ def exist_share(args):
     return fsc.exists(share_name=args.get('share_name'))
 
 @command_table.command('storage share mount')
-@command_table.description(L('Mount an SMB file share.'))
+@command_table.description('''Mount an SMB 3.0 file share in Windows or Linux (not OSX). Must have
+    inbound and outbound TCP access of port 445. For Linux, the share will be mounted as the share
+    name. For Windows, a drive letter must be specified.''')
 @command_table.option(**PARAMETER_ALIASES['share_name'])
-@command_table.option('--drive', required=True, help=L('the desired drive letter (Windows only)'))
+@command_table.option('--drive', required=False,
+                      help=L('the desired drive letter (Required on Windows)'))
+@command_table.option('--reload-on-restart', required=False, action='store_false',
+                      help=L('if specified, will persist credentials so share will ' + \
+                     'automatically be rediscovered on restart'))
 @command_table.option(**PARAMETER_ALIASES['account_name'])
 @command_table.option(**PARAMETER_ALIASES['account_key'])
 def mount_share(args):
@@ -480,12 +487,16 @@ def mount_share(args):
     share_name = args.get('share_name')
     account_name = args.get('account_name')
     account_key = args.get('account_key')
+    persist_creds = args.get('reload_on_restart')
     if os.name == 'nt':
-        command = 'cmdkey /add:{}.file.core.windows.net /user:{} /pass:{}'.format(
-            account_name, account_name, account_key)
-        subprocess.call(command.split())
-        command = 'net use {}: \\\\{}.file.core.windows.net\\{}'.format(
-            drive, account_name, share_name)
+        if not drive:
+            raise IncorrectUsageError('drive letter is required for Windows')
+        if persist_creds:
+            command = 'cmdkey /add:{}.file.core.windows.net /user:{} /pass:{}'.format(
+                account_name, account_name, account_key)
+            subprocess.call(command.split())
+        command = 'net use {}: \\\\{}.file.core.windows.net\\{} {} /user:{}'.format(
+            drive, account_name, share_name, account_key, account_name)
         exit_code = subprocess.call(command.split())
     elif os.name == 'posix':
         if subprocess.call('apt show cifs-utils'.split()):
