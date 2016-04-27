@@ -2,7 +2,7 @@ from azure.mgmt.compute.models import DataDisk
 from azure.mgmt.compute.models.compute_management_client_enums import DiskCreateOptionTypes
 from azure.cli._locale import L
 from azure.cli.commands import CommandTable, LongRunningOperation
-from azure.cli.commands._command_creation import get_mgmt_service_client
+from azure.cli.commands._command_creation import get_mgmt_service_client, get_data_service_client
 from azure.mgmt.compute import ComputeManagementClient, ComputeManagementClientConfiguration
 
 from ._params import PARAMETER_ALIASES
@@ -172,3 +172,49 @@ def _vm_get_ip_addresses(args):
                 })
 
     return result
+
+
+#
+# Composite convenience functions
+#
+@command_table.command('vm get-console-boot-log', description='Retrieve serial console boot log file for Virtual Machine')
+@command_table.option(**PARAMETER_ALIASES['resource_group_name'])
+@command_table.option('-n --vm-name', dest='vm_name', help='Name of Virtual Machine', required=True)
+def _vm_get_diagnostics(args):
+    import sys
+    from urllib.parse import urlparse
+    from azure.mgmt.storage import StorageManagementClient, StorageManagementClientConfiguration
+    from azure.storage.blob import BlockBlobService
+
+    client = _compute_client_factory(args)
+
+    virtual_machine = client.virtual_machines.get(
+        resource_group_name=args.get('resourcegroup'),
+        vm_name=args.get('vm_name'),
+        expand='instanceView')
+    boot_diagnostics = virtual_machine.instance_view.boot_diagnostics
+
+    # Find storage account for diagnostics
+    storage_mgmt_client = get_mgmt_service_client(StorageManagementClient, StorageManagementClientConfiguration)
+    if not boot_diagnostics.serial_console_log_blob_uri:
+        raise RuntimeError('No console log available')
+    try:
+        storage_account = next(filter(lambda sa: (boot_diagnostics.serial_console_log_blob_uri or '').startswith(sa.primary_endpoints.blob),
+                                      list(storage_mgmt_client.storage_accounts.list())))
+    except StopIteration:
+        raise RuntimeError('Failed to find storage accont for console log file')
+
+    # Get account key
+    keys = storage_mgmt_client.storage_accounts.list_keys(args.get('resourcegroup'), storage_account.name)
+
+    # Extract container and blob name from url...
+    container, blob = urlparse(boot_diagnostics.serial_console_log_blob_uri)[2].split('/')[-2:]
+
+    storage_client = get_data_service_client(
+        BlockBlobService,
+        storage_account.name,
+        keys.key1)
+
+    # TODO: Stream the output instead of downloading in-memory...
+    stuff = storage_client.get_blob_to_bytes(container, blob)
+    sys.stdout.buffer.write(stuff.content)
