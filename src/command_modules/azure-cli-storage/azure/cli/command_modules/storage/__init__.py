@@ -1,8 +1,8 @@
 from __future__ import print_function
-from os import environ
+import os
 from sys import stderr
 
-from azure.storage.blob import PublicAccess, BlockBlobService
+from azure.storage.blob import PublicAccess, BlockBlobService, AppendBlobService, PageBlobService
 from azure.storage.file import FileService
 from azure.storage import CloudStorageAccount
 from azure.mgmt.storage import StorageManagementClient, StorageManagementClientConfiguration
@@ -15,7 +15,7 @@ from azure.cli.commands._auto_command import build_operation, AutoCommandDefinit
 from azure.cli._locale import L
 
 from ._params import PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS
-from ._validators import validate_datetime, validate_key_value_pairs
+from ._validators import validate_key_value_pairs
 
 command_table = CommandTable()
 
@@ -33,8 +33,10 @@ def _file_data_service_factory(args):
         sas_token=args.pop('sas_token', None))
 
 def _blob_data_service_factory(args):
+    blob_type = args.get('type')
+    blob_service = blob_types.get(blob_type, BlockBlobService)
     return get_data_service_client(
-        BlockBlobService,
+        blob_service,
         args.pop('account_name', None),
         args.pop('account_key', None),
         connection_string=args.pop('connection_string', None),
@@ -210,14 +212,14 @@ build_operation(
     'storage container acl', None, _blob_data_service_factory,
     [
         AutoCommandDefinition(BlockBlobService.set_container_acl, 'StoredAccessPolicy', 'set'),
-        AutoCommandDefinition(BlockBlobService.get_container_acl, '[StoredAccessPolicy]', 'get'),
+        AutoCommandDefinition(BlockBlobService.get_container_acl, '[StoredAccessPolicy]', 'show'),
     ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
 build_operation(
     'storage container metadata', None, _blob_data_service_factory,
     [
         AutoCommandDefinition(BlockBlobService.set_container_metadata, 'Properties', 'set'),
-        AutoCommandDefinition(BlockBlobService.get_container_metadata, 'Metadata', 'get'),
+        AutoCommandDefinition(BlockBlobService.get_container_metadata, 'Metadata', 'show'),
     ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
 # TODO: update this once enums are supported in commands first-class (task #115175885)
@@ -228,11 +230,8 @@ public_access_types = {'none': None,
 @command_table.command('storage container exists')
 @command_table.description(L('Check if a storage container exists.'))
 @command_table.option(**PARAMETER_ALIASES['container_name'])
-@command_table.option(**PARAMETER_ALIASES['account_name'])
-@command_table.option(**PARAMETER_ALIASES['account_key'])
-@command_table.option(**PARAMETER_ALIASES['connection_string'])
-@command_table.option('--snapshot', type=validate_datetime,
-                      help=L('UTC datetime value which specifies a snapshot'))
+@command_table.option_set(STORAGE_DATA_CLIENT_ARGS)
+@command_table.option('--snapshot', help=L('UTC datetime value which specifies a snapshot'))
 @command_table.option(**PARAMETER_ALIASES['timeout'])
 def exists_container(args):
     bbs = _blob_data_service_factory(args)
@@ -267,14 +266,16 @@ build_operation(
         AutoCommandDefinition(BlockBlobService.generate_blob_shared_access_signature,
                               'SAS', 'generate-sas'),
         AutoCommandDefinition(BlockBlobService.make_blob_url, 'URL', 'url'),
-        AutoCommandDefinition(BlockBlobService.snapshot_blob, 'SnapshotProperties', 'snapshot')
+        AutoCommandDefinition(BlockBlobService.snapshot_blob, 'SnapshotProperties', 'snapshot'),
+        AutoCommandDefinition(BlockBlobService.get_blob_properties, 'Properties', 'show'),
+        AutoCommandDefinition(BlockBlobService.set_blob_properties, 'Propeties', 'set')
     ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
 build_operation(
     'storage blob service-properties', None, _blob_data_service_factory,
     [
         AutoCommandDefinition(BlockBlobService.get_blob_service_properties,
-                              '[ServiceProperties]', 'get'),
+                              '[ServiceProperties]', 'show'),
         AutoCommandDefinition(BlockBlobService.set_blob_service_properties,
                               'ServiceProperties', 'set')
     ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
@@ -282,25 +283,26 @@ build_operation(
 build_operation(
     'storage blob metadata', None, _blob_data_service_factory,
     [
-        AutoCommandDefinition(BlockBlobService.get_blob_metadata, 'Metadata', 'get'),
+        AutoCommandDefinition(BlockBlobService.get_blob_metadata, 'Metadata', 'show'),
         AutoCommandDefinition(BlockBlobService.set_blob_metadata, 'Metadata', 'set')
     ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
-build_operation(
-    'storage blob properties', None, _blob_data_service_factory,
-    [
-        AutoCommandDefinition(BlockBlobService.get_blob_properties, 'Properties', 'get'),
-        AutoCommandDefinition(BlockBlobService.set_blob_properties, 'Propeties', 'set')
-    ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
+blob_types = {
+    'block': BlockBlobService,
+    'page': PageBlobService,
+    'append': AppendBlobService
+}
+blob_types_str = ' '.join(blob_types.keys())
 
-@command_table.command('storage blob upload-block-blob')
-@command_table.description(L('Upload a block blob to a container.'))
+@command_table.command('storage blob upload')
+@command_table.description(L('Upload a blob to a container.'))
 @command_table.option(**PARAMETER_ALIASES['container_name'])
 @command_table.option(**PARAMETER_ALIASES['blob_name'])
-@command_table.option('--upload-from', required=True)
-@command_table.option(**PARAMETER_ALIASES['account_name'])
-@command_table.option(**PARAMETER_ALIASES['account_key'])
-@command_table.option(**PARAMETER_ALIASES['connection_string'])
+@command_table.option('--type', required=True, choices=blob_types.keys(),
+                      help=L('type of blob to upload ({})'.format(blob_types_str)))
+@command_table.option('--upload-from', required=True,
+                      help=L('local path to upload from'))
+@command_table.option_set(STORAGE_DATA_CLIENT_ARGS)
 @command_table.option('--container.public-access', default=None,
                       choices=public_access_types.keys(),
                       type=lambda x: public_access_types.get(x, ValueError))
@@ -310,33 +312,57 @@ build_operation(
 @command_table.option('--content.language')
 @command_table.option('--content.md5')
 @command_table.option('--content.cache-control')
-def create_block_blob(args):
+def upload_blob(args):
     from azure.storage.blob import ContentSettings
-    bbs = _blob_data_service_factory(args)
-    bbs.create_container(args.get('container_name'),
-                         public_access=args.get('public_access'))
+    bds = _blob_data_service_factory(args)
+    blob_type = args.get('type')
+    container_name = args.get('container_name')
+    blob_name = args.get('blob_name')
+    file_path = args.get('upload_from')
+    content_settings = ContentSettings(
+        content_type=args.get('content.type'),
+        content_disposition=args.get('content.disposition'),
+        content_encoding=args.get('content.encoding'),
+        content_language=args.get('content.language'),
+        content_md5=args.get('content.md5'),
+        cache_control=args.get('content.cache-control')
+    )
 
-    return bbs.create_blob_from_path(
-        container_name=args.get('container_name'),
-        blob_name=args.get('blob_name'),
-        file_path=args.get('upload_from'),
-        progress_callback=_update_progress,
-        content_settings=ContentSettings(content_type=args.get('content.type'),
-                                         content_disposition=args.get('content.disposition'),
-                                         content_encoding=args.get('content.encoding'),
-                                         content_language=args.get('content.language'),
-                                         content_md5=args.get('content.md5'),
-                                         cache_control=args.get('content.cache-control'))
+    def upload_append_blob():
+        if not bds.exists(container_name, blob_name):
+            bds.create_blob(
+                container_name=container_name,
+                blob_name=blob_name,
+                content_settings=content_settings)
+        return bds.append_blob_from_path(
+            container_name=container_name,
+            blob_name=blob_name,
+            file_path=file_path,
+            progress_callback=_update_progress
         )
+
+    def upload_block_blob():
+        return bds.create_blob_from_path(
+            container_name=container_name,
+            blob_name=blob_name,
+            file_path=file_path,
+            progress_callback=_update_progress,
+            content_settings=content_settings
+        )
+
+    type_func = {
+        'append': upload_append_blob,
+        'block': upload_block_blob,
+        'page': upload_block_blob  # same implementation
+    }
+    return type_func[blob_type]()
 
 @command_table.command('storage blob download')
 @command_table.description(L('Download the specified blob.'))
 @command_table.option(**PARAMETER_ALIASES['container_name'])
 @command_table.option(**PARAMETER_ALIASES['blob_name'])
 @command_table.option('--download-to', help=L('the file path to download to'), required=True)
-@command_table.option(**PARAMETER_ALIASES['account_name'])
-@command_table.option(**PARAMETER_ALIASES['account_key'])
-@command_table.option(**PARAMETER_ALIASES['connection_string'])
+@command_table.option_set(STORAGE_DATA_CLIENT_ARGS)
 def download_blob(args):
     bbs = _blob_data_service_factory(args)
 
@@ -350,11 +376,8 @@ def download_blob(args):
 @command_table.description(L('Check if a storage blob exists.'))
 @command_table.option(**PARAMETER_ALIASES['container_name'])
 @command_table.option(**PARAMETER_ALIASES['blob_name'])
-@command_table.option(**PARAMETER_ALIASES['account_name'])
-@command_table.option(**PARAMETER_ALIASES['account_key'])
-@command_table.option(**PARAMETER_ALIASES['connection_string'])
-@command_table.option('--snapshot', type=validate_datetime,
-                      help=L('UTC datetime value which specifies a snapshot'))
+@command_table.option_set(STORAGE_DATA_CLIENT_ARGS)
+@command_table.option('--snapshot', help=L('UTC datetime value which specifies a snapshot'))
 @command_table.option(**PARAMETER_ALIASES['timeout'])
 def exists_blob(args):
     bbs = _blob_data_service_factory(args)
@@ -395,36 +418,30 @@ build_operation(
         AutoCommandDefinition(FileService.delete_share, 'Boolean', 'delete'),
         AutoCommandDefinition(FileService.generate_share_shared_access_signature,
                               'SAS', 'generate-sas'),
-        AutoCommandDefinition(FileService.get_share_stats, 'ShareStats', 'stats')
+        AutoCommandDefinition(FileService.get_share_stats, 'ShareStats', 'stats'),
+        AutoCommandDefinition(FileService.get_share_properties, 'Properties', 'show'),
+        AutoCommandDefinition(FileService.set_share_properties, 'Properties', 'set')
+
     ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
 build_operation(
     'storage share metadata', None, _file_data_service_factory,
     [
-        AutoCommandDefinition(FileService.get_share_metadata, 'Metadata', 'get'),
+        AutoCommandDefinition(FileService.get_share_metadata, 'Metadata', 'show'),
         AutoCommandDefinition(FileService.set_share_metadata, 'Metadata', 'set')
-    ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
-
-build_operation(
-    'storage share properties', None, _file_data_service_factory,
-    [
-        AutoCommandDefinition(FileService.get_share_properties, 'Properties', 'get'),
-        AutoCommandDefinition(FileService.set_share_properties, 'Properties', 'set')
     ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
 build_operation(
     'storage share acl', None, _file_data_service_factory,
     [
         AutoCommandDefinition(FileService.set_share_acl, '[StoredAccessPolicy]', 'set'),
-        AutoCommandDefinition(FileService.get_share_acl, 'StoredAccessPolicy', 'get'),
+        AutoCommandDefinition(FileService.get_share_acl, 'StoredAccessPolicy', 'show'),
     ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
 @command_table.command('storage share exists')
 @command_table.description(L('Check if a file share exists.'))
 @command_table.option(**PARAMETER_ALIASES['share_name'])
-@command_table.option(**PARAMETER_ALIASES['account_name'])
-@command_table.option(**PARAMETER_ALIASES['account_key'])
-@command_table.option(**PARAMETER_ALIASES['connection_string'])
+@command_table.option_set(STORAGE_DATA_CLIENT_ARGS)
 def exist_share(args):
     fsc = _file_data_service_factory(args)
     return fsc.exists(share_name=args.get('share_name'))
@@ -436,12 +453,13 @@ build_operation(
     [
         AutoCommandDefinition(FileService.create_directory, 'Boolean', 'create'),
         AutoCommandDefinition(FileService.delete_directory, 'Boolean', 'delete'),
+        AutoCommandDefinition(FileService.get_directory_properties, 'Properties', 'show')
     ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
 build_operation(
     'storage directory metadata', None, _file_data_service_factory,
     [
-        AutoCommandDefinition(FileService.get_directory_metadata, 'Metadata', 'get'),
+        AutoCommandDefinition(FileService.get_directory_metadata, 'Metadata', 'show'),
         AutoCommandDefinition(FileService.set_directory_metadata, 'Metadata', 'set')
     ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
@@ -449,9 +467,7 @@ build_operation(
 @command_table.description(L('Check if a directory exists.'))
 @command_table.option(**PARAMETER_ALIASES['share_name'])
 @command_table.option('--directory-name -d', help=L('the directory name'), required=True)
-@command_table.option(**PARAMETER_ALIASES['account_name'])
-@command_table.option(**PARAMETER_ALIASES['account_key'])
-@command_table.option(**PARAMETER_ALIASES['connection_string'])
+@command_table.option_set(STORAGE_DATA_CLIENT_ARGS)
 def exist_directory(args):
     fsc = _file_data_service_factory(args)
     return fsc.exists(share_name=args.get('share_name'),
@@ -462,10 +478,11 @@ def exist_directory(args):
 FILE_PARAM_ALIASES = PARAMETER_ALIASES.copy()
 FILE_PARAM_ALIASES.update({
     'directory_name': {
-        'name': '--directory-name',
+        'name': '--directory-name -d',
         'required': False
     }
 })
+
 build_operation(
     'storage file', None, _file_data_service_factory,
     [
@@ -473,38 +490,31 @@ build_operation(
         AutoCommandDefinition(FileService.resize_file, 'Result', 'resize'),
         AutoCommandDefinition(FileService.make_file_url, 'URL', 'url'),
         AutoCommandDefinition(FileService.generate_file_shared_access_signature,
-                              'SAS', 'generate-sas')
+                              'SAS', 'generate-sas'),
+        AutoCommandDefinition(FileService.get_file_properties, 'Properties', 'show'),
+        AutoCommandDefinition(FileService.set_file_properties, 'Properties', 'set')
     ], command_table, FILE_PARAM_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
 build_operation(
     'storage file metadata', None, _file_data_service_factory,
     [
-        AutoCommandDefinition(FileService.get_file_metadata, 'Metadata', 'get'),
+        AutoCommandDefinition(FileService.get_file_metadata, 'Metadata', 'show'),
         AutoCommandDefinition(FileService.set_file_metadata, 'Metadata', 'set')
-    ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
-
-build_operation(
-    'storage file properties', None, _file_data_service_factory,
-    [
-        AutoCommandDefinition(FileService.get_file_properties, 'Properties', 'get'),
-        AutoCommandDefinition(FileService.set_file_properties, 'Properties', 'set')
-    ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
+    ], command_table, FILE_PARAM_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
 build_operation(
     'storage file service-properties', None, _file_data_service_factory,
     [
-        AutoCommandDefinition(FileService.get_file_service_properties, 'ServiceProperties', 'get'),
+        AutoCommandDefinition(FileService.get_file_service_properties, 'ServiceProperties', 'show'),
         AutoCommandDefinition(FileService.set_file_service_properties, 'ServiceProperties', 'set')
-    ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
+    ], command_table, FILE_PARAM_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
 @command_table.command('storage file download')
 @command_table.option(**PARAMETER_ALIASES['share_name'])
 @command_table.option('--file-name -f', help=L('the file name'), required=True)
 @command_table.option('--local-file-name', help=L('the path to the local file'), required=True)
 @command_table.option('--directory-name -d', help=L('the directory name'))
-@command_table.option(**PARAMETER_ALIASES['account_name'])
-@command_table.option(**PARAMETER_ALIASES['account_key'])
-@command_table.option(**PARAMETER_ALIASES['connection_string'])
+@command_table.option_set(STORAGE_DATA_CLIENT_ARGS)
 def storage_file_download(args):
     fsc = _file_data_service_factory(args)
     fsc.get_file_to_path(args.get('share_name'),
@@ -518,9 +528,7 @@ def storage_file_download(args):
 @command_table.option(**PARAMETER_ALIASES['share_name'])
 @command_table.option('--file-name -f', help=L('the file name to check'), required=True)
 @command_table.option('--directory-name -d', help=L('subdirectory path to the file'))
-@command_table.option(**PARAMETER_ALIASES['account_name'])
-@command_table.option(**PARAMETER_ALIASES['account_key'])
-@command_table.option(**PARAMETER_ALIASES['connection_string'])
+@command_table.option_set(STORAGE_DATA_CLIENT_ARGS)
 def exist_file(args):
     fsc = _file_data_service_factory(args)
     return fsc.exists(share_name=args.get('share_name'),
@@ -532,9 +540,7 @@ def exist_file(args):
 @command_table.option('--file-name -f', help=L('the destination file name'), required=True)
 @command_table.option('--local-file-name', help=L('the file name to upload'), required=True)
 @command_table.option('--directory-name -d', help=L('the destination directory to upload to'))
-@command_table.option(**PARAMETER_ALIASES['account_name'])
-@command_table.option(**PARAMETER_ALIASES['account_key'])
-@command_table.option(**PARAMETER_ALIASES['connection_string'])
+@command_table.option_set(STORAGE_DATA_CLIENT_ARGS)
 def storage_file_upload(args):
     fsc = _file_data_service_factory(args)
     fsc.create_file_from_path(args.get('share_name'),
