@@ -275,7 +275,7 @@ build_operation(
     'storage blob service-properties', None, _blob_data_service_factory,
     [
         AutoCommandDefinition(BlockBlobService.get_blob_service_properties,
-                              '[ServiceProperties]', 'show'),
+                              'ServiceProperties', 'show'),
         AutoCommandDefinition(BlockBlobService.set_blob_service_properties,
                               'ServiceProperties', 'set')
     ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
