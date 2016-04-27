@@ -92,7 +92,7 @@ class StorageBlobScenarioTest(CommandTestScript):
         s.test('storage blob exists -b {} -c {}'.format(block_blob, container), True)
 
         # test page blob upload
-        s.run('storage blob upload -b {} -c {} --type page --upload-from {}'.format(page_blob, container, os.path.join(TEST_DIR, 'testfile.rst')))
+        s.run('storage blob upload -b {} -c {} --type page --upload-from {}'.format(page_blob, container, os.path.join(TEST_DIR, 'testpage.rst')))
         s.test('storage blob exists -b {} -c {}'.format(page_blob, container), True)
 
         # test append blob upload
