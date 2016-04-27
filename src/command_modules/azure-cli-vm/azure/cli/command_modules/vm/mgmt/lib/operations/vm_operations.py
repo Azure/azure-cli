@@ -32,7 +32,7 @@ class VMOperations(object):
         self.config = config
 
     def create_or_update(
-            self, resource_group_name, deployment_name, admin_password, admin_user_name, dns_name_for_public_ip, name, content_version=None, os=None, os_publisher=None, storage_type=None, size=None, os_sku=None, os_offer=None, os_version=None, auth_method=None, ssh_key_value=None, ssh_key_path=None, add_to_availability_set=None, availability_set_id=None, subnet_name=None, vnet_name=None, new_or_existing_vnet=None, vnet_ip_address_type=None, subnet_ip_address_prefix=None, custom_headers={}, raw=False, **operation_config):
+            self, resource_group_name, deployment_name, admin_password, dns_name_for_public_ip, admin_username, virtual_machine_name, content_version=None, os_publisher=None, virtual_network_ip_address_prefix=None, new_or_existing_storage_account=None, add_to_availability_set=None, subnet_name=None, size=None, os_sku=None, ssh_key_path=None, ssh_key_value=None, storage_container_name=None, availability_set_id=None, _artifacts_location=None, storage_account_name=None, location=None, subnet_ip_address_prefix=None, os_offer=None, os_disk_name=None, new_or_existing_vnet=None, virtual_network_name=None, storage_type=None, os_version=None, authentication_method=None, virtual_network_ip_address_type=None, os=None, custom_headers={}, raw=False, **operation_config):
         """
         Create or update a virtual machine.
 
@@ -43,57 +43,72 @@ class VMOperations(object):
         :type deployment_name: str
         :param admin_password: Password for the Virtual Machine.
         :type admin_password: str
-        :param admin_user_name: Username for the Virtual Machine.
-        :type admin_user_name: str
         :param dns_name_for_public_ip: Globally unique DNS Name for the
          Public IP used to access the Virtual Machine.
         :type dns_name_for_public_ip: str
-        :param name: The Virtual Machine name.
-        :type name: str
+        :param admin_username: Username for the Virtual Machine.
+        :type admin_username: str
+        :param virtual_machine_name: The VM resource name.
+        :type virtual_machine_name: str
         :param content_version: If included it must match the ContentVersion
          in the template.
         :type content_version: str
-        :param os: Common OS choices.
-        :type os: str
         :param os_publisher: The OS publisher of the OS image.
         :type os_publisher: str
-        :param storage_type: The VM storage type.
-        :type storage_type: str
-        :param size: The VM Size that should be created.  Values:
-         standard_A0-standard_A7, standard_D1-standard_D4,
-         standard_D11-standard_D14
+        :param virtual_network_ip_address_prefix: The IP address prefix.
+        :type virtual_network_ip_address_prefix: str
+        :param new_or_existing_storage_account: Whether to use an existing
+         storage account or create a new one.
+        :type new_or_existing_storage_account: str
+        :param add_to_availability_set: Flag to add the VM to an existing
+         availability set.
+        :type add_to_availability_set: str
+        :param subnet_name: The subnet name.
+        :type subnet_name: str
+        :param size: The VM Size that should be created.
         :type size: str
         :param os_sku: The OS SKU to install.
         :type os_sku: str
+        :param ssh_key_path: VM file path for SSH key.
+        :type ssh_key_path: str
+        :param ssh_key_value: SSH key file data.
+        :type ssh_key_value: str
+        :param storage_container_name: Name of storage container for the VM
+         OS disk.
+        :type storage_container_name: str
+        :param availability_set_id: Existing availability set for the VM.
+        :type availability_set_id: str
+        :param _artifacts_location: Container URI of of the template.
+        :type _artifacts_location: str
+        :param storage_account_name: Name of storage account for the VM OS
+         disk.
+        :type storage_account_name: str
+        :param location: Location for VM resources.
+        :type location: str
+        :param subnet_ip_address_prefix: The subnet address type.
+        :type subnet_ip_address_prefix: str
         :param os_offer: The OS Offer to install.
         :type os_offer: str
-        :param os_version: The OS version to install.
-        :type os_version: str
-        :param auth_method: The VM authentication type.  Password is
-         available on Windows and Linux.  SSH is only available on Linux.
-         Possible values include: 'password', 'sshkey'
-        :type auth_method: str
-        :param ssh_key_value: The string value for an SSH public key.
-        :type ssh_key_value: str
-        :param ssh_key_path: The VM file path to save the SSh key to.
-        :type ssh_key_path: str
-        :param add_to_availability_set: Whether or not to add the VM to an
-         availability set. Possible values include: 'none', 'existing'
-        :type add_to_availability_set: str
-        :param availability_set_id: ID of the availability set the VM should
-         be added to.
-        :type availability_set_id: str
-        :param subnet_name: The subnet name.
-        :type subnet_name: str
-        :param vnet_name: Name of virtual network to add VM to.
-        :type vnet_name: str
+        :param os_disk_name: Name of storage VHD for the VM OS disk.
+        :type os_disk_name: str
         :param new_or_existing_vnet: Whether to use an existing VNet or
          create a new one.
         :type new_or_existing_vnet: str
-        :param vnet_ip_address_type: Dynamic or Static IP address allocation.
-        :type vnet_ip_address_type: str
-        :param subnet_ip_address_prefix: The subnet address prefix.
-        :type subnet_ip_address_prefix: str
+        :param virtual_network_name: Name of virtual network to add VM to.
+        :type virtual_network_name: str
+        :param storage_type: The VM storage type.
+        :type storage_type: str
+        :param os_version: The OS version to install.
+        :type os_version: str
+        :param authentication_method: Authentication method: password-only or
+         add ssh-keys (Linux-only).
+        :type authentication_method: str
+        :param virtual_network_ip_address_type: Dynamic or Static IP address
+         allocation.
+        :type virtual_network_ip_address_type: str
+        :param os: Common OS choices.  Choose 'Custom' to specify an image
+         with the osPublisher, osOffer, osSKU, and osVersion parameters.
+        :type os: str
         :param dict custom_headers: headers that will be added to the request
         :param bool raw: returns the direct response alongside the
          deserialized response
@@ -104,7 +119,7 @@ class VMOperations(object):
         :rtype: :class:`ClientRawResponse<msrest.pipeline.ClientRawResponse>`
          if raw=true
         """
-        parameters = models.DeploymentVM(content_version=content_version, os=os, os_publisher=os_publisher, admin_password=admin_password, storage_type=storage_type, size=size, admin_user_name=admin_user_name, dns_name_for_public_ip=dns_name_for_public_ip, name=name, os_sku=os_sku, os_offer=os_offer, os_version=os_version, auth_method=auth_method, ssh_key_value=ssh_key_value, ssh_key_path=ssh_key_path, add_to_availability_set=add_to_availability_set, availability_set_id=availability_set_id, subnet_name=subnet_name, vnet_name=vnet_name, new_or_existing_vnet=new_or_existing_vnet, vnet_ip_address_type=vnet_ip_address_type, subnet_ip_address_prefix=subnet_ip_address_prefix)
+        parameters = models.DeploymentVM(content_version=content_version, os_publisher=os_publisher, virtual_network_ip_address_prefix=virtual_network_ip_address_prefix, new_or_existing_storage_account=new_or_existing_storage_account, admin_password=admin_password, dns_name_for_public_ip=dns_name_for_public_ip, add_to_availability_set=add_to_availability_set, subnet_name=subnet_name, size=size, os_sku=os_sku, ssh_key_path=ssh_key_path, ssh_key_value=ssh_key_value, storage_container_name=storage_container_name, admin_username=admin_username, virtual_machine_name=virtual_machine_name, availability_set_id=availability_set_id, _artifacts_location=_artifacts_location, storage_account_name=storage_account_name, location=location, subnet_ip_address_prefix=subnet_ip_address_prefix, os_offer=os_offer, os_disk_name=os_disk_name, new_or_existing_vnet=new_or_existing_vnet, virtual_network_name=virtual_network_name, storage_type=storage_type, os_version=os_version, authentication_method=authentication_method, virtual_network_ip_address_type=virtual_network_ip_address_type, os=os)
 
         # Construct URL
         url = '/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Resources/deployments/{deploymentName}'

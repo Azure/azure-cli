@@ -13,126 +13,159 @@ class DeploymentVM(Model):
     """
     Deployment operation parameters.
 
-    :param uri: URI referencing the template. Default value:
+    Variables are only populated by the server, and will be ignored when
+    sending a request.
+
+    :ivar uri: URI referencing the template. Default value:
      "https://azuretemplatehost.blob.core.windows.net/templatehost/CreateVM/azuredeploy.json"
      .
-    :type uri: str
+    :vartype uri: str
     :param content_version: If included it must match the ContentVersion in
      the template.
     :type content_version: str
-    :param os: Common OS choices.
-    :type os: str
     :param os_publisher: The OS publisher of the OS image.
     :type os_publisher: str
+    :param virtual_network_ip_address_prefix: The IP address prefix.
+    :type virtual_network_ip_address_prefix: str
+    :param new_or_existing_storage_account: Whether to use an existing
+     storage account or create a new one.
+    :type new_or_existing_storage_account: str
     :param admin_password: Password for the Virtual Machine.
     :type admin_password: str
-    :param storage_type: The VM storage type.
-    :type storage_type: str
-    :param size: The VM Size that should be created.  Values:
-     standard_A0-standard_A7, standard_D1-standard_D4,
-     standard_D11-standard_D14
-    :type size: str
-    :param admin_user_name: Username for the Virtual Machine.
-    :type admin_user_name: str
     :param dns_name_for_public_ip: Globally unique DNS Name for the Public IP
      used to access the Virtual Machine.
     :type dns_name_for_public_ip: str
-    :param name: The Virtual Machine name.
-    :type name: str
-    :param os_sku: The OS SKU to install.
-    :type os_sku: str
-    :param os_offer: The OS Offer to install.
-    :type os_offer: str
-    :param os_version: The OS version to install.
-    :type os_version: str
-    :param auth_method: The VM authentication type.  Password is available on
-     Windows and Linux.  SSH is only available on Linux. Possible values
-     include: 'password', 'sshkey'
-    :type auth_method: str
-    :param ssh_key_value: The string value for an SSH public key.
-    :type ssh_key_value: str
-    :param ssh_key_path: The VM file path to save the SSh key to.
-    :type ssh_key_path: str
-    :param add_to_availability_set: Whether or not to add the VM to an
-     availability set. Possible values include: 'none', 'existing'
+    :param add_to_availability_set: Flag to add the VM to an existing
+     availability set.
     :type add_to_availability_set: str
-    :param availability_set_id: ID of the availability set the VM should be
-     added to.
-    :type availability_set_id: str
     :param subnet_name: The subnet name.
     :type subnet_name: str
-    :param vnet_name: Name of virtual network to add VM to.
-    :type vnet_name: str
+    :param size: The VM Size that should be created.
+    :type size: str
+    :param os_sku: The OS SKU to install.
+    :type os_sku: str
+    :param ssh_key_path: VM file path for SSH key.
+    :type ssh_key_path: str
+    :param ssh_key_value: SSH key file data.
+    :type ssh_key_value: str
+    :param storage_container_name: Name of storage container for the VM OS
+     disk.
+    :type storage_container_name: str
+    :param admin_username: Username for the Virtual Machine.
+    :type admin_username: str
+    :param virtual_machine_name: The VM resource name.
+    :type virtual_machine_name: str
+    :param availability_set_id: Existing availability set for the VM.
+    :type availability_set_id: str
+    :param _artifacts_location: Container URI of of the template.
+    :type _artifacts_location: str
+    :param storage_account_name: Name of storage account for the VM OS disk.
+    :type storage_account_name: str
+    :param location: Location for VM resources.
+    :type location: str
+    :param subnet_ip_address_prefix: The subnet address type.
+    :type subnet_ip_address_prefix: str
+    :param os_offer: The OS Offer to install.
+    :type os_offer: str
+    :param os_disk_name: Name of storage VHD for the VM OS disk.
+    :type os_disk_name: str
     :param new_or_existing_vnet: Whether to use an existing VNet or create a
      new one.
     :type new_or_existing_vnet: str
-    :param vnet_ip_address_type: Dynamic or Static IP address allocation.
-    :type vnet_ip_address_type: str
-    :param subnet_ip_address_prefix: The subnet address prefix.
-    :type subnet_ip_address_prefix: str
-    :param mode: Gets or sets the deployment mode. Default value:
+    :param virtual_network_name: Name of virtual network to add VM to.
+    :type virtual_network_name: str
+    :param storage_type: The VM storage type.
+    :type storage_type: str
+    :param os_version: The OS version to install.
+    :type os_version: str
+    :param authentication_method: Authentication method: password-only or add
+     ssh-keys (Linux-only).
+    :type authentication_method: str
+    :param virtual_network_ip_address_type: Dynamic or Static IP address
+     allocation.
+    :type virtual_network_ip_address_type: str
+    :param os: Common OS choices.  Choose 'Custom' to specify an image with
+     the osPublisher, osOffer, osSKU, and osVersion parameters.
+    :type os: str
+    :ivar mode: Gets or sets the deployment mode. Default value:
      "Incremental" .
-    :type mode: str
+    :vartype mode: str
     """ 
 
     _validation = {
         'uri': {'required': True, 'constant': True},
         'admin_password': {'required': True},
-        'admin_user_name': {'required': True},
         'dns_name_for_public_ip': {'required': True},
-        'name': {'required': True},
+        'admin_username': {'required': True},
+        'virtual_machine_name': {'required': True},
         'mode': {'required': True, 'constant': True},
     }
 
     _attribute_map = {
         'uri': {'key': 'properties.templateLink.uri', 'type': 'str'},
         'content_version': {'key': 'properties.templateLink.contentVersion', 'type': 'str'},
-        'os': {'key': 'properties.parameters.os.value', 'type': 'str'},
         'os_publisher': {'key': 'properties.parameters.osPublisher.value', 'type': 'str'},
+        'virtual_network_ip_address_prefix': {'key': 'properties.parameters.virtualNetworkIpAddressPrefix.value', 'type': 'str'},
+        'new_or_existing_storage_account': {'key': 'properties.parameters.newOrExistingStorageAccount.value', 'type': 'str'},
         'admin_password': {'key': 'properties.parameters.adminPassword.value', 'type': 'str'},
-        'storage_type': {'key': 'properties.parameters.storageType.value', 'type': 'str'},
-        'size': {'key': 'properties.parameters.size.value', 'type': 'str'},
-        'admin_user_name': {'key': 'properties.parameters.adminUsername.value', 'type': 'str'},
         'dns_name_for_public_ip': {'key': 'properties.parameters.dnsNameForPublicIP.value', 'type': 'str'},
-        'name': {'key': 'properties.parameters.virtualMachineName.value', 'type': 'str'},
-        'os_sku': {'key': 'properties.parameters.osSKU.value', 'type': 'str'},
-        'os_offer': {'key': 'properties.parameters.osOffer.value', 'type': 'str'},
-        'os_version': {'key': 'properties.parameters.osVersion.value', 'type': 'str'},
-        'auth_method': {'key': 'properties.parameters.authenticationMethod.value', 'type': 'str'},
-        'ssh_key_value': {'key': 'properties.parameters.sshKeyValue.value', 'type': 'str'},
-        'ssh_key_path': {'key': 'properties.parameters.sshKeyPath.value', 'type': 'str'},
         'add_to_availability_set': {'key': 'properties.parameters.addToAvailabilitySet.value', 'type': 'str'},
-        'availability_set_id': {'key': 'properties.parameters.availabilitySetId.value', 'type': 'str'},
         'subnet_name': {'key': 'properties.parameters.subnetName.value', 'type': 'str'},
-        'vnet_name': {'key': 'properties.parameters.virtualNetworkName.value', 'type': 'str'},
-        'new_or_existing_vnet': {'key': 'properties.parameters.newOrExistingVNet.value', 'type': 'str'},
-        'vnet_ip_address_type': {'key': 'properties.parameters.virtualNetworkIpAddressType.value', 'type': 'str'},
+        'size': {'key': 'properties.parameters.size.value', 'type': 'str'},
+        'os_sku': {'key': 'properties.parameters.osSKU.value', 'type': 'str'},
+        'ssh_key_path': {'key': 'properties.parameters.sshKeyPath.value', 'type': 'str'},
+        'ssh_key_value': {'key': 'properties.parameters.sshKeyValue.value', 'type': 'str'},
+        'storage_container_name': {'key': 'properties.parameters.storageContainerName.value', 'type': 'str'},
+        'admin_username': {'key': 'properties.parameters.adminUsername.value', 'type': 'str'},
+        'virtual_machine_name': {'key': 'properties.parameters.virtualMachineName.value', 'type': 'str'},
+        'availability_set_id': {'key': 'properties.parameters.availabilitySetId.value', 'type': 'str'},
+        '_artifacts_location': {'key': 'properties.parameters._artifactsLocation.value', 'type': 'str'},
+        'storage_account_name': {'key': 'properties.parameters.storageAccountName.value', 'type': 'str'},
+        'location': {'key': 'properties.parameters.location.value', 'type': 'str'},
         'subnet_ip_address_prefix': {'key': 'properties.parameters.subnetIpAddressPrefix.value', 'type': 'str'},
+        'os_offer': {'key': 'properties.parameters.osOffer.value', 'type': 'str'},
+        'os_disk_name': {'key': 'properties.parameters.osDiskName.value', 'type': 'str'},
+        'new_or_existing_vnet': {'key': 'properties.parameters.newOrExistingVNet.value', 'type': 'str'},
+        'virtual_network_name': {'key': 'properties.parameters.virtualNetworkName.value', 'type': 'str'},
+        'storage_type': {'key': 'properties.parameters.storageType.value', 'type': 'str'},
+        'os_version': {'key': 'properties.parameters.osVersion.value', 'type': 'str'},
+        'authentication_method': {'key': 'properties.parameters.authenticationMethod.value', 'type': 'str'},
+        'virtual_network_ip_address_type': {'key': 'properties.parameters.virtualNetworkIpAddressType.value', 'type': 'str'},
+        'os': {'key': 'properties.parameters.os.value', 'type': 'str'},
         'mode': {'key': 'properties.mode', 'type': 'str'},
     }
 
-    def __init__(self, admin_password, admin_user_name, dns_name_for_public_ip, name, content_version=None, os=None, os_publisher=None, storage_type=None, size=None, os_sku=None, os_offer=None, os_version=None, auth_method=None, ssh_key_value=None, ssh_key_path=None, add_to_availability_set=None, availability_set_id=None, subnet_name=None, vnet_name=None, new_or_existing_vnet=None, vnet_ip_address_type=None, subnet_ip_address_prefix=None):
-        self.uri = "https://azuretemplatehost.blob.core.windows.net/templatehost/CreateVM/azuredeploy.json"
+    uri = "https://azuretemplatehost.blob.core.windows.net/templatehost/CreateVM/azuredeploy.json"
+
+    mode = "Incremental"
+
+    def __init__(self, admin_password, dns_name_for_public_ip, admin_username, virtual_machine_name, content_version=None, os_publisher=None, virtual_network_ip_address_prefix=None, new_or_existing_storage_account=None, add_to_availability_set=None, subnet_name=None, size=None, os_sku=None, ssh_key_path=None, ssh_key_value=None, storage_container_name=None, availability_set_id=None, _artifacts_location=None, storage_account_name=None, location=None, subnet_ip_address_prefix=None, os_offer=None, os_disk_name=None, new_or_existing_vnet=None, virtual_network_name=None, storage_type=None, os_version=None, authentication_method=None, virtual_network_ip_address_type=None, os=None):
         self.content_version = content_version
-        self.os = os
         self.os_publisher = os_publisher
+        self.virtual_network_ip_address_prefix = virtual_network_ip_address_prefix
+        self.new_or_existing_storage_account = new_or_existing_storage_account
         self.admin_password = admin_password
-        self.storage_type = storage_type
-        self.size = size
-        self.admin_user_name = admin_user_name
         self.dns_name_for_public_ip = dns_name_for_public_ip
-        self.name = name
-        self.os_sku = os_sku
-        self.os_offer = os_offer
-        self.os_version = os_version
-        self.auth_method = auth_method
-        self.ssh_key_value = ssh_key_value
-        self.ssh_key_path = ssh_key_path
         self.add_to_availability_set = add_to_availability_set
-        self.availability_set_id = availability_set_id
         self.subnet_name = subnet_name
-        self.vnet_name = vnet_name
-        self.new_or_existing_vnet = new_or_existing_vnet
-        self.vnet_ip_address_type = vnet_ip_address_type
+        self.size = size
+        self.os_sku = os_sku
+        self.ssh_key_path = ssh_key_path
+        self.ssh_key_value = ssh_key_value
+        self.storage_container_name = storage_container_name
+        self.admin_username = admin_username
+        self.virtual_machine_name = virtual_machine_name
+        self.availability_set_id = availability_set_id
+        self._artifacts_location = _artifacts_location
+        self.storage_account_name = storage_account_name
+        self.location = location
         self.subnet_ip_address_prefix = subnet_ip_address_prefix
-        self.mode = "Incremental"
+        self.os_offer = os_offer
+        self.os_disk_name = os_disk_name
+        self.new_or_existing_vnet = new_or_existing_vnet
+        self.virtual_network_name = virtual_network_name
+        self.storage_type = storage_type
+        self.os_version = os_version
+        self.authentication_method = authentication_method
+        self.virtual_network_ip_address_type = virtual_network_ip_address_type
+        self.os = os

@@ -8,7 +8,6 @@
 
 from .deployment_vm import DeploymentVM
 from .template_link import TemplateLink
-from .deployment_parameter_virtual_network_ip_address_prefix import DeploymentParameterVirtualNetworkIpAddressPrefix
 from .parameters_link import ParametersLink
 from .provider_resource_type import ProviderResourceType
 from .provider import Provider
@@ -23,7 +22,6 @@ from .vm_creation_client_enums import (
 __all__ = [
     'DeploymentVM',
     'TemplateLink',
-    'DeploymentParameterVirtualNetworkIpAddressPrefix',
     'ParametersLink',
     'ProviderResourceType',
     'Provider',

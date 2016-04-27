@@ -160,14 +160,19 @@
     },
     "VMParameters": {
       "properties": {
-        "os": {
-          "type": "object",
-          "$ref": "#/definitions/DeploymentParameter_os",
-          "x-ms-client-flatten": true
-        },
         "osPublisher": {
           "type": "object",
           "$ref": "#/definitions/DeploymentParameter_osPublisher",
+          "x-ms-client-flatten": true
+        },
+        "virtualNetworkIpAddressPrefix": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_virtualNetworkIpAddressPrefix",
+          "x-ms-client-flatten": true
+        },
+        "newOrExistingStorageAccount": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_newOrExistingStorageAccount",
           "x-ms-client-flatten": true
         },
         "adminPassword": {
@@ -175,9 +180,19 @@
           "$ref": "#/definitions/DeploymentParameter_adminPassword",
           "x-ms-client-flatten": true
         },
-        "storageType": {
+        "dnsNameForPublicIP": {
           "type": "object",
-          "$ref": "#/definitions/DeploymentParameter_storageType",
+          "$ref": "#/definitions/DeploymentParameter_dnsNameForPublicIP",
+          "x-ms-client-flatten": true
+        },
+        "addToAvailabilitySet": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_addToAvailabilitySet",
+          "x-ms-client-flatten": true
+        },
+        "subnetName": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_subnetName",
           "x-ms-client-flatten": true
         },
         "size": {
@@ -185,14 +200,29 @@
           "$ref": "#/definitions/DeploymentParameter_size",
           "x-ms-client-flatten": true
         },
+        "osSKU": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_osSKU",
+          "x-ms-client-flatten": true
+        },
+        "sshKeyPath": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_sshKeyPath",
+          "x-ms-client-flatten": true
+        },
+        "sshKeyValue": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_sshKeyValue",
+          "x-ms-client-flatten": true
+        },
+        "storageContainerName": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_storageContainerName",
+          "x-ms-client-flatten": true
+        },
         "adminUsername": {
           "type": "object",
           "$ref": "#/definitions/DeploymentParameter_adminUsername",
-          "x-ms-client-flatten": true
-        },
-        "dnsNameForPublicIP": {
-          "type": "object",
-          "$ref": "#/definitions/DeploymentParameter_dnsNameForPublicIP",
           "x-ms-client-flatten": true
         },
         "virtualMachineName": {
@@ -200,14 +230,54 @@
           "$ref": "#/definitions/DeploymentParameter_virtualMachineName",
           "x-ms-client-flatten": true
         },
-        "osSKU": {
+        "availabilitySetId": {
           "type": "object",
-          "$ref": "#/definitions/DeploymentParameter_osSKU",
+          "$ref": "#/definitions/DeploymentParameter_availabilitySetId",
+          "x-ms-client-flatten": true
+        },
+        "_artifactsLocation": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter__artifactsLocation",
+          "x-ms-client-flatten": true
+        },
+        "storageAccountName": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_storageAccountName",
+          "x-ms-client-flatten": true
+        },
+        "location": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_location",
+          "x-ms-client-flatten": true
+        },
+        "subnetIpAddressPrefix": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_subnetIpAddressPrefix",
           "x-ms-client-flatten": true
         },
         "osOffer": {
           "type": "object",
           "$ref": "#/definitions/DeploymentParameter_osOffer",
+          "x-ms-client-flatten": true
+        },
+        "osDiskName": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_osDiskName",
+          "x-ms-client-flatten": true
+        },
+        "newOrExistingVNet": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_newOrExistingVNet",
+          "x-ms-client-flatten": true
+        },
+        "virtualNetworkName": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_virtualNetworkName",
+          "x-ms-client-flatten": true
+        },
+        "storageType": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_storageType",
           "x-ms-client-flatten": true
         },
         "osVersion": {
@@ -220,49 +290,14 @@
           "$ref": "#/definitions/DeploymentParameter_authenticationMethod",
           "x-ms-client-flatten": true
         },
-        "sshKeyValue": {
-          "type": "object",
-          "$ref": "#/definitions/DeploymentParameter_sshKeyValue",
-          "x-ms-client-flatten": true
-        },
-        "sshKeyPath": {
-          "type": "object",
-          "$ref": "#/definitions/DeploymentParameter_sshKeyPath",
-          "x-ms-client-flatten": true
-        },
-        "addToAvailabilitySet": {
-          "type": "object",
-          "$ref": "#/definitions/DeploymentParameter_addToAvailabilitySet",
-          "x-ms-client-flatten": true
-        },
-        "availabilitySetId": {
-          "type": "object",
-          "$ref": "#/definitions/DeploymentParameter_availabilitySetId",
-          "x-ms-client-flatten": true
-        },
-        "subnetName": {
-          "type": "object",
-          "$ref": "#/definitions/DeploymentParameter_subnetName",
-          "x-ms-client-flatten": true
-        },
-        "virtualNetworkName": {
-          "type": "object",
-          "$ref": "#/definitions/DeploymentParameter_virtualNetworkName",
-          "x-ms-client-flatten": true
-        },
-        "newOrExistingVNet": {
-          "type": "object",
-          "$ref": "#/definitions/DeploymentParameter_newOrExistingVNet",
-          "x-ms-client-flatten": true
-        },
         "virtualNetworkIpAddressType": {
           "type": "object",
           "$ref": "#/definitions/DeploymentParameter_virtualNetworkIpAddressType",
           "x-ms-client-flatten": true
         },
-        "subnetIpAddressPrefix": {
+        "os": {
           "type": "object",
-          "$ref": "#/definitions/DeploymentParameter_subnetIpAddressPrefix",
+          "$ref": "#/definitions/DeploymentParameter_os",
           "x-ms-client-flatten": true
         }
       },
@@ -273,47 +308,71 @@
         "virtualMachineName"
       ]
     },
-    "DeploymentParameter_os": {
+    "DeploymentParameter_storageContainerName": {
       "properties": {
         "value": {
           "type": "string",
-          "description": "Common OS choices.",
-          "x-ms-client-name": "os"
+          "description": "Name of storage container for the VM OS disk.",
+          "x-ms-client-name": "storageContainerName"
         }
       }
-    },
-    "DeploymentParameter_osOffer": {
-      "properties": {
-        "value": {
-          "type": "string",
-          "description": "The OS Offer to install.",
-          "x-ms-client-name": "osOffer"
-        }
-      }
-    },
-    "DeploymentParameter_adminUsername": {
-      "properties": {
-        "value": {
-          "type": "string",
-          "description": "Username for the Virtual Machine.",
-          "x-ms-client-name": "adminUserName"
-        }
-      },
-      "required": [
-        "value"
-      ]
     },
     "DeploymentParameter_virtualMachineName": {
       "properties": {
         "value": {
           "type": "string",
-          "description": "The Virtual Machine name.",
-          "x-ms-client-name": "name"
+          "description": "The VM resource name.",
+          "x-ms-client-name": "virtualMachineName"
         }
       },
       "required": [
         "value"
       ]
+    },
+    "DeploymentParameter_virtualNetworkName": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "Name of virtual network to add VM to.",
+          "x-ms-client-name": "virtualNetworkName"
+        }
+      }
+    },
+    "DeploymentParameter_osDiskName": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "Name of storage VHD for the VM OS disk.",
+          "x-ms-client-name": "osDiskName"
+        }
+      }
+    },
+    "DeploymentParameter_storageAccountName": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "Name of storage account for the VM OS disk.",
+          "x-ms-client-name": "storageAccountName"
+        }
+      }
+    },
+    "DeploymentParameter_availabilitySetId": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "Existing availability set for the VM.",
+          "x-ms-client-name": "availabilitySetId"
+        }
+      }
+    },
+    "DeploymentParameter_subnetName": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "The subnet name.",
+          "x-ms-client-name": "subnetName"
+        }
+      }
     },
     "DeploymentParameter_adminPassword": {
       "properties": {
@@ -327,57 +386,51 @@
         "value"
       ]
     },
-    "DeploymentParameter_osSKU": {
+    "DeploymentParameter_sshKeyValue": {
       "properties": {
         "value": {
           "type": "string",
-          "description": "The OS SKU to install.",
-          "x-ms-client-name": "osSku"
+          "description": "SSH key file data.",
+          "x-ms-client-name": "sshKeyValue"
         }
       }
     },
-    "DeploymentParameter_osPublisher": {
+    "DeploymentParameter_virtualNetworkIpAddressPrefix": {
       "properties": {
         "value": {
           "type": "string",
-          "description": "The OS publisher of the OS image.",
-          "x-ms-client-name": "osPublisher"
+          "description": "The IP address prefix.",
+          "x-ms-client-name": "virtualNetworkIpAddressPrefix"
         }
       }
     },
-    "DeploymentParameter_storageType": {
+    "DeploymentParameter_virtualNetworkIpAddressType": {
       "properties": {
         "value": {
           "type": "string",
-          "description": "The VM storage type.",
-          "x-ms-client-name": "storageType"
+          "description": "Dynamic or Static IP address allocation.",
+          "x-ms-client-name": "virtualNetworkIpAddressType"
         }
       }
     },
-    "DeploymentParameter_osVersion": {
+    "DeploymentParameter_adminUsername": {
       "properties": {
         "value": {
           "type": "string",
-          "description": "The OS version to install.",
-          "x-ms-client-name": "osVersion"
+          "description": "Username for the Virtual Machine.",
+          "x-ms-client-name": "adminUsername"
         }
-      }
+      },
+      "required": [
+        "value"
+      ]
     },
-    "DeploymentParameter_subnetName": {
+    "DeploymentParameter_sshKeyPath": {
       "properties": {
         "value": {
           "type": "string",
-          "description": "The subnet name.",
-          "x-ms-client-name": "subnetName"
-        }
-      }
-    },
-    "DeploymentParameter_virtualNetworkName": {
-      "properties": {
-        "value": {
-          "type": "string",
-          "description": "Name of virtual network to add VM to.",
-          "x-ms-client-name": "vnetName"
+          "description": "VM file path for SSH key.",
+          "x-ms-client-name": "sshKeyPath"
         }
       }
     },
@@ -387,33 +440,6 @@
           "type": "string",
           "description": "Whether to use an existing VNet or create a new one.",
           "x-ms-client-name": "newOrExistingVNet"
-        }
-      }
-    },
-    "DeploymentParameter_virtualNetworkIpAddressType": {
-      "properties": {
-        "value": {
-          "type": "string",
-          "description": "Dynamic or Static IP address allocation.",
-          "x-ms-client-name": "vnetIpAddressType"
-        }
-      }
-    },
-    "DeploymentParameter_subnetIpAddressPrefix": {
-      "properties": {
-        "value": {
-          "type": "string",
-          "description": "The subnet address prefix.",
-          "x-ms-client-name": "subnetIpAddressPrefix"
-        }
-      }
-    },
-    "DeploymentParameter_virtualNetworkIpAddressPrefix": {
-      "properties": {
-        "value": {
-          "type": "string",
-          "description": "IP address prefixe for the virtual network.",
-          "x-ms-client-name": "vnetIpAddressPrefix"
         }
       }
     },
@@ -429,43 +455,66 @@
         "value"
       ]
     },
-    "DeploymentParameter_size": {
+    "DeploymentParameter_osOffer": {
       "properties": {
         "value": {
           "type": "string",
-          "description": "The VM Size that should be created.  Values: standard_A0-standard_A7, standard_D1-standard_D4, standard_D11-standard_D14",
-          "x-ms-client-name": "size"
+          "description": "The OS Offer to install.",
+          "x-ms-client-name": "osOffer"
         }
       }
     },
-    "DeploymentParameter_authenticationMethod": {
+    "DeploymentParameter__artifactsLocation": {
       "properties": {
         "value": {
           "type": "string",
-          "description": "The VM authentication type.  Password is available on Windows and Linux.  SSH is only available on Linux.",
-          "enum": [
-            "password",
-            "sshkey"
-          ],
-          "x-ms-client-name": "authMethod"
+          "description": "Container URI of of the template.",
+          "x-ms-client-name": "_artifactsLocation"
         }
       }
     },
-    "DeploymentParameter_sshKeyValue": {
+    "DeploymentParameter_storageType": {
       "properties": {
         "value": {
           "type": "string",
-          "description": "The string value for an SSH public key.",
-          "x-ms-client-name": "sshKeyValue"
+          "description": "The VM storage type.",
+          "x-ms-client-name": "storageType"
         }
       }
     },
-    "DeploymentParameter_sshKeyPath": {
+    "DeploymentParameter_osPublisher": {
       "properties": {
         "value": {
           "type": "string",
-          "description": "The VM file path to save the SSh key to.",
-          "x-ms-client-name": "sshKeyPath"
+          "description": "The OS publisher of the OS image.",
+          "x-ms-client-name": "osPublisher"
+        }
+      }
+    },
+    "DeploymentParameter_os": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "Common OS choices.  Choose 'Custom' to specify an image with the osPublisher, osOffer, osSKU, and osVersion parameters.",
+          "x-ms-client-name": "os"
+        }
+      }
+    },
+    "DeploymentParameter_newOrExistingStorageAccount": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "Whether to use an existing storage account or create a new one.",
+          "x-ms-client-name": "newOrExistingStorageAccount"
+        }
+      }
+    },
+    "DeploymentParameter_osSKU": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "The OS SKU to install.",
+          "x-ms-client-name": "osSKU"
         }
       }
     },
@@ -473,21 +522,53 @@
       "properties": {
         "value": {
           "type": "string",
-          "description": "Whether or not to add the VM to an availability set.",
-          "enum": [
-            "none",
-            "existing"
-          ],
+          "description": "Flag to add the VM to an existing availability set.",
           "x-ms-client-name": "addToAvailabilitySet"
         }
       }
     },
-    "DeploymentParameter_availabilitySetId": {
+    "DeploymentParameter_subnetIpAddressPrefix": {
       "properties": {
         "value": {
           "type": "string",
-          "description": "ID of the availability set the VM should be added to.",
-          "x-ms-client-name": "availabilitySetId"
+          "description": "The subnet address type.",
+          "x-ms-client-name": "subnetIpAddressPrefix"
+        }
+      }
+    },
+    "DeploymentParameter_authenticationMethod": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "Authentication method: password-only or add ssh-keys (Linux-only).",
+          "x-ms-client-name": "authenticationMethod"
+        }
+      }
+    },
+    "DeploymentParameter_size": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "The VM Size that should be created.",
+          "x-ms-client-name": "size"
+        }
+      }
+    },
+    "DeploymentParameter_osVersion": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "The OS version to install.",
+          "x-ms-client-name": "osVersion"
+        }
+      }
+    },
+    "DeploymentParameter_location": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "Location for VM resources.",
+          "x-ms-client-name": "location"
         }
       }
     },
