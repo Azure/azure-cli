@@ -120,55 +120,63 @@ def _parse_rg_name(strid):
 
     return (parts[4], parts[8])
 
-@command_table.command('vm get-ip-addresses')
-@command_table.option(**PARAMETER_ALIASES['optional_resource_group_name'])
-@command_table.option('-n --vm-name', required=False)
-def _vm_get_ip_addresses(args):
-    from azure.mgmt.network import NetworkManagementClient, NetworkManagementClientConfiguration
+class ConvenienceVmCommands(object):
 
-    # We start by getting NICs as they are the smack in the middle of all data that we
-    # want to collect for a VM (as long as we don't need any info on the VM than what
-    # is available in the Id, we don't need to make any calls to the compute RP)
-    #
-    # Since there is no guarantee that a NIC is in the same resource group as a given
-    # Virtual Machine, we can't constrain the lookup to only a single group...
-    network_client = get_mgmt_service_client(NetworkManagementClient,
-                                             NetworkManagementClientConfiguration)
-    nics = network_client.network_interfaces.list_all()
-    public_ip_addresses = network_client.public_ip_addresses.list_all()
+    def __init__(self, _):
+        pass
 
-    ip_address_lookup = {pip.id: pip for pip in list(public_ip_addresses)}
+    def get_ip_addresses(self, optional_resource_group_name=None, vm_name=None):
+        '''
+        Get IP addresses from one or more Virtual Machines
 
-    result = []
-    for nic in [n for n in list(nics) if n.virtual_machine]:
-        resource_group, vm_name = _parse_rg_name(nic.virtual_machine.id)
+        :param str optional_resource_group_name:Name of resource group.
+        :param str vm_name:Name of virtual machine.
+        '''
+        from azure.mgmt.network import NetworkManagementClient, NetworkManagementClientConfiguration
 
-        # If provided, make sure that resource group name and vm name match the NIC we are
-        # looking at before adding it to the result...
-        if (args.get('resource_group_name') in (None, resource_group)
-                and args.get('vm_name') in (None, vm_name)):
+        # We start by getting NICs as they are the smack in the middle of all data that we
+        # want to collect for a VM (as long as we don't need any info on the VM than what
+        # is available in the Id, we don't need to make any calls to the compute RP)
+        #
+        # Since there is no guarantee that a NIC is in the same resource group as a given
+        # Virtual Machine, we can't constrain the lookup to only a single group...
+        network_client = get_mgmt_service_client(NetworkManagementClient,
+                                                 NetworkManagementClientConfiguration)
+        nics = network_client.network_interfaces.list_all()
+        public_ip_addresses = network_client.public_ip_addresses.list_all()
 
-            network_info = {
-                'privateIpAddresses': [],
-                'publicIpAddresses': []
-            }
-            for ip_configuration in nic.ip_configurations:
-                network_info['privateIpAddresses'].append(ip_configuration.private_ip_address)
-                if ip_configuration.public_ip_address:
-                    public_ip_address = ip_address_lookup[ip_configuration.public_ip_address.id]
-                    network_info['publicIpAddresses'].append({
-                        'id': public_ip_address.id,
-                        'name': public_ip_address.name,
-                        'ipAddress': public_ip_address.ip_address,
-                        'ipAllocationMethod': public_ip_address.public_ip_allocation_method
-                        })
+        ip_address_lookup = {pip.id: pip for pip in list(public_ip_addresses)}
 
-            result.append({
-                'virtualMachine': {
-                    'resourceGroup': resource_group,
-                    'name': vm_name,
-                    'network': network_info
-                    }
-                })
+        result = []
+        for nic in [n for n in list(nics) if n.virtual_machine]:
+            nic_resource_group, nic_vm_name = _parse_rg_name(nic.virtual_machine.id)
 
-    return result
+            # If provided, make sure that resource group name and vm name match the NIC we are
+            # looking at before adding it to the result...
+            if (optional_resource_group_name in (None, nic_resource_group)
+                and vm_name in (None, nic_vm_name )):
+
+                network_info = {
+                    'privateIpAddresses': [],
+                    'publicIpAddresses': []
+                }
+                for ip_configuration in nic.ip_configurations:
+                    network_info['privateIpAddresses'].append(ip_configuration.private_ip_address)
+                    if ip_configuration.public_ip_address:
+                        public_ip_address = ip_address_lookup[ip_configuration.public_ip_address.id]
+                        network_info['publicIpAddresses'].append({
+                            'id': public_ip_address.id,
+                            'name': public_ip_address.name,
+                            'ipAddress': public_ip_address.ip_address,
+                            'ipAllocationMethod': public_ip_address.public_ip_allocation_method
+                            })
+
+                result.append({
+                    'virtualMachine': {
+                        'resourceGroup': nic_resource_group,
+                        'name': nic_vm_name,
+                        'network': network_info
+                        }
+                    })
+
+        return result
