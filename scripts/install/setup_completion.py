@@ -45,14 +45,20 @@ def create_tab_completion_file(filename):
         completion_file.write(REGISTER_PYTHON_ARGCOMPLETE)
 
 def backup_rc(rc_file):
-    print("Backing up '{}' to '{}'".format(rc_file, rc_file+'.backup'))
-    shutil.copyfile(rc_file, rc_file+'.backup')
+    try:
+        shutil.copyfile(rc_file, rc_file+'.backup')
+        print("Backed up '{}' to '{}'".format(rc_file, rc_file+'.backup'))
+    except FileNotFoundError:
+        pass
 
 def find_line_in_file(file_path, search_pattern):
-    with open(file_path, 'r') as search_file:
-        for line in search_file:
-            if search_pattern in line:
-                return True
+    try:
+        with open(file_path, 'r') as search_file:
+            for line in search_file:
+                if search_pattern in line:
+                    return True
+    except FileNotFoundError:
+        pass
     return False
 
 def modify_rc(rc_file_path, line_to_add):
