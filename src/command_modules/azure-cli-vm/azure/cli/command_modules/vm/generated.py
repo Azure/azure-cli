@@ -15,6 +15,7 @@ from azure.cli.commands import CommandTable, LongRunningOperation
 from azure.cli._locale import L
 
 from ._params import PARAMETER_ALIASES
+from .custom import ConvenienceVmCommands
 
 command_table = CommandTable()
 
@@ -127,5 +128,13 @@ build_operation("vm scalesetvm",
                     AutoCommandDefinition(VirtualMachineScaleSetVMsOperations.power_off, LongRunningOperation(L('Powering off VM scale set VMs'), L('VM scale set VMs powered off'))),
                     AutoCommandDefinition(VirtualMachineScaleSetVMsOperations.restart, LongRunningOperation(L('Restarting VM scale set VMs'), L('VM scale set VMs restarted'))),
                     AutoCommandDefinition(VirtualMachineScaleSetVMsOperations.start, LongRunningOperation(L('Starting VM scale set VMs'), L('VM scale set VMs started'))),
+                ],
+                command_table, PARAMETER_ALIASES)
+
+build_operation("vm",
+                None,
+                ConvenienceVmCommands,
+                [
+                    AutoCommandDefinition(ConvenienceVmCommands.list_ip_addresses, 'object'),
                 ],
                 command_table, PARAMETER_ALIASES)
