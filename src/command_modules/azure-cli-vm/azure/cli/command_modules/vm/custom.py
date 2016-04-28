@@ -125,7 +125,7 @@ class ConvenienceVmCommands(object):
     def __init__(self, _):
         pass
 
-    def get_ip_addresses(self, optional_resource_group_name=None, vm_name=None):
+    def list_ip_addresses(self, optional_resource_group_name=None, vm_name=None):
         '''
         Get IP addresses from one or more Virtual Machines
 

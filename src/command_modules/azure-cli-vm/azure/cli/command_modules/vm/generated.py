@@ -135,6 +135,6 @@ build_operation("vm",
                 None,
                 ConvenienceVmCommands,
                 [
-                    AutoCommandDefinition(ConvenienceVmCommands.get_ip_addresses, 'object'),
+                    AutoCommandDefinition(ConvenienceVmCommands.list_ip_addresses, 'object'),
                 ],
                 command_table, PARAMETER_ALIASES)
