@@ -2,7 +2,7 @@
 import logging
 from logging.handlers import RotatingFileHandler
 
-CONSOLE_LOG_LEVEL_CONFIGS = [
+CONSOLE_LOG_CONFIGS = [
     # (default)
     {
         'az': logging.WARNING,
@@ -41,7 +41,7 @@ def _determine_verbose_level(argv):
         else:
             i += 1
     # Use max verbose level if too much verbosity specified.
-    return verbose_level if verbose_level < len(CONSOLE_LOG_LEVEL_CONFIGS) else len(CONSOLE_LOG_LEVEL_CONFIGS)-1
+    return verbose_level if verbose_level < len(CONSOLE_LOG_CONFIGS) else len(CONSOLE_LOG_CONFIGS)-1
 
 def _init_console_handlers(root_logger, az_logger, log_level_config):
     console_log_format = logging.Formatter('%(levelname)s: %(message)s')
@@ -67,14 +67,15 @@ def _init_logfile_handlers(root_logger, az_logger):
         return
     log_file_path = _get_log_file_path()
     logfile_handler = RotatingFileHandler(log_file_path, maxBytes=5*1024*1024, backupCount=5)
-    logfile_handler.setFormatter(logging.Formatter('%(process)d : %(asctime)s : %(name)s :  %(levelname)s : %(message)s'))
+    lfmt = logging.Formatter('%(process)d : %(asctime)s : %(name)s :  %(levelname)s : %(message)s')
+    logfile_handler.setFormatter(lfmt)
     logfile_handler.setLevel(logging.DEBUG)
     root_logger.addHandler(logfile_handler)
     az_logger.addHandler(logfile_handler)
 
 def configure_logging(argv):
     verbose_level = _determine_verbose_level(argv)
-    log_level_config = CONSOLE_LOG_LEVEL_CONFIGS[verbose_level]
+    log_level_config = CONSOLE_LOG_CONFIGS[verbose_level]
 
     root_logger = logging.getLogger()
     az_logger = logging.getLogger('az')
