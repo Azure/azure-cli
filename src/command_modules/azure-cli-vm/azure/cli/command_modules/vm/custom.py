@@ -145,7 +145,7 @@ def _vm_get_ip_addresses(args):
 
         # If provided, make sure that resource group name and vm name match the NIC we are
         # looking at before adding it to the result...
-        if (args.get('resource_group_name') in (None, resource_group)
+        if (args.get(COMMON_PARAMETERS_RESOURCE_GROUP_ARG_NAME) in (None, resource_group)
                 and args.get('name') in (None, vm_name)):
 
             network_info = {

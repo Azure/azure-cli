@@ -26,7 +26,7 @@ from azure.cli.command_modules.network.mgmt.lib.operations import VNetOperations
 
 from azure.cli.commands._command_creation import get_mgmt_service_client
 from azure.cli.commands._auto_command import build_operation, AutoCommandDefinition
-from azure.cli.commands import CommandTable, LongRunningOperation, COMMON_PARAMETERS
+from azure.cli.commands import CommandTable, LongRunningOperation, COMMON_PARAMETERS, COMMON_PARAMETERS_RESOURCE_GROUP_ARG_NAME
 from azure.cli._locale import L
 
 command_table = CommandTable()
@@ -363,7 +363,7 @@ build_operation('network vnet',
 def create_update_subnet(args):
     from azure.mgmt.network.models import Subnet
 
-    resource_group = args.get('resource_group')
+    resource_group = args.get(COMMON_PARAMETERS_RESOURCE_GROUP_ARG_NAME)
     vnet = args.get('vnet')
     name = args.get('name')
     address_prefix = args.get('address_prefix')
