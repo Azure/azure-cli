@@ -64,7 +64,10 @@ build_operation("network express-route circuit-auth",
                     AutoCommandDefinition(ExpressRouteCircuitAuthorizationsOperations.get, 'ExpressRouteCircuitAuthorization', command_alias='show'),
                     AutoCommandDefinition(ExpressRouteCircuitAuthorizationsOperations.list, '[ExpressRouteCircuitAuthorization]'),
                 ],
-                command_table)
+                command_table,
+                {
+                    'authorization_name': {'name': '--name -n'}
+                })
 
 
 # ExpressRouteCircuitPeeringsOperations
@@ -76,7 +79,10 @@ build_operation("network express-route circuit-peering",
                     AutoCommandDefinition(ExpressRouteCircuitPeeringsOperations.get, 'ExpressRouteCircuitPeering', command_alias='show'),
                     AutoCommandDefinition(ExpressRouteCircuitPeeringsOperations.list, '[ExpressRouteCircuitPeering]'),
                 ],
-                command_table)
+                command_table,
+                {
+                    'peering_name': {'name': '--name -n'}
+                })
 
 # ExpressRouteCircuitsOperations
 build_operation("network express-route circuit",
@@ -97,7 +103,7 @@ build_operation("network express-route circuit",
                 })
 
 # ExpressRouteServiceProvidersOperations
-build_operation("network express-route-service-provider",
+build_operation("network express-route service-provider",
                 "express_route_service_providers",
                 _network_client_factory,
                 [
@@ -290,7 +296,9 @@ build_operation("network vpn-connection shared-key",
                 ],
                 command_table,
                 {
-                    'virtual_network_gateway_connection_name': {'name': '--name -n'}
+                    'virtual_network_gateway_connection_name': {'name': '--connection-name'},
+                    'connection_shared_key_name': {'name': '--name -n'}
+
                 })
 
 # VirtualNetworkGatewaysOperations
@@ -326,7 +334,7 @@ build_operation("network vnet",
 # BUG: we are waiting on autorest to support this rename (https://github.com/Azure/autorest/issues/941)
 VNET_SPECIFIC_PARAMS = {
     'deployment_parameter_virtual_network_name_value': {
-        'name': '--vnet-name',
+        'name': '--name -n',
         'metavar': 'VNETNAME',
     },
     'deployment_parameter_virtual_network_prefix_value': {
