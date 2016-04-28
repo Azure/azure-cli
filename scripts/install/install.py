@@ -119,13 +119,6 @@ def create_executable(exec_dir, install_dir, environment_name):
 def prompt_input(message):
     return None if DISABLE_PROMPTS else input(message)
 
-def verify_executable_overwrite(exec_filename):
-    if os.path.isfile(exec_filename):
-        ans = prompt_input("'{}' exists! Overwrite? [y/n]: ".format(exec_filename))
-        if ans is not None and ans.lower() != 'y':
-            return False
-    return True
-
 def get_install_dir():
     prompt_message = 'In what directory would you like to place the install? (default {}): '.format(DEFAULT_INSTALL_DIR)
     install_dir = prompt_input(prompt_message) or DEFAULT_INSTALL_DIR
@@ -144,7 +137,7 @@ def get_environment_name():
     return os.environ.get('AZURE_CLI_ENVIRONMENT_NAME') or DEFAULT_ENVIRONMENT_NAME
 
 def handle_tab_completion(completion_script_url, tmp_dir, install_dir):
-    ans = prompt_input('Enable shell/tab completion? [y/n]: ')
+    ans = prompt_input('Enable shell/tab completion? [y/N]: ')
     if ans is not None and ans.lower() == 'y':
         path_to_completion_script = os.path.join(tmp_dir, 'completion_script')
         urlretrieve(completion_script_url, path_to_completion_script)

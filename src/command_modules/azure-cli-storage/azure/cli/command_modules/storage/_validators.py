@@ -49,6 +49,13 @@ def validate_key_value_pairs(string):
         result = dict(x.split('=', 1) for x in kv_list)
     return result
 
+def validate_quota(string):
+    ''' Validates that share service quota is between 1-5. '''
+    val = int(string)
+    if val < 1 or val > 5:
+        raise ValueError('share quota must be between 1 and 5')
+    return string
+
 def validate_resource_types(string):
     ''' Validates that resource types string contains only a combination
     of (s)ervice, (c)ontainer, (o)bject '''
