@@ -2,28 +2,54 @@
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "vnetName": {
-      "type": "string"
-    },
-    "vnetIpAddressType": {
-      "type": "string"
-    },
-    "vnetIpAddressPrefix": {
-      "type": "string"
-    },
-    "subnetIpAddressPrefix": {
-      "type": "string"
-    },
-    "subnetName": {
-      "type": "string"
-    },
     "location": {
+      "type": "string"
+    },
+    "dnsNameForPublicIP": {
+      "type": "string"
+    },
+    "VirtualMachineName": {
+      "type": "string"
+    },
+    "publicIPAddressName": {
+      "type": "string"
+    },
+    "publicIpAddressAllocation": {
+      "type": "string"
+    },
+    "nicName": {
+      "type": "string"
+    },
+    "subnetRef": {
       "type": "string"
     }
   },
   "variables": {
   },
   "resources": [
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "[parameters('nicName')]",
+      "location": "[parameters('location')]",
+      "tags": {
+        "displayName": "NetworkInterface"
+      },
+      "dependsOn": [ ],
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "[concat('ipconfig', parameters('VirtualMachineName'))]",
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "subnet": {
+                "id": "[parameters('subnetRef')]"
+              }
+            }
+          }
+        ]
+      }
+    }
   ],
   "outputs": {
   }
