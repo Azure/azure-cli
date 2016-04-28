@@ -7,7 +7,7 @@ from azure.cli.command_modules.vm._validators import MinMaxValue
 PARAMETER_ALIASES = GLOBAL_COMMON_PARAMETERS.copy()
 PARAMETER_ALIASES.update({
     'diskname': {
-        'name': '--diskname',
+        'name': '--name -n',
         'dest': 'name',
         'help': L('Disk name'),
         'required': True
