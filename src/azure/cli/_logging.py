@@ -6,12 +6,12 @@ LOG_LEVEL_CONFIGS = [
         'az': logging.WARNING,
         'root': logging.CRITICAL,
     },
-    # -v
+    # --verbose
     {
         'az': logging.INFO,
         'root': logging.CRITICAL,
     },
-    # -vv
+    # --debug
     {
         'az': logging.DEBUG,
         'root': logging.DEBUG,
@@ -24,10 +24,10 @@ def _determine_verbose_level(argv):
     i = 0
     while i < len(argv):
         arg = argv[i]
-        if arg in ['-v', '--verbose']:
+        if arg in ['--verbose']:
             verbose_level += 1
             argv.pop(i)
-        elif arg in ['-vv']:
+        elif arg in ['--debug']:
             verbose_level += 2
             argv.pop(i)
         else:

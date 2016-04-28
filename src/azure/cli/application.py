@@ -137,8 +137,10 @@ class Application(object):
                             choices=['list', 'json', 'tsv'],
                             help='Output format of type "list", "json" or "tsv"')
         # The arguments for verbosity don't get parsed by argparse but we add it here for help.
-        parser.add_argument('-v', '--verbose', action="count", dest='_log_verbosity',
-                            help='Logging verbosity. Can be used up to 2 times (-vv for short).')
+        parser.add_argument('--verbose', dest='_log_verbosity_verbose',
+                            help='Increase logging verbosity. Use --debug for full debug logs.')
+        parser.add_argument('--debug', dest='_log_verbosity_debug',
+                            help='Increase logging verbosity to show all debug logs.')
 
     def _handle_builtin_arguments(self, args):
         self.configuration.output_format = args._output_format #pylint: disable=protected-access
