@@ -155,7 +155,7 @@
         "existing"
       ],
       "metadata": {
-        "description": "Dynamic or Static IP address allocation."
+        "description": "Use a public IP Address for the VM Nic. (new, existing or none)."
       }
     },
     "publicIpDNSEntryType": {
@@ -245,6 +245,13 @@
       "metadata": {
         "description": "Name of virtual network to add VM to."
       }
+    },
+    "publicIpAddressName": {
+      "type": "string",
+      "defaultValue": "[concat('PublicIP', parameters('VirtualMachineName'))]",
+      "metadata": {
+        "description": "Name of public IP address to use."
+      }
     }
   },
   "variables": {
@@ -278,7 +285,7 @@
     "subnetName": "[parameters('subnetName')]",
     "subnetAddressPrefix": "[parameters('subnetIpAddressPrefix')]",
     "vhdStorageType": "[parameters('storageType')]",
-    "publicIPAddressName": "[concat('PublicIP', parameters('VirtualMachineName'))]",
+    "publicIPName": "[parameters('publicIpAddressName')]",
     "publicIpAddressAllocation": "[parameters('publicIpAddressAllocation')]",
     "vhdStorageContainerName": "vhds",
     "vmName": "[parameters('virtualMachineName')]",
@@ -340,7 +347,7 @@
           "location": { "value": "[parameters('location')]" },
           "dnsNameForPublicIP": { "value": "[parameters('dnsNameForPublicIP')]" },
           "VirtualMachineName": { "value": "[parameters('VirtualMachineName')]" },
-          "publicIPAddressName": { "value": "[variables('publicIPAddressName')]" },
+          "publicIPAddressName": { "value": "[variables('publicIPName')]" },
           "publicIpAddressAllocation": { "value": "[variables('publicIpAddressAllocation')]" },
           "nicName": { "value": "[variables('nicName')]" },
           "subnetRef": { "value": "[variables('subnetRef')]" }
