@@ -5,7 +5,6 @@ import mock
 import sys
 from six import StringIO
 
-from azure.cli._logging import logger
 from azure.cli.parser import AzCliCommandParser
 from azure.cli.application import Application, Configuration
 from azure.cli.commands import CommandTable

@@ -1,59 +1,58 @@
-﻿import logging as _logging
-import sys
+﻿import logging
 
-__all__ = ['logger', 'configure_logging']
+LOG_LEVEL_CONFIGS = [
+    # (default)
+    {
+        'az': logging.WARNING,
+        'root': logging.CRITICAL,
+    },
+    # --verbose
+    {
+        'az': logging.INFO,
+        'root': logging.CRITICAL,
+    },
+    # --debug
+    {
+        'az': logging.DEBUG,
+        'root': logging.DEBUG,
+    }]
 
-logger = _logging.Logger('az', _logging.WARNING)
-
-def _arg_name(arg):
-    a = arg.lstrip('-/')
-    if a == arg:
-        return None
-    return a.lower()
-
-def configure_logging(argv, config):
-    level = _logging.WARNING
-
-    # Load logging info from config
-    if config.get('verbose'):
-        level = _logging.INFO
-    if config.get('debug'):
-        level = _logging.DEBUG
-    logfile = config.get('log')
-
-    # Load logging info from arguments
-    # Also remove any arguments consumed so that the parser does not
-    # have to explicitly ignore them.
+def _determine_verbose_level(argv):
+    # Get verbose level by reading the arguments.
+    # Remove any consumed args.
+    verbose_level = 0
     i = 0
     while i < len(argv):
-        arg = _arg_name(argv[i])
-        if arg in ('v', 'verbose'):
-            level = min(_logging.INFO, level)
+        arg = argv[i]
+        if arg in ['--verbose']:
+            verbose_level += 1
             argv.pop(i)
-        elif arg in ('debug',):
-            level = min(_logging.DEBUG, level)
+        elif arg in ['--debug']:
+            verbose_level += 2
             argv.pop(i)
-        elif arg in ('log',):
-            argv.pop(i)
-            try:
-                logfile = argv.pop(i)
-            except IndexError:
-                pass
         else:
             i += 1
+    # Use max verbose level if too much verbosity specified.
+    return verbose_level if verbose_level < len(LOG_LEVEL_CONFIGS) else len(LOG_LEVEL_CONFIGS)-1
 
-    # Configure the console output handler
-    stderr_handler = _logging.StreamHandler(sys.stderr)
-    stderr_handler.formatter = _logging.Formatter('%(levelname)s: %(message)s')
-    logger.level = stderr_handler.level = level
-    logger.handlers.append(stderr_handler)
+def _configure_root_logger(log_level_config):
+    root_logger = logging.getLogger()
+    root_logger.setLevel(log_level_config['root'])
 
-    # Set logging level for all loggers
-    _logging.basicConfig(level=level)
+def _configure_az_logger(log_level_config):
+    az_logger = logging.getLogger('az')
+    az_logger.setLevel(log_level_config['az'])
 
-    if logfile:
-        # Configure the handler that logs code to a text file
-        log_handler = _logging.StreamHandler(open(logfile, 'w', encoding='utf-8'))
-        log_handler.formatter = _logging.Formatter('[%(levelname)s:%(asctime)s] %(message)s')
-        log_handler.level = level if level == _logging.DEBUG else _logging.INFO
-        logger.handlers.append(log_handler)
+def _init_console_handler():
+    logging.basicConfig(format='%(levelname)s: %(message)s')
+
+def configure_logging(argv):
+    verbose_level = _determine_verbose_level(argv)
+    log_level_config = LOG_LEVEL_CONFIGS[verbose_level]
+
+    _init_console_handler()
+    _configure_root_logger(log_level_config)
+    _configure_az_logger(log_level_config)
+
+def get_az_logger(module_name=None):
+    return logging.getLogger('az.' + module_name if module_name else 'az')
