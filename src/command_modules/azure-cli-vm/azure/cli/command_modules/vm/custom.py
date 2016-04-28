@@ -120,15 +120,13 @@ def _parse_rg_name(strid):
 
     return (parts[4], parts[8])
 
-class ConvenienceVmCommands(object):
+class ConvenienceVmCommands(object): # pylint: disable=too-few-public-methods
 
     def __init__(self, _):
         pass
 
-    def list_ip_addresses(self, optional_resource_group_name=None, vm_name=None):
-        '''
-        Get IP addresses from one or more Virtual Machines
-
+    def list_ip_addresses(self, optional_resource_group_name=None, vm_name=None): # pylint: disable=no-self-use
+        ''' Get IP addresses from one or more Virtual Machines
         :param str optional_resource_group_name:Name of resource group.
         :param str vm_name:Name of virtual machine.
         '''
@@ -154,7 +152,7 @@ class ConvenienceVmCommands(object):
             # If provided, make sure that resource group name and vm name match the NIC we are
             # looking at before adding it to the result...
             if (optional_resource_group_name in (None, nic_resource_group)
-                and vm_name in (None, nic_vm_name )):
+                    and vm_name in (None, nic_vm_name)):
 
                 network_info = {
                     'privateIpAddresses': [],
