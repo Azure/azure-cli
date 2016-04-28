@@ -11,9 +11,12 @@ INSTALLED_COMMAND_MODULES = [dist.key.replace('azure-cli-', '')
                              for dist in get_installed_distributions(local_only=True)
                              if dist.key.startswith('azure-cli-')]
 
+COMMON_PARAMETERS_RESOURCE_GROUP_ARG_NAME = 'resource_group_name'
+
 COMMON_PARAMETERS = {
     'resource_group_name': {
-        'name': '--resourcegroup -g',
+        'name': '--resource-group -g',
+        'dest': COMMON_PARAMETERS_RESOURCE_GROUP_ARG_NAME,
         'metavar': 'RESOURCEGROUP',
         'help': 'Name of resource group',
         'required': True

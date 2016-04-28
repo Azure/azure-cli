@@ -1,7 +1,9 @@
 from azure.mgmt.compute.models import DataDisk
 from azure.mgmt.compute.models.compute_management_client_enums import DiskCreateOptionTypes
 from azure.cli._locale import L
-from azure.cli.commands import CommandTable, LongRunningOperation
+from azure.cli.commands import (CommandTable,
+                                LongRunningOperation,
+                                COMMON_PARAMETERS_RESOURCE_GROUP_ARG_NAME)
 from azure.cli.commands._command_creation import get_mgmt_service_client
 from azure.mgmt.compute import ComputeManagementClient, ComputeManagementClientConfiguration
 
@@ -67,7 +69,7 @@ def list_vm(args):
 @command_table.command('vm disk attach-new',
                        help=L('Attach a new disk to an existing Virtual Machine'))
 @command_table.option(**PARAMETER_ALIASES['lun'])
-@command_table.option(**PARAMETER_ALIASES['diskname'])
+@command_table.option('--name -n', dest='name', help='Disk name', required=True)
 @command_table.option(**PARAMETER_ALIASES['disksize'])
 @command_table.option(**PARAMETER_ALIASES['vhd'])
 @patches_vm('Attaching disk', 'Disk attached')
@@ -82,7 +84,7 @@ def _vm_disk_attach_new(args, instance):
 @command_table.command('vm disk attach-existing',
                        help=L('Attach an existing disk to an existing Virtual Machine'))
 @command_table.option(**PARAMETER_ALIASES['lun'])
-@command_table.option(**PARAMETER_ALIASES['diskname'])
+@command_table.option('--name -n', dest='name', help='Disk name', required=True)
 @command_table.option(**PARAMETER_ALIASES['disksize'])
 @command_table.option(**PARAMETER_ALIASES['vhd'])
 @patches_vm('Attaching disk', 'Disk attached')
@@ -96,7 +98,7 @@ def _vm_disk_attach_existing(args, instance):
     instance.storage_profile.data_disks.append(disk)
 
 @command_table.command('vm disk detach')
-@command_table.option(**PARAMETER_ALIASES['diskname'])
+@command_table.option('--name -n', dest='name', help='Disk name', required=True)
 @patches_vm('Detaching disk', 'Disk detached')
 def _vm_disk_detach(args, instance):
     instance.resources = None # Issue: https://github.com/Azure/autorest/issues/934
@@ -122,7 +124,7 @@ def _parse_rg_name(strid):
 
 @command_table.command('vm get-ip-addresses')
 @command_table.option(**PARAMETER_ALIASES['optional_resource_group_name'])
-@command_table.option('-n --vm-name', required=False)
+@command_table.option('-n --name', required=False)
 def _vm_get_ip_addresses(args):
     from azure.mgmt.network import NetworkManagementClient, NetworkManagementClientConfiguration
 
@@ -145,8 +147,8 @@ def _vm_get_ip_addresses(args):
 
         # If provided, make sure that resource group name and vm name match the NIC we are
         # looking at before adding it to the result...
-        if (args.get('resource_group_name') in (None, resource_group)
-                and args.get('vm_name') in (None, vm_name)):
+        if (args.get(COMMON_PARAMETERS_RESOURCE_GROUP_ARG_NAME) in (None, resource_group)
+                and args.get('name') in (None, vm_name)):
 
             network_info = {
                 'privateIpAddresses': [],

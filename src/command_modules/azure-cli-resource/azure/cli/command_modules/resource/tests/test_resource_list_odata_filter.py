@@ -54,7 +54,7 @@ class TestListResources(unittest.TestCase):
             'location': 'dory'
             }
         filter = _list_resources_odata_filter_builder(args)
-        self.assertEquals(filter, "name eq 'wonky' and location eq 'dory'")
+        self.assertEqual(filter, "name eq 'wonky' and location eq 'dory'")
 
     def test_tag_and_name_fails(self):
         args = {

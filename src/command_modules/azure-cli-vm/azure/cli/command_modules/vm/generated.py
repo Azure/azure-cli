@@ -21,24 +21,31 @@ command_table = CommandTable()
 def _compute_client_factory(_):
     return get_mgmt_service_client(ComputeManagementClient, ComputeManagementClientConfiguration)
 
+def _patch_aliases(alias_items):
+    aliases = PARAMETER_ALIASES.copy()
+    aliases.update(alias_items)
+    return aliases
+
 # pylint: disable=line-too-long
-build_operation("vm availabilityset",
+build_operation("vm availset",
                 "availability_sets",
                 _compute_client_factory,
                 [
                     AutoCommandDefinition(AvailabilitySetsOperations.delete, None),
-                    AutoCommandDefinition(AvailabilitySetsOperations.get, 'AvailabilitySet'),
+                    AutoCommandDefinition(AvailabilitySetsOperations.get, 'AvailabilitySet', command_alias='show'),
                     AutoCommandDefinition(AvailabilitySetsOperations.list, '[AvailabilitySet]'),
                     AutoCommandDefinition(AvailabilitySetsOperations.list_available_sizes, '[VirtualMachineSize]', 'list-sizes')
                 ],
-                command_table, PARAMETER_ALIASES)
+                command_table,
+                _patch_aliases({
+                    'availability_set_name': {'name': '--name -n'}
+                }))
 
-
-build_operation("vm machineextensionimage",
+build_operation("vm machine-extension-image",
                 "virtual_machine_extension_images",
                 _compute_client_factory,
                 [
-                    AutoCommandDefinition(VirtualMachineExtensionImagesOperations.get, 'VirtualMachineExtensionImage'),
+                    AutoCommandDefinition(VirtualMachineExtensionImagesOperations.get, 'VirtualMachineExtensionImage', command_alias='show'),
                     AutoCommandDefinition(VirtualMachineExtensionImagesOperations.list_types, '[VirtualMachineImageResource]'),
                     AutoCommandDefinition(VirtualMachineExtensionImagesOperations.list_versions, '[VirtualMachineImageResource]'),
                 ],
@@ -49,15 +56,18 @@ build_operation("vm extension",
                 _compute_client_factory,
                 [
                     AutoCommandDefinition(VirtualMachineExtensionsOperations.delete, LongRunningOperation(L('Deleting VM extension'), L('VM extension deleted'))),
-                    AutoCommandDefinition(VirtualMachineExtensionsOperations.get, 'VirtualMachineExtension'),
+                    AutoCommandDefinition(VirtualMachineExtensionsOperations.get, 'VirtualMachineExtension', command_alias='show'),
                 ],
-                command_table, PARAMETER_ALIASES)
+                command_table,
+                _patch_aliases({
+                    'vm_extension_name': {'name': '--name -n'}
+                }))
 
 build_operation("vm image",
                 "virtual_machine_images",
                 _compute_client_factory,
                 [
-                    AutoCommandDefinition(VirtualMachineImagesOperations.get, 'VirtualMachineImage'),
+                    AutoCommandDefinition(VirtualMachineImagesOperations.get, 'VirtualMachineImage', command_alias='show'),
                     AutoCommandDefinition(VirtualMachineImagesOperations.list, '[VirtualMachineImageResource]'),
                     AutoCommandDefinition(VirtualMachineImagesOperations.list_offers, '[VirtualMachineImageResource]'),
                     AutoCommandDefinition(VirtualMachineImagesOperations.list_publishers, '[VirtualMachineImageResource]'),
@@ -88,13 +98,16 @@ build_operation("vm",
                     AutoCommandDefinition(VirtualMachinesOperations.delete, LongRunningOperation(L('Deleting VM'), L('VM Deleted'))),
                     AutoCommandDefinition(VirtualMachinesOperations.deallocate, LongRunningOperation(L('Deallocating VM'), L('VM Deallocated'))),
                     AutoCommandDefinition(VirtualMachinesOperations.generalize, None),
-                    AutoCommandDefinition(VirtualMachinesOperations.get, 'VirtualMachine'),
+                    AutoCommandDefinition(VirtualMachinesOperations.get, 'VirtualMachine', command_alias='show'),
                     AutoCommandDefinition(VirtualMachinesOperations.list_available_sizes, '[VirtualMachineSize]', 'list-sizes'),
                     AutoCommandDefinition(VirtualMachinesOperations.power_off, LongRunningOperation(L('Powering off VM'), L('VM powered off'))),
                     AutoCommandDefinition(VirtualMachinesOperations.restart, LongRunningOperation(L('Restarting VM'), L('VM Restarted'))),
                     AutoCommandDefinition(VirtualMachinesOperations.start, LongRunningOperation(L('Starting VM'), L('VM Started'))),
                 ],
-                command_table, PARAMETER_ALIASES)
+                command_table,
+                _patch_aliases({
+                    'vm_name': {'name': '--name -n'}
+                }))
 
 build_operation("vm scaleset",
                 "virtual_machine_scale_sets",
@@ -102,7 +115,7 @@ build_operation("vm scaleset",
                 [
                     AutoCommandDefinition(VirtualMachineScaleSetsOperations.deallocate, LongRunningOperation(L('Deallocating VM scale set'), L('VM scale set deallocated'))),
                     AutoCommandDefinition(VirtualMachineScaleSetsOperations.delete, LongRunningOperation(L('Deleting VM scale set'), L('VM scale set deleted'))),
-                    AutoCommandDefinition(VirtualMachineScaleSetsOperations.get, 'VirtualMachineScaleSet'),
+                    AutoCommandDefinition(VirtualMachineScaleSetsOperations.get, 'VirtualMachineScaleSet', command_alias='show'),
                     AutoCommandDefinition(VirtualMachineScaleSetsOperations.delete_instances, LongRunningOperation(L('Deleting VM scale set instances'), L('VM scale set instances deleted'))),
                     AutoCommandDefinition(VirtualMachineScaleSetsOperations.get_instance_view, 'VirtualMachineScaleSetInstanceView'),
                     AutoCommandDefinition(VirtualMachineScaleSetsOperations.list, '[VirtualMachineScaleSet]'),
@@ -113,19 +126,25 @@ build_operation("vm scaleset",
                     AutoCommandDefinition(VirtualMachineScaleSetsOperations.start, LongRunningOperation(L('Starting VM scale set'), L('VM scale set started'))),
                     AutoCommandDefinition(VirtualMachineScaleSetsOperations.update_instances, LongRunningOperation(L('Updating VM scale set instances'), L('VM scale set instances updated'))),
                 ],
-                command_table, PARAMETER_ALIASES)
+                command_table,
+                _patch_aliases({
+                    'vm_scale_set_name': {'name': '--name -n'}
+                }))
 
-build_operation("vm scalesetvm",
+build_operation("vm scaleset-vm",
                 "virtual_machine_scale_set_vms",
                 _compute_client_factory,
                 [
                     AutoCommandDefinition(VirtualMachineScaleSetVMsOperations.deallocate, LongRunningOperation(L('Deallocating VM scale set VMs'), L('VM scale set VMs deallocated'))),
                     AutoCommandDefinition(VirtualMachineScaleSetVMsOperations.delete, LongRunningOperation(L('Deleting VM scale set VMs'), L('VM scale set VMs deleted'))),
-                    AutoCommandDefinition(VirtualMachineScaleSetVMsOperations.get, 'VirtualMachineScaleSetVM'),
+                    AutoCommandDefinition(VirtualMachineScaleSetVMsOperations.get, 'VirtualMachineScaleSetVM', command_alias='show'),
                     AutoCommandDefinition(VirtualMachineScaleSetVMsOperations.get_instance_view, 'VirtualMachineScaleSetVMInstanceView'),
                     AutoCommandDefinition(VirtualMachineScaleSetVMsOperations.list, '[VirtualMachineScaleSetVM]'),
                     AutoCommandDefinition(VirtualMachineScaleSetVMsOperations.power_off, LongRunningOperation(L('Powering off VM scale set VMs'), L('VM scale set VMs powered off'))),
                     AutoCommandDefinition(VirtualMachineScaleSetVMsOperations.restart, LongRunningOperation(L('Restarting VM scale set VMs'), L('VM scale set VMs restarted'))),
                     AutoCommandDefinition(VirtualMachineScaleSetVMsOperations.start, LongRunningOperation(L('Starting VM scale set VMs'), L('VM scale set VMs started'))),
                 ],
-                command_table, PARAMETER_ALIASES)
+                command_table,
+                _patch_aliases({
+                    'vm_scale_set_name': {'name': '--name -n'}
+                }))
