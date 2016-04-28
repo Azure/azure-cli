@@ -9,8 +9,6 @@ from ._help_files import _load_help_file
 
 __all__ = ['print_detailed_help', 'print_welcome_message', 'GroupHelpFile', 'CommandHelpFile']
 
-_out = sys.stdout
-
 def show_help(nouns, parser, is_group):
     delimiters = ' '.join(nouns)
     help_file = CommandHelpFile(delimiters, parser) \
@@ -41,9 +39,7 @@ def print_welcome_message():
 """))
     _print_indent(L('\nWelcome to the cool new Azure CLI!\n\nHere are the base commands:\n'))
 
-def print_detailed_help(help_file, out=sys.stdout): #pylint: disable=unused-argument
-    global _out #pylint: disable=global-statement
-    _out = out
+def print_detailed_help(help_file):
     _print_header(help_file)
 
     _print_indent(L('Arguments') if help_file.type == 'command' else L('Sub-Commands'))
@@ -56,10 +52,7 @@ def print_detailed_help(help_file, out=sys.stdout): #pylint: disable=unused-argu
     if len(help_file.examples) > 0:
         _print_examples(help_file)
 
-def print_description_list(help_files, out=sys.stdout):
-    global _out #pylint: disable=global-statement
-    _out = out
-
+def print_description_list(help_files):
     indent = 1
     max_name_length = max(len(f.name) for f in help_files) if help_files else 0
     for help_file in sorted(help_files, key=lambda h: h.name):
@@ -209,7 +202,7 @@ class CommandHelpFile(HelpFile): #pylint: disable=too-few-public-methods
         self.parameters = []
 
         for action in [a for a in parser._actions if a.help != argparse.SUPPRESS]: # pylint: disable=protected-access
-            self.parameters.append(HelpParameter('/'.join(sorted(action.option_strings)),
+            self.parameters.append(HelpParameter(' '.join(sorted(action.option_strings)),
                                                  action.help,
                                                  required=action.required))
 
@@ -276,7 +269,7 @@ def _print_indent(s, indent=0, subsequent_spaces=-1):
                               width=100)
     paragraphs = s.split('\n')
     for p in paragraphs:
-        print(tw.fill(p), file=_out)
+        print(tw.fill(p), file=sys.stdout)
 
 def _get_column_indent(text, max_name_length):
     return ' '*(max_name_length - len(text))
