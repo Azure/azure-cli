@@ -18,6 +18,8 @@ To install via cURL on Linux, Unix and OS X, type:
 
     curl http://azure-cli-nightly.cloudapp.net/install | bash
 
+If you chose to enable tab completion, type `exec -l $SHELL` to restart your shell.
+
 Note: This will install the latest nightly builds.
 
 **Errors on install with cffi or cryptography:**
@@ -30,12 +32,32 @@ If you get errors on install on **OS X**, upgrade pip by typing:
 
 
 If you get errors on install on **Debian or Ubuntu** such as the examples below,
-install libssl-dev, libffi-dev and python3-dev by typing:
+install libssl-dev and libffi-dev by typing:
 
 .. code:: shell
 
     sudo apt-get update
-    sudo apt-get install -y build-essential libssl-dev libffi-dev python3-dev
+    sudo apt-get install -y libssl-dev libffi-dev
+
+Also install Python Dev for your version of Python.
+
+Python 2:
+
+.. code:: shell
+
+    sudo apt-get install -y python-dev
+
+Python 3:
+
+.. code:: shell
+
+    sudo apt-get install -y python3-dev
+
+Ubuntu 15 may require `build-essential` also:
+
+.. code:: shell
+
+    sudo apt-get install -y build-essential
 
 
 **Example Errors**

@@ -1,19 +1,14 @@
 from os import environ
 
-from azure.cli.commands import COMMON_PARAMETERS as GLOBAL_COMMON_PARAMETERS
+from azure.cli.commands import (COMMON_PARAMETERS as GLOBAL_COMMON_PARAMETERS, extend_parameter)
 from azure.cli._locale import L
 
 from ._validators import (
     validate_container_permission, validate_datetime, validate_datetime_as_string, validate_id,
     validate_ip_range, validate_key_value_pairs, validate_resource_types, validate_services,
-    validate_tags, validate_lease_duration)
+    validate_tags, validate_lease_duration, validate_quota)
 
 # HELPER METHODS
-
-def extend_parameter(parameter_metadata, **kwargs):
-    modified_parameter_metadata = parameter_metadata.copy()
-    modified_parameter_metadata.update(kwargs)
-    return modified_parameter_metadata
 
 def get_account_name(string):
     return string if string != 'query' else environ.get('AZURE_STORAGE_ACCOUNT')
@@ -74,6 +69,9 @@ PARAMETER_ALIASES.update({
         'type': get_connection_string,
         'required': False,
         'default': 'query'
+    },
+    'directory_name': {
+        'name': '--directory-name -d'
     },
     'expiry': {
         'name': '--expiry',
@@ -140,6 +138,10 @@ PARAMETER_ALIASES.update({
         'metavar': 'SPECIFIERS',
         'choices': ['blob', 'container']
     },
+    'quota': {
+        'name': '--quota',
+        'type': validate_quota
+    },
     'resource_types': {
         'name': '--resource-types',
         'help': L('the resource types the SAS is applicable for. Allowed values: (s)ervice ' + \
@@ -159,7 +161,7 @@ PARAMETER_ALIASES.update({
         'type': validate_services
     },
     'share_name': {
-        'name': '--share-name',
+        'name': '--share-name -s',
         'help': L('the name of the file share'),
         'required': True,
     },
@@ -191,9 +193,9 @@ PARAMETER_ALIASES.update({
 
 # SUPPLEMENTAL (EXTRA) PARAMETER SETS
 
-STORAGE_DATA_CLIENT_ARGS = {
-    'account_name': PARAMETER_ALIASES['account_name'],
-    'account_key': PARAMETER_ALIASES['account_key'],
-    'connection_string': PARAMETER_ALIASES['connection_string'],
-    'sas_token': PARAMETER_ALIASES['sas_token']
-}
+STORAGE_DATA_CLIENT_ARGS = [
+    PARAMETER_ALIASES['account_name'],
+    PARAMETER_ALIASES['account_key'],
+    PARAMETER_ALIASES['connection_string'],
+    PARAMETER_ALIASES['sas_token']
+]

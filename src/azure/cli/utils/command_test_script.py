@@ -86,9 +86,9 @@ class CommandTestScript(object): #pylint: disable=too-many-instance-attributes
             try:
                 assert bool_val == checks
             except AssertionError as ex:
-                print('COMMAND FAILED: {}'.format(command))
-                print("EXPECTED: {} ACTUAL: {} RESULT: {}".format(checks, result_val, bool_val))
                 raise ex
+        elif isinstance(checks, str):
+            assert result.replace('"', '') == checks
         elif isinstance(checks, dict):
             json_val = json.loads(result)
             _check_json(json_val, checks)

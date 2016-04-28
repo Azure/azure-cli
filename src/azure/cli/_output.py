@@ -11,7 +11,7 @@ class OutputFormatException(Exception):
 
 def format_json(obj):
     input_dict = obj.__dict__ if hasattr(obj, '__dict__') else obj
-    return json.dumps(input_dict, indent=2, sort_keys=True, separators=(',', ': '))
+    return json.dumps(input_dict, indent=2, sort_keys=True, separators=(',', ': ')) + '\n'
 
 def format_table(obj):
     obj_list = obj if isinstance(obj, list) else [obj]
@@ -60,7 +60,7 @@ class OutputProducer(object): #pylint: disable=too-few-public-methods
         self.file = file
 
     def out(self, obj):
-        print(self.formatter(obj), file=self.file)
+        print(self.formatter(obj), file=self.file, end='')
 
 
     @staticmethod
@@ -133,6 +133,7 @@ class ListOutput(object): #pylint: disable=too-few-public-methods
         for obj in data:
             self._dump_object(io, obj, 0)
             io.write('\n')
+        io.write('\n')
         result = io.getvalue()
         io.close()
         return result
@@ -215,18 +216,30 @@ class TsvOutput(object): #pylint: disable=too-few-public-methods
             # We need to print something to avoid mismatching
             # number of columns if the value is None for some instances
             # and a dictionary value in other...
-            stream.write('{object}')
+            stream.write('')
         else:
             stream.write(str(data))
 
     @staticmethod
     def _dump_row(data, stream):
-        if isinstance(data, dict):
-            separator = ''
+        separator = ''
+        if isinstance(data, dict) or isinstance(data, list):
+            if isinstance(data, OrderedDict):
+                values = data.values()
+            elif isinstance(data, dict):
+                values = [value for _, value in sorted(data.items())]
+            else:
+                values = data
+
             # Iterate through the items either sorted by key value (if dict) or in the order
             # they were added (in the cases of an ordered dict) in order to make the output
             # stable
-            for _, value in data.items() if isinstance(data, OrderedDict) else sorted(data.items()):
+            for value in values:
+                stream.write(separator)
+                TsvOutput._dump_obj(value, stream)
+                separator = '\t'
+        elif isinstance(data, list):
+            for value in data:
                 stream.write(separator)
                 TsvOutput._dump_obj(value, stream)
                 separator = '\t'
@@ -236,9 +249,12 @@ class TsvOutput(object): #pylint: disable=too-few-public-methods
     @staticmethod
     def dump(data):
         io = StringIO()
+        first_line = True
         for item in data:
+            if not first_line:
+                io.write('\n')
             TsvOutput._dump_row(item, io)
-            io.write('\n')
+            first_line = False
 
         result = io.getvalue()
         io.close()
