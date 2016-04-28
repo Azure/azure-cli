@@ -53,7 +53,7 @@
     },
     "dnsNameForPublicIP": {
       "type": "string",
-      "minLength": 1,
+      "defaultValue": "",
       "metadata": {
         "description": "Globally unique DNS Name for the Public IP used to access the Virtual Machine."
       }
@@ -148,7 +148,7 @@
     },
     "publicIpAddressType": {
       "type": "string",
-      "defaultValue": "new",
+      "defaultValue": "none",
       "allowedValues": [
         "none",
         "new",
@@ -160,20 +160,13 @@
     },
     "publicIpDNSEntryType": {
       "type": "string",
-      "defaultValue": "new",
+      "defaultValue": "none",
       "allowedValues": [
         "none",
         "new"
       ],
       "metadata": {
         "description": "Associate VMs with a public IP address to a DNS name (new or none)."
-      }
-    },
-    "publicIpDNSName": {
-      "type": "string",
-      "defaultValue": "",
-      "metadata": {
-        "description": "DNS name to associate with a VM's public IP address (globally unique identifier)."
       }
     },
     "size": {
