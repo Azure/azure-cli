@@ -22,18 +22,18 @@ def _determine_verbose_level(argv):
     # Remove any consumed args.
     verbose_level = 0
     i = 0
-    # TODO: WRITE TESTS FOR THIS
     while i < len(argv):
         arg = argv[i]
         if arg in ['-v', '--verbose']:
             verbose_level += 1
             argv.pop(i)
-        elif arg in ['-vv'] and verbose_level == 0:
-            verbose_level = 2
+        elif arg in ['-vv']:
+            verbose_level += 2
             argv.pop(i)
         else:
             i += 1
-    return verbose_level
+    # Default to 0 verbose level if too much verbosity specified.
+    return verbose_level if verbose_level < len(LOG_LEVEL_CONFIGS) else 0
 
 def _configure_root_logger(log_level_config):
     root_logger = logging.getLogger()
@@ -48,15 +48,11 @@ def _init_console_handler():
 
 def configure_logging(argv):
     verbose_level = _determine_verbose_level(argv)
-    
-    try:
-        log_level_config = LOG_LEVEL_CONFIGS[verbose_level]
-    except IndexError:
-        log_level_config = LOG_LEVEL_CONFIGS[0]
+    log_level_config = LOG_LEVEL_CONFIGS[verbose_level]
 
     _init_console_handler()
     _configure_root_logger(log_level_config)
     _configure_az_logger(log_level_config)
 
-def getAzLogger(module_name):
-    return logging.getLogger('az.'+module_name)
+def getAzLogger(module_name=None):
+    return logging.getLogger('az.' + module_name if module_name else 'az')
