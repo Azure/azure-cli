@@ -10,6 +10,7 @@ try:
     import unittest.mock as mock
 except ImportError:
     import mock
+import zlib
 
 from six import StringIO
 from six.moves import input #pylint: disable=redefined-builtin
@@ -193,7 +194,28 @@ class CommandTestGenerator(object):
 
     @staticmethod
     def before_record_response(response):
+
+        def _decode_body(response):
+            encoding = response['headers'].get('Content-Encoding', [])
+            if encoding and encoding[0] == 'gzip':
+                body = response['body']['string']
+                new_body = zlib.decompress(body, zlib.MAX_WBITS | 16)
+                response['body']['string'] = new_body
+                response['headers']['content-length'] = [str(len(new_body))]
+
+        def _mask_sensitive_keys(response):
+            SENSITIVE = ['key1', 'key2']
+            body = response['body'].get('string')
+            if body:
+                body_json = json.loads(body.decode('utf-8'))
+                for key in body_json:
+                    if key in SENSITIVE:
+                        body_json[key] = '0' * len(body_json[key])
+                        print('MASKED {}: {}'.format(key, body_json[key]))
+
         for key in CommandTestGenerator.FILTER_HEADERS:
             if key in response['headers']:
                 del response['headers'][key]
+        #_decode_body(response)
+        #_mask_sensitive_keys(response)
         return response
