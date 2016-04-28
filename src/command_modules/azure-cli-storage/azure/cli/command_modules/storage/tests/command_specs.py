@@ -37,7 +37,7 @@ class StorageAccountScenarioTest(CommandTestScript):
         s.test('storage account check-name --name {}'.format(account),
                {'nameAvailable': False, 'reason': 'AlreadyExists'})
         s.rec('storage account list -g {}'.format(rg))
-        s.test('storage account show --resourcegroup {} --account-name {}'.format(rg, account),
+        s.test('storage account show --resource-group {} --account-name {}'.format(rg, account),
                {'name': account, 'accountType': 'Standard_LRS', 'location': 'westus', 'resourceGroup': rg})
         s.rec('storage account usage')
         s.rec('storage account connection-string -g {} --account-name {} --use-http'.format(rg, account))
