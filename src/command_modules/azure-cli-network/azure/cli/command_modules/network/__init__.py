@@ -29,13 +29,15 @@ from azure.cli.commands._auto_command import build_operation, AutoCommandDefinit
 from azure.cli.commands import (CommandTable,
                                 LongRunningOperation,
                                 COMMON_PARAMETERS,
-                                COMMON_PARAMETERS_RESOURCE_GROUP_ARG_NAME)
+                                RESOURCE_GROUP_ARG_NAME)
 from azure.cli._locale import L
 
 command_table = CommandTable()
 
 def _network_client_factory(_):
     return get_mgmt_service_client(NetworkManagementClient, NetworkManagementClientConfiguration)
+
+_VNET_PARAM_NAME = '--vnet-name'
 
 # pylint: disable=line-too-long
 # Application gateways
@@ -64,7 +66,10 @@ build_operation("network express-route circuit-auth",
                     AutoCommandDefinition(ExpressRouteCircuitAuthorizationsOperations.get, 'ExpressRouteCircuitAuthorization', command_alias='show'),
                     AutoCommandDefinition(ExpressRouteCircuitAuthorizationsOperations.list, '[ExpressRouteCircuitAuthorization]'),
                 ],
-                command_table)
+                command_table,
+                {
+                    'authorization_name': {'name': '--name -n'}
+                })
 
 
 # ExpressRouteCircuitPeeringsOperations
@@ -76,7 +81,10 @@ build_operation("network express-route circuit-peering",
                     AutoCommandDefinition(ExpressRouteCircuitPeeringsOperations.get, 'ExpressRouteCircuitPeering', command_alias='show'),
                     AutoCommandDefinition(ExpressRouteCircuitPeeringsOperations.list, '[ExpressRouteCircuitPeering]'),
                 ],
-                command_table)
+                command_table,
+                {
+                    'peering_name': {'name': '--name -n'}
+                })
 
 # ExpressRouteCircuitsOperations
 build_operation("network express-route circuit",
@@ -97,7 +105,7 @@ build_operation("network express-route circuit",
                 })
 
 # ExpressRouteServiceProvidersOperations
-build_operation("network express-route-service-provider",
+build_operation("network express-route service-provider",
                 "express_route_service_providers",
                 _network_client_factory,
                 [
@@ -253,7 +261,7 @@ build_operation("network vnet subnet",
                 command_table,
                 {
                     'subnet_name': {'name': '--name -n'},
-                    'virtual_network_name': {'name': '--vnet-name'}
+                    'virtual_network_name': {'name': _VNET_PARAM_NAME}
                 })
 
 # UsagesOperations
@@ -290,7 +298,9 @@ build_operation("network vpn-connection shared-key",
                 ],
                 command_table,
                 {
-                    'virtual_network_gateway_connection_name': {'name': '--name -n'}
+                    'virtual_network_gateway_connection_name': {'name': '--connection-name'},
+                    'connection_shared_key_name': {'name': '--name -n'}
+
                 })
 
 # VirtualNetworkGatewaysOperations
@@ -326,7 +336,7 @@ build_operation("network vnet",
 # BUG: we are waiting on autorest to support this rename (https://github.com/Azure/autorest/issues/941)
 VNET_SPECIFIC_PARAMS = {
     'deployment_parameter_virtual_network_name_value': {
-        'name': '--vnet-name',
+        'name': '--name -n',
         'metavar': 'VNETNAME',
     },
     'deployment_parameter_virtual_network_prefix_value': {
@@ -360,13 +370,13 @@ build_operation('network vnet',
 @command_table.command('network subnet create')
 @command_table.description(L('Create or update a virtual network (VNet) subnet'))
 @command_table.option(**COMMON_PARAMETERS['resource_group_name'])
-@command_table.option('--name -n', help=L('the the subnet name'), required=True)
-@command_table.option('--vnet -v', help=L('the name of the subnet vnet'), required=True)
+@command_table.option('--name -n', help=L('the subnet name'), required=True)
+@command_table.option(_VNET_PARAM_NAME, help=L('the name of the vnet'), required=True)
 @command_table.option('--address-prefix -a', help=L('the the address prefix in CIDR format'), required=True)
 def create_update_subnet(args):
     from azure.mgmt.network.models import Subnet
 
-    resource_group = args.get(COMMON_PARAMETERS_RESOURCE_GROUP_ARG_NAME)
+    resource_group = args.get(RESOURCE_GROUP_ARG_NAME)
     vnet = args.get('vnet')
     name = args.get('name')
     address_prefix = args.get('address_prefix')
