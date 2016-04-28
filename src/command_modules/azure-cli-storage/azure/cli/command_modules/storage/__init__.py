@@ -478,6 +478,9 @@ def mount_share(args):
             drive, account_name, share_name, account_key, account_name)
         exit_code = subprocess.call(command.split())
     elif os.name == 'posix':
+        if persist_creds:
+            # TODO: Add settings to /etc/fstab file
+            pass
         if subprocess.call('apt show cifs-utils'.split()):
             subprocess.call('sudo apt-get install cifs-utils'.split())
         subprocess.call('mkdir share_name'.split())
