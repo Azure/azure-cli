@@ -32,12 +32,12 @@ If you get errors on install on **OS X**, upgrade pip by typing:
 
 
 If you get errors on install on **Debian or Ubuntu** such as the examples below,
-install build-essential, libssl-dev and libffi-dev by typing:
+install libssl-dev and libffi-dev by typing:
 
 .. code:: shell
 
     sudo apt-get update
-    sudo apt-get install -y build-essential libssl-dev libffi-dev
+    sudo apt-get install -y libssl-dev libffi-dev
 
 Also install Python Dev for your version of Python.
 
@@ -52,6 +52,12 @@ Python 3:
 .. code:: shell
 
     sudo apt-get install -y python3-dev
+
+Ubuntu 15 may require `build-essential` also:
+
+.. code:: shell
+
+    sudo apt-get install -y build-essential
 
 
 **Example Errors**
