@@ -106,7 +106,7 @@
             "version": "[variables('imageVersion')]"
           },
           "osDisk": {
-            "name": "[concat('osdisk', uniqueString(parameters('dnsNameForPublicIP')))]",
+            "name": "[concat('osdisk', parameters('virtualMachineName'))]",
             "vhd": {
               "uri": "[concat('http://', variables('vhdStorageName'), '.blob.core.windows.net/', variables('vhdStorageContainerName'), '/', variables('OSDiskName'), '.vhd')]"
             },

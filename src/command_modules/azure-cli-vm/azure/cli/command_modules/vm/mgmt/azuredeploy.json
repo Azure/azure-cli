@@ -9,17 +9,6 @@
         "description": "Container URI of of the template."
       }
     },
-    "addToAvailabilitySet": {
-      "type": "string",
-      "defaultValue": "none",
-      "allowedValues": [
-        "none",
-        "existing"
-      ],
-      "metadata": {
-        "description": "Flag to add the VM to an existing availability set."
-      }
-    },
     "adminPassword": {
       "type": "securestring",
       "metadata": {
@@ -33,7 +22,7 @@
         "description": "Username for the Virtual Machine."
       }
     },
-    "authenticationMethod": {
+    "authenticationType": {
       "type": "string",
       "defaultValue": "password",
       "allowedValues": [
@@ -51,11 +40,33 @@
         "description": "Existing availability set for the VM."
       }
     },
+    "availabilitySetType": {
+      "type": "string",
+      "defaultValue": "none",
+      "allowedValues": [
+        "none",
+        "existing"
+      ],
+      "metadata": {
+        "description": "Flag to add the VM to an existing availability set."
+      }
+    },
     "dnsNameForPublicIP": {
       "type": "string",
       "defaultValue": "",
       "metadata": {
         "description": "Globally unique DNS Name for the Public IP used to access the Virtual Machine."
+      }
+    },
+    "dnsNameType": {
+      "type": "string",
+      "defaultValue": "none",
+      "allowedValues": [
+        "none",
+        "new"
+      ],
+      "metadata": {
+        "description": "Associate VMs with a public IP address to a DNS name (new or none)."
       }
     },
     "location": {
@@ -65,39 +76,11 @@
         "description": "Location for VM resources."
       }
     },
-    "newOrExistingStorageAccount": {
+    "name": {
       "type": "string",
-      "defaultValue": "new",
-      "allowedValues": [
-        "new",
-        "existing"
-      ],
+      "minLength": 1,
       "metadata": {
-        "description": "Whether to use an existing storage account or create a new one."
-      }
-    },
-    "newOrExistingVNet": {
-      "type": "string",
-      "defaultValue": "new",
-      "allowedValues": [
-        "new",
-        "existing"
-      ],
-      "metadata": {
-        "description": "Whether to use an existing VNet or create a new one."
-      }
-    },
-    "os": {
-      "type": "string",
-      "defaultValue": "WinServer 2012 R2",
-      "allowedValues": [
-        "Ubuntu 14.04",
-        "Ubuntu 15.10",
-        "WinServer 2012 R2",
-        "Custom"
-      ],
-      "metadata": {
-        "description": "Common OS choices.  Choose 'Custom' to specify an image with the osPublisher, osOffer, osSKU, and osVersion parameters."
+        "description": "The VM resource name."
       }
     },
     "osDiskName": {
@@ -128,6 +111,19 @@
         "description": "The OS SKU to install."
       }
     },
+    "osType": {
+      "type": "string",
+      "defaultValue": "WinServer 2012 R2",
+      "allowedValues": [
+        "Ubuntu 14.04",
+        "Ubuntu 15.10",
+        "WinServer 2012 R2",
+        "Custom"
+      ],
+      "metadata": {
+        "description": "Common OS choices.  Choose 'Custom' to specify an image with the osPublisher, osOffer, osSKU, and osVersion parameters."
+      }
+    },
     "osVersion": {
       "type": "string",
       "defaultValue": "latest",
@@ -146,6 +142,13 @@
         "description": "Dynamic or Static IP address allocation."
       }
     },
+    "publicIpAddressName": {
+      "type": "string",
+      "defaultValue": "[concat('PublicIP', parameters('name'))]",
+      "metadata": {
+        "description": "Name of public IP address to use."
+      }
+    },
     "publicIpAddressType": {
       "type": "string",
       "defaultValue": "none",
@@ -156,17 +159,6 @@
       ],
       "metadata": {
         "description": "Use a public IP Address for the VM Nic. (new, existing or none)."
-      }
-    },
-    "publicIpDNSEntryType": {
-      "type": "string",
-      "defaultValue": "none",
-      "allowedValues": [
-        "none",
-        "new"
-      ],
-      "metadata": {
-        "description": "Associate VMs with a public IP address to a DNS name (new or none)."
       }
     },
     "size": {
@@ -192,9 +184,20 @@
     },
     "storageAccountName": {
       "type": "string",
-      "defaultValue": "[concat('vhdstorage', uniqueString(parameters('VirtualMachineName')))]",
+      "defaultValue": "[concat('vhdstorage', uniqueString(parameters('name')))]",
       "metadata": {
         "description": "Name of storage account for the VM OS disk."
+      }
+    },
+    "storageAccountType": {
+      "type": "string",
+      "defaultValue": "new",
+      "allowedValues": [
+        "new",
+        "existing"
+      ],
+      "metadata": {
+        "description": "Whether to use an existing storage account or create a new one."
       }
     },
     "storageContainerName": {
@@ -204,7 +207,7 @@
         "description": "Name of storage container for the VM OS disk."
       }
     },
-    "storageType": {
+    "storageRedundancyType": {
       "type": "string",
       "defaultValue": "Standard_LRS",
       "metadata": {
@@ -220,16 +223,9 @@
     },
     "subnetName": {
       "type": "string",
-      "defaultValue": "[concat('Subnet', parameters('virtualMachineName'))]",
+      "defaultValue": "[concat('Subnet', parameters('name'))]",
       "metadata": {
         "description": "The subnet name."
-      }
-    },
-    "virtualMachineName": {
-      "type": "string",
-      "minLength": 1,
-      "metadata": {
-        "description": "The VM resource name."
       }
     },
     "virtualNetworkIpAddressPrefix": {
@@ -241,16 +237,20 @@
     },
     "virtualNetworkName": {
       "type": "string",
-      "defaultValue": "[concat('VNET', parameters('VirtualMachineName'))]",
+      "defaultValue": "[concat('VNET', parameters('name'))]",
       "metadata": {
         "description": "Name of virtual network to add VM to."
       }
     },
-    "publicIpAddressName": {
+    "virtualNetworkType": {
       "type": "string",
-      "defaultValue": "[concat('PublicIP', parameters('VirtualMachineName'))]",
+      "defaultValue": "new",
+      "allowedValues": [
+        "new",
+        "existing"
+      ],
       "metadata": {
-        "description": "Name of public IP address to use."
+        "description": "Whether to use an existing VNet or create a new one."
       }
     }
   },
@@ -280,15 +280,15 @@
       "Custom": "[parameters('osVersion')]"
     },
     "vnetDeploymentName": "[concat('VNet', variables('vmName'))]",
-    "nicName": "[concat('VMNic', parameters('VirtualMachineName'))]",
+    "nicName": "[concat('VMNic', parameters('name'))]",
     "vnetAddressPrefix": "[parameters('virtualNetworkIpAddressPrefix')]",
     "subnetName": "[parameters('subnetName')]",
     "subnetAddressPrefix": "[parameters('subnetIpAddressPrefix')]",
-    "vhdStorageType": "[parameters('storageType')]",
+    "vhdStorageType": "[parameters('storageRedundancyType')]",
     "publicIPName": "[parameters('publicIpAddressName')]",
     "publicIpAddressAllocation": "[parameters('publicIpAddressAllocation')]",
     "vhdStorageContainerName": "vhds",
-    "vmName": "[parameters('virtualMachineName')]",
+    "vmName": "[parameters('name')]",
     "vmSize": "[parameters('size')]",
     "vmDeploymentName": "[concat('VM', variables('vmName'))]",
     "nicDeploymentName": "[concat('NicIp', variables('vmName'))]",
@@ -306,9 +306,9 @@
       "existing": "nested_templates/ExistingVNet.json"
     },
     "nicTemplateFilePaths": {
-      "none": "[concat('/nested_templates/nic_ip_none_dns_', parameters('publicIpDNSEntryType'), '.json')]",
-      "new": "[concat('/nested_templates/nic_ip_new_dns_', parameters('publicIpDNSEntryType'), '.json')]",
-      "existing": "[concat('/nested_templates/nic_ip_existing_dns_', parameters('publicIpDNSEntryType'), '.json')]"
+      "none": "[concat('/nested_templates/nic_ip_none_dns_', parameters('dnsNameType'), '.json')]",
+      "new": "[concat('/nested_templates/nic_ip_new_dns_', parameters('dnsNameType'), '.json')]",
+      "existing": "[concat('/nested_templates/nic_ip_existing_dns_', parameters('dnsNameType'), '.json')]"
     }
   },
   "resources": [
@@ -320,7 +320,7 @@
       "properties": {
         "mode": "Incremental",
         "templateLink": {
-          "uri": "[concat(parameters('_artifactsLocation'), '/', variables('storageAccountTemplateFilePaths')[parameters('newOrExistingStorageAccount')])]",
+          "uri": "[concat(parameters('_artifactsLocation'), '/', variables('storageAccountTemplateFilePaths')[parameters('storageAccountType')])]",
           "contentVersion": "1.0.0.0"
         },
         "parameters": {
@@ -346,7 +346,7 @@
         "parameters": {
           "location": { "value": "[parameters('location')]" },
           "dnsNameForPublicIP": { "value": "[parameters('dnsNameForPublicIP')]" },
-          "VirtualMachineName": { "value": "[parameters('VirtualMachineName')]" },
+          "virtualMachineName": { "value": "[parameters('name')]" },
           "publicIPAddressName": { "value": "[variables('publicIPName')]" },
           "publicIpAddressAllocation": { "value": "[variables('publicIpAddressAllocation')]" },
           "nicName": { "value": "[variables('nicName')]" },
@@ -362,7 +362,7 @@
       "properties": {
         "mode": "Incremental",
         "templateLink": {
-          "uri": "[concat(parameters('_artifactsLocation'), '/', variables('vnetTemplateFilePaths')[parameters('newOrExistingVNet')])]",
+          "uri": "[concat(parameters('_artifactsLocation'), '/', variables('vnetTemplateFilePaths')[parameters('virtualNetworkType')])]",
           "contentVersion": "1.0.0.0"
         },
         "parameters": {
@@ -386,7 +386,7 @@
       "properties": {
         "mode": "Incremental",
         "templateLink": {
-          "uri": "[concat(parameters('_artifactsLocation'), '/nested_templates/vm_', parameters('addToAvailabilitySet'), '_', parameters('authenticationMethod'), '.json')]",
+          "uri": "[concat(parameters('_artifactsLocation'), '/nested_templates/vm_', parameters('availabilitySetType'), '_', parameters('authenticationType'), '.json')]",
           "contentVersion": "1.0.0.0"
         },
         "parameters": {
@@ -394,10 +394,10 @@
           "adminPassword": { "value": "[parameters('adminPassword')]" },
           "dnsNameForPublicIP": { "value": "[parameters('dnsNameForPublicIP')]" },
           "virtualMachineName": { "value": "[variables('vmName')]" },
-          "osPublisher": { "value": "[variables('imagePublishers')[parameters('os')]]" },
-          "osOffer": { "value": "[variables('imageOffers')[parameters('os')]]" },
-          "osSKU": { "value": "[variables('imageSkus')[parameters('os')]]" },
-          "osVersion": { "value": "[variables('imageVersions')[parameters('os')]]" },
+          "osPublisher": { "value": "[variables('imagePublishers')[parameters('osType')]]" },
+          "osOffer": { "value": "[variables('imageOffers')[parameters('osType')]]" },
+          "osSKU": { "value": "[variables('imageSkus')[parameters('osType')]]" },
+          "osVersion": { "value": "[variables('imageVersions')[parameters('osType')]]" },
           "size": { "value": "[variables('vmSize')]" },
           "storageType": { "value": "[variables('vhdStorageType')]" },
           "storageAccountName": { "value": "[parameters('storageAccountName')]" },
