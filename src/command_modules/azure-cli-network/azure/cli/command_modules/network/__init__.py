@@ -26,7 +26,10 @@ from azure.cli.command_modules.network.mgmt.lib.operations import VNetOperations
 
 from azure.cli.commands._command_creation import get_mgmt_service_client
 from azure.cli.commands._auto_command import build_operation, AutoCommandDefinition
-from azure.cli.commands import CommandTable, LongRunningOperation, COMMON_PARAMETERS, COMMON_PARAMETERS_RESOURCE_GROUP_ARG_NAME
+from azure.cli.commands import (CommandTable,
+                                LongRunningOperation,
+                                COMMON_PARAMETERS,
+                                COMMON_PARAMETERS_RESOURCE_GROUP_ARG_NAME)
 from azure.cli._locale import L
 
 command_table = CommandTable()
@@ -53,7 +56,7 @@ build_operation("network application-gateway",
                 })
 
 # ExpressRouteCircuitAuthorizationsOperations
-build_operation("network express-route-circuit-auth",
+build_operation("network express-route circuit-auth",
                 "express_route_circuit_authorizations",
                 _network_client_factory,
                 [
@@ -65,7 +68,7 @@ build_operation("network express-route-circuit-auth",
 
 
 # ExpressRouteCircuitPeeringsOperations
-build_operation("network express-route-circuit-peering",
+build_operation("network express-route circuit-peering",
                 "express_route_circuit_peerings",
                 _network_client_factory,
                 [
@@ -76,7 +79,7 @@ build_operation("network express-route-circuit-peering",
                 command_table)
 
 # ExpressRouteCircuitsOperations
-build_operation("network express-route-circuit",
+build_operation("network express-route circuit",
                 "express_route_circuits",
                 _network_client_factory,
                 [

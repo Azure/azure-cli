@@ -9,7 +9,9 @@ from azure.mgmt.storage import StorageManagementClient, StorageManagementClientC
 from azure.mgmt.storage.models import AccountType
 from azure.mgmt.storage.operations import StorageAccountsOperations
 
-from azure.cli.commands import (CommandTable, LongRunningOperation, COMMON_PARAMETERS_RESOURCE_GROUP_ARG_NAME)
+from azure.cli.commands import (CommandTable,
+                                LongRunningOperation,
+                                COMMON_PARAMETERS_RESOURCE_GROUP_ARG_NAME)
 from azure.cli.commands._command_creation import get_mgmt_service_client, get_data_service_client
 from azure.cli.commands._auto_command import build_operation, AutoCommandDefinition
 from azure.cli._locale import L
@@ -134,7 +136,7 @@ def show_storage_connection_string(args):
     smc = _storage_client_factory({})
     endpoint_protocol = args.get('use_http')
     storage_account = args.get('account_name')
-    keys = smc.storage_accounts.list_keys(args.get(COMMON_PARAMETERS_RESOURCE_GROUP_ARG_NAME), 
+    keys = smc.storage_accounts.list_keys(args.get(COMMON_PARAMETERS_RESOURCE_GROUP_ARG_NAME),
                                           storage_account)
 
     connection_string = 'DefaultEndpointsProtocol={};AccountName={};AccountKey={}'.format(
