@@ -39,7 +39,6 @@ class Test_argparse(unittest.TestCase):
 
     @redirect_io
     def test_help_param(self):
-        app = Application(Configuration([]))
         def test_handler(args):
             pass
 
@@ -52,7 +51,9 @@ class Test_argparse(unittest.TestCase):
                     ]
                 }
             }
-        app.load_commands(cmd_table)
+        config = Configuration([])
+        config.get_command_table = lambda: cmd_table
+        app = Application(config)
 
         with self.assertRaises(SystemExit):
             app.execute('n1 -h'.split())
@@ -76,7 +77,9 @@ class Test_argparse(unittest.TestCase):
                     ]
                 }
             }
-        app.load_commands(cmd_table)
+        config = Configuration([])
+        config.get_command_table = lambda: cmd_table
+        app = Application(config)
 
         with self.assertRaises(SystemExit):
             app.execute('n1 -h'.split())
@@ -98,7 +101,9 @@ class Test_argparse(unittest.TestCase):
                     ]
                 }
             }
-        app.load_commands(cmd_table)
+        config = Configuration([])
+        config.get_command_table = lambda: cmd_table
+        app = Application(config)
 
         with self.assertRaises(SystemExit):
             app.execute('n1 -h'.split())
@@ -121,7 +126,9 @@ class Test_argparse(unittest.TestCase):
                     ]
                 }
             }
-        app.load_commands(cmd_table)
+        config = Configuration([])
+        config.get_command_table = lambda: cmd_table
+        app = Application(config)
 
         with self.assertRaises(SystemExit):
             app.execute('n1 -h'.split())
@@ -144,7 +151,9 @@ class Test_argparse(unittest.TestCase):
                     ]
                 }
             }
-        app.load_commands(cmd_table)
+        config = Configuration([])
+        config.get_command_table = lambda: cmd_table
+        app = Application(config)
 
         with self.assertRaises(SystemExit):
             app.execute('n1 -h'.split())
@@ -170,7 +179,9 @@ class Test_argparse(unittest.TestCase):
                     ]
                 }
             }
-        app.load_commands(cmd_table)
+        config = Configuration([])
+        config.get_command_table = lambda: cmd_table
+        app = Application(config)
 
         with self.assertRaises(SystemExit):
             app.execute('n1 -h'.split())
@@ -210,7 +221,9 @@ class Test_argparse(unittest.TestCase):
                     ]
                 }
             }
-        app.load_commands(cmd_table)
+        config = Configuration([])
+        config.get_command_table = lambda: cmd_table
+        app = Application(config)
 
         with self.assertRaises(SystemExit):
             app.execute('n1 -h'.split())
@@ -269,7 +282,9 @@ Arguments
                     ]
                 }
             }
-        app.load_commands(cmd_table)
+        config = Configuration([])
+        config.get_command_table = lambda: cmd_table
+        app = Application(config)
 
         with self.assertRaises(SystemExit):
             app.execute('n1 -h'.split())
@@ -318,7 +333,9 @@ Examples
                     ]
                 }
             }
-        app.load_commands(cmd_table)
+        config = Configuration([])
+        config.get_command_table = lambda: cmd_table
+        app = Application(config)
 
         self.assertRaisesRegexp(HelpAuthoringException,
                                '.*mismatched required True vs\. False, --foobar -fb.*',
@@ -349,7 +366,9 @@ Examples
                     ]
                 }
             }
-        app.load_commands(cmd_table)
+        config = Configuration([])
+        config.get_command_table = lambda: cmd_table
+        app = Application(config)
 
         self.assertRaisesRegexp(HelpAuthoringException,
                                '.*Extra help param --foobar -fb.*',
@@ -371,7 +390,9 @@ Examples
 #                    ]
 #                }
 #            }
-#        app.load_commands(cmd_table)
+#        config = Configuration([])
+        #config.get_command_table = lambda: cmd_table
+        #app = Application(config)
 
 #        with self.assertRaises(SystemExit):
 #            cmd_result = app.execute('n1 --arg -h'.split())
@@ -413,7 +434,9 @@ Examples
                     ]
                 }
             }
-        app.load_commands(cmd_table)
+        config = Configuration([])
+        config.get_command_table = lambda: cmd_table
+        app = Application(config)
 
         with self.assertRaises(SystemExit):
             app.execute('group1 -h'.split())
@@ -436,7 +459,9 @@ Examples
     #                ]
     #            }
     #        }
-    #    app.load_commands(cmd_table)
+    #    config = Configuration([])
+        #config.get_command_table = lambda: cmd_table
+        #app = Application(config)
 
     #    with self.assertRaises(SystemExit):
     #        app.execute('n1 -fb a --foobar3 bad'.split())
@@ -484,7 +509,9 @@ Examples
                 'arguments': {}
                 }
             }
-        app.load_commands(cmd_table)
+        config = Configuration([])
+        config.get_command_table = lambda: cmd_table
+        app = Application(config)
 
         with self.assertRaises(SystemExit):
             app.execute('test_group1 test_group2 --help'.split())
