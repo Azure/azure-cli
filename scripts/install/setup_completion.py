@@ -3,8 +3,8 @@
 # This script will set up tab completion for the Azure CLI.
 #
 # Calling the script
-#   e.g. python <filename> <path_to_cli_install> <path_to_rc_file>
-#           <path_to_rc_file> is optional as a default will be used.
+#   e.g. python <filename> <path_to_cli_install> <path_to_config_file>
+#           <path_to_config_file> is optional as a default will be used. (e.g. ~/.bashrc)
 #
 # - Optional Environment Variables Available
 #     AZURE_CLI_DISABLE_PROMPTS  - Disable prompts during installation and use the defaults
@@ -48,7 +48,7 @@ def backup_rc(rc_file):
     try:
         shutil.copyfile(rc_file, rc_file+'.backup')
         print("Backed up '{}' to '{}'".format(rc_file, rc_file+'.backup'))
-    except FileNotFoundError:
+    except (OSError, IOError):
         pass
 
 def find_line_in_file(file_path, search_pattern):
@@ -57,7 +57,7 @@ def find_line_in_file(file_path, search_pattern):
             for line in search_file:
                 if search_pattern in line:
                     return True
-    except FileNotFoundError:
+    except (OSError, IOError):
         pass
     return False
 
