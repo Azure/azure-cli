@@ -20,66 +20,33 @@ class TestLogging(unittest.TestCase):
         self.assertEqual(actual_level, expected_level)
         self.assertFalse(argv)
 
-    def test_determine_verbose_level_v(self):
-        argv = ['-v']
-        actual_level = _logging._determine_verbose_level(argv)
-        expected_level = 1
-        self.assertEqual(actual_level, expected_level)
-        self.assertFalse(argv)
-
-    def test_determine_verbose_level_v_v(self):
-        argv = ['-v', '-v']
-        actual_level = _logging._determine_verbose_level(argv)
-        expected_level = 2
-        self.assertEqual(actual_level, expected_level)
-        self.assertFalse(argv)
-
-    def test_determine_verbose_level_verbose_verbose(self):
-        argv = ['--verbose', '--verbose']
-        actual_level = _logging._determine_verbose_level(argv)
-        expected_level = 2
-        self.assertEqual(actual_level, expected_level)
-        self.assertFalse(argv)
-
-    def test_determine_verbose_level_vv(self):
-        argv = ['-vv']
+    def test_determine_verbose_level_debug(self):
+        argv = ['--debug']
         actual_level = _logging._determine_verbose_level(argv)
         expected_level = 2
         self.assertEqual(actual_level, expected_level)
         self.assertFalse(argv)
 
     def test_determine_verbose_level_v_v_v_default(self):
-        # User specified verbose 3 times (we only support 2)
-        # So default to verbose level of max
-        argv = ['-v', '-v', '-v']
+        argv = ['--verbose', '--debug']
         actual_level = _logging._determine_verbose_level(argv)
         expected_level = 2
         self.assertEqual(actual_level, expected_level)
         # We still consumed the arguments
         self.assertFalse(argv)
 
-    def test_determine_verbose_level_v_vv(self):
-        # Too much verbosity specified
-        argv = ['-v', '-vv']
-        actual_level = _logging._determine_verbose_level(argv)
-        expected_level = 2
-        self.assertEqual(actual_level, expected_level)
-        # We still consumed the arguments
-        self.assertFalse(argv)
-
-    def test_determine_verbose_level_vv_v(self):
-        # Too much verbosity specified
-        argv = ['-vv', '-v']
-        actual_level = _logging._determine_verbose_level(argv)
-        expected_level = 2
-        self.assertEqual(actual_level, expected_level)
-        # We still consumed the arguments
-        self.assertFalse(argv)
-
-    def test_determine_verbose_level_other_args(self):
-        argv = ['account', '-v']
+    def test_determine_verbose_level_other_args_verbose(self):
+        argv = ['account', '--verbose']
         actual_level = _logging._determine_verbose_level(argv)
         expected_level = 1
+        self.assertEqual(actual_level, expected_level)
+        # We consumed 1 argument
+        self.assertEqual(argv, ['account'])
+
+    def test_determine_verbose_level_other_args_debug(self):
+        argv = ['account', '--debug']
+        actual_level = _logging._determine_verbose_level(argv)
+        expected_level = 2
         self.assertEqual(actual_level, expected_level)
         # We consumed 1 argument
         self.assertEqual(argv, ['account'])
