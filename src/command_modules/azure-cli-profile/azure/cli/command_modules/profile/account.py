@@ -4,7 +4,7 @@ from azure.cli._locale import L
 from .command_tables import COMMAND_TABLES
 import azure.cli._logging as _logging
 
-logger = _logging.getAzLogger(__name__)
+logger = _logging.get_az_logger(__name__)
 
 command_table = CommandTable()
 

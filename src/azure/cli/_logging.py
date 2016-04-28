@@ -32,8 +32,8 @@ def _determine_verbose_level(argv):
             argv.pop(i)
         else:
             i += 1
-    # Default to 0 verbose level if too much verbosity specified.
-    return verbose_level if verbose_level < len(LOG_LEVEL_CONFIGS) else 0
+    # Use max verbose level if too much verbosity specified.
+    return verbose_level if verbose_level < len(LOG_LEVEL_CONFIGS) else len(LOG_LEVEL_CONFIGS)-1
 
 def _configure_root_logger(log_level_config):
     root_logger = logging.getLogger()
@@ -54,5 +54,5 @@ def configure_logging(argv):
     _configure_root_logger(log_level_config)
     _configure_az_logger(log_level_config)
 
-def getAzLogger(module_name=None):
+def get_az_logger(module_name=None):
     return logging.getLogger('az.' + module_name if module_name else 'az')

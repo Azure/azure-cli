@@ -50,10 +50,10 @@ class TestLogging(unittest.TestCase):
 
     def test_determine_verbose_level_v_v_v_default(self):
         # User specified verbose 3 times (we only support 2)
-        # So default to verbose level of 0
+        # So default to verbose level of max
         argv = ['-v', '-v', '-v']
         actual_level = _logging._determine_verbose_level(argv)
-        expected_level = 0
+        expected_level = 2
         self.assertEqual(actual_level, expected_level)
         # We still consumed the arguments
         self.assertFalse(argv)
@@ -62,7 +62,7 @@ class TestLogging(unittest.TestCase):
         # Too much verbosity specified
         argv = ['-v', '-vv']
         actual_level = _logging._determine_verbose_level(argv)
-        expected_level = 0
+        expected_level = 2
         self.assertEqual(actual_level, expected_level)
         # We still consumed the arguments
         self.assertFalse(argv)
@@ -71,7 +71,7 @@ class TestLogging(unittest.TestCase):
         # Too much verbosity specified
         argv = ['-vv', '-v']
         actual_level = _logging._determine_verbose_level(argv)
-        expected_level = 0
+        expected_level = 2
         self.assertEqual(actual_level, expected_level)
         # We still consumed the arguments
         self.assertFalse(argv)
@@ -85,11 +85,11 @@ class TestLogging(unittest.TestCase):
         self.assertEqual(argv, ['account'])
 
     def test_get_az_logger(self):
-        az_logger = _logging.getAzLogger()
+        az_logger = _logging.get_az_logger()
         self.assertEqual(az_logger.name, 'az')
 
     def test_get_az_logger_module(self):
-        az_module_logger = _logging.getAzLogger('azure.cli.module')
+        az_module_logger = _logging.get_az_logger('azure.cli.module')
         self.assertEqual(az_module_logger.name, 'az.azure.cli.module')
 
 if __name__ == '__main__':

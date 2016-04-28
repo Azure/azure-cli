@@ -7,7 +7,7 @@ import azure.cli._logging as _logging
 from ._session import Session
 from ._output import OutputProducer
 
-logger = _logging.getAzLogger(__name__)
+logger = _logging.get_az_logger(__name__)
 
 #ACCOUNT contains subscriptions information
 # this file will be shared with azure-xplat-cli, which assumes ascii
