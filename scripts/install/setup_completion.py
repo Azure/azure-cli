@@ -46,9 +46,11 @@ def create_tab_completion_file(filename):
 def _get_default_rc_file():
     user_bash_rc = os.path.expanduser(os.path.join('~', '.bashrc'))
     user_bash_profile = os.path.expanduser(os.path.join('~', '.bash_profile'))
-    if not os.path.isfile(user_bash_rc) and os.path.isfile(user_bash_profile):
+    bashrc_exists = os.path.isfile(user_bash_rc)
+    bash_profile_exists = os.path.isfile(user_bash_profile)
+    if not bashrc_exists and bash_profile_exists:
         return user_bash_profile
-    return user_bash_rc
+    return user_bash_rc if bashrc_exists else None
 
 def backup_rc(rc_file):
     try:
@@ -82,13 +84,19 @@ def main():
 
     completion_file_path = os.path.join(sys.argv[1], COMPLETION_FILENAME)
     create_tab_completion_file(completion_file_path)
-    try:
-        # use value from argv if available else fall back to prompt or default
-        default_rc_file = _get_default_rc_file()
-        rc_file = sys.argv[2] if len(sys.argv) >= 3 else prompt_input('Path to rc file to update (default {}): '.format(default_rc_file)) or default_rc_file
-    except EOFError:
-        error_exit('Unable to prompt for input. Pass the rc file as an argument to this script.')
-    rc_file_path = os.path.realpath(os.path.expanduser(rc_file))
+    default_rc_file = _get_default_rc_file()
+    rc_file_exists = False
+    while not rc_file_exists:
+        try:
+            # use value from argv if available else fall back to prompt or default
+            rc_prompt_message = 'Path to rc file to update (leave blank to use {}): '.format(default_rc_file) if default_rc_file else 'Path to rc file to update: '
+            rc_file = sys.argv[2] if len(sys.argv) >= 3 else prompt_input(rc_prompt_message) or default_rc_file
+        except EOFError:
+            error_exit('Unable to prompt for input. Pass the rc file as an argument to this script.')
+        rc_file_path = os.path.realpath(os.path.expanduser(rc_file))
+        rc_file_exists = os.path.isfile(rc_file_path)
+        if not rc_file_exists:
+            print("ERROR: File '{}' does not exist!".format(rc_file_path))
     backup_rc(rc_file_path)
     line_to_add = "source '{}'".format(completion_file_path)
     modify_rc(rc_file_path, line_to_add)
