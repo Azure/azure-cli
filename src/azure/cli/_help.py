@@ -76,7 +76,8 @@ def print_arguments(help_file):
     max_name_length = max(len(p.name) + (len(required_tag) if p.required else 0)
                           for p in help_file.parameters)
     added_global_space = False
-    for p in sorted(help_file.parameters, key=lambda p: str(not p.required) + str(p.global_param) + p.name):
+    for p in sorted(help_file.parameters,
+                    key=lambda p: str(not p.required) + str(p.global_param) + p.name):
         indent = 1
         required_text = required_tag if p.required else ''
         if p.global_param and not added_global_space:
@@ -95,7 +96,6 @@ def print_arguments(help_file):
             _print_indent('{0}'.format(p.long_summary.rstrip()), indent)
 
         if p.value_sources:
-            _print_indent('')
             _print_indent(L("Values from: {0}").format(', '.join(p.value_sources)), indent)
     return indent
 
@@ -130,6 +130,7 @@ def _print_groups(help_file):
 
 def _print_examples(help_file):
     indent = 0
+    print('')
     _print_indent(L('Examples'), indent)
 
     for e in help_file.examples:
@@ -209,7 +210,9 @@ class CommandHelpFile(HelpFile): #pylint: disable=too-few-public-methods
             self.parameters.append(HelpParameter(' '.join(sorted(action.option_strings)),
                                                  action.help,
                                                  required=action.required,
-                                                 global_param=action.container.description == parser.get_global_group().description or action.dest == 'help'))
+                                                 global_param=action.container.description
+                                                 == parser.get_global_group().description
+                                                 or action.dest == 'help'))
 
     def _load_from_data(self, data):
         super(CommandHelpFile, self)._load_from_data(data)

@@ -106,7 +106,7 @@ class Test_argparse(unittest.TestCase):
 
         with self.assertRaises(SystemExit):
             app.execute('n1 -h'.split())
-        self.assertEqual(True, io.getvalue().startswith('\nCommand\n    n1\n        long description'))
+        self.assertEqual(True, io.getvalue().startswith('\nCommand\n    az n1\n        long description'))
 
     @redirect_io
     def test_help_long_description_and_short_description(self):
@@ -131,7 +131,7 @@ class Test_argparse(unittest.TestCase):
 
         with self.assertRaises(SystemExit):
             app.execute('n1 -h'.split())
-        self.assertEqual(True, io.getvalue().startswith('\nCommand\n    n1: short description\n        long description'))
+        self.assertEqual(True, io.getvalue().startswith('\nCommand\n    az n1: short description\n        long description'))
 
     @redirect_io
     def test_help_docstring_description_overrides_short_description(self):
@@ -185,7 +185,7 @@ class Test_argparse(unittest.TestCase):
         with self.assertRaises(SystemExit):
             app.execute('n1 -h'.split())
 
-        self.assertEqual(True, io.getvalue().startswith('\nCommand\n    n1\n        line1\n        line2'))
+        self.assertEqual(True, io.getvalue().startswith('\nCommand\n    az n1\n        line1\n        line2'))
 
     @redirect_io
     @mock.patch('azure.cli.application.Application.register', return_value=None)
@@ -228,16 +228,17 @@ class Test_argparse(unittest.TestCase):
             app.execute('n1 -h'.split())
         s = '''
 Command
-    n1
+    az n1
 
 Arguments
     --foobar2 -fb2 [Required]: one line partial sentence
         paragraph(s)
     --foobar -fb             : one line partial sentence
         text, markdown, etc.
-
         Values from: az vm list, default
     --foobar3 -fb3           : the foobar3
+
+Global Arguments
     --help -h                : show this help message and exit
 '''
         self.assertEqual(s, io.getvalue())
@@ -289,7 +290,7 @@ Arguments
             app.execute('n1 -h'.split())
         s = '''
 Command
-    n1: this module does xyz one-line or so
+    az n1: this module does xyz one-line or so
         this module.... kjsdflkj... klsfkj paragraph1
         this module.... kjsdflkj... klsfkj paragraph2
 
@@ -298,9 +299,11 @@ Arguments
         paragraph(s)
     --foobar -fb             : one line partial sentence
         text, markdown, etc.
-
         Values from: az vm list, default
+
+Global Arguments
     --help -h                : show this help message and exit
+
 Examples
     foo example
         example details
@@ -439,7 +442,7 @@ Examples
 
         with self.assertRaises(SystemExit):
             app.execute('group1 -h'.split())
-        s = '\nGroup\n    group1\n\nSub-Commands\n    group2\n    group3\n\n'
+        s = '\nGroup\n    az group1\n\nSub-Commands\n    group2\n    group3\n\n'
         self.assertEqual(s, io.getvalue())
 
     # Will uncomment when all errors are shown at once (help behaviors implementation) task #115631559
@@ -516,12 +519,13 @@ Examples
             app.execute('test_group1 test_group2 --help'.split())
         s = '''
 Group
-    test_group1 test_group2: this module does xyz one-line or so
+    az test_group1 test_group2: this module does xyz one-line or so
         this module.... kjsdflkj... klsfkj paragraph1
         this module.... kjsdflkj... klsfkj paragraph2
 
 Sub-Commands
     n1: this module does xyz one-line or so
+
 
 Examples
     foo example

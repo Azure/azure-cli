@@ -139,14 +139,15 @@ class Application(object):
 
         global_group.add_argument('--subscription', dest='_subscription_id', help=argparse.SUPPRESS)
         global_group.add_argument('--output', '-o', dest='_output_format',
-                            choices=['list', 'json', 'tsv'],
-                            help='Output format of type "list", "json" or "tsv"')
+                                  choices=['list', 'json', 'tsv'],
+                                  help='Output format of type "list", "json" or "tsv"')
         # The arguments for verbosity don't get parsed by argparse but we add it here for help.
         global_group.add_argument('--verbose', dest='_log_verbosity_verbose',
-                            help='Increase logging verbosity. Use --debug for full debug logs.')
+                                  help='Increase logging verbosity.'
+                                  ' Use --debug for full debug logs.')
         global_group.add_argument('--debug', dest='_log_verbosity_debug',
-                            help='Increase logging verbosity to show all debug logs.')
+                                  help='Increase logging verbosity to show all debug logs.')
 
     def _handle_builtin_arguments(self, args):
-        self.configuration.output_format = args._output_format_global #pylint: disable=protected-access
-        del args._output_format_global
+        self.configuration.output_format = args._output_format #pylint: disable=protected-access
+        del args._output_format
