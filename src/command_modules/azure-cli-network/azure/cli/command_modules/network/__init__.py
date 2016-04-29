@@ -1,4 +1,3 @@
-import time
 from azure.mgmt.network import NetworkManagementClient, NetworkManagementClientConfiguration
 from azure.mgmt.network.operations import (ApplicationGatewaysOperations,
                                            ExpressRouteCircuitAuthorizationsOperations,
