@@ -105,7 +105,7 @@ def _print_header(help_file):
     _print_indent(L('Command') if help_file.type == 'command' else L('Group'), indent)
 
     indent += 1
-    _print_indent('{0}{1}'.format(help_file.command,
+    _print_indent('{0}{1}'.format('az ' + help_file.command,
                                   ': ' + help_file.short_summary
                                   if help_file.short_summary
                                   else ''),
