@@ -1,35 +1,7 @@
 FROM ubuntu:14.04
-
-RUN apt-get update -qq && \
-    apt-get install -qqy --no-install-recommends\
-      build-essential \
-      curl \
-      ca-certificates \
-      python-pip \
-      libffi-dev \
-      libssl-dev \
-      python-dev \
-      vim \
-      jq && \
-    rm -rf /var/lib/apt/lists/* && \
-    pip install --upgrade requests && \
-    pip install cryptography && \
-    pip install pyopenssl ndg-httpsclient pyasn1
-
-ENV AZURECLITEMP /opt/azure-cli
-ENV PYTHONPATH $PYTHONPATH:$AZURECLITEMP/src
-ENV PATH $PATH:$AZURECLITEMP
-
-RUN mkdir -p $AZURECLITEMP
-COPY src $AZURECLITEMP/src
-COPY az.completion.sh $AZURECLITEMP/
-COPY requirements.txt $AZURECLITEMP/
-COPY az $AZURECLITEMP/
-
-RUN pip install -r $AZURECLITEMP/requirements.txt
-
-RUN chmod +x $AZURECLITEMP/az
-RUN echo "source $AZURECLITEMP/az.completion.sh" >> ~/.bashrc
-RUN az
-
-ENV EDITOR vim
+RUN apt-get update -qq
+# install *-dev packages below so cryptography package can install
+RUN apt-get install -qqy python-pip curl libssl-dev libffi-dev python-dev
+ENV AZURE_CLI_DISABLE_PROMPTS 1
+RUN curl http://azure-cli-nightly.westus.cloudapp.azure.com/install | bash
+CMD az

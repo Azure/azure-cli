@@ -16,17 +16,48 @@ To install via cURL on Linux, Unix and OS X, type:
 
 .. code:: shell
 
-    curl http://azure-cli-nightly.cloudapp.net/install | bash
+    curl http://azure-cli-nightly.westus.cloudapp.azure.com/install | bash
+
+If you chose to enable tab completion, type `exec -l $SHELL` to restart your shell.
 
 Note: This will install the latest nightly builds.
 
-If you get errors on install with cffi or cryptography such as the examples below,
-install libssl-dev, libffi-dev and python3-dev by typing:
+**Errors on install with cffi or cryptography:**
+
+If you get errors on install on **OS X**, upgrade pip by typing:
+
+.. code:: shell
+
+    pip install --upgrade --force-reinstall pip
+
+
+If you get errors on install on **Debian or Ubuntu** such as the examples below,
+install libssl-dev and libffi-dev by typing:
 
 .. code:: shell
 
     sudo apt-get update
-    sudo apt-get install -y build-essential libssl-dev libffi-dev python3-dev
+    sudo apt-get install -y libssl-dev libffi-dev
+
+Also install Python Dev for your version of Python.
+
+Python 2:
+
+.. code:: shell
+
+    sudo apt-get install -y python-dev
+
+Python 3:
+
+.. code:: shell
+
+    sudo apt-get install -y python3-dev
+
+Ubuntu 15 may require `build-essential` also:
+
+.. code:: shell
+
+    sudo apt-get install -y build-essential
 
 
 **Example Errors**
@@ -34,7 +65,7 @@ install libssl-dev, libffi-dev and python3-dev by typing:
 .. code:: shell
 
     Downloading cffi-1.5.2.tar.gz (388kB)
-      100% |################################| 389kB 3.9MB/s 
+      100% |################################| 389kB 3.9MB/s
       Complete output from command python setup.py egg_info:
     
           No working compiler found, or bogus compiler options
@@ -54,6 +85,8 @@ install libssl-dev, libffi-dev and python3-dev by typing:
     error: command 'x86_64-linux-gnu-gcc' failed with exit status 1
     
     Failed building wheel for cryptography
+
+`See Stack Overflow question - Failed to install Python Cryptography package with PIP and setup.py <http://stackoverflow.com/questions/22073516/failed-to-install-python-cryptography-package-with-pip-and-setup-py>`__
 
 
 Download Package
