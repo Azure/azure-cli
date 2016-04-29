@@ -3,6 +3,8 @@ import os
 import subprocess
 from sys import stderr
 
+from six import StringIO
+
 from azure.storage.blob import PublicAccess, BlockBlobService, AppendBlobService, PageBlobService
 from azure.storage.file import FileService
 from azure.storage import CloudStorageAccount
@@ -473,16 +475,22 @@ def mount_share(args):
             raise IncorrectUsageError('drive letter is required for Windows')
         command = 'net use {}: \\\\{}.file.core.windows.net\\{} {} /user:{}'.format(
             drive, account_name, share_name, account_key, account_name)
-        exit_code = subprocess.call(command.split())
     elif os.name == 'posix':
-        if subprocess.call('apt show cifs-utils'.split()):
-            subprocess.call('sudo apt-get install cifs-utils'.split())
-        subprocess.call('mkdir share_name'.split())
+        try:
+            subprocess.check_output('apt show cifs-utils'.split())
+        except subprocess.CalledProcessError:
+            raise RuntimeError('\'cifs-utils\' package required to run this command')
+        try:
+            subprocess.check_output('mkdir {}'.format(share_name).split())
+        except subprocess.CalledProcessError:
+            raise RuntimeError('mount point \'{}\' already in use'.format(share_name))
         command = 'sudo mount -t cifs //{}.file.core.windows.net/{} ./{} ' + \
-                  '-o vers=3.0,username={},password={},dir_mode=0666,file_mode=0666'
+                  '-o vers=3.0,username={},password={},dir_mode=0777,file_mode=0666'
         command.format(account_name, share_name, share_name, account_name, account_key)
-        exit_code = subprocess.call(command.split())
-    return {'result': exit_code}
+    try:
+        subprocess.check_output(command.split())
+    except subprocess.CalledProcessError:
+        raise RuntimeError('Unable to mount \'{}\''.format(share_name))
 
 # DIRECTORY COMMANDS
 
