@@ -17,7 +17,7 @@ class DeploymentVM(Model):
     sending a request.
 
     :ivar uri: URI referencing the template. Default value:
-     "https://azuretemplatehost.blob.core.windows.net/templatehost/CreateVM/azuredeploy.json"
+     "https://azuresdkci.blob.core.windows.net/templatehost/CreateVM/azuredeploy.json"
      .
     :vartype uri: str
     :param content_version: If included it must match the ContentVersion in
@@ -144,7 +144,7 @@ class DeploymentVM(Model):
         'mode': {'key': 'properties.mode', 'type': 'str'},
     }
 
-    uri = "https://azuretemplatehost.blob.core.windows.net/templatehost/CreateVM/azuredeploy.json"
+    uri = "https://azuresdkci.blob.core.windows.net/templatehost/CreateVM/azuredeploy.json"
 
     mode = "Incremental"
 
