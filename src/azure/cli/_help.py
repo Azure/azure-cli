@@ -80,7 +80,7 @@ def print_arguments(help_file):
         indent = 1
         required_text = required_tag if p.required else ''
         if p.global_param and not added_global_space:
-            print('')
+            print('\nGlobal Arguments')
             added_global_space = True
         _print_indent('{0}{1}{2}{3}'.format(p.name,
                                             _get_column_indent(p.name + required_text,
