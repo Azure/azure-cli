@@ -1,5 +1,5 @@
 from azure.cli.parser import IncorrectUsageError
-from azure.cli.commands import CommandTable, COMMON_PARAMETERS
+from azure.cli.commands import CommandTable, COMMON_PARAMETERS, RESOURCE_GROUP_ARG_NAME
 from azure.cli.commands._command_creation import get_mgmt_service_client
 from azure.cli._locale import L
 
@@ -127,7 +127,7 @@ def _resolve_api_version(args, rmc):
 
     # if api-version not supplied, attempt to resolve using provider namespace
     parent = args.get('parent')
-    full_type = args.get('resource-type').split('/')
+    full_type = args.get('resource_type').split('/')
     try:
         provider_namespace = full_type[0]
         resource_type = full_type[1]
