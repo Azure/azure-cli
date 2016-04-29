@@ -3,8 +3,6 @@ import os
 import subprocess
 from sys import stderr
 
-from six import StringIO
-
 from azure.storage.blob import PublicAccess, BlockBlobService, AppendBlobService, PageBlobService
 from azure.storage.file import FileService
 from azure.storage import CloudStorageAccount
