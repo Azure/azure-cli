@@ -22,6 +22,9 @@
     },
     "subnetRef": {
       "type": "string"
+    },
+    "privateIpAllocation": {
+      "type": "string"
     }
   },
   "variables": {
@@ -41,7 +44,7 @@
           {
             "name": "[concat('ipconfig', parameters('VirtualMachineName'))]",
             "properties": {
-              "privateIPAllocationMethod": "Dynamic",
+              "privateIPAllocationMethod": "[parameters('privateIpAllocation')]",
               "publicIPAddress": {
                 "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddressName'))]"
               },
