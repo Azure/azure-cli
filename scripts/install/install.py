@@ -120,14 +120,14 @@ def prompt_input(message):
     return None if DISABLE_PROMPTS else input(message)
 
 def get_install_dir():
-    prompt_message = 'In what directory would you like to place the install? (default {}): '.format(DEFAULT_INSTALL_DIR)
+    prompt_message = 'In what directory would you like to place the install? (leave blank to use {}): '.format(DEFAULT_INSTALL_DIR)
     install_dir = prompt_input(prompt_message) or DEFAULT_INSTALL_DIR
     install_dir = os.path.realpath(os.path.expanduser(install_dir))
     print("We will install at '{}'.".format(install_dir))
     return install_dir
 
 def get_exec_dir():
-    prompt_message = 'In what directory would you like to place the executable? (default {}): '.format(DEFAULT_EXEC_DIR)
+    prompt_message = 'In what directory would you like to place the executable? (leave blank to use {}): '.format(DEFAULT_EXEC_DIR)
     exec_dir = prompt_input(prompt_message) or DEFAULT_EXEC_DIR
     exec_dir = os.path.realpath(os.path.expanduser(exec_dir))
     print("The executable will be in '{}'.".format(exec_dir))
