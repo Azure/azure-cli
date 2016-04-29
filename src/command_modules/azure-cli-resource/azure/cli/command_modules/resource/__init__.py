@@ -57,7 +57,7 @@ def show_resource(args):
             L('API version is required and could not be resolved for resource {}'
               .format(full_type)))
     results = rmc.resources.get(
-        resource_group_name=args.get('resourcegroup'),
+        resource_group_name=args.get(RESOURCE_GROUP_ARG_NAME),
         resource_name=args.get('name'),
         resource_provider_namespace=provider_namespace,
         resource_type=resource_type,
