@@ -3,8 +3,8 @@
 # This script will set up tab completion for the Azure CLI.
 #
 # Calling the script
-#   e.g. python <filename> <path_to_cli_install> <path_to_config_file>
-#           <path_to_config_file> is optional as a default will be used. (e.g. ~/.bashrc)
+#   e.g. python <filename> <path_to_cli_install> <path_to_rc_file>
+#           <path_to_rc_file> is optional as a default will be used. (e.g. ~/.bashrc)
 #
 # - Optional Environment Variables Available
 #     AZURE_CLI_DISABLE_PROMPTS  - Disable prompts during installation and use the defaults
