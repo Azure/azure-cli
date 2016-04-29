@@ -22,7 +22,7 @@ CONSOLE_LOG_CONFIGS = [
 AZ_LOGFILE_NAME = 'az.log'
 DEFAULT_LOG_DIR = os.path.expanduser(os.path.join('~', '.azure', 'logs'))
 
-DISABLE_LOG_FILE = os.environ.get('AZURE_CLI_DISABLE_LOG_FILE')
+ENABLE_LOG_FILE = os.environ.get('AZURE_CLI_ENABLE_LOG_FILE')
 LOG_DIR = os.environ.get('AZURE_CLI_LOG_DIR')
 
 def _determine_verbose_level(argv):
@@ -63,7 +63,7 @@ def _get_log_file_path():
     return os.path.join(log_dir, AZ_LOGFILE_NAME)
 
 def _init_logfile_handlers(root_logger, az_logger):
-    if DISABLE_LOG_FILE:
+    if not ENABLE_LOG_FILE:
         return
     log_file_path = _get_log_file_path()
     logfile_handler = RotatingFileHandler(log_file_path, maxBytes=5*1024*1024, backupCount=5)
