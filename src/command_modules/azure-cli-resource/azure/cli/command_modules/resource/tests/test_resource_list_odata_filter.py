@@ -1,5 +1,5 @@
 import unittest
-from azure.cli.command_modules.resource import _list_resources_odata_filter_builder
+from azure.cli.command_modules.resource.custom import _list_resources_odata_filter_builder
 from azure.cli.parser import IncorrectUsageError
 
 class TestListResources(unittest.TestCase):   

@@ -14,10 +14,10 @@ from azure.cli.commands import (CommandTable,
                                 RESOURCE_GROUP_ARG_NAME)
 from azure.cli.commands._command_creation import get_mgmt_service_client, get_data_service_client
 from azure.cli.commands._auto_command import build_operation, AutoCommandDefinition
+from azure.cli.commands._validators import validate_key_value_pairs
 from azure.cli._locale import L
 
 from ._params import PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS
-from ._validators import validate_key_value_pairs
 
 command_table = CommandTable()
 
