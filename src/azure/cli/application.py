@@ -69,8 +69,8 @@ class Application(object):
             argv[0] = '--help'
 
         try:
-        args = self.parser.parse_args(argv)
-        self.raise_event(self.COMMAND_PARSER_PARSED, args)
+            args = self.parser.parse_args(argv)
+            self.raise_event(self.COMMAND_PARSER_PARSED, args)
         except SystemExit as se:
             if se.code == AzCliCommandParser.ARGUMENT_ERROR_CODE:
                 for c in command_table.values():
