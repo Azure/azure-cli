@@ -17,7 +17,7 @@ TEST_DEF = [
   },
   {
     'test_name': 'name2',
-    'script': 'script_class()'
+    'script': script_class()
   }
 ]
 ```
@@ -74,6 +74,10 @@ This method is a wrapper around `os.environ` and simply sets an environment vari
 ####pop_env(variable_name)
 
 Another wrapper around `os.environ` this pops the value of the indicated environment variable.
+
+####print_(string)
+
+This method allows you to write to the display output, but does not add to the `expected_results.res` file. One application of this would be to print information ahead of a `rec` statement so the person validating the output knows what to look for.
 
 ##Long Running Operations (LRO)
 
