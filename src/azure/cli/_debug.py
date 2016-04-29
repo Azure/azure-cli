@@ -1,5 +1,7 @@
 ﻿import os
-from ._logging import logger
+import azure.cli._logging as _logging
+
+logger = _logging.get_az_logger(__name__)
 
 DISABLE_VERIFY_VARIABLE_NAME = "AZURE_CLI_DISABLE_CONNECTION_VERIFICATION"
 

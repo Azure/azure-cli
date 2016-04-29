@@ -1,5 +1,4 @@
-﻿import json
-import unittest
+﻿import unittest
 from azure.cli.command_modules.vm._validators import MinMaxValue
 
 class Test_Vm_Custom(unittest.TestCase):

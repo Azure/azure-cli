@@ -1,3 +1,9 @@
+import json
+try:
+    from urllib.request import urlopen
+except ImportError:
+    from urllib import urlopen # pylint: disable=no-name-in-module
+
 from azure.mgmt.compute.models import DataDisk
 from azure.mgmt.compute.models.compute_management_client_enums import DiskCreateOptionTypes
 from azure.cli._locale import L
@@ -107,6 +113,26 @@ def _vm_disk_detach(args, instance):
     except StopIteration:
         raise RuntimeError("No disk with the name '%s' found" % args.get('name'))
 
+#temporary behavior, filters for publisher, sku, etc will be supported soon
+@command_table.command('vm image list-aliases')
+@command_table.description(L('a temporary command you can query for the most common images'
+                             ', and use the details to create a new VM.'))
+def _list_images(_):
+    return read_images_from_aliases_doc()
+
+def read_images_from_aliases_doc():
+    target_url = ('https://raw.githubusercontent.com/Azure/azure-rest-api-specs/'
+                  'master/arm-compute/quickstart-templates/aliases.json')
+    txt = urlopen(target_url).read()
+    dic = json.loads(txt.decode())
+    try:
+        result = dic['outputs']['aliases']['value']
+        for v in result.values(): #loop around os
+            for vv in v.values(): #loop around distros
+                vv['urn'] = ':'.join([vv['publisher'], vv['offer'], vv['sku'], vv['version']])
+        return result
+    except KeyError:
+        raise RuntimeError('Could not retrieve image list from {}'.format(target_url))
 #
 # Composite convenience commands for the CLI
 #
