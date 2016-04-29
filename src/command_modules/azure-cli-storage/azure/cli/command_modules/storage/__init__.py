@@ -453,15 +453,12 @@ def exist_share(args):
     return fsc.exists(share_name=args.get('share_name'))
 
 @command_table.command('storage share mount')
-@command_table.description('''Mount an SMB 3.0 file share in Windows or Linux (not OSX). Must have
-    inbound and outbound TCP access of port 445. For Linux, the share will be mounted as the share
-    name. For Windows, a drive letter must be specified.''')
+@command_table.description('Mount an SMB 3.0 file share in Windows or Linux (not OSX). Must ' + \
+    'have inbound and outbound TCP access of port 445. For Linux, the share will be mounted as ' + \
+    'the share name. For Windows, a drive letter must be specified.')
 @command_table.option(**PARAMETER_ALIASES['share_name'])
 @command_table.option('--drive', required=False,
                       help=L('the desired drive letter (Required on Windows)'))
-@command_table.option('--reload-on-restart', required=False, action='store_false',
-                      help=L('if specified, will persist credentials so share will ' + \
-                     'automatically be rediscovered on restart'))
 @command_table.option(**PARAMETER_ALIASES['account_name'])
 @command_table.option(**PARAMETER_ALIASES['account_key'])
 def mount_share(args):
@@ -469,21 +466,16 @@ def mount_share(args):
     share_name = args.get('share_name')
     account_name = args.get('account_name')
     account_key = args.get('account_key')
-    persist_creds = args.get('reload_on_restart')
+    if not account_name or not account_key:
+        raise IncorrectUsageError('storage account name and key are required, or appropriate ' + \
+            'environment variables must be set')
     if os.name == 'nt':
         if not drive:
             raise IncorrectUsageError('drive letter is required for Windows')
-        if persist_creds:
-            command = 'cmdkey /add:{}.file.core.windows.net /user:{} /pass:{}'.format(
-                account_name, account_name, account_key)
-            subprocess.call(command.split())
         command = 'net use {}: \\\\{}.file.core.windows.net\\{} {} /user:{}'.format(
             drive, account_name, share_name, account_key, account_name)
         exit_code = subprocess.call(command.split())
     elif os.name == 'posix':
-        if persist_creds:
-            # TODO: Add settings to /etc/fstab file
-            pass
         if subprocess.call('apt show cifs-utils'.split()):
             subprocess.call('sudo apt-get install cifs-utils'.split())
         subprocess.call('mkdir share_name'.split())
