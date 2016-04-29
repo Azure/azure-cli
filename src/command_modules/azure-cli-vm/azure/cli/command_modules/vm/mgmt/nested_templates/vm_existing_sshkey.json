@@ -52,6 +52,9 @@
     },
     "location": {
       "type": "string"
+    },
+    "osDiskUri": {
+      "type": "string"
     }
   },
   "variables": {
@@ -110,7 +113,7 @@
           "osDisk": {
             "name": "[concat('osdisk', parameters('virtualMachineName'))]",
             "vhd": {
-              "uri": "[concat('http://', variables('vhdStorageName'), '.blob.core.windows.net/', variables('vhdStorageContainerName'), '/', variables('OSDiskName'), '.vhd')]"
+              "uri": "[parameters('osDiskUri')]"
             },
             "caching": "ReadWrite",
             "createOption": "FromImage"
