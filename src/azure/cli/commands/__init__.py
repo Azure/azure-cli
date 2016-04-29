@@ -11,9 +11,12 @@ INSTALLED_COMMAND_MODULES = [dist.key.replace('azure-cli-', '')
                              for dist in get_installed_distributions(local_only=True)
                              if dist.key.startswith('azure-cli-')]
 
+RESOURCE_GROUP_ARG_NAME = 'resource_group_name'
+
 COMMON_PARAMETERS = {
     'resource_group_name': {
-        'name': '--resourcegroup -g',
+        'name': '--resource-group -g',
+        'dest': RESOURCE_GROUP_ARG_NAME,
         'metavar': 'RESOURCEGROUP',
         'help': 'Name of resource group',
         'required': True
@@ -32,6 +35,11 @@ COMMON_PARAMETERS = {
         'required': False
     }
 }
+
+def extend_parameter(parameter_metadata, **kwargs):
+    modified_parameter_metadata = parameter_metadata.copy()
+    modified_parameter_metadata.update(kwargs)
+    return modified_parameter_metadata
 
 class LongRunningOperation(object): #pylint: disable=too-few-public-methods
 
@@ -98,6 +106,13 @@ class CommandTable(defaultdict):
             opt = dict(kwargs)
             opt['name'] = name
             self[func]['arguments'].append(opt)
+            return func
+        return wrapper
+
+    def option_set(self, options):
+        def wrapper(func):
+            for opt in options:
+                self[func]['arguments'].append(opt)
             return func
         return wrapper
 

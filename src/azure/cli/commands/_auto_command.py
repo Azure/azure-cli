@@ -68,7 +68,7 @@ def build_operation(command_name,
                     client_type,
                     operations,
                     command_table,
-                    custom_parameters=None,
+                    param_aliases=None,
                     extra_parameters=None):
 
     for op in operations:
@@ -113,15 +113,15 @@ def build_operation(command_name,
                 'action': action
             }
             parameter.update(COMMON_PARAMETERS.get(arg, {}))
-            if custom_parameters:
-                parameter.update(custom_parameters.get(arg, {}))
+            if param_aliases:
+                parameter.update(param_aliases.get(arg, {}))
 
             options.append(parameter)
 
         # append any 'extra' args needed (for example to obtain a client) that aren't required
         # by the SDK.
         if extra_parameters:
-            for arg in extra_parameters.values():
+            for arg in extra_parameters:
                 options.append(arg.copy())
 
         command_table[func] = {

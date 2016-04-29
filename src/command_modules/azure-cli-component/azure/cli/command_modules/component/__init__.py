@@ -144,7 +144,7 @@ def remove_component(args):
                   if dist.key == COMPONENT_PREFIX+component_name])
     if found:
         if prompt_for_delete:
-            ans = input("Really delete '{}'? [Y/n] ".format(component_name))
+            ans = input("Really delete '{}'? [y/N] ".format(component_name))
             if not ans or ans[0].lower() != 'y':
                 return
         pip.main(['uninstall', '--quiet', '--isolated', '--yes',

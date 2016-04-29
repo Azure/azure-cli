@@ -3,7 +3,6 @@ from datetime import datetime
 import sys
 import re
 import argparse
-import logging
 from enum import Enum
 from .parser import AzCliCommandParser
 import azure.cli.extensions
@@ -15,7 +14,6 @@ class Configuration(object): # pylint: disable=too-few-public-methods
     """
     def __init__(self, argv):
         self.argv = argv or sys.argv[1:]
-        self.log = logging.getLogger('az')
         self.output_format = 'list'
 
     def get_command_table(self):
@@ -66,6 +64,9 @@ class Application(object):
             az_subparser = self.parser.subparsers[tuple()]
             _help.show_welcome(az_subparser)
             return None
+
+        if argv[0].lower() == 'help':
+            argv[0] = '--help'
 
         args = self.parser.parse_args(argv)
         self.raise_event(self.COMMAND_PARSER_PARSED, args)
@@ -138,6 +139,11 @@ class Application(object):
         parser.add_argument('--output', '-o', dest='_output_format',
                             choices=['list', 'json', 'tsv'],
                             help='Output format of type "list", "json" or "tsv"')
+        # The arguments for verbosity don't get parsed by argparse but we add it here for help.
+        parser.add_argument('--verbose', dest='_log_verbosity_verbose',
+                            help='Increase logging verbosity. Use --debug for full debug logs.')
+        parser.add_argument('--debug', dest='_log_verbosity_debug',
+                            help='Increase logging verbosity to show all debug logs.')
 
     def _handle_builtin_arguments(self, args):
         self.configuration.output_format = args._output_format #pylint: disable=protected-access
