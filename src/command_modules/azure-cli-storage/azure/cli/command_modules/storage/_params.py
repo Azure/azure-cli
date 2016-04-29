@@ -1,12 +1,13 @@
 from os import environ
 
 from azure.cli.commands import (COMMON_PARAMETERS as GLOBAL_COMMON_PARAMETERS, extend_parameter)
+from azure.cli.commands._validators import validate_key_value_pairs
 from azure.cli._locale import L
 
 from ._validators import (
     validate_container_permission, validate_datetime, validate_datetime_as_string, validate_id,
-    validate_ip_range, validate_key_value_pairs, validate_resource_types, validate_services,
-    validate_tags, validate_lease_duration, validate_quota)
+    validate_ip_range, validate_resource_types, validate_services, validate_lease_duration,
+    validate_quota)
 
 # HELPER METHODS
 
@@ -175,13 +176,6 @@ PARAMETER_ALIASES.update({
         'help': L('start UTC datetime of SAS token (Y-m-d\'T\'H:M\'Z\'). Defaults to time ' + \
                   'of request.'),
         'type': validate_datetime_as_string
-    },
-    'tags' : {
-        'name': '--tags',
-        'metavar': 'TAGS',
-        'help': L('individual and/or key/value pair tags in "a=b;c" format'),
-        'required': False,
-        'type': validate_tags
     },
     'timeout': {
         'name': '--timeout',

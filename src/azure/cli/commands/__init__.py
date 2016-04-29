@@ -6,6 +6,9 @@ from importlib import import_module
 from collections import defaultdict, OrderedDict
 from pip import get_installed_distributions
 
+from azure.cli._locale import L
+from azure.cli.commands._validators import validate_tags
+
 # Find our command modules, they start with 'azure-cli-'
 INSTALLED_COMMAND_MODULES = [dist.key.replace('azure-cli-', '')
                              for dist in get_installed_distributions(local_only=True)
@@ -14,12 +17,12 @@ INSTALLED_COMMAND_MODULES = [dist.key.replace('azure-cli-', '')
 RESOURCE_GROUP_ARG_NAME = 'resource_group_name'
 
 COMMON_PARAMETERS = {
-    'resource_group_name': {
-        'name': '--resource-group -g',
-        'dest': RESOURCE_GROUP_ARG_NAME,
-        'metavar': 'RESOURCEGROUP',
-        'help': 'Name of resource group',
-        'required': True
+    'deployment_name': {
+        'name': '--deployment-name',
+        'metavar': 'DEPLOYMENTNAME',
+        'help': 'Name of the resource deployment',
+        'default': 'azurecli' + str(time.time()) + str(random.randint(0, 10000000)),
+        'required': False
     },
     'location': {
         'name': '--location -l',
@@ -27,12 +30,19 @@ COMMON_PARAMETERS = {
         'help': 'Location',
         'required': True
     },
-    'deployment_name': {
-        'name': '--deployment-name',
-        'metavar': 'DEPLOYMENTNAME',
-        'help': 'Name of the resource deployment',
-        'default': 'azurecli' + str(time.time()) + str(random.randint(0, 10000000)),
-        'required': False
+    'resource_group_name': {
+        'name': '--resource-group -g',
+        'dest': RESOURCE_GROUP_ARG_NAME,
+        'metavar': 'RESOURCEGROUP',
+        'help': 'Name of resource group',
+        'required': True
+    },
+    'tags' : {
+        'name': '--tags',
+        'metavar': 'TAGS',
+        'help': L('individual and/or key/value pair tags in "a=b;c" format'),
+        'required': False,
+        'type': validate_tags
     }
 }
 
