@@ -1,3 +1,4 @@
+import argparse
 from azure.mgmt.compute import ComputeManagementClient, ComputeManagementClientConfiguration
 from azure.mgmt.compute.operations import (AvailabilitySetsOperations,
                                            VirtualMachineExtensionImagesOperations,
@@ -13,6 +14,11 @@ from azure.cli.commands._command_creation import get_mgmt_service_client
 from azure.cli.commands._auto_command import build_operation, AutoCommandDefinition
 from azure.cli.commands import CommandTable, LongRunningOperation
 from azure.cli._locale import L
+from azure.cli.command_modules.vm.mgmt.lib import (VMCreationClient as VMClient,
+                                                   VMCreationClientConfiguration
+                                                   as VMClientConfig)
+from azure.cli.command_modules.vm.mgmt.lib.operations import VMOperations
+
 
 from ._params import PARAMETER_ALIASES
 from .custom import ConvenienceVmCommands
@@ -157,3 +163,21 @@ build_operation("vm",
                     AutoCommandDefinition(ConvenienceVmCommands.list_ip_addresses, 'object'),
                 ],
                 command_table, PARAMETER_ALIASES)
+
+vm_param_aliases = {
+    '_artifacts_location': {
+        'name': '--artifacts_location',
+        'help': argparse.SUPPRESS,
+        }
+    }
+
+build_operation('vm',
+                'vm',
+                lambda _: get_mgmt_service_client(VMClient, VMClientConfig),
+                [
+                    AutoCommandDefinition(VMOperations.create_or_update,
+                                          LongRunningOperation(L('Creating virtual machine'), L('Virtual machine created')),
+                                          'create')
+                ],
+                command_table,
+                vm_param_aliases)
