@@ -24,7 +24,6 @@ except NameError:
 DISABLE_PROMPTS = os.environ.get('AZURE_CLI_DISABLE_PROMPTS')
 
 COMPLETION_FILENAME = 'az.completion'
-DEFAULT_RC_FILE = os.path.expanduser(os.path.join('~', '.bashrc'))
 REGISTER_PYTHON_ARGCOMPLETE = """
 
 _python_argcomplete() {
@@ -43,6 +42,13 @@ def prompt_input(message):
 def create_tab_completion_file(filename):
     with open(filename, 'w') as completion_file:
         completion_file.write(REGISTER_PYTHON_ARGCOMPLETE)
+
+def _get_default_rc_file():
+    user_bash_rc = os.path.expanduser(os.path.join('~', '.bashrc'))
+    user_bash_profile = os.path.expanduser(os.path.join('~', '.bash_profile'))
+    if not os.path.isfile(user_bash_rc) and os.path.isfile(user_bash_profile):
+        return user_bash_profile
+    return user_bash_rc
 
 def backup_rc(rc_file):
     try:
@@ -78,7 +84,8 @@ def main():
     create_tab_completion_file(completion_file_path)
     try:
         # use value from argv if available else fall back to prompt or default
-        rc_file = sys.argv[2] if len(sys.argv) >= 3 else prompt_input('Path to rc file (default {}): '.format(DEFAULT_RC_FILE)) or DEFAULT_RC_FILE
+        default_rc_file = _get_default_rc_file()
+        rc_file = sys.argv[2] if len(sys.argv) >= 3 else prompt_input('Path to rc file to update (default {}): '.format(default_rc_file)) or default_rc_file
     except EOFError:
         error_exit('Unable to prompt for input. Pass the rc file as an argument to this script.')
     rc_file_path = os.path.realpath(os.path.expanduser(rc_file))
