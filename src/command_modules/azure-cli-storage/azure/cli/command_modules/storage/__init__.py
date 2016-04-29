@@ -479,7 +479,7 @@ def mount_share(args):
             subprocess.call('sudo apt-get install cifs-utils'.split())
         subprocess.call('mkdir share_name'.split())
         command = 'sudo mount -t cifs //{}.file.core.windows.net/{} ./{} ' + \
-                  '-o vers=3.0,username={},password={},dir_mode=0777,file_mode=0777'
+                  '-o vers=3.0,username={},password={},dir_mode=0666,file_mode=0666'
         command.format(account_name, share_name, share_name, account_name, account_key)
         exit_code = subprocess.call(command.split())
     return {'result': exit_code}
