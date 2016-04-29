@@ -75,9 +75,13 @@ def print_arguments(help_file):
     required_tag = L(' [Required]')
     max_name_length = max(len(p.name) + (len(required_tag) if p.required else 0)
                           for p in help_file.parameters)
-    for p in sorted(help_file.parameters, key=lambda p: str(not p.required) + p.name):
+    added_global_space = False
+    for p in sorted(help_file.parameters, key=lambda p: str(not p.required) + str(p.global_param) + p.name):
         indent = 1
         required_text = required_tag if p.required else ''
+        if p.global_param and not added_global_space:
+            print('')
+            added_global_space = True
         _print_indent('{0}{1}{2}{3}'.format(p.name,
                                             _get_column_indent(p.name + required_text,
                                                                max_name_length),
@@ -204,7 +208,8 @@ class CommandHelpFile(HelpFile): #pylint: disable=too-few-public-methods
         for action in [a for a in parser._actions if a.help != argparse.SUPPRESS]: # pylint: disable=protected-access
             self.parameters.append(HelpParameter(' '.join(sorted(action.option_strings)),
                                                  action.help,
-                                                 required=action.required))
+                                                 required=action.required,
+                                                 global_param='global' in action.dest or action.dest == 'help'))
 
     def _load_from_data(self, data):
         super(CommandHelpFile, self)._load_from_data(data)
@@ -229,13 +234,14 @@ class CommandHelpFile(HelpFile): #pylint: disable=too-few-public-methods
 
 
 class HelpParameter(object): #pylint: disable=too-few-public-methods
-    def __init__(self, param_name, description, required):
+    def __init__(self, param_name, description, required, global_param=False):
         self.name = param_name
         self.required = required
         self.type = 'string'
         self.short_summary = description
         self.long_summary = ''
         self.value_sources = []
+        self.global_param = global_param
 
     def update_from_data(self, data):
         if self.name != data.get('name'):

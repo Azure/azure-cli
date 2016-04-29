@@ -135,16 +135,16 @@ class Application(object):
 
     @staticmethod
     def _register_builtin_arguments(parser):
-        parser.add_argument('--subscription', dest='_subscription_id', help=argparse.SUPPRESS)
-        parser.add_argument('--output', '-o', dest='_output_format',
+        parser.add_argument('--subscription', dest='_subscription_id_global', help=argparse.SUPPRESS)
+        parser.add_argument('--output', '-o', dest='_output_format_global',
                             choices=['list', 'json', 'tsv'],
                             help='Output format of type "list", "json" or "tsv"')
         # The arguments for verbosity don't get parsed by argparse but we add it here for help.
-        parser.add_argument('--verbose', dest='_log_verbosity_verbose',
+        parser.add_argument('--verbose', dest='_log_verbosity_verbose_global',
                             help='Increase logging verbosity. Use --debug for full debug logs.')
-        parser.add_argument('--debug', dest='_log_verbosity_debug',
+        parser.add_argument('--debug', dest='_log_verbosity_debug_global',
                             help='Increase logging verbosity to show all debug logs.')
 
     def _handle_builtin_arguments(self, args):
-        self.configuration.output_format = args._output_format #pylint: disable=protected-access
-        del args._output_format
+        self.configuration.output_format = args._output_format_global #pylint: disable=protected-access
+        del args._output_format_global
