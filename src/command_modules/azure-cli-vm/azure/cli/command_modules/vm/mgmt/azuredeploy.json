@@ -87,7 +87,14 @@
       "type": "string",
       "defaultValue": "osdiskimage",
       "metadata": {
-        "description": "Name of storage VHD for the VM OS disk."
+        "description": "Name of new VM OS disk."
+      }
+    },
+    "osDiskUri": {
+      "type": "string",
+      "defaultValue": "[concat('http://', parameters('storageAccountName'), '.blob.core.windows.net/', parameters('storageContainerName'), '/', parameters('osDiskName'), '.vhd')]",
+      "metadata": {
+        "description": "URI for a custom VHD image."
       }
     },
     "osOffer": {
@@ -113,7 +120,7 @@
     },
     "osType": {
       "type": "string",
-      "defaultValue": "WinServer 2012 R2",
+      "defaultValue": "Win2012R2Datacenter",
       "allowedValues": [
         "CentOS",
         "CoreOS",
@@ -450,6 +457,7 @@
           "storageAccountName": { "value": "[parameters('storageAccountName')]" },
           "storageContainerName": { "value": "[parameters('storageContainerName')]" },
           "osDiskName": { "value": "[parameters('osDiskName')]" },
+          "osDiskUri":  { "value": "[parameters('osDiskUri')]"},
           "sshKeyValue": { "value": "[parameters('sshKeyValue')]" },
           "sshKeyPath": { "value": "[parameters('sshKeyPath')]" },
           "availabilitySetId": { "value": "[variables('availSetId')]" },
