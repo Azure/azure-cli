@@ -138,7 +138,7 @@ build_operation("vm scalesetvm",
 
 vm_param_aliases = {
     '_artifacts_location': {
-        'name': '--artifacts_locatoin',
+        'name': '--artifacts_location',
         'help': argparse.SUPPRESS,
         }
     }
