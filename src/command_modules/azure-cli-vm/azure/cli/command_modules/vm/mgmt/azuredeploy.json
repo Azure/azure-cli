@@ -138,6 +138,17 @@
         "description": "The OS version to install."
       }
     },
+    "privateIpAddressAllocation": {
+      "type": "string",
+      "defaultValue": "Dynamic",
+      "allowedValues": [
+        "Dynamic",
+        "Static"
+      ],
+      "metadata": {
+        "description": "Dynamic of Static private IP address allocation."
+      }
+    },
     "publicIpAddressAllocation": {
       "type": "string",
       "defaultValue": "Dynamic",
@@ -146,7 +157,7 @@
         "Static"
       ],
       "metadata": {
-        "description": "Dynamic or Static IP address allocation."
+        "description": "Dynamic or Static public IP address allocation."
       }
     },
     "publicIpAddressName": {
@@ -385,7 +396,8 @@
           "publicIPAddressName": { "value": "[variables('publicIPName')]" },
           "publicIpAddressAllocation": { "value": "[variables('publicIpAddressAllocation')]" },
           "nicName": { "value": "[variables('nicName')]" },
-          "subnetRef": { "value": "[variables('subnetRef')]" }
+          "subnetRef": { "value": "[variables('subnetRef')]" },
+          "privateIpAllocation": { "value": "[parameters('privateIpAddressAllocation')]" }
         }
       }
     },
