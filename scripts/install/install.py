@@ -123,6 +123,9 @@ def get_install_dir():
     prompt_message = 'In what directory would you like to place the install? (leave blank to use {}): '.format(DEFAULT_INSTALL_DIR)
     install_dir = prompt_input(prompt_message) or DEFAULT_INSTALL_DIR
     install_dir = os.path.realpath(os.path.expanduser(install_dir))
+    if not os.path.isdir(install_dir):
+        print("Directory '{}' does not exist. Creating directory...".format(install_dir))
+        create_dir(install_dir)
     print("We will install at '{}'.".format(install_dir))
     return install_dir
 
@@ -130,6 +133,9 @@ def get_exec_dir():
     prompt_message = 'In what directory would you like to place the executable? (leave blank to use {}): '.format(DEFAULT_EXEC_DIR)
     exec_dir = prompt_input(prompt_message) or DEFAULT_EXEC_DIR
     exec_dir = os.path.realpath(os.path.expanduser(exec_dir))
+    if not os.path.isdir(exec_dir):
+        print("Directory '{}' does not exist. Creating directory...".format(exec_dir))
+        create_dir(exec_dir)
     print("The executable will be in '{}'.".format(exec_dir))
     return exec_dir
 
