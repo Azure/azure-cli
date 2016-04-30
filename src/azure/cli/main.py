@@ -2,7 +2,6 @@
 import sys
 
 from .application import Application, Configuration
-
 import azure.cli._logging as _logging
 from ._session import Session
 from ._output import OutputProducer
@@ -49,6 +48,6 @@ def main(args, file=sys.stdout): #pylint: disable=redefined-builtin
     except KeyboardInterrupt:
         return -1
     except Exception as ex: # pylint: disable=broad-except
-        logger.error(ex)
+        logger.exception(ex)
         return -1
 

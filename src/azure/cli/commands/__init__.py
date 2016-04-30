@@ -5,11 +5,16 @@ import random
 from importlib import import_module
 from collections import defaultdict, OrderedDict
 from pip import get_installed_distributions
+import azure.cli._logging as _logging
+
+logger = _logging.get_az_logger(__name__)
 
 # Find our command modules, they start with 'azure-cli-'
 INSTALLED_COMMAND_MODULES = [dist.key.replace('azure-cli-', '')
                              for dist in get_installed_distributions(local_only=True)
                              if dist.key.startswith('azure-cli-')]
+
+logger.info('Installed command modules %s', INSTALLED_COMMAND_MODULES)
 
 RESOURCE_GROUP_ARG_NAME = 'resource_group_name'
 
@@ -51,6 +56,7 @@ class LongRunningOperation(object): #pylint: disable=too-few-public-methods
         self.poll_interval_ms = poll_interval_ms
 
     def __call__(self, poller):
+        logger.info("Starting long running operation '%s' with polling interval %s ms", self.start_msg, self.poll_interval_ms)
         print(self.start_msg, file=self.progress_file)
         succeeded = False
         try:
@@ -59,8 +65,10 @@ class LongRunningOperation(object): #pylint: disable=too-few-public-methods
                     print('.', end='', file=self.progress_file)
                     self.progress_file.flush()
                 time.sleep(self.poll_interval_ms / 1000.0)
+                logger.info("Long running operation '%s' polling now", self.start_msg)
             result = poller.result()
             succeeded = True
+            logger.info("Long running operation '%s' completed with result %s", self.start_msg, result)
             return result
         finally:
             # Ensure that we get a newline after the dots...
@@ -130,13 +138,16 @@ def get_command_table(module_name=None):
     if module_name:
         try:
             command_table = _get_command_table(module_name)
+            logger.info("Successfully loaded command table from module '%s'.", module_name)
             loaded = True
         except ImportError:
             # Unknown command - we'll load all installed modules below
+            logger.info("Unable to load command table from module '%s'.", module_name)
             pass
 
     if not loaded:
         command_table = {}
+        logger.info('Loading command tables from all installed modules.')
         for mod in INSTALLED_COMMAND_MODULES:
             command_table.update(_get_command_table(mod))
 
