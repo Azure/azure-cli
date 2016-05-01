@@ -76,7 +76,6 @@ build_operation("vm image",
                 _compute_client_factory,
                 [
                     AutoCommandDefinition(VirtualMachineImagesOperations.get, 'VirtualMachineImage', command_alias='show'),
-                    AutoCommandDefinition(VirtualMachineImagesOperations.list, '[VirtualMachineImageResource]'),
                     AutoCommandDefinition(VirtualMachineImagesOperations.list_offers, '[VirtualMachineImageResource]'),
                     AutoCommandDefinition(VirtualMachineImagesOperations.list_publishers, '[VirtualMachineImageResource]'),
                     AutoCommandDefinition(VirtualMachineImagesOperations.list_skus, '[VirtualMachineImageResource]'),
@@ -262,3 +261,16 @@ build_operation('vm',
                 command_table,
                 vm_param_aliases,
                 extra_parameters)
+
+build_operation("vm image",
+                None,
+                ConvenienceVmCommands,
+                [
+                    AutoCommandDefinition(ConvenienceVmCommands.list_vm_images, 'object', 'list')
+                ],
+                command_table,
+                _patch_aliases({
+                    #get rid of the alias with work on https://www.pivotaltracker.com/projects/1535539/stories/118884633
+                    'image_location' : {'name': '--location -l', 'help': 'Image location'}
+                    }))
+
