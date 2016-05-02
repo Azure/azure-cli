@@ -1,4 +1,5 @@
 import argparse
+import re
 from azure.mgmt.compute import ComputeManagementClient, ComputeManagementClientConfiguration
 from azure.mgmt.compute.operations import (AvailabilitySetsOperations,
                                            VirtualMachineExtensionImagesOperations,
@@ -167,8 +168,54 @@ build_operation("vm",
 vm_param_aliases = {
     'name': {
         'name': '--name -n'
-        }
+        },
+    'os_disk_uri': {
+        'name': '--os-disk-uri',
+        'help': argparse.SUPPRESS
+        },
+    'os_offer': {
+        'name': '--os_offer',
+        'help': argparse.SUPPRESS
+        },
+    'os_publisher': {
+        'name': '--os-publisher',
+        'help': argparse.SUPPRESS
+        },
+    'os_sku': {
+        'name': '--os-sku',
+        'help': argparse.SUPPRESS
+        },
+    'os_type': {
+        'name': '--os-type',
+        'help': argparse.SUPPRESS
+        },
+    'os_version': {
+        'name': '--os-version',
+        'help': argparse.SUPPRESS
+        },
     }
+
+extra_parameters = [
+    {
+        'name': '--image',
+        'help': 'The OS image.  Supported values: Common OS (e.g. Win2012R2Datacenter), URN (e.g. "publisher:offer:sku:version"), or existing VHD URI.'
+        }
+    ]
+
+def preamble(_, args):
+    image = args.get('image')
+    match = re.match('([^:]*):([^:]*):([^:]*):([^:]*)', image)
+
+    if image.lower().endswith('.vhd'):
+        args['os_disk_uri'] = image
+    elif match:
+        args['os_type'] = 'Custom'
+        args['os_publisher'] = match.group(1)
+        args['os_offer'] = match.group(2)
+        args['os_sku'] = match.group(3)
+        args['os_version'] = match.group(4)
+    else:
+        args['os_type'] = image
 
 build_operation('vm',
                 'vm',
@@ -179,4 +226,6 @@ build_operation('vm',
                                           'create')
                 ],
                 command_table,
-                vm_param_aliases)
+                vm_param_aliases,
+                extra_parameters,
+                preamble)
