@@ -79,7 +79,7 @@ class DeploymentVM(Model):
     :type storage_account_name: str
     :param storage_redundancy_type: The VM storage type.
     :type storage_redundancy_type: str
-    :param size: The VM Size that should be created.
+    :param size: The VM Size that should be created  (e.g. Standard_A2)
     :type size: str
     :param public_ip_address_type: Use a public IP Address for the VM Nic.
      (new, existing or none).
