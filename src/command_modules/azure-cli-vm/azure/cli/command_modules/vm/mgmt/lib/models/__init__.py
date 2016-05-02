@@ -8,6 +8,7 @@
 
 from .deployment_vm import DeploymentVM
 from .template_link import TemplateLink
+from .deployment_parameter_artifacts_location import DeploymentParameterArtifactsLocation
 from .parameters_link import ParametersLink
 from .provider_resource_type import ProviderResourceType
 from .provider import Provider
@@ -22,6 +23,7 @@ from .vm_creation_client_enums import (
 __all__ = [
     'DeploymentVM',
     'TemplateLink',
+    'DeploymentParameterArtifactsLocation',
     'ParametersLink',
     'ProviderResourceType',
     'Provider',
