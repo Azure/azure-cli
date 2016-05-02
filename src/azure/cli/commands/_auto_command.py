@@ -33,12 +33,14 @@ def _get_member(obj, path):
             pass
     return obj
 
-def _make_func(client_factory, member_path, return_type_or_func, unbound_func):
+def _make_func(client_factory, member_path, return_type_or_func, unbound_func, preamble=None):
     def call_client(args):
         client = client_factory(args)
         ops_instance = _get_member(client, member_path)
 
         try:
+            if preamble:
+                preamble(ops_instance, args)
             result = unbound_func(ops_instance, **args)
             if not return_type_or_func:
                 return {}
@@ -69,11 +71,12 @@ def build_operation(command_name,
                     operations,
                     command_table,
                     param_aliases=None,
-                    extra_parameters=None):
+                    extra_parameters=None,
+                    preamble=None):
 
     for op in operations:
 
-        func = _make_func(client_type, member_path, op.return_type, op.operation)
+        func = _make_func(client_type, member_path, op.return_type, op.operation, preamble)
 
         args = []
         try:
