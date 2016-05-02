@@ -17,11 +17,6 @@ class AzCliCommandParser(argparse.ArgumentParser):
         self.help_file = kwargs.pop('help_file', None)
         super(AzCliCommandParser, self).__init__(**kwargs)
 
-    def get_global_group(self):
-        if len(self._action_groups) < 3:
-            self.add_argument_group('global', 'global arguments')
-        return self._action_groups[2]
-
     def load_command_table(self, command_table):
         """Load a command table into our parser.
         """
