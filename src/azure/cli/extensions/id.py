@@ -10,7 +10,7 @@ def register(application):
                 setattr(namespace, source, parts[4])
                 setattr(namespace, target, parts[8])
             except Exception:
-                raise RuntimeError('Invalid ID "{0}". You have to specify a valid ID or RESOURCEGROUP and NAME'.format(id))
+                raise RuntimeError('Invalid RESOURCEID "{0}". You have to specify a RESOURCEGROUP and NAME or a valid RESOURCEID'.format(id))
         return split
 
     def annotate_id(command_table):
@@ -27,7 +27,7 @@ def register(application):
                 arguments.remove(name)
                 arguments.append({
                     'name': rg.get('dest', 'resource_group_name'),
-                    'metavar': '(ID | %s %s)' % (rg.get('metavar', 'RESOURCEGROUP'), name.get('metavar', 'NAME')),
+                    'metavar': '(RESOURCEID | %s %s)' % (rg.get('metavar', 'RESOURCEGROUP'), name.get('metavar', 'NAME')),
                     'help': 'Resource ID or resource group name followed by resource name',
                     })
                 arguments.append({
