@@ -233,7 +233,8 @@ class CommandHelpFile(HelpFile): #pylint: disable=too-few-public-methods
             raise HelpAuthoringException('Extra help param {0}'.format(extra_param['name']))
         self.parameters = loaded_params
 
-    def is_global(self, action):
+    @staticmethod
+    def is_global(action):
         return action.container.description == 'global arguments' \
             or action.dest == 'help'
 
