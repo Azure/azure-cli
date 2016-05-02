@@ -164,13 +164,6 @@ build_operation("vm",
                 ],
                 command_table, PARAMETER_ALIASES)
 
-vm_param_aliases = {
-    '_artifacts_location': {
-        'name': '--artifacts_location',
-        'help': argparse.SUPPRESS,
-        }
-    }
-
 build_operation('vm',
                 'vm',
                 lambda _: get_mgmt_service_client(VMClient, VMClientConfig),
@@ -179,5 +172,4 @@ build_operation('vm',
                                           LongRunningOperation(L('Creating virtual machine'), L('Virtual machine created')),
                                           'create')
                 ],
-                command_table,
-                vm_param_aliases)
+                command_table)

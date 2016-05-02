@@ -6,6 +6,7 @@
 # regenerated.
 # --------------------------------------------------------------------------
 
+from .deployment_parameter_artifacts_location import DeploymentParameterArtifactsLocation
 from msrest.serialization import Model
 
 
@@ -41,9 +42,9 @@ class DeploymentVM(Model):
     :type storage_account_type: str
     :param os_disk_uri: URI for a custom VHD image.
     :type os_disk_uri: str
-    :ivar _artifacts_location: Container URI of of the template. Default
-     value: "https://azuresdkci.blob.core.windows.net/templatehost/CreateVM" .
-    :vartype _artifacts_location: str
+    :ivar _artifacts_location:
+    :vartype _artifacts_location:
+     :class:`DeploymentParameterArtifactsLocation <mynamespace.models.DeploymentParameterArtifactsLocation>`
     :param name: The VM resource name.
     :type name: str
     :param virtual_network_type: Whether to use an existing VNet or create a
@@ -108,7 +109,7 @@ class DeploymentVM(Model):
 
     _validation = {
         'uri': {'required': True, 'constant': True},
-        '_artifacts_location': {'required': True, 'constant': True},
+        '_artifacts_location': {'constant': True},
         'name': {'required': True},
         'admin_password': {'required': True},
         'admin_username': {'required': True},
@@ -125,7 +126,7 @@ class DeploymentVM(Model):
         'dns_name_for_public_ip': {'key': 'properties.parameters.dnsNameForPublicIP.value', 'type': 'str'},
         'storage_account_type': {'key': 'properties.parameters.storageAccountType.value', 'type': 'str'},
         'os_disk_uri': {'key': 'properties.parameters.osDiskUri.value', 'type': 'str'},
-        '_artifacts_location': {'key': 'properties.parameters._artifactsLocation.value', 'type': 'str'},
+        '_artifacts_location': {'key': 'properties.parameters._artifactsLocation', 'type': 'DeploymentParameterArtifactsLocation'},
         'name': {'key': 'properties.parameters.name.value', 'type': 'str'},
         'virtual_network_type': {'key': 'properties.parameters.virtualNetworkType.value', 'type': 'str'},
         'admin_password': {'key': 'properties.parameters.adminPassword.value', 'type': 'str'},
@@ -156,7 +157,7 @@ class DeploymentVM(Model):
 
     uri = "https://azuresdkci.blob.core.windows.net/templatehost/CreateVM/azuredeploy.json"
 
-    _artifacts_location = "https://azuresdkci.blob.core.windows.net/templatehost/CreateVM"
+    _artifacts_location = DeploymentParameterArtifactsLocation()
 
     mode = "Incremental"
 
