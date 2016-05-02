@@ -113,7 +113,7 @@ build_operation("vm",
                 ],
                 command_table,
                 _patch_aliases({
-                    'vm_name': {'name': '--name -n'}
+                    'vm_name': {'name': '--name -n', '_semantic_type': 'resource_name'}
                 }))
 
 build_operation("vm scaleset",

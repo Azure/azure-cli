@@ -19,7 +19,8 @@ COMMON_PARAMETERS = {
         'dest': RESOURCE_GROUP_ARG_NAME,
         'metavar': 'RESOURCEGROUP',
         'help': 'The name of the resource group.',
-        'required': True
+        'required': True,
+        '_semantic_type': 'resource_group_name',
     },
     'location': {
         'name': '--location -l',

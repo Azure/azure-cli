@@ -39,7 +39,7 @@ class AzCliCommandParser(argparse.ArgumentParser):
                                                   help_file=metadata.get('help_file'))
             for arg in metadata['arguments']:
                 names = arg.get('name').split()
-                command_parser.add_argument(*names, **{k:v for k, v in arg.items() if k != 'name'})
+                command_parser.add_argument(*names, **{k:v for k, v in arg.items() if k != 'name' and not k.startswith('_')})
             command_parser.set_defaults(func=handler)
 
     def _get_subparser(self, path):

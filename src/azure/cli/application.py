@@ -36,6 +36,7 @@ class Application(object):
     COMMAND_PARSER_CREATED = 'CommandParser.Created'
     COMMAND_PARSER_LOADED = 'CommandParser.Loaded'
     COMMAND_PARSER_PARSED = 'CommandParser.Parsed'
+    COMMAND_TABLE_LOADED = 'CommandTable.Loaded'
 
     def __init__(self, configuration):
         self._event_handlers = defaultdict(lambda: [])
@@ -57,6 +58,7 @@ class Application(object):
 
     def execute(self, argv):
         command_table = self.configuration.get_command_table()
+        self.raise_event(self.COMMAND_TABLE_LOADED, command_table)
         self.parser.load_command_table(command_table)
         self.raise_event(self.COMMAND_PARSER_LOADED, self.parser)
 
