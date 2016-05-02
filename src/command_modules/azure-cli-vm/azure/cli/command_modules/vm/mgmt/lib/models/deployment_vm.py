@@ -41,8 +41,9 @@ class DeploymentVM(Model):
     :type storage_account_type: str
     :param os_disk_uri: URI for a custom VHD image.
     :type os_disk_uri: str
-    :param _artifacts_location: Container URI of of the template.
-    :type _artifacts_location: str
+    :ivar _artifacts_location: Container URI of of the template. Default
+     value: "https://azuresdkci.blob.core.windows.net/templatehost/CreateVM" .
+    :vartype _artifacts_location: str
     :param name: The VM resource name.
     :type name: str
     :param virtual_network_type: Whether to use an existing VNet or create a
@@ -107,6 +108,7 @@ class DeploymentVM(Model):
 
     _validation = {
         'uri': {'required': True, 'constant': True},
+        '_artifacts_location': {'required': True, 'constant': True},
         'name': {'required': True},
         'admin_password': {'required': True},
         'admin_username': {'required': True},
@@ -154,9 +156,11 @@ class DeploymentVM(Model):
 
     uri = "https://azuresdkci.blob.core.windows.net/templatehost/CreateVM/azuredeploy.json"
 
+    _artifacts_location = "https://azuresdkci.blob.core.windows.net/templatehost/CreateVM"
+
     mode = "Incremental"
 
-    def __init__(self, name, admin_password, admin_username, content_version=None, storage_container_name=None, virtual_network_name=None, subnet_ip_address_prefix=None, private_ip_address_allocation=None, dns_name_for_public_ip=None, storage_account_type=None, os_disk_uri=None, _artifacts_location=None, virtual_network_type=None, os_sku=None, subnet_name=None, os_type=None, os_version=None, os_disk_name=None, ssh_key_path=None, os_offer=None, public_ip_address_allocation=None, authentication_type=None, storage_account_name=None, storage_redundancy_type=None, size=None, public_ip_address_type=None, virtual_network_ip_address_prefix=None, availability_set_id=None, ssh_key_value=None, location=None, os_publisher=None, availability_set_type=None, public_ip_address_name=None, dns_name_type=None):
+    def __init__(self, name, admin_password, admin_username, content_version=None, storage_container_name=None, virtual_network_name=None, subnet_ip_address_prefix=None, private_ip_address_allocation=None, dns_name_for_public_ip=None, storage_account_type=None, os_disk_uri=None, virtual_network_type=None, os_sku=None, subnet_name=None, os_type=None, os_version=None, os_disk_name=None, ssh_key_path=None, os_offer=None, public_ip_address_allocation=None, authentication_type=None, storage_account_name=None, storage_redundancy_type=None, size=None, public_ip_address_type=None, virtual_network_ip_address_prefix=None, availability_set_id=None, ssh_key_value=None, location=None, os_publisher=None, availability_set_type=None, public_ip_address_name=None, dns_name_type=None):
         self.content_version = content_version
         self.storage_container_name = storage_container_name
         self.virtual_network_name = virtual_network_name
@@ -165,7 +169,6 @@ class DeploymentVM(Model):
         self.dns_name_for_public_ip = dns_name_for_public_ip
         self.storage_account_type = storage_account_type
         self.os_disk_uri = os_disk_uri
-        self._artifacts_location = _artifacts_location
         self.name = name
         self.virtual_network_type = virtual_network_type
         self.admin_password = admin_password
