@@ -210,9 +210,7 @@ class CommandHelpFile(HelpFile): #pylint: disable=too-few-public-methods
             self.parameters.append(HelpParameter(' '.join(sorted(action.option_strings)),
                                                  action.help,
                                                  required=action.required,
-                                                 global_param=action.container.description
-                                                 == parser.get_global_group().description
-                                                 or action.dest == 'help'))
+                                                 global_param=self.is_global(action)))
 
     def _load_from_data(self, data):
         super(CommandHelpFile, self)._load_from_data(data)
@@ -235,6 +233,9 @@ class CommandHelpFile(HelpFile): #pylint: disable=too-few-public-methods
             raise HelpAuthoringException('Extra help param {0}'.format(extra_param['name']))
         self.parameters = loaded_params
 
+    def is_global(self, action):
+        return action.container.description == 'global arguments' \
+            or action.dest == 'help'
 
 class HelpParameter(object): #pylint: disable=too-few-public-methods
     def __init__(self, param_name, description, required, global_param=False):
