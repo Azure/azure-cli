@@ -533,6 +533,60 @@ Examples
 '''
         self.assertEqual(s, io.getvalue())
 
+    @redirect_io
+    @mock.patch('azure.cli.application.Application.register', return_value=None)
+    @mock.patch('azure.cli.extensions.register_extensions', return_value=None)
+    def test_help_global_params(self, mock_register_extensions, _):
+        def register_globals(global_group):
+            global_group.add_argument('--query2', dest='_jmespath_query', metavar='JMESPATH',
+                              help='JMESPath query string. See http://jmespath.org/ '
+                              'for more information and examples.')
+
+        mock_register_extensions.return_value = None
+        mock_register_extensions.side_effect = lambda app: \
+            app._event_handlers[app.GLOBAL_PARSER_CREATED].append(register_globals)
+
+        def test_handler(args):
+            pass
+
+        cmd_table = {
+            test_handler: {
+                'name': 'n1',
+                'help_file': '''
+                    long-summary: |
+                        line1
+                        line2
+                    ''',
+                'arguments': [
+                    {'name': '--arg -a', 'required': False},
+                    {'name': '-b', 'required': False}
+                    ]
+                }
+            }
+        config = Configuration([])
+        config.get_command_table = lambda: cmd_table
+        app = Application(config)
+
+        with self.assertRaises(SystemExit):
+            app.execute('n1 -h'.split())
+
+        s = """
+Command
+    az n1
+        line1
+        line2
+
+Arguments
+    --arg -a
+    -b
+
+Global Arguments
+    --help -h: show this help message and exit
+    --query2 : JMESPath query string. See http://jmespath.org/ for more information and examples.
+"""
+
+        self.assertEqual(s, io.getvalue())
+
 
 if __name__ == '__main__':
     unittest.main()
