@@ -78,6 +78,8 @@ def print_arguments(help_file):
     for p in sorted(help_file.parameters, key=lambda p: str(not p.required) + p.name):
         indent = 1
         required_text = required_tag if p.required else ''
+        if p.choices:
+            p.short_summary = (p.short_summary + ' ' if p.short_summary else '') + str(p.choices)
         _print_indent('{0}{1}{2}{3}'.format(p.name,
                                             _get_column_indent(p.name + required_text,
                                                                max_name_length),
@@ -204,7 +206,8 @@ class CommandHelpFile(HelpFile): #pylint: disable=too-few-public-methods
         for action in [a for a in parser._actions if a.help != argparse.SUPPRESS]: # pylint: disable=protected-access
             self.parameters.append(HelpParameter(' '.join(sorted(action.option_strings)),
                                                  action.help,
-                                                 required=action.required))
+                                                 required=action.required,
+                                                 choices=action.choices))
 
     def _load_from_data(self, data):
         super(CommandHelpFile, self)._load_from_data(data)
@@ -229,13 +232,14 @@ class CommandHelpFile(HelpFile): #pylint: disable=too-few-public-methods
 
 
 class HelpParameter(object): #pylint: disable=too-few-public-methods
-    def __init__(self, param_name, description, required):
+    def __init__(self, param_name, description, required, choices=None):
         self.name = param_name
         self.required = required
         self.type = 'string'
         self.short_summary = description
         self.long_summary = ''
         self.value_sources = []
+        self.choices = choices
 
     def update_from_data(self, data):
         if self.name != data.get('name'):
