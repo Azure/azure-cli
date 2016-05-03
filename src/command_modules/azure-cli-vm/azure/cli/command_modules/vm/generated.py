@@ -195,27 +195,31 @@ vm_param_aliases = {
         },
     }
 
+class VMImageFieldAction(argparse.Action):
+    def __call__(self, parser, namespace, values, option_string = None):
+        image = values
+        match = re.match('([^:]*):([^:]*):([^:]*):([^:]*)', image)
+
+        if image.lower().endswith('.vhd'):
+            namespace.os_disk_uri = image
+        elif match:
+            namespace.os_type = 'Custom'
+            namespace.os_publisher = match.group(1)
+            namespace.os_offer = match.group(2)
+            namespace.os_sku = match.group(3)
+            namespace.os_version = match.group(4)
+        else:
+            namespace.os_type = image
+        #return super(VMImageFieldAction, self).__call__(parser, namespace, values, option_string)
+
+
 extra_parameters = [
     {
         'name': '--image',
-        'help': 'The OS image.  Supported values: Common OS (e.g. Win2012R2Datacenter), URN (e.g. "publisher:offer:sku:version"), or existing VHD URI.'
+        'help': 'The OS image.  Supported values: Common OS (e.g. Win2012R2Datacenter), URN (e.g. "publisher:offer:sku:version"), or existing VHD URI.',
+        'action': VMImageFieldAction
         }
     ]
-
-def preamble(_, args):
-    image = args.get('image')
-    match = re.match('([^:]*):([^:]*):([^:]*):([^:]*)', image)
-
-    if image.lower().endswith('.vhd'):
-        args['os_disk_uri'] = image
-    elif match:
-        args['os_type'] = 'Custom'
-        args['os_publisher'] = match.group(1)
-        args['os_offer'] = match.group(2)
-        args['os_sku'] = match.group(3)
-        args['os_version'] = match.group(4)
-    else:
-        args['os_type'] = image
 
 build_operation('vm',
                 'vm',
@@ -227,5 +231,4 @@ build_operation('vm',
                 ],
                 command_table,
                 vm_param_aliases,
-                extra_parameters,
-                preamble)
+                extra_parameters)
