@@ -1,4 +1,5 @@
 from __future__ import print_function
+import re
 import inspect
 from msrest.paging import Paged
 from msrest.exceptions import ClientException
@@ -54,13 +55,37 @@ def _make_func(client_factory, member_path, return_type_or_func, unbound_func):
 
     return call_client
 
-def _option_description(operation, arg):
+def _option_descriptions(operation):
     """Pull out parameter help from doccomments of the command
     """
-    # TODO: We are currently doing this for every option/argument.
-    # We should do it (at most) once for a given command...
-    return ' '.join(l.split(':')[-1] for l in inspect.getdoc(operation).splitlines()
-                    if l.startswith(':param') and arg + ':' in l)
+    lines = inspect.getdoc(operation).splitlines()
+    option_descs = {}
+    index = 0
+    while index < len(lines):
+        l = lines[index]
+        regex = r'\s*(:param)\s+(.+)\s*:(.*)'
+        match = re.search(regex, l)
+        if match:
+            # 'arg name' portion might have type info, we don't need it
+            arg_name = str.split(match.group(2))[-1]
+            arg_desc = match.group(3).strip()
+            #look for more descriptions on subsequent lines
+            index += 1
+            while index < len(lines):
+                temp = lines[index].strip()
+                if temp.startswith(':'):
+                    break
+                else:
+                    if temp:
+                        arg_desc += (' ' + temp)
+                    index += 1
+
+            option_descs[arg_name] = arg_desc
+        else:
+            index += 1
+
+    return option_descs
+
 
 #pylint: disable=too-many-arguments
 def build_operation(command_name,
@@ -85,13 +110,18 @@ def build_operation(command_name,
             args = sig.args
 
         options = []
-        for arg in [a for a in args if not a in EXCLUDED_PARAMS]:
+
+        option_helps = _option_descriptions(op.operation)
+        filtered_args = [a for a in args if not a in EXCLUDED_PARAMS]
+        for arg in filtered_args:
             try:
                 # this works in python3
                 default = args[arg].default
                 required = default == inspect.Parameter.empty #pylint: disable=no-member
             except TypeError:
-                arg_defaults = dict(zip(sig.args[-len(sig.defaults):], sig.defaults))
+                arg_defaults = (dict(zip(sig.args[-len(sig.defaults):], sig.defaults))
+                                if sig.defaults
+                                else {})
                 default = arg_defaults.get(arg)
                 required = arg not in arg_defaults
 
@@ -109,7 +139,7 @@ def build_operation(command_name,
                 'required': required,
                 'default': default,
                 'dest': arg,
-                'help': _option_description(op.operation, arg),
+                'help': option_helps.get(arg),
                 'action': action
             }
             parameter.update(COMMON_PARAMETERS.get(arg, {}))
