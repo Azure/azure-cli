@@ -71,7 +71,7 @@ build_operation(
     }))
 
 build_operation(
-    'deployment', 'deployments', _resource_client_factory,
+    'resource group deployment', 'deployments', _resource_client_factory,
     [
         AutoCommandDefinition(DeploymentsOperations.list, '[Deployment]'),
         AutoCommandDefinition(DeploymentsOperations.get, 'Deployment', 'show'),
@@ -87,7 +87,7 @@ build_operation(
     }))
 
 build_operation(
-    'deployment operation', 'deployment_operations', _resource_client_factory,
+    'resource group deployment operation', 'deployment_operations', _resource_client_factory,
     [
         AutoCommandDefinition(DeploymentOperationsOperations.list, '[DeploymentOperations]'),
         AutoCommandDefinition(DeploymentOperationsOperations.get, 'DeploymentOperations', 'show')
