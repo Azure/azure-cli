@@ -8,6 +8,7 @@ from azure.cli.commands import CommandTable, COMMON_PARAMETERS
 from azure.cli._locale import L
 
 from azure.cli.utils.update_checker import check_for_component_update, UpdateCheckError
+from azure.cli._util import CLIError
 
 CLI_PACKAGE_NAME = 'azure-cli'
 COMPONENT_PREFIX = 'azure-cli-'
@@ -32,7 +33,7 @@ def _install_or_update(component_name, version, link, private, upgrade=False):
     found = bool([dist for dist in pip.get_installed_distributions(local_only=True)
                   if dist.key == COMPONENT_PREFIX + component_name])
     if found and not upgrade:
-        raise RuntimeError("Component already installed.")
+        raise CLIError('Component already installed.')
     else:
         version_no = '==' + version if version else ''
         options = ['--quiet', '--isolated', '--disable-pip-version-check']
@@ -43,10 +44,10 @@ def _install_or_update(component_name, version, link, private, upgrade=False):
             pkg_index_options += ['--find-links', link]
         if private:
             if not PRIVATE_PYPI_URL:
-                raise RuntimeError('{} environment variable not set.'
+                raise CLIError('{} environment variable not set.'
                                    .format(PRIVATE_PYPI_URL_ENV_NAME))
             if not PRIVATE_PYPI_HOST:
-                raise RuntimeError('{} environment variable not set.'
+                raise CLIError('{} environment variable not set.'
                                    .format(PRIVATE_PYPI_HOST_ENV_NAME))
             pkg_index_options += ['--extra-index-url', PRIVATE_PYPI_URL,
                                   '--trusted-host', PRIVATE_PYPI_HOST]
@@ -87,10 +88,10 @@ def update_self(args):
     pkg_index_options = []
     if args.get('private'):
         if not PRIVATE_PYPI_URL:
-            raise RuntimeError('{} environment variable not set.'
+            raise CLIError('{} environment variable not set.'
                                .format(PRIVATE_PYPI_URL_ENV_NAME))
         if not PRIVATE_PYPI_HOST:
-            raise RuntimeError('{} environment variable not set.'
+            raise CLIError('{} environment variable not set.'
                                .format(PRIVATE_PYPI_HOST_ENV_NAME))
         pkg_index_options += ['--extra-index-url', PRIVATE_PYPI_URL,
                               '--trusted-host', PRIVATE_PYPI_HOST]
@@ -124,7 +125,7 @@ def check_component(args):
     found = bool([dist for dist in pip.get_installed_distributions(local_only=True)
                   if dist.key == COMPONENT_PREFIX+component_name])
     if not found:
-        raise RuntimeError(L("Component not installed."))
+        raise CLIError(L("Component not installed."))
     update_status = check_for_component_update(component_name, private)
     result = {}
     result['currentVersion'] = str(update_status['current_version'])
@@ -150,4 +151,4 @@ def remove_component(args):
         pip.main(['uninstall', '--quiet', '--isolated', '--yes',
                   '--disable-pip-version-check', COMPONENT_PREFIX+component_name])
     else:
-        raise RuntimeError(L("Component not installed."))
+        raise CLIError(L("Component not installed."))

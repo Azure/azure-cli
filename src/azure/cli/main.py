@@ -5,6 +5,7 @@ from .application import Application, Configuration
 import azure.cli._logging as _logging
 from ._session import Session
 from ._output import OutputProducer
+from ._util import CLIError
 
 logger = _logging.get_az_logger(__name__)
 
@@ -42,7 +43,7 @@ def main(args, file=sys.stdout): #pylint: disable=redefined-builtin
         if cmd_result:
             formatter = OutputProducer.get_formatter(app.configuration.output_format)
             OutputProducer(formatter=formatter, file=file).out(cmd_result)
-    except RuntimeError as ex:
+    except CLIError as ex:
         logger.error(ex.args[0])
         return ex.args[1] if len(ex.args) >= 2 else -1
     except KeyboardInterrupt:

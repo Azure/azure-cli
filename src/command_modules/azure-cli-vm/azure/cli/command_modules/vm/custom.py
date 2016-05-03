@@ -3,6 +3,7 @@ from azure.mgmt.compute.models.compute_management_client_enums import DiskCreate
 from azure.cli._locale import L
 from azure.cli.commands import CommandTable, LongRunningOperation
 from azure.cli.commands._command_creation import get_mgmt_service_client
+from azure.cli._util import CLIError
 from azure.mgmt.compute import ComputeManagementClient, ComputeManagementClientConfiguration
 
 from ._params import PARAMETER_ALIASES
@@ -105,7 +106,7 @@ def _vm_disk_detach(args, instance):
                     if d.name == args.get('name'))
         instance.storage_profile.data_disks.remove(disk)
     except StopIteration:
-        raise RuntimeError("No disk with the name '%s' found" % args.get('name'))
+        raise CLIError("No disk with the name '%s' found" % args.get('name'))
 
 #
 # Composite convenience commands for the CLI
