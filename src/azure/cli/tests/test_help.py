@@ -376,41 +376,42 @@ Examples
                                '.*Extra help param --foobar -fb.*',
                                 lambda: app.execute('n1 -h'.split()))
 
-# Will uncomment when partial params don't bypass help (help behaviors implementation) task #115631559
-#    @redirect_io
-#    def test_help_with_param_specified(self):
-#        app = Application(Configuration([]))
-#        def test_handler(args):
-#            pass
+    @redirect_io
+    @mock.patch('azure.cli.application.Application.register', return_value=None)
+    def test_help_with_param_specified(self, _):
+        app = Application(Configuration([]))
+        def test_handler(args):
+            pass
 
-#        cmd_table = {
-#            test_handler: {
-#                'name': 'n1',
-#                'arguments': [
-#                    {'name': '--arg -a', 'required': False},
-#                    {'name': '-b', 'required': False}
-#                    ]
-#                }
-#            }
-#        config = Configuration([])
-        #config.get_command_table = lambda: cmd_table
-        #app = Application(config)
+        cmd_table = {
+            test_handler: {
+                'name': 'n1',
+                'arguments': [
+                    {'name': '--arg -a', 'required': False},
+                    {'name': '-b', 'required': False}
+                    ]
+                }
+            }
+        config = Configuration([])
+        config.get_command_table = lambda: cmd_table
+        app = Application(config)
 
-#        with self.assertRaises(SystemExit):
-#            cmd_result = app.execute('n1 --arg -h'.split())
+        with self.assertRaises(SystemExit):
+            cmd_result = app.execute('n1 --arg foo -h'.split())
 
-#        s = '''
-#Command
-#    n1
+        s = '''
+Command
+    az n1
 
-#Arguments
-#    --arg -a
+Arguments
+    --arg -a
+    -b
 
-#    -b
+Global Arguments
+    --help -h: show this help message and exit
+'''
 
-#'''
-
-#        self.assertEqual(s, io.getvalue())
+        self.assertEqual(s, io.getvalue())
 
     @redirect_io
     def test_help_group_children(self):
@@ -445,36 +446,35 @@ Examples
         s = '\nGroup\n    az group1\n\nSub-Commands\n    group2\n    group3\n\n'
         self.assertEqual(s, io.getvalue())
 
-    # Will uncomment when all errors are shown at once (help behaviors implementation) task #115631559
-    #@redirect_io
-    #def test_help_extra_missing_params(self):
-    #    app = Application(Configuration([]))
-    #    def test_handler(args):
-    #        pass
+    @redirect_io
+    def test_help_extra_missing_params(self):
+        app = Application(Configuration([]))
+        def test_handler(args):
+            pass
 
-    #    cmd_table = {
-    #        test_handler: {
-    #            'name': 'n1',
-    #            'arguments': [
-    #                {'name': '--foobar -fb', 'required': False},
-    #                {'name': '--foobar2 -fb2', 'required': True}
-    #                ]
-    #            }
-    #        }
-    #    config = Configuration([])
-        #config.get_command_table = lambda: cmd_table
-        #app = Application(config)
+        cmd_table = {
+            test_handler: {
+                'name': 'n1',
+                'arguments': [
+                    {'name': '--foobar -fb', 'required': False},
+                    {'name': '--foobar2 -fb2', 'required': True}
+                    ]
+                }
+            }
+        config = Configuration([])
+        config.get_command_table = lambda: cmd_table
+        app = Application(config)
 
-    #    with self.assertRaises(SystemExit):
-    #        app.execute('n1 -fb a --foobar3 bad'.split())
+        with self.assertRaises(SystemExit):
+            app.execute('n1 -fb a --foobar value'.split())
 
-    #    with open(r'C:\temp\value.txt', 'w') as f:
-    #        f.write(io.getvalue())
+        with self.assertRaises(SystemExit):
+            app.execute('n1 -fb a --foobar2 value --foobar3 extra'.split())
 
-    #    self.assertTrue('required' in io.getvalue()
-    #                    and '--foobar/-fb' not in io.getvalue()
-    #                    and '--foobar2/-fb' in io.getvalue()
-    #                    and 'unrecognized arguments: --foobar3' in io.getvalue())
+        self.assertTrue('required' in io.getvalue()
+                        and '--foobar/-fb' not in io.getvalue()
+                        and '--foobar2/-fb' in io.getvalue()
+                        and 'unrecognized arguments: --foobar3' in io.getvalue())
 
     @redirect_io
     def test_help_group_help(self):
