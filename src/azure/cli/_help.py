@@ -77,7 +77,8 @@ def print_arguments(help_file):
                           for p in help_file.parameters)
     last_group_name = None
     for p in sorted(help_file.parameters,
-                    key=lambda p: str(p.group_name or 'A') + str(not p.required) + p.name):
+                    key=lambda p: str(p.group_name or 'A')
+                    + str(not p.required) + p.name):
         indent = 1
         required_text = required_tag if p.required else ''
         if p.group_name != last_group_name:
@@ -213,6 +214,9 @@ class CommandHelpFile(HelpFile): #pylint: disable=too-few-public-methods
                                                  action.help,
                                                  required=action.required,
                                                  group_name=action.container.description))
+
+        help_param = next(p for p in self.parameters if p.name == '--help -h')
+        help_param.group_name = 'Global Arguments'
 
     def _load_from_data(self, data):
         super(CommandHelpFile, self)._load_from_data(data)
