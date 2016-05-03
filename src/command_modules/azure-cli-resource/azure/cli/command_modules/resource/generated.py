@@ -5,7 +5,8 @@ from azure.cli.commands import (CommandTable, LongRunningOperation,
                                 COMMON_PARAMETERS as PARAMETER_ALIASES)
 from azure.cli._locale import L
 
-from .custom import _resource_client_factory
+from .custom import (_resource_client_factory,
+                     ConvenienceResourceGroupCommands, ConvenienceResourceCommands)
 
 command_table = CommandTable()
 
@@ -27,3 +28,23 @@ build_operation(
     _patch_aliases({
         'resource_group_name': {'name': '--name -n'}
     }))
+
+build_operation(
+    'resource group', None, ConvenienceResourceGroupCommands,
+    [
+        AutoCommandDefinition(ConvenienceResourceGroupCommands.list, '[ResourceGroup]'),
+        AutoCommandDefinition(ConvenienceResourceGroupCommands.create, 'ResourceGroup'),
+    ],
+    command_table,
+    _patch_aliases({
+        'resource_group_name': {'name': '--name -n'}
+    }))
+
+build_operation(
+    'resource', None, ConvenienceResourceCommands,
+    [
+        AutoCommandDefinition(ConvenienceResourceCommands.list, '[Resource]'),
+        AutoCommandDefinition(ConvenienceResourceCommands.show, 'Resource'),
+    ],
+    command_table,
+    PARAMETER_ALIASES)
