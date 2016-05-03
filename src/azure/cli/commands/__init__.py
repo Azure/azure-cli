@@ -7,7 +7,7 @@ from collections import defaultdict, OrderedDict
 from pip import get_installed_distributions
 
 from azure.cli._locale import L
-from azure.cli.commands._validators import validate_tags
+from azure.cli.commands._validators import validate_tags, validate_tag
 
 # Find our command modules, they start with 'azure-cli-'
 INSTALLED_COMMAND_MODULES = [dist.key.replace('azure-cli-', '')
@@ -37,13 +37,20 @@ COMMON_PARAMETERS = {
         'help': 'The name of the resource group',
         'required': True
     },
+    'tag' : {
+        'name': '--tag',
+        'metavar': 'TAG',
+        'help': L('a single tag in \'key[=value]\' format'),
+        'required': False,
+        'type': validate_tag
+    },
     'tags' : {
         'name': '--tags',
         'metavar': 'TAGS',
-        'help': L('individual and/or key/value pair tags in "a=b;c" format'),
+        'help': L('multiple semicolon separated tags in \'key[=value]\' format'),
         'required': False,
         'type': validate_tags
-    }
+    },
 }
 
 def extend_parameter(parameter_metadata, **kwargs):

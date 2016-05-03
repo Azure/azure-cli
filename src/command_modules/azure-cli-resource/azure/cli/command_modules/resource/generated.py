@@ -1,10 +1,10 @@
 from azure.mgmt.resource.resources.operations.resource_groups_operations \
     import ResourceGroupsOperations
 from azure.cli.commands._auto_command import build_operation, AutoCommandDefinition
-from azure.cli.commands import (CommandTable, LongRunningOperation,
-                                COMMON_PARAMETERS as PARAMETER_ALIASES)
+from azure.cli.commands import CommandTable, LongRunningOperation
 from azure.cli._locale import L
 
+from ._params import PARAMETER_ALIASES
 from .custom import (_resource_client_factory,
                      ConvenienceResourceGroupCommands, ConvenienceResourceCommands)
 

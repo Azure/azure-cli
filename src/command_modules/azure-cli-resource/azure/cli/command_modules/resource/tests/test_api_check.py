@@ -5,6 +5,7 @@ except ImportError:
     from mock import MagicMock
 
 from azure.cli.command_modules.resource.custom import _resolve_api_version as resolve_api_version
+from azure.cli.command_modules.resource._validators import *
 
 class TestApiCheck(unittest.TestCase):   
 
@@ -24,19 +25,23 @@ class TestApiCheck(unittest.TestCase):
 
     def test_resolve_api_provider_backup(self):
         """ Verifies provider is used as backup if api-version not specified. """
-        self.assertEqual(resolve_api_version(self._get_mock_client(), 'Mock/test'), "2016-01-01")
+        resource_type = validate_resource_type('Mock/test')
+        self.assertEqual(resolve_api_version(self._get_mock_client(), resource_type), "2016-01-01")
 
     def test_resolve_api_provider_with_parent_backup(self):
         """ Verifies provider (with parent) is used as backup if api-version not specified. """
+        resource_type = validate_resource_type('Mock/bar')
+        parent = validate_parent('foo/testfoo123')
         self.assertEqual(
-            resolve_api_version(self._get_mock_client(), 'Mock/bar', 'foo/testfoo123'),
+            resolve_api_version(self._get_mock_client(), resource_type, parent),
             "1999-01-01"
         )
 
     def test_resolve_api_all_previews(self):
         """ Verifies most recent preview version returned only if there are no non-preview versions. """
+        resource_type = validate_resource_type('Mock/preview')
         self.assertEqual(
-            resolve_api_version(self._get_mock_client(), 'Mock/preview'),
+            resolve_api_version(self._get_mock_client(), resource_type),
             "2005-01-01-preview"
         )
 

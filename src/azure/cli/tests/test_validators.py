@@ -43,5 +43,10 @@ class Test_storage_validators(unittest.TestCase):
         expected = None
         self.assertEqual(actual, expected)
 
+    def test_tag(self):
+        self.assertEqual(validate_tag('test'), {'test':''})
+        self.assertEqual(validate_tag('a=b'), {'a':'b'})
+        self.assertEqual(validate_tag('a=b;c=d'), {'a':'b;c=d'})
+
 if __name__ == '__main__':
     unittest.main()
