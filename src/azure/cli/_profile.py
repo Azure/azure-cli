@@ -12,6 +12,8 @@ from ._util import CLIError
 from ._locale import L
 from ._azure_env import (get_authority_url, CLIENT_ID, get_management_endpoint_url,
                          ENV_DEFAULT, COMMON_TENANT)
+import azure.cli._logging as _logging
+logger = _logging.get_az_logger(__name__)
 
 #Names below are used by azure-xplat-cli to persist account information into
 #~/.azure/azureProfile.json or osx/keychainer or windows secure storage,
@@ -220,7 +222,7 @@ class SubscriptionFinder(object):
     def find_through_interactive_flow(self):
         context = self._create_auth_context(COMMON_TENANT)
         code = context.acquire_user_code(self._resource, CLIENT_ID)
-        print(code['message'])
+        logger.warn(code['message'])
         token_entry = context.acquire_token_with_device_code(self._resource, code, CLIENT_ID)
         self.user_id = token_entry[_TOKEN_ENTRY_USER_ID]
         result = self._find_using_common_tenant(token_entry[_ACCESS_TOKEN])
