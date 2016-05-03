@@ -478,7 +478,8 @@ def mount_share(args):
             subprocess.check_output('apt show cifs-utils'.split())
         except subprocess.CalledProcessError:
             raise RuntimeError('\'cifs-utils\' package required to run this command')
-        os.makedirs(share_name)
+        if not os.path.isdir(share_name):
+            os.makedirs(share_name)
         command = 'sudo mount -t cifs //{}.file.core.windows.net/{} ./{} ' + \
                   '-o vers=3.0,username={},password={},dir_mode=0777,file_mode=0666'
         command.format(account_name, share_name, share_name, account_name, account_key)
