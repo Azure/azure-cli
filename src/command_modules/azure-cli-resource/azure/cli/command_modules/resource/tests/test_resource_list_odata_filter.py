@@ -23,30 +23,30 @@ class TestListResources(unittest.TestCase):
             'tag': 'foo'
             }
         filter = _list_resources_odata_filter_builder(args)
-        self.assertEquals(filter, "tagname eq 'foo'")
+        self.assertEqual(filter, "tagname eq 'foo'")
 
     def test_tag_name_starts_with(self):
         args = {
             'tag': 'f*'
             }
         filter = _list_resources_odata_filter_builder(args)
-        self.assertEquals(filter, "startswith(tagname, 'f')")
+        self.assertEqual(filter, "startswith(tagname, 'f')")
 
     def test_tag_name_value_equals(self):
         args = {
             'tag': 'foo=bar'
             }
         filter = _list_resources_odata_filter_builder(args)
-        self.assertEquals(filter, "tagname eq 'foo' and tagvalue eq 'bar'")
+        self.assertEqual(filter, "tagname eq 'foo' and tagvalue eq 'bar'")
 
-    def test_name_location_equals(self):
+    def test_name_location_with_resource_type_equals(self):
         args = {
             'name': 'wonky',
             'location': 'dory',
-            'resourcetype': 'resource/type'
+            'resource_type': 'resource/type'
             }
         filter = _list_resources_odata_filter_builder(args)
-        self.assertEquals(filter, "name eq 'wonky' and location eq 'dory' and resourceType eq 'resource/type'")
+        self.assertEqual(filter, "name eq 'wonky' and location eq 'dory' and resourceType eq 'resource/type'")
 
     def test_name_location_equals(self):
         args = {
