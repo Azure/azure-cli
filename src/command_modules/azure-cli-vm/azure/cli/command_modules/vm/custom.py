@@ -7,7 +7,7 @@ except ImportError:
 from azure.mgmt.compute.models import DataDisk
 from azure.mgmt.compute.models.compute_management_client_enums import DiskCreateOptionTypes
 from azure.cli._locale import L
-from azure.cli.commands import CommandTable, LongRunningOperation
+from azure.cli.commands import CommandTable, LongRunningOperation, RESOURCE_GROUP_ARG_NAME
 from azure.cli.commands._command_creation import get_mgmt_service_client
 from azure.mgmt.compute import ComputeManagementClient, ComputeManagementClientConfiguration
 
@@ -22,7 +22,7 @@ def vm_getter(args):
     ''' Retreive a VM based on the `args` passed in.
     '''
     client = _compute_client_factory(args)
-    result = client.virtual_machines.get(args.get('resourcegroup'), args.get('vm_name'))
+    result = client.virtual_machines.get(args.get(RESOURCE_GROUP_ARG_NAME), args.get('vm_name'))
     return result
 
 def vm_setter(args, instance, start_msg, end_msg):
@@ -31,7 +31,7 @@ def vm_setter(args, instance, start_msg, end_msg):
     instance.resources = None # Issue: https://github.com/Azure/autorest/issues/934
     client = _compute_client_factory(args)
     poller = client.virtual_machines.create_or_update(
-        resource_group_name=args.get('resourcegroup'),
+        resource_group_name=args.get(RESOURCE_GROUP_ARG_NAME),
         vm_name=args.get('vm_name'),
         parameters=instance)
     return LongRunningOperation(start_msg, end_msg)(poller)
@@ -65,7 +65,7 @@ def patches_vm(start_msg, finish_msg):
 @command_table.option(**PARAMETER_ALIASES['optional_resource_group_name'])
 def list_vm(args):
     ccf = _compute_client_factory(args)
-    group = args.get('resourcegroup')
+    group = args.get(RESOURCE_GROUP_ARG_NAME)
     vm_list = ccf.virtual_machines.list(resource_group_name=group) if group else \
               ccf.virtual_machines.list_all()
     return list(vm_list)
