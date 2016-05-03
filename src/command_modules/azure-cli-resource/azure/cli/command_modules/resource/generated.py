@@ -47,4 +47,6 @@ build_operation(
         AutoCommandDefinition(ConvenienceResourceCommands.show, 'Resource'),
     ],
     command_table,
-    PARAMETER_ALIASES)
+    _patch_aliases({
+        'resource_name': {'name': '--name -n'}
+    }))

@@ -119,7 +119,7 @@ class ConvenienceResourceCommands(object): # pylint: disable=too-few-public-meth
     def __init__(self, _):
         pass
 
-    def show(self, resource_group, name, resource_type, api_version, parent=''): # pylint: disable=too-many-arguments,no-self-use
+    def show(self, resource_group, resource_name, resource_type, api_version=None, parent=''): # pylint: disable=too-many-arguments,no-self-use
         ''' Show details of a specific resource in a resource group or subscription
         :param str resource-group_name:the containing resource group name
         :param str name:the resource name
@@ -129,10 +129,10 @@ class ConvenienceResourceCommands(object): # pylint: disable=too-few-public-meth
         <parent-type>/<parent-name> format'''
         rcf = _resource_client_factory(None)
 
-        full_type = resource_type.split('/')
+        type_comps = resource_type.split('/')
         try:
-            provider_namespace = full_type[0]
-            resource_type = full_type[1]
+            namespace_comp = type_comps[0]
+            resource_comp = type_comps[1]
         except IndexError:
             raise IncorrectUsageError('Parameter --resource-type must be in ' + \
                 '<namespace>/<type> format.')
@@ -146,9 +146,9 @@ class ConvenienceResourceCommands(object): # pylint: disable=too-few-public-meth
                   .format(full_type)))
         results = rcf.resources.get(
             resource_group_name=resource_group,
-            resource_name=name,
-            resource_provider_namespace=provider_namespace,
-            resource_type=resource_type,
+            resource_name=resource_name,
+            resource_provider_namespace=namespace_comp,
+            resource_type=resource_comp,
             api_version=api_version,
             parent_resource_path=parent
         )
