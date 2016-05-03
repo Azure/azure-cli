@@ -143,7 +143,7 @@ class Profile(object):
 
         if len(result) != 1:
             raise CLIError('The subscription of "{}" does not exist or has more than'
-                             ' one match.'.format(subscription_id_or_name))
+                           ' one match.'.format(subscription_id_or_name))
 
         for s in subscriptions:
             s[_IS_DEFAULT_SUBSCRIPTION] = False

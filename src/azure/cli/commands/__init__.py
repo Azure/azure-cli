@@ -56,7 +56,8 @@ class LongRunningOperation(object): #pylint: disable=too-few-public-methods
         self.poll_interval_ms = poll_interval_ms
 
     def __call__(self, poller):
-        logger.info("Starting long running operation '%s' with polling interval %s ms", self.start_msg, self.poll_interval_ms)
+        logger.info("Starting long running operation '%s' with polling interval %s ms",
+                    self.start_msg, self.poll_interval_ms)
         print(self.start_msg, file=self.progress_file)
         succeeded = False
         try:
@@ -68,7 +69,8 @@ class LongRunningOperation(object): #pylint: disable=too-few-public-methods
                 logger.info("Long running operation '%s' polling now", self.start_msg)
             result = poller.result()
             succeeded = True
-            logger.info("Long running operation '%s' completed with result %s", self.start_msg, result)
+            logger.info("Long running operation '%s' completed with result %s",
+                        self.start_msg, result)
             return result
         finally:
             # Ensure that we get a newline after the dots...
@@ -143,7 +145,6 @@ def get_command_table(module_name=None):
         except ImportError:
             # Unknown command - we'll load all installed modules below
             logger.info("Unable to load command table from module '%s'.", module_name)
-            pass
 
     if not loaded:
         command_table = {}

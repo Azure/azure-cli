@@ -45,10 +45,10 @@ def _install_or_update(component_name, version, link, private, upgrade=False):
         if private:
             if not PRIVATE_PYPI_URL:
                 raise CLIError('{} environment variable not set.'
-                                   .format(PRIVATE_PYPI_URL_ENV_NAME))
+                               .format(PRIVATE_PYPI_URL_ENV_NAME))
             if not PRIVATE_PYPI_HOST:
                 raise CLIError('{} environment variable not set.'
-                                   .format(PRIVATE_PYPI_HOST_ENV_NAME))
+                               .format(PRIVATE_PYPI_HOST_ENV_NAME))
             pkg_index_options += ['--extra-index-url', PRIVATE_PYPI_URL,
                                   '--trusted-host', PRIVATE_PYPI_HOST]
         pip.main(['install'] + options + [COMPONENT_PREFIX + component_name+version_no]
@@ -89,10 +89,10 @@ def update_self(args):
     if args.get('private'):
         if not PRIVATE_PYPI_URL:
             raise CLIError('{} environment variable not set.'
-                               .format(PRIVATE_PYPI_URL_ENV_NAME))
+                           .format(PRIVATE_PYPI_URL_ENV_NAME))
         if not PRIVATE_PYPI_HOST:
             raise CLIError('{} environment variable not set.'
-                               .format(PRIVATE_PYPI_HOST_ENV_NAME))
+                           .format(PRIVATE_PYPI_HOST_ENV_NAME))
         pkg_index_options += ['--extra-index-url', PRIVATE_PYPI_URL,
                               '--trusted-host', PRIVATE_PYPI_HOST]
     pip.main(['install', '--quiet', '--isolated', '--disable-pip-version-check', '--upgrade']
