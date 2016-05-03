@@ -195,8 +195,8 @@ vm_param_aliases = {
         },
     }
 
-class VMImageFieldAction(argparse.Action):
-    def __call__(self, parser, namespace, values, option_string = None):
+class VMImageFieldAction(argparse.Action): #pylint: disable=too-few-public-methods
+    def __call__(self, parser, namespace, values, option_string=None):
         image = values
         match = re.match('([^:]*):([^:]*):([^:]*):([^:]*)', image)
 
