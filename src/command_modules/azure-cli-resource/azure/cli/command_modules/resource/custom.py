@@ -75,15 +75,15 @@ def _list_resources_odata_filter_builder(location=None, resource_type=None, tag=
             raise IncorrectUsageError(
                 'you cannot use the tagname or tagvalue filters with other filters')
 
-        tag_name_value = tag.split('=')
-        tag_name = tag_name_value[0]
+        tag_comps = tag.split('=')
+        tag_name = tag_comps[0]
         if tag_name:
             if tag_name[-1] == '*':
                 filters.append("startswith(tagname, '%s')" % tag_name[0:-1])
             else:
-                filters.append("tagname eq '%s'" % tag_name_value[0])
-                if len(tag_name_value) == 2:
-                    filters.append("tagvalue eq '%s'" % tag_name_value[1])
+                filters.append("tagname eq '%s'" % tag_name)
+                if len(tag_comps) == 2:
+                    filters.append("tagvalue eq '%s'" % tag_comps[1])
     return ' and '.join(filters)
 
 def _resolve_api_version(rcf, resource_type, parent=None):
@@ -108,11 +108,15 @@ def _resolve_api_version(rcf, resource_type, parent=None):
 
     rt = [t for t in provider.resource_types if t.resource_type == resource_type_val]
     if not rt:
-        raise IncorrectUsageError('Resource type {} not found.'.format(full_type))
+        raise IncorrectUsageError('Resource type {} not found.'.format(resource_type))
     if len(rt) == 1 and rt[0].api_versions:
         npv = [v for v in rt[0].api_versions if "preview" not in v]
         return npv[0] if npv else rt[0].api_versions[0]
-    return None
+    else:
+        raise IncorrectUsageError(
+            L('API version is required and could not be resolved for resource {}'
+              .format(resource_type)))
+
 
 class ConvenienceResourceCommands(object): # pylint: disable=too-few-public-methods
 
@@ -140,10 +144,6 @@ class ConvenienceResourceCommands(object): # pylint: disable=too-few-public-meth
         api_version = _resolve_api_version(rcf, resource_type, parent) \
             if not api_version else api_version
 
-        if not api_version:
-            raise IncorrectUsageError(
-                L('API version is required and could not be resolved for resource {}'
-                  .format(full_type)))
         results = rcf.resources.get(
             resource_group_name=resource_group,
             resource_name=resource_name,
