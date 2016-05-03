@@ -19,18 +19,17 @@ class ConvenienceResourceGroupCommands(object): # pylint: disable=too-few-public
     def __init__(self, _):
         pass
 
-    def list(self, tag_name=None, tag_value=None): # pylint: disable=no-self-use
-        ''' List resource groups, optionally filtered by tag key or value.
-        :param str tag_name:the resource group's tag name
-        :param str tag_value:the resource group's tag value
+    def list(self, tag=None): # pylint: disable=no-self-use
+        ''' List resource groups, optionally filtered by a tag.
+        :param str tag:tag to filter by in 'key[=value]' format
         '''
         rcf = _resource_client_factory(None)
 
         filters = []
-        if tag_name:
-            filters.append("tagname eq '{}'".format(tag_name))
-        if tag_value:
-            filters.append("tagvalue eq '{}'".format(tag_value))
+        if tag:
+            key = tag.keys()[0]
+            filters.append("tagname eq '{}'".format(key))
+            filters.append("tagvalue eq '{}'".format(tag[key]))
 
         filter_text = ' and '.join(filters) if len(filters) > 0 else None
 
@@ -87,70 +86,48 @@ def _list_resources_odata_filter_builder(location=None, resource_type=None, tag=
     return ' and '.join(filters)
 
 def _resolve_api_version(rcf, resource_type, parent=None):
-    # if api-version not supplied, attempt to resolve using provider namespace
-    full_type = resource_type.split('/')
-    try:
-        provider_namespace = full_type[0]
-        resource_type_val = full_type[1]
-    except IndexError:
-        raise IncorrectUsageError('Parameter --resource-type must be in ' + \
-            '<namespace>/<type> format.')
 
-    if parent:
-        try:
-            parent_type = parent.split('/')[0]
-        except IndexError:
-            raise IncorrectUsageError('Parameter --parent must be in <type>/<name> format.')
+    provider = rcf.providers.get(resource_type.namespace)
+    resource_type_str = '{}/{}'.format(parent.type, resource_type.type) \
+        if parent else resource_type.type
 
-        resource_type_val = "{}/{}".format(parent_type, resource_type_val)
-
-    provider = rcf.providers.get(provider_namespace)
-
-    rt = [t for t in provider.resource_types if t.resource_type == resource_type_val]
+    rt = [t for t in provider.resource_types if t.resource_type == resource_type_str]
     if not rt:
-        raise IncorrectUsageError('Resource type {} not found.'.format(resource_type))
+        raise IncorrectUsageError('Resource type {}/{} not found.'
+                                  .format(resource_type.namespace, resource_type.type))
     if len(rt) == 1 and rt[0].api_versions:
         npv = [v for v in rt[0].api_versions if "preview" not in v]
         return npv[0] if npv else rt[0].api_versions[0]
     else:
         raise IncorrectUsageError(
-            L('API version is required and could not be resolved for resource {}'
-              .format(resource_type)))
-
+            L('API version is required and could not be resolved for resource {}/{}'
+              .format(resource_type.namespace, resource_type.type)))
 
 class ConvenienceResourceCommands(object): # pylint: disable=too-few-public-methods
 
     def __init__(self, _):
         pass
 
-    def show(self, resource_group, resource_name, resource_type, api_version=None, parent=''): # pylint: disable=too-many-arguments,no-self-use
+    def show(self, resource_group, resource_name, resource_type, api_version=None, parent=None): # pylint: disable=too-many-arguments,no-self-use
         ''' Show details of a specific resource in a resource group or subscription
-        :param str resource-group_name:the containing resource group name
+        :param str resource-group-name:the containing resource group name
         :param str name:the resource name
-        :param str resource_type:the resource type in format: <provider-namespace>/<type>
+        :param str resource-type:the resource type in format: <provider-namespace>/<type>
         :param str api-version:the API version of the resource provider
-        :param str parent:the name of the parent resource (if needed) in
-        <parent-type>/<parent-name> format'''
+        :param str parent:the name of the parent resource (if needed) in <type>/<name> format'''
         rcf = _resource_client_factory(None)
-
-        type_comps = resource_type.split('/')
-        try:
-            namespace_comp = type_comps[0]
-            resource_comp = type_comps[1]
-        except IndexError:
-            raise IncorrectUsageError('Parameter --resource-type must be in ' + \
-                '<namespace>/<type> format.')
 
         api_version = _resolve_api_version(rcf, resource_type, parent) \
             if not api_version else api_version
+        parent_path = '{}/{}'.format(parent.type, parent.name) if parent else ''
 
         results = rcf.resources.get(
             resource_group_name=resource_group,
             resource_name=resource_name,
-            resource_provider_namespace=namespace_comp,
-            resource_type=resource_comp,
+            resource_provider_namespace=resource_type.namespace,
+            resource_type=resource_type.type,
             api_version=api_version,
-            parent_resource_path=parent
+            parent_resource_path=parent_path
         )
         return results
 
