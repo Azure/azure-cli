@@ -75,14 +75,16 @@ def print_arguments(help_file):
     required_tag = L(' [Required]')
     max_name_length = max(len(p.name) + (len(required_tag) if p.required else 0)
                           for p in help_file.parameters)
-    added_global_space = False
+    last_group_name = None
     for p in sorted(help_file.parameters,
-                    key=lambda p: str(not p.required) + str(p.global_param) + p.name):
+                    key=lambda p: str(p.group_name or 'A') + str(not p.required) + p.name):
         indent = 1
         required_text = required_tag if p.required else ''
-        if p.global_param and not added_global_space:
-            print('\nGlobal Arguments')
-            added_global_space = True
+        if p.group_name != last_group_name:
+            if p.group_name:
+                print('')
+                print(p.group_name)
+            last_group_name = p.group_name
         _print_indent('{0}{1}{2}{3}'.format(p.name,
                                             _get_column_indent(p.name + required_text,
                                                                max_name_length),
@@ -210,7 +212,7 @@ class CommandHelpFile(HelpFile): #pylint: disable=too-few-public-methods
             self.parameters.append(HelpParameter(' '.join(sorted(action.option_strings)),
                                                  action.help,
                                                  required=action.required,
-                                                 global_param=self.is_global(action)))
+                                                 group_name=action.container.description))
 
     def _load_from_data(self, data):
         super(CommandHelpFile, self)._load_from_data(data)
@@ -233,20 +235,16 @@ class CommandHelpFile(HelpFile): #pylint: disable=too-few-public-methods
             raise HelpAuthoringException('Extra help param {0}'.format(extra_param['name']))
         self.parameters = loaded_params
 
-    @staticmethod
-    def is_global(action):
-        return action.container.description == 'global arguments' \
-            or action.dest == 'help'
 
 class HelpParameter(object): #pylint: disable=too-few-public-methods
-    def __init__(self, param_name, description, required, global_param=False):
+    def __init__(self, param_name, description, required, group_name=False):
         self.name = param_name
         self.required = required
         self.type = 'string'
         self.short_summary = description
         self.long_summary = ''
         self.value_sources = []
-        self.global_param = global_param
+        self.group_name = group_name
 
     def update_from_data(self, data):
         if self.name != data.get('name'):

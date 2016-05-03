@@ -50,7 +50,7 @@ class Application(object):
         azure.cli.extensions.register_extensions(self)
 
         self.global_parser = AzCliCommandParser(prog='az', add_help=False)
-        global_group = self.global_parser.add_argument_group('global', 'global arguments')
+        global_group = self.global_parser.add_argument_group('global', 'Global Arguments')
         self.raise_event(self.GLOBAL_PARSER_CREATED, global_group)
 
         self.parser = AzCliCommandParser(prog='az', parents=[self.global_parser])
@@ -143,9 +143,11 @@ class Application(object):
         # The arguments for verbosity don't get parsed by argparse but we add it here for help.
         global_group.add_argument('--verbose', dest='_log_verbosity_verbose',
                                   help='Increase logging verbosity.'
-                                  ' Use --debug for full debug logs.')
+                                  ' Use --debug for full debug logs.',
+                                  action='store_true')
         global_group.add_argument('--debug', dest='_log_verbosity_debug',
-                                  help='Increase logging verbosity to show all debug logs.')
+                                  help='Increase logging verbosity to show all debug logs.',
+                                  action='store_true')
 
     def _handle_builtin_arguments(self, args):
         self.configuration.output_format = args._output_format #pylint: disable=protected-access
