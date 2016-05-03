@@ -22,25 +22,23 @@ class TestApiCheck(unittest.TestCase):
     def tearDown(self):
         pass
 
-    def test_resolve_api_max_priority_option(self):
-        """ Verifies the --api-version parameter has maximum priority. """
-        args = {'api-version': '2015-01-01', 'resource-type': 'Mock/test'}
-        self.assertEqual(resolve_api_version(args, self._get_mock_client()), "2015-01-01")
-
     def test_resolve_api_provider_backup(self):
         """ Verifies provider is used as backup if api-version not specified. """
-        args = {'resource-type': 'Mock/test'}
-        self.assertEqual(resolve_api_version(args, self._get_mock_client()), "2016-01-01")
+        self.assertEqual(resolve_api_version(self._get_mock_client(), 'Mock/test'), "2016-01-01")
 
     def test_resolve_api_provider_with_parent_backup(self):
         """ Verifies provider (with parent) is used as backup if api-version not specified. """
-        args = {'resource-type': 'Mock/bar', 'parent': 'foo/testfoo123'}
-        self.assertEqual(resolve_api_version(args, self._get_mock_client()), "1999-01-01")
+        self.assertEqual(
+            resolve_api_version(self._get_mock_client(), 'Mock/bar', 'foo/testfoo123'),
+            "1999-01-01"
+        )
 
     def test_resolve_api_all_previews(self):
         """ Verifies most recent preview version returned only if there are no non-preview versions. """
-        args = {'resource-type': 'Mock/preview'}
-        self.assertEqual(resolve_api_version(args, self._get_mock_client()), "2005-01-01-preview")    
+        self.assertEqual(
+            resolve_api_version(self._get_mock_client(), 'Mock/preview'),
+            "2005-01-01-preview"
+        )
 
     def _get_mock_client(self):
         client = MagicMock()
