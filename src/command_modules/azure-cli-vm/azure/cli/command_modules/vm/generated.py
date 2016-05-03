@@ -210,8 +210,6 @@ class VMImageFieldAction(argparse.Action):
             namespace.os_version = match.group(4)
         else:
             namespace.os_type = image
-        #return super(VMImageFieldAction, self).__call__(parser, namespace, values, option_string)
-
 
 extra_parameters = [
     {
