@@ -1,5 +1,9 @@
 from azure.mgmt.resource.resources.operations.resource_groups_operations \
     import ResourceGroupsOperations
+from azure.mgmt.resource.resources.operations.tags_operations import TagsOperations
+from azure.mgmt.resource.resources.operations.deployments_operations import DeploymentsOperations
+from azure.mgmt.resource.resources.operations.deployment_operations_operations \
+    import DeploymentOperationsOperations
 from azure.cli.commands._auto_command import build_operation, AutoCommandDefinition
 from azure.cli.commands import CommandTable, LongRunningOperation
 from azure.cli._locale import L
@@ -49,4 +53,19 @@ build_operation(
     command_table,
     _patch_aliases({
         'resource_name': {'name': '--name -n'}
+    }))
+
+build_operation(
+    'tag', 'tags', _resource_client_factory,
+    [
+        AutoCommandDefinition(TagsOperations.list, '[Tag]'),
+        AutoCommandDefinition(TagsOperations.create_or_update, 'Object', 'create'),
+        AutoCommandDefinition(TagsOperations.delete, None, 'delete'),
+        AutoCommandDefinition(TagsOperations.create_or_update_value, 'Object', 'add-value'),
+        AutoCommandDefinition(TagsOperations.delete_value, 'Object', 'remove-value'),
+    ],
+    command_table,
+    _patch_aliases({
+        'tag_name': {'name': '--name -n'},
+        'tag_value': {'name': '--value'}
     }))
