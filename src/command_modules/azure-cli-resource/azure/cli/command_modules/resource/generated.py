@@ -59,13 +59,40 @@ build_operation(
     'tag', 'tags', _resource_client_factory,
     [
         AutoCommandDefinition(TagsOperations.list, '[Tag]'),
-        AutoCommandDefinition(TagsOperations.create_or_update, 'Object', 'create'),
+        AutoCommandDefinition(TagsOperations.create_or_update, 'Tag', 'create'),
         AutoCommandDefinition(TagsOperations.delete, None, 'delete'),
-        AutoCommandDefinition(TagsOperations.create_or_update_value, 'Object', 'add-value'),
-        AutoCommandDefinition(TagsOperations.delete_value, 'Object', 'remove-value'),
+        AutoCommandDefinition(TagsOperations.create_or_update_value, 'Tag', 'add-value'),
+        AutoCommandDefinition(TagsOperations.delete_value, None, 'remove-value'),
     ],
     command_table,
     _patch_aliases({
         'tag_name': {'name': '--name -n'},
         'tag_value': {'name': '--value'}
+    }))
+
+build_operation(
+    'deployment', 'deployments', _resource_client_factory,
+    [
+        AutoCommandDefinition(DeploymentsOperations.list, '[Deployment]'),
+        AutoCommandDefinition(DeploymentsOperations.get, 'Deployment', 'show'),
+        #AutoCommandDefinition(DeploymentsOperations.validate, 'Object'),
+        #AutoCommandDefinition(DeploymentsOperations.delete, 'Object'),
+        AutoCommandDefinition(DeploymentsOperations.check_existence, 'Bool', 'exists'),
+        #AutoCommandDefinition(DeploymentsOperations.cancel, 'Object'),
+        #AutoCommandDefinition(DeploymentsOperations.create_or_update, 'Object', 'create'),
+    ],
+    command_table,
+    _patch_aliases({
+        'deployment_name': {'name': '--name -n', 'required': True}
+    }))
+
+build_operation(
+    'deployment operation', 'deployment_operations', _resource_client_factory,
+    [
+        AutoCommandDefinition(DeploymentOperationsOperations.list, '[DeploymentOperations]'),
+        AutoCommandDefinition(DeploymentOperationsOperations.get, 'DeploymentOperations', 'show')
+    ],
+    command_table,
+    _patch_aliases({
+        'deployment_name': {'name': '--name -n', 'required': True}
     }))
