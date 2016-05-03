@@ -94,12 +94,15 @@ def print_arguments(help_file):
                       indent,
                       max_name_length + indent*4 + 2)
 
-        indent = 2
+        indent = 4
         if p.long_summary:
             _print_indent('{0}'.format(p.long_summary.rstrip()), indent)
 
         if p.value_sources:
             _print_indent(L("Values from: {0}").format(', '.join(p.value_sources)), indent)
+
+        if p.long_summary or p.value_sources:
+            print('')
     return indent
 
 def _print_header(help_file):
@@ -262,10 +265,17 @@ class HelpParameter(object): #pylint: disable=too-few-public-methods
                                                  data.get('required'),
                                                  data.get('name')))
 
-        self.type = data.get('type')
-        self.short_summary = data.get('short-summary')
-        self.long_summary = data.get('long-summary')
-        self.value_sources = data.get('populator-commands')
+        if data.get('type'):
+            self.type = data.get('type')
+
+        if data.get('short-summary'):
+            self.short_summary = data.get('short-summary')
+
+        if data.get('long-summary'):
+            self.long_summary = data.get('long-summary')
+
+        if data.get('populator-commands'):
+            self.value_sources = data.get('populator-commands')
 
 
 class HelpExample(object): #pylint: disable=too-few-public-methods

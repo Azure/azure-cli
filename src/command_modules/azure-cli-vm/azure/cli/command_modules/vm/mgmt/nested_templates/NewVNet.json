@@ -1,0 +1,60 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "vnetName": {
+      "type": "string"
+    },
+    "vnetIpAddressType": {
+      "type": "string"
+    },
+    "vnetIpAddressPrefix": {
+      "type": "string"
+    },
+    "subnetIpAddressPrefix": {
+      "type": "string"
+    },
+    "subnetName": {
+      "type": "string"
+    },
+    "location": {
+      "type": "string"
+    }
+  },
+  "variables": {
+    "NewVNetName": "[parameters('vnetName')]",
+    "NewVNetPrefix": "[parameters('vnetIpAddressPrefix')]",
+    "NewVNetSubnet1Name": "[parameters('subnetName')]",
+    "NewVNetSubnet1Prefix": "[parameters('subnetIpAddressPrefix')]",
+    "NewVNetIpAddressType": "[parameters('vnetIpAddressType')]"
+  },
+  "resources": [
+    {
+      "name": "[variables('NewVNetName')]",
+      "type": "Microsoft.Network/virtualNetworks",
+      "location": "[parameters('location')]",
+      "apiVersion": "2015-06-15",
+      "dependsOn": [ ],
+      "tags": {
+        "displayName": "NewVNet"
+      },
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "[variables('NewVNetPrefix')]"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "[variables('NewVNetSubnet1Name')]",
+            "properties": {
+              "addressPrefix": "[variables('NewVNetSubnet1Prefix')]"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "outputs": {
+  }
+}
