@@ -217,8 +217,8 @@ class VMSSHFieldAction(argparse.Action): #pylint: disable=too-few-public-methods
         ssh_value = values
 
         if os.path.exists(ssh_value):
-            with open(ssh_value, 'r') as file:
-                namespace.ssh_key_value = file.read()
+            with open(ssh_value, 'r') as f:
+                namespace.ssh_key_value = f.read()
         else:
             namespace.ssh_key_value = ssh_value
 
@@ -228,7 +228,7 @@ extra_parameters = [
         'help': 'The OS image.  Supported values: Common OS (e.g. Win2012R2Datacenter), URN (e.g. "publisher:offer:sku:version"), or existing VHD URI.',
         'action': VMImageFieldAction
         },
-        {
+    {
         'name': '--ssh-key-value',
         'action': VMSSHFieldAction
         }
