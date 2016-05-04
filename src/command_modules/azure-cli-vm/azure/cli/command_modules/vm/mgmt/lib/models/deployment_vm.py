@@ -50,7 +50,8 @@ class DeploymentVM(Model):
     :param virtual_network_type: Whether to use an existing VNet or create a
      new one.
     :type virtual_network_type: str
-    :param admin_password: Password for the Virtual Machine.
+    :param admin_password: Password for the Virtual Machine.  Required if SSH
+     (Linux only) is not specified.
     :type admin_password: str
     :param os_sku: The OS SKU to install.
     :type os_sku: str
@@ -111,7 +112,6 @@ class DeploymentVM(Model):
         'uri': {'required': True, 'constant': True},
         '_artifacts_location': {'constant': True},
         'name': {'required': True},
-        'admin_password': {'required': True},
         'admin_username': {'required': True},
         'mode': {'required': True, 'constant': True},
     }
@@ -161,7 +161,7 @@ class DeploymentVM(Model):
 
     mode = "Incremental"
 
-    def __init__(self, name, admin_password, admin_username, content_version=None, storage_container_name=None, virtual_network_name=None, subnet_ip_address_prefix=None, private_ip_address_allocation=None, dns_name_for_public_ip=None, storage_account_type=None, os_disk_uri=None, virtual_network_type=None, os_sku=None, subnet_name=None, os_type=None, os_version=None, os_disk_name=None, ssh_key_path=None, os_offer=None, public_ip_address_allocation=None, authentication_type=None, storage_account_name=None, storage_redundancy_type=None, size=None, public_ip_address_type=None, virtual_network_ip_address_prefix=None, availability_set_id=None, ssh_key_value=None, location=None, os_publisher=None, availability_set_type=None, public_ip_address_name=None, dns_name_type=None):
+    def __init__(self, name, admin_username, content_version=None, storage_container_name=None, virtual_network_name=None, subnet_ip_address_prefix=None, private_ip_address_allocation=None, dns_name_for_public_ip=None, storage_account_type=None, os_disk_uri=None, virtual_network_type=None, admin_password=None, os_sku=None, subnet_name=None, os_type=None, os_version=None, os_disk_name=None, ssh_key_path=None, os_offer=None, public_ip_address_allocation=None, authentication_type=None, storage_account_name=None, storage_redundancy_type=None, size=None, public_ip_address_type=None, virtual_network_ip_address_prefix=None, availability_set_id=None, ssh_key_value=None, location=None, os_publisher=None, availability_set_type=None, public_ip_address_name=None, dns_name_type=None):
         self.content_version = content_version
         self.storage_container_name = storage_container_name
         self.virtual_network_name = virtual_network_name
