@@ -241,10 +241,10 @@ class ConvenienceVmCommands(object): # pylint: disable=too-few-public-methods
 
 
     def list_ip_addresses(self,
-                          optional_resource_group_name=None,
+                          resource_group_name=None,
                           vm_name=None):
         ''' Get IP addresses from one or more Virtual Machines
-        :param str optional_resource_group_name:Name of resource group.
+        :param str resource_group_name:Name of resource group.
         :param str vm_name:Name of virtual machine.
         '''
         from azure.mgmt.network import NetworkManagementClient, NetworkManagementClientConfiguration
@@ -268,7 +268,7 @@ class ConvenienceVmCommands(object): # pylint: disable=too-few-public-methods
 
             # If provided, make sure that resource group name and vm name match the NIC we are
             # looking at before adding it to the result...
-            if (optional_resource_group_name in (None, nic_resource_group)
+            if (resource_group_name == nic_resource_group
                     and vm_name in (None, nic_vm_name)):
 
                 network_info = {
@@ -295,5 +295,3 @@ class ConvenienceVmCommands(object): # pylint: disable=too-few-public-methods
                     })
 
         return result
-
-
