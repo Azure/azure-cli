@@ -32,7 +32,7 @@ class VMOperations(object):
         self.config = config
 
     def create_or_update(
-            self, resource_group_name, deployment_name, name, admin_password, admin_username, content_version=None, storage_container_name=None, virtual_network_name=None, subnet_ip_address_prefix=None, private_ip_address_allocation=None, dns_name_for_public_ip=None, storage_account_type=None, os_disk_uri=None, virtual_network_type=None, os_sku=None, subnet_name=None, os_type=None, os_version=None, os_disk_name=None, ssh_key_path=None, os_offer=None, public_ip_address_allocation=None, authentication_type=None, storage_account_name=None, storage_redundancy_type=None, size=None, public_ip_address_type=None, virtual_network_ip_address_prefix=None, availability_set_id=None, ssh_key_value=None, location=None, os_publisher=None, availability_set_type=None, public_ip_address_name=None, dns_name_type=None, custom_headers={}, raw=False, **operation_config):
+            self, resource_group_name, deployment_name, name, admin_username, content_version=None, storage_container_name=None, virtual_network_name=None, subnet_ip_address_prefix=None, private_ip_address_allocation=None, dns_name_for_public_ip=None, storage_account_type=None, os_disk_uri=None, virtual_network_type=None, admin_password=None, os_sku=None, subnet_name=None, os_type=None, os_version=None, os_disk_name=None, ssh_key_path=None, os_offer=None, public_ip_address_allocation=None, authentication_type=None, storage_account_name=None, storage_redundancy_type=None, size=None, public_ip_address_type=None, virtual_network_ip_address_prefix=None, availability_set_id=None, ssh_key_value=None, location=None, os_publisher=None, availability_set_type=None, public_ip_address_name=None, dns_name_type=None, custom_headers={}, raw=False, **operation_config):
         """
         Create or update a virtual machine.
 
@@ -43,8 +43,6 @@ class VMOperations(object):
         :type deployment_name: str
         :param name: The VM resource name.
         :type name: str
-        :param admin_password: Password for the Virtual Machine.
-        :type admin_password: str
         :param admin_username: Username for the Virtual Machine.
         :type admin_username: str
         :param content_version: If included it must match the ContentVersion
@@ -71,6 +69,9 @@ class VMOperations(object):
         :param virtual_network_type: Whether to use an existing VNet or
          create a new one.
         :type virtual_network_type: str
+        :param admin_password: Password for the Virtual Machine.  Required if
+         SSH (Linux only) is not specified.
+        :type admin_password: str
         :param os_sku: The OS SKU to install.
         :type os_sku: str
         :param subnet_name: The subnet name.
