@@ -1,6 +1,5 @@
 import argparse
 import re
-from azure.mgmt.compute import ComputeManagementClient, ComputeManagementClientConfiguration
 from azure.mgmt.compute.operations import (AvailabilitySetsOperations,
                                            VirtualMachineExtensionImagesOperations,
                                            VirtualMachineExtensionsOperations,
@@ -12,6 +11,7 @@ from azure.mgmt.compute.operations import (AvailabilitySetsOperations,
                                            VirtualMachineScaleSetVMsOperations)
 from azure.cli.commands._auto_command import build_operation, AutoCommandDefinition
 from azure.cli.commands import CommandTable, LongRunningOperation
+from azure.cli.commands._command_creation import get_mgmt_service_client
 from azure.cli._locale import L
 from azure.cli.command_modules.vm.mgmt.lib import (VMCreationClient as VMClient,
                                                    VMCreationClientConfiguration
