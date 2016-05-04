@@ -50,7 +50,8 @@ class Application(object):
         azure.cli.extensions.register_extensions(self)
 
         self.global_parser = AzCliCommandParser(prog='az', add_help=False)
-        self.raise_event(self.GLOBAL_PARSER_CREATED, self.global_parser)
+        global_group = self.global_parser.add_argument_group('global', 'Global Arguments')
+        self.raise_event(self.GLOBAL_PARSER_CREATED, global_group)
 
         self.parser = AzCliCommandParser(prog='az', parents=[self.global_parser])
         self.raise_event(self.COMMAND_PARSER_CREATED, self.parser)
@@ -134,17 +135,20 @@ class Application(object):
         argcomplete.autocomplete(parser)
 
     @staticmethod
-    def _register_builtin_arguments(parser):
-        parser.add_argument('--subscription', dest='_subscription_id', help=argparse.SUPPRESS)
-        parser.add_argument('--output', '-o', dest='_output_format',
-                            choices=['list', 'json', 'tsv'],
-                            default='list',
-                            help='Output format')
+    def _register_builtin_arguments(global_group):
+        global_group.add_argument('--subscription', dest='_subscription_id', help=argparse.SUPPRESS)
+        global_group.add_argument('--output', '-o', dest='_output_format',
+                                  choices=['list', 'json', 'tsv'],
+                                  default='list',
+                                  help='Output format')
         # The arguments for verbosity don't get parsed by argparse but we add it here for help.
-        parser.add_argument('--verbose', dest='_log_verbosity_verbose',
-                            help='Increase logging verbosity. Use --debug for full debug logs.')
-        parser.add_argument('--debug', dest='_log_verbosity_debug',
-                            help='Increase logging verbosity to show all debug logs.')
+        global_group.add_argument('--verbose', dest='_log_verbosity_verbose',
+                                  help='Increase logging verbosity.'
+                                  ' Use --debug for full debug logs.',
+                                  action='store_true')
+        global_group.add_argument('--debug', dest='_log_verbosity_debug',
+                                  help='Increase logging verbosity to show all debug logs.',
+                                  action='store_true')
 
     def _handle_builtin_arguments(self, args):
         self.configuration.output_format = args._output_format #pylint: disable=protected-access
