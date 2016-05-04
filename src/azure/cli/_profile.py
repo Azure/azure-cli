@@ -222,7 +222,7 @@ class SubscriptionFinder(object):
     def find_through_interactive_flow(self):
         context = self._create_auth_context(COMMON_TENANT)
         code = context.acquire_user_code(self._resource, CLIENT_ID)
-        logger.warn(code['message'])
+        logger.warning(code['message'])
         token_entry = context.acquire_token_with_device_code(self._resource, code, CLIENT_ID)
         self.user_id = token_entry[_TOKEN_ENTRY_USER_ID]
         result = self._find_using_common_tenant(token_entry[_ACCESS_TOKEN])

@@ -1,8 +1,9 @@
 ﻿import os
 import platform
 import logging
-import colorama
 from logging.handlers import RotatingFileHandler
+
+import colorama
 
 AZ_LOGFILE_NAME = 'az.log'
 DEFAULT_LOG_DIR = os.path.expanduser(os.path.join('~', '.azure', 'logs'))
@@ -101,8 +102,10 @@ class CustomStreamHandler(logging.StreamHandler):
         return msg
 
 def _init_console_handlers(root_logger, az_logger, log_level_config):
-    root_logger.addHandler(CustomStreamHandler(log_level_config['root'], CONSOLE_LOG_FORMAT['root']))
-    az_logger.addHandler(CustomStreamHandler(log_level_config['az'], CONSOLE_LOG_FORMAT['az']))
+    root_logger.addHandler(CustomStreamHandler(log_level_config['root'],
+                                               CONSOLE_LOG_FORMAT['root']))
+    az_logger.addHandler(CustomStreamHandler(log_level_config['az'],
+                                             CONSOLE_LOG_FORMAT['az']))
 
 def _get_log_file_path():
     log_dir = LOG_DIR or DEFAULT_LOG_DIR
