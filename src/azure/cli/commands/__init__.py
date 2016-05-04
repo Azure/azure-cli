@@ -5,6 +5,9 @@ import random
 from importlib import import_module
 from collections import defaultdict, OrderedDict
 from pip import get_installed_distributions
+from msrest.exceptions import ClientException
+
+from azure.cli._util import CLIError
 import azure.cli._logging as _logging
 
 logger = _logging.get_az_logger(__name__)
@@ -48,35 +51,27 @@ def extend_parameter(parameter_metadata, **kwargs):
 
 class LongRunningOperation(object): #pylint: disable=too-few-public-methods
 
-    progress_file = sys.stderr
-
     def __init__(self, start_msg='', finish_msg='', poll_interval_ms=1000.0):
         self.start_msg = start_msg
         self.finish_msg = finish_msg
         self.poll_interval_ms = poll_interval_ms
 
     def __call__(self, poller):
+        logger.warning(self.start_msg)
         logger.info("Starting long running operation '%s' with polling interval %s ms",
                     self.start_msg, self.poll_interval_ms)
-        print(self.start_msg, file=self.progress_file)
-        succeeded = False
+        while not poller.done():
+            time.sleep(self.poll_interval_ms / 1000.0)
+            logger.info("Long running operation '%s' polling now", self.start_msg)
         try:
-            while not poller.done():
-                if self.progress_file:
-                    print('.', end='', file=self.progress_file)
-                    self.progress_file.flush()
-                time.sleep(self.poll_interval_ms / 1000.0)
-                logger.info("Long running operation '%s' polling now", self.start_msg)
             result = poller.result()
-            succeeded = True
-            logger.info("Long running operation '%s' completed with result %s",
-                        self.start_msg, result)
-            return result
-        finally:
-            # Ensure that we get a newline after the dots...
-            if self.progress_file:
-                print(file=self.progress_file)
-                print(self.finish_msg if succeeded else '', file=self.progress_file)
+        except ClientException as client_exception:
+            message = getattr(client_exception, 'message', client_exception)
+            raise CLIError(message)
+        logger.info("Long running operation '%s' completed with result %s",
+                    self.start_msg, result)
+        logger.warning(self.finish_msg)
+        return result
 
 class CommandTable(defaultdict):
     """A command table is a dictionary of func -> {name,
