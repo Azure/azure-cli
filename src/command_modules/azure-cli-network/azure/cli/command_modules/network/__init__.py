@@ -53,7 +53,7 @@ build_operation("network application-gateway",
                 ],
                 command_table,
                 {
-                    'application_gateway_name': {'name': '--name -n'}
+                    'application_gateway_name': {'name': '--name -n', '_semantic_type': 'resource_name', }
                 })
 
 # ExpressRouteCircuitAuthorizationsOperations
@@ -67,7 +67,7 @@ build_operation("network express-route circuit-auth",
                 ],
                 command_table,
                 {
-                    'authorization_name': {'name': '--name -n'}
+                    'authorization_name': {'name': '--name -n', '_semantic_type': 'resource_name', }
                 })
 
 
@@ -82,7 +82,7 @@ build_operation("network express-route circuit-peering",
                 ],
                 command_table,
                 {
-                    'peering_name': {'name': '--name -n'}
+                    'peering_name': {'name': '--name -n', '_semantic_type': 'resource_name', }
                 })
 
 # ExpressRouteCircuitsOperations
@@ -100,7 +100,7 @@ build_operation("network express-route circuit",
                 ],
                 command_table,
                 {
-                    'circuit_name': {'name': '--name -n'}
+                    'circuit_name': {'name': '--name -n', '_semantic_type': 'resource_name', }
                 })
 
 # ExpressRouteServiceProvidersOperations
@@ -124,7 +124,7 @@ build_operation("network lb",
                 ],
                 command_table,
                 {
-                    'load_balancer_name': {'name': '--name -n'}
+                    'load_balancer_name': {'name': '--name -n', '_semantic_type': 'resource_name', }
                 })
 
 # LocalNetworkGatewaysOperations
@@ -138,7 +138,7 @@ build_operation("network local-gateway",
                 ],
                 command_table,
                 {
-                    'local_network_gateway_name': {'name': '--name -n'}
+                    'local_network_gateway_name': {'name': '--name -n', '_semantic_type': 'resource_name', }
                 })
 
 
@@ -154,7 +154,7 @@ build_operation("network nic",
                 ],
                 command_table,
                 {
-                    'network_interface_name': {'name': '--name -n'}
+                    'network_interface_name': {'name': '--name -n', '_semantic_type': 'resource_name', }
                 })
 
 # NetworkInterfacesOperations: scaleset
@@ -169,7 +169,7 @@ build_operation("network nic scale-set",
                 command_table,
                 {
                     'virtual_machine_scale_set_name': {'name': '--vm-scale-set'},
-                    'network_interface_name': {'name': '--name -n'},
+                    'network_interface_name': {'name': '--name -n', '_semantic_type': 'resource_name', },
                     'virtualmachine_index': {'name': '--vm-index'}
                 })
 
@@ -185,7 +185,7 @@ build_operation("network nsg",
                 ],
                 command_table,
                 {
-                    'network_security_group_name': {'name': '--name -n'}
+                    'network_security_group_name': {'name': '--name -n', '_semantic_type': 'resource_name', }
                 })
 
 # PublicIPAddressesOperations
@@ -200,7 +200,7 @@ build_operation("network public-ip",
                 ],
                 command_table,
                 {
-                    'public_ip_address_name': {'name': '--name -n'}
+                    'public_ip_address_name': {'name': '--name -n', '_semantic_type': 'resource_name', }
                 })
 
 # RouteTablesOperations
@@ -215,7 +215,7 @@ build_operation("network route-table",
                 ],
                 command_table,
                 {
-                    'route_table_name': {'name': '--name -n'}
+                    'route_table_name': {'name': '--name -n', '_semantic_type': 'resource_name', }
                 })
 
 
@@ -230,7 +230,7 @@ build_operation("network route-operation",
                 ],
                 command_table,
                 {
-                    'route_name': {'name': '--name -n'}
+                    'route_name': {'name': '--name -n', '_semantic_type': 'resource_name', }
                 })
 
 # SecurityRulesOperations
@@ -244,8 +244,8 @@ build_operation("network nsg-rule",
                 ],
                 command_table,
                 {
-                    'security_rule_name': {'name': '--name'},
-                    'network_security_group_name': {'name': '--nsg-name'}
+                    'security_rule_name': {'name': '--name', '_semantic_type': 'resource_name', },
+                    'network_security_group_name': {'name': '--nsg-name', '_semantic_type': 'resource_name', }
                 })
 
 # SubnetsOperations
@@ -259,8 +259,8 @@ build_operation("network vnet subnet",
                 ],
                 command_table,
                 {
-                    'subnet_name': {'name': '--name -n'},
-                    'virtual_network_name': {'name': _VNET_PARAM_NAME}
+                    'subnet_name': {'name': '--name -n', '_semantic_type': 'resource_name', },
+                    'virtual_network_name': {'name': _VNET_PARAM_NAME, '_semantic_type': 'resource_name', }
                 })
 
 # UsagesOperations
@@ -283,7 +283,7 @@ build_operation("network vpn-connection",
                 ],
                 command_table,
                 {
-                    'virtual_network_gateway_connection_name': {'name': '--name -n'}
+                    'virtual_network_gateway_connection_name': {'name': '--name -n', '_semantic_type': 'resource_name', }
                 })
 
 # VirtualNetworkGatewayConnectionsOperations: shared-key
@@ -297,8 +297,8 @@ build_operation("network vpn-connection shared-key",
                 ],
                 command_table,
                 {
-                    'virtual_network_gateway_connection_name': {'name': '--connection-name'},
-                    'connection_shared_key_name': {'name': '--name -n'}
+                    'virtual_network_gateway_connection_name': {'name': '--connection-name', '_semantic_type': 'resource_name', },
+                    'connection_shared_key_name': {'name': '--name -n', '_semantic_type': 'resource_name', }
 
                 })
 
@@ -314,7 +314,7 @@ build_operation("network vpn-gateway",
                 ],
                 command_table,
                 {
-                    'virtual_network_gateway_name': {'name': '--name -n'}
+                    'virtual_network_gateway_name': {'name': '--name -n', '_semantic_type': 'resource_name', }
                 })
 
 # VirtualNetworksOperations
@@ -329,7 +329,7 @@ build_operation("network vnet",
                 ],
                 command_table,
                 {
-                    'virtual_network_name': {'name': '--name -n'}
+                    'virtual_network_name': {'name': '--name -n', '_semantic_type': 'resource_name', }
                 })
 
 # BUG: we are waiting on autorest to support this rename (https://github.com/Azure/autorest/issues/941)
@@ -369,8 +369,8 @@ build_operation('network vnet',
 @command_table.command('network subnet create')
 @command_table.description(L('Create or update a virtual network (VNet) subnet'))
 @command_table.option(**COMMON_PARAMETERS['resource_group_name'])
-@command_table.option('--name -n', help=L('the subnet name'), required=True)
-@command_table.option(_VNET_PARAM_NAME, help=L('the name of the vnet'), required=True)
+@command_table.option('--subnet-name -s', help=L('the subnet name'), required=True)
+@command_table.option(_VNET_PARAM_NAME, help=L('the name of the vnet'), required=True, _semantic_type='resource_name')
 @command_table.option('--address-prefix -a', help=L('the the address prefix in CIDR format'), required=True)
 def create_update_subnet(args):
     from azure.mgmt.network.models import Subnet

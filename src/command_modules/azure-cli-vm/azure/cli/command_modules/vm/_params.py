@@ -28,7 +28,7 @@ PARAMETER_ALIASES.update({
         'required': True
     },
     'optional_resource_group_name':
-        extend_parameter(GLOBAL_COMMON_PARAMETERS['resource_group_name'], required=False),
+        extend_parameter(GLOBAL_COMMON_PARAMETERS['resource_group_name'], nargs='?'),
     'vhd': {
         'name': '--vhd',
         'required': True,

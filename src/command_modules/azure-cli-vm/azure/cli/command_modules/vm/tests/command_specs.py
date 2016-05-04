@@ -32,7 +32,7 @@ TEST_DEF = [
     },
     {
         'test_name': 'vm_list_from_group',
-        'command': 'vm list --resource-group XPLATTESTGEXTENSION9085',
+        'command': 'vm list XPLATTESTGEXTENSION9085',
     },
     {
         'test_name': 'vm_images_list_by_aliases',
@@ -43,5 +43,3 @@ TEST_DEF = [
         'command': VMImageListThruServiceScenarioTest()
     }
 ]
-
-
