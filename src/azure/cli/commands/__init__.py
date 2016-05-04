@@ -139,7 +139,7 @@ def get_command_table(module_name=None):
             loaded = True
         except ImportError:
             # Unknown command - we'll load all installed modules below
-            logger.info("Unable to load command table from module '%s'. Will load all installed modules.", module_name) #pylint: disable=line-too-long
+            logger.info("Loading all installed modules as module with name '%s' not found.", module_name) #pylint: disable=line-too-long
 
     if not loaded:
         command_table = {}
