@@ -144,7 +144,7 @@ def get_command_table(module_name=None):
             loaded = True
         except ImportError:
             # Unknown command - we'll load all installed modules below
-            logger.info("Unable to load command table from module '%s'.", module_name)
+            logger.info("Unable to load command table from module '%s'. Will load all installed modules.", module_name)
 
     if not loaded:
         command_table = {}
