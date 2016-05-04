@@ -1,4 +1,6 @@
+from __future__ import print_function
 import argparse
+import sys
 import azure.cli._help as _help
 
 class IncorrectUsageError(Exception):
@@ -11,6 +13,10 @@ class AzCliCommandParser(argparse.ArgumentParser):
     """ArgumentParser implementation specialized for the
     Azure CLI utility.
     """
+    ARGUMENT_ERROR_CODE = 3
+
+    usage_shown = False
+
     def __init__(self, **kwargs):
         self.subparsers = {}
         self.parents = kwargs.get('parents', [])
@@ -66,6 +72,19 @@ class AzCliCommandParser(argparse.ArgumentParser):
                 parent_subparser.required = True
                 self.subparsers[tuple(path[0:length])] = parent_subparser
         return parent_subparser
+
+    def format_usage(self):
+        if not AzCliCommandParser.usage_shown:
+            AzCliCommandParser.usage_shown = True
+            return '\n{0}help: use --help for more information\n\n' \
+                .format(super(AzCliCommandParser, self).format_usage())
+        return None
+
+    def error(self, message):
+        if 'required' in message or 'unrecognized' in message:
+            print(message, file=sys.stderr)
+            self.exit(AzCliCommandParser.ARGUMENT_ERROR_CODE)
+        super(AzCliCommandParser, self).error(message)
 
     def format_help(self):
         is_group = not self._defaults.get('func')
