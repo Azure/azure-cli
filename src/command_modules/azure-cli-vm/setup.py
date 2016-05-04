@@ -60,6 +60,10 @@ setup(
     ],
     packages=[
         'azure.cli.command_modules.vm',
+        'azure.cli.command_modules.vm.mgmt',
+        'azure.cli.command_modules.vm.mgmt.lib',
+        'azure.cli.command_modules.vm.mgmt.lib.models',
+        'azure.cli.command_modules.vm.mgmt.lib.operations',
     ],
     install_requires=DEPENDENCIES,
 )

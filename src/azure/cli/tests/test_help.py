@@ -232,11 +232,13 @@ Command
 
 Arguments
     --foobar2 -fb2 [Required]: one line partial sentence
-        paragraph(s)
-    --foobar -fb             : one line partial sentence
-        text, markdown, etc.
+                paragraph(s)
 
-        Values from: az vm list, default
+    --foobar -fb             : one line partial sentence
+                text, markdown, etc.
+
+                Values from: az vm list, default
+
     --foobar3 -fb3           : the foobar3
     --help -h                : show this help message and exit
 '''
@@ -295,11 +297,13 @@ Command
 
 Arguments
     --foobar2 -fb2 [Required]: one line partial sentence
-        paragraph(s)
-    --foobar -fb             : one line partial sentence
-        text, markdown, etc.
+                paragraph(s)
 
-        Values from: az vm list, default
+    --foobar -fb             : one line partial sentence
+                text, markdown, etc.
+
+                Values from: az vm list, default
+
     --help -h                : show this help message and exit
 Examples
     foo example
