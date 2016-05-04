@@ -78,8 +78,7 @@ def print_arguments(help_file):
     for p in sorted(help_file.parameters, key=lambda p: str(not p.required) + p.name):
         indent = 1
         required_text = required_tag if p.required else ''
-        if p.choices:
-            p.short_summary = (p.short_summary + ' ' if p.short_summary else '') + str(p.choices)
+        p.short_summary = (p.short_summary if p.short_summary else '') + _get_choices_str(p)
         _print_indent('{0}{1}{2}{3}'.format(p.name,
                                             _get_column_indent(p.name + required_text,
                                                                max_name_length),
@@ -125,6 +124,14 @@ def _print_groups(help_file):
                                          ': ' + c.short_summary if c.short_summary else ''),
                       indent)
     _print_indent('')
+
+def _get_choices_str(p):
+    choice_str = ""
+    if p.choices:
+        choice_str = (' ' if p.short_summary else '') \
+            + '[{}{}]'.format(', '.join(p.choices),
+                              ('; default: ' + p.default) if p.default else '')
+    return choice_str
 
 def _print_examples(help_file):
     indent = 0
@@ -207,7 +214,8 @@ class CommandHelpFile(HelpFile): #pylint: disable=too-few-public-methods
             self.parameters.append(HelpParameter(' '.join(sorted(action.option_strings)),
                                                  action.help,
                                                  required=action.required,
-                                                 choices=action.choices))
+                                                 choices=action.choices,
+                                                 default=action.default))
 
     def _load_from_data(self, data):
         super(CommandHelpFile, self)._load_from_data(data)
@@ -232,7 +240,7 @@ class CommandHelpFile(HelpFile): #pylint: disable=too-few-public-methods
 
 
 class HelpParameter(object): #pylint: disable=too-few-public-methods
-    def __init__(self, param_name, description, required, choices=None):
+    def __init__(self, param_name, description, required, choices=None, default=None):
         self.name = param_name
         self.required = required
         self.type = 'string'
@@ -240,6 +248,7 @@ class HelpParameter(object): #pylint: disable=too-few-public-methods
         self.long_summary = ''
         self.value_sources = []
         self.choices = choices
+        self.default = default
 
     def update_from_data(self, data):
         if self.name != data.get('name'):
