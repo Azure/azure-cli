@@ -154,6 +154,6 @@ class Application(object):
 
     @staticmethod
     def _resolve_computed_values(args):
-        for key, value in args.__dict__.items():
+        for value in args.__dict__.values():
             if callable(value) and getattr(value, 'computed', False):
                 value(args)

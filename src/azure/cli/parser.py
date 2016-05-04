@@ -39,7 +39,8 @@ class AzCliCommandParser(argparse.ArgumentParser):
                                                   help_file=metadata.get('help_file'))
             for arg in metadata['arguments']:
                 names = (arg.get('name') or '').split()
-                command_parser.add_argument(*names, **{k:v for k, v in arg.items() if k != 'name' and not k.startswith('_')})
+                command_parser.add_argument(*names, **{k:v for k, v in arg.items()
+                                                       if k != 'name' and not k.startswith('_')})
             command_parser.set_defaults(func=handler)
 
     def _get_subparser(self, path):
@@ -71,7 +72,7 @@ class AzCliCommandParser(argparse.ArgumentParser):
         if args and not args[0].startswith('-'):
             kwargs.pop('dest', None)
             kwargs.pop('required', None)
-        return super().add_argument(*args, **kwargs)
+        return super(AzCliCommandParser, self).add_argument(*args, **kwargs)
 
     def format_help(self):
         is_group = not self._defaults.get('func')

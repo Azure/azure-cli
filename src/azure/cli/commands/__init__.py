@@ -116,12 +116,12 @@ class CommandTable(defaultdict):
         return wrapper
 
 def computed_value(func):
-    '''For options that have values that are computed based on the 
+    '''For options that have values that are computed based on the
     value of other arguments, we extend the "normal" argparse options
-    to allow for a computed default value. 
+    to allow for a computed default value.
 
-    Example: 
-        option = { name='--hello -h', 'default': computed_value(lambda args: return args.foo + args.bar) }
+    Example:
+        { name='--hello -h', 'default': computed_value(lambda args: return args.foo + args.bar) }
     '''
     def wrapped(args):
         return func(args)
