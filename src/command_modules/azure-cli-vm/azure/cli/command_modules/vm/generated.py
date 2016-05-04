@@ -46,7 +46,7 @@ build_operation("vm availset",
                 ],
                 command_table,
                 _patch_aliases({
-                    'availability_set_name': {'name': '--name -n'}
+                    'availability_set_name': {'name': '--name -n', '_semantic_type': 'resource_name', }
                 }))
 
 build_operation("vm machine-extension-image",
@@ -68,7 +68,7 @@ build_operation("vm extension",
                 ],
                 command_table,
                 _patch_aliases({
-                    'vm_extension_name': {'name': '--name -n'}
+                    'vm_extension_name': {'name': '--name -n', '_semantic_type': 'resource_name', }
                 }))
 
 build_operation("vm image",
@@ -135,7 +135,7 @@ build_operation("vm scaleset",
                 ],
                 command_table,
                 _patch_aliases({
-                    'vm_scale_set_name': {'name': '--name -n'}
+                    'vm_scale_set_name': {'name': '--name -n', '_semantic_type': 'resource_name', }
                 }))
 
 build_operation("vm scaleset-vm",
@@ -153,7 +153,7 @@ build_operation("vm scaleset-vm",
                 ],
                 command_table,
                 _patch_aliases({
-                    'vm_scale_set_name': {'name': '--name -n'}
+                    'vm_scale_set_name': {'name': '--name -n', '_semantic_type': 'resource_name', }
                 }))
 
 build_operation("vm",

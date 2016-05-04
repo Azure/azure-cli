@@ -42,14 +42,16 @@ PARAMETER_ALIASES.update({
         # specified, it is only required unless the connection string has been specified
         'required': False,
         'type': get_account_name,
-        'default': 'query'
+        'default': 'query',
+        '_semantic_type': 'resource_name',
     },
     'account_name_required': {
         # this is used only to obtain the connection string. Thus, the env variable default
         # does not apply and this is a required parameter
         'name': '--account-name -n',
         'help': L('the storage account name'),
-        'required': True
+        'required': True,
+        '_semantic_type': 'resource_name',
     },
     'blob_name': {
         'name': '--blob-name -b',
@@ -125,7 +127,7 @@ PARAMETER_ALIASES.update({
         'help': L('metadata in "a=b;c=d" format')
     },
     'optional_resource_group_name':
-        extend_parameter(GLOBAL_COMMON_PARAMETERS['resource_group_name'], required=False),
+        extend_parameter(GLOBAL_COMMON_PARAMETERS['resource_group_name'], nargs='?'),
     'permission': {
         'name': '--permission',
         'help': L('permissions granted: (r)ead (w)rite (d)elete (l)ist. Can be combined.'),

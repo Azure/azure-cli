@@ -33,7 +33,8 @@ def list_groups(args):
 @command_table.description(
     L('Show details of a specific resource in a resource group or subscription'))
 @command_table.option(**COMMON_PARAMETERS['resource_group_name'])
-@command_table.option('--name -n', help=L('the resource name'), required=True)
+@command_table.option('--name -n', help=L('the resource name'), required=True, 
+                      _semantic_type='resource_name')
 @command_table.option('--resource-type -r',
                       help=L('the resource type in format: <provider-namespace>/<type>'),
                       required=True)

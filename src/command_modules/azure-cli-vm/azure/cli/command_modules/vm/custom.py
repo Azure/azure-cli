@@ -55,9 +55,10 @@ def patches_vm(start_msg, finish_msg):
         # we add these parameters to all commands
         command_table[invoke]['arguments'].append(PARAMETER_ALIASES['resource_group_name'])
         command_table[invoke]['arguments'].append({
-            'name': '--vm-name -n',
+            'name': '--name -n',
             'dest': 'vm_name',
             'help': 'Name of Virtual Machine to update',
+            '_semantic_type': 'resource_name',
             'required': True
             })
         return invoke

@@ -22,7 +22,7 @@ ENV_VAR = {
 }
 
 def _get_connection_string(runner):
-    out = runner.run('storage account connection-string -g {} -n {}'
+    out = runner.run('storage account connection-string {} {}'
         .format(RESOURCE_GROUP_NAME, STORAGE_ACCOUNT_NAME))
     connection_string = out.replace('Connection String : ', '')
     runner.set_env('AZURE_STORAGE_CONNECTION_STRING', connection_string)
@@ -36,22 +36,22 @@ class StorageAccountScenarioTest(CommandTestScript):
         s.test('storage account check-name --name teststorageomega', {'nameAvailable': True})
         s.test('storage account check-name --name {}'.format(account),
                {'nameAvailable': False, 'reason': 'AlreadyExists'})
-        s.rec('storage account list -g {}'.format(rg))
-        s.test('storage account show --resource-group {} --account-name {}'.format(rg, account),
+        s.rec('storage account list {}'.format(rg))
+        s.test('storage account show {} {}'.format(rg, account),
                {'name': account, 'accountType': 'Standard_LRS', 'location': 'westus', 'resourceGroup': rg})
         s.rec('storage account usage')
-        s.rec('storage account connection-string -g {} --account-name {} --use-http'.format(rg, account))
-        s.rec('storage account keys list -g {} --account-name {}'.format(rg, account))
-        s.rec('storage account keys renew -g {} --account-name {}'.format(rg, account))
-        s.rec('storage account keys renew -g {} --account-name {} --key key2'.format(rg, account))
-        s.test('storage account set -g {} -n {} --tags foo=bar;cat'.format(rg, account),
+        s.rec('storage account connection-string {} {} --use-http'.format(rg, account))
+        s.rec('storage account keys list {} {}'.format(rg, account))
+        s.rec('storage account keys renew {} {}'.format(rg, account))
+        s.rec('storage account keys renew {} {} --key key2'.format(rg, account))
+        s.test('storage account set {} {} --tags foo=bar;cat'.format(rg, account),
                {'tags': {'cat':'', 'foo':'bar'}})
         # TODO: This should work like other tag commands--no value to clear
-        s.test('storage account set -g {} -n {} --tags none='.format(rg, account),
+        s.test('storage account set {} {} --tags none='.format(rg, account),
                {'tags': {'none': ''}})
-        s.test('storage account set -g {} -n {} --type Standard_GRS'.format(rg, account),
+        s.test('storage account set {} {} --type Standard_GRS'.format(rg, account),
                {'accountType': 'Standard_GRS'})
-        s.run('storage account set -g {} -n {} --type Standard_LRS'.format(rg, account))
+        s.run('storage account set {} {} --type Standard_LRS'.format(rg, account))
 
     def __init__(self):
         super(StorageAccountScenarioTest, self).__init__(None, self.test_body, None)
@@ -313,7 +313,7 @@ TEST_DEF = [
     #},
     {
         'test_name': 'storage_account_delete',
-        'command': 'storage account delete -g travistestresourcegroup --account-name teststorageaccount04'
+        'command': 'storage account delete travistestresourcegroup teststorageaccount04'
     },
     # STORAGE CONTAINER TESTS
     {

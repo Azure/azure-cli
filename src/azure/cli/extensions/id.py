@@ -1,5 +1,6 @@
 import argparse
 import collections
+from azure.cli.commands import computed_value
 
 def register(application):
     def split_id(source, target):
@@ -7,10 +8,11 @@ def register(application):
             try:
                 id = getattr(namespace, source)
                 parts = id.split('/')
-                setattr(namespace, source, parts[4])
                 setattr(namespace, target, parts[8])
+                setattr(namespace, source, parts[4])
             except Exception:
-                raise RuntimeError('Invalid RESOURCEID "{0}". You have to specify a RESOURCEGROUP and NAME or a valid RESOURCEID'.format(id))
+                raise RuntimeError(
+                    'Invalid RESOURCEID "{0}". You have to specify a RESOURCEGROUP and NAME or a valid RESOURCEID'.format(id))
         return split
 
     def annotate_id(command_table):
@@ -25,17 +27,23 @@ def register(application):
                 name = rg_name['resource_name']
                 arguments.remove(rg)
                 arguments.remove(name)
-                arguments.append({
-                    'name': rg.get('dest', 'resource_group_name'),
-                    'metavar': '(RESOURCEID | %s %s)' % (rg.get('metavar', 'RESOURCEGROUP'), name.get('metavar', 'NAME')),
-                    'help': 'Resource ID or resource group name followed by resource name',
-                    })
-                arguments.append({
-                    'name': name.get('dest', 'name'),
-                    'help': argparse.SUPPRESS,
-                    'default': split_id(rg.get('dest', 'resource_group_name'), name.get('dest', 'name')),
-                    'nargs': '?'
-                    })
+                name_dest = name.get('dest') or name.get('name').split()[0].replace('--', '', 1).replace('-', '_')
+                arguments.extend((
+                    {
+                        'name': rg.get('dest', 'resource_group_name'),
+                        'metavar': '(RESOURCEID | %s %s)' % (rg.get('metavar', 'RESOURCEGROUP'),
+                                                             name.get('metavar', 'NAME')),
+                        'help': 'Resource ID or resource group name followed by resource name',
+                    },
+                    {
+                        'name': name_dest,
+                        'help': argparse.SUPPRESS,
+                        'default': computed_value(
+                            split_id(
+                                rg.get('dest', 'resource_group_name'),
+                                name.get('dest'))),
+                        'nargs': '?'
+                    }))
             except KeyError:
                 pass
 
@@ -45,5 +53,4 @@ def register(application):
                 getattr(args, name)(args)
 
     application.register(application.COMMAND_TABLE_LOADED, annotate_id)
-    application.register(application.COMMAND_PARSER_PARSED, validate_resourcegroup_name)
 

@@ -15,11 +15,9 @@ RESOURCE_GROUP_ARG_NAME = 'resource_group_name'
 
 COMMON_PARAMETERS = {
     'resource_group_name': {
-        'name': '--resource-group -g',
-        'dest': RESOURCE_GROUP_ARG_NAME,
+        'name': 'resource_group_name',
         'metavar': 'RESOURCEGROUP',
         'help': 'The name of the resource group.',
-        'required': True,
         '_semantic_type': 'resource_group_name',
     },
     'location': {
@@ -116,6 +114,20 @@ class CommandTable(defaultdict):
                 self[func]['arguments'].append(opt)
             return func
         return wrapper
+
+def computed_value(func):
+    '''For options that have values that are computed based on the 
+    value of other arguments, we extend the "normal" argparse options
+    to allow for a computed default value. 
+
+    Example: 
+        option = { name='--hello -h', 'default': computed_value(lambda args: return args.foo + args.bar) }
+    '''
+    def wrapped(args):
+        return func(args)
+
+    setattr(wrapped, 'computed', True)
+    return wrapped
 
 def _get_command_table(module_name):
     module = import_module('azure.cli.command_modules.' + module_name)

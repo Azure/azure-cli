@@ -9,7 +9,7 @@ TEST_DEF = [
     },
     {
         'test_name': 'network_nic_list',
-        'command': 'network nic list -g travistestresourcegroup'
+        'command': 'network nic list travistestresourcegroup'
     }
 ]
 
