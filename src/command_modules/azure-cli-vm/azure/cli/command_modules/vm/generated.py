@@ -13,8 +13,10 @@ from azure.mgmt.compute.operations import (AvailabilitySetsOperations,
                                            VirtualMachineScaleSetVMsOperations)
 
 from azure.cli.commands._command_creation import get_mgmt_service_client
-from azure.cli.commands._auto_command import build_operation, AutoCommandDefinition
-from azure.cli.commands import CommandTable, LongRunningOperation
+from azure.cli.commands._auto_command import (build_operation,
+                                              AutoCommandDefinition,
+                                              COMMON_PARAMETERS)
+from azure.cli.commands import CommandTable, LongRunningOperation, extend_parameter
 from azure.cli._locale import L
 from azure.cli.command_modules.vm.mgmt.lib import (VMCreationClient as VMClient,
                                                    VMCreationClientConfiguration
@@ -163,7 +165,7 @@ build_operation("vm",
                 [
                     AutoCommandDefinition(ConvenienceVmCommands.list_ip_addresses, 'object'),
                 ],
-                command_table, PARAMETER_ALIASES)
+                command_table, {'resource_group_name': extend_parameter(COMMON_PARAMETERS['resource_group_name'], required=False),})
 
 vm_param_aliases = {
     'name': {
