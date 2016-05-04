@@ -469,8 +469,12 @@ Global Arguments
         config.get_command_table = lambda: cmd_table
         app = Application(config)
 
-        with self.assertRaises(SystemExit):
+        # there is an argparse bug on <2.7.10 where SystemExit is not thrown on missing required param
+        if sys.version_info < (2, 7, 10):
             app.execute('n1 -fb a --foobar value'.split())
+        else:
+            with self.assertRaises(SystemExit):
+                app.execute('n1 -fb a --foobar value'.split())
 
         with self.assertRaises(SystemExit):
             app.execute('n1 -fb a --foobar2 value --foobar3 extra'.split())
