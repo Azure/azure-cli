@@ -86,9 +86,8 @@ class CustomStreamHandler(logging.StreamHandler):
     def __init__(self, log_level_config, log_format):
         logging.StreamHandler.__init__(self)
         self.setLevel(log_level_config)
-        # TODO test on Windows
         if platform.system() == 'Windows':
-            self.stream = colorama.AnsiToWin32(self.stream)
+            self.stream = colorama.AnsiToWin32(self.stream).stream
         self.enable_color = self._should_enable_color()
         self.setFormatter(logging.Formatter(log_format[self.enable_color]))
 
