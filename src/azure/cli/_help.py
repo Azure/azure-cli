@@ -81,6 +81,7 @@ def print_arguments(help_file):
                     + str(not p.required) + p.name):
         indent = 1
         required_text = required_tag if p.required else ''
+        p.short_summary = (p.short_summary if p.short_summary else '') + _get_choices_str(p)
         if p.group_name != last_group_name:
             if p.group_name:
                 print('')
@@ -133,6 +134,14 @@ def _print_groups(help_file):
                                          ': ' + c.short_summary if c.short_summary else ''),
                       indent)
     _print_indent('')
+
+def _get_choices_str(p):
+    choice_str = ""
+    if p.choices:
+        choice_str = (' ' if p.short_summary else '') \
+            + '[{}{}]'.format(', '.join(p.choices),
+                              ('; default: ' + p.default) if p.default else '')
+    return choice_str
 
 def _print_examples(help_file):
     indent = 0
@@ -216,6 +225,8 @@ class CommandHelpFile(HelpFile): #pylint: disable=too-few-public-methods
             self.parameters.append(HelpParameter(' '.join(sorted(action.option_strings)),
                                                  action.help,
                                                  required=action.required,
+                                                 choices=action.choices,
+                                                 default=action.default,
                                                  group_name=action.container.description))
 
         help_param = next(p for p in self.parameters if p.name == '--help -h')
@@ -243,14 +254,17 @@ class CommandHelpFile(HelpFile): #pylint: disable=too-few-public-methods
         self.parameters = loaded_params
 
 
-class HelpParameter(object): #pylint: disable=too-few-public-methods
-    def __init__(self, param_name, description, required, group_name=False):
+class HelpParameter(object): #pylint: disable=too-few-public-methods, too-many-instance-attributes
+    def __init__(self, param_name, description, required, choices=None, #pylint: disable=too-many-arguments
+                 default=None, group_name=None):
         self.name = param_name
         self.required = required
         self.type = 'string'
         self.short_summary = description
         self.long_summary = ''
         self.value_sources = []
+        self.choices = choices
+        self.default = default
         self.group_name = group_name
 
     def update_from_data(self, data):

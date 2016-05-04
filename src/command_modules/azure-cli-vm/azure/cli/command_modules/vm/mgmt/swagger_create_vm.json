@@ -327,7 +327,6 @@
         }
       },
       "required": [
-        "adminPassword",
         "adminUsername",
         "virtualMachineName"
       ]
@@ -382,6 +381,11 @@
         "value": {
           "type": "string",
           "description": "Whether to use an existing storage account or create a new one.",
+          "enum": [
+            "new",
+            "existing"
+          ],
+          "default": "new",
           "x-ms-client-name": "storageAccountType"
         }
       }
@@ -427,6 +431,11 @@
         "value": {
           "type": "string",
           "description": "Whether to use an existing VNet or create a new one.",
+          "enum": [
+            "new",
+            "existing"
+          ],
+          "default": "new",
           "x-ms-client-name": "virtualNetworkType"
         }
       }
@@ -435,14 +444,10 @@
       "properties": {
         "value": {
           "type": "string",
-          "description": "Password for the Virtual Machine.",
+          "description": "Password for the Virtual Machine.  Required if SSH (Linux only) is not specified.",
           "x-ms-client-name": "adminPassword"
         }
-      },
-      "required": [
-        "value"
-      ]
-
+      }
     },
     "DeploymentParameter_osSKU": {
       "properties": {
@@ -467,6 +472,20 @@
         "value": {
           "type": "string",
           "description": "Common OS choices.  Choose 'Custom' to specify an image with the osPublisher, osOffer, osSKU, and osVersion parameters.",
+          "enum": [
+            "CentOS",
+            "CoreOS",
+            "Debian",
+            "openSUSE",
+            "RHEL",
+            "SLES",
+            "UbuntuLTS",
+            "Win2012R2Datacenter",
+            "Win2012Datacenter",
+            "Win2008R2SP1",
+            "Custom"
+          ],
+          "default": "Win2012R2Datacenter",
           "x-ms-client-name": "osType"
         }
       }
@@ -525,6 +544,11 @@
         "value": {
           "type": "string",
           "description": "Dynamic or Static public IP address allocation.",
+          "enum": [
+            "Dynamic",
+            "Static"
+          ],
+          "default": "Dynamic",
           "x-ms-client-name": "publicIpAddressAllocation"
         }
       }
@@ -534,6 +558,11 @@
         "value": {
           "type": "string",
           "description": "Authentication method: password-only or add ssh-keys (Linux-only).",
+          "enum": [
+            "password",
+            "sshkey"
+          ],
+          "default": "password",
           "x-ms-client-name": "authenticationType"
         }
       }
@@ -570,6 +599,12 @@
         "value": {
           "type": "string",
           "description": "Use a public IP Address for the VM Nic. (new, existing or none).",
+          "enum": [
+            "none",
+            "new",
+            "existing"
+          ],
+          "default": "none",
           "x-ms-client-name": "publicIpAddressType"
         }
       }
@@ -624,6 +659,11 @@
         "value": {
           "type": "string",
           "description": "Flag to add the VM to an existing availability set.",
+          "enum": [
+            "none",
+            "existing"
+          ],
+          "default": "none",
           "x-ms-client-name": "availabilitySetType"
         }
       }
@@ -642,6 +682,11 @@
         "value": {
           "type": "string",
           "description": "Associate VMs with a public IP address to a DNS name (new or none).",
+          "enum": [
+            "none",
+            "new"
+          ],
+          "default": "none",
           "x-ms-client-name": "dnsNameType"
         }
       }
