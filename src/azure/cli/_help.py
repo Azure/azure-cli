@@ -239,8 +239,8 @@ class CommandHelpFile(HelpFile): #pylint: disable=too-few-public-methods
         self.parameters = loaded_params
 
 
-class HelpParameter(object): #pylint: disable=too-few-public-methods
-    def __init__(self, param_name, description, required, choices=None, default=None):
+class HelpParameter(object): #pylint: disable=too-few-public-methods, too-many-instance-attributes
+    def __init__(self, param_name, description, required, choices=None, default=None): #pylint: disable=too-many-arguments
         self.name = param_name
         self.required = required
         self.type = 'string'
