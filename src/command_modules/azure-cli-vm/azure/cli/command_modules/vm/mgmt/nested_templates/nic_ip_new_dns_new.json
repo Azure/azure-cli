@@ -1,0 +1,84 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "type": "string"
+    },
+    "dnsNameForPublicIP": {
+      "type": "string"
+    },
+    "VirtualMachineName": {
+      "type": "string"
+    },
+
+    "publicIPAddressName": {
+      "type": "string"
+    },
+    "publicIpAddressAllocation": {
+      "type": "string"
+    },
+    "nicName": {
+      "type": "string"
+    },
+    "subnetRef": {
+      "type": "string"
+    },
+    "privateIpAllocation": {
+      "type": "string"
+    }
+  },
+  "variables": {
+  },
+  "resources": [
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Network/publicIPAddresses",
+      "name": "[parameters('publicIPAddressName')]",
+      "location": "[parameters('location')]",
+      "tags": {
+        "displayName": "PublicIPAddress"
+      },
+      "properties": {
+        "publicIPAllocationMethod": "[parameters('publicIpAddressAllocation')]",
+        "dnsSettings": {
+          "domainNameLabel": "[parameters('dnsNameForPublicIP')]"
+        }
+      }
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "[parameters('nicName')]",
+      "location": "[parameters('location')]",
+      "tags": {
+        "displayName": "NetworkInterface"
+      },
+      "dependsOn": [
+        "[concat('Microsoft.Network/publicIPAddresses/', parameters('publicIPAddressName'))]"
+      ],
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "[concat('ipconfig', parameters('VirtualMachineName'))]",
+            "properties": {
+              "privateIPAllocationMethod": "[parameters('privateIpAllocation')]",
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddressName'))]"
+              },
+              "subnet": {
+                "id": "[parameters('subnetRef')]"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "outputs": {
+    "VMNic": {
+      "type": "object",
+      "value": "[reference(parameters('nicName'))]"
+    }
+  }
+}
