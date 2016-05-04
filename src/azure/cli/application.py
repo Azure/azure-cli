@@ -138,7 +138,8 @@ class Application(object):
         parser.add_argument('--subscription', dest='_subscription_id', help=argparse.SUPPRESS)
         parser.add_argument('--output', '-o', dest='_output_format',
                             choices=['list', 'json', 'tsv'],
-                            help='Output format of type "list", "json" or "tsv"')
+                            default='list',
+                            help='Output format')
         # The arguments for verbosity don't get parsed by argparse but we add it here for help.
         parser.add_argument('--verbose', dest='_log_verbosity_verbose',
                             help='Increase logging verbosity. Use --debug for full debug logs.')
