@@ -14,7 +14,7 @@ class TemplateLink(Model):
     Entity representing the reference to the template.
 
     :param str uri: URI referencing the template. Default value:
-     "https://azuretemplatehost.blob.core.windows.net/templatehost/CreateVNet/azuredeploy.json"
+     "https://azuresdkci.blob.core.windows.net/templatehost/CreateVNet/azuredeploy.json"
      .
     :param str content_version: If included it must match the ContentVersion
      in the template.
@@ -30,5 +30,5 @@ class TemplateLink(Model):
     }
 
     def __init__(self, content_version=None, **kwargs):
-        self.uri = "https://azuretemplatehost.blob.core.windows.net/templatehost/CreateVNet/azuredeploy.json"
+        self.uri = "https://azuresdkci.blob.core.windows.net/templatehost/CreateVNet/azuredeploy.json"
         self.content_version = content_version
