@@ -479,10 +479,10 @@ Global Arguments
             with self.assertRaises(SystemExit):
                 app.execute('n1 -fb a --foobar2 value --foobar3 extra'.split())
 
-        self.assertTrue('required' in io.getvalue()
-                        and '--foobar/-fb' not in io.getvalue()
-                        and '--foobar2/-fb' in io.getvalue()
-                        and 'unrecognized arguments: --foobar3' in io.getvalue())
+            self.assertTrue('required' in io.getvalue()
+                            and '--foobar/-fb' not in io.getvalue()
+                            and '--foobar2/-fb2' in io.getvalue()
+                            and 'unrecognized arguments: --foobar3 extra' in io.getvalue())
 
     @redirect_io
     def test_help_group_help(self):
