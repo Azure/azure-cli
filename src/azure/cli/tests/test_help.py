@@ -490,11 +490,6 @@ Global Arguments
                             and '--foobar2/-fb2' in io.getvalue()
                             and 'unrecognized arguments: --foobar3 extra' in io.getvalue())
 
-        self.assertTrue('required' in io.getvalue()
-                        and '--foobar/-fb' not in io.getvalue()
-                        and '--foobar2/-fb2' in io.getvalue()
-                        and 'unrecognized arguments: --foobar3 extra' in io.getvalue())
-
     @redirect_io
     def test_help_group_help(self):
         app = Application(Configuration([]))
