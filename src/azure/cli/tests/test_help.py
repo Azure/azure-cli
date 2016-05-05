@@ -469,10 +469,15 @@ Global Arguments
         config.get_command_table = lambda: cmd_table
         app = Application(config)
 
-        with self.assertRaises(SystemExit):
+        try:
             app.execute('n1 -fb a --foobar value'.split())
-        with self.assertRaises(SystemExit):
+        except SystemExit:
+            pass
+
+        try:
             app.execute('n1 -fb a --foobar2 value --foobar3 extra'.split())
+        except SystemExit:
+            pass
 
         self.assertTrue('required' in io.getvalue()
                         and '--foobar/-fb' not in io.getvalue()
