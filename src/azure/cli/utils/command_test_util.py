@@ -35,7 +35,6 @@ class CommandTestGenerator(object):
     def __init__(self, recording_dir, test_def, env_var):
         self.test_def = test_def
         self.recording_dir = recording_dir
-        logging.basicConfig()
         logging.getLogger('vcr').setLevel(logging.ERROR)
         self.my_vcr = vcr.VCR(
             cassette_library_dir=recording_dir,
