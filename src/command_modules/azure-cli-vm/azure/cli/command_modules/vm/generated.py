@@ -243,8 +243,7 @@ helps['vm create'] = """
                   required: false
                   short-summary: OS image
                   long-summary: |
-                    Common OS types: CentOS, CoreOS, Debian, openSUSE, RHEL, SLES, UbuntuLTS,
-                    Win2012R2Datacenter, Win2012Datacenter, Win2008R2SP1
+                    Common OS types: CentOS, CoreOS, Debian, openSUSE, RHEL, SLES, UbuntuLTS, Win2012R2Datacenter, Win2012Datacenter, Win2008R2SP1
                     Example URN: canonical:Ubuntu_Snappy_Core:15.04:2016.0318.1949
                     Example URI: http://<storageAccount>.blob.core.windows.net/vhds/osdiskimage.vhd
                   populator-commands: 
