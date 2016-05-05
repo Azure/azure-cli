@@ -450,25 +450,24 @@ Global Arguments
         s = '\nGroup\n    az group1\n\nSub-Commands\n    group2\n    group3\n\n'
         self.assertEqual(s, io.getvalue())
 
-    # TODO: Uncomment once this test is fixed for Python 2.7
-    #@redirect_io
-    #def test_help_extra_missing_params(self):
-    #    app = Application(Configuration([]))
-    #    def test_handler(args):
-    #        pass
+    @redirect_io
+    def test_help_extra_missing_params(self):
+        app = Application(Configuration([]))
+        def test_handler(args):
+            pass
 
-    #    cmd_table = {
-    #        test_handler: {
-    #            'name': 'n1',
-    #            'arguments': [
-    #                {'name': '--foobar -fb', 'required': False},
-    #                {'name': '--foobar2 -fb2', 'required': True}
-    #                ]
-    #            }
-    #        }
-    #    config = Configuration([])
-    #    config.get_command_table = lambda: cmd_table
-    #    app = Application(config)
+        cmd_table = {
+            test_handler: {
+                'name': 'n1',
+                'arguments': [
+                    {'name': '--foobar -fb', 'required': False},
+                    {'name': '--foobar2 -fb2', 'required': True}
+                    ]
+                }
+            }
+        config = Configuration([])
+        config.get_command_table = lambda: cmd_table
+        app = Application(config)
 
         # work around an argparse behavior where output is not printed and SystemExit
         # is not raised on Python 2.7.9
@@ -488,10 +487,10 @@ Global Arguments
             with self.assertRaises(SystemExit):
                 app.execute('n1 -fb a --foobar2 value --foobar3 extra'.split())
 
-    #        self.assertTrue('required' in io.getvalue()
-    #                        and '--foobar/-fb' not in io.getvalue()
-    #                        and '--foobar2/-fb2' in io.getvalue()
-    #                        and 'unrecognized arguments: --foobar3 extra' in io.getvalue())
+            self.assertTrue('required' in io.getvalue()
+                            and '--foobar/-fb' not in io.getvalue()
+                            and '--foobar2/-fb2' in io.getvalue()
+                            and 'unrecognized arguments: --foobar3 extra' in io.getvalue())
 
     @redirect_io
     def test_help_group_help(self):
