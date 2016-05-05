@@ -4,7 +4,6 @@ import collections
 import json
 import os
 import sys
-from time import sleep
 
 from azure.cli.utils.command_test_script import CommandTestScript
 from azure.common import AzureHttpError
@@ -24,6 +23,31 @@ def _get_connection_string(runner):
         .format(RESOURCE_GROUP_NAME, STORAGE_ACCOUNT_NAME))
     connection_string = out.replace('Connection String : ', '')
     runner.set_env('AZURE_STORAGE_CONNECTION_STRING', connection_string)
+
+class StorageAccountCreateAndDeleteTest(CommandTestScript):
+    def set_up(self):
+        self.account = 'testcreatedelete'
+        self.run('storage account delete -g {} -n {}'.format(RESOURCE_GROUP_NAME, self.account))
+        result = json.loads(self.run('storage account check-name --name {} -o json'.format(self.account)))
+        if not result['nameAvailable']:
+            raise RuntimeError('Failed to delete pre-existing storage account {}. Unable to continue test.'.format(self.account))
+
+    def test_body(self):
+        account = self.account
+        rg = RESOURCE_GROUP_NAME
+        s = self
+        s.run('storage account create --type Standard_LRS -l westus -n {} -g {}'.format(account, rg))
+        s.test('storage account check-name --name {}'.format(account),
+               {'nameAvailable': False, 'reason': 'AlreadyExists'})
+        s.run('storage account delete -g {} -n {}'.format(RESOURCE_GROUP_NAME, account))
+        s.test('storage account check-name --name {}'.format(account), {'nameAvailable': True})
+
+    def tear_down(self):
+        self.run('storage account delete -g {} -n {}'.format(RESOURCE_GROUP_NAME, self.account))
+
+    def __init__(self):
+        super(StorageAccountCreateAndDeleteTest, self).__init__(
+            self.set_up, self.test_body, self.tear_down)
 
 class StorageAccountScenarioTest(CommandTestScript):
 
@@ -52,7 +76,8 @@ class StorageAccountScenarioTest(CommandTestScript):
         s.run('storage account set -g {} -n {} --type Standard_LRS'.format(rg, account))
 
     def __init__(self):
-        super(StorageAccountScenarioTest, self).__init__(None, self.test_body, None)
+        super(StorageAccountScenarioTest, self).__init__(
+            None, self.test_body, None)
 
 class StorageBlobScenarioTest(CommandTestScript):
 
@@ -61,9 +86,9 @@ class StorageBlobScenarioTest(CommandTestScript):
         self.rg = RESOURCE_GROUP_NAME
         self.proposed_lease_id = 'abcdabcd-abcd-abcd-abcd-abcdabcdabcd'
         self.new_lease_id = 'dcbadcba-dcba-dcba-dcba-dcbadcbadcba'
-        self.date = '2016-04-08T12:00Z'
+        self.date = '2016-04-01t12:00z'
         _get_connection_string(self)
-        sas_token = self.run('storage account generate-sas --services b --resource-types sco --permission rwdl --expiry 2017-01-01t00:00z')
+        sas_token = self.run('storage account generate-sas --services b --resource-types sco --permission rwdl --expiry 2100-01-01t00:00z')
         self.set_env('AZURE_SAS_TOKEN', sas_token)
         self.set_env('AZURE_STORAGE_ACCOUNT', STORAGE_ACCOUNT_NAME)
         self.pop_env('AZURE_STORAGE_CONNECTION_STRING')
@@ -185,7 +210,7 @@ class StorageFileScenarioTest(CommandTestScript):
         self.share1 = 'testshare01'
         self.share2 = 'testshare02'
         _get_connection_string(self)
-        sas_token = self.run('storage account generate-sas --services f --resource-types sco --permission rwdl --expiry 2017-01-01t00:00z')
+        sas_token = self.run('storage account generate-sas --services f --resource-types sco --permission rwdl --expiry 2100-01-01t00:00z')
         self.set_env('AZURE_SAS_TOKEN', sas_token)
         self.set_env('AZURE_STORAGE_ACCOUNT', STORAGE_ACCOUNT_NAME)
         self.pop_env('AZURE_STORAGE_CONNECTION_STRING')
@@ -299,28 +324,20 @@ class StorageFileScenarioTest(CommandTestScript):
         super(StorageFileScenarioTest, self).__init__(self.set_up, self.test_body, self.tear_down)
 
 TEST_DEF = [
-    # STORAGE ACCOUNT TESTS
     {
         'test_name': 'storage_account',
         'script': StorageAccountScenarioTest()
     },
-    # TODO: Enable when item #117262541 is complete
-    #{
-    #    'test_name': 'storage_account_create',
-    #    'command': 'storage account create --type Standard_LRS -l westus -g travistestresourcegroup --account-name teststorageaccount04'
-    #},
     {
-        'test_name': 'storage_account_delete',
-        'command': 'storage account delete -g travistestresourcegroup --account-name teststorageaccount04'
+        'test_name': 'storage_account_create_and_delete',
+        'script': StorageAccountCreateAndDeleteTest()
     },
-    # STORAGE CONTAINER TESTS
     {
         'test_name': 'storage_blob',
         'script': StorageBlobScenarioTest()
     },
-    # STORAGE SHARE TESTS
     {
         'test_name': 'storage_file',
         'script': StorageFileScenarioTest()
-    },
+    }
 ]
