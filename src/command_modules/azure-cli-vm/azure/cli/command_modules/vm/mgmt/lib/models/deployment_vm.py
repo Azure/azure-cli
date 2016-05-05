@@ -35,7 +35,8 @@ class DeploymentVM(Model):
      address allocation.
     :type private_ip_address_allocation: str
     :param dns_name_for_public_ip: Globally unique DNS Name for the Public IP
-     used to access the Virtual Machine.
+     used to access the Virtual Machine.  Requires a new public IP to be
+     created by setting Public IP Address Type to New.
     :type dns_name_for_public_ip: str
     :param storage_account_type: Whether to use an existing storage account
      or create a new one. Possible values include: 'new', 'existing'. Default
