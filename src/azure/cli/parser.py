@@ -1,4 +1,5 @@
 import argparse
+import sys
 import azure.cli._help as _help
 
 class IncorrectUsageError(Exception):
@@ -78,5 +79,5 @@ class AzCliCommandParser(argparse.ArgumentParser):
 
     def exit(self, status = 0, message = None):
         if message:
-            self._print_message(message, _sys.stderr)
-        _sys.exit(status)
+            self._print_message(message, sys.stderr)
+        sys.exit(status)
