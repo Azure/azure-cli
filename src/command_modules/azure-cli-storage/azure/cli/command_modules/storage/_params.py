@@ -1,4 +1,4 @@
-from os import environ
+import os
 
 from azure.cli.commands import (COMMON_PARAMETERS as GLOBAL_COMMON_PARAMETERS, extend_parameter)
 from azure.cli._locale import L
@@ -10,17 +10,32 @@ from ._validators import (
 
 # HELPER METHODS
 
+def parse_connection_string():
+    value = os.environ.get('AZURE_STORAGE_CONNECTION_STRING')
+    if value:
+        cs_dict = validate_key_value_pairs(value)
+        os.environ['AZURE_STORAGE_ACCOUNT'] = cs_dict['AccountName']
+        os.environ['AZURE_STORAGE_KEY'] = cs_dict['AccountKey']
+
 def get_account_name(string):
-    return string if string != 'query' else environ.get('AZURE_STORAGE_ACCOUNT')
+    if string != 'query':
+        return string
+    else:
+        parse_connection_string()
+        return os.environ.get('AZURE_STORAGE_ACCOUNT')
 
 def get_account_key(string):
-    return string if string != 'query' else environ.get('AZURE_STORAGE_KEY')
+    if string != 'query':
+        return string
+    else:
+        parse_connection_string()
+        return os.environ.get('AZURE_STORAGE_KEY')
 
 def get_connection_string(string):
-    return string if string != 'query' else environ.get('AZURE_STORAGE_CONNECTION_STRING')
+    return string if string != 'query' else os.environ.get('AZURE_STORAGE_CONNECTION_STRING')
 
 def get_sas_token(string):
-    return string if string != 'query' else environ.get('AZURE_SAS_TOKEN')
+    return string if string != 'query' else os.environ.get('AZURE_SAS_TOKEN')
 
 # BASIC PARAMETER CONFIGURATION
 

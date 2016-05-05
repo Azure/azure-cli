@@ -6,8 +6,6 @@ import os
 import sys
 from time import sleep
 
-from six import StringIO
-
 from azure.cli.utils.command_test_script import CommandTestScript
 from azure.common import AzureHttpError
 
