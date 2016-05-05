@@ -95,7 +95,7 @@ def print_arguments(help_file):
                       indent,
                       max_name_length + indent*4 + 2)
 
-        indent = 4
+        indent = 1
         if p.long_summary:
             _print_indent('{0}'.format(p.long_summary.rstrip()), indent)
 
