@@ -89,7 +89,7 @@ class ConvenienceBlobServiceCommands(object):
     def __init__(self, **kwargs):
         self.client = blob_data_service_factory(**kwargs)
 
-    def container_exists(self, container_name, snapshot=None, timeout=None, **kwargs):
+    def container_exists(self, container_name, snapshot=None, timeout=None):
         '''Check if a storage container exists.
         :param str snapshot:UTC datetime value which specifies a snapshot
         '''
@@ -101,7 +101,7 @@ class ConvenienceBlobServiceCommands(object):
     def upload(self, container_name, blob_name, blob_type, upload_from,
                content_type=None, content_disposition=None,
                content_encoding=None, content_language=None, content_md5=None,
-               content_cache_control=None, **kwargs):
+               content_cache_control=None):
         '''Upload a blob to a container.
         :param str blob_type:type of blob to upload
         :param str upload_from:local path to upload from
@@ -145,7 +145,7 @@ class ConvenienceBlobServiceCommands(object):
         }
         return type_func[blob_type]()
 
-    def download(self, container_name, blob_name, download_to, **kwargs):
+    def download(self, container_name, blob_name, download_to):
         ''' Download the specified blob.
         :param str download_to:the file path to download to
         '''
@@ -153,7 +153,7 @@ class ConvenienceBlobServiceCommands(object):
         self.client.get_blob_to_path(container_name, blob_name, download_to,
                                      progress_callback=_update_progress)
 
-    def blob_exists(self, container_name, blob_name, snapshot=None, timeout=None, **kwargs):
+    def blob_exists(self, container_name, blob_name, snapshot=None, timeout=None):
         ''' Check if a storage blob exists. '''
         return self.client.exists(
             blob_name=blob_name,
@@ -166,22 +166,22 @@ class ConvenienceFileServiceCommands(object):
     def __init__(self, **kwargs):
         self.client = file_data_service_factory(**kwargs)
 
-    def share_exists(self, share_name, **kwargs):
+    def share_exists(self, share_name):
         ''' Check if a file share exists.'''
         return self.client.exists(share_name=share_name)
 
-    def dir_exists(self, share_name, directory_name, **kwargs):
+    def dir_exists(self, share_name, directory_name):
         ''' Check if a share directory exists.'''
         return self.client.exists(share_name=share_name, directory_name=directory_name)
 
-    def download(self, share_name, file_name, local_file_name, directory_name=None, **kwargs):
+    def download(self, share_name, file_name, local_file_name, directory_name=None):
         ''' Download a file from a file share.
         :param str file_name:the file name
         :param str local_file_name:the path to the local file to download to'''
         self.client.get_file_to_path(share_name, directory_name, file_name, local_file_name,
                                      progress_callback=_update_progress)
 
-    def file_exists(self, share_name, file_name, directory_name=None, **kwargs):
+    def file_exists(self, share_name, file_name, directory_name=None):
         ''' Check if a file exists at a specified path.
         :param str file_name:the file name to check
         :param str directory_name:subdirectory path to the file
@@ -190,7 +190,7 @@ class ConvenienceFileServiceCommands(object):
                                   directory_name=directory_name,
                                   file_name=file_name)
 
-    def upload(self, share_name, file_name, local_file_name, directory_name=None, **kwargs):
+    def upload(self, share_name, file_name, local_file_name, directory_name=None):
         ''' Upload a file to a file share path.
         :param str file_name:the destination file name
         :param str local_file_name:the path and file name to upload

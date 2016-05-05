@@ -75,9 +75,18 @@ def print_arguments(help_file):
     required_tag = L(' [Required]')
     max_name_length = max(len(p.name) + (len(required_tag) if p.required else 0)
                           for p in help_file.parameters)
-    for p in sorted(help_file.parameters, key=lambda p: str(not p.required) + p.name):
+    last_group_name = None
+    for p in sorted(help_file.parameters,
+                    key=lambda p: str(p.group_name or 'A')
+                    + str(not p.required) + p.name):
         indent = 1
         required_text = required_tag if p.required else ''
+        p.short_summary = (p.short_summary if p.short_summary else '') + _get_choices_str(p)
+        if p.group_name != last_group_name:
+            if p.group_name:
+                print('')
+                print(p.group_name)
+            last_group_name = p.group_name
         _print_indent('{0}{1}{2}{3}'.format(p.name,
                                             _get_column_indent(p.name + required_text,
                                                                max_name_length),
@@ -91,7 +100,6 @@ def print_arguments(help_file):
             _print_indent('{0}'.format(p.long_summary.rstrip()), indent)
 
         if p.value_sources:
-            _print_indent('')
             _print_indent(L("Values from: {0}").format(', '.join(p.value_sources)), indent)
 
         if p.long_summary or p.value_sources:
@@ -104,7 +112,7 @@ def _print_header(help_file):
     _print_indent(L('Command') if help_file.type == 'command' else L('Group'), indent)
 
     indent += 1
-    _print_indent('{0}{1}'.format(help_file.command,
+    _print_indent('{0}{1}'.format('az ' + help_file.command,
                                   ': ' + help_file.short_summary
                                   if help_file.short_summary
                                   else ''),
@@ -127,8 +135,17 @@ def _print_groups(help_file):
                       indent)
     _print_indent('')
 
+def _get_choices_str(p):
+    choice_str = ""
+    if p.choices:
+        choice_str = (' ' if p.short_summary else '') \
+            + '[{}{}]'.format(', '.join(p.choices),
+                              ('; default: ' + p.default) if p.default else '')
+    return choice_str
+
 def _print_examples(help_file):
     indent = 0
+    print('')
     _print_indent(L('Examples'), indent)
 
     for e in help_file.examples:
@@ -207,7 +224,13 @@ class CommandHelpFile(HelpFile): #pylint: disable=too-few-public-methods
         for action in [a for a in parser._actions if a.help != argparse.SUPPRESS]: # pylint: disable=protected-access
             self.parameters.append(HelpParameter(' '.join(sorted(action.option_strings)),
                                                  action.help,
-                                                 required=action.required))
+                                                 required=action.required,
+                                                 choices=action.choices,
+                                                 default=action.default,
+                                                 group_name=action.container.description))
+
+        help_param = next(p for p in self.parameters if p.name == '--help -h')
+        help_param.group_name = 'Global Arguments'
 
     def _load_from_data(self, data):
         super(CommandHelpFile, self)._load_from_data(data)
@@ -231,14 +254,18 @@ class CommandHelpFile(HelpFile): #pylint: disable=too-few-public-methods
         self.parameters = loaded_params
 
 
-class HelpParameter(object): #pylint: disable=too-few-public-methods
-    def __init__(self, param_name, description, required):
+class HelpParameter(object): #pylint: disable=too-few-public-methods, too-many-instance-attributes
+    def __init__(self, param_name, description, required, choices=None, #pylint: disable=too-many-arguments
+                 default=None, group_name=None):
         self.name = param_name
         self.required = required
         self.type = 'string'
         self.short_summary = description
         self.long_summary = ''
         self.value_sources = []
+        self.choices = choices
+        self.default = default
+        self.group_name = group_name
 
     def update_from_data(self, data):
         if self.name != data.get('name'):
