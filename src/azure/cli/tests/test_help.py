@@ -376,43 +376,6 @@ Examples
         self.assertRaisesRegexp(HelpAuthoringException,
                                '.*Extra help param --foobar -fb.*',
                                 lambda: app.execute('n1 -h'.split()))
-
-# Will uncomment when partial params don't bypass help (help behaviors implementation) task #115631559
-#    @redirect_io
-#    def test_help_with_param_specified(self):
-#        app = Application(Configuration([]))
-#        def test_handler(args):
-#            pass
-
-#        cmd_table = {
-#            test_handler: {
-#                'name': 'n1',
-#                'arguments': [
-#                    {'name': '--arg -a', 'required': False},
-#                    {'name': '-b', 'required': False}
-#                    ]
-#                }
-#            }
-#        config = Configuration([])
-        #config.get_command_table = lambda: cmd_table
-        #app = Application(config)
-
-#        with self.assertRaises(SystemExit):
-#            cmd_result = app.execute('n1 --arg -h'.split())
-
-#        s = '''
-#Command
-#    n1
-
-#Arguments
-#    --arg -a
-
-#    -b
-
-#'''
-
-#        self.assertEqual(s, io.getvalue())
-
     @redirect_io
     def test_help_group_children(self):
         app = Application(Configuration([]))
@@ -445,37 +408,6 @@ Examples
             app.execute('group1 -h'.split())
         s = '\nGroup\n    group1\n\nSub-Commands\n    group2\n    group3\n\n'
         self.assertEqual(s, io.getvalue())
-
-    # Will uncomment when all errors are shown at once (help behaviors implementation) task #115631559
-    #@redirect_io
-    #def test_help_extra_missing_params(self):
-    #    app = Application(Configuration([]))
-    #    def test_handler(args):
-    #        pass
-
-    #    cmd_table = {
-    #        test_handler: {
-    #            'name': 'n1',
-    #            'arguments': [
-    #                {'name': '--foobar -fb', 'required': False},
-    #                {'name': '--foobar2 -fb2', 'required': True}
-    #                ]
-    #            }
-    #        }
-    #    config = Configuration([])
-        #config.get_command_table = lambda: cmd_table
-        #app = Application(config)
-
-    #    with self.assertRaises(SystemExit):
-    #        app.execute('n1 -fb a --foobar3 bad'.split())
-
-    #    with open(r'C:\temp\value.txt', 'w') as f:
-    #        f.write(io.getvalue())
-
-    #    self.assertTrue('required' in io.getvalue()
-    #                    and '--foobar/-fb' not in io.getvalue()
-    #                    and '--foobar2/-fb' in io.getvalue()
-    #                    and 'unrecognized arguments: --foobar3' in io.getvalue())
 
     @redirect_io
     def test_help_group_help(self):
@@ -536,3 +468,70 @@ Examples
 
 if __name__ == '__main__':
     unittest.main()
+
+# Will uncomment when all errors are shown at once (help behaviors implementation) task #115631559
+#@redirect_io
+#def test_help_extra_missing_params(self):
+#    app = Application(Configuration([]))
+#    def test_handler(args):
+#        pass
+
+#    cmd_table = {
+#        test_handler: {
+#            'name': 'n1',
+#            'arguments': [
+#                {'name': '--foobar -fb', 'required': False},
+#                {'name': '--foobar2 -fb2', 'required': True}
+#                ]
+#            }
+#        }
+#    config = Configuration([])
+    #config.get_command_table = lambda: cmd_table
+    #app = Application(config)
+
+#    with self.assertRaises(SystemExit):
+#        app.execute('n1 -fb a --foobar3 bad'.split())
+
+#    with open(r'C:\temp\value.txt', 'w') as f:
+#        f.write(io.getvalue())
+
+#    self.assertTrue('required' in io.getvalue()
+#                    and '--foobar/-fb' not in io.getvalue()
+#                    and '--foobar2/-fb' in io.getvalue()
+#                    and 'unrecognized arguments: --foobar3' in io.getvalue())
+
+# Will uncomment when partial params don't bypass help (help behaviors implementation) task #115631559
+#    @redirect_io
+#    def test_help_with_param_specified(self):
+#        app = Application(Configuration([]))
+#        def test_handler(args):
+#            pass
+
+#        cmd_table = {
+#            test_handler: {
+#                'name': 'n1',
+#                'arguments': [
+#                    {'name': '--arg -a', 'required': False},
+#                    {'name': '-b', 'required': False}
+#                    ]
+#                }
+#            }
+#        config = Configuration([])
+        #config.get_command_table = lambda: cmd_table
+        #app = Application(config)
+
+#        with self.assertRaises(SystemExit):
+#            cmd_result = app.execute('n1 --arg -h'.split())
+
+#        s = '''
+#Command
+#    n1
+
+#Arguments
+#    --arg -a
+
+#    -b
+
+#'''
+
+#        self.assertEqual(s, io.getvalue())
