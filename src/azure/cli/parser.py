@@ -1,5 +1,4 @@
 import argparse
-import sys
 import azure.cli._help as _help
 
 class IncorrectUsageError(Exception):
