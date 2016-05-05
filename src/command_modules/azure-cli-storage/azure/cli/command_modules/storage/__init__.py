@@ -303,7 +303,7 @@ blob_types_str = ' '.join(blob_types.keys())
 @command_table.option(**PARAMETER_ALIASES['container_name'])
 @command_table.option(**PARAMETER_ALIASES['blob_name'])
 @command_table.option('--type', required=True, choices=blob_types.keys(),
-                      help=L('type of blob to upload ({})'.format(blob_types_str)))
+                      help=L('type of blob to upload'))
 @command_table.option('--upload-from', required=True,
                       help=L('local path to upload from'))
 @command_table.option_set(STORAGE_DATA_CLIENT_ARGS)
