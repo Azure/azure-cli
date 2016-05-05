@@ -10,10 +10,10 @@ except ImportError:
 
 from azure.mgmt.compute.models import DataDisk
 from azure.mgmt.compute.models.compute_management_client_enums import DiskCreateOptionTypes
-from azure.cli.commands import CommandTable, LongRunningOperation, RESOURCE_GROUP_ARG_NAME
+from azure.cli.commands import CommandTable, LongRunningOperation
 from azure.cli.commands._command_creation import get_mgmt_service_client
 
-from ._params import PARAMETER_ALIASES, VM_PATCH_EXTRA_PARAMETERS, _compute_client_factory
+from ._params import _compute_client_factory
 
 command_table = CommandTable()
 
@@ -217,7 +217,7 @@ class ConvenienceVmCommands(object): # pylint: disable=too-few-public-methods
 
         return result
 
-    def attach_new_disk(self, lun, diskname, vhd, disksize=1023, **kwargs):
+    def attach_new_disk(self, lun, diskname, vhd, disksize=1023):
         ''' Attach a new disk to an existing Virtual Machine'''
         disk = DataDisk(lun=lun, vhd=vhd, name=diskname,
                         create_option=DiskCreateOptionTypes.empty,
@@ -225,7 +225,7 @@ class ConvenienceVmCommands(object): # pylint: disable=too-few-public-methods
         self.vm.storage_profile.data_disks.append(disk)
         _vm_set(self.vm, 'Attaching disk', 'Disk attached')
 
-    def attach_existing_disk(self, lun, diskname, vhd, disksize=1023, **kwargs):
+    def attach_existing_disk(self, lun, diskname, vhd, disksize=1023):
         ''' Attach an existing disk to an existing Virtual Machine '''
         # TODO: figure out size of existing disk instead of making the default value 1023
         disk = DataDisk(lun=lun, vhd=vhd, name=diskname,
@@ -234,13 +234,12 @@ class ConvenienceVmCommands(object): # pylint: disable=too-few-public-methods
         self.vm.storage_profile.data_disks.append(disk)
         _vm_set(self.vm, 'Attaching disk', 'Disk attached')
 
-    def detach_disk(self, diskname, **kwargs):
+    def detach_disk(self, diskname):
         ''' Detach a disk from a Virtual Machine '''
         # Issue: https://github.com/Azure/autorest/issues/934
         self.vm.resources = None
         try:
-            disk = next(d for d in self.vm.storage_profile.data_disks
-                        if d.name == kwargs.get('name'))
+            disk = next(d for d in self.vm.storage_profile.data_disks if d.name == diskname)
             self.vm.storage_profile.data_disks.remove(disk)
         except StopIteration:
             raise RuntimeError("No disk with the name '{}' found".format(diskname))
