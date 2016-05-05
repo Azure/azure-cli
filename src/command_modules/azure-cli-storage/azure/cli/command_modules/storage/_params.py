@@ -18,7 +18,7 @@ from ._validators import (
 
 # FACTORIES
 
-def storage_client_factory(**kwargs):
+def storage_client_factory(**_):
     return get_mgmt_service_client(StorageManagementClient, StorageManagementClientConfiguration)
 
 def file_data_service_factory(**kwargs):
