@@ -245,9 +245,9 @@
           "$ref": "#/definitions/DeploymentParameter_osDiskName",
           "x-ms-client-flatten": true
         },
-        "sshKeyPath": {
+        "sshDestKeyPath": {
           "type": "object",
-          "$ref": "#/definitions/DeploymentParameter_sshKeyPath",
+          "$ref": "#/definitions/DeploymentParameter_sshDestKeyPath",
           "x-ms-client-flatten": true
         },
         "osOffer": {
@@ -362,7 +362,7 @@
       "properties": {
         "value": {
           "type": "string",
-          "description": "Dynamic of Static private IP address allocation.",
+          "description": "Private IP address allocation method.",
           "x-ms-client-name": "privateIpAddressAllocation"
         }
       }
@@ -521,12 +521,12 @@
         }
       }
     },
-    "DeploymentParameter_sshKeyPath": {
+    "DeploymentParameter_sshDestKeyPath": {
       "properties": {
         "value": {
           "type": "string",
           "description": "VM file path for SSH key.",
-          "x-ms-client-name": "sshKeyPath"
+          "x-ms-client-name": "sshDestKeyPath"
         }
       }
     },
@@ -543,7 +543,7 @@
       "properties": {
         "value": {
           "type": "string",
-          "description": "Dynamic or Static public IP address allocation.",
+          "description": "Public IP address allocation method.",
           "enum": [
             "Dynamic",
             "Static"
@@ -557,7 +557,7 @@
       "properties": {
         "value": {
           "type": "string",
-          "description": "Authentication method: password-only or add ssh-keys (Linux-only).",
+          "description": "Password or SSH-based authentication.",
           "enum": [
             "password",
             "sshkey"
@@ -580,7 +580,7 @@
       "properties": {
         "value": {
           "type": "string",
-          "description": "The VM storage type.",
+          "description": "The VM storage type (Standard_LRS, Standard_GRS, Standard_RAGRS).",
           "x-ms-client-name": "storageRedundancyType"
         }
       }
@@ -589,7 +589,7 @@
       "properties": {
         "value": {
           "type": "string",
-          "description": "The VM Size that should be created  (e.g. Standard_A2)",
+          "description": "The VM Size that should be created.  See https://azure.microsoft.com/en-us/pricing/details/virtual-machines/ for size info.",
           "x-ms-client-name": "size"
         }
       }
@@ -598,7 +598,7 @@
       "properties": {
         "value": {
           "type": "string",
-          "description": "Use a public IP Address for the VM Nic. (new, existing or none).",
+          "description": "Use a public IP Address for the VM Nic.",
           "enum": [
             "none",
             "new",
@@ -613,7 +613,7 @@
       "properties": {
         "value": {
           "type": "string",
-          "description": "The IP address prefix.",
+          "description": "The virtual network IP address prefix.",
           "x-ms-client-name": "virtualNetworkIpAddressPrefix"
         }
       }
@@ -681,7 +681,7 @@
       "properties": {
         "value": {
           "type": "string",
-          "description": "Associate VMs with a public IP address to a DNS name (new or none).",
+          "description": "Associate VMs with a public IP address to a DNS name.",
           "enum": [
             "none",
             "new"

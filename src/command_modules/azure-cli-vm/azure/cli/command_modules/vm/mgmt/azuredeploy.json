@@ -31,7 +31,7 @@
         "sshkey"
       ],
       "metadata": {
-        "description": "Authentication method: password-only or add ssh-keys (Linux-only)."
+        "description": "Password or SSH-based authentication."
       }
     },
     "availabilitySetId": {
@@ -67,7 +67,7 @@
         "new"
       ],
       "metadata": {
-        "description": "Associate VMs with a public IP address to a DNS name (new or none)."
+        "description": "Associate VMs with a public IP address to a DNS name."
       }
     },
     "location": {
@@ -81,7 +81,7 @@
       "type": "string",
       "minLength": 1,
       "metadata": {
-        "description": "The VM resource name."
+        "description": "The VM name."
       }
     },
     "osDiskName": {
@@ -154,7 +154,7 @@
         "Static"
       ],
       "metadata": {
-        "description": "Dynamic of Static private IP address allocation."
+        "description": "Private IP address allocation method."
       }
     },
     "publicIpAddressAllocation": {
@@ -165,7 +165,7 @@
         "Static"
       ],
       "metadata": {
-        "description": "Dynamic or Static public IP address allocation."
+        "description": "Public IP address allocation method."
       }
     },
     "publicIpAddressName": {
@@ -184,21 +184,21 @@
         "existing"
       ],
       "metadata": {
-        "description": "Use a public IP Address for the VM Nic. (new, existing or none)."
+        "description": "Use a public IP Address for the VM Nic."
       }
     },
     "size": {
       "type": "string",
       "defaultValue": "Standard_A2",
       "metadata": {
-        "description": "The VM Size that should be created (e.g. Standard_A2)"
+        "description": "The VM Size that should be created.  See https://azure.microsoft.com/en-us/pricing/details/virtual-machines/ for size info."
       }
     },
-    "sshKeyPath": {
+    "sshDestKeyPath": {
       "type": "string",
       "defaultValue": "[concat('/home/',parameters('adminUsername'),'/.ssh/authorized_keys')]",
       "metadata": {
-        "description": "VM file path for SSH key."
+        "description": "Destination file path on VM for SSH key."
       }
     },
     "sshKeyValue": {
@@ -237,14 +237,14 @@
       "type": "string",
       "defaultValue": "Standard_LRS",
       "metadata": {
-        "description": "The VM storage type."
+        "description": "The VM storage type (Standard_LRS, Standard_GRS, Standard_RAGRS)."
       }
     },
     "subnetIpAddressPrefix": {
       "type": "string",
       "defaultValue": "10.0.0.0/24",
       "metadata": {
-        "description": "The subnet address type."
+        "description": "The subnet address prefix."
       }
     },
     "subnetName": {
@@ -258,7 +258,7 @@
       "type": "string",
       "defaultValue": "10.0.0.0/16",
       "metadata": {
-        "description": "The IP address prefix."
+        "description": "The virtual network IP address prefix."
       }
     },
     "virtualNetworkName": {
@@ -460,7 +460,7 @@
           "osDiskName": { "value": "[parameters('osDiskName')]" },
           "osDiskUri":  { "value": "[parameters('osDiskUri')]"},
           "sshKeyValue": { "value": "[parameters('sshKeyValue')]" },
-          "sshKeyPath": { "value": "[parameters('sshKeyPath')]" },
+          "sshKeyPath": { "value": "[parameters('sshDestKeyPath')]" },
           "availabilitySetId": { "value": "[variables('availSetId')]" },
           "location": { "value": "[parameters('location')]" }
         }
