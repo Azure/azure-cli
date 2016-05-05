@@ -19,7 +19,6 @@ PARAMETER_ALIASES.update({
         'name': '--name -n',
         'dest': 'name',
         'help': L('Disk name'),
-        'required': True
     },
     'disksize': {
         'name': '--disksize',
@@ -34,13 +33,9 @@ PARAMETER_ALIASES.update({
         'help': L('0-based logical unit number (LUN). Max value depends on the Virtual ' + \
                   'Machine size'),
         'type': int,
-        'required': True
     },
-    'optional_resource_group_name':
-        extend_parameter(GLOBAL_COMMON_PARAMETERS['resource_group_name'], required=False),
     'vhd': {
         'name': '--vhd',
-        'required': True,
         'type': VirtualHardDisk
     },
 })

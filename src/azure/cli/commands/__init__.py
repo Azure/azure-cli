@@ -22,33 +22,28 @@ COMMON_PARAMETERS = {
         'metavar': 'DEPLOYMENTNAME',
         'help': 'Name of the resource deployment',
         'default': 'azurecli' + str(time.time()) + str(random.randint(0, 10000000)),
-        'required': False
     },
     'location': {
         'name': '--location -l',
         'metavar': 'LOCATION',
         'help': 'Location',
-        'required': True
     },
     'resource_group_name': {
         'name': '--resource-group -g',
         'dest': RESOURCE_GROUP_ARG_NAME,
         'metavar': 'RESOURCEGROUP',
         'help': 'The name of the resource group',
-        'required': True
     },
     'tag' : {
         'name': '--tag',
         'metavar': 'TAG',
         'help': L('a single tag in \'key[=value]\' format'),
-        'required': False,
         'type': validate_tag
     },
     'tags' : {
         'name': '--tags',
         'metavar': 'TAGS',
         'help': L('multiple semicolon separated tags in \'key[=value]\' format'),
-        'required': False,
         'type': validate_tags
     },
 }
