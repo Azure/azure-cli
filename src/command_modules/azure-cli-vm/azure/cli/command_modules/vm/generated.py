@@ -1,5 +1,6 @@
 import argparse
 import re
+import os
 from azure.mgmt.compute.operations import (AvailabilitySetsOperations,
                                            VirtualMachineExtensionImagesOperations,
                                            VirtualMachineExtensionsOperations,
@@ -205,11 +206,25 @@ class VMImageFieldAction(argparse.Action): #pylint: disable=too-few-public-metho
         else:
             namespace.os_type = image
 
+class VMSSHFieldAction(argparse.Action): #pylint: disable=too-few-public-methods
+    def __call__(self, parser, namespace, values, option_string=None):
+        ssh_value = values
+
+        if os.path.exists(ssh_value):
+            with open(ssh_value, 'r') as f:
+                namespace.ssh_key_value = f.read()
+        else:
+            namespace.ssh_key_value = ssh_value
+
 extra_parameters = [
     {
         'name': '--image',
         'help': 'The OS image.  Supported values: Common OS (e.g. Win2012R2Datacenter), URN (e.g. "publisher:offer:sku:version"), or existing VHD URI.',
         'action': VMImageFieldAction
+        },
+    {
+        'name': '--ssh-key-value',
+        'action': VMSSHFieldAction
         }
     ]
 
@@ -242,7 +257,7 @@ helps['vm create'] = """
                     --virtual-network-type existing --virtual-network-name myvnet --subnet-name default
                     --availability-set-type existing --availability-set-id myavailset
                     --public-ip-address-type new --dns-name-for-public-ip myGloballyUniqueVmDnsName
-                    -l "West US" -g myvms --name myvm18o --ssh-key-value "<ssh-rsa-key>"
+                    -l "West US" -g myvms --name myvm18o --ssh-key-value "<ssh-rsa-key or key-file-path>"
             """
 
 build_operation('vm',
