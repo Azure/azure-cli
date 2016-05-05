@@ -1,6 +1,8 @@
-﻿import logging
+﻿import os
+import logging
+from logging.handlers import RotatingFileHandler
 
-LOG_LEVEL_CONFIGS = [
+CONSOLE_LOG_CONFIGS = [
     # (default)
     {
         'az': logging.WARNING,
@@ -16,6 +18,12 @@ LOG_LEVEL_CONFIGS = [
         'az': logging.DEBUG,
         'root': logging.DEBUG,
     }]
+
+AZ_LOGFILE_NAME = 'az.log'
+DEFAULT_LOG_DIR = os.path.expanduser(os.path.join('~', '.azure', 'logs'))
+
+ENABLE_LOG_FILE = os.environ.get('AZURE_CLI_ENABLE_LOG_FILE')
+LOG_DIR = os.environ.get('AZURE_CLI_LOG_DIR')
 
 def _determine_verbose_level(argv):
     # Get verbose level by reading the arguments.
@@ -33,26 +41,52 @@ def _determine_verbose_level(argv):
         else:
             i += 1
     # Use max verbose level if too much verbosity specified.
-    return verbose_level if verbose_level < len(LOG_LEVEL_CONFIGS) else len(LOG_LEVEL_CONFIGS)-1
+    return verbose_level if verbose_level < len(CONSOLE_LOG_CONFIGS) else len(CONSOLE_LOG_CONFIGS)-1
 
-def _configure_root_logger(log_level_config):
-    root_logger = logging.getLogger()
-    root_logger.setLevel(log_level_config['root'])
+def _init_console_handlers(root_logger, az_logger, log_level_config):
+    console_log_format = logging.Formatter('%(levelname)s: %(message)s')
 
-def _configure_az_logger(log_level_config):
-    az_logger = logging.getLogger('az')
-    az_logger.setLevel(log_level_config['az'])
+    root_console_handler = logging.StreamHandler()
+    root_console_handler.setFormatter(console_log_format)
+    root_console_handler.setLevel(log_level_config['root'])
+    root_logger.addHandler(root_console_handler)
 
-def _init_console_handler():
-    logging.basicConfig(format='%(levelname)s: %(message)s')
+    az_console_handler = logging.StreamHandler()
+    az_console_handler.setFormatter(console_log_format)
+    az_console_handler.setLevel(log_level_config['az'])
+    az_logger.addHandler(az_console_handler)
+
+def _get_log_file_path():
+    log_dir = LOG_DIR or DEFAULT_LOG_DIR
+    if not os.path.isdir(log_dir):
+        os.makedirs(log_dir)
+    return os.path.join(log_dir, AZ_LOGFILE_NAME)
+
+def _init_logfile_handlers(root_logger, az_logger):
+    if not ENABLE_LOG_FILE:
+        return
+    log_file_path = _get_log_file_path()
+    logfile_handler = RotatingFileHandler(log_file_path, maxBytes=5*1024*1024, backupCount=5)
+    lfmt = logging.Formatter('%(process)d : %(asctime)s : %(name)s :  %(levelname)s : %(message)s')
+    logfile_handler.setFormatter(lfmt)
+    logfile_handler.setLevel(logging.DEBUG)
+    root_logger.addHandler(logfile_handler)
+    az_logger.addHandler(logfile_handler)
 
 def configure_logging(argv):
     verbose_level = _determine_verbose_level(argv)
-    log_level_config = LOG_LEVEL_CONFIGS[verbose_level]
+    log_level_config = CONSOLE_LOG_CONFIGS[verbose_level]
 
-    _init_console_handler()
-    _configure_root_logger(log_level_config)
-    _configure_az_logger(log_level_config)
+    root_logger = logging.getLogger()
+    az_logger = logging.getLogger('az')
+    # Set the levels of the loggers to lowest level.
+    # Handlers can override by choosing a higher level.
+    root_logger.setLevel(logging.DEBUG)
+    az_logger.setLevel(logging.DEBUG)
+    az_logger.propagate = False
+
+    _init_console_handlers(root_logger, az_logger, log_level_config)
+    _init_logfile_handlers(root_logger, az_logger)
 
 def get_az_logger(module_name=None):
     return logging.getLogger('az.' + module_name if module_name else 'az')
