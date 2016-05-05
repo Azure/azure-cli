@@ -450,40 +450,47 @@ Global Arguments
         s = '\nGroup\n    az group1\n\nSub-Commands\n    group2\n    group3\n\n'
         self.assertEqual(s, io.getvalue())
 
-    # TODO: Comment back in once fix is applied for this for Python 2.7 bug
-    #@redirect_io
-    #def test_help_extra_missing_params(self):
-    #    app = Application(Configuration([]))
-    #    def test_handler(args):
-    #        pass
+    @redirect_io
+    def test_help_extra_missing_params(self):
+        app = Application(Configuration([]))
+        def test_handler(args):
+            pass
 
-    #    cmd_table = {
-    #        test_handler: {
-    #            'name': 'n1',
-    #            'arguments': [
-    #                {'name': '--foobar -fb', 'required': False},
-    #                {'name': '--foobar2 -fb2', 'required': True}
-    #                ]
-    #            }
-    #        }
-    #    config = Configuration([])
-    #    config.get_command_table = lambda: cmd_table
-    #    app = Application(config)
+        cmd_table = {
+            test_handler: {
+                'name': 'n1',
+                'arguments': [
+                    {'name': '--foobar -fb', 'required': False},
+                    {'name': '--foobar2 -fb2', 'required': True}
+                    ]
+                }
+            }
+        config = Configuration([])
+        config.get_command_table = lambda: cmd_table
+        app = Application(config)
 
-    #    # there is an argparse bug on <2.7.10 where SystemExit is not thrown on missing required param
-    #    if sys.version_info < (2, 7, 10):
-    #        app.execute('n1 -fb a --foobar value'.split())
-    #        app.execute('n1 -fb a --foobar2 value --foobar3 extra'.split())
-    #    else:
-    #        with self.assertRaises(SystemExit):
-    #            app.execute('n1 -fb a --foobar value'.split())
-    #        with self.assertRaises(SystemExit):
-    #            app.execute('n1 -fb a --foobar2 value --foobar3 extra'.split())
+        # work around an argparse behavior where output is not printed and SystemExit
+        # is not raised on Python 2.7.9
+        if sys.version_info < (2, 7, 10):
+            try:
+                app.execute('n1 -fb a --foobar value'.split())
+            except SystemExit:
+                pass
 
-    #        self.assertTrue('required' in io.getvalue()
-    #                        and '--foobar/-fb' not in io.getvalue()
-    #                        and '--foobar2/-fb2' in io.getvalue()
-    #                        and 'unrecognized arguments: --foobar3 extra' in io.getvalue())
+            try:
+                app.execute('n1 -fb a --foobar2 value --foobar3 extra'.split())
+            except SystemExit:
+                pass
+        else:
+            with self.assertRaises(SystemExit):
+                app.execute('n1 -fb a --foobar value'.split())
+            with self.assertRaises(SystemExit):
+                app.execute('n1 -fb a --foobar2 value --foobar3 extra'.split())
+
+            self.assertTrue('required' in io.getvalue()
+                            and '--foobar/-fb' not in io.getvalue()
+                            and '--foobar2/-fb2' in io.getvalue()
+                            and 'unrecognized arguments: --foobar3 extra' in io.getvalue())
 
     @redirect_io
     def test_help_group_help(self):
