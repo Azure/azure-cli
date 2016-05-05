@@ -74,7 +74,7 @@ class CommandTestScript(object): #pylint: disable=too-many-instance-attributes
                     _check_json(source[check], checks[check])
                 else:
                     assert source[check] == checks[check]
-        print('RUNNING: {}'.format(command))
+        #print('RUNNING: {}'.format(command))
         output = StringIO()
         command += ' -o json'
         cli(command.split(), file=output)

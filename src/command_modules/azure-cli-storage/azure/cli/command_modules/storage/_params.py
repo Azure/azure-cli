@@ -30,7 +30,7 @@ def file_data_service_factory(**kwargs):
         sas_token=kwargs.pop('sas_token', None))
 
 def blob_data_service_factory(**kwargs):
-    blob_type = kwargs.get('type')
+    blob_type = kwargs.get('blob_type')
     blob_service = blob_types.get(blob_type, BlockBlobService)
     return get_data_service_client(
         blob_service,
@@ -114,8 +114,7 @@ PARAMETER_ALIASES.update({
     },
     'blob_type': {
         'name': '--blob-type',
-        'choices': blob_types.keys(),
-        'type': lambda x: blob_types[x]
+        'choices': blob_types.keys()
     },
     'container_name': {
         'name': '--container-name -c',
