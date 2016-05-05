@@ -37,11 +37,8 @@ def _get_member(obj, path):
 def _make_func(client_factory, member_path, return_type_or_func, unbound_func, extra_parameters):
     def call_client(args):
         client = client_factory(**args)
-        for p in extra_parameters or []:
-            param_name = p['name'].split()[0]
-            param_name = re.sub('--', '', param_name)
-            param_name = re.sub('-', '_', param_name)
-            args.pop(param_name)
+        for param in extra_parameters.keys() if extra_parameters else []:
+            args.pop(param)
         ops_instance = _get_member(client, member_path)
 
         try:
@@ -156,8 +153,8 @@ def build_operation(command_name,
         # append any 'extra' args needed (for example to obtain a client) that aren't required
         # by the SDK.
         if extra_parameters:
-            for arg in extra_parameters:
-                options.append(arg.copy())
+            for arg in extra_parameters.keys():
+                options.append(extra_parameters[arg].copy())
 
         command_table[func] = {
             'name': ' '.join([command_name, op.opname]),
