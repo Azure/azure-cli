@@ -8,9 +8,8 @@ from azure.cli.commands._auto_command import build_operation, AutoCommandDefinit
 from azure.cli.commands import CommandTable, LongRunningOperation
 from azure.cli._locale import L
 
-from ._params import PARAMETER_ALIASES
-from .custom import (_resource_client_factory,
-                     ConvenienceResourceGroupCommands, ConvenienceResourceCommands)
+from ._params import PARAMETER_ALIASES, _resource_client_factory
+from .custom import ConvenienceResourceGroupCommands, ConvenienceResourceCommands
 
 command_table = CommandTable()
 
