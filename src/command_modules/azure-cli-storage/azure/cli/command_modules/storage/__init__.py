@@ -1,5 +1,4 @@
 from __future__ import print_function
-import os
 from sys import stderr
 
 from azure.storage.blob import PublicAccess, BlockBlobService, AppendBlobService, PageBlobService
@@ -64,6 +63,8 @@ def _update_progress(current, total):
         message += '{: >5.1f}'.format(percent_done)
         print('\b' * len(message) + message, end='', file=stderr)
         stderr.flush()
+        if current == total:
+            print('', file=stderr)
 
 #### ACCOUNT COMMANDS #############################################################################
 
@@ -302,7 +303,7 @@ blob_types_str = ' '.join(blob_types.keys())
 @command_table.option(**PARAMETER_ALIASES['container_name'])
 @command_table.option(**PARAMETER_ALIASES['blob_name'])
 @command_table.option('--type', required=True, choices=blob_types.keys(),
-                      help=L('type of blob to upload ({})'.format(blob_types_str)))
+                      help=L('type of blob to upload'))
 @command_table.option('--upload-from', required=True,
                       help=L('local path to upload from'))
 @command_table.option_set(STORAGE_DATA_CLIENT_ARGS)

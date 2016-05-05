@@ -16,7 +16,7 @@ To install via cURL on Linux, Unix and OS X, type:
 
 .. code:: shell
 
-    curl http://azure-cli-nightly.cloudapp.net/install | bash
+    curl http://azure-cli-nightly.westus.cloudapp.azure.com/install | bash
 
 If you chose to enable tab completion, type `exec -l $SHELL` to restart your shell.
 

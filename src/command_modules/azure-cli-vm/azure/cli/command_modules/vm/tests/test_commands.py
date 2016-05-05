@@ -1,7 +1,7 @@
 import os
 import unittest
 from azure.cli.utils.command_test_util import CommandTestGenerator
-from command_specs import TEST_DEF, ENV_VAR
+from command_specs import TEST_DEF, ENV_VAR #pylint: disable=import-error,relative-import
 
 class TestCommands(unittest.TestCase):
     pass

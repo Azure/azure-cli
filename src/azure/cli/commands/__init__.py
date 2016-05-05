@@ -26,7 +26,7 @@ COMMON_PARAMETERS = {
         'name': '--resource-group -g',
         'dest': RESOURCE_GROUP_ARG_NAME,
         'metavar': 'RESOURCEGROUP',
-        'help': 'Name of resource group',
+        'help': 'The name of the resource group.',
         'required': True
     },
     'location': {
@@ -38,7 +38,7 @@ COMMON_PARAMETERS = {
     'deployment_name': {
         'name': '--deployment-name',
         'metavar': 'DEPLOYMENTNAME',
-        'help': 'Name of the resource deployment',
+        'help': 'The name of the resource deployment.',
         'default': 'azurecli' + str(time.time()) + str(random.randint(0, 10000000)),
         'required': False
     }
