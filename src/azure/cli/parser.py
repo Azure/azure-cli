@@ -80,4 +80,4 @@ class AzCliCommandParser(argparse.ArgumentParser):
     def exit(self, status = 0, message = None):
         if message:
             self._print_message(message, sys.stderr)
-        sys.exit(status)
+        raise SystemExit(status)
