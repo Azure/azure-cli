@@ -469,6 +469,8 @@ Global Arguments
         config.get_command_table = lambda: cmd_table
         app = Application(config)
 
+        # work around an argparse behavior where output is not printed and SystemExit
+        # is not raised on Python 2.7.9
         if sys.version_info < (2, 7, 10):
             try:
                 app.execute('n1 -fb a --foobar value'.split())
