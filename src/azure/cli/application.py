@@ -147,10 +147,10 @@ class Application(object):
                                   default='list',
                                   help='Output format')
         # The arguments for verbosity don't get parsed by argparse but we add it here for help.
-        parser.add_argument('--verbose', dest='_log_verbosity_verbose', action='store_true',
-                            help='Increase logging verbosity. Use --debug for full debug logs.')
-        parser.add_argument('--debug', dest='_log_verbosity_debug', action='store_true',
-                            help='Increase logging verbosity to show all debug logs.')
+        global_group.add_argument('--verbose', dest='_log_verbosity_verbose', action='store_true',
+                                  help='Increase logging verbosity. Use --debug for full debug logs.') #pylint: disable=line-too-long
+        global_group.add_argument('--debug', dest='_log_verbosity_debug', action='store_true',
+                                  help='Increase logging verbosity to show all debug logs.')
 
     def _handle_builtin_arguments(self, args):
         self.configuration.output_format = args._output_format #pylint: disable=protected-access

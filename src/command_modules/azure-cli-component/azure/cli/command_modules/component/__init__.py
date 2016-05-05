@@ -7,7 +7,7 @@ from azure.cli.parser import IncorrectUsageError
 from azure.cli.commands import CommandTable
 from azure.cli._locale import L
 
-from azure.cli.utils.update_checker import check_for_component_update, UpdateCheckError
+from azure.cli.utils.update_checker import check_for_component_update
 from azure.cli._util import CLIError
 
 CLI_PACKAGE_NAME = 'azure-cli'

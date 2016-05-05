@@ -139,7 +139,7 @@ def _load_images_from_aliases_doc(publisher, offer, sku):
                                                 _partial_matched(sku, i['sku']))]
         return all_images
     except KeyError:
-        raise RuntimeError('Could not retrieve image list from {}'.format(target_url))
+        raise CLIError('Could not retrieve image list from {}'.format(target_url))
 
 def _load_images_thru_services(publisher, offer, sku, location):
     from concurrent.futures import ThreadPoolExecutor
@@ -225,7 +225,7 @@ class ConvenienceVmCommands(object): # pylint: disable=too-few-public-methods
         '''
         load_thru_services = all
         if load_thru_services and not image_location:
-            raise RuntimeError('Argument of --location/-l is required to use with --all flag')
+            raise CLIError('Argument of --location/-l is required to use with --all flag')
 
         if load_thru_services:
             all_images = _load_images_thru_services(publisher,
