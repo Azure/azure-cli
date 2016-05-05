@@ -460,8 +460,8 @@ Global Arguments
             test_handler: {
                 'name': 'n1',
                 'arguments': [
-                    {'name': '--foobar -fb', 'required': False},
-                    {'name': '--foobar2 -fb2', 'required': True}
+                    {'name': '--foobar -f', 'required': False},
+                    {'name': '--foobar2 -x', 'required': True}
                     ]
                 }
             }
@@ -470,19 +470,14 @@ Global Arguments
         app = Application(config)
 
         # there is an argparse bug on <2.7.10 where SystemExit is not thrown on missing required param
-        if sys.version_info < (2, 7, 10):
+        with self.assertRaises(SystemExit):
             app.execute('n1 -fb a --foobar value'.split())
+        with self.assertRaises(SystemExit):
             app.execute('n1 -fb a --foobar2 value --foobar3 extra'.split())
-        else:
-            with self.assertRaises(SystemExit):
-                app.execute('n1 -fb a --foobar value'.split())
-            with self.assertRaises(SystemExit):
-                app.execute('n1 -fb a --foobar2 value --foobar3 extra'.split())
-
-            self.assertTrue('required' in io.getvalue()
-                            and '--foobar/-fb' not in io.getvalue()
-                            and '--foobar2/-fb2' in io.getvalue()
-                            and 'unrecognized arguments: --foobar3 extra' in io.getvalue())
+        self.assertTrue('required' in io.getvalue()
+                        and '--foobar/-fb' not in io.getvalue()
+                        and '--foobar2/-fb2' in io.getvalue()
+                        and 'unrecognized arguments: --foobar3 extra' in io.getvalue())
 
     @redirect_io
     def test_help_group_help(self):
