@@ -11,19 +11,15 @@ from azure.mgmt.compute.models.compute_management_client_enums import DiskCreate
 from azure.cli._locale import L
 from azure.cli.commands import CommandTable, LongRunningOperation, RESOURCE_GROUP_ARG_NAME
 from azure.cli.commands._command_creation import get_mgmt_service_client
-from azure.mgmt.compute import ComputeManagementClient, ComputeManagementClientConfiguration
 
-from ._params import PARAMETER_ALIASES
-
-def _compute_client_factory(_):
-    return get_mgmt_service_client(ComputeManagementClient, ComputeManagementClientConfiguration)
+from ._params import PARAMETER_ALIASES, _compute_client_factory
 
 command_table = CommandTable()
 
 def vm_getter(args):
     ''' Retreive a VM based on the `args` passed in.
     '''
-    client = _compute_client_factory(args)
+    client = _compute_client_factory(**args)
     result = client.virtual_machines.get(args.get(RESOURCE_GROUP_ARG_NAME), args.get('vm_name'))
     return result
 
@@ -31,7 +27,7 @@ def vm_setter(args, instance, start_msg, end_msg):
     '''Update the given Virtual Machine instance
     '''
     instance.resources = None # Issue: https://github.com/Azure/autorest/issues/934
-    client = _compute_client_factory(args)
+    client = _compute_client_factory(**args)
     poller = client.virtual_machines.create_or_update(
         resource_group_name=args.get(RESOURCE_GROUP_ARG_NAME),
         vm_name=args.get('vm_name'),
@@ -66,7 +62,7 @@ def patches_vm(start_msg, finish_msg):
 @command_table.command('vm list', description=L('List Virtual Machines.'))
 @command_table.option(**PARAMETER_ALIASES['optional_resource_group_name'])
 def list_vm(args):
-    ccf = _compute_client_factory(args)
+    ccf = _compute_client_factory(**args)
     group = args.get(RESOURCE_GROUP_ARG_NAME)
     vm_list = ccf.virtual_machines.list(resource_group_name=group) if group else \
               ccf.virtual_machines.list_all()
@@ -144,7 +140,7 @@ def _load_images_thru_services(publisher, offer, sku, location):
     from concurrent.futures import ThreadPoolExecutor
 
     all_images = []
-    client = _compute_client_factory({})
+    client = _compute_client_factory()
 
     def _load_images_from_publisher(publisher):
         offers = client.virtual_machine_images.list_offers(location, publisher)
@@ -205,7 +201,7 @@ def _parse_rg_name(strid):
 
 class ConvenienceVmCommands(object): # pylint: disable=too-few-public-methods
 
-    def __init__(self, _):
+    def __init__(self, **_):
         pass
 
     # pylint: disable=no-self-use,too-many-arguments

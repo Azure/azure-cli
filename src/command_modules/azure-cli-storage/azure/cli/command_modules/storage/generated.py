@@ -1,45 +1,32 @@
+from __future__ import print_function
+
+from azure.cli.commands import CommandTable, LongRunningOperation
+from azure.cli.commands._auto_command import build_operation, AutoCommandDefinition
+
+from azure.mgmt.storage.operations import StorageAccountsOperations
+from azure.storage.blob import BlockBlobService
+from azure.storage.file import FileService
+from azure.storage import CloudStorageAccount
+
+from ._params import (PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS, storage_client_factory,
+                      blob_data_service_factory, file_data_service_factory,
+                      cloud_storage_account_service_factory)
+from .custom import (ConvenienceStorageAccountCommands, ConvenienceBlobServiceCommands,
+                     ConvenienceFileServiceCommands)
+
 command_table = CommandTable()
 
-# FACTORIES
+# HELPER METHODS
 
-def _storage_client_factory(_):
-    return get_mgmt_service_client(StorageManagementClient, StorageManagementClientConfiguration)
-
-def _file_data_service_factory(args):
-    return get_data_service_client(
-        FileService,
-        args.pop('account_name', None),
-        args.pop('account_key', None),
-        connection_string=args.pop('connection_string', None),
-        sas_token=args.pop('sas_token', None))
-
-def _blob_data_service_factory(args):
-    blob_type = args.get('type')
-    blob_service = blob_types.get(blob_type, BlockBlobService)
-    return get_data_service_client(
-        blob_service,
-        args.pop('account_name', None),
-        args.pop('account_key', None),
-        connection_string=args.pop('connection_string', None),
-        sas_token=args.pop('sas_token', None))
-
-def _cloud_storage_account_service_factory(args):
-    account_name = args.pop('account_name', None)
-    account_key = args.pop('account_key', None)
-    sas_token = args.pop('sas_token', None)
-    connection_string = args.pop('connection_string', None)
-    if connection_string:
-        # CloudStorageAccount doesn't accept connection string directly, so we must parse
-        # out the account name and key manually
-        conn_dict = validate_key_value_pairs(connection_string)
-        account_name = conn_dict['AccountName']
-        account_key = conn_dict['AccountKey']
-    return CloudStorageAccount(account_name, account_key, sas_token)
+def _patch_aliases(alias_items):
+    aliases = PARAMETER_ALIASES.copy()
+    aliases.update(alias_items)
+    return aliases
 
 # STORAGE ACCOUNT COMMANDS
 
 build_operation(
-    'storage account', 'storage_accounts', _storage_client_factory,
+    'storage account', 'storage_accounts', storage_client_factory,
     [
         AutoCommandDefinition(StorageAccountsOperations.check_name_availability,
                               'Result', 'check-name'),
@@ -48,22 +35,42 @@ build_operation(
     ], command_table, PARAMETER_ALIASES)
 
 build_operation(
-    'storage account', None, _cloud_storage_account_service_factory,
+    'storage account', None, cloud_storage_account_service_factory,
     [
         AutoCommandDefinition(CloudStorageAccount.generate_shared_access_signature,
                               'SAS', 'generate-sas')
     ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
 build_operation(
-    'storage account keys', 'storage_accounts', _storage_client_factory,
+    'storage account', None, ConvenienceStorageAccountCommands,
+    [
+        AutoCommandDefinition(
+            ConvenienceStorageAccountCommands.create,
+            LongRunningOperation('Creating storage account', 'Storage account created')),
+        AutoCommandDefinition(ConvenienceStorageAccountCommands.list, '[StorageAccount]'),
+        AutoCommandDefinition(ConvenienceStorageAccountCommands.show_usage, 'Object'),
+        AutoCommandDefinition(ConvenienceStorageAccountCommands.set, 'Object'),
+        AutoCommandDefinition(ConvenienceStorageAccountCommands.connection_string, 'Object')
+    ], command_table, _patch_aliases({
+        'account_type': {'name': '--type'}
+    }))
+
+build_operation(
+    'storage account keys', 'storage_accounts', storage_client_factory,
     [
         AutoCommandDefinition(StorageAccountsOperations.list_keys, '[StorageAccountKeys]', 'list')
+    ], command_table, PARAMETER_ALIASES)
+
+build_operation(
+    'storage account keys', None, ConvenienceStorageAccountCommands,
+    [
+        AutoCommandDefinition(ConvenienceStorageAccountCommands.renew_keys, 'Object', 'renew')
     ], command_table, PARAMETER_ALIASES)
 
 # BLOB SERVICE COMMANDS
 
 build_operation(
-    'storage container', None, _blob_data_service_factory,
+    'storage container', None, blob_data_service_factory,
     [
         AutoCommandDefinition(BlockBlobService.list_containers, '[Container]', 'list'),
         AutoCommandDefinition(BlockBlobService.delete_container, 'Bool', 'delete'),
@@ -75,21 +82,27 @@ build_operation(
     ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
 build_operation(
-    'storage container acl', None, _blob_data_service_factory,
+    'storage container', None, ConvenienceBlobServiceCommands,
+    [
+        AutoCommandDefinition(ConvenienceBlobServiceCommands.container_exists, 'Bool', 'exists')
+    ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
+
+build_operation(
+    'storage container acl', None, blob_data_service_factory,
     [
         AutoCommandDefinition(BlockBlobService.set_container_acl, 'StoredAccessPolicy', 'set'),
         AutoCommandDefinition(BlockBlobService.get_container_acl, '[StoredAccessPolicy]', 'show'),
     ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
 build_operation(
-    'storage container metadata', None, _blob_data_service_factory,
+    'storage container metadata', None, blob_data_service_factory,
     [
         AutoCommandDefinition(BlockBlobService.set_container_metadata, 'Properties', 'set'),
         AutoCommandDefinition(BlockBlobService.get_container_metadata, 'Metadata', 'show'),
     ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
 build_operation(
-    'storage container lease', None, _blob_data_service_factory,
+    'storage container lease', None, blob_data_service_factory,
     [
         AutoCommandDefinition(BlockBlobService.acquire_container_lease, 'LeaseID', 'acquire'),
         AutoCommandDefinition(BlockBlobService.renew_container_lease, 'LeaseID', 'renew'),
@@ -99,7 +112,7 @@ build_operation(
     ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
 build_operation(
-    'storage blob', None, _blob_data_service_factory,
+    'storage blob', None, blob_data_service_factory,
     [
         AutoCommandDefinition(BlockBlobService.list_blobs, '[Blob]', 'list'),
         AutoCommandDefinition(BlockBlobService.delete_blob, None, 'delete'),
@@ -112,7 +125,17 @@ build_operation(
     ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
 build_operation(
-    'storage blob service-properties', None, _blob_data_service_factory,
+    'storage blob', None, ConvenienceBlobServiceCommands,
+    [
+        AutoCommandDefinition(ConvenienceBlobServiceCommands.blob_exists, 'Bool', 'exists'),
+        AutoCommandDefinition(ConvenienceBlobServiceCommands.download, 'Object'),
+        AutoCommandDefinition(ConvenienceBlobServiceCommands.upload, 'Object')
+    ], command_table, _patch_aliases({
+        'blob_type': {'name': '--type'}
+    }), STORAGE_DATA_CLIENT_ARGS)
+
+build_operation(
+    'storage blob service-properties', None, blob_data_service_factory,
     [
         AutoCommandDefinition(BlockBlobService.get_blob_service_properties,
                               '[ServiceProperties]', 'show'),
@@ -121,14 +144,14 @@ build_operation(
     ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
 build_operation(
-    'storage blob metadata', None, _blob_data_service_factory,
+    'storage blob metadata', None, blob_data_service_factory,
     [
         AutoCommandDefinition(BlockBlobService.get_blob_metadata, 'Metadata', 'show'),
         AutoCommandDefinition(BlockBlobService.set_blob_metadata, 'Metadata', 'set')
     ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
 build_operation(
-    'storage blob lease', None, _blob_data_service_factory,
+    'storage blob lease', None, blob_data_service_factory,
     [
         AutoCommandDefinition(BlockBlobService.acquire_blob_lease, 'LeaseID', 'acquire'),
         AutoCommandDefinition(BlockBlobService.renew_blob_lease, 'LeaseID', 'renew'),
@@ -138,7 +161,7 @@ build_operation(
     ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
 build_operation(
-    'storage blob copy', None, _blob_data_service_factory,
+    'storage blob copy', None, blob_data_service_factory,
     [
         AutoCommandDefinition(BlockBlobService.copy_blob, 'CopyOperationProperties', 'start'),
         AutoCommandDefinition(BlockBlobService.abort_copy_blob, None, 'cancel'),
@@ -147,7 +170,7 @@ build_operation(
 # FILE SERVICE COMMANDS
 
 build_operation(
-    'storage share', None, _file_data_service_factory,
+    'storage share', None, file_data_service_factory,
     [
         AutoCommandDefinition(FileService.list_shares, '[Share]', 'list'),
         AutoCommandDefinition(FileService.list_directories_and_files,
@@ -163,21 +186,27 @@ build_operation(
     ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
 build_operation(
-    'storage share metadata', None, _file_data_service_factory,
+    'storage share', None, ConvenienceFileServiceCommands,
+    [
+        AutoCommandDefinition(ConvenienceFileServiceCommands.share_exists, 'Boolean', 'exists')
+    ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
+
+build_operation(
+    'storage share metadata', None, file_data_service_factory,
     [
         AutoCommandDefinition(FileService.get_share_metadata, 'Metadata', 'show'),
         AutoCommandDefinition(FileService.set_share_metadata, 'Metadata', 'set')
     ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
 build_operation(
-    'storage share acl', None, _file_data_service_factory,
+    'storage share acl', None, file_data_service_factory,
     [
         AutoCommandDefinition(FileService.set_share_acl, '[StoredAccessPolicy]', 'set'),
         AutoCommandDefinition(FileService.get_share_acl, 'StoredAccessPolicy', 'show'),
     ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
 build_operation(
-    'storage directory', None, _file_data_service_factory,
+    'storage directory', None, file_data_service_factory,
     [
         AutoCommandDefinition(FileService.create_directory, 'Boolean', 'create'),
         AutoCommandDefinition(FileService.delete_directory, 'Boolean', 'delete'),
@@ -185,14 +214,20 @@ build_operation(
     ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
 build_operation(
-    'storage directory metadata', None, _file_data_service_factory,
+    'storage directory', None, ConvenienceFileServiceCommands,
+    [
+        AutoCommandDefinition(ConvenienceFileServiceCommands.dir_exists, 'Bool', 'exists')
+    ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
+
+build_operation(
+    'storage directory metadata', None, file_data_service_factory,
     [
         AutoCommandDefinition(FileService.get_directory_metadata, 'Metadata', 'show'),
         AutoCommandDefinition(FileService.set_directory_metadata, 'Metadata', 'set')
     ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
 build_operation(
-    'storage file', None, _file_data_service_factory,
+    'storage file', None, file_data_service_factory,
     [
         AutoCommandDefinition(FileService.delete_file, 'Boolean', 'delete'),
         AutoCommandDefinition(FileService.resize_file, 'Result', 'resize'),
@@ -201,24 +236,37 @@ build_operation(
                               'SAS', 'generate-sas'),
         AutoCommandDefinition(FileService.get_file_properties, 'Properties', 'show'),
         AutoCommandDefinition(FileService.set_file_properties, 'Properties', 'set')
-    ], command_table, FILE_PARAM_ALIASES, STORAGE_DATA_CLIENT_ARGS)
+    ], command_table, _patch_aliases({
+        'directory_name': {'required': False}
+    }), STORAGE_DATA_CLIENT_ARGS)
 
 build_operation(
-    'storage file metadata', None, _file_data_service_factory,
+    'storage file', None, ConvenienceFileServiceCommands,
+    [
+        AutoCommandDefinition(ConvenienceFileServiceCommands.file_exists, 'Bool', 'exists'),
+        AutoCommandDefinition(ConvenienceFileServiceCommands.download, 'Object'),
+        AutoCommandDefinition(ConvenienceFileServiceCommands.upload, 'Object')
+    ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
+
+build_operation(
+    'storage file metadata', None, file_data_service_factory,
     [
         AutoCommandDefinition(FileService.get_file_metadata, 'Metadata', 'show'),
         AutoCommandDefinition(FileService.set_file_metadata, 'Metadata', 'set')
-    ], command_table, FILE_PARAM_ALIASES, STORAGE_DATA_CLIENT_ARGS)
+    ], command_table, _patch_aliases({
+        'directory_name': {'required': False}
+    }), STORAGE_DATA_CLIENT_ARGS)
+
 
 build_operation(
-    'storage file service-properties', None, _file_data_service_factory,
+    'storage file service-properties', None, file_data_service_factory,
     [
         AutoCommandDefinition(FileService.get_file_service_properties, 'ServiceProperties', 'show'),
         AutoCommandDefinition(FileService.set_file_service_properties, 'ServiceProperties', 'set')
-    ], command_table, FILE_PARAM_ALIASES, STORAGE_DATA_CLIENT_ARGS)
+    ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
 
 build_operation(
-    'storage file copy', None, _file_data_service_factory,
+    'storage file copy', None, file_data_service_factory,
     [
         AutoCommandDefinition(FileService.copy_file, 'CopyOperationPropeties', 'start'),
         AutoCommandDefinition(FileService.abort_copy_file, None, 'cancel'),

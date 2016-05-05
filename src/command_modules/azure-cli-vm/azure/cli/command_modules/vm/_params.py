@@ -1,8 +1,17 @@
+from azure.mgmt.compute import ComputeManagementClient, ComputeManagementClientConfiguration
 from azure.mgmt.compute.models import VirtualHardDisk
 
 from azure.cli.commands import (COMMON_PARAMETERS as GLOBAL_COMMON_PARAMETERS, extend_parameter)
+from azure.cli.commands._command_creation import get_mgmt_service_client
 from azure.cli._locale import L
 from azure.cli.command_modules.vm._validators import MinMaxValue
+
+# FACTORIES
+
+def _compute_client_factory(**_):
+    return get_mgmt_service_client(ComputeManagementClient, ComputeManagementClientConfiguration)
+
+# BASIC PARAMETER CONFIGURATION
 
 PARAMETER_ALIASES = GLOBAL_COMMON_PARAMETERS.copy()
 PARAMETER_ALIASES.update({

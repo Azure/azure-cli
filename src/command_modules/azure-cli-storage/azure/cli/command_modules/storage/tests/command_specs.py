@@ -39,7 +39,7 @@ class StorageAccountScenarioTest(CommandTestScript):
         s.rec('storage account list -g {}'.format(rg))
         s.test('storage account show --resource-group {} --account-name {}'.format(rg, account),
                {'name': account, 'accountType': 'Standard_LRS', 'location': 'westus', 'resourceGroup': rg})
-        s.rec('storage account usage')
+        s.rec('storage account show-usage')
         s.rec('storage account connection-string -g {} --account-name {} --use-http'.format(rg, account))
         s.rec('storage account keys list -g {} --account-name {}'.format(rg, account))
         s.rec('storage account keys renew -g {} --account-name {}'.format(rg, account))

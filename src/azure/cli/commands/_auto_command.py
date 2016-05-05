@@ -7,7 +7,7 @@ from azure.cli.parser import IncorrectUsageError
 from ..commands import COMMON_PARAMETERS
 
 EXCLUDED_PARAMS = frozenset(['self', 'raw', 'custom_headers', 'operation_config',
-                             'content_version'])
+                             'content_version', 'kwargs'])
 
 class AutoCommandDefinition(object): #pylint: disable=too-few-public-methods
 
@@ -34,9 +34,14 @@ def _get_member(obj, path):
             pass
     return obj
 
-def _make_func(client_factory, member_path, return_type_or_func, unbound_func):
+def _make_func(client_factory, member_path, return_type_or_func, unbound_func, extra_parameters):
     def call_client(args):
-        client = client_factory(args)
+        client = client_factory(**args)
+        for p in extra_parameters or []:
+            param_name = p['name'].split()[0]
+            param_name = re.sub('--', '', param_name)
+            param_name = re.sub('-', '_', param_name)
+            args.pop(param_name)
         ops_instance = _get_member(client, member_path)
 
         try:
@@ -98,7 +103,7 @@ def build_operation(command_name,
 
     for op in operations:
 
-        func = _make_func(client_type, member_path, op.return_type, op.operation)
+        func = _make_func(client_type, member_path, op.return_type, op.operation, extra_parameters)
 
         args = []
         try:

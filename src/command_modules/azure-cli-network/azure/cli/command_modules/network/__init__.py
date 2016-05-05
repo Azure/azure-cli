@@ -33,7 +33,7 @@ from azure.cli._locale import L
 
 command_table = CommandTable()
 
-def _network_client_factory(_):
+def _network_client_factory(**_):
     return get_mgmt_service_client(NetworkManagementClient, NetworkManagementClientConfiguration)
 
 _VNET_PARAM_NAME = '--vnet-name'
@@ -384,6 +384,6 @@ def create_update_subnet(args):
                              address_prefix=address_prefix)
 
     op = LongRunningOperation('Creating subnet', 'Subnet created')
-    smc = _network_client_factory(args)
+    smc = _network_client_factory(**args)
     poller = smc.subnets.create_or_update(resource_group, vnet, name, subnet_settings)
     return op(poller)
