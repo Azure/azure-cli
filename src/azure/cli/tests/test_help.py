@@ -469,15 +469,26 @@ Global Arguments
         config.get_command_table = lambda: cmd_table
         app = Application(config)
 
-        try:
-            app.execute('n1 -fb a --foobar value'.split())
-        except SystemExit:
-            pass
+        if sys.version_info < (2, 7, 10):
+            try:
+                app.execute('n1 -fb a --foobar value'.split())
+            except SystemExit:
+                pass
 
-        try:
-            app.execute('n1 -fb a --foobar2 value --foobar3 extra'.split())
-        except SystemExit:
-            pass
+            try:
+                app.execute('n1 -fb a --foobar2 value --foobar3 extra'.split())
+            except SystemExit:
+                pass
+        else:
+            with self.assertRaises(SystemExit):
+                app.execute('n1 -fb a --foobar value'.split())
+            with self.assertRaises(SystemExit):
+                app.execute('n1 -fb a --foobar2 value --foobar3 extra'.split())
+
+            self.assertTrue('required' in io.getvalue()
+                            and '--foobar/-fb' not in io.getvalue()
+                            and '--foobar2/-fb2' in io.getvalue()
+                            and 'unrecognized arguments: --foobar3 extra' in io.getvalue())
 
         self.assertTrue('required' in io.getvalue()
                         and '--foobar/-fb' not in io.getvalue()
