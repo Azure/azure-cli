@@ -10,56 +10,31 @@ except ImportError:
 
 from azure.mgmt.compute.models import DataDisk
 from azure.mgmt.compute.models.compute_management_client_enums import DiskCreateOptionTypes
-from azure.cli._locale import L
 from azure.cli.commands import CommandTable, LongRunningOperation, RESOURCE_GROUP_ARG_NAME
 from azure.cli.commands._command_creation import get_mgmt_service_client
 
-from ._params import PARAMETER_ALIASES, _compute_client_factory
+from ._params import PARAMETER_ALIASES, VM_PATCH_EXTRA_PARAMETERS, _compute_client_factory
 
 command_table = CommandTable()
 
-def vm_getter(args):
-    ''' Retreive a VM based on the `args` passed in.
-    '''
-    client = _compute_client_factory(**args)
-    result = client.virtual_machines.get(args.get(RESOURCE_GROUP_ARG_NAME), args.get('vm_name'))
-    return result
+def _vm_get(**kwargs):
+    '''Retrieves a VM if a resource group and vm name are supplied.'''
+    vm_name = kwargs.get('vm_name')
+    resource_group_name = kwargs.get('resource_group_name')
+    client = _compute_client_factory()
+    return client.virtual_machines.get(resource_group_name, vm_name) \
+        if resource_group_name and vm_name else None
 
-def vm_setter(args, instance, start_msg, end_msg):
-    '''Update the given Virtual Machine instance
-    '''
+def _vm_set(instance, start_msg, end_msg):
+    '''Update the given Virtual Machine instance'''
     instance.resources = None # Issue: https://github.com/Azure/autorest/issues/934
-    client = _compute_client_factory(**args)
+    client = _compute_client_factory()
+    parsed_id = _parse_rg_name(instance.id)
     poller = client.virtual_machines.create_or_update(
-        resource_group_name=args.get(RESOURCE_GROUP_ARG_NAME),
-        vm_name=args.get('vm_name'),
+        resource_group_name=parsed_id[0],
+        vm_name=parsed_id[1],
         parameters=instance)
     return LongRunningOperation(start_msg, end_msg)(poller)
-
-def patches_vm(start_msg, finish_msg):
-    '''Decorator indicating that the decorated function modifies an existing Virtual Machine
-    in Azure.
-    It automatically adds arguments required to identify the Virtual Machine to be patched and
-    handles the actual put call to the compute service, leaving the decorated function to only
-    have to worry about the modifications it has to do.
-    '''
-    def wrapped(func):
-        def invoke(args):
-            instance = vm_getter(args)
-            func(args, instance)
-            vm_setter(args, instance, start_msg, finish_msg)
-
-        # All Virtual Machines are identified with a resource group name/name pair, so
-        # we add these parameters to all commands
-        command_table[invoke]['arguments'].append(PARAMETER_ALIASES['resource_group_name'])
-        command_table[invoke]['arguments'].append({
-            'name': '--vm-name -n',
-            'dest': 'vm_name',
-            'help': 'Name of Virtual Machine to update',
-            'required': True
-            })
-        return invoke
-    return wrapped
 
 def _load_images_from_aliases_doc(publisher, offer, sku):
     target_url = ('https://raw.githubusercontent.com/Azure/azure-rest-api-specs/'
@@ -134,7 +109,8 @@ def _create_image_instance(publisher, offer, sku, version):
         'offer': offer,
         'sku': sku,
         'version': version
-        }
+    }
+
 #
 # Composite convenience commands for the CLI
 #
@@ -150,23 +126,17 @@ def _parse_rg_name(strid):
 
 class ConvenienceVmCommands(object): # pylint: disable=too-few-public-methods
 
-    def __init__(self, **_):
-        pass
+    def __init__(self, **kwargs):
+        self.vm = _vm_get(**kwargs)
 
     def list(self, resource_group_name):
         ''' List Virtual Machines. '''
         ccf = _compute_client_factory()
         vm_list = ccf.virtual_machines.list(resource_group_name=resource_group_name) \
-            if group else ccf.virtual_machines.list_all()
+            if resource_group_name else ccf.virtual_machines.list_all()
         return list(vm_list)
 
-
-    def list_vm_images(self,
-                       image_location=None,
-                       publisher=None,
-                       offer=None,
-                       sku=None,
-                       all=False):
+    def list_vm_images(self, image_location=None, publisher=None, offer=None, sku=None, all=False): # pylint: disable=redefined-builtin
         '''vm image list
         :param str location:Image location
         :param str publisher:Image publisher name
@@ -247,34 +217,31 @@ class ConvenienceVmCommands(object): # pylint: disable=too-few-public-methods
 
         return result
 
-    #@command_table.command('vm disk attach-new',
-    @patches_vm('Attaching disk', 'Disk attached')
-    def attach_new_disk(self, lun, diskname,  vhd, disksize=1023, **kwargs):
+    def attach_new_disk(self, lun, diskname, vhd, disksize=1023, **kwargs):
         ''' Attach a new disk to an existing Virtual Machine'''
-        disk = DataDisk(lun=lun, vhd=vhd, name=kwargs.get('name'),
+        disk = DataDisk(lun=lun, vhd=vhd, name=diskname,
                         create_option=DiskCreateOptionTypes.empty,
                         disk_size_gb=disksize)
-        kwargs.get('instance').storage_profile.data_disks.append(disk)
+        self.vm.storage_profile.data_disks.append(disk)
+        _vm_set(self.vm, 'Attaching disk', 'Disk attached')
 
-    #@command_table.command('vm disk attach-existing',
-    @patches_vm('Attaching disk', 'Disk attached')
     def attach_existing_disk(self, lun, diskname, vhd, disksize=1023, **kwargs):
         ''' Attach an existing disk to an existing Virtual Machine '''
         # TODO: figure out size of existing disk instead of making the default value 1023
-        disk = DataDisk(lun=lun, vhd=vhd, name=kwargs.get('name'),
+        disk = DataDisk(lun=lun, vhd=vhd, name=diskname,
                         create_option=DiskCreateOptionTypes.attach,
                         disk_size_gb=disksize)
-        kwargs.get('instance').storage_profile.data_disks.append(disk)
+        self.vm.storage_profile.data_disks.append(disk)
+        _vm_set(self.vm, 'Attaching disk', 'Disk attached')
 
-    #@command_table.command('vm disk detach')
-    @patches_vm('Detaching disk', 'Disk detached')
     def detach_disk(self, diskname, **kwargs):
+        ''' Detach a disk from a Virtual Machine '''
         # Issue: https://github.com/Azure/autorest/issues/934
-        instance = kwargs.get('instance')
-        instance.resources = None
+        self.vm.resources = None
         try:
-            disk = next(d for d in instance.storage_profile.data_disks
+            disk = next(d for d in self.vm.storage_profile.data_disks
                         if d.name == kwargs.get('name'))
-            instance.storage_profile.data_disks.remove(disk)
+            self.vm.storage_profile.data_disks.remove(disk)
         except StopIteration:
-            raise RuntimeError("No disk with the name '%s' found" % args.get('name'))
+            raise RuntimeError("No disk with the name '{}' found".format(diskname))
+        _vm_set(self.vm, 'Detaching disk', 'Disk detached')
