@@ -77,7 +77,7 @@ class AzCliCommandParser(argparse.ArgumentParser):
                         is_group)
         self.exit()
 
-    def exit(self, status = 0, message = None):
+    def exit(self, status=0, message=None):
         if message:
             self._print_message(message, sys.stderr)
         #raise SystemExit(status)
