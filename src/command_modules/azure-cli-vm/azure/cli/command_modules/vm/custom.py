@@ -1,4 +1,6 @@
-﻿import json
+﻿# pylint: disable=no-self-use,too-many-arguments
+
+import json
 import re
 
 try:
@@ -58,59 +60,6 @@ def patches_vm(start_msg, finish_msg):
             })
         return invoke
     return wrapped
-
-@command_table.command('vm list', description=L('List Virtual Machines.'))
-@command_table.option(**PARAMETER_ALIASES['optional_resource_group_name'])
-def list_vm(args):
-    ccf = _compute_client_factory(**args)
-    group = args.get(RESOURCE_GROUP_ARG_NAME)
-    vm_list = ccf.virtual_machines.list(resource_group_name=group) if group else \
-              ccf.virtual_machines.list_all()
-    return list(vm_list)
-
-@command_table.command('vm disk attach-new',
-                       help=L('Attach a new disk to an existing Virtual Machine'))
-@command_table.option(**PARAMETER_ALIASES['lun'])
-@command_table.option(**PARAMETER_ALIASES['diskname'])
-@command_table.option(**PARAMETER_ALIASES['disksize'])
-@command_table.option(**PARAMETER_ALIASES['vhd'])
-@patches_vm('Attaching disk', 'Disk attached')
-def _vm_disk_attach_new(args, instance):
-    disk = DataDisk(lun=args.get('lun'),
-                    vhd=args.get('vhd'),
-                    name=args.get('name'),
-                    create_option=DiskCreateOptionTypes.empty,
-                    disk_size_gb=args.get('disksize'))
-    instance.storage_profile.data_disks.append(disk)
-
-@command_table.command('vm disk attach-existing',
-                       help=L('Attach an existing disk to an existing Virtual Machine'))
-@command_table.option(**PARAMETER_ALIASES['lun'])
-@command_table.option(**PARAMETER_ALIASES['diskname'])
-@command_table.option(**PARAMETER_ALIASES['disksize'])
-@command_table.option(**PARAMETER_ALIASES['vhd'])
-@patches_vm('Attaching disk', 'Disk attached')
-def _vm_disk_attach_existing(args, instance):
-    # TODO: figure out size of existing disk instead of making the default value 1023
-    disk = DataDisk(lun=args.get('lun'),
-                    vhd=args.get('vhd'),
-                    name=args.get('name'),
-                    create_option=DiskCreateOptionTypes.attach,
-                    disk_size_gb=args.get('disksize'))
-    instance.storage_profile.data_disks.append(disk)
-
-@command_table.command('vm disk detach')
-@command_table.option(**PARAMETER_ALIASES['diskname'])
-@patches_vm('Detaching disk', 'Disk detached')
-def _vm_disk_detach(args, instance):
-    instance.resources = None # Issue: https://github.com/Azure/autorest/issues/934
-    try:
-        disk = next(d for d in instance.storage_profile.data_disks
-                    if d.name == args.get('name'))
-        instance.storage_profile.data_disks.remove(disk)
-    except StopIteration:
-        raise RuntimeError("No disk with the name '%s' found" % args.get('name'))
-
 
 def _load_images_from_aliases_doc(publisher, offer, sku):
     target_url = ('https://raw.githubusercontent.com/Azure/azure-rest-api-specs/'
@@ -204,13 +153,20 @@ class ConvenienceVmCommands(object): # pylint: disable=too-few-public-methods
     def __init__(self, **_):
         pass
 
-    # pylint: disable=no-self-use,too-many-arguments
+    def list(self, resource_group_name):
+        ''' List Virtual Machines. '''
+        ccf = _compute_client_factory()
+        vm_list = ccf.virtual_machines.list(resource_group_name=resource_group_name) \
+            if group else ccf.virtual_machines.list_all()
+        return list(vm_list)
+
+
     def list_vm_images(self,
                        image_location=None,
                        publisher=None,
                        offer=None,
                        sku=None,
-                       all=False): #pylint: disable=redefined-builtin
+                       all=False):
         '''vm image list
         :param str location:Image location
         :param str publisher:Image publisher name
@@ -291,4 +247,34 @@ class ConvenienceVmCommands(object): # pylint: disable=too-few-public-methods
 
         return result
 
+    #@command_table.command('vm disk attach-new',
+    @patches_vm('Attaching disk', 'Disk attached')
+    def attach_new_disk(self, lun, diskname,  vhd, disksize=1023, **kwargs):
+        ''' Attach a new disk to an existing Virtual Machine'''
+        disk = DataDisk(lun=lun, vhd=vhd, name=kwargs.get('name'),
+                        create_option=DiskCreateOptionTypes.empty,
+                        disk_size_gb=disksize)
+        kwargs.get('instance').storage_profile.data_disks.append(disk)
 
+    #@command_table.command('vm disk attach-existing',
+    @patches_vm('Attaching disk', 'Disk attached')
+    def attach_existing_disk(self, lun, diskname, vhd, disksize=1023, **kwargs):
+        ''' Attach an existing disk to an existing Virtual Machine '''
+        # TODO: figure out size of existing disk instead of making the default value 1023
+        disk = DataDisk(lun=lun, vhd=vhd, name=kwargs.get('name'),
+                        create_option=DiskCreateOptionTypes.attach,
+                        disk_size_gb=disksize)
+        kwargs.get('instance').storage_profile.data_disks.append(disk)
+
+    #@command_table.command('vm disk detach')
+    @patches_vm('Detaching disk', 'Disk detached')
+    def detach_disk(self, diskname, **kwargs):
+        # Issue: https://github.com/Azure/autorest/issues/934
+        instance = kwargs.get('instance')
+        instance.resources = None
+        try:
+            disk = next(d for d in instance.storage_profile.data_disks
+                        if d.name == kwargs.get('name'))
+            instance.storage_profile.data_disks.remove(disk)
+        except StopIteration:
+            raise RuntimeError("No disk with the name '%s' found" % args.get('name'))
