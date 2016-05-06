@@ -4,7 +4,7 @@ import unittest
 from six import StringIO
 from collections import namedtuple
 
-from azure.cli._output import (OutputProducer, OutputFormatException, format_json, format_table, format_list, format_text,
+from azure.cli._output import (OutputProducer, format_json, format_table, format_list, format_text,
                                 format_tsv, ListOutput)
 import azure.cli._util as util
 

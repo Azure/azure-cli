@@ -1,10 +1,15 @@
 from __future__ import print_function
-import sys
 import time
 import random
 from importlib import import_module
 from collections import defaultdict, OrderedDict
 from pip import get_installed_distributions
+from msrest.exceptions import ClientException
+
+from azure.cli._util import CLIError
+import azure.cli._logging as _logging
+
+logger = _logging.get_az_logger(__name__)
 
 from azure.cli._locale import L
 from azure.cli.commands._validators import validate_tags, validate_tag
@@ -13,6 +18,8 @@ from azure.cli.commands._validators import validate_tags, validate_tag
 INSTALLED_COMMAND_MODULES = [dist.key.replace('azure-cli-', '')
                              for dist in get_installed_distributions(local_only=True)
                              if dist.key.startswith('azure-cli-')]
+
+logger.info('Installed command modules %s', INSTALLED_COMMAND_MODULES)
 
 RESOURCE_GROUP_ARG_NAME = 'resource_group_name'
 
@@ -60,30 +67,27 @@ def extend_parameter(parameter_metadata, **kwargs):
 
 class LongRunningOperation(object): #pylint: disable=too-few-public-methods
 
-    progress_file = sys.stderr
-
     def __init__(self, start_msg='', finish_msg='', poll_interval_ms=1000.0):
         self.start_msg = start_msg
         self.finish_msg = finish_msg
         self.poll_interval_ms = poll_interval_ms
 
     def __call__(self, poller):
-        print(self.start_msg, file=self.progress_file)
-        succeeded = False
+        logger.warning(self.start_msg)
+        logger.info("Starting long running operation '%s' with polling interval %s ms",
+                    self.start_msg, self.poll_interval_ms)
+        while not poller.done():
+            time.sleep(self.poll_interval_ms / 1000.0)
+            logger.info("Long running operation '%s' polling now", self.start_msg)
         try:
-            while not poller.done():
-                if self.progress_file:
-                    print('.', end='', file=self.progress_file)
-                    self.progress_file.flush()
-                    time.sleep(self.poll_interval_ms / 1000.0)
             result = poller.result()
-            succeeded = True
-            return result
-        finally:
-            # Ensure that we get a newline after the dots...
-            if self.progress_file:
-                print(file=self.progress_file)
-                print(self.finish_msg if succeeded else '', file=self.progress_file)
+        except ClientException as client_exception:
+            message = getattr(client_exception, 'message', client_exception)
+            raise CLIError(message)
+        logger.info("Long running operation '%s' completed with result %s",
+                    self.start_msg, result)
+        logger.warning(self.finish_msg)
+        return result
 
 class CommandTable(defaultdict):
     """A command table is a dictionary of func -> {name,
@@ -147,13 +151,15 @@ def get_command_table(module_name=None):
     if module_name:
         try:
             command_table = _get_command_table(module_name)
+            logger.info("Successfully loaded command table from module '%s'.", module_name)
             loaded = True
         except ImportError:
             # Unknown command - we'll load all installed modules below
-            pass
+            logger.info("Loading all installed modules as module with name '%s' not found.", module_name) #pylint: disable=line-too-long
 
     if not loaded:
         command_table = {}
+        logger.info('Loading command tables from all installed modules.')
         for mod in INSTALLED_COMMAND_MODULES:
             command_table.update(_get_command_table(mod))
 
