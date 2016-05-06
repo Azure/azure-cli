@@ -25,14 +25,16 @@ class DeploymentVM(Model):
      the template.
     :type content_version: str
     :param storage_container_name: Name of storage container for the VM OS
-     disk.
+     disk. Default value: "vhds" .
     :type storage_container_name: str
     :param virtual_network_name: Name of virtual network to add VM to.
     :type virtual_network_name: str
-    :param subnet_ip_address_prefix: The subnet address prefix in CIDR format.
+    :param subnet_ip_address_prefix: The subnet address prefix in CIDR
+     format. Default value: "10.0.0.0/24" .
     :type subnet_ip_address_prefix: str
     :param private_ip_address_allocation: Private IP address allocation
-     method.
+     method. Possible values include: 'Dynamic', 'Static'. Default value:
+     "Dynamic" .
     :type private_ip_address_allocation: str
     :param dns_name_for_public_ip: Globally unique DNS Name for the Public IP
      used to access the Virtual Machine.  Requires a new public IP to be
@@ -56,25 +58,26 @@ class DeploymentVM(Model):
     :param admin_password: Password for the Virtual Machine.  Required if SSH
      (Linux only) is not specified.
     :type admin_password: str
-    :param os_sku: The OS SKU to install.
+    :param os_sku: The OS SKU to install. Default value: "2012-R2-Datacenter"
+     .
     :type os_sku: str
     :param subnet_name: The subnet name.
     :type subnet_name: str
     :param os_type: Common OS choices.  Choose 'Custom' to specify an image
      with the osPublisher, osOffer, osSKU, and osVersion parameters. Possible
-     values include: 'CentOS', 'CoreOS', 'Debian', 'openSUSE', 'RHEL',
-     'SLES', 'UbuntuLTS', 'Win2012R2Datacenter', 'Win2012Datacenter',
+     values include: 'Win2012R2Datacenter', 'Win2012Datacenter',
      'Win2008R2SP1', 'Custom'. Default value: "Win2012R2Datacenter" .
     :type os_type: str
     :param admin_username: Username for the Virtual Machine.
     :type admin_username: str
-    :param os_version: The OS version to install.
+    :param os_version: The OS version to install. Default value: "latest" .
     :type os_version: str
-    :param os_disk_name: Name of new VM OS disk.
+    :param os_disk_name: Name of new VM OS disk. Default value: "osdiskimage"
+     .
     :type os_disk_name: str
     :param ssh_dest_key_path: VM file path for SSH key.
     :type ssh_dest_key_path: str
-    :param os_offer: The OS Offer to install.
+    :param os_offer: The OS Offer to install. Default value: "WindowsServer" .
     :type os_offer: str
     :param public_ip_address_allocation: Public IP address allocation method.
      Possible values include: 'Dynamic', 'Static'. Default value: "Dynamic" .
@@ -97,7 +100,7 @@ class DeploymentVM(Model):
      "none" .
     :type public_ip_address_type: str
     :param virtual_network_ip_address_prefix: The virtual network IP address
-     prefix in CIDR format.
+     prefix in CIDR format. Default value: "10.0.0.0/16" .
     :type virtual_network_ip_address_prefix: str
     :param availability_set_id: Existing availability set for the VM.
     :type availability_set_id: str
@@ -105,7 +108,8 @@ class DeploymentVM(Model):
     :type ssh_key_value: str
     :param location: Location for VM resources.
     :type location: str
-    :param os_publisher: The OS publisher of the OS image.
+    :param os_publisher: The OS publisher of the OS image. Default value:
+     "MicrosoftWindowsServer" .
     :type os_publisher: str
     :param availability_set_type: Flag to add the VM to an existing
      availability set. Possible values include: 'none', 'existing'. Default
@@ -174,7 +178,7 @@ class DeploymentVM(Model):
 
     mode = "Incremental"
 
-    def __init__(self, name, admin_username, content_version=None, storage_container_name=None, virtual_network_name=None, subnet_ip_address_prefix=None, private_ip_address_allocation=None, dns_name_for_public_ip=None, storage_account_type="new", os_disk_uri=None, virtual_network_type="new", admin_password=None, os_sku=None, subnet_name=None, os_type="Win2012R2Datacenter", os_version=None, os_disk_name=None, ssh_dest_key_path=None, os_offer=None, public_ip_address_allocation="Dynamic", authentication_type="password", storage_account_name=None, storage_redundancy_type="Standard_LRS", size="Standard_A2", public_ip_address_type="none", virtual_network_ip_address_prefix=None, availability_set_id=None, ssh_key_value=None, location=None, os_publisher=None, availability_set_type="none", public_ip_address_name=None, dns_name_type="none"):
+    def __init__(self, name, admin_username, content_version=None, storage_container_name="vhds", virtual_network_name=None, subnet_ip_address_prefix="10.0.0.0/24", private_ip_address_allocation="Dynamic", dns_name_for_public_ip=None, storage_account_type="new", os_disk_uri=None, virtual_network_type="new", admin_password=None, os_sku="2012-R2-Datacenter", subnet_name=None, os_type="Win2012R2Datacenter", os_version="latest", os_disk_name="osdiskimage", ssh_dest_key_path=None, os_offer="WindowsServer", public_ip_address_allocation="Dynamic", authentication_type="password", storage_account_name=None, storage_redundancy_type="Standard_LRS", size="Standard_A2", public_ip_address_type="none", virtual_network_ip_address_prefix="10.0.0.0/16", availability_set_id=None, ssh_key_value=None, location=None, os_publisher="MicrosoftWindowsServer", availability_set_type="none", public_ip_address_name=None, dns_name_type="none"):
         self.content_version = content_version
         self.storage_container_name = storage_container_name
         self.virtual_network_name = virtual_network_name

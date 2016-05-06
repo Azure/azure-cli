@@ -148,8 +148,9 @@ build_operation(
     ],
     command_table, PARAMETER_ALIASES)
 
+
 build_operation(
-    'vm', 'vm', lambda **_: get_mgmt_service_client(VMClient, VMClientConfig),
+    'vm', 'vm', lambda _: get_mgmt_service_client(VMClient, VMClientConfig),
     [
         CommandDefinition(
             VMOperations.create_or_update,
