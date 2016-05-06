@@ -54,7 +54,7 @@ class Test_autocommand(unittest.TestCase):
         self.assertEqual(command_metadata['name'], 'test autocommand sample-vm-get', 'Unexpected command name...')
         self.assertEqual(len(command_metadata['arguments']), 4, 'We expected exactly 4 arguments')
         some_expected_arguments = [
-            {'name': '--resource-group -g', 'dest': 'resource_group_name', 'required': True, 'help':'The name of the resource group.'},
+            {'name': '--resource-group -g', 'dest': 'resource_group_name', 'required': True, 'help':'The name of the resource group'},
             {'name': '--vm-name', 'dest': 'vm_name', 'required': True, 'help': 'The name of the virtual machine.'},
             {'name': '--opt-param', 'required': False, 'help': 'Used to verify auto-command correctly identifies optional params.'},
             {'name': '--expand', 'required': False, 'help': 'The expand expression to apply on the operation.'},
