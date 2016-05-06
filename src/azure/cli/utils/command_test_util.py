@@ -66,6 +66,10 @@ class CommandTestGenerator(object):
             def get_user_access_token_mock(_, _1, _2): #pylint: disable=unused-argument
                 return 'top-secret-token-for-you'
 
+            def operation_delay_mock(_):
+                # don't run time.sleep()
+                return
+
             def _get_expected_results_from_file(recording_dir):
                 expected_results_path = os.path.join(recording_dir, 'expected_results.res')
                 try:
@@ -151,6 +155,10 @@ class CommandTestGenerator(object):
                             load_subscriptions_mock)
                 @mock.patch('azure.cli._profile.CredsCache.retrieve_token_for_user',
                             get_user_access_token_mock)
+                @mock.patch('msrestazure.azure_operation.AzureOperationPoller._delay',
+                            operation_delay_mock)
+                @mock.patch('azure.cli.commands.LongRunningOperation._delay',
+                            operation_delay_mock)
                 @self.my_vcr.use_cassette(cassette_path,
                                           filter_headers=CommandTestGenerator.FILTER_HEADERS)
                 def test(self):
