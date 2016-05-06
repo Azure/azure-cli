@@ -11,6 +11,7 @@ from azure.mgmt.compute.models.compute_management_client_enums import DiskCreate
 from azure.cli._locale import L
 from azure.cli.commands import CommandTable, LongRunningOperation, RESOURCE_GROUP_ARG_NAME
 from azure.cli.commands._command_creation import get_mgmt_service_client
+from azure.cli._util import CLIError
 from azure.mgmt.compute import ComputeManagementClient, ComputeManagementClientConfiguration
 
 from ._params import PARAMETER_ALIASES
@@ -113,7 +114,7 @@ def _vm_disk_detach(args, instance):
                     if d.name == args.get('name'))
         instance.storage_profile.data_disks.remove(disk)
     except StopIteration:
-        raise RuntimeError("No disk with the name '%s' found" % args.get('name'))
+        raise CLIError("No disk with the name '%s' found" % args.get('name'))
 
 
 def _load_images_from_aliases_doc(publisher, offer, sku):
@@ -138,7 +139,7 @@ def _load_images_from_aliases_doc(publisher, offer, sku):
                                                 _partial_matched(sku, i['sku']))]
         return all_images
     except KeyError:
-        raise RuntimeError('Could not retrieve image list from {}'.format(target_url))
+        raise CLIError('Could not retrieve image list from {}'.format(target_url))
 
 def _load_images_thru_services(publisher, offer, sku, location):
     from concurrent.futures import ThreadPoolExecutor
@@ -224,7 +225,7 @@ class ConvenienceVmCommands(object): # pylint: disable=too-few-public-methods
         '''
         load_thru_services = all
         if load_thru_services and not image_location:
-            raise RuntimeError('Argument of --location/-l is required to use with --all flag')
+            raise CLIError('Argument of --location/-l is required to use with --all flag')
 
         if load_thru_services:
             all_images = _load_images_thru_services(publisher,

@@ -1,9 +1,10 @@
+from adal.adal_error import AdalError
 from azure.cli._profile import Profile
 from azure.cli.commands import CommandTable
 from azure.cli._locale import L
 #TODO: update adal-python to support it
 #from azure.cli._debug import should_disable_connection_verify
-
+from azure.cli._util import CLIError
 from .command_tables import COMMAND_TABLES
 
 command_table = CommandTable()
@@ -37,10 +38,13 @@ def login(args):
     tenant = args.get('tenant')
 
     profile = Profile()
-    subscriptions = profile.find_subscriptions_on_login(
-        interactive,
-        username,
-        password,
-        is_service_principal,
-        tenant)
+    try:
+        subscriptions = profile.find_subscriptions_on_login(
+            interactive,
+            username,
+            password,
+            is_service_principal,
+            tenant)
+    except AdalError as err:
+        raise CLIError(err)
     return list(subscriptions)

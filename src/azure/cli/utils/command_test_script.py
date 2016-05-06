@@ -116,10 +116,7 @@ class CommandTestScript(object): #pylint: disable=too-many-instance-attributes
         elif isinstance(checks, bool):
             result_val = str(result).lower().replace('"', '')
             bool_val = result_val in ('yes', 'true', 't', '1')
-            try:
-                assert bool_val == checks
-            except AssertionError as ex:
-                raise ex
+            assert bool_val == checks
         elif isinstance(checks, str):
             assert result.replace('"', '') == checks
         elif isinstance(checks, dict):
@@ -128,8 +125,7 @@ class CommandTestScript(object): #pylint: disable=too-many-instance-attributes
         elif checks is None:
             assert result is None or result == ''
         else:
-            raise IncorrectUsageError('test only accepts a dictionary of json properties or ' + \
-                                      'a boolean value.')
+            raise IncorrectUsageError('unsupported type \'{}\' in test'.format(type(checks)))
     def set_env(self, key, val): #pylint: disable=no-self-use
         os.environ[key] = val
 
