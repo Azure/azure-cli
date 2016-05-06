@@ -6,6 +6,7 @@ from six.moves import input #pylint: disable=redefined-builtin
 
 from azure.cli.parser import IncorrectUsageError
 from azure.cli._locale import L
+from azure.cli._help_files import helps
 
 from azure.cli.utils.update_checker import check_for_component_update
 
@@ -49,22 +50,38 @@ class ComponentCommands(object):
     def __init__(self, **_):
         pass
 
+    helps['component list'] = """
+        short-summary: List the installed components
+    """
     def list(self):
-        ''' List the installed components.'''
         return sorted([{'name': dist.key.replace(COMPONENT_PREFIX, ''), 'version': dist.version}
                        for dist in pip.get_installed_distributions(local_only=True)
                        if dist.key.startswith(COMPONENT_PREFIX)], key=lambda x: x['name'])
 
+    helps['component install'] = """
+        short-summary: Install a component
+        parameters:
+            - name: --name -n
+              short-summary: The component name to install.
+              required: True
+    """
     def install(self, component_name, link, private=False, version=None):
-        ''' Install a component'''
         _install_or_update(component_name, version, link, private, upgrade=False)
 
+    helps['component update'] = """
+        short-summary: Update a component
+        parameters:
+            - name: --name -n
+              short-summary: The component name to update.
+              required: True
+    """
     def update(self, component_name, link, private=False):
-        ''' Update a component'''
         _install_or_update(component_name, None, link, private, upgrade=True)
 
+    helps['component update-self'] = """
+        short-summary: Update the CLI
+    """
     def update_self(self, private=False):
-        ''' Update the CLI'''
         pkg_index_options = []
         if private:
             if not PRIVATE_PYPI_URL:
@@ -78,16 +95,24 @@ class ComponentCommands(object):
         pip.main(['install', '--quiet', '--isolated', '--disable-pip-version-check', '--upgrade']
                  + [CLI_PACKAGE_NAME] + pkg_index_options)
 
+    helps['component update-all'] = """
+        short-summary: Update all components
+    """
     def update_all(self, link, private=False):
-        ''' Update all components'''
         component_names = [dist.key.replace(COMPONENT_PREFIX, '')
                            for dist in pip.get_installed_distributions(local_only=True)
                            if dist.key.startswith(COMPONENT_PREFIX)]
         for name in component_names:
             _install_or_update(name, None, link, private, upgrade=True)
 
+    helps['component check'] = """
+        short-summary: Check a component for an update
+        parameters:
+            - name: --name -n
+              short-summary: The component name to check.
+              required: True        
+    """
     def check_component(self, component_name, private=False):
-        ''' Check a component for an update'''
         found = bool([dist for dist in pip.get_installed_distributions(local_only=True)
                       if dist.key == COMPONENT_PREFIX + component_name])
         if not found:
@@ -99,8 +124,14 @@ class ComponentCommands(object):
         result['updateAvailable'] = update_status['update_available']
         return result
 
+    helps['component remove'] = """
+        short-summary: Remove a component
+        parameters:
+            - name: --name -n
+              short-summary: The component name to remove.
+              required: True
+    """
     def remove(self, component_name, force=False):
-        ''' Remove a component'''
         prompt_for_delete = force is None
         found = bool([dist for dist in pip.get_installed_distributions(local_only=True)
                       if dist.key == COMPONENT_PREFIX + component_name])

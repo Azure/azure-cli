@@ -10,7 +10,7 @@ from azure.mgmt.compute.operations import (AvailabilitySetsOperations,
 
 from azure.cli.commands._auto_command import build_operation, CommandDefinition
 from azure.cli.commands._command_creation import get_mgmt_service_client
-from azure.cli.commands import CommandTable, LongRunningOperation
+from azure.cli.commands import CommandTable, LongRunningOperation, patch_aliases
 from azure.cli.command_modules.vm.mgmt.lib import (VMCreationClient as VMClient,
                                                    VMCreationClientConfiguration
                                                    as VMClientConfig)
@@ -23,11 +23,6 @@ from .custom import ConvenienceVmCommands
 
 command_table = CommandTable()
 
-def _patch_aliases(alias_items):
-    aliases = PARAMETER_ALIASES.copy()
-    aliases.update(alias_items)
-    return aliases
-
 # pylint: disable=line-too-long
 build_operation(
     'vm availset', 'availability_sets', _compute_client_factory,
@@ -37,8 +32,7 @@ build_operation(
         CommandDefinition(AvailabilitySetsOperations.list, '[AvailabilitySet]'),
         CommandDefinition(AvailabilitySetsOperations.list_available_sizes, '[VirtualMachineSize]', 'list-sizes')
     ],
-    command_table,
-    _patch_aliases({
+    command_table, patch_aliases(PARAMETER_ALIASES, {
         'availability_set_name': {'name': '--name -n'}
     }))
 
@@ -66,8 +60,7 @@ build_operation(
         CommandDefinition(VirtualMachineExtensionsOperations.delete, LongRunningOperation(L('Deleting VM extension'), L('VM extension deleted'))),
         CommandDefinition(VirtualMachineExtensionsOperations.get, 'VirtualMachineExtension', command_alias='show'),
     ],
-    command_table,
-    _patch_aliases({
+    command_table, patch_aliases(PARAMETER_ALIASES, {
         'vm_extension_name': {'name': '--name -n'}
     }))
 
@@ -107,8 +100,7 @@ build_operation(
         CommandDefinition(VirtualMachinesOperations.restart, LongRunningOperation(L('Restarting VM'), L('VM Restarted'))),
         CommandDefinition(VirtualMachinesOperations.start, LongRunningOperation(L('Starting VM'), L('VM Started'))),
     ],
-    command_table,
-    _patch_aliases({
+    command_table, patch_aliases(PARAMETER_ALIASES, {
         'vm_name': {'name': '--name -n'}
     }))
 
@@ -128,8 +120,7 @@ build_operation(
         CommandDefinition(VirtualMachineScaleSetsOperations.start, LongRunningOperation(L('Starting VM scale set'), L('VM scale set started'))),
         CommandDefinition(VirtualMachineScaleSetsOperations.update_instances, LongRunningOperation(L('Updating VM scale set instances'), L('VM scale set instances updated'))),
     ],
-    command_table,
-    _patch_aliases({
+    command_table, patch_aliases(PARAMETER_ALIASES, {
         'vm_scale_set_name': {'name': '--name -n'}
     }))
 
@@ -145,8 +136,7 @@ build_operation(
         CommandDefinition(VirtualMachineScaleSetVMsOperations.restart, LongRunningOperation(L('Restarting VM scale set VMs'), L('VM scale set VMs restarted'))),
         CommandDefinition(VirtualMachineScaleSetVMsOperations.start, LongRunningOperation(L('Starting VM scale set VMs'), L('VM scale set VMs started'))),
     ],
-    command_table,
-    _patch_aliases({
+    command_table, patch_aliases(PARAMETER_ALIASES, {
         'vm_scale_set_name': {'name': '--name -n'}
     }))
 
@@ -173,6 +163,6 @@ build_operation(
     [
         CommandDefinition(ConvenienceVmCommands.list_vm_images, 'object', 'list')
     ],
-    command_table, _patch_aliases({
+    command_table, patch_aliases(PARAMETER_ALIASES, {
         'image_location': {'name': '--location -l'}
     }))

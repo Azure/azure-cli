@@ -1,5 +1,4 @@
 ﻿# pylint: disable=no-self-use,too-many-arguments
-
 import json
 import re
 

@@ -59,32 +59,33 @@ def _make_func(client_factory, member_path, return_type_or_func, unbound_func, e
 def _option_descriptions(operation):
     """Pull out parameter help from doccomments of the command
     """
-    lines = inspect.getdoc(operation).splitlines()
     option_descs = {}
-    index = 0
-    while index < len(lines):
-        l = lines[index]
-        regex = r'\s*(:param)\s+(.+)\s*:(.*)'
-        match = re.search(regex, l)
-        if match:
-            # 'arg name' portion might have type info, we don't need it
-            arg_name = str.split(match.group(2))[-1]
-            arg_desc = match.group(3).strip()
-            #look for more descriptions on subsequent lines
-            index += 1
-            while index < len(lines):
-                temp = lines[index].strip()
-                if temp.startswith(':'):
-                    break
-                else:
-                    if temp:
-                        arg_desc += (' ' + temp)
-                    index += 1
+    lines = inspect.getdoc(operation)
+    if lines:
+        lines = lines.splitlines()
+        index = 0
+        while index < len(lines):
+            l = lines[index]
+            regex = r'\s*(:param)\s+(.+)\s*:(.*)'
+            match = re.search(regex, l)
+            if match:
+                # 'arg name' portion might have type info, we don't need it
+                arg_name = str.split(match.group(2))[-1]
+                arg_desc = match.group(3).strip()
+                #look for more descriptions on subsequent lines
+                index += 1
+                while index < len(lines):
+                    temp = lines[index].strip()
+                    if temp.startswith(':'):
+                        break
+                    else:
+                        if temp:
+                            arg_desc += (' ' + temp)
+                        index += 1
 
-            option_descs[arg_name] = arg_desc
-        else:
-            index += 1
-
+                option_descs[arg_name] = arg_desc
+            else:
+                index += 1
     return option_descs
 
 

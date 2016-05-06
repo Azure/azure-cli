@@ -1,6 +1,7 @@
 from os import environ
 
-from azure.cli.commands import (COMMON_PARAMETERS as GLOBAL_COMMON_PARAMETERS, extend_parameter)
+from azure.cli.commands import (COMMON_PARAMETERS as GLOBAL_COMMON_PARAMETERS, extend_parameter,
+                                patch_aliases)
 from azure.cli.commands._command_creation import get_mgmt_service_client, get_data_service_client
 from azure.cli.commands._validators import validate_key_value_pairs
 from azure.cli._locale import L
@@ -91,8 +92,7 @@ blob_types = {'block': BlockBlobService, 'page': PageBlobService, 'append': Appe
 
 # BASIC PARAMETER CONFIGURATION
 
-PARAMETER_ALIASES = GLOBAL_COMMON_PARAMETERS.copy()
-PARAMETER_ALIASES.update({
+PARAMETER_ALIASES = patch_aliases(GLOBAL_COMMON_PARAMETERS, {
     'account_key': {
         'name': '--account-key -k',
         'help': L('the storage account key'),

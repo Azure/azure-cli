@@ -1,6 +1,6 @@
 from __future__ import print_function
 
-from azure.cli.commands import CommandTable, LongRunningOperation
+from azure.cli.commands import CommandTable, LongRunningOperation, patch_aliases
 from azure.cli.commands._auto_command import build_operation, CommandDefinition
 
 from azure.mgmt.storage.operations import StorageAccountsOperations
@@ -15,13 +15,6 @@ from .custom import (ConvenienceStorageAccountCommands, ConvenienceBlobServiceCo
                      ConvenienceFileServiceCommands)
 
 command_table = CommandTable()
-
-# HELPER METHODS
-
-def _patch_aliases(alias_items):
-    aliases = PARAMETER_ALIASES.copy()
-    aliases.update(alias_items)
-    return aliases
 
 # STORAGE ACCOUNT COMMANDS
 
@@ -51,7 +44,7 @@ build_operation(
         CommandDefinition(ConvenienceStorageAccountCommands.show_usage, 'Object'),
         CommandDefinition(ConvenienceStorageAccountCommands.set, 'Object'),
         CommandDefinition(ConvenienceStorageAccountCommands.connection_string, 'Object')
-    ], command_table, _patch_aliases({
+    ], command_table, patch_aliases(PARAMETER_ALIASES, {
         'account_type': {'name': '--type'}
     }))
 
@@ -130,7 +123,7 @@ build_operation(
         CommandDefinition(ConvenienceBlobServiceCommands.blob_exists, 'Bool', 'exists'),
         CommandDefinition(ConvenienceBlobServiceCommands.download, 'Object'),
         CommandDefinition(ConvenienceBlobServiceCommands.upload, 'Object')
-    ], command_table, _patch_aliases({
+    ], command_table, patch_aliases(PARAMETER_ALIASES, {
         'blob_type': {'name': '--type'}
     }), STORAGE_DATA_CLIENT_ARGS)
 
@@ -236,7 +229,7 @@ build_operation(
                           'SAS', 'generate-sas'),
         CommandDefinition(FileService.get_file_properties, 'Properties', 'show'),
         CommandDefinition(FileService.set_file_properties, 'Properties', 'set')
-    ], command_table, _patch_aliases({
+    ], command_table, patch_aliases(PARAMETER_ALIASES, {
         'directory_name': {'required': False}
     }), STORAGE_DATA_CLIENT_ARGS)
 
@@ -253,7 +246,7 @@ build_operation(
     [
         CommandDefinition(FileService.get_file_metadata, 'Metadata', 'show'),
         CommandDefinition(FileService.set_file_metadata, 'Metadata', 'set')
-    ], command_table, _patch_aliases({
+    ], command_table, patch_aliases(PARAMETER_ALIASES, {
         'directory_name': {'required': False}
     }), STORAGE_DATA_CLIENT_ARGS)
 
