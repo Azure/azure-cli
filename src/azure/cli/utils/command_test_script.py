@@ -17,7 +17,7 @@ class JMESPathComparatorAssertionError(AssertionError):
             actual_result,
             comparator.expected_result)
         message += "Query '{}' used on json data '{}'".format(comparator.query, json_data)
-        super().__init__(message)
+        super(JMESPathComparatorAssertionError, self).__init__(message)
 
 class JMESPathComparator(object): #pylint: disable=too-few-public-methods
 
