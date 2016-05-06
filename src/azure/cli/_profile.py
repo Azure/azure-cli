@@ -3,6 +3,7 @@ import collections
 from codecs import open as codecs_open
 import json
 import os.path
+import errno
 from msrest.authentication import BasicTokenAuthentication
 import adal
 from azure.mgmt.resource.subscriptions import (SubscriptionClient,
@@ -31,9 +32,15 @@ _SERVICE_PRINCIPAL = 'servicePrincipal'
 _SERVICE_PRINCIPAL_ID = 'servicePrincipalId'
 _SERVICE_PRINCIPAL_TENANT = 'servicePrincipalTenant'
 _TOKEN_ENTRY_USER_ID = 'userId'
-#This could mean real access token, or client secret of a service principal
+#This could mean either real access token, or client secret of a service principal
 #This naming is no good, but can't change because xplat-cli does so.
 _ACCESS_TOKEN = 'accessToken'
+
+TOKEN_FIELDS_EXCLUDED_FROM_PERSISTENCE = ['familyName',
+                                          'givenName',
+                                          'isUserIdDisplayable',
+                                          'tenantId']
+
 
 _AUTH_CTX_FACTORY = lambda authority, cache: adal.AuthenticationContext(authority, cache=cache)
 
@@ -43,6 +50,13 @@ def _read_file_content(file_path):
         with codecs_open(file_path, 'r', encoding='ascii') as file_to_read:
             file_text = file_to_read.read()
     return file_text
+
+def _delete_file(file_path):
+    try:
+        os.remove(file_path)
+    except OSError as e:
+        if e.errno != errno.ENOENT:
+            raise
 
 class Profile(object):
     def __init__(self, storage=None, auth_ctx_factory=None):
@@ -165,6 +179,9 @@ class Profile(object):
 
         self._creds_cache.remove_cached_creds(user_or_sp)
 
+    def logout_all(self):
+        self._cache_subscriptions_to_local_storage({})
+        self._creds_cache.remove_all_cached_creds()
 
     def load_cached_subscriptions(self):
         return self._storage.get(_SUBSCRIPTIONS) or []
@@ -283,6 +300,12 @@ class CredsCache(object):
         with codecs_open(self._token_file, 'w', encoding='ascii') as cred_file:
             items = self.adal_token_cache.read_items()
             all_creds = [entry for _, entry in items]
+
+            #trim away useless fields (needed for cred sharing with xplat)
+            for i in all_creds:
+                for key in TOKEN_FIELDS_EXCLUDED_FROM_PERSISTENCE:
+                    i.pop(key, None)
+
             all_creds.extend(self._service_principal_creds)
             cred_file.write(json.dumps(all_creds))
         self.adal_token_cache.has_state_changed = False
@@ -372,3 +395,7 @@ class CredsCache(object):
 
         if state_changed:
             self.persist_cached_creds()
+
+    def remove_all_cached_creds(self):
+        #we can clear file contents, but deleting it is simpler
+        _delete_file(self._token_file)

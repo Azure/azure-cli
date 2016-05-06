@@ -1,4 +1,4 @@
-from azure.cli._profile import Profile
+﻿from azure.cli._profile import Profile
 from azure.cli.commands import CommandTable
 from azure.cli._locale import L
 from .command_tables import COMMAND_TABLES
@@ -32,3 +32,11 @@ def set_active_subscription(args):
 
     profile = Profile()
     profile.set_active_subscription(subscription_name_or_id)
+
+@command_table.command('account clear')
+@command_table.description(L('Clear all stored subscriptions. '
+                             'To clear individual, use "logout".'))
+def clear(_):
+    profile = Profile()
+    profile.logout_all()
+
