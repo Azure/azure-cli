@@ -32,7 +32,7 @@ class StorageAccountCreateAndDeleteTest(CommandTestScript):
         self.run('storage account delete -g {} -n {}'.format(RESOURCE_GROUP_NAME, self.account))
         result = json.loads(self.run('storage account check-name --name {} -o json'.format(self.account)))
         if not result['nameAvailable']:
-            raise RuntimeError('Failed to delete pre-existing storage account {}. Unable to continue test.'.format(self.account))
+            raise CLIError('Failed to delete pre-existing storage account {}. Unable to continue test.'.format(self.account))
 
     def test_body(self):
         account = self.account
@@ -96,7 +96,7 @@ class StorageBlobScenarioTest(CommandTestScript):
         self.pop_env('AZURE_STORAGE_CONNECTION_STRING')
         self.run('storage container delete --container-name {}'.format(self.container))
         if self.run('storage container exists --container-name {}'.format(self.container)) == 'True':
-            raise RuntimeError('Failed to delete pre-existing container {}. Unable to continue test.'.format(self.container))
+            raise CLIError('Failed to delete pre-existing container {}. Unable to continue test.'.format(self.container))
 
     def _storage_blob_scenario(self):
         s = self
@@ -140,7 +140,7 @@ class StorageBlobScenarioTest(CommandTestScript):
         if os.path.isfile(dest_file):
             os.remove(dest_file)
         else:
-            raise RuntimeError('Download failed. Test failed!')
+            raise CLIError('Download failed. Test failed!')
 
         # test lease operations
         s.run('storage blob lease acquire --lease-duration 60 -b {} -c {} --if-modified-since {} --proposed-lease-id {}'.format(blob, container, date, proposed_lease_id))
@@ -255,7 +255,7 @@ class StorageFileScenarioTest(CommandTestScript):
         if os.path.isfile(dest_file):
             os.remove(dest_file)
         else:
-            raise RuntimeError('\nDownload failed. Test failed!')
+            raise CLIError('\nDownload failed. Test failed!')
 
         # test resize command
         s.run('storage file resize -s {} --file-name {} --content-length 1234'.format(share, filename))

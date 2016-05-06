@@ -226,6 +226,29 @@ class Test_Profile(unittest.TestCase):
         self.assertEqual(mock_read_cred_file.call_count, 1)
         self.assertEqual(mock_persist_creds.call_count, 1)
 
+    @mock.patch('azure.cli._profile._delete_file', autospec=True)
+    def test_logout_all(self, mock_delete_cred_file):
+        #setup
+        storage_mock = {'subscriptions': None}
+        profile = Profile(storage_mock)
+        consolidated = Profile._normalize_properties(self.user1, 
+                                                [self.subscription1],
+                                                False,
+                                                ENV_DEFAULT)
+        consolidated2 = Profile._normalize_properties(self.user2, 
+                                                [self.subscription2],
+                                                False,
+                                                ENV_DEFAULT)
+        profile._set_subscriptions(consolidated + consolidated2)
+
+        self.assertEqual(2, len(storage_mock['subscriptions']))
+        #action
+        profile.logout_all()
+
+        #verify
+        self.assertEqual(0, len(storage_mock['subscriptions']))
+        self.assertEqual(mock_delete_cred_file.call_count, 1)
+
     @mock.patch('adal.AuthenticationContext', autospec=True)
     def test_find_subscriptions_thru_username_password(self, mock_auth_context):
         mock_auth_context.acquire_token_with_username_password.return_value = self.token_entry1

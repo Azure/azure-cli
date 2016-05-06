@@ -1,7 +1,8 @@
 import argparse
 import azure.cli._help as _help
+from azure.cli._util import CLIError
 
-class IncorrectUsageError(Exception):
+class IncorrectUsageError(CLIError):
     '''Raised when a command is incorrectly used and the usage should be
     displayed to the user.
     '''

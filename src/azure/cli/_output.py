@@ -6,9 +6,6 @@ import re
 from collections import OrderedDict
 from six import StringIO
 
-class OutputFormatException(Exception):
-    pass
-
 def format_json(obj):
     input_dict = obj.__dict__ if hasattr(obj, '__dict__') else obj
     return json.dumps(input_dict, indent=2, sort_keys=True, separators=(',', ': ')) + '\n'

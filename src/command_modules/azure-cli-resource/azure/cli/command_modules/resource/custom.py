@@ -5,6 +5,7 @@ from azure.mgmt.resource.resources.models.resource_group import ResourceGroup
 from azure.cli.parser import IncorrectUsageError
 from azure.cli.commands import CommandTable
 from azure.cli._locale import L
+from azure.cli._util import CLIError
 
 from ._params import _resource_client_factory
 
@@ -90,7 +91,7 @@ class ConvenienceResourceGroupCommands(object):
         rcf = _resource_client_factory(None)
 
         if rcf.resource_groups.check_existence(resource_group_name):
-            raise ValueError('resource group {} already exists'.format(resource_group_name))
+            raise CLIError('resource group {} already exists'.format(resource_group_name))
         parameters = ResourceGroup(
             location=location,
             tags=tags

@@ -16,6 +16,7 @@ from six.moves import input #pylint: disable=redefined-builtin
 import vcr
 
 from azure.cli.main import main as cli
+from azure.cli._util import CLIError
 
 class CommandTestGenerator(object):
 
@@ -168,7 +169,7 @@ class CommandTestGenerator(object):
                     _test_impl(self, test_name, expected, recording_dir)
             else:
                 # yaml file failed to delete or bug exists
-                raise RuntimeError('Unable to generate test for {} due to inconsistent data. ' \
+                raise CLIError('Unable to generate test for {} due to inconsistent data. ' \
                     + 'Please manually remove the associated .yaml cassette and/or the test\'s ' \
                     + 'entry in expected_results.res and try again.')
             return test
