@@ -27,7 +27,7 @@ def list_subscriptions(_):
                       help=L('Subscription Id, unique name also works.'),
                       required=True)
 def set_active_subscription(args):
-    subscription_name_or_id = args.get('subscription-name-or-id')
+    subscription_name_or_id = args.get('subscription_name_or_id')
     if not id:
         raise CLIError(L('Please provide subscription id or unique name.'))
 
