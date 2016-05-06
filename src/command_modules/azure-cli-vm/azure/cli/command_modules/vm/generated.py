@@ -1,7 +1,6 @@
 import argparse
 import re
 import os
-from azure.mgmt.compute import ComputeManagementClient, ComputeManagementClientConfiguration
 from azure.mgmt.compute.operations import (AvailabilitySetsOperations,
                                            VirtualMachineExtensionImagesOperations,
                                            VirtualMachineExtensionsOperations,
@@ -11,10 +10,9 @@ from azure.mgmt.compute.operations import (AvailabilitySetsOperations,
                                            VirtualMachinesOperations,
                                            VirtualMachineScaleSetsOperations,
                                            VirtualMachineScaleSetVMsOperations)
-
-from azure.cli.commands._command_creation import get_mgmt_service_client
 from azure.cli.commands._auto_command import build_operation, AutoCommandDefinition
 from azure.cli.commands import CommandTable, LongRunningOperation
+from azure.cli.commands._command_creation import get_mgmt_service_client
 from azure.cli._locale import L
 from azure.cli.command_modules.vm.mgmt.lib import (VMCreationClient as VMClient,
                                                    VMCreationClientConfiguration
@@ -23,12 +21,9 @@ from azure.cli.command_modules.vm.mgmt.lib.operations import VMOperations
 from azure.cli._help_files import helps
 
 from ._params import PARAMETER_ALIASES
-from .custom import ConvenienceVmCommands
+from .custom import ConvenienceVmCommands, _compute_client_factory
 
 command_table = CommandTable()
-
-def _compute_client_factory(_):
-    return get_mgmt_service_client(ComputeManagementClient, ComputeManagementClientConfiguration)
 
 def _patch_aliases(alias_items):
     aliases = PARAMETER_ALIASES.copy()
