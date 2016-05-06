@@ -45,8 +45,6 @@ def _make_func(client_factory, member_path, return_type_or_func, unbound_func, e
             result = unbound_func(ops_instance, **args)
             if not return_type_or_func:
                 return {}
-            if callable(return_type_or_func):
-                return return_type_or_func(result)
             if isinstance(return_type_or_func, str):
                 return list(result) if isinstance(result, Paged) else result
         except TypeError as exception:
