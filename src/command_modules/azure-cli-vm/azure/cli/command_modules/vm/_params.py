@@ -29,6 +29,10 @@ PARAMETER_ALIASES.update({
         'type': MinMaxValue(1, 1023),
         'default': 1023
     },
+    'image_location': {
+        'name': '--image-location',
+        'help': L('Image location')
+    },
     'lun': {
         'name': '--lun',
         'help': L('0-based logical unit number (LUN). Max value depends on the Virtual ' + \
