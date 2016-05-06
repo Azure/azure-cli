@@ -25,6 +25,7 @@ class VMImageListThruServiceScenarioTest(CommandTestScript):
 class VMListIPAddressesScenarioTest(CommandTestScript):
 
     def __init__(self):
+        self.deployment_name = 'azurecli-test-deployment-vm-list-ips'
         self.resource_group = 'cliTestRg_VmListIpAddresses'
         self.vm_name = 'vm-with-public-ip'
         self.ip_allocation_method = 'Dynamic'
@@ -43,7 +44,8 @@ class VMListIPAddressesScenarioTest(CommandTestScript):
         self.test('vm list-ip-addresses --resource-group {}'.format(self.resource_group), None)
         self.run(['vm', 'create', '-g', self.resource_group, '-l', 'West US', '-n', self.vm_name,
                   '--admin-username', 'ubuntu', '--image', 'UbuntuLTS', '--admin-password',
-                  'testPassword0', '--public-ip-address-allocation', self.ip_allocation_method,
+                  'testPassword0', '--deployment-name', self.deployment_name,
+                  '--public-ip-address-allocation', self.ip_allocation_method,
                   '--public-ip-address-type', 'new'])
         # Expecting the one we just added
         self.test('vm list-ip-addresses --resource-group {}'.format(self.resource_group),
@@ -61,7 +63,7 @@ class VMListIPAddressesScenarioTest(CommandTestScript):
                  )
 
     def tear_down(self):
-        # TODO Delete the resource group
+        # TODO Delete the resource group instead
         self.run('vm delete --resource-group {} --name {}'.format(
             self.resource_group,
             self.vm_name))
