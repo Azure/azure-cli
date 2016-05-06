@@ -32,7 +32,7 @@ class VMOperations(object):
         self.config = config
 
     def create_or_update(
-            self, resource_group_name, deployment_name, name, admin_username, content_version=None, storage_container_name=None, virtual_network_name=None, subnet_ip_address_prefix=None, private_ip_address_allocation=None, dns_name_for_public_ip=None, storage_account_type="new", os_disk_uri=None, virtual_network_type="new", admin_password=None, os_sku=None, subnet_name=None, os_type="Win2012R2Datacenter", os_version=None, os_disk_name=None, ssh_dest_key_path=None, os_offer=None, public_ip_address_allocation="Dynamic", authentication_type="password", storage_account_name=None, storage_redundancy_type="Standard_LRS", size="Standard_A2", public_ip_address_type="none", virtual_network_ip_address_prefix=None, availability_set_id=None, ssh_key_value=None, location=None, os_publisher=None, availability_set_type="none", public_ip_address_name=None, dns_name_type="none", custom_headers={}, raw=False, **operation_config):
+            self, resource_group_name, deployment_name, name, admin_username, content_version=None, storage_container_name="vhds", virtual_network_name=None, subnet_ip_address_prefix="10.0.0.0/24", private_ip_address_allocation="Dynamic", dns_name_for_public_ip=None, storage_account_type="new", os_disk_uri=None, virtual_network_type="new", admin_password=None, os_sku="2012-R2-Datacenter", subnet_name=None, os_type="Win2012R2Datacenter", os_version="latest", os_disk_name="osdiskimage", ssh_dest_key_path=None, os_offer="WindowsServer", public_ip_address_allocation="Dynamic", authentication_type="password", storage_account_name=None, storage_redundancy_type="Standard_LRS", size="Standard_A2", public_ip_address_type="none", virtual_network_ip_address_prefix="10.0.0.0/16", availability_set_id=None, ssh_key_value=None, location=None, os_publisher="MicrosoftWindowsServer", availability_set_type="none", public_ip_address_name=None, dns_name_type="none", custom_headers={}, raw=False, **operation_config):
         """
         Create or update a virtual machine.
 
@@ -57,7 +57,7 @@ class VMOperations(object):
          format.
         :type subnet_ip_address_prefix: str
         :param private_ip_address_allocation: Private IP address allocation
-         method.
+         method. Possible values include: 'Dynamic', 'Static'
         :type private_ip_address_allocation: str
         :param dns_name_for_public_ip: Globally unique DNS Name for the
          Public IP used to access the Virtual Machine.  Requires a new public
@@ -81,8 +81,7 @@ class VMOperations(object):
         :type subnet_name: str
         :param os_type: Common OS choices.  Choose 'Custom' to specify an
          image with the osPublisher, osOffer, osSKU, and osVersion
-         parameters. Possible values include: 'CentOS', 'CoreOS', 'Debian',
-         'openSUSE', 'RHEL', 'SLES', 'UbuntuLTS', 'Win2012R2Datacenter',
+         parameters. Possible values include: 'Win2012R2Datacenter',
          'Win2012Datacenter', 'Win2008R2SP1', 'Custom'
         :type os_type: str
         :param os_version: The OS version to install.

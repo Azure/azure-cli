@@ -198,6 +198,9 @@ class CommandTestGenerator(object):
     def before_record_request(request):
         request.uri = re.sub('/subscriptions/([^/]+)/',
                              '/subscriptions/00000000-0000-0000-0000-000000000000/', request.uri)
+        # prevents URI mismatch between Python 2 and 3 if request URI has extra / chars
+        request.uri = re.sub('//', '/', request.uri)
+        request.uri = re.sub('/', '//', request.uri, count=1)
         return request
 
     @staticmethod
