@@ -1,6 +1,15 @@
 ﻿import os
+import platform
 import logging
 from logging.handlers import RotatingFileHandler
+
+import colorama
+
+AZ_LOGFILE_NAME = 'az.log'
+DEFAULT_LOG_DIR = os.path.expanduser(os.path.join('~', '.azure', 'logs'))
+
+ENABLE_LOG_FILE = os.environ.get('AZURE_CLI_ENABLE_LOG_FILE')
+LOG_DIR = os.environ.get('AZURE_CLI_LOG_DIR')
 
 CONSOLE_LOG_CONFIGS = [
     # (default)
@@ -19,11 +28,19 @@ CONSOLE_LOG_CONFIGS = [
         'root': logging.DEBUG,
     }]
 
-AZ_LOGFILE_NAME = 'az.log'
-DEFAULT_LOG_DIR = os.path.expanduser(os.path.join('~', '.azure', 'logs'))
-
-ENABLE_LOG_FILE = os.environ.get('AZURE_CLI_ENABLE_LOG_FILE')
-LOG_DIR = os.environ.get('AZURE_CLI_LOG_DIR')
+# Formats for console logging if coloring is enabled or not.
+# Show the level name if coloring is disabled (e.g. INFO).
+# Also, Root logger should show the logger name.
+CONSOLE_LOG_FORMAT = {
+    'az': {
+        True: '%(message)s',
+        False: '%(levelname)s: %(message)s',
+    },
+    'root': {
+        True: '%(name)s : %(message)s',
+        False: '%(levelname)s: %(name)s : %(message)s',
+    }
+}
 
 def _determine_verbose_level(argv):
     # Get verbose level by reading the arguments.
@@ -43,18 +60,52 @@ def _determine_verbose_level(argv):
     # Use max verbose level if too much verbosity specified.
     return verbose_level if verbose_level < len(CONSOLE_LOG_CONFIGS) else len(CONSOLE_LOG_CONFIGS)-1
 
+def _color_wrapper(color_marker):
+    def wrap_msg_with_color(msg):
+        return color_marker + msg + colorama.Style.RESET_ALL
+    return wrap_msg_with_color
+
+class CustomStreamHandler(logging.StreamHandler):
+    COLOR_MAP = {
+        logging.CRITICAL: _color_wrapper(colorama.Fore.RED),
+        logging.ERROR: _color_wrapper(colorama.Fore.RED),
+        logging.WARNING: _color_wrapper(colorama.Fore.YELLOW),
+        logging.INFO: _color_wrapper(colorama.Fore.GREEN),
+        logging.DEBUG: _color_wrapper(colorama.Fore.CYAN),
+    }
+
+    def _should_enable_color(self):
+        try:
+            # Color if tty stream available
+            if self.stream.isatty():
+                return True
+        except AttributeError:
+            pass
+
+        return False
+
+    def __init__(self, log_level_config, log_format):
+        logging.StreamHandler.__init__(self)
+        self.setLevel(log_level_config)
+        if platform.system() == 'Windows':
+            self.stream = colorama.AnsiToWin32(self.stream).stream
+        self.enable_color = self._should_enable_color()
+        self.setFormatter(logging.Formatter(log_format[self.enable_color]))
+
+    def format(self, record):
+        msg = logging.StreamHandler.format(self, record)
+        if self.enable_color:
+            try:
+                msg = self.COLOR_MAP[record.levelno](msg)
+            except KeyError:
+                pass
+        return msg
+
 def _init_console_handlers(root_logger, az_logger, log_level_config):
-    console_log_format = logging.Formatter('%(levelname)s: %(message)s')
-
-    root_console_handler = logging.StreamHandler()
-    root_console_handler.setFormatter(console_log_format)
-    root_console_handler.setLevel(log_level_config['root'])
-    root_logger.addHandler(root_console_handler)
-
-    az_console_handler = logging.StreamHandler()
-    az_console_handler.setFormatter(console_log_format)
-    az_console_handler.setLevel(log_level_config['az'])
-    az_logger.addHandler(az_console_handler)
+    root_logger.addHandler(CustomStreamHandler(log_level_config['root'],
+                                               CONSOLE_LOG_FORMAT['root']))
+    az_logger.addHandler(CustomStreamHandler(log_level_config['az'],
+                                             CONSOLE_LOG_FORMAT['az']))
 
 def _get_log_file_path():
     log_dir = LOG_DIR or DEFAULT_LOG_DIR
@@ -67,7 +118,7 @@ def _init_logfile_handlers(root_logger, az_logger):
         return
     log_file_path = _get_log_file_path()
     logfile_handler = RotatingFileHandler(log_file_path, maxBytes=5*1024*1024, backupCount=5)
-    lfmt = logging.Formatter('%(process)d : %(asctime)s : %(name)s :  %(levelname)s : %(message)s')
+    lfmt = logging.Formatter('%(process)d : %(asctime)s : %(levelname)s : %(name)s : %(message)s')
     logfile_handler.setFormatter(lfmt)
     logfile_handler.setLevel(logging.DEBUG)
     root_logger.addHandler(logfile_handler)

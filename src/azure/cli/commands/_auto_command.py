@@ -4,6 +4,7 @@ import inspect
 from msrest.paging import Paged
 from msrest.exceptions import ClientException
 from azure.cli.parser import IncorrectUsageError
+from azure.cli._util import CLIError
 from ..commands import COMMON_PARAMETERS
 
 EXCLUDED_PARAMS = frozenset(['self', 'raw', 'custom_headers', 'operation_config',
@@ -51,7 +52,7 @@ def _make_func(client_factory, member_path, return_type_or_func, unbound_func, e
             raise IncorrectUsageError(exception)
         except ClientException as client_exception:
             message = getattr(client_exception, 'message', client_exception)
-            raise RuntimeError(message)
+            raise CLIError(message)
 
     return call_client
 

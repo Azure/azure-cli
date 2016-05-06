@@ -5,11 +5,12 @@ import requests
 import pip
 from pip import get_installed_distributions
 from pip._vendor.packaging import version as packaging_version
+from azure.cli._util import CLIError
 
 PRIVATE_PYPI_URL_ENV_NAME = 'AZURE_CLI_PRIVATE_PYPI_URL'
 PRIVATE_PYPI_URL = os.environ.get(PRIVATE_PYPI_URL_ENV_NAME)
 
-class UpdateCheckError(Exception):
+class UpdateCheckError(CLIError):
     '''Raised when there is an error attempting to check for update(s)
     '''
     pass

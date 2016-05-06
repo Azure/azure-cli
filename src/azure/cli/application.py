@@ -7,6 +7,9 @@ from enum import Enum
 from .parser import AzCliCommandParser
 import azure.cli.extensions
 import azure.cli._help as _help
+import azure.cli._logging as _logging
+
+logger = _logging.get_az_logger(__name__)
 
 class Configuration(object): # pylint: disable=too-few-public-methods
     """The configuration object tracks session specific data such
@@ -91,6 +94,7 @@ class Application(object):
     def raise_event(self, name, event_data):
         '''Raise the event `name`.
         '''
+        logger.info("Application event '%s' with event data %s", name, event_data)
         for func in self._event_handlers[name]:
             func(event_data)
 
@@ -104,6 +108,7 @@ class Application(object):
           event_data: `dict` with event specific data.
         '''
         self._event_handlers[name].append(handler)
+        logger.info("Registered application event handler '%s' at %s", name, handler)
 
     KEYS_CAMELCASE_PATTERN = re.compile('(?!^)_([a-zA-Z])')
     @classmethod
@@ -142,13 +147,10 @@ class Application(object):
                                   default='list',
                                   help='Output format')
         # The arguments for verbosity don't get parsed by argparse but we add it here for help.
-        global_group.add_argument('--verbose', dest='_log_verbosity_verbose',
-                                  help='Increase logging verbosity.'
-                                  ' Use --debug for full debug logs.',
-                                  action='store_true')
-        global_group.add_argument('--debug', dest='_log_verbosity_debug',
-                                  help='Increase logging verbosity to show all debug logs.',
-                                  action='store_true')
+        global_group.add_argument('--verbose', dest='_log_verbosity_verbose', action='store_true',
+                                  help='Increase logging verbosity. Use --debug for full debug logs.') #pylint: disable=line-too-long
+        global_group.add_argument('--debug', dest='_log_verbosity_debug', action='store_true',
+                                  help='Increase logging verbosity to show all debug logs.')
 
     def _handle_builtin_arguments(self, args):
         self.configuration.output_format = args._output_format #pylint: disable=protected-access
