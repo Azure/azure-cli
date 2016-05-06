@@ -13,9 +13,10 @@ from azure.cli.parser import IncorrectUsageError
 class JMESPathComparatorAssertionError(AssertionError):
 
     def __init__(self, comparator, actual_result, json_data):
-        message = "Actual value '{}' != Expected value '{}'. " + \
-                  "Query '{}' used on json data '{}'".format( #pylint: disable=too-many-format-args
-                      actual_result, comparator.expected_result, comparator.query, json_data)
+        message = "Actual value '{}' != Expected value '{}'. ".format(
+            actual_result,
+            comparator.expected_result)
+        message += "Query '{}' used on json data '{}'".format(comparator.query, json_data)
         super().__init__(message)
 
 class JMESPathComparator(object): #pylint: disable=too-few-public-methods
