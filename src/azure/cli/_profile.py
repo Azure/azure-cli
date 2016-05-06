@@ -3,14 +3,18 @@ import collections
 from codecs import open as codecs_open
 import json
 import os.path
+import errno
 from msrest.authentication import BasicTokenAuthentication
 import adal
 from azure.mgmt.resource.subscriptions import (SubscriptionClient,
                                                SubscriptionClientConfiguration)
 from .main import ACCOUNT
+from ._util import CLIError
 from ._locale import L
 from ._azure_env import (get_authority_url, CLIENT_ID, get_management_endpoint_url,
                          ENV_DEFAULT, COMMON_TENANT)
+import azure.cli._logging as _logging
+logger = _logging.get_az_logger(__name__)
 
 #Names below are used by azure-xplat-cli to persist account information into
 #~/.azure/azureProfile.json or osx/keychainer or windows secure storage,
@@ -31,9 +35,15 @@ _SERVICE_PRINCIPAL = 'servicePrincipal'
 _SERVICE_PRINCIPAL_ID = 'servicePrincipalId'
 _SERVICE_PRINCIPAL_TENANT = 'servicePrincipalTenant'
 _TOKEN_ENTRY_USER_ID = 'userId'
-#This could mean real access token, or client secret of a service principal
+#This could mean either real access token, or client secret of a service principal
 #This naming is no good, but can't change because xplat-cli does so.
 _ACCESS_TOKEN = 'accessToken'
+
+TOKEN_FIELDS_EXCLUDED_FROM_PERSISTENCE = ['familyName',
+                                          'givenName',
+                                          'isUserIdDisplayable',
+                                          'tenantId']
+
 
 _AUTH_CTX_FACTORY = lambda authority, cache: adal.AuthenticationContext(authority, cache=cache)
 
@@ -43,6 +53,13 @@ def _read_file_content(file_path):
         with codecs_open(file_path, 'r', encoding='ascii') as file_to_read:
             file_text = file_to_read.read()
     return file_text
+
+def _delete_file(file_path):
+    try:
+        os.remove(file_path)
+    except OSError as e:
+        if e.errno != errno.ENOENT:
+            raise
 
 class Profile(object):
     def __init__(self, storage=None, auth_ctx_factory=None):
@@ -64,7 +81,7 @@ class Profile(object):
         else:
             if is_service_principal:
                 if not tenant:
-                    raise ValueError(L('Please supply tenant using "--tenant"'))
+                    raise CLIError(L('Please supply tenant using "--tenant"'))
 
                 subscriptions = self._subscription_finder.find_from_service_principal_id(username,
                                                                                          password,
@@ -73,7 +90,7 @@ class Profile(object):
                 subscriptions = self._subscription_finder.find_from_user_account(username, password)
 
         if not subscriptions:
-            raise RuntimeError(L('No subscriptions found for this account.'))
+            raise CLIError(L('No subscriptions found for this account.'))
 
         if is_service_principal:
             self._creds_cache.save_service_principal_cred(username,
@@ -141,8 +158,8 @@ class Profile(object):
                   subscription_id_or_name == x[_SUBSCRIPTION_NAME].lower()]
 
         if len(result) != 1:
-            raise ValueError('The subscription of "{}" does not exist or has more than'
-                             ' one match.'.format(subscription_id_or_name))
+            raise CLIError('The subscription of "{}" does not exist or has more than'
+                           ' one match.'.format(subscription_id_or_name))
 
         for s in subscriptions:
             s[_IS_DEFAULT_SUBSCRIPTION] = False
@@ -165,6 +182,9 @@ class Profile(object):
 
         self._creds_cache.remove_cached_creds(user_or_sp)
 
+    def logout_all(self):
+        self._cache_subscriptions_to_local_storage({})
+        self._creds_cache.remove_all_cached_creds()
 
     def load_cached_subscriptions(self):
         return self._storage.get(_SUBSCRIPTIONS) or []
@@ -175,11 +195,11 @@ class Profile(object):
     def get_login_credentials(self):
         subscriptions = self.load_cached_subscriptions()
         if not subscriptions:
-            raise ValueError('Please run login to setup account.')
+            raise CLIError('Please run login to setup account.')
 
         active = [x for x in subscriptions if x.get(_IS_DEFAULT_SUBSCRIPTION)]
         if len(active) != 1:
-            raise ValueError('Please run "account set" to select active account.')
+            raise CLIError('Please run "account set" to select active account.')
         active_account = active[0]
 
         user_type = active_account[_USER_ENTITY][_USER_TYPE]
@@ -219,7 +239,7 @@ class SubscriptionFinder(object):
     def find_through_interactive_flow(self):
         context = self._create_auth_context(COMMON_TENANT)
         code = context.acquire_user_code(self._resource, CLIENT_ID)
-        print(code['message'])
+        logger.warning(code['message'])
         token_entry = context.acquire_token_with_device_code(self._resource, code, CLIENT_ID)
         self.user_id = token_entry[_TOKEN_ENTRY_USER_ID]
         result = self._find_using_common_tenant(token_entry[_ACCESS_TOKEN])
@@ -283,6 +303,12 @@ class CredsCache(object):
         with codecs_open(self._token_file, 'w', encoding='ascii') as cred_file:
             items = self.adal_token_cache.read_items()
             all_creds = [entry for _, entry in items]
+
+            #trim away useless fields (needed for cred sharing with xplat)
+            for i in all_creds:
+                for key in TOKEN_FIELDS_EXCLUDED_FROM_PERSISTENCE:
+                    i.pop(key, None)
+
             all_creds.extend(self._service_principal_creds)
             cred_file.write(json.dumps(all_creds))
         self.adal_token_cache.has_state_changed = False
@@ -292,7 +318,7 @@ class CredsCache(object):
         context = self._auth_ctx_factory(authority, cache=self.adal_token_cache)
         token_entry = context.acquire_token(self._resource, username, CLIENT_ID)
         if not token_entry: #TODO: consider to letting adal-python throw
-            raise ValueError('Could not retrieve token from local cache, please run \'login\'.')
+            raise CLIError('Could not retrieve token from local cache, please run \'login\'.')
 
         if self.adal_token_cache.has_state_changed:
             self.persist_cached_creds()
@@ -301,7 +327,7 @@ class CredsCache(object):
     def retrieve_token_for_service_principal(self, sp_id):
         matched = [x for x in self._service_principal_creds if sp_id == x[_SERVICE_PRINCIPAL_ID]]
         if not matched:
-            raise ValueError(L('Please run "account set" to select active account.'))
+            raise CLIError(L('Please run "account set" to select active account.'))
         cred = matched[0]
         authority_url = get_authority_url(cred[_SERVICE_PRINCIPAL_TENANT], ENV_DEFAULT)
         context = self._auth_ctx_factory(authority_url, None)
@@ -372,3 +398,7 @@ class CredsCache(object):
 
         if state_changed:
             self.persist_cached_creds()
+
+    def remove_all_cached_creds(self):
+        #we can clear file contents, but deleting it is simpler
+        _delete_file(self._token_file)
