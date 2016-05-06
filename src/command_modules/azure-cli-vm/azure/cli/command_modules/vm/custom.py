@@ -1,10 +1,7 @@
 ﻿import json
 import re
 
-try:
-    from urllib.request import urlopen
-except ImportError:
-    from urllib import urlopen # pylint: disable=no-name-in-module
+from six.moves.urllib.request import urlopen
 
 from azure.mgmt.compute.models import DataDisk
 from azure.mgmt.compute.models.compute_management_client_enums import DiskCreateOptionTypes
