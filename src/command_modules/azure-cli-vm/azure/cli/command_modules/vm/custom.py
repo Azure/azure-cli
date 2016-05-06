@@ -138,7 +138,7 @@ class ConvenienceVmCommands(object): # pylint: disable=too-few-public-methods
 
     def list_vm_images(self, image_location=None, publisher=None, offer=None, sku=None, all=False): # pylint: disable=redefined-builtin
         '''vm image list
-        :param str location:Image location
+        :param str image_location:Image location
         :param str publisher:Image publisher name
         :param str offer:Image offer name
         :param str sku:Image sku name
