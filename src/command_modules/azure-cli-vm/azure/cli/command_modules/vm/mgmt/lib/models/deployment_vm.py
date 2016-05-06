@@ -29,13 +29,14 @@ class DeploymentVM(Model):
     :type storage_container_name: str
     :param virtual_network_name: Name of virtual network to add VM to.
     :type virtual_network_name: str
-    :param subnet_ip_address_prefix: The subnet address type.
+    :param subnet_ip_address_prefix: The subnet address prefix in CIDR format.
     :type subnet_ip_address_prefix: str
-    :param private_ip_address_allocation: Dynamic of Static private IP
-     address allocation.
+    :param private_ip_address_allocation: Private IP address allocation
+     method.
     :type private_ip_address_allocation: str
     :param dns_name_for_public_ip: Globally unique DNS Name for the Public IP
-     used to access the Virtual Machine.
+     used to access the Virtual Machine.  Requires a new public IP to be
+     created by setting Public IP Address Type to New.
     :type dns_name_for_public_ip: str
     :param storage_account_type: Whether to use an existing storage account
      or create a new one. Possible values include: 'new', 'existing'. Default
@@ -71,29 +72,32 @@ class DeploymentVM(Model):
     :type os_version: str
     :param os_disk_name: Name of new VM OS disk.
     :type os_disk_name: str
-    :param ssh_key_path: VM file path for SSH key.
-    :type ssh_key_path: str
+    :param ssh_dest_key_path: VM file path for SSH key.
+    :type ssh_dest_key_path: str
     :param os_offer: The OS Offer to install.
     :type os_offer: str
-    :param public_ip_address_allocation: Dynamic or Static public IP address
-     allocation. Possible values include: 'Dynamic', 'Static'. Default value:
-     "Dynamic" .
+    :param public_ip_address_allocation: Public IP address allocation method.
+     Possible values include: 'Dynamic', 'Static'. Default value: "Dynamic" .
     :type public_ip_address_allocation: str
-    :param authentication_type: Authentication method: password-only or add
-     ssh-keys (Linux-only). Possible values include: 'password', 'sshkey'.
-     Default value: "password" .
+    :param authentication_type: Password or SSH Public Key authentication.
+     Possible values include: 'password', 'sshkey'. Default value: "password"
+     .
     :type authentication_type: str
     :param storage_account_name: Name of storage account for the VM OS disk.
     :type storage_account_name: str
-    :param storage_redundancy_type: The VM storage type.
+    :param storage_redundancy_type: The VM storage type (Standard_LRS,
+     Standard_GRS, Standard_RAGRS). Default value: "Standard_LRS" .
     :type storage_redundancy_type: str
-    :param size: The VM Size that should be created  (e.g. Standard_A2)
+    :param size: The VM Size that should be created.  See
+     https://azure.microsoft.com/en-us/pricing/details/virtual-machines/ for
+     size info. Default value: "Standard_A2" .
     :type size: str
     :param public_ip_address_type: Use a public IP Address for the VM Nic.
-     (new, existing or none). Possible values include: 'none', 'new',
-     'existing'. Default value: "none" .
+     Possible values include: 'none', 'new', 'existing'. Default value:
+     "none" .
     :type public_ip_address_type: str
-    :param virtual_network_ip_address_prefix: The IP address prefix.
+    :param virtual_network_ip_address_prefix: The virtual network IP address
+     prefix in CIDR format.
     :type virtual_network_ip_address_prefix: str
     :param availability_set_id: Existing availability set for the VM.
     :type availability_set_id: str
@@ -110,8 +114,7 @@ class DeploymentVM(Model):
     :param public_ip_address_name: Name of public IP address to use.
     :type public_ip_address_name: str
     :param dns_name_type: Associate VMs with a public IP address to a DNS
-     name (new or none). Possible values include: 'none', 'new'. Default
-     value: "none" .
+     name. Possible values include: 'none', 'new'. Default value: "none" .
     :type dns_name_type: str
     :ivar mode: Gets or sets the deployment mode. Default value:
      "Incremental" .
@@ -146,7 +149,7 @@ class DeploymentVM(Model):
         'admin_username': {'key': 'properties.parameters.adminUsername.value', 'type': 'str'},
         'os_version': {'key': 'properties.parameters.osVersion.value', 'type': 'str'},
         'os_disk_name': {'key': 'properties.parameters.osDiskName.value', 'type': 'str'},
-        'ssh_key_path': {'key': 'properties.parameters.sshKeyPath.value', 'type': 'str'},
+        'ssh_dest_key_path': {'key': 'properties.parameters.sshDestKeyPath.value', 'type': 'str'},
         'os_offer': {'key': 'properties.parameters.osOffer.value', 'type': 'str'},
         'public_ip_address_allocation': {'key': 'properties.parameters.publicIpAddressAllocation.value', 'type': 'str'},
         'authentication_type': {'key': 'properties.parameters.authenticationType.value', 'type': 'str'},
@@ -171,7 +174,7 @@ class DeploymentVM(Model):
 
     mode = "Incremental"
 
-    def __init__(self, name, admin_username, content_version=None, storage_container_name=None, virtual_network_name=None, subnet_ip_address_prefix=None, private_ip_address_allocation=None, dns_name_for_public_ip=None, storage_account_type="new", os_disk_uri=None, virtual_network_type="new", admin_password=None, os_sku=None, subnet_name=None, os_type="Win2012R2Datacenter", os_version=None, os_disk_name=None, ssh_key_path=None, os_offer=None, public_ip_address_allocation="Dynamic", authentication_type="password", storage_account_name=None, storage_redundancy_type=None, size=None, public_ip_address_type="none", virtual_network_ip_address_prefix=None, availability_set_id=None, ssh_key_value=None, location=None, os_publisher=None, availability_set_type="none", public_ip_address_name=None, dns_name_type="none"):
+    def __init__(self, name, admin_username, content_version=None, storage_container_name=None, virtual_network_name=None, subnet_ip_address_prefix=None, private_ip_address_allocation=None, dns_name_for_public_ip=None, storage_account_type="new", os_disk_uri=None, virtual_network_type="new", admin_password=None, os_sku=None, subnet_name=None, os_type="Win2012R2Datacenter", os_version=None, os_disk_name=None, ssh_dest_key_path=None, os_offer=None, public_ip_address_allocation="Dynamic", authentication_type="password", storage_account_name=None, storage_redundancy_type="Standard_LRS", size="Standard_A2", public_ip_address_type="none", virtual_network_ip_address_prefix=None, availability_set_id=None, ssh_key_value=None, location=None, os_publisher=None, availability_set_type="none", public_ip_address_name=None, dns_name_type="none"):
         self.content_version = content_version
         self.storage_container_name = storage_container_name
         self.virtual_network_name = virtual_network_name
@@ -189,7 +192,7 @@ class DeploymentVM(Model):
         self.admin_username = admin_username
         self.os_version = os_version
         self.os_disk_name = os_disk_name
-        self.ssh_key_path = ssh_key_path
+        self.ssh_dest_key_path = ssh_dest_key_path
         self.os_offer = os_offer
         self.public_ip_address_allocation = public_ip_address_allocation
         self.authentication_type = authentication_type
