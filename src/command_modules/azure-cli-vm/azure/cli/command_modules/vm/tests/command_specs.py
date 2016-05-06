@@ -27,6 +27,7 @@ class VMListIPAddressesScenarioTest(CommandTestScript):
     def __init__(self):
         self.deployment_name = 'azurecli-test-deployment-vm-list-ips'
         self.resource_group = 'cliTestRg_VmListIpAddresses'
+        self.location = 'westus'
         self.vm_name = 'vm-with-public-ip'
         self.ip_allocation_method = 'Dynamic'
         super(VMListIPAddressesScenarioTest, self).__init__(
@@ -35,15 +36,15 @@ class VMListIPAddressesScenarioTest(CommandTestScript):
             self.tear_down)
 
     def set_up(self):
-        # TODO Create the resource group
-        # (e.g. az resource group create --name cliTestRg_VmListIpAddresses)
-        pass
+        self.run('resource group create --location {} --name {}'.format(
+            self.location,
+            self.resource_group))
 
     def test_body(self):
         # Expecting no results at the beginning
         self.test('vm list-ip-addresses --resource-group {}'.format(self.resource_group), None)
-        self.run(['vm', 'create', '-g', self.resource_group, '-l', 'West US', '-n', self.vm_name,
-                  '--admin-username', 'ubuntu',
+        self.run(['vm', 'create', '-g', self.resource_group, '-l', self.location,
+                  '-n', self.vm_name, '--admin-username', 'ubuntu',
                   '--image', 'Canonical:UbuntuServer:14.04.4-LTS:latest',
                   '--admin-password', 'testPassword0', '--deployment-name', self.deployment_name,
                   '--public-ip-address-allocation', self.ip_allocation_method,
@@ -54,7 +55,9 @@ class VMListIPAddressesScenarioTest(CommandTestScript):
                       JMESPathComparator('length(@)', 1),
                       JMESPathComparator('[0].virtualMachine.name', self.vm_name),
                       JMESPathComparator('[0].virtualMachine.resourceGroup', self.resource_group),
-                      JMESPathComparator('length([0].virtualMachine.network.publicIpAddresses)', 1),
+                      JMESPathComparator(
+                          'length([0].virtualMachine.network.publicIpAddresses)',
+                          1),
                       JMESPathComparator(
                           '[0].virtualMachine.network.publicIpAddresses[0].ipAllocationMethod',
                           self.ip_allocation_method),
@@ -64,10 +67,7 @@ class VMListIPAddressesScenarioTest(CommandTestScript):
                  )
 
     def tear_down(self):
-        # TODO Delete the resource group instead
-        self.run('vm delete --resource-group {} --name {}'.format(
-            self.resource_group,
-            self.vm_name))
+        self.run('resource group delete --name {}'.format(self.resource_group))
 
 ENV_VAR = {}
 
