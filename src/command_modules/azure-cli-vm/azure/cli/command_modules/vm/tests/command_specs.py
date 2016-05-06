@@ -43,8 +43,9 @@ class VMListIPAddressesScenarioTest(CommandTestScript):
         # Expecting no results at the beginning
         self.test('vm list-ip-addresses --resource-group {}'.format(self.resource_group), None)
         self.run(['vm', 'create', '-g', self.resource_group, '-l', 'West US', '-n', self.vm_name,
-                  '--admin-username', 'ubuntu', '--image', 'UbuntuLTS', '--admin-password',
-                  'testPassword0', '--deployment-name', self.deployment_name,
+                  '--admin-username', 'ubuntu',
+                  '--image', 'Canonical:UbuntuServer:14.04.4-LTS:latest',
+                  '--admin-password', 'testPassword0', '--deployment-name', self.deployment_name,
                   '--public-ip-address-allocation', self.ip_allocation_method,
                   '--public-ip-address-type', 'new'])
         # Expecting the one we just added
