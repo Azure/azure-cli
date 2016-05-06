@@ -12,6 +12,7 @@ from azure.mgmt.compute.models import DataDisk
 from azure.mgmt.compute.models.compute_management_client_enums import DiskCreateOptionTypes
 from azure.cli.commands import CommandTable, LongRunningOperation
 from azure.cli.commands._command_creation import get_mgmt_service_client
+from azure.cli._util import CLIError
 
 from ._params import _compute_client_factory
 
