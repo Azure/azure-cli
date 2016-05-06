@@ -7,7 +7,8 @@ from azure.cli.commands import (COMMON_PARAMETERS as GLOBAL_COMMON_PARAMETERS, e
                                 patch_aliases)
 from azure.cli.commands._command_creation import get_mgmt_service_client
 from azure.cli.command_modules.vm._validators import MinMaxValue
-from azure.cli.command_modules.vm._actions import VMImageFieldAction, VMSSHFieldAction
+from azure.cli.command_modules.vm._actions import (VMImageFieldAction, VMSSHFieldAction,
+                                                   VMDNSNameAction)
 from azure.cli._help_files import helps
 from azure.cli._locale import L
 
@@ -85,13 +86,19 @@ VM_CREATE_PARAMETER_ALIASES = {
 VM_CREATE_EXTRA_PARAMETERS = {
     'image': {
         'name': '--image',
-        'help': 'The OS image.  Supported values: Common OS (e.g. Win2012R2Datacenter), ' + \
-                'URN (e.g. "publisher:offer:sku:version"), or existing VHD URI.',
         'action': VMImageFieldAction
-    },
+        },
     'ssh_key_value': {
         'name': '--ssh-key-value',
         'action': VMSSHFieldAction
+    },
+    'dns_name_for_public_ip': {
+        'name': '--dns-name-for-public-ip',
+        'action': VMDNSNameAction
+    },
+    'dns_name_type': {
+        'name': '--dns-name-type',
+        'help': argparse.SUPPRESS
     }
 }
 
@@ -112,23 +119,28 @@ helps['vm create'] = """
                 - name: --image
                   type: string
                   required: false
-                  short-summary: OS image
+                  short-summary: OS image (Common, URN or URI).
                   long-summary: |
-                    Common OS types: CentOS, CoreOS, Debian, openSUSE, RHEL, SLES, UbuntuLTS,
-                    Win2012R2Datacenter, Win2012Datacenter, Win2008R2SP1
-                    Example URN: canonical:Ubuntu_Snappy_Core:15.04:2016.0318.1949
+                    Common OS types: Win2012R2Datacenter, Win2012Datacenter, Win2008SP1, or Offer from 'az vm image list'
+                    Example URN: MicrosoftWindowsServer:WindowsServer:2012-R2-Datacenter:latest
                     Example URI: http://<storageAccount>.blob.core.windows.net/vhds/osdiskimage.vhd
                   populator-commands: 
                     - az vm image list
                     - az vm image show
+                - name: --ssh-key-value
+                  short-summary: SSH key file value or key file path.
             examples:
                 - name: Create a simple Windows Server VM with private IP address
                   text: >
                     az vm create --image Win2012R2Datacenter --admin-username myadmin --admin-password Admin_001 
                     -l "West US" -g myvms --name myvm001
+                - name: Create a simple Windows Server VM with public IP address and DNS entry
+                  text: >
+                    az vm create --image Win2012R2Datacenter --admin-username myadmin --admin-password Admin_001 
+                    -l "West US" -g myvms --name myvm001 --public-ip-address-type new --dns-name-for-public-ip myGloballyUniqueVmDnsName
                 - name: Create a Linux VM with SSH key authentication, add a public DNS entry and add to an existing Virtual Network and Availability Set.
                   text: >
-                    az vm create --image canonical:Ubuntu_Snappy_Core:15.04:2016.0318.1949
+                    az vm create --image <linux image from 'az vm image list'>
                     --admin-username myadmin --admin-password Admin_001 --authentication-type sshkey
                     --virtual-network-type existing --virtual-network-name myvnet --subnet-name default
                     --availability-set-type existing --availability-set-id myavailset
