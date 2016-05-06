@@ -1,5 +1,6 @@
 ﻿import os.path
 from codecs import open as codecs_open
+from azure.cli._util import CLIError
 
 _translations = dict()
 _locale_dir = ''
@@ -27,6 +28,6 @@ def get_file(name):
     try:
         src = _locale_dir
     except (NameError, AttributeError):
-        raise RuntimeError("localizations not installed")
+        raise CLIError('Localizations not installed')
 
     return os.path.join(src, name)
