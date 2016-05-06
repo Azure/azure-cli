@@ -69,6 +69,7 @@ DEPENDENCIES = [
     'applicationinsights',
     'argcomplete',
     'azure==2.0.0rc1',
+    'colorama',
     'jmespath',
     'msrest',
     'pip',

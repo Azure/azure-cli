@@ -1,6 +1,7 @@
 ﻿from azure.cli._profile import Profile
 from azure.cli.commands import CommandTable
 from azure.cli._locale import L
+from azure.cli._util import CLIError
 from .command_tables import COMMAND_TABLES
 import azure.cli._logging as _logging
 
@@ -28,7 +29,7 @@ def list_subscriptions(_):
 def set_active_subscription(args):
     subscription_name_or_id = args.get('subscription-name-or-id')
     if not id:
-        raise ValueError(L('Please provide subscription id or unique name.'))
+        raise CLIError(L('Please provide subscription id or unique name.'))
 
     profile = Profile()
     profile.set_active_subscription(subscription_name_or_id)

@@ -1,7 +1,6 @@
 import argparse
 import re
 import os
-from azure.mgmt.compute import ComputeManagementClient, ComputeManagementClientConfiguration
 from azure.mgmt.compute.operations import (AvailabilitySetsOperations,
                                            VirtualMachineExtensionImagesOperations,
                                            VirtualMachineExtensionsOperations,
@@ -11,10 +10,9 @@ from azure.mgmt.compute.operations import (AvailabilitySetsOperations,
                                            VirtualMachinesOperations,
                                            VirtualMachineScaleSetsOperations,
                                            VirtualMachineScaleSetVMsOperations)
-
-from azure.cli.commands._command_creation import get_mgmt_service_client
 from azure.cli.commands._auto_command import build_operation, AutoCommandDefinition
 from azure.cli.commands import CommandTable, LongRunningOperation
+from azure.cli.commands._command_creation import get_mgmt_service_client
 from azure.cli._locale import L
 from azure.cli.command_modules.vm.mgmt_avail_set.lib import (AvailSetCreationClient
                                                              as AvailSetClient,
@@ -28,12 +26,9 @@ from azure.cli.command_modules.vm.mgmt_vm_create.lib.operations import VMOperati
 from azure.cli._help_files import helps
 
 from ._params import PARAMETER_ALIASES
-from .custom import ConvenienceVmCommands
+from .custom import ConvenienceVmCommands, _compute_client_factory
 
 command_table = CommandTable()
-
-def _compute_client_factory(_):
-    return get_mgmt_service_client(ComputeManagementClient, ComputeManagementClientConfiguration)
 
 def _patch_aliases(alias_items):
     aliases = PARAMETER_ALIASES.copy()
@@ -226,6 +221,15 @@ class VMSSHFieldAction(argparse.Action): #pylint: disable=too-few-public-methods
         else:
             namespace.ssh_key_value = ssh_value
 
+class VMDNSNameAction(argparse.Action): #pylint: disable=too-few-public-methods
+    def __call__(self, parser, namespace, values, option_string=None):
+        dns_value = values
+
+        if dns_value:
+            namespace.dns_name_type = 'new'
+
+        namespace.dns_name_for_public_ip = dns_value
+
 extra_parameters = [
     {
         'name': '--image',
@@ -234,6 +238,14 @@ extra_parameters = [
     {
         'name': '--ssh-key-value',
         'action': VMSSHFieldAction
+        },
+    {
+        'name': '--dns-name-for-public-ip',
+        'action': VMDNSNameAction
+        },
+    {
+        'name': '--dns-name-type',
+        'help': argparse.SUPPRESS
         }
     ]
 
@@ -247,8 +259,8 @@ helps['vm create'] = """
                   required: false
                   short-summary: OS image (Common, URN or URI).
                   long-summary: |
-                    Common OS types: CentOS, CoreOS, Debian, openSUSE, RHEL, SLES, UbuntuLTS, Win2012R2Datacenter, Win2012Datacenter, Win2008R2SP1
-                    Example URN: canonical:Ubuntu_Snappy_Core:15.04:2016.0318.1949
+                    Common OS types: Win2012R2Datacenter, Win2012Datacenter, Win2008SP1, or Offer from 'az vm image list'
+                    Example URN: MicrosoftWindowsServer:WindowsServer:2012-R2-Datacenter:latest
                     Example URI: http://<storageAccount>.blob.core.windows.net/vhds/osdiskimage.vhd
                   populator-commands: 
                     - az vm image list
@@ -266,7 +278,7 @@ helps['vm create'] = """
                     -l "West US" -g myvms --name myvm001 --public-ip-address-type new --dns-name-for-public-ip myGloballyUniqueVmDnsName
                 - name: Create a Linux VM with SSH key authentication, add a public DNS entry and add to an existing Virtual Network and Availability Set.
                   text: >
-                    az vm create --image canonical:Ubuntu_Snappy_Core:15.04:2016.0318.1949
+                    az vm create --image <linux image from 'az vm image list'>
                     --admin-username myadmin --admin-password Admin_001 --authentication-type sshkey
                     --virtual-network-type existing --virtual-network-name myvnet --subnet-name default
                     --availability-set-type existing --availability-set-id myavailset
