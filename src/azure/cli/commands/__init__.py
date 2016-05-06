@@ -8,11 +8,10 @@ from msrest.exceptions import ClientException
 
 from azure.cli._util import CLIError
 import azure.cli._logging as _logging
-
-logger = _logging.get_az_logger(__name__)
-
 from azure.cli._locale import L
 from azure.cli.commands._validators import validate_tags, validate_tag
+
+logger = _logging.get_az_logger(__name__)
 
 # Find our command modules, they start with 'azure-cli-'
 INSTALLED_COMMAND_MODULES = [dist.key.replace('azure-cli-', '')
