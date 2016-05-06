@@ -32,7 +32,7 @@ class VMOperations(object):
         self.config = config
 
     def create_or_update(
-            self, resource_group_name, deployment_name, name, admin_username, content_version=None, storage_container_name=None, virtual_network_name=None, subnet_ip_address_prefix=None, private_ip_address_allocation=None, dns_name_for_public_ip=None, storage_account_type="new", os_disk_uri=None, virtual_network_type="new", admin_password=None, os_sku=None, subnet_name=None, os_type="Win2012R2Datacenter", os_version=None, os_disk_name=None, ssh_dest_key_path=None, os_offer=None, public_ip_address_allocation="Dynamic", authentication_type="password", storage_account_name=None, storage_redundancy_type=None, size=None, public_ip_address_type="none", virtual_network_ip_address_prefix=None, availability_set_id=None, ssh_key_value=None, location=None, os_publisher=None, availability_set_type="none", public_ip_address_name=None, dns_name_type="none", custom_headers={}, raw=False, **operation_config):
+            self, resource_group_name, deployment_name, name, admin_username, content_version=None, storage_container_name=None, virtual_network_name=None, subnet_ip_address_prefix=None, private_ip_address_allocation=None, dns_name_for_public_ip=None, storage_account_type="new", os_disk_uri=None, virtual_network_type="new", admin_password=None, os_sku=None, subnet_name=None, os_type="Win2012R2Datacenter", os_version=None, os_disk_name=None, ssh_dest_key_path=None, os_offer=None, public_ip_address_allocation="Dynamic", authentication_type="password", storage_account_name=None, storage_redundancy_type="Standard_LRS", size="Standard_A2", public_ip_address_type="none", virtual_network_ip_address_prefix=None, availability_set_id=None, ssh_key_value=None, location=None, os_publisher=None, availability_set_type="none", public_ip_address_name=None, dns_name_type="none", custom_headers={}, raw=False, **operation_config):
         """
         Create or update a virtual machine.
 
@@ -53,7 +53,8 @@ class VMOperations(object):
         :type storage_container_name: str
         :param virtual_network_name: Name of virtual network to add VM to.
         :type virtual_network_name: str
-        :param subnet_ip_address_prefix: The subnet address type.
+        :param subnet_ip_address_prefix: The subnet address prefix in CIDR
+         format.
         :type subnet_ip_address_prefix: str
         :param private_ip_address_allocation: Private IP address allocation
          method.
@@ -95,8 +96,8 @@ class VMOperations(object):
         :param public_ip_address_allocation: Public IP address allocation
          method. Possible values include: 'Dynamic', 'Static'
         :type public_ip_address_allocation: str
-        :param authentication_type: Password or SSH-based authentication.
-         Possible values include: 'password', 'sshkey'
+        :param authentication_type: Password or SSH Public Key
+         authentication. Possible values include: 'password', 'sshkey'
         :type authentication_type: str
         :param storage_account_name: Name of storage account for the VM OS
          disk.
@@ -112,7 +113,7 @@ class VMOperations(object):
          Nic. Possible values include: 'none', 'new', 'existing'
         :type public_ip_address_type: str
         :param virtual_network_ip_address_prefix: The virtual network IP
-         address prefix.
+         address prefix in CIDR format.
         :type virtual_network_ip_address_prefix: str
         :param availability_set_id: Existing availability set for the VM.
         :type availability_set_id: str

@@ -336,6 +336,7 @@
         "value": {
           "type": "string",
           "description": "Name of storage container for the VM OS disk.",
+          "default": "vhds",
           "x-ms-client-name": "storageContainerName"
         }
       }
@@ -353,7 +354,8 @@
       "properties": {
         "value": {
           "type": "string",
-          "description": "The subnet address type.",
+          "description": "The subnet address prefix in CIDR format.",
+          "default": "10.0.0.0/24",
           "x-ms-client-name": "subnetIpAddressPrefix"
         }
       }
@@ -363,6 +365,11 @@
         "value": {
           "type": "string",
           "description": "Private IP address allocation method.",
+          "enum": [
+            "Dynamic",
+            "Static"
+          ],
+          "default": "Dynamic",
           "x-ms-client-name": "privateIpAddressAllocation"
         }
       }
@@ -454,6 +461,7 @@
         "value": {
           "type": "string",
           "description": "The OS SKU to install.",
+          "default": "2012-R2-Datacenter",
           "x-ms-client-name": "osSKU"
         }
       }
@@ -508,6 +516,7 @@
         "value": {
           "type": "string",
           "description": "The OS version to install.",
+          "default": "latest",
           "x-ms-client-name": "osVersion"
         }
       }
@@ -517,6 +526,7 @@
         "value": {
           "type": "string",
           "description": "Name of new VM OS disk.",
+          "default": "osdiskimage",
           "x-ms-client-name": "osDiskName"
         }
       }
@@ -535,6 +545,7 @@
         "value": {
           "type": "string",
           "description": "The OS Offer to install.",
+          "default": "WindowsServer",
           "x-ms-client-name": "osOffer"
         }
       }
@@ -557,7 +568,7 @@
       "properties": {
         "value": {
           "type": "string",
-          "description": "Password or SSH-based authentication.",
+          "description": "Password or SSH Public Key authentication.",
           "enum": [
             "password",
             "sshkey"
@@ -581,6 +592,7 @@
         "value": {
           "type": "string",
           "description": "The VM storage type (Standard_LRS, Standard_GRS, Standard_RAGRS).",
+          "default": "Standard_LRS",
           "x-ms-client-name": "storageRedundancyType"
         }
       }
@@ -590,6 +602,7 @@
         "value": {
           "type": "string",
           "description": "The VM Size that should be created.  See https://azure.microsoft.com/en-us/pricing/details/virtual-machines/ for size info.",
+          "default": "Standard_A2",
           "x-ms-client-name": "size"
         }
       }
@@ -613,7 +626,8 @@
       "properties": {
         "value": {
           "type": "string",
-          "description": "The virtual network IP address prefix.",
+          "description": "The virtual network IP address prefix in CIDR format.",
+          "default": "10.0.0.0/16",
           "x-ms-client-name": "virtualNetworkIpAddressPrefix"
         }
       }
@@ -650,6 +664,7 @@
         "value": {
           "type": "string",
           "description": "The OS publisher of the OS image.",
+          "default": "MicrosoftWindowsServer",
           "x-ms-client-name": "osPublisher"
         }
       }
