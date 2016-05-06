@@ -16,10 +16,15 @@ from azure.cli.commands._command_creation import get_mgmt_service_client
 from azure.cli.commands._auto_command import build_operation, AutoCommandDefinition
 from azure.cli.commands import CommandTable, LongRunningOperation
 from azure.cli._locale import L
-from azure.cli.command_modules.vm.mgmt.lib import (VMCreationClient as VMClient,
-                                                   VMCreationClientConfiguration
-                                                   as VMClientConfig)
-from azure.cli.command_modules.vm.mgmt.lib.operations import VMOperations
+from azure.cli.command_modules.vm.mgmt_avail_set.lib import (AvailSetCreationClient
+                                                             as AvailSetClient,
+                                                             AvailSetCreationClientConfiguration
+                                                             as AvailSetClientConfig)
+from azure.cli.command_modules.vm.mgmt_avail_set.lib.operations import AvailSetOperations
+from azure.cli.command_modules.vm.mgmt_vm_create.lib import (VMCreationClient as VMClient,
+                                                             VMCreationClientConfiguration
+                                                             as VMClientConfig)
+from azure.cli.command_modules.vm.mgmt_vm_create.lib.operations import VMOperations
 from azure.cli._help_files import helps
 
 from ._params import PARAMETER_ALIASES
@@ -292,4 +297,26 @@ build_operation("vm image",
                     #get rid of the alias with work on https://www.pivotaltracker.com/projects/1535539/stories/118884633
                     'image_location' : {'name': '--location -l', 'help': 'Image location'}
                     }))
+
+avail_set_param_aliases = {
+    'name': {
+        'name': '--name -n'
+        }
+    }
+
+helps['vm availability-set create'] = """
+            type: command
+            long-summary: For more info, see https://blogs.technet.microsoft.com/yungchou/2013/05/14/window-azure-fault-domain-and-upgrade-domain-explained-explained-reprised/
+"""
+
+build_operation("vm availability-set",
+                'avail_set',
+                lambda _: get_mgmt_service_client(AvailSetClient, AvailSetClientConfig),
+                [
+                    AutoCommandDefinition(AvailSetOperations.create_or_update,
+                                          LongRunningOperation(L('Creating availability set'), L('Availability set created')),
+                                          'create')
+                ],
+                command_table,
+                avail_set_param_aliases)
 
