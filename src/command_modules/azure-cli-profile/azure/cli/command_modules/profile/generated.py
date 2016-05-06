@@ -8,13 +8,6 @@ from .custom import ProfileCommands
 
 command_table = CommandTable()
 
-# HELPER METHODS
-
-def _patch_aliases(alias_items):
-    aliases = PARAMETER_ALIASES.copy()
-    aliases.update(alias_items)
-    return aliases
-
 # PROFILE COMMANDS
 
 build_operation(

@@ -20,8 +20,6 @@ INSTALLED_COMMAND_MODULES = [dist.key.replace('azure-cli-', '')
 
 logger.info('Installed command modules %s', INSTALLED_COMMAND_MODULES)
 
-RESOURCE_GROUP_ARG_NAME = 'resource_group_name'
-
 COMMON_PARAMETERS = {
     'deployment_name': {
         'name': '--deployment-name',
@@ -36,7 +34,6 @@ COMMON_PARAMETERS = {
     },
     'resource_group_name': {
         'name': '--resource-group -g',
-        'dest': RESOURCE_GROUP_ARG_NAME,
         'metavar': 'RESOURCEGROUP',
         'help': 'The name of the resource group',
     },
@@ -55,9 +52,14 @@ COMMON_PARAMETERS = {
 }
 
 def extend_parameter(parameter_metadata, **kwargs):
-    modified_parameter_metadata = parameter_metadata.copy()
-    modified_parameter_metadata.update(kwargs)
-    return modified_parameter_metadata
+    extended_param = parameter_metadata.copy()
+    extended_param.update(kwargs)
+    return extended_param
+
+def patch_aliases(aliases, patch):
+    patched_aliases = aliases.copy()
+    patched_aliases.update(patch)
+    return patched_aliases
 
 class LongRunningOperation(object): #pylint: disable=too-few-public-methods
 

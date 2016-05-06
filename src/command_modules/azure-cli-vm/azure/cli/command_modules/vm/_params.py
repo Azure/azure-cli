@@ -3,7 +3,8 @@ import argparse
 from azure.mgmt.compute import ComputeManagementClient, ComputeManagementClientConfiguration
 from azure.mgmt.compute.models import VirtualHardDisk
 
-from azure.cli.commands import COMMON_PARAMETERS as GLOBAL_COMMON_PARAMETERS, extend_parameter
+from azure.cli.commands import (COMMON_PARAMETERS as GLOBAL_COMMON_PARAMETERS, extend_parameter,
+                                patch_aliases)
 from azure.cli.commands._command_creation import get_mgmt_service_client
 from azure.cli.command_modules.vm._validators import MinMaxValue
 from azure.cli.command_modules.vm._actions import VMImageFieldAction, VMSSHFieldAction
@@ -17,8 +18,7 @@ def _compute_client_factory(**_):
 
 # BASIC PARAMETER CONFIGURATION
 
-PARAMETER_ALIASES = GLOBAL_COMMON_PARAMETERS.copy()
-PARAMETER_ALIASES.update({
+PARAMETER_ALIASES = patch_aliases(GLOBAL_COMMON_PARAMETERS, {
     'diskname': {
         'name': '--name -n',
         'help': L('Disk name'),
