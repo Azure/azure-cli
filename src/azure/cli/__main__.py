@@ -2,7 +2,6 @@
 import os
 
 import azure.cli.main
-import azure.cli._logging as _logging
 
 from azure.cli._telemetry import init_telemetry, user_agrees_to_telemetry, telemetry_flush
 
@@ -22,7 +21,6 @@ try:
         if comp_line:
             args = comp_line.split()[1:]
 
-    _logging.configure_logging(args)
     sys.exit(azure.cli.main.main(args))
 finally:
     telemetry_flush()
