@@ -224,7 +224,6 @@ class VMSSHFieldAction(argparse.Action): #pylint: disable=too-few-public-methods
 extra_parameters = [
     {
         'name': '--image',
-        'help': 'The OS image.  Supported values: Common OS (e.g. Win2012R2Datacenter), URN (e.g. "publisher:offer:sku:version"), or existing VHD URI.',
         'action': VMImageFieldAction
         },
     {
@@ -241,20 +240,25 @@ helps['vm create'] = """
                 - name: --image
                   type: string
                   required: false
-                  short-summary: OS image
+                  short-summary: OS image (Common, URN or URI).
                   long-summary: |
-                    Common OS types: CentOS, CoreOS, Debian, openSUSE, RHEL, SLES, UbuntuLTS,
-                    Win2012R2Datacenter, Win2012Datacenter, Win2008R2SP1
+                    Common OS types: CentOS, CoreOS, Debian, openSUSE, RHEL, SLES, UbuntuLTS, Win2012R2Datacenter, Win2012Datacenter, Win2008R2SP1
                     Example URN: canonical:Ubuntu_Snappy_Core:15.04:2016.0318.1949
                     Example URI: http://<storageAccount>.blob.core.windows.net/vhds/osdiskimage.vhd
                   populator-commands: 
                     - az vm image list
                     - az vm image show
+                - name: --ssh-key-value
+                  short-summary: SSH key file value or key file path.
             examples:
                 - name: Create a simple Windows Server VM with private IP address
                   text: >
                     az vm create --image Win2012R2Datacenter --admin-username myadmin --admin-password Admin_001 
                     -l "West US" -g myvms --name myvm001
+                - name: Create a simple Windows Server VM with public IP address and DNS entry
+                  text: >
+                    az vm create --image Win2012R2Datacenter --admin-username myadmin --admin-password Admin_001 
+                    -l "West US" -g myvms --name myvm001 --public-ip-address-type new --dns-name-for-public-ip myGloballyUniqueVmDnsName
                 - name: Create a Linux VM with SSH key authentication, add a public DNS entry and add to an existing Virtual Network and Availability Set.
                   text: >
                     az vm create --image canonical:Ubuntu_Snappy_Core:15.04:2016.0318.1949

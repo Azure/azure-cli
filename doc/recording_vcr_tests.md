@@ -17,29 +17,74 @@ TEST_DEF = [
   },
   {
     'test_name': 'name2',
-    'command': 'command2'
+    'script': script_class()
   }
 ]
 ```
 
-Simply add your new entries and run all tests. The test driver will automatically detect the new tests and run the command, show you the output, and query if it is correct. If so, it will save the HTTP recording into a YAML file, as well as the raw output into a dictionary called `expected_results.res`. When the test is replayed, as long as the test has an entry in `expected_results.res` and a corresponding .yaml file, the test will proceed automatically. If either the entry or the .yaml file are missing, the test will be re-recorded.
+Simply add your new entries and run all tests. The test driver will automatically detect the new tests and run the commands, show you the output, and query if it is correct. If so, it will save the HTTP recording into a YAML file, as well as the raw output into a dictionary called `expected_results.res`. When the test is replayed, as long as the test has an entry in `expected_results.res` and a corresponding .yaml file, the test will proceed automatically. If either the entry or the .yaml file are missing, the test will be re-recorded.
 
 If the tests are run on TravisCI, any tests which cannot be replayed will automatically fail. 
 
-##Recording Tests
+##Types of Tests
 
-Many tests, for example those which simply retrieve information, can simply be played back, verified and recorded.
+The system currently accepts individual commands and script test objects. Individual commands will always display the output and query the user if the results are correct. These are the "old" style tests.
 
-Other tests, such as create and delete scenarios, may require additional commands to set up for recording, or may require additional commands to verify the proper operation of a command. For example, several create commands output nothing on success. Thus, you'll find yourself staring at nothing with a prompt asking if that is the expected response.
+To allow for more complex testing scenarios involving creating and deleting resources, long-running operations, or automated verification, use the script object method. To do so, simply create a class in the `command_specs.py` file with the following structure:
 
-For these scenarios, I recommend having a second shell open, from which you can run any setup commands and then run any commands you need to verify the proper operation of the command in order to answer the prompt.
+```Python
+class MyScenarioTest(CommandTestScript):
+  def __init__(self):
+    super(MyScenarioTest, self).__init__(self.set_up, self.test_body, self.tear_down)
+  
+  def set_up(self):
+    # Setup logic here
+    pass
+    
+  def test_body(self):
+    # Main test logic
+    pass
+    
+  def tear_down(self):
+    # clean up logic here
+    pass
+```
 
-I don't recommend trying to structure your tests so that one test sets up for another, because in general you cannot guarantee the order in which the tests will run. Also, I don't recommend attempting to record large batches of tests at once. I generally add one to three tests at a time and leave the remaining new tests commented out. Running `testall.bat` will let me record these. Then I uncomment a few more and so on, until they are all recorded.
+The `set_up` and `tear_down` methods are optional and can be omitted. A number of helper methods are available for structuring your script tests.
+
+####run(command_string)
+
+This method executes a given command and returns the output. The results are not sent to the display or to expected results. Use this for:
+
+- running commands that produce no output (the next statement will usually be a test)
+- running commands that are needed for conditional logic or in setup/cleanup logic
+
+####rec(command_string)
+
+This method runs a given command and records its output to the display for manual verification. Using this command will force the user to verify the output via a Y/N prompt. If the user accepts the output, it will be saved to `expected_results.res`.
+
+####test(command_string, checks)
+
+This method runs a given command and automatically validates the output. The results are saved to `expected_results.res` if valid, but nothing is display on the screen. Valid checks include: `bool`, `str` and `dict`. A check with a `dict` can be used to check for multiple matching parameters (and logic). Child `dict` objects can be used as values to verify properties within nested objects.
+
+####set_env(variable_name, value)
+
+This method is a wrapper around `os.environ` and simply sets an environment variable to the specified value.
+
+####pop_env(variable_name)
+
+Another wrapper around `os.environ` this pops the value of the indicated environment variable.
+
+####print_(string)
+
+This method allows you to write to the display output, but does not add to the `expected_results.res` file. One application of this would be to print information ahead of a `rec` statement so the person validating the output knows what to look for.
+
+##Long Running Operations (LRO)
+
+The system now allows the testing of long running operations. Regardless of the time required to record the test, playback will truncate the long running operation to finish very quickly. However, because re-recording these actions can take a very long time, it is recommended that each LRO scenario be individually tested (possibly in tandem with a delete operation) rather than as part of a larger scenario.
 
 ##Limitations
 
 The current system saves time, but has some limitations.
 
-+ Certain commands require manual steps to setup or verify
 + You can't test for things like 'this input results in an exception'. It simply tests that the response equals an expected response.
-+ This system does not work with long running operations. While it technically does, the resulting recording takes as long as the original call, which negates some of the key benefits of automated testing.
