@@ -20,6 +20,8 @@ CONFIG = Session()
 SESSION = Session()
 
 def main(args, file=sys.stdout): #pylint: disable=redefined-builtin
+    _logging.configure_logging(args)
+
     azure_folder = os.path.expanduser('~/.azure')
     if not os.path.exists(azure_folder):
         os.makedirs(azure_folder)
