@@ -9,7 +9,7 @@ from ..commands import COMMON_PARAMETERS
 EXCLUDED_PARAMS = frozenset(['self', 'raw', 'custom_headers', 'operation_config',
                              'content_version', 'kwargs'])
 
-class AutoCommandDefinition(object): #pylint: disable=too-few-public-methods
+class CommandDefinition(object): #pylint: disable=too-few-public-methods
 
     def __init__(self, operation, return_type, command_alias=None):
         self.operation = operation
