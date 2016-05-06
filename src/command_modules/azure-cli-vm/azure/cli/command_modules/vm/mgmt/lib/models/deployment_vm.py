@@ -29,7 +29,7 @@ class DeploymentVM(Model):
     :type storage_container_name: str
     :param virtual_network_name: Name of virtual network to add VM to.
     :type virtual_network_name: str
-    :param subnet_ip_address_prefix: The subnet address type.
+    :param subnet_ip_address_prefix: The subnet address prefix in CIDR format.
     :type subnet_ip_address_prefix: str
     :param private_ip_address_allocation: Private IP address allocation
      method.
@@ -79,25 +79,25 @@ class DeploymentVM(Model):
     :param public_ip_address_allocation: Public IP address allocation method.
      Possible values include: 'Dynamic', 'Static'. Default value: "Dynamic" .
     :type public_ip_address_allocation: str
-    :param authentication_type: Password or SSH-based authentication.
+    :param authentication_type: Password or SSH Public Key authentication.
      Possible values include: 'password', 'sshkey'. Default value: "password"
      .
     :type authentication_type: str
     :param storage_account_name: Name of storage account for the VM OS disk.
     :type storage_account_name: str
     :param storage_redundancy_type: The VM storage type (Standard_LRS,
-     Standard_GRS, Standard_RAGRS).
+     Standard_GRS, Standard_RAGRS). Default value: "Standard_LRS" .
     :type storage_redundancy_type: str
     :param size: The VM Size that should be created.  See
      https://azure.microsoft.com/en-us/pricing/details/virtual-machines/ for
-     size info.
+     size info. Default value: "Standard_A2" .
     :type size: str
     :param public_ip_address_type: Use a public IP Address for the VM Nic.
      Possible values include: 'none', 'new', 'existing'. Default value:
      "none" .
     :type public_ip_address_type: str
     :param virtual_network_ip_address_prefix: The virtual network IP address
-     prefix.
+     prefix in CIDR format.
     :type virtual_network_ip_address_prefix: str
     :param availability_set_id: Existing availability set for the VM.
     :type availability_set_id: str
@@ -174,7 +174,7 @@ class DeploymentVM(Model):
 
     mode = "Incremental"
 
-    def __init__(self, name, admin_username, content_version=None, storage_container_name=None, virtual_network_name=None, subnet_ip_address_prefix=None, private_ip_address_allocation=None, dns_name_for_public_ip=None, storage_account_type="new", os_disk_uri=None, virtual_network_type="new", admin_password=None, os_sku=None, subnet_name=None, os_type="Win2012R2Datacenter", os_version=None, os_disk_name=None, ssh_dest_key_path=None, os_offer=None, public_ip_address_allocation="Dynamic", authentication_type="password", storage_account_name=None, storage_redundancy_type=None, size=None, public_ip_address_type="none", virtual_network_ip_address_prefix=None, availability_set_id=None, ssh_key_value=None, location=None, os_publisher=None, availability_set_type="none", public_ip_address_name=None, dns_name_type="none"):
+    def __init__(self, name, admin_username, content_version=None, storage_container_name=None, virtual_network_name=None, subnet_ip_address_prefix=None, private_ip_address_allocation=None, dns_name_for_public_ip=None, storage_account_type="new", os_disk_uri=None, virtual_network_type="new", admin_password=None, os_sku=None, subnet_name=None, os_type="Win2012R2Datacenter", os_version=None, os_disk_name=None, ssh_dest_key_path=None, os_offer=None, public_ip_address_allocation="Dynamic", authentication_type="password", storage_account_name=None, storage_redundancy_type="Standard_LRS", size="Standard_A2", public_ip_address_type="none", virtual_network_ip_address_prefix=None, availability_set_id=None, ssh_key_value=None, location=None, os_publisher=None, availability_set_type="none", public_ip_address_name=None, dns_name_type="none"):
         self.content_version = content_version
         self.storage_container_name = storage_container_name
         self.virtual_network_name = virtual_network_name
