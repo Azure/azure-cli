@@ -7,8 +7,10 @@ class TestCommands(unittest.TestCase):
     pass
 
 recording_dir = os.path.join(os.path.dirname(__file__), 'recordings')
+
 generator = CommandTestGenerator(recording_dir, TEST_DEF, ENV_VAR)
 tests = generator.generate_tests()
+
 for test_name in tests:
     setattr(TestCommands, test_name, tests[test_name])
 
