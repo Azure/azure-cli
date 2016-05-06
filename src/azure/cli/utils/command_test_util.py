@@ -126,6 +126,8 @@ class CommandTestGenerator(object):
                         _remove_expected_result(test_name, recording_dir)
 
                 io.close()
+                if fail:
+                    self.fail(display_result)
                 self.assertEqual(actual_result, expected)
 
             expected_results = _get_expected_results_from_file(recording_dir)
