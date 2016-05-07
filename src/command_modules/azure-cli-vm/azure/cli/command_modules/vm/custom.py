@@ -142,10 +142,10 @@ def _load_images_from_aliases_doc(publisher, offer, sku):
         raise CLIError('Could not retrieve image list from {}'.format(target_url))
 
 def _load_images_thru_services(publisher, offer, sku, location):
-    from concurrent.futures import ThreadPoolExecutor
+    from concurrent.futures import ThreadPoolExecutor, as_completed
 
-    all_images = []
     client = _compute_client_factory({})
+    all_images = []
 
     def _load_images_from_publisher(publisher):
         offers = client.virtual_machine_images.list_offers(location, publisher)
@@ -171,8 +171,9 @@ def _load_images_thru_services(publisher, offer, sku, location):
     publisher_num = len(publishers)
     if publisher_num > 1:
         with ThreadPoolExecutor(max_workers=40) as executor:
-            for p in publishers:
-                executor.submit(_load_images_from_publisher, p.name)
+            tasks = [executor.submit(_load_images_from_publisher, p.name) for p in publishers]
+            for t in as_completed(tasks):
+                t.result() #we don't use the result, rather just to expose exceptions from threads
     elif publisher_num == 1:
         _load_images_from_publisher(publishers[0].name)
 
