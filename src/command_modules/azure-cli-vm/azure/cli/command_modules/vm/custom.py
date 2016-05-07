@@ -1,7 +1,7 @@
 ﻿import json
 import re
 
-from six.moves.urllib.request import urlopen
+from six.moves.urllib.request import urlopen #pylint: disable=import-error
 
 from azure.mgmt.compute.models import DataDisk
 from azure.mgmt.compute.models.compute_management_client_enums import DiskCreateOptionTypes
