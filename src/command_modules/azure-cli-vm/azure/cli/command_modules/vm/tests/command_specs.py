@@ -76,7 +76,7 @@ class VMSizeListScenarioTest(CommandTestScript):
         super(VMSizeListScenarioTest, self).__init__(None, self.test_body, None)
 
     def test_body(self):
-        self.test('vm size list --location westus', JMESPathComparator('length(@)', 53))
+        self.test('vm size list --location westus', JMESPathComparator('type(@)', 'array'))
 
 class VMShowScenarioTest(CommandTestScript):
 
@@ -123,9 +123,11 @@ class VMImageListOffersScenarioTest(CommandTestScript):
         self.test('vm image list-offers --location {} --publisher-name {}'.format(
             self.location, self.publisher_name),
                   [
-                      JMESPathComparator('length(@)', 6),
+                      JMESPathComparator('type(@)', 'array'),
                       # all results should have location has set in the test
-                      JMESPathComparator("length([?location == '{}'])".format(self.location), 6),
+                      JMESPathComparator("length([?location == '{}']) == length(@)".format(
+                          self.location),
+                          True),
                       # all results should have the correct publisher name
                       JMESPathComparator(
                           "length([].id.contains(@, '/Publishers/{}'))".format(self.publisher_name),
@@ -141,9 +143,11 @@ class VMImageListPublishersScenarioTest(CommandTestScript):
     def test_body(self):
         self.test('vm image list-publishers --location {}'.format(self.location),
                   [
-                      JMESPathComparator('length(@)', 532),
+                      JMESPathComparator('type(@)', 'array'),
                       # all results should have location has set in the test
-                      JMESPathComparator("length([?location == '{}'])".format(self.location), 532),
+                      JMESPathComparator("length([?location == '{}']) == length(@)".format(
+                          self.location),
+                          True),
                   ])
 
 class VMImageListSkusScenarioTest(CommandTestScript):
@@ -158,9 +162,11 @@ class VMImageListSkusScenarioTest(CommandTestScript):
         self.test('vm image list-skus --location {} --publisher-name {} --offer {}'.format(
             self.location, self.publisher_name, self.offer),
                   [
-                      JMESPathComparator('length(@)', 27),
+                      JMESPathComparator('type(@)', 'array'),
                       # all results should have location has set in the test
-                      JMESPathComparator("length([?location == '{}'])".format(self.location), 27),
+                      JMESPathComparator("length([?location == '{}']) == length(@)".format(
+                          self.location),
+                          True),
                       # all results should have the correct publisher name
                       JMESPathComparator(
                           "length([].id.contains(@, '/Publishers/{}/ArtifactTypes/VMImage/Offers/{}/Skus/'))".format( #pylint: disable=line-too-long
@@ -216,14 +222,7 @@ class VMListSizesScenarioTest(CommandTestScript):
             'vm list-sizes --resource-group {} --name {}'.format(
                 self.resource_group,
                 self.vm_name),
-            [
-                JMESPathComparator('length(@)', 23),
-                # All the following values in the array result should be numbers
-                JMESPathComparator('[].maxDataDiskCount.type(@)', ['number'] * 23),
-                JMESPathComparator('[].memoryInMb.type(@)', ['number'] * 23),
-                JMESPathComparator('[].osDiskSizeInMb.type(@)', ['number'] * 23),
-                JMESPathComparator('[].resourceDiskSizeInMb.type(@)', ['number'] * 23),
-            ])
+                JMESPathComparator('type(@)', 'array'))
 
     def tear_down(self):
         self.run('resource group delete --name {}'.format(self.resource_group))
