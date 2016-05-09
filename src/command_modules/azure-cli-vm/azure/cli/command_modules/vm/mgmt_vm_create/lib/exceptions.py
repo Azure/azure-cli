@@ -5,13 +5,15 @@
 # regenerated.
 # --------------------------------------------------------------------------
 
-from .vm_creation_client import VMCreationClient, VMCreationClientConfiguration
-from .version import VERSION
+from msrest.exceptions import (
+    ClientException,
+    SerializationError,
+    DeserializationError,
+    TokenExpiredError,
+    ClientRequestError,
+    AuthenticationError,
+    HttpOperationError,
+    ValidationError,
+)
 
-__all__ = [
-    'VMCreationClient',
-    'VMCreationClientConfiguration'
-]
-
-__version__ = VERSION
-
+from msrestazure.azure_exceptions import CloudError

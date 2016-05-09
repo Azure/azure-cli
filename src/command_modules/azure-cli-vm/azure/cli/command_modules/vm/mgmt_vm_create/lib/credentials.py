@@ -5,13 +5,12 @@
 # regenerated.
 # --------------------------------------------------------------------------
 
-from .vm_creation_client import VMCreationClient, VMCreationClientConfiguration
-from .version import VERSION
+from msrest.authentication import (
+    BasicAuthentication,
+    BasicTokenAuthentication,
+    OAuthTokenAuthentication)
 
-__all__ = [
-    'VMCreationClient',
-    'VMCreationClientConfiguration'
-]
-
-__version__ = VERSION
-
+from msrestazure.azure_active_directory import (
+    InteractiveCredentials,
+    ServicePrincipalCredentials,
+    UserPassCredentials)

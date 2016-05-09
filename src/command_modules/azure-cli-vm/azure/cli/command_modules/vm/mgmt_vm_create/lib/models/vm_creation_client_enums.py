@@ -5,13 +5,10 @@
 # regenerated.
 # --------------------------------------------------------------------------
 
-from .vm_creation_client import VMCreationClient, VMCreationClientConfiguration
-from .version import VERSION
+from enum import Enum
 
-__all__ = [
-    'VMCreationClient',
-    'VMCreationClientConfiguration'
-]
 
-__version__ = VERSION
+class DeploymentMode(Enum):
 
+    incremental = "Incremental"
+    complete = "Complete"
