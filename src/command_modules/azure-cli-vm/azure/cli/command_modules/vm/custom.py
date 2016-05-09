@@ -18,9 +18,11 @@ def _vm_get(**kwargs):
     '''Retrieves a VM if a resource group and vm name are supplied.'''
     vm_name = kwargs.get('vm_name')
     resource_group_name = kwargs.get('resource_group_name')
-    client = _compute_client_factory()
-    return client.virtual_machines.get(resource_group_name, vm_name) \
-        if resource_group_name and vm_name else None
+    result = None
+    if resource_group_name and vm_name:
+        client = _compute_client_factory()
+        result = client.virtual_machines.get(resource_group_name, vm_name)
+    return result
 
 def _vm_set(instance, start_msg, end_msg):
     '''Update the given Virtual Machine instance'''
@@ -138,7 +140,7 @@ class ConvenienceVmCommands(object): # pylint: disable=too-few-public-methods
         disk = DataDisk(lun=lun, vhd=vhd, name=diskname,
                         create_option=DiskCreateOptionTypes.empty,
                         disk_size_gb=disksize)
-        self.vm.storage_profile.data_disks.append(disk)
+        self.vm.storage_profile.data_disks.append(disk) # pylint: disable=no-member
         _vm_set(self.vm, 'Attaching disk', 'Disk attached')
 
     def attach_existing_disk(self, lun, diskname, vhd, disksize=1023):
@@ -147,7 +149,7 @@ class ConvenienceVmCommands(object): # pylint: disable=too-few-public-methods
         disk = DataDisk(lun=lun, vhd=vhd, name=diskname,
                         create_option=DiskCreateOptionTypes.attach,
                         disk_size_gb=disksize)
-        self.vm.storage_profile.data_disks.append(disk)
+        self.vm.storage_profile.data_disks.append(disk) # pylint: disable=no-member
         _vm_set(self.vm, 'Attaching disk', 'Disk attached')
 
     def detach_disk(self, diskname):
@@ -155,8 +157,8 @@ class ConvenienceVmCommands(object): # pylint: disable=too-few-public-methods
         # Issue: https://github.com/Azure/autorest/issues/934
         self.vm.resources = None
         try:
-            disk = next(d for d in self.vm.storage_profile.data_disks if d.name == diskname)
-            self.vm.storage_profile.data_disks.remove(disk)
+            disk = next(d for d in self.vm.storage_profile.data_disks if d.name == diskname) # pylint: disable=no-member
+            self.vm.storage_profile.data_disks.remove(disk) # pylint: disable=no-member
         except StopIteration:
             raise CLIError("No disk with the name '{}' found".format(diskname))
         _vm_set(self.vm, 'Detaching disk', 'Disk detached')
