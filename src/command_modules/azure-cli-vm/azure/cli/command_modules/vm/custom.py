@@ -1,6 +1,8 @@
 ﻿# pylint: disable=no-self-use,too-many-arguments
+import argparse
 import json
 import re
+
 from six.moves.urllib.request import urlopen #pylint: disable=import-error
 
 from azure.mgmt.compute.models import DataDisk
@@ -32,7 +34,16 @@ def _vm_set(instance, start_msg, end_msg):
         parameters=instance)
     return LongRunningOperation(start_msg, end_msg)(poller)
 
-def _load_images_from_aliases_doc(publisher, offer, sku):
+def _parse_rg_name(strid):
+    '''From an ID, extract the contained (resource group, name) tuple
+    '''
+    parts = re.split('/', strid)
+    if parts[3] != 'resourceGroups':
+        raise KeyError()
+
+    return (parts[4], parts[8])
+
+def load_images_from_aliases_doc(publisher, offer, sku):
     target_url = ('https://raw.githubusercontent.com/Azure/azure-rest-api-specs/'
                   'master/arm-compute/quickstart-templates/aliases.json')
     txt = urlopen(target_url).read()
@@ -41,8 +52,9 @@ def _load_images_from_aliases_doc(publisher, offer, sku):
         all_images = []
         result = (dic['outputs']['aliases']['value'])
         for v in result.values(): #loop around os
-            for vv in v.values(): #loop around distros
+            for alias, vv in v.items(): #loop around distros
                 all_images.append({
+                    'urn alias': alias,
                     'publisher': vv['publisher'],
                     'offer': vv['offer'],
                     'sku': vv['sku'],
@@ -56,7 +68,7 @@ def _load_images_from_aliases_doc(publisher, offer, sku):
     except KeyError:
         raise CLIError('Could not retrieve image list from {}'.format(target_url))
 
-def _load_images_thru_services(publisher, offer, sku, location):
+def load_images_thru_services(publisher, offer, sku, location):
     from concurrent.futures import ThreadPoolExecutor
 
     all_images = []
@@ -107,19 +119,6 @@ def _create_image_instance(publisher, offer, sku, version):
         'version': version
     }
 
-#
-# Composite convenience commands for the CLI
-#
-def _parse_rg_name(strid):
-    '''From an ID, extract the contained (resource group, name) tuple
-    '''
-    parts = re.split('/', strid)
-    if parts[3] != 'resourceGroups':
-        raise KeyError()
-
-    return (parts[4], parts[8])
-
-
 class ConvenienceVmCommands(object): # pylint: disable=too-few-public-methods
 
     def __init__(self, **kwargs):
@@ -145,12 +144,12 @@ class ConvenienceVmCommands(object): # pylint: disable=too-few-public-methods
             raise CLIError('Argument of --location/-l is required to use with --all flag')
 
         if load_thru_services:
-            all_images = _load_images_thru_services(publisher,
-                                                    offer,
-                                                    sku,
-                                                    image_location)
+            all_images = load_images_thru_services(publisher,
+                                                   offer,
+                                                   sku,
+                                                   image_location)
         else:
-            all_images = _load_images_from_aliases_doc(publisher, offer, sku)
+            all_images = load_images_from_aliases_doc(publisher, offer, sku)
 
         for i in all_images:
             i['urn'] = ':'.join([i['publisher'], i['offer'], i['sku'], i['version']])
@@ -240,3 +239,49 @@ class ConvenienceVmCommands(object): # pylint: disable=too-few-public-methods
         except StopIteration:
             raise CLIError("No disk with the name '{}' found".format(diskname))
         _vm_set(self.vm, 'Detaching disk', 'Disk detached')
+
+# CUSTOM ACTIONS ###############
+
+class VMImageFieldAction(argparse.Action): #pylint: disable=too-few-public-methods
+    def __call__(self, parser, namespace, values, option_string=None):
+        image = values
+        match = re.match('([^:]*):([^:]*):([^:]*):([^:]*)', image)
+
+        if image.lower().endswith('.vhd'):
+            namespace.os_disk_uri = image
+        elif match:
+            namespace.os_type = 'Custom'
+            namespace.os_publisher = match.group(1)
+            namespace.os_offer = match.group(2)
+            namespace.os_sku = match.group(3)
+            namespace.os_version = match.group(4)
+        else:
+            images = load_images_from_aliases_doc(None, None, None)
+            matched = next((x for x in images if x['urn alias'].lower() == image.lower()), None)
+            if matched is None:
+                raise CLIError('Invalid image "{}". Please pick one from {}'.format(
+                    image, [x['urn alias'] for x in images]))
+            namespace.os_type = 'Custom'
+            namespace.os_publisher = matched['publisher']
+            namespace.os_offer = matched['offer']
+            namespace.os_sku = matched['sku']
+            namespace.os_version = matched['version']
+
+class VMSSHFieldAction(argparse.Action): #pylint: disable=too-few-public-methods
+    def __call__(self, parser, namespace, values, option_string=None):
+        ssh_value = values
+
+        if os.path.exists(ssh_value):
+            with open(ssh_value, 'r') as f:
+                namespace.ssh_key_value = f.read()
+        else:
+            namespace.ssh_key_value = ssh_value
+
+class VMDNSNameAction(argparse.Action): #pylint: disable=too-few-public-methods
+    def __call__(self, parser, namespace, values, option_string=None):
+        dns_value = values
+
+        if dns_value:
+            namespace.dns_name_type = 'new'
+
+        namespace.dns_name_for_public_ip = dns_value

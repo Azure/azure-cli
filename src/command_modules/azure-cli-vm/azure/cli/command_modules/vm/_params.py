@@ -121,7 +121,7 @@ helps['vm create'] = """
                   required: false
                   short-summary: OS image (Common, URN or URI).
                   long-summary: |
-                    Common OS types: Win2012R2Datacenter, Win2012Datacenter, Win2008SP1, or Offer from 'az vm image list'
+                    Common OS types: Win2012R2Datacenter, Win2012Datacenter, Win2008SP1. For other values please run 'az vm image list'
                     Example URN: MicrosoftWindowsServer:WindowsServer:2012-R2-Datacenter:latest
                     Example URI: http://<storageAccount>.blob.core.windows.net/vhds/osdiskimage.vhd
                   populator-commands: 
