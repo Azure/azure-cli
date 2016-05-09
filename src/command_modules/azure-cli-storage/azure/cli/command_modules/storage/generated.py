@@ -1,6 +1,6 @@
 from __future__ import print_function
 
-from azure.cli.commands import CommandTable, LongRunningOperation, patch_aliases
+from azure.cli.commands import CommandTable, patch_aliases
 from azure.cli.commands._auto_command import build_operation, CommandDefinition
 
 from azure.mgmt.storage.operations import StorageAccountsOperations
@@ -37,9 +37,7 @@ build_operation(
 build_operation(
     'storage account', None, ConvenienceStorageAccountCommands,
     [
-        CommandDefinition(
-            ConvenienceStorageAccountCommands.create,
-            LongRunningOperation('Creating storage account', 'Storage account created')),
+        CommandDefinition(ConvenienceStorageAccountCommands.create, 'Result'),
         CommandDefinition(ConvenienceStorageAccountCommands.list, '[StorageAccount]'),
         CommandDefinition(ConvenienceStorageAccountCommands.show_usage, 'Object'),
         CommandDefinition(ConvenienceStorageAccountCommands.set, 'Object'),

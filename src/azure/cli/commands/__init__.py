@@ -68,12 +68,15 @@ class LongRunningOperation(object): #pylint: disable=too-few-public-methods
         self.finish_msg = finish_msg
         self.poll_interval_ms = poll_interval_ms
 
+    def _delay(self):
+        time.sleep(self.poll_interval_ms / 1000.0)
+
     def __call__(self, poller):
         logger.warning(self.start_msg)
         logger.info("Starting long running operation '%s' with polling interval %s ms",
                     self.start_msg, self.poll_interval_ms)
         while not poller.done():
-            time.sleep(self.poll_interval_ms / 1000.0)
+            self._delay()
             logger.info("Long running operation '%s' polling now", self.start_msg)
         try:
             result = poller.result()
