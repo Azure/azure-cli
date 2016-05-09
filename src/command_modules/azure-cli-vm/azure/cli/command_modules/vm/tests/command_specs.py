@@ -337,7 +337,7 @@ class VMAvailSetScenarioTest(CommandTestScript):
         super(VMAvailSetScenarioTest, self).__init__(self.set_up, self.test_body, self.tear_down)
 
     def set_up(self):
-        # TODO Create the resource group and availability set here once the command exist
+        # TODO Create the resource group and availability set here once the command exists
         pass
 
     def test_body(self):
@@ -364,9 +364,34 @@ class VMAvailSetScenarioTest(CommandTestScript):
             self.resource_group), None)
 
     def tear_down(self):
-        # TODO Delete the resource group once we can create the availset
         pass
 
+class VMExtensionsScenarioTest(CommandTestScript):
+
+    def __init__(self):
+        self.resource_group = 'cliTestRg_VMExtensions'
+        self.location = 'westus'
+        self.vm_name = 'windows-ext'
+        self.extension_name = 'Microsoft.Insights.VMDiagnosticsSettings'
+        super(VMExtensionsScenarioTest, self).__init__(self.set_up, self.test_body, self.tear_down)
+
+    def set_up(self):
+        # TODO Create the resource group and VM with extension here once the command exists
+        pass
+
+    def test_body(self):
+        self.test('vm extension show --resource-group {} --vm-name {} --name {}'.format(
+            self.resource_group, self.vm_name, self.extension_name), [
+                JMESPathComparator('type(@)', 'object'),
+                JMESPathComparator('name', self.extension_name),
+                JMESPathComparator('resourceGroup', self.resource_group),
+            ])
+        self.test('vm extension delete --resource-group {} --vm-name {} --name {}'.format(
+            self.resource_group, self.vm_name, self.extension_name),
+            None)
+
+    def tear_down(self):
+        pass
 
 ENV_VAR = {}
 
@@ -430,6 +455,10 @@ TEST_DEF = [
     {
         'test_name': 'vm_availset',
         'command': VMAvailSetScenarioTest()
+    },
+    {
+        'test_name': 'vm_extension',
+        'command': VMExtensionsScenarioTest()
     },
 ]
 
