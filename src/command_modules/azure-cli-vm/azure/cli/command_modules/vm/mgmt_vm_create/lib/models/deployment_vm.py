@@ -47,18 +47,14 @@ class DeploymentVM(Model):
     :param dns_name_type: Associate VMs with a public IP address to a DNS
      name. Possible values include: 'none', 'new'. Default value: "none" .
     :type dns_name_type: str
-    :param location: Location for VM resources. Default value:
-     "[resourceGroup().location]" .
+    :param location: Location for VM resources.
     :type location: str
     :param name: The VM name.
     :type name: str
     :param os_disk_name: Name of new VM OS disk. Default value: "osdiskimage"
      .
     :type os_disk_name: str
-    :param os_disk_uri: URI for a custom VHD image. Default value:
-     "[concat('http://', parameters('storageAccountName'),
-     '.blob.core.windows.net/', parameters('storageContainerName'), '/',
-     parameters('osDiskName'), '.vhd')]" .
+    :param os_disk_uri: URI for a custom VHD image.
     :type os_disk_uri: str
     :param os_offer: The OS Offer to install. Default value: "WindowsServer" .
     :type os_offer: str
@@ -82,8 +78,7 @@ class DeploymentVM(Model):
     :param public_ip_address_allocation: Public IP address allocation method.
      Possible values include: 'Dynamic', 'Static'. Default value: "Dynamic" .
     :type public_ip_address_allocation: str
-    :param public_ip_address_name: Name of public IP address to use. Default
-     value: "[concat('PublicIP', parameters('name'))]" .
+    :param public_ip_address_name: Name of public IP address to use.
     :type public_ip_address_name: str
     :param public_ip_address_type: Use a public IP Address for the VM Nic.
      Possible values include: 'none', 'new', 'existing'. Default value:
@@ -94,15 +89,10 @@ class DeploymentVM(Model):
      size info. Default value: "Standard_A2" .
     :type size: str
     :param ssh_dest_key_path: Destination file path on VM for SSH key.
-     Default value:
-     "[concat('/home/',parameters('adminUsername'),'/.ssh/authorized_keys')]"
-     .
     :type ssh_dest_key_path: str
     :param ssh_key_value: SSH key file data.
     :type ssh_key_value: str
     :param storage_account_name: Name of storage account for the VM OS disk.
-     Default value: "[concat('vhdstorage',
-     uniqueString(parameters('name')))]" .
     :type storage_account_name: str
     :param storage_account_type: Whether to use an existing storage account
      or create a new one. Possible values include: 'new', 'existing'. Default
@@ -117,14 +107,12 @@ class DeploymentVM(Model):
     :param subnet_ip_address_prefix: The subnet address prefix in CIDR
      format. Default value: "10.0.0.0/24" .
     :type subnet_ip_address_prefix: str
-    :param subnet_name: The subnet name. Default value: "[concat('Subnet',
-     parameters('name'))]" .
+    :param subnet_name: The subnet name.
     :type subnet_name: str
     :param virtual_network_ip_address_prefix: The virtual network IP address
      prefix in CIDR format. Default value: "10.0.0.0/16" .
     :type virtual_network_ip_address_prefix: str
     :param virtual_network_name: Name of virtual network to add VM to.
-     Default value: "[concat('VNET', parameters('name'))]" .
     :type virtual_network_name: str
     :param virtual_network_type: Whether to use an existing VNet or create a
      new one. Possible values include: 'new', 'existing'. Default value:
@@ -188,7 +176,7 @@ class DeploymentVM(Model):
 
     mode = "Incremental"
 
-    def __init__(self, admin_username, name, content_version=None, admin_password=None, authentication_type="password", availability_set_id=None, availability_set_type="none", dns_name_for_public_ip=None, dns_name_type="none", location="[resourceGroup().location]", os_disk_name="osdiskimage", os_disk_uri="[concat('http://', parameters('storageAccountName'), '.blob.core.windows.net/', parameters('storageContainerName'), '/', parameters('osDiskName'), '.vhd')]", os_offer="WindowsServer", os_publisher="MicrosoftWindowsServer", os_sku="2012-R2-Datacenter", os_type="Win2012R2Datacenter", os_version="latest", private_ip_address_allocation="Dynamic", public_ip_address_allocation="Dynamic", public_ip_address_name="[concat('PublicIP', parameters('name'))]", public_ip_address_type="none", size="Standard_A2", ssh_dest_key_path="[concat('/home/',parameters('adminUsername'),'/.ssh/authorized_keys')]", ssh_key_value=None, storage_account_name="[concat('vhdstorage', uniqueString(parameters('name')))]", storage_account_type="new", storage_container_name="vhds", storage_redundancy_type="Standard_LRS", subnet_ip_address_prefix="10.0.0.0/24", subnet_name="[concat('Subnet', parameters('name'))]", virtual_network_ip_address_prefix="10.0.0.0/16", virtual_network_name="[concat('VNET', parameters('name'))]", virtual_network_type="new"):
+    def __init__(self, admin_username, name, content_version=None, admin_password=None, authentication_type="password", availability_set_id=None, availability_set_type="none", dns_name_for_public_ip=None, dns_name_type="none", location=None, os_disk_name="osdiskimage", os_disk_uri=None, os_offer="WindowsServer", os_publisher="MicrosoftWindowsServer", os_sku="2012-R2-Datacenter", os_type="Win2012R2Datacenter", os_version="latest", private_ip_address_allocation="Dynamic", public_ip_address_allocation="Dynamic", public_ip_address_name=None, public_ip_address_type="none", size="Standard_A2", ssh_dest_key_path=None, ssh_key_value=None, storage_account_name=None, storage_account_type="new", storage_container_name="vhds", storage_redundancy_type="Standard_LRS", subnet_ip_address_prefix="10.0.0.0/24", subnet_name=None, virtual_network_ip_address_prefix="10.0.0.0/16", virtual_network_name=None, virtual_network_type="new"):
         self.content_version = content_version
         self.admin_password = admin_password
         self.admin_username = admin_username
