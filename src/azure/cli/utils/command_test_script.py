@@ -8,6 +8,7 @@ from six import StringIO
 
 from azure.cli.main import main as cli
 from azure.cli.parser import IncorrectUsageError
+from azure.cli._util import CLIError
 
 def _check_json(source, checks):
 
@@ -26,7 +27,6 @@ def _check_json(source, checks):
         if passed:
             break
     return passed
-        
 
 class CommandTestScript(object): #pylint: disable=too-many-instance-attributes
 
@@ -83,7 +83,7 @@ class CommandTestScript(object): #pylint: disable=too-many-instance-attributes
         if self.debug:
             print('RUNNING: {}'.format(command))
         output = StringIO()
-        cli(command.split(), file=output)
+        check = cli(command.split(), file=output)
         result = output.getvalue().strip()
         output.close()
         return result
@@ -108,22 +108,20 @@ class CommandTestScript(object): #pylint: disable=too-many-instance-attributes
                 assert result.replace('"', '') == checks
             elif isinstance(checks, dict):
                 json_val = json.loads(result)
-                result = _check_json(json_val, checks)
-                assert result == True
+                assert _check_json(json_val, checks)
             elif checks is None:
                 assert result is None or result == ''
             else:
                 raise IncorrectUsageError('unsupported type \'{}\' in test'.format(type(checks)))
         except AssertionError:
-            if self.debug:        
-                print('\tFAILED! RESULT: {} CHECKS: {}'.format(result, checks))
+            raise CLIError('COMMAND {} FAILED. Result: {} Checks: {}'.format(command, result, checks))
     def set_env(self, key, val): #pylint: disable=no-self-use
         os.environ[key] = val
 
     def pop_env(self, key): #pylint: disable=no-self-use
         return os.environ.pop(key, None)
 
-    def print_(self, string):
+    def display(self, string):
         ''' Write free text to the display output only. This text will not be included in the
         raw saved output and using this command does not flag a test as requiring manual
         verification. '''
