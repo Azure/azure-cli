@@ -16,7 +16,16 @@ class VMImageFieldAction(argparse.Action): #pylint: disable=too-few-public-metho
             namespace.os_sku = match.group(3)
             namespace.os_version = match.group(4)
         else:
-            namespace.os_type = image
+            images = load_images_from_aliases_doc(None, None, None)
+            matched = next((x for x in images if x['urn alias'].lower() == image.lower()), None)
+            if matched is None:
+                raise CLIError('Invalid image "{}". Please pick one from {}'.format(
+                    image, [x['urn alias'] for x in images]))
+            namespace.os_type = 'Custom'
+            namespace.os_publisher = matched['publisher']
+            namespace.os_offer = matched['offer']
+            namespace.os_sku = matched['sku']
+            namespace.os_version = matched['version']
 
 class VMSSHFieldAction(argparse.Action): #pylint: disable=too-few-public-methods
     def __call__(self, parser, namespace, values, option_string=None):
