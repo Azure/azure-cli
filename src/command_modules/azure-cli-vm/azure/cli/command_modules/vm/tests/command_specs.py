@@ -112,12 +112,12 @@ class VMShowScenarioTest(CommandTestScript):
     def tear_down(self):
         self.run('resource group delete --name {}'.format(self.resource_group))
 
-class VMImageListOffers(CommandTestScript):
+class VMImageListOffersScenarioTest(CommandTestScript):
 
     def __init__(self):
         self.location = 'westus'
         self.publisher_name = 'Canonical'
-        super(VMImageListOffers, self).__init__(None, self.test_body, None)
+        super(VMImageListOffersScenarioTest, self).__init__(None, self.test_body, None)
 
     def test_body(self):
         self.test('vm image list-offers --location {} --publisher-name {}'.format(
@@ -132,11 +132,11 @@ class VMImageListOffers(CommandTestScript):
                           6),
                   ])
 
-class VMImageListPublishers(CommandTestScript):
+class VMImageListPublishersScenarioTest(CommandTestScript):
 
     def __init__(self):
         self.location = 'westus'
-        super(VMImageListPublishers, self).__init__(None, self.test_body, None)
+        super(VMImageListPublishersScenarioTest, self).__init__(None, self.test_body, None)
 
     def test_body(self):
         self.test('vm image list-publishers --location {}'.format(self.location),
@@ -146,13 +146,13 @@ class VMImageListPublishers(CommandTestScript):
                       JMESPathComparator("length([?location == '{}'])".format(self.location), 532),
                   ])
 
-class VMImageListSkus(CommandTestScript):
+class VMImageListSkusScenarioTest(CommandTestScript):
 
     def __init__(self):
         self.location = 'westus'
         self.publisher_name = 'Canonical'
         self.offer = 'UbuntuServer'
-        super(VMImageListSkus, self).__init__(None, self.test_body, None)
+        super(VMImageListSkusScenarioTest, self).__init__(None, self.test_body, None)
 
     def test_body(self):
         self.test('vm image list-skus --location {} --publisher-name {} --offer {}'.format(
@@ -168,7 +168,7 @@ class VMImageListSkus(CommandTestScript):
                           27),
                   ])
 
-class VMImageShow(CommandTestScript):
+class VMImageShowScenarioTest(CommandTestScript):
 
     def __init__(self):
         self.location = 'westus'
@@ -176,7 +176,7 @@ class VMImageShow(CommandTestScript):
         self.offer = 'UbuntuServer'
         self.skus = '14.04.2-LTS'
         self.version = '14.04.201503090'
-        super(VMImageShow, self).__init__(None, self.test_body, None)
+        super(VMImageShowScenarioTest, self).__init__(None, self.test_body, None)
 
     def test_body(self):
         self.test('vm image show --location {} --publisher-name {} --offer {} --skus {} --version {}'.format( #pylint: disable=line-too-long
@@ -192,14 +192,14 @@ class VMImageShow(CommandTestScript):
                           True),
                   ])
 
-class VMListSizes(CommandTestScript):
+class VMListSizesScenarioTest(CommandTestScript):
 
     def __init__(self):
         self.deployment_name = 'azurecli-test-deployment-vm-list-sizes'
         self.resource_group = 'cliTestRg_VmListSizes'
         self.location = 'westus'
         self.vm_name = 'vm-show'
-        super(VMListSizes, self).__init__(self.set_up, self.test_body, self.tear_down)
+        super(VMListSizesScenarioTest, self).__init__(self.set_up, self.test_body, self.tear_down)
 
     def set_up(self):
         self.run('resource group create --location {} --name {}'.format(
@@ -228,14 +228,14 @@ class VMListSizes(CommandTestScript):
     def tear_down(self):
         self.run('resource group delete --name {}'.format(self.resource_group))
 
-class VMGeneralize(CommandTestScript):
+class VMGeneralizeScenarioTest(CommandTestScript):
 
     def __init__(self):
         self.deployment_name = 'azurecli-test-deployment-vm-generalize'
         self.resource_group = 'cliTestRg_VmGeneralize'
         self.location = 'westus'
         self.vm_name = 'vm-generalize'
-        super(VMGeneralize, self).__init__(self.set_up, self.test_body, self.tear_down)
+        super(VMGeneralizeScenarioTest, self).__init__(self.set_up, self.test_body, self.tear_down)
 
     def set_up(self):
         self.run('resource group create --location {} --name {}'.format(
@@ -259,14 +259,14 @@ class VMGeneralize(CommandTestScript):
     def tear_down(self):
         self.run('resource group delete --name {}'.format(self.resource_group))
 
-class VMCreateAndStateModifications(CommandTestScript):
+class VMCreateAndStateModificationsScenarioTest(CommandTestScript):
 
     def __init__(self):
         self.deployment_name = 'azurecli-test-deployment-vm-state-mod'
         self.resource_group = 'cliTestRg_VmStateMod'
         self.location = 'westus'
         self.vm_name = 'vm-state-mod'
-        super(VMCreateAndStateModifications, self).__init__(
+        super(VMCreateAndStateModificationsScenarioTest, self).__init__(
             self.set_up,
             self.test_body,
             self.tear_down)
@@ -362,31 +362,31 @@ TEST_DEF = [
     },
     {
         'test_name': 'vm_image_list_offers',
-        'command': VMImageListOffers()
+        'command': VMImageListOffersScenarioTest()
     },
     {
         'test_name': 'vm_image_list_publishers',
-        'command': VMImageListPublishers()
+        'command': VMImageListPublishersScenarioTest()
     },
     {
         'test_name': 'vm_image_list_skus',
-        'command': VMImageListSkus()
+        'command': VMImageListSkusScenarioTest()
     },
     {
         'test_name': 'vm_image_show',
-        'command': VMImageShow()
+        'command': VMImageShowScenarioTest()
     },
     {
         'test_name': 'vm_list_sizes',
-        'command': VMListSizes()
+        'command': VMListSizesScenarioTest()
     },
     {
         'test_name': 'vm_generalize',
-        'command': VMGeneralize()
+        'command': VMGeneralizeScenarioTest()
     },
     {
         'test_name': 'vm_create_state_modifications',
-        'command': VMCreateAndStateModifications()
+        'command': VMCreateAndStateModificationsScenarioTest()
     },
 ]
 
