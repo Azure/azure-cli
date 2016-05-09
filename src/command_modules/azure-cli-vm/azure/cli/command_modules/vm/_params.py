@@ -1,21 +1,14 @@
 import argparse
 
-from azure.mgmt.compute import ComputeManagementClient, ComputeManagementClientConfiguration
 from azure.mgmt.compute.models import VirtualHardDisk
 
 from azure.cli.commands import (COMMON_PARAMETERS as GLOBAL_COMMON_PARAMETERS, extend_parameter,
                                 patch_aliases)
-from azure.cli.commands._command_creation import get_mgmt_service_client
 from azure.cli.command_modules.vm._validators import MinMaxValue
 from azure.cli.command_modules.vm._actions import (VMImageFieldAction, VMSSHFieldAction,
                                                    VMDNSNameAction)
 from azure.cli._help_files import helps
 from azure.cli._locale import L
-
-# FACTORIES
-
-def _compute_client_factory(**_):
-    return get_mgmt_service_client(ComputeManagementClient, ComputeManagementClientConfiguration)
 
 # BASIC PARAMETER CONFIGURATION
 

@@ -1,6 +1,13 @@
 import argparse
+import json
 import os
 import re
+
+from azure.cli._util import CLIError
+
+from six.moves.urllib.request import urlopen #pylint: disable=import-error
+
+from ._factory import _compute_client_factory
 
 class VMImageFieldAction(argparse.Action): #pylint: disable=too-few-public-methods
     def __call__(self, parser, namespace, values, option_string=None):
@@ -45,3 +52,79 @@ class VMDNSNameAction(argparse.Action): #pylint: disable=too-few-public-methods
             namespace.dns_name_type = 'new'
 
         namespace.dns_name_for_public_ip = dns_value
+
+def load_images_from_aliases_doc(publisher, offer, sku):
+    target_url = ('https://raw.githubusercontent.com/Azure/azure-rest-api-specs/'
+                  'master/arm-compute/quickstart-templates/aliases.json')
+    txt = urlopen(target_url).read()
+    dic = json.loads(txt.decode())
+    try:
+        all_images = []
+        result = (dic['outputs']['aliases']['value'])
+        for v in result.values(): #loop around os
+            for alias, vv in v.items(): #loop around distros
+                all_images.append({
+                    'urn alias': alias,
+                    'publisher': vv['publisher'],
+                    'offer': vv['offer'],
+                    'sku': vv['sku'],
+                    'version': vv['version']
+                    })
+
+        all_images = [i for i in all_images if (_partial_matched(publisher, i['publisher']) and
+                                                _partial_matched(offer, i['offer']) and
+                                                _partial_matched(sku, i['sku']))]
+        return all_images
+    except KeyError:
+        raise CLIError('Could not retrieve image list from {}'.format(target_url))
+
+def load_images_thru_services(publisher, offer, sku, location):
+    from concurrent.futures import ThreadPoolExecutor
+
+    all_images = []
+    client = _compute_client_factory()
+
+    def _load_images_from_publisher(publisher):
+        offers = client.virtual_machine_images.list_offers(location, publisher)
+        if offer:
+            offers = [o for o in offers if _partial_matched(offer, o.name)]
+        for o in offers:
+            skus = client.virtual_machine_images.list_skus(location, publisher, o.name)
+            if sku:
+                skus = [s for s in skus if _partial_matched(sku, s.name)]
+            for s in skus:
+                images = client.virtual_machine_images.list(location, publisher, o.name, s.name)
+                for i in images:
+                    all_images.append({
+                        'publisher': publisher,
+                        'offer': o.name,
+                        'sku': s.name,
+                        'version': i.name})
+
+    publishers = client.virtual_machine_images.list_publishers(location)
+    if publisher:
+        publishers = [p for p in publishers if _partial_matched(publisher, p.name)]
+
+    publisher_num = len(publishers)
+    if publisher_num > 1:
+        with ThreadPoolExecutor(max_workers=40) as executor:
+            for p in publishers:
+                executor.submit(_load_images_from_publisher, p.name)
+    elif publisher_num == 1:
+        _load_images_from_publisher(publishers[0].name)
+
+    return all_images
+
+def _partial_matched(pattern, string):
+    if not pattern:
+        return True # empty pattern means wildcard-match
+    pattern = r'.*' + pattern
+    return re.match(pattern, string, re.I)
+
+def _create_image_instance(publisher, offer, sku, version):
+    return {
+        'publisher': publisher,
+        'offer': offer,
+        'sku': sku,
+        'version': version
+    }
