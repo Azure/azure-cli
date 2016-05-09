@@ -60,10 +60,14 @@ setup(
     ],
     packages=[
         'azure.cli.command_modules.network',
-        'azure.cli.command_modules.network.mgmt',
-        'azure.cli.command_modules.network.mgmt.lib',
-        'azure.cli.command_modules.network.mgmt.lib.models',
-        'azure.cli.command_modules.network.mgmt.lib.operations',
+        'azure.cli.command_modules.network.mgmt_vnet',
+        'azure.cli.command_modules.network.mgmt_vnet.lib',
+        'azure.cli.command_modules.network.mgmt_vnet.lib.models',
+        'azure.cli.command_modules.network.mgmt_vnet.lib.operations',
+        'azure.cli.command_modules.network.mgmt_public_ip',
+        'azure.cli.command_modules.network.mgmt_public_ip.lib',
+        'azure.cli.command_modules.network.mgmt_public_ip.lib.models',
+        'azure.cli.command_modules.network.mgmt_public_ip.lib.operations',
     ],
     install_requires=DEPENDENCIES,
 )

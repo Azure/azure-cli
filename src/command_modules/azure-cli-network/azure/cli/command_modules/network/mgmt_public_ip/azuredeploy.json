@@ -1,0 +1,88 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "_artifactsLocation": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Container URI of the template."
+      }
+    },
+    "allocationMethod": {
+      "type": "string",
+      "allowedValues": [
+        "Dynamic",
+        "Static"
+      ],
+      "defaultValue": "Dynamic",
+      "metadata": {
+        "description": "IP address Allocation method."
+      }
+    },
+    "dnsName": {
+      "type": "string",
+      "metadata": {
+        "description": "Globally unique DNS entry."
+      },
+      "defaultValue": ""
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": {
+        "description": "Location (e.g. eastus)."
+      }
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "metadata": {
+        "description": "Name of the Public IP address."
+      }
+    },
+    "publicIpAddressType": {
+      "type": "string",
+      "allowedValues": [
+        "dns",
+        "noDns"
+      ],
+      "defaultValue": "noDns",
+      "metadata": {
+        "description": "Whether to include a DNS entry or not."
+      }
+    }
+  },
+  "variables": {
+    "publicIpName": "[parameters('name')]",
+    "deploymentName": "[concat(parameters('name'), 'IP')]",
+    "templateFilePaths": {
+      "dns": "nested_templates/publicIpDeployment_dns.json",
+      "noDns": "nested_templates/publicIpDeployment_nodns.json"
+    }
+  },
+  "resources": [
+    {
+      "name": "[variables('deploymentName')]",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "dependsOn": [
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(parameters('_artifactsLocation'), '/', variables('templateFilePaths')[parameters('publicIpAddressType')])]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "allocationMethod": { "value": "[parameters('allocationMethod')]" },
+          "location": { "value": "[parameters('location')]" },
+          "name": { "value": "[parameters('name')]" },
+          "publicIpDnsName": { "value": "[parameters('dnsName')]" }
+        }
+      }
+    }
+  ],
+  "outputs": {
+  }
+}
