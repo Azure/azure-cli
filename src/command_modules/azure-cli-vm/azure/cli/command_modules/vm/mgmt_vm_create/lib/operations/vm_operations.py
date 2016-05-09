@@ -31,7 +31,7 @@ class VMOperations(object):
         self.config = config
 
     def create_or_update(
-            self, resource_group_name, deployment_name, admin_username, name, content_version=None, _artifacts_location=None, admin_password=None, authentication_type="password", availability_set_id=None, availability_set_type="none", dns_name_for_public_ip=None, dns_name_type="none", location="[resourceGroup().location]", os_disk_name="osdiskimage", os_disk_uri="[concat('http://', parameters('storageAccountName'), '.blob.core.windows.net/', parameters('storageContainerName'), '/', parameters('osDiskName'), '.vhd')]", os_offer="WindowsServer", os_publisher="MicrosoftWindowsServer", os_sku="2012-R2-Datacenter", os_type="Win2012R2Datacenter", os_version="latest", private_ip_address_allocation="Dynamic", public_ip_address_allocation="Dynamic", public_ip_address_name="[concat('PublicIP', parameters('name'))]", public_ip_address_type="none", size="Standard_A2", ssh_dest_key_path="[concat('/home/',parameters('adminUsername'),'/.ssh/authorized_keys')]", ssh_key_value=None, storage_account_name="[concat('vhdstorage', uniqueString(parameters('name')))]", storage_account_type="new", storage_container_name="vhds", storage_redundancy_type="Standard_LRS", subnet_ip_address_prefix="10.0.0.0/24", subnet_name="[concat('Subnet', parameters('name'))]", virtual_network_ip_address_prefix="10.0.0.0/16", virtual_network_name="[concat('VNET', parameters('name'))]", virtual_network_type="new", custom_headers={}, raw=False, **operation_config):
+            self, resource_group_name, deployment_name, admin_username, name, content_version=None, admin_password=None, authentication_type="password", availability_set_id=None, availability_set_type="none", dns_name_for_public_ip=None, dns_name_type="none", location="[resourceGroup().location]", os_disk_name="osdiskimage", os_disk_uri="[concat('http://', parameters('storageAccountName'), '.blob.core.windows.net/', parameters('storageContainerName'), '/', parameters('osDiskName'), '.vhd')]", os_offer="WindowsServer", os_publisher="MicrosoftWindowsServer", os_sku="2012-R2-Datacenter", os_type="Win2012R2Datacenter", os_version="latest", private_ip_address_allocation="Dynamic", public_ip_address_allocation="Dynamic", public_ip_address_name="[concat('PublicIP', parameters('name'))]", public_ip_address_type="none", size="Standard_A2", ssh_dest_key_path="[concat('/home/',parameters('adminUsername'),'/.ssh/authorized_keys')]", ssh_key_value=None, storage_account_name="[concat('vhdstorage', uniqueString(parameters('name')))]", storage_account_type="new", storage_container_name="vhds", storage_redundancy_type="Standard_LRS", subnet_ip_address_prefix="10.0.0.0/24", subnet_name="[concat('Subnet', parameters('name'))]", virtual_network_ip_address_prefix="10.0.0.0/16", virtual_network_name="[concat('VNET', parameters('name'))]", virtual_network_type="new", custom_headers={}, raw=False, **operation_config):
         """
         Create or update a virtual machine.
 
@@ -47,8 +47,6 @@ class VMOperations(object):
         :param content_version: If included it must match the ContentVersion
          in the template.
         :type content_version: str
-        :param _artifacts_location: Container URI of the template.
-        :type _artifacts_location: str
         :param admin_password: Password for the Virtual Machine.  Required if
          SSH (Linux only) is not specified.
         :type admin_password: str
@@ -81,8 +79,7 @@ class VMOperations(object):
         :type os_sku: str
         :param os_type: Common OS choices.  Choose 'Custom' to specify an
          image with the osPublisher, osOffer, osSKU, and osVersion
-         parameters. Possible values include: 'CentOS', 'CoreOS', 'Debian',
-         'openSUSE', 'RHEL', 'SLES', 'UbuntuLTS', 'Win2012R2Datacenter',
+         parameters. Possible values include: 'Win2012R2Datacenter',
          'Win2012Datacenter', 'Win2008R2SP1', 'Custom'
         :type os_type: str
         :param os_version: The OS version to install.
@@ -142,7 +139,7 @@ class VMOperations(object):
         :rtype: :class:`ClientRawResponse<msrest.pipeline.ClientRawResponse>`
          if raw=true
         """
-        parameters = models.DeploymentVM(content_version=content_version, _artifacts_location=_artifacts_location, admin_password=admin_password, admin_username=admin_username, authentication_type=authentication_type, availability_set_id=availability_set_id, availability_set_type=availability_set_type, dns_name_for_public_ip=dns_name_for_public_ip, dns_name_type=dns_name_type, location=location, name=name, os_disk_name=os_disk_name, os_disk_uri=os_disk_uri, os_offer=os_offer, os_publisher=os_publisher, os_sku=os_sku, os_type=os_type, os_version=os_version, private_ip_address_allocation=private_ip_address_allocation, public_ip_address_allocation=public_ip_address_allocation, public_ip_address_name=public_ip_address_name, public_ip_address_type=public_ip_address_type, size=size, ssh_dest_key_path=ssh_dest_key_path, ssh_key_value=ssh_key_value, storage_account_name=storage_account_name, storage_account_type=storage_account_type, storage_container_name=storage_container_name, storage_redundancy_type=storage_redundancy_type, subnet_ip_address_prefix=subnet_ip_address_prefix, subnet_name=subnet_name, virtual_network_ip_address_prefix=virtual_network_ip_address_prefix, virtual_network_name=virtual_network_name, virtual_network_type=virtual_network_type)
+        parameters = models.DeploymentVM(content_version=content_version, admin_password=admin_password, admin_username=admin_username, authentication_type=authentication_type, availability_set_id=availability_set_id, availability_set_type=availability_set_type, dns_name_for_public_ip=dns_name_for_public_ip, dns_name_type=dns_name_type, location=location, name=name, os_disk_name=os_disk_name, os_disk_uri=os_disk_uri, os_offer=os_offer, os_publisher=os_publisher, os_sku=os_sku, os_type=os_type, os_version=os_version, private_ip_address_allocation=private_ip_address_allocation, public_ip_address_allocation=public_ip_address_allocation, public_ip_address_name=public_ip_address_name, public_ip_address_type=public_ip_address_type, size=size, ssh_dest_key_path=ssh_dest_key_path, ssh_key_value=ssh_key_value, storage_account_name=storage_account_name, storage_account_type=storage_account_type, storage_container_name=storage_container_name, storage_redundancy_type=storage_redundancy_type, subnet_ip_address_prefix=subnet_ip_address_prefix, subnet_name=subnet_name, virtual_network_ip_address_prefix=virtual_network_ip_address_prefix, virtual_network_name=virtual_network_name, virtual_network_type=virtual_network_type)
 
         # Construct URL
         url = '/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Resources/deployments/{deploymentName}'
