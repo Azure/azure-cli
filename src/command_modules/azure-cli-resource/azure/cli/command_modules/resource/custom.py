@@ -105,10 +105,10 @@ class ConvenienceResourceCommands(object):
 
     def show(self, resource_group, resource_name, resource_type, api_version=None, parent=None):
         ''' Show details of a specific resource in a resource group or subscription
-        :param str resource-group-name:the containing resource group name
-        :param str name:the resource name
-        :param str resource-type:the resource type in format: <provider-namespace>/<type>
-        :param str api-version:the API version of the resource provider
+        :param str resource_group:the containing resource group name
+        :param str resource_name:the resource name
+        :param str resource_type:the resource type in format: <provider-namespace>/<type>
+        :param str api_version:the API version of the resource provider
         :param str parent:the name of the parent resource (if needed) in <type>/<name> format'''
         rcf = _resource_client_factory()
 
@@ -136,7 +136,7 @@ class ConvenienceResourceCommands(object):
                 az resource list --tag some*
                 az resource list --tag something=else
             :param str location:filter by resource location
-            :param str resource-type:filter by resource type
+            :param str resource_type:filter by resource type
             :param str tag:filter by tag in 'a=b;c' format
             :param str name:filter by resource name
         '''
