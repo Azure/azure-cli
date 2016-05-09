@@ -1,7 +1,6 @@
 from os import environ
 
-from azure.cli.commands import (COMMON_PARAMETERS as GLOBAL_COMMON_PARAMETERS, extend_parameter,
-                                patch_aliases)
+from azure.cli.commands import COMMON_PARAMETERS as GLOBAL_COMMON_PARAMETERS, patch_aliases
 from azure.cli.commands._command_creation import get_mgmt_service_client, get_data_service_client
 from azure.cli.commands._validators import validate_key_value_pairs
 from azure.cli._locale import L
@@ -178,8 +177,6 @@ PARAMETER_ALIASES = patch_aliases(GLOBAL_COMMON_PARAMETERS, {
         'type': validate_key_value_pairs,
         'help': L('metadata in "a=b;c=d" format')
     },
-    'optional_resource_group_name':
-        extend_parameter(GLOBAL_COMMON_PARAMETERS['resource_group_name'], required=False),
     'permission': {
         'name': '--permission',
         'help': L('permissions granted: (r)ead (w)rite (d)elete (l)ist. Can be combined.'),

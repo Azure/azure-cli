@@ -36,14 +36,14 @@ def _get_member(obj, path):
     return obj
 
 def _make_func(client_factory, member_path, return_type_or_func, unbound_func, extra_parameters):
-    def call_client(args):
-        client = client_factory(**args)
+    def call_client(kwargs):
+        client = client_factory(**kwargs)
         for param in extra_parameters.keys() if extra_parameters else []:
-            args.pop(param)
+            kwargs.pop(param)
         ops_instance = _get_member(client, member_path)
 
         try:
-            result = unbound_func(ops_instance, **args)
+            result = unbound_func(ops_instance, **kwargs)
             if not return_type_or_func:
                 return {}
             if callable(return_type_or_func):
