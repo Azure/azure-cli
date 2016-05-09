@@ -328,6 +328,46 @@ class VMCreateAndStateModificationsScenarioTest(CommandTestScript):
     def tear_down(self):
         self.run('resource group delete --name {}'.format(self.resource_group))
 
+class VMAvailSetScenarioTest(CommandTestScript):
+
+    def __init__(self):
+        self.resource_group = 'cliTestRg_Availset'
+        self.location = 'westus'
+        self.name = 'availset-test'
+        super(VMAvailSetScenarioTest, self).__init__(self.set_up, self.test_body, self.tear_down)
+
+    def set_up(self):
+        # TODO Create the resource group and availability set here once the command exist
+        pass
+
+    def test_body(self):
+        self.test('vm availset list --resource-group {}'.format(self.resource_group), [
+            JMESPathComparator('length(@)', 1),
+            JMESPathComparator('[0].name', self.name),
+            JMESPathComparator('[0].resourceGroup', self.resource_group),
+            JMESPathComparator('[0].location', self.location),
+        ])
+        self.test('vm availset list-sizes --resource-group {} --name {}'.format(
+            self.resource_group, self.name), [
+            JMESPathComparator('type(@)', 'array'),
+        ])
+        self.test('vm availset show --resource-group {} --name {}'.format(
+            self.resource_group, self.name), [
+            JMESPathComparator('type(@)', 'object'),
+            JMESPathComparator('name', self.name),
+            JMESPathComparator('resourceGroup', self.resource_group),
+            JMESPathComparator('location', self.location),
+        ])
+        self.test('vm availset delete --resource-group {} --name {}'.format(
+            self.resource_group, self.name), None)
+        self.test('vm availset list --resource-group {}'.format(
+            self.resource_group), None)
+
+    def tear_down(self):
+        # TODO Delete the resource group once we can create the availset
+        pass
+
+
 ENV_VAR = {}
 
 TEST_DEF = [
@@ -386,6 +426,10 @@ TEST_DEF = [
     {
         'test_name': 'vm_create_state_modifications',
         'command': VMCreateAndStateModificationsScenarioTest()
+    },
+    {
+        'test_name': 'vm_availset',
+        'command': VMAvailSetScenarioTest()
     },
 ]
 
