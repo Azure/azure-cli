@@ -10,7 +10,7 @@ from azure.cli._util import CLIError
 from ._actions import load_images_from_aliases_doc, load_images_thru_services
 from ._factory import _compute_client_factory
 
-from six.moves.urllib.request import urlopen #pylint: disable=import-error
+from six.moves.urllib.request import urlopen #pylint: disable=import-error,unused-import
 
 command_table = CommandTable()
 
