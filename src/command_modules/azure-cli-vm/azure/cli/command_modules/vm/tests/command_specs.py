@@ -127,7 +127,7 @@ class VMImageListOffersScenarioTest(CommandTestScript):
                       # all results should have location has set in the test
                       JMESPathComparator("length([?location == '{}']) == length(@)".format(
                           self.location),
-                          True),
+                                         True),
                       # all results should have the correct publisher name
                       JMESPathComparator(
                           "length([].id.contains(@, '/Publishers/{}'))".format(self.publisher_name),
@@ -147,7 +147,7 @@ class VMImageListPublishersScenarioTest(CommandTestScript):
                       # all results should have location has set in the test
                       JMESPathComparator("length([?location == '{}']) == length(@)".format(
                           self.location),
-                          True),
+                                         True),
                   ])
 
 class VMImageListSkusScenarioTest(CommandTestScript):
@@ -166,7 +166,7 @@ class VMImageListSkusScenarioTest(CommandTestScript):
                       # all results should have location has set in the test
                       JMESPathComparator("length([?location == '{}']) == length(@)".format(
                           self.location),
-                          True),
+                                         True),
                       # all results should have the correct publisher name
                       JMESPathComparator(
                           "length([].id.contains(@, '/Publishers/{}/ArtifactTypes/VMImage/Offers/{}/Skus/'))".format( #pylint: disable=line-too-long
@@ -222,7 +222,7 @@ class VMListSizesScenarioTest(CommandTestScript):
             'vm list-sizes --resource-group {} --name {}'.format(
                 self.resource_group,
                 self.vm_name),
-                JMESPathComparator('type(@)', 'array'))
+            JMESPathComparator('type(@)', 'array'))
 
     def tear_down(self):
         self.run('resource group delete --name {}'.format(self.resource_group))
