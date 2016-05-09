@@ -83,7 +83,7 @@ class CommandTestScript(object): #pylint: disable=too-many-instance-attributes
         if self.debug:
             print('RUNNING: {}'.format(command))
         output = StringIO()
-        check = cli(command.split(), file=output)
+        cli(command.split(), file=output)
         result = output.getvalue().strip()
         output.close()
         return result
@@ -114,7 +114,8 @@ class CommandTestScript(object): #pylint: disable=too-many-instance-attributes
             else:
                 raise IncorrectUsageError('unsupported type \'{}\' in test'.format(type(checks)))
         except AssertionError:
-            raise CLIError('COMMAND {} FAILED. Result: {} Checks: {}'.format(command, result, checks))
+            raise CLIError('COMMAND {} FAILED. Result: {} Checks: {}'.format(
+                command, result, checks))
     def set_env(self, key, val): #pylint: disable=no-self-use
         os.environ[key] = val
 
