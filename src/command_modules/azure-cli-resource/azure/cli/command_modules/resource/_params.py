@@ -9,7 +9,7 @@ from ._validators import validate_resource_type, validate_parent
 
 # FACTORIES
 
-def _resource_client_factory(_):
+def _resource_client_factory(**_):
     return get_mgmt_service_client(ResourceManagementClient, ResourceManagementClientConfiguration)
 
 # BASIC PARAMETER CONFIGURATION

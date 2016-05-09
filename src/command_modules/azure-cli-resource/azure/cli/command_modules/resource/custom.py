@@ -69,11 +69,11 @@ class ConvenienceResourceGroupCommands(object):
         ''' List resource groups, optionally filtered by a tag.
         :param str tag:tag to filter by in 'key[=value]' format
         '''
-        rcf = _resource_client_factory(None)
+        rcf = _resource_client_factory()
 
         filters = []
         if tag:
-            key = tag.keys()[0]
+            key = list(tag.keys())[0]
             filters.append("tagname eq '{}'".format(key))
             filters.append("tagvalue eq '{}'".format(tag[key]))
 
@@ -88,7 +88,7 @@ class ConvenienceResourceGroupCommands(object):
         :param str location:the resource group location
         :param str tags:tags in 'a=b;c' format
         '''
-        rcf = _resource_client_factory(None)
+        rcf = _resource_client_factory()
 
         if rcf.resource_groups.check_existence(resource_group_name):
             raise CLIError('resource group {} already exists'.format(resource_group_name))
@@ -110,7 +110,7 @@ class ConvenienceResourceCommands(object):
         :param str resource-type:the resource type in format: <provider-namespace>/<type>
         :param str api-version:the API version of the resource provider
         :param str parent:the name of the parent resource (if needed) in <type>/<name> format'''
-        rcf = _resource_client_factory(None)
+        rcf = _resource_client_factory()
 
         api_version = _resolve_api_version(rcf, resource_type, parent) \
             if not api_version else api_version
@@ -140,7 +140,7 @@ class ConvenienceResourceCommands(object):
             :param str tag:filter by tag in 'a=b;c' format
             :param str name:filter by resource name
         '''
-        rcf = _resource_client_factory(None)
-        odata_filter = _list_resources_odata_filter_builder(location, resource_type, tag, name)
+        rcf = _resource_client_factory()
+        odata_filter = _list_resources_odata_filter_builder(location, resource_type, str(tag), name)
         resources = rcf.resources.list(filter=odata_filter)
         return list(resources)
