@@ -5,13 +5,5 @@
 # regenerated.
 # --------------------------------------------------------------------------
 
-from .vm_creation_client import VMCreationClient, VMCreationClientConfiguration
-from .version import VERSION
-
-__all__ = [
-    'VMCreationClient',
-    'VMCreationClientConfiguration'
-]
-
-__version__ = VERSION
+VERSION = "2015-11-01"
 

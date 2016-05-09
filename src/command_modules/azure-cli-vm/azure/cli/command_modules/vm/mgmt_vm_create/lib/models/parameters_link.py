@@ -8,24 +8,19 @@
 from msrest.serialization import Model
 
 
-class TemplateLink(Model):
+class ParametersLink(Model):
     """
-    Entity representing the reference to the template.
+    Entity representing the reference to the deployment paramaters.
 
-    Variables are only populated by the server, and will be ignored when
-    sending a request.
-
-    :ivar uri: URI referencing the template. Default value:
-     "https://azuresdkci.blob.core.windows.net/templatehost/CreateVM/azuredeploy.json"
-     .
-    :vartype uri: str
+    :param uri: URI referencing the template.
+    :type uri: str
     :param content_version: If included it must match the ContentVersion in
      the template.
     :type content_version: str
     """ 
 
     _validation = {
-        'uri': {'required': True, 'constant': True},
+        'uri': {'required': True},
     }
 
     _attribute_map = {
@@ -33,7 +28,6 @@ class TemplateLink(Model):
         'content_version': {'key': 'contentVersion', 'type': 'str'},
     }
 
-    uri = "https://azuresdkci.blob.core.windows.net/templatehost/CreateVM/azuredeploy.json"
-
-    def __init__(self, content_version=None):
+    def __init__(self, uri, content_version=None):
+        self.uri = uri
         self.content_version = content_version
