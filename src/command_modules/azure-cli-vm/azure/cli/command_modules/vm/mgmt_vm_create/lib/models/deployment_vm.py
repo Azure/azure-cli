@@ -22,8 +22,9 @@ class DeploymentVM(Model):
     :param content_version: If included it must match the ContentVersion in
      the template.
     :type content_version: str
-    :param _artifacts_location: Container URI of the template.
-    :type _artifacts_location: str
+    :ivar _artifacts_location: Container URI of of the template. Default
+     value: "https://azuresdkci.blob.core.windows.net/templatehost/CreateVM" .
+    :vartype _artifacts_location: str
     :param admin_password: Password for the Virtual Machine.  Required if SSH
      (Linux only) is not specified.
     :type admin_password: str
@@ -69,8 +70,7 @@ class DeploymentVM(Model):
     :type os_sku: str
     :param os_type: Common OS choices.  Choose 'Custom' to specify an image
      with the osPublisher, osOffer, osSKU, and osVersion parameters. Possible
-     values include: 'CentOS', 'CoreOS', 'Debian', 'openSUSE', 'RHEL',
-     'SLES', 'UbuntuLTS', 'Win2012R2Datacenter', 'Win2012Datacenter',
+     values include: 'Win2012R2Datacenter', 'Win2012Datacenter',
      'Win2008R2SP1', 'Custom'. Default value: "Win2012R2Datacenter" .
     :type os_type: str
     :param os_version: The OS version to install. Default value: "latest" .
@@ -137,6 +137,7 @@ class DeploymentVM(Model):
 
     _validation = {
         'uri': {'required': True, 'constant': True},
+        '_artifacts_location': {'required': True, 'constant': True},
         'admin_username': {'required': True},
         'name': {'required': True},
         'mode': {'required': True, 'constant': True},
@@ -183,11 +184,12 @@ class DeploymentVM(Model):
 
     uri = "https://azuresdkci.blob.core.windows.net/templatehost/CreateVM/azuredeploy.json"
 
+    _artifacts_location = "https://azuresdkci.blob.core.windows.net/templatehost/CreateVM"
+
     mode = "Incremental"
 
-    def __init__(self, admin_username, name, content_version=None, _artifacts_location=None, admin_password=None, authentication_type="password", availability_set_id=None, availability_set_type="none", dns_name_for_public_ip=None, dns_name_type="none", location="[resourceGroup().location]", os_disk_name="osdiskimage", os_disk_uri="[concat('http://', parameters('storageAccountName'), '.blob.core.windows.net/', parameters('storageContainerName'), '/', parameters('osDiskName'), '.vhd')]", os_offer="WindowsServer", os_publisher="MicrosoftWindowsServer", os_sku="2012-R2-Datacenter", os_type="Win2012R2Datacenter", os_version="latest", private_ip_address_allocation="Dynamic", public_ip_address_allocation="Dynamic", public_ip_address_name="[concat('PublicIP', parameters('name'))]", public_ip_address_type="none", size="Standard_A2", ssh_dest_key_path="[concat('/home/',parameters('adminUsername'),'/.ssh/authorized_keys')]", ssh_key_value=None, storage_account_name="[concat('vhdstorage', uniqueString(parameters('name')))]", storage_account_type="new", storage_container_name="vhds", storage_redundancy_type="Standard_LRS", subnet_ip_address_prefix="10.0.0.0/24", subnet_name="[concat('Subnet', parameters('name'))]", virtual_network_ip_address_prefix="10.0.0.0/16", virtual_network_name="[concat('VNET', parameters('name'))]", virtual_network_type="new"):
+    def __init__(self, admin_username, name, content_version=None, admin_password=None, authentication_type="password", availability_set_id=None, availability_set_type="none", dns_name_for_public_ip=None, dns_name_type="none", location="[resourceGroup().location]", os_disk_name="osdiskimage", os_disk_uri="[concat('http://', parameters('storageAccountName'), '.blob.core.windows.net/', parameters('storageContainerName'), '/', parameters('osDiskName'), '.vhd')]", os_offer="WindowsServer", os_publisher="MicrosoftWindowsServer", os_sku="2012-R2-Datacenter", os_type="Win2012R2Datacenter", os_version="latest", private_ip_address_allocation="Dynamic", public_ip_address_allocation="Dynamic", public_ip_address_name="[concat('PublicIP', parameters('name'))]", public_ip_address_type="none", size="Standard_A2", ssh_dest_key_path="[concat('/home/',parameters('adminUsername'),'/.ssh/authorized_keys')]", ssh_key_value=None, storage_account_name="[concat('vhdstorage', uniqueString(parameters('name')))]", storage_account_type="new", storage_container_name="vhds", storage_redundancy_type="Standard_LRS", subnet_ip_address_prefix="10.0.0.0/24", subnet_name="[concat('Subnet', parameters('name'))]", virtual_network_ip_address_prefix="10.0.0.0/16", virtual_network_name="[concat('VNET', parameters('name'))]", virtual_network_type="new"):
         self.content_version = content_version
-        self._artifacts_location = _artifacts_location
         self.admin_password = admin_password
         self.admin_username = admin_username
         self.authentication_type = authentication_type
