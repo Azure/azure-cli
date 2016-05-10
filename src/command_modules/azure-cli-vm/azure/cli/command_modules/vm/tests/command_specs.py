@@ -101,7 +101,8 @@ class VMShowScenarioTest(CommandTestScript):
                   '-n', self.vm_name, '--admin-username', 'ubuntu',
                   '--image', 'Canonical:UbuntuServer:14.04.4-LTS:latest',
                   '--admin-password', 'testPassword0', '--deployment-name', self.deployment_name])
-        self.test('vm show --resource-group {} --name {} --expand instanceView'.format(self.resource_group, self.vm_name),
+        self.test('vm show --resource-group {} --name {} --expand instanceView'.format(
+            self.resource_group, self.vm_name),
                   [
                       JMESPathComparator('type(@)', 'object'),
                       JMESPathComparator('name', self.vm_name),
