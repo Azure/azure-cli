@@ -246,9 +246,9 @@ class VMDNSNameAction(argparse.Action): #pylint: disable=too-few-public-methods
         namespace.dns_name_for_public_ip = dns_value
 
 def _handle_auth_types(data):
-    argv, args = data
+    command, args = data
 
-    if not ' '.join(argv).startswith('vm create'):
+    if command != 'vm create':
         return
 
     if args.authentication_type == 'password':
