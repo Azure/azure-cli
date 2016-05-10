@@ -101,7 +101,8 @@ class VMShowScenarioTest(CommandTestScript):
                   '-n', self.vm_name, '--admin-username', 'ubuntu',
                   '--image', 'Canonical:UbuntuServer:14.04.4-LTS:latest',
                   '--admin-password', 'testPassword0', '--deployment-name', self.deployment_name])
-        self.test('vm show --resource-group {} --name {}'.format(self.resource_group, self.vm_name),
+        self.test('vm show --resource-group {} --name {} --expand instanceView'.format(
+            self.resource_group, self.vm_name),
                   [
                       JMESPathComparator('type(@)', 'object'),
                       JMESPathComparator('name', self.vm_name),
@@ -127,7 +128,7 @@ class VMImageListOffersScenarioTest(CommandTestScript):
                       # all results should have location has set in the test
                       JMESPathComparator("length([?location == '{}']) == length(@)".format(
                           self.location),
-                          True),
+                                         True),
                       # all results should have the correct publisher name
                       JMESPathComparator(
                           "length([].id.contains(@, '/Publishers/{}'))".format(self.publisher_name),
@@ -147,7 +148,7 @@ class VMImageListPublishersScenarioTest(CommandTestScript):
                       # all results should have location has set in the test
                       JMESPathComparator("length([?location == '{}']) == length(@)".format(
                           self.location),
-                          True),
+                                         True),
                   ])
 
 class VMImageListSkusScenarioTest(CommandTestScript):
@@ -166,7 +167,7 @@ class VMImageListSkusScenarioTest(CommandTestScript):
                       # all results should have location has set in the test
                       JMESPathComparator("length([?location == '{}']) == length(@)".format(
                           self.location),
-                          True),
+                                         True),
                       # all results should have the correct publisher name
                       JMESPathComparator(
                           "length([].id.contains(@, '/Publishers/{}/ArtifactTypes/VMImage/Offers/{}/Skus/'))".format( #pylint: disable=line-too-long
@@ -222,7 +223,7 @@ class VMListSizesScenarioTest(CommandTestScript):
             'vm list-sizes --resource-group {} --name {}'.format(
                 self.resource_group,
                 self.vm_name),
-                JMESPathComparator('type(@)', 'array'))
+            JMESPathComparator('type(@)', 'array'))
 
     def tear_down(self):
         self.run('resource group delete --name {}'.format(self.resource_group))
