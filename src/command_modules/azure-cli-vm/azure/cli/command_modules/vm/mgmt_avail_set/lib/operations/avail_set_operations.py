@@ -32,7 +32,7 @@ class AvailSetOperations(object):
         self.config = config
 
     def create_or_update(
-            self, resource_group_name, deployment_name, name, content_version=None, location="[resourceGroup().location]", platform_fault_domain_count="1", platform_update_domain_count="1", custom_headers={}, raw=False, **operation_config):
+            self, resource_group_name, deployment_name, name, content_version=None, location=None, platform_fault_domain_count="1", platform_update_domain_count="1", custom_headers={}, raw=False, **operation_config):
         """
         Create or update a virtual machine.
 
