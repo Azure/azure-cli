@@ -420,6 +420,41 @@ class VMMachineExtensionImageScenarioTest(CommandTestScript):
                     self.location, self.publisher, self.type, self.version
                 ), True)])
 
+class VMScaleSetGetsScenarioTest(CommandTestScript):
+
+    def __init__(self):
+        self.resource_group = 'cliTestRg_ScaleSet1'
+        self.ss_name = 'scaleset1'
+        self.location = 'westus'
+        super(VMScaleSetGetsScenarioTest, self).__init__(None, self.test_body, None)
+
+    def test_body(self):
+        self.test('vm scaleset list-all', [
+                JMESPathComparator('type(@)', 'array')])
+        self.test('vm scaleset list --resource-group {}'.format(
+            self.resource_group), [
+                JMESPathComparator('type(@)', 'array'),
+                JMESPathComparator('length(@)', 1),
+                JMESPathComparator('[0].name', self.ss_name),
+                JMESPathComparator('[0].location', self.location),
+                JMESPathComparator('[0].resourceGroup', self.resource_group),
+                ])
+        self.test('vm scaleset list-skus --resource-group {} --name {}'.format(
+                self.resource_group, self.ss_name),
+                JMESPathComparator('type(@)', 'array'))
+        self.test('vm scaleset show --resource-group {} --name {}'.format(
+                self.resource_group, self.ss_name), [
+                    JMESPathComparator('type(@)', 'object'),
+                    JMESPathComparator('name', self.ss_name),
+                    JMESPathComparator('location', self.location),
+                    JMESPathComparator('resourceGroup', self.resource_group),
+                ])
+        self.test('vm scaleset get-instance-view --resource-group {} --name {}'.format(
+                self.resource_group, self.ss_name), [
+                    JMESPathComparator('type(@)', 'object'),
+                    JMESPathComparator('type(virtualMachine)', 'object'),
+                    JMESPathComparator('type(statuses)', 'array')
+                    ])
 
 ENV_VAR = {}
 
@@ -491,6 +526,10 @@ TEST_DEF = [
     {
         'test_name': 'vm_machine_extension_image',
         'command': VMMachineExtensionImageScenarioTest()
+    },
+    {
+        'test_name': 'vm_scaleset_gets',
+        'command': VMScaleSetGetsScenarioTest()
     },
 ]
 
