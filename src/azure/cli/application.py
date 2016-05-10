@@ -43,7 +43,7 @@ class Application(object):
     COMMAND_PARSER_PARSED = 'CommandParser.Parsed'
 
     def __init__(self, configuration):
-        global APPLICATION
+        global APPLICATION #pylint: disable=global-statement
         APPLICATION = self
         self._event_handlers = defaultdict(lambda: [])
         self.configuration = configuration
