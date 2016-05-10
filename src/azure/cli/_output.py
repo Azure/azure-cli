@@ -57,8 +57,11 @@ class OutputProducer(object): #pylint: disable=too-few-public-methods
         self.file = file
 
     def out(self, obj):
-        print(self.formatter(obj), file=self.file, end='')
-
+        try:
+            print(self.formatter(obj), file=self.file, end='')
+        except UnicodeEncodeError:
+            print(self.formatter(obj).encode('ascii', 'ignore').decode('utf-8', 'ignore'),
+                  file=self.file, end='')
 
     @staticmethod
     def get_formatter(format_type):
