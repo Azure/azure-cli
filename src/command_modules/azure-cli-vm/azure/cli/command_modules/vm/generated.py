@@ -259,9 +259,12 @@ def _handle_auth_types(data):
             raise CLIError('Admin password cannot be used with SSH authentication type')
 
         ssh_key_file = os.path.join(os.path.expanduser('~'), '.ssh/id_rsa.pub')
-        if not args.ssh_key_value and os.path.isfile(ssh_key_file):
-            with open(ssh_key_file) as f:
-                args.ssh_key_value = f.read()
+        if not args.ssh_key_value:
+            if os.path.isfile(ssh_key_file):
+                with open(ssh_key_file) as f:
+                    args.ssh_key_value = f.read()
+            else:
+                raise CLIError('An RSA key file or key value must be supplied to SSH Key Value')
 
 if APPLICATION:
     # set to none in tests
