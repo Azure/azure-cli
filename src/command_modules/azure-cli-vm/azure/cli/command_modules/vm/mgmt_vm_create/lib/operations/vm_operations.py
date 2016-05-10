@@ -13,7 +13,6 @@ import uuid
 
 from .. import models
 
-
 class VMOperations(object):
     """VMOperations operations.
 

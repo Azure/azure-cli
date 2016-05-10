@@ -2,7 +2,7 @@
 import unittest
 import mock
 
-from azure.cli.command_modules.vm.custom import _load_images_from_aliases_doc
+from azure.cli.command_modules.vm.generated import ConvenienceVmCommands
 
 class TestVMImage(unittest.TestCase):
     @mock.patch('azure.cli.command_modules.vm.custom.urlopen', autospec=True)
@@ -17,7 +17,7 @@ class TestVMImage(unittest.TestCase):
         mock_urlopen.return_value = mock_read
 
         #action
-        images = _load_images_from_aliases_doc(None, None, None)
+        images = ConvenienceVmCommands().list_vm_images()
 
         #assert
         win_images = [i for i in images if i['publisher'] == 'MicrosoftWindowsServer']
@@ -25,6 +25,12 @@ class TestVMImage(unittest.TestCase):
         ubuntu_image = next(i for i in images if i['publisher'] == 'Canonical')
         self.assertEqual(ubuntu_image['publisher'], 'Canonical')
         self.assertEqual(ubuntu_image['offer'], 'UbuntuServer')
+        self.assertEqual(ubuntu_image['urn alias'], 'UbuntuLTS')
+        parts = ubuntu_image['urn'].split(':')
+        self.assertEqual(parts[0], ubuntu_image['publisher'])
+        self.assertEqual(parts[1], ubuntu_image['offer'])
+        self.assertEqual(parts[2], ubuntu_image['sku'])
+        self.assertEqual(parts[3], ubuntu_image['version'])
 
 if __name__ == '__main__':
     unittest.main()
