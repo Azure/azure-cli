@@ -6,7 +6,8 @@ def _register_global_parameter(global_group):
                               help='JMESPath query string. See http://jmespath.org/ for more information and examples.') # pylint: disable=line-too-long
 
 def register(application):
-    def handle_query_parameter(args):
+    def handle_query_parameter(data):
+        _, args = data
         try:
             query_value = args._jmespath_query #  pylint: disable=protected-access
             del args._jmespath_query

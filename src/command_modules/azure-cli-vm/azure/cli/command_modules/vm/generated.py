@@ -1,6 +1,7 @@
 import argparse
 import re
 import os
+import getpass
 from azure.mgmt.compute.operations import (AvailabilitySetsOperations,
                                            VirtualMachineExtensionImagesOperations,
                                            VirtualMachineExtensionsOperations,
@@ -10,6 +11,7 @@ from azure.mgmt.compute.operations import (AvailabilitySetsOperations,
                                            VirtualMachinesOperations,
                                            VirtualMachineScaleSetsOperations,
                                            VirtualMachineScaleSetVMsOperations)
+from azure.cli.application import Application
 from azure.cli.commands._auto_command import build_operation, AutoCommandDefinition
 from azure.cli.commands import CommandTable, LongRunningOperation
 from azure.cli.commands._command_creation import get_mgmt_service_client
@@ -191,6 +193,11 @@ vm_param_aliases = {
         'name': '--os-version',
         'help': argparse.SUPPRESS
         },
+    'admin_username': {
+        'name': '--admin-username',
+        'default': getpass.getuser(),
+        'help': 'Admin login.  Defaults to current username.'
+        }
     }
 
 class VMImageFieldAction(argparse.Action): #pylint: disable=too-few-public-methods
@@ -237,6 +244,28 @@ class VMDNSNameAction(argparse.Action): #pylint: disable=too-few-public-methods
             namespace.dns_name_type = 'new'
 
         namespace.dns_name_for_public_ip = dns_value
+
+import os
+
+def _handle_auth_types(data):
+    argv, args = data
+
+    if not ' '.join(argv).startswith('vm create'):
+        return
+
+    if args.authentication_type == 'password':
+        if args.ssh_dest_key_path or args.ssh_key_value:
+            raise CLIError('SSH parameters cannot be used with password authentication type')
+    elif args.authentication_type == 'sshkey':
+        if args.admin_password:
+            raise CLIError('Admin password cannot be used with SSH authentication type')
+
+        ssh_key_file = '~/.ssh/id_rsa'
+        if os.path.isfile(ssh_key_file):
+            with open(ssh_key_file) as file:
+                args.ssh_key_value = file.read()
+
+Application.INSTANCE.register(Application.COMMAND_PARSER_PARSED, _handle_auth_types)
 
 extra_parameters = [
     {

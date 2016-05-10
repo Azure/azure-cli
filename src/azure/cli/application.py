@@ -33,6 +33,7 @@ class Configuration(object): # pylint: disable=too-few-public-methods
 
 class Application(object):
 
+    INSTANCE = None
     TRANSFORM_RESULT = 'Application.TransformResults'
     FILTER_RESULT = 'Application.FilterResults'
     GLOBAL_PARSER_CREATED = 'GlobalParser.Created'
@@ -41,6 +42,7 @@ class Application(object):
     COMMAND_PARSER_PARSED = 'CommandParser.Parsed'
 
     def __init__(self, configuration):
+        Application.INSTANCE = self
         self._event_handlers = defaultdict(lambda: [])
         self.configuration = configuration
 
@@ -73,7 +75,7 @@ class Application(object):
             argv[0] = '--help'
 
         args = self.parser.parse_args(argv)
-        self.raise_event(self.COMMAND_PARSER_PARSED, args)
+        self.raise_event(self.COMMAND_PARSER_PARSED, (argv, args))
 
         # Consider - we are using any args that start with an underscore (_) as 'private'
         # arguments and remove them from the arguments that we pass to the actual function.
@@ -152,6 +154,7 @@ class Application(object):
         global_group.add_argument('--debug', dest='_log_verbosity_debug', action='store_true',
                                   help='Increase logging verbosity to show all debug logs.')
 
-    def _handle_builtin_arguments(self, args):
+    def _handle_builtin_arguments(self, data):
+        _, args = data
         self.configuration.output_format = args._output_format #pylint: disable=protected-access
         del args._output_format

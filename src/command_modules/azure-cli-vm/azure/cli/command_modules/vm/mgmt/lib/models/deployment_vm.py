@@ -129,7 +129,6 @@ class DeploymentVM(Model):
         'uri': {'required': True, 'constant': True},
         '_artifacts_location': {'constant': True},
         'name': {'required': True},
-        'admin_username': {'required': True},
         'mode': {'required': True, 'constant': True},
     }
 
@@ -178,7 +177,7 @@ class DeploymentVM(Model):
 
     mode = "Incremental"
 
-    def __init__(self, name, admin_username, content_version=None, storage_container_name="vhds", virtual_network_name=None, subnet_ip_address_prefix="10.0.0.0/24", private_ip_address_allocation="Dynamic", dns_name_for_public_ip=None, storage_account_type="new", os_disk_uri=None, virtual_network_type="new", admin_password=None, os_sku="2012-R2-Datacenter", subnet_name=None, os_type="Win2012R2Datacenter", os_version="latest", os_disk_name="osdiskimage", ssh_dest_key_path=None, os_offer="WindowsServer", public_ip_address_allocation="Dynamic", authentication_type="password", storage_account_name=None, storage_redundancy_type="Standard_LRS", size="Standard_A2", public_ip_address_type="none", virtual_network_ip_address_prefix="10.0.0.0/16", availability_set_id=None, ssh_key_value=None, location=None, os_publisher="MicrosoftWindowsServer", availability_set_type="none", public_ip_address_name=None, dns_name_type="none"):
+    def __init__(self, name, content_version=None, storage_container_name="vhds", virtual_network_name=None, subnet_ip_address_prefix="10.0.0.0/24", private_ip_address_allocation="Dynamic", dns_name_for_public_ip=None, storage_account_type="new", os_disk_uri=None, virtual_network_type="new", admin_password=None, os_sku="2012-R2-Datacenter", subnet_name=None, os_type="Win2012R2Datacenter", admin_username=None, os_version="latest", os_disk_name="osdiskimage", ssh_dest_key_path=None, os_offer="WindowsServer", public_ip_address_allocation="Dynamic", authentication_type="password", storage_account_name=None, storage_redundancy_type="Standard_LRS", size="Standard_A2", public_ip_address_type="none", virtual_network_ip_address_prefix="10.0.0.0/16", availability_set_id=None, ssh_key_value=None, location=None, os_publisher="MicrosoftWindowsServer", availability_set_type="none", public_ip_address_name=None, dns_name_type="none"):
         self.content_version = content_version
         self.storage_container_name = storage_container_name
         self.virtual_network_name = virtual_network_name
