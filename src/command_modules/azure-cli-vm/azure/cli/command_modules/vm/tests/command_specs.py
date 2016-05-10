@@ -50,12 +50,6 @@ class VMListIPAddressesScenarioTest(CommandTestScript):
                   '--admin-password', 'testPassword0', '--deployment-name', self.deployment_name,
                   '--public-ip-address-allocation', self.ip_allocation_method,
                   '--public-ip-address-type', 'new'])
-        self.run(['vm', 'create', '-g', self.resource_group, '-l', self.location,
-                  '-n', self.vm_name, '--admin-username', 'ubuntu',
-                  '--image', 'Canonical:UbuntuServer:14.04.4-LTS:latest',
-                  '--admin-password', 'testPassword0', '--deployment-name', self.deployment_name,
-                  '--public-ip-address-allocation', self.ip_allocation_method,
-                  '--public-ip-address-type', 'new'])
         # Expecting the one we just added
         self.test('vm list-ip-addresses --resource-group {}'.format(self.resource_group),
                   [
