@@ -23,8 +23,7 @@ class DeploymentAvailSet(Model):
     :param content_version: If included it must match the ContentVersion in
      the template.
     :type content_version: str
-    :param location: Location to deploy the availability set. Default value:
-     "[resourceGroup().location]" .
+    :param location: Location to deploy the availability set.
     :type location: str
     :param name: Name of the availability set.
     :type name: str
@@ -59,7 +58,7 @@ class DeploymentAvailSet(Model):
 
     mode = "Incremental"
 
-    def __init__(self, name, content_version=None, location="[resourceGroup().location]", platform_fault_domain_count="1", platform_update_domain_count="1"):
+    def __init__(self, name, content_version=None, location=None, platform_fault_domain_count="1", platform_update_domain_count="1"):
         self.content_version = content_version
         self.location = location
         self.name = name
