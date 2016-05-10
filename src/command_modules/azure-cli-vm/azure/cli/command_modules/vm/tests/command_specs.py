@@ -349,16 +349,13 @@ class VMAvailSetScenarioTest(CommandTestScript):
             JMESPathComparator('[0].location', self.location),
         ])
         self.test('vm availset list-sizes --resource-group {} --name {}'.format(
-            self.resource_group, self.name), [
-            JMESPathComparator('type(@)', 'array'),
-        ])
+            self.resource_group, self.name), JMESPathComparator('type(@)', 'array'))
         self.test('vm availset show --resource-group {} --name {}'.format(
             self.resource_group, self.name), [
-            JMESPathComparator('type(@)', 'object'),
-            JMESPathComparator('name', self.name),
-            JMESPathComparator('resourceGroup', self.resource_group),
-            JMESPathComparator('location', self.location),
-        ])
+                JMESPathComparator('type(@)', 'object'),
+                JMESPathComparator('name', self.name),
+                JMESPathComparator('resourceGroup', self.resource_group),
+                JMESPathComparator('location', self.location)])
         self.test('vm availset delete --resource-group {} --name {}'.format(
             self.resource_group, self.name), None)
         self.test('vm availset list --resource-group {}'.format(
@@ -385,11 +382,10 @@ class VMExtensionsScenarioTest(CommandTestScript):
             self.resource_group, self.vm_name, self.extension_name), [
                 JMESPathComparator('type(@)', 'object'),
                 JMESPathComparator('name', self.extension_name),
-                JMESPathComparator('resourceGroup', self.resource_group),
-            ])
+                JMESPathComparator('resourceGroup', self.resource_group)])
         self.test('vm extension delete --resource-group {} --vm-name {} --name {}'.format(
             self.resource_group, self.vm_name, self.extension_name),
-            None)
+                  None)
 
     def tear_down(self):
         pass
