@@ -6,7 +6,7 @@ from azure.cli._locale import L
 PARAMETER_ALIASES = GLOBAL_COMMON_PARAMETERS.copy()
 PARAMETER_ALIASES.update({
     'password': {
-        'name': '--name -n',
+        'name': '--password -p',
         'help': L('User password or client secret. Will prompt if not given.'),
     },
     'service_principal': {

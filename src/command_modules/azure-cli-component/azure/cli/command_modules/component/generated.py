@@ -26,14 +26,3 @@ build_operation(
         CommandDefinition(ComponentCommands.remove, 'Result'),
         CommandDefinition(ComponentCommands.check_component, 'Result', 'check')
     ], command_table, PARAMETER_ALIASES)
-
-#@command_table.option('--name -n', help=L('Name of component to install'), required=True)
-#@command_table.option('--name -n', help=L('Name of component to install'), required=True)
-#@command_table.option('--name -n', help=L('Name of component to remove'), required=True)
-#@command_table.option('--name -n', help=L('Name of component to remove'), required=True)
-
-#@command_table.option('--private -p', action='store_true',
-#                      help=L('Look for updates from the project private PyPI server'))
-
-#@command_table.option('--version', help=L('Component version (otherwise latest)'))
-
