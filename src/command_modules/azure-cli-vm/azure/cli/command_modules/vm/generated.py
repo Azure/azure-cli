@@ -260,7 +260,7 @@ def _handle_auth_types(data):
         if args.admin_password:
             raise CLIError('Admin password cannot be used with SSH authentication type')
 
-        ssh_key_file = '~/.ssh/id_rsa'
+        ssh_key_file = os.path.expanduser('~/.ssh/id_rsa')
         if os.path.isfile(ssh_key_file):
             with open(ssh_key_file) as file:
                 args.ssh_key_value = file.read()
