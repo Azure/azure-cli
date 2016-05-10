@@ -245,8 +245,6 @@ class VMDNSNameAction(argparse.Action): #pylint: disable=too-few-public-methods
 
         namespace.dns_name_for_public_ip = dns_value
 
-import os
-
 def _handle_auth_types(data):
     argv, args = data
 
@@ -262,10 +260,12 @@ def _handle_auth_types(data):
 
         ssh_key_file = os.path.join(os.path.expanduser('~'), '.ssh/id_rsa.pub')
         if not args.ssh_key_value and os.path.isfile(ssh_key_file):
-            with open(ssh_key_file) as file:
-                args.ssh_key_value = file.read()
+            with open(ssh_key_file) as f:
+                args.ssh_key_value = f.read()
 
-Application.INSTANCE.register(Application.COMMAND_PARSER_PARSED, _handle_auth_types)
+if Application.INSTANCE:
+    # set to none in tests
+    Application.INSTANCE.register(Application.COMMAND_PARSER_PARSED, _handle_auth_types)
 
 extra_parameters = [
     {
