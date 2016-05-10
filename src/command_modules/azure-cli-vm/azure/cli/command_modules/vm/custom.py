@@ -1,198 +1,40 @@
-﻿import json
+﻿# pylint: disable=no-self-use,too-many-arguments
 import re
-
-from six.moves.urllib.request import urlopen #pylint: disable=import-error
 
 from azure.mgmt.compute.models import DataDisk
 from azure.mgmt.compute.models.compute_management_client_enums import DiskCreateOptionTypes
-from azure.cli._locale import L
-from azure.cli.commands import CommandTable, LongRunningOperation, RESOURCE_GROUP_ARG_NAME
+from azure.cli.commands import CommandTable, LongRunningOperation
 from azure.cli.commands._command_creation import get_mgmt_service_client
 from azure.cli._util import CLIError
-from azure.mgmt.compute import ComputeManagementClient, ComputeManagementClientConfiguration
 
-from ._params import PARAMETER_ALIASES
+from ._actions import load_images_from_aliases_doc, load_images_thru_services
+from ._factory import _compute_client_factory
 
-def _compute_client_factory(_):
-    return get_mgmt_service_client(ComputeManagementClient, ComputeManagementClientConfiguration)
+from six.moves.urllib.request import urlopen #pylint: disable=import-error,unused-import
 
 command_table = CommandTable()
 
-def vm_getter(args):
-    ''' Retreive a VM based on the `args` passed in.
-    '''
-    client = _compute_client_factory(args)
-    result = client.virtual_machines.get(args.get(RESOURCE_GROUP_ARG_NAME), args.get('vm_name'))
+def _vm_get(**kwargs):
+    '''Retrieves a VM if a resource group and vm name are supplied.'''
+    vm_name = kwargs.get('vm_name')
+    resource_group_name = kwargs.get('resource_group_name')
+    result = None
+    if resource_group_name and vm_name:
+        client = _compute_client_factory()
+        result = client.virtual_machines.get(resource_group_name, vm_name)
     return result
 
-def vm_setter(args, instance, start_msg, end_msg):
-    '''Update the given Virtual Machine instance
-    '''
+def _vm_set(instance, start_msg, end_msg):
+    '''Update the given Virtual Machine instance'''
     instance.resources = None # Issue: https://github.com/Azure/autorest/issues/934
-    client = _compute_client_factory(args)
+    client = _compute_client_factory()
+    parsed_id = _parse_rg_name(instance.id)
     poller = client.virtual_machines.create_or_update(
-        resource_group_name=args.get(RESOURCE_GROUP_ARG_NAME),
-        vm_name=args.get('vm_name'),
+        resource_group_name=parsed_id[0],
+        vm_name=parsed_id[1],
         parameters=instance)
     return LongRunningOperation(start_msg, end_msg)(poller)
 
-def patches_vm(start_msg, finish_msg):
-    '''Decorator indicating that the decorated function modifies an existing Virtual Machine
-    in Azure.
-    It automatically adds arguments required to identify the Virtual Machine to be patched and
-    handles the actual put call to the compute service, leaving the decorated function to only
-    have to worry about the modifications it has to do.
-    '''
-    def wrapped(func):
-        def invoke(args):
-            instance = vm_getter(args)
-            func(args, instance)
-            vm_setter(args, instance, start_msg, finish_msg)
-
-        # All Virtual Machines are identified with a resource group name/name pair, so
-        # we add these parameters to all commands
-        command_table[invoke]['arguments'].append(PARAMETER_ALIASES['resource_group_name'])
-        command_table[invoke]['arguments'].append({
-            'name': '--vm-name -n',
-            'dest': 'vm_name',
-            'help': 'Name of Virtual Machine to update',
-            'required': True
-            })
-        return invoke
-    return wrapped
-
-@command_table.command('vm list', description=L('List Virtual Machines.'))
-@command_table.option(**PARAMETER_ALIASES['optional_resource_group_name'])
-def list_vm(args):
-    ccf = _compute_client_factory(args)
-    group = args.get(RESOURCE_GROUP_ARG_NAME)
-    vm_list = ccf.virtual_machines.list(resource_group_name=group) if group else \
-              ccf.virtual_machines.list_all()
-    return list(vm_list)
-
-@command_table.command('vm disk attach-new',
-                       help=L('Attach a new disk to an existing Virtual Machine'))
-@command_table.option(**PARAMETER_ALIASES['lun'])
-@command_table.option(**PARAMETER_ALIASES['diskname'])
-@command_table.option(**PARAMETER_ALIASES['disksize'])
-@command_table.option(**PARAMETER_ALIASES['vhd'])
-@patches_vm('Attaching disk', 'Disk attached')
-def _vm_disk_attach_new(args, instance):
-    disk = DataDisk(lun=args.get('lun'),
-                    vhd=args.get('vhd'),
-                    name=args.get('name'),
-                    create_option=DiskCreateOptionTypes.empty,
-                    disk_size_gb=args.get('disksize'))
-    instance.storage_profile.data_disks.append(disk)
-
-@command_table.command('vm disk attach-existing',
-                       help=L('Attach an existing disk to an existing Virtual Machine'))
-@command_table.option(**PARAMETER_ALIASES['lun'])
-@command_table.option(**PARAMETER_ALIASES['diskname'])
-@command_table.option(**PARAMETER_ALIASES['disksize'])
-@command_table.option(**PARAMETER_ALIASES['vhd'])
-@patches_vm('Attaching disk', 'Disk attached')
-def _vm_disk_attach_existing(args, instance):
-    # TODO: figure out size of existing disk instead of making the default value 1023
-    disk = DataDisk(lun=args.get('lun'),
-                    vhd=args.get('vhd'),
-                    name=args.get('name'),
-                    create_option=DiskCreateOptionTypes.attach,
-                    disk_size_gb=args.get('disksize'))
-    instance.storage_profile.data_disks.append(disk)
-
-@command_table.command('vm disk detach')
-@command_table.option(**PARAMETER_ALIASES['diskname'])
-@patches_vm('Detaching disk', 'Disk detached')
-def _vm_disk_detach(args, instance):
-    instance.resources = None # Issue: https://github.com/Azure/autorest/issues/934
-    try:
-        disk = next(d for d in instance.storage_profile.data_disks
-                    if d.name == args.get('name'))
-        instance.storage_profile.data_disks.remove(disk)
-    except StopIteration:
-        raise CLIError("No disk with the name '%s' found" % args.get('name'))
-
-
-def load_images_from_aliases_doc(publisher, offer, sku):
-    target_url = ('https://raw.githubusercontent.com/Azure/azure-rest-api-specs/'
-                  'master/arm-compute/quickstart-templates/aliases.json')
-    txt = urlopen(target_url).read()
-    dic = json.loads(txt.decode())
-    try:
-        all_images = []
-        result = (dic['outputs']['aliases']['value'])
-        for v in result.values(): #loop around os
-            for alias, vv in v.items(): #loop around distros
-                all_images.append({
-                    'urn alias': alias,
-                    'publisher': vv['publisher'],
-                    'offer': vv['offer'],
-                    'sku': vv['sku'],
-                    'version': vv['version']
-                    })
-
-        all_images = [i for i in all_images if (_partial_matched(publisher, i['publisher']) and
-                                                _partial_matched(offer, i['offer']) and
-                                                _partial_matched(sku, i['sku']))]
-        return all_images
-    except KeyError:
-        raise CLIError('Could not retrieve image list from {}'.format(target_url))
-
-def _load_images_thru_services(publisher, offer, sku, location):
-    from concurrent.futures import ThreadPoolExecutor, as_completed
-
-    client = _compute_client_factory({})
-    all_images = []
-
-    def _load_images_from_publisher(publisher):
-        offers = client.virtual_machine_images.list_offers(location, publisher)
-        if offer:
-            offers = [o for o in offers if _partial_matched(offer, o.name)]
-        for o in offers:
-            skus = client.virtual_machine_images.list_skus(location, publisher, o.name)
-            if sku:
-                skus = [s for s in skus if _partial_matched(sku, s.name)]
-            for s in skus:
-                images = client.virtual_machine_images.list(location, publisher, o.name, s.name)
-                for i in images:
-                    all_images.append({
-                        'publisher': publisher,
-                        'offer': o.name,
-                        'sku': s.name,
-                        'version': i.name})
-
-    publishers = client.virtual_machine_images.list_publishers(location)
-    if publisher:
-        publishers = [p for p in publishers if _partial_matched(publisher, p.name)]
-
-    publisher_num = len(publishers)
-    if publisher_num > 1:
-        with ThreadPoolExecutor(max_workers=40) as executor:
-            tasks = [executor.submit(_load_images_from_publisher, p.name) for p in publishers]
-            for t in as_completed(tasks):
-                t.result() #we don't use the result, rather just to expose exceptions from threads
-    elif publisher_num == 1:
-        _load_images_from_publisher(publishers[0].name)
-
-    return all_images
-
-def _partial_matched(pattern, string):
-    if not pattern:
-        return True # empty pattern means wildcard-match
-    pattern = r'.*' + pattern
-    return re.match(pattern, string, re.I)
-
-def _create_image_instance(publisher, offer, sku, version):
-    return {
-        'publisher': publisher,
-        'offer': offer,
-        'sku': sku,
-        'version': version
-        }
-#
-# Composite convenience commands for the CLI
-#
 def _parse_rg_name(strid):
     '''From an ID, extract the contained (resource group, name) tuple
     '''
@@ -202,21 +44,21 @@ def _parse_rg_name(strid):
 
     return (parts[4], parts[8])
 
-
 class ConvenienceVmCommands(object): # pylint: disable=too-few-public-methods
 
-    def __init__(self, _):
-        pass
+    def __init__(self, **kwargs):
+        self.vm = _vm_get(**kwargs)
 
-    # pylint: disable=no-self-use,too-many-arguments
-    def list_vm_images(self,
-                       image_location=None,
-                       publisher=None,
-                       offer=None,
-                       sku=None,
-                       all=False): #pylint: disable=redefined-builtin
+    def list(self, resource_group_name):
+        ''' List Virtual Machines. '''
+        ccf = _compute_client_factory()
+        vm_list = ccf.virtual_machines.list(resource_group_name=resource_group_name) \
+            if resource_group_name else ccf.virtual_machines.list_all()
+        return list(vm_list)
+
+    def list_vm_images(self, image_location=None, publisher=None, offer=None, sku=None, all=False): # pylint: disable=redefined-builtin
         '''vm image list
-        :param str location:Image location
+        :param str image_location:Image location
         :param str publisher:Image publisher name
         :param str offer:Image offer name
         :param str sku:Image sku name
@@ -227,10 +69,10 @@ class ConvenienceVmCommands(object): # pylint: disable=too-few-public-methods
             raise CLIError('Argument of --location/-l is required to use with --all flag')
 
         if load_thru_services:
-            all_images = _load_images_thru_services(publisher,
-                                                    offer,
-                                                    sku,
-                                                    image_location)
+            all_images = load_images_thru_services(publisher,
+                                                   offer,
+                                                   sku,
+                                                   image_location)
         else:
             all_images = load_images_from_aliases_doc(publisher, offer, sku)
 
@@ -239,9 +81,7 @@ class ConvenienceVmCommands(object): # pylint: disable=too-few-public-methods
         return all_images
 
 
-    def list_ip_addresses(self,
-                          resource_group_name=None,
-                          vm_name=None):
+    def list_ip_addresses(self, resource_group_name=None, vm_name=None):
         ''' Get IP addresses from one or more Virtual Machines
         :param str resource_group_name:Name of resource group.
         :param str vm_name:Name of virtual machine.
@@ -295,4 +135,30 @@ class ConvenienceVmCommands(object): # pylint: disable=too-few-public-methods
 
         return result
 
+    def attach_new_disk(self, lun, diskname, vhd, disksize=1023):
+        ''' Attach a new disk to an existing Virtual Machine'''
+        disk = DataDisk(lun=lun, vhd=vhd, name=diskname,
+                        create_option=DiskCreateOptionTypes.empty,
+                        disk_size_gb=disksize)
+        self.vm.storage_profile.data_disks.append(disk) # pylint: disable=no-member
+        _vm_set(self.vm, 'Attaching disk', 'Disk attached')
 
+    def attach_existing_disk(self, lun, diskname, vhd, disksize=1023):
+        ''' Attach an existing disk to an existing Virtual Machine '''
+        # TODO: figure out size of existing disk instead of making the default value 1023
+        disk = DataDisk(lun=lun, vhd=vhd, name=diskname,
+                        create_option=DiskCreateOptionTypes.attach,
+                        disk_size_gb=disksize)
+        self.vm.storage_profile.data_disks.append(disk) # pylint: disable=no-member
+        _vm_set(self.vm, 'Attaching disk', 'Disk attached')
+
+    def detach_disk(self, diskname):
+        ''' Detach a disk from a Virtual Machine '''
+        # Issue: https://github.com/Azure/autorest/issues/934
+        self.vm.resources = None
+        try:
+            disk = next(d for d in self.vm.storage_profile.data_disks if d.name == diskname) # pylint: disable=no-member
+            self.vm.storage_profile.data_disks.remove(disk) # pylint: disable=no-member
+        except StopIteration:
+            raise CLIError("No disk with the name '{}' found".format(diskname))
+        _vm_set(self.vm, 'Detaching disk', 'Disk detached')

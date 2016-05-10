@@ -20,49 +20,46 @@ INSTALLED_COMMAND_MODULES = [dist.key.replace('azure-cli-', '')
 
 logger.info('Installed command modules %s', INSTALLED_COMMAND_MODULES)
 
-RESOURCE_GROUP_ARG_NAME = 'resource_group_name'
-
 COMMON_PARAMETERS = {
     'deployment_name': {
         'name': '--deployment-name',
         'metavar': 'DEPLOYMENTNAME',
         'help': 'Name of the resource deployment',
         'default': 'azurecli' + str(time.time()) + str(random.randint(0, 10000000)),
-        'required': False
     },
     'location': {
         'name': '--location -l',
         'metavar': 'LOCATION',
         'help': 'Location',
-        'required': True
     },
     'resource_group_name': {
         'name': '--resource-group -g',
-        'dest': RESOURCE_GROUP_ARG_NAME,
         'metavar': 'RESOURCEGROUP',
         'help': 'The name of the resource group',
-        'required': True
     },
     'tag' : {
         'name': '--tag',
         'metavar': 'TAG',
         'help': L('a single tag in \'key[=value]\' format'),
-        'required': False,
         'type': validate_tag
     },
     'tags' : {
         'name': '--tags',
         'metavar': 'TAGS',
         'help': L('multiple semicolon separated tags in \'key[=value]\' format'),
-        'required': False,
         'type': validate_tags
     },
 }
 
 def extend_parameter(parameter_metadata, **kwargs):
-    modified_parameter_metadata = parameter_metadata.copy()
-    modified_parameter_metadata.update(kwargs)
-    return modified_parameter_metadata
+    extended_param = parameter_metadata.copy()
+    extended_param.update(kwargs)
+    return extended_param
+
+def patch_aliases(aliases, patch):
+    patched_aliases = aliases.copy()
+    patched_aliases.update(patch)
+    return patched_aliases
 
 class LongRunningOperation(object): #pylint: disable=too-few-public-methods
 

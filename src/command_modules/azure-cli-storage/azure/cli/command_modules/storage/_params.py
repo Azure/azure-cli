@@ -1,13 +1,57 @@
 from os import environ
 
-from azure.cli.commands import (COMMON_PARAMETERS as GLOBAL_COMMON_PARAMETERS, extend_parameter)
+from azure.cli.commands import COMMON_PARAMETERS as GLOBAL_COMMON_PARAMETERS, patch_aliases
+from azure.cli.commands._command_creation import get_mgmt_service_client, get_data_service_client
 from azure.cli.commands._validators import validate_key_value_pairs
 from azure.cli._locale import L
+
+from azure.mgmt.storage import StorageManagementClient, StorageManagementClientConfiguration
+from azure.mgmt.storage.models import AccountType
+
+from azure.storage.blob import PublicAccess, BlockBlobService, PageBlobService, AppendBlobService
+from azure.storage.file import FileService
+from azure.storage import CloudStorageAccount
 
 from ._validators import (
     validate_container_permission, validate_datetime, validate_datetime_as_string, validate_id,
     validate_ip_range, validate_resource_types, validate_services, validate_lease_duration,
     validate_quota)
+
+# FACTORIES
+
+def storage_client_factory(**_):
+    return get_mgmt_service_client(StorageManagementClient, StorageManagementClientConfiguration)
+
+def file_data_service_factory(**kwargs):
+    return get_data_service_client(
+        FileService,
+        kwargs.pop('account_name', None),
+        kwargs.pop('account_key', None),
+        connection_string=kwargs.pop('connection_string', None),
+        sas_token=kwargs.pop('sas_token', None))
+
+def blob_data_service_factory(**kwargs):
+    blob_type = kwargs.get('blob_type')
+    blob_service = blob_types.get(blob_type, BlockBlobService)
+    return get_data_service_client(
+        blob_service,
+        kwargs.pop('account_name', None),
+        kwargs.pop('account_key', None),
+        connection_string=kwargs.pop('connection_string', None),
+        sas_token=kwargs.pop('sas_token', None))
+
+def cloud_storage_account_service_factory(**kwargs):
+    account_name = kwargs.pop('account_name', None)
+    account_key = kwargs.pop('account_key', None)
+    sas_token = kwargs.pop('sas_token', None)
+    connection_string = kwargs.pop('connection_string', None)
+    if connection_string:
+        # CloudStorageAccount doesn't accept connection string directly, so we must parse
+        # out the account name and key manually
+        conn_dict = validate_key_value_pairs(connection_string)
+        account_name = conn_dict['AccountName']
+        account_key = conn_dict['AccountKey']
+    return CloudStorageAccount(account_name, account_key, sas_token)
 
 # HELPER METHODS
 
@@ -23,52 +67,62 @@ def get_connection_string(string):
 def get_sas_token(string):
     return string if string != 'query' else environ.get('AZURE_SAS_TOKEN')
 
+# PARAMETER CHOICE LISTS
+
+storage_account_key_options = ['key1', 'key2']
+
+# TODO: update this once enums are supported in commands first-class (task #115175885)
+storage_account_types = {'Standard_LRS': AccountType.standard_lrs,
+                         'Standard_ZRS': AccountType.standard_zrs,
+                         'Standard_GRS': AccountType.standard_grs,
+                         'Standard_RAGRS': AccountType.standard_ragrs,
+                         'Premium_LRS': AccountType.premium_lrs}
+
+# TODO: update this once enums are supported in commands first-class (task #115175885)
+public_access_types = {'none': None, 'blob': PublicAccess.Blob, 'container': PublicAccess.Container}
+
+lease_duration_values = {'min':15, 'max':60, 'infinite':-1}
+lease_duration_values_string = 'Between {} and {} seconds. ({} for infinite)'.format(
+    lease_duration_values['min'],
+    lease_duration_values['max'],
+    lease_duration_values['infinite'])
+
+blob_types = {'block': BlockBlobService, 'page': PageBlobService, 'append': AppendBlobService}
+
 # BASIC PARAMETER CONFIGURATION
 
-PARAMETER_ALIASES = GLOBAL_COMMON_PARAMETERS.copy()
-PARAMETER_ALIASES.update({
+PARAMETER_ALIASES = patch_aliases(GLOBAL_COMMON_PARAMETERS, {
     'account_key': {
         'name': '--account-key -k',
         'help': L('the storage account key'),
-        # While account key *may* actually be required if the environment variable hasn't been
-        # specified, it is only required unless the connection string has been specified
-        'required': False,
         'type': get_account_key,
         'default': 'query'
     },
     'account_name': {
         'name': '--account-name -n',
         'help': L('the storage account name'),
-        # While account name *may* actually be required if the environment variable hasn't been
-        # specified, it is only required unless the connection string has been specified
-        'required': False,
         'type': get_account_name,
         'default': 'query'
     },
-    'account_name_required': {
-        # this is used only to obtain the connection string. Thus, the env variable default
-        # does not apply and this is a required parameter
-        'name': '--account-name -n',
-        'help': L('the storage account name'),
-        'required': True
+    'account_type': {
+        'name': '--account-type',
+        'choices': storage_account_types
     },
     'blob_name': {
         'name': '--blob-name -b',
         'help': L('the name of the blob'),
-        'required': True
+    },
+    'blob_type': {
+        'name': '--blob-type',
+        'choices': blob_types.keys()
     },
     'container_name': {
         'name': '--container-name -c',
-        'required': True
     },
     'connection_string': {
         'name': '--connection-string',
         'help': L('the storage connection string'),
-        # You can either specify connection string or name/key. There is no convenient way
-        # to express this kind of relationship in argparse...
-        # TODO: Move to exclusive group
         'type': get_connection_string,
-        'required': False,
         'default': 'query'
     },
     'directory_name': {
@@ -83,7 +137,6 @@ PARAMETER_ALIASES.update({
         'name': '--if-modified-since',
         'help': L('alter only if modified since supplied UTC datetime (Y-m-d\'T\'H:M\'Z\')'),
         'type': validate_datetime,
-        'required': False,
     },
     'id': {
         'name': '--id',
@@ -94,7 +147,6 @@ PARAMETER_ALIASES.update({
         'name': '--if-unmodified-since',
         'help': L('alter only if unmodified since supplied UTC datetime (Y-m-d\'T\'H:M\'Z\')'),
         'type': validate_datetime,
-        'required': False,
     },
     'ip': {
         'name': '--ip',
@@ -125,8 +177,6 @@ PARAMETER_ALIASES.update({
         'type': validate_key_value_pairs,
         'help': L('metadata in "a=b;c=d" format')
     },
-    'optional_resource_group_name':
-        extend_parameter(GLOBAL_COMMON_PARAMETERS['resource_group_name'], required=False),
     'permission': {
         'name': '--permission',
         'help': L('permissions granted: (r)ead (w)rite (d)elete (l)ist. Can be combined.'),
@@ -164,7 +214,6 @@ PARAMETER_ALIASES.update({
     'share_name': {
         'name': '--share-name -s',
         'help': L('the name of the file share'),
-        'required': True,
     },
     'signed_identifiers': {
         'name': '--signed-identifiers',
@@ -180,16 +229,21 @@ PARAMETER_ALIASES.update({
     'timeout': {
         'name': '--timeout',
         'help': L('timeout in seconds'),
-        'required': False,
         'type': int
-    }
+    },
+    'use_http': {
+        'name': '--use-http',
+        'help': L('specifies that http should be the default endpoint protocol'),
+        'action': 'store_const',
+        'const': 'http'
+    },
 })
 
 # SUPPLEMENTAL (EXTRA) PARAMETER SETS
 
-STORAGE_DATA_CLIENT_ARGS = [
-    PARAMETER_ALIASES['account_name'],
-    PARAMETER_ALIASES['account_key'],
-    PARAMETER_ALIASES['connection_string'],
-    PARAMETER_ALIASES['sas_token']
-]
+STORAGE_DATA_CLIENT_ARGS = {
+    'account_name': PARAMETER_ALIASES['account_name'],
+    'account_key': PARAMETER_ALIASES['account_key'],
+    'connection_string': PARAMETER_ALIASES['connection_string'],
+    'sas_token': PARAMETER_ALIASES['sas_token']
+}
