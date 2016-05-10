@@ -261,8 +261,11 @@ def _handle_auth_types(data):
             raise CLIError('Admin password cannot be used with SSH authentication type')
 
         ssh_key_file = os.path.expanduser('~/.ssh/id_rsa')
+        print('FILE: ' + ssh_key_file)
+        print('IS FILE: ' + str(os.path.isfile(ssh_key_file)))
         if os.path.isfile(ssh_key_file):
             with open(ssh_key_file) as file:
+                print('DOING IT')
                 args.ssh_key_value = file.read()
 
 Application.INSTANCE.register(Application.COMMAND_PARSER_PARSED, _handle_auth_types)
