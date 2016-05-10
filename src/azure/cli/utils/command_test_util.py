@@ -16,6 +16,7 @@ from six.moves import input #pylint: disable=redefined-builtin
 import vcr
 
 from azure.cli.main import main as cli
+from azure.cli._util import CLIError
 
 class CommandTestGenerator(object):
 
@@ -65,6 +66,10 @@ class CommandTestGenerator(object):
 
             def get_user_access_token_mock(_, _1, _2): #pylint: disable=unused-argument
                 return 'top-secret-token-for-you'
+
+            def operation_delay_mock(_):
+                # don't run time.sleep()
+                return
 
             def _get_expected_results_from_file(recording_dir):
                 expected_results_path = os.path.join(recording_dir, 'expected_results.res')
@@ -126,6 +131,8 @@ class CommandTestGenerator(object):
                         _remove_expected_result(test_name, recording_dir)
 
                 io.close()
+                if fail:
+                    self.fail(display_result)
                 self.assertEqual(actual_result, expected)
 
             expected_results = _get_expected_results_from_file(recording_dir)
@@ -149,6 +156,10 @@ class CommandTestGenerator(object):
                             load_subscriptions_mock)
                 @mock.patch('azure.cli._profile.CredsCache.retrieve_token_for_user',
                             get_user_access_token_mock)
+                @mock.patch('msrestazure.azure_operation.AzureOperationPoller._delay',
+                            operation_delay_mock)
+                @mock.patch('azure.cli.commands.LongRunningOperation._delay',
+                            operation_delay_mock)
                 @self.my_vcr.use_cassette(cassette_path,
                                           filter_headers=CommandTestGenerator.FILTER_HEADERS)
                 def test(self):
@@ -168,7 +179,7 @@ class CommandTestGenerator(object):
                     _test_impl(self, test_name, expected, recording_dir)
             else:
                 # yaml file failed to delete or bug exists
-                raise RuntimeError('Unable to generate test for {} due to inconsistent data. ' \
+                raise CLIError('Unable to generate test for {} due to inconsistent data. ' \
                     + 'Please manually remove the associated .yaml cassette and/or the test\'s ' \
                     + 'entry in expected_results.res and try again.')
             return test
