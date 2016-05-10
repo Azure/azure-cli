@@ -77,7 +77,7 @@ class Application(object):
             argv[0] = '--help'
 
         args = self.parser.parse_args(argv)
-        self.raise_event(self.COMMAND_PARSER_PARSED, (argv, args))
+        self.raise_event(self.COMMAND_PARSER_PARSED, (args.command, args))
 
         # Consider - we are using any args that start with an underscore (_) as 'private'
         # arguments and remove them from the arguments that we pass to the actual function.
@@ -86,6 +86,7 @@ class Application(object):
                        for key, value in args.__dict__.items() if not key.startswith('_')])
         params.pop('subcommand', None)
         params.pop('func', None)
+        params.pop('command', None)
 
         result = args.func(params)
 
