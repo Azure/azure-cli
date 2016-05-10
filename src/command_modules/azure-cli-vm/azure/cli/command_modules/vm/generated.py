@@ -11,7 +11,7 @@ from azure.mgmt.compute.operations import (AvailabilitySetsOperations,
                                            VirtualMachinesOperations,
                                            VirtualMachineScaleSetsOperations,
                                            VirtualMachineScaleSetVMsOperations)
-from azure.cli.application import Application
+from azure.cli.application import APPLICATION
 from azure.cli.commands._auto_command import build_operation, AutoCommandDefinition
 from azure.cli.commands import CommandTable, LongRunningOperation
 from azure.cli.commands._command_creation import get_mgmt_service_client
@@ -263,9 +263,9 @@ def _handle_auth_types(data):
             with open(ssh_key_file) as f:
                 args.ssh_key_value = f.read()
 
-if Application.INSTANCE:
+if APPLICATION:
     # set to none in tests
-    Application.INSTANCE.register(Application.COMMAND_PARSER_PARSED, _handle_auth_types)
+    APPLICATION.register(APPLICATION.COMMAND_PARSER_PARSED, _handle_auth_types)
 
 extra_parameters = [
     {

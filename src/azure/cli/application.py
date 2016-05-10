@@ -10,6 +10,7 @@ import azure.cli._help as _help
 import azure.cli._logging as _logging
 
 logger = _logging.get_az_logger(__name__)
+APPLICATION = None
 
 class Configuration(object): # pylint: disable=too-few-public-methods
     """The configuration object tracks session specific data such
@@ -42,7 +43,8 @@ class Application(object):
     COMMAND_PARSER_PARSED = 'CommandParser.Parsed'
 
     def __init__(self, configuration):
-        Application.INSTANCE = self
+        global APPLICATION
+        APPLICATION = self
         self._event_handlers = defaultdict(lambda: [])
         self.configuration = configuration
 
