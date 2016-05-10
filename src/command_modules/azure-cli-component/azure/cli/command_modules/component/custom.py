@@ -63,7 +63,6 @@ class ComponentCommands(object):
         parameters:
             - name: --name -n
               short-summary: The component name to install.
-              required: True
     """
     def install(self, component_name, link, private=False, version=None):
         _install_or_update(component_name, version, link, private, upgrade=False)
@@ -73,7 +72,6 @@ class ComponentCommands(object):
         parameters:
             - name: --name -n
               short-summary: The component name to update.
-              required: True
     """
     def update(self, component_name, link, private=False):
         _install_or_update(component_name, None, link, private, upgrade=True)
@@ -110,7 +108,6 @@ class ComponentCommands(object):
         parameters:
             - name: --name -n
               short-summary: The component name to check.
-              required: True        
     """
     def check_component(self, component_name, private=False):
         found = bool([dist for dist in pip.get_installed_distributions(local_only=True)
@@ -129,7 +126,6 @@ class ComponentCommands(object):
         parameters:
             - name: --name -n
               short-summary: The component name to remove.
-              required: True
     """
     def remove(self, component_name, force=False):
         prompt_for_delete = force is None
