@@ -390,6 +390,37 @@ class VMExtensionsScenarioTest(CommandTestScript):
     def tear_down(self):
         pass
 
+class VMMachineExtensionImageScenarioTest(CommandTestScript):
+
+    def __init__(self):
+        self.location = 'westus'
+        self.publisher = 'Microsoft.Azure.Diagnostics'
+        self.type = 'IaaSDiagnostics'
+        self.version = '1.6.4.0'
+        super(VMMachineExtensionImageScenarioTest, self).__init__(None, self.test_body, None)
+
+    def test_body(self):
+        self.test('vm machine-extension-image list-types --location {} --publisher-name {}'.format(
+            self.location, self.publisher), [
+                JMESPathComparator('type(@)', 'array'),
+                JMESPathComparator("length([?location == '{}']) == length(@)".format(self.location),
+                                   True),
+            ])
+        self.test('vm machine-extension-image list-versions --location {} --publisher-name {} --type {}'.format( #pylint: disable=line-too-long
+            self.location, self.publisher, self.type), [
+                JMESPathComparator('type(@)', 'array'),
+                JMESPathComparator("length([?location == '{}']) == length(@)".format(self.location),
+                                   True),
+            ])
+        self.test('vm machine-extension-image show --location {} --publisher-name {} --type {} --version {}'.format( #pylint: disable=line-too-long
+            self.location, self.publisher, self.type, self.version), [
+                JMESPathComparator('type(@)', 'object'),
+                JMESPathComparator('location', self.location),
+                JMESPathComparator("contains(id, '/Providers/Microsoft.Compute/Locations/{}/Publishers/{}/ArtifactTypes/VMExtension/Types/{}/Versions/{}')".format( #pylint: disable=line-too-long
+                    self.location, self.publisher, self.type, self.version
+                ), True)])
+
+
 ENV_VAR = {}
 
 TEST_DEF = [
@@ -456,6 +487,10 @@ TEST_DEF = [
     {
         'test_name': 'vm_extension',
         'command': VMExtensionsScenarioTest()
+    },
+    {
+        'test_name': 'vm_machine_extension_image',
+        'command': VMMachineExtensionImageScenarioTest()
     },
 ]
 
