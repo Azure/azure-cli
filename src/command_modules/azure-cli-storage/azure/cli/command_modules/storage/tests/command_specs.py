@@ -30,7 +30,7 @@ class StorageAccountCreateAndDeleteTest(CommandTestScript):
     def set_up(self):
         self.account = 'testcreatedelete'
         self.run('storage account delete -g {} -n {}'.format(RESOURCE_GROUP_NAME, self.account))
-        result = json.loads(self.run('storage account check-name --name {} -o json'.format(self.account)))
+        result = self.run('storage account check-name --name {} -o json'.format(self.account))
         if not result['nameAvailable']:
             raise CLIError('Failed to delete pre-existing storage account {}. Unable to continue test.'.format(self.account))
 
@@ -68,16 +68,16 @@ class StorageAccountScenarioTest(CommandTestScript):
         cs = s.run('storage account connection-string -g {} --account-name {} --use-http'.format(rg, account))
         assert 'https' not in cs
         assert account in cs
-        keys = json.loads(s.run('storage account keys list -g {} --account-name {} -o json'.format(rg, account)))
+        keys = s.run('storage account keys list -g {} --account-name {} -o json'.format(rg, account))
         key1 = keys['key1']
         key2 = keys['key2']
         assert key1 and key2
-        keys = json.loads(s.run('storage account keys renew -g {} --account-name {} -o json'.format(rg, account)))
+        keys = s.run('storage account keys renew -g {} --account-name {} -o json'.format(rg, account))
         assert key1 != keys['key1']
         key1 = keys['key1']
         assert key2 != keys['key2']
         key2 = keys['key2']
-        keys = json.loads(s.run('storage account keys renew -g {} --account-name {} --key secondary -o json'.format(rg, account)))
+        keys = json.loads(s.run('storage account keys renew -g {} --name {} --key secondary -o json'.format(rg, account)))
         assert key1 == keys['key1']
         assert key2 != keys['key2']
         s.test('storage account set -g {} -n {} --tags foo=bar;cat'.format(rg, account),
@@ -149,7 +149,7 @@ class StorageBlobScenarioTest(CommandTestScript):
         s.run('storage blob metadata set -b {} -c {}'.format(blob, container))
         s.test('storage blob metadata show -b {} -c {}'.format(blob, container), None)
 
-        res = json.loads(s.run('storage blob list --container-name {} -o json'.format(container)))['items']
+        res = s.run('storage blob list --container-name {} -o json'.format(container))['items']
         blob_list = [block_blob, append_blob, page_blob]
         for item in res:
             assert item['name'] in blob_list
@@ -177,7 +177,7 @@ class StorageBlobScenarioTest(CommandTestScript):
         s.test('storage blob show -b {} -c {}'.format(blob, container),
                 {'properties': {'lease': {'duration': None, 'state': 'available', 'status': 'unlocked'}}})
 
-        json_result = json.loads(s.run('storage blob snapshot -c {} -b {} -o json'.format(container, append_blob)))
+        json_result = s.run('storage blob snapshot -c {} -b {} -o json'.format(container, append_blob))
         snapshot_dt = json_result['snapshot']
         s.test('storage blob exists -b {} -c {} --snapshot {}'.format(append_blob, container, snapshot_dt), True)
         
@@ -195,7 +195,7 @@ class StorageBlobScenarioTest(CommandTestScript):
         s.test('storage container exists --container-name {}'.format(container), True)
 
         s.test('storage container show --container-name {}'.format(container), {'name': container})
-        res = json.loads(s.run('storage container list -o json'))['items']
+        res = s.run('storage container list -o json')['items']
         assert container in [x['name'] for x in res]
 
         s.run('storage container metadata set -c {} --metadata foo=bar;moo=bak;'.format(container))
@@ -342,7 +342,7 @@ class StorageFileScenarioTest(CommandTestScript):
         file_url = 'https://{}.file.core.windows.net/{}/{}'.format(STORAGE_ACCOUNT_NAME, share, filename)
         s.test('storage file url -s {} --file-name {}'.format(share, filename), file_url)
 
-        res = [x['name'] for x in json.loads(s.run('storage share contents --share-name {} -o json'.format(share)))['items']]
+        res = [x['name'] for x in s.run('storage share contents --share-name {} -o json'.format(share))['items']]
         assert filename in res
 
         s.run('storage file delete --share-name {} --file-name {}'.format(share, filename))
@@ -363,7 +363,7 @@ class StorageFileScenarioTest(CommandTestScript):
         else:
             io.print_('\nDownload failed. Test failed!')
 
-        res = [x['name'] for x in json.loads(s.run('storage share contents --share-name {} --directory-name {} -o json'.format(share, dir)))['items']]
+        res = [x['name'] for x in s.run('storage share contents --share-name {} --directory-name {} -o json'.format(share, dir))['items']]
         assert filename in res
 
         s.test('storage share stats -s {}'.format(share), "1")
@@ -378,7 +378,7 @@ class StorageFileScenarioTest(CommandTestScript):
         s.test('storage share create --share-name {} --fail-on-exist --metadata foo=bar;cat=hat'.format(share2), True)
         s.test('storage share exists --share-name {}'.format(share1), True)
         s.test('storage share metadata show --share-name {}'.format(share2), {'cat': 'hat', 'foo': 'bar'})
-        res = [x['name'] for x in json.loads(s.run('storage share list -o json'))['items']]
+        res = [x['name'] for x in s.run('storage share list -o json')['items']]
         assert share1 in res
         assert share2 in res
 

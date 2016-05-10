@@ -4,7 +4,12 @@ import sys
 import json
 import re
 from collections import OrderedDict
-from six import StringIO
+from six import StringIO, text_type, u
+
+def _decode_str(output):
+    if not isinstance(output, text_type):
+        output = u(str(output))
+    return output
 
 def format_json(obj):
     input_dict = obj.__dict__ if hasattr(obj, '__dict__') else obj
@@ -57,7 +62,12 @@ class OutputProducer(object): #pylint: disable=too-few-public-methods
         self.file = file
 
     def out(self, obj):
-        print(self.formatter(obj), file=self.file, end='')
+        output = self.formatter(obj)
+        try:
+            print(output, file=self.file, end='')
+        except UnicodeEncodeError:
+            print(output.encode('ascii', 'ignore').decode('utf-8', 'ignore'), 
+                  file=self.file, end='')
 
 
     @staticmethod
@@ -101,7 +111,7 @@ class ListOutput(object): #pylint: disable=too-few-public-methods
     @staticmethod
     def _dump_line(io, line, indent):
         io.write('   ' * indent)
-        io.write(str(line))
+        io.write(_decode_str(line))
         io.write('\n')
 
     def _dump_object(self, io, obj, indent):
