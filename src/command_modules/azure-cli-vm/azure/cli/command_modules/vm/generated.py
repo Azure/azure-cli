@@ -20,6 +20,7 @@ from azure.cli._locale import L
 from ._params import (PARAMETER_ALIASES, VM_CREATE_EXTRA_PARAMETERS, VM_CREATE_PARAMETER_ALIASES,
                       VM_PATCH_EXTRA_PARAMETERS)
 from ._factory import _compute_client_factory
+from ._help import helps
 from .custom import ConvenienceVmCommands
 
 command_table = CommandTable()
