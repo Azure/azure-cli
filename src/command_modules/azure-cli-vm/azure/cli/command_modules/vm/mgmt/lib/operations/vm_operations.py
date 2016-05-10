@@ -38,7 +38,6 @@ class VMOperations(object):
                 parameters: 
                     - name: --image
                       type: string
-                      required: false
                       short-summary: OS image (Common, URN or URI).
                       long-summary: |
                         Common OS types: Win2012R2Datacenter, Win2012Datacenter, Win2008SP1. For other values please run 'az vm image list'
