@@ -4,6 +4,7 @@ from azure.cli.parser import IncorrectUsageError
 from azure.cli.commands import CommandTable
 from azure.cli.commands._command_creation import get_mgmt_service_client
 from azure.cli._locale import L
+from azure.cli._util import CLIError
 
 command_table = CommandTable()
 
@@ -45,7 +46,7 @@ class ConvenienceResourceGroupCommands(object): # pylint: disable=too-few-public
         rcf = _resource_client_factory(None)
 
         if rcf.resource_groups.check_existence(resource_group_name):
-            raise ValueError('resource group {} already exists'.format(resource_group_name))
+            raise CLIError('Resource group {} already exists'.format(resource_group_name))
         parameters = ResourceGroup(
             location=location,
             tags=tags
