@@ -106,6 +106,24 @@ build_operation(
     }))
 
 build_operation(
+    'vm', None, ConvenienceVmCommands,
+    [
+        CommandDefinition(ConvenienceVmCommands.list_ip_addresses, 'object'),
+        CommandDefinition(ConvenienceVmCommands.list, '[VirtualMachine]')
+    ],
+    command_table, PARAMETER_ALIASES)
+
+build_operation(
+    'vm', 'vm', lambda **_: get_mgmt_service_client(VMClient, VMClientConfig),
+    [
+        CommandDefinition(
+            VMOperations.create_or_update,
+            LongRunningOperation(L('Creating virtual machine'), L('Virtual machine created')),
+            'create')
+    ],
+    command_table, VM_CREATE_PARAMETER_ALIASES, VM_CREATE_EXTRA_PARAMETERS)
+
+build_operation(
     'vm scaleset', 'virtual_machine_scale_sets', _compute_client_factory,
     [
         CommandDefinition(VirtualMachineScaleSetsOperations.deallocate, LongRunningOperation(L('Deallocating VM scale set'), L('VM scale set deallocated'))),
@@ -140,25 +158,6 @@ build_operation(
     command_table, patch_aliases(PARAMETER_ALIASES, {
         'vm_scale_set_name': {'name': '--name -n'}
     }))
-
-build_operation(
-    'vm', None, ConvenienceVmCommands,
-    [
-        CommandDefinition(ConvenienceVmCommands.list_ip_addresses, 'object'),
-        CommandDefinition(ConvenienceVmCommands.list, '[VirtualMachine]')
-    ],
-    command_table, PARAMETER_ALIASES)
-
-
-build_operation(
-    'vm', 'vm', lambda _: get_mgmt_service_client(VMClient, VMClientConfig),
-    [
-        CommandDefinition(
-            VMOperations.create_or_update,
-            LongRunningOperation(L('Creating virtual machine'), L('Virtual machine created')),
-            'create')
-    ],
-    command_table, VM_CREATE_PARAMETER_ALIASES, VM_CREATE_EXTRA_PARAMETERS)
 
 build_operation(
     'vm image', None, ConvenienceVmCommands,
