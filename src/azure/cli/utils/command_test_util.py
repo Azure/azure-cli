@@ -68,7 +68,7 @@ class CommandTestGenerator(object):
                 return 'top-secret-token-for-you'
 
             def operation_delay_mock(_):
-                # don't run time.sleeep()
+                # don't run time.sleep()
                 return
 
             def _get_expected_results_from_file(recording_dir):

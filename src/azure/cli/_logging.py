@@ -139,7 +139,6 @@ def configure_logging(argv):
     if len(root_logger.handlers) and len(az_logger.handlers):
         # loggers already configured
         return
-
     _init_console_handlers(root_logger, az_logger, log_level_config)
     _init_logfile_handlers(root_logger, az_logger)
 

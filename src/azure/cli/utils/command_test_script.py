@@ -3,12 +3,37 @@ from __future__ import print_function
 import json
 import os
 import traceback
-
+import collections
+import jmespath
 from six import StringIO
 
 from azure.cli.main import main as cli
 from azure.cli.parser import IncorrectUsageError
 from azure.cli._util import CLIError
+
+class JMESPathComparatorAssertionError(AssertionError):
+
+    def __init__(self, comparator, actual_result, json_data):
+        message = "Actual value '{}' != Expected value '{}'. ".format(
+            actual_result,
+            comparator.expected_result)
+        message += "Query '{}' used on json data '{}'".format(comparator.query, json_data)
+        super(JMESPathComparatorAssertionError, self).__init__(message)
+
+class JMESPathComparator(object): #pylint: disable=too-few-public-methods
+
+    def __init__(self, query, expected_result):
+        self.query = query
+        self.expected_result = expected_result
+
+    def compare(self, json_data):
+        json_val = json.loads(json_data)
+        actual_result = jmespath.search(
+            self.query,
+            json_val,
+            jmespath.Options(collections.OrderedDict))
+        if not actual_result == self.expected_result:
+            raise JMESPathComparatorAssertionError(self, actual_result, json_data)
 
 def _check_json(source, checks):
 
@@ -70,7 +95,8 @@ class CommandTestScript(object): #pylint: disable=too-many-instance-attributes
             print('RECORDING: {}'.format(command))
         self.auto = False
         output = StringIO()
-        cli(command.split(), file=output)
+        command_list = command if isinstance(command, list) else command.split()
+        cli(command_list, file=output)
         result = output.getvalue().strip()
         self._display.write('\n\n== {} ==\n\n{}'.format(command, result))
         self._raw.write(result)
@@ -83,7 +109,8 @@ class CommandTestScript(object): #pylint: disable=too-many-instance-attributes
         if self.debug:
             print('RUNNING: {}'.format(command))
         output = StringIO()
-        cli(command.split(), file=output)
+        command_list = command if isinstance(command, list) else command.split()
+        cli(command_list, file=output)
         result = output.getvalue().strip()
         output.close()
         return result
@@ -95,12 +122,19 @@ class CommandTestScript(object): #pylint: disable=too-many-instance-attributes
         if self.debug:
             print('TESTING: {}'.format(command))
         output = StringIO()
-        command += ' -o json'
-        cli(command.split(), file=output)
+        command_list = command if isinstance(command, list) else command.split()
+        command_list += ['-o', 'json']
+        cli(command_list, file=output)
         result = output.getvalue().strip()
         self._raw.write(result)
         try:
-            if isinstance(checks, bool):
+            if isinstance(checks, list) and all(
+                    isinstance(comparator, JMESPathComparator) for comparator in checks):
+                for comparator in checks:
+                    comparator.compare(result)
+            elif isinstance(checks, JMESPathComparator):
+                checks.compare(result)
+            elif isinstance(checks, bool):
                 result_val = str(result).lower().replace('"', '')
                 result = result_val in ('yes', 'true', 't', '1')
                 assert result == checks

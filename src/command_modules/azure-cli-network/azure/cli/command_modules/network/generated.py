@@ -23,14 +23,13 @@ from azure.cli.command_modules.network.mgmt.lib import (ResourceManagementClient
                                                         as VNetClientConfig)
 from azure.cli.command_modules.network.mgmt.lib.operations import VNetOperations
 from azure.cli.command_modules.network.custom import ConvenienceNetworkCommands
-from azure.cli.command_modules.network._params import VNET_SPECIFIC_PARAMS, _network_client_factory
+from azure.cli.command_modules.network._params import (VNET_ALIASES, SUBNET_ALIASES,
+                                                       _network_client_factory)
 from azure.cli.commands._auto_command import build_operation, CommandDefinition
 from azure.cli.commands import CommandTable, LongRunningOperation
 from azure.cli._locale import L
 
 command_table = CommandTable()
-
-_VNET_PARAM_NAME = '--vnet-name'
 
 # pylint: disable=line-too-long
 # Application gateways
@@ -235,11 +234,14 @@ build_operation(
         CommandDefinition(SubnetsOperations.get, 'Subnet', command_alias='show'),
         CommandDefinition(SubnetsOperations.list, '[Subnet]'),
     ],
-    command_table,
-    {
-        'subnet_name': {'name': '--name -n'},
-        'virtual_network_name': {'name': _VNET_PARAM_NAME}
-    })
+    command_table, SUBNET_ALIASES)
+
+build_operation(
+    'network subnet', None, ConvenienceNetworkCommands,
+    [
+        CommandDefinition(ConvenienceNetworkCommands.create_update_subnet, 'Object', 'create')
+    ],
+    command_table, SUBNET_ALIASES)
 
 # UsagesOperations
 build_operation(
@@ -299,21 +301,11 @@ build_operation(
         CommandDefinition(VirtualNetworksOperations.list, '[VirtualNetwork]'),
         CommandDefinition(VirtualNetworksOperations.list_all, '[VirtualNetwork]'),
     ],
-    command_table,
-    {
-        'virtual_network_name': {'name': '--name -n'}
-    })
+    command_table, VNET_ALIASES)
 
 build_operation(
     'network vnet', 'vnet', lambda _: get_mgmt_service_client(VNetClient, VNetClientConfig),
     [
         CommandDefinition(VNetOperations.create, LongRunningOperation(L('Creating virtual network'), L('Virtual network created')))
     ],
-    command_table, VNET_SPECIFIC_PARAMS)
-
-build_operation(
-    'network subnet', None, ConvenienceNetworkCommands,
-    [
-        CommandDefinition(ConvenienceNetworkCommands.create_update_subnet, 'Object', 'create')
-    ],
-    command_table)
+    command_table, VNET_ALIASES)
