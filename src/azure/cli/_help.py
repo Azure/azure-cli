@@ -273,12 +273,6 @@ class HelpParameter(object): #pylint: disable=too-few-public-methods, too-many-i
                                          .format(self.name,
                                                  data.get('name')))
 
-        if self.required != data.get('required', False):
-            raise HelpAuthoringException("mismatched required {0} vs. {1}, {2}"
-                                         .format(self.required,
-                                                 data.get('required'),
-                                                 data.get('name')))
-
         if data.get('type'):
             self.type = data.get('type')
 
