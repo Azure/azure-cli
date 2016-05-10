@@ -35,8 +35,8 @@ class ResourceScenarioTest(CommandTestScript):
     def test_body(self):
         s = self
         rg = 'travistestresourcegroup'
-        all_resources = json.loads(s.run('resource list -o json'))
-        some_resources = json.loads(s.run('resource list -l centralus -o json'))
+        all_resources = s.run('resource list -o json')
+        some_resources = s.run('resource list -l centralus -o json')
         assert len(all_resources) > len(some_resources)
 
         s.test('resource list -l centralus',
@@ -64,9 +64,9 @@ class ResourceScenarioTest(CommandTestScript):
                 JMESPathComparator("length([?resourceGroup == 'yugangw']) == length(@)", True)
             ])
 
-        all_tagged_displayname = json.loads(s.run('resource list --tag displayName -o json'))
+        all_tagged_displayname = s.run('resource list --tag displayName -o json')
         storage_acc_tagged_displayname = \
-            json.loads(s.run('resource list --tag displayName=StorageAccount -o json'))
+            s.run('resource list --tag displayName=StorageAccount -o json')
         assert len(all_tagged_displayname) > len(storage_acc_tagged_displayname)
 
         s.run('resource set -n testserver23456 -g {} --resource-type '
