@@ -314,39 +314,6 @@ Examples
 '''
         self.assertEqual(s, io.getvalue())
 
-    @redirect_io
-    def test_help_mismatched_required_params(self):
-        app = Application(Configuration([]))
-        def test_handler(args):
-            pass
-
-        cmd_table = {
-            test_handler: {
-                'name': 'n1',
-                'help_file': '''
-                    parameters: 
-                      - name: --foobar -fb
-                        type: string
-                        required: false
-                        short-summary: one line partial sentence
-                        long-summary: text, markdown, etc.
-                        populator-commands: 
-                            - az vm list
-                            - default
-                    ''',
-                'arguments': [
-                    {'name': '--foobar -fb', 'required': True}
-                    ]
-                }
-            }
-        config = Configuration([])
-        config.get_command_table = lambda: cmd_table
-        app = Application(config)
-
-        self.assertRaisesRegexp(HelpAuthoringException,
-                               '.*mismatched required True vs\. False, --foobar -fb.*',
-                                lambda: app.execute('n1 -h'.split()))
-
     # TODO: Restore test when Python 2.7 bug fix applied
     #@redirect_io
     #def test_help_extra_help_params(self):

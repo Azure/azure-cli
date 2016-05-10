@@ -114,7 +114,7 @@ def _vm_disk_detach(args, instance):
         raise CLIError("No disk with the name '%s' found" % args.get('name'))
 
 
-def _load_images_from_aliases_doc(publisher, offer, sku):
+def load_images_from_aliases_doc(publisher, offer, sku):
     target_url = ('https://raw.githubusercontent.com/Azure/azure-rest-api-specs/'
                   'master/arm-compute/quickstart-templates/aliases.json')
     txt = urlopen(target_url).read()
@@ -123,8 +123,9 @@ def _load_images_from_aliases_doc(publisher, offer, sku):
         all_images = []
         result = (dic['outputs']['aliases']['value'])
         for v in result.values(): #loop around os
-            for vv in v.values(): #loop around distros
+            for alias, vv in v.items(): #loop around distros
                 all_images.append({
+                    'urn alias': alias,
                     'publisher': vv['publisher'],
                     'offer': vv['offer'],
                     'sku': vv['sku'],
@@ -139,10 +140,10 @@ def _load_images_from_aliases_doc(publisher, offer, sku):
         raise CLIError('Could not retrieve image list from {}'.format(target_url))
 
 def _load_images_thru_services(publisher, offer, sku, location):
-    from concurrent.futures import ThreadPoolExecutor
+    from concurrent.futures import ThreadPoolExecutor, as_completed
 
-    all_images = []
     client = _compute_client_factory({})
+    all_images = []
 
     def _load_images_from_publisher(publisher):
         offers = client.virtual_machine_images.list_offers(location, publisher)
@@ -168,8 +169,9 @@ def _load_images_thru_services(publisher, offer, sku, location):
     publisher_num = len(publishers)
     if publisher_num > 1:
         with ThreadPoolExecutor(max_workers=40) as executor:
-            for p in publishers:
-                executor.submit(_load_images_from_publisher, p.name)
+            tasks = [executor.submit(_load_images_from_publisher, p.name) for p in publishers]
+            for t in as_completed(tasks):
+                t.result() #we don't use the result, rather just to expose exceptions from threads
     elif publisher_num == 1:
         _load_images_from_publisher(publishers[0].name)
 
@@ -230,7 +232,7 @@ class ConvenienceVmCommands(object): # pylint: disable=too-few-public-methods
                                                     sku,
                                                     image_location)
         else:
-            all_images = _load_images_from_aliases_doc(publisher, offer, sku)
+            all_images = load_images_from_aliases_doc(publisher, offer, sku)
 
         for i in all_images:
             i['urn'] = ':'.join([i['publisher'], i['offer'], i['sku'], i['version']])

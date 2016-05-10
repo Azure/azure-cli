@@ -19,9 +19,12 @@ from azure.cli.command_modules.vm.mgmt.lib import (VMCreationClient as VMClient,
                                                    as VMClientConfig)
 from azure.cli.command_modules.vm.mgmt.lib.operations import VMOperations
 from azure.cli._help_files import helps
+from azure.cli._util import CLIError
 
 from ._params import PARAMETER_ALIASES
-from .custom import ConvenienceVmCommands, _compute_client_factory
+from .custom import (ConvenienceVmCommands,
+                     _compute_client_factory,
+                     load_images_from_aliases_doc)
 
 command_table = CommandTable()
 
@@ -204,7 +207,17 @@ class VMImageFieldAction(argparse.Action): #pylint: disable=too-few-public-metho
             namespace.os_sku = match.group(3)
             namespace.os_version = match.group(4)
         else:
-            namespace.os_type = image
+            images = load_images_from_aliases_doc(None, None, None)
+            matched = next((x for x in images if x['urn alias'].lower() == image.lower()), None)
+            if matched is None:
+                raise CLIError('Invalid image "{}". Please pick one from {}'.format(image,
+                                                                                    [x['urn alias'] for x in images]))
+            namespace.os_type = 'Custom'
+            namespace.os_publisher = matched['publisher']
+            namespace.os_offer = matched['offer']
+            namespace.os_sku = matched['sku']
+            namespace.os_version = matched['version']
+
 
 class VMSSHFieldAction(argparse.Action): #pylint: disable=too-few-public-methods
     def __call__(self, parser, namespace, values, option_string=None):
@@ -254,7 +267,7 @@ helps['vm create'] = """
                   required: false
                   short-summary: OS image (Common, URN or URI).
                   long-summary: |
-                    Common OS types: Win2012R2Datacenter, Win2012Datacenter, Win2008SP1, or Offer from 'az vm image list'
+                    Common OS types: Win2012R2Datacenter, Win2012Datacenter, Win2008SP1. For other values please run 'az vm image list'.
                     Example URN: MicrosoftWindowsServer:WindowsServer:2012-R2-Datacenter:latest
                     Example URI: http://<storageAccount>.blob.core.windows.net/vhds/osdiskimage.vhd
                   populator-commands: 
