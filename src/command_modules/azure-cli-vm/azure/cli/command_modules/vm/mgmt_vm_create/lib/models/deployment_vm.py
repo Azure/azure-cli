@@ -32,8 +32,7 @@ class DeploymentVM(Model):
     :param admin_username: Username for the Virtual Machine.
     :type admin_username: str
     :param authentication_type: Password or SSH Public Key authentication.
-     Possible values include: 'password', 'sshkey'. Default value: "password"
-     .
+     Possible values include: 'password', 'ssh'. Default value: "password" .
     :type authentication_type: str
     :param availability_set_id: Existing availability set for the VM.
     :type availability_set_id: str
@@ -82,8 +81,8 @@ class DeploymentVM(Model):
     :param public_ip_address_name: Name of public IP address to use.
     :type public_ip_address_name: str
     :param public_ip_address_type: Use a public IP Address for the VM Nic.
-     Possible values include: 'none', 'new', 'existing'. Default value:
-     "none" .
+     Possible values include: 'none', 'new', 'existing'. Default value: "new"
+     .
     :type public_ip_address_type: str
     :param size: The VM Size that should be created.  See
      https://azure.microsoft.com/en-us/pricing/details/virtual-machines/ for
@@ -177,7 +176,7 @@ class DeploymentVM(Model):
 
     mode = "Incremental"
 
-    def __init__(self, name, content_version=None, storage_container_name="vhds", virtual_network_name=None, subnet_ip_address_prefix="10.0.0.0/24", private_ip_address_allocation="Dynamic", dns_name_for_public_ip=None, storage_account_type="new", os_disk_uri=None, virtual_network_type="new", admin_password=None, os_sku="2012-R2-Datacenter", subnet_name=None, os_type="Win2012R2Datacenter", admin_username=None, os_version="latest", os_disk_name="osdiskimage", ssh_dest_key_path=None, os_offer="WindowsServer", public_ip_address_allocation="Dynamic", authentication_type="password", storage_account_name=None, storage_redundancy_type="Standard_LRS", size="Standard_A2", public_ip_address_type="none", virtual_network_ip_address_prefix="10.0.0.0/16", availability_set_id=None, ssh_key_value=None, location=None, os_publisher="MicrosoftWindowsServer", availability_set_type="none", public_ip_address_name=None, dns_name_type="none"):
+    def __init__(self, admin_username, name, content_version=None, admin_password=None, authentication_type="password", availability_set_id=None, availability_set_type="none", dns_name_for_public_ip=None, dns_name_type="none", location=None, os_disk_name="osdiskimage", os_disk_uri=None, os_offer="WindowsServer", os_publisher="MicrosoftWindowsServer", os_sku="2012-R2-Datacenter", os_type="Win2012R2Datacenter", os_version="latest", private_ip_address_allocation="Dynamic", public_ip_address_allocation="Dynamic", public_ip_address_name=None, public_ip_address_type="new", size="Standard_A2", ssh_dest_key_path=None, ssh_key_value=None, storage_account_name=None, storage_account_type="new", storage_container_name="vhds", storage_redundancy_type="Standard_LRS", subnet_ip_address_prefix="10.0.0.0/24", subnet_name=None, virtual_network_ip_address_prefix="10.0.0.0/16", virtual_network_name=None, virtual_network_type="new"):
         self.content_version = content_version
         self.admin_password = admin_password
         self.admin_username = admin_username
