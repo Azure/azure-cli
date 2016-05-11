@@ -66,7 +66,7 @@ class OutputProducer(object): #pylint: disable=too-few-public-methods
         try:
             print(output, file=self.file, end='')
         except UnicodeEncodeError:
-            print(output.encode('ascii', 'ignore').decode('utf-8', 'ignore'), 
+            print(output.encode('ascii', 'ignore').decode('utf-8', 'ignore'),
                   file=self.file, end='')
 
 

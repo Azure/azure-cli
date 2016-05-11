@@ -6,6 +6,7 @@ PARAMETER_ALIASES = {
     'component_name': {
         'name': '--name -n',
         'help': L('Name of component'),
+        'choices': ['component', 'network', 'profile', 'resource', 'storage', 'taskhelp', 'vm']
     },
     'force': {
         'name': '--force -f',
