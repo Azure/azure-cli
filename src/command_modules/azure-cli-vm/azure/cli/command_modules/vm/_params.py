@@ -1,4 +1,5 @@
 import argparse
+import getpass
 
 from azure.mgmt.compute.models import VirtualHardDisk
 
@@ -71,6 +72,11 @@ VM_CREATE_PARAMETER_ALIASES = {
         'name': '--os-version',
         'help': argparse.SUPPRESS
     },
+    'admin_username': {
+        'name': '--admin-username',
+        'default': getpass.getuser(),
+        'help': 'Admin login.  Defaults to current username.'
+    }
 }
 
 # EXTRA PARAMETER SETS

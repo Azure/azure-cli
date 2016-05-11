@@ -41,7 +41,7 @@ class AzCliCommandParser(argparse.ArgumentParser):
             for arg in metadata['arguments']:
                 names = arg.get('name').split()
                 command_parser.add_argument(*names, **{k:v for k, v in arg.items() if k != 'name'})
-            command_parser.set_defaults(func=handler)
+            command_parser.set_defaults(func=handler, command=metadata['name'])
 
     def _get_subparser(self, path):
         """For each part of the path, walk down the tree of
