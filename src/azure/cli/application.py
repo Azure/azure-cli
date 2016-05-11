@@ -89,8 +89,8 @@ class Application(object):
 
         result = self.todict(result)
         event_data = {'result': result}
-        self.raise_event(self.TRANSFORM_RESULT, result=event_data)
-        self.raise_event(self.FILTER_RESULT, result=event_data)
+        self.raise_event(self.TRANSFORM_RESULT, event_data=event_data)
+        self.raise_event(self.FILTER_RESULT, event_data=event_data)
         return event_data['result']
 
     def raise_event(self, name, **kwargs):
