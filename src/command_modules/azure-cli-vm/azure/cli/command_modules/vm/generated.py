@@ -11,11 +11,17 @@ from azure.mgmt.compute.operations import (AvailabilitySetsOperations,
 from azure.cli.commands._auto_command import build_operation, CommandDefinition
 from azure.cli.commands._command_creation import get_mgmt_service_client
 from azure.cli.commands import CommandTable, LongRunningOperation, patch_aliases
-from azure.cli.command_modules.vm.mgmt.lib import (VMCreationClient as VMClient,
-                                                   VMCreationClientConfiguration
-                                                   as VMClientConfig)
-from azure.cli.command_modules.vm.mgmt.lib.operations import VMOperations
 from azure.cli._locale import L
+from azure.cli.command_modules.vm.mgmt_avail_set.lib import (AvailSetCreationClient
+                                                             as AvailSetClient,
+                                                             AvailSetCreationClientConfiguration
+                                                             as AvailSetClientConfig)
+from azure.cli.command_modules.vm.mgmt_avail_set.lib.operations import AvailSetOperations
+from azure.cli.command_modules.vm.mgmt_vm_create.lib import (VMCreationClient as VMClient,
+                                                             VMCreationClientConfiguration
+                                                             as VMClientConfig)
+from azure.cli.command_modules.vm.mgmt_vm_create.lib.operations import VMOperations
+from azure.cli._help_files import helps
 
 from ._params import (PARAMETER_ALIASES, VM_CREATE_EXTRA_PARAMETERS, VM_CREATE_PARAMETER_ALIASES,
                       VM_PATCH_EXTRA_PARAMETERS)
@@ -36,7 +42,7 @@ build_operation(
     ],
     command_table, patch_aliases(PARAMETER_ALIASES, {
         'availability_set_name': {'name': '--name -n'}
-    }))
+        }))
 
 build_operation(
     'vm machine-extension-image', 'virtual_machine_extension_images', _compute_client_factory,
@@ -64,7 +70,7 @@ build_operation(
     ],
     command_table, patch_aliases(PARAMETER_ALIASES, {
         'vm_extension_name': {'name': '--name -n'}
-    }))
+        }))
 
 build_operation(
     'vm image', 'virtual_machine_images', _compute_client_factory,
@@ -104,7 +110,7 @@ build_operation(
     ],
     command_table, patch_aliases(PARAMETER_ALIASES, {
         'vm_name': {'name': '--name -n'}
-    }))
+        }))
 
 build_operation(
     'vm', None, ConvenienceVmCommands,
@@ -167,4 +173,27 @@ build_operation(
     ],
     command_table, patch_aliases(PARAMETER_ALIASES, {
         'image_location': {'name': '--location -l'}
-    }))
+        }))
+
+avail_set_param_aliases = {
+    'name': {
+        'name': '--name -n'
+        }
+    }
+
+helps['vm availability-set create'] = """
+            type: command
+            long-summary: For more info, see https://blogs.technet.microsoft.com/yungchou/2013/05/14/window-azure-fault-domain-and-upgrade-domain-explained-explained-reprised/
+"""
+
+build_operation("vm availability-set",
+                'avail_set',
+                lambda **_: get_mgmt_service_client(AvailSetClient, AvailSetClientConfig),
+                [
+                    CommandDefinition(AvailSetOperations.create_or_update,
+                                      LongRunningOperation(L('Creating availability set'), L('Availability set created')),
+                                      'create')
+                ],
+                command_table,
+                avail_set_param_aliases)
+
