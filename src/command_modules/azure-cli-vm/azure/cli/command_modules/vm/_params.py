@@ -1,4 +1,5 @@
 import argparse
+import getpass
 
 from azure.mgmt.compute.models import VirtualHardDisk
 
@@ -71,15 +72,11 @@ VM_CREATE_PARAMETER_ALIASES = {
         'name': '--os-version',
         'help': argparse.SUPPRESS
     },
-}
-
-# EXTRA PARAMETER SETS
-
-VM_CREATE_EXTRA_PARAMETERS = {
-    'image': {
-        'name': '--image',
-        'action': VMImageFieldAction
-        },
+    'admin_username': {
+        'name': '--admin-username',
+        'default': getpass.getuser(),
+        'help': 'Admin login.  Defaults to current username.'
+    },
     'ssh_key_value': {
         'name': '--ssh-key-value',
         'action': VMSSHFieldAction
@@ -92,6 +89,15 @@ VM_CREATE_EXTRA_PARAMETERS = {
         'name': '--dns-name-type',
         'help': argparse.SUPPRESS
     }
+}
+
+# EXTRA PARAMETER SETS
+
+VM_CREATE_EXTRA_PARAMETERS = {
+    'image': {
+        'name': '--image',
+        'action': VMImageFieldAction
+        },
 }
 
 VM_PATCH_EXTRA_PARAMETERS = {

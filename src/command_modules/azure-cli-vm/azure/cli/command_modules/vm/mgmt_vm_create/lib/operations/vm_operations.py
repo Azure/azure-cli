@@ -13,6 +13,7 @@ import uuid
 
 from .. import models
 
+
 class VMOperations(object):
     """VMOperations operations.
 
@@ -31,7 +32,7 @@ class VMOperations(object):
         self.config = config
 
     def create_or_update(
-            self, resource_group_name, deployment_name, admin_username, name, content_version=None, admin_password=None, authentication_type="password", availability_set_id=None, availability_set_type="none", dns_name_for_public_ip=None, dns_name_type="none", location=None, os_disk_name="osdiskimage", os_disk_uri=None, os_offer="WindowsServer", os_publisher="MicrosoftWindowsServer", os_sku="2012-R2-Datacenter", os_type="Win2012R2Datacenter", os_version="latest", private_ip_address_allocation="Dynamic", public_ip_address_allocation="Dynamic", public_ip_address_name=None, public_ip_address_type="none", size="Standard_A2", ssh_dest_key_path=None, ssh_key_value=None, storage_account_name=None, storage_account_type="new", storage_container_name="vhds", storage_redundancy_type="Standard_LRS", subnet_ip_address_prefix="10.0.0.0/24", subnet_name=None, virtual_network_ip_address_prefix="10.0.0.0/16", virtual_network_name=None, virtual_network_type="new", custom_headers={}, raw=False, **operation_config):
+            self, resource_group_name, deployment_name, name, content_version=None, admin_password=None, admin_username=None, authentication_type="password", availability_set_id=None, availability_set_type="none", dns_name_for_public_ip=None, dns_name_type="none", location=None, os_disk_name="osdiskimage", os_disk_uri=None, os_offer="WindowsServer", os_publisher="MicrosoftWindowsServer", os_sku="2012-R2-Datacenter", os_type="Win2012R2Datacenter", os_version="latest", private_ip_address_allocation="Dynamic", public_ip_address_allocation="Dynamic", public_ip_address_name=None, public_ip_address_type="new", size="Standard_A2", ssh_dest_key_path=None, ssh_key_value=None, storage_account_name=None, storage_account_type="new", storage_container_name="vhds", storage_redundancy_type="Standard_LRS", subnet_ip_address_prefix="10.0.0.0/24", subnet_name=None, virtual_network_ip_address_prefix="10.0.0.0/16", virtual_network_name=None, virtual_network_type="new", custom_headers={}, raw=False, **operation_config):
         """
         Create or update a virtual machine.
 
@@ -40,8 +41,6 @@ class VMOperations(object):
         :type resource_group_name: str
         :param deployment_name: The name of the deployment.
         :type deployment_name: str
-        :param admin_username: Username for the Virtual Machine.
-        :type admin_username: str
         :param name: The VM name.
         :type name: str
         :param content_version: If included it must match the ContentVersion
@@ -50,8 +49,10 @@ class VMOperations(object):
         :param admin_password: Password for the Virtual Machine.  Required if
          SSH (Linux only) is not specified.
         :type admin_password: str
+        :param admin_username: Username for the Virtual Machine.
+        :type admin_username: str
         :param authentication_type: Password or SSH Public Key
-         authentication. Possible values include: 'password', 'sshkey'
+         authentication. Possible values include: 'password', 'ssh'
         :type authentication_type: str
         :param availability_set_id: Existing availability set for the VM.
         :type availability_set_id: str
