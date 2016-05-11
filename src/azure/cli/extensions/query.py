@@ -15,8 +15,9 @@ def register(application):
             if query_value:
                 def filter_output(**kwargs):
                     from jmespath import search, Options
-                    kwargs['result'] = search(query_value, kwargs['result'],
-                                              Options(collections.OrderedDict))
+                    kwargs['event_data']['result'] = search(query_value,
+                                                            kwargs['event_data']['result'],
+                                                            Options(collections.OrderedDict))
                 application.register(application.FILTER_RESULT, filter_output)
 
         except AttributeError:
