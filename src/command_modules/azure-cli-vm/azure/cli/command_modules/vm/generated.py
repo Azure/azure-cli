@@ -1,7 +1,3 @@
-import argparse
-import re
-import os
-import getpass
 from azure.mgmt.compute.operations import (AvailabilitySetsOperations,
                                            VirtualMachineExtensionImagesOperations,
                                            VirtualMachineExtensionsOperations,
@@ -11,9 +7,7 @@ from azure.mgmt.compute.operations import (AvailabilitySetsOperations,
                                            VirtualMachinesOperations,
                                            VirtualMachineScaleSetsOperations,
                                            VirtualMachineScaleSetVMsOperations)
-from azure.cli.application import APPLICATION
 from azure.cli.commands._auto_command import build_operation, CommandDefinition
-from azure.cli.commands import CommandTable, LongRunningOperation
 from azure.cli.commands._command_creation import get_mgmt_service_client
 from azure.cli.commands import CommandTable, LongRunningOperation, patch_aliases
 from azure.cli._locale import L
@@ -23,10 +17,9 @@ from azure.cli.command_modules.vm.mgmt_avail_set.lib import (AvailSetCreationCli
                                                              as AvailSetClientConfig)
 from azure.cli.command_modules.vm.mgmt_avail_set.lib.operations import AvailSetOperations
 from azure.cli.command_modules.vm.mgmt_vm_create.lib import (VMCreationClient as VMClient,
-                                                   VMCreationClientConfiguration
-                                                   as VMClientConfig)
+                                                             VMCreationClientConfiguration
+                                                             as VMClientConfig)
 from azure.cli.command_modules.vm.mgmt_vm_create.lib.operations import VMOperations
-from azure.cli._help_files import helps
 
 from ._params import (PARAMETER_ALIASES, VM_CREATE_EXTRA_PARAMETERS, VM_CREATE_PARAMETER_ALIASES,
                       VM_PATCH_EXTRA_PARAMETERS)
@@ -39,32 +32,32 @@ command_table = CommandTable()
 # pylint: disable=line-too-long
 build_operation(
     'vm availset', 'availability_sets', _compute_client_factory,
-                [
+    [
         CommandDefinition(AvailabilitySetsOperations.delete, None),
         CommandDefinition(AvailabilitySetsOperations.get, 'AvailabilitySet', command_alias='show'),
         CommandDefinition(AvailabilitySetsOperations.list, '[AvailabilitySet]'),
         CommandDefinition(AvailabilitySetsOperations.list_available_sizes, '[VirtualMachineSize]', 'list-sizes')
-                ],
+    ],
     command_table, patch_aliases(PARAMETER_ALIASES, {
-                    'availability_set_name': {'name': '--name -n'}
-                }))
+        'availability_set_name': {'name': '--name -n'}
+        }))
 
 build_operation(
     'vm machine-extension-image', 'virtual_machine_extension_images', _compute_client_factory,
-                [
+    [
         CommandDefinition(VirtualMachineExtensionImagesOperations.get, 'VirtualMachineExtensionImage', command_alias='show'),
         CommandDefinition(VirtualMachineExtensionImagesOperations.list_types, '[VirtualMachineImageResource]'),
         CommandDefinition(VirtualMachineExtensionImagesOperations.list_versions, '[VirtualMachineImageResource]'),
-                ],
-                command_table, PARAMETER_ALIASES)
+    ],
+    command_table, PARAMETER_ALIASES)
 
 build_operation(
     'vm disk', None, ConvenienceVmCommands,
-                [
+    [
         CommandDefinition(ConvenienceVmCommands.attach_new_disk, 'Object', 'attach-new'),
         CommandDefinition(ConvenienceVmCommands.attach_existing_disk, 'Object', 'attach-existing'),
         CommandDefinition(ConvenienceVmCommands.detach_disk, 'Object', 'detach'),
-                ],
+    ],
     command_table, PARAMETER_ALIASES, VM_PATCH_EXTRA_PARAMETERS)
 
 build_operation(
@@ -74,36 +67,36 @@ build_operation(
         CommandDefinition(VirtualMachineExtensionsOperations.get, 'VirtualMachineExtension', command_alias='show'),
     ],
     command_table, patch_aliases(PARAMETER_ALIASES, {
-                    'vm_extension_name': {'name': '--name -n'}
-                }))
+        'vm_extension_name': {'name': '--name -n'}
+        }))
 
 build_operation(
     'vm image', 'virtual_machine_images', _compute_client_factory,
-                [
+    [
         CommandDefinition(VirtualMachineImagesOperations.get, 'VirtualMachineImage', command_alias='show'),
         CommandDefinition(VirtualMachineImagesOperations.list_offers, '[VirtualMachineImageResource]'),
         CommandDefinition(VirtualMachineImagesOperations.list_publishers, '[VirtualMachineImageResource]'),
         CommandDefinition(VirtualMachineImagesOperations.list_skus, '[VirtualMachineImageResource]'),
-                ],
-                command_table, PARAMETER_ALIASES)
+    ],
+    command_table, PARAMETER_ALIASES)
 
 build_operation(
     'vm usage', 'usage', _compute_client_factory,
-                [
+    [
         CommandDefinition(UsageOperations.list, '[Usage]'),
-                ],
-                command_table, PARAMETER_ALIASES)
+    ],
+    command_table, PARAMETER_ALIASES)
 
 build_operation(
     'vm size', 'virtual_machine_sizes', _compute_client_factory,
-                [
+    [
         CommandDefinition(VirtualMachineSizesOperations.list, '[VirtualMachineSize]'),
-                ],
-                command_table, PARAMETER_ALIASES)
+    ],
+    command_table, PARAMETER_ALIASES)
 
 build_operation(
     'vm', 'virtual_machines', _compute_client_factory,
-                [
+    [
         CommandDefinition(VirtualMachinesOperations.delete, LongRunningOperation(L('Deleting VM'), L('VM Deleted'))),
         CommandDefinition(VirtualMachinesOperations.deallocate, LongRunningOperation(L('Deallocating VM'), L('VM Deallocated'))),
         CommandDefinition(VirtualMachinesOperations.generalize, None),
@@ -112,17 +105,17 @@ build_operation(
         CommandDefinition(VirtualMachinesOperations.power_off, LongRunningOperation(L('Powering off VM'), L('VM powered off'))),
         CommandDefinition(VirtualMachinesOperations.restart, LongRunningOperation(L('Restarting VM'), L('VM Restarted'))),
         CommandDefinition(VirtualMachinesOperations.start, LongRunningOperation(L('Starting VM'), L('VM Started'))),
-                ],
+    ],
     command_table, patch_aliases(PARAMETER_ALIASES, {
-                    'vm_name': {'name': '--name -n'}
-                }))
+        'vm_name': {'name': '--name -n'}
+        }))
 
 build_operation(
     'vm', None, ConvenienceVmCommands,
-                [
+    [
         CommandDefinition(ConvenienceVmCommands.list_ip_addresses, 'object'),
         CommandDefinition(ConvenienceVmCommands.list, '[VirtualMachine]')
-                ],
+    ],
     command_table, PARAMETER_ALIASES)
 
 build_operation(
@@ -152,12 +145,12 @@ build_operation(
         CommandDefinition(VirtualMachineScaleSetsOperations.update_instances, LongRunningOperation(L('Updating VM scale set instances'), L('VM scale set instances updated'))),
     ],
     command_table, patch_aliases(PARAMETER_ALIASES, {
-                    'vm_scale_set_name': {'name': '--name -n'}
-                }))
+        'vm_scale_set_name': {'name': '--name -n'}
+        }))
 
 build_operation(
     'vm scaleset-vm', 'virtual_machine_scale_set_vms', _compute_client_factory,
-                [
+    [
         CommandDefinition(VirtualMachineScaleSetVMsOperations.deallocate, LongRunningOperation(L('Deallocating VM scale set VMs'), L('VM scale set VMs deallocated'))),
         CommandDefinition(VirtualMachineScaleSetVMsOperations.delete, LongRunningOperation(L('Deleting VM scale set VMs'), L('VM scale set VMs deleted'))),
         CommandDefinition(VirtualMachineScaleSetVMsOperations.get, 'VirtualMachineScaleSetVM', command_alias='show'),
@@ -166,145 +159,19 @@ build_operation(
         CommandDefinition(VirtualMachineScaleSetVMsOperations.power_off, LongRunningOperation(L('Powering off VM scale set VMs'), L('VM scale set VMs powered off'))),
         CommandDefinition(VirtualMachineScaleSetVMsOperations.restart, LongRunningOperation(L('Restarting VM scale set VMs'), L('VM scale set VMs restarted'))),
         CommandDefinition(VirtualMachineScaleSetVMsOperations.start, LongRunningOperation(L('Starting VM scale set VMs'), L('VM scale set VMs started'))),
-                ],
+    ],
     command_table, patch_aliases(PARAMETER_ALIASES, {
-                    'vm_scale_set_name': {'name': '--name -n'}
-                }))
+        'vm_scale_set_name': {'name': '--name -n'}
+        }))
 
 build_operation(
     'vm image', None, ConvenienceVmCommands,
-                [
+    [
         CommandDefinition(ConvenienceVmCommands.list_vm_images, 'object', 'list')
-                ],
+    ],
     command_table, patch_aliases(PARAMETER_ALIASES, {
         'image_location': {'name': '--location -l'}
         }))
-
-avail_set_param_aliases = {
-    'name': {
-        'name': '--name -n'
-        },
-    'os_disk_uri': {
-        'name': '--os-disk-uri',
-        'help': argparse.SUPPRESS
-        },
-    'os_offer': {
-        'name': '--os_offer',
-        'help': argparse.SUPPRESS
-        },
-    'os_publisher': {
-        'name': '--os-publisher',
-        'help': argparse.SUPPRESS
-        },
-    'os_sku': {
-        'name': '--os-sku',
-        'help': argparse.SUPPRESS
-        },
-    'os_type': {
-        'name': '--os-type',
-        'help': argparse.SUPPRESS
-        },
-    'os_version': {
-        'name': '--os-version',
-        'help': argparse.SUPPRESS
-        },
-    'admin_username': {
-        'name': '--admin-username',
-        'default': getpass.getuser(),
-        'help': 'Admin login.  Defaults to current username.'
-    }
-    }
-
-class VMImageFieldAction(argparse.Action): #pylint: disable=too-few-public-methods
-    def __call__(self, parser, namespace, values, option_string=None):
-        image = values
-        match = re.match('([^:]*):([^:]*):([^:]*):([^:]*)', image)
-
-        if image.lower().endswith('.vhd'):
-            namespace.os_disk_uri = image
-        elif match:
-            namespace.os_type = 'Custom'
-            namespace.os_publisher = match.group(1)
-            namespace.os_offer = match.group(2)
-            namespace.os_sku = match.group(3)
-            namespace.os_version = match.group(4)
-        else:
-            images = load_images_from_aliases_doc(None, None, None)
-            matched = next((x for x in images if x['urn alias'].lower() == image.lower()), None)
-            if matched is None:
-                raise CLIError('Invalid image "{}". Please pick one from {}'.format(image,
-                                                                                    [x['urn alias'] for x in images]))
-            namespace.os_type = 'Custom'
-            namespace.os_publisher = matched['publisher']
-            namespace.os_offer = matched['offer']
-            namespace.os_sku = matched['sku']
-            namespace.os_version = matched['version']
-
-
-class VMSSHFieldAction(argparse.Action): #pylint: disable=too-few-public-methods
-    def __call__(self, parser, namespace, values, option_string=None):
-        ssh_value = values
-
-        if os.path.exists(ssh_value):
-            with open(ssh_value, 'r') as f:
-                namespace.ssh_key_value = f.read()
-        else:
-            namespace.ssh_key_value = ssh_value
-
-class VMDNSNameAction(argparse.Action): #pylint: disable=too-few-public-methods
-    def __call__(self, parser, namespace, values, option_string=None):
-        dns_value = values
-
-        if dns_value:
-            namespace.dns_name_type = 'new'
-
-        namespace.dns_name_for_public_ip = dns_value
-
-def _handle_auth_types(**kwargs):
-    if kwargs['command'] != 'vm create':
-        return
-
-    args = kwargs['args']
-
-    if args.authentication_type == 'password':
-        if args.ssh_dest_key_path or args.ssh_key_value:
-            raise CLIError('SSH parameters cannot be used with password authentication type')
-    elif args.authentication_type == 'sshkey':
-        if args.admin_password:
-            raise CLIError('Admin password cannot be used with SSH authentication type')
-
-        ssh_key_file = os.path.join(os.path.expanduser('~'), '.ssh/id_rsa.pub')
-        if not args.ssh_key_value:
-            if os.path.isfile(ssh_key_file):
-                with open(ssh_key_file) as f:
-                    args.ssh_key_value = f.read()
-            else:
-                raise CLIError('An RSA key file or key value must be supplied to SSH Key Value')
-
-APPLICATION.register(APPLICATION.COMMAND_PARSER_PARSED, _handle_auth_types)
-
-extra_parameters = [
-    {
-        'name': '--image',
-        'action': VMImageFieldAction
-        },
-    {
-        'name': '--ssh-key-value',
-        'action': VMSSHFieldAction
-        },
-    {
-        'name': '--dns-name-for-public-ip',
-        'action': VMDNSNameAction
-        },
-    {
-        'name': '--dns-name-type',
-        'help': argparse.SUPPRESS
-        }
-
-helps['vm availability-set create'] = """
-            type: command
-            long-summary: For more info, see https://blogs.technet.microsoft.com/yungchou/2013/05/14/window-azure-fault-domain-and-upgrade-domain-explained-explained-reprised/
-            """
 
 build_operation("vm availability-set",
                 'avail_set',
@@ -312,8 +179,7 @@ build_operation("vm availability-set",
                 [
                     CommandDefinition(AvailSetOperations.create_or_update,
                                       LongRunningOperation(L('Creating availability set'), L('Availability set created')),
-                                          'create')
+                                      'create')
                 ],
-                command_table,
-                avail_set_param_aliases)
+                command_table)
 
