@@ -5,13 +5,26 @@ from azure.cli.utils.command_test_script import CommandTestScript, JMESPathCompa
 
 class RoleScenarioTest(CommandTestScript):
 
+        # UNTESTED
+        # create
+        # delete
+
     def test_body(self):
         s = self
         scope = '/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590'
+        role_def_id = 'de139f84-1756-47ae-9be6-808fbbe84772'
+        full_role_def_id = '{}/providers/Microsoft.Authorization/roleDefinitions/{}'.format(scope, role_def_id)
+
         s.test('role list --scope {}'.format(scope),
             [
                 JMESPathComparator("length([].contains(id, '{}')) == length(@)".format(scope), True)
             ])
+
+        s.test('role show --scope {} --role-definition-id {}'.format(scope, role_def_id),
+            {'name': role_def_id, 'properties' : {'roleName': 'Website Contributor', 'type': 'BuiltInRole'}})
+
+        s.test('role show-by-id --role-definition-id {}'.format(full_role_def_id),
+            {'name': role_def_id, 'properties' : {'roleName': 'Website Contributor', 'type': 'BuiltInRole'}})
 
     def __init__(self):
         super(RoleScenarioTest, self).__init__(None, self.test_body, None)
