@@ -27,6 +27,6 @@ def _add_resource_group(obj):
         for item_key in obj:
             _add_resource_group(obj[item_key])
 
-def _resource_group_transform(event_data):
-    _add_resource_group(event_data['result'])
+def _resource_group_transform(**kwargs):
+    _add_resource_group(kwargs['result'])
 

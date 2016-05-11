@@ -55,15 +55,15 @@ class Application(object):
 
         self.global_parser = AzCliCommandParser(prog='az', add_help=False)
         global_group = self.global_parser.add_argument_group('global', 'Global Arguments')
-        self.raise_event(self.GLOBAL_PARSER_CREATED, global_group)
+        self.raise_event(self.GLOBAL_PARSER_CREATED, global_group=global_group)
 
         self.parser = AzCliCommandParser(prog='az', parents=[self.global_parser])
-        self.raise_event(self.COMMAND_PARSER_CREATED, self.parser)
+        self.raise_event(self.COMMAND_PARSER_CREATED, parser=self.parser)
 
     def execute(self, argv):
         command_table = self.configuration.get_command_table()
         self.parser.load_command_table(command_table)
-        self.raise_event(self.COMMAND_PARSER_LOADED, self.parser)
+        self.raise_event(self.COMMAND_PARSER_LOADED, parser=self.parser)
 
         if len(argv) == 0:
             az_subparser = self.parser.subparsers[tuple()]
@@ -74,7 +74,7 @@ class Application(object):
             argv[0] = '--help'
 
         args = self.parser.parse_args(argv)
-        self.raise_event(self.COMMAND_PARSER_PARSED, (args.command, args))
+        self.raise_event(self.COMMAND_PARSER_PARSED, command=args.command, args=args)
 
         # Consider - we are using any args that start with an underscore (_) as 'private'
         # arguments and remove them from the arguments that we pass to the actual function.
@@ -89,16 +89,16 @@ class Application(object):
 
         result = self.todict(result)
         event_data = {'result': result}
-        self.raise_event(self.TRANSFORM_RESULT, event_data)
-        self.raise_event(self.FILTER_RESULT, event_data)
+        self.raise_event(self.TRANSFORM_RESULT, result=event_data)
+        self.raise_event(self.FILTER_RESULT, result=event_data)
         return event_data['result']
 
-    def raise_event(self, name, event_data):
+    def raise_event(self, name, **kwargs):
         '''Raise the event `name`.
         '''
-        logger.info("Application event '%s' with event data %s", name, event_data)
+        logger.info("Application event '%s' with event data %s", name, kwargs)
         for func in self._event_handlers[name]:
-            func(event_data)
+            func(**kwargs)
 
     def register(self, name, handler):
         '''Register a callable that will be called when the
@@ -137,12 +137,13 @@ class Application(object):
             return obj
 
     @staticmethod
-    def _enable_autocomplete(parser):
+    def _enable_autocomplete(**kwargs):
         import argcomplete
-        argcomplete.autocomplete(parser)
+        argcomplete.autocomplete(kwargs['parser'])
 
     @staticmethod
-    def _register_builtin_arguments(global_group):
+    def _register_builtin_arguments(**kwargs):
+        global_group = kwargs['global_group']
         global_group.add_argument('--subscription', dest='_subscription_id', help=argparse.SUPPRESS)
         global_group.add_argument('--output', '-o', dest='_output_format',
                                   choices=['list', 'json', 'tsv'],
@@ -154,7 +155,7 @@ class Application(object):
         global_group.add_argument('--debug', dest='_log_verbosity_debug', action='store_true',
                                   help='Increase logging verbosity to show all debug logs.')
 
-    def _handle_builtin_arguments(self, data):
-        _, args = data
+    def _handle_builtin_arguments(self, **kwargs):
+        args = kwargs['args']
         self.configuration.output_format = args._output_format #pylint: disable=protected-access
         del args._output_format
