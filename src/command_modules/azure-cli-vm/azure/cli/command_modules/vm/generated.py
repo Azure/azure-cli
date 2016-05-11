@@ -245,11 +245,11 @@ class VMDNSNameAction(argparse.Action): #pylint: disable=too-few-public-methods
 
         namespace.dns_name_for_public_ip = dns_value
 
-def _handle_auth_types(data):
-    command, args = data
-
-    if command != 'vm create':
+def _handle_auth_types(**kwargs):
+    if kwargs['command'] != 'vm create':
         return
+
+    args = kwargs['args']
 
     if args.authentication_type == 'password':
         if args.ssh_dest_key_path or args.ssh_key_value:
@@ -266,9 +266,7 @@ def _handle_auth_types(data):
             else:
                 raise CLIError('An RSA key file or key value must be supplied to SSH Key Value')
 
-if APPLICATION:
-    # set to none in tests
-    APPLICATION.register(APPLICATION.COMMAND_PARSER_PARSED, _handle_auth_types)
+APPLICATION.register(APPLICATION.COMMAND_PARSER_PARSED, _handle_auth_types)
 
 extra_parameters = [
     {
