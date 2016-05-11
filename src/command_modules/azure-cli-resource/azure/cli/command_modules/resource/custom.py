@@ -1,4 +1,6 @@
-# pylint: disable=too-few-public-methods,no-self-use,too-many-arguments
+﻿# pylint: disable=too-few-public-methods,no-self-use,too-many-arguments
+
+from __future__ import print_function
 
 from azure.mgmt.resource.resources.models.resource_group import ResourceGroup
 
@@ -6,8 +8,11 @@ from azure.cli.parser import IncorrectUsageError
 from azure.cli.commands import CommandTable
 from azure.cli._locale import L
 from azure.cli._util import CLIError
+import azure.cli._logging as _logging
 
 from ._params import _resource_client_factory
+
+logger = _logging.get_az_logger(__name__)
 
 command_table = CommandTable()
 
@@ -97,6 +102,36 @@ class ConvenienceResourceGroupCommands(object):
             tags=tags
         )
         return rcf.resource_groups.create_or_update(resource_group_name, parameters)
+
+    def export_group_as_template(self,
+                                 resource_group_name,
+                                 include_comments=False,
+                                 include_parameter_default_value=False):
+        '''Captures a resource group as a template.
+        :param str resource_group_name:the name of the resoruce group.
+        :param bool include_comments:export template with comments.
+        :param bool include_parameter_default_value: export template parameter with default value.
+        '''
+        import json
+        rcf = _resource_client_factory()
+
+        export_options = []
+        if include_comments:
+            export_options.append('IncludeComments')
+        if include_parameter_default_value:
+            export_options.append('IncludeParameterDefaultValue')
+        options = None
+        if export_options:
+            options = ','.join(export_options)
+
+        result = rcf.resource_groups.export_template(resource_group_name, '*', options=options)
+        #pylint: disable=no-member
+        # On error, server still returns 200, with details in the error attribute
+        if result.error:
+            raise CLIError(result.error)
+
+        print(json.dumps(result.template, indent=2))
+
 
 class ConvenienceResourceCommands(object):
 
