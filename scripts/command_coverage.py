@@ -6,7 +6,6 @@ from azure.cli.application import Configuration
 
 DEVNULL = open(os.devnull, 'w')
 
-# Get all commands
 config = Configuration([])
 cmd_table = config.get_command_table()
 cmd_list = [x['name'].strip() for x in cmd_table.values()]
@@ -17,7 +16,8 @@ if os.path.isfile(coverage_file):
 
 print('Running tests...')
 try:
-    check_call(['python', 'scripts/command_modules/test.py'], stdout=DEVNULL, stderr=DEVNULL)
+    check_call(['python', 'scripts/command_modules/test.py'], stdout=DEVNULL, stderr=DEVNULL,
+               env=dict(os.environ, AZURE_CLI_TEST_TRACK_COMMANDS='1'))
 except CalledProcessError as err:
     print(err, file=sys.stderr)
     print("Tests failed.")
@@ -34,7 +34,10 @@ print("=================")
 print('\n'.join(sorted(untested)))
 percentage_tested = (len(commands_tested) / len(cmd_list)) * 100
 print()
-print('Total commands {}, Tested commands {}, Untested commands {}'.format(len(cmd_list), len(commands_tested), len(cmd_list)-len(commands_tested)))
+print('Total commands {}, Tested commands {}, Untested commands {}'.format(
+    len(cmd_list),
+    len(commands_tested),
+    len(cmd_list)-len(commands_tested)))
 print('COMMAND COVERAGE {0:.2f}%'.format(percentage_tested))
 
 # Delete the command coverage file
