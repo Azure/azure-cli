@@ -21,7 +21,7 @@ class TestVMImage(unittest.TestCase):
         mock_urlopen.return_value = mock_read
 
         #action
-        images = ConvenienceVmCommands(None).list_vm_images()
+        images = ConvenienceVmCommands().list_vm_images()
 
         #assert
         win_images = [i for i in images if i['publisher'] == 'MicrosoftWindowsServer']
