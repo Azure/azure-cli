@@ -9,6 +9,7 @@ from six import StringIO
 
 from azure.cli.main import main as cli
 from azure.cli.parser import IncorrectUsageError
+from azure.cli._util import CLIError
 
 class JMESPathComparatorAssertionError(AssertionError):
 
@@ -34,12 +35,31 @@ class JMESPathComparator(object): #pylint: disable=too-few-public-methods
         if not actual_result == self.expected_result:
             raise JMESPathComparatorAssertionError(self, actual_result, json_data)
 
+def _check_json(source, checks):
+
+    def _check_json_child(item, checks):
+        for check in checks.keys():
+            if isinstance(checks[check], dict) and check in item:
+                return _check_json_child(item[check], checks[check])
+            else:
+                return item[check] == checks[check]
+
+    if not isinstance(source, list):
+        source = [source]
+    passed = False
+    for item in source:
+        passed = _check_json_child(item, checks)
+        if passed:
+            break
+    return passed
+
 class CommandTestScript(object): #pylint: disable=too-many-instance-attributes
 
     def __init__(self, set_up, test_body, tear_down):
         self._display = StringIO()
         self._raw = StringIO()
         self.display_result = ''
+        self.debug = False
         self.raw_result = ''
         self.auto = True
         self.fail = False
@@ -71,6 +91,8 @@ class CommandTestScript(object): #pylint: disable=too-many-instance-attributes
         save the output to a display file so you can see the command, followed by its output
         in order to determine if the output is acceptable. Invoking this command in a script
         turns off the flag that signals the test is fully automatic. '''
+        if self.debug:
+            print('RECORDING: {}'.format(command))
         self.auto = False
         output = StringIO()
         command_list = command if isinstance(command, list) else command.split()
@@ -84,6 +106,8 @@ class CommandTestScript(object): #pylint: disable=too-many-instance-attributes
     def run(self, command): #pylint: disable=no-self-use
         ''' Run a command without recording the output as part of expected results. Useful if you
         need to run a command for branching logic or just to reset back to a known condition. '''
+        if self.debug:
+            print('RUNNING: {}'.format(command))
         output = StringIO()
         command_list = command if isinstance(command, list) else command.split()
         cli(command_list, file=output)
@@ -95,45 +119,44 @@ class CommandTestScript(object): #pylint: disable=too-many-instance-attributes
         ''' Runs a command with the json output format and validates the input against the provided
         checks. Multiple JSON properties can be submitted as a dictionary and are treated as an AND
         condition. '''
-        def _check_json(source, checks):
-            for check in checks.keys():
-                if isinstance(checks[check], dict) and check in source:
-                    _check_json(source[check], checks[check])
-                else:
-                    assert source[check] == checks[check]
-
+        if self.debug:
+            print('TESTING: {}'.format(command))
         output = StringIO()
         command_list = command if isinstance(command, list) else command.split()
         command_list += ['-o', 'json']
         cli(command_list, file=output)
         result = output.getvalue().strip()
         self._raw.write(result)
-        if isinstance(checks, list) and all(
-                isinstance(comparator, JMESPathComparator) for comparator in checks):
-            for comparator in checks:
-                comparator.compare(result)
-        elif isinstance(checks, JMESPathComparator):
-            checks.compare(result)
-        elif isinstance(checks, bool):
-            result_val = str(result).lower().replace('"', '')
-            bool_val = result_val in ('yes', 'true', 't', '1')
-            assert bool_val == checks
-        elif isinstance(checks, str):
-            assert result.replace('"', '') == checks
-        elif isinstance(checks, dict):
-            json_val = json.loads(result)
-            _check_json(json_val, checks)
-        elif checks is None:
-            assert result is None or result == ''
-        else:
-            raise IncorrectUsageError('unsupported type \'{}\' in test'.format(type(checks)))
+        try:
+            if isinstance(checks, list) and all(
+                    isinstance(comparator, JMESPathComparator) for comparator in checks):
+                for comparator in checks:
+                    comparator.compare(result)
+            elif isinstance(checks, JMESPathComparator):
+                checks.compare(result)
+            elif isinstance(checks, bool):
+                result_val = str(result).lower().replace('"', '')
+                result = result_val in ('yes', 'true', 't', '1')
+                assert result == checks
+            elif isinstance(checks, str):
+                assert result.replace('"', '') == checks
+            elif isinstance(checks, dict):
+                json_val = json.loads(result)
+                assert _check_json(json_val, checks)
+            elif checks is None:
+                assert result is None or result == ''
+            else:
+                raise IncorrectUsageError('unsupported type \'{}\' in test'.format(type(checks)))
+        except AssertionError:
+            raise CLIError('COMMAND {} FAILED. Result: {} Checks: {}'.format(
+                command, result, checks))
     def set_env(self, key, val): #pylint: disable=no-self-use
         os.environ[key] = val
 
     def pop_env(self, key): #pylint: disable=no-self-use
         return os.environ.pop(key, None)
 
-    def print_(self, string):
+    def display(self, string):
         ''' Write free text to the display output only. This text will not be included in the
         raw saved output and using this command does not flag a test as requiring manual
         verification. '''

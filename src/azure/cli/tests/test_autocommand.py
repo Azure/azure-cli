@@ -3,7 +3,7 @@ import unittest
 
 from azure.cli.commands._auto_command import build_operation, _option_descriptions
 from azure.cli.commands import CommandTable
-from azure.cli.commands._auto_command import AutoCommandDefinition
+from azure.cli.commands._auto_command import CommandDefinition
 from azure.cli.main import main as cli
 
 from six import StringIO
@@ -45,7 +45,7 @@ class Test_autocommand(unittest.TestCase):
                         "",
                         None,
                         [
-                            AutoCommandDefinition(Test_autocommand.sample_vm_get, None)
+                            CommandDefinition(Test_autocommand.sample_vm_get, None)
                         ],
                         command_table)
 
@@ -78,7 +78,7 @@ class Test_autocommand(unittest.TestCase):
                         "",
                         None,
                         [
-                            AutoCommandDefinition(Test_autocommand.sample_vm_get, None)
+                            CommandDefinition(Test_autocommand.sample_vm_get, None)
                         ],
                         command_table,
                         VM_SPECIFIC_PARAMS
@@ -99,19 +99,19 @@ class Test_autocommand(unittest.TestCase):
 
     def test_autocommand_with_extra_parameters(self):
         command_table = CommandTable()
-        NEW_PARAMETERS= [
-            {
+        NEW_PARAMETERS = {
+            'added_param': {
                 'name': '--added-param',
                 'metavar': 'ADDED',
                 'help': 'Just added this right now!',
                 'required': True
             }
-        ]
+        }
         build_operation("test autocommand",
                         "",
                         None,
                         [
-                            AutoCommandDefinition(Test_autocommand.sample_vm_get, None)
+                            CommandDefinition(Test_autocommand.sample_vm_get, None)
                         ],
                         command_table,
                         None, NEW_PARAMETERS
@@ -137,7 +137,7 @@ class Test_autocommand(unittest.TestCase):
                         "",
                         None,
                         [
-                            AutoCommandDefinition(Test_autocommand.sample_vm_get, None, 'woot')
+                            CommandDefinition(Test_autocommand.sample_vm_get, None, 'woot')
                         ],
                         command_table
                         )
@@ -165,7 +165,7 @@ class Test_autocommand(unittest.TestCase):
                         "",
                         None,
                         [
-                            AutoCommandDefinition(sample_sdk_method_with_weired_docstring, None)
+                            CommandDefinition(sample_sdk_method_with_weired_docstring, None)
                         ],
                         command_table)
 

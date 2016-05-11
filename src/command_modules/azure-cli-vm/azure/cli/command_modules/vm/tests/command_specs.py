@@ -1,4 +1,6 @@
 ﻿# AZURE CLI VM TEST DEFINITIONS
+import json
+
 from azure.cli.utils.command_test_script import CommandTestScript, JMESPathComparator
 
 #pylint: disable=method-hidden
@@ -21,6 +23,16 @@ class VMImageListThruServiceScenarioTest(CommandTestScript):
 
     def __init__(self):
         super(VMImageListThruServiceScenarioTest, self).__init__(None, self.test_body, None)
+
+class VMListFoldedScenarioTest(CommandTestScript):
+
+    def __init__(self):
+        super(VMListFoldedScenarioTest, self).__init__(None, self.test_body, None)
+
+    def test_body(self):
+        all_vms = json.loads(self.run('vm list -o json'))
+        some_vms = json.loads(self.run('vm list -g travistestresourcegroup -o json'))
+        assert len(all_vms) > len(some_vms)
 
 class VMListIPAddressesScenarioTest(CommandTestScript):
 
@@ -430,31 +442,28 @@ class VMScaleSetGetsScenarioTest(CommandTestScript):
 
     def test_body(self):
         self.test('vm scaleset list-all', [
-                JMESPathComparator('type(@)', 'array')])
+            JMESPathComparator('type(@)', 'array')])
         self.test('vm scaleset list --resource-group {}'.format(
             self.resource_group), [
                 JMESPathComparator('type(@)', 'array'),
                 JMESPathComparator('length(@)', 1),
                 JMESPathComparator('[0].name', self.ss_name),
                 JMESPathComparator('[0].location', self.location),
-                JMESPathComparator('[0].resourceGroup', self.resource_group),
-                ])
+                JMESPathComparator('[0].resourceGroup', self.resource_group)])
         self.test('vm scaleset list-skus --resource-group {} --name {}'.format(
-                self.resource_group, self.ss_name),
-                JMESPathComparator('type(@)', 'array'))
+            self.resource_group, self.ss_name),
+                  JMESPathComparator('type(@)', 'array'))
         self.test('vm scaleset show --resource-group {} --name {}'.format(
-                self.resource_group, self.ss_name), [
-                    JMESPathComparator('type(@)', 'object'),
-                    JMESPathComparator('name', self.ss_name),
-                    JMESPathComparator('location', self.location),
-                    JMESPathComparator('resourceGroup', self.resource_group),
-                ])
+            self.resource_group, self.ss_name), [
+                JMESPathComparator('type(@)', 'object'),
+                JMESPathComparator('name', self.ss_name),
+                JMESPathComparator('location', self.location),
+                JMESPathComparator('resourceGroup', self.resource_group)])
         self.test('vm scaleset get-instance-view --resource-group {} --name {}'.format(
-                self.resource_group, self.ss_name), [
-                    JMESPathComparator('type(@)', 'object'),
-                    JMESPathComparator('type(virtualMachine)', 'object'),
-                    JMESPathComparator('type(statuses)', 'array')
-                    ])
+            self.resource_group, self.ss_name), [
+                JMESPathComparator('type(@)', 'object'),
+                JMESPathComparator('type(virtualMachine)', 'object'),
+                JMESPathComparator('type(statuses)', 'array')])
 
 ENV_VAR = {}
 
@@ -530,6 +539,10 @@ TEST_DEF = [
     {
         'test_name': 'vm_scaleset_gets',
         'command': VMScaleSetGetsScenarioTest()
+    },
+    {
+        'test_name': 'vm_combined_list',
+        'command': VMListFoldedScenarioTest()
     },
 ]
 
