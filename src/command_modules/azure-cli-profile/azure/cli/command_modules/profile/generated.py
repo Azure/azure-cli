@@ -33,7 +33,7 @@ build_operation(
     ], command_table, PARAMETER_ALIASES)
 
 build_operation(
-    'role', None, _auth_client_factory,
+    'role', 'role_definitions', _auth_client_factory,
     [
         CommandDefinition(RoleDefinitionsOperations.list, '[Role]'),
         CommandDefinition(RoleDefinitionsOperations.create_or_update, 'Result', 'create'),
@@ -43,10 +43,10 @@ build_operation(
     ], command_table, PARAMETER_ALIASES)
 
 build_operation(
-    'role assignment', None, _auth_client_factory,
+    'role assignment', 'role_assignments', _auth_client_factory,
     [
-        CommandDefinition(RoleAssignmentsOperations.create, 'Result'),
-        CommandDefinition(RoleAssignmentsOperations.create_by_id, 'Result'),
+        #CommandDefinition(RoleAssignmentsOperations.create, 'Result'),
+        #CommandDefinition(RoleAssignmentsOperations.create_by_id, 'Result'),
         CommandDefinition(RoleAssignmentsOperations.delete, 'Result'),
         CommandDefinition(RoleAssignmentsOperations.delete_by_id, 'Result'),
         CommandDefinition(RoleAssignmentsOperations.get, 'Result', 'show'),

@@ -113,6 +113,10 @@ class CommandTestScript(object): #pylint: disable=too-many-instance-attributes
         cli(command_list, file=output)
         result = output.getvalue().strip()
         output.close()
+        if isinstance(command, str) and '-o json' in command:
+            result = json.loads(result)
+        elif isinstance(command, list) and set(command).issuperset(set(['-o', 'json'])):
+            result = json.loads(result)
         return result
 
     def test(self, command, checks):

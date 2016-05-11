@@ -35,33 +35,33 @@ class ResourceScenarioTest(CommandTestScript):
     def test_body(self):
         s = self
         rg = 'travistestresourcegroup'
-        all_resources = json.loads(s.run('resource list -o json'))
-        some_resources = json.loads(s.run('resource list -l centralus -o json'))
+        all_resources = s.run('resource list -o json')
+        some_resources = s.run('resource list -l centralus -o json')
         assert len(all_resources) > len(some_resources)
 
         s.test('resource list -l centralus',
             [
-                JMESPathComparator('[0].location', 'centralus'),
+                JMESPathComparator("length([?location == 'centralus']) == length(@)", True),
             ])
 
         s.test('resource list --tag displayName=PublicIPAddress',
             [
-                JMESPathComparator('[0].type', 'Microsoft.Network/publicIPAddresses')
+                JMESPathComparator("length([?type == 'Microsoft.Network/publicIPAddresses']) == length(@)", True)
             ])
 
         s.test('resource list --resource-type Microsoft.Network/networkInterfaces',
             [
-                JMESPathComparator('[0].type', 'Microsoft.Network/networkInterfaces')
+                JMESPathComparator("length([?type == 'Microsoft.Network/networkInterfaces']) == length(@)", True)
             ])
 
         s.test('resource list --name TravisTestResourceGroup',
             [
-                JMESPathComparator('[0].name', 'TravisTestResourceGroup')
+                JMESPathComparator("length([?name == 'TravisTestResourceGroup']) == length(@)", True)
             ])
 
-        all_tagged_displayname = json.loads(s.run('resource list --tag displayName -o json'))
+        all_tagged_displayname = s.run('resource list --tag displayName -o json')
         storage_acc_tagged_displayname = \
-            json.loads(s.run('resource list --tag displayName=StorageAccount -o json'))
+            s.run('resource list --tag displayName=StorageAccount -o json')
         assert len(all_tagged_displayname) > len(storage_acc_tagged_displayname)
 
         s.test('resource show -n xplatvmExt1314 --resource-group XPLATTESTGEXTENSION9085 ' + \
