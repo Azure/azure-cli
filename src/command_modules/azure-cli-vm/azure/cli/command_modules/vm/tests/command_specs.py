@@ -465,6 +465,33 @@ class VMScaleSetGetsScenarioTest(CommandTestScript):
                 JMESPathComparator('type(virtualMachine)', 'object'),
                 JMESPathComparator('type(statuses)', 'array')])
 
+class VMScaleSetStatesScenarioTest(CommandTestScript):
+
+    def __init__(self):
+        self.resource_group = 'cliTestRg_ScaleSet1'
+        self.ss_name = 'scaleset1'
+        super(VMScaleSetStatesScenarioTest, self).__init__(None, self.test_body, None)
+
+    def test_body(self):
+        self.test('vm scaleset power-off --resource-group {} --name {}'.format(
+            self.resource_group, self.ss_name), None)
+        self.test('vm scaleset start --resource-group {} --name {}'.format(
+            self.resource_group, self.ss_name), None)
+        self.test('vm scaleset restart --resource-group {} --name {}'.format(
+            self.resource_group, self.ss_name), None)
+        self.test('vm scaleset update-instances --resource-group {} --name {} --instance-ids 0'.format(
+            self.resource_group, self.ss_name), None)
+
+# class VMScaleSetDeleteScenarioTest(CommandTestScript):
+
+#     def __init__(self):
+#         self.resource_group = 'cliTestRg_ScaleSet1'
+#         self.ss_name = 'scaleset1'
+#         super(VMScaleSetStatesScenarioTest, self).__init__(None, self.test_body, None)
+
+#     def test_body(self):
+#         pass
+
 ENV_VAR = {}
 
 TEST_DEF = [
@@ -537,13 +564,21 @@ TEST_DEF = [
         'command': VMMachineExtensionImageScenarioTest()
     },
     {
+        'test_name': 'vm_combined_list',
+        'command': VMListFoldedScenarioTest()
+    },
+    {
         'test_name': 'vm_scaleset_gets',
         'command': VMScaleSetGetsScenarioTest()
     },
     {
-        'test_name': 'vm_combined_list',
-        'command': VMListFoldedScenarioTest()
+        'test_name': 'vm_scaleset_states',
+        'command': VMScaleSetStatesScenarioTest()
     },
+    # {
+    #     'test_name': 'vm_scaleset_delete',
+    #     'command': VMScaleSetDeleteScenarioTest()
+    # },
 ]
 
 
