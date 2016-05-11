@@ -4,7 +4,6 @@ import mock
 
 from azure.cli.command_modules.vm.generated import ConvenienceVmCommands
 
-
 class TestVMImage(unittest.TestCase):
     @mock.patch('azure.cli.command_modules.vm.custom.urlopen', autospec=True)
     def test_read_images_from_alias_doc(self, mock_urlopen):
@@ -18,7 +17,7 @@ class TestVMImage(unittest.TestCase):
         mock_urlopen.return_value = mock_read
 
         #action
-        images = ConvenienceVmCommands(None).list_vm_images()
+        images = ConvenienceVmCommands().list_vm_images()
 
         #assert
         win_images = [i for i in images if i['publisher'] == 'MicrosoftWindowsServer']
