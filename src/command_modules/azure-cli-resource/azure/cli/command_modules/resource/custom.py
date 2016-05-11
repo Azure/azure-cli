@@ -24,22 +24,22 @@ def _list_resources_odata_filter_builder(location=None, resource_type=None, tag=
         filters.append("location eq '%s'" % location)
 
     if resource_type:
-        filters.append("resourceType eq '%s'" % resource_type)
+        filters.append("resourceType eq '{}/{}'".format(
+            resource_type.namespace, resource_type.type))
 
     if tag:
         if name or location:
-            raise IncorrectUsageError(
-                'you cannot use the tagname or tagvalue filters with other filters')
+            raise IncorrectUsageError('you cannot use the tag filter with other filters')
 
-        tag_comps = tag.split('=')
-        tag_name = tag_comps[0]
+        tag_name = list(tag.keys())[0] if isinstance(tag, dict) else tag
+        tag_value = tag[tag_name] if isinstance(tag, dict) else ''
         if tag_name:
             if tag_name[-1] == '*':
                 filters.append("startswith(tagname, '%s')" % tag_name[0:-1])
             else:
                 filters.append("tagname eq '%s'" % tag_name)
-                if len(tag_comps) == 2:
-                    filters.append("tagvalue eq '%s'" % tag_comps[1])
+                if tag_value != '':
+                    filters.append("tagvalue eq '%s'" % tag_value)
     return ' and '.join(filters)
 
 def _resolve_api_version(rcf, resource_type, parent=None):
@@ -141,6 +141,6 @@ class ConvenienceResourceCommands(object):
             :param str name:filter by resource name
         '''
         rcf = _resource_client_factory()
-        odata_filter = _list_resources_odata_filter_builder(location, resource_type, str(tag), name)
+        odata_filter = _list_resources_odata_filter_builder(location, resource_type, tag, name)
         resources = rcf.resources.list(filter=odata_filter)
         return list(resources)
