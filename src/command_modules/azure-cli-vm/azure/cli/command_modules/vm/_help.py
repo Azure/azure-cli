@@ -29,7 +29,7 @@ helps['vm create'] = """
                 - name: Create a Linux VM with SSH key authentication, add a public DNS entry and add to an existing Virtual Network and Availability Set.
                   text: >
                     az vm create --image <linux image from 'az vm image list'>
-                    --admin-username myadmin --admin-password Admin_001 --authentication-type sshkey
+                    --authentication-type ssh
                     --virtual-network-type existing --virtual-network-name myvnet --subnet-name default
                     --availability-set-type existing --availability-set-id myavailset
                     --public-ip-address-type new --dns-name-for-public-ip myGloballyUniqueVmDnsName
