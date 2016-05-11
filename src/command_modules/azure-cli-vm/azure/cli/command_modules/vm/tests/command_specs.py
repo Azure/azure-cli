@@ -479,18 +479,44 @@ class VMScaleSetStatesScenarioTest(CommandTestScript):
             self.resource_group, self.ss_name), None)
         self.test('vm scaleset restart --resource-group {} --name {}'.format(
             self.resource_group, self.ss_name), None)
-        self.test('vm scaleset update-instances --resource-group {} --name {} --instance-ids 0'.format(
+        self.test('vm scaleset update-instances --resource-group {} --name {} --instance-ids 0'.format( #pylint: disable=line-too-long
             self.resource_group, self.ss_name), None)
 
-# class VMScaleSetDeleteScenarioTest(CommandTestScript):
+class VMScaleSetDeleteScenarioTest(CommandTestScript):
 
-#     def __init__(self):
-#         self.resource_group = 'cliTestRg_ScaleSet1'
-#         self.ss_name = 'scaleset1'
-#         super(VMScaleSetStatesScenarioTest, self).__init__(None, self.test_body, None)
+    def __init__(self):
+        self.resource_group = 'cliTestRg_ScaleSet1'
+        self.ss_name = 'scaleset1'
+        self.vm_count = 5
+        self.instance_id_to_delete = 1
+        super(VMScaleSetDeleteScenarioTest, self).__init__(None, self.test_body, None)
 
-#     def test_body(self):
-#         pass
+    def test_body(self):
+        self.test('vm scaleset list --resource-group {}'.format(
+            self.resource_group), [
+                JMESPathComparator('type(@)', 'array'),
+                JMESPathComparator('length(@)', 1),
+                JMESPathComparator('[0].name', self.ss_name),
+                JMESPathComparator('[0].resourceGroup', self.resource_group)])
+        self.test('vm scaleset get-instance-view --resource-group {} --name {}'.format(
+            self.resource_group, self.ss_name), [
+                JMESPathComparator('type(@)', 'object'),
+                JMESPathComparator('type(virtualMachine)', 'object'),
+                JMESPathComparator('virtualMachine.statusesSummary[0].count', self.vm_count)])
+        self.test('vm scaleset delete-instances --resource-group {} --name {} --instance-ids {}'.format( #pylint: disable=line-too-long
+            self.resource_group, self.ss_name, self.instance_id_to_delete), None)
+        self.test('vm scaleset get-instance-view --resource-group {} --name {}'.format(
+            self.resource_group, self.ss_name), [
+                JMESPathComparator('type(@)', 'object'),
+                JMESPathComparator('type(virtualMachine)', 'object'),
+                JMESPathComparator('virtualMachine.statusesSummary[0].count', self.vm_count-1)])
+        self.test('vm scaleset deallocate --resource-group {} --name {}'.format(
+            self.resource_group, self.ss_name), None)
+        self.test('vm scaleset delete --resource-group {} --name {}'.format(
+            self.resource_group, self.ss_name), None)
+        self.test('vm scaleset list --resource-group {}'.format(
+            self.resource_group), None)
+
 
 ENV_VAR = {}
 
@@ -575,10 +601,10 @@ TEST_DEF = [
         'test_name': 'vm_scaleset_states',
         'command': VMScaleSetStatesScenarioTest()
     },
-    # {
-    #     'test_name': 'vm_scaleset_delete',
-    #     'command': VMScaleSetDeleteScenarioTest()
-    # },
+    {
+        'test_name': 'vm_scaleset_delete',
+        'command': VMScaleSetDeleteScenarioTest()
+    },
 ]
 
 
