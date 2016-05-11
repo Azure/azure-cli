@@ -36,7 +36,7 @@ build_operation(
     'role', 'role_definitions', _auth_client_factory,
     [
         CommandDefinition(RoleDefinitionsOperations.list, '[Role]'),
-       # CommandDefinition(RoleDefinitionsOperations.create_or_update, 'Result', 'create'),
+        #CommandDefinition(RoleDefinitionsOperations.create_or_update, 'Result', 'create'),
         #CommandDefinition(RoleDefinitionsOperations.delete, 'Result'),
         CommandDefinition(RoleDefinitionsOperations.get, 'Role', 'show'),
         CommandDefinition(RoleDefinitionsOperations.get_by_id, 'Role', 'show-by-id')

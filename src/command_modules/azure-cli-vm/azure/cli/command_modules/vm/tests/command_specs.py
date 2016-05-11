@@ -1,5 +1,4 @@
 ﻿# AZURE CLI VM TEST DEFINITIONS
-import json
 
 from azure.cli.utils.command_test_script import CommandTestScript, JMESPathComparator
 
@@ -30,8 +29,8 @@ class VMListFoldedScenarioTest(CommandTestScript):
         super(VMListFoldedScenarioTest, self).__init__(None, self.test_body, None)
 
     def test_body(self):
-        all_vms = json.loads(self.run('vm list -o json'))
-        some_vms = json.loads(self.run('vm list -g travistestresourcegroup -o json'))
+        all_vms = self.run('vm list -o json')
+        some_vms = self.run('vm list -g travistestresourcegroup -o json')
         assert len(all_vms) > len(some_vms)
 
 class VMListIPAddressesScenarioTest(CommandTestScript):
