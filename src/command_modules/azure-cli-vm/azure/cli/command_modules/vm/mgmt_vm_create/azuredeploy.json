@@ -18,7 +18,6 @@
     },
     "adminUsername": {
       "type": "string",
-      "minLength": 1,
       "metadata": {
         "description": "Username for the Virtual Machine."
       }
@@ -28,7 +27,7 @@
       "defaultValue": "password",
       "allowedValues": [
         "password",
-        "sshkey"
+        "ssh"
       ],
       "metadata": {
         "description": "Password or SSH Public Key authentication."
@@ -170,7 +169,7 @@
     },
     "publicIpAddressType": {
       "type": "string",
-      "defaultValue": "none",
+      "defaultValue": "new",
       "allowedValues": [
         "none",
         "new",
@@ -298,6 +297,10 @@
       "Win2008R2SP1": "latest",
       "Custom": "[parameters('osVersion')]"
     },
+    "authTypePath": {
+      "ssh": "sshkey",
+      "password":  "password"
+    },
     "vnetDeploymentName": "[concat('VNet', variables('vmName'))]",
     "nicName": "[concat('VMNic', parameters('name'))]",
     "vnetAddressPrefix": "[parameters('virtualNetworkIpAddressPrefix')]",
@@ -406,7 +409,7 @@
       "properties": {
         "mode": "Incremental",
         "templateLink": {
-          "uri": "[concat(parameters('_artifactsLocation'), '/nested_templates/vm_', parameters('availabilitySetType'), '_', parameters('authenticationType'), '.json')]",
+          "uri": "[concat(parameters('_artifactsLocation'), '/nested_templates/vm_', parameters('availabilitySetType'), '_', variables('authTypePath')[parameters('authenticationType')], '.json')]",
           "contentVersion": "1.0.0.0"
         },
         "parameters": {
@@ -433,5 +436,13 @@
     }
   ],
   "outputs": {
+    "vm": {
+      "value": "[reference(variables('vmDeploymentName')).outputs.vm.value]",
+      "type": "object"
+    },
+    "vmNic": {
+      "value": "[reference(variables('nicDeploymentName')).outputs.vmNic.value]",
+      "type": "object"
+    }
   }
 }

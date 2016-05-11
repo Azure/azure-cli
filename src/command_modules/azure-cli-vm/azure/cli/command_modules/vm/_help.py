@@ -9,9 +9,9 @@ helps['vm create'] = """
                   type: string
                   short-summary: OS image (Common, URN or URI).
                   long-summary: |
-                  Common OS types: Win2012R2Datacenter, Win2012Datacenter, Win2008SP1. For other values please run 'az vm image list'
-                  Example URN: MicrosoftWindowsServer:WindowsServer:2012-R2-Datacenter:latest
-                  Example URI: http://<storageAccount>.blob.core.windows.net/vhds/osdiskimage.vhd
+                      Common OS types: CentOS, CoreOS, Debian, openSUSE, RHEL, SLES, UbuntuLTS, Win2008SP1, Win2012Datacenter, Win2012R2Datacenter. 
+                      Example URN: MicrosoftWindowsServer:WindowsServer:2012-R2-Datacenter:latest
+                      Example URI: http://<storageAccount>.blob.core.windows.net/vhds/osdiskimage.vhd
                   populator-commands: 
                   - az vm image list
                   - az vm image show
@@ -29,9 +29,14 @@ helps['vm create'] = """
                 - name: Create a Linux VM with SSH key authentication, add a public DNS entry and add to an existing Virtual Network and Availability Set.
                   text: >
                     az vm create --image <linux image from 'az vm image list'>
-                    --admin-username myadmin --admin-password Admin_001 --authentication-type sshkey
+                    --authentication-type ssh
                     --virtual-network-type existing --virtual-network-name myvnet --subnet-name default
                     --availability-set-type existing --availability-set-id myavailset
                     --public-ip-address-type new --dns-name-for-public-ip myGloballyUniqueVmDnsName
                     -l "West US" -g myvms --name myvm18o --ssh-key-value "<ssh-rsa-key or key-file-path>"
+            """
+
+helps['vm availability-set create'] = """
+            type: command
+            long-summary: For more info, see https://blogs.technet.microsoft.com/yungchou/2013/05/14/window-azure-fault-domain-and-upgrade-domain-explained-explained-reprised/
             """
