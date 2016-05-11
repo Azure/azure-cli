@@ -2,11 +2,15 @@
 import unittest
 import mock
 
-from azure.cli.command_modules.vm.generated import ConvenienceVmCommands
+import azure.cli.application as application
 
 class TestVMImage(unittest.TestCase):
     @mock.patch('azure.cli.command_modules.vm.custom.urlopen', autospec=True)
     def test_read_images_from_alias_doc(self, mock_urlopen):
+        config = application.Configuration([])
+        application.APPLICATION = application.Application(config)
+        from azure.cli.command_modules.vm.generated import ConvenienceVmCommands
+
         file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                  'aliases.json')
         with open(file_path, 'r') as test_file:
