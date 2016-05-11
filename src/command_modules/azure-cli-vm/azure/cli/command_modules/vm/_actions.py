@@ -66,7 +66,7 @@ def _handle_auth_types(**kwargs):
             raise CLIError('SSH parameters cannot be used with password authentication type')
         elif not args.admin_password:
             raise CLIError('Admin password is required with password authentication type')
-    elif args.authentication_type == 'sshkey':
+    elif args.authentication_type == 'ssh':
         if args.admin_password:
             raise CLIError('Admin password cannot be used with SSH authentication type')
 
@@ -79,6 +79,13 @@ def _handle_auth_types(**kwargs):
                 raise CLIError('An RSA key file or key value must be supplied to SSH Key Value')
 
 APPLICATION.register(APPLICATION.COMMAND_PARSER_PARSED, _handle_auth_types)
+
+def _transform_deployment_result(**kwargs):
+    event_data = kwargs['event_data']
+    event_data['result'] = event_data['result']['properties']['outputs']
+
+APPLICATION.register(APPLICATION.TRANSFORM_RESULT, _transform_deployment_result)
+
 
 def load_images_from_aliases_doc(publisher, offer, sku):
     target_url = ('https://raw.githubusercontent.com/Azure/azure-rest-api-specs/'
