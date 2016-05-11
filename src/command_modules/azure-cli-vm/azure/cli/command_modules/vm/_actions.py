@@ -80,13 +80,6 @@ def _handle_auth_types(**kwargs):
 
 APPLICATION.register(APPLICATION.COMMAND_PARSER_PARSED, _handle_auth_types)
 
-def _transform_deployment_result(**kwargs):
-    event_data = kwargs['event_data']
-    event_data['result'] = event_data['result']['properties']['outputs']
-
-APPLICATION.register(APPLICATION.TRANSFORM_RESULT, _transform_deployment_result)
-
-
 def load_images_from_aliases_doc(publisher, offer, sku):
     target_url = ('https://raw.githubusercontent.com/Azure/azure-rest-api-specs/'
                   'master/arm-compute/quickstart-templates/aliases.json')
