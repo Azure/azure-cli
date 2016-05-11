@@ -22,7 +22,7 @@ command_table = CommandTable()
 
 def _vm_get(resource_group_name, vm_name, expand=None):
     '''Retrieves a VM'''
-    client = _compute_client_factory()
+        client = _compute_client_factory()
     return client.virtual_machines.get(resource_group_name,
                                        vm_name,
                                        expand=expand)
