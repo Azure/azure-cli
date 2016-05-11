@@ -2,11 +2,11 @@ from __future__ import print_function
 import os
 import sys
 from subprocess import check_call, CalledProcessError
-from azure.cli.application import Configuration
+import azure.cli.application as application
 
 DEVNULL = open(os.devnull, 'w')
-
-config = Configuration([])
+config = application.Configuration([])
+application.APPLICATION = application.Application(config)
 cmd_table = config.get_command_table()
 cmd_list = [x['name'].strip() for x in cmd_table.values()]
 
