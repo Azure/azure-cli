@@ -49,7 +49,7 @@ class ConvenienceVmCommands(object): # pylint: disable=too-few-public-methods
     def __init__(self, **kwargs):
         self.vm = _vm_get(**kwargs)
 
-    def list(self, resource_group_name):
+    def list(self, resource_group_name=None):
         ''' List Virtual Machines. '''
         ccf = _compute_client_factory()
         vm_list = ccf.virtual_machines.list(resource_group_name=resource_group_name) \
