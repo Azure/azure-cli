@@ -65,7 +65,34 @@ This method runs a given command and records its output to the display for manua
 
 ####test(command_string, checks)
 
-This method runs a given command and automatically validates the output. The results are saved to `expected_results.res` if valid, but nothing is display on the screen. Valid checks include: `bool`, `str` and `dict`. A check with a `dict` can be used to check for multiple matching parameters (and logic). Child `dict` objects can be used as values to verify properties within nested objects.
+This method runs a given command and automatically validates the output. The results are saved to `expected_results.res` if valid, but nothing is display on the screen. Valid checks include: `bool`, `str`, `dict` and JMESPath checks (see below). A check with a `dict` can be used to check for multiple matching parameters (and logic). Child `dict` objects can be used as values to verify properties within nested objects.
+
+#####JMESPath Comparator
+
+You can use the JMESPathComparator object to validate the result from a command.
+This is useful for checking that the JSON result has fields you were expecting, arrays of certain lengths etc.
+
+######Usage
+```
+JMESPathComparator(query, expected_result)
+```
+- `query` - JMESPath query as a string.
+- `expected_result` - The expected result from the JMESPath query (see [jmespath.search()](https://github.com/jmespath/jmespath.py#api))
+
+######Example
+
+The example below shows how you can use a JMESPath query to validate the values from a command.
+When calling `test(command_string, checks)` you can pass in just one JMESPathComparator or a list of JMESPathComparators.
+
+```
+from azure.cli.utils.command_test_script import JMESPathComparator
+
+self.test('vm list-ip-addresses --resource-group myResourceGroup',
+    [
+        JMESPathComparator('length(@)', 1),
+        JMESPathComparator('[0].virtualMachine.name', 'myVMName')])
+```
+
 
 ####set_env(variable_name, value)
 
