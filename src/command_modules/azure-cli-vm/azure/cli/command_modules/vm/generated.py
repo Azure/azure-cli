@@ -118,7 +118,7 @@ build_operation(
     ],
     command_table, PARAMETER_ALIASES)
 
-class DeploymentOutputLongRunningOperation(LongRunningOperation):
+class DeploymentOutputLongRunningOperation(LongRunningOperation): #pylint: disable=too-few-public-methods
     def __call__(self, poller):
         result = super(DeploymentOutputLongRunningOperation, self).__call__(poller)
         return result.properties.outputs
