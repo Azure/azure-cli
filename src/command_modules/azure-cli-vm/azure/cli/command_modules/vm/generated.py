@@ -59,6 +59,7 @@ build_operation(
         CommandDefinition(ConvenienceVmCommands.attach_new_disk, 'Object', 'attach-new'),
         CommandDefinition(ConvenienceVmCommands.attach_existing_disk, 'Object', 'attach-existing'),
         CommandDefinition(ConvenienceVmCommands.detach_disk, 'Object', 'detach'),
+        CommandDefinition(ConvenienceVmCommands.list_disks, '[VMDisk]', 'list'),
     ],
     command_table, PARAMETER_ALIASES, VM_PATCH_EXTRA_PARAMETERS)
 
