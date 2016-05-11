@@ -1,4 +1,6 @@
 ﻿# AZURE CLI VM TEST DEFINITIONS
+import json
+
 from azure.cli.utils.command_test_script import CommandTestScript, JMESPathComparator
 
 #pylint: disable=method-hidden
@@ -21,6 +23,16 @@ class VMImageListThruServiceScenarioTest(CommandTestScript):
 
     def __init__(self):
         super(VMImageListThruServiceScenarioTest, self).__init__(None, self.test_body, None)
+
+class VMListFoldedScenarioTest(CommandTestScript):
+
+    def __init__(self):
+        super(VMListFoldedScenarioTest, self).__init__(None, self.test_body, None)
+
+    def test_body(self):
+        all_vms = json.loads(self.run('vm list -o json'))
+        some_vms = json.loads(self.run('vm list -g travistestresourcegroup -o json'))
+        assert len(all_vms) > len(some_vms)
 
 class VMListIPAddressesScenarioTest(CommandTestScript):
 
@@ -387,6 +399,10 @@ TEST_DEF = [
     {
         'test_name': 'vm_create_state_modifications',
         'command': VMCreateAndStateModificationsScenarioTest()
+    },
+    {
+        'test_name': 'vm_combined_list',
+        'command': VMListFoldedScenarioTest()
     },
 ]
 

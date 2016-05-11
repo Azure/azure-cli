@@ -27,7 +27,7 @@ class TestListResources(unittest.TestCase):
         self.assertEqual(filter, "startswith(tagname, 'f')")
 
     def test_tag_name_value_equals(self):
-        filter = _list_resources_odata_filter_builder(tag='foo=bar')
+        filter = _list_resources_odata_filter_builder(tag={'foo':'bar'})
         self.assertEqual(filter, "tagname eq 'foo' and tagvalue eq 'bar'")
 
     def test_name_location_equals(self):
