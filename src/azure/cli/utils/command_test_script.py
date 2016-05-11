@@ -86,6 +86,12 @@ class CommandTestScript(object): #pylint: disable=too-many-instance-attributes
             self._display.close()
             self._raw.close()
 
+    def _track_executed_commands(self, command):
+        filename = 'command_coverage.txt'
+        with open(filename, 'a+') as f:
+            f.write(' '.join(command))
+            f.write('\n')
+
     def rec(self, command):
         ''' Run a command and save the output as part of the expected results. This will also
         save the output to a display file so you can see the command, followed by its output
@@ -97,6 +103,7 @@ class CommandTestScript(object): #pylint: disable=too-many-instance-attributes
         output = StringIO()
         command_list = command if isinstance(command, list) else command.split()
         cli(command_list, file=output)
+        self._track_executed_commands(command_list)
         result = output.getvalue().strip()
         self._display.write('\n\n== {} ==\n\n{}'.format(command, result))
         self._raw.write(result)
@@ -111,6 +118,7 @@ class CommandTestScript(object): #pylint: disable=too-many-instance-attributes
         output = StringIO()
         command_list = command if isinstance(command, list) else command.split()
         cli(command_list, file=output)
+        self._track_executed_commands(command_list)
         result = output.getvalue().strip()
         output.close()
         return result
@@ -125,6 +133,7 @@ class CommandTestScript(object): #pylint: disable=too-many-instance-attributes
         command_list = command if isinstance(command, list) else command.split()
         command_list += ['-o', 'json']
         cli(command_list, file=output)
+        self._track_executed_commands(command_list)
         result = output.getvalue().strip()
         self._raw.write(result)
         try:
