@@ -517,6 +517,31 @@ class VMScaleSetDeleteScenarioTest(CommandTestScript):
         self.test('vm scaleset list --resource-group {}'.format(
             self.resource_group), None)
 
+class VMScaleSetVMsScenarioTest(CommandTestScript):
+
+    def __init__(self):
+        self.resource_group = 'cliTestRg_ScaleSet3'
+        self.ss_name = 'scaleset3'
+        self.vm_count = 5
+        self.instance_ids = ['1', '3', '4', '5', '6']
+        self.instance_id_to_delete = 1
+        super(VMScaleSetVMsScenarioTest, self).__init__(None, self.test_body, None)
+
+    def _check_vms_power_state(self, expected_power_state):
+        for iid in self.instance_ids:
+            self.test('vm scaleset-vm get-instance-view --resource-group {} --name {} --instance-id {}'.format(self.resource_group, self.ss_name, iid),
+            JMESPathComparator('statuses[1].code', expected_power_state))
+
+    def test_body(self):
+        self.test('vm scaleset-vm list --resource-group {} --virtual-machine-scale-set-name {}'.format( #pylint: disable=line-too-long
+            self.resource_group, self.ss_name), [
+                JMESPathComparator('type(@)', 'array'),
+                JMESPathComparator('length(@)', self.vm_count),
+                JMESPathComparator("[].name.starts_with(@, '{}')".format(self.ss_name), [True]*self.vm_count),
+        ])
+        self._check_vms_power_state('PowerState/running')
+        
+
 
 ENV_VAR = {}
 
@@ -604,6 +629,10 @@ TEST_DEF = [
     {
         'test_name': 'vm_scaleset_delete',
         'command': VMScaleSetDeleteScenarioTest()
+    },
+    {
+        'test_name': 'vm_scaleset_vms',
+        'command': VMScaleSetVMsScenarioTest()
     },
 ]
 
