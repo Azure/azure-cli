@@ -34,7 +34,6 @@ class Configuration(object): # pylint: disable=too-few-public-methods
 
 class Application(object):
 
-    INSTANCE = None
     TRANSFORM_RESULT = 'Application.TransformResults'
     FILTER_RESULT = 'Application.FilterResults'
     GLOBAL_PARSER_CREATED = 'GlobalParser.Created'
@@ -43,8 +42,6 @@ class Application(object):
     COMMAND_PARSER_PARSED = 'CommandParser.Parsed'
 
     def __init__(self, configuration):
-        global APPLICATION #pylint: disable=global-statement
-        APPLICATION = self
         self._event_handlers = defaultdict(lambda: [])
         self.configuration = configuration
 

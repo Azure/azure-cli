@@ -1,7 +1,7 @@
 ﻿import os
 import sys
 
-from .application import Application, Configuration
+from .application import APPLICATION, Application, Configuration
 import azure.cli._logging as _logging
 from ._session import Session
 from ._output import OutputProducer
@@ -35,7 +35,7 @@ def main(args, file=sys.stdout): #pylint: disable=redefined-builtin
                                 CONFIG.get('locale', 'en-US')))
 
     config = Configuration(args)
-    app = Application(config)
+    APPLICATION = app = Application(config)
     try:
         cmd_result = app.execute(args)
         # Commands can return a dictionary/list of results
