@@ -4,6 +4,7 @@ import os
 import re
 
 from azure.cli._util import CLIError
+from azure.cli.application import APPLICATION
 
 from six.moves.urllib.request import urlopen #pylint: disable=import-error
 
@@ -26,13 +27,14 @@ class VMImageFieldAction(argparse.Action): #pylint: disable=too-few-public-metho
             images = load_images_from_aliases_doc(None, None, None)
             matched = next((x for x in images if x['urn alias'].lower() == image.lower()), None)
             if matched is None:
-                raise CLIError('Invalid image "{}". Please pick one from {}'.format(
-                    image, [x['urn alias'] for x in images]))
+                raise CLIError('Invalid image "{}". Please pick one from {}' \
+                    .format(image, [x['urn alias'] for x in images]))
             namespace.os_type = 'Custom'
             namespace.os_publisher = matched['publisher']
             namespace.os_offer = matched['offer']
             namespace.os_sku = matched['sku']
             namespace.os_version = matched['version']
+
 
 class VMSSHFieldAction(argparse.Action): #pylint: disable=too-few-public-methods
     def __call__(self, parser, namespace, values, option_string=None):
@@ -52,6 +54,31 @@ class VMDNSNameAction(argparse.Action): #pylint: disable=too-few-public-methods
             namespace.dns_name_type = 'new'
 
         namespace.dns_name_for_public_ip = dns_value
+
+def _handle_auth_types(**kwargs):
+    if kwargs['command'] != 'vm create':
+        return
+
+    args = kwargs['args']
+
+    if args.authentication_type == 'password':
+        if args.ssh_dest_key_path or args.ssh_key_value:
+            raise CLIError('SSH parameters cannot be used with password authentication type')
+        elif not args.admin_password:
+            raise CLIError('Admin password is required with password authentication type')
+    elif args.authentication_type == 'sshkey':
+        if args.admin_password:
+            raise CLIError('Admin password cannot be used with SSH authentication type')
+
+        ssh_key_file = os.path.join(os.path.expanduser('~'), '.ssh/id_rsa.pub')
+        if not args.ssh_key_value:
+            if os.path.isfile(ssh_key_file):
+                with open(ssh_key_file) as f:
+                    args.ssh_key_value = f.read()
+            else:
+                raise CLIError('An RSA key file or key value must be supplied to SSH Key Value')
+
+APPLICATION.register(APPLICATION.COMMAND_PARSER_PARSED, _handle_auth_types)
 
 def load_images_from_aliases_doc(publisher, offer, sku):
     target_url = ('https://raw.githubusercontent.com/Azure/azure-rest-api-specs/'
