@@ -67,16 +67,16 @@ class TestApplication(unittest.TestCase):
     def test_application_register_and_call_handlers(self):
         handler_called = [False]
 
-        def handler(args):
-            args[0] = True
+        def handler(**kwargs):
+            kwargs['args'][0] = True
 
-        def other_handler(args):
-            self.assertEqual(args, 'secret sauce')
+        def other_handler(**kwargs):
+            self.assertEqual(kwargs['args'], 'secret sauce')
 
         config = Configuration([])
         app = Application(config)
 
-        app.raise_event('was_handler_called', handler_called)
+        app.raise_event('was_handler_called', args=handler_called)
         self.assertFalse(handler_called[0], "Raising event with no handlers registered somehow failed...")
 
         app.register('was_handler_called', handler)
@@ -84,13 +84,13 @@ class TestApplication(unittest.TestCase):
 
         # Registered handler won't get called if event with different name
         # is raised...
-        app.raise_event('other_handler_called', handler_called)
+        app.raise_event('other_handler_called', args=handler_called)
         self.assertFalse(handler_called[0], 'Wrong handler called!')
         
-        app.raise_event('was_handler_called', handler_called)
+        app.raise_event('was_handler_called', args=handler_called)
         self.assertTrue(handler_called[0], "Handler didn't get called")
 
-        app.raise_event('other_handler_called', 'secret sauce')
+        app.raise_event('other_handler_called', args='secret sauce')
 
 if __name__ == '__main__':
     unittest.main()

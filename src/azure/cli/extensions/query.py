@@ -6,16 +6,18 @@ def _register_global_parameter(global_group):
                               help='JMESPath query string. See http://jmespath.org/ for more information and examples.') # pylint: disable=line-too-long
 
 def register(application):
-    def handle_query_parameter(args):
+    def handle_query_parameter(**kwargs):
+        args = kwargs['args']
         try:
             query_value = args._jmespath_query #  pylint: disable=protected-access
             del args._jmespath_query
 
             if query_value:
-                def filter_output(event_data):
+                def filter_output(**kwargs):
                     from jmespath import search, Options
-                    event_data['result'] = search(query_value, event_data['result'],
-                                                  Options(collections.OrderedDict))
+                    kwargs['event_data']['result'] = search(query_value,
+                                                            kwargs['event_data']['result'],
+                                                            Options(collections.OrderedDict))
                 application.register(application.FILTER_RESULT, filter_output)
 
         except AttributeError:

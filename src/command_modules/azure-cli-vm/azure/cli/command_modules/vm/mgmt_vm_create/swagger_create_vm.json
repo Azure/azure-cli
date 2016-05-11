@@ -328,8 +328,7 @@
         }
       },
       "required": [
-        "adminUsername",
-        "name"
+        "virtualMachineName"
       ]
 
     },
@@ -364,11 +363,7 @@
           "description": "Username for the Virtual Machine.",
           "x-ms-client-name": "adminUsername"
         }
-      },
-      "required": [
-        "value"
-      ]
-
+      }
     },
     "DeploymentParameter_authenticationType": {
       "properties": {
@@ -378,7 +373,7 @@
           "x-ms-client-name": "authenticationType",
           "enum": [
             "password",
-            "sshkey"
+            "ssh"
           ],
           "default": "password"
         }
@@ -516,6 +511,7 @@
           "default": "Win2012R2Datacenter"
         }
       }
+
     },
     "DeploymentParameter_osVersion": {
       "properties": {
@@ -575,7 +571,7 @@
             "new",
             "existing"
           ],
-          "default": "none"
+          "default": "new"
         }
       }
     },
