@@ -120,9 +120,8 @@ class ConvenienceResourceGroupCommands(object):
             export_options.append('IncludeComments')
         if include_parameter_default_value:
             export_options.append('IncludeParameterDefaultValue')
-        options = None
-        if export_options:
-            options = ','.join(export_options)
+
+        options = ','.join(export_options) if export_options else None
 
         result = rcf.resource_groups.export_template(resource_group_name, '*', options=options)
         #pylint: disable=no-member
