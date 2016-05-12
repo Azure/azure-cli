@@ -1,4 +1,4 @@
-from azure.mgmt.resource.resources.operations.resource_groups_operations \
+﻿from azure.mgmt.resource.resources.operations.resource_groups_operations \
     import ResourceGroupsOperations
 from azure.mgmt.resource.resources.operations.tags_operations import TagsOperations
 from azure.mgmt.resource.resources.operations.deployments_operations import DeploymentsOperations
@@ -31,9 +31,13 @@ build_operation(
     [
         CommandDefinition(ConvenienceResourceGroupCommands.list, '[ResourceGroup]'),
         CommandDefinition(ConvenienceResourceGroupCommands.create, 'ResourceGroup'),
+        CommandDefinition(ConvenienceResourceGroupCommands.export_group_as_template,
+                          None, "export")
     ],
     command_table, patch_aliases(PARAMETER_ALIASES, {
-        'resource_group_name': {'name': '--name -n'}
+        'resource_group_name':{'name':'--name -n'},
+        'include_comments':{'action':'store_true'},
+        'include_parameter_default_value':{'action':'store_true'}
     }))
 
 build_operation(
