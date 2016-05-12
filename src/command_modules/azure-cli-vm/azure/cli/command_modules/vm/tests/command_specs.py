@@ -21,15 +21,6 @@ class VMUsageScenarioTest(CommandTestScript):
     def test_body(self):
         self.test('vm usage list --location westus', JMESPathComparator('type(@)', 'array'))
 
-class VMListRgScenarioTest(CommandTestScript):
-
-    def __init__(self):
-        super(VMListRgScenarioTest, self).__init__(None, self.test_body, None)
-
-    def test_body(self):
-        self.test('vm list --resource-group XPLATTESTGEXTENSION9085',
-                  JMESPathComparator('type(@)', 'array'))
-
 class VMImageListThruServiceScenarioTest(CommandTestScript):
 
     def test_body(self):
@@ -51,7 +42,7 @@ class VMListFoldedScenarioTest(CommandTestScript):
         some_vms = json.loads(self.run('vm list -g travistestresourcegroup -o json'))
         assert len(all_vms) > len(some_vms)
 
-class VMListIPAddressesScenarioTest(CommandTestScript):
+class VMShowAndListIPAddressesScenarioTest(CommandTestScript):
 
     def __init__(self):
         self.deployment_name = 'azurecli-test-deployment-vm-list-ips'
@@ -59,7 +50,7 @@ class VMListIPAddressesScenarioTest(CommandTestScript):
         self.location = 'westus'
         self.vm_name = 'vm-with-public-ip'
         self.ip_allocation_method = 'Dynamic'
-        super(VMListIPAddressesScenarioTest, self).__init__(
+        super(VMShowAndListIPAddressesScenarioTest, self).__init__(
             self.set_up,
             self.test_body,
             self.tear_down)
@@ -79,6 +70,14 @@ class VMListIPAddressesScenarioTest(CommandTestScript):
                   '--admin-password', 'testPassword0', '--deployment-name', self.deployment_name,
                   '--public-ip-address-allocation', self.ip_allocation_method,
                   '--public-ip-address-type', 'new'])
+        self.test('vm show --resource-group {} --name {} --expand instanceView'.format(
+            self.resource_group, self.vm_name),
+                  [
+                      JMESPathComparator('type(@)', 'object'),
+                      JMESPathComparator('name', self.vm_name),
+                      JMESPathComparator('location', self.location),
+                      JMESPathComparator('resourceGroup', self.resource_group),
+                  ])
         # Expecting the one we just added
         self.test('vm list-ip-addresses --resource-group {}'.format(self.resource_group),
                   [
@@ -106,41 +105,6 @@ class VMSizeListScenarioTest(CommandTestScript):
 
     def test_body(self):
         self.test('vm size list --location westus', JMESPathComparator('type(@)', 'array'))
-
-class VMShowScenarioTest(CommandTestScript):
-
-    def __init__(self):
-        self.deployment_name = 'azurecli-test-deployment-vm-show'
-        self.resource_group = 'cliTestRg_VmShow'
-        self.location = 'westus'
-        self.vm_name = 'vm-show'
-        super(VMShowScenarioTest, self).__init__(
-            self.set_up,
-            self.test_body,
-            self.tear_down)
-
-    def set_up(self):
-        self.run('resource group create --location {} --name {}'.format(
-            self.location,
-            self.resource_group))
-
-    def test_body(self):
-        self.run(['vm', 'create', '--resource-group', self.resource_group,
-                  '--location', self.location,
-                  '-n', self.vm_name, '--admin-username', 'ubuntu',
-                  '--image', 'Canonical:UbuntuServer:14.04.4-LTS:latest',
-                  '--admin-password', 'testPassword0', '--deployment-name', self.deployment_name])
-        self.test('vm show --resource-group {} --name {} --expand instanceView'.format(
-            self.resource_group, self.vm_name),
-                  [
-                      JMESPathComparator('type(@)', 'object'),
-                      JMESPathComparator('name', self.vm_name),
-                      JMESPathComparator('location', self.location),
-                      JMESPathComparator('resourceGroup', self.resource_group),
-                  ])
-
-    def tear_down(self):
-        self.run('resource group delete --name {}'.format(self.resource_group))
 
 class VMImageListOffersScenarioTest(CommandTestScript):
 
@@ -590,12 +554,8 @@ TEST_DEF = [
         'command': VMUsageScenarioTest()
     },
     {
-        'test_name': 'vm_list_from_group',
-        'command': VMListRgScenarioTest()
-    },
-    {
-        'test_name': 'vm_list_ip_addresses',
-        'command': VMListIPAddressesScenarioTest()
+        'test_name': 'vm_show_and_list_ip_addresses',
+        'command': VMShowAndListIPAddressesScenarioTest()
     },
     {
         'test_name': 'vm_images_list_by_aliases',
@@ -608,10 +568,6 @@ TEST_DEF = [
     {
         'test_name': 'vm_size_list',
         'command': VMSizeListScenarioTest()
-    },
-    {
-        'test_name': 'vm_show',
-        'command': VMShowScenarioTest()
     },
     {
         'test_name': 'vm_image_list_offers',
