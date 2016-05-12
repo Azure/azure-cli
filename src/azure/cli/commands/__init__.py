@@ -59,7 +59,11 @@ def extend_parameter(parameter_metadata, **kwargs):
 
 def patch_aliases(aliases, patch):
     patched_aliases = aliases.copy()
-    patched_aliases.update(patch)
+    for key in patch:
+        if key in patched_aliases:
+            patched_aliases[key].update(patch[key])
+        else:
+            patched_aliases[key] = patch[key]
     return patched_aliases
 
 class LongRunningOperation(object): #pylint: disable=too-few-public-methods
