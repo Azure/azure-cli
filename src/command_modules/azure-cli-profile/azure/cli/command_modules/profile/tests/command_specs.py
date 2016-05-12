@@ -5,10 +5,6 @@ from azure.cli.utils.command_test_script import CommandTestScript, JMESPathCompa
 
 class RoleScenarioTest(CommandTestScript):
 
-        # UNTESTED
-        # create
-        # delete
-
     def test_body(self):
         s = self
         scope = '/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590'
@@ -30,15 +26,6 @@ class RoleScenarioTest(CommandTestScript):
         super(RoleScenarioTest, self).__init__(None, self.test_body, None)
 
 class RoleAssignmentScenarioTest(CommandTestScript):
-
-    # UNTESTED
-    #create
-    #create-by-id
-    #delete
-    #delete-by-id
-    #list-for-resource * (unknown if correct)
-    #list-for-resource-group * (fails)
-    #show * (fails)
 
     def test_body(self):
         s = self
