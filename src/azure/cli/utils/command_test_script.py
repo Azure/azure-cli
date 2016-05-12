@@ -72,12 +72,16 @@ class CommandTestScript(object): #pylint: disable=too-many-instance-attributes
         else:
             raise TypeError('test_body must be callable')
         self.tear_down = tear_down
+        self.track_commands = False
 
     def run_test(self):
         try:
             if hasattr(self.set_up, '__call__'):
                 self.set_up()
+            # only track commands for the test body
+            self.track_commands = TRACK_COMMANDS
             self.test_body()
+            self.track_commands = False
         except Exception: #pylint: disable=broad-except
             traceback.print_exc(file=self._display)
             self.fail = True
@@ -89,8 +93,8 @@ class CommandTestScript(object): #pylint: disable=too-many-instance-attributes
             self._display.close()
             self._raw.close()
 
-    def _track_executed_commands(self, command): #pylint: disable=no-self-use
-        if not TRACK_COMMANDS:
+    def _track_executed_commands(self, command):
+        if not self.track_commands:
             return
         filename = COMMAND_COVERAGE_FILENAME
         with open(filename, 'a+') as f:
