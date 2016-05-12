@@ -3,3 +3,8 @@ from azure.mgmt.compute import ComputeManagementClient, ComputeManagementClientC
 
 def _compute_client_factory(**_):
     return get_mgmt_service_client(ComputeManagementClient, ComputeManagementClientConfiguration)
+
+def _subscription_client_factory(**_):
+    from azure.mgmt.resource.subscriptions import (SubscriptionClient,
+                                                   SubscriptionClientConfiguration)
+    return get_mgmt_service_client(SubscriptionClient, SubscriptionClientConfiguration, False)

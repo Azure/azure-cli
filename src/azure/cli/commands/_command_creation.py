@@ -5,11 +5,16 @@ import azure.cli._logging as _logging
 
 logger = _logging.get_az_logger(__name__)
 
-def get_mgmt_service_client(client_type, config_type):
+def get_mgmt_service_client(client_type, config_type, subscription_bound=True):
     logger.info('Getting management service client client_type=%s, config_type=%s',
                 client_type.__name__, config_type.__name__)
     profile = Profile()
-    config = config_type(*profile.get_login_credentials())
+    cred, subscription_id = profile.get_login_credentials()
+    if subscription_bound:
+        config = config_type(cred, subscription_id)
+    else:
+        config = config_type(cred)
+
     client = client_type(config)
     _debug.allow_debug_connection(client)
     client.config.add_user_agent("AZURECLI_{}".format(cli.__version__))
