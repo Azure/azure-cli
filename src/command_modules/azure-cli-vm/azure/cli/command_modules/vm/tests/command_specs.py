@@ -610,8 +610,8 @@ TEST_DEF = [
         'command': VMSizeListScenarioTest()
     },
     {
-        'test_name': 'vm_show',
-        'command': VMShowScenarioTest()
+       'test_name': 'vm_show',
+       'command': VMShowScenarioTest()
     },
     {
         'test_name': 'vm_image_list_offers',
@@ -645,34 +645,34 @@ TEST_DEF = [
         'test_name': 'vm_availset',
         'command': VMAvailSetScenarioTest()
     },
-    {
-        'test_name': 'vm_extension',
-        'command': VMExtensionsScenarioTest()
-    },
-    {
-        'test_name': 'vm_machine_extension_image',
-        'command': VMMachineExtensionImageScenarioTest()
-    },
+    # {
+    #     'test_name': 'vm_extension',
+    #     'command': VMExtensionsScenarioTest()
+    # },
+    # {
+    #     'test_name': 'vm_machine_extension_image',
+    #     'command': VMMachineExtensionImageScenarioTest()
+    # },
     {
         'test_name': 'vm_combined_list',
         'command': VMListFoldedScenarioTest()
     },
-    {
-        'test_name': 'vm_scaleset_gets',
-        'command': VMScaleSetGetsScenarioTest()
-    },
-    {
-        'test_name': 'vm_scaleset_states',
-        'command': VMScaleSetStatesScenarioTest()
-    },
-    {
-        'test_name': 'vm_scaleset_delete',
-        'command': VMScaleSetDeleteScenarioTest()
-    },
-    {
-        'test_name': 'vm_scaleset_vms',
-        'command': VMScaleSetVMsScenarioTest()
-    },
+    # {
+    #     'test_name': 'vm_scaleset_gets',
+    #     'command': VMScaleSetGetsScenarioTest()
+    # },
+    # {
+    #     'test_name': 'vm_scaleset_states',
+    #     'command': VMScaleSetStatesScenarioTest()
+    # },
+    # {
+    #     'test_name': 'vm_scaleset_delete',
+    #     'command': VMScaleSetDeleteScenarioTest()
+    # },
+    # {
+    #     'test_name': 'vm_scaleset_vms',
+    #     'command': VMScaleSetVMsScenarioTest()
+    # },
 ]
 
 

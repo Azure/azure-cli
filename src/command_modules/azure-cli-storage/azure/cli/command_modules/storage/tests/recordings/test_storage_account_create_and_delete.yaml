@@ -7,7 +7,7 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.1 requests/2.9.1 msrest/0.2.0 msrest_azure/0.2.1 storagemanagementclient/2015-06-15
+      User-Agent: [python/3.5.0 requests/2.9.1 msrest/0.3.0 msrest_azure/0.3.0 storagemanagementclient/2015-06-15
           Azure-SDK-For-Python AZURECLI_0.0.32]
       accept-language: [en-US]
     method: DELETE
@@ -16,21 +16,23 @@ interactions:
     body: {string: ''}
     headers:
       Cache-Control: [no-cache]
-      Date: ['Tue, 26 Apr 2016 15:35:44 GMT']
+      Date: ['Thu, 12 May 2016 00:07:39 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-ms-ratelimit-remaining-subscription-writes: ['1197']
     status: {code: 204, message: No Content}
 - request:
-    body: '{"name": "testcreatedelete", "type": "Microsoft.Storage/storageAccounts"}'
+    body: !!binary |
+      eyJuYW1lIjogInRlc3RjcmVhdGVkZWxldGUiLCAidHlwZSI6ICJNaWNyb3NvZnQuU3RvcmFnZS9z
+      dG9yYWdlQWNjb3VudHMifQ==
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Length: ['73']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.1 requests/2.9.1 msrest/0.2.0 msrest_azure/0.2.1 storagemanagementclient/2015-06-15
+      User-Agent: [python/3.5.0 requests/2.9.1 msrest/0.3.0 msrest_azure/0.3.0 storagemanagementclient/2015-06-15
           Azure-SDK-For-Python AZURECLI_0.0.32]
       accept-language: [en-US]
     method: POST
@@ -45,7 +47,7 @@ interactions:
       Cache-Control: [no-cache]
       Content-Encoding: [gzip]
       Content-Type: [application/json]
-      Date: ['Tue, 26 Apr 2016 15:35:44 GMT']
+      Date: ['Thu, 12 May 2016 00:07:39 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-Azure-Storage-Resource-Provider/1.0, Microsoft-HTTPAPI/2.0]
@@ -53,18 +55,71 @@ interactions:
       Vary: [Accept-Encoding]
     status: {code: 200, message: OK}
 - request:
-    body: '{"properties": {"accountType": "Standard_LRS"}, "location": "westus"}'
+    body: !!binary |
+      eyJwcm9wZXJ0aWVzIjogeyJhY2NvdW50VHlwZSI6ICJTdGFuZGFyZF9MUlMifSwgImxvY2F0aW9u
+      IjogIndlc3R1cyJ9
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Length: ['69']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.1 requests/2.9.1 msrest/0.2.0 msrest_azure/0.2.1 storagemanagementclient/2015-06-15
+      User-Agent: [python/3.5.0 requests/2.9.1 msrest/0.3.0 msrest_azure/0.3.0 storagemanagementclient/2015-06-15
           Azure-SDK-For-Python AZURECLI_0.0.32]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/travistestresourcegroup/providers/Microsoft.Storage/storageAccounts/testcreatedelete?api-version=2015-06-15
+  response:
+    body: {string: ''}
+    headers:
+      Cache-Control: [no-cache]
+      Content-Length: ['0']
+      Date: ['Thu, 12 May 2016 00:07:40 GMT']
+      Expires: ['-1']
+      Location: ['https://management.azure.com/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/providers/Microsoft.Storage/operations/67867d31-540f-48a4-9fca-37296277f80c?monitor=true&api-version=2015-06-15']
+      Pragma: [no-cache]
+      Retry-After: ['25']
+      Server: [Microsoft-Azure-Storage-Resource-Provider/1.0, Microsoft-HTTPAPI/2.0]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      x-ms-ratelimit-remaining-subscription-writes: ['1193']
+    status: {code: 202, message: Accepted}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.0 requests/2.9.1 msrest/0.3.0 msrest_azure/0.3.0 storagemanagementclient/2015-06-15
+          Azure-SDK-For-Python AZURECLI_0.0.32]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/operations/67867d31-540f-48a4-9fca-37296277f80c?monitor=true&api-version=2015-06-15
+  response:
+    body: {string: ''}
+    headers:
+      Cache-Control: [no-cache]
+      Content-Length: ['0']
+      Date: ['Thu, 12 May 2016 00:08:06 GMT']
+      Expires: ['-1']
+      Location: ['https://management.azure.com/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/providers/Microsoft.Storage/operations/67867d31-540f-48a4-9fca-37296277f80c?monitor=true&api-version=2015-06-15']
+      Pragma: [no-cache]
+      Retry-After: ['25']
+      Server: [Microsoft-Azure-Storage-Resource-Provider/1.0, Microsoft-HTTPAPI/2.0]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+    status: {code: 202, message: Accepted}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.0 requests/2.9.1 msrest/0.3.0 msrest_azure/0.3.0 storagemanagementclient/2015-06-15
+          Azure-SDK-For-Python AZURECLI_0.0.32]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/operations/67867d31-540f-48a4-9fca-37296277f80c?monitor=true&api-version=2015-06-15
   response:
     body:
       string: !!binary |
@@ -76,7 +131,7 @@ interactions:
       Cache-Control: [no-cache]
       Content-Encoding: [gzip]
       Content-Type: [application/json]
-      Date: ['Tue, 26 Apr 2016 15:36:12 GMT']
+      Date: ['Thu, 12 May 2016 00:08:31 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-Azure-Storage-Resource-Provider/1.0, Microsoft-HTTPAPI/2.0]
@@ -84,14 +139,16 @@ interactions:
       Vary: [Accept-Encoding]
     status: {code: 200, message: OK}
 - request:
-    body: '{"name": "testcreatedelete", "type": "Microsoft.Storage/storageAccounts"}'
+    body: !!binary |
+      eyJuYW1lIjogInRlc3RjcmVhdGVkZWxldGUiLCAidHlwZSI6ICJNaWNyb3NvZnQuU3RvcmFnZS9z
+      dG9yYWdlQWNjb3VudHMifQ==
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Length: ['73']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.1 requests/2.9.1 msrest/0.2.0 msrest_azure/0.2.1 storagemanagementclient/2015-06-15
+      User-Agent: [python/3.5.0 requests/2.9.1 msrest/0.3.0 msrest_azure/0.3.0 storagemanagementclient/2015-06-15
           Azure-SDK-For-Python AZURECLI_0.0.32]
       accept-language: [en-US]
     method: POST
@@ -107,7 +164,7 @@ interactions:
       Cache-Control: [no-cache]
       Content-Encoding: [gzip]
       Content-Type: [application/json]
-      Date: ['Tue, 26 Apr 2016 15:36:12 GMT']
+      Date: ['Thu, 12 May 2016 00:09:08 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-Azure-Storage-Resource-Provider/1.0, Microsoft-HTTPAPI/2.0]
@@ -122,7 +179,7 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.1 requests/2.9.1 msrest/0.2.0 msrest_azure/0.2.1 storagemanagementclient/2015-06-15
+      User-Agent: [python/3.5.0 requests/2.9.1 msrest/0.3.0 msrest_azure/0.3.0 storagemanagementclient/2015-06-15
           Azure-SDK-For-Python AZURECLI_0.0.32]
       accept-language: [en-US]
     method: DELETE
@@ -132,7 +189,7 @@ interactions:
     headers:
       Cache-Control: [no-cache]
       Content-Length: ['0']
-      Date: ['Tue, 26 Apr 2016 15:36:16 GMT']
+      Date: ['Thu, 12 May 2016 00:09:10 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-Azure-Storage-Resource-Provider/1.0, Microsoft-HTTPAPI/2.0]
@@ -140,14 +197,16 @@ interactions:
       x-ms-ratelimit-remaining-subscription-writes: ['1199']
     status: {code: 200, message: OK}
 - request:
-    body: '{"name": "testcreatedelete", "type": "Microsoft.Storage/storageAccounts"}'
+    body: !!binary |
+      eyJuYW1lIjogInRlc3RjcmVhdGVkZWxldGUiLCAidHlwZSI6ICJNaWNyb3NvZnQuU3RvcmFnZS9z
+      dG9yYWdlQWNjb3VudHMifQ==
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Length: ['73']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.1 requests/2.9.1 msrest/0.2.0 msrest_azure/0.2.1 storagemanagementclient/2015-06-15
+      User-Agent: [python/3.5.0 requests/2.9.1 msrest/0.3.0 msrest_azure/0.3.0 storagemanagementclient/2015-06-15
           Azure-SDK-For-Python AZURECLI_0.0.32]
       accept-language: [en-US]
     method: POST
@@ -162,7 +221,7 @@ interactions:
       Cache-Control: [no-cache]
       Content-Encoding: [gzip]
       Content-Type: [application/json]
-      Date: ['Tue, 26 Apr 2016 15:36:16 GMT']
+      Date: ['Thu, 12 May 2016 00:09:11 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-Azure-Storage-Resource-Provider/1.0, Microsoft-HTTPAPI/2.0]
@@ -177,7 +236,7 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.1 requests/2.9.1 msrest/0.2.0 msrest_azure/0.2.1 storagemanagementclient/2015-06-15
+      User-Agent: [python/3.5.0 requests/2.9.1 msrest/0.3.0 msrest_azure/0.3.0 storagemanagementclient/2015-06-15
           Azure-SDK-For-Python AZURECLI_0.0.32]
       accept-language: [en-US]
     method: DELETE
@@ -186,7 +245,7 @@ interactions:
     body: {string: ''}
     headers:
       Cache-Control: [no-cache]
-      Date: ['Tue, 26 Apr 2016 15:36:17 GMT']
+      Date: ['Thu, 12 May 2016 00:09:11 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
