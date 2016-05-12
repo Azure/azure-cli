@@ -2,6 +2,7 @@ import json
 # AZURE CLI RESOURCE TEST DEFINITIONS
 
 from azure.cli.utils.command_test_script import CommandTestScript, JMESPathComparator
+from azure.cli.commands import LongRunningOperation
 
 #pylint: disable=method-hidden
 class ResourceGroupScenarioTest(CommandTestScript):
@@ -98,6 +99,50 @@ class ResourceScenarioTest(CommandTestScript):
     def __init__(self):
         super(ResourceScenarioTest, self).__init__(None, self.test_body, None)
 
+class TagScenarioTest(CommandTestScript):
+
+    def set_up(self):
+        tn = self.tag_name
+        tags = self.run('tag list --query "[?tagName == \'{}\'].values[].tagValue" -o json'.format(tn))
+        for tag in tags:
+            self.run('tag remove-value -n {} --value {}'.format(tn, tag))
+        self.run('tag delete -n {}'.format(tn))
+
+    def test_body(self):
+        s = self
+        tn = s.tag_name
+        s.test('tag list --query "[?tagName == \'{}\']"'.format(tn), None)
+        s.test('tag create -n {}'.format(tn), {'tagName': tn, 'values': [], 'count': {'value': "0"}})
+        s.test('tag add-value -n {} --value test'.format(tn), {'tagValue': 'test'})
+        s.test('tag add-value -n {} --value test2'. format(tn), {'tagValue': 'test2'})
+        s.test('tag list --query "[?tagName == \'{}\']"'.format(tn),
+            [
+                JMESPathComparator('[].values[].tagValue', [u'test', u'test2'])
+            ])
+        s.run('tag remove-value -n {} --value test'.format(tn))
+        s.test('tag list --query "[?tagName == \'{}\']"'.format(tn),
+            [
+                JMESPathComparator('[].values[].tagValue', [u'test2'])
+            ])
+        s.run('tag remove-value -n {} --value test2'.format(tn))
+        s.test('tag list --query "[?tagName == \'{}\']"'.format(tn),
+            [
+                JMESPathComparator('[].values[].tagValue', [])
+            ])
+        s.run('tag delete -n {}'.format(tn))
+        s.test('tag list --query "[?tagName == \'{}\']"'.format(self.tag_name), None)        
+
+    def tear_down(self):
+        tn = self.tag_name
+        tags = self.run('tag list --query "[?tagName == \'{}\'].values[].tagValue" -o json'.format(tn))
+        for tag in tags:
+            self.run('tag remove-value -n {} --value {}'.format(tn, tag))
+        self.run('tag delete -n {}'.format(tn))
+
+    def __init__(self):
+        self.tag_name = 'travistesttag'
+        super(TagScenarioTest, self).__init__(self.set_up, self.test_body, self.tear_down)
+
 ENV_VAR = {}
 
 TEST_DEF = [
@@ -108,6 +153,10 @@ TEST_DEF = [
     {
         'test_name': 'resource_scenario',
         'script': ResourceScenarioTest()
+    },
+    {
+        'test_name': 'tag_scenario',
+        'script': TagScenarioTest()
     },
 ]
 

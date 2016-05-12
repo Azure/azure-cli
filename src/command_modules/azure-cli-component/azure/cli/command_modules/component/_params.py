@@ -1,3 +1,5 @@
+from pip import get_installed_distributions
+
 from azure.cli._locale import L
 
 # BASIC PARAMETER CONFIGURATION
@@ -6,7 +8,9 @@ PARAMETER_ALIASES = {
     'component_name': {
         'name': '--name -n',
         'help': L('Name of component'),
-        'choices': ['component', 'network', 'profile', 'resource', 'storage', 'taskhelp', 'vm']
+        'choices': [dist.key.replace('azure-cli-', '')
+                    for dist in get_installed_distributions(local_only=True)
+                    if dist.key.startswith('azure-cli-')]
     },
     'force': {
         'name': '--force -f',

@@ -8,6 +8,7 @@ import sys
 from six import StringIO
 
 from azure.cli.utils.command_test_script import CommandTestScript
+from azure.cli._util import CLIError
 from azure.common import AzureHttpError
 
 RESOURCE_GROUP_NAME = 'travistestresourcegroup'
@@ -129,16 +130,16 @@ class StorageBlobScenarioTest(CommandTestScript):
         })
 
         # test block blob upload
-        s.run('storage blob upload -b {} -c {} --type block --upload-from {}'.format(block_blob, container, os.path.join(TEST_DIR, 'testfile.rst')))
+        s.run('storage blob upload -b {} -c {} --type block --upload-from "{}"'.format(block_blob, container, os.path.join(TEST_DIR, 'testfile.rst')))
         s.test('storage blob exists -b {} -c {}'.format(block_blob, container), True)
 
         # test page blob upload
-        s.run('storage blob upload -b {} -c {} --type page --upload-from {}'.format(page_blob, container, os.path.join(TEST_DIR, 'testpage.rst')))
+        s.run('storage blob upload -b {} -c {} --type page --upload-from "{}"'.format(page_blob, container, os.path.join(TEST_DIR, 'testpage.rst')))
         s.test('storage blob exists -b {} -c {}'.format(page_blob, container), True)
 
         # test append blob upload
-        s.run('storage blob upload -b {} -c {} --type append --upload-from {}'.format(append_blob, container, os.path.join(TEST_DIR, 'testfile.rst')))
-        s.run('storage blob upload -b {} -c {} --type append --upload-from {}'.format(append_blob, container, os.path.join(TEST_DIR, 'testfile.rst')))
+        s.run('storage blob upload -b {} -c {} --type append --upload-from "{}"'.format(append_blob, container, os.path.join(TEST_DIR, 'testfile.rst')))
+        s.run('storage blob upload -b {} -c {} --type append --upload-from "{}"'.format(append_blob, container, os.path.join(TEST_DIR, 'testfile.rst')))
         s.test('storage blob exists -b {} -c {}'.format(append_blob, container), True)
 
         blob_url = 'https://{}.blob.core.windows.net/{}/{}'.format(STORAGE_ACCOUNT_NAME, container, blob)
@@ -156,7 +157,7 @@ class StorageBlobScenarioTest(CommandTestScript):
 
         s.test('storage blob show --container-name {} --blob-name {}'.format(container, block_blob),
                {'name': block_blob, 'properties': {'blobType': 'BlockBlob'}})
-        s.run('storage blob download -b {} -c {} --download-to {}'.format(blob, container, dest_file))
+        s.run('storage blob download -b {} -c {} --download-to "{}"'.format(blob, container, dest_file))
         if os.path.isfile(dest_file):
             os.remove(dest_file)
         else:
@@ -318,11 +319,11 @@ class StorageFileScenarioTest(CommandTestScript):
         dest_file = os.path.join(TEST_DIR, 'download_test.rst')
         filename = 'testfile.rst'
         s = self
-        s.run('storage file upload --share-name {} --local-file-name {} --file-name {}'.format(share, source_file, filename))
+        s.run('storage file upload --share-name {} --local-file-name "{}" --file-name "{}"'.format(share, source_file, filename))
         s.test('storage file exists --share-name {} --file-name {}'.format(share, filename), True)
         if os.path.isfile(dest_file):
             os.remove(dest_file)
-        s.run('storage file download --share-name {} --file-name {} --local-file-name {}'.format(share, filename, dest_file))
+        s.run('storage file download --share-name {} --file-name "{}" --local-file-name "{}"'.format(share, filename, dest_file))
         if os.path.isfile(dest_file):
             os.remove(dest_file)
         else:
@@ -353,11 +354,11 @@ class StorageFileScenarioTest(CommandTestScript):
         dest_file = os.path.join(TEST_DIR, 'download_test.rst')
         filename = 'testfile.rst'
         s = self
-        s.run('storage file upload --share-name {} --directory-name {} --local-file-name {} --file-name {}'.format(share, dir, source_file, filename))
+        s.run('storage file upload --share-name {} --directory-name {} --local-file-name "{}" --file-name {}'.format(share, dir, source_file, filename))
         s.test('storage file exists --share-name {} --directory-name {} --file-name {}'.format(share, dir, filename), True)
         if os.path.isfile(dest_file):    
             os.remove(dest_file)
-        s.run('storage file download --share-name {} --directory-name {} --file-name {} --local-file-name {}'.format(share, dir, filename, dest_file))
+        s.run('storage file download --share-name {} --directory-name {} --file-name {} --local-file-name "{}"'.format(share, dir, filename, dest_file))
         if os.path.isfile(dest_file):
             os.remove(dest_file)
         else:
