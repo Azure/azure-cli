@@ -1,5 +1,5 @@
-# AZURE CLI RESOURCE TEST DEFINITIONS
 import json
+# AZURE CLI RESOURCE TEST DEFINITIONS
 
 from azure.cli.utils.command_test_script import CommandTestScript, JMESPathComparator
 

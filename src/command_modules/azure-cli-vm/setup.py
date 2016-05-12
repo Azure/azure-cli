@@ -37,7 +37,7 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
-    'azure==2.0.0rc1',
+    'azure==2.0.0rc3',
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
