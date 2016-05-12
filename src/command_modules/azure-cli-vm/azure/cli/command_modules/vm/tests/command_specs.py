@@ -28,6 +28,11 @@ class VMImageListThruServiceScenarioTest(CommandTestScript):
         result = self.run(cmd)
         assert result.index('15.04') >= 0
 
+        cmd = ('vm image list --publisher Canonical --offer '
+               'Ubuntu_Snappy_Core -o tsv --all')
+        result = self.run(cmd)
+        assert result.index('15.04') >= 0
+
     def __init__(self):
         super(VMImageListThruServiceScenarioTest, self).__init__(None, self.test_body, None)
 
