@@ -160,3 +160,7 @@ class ConvenienceVmCommands(object): # pylint: disable=too-few-public-methods
         except StopIteration:
             raise CLIError("No disk with the name '{}' found".format(diskname))
         _vm_set(self.vm, 'Detaching disk', 'Disk detached')
+
+    def list_disks(self):
+        ''' List disks for a Virtual Machine '''
+        return self.vm.storage_profile.data_disks # pylint: disable=no-member
