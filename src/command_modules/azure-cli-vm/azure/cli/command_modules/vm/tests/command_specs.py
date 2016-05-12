@@ -13,6 +13,23 @@ class VMImageListByAliasesScenarioTest(CommandTestScript):
     def __init__(self):
         super(VMImageListByAliasesScenarioTest, self).__init__(None, self.test_body, None)
 
+class VMUsageScenarioTest(CommandTestScript):
+
+    def __init__(self):
+        super(VMUsageScenarioTest, self).__init__(None, self.test_body, None)
+
+    def test_body(self):
+        self.test('vm usage list --location westus', JMESPathComparator('type(@)', 'array'))
+
+class VMListRgScenarioTest(CommandTestScript):
+
+    def __init__(self):
+        super(VMListRgScenarioTest, self).__init__(None, self.test_body, None)
+
+    def test_body(self):
+        self.test('vm list --resource-group XPLATTESTGEXTENSION9085',
+                  JMESPathComparator('type(@)', 'array'))
+
 class VMImageListThruServiceScenarioTest(CommandTestScript):
 
     def test_body(self):
@@ -520,11 +537,10 @@ class VMScaleSetDeleteScenarioTest(CommandTestScript):
 class VMScaleSetVMsScenarioTest(CommandTestScript):
 
     def __init__(self):
-        self.resource_group = 'cliTestRg_ScaleSet3'
-        self.ss_name = 'scaleset3'
+        self.resource_group = 'cliTestRg_ScaleSet2'
+        self.ss_name = 'scaleset2'
         self.vm_count = 5
-        self.instance_ids = ['1', '3', '4', '5', '6']
-        self.instance_id_to_delete = 1
+        self.instance_ids = ['0', '3', '4', '5', '6']
         super(VMScaleSetVMsScenarioTest, self).__init__(None, self.test_body, None)
 
     def _check_vms_power_state(self, expected_power_state):
@@ -536,6 +552,10 @@ class VMScaleSetVMsScenarioTest(CommandTestScript):
                       JMESPathComparator('statuses[1].code', expected_power_state))
 
     def test_body(self):
+        self.test('vm scaleset-vm show --resource-group {} --name {} --instance-id {}'.format(
+            self.resource_group, self.ss_name, self.instance_ids[0]), [
+                JMESPathComparator('type(@)', 'object'),
+                JMESPathComparator('instanceId', str(self.instance_ids[0]))])
         self.test('vm scaleset-vm list --resource-group {} --virtual-machine-scale-set-name {}'.format( #pylint: disable=line-too-long
             self.resource_group, self.ss_name), [
                 JMESPathComparator('type(@)', 'array'),
@@ -543,6 +563,22 @@ class VMScaleSetVMsScenarioTest(CommandTestScript):
                 JMESPathComparator("[].name.starts_with(@, '{}')".format(self.ss_name),
                                    [True]*self.vm_count)])
         self._check_vms_power_state('PowerState/running')
+        self.test('vm scaleset-vm power-off --resource-group {} --name {} --instance-id *'.format(
+            self.resource_group, self.ss_name), None)
+        self._check_vms_power_state('PowerState/stopped')
+        self.test('vm scaleset-vm start --resource-group {} --name {} --instance-id *'.format(
+            self.resource_group, self.ss_name), None)
+        self._check_vms_power_state('PowerState/running')
+        self.test('vm scaleset-vm restart --resource-group {} --name {} --instance-id *'.format(
+            self.resource_group, self.ss_name), None)
+        self._check_vms_power_state('PowerState/running')
+        self.test('vm scaleset-vm deallocate --resource-group {} --name {} --instance-id *'.format(
+            self.resource_group, self.ss_name), None)
+        self._check_vms_power_state('PowerState/deallocated')
+        self.test('vm scaleset-vm delete --resource-group {} --name {} --instance-id *'.format(
+            self.resource_group, self.ss_name), None)
+        self.test('vm scaleset-vm list --resource-group {} --virtual-machine-scale-set-name {}'.format( #pylint: disable=line-too-long
+            self.resource_group, self.ss_name), None)
 
 
 
@@ -551,11 +587,11 @@ ENV_VAR = {}
 TEST_DEF = [
     {
         'test_name': 'vm_usage_list_westus',
-        'command': 'vm usage list --location westus --output json'
+        'command': VMUsageScenarioTest()
     },
     {
         'test_name': 'vm_list_from_group',
-        'command': 'vm list --resource-group XPLATTESTGEXTENSION9085'
+        'command': VMListRgScenarioTest()
     },
     {
         'test_name': 'vm_list_ip_addresses',
