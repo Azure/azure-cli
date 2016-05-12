@@ -399,7 +399,7 @@ class VMExtensionsScenarioTest(CommandTestScript):
         self.resource_group = 'cliTestRg_VMExtensions'
         self.location = 'westus'
         self.vm_name = 'windows-ext'
-        self.extension_name = 'Microsoft.Insights.VMDiagnosticsSettings'
+        self.extension_name = 'IaaSDiagnostics'
         super(VMExtensionsScenarioTest, self).__init__(self.set_up, self.test_body, self.tear_down)
 
     def set_up(self):
@@ -505,7 +505,7 @@ class VMScaleSetDeleteScenarioTest(CommandTestScript):
         self.resource_group = 'cliTestRg_ScaleSet1'
         self.ss_name = 'scaleset1'
         self.vm_count = 5
-        self.instance_id_to_delete = 1
+        self.instance_id_to_delete = 2
         super(VMScaleSetDeleteScenarioTest, self).__init__(None, self.test_body, None)
 
     def test_body(self):
@@ -537,10 +537,10 @@ class VMScaleSetDeleteScenarioTest(CommandTestScript):
 class VMScaleSetVMsScenarioTest(CommandTestScript):
 
     def __init__(self):
-        self.resource_group = 'cliTestRg_ScaleSet2'
-        self.ss_name = 'scaleset2'
+        self.resource_group = 'cliTestRg_ScaleSet3'
+        self.ss_name = 'scaleset3'
         self.vm_count = 5
-        self.instance_ids = ['0', '3', '4', '5', '6']
+        self.instance_ids = ['1', '2', '3', '6', '7']
         super(VMScaleSetVMsScenarioTest, self).__init__(None, self.test_body, None)
 
     def _check_vms_power_state(self, expected_power_state):
@@ -610,8 +610,8 @@ TEST_DEF = [
         'command': VMSizeListScenarioTest()
     },
     {
-       'test_name': 'vm_show',
-       'command': VMShowScenarioTest()
+        'test_name': 'vm_show',
+        'command': VMShowScenarioTest()
     },
     {
         'test_name': 'vm_image_list_offers',
@@ -645,34 +645,34 @@ TEST_DEF = [
         'test_name': 'vm_availset',
         'command': VMAvailSetScenarioTest()
     },
-    # {
-    #     'test_name': 'vm_extension',
-    #     'command': VMExtensionsScenarioTest()
-    # },
-    # {
-    #     'test_name': 'vm_machine_extension_image',
-    #     'command': VMMachineExtensionImageScenarioTest()
-    # },
+    {
+        'test_name': 'vm_extension',
+        'command': VMExtensionsScenarioTest()
+    },
+    {
+        'test_name': 'vm_machine_extension_image',
+        'command': VMMachineExtensionImageScenarioTest()
+    },
     {
         'test_name': 'vm_combined_list',
         'command': VMListFoldedScenarioTest()
     },
-    # {
-    #     'test_name': 'vm_scaleset_gets',
-    #     'command': VMScaleSetGetsScenarioTest()
-    # },
-    # {
-    #     'test_name': 'vm_scaleset_states',
-    #     'command': VMScaleSetStatesScenarioTest()
-    # },
-    # {
-    #     'test_name': 'vm_scaleset_delete',
-    #     'command': VMScaleSetDeleteScenarioTest()
-    # },
-    # {
-    #     'test_name': 'vm_scaleset_vms',
-    #     'command': VMScaleSetVMsScenarioTest()
-    # },
+    {
+        'test_name': 'vm_scaleset_gets',
+        'command': VMScaleSetGetsScenarioTest()
+    },
+    {
+        'test_name': 'vm_scaleset_states',
+        'command': VMScaleSetStatesScenarioTest()
+    },
+    {
+        'test_name': 'vm_scaleset_delete',
+        'command': VMScaleSetDeleteScenarioTest()
+    },
+    {
+        'test_name': 'vm_scaleset_vms',
+        'command': VMScaleSetVMsScenarioTest()
+    },
 ]
 
 
