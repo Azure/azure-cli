@@ -4,15 +4,16 @@ import sys
 from subprocess import check_call, CalledProcessError
 import azure.cli.application as application
 
+COVERAGE_FILE = 'command_coverage.txt'
 DEVNULL = open(os.devnull, 'w')
+
 config = application.Configuration([])
 application.APPLICATION = application.Application(config)
 cmd_table = config.get_command_table()
 cmd_list = [x['name'].strip() for x in cmd_table.values()]
-
-coverage_file = 'command_coverage.txt'
-if os.path.isfile(coverage_file):
-    os.remove(coverage_file)
+cmd_set = set(cmd_list)
+if os.path.isfile(COVERAGE_FILE):
+    os.remove(COVERAGE_FILE)
 
 print('Running tests...')
 try:
@@ -24,23 +25,29 @@ except CalledProcessError as err:
     sys.exit(1)
 print('Tests passed.')
 
-commands_tested_with_params = [line.rstrip('\n') for line in open(coverage_file)]
+commands_tested_with_params = [line.rstrip('\n') for line in open(COVERAGE_FILE)]
 
-commands_tested = [c.split(' -')[0] for c in commands_tested_with_params]
-untested = list(set(cmd_list) - set(commands_tested))
+commands_tested = []
+for tested_command in commands_tested_with_params:
+    for c in cmd_list:
+        if tested_command.startswith(c):
+            commands_tested.append(c)
+
+commands_tested_set = set(commands_tested)
+untested = list(cmd_set - commands_tested_set)
 print()
 print("Untested commands")
 print("=================")
 print('\n'.join(sorted(untested)))
-percentage_tested = (len(commands_tested) / len(cmd_list)) * 100
+percentage_tested = (len(commands_tested_set) / len(cmd_set)) * 100
 print()
 print('Total commands {}, Tested commands {}, Untested commands {}'.format(
-    len(cmd_list),
-    len(commands_tested),
-    len(cmd_list)-len(commands_tested)))
+    len(cmd_set),
+    len(commands_tested_set),
+    len(cmd_set)-len(commands_tested_set)))
 print('COMMAND COVERAGE {0:.2f}%'.format(percentage_tested))
 
 # Delete the command coverage file
-if os.path.isfile(coverage_file):
-    os.remove(coverage_file)
+if os.path.isfile(COVERAGE_FILE):
+    os.remove(COVERAGE_FILE)
 
