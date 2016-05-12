@@ -115,8 +115,10 @@ def load_images_thru_services(publisher, offer, sku, location):
         result = list(subscription_client.subscriptions.list_locations(
             client.config.subscription_id))
         if result:
-            location = result[0].name
+            location = next((r.name for r in result if r.name.lower() == 'westus'),
+                            result[0].name)
         else:
+            #this should never happen, just in case
             raise CLIError('Current subscription does not have valid location list')
 
     def _load_images_from_publisher(publisher):
