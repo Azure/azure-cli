@@ -88,6 +88,41 @@ VM_CREATE_PARAMETER_ALIASES = {
     'dns_name_type': {
         'name': '--dns-name-type',
         'help': argparse.SUPPRESS
+    },
+    'authentication_type': {
+        'name': '--authentication-type',
+        'choices': ['ssh', 'password'],
+        'default': 'password'
+    },
+    'availability_set_type': {
+        'name': '--availability-set-type',
+        'choices': ['none', 'existing'],
+        'default': 'none'
+    },
+    'private_ip_address_allocation': {
+        'name': '--private-ip-address-allocation',
+        'choices': ['Dynamic', 'Static'],
+        'default': 'Dynamic'
+    },
+    'public_ip_address_allocation': {
+        'name': '--public-ip-address-allocation',
+        'choices': ['Dynamic', 'Static'],
+        'default': 'Dynamic'
+    },
+    'public_ip_address_type': {
+        'name': '--public-ip-address-type',
+        'choices': ['none', 'new', 'existing'],
+        'default': 'new'
+    },
+    'storage_account_type': {
+        'name': '--storage-account-type',
+        'choices': ['new', 'existing'],
+        'default': 'new'
+    },
+    'virtual_network_type': {
+        'name': '--virtual-network-type',
+        'choices': ['new', 'existing'],
+        'default': 'new'
     }
 }
 
