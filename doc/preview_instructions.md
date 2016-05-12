@@ -1,20 +1,12 @@
-Microsoft Azure Command-Line Tools
+Microsoft Azure CLI v2 Preview
 ==================================
 
-This is the Microsoft Azure CLI.
-
-This package has [not] been tested [much] with Python 2.7, 3.4 and 3.5.
-
-
-Installation
-============
+After weeks of hard work, the Azure CLI team is excited to offer a preview build for members of the GitHub Azure organization.  While we are still early in this project, it is never too early to get feedback and we are eagerly interested in getting yours!
 
 Installation via CURL (recommended)
 -----------------
 
 To install via cURL on Linux, Unix and OS X, type:
-
-.. code:: shell
 
     curl http://azure-cli-nightly.westus.cloudapp.azure.com/install | bash
 
@@ -27,8 +19,6 @@ Installation via PIP (not recommended)
 ----------------
 
 To install via the Python Package Index (PyPI), type:
-
-.. code:: shell
 
     pip install azure-cli
 
@@ -56,7 +46,6 @@ If you get errors on install on **OS X**, upgrade pip by typing:
 If you get errors on install on **Debian or Ubuntu** such as the examples below,
 install libssl-dev and libffi-dev by typing:
 
-.. code:: shell
 
     sudo apt-get update
     sudo apt-get install -y libssl-dev libffi-dev
@@ -65,26 +54,18 @@ Also install Python Dev for your version of Python.
 
 Python 2:
 
-.. code:: shell
-
     sudo apt-get install -y python-dev
 
 Python 3:
-
-.. code:: shell
 
     sudo apt-get install -y python3-dev
 
 Ubuntu 15 may require `build-essential` also:
 
-.. code:: shell
-
     sudo apt-get install -y build-essential
 
 
 **Example Errors**
-
-.. code:: shell
 
     Downloading cffi-1.5.2.tar.gz (388kB)
       100% |################################| 389kB 3.9MB/s
@@ -99,7 +80,6 @@ Ubuntu 15 may require `build-essential` also:
       ----------------------------------------
     Command "python setup.py egg_info" failed with error code 1 in /tmp/pip-build-77i2fido/cffi/
 
-.. code:: shell
 
     #include <openssl/e_os2.h>
                              ^
