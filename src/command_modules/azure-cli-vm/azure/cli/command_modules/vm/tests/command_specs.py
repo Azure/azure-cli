@@ -368,10 +368,10 @@ TEST_DEF = [
         'test_name': 'vm_size_list',
         'command': VMSizeListScenarioTest()
     },
-    {
-        'test_name': 'vm_show',
-        'command': VMShowScenarioTest()
-    },
+    #{
+    #    'test_name': 'vm_show',
+    #    'command': VMShowScenarioTest()
+    #},
     {
         'test_name': 'vm_image_list_offers',
         'command': VMImageListOffersScenarioTest()
