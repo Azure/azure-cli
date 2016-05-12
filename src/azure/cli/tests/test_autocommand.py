@@ -2,7 +2,7 @@ import logging
 import unittest
 
 from azure.cli.commands._auto_command import build_operation, _option_descriptions
-from azure.cli.commands import CommandTable
+from azure.cli.commands import CommandTable, patch_aliases
 from azure.cli.commands._auto_command import CommandDefinition
 from azure.cli.main import main as cli
 
@@ -66,7 +66,7 @@ class Test_autocommand(unittest.TestCase):
 
     def test_autocommand_with_parameter_alias(self):
         command_table = CommandTable()
-        VM_SPECIFIC_PARAMS= {
+        VM_SPECIFIC_PARAMS = {
             'vm_name': {
                 'name': '--wonky-name -n',
                 'metavar': 'VMNAME',
@@ -96,6 +96,44 @@ class Test_autocommand(unittest.TestCase):
         for probe in some_expected_arguments:
             existing = [arg for arg in command_metadata['arguments'] if arg['name'] == probe['name']][0]
             self.assertDictContainsSubset(probe, existing)
+
+    def test_autocommand_with_patch_aliases(self):
+        command_table = CommandTable()
+        GLOBAL_PARAMS = {
+            'vm_name': {
+                'name': '--foo -f',
+                'metavar': 'FOO',
+                'help': 'foo help'
+            }
+        }
+        PARAMS = patch_aliases(GLOBAL_PARAMS, {
+            'added': {
+                'name': '--added',
+                'help': 'Added'
+            },
+            'vm_name': {
+                'help': 'FOO TIME'
+            }
+        })
+
+        self.assertTrue(PARAMS['vm_name']['help'] == 'FOO TIME', '\'vm_name\' help should have been updated.')
+        self.assertTrue(PARAMS['vm_name']['name'] == '--foo -f', '\'vm_name\' name should not have changed.')
+        self.assertTrue(PARAMS['added']['name'] == '--added', '\'added\' should have been added to the aliases.')
+        self.assertTrue(PARAMS['added']['help'] == 'Added', '\'added\' should have been added to the aliases.')
+
+        build_operation('test autocommand', '', None, [
+            CommandDefinition(Test_autocommand.sample_vm_get, None)
+        ], command_table, patch_aliases(PARAMS, {'vm_name': {'name': '--changed'}}))
+
+        self.assertEqual(len(command_table), 1, 'We expect exactly one command in the command table')
+        command_metadata = list(command_table.values())[0]
+        some_expected_arguments = [
+            {'name': '--changed', 'help': 'FOO TIME'},
+        ]
+
+        for probe in some_expected_arguments:
+            existing = [arg for arg in command_metadata['arguments'] if arg['name'] == probe['name']][0]
+            self.assertDictContainsSubset(probe, existing)        
 
     def test_autocommand_with_extra_parameters(self):
         command_table = CommandTable()

@@ -106,7 +106,8 @@ PARAMETER_ALIASES = patch_aliases(GLOBAL_COMMON_PARAMETERS, {
     },
     'account_type': {
         'name': '--account-type',
-        'choices': storage_account_types
+        'choices': storage_account_types,
+        'help': 'the storage account type'
     },
     'blob_name': {
         'name': '--blob-name -b',
