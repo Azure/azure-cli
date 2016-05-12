@@ -160,14 +160,14 @@ Myarray :
         obj['A'] = 1
         obj['B'] = 2
         result = format_tsv(obj)
-        self.assertEqual(result, '1\t2')
+        self.assertEqual(result, '1\t2\n')
 
     def test_output_format_dict_sort(self):
         obj = {}
         obj['B'] = 1
         obj['A'] = 2
         result = format_tsv(obj)
-        self.assertEqual(result, '2\t1')
+        self.assertEqual(result, '2\t1\n')
 
     def test_output_format_ordereddict_not_sorted(self):
         from collections import OrderedDict
@@ -175,7 +175,7 @@ Myarray :
         obj['B'] = 1
         obj['A'] = 2
         result = format_tsv(obj)
-        self.assertEqual(result, '1\t2')
+        self.assertEqual(result, '1\t2\n')
 
     def test_output_format_ordereddict_list_not_sorted(self):
         from collections import OrderedDict
@@ -187,7 +187,7 @@ Myarray :
         obj2['A'] = 3
         obj2['B'] = 4
         result = format_tsv([obj1, obj2])
-        self.assertEqual(result, '1\t2\n3\t4')
+        self.assertEqual(result, '1\t2\n3\t4\n')
 
 if __name__ == '__main__':
     unittest.main()
