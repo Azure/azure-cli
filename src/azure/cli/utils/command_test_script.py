@@ -11,6 +11,9 @@ from azure.cli.main import main as cli
 from azure.cli.parser import IncorrectUsageError
 from azure.cli._util import CLIError
 
+TRACK_COMMANDS = os.environ.get('AZURE_CLI_TEST_TRACK_COMMANDS')
+COMMAND_COVERAGE_FILENAME = 'command_coverage.txt'
+
 class JMESPathComparatorAssertionError(AssertionError):
 
     def __init__(self, comparator, actual_result, json_data):
@@ -69,12 +72,16 @@ class CommandTestScript(object): #pylint: disable=too-many-instance-attributes
         else:
             raise TypeError('test_body must be callable')
         self.tear_down = tear_down
+        self.track_commands = False
 
     def run_test(self):
         try:
             if hasattr(self.set_up, '__call__'):
                 self.set_up()
+            # only track commands for the test body
+            self.track_commands = TRACK_COMMANDS
             self.test_body()
+            self.track_commands = False
         except Exception: #pylint: disable=broad-except
             traceback.print_exc(file=self._display)
             self.fail = True
@@ -85,6 +92,14 @@ class CommandTestScript(object): #pylint: disable=too-many-instance-attributes
             self.raw_result = self._raw.getvalue()
             self._display.close()
             self._raw.close()
+
+    def _track_executed_commands(self, command):
+        if not self.track_commands:
+            return
+        filename = COMMAND_COVERAGE_FILENAME
+        with open(filename, 'a+') as f:
+            f.write(' '.join(command))
+            f.write('\n')
 
     def rec(self, command):
         ''' Run a command and save the output as part of the expected results. This will also
@@ -97,6 +112,7 @@ class CommandTestScript(object): #pylint: disable=too-many-instance-attributes
         output = StringIO()
         command_list = command if isinstance(command, list) else command.split()
         cli(command_list, file=output)
+        self._track_executed_commands(command_list)
         result = output.getvalue().strip()
         self._display.write('\n\n== {} ==\n\n{}'.format(command, result))
         self._raw.write(result)
@@ -111,6 +127,7 @@ class CommandTestScript(object): #pylint: disable=too-many-instance-attributes
         output = StringIO()
         command_list = command if isinstance(command, list) else command.split()
         cli(command_list, file=output)
+        self._track_executed_commands(command_list)
         result = output.getvalue().strip()
         output.close()
         return result
@@ -125,6 +142,7 @@ class CommandTestScript(object): #pylint: disable=too-many-instance-attributes
         command_list = command if isinstance(command, list) else command.split()
         command_list += ['-o', 'json']
         cli(command_list, file=output)
+        self._track_executed_commands(command_list)
         result = output.getvalue().strip()
         self._raw.write(result)
         try:
