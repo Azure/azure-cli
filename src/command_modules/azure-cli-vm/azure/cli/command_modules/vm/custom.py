@@ -65,8 +65,6 @@ class ConvenienceVmCommands(object): # pylint: disable=too-few-public-methods
         :param bool all:Retrieve all versions of images from all publishers
         '''
         load_thru_services = all
-        if load_thru_services and not image_location:
-            raise CLIError('Argument of --location/-l is required to use with --all flag')
 
         if load_thru_services:
             all_images = load_images_thru_services(publisher,
