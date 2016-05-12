@@ -23,7 +23,7 @@ To install via the Python Package Index (PyPI), type:
     pip install azure-cli
 
 
-Providing Feedback and Reporting Issues
+Reporting issues and feedback
 =======================================
 
 If you encounter any bugs with the tool please file an issue in the
@@ -32,7 +32,7 @@ section of the project.
 
 
 Troubleshooting
-==============
+---------------
 
 **Errors on install with cffi or cryptography:**
 
