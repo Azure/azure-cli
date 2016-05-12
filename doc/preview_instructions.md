@@ -3,7 +3,7 @@ Microsoft Azure CLI v2 Preview
 
 After weeks of hard work, the Azure CLI team is excited to offer a preview build for members of the GitHub Azure organization.  While we are still early in this project, it is never too early to get feedback and we are eagerly interested in getting yours!
 
-Installation via CURL (recommended)
+Installation via CURL
 -----------------
 
 To install via cURL on Linux, Unix and OS X, type:
@@ -12,23 +12,28 @@ To install via cURL on Linux, Unix and OS X, type:
 
 If you chose to enable tab completion, type `exec -l $SHELL` to restart your shell.
 
-Note: This will install the latest nightly builds.
+Note: This will install the latest nightly builds.  You may re-run this script later to safely update to the latest version.
 
+Example Demo Script
+-------------------
 
-Installation via PIP (not recommended)
-----------------
+This preview covers a number of popular scenarios:
 
-To install via the Python Package Index (PyPI), type:
+1. Find common VM images
+2. Search all VM images
+3. Create a Linux VM using SSH
+4. List all IP Addresses in a resource group
+5. Export a resource group to an ARM template
+6. Using Query to control outputs
+7. Learning to Query with JPTerm
+8. Simplified help experience
 
-    pip install azure-cli
-
+For sample scripts and commands, please visit the [Demo Scripts](https://github.com/Azure/azure-cli/blob/master/doc/preview_demo_scripts.md) page.  
 
 Reporting issues and feedback
 =======================================
 
-If you encounter any bugs with the tool please file an issue in the
-`Issues <https://github.com/Azure/azure-cli/issues>`__
-section of the project.
+If you encounter any bugs with the tool please file an issue in the [Issues](https://github.com/Azure/azure-cli/issues) section of our GitHub repo.
 
 
 Troubleshooting
@@ -38,14 +43,10 @@ Troubleshooting
 
 If you get errors on install on **OS X**, upgrade pip by typing:
 
-.. code:: shell
-
     pip install --upgrade --force-reinstall pip
-
 
 If you get errors on install on **Debian or Ubuntu** such as the examples below,
 install libssl-dev and libffi-dev by typing:
-
 
     sudo apt-get update
     sudo apt-get install -y libssl-dev libffi-dev
@@ -88,4 +89,4 @@ Ubuntu 15 may require `build-essential` also:
 
     Failed building wheel for cryptography
 
-`See Stack Overflow question - Failed to install Python Cryptography package with PIP and setup.py <http://stackoverflow.com/questions/22073516/failed-to-install-python-cryptography-package-with-pip-and-setup-py>`__
+See Stack Overflow question - [Failed to install Python Cryptography package with PIP and setup.py](http://stackoverflow.com/questions/22073516/failed-to-install-python-cryptography-package-with-pip-and-setup-py>)
