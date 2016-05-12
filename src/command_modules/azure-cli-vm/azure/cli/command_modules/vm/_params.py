@@ -102,7 +102,7 @@ VM_CREATE_EXTRA_PARAMETERS = {
 
 VM_PATCH_EXTRA_PARAMETERS = {
     'resource_group_name':
-        extend_parameter(PARAMETER_ALIASES['resource_group_name'], required=True, 
+        extend_parameter(PARAMETER_ALIASES['resource_group_name'], required=True,
                          dest='resource_group_name'),
     'vm_name':
         extend_parameter(PARAMETER_ALIASES['vm_name'], required=True)
