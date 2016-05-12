@@ -1,6 +1,7 @@
 import json
 import unittest
 from six import StringIO
+import shlex
 
 from azure.cli.utils.command_test_script import _check_json as check_json
 
@@ -39,7 +40,6 @@ class Test_test_script_checks(unittest.TestCase):
         source = json.loads(json.dumps([{'a': {'b': 1, 'c': 2}}, {'a': {'b': 3, 'c': 5}}]))
         check = {'a': {'c': 5}}
         check_json(source, check)
-
 
 if __name__ == '__main__':
     unittest.main()
