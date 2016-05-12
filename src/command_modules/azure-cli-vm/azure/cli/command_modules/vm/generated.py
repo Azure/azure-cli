@@ -118,12 +118,18 @@ build_operation(
     ],
     command_table, PARAMETER_ALIASES)
 
+class DeploymentOutputLongRunningOperation(LongRunningOperation): #pylint: disable=too-few-public-methods
+    def __call__(self, poller):
+        result = super(DeploymentOutputLongRunningOperation, self).__call__(poller)
+        return result.properties.outputs
+
 build_operation(
     'vm', 'vm', lambda **_: get_mgmt_service_client(VMClient, VMClientConfig),
     [
         CommandDefinition(
             VMOperations.create_or_update,
-            LongRunningOperation(L('Creating virtual machine'), L('Virtual machine created')),
+            DeploymentOutputLongRunningOperation(L('Creating virtual machine'),
+                                                 L('Virtual machine created')),
             'create')
     ],
     command_table, VM_CREATE_PARAMETER_ALIASES, VM_CREATE_EXTRA_PARAMETERS)
