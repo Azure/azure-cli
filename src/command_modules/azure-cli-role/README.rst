@@ -1,4 +1,4 @@
-Microsoft Azure CLI 'role' Command Module
+Microsoft Azure CLI 'role' Command Module for Role-Based Access Control (RBAC)
 ==================================
 
 This package is for the 'role' module.
