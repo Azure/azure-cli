@@ -1,0 +1,88 @@
+from __future__ import print_function
+
+import argparse
+import json
+import re
+import sys
+
+from azure.cli.application import Configuration
+
+class Exporter(json.JSONEncoder):
+
+    def default(self, o):#pylint: disable=method-hidden
+        try:
+            return super(Exporter, self).default(o)
+        except TypeError:
+            return str(o)
+
+PRIMITIVE = (str, int, bool, float)
+
+def extract_non_callable(obj):
+    if isinstance(obj, PRIMITIVE):
+        return obj
+    elif callable(obj):
+        return None
+    elif isinstance(obj, dict):
+        new_dict = {}
+        for key in obj.keys():
+            res = extract_non_callable(obj[key])
+            if res:
+                new_dict[key] = res
+        return new_dict
+    elif isinstance(obj, list):
+        new_list = []
+        for item in obj:
+            res = extract_non_callable(item)
+            if res:
+                new_list.append(res)
+        return new_list
+
+parser = argparse.ArgumentParser(description='Command Table Parser')
+parser.add_argument('--commands', metavar='N', nargs='+', help='Filter by first level command (OR)')
+parser.add_argument('--params', metavar='N', nargs='+', help='Filter by parameters (OR)')
+args = parser.parse_args()
+cmd_set_names = args.commands
+param_names = args.params
+
+config = Configuration([])
+cmd_table = config.get_command_table()
+cmd_list = []
+for val in cmd_table.values():
+    cmd_name = val['name']
+    if cmd_set_names is None:
+        cmd_list.append(cmd_name)
+        continue
+
+    for prefix in cmd_set_names:
+        if cmd_name.startswith(prefix):
+            cmd_list.append(cmd_name)
+            break
+results = []
+
+if param_names:
+    for name in cmd_list:
+        cmd_args = [x for x in cmd_table.values() if name == x['name']][0]['arguments']
+        match = False
+        for arg in cmd_args:
+            if match:
+                break
+            arg_name = re.sub('--','', arg['name']).split(' ')[0]
+            if arg_name in param_names:
+                results.append(name)
+                match = True
+else:
+    results = cmd_list
+
+heading = '=== COMMANDS IN {} PACKAGE(S) WITH {} PARAMETERS ==='.format(
+    cmd_set_names or 'ANY', param_names or 'ANY')
+print('\n{}\n'.format(heading))
+
+for cmd_name in results:
+    print('== {} =='.format(cmd_name))
+    table_entry = [x for x in cmd_table.values() if cmd_name == x['name']][0]
+    # keep only the JSON Serializable keys
+    json_entry = {}
+    for key in table_entry.keys():
+        json_entry[key] = extract_non_callable(table_entry[key])
+    print(json.dumps(json_entry, indent=2, sort_keys=True), end='\n\n')
+    
