@@ -1,7 +1,6 @@
 import json
 import unittest
 from six import StringIO
-import shlex
 
 from azure.cli.utils.command_test_script import _check_json as check_json
 
