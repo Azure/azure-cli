@@ -1,7 +1,7 @@
-Microsoft Azure CLI v2 Preview
+Microsoft Project AZ Preview
 ==================================
 
-After weeks of hard work, the Azure CLI team is excited to offer a preview build for members of the GitHub Azure organization.  While we are still early in this project, it is never too early to get feedback and we are eagerly interested in getting yours!
+The Project AZ team is excited to offer a preview build for members of the GitHub Azure organization.  While we are still early in this experiment, it is never too early to get feedback and we are eagerly interested in getting yours!
 
 Installation via CURL
 -----------------
