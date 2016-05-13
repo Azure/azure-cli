@@ -70,8 +70,9 @@ class VMShowListSizesListIPAddressesScenarioTest(CommandTestScript):
         self.run('vm create --resource-group {0} --location {1} -n {2} --admin-username ubuntu '
                  '--image Canonical:UbuntuServer:14.04.4-LTS:latest --admin-password testPassword0 '
                  '--deployment-name {3} --public-ip-address-allocation {4} '
-                 '--public-ip-address-type new'.format(self.resource_group, self.location,
-                 self.vm_name, self.deployment_name, self.ip_allocation_method))
+                 '--public-ip-address-type new'.format(
+                     self.resource_group, self.location, self.vm_name, self.deployment_name,
+                     self.ip_allocation_method))
         self.test('vm show --resource-group {} --name {} --expand instanceView'.format(
             self.resource_group, self.vm_name),
                   [
@@ -215,8 +216,8 @@ class VMGeneralizeScenarioTest(CommandTestScript):
     def test_body(self):
         self.run('vm create --resource-group {0} --location {1} --name {2} --admin-username ubuntu '
                  '--image Canonical:UbuntuServer:14.04.4-LTS:latest --admin-password testPassword0 '
-                 '--deployment-name {3}'.format(self.resource_group, self.location, self.vm_name,
-                 self.deployment_name))
+                 '--deployment-name {3}'.format(
+                     self.resource_group, self.location, self.vm_name, self.deployment_name))
         self.run('vm power-off --resource-group {} --name {}'.format(
             self.resource_group, self.vm_name))
         # Should be able to generalize the VM after it has been stopped
@@ -266,8 +267,8 @@ class VMCreateAndStateModificationsScenarioTest(CommandTestScript):
         self.test('vm list --resource-group {}'.format(self.resource_group), None)
         self.run('vm create --resource-group {0} --location {1} --name {2} --admin-username ubuntu '
                  '--image Canonical:UbuntuServer:14.04.4-LTS:latest --admin-password testPassword0 '
-                 '--deployment-name {3}'.format(self.resource_group, self.location, self.vm_name,
-                 self.deployment_name))
+                 '--deployment-name {3}'.format(
+                     self.resource_group, self.location, self.vm_name, self.deployment_name))
         # Expecting one result, the one we created
         self.test('vm list --resource-group {}'.format(self.resource_group), [
             JMESPathComparator('length(@)', 1),
