@@ -99,7 +99,7 @@ def install_cli(install_dir):
                  env=dict(os.environ, AZURE_CLI_DISABLE_POST_INSTALL='1'))
     modules_to_install = ['azure-cli-component', 'azure-cli-profile', 'azure-cli-storage',
                           'azure-cli-vm', 'azure-cli-network', 'azure-cli-resource',
-                          'azure-cli-taskhelp', 'azure-cli-rbac']
+                          'azure-cli-taskhelp', 'azure-cli-role']
     for module_name in modules_to_install:
         exec_command(get_pip_install_command(module_name, path_to_pip))
 

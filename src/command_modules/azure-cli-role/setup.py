@@ -38,14 +38,13 @@ CLASSIFIERS = [
 
 DEPENDENCIES = [
     'azure==2.0.0rc3',
-    'adal==0.2.2', #from libs/adal-*.zip
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
     README = f.read()
 
 setup(
-    name='azure-cli-rbac',
+    name='azure-cli-role',
     version=VERSION,
     description='Microsoft Azure Command-Line Tools',
     long_description=README,
@@ -60,7 +59,7 @@ setup(
         'azure.cli.command_modules',
     ],
     packages=[
-        'azure.cli.command_modules.rbac',
+        'azure.cli.command_modules.role',
     ],
     install_requires=DEPENDENCIES,
 )
