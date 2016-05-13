@@ -6,8 +6,11 @@ from azure.mgmt.compute.models import VirtualHardDisk
 from azure.cli.commands import (COMMON_PARAMETERS as GLOBAL_COMMON_PARAMETERS, extend_parameter,
                                 patch_aliases)
 from azure.cli.command_modules.vm._validators import MinMaxValue
-from azure.cli.command_modules.vm._actions import (VMImageFieldAction, VMSSHFieldAction,
-                                                   VMDNSNameAction)
+from azure.cli.command_modules.vm._actions import (VMImageFieldAction,
+                                                   VMSSHFieldAction,
+                                                   VMDNSNameAction,
+                                                   load_images_from_aliases_doc,
+                                                   get_subscription_locations)
 from azure.cli._locale import L
 
 # BASIC PARAMETER CONFIGURATION
@@ -44,7 +47,18 @@ PARAMETER_ALIASES = patch_aliases(GLOBAL_COMMON_PARAMETERS, {
     }
 })
 
+def get_location_completion_list(prefix, **kwargs):#pylint: disable=unused-argument
+    result = get_subscription_locations()
+    return [l.name for l in result]
+
+def get_urn_aliases_completion_list(prefix, **kwargs):#pylint: disable=unused-argument
+    images = load_images_from_aliases_doc()
+    return [i['urn alias'] for i in images]
+
 VM_CREATE_PARAMETER_ALIASES = {
+    'location': {
+        'completer': get_location_completion_list
+    },
     'name': {
         'name': '--name -n'
     },
@@ -96,7 +110,8 @@ VM_CREATE_PARAMETER_ALIASES = {
 VM_CREATE_EXTRA_PARAMETERS = {
     'image': {
         'name': '--image',
-        'action': VMImageFieldAction
+        'action': VMImageFieldAction,
+        'completer': get_urn_aliases_completion_list
         },
 }
 
