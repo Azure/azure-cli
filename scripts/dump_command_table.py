@@ -5,7 +5,7 @@ import json
 import re
 import sys
 
-from azure.cli.application import Application, Configuration
+from azure.cli.application import Configuration
 
 PRIMITIVES = (str, int, bool, float)
 
@@ -18,7 +18,7 @@ class Exporter(json.JSONEncoder):
             return str(o)
 
 def _extract_non_callable(obj):
-    if isinstance(obj, PRIMITIVE):
+    if isinstance(obj, PRIMITIVES):
         return obj
     elif callable(obj):
         return None

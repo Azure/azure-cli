@@ -45,17 +45,18 @@ class RoleAssignmentScenarioTest(CommandTestScript):
                 JMESPathComparator("length([].properties.contains(scope, '{}')) == length(@)".format(scope), True)
             ])
 
-        # TODO: Currently this fails. It returns assignments without a 'resourceGroup' field!
+        # TODO: Currently this fails. It returns assignments without a 'resourceGroup' field! 
+        # Pivotal Item #119559823
         #s.test('role assignment list-for-resource-group -g {}'.format(rg),
         #    [
         #        JMESPathComparator("length([].contains(resourceGroup, '{}')) == length(@)".format(rg), True)
         #    ])
 
-        # TODO: This produces some output, but I have no idea if it is correct!
-        #s.rec('role assignment list-for-resource --parent-resource-path {} -g {} --resource-name {} --resource-provider-namespace {} --resource-type {}'.format(
+        # TODO: This produces some output, but I have no idea if it is correct! (Pivotal Item #119559823)
+        #s.rec('role assignment list-for-resource --parent-resource-path {0} -g {1} --resource-name {2} --resource-provider-namespace {3} --resource-type {4}'.format(
         #    parent_path, rg, resource, 'Microsoft.Sql', 'databases'))
 
-        # TODO: This role assignment is not found
+        # TODO: This role assignment is not found (Pivotal Item #119559823)
         #name = 'c00ddce0-e2f9-417c-bbe4-0429bba5d11e'
         #s.test('role assignment show --scope {} --role-assignment-name {}'.format(scope, name), 
         #    [

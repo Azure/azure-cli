@@ -41,11 +41,5 @@ class Test_test_script_checks(unittest.TestCase):
         check = {'a': {'c': 5}}
         check_json(source, check)
 
-    def test_quoted_split(self):
-        self.assertEqual(shlex.split('a b c d'), ['a', 'b', 'c', 'd'])
-        self.assertEqual(shlex.split('a "b c"'), ['a', 'b c'])
-        self.assertEqual(shlex.split('a b/c'), ['a', 'b/c'])
-        self.assertEqual(shlex.split('a "b\c"'), ['a', 'b\c'])
-
 if __name__ == '__main__':
     unittest.main()
