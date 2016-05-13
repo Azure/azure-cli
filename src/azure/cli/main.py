@@ -1,7 +1,7 @@
 ﻿import os
 import sys
 
-import azure.cli.application as application
+from azure.cli.application import APPLICATION, Configuration
 import azure.cli._logging as _logging
 from ._session import Session
 from ._output import OutputProducer
@@ -34,14 +34,15 @@ def main(args, file=sys.stdout): #pylint: disable=redefined-builtin
                                 'locale',
                                 CONFIG.get('locale', 'en-US')))
 
-    config = application.Configuration(args)
-    application.APPLICATION = app = application.Application(config)
+    config = Configuration(args)
+    APPLICATION.initialize(config)
+
     try:
-        cmd_result = app.execute(args)
+        cmd_result = APPLICATION.execute(args)
         # Commands can return a dictionary/list of results
         # If they do, we print the results.
         if cmd_result:
-            formatter = OutputProducer.get_formatter(app.configuration.output_format)
+            formatter = OutputProducer.get_formatter(APPLICATION.configuration.output_format)
             OutputProducer(formatter=formatter, file=file).out(cmd_result)
     except CLIError as ex:
         logger.error(ex.args[0])
