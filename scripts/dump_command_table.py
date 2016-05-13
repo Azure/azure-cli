@@ -5,7 +5,9 @@ import json
 import re
 import sys
 
-from azure.cli.application import Configuration
+from azure.cli.application import Application, Configuration
+
+PRIMITIVES = (str, int, bool, float)
 
 class Exporter(json.JSONEncoder):
 
@@ -15,27 +17,20 @@ class Exporter(json.JSONEncoder):
         except TypeError:
             return str(o)
 
-PRIMITIVE = (str, int, bool, float)
-
-def extract_non_callable(obj):
+def _extract_non_callable(obj):
     if isinstance(obj, PRIMITIVE):
         return obj
     elif callable(obj):
         return None
     elif isinstance(obj, dict):
-        new_dict = {}
-        for key in obj.keys():
-            res = extract_non_callable(obj[key])
-            if res:
-                new_dict[key] = res
+        new_dict = {key: _extract_non_callable(obj[key]) for key in obj.keys()}
         return new_dict
     elif isinstance(obj, list):
-        new_list = []
-        for item in obj:
-            res = extract_non_callable(item)
-            if res:
-                new_list.append(res)
+        new_list = [_extract_non_callable(x) for x in obj]
         return new_list
+
+def _extract_command_table_entry(name):
+    return next(x for x in cmd_table.values() if name == x['name'])
 
 parser = argparse.ArgumentParser(description='Command Table Parser')
 parser.add_argument('--commands', metavar='N', nargs='+', help='Filter by first level command (OR)')
@@ -61,7 +56,7 @@ results = []
 
 if param_names:
     for name in cmd_list:
-        cmd_args = [x for x in cmd_table.values() if name == x['name']][0]['arguments']
+        cmd_args = _extract_command_table_entry(name)['arguments']
         match = False
         for arg in cmd_args:
             if match:
@@ -79,10 +74,10 @@ print('\n{}\n'.format(heading))
 
 for cmd_name in results:
     print('== {} =='.format(cmd_name))
-    table_entry = [x for x in cmd_table.values() if cmd_name == x['name']][0]
+    table_entry = _extract_command_table_entry(cmd_name)
     # keep only the JSON Serializable keys
     json_entry = {}
     for key in table_entry.keys():
-        json_entry[key] = extract_non_callable(table_entry[key])
+        json_entry[key] = _extract_non_callable(table_entry[key])
     print(json.dumps(json_entry, indent=2, sort_keys=True), end='\n\n')
     
