@@ -36,8 +36,8 @@ class RoleAssignmentScenarioTest(CommandTestScript):
         parent_path = 'servers/testserver23456'
 
         list_all = s.run('role assignment list -o json')
-        list_some = s.run(['role', 'assignment', 'list', '--filter',
-                           'principalId eq \'{}\''.format(principal_id), '-o', 'json'])
+        list_some = s.run('role assignment list --filter "principalId eq \'{}\'" '
+                          '-o json'.format(principal_id))
         assert len(list_all) > len(list_some)
 
         s.test('role assignment list-for-scope --scope {}'.format(scope),

@@ -112,7 +112,7 @@ class CommandTestScript(object): #pylint: disable=too-many-instance-attributes
             print('RECORDING: {}'.format(command))
         self.auto = False
         output = StringIO()
-        command_list = command if isinstance(command, list) else shlex.split(command)
+        command_list = shlex.split(command)
         cli(command_list, file=output)
         self._track_executed_commands(command_list)
         result = output.getvalue().strip()
@@ -127,15 +127,14 @@ class CommandTestScript(object): #pylint: disable=too-many-instance-attributes
         if self.debug:
             print('RUNNING: {}'.format(command))
         output = StringIO()
-        command_list = command if isinstance(command, list) else shlex.split(command)
+        command_list = shlex.split(command)
         cli(command_list, file=output)
         self._track_executed_commands(command_list)
         result = output.getvalue().strip()
         output.close()
+        # if json output was specified, return result as json object
         if isinstance(command, str) and '-o json' in command:
             result = json.loads(result) if result else []
-        elif isinstance(command, list) and set(command).issuperset(set(['-o', 'json'])):
-            result = json.loads(result)
         return result
 
     def test(self, command, checks):
@@ -145,7 +144,7 @@ class CommandTestScript(object): #pylint: disable=too-many-instance-attributes
         if self.debug:
             print('TESTING: {}'.format(command))
         output = StringIO()
-        command_list = command if isinstance(command, list) else shlex.split(command)
+        command_list = shlex.split(command)
         command_list += ['-o', 'json']
         cli(command_list, file=output)
         self._track_executed_commands(command_list)
