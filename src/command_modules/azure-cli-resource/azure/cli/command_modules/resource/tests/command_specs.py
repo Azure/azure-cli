@@ -114,7 +114,7 @@ class TagScenarioTest(CommandTestScript):
         s.test('tag list --query "[?tagName == \'{}\']"'.format(tn), None)
         s.test('tag create -n {}'.format(tn), {'tagName': tn, 'values': [], 'count': {'value': "0"}})
         s.test('tag add-value -n {} --value test'.format(tn), {'tagValue': 'test'})
-        s.test('tag add-value -n {} --value test2'. format(tn), {'tagValue': 'test2'})
+        s.test('tag add-value -n {} --value test2'.format(tn), {'tagValue': 'test2'})
         s.test('tag list --query "[?tagName == \'{}\']"'.format(tn),
             [
                 JMESPathComparator('[].values[].tagValue', [u'test', u'test2'])
