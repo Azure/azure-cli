@@ -8,6 +8,7 @@ import sys
 from azure.cli.application import Configuration
 
 PRIMITIVES = (str, int, bool, float)
+IGNORE_ARGS = ['help']
 
 class Exporter(json.JSONEncoder):
 
@@ -17,16 +18,16 @@ class Exporter(json.JSONEncoder):
         except TypeError:
             return str(o)
 
-def _extract_non_callable(obj):
+def _format_entry(obj):
     if isinstance(obj, PRIMITIVES):
         return obj
     elif callable(obj):
         return 'function <{}>'.format(obj.__name__)
     elif isinstance(obj, dict):
-        new_dict = {key: _extract_non_callable(obj[key]) for key in obj.keys()}
+        new_dict = {key: _format_entry(obj[key]) for key in obj.keys() if key not in IGNORE_ARGS}
         return new_dict
     elif isinstance(obj, list):
-        new_list = [_extract_non_callable(x) for x in obj]
+        new_list = [_format_entry(x) for x in obj]
         return new_list
 
 def _extract_command_table_entry(name):
@@ -69,16 +70,13 @@ if param_names:
 else:
     results = cmd_list
 
-heading = '=== COMMANDS IN {} PACKAGE(S) WITH {} PARAMETERS ==='.format(
-    cmd_set_names or 'ANY', param_names or 'ANY')
-print('\n{}\n'.format(heading))
-
+result_dict = {}
 for cmd_name in results:
-    print('== {} =='.format(cmd_name))
     table_entry = _extract_command_table_entry(cmd_name)
-    # keep only the JSON Serializable keys
     json_entry = {}
     for key in table_entry.keys():
-        json_entry[key] = _extract_non_callable(table_entry[key])
-    print(json.dumps(json_entry, indent=2, sort_keys=True), end='\n\n')
+        if key not in IGNORE_ARGS:
+            json_entry[key] = _format_entry(table_entry[key])
+    result_dict[cmd_name] = json_entry
+print(json.dumps(result_dict, indent=2, sort_keys=True))
     
