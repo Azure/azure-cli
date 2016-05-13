@@ -5,7 +5,14 @@ import azure.cli._logging as _logging
 
 logger = _logging.get_az_logger(__name__)
 
-def get_mgmt_service_client(client_type, config_type, subscription_bound=True):
+def get_mgmt_service_client(client_type, config_type):
+    client, _ = _get_mgmt_service_client(client_type, config_type)
+    return client
+
+def get_subscription_service_client(client_type, config_type):
+    return _get_mgmt_service_client(client_type, config_type, False)
+
+def _get_mgmt_service_client(client_type, config_type, subscription_bound=True):
     logger.info('Getting management service client client_type=%s, config_type=%s',
                 client_type.__name__, config_type.__name__)
     profile = Profile()
@@ -19,7 +26,8 @@ def get_mgmt_service_client(client_type, config_type, subscription_bound=True):
     _debug.allow_debug_connection(client)
     client.config.add_user_agent("AZURECLI_{}".format(cli.__version__))
 
-    return client
+    return (client, subscription_id)
+
 
 def get_data_service_client(service_type, account_name, account_key, connection_string=None,
                             sas_token=None):
