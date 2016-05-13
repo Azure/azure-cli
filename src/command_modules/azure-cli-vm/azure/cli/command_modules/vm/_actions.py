@@ -24,7 +24,7 @@ class VMImageFieldAction(argparse.Action): #pylint: disable=too-few-public-metho
             namespace.os_sku = match.group(3)
             namespace.os_version = match.group(4)
         else:
-            images = load_images_from_aliases_doc(None, None, None)
+            images = load_images_from_aliases_doc()
             matched = next((x for x in images if x['urn alias'].lower() == image.lower()), None)
             if matched is None:
                 raise CLIError('Invalid image "{}". Please pick one from {}' \
@@ -80,7 +80,7 @@ def _handle_auth_types(**kwargs):
 
 APPLICATION.register(APPLICATION.COMMAND_PARSER_PARSED, _handle_auth_types)
 
-def load_images_from_aliases_doc(publisher, offer, sku):
+def load_images_from_aliases_doc(publisher=None, offer=None, sku=None):
     target_url = ('https://raw.githubusercontent.com/Azure/azure-rest-api-specs/'
                   'master/arm-compute/quickstart-templates/aliases.json')
     txt = urlopen(target_url).read()
@@ -107,16 +107,12 @@ def load_images_from_aliases_doc(publisher, offer, sku):
 
 def load_images_thru_services(publisher, offer, sku, location):
     from concurrent.futures import ThreadPoolExecutor, as_completed
-
     all_images = []
     client = _compute_client_factory()
     if location is None:
-        subscription_client = _subscription_client_factory()
-        result = list(subscription_client.subscriptions.list_locations(
-            client.config.subscription_id))
+        result = get_subscription_locations()
         if result:
-            location = next((r.name for r in result if r.name.lower() == 'westus'),
-                            result[0].name)
+            location = next((r.name for r in result if r.name.lower() == 'westus'), result[0].name)
         else:
             #this should never happen, just in case
             raise CLIError('Current subscription does not have valid location list')
@@ -152,6 +148,11 @@ def load_images_thru_services(publisher, offer, sku, location):
         _load_images_from_publisher(publishers[0].name)
 
     return all_images
+
+def get_subscription_locations():
+    subscription_client, subscription_id = _subscription_client_factory()
+    result = list(subscription_client.subscriptions.list_locations(subscription_id))
+    return result
 
 def _partial_matched(pattern, string):
     if not pattern:
