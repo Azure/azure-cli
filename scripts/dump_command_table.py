@@ -21,7 +21,7 @@ def _extract_non_callable(obj):
     if isinstance(obj, PRIMITIVES):
         return obj
     elif callable(obj):
-        return None
+        return 'function <{}>'.format(obj.__name__)
     elif isinstance(obj, dict):
         new_dict = {key: _extract_non_callable(obj[key]) for key in obj.keys()}
         return new_dict
@@ -42,18 +42,19 @@ param_names = args.params
 config = Configuration([])
 cmd_table = config.get_command_table()
 cmd_list = []
-for val in cmd_table.values():
-    cmd_name = val['name']
-    if cmd_set_names is None:
-        cmd_list.append(cmd_name)
-        continue
+if cmd_set_names is None :
+    # if no command prefix specified, use all command table entries
+    cmd_list = [x['name'] for x in cmd_table.values()]
+else:
+    # if the command name matches a prefix, add it to the output list
+    for val in cmd_table.values():
+        cmd_name = val['name']
+        for prefix in cmd_set_names:
+            if cmd_name.startswith(prefix):
+                cmd_list.append(cmd_name)
+                break
 
-    for prefix in cmd_set_names:
-        if cmd_name.startswith(prefix):
-            cmd_list.append(cmd_name)
-            break
 results = []
-
 if param_names:
     for name in cmd_list:
         cmd_args = _extract_command_table_entry(name)['arguments']
