@@ -1,8 +1,10 @@
 from __future__ import print_function
 
 import argparse
+import inspect
 import json
 import re
+import types
 import sys
 
 from azure.cli.application import Configuration
@@ -21,8 +23,12 @@ class Exporter(json.JSONEncoder):
 def _format_entry(obj):
     if isinstance(obj, PRIMITIVES):
         return obj
-    elif callable(obj):
+    elif isinstance(obj, types.FunctionType):
         return 'function <{}>'.format(obj.__name__)
+    elif isinstance(obj, types.TypeType):
+        return 'type <{}>'.format(obj.__name__)
+    elif callable(obj):
+        return 'callable {}'.format(type(obj))
     elif isinstance(obj, dict):
         new_dict = {key: _format_entry(obj[key]) for key in obj.keys() if key not in IGNORE_ARGS}
         return new_dict
