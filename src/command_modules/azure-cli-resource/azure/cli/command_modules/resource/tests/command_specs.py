@@ -2,6 +2,7 @@ import json
 # AZURE CLI RESOURCE TEST DEFINITIONS
 
 from azure.cli.utils.command_test_script import CommandTestScript, JMESPathComparator
+from azure.cli.commands import LongRunningOperation
 
 #pylint: disable=method-hidden
 class ResourceGroupScenarioTest(CommandTestScript):
@@ -35,33 +36,33 @@ class ResourceScenarioTest(CommandTestScript):
     def test_body(self):
         s = self
         rg = 'travistestresourcegroup'
-        all_resources = json.loads(s.run('resource list -o json'))
-        some_resources = json.loads(s.run('resource list -l centralus -o json'))
+        all_resources = s.run('resource list -o json')
+        some_resources = s.run('resource list -l centralus -o json')
         assert len(all_resources) > len(some_resources)
 
         s.test('resource list -l centralus',
             [
-                JMESPathComparator('[0].location', 'centralus'),
+                JMESPathComparator("length([?location == 'centralus']) == length(@)", True),
             ])
 
         s.test('resource list --tag displayName=PublicIPAddress',
             [
-                JMESPathComparator('[0].type', 'Microsoft.Network/publicIPAddresses')
+                JMESPathComparator("length([?type == 'Microsoft.Network/publicIPAddresses']) == length(@)", True)
             ])
 
         s.test('resource list --resource-type Microsoft.Network/networkInterfaces',
             [
-                JMESPathComparator('[0].type', 'Microsoft.Network/networkInterfaces')
+                JMESPathComparator("length([?type == 'Microsoft.Network/networkInterfaces']) == length(@)", True)
             ])
 
         s.test('resource list --name TravisTestResourceGroup',
             [
-                JMESPathComparator('[0].name', 'TravisTestResourceGroup')
+                JMESPathComparator("length([?name == 'TravisTestResourceGroup']) == length(@)", True)
             ])
 
-        all_tagged_displayname = json.loads(s.run('resource list --tag displayName -o json'))
+        all_tagged_displayname = s.run('resource list --tag displayName -o json')
         storage_acc_tagged_displayname = \
-            json.loads(s.run('resource list --tag displayName=StorageAccount -o json'))
+            s.run('resource list --tag displayName=StorageAccount -o json')
         assert len(all_tagged_displayname) > len(storage_acc_tagged_displayname)
 
         s.test('resource show -n xplatvmExt1314 --resource-group XPLATTESTGEXTENSION9085 ' + \
@@ -71,6 +72,50 @@ class ResourceScenarioTest(CommandTestScript):
 
     def __init__(self):
         super(ResourceScenarioTest, self).__init__(None, self.test_body, None)
+
+class TagScenarioTest(CommandTestScript):
+
+    def set_up(self):
+        tn = self.tag_name
+        tags = self.run('tag list --query "[?tagName == \'{}\'].values[].tagValue" -o json'.format(tn))
+        for tag in tags:
+            self.run('tag remove-value -n {} --value {}'.format(tn, tag))
+        self.run('tag delete -n {}'.format(tn))
+
+    def test_body(self):
+        s = self
+        tn = s.tag_name
+        s.test('tag list --query "[?tagName == \'{}\']"'.format(tn), None)
+        s.test('tag create -n {}'.format(tn), {'tagName': tn, 'values': [], 'count': {'value': "0"}})
+        s.test('tag add-value -n {} --value test'.format(tn), {'tagValue': 'test'})
+        s.test('tag add-value -n {} --value test2'.format(tn), {'tagValue': 'test2'})
+        s.test('tag list --query "[?tagName == \'{}\']"'.format(tn),
+            [
+                JMESPathComparator('[].values[].tagValue', [u'test', u'test2'])
+            ])
+        s.run('tag remove-value -n {} --value test'.format(tn))
+        s.test('tag list --query "[?tagName == \'{}\']"'.format(tn),
+            [
+                JMESPathComparator('[].values[].tagValue', [u'test2'])
+            ])
+        s.run('tag remove-value -n {} --value test2'.format(tn))
+        s.test('tag list --query "[?tagName == \'{}\']"'.format(tn),
+            [
+                JMESPathComparator('[].values[].tagValue', [])
+            ])
+        s.run('tag delete -n {}'.format(tn))
+        s.test('tag list --query "[?tagName == \'{}\']"'.format(self.tag_name), None)        
+
+    def tear_down(self):
+        tn = self.tag_name
+        tags = self.run('tag list --query "[?tagName == \'{}\'].values[].tagValue" -o json'.format(tn))
+        for tag in tags:
+            self.run('tag remove-value -n {} --value {}'.format(tn, tag))
+        self.run('tag delete -n {}'.format(tn))
+
+    def __init__(self):
+        self.tag_name = 'travistesttag'
+        super(TagScenarioTest, self).__init__(self.set_up, self.test_body, self.tear_down)
 
 ENV_VAR = {}
 
@@ -82,6 +127,10 @@ TEST_DEF = [
     {
         'test_name': 'resource_scenario',
         'script': ResourceScenarioTest()
+    },
+    {
+        'test_name': 'tag_scenario',
+        'script': TagScenarioTest()
     },
 ]
 

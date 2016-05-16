@@ -39,7 +39,7 @@ print()
 print("Untested commands")
 print("=================")
 print('\n'.join(sorted(untested)))
-percentage_tested = (len(commands_tested_set) / len(cmd_set)) * 100
+percentage_tested = (len(commands_tested_set) * 100.0 / len(cmd_set))
 print()
 print('Total commands {}, Tested commands {}, Untested commands {}'.format(
     len(cmd_set),
