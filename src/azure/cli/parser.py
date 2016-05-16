@@ -28,13 +28,13 @@ class AzCliCommandParser(argparse.ArgumentParser):
             sp.required = True
             self.subparsers = {(): sp}
 
-        for handler, metadata in command_table.items():
-            subparser = self._get_subparser(metadata['name'].split())
-            command_name = metadata['name'].split()[-1]
+        for command_name, metadata in command_table.items():
+            subparser = self._get_subparser(command_name.split())
+            command_verb = command_name.split()[-1]
             # To work around http://bugs.python.org/issue9253, we artificially add any new
             # parsers we add to the "choices" section of the subparser.
-            subparser.choices[command_name] = command_name
-            command_parser = subparser.add_parser(command_name,
+            subparser.choices[command_verb] = command_verb
+            command_parser = subparser.add_parser(command_verb,
                                                   description=metadata.get('description'),
                                                   parents=self.parents, conflict_handler='resolve',
                                                   help_file=metadata.get('help_file'))
@@ -45,7 +45,7 @@ class AzCliCommandParser(argparse.ArgumentParser):
                     *names, **{k:v for k, v in arg.items() if k != 'name'})
                 param.completer = completer
 
-            command_parser.set_defaults(func=handler, command=metadata['name'])
+            command_parser.set_defaults(func=metadata['handler'], command=command_name)
 
     def _get_subparser(self, path):
         """For each part of the path, walk down the tree of
