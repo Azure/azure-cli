@@ -1,6 +1,8 @@
 from azure.cli._help_files import helps
 
-image_long_summary = """                      Common OS types: CentOS, CoreOS, Debian, openSUSE, RHEL, SLES, UbuntuLTS, Win2008SP1, Win2012Datacenter, Win2012R2Datacenter. 
+#pylint: disable=line-too-long
+
+image_long_summary = """                      Common OS types: CentOS, CoreOS, Debian, openSUSE, RHEL, SLES, UbuntuLTS, Win2008SP1, Win2012Datacenter, Win2012R2Datacenter.
                       Example URN: MicrosoftWindowsServer:WindowsServer:2012-R2-Datacenter:latest
                       Example URI: http://<storageAccount>.blob.core.windows.net/vhds/osdiskimage.vhd
 """

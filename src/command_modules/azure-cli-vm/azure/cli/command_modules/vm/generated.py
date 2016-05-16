@@ -21,8 +21,8 @@ from azure.cli.command_modules.vm.mgmt_vm_create.lib import (VMCreationClient as
                                                              as VMClientConfig)
 from azure.cli.command_modules.vm.mgmt_vm_create.lib.operations import VMOperations
 from azure.cli.command_modules.vm.mgmt_vmss_create.lib import (VMSSCreationClient as VMSSClient,
-                                                             VMSSCreationClientConfiguration
-                                                             as VMSSClientConfig)
+                                                               VMSSCreationClientConfiguration
+                                                               as VMSSClientConfig)
 from azure.cli.command_modules.vm.mgmt_vmss_create.lib.operations import VMSSOperations
 
 from ._params import (PARAMETER_ALIASES, VM_CREATE_EXTRA_PARAMETERS, VM_CREATE_PARAMETER_ALIASES,
