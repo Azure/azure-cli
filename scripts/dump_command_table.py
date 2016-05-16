@@ -36,9 +36,6 @@ def _format_entry(obj):
         new_list = [_format_entry(x) for x in obj]
         return new_list
 
-def _extract_command_table_entry(name):
-    return next(x for x in cmd_table.values() if name == x['name'])
-
 parser = argparse.ArgumentParser(description='Command Table Parser')
 parser.add_argument('--commands', metavar='N', nargs='+', help='Filter by first level command (OR)')
 parser.add_argument('--params', metavar='N', nargs='+', help='Filter by parameters (OR)')
@@ -51,20 +48,19 @@ cmd_table = config.get_command_table()
 cmd_list = []
 if cmd_set_names is None :
     # if no command prefix specified, use all command table entries
-    cmd_list = [x['name'] for x in cmd_table.values()]
+    cmd_list = cmd_table.keys()
 else:
     # if the command name matches a prefix, add it to the output list
-    for val in cmd_table.values():
-        cmd_name = val['name']
+    for name in cmd_table.keys():
         for prefix in cmd_set_names:
-            if cmd_name.startswith(prefix):
-                cmd_list.append(cmd_name)
+            if name.startswith(prefix):
+                cmd_list.append(name)
                 break
 
 results = []
 if param_names:
     for name in cmd_list:
-        cmd_args = _extract_command_table_entry(name)['arguments']
+        cmd_args = cmd_table[name]['arguments']
         match = False
         for arg in cmd_args:
             if match:
@@ -78,11 +74,9 @@ else:
 
 result_dict = {}
 for cmd_name in results:
-    table_entry = _extract_command_table_entry(cmd_name)
-    json_entry = {}
-    for key in table_entry.keys():
-        if key not in IGNORE_ARGS:
-            json_entry[key] = _format_entry(table_entry[key])
+    table_entry = cmd_table[cmd_name]
+    json_entry = {key: _format_entry(table_entry[key]) for key in table_entry.keys() \
+        if key not in IGNORE_ARGS}
     result_dict[cmd_name] = json_entry
 print(json.dumps(result_dict, indent=2, sort_keys=True))
     

@@ -78,8 +78,7 @@ def _handle_auth_types(**kwargs):
             else:
                 raise CLIError('An RSA key file or key value must be supplied to SSH Key Value')
 
-if APPLICATION:
-    APPLICATION.register(APPLICATION.COMMAND_PARSER_PARSED, _handle_auth_types)
+APPLICATION.register(APPLICATION.COMMAND_PARSER_PARSED, _handle_auth_types)
 
 def load_images_from_aliases_doc(publisher=None, offer=None, sku=None):
     target_url = ('https://raw.githubusercontent.com/Azure/azure-rest-api-specs/'
