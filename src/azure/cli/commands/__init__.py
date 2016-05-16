@@ -107,40 +107,6 @@ class CommandTable(defaultdict):
     def __init__(self):
         super(CommandTable, self).__init__(lambda: {'arguments': []})
 
-    def command(self, name, **kwargs):
-        def wrapper(func):
-            self[func]['name'] = name
-            self[func].update(kwargs)
-            return func
-        return wrapper
-
-    def description(self, description):
-        def wrapper(func):
-            self[func]['description'] = description
-            return func
-        return wrapper
-
-    def help(self, help_file):
-        def wrapper(func):
-            self[func]['help_file'] = help_file
-            return func
-        return wrapper
-
-    def option(self, name, **kwargs):
-        def wrapper(func):
-            opt = dict(kwargs)
-            opt['name'] = name
-            self[func]['arguments'].append(opt)
-            return func
-        return wrapper
-
-    def option_set(self, options):
-        def wrapper(func):
-            for opt in options:
-                self[func]['arguments'].append(opt)
-            return func
-        return wrapper
-
 def _get_command_table(module_name):
     module = import_module('azure.cli.command_modules.' + module_name)
     return module.command_table
@@ -167,5 +133,5 @@ def get_command_table(module_name=None):
         for mod in INSTALLED_COMMAND_MODULES:
             command_table.update(_get_command_table(mod))
 
-    ordered_commands = OrderedDict(sorted(command_table.items(), key=lambda item: item[1]['name']))
+    ordered_commands = OrderedDict(command_table)
     return ordered_commands

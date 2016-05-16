@@ -27,12 +27,12 @@ class TestParser(unittest.TestCase):
             pass
 
         command_table = {
-            test_handler1: {
-                'name': 'command the-name',
+            'command the-name': {
+                'handler': test_handler1,
                 'arguments': []
                 },
-            test_handler2: {
-                'name': 'sub-command the-second-name',
+            'sub-command the-second-name': {
+                'handler': test_handler2,
                 'arguments': []
                 }
             }
@@ -54,8 +54,8 @@ class TestParser(unittest.TestCase):
             pass
 
         command_table = {
-            test_handler: {
-                'name': 'test command',
+            'test command': {
+                'handler': test_handler,
                 'arguments': [
                     {'name': '--req', 'required': True}
                     ]
@@ -76,8 +76,8 @@ class TestParser(unittest.TestCase):
             pass
 
         command_table = {
-            test_handler: {
-                'name': 'test command',
+            'test command': {
+                'handler': test_handler,
                 'arguments': [
                     {'name': '--req', 'required': True, 'nargs': 2}
                     ]
