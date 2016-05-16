@@ -49,9 +49,8 @@ class DeploymentVMSS(Model):
     :type load_balancer_backend_pool_name: str
     :param load_balancer_name: Name for load balancer.
     :type load_balancer_name: str
-    :param load_balancer_nat_pool_name: Size of VMs in the VM Scale Set.  See
-     https://azure.microsoft.com/en-us/pricing/details/virtual-machines/ for
-     size info.
+    :param load_balancer_nat_pool_name: Name of load balancer NAT (network
+     address translation) pool.
     :type load_balancer_nat_pool_name: str
     :param load_balancer_type: Whether to use an existing load balancer,
      create a new one, or use no load balancer. Possible values include:

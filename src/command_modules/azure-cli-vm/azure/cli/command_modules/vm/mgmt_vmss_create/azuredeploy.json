@@ -51,11 +51,44 @@
         "description": "Associate VMs with a public IP address to a DNS name."
       }
     },
+    "instanceCount": {
+      "type": "string",
+      "defaultValue": 2,
+      "metadata": {
+        "description": "Number of VMs in scale set."
+      }
+    },
+    "loadBalancerBackendPoolName": {
+      "type": "string",
+      "defaultValue": "[concat(parameters('name'), 'bepool')]",
+      "metadata": {
+        "description": "Name of load balancer backend pool."
+      }
+    },
     "loadBalancerName": {
       "type": "string",
       "defaultValue": "[concat(parameters('name'), 'lb')]",
       "metadata": {
         "description": "Name for load balancer."
+      }
+    },
+    "loadBalancerNatPoolName": {
+      "type": "string",
+      "defaultValue": "[concat(parameters('name'), 'natpool')]",
+      "metadata": {
+        "description": "Name of load balancer NAT (network address translation) pool."
+      }
+    },
+    "loadBalancerType": {
+      "type": "string",
+      "defaultValue": "new",
+      "allowedValues": [
+        "new",
+        "existing",
+        "none"
+      ],
+      "metadata": {
+        "description": "Whether to use an existing load balancer, create a new one, or use no load balancer."
       }
     },
     "location": {
@@ -253,42 +286,9 @@
         "description": "Whether to use an existing VNet or create a new one."
       }
     },
-    "loadBalancerType": {
-      "type": "string",
-      "defaultValue": "new",
-      "allowedValues": [
-        "new",
-        "existing",
-        "none"
-      ],
-      "metadata": {
-        "description": "Whether to use an existing load balancer, create a new one, or use no load balancer."
-      }
-    },
-    "instanceCount": {
-      "type": "string",
-      "defaultValue": 2,
-      "metadata": {
-        "description": "Number of VMs in scale set."
-      }
-    },
     "vmSku": {
       "type": "string",
       "defaultValue": "Standard_D1_v2",
-      "metadata": {
-        "description": "Size of VMs in the VM Scale Set.  See https://azure.microsoft.com/en-us/pricing/details/virtual-machines/ for size info."
-      }
-    },
-    "loadBalancerBackendPoolName": {
-      "type": "string",
-      "defaultValue": "[concat(variables('namingInfix'), 'bepool')]",
-      "metadata": {
-        "description": "Name of load balancer backend pool."
-      }
-    },
-    "loadBalancerNatPoolName": {
-      "type": "string",
-      "defaultValue": "[concat(variables('namingInfix'), 'natpool')]",
       "metadata": {
         "description": "Size of VMs in the VM Scale Set.  See https://azure.microsoft.com/en-us/pricing/details/virtual-machines/ for size info."
       }
@@ -538,7 +538,8 @@
           "frontEndIPConfigID": { "value": "[variables('frontEndIPConfigID')]" },
           "natStartPort": { "value": "[variables('natStartPort')]" },
           "natEndPort": { "value": "[variables('natEndPort')]" },
-          "natBackendPort": { "value": "[variables('natBackendPort')]" }
+          "natBackendPort": { "value": "[variables('natBackendPort')]" },
+          "publicIpAddressType": { "value": "[parameters('publicIpAddressType')]" }
         }
       }
     },

@@ -34,6 +34,38 @@
     },
     "natBackendPort": {
       "type": "int"
+    },
+    "publicIpAddressType": {
+      "type": "string"
+    }
+  },
+  "variables": {
+    "frontendConfig": {
+      "new": [
+        {
+          "name": "LoadBalancerFrontEnd",
+          "properties": {
+            "publicIPAddress": {
+              "id": "[parameters('publicIPAddressID')]"
+            }
+          }
+        }
+      ],
+      "existing": [
+        {
+          "name": "LoadBalancerFrontEnd",
+          "properties": {
+            "publicIPAddress": {
+              "id": "[parameters('publicIPAddressID')]"
+            }
+          }
+        }
+      ],
+      "none": [
+        {
+          "name": "LoadBalancerFrontEnd"
+        }
+      ]
     }
   },
   "resources": [
@@ -44,16 +76,7 @@
       "apiVersion": "[parameters('apiVersion')]",
       "dependsOn": [ ],
       "properties": {
-        "frontendIPConfigurations": [
-          {
-            "name": "LoadBalancerFrontEnd",
-            "properties": {
-              "publicIPAddress": {
-                "id": "[parameters('publicIPAddressID')]"
-              }
-            }
-          }
-        ],
+        "frontendIPConfigurations": "[variables('frontendConfig')[parameters('publicIpAddressType')]]",
         "backendAddressPools": [
           {
             "name": "[parameters('bePoolName')]"
