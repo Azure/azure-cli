@@ -5,8 +5,8 @@ import mock
 import sys
 from six import StringIO
 
-from azure.cli.parser import AzCliCommandParser
 from azure.cli.application import Application, Configuration
+from azure.cli.parser import AzCliCommandParser
 from azure.cli.commands import CommandTable
 import azure.cli._help_files
 import azure.cli._util as util
@@ -42,8 +42,8 @@ class Test_argparse(unittest.TestCase):
             pass
 
         cmd_table = {
-            test_handler: {
-                'name': 'n1',
+            'n1': {
+                'handler': test_handler,
                 'arguments': [
                     {'name': '--arg -a', 'required': False},
                     {'name': '-b', 'required': False}
@@ -52,8 +52,8 @@ class Test_argparse(unittest.TestCase):
             }
         config = Configuration([])
         config.get_command_table = lambda: cmd_table
-        app = Application(config)
-
+        app = Application()
+        app.initialize(config)
         with self.assertRaises(SystemExit):
             app.execute('n1 -h'.split())
 
@@ -62,13 +62,12 @@ class Test_argparse(unittest.TestCase):
 
     @redirect_io
     def test_help_plain_short_description(self):
-        app = Application(Configuration([]))
         def test_handler(args):
             pass
 
         cmd_table = {
-            test_handler: {
-                'name': 'n1',
+            'n1': {
+                'handler': test_handler,
                 'description': 'the description',
                 'arguments': [
                     {'name': '--arg -a', 'required': False},
@@ -86,13 +85,12 @@ class Test_argparse(unittest.TestCase):
 
     @redirect_io
     def test_help_plain_long_description(self):
-        app = Application(Configuration([]))
         def test_handler(args):
             pass
 
         cmd_table = {
-            test_handler: {
-                'name': 'n1',
+            'n1': {
+                'handler': test_handler,
                 'help_file': 'long description',
                 'arguments': [
                     {'name': '--arg -a', 'required': False},
@@ -110,13 +108,12 @@ class Test_argparse(unittest.TestCase):
 
     @redirect_io
     def test_help_long_description_and_short_description(self):
-        app = Application(Configuration([]))
         def test_handler(args):
             pass
 
         cmd_table = {
-            test_handler: {
-                'name': 'n1',
+            'n1': {
+                'handler': test_handler,
                 'description': 'short description',
                 'help_file': 'long description',
                 'arguments': [
@@ -135,13 +132,12 @@ class Test_argparse(unittest.TestCase):
 
     @redirect_io
     def test_help_docstring_description_overrides_short_description(self):
-        app = Application(Configuration([]))
         def test_handler(args):
             pass
 
         cmd_table = {
-            test_handler: {
-                'name': 'n1',
+            'n1': {
+                'handler': test_handler,
                 'description': 'short description',
                 'help_file': 'short-summary: docstring summary',
                 'arguments': [
@@ -160,13 +156,12 @@ class Test_argparse(unittest.TestCase):
 
     @redirect_io
     def test_help_long_description_multi_line(self):
-        app = Application(Configuration([]))
         def test_handler(args):
             pass
 
         cmd_table = {
-            test_handler: {
-                'name': 'n1',
+            'n1': {
+                'handler': test_handler,
                 'help_file': '''
                     long-summary: |
                         line1
@@ -195,8 +190,8 @@ class Test_argparse(unittest.TestCase):
             pass
 
         cmd_table = {
-            test_handler: {
-                'name': 'n1',
+            'n1': {
+                'handler': test_handler,
                 'help_file': '''
                     parameters: 
                       - name: --foobar -fb
@@ -253,8 +248,8 @@ Global Arguments
             pass
 
         cmd_table = {
-            test_handler: {
-                'name': 'n1',
+            'n1': {
+                'handler': test_handler,
                 'help_file': '''
                     short-summary: this module does xyz one-line or so
                     long-summary: |
@@ -356,8 +351,8 @@ Examples
             pass
 
         cmd_table = {
-            test_handler: {
-                'name': 'n1',
+            'n1': {
+                'handler': test_handler,
                 'arguments': [
                     {'name': '--arg -a', 'required': False},
                     {'name': '-b', 'required': False}
@@ -394,15 +389,15 @@ Global Arguments
             pass
 
         cmd_table = {
-            test_handler: {
-                'name': 'group1 group3 n1',
+            'group1 group3 n1': {
+                'handler': test_handler,
                 'arguments': [
                     {'name': '--foobar -fb', 'required': False},
                     {'name': '--foobar2 -fb2', 'required': True}
                     ]
                 },
-            test_handler2: {
-                'name': 'group1 group2 n1',
+            'group1 group2 n1': {
+                'handler': test_handler2,
                 'arguments': [
                     {'name': '--foobar -fb', 'required': False},
                     {'name': '--foobar2 -fb2', 'required': True}
@@ -425,8 +420,8 @@ Global Arguments
             pass
 
         cmd_table = {
-            test_handler: {
-                'name': 'n1',
+            'n1': {
+                'handler': test_handler,
                 'arguments': [
                     {'name': '--foobar -fb', 'required': False},
                     {'name': '--foobar2 -fb2', 'required': True}
@@ -467,8 +462,8 @@ Global Arguments
             pass
 
         cmd_table = {
-            test_handler: {
-                'name': 'test_group1 test_group2 n1',
+            'test_group1 test_group2 n1': {
+                'handler': test_handler,
                 'help_file': '''
                     short-summary: this module does xyz one-line or so
                     long-summary: |
@@ -534,8 +529,8 @@ Examples
             pass
 
         cmd_table = {
-            test_handler: {
-                'name': 'n1',
+            'n1': {
+                'handler': test_handler,
                 'help_file': '''
                     long-summary: |
                         line1

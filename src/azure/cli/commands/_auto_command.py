@@ -158,8 +158,8 @@ def build_operation(command_name,
             for arg in extra_parameters.keys():
                 options.append(extra_parameters[arg].copy())
 
-        command_table[func] = {
-            'name': ' '.join([command_name, op.opname]),
+        full_command_name = ' '.join([command_name, op.opname])
+        command_table[full_command_name] = {
             'handler': func,
             'arguments': options
             }

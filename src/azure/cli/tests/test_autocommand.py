@@ -50,8 +50,7 @@ class Test_autocommand(unittest.TestCase):
                         command_table)
 
         self.assertEqual(len(command_table), 1, 'We expect exactly one command in the command table')
-        command_metadata = list(command_table.values())[0]
-        self.assertEqual(command_metadata['name'], 'test autocommand sample-vm-get', 'Unexpected command name...')
+        command_metadata = command_table['test autocommand sample-vm-get']
         self.assertEqual(len(command_metadata['arguments']), 4, 'We expected exactly 4 arguments')
         some_expected_arguments = [
             {'name': '--resource-group -g', 'dest': 'resource_group_name', 'required': True, 'help':'The name of the resource group'},
@@ -85,8 +84,7 @@ class Test_autocommand(unittest.TestCase):
                         )
 
         self.assertEqual(len(command_table), 1, 'We expect exactly one command in the command table')
-        command_metadata = list(command_table.values())[0]
-        self.assertEqual(command_metadata['name'], 'test autocommand sample-vm-get', 'Unexpected command name...')
+        command_metadata = command_table['test autocommand sample-vm-get']
         self.assertEqual(len(command_metadata['arguments']), 4, 'We expected exactly 4 arguments')
         some_expected_arguments = [
             {'name': '--resource-group -g', 'dest': 'resource_group_name', 'required': True},
@@ -156,8 +154,7 @@ class Test_autocommand(unittest.TestCase):
                         )
 
         self.assertEqual(len(command_table), 1, 'We expect exactly one command in the command table')
-        command_metadata = list(command_table.values())[0]
-        self.assertEqual(command_metadata['name'], 'test autocommand sample-vm-get', 'Unexpected command name...')
+        command_metadata = command_table['test autocommand sample-vm-get']
         self.assertEqual(len(command_metadata['arguments']), 5, 'We expected exactly 5 arguments')
         some_expected_arguments = [
             {'name': '--resource-group -g', 'dest': 'resource_group_name', 'required': True},
@@ -181,8 +178,7 @@ class Test_autocommand(unittest.TestCase):
                         )
 
         self.assertEqual(len(command_table), 1, 'We expect exactly one command in the command table')
-        command_metadata = list(command_table.values())[0]
-        self.assertEqual(command_metadata['name'], 'test autocommand woot', 'Unexpected command name...')
+        self.assertTrue('test autocommand woot' in command_table, 'Unexpected command name...')
 
     def test_autocommand_build_argument_help_text(self):
         def sample_sdk_method_with_weired_docstring(self, param_a, param_b, param_c):
@@ -207,7 +203,7 @@ class Test_autocommand(unittest.TestCase):
                         ],
                         command_table)
 
-        command_metadata = list(command_table.values())[0]
+        command_metadata = command_table['test autocommand sample-sdk-method-with-weired-docstring']
         self.assertEqual(len(command_metadata['arguments']), 3, 'We expected exactly 3 arguments')
         some_expected_arguments = [
             {'name': '--param-a', 'dest': 'param_a', 'required': True, 'help': ''},
