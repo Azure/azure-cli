@@ -2,11 +2,15 @@
 import unittest
 import mock
 
-from azure.cli.command_modules.vm.custom import _load_images_from_aliases_doc
+import azure.cli.application as application
 
 class TestVMImage(unittest.TestCase):
     @mock.patch('azure.cli.command_modules.vm.custom.urlopen', autospec=True)
     def test_read_images_from_alias_doc(self, mock_urlopen):
+        config = application.Configuration([])
+        application.APPLICATION = application.Application(config)
+        from azure.cli.command_modules.vm.generated import ConvenienceVmCommands
+
         file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                  'aliases.json')
         with open(file_path, 'r') as test_file:
@@ -17,7 +21,7 @@ class TestVMImage(unittest.TestCase):
         mock_urlopen.return_value = mock_read
 
         #action
-        images = _load_images_from_aliases_doc(None, None, None)
+        images = ConvenienceVmCommands().list_vm_images()
 
         #assert
         win_images = [i for i in images if i['publisher'] == 'MicrosoftWindowsServer']
@@ -25,6 +29,12 @@ class TestVMImage(unittest.TestCase):
         ubuntu_image = next(i for i in images if i['publisher'] == 'Canonical')
         self.assertEqual(ubuntu_image['publisher'], 'Canonical')
         self.assertEqual(ubuntu_image['offer'], 'UbuntuServer')
+        self.assertEqual(ubuntu_image['urn alias'], 'UbuntuLTS')
+        parts = ubuntu_image['urn'].split(':')
+        self.assertEqual(parts[0], ubuntu_image['publisher'])
+        self.assertEqual(parts[1], ubuntu_image['offer'])
+        self.assertEqual(parts[2], ubuntu_image['sku'])
+        self.assertEqual(parts[3], ubuntu_image['version'])
 
 if __name__ == '__main__':
     unittest.main()

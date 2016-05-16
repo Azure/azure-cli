@@ -4,12 +4,13 @@ import inspect
 from msrest.paging import Paged
 from msrest.exceptions import ClientException
 from azure.cli.parser import IncorrectUsageError
+from azure.cli._util import CLIError
 from ..commands import COMMON_PARAMETERS
 
 EXCLUDED_PARAMS = frozenset(['self', 'raw', 'custom_headers', 'operation_config',
-                             'content_version'])
+                             'content_version', 'kwargs'])
 
-class AutoCommandDefinition(object): #pylint: disable=too-few-public-methods
+class CommandDefinition(object): #pylint: disable=too-few-public-methods
 
     def __init__(self, operation, return_type, command_alias=None):
         self.operation = operation
@@ -34,13 +35,15 @@ def _get_member(obj, path):
             pass
     return obj
 
-def _make_func(client_factory, member_path, return_type_or_func, unbound_func):
-    def call_client(args):
-        client = client_factory(args)
+def _make_func(client_factory, member_path, return_type_or_func, unbound_func, extra_parameters):
+    def call_client(kwargs):
+        client = client_factory(**kwargs)
+        for param in extra_parameters.keys() if extra_parameters else []:
+            kwargs.pop(param)
         ops_instance = _get_member(client, member_path)
 
         try:
-            result = unbound_func(ops_instance, **args)
+            result = unbound_func(ops_instance, **kwargs)
             if not return_type_or_func:
                 return {}
             if callable(return_type_or_func):
@@ -51,39 +54,40 @@ def _make_func(client_factory, member_path, return_type_or_func, unbound_func):
             raise IncorrectUsageError(exception)
         except ClientException as client_exception:
             message = getattr(client_exception, 'message', client_exception)
-            raise RuntimeError(message)
+            raise CLIError(message)
 
     return call_client
 
 def _option_descriptions(operation):
     """Pull out parameter help from doccomments of the command
     """
-    lines = inspect.getdoc(operation).splitlines()
     option_descs = {}
-    index = 0
-    while index < len(lines):
-        l = lines[index]
-        regex = r'\s*(:param)\s+(.+)\s*:(.*)'
-        match = re.search(regex, l)
-        if match:
-            # 'arg name' portion might have type info, we don't need it
-            arg_name = str.split(match.group(2))[-1]
-            arg_desc = match.group(3).strip()
-            #look for more descriptions on subsequent lines
-            index += 1
-            while index < len(lines):
-                temp = lines[index].strip()
-                if temp.startswith(':'):
-                    break
-                else:
-                    if temp:
-                        arg_desc += (' ' + temp)
-                    index += 1
+    lines = inspect.getdoc(operation)
+    if lines:
+        lines = lines.splitlines()
+        index = 0
+        while index < len(lines):
+            l = lines[index]
+            regex = r'\s*(:param)\s+(.+)\s*:(.*)'
+            match = re.search(regex, l)
+            if match:
+                # 'arg name' portion might have type info, we don't need it
+                arg_name = str.split(match.group(2))[-1]
+                arg_desc = match.group(3).strip()
+                #look for more descriptions on subsequent lines
+                index += 1
+                while index < len(lines):
+                    temp = lines[index].strip()
+                    if temp.startswith(':'):
+                        break
+                    else:
+                        if temp:
+                            arg_desc += (' ' + temp)
+                        index += 1
 
-            option_descs[arg_name] = arg_desc
-        else:
-            index += 1
-
+                option_descs[arg_name] = arg_desc
+            else:
+                index += 1
     return option_descs
 
 
@@ -98,7 +102,7 @@ def build_operation(command_name,
 
     for op in operations:
 
-        func = _make_func(client_type, member_path, op.return_type, op.operation)
+        func = _make_func(client_type, member_path, op.return_type, op.operation, extra_parameters)
 
         args = []
         try:
@@ -151,8 +155,8 @@ def build_operation(command_name,
         # append any 'extra' args needed (for example to obtain a client) that aren't required
         # by the SDK.
         if extra_parameters:
-            for arg in extra_parameters:
-                options.append(arg.copy())
+            for arg in extra_parameters.keys():
+                options.append(extra_parameters[arg].copy())
 
         command_table[func] = {
             'name': ' '.join([command_name, op.opname]),

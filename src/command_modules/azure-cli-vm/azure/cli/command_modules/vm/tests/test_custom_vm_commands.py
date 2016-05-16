@@ -1,5 +1,5 @@
 ﻿import unittest
-from azure.cli.command_modules.vm._validators import MinMaxValue
+import azure.cli.application as application
 
 class Test_Vm_Custom(unittest.TestCase):
 
@@ -8,6 +8,10 @@ class Test_Vm_Custom(unittest.TestCase):
         pass
 
     def test_custom_minmax(self):
+        config = application.Configuration([])
+        application.APPLICATION = application.Application(config)
+        from azure.cli.command_modules.vm._validators import MinMaxValue
+
         validator = MinMaxValue(1, 3)
         self.assertEqual(1, validator(1))
         self.assertEqual(2, validator(2))

@@ -2,8 +2,8 @@ import logging
 import unittest
 
 from azure.cli.commands._auto_command import build_operation, _option_descriptions
-from azure.cli.commands import CommandTable
-from azure.cli.commands._auto_command import AutoCommandDefinition
+from azure.cli.commands import CommandTable, patch_aliases
+from azure.cli.commands._auto_command import CommandDefinition
 from azure.cli.main import main as cli
 
 from six import StringIO
@@ -45,7 +45,7 @@ class Test_autocommand(unittest.TestCase):
                         "",
                         None,
                         [
-                            AutoCommandDefinition(Test_autocommand.sample_vm_get, None)
+                            CommandDefinition(Test_autocommand.sample_vm_get, None)
                         ],
                         command_table)
 
@@ -54,7 +54,7 @@ class Test_autocommand(unittest.TestCase):
         self.assertEqual(command_metadata['name'], 'test autocommand sample-vm-get', 'Unexpected command name...')
         self.assertEqual(len(command_metadata['arguments']), 4, 'We expected exactly 4 arguments')
         some_expected_arguments = [
-            {'name': '--resource-group -g', 'dest': 'resource_group_name', 'required': True, 'help':'The name of the resource group.'},
+            {'name': '--resource-group -g', 'dest': 'resource_group_name', 'required': True, 'help':'The name of the resource group'},
             {'name': '--vm-name', 'dest': 'vm_name', 'required': True, 'help': 'The name of the virtual machine.'},
             {'name': '--opt-param', 'required': False, 'help': 'Used to verify auto-command correctly identifies optional params.'},
             {'name': '--expand', 'required': False, 'help': 'The expand expression to apply on the operation.'},
@@ -66,7 +66,7 @@ class Test_autocommand(unittest.TestCase):
 
     def test_autocommand_with_parameter_alias(self):
         command_table = CommandTable()
-        VM_SPECIFIC_PARAMS= {
+        VM_SPECIFIC_PARAMS = {
             'vm_name': {
                 'name': '--wonky-name -n',
                 'metavar': 'VMNAME',
@@ -78,7 +78,7 @@ class Test_autocommand(unittest.TestCase):
                         "",
                         None,
                         [
-                            AutoCommandDefinition(Test_autocommand.sample_vm_get, None)
+                            CommandDefinition(Test_autocommand.sample_vm_get, None)
                         ],
                         command_table,
                         VM_SPECIFIC_PARAMS
@@ -97,21 +97,59 @@ class Test_autocommand(unittest.TestCase):
             existing = [arg for arg in command_metadata['arguments'] if arg['name'] == probe['name']][0]
             self.assertDictContainsSubset(probe, existing)
 
+    def test_autocommand_with_patch_aliases(self):
+        command_table = CommandTable()
+        GLOBAL_PARAMS = {
+            'vm_name': {
+                'name': '--foo -f',
+                'metavar': 'FOO',
+                'help': 'foo help'
+            }
+        }
+        PARAMS = patch_aliases(GLOBAL_PARAMS, {
+            'added': {
+                'name': '--added',
+                'help': 'Added'
+            },
+            'vm_name': {
+                'help': 'FOO TIME'
+            }
+        })
+
+        self.assertTrue(PARAMS['vm_name']['help'] == 'FOO TIME', '\'vm_name\' help should have been updated.')
+        self.assertTrue(PARAMS['vm_name']['name'] == '--foo -f', '\'vm_name\' name should not have changed.')
+        self.assertTrue(PARAMS['added']['name'] == '--added', '\'added\' should have been added to the aliases.')
+        self.assertTrue(PARAMS['added']['help'] == 'Added', '\'added\' should have been added to the aliases.')
+
+        build_operation('test autocommand', '', None, [
+            CommandDefinition(Test_autocommand.sample_vm_get, None)
+        ], command_table, patch_aliases(PARAMS, {'vm_name': {'name': '--changed'}}))
+
+        self.assertEqual(len(command_table), 1, 'We expect exactly one command in the command table')
+        command_metadata = list(command_table.values())[0]
+        some_expected_arguments = [
+            {'name': '--changed', 'help': 'FOO TIME'},
+        ]
+
+        for probe in some_expected_arguments:
+            existing = [arg for arg in command_metadata['arguments'] if arg['name'] == probe['name']][0]
+            self.assertDictContainsSubset(probe, existing)        
+
     def test_autocommand_with_extra_parameters(self):
         command_table = CommandTable()
-        NEW_PARAMETERS= [
-            {
+        NEW_PARAMETERS = {
+            'added_param': {
                 'name': '--added-param',
                 'metavar': 'ADDED',
                 'help': 'Just added this right now!',
                 'required': True
             }
-        ]
+        }
         build_operation("test autocommand",
                         "",
                         None,
                         [
-                            AutoCommandDefinition(Test_autocommand.sample_vm_get, None)
+                            CommandDefinition(Test_autocommand.sample_vm_get, None)
                         ],
                         command_table,
                         None, NEW_PARAMETERS
@@ -137,7 +175,7 @@ class Test_autocommand(unittest.TestCase):
                         "",
                         None,
                         [
-                            AutoCommandDefinition(Test_autocommand.sample_vm_get, None, 'woot')
+                            CommandDefinition(Test_autocommand.sample_vm_get, None, 'woot')
                         ],
                         command_table
                         )
@@ -165,7 +203,7 @@ class Test_autocommand(unittest.TestCase):
                         "",
                         None,
                         [
-                            AutoCommandDefinition(sample_sdk_method_with_weired_docstring, None)
+                            CommandDefinition(sample_sdk_method_with_weired_docstring, None)
                         ],
                         command_table)
 

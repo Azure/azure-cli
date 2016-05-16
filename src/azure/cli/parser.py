@@ -1,7 +1,8 @@
 import argparse
 import azure.cli._help as _help
+from azure.cli._util import CLIError
 
-class IncorrectUsageError(Exception):
+class IncorrectUsageError(CLIError):
     '''Raised when a command is incorrectly used and the usage should be
     displayed to the user.
     '''
@@ -39,8 +40,12 @@ class AzCliCommandParser(argparse.ArgumentParser):
                                                   help_file=metadata.get('help_file'))
             for arg in metadata['arguments']:
                 names = arg.get('name').split()
-                command_parser.add_argument(*names, **{k:v for k, v in arg.items() if k != 'name'})
-            command_parser.set_defaults(func=handler)
+                completer = arg.pop('completer', None)
+                param = command_parser.add_argument(
+                    *names, **{k:v for k, v in arg.items() if k != 'name'})
+                param.completer = completer
+
+            command_parser.set_defaults(func=handler, command=metadata['name'])
 
     def _get_subparser(self, path):
         """For each part of the path, walk down the tree of

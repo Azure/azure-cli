@@ -37,7 +37,7 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
-    'azure==2.0.0rc1',
+    'azure==2.0.0rc3',
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
@@ -60,10 +60,14 @@ setup(
     ],
     packages=[
         'azure.cli.command_modules.vm',
-        'azure.cli.command_modules.vm.mgmt',
-        'azure.cli.command_modules.vm.mgmt.lib',
-        'azure.cli.command_modules.vm.mgmt.lib.models',
-        'azure.cli.command_modules.vm.mgmt.lib.operations',
+        'azure.cli.command_modules.vm.mgmt_vm_create',
+        'azure.cli.command_modules.vm.mgmt_vm_create.lib',
+        'azure.cli.command_modules.vm.mgmt_vm_create.lib.models',
+        'azure.cli.command_modules.vm.mgmt_vm_create.lib.operations',
+        'azure.cli.command_modules.vm.mgmt_avail_set',
+        'azure.cli.command_modules.vm.mgmt_avail_set.lib',
+        'azure.cli.command_modules.vm.mgmt_avail_set.lib.models',
+        'azure.cli.command_modules.vm.mgmt_avail_set.lib.operations',
     ],
     install_requires=DEPENDENCIES,
 )

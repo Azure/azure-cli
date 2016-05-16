@@ -6,9 +6,6 @@ import re
 from collections import OrderedDict
 from six import StringIO
 
-class OutputFormatException(Exception):
-    pass
-
 def format_json(obj):
     input_dict = obj.__dict__ if hasattr(obj, '__dict__') else obj
     return json.dumps(input_dict, indent=2, sort_keys=True, separators=(',', ': ')) + '\n'
@@ -245,16 +242,13 @@ class TsvOutput(object): #pylint: disable=too-few-public-methods
                 separator = '\t'
         else:
             TsvOutput._dump_obj(data, stream)
+        stream.write('\n')
 
     @staticmethod
     def dump(data):
         io = StringIO()
-        first_line = True
         for item in data:
-            if not first_line:
-                io.write('\n')
             TsvOutput._dump_row(item, io)
-            first_line = False
 
         result = io.getvalue()
         io.close()
