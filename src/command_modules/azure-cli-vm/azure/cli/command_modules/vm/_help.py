@@ -26,7 +26,7 @@ helps['vm create'] = """
                 - name: Create a simple Windows Server VM with private IP address
                   text: >
                     az vm create --image Win2012R2Datacenter --admin-username myadmin --admin-password Admin_001 
-                    -l "West US" -g myvms --name myvm001
+                    -l "West US" -g myvms --name myvm001 --public-ip-address-type none
                 - name: Create a simple Windows Server VM with public IP address and DNS entry
                   text: >
                     az vm create --image Win2012R2Datacenter --admin-username myadmin --admin-password Admin_001 
@@ -51,6 +51,16 @@ helps['vm scaleset create'] = """
                   short-summary: OS image (Common, URN or URI).
                   long-summary: |
 {0}
+            examples:
+                - name: Windows scaleset with 5 instances, a load balancer and a public IP address
+                  text: >
+                    az vm scaleset create -n myName -g myResourceGroup --admin-password MyPassword123 --instance-count 5
+                - name: Linux scaleset with SSH authentication, a public IP address, a DNS entry, an existing load balancer, and an existing virtual network
+                  text: >
+                    az vm scaleset create  -n myName -g myResourceGroup --dns-name-for-public-ip myGloballyUnieqDnsName
+                    --load-balancer-type existing --load-balancer-name myLoadBalancer
+                    --virtual-network-type existing --virtual-network-name myVNET --subnet-name mySubnet --image canonical:Ubuntu_Snappy_Core:15.04:2016.0318.1949
+                    --authentication-type ssh --ssh-key-value "<ssh-key-value or ssh-key-file-path"
 """.format(image_long_summary)
 
 helps['vm availability-set create'] = """
