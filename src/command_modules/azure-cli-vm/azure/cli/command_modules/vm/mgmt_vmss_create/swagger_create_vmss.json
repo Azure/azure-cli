@@ -196,9 +196,24 @@
     "$ref": "#/definitions/DeploymentParameter_instanceCount",
     "x-ms-client-flatten": true
   },
+          "loadBalancerBackendPoolName": {
+    "type": "object",
+    "$ref": "#/definitions/DeploymentParameter_loadBalancerBackendPoolName",
+    "x-ms-client-flatten": true
+  },
           "loadBalancerName": {
     "type": "object",
     "$ref": "#/definitions/DeploymentParameter_loadBalancerName",
+    "x-ms-client-flatten": true
+  },
+          "loadBalancerNatPoolName": {
+    "type": "object",
+    "$ref": "#/definitions/DeploymentParameter_loadBalancerNatPoolName",
+    "x-ms-client-flatten": true
+  },
+          "loadBalancerType": {
+    "type": "object",
+    "$ref": "#/definitions/DeploymentParameter_loadBalancerType",
     "x-ms-client-flatten": true
   },
           "location": {
@@ -329,8 +344,8 @@
 }
 ,
       "required": [
-        "adminUsername",
-        "name"
+        "name",
+        "adminUsername"
       ]
 
     },
@@ -403,12 +418,45 @@
     }
   }
 },
+"DeploymentParameter_loadBalancerBackendPoolName": {
+  "properties": {
+    "value": {
+      "type": "string",
+      "description": "Name of load balancer backend pool.",
+      "x-ms-client-name": "loadBalancerBackendPoolName"
+    }
+  }
+},
 "DeploymentParameter_loadBalancerName": {
   "properties": {
     "value": {
       "type": "string",
       "description": "Name for load balancer.",
       "x-ms-client-name": "loadBalancerName"
+    }
+  }
+},
+"DeploymentParameter_loadBalancerNatPoolName": {
+  "properties": {
+    "value": {
+      "type": "string",
+      "description": "Size of VMs in the VM Scale Set.  See https://azure.microsoft.com/en-us/pricing/details/virtual-machines/ for size info.",
+      "x-ms-client-name": "loadBalancerNatPoolName"
+    }
+  }
+},
+"DeploymentParameter_loadBalancerType": {
+  "properties": {
+    "value": {
+      "type": "string",
+      "description": "Whether to use an existing load balancer, create a new one, or use no load balancer.",
+      "x-ms-client-name": "loadBalancerType",
+      "enum": [
+        "new",
+        "existing",
+        "none"
+      ],
+      "default": "new"
     }
   }
 },
@@ -425,7 +473,7 @@
   "properties": {
     "value": {
       "type": "string",
-      "description": "The VM Scale Set name.",
+      "description": "The VM name.",
       "x-ms-client-name": "name"
     }
   },
