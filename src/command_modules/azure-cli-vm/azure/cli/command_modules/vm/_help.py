@@ -1,5 +1,10 @@
 from azure.cli._help_files import helps
 
+image_long_summary = """                      Common OS types: CentOS, CoreOS, Debian, openSUSE, RHEL, SLES, UbuntuLTS, Win2008SP1, Win2012Datacenter, Win2012R2Datacenter. 
+                      Example URN: MicrosoftWindowsServer:WindowsServer:2012-R2-Datacenter:latest
+                      Example URI: http://<storageAccount>.blob.core.windows.net/vhds/osdiskimage.vhd
+"""
+
 helps['vm create'] = """
             type: command
             short-summary: Create an Azure Virtual Machine
@@ -9,9 +14,7 @@ helps['vm create'] = """
                   type: string
                   short-summary: OS image (Common, URN or URI).
                   long-summary: |
-                      Common OS types: CentOS, CoreOS, Debian, openSUSE, RHEL, SLES, UbuntuLTS, Win2008SP1, Win2012Datacenter, Win2012R2Datacenter. 
-                      Example URN: MicrosoftWindowsServer:WindowsServer:2012-R2-Datacenter:latest
-                      Example URI: http://<storageAccount>.blob.core.windows.net/vhds/osdiskimage.vhd
+{0}
                   populator-commands: 
                   - az vm image list
                   - az vm image show
@@ -34,7 +37,19 @@ helps['vm create'] = """
                     --availability-set-type existing --availability-set-id myavailset
                     --public-ip-address-type new --dns-name-for-public-ip myGloballyUniqueVmDnsName
                     -l "West US" -g myvms --name myvm18o --ssh-key-value "<ssh-rsa-key or key-file-path>"
-            """
+            """.format(image_long_summary)
+
+helps['vm scaleset create'] = """
+            type: command
+            short-summary: Create an Azure Virtual Machine Scale Set
+            long-summary: See https://azure.microsoft.com/en-us/blog/azure-virtual-machine-scale-sets-ga/ for an introduction to scale sets.
+            parameters: 
+                - name: --image
+                  type: string
+                  short-summary: OS image (Common, URN or URI).
+                  long-summary: |
+{0}
+""".format(image_long_summary)
 
 helps['vm availability-set create'] = """
             type: command

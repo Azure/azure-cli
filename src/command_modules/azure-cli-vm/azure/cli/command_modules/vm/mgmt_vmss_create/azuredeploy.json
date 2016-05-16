@@ -1,5 +1,5 @@
 {
-  "$schema": "http://schema.management.azure.com/schemas/2015-01-01-preview/deploymentTemplate.json",
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
   "contentVersion": "1.0.0.0",
   "parameters": {
     "_artifactsLocation": {
@@ -53,7 +53,10 @@
     },
     "loadBalancerName": {
       "type": "string",
-      "defaultValue": "[concat(parameters('name'), 'lb')]"
+      "defaultValue": "[concat(parameters('name'), 'lb')]",
+      "metadata": {
+        "description": "Name for load balancer."
+      }
     },
     "location": {
       "type": "string",
@@ -306,9 +309,10 @@
       "adminPassword": "[parameters('adminPassword')]"
     },
     "sshKeyPath": "[parameters('sshDestKeyPath')]",
-    "osProfilesshPublicKey": {
+    "osProfilessh": {
       "computerNamePrefix": "[variables('namingInfix')]",
       "adminUsername": "[parameters('adminUsername')]",
+      "adminPassword": "[parameters('adminPassword')]",
       "linuxConfiguration": {
         "disablePasswordAuthentication": "true",
         "ssh": {
@@ -421,7 +425,7 @@
           "publicIpAddressAllocation": { "value": "[variables('publicIpAddressAllocation')]" },
           "privateIpAllocation": { "value": "[parameters('privateIpAddressAllocation')]" },
           "location": { "value": "[parameters('location')]" },
-          "dnsNameType": { "value": "[parameters('dnsNameType')]"}
+          "dnsNameType": { "value": "[parameters('dnsNameType')]" }
         }
       }
     },
