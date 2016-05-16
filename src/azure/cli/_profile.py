@@ -205,8 +205,11 @@ class Profile(object):
         user_type = active_account[_USER_ENTITY][_USER_TYPE]
         username_or_sp_id = active_account[_USER_ENTITY][_USER_NAME]
         if user_type == _USER:
-            access_token = self._creds_cache.retrieve_token_for_user(username_or_sp_id,
-                                                                     active_account[_TENANT_ID])
+            try:
+                access_token = self._creds_cache.retrieve_token_for_user(username_or_sp_id,
+                                                                         active_account[_TENANT_ID])
+            except adal.AdalError as err:
+                raise CLIError(err)
         else:
             access_token = self._creds_cache.retrieve_token_for_service_principal(
                 username_or_sp_id)

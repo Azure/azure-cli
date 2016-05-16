@@ -10,7 +10,6 @@ import azure.cli._help as _help
 import azure.cli._logging as _logging
 
 logger = _logging.get_az_logger(__name__)
-APPLICATION = None
 
 class Configuration(object): # pylint: disable=too-few-public-methods
     """The configuration object tracks session specific data such
@@ -37,13 +36,11 @@ class Application(object):
     TRANSFORM_RESULT = 'Application.TransformResults'
     FILTER_RESULT = 'Application.FilterResults'
     GLOBAL_PARSER_CREATED = 'GlobalParser.Created'
-    COMMAND_PARSER_CREATED = 'CommandParser.Created'
     COMMAND_PARSER_LOADED = 'CommandParser.Loaded'
     COMMAND_PARSER_PARSED = 'CommandParser.Parsed'
 
-    def __init__(self, configuration):
+    def __init__(self, config=None):
         self._event_handlers = defaultdict(lambda: [])
-        self.configuration = configuration
 
         # Register presence of and handlers for global parameters
         self.register(self.GLOBAL_PARSER_CREATED, Application._register_builtin_arguments)
@@ -58,7 +55,12 @@ class Application(object):
         self.raise_event(self.GLOBAL_PARSER_CREATED, global_group=global_group)
 
         self.parser = AzCliCommandParser(prog='az', parents=[self.global_parser])
-        self.raise_event(self.COMMAND_PARSER_CREATED, parser=self.parser)
+
+        if config:
+            self.initialize(config)
+
+    def initialize(self, configuration):
+        self.configuration = configuration
 
     def execute(self, argv):
         command_table = self.configuration.get_command_table()
@@ -159,3 +161,5 @@ class Application(object):
         args = kwargs['args']
         self.configuration.output_format = args._output_format #pylint: disable=protected-access
         del args._output_format
+
+APPLICATION = Application()
