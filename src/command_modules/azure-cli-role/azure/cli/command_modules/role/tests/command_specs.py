@@ -45,25 +45,6 @@ class RoleAssignmentScenarioTest(CommandTestScript):
                 JMESPathComparator("length([].properties.contains(scope, '{}')) == length(@)".format(scope), True)
             ])
 
-        # TODO: Currently this fails. It returns assignments without a 'resourceGroup' field! 
-        # Pivotal Item #119559823
-        #s.test('role assignment list-for-resource-group -g {}'.format(rg),
-        #    [
-        #        JMESPathComparator("length([].contains(resourceGroup, '{}')) == length(@)".format(rg), True)
-        #    ])
-
-        # TODO: This produces some output, but I have no idea if it is correct! (Pivotal Item #119559823)
-        #s.rec('role assignment list-for-resource --parent-resource-path {0} -g {1} --resource-name {2} --resource-provider-namespace {3} --resource-type {4}'.format(
-        #    parent_path, rg, resource, 'Microsoft.Sql', 'databases'))
-
-        # TODO: This role assignment is not found (Pivotal Item #119559823)
-        #name = 'c00ddce0-e2f9-417c-bbe4-0429bba5d11e'
-        #s.test('role assignment show --scope {} --role-assignment-name {}'.format(scope, name), 
-        #    [
-        #        JMESPathComparator("length([?name == '{}']) == length(@)".format(name), True),
-        #        JMESPathComparator("length([].properties.container(scope, '{}')) == length(@)".format(scope), True)
-        #    ])
-
         id = '/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst39112/providers/Microsoft.Authorization/roleAssignments/b022bb45-7fc4-4125-b781-72b49c38ba18'
         res = s.run("role assignment show-by-id --role-assignment-id {} -o json".format(id))['id']
         assert res == id

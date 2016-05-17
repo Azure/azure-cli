@@ -78,7 +78,7 @@ class StorageAccountScenarioTest(CommandTestScript):
         key1 = keys['key1']
         assert key2 != keys['key2']
         key2 = keys['key2']
-        keys = json.loads(s.run('storage account keys renew -g {} --name {} --key secondary -o json'.format(rg, account)))
+        keys = s.run('storage account keys renew -g {} --account-name {} --key secondary -o json'.format(rg, account))
         assert key1 == keys['key1']
         assert key2 != keys['key2']
         s.test('storage account set -g {} -n {} --tags foo=bar;cat'.format(rg, account),
