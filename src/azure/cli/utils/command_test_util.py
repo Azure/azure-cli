@@ -202,6 +202,8 @@ class CommandTestGenerator(object):
         # prevents URI mismatch between Python 2 and 3 if request URI has extra / chars
         request.uri = re.sub('//', '/', request.uri)
         request.uri = re.sub('/', '//', request.uri, count=1)
+
+        # do not record requests sent for token refresh
         if '/oauth2/token' in (request.uri or '') or \
             'grant-type=refresh_token' in (request.body or []):
             request=None
