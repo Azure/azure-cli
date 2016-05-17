@@ -305,7 +305,7 @@ build_operation(
     command_table, VNET_ALIASES)
 
 build_operation(
-    'network vnet', 'vnet', lambda _: get_mgmt_service_client(VNetClient, VNetClientConfig),
+    'network vnet', 'vnet', lambda **_: get_mgmt_service_client(VNetClient, VNetClientConfig),
     [
         CommandDefinition(VNetOperations.create, LongRunningOperation(L('Creating virtual network'), L('Virtual network created')))
     ],

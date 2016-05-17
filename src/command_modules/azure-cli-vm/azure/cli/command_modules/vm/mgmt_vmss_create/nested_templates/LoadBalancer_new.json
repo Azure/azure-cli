@@ -37,6 +37,9 @@
     },
     "publicIpAddressType": {
       "type": "string"
+    },
+    "subnetID": {
+      "type": "string"
     }
   },
   "variables": {
@@ -63,7 +66,12 @@
       ],
       "none": [
         {
-          "name": "LoadBalancerFrontEnd"
+          "name": "LoadBalancerFrontEnd",
+          "properties": {
+            "subnet": {
+              "id": "[parameters('subnetID')]"
+            }
+          }
         }
       ]
     }
