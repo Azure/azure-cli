@@ -81,7 +81,11 @@ def print_arguments(help_file):
                     + str(not p.required) + p.name):
         indent = 1
         required_text = required_tag if p.required else ''
-        p.short_summary = (p.short_summary if p.short_summary else '') + _get_choices_str(p)
+        short_summary = (p.short_summary if p.short_summary else '')
+        possible_values_index = short_summary.find(' Possible values include')
+        short_summary = short_summary[0:possible_values_index
+                                      if possible_values_index >= 0 else len(short_summary)]
+        short_summary += _get_choices_str(p)
         if p.group_name != last_group_name:
             if p.group_name:
                 print('')
@@ -91,7 +95,7 @@ def print_arguments(help_file):
                                             _get_column_indent(p.name + required_text,
                                                                max_name_length),
                                             required_text,
-                                            ': ' + p.short_summary if p.short_summary else ''),
+                                            ': ' + short_summary if short_summary else ''),
                       indent,
                       max_name_length + indent*4 + 2)
 
