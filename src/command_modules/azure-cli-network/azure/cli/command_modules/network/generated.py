@@ -23,13 +23,9 @@ from azure.cli.command_modules.network.mgmt.lib import (ResourceManagementClient
                                                         ResourceManagementClientConfiguration
                                                         as VNetClientConfig)
 from azure.cli.command_modules.network.mgmt.lib.operations import VNetOperations
-from azure.cli.command_modules.network.mgmt_lb.lib import (LBCreationClient as LBClient,
-                                                        LBCreationClientConfiguration
-                                                        as LBClientConfig)
-from azure.cli.command_modules.network.mgmt_lb.lib.operations import LBOperations
 from azure.cli.command_modules.network.custom import ConvenienceNetworkCommands
 from azure.cli.command_modules.network._params import (VNET_ALIASES, SUBNET_ALIASES,
-                                                       NAME_ALIASES, _network_client_factory)
+                                                       _network_client_factory)
 from azure.cli.commands._auto_command import build_operation, CommandDefinition
 from azure.cli.commands import CommandTable, LongRunningOperation
 from azure.cli._locale import L
@@ -314,12 +310,3 @@ build_operation(
         CommandDefinition(VNetOperations.create, LongRunningOperation(L('Creating virtual network'), L('Virtual network created')))
     ],
     command_table, VNET_ALIASES)
-
-build_operation(
-    'network lb', 'lb', lambda **_: get_mgmt_service_client(LBClient, LBClientConfig),
-    [
-        CommandDefinition(LBOperations.create_or_update,
-                          LongRunningOperation(L('Creating load balancer'), L('Load balancer created')),
-                          'create')
-    ],
-    command_table, NAME_ALIASES)

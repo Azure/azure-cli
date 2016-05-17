@@ -1,8 +1,5 @@
-import argparse
-
 from azure.mgmt.network import NetworkManagementClient, NetworkManagementClientConfiguration
 
-from azure.cli.command_modules.network._actions import LBDNSNameAction
 from azure.cli.commands import COMMON_PARAMETERS as GLOBAL_COMMON_PARAMETERS, patch_aliases
 from azure.cli.commands._command_creation import get_mgmt_service_client
 
@@ -53,19 +50,5 @@ VNET_ALIASES = patch_aliases(GLOBAL_COMMON_PARAMETERS, {
     'deployment_parameter_location_value': {
         'name': '--location',
         'metavar': 'LOCATION',
-    }
-})
-
-NAME_ALIASES = patch_aliases(GLOBAL_COMMON_PARAMETERS, {
-    'name': {
-        'name': '--name -n'
-    },
-     'dns_name_for_public_ip': {
-        'name': '--dns-name-for-public-ip',
-        'action': LBDNSNameAction
-    },
-    'dns_name_type': {
-        'name': '--dns-name-type',
-        'help': argparse.SUPPRESS
     }
 })
