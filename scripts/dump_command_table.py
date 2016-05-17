@@ -36,9 +36,6 @@ def _format_entry(obj):
         new_list = [_format_entry(x) for x in obj]
         return new_list
 
-def _extract_command_table_entry(name):
-    return next(x for x in cmd_table.values() if name == x['name'])
-
 parser = argparse.ArgumentParser(description='Command Table Parser')
 parser.add_argument('--commands', metavar='N', nargs='+', help='Filter by first level command (OR)')
 parser.add_argument('--params', metavar='N', nargs='+', help='Filter by parameters (OR)')
@@ -55,7 +52,7 @@ if cmd_set_names is None :
 else:
     # if the command name matches a prefix, add it to the output list
     for name in cmd_table.keys():
-    for prefix in cmd_set_names:
+        for prefix in cmd_set_names:
             if name.startswith(prefix):
                 cmd_list.append(name)
             break
