@@ -18,12 +18,15 @@ def get_all_command_modules():
     print([name for name, fullpath in all_command_modules])
     return all_command_modules
 
-def exec_command(command, cwd=None, stdout=None):
+def exec_command(command, cwd=None, stdout=None, env=None):
     '''Returns True in the command was executed successfully'''
     try:
         print(command)
         command_list = command if isinstance(command, list) else command.split()
-        check_call(command_list, stdout=stdout, cwd=cwd)
+        env_vars = os.environ.copy()
+        if env:
+            env_vars.update(env)
+        check_call(command_list, stdout=stdout, cwd=cwd, env=env_vars)
         return True
     except CalledProcessError as err:
         print(err, file=sys.stderr)

@@ -524,7 +524,20 @@ class VMScaleSetVMsScenarioTest(CommandTestScript):
         self.test('vm scaleset-vm list --resource-group {} --virtual-machine-scale-set-name {}'.format( #pylint: disable=line-too-long
             self.resource_group, self.ss_name), None)
 
+class VMAccessAddRemoveLinuxUser(CommandTestScript):
 
+    def __init__(self):
+        super(VMAccessAddRemoveLinuxUser, self).__init__(None, self.test_body, None)
+
+    def test_body(self):
+        common_part = '-g yugangw4 -n yugangw4-1 -u foouser1'
+        verification = [JMESPathComparator('provisioningState', 'Succeeded'),
+                        JMESPathComparator('name', 'VMAccessForLinux')]
+        self.test('vm access set-linux-user {} -p Foo12345 '.format(common_part),
+                  verification)
+        #Ensure to get rid of the user
+        self.test('vm access delete-linux-user {}'.format(common_part),
+                  verification)
 
 ENV_VAR = {}
 
@@ -605,6 +618,10 @@ TEST_DEF = [
         'test_name': 'vm_scaleset_vms',
         'command': VMScaleSetVMsScenarioTest()
     },
+    {
+        'test_name': 'vm_add_remove_linux_user',
+        'command': VMAccessAddRemoveLinuxUser()
+    }
 ]
 
 
