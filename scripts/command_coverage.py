@@ -10,7 +10,7 @@ DEVNULL = open(os.devnull, 'w')
 config = application.Configuration([])
 application.APPLICATION = application.Application(config)
 cmd_table = config.get_command_table()
-cmd_list = [x['name'].strip() for x in cmd_table.values()]
+cmd_list = cmd_table.keys()
 cmd_set = set(cmd_list)
 if os.path.isfile(COVERAGE_FILE):
     os.remove(COVERAGE_FILE)
