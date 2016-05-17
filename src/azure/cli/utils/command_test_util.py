@@ -203,10 +203,11 @@ class CommandTestGenerator(object):
         request.uri = re.sub('//', '/', request.uri)
         request.uri = re.sub('/', '//', request.uri, count=1)
 
-        # do not record requests sent for token refresh
-        if '/oauth2/token' in (request.uri or '') or \
-            'grant-type=refresh_token' in (request.body or []):
-            request=None
+        # do not record requests sent for token refresh'
+        if (request.body and 'grant-type=refresh_token' in str(request.body)) or \
+            '/oauth2/token' in request.uri:
+            request = None
+
         return request
 
     @staticmethod
