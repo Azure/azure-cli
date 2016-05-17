@@ -315,23 +315,23 @@ class VMAvailSetScenarioTest(CommandTestScript):
         pass
 
     def test_body(self):
-        self.test('vm availset list --resource-group {}'.format(self.resource_group), [
+        self.test('vm availability-set list --resource-group {}'.format(self.resource_group), [
             JMESPathComparator('length(@)', 1),
             JMESPathComparator('[0].name', self.name),
             JMESPathComparator('[0].resourceGroup', self.resource_group),
             JMESPathComparator('[0].location', self.location),
         ])
-        self.test('vm availset list-sizes --resource-group {} --name {}'.format(
+        self.test('vm availability-set list-sizes --resource-group {} --name {}'.format(
             self.resource_group, self.name), JMESPathComparator('type(@)', 'array'))
-        self.test('vm availset show --resource-group {} --name {}'.format(
+        self.test('vm availability-set show --resource-group {} --name {}'.format(
             self.resource_group, self.name), [
                 JMESPathComparator('type(@)', 'object'),
                 JMESPathComparator('name', self.name),
                 JMESPathComparator('resourceGroup', self.resource_group),
                 JMESPathComparator('location', self.location)])
-        self.test('vm availset delete --resource-group {} --name {}'.format(
+        self.test('vm availability-set delete --resource-group {} --name {}'.format(
             self.resource_group, self.name), None)
-        self.test('vm availset list --resource-group {}'.format(
+        self.test('vm availability-set list --resource-group {}'.format(
             self.resource_group), None)
 
     def tear_down(self):
@@ -373,19 +373,19 @@ class VMMachineExtensionImageScenarioTest(CommandTestScript):
         super(VMMachineExtensionImageScenarioTest, self).__init__(None, self.test_body, None)
 
     def test_body(self):
-        self.test('vm machine-extension-image list-types --location {} --publisher-name {}'.format(
+        self.test('vm extension image list-types --location {} --publisher-name {}'.format(
             self.location, self.publisher), [
                 JMESPathComparator('type(@)', 'array'),
                 JMESPathComparator("length([?location == '{}']) == length(@)".format(self.location),
                                    True),
             ])
-        self.test('vm machine-extension-image list-versions --location {} --publisher-name {} --type {}'.format( #pylint: disable=line-too-long
+        self.test('vm extension image list-versions --location {} --publisher-name {} --type {}'.format( #pylint: disable=line-too-long
             self.location, self.publisher, self.type), [
                 JMESPathComparator('type(@)', 'array'),
                 JMESPathComparator("length([?location == '{}']) == length(@)".format(self.location),
                                    True),
             ])
-        self.test('vm machine-extension-image show --location {} --publisher-name {} --type {} --version {}'.format( #pylint: disable=line-too-long
+        self.test('vm extension image show --location {} --publisher-name {} --type {} --version {}'.format( #pylint: disable=line-too-long
             self.location, self.publisher, self.type, self.version), [
                 JMESPathComparator('type(@)', 'object'),
                 JMESPathComparator('location', self.location),

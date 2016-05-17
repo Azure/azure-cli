@@ -31,7 +31,7 @@ command_table = CommandTable()
 
 # pylint: disable=line-too-long
 build_operation(
-    'vm availset', 'availability_sets', _compute_client_factory,
+    'vm availability-set', 'availability_sets', _compute_client_factory,
     [
         CommandDefinition(AvailabilitySetsOperations.delete, None),
         CommandDefinition(AvailabilitySetsOperations.get, 'AvailabilitySet', command_alias='show'),
@@ -43,7 +43,7 @@ build_operation(
         }))
 
 build_operation(
-    'vm machine-extension-image', 'virtual_machine_extension_images', _compute_client_factory,
+    'vm extension image', 'virtual_machine_extension_images', _compute_client_factory,
     [
         CommandDefinition(VirtualMachineExtensionImagesOperations.get, 'VirtualMachineExtensionImage', command_alias='show'),
         CommandDefinition(VirtualMachineExtensionImagesOperations.list_types, '[VirtualMachineImageResource]'),
