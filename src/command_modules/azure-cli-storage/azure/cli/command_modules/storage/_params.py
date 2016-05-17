@@ -69,7 +69,7 @@ def get_sas_token(string):
 
 # PARAMETER CHOICE LISTS
 
-storage_account_key_options = ['key1', 'key2']
+storage_account_key_options = {'primary': 'key1', 'secondary': 'key2'}
 
 # TODO: update this once enums are supported in commands first-class (task #115175885)
 storage_account_types = {'Standard_LRS': AccountType.standard_lrs,
@@ -154,6 +154,11 @@ PARAMETER_ALIASES = patch_aliases(GLOBAL_COMMON_PARAMETERS, {
         'help': L('specifies the IP address or range of IP addresses from which to accept ' + \
                   'requests.'),
         'type': validate_ip_range
+    },
+    'key': {
+        'name': '--key',
+        'help': 'The key to renew (omit to renew both)',
+        'choices': storage_account_key_options.keys()
     },
     'lease_break_period': {
         'name': '--lease-break-period',
