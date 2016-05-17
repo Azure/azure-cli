@@ -1,10 +1,12 @@
 from __future__ import print_function
 
+import ast
 import json
 import os
 import traceback
 import collections
 import shlex
+import time
 
 import jmespath
 from six import StringIO
@@ -111,6 +113,15 @@ class CommandTestScript(object): #pylint: disable=too-many-instance-attributes
             f.write(' '.join(command))
             f.write('\n')
 
+    def pause(self, delay, debug=False):
+        ''' Pauses execution of a test script for 'delay' seconds. This delay is mocked out when
+        a test is replayed. This method can be used when you need to insert a short delay to allow
+        a change to propagate through Azure. It should not be used if a command invokes a long
+        running operation.'''
+        if self.debug or debug:
+            print('PAUSE: {} seconds'.format(delay))
+        time.sleep(delay)
+
     def rec(self, command, debug=False):
         ''' Run a command and save the output as part of the expected results. This will also
         save the output to a display file so you can see the command, followed by its output
@@ -167,10 +178,13 @@ class CommandTestScript(object): #pylint: disable=too-many-instance-attributes
         try:
             if result is None or result == '':
                 assert checks is None or checks is False
-            elif isinstance(checks, list) and all(
-                    isinstance(comparator, JMESPathComparator) for comparator in checks):
-                for comparator in checks:
-                    comparator.compare(result)
+            elif isinstance(checks, list):
+                if all(isinstance(comparator, JMESPathComparator) for comparator in checks):
+                    for comparator in checks:
+                        comparator.compare(result)
+                else:
+                    result_set = set(ast.literal_eval(result))
+                    assert result_set == set(checks)
             elif isinstance(checks, JMESPathComparator):
                 checks.compare(result)
             elif isinstance(checks, bool):

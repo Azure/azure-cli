@@ -161,6 +161,7 @@ class CommandTestGenerator(object):
                             get_user_access_token_mock)
                 @mock.patch('msrestazure.azure_operation.AzureOperationPoller._delay',
                             operation_delay_mock)
+                @mock.patch('time.sleep', operation_delay_mock)
                 @mock.patch('azure.cli.commands.LongRunningOperation._delay',
                             operation_delay_mock)
                 def test(self):

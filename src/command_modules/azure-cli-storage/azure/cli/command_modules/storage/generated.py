@@ -16,7 +16,8 @@ from azure.cli.command_modules.storage.custom import \
     (create_storage_account, list_storage_accounts, show_storage_account_usage,
      set_storage_account_properties, show_storage_account_connection_string,
      renew_storage_account_keys, container_exists, blob_exists, download_blob, upload_blob,
-     share_exists, dir_exists, file_exists, upload_file, download_file)
+     share_exists, dir_exists, file_exists, upload_file, download_file, get_acl_policy,
+     create_acl_policy, delete_acl_policy, list_acl_policies, set_acl_policy)
 
 command_table = CommandTable()
 
@@ -49,6 +50,11 @@ cli_storage_data_plane_command(command_table, 'storage container lease release',
 cli_storage_data_plane_command(command_table, 'storage container lease change', BlockBlobService.change_container_lease, factory)
 cli_storage_data_plane_command(command_table, 'storage container lease break', BlockBlobService.break_container_lease, factory)
 cli_storage_data_plane_command(command_table, 'storage container exists', container_exists, factory)
+cli_storage_data_plane_command(command_table, 'storage container policy create', create_acl_policy, factory)
+cli_storage_data_plane_command(command_table, 'storage container policy delete', delete_acl_policy, factory)
+cli_storage_data_plane_command(command_table, 'storage container policy show', get_acl_policy, factory)
+cli_storage_data_plane_command(command_table, 'storage container policy list', list_acl_policies, factory)
+cli_storage_data_plane_command(command_table, 'storage container policy set', set_acl_policy, factory)
 
 # blob commands
 cli_storage_data_plane_command(command_table, 'storage blob list', BlockBlobService.list_blobs, factory)
@@ -86,6 +92,11 @@ cli_storage_data_plane_command(command_table, 'storage share set', FileService.s
 cli_storage_data_plane_command(command_table, 'storage share metadata show', FileService.get_share_metadata, factory)
 cli_storage_data_plane_command(command_table, 'storage share metadata set', FileService.set_share_metadata, factory)
 cli_storage_data_plane_command(command_table, 'storage share exists', share_exists, factory)
+cli_storage_data_plane_command(command_table, 'storage share policy create', create_acl_policy, factory)
+cli_storage_data_plane_command(command_table, 'storage share policy delete', delete_acl_policy, factory)
+cli_storage_data_plane_command(command_table, 'storage share policy show', get_acl_policy, factory)
+cli_storage_data_plane_command(command_table, 'storage share policy list', list_acl_policies, factory)
+cli_storage_data_plane_command(command_table, 'storage share policy set', set_acl_policy, factory)
 
 # directory commands
 cli_storage_data_plane_command(command_table, 'storage directory create', FileService.create_directory, factory)
@@ -111,3 +122,4 @@ cli_storage_data_plane_command(command_table, 'storage file service-properties s
 cli_storage_data_plane_command(command_table, 'storage file service-properties set', FileService.set_file_service_properties, factory)
 cli_storage_data_plane_command(command_table, 'storage file copy start', FileService.copy_file, factory)
 cli_storage_data_plane_command(command_table, 'storage file copy cancel', FileService.abort_copy_file, factory)
+
