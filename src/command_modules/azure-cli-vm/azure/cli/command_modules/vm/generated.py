@@ -190,3 +190,24 @@ build_operation("vm availability-set",
                 ],
                 command_table)
 
+build_operation('vm access',
+                None,
+                ConvenienceVmCommands,
+                [
+                    CommandDefinition(ConvenienceVmCommands.set_linux_user, LongRunningOperation(L('Setting Linux user'), L('Linux User was set'))),
+                    CommandDefinition(ConvenienceVmCommands.delete_linux_user, LongRunningOperation(L('Deleting Linux user'), L('Linux User was deleted'))),
+                    CommandDefinition(ConvenienceVmCommands.set_windows_user_password, LongRunningOperation(L('Setting Windows user password'), L('Password was resetted')))
+                ],
+                command_table,
+                patch_aliases(PARAMETER_ALIASES, {
+                    'username': {
+                        'help': 'The user name',
+                        'name': '--username -u'
+                        },
+                    'password': {
+                        'help': 'The user password',
+                        'name': '--password -p'
+                        }
+                })
+               )
+
