@@ -1,0 +1,334 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.1 requests/2.9.1 msrest/0.3.0 msrest_azure/0.3.0 resourcemanagementclient/2016-02-01
+          Azure-SDK-For-Python AZURECLI_0.0.32]
+      accept-language: [en-US]
+    method: HEAD
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliTestRg_VMCreate_Ubuntu?api-version=2016-02-01
+  response:
+    body: {string: ''}
+    headers:
+      Cache-Control: [no-cache]
+      Content-Length: ['117']
+      Content-Type: [application/json; charset=utf-8]
+      Date: ['Thu, 12 May 2016 21:54:03 GMT']
+      Expires: ['-1']
+      Pragma: [no-cache]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      x-ms-failure-cause: [gateway]
+    status: {code: 404, message: Not Found}
+- request:
+    body: !!binary |
+      eyJsb2NhdGlvbiI6ICJ3ZXN0dXMifQ==
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['22']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.1 requests/2.9.1 msrest/0.3.0 msrest_azure/0.3.0 resourcemanagementclient/2016-02-01
+          Azure-SDK-For-Python AZURECLI_0.0.32]
+      accept-language: [en-US]
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliTestRg_VMCreate_Ubuntu?api-version=2016-02-01
+  response:
+    body: {string: '{"id":"/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/cliTestRg_VMCreate_Ubuntu","name":"cliTestRg_VMCreate_Ubuntu","location":"westus","properties":{"provisioningState":"Succeeded"}}'}
+    headers:
+      Cache-Control: [no-cache]
+      Content-Length: ['203']
+      Content-Type: [application/json; charset=utf-8]
+      Date: ['Thu, 12 May 2016 21:54:05 GMT']
+      Expires: ['-1']
+      Pragma: [no-cache]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      x-ms-ratelimit-remaining-subscription-writes: ['1195']
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Connection: [close]
+      Host: [raw.githubusercontent.com]
+      User-Agent: [Python-urllib/3.5]
+    method: GET
+    uri: https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/arm-compute/quickstart-templates/aliases.json
+  response:
+    body: {string: "{\n  \"$schema\":\"http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json\"\
+        ,\n  \"contentVersion\":\"1.0.0.0\",\n  \"parameters\":{},\n  \"variables\"\
+        :{},\n  \"resources\":[],\n\n  \"outputs\":{\n    \"aliases\":{\n      \"\
+        metadata\":{\n        \"description\":\"This list of aliases is used by Azure\
+        \ XPLAT CLI, Azure Powershell, and Azure Portal as shorthands for commonly\
+        \ used VM images. If you change this file, please verify that this doesn't\
+        \ break VMSS creation from Portal :).\"\n      },\n      \"type\":\"object\"\
+        ,\n      \"value\":{\n\n        \"Linux\":{\n          \"CentOS\":{\n    \
+        \        \"publisher\":\"OpenLogic\",\n            \"offer\":\"CentOS\",\n\
+        \            \"sku\":\"7.2\",\n            \"version\":\"latest\"\n      \
+        \    },\n          \"CoreOS\":{\n            \"publisher\":\"CoreOS\",\n \
+        \           \"offer\":\"CoreOS\",\n            \"sku\":\"Stable\",\n     \
+        \       \"version\":\"latest\"\n          },\n          \"Debian\":{\n   \
+        \         \"publisher\":\"credativ\",\n            \"offer\":\"Debian\",\n\
+        \            \"sku\":\"8\",\n            \"version\":\"latest\"\n        \
+        \  },\n          \"openSUSE\":{\n            \"publisher\":\"SUSE\",\n   \
+        \         \"offer\":\"openSUSE\",\n            \"sku\":\"13.2\",\n       \
+        \     \"version\":\"latest\"\n          },\n          \"RHEL\":{\n       \
+        \     \"publisher\":\"RedHat\",\n            \"offer\":\"RHEL\",\n       \
+        \     \"sku\":\"7.2\",\n            \"version\":\"latest\"\n          },\n\
+        \          \"SLES\":{\n            \"publisher\":\"SUSE\",\n            \"\
+        offer\":\"SLES\",\n            \"sku\":\"12-SP1\",\n            \"version\"\
+        :\"latest\"\n          },\n          \"UbuntuLTS\":{\n            \"publisher\"\
+        :\"Canonical\",\n            \"offer\":\"UbuntuServer\",\n            \"sku\"\
+        :\"14.04.4-LTS\",\n            \"version\":\"latest\"\n          }\n     \
+        \   },\n\n        \"Windows\":{\n          \"Win2012R2Datacenter\":{\n   \
+        \         \"publisher\":\"MicrosoftWindowsServer\",\n            \"offer\"\
+        :\"WindowsServer\",\n            \"sku\":\"2012-R2-Datacenter\",\n       \
+        \     \"version\":\"latest\"\n          },\n          \"Win2012Datacenter\"\
+        :{\n            \"publisher\":\"MicrosoftWindowsServer\",\n            \"\
+        offer\":\"WindowsServer\",\n            \"sku\":\"2012-Datacenter\",\n   \
+        \         \"version\":\"latest\"\n          },\n          \"Win2008R2SP1\"\
+        :{\n            \"publisher\":\"MicrosoftWindowsServer\",\n            \"\
+        offer\":\"WindowsServer\",\n            \"sku\":\"2008-R2-SP1\",\n       \
+        \     \"version\":\"latest\"\n          }\n        }\n      }\n    }\n  }\n\
+        }\n"}
+    headers:
+      Accept-Ranges: [bytes]
+      Access-Control-Allow-Origin: ['*']
+      Cache-Control: [max-age=300]
+      Connection: [close]
+      Content-Length: ['2297']
+      Content-Security-Policy: [default-src 'none'; style-src 'unsafe-inline']
+      Content-Type: [text/plain; charset=utf-8]
+      Date: ['Thu, 12 May 2016 21:54:06 GMT']
+      ETag: ['"db78eb36618a060181b32ac2de91b1733f382e01"']
+      Expires: ['Thu, 12 May 2016 21:59:06 GMT']
+      Source-Age: ['0']
+      Strict-Transport-Security: [max-age=31536000]
+      Vary: ['Authorization,Accept-Encoding']
+      Via: [1.1 varnish]
+      X-Cache: [MISS]
+      X-Cache-Hits: ['0']
+      X-Content-Type-Options: [nosniff]
+      X-Fastly-Request-ID: [ec5056eeeeb71b38b693844dc59476c83bdecc66]
+      X-Frame-Options: [deny]
+      X-GitHub-Request-Id: ['17EB2814:64F8:30623B:5734FB7E']
+      X-Served-By: [cache-ord1746-ORD]
+      X-XSS-Protection: [1; mode=block]
+    status: {code: 200, message: OK}
+- request:
+    body: !!binary |
+      eyJwcm9wZXJ0aWVzIjogeyJtb2RlIjogIkluY3JlbWVudGFsIiwgInRlbXBsYXRlTGluayI6IHsi
+      dXJpIjogImh0dHBzOi8vYXp1cmVzZGtjaS5ibG9iLmNvcmUud2luZG93cy5uZXQvdGVtcGxhdGVo
+      b3N0L0NyZWF0ZVZNL2F6dXJlZGVwbG95Lmpzb24ifSwgInBhcmFtZXRlcnMiOiB7InB1YmxpY0lw
+      QWRkcmVzc0FsbG9jYXRpb24iOiB7InZhbHVlIjogIkR5bmFtaWMifSwgInB1YmxpY0lwQWRkcmVz
+      c1R5cGUiOiB7InZhbHVlIjogIm5ldyJ9LCAidmlydHVhbE5ldHdvcmtJcEFkZHJlc3NQcmVmaXgi
+      OiB7InZhbHVlIjogIjEwLjAuMC4wLzE2In0sICJzaXplIjogeyJ2YWx1ZSI6ICJTdGFuZGFyZF9B
+      MiJ9LCAiX2FydGlmYWN0c0xvY2F0aW9uIjogeyJ2YWx1ZSI6ICJodHRwczovL2F6dXJlc2RrY2ku
+      YmxvYi5jb3JlLndpbmRvd3MubmV0L3RlbXBsYXRlaG9zdC9DcmVhdGVWTSJ9LCAib3NPZmZlciI6
+      IHsidmFsdWUiOiAiVWJ1bnR1U2VydmVyIn0sICJsb2NhdGlvbiI6IHsidmFsdWUiOiAid2VzdHVz
+      In0sICJhZG1pblVzZXJuYW1lIjogeyJ2YWx1ZSI6ICJ1YnVudHUifSwgIm9zU0tVIjogeyJ2YWx1
+      ZSI6ICIxNC4wNC40LUxUUyJ9LCAib3NEaXNrTmFtZSI6IHsidmFsdWUiOiAib3NkaXNraW1hZ2Ui
+      fSwgInNzaEtleVZhbHVlIjogeyJ2YWx1ZSI6ICJzc2gtcnNhIEFBQUFCM056YUMxeWMyRUFBQUFE
+      QVFBQkFBQUNBUUNiSWcxZ3VSSGJJMGxWMTF3V0R0MXIyY1VkY05kMjdDSnNnK1NmZ0M3bWlaZXVi
+      dHdVaGJzUGRoTVFzZkR5aE9XSHExK1pMME0rbkpaVjYzZC8xZGhtaHRneU9xZWpVd3JQbHpLaHlk
+      c2Jyc2RVb3IrSm1OSkRkVzAxdjdCWEh5dXltVDhHNHMwOWpDYXNOT3dpdWZiUC9xcDcycnV1MGJJ
+      QTFueVNzdmxmOXBDUUF1RmtBblZuZi9yRmhVbE9raHRScHdjcThTVU5ZMnpSSFIvRUtiLzROV1kx
+      SnpSNHNhM3EyZldJSmRyclgwRHZMb2E1ZzliSUVkNERmNzliYTd2K3lpVUJPUzB6VDJsbCt6NGc5
+      aXpISzNFTzVkOGhMNGpZeGNqS3Mrd2NzbFNZUldyYXNjZnNjTGdNbE1HaDBDZEtlTlREakhwR1Bu
+      Y2FmM1orRnd3d2pXZXVpTkJ4djdiSm8xMy84Qi8wOThLbFZEbDRHWnFzb0JDRWpQeUpmVjZoTzB5
+      L0xrUkdrazdvSFdLZ2VXQWZLdGZMSXRScDAwZVo0ZmNKTks5a0NhU01tRXVnb1pXY0k3TkdiWlh6
+      cUZXcWJwUkk3TmNEUDkrV0lRK2k5VTV2cVdzcWQvem5nNGtidUFKNlV1S3FJekIwdXBZckxTaGZR
+      RTNTQWNrOG9hTGhKcXFxNTZWZkR1QVNOcEpLaWRWK3pxMjdIZlNCbWJYbmtSLzVBSzMzN2RjM01Y
+      S0p5cG9LL1FQTUxLVUFQNVhMUGJzK05kZEpRVjdFWlhkMjlETGdwK2ZSSWczZWRwS2RPN1pFcldo
+      djdkKzNLd3MrZTFZK3lwbVIyV0lWU3dWeUJFVWZndjJDOFRzOWduVEY0cE5jRVkvUzJhQmljejVF
+      dzIramR5R05RUT09IHRlc3RAZXhhbXBsZS5jb21cbiJ9LCAib3NWZXJzaW9uIjogeyJ2YWx1ZSI6
+      ICJsYXRlc3QifSwgIm9zUHVibGlzaGVyIjogeyJ2YWx1ZSI6ICJDYW5vbmljYWwifSwgInN0b3Jh
+      Z2VBY2NvdW50VHlwZSI6IHsidmFsdWUiOiAibmV3In0sICJzdWJuZXRJcEFkZHJlc3NQcmVmaXgi
+      OiB7InZhbHVlIjogIjEwLjAuMC4wLzI0In0sICJzdG9yYWdlQ29udGFpbmVyTmFtZSI6IHsidmFs
+      dWUiOiAidmhkcyJ9LCAicHJpdmF0ZUlwQWRkcmVzc0FsbG9jYXRpb24iOiB7InZhbHVlIjogIkR5
+      bmFtaWMifSwgIm9zVHlwZSI6IHsidmFsdWUiOiAiQ3VzdG9tIn0sICJzdG9yYWdlUmVkdW5kYW5j
+      eVR5cGUiOiB7InZhbHVlIjogIlN0YW5kYXJkX0xSUyJ9LCAiYXV0aGVudGljYXRpb25UeXBlIjog
+      eyJ2YWx1ZSI6ICJzc2gifSwgInZpcnR1YWxOZXR3b3JrVHlwZSI6IHsidmFsdWUiOiAibmV3In0s
+      ICJkbnNOYW1lVHlwZSI6IHsidmFsdWUiOiAibm9uZSJ9LCAibmFtZSI6IHsidmFsdWUiOiAiY2xp
+      LXRlc3Qtdm0xIn0sICJhdmFpbGFiaWxpdHlTZXRUeXBlIjogeyJ2YWx1ZSI6ICJub25lIn19fX0=
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['1937']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.1 requests/2.9.1 msrest/0.3.0 msrest_azure/0.3.0 vmcreationclient/2015-11-01
+          Azure-SDK-For-Python AZURECLI_0.0.32]
+      accept-language: [en-US]
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliTestRg_VMCreate_Ubuntu/providers/Microsoft.Resources/deployments/azurecli-test-deployment-vm-create-ubuntu?api-version=2015-11-01
+  response:
+    body: {string: '{"id":"/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/cliTestRg_VMCreate_Ubuntu/providers/Microsoft.Resources/deployments/azurecli-test-deployment-vm-create-ubuntu","name":"azurecli-test-deployment-vm-create-ubuntu","properties":{"templateLink":{"uri":"https://azuresdkci.blob.core.windows.net/templatehost/CreateVM/azuredeploy.json","contentVersion":"1.0.0.0"},"parameters":{"_artifactsLocation":{"type":"String","value":"https://azuresdkci.blob.core.windows.net/templatehost/CreateVM"},"adminPassword":{"type":"SecureString"},"adminUsername":{"type":"String","value":"ubuntu"},"authenticationType":{"type":"String","value":"ssh"},"availabilitySetId":{"type":"String","value":""},"availabilitySetType":{"type":"String","value":"none"},"dnsNameForPublicIP":{"type":"String","value":""},"dnsNameType":{"type":"String","value":"none"},"location":{"type":"String","value":"westus"},"name":{"type":"String","value":"cli-test-vm1"},"osDiskName":{"type":"String","value":"osdiskimage"},"osDiskUri":{"type":"String","value":"http://vhdstoragevjb5dorpukd4q.blob.core.windows.net/vhds/osdiskimage.vhd"},"osOffer":{"type":"String","value":"UbuntuServer"},"osPublisher":{"type":"String","value":"Canonical"},"osSKU":{"type":"String","value":"14.04.4-LTS"},"osType":{"type":"String","value":"Custom"},"osVersion":{"type":"String","value":"latest"},"privateIpAddressAllocation":{"type":"String","value":"Dynamic"},"publicIpAddressAllocation":{"type":"String","value":"Dynamic"},"publicIpAddressName":{"type":"String","value":"PublicIPcli-test-vm1"},"publicIpAddressType":{"type":"String","value":"new"},"size":{"type":"String","value":"Standard_A2"},"sshDestKeyPath":{"type":"String","value":"/home/ubuntu/.ssh/authorized_keys"},"sshKeyValue":{"type":"String","value":"ssh-rsa
+        AAAAB3NzaC1yc2EAAAADAQABAAACAQCbIg1guRHbI0lV11wWDt1r2cUdcNd27CJsg+SfgC7miZeubtwUhbsPdhMQsfDyhOWHq1+ZL0M+nJZV63d/1dhmhtgyOqejUwrPlzKhydsbrsdUor+JmNJDdW01v7BXHyuymT8G4s09jCasNOwiufbP/qp72ruu0bIA1nySsvlf9pCQAuFkAnVnf/rFhUlOkhtRpwcq8SUNY2zRHR/EKb/4NWY1JzR4sa3q2fWIJdrrX0DvLoa5g9bIEd4Df79ba7v+yiUBOS0zT2ll+z4g9izHK3EO5d8hL4jYxcjKs+wcslSYRWrascfscLgMlMGh0CdKeNTDjHpGPncaf3Z+FwwwjWeuiNBxv7bJo13/8B/098KlVDl4GZqsoBCEjPyJfV6hO0y/LkRGkk7oHWKgeWAfKtfLItRp00eZ4fcJNK9kCaSMmEugoZWcI7NGbZXzqFWqbpRI7NcDP9+WIQ+i9U5vqWsqd/zng4kbuAJ6UuKqIzB0upYrLShfQE3SAck8oaLhJqqq56VfDuASNpJKidV+zq27HfSBmbXnkR/5AK337dc3MXKJypoK/QPMLKUAP5XLPbs+NddJQV7EZXd29DLgp+fRIg3edpKdO7ZErWhv7d+3Kws+e1Y+ypmR2WIVSwVyBEUfgv2C8Ts9gnTF4pNcEY/S2aBicz5Ew2+jdyGNQQ==
+        test@example.com\n"},"storageAccountName":{"type":"String","value":"vhdstoragevjb5dorpukd4q"},"storageAccountType":{"type":"String","value":"new"},"storageContainerName":{"type":"String","value":"vhds"},"storageRedundancyType":{"type":"String","value":"Standard_LRS"},"subnetIpAddressPrefix":{"type":"String","value":"10.0.0.0/24"},"subnetName":{"type":"String","value":"Subnetcli-test-vm1"},"virtualNetworkIpAddressPrefix":{"type":"String","value":"10.0.0.0/16"},"virtualNetworkName":{"type":"String","value":"VNETcli-test-vm1"},"virtualNetworkType":{"type":"String","value":"new"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2016-05-12T21:54:07.458332Z","duration":"PT0.2046025S","correlationId":"c96e99e1-b741-4841-a059-7a316959044e","providers":[{"namespace":"Microsoft.Resources","resourceTypes":[{"resourceType":"deployments","locations":[null]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/cliTestRg_VMCreate_Ubuntu/providers/Microsoft.Resources/deployments/VNetcli-test-vm1","resourceType":"Microsoft.Resources/deployments","resourceName":"VNetcli-test-vm1"}],"id":"/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/cliTestRg_VMCreate_Ubuntu/providers/Microsoft.Resources/deployments/NicIpcli-test-vm1","resourceType":"Microsoft.Resources/deployments","resourceName":"NicIpcli-test-vm1"},{"dependsOn":[{"id":"/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/cliTestRg_VMCreate_Ubuntu/providers/Microsoft.Resources/deployments/vhdstoragevjb5dorpukd4qcli-test-vm1","resourceType":"Microsoft.Resources/deployments","resourceName":"vhdstoragevjb5dorpukd4qcli-test-vm1"},{"id":"/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/cliTestRg_VMCreate_Ubuntu/providers/Microsoft.Resources/deployments/NicIpcli-test-vm1","resourceType":"Microsoft.Resources/deployments","resourceName":"NicIpcli-test-vm1"}],"id":"/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/cliTestRg_VMCreate_Ubuntu/providers/Microsoft.Resources/deployments/VMcli-test-vm1","resourceType":"Microsoft.Resources/deployments","resourceName":"VMcli-test-vm1"}]}}'}
+    headers:
+      Azure-AsyncOperation: ['https://management.azure.com/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourcegroups/cliTestRg_VMCreate_Ubuntu/providers/Microsoft.Resources/deployments/azurecli-test-deployment-vm-create-ubuntu/operationStatuses/08587385168382240447?api-version=2015-11-01']
+      Cache-Control: [no-cache]
+      Content-Length: ['4682']
+      Content-Type: [application/json; charset=utf-8]
+      Date: ['Thu, 12 May 2016 21:54:06 GMT']
+      Expires: ['-1']
+      Pragma: [no-cache]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      x-ms-ratelimit-remaining-subscription-writes: ['1196']
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.1 requests/2.9.1 msrest/0.3.0 msrest_azure/0.3.0 vmcreationclient/2015-11-01
+          Azure-SDK-For-Python AZURECLI_0.0.32]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliTestRg_VMCreate_Ubuntu/providers/Microsoft.Resources/deployments/azurecli-test-deployment-vm-create-ubuntu/operationStatuses/08587385168382240447?api-version=2015-11-01
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAEAO29B2AcSZYlJi9tynt/SvVK1+B0oQiAYBMk2JBAEOzBiM3mkuwdaUcjKasqgcpl
+        VmVdZhZAzO2dvPfee++999577733ujudTif33/8/XGZkAWz2zkrayZ4hgKrIHz9+fB8/In7xR02b
+        tevmo0cfvV5Pp3k+y2cf/ZL/ByCIe+QWAAAA
+    headers:
+      Cache-Control: [no-cache]
+      Content-Encoding: [gzip]
+      Content-Length: ['141']
+      Content-Type: [application/json; charset=utf-8]
+      Date: ['Thu, 12 May 2016 21:57:39 GMT']
+      Expires: ['-1']
+      Pragma: [no-cache]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      Vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.1 requests/2.9.1 msrest/0.3.0 msrest_azure/0.3.0 vmcreationclient/2015-11-01
+          Azure-SDK-For-Python AZURECLI_0.0.32]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliTestRg_VMCreate_Ubuntu/providers/Microsoft.Resources/deployments/azurecli-test-deployment-vm-create-ubuntu?api-version=2015-11-01
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAEAO29B2AcSZYlJi9tynt/SvVK1+B0oQiAYBMk2JBAEOzBiM3mkuwdaUcjKasqgcpl
+        VmVdZhZAzO2dvPfee++999577733ujudTif33/8/XGZkAWz2zkrayZ4hgKrIHz9+fB8/In7xR8Xs
+        o0cf3W3Wk2ZaF6u2qJbN3Z3J7vmn+w92t3cn5zvb+7NZtp3l03vb08nDvQd75zsP7z/cuVvnTbWu
+        p/nndbVeNXenZfEmb9pXF7//T35xUudZm//+X03Wy3Z9d1VXl8Usr5u7XxTTumqq83b8Sl9u7s7y
+        VVldL/Jl29zNfrCucwK03RKkbffN9uVie8owt9cM86PRR8tskRPm7/MKIbLK67bIm48e/eKP2nyx
+        Kun758XyLf5e1wXBm7ftqnl0V1BpZm+nxXhSVpPxtKrz8VWxnFVXzXiZt3fN6/Oqae/KgH/yC3lN
+        sBj/dFMtqddptWwJoZ8kAhBxqYvd8Q7+++iXEEZZTcNo6Stg8PtnhNx5Nm2b59U0w1Tg0/Z6hYG+
+        butieUHwLrNyjQ8+DFP0ns0WxfJl1jRXVU1c4LrKpwRSOzTtvmryWmju2kkLh5JSGq+s2zkNupBh
+        vOH2w+81zZxfusyKMpsUZdFev87bswCn7juRF27qZlktc7w2WzYvskX+rKpfridlMT17uekt743b
+        dlDeYvquiF/XDVrfRFXL3ZeLXbSvmqdF8xb4bHqrambUqlhkF4ySvPQVeHz4HbAUcdTlfNa0VU1v
+        Xv705P6sqlfrt7P9XzTAXmh91+ttTB9Ij1+en+f1pv5EQbzO60tqx6/whDRz+nPDaycZEZpYq5R3
+        Xv9eX21qvbs/3tkf728/f/Na2t80iydrGv1C2lqpHW4O0WpaNF/VxSX9cbY6ns1IJJvj8jaM8PSa
+        GKCYMgCMfvqNvX8TizCxifu7DNYBcxO9lvkV3mqKH9Bfw81et9lyltWz3/94j5s386fU5++VX7/M
+        2vmmF+/Oq0V+V3TL3TG9dxfapaqpv9nv/za/ZiGijwnUT8orw7Co2XbdZOkxPU/uvfhBdrJ7Pd07
+        pb+Onx7/xPET+nly/BMnk7OL3Yv1q29PznbKn9zdvfru03a33pt+NZu+mO09OPlOc/HJ6/OLkweL
+        4qfy9aS9+mo+aV7O5l/8RHP+9Hr+5Xe//Yt2P/mp5ztffLL8zk/95Kf3Znd3Z/PFvL24/vIX5T/9
+        1VX9svzB7zW/njWTupl9VdWffGfx4jtPZ9/d2b188OT3/vb1+nrx5uDz/Wbn4U+fZM2LL6+K9fnk
+        5d1ftHqwV6/XO5Oz493l9evmsjx/uDr5ieP1s7fHy59cnt+tn82/Kr98O29fra6mv+jg9Vcvfp+9
+        H7z69qu7p7/X5O7+i+/+Prvf+cGr/Sa794v2zr979p1ZXf/eO08vn1fZ/YuHk7PT2f7T8wcPJ9mD
+        y0+ui6+efPl65wdv9srykx/sXzwsfvDt3+ve6Zf3Zwfz5/s//fu8m/7079V8cjVtyte/z6vv1lkz
+        PW+mzy++KL/4fL5zMvu98hdvnv70t1efv1xOs/N7P/XJs6urq5/+br4uXjx5d/lg8p1q997dgyd3
+        dx4e/F7lTz4t9z//qV/UVE9OTn/65fV3zn/y0/mXO9d3n7999fnbtw+qb3/397rIv3t8/nu158/P
+        aGg7O/lP7Z9Pv/Pi93r49iR7/cXidH1R/dR3p2cPXnw++anf+we/6Nl3f9Fk9Yr+nD59+fCT7579
+        xCfFw6/uX/6i7za/aHb3B8uL/beT9fF3Pv1q/Xv9orMfPNlZr36f+vnr+flPnN57fTx9e1Blz+ff
+        +UW/6Bfd//Qnz5+uj1+/WH3n9ypmP/nJD37R3oNvn79+spj83su3r+7eP/697t17MJve++L3/r2+
+        c72qfq+7P/Hyi+e/11fHL+//3s9fTppPXsxm3/mJn3xw+lO/92zv4dPnF6tPzl+dXdzLZ6vfa/bl
+        g586rb87v3ww++Te73XVfJLv/j6fXK8Wr/a+e/aTr69+8vrJ6VfnF5d7JwdvmocXyzfP9lcvpqe/
+        z93Xe9mTYvqD+6dXe5/89Oz68xc/8ROffZZCdn/P/F1GZj4n/bz4fZcsEaLCj6fTiiTnJl1ASltf
+        CHR+H9BttYG8dELOT1Ys8/o2/Xvvvcpna9IWy+n1Tf1ZtfL8Fet38mTJKlnl9bLOz4t3mwDski+G
+        /+7u7bv3b0L3NbfqKs7Lom7XWfkib8mjevt1cNj9tA/nJlx+8sXpm82Y3ERDnjN6a1HN8OfZkjxn
+        ONFkYckawH2HEaR3iNgtWrxeT6c5+bkz+r4tFtQxMR99vrez++n2zv3t3b03e7uP7j94tHcwvr9D
+        Un7vwU9R09m6VnP20cs3977Y2x3v7T/Yu7+/95q+JMeizsmY0vfw/D6aPvw0f/gw392ePNjf3d4/
+        oH+ynfsPtx9k93Y/RQSyv5/Ta4weoouPHn3vF7Mv1ayyKZCMRBvUniaEfwdN5B3/E3pNvHcMH82N
+        BUbT5bosv/9L6D8aSb7Kl7N8OeVggoDIB82XNDb66/9NQdVPEhMQHMceIQ0I0RsgeC8IKxLHdUCC
+        JP9vGvMLuC8EyGHoxvB1B92H+UtG/2+ed2hUUaaBRifQbgRukF+XKrfpBXT6fxNl+jPphvV16dCH
+        +f82mfjJLwiKQ8+N4OsOuQMQ463W7WpNbcnWXC7wr1qcLyc/nU9bAqEWB1+zkj843/30fO8g384f
+        7pCSnxxMtw8ePvh0+2A3f7Bzfz/fzfMDem1OBv4qq/OXdXVelArgNQUABIJskjgAGlcIN3otOSp9
+        lVMsSvqaP+EAR6JML5gk9CVgDeNSAvl2TR/6cSQNhEhO00mfk8kiEqBribHRgQkyP6Lk0vodNYdd
+        oj8lTA7IRoaPJ/RLZg9q86yuFmdAmb4i6QI4l5r6xqLzaTadk0EnsK/ybPbduiC7Th/PsjbDIGgK
+        v/d9+psickdIci1pdo0vF+YlKBkTZolMMohMKGhAjuB5cWHtPynOoskmZW7ST8cU0hGb0URIg7Ze
+        50R5SgxRW56vKcV3QIv+5IDxFnHh6CP68ZSGRK3p+x9Ffj+K/P7/H/l9H558k5NWgSJmKSZFQDL2
+        1hNl/eSMUtM1ZZzVif25MVcvBJe7PZzIZJFZJWBOzdDo1OWH9iUFRtqfNBdZgbWJSDD8ywW9iHEO
+        2p/NMJyt+3zNRJk9fEhUOD/fnk53z7f3z/ez7YPZZLY9zfY+ffDw3vnkwfk9eqtYBXpOqKr6sFjR
+        SgB9F4yHXgH4u/8vpvnd7qDog+hI8jaDPfnu3d/3o3t7k8n+vft727PzhzSA3fuz7YckCtsH+f1P
+        Z3m2s//pw73f9yN6h3DzlmTor42TYhKsLzWwpq81ct4PvrV50y9yMgggsEmSUiu2JdTIgPi5ZvsO
+        QjQFQ3lZwpDm6+ce4zC5QCzTSUDcJcQI0ebua/7pf4Vh0DwtsvpabPwvgdtIyyu0fNPSrPN88J/w
+        veiv79HX2WpVFvnsafAxAcqX8CDOXtJCDjmHM3r9o0fnWdkQUPpWfFHry9I7Sjc3oBNxaMyAvmCf
+        iCagg3HvPR35baRn0+u3nvlBCIq4/kndd2Yi9u5rcR7vqhOpab3BeBEq95f8P+3ozwMnHgAA
+    headers:
+      Cache-Control: [no-cache]
+      Content-Encoding: [gzip]
+      Content-Length: ['2733']
+      Content-Type: [application/json; charset=utf-8]
+      Date: ['Thu, 12 May 2016 21:57:39 GMT']
+      Expires: ['-1']
+      Pragma: [no-cache]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      Vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.1 requests/2.9.1 msrest/0.3.0 msrest_azure/0.3.0 resourcemanagementclient/2016-02-01
+          Azure-SDK-For-Python AZURECLI_0.0.32]
+      accept-language: [en-US]
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliTestRg_VMCreate_Ubuntu?api-version=2016-02-01
+  response:
+    body: {string: ''}
+    headers:
+      Cache-Control: [no-cache]
+      Content-Length: ['0']
+      Date: ['Thu, 12 May 2016 21:57:39 GMT']
+      Expires: ['-1']
+      Location: ['https://management.azure.com/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUUkc6NUZWTUNSRUFURTo1RlVCVU5UVS1XRVNUVVMiLCJqb2JMb2NhdGlvbiI6Indlc3R1cyJ9?api-version=2016-02-01']
+      Pragma: [no-cache]
+      Retry-After: ['15']
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+    status: {code: 202, message: Accepted}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.1 requests/2.9.1 msrest/0.3.0 msrest_azure/0.3.0 resourcemanagementclient/2016-02-01
+          Azure-SDK-For-Python AZURECLI_0.0.32]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUUkc6NUZWTUNSRUFURTo1RlVCVU5UVS1XRVNUVVMiLCJqb2JMb2NhdGlvbiI6Indlc3R1cyJ9?api-version=2016-02-01
+  response:
+    body: {string: ''}
+    headers:
+      Cache-Control: [no-cache]
+      Content-Length: ['0']
+      Date: ['Thu, 12 May 2016 22:04:17 GMT']
+      Expires: ['-1']
+      Pragma: [no-cache]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+    status: {code: 200, message: OK}
+version: 1

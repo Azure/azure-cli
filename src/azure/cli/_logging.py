@@ -117,7 +117,7 @@ def _init_logfile_handlers(root_logger, az_logger):
     if not ENABLE_LOG_FILE:
         return
     log_file_path = _get_log_file_path()
-    logfile_handler = RotatingFileHandler(log_file_path, maxBytes=5*1024*1024, backupCount=5)
+    logfile_handler = RotatingFileHandler(log_file_path, maxBytes=10*1024*1024, backupCount=5)
     lfmt = logging.Formatter('%(process)d : %(asctime)s : %(levelname)s : %(name)s : %(message)s')
     logfile_handler.setFormatter(lfmt)
     logfile_handler.setLevel(logging.DEBUG)

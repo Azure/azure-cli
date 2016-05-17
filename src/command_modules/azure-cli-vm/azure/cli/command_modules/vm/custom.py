@@ -1,4 +1,5 @@
 ﻿# pylint: disable=no-self-use,too-many-arguments
+import os
 import re
 
 from azure.mgmt.compute.models import DataDisk
@@ -77,6 +78,91 @@ class ConvenienceVmCommands(object): # pylint: disable=too-few-public-methods
         for i in all_images:
             i['urn'] = ':'.join([i['publisher'], i['offer'], i['sku'], i['version']])
         return all_images
+
+
+    def set_windows_user_password(self,
+                                  resource_group_name,
+                                  vm_name,
+                                  username,
+                                  password):
+        '''Update the password.
+        You can only change the password. Adding a new user is not supported.
+        '''
+        client = _compute_client_factory()
+
+        from azure.mgmt.compute.models import VirtualMachineExtension
+
+        ext = VirtualMachineExtension(self.vm.location,#pylint: disable=no-member
+                                      publisher="Microsoft.Compute",
+                                      virtual_machine_extension_type='VMAccessAgent',
+                                      protected_settings={'Password': password},
+                                      type_handler_version='2.0',
+                                      settings={'UserName': username})
+
+        return client.virtual_machine_extensions.create_or_update(resource_group_name,
+                                                                  vm_name,
+                                                                  'VMAccessAgent',
+                                                                  ext)
+
+    def set_linux_user(self,
+                       resource_group_name,
+                       vm_name,
+                       username,
+                       password=None,
+                       ssh_key_value=None):
+        '''craete or update a user credential
+        :param ssh_key_value: SSH key file value or key file path
+        '''
+        client = _compute_client_factory()
+
+        from azure.mgmt.compute.models import VirtualMachineExtension
+
+        if password is None and ssh_key_value is None:
+            raise CLIError('Please provide either password or ssh public key.')
+
+        protected_settings = {}
+        protected_settings['username'] = username
+        if password:
+            protected_settings['password'] = password
+
+        if ssh_key_value:
+            if os.path.exists(ssh_key_value):
+                with open(ssh_key_value, 'r') as f:
+                    ssh_key_value = f.read()
+            protected_settings['ssh_key'] = ssh_key_value
+
+        ext = VirtualMachineExtension(self.vm.location,#pylint: disable=no-member
+                                      publisher='Microsoft.OSTCExtensions',
+                                      virtual_machine_extension_type='VMAccessForLinux',
+                                      protected_settings=protected_settings,
+                                      type_handler_version='1.4',
+                                      settings={})
+
+        return client.virtual_machine_extensions.create_or_update(resource_group_name,
+                                                                  vm_name,
+                                                                  'VMAccessForLinux',
+                                                                  ext)
+
+    def delete_linux_user(self,
+                          resource_group_name,
+                          vm_name,
+                          username):
+        '''Remove the user '''
+        client = _compute_client_factory()
+
+        from azure.mgmt.compute.models import VirtualMachineExtension
+
+        ext = VirtualMachineExtension(self.vm.location,#pylint: disable=no-member
+                                      publisher='Microsoft.OSTCExtensions',
+                                      virtual_machine_extension_type='VMAccessForLinux',
+                                      protected_settings={'remove_user':username},
+                                      type_handler_version='1.4',
+                                      settings={})
+
+        return client.virtual_machine_extensions.create_or_update(resource_group_name,
+                                                                  vm_name,
+                                                                  'VMAccessForLinux',
+                                                                  ext)
 
 
     def list_ip_addresses(self, resource_group_name=None, vm_name=None):
