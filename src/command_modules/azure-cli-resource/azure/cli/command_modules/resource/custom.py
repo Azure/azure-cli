@@ -1,6 +1,8 @@
 ﻿# pylint: disable=too-few-public-methods,no-self-use,too-many-arguments
 
 from __future__ import print_function
+import json
+from codecs import open as codecs_open
 
 from azure.mgmt.resource.resources.models.resource_group import ResourceGroup
 
@@ -9,6 +11,8 @@ from azure.cli.commands import CommandTable
 from azure.cli._locale import L
 from azure.cli._util import CLIError
 import azure.cli._logging as _logging
+from azure.cli.commands import LongRunningOperation
+from azure.cli.commands._command_creation import get_mgmt_service_client
 
 from ._params import _resource_client_factory
 
@@ -112,7 +116,6 @@ class ConvenienceResourceGroupCommands(object):
         :param bool include_comments:export template with comments.
         :param bool include_parameter_default_value: export template parameter with default value.
         '''
-        import json
         rcf = _resource_client_factory()
 
         export_options = []
@@ -178,3 +181,47 @@ class ConvenienceResourceCommands(object):
         odata_filter = _list_resources_odata_filter_builder(location, resource_type, tag, name)
         resources = rcf.resources.list(filter=odata_filter)
         return list(resources)
+
+    def deploy(self, resource_group, deployment_name, template_file_path,
+               parameters_file_path, mode='Incremental'):
+        ''' Deploy resources with an ARM template.
+            :param str resource_group:resource group for deployment
+            :param str location:location for deployment
+            :param str deployment_name:name for deployment
+            (use different values for simultaneous deployments)
+            :param str template_file_path:path to deployment template JSON file
+            :param str parameters_file_path:path to deployment parameters JSON file
+        '''
+        from azure.mgmt.resource.resources import (ResourceManagementClientConfiguration,
+                                                   ResourceManagementClient)
+        from azure.mgmt.resource.resources.models import DeploymentProperties
+
+        parameters = _get_file_json(parameters_file_path)
+        parameters = parameters.get('parameters', parameters)
+
+        template = _get_file_json(template_file_path)
+
+        properties = DeploymentProperties(template=template,
+                                          parameters=parameters,
+                                          mode=mode)
+
+        op = LongRunningOperation('Deployment started', 'Deployment complete')
+        smc = get_mgmt_service_client(ResourceManagementClient,
+                                      ResourceManagementClientConfiguration)
+        poller = smc.deployments.create_or_update(resource_group, deployment_name, properties)
+        return op(poller)
+
+def _get_file_json(file_path):
+    return _load_json(file_path, 'utf-8') \
+        or _load_json(file_path, 'utf-8-sig') \
+        or _load_json(file_path, 'utf-16') \
+        or _load_json(file_path, 'utf-16le') \
+        or _load_json(file_path, 'utf-16be')
+
+def _load_json(file_path, encoding):
+    try:
+        with codecs_open(file_path, encoding=encoding) as f:
+            text = f.read()
+        return json.loads(text)
+    except ValueError:
+        pass
