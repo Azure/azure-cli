@@ -1,3 +1,5 @@
+import argparse
+
 from azure.mgmt.network import NetworkManagementClient, NetworkManagementClientConfiguration
 
 from azure.cli.commands import COMMON_PARAMETERS as GLOBAL_COMMON_PARAMETERS, patch_aliases
@@ -25,6 +27,14 @@ SUBNET_ALIASES = patch_aliases(GLOBAL_COMMON_PARAMETERS, {
         'name': '--address-prefix',
         'metavar': 'PREFIX',
         'help': 'the address prefix in CIDR format'
+    }
+})
+
+IP_ALIASES = patch_aliases(GLOBAL_COMMON_PARAMETERS, {
+    'public_ip_address_type':
+    {
+        'name': '--public-ip-address-type',
+        'help': argparse.SUPPRESS
     }
 })
 

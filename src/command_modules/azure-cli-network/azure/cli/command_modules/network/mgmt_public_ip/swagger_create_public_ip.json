@@ -1,7 +1,7 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "ResourceManagementClient",
+    "title": "PublicIPCreationClient",
     "version": "2015-11-01"
   },
   "host": "management.azure.com",
@@ -36,10 +36,10 @@
     "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Resources/deployments/{deploymentName}": {
       "put": {
         "tags": [
-          "VNet"
+          "PublicIP"
         ],
-        "operationId": "VNet_Create",
-        "description": "Create a named template deployment using a template.",
+        "operationId": "PublicIP_CreateOrUpdate",
+        "description": "Create or update a virtual machine.",
         "parameters": [
           {
             "name": "resourceGroupName",
@@ -67,7 +67,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/Deployment_VNet"
+              "$ref": "#/definitions/Deployment_PublicIP"
             },
             "description": "Additional parameters supplied to the operation."
           },
@@ -97,20 +97,17 @@
     }
   },
   "definitions": {
-    "Deployment_VNet": {
+    "Deployment_PublicIP": {
       "properties": {
         "properties": {
-          "$ref": "#/definitions/DeploymentProperties_VNet",
+          "$ref": "#/definitions/DeploymentProperties_PublicIP",
           "description": "Gets or sets the deployment properties.",
           "x-ms-client-flatten": true
         }
       },
-	  "required": [
-        "properties"
-      ],
       "description": "Deployment operation parameters."
     },
-    "DeploymentProperties_VNet": {
+    "DeploymentProperties_PublicIP": {
       "properties": {
         "templateLink": {
           "$ref": "#/definitions/TemplateLink",
@@ -118,7 +115,7 @@
           "x-ms-client-flatten": true
         },
         "parameters": {
-          "$ref": "#/definitions/VNetParameters",
+          "$ref": "#/definitions/PublicIPParameters",
           "type": "object",
           "description": "Deployment parameters. Use only one of Parameters or ParametersLink.",
           "x-ms-client-flatten": true
@@ -148,7 +145,7 @@
           "type": "string",
           "description": "URI referencing the template.",
           "enum": [
-            "https://azuresdkci.blob.core.windows.net/templatehost/CreateVNet/azuredeploy.json"
+            "https://azuresdkci.blob.core.windows.net/templatehost/CreatePublicIP/azuredeploy.json"
           ]
         },
         "contentVersion": {
@@ -161,82 +158,65 @@
       ],
       "description": "Entity representing the reference to the template."
     },
-    "VNetParameters": {
+    "PublicIPParameters": {
+
       "properties": {
-        "virtualNetworkPrefix": {
+        "_artifactsLocation": {
           "type": "object",
-          "$ref": "#/definitions/DeploymentParameter_virtualNetworkPrefix",
-          "x-ms-client-flatten": true,
-        },
-        "subnetPrefix": {
-          "type": "object",
-          "$ref": "#/definitions/DeploymentParameter_subnetPrefix",
+          "$ref": "#/definitions/DeploymentParameter__artifactsLocation",
           "x-ms-client-flatten": true
         },
-        "virtualNetworkName": {
+        "allocationMethod": {
           "type": "object",
-          "$ref": "#/definitions/DeploymentParameter_virtualNetworkName",
+          "$ref": "#/definitions/DeploymentParameter_allocationMethod",
           "x-ms-client-flatten": true
         },
-        "subnetName": {
+        "dnsName": {
           "type": "object",
-          "$ref": "#/definitions/DeploymentParameter_subnetName",
+          "$ref": "#/definitions/DeploymentParameter_dnsName",
           "x-ms-client-flatten": true
         },
         "location": {
           "type": "object",
           "$ref": "#/definitions/DeploymentParameter_location",
           "x-ms-client-flatten": true
+        },
+        "name": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_name",
+          "x-ms-client-flatten": true
+        },
+        "publicIpAddressType": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_publicIpAddressType",
+          "x-ms-client-flatten": true
         }
       },
       "required": [
-        "virtualNetworkName"
+        "name"
       ]
+
     },
-    "DeploymentParameter_virtualNetworkPrefix": {
+    "DeploymentParameter_allocationMethod": {
       "properties": {
         "value": {
           "type": "string",
-          "description": "IP address prefix for the virtual network.",
-          "pattern": "^[\\d\\./]+$",
-          "x-ms-client-name": "virtualNetworkPrefix"
+          "description": "IP address Allocation method.",
+          "x-ms-client-name": "allocationMethod",
+          "enum": [
+            "Dynamic",
+            "Static"
+          ],
+          "default": "Dynamic"
         }
       }
     },
-    "DeploymentParameter_subnetPrefix": {
+    "DeploymentParameter_dnsName": {
       "properties": {
         "value": {
           "type": "string",
-          "description": "IP address prefix for the subnet.",
-          "pattern": "^[\\d\\./]+$",
-		  "x-ms-client-name": "subnetPrefix"
-        }
-      }
-    },
-    "DeploymentParameter_virtualNetworkName": {
-      "properties": {
-        "value": {
-          "type": "string",
-          "description": "Name of the virtual network.",
-          "pattern": "^[-\\w\\._]+$",
-          "minLength": 2,
-          "maxLength": 80,
-		  "x-ms-client-name": "virtualNetworkName"
-      }
-    },
-	  "required": [
-        "value"
-      ]
-    },
-    "DeploymentParameter_subnetName": {
-      "properties": {
-        "value": {
-          "type": "string",
-          "description": "Name of the subnet.",
-          "pattern": "^[-\\w\\._]+$",
-          "minLength": 2,
-          "maxLength": 80,
-		  "x-ms-client-name": "subnetName"
+          "description": "Globally unique DNS entry.",
+          "x-ms-client-name": "dnsName"
         }
       }
     },
@@ -244,10 +224,53 @@
       "properties": {
         "value": {
           "type": "string",
-          "description": "Location of the virtual network.",
-		  "x-ms-client-name": "location"
+          "description": "Location (e.g. eastus).",
+          "x-ms-client-name": "location"
         }
       }
+    },
+    "DeploymentParameter_name": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "Name of the Public IP address.",
+          "x-ms-client-name": "name"
+        }
+      },
+      "required": [
+        "value"
+      ]
+
+    },
+    "DeploymentParameter_publicIpAddressType": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "Whether to include a DNS entry or not.",
+          "x-ms-client-name": "publicIpAddressType",
+          "enum": [
+            "dns",
+            "noDns"
+          ],
+          "default": "noDns"
+        }
+      }
+    },
+
+    "DeploymentParameter__artifactsLocation": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "Container URI of of the template.",
+          "x-ms-client-name": "_artifactsLocation",
+          "enum": [
+            "https://azuresdkci.blob.core.windows.net/templatehost/CreatePublicIP"
+          ]
+        }
+      },
+      "required": [
+        "value"
+      ]
     },
     "ParametersLink": {
       "properties": {
