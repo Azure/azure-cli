@@ -19,13 +19,18 @@
     VirtualNetworksOperations)
 
 from azure.cli.commands._command_creation import get_mgmt_service_client
-from azure.cli.command_modules.network.mgmt.lib import (ResourceManagementClient as VNetClient,
-                                                        ResourceManagementClientConfiguration
-                                                        as VNetClientConfig)
-from azure.cli.command_modules.network.mgmt.lib.operations import VNetOperations
+from azure.cli.command_modules.network.mgmt_vnet.lib import (ResourceManagementClient as VNetClient,
+                                                             ResourceManagementClientConfiguration
+                                                             as VNetClientConfig)
+from azure.cli.command_modules.network.mgmt_vnet.lib.operations import VNetOperations
+from azure.cli.command_modules.network.mgmt_public_ip.lib import (PublicIPCreationClient
+                                                                  as PublicIPClient,
+                                                                  PublicIPCreationClientConfiguration #pylint: disable=line-too-long
+                                                                  as PublicIPClientConfig)
+from azure.cli.command_modules.network.mgmt_public_ip.lib.operations import PublicIPOperations
 from azure.cli.command_modules.network.custom import ConvenienceNetworkCommands
 from azure.cli.command_modules.network._params import (VNET_ALIASES, SUBNET_ALIASES,
-                                                       _network_client_factory)
+                                                       IP_ALIASES, _network_client_factory)
 from azure.cli.commands._auto_command import build_operation, CommandDefinition
 from azure.cli.commands import CommandTable, LongRunningOperation
 from azure.cli._locale import L
@@ -305,8 +310,22 @@ build_operation(
     command_table, VNET_ALIASES)
 
 build_operation(
-    'network vnet', 'vnet', lambda _: get_mgmt_service_client(VNetClient, VNetClientConfig),
+    'network vnet', 'vnet', lambda **_: get_mgmt_service_client(VNetClient, VNetClientConfig),
     [
         CommandDefinition(VNetOperations.create, LongRunningOperation(L('Creating virtual network'), L('Virtual network created')))
     ],
     command_table, VNET_ALIASES)
+
+
+
+build_operation(
+    'network public-ip',
+    'public_ip',
+    lambda **_: get_mgmt_service_client(PublicIPClient, PublicIPClientConfig),
+    [
+        CommandDefinition(PublicIPOperations.create_or_update,
+                          LongRunningOperation(L('Creating public IP address'), L('Public IP address created')),
+                          'create')
+    ],
+    command_table,
+    IP_ALIASES)
