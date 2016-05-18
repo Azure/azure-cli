@@ -1,4 +1,5 @@
 from __future__ import print_function
+import copy
 import time
 import random
 from importlib import import_module
@@ -53,12 +54,12 @@ COMMON_PARAMETERS = {
 }
 
 def extend_parameter(parameter_metadata, **kwargs):
-    extended_param = parameter_metadata.copy()
+    extended_param = copy.deepcopy(parameter_metadata)
     extended_param.update(kwargs)
     return extended_param
 
 def patch_aliases(aliases, patch):
-    patched_aliases = aliases.copy()
+    patched_aliases = copy.deepcopy(aliases)
     for key in patch:
         if key in patched_aliases:
             patched_aliases[key].update(patch[key])
