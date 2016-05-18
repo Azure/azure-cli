@@ -115,7 +115,7 @@ PARAMETER_ALIASES = patch_aliases(GLOBAL_COMMON_PARAMETERS, {
     },
     'blob_type': {
         'name': '--blob-type',
-        'choices': blob_types.keys()
+        'choices': list(blob_types.keys())
     },
     'container_name': {
         'name': '--container-name -c',

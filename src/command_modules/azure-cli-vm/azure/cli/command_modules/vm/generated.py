@@ -208,9 +208,9 @@ build_operation('vm access',
                         'help': 'The user password',
                         'name': '--password -p'
                         },
-                    #'vm_name': {
-                    #    'name' : '--name -n'
-                    #}
+                    'vm_name': {
+                        'name' : '--name -n'
+                    }
                 })
                )
 
