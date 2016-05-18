@@ -19,10 +19,10 @@ class Test_vcr_security(unittest.TestCase):
         pass
 
     def setUp(self):
-        self.io = StringIO()
+        pass
         
     def tearDown(self):
-        self.io.close()
+        pass
 
     def test_cassettes_for_token_refresh(self):
         cls = Test_vcr_security
