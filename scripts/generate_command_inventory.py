@@ -20,15 +20,17 @@ args = parser.parse_args()
 cmd_set_names = args.commands
 param_names = args.params
 
+# ignore the params passed in now so they aren't used by the cli
+sys.argv = sys.argv[:1]
 config = Configuration([])
 cmd_table = config.get_command_table()
-cmd_list = [x['name'] for x in cmd_table.values()
-             if cmd_set_names is None or (x['name'].split()[0]) in cmd_set_names]
+cmd_list = [cmd_name for cmd_name in cmd_table.keys() if cmd_set_names is None or cmd_name.split()[0] in cmd_set_names]
 results = []
 
 if param_names:
     for name in cmd_list:
-        cmd_args = [x for x in cmd_table.values() if name == x['name']][0]['arguments']
+        cmd_name = [x for x in cmd_table.keys() if name == x][0]
+        cmd_args = cmd_table[cmd_name]['arguments']
         match = False
         for arg in cmd_args:
             if match:
