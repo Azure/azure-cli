@@ -5,7 +5,7 @@ from azure.cli.application import APPLICATION, Configuration
 import azure.cli._logging as _logging
 from ._session import Session
 from ._output import OutputProducer
-from ._util import CLIError
+from ._util import CLIError, show_version_info_exit
 
 logger = _logging.get_az_logger(__name__)
 
@@ -21,6 +21,9 @@ SESSION = Session()
 
 def main(args, file=sys.stdout): #pylint: disable=redefined-builtin
     _logging.configure_logging(args)
+
+    if len(args) > 0 and args[0] == '--version':
+        show_version_info_exit(file)
 
     azure_folder = os.path.expanduser('~/.azure')
     if not os.path.exists(azure_folder):
