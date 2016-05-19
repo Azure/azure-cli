@@ -158,7 +158,7 @@ PARAMETER_ALIASES = patch_aliases(GLOBAL_COMMON_PARAMETERS, {
     'key': {
         'name': '--key',
         'help': 'The key to renew (omit to renew both)',
-        'choices': storage_account_key_options.keys()
+        'choices': list(storage_account_key_options.keys())
     },
     'lease_break_period': {
         'name': '--lease-break-period',
