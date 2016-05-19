@@ -112,6 +112,4 @@ The system now allows the testing of long running operations. Regardless of the 
 
 ##Limitations
 
-The current system saves time, but has some limitations.
-
 + You can't test for things like 'this input results in an exception'. It simply tests that the response equals an expected response.
