@@ -42,7 +42,8 @@ class ConvenienceStorageAccountCommands(object):
         :param str key:Key to renew.'''
         from azure.cli.command_modules.storage._params import storage_account_key_options
         scf = storage_client_factory()
-        for k in [key] if key else storage_account_key_options:
+        for k in [storage_account_key_options[key]] if key \
+            else storage_account_key_options.values():
             result = scf.storage_accounts.regenerate_key(
                 resource_group_name=resource_group_name,
                 account_name=account_name,
