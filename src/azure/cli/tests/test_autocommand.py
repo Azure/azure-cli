@@ -104,29 +104,37 @@ class Test_autocommand(unittest.TestCase):
                 'help': 'foo help'
             }
         }
-        PARAMS = patch_aliases(GLOBAL_PARAMS, {
+        PARAMS1 = patch_aliases(GLOBAL_PARAMS, {
             'added': {
                 'name': '--added',
                 'help': 'Added'
             },
             'vm_name': {
-                'help': 'FOO TIME'
+                'help': 'first modification'
             }
         })
 
-        self.assertTrue(PARAMS['vm_name']['help'] == 'FOO TIME', '\'vm_name\' help should have been updated.')
-        self.assertTrue(PARAMS['vm_name']['name'] == '--foo -f', '\'vm_name\' name should not have changed.')
-        self.assertTrue(PARAMS['added']['name'] == '--added', '\'added\' should have been added to the aliases.')
-        self.assertTrue(PARAMS['added']['help'] == 'Added', '\'added\' should have been added to the aliases.')
+        PARAMS2 = patch_aliases(GLOBAL_PARAMS, {
+            'vm_name': {
+                'help': 'second modification'
+            }
+        })
+
+        self.assertTrue(PARAMS1['vm_name']['help'] == 'first modification', '\'vm_name\' help should have been updated for the first copy ONLY.')
+        self.assertTrue(PARAMS1['vm_name']['name'] == '--foo -f', '\'vm_name\' name should not have changed.')
+        self.assertTrue(PARAMS1['added']['name'] == '--added', '\'added\' should have been added to the aliases.')
+        self.assertTrue(PARAMS1['added']['help'] == 'Added', '\'added\' should have been added to the aliases.')
+
+        self.assertTrue(PARAMS2['vm_name']['help'] == 'second modification', '\'vm_name\' should have been updated.')
 
         build_operation('test autocommand', '', None, [
             CommandDefinition(Test_autocommand.sample_vm_get, None)
-        ], command_table, patch_aliases(PARAMS, {'vm_name': {'name': '--changed'}}))
+        ], command_table, patch_aliases(PARAMS1, {'vm_name': {'name': '--changed'}}))
 
         self.assertEqual(len(command_table), 1, 'We expect exactly one command in the command table')
         command_metadata = list(command_table.values())[0]
         some_expected_arguments = [
-            {'name': '--changed', 'help': 'FOO TIME'},
+            {'name': '--changed', 'help': 'first modification'},
         ]
 
         for probe in some_expected_arguments:
