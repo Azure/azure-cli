@@ -68,6 +68,10 @@ setup(
         'azure.cli.command_modules.network.mgmt_public_ip.lib',
         'azure.cli.command_modules.network.mgmt_public_ip.lib.models',
         'azure.cli.command_modules.network.mgmt_public_ip.lib.operations',
+        'azure.cli.command_modules.network.mgmt_lb',
+        'azure.cli.command_modules.network.mgmt_lb.lib',
+        'azure.cli.command_modules.network.mgmt_lb.lib.models',
+        'azure.cli.command_modules.network.mgmt_lb.lib.operations',
     ],
     install_requires=DEPENDENCIES,
 )

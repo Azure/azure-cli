@@ -19,18 +19,22 @@
     VirtualNetworksOperations)
 
 from azure.cli.commands._command_creation import get_mgmt_service_client
-from azure.cli.command_modules.network.mgmt_vnet.lib import (ResourceManagementClient as VNetClient,
-                                                             ResourceManagementClientConfiguration
-                                                             as VNetClientConfig)
+from azure.cli.command_modules.network.mgmt_vnet.lib \
+    import (ResourceManagementClient as VNetClient,
+            ResourceManagementClientConfiguration as VNetClientConfig)
 from azure.cli.command_modules.network.mgmt_vnet.lib.operations import VNetOperations
-from azure.cli.command_modules.network.mgmt_public_ip.lib import (PublicIPCreationClient
-                                                                  as PublicIPClient,
-                                                                  PublicIPCreationClientConfiguration #pylint: disable=line-too-long
-                                                                  as PublicIPClientConfig)
+from azure.cli.command_modules.network.mgmt_public_ip.lib \
+    import (PublicIPCreationClient as PublicIPClient,
+            PublicIPCreationClientConfiguration as PublicIPClientConfig)
 from azure.cli.command_modules.network.mgmt_public_ip.lib.operations import PublicIPOperations
+from azure.cli.command_modules.network.mgmt_lb.lib import (LBCreationClient as LBClient,
+                                                           LBCreationClientConfiguration
+                                                           as LBClientConfig)
+from azure.cli.command_modules.network.mgmt_lb.lib.operations import LBOperations
 from azure.cli.command_modules.network.custom import ConvenienceNetworkCommands
 from azure.cli.command_modules.network._params import (VNET_ALIASES, SUBNET_ALIASES,
-                                                       IP_ALIASES, _network_client_factory)
+                                                       NAME_ALIASES, IP_ALIASES,
+                                                       _network_client_factory)
 from azure.cli.commands._auto_command import build_operation, CommandDefinition
 from azure.cli.commands import CommandTable, LongRunningOperation
 from azure.cli._locale import L
@@ -316,7 +320,14 @@ build_operation(
     ],
     command_table, VNET_ALIASES)
 
-
+build_operation(
+    'network lb', 'lb', lambda **_: get_mgmt_service_client(LBClient, LBClientConfig),
+    [
+        CommandDefinition(LBOperations.create_or_update,
+                          LongRunningOperation(L('Creating load balancer'), L('Load balancer created')),
+                          'create')
+    ],
+    command_table, NAME_ALIASES)
 
 build_operation(
     'network public-ip',
