@@ -1,0 +1,119 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "_artifactsLocation": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Container URI of the template."
+      }
+    },
+    "hostingPlanName": {
+      "type": "string",
+      "defaultValue": "[concat('hostingPlan', parameters('name'))]",
+      "metadata": {
+        "description": "Name for the web application's hosting plan."
+      }
+    },
+    "hostingPlanType": {
+      "type": "string",
+      "defaultValue": "new",
+      "allowedValues": [
+        "new",
+        "existing"
+      ],
+      "metadata": {
+        "description": "Use a new or existing hosting plan."
+      }
+    },
+    "name": {
+      "type": "string",
+      "metadata": {
+        "description": "Name for the web application."
+      }
+    },
+    "numberOfWorkers": {
+      "type": "string",
+      "defaultValue": "1",
+      "metadata": {
+        "description": "Number of dedicated VMs in the farm."
+      }
+    },
+    "skuCapacity": {
+      "type": "string",
+      "defaultValue": "1",
+      "metadata": {
+        "description": "Describes plan's instance count"
+      }
+    },
+    "skuName": {
+      "type": "string",
+      "defaultValue": "F1",
+      "metadata": {
+        "description": "Describes plan's pricing tier and instance size. Check details at https://azure.microsoft.com/en-us/pricing/details/app-service/"
+      }
+    }
+  },
+  "variables": {
+    "hostingPlanDeploymentName": "[concat(parameters('hostingPlanName'), parameters('name'), 'deployment')]",
+    "hostingPlanTemplatePaths": {
+      "new": "nested_templates/hostingplan_new.json",
+      "existing": "nested_templates/hostingplan_existing.json"
+    }
+  },
+  "resources": [
+    {
+      "name": "[variables('hostingPlanDeploymentName')]",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "dependsOn": [ ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(parameters('_artifactsLocation'), '/', variables('hostingPlanTemplatePaths')[parameters('hostingPlanType')])]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "hostingPlanName": { "value": "[parameters('hostingPlanName')]" },
+          "skuName": { "value": "[parameters('skuName')]" },
+          "skuCapacity": { "value": "[parameters('skuCapacity')]" },
+          "numberOfWorkers": { "value": "[parameters('numberOfWorkers')]"}
+        }
+      }
+    },
+    {
+      "apiVersion": "2015-08-01",
+      "name": "[parameters('name')]",
+      "type": "Microsoft.Web/sites",
+      "location": "[resourceGroup().location]",
+      "tags": {
+        "[concat('hidden-related:', resourceGroup().id, '/providers/Microsoft.Web/serverfarms/', parameters('hostingPlanName'))]": "Resource",
+        "displayName": "Website"
+      },
+      "dependsOn": [
+        "[concat('Microsoft.Resources/deployments/', variables('hostingPlanDeploymentName'))]"
+      ],
+      "properties": {
+        "name": "[parameters('name')]",
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('hostingPlanName'))]"
+      }
+    },
+    {
+      "apiVersion": "2014-04-01",
+      "name": "[parameters('name')]",
+      "type": "Microsoft.Insights/components",
+      "location": "Central US",
+      "dependsOn": [
+        "[concat('Microsoft.Web/sites/', parameters('name'))]"
+      ],
+      "tags": {
+        "[concat('hidden-link:', resourceGroup().id, '/providers/Microsoft.Web/sites/', parameters('name'))]": "Resource",
+        "displayName": "AppInsightsComponent"
+      },
+      "properties": {
+        "applicationId": "[parameters('name')]"
+      }
+    }
+  ]
+}
