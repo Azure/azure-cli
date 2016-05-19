@@ -84,7 +84,20 @@ build_operation(
         CommandDefinition(VirtualMachineExtensionsOperations.delete, LongRunningOperation(L('Deleting VM extension'), L('VM extension deleted'))),
         CommandDefinition(VirtualMachineExtensionsOperations.get, 'VirtualMachineExtension', command_alias='show'),
     ],
-    command_table, {'vm_extension_name': {'name': '--name -n'}})
+    command_table, patch_aliases(PARAMETER_ALIASES, {
+        'vm_extension_name': {'name': '--name -n'}
+        }))
+
+build_operation(
+    'vm extension', None, ConvenienceVmCommands,
+    [
+        CommandDefinition(ConvenienceVmCommands.set_extension, LongRunningOperation(L('Setting extension'), L('Extension was set')), command_alias='set'),
+        CommandDefinition(ConvenienceVmCommands.list_extensions, '[Extensions]', command_alias='list')
+    ],
+    command_table, patch_aliases(PARAMETER_ALIASES, {
+        'vm_extension_name': {'name': '--name -n'},
+        'auto_upgrade_minor_version': {'action': 'store_true'}
+        }))
 
 build_operation(
     'vm image', 'virtual_machine_images', _compute_client_factory,

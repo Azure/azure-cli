@@ -1,8 +1,11 @@
 ﻿# AZURE CLI VM TEST DEFINITIONS
 import json
+import os
 import tempfile
 
 from azure.cli.utils.command_test_script import CommandTestScript, JMESPathComparator
+
+TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 #pylint: disable=method-hidden
 class VMImageListByAliasesScenarioTest(CommandTestScript):
@@ -634,6 +637,45 @@ class VMBootDiagnostics(CommandTestScript):
         verification = [JMESPathComparator('diagnosticsProfile.bootDiagnostics.enabled', False)]
         self.test('vm show {}'.format(common_part), verification)
 
+
+class VMExtensionInstallTest(CommandTestScript):
+
+    def __init__(self):
+        super(VMExtensionInstallTest, self).__init__(None, self.test_body, None)
+
+    def test_body(self):
+        #pylint: disable=line-too-long
+        publisher = 'Microsoft.OSTCExtensions'
+        extension_name = 'VMAccessForLinux'
+        vm_name = 'yugangw8-1'
+        resource_group = 'yugangw8'
+        public_key = ('ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC8InHIPLAu6lMc0d+5voyXqigZfT5r6fAM1+FQAi+mkPDdk2hNq1BG0Bwfc88G'
+                      'm7BImw8TS+x2bnZmhCbVnHd6BPCDY7a+cHCSqrQMW89Cv6Vl4ueGOeAWHpJTV9CTLVz4IY1x4HBdkLI2lKIHri9+z7NIdvFk7iOk'
+                      'MVGyez5H1xDbF2szURxgc4I2/o5wycSwX+G8DrtsBvWLmFv9YAPx+VkEHQDjR0WWezOjuo1rDn6MQfiKfqAjPuInwNOg5AIxXAOR'
+                      'esrin2PUlArNtdDH1zlvI4RZi36+tJO7mtm3dJiKs4Sj7G6b1CjIU6aaj27MmKy3arIFChYav9yYM3IT')
+        user_name = 'yugangw'
+        config_file_name = 'private_config.json'
+        config = {
+            'username': user_name,
+            'ssh_key': public_key
+            }
+        config_file = os.path.join(TEST_DIR, config_file_name)
+        with open(config_file, 'w') as outfile:
+            json.dump(config, outfile)
+
+        try:
+            set_cmd = ('vm extension set -n {} --publisher {} --version 1.4  --vm-name {} --resource-group {} --private-config {}'
+                       .format(extension_name, publisher, vm_name, resource_group, config_file))
+            self.run(set_cmd)
+            self.test('vm extension show --resource-group {} --vm-name {} --name {}'.format(
+                resource_group, vm_name, extension_name), [
+                    JMESPathComparator('type(@)', 'object'),
+                    JMESPathComparator('name', extension_name),
+                    JMESPathComparator('resourceGroup', resource_group)])
+        finally:
+            os.remove(config_file)
+
+
 ENV_VAR = {}
 
 TEST_DEF = [
@@ -728,5 +770,9 @@ TEST_DEF = [
     {
         'test_name': 'vm_enable_disable_boot_diagnostic',
         'command': VMBootDiagnostics()
+    },
+    {
+        'test_name': 'vm_extension_install',
+        'command': VMExtensionInstallTest()
     }
 ]

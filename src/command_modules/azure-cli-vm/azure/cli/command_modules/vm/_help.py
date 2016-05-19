@@ -67,3 +67,11 @@ helps['vm availability-set create'] = """
             type: command
             long-summary: For more info, see https://blogs.technet.microsoft.com/yungchou/2013/05/14/window-azure-fault-domain-and-upgrade-domain-explained-explained-reprised/
             """
+
+helps['vm extension set'] = """
+            type: command
+            examples:
+                - name: Add a new linux user:
+                  text: 
+                    az vm extension set -n VMAccessForLinux --publisher Microsoft.OSTCExtensions --version 1.4 --vm-name myvm --resource-group yugangw --private-config "{\\"username\\":\\"user1\\", \\"ssh_key\\":\\"ssh_rsa ....\\"}"
+            """
