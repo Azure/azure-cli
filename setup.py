@@ -72,6 +72,7 @@ DEPENDENCIES = [
     'colorama',
     'jmespath',
     'msrest',
+    'msrestazure',
     'pip',
     'pyyaml',
     'requests',
