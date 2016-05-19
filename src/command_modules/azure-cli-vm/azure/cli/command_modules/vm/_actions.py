@@ -1,4 +1,4 @@
-import argparse
+﻿import argparse
 import json
 import os
 import re
@@ -113,12 +113,7 @@ def load_images_thru_services(publisher, offer, sku, location):
     all_images = []
     client = _compute_client_factory()
     if location is None:
-        result = get_subscription_locations()
-        if result:
-            location = next((r.name for r in result if r.name.lower() == 'westus'), result[0].name)
-        else:
-            #this should never happen, just in case
-            raise CLIError('Current subscription does not have valid location list')
+        location = get_one_of_subscription_locations()
 
     def _load_images_from_publisher(publisher):
         offers = client.virtual_machine_images.list_offers(location, publisher)
@@ -152,10 +147,56 @@ def load_images_thru_services(publisher, offer, sku, location):
 
     return all_images
 
+def load_extension_images_thru_services(publisher, name, version, location):
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+    all_images = []
+    client = _compute_client_factory()
+    if location is None:
+        location = get_one_of_subscription_locations()
+
+    def _load_extension_images_from_publisher(publisher):
+        types = client.virtual_machine_extension_images.list_types(location, publisher)
+        if name:
+            types = [t for t in types if _partial_matched(name, t.name)]
+        for t in types:
+            versions = client.virtual_machine_extension_images.list_versions(location,
+                                                                             publisher,
+                                                                             t.name)
+            if version:
+                versions = [v for v in versions if _partial_matched(version, v.name)]
+            for v in versions:
+                all_images.append({
+                    'publisher': publisher,
+                    'name': t.name,
+                    'version': v.name})
+
+    publishers = client.virtual_machine_images.list_publishers(location)
+    if publisher:
+        publishers = [p for p in publishers if _partial_matched(publisher, p.name)]
+
+    publisher_num = len(publishers)
+    if publisher_num > 1:
+        with ThreadPoolExecutor(max_workers=40) as executor:
+            tasks = [executor.submit(_load_extension_images_from_publisher,
+                                     p.name) for p in publishers]
+            for t in as_completed(tasks):
+                t.result() # don't use the result but expose exceptions from the threads
+    elif publisher_num == 1:
+        _load_extension_images_from_publisher(publishers[0].name)
+
+    return all_images
+
 def get_subscription_locations():
     subscription_client, subscription_id = _subscription_client_factory()
-    result = list(subscription_client.subscriptions.list_locations(subscription_id))
-    return result
+    return list(subscription_client.subscriptions.list_locations(subscription_id))
+
+def get_one_of_subscription_locations():
+    result = get_subscription_locations()
+    if result:
+        return next((r.name for r in result if r.name.lower() == 'westus'), result[0].name)
+    else:
+        #this should never happen, just in case
+        raise CLIError('Current subscription does not have valid location list')
 
 def _partial_matched(pattern, string):
     if not pattern:
