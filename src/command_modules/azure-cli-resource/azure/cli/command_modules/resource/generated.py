@@ -45,9 +45,17 @@ build_operation(
     [
         CommandDefinition(ConvenienceResourceCommands.list, '[Resource]'),
         CommandDefinition(ConvenienceResourceCommands.show, 'Resource'),
+        CommandDefinition(ConvenienceResourceCommands.deploy, 'Resource'),
     ],
     command_table, patch_aliases(PARAMETER_ALIASES, {
-        'resource_name': {'name': '--name -n'}
+        'resource_name': {'name': '--name -n'},
+        'mode': {
+            'name': '--mode',
+            'choices': ['Incremental', 'Complete'],
+            'help': 'Incremental (only add resources to resource group) or '
+                    'Complete (remove extra resources from resource group)',
+            'default': 'Incremental'
+        }
     }))
 
 build_operation(
@@ -69,7 +77,7 @@ build_operation(
     [
         CommandDefinition(DeploymentsOperations.list, '[Deployment]'),
         CommandDefinition(DeploymentsOperations.get, 'Deployment', 'show'),
-        #CommandDefinition(DeploymentsOperations.validate, 'Object'),
+        CommandDefinition(DeploymentsOperations.validate, 'Object'),
         #CommandDefinition(DeploymentsOperations.delete, 'Object'),
         CommandDefinition(DeploymentsOperations.check_existence, 'Bool', 'exists'),
         #CommandDefinition(DeploymentsOperations.cancel, 'Object'),
