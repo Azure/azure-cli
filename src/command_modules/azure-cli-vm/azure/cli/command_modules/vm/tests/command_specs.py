@@ -396,8 +396,8 @@ class VMMachineExtensionImageScenarioTest(CommandTestScript):
 class VMScaleSetGetsScenarioTest(CommandTestScript):
 
     def __init__(self):
-        self.resource_group = 'cliTestRg_ScaleSet1'
-        self.ss_name = 'scaleset1'
+        self.resource_group = 'CLI_TEST1'
+        self.ss_name = 'clitestvm'
         self.location = 'westus'
         super(VMScaleSetGetsScenarioTest, self).__init__(None, self.test_body, None)
 
