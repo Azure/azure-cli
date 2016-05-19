@@ -20,6 +20,10 @@ from azure.cli.command_modules.vm.mgmt_vm_create.lib import (VMCreationClient as
                                                              VMCreationClientConfiguration
                                                              as VMClientConfig)
 from azure.cli.command_modules.vm.mgmt_vm_create.lib.operations import VMOperations
+from azure.cli.command_modules.vm.mgmt_vmss_create.lib import (VMSSCreationClient as VMSSClient,
+                                                               VMSSCreationClientConfiguration
+                                                               as VMSSClientConfig)
+from azure.cli.command_modules.vm.mgmt_vmss_create.lib.operations import VMSSOperations
 
 from ._params import (PARAMETER_ALIASES, VM_CREATE_EXTRA_PARAMETERS, VM_CREATE_PARAMETER_ALIASES,
                       VM_PATCH_EXTRA_PARAMETERS)
@@ -131,6 +135,17 @@ build_operation(
             VMOperations.create_or_update,
             DeploymentOutputLongRunningOperation(L('Creating virtual machine'),
                                                  L('Virtual machine created')),
+            'create')
+    ],
+    command_table, VM_CREATE_PARAMETER_ALIASES, VM_CREATE_EXTRA_PARAMETERS)
+
+build_operation(
+    'vm scaleset', 'vmss', lambda **_: get_mgmt_service_client(VMSSClient, VMSSClientConfig),
+    [
+        CommandDefinition(
+            VMSSOperations.create_or_update,
+            DeploymentOutputLongRunningOperation(L('Creating virtual machine scale set'),
+                                                 L('Virtual machine scale set created')),
             'create')
     ],
     command_table, VM_CREATE_PARAMETER_ALIASES, VM_CREATE_EXTRA_PARAMETERS)

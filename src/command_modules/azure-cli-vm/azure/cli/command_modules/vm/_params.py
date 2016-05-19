@@ -89,6 +89,7 @@ VM_CREATE_PARAMETER_ALIASES = {
     'admin_username': {
         'name': '--admin-username',
         'default': getpass.getuser(),
+        'required': False,
         'help': 'Admin login.  Defaults to current username.'
     },
     'ssh_key_value': {

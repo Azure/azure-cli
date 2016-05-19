@@ -1,5 +1,12 @@
 from azure.cli._help_files import helps
 
+#pylint: disable=line-too-long
+
+image_long_summary = """                      URN aliases: CentOS, CoreOS, Debian, openSUSE, RHEL, SLES, UbuntuLTS, Win2008SP1, Win2012Datacenter, Win2012R2Datacenter.
+                      Example URN: MicrosoftWindowsServer:WindowsServer:2012-R2-Datacenter:latest
+                      Example URI: http://<storageAccount>.blob.core.windows.net/vhds/osdiskimage.vhd
+"""
+
 helps['vm create'] = """
             type: command
             short-summary: Create an Azure Virtual Machine
@@ -7,11 +14,9 @@ helps['vm create'] = """
             parameters: 
                 - name: --image
                   type: string
-                  short-summary: OS image (Common, URN or URI).
+                  short-summary: 'OS image (URN alias, URN or URI) [default: Win2012R2Datacenter].'
                   long-summary: |
-                      Common OS types: CentOS, CoreOS, Debian, openSUSE, RHEL, SLES, UbuntuLTS, Win2008SP1, Win2012Datacenter, Win2012R2Datacenter. 
-                      Example URN: MicrosoftWindowsServer:WindowsServer:2012-R2-Datacenter:latest
-                      Example URI: http://<storageAccount>.blob.core.windows.net/vhds/osdiskimage.vhd
+{0}
                   populator-commands: 
                   - az vm image list
                   - az vm image show
@@ -21,7 +26,7 @@ helps['vm create'] = """
                 - name: Create a simple Windows Server VM with private IP address
                   text: >
                     az vm create --image Win2012R2Datacenter --admin-username myadmin --admin-password Admin_001 
-                    -l "West US" -g myvms --name myvm001
+                    -l "West US" -g myvms --name myvm001 --public-ip-address-type none
                 - name: Create a simple Windows Server VM with public IP address and DNS entry
                   text: >
                     az vm create --image Win2012R2Datacenter --admin-username myadmin --admin-password Admin_001 
@@ -34,7 +39,29 @@ helps['vm create'] = """
                     --availability-set-type existing --availability-set-id myavailset
                     --public-ip-address-type new --dns-name-for-public-ip myGloballyUniqueVmDnsName
                     -l "West US" -g myvms --name myvm18o --ssh-key-value "<ssh-rsa-key or key-file-path>"
-            """
+            """.format(image_long_summary)
+
+helps['vm scaleset create'] = """
+            type: command
+            short-summary: Create an Azure Virtual Machine Scale Set
+            long-summary: See https://azure.microsoft.com/en-us/blog/azure-virtual-machine-scale-sets-ga/ for an introduction to scale sets.
+            parameters: 
+                - name: --image
+                  type: string
+                  short-summary: 'OS image (URN alias, URN or URI) [default: Win2012R2Datacenter].'
+                  long-summary: |
+{0}
+            examples:
+                - name: Windows scaleset with 5 instances, a load balancer and a public IP address
+                  text: >
+                    az vm scaleset create -n myName -g myResourceGroup --admin-password MyPassword123 --instance-count 5
+                - name: Linux scaleset with SSH authentication, a public IP address, a DNS entry, an existing load balancer, and an existing virtual network
+                  text: >
+                    az vm scaleset create  -n myName -g myResourceGroup --dns-name-for-public-ip myGloballyUnieqDnsName
+                    --load-balancer-type existing --load-balancer-name myLoadBalancer
+                    --virtual-network-type existing --virtual-network-name myVNET --subnet-name mySubnet --image canonical:Ubuntu_Snappy_Core:15.04:2016.0318.1949
+                    --authentication-type ssh --ssh-key-value "<ssh-key-value or ssh-key-file-path"
+""".format(image_long_summary)
 
 helps['vm availability-set create'] = """
             type: command
