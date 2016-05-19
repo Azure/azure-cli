@@ -1,0 +1,48 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01-preview/deploymentTemplate.json",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "type": "string"
+    },
+    "dnsNameForPublicIP": {
+      "type": "string"
+    },
+    "publicIPAddressName": {
+      "type": "string"
+    },
+    "publicIpAddressAllocation": {
+      "type": "string"
+    },
+    "privateIpAllocation": {
+      "type": "string"
+    },
+    "dnsNameType": {
+      "type": "string"
+    }
+  },
+  "variables": {
+    "properties_dns": {
+      "new": {
+        "publicIPAllocationMethod": "[parameters('publicIpAddressAllocation')]",
+        "privateIPAllocationMethod": "[parameters('privateIpAllocation')]",
+        "dnsSettings": {
+          "domainNameLabel": "[parameters('dnsNameForPublicIP')]"
+        }
+      },
+      "none": {
+        "publicIPAllocationMethod": "[parameters('publicIpAddressAllocation')]",
+        "privateIPAllocationMethod": "[parameters('privateIpAllocation')]"
+      }
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Network/publicIPAddresses",
+      "name": "[parameters('publicIPAddressName')]",
+      "location": "[parameters('location')]",
+      "apiVersion": "2015-06-15",
+      "properties": "[variables('properties_dns')[parameters('dnsNameType')]]"
+    }
+  ]
+}
