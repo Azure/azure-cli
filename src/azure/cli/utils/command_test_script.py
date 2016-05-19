@@ -41,6 +41,8 @@ class JMESPathComparator(object): #pylint: disable=too-few-public-methods
 def _check_json(source, checks):
 
     def _check_json_child(item, checks):
+        if not item:
+            return item == checks
         for check in checks.keys():
             if isinstance(checks[check], dict) and check in item:
                 return _check_json_child(item[check], checks[check])

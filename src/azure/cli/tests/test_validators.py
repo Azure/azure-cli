@@ -40,7 +40,7 @@ class Test_storage_validators(unittest.TestCase):
     def test_tags_invalid(self):
         input = ''
         actual = validate_tags(input)
-        expected = None
+        expected = {}
         self.assertEqual(actual, expected)
 
     def test_tag(self):

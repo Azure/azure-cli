@@ -1,6 +1,6 @@
 def validate_tags(string):
     ''' Extracts multiple tags in key[=value] format, separated by semicolons '''
-    result = None
+    result = {}
     if string:
         result = validate_key_value_pairs(string)
         s_list = [x for x in string.split(';') if '=' not in x]  # single values
@@ -9,7 +9,7 @@ def validate_tags(string):
 
 def validate_tag(string):
     ''' Extracts a single tag in key[=value] format '''
-    result = None
+    result = {}
     if string:
         comps = string.split('=', 1)
         result = {comps[0]: comps[1]} if len(comps) > 1 else {string: ''}
