@@ -1,5 +1,8 @@
 ﻿import unittest
+import mock
 import azure.cli.application as application
+from azure.cli.command_modules.vm.custom import (_get_access_extension_upgrade_info,
+                                                 ConvenienceVmCommands)
 
 class Test_Vm_Custom(unittest.TestCase):
 
@@ -29,7 +32,6 @@ class Test_Vm_Custom(unittest.TestCase):
             validator('4')
 
     def test_get_access_extension_upgrade_info(self):
-        from azure.cli.command_modules.vm.custom import _get_access_extension_upgrade_info
 
         #when there is no extension installed on linux vm, use the version we like
         publisher, name, version, auto_upgrade = _get_access_extension_upgrade_info(None, True)
@@ -65,12 +67,48 @@ class Test_Vm_Custom(unittest.TestCase):
         self.assertEqual('1.4', version)
         self.assertEqual(True, auto_upgrade)
 
+    @mock.patch('azure.cli.command_modules.vm.custom._vm_get', autospec=True)
+    @mock.patch('azure.cli.command_modules.vm.custom._vm_set', autospec=True)
+    def test_enable_boot_diagnostics_on_vm_never_enabled(self, mock_vm_set, mock_vm_get):
+        vm_fake = mock.MagicMock()
+        mock_vm_get.return_value = vm_fake
+        commands = ConvenienceVmCommands()
+        commands.enable_boot_diagnostics('g1', 'vm1', 'storage_uri1')
+        self.assertTrue(vm_fake.diagnostics_profile.boot_diagnostics.enabled)
+        self.assertEqual('storage_uri1', vm_fake.diagnostics_profile.boot_diagnostics.storage_uri)
+        self.assertTrue(mock_vm_get.called)
+        mock_vm_set.assert_called_once_with(vm_fake, 'Enabling boot diagnostics', 'Done')
+
+    @mock.patch('azure.cli.command_modules.vm.custom._vm_get', autospec=True)
+    @mock.patch('azure.cli.command_modules.vm.custom._vm_set', autospec=True)
+    def test_enable_boot_diagnostics_skip_when_enabled_already(self, mock_vm_set, mock_vm_get):
+        vm_fake = mock.MagicMock()
+        mock_vm_get.return_value = vm_fake
+        vm_fake.diagnostics_profile.boot_diagnostics.enabled = True
+        vm_fake.diagnostics_profile.boot_diagnostics.storage_uri = 'storage_uri1'
+        commands = ConvenienceVmCommands()
+        commands.enable_boot_diagnostics('g1', 'vm1', 'storage_uri1')
+        self.assertTrue(mock_vm_get.called)
+        self.assertFalse(mock_vm_set.called)
+
+    @mock.patch('azure.cli.command_modules.vm.custom._vm_get', autospec=True)
+    @mock.patch('azure.cli.command_modules.vm.custom._vm_set', autospec=True)
+    def test_disable_boot_diagnostics_on_vm(self, mock_vm_set, mock_vm_get):
+        vm_fake = mock.MagicMock()
+        mock_vm_get.return_value = vm_fake
+        vm_fake.diagnostics_profile.boot_diagnostics.enabled = True
+        vm_fake.diagnostics_profile.boot_diagnostics.storage_uri = 'storage_uri1'
+        commands = ConvenienceVmCommands()
+        commands.disable_boot_diagnostics('g1', 'vm1')
+        self.assertFalse(vm_fake.diagnostics_profile.boot_diagnostics.enabled)
+        self.assertIsNone(vm_fake.diagnostics_profile.boot_diagnostics.storage_uri)
+        self.assertTrue(mock_vm_get.called)
+        mock_vm_set.assert_called_once_with(vm_fake, 'Disabling boot diagnostics', 'Done')
 
 class FakedAccessExtensionEntity:#pylint: disable=too-few-public-methods,old-style-class
     def __init__(self, is_linux, version):
         self.name = 'VMAccessForLinux' if is_linux else 'VMAccessAgent'
         self.type_handler_version = version
-
 
 if __name__ == '__main__':
     unittest.main()

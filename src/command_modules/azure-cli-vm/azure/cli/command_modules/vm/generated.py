@@ -1,12 +1,13 @@
-from azure.mgmt.compute.operations import (AvailabilitySetsOperations,
-                                           VirtualMachineExtensionImagesOperations,
-                                           VirtualMachineExtensionsOperations,
-                                           VirtualMachineImagesOperations,
-                                           UsageOperations,
-                                           VirtualMachineSizesOperations,
-                                           VirtualMachinesOperations,
-                                           VirtualMachineScaleSetsOperations,
-                                           VirtualMachineScaleSetVMsOperations)
+﻿from azure.mgmt.compute.operations import (
+    AvailabilitySetsOperations,
+    VirtualMachineExtensionImagesOperations,
+    VirtualMachineExtensionsOperations,
+    VirtualMachineImagesOperations,
+    UsageOperations,
+    VirtualMachineSizesOperations,
+    VirtualMachinesOperations,
+    VirtualMachineScaleSetsOperations,
+    VirtualMachineScaleSetVMsOperations)
 from azure.cli.commands._auto_command import build_operation, CommandDefinition
 from azure.cli.commands._command_creation import get_mgmt_service_client
 from azure.cli.commands import CommandTable, LongRunningOperation, patch_aliases
@@ -66,14 +67,23 @@ build_operation(
     command_table, PARAMETER_ALIASES, VM_PATCH_EXTRA_PARAMETERS)
 
 build_operation(
+    'vm boot-diagnostics', None, ConvenienceVmCommands,
+    [
+        CommandDefinition(ConvenienceVmCommands.disable_boot_diagnostics, None, 'disable'),
+        CommandDefinition(ConvenienceVmCommands.enable_boot_diagnostics, None, 'enable'),
+        CommandDefinition(ConvenienceVmCommands.get_boot_log, None)
+    ],
+    command_table, patch_aliases(PARAMETER_ALIASES, {
+        'vm_name': {'name': '--name -n'}
+        }))
+
+build_operation(
     'vm extension', 'virtual_machine_extensions', _compute_client_factory,
     [
         CommandDefinition(VirtualMachineExtensionsOperations.delete, LongRunningOperation(L('Deleting VM extension'), L('VM extension deleted'))),
         CommandDefinition(VirtualMachineExtensionsOperations.get, 'VirtualMachineExtension', command_alias='show'),
     ],
-    command_table, patch_aliases(PARAMETER_ALIASES, {
-        'vm_extension_name': {'name': '--name -n'}
-        }))
+    command_table, {'vm_extension_name': {'name': '--name -n'}})
 
 build_operation(
     'vm image', 'virtual_machine_images', _compute_client_factory,

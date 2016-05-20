@@ -1,17 +1,16 @@
 ﻿# pylint: disable=no-self-use,too-many-arguments
 import os
 import re
+from six.moves.urllib.request import urlopen #pylint: disable=import-error,unused-import
 
 from azure.mgmt.compute.models import DataDisk
 from azure.mgmt.compute.models.compute_management_client_enums import DiskCreateOptionTypes
 from azure.cli.commands import CommandTable, LongRunningOperation
-from azure.cli.commands._command_creation import get_mgmt_service_client
+from azure.cli.commands._command_creation import get_mgmt_service_client, get_data_service_client
 from azure.cli._util import CLIError
 
 from ._actions import load_images_from_aliases_doc, load_images_thru_services
 from ._factory import _compute_client_factory
-
-from six.moves.urllib.request import urlopen #pylint: disable=import-error,unused-import
 
 command_table = CommandTable()
 
@@ -289,3 +288,103 @@ class ConvenienceVmCommands(object): # pylint: disable=too-few-public-methods
                                                                   extension_name,
                                                                   ext)
 
+
+    def disable_boot_diagnostics(self, resource_group_name, vm_name):
+        vm = _vm_get(resource_group_name, vm_name)
+        diag_profile = vm.diagnostics_profile
+        if not (diag_profile and
+                diag_profile.boot_diagnostics and
+                diag_profile.boot_diagnostics.enabled):
+            return
+
+        # Issue: https://github.com/Azure/autorest/issues/934
+        vm.resources = None
+        diag_profile.boot_diagnostics.enabled = False
+        diag_profile.boot_diagnostics.storage_uri = None
+        _vm_set(vm, "Disabling boot diagnostics", "Done")
+
+    def enable_boot_diagnostics(self, resource_group_name, vm_name, storage_uri):
+        '''Enable boot diagnostics
+        :param storage_uri:the storage account uri for boot diagnostics. A valid uri
+           in format like https://your_stoage_account_name.blob.core.windows.net/
+        '''
+        vm = _vm_get(resource_group_name, vm_name)
+
+        if (vm.diagnostics_profile and
+                vm.diagnostics_profile.boot_diagnostics and
+                vm.diagnostics_profile.boot_diagnostics.enabled and
+                vm.diagnostics_profile.boot_diagnostics.storage_uri and
+                vm.diagnostics_profile.boot_diagnostics.storage_uri.lower() == storage_uri.lower()):
+            return
+
+        from azure.mgmt.compute.models import DiagnosticsProfile, BootDiagnostics
+        boot_diag = BootDiagnostics(True, storage_uri)
+        if vm.diagnostics_profile is None:
+            vm.diagnostics_profile = DiagnosticsProfile(boot_diag)
+        else:
+            vm.diagnostics_profile.boot_diagnostics = boot_diag
+
+        # Issue: https://github.com/Azure/autorest/issues/934
+        vm.resources = None
+        _vm_set(vm, "Enabling boot diagnostics", "Done")
+
+    def get_boot_log(self, resource_group_name, vm_name):
+        import sys
+        import io
+        try:
+            from urllib.parse import urlparse
+        except ImportError:
+            from urlparse import urlparse # pylint: disable=import-error
+
+        from azure.mgmt.storage import StorageManagementClient, StorageManagementClientConfiguration
+        from azure.storage.blob import BlockBlobService
+
+        client = _compute_client_factory()
+
+        virtual_machine = client.virtual_machines.get(
+            resource_group_name,
+            vm_name,
+            expand='instanceView')
+
+        blob_uri = virtual_machine.instance_view.boot_diagnostics.serial_console_log_blob_uri # pylint: disable=no-member
+
+        # Find storage account for diagnostics
+        storage_mgmt_client = get_mgmt_service_client(StorageManagementClient,
+                                                      StorageManagementClientConfiguration)
+        if not blob_uri:
+            raise CLIError('No console log available')
+        try:
+            storage_accounts = storage_mgmt_client.storage_accounts.list()
+            matching_storage_account = (a for a in list(storage_accounts)
+                                        if blob_uri.startswith(a.primary_endpoints.blob))
+            storage_account = next(matching_storage_account)
+        except StopIteration:
+            raise CLIError('Failed to find storage accont for console log file')
+
+        regex = r'/subscriptions/[^/]+/resourceGroups/(?P<rg>[^/]+)/.+'
+        match = re.search(regex, storage_account.id, re.I)
+        rg = match.group('rg')
+        # Get account key
+        keys = storage_mgmt_client.storage_accounts.list_keys(rg,
+                                                              storage_account.name)
+
+        # Extract container and blob name from url...
+        container, blob = urlparse(blob_uri).path.split('/')[-2:]
+
+        storage_client = get_data_service_client(
+            BlockBlobService,
+            storage_account.name,
+            keys.key1) # pylint: disable=no-member
+
+        class StreamWriter(object): # pylint: disable=too-few-public-methods
+
+            def __init__(self, out):
+                self.out = out
+
+            def write(self, str_or_bytes):
+                if isinstance(str_or_bytes, bytes):
+                    self.out.write(str_or_bytes.decode())
+                else:
+                    self.out.write(str_or_bytes)
+
+        storage_client.get_blob_to_stream(container, blob, StreamWriter(sys.stdout))
