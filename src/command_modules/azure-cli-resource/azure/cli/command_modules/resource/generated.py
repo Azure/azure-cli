@@ -1,14 +1,20 @@
-﻿from azure.mgmt.resource.resources.operations.resources_operations import ResourcesOperations
+﻿import argparse
+
+from azure.mgmt.resource.resources.operations.resources_operations import ResourcesOperations
+from azure.mgmt.resource.resources.operations.providers_operations import ProvidersOperations
 from azure.mgmt.resource.resources.operations.resource_groups_operations \
     import ResourceGroupsOperations
 from azure.mgmt.resource.resources.operations.tags_operations import TagsOperations
 from azure.mgmt.resource.resources.operations.deployments_operations import DeploymentsOperations
 from azure.mgmt.resource.resources.operations.deployment_operations_operations \
     import DeploymentOperationsOperations
+
+from azure.cli.application import APPLICATION
 from azure.cli.commands._auto_command import build_operation, CommandDefinition
 from azure.cli.commands import CommandTable, LongRunningOperation, patch_aliases
 from azure.cli._locale import L
 
+from azure.cli.command_modules.resource._actions import handle_resource_parameters
 from ._params import PARAMETER_ALIASES
 from ._factory import _resource_client_factory
 from .custom import ConvenienceResourceGroupCommands, ConvenienceResourceCommands
@@ -48,6 +54,19 @@ build_operation(
         CommandDefinition(ResourcesOperations.get, 'Resource', 'show'),
     ], command_table, patch_aliases(PARAMETER_ALIASES, {
         'resource_name': {'name': '--name -n'},
+    }))
+
+build_operation(
+    'resource provider', 'providers', _resource_client_factory,
+    [
+        CommandDefinition(ProvidersOperations.list, '[Provider]'),
+        CommandDefinition(ProvidersOperations.get, 'Provider', 'show'),
+    ], command_table, patch_aliases(PARAMETER_ALIASES, {
+        'top': {'help': argparse.SUPPRESS},
+        'resource_provider_namespace': {
+            'name': '--namespace -n',
+            'help': 'the resource provider namespace to retrieve'
+        }
     }))
 
 build_operation(
@@ -103,3 +122,5 @@ build_operation(
     ], command_table, patch_aliases(PARAMETER_ALIASES, {
         'deployment_name': {'name': '--name -n', 'required': True}
     }))
+
+APPLICATION.register(APPLICATION.COMMAND_PARSER_PARSED, handle_resource_parameters)

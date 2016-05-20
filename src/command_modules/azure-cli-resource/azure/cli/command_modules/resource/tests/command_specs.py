@@ -84,10 +84,10 @@ class ResourceScenarioTest(CommandTestScript):
                '--resource-type Microsoft.Sql/databases'.format(rg),
             {'name': 'testsql23456', 'location': 'West US', 'resourceGroup': rg})
 
-        # TODO: FIX! check that commands succeeds regardless of parameter order
-        #s.test('resource show -n testsql23456 -g {} --resource-type Microsoft.Sql/databases '
-        #       '--parent servers/testserver23456 '.format(rg),
-        #    {'name': 'testsql23456', 'location': 'West US', 'resourceGroup': rg})
+        # Check that commands succeeds regardless of parameter order
+        s.test('resource show -n testsql23456 -g {} --resource-type Microsoft.Sql/databases '
+               '--parent servers/testserver23456 '.format(rg),
+            {'name': 'testsql23456', 'location': 'West US', 'resourceGroup': rg})
 
         # clear tag and verify
         s.run('resource set -n testserver23456 -g {} --resource-type '

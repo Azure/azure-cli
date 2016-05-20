@@ -15,7 +15,6 @@ import azure.cli._logging as _logging
 from azure.cli.commands import LongRunningOperation
 from azure.cli.commands._command_creation import get_mgmt_service_client
 
-from ._actions import _resolve_api_version
 from ._factory import _resource_client_factory
 
 logger = _logging.get_az_logger(__name__)
@@ -178,33 +177,29 @@ class ConvenienceResourceCommands(object):
         return op(poller)
 
     def set_tag(self, resource_group_name, resource_name, resource_type, tags,
-                parent_resource_path=None, api_version=None):
+                parent_resource_path=None, api_version=None, resource_provider_namespace=None):
         ''' Updates the tags on an existing resource. To clear tags, specify the --tag option
         without anything else. '''
         rcf = _resource_client_factory()
-        parent_path = '{}/{}'.format(parent_resource_path.type, parent_resource_path.name) \
-            if parent_resource_path else ''
-        api_version = _resolve_api_version(rcf, resource_type, parent_resource_path)
         resource = rcf.resources.get(
             resource_group_name,
-            resource_type.namespace,
-            parent_path,
-            resource_type.type,
+            resource_provider_namespace,
+            parent_resource_path,
+            resource_type,
             resource_name,
             api_version)
         parameters = GenericResource(resource.location, tags, None, None) # pylint: disable=no-member
         try:
             rcf.resources.create_or_update(
                 resource_group_name,
-                resource_type.namespace,
-                parent_path,
-                resource_type.type,
+                resource_provider_namespace,
+                parent_resource_path,
+                resource_type,
                 resource_name,
                 api_version,
                 parameters)
         except CloudError as ex:
-            # SDK raises CloudError unless status is 200 or 201. 202 (Accepted) is fine and the
-            # operation actually succeeds.
+            # TODO: Remove workaround once Swagger and SDK fix is implemented (#120123723)
             if '202' not in str(ex):
                 raise ex
 
