@@ -60,6 +60,10 @@ setup(
     ],
     packages=[
         'azure.cli.command_modules.webapp',
+        'azure.cli.command_modules.webapp.mgmt_webapp',
+        'azure.cli.command_modules.webapp.mgmt_webapp.lib',
+        'azure.cli.command_modules.webapp.mgmt_webapp.lib.models',
+        'azure.cli.command_modules.webapp.mgmt_webapp.lib.operations',
     ],
     install_requires=DEPENDENCIES,
 )
