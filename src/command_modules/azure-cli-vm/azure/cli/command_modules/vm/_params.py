@@ -89,8 +89,7 @@ VM_CREATE_PARAMETER_ALIASES = {
     'admin_username': {
         'name': '--admin-username',
         'default': getpass.getuser(),
-        'required': False,
-        'help': 'Admin login.  Defaults to current username.'
+        'required': False
     },
     'ssh_key_value': {
         'name': '--ssh-key-value',
@@ -107,37 +106,44 @@ VM_CREATE_PARAMETER_ALIASES = {
     'authentication_type': {
         'name': '--authentication-type',
         'choices': ['ssh', 'password'],
-        'default': 'password'
+        'default': 'password',
+        'help': ''
     },
     'availability_set_type': {
         'name': '--availability-set-type',
         'choices': ['none', 'existing'],
-        'default': 'none'
+        'default': 'none',
+        'help': ''
     },
     'private_ip_address_allocation': {
         'name': '--private-ip-address-allocation',
         'choices': ['Dynamic', 'Static'],
-        'default': 'Dynamic'
+        'default': 'Dynamic',
+        'help': ''
     },
     'public_ip_address_allocation': {
         'name': '--public-ip-address-allocation',
         'choices': ['Dynamic', 'Static'],
-        'default': 'Dynamic'
+        'default': 'Dynamic',
+        'help': ''
     },
     'public_ip_address_type': {
         'name': '--public-ip-address-type',
         'choices': ['none', 'new', 'existing'],
-        'default': 'new'
+        'default': 'new',
+        'help': ''
     },
     'storage_account_type': {
         'name': '--storage-account-type',
         'choices': ['new', 'existing'],
-        'default': 'new'
+        'default': 'new',
+        'help': ''
     },
     'virtual_network_type': {
         'name': '--virtual-network-type',
         'choices': ['new', 'existing'],
-        'default': 'new'
+        'default': 'new',
+        'help': ''
     }
 }
 
@@ -147,7 +153,8 @@ VM_CREATE_EXTRA_PARAMETERS = {
     'image': {
         'name': '--image',
         'action': VMImageFieldAction,
-        'completer': get_urn_aliases_completion_list
+        'completer': get_urn_aliases_completion_list,
+        'default': 'Win2012R2Datacenter'
         },
 }
 
