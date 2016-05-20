@@ -12,8 +12,38 @@ from azure.cli.command_modules.vm._actions import (VMImageFieldAction,
                                                    load_images_from_aliases_doc,
                                                    get_subscription_locations)
 from azure.cli._locale import L
+from azure.cli.commands.argument_types import register_cli_argument, CliArgumentType, location, register_additional_cli_argument
+
+def get_location_completion_list(prefix, **kwargs):#pylint: disable=unused-argument
+    result = get_subscription_locations()
+    return [l.name for l in result]
+
+def get_urn_aliases_completion_list(prefix, **kwargs):#pylint: disable=unused-argument
+    images = load_images_from_aliases_doc()
+    return [i['urn alias'] for i in images]
+
 
 # BASIC PARAMETER CONFIGURATION
+name_arg_type = CliArgumentType(options_list=('--name', '-n'), metavar='NAME')
+
+register_cli_argument('vm', 'vm_name', type=name_arg_type)
+register_cli_argument('vm', 'vm_scale_set_name', type=name_arg_type)
+
+
+register_cli_argument('vm availability-set', 'availability_set_name', type=name_arg_type)
+register_cli_argument('vm extension', 'vm_extension_name', type=name_arg_type)
+register_cli_argument('vm extension', 'vm_name', CliArgumentType(options_list=('--vm-name',)))
+
+register_cli_argument('vm', 'vm_scale_set_name', type=name_arg_type)
+
+register_cli_argument('vm create', 'name', type=name_arg_type)
+register_additional_cli_argument('vm create', 'image', options_list=('--image',), action=VMImageFieldAction, completer=get_urn_aliases_completion_list)
+register_additional_cli_argument('vm scaleset create', 'image', options_list=('--image',), action=VMImageFieldAction, completer=get_urn_aliases_completion_list)
+
+register_cli_argument('vm image list', 'image_location', location)
+
+register_cli_argument('vm access', 'username', CliArgumentType(options_list=('--username', '-u'), help='The user name'))
+register_cli_argument('vm access', 'password', CliArgumentType(options_list=('--password', '-p'), help='The user name'))
 
 PARAMETER_ALIASES = patch_aliases(GLOBAL_COMMON_PARAMETERS, {
     'diskname': {
@@ -46,14 +76,6 @@ PARAMETER_ALIASES = patch_aliases(GLOBAL_COMMON_PARAMETERS, {
         'help': 'Name of Virtual Machine to update',
     }
 })
-
-def get_location_completion_list(prefix, **kwargs):#pylint: disable=unused-argument
-    result = get_subscription_locations()
-    return [l.name for l in result]
-
-def get_urn_aliases_completion_list(prefix, **kwargs):#pylint: disable=unused-argument
-    images = load_images_from_aliases_doc()
-    return [i['urn alias'] for i in images]
 
 VM_CREATE_PARAMETER_ALIASES = {
     'location': {

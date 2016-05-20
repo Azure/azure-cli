@@ -35,17 +35,20 @@ class AzCliCommandParser(argparse.ArgumentParser):
             # parsers we add to the "choices" section of the subparser.
             subparser.choices[command_verb] = command_verb
             command_parser = subparser.add_parser(command_verb,
-                                                  description=metadata.get('description'),
+                                                  description=metadata.description,
                                                   parents=self.parents, conflict_handler='resolve',
-                                                  help_file=metadata.get('help_file'))
-            for arg in metadata['arguments']:
-                names = arg.get('name').split()
-                completer = arg.pop('completer', None)
+                                                  help_file=metadata.help_file)
+            argument_validators = []
+            for name, arg in metadata.arguments.items():
+                try:
+                    argument_validators.append(arg.options.pop('validator'))
+                except KeyError:
+                    pass
                 param = command_parser.add_argument(
-                    *names, **{k:v for k, v in arg.items() if k != 'name'})
-                param.completer = completer
+                    *arg.options_list, **arg.options)
+                param.completer = arg.completer
 
-            command_parser.set_defaults(func=metadata['handler'], command=command_name)
+            command_parser.set_defaults(func=metadata.handler, command=command_name, _validators=argument_validators)
 
     def _get_subparser(self, path):
         """For each part of the path, walk down the tree of
