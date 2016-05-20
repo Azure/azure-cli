@@ -539,6 +539,27 @@ class VMAccessAddRemoveLinuxUser(CommandTestScript):
         self.test('vm access delete-linux-user {}'.format(common_part),
                   verification)
 
+class VMBootDiagnostics(CommandTestScript):
+
+    def __init__(self):
+        super(VMBootDiagnostics, self).__init__(None, self.test_body, None)
+
+    def test_body(self):
+        common_part = '-g yugangw5 -n yugangw5-1'
+        #pylint: disable=line-too-long
+        storage_uri = 'https://yugangwstorage.blob.core.windows.net/'
+        self.run('vm boot-diagnostics enable {} --storage-uri {}'.format(common_part, storage_uri))
+        verification = [JMESPathComparator('diagnosticsProfile.bootDiagnostics.enabled', True),
+                        JMESPathComparator('diagnosticsProfile.bootDiagnostics.storageUri', storage_uri)]
+        self.test('vm show {}'.format(common_part), verification)
+
+        #will uncomment after #302 gets addressed
+        #self.run('vm boot-diagnostics get-boot-log {}'.format(common_part))
+
+        self.run('vm boot-diagnostics disable {}'.format(common_part))
+        verification = [JMESPathComparator('diagnosticsProfile.bootDiagnostics.enabled', False)]
+        self.test('vm show {}'.format(common_part), verification)
+
 ENV_VAR = {}
 
 TEST_DEF = [
@@ -621,6 +642,10 @@ TEST_DEF = [
     {
         'test_name': 'vm_add_remove_linux_user',
         'command': VMAccessAddRemoveLinuxUser()
+    },
+    {
+        'test_name': 'vm_enable_disable_boot_diagnostic',
+        'command': VMBootDiagnostics()
     }
 ]
 
