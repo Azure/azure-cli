@@ -31,312 +31,149 @@ from azure.cli.command_modules.network.mgmt_lb.lib import (LBCreationClient as L
                                                            LBCreationClientConfiguration
                                                            as LBClientConfig)
 from azure.cli.command_modules.network.mgmt_lb.lib.operations import LBOperations
-from azure.cli.command_modules.network.custom import ConvenienceNetworkCommands
-from azure.cli.command_modules.network._params import (VNET_ALIASES, SUBNET_ALIASES,
-                                                       NAME_ALIASES, IP_ALIASES,
-                                                       _network_client_factory)
-from azure.cli.commands._auto_command import build_operation, CommandDefinition
+from azure.cli.command_modules.network._params import _network_client_factory
+from azure.cli.commands._auto_command import build_operation, CommandDefinition, sdk_cli_command
 from azure.cli.commands import CommandTable, LongRunningOperation
 from azure.cli._locale import L
+from .custom import create_update_subnet
 
 command_table = CommandTable()
 
 # pylint: disable=line-too-long
 # Application gateways
-build_operation(
-    'network application-gateway', 'application_gateways', _network_client_factory,
-    [
-        CommandDefinition(ApplicationGatewaysOperations.delete, LongRunningOperation(L('Deleting application gateway'), L('Application gateway deleted'))),
-        CommandDefinition(ApplicationGatewaysOperations.get, 'ApplicationGateway', command_alias='show'),
-        CommandDefinition(ApplicationGatewaysOperations.list, '[ApplicationGateway]'),
-        CommandDefinition(ApplicationGatewaysOperations.list_all, '[ApplicationGateway]'),
-        CommandDefinition(ApplicationGatewaysOperations.start, LongRunningOperation(L('Starting application gateway'), L('Application gateway started'))),
-        CommandDefinition(ApplicationGatewaysOperations.stop, LongRunningOperation(L('Stopping application gateway'), L('Application gateway stopped'))),
-    ],
-    command_table,
-    {
-        'application_gateway_name': {'name': '--name -n'}
-    })
+factory = lambda **kwargs: _network_client_factory(**kwargs).application_gateways
+sdk_cli_command('network application-gateway delete', factory, ApplicationGatewaysOperations.delete, None, command_table)
+sdk_cli_command('network application-gateway show', factory, ApplicationGatewaysOperations.get, 'ApplicationGateway', command_table)
+sdk_cli_command('network application-gateway list', factory, ApplicationGatewaysOperations.list, '[ApplicationGateway]', command_table)
+sdk_cli_command('network application-gateway list-all', factory, ApplicationGatewaysOperations.list_all, '[ApplicationGateway]', command_table)
+sdk_cli_command('network application-gateway start', factory, ApplicationGatewaysOperations.start, None, command_table)
+sdk_cli_command('network application-gateway stop', factory, ApplicationGatewaysOperations.stop, None, command_table)
 
 # ExpressRouteCircuitAuthorizationsOperations
-build_operation(
-    'network express-route circuit-auth', 'express_route_circuit_authorizations', _network_client_factory,
-    [
-        CommandDefinition(ExpressRouteCircuitAuthorizationsOperations.delete, LongRunningOperation(L('Deleting express route authorization'), L('Express route authorization deleted'))),
-        CommandDefinition(ExpressRouteCircuitAuthorizationsOperations.get, 'ExpressRouteCircuitAuthorization', command_alias='show'),
-        CommandDefinition(ExpressRouteCircuitAuthorizationsOperations.list, '[ExpressRouteCircuitAuthorization]'),
-    ],
-    command_table,
-    {
-        'authorization_name': {'name': '--name -n'}
-    })
+factory = lambda **kwargs: _network_client_factory(**kwargs).express_route_circuit_authorizations
+sdk_cli_command('network express-route circuit-auth delete', factory, ExpressRouteCircuitAuthorizationsOperations.delete, None, command_table)
+sdk_cli_command('network express-route circuit-auth show', factory, ExpressRouteCircuitAuthorizationsOperations.get, 'ExpressRouteCircuitAuthorization', command_table)
+sdk_cli_command('network express-route circuit-auth list', factory, ExpressRouteCircuitAuthorizationsOperations.list, '[ExpressRouteCircuitAuthorization]', command_table)
 
 # ExpressRouteCircuitPeeringsOperations
-build_operation(
-    'network express-route circuit-peering', 'express_route_circuit_peerings', _network_client_factory,
-    [
-        CommandDefinition(ExpressRouteCircuitPeeringsOperations.delete, LongRunningOperation(L('Deleting express route circuit peering'), L('Express route circuit peering deleted'))),
-        CommandDefinition(ExpressRouteCircuitPeeringsOperations.get, 'ExpressRouteCircuitPeering', command_alias='show'),
-        CommandDefinition(ExpressRouteCircuitPeeringsOperations.list, '[ExpressRouteCircuitPeering]'),
-    ],
-    command_table,
-    {
-        'peering_name': {'name': '--name -n'}
-    })
+factory = lambda **kwargs: _network_client_factory(**kwargs).express_route_circuit_peerings
+sdk_cli_command('network express-route circuit-peering delete', factory, ExpressRouteCircuitPeeringsOperations.delete, None, command_table)
+sdk_cli_command('network express-route circuit-peering show', factory, ExpressRouteCircuitPeeringsOperations.get, 'ExpressRouteCircuitPeering', command_table)
+sdk_cli_command('network express-route circuit-peering list', factory, ExpressRouteCircuitPeeringsOperations.list, '[ExpressRouteCircuitPeering]', command_table)
 
 # ExpressRouteCircuitsOperations
-build_operation(
-    'network express-route circuit', 'express_route_circuits', _network_client_factory,
-    [
-        CommandDefinition(ExpressRouteCircuitsOperations.delete, LongRunningOperation(L('Deleting express route circuit'), L('Express route circuit deleted'))),
-        CommandDefinition(ExpressRouteCircuitsOperations.get, 'ExpressRouteCircuit', command_alias='show'),
-        CommandDefinition(ExpressRouteCircuitsOperations.list_arp_table, '[ExpressRouteCircuitArpTable]', 'list-arp'),
-        CommandDefinition(ExpressRouteCircuitsOperations.list_routes_table, '[ExpressRouteCircuitRoutesTable]', 'list-routes'),
-        CommandDefinition(ExpressRouteCircuitsOperations.get_stats, '[ExpressRouteCircuitStats]'),
-        CommandDefinition(ExpressRouteCircuitsOperations.list, '[ExpressRouteCircuit]'),
-        CommandDefinition(ExpressRouteCircuitsOperations.list_all, '[ExpressRouteCircuit]'),
-    ],
-    command_table,
-    {
-        'circuit_name': {'name': '--name -n'}
-    })
+factory = lambda **kwargs: _network_client_factory(**kwargs).express_route_circuits
+sdk_cli_command('network express-route circuit delete', factory, ExpressRouteCircuitsOperations.delete, None, command_table)
+sdk_cli_command('network express-route circuit show', factory, ExpressRouteCircuitsOperations.get, 'ExpressRouteCircuit', command_table)
+sdk_cli_command('network express-route circuit list-arp', factory, ExpressRouteCircuitsOperations.list_arp_table, '[ExpressRouteCircuitArpTable]', command_table)
+sdk_cli_command('network express-route circuit list-routes', factory, ExpressRouteCircuitsOperations.list_routes_table, '[ExpressRouteCircuitRoutesTable]', command_table)
+sdk_cli_command('network express-route circuit list', factory, ExpressRouteCircuitsOperations.delete, '[ExpressRouteCircuit]', command_table)
+sdk_cli_command('network express-route circuit list-all', factory, ExpressRouteCircuitsOperations.delete, '[ExpressRouteCircuit]', command_table)
 
 # ExpressRouteServiceProvidersOperations
-build_operation(
-    'network express-route service-provider', 'express_route_service_providers', _network_client_factory,
-    [
-        CommandDefinition(ExpressRouteServiceProvidersOperations.list, '[ExpressRouteServiceProvider]'),
-    ],
-    command_table)
+factory = lambda **kwargs: _network_client_factory(**kwargs).load_balancers
+sdk_cli_command('network express-route service-provider list', factory, ExpressRouteServiceProvidersOperations.list, '[ExpressRouteServiceProvider]', command_table)
 
 # LoadBalancersOperations
-build_operation(
-    'network lb', 'load_balancers', _network_client_factory,
-    [
-        CommandDefinition(LoadBalancersOperations.delete, LongRunningOperation(L('Deleting load balancer'), L('Load balancer deleted'))),
-        CommandDefinition(LoadBalancersOperations.get, 'LoadBalancer', command_alias='show'),
-        CommandDefinition(LoadBalancersOperations.list_all, '[LoadBalancer]'),
-        CommandDefinition(LoadBalancersOperations.list, '[LoadBalancer]'),
-    ],
-    command_table,
-    {
-        'load_balancer_name': {'name': '--name -n'}
-    })
+factory = lambda **kwargs: _network_client_factory(**kwargs).load_balancers
+sdk_cli_command('network lb delete', factory, LoadBalancersOperations.delete, None, command_table)
+sdk_cli_command('network lb show', factory, LoadBalancersOperations.get, 'LoadBalancer', command_table)
+sdk_cli_command('network lb list', factory, LoadBalancersOperations.list_all, '[LoadBalancer]', command_table)
+sdk_cli_command('network lb list-all', factory, LoadBalancersOperations.delete, '[LoadBalancer]', command_table)
+
+factory = lambda **_: get_mgmt_service_client(LBClient, LBClientConfig).lb
+sdk_cli_command('network lb create', factory, LBOperations.create_or_update, 'LoadBalancer', command_table)
 
 # LocalNetworkGatewaysOperations
-build_operation(
-    'network local-gateway', 'local_network_gateways', _network_client_factory,
-    [
-        CommandDefinition(LocalNetworkGatewaysOperations.get, 'LocalNetworkGateway', command_alias='show'),
-        CommandDefinition(LocalNetworkGatewaysOperations.delete, LongRunningOperation(L('Deleting local network gateway'), L('Local network gateway deleted'))),
-        CommandDefinition(LocalNetworkGatewaysOperations.list, '[LocalNetworkGateway]'),
-    ],
-    command_table,
-    {
-        'local_network_gateway_name': {'name': '--name -n'}
-    })
-
+factory = lambda **kwargs: _network_client_factory(**kwargs).local_network_gateways
+sdk_cli_command('network local-gateway delete', factory, LocalNetworkGatewaysOperations.delete, None, command_table)
+sdk_cli_command('network local-gateway show', factory, LocalNetworkGatewaysOperations.get, 'LocalNetworkGateway', command_table)
+sdk_cli_command('network local-gateway list', factory, LocalNetworkGatewaysOperations.list, '[LocalNetworkGateway]', command_table)
 
 # NetworkInterfacesOperations
-build_operation(
-    'network nic', 'network_interfaces', _network_client_factory,
-    [
-        CommandDefinition(NetworkInterfacesOperations.delete, LongRunningOperation(L('Deleting network interface'), L('Network interface deleted'))),
-        CommandDefinition(NetworkInterfacesOperations.get, 'NetworkInterface', command_alias='show'),
-        CommandDefinition(NetworkInterfacesOperations.list_all, '[NetworkInterface]'),
-        CommandDefinition(NetworkInterfacesOperations.list, '[NetworkInterface]'),
-    ],
-    command_table,
-    {
-        'network_interface_name': {'name': '--name -n'}
-    })
+factory = lambda **kwargs: _network_client_factory(**kwargs).network_interfaces
+sdk_cli_command('network nic delete', factory, NetworkInterfacesOperations.delete, None, command_table)
+sdk_cli_command('network nic show', factory, NetworkInterfacesOperations.get, 'NetworkInterface', command_table)
+sdk_cli_command('network nic list', factory, NetworkInterfacesOperations.list, '[NetworkInterface]', command_table)
+sdk_cli_command('network nic list-all', factory, NetworkInterfacesOperations.list_all, '[NetworkInterface]', command_table)
 
 # NetworkInterfacesOperations: scaleset
-build_operation(
-    'network nic scale-set', 'network_interfaces', _network_client_factory,
-    [
-        CommandDefinition(NetworkInterfacesOperations.list_virtual_machine_scale_set_vm_network_interfaces, '[NetworkInterface]', command_alias='list-vm-nics'),
-        CommandDefinition(NetworkInterfacesOperations.list_virtual_machine_scale_set_network_interfaces, '[NetworkInterface]', command_alias='list'),
-        CommandDefinition(NetworkInterfacesOperations.get_virtual_machine_scale_set_network_interface, 'NetworkInterface', command_alias='show'),
-    ],
-    command_table,
-    {
-        'virtual_machine_scale_set_name': {'name': '--vm-scale-set'},
-        'network_interface_name': {'name': '--name -n'},
-        'virtualmachine_index': {'name': '--vm-index'}
-    })
+sdk_cli_command('network nic scale-set list-vm-nics', factory, NetworkInterfacesOperations.list_virtual_machine_scale_set_vm_network_interfaces, '[NetworkInterface]', command_table)
+sdk_cli_command('network nic scale-set list', factory, NetworkInterfacesOperations.list_virtual_machine_scale_set_network_interfaces, '[NetworkInterface]', command_table)
+sdk_cli_command('network nic scale-set show', factory, NetworkInterfacesOperations.get_virtual_machine_scale_set_network_interface, 'NetworkInterface', command_table)
 
 # NetworkSecurityGroupsOperations
-build_operation(
-    'network nsg', 'network_security_groups', _network_client_factory,
-    [
-        CommandDefinition(NetworkSecurityGroupsOperations.delete, LongRunningOperation(L('Deleting network security group'), L('Network security group deleted'))),
-        CommandDefinition(NetworkSecurityGroupsOperations.get, 'NetworkSecurityGroup', command_alias='show'),
-        CommandDefinition(NetworkSecurityGroupsOperations.list_all, '[NetworkSecurityGroup]'),
-        CommandDefinition(NetworkSecurityGroupsOperations.list, '[NetworkSecurityGroup]'),
-    ],
-    command_table,
-    {
-        'network_security_group_name': {'name': '--name -n'}
-    })
+factory = lambda **kwargs: _network_client_factory(**kwargs).network_security_groups
+sdk_cli_command('network nsg delete', factory, NetworkSecurityGroupsOperations.delete, None, command_table)
+sdk_cli_command('network nsg show', factory, NetworkSecurityGroupsOperations.get, 'NetworkSecurityGroup', command_table)
+sdk_cli_command('network nsg list', factory, NetworkSecurityGroupsOperations.list, '[NetworkSecurityGroup]', command_table)
+sdk_cli_command('network nsg list-all', factory, NetworkSecurityGroupsOperations.list_all, '[NetworkSecurityGroup]', command_table)
 
 # PublicIPAddressesOperations
-build_operation(
-    'network public-ip', 'public_ip_addresses', _network_client_factory,
-    [
-        CommandDefinition(PublicIPAddressesOperations.delete, LongRunningOperation(L('Deleting public IP address'), L('Public IP address deleted'))),
-        CommandDefinition(PublicIPAddressesOperations.get, 'PublicIPAddress', command_alias='show'),
-        CommandDefinition(PublicIPAddressesOperations.list_all, '[PublicIPAddress]'),
-        CommandDefinition(PublicIPAddressesOperations.list, '[PublicIPAddress]'),
-    ],
-    command_table,
-    {
-        'public_ip_address_name': {'name': '--name -n'}
-    })
+factory = lambda **kwargs: _network_client_factory(**kwargs).public_ip_addresses
+sdk_cli_command('network public-ip delete', factory, PublicIPAddressesOperations.delete, None, command_table)
+sdk_cli_command('network public-ip show', factory, PublicIPAddressesOperations.get, 'PublicIPAddress', command_table)
+sdk_cli_command('network public-ip list', factory, PublicIPAddressesOperations.list, '[PublicIPAddress]', command_table)
+sdk_cli_command('network public-ip list-all', factory, PublicIPAddressesOperations.list_all, '[PublicIPAddress]', command_table)
+
+factory = lambda **_: get_mgmt_service_client(PublicIPClient, PublicIPClientConfig).public_ip
+sdk_cli_command('network public-ip create', factory, PublicIPOperations.create_or_update, 'PublicIPAddress', command_table)
 
 # RouteTablesOperations
-build_operation(
-    'network route-table', 'route_tables', _network_client_factory,
-    [
-        CommandDefinition(RouteTablesOperations.delete, LongRunningOperation(L('Deleting route table'), L('Route table deleted'))),
-        CommandDefinition(RouteTablesOperations.get, 'RouteTable', command_alias='show'),
-        CommandDefinition(RouteTablesOperations.list, '[RouteTable]'),
-        CommandDefinition(RouteTablesOperations.list_all, '[RouteTable]'),
-    ],
-    command_table,
-    {
-        'route_table_name': {'name': '--name -n'}
-    })
+factory = lambda **kwargs: _network_client_factory(**kwargs).route_tables
+sdk_cli_command('network route-table delete', factory, RouteTablesOperations.delete, None, command_table)
+sdk_cli_command('network route-table show', factory, RouteTablesOperations.get, 'RouteTable', command_table)
+sdk_cli_command('network route-table list', factory, RouteTablesOperations.list, '[RouteTable]', command_table)
+sdk_cli_command('network route-table list-all', factory, RouteTablesOperations.list_all, '[RouteTable]', command_table)
 
 
 # RoutesOperations
-build_operation(
-    'network route-operation', 'routes', _network_client_factory,
-    [
-        CommandDefinition(RoutesOperations.delete, LongRunningOperation(L('Deleting route'), L('Route deleted'))),
-        CommandDefinition(RoutesOperations.get, 'Route', command_alias='show'),
-        CommandDefinition(RoutesOperations.list, '[Route]'),
-    ],
-    command_table,
-    {
-        'route_name': {'name': '--name -n'}
-    })
+factory = lambda **kwargs: _network_client_factory(**kwargs).routes
+sdk_cli_command('network route-operation delete', factory, RoutesOperations.delete, None, command_table)
+sdk_cli_command('network route-operation show', factory, RoutesOperations.get, 'Route', command_table)
+sdk_cli_command('network route-operation list', factory, RoutesOperations.delete, '[Route]', command_table)
 
 # SecurityRulesOperations
-build_operation(
-    'network nsg-rule', 'security_rules', _network_client_factory,
-    [
-        CommandDefinition(SecurityRulesOperations.delete, LongRunningOperation(L('Deleting security rule'), L('Security rule deleted'))),
-        CommandDefinition(SecurityRulesOperations.get, 'SecurityRule', command_alias='show'),
-        CommandDefinition(SecurityRulesOperations.list, '[SecurityRule]'),
-    ],
-    command_table,
-    {
-        'security_rule_name': {'name': '--name'},
-        'network_security_group_name': {'name': '--nsg-name'}
-    })
+factory = lambda **kwargs: _network_client_factory(**kwargs).security_rules
+sdk_cli_command('network nsg-rule delete', factory, SecurityRulesOperations.delete, None, command_table)
+sdk_cli_command('network nsg-rule show', factory, SecurityRulesOperations.get, 'SecurityRule', command_table)
+sdk_cli_command('network nsg-rule list', factory, SecurityRulesOperations.list, '[SecurityRule]', command_table)
 
 # SubnetsOperations
-build_operation(
-    'network vnet subnet', 'subnets', _network_client_factory,
-    [
-        CommandDefinition(SubnetsOperations.delete, LongRunningOperation(L('Deleting subnet'), L('Subnet deleted'))),
-        CommandDefinition(SubnetsOperations.get, 'Subnet', command_alias='show'),
-        CommandDefinition(SubnetsOperations.list, '[Subnet]'),
-    ],
-    command_table, SUBNET_ALIASES)
+factory = lambda **kwargs: _network_client_factory(**kwargs).subnets
+sdk_cli_command('network vnet subnet delete', factory, SubnetsOperations.delete, None, command_table)
+sdk_cli_command('network vnet subnet show', factory, SubnetsOperations.get, 'Subnet', command_table)
+sdk_cli_command('network vnet subnet list', factory, SubnetsOperations.list, '[Subnet]', command_table)
+sdk_cli_command('network vnet subnet create', None, create_update_subnet, 'Object', command_table)
 
-build_operation(
-    'network subnet', None, ConvenienceNetworkCommands,
-    [
-        CommandDefinition(ConvenienceNetworkCommands.create_update_subnet, 'Object', 'create')
-    ],
-    command_table, SUBNET_ALIASES)
+# Usages operations
+factory = lambda **kwargs: _network_client_factory(**kwargs).usages
+sdk_cli_command('network list-usages', factory, UsagesOperations.list, '[Usage]', command_table)
 
-# UsagesOperations
-build_operation(
-    'network', 'usages', _network_client_factory,
-    [
-        CommandDefinition(UsagesOperations.list, '[Usage]', command_alias='list-usages'),
-    ],
-    command_table)
-
+factory = lambda **kwargs: _network_client_factory(**kwargs).virtual_network_gateway_connections
 # VirtualNetworkGatewayConnectionsOperations
-build_operation(
-    'network vpn-connection', 'virtual_network_gateway_connections', _network_client_factory,
-    [
-        CommandDefinition(VirtualNetworkGatewayConnectionsOperations.delete, LongRunningOperation(L('Deleting virtual network gateway connection'), L('Virtual network gateway connection deleted'))),
-        CommandDefinition(VirtualNetworkGatewayConnectionsOperations.get, 'VirtualNetworkGatewayConnection', command_alias='show'),
-        CommandDefinition(VirtualNetworkGatewayConnectionsOperations.list, '[VirtualNetworkGatewayConnection]'),
-    ],
-    command_table,
-    {
-        'virtual_network_gateway_connection_name': {'name': '--name -n'}
-    })
-
-# VirtualNetworkGatewayConnectionsOperations: shared-key
-build_operation(
-    'network vpn-connection shared-key', 'virtual_network_gateway_connections', _network_client_factory,
-    [
-        CommandDefinition(VirtualNetworkGatewayConnectionsOperations.get_shared_key, 'ConnectionSharedKeyResult', command_alias='show'),
-        CommandDefinition(VirtualNetworkGatewayConnectionsOperations.reset_shared_key, 'ConnectionResetSharedKey', command_alias='reset'),
-        CommandDefinition(VirtualNetworkGatewayConnectionsOperations.set_shared_key, 'ConnectionSharedKey', command_alias='set'),
-    ],
-    command_table,
-    {
-        'virtual_network_gateway_connection_name': {'name': '--connection-name'},
-        'connection_shared_key_name': {'name': '--name -n'}
-    })
+sdk_cli_command('network vpn-connection delete', factory, VirtualNetworkGatewayConnectionsOperations.delete, None, command_table)
+sdk_cli_command('network vpn-connection show', factory, VirtualNetworkGatewayConnectionsOperations.get, 'VirtualNetworkGatewayConnection', command_table)
+sdk_cli_command('network vpn-connection list', factory, VirtualNetworkGatewayConnectionsOperations.list, '[VirtualNetworkGatewayConnection]', command_table)
+sdk_cli_command('network vpn-connection shared-key show', factory, VirtualNetworkGatewayConnectionsOperations.get_shared_key, 'ConnectionSharedKeyResult', command_table)
+sdk_cli_command('network vpn-connection shared-key reset', factory, VirtualNetworkGatewayConnectionsOperations.reset_shared_key, 'ConnectionResetSharedKey', command_table)
+sdk_cli_command('network vpn-connection shared-key set', factory, VirtualNetworkGatewayConnectionsOperations.set_shared_key, 'ConnectionSharedKey', command_table)
 
 # VirtualNetworkGatewaysOperations
-build_operation(
-    'network vpn-gateway', 'virtual_network_gateways', _network_client_factory,
-    [
-        CommandDefinition(VirtualNetworkGatewaysOperations.delete, LongRunningOperation(L('Deleting virtual network gateway'), L('Virtual network gateway deleted'))),
-        CommandDefinition(VirtualNetworkGatewaysOperations.get, 'VirtualNetworkGateway', command_alias='show'),
-        CommandDefinition(VirtualNetworkGatewaysOperations.list, '[VirtualNetworkGateway]'),
-        CommandDefinition(VirtualNetworkGatewaysOperations.reset, 'VirtualNetworkGateway'),
-    ],
-    command_table,
-    {
-        'virtual_network_gateway_name': {'name': '--name -n'}
-    })
+factory = lambda **kwargs: _network_client_factory(**kwargs).virtual_network_gateways
+sdk_cli_command('network vpn-gateway delete', factory, VirtualNetworkGatewaysOperations.delete, None, command_table)
+sdk_cli_command('network vpn-gateway show', factory, VirtualNetworkGatewaysOperations.get, 'VirtualNetworkGateway', command_table)
+sdk_cli_command('network vpn-gateway list', factory, VirtualNetworkGatewaysOperations.list, '[VirtualNetworkGateway]', command_table)
+sdk_cli_command('network vpn-gateway reset', factory, VirtualNetworkGatewaysOperations.reset, 'VirtualNetworkGateway', command_table)
 
 # VirtualNetworksOperations
-build_operation(
-    'network vnet', 'virtual_networks', _network_client_factory,
-    [
-        CommandDefinition(VirtualNetworksOperations.delete, LongRunningOperation(L('Deleting virtual network'), L('Virtual network deleted'))),
-        CommandDefinition(VirtualNetworksOperations.get, 'VirtualNetwork', command_alias='show'),
-        CommandDefinition(VirtualNetworksOperations.list, '[VirtualNetwork]'),
-        CommandDefinition(VirtualNetworksOperations.list_all, '[VirtualNetwork]'),
-    ],
-    command_table, VNET_ALIASES)
+factory = lambda **kwargs: _network_client_factory(**kwargs).virtual_networks
+sdk_cli_command('network vnet delete', factory, VirtualNetworksOperations.delete, None, command_table)
+sdk_cli_command('network vnet show', factory, VirtualNetworksOperations.get, 'VirtualNetwork', command_table)
+sdk_cli_command('network vnet list', factory, VirtualNetworksOperations.list, '[VirtualNetwork]', command_table)
+sdk_cli_command('network vnet list-all', factory, VirtualNetworksOperations.list_all, '[VirtualNetwork]', command_table)
 
-build_operation(
-    'network vnet', 'vnet', lambda **_: get_mgmt_service_client(VNetClient, VNetClientConfig),
-    [
-        CommandDefinition(VNetOperations.create, LongRunningOperation(L('Creating virtual network'), L('Virtual network created')))
-    ],
-    command_table, VNET_ALIASES)
+factory = lambda **_: get_mgmt_service_client(VNetClient, VNetClientConfig).vnet
+sdk_cli_command('network vnet create', factory, VNetOperations.create, 'object', command_table)
 
-build_operation(
-    'network lb', 'lb', lambda **_: get_mgmt_service_client(LBClient, LBClientConfig),
-    [
-        CommandDefinition(LBOperations.create_or_update,
-                          LongRunningOperation(L('Creating load balancer'), L('Load balancer created')),
-                          'create')
-    ],
-    command_table, NAME_ALIASES)
 
-build_operation(
-    'network public-ip',
-    'public_ip',
-    lambda **_: get_mgmt_service_client(PublicIPClient, PublicIPClientConfig),
-    [
-        CommandDefinition(PublicIPOperations.create_or_update,
-                          LongRunningOperation(L('Creating public IP address'), L('Public IP address created')),
-                          'create')
-    ],
-    command_table,
-    IP_ALIASES)

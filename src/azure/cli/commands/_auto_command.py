@@ -5,7 +5,8 @@ from msrest.paging import Paged
 from msrest.exceptions import ClientException
 from azure.cli.parser import IncorrectUsageError
 from azure.cli._util import CLIError
-from ..commands import COMMON_PARAMETERS
+from ..commands import COMMON_PARAMETERS, CliCommand
+from azure.cli.commands.argument_types import get_cli_argument, CliArgumentType
 
 EXCLUDED_PARAMS = frozenset(['self', 'raw', 'custom_headers', 'operation_config',
                              'content_version', 'kwargs'])
@@ -90,76 +91,101 @@ def _option_descriptions(operation):
                 index += 1
     return option_descs
 
-
-#pylint: disable=too-many-arguments
 def build_operation(command_name,
                     member_path,
                     client_type,
                     operations,
                     command_table,
                     param_aliases=None,
-                    extra_parameters=None):
-
+                    extra_parameters=None,
+                    argument_types={}):
+    built_commands = []
     for op in operations:
+        cmd = _build_operation(command_name,
+                               member_path,
+                               client_type,
+                               op,
+                               argument_types,
+                               param_aliases,
+                               extra_parameters)
+        built_commands.append(cmd)
+        command_table[cmd.name] = cmd
+    return built_commands
 
-        func = _make_func(client_type, member_path, op.return_type, op.operation, extra_parameters)
+#pylint: disable=too-many-arguments
+def _build_operation(command_name,
+                     member_path,
+                     client_type,
+                     op,
+                     argument_types={},
+                     param_aliases=None,
+                     extra_parameters=None):
 
-        args = []
+    full_command_name = ' '.join([command_name, op.opname])
+    func = _make_func(client_type, member_path, op.return_type, op.operation, extra_parameters)
+
+    command = CliCommand(full_command_name, func)
+
+    args = []
+    try:
+        # only supported in python3 - falling back to argspec if not available
+        sig = inspect.signature(op.operation)
+        args = sig.parameters
+    except AttributeError:
+        sig = inspect.getargspec(op.operation) #pylint: disable=deprecated-method
+        args = sig.args
+
+    options = []
+
+    option_helps = _option_descriptions(op.operation)
+    filtered_args = [a for a in args if not a in EXCLUDED_PARAMS]
+    for arg in filtered_args:
         try:
-            # only supported in python3 - falling back to argspec if not available
-            sig = inspect.signature(op.operation)
-            args = sig.parameters
+            # this works in python3
+            default = args[arg].default
+            required = default == inspect.Parameter.empty #pylint: disable=no-member
+        except TypeError:
+            arg_defaults = (dict(zip(sig.args[-len(sig.defaults):], sig.defaults))
+                            if sig.defaults
+                            else {})
+            default = arg_defaults.get(arg)
+            required = arg not in arg_defaults
+
+        action = 'store_' + str(not default).lower() if isinstance(default, bool) else None
+
+        try:
+            default = (default
+                        if default != inspect._empty #pylint: disable=protected-access, no-member
+                        else None)
         except AttributeError:
-            sig = inspect.getargspec(op.operation) #pylint: disable=deprecated-method
-            args = sig.args
+            pass
 
-        options = []
+        param_name = arg
+        command.add_argument(arg,
+                            *['--' + arg.replace('_', '-')],
+                            required=required,
+                            default=default,
+                            help=option_helps.get(arg),
+                            action=action)
+        
+        #overlay = get_cli_argument(full_command_name, arg)
+        #if overlay:
+        #    command.update_argument(param_name, overlay)
+        # command.update_argument(param_name, **COMMON_PARAMETERS.get(arg, {}))
+        #if param_aliases:
+        #    command.update_argument(param_name, **param_aliases.get(arg, {}))
 
-        option_helps = _option_descriptions(op.operation)
-        filtered_args = [a for a in args if not a in EXCLUDED_PARAMS]
-        for arg in filtered_args:
-            try:
-                # this works in python3
-                default = args[arg].default
-                required = default == inspect.Parameter.empty #pylint: disable=no-member
-            except TypeError:
-                arg_defaults = (dict(zip(sig.args[-len(sig.defaults):], sig.defaults))
-                                if sig.defaults
-                                else {})
-                default = arg_defaults.get(arg)
-                required = arg not in arg_defaults
+    # append any 'extra' args needed (for example to obtain a client) that aren't required
+    # by the SDK.
+    if extra_parameters:
+        for arg in extra_parameters.keys():
+            options.append(extra_parameters[arg].copy())
 
-            action = 'store_' + str(not default).lower() if isinstance(default, bool) else None
+    return command
 
-            try:
-                default = (default
-                           if default != inspect._empty #pylint: disable=protected-access, no-member
-                           else None)
-            except AttributeError:
-                pass
-
-            parameter = {
-                'name': '--' + arg.replace('_', '-'),
-                'required': required,
-                'default': default,
-                'dest': arg,
-                'help': option_helps.get(arg),
-                'action': action
-            }
-            parameter.update(COMMON_PARAMETERS.get(arg, {}))
-            if param_aliases:
-                parameter.update(param_aliases.get(arg, {}))
-
-            options.append(parameter)
-
-        # append any 'extra' args needed (for example to obtain a client) that aren't required
-        # by the SDK.
-        if extra_parameters:
-            for arg in extra_parameters.keys():
-                options.append(extra_parameters[arg].copy())
-
-        full_command_name = ' '.join([command_name, op.opname])
-        command_table[full_command_name] = {
-            'handler': func,
-            'arguments': options
-            }
+def sdk_cli_command(name, client_factory, func, return_type, command_table):
+    return build_operation(' '.join(name.split()[:-1]),
+                           None,
+                           client_factory,
+                           [CommandDefinition(func, return_type, command_alias=name.split()[-1])],
+                           command_table)[0]

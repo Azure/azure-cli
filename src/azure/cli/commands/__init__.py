@@ -11,6 +11,7 @@ from azure.cli._util import CLIError
 import azure.cli._logging as _logging
 from azure.cli._locale import L
 from azure.cli.commands._validators import validate_tags, validate_tag
+import azure.cli.commands.argument_types
 
 logger = _logging.get_az_logger(__name__)
 
@@ -136,3 +137,23 @@ def get_command_table(module_name=None):
 
     ordered_commands = OrderedDict(command_table)
     return ordered_commands
+
+class CliCommand(object):
+
+    def __init__(self, name, handler, description=None):
+        self.name = name
+        self.handler = handler
+        self.description = description
+        self.help_file = None
+        self.arguments = {}
+
+    def add_argument(self, param_name, *option_strings, **kwargs):
+        argument = azure.cli.commands.argument_types.CliCommandArgument(param_name, options_list=option_strings, **kwargs)
+        self.arguments[param_name] = argument
+
+    def update_argument(self, param_name, argument_type):
+        arg = self.arguments[param_name]
+        arg.update(argument_type.options_list, **argument_type.options)
+
+    def execute(**kwargs):
+        return self.handler(**kwargs)
