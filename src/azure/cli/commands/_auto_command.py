@@ -3,6 +3,7 @@ import re
 import inspect
 from msrest.paging import Paged
 from msrest.exceptions import ClientException
+from azure.storage._error import _ERROR_STORAGE_MISSING_INFO
 from azure.cli.parser import IncorrectUsageError
 from azure.cli._util import CLIError
 from ..commands import COMMON_PARAMETERS
@@ -37,7 +38,21 @@ def _get_member(obj, path):
 
 def _make_func(client_factory, member_path, return_type_or_func, unbound_func, extra_parameters):
     def call_client(kwargs):
-        client = client_factory(**kwargs)
+        try:
+            client = client_factory(**kwargs)
+        except ValueError as val_exception:
+            message = str(val_exception)
+            if message == _ERROR_STORAGE_MISSING_INFO:
+                message = """
+No credentials specifed to access storage service. Please provide any of the following:
+    (1) account name and key (--account-name and --account-key options or
+        set AZURE_STORAGE_ACCOUNT and AZURE_STORAGE_KEY environment variables)
+    (2) connection string (--connection-string option or 
+        set AZURE_STORAGE_CONNECTION_STRING environment variable)
+    (3) account name and SAS token (--sas-token option used with either the --account-name 
+        option or AZURE_STORAGE_ACCOUNT environment variable)
+"""
+            raise CLIError(message)
         for param in extra_parameters.keys() if extra_parameters else []:
             kwargs.pop(param)
         ops_instance = _get_member(client, member_path)
