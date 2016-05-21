@@ -14,7 +14,7 @@ helps['vm create'] = """
             parameters: 
                 - name: --image
                   type: string
-                  short-summary: 'OS image (URN alias, URN or URI) [default: Win2012R2Datacenter].'
+                  short-summary: 'OS image (URN alias, URN or URI).'
                   long-summary: |
 {0}
                   populator-commands: 

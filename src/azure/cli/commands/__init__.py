@@ -26,7 +26,7 @@ COMMON_PARAMETERS = {
         'name': '--deployment-name',
         'metavar': 'DEPLOYMENTNAME',
         'help': 'Name of the resource deployment',
-        'default': 'azurecli' + str(time.time()) + str(random.randint(0, 10000000)),
+        'default': 'azurecli' + str(random.randint(0, 10000000)),
         'required': False
     },
     'location': {

@@ -81,12 +81,15 @@ def print_arguments(help_file):
                     + str(not p.required) + p.name):
         indent = 1
         required_text = required_tag if p.required else ''
+
         short_summary = p.short_summary if p.short_summary else ''
         possible_values_index = short_summary.find(' Possible values include')
         short_summary = short_summary[0:possible_values_index
                                       if possible_values_index >= 0 else len(short_summary)]
         short_summary = _normalize_text(short_summary)
         short_summary += _get_choices_defaults_str(p)
+        short_summary = short_summary.strip()
+
         if p.group_name != last_group_name:
             if p.group_name:
                 print('')
@@ -312,10 +315,10 @@ def _get_column_indent(text, max_name_length):
 
 def _normalize_text(s):
     if not s or len(s) < 2:
-        return
+        return ''
     initial_upper = s[0].upper() + s[1:]
     trailing_period = '.' if not s.endswith('.') else ''
-    return initial_upper + trailing_period
+    return (initial_upper + trailing_period).strip()
 
 def _load_help_file_from_string(text):
     try:
