@@ -102,7 +102,7 @@ class StorageBlobScenarioTest(CommandTestScript):
         self.new_lease_id = 'dcbadcba-dcba-dcba-dcba-dcbadcbadcba'
         self.date = '2016-04-01t12:00z'
         _get_connection_string(self)
-        sas_token = self.run('storage account generate-sas --services b --resource-types sco --permission rwdl --expiry 2100-01-01t00:00z')
+        sas_token = self.run('storage account generate-sas --services b --resource-types sco --permission rwdl --expiry 2100-01-01t00:00z -o list')
         self.set_env('AZURE_SAS_TOKEN', sas_token)
         self.set_env('AZURE_STORAGE_ACCOUNT', STORAGE_ACCOUNT_NAME)
         self.pop_env('AZURE_STORAGE_CONNECTION_STRING')
@@ -236,7 +236,7 @@ class StorageFileScenarioTest(CommandTestScript):
         self.share1 = 'testshare01'
         self.share2 = 'testshare02'
         _get_connection_string(self)
-        sas_token = self.run('storage account generate-sas --services f --resource-types sco --permission rwdl --expiry 2100-01-01t00:00z')
+        sas_token = self.run('storage account generate-sas --services f --resource-types sco --permission rwdl --expiry 2100-01-01t00:00z -o list')
         self.set_env('AZURE_SAS_TOKEN', sas_token)
         self.set_env('AZURE_STORAGE_ACCOUNT', STORAGE_ACCOUNT_NAME)
         self.pop_env('AZURE_STORAGE_CONNECTION_STRING')
