@@ -3,9 +3,11 @@ from collections import defaultdict
 
 class CliArgumentType(object):
 
-    def __init__(self, options_list=None, base_type=str, overrides=None, completer=None, **kwargs):
+    def __init__(self, options_list=None, base_type=str, overrides=None, completer=None,
+                 validator=None, **kwargs):
         self.options_list = ()
         self.completer = completer
+        self.validator = validator
         if not overrides is None:
             self.options_list = overrides.options_list
             self.options = overrides.options.copy()
@@ -16,18 +18,19 @@ class CliArgumentType(object):
         self.base_type = base_type
         self.update(options_list=options_list, **kwargs)
 
-    def update(self, options_list=None, completer=None, **kwargs):
+    def update(self, options_list=None, completer=None, validator=None, **kwargs):
         self.options_list = options_list or self.options_list 
         self.completer = completer or self.completer
+        self.validator = validator or self.validator
         self.options.update(**kwargs)
 
 class CliCommandArgument(CliArgumentType):
-    def __init__(self, dest, options_list=None, completer=None, **kwargs):
+    def __init__(self, dest, options_list=None, completer=None, validator=None, **kwargs):
         if options_list is None:
             options_list = '--' + dest.replace('_', '-')
 
         super(CliCommandArgument, self).__init__(**kwargs)
-        self.update(options_list=options_list, completer=completer, **kwargs)
+        self.update(options_list=options_list, completer=completer, validator=validator, **kwargs)
         self.options['dest'] = dest
 
     def name(self):

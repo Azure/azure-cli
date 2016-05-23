@@ -62,22 +62,22 @@ class StorageAccountScenarioTest(CommandTestScript):
                {'nameAvailable': False, 'reason': 'AlreadyExists'})
         s.test('storage account list -g {}'.format(rg),
                {'name': account, 'accountType': 'Standard_LRS', 'location': 'westus', 'resourceGroup': rg})
-        s.test('storage account show --resource-group {} --account-name {}'.format(rg, account),
+        s.test('storage account show --resource-group {} --name {}'.format(rg, account),
                {'name': account, 'accountType': 'Standard_LRS', 'location': 'westus', 'resourceGroup': rg})
         s.test('storage account show-usage', {'name': {'value': 'StorageAccounts'}})
         cs = s.run('storage account connection-string -g {} --account-name {} --use-http'.format(rg, account))
         assert 'https' not in cs
         assert account in cs
-        keys = json.loads(s.run('storage account keys list -g {} --account-name {} -o json'.format(rg, account)))
+        keys = json.loads(s.run('storage account keys list -g {} --name {} -o json'.format(rg, account)))
         key1 = keys['key1']
         key2 = keys['key2']
         assert key1 and key2
-        keys = json.loads(s.run('storage account keys renew -g {} --account-name {} -o json'.format(rg, account)))
+        keys = json.loads(s.run('storage account keys renew -g {} --name {} -o json'.format(rg, account)))
         assert key1 != keys['key1']
         key1 = keys['key1']
         assert key2 != keys['key2']
         key2 = keys['key2']
-        keys = json.loads(s.run('storage account keys renew -g {} --account-name {} --key secondary -o json'.format(rg, account)))
+        keys = json.loads(s.run('storage account keys renew -g {} --name {} --key secondary -o json'.format(rg, account)))
         assert key1 == keys['key1']
         assert key2 != keys['key2']
         s.test('storage account set -g {} -n {} --tags foo=bar;cat'.format(rg, account),
@@ -157,6 +157,7 @@ class StorageBlobScenarioTest(CommandTestScript):
 
         s.test('storage blob show --container-name {} --blob-name {}'.format(container, block_blob),
                {'name': block_blob, 'properties': {'blobType': 'BlockBlob'}})
+
         s.run('storage blob download -b {} -c {} --download-to {}'.format(blob, container, dest_file))
         if os.path.isfile(dest_file):
             os.remove(dest_file)
@@ -165,11 +166,11 @@ class StorageBlobScenarioTest(CommandTestScript):
 
         # test lease operations
         s.run('storage blob lease acquire --lease-duration 60 -b {} -c {} --if-modified-since {} --proposed-lease-id {}'.format(blob, container, date, proposed_lease_id))
-        s.test('storage blob show -b {} -c {}'.format(blob, container),
+        s.test('storage blob show -b {} -c {} --lease-id {}'.format(blob, container, proposed_lease_id),
                 {'properties': {'lease': {'duration': 'fixed', 'state': 'leased', 'status': 'locked'}}})
         s.run('storage blob lease change -b {} -c {} --lease-id {} --proposed-lease-id {}'.format(blob, container, proposed_lease_id, new_lease_id))
         s.run('storage blob lease renew -b {} -c {} --lease-id {}'.format(blob, container, new_lease_id))
-        s.test('storage blob show -b {} -c {}'.format(blob, container),
+        s.test('storage blob show -b {} -c {} --lease-id {}'.format(blob, container, new_lease_id),
                 {'properties': {'lease': {'duration': 'fixed', 'state': 'leased', 'status': 'locked'}}})
         s.run('storage blob lease break -b {} -c {} --lease-break-period 30'.format(blob, container))
         s.test('storage blob show -b {} -c {}'.format(blob, container),
@@ -207,11 +208,11 @@ class StorageBlobScenarioTest(CommandTestScript):
         
         # test lease operations
         s.run('storage container lease acquire --lease-duration 60 -c {} --if-modified-since {} --proposed-lease-id {}'.format(container, date, proposed_lease_id))
-        s.test('storage container show --container-name {}'.format(container),
+        s.test('storage container show --container-name {} --lease-id {}'.format(container, proposed_lease_id),
                 {'properties': {'lease': {'duration': 'fixed', 'state': 'leased', 'status': 'locked'}}})
         s.run('storage container lease change --container-name {} --lease-id {} --proposed-lease-id {}'.format(container, proposed_lease_id, new_lease_id))
         s.run('storage container lease renew --container-name {} --lease-id {}'.format(container, new_lease_id))
-        s.test('storage container show --container-name {}'.format(container),
+        s.test('storage container show --container-name {} --lease-id {}'.format(container, new_lease_id),
                 {'properties': {'lease': {'duration': 'fixed', 'state': 'leased', 'status': 'locked'}}})
         s.run('storage container lease break --container-name {} --lease-break-period 30'.format(container))
         s.test('storage container show --container-name {}'.format(container),

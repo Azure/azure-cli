@@ -75,13 +75,13 @@ class ResourceScenarioTest(CommandTestScript):
 ENV_VAR = {}
 
 TEST_DEF = [
-    {
-        'test_name': 'resource_group_scenario',
-        'script': ResourceGroupScenarioTest()
-    },
-    {
-        'test_name': 'resource_scenario',
-        'script': ResourceScenarioTest()
-    },
+    #{
+    #    'test_name': 'resource_group_scenario',
+    #    'script': ResourceGroupScenarioTest()
+    #},
+    #{
+    #    'test_name': 'resource_scenario',
+    #    'script': ResourceScenarioTest()
+    #},
 ]
 

@@ -1,8 +1,11 @@
 from os import environ
 
 from azure.cli.commands import COMMON_PARAMETERS as GLOBAL_COMMON_PARAMETERS, patch_aliases
+from azure.cli.commands.argument_types import (
+    register_cli_argument, register_additional_cli_argument, CliArgumentType
+)
 from azure.cli.commands._command_creation import get_mgmt_service_client, get_data_service_client
-from azure.cli.commands._validators import validate_key_value_pairs
+from azure.cli.commands._validators import validate_key_value_pairs, validate_tag, validate_tags
 from azure.cli._locale import L
 
 from azure.mgmt.storage import StorageManagementClient, StorageManagementClientConfiguration
@@ -17,57 +20,7 @@ from ._validators import (
     validate_ip_range, validate_resource_types, validate_services, validate_lease_duration,
     validate_quota)
 
-# FACTORIES
-
-def storage_client_factory(**_):
-    return get_mgmt_service_client(StorageManagementClient, StorageManagementClientConfiguration)
-
-def file_data_service_factory(**kwargs):
-    return get_data_service_client(
-        FileService,
-        kwargs.pop('account_name', None),
-        kwargs.pop('account_key', None),
-        connection_string=kwargs.pop('connection_string', None),
-        sas_token=kwargs.pop('sas_token', None))
-
-def blob_data_service_factory(**kwargs):
-    blob_type = kwargs.get('blob_type')
-    blob_service = blob_types.get(blob_type, BlockBlobService)
-    return get_data_service_client(
-        blob_service,
-        kwargs.pop('account_name', None),
-        kwargs.pop('account_key', None),
-        connection_string=kwargs.pop('connection_string', None),
-        sas_token=kwargs.pop('sas_token', None))
-
-def cloud_storage_account_service_factory(**kwargs):
-    account_name = kwargs.pop('account_name', None)
-    account_key = kwargs.pop('account_key', None)
-    sas_token = kwargs.pop('sas_token', None)
-    connection_string = kwargs.pop('connection_string', None)
-    if connection_string:
-        # CloudStorageAccount doesn't accept connection string directly, so we must parse
-        # out the account name and key manually
-        conn_dict = validate_key_value_pairs(connection_string)
-        account_name = conn_dict['AccountName']
-        account_key = conn_dict['AccountKey']
-    return CloudStorageAccount(account_name, account_key, sas_token)
-
-# HELPER METHODS
-
-def get_account_name(string):
-    return string if string != 'query' else environ.get('AZURE_STORAGE_ACCOUNT')
-
-def get_account_key(string):
-    return string if string != 'query' else environ.get('AZURE_STORAGE_KEY')
-
-def get_connection_string(string):
-    return string if string != 'query' else environ.get('AZURE_STORAGE_CONNECTION_STRING')
-
-def get_sas_token(string):
-    return string if string != 'query' else environ.get('AZURE_SAS_TOKEN')
-
-# PARAMETER CHOICE LISTS
+## PARAMETER CHOICE LISTS
 
 storage_account_key_options = {'primary': 'key1', 'secondary': 'key2'}
 
@@ -89,167 +42,200 @@ lease_duration_values_string = 'Between {} and {} seconds. ({} for infinite)'.fo
 
 blob_types = {'block': BlockBlobService, 'page': PageBlobService, 'append': AppendBlobService}
 
-# BASIC PARAMETER CONFIGURATION
+# PARAMETER TYPE DEFINITIONS
 
-PARAMETER_ALIASES = patch_aliases(GLOBAL_COMMON_PARAMETERS, {
-    'account_key': {
-        'name': '--account-key -k',
-        'help': L('the storage account key'),
-        'type': get_account_key,
-        'default': 'query'
-    },
-    'account_name': {
-        'name': '--account-name -n',
-        'help': L('the storage account name'),
-        'type': get_account_name,
-        'default': 'query'
-    },
-    'account_type': {
-        'name': '--account-type',
-        'choices': storage_account_types,
-        'help': 'the storage account type'
-    },
-    'blob_name': {
-        'name': '--blob-name -b',
-        'help': L('the name of the blob'),
-    },
-    'blob_type': {
-        'name': '--blob-type',
-        'choices': list(blob_types.keys())
-    },
-    'container_name': {
-        'name': '--container-name -c',
-    },
-    'connection_string': {
-        'name': '--connection-string',
-        'help': L('the storage connection string'),
-        'type': get_connection_string,
-        'default': 'query'
-    },
-    'directory_name': {
-        'name': '--directory-name -d'
-    },
-    'expiry': {
-        'name': '--expiry',
-        'help': L('expiration UTC datetime of SAS token (Y-m-d\'T\'H:M\'Z\')'),
-        'type': validate_datetime_as_string
-    },
-    'if_modified_since': {
-        'name': '--if-modified-since',
-        'help': L('alter only if modified since supplied UTC datetime (Y-m-d\'T\'H:M\'Z\')'),
-        'type': validate_datetime,
-    },
-    'id': {
-        'name': '--id',
-        'help': L('stored access policy id (up to 64 characters)'),
-        'type': validate_id
-    },
-    'if_unmodified_since': {
-        'name': '--if-unmodified-since',
-        'help': L('alter only if unmodified since supplied UTC datetime (Y-m-d\'T\'H:M\'Z\')'),
-        'type': validate_datetime,
-    },
-    'ip': {
-        'name': '--ip',
-        'help': L('specifies the IP address or range of IP addresses from which to accept ' + \
-                  'requests.'),
-        'type': validate_ip_range
-    },
-    'key': {
-        'name': '--key',
-        'help': 'The key to renew (omit to renew both)',
-        'choices': list(storage_account_key_options.keys())
-    },
-    'lease_break_period': {
-        'name': '--lease-break-period',
-        'metavar': 'DURATION',
-        'help': L('break period. 15-60 seconds or -1 for infinite.'),
-        'type': validate_lease_duration
-    },
-    'lease_duration': {
-        'name': '--lease-duration',
-        'metavar': 'DURATION',
-        'help': L('lease duration. 15-60 seconds or -1 for infinite.'),
-        'type': validate_lease_duration
-    },
-    'lease_id': {
-        'name': '--lease-id',
-        'metavar': 'ID',
-        'help': L('lease ID in GUID format.')
-    },
-    'metadata': {
-        'name': '--metadata',
-        'metavar': 'METADATA',
-        'type': validate_key_value_pairs,
-        'help': L('metadata in "a=b;c=d" format')
-    },
-    'permission': {
-        'name': '--permission',
-        'help': L('permissions granted: (r)ead (w)rite (d)elete (l)ist. Can be combined.'),
-        'metavar': 'PERMISSION',
-        # TODO: This will be problematic because the other sas types take different permissions
-        'type': validate_container_permission
-    },
-    'public_access': {
-        'name': '--public-access',
-        'metavar': 'SPECIFIERS',
-        'choices': ['blob', 'container']
-    },
-    'quota': {
-        'name': '--quota',
-        'type': validate_quota
-    },
-    'resource_types': {
-        'name': '--resource-types',
-        'help': L('the resource types the SAS is applicable for. Allowed values: (s)ervice ' + \
-                  '(c)ontainer (o)bject. Can be combined.'),
-        'type': validate_resource_types
-    },
-    'sas_token': {
-        'name': '--sas-token',
-        'help': L('a shared access signature token'),
-        'type': get_sas_token,
-        'default': 'query'
-    },
-    'services': {
-        'name': '--services',
-        'help': L('the storage services the SAS is applicable for. Allowed values: (b)lob ' + \
-                  '(f)ile (q)ueue (t)able. Can be combined.'),
-        'type': validate_services
-    },
-    'share_name': {
-        'name': '--share-name -s',
-        'help': L('the name of the file share'),
-    },
-    'signed_identifiers': {
-        'name': '--signed-identifiers',
-        'help': L(''),
-        'metavar': 'IDENTIFIERS'
-    },
-    'start': {
-        'name': '--start',
-        'help': L('start UTC datetime of SAS token (Y-m-d\'T\'H:M\'Z\'). Defaults to time ' + \
-                  'of request.'),
-        'type': validate_datetime_as_string
-    },
-    'timeout': {
-        'name': '--timeout',
-        'help': L('timeout in seconds'),
-        'type': int
-    },
-    'use_http': {
-        'name': '--use-http',
-        'help': L('specifies that http should be the default endpoint protocol'),
-        'action': 'store_const',
-        'const': 'http'
-    },
-})
+name_arg_type = CliArgumentType(options_list=('--name', '-n'), metavar='NAME')
 
-# SUPPLEMENTAL (EXTRA) PARAMETER SETS
+account_name_type = CliArgumentType(
+    options_list=('--account-name', '-n'),
+    help='the storage account name',
+)
 
-STORAGE_DATA_CLIENT_ARGS = {
-    'account_name': PARAMETER_ALIASES['account_name'],
-    'account_key': PARAMETER_ALIASES['account_key'],
-    'connection_string': PARAMETER_ALIASES['connection_string'],
-    'sas_token': PARAMETER_ALIASES['sas_token']
-}
+account_type_type = CliArgumentType(
+    options_list=('--account-type',),
+    choices=storage_account_types,
+    help='the storage account type'
+)
+
+blob_name_type = CliArgumentType(
+    options_list=('--blob-name', '-b')
+)
+
+blob_type_type = CliArgumentType(
+    options_list=('--blob-type',),
+    choices=list(blob_types.keys())
+)
+
+container_name_type = CliArgumentType(
+    options_list=('--container-name', '-c')
+)
+
+directory_type = CliArgumentType(
+    options_list=('--directory-name','-d')
+)
+
+expiry_type = CliArgumentType(
+    help='expiration UTC datetime in (Y-m-d\'T\'H:M\'Z\')',
+    type=validate_datetime_as_string
+)
+
+file_name_type = CliArgumentType(
+    options_list=('--file-name','-f')
+)
+
+
+id_type = CliArgumentType(
+    help='stored access policy id (up to 64 characters)',
+    type=validate_id
+)
+
+if_modified_since_type = CliArgumentType(
+    help='alter only if modified since supplied UTC datetime (Y-m-d\'T\'H:M\'Z\')',
+    type=validate_datetime
+)
+
+if_unmodified_since_type = CliArgumentType(
+    help='alter only if unmodified since supplied UTC datetime (Y-m-d\'T\'H:M\'Z\')',
+    type=validate_datetime
+)
+
+ip_type = CliArgumentType(
+    help='specifies the IP address or range of IP addresses from which to accept requests',
+    type=validate_ip_range
+)
+
+key_type = CliArgumentType(
+    help='the key to renew (omit to renew both)',
+    choices=list(storage_account_key_options.keys())
+)
+
+lease_break_period_type = CliArgumentType(
+    metavar='DURATION',
+    help='break period. 15-60 seconds or -1 for infinite',
+    type=validate_lease_duration
+)
+
+lease_duration_type = CliArgumentType(
+    metavar='DURATION',
+    help='lease duration. 15-60 seconds or -1 for infinite',
+    type=validate_lease_duration
+)
+
+lease_id_type = CliArgumentType(
+    metavar='ID',
+    help='lease ID in GUID format'
+)
+
+metadata_type = CliArgumentType(
+    metavar='METADATA',
+    type=validate_key_value_pairs,
+    help='metadata in semicolon separated key=value pairs'
+)
+
+permission_type = CliArgumentType(
+    metavar='PERMISSIONS',
+    help='permissions granted: (r)ead (w)rite (d)elete (l)ist. Can be combined',
+    type=validate_container_permission
+)
+
+public_access_type = CliArgumentType(
+    metavar='SPECIFIERS',
+    choices=['blob', 'container']
+)
+
+quota_type = CliArgumentType(
+    type=validate_quota
+)
+
+resource_types_type = CliArgumentType(
+    type=validate_resource_types,
+    help='the resource types the SAS is applicable for. Allowed values: (s)ervice (c)ontainer '
+         '(o)bject. Can be combined.'
+)
+
+services_type = CliArgumentType(
+    type=validate_services,
+    help='the storage services the SAS is applicable for. Allowed values: (b)lob (f)ile (q)ueue '
+         '(t)able. Can be combined.'
+)
+
+share_name_type = CliArgumentType(
+    options_list=('--share-name', '-s'),
+    help='the name of the file share'
+)
+
+signed_identifiers_type = CliArgumentType(
+    help='',
+    metavar='IDENTIFIERS'
+)
+
+start_type = CliArgumentType(
+    options_list=('--start',),
+    type=validate_datetime_as_string,
+    help='start UTC datetime of SAS token (Y-m-d\'T\'H:M\'Z\'). Defaults to time of request.'
+)
+
+tags_type = CliArgumentType(
+    type=validate_tags,
+    help='multiple semicolon separated tags in \'key[=value]\' format'
+)
+
+tags_type = CliArgumentType(
+    help='a single tag tag in \'key[=value]\' format',
+    type=validate_tag
+)
+
+timeout_type = CliArgumentType(
+    help='timeout in seconds',
+    type=int
+)
+
+use_http_type = CliArgumentType(
+    help='specifies that http should be the default endpoint protocol',
+    action='store_const',
+    const='http'
+)
+
+# PARAMETER SCOPE REGISTRATIONS
+
+register_cli_argument('storage', 'tags', tags_type)
+register_cli_argument('storage', 'tag', tags_type)
+register_cli_argument('storage', 'metadata', metadata_type)
+register_cli_argument('storage', 'blob_name', blob_name_type)
+register_cli_argument('storage', 'blob_type', blob_type_type)
+register_cli_argument('storage', 'container_name', container_name_type)
+register_cli_argument('storage', 'directory_name', directory_type)
+register_cli_argument('storage', 'file_name', file_name_type)
+register_cli_argument('storage', 'share_name', share_name_type)
+register_cli_argument('storage', 'account_name', account_name_type)
+register_cli_argument('storage', 'account_type', account_type_type)
+register_cli_argument('storage', 'expiry', expiry_type)
+register_cli_argument('storage', 'if_modified_since', if_modified_since_type)
+register_cli_argument('storage', 'if_unmodified_since', if_unmodified_since_type)
+register_cli_argument('storage', 'ip', ip_type)
+register_cli_argument('storage', 'lease_break_period', lease_break_period_type)
+register_cli_argument('storage', 'lease_duration', lease_duration_type)
+register_cli_argument('storage', 'lease_id', lease_id_type)
+register_cli_argument('storage', 'permission', permission_type)
+register_cli_argument('storage', 'public_access', public_access_type)
+register_cli_argument('storage', 'quota', quota_type)
+register_cli_argument('storage', 'resource_types', resource_types_type)
+register_cli_argument('storage', 'services', services_type)
+register_cli_argument('storage', 'signed_identifiers', signed_identifiers_type)
+register_cli_argument('storage', 'start', start_type)
+register_cli_argument('storage', 'timeout', timeout_type)
+
+register_cli_argument('storage account', 'account_name', account_name_type, options_list=('--name', '-n'))
+register_cli_argument('storage account', 'account_type', account_type_type, options_list=('--type', '-t'))
+
+register_cli_argument('storage account keys', 'key', key_type)
+
+register_cli_argument('storage account connection-string', 'use_http', use_http_type)
+register_cli_argument('storage account connection-string', 'account_name', account_name_type)
+
+register_cli_argument('storage container', 'container_name', container_name_type)
+
+register_cli_argument('storage blob', 'blob_type', blob_type_type, options_list=('--type', '-t'))
+
+register_cli_argument('storage file', 'directory_name', directory_type, required=False)
+register_cli_argument('storage file metadata', 'directory_name', directory_type, required=False)
