@@ -106,8 +106,9 @@ VM_CREATE_PARAMETER_ALIASES = {
     'authentication_type': {
         'name': '--authentication-type',
         'choices': ['ssh', 'password'],
-        'default': 'password',
-        'help': ''
+        'help': 'Password or SSH public key authentication.  '
+                'Defaults to password for Windows and SSH public key for Linux.',
+        'default': None
     },
     'availability_set_type': {
         'name': '--availability-set-type',
