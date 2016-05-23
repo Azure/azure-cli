@@ -1,5 +1,6 @@
 from __future__ import print_function
 import copy
+import json
 import time
 import random
 from importlib import import_module
@@ -88,7 +89,15 @@ class LongRunningOperation(object): #pylint: disable=too-few-public-methods
             result = poller.result()
         except ClientException as client_exception:
             message = getattr(client_exception, 'message', client_exception)
+
+            try:
+                message = str(message) + ' ' + json.loads(client_exception.response.text) \
+                    ['error']['details'][0]['message']
+            except AttributeError:
+                pass
+
             raise CLIError(message)
+
         logger.info("Long running operation '%s' completed with result %s",
                     self.start_msg, result)
         logger.warning(self.finish_msg)
