@@ -45,18 +45,22 @@ VNET_ALIASES = patch_aliases(GLOBAL_COMMON_PARAMETERS, {
     'deployment_parameter_virtual_network_name_value': {
         'name': '--name -n',
         'metavar': 'VNETNAME',
+        'required': True
     },
     'deployment_parameter_virtual_network_prefix_value': {
         'name': '--vnet-prefix',
         'metavar': 'VNETPREFIX',
+        'default': '10.0.0.0/16'
     },
     'deployment_parameter_subnet_name_value': {
         'name': '--subnet-name',
         'metavar': 'SUBNETNAME',
+        'default': 'Subnet1'
     },
     'deployment_parameter_subnet_prefix_value': {
         'name': '--subnet-prefix',
         'metavar': 'SUBNETPREFIX',
+        'default': '10.0.0.0/24'
     },
     'deployment_parameter_location_value': {
         'name': '--location',
@@ -75,5 +79,17 @@ NAME_ALIASES = patch_aliases(GLOBAL_COMMON_PARAMETERS, {
     'dns_name_type': {
         'name': '--dns-name-type',
         'help': argparse.SUPPRESS
+    },
+    'private_ip_address_allocation': {
+        'name': '--private-ip-address-allocation',
+        'help': '',
+        'choices': ['Dynamic', 'Static'],
+        'default': 'Dynamic'
+    },
+    'public_ip_address_allocation': {
+        'name': '--public-ip-address-allocation',
+        'help': '',
+        'choices': ['Dynamic', 'Static'],
+        'default': 'Dynamic'
     }
 })
