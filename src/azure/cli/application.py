@@ -148,8 +148,8 @@ class Application(object):
         global_group = kwargs['global_group']
         global_group.add_argument('--subscription', dest='_subscription_id', help=argparse.SUPPRESS)
         global_group.add_argument('--output', '-o', dest='_output_format',
-                                  choices=['list', 'json', 'tsv'],
-                                  default='list',
+                                  choices=['json', 'tsv', 'list'],
+                                  default='json',
                                   help='Output format')
         # The arguments for verbosity don't get parsed by argparse but we add it here for help.
         global_group.add_argument('--verbose', dest='_log_verbosity_verbose', action='store_true',
