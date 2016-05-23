@@ -58,7 +58,7 @@ def print_description_list(help_files):
     for help_file in sorted(help_files, key=lambda h: h.name):
         _print_indent('{0}{1}{2}'.format(help_file.name,
                                          _get_column_indent(help_file.name, max_name_length),
-                                         ': ' + help_file.short_summary \
+                                         ': ' + _normalize_text(help_file.short_summary) \
                                              if help_file.short_summary \
                                              else ''),
                       indent)
@@ -81,11 +81,15 @@ def print_arguments(help_file):
                     + str(not p.required) + p.name):
         indent = 1
         required_text = required_tag if p.required else ''
-        short_summary = (p.short_summary if p.short_summary else '')
+
+        short_summary = p.short_summary if p.short_summary else ''
         possible_values_index = short_summary.find(' Possible values include')
         short_summary = short_summary[0:possible_values_index
                                       if possible_values_index >= 0 else len(short_summary)]
-        short_summary += _get_choices_str(p)
+        short_summary = _normalize_text(short_summary)
+        short_summary += _get_choices_defaults_str(p)
+        short_summary = short_summary.strip()
+
         if p.group_name != last_group_name:
             if p.group_name:
                 print('')
@@ -101,10 +105,10 @@ def print_arguments(help_file):
 
         indent = 1
         if p.long_summary:
-            _print_indent('{0}'.format(p.long_summary.rstrip()), indent)
+            _print_indent('{0}'.format(_normalize_text(p.long_summary.rstrip())), indent)
 
         if p.value_sources:
-            _print_indent(L("Values from: {0}").format(', '.join(p.value_sources)), indent)
+            _print_indent(L("Values from: {0}.").format(', '.join(p.value_sources)), indent)
 
         if p.long_summary or p.value_sources:
             print('')
@@ -117,14 +121,14 @@ def _print_header(help_file):
 
     indent += 1
     _print_indent('{0}{1}'.format('az ' + help_file.command,
-                                  ': ' + help_file.short_summary
+                                  ': ' + _normalize_text(help_file.short_summary)
                                   if help_file.short_summary
                                   else ''),
                   indent)
 
     indent += 1
     if help_file.long_summary:
-        _print_indent('{0}'.format(help_file.long_summary.rstrip()), indent)
+        _print_indent('{0}'.format(_normalize_text(help_file.long_summary.rstrip())), indent)
     _print_indent('')
 
 def _print_groups(help_file):
@@ -135,17 +139,16 @@ def _print_groups(help_file):
     for c in sorted(help_file.children, key=lambda h: h.name):
         _print_indent('{0}{1}{2}'.format(c.name,
                                          _get_column_indent(c.name, max_name_length),
-                                         ': ' + c.short_summary if c.short_summary else ''),
+                                         ': ' + _normalize_text(c.short_summary) if c.short_summary else ''),
                       indent)
     _print_indent('')
 
-def _get_choices_str(p):
-    choice_str = ""
-    if p.choices:
-        choice_str = (' ' if p.short_summary else '') \
-            + '[{}{}]'.format(', '.join(p.choices),
-                              ('; default: ' + p.default) if p.default else '')
-    return choice_str
+def _get_choices_defaults_str(p):
+    choice_str = '  Allowed values: {0}.'.format(', '.join(p.choices)) \
+        if p.choices else ''
+    default_str = '  Default: {0}.'.format(p.default) \
+        if p.default and p.default != argparse.SUPPRESS else ''
+    return '{0}{1}'.format(choice_str, default_str)
 
 def _print_examples(help_file):
     indent = 0
@@ -295,6 +298,7 @@ class HelpExample(object): #pylint: disable=too-few-public-methods
         self.name = _data['name']
         self.text = _data['text']
 
+
 def _print_indent(s, indent=0, subsequent_spaces=-1):
     tw = textwrap.TextWrapper(initial_indent='    '*indent,
                               subsequent_indent=('    '*indent
@@ -308,6 +312,13 @@ def _print_indent(s, indent=0, subsequent_spaces=-1):
 
 def _get_column_indent(text, max_name_length):
     return ' '*(max_name_length - len(text))
+
+def _normalize_text(s):
+    if not s or len(s) < 2:
+        return ''
+    initial_upper = s[0].upper() + s[1:]
+    trailing_period = '.' if not s.endswith('.') else ''
+    return (initial_upper + trailing_period).strip()
 
 def _load_help_file_from_string(text):
     try:
