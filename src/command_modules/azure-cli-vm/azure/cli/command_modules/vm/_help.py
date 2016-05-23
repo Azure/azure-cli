@@ -3,8 +3,8 @@ from azure.cli._help_files import helps
 #pylint: disable=line-too-long
 
 image_long_summary = """                      URN aliases: CentOS, CoreOS, Debian, openSUSE, RHEL, SLES, UbuntuLTS, Win2008SP1, Win2012Datacenter, Win2012R2Datacenter.
-                      Example URN: MicrosoftWindowsServer:WindowsServer:2012-R2-Datacenter:latest
-                      Example URI: http://<storageAccount>.blob.core.windows.net/vhds/osdiskimage.vhd
+                      Example URN: MicrosoftWindowsServer:WindowsServer:2012-R2-Datacenter:latest.
+                      Example URI: http://<storageAccount>.blob.core.windows.net/vhds/osdiskimage.vhd.
 """
 
 helps['vm create'] = """
@@ -14,7 +14,7 @@ helps['vm create'] = """
             parameters: 
                 - name: --image
                   type: string
-                  short-summary: 'OS image (URN alias, URN or URI) [default: Win2012R2Datacenter].'
+                  short-summary: 'OS image (URN alias, URN or URI).'
                   long-summary: |
 {0}
                   populator-commands: 
