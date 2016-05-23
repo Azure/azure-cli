@@ -34,7 +34,12 @@ class NetworkAppGatewayScenarioTest(CommandTestScript):
     def __init__(self):
         self.resource_group = 'cli_tmp_test1'
         self.name = 'applicationGateway1'
-        super(NetworkAppGatewayScenarioTest, self).__init__(None, self.test_body, None)
+        super(NetworkAppGatewayScenarioTest, self).__init__(self.set_up, self.test_body, None)
+
+    def set_up(self):
+        if not self.run('network application-gateway show --resource-group {} --name {}'.format(
+            self.resource_group, self.name)):
+            raise RuntimeError('Application gateway must be manually created in order to support this test.')
 
     def test_body(self):
         self.test('network application-gateway list-all', [
@@ -67,7 +72,12 @@ class NetworkPublicIpScenarioTest(CommandTestScript):
     def __init__(self):
         self.resource_group = 'cli_test1'
         self.public_ip_name = 'windowsvm'
-        super(NetworkPublicIpScenarioTest, self).__init__(None, self.test_body, None)
+        super(NetworkPublicIpScenarioTest, self).__init__(self.set_up, self.test_body, None)
+
+    def set_up(self):
+        if not self.run('network public-ip show --resource-group {} --name {}'.format(
+            self.resource_group, self.public_ip_name)):
+            raise RuntimeError('Public IP must be manually created in order to support this test.')
 
     def test_body(self):
         self.test('network public-ip list-all', JMESPathComparator('type(@)', 'array'))
@@ -94,7 +104,12 @@ class NetworkExpressRouteScenarioTest(CommandTestScript):
         self.resource_group = 'cli_test1'
         self.express_route_name = 'test_route'
         self.resource_type = 'Microsoft.Network/expressRouteCircuits'
-        super(NetworkExpressRouteScenarioTest, self).__init__(None, self.test_body, None)
+        super(NetworkExpressRouteScenarioTest, self).__init__(self.set_up, self.test_body, None)
+
+    def set_up(self):
+        if not self.run('network express-route circuit show --resource-group {} --name {}'.format(
+            self.resource_group, self.express_route_name)):
+            raise RuntimeError('Express route must be manually created in order to support this test.')
 
     def test_body(self):
         self.test('network express-route circuit list-all', [
@@ -139,6 +154,8 @@ class NetworkExpressRouteScenarioTest(CommandTestScript):
 class NetworkExpressRouteCircuitScenarioTest(CommandTestScript):
 
     def __init__(self):
+        # The resources for this test did not exist so the commands will return 404 errors.
+        # So this test is for the command execution itself.
         self.resource_group = 'cli_test1'
         self.express_route_name = 'test_route'
         self.placeholder_value = 'none_existent'
@@ -164,7 +181,12 @@ class NetworkLoadBalancerScenarioTest(CommandTestScript):
         self.resource_group = 'cli_test1'
         self.lb_name = 'cli-test-lb'
         self.resource_type = 'Microsoft.Network/loadBalancers'
-        super(NetworkLoadBalancerScenarioTest, self).__init__(None, self.test_body, None)
+        super(NetworkLoadBalancerScenarioTest, self).__init__(self.set_up, self.test_body, None)
+
+    def set_up(self):
+        if not self.run('network lb show --resource-group {} --name {}'.format(
+            self.resource_group, self.lb_name)):
+            raise RuntimeError('Load balancer must be manually created in order to support this test.')
 
     def test_body(self):
         self.test('network lb list-all', [
@@ -194,7 +216,12 @@ class NetworkLocalGatewayScenarioTest(CommandTestScript):
         self.resource_group = 'cli_test1'
         self.name = 'cli-test-loc-gateway'
         self.resource_type = 'Microsoft.Network/localNetworkGateways'
-        super(NetworkLocalGatewayScenarioTest, self).__init__(None, self.test_body, None)
+        super(NetworkLocalGatewayScenarioTest, self).__init__(self.set_up, self.test_body, None)
+
+    def set_up(self):
+        if not self.run('network local-gateway show --resource-group {} --name {}'.format(
+            self.resource_group, self.name)):
+            raise RuntimeError('Local gateway must be manually created in order to support this test.')
 
     def test_body(self):
         self.test('network local-gateway list --resource-group {}'.format(self.resource_group), [
@@ -221,7 +248,12 @@ class NetworkNicScenarioTest(CommandTestScript):
         self.resource_group = 'cli_test1'
         self.name = 'cli-test-nic'
         self.resource_type = 'Microsoft.Network/networkInterfaces'
-        super(NetworkNicScenarioTest, self).__init__(None, self.test_body, None)
+        super(NetworkNicScenarioTest, self).__init__(self.set_up, self.test_body, None)
+
+    def set_up(self):
+        if not self.run('network nic show --resource-group {} --name {}'.format(
+            self.resource_group, self.name)):
+            raise RuntimeError('NIC must be manually created in order to support this test.')
 
     def test_body(self):
         self.test('network nic list-all', [
@@ -251,7 +283,12 @@ class NetworkNicScaleSetScenarioTest(CommandTestScript):
         self.nic_name = 'clitestvmnic'
         self.vm_index = 0
         self.resource_type = 'Microsoft.Network/networkInterfaces'
-        super(NetworkNicScaleSetScenarioTest, self).__init__(None, self.test_body, None)
+        super(NetworkNicScaleSetScenarioTest, self).__init__(self.set_up, self.test_body, None)
+
+    def set_up(self):
+        if not self.run('network nic scale-set show --resource-group {} --vm-scale-set {} --vm-index {} --name {}'.format( #pylint: disable=line-too-long
+            self.resource_group, self.vmss_name, self.vm_index, self.nic_name)):
+            raise RuntimeError('VM scale set NIC must be manually created in order to support this test.')
 
     def test_body(self):
         self.test('network nic scale-set list --resource-group {} --vm-scale-set {}'.format(
@@ -282,7 +319,15 @@ class NetworkSecurityGroupScenarioTest(CommandTestScript):
         self.nsg_name = 'cli-test-nsg'
         self.nsg_rule_name = 'web'
         self.resource_type = 'Microsoft.Network/networkSecurityGroups'
-        super(NetworkSecurityGroupScenarioTest, self).__init__(None, self.test_body, None)
+        super(NetworkSecurityGroupScenarioTest, self).__init__(self.set_up, self.test_body, None)
+
+    def set_up(self):
+        if not self.run('network nsg show --resource-group {} --name {}'.format(
+            self.resource_group, self.nsg_name)):
+            raise RuntimeError('Network security group must be manually created in order to support this test.')
+        if not self.run('network nsg-rule show --resource-group {} --nsg-name {} --name {}'.format(
+            self.resource_group, self.nsg_name, self.nsg_rule_name)):
+            raise RuntimeError('Network security group rule must be manually created in order to support this test.')
 
     def test_body(self):
         self.test('network nsg list-all', [
@@ -328,7 +373,15 @@ class NetworkRouteTableOperationScenarioTest(CommandTestScript):
         self.route_table_name = 'cli-test-route-table'
         self.route_operation_name = 'my-route'
         self.resource_type = 'Microsoft.Network/routeTables'
-        super(NetworkRouteTableOperationScenarioTest, self).__init__(None, self.test_body, None)
+        super(NetworkRouteTableOperationScenarioTest, self).__init__(self.set_up, self.test_body, None)
+
+    def set_up(self):
+        if not self.run('network route-table show --resource-group {} --name {}'.format(
+                self.resource_group, self.route_table_name)):
+            raise RuntimeError('Network route table must be manually created in order to support this test.')
+        if not self.run('network route-operation show --resource-group {} --route-table-name {} --name {}'.format( #pylint: disable=line-too-long
+                self.resource_group, self.route_table_name, self.route_operation_name)):
+            raise RuntimeError('Network route operation must be manually created in order to support this test.')
 
     def test_body(self):
         self.test('network route-table list-all', [
@@ -370,7 +423,15 @@ class NetworkVNetScenarioTest(CommandTestScript):
         self.vnet_name = 'test-vnet'
         self.vnet_subnet_name = 'test-subnet1'
         self.resource_type = 'Microsoft.Network/virtualNetworks'
-        super(NetworkVNetScenarioTest, self).__init__(None, self.test_body, None)
+        super(NetworkVNetScenarioTest, self).__init__(self.set_up, self.test_body, None)
+
+    def set_up(self):
+        if not self.run('network vnet show --resource-group {} --name {}'.format(
+            self.resource_group, self.vnet_name)):
+            raise RuntimeError('Network vnet must be manually created in order to support this test.')
+        if not self.run('network vnet subnet show --resource-group {} --virtual-network-name {} --name {}'.format( #pylint: disable=line-too-long
+            self.resource_group, self.vnet_name, self.vnet_subnet_name)):
+            raise RuntimeError('Network vnet subnet must be manually created in order to support this test.')
 
     def test_body(self):
         self.test('network vnet list-all', [
@@ -417,6 +478,8 @@ class NetworkVNetScenarioTest(CommandTestScript):
 class NetworkVpnGatewayScenarioTest(CommandTestScript):
 
     def __init__(self):
+        # The resources for this test did not exist so the commands will return 404 errors.
+        # So this test is for the command execution itself.
         self.resource_group = 'cli_test1'
         self.placeholder_value = 'none_existent'
         super(NetworkVpnGatewayScenarioTest, self).__init__(None, self.test_body, None)
@@ -433,6 +496,8 @@ class NetworkVpnGatewayScenarioTest(CommandTestScript):
 class NetworkVpnConnectionScenarioTest(CommandTestScript):
 
     def __init__(self):
+        # The resources for this test did not exist so the commands will return 404 errors.
+        # So this test is for the command execution itself.
         self.resource_group = 'cli_test1'
         self.placeholder_value = 'none_existent'
         super(NetworkVpnConnectionScenarioTest, self).__init__(None, self.test_body, None)
@@ -454,6 +519,8 @@ class NetworkVpnConnectionScenarioTest(CommandTestScript):
 class NetworkSubnetCreateScenarioTest(CommandTestScript):
 
     def __init__(self):
+        # The resources for this test did not exist so the commands will return 404 errors.
+        # So this test is for the command execution itself.
         self.resource_group = 'cli_test1'
         self.placeholder_value = 'none_existent'
         self.address_prefix = '192.168.0/16'
