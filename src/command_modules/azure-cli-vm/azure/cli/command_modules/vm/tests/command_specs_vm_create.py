@@ -59,10 +59,10 @@ class VMCreateUbuntuScenarioTest(CommandTestScript): #pylint: disable=too-many-i
 ENV_VAR = {}
 
 TEST_DEF = [
-    {
-        'test_name': 'vm_create_ubuntu',
-        'command': VMCreateUbuntuScenarioTest()
-    },
+    #{
+    #    'test_name': 'vm_create_ubuntu',
+    #    'command': VMCreateUbuntuScenarioTest()
+    #},
 ]
 
 

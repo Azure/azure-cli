@@ -5,7 +5,8 @@ from sys import stderr
 
 from azure.cli.commands import CommandTable, LongRunningOperation
 
-from ._params import storage_client_factory, blob_data_service_factory, file_data_service_factory
+from azure.cli.command_modules.storage._factory import \
+    storage_client_factory, blob_data_service_factory, file_data_service_factory
 
 command_table = CommandTable()
 
@@ -87,14 +88,11 @@ class ConvenienceStorageAccountCommands(object):
 
 class ConvenienceBlobServiceCommands(object):
 
-    def __init__(self, **kwargs):
-        self.client = blob_data_service_factory(**kwargs)
-
     def container_exists(self, container_name, snapshot=None, timeout=None):
         '''Check if a storage container exists.
         :param str snapshot:UTC datetime value which specifies a snapshot
         '''
-        return self.client.exists(
+        return self.exists(
             container_name=container_name,
             snapshot=snapshot,
             timeout=timeout)
@@ -118,12 +116,12 @@ class ConvenienceBlobServiceCommands(object):
         )
 
         def upload_append_blob():
-            if not self.client.exists(container_name, blob_name):
-                self.client.create_blob(
+            if not self.exists(container_name, blob_name):
+                self.create_blob(
                     container_name=container_name,
                     blob_name=blob_name,
                     content_settings=content_settings)
-            return self.client.append_blob_from_path(
+            return self.append_blob_from_path(
                 container_name=container_name,
                 blob_name=blob_name,
                 file_path=upload_from,
@@ -131,7 +129,7 @@ class ConvenienceBlobServiceCommands(object):
             )
 
         def upload_block_blob():
-            return self.client.create_blob_from_path(
+            return self.create_blob_from_path(
                 container_name=container_name,
                 blob_name=blob_name,
                 file_path=upload_from,
@@ -151,12 +149,12 @@ class ConvenienceBlobServiceCommands(object):
         :param str download_to:the file path to download to
         '''
         # show dot indicator of download progress (one for every 10%)
-        self.client.get_blob_to_path(container_name, blob_name, download_to,
+        self.get_blob_to_path(container_name, blob_name, download_to,
                                      progress_callback=_update_progress)
 
     def blob_exists(self, container_name, blob_name, snapshot=None, timeout=None):
         ''' Check if a storage blob exists. '''
-        return self.client.exists(
+        return self.exists(
             blob_name=blob_name,
             container_name=container_name,
             snapshot=snapshot,
@@ -164,37 +162,34 @@ class ConvenienceBlobServiceCommands(object):
 
 class ConvenienceFileServiceCommands(object):
 
-    def __init__(self, **kwargs):
-        self.client = file_data_service_factory(**kwargs)
-
     def share_exists(self, share_name):
         ''' Check if a file share exists.'''
-        return self.client.exists(share_name=share_name)
+        return self.exists(share_name=share_name)
 
     def dir_exists(self, share_name, directory_name):
         ''' Check if a share directory exists.'''
-        return self.client.exists(share_name=share_name, directory_name=directory_name)
+        return self.exists(share_name=share_name, directory_name=directory_name)
 
     def download(self, share_name, file_name, local_file_name, directory_name=None):
         ''' Download a file from a file share.
         :param str file_name:the file name
         :param str local_file_name:the path to the local file to download to'''
-        self.client.get_file_to_path(share_name, directory_name, file_name, local_file_name,
-                                     progress_callback=_update_progress)
+        self.get_file_to_path(share_name, directory_name, file_name, local_file_name,
+                              progress_callback=_update_progress)
 
     def file_exists(self, share_name, file_name, directory_name=None):
         ''' Check if a file exists at a specified path.
         :param str file_name:the file name to check
         :param str directory_name:subdirectory path to the file
         '''
-        return self.client.exists(share_name=share_name,
-                                  directory_name=directory_name,
-                                  file_name=file_name)
+        return self.exists(share_name=share_name,
+                           directory_name=directory_name,
+                           file_name=file_name)
 
     def upload(self, share_name, file_name, local_file_name, directory_name=None):
         ''' Upload a file to a file share path.
         :param str file_name:the destination file name
         :param str local_file_name:the path and file name to upload
         :param str directory_name:the destination directory to upload to'''
-        self.client.create_file_from_path(share_name, directory_name, file_name, local_file_name,
-                                          progress_callback=_update_progress)
+        self.create_file_from_path(share_name, directory_name, file_name, local_file_name,
+                                   progress_callback=_update_progress)

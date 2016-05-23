@@ -6,7 +6,8 @@ from msrest.exceptions import ClientException
 from azure.cli.parser import IncorrectUsageError
 from azure.cli._util import CLIError
 from ..commands import COMMON_PARAMETERS, CliCommand
-from azure.cli.commands.argument_types import get_cli_argument, CliArgumentType
+from azure.cli.commands.argument_types import \
+    get_cli_argument, CliArgumentType, _cli_extra_argument_registry as extra_argument_registry
 
 EXCLUDED_PARAMS = frozenset(['self', 'raw', 'custom_headers', 'operation_config',
                              'content_version', 'kwargs'])
@@ -36,12 +37,20 @@ def _get_member(obj, path):
             pass
     return obj
 
-def _make_func(client_factory, member_path, return_type_or_func, unbound_func, extra_parameters):
+def _make_func(client_factory, member_path, return_type_or_func, unbound_func, extra_parameters,
+               command_name=None):
     def call_client(kwargs):
-        client = client_factory(**kwargs)
+        client = client_factory(**kwargs) if client_factory else None
+
+        extra_args = extra_argument_registry.get(command_name)
+        for key in extra_args.keys() if extra_args else []:
+            kwargs.pop(key)
+
+        # TODO: Remove this once conversion is complete. This is the OLD WAY
         for param in extra_parameters.keys() if extra_parameters else []:
             kwargs.pop(param)
-        ops_instance = _get_member(client, member_path)
+
+        ops_instance = _get_member(client, member_path) if client else member_path
 
         try:
             result = unbound_func(ops_instance, **kwargs)
@@ -91,6 +100,47 @@ def _option_descriptions(operation):
                 index += 1
     return option_descs
 
+def _extract_args_from_signature(command, operation):
+    """ Extracts basic argument data from an operation's signature and docstring """
+    args = []
+    try:
+        # only supported in python3 - falling back to argspec if not available
+        sig = inspect.signature(operation)
+        args = sig.parameters
+    except AttributeError:
+        sig = inspect.getargspec(operation) #pylint: disable=deprecated-method
+        args = sig.args
+
+    arg_docstring_help = _option_descriptions(operation)
+    for arg_name in [a for a in args if not a in EXCLUDED_PARAMS]:
+        try:
+            # this works in python3
+            default = args[arg_name].default
+            required = default == inspect.Parameter.empty #pylint: disable=no-member
+        except TypeError:
+            arg_defaults = (dict(zip(sig.args[-len(sig.defaults):], sig.defaults))
+                            if sig.defaults
+                            else {})
+            default = arg_defaults.get(arg_name)
+            required = arg not in arg_defaults
+
+        action = 'store_' + str(not default).lower() if isinstance(default, bool) else None
+
+        try:
+            default = (default
+                        if default != inspect._empty #pylint: disable=protected-access, no-member
+                        else None)
+        except AttributeError:
+            pass
+
+        command.add_argument(arg_name,
+                            *['--' + arg_name.replace('_', '-')],
+                            required=required,
+                            default=default,
+                            help=arg_docstring_help.get(arg_name),
+                            action=action)
+
+
 def build_operation(command_name,
                     member_path,
                     client_type,
@@ -122,59 +172,12 @@ def _build_operation(command_name,
                      extra_parameters=None):
 
     full_command_name = ' '.join([command_name, op.opname])
-    func = _make_func(client_type, member_path, op.return_type, op.operation, extra_parameters)
+    func = _make_func(client_type, member_path, op.return_type, op.operation, extra_parameters,
+                      command_name=full_command_name)
 
     command = CliCommand(full_command_name, func)
-
-    args = []
-    try:
-        # only supported in python3 - falling back to argspec if not available
-        sig = inspect.signature(op.operation)
-        args = sig.parameters
-    except AttributeError:
-        sig = inspect.getargspec(op.operation) #pylint: disable=deprecated-method
-        args = sig.args
-
-    options = []
-
-    option_helps = _option_descriptions(op.operation)
-    filtered_args = [a for a in args if not a in EXCLUDED_PARAMS]
-    for arg in filtered_args:
-        try:
-            # this works in python3
-            default = args[arg].default
-            required = default == inspect.Parameter.empty #pylint: disable=no-member
-        except TypeError:
-            arg_defaults = (dict(zip(sig.args[-len(sig.defaults):], sig.defaults))
-                            if sig.defaults
-                            else {})
-            default = arg_defaults.get(arg)
-            required = arg not in arg_defaults
-
-        action = 'store_' + str(not default).lower() if isinstance(default, bool) else None
-
-        try:
-            default = (default
-                        if default != inspect._empty #pylint: disable=protected-access, no-member
-                        else None)
-        except AttributeError:
-            pass
-
-        param_name = arg
-        command.add_argument(arg,
-                            *['--' + arg.replace('_', '-')],
-                            required=required,
-                            default=default,
-                            help=option_helps.get(arg),
-                            action=action)
+    _extract_args_from_signature(command, op.operation)
         
-        #overlay = get_cli_argument(full_command_name, arg)
-        #if overlay:
-        #    command.update_argument(param_name, overlay)
-        # command.update_argument(param_name, **COMMON_PARAMETERS.get(arg, {}))
-        #if param_aliases:
-        #    command.update_argument(param_name, **param_aliases.get(arg, {}))
-
     # append any 'extra' args needed (for example to obtain a client) that aren't required
     # by the SDK.
     if extra_parameters:
@@ -183,7 +186,7 @@ def _build_operation(command_name,
 
     return command
 
-def sdk_cli_command(name, client_factory, func, return_type, command_table):
+def cli_command(name, client_factory, func, return_type, command_table):
     return build_operation(' '.join(name.split()[:-1]),
                            None,
                            client_factory,

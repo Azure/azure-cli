@@ -40,10 +40,8 @@ class AzCliCommandParser(argparse.ArgumentParser):
                                                   help_file=metadata.help_file)
             argument_validators = []
             for name, arg in metadata.arguments.items():
-                try:
-                    argument_validators.append(arg.options.pop('validator'))
-                except KeyError:
-                    pass
+                if arg.validator:                
+                    argument_validators.append(arg.validator)
                 param = command_parser.add_argument(
                     *arg.options_list, **arg.options)
                 param.completer = arg.completer
