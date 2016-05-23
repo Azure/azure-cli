@@ -227,11 +227,11 @@ Command
 
 Arguments
     --foobar2 -fb2 [Required]: One line partial sentence.
-    Paragraph(s).
+        Paragraph(s).
 
     --foobar -fb             : One line partial sentence.
-    Text, markdown, etc.
-    Values from: az vm list, default.
+        Text, markdown, etc.
+        Values from: az vm list, default.
 
     --foobar3 -fb3           : The foobar3.
 
@@ -293,11 +293,11 @@ Command
 
 Arguments
     --foobar2 -fb2 [Required]: One line partial sentence.
-    Paragraph(s).
+        Paragraph(s).
 
     --foobar -fb             : One line partial sentence.
-    Text, markdown, etc.
-    Values from: az vm list, default.
+        Text, markdown, etc.
+        Values from: az vm list, default.
 
 
 Global Arguments
