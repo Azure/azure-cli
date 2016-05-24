@@ -44,13 +44,17 @@ COMMON_PARAMETERS = {
         'name': '--tag',
         'metavar': 'TAG',
         'help': L('a single tag in \'key[=value]\' format'),
-        'type': validate_tag
+        'type': validate_tag,
+        'nargs': '?',
+        'const': {}
     },
     'tags' : {
         'name': '--tags',
         'metavar': 'TAGS',
         'help': L('multiple semicolon separated tags in \'key[=value]\' format'),
-        'type': validate_tags
+        'type': validate_tags,
+        'nargs': '?',
+        'const': {}
     },
 }
 
