@@ -4,13 +4,15 @@ from azure.cli.commands import COMMON_PARAMETERS as GLOBAL_COMMON_PARAMETERS, pa
 from azure.cli.commands._command_creation import get_mgmt_service_client, get_data_service_client
 from azure.cli.commands._validators import validate_key_value_pairs
 from azure.cli._locale import L
+from azure.cli._util import CLIError
 
 from azure.mgmt.storage import StorageManagementClient, StorageManagementClientConfiguration
 from azure.mgmt.storage.models import AccountType
 
+from azure.storage import CloudStorageAccount
 from azure.storage.blob import PublicAccess, BlockBlobService, PageBlobService, AppendBlobService
 from azure.storage.file import FileService
-from azure.storage import CloudStorageAccount
+from azure.storage._error import _ERROR_STORAGE_MISSING_INFO
 
 from ._validators import (
     validate_container_permission, validate_datetime, validate_datetime_as_string, validate_id,
@@ -19,11 +21,30 @@ from ._validators import (
 
 # FACTORIES
 
+NO_CREDENTIALS_ERROR_MESSAGE = """
+No credentials specifed to access storage service. Please provide any of the following:
+    (1) account name and key (--account-name and --account-key options or
+        set AZURE_STORAGE_ACCOUNT and AZURE_STORAGE_KEY environment variables)
+    (2) connection string (--connection-string option or 
+        set AZURE_STORAGE_CONNECTION_STRING environment variable)
+    (3) account name and SAS token (--sas-token option used with either the --account-name 
+        option or AZURE_STORAGE_ACCOUNT environment variable)
+"""
+
 def storage_client_factory(**_):
     return get_mgmt_service_client(StorageManagementClient, StorageManagementClientConfiguration)
 
+def _get_data_service_client(service, name=None, key=None, connection_string=None, sas_token=None):
+    try:
+        return get_data_service_client(service, name, key, connection_string, sas_token)
+    except ValueError as val_exception:
+        message = str(val_exception)
+        if message == _ERROR_STORAGE_MISSING_INFO:
+            message = NO_CREDENTIALS_ERROR_MESSAGE
+        raise CLIError(message)
+
 def file_data_service_factory(**kwargs):
-    return get_data_service_client(
+    return _get_data_service_client(
         FileService,
         kwargs.pop('account_name', None),
         kwargs.pop('account_key', None),
@@ -33,7 +54,7 @@ def file_data_service_factory(**kwargs):
 def blob_data_service_factory(**kwargs):
     blob_type = kwargs.get('blob_type')
     blob_service = blob_types.get(blob_type, BlockBlobService)
-    return get_data_service_client(
+    return _get_data_service_client(
         blob_service,
         kwargs.pop('account_name', None),
         kwargs.pop('account_key', None),
