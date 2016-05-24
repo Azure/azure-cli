@@ -363,6 +363,7 @@ class VMExtensionsScenarioTest(CommandTestScript):
     def tear_down(self):
         pass
 
+
 class VMMachineExtensionImageScenarioTest(CommandTestScript):
 
     def __init__(self):
@@ -392,6 +393,25 @@ class VMMachineExtensionImageScenarioTest(CommandTestScript):
                 JMESPathComparator("contains(id, '/Providers/Microsoft.Compute/Locations/{}/Publishers/{}/ArtifactTypes/VMExtension/Types/{}/Versions/{}')".format( #pylint: disable=line-too-long
                     self.location, self.publisher, self.type, self.version
                 ), True)])
+
+
+class VMExtensionImageSearchScenarioTest(CommandTestScript):
+
+    def __init__(self):
+        super(VMExtensionImageSearchScenarioTest, self).__init__(None, self.test_body, None)
+
+    def test_body(self):
+        #pick this specific name, so the search will be under one publisher. This avoids
+        #the parallel searching behavior that causes incomplete VCR recordings.
+        publisher = 'Vormetric.VormetricTransparentEncryption'
+        image_name = 'VormetricTransparentEncryptionAgent'
+        verification = [
+            JMESPathComparator('type(@)', 'array'),
+            JMESPathComparator("length([?name == '{}']) == length(@)".format(image_name), True),
+            ]
+        cmd = ('vm extension image list -l westus --publisher {} --name {} -o json'.format(publisher, image_name))#pylint: disable=line-too-long
+        self.test(cmd, verification)
+
 
 class VMScaleSetGetsScenarioTest(CommandTestScript):
 
@@ -618,6 +638,10 @@ TEST_DEF = [
     {
         'test_name': 'vm_machine_extension_image',
         'command': VMMachineExtensionImageScenarioTest()
+    },
+    {
+        'test_name': 'vm_extension_image_search',
+        'command': VMExtensionImageSearchScenarioTest()
     },
     {
         'test_name': 'vm_combined_list',
