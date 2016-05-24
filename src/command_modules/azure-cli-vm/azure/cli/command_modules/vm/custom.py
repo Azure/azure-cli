@@ -9,7 +9,9 @@ from azure.cli.commands import CommandTable, LongRunningOperation
 from azure.cli.commands._command_creation import get_mgmt_service_client, get_data_service_client
 from azure.cli._util import CLIError
 
-from ._actions import load_images_from_aliases_doc, load_images_thru_services
+from ._actions import (load_images_from_aliases_doc,
+                       load_extension_images_thru_services,
+                       load_images_thru_services)
 from ._factory import _compute_client_factory
 
 command_table = CommandTable()
@@ -97,6 +99,22 @@ class ConvenienceVmCommands(object): # pylint: disable=too-few-public-methods
         for i in all_images:
             i['urn'] = ':'.join([i['publisher'], i['offer'], i['sku'], i['version']])
         return all_images
+
+    def list_vm_extension_images(self,
+                                 image_location=None,
+                                 publisher=None,
+                                 name=None,
+                                 version=None):
+        '''vm extension image list
+        :param str image_location:Image location
+        :param str publisher:Image publisher name
+        :param str type:Image name
+        :param str version:Image version
+        '''
+        return load_extension_images_thru_services(publisher,
+                                                   name,
+                                                   version,
+                                                   image_location)
 
     def list_ip_addresses(self, resource_group_name=None, vm_name=None):
         ''' Get IP addresses from one or more Virtual Machines

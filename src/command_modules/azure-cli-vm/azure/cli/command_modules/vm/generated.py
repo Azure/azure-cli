@@ -8,6 +8,7 @@
     VirtualMachinesOperations,
     VirtualMachineScaleSetsOperations,
     VirtualMachineScaleSetVMsOperations)
+
 from azure.cli.commands._auto_command import build_operation, CommandDefinition
 from azure.cli.commands._command_creation import get_mgmt_service_client
 from azure.cli.commands import CommandTable, LongRunningOperation, patch_aliases
@@ -200,6 +201,15 @@ build_operation(
     'vm image', None, ConvenienceVmCommands,
     [
         CommandDefinition(ConvenienceVmCommands.list_vm_images, 'object', 'list')
+    ],
+    command_table, patch_aliases(PARAMETER_ALIASES, {
+        'image_location': {'name': '--location -l'}
+        }))
+
+build_operation(
+    'vm extension image', None, ConvenienceVmCommands,
+    [
+        CommandDefinition(ConvenienceVmCommands.list_vm_extension_images, '[VirtualMachineExtensionImage]', 'list')
     ],
     command_table, patch_aliases(PARAMETER_ALIASES, {
         'image_location': {'name': '--location -l'}
