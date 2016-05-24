@@ -82,9 +82,8 @@ class StorageAccountScenarioTest(CommandTestScript):
         assert key2 != keys['key2']
         s.test('storage account set -g {} -n {} --tags foo=bar;cat'.format(rg, account),
                {'tags': {'cat':'', 'foo':'bar'}})
-        # TODO: This should work like other tag commands--no value to clear
-        s.test('storage account set -g {} -n {} --tags none='.format(rg, account),
-               {'tags': {'none': ''}})
+        s.test('storage account set -g {} -n {} --tags'.format(rg, account),
+               {'tags': {}})
         s.test('storage account set -g {} -n {} --type Standard_GRS'.format(rg, account),
                {'accountType': 'Standard_GRS'})
         s.run('storage account set -g {} -n {} --type Standard_LRS'.format(rg, account))

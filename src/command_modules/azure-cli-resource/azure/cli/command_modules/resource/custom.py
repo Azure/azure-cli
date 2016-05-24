@@ -4,33 +4,38 @@ from __future__ import print_function
 import json
 from codecs import open as codecs_open
 
+from msrestazure.azure_exceptions import CloudError
 from azure.mgmt.resource.resources.models.resource_group import ResourceGroup
+from azure.mgmt.resource.resources.models import GenericResource
 
 from azure.cli.parser import IncorrectUsageError
 from azure.cli.commands import CommandTable
-from azure.cli._locale import L
 from azure.cli._util import CLIError
 import azure.cli._logging as _logging
 from azure.cli.commands import LongRunningOperation
 from azure.cli.commands._command_creation import get_mgmt_service_client
 
-from ._params import _resource_client_factory
+from ._factory import _resource_client_factory
 
 logger = _logging.get_az_logger(__name__)
 
 command_table = CommandTable()
 
-def _list_resources_odata_filter_builder(location=None, resource_type=None, tag=None, name=None):
+def _list_resources_odata_filter_builder(location=None, resource_type=None,
+                                         resource_group_name=None, tag=None, name=None):
     '''Build up OData filter string from parameters
     '''
 
     filters = []
 
+    if resource_group_name:
+        filters.append("resourceGroup eq '{}'".format(resource_group_name))
+
     if name:
-        filters.append("name eq '%s'" % name)
+        filters.append("name eq '{}'".format(name))
 
     if location:
-        filters.append("location eq '%s'" % location)
+        filters.append("location eq '{}'".format(location))
 
     if resource_type:
         filters.append("resourceType eq '{}/{}'".format(
@@ -50,24 +55,6 @@ def _list_resources_odata_filter_builder(location=None, resource_type=None, tag=
                 if tag_value != '':
                     filters.append("tagvalue eq '%s'" % tag_value)
     return ' and '.join(filters)
-
-def _resolve_api_version(rcf, resource_type, parent=None):
-
-    provider = rcf.providers.get(resource_type.namespace)
-    resource_type_str = '{}/{}'.format(parent.type, resource_type.type) \
-        if parent else resource_type.type
-
-    rt = [t for t in provider.resource_types if t.resource_type == resource_type_str]
-    if not rt:
-        raise IncorrectUsageError('Resource type {}/{} not found.'
-                                  .format(resource_type.namespace, resource_type.type))
-    if len(rt) == 1 and rt[0].api_versions:
-        npv = [v for v in rt[0].api_versions if "preview" not in v]
-        return npv[0] if npv else rt[0].api_versions[0]
-    else:
-        raise IncorrectUsageError(
-            L('API version is required and could not be resolved for resource {}/{}'
-              .format(resource_type.namespace, resource_type.type)))
 
 class ConvenienceResourceGroupCommands(object):
 
@@ -134,36 +121,13 @@ class ConvenienceResourceGroupCommands(object):
 
         print(json.dumps(result.template, indent=2))
 
-
 class ConvenienceResourceCommands(object):
 
     def __init__(self, **_):
         pass
 
-    def show(self, resource_group, resource_name, resource_type, api_version=None, parent=None):
-        ''' Show details of a specific resource in a resource group or subscription
-        :param str resource_group:the containing resource group name
-        :param str resource_name:the resource name
-        :param str resource_type:the resource type in format: <provider-namespace>/<type>
-        :param str api_version:the API version of the resource provider
-        :param str parent:the name of the parent resource (if needed) in <type>/<name> format'''
-        rcf = _resource_client_factory()
-
-        api_version = _resolve_api_version(rcf, resource_type, parent) \
-            if not api_version else api_version
-        parent_path = '{}/{}'.format(parent.type, parent.name) if parent else ''
-
-        results = rcf.resources.get(
-            resource_group_name=resource_group,
-            resource_name=resource_name,
-            resource_provider_namespace=resource_type.namespace,
-            resource_type=resource_type.type,
-            api_version=api_version,
-            parent_resource_path=parent_path
-        )
-        return results
-
-    def list(self, location=None, resource_type=None, tag=None, name=None):
+    def list(self, location=None, resource_type=None, resource_group_name=None, tag=None,
+             name=None):
         ''' List resources
             EXAMPLES:
                 az resource list --location westus
@@ -178,7 +142,8 @@ class ConvenienceResourceCommands(object):
             :param str name:filter by resource name
         '''
         rcf = _resource_client_factory()
-        odata_filter = _list_resources_odata_filter_builder(location, resource_type, tag, name)
+        odata_filter = _list_resources_odata_filter_builder(
+            location, resource_type, resource_group_name, tag, name)
         resources = rcf.resources.list(filter=odata_filter)
         return list(resources)
 
@@ -210,6 +175,33 @@ class ConvenienceResourceCommands(object):
                                       ResourceManagementClientConfiguration)
         poller = smc.deployments.create_or_update(resource_group, deployment_name, properties)
         return op(poller)
+
+    def set_tag(self, resource_group_name, resource_name, resource_type, tags,
+                parent_resource_path=None, api_version=None, resource_provider_namespace=None):
+        ''' Updates the tags on an existing resource. To clear tags, specify the --tag option
+        without anything else. '''
+        rcf = _resource_client_factory()
+        resource = rcf.resources.get(
+            resource_group_name,
+            resource_provider_namespace,
+            parent_resource_path,
+            resource_type,
+            resource_name,
+            api_version)
+        parameters = GenericResource(resource.location, tags, None, None) # pylint: disable=no-member
+        try:
+            rcf.resources.create_or_update(
+                resource_group_name,
+                resource_provider_namespace,
+                parent_resource_path,
+                resource_type,
+                resource_name,
+                api_version,
+                parameters)
+        except CloudError as ex:
+            # TODO: Remove workaround once Swagger and SDK fix is implemented (#120123723)
+            if '202' not in str(ex):
+                raise ex
 
 def _get_file_json(file_path):
     return _load_json(file_path, 'utf-8') \

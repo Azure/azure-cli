@@ -41,22 +41,27 @@ class ResourceScenarioTest(CommandTestScript):
 
         s.test('resource list -l centralus',
             [
-                JMESPathComparator('[0].location', 'centralus'),
+                JMESPathComparator("length([?location == 'centralus']) == length(@)", True)
             ])
 
         s.test('resource list --tag displayName=PublicIPAddress',
             [
-                JMESPathComparator('[0].type', 'Microsoft.Network/publicIPAddresses')
+                JMESPathComparator("length([?type == 'Microsoft.Network/publicIPAddresses']) == length(@)", True)
             ])
 
         s.test('resource list --resource-type Microsoft.Network/networkInterfaces',
             [
-                JMESPathComparator('[0].type', 'Microsoft.Network/networkInterfaces')
+                JMESPathComparator("length([?type == 'Microsoft.Network/networkInterfaces']) == length(@)", True)
             ])
 
         s.test('resource list --name TravisTestResourceGroup',
             [
-                JMESPathComparator('[0].name', 'TravisTestResourceGroup')
+                JMESPathComparator("length([?name == 'TravisTestResourceGroup']) == length(@)", True)
+            ])
+
+        s.test('resource list -g yugangw',
+            [
+                JMESPathComparator("length([?resourceGroup == 'yugangw']) == length(@)", True)
             ])
 
         all_tagged_displayname = json.loads(s.run('resource list --tag displayName -o json'))
@@ -64,10 +69,31 @@ class ResourceScenarioTest(CommandTestScript):
             json.loads(s.run('resource list --tag displayName=StorageAccount -o json'))
         assert len(all_tagged_displayname) > len(storage_acc_tagged_displayname)
 
-        s.test('resource show -n xplatvmExt1314 --resource-group XPLATTESTGEXTENSION9085 ' + \
-               '--resource-type Microsoft.Compute/virtualMachines',
-               {'name': 'xplatvmExt1314', 'location': 'southeastasia'}
-        )
+        s.run('resource set -n testserver23456 -g {} --resource-type '
+               'Microsoft.Sql/servers --tags test=pass'.format(rg))
+
+        # check for simple resource with tag
+        s.test('resource show -n testserver23456 -g {} --resource-type '
+               'Microsoft.Sql/servers'.format(rg), {
+                    'name': 'testserver23456', 'location': 'West US', 'resourceGroup': rg,
+                    'tags': {'test': 'pass'}
+                })
+
+        # check for child resource
+        s.test('resource show -n testsql23456 -g {} --parent servers/testserver23456 '
+               '--resource-type Microsoft.Sql/databases'.format(rg),
+            {'name': 'testsql23456', 'location': 'West US', 'resourceGroup': rg})
+
+        # Check that commands succeeds regardless of parameter order
+        s.test('resource show -n testsql23456 -g {} --resource-type Microsoft.Sql/databases '
+               '--parent servers/testserver23456 '.format(rg),
+            {'name': 'testsql23456', 'location': 'West US', 'resourceGroup': rg})
+
+        # clear tag and verify
+        s.run('resource set -n testserver23456 -g {} --resource-type '
+               'Microsoft.Sql/servers --tags'.format(rg))
+        s.test('resource show -n testserver23456 -g {} --resource-type '
+               'Microsoft.Sql/servers'.format(rg), {'tags': {}})
 
     def __init__(self):
         super(ResourceScenarioTest, self).__init__(None, self.test_body, None)
