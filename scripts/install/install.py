@@ -112,7 +112,7 @@ def create_executable(exec_dir, install_dir, environment_name):
                         envs_dir_name=ENVS_DIR_NAME,
                         bin_dir_name=BIN_DIR_NAME))
     cur_stat = os.stat(exec_filename)
-    os.chmod(exec_filename, cur_stat.st_mode | stat.S_IEXEC)
+    os.chmod(exec_filename, cur_stat.st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
     return exec_filename
 
 def prompt_input(message):
