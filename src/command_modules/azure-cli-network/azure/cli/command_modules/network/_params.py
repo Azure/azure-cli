@@ -19,11 +19,6 @@ SUBNET_ALIASES = patch_aliases(GLOBAL_COMMON_PARAMETERS, {
         'metavar': 'SUBNET',
         'help': 'the subnet name'
     },
-    'virtual_network_name': {
-        'name': '--name -n',
-        'metavar': 'VNET',
-        'help': 'the name of the VNET'
-    },
     'address_prefix': {
         'name': '--address-prefix',
         'metavar': 'PREFIX',
@@ -42,6 +37,11 @@ IP_ALIASES = patch_aliases(GLOBAL_COMMON_PARAMETERS, {
 # BUG: we are waiting on autorest to support this rename
 # (https://github.com/Azure/autorest/issues/941)
 VNET_ALIASES = patch_aliases(GLOBAL_COMMON_PARAMETERS, {
+    'virtual_network_name': {
+        'name': '--name -n',
+        'metavar': 'VNET',
+        'help': 'the name of the VNET'
+    },
     'deployment_parameter_virtual_network_name_value': {
         'name': '--name -n',
         'metavar': 'VNETNAME',

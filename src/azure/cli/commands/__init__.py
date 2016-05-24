@@ -93,7 +93,7 @@ class LongRunningOperation(object): #pylint: disable=too-few-public-methods
             try:
                 message = str(message) + ' ' + json.loads(client_exception.response.text) \
                     ['error']['details'][0]['message']
-            except AttributeError:
+            except (AttributeError, KeyError):
                 pass
 
             raise CLIError(message)
