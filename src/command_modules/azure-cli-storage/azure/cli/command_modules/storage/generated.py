@@ -12,9 +12,7 @@ from azure.cli.command_modules.storage._command_type import cli_storage_data_pla
 from azure.cli.command_modules.storage._factory import \
     (storage_client_factory, blob_data_service_factory, file_data_service_factory,
      cloud_storage_account_service_factory)
-from azure.cli.command_modules.storage.custom import \
-    (ConvenienceStorageAccountCommands, ConvenienceBlobServiceCommands,
-     ConvenienceFileServiceCommands)
+from azure.cli.command_modules.storage.custom import *
 
 command_table = CommandTable()
 
@@ -24,12 +22,12 @@ cli_command('storage account check-name', factory, StorageAccountsOperations.che
 cli_command('storage account delete', factory, StorageAccountsOperations.delete, None, command_table)
 cli_command('storage account show', factory, StorageAccountsOperations.get_properties, 'StorageAccount', command_table)
 cli_command('storage account keys list', factory, StorageAccountsOperations.list_keys, '[StorageAccountKeys]', command_table)
-cli_command('storage account create', None, ConvenienceStorageAccountCommands.create, 'Result', command_table)
-cli_command('storage account list', None, ConvenienceStorageAccountCommands.list, '[StorageAccount]', command_table)
-cli_command('storage account show-usage', None, ConvenienceStorageAccountCommands.show_usage, 'Result', command_table)
-cli_command('storage account set', None, ConvenienceStorageAccountCommands.set, 'Result', command_table)
-cli_command('storage account connection-string', None, ConvenienceStorageAccountCommands.connection_string, 'Result', command_table)
-cli_command('storage account keys renew', None, ConvenienceStorageAccountCommands.renew_keys, '[StorageAccountKeys]', command_table)
+cli_command('storage account create', None, create_storage_account, 'Result', command_table)
+cli_command('storage account list', None, list_storage_accounts, '[StorageAccount]', command_table)
+cli_command('storage account show-usage', None, show_storage_account_usage, 'Result', command_table)
+cli_command('storage account set', None, set_storage_account_properties, 'Result', command_table)
+cli_command('storage account connection-string', None, show_storage_account_connection_string, 'Result', command_table)
+cli_command('storage account keys renew', None, renew_storage_account_keys, '[StorageAccountKeys]', command_table)
 cli_storage_data_plane_command(command_table, 'storage account generate-sas', CloudStorageAccount.generate_shared_access_signature, 'SAS', cloud_storage_account_service_factory)
 
 # container commands
@@ -46,7 +44,7 @@ cli_storage_data_plane_command(command_table, 'storage container lease renew', B
 cli_storage_data_plane_command(command_table, 'storage container lease release', BlockBlobService.release_container_lease, None, factory)
 cli_storage_data_plane_command(command_table, 'storage container lease change', BlockBlobService.change_container_lease, None, factory)
 cli_storage_data_plane_command(command_table, 'storage container lease break', BlockBlobService.break_container_lease, 'Int', factory)
-cli_storage_data_plane_command(command_table, 'storage container exists', ConvenienceBlobServiceCommands.container_exists, 'Bool', factory)
+cli_storage_data_plane_command(command_table, 'storage container exists', container_exists, 'Bool', factory)
 
 # blob commands
 cli_storage_data_plane_command(command_table, 'storage blob list', BlockBlobService.list_blobs, '[Blob]', factory)
@@ -56,9 +54,9 @@ cli_storage_data_plane_command(command_table, 'storage blob url', BlockBlobServi
 cli_storage_data_plane_command(command_table, 'storage blob snapshot', BlockBlobService.snapshot_blob, 'SnapshotProperties', factory)
 cli_storage_data_plane_command(command_table, 'storage blob show', BlockBlobService.get_blob_properties, 'Properties', factory)
 cli_storage_data_plane_command(command_table, 'storage blob set', BlockBlobService.set_blob_properties, 'Properties', factory)
-cli_storage_data_plane_command(command_table, 'storage blob exists', ConvenienceBlobServiceCommands.blob_exists, 'Bool', factory)
-cli_storage_data_plane_command(command_table, 'storage blob download', ConvenienceBlobServiceCommands.download, 'Results', factory)
-cli_storage_data_plane_command(command_table, 'storage blob upload', ConvenienceBlobServiceCommands.upload, 'Results', factory)
+cli_storage_data_plane_command(command_table, 'storage blob exists', blob_exists, 'Bool', factory)
+cli_storage_data_plane_command(command_table, 'storage blob download', download_blob, 'Results', factory)
+cli_storage_data_plane_command(command_table, 'storage blob upload', upload_blob, 'Results', factory)
 cli_storage_data_plane_command(command_table, 'storage blob service-properties show', BlockBlobService.get_blob_service_properties, '[ServiceProperties]', factory)
 cli_storage_data_plane_command(command_table, 'storage blob service-properties set', BlockBlobService.set_blob_service_properties, 'ServiceProperties', factory)
 cli_storage_data_plane_command(command_table, 'storage blob metadata show', BlockBlobService.get_blob_metadata, 'Metadata', factory)
@@ -83,13 +81,13 @@ cli_storage_data_plane_command(command_table, 'storage share show', FileService.
 cli_storage_data_plane_command(command_table, 'storage share set', FileService.set_share_properties, 'Properties', factory)
 cli_storage_data_plane_command(command_table, 'storage share metadata show', FileService.get_share_metadata, 'Metadata', factory)
 cli_storage_data_plane_command(command_table, 'storage share metadata set', FileService.set_share_metadata, 'Metadata', factory)
-cli_storage_data_plane_command(command_table, 'storage share exists', ConvenienceFileServiceCommands.share_exists, 'Bool', factory)
+cli_storage_data_plane_command(command_table, 'storage share exists', share_exists, 'Bool', factory)
 
 # directory commands
 cli_storage_data_plane_command(command_table, 'storage directory create', FileService.create_directory, 'Bool', factory)
 cli_storage_data_plane_command(command_table, 'storage directory delete', FileService.delete_directory, 'Bool', factory)
 cli_storage_data_plane_command(command_table, 'storage directory show', FileService.get_directory_properties, 'Properties', factory)
-cli_storage_data_plane_command(command_table, 'storage directory exists', ConvenienceFileServiceCommands.dir_exists, 'Bool', factory)
+cli_storage_data_plane_command(command_table, 'storage directory exists', dir_exists, 'Bool', factory)
 cli_storage_data_plane_command(command_table, 'storage directory metadata show', FileService.get_directory_metadata, 'Metadata', factory)
 cli_storage_data_plane_command(command_table, 'storage directory metadata set', FileService.set_directory_metadata, 'Metadata', factory)
 
@@ -100,9 +98,9 @@ cli_storage_data_plane_command(command_table, 'storage file url', FileService.ma
 cli_storage_data_plane_command(command_table, 'storage file generate-sas', FileService.generate_file_shared_access_signature, 'SAS', factory)
 cli_storage_data_plane_command(command_table, 'storage file show', FileService.get_file_properties, 'Properties', factory)
 cli_storage_data_plane_command(command_table, 'storage file set', FileService.set_file_properties, 'Properties', factory)
-cli_storage_data_plane_command(command_table, 'storage file exists', ConvenienceFileServiceCommands.file_exists, 'Bool', factory)
-cli_storage_data_plane_command(command_table, 'storage file download', ConvenienceFileServiceCommands.download, 'Results', factory)
-cli_storage_data_plane_command(command_table, 'storage file upload', ConvenienceFileServiceCommands.upload, 'Results', factory)
+cli_storage_data_plane_command(command_table, 'storage file exists', file_exists, 'Bool', factory)
+cli_storage_data_plane_command(command_table, 'storage file download', download_file, 'Results', factory)
+cli_storage_data_plane_command(command_table, 'storage file upload', upload_file, 'Results', factory)
 cli_storage_data_plane_command(command_table, 'storage file metadata show', FileService.get_file_metadata, 'Metadata', factory)
 cli_storage_data_plane_command(command_table, 'storage file metadata set', FileService.set_file_metadata, 'Metadata', factory)
 cli_storage_data_plane_command(command_table, 'storage file service-properties show', FileService.get_file_service_properties, '[ServiceProperties]', factory)

@@ -10,7 +10,7 @@ from azure.cli.commands.argument_types import \
     get_cli_argument, CliArgumentType, _cli_extra_argument_registry as extra_argument_registry
 
 EXCLUDED_PARAMS = frozenset(['self', 'raw', 'custom_headers', 'operation_config',
-                             'content_version', 'kwargs'])
+                             'content_version', 'kwargs', 'client'])
 
 class CommandDefinition(object): #pylint: disable=too-few-public-methods
 
@@ -42,11 +42,6 @@ def _make_func(client_factory, member_path, return_type_or_func, unbound_func, e
     def call_client(kwargs):
         client = client_factory(**kwargs) if client_factory else None
 
-        extra_args = extra_argument_registry.get(command_name)
-        for key in extra_args.keys() if extra_args else []:
-            kwargs.pop(key)
-
-        # TODO: Remove this once conversion is complete. This is the OLD WAY
         for param in extra_parameters.keys() if extra_parameters else []:
             kwargs.pop(param)
 
