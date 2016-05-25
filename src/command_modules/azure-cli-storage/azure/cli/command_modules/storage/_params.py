@@ -5,7 +5,7 @@ from azure.cli.commands.argument_types import (
     register_cli_argument, register_additional_cli_argument, CliArgumentType
 )
 from azure.cli.commands._command_creation import get_mgmt_service_client, get_data_service_client
-from azure.cli.commands._validators import validate_key_value_pairs, validate_tag, validate_tags
+from azure.cli.commands._validators import validate_key_value_pairs, validate_tags
 from azure.cli._locale import L
 
 from azure.mgmt.storage import StorageManagementClient, StorageManagementClientConfiguration
@@ -180,11 +180,6 @@ tags_type = CliArgumentType(
     help='multiple semicolon separated tags in \'key[=value]\' format'
 )
 
-tags_type = CliArgumentType(
-    help='a single tag tag in \'key[=value]\' format',
-    type=validate_tag
-)
-
 timeout_type = CliArgumentType(
     help='timeout in seconds',
     type=int
@@ -198,17 +193,11 @@ use_http_type = CliArgumentType(
 
 # PARAMETER SCOPE REGISTRATIONS
 
-register_cli_argument('storage', 'tags', tags_type)
-register_cli_argument('storage', 'tag', tags_type)
 register_cli_argument('storage', 'metadata', metadata_type)
-register_cli_argument('storage', 'blob_name', blob_name_type)
-register_cli_argument('storage', 'blob_type', blob_type_type)
 register_cli_argument('storage', 'container_name', container_name_type)
 register_cli_argument('storage', 'directory_name', directory_type)
-register_cli_argument('storage', 'file_name', file_name_type)
 register_cli_argument('storage', 'share_name', share_name_type)
 register_cli_argument('storage', 'account_name', account_name_type)
-register_cli_argument('storage', 'account_type', account_type_type)
 register_cli_argument('storage', 'expiry', expiry_type)
 register_cli_argument('storage', 'if_modified_since', if_modified_since_type)
 register_cli_argument('storage', 'if_unmodified_since', if_unmodified_since_type)
@@ -217,25 +206,26 @@ register_cli_argument('storage', 'lease_break_period', lease_break_period_type)
 register_cli_argument('storage', 'lease_duration', lease_duration_type)
 register_cli_argument('storage', 'lease_id', lease_id_type)
 register_cli_argument('storage', 'permission', permission_type)
-register_cli_argument('storage', 'public_access', public_access_type)
-register_cli_argument('storage', 'quota', quota_type)
-register_cli_argument('storage', 'resource_types', resource_types_type)
-register_cli_argument('storage', 'services', services_type)
-register_cli_argument('storage', 'signed_identifiers', signed_identifiers_type)
 register_cli_argument('storage', 'start', start_type)
 register_cli_argument('storage', 'timeout', timeout_type)
 
 register_cli_argument('storage account', 'account_name', account_name_type, options_list=('--name', '-n'))
 register_cli_argument('storage account', 'account_type', account_type_type, options_list=('--type', '-t'))
-
+register_cli_argument('storage account', 'tags', tags_type)
 register_cli_argument('storage account keys', 'key', key_type)
-
 register_cli_argument('storage account connection-string', 'use_http', use_http_type)
 register_cli_argument('storage account connection-string', 'account_name', account_name_type)
+register_cli_argument('storage account generate-sas', 'resource_types', resource_types_type)
+register_cli_argument('storage account generate-sas', 'services', services_type)
 
 register_cli_argument('storage container', 'container_name', container_name_type)
+register_cli_argument('storage container create', 'public_access', public_access_type)
 
-register_cli_argument('storage blob', 'blob_type', blob_type_type, options_list=('--type', '-t'))
+register_cli_argument('storage blob upload', 'blob_type', blob_type_type, options_list=('--type', '-t'))
+register_cli_argument('storage blob', 'blob_name', blob_name_type)
 
+register_cli_argument('storage share', 'quota', quota_type)
+
+register_cli_argument('storage file', 'file_name', file_name_type)
 register_cli_argument('storage file', 'directory_name', directory_type, required=False)
 register_cli_argument('storage file metadata', 'directory_name', directory_type, required=False)
