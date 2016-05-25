@@ -9,6 +9,7 @@ from azure.cli.application import APPLICATION
 from six.moves.urllib.request import urlopen #pylint: disable=import-error
 
 from ._factory import _compute_client_factory, _subscription_client_factory
+from ._vm_utils import read_content_if_is_file
 
 class VMImageFieldAction(argparse.Action): #pylint: disable=too-few-public-methods
     def __call__(self, parser, namespace, values, option_string=None):
@@ -38,13 +39,7 @@ class VMImageFieldAction(argparse.Action): #pylint: disable=too-few-public-metho
 
 class VMSSHFieldAction(argparse.Action): #pylint: disable=too-few-public-methods
     def __call__(self, parser, namespace, values, option_string=None):
-        ssh_value = values
-
-        if os.path.exists(ssh_value):
-            with open(ssh_value, 'r') as f:
-                namespace.ssh_key_value = f.read()
-        else:
-            namespace.ssh_key_value = ssh_value
+        namespace.ssh_key_value = read_content_if_is_file(values)
 
 class VMDNSNameAction(argparse.Action): #pylint: disable=too-few-public-methods
     def __call__(self, parser, namespace, values, option_string=None):
