@@ -1,12 +1,16 @@
 from __future__ import print_function
 import copy
+import inspect
+import re
 import time
 import random
 from importlib import import_module
 from collections import defaultdict, OrderedDict
 from pip import get_installed_distributions
 from msrest.exceptions import ClientException
+from msrest.paging import Paged
 
+from azure.cli.parser import IncorrectUsageError
 from azure.cli._util import CLIError
 import azure.cli._logging as _logging
 from azure.cli._locale import L
@@ -21,6 +25,9 @@ INSTALLED_COMMAND_MODULES = [dist.key.replace('azure-cli-', '')
                              if dist.key.startswith('azure-cli-')]
 
 logger.info('Installed command modules %s', INSTALLED_COMMAND_MODULES)
+
+EXCLUDED_PARAMS = frozenset(['self', 'raw', 'custom_headers', 'operation_config',
+                             'content_version', 'kwargs', 'client'])
 
 COMMON_PARAMETERS = {
     'deployment_name': {
@@ -138,6 +145,78 @@ def get_command_table(module_name=None):
     ordered_commands = OrderedDict(command_table)
     return ordered_commands
 
+def _option_descriptions(operation):
+    """Pull out parameter help from doccomments of the command
+    """
+    option_descs = {}
+    lines = inspect.getdoc(operation)
+    if lines:
+        lines = lines.splitlines()
+        index = 0
+        while index < len(lines):
+            l = lines[index]
+            regex = r'\s*(:param)\s+(.+)\s*:(.*)'
+            match = re.search(regex, l)
+            if match:
+                # 'arg name' portion might have type info, we don't need it
+                arg_name = str.split(match.group(2))[-1]
+                arg_desc = match.group(3).strip()
+                #look for more descriptions on subsequent lines
+                index += 1
+                while index < len(lines):
+                    temp = lines[index].strip()
+                    if temp.startswith(':'):
+                        break
+                    else:
+                        if temp:
+                            arg_desc += (' ' + temp)
+                        index += 1
+
+                option_descs[arg_name] = arg_desc
+            else:
+                index += 1
+    return option_descs
+
+def _extract_args_from_signature(command, operation):
+    """ Extracts basic argument data from an operation's signature and docstring """
+    args = []
+    try:
+        # only supported in python3 - falling back to argspec if not available
+        sig = inspect.signature(operation)
+        args = sig.parameters
+    except AttributeError:
+        sig = inspect.getargspec(operation) #pylint: disable=deprecated-method
+        args = sig.args
+
+    arg_docstring_help = _option_descriptions(operation)
+    for arg_name in [a for a in args if not a in EXCLUDED_PARAMS]:
+        try:
+            # this works in python3
+            default = args[arg_name].default
+            required = default == inspect.Parameter.empty #pylint: disable=no-member
+        except TypeError:
+            arg_defaults = (dict(zip(sig.args[-len(sig.defaults):], sig.defaults))
+                            if sig.defaults
+                            else {})
+            default = arg_defaults.get(arg_name)
+            required = arg not in arg_defaults
+
+        action = 'store_' + str(not default).lower() if isinstance(default, bool) else None
+
+        try:
+            default = (default
+                        if default != inspect._empty #pylint: disable=protected-access, no-member
+                        else None)
+        except AttributeError:
+            pass
+
+        command.add_argument(arg_name,
+                            *['--' + arg_name.replace('_', '-')],
+                            required=required,
+                            default=default,
+                            help=arg_docstring_help.get(arg_name),
+                            action=action)
+
 class CliCommand(object):
 
     def __init__(self, name, handler, description=None):
@@ -157,3 +236,27 @@ class CliCommand(object):
 
     def execute(**kwargs):
         return self.handler(**kwargs)
+
+def create_command(name, operation, return_type, client_factory):
+    def _execute_command(kwargs):
+        client = client_factory(kwargs) if client_factory else None
+        try:
+            result = operation(client, **kwargs)
+            if not return_type:
+                return {}
+            if callable(return_type):
+                return return_type(result)
+            if isinstance(return_type, str):
+                return list(result) if isinstance(result, Paged) else result
+        except TypeError as exception:
+            raise IncorrectUsageError(exception)
+        except ClientException as client_exception:
+            message = getattr(client_exception, 'message', client_exception)
+            raise CLIError(message)
+
+    name = ' '.join(name.split())
+    command = CliCommand(name, _execute_command)
+    _extract_args_from_signature(command, operation)
+
+    return command
+
