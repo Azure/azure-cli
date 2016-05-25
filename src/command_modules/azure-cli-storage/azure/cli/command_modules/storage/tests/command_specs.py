@@ -229,6 +229,54 @@ class StorageBlobScenarioTest(CommandTestScript):
     def __init__(self):
         super(StorageBlobScenarioTest, self).__init__(self.set_up, self.test_body, self.tear_down)
 
+class StorageBlobCopyScenarioTest(CommandTestScript):
+
+    def set_up(self):
+        self.rg = RESOURCE_GROUP_NAME
+        self.src_container = 'testcopyblob1'
+        self.src_blob = 'src_blob'
+        self.dest_container = 'testcopyblob2'
+        self.dest_blob = 'dest_blob'
+
+        _get_connection_string(self)
+        self.run('storage container delete --container-name {}'.format(self.src_container))
+        self.run('storage container delete --container-name {}'.format(self.dest_container))
+        if self.run('storage container exists --container-name {}'.format(self.src_container)) == 'True':
+            raise CLIError('Failed to delete pre-existing container {}. Unable to continue test.'.format(self.src_container))
+        if self.run('storage container exists --container-name {}'.format(self.dest_container)) == 'True':
+            raise CLIError('Failed to delete pre-existing container {}. Unable to continue test.'.format(self.dest_container))
+        
+    def test_body(self):
+        s = self
+        src_cont = s.src_container
+        src_blob = s.src_blob
+        dst_cont = s.dest_container
+        dst_blob = s.dest_blob
+        rg = s.rg
+
+        s.run('storage container create --container-name {} --fail-on-exist'.format(src_cont))
+        s.run('storage container create --container-name {} --fail-on-exist'.format(dst_cont))
+
+        s.run('storage blob upload -b {} -c {} --type block --upload-from {}'.format(src_blob, src_cont, os.path.join(TEST_DIR, 'testfile.rst')))
+        s.test('storage blob exists -b {} -c {}'.format(src_blob, src_cont), True)
+
+        # test that a blob can be successfully copied
+        src_uri = s.run('storage blob url -b {} -c {}'.format(src_blob, src_cont))
+        copy_status = json.loads(s.run('storage blob copy start -c {0} -n {1} -u {2} -o json'.format(
+            dst_cont, dst_blob, src_uri)))
+        assert copy_status['status'] == 'success'
+        copy_id = copy_status['id']
+        s.test('storage blob show -c {} -b {}'.format(dst_cont, dst_blob),
+            {'name': dst_blob, 'properties': {'copy': {'id': copy_id, 'status': 'success'}}})
+
+    def tear_down(self):
+        self.run('storage container delete --container-name {}'.format(self.src_container))
+        self.run('storage container delete --container-name {}'.format(self.dest_container))
+
+    def __init__(self):
+        super(StorageBlobCopyScenarioTest, self).__init__(
+            self.set_up, self.test_body, self.tear_down)
+
 class StorageFileScenarioTest(CommandTestScript):
 
     def set_up(self):
@@ -360,6 +408,68 @@ class StorageFileScenarioTest(CommandTestScript):
     def __init__(self):
         super(StorageFileScenarioTest, self).__init__(self.set_up, self.test_body, self.tear_down)
 
+class StorageFileCopyScenarioTest(CommandTestScript):
+
+    def set_up(self):
+        self.rg = RESOURCE_GROUP_NAME
+        self.src_share = 'testcopyfile1'
+        self.src_dir = 'testdir'
+        self.src_file = 'src_file'
+        self.dest_share = 'testcopyfile2'
+        self.dest_dir = 'mydir'
+        self.dest_file = 'dest_file'
+
+        _get_connection_string(self)
+        self.run('storage share delete --share-name {}'.format(self.src_share))
+        self.run('storage share delete --share-name {}'.format(self.dest_share))
+        if self.run('storage share exists --share-name {}'.format(self.src_share)) == 'True':
+            raise CLIError('Failed to delete pre-existing share {}. Unable to continue test.'.format(self.src_share))
+        if self.run('storage share exists --share-name {}'.format(self.dest_share)) == 'True':
+            raise CLIError('Failed to delete pre-existing share {}. Unable to continue test.'.format(self.dest_share))
+        
+    def test_body(self):
+        s = self
+        src_share = s.src_share
+        src_dir = s.src_dir
+        src_file = s.src_file
+        dst_share = s.dest_share
+        dst_dir = s.dest_dir
+        dst_file = s.dest_file
+        rg = s.rg
+
+        s.run('storage share create --share-name {} --fail-on-exist'.format(src_share))
+        s.run('storage share create --share-name {} --fail-on-exist'.format(dst_share))
+        s.run('storage directory create --share-name {} -d {}'.format(src_share, src_dir))
+        s.run('storage directory create --share-name {} -d {}'.format(dst_share, dst_dir))
+
+        s.run('storage file upload -f {} --share-name {} -d {} --local-file-name {}'.format(src_file, src_share, src_dir, os.path.join(TEST_DIR, 'testfile.rst')))
+        s.test('storage file exists -f {} --share-name {} -d {}'.format(src_file, src_share, src_dir), True)
+
+        # test that a file can be successfully copied to root
+        src_uri = s.run('storage file url -f {} --share-name {} -d {}'.format(src_file, src_share, src_dir))
+        copy_status = json.loads(s.run('storage file copy start --destination-share {0} -n {1} -u {2} -o json'.format(
+            dst_share, dst_file, src_uri)))
+        assert copy_status['status'] == 'success'
+        copy_id = copy_status['id']
+        s.test('storage file show --share-name {} -f {}'.format(dst_share, dst_file),
+            {'name': dst_file, 'properties': {'copy': {'id': copy_id, 'status': 'success'}}})
+
+        # test that a file can be successfully copied to a directory
+        copy_status = json.loads(s.run('storage file copy start --destination-share {0} -n {1} -d {3} -u {2} -o json'.format(
+            dst_share, dst_file, src_uri, dst_dir)))
+        assert copy_status['status'] == 'success'
+        copy_id = copy_status['id']
+        s.test('storage file show --share-name {} -f {} -d {}'.format(dst_share, dst_file, dst_dir),
+            {'name': dst_file, 'properties': {'copy': {'id': copy_id, 'status': 'success'}}})
+
+    def tear_down(self):
+        self.run('storage share delete --share-name {}'.format(self.src_share))
+        self.run('storage share delete --share-name {}'.format(self.dest_share))
+
+    def __init__(self):
+        super(StorageFileCopyScenarioTest, self).__init__(
+            self.set_up, self.test_body, self.tear_down)
+
 TEST_DEF = [
     {
         'test_name': 'storage_account',
@@ -374,7 +484,15 @@ TEST_DEF = [
         'script': StorageBlobScenarioTest()
     },
     {
+        'test_name': 'storage_blob_copy',
+        'script': StorageBlobCopyScenarioTest()
+    },
+    {
         'test_name': 'storage_file',
         'script': StorageFileScenarioTest()
-    }
+    },
+    {
+        'test_name': 'storage_file_copy',
+        'script': StorageFileCopyScenarioTest()
+    },
 ]

@@ -155,6 +155,9 @@ PARAMETER_ALIASES = patch_aliases(GLOBAL_COMMON_PARAMETERS, {
         'help': L('expiration UTC datetime of SAS token (Y-m-d\'T\'H:M\'Z\')'),
         'type': validate_datetime_as_string
     },
+    'file_name': {
+        'name': '--file-name -f'
+    },
     'if_modified_since': {
         'name': '--if-modified-since',
         'help': L('alter only if modified since supplied UTC datetime (Y-m-d\'T\'H:M\'Z\')'),

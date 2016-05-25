@@ -156,7 +156,20 @@ build_operation(
     [
         CommandDefinition(BlockBlobService.copy_blob, 'CopyOperationProperties', 'start'),
         CommandDefinition(BlockBlobService.abort_copy_blob, None, 'cancel'),
-    ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
+    ], command_table, patch_aliases(PARAMETER_ALIASES, {
+        'blob_name': {
+            'name': '--destination-name -n',
+            'help': 'Name of the destination blob. If the blob exists, it will be overwritten.'
+        },
+        'container_name': {
+            'name': '--destination-container -c'
+        },
+        'copy_source': {
+            'name': '--source-uri -u'
+        }
+    }), patch_aliases(STORAGE_DATA_CLIENT_ARGS, {
+        'account_name': {'name': '--account-name'}
+    }))
 
 # FILE SERVICE COMMANDS
 
@@ -261,4 +274,22 @@ build_operation(
     [
         CommandDefinition(FileService.copy_file, 'CopyOperationPropeties', 'start'),
         CommandDefinition(FileService.abort_copy_file, None, 'cancel'),
-    ], command_table, PARAMETER_ALIASES, STORAGE_DATA_CLIENT_ARGS)
+    ], command_table, patch_aliases(PARAMETER_ALIASES, {
+        'directory_name': {
+            'name': '--destination-directory -d',
+            'required': False,
+            'default': ''
+        },
+        'file_name': {
+            'name': '--destination-name -n',
+        },
+        'share_name': {
+            'name': '--destination-share -s',
+            'help': 'Name of the destination share. The share must exist.'
+        },
+        'copy_source': {
+            'name': '--source-uri -u'
+        }
+    }), patch_aliases(STORAGE_DATA_CLIENT_ARGS, {
+        'account_name': {'name': '--account-name'}
+    }))
