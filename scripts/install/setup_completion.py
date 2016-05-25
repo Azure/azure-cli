@@ -6,9 +6,6 @@
 #   e.g. python <filename> <path_to_cli_install> <path_to_rc_file>
 #           <path_to_rc_file> is optional as a default will be used. (e.g. ~/.bashrc)
 #
-# - Optional Environment Variables Available
-#     AZURE_CLI_DISABLE_PROMPTS  - Disable prompts during installation and use the defaults
-#
 from __future__ import print_function
 import os
 import sys
@@ -20,8 +17,6 @@ try:
 except NameError:
     # Python 3 doesn't have raw_input
     pass
-
-DISABLE_PROMPTS = os.environ.get('AZURE_CLI_DISABLE_PROMPTS')
 
 COMPLETION_FILENAME = 'az.completion'
 REGISTER_PYTHON_ARGCOMPLETE = """
@@ -36,21 +31,19 @@ _python_argcomplete() {
 complete -o nospace -o default -F _python_argcomplete "az"
 """
 
-def prompt_input(message):
-    return None if DISABLE_PROMPTS else input(message)
+USER_BASH_RC = os.path.expanduser(os.path.join('~', '.bashrc'))
+USER_BASH_PROFILE = os.path.expanduser(os.path.join('~', '.bash_profile'))
 
 def create_tab_completion_file(filename):
     with open(filename, 'w') as completion_file:
         completion_file.write(REGISTER_PYTHON_ARGCOMPLETE)
 
 def _get_default_rc_file():
-    user_bash_rc = os.path.expanduser(os.path.join('~', '.bashrc'))
-    user_bash_profile = os.path.expanduser(os.path.join('~', '.bash_profile'))
-    bashrc_exists = os.path.isfile(user_bash_rc)
-    bash_profile_exists = os.path.isfile(user_bash_profile)
+    bashrc_exists = os.path.isfile(USER_BASH_RC)
+    bash_profile_exists = os.path.isfile(USER_BASH_PROFILE)
     if not bashrc_exists and bash_profile_exists:
-        return user_bash_profile
-    return user_bash_rc if bashrc_exists else None
+        return USER_BASH_PROFILE
+    return USER_BASH_RC if bashrc_exists else None
 
 def backup_rc(rc_file):
     try:
@@ -84,24 +77,18 @@ def main():
 
     completion_file_path = os.path.join(sys.argv[1], COMPLETION_FILENAME)
     create_tab_completion_file(completion_file_path)
-    default_rc_file = _get_default_rc_file()
-    rc_file_exists = False
-    while not rc_file_exists:
-        try:
-            # use value from argv if available else fall back to prompt or default
-            rc_prompt_message = 'Path to rc file to update (leave blank to use {}): '.format(default_rc_file) if default_rc_file else 'Path to rc file to update: '
-            rc_file = sys.argv[2] if len(sys.argv) >= 3 else prompt_input(rc_prompt_message) or default_rc_file
-        except EOFError:
-            error_exit('Unable to prompt for input. Pass the rc file as an argument to this script.')
+    rc_file = _get_default_rc_file()
+    if rc_file:
+        print("Modifying '{}' to enable tab completion.".format(rc_file))
         rc_file_path = os.path.realpath(os.path.expanduser(rc_file))
-        rc_file_exists = os.path.isfile(rc_file_path)
-        if not rc_file_exists:
-            print("ERROR: File '{}' does not exist!".format(rc_file_path))
-    backup_rc(rc_file_path)
-    line_to_add = "source '{}'".format(completion_file_path)
-    modify_rc(rc_file_path, line_to_add)
-    print('Tab completion enabled.')
-    print('Run `exec -l $SHELL` to restart your shell.')
+        backup_rc(rc_file_path)
+        line_to_add = "source '{}'".format(completion_file_path)
+        modify_rc(rc_file_path, line_to_add)
+        print('Tab completion set up complete.')
+        print('** Run `exec -l $SHELL` to restart your shell. **')
+        print("If tab completion is not activated, verify that '{}' is sourced by your shell.".format(rc_file))
+    else:
+        print("Unable to enable tab completion. No '{}' or '{}' file found.".format(USER_BASH_RC, USER_BASH_PROFILE))
 
 if __name__ == '__main__':
     main()

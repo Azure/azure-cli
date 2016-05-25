@@ -158,12 +158,12 @@ def main():
     create_virtualenv(tmp_dir, VIRTUALENV_VERSION, env_dir)
     install_cli(env_dir)
     exec_filepath = create_executable(exec_dir, install_dir, environment_name)
+    print("Installation successful.")
     try:
         completion_script_url = sys.argv[1]
         handle_tab_completion(completion_script_url, tmp_dir, install_dir)
-    except IndexError:
-        pass
-    print("Installation successful.")
+    except Exception as e:
+        print("Unable to set up tab completion.", e)
     print("Run the CLI with {} --help".format(exec_filepath))
 
 if __name__ == '__main__':
