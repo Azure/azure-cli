@@ -1,6 +1,4 @@
 ﻿# pylint: disable=no-self-use,too-many-arguments
-import os
-import json
 import re
 try:
     from urllib.parse import urlparse
@@ -13,6 +11,7 @@ from azure.mgmt.compute.models.compute_management_client_enums import DiskCreate
 from azure.cli.commands import CommandTable, LongRunningOperation
 from azure.cli.commands._command_creation import get_mgmt_service_client, get_data_service_client
 from azure.cli._util import CLIError
+from ._vm_utils import read_content_if_is_file, load_json
 
 from ._actions import (load_images_from_aliases_doc,
                        load_extension_images_thru_services,
@@ -70,13 +69,6 @@ def _get_access_extension_upgrade_info(extensions, is_linux=True):
             version = extension.type_handler_version
 
     return publisher, name, version, auto_upgrade
-
-def _read_content_if_is_file(string_or_file):
-    content = string_or_file
-    if os.path.exists(string_or_file):
-        with open(string_or_file, 'r') as f:
-            content = f.read()
-    return content
 
 class ConvenienceVmCommands(object): # pylint: disable=too-few-public-methods
 
@@ -271,7 +263,7 @@ class ConvenienceVmCommands(object): # pylint: disable=too-few-public-methods
             protected_settings['password'] = password
 
         if ssh_key_value:
-            protected_settings['ssh_key'] = _read_content_if_is_file(ssh_key_value)
+            protected_settings['ssh_key'] = read_content_if_is_file(ssh_key_value)
 
         publisher, extension_name, version, auto_upgrade = _get_access_extension_upgrade_info(
             vm.resources, is_linux=True)
@@ -440,14 +432,8 @@ class ConvenienceVmCommands(object): # pylint: disable=too-few-public-methods
 
         from azure.mgmt.compute.models import VirtualMachineExtension
 
-        if public_config:
-            public_config = _read_content_if_is_file(public_config)
-
-        if private_config:
-            private_config = _read_content_if_is_file(private_config)
-
-        protected_settings = json.loads(private_config) if private_config is not None else {}
-        settings = json.loads(public_config) if public_config is not None else None
+        protected_settings = load_json(private_config) if not private_config else {}
+        settings = load_json(public_config) if not public_config else None
 
         #workaround a known issue: the version must only contain "major.minor", even though
         #"extension image list" gives more detail
