@@ -1,5 +1,6 @@
 import argparse
 import getpass
+import os
 
 from azure.mgmt.compute.models import VirtualHardDisk
 
@@ -166,3 +167,21 @@ VM_PATCH_EXTRA_PARAMETERS = {
     'vm_name':
         extend_parameter(PARAMETER_ALIASES['vm_name'], required=True)
 }
+
+ACS_CREATE_PARAMETER_ALIASES = {
+    'orchestrator_type': {
+        'name': '--orchestrator-type',
+        'choices': ['dcos', 'swarm']
+        },
+    'admin_username': {
+        'name': '--admin-username',
+        'default': getpass.getuser(),
+        'required': False
+        },
+    'ssh_key_value': {
+        'name': '--ssh-key-value',
+        'required': False,
+        'help': 'SSH key file value or key file path.',
+        'default': os.path.join(os.path.expanduser('~'), '.ssh', 'id_rsa.pub')
+        }
+    }

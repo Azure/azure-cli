@@ -206,3 +206,14 @@ def _create_image_instance(publisher, offer, sku, version):
         'sku': sku,
         'version': version
     }
+
+def _handle_container_ssh_file(**kwargs):
+    if kwargs['command'] != 'vm container create':
+        return
+
+    args = kwargs['args']
+
+    args.ssh_key_value = read_content_if_is_file(args.ssh_key_value)
+
+APPLICATION.register(APPLICATION.COMMAND_PARSER_PARSED, _handle_container_ssh_file)
+
