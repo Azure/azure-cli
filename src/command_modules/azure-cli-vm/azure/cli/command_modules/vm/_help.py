@@ -75,3 +75,8 @@ helps['vm extension set'] = """
                   text: 
                     az vm extension set -n VMAccessForLinux --publisher Microsoft.OSTCExtensions --version 1.4 --vm-name myvm --resource-group yugangw --private-config "{\\"username\\":\\"user1\\", \\"ssh_key\\":\\"ssh_rsa ....\\"}"
             """
+
+helps['container create'] = """
+            type: command
+            long-summary: See https://azure.microsoft.com/en-us/documentation/articles/container-service-intro/ for an intro to Container Service.
+"""
