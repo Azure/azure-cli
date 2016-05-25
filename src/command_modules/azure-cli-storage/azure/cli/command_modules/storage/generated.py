@@ -1,7 +1,7 @@
 from __future__ import print_function
 
-from azure.cli.commands import CommandTable, patch_aliases
-from azure.cli.commands._auto_command import build_operation, CommandDefinition, cli_command
+from azure.cli.commands import CommandTable
+from azure.cli.commands.command_types import cli_command
 
 from azure.mgmt.storage.operations import StorageAccountsOperations
 from azure.storage.blob import BlockBlobService
@@ -17,17 +17,17 @@ from azure.cli.command_modules.storage.custom import *
 command_table = CommandTable()
 
 # storage account commands
-factory = lambda **kwargs: storage_client_factory(**kwargs).storage_accounts
-cli_command('storage account check-name', factory, StorageAccountsOperations.check_name_availability, 'Result', command_table)
-cli_command('storage account delete', factory, StorageAccountsOperations.delete, None, command_table)
-cli_command('storage account show', factory, StorageAccountsOperations.get_properties, 'StorageAccount', command_table)
-cli_command('storage account keys list', factory, StorageAccountsOperations.list_keys, '[StorageAccountKeys]', command_table)
-cli_command('storage account create', None, create_storage_account, 'Result', command_table)
-cli_command('storage account list', None, list_storage_accounts, '[StorageAccount]', command_table)
-cli_command('storage account show-usage', None, show_storage_account_usage, 'Result', command_table)
-cli_command('storage account set', None, set_storage_account_properties, 'Result', command_table)
-cli_command('storage account connection-string', None, show_storage_account_connection_string, 'Result', command_table)
-cli_command('storage account keys renew', None, renew_storage_account_keys, '[StorageAccountKeys]', command_table)
+factory = lambda kwargs: storage_client_factory().storage_accounts
+cli_command(command_table, 'storage account check-name', StorageAccountsOperations.check_name_availability, 'Result', factory)
+cli_command(command_table, 'storage account delete', StorageAccountsOperations.delete, None, factory)
+cli_command(command_table, 'storage account show', StorageAccountsOperations.get_properties, 'StorageAccount', factory)
+cli_command(command_table, 'storage account keys list', StorageAccountsOperations.list_keys, '[StorageAccountKeys]', factory)
+cli_command(command_table, 'storage account create', create_storage_account, 'Result')
+cli_command(command_table, 'storage account list', list_storage_accounts, '[StorageAccount]')
+cli_command(command_table, 'storage account show-usage', show_storage_account_usage, 'Result')
+cli_command(command_table, 'storage account set', set_storage_account_properties, 'Result')
+cli_command(command_table, 'storage account connection-string', show_storage_account_connection_string, 'Result')
+cli_command(command_table, 'storage account keys renew', renew_storage_account_keys, '[StorageAccountKeys]')
 cli_storage_data_plane_command(command_table, 'storage account generate-sas', CloudStorageAccount.generate_shared_access_signature, 'SAS', cloud_storage_account_service_factory)
 
 # container commands
