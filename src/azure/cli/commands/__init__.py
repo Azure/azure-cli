@@ -3,6 +3,7 @@ import copy
 import json
 import time
 import random
+import traceback
 from importlib import import_module
 from collections import defaultdict, OrderedDict
 from pip import get_installed_distributions
@@ -140,12 +141,20 @@ def get_command_table(module_name=None):
         except ImportError:
             # Unknown command - we'll load all installed modules below
             logger.info("Loading all installed modules as module with name '%s' not found.", module_name) #pylint: disable=line-too-long
+        except Exception: #pylint: disable=broad-except
+            # Catch exception whilst loading the command module.
+            # We don't log anything here as we will log below when we try and load all.
+            pass
 
     if not loaded:
         command_table = {}
         logger.info('Loading command tables from all installed modules.')
         for mod in INSTALLED_COMMAND_MODULES:
-            command_table.update(_get_command_table(mod))
+            try:
+                command_table.update(_get_command_table(mod))
+            except Exception: #pylint: disable=broad-except
+                logger.error("Error loading command module '%s'", mod)
+                logger.debug(traceback.format_exc())
 
     ordered_commands = OrderedDict(command_table)
     return ordered_commands
