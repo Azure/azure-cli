@@ -26,9 +26,13 @@ from azure.cli.command_modules.vm.mgmt_vmss_create.lib import (VMSSCreationClien
                                                                VMSSCreationClientConfiguration
                                                                as VMSSClientConfig)
 from azure.cli.command_modules.vm.mgmt_vmss_create.lib.operations import VMSSOperations
+from azure.cli.command_modules.vm.mgmt_acs.lib import (ACSCreationClient as ACSClient,
+                                                       ACSCreationClientConfiguration
+                                                       as ACSClientConfig)
+from azure.cli.command_modules.vm.mgmt_acs.lib.operations import ACSOperations
 
 from ._params import (PARAMETER_ALIASES, VM_CREATE_EXTRA_PARAMETERS, VM_CREATE_PARAMETER_ALIASES,
-                      VM_PATCH_EXTRA_PARAMETERS)
+                      VM_PATCH_EXTRA_PARAMETERS, ACS_CREATE_PARAMETER_ALIASES)
 from ._factory import _compute_client_factory
 from ._help import helps # pylint: disable=unused-import
 from .custom import ConvenienceVmCommands
@@ -262,3 +266,13 @@ build_operation('vm access',
                 })
                )
 
+build_operation(
+    'vm container', 'acs', lambda **_: get_mgmt_service_client(ACSClient, ACSClientConfig),
+    [
+        CommandDefinition(
+            ACSOperations.create_or_update,
+            DeploymentOutputLongRunningOperation(L('Creating container service'),
+                                                 L('Container service created')),
+            'create')
+    ],
+    command_table, ACS_CREATE_PARAMETER_ALIASES)
