@@ -9,8 +9,11 @@ from ..commands import COMMON_PARAMETERS, CliCommand
 from azure.cli.commands.argument_types import \
     get_cli_argument, CliArgumentType, _cli_extra_argument_registry as extra_argument_registry
 
+# TODO THIS ENTIRE FILE ONCE CONVERSION IS COMPLETE. MAKE CHANGES IN commands.__init__ ############
+
 EXCLUDED_PARAMS = frozenset(['self', 'raw', 'custom_headers', 'operation_config',
                              'content_version', 'kwargs', 'client'])
+
 
 class CommandDefinition(object): #pylint: disable=too-few-public-methods
 

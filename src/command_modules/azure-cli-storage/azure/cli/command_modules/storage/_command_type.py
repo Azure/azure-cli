@@ -3,9 +3,7 @@ import inspect
 from msrest.exceptions import ClientException
 from msrest.paging import Paged
 
-from azure.cli.commands import CliCommand
-from azure.cli.commands._auto_command import \
-    (EXCLUDED_PARAMS, _extract_args_from_signature)
+from azure.cli.commands import create_command
 from azure.cli.parser import IncorrectUsageError
 from azure.cli._util import CLIError
 
@@ -15,25 +13,7 @@ def cli_storage_data_plane_command(command_table, name, operation, return_type, 
     """ Registers an Azure CLI Storage Data Plane command. These commands always include the
     four parameters which can be used to obtain a storage client: account-name, account-key,
     connection-string, and sas-token. """
-    def call_client(kwargs):
-        client = client_factory(kwargs) if client_factory else None
-        try:
-            result = operation(client, **kwargs)
-            if not return_type:
-                return {}
-            if callable(return_type):
-                return return_type(result)
-            if isinstance(return_type, str):
-                return list(result) if isinstance(result, Paged) else result
-        except TypeError as exception:
-            raise IncorrectUsageError(exception)
-        except ClientException as client_exception:
-            message = getattr(client_exception, 'message', client_exception)
-            raise CLIError(message)
-
-    name = ' '.join(name.split())
-    command = CliCommand(name, call_client)
-    _extract_args_from_signature(command, operation)
+    command = create_command(name, operation, return_type, client_factory)
 
     # add parameters required to create a storage client
     command.add_argument('account_name', *['--account-name'], required=False, default=None)
