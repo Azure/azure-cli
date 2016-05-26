@@ -3,8 +3,8 @@ from azure.cli._help_files import helps
 #pylint: disable=line-too-long
 
 image_long_summary = """                      URN aliases: CentOS, CoreOS, Debian, openSUSE, RHEL, SLES, UbuntuLTS, Win2008SP1, Win2012Datacenter, Win2012R2Datacenter.
-                      Example URN: MicrosoftWindowsServer:WindowsServer:2012-R2-Datacenter:latest
-                      Example URI: http://<storageAccount>.blob.core.windows.net/vhds/osdiskimage.vhd
+                      Example URN: MicrosoftWindowsServer:WindowsServer:2012-R2-Datacenter:latest.
+                      Example URI: http://<storageAccount>.blob.core.windows.net/vhds/osdiskimage.vhd.
 """
 
 helps['vm create'] = """
@@ -14,7 +14,7 @@ helps['vm create'] = """
             parameters: 
                 - name: --image
                   type: string
-                  short-summary: 'OS image (URN alias, URN or URI) [default: Win2012R2Datacenter].'
+                  short-summary: 'OS image (URN alias, URN or URI).'
                   long-summary: |
 {0}
                   populator-commands: 
@@ -67,3 +67,16 @@ helps['vm availability-set create'] = """
             type: command
             long-summary: For more info, see https://blogs.technet.microsoft.com/yungchou/2013/05/14/window-azure-fault-domain-and-upgrade-domain-explained-explained-reprised/
             """
+
+helps['vm extension set'] = """
+            type: command
+            examples:
+                - name: Add a new linux user
+                  text: 
+                    az vm extension set -n VMAccessForLinux --publisher Microsoft.OSTCExtensions --version 1.4 --vm-name myvm --resource-group yugangw --private-config "{\\"username\\":\\"user1\\", \\"ssh_key\\":\\"ssh_rsa ....\\"}"
+            """
+
+helps['container create'] = """
+            type: command
+            long-summary: See https://azure.microsoft.com/en-us/documentation/articles/container-service-intro/ for an intro to Container Service.
+"""

@@ -85,7 +85,7 @@ def get_pip_install_command(module_name, path_to_pip):
     version = '==' + PACKAGE_VERSION if PACKAGE_VERSION else ''
     param_extra_index_url = '--extra-index-url '+PRIVATE_PYPI_URL if PRIVATE_PYPI_URL else ''
     param_trusted_host = '--trusted-host '+PRIVATE_PYPI_HOST if PRIVATE_PYPI_HOST else ''
-    return '{pip} install {module_name}{version} {param_extra_index_url} {param_trusted_host}'.format(
+    return '{pip} install --no-cache-dir {module_name}{version} {param_extra_index_url} {param_trusted_host}'.format(
         pip=path_to_pip,
         module_name=module_name,
         version=version,
@@ -98,7 +98,8 @@ def install_cli(install_dir):
     exec_command(get_pip_install_command('azure-cli', path_to_pip),
                  env=dict(os.environ, AZURE_CLI_DISABLE_POST_INSTALL='1'))
     modules_to_install = ['azure-cli-component', 'azure-cli-profile', 'azure-cli-storage',
-                          'azure-cli-vm', 'azure-cli-network', 'azure-cli-resource']
+                          'azure-cli-vm', 'azure-cli-network', 'azure-cli-resource', 
+                          'azure-cli-role']
     for module_name in modules_to_install:
         exec_command(get_pip_install_command(module_name, path_to_pip))
 
@@ -112,7 +113,7 @@ def create_executable(exec_dir, install_dir, environment_name):
                         envs_dir_name=ENVS_DIR_NAME,
                         bin_dir_name=BIN_DIR_NAME))
     cur_stat = os.stat(exec_filename)
-    os.chmod(exec_filename, cur_stat.st_mode | stat.S_IEXEC)
+    os.chmod(exec_filename, cur_stat.st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
     return exec_filename
 
 def prompt_input(message):
@@ -158,12 +159,12 @@ def main():
     create_virtualenv(tmp_dir, VIRTUALENV_VERSION, env_dir)
     install_cli(env_dir)
     exec_filepath = create_executable(exec_dir, install_dir, environment_name)
+    print("Installation successful.")
     try:
         completion_script_url = sys.argv[1]
         handle_tab_completion(completion_script_url, tmp_dir, install_dir)
-    except IndexError:
-        pass
-    print("Installation successful.")
+    except Exception as e:
+        print("Unable to set up tab completion.", e)
     print("Run the CLI with {} --help".format(exec_filepath))
 
 if __name__ == '__main__':

@@ -40,6 +40,5 @@ class Test_test_script_checks(unittest.TestCase):
         check = {'a': {'c': 5}}
         check_json(source, check)
 
-
 if __name__ == '__main__':
     unittest.main()

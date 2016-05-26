@@ -1,4 +1,5 @@
-from azure.mgmt.compute.operations import (AvailabilitySetsOperations,
+﻿from azure.mgmt.compute.operations import (
+    AvailabilitySetsOperations,
                                            VirtualMachineExtensionImagesOperations,
                                            VirtualMachineExtensionsOperations,
                                            VirtualMachineImagesOperations,
@@ -7,7 +8,7 @@ from azure.mgmt.compute.operations import (AvailabilitySetsOperations,
                                            VirtualMachinesOperations,
                                            VirtualMachineScaleSetsOperations,
                                            VirtualMachineScaleSetVMsOperations)
-from azure.cli.commands._auto_command import build_operation, CommandDefinition, cli_command
+from azure.cli.commands._auto_command import build_operation, CommandDefinition
 from azure.cli.commands._command_creation import get_mgmt_service_client
 from azure.cli.commands import CommandTable, LongRunningOperation, patch_aliases
 from azure.cli._locale import L
@@ -24,10 +25,14 @@ from azure.cli.command_modules.vm.mgmt_vmss_create.lib import (VMSSCreationClien
                                                                VMSSCreationClientConfiguration
                                                                as VMSSClientConfig)
 from azure.cli.command_modules.vm.mgmt_vmss_create.lib.operations import VMSSOperations
+from azure.cli.command_modules.vm.mgmt_acs.lib import (ACSCreationClient as ACSClient,
+                                                       ACSCreationClientConfiguration
+                                                       as ACSClientConfig)
+from azure.cli.command_modules.vm.mgmt_acs.lib.operations import ACSOperations
 
 from azure.cli.command_modules.vm._actions import VMImageFieldAction
 from ._params import (PARAMETER_ALIASES, VM_CREATE_EXTRA_PARAMETERS, VM_CREATE_PARAMETER_ALIASES,
-                      get_urn_aliases_completion_list, get_location_completion_list)
+                      VM_PATCH_EXTRA_PARAMETERS)
 from ._factory import _compute_client_factory
 from ._help import helps # pylint: disable=unused-import
 from .custom import ConvenienceVmCommands
@@ -47,12 +52,52 @@ cli_command('vm machine-extension-image show', factory, VirtualMachineExtensionI
 cli_command('vm machine-extension-image list-types', factory, VirtualMachineExtensionImagesOperations.list_types, 'VirtualMachineExtensionImage', command_table)
 cli_command('vm machine-extension-image list-versions', factory, VirtualMachineExtensionImagesOperations.list_versions, 'VirtualMachineExtensionImage', command_table)
 
+build_operation(
+    'vm boot-diagnostics', None, ConvenienceVmCommands,
+    [
+        CommandDefinition(ConvenienceVmCommands.disable_boot_diagnostics, None, 'disable'),
+        CommandDefinition(ConvenienceVmCommands.enable_boot_diagnostics, None, 'enable'),
+        CommandDefinition(ConvenienceVmCommands.get_boot_log, None)
+    ],
+    command_table, patch_aliases(PARAMETER_ALIASES, {
+        'vm_name': {'name': '--name -n'}
+        }))
+
+build_operation(
+    'vm extension', 'virtual_machine_extensions', _compute_client_factory,
+    [
+        CommandDefinition(VirtualMachineExtensionsOperations.delete, LongRunningOperation(L('Deleting VM extension'), L('VM extension deleted'))),
+        CommandDefinition(VirtualMachineExtensionsOperations.get, 'VirtualMachineExtension', command_alias='show'),
+    ],
+    command_table, patch_aliases(PARAMETER_ALIASES, {
+        'vm_extension_name': {'name': '--name -n'}
+        }))
 factory = ConvenienceVmCommands # TODO: Add good support for patch!
 cli_command('vm disk attach-new', factory, ConvenienceVmCommands.attach_new_disk, 'object', command_table)
 cli_command('vm disk attach-existing', factory, ConvenienceVmCommands.attach_existing_disk, 'object', command_table)
 cli_command('vm disk attach-detach', factory, ConvenienceVmCommands.detach_disk, 'object', command_table)
 cli_command('vm disk list', factory, ConvenienceVmCommands.list_disks, '[VMDisk]', command_table)
 
+build_operation(
+    'vm extension', None, ConvenienceVmCommands,
+    [
+        CommandDefinition(ConvenienceVmCommands.set_extension, LongRunningOperation(L('Setting extension'), L('Extension was set')), command_alias='set'),
+        CommandDefinition(ConvenienceVmCommands.list_extensions, '[Extensions]', command_alias='list')
+    ],
+    command_table, patch_aliases(PARAMETER_ALIASES, {
+        'vm_extension_name': {'name': '--name -n'},
+        'auto_upgrade_minor_version': {'action': 'store_true'}
+        }))
+
+build_operation(
+    'vm image', 'virtual_machine_images', _compute_client_factory,
+    [
+        CommandDefinition(VirtualMachineImagesOperations.get, 'VirtualMachineImage', command_alias='show'),
+        CommandDefinition(VirtualMachineImagesOperations.list_offers, '[VirtualMachineImageResource]'),
+        CommandDefinition(VirtualMachineImagesOperations.list_publishers, '[VirtualMachineImageResource]'),
+        CommandDefinition(VirtualMachineImagesOperations.list_skus, '[VirtualMachineImageResource]'),
+    ],
+    command_table, PARAMETER_ALIASES)
 factory = lambda **kwargs: _compute_client_factory(**kwargs).virtual_machine_extensions
 cli_command('vm extension delete', factory, VirtualMachineExtensionsOperations.delete, None, command_table)
 cli_command('vm extension show', factory, VirtualMachineExtensionsOperations.get, 'VirtualMachineExtension', command_table)
@@ -126,12 +171,40 @@ cli_command('vm scaleset-vm restart', factory, VirtualMachineScaleSetVMsOperatio
 cli_command('vm scaleset-vm start', factory, VirtualMachineScaleSetVMsOperations.start, LongRunningOperation(), command_table)
 
 
+build_operation(
+    'vm extension image', None, ConvenienceVmCommands,
+    [
+        CommandDefinition(ConvenienceVmCommands.list_vm_extension_images, '[VirtualMachineExtensionImage]', 'list')
+    ],
+    command_table, patch_aliases(PARAMETER_ALIASES, {
+        'image_location': {'name': '--location -l'}
+        }))
+
+build_operation("vm availability-set",
+                'avail_set',
+                lambda **_: get_mgmt_service_client(AvailSetClient, AvailSetClientConfig),
+                [
+                    CommandDefinition(AvailSetOperations.create_or_update,
+                                      LongRunningOperation(L('Creating availability set'), L('Availability set created')),
+                                      'create')
+                ],
+                command_table)
 factory = lambda **_: get_mgmt_service_client(AvailSetClient, AvailSetClientConfig).avail_set
 cli_command('vm availability-set create', factory, AvailSetOperations.create_or_update, LongRunningOperation(), command_table)
 
 # Cool custom commands
 cli_command('vm image list', ConvenienceVmCommands, ConvenienceVmCommands.list_vm_images, 'object', command_table)
 
+build_operation(
+    'vm container', 'acs', lambda **_: get_mgmt_service_client(ACSClient, ACSClientConfig),
+    [
+        CommandDefinition(
+            ACSOperations.create_or_update,
+            DeploymentOutputLongRunningOperation(L('Creating container service'),
+                                                 L('Container service created')),
+            'create')
+    ],
+    command_table, ACS_CREATE_PARAMETER_ALIASES)
 cli_command('vm access set-linux-user', ConvenienceVmCommands, ConvenienceVmCommands.set_linux_user, LongRunningOperation(), command_table)
 cli_command('vm access delete-linux-user', ConvenienceVmCommands, ConvenienceVmCommands.delete_linux_user, LongRunningOperation(), command_table)
 cli_command('vm access set-windows-user-password', ConvenienceVmCommands, ConvenienceVmCommands.set_windows_user_password, LongRunningOperation(), command_table)

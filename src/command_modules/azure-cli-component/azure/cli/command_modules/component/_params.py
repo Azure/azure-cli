@@ -5,7 +5,7 @@ from azure.cli._locale import L
 PARAMETER_ALIASES = {
     'component_name': {
         'name': '--name -n',
-        'help': L('Name of component'),
+        'help': L('Name of component')
     },
     'force': {
         'name': '--force -f',

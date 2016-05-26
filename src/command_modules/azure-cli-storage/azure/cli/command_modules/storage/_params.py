@@ -7,13 +7,15 @@ from azure.cli.commands.argument_types import (
 from azure.cli.commands._command_creation import get_mgmt_service_client, get_data_service_client
 from azure.cli.commands._validators import validate_key_value_pairs, validate_tags
 from azure.cli._locale import L
+from azure.cli._util import CLIError
 
 from azure.mgmt.storage import StorageManagementClient, StorageManagementClientConfiguration
 from azure.mgmt.storage.models import AccountType
 
+from azure.storage import CloudStorageAccount
 from azure.storage.blob import PublicAccess, BlockBlobService, PageBlobService, AppendBlobService
 from azure.storage.file import FileService
-from azure.storage import CloudStorageAccount
+from azure.storage._error import _ERROR_STORAGE_MISSING_INFO
 
 from ._validators import (
     validate_container_permission, validate_datetime, validate_datetime_as_string, validate_id,
@@ -21,6 +23,75 @@ from ._validators import (
     validate_quota)
 
 ## PARAMETER CHOICE LISTS
+
+NO_CREDENTIALS_ERROR_MESSAGE = """
+No credentials specifed to access storage service. Please provide any of the following:
+    (1) account name and key (--account-name and --account-key options or
+        set AZURE_STORAGE_ACCOUNT and AZURE_STORAGE_KEY environment variables)
+    (2) connection string (--connection-string option or 
+        set AZURE_STORAGE_CONNECTION_STRING environment variable)
+    (3) account name and SAS token (--sas-token option used with either the --account-name 
+        option or AZURE_STORAGE_ACCOUNT environment variable)
+"""
+
+def storage_client_factory(**_):
+    return get_mgmt_service_client(StorageManagementClient, StorageManagementClientConfiguration)
+
+def _get_data_service_client(service, name=None, key=None, connection_string=None, sas_token=None):
+    try:
+        return get_data_service_client(service, name, key, connection_string, sas_token)
+    except ValueError as val_exception:
+        message = str(val_exception)
+        if message == _ERROR_STORAGE_MISSING_INFO:
+            message = NO_CREDENTIALS_ERROR_MESSAGE
+        raise CLIError(message)
+
+def file_data_service_factory(**kwargs):
+    return _get_data_service_client(
+        FileService,
+        kwargs.pop('account_name', None),
+        kwargs.pop('account_key', None),
+        connection_string=kwargs.pop('connection_string', None),
+        sas_token=kwargs.pop('sas_token', None))
+
+def blob_data_service_factory(**kwargs):
+    blob_type = kwargs.get('blob_type')
+    blob_service = blob_types.get(blob_type, BlockBlobService)
+    return _get_data_service_client(
+        blob_service,
+        kwargs.pop('account_name', None),
+        kwargs.pop('account_key', None),
+        connection_string=kwargs.pop('connection_string', None),
+        sas_token=kwargs.pop('sas_token', None))
+
+def cloud_storage_account_service_factory(**kwargs):
+    account_name = kwargs.pop('account_name', None)
+    account_key = kwargs.pop('account_key', None)
+    sas_token = kwargs.pop('sas_token', None)
+    connection_string = kwargs.pop('connection_string', None)
+    if connection_string:
+        # CloudStorageAccount doesn't accept connection string directly, so we must parse
+        # out the account name and key manually
+        conn_dict = validate_key_value_pairs(connection_string)
+        account_name = conn_dict['AccountName']
+        account_key = conn_dict['AccountKey']
+    return CloudStorageAccount(account_name, account_key, sas_token)
+
+# HELPER METHODS
+
+def get_account_name(string):
+    return string if string != 'query' else environ.get('AZURE_STORAGE_ACCOUNT')
+
+def get_account_key(string):
+    return string if string != 'query' else environ.get('AZURE_STORAGE_KEY')
+
+def get_connection_string(string):
+    return string if string != 'query' else environ.get('AZURE_STORAGE_CONNECTION_STRING')
+
+def get_sas_token(string):
+    return string if string != 'query' else environ.get('AZURE_SAS_TOKEN')
+
+# PARAMETER CHOICE LISTS
 
 storage_account_key_options = {'primary': 'key1', 'secondary': 'key2'}
 

@@ -9,8 +9,8 @@ This package has [not] been tested [much] with Python 2.7, 3.4 and 3.5.
 Installation
 ============
 
-cURL Installation
------------------
+cURL Installation (nightly build)
+---------------------------------
 
 To install via cURL on Linux, Unix and OS X, type:
 
@@ -18,9 +18,90 @@ To install via cURL on Linux, Unix and OS X, type:
 
     curl http://azure-cli-nightly.westus.cloudapp.azure.com/install | bash
 
-If you chose to enable tab completion, type `exec -l $SHELL` to restart your shell.
+If you chose to enable tab completion, type ``exec -l $SHELL`` to restart your shell.
 
 Note: This will install the latest nightly builds.
+
+Installation with pip (nightly build)
+-------------------------------------
+
+**1 Prerequisites that should be installed**
+
+    - Python
+    - pip
+    - virtualenv / venv
+
+On Windows, you can install Python 3.5.1 from the `Python download site <https://www.python.org/downloads/release/python-351/>`__.
+When installing, enable the 'add Python to PATH' option. Also, choose to include 'pip' in the installation.
+After Python has been installed, to install virtualenv, run ``pip install virtualenv``.
+
+Also, it is recommended to upgrade pip to the latest version ``pip install --upgrade pip``.
+
+**2 Create and activate your virtual environment**
+
+For example, ``virtualenv env`` to create the environment.
+
+Activate the environment.
+
+(Unix)
+``source env/bin/activate``
+
+(Windows)
+``env\Scripts\activate``
+
+**3 Install the CLI**
+
+**(Unix)**
+
+Set the environment variable to point to the version you wish to install.
+
+e.g. ``export AZURE_CLI_NIGHTLY_VERSION=2016.05.19.nightly``
+
+.. code:: shell
+
+    export AZURE_CLI_DISABLE_POST_INSTALL=1
+    export AZURE_CLI_PRIVATE_PYPI_URL=http://40.112.211.51:8080
+    export AZURE_CLI_PRIVATE_PYPI_HOST=40.112.211.51
+    # Install the CLI and all default components
+    pip install azure-cli==$AZURE_CLI_NIGHTLY_VERSION --extra-index-url $AZURE_CLI_PRIVATE_PYPI_URL --trusted-host $AZURE_CLI_PRIVATE_PYPI_HOST
+    pip install azure-cli-component==$AZURE_CLI_NIGHTLY_VERSION --extra-index-url $AZURE_CLI_PRIVATE_PYPI_URL --trusted-host $AZURE_CLI_PRIVATE_PYPI_HOST
+    pip install azure-cli-profile==$AZURE_CLI_NIGHTLY_VERSION --extra-index-url $AZURE_CLI_PRIVATE_PYPI_URL --trusted-host $AZURE_CLI_PRIVATE_PYPI_HOST
+    pip install azure-cli-storage==$AZURE_CLI_NIGHTLY_VERSION --extra-index-url $AZURE_CLI_PRIVATE_PYPI_URL --trusted-host $AZURE_CLI_PRIVATE_PYPI_HOST
+    pip install azure-cli-vm==$AZURE_CLI_NIGHTLY_VERSION --extra-index-url $AZURE_CLI_PRIVATE_PYPI_URL --trusted-host $AZURE_CLI_PRIVATE_PYPI_HOST
+    pip install azure-cli-network==$AZURE_CLI_NIGHTLY_VERSION --extra-index-url $AZURE_CLI_PRIVATE_PYPI_URL --trusted-host $AZURE_CLI_PRIVATE_PYPI_HOST
+    pip install azure-cli-resource==$AZURE_CLI_NIGHTLY_VERSION --extra-index-url $AZURE_CLI_PRIVATE_PYPI_URL --trusted-host $AZURE_CLI_PRIVATE_PYPI_HOST
+
+    # Enable tab completion if you wish.
+    eval "$(register-python-argcomplete az)"
+
+
+**(Windows)**
+
+Set the environment variable to point to the version you wish to install.
+
+e.g. ``set AZURE_CLI_NIGHTLY_VERSION=2016.05.19.nightly``
+
+.. code:: shell
+
+    set AZURE_CLI_DISABLE_POST_INSTALL=1
+    set AZURE_CLI_PRIVATE_PYPI_URL=http://40.112.211.51:8080
+    set AZURE_CLI_PRIVATE_PYPI_HOST=40.112.211.51
+    pip install azure-cli==%AZURE_CLI_NIGHTLY_VERSION% --extra-index-url %AZURE_CLI_PRIVATE_PYPI_URL% --trusted-host %AZURE_CLI_PRIVATE_PYPI_HOST%
+    pip install azure-cli-component==%AZURE_CLI_NIGHTLY_VERSION% --extra-index-url %AZURE_CLI_PRIVATE_PYPI_URL% --trusted-host %AZURE_CLI_PRIVATE_PYPI_HOST%
+    pip install azure-cli-profile==%AZURE_CLI_NIGHTLY_VERSION% --extra-index-url %AZURE_CLI_PRIVATE_PYPI_URL% --trusted-host %AZURE_CLI_PRIVATE_PYPI_HOST%
+    pip install azure-cli-storage==%AZURE_CLI_NIGHTLY_VERSION% --extra-index-url %AZURE_CLI_PRIVATE_PYPI_URL% --trusted-host %AZURE_CLI_PRIVATE_PYPI_HOST%
+    pip install azure-cli-vm==%AZURE_CLI_NIGHTLY_VERSION% --extra-index-url %AZURE_CLI_PRIVATE_PYPI_URL% --trusted-host %AZURE_CLI_PRIVATE_PYPI_HOST%
+    pip install azure-cli-network==%AZURE_CLI_NIGHTLY_VERSION% --extra-index-url %AZURE_CLI_PRIVATE_PYPI_URL% --trusted-host %AZURE_CLI_PRIVATE_PYPI_HOST%
+    pip install azure-cli-resource==%AZURE_CLI_NIGHTLY_VERSION% --extra-index-url %AZURE_CLI_PRIVATE_PYPI_URL% --trusted-host %AZURE_CLI_PRIVATE_PYPI_HOST%
+
+**4 Run the CLI**
+
+.. code:: shell
+
+   az
+
+Installation Troubleshooting
+----------------------------
 
 **Errors on install with cffi or cryptography:**
 
