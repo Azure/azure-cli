@@ -85,7 +85,7 @@ def get_pip_install_command(module_name, path_to_pip):
     version = '==' + PACKAGE_VERSION if PACKAGE_VERSION else ''
     param_extra_index_url = '--extra-index-url '+PRIVATE_PYPI_URL if PRIVATE_PYPI_URL else ''
     param_trusted_host = '--trusted-host '+PRIVATE_PYPI_HOST if PRIVATE_PYPI_HOST else ''
-    return '{pip} install {module_name}{version} {param_extra_index_url} {param_trusted_host}'.format(
+    return '{pip} install --no-cache-dir {module_name}{version} {param_extra_index_url} {param_trusted_host}'.format(
         pip=path_to_pip,
         module_name=module_name,
         version=version,
