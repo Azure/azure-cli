@@ -672,6 +672,26 @@ class VMExtensionInstallTest(CommandTestScript):
         finally:
             os.remove(config_file)
 
+class VMDiagnosticsTest(CommandTestScript):
+
+    def __init__(self):
+        super(VMDiagnosticsTest, self).__init__(None, self.test_body, None)
+
+    def test_body(self):
+        #pylint: disable=line-too-long
+        vm_name = 'yugangwtest-1'
+        resource_group = 'yugangwtest'
+        storage_account = 'vhdstorage4jjdhrm754a5g'
+        extension_name = 'LinuxDiagnostic'
+        set_cmd = ('vm diagnostics set --vm-name {} --resource-group {} --storage-account {}'
+                   .format(vm_name, resource_group, storage_account))
+        self.run(set_cmd)
+        self.test('vm extension show --resource-group {} --vm-name {} --name {}'.format(
+            resource_group, vm_name, extension_name), [
+                JMESPathComparator('type(@)', 'object'),
+                JMESPathComparator('name', extension_name),
+                JMESPathComparator('resourceGroup', resource_group)])
+
 
 ENV_VAR = {}
 
@@ -771,5 +791,9 @@ TEST_DEF = [
     {
         'test_name': 'vm_extension_install',
         'command': VMExtensionInstallTest()
+    },
+    {
+        'test_name': 'vm_diagnostics_install',
+        'command': VMDiagnosticsTest()
     }
 ]

@@ -11,7 +11,7 @@ from azure.mgmt.compute.models.compute_management_client_enums import DiskCreate
 from azure.cli.commands import CommandTable, LongRunningOperation
 from azure.cli.commands._command_creation import get_mgmt_service_client, get_data_service_client
 from azure.cli._util import CLIError
-from ._vm_utils import read_content_if_is_file, load_json
+from ._vm_utils import read_content_if_is_file, load_json, get_default_linux_diag_config
 
 from ._actions import (load_images_from_aliases_doc,
                        load_extension_images_thru_services,
@@ -69,6 +69,16 @@ def _get_access_extension_upgrade_info(extensions, is_linux=True):
             version = extension.type_handler_version
 
     return publisher, name, version, auto_upgrade
+
+def _get_storage_management_client():
+    from azure.mgmt.storage import StorageManagementClient, StorageManagementClientConfiguration
+    return get_mgmt_service_client(StorageManagementClient,
+                                   StorageManagementClientConfiguration)
+
+def _trim_away_build_number(version):
+    #workaround a known issue: the version must only contain "major.minor", even though
+    #"extension image list" gives more detail
+    return '.'.join(version.split('.')[0:2])
 
 class ConvenienceVmCommands(object): # pylint: disable=too-few-public-methods
 
@@ -350,7 +360,6 @@ class ConvenienceVmCommands(object): # pylint: disable=too-few-public-methods
         import sys
         import io
 
-        from azure.mgmt.storage import StorageManagementClient, StorageManagementClientConfiguration
         from azure.storage.blob import BlockBlobService
 
         client = _compute_client_factory()
@@ -363,8 +372,7 @@ class ConvenienceVmCommands(object): # pylint: disable=too-few-public-methods
         blob_uri = virtual_machine.instance_view.boot_diagnostics.serial_console_log_blob_uri # pylint: disable=no-member
 
         # Find storage account for diagnostics
-        storage_mgmt_client = get_mgmt_service_client(StorageManagementClient,
-                                                      StorageManagementClientConfiguration)
+        storage_mgmt_client = _get_storage_management_client()
         if not blob_uri:
             raise CLIError('No console log available')
         try:
@@ -435,9 +443,7 @@ class ConvenienceVmCommands(object): # pylint: disable=too-few-public-methods
         protected_settings = load_json(private_config) if not private_config else {}
         settings = load_json(public_config) if not public_config else None
 
-        #workaround a known issue: the version must only contain "major.minor", even though
-        #"extension image list" gives more detail
-        version = '.'.join(version.split('.')[0:2])
+        version = _trim_away_build_number(version)
 
         ext = VirtualMachineExtension(vm.location,#pylint: disable=no-member
                                       publisher=publisher,
@@ -451,3 +457,66 @@ class ConvenienceVmCommands(object): # pylint: disable=too-few-public-methods
                                                                   vm_name,
                                                                   vm_extension_name,
                                                                   ext)
+
+    def set_diagnostics_extension(self,
+                                  resource_group_name,
+                                  vm_name,
+                                  storage_account,
+                                  public_config=None,
+                                  version=None):
+        '''add/update diagnostics extensions'
+
+        :param vm_name: the name of virtual machine
+        :param storage_account: the storage account to upload diagnostics log
+        :param public_config: the config file which defines data to be collected.
+        Default will be provided if missing
+        :param version: the version of LinuxDiagnostic extension
+        '''
+        vm = _vm_get(resource_group_name, vm_name)
+        client = _compute_client_factory()
+
+        from distutils.version import LooseVersion ##pylint: disable=no-name-in-module,import-error
+        from azure.mgmt.compute.models import VirtualMachineExtension
+        #pylint: disable=no-member
+        if public_config:
+            public_config = load_json(public_config)
+        else:
+            public_config = get_default_linux_diag_config(vm.id)
+
+        storage_mgmt_client = _get_storage_management_client()
+        keys = storage_mgmt_client.storage_accounts.list_keys(resource_group_name,
+                                                              storage_account)
+
+        private_config = {
+            'storageAccountName': storage_account,
+            'storageAccountKey': keys.key1
+            }
+
+        publisher = 'Microsoft.OSTCExtensions'
+        vm_extension_name = 'LinuxDiagnostic'
+        if version is None:
+            result = load_extension_images_thru_services(publisher,
+                                                         vm_extension_name, None, vm.location)
+            if not result:
+                raise CLIError('Can\'t find the image {} from publisher {}.'.format(
+                    vm_extension_name, publisher))
+
+            #look for the highest
+            result.sort(key=lambda x: LooseVersion(x['version']), reverse=True)
+            version = _trim_away_build_number(result[0]['version'])
+
+        ext = VirtualMachineExtension(vm.location,
+                                      publisher=publisher,
+                                      virtual_machine_extension_type=vm_extension_name,
+                                      protected_settings=private_config,
+                                      type_handler_version=version,
+                                      settings=public_config,
+                                      auto_upgrade_minor_version=False)
+
+        return client.virtual_machine_extensions.create_or_update(resource_group_name,
+                                                                  vm_name,
+                                                                  vm_extension_name,
+                                                                  ext)
+
+    def show_default_diagnostics_configuration(self):
+        return get_default_linux_diag_config()

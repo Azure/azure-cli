@@ -83,6 +83,14 @@ build_operation(
         }))
 
 build_operation(
+    'vm diagnostics', None, ConvenienceVmCommands,
+    [
+        CommandDefinition(ConvenienceVmCommands.set_diagnostics_extension, LongRunningOperation(L('Setting extension'), L('Extension was set')), command_alias='set'),
+        CommandDefinition(ConvenienceVmCommands.show_default_diagnostics_configuration, 'Object', command_alias='get-default-config'),
+    ],
+    command_table, PARAMETER_ALIASES)
+
+build_operation(
     'vm extension', 'virtual_machine_extensions', _compute_client_factory,
     [
         CommandDefinition(VirtualMachineExtensionsOperations.delete, LongRunningOperation(L('Deleting VM extension'), L('VM extension deleted'))),
