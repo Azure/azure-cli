@@ -39,14 +39,15 @@ class AzCliCommandParser(argparse.ArgumentParser):
                                                   parents=self.parents, conflict_handler='resolve',
                                                   help_file=metadata.help_file)
             argument_validators = []
-            for name, arg in metadata.arguments.items():
-                if arg.validator:                
+            for _, arg in metadata.arguments.items():
+                if arg.validator:
                     argument_validators.append(arg.validator)
                 param = command_parser.add_argument(
                     *arg.options_list, **arg.options)
                 param.completer = arg.completer
 
-            command_parser.set_defaults(func=metadata.handler, command=command_name, _validators=argument_validators)
+            command_parser.set_defaults(func=metadata.handler, command=command_name,
+                                        _validators=argument_validators)
 
     def _get_subparser(self, path):
         """For each part of the path, walk down the tree of

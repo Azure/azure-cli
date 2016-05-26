@@ -1,95 +1,17 @@
-from os import environ
-
-from azure.cli.commands import COMMON_PARAMETERS as GLOBAL_COMMON_PARAMETERS, patch_aliases
+# pylint: disable=line-too-long
 from azure.cli.commands.argument_types import (
-    register_cli_argument, register_additional_cli_argument, CliArgumentType
+    register_cli_argument, CliArgumentType
 )
-from azure.cli.commands._command_creation import get_mgmt_service_client, get_data_service_client
 from azure.cli.commands._validators import validate_key_value_pairs, validate_tags
-from azure.cli._locale import L
-from azure.cli._util import CLIError
 
-from azure.mgmt.storage import StorageManagementClient, StorageManagementClientConfiguration
 from azure.mgmt.storage.models import AccountType
 
-from azure.storage import CloudStorageAccount
 from azure.storage.blob import PublicAccess, BlockBlobService, PageBlobService, AppendBlobService
-from azure.storage.file import FileService
-from azure.storage._error import _ERROR_STORAGE_MISSING_INFO
 
 from ._validators import (
     validate_container_permission, validate_datetime, validate_datetime_as_string, validate_id,
     validate_ip_range, validate_resource_types, validate_services, validate_lease_duration,
     validate_quota)
-
-## PARAMETER CHOICE LISTS
-
-NO_CREDENTIALS_ERROR_MESSAGE = """
-No credentials specifed to access storage service. Please provide any of the following:
-    (1) account name and key (--account-name and --account-key options or
-        set AZURE_STORAGE_ACCOUNT and AZURE_STORAGE_KEY environment variables)
-    (2) connection string (--connection-string option or 
-        set AZURE_STORAGE_CONNECTION_STRING environment variable)
-    (3) account name and SAS token (--sas-token option used with either the --account-name 
-        option or AZURE_STORAGE_ACCOUNT environment variable)
-"""
-
-def storage_client_factory(**_):
-    return get_mgmt_service_client(StorageManagementClient, StorageManagementClientConfiguration)
-
-def _get_data_service_client(service, name=None, key=None, connection_string=None, sas_token=None):
-    try:
-        return get_data_service_client(service, name, key, connection_string, sas_token)
-    except ValueError as val_exception:
-        message = str(val_exception)
-        if message == _ERROR_STORAGE_MISSING_INFO:
-            message = NO_CREDENTIALS_ERROR_MESSAGE
-        raise CLIError(message)
-
-def file_data_service_factory(**kwargs):
-    return _get_data_service_client(
-        FileService,
-        kwargs.pop('account_name', None),
-        kwargs.pop('account_key', None),
-        connection_string=kwargs.pop('connection_string', None),
-        sas_token=kwargs.pop('sas_token', None))
-
-def blob_data_service_factory(**kwargs):
-    blob_type = kwargs.get('blob_type')
-    blob_service = blob_types.get(blob_type, BlockBlobService)
-    return _get_data_service_client(
-        blob_service,
-        kwargs.pop('account_name', None),
-        kwargs.pop('account_key', None),
-        connection_string=kwargs.pop('connection_string', None),
-        sas_token=kwargs.pop('sas_token', None))
-
-def cloud_storage_account_service_factory(**kwargs):
-    account_name = kwargs.pop('account_name', None)
-    account_key = kwargs.pop('account_key', None)
-    sas_token = kwargs.pop('sas_token', None)
-    connection_string = kwargs.pop('connection_string', None)
-    if connection_string:
-        # CloudStorageAccount doesn't accept connection string directly, so we must parse
-        # out the account name and key manually
-        conn_dict = validate_key_value_pairs(connection_string)
-        account_name = conn_dict['AccountName']
-        account_key = conn_dict['AccountKey']
-    return CloudStorageAccount(account_name, account_key, sas_token)
-
-# HELPER METHODS
-
-def get_account_name(string):
-    return string if string != 'query' else environ.get('AZURE_STORAGE_ACCOUNT')
-
-def get_account_key(string):
-    return string if string != 'query' else environ.get('AZURE_STORAGE_KEY')
-
-def get_connection_string(string):
-    return string if string != 'query' else environ.get('AZURE_STORAGE_CONNECTION_STRING')
-
-def get_sas_token(string):
-    return string if string != 'query' else environ.get('AZURE_SAS_TOKEN')
 
 # PARAMETER CHOICE LISTS
 
@@ -114,12 +36,8 @@ lease_duration_values_string = 'Between {} and {} seconds. ({} for infinite)'.fo
 blob_types = {'block': BlockBlobService, 'page': PageBlobService, 'append': AppendBlobService}
 
 # PARAMETER TYPE DEFINITIONS
-
-name_arg_type = CliArgumentType(options_list=('--name', '-n'), metavar='NAME')
-
 account_name_type = CliArgumentType(
-    options_list=('--account-name', '-n'),
-    help='the storage account name',
+    help='the storage account name'
 )
 
 account_type_type = CliArgumentType(
@@ -141,8 +59,12 @@ container_name_type = CliArgumentType(
     options_list=('--container-name', '-c')
 )
 
+copy_source_type = CliArgumentType(
+    options_list=('--source-uri', '-u')
+)
+
 directory_type = CliArgumentType(
-    options_list=('--directory-name','-d')
+    options_list=('--directory-name', '-d')
 )
 
 expiry_type = CliArgumentType(
@@ -151,7 +73,7 @@ expiry_type = CliArgumentType(
 )
 
 file_name_type = CliArgumentType(
-    options_list=('--file-name','-f')
+    options_list=('--file-name', '-f')
 )
 
 
@@ -203,6 +125,11 @@ metadata_type = CliArgumentType(
     help='metadata in semicolon separated key=value pairs'
 )
 
+name_arg_type = CliArgumentType(
+    options_list=('--name', '-n'),
+    metavar='NAME'
+)
+
 permission_type = CliArgumentType(
     metavar='PERMISSIONS',
     help='permissions granted: (r)ead (w)rite (d)elete (l)ist. Can be combined',
@@ -248,7 +175,9 @@ start_type = CliArgumentType(
 
 tags_type = CliArgumentType(
     type=validate_tags,
-    help='multiple semicolon separated tags in \'key[=value]\' format'
+    help='multiple semicolon separated tags in \'key[=value]\' format',
+    nargs='?',
+    default=''
 )
 
 timeout_type = CliArgumentType(
@@ -266,9 +195,9 @@ use_http_type = CliArgumentType(
 
 register_cli_argument('storage', 'metadata', metadata_type)
 register_cli_argument('storage', 'container_name', container_name_type)
+register_cli_argument('storage', 'copy_source', copy_source_type)
 register_cli_argument('storage', 'directory_name', directory_type)
 register_cli_argument('storage', 'share_name', share_name_type)
-register_cli_argument('storage', 'account_name', account_name_type)
 register_cli_argument('storage', 'expiry', expiry_type)
 register_cli_argument('storage', 'if_modified_since', if_modified_since_type)
 register_cli_argument('storage', 'if_unmodified_since', if_unmodified_since_type)
@@ -294,9 +223,23 @@ register_cli_argument('storage container create', 'public_access', public_access
 
 register_cli_argument('storage blob upload', 'blob_type', blob_type_type, options_list=('--type', '-t'))
 register_cli_argument('storage blob', 'blob_name', blob_name_type)
-
+register_cli_argument('storage blob copy', 'blob_name', blob_name_type,
+                      options_list=('--destination-name', '-n'),
+                      help='Name of the destination blob. If the exists, it will be overwritten.'
+                     )
+register_cli_argument('storage blob copy', 'container_name', container_name_type, options_list=('--destination-container', '-c'))
 register_cli_argument('storage share', 'quota', quota_type)
-
-register_cli_argument('storage file', 'file_name', file_name_type)
+register_cli_argument('storage share', 'share_name', share_name_type, options_list=('--name', '-n'))
+register_cli_argument('storage file', 'file_name', file_name_type, options_list=('--name', '-n'))
 register_cli_argument('storage file', 'directory_name', directory_type, required=False)
 register_cli_argument('storage file metadata', 'directory_name', directory_type, required=False)
+register_cli_argument('storage file copy', 'directory_name', directory_type,
+                      options_list=('--destination-directory', '-d'),
+                      required=False,
+                      default=''
+                     )
+register_cli_argument('storage file copy', 'file_name', file_name_type, options_list=('--destination-name', '-n'))
+register_cli_argument('storage file copy', 'share_name', share_name_type,
+                      options_list=('--destination-share', '-s'),
+                      help='Name of the destination share. The share must exist.'
+                     )

@@ -1,10 +1,8 @@
 from __future__ import print_function
-import argparse
-import copy
 import inspect
+import json
 import re
 import time
-import random
 import traceback
 from importlib import import_module
 from collections import defaultdict, OrderedDict
@@ -15,8 +13,6 @@ from msrest.paging import Paged
 from azure.cli.parser import IncorrectUsageError
 from azure.cli._util import CLIError
 import azure.cli._logging as _logging
-from azure.cli._locale import L
-from azure.cli.commands._validators import validate_tags, validate_tag
 import azure.cli.commands.argument_types
 
 logger = _logging.get_az_logger(__name__)
@@ -30,56 +26,6 @@ logger.info('Installed command modules %s', INSTALLED_COMMAND_MODULES)
 
 EXCLUDED_PARAMS = frozenset(['self', 'raw', 'custom_headers', 'operation_config',
                              'content_version', 'kwargs', 'client'])
-
-COMMON_PARAMETERS = {
-    'deployment_name': {
-        'name': '--deployment-name',
-        'metavar': 'DEPLOYMENTNAME',
-        'help': argparse.SUPPRESS,
-        'default': 'azurecli' + str(time.time()) + str(random.randint(0, 100000)),
-        'required': False
-    },
-    'location': {
-        'name': '--location -l',
-        'metavar': 'LOCATION',
-        'help': 'Location',
-    },
-    'resource_group_name': {
-        'name': '--resource-group -g',
-        'metavar': 'RESOURCEGROUP',
-        'help': 'The name of the resource group',
-    },
-    'tag' : {
-        'name': '--tag',
-        'metavar': 'TAG',
-        'help': L('a single tag in \'key[=value]\' format'),
-        'type': validate_tag,
-        'nargs': '?',
-        'const': {}
-    },
-    'tags' : {
-        'name': '--tags',
-        'metavar': 'TAGS',
-        'help': L('multiple semicolon separated tags in \'key[=value]\' format'),
-        'type': validate_tags,
-        'nargs': '?',
-        'const': {}
-    },
-}
-
-def extend_parameter(parameter_metadata, **kwargs):
-    extended_param = copy.deepcopy(parameter_metadata)
-    extended_param.update(kwargs)
-    return extended_param
-
-def patch_aliases(aliases, patch):
-    patched_aliases = copy.deepcopy(aliases)
-    for key in patch:
-        if key in patched_aliases:
-            patched_aliases[key].update(patch[key])
-        else:
-            patched_aliases[key] = patch[key]
-    return patched_aliases
 
 class LongRunningOperation(object): #pylint: disable=too-few-public-methods
 
@@ -134,6 +80,31 @@ def _get_command_table(module_name):
     module = import_module('azure.cli.command_modules.' + module_name)
     return module.command_table
 
+class CliCommand(object):
+
+    def __init__(self, name, handler, description=None):
+        self.name = name
+        self.handler = handler
+        self.description = description
+        self.help_file = None
+        self.arguments = {}
+
+    def add_argument(self, param_name, *option_strings, **kwargs):
+        argument = azure.cli.commands.argument_types.CliCommandArgument(
+            param_name, options_list=option_strings, **kwargs)
+        self.arguments[param_name] = argument
+
+    def update_argument(self, param_name, argtype):
+        arg = self.arguments[param_name]
+        arg.update(
+            argtype.options_list,
+            completer=argtype.completer,
+            validator=argtype.validator,
+            **argtype.options)
+
+    def execute(self, **kwargs):
+        return self.handler(**kwargs)
+
 def get_command_table(module_name=None):
     '''Loads command table(s)
 
@@ -159,13 +130,36 @@ def get_command_table(module_name=None):
         logger.info('Loading command tables from all installed modules.')
         for mod in INSTALLED_COMMAND_MODULES:
             try:
-            command_table.update(_get_command_table(mod))
+                command_table.update(_get_command_table(mod))
             except Exception: #pylint: disable=broad-except
                 logger.error("Error loading command module '%s'", mod)
                 logger.debug(traceback.format_exc())
 
     ordered_commands = OrderedDict(command_table)
     return ordered_commands
+
+def create_command(name, operation, return_type, client_factory):
+    def _execute_command(kwargs):
+        client = client_factory(kwargs) if client_factory else None
+        try:
+            result = operation(client, **kwargs) if client else operation(**kwargs)
+            if not return_type:
+                return {}
+            if callable(return_type):
+                return return_type(result)
+            if isinstance(return_type, str):
+                return list(result) if isinstance(result, Paged) else result
+        except TypeError as exception:
+            raise IncorrectUsageError(exception)
+        except ClientException as client_exception:
+            message = getattr(client_exception, 'message', client_exception)
+            raise CLIError(message)
+
+    name = ' '.join(name.split())
+    command = CliCommand(name, _execute_command)
+    _extract_args_from_signature(command, operation)
+
+    return command
 
 def _option_descriptions(operation):
     """Pull out parameter help from doccomments of the command
@@ -227,58 +221,14 @@ def _extract_args_from_signature(command, operation):
 
         try:
             default = (default
-                        if default != inspect._empty #pylint: disable=protected-access, no-member
-                        else None)
+                       if default != inspect._empty #pylint: disable=protected-access, no-member
+                       else None)
         except AttributeError:
             pass
 
         command.add_argument(arg_name,
-                            *['--' + arg_name.replace('_', '-')],
-                            required=required,
-                            default=default,
-                            help=arg_docstring_help.get(arg_name),
-                            action=action)
-
-class CliCommand(object):
-
-    def __init__(self, name, handler, description=None):
-        self.name = name
-        self.handler = handler
-        self.description = description
-        self.help_file = None
-        self.arguments = {}
-
-    def add_argument(self, param_name, *option_strings, **kwargs):
-        argument = azure.cli.commands.argument_types.CliCommandArgument(param_name, options_list=option_strings, **kwargs)
-        self.arguments[param_name] = argument
-
-    def update_argument(self, param_name, argument_type):
-        arg = self.arguments[param_name]
-        arg.update(argument_type.options_list, **argument_type.options)
-
-    def execute(**kwargs):
-        return self.handler(**kwargs)
-
-def create_command(name, operation, return_type, client_factory):
-    def _execute_command(kwargs):
-        client = client_factory(kwargs) if client_factory else None
-        try:
-            result = operation(client, **kwargs)
-            if not return_type:
-                return {}
-            if callable(return_type):
-                return return_type(result)
-            if isinstance(return_type, str):
-                return list(result) if isinstance(result, Paged) else result
-        except TypeError as exception:
-            raise IncorrectUsageError(exception)
-        except ClientException as client_exception:
-            message = getattr(client_exception, 'message', client_exception)
-            raise CLIError(message)
-
-    name = ' '.join(name.split())
-    command = CliCommand(name, _execute_command)
-    _extract_args_from_signature(command, operation)
-
-    return command
-
+                             *['--' + arg_name.replace('_', '-')],
+                             required=required,
+                             default=default,
+                             help=arg_docstring_help.get(arg_name),
+                             action=action)

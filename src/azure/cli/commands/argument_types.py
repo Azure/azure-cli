@@ -1,6 +1,8 @@
-from azure.cli.application import APPLICATION
 from collections import defaultdict
 
+from azure.cli.application import APPLICATION
+
+# pylint: disable=too-many-arguments,too-few-public-methods
 class CliArgumentType(object):
 
     def __init__(self, options_list=None, base_type=str, overrides=None, completer=None,
@@ -8,7 +10,7 @@ class CliArgumentType(object):
         self.options_list = ()
         self.completer = completer
         self.validator = validator
-        if not overrides is None:
+        if overrides is not None:
             self.options_list = overrides.options_list
             self.options = overrides.options.copy()
             self.base_type = overrides.base_type
@@ -19,7 +21,7 @@ class CliArgumentType(object):
         self.update(options_list=options_list, **kwargs)
 
     def update(self, options_list=None, completer=None, validator=None, **kwargs):
-        self.options_list = options_list or self.options_list 
+        self.options_list = options_list or self.options_list
         self.completer = completer or self.completer
         self.validator = validator or self.validator
         self.options.update(**kwargs)
@@ -42,7 +44,9 @@ class _ArgumentRegistry(object):
         self.arguments = defaultdict(lambda: {})
 
     def register_cli_argument(self, scope, dest, argtype, options_list, **kwargs):
-        argument = CliArgumentType(options_list=options_list, overrides=argtype, **kwargs)
+        argument = CliArgumentType(options_list=options_list, overrides=argtype,
+                                   completer=argtype.completer, validator=argtype.validator,
+                                   **kwargs)
         self.arguments[scope][dest] = argument
 
     def get_cli_argument(self, command, name):
@@ -53,15 +57,17 @@ class _ArgumentRegistry(object):
             override = self.arguments.get(probe, {}).get(name, None)
             if override:
                 result.update(override.options_list, **override.options)
+                result.completer = override.completer
+                result.validator = override.validator
         return result
 
 _cli_argument_registry = _ArgumentRegistry()
 _cli_extra_argument_registry = defaultdict(lambda: {})
 
-def register_cli_argument(scope, dest, type, options_list=None, **kwargs):
+def register_cli_argument(scope, dest, argtype, options_list=None, **kwargs):
     '''Specify CLI specific metadata for a given argument for a given scope.
     '''
-    _cli_argument_registry.register_cli_argument(scope, dest, type, options_list, **kwargs)
+    _cli_argument_registry.register_cli_argument(scope, dest, argtype, options_list, **kwargs)
 
 def get_cli_argument(command, argname):
     return _cli_argument_registry.get_cli_argument(command, argname)
@@ -78,11 +84,12 @@ def _update_command_definitions(command_table):
             command.update_argument(argument_name, get_cli_argument(command_name, argument_name))
 
         # Add any arguments explicitly registered for this command
-        for argument_name, argument_definition in _cli_extra_argument_registry[command_name].items():
+        for argument_name, argument_definition in \
+                _cli_extra_argument_registry[command_name].items():
             command.arguments[argument_name] = argument_definition
             command.update_argument(argument_name, get_cli_argument(command_name, argument_name))
 
-def _validate_arguments(args, **kwargs):
+def _validate_arguments(args, **_):
     for validator in getattr(args, '_validators', []):
         validator(args)
     try:
@@ -91,16 +98,16 @@ def _validate_arguments(args, **kwargs):
         pass
 
 # Shared argument type definitions
-resource_group_name = CliArgumentType(options_list=('--resource-group', '-g'), help='Name of resource group')
-location = CliArgumentType(options_list=('--location', '-l'), help='Location. Use "az locations get" to get a list of valid locations', metavar='LOCATION')
-name = CliArgumentType(options_list=('--name', '-n'))
+resource_group_name_type = CliArgumentType(
+    options_list=('--resource-group', '-g'), help='Name of resource group')
+location_type = CliArgumentType(
+    options_list=('--location', '-l'),
+    help='Location. Use "az locations get" to get a list of valid locations', metavar='LOCATION')
+name_type = CliArgumentType(options_list=('--name', '-n'))
 
 # Register usage of said argument types
-register_cli_argument('', 'resource_group_name', type=resource_group_name)
-register_cli_argument('', 'location', location)
-
-register_cli_argument('resource group', 'resource_group_name', resource_group_name, options_list=('--name', '-n'))
-register_cli_argument('resource group create', 'resource_group_name', type=resource_group_name, options_list=('--name', '-n'), help='Name of new resource group')
+register_cli_argument('', 'resource_group_name', resource_group_name_type)
+register_cli_argument('', 'location', location_type)
 
 # Handlers to update command definitions before they are fed to the parser
 APPLICATION.register(APPLICATION.COMMAND_TABLE_LOADED, _update_command_definitions)

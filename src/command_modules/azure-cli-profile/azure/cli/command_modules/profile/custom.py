@@ -10,55 +10,50 @@ from azure.cli._locale import L
 
 logger = _logging.get_az_logger(__name__)
 
-class ProfileCommands(object):
+def list_subscriptions():
+    '''List the imported subscriptions.'''
+    profile = Profile()
+    subscriptions = profile.load_cached_subscriptions()
+    if not subscriptions:
+        logger.warning('Please run "az login" to access your accounts.')
+    return subscriptions
 
-    def __init__(self, **_):
-        pass
+def set_active_subscription(subscription_name_or_id):
+    '''Set the current subscription'''
+    if not id:
+        raise CLIError(L('Please provide subscription id or unique name.'))
+    profile = Profile()
+    profile.set_active_subscription(subscription_name_or_id)
 
-    def list_subscriptions(self):
-        '''List the imported subscriptions.'''
-        profile = Profile()
-        subscriptions = profile.load_cached_subscriptions()
-        if not subscriptions:
-            logger.warning('Please run "az login" to access your accounts.')
-        return subscriptions
+def account_clear():
+    '''Clear all stored subscriptions. To clear individual, use \'logout\''''
+    profile = Profile()
+    profile.logout_all()
 
-    def set_active_subscription(self, subscription_name_or_id):
-        '''Set the current subscription'''
-        if not id:
-            raise CLIError(L('Please provide subscription id or unique name.'))
-        profile = Profile()
-        profile.set_active_subscription(subscription_name_or_id)
+def login(username=None, password=None, service_principal=None, tenant=None):
+    '''Log in to an Azure subscription using Active Directory Organization Id'''
+    interactive = False
 
-    def account_clear(self):
-        '''Clear all stored subscriptions. To clear individual, use \'logout\''''
-        profile = Profile()
-        profile.logout_all()
+    if username:
+        if not password:
+            import getpass
+            password = getpass.getpass(L('Password: '))
+    else:
+        interactive = True
 
-    def login(self, username=None, password=None, service_principal=None, tenant=None):
-        '''Log in to an Azure subscription using Active Directory Organization Id'''
-        interactive = False
+    profile = Profile()
+    try:
+        subscriptions = profile.find_subscriptions_on_login(
+            interactive,
+            username,
+            password,
+            service_principal,
+            tenant)
+    except AdalError as err:
+        raise CLIError(err)
+    return list(subscriptions)
 
-        if username:
-            if not password:
-                import getpass
-                password = getpass.getpass(L('Password: '))
-        else:
-            interactive = True
-
-        profile = Profile()
-        try:
-            subscriptions = profile.find_subscriptions_on_login(
-                interactive,
-                username,
-                password,
-                service_principal,
-                tenant)
-        except AdalError as err:
-            raise CLIError(err)
-        return list(subscriptions)
-
-    def logout(self, username):
-        '''Log out from Azure subscription using Active Directory.'''
-        profile = Profile()
-        profile.logout(username)
+def logout(username):
+    '''Log out from Azure subscription using Active Directory.'''
+    profile = Profile()
+    profile.logout(username)
