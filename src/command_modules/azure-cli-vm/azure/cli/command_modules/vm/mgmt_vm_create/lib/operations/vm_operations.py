@@ -32,7 +32,7 @@ class VMOperations(object):
         self.config = config
 
     def create_or_update(
-            self, resource_group_name, deployment_name, name, content_version=None, admin_password=None, admin_username=None, authentication_type="password", availability_set_id=None, availability_set_type="none", dns_name_for_public_ip=None, dns_name_type="none", location=None, os_disk_name="osdiskimage", os_disk_uri=None, os_offer="WindowsServer", os_publisher="MicrosoftWindowsServer", os_sku="2012-R2-Datacenter", os_type="Win2012R2Datacenter", os_version="latest", private_ip_address_allocation="Dynamic", public_ip_address_allocation="Dynamic", public_ip_address_name=None, public_ip_address_type="new", size="Standard_A2", ssh_dest_key_path=None, ssh_key_value=None, storage_account_name=None, storage_account_type="new", storage_container_name="vhds", storage_redundancy_type="Standard_LRS", subnet_ip_address_prefix="10.0.0.0/24", subnet_name=None, virtual_network_ip_address_prefix="10.0.0.0/16", virtual_network_name=None, virtual_network_type="new", custom_headers={}, raw=False, **operation_config):
+            self, resource_group_name, deployment_name, admin_username, name, content_version=None, admin_password=None, authentication_type="password", availability_set_id=None, availability_set_type="none", dns_name_for_public_ip=None, dns_name_type="none", location=None, network_security_group_name=None, network_security_group_rule="RDP", network_security_group_type="new", os_disk_name="osdiskimage", os_disk_uri=None, os_offer="WindowsServer", os_publisher="MicrosoftWindowsServer", os_sku="2012-R2-Datacenter", os_type="Win2012R2Datacenter", os_version="latest", private_ip_address_allocation="Dynamic", public_ip_address_allocation="Dynamic", public_ip_address_name=None, public_ip_address_type="new", size="Standard_A2", ssh_dest_key_path=None, ssh_key_value=None, storage_account_name=None, storage_account_type="new", storage_container_name="vhds", storage_redundancy_type="Standard_LRS", subnet_ip_address_prefix="10.0.0.0/24", subnet_name=None, virtual_network_ip_address_prefix="10.0.0.0/16", virtual_network_name=None, virtual_network_type="new", custom_headers={}, raw=False, **operation_config):
         """
         Create or update a virtual machine.
 
@@ -41,6 +41,8 @@ class VMOperations(object):
         :type resource_group_name: str
         :param deployment_name: The name of the deployment.
         :type deployment_name: str
+        :param admin_username: Username for the Virtual Machine.
+        :type admin_username: str
         :param name: The VM name.
         :type name: str
         :param content_version: If included it must match the ContentVersion
@@ -49,8 +51,6 @@ class VMOperations(object):
         :param admin_password: Password for the Virtual Machine.  Required if
          SSH (Linux only) is not specified.
         :type admin_password: str
-        :param admin_username: Username for the Virtual Machine.
-        :type admin_username: str
         :param authentication_type: Password or SSH Public Key
          authentication. Possible values include: 'password', 'ssh'
         :type authentication_type: str
@@ -68,6 +68,15 @@ class VMOperations(object):
         :type dns_name_type: str
         :param location: Location for VM resources.
         :type location: str
+        :param network_security_group_name: Name of the network security
+         group.
+        :type network_security_group_name: str
+        :param network_security_group_rule: The type of rule to add to a new
+         network security group. Possible values include: 'RDP', 'SSH'
+        :type network_security_group_rule: str
+        :param network_security_group_type: Whether to use a network security
+         group or not. Possible values include: 'new', 'existing', 'none'
+        :type network_security_group_type: str
         :param os_disk_name: Name of new VM OS disk.
         :type os_disk_name: str
         :param os_disk_uri: URI for a custom VHD image.
@@ -140,7 +149,7 @@ class VMOperations(object):
         :rtype: :class:`ClientRawResponse<msrest.pipeline.ClientRawResponse>`
          if raw=true
         """
-        parameters = models.DeploymentVM(content_version=content_version, admin_password=admin_password, admin_username=admin_username, authentication_type=authentication_type, availability_set_id=availability_set_id, availability_set_type=availability_set_type, dns_name_for_public_ip=dns_name_for_public_ip, dns_name_type=dns_name_type, location=location, name=name, os_disk_name=os_disk_name, os_disk_uri=os_disk_uri, os_offer=os_offer, os_publisher=os_publisher, os_sku=os_sku, os_type=os_type, os_version=os_version, private_ip_address_allocation=private_ip_address_allocation, public_ip_address_allocation=public_ip_address_allocation, public_ip_address_name=public_ip_address_name, public_ip_address_type=public_ip_address_type, size=size, ssh_dest_key_path=ssh_dest_key_path, ssh_key_value=ssh_key_value, storage_account_name=storage_account_name, storage_account_type=storage_account_type, storage_container_name=storage_container_name, storage_redundancy_type=storage_redundancy_type, subnet_ip_address_prefix=subnet_ip_address_prefix, subnet_name=subnet_name, virtual_network_ip_address_prefix=virtual_network_ip_address_prefix, virtual_network_name=virtual_network_name, virtual_network_type=virtual_network_type)
+        parameters = models.DeploymentVM(content_version=content_version, admin_password=admin_password, admin_username=admin_username, authentication_type=authentication_type, availability_set_id=availability_set_id, availability_set_type=availability_set_type, dns_name_for_public_ip=dns_name_for_public_ip, dns_name_type=dns_name_type, location=location, name=name, network_security_group_name=network_security_group_name, network_security_group_rule=network_security_group_rule, network_security_group_type=network_security_group_type, os_disk_name=os_disk_name, os_disk_uri=os_disk_uri, os_offer=os_offer, os_publisher=os_publisher, os_sku=os_sku, os_type=os_type, os_version=os_version, private_ip_address_allocation=private_ip_address_allocation, public_ip_address_allocation=public_ip_address_allocation, public_ip_address_name=public_ip_address_name, public_ip_address_type=public_ip_address_type, size=size, ssh_dest_key_path=ssh_dest_key_path, ssh_key_value=ssh_key_value, storage_account_name=storage_account_name, storage_account_type=storage_account_type, storage_container_name=storage_container_name, storage_redundancy_type=storage_redundancy_type, subnet_ip_address_prefix=subnet_ip_address_prefix, subnet_name=subnet_name, virtual_network_ip_address_prefix=virtual_network_ip_address_prefix, virtual_network_name=virtual_network_name, virtual_network_type=virtual_network_type)
 
         # Construct URL
         url = '/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Resources/deployments/{deploymentName}'
