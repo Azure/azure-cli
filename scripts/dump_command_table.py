@@ -55,7 +55,7 @@ else:
         for prefix in cmd_set_names:
             if name.startswith(prefix):
                 cmd_list.append(name)
-                break
+            break
 
 results = []
 if param_names:
