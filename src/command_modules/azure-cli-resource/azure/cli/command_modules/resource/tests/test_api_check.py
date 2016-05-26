@@ -4,7 +4,7 @@ try:
 except ImportError:
     from mock import MagicMock
 
-from azure.cli.command_modules.resource.custom import _resolve_api_version as resolve_api_version
+from azure.cli.command_modules.resource._actions import _resolve_api_version as resolve_api_version
 from azure.cli.command_modules.resource._validators import *
 
 class TestApiCheck(unittest.TestCase):   

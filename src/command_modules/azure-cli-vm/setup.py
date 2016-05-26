@@ -72,6 +72,10 @@ setup(
         'azure.cli.command_modules.vm.mgmt_avail_set.lib',
         'azure.cli.command_modules.vm.mgmt_avail_set.lib.models',
         'azure.cli.command_modules.vm.mgmt_avail_set.lib.operations',
+        'azure.cli.command_modules.vm.mgmt_acs',
+        'azure.cli.command_modules.vm.mgmt_acs.lib',
+        'azure.cli.command_modules.vm.mgmt_acs.lib.models',
+        'azure.cli.command_modules.vm.mgmt_acs.lib.operations',
     ],
     install_requires=DEPENDENCIES,
 )

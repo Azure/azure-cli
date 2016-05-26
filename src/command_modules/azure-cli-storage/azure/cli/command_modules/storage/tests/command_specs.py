@@ -1,13 +1,13 @@
 # AZURE CLI STORAGE TEST DEFINITIONS
 
 import collections
-import json
 import os
 import sys
 
 from six import StringIO
 
 from azure.cli.utils.command_test_script import CommandTestScript
+from azure.cli._util import CLIError
 from azure.common import AzureHttpError
 
 RESOURCE_GROUP_NAME = 'travistestresourcegroup'
@@ -30,7 +30,7 @@ class StorageAccountCreateAndDeleteTest(CommandTestScript):
     def set_up(self):
         self.account = 'testcreatedelete'
         self.run('storage account delete -g {} -n {}'.format(RESOURCE_GROUP_NAME, self.account))
-        result = json.loads(self.run('storage account check-name --name {} -o json'.format(self.account)))
+        result = self.run('storage account check-name --name {} -o json'.format(self.account))
         if not result['nameAvailable']:
             raise CLIError('Failed to delete pre-existing storage account {}. Unable to continue test.'.format(self.account))
 
@@ -68,23 +68,22 @@ class StorageAccountScenarioTest(CommandTestScript):
         cs = s.run('storage account connection-string -g {} --account-name {} --use-http'.format(rg, account))
         assert 'https' not in cs
         assert account in cs
-        keys = json.loads(s.run('storage account keys list -g {} --name {} -o json'.format(rg, account)))
+        keys = s.run('storage account keys list -g {} --account-name {} -o json'.format(rg, account))
         key1 = keys['key1']
         key2 = keys['key2']
         assert key1 and key2
-        keys = json.loads(s.run('storage account keys renew -g {} --name {} -o json'.format(rg, account)))
+        keys = s.run('storage account keys renew -g {} --account-name {} -o json'.format(rg, account))
         assert key1 != keys['key1']
         key1 = keys['key1']
         assert key2 != keys['key2']
         key2 = keys['key2']
-        keys = json.loads(s.run('storage account keys renew -g {} --name {} --key secondary -o json'.format(rg, account)))
+        keys = s.run('storage account keys renew -g {} --account-name {} --key secondary -o json'.format(rg, account))
         assert key1 == keys['key1']
         assert key2 != keys['key2']
         s.test('storage account set -g {} -n {} --tags foo=bar;cat'.format(rg, account),
                {'tags': {'cat':'', 'foo':'bar'}})
-        # TODO: This should work like other tag commands--no value to clear
-        s.test('storage account set -g {} -n {} --tags none='.format(rg, account),
-               {'tags': {'none': ''}})
+        s.test('storage account set -g {} -n {} --tags'.format(rg, account),
+               {'tags': {}})
         s.test('storage account set -g {} -n {} --type Standard_GRS'.format(rg, account),
                {'accountType': 'Standard_GRS'})
         s.run('storage account set -g {} -n {} --type Standard_LRS'.format(rg, account))
@@ -102,7 +101,7 @@ class StorageBlobScenarioTest(CommandTestScript):
         self.new_lease_id = 'dcbadcba-dcba-dcba-dcba-dcbadcbadcba'
         self.date = '2016-04-01t12:00z'
         _get_connection_string(self)
-        sas_token = self.run('storage account generate-sas --services b --resource-types sco --permission rwdl --expiry 2100-01-01t00:00z')
+        sas_token = self.run('storage account generate-sas --services b --resource-types sco --permission rwdl --expiry 2100-01-01t00:00z -o list')
         self.set_env('AZURE_SAS_TOKEN', sas_token)
         self.set_env('AZURE_STORAGE_ACCOUNT', STORAGE_ACCOUNT_NAME)
         self.pop_env('AZURE_STORAGE_CONNECTION_STRING')
@@ -130,16 +129,16 @@ class StorageBlobScenarioTest(CommandTestScript):
         })
 
         # test block blob upload
-        s.run('storage blob upload -b {} -c {} --type block --upload-from {}'.format(block_blob, container, os.path.join(TEST_DIR, 'testfile.rst')))
+        s.run('storage blob upload -b {} -c {} --type block --upload-from "{}"'.format(block_blob, container, os.path.join(TEST_DIR, 'testfile.rst')))
         s.test('storage blob exists -b {} -c {}'.format(block_blob, container), True)
 
         # test page blob upload
-        s.run('storage blob upload -b {} -c {} --type page --upload-from {}'.format(page_blob, container, os.path.join(TEST_DIR, 'testpage.rst')))
+        s.run('storage blob upload -b {} -c {} --type page --upload-from "{}"'.format(page_blob, container, os.path.join(TEST_DIR, 'testpage.rst')))
         s.test('storage blob exists -b {} -c {}'.format(page_blob, container), True)
 
         # test append blob upload
-        s.run('storage blob upload -b {} -c {} --type append --upload-from {}'.format(append_blob, container, os.path.join(TEST_DIR, 'testfile.rst')))
-        s.run('storage blob upload -b {} -c {} --type append --upload-from {}'.format(append_blob, container, os.path.join(TEST_DIR, 'testfile.rst')))
+        s.run('storage blob upload -b {} -c {} --type append --upload-from "{}"'.format(append_blob, container, os.path.join(TEST_DIR, 'testfile.rst')))
+        s.run('storage blob upload -b {} -c {} --type append --upload-from "{}"'.format(append_blob, container, os.path.join(TEST_DIR, 'testfile.rst')))
         s.test('storage blob exists -b {} -c {}'.format(append_blob, container), True)
 
         blob_url = 'https://{}.blob.core.windows.net/{}/{}'.format(STORAGE_ACCOUNT_NAME, container, blob)
@@ -150,15 +149,14 @@ class StorageBlobScenarioTest(CommandTestScript):
         s.run('storage blob metadata set -b {} -c {}'.format(blob, container))
         s.test('storage blob metadata show -b {} -c {}'.format(blob, container), None)
 
-        res = json.loads(s.run('storage blob list --container-name {} -o json'.format(container)))['items']
+        res = s.run('storage blob list --container-name {} -o json'.format(container))['items']
         blob_list = [block_blob, append_blob, page_blob]
         for item in res:
             assert item['name'] in blob_list
 
         s.test('storage blob show --container-name {} --blob-name {}'.format(container, block_blob),
                {'name': block_blob, 'properties': {'blobType': 'BlockBlob'}})
-
-        s.run('storage blob download -b {} -c {} --download-to {}'.format(blob, container, dest_file))
+        s.run('storage blob download -b {} -c {} --download-to "{}"'.format(blob, container, dest_file))
         if os.path.isfile(dest_file):
             os.remove(dest_file)
         else:
@@ -179,7 +177,7 @@ class StorageBlobScenarioTest(CommandTestScript):
         s.test('storage blob show -b {} -c {}'.format(blob, container),
                 {'properties': {'lease': {'duration': None, 'state': 'available', 'status': 'unlocked'}}})
 
-        json_result = json.loads(s.run('storage blob snapshot -c {} -b {} -o json'.format(container, append_blob)))
+        json_result = s.run('storage blob snapshot -c {} -b {} -o json'.format(container, append_blob))
         snapshot_dt = json_result['snapshot']
         s.test('storage blob exists -b {} -c {} --snapshot {}'.format(append_blob, container, snapshot_dt), True)
         
@@ -197,7 +195,7 @@ class StorageBlobScenarioTest(CommandTestScript):
         s.test('storage container exists --container-name {}'.format(container), True)
 
         s.test('storage container show --container-name {}'.format(container), {'name': container})
-        res = json.loads(s.run('storage container list -o json'))['items']
+        res = s.run('storage container list -o json')['items']
         assert container in [x['name'] for x in res]
 
         s.run('storage container metadata set -c {} --metadata foo=bar;moo=bak;'.format(container))
@@ -231,13 +229,61 @@ class StorageBlobScenarioTest(CommandTestScript):
     def __init__(self):
         super(StorageBlobScenarioTest, self).__init__(self.set_up, self.test_body, self.tear_down)
 
+class StorageBlobCopyScenarioTest(CommandTestScript):
+
+    def set_up(self):
+        self.rg = RESOURCE_GROUP_NAME
+        self.src_container = 'testcopyblob1'
+        self.src_blob = 'src_blob'
+        self.dest_container = 'testcopyblob2'
+        self.dest_blob = 'dest_blob'
+
+        _get_connection_string(self)
+        self.run('storage container delete --container-name {}'.format(self.src_container))
+        self.run('storage container delete --container-name {}'.format(self.dest_container))
+        if self.run('storage container exists --container-name {}'.format(self.src_container)) == 'True':
+            raise CLIError('Failed to delete pre-existing container {}. Unable to continue test.'.format(self.src_container))
+        if self.run('storage container exists --container-name {}'.format(self.dest_container)) == 'True':
+            raise CLIError('Failed to delete pre-existing container {}. Unable to continue test.'.format(self.dest_container))
+        
+    def test_body(self):
+        s = self
+        src_cont = s.src_container
+        src_blob = s.src_blob
+        dst_cont = s.dest_container
+        dst_blob = s.dest_blob
+        rg = s.rg
+
+        s.run('storage container create --container-name {} --fail-on-exist'.format(src_cont))
+        s.run('storage container create --container-name {} --fail-on-exist'.format(dst_cont))
+
+        s.run('storage blob upload -b {} -c {} --type block --upload-from "{}"'.format(src_blob, src_cont, os.path.join(TEST_DIR, 'testfile.rst')))
+        s.test('storage blob exists -b {} -c {}'.format(src_blob, src_cont), True)
+
+        # test that a blob can be successfully copied
+        src_uri = s.run('storage blob url -b {} -c {}'.format(src_blob, src_cont))
+        copy_status = s.run('storage blob copy start -c {0} -n {1} -u {2} -o json'.format(
+            dst_cont, dst_blob, src_uri))
+        assert copy_status['status'] == 'success'
+        copy_id = copy_status['id']
+        s.test('storage blob show -c {} -b {}'.format(dst_cont, dst_blob),
+            {'name': dst_blob, 'properties': {'copy': {'id': copy_id, 'status': 'success'}}})
+
+    def tear_down(self):
+        self.run('storage container delete --container-name {}'.format(self.src_container))
+        self.run('storage container delete --container-name {}'.format(self.dest_container))
+
+    def __init__(self):
+        super(StorageBlobCopyScenarioTest, self).__init__(
+            self.set_up, self.test_body, self.tear_down)
+
 class StorageFileScenarioTest(CommandTestScript):
 
     def set_up(self):
         self.share1 = 'testshare01'
         self.share2 = 'testshare02'
         _get_connection_string(self)
-        sas_token = self.run('storage account generate-sas --services f --resource-types sco --permission rwdl --expiry 2100-01-01t00:00z')
+        sas_token = self.run('storage account generate-sas --services f --resource-types sco --permission rwdl --expiry 2100-01-01t00:00z -o list')
         self.set_env('AZURE_SAS_TOKEN', sas_token)
         self.set_env('AZURE_STORAGE_ACCOUNT', STORAGE_ACCOUNT_NAME)
         self.pop_env('AZURE_STORAGE_CONNECTION_STRING')
@@ -272,11 +318,11 @@ class StorageFileScenarioTest(CommandTestScript):
         dest_file = os.path.join(TEST_DIR, 'download_test.rst')
         filename = 'testfile.rst'
         s = self
-        s.run('storage file upload --share-name {} --local-file-name {} --file-name {}'.format(share, source_file, filename))
+        s.run('storage file upload --share-name {} --local-file-name "{}" --file-name "{}"'.format(share, source_file, filename))
         s.test('storage file exists --share-name {} --file-name {}'.format(share, filename), True)
         if os.path.isfile(dest_file):
             os.remove(dest_file)
-        s.run('storage file download --share-name {} --file-name {} --local-file-name {}'.format(share, filename, dest_file))
+        s.run('storage file download --share-name {} --file-name "{}" --local-file-name "{}"'.format(share, filename, dest_file))
         if os.path.isfile(dest_file):
             os.remove(dest_file)
         else:
@@ -296,7 +342,7 @@ class StorageFileScenarioTest(CommandTestScript):
         file_url = 'https://{}.file.core.windows.net/{}/{}'.format(STORAGE_ACCOUNT_NAME, share, filename)
         s.test('storage file url -s {} --file-name {}'.format(share, filename), file_url)
 
-        res = [x['name'] for x in json.loads(s.run('storage share contents --share-name {} -o json'.format(share)))['items']]
+        res = [x['name'] for x in s.run('storage share contents --share-name {} -o json'.format(share))['items']]
         assert filename in res
 
         s.run('storage file delete --share-name {} --file-name {}'.format(share, filename))
@@ -307,17 +353,17 @@ class StorageFileScenarioTest(CommandTestScript):
         dest_file = os.path.join(TEST_DIR, 'download_test.rst')
         filename = 'testfile.rst'
         s = self
-        s.run('storage file upload --share-name {} --directory-name {} --local-file-name {} --file-name {}'.format(share, dir, source_file, filename))
+        s.run('storage file upload --share-name {} --directory-name {} --local-file-name "{}" --file-name {}'.format(share, dir, source_file, filename))
         s.test('storage file exists --share-name {} --directory-name {} --file-name {}'.format(share, dir, filename), True)
         if os.path.isfile(dest_file):    
             os.remove(dest_file)
-        s.run('storage file download --share-name {} --directory-name {} --file-name {} --local-file-name {}'.format(share, dir, filename, dest_file))
+        s.run('storage file download --share-name {} --directory-name {} --file-name {} --local-file-name "{}"'.format(share, dir, filename, dest_file))
         if os.path.isfile(dest_file):
             os.remove(dest_file)
         else:
             io.print_('\nDownload failed. Test failed!')
 
-        res = [x['name'] for x in json.loads(s.run('storage share contents --share-name {} --directory-name {} -o json'.format(share, dir)))['items']]
+        res = [x['name'] for x in s.run('storage share contents --share-name {} --directory-name {} -o json'.format(share, dir))['items']]
         assert filename in res
 
         s.test('storage share stats -s {}'.format(share), "1")
@@ -332,7 +378,7 @@ class StorageFileScenarioTest(CommandTestScript):
         s.test('storage share create --share-name {} --fail-on-exist --metadata foo=bar;cat=hat'.format(share2), True)
         s.test('storage share exists --share-name {}'.format(share1), True)
         s.test('storage share metadata show --share-name {}'.format(share2), {'cat': 'hat', 'foo': 'bar'})
-        res = [x['name'] for x in json.loads(s.run('storage share list -o json'))['items']]
+        res = [x['name'] for x in s.run('storage share list -o json')['items']]
         assert share1 in res
         assert share2 in res
 
@@ -362,6 +408,68 @@ class StorageFileScenarioTest(CommandTestScript):
     def __init__(self):
         super(StorageFileScenarioTest, self).__init__(self.set_up, self.test_body, self.tear_down)
 
+class StorageFileCopyScenarioTest(CommandTestScript):
+
+    def set_up(self):
+        self.rg = RESOURCE_GROUP_NAME
+        self.src_share = 'testcopyfile1'
+        self.src_dir = 'testdir'
+        self.src_file = 'src_file'
+        self.dest_share = 'testcopyfile2'
+        self.dest_dir = 'mydir'
+        self.dest_file = 'dest_file'
+
+        _get_connection_string(self)
+        self.run('storage share delete --share-name {}'.format(self.src_share))
+        self.run('storage share delete --share-name {}'.format(self.dest_share))
+        if self.run('storage share exists --share-name {}'.format(self.src_share)) == 'True':
+            raise CLIError('Failed to delete pre-existing share {}. Unable to continue test.'.format(self.src_share))
+        if self.run('storage share exists --share-name {}'.format(self.dest_share)) == 'True':
+            raise CLIError('Failed to delete pre-existing share {}. Unable to continue test.'.format(self.dest_share))
+        
+    def test_body(self):
+        s = self
+        src_share = s.src_share
+        src_dir = s.src_dir
+        src_file = s.src_file
+        dst_share = s.dest_share
+        dst_dir = s.dest_dir
+        dst_file = s.dest_file
+        rg = s.rg
+
+        s.run('storage share create --share-name {} --fail-on-exist'.format(src_share))
+        s.run('storage share create --share-name {} --fail-on-exist'.format(dst_share))
+        s.run('storage directory create --share-name {} -d {}'.format(src_share, src_dir))
+        s.run('storage directory create --share-name {} -d {}'.format(dst_share, dst_dir))
+
+        s.run('storage file upload -f {} --share-name {} -d {} --local-file-name "{}"'.format(src_file, src_share, src_dir, os.path.join(TEST_DIR, 'testfile.rst')))
+        s.test('storage file exists -f {} --share-name {} -d {}'.format(src_file, src_share, src_dir), True)
+
+        # test that a file can be successfully copied to root
+        src_uri = s.run('storage file url -f {} --share-name {} -d {}'.format(src_file, src_share, src_dir))
+        copy_status = s.run('storage file copy start --destination-share {0} -n {1} -u {2} -o json'.format(
+            dst_share, dst_file, src_uri))
+        assert copy_status['status'] == 'success'
+        copy_id = copy_status['id']
+        s.test('storage file show --share-name {} -f {}'.format(dst_share, dst_file),
+            {'name': dst_file, 'properties': {'copy': {'id': copy_id, 'status': 'success'}}})
+
+        # test that a file can be successfully copied to a directory
+        copy_status = s.run('storage file copy start --destination-share {0} -n {1} -d {3} -u {2} -o json'.format(
+            dst_share, dst_file, src_uri, dst_dir))
+        assert copy_status['status'] == 'success'
+        copy_id = copy_status['id']
+        s.test('storage file show --share-name {} -f {} -d {}'.format(dst_share, dst_file, dst_dir),
+            {'name': dst_file, 'properties': {'copy': {'id': copy_id, 'status': 'success'}}})
+
+    def tear_down(self):
+        self.run('storage share delete --share-name {}'.format(self.src_share))
+        self.run('storage share delete --share-name {}'.format(self.dest_share))
+
+    def __init__(self):
+        super(StorageFileCopyScenarioTest, self).__init__(
+            self.set_up, self.test_body, self.tear_down)
+
 TEST_DEF = [
     {
         'test_name': 'storage_account',
@@ -376,7 +484,15 @@ TEST_DEF = [
         'script': StorageBlobScenarioTest()
     },
     {
+        'test_name': 'storage_blob_copy',
+        'script': StorageBlobCopyScenarioTest()
+    },
+    {
         'test_name': 'storage_file',
         'script': StorageFileScenarioTest()
-    }
+    },
+    {
+        'test_name': 'storage_file_copy',
+        'script': StorageFileCopyScenarioTest()
+    },
 ]

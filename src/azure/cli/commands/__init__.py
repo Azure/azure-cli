@@ -1,9 +1,11 @@
 from __future__ import print_function
+import argparse
 import copy
 import inspect
 import re
 import time
 import random
+import traceback
 from importlib import import_module
 from collections import defaultdict, OrderedDict
 from pip import get_installed_distributions
@@ -33,8 +35,8 @@ COMMON_PARAMETERS = {
     'deployment_name': {
         'name': '--deployment-name',
         'metavar': 'DEPLOYMENTNAME',
-        'help': 'Name of the resource deployment',
-        'default': 'azurecli' + str(time.time()) + str(random.randint(0, 10000000)),
+        'help': argparse.SUPPRESS,
+        'default': 'azurecli' + str(time.time()) + str(random.randint(0, 100000)),
         'required': False
     },
     'location': {
@@ -51,13 +53,17 @@ COMMON_PARAMETERS = {
         'name': '--tag',
         'metavar': 'TAG',
         'help': L('a single tag in \'key[=value]\' format'),
-        'type': validate_tag
+        'type': validate_tag,
+        'nargs': '?',
+        'const': {}
     },
     'tags' : {
         'name': '--tags',
         'metavar': 'TAGS',
         'help': L('multiple semicolon separated tags in \'key[=value]\' format'),
-        'type': validate_tags
+        'type': validate_tags,
+        'nargs': '?',
+        'const': {}
     },
 }
 
@@ -96,7 +102,15 @@ class LongRunningOperation(object): #pylint: disable=too-few-public-methods
             result = poller.result()
         except ClientException as client_exception:
             message = getattr(client_exception, 'message', client_exception)
+
+            try:
+                message = str(message) + ' ' + json.loads(client_exception.response.text) \
+                    ['error']['details'][0]['message']
+            except (AttributeError, KeyError):
+                pass
+
             raise CLIError(message)
+
         logger.info("Long running operation '%s' completed with result %s",
                     self.start_msg, result)
         logger.warning(self.finish_msg)
@@ -135,12 +149,20 @@ def get_command_table(module_name=None):
         except ImportError:
             # Unknown command - we'll load all installed modules below
             logger.info("Loading all installed modules as module with name '%s' not found.", module_name) #pylint: disable=line-too-long
+        except Exception: #pylint: disable=broad-except
+            # Catch exception whilst loading the command module.
+            # We don't log anything here as we will log below when we try and load all.
+            pass
 
     if not loaded:
         command_table = {}
         logger.info('Loading command tables from all installed modules.')
         for mod in INSTALLED_COMMAND_MODULES:
+            try:
             command_table.update(_get_command_table(mod))
+            except Exception: #pylint: disable=broad-except
+                logger.error("Error loading command module '%s'", mod)
+                logger.debug(traceback.format_exc())
 
     ordered_commands = OrderedDict(command_table)
     return ordered_commands

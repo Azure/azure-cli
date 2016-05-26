@@ -19,35 +19,35 @@ class Exporter(json.JSONEncoder):
 
 def _dump_command_table(**kwargs):
     cmd_table = APPLICATION.configuration.get_command_table()
-    cmd_list = []
-    if cmd_set_names is None :
-        # if no command prefix specified, use all command table entries
+cmd_list = []
+if cmd_set_names is None :
+    # if no command prefix specified, use all command table entries
         cmd_list = list(cmd_table.keys())
-    else:
-        # if the command name matches a prefix, add it to the output list
-        for name in cmd_table.keys():
-            for prefix in cmd_set_names:
-                if name.startswith(prefix):
-                    cmd_list.append(name)
-                    break
+else:
+    # if the command name matches a prefix, add it to the output list
+    for name in cmd_table.keys():
+        for prefix in cmd_set_names:
+            if name.startswith(prefix):
+                cmd_list.append(name)
+                break
 
-    results = []
-    if param_names:
+results = []
+if param_names:
         for cmd_name in cmd_list:
             cmd_args = cmd_table[cmd_name].arguments
-            match = False
+        match = False
             for arg in list(cmd_args.keys()):
-                if match:
-                    break
+            if match:
+                break
                 if arg in param_names:
                     results.append(cmd_name)
-                    match = True
-    else:
-        results = cmd_list
+                match = True
+else:
+    results = cmd_list
 
-    result_dict = {}
-    for cmd_name in results:
-        table_entry = cmd_table[cmd_name]
+result_dict = {}
+for cmd_name in results:
+    table_entry = cmd_table[cmd_name]
         result_dict[cmd_name] = _format_entry(cmd_table[cmd_name])
     print(json.dumps(result_dict, indent=4, sort_keys=True))
     
@@ -115,7 +115,7 @@ show_nulls = args.show_nulls
 
 PRIMITIVES = (str, int, bool, float)
 IGNORE_ARGS = ['help', 'help_file', 'name', 'base_type']
-
+    
 APPLICATION = Application(Configuration([]))
 APPLICATION.register(Application.COMMAND_TABLE_LOADED, _dump_command_table)
 APPLICATION.execute([''])

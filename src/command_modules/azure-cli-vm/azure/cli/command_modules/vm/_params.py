@@ -1,5 +1,6 @@
 import argparse
 import getpass
+import os
 
 from azure.mgmt.compute.models import VirtualHardDisk
 
@@ -111,8 +112,7 @@ VM_CREATE_PARAMETER_ALIASES = {
     'admin_username': {
         'name': '--admin-username',
         'default': getpass.getuser(),
-        'required': False,
-        'help': 'Admin login.  Defaults to current username.'
+        'required': False
     },
     'ssh_key_value': {
         'name': '--ssh-key-value',
@@ -129,37 +129,45 @@ VM_CREATE_PARAMETER_ALIASES = {
     'authentication_type': {
         'name': '--authentication-type',
         'choices': ['ssh', 'password'],
-        'default': 'password'
+        'help': 'Password or SSH public key authentication.  '
+                'Defaults to password for Windows and SSH public key for Linux.',
+        'default': None
     },
     'availability_set_type': {
         'name': '--availability-set-type',
         'choices': ['none', 'existing'],
-        'default': 'none'
+        'default': 'none',
+        'help': ''
     },
     'private_ip_address_allocation': {
         'name': '--private-ip-address-allocation',
         'choices': ['Dynamic', 'Static'],
-        'default': 'Dynamic'
+        'default': 'Dynamic',
+        'help': ''
     },
     'public_ip_address_allocation': {
         'name': '--public-ip-address-allocation',
         'choices': ['Dynamic', 'Static'],
-        'default': 'Dynamic'
+        'default': 'Dynamic',
+        'help': ''
     },
     'public_ip_address_type': {
         'name': '--public-ip-address-type',
         'choices': ['none', 'new', 'existing'],
-        'default': 'new'
+        'default': 'new',
+        'help': ''
     },
     'storage_account_type': {
         'name': '--storage-account-type',
         'choices': ['new', 'existing'],
-        'default': 'new'
+        'default': 'new',
+        'help': ''
     },
     'virtual_network_type': {
         'name': '--virtual-network-type',
         'choices': ['new', 'existing'],
-        'default': 'new'
+        'default': 'new',
+        'help': ''
     }
 }
 
@@ -169,7 +177,8 @@ VM_CREATE_EXTRA_PARAMETERS = {
     'image': {
         'name': '--image',
         'action': VMImageFieldAction,
-        'completer': get_urn_aliases_completion_list
+        'completer': get_urn_aliases_completion_list,
+        'default': 'Win2012R2Datacenter'
         },
 }
 
@@ -180,3 +189,21 @@ VM_PATCH_EXTRA_PARAMETERS = {
     'vm_name':
         extend_parameter(PARAMETER_ALIASES['vm_name'], required=True)
 }
+
+ACS_CREATE_PARAMETER_ALIASES = {
+    'orchestrator_type': {
+        'name': '--orchestrator-type',
+        'choices': ['dcos', 'swarm']
+        },
+    'admin_username': {
+        'name': '--admin-username',
+        'default': getpass.getuser(),
+        'required': False
+        },
+    'ssh_key_value': {
+        'name': '--ssh-key-value',
+        'required': False,
+        'help': 'SSH key file value or key file path.',
+        'default': os.path.join(os.path.expanduser('~'), '.ssh', 'id_rsa.pub')
+        }
+    }

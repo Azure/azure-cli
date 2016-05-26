@@ -1,7 +1,11 @@
 ﻿# AZURE CLI VM TEST DEFINITIONS
 import json
+import os
+import tempfile
 
 from azure.cli.utils.command_test_script import CommandTestScript, JMESPathComparator
+
+TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 #pylint: disable=method-hidden
 class VMImageListByAliasesScenarioTest(CommandTestScript):
@@ -43,8 +47,8 @@ class VMListFoldedScenarioTest(CommandTestScript):
         super(VMListFoldedScenarioTest, self).__init__(None, self.test_body, None)
 
     def test_body(self):
-        all_vms = json.loads(self.run('vm list -o json'))
-        some_vms = json.loads(self.run('vm list -g travistestresourcegroup -o json'))
+        all_vms = self.run('vm list -o json')
+        some_vms = self.run('vm list -g travistestresourcegroup -o json')
         assert len(all_vms) > len(some_vms)
 
 class VMShowListSizesListIPAddressesScenarioTest(CommandTestScript):
@@ -68,13 +72,12 @@ class VMShowListSizesListIPAddressesScenarioTest(CommandTestScript):
     def test_body(self):
         # Expecting no results at the beginning
         self.test('vm list-ip-addresses --resource-group {}'.format(self.resource_group), None)
-        self.run(['vm', 'create', '--resource-group', self.resource_group,
-                  '--location', self.location,
-                  '-n', self.vm_name, '--admin-username', 'ubuntu',
-                  '--image', 'Canonical:UbuntuServer:14.04.4-LTS:latest',
-                  '--admin-password', 'testPassword0', '--deployment-name', self.deployment_name,
-                  '--public-ip-address-allocation', self.ip_allocation_method,
-                  '--public-ip-address-type', 'new'])
+        self.run('vm create --resource-group {0} --location {1} -n {2} --admin-username ubuntu '
+                 '--image Canonical:UbuntuServer:14.04.4-LTS:latest --admin-password testPassword0 '
+                 '--deployment-name {3} --public-ip-address-allocation {4} '
+                 '--public-ip-address-type new'.format(
+                     self.resource_group, self.location, self.vm_name, self.deployment_name,
+                     self.ip_allocation_method))
         self.test('vm show --resource-group {} --name {} --expand instanceView'.format(
             self.resource_group, self.vm_name),
                   [
@@ -216,11 +219,10 @@ class VMGeneralizeScenarioTest(CommandTestScript):
             self.resource_group))
 
     def test_body(self):
-        self.run(['vm', 'create', '--resource-group', self.resource_group,
-                  '--location', self.location,
-                  '--name', self.vm_name, '--admin-username', 'ubuntu',
-                  '--image', 'Canonical:UbuntuServer:14.04.4-LTS:latest',
-                  '--admin-password', 'testPassword0', '--deployment-name', self.deployment_name])
+        self.run('vm create --resource-group {0} --location {1} --name {2} --admin-username ubuntu '
+                 '--image Canonical:UbuntuServer:14.04.4-LTS:latest --admin-password testPassword0 '
+                 '--deployment-name {3}'.format(
+                     self.resource_group, self.location, self.vm_name, self.deployment_name))
         self.run('vm power-off --resource-group {} --name {}'.format(
             self.resource_group, self.vm_name))
         # Should be able to generalize the VM after it has been stopped
@@ -268,11 +270,10 @@ class VMCreateAndStateModificationsScenarioTest(CommandTestScript):
     def test_body(self):
         # Expecting no results
         self.test('vm list --resource-group {}'.format(self.resource_group), None)
-        self.run(['vm', 'create', '--resource-group', self.resource_group,
-                  '--location', self.location,
-                  '--name', self.vm_name, '--admin-username', 'ubuntu',
-                  '--image', 'Canonical:UbuntuServer:14.04.4-LTS:latest',
-                  '--admin-password', 'testPassword0', '--deployment-name', self.deployment_name])
+        self.run('vm create --resource-group {0} --location {1} --name {2} --admin-username ubuntu '
+                 '--image Canonical:UbuntuServer:14.04.4-LTS:latest --admin-password testPassword0 '
+                 '--deployment-name {3}'.format(
+                     self.resource_group, self.location, self.vm_name, self.deployment_name))
         # Expecting one result, the one we created
         self.test('vm list --resource-group {}'.format(self.resource_group), [
             JMESPathComparator('length(@)', 1),
@@ -363,6 +364,7 @@ class VMExtensionsScenarioTest(CommandTestScript):
     def tear_down(self):
         pass
 
+
 class VMMachineExtensionImageScenarioTest(CommandTestScript):
 
     def __init__(self):
@@ -392,6 +394,25 @@ class VMMachineExtensionImageScenarioTest(CommandTestScript):
                 JMESPathComparator("contains(id, '/Providers/Microsoft.Compute/Locations/{}/Publishers/{}/ArtifactTypes/VMExtension/Types/{}/Versions/{}')".format( #pylint: disable=line-too-long
                     self.location, self.publisher, self.type, self.version
                 ), True)])
+
+
+class VMExtensionImageSearchScenarioTest(CommandTestScript):
+
+    def __init__(self):
+        super(VMExtensionImageSearchScenarioTest, self).__init__(None, self.test_body, None)
+
+    def test_body(self):
+        #pick this specific name, so the search will be under one publisher. This avoids
+        #the parallel searching behavior that causes incomplete VCR recordings.
+        publisher = 'Vormetric.VormetricTransparentEncryption'
+        image_name = 'VormetricTransparentEncryptionAgent'
+        verification = [
+            JMESPathComparator('type(@)', 'array'),
+            JMESPathComparator("length([?name == '{}']) == length(@)".format(image_name), True),
+            ]
+        cmd = ('vm extension image list -l westus --publisher {} --name {} -o json'.format(publisher, image_name))#pylint: disable=line-too-long
+        self.test(cmd, verification)
+
 
 class VMScaleSetGetsScenarioTest(CommandTestScript):
 
@@ -539,89 +560,216 @@ class VMAccessAddRemoveLinuxUser(CommandTestScript):
         self.test('vm access delete-linux-user {}'.format(common_part),
                   verification)
 
+class VMCreateUbuntuScenarioTest(CommandTestScript): #pylint: disable=too-many-instance-attributes
+
+    TEST_SSH_KEY_PUB = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCbIg1guRHbI0lV11wWDt1r2cUdcNd27CJsg+SfgC7miZeubtwUhbsPdhMQsfDyhOWHq1+ZL0M+nJZV63d/1dhmhtgyOqejUwrPlzKhydsbrsdUor+JmNJDdW01v7BXHyuymT8G4s09jCasNOwiufbP/qp72ruu0bIA1nySsvlf9pCQAuFkAnVnf/rFhUlOkhtRpwcq8SUNY2zRHR/EKb/4NWY1JzR4sa3q2fWIJdrrX0DvLoa5g9bIEd4Df79ba7v+yiUBOS0zT2ll+z4g9izHK3EO5d8hL4jYxcjKs+wcslSYRWrascfscLgMlMGh0CdKeNTDjHpGPncaf3Z+FwwwjWeuiNBxv7bJo13/8B/098KlVDl4GZqsoBCEjPyJfV6hO0y/LkRGkk7oHWKgeWAfKtfLItRp00eZ4fcJNK9kCaSMmEugoZWcI7NGbZXzqFWqbpRI7NcDP9+WIQ+i9U5vqWsqd/zng4kbuAJ6UuKqIzB0upYrLShfQE3SAck8oaLhJqqq56VfDuASNpJKidV+zq27HfSBmbXnkR/5AK337dc3MXKJypoK/QPMLKUAP5XLPbs+NddJQV7EZXd29DLgp+fRIg3edpKdO7ZErWhv7d+3Kws+e1Y+ypmR2WIVSwVyBEUfgv2C8Ts9gnTF4pNcEY/S2aBicz5Ew2+jdyGNQQ== test@example.com\n" #pylint: disable=line-too-long
+
+    def __init__(self):
+        self.deployment_name = 'azurecli-test-deployment-vm-create-ubuntu'
+        self.resource_group = 'cliTestRg_VMCreate_Ubuntu'
+        self.admin_username = 'ubuntu'
+        self.location = 'westus'
+        self.vm_names = ['cli-test-vm1']
+        self.vm_image = 'UbuntuLTS'
+        self.auth_type = 'ssh'
+        self.pub_ssh_filename = None
+        super(VMCreateUbuntuScenarioTest, self).__init__(
+            self.set_up,
+            self.test_body,
+            self.tear_down)
+
+    def set_up(self):
+        _, pathname = tempfile.mkstemp()
+        with open(pathname, 'w') as key_file:
+            key_file.write(VMCreateUbuntuScenarioTest.TEST_SSH_KEY_PUB)
+        self.pub_ssh_filename = pathname
+        self.run('resource group create --location {} --name {}'.format(
+            self.location,
+            self.resource_group))
+
+    def test_body(self):
+        self.test('vm create --resource-group {rg} --admin-username {admin} --name {vm_name} --authentication-type {auth_type} --image {image} --ssh-key-value {ssh_key} --location {location} --deployment-name {deployment}'.format( #pylint: disable=line-too-long
+            rg=self.resource_group,
+            admin=self.admin_username,
+            vm_name=self.vm_names[0],
+            image=self.vm_image,
+            auth_type=self.auth_type,
+            ssh_key=self.pub_ssh_filename,
+            location=self.location,
+            deployment=self.deployment_name,
+        ), [
+            JMESPathComparator('type(@)', 'object'),
+            JMESPathComparator('vm.value.provisioningState', 'Succeeded'),
+            JMESPathComparator('vm.value.osProfile.adminUsername', self.admin_username),
+            JMESPathComparator('vm.value.osProfile.computerName', self.vm_names[0]),
+            JMESPathComparator(
+                'vm.value.osProfile.linuxConfiguration.disablePasswordAuthentication',
+                True),
+            JMESPathComparator(
+                'vm.value.osProfile.linuxConfiguration.ssh.publicKeys[0].keyData',
+                VMCreateUbuntuScenarioTest.TEST_SSH_KEY_PUB),
+        ])
+
+    def tear_down(self):
+        self.run('resource group delete --name {}'.format(self.resource_group))
+
+class VMBootDiagnostics(CommandTestScript):
+
+    def __init__(self):
+        super(VMBootDiagnostics, self).__init__(None, self.test_body, None)
+
+    def test_body(self):
+        common_part = '-g yugangw5 -n yugangw5-1'
+        #pylint: disable=line-too-long
+        storage_uri = 'https://yugangwstorage.blob.core.windows.net/'
+        self.run('vm boot-diagnostics enable {} --storage-uri {}'.format(common_part, storage_uri))
+        verification = [JMESPathComparator('diagnosticsProfile.bootDiagnostics.enabled', True),
+                        JMESPathComparator('diagnosticsProfile.bootDiagnostics.storageUri', storage_uri)]
+        self.test('vm show {}'.format(common_part), verification)
+
+        #will uncomment after #302 gets addressed
+        #self.run('vm boot-diagnostics get-boot-log {}'.format(common_part))
+
+        self.run('vm boot-diagnostics disable {}'.format(common_part))
+        verification = [JMESPathComparator('diagnosticsProfile.bootDiagnostics.enabled', False)]
+        self.test('vm show {}'.format(common_part), verification)
+
+
+class VMExtensionInstallTest(CommandTestScript):
+
+    def __init__(self):
+        super(VMExtensionInstallTest, self).__init__(None, self.test_body, None)
+
+    def test_body(self):
+        #pylint: disable=line-too-long
+        publisher = 'Microsoft.OSTCExtensions'
+        extension_name = 'VMAccessForLinux'
+        vm_name = 'yugangw8-1'
+        resource_group = 'yugangw8'
+        public_key = ('ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC8InHIPLAu6lMc0d+5voyXqigZfT5r6fAM1+FQAi+mkPDdk2hNq1BG0Bwfc88G'
+                      'm7BImw8TS+x2bnZmhCbVnHd6BPCDY7a+cHCSqrQMW89Cv6Vl4ueGOeAWHpJTV9CTLVz4IY1x4HBdkLI2lKIHri9+z7NIdvFk7iOk'
+                      'MVGyez5H1xDbF2szURxgc4I2/o5wycSwX+G8DrtsBvWLmFv9YAPx+VkEHQDjR0WWezOjuo1rDn6MQfiKfqAjPuInwNOg5AIxXAOR'
+                      'esrin2PUlArNtdDH1zlvI4RZi36+tJO7mtm3dJiKs4Sj7G6b1CjIU6aaj27MmKy3arIFChYav9yYM3IT')
+        user_name = 'yugangw'
+        config_file_name = 'private_config.json'
+        config = {
+            'username': user_name,
+            'ssh_key': public_key
+            }
+        config_file = os.path.join(TEST_DIR, config_file_name)
+        with open(config_file, 'w') as outfile:
+            json.dump(config, outfile)
+
+        try:
+            set_cmd = ('vm extension set -n {} --publisher {} --version 1.4  --vm-name {} --resource-group {} --private-config {}'
+                       .format(extension_name, publisher, vm_name, resource_group, config_file))
+            self.run(set_cmd)
+            self.test('vm extension show --resource-group {} --vm-name {} --name {}'.format(
+                resource_group, vm_name, extension_name), [
+                    JMESPathComparator('type(@)', 'object'),
+                    JMESPathComparator('name', extension_name),
+                    JMESPathComparator('resourceGroup', resource_group)])
+        finally:
+            os.remove(config_file)
+
+
 ENV_VAR = {}
 
 TEST_DEF = [
-    #{
-    #    'test_name': 'vm_usage_list_westus',
-    #    'command': VMUsageScenarioTest()
-    #},
-    #{
-    #    'test_name': 'vm_show_list_sizes_list_ip_addresses',
-    #    'command': VMShowListSizesListIPAddressesScenarioTest()
-    #},
-    #{
-    #    'test_name': 'vm_images_list_by_aliases',
-    #    'command': VMImageListByAliasesScenarioTest()
-    #},
-    #{
-    #    'test_name': 'vm_images_list_thru_services',
-    #    'command': VMImageListThruServiceScenarioTest()
-    #},
-    #{
-    #    'test_name': 'vm_size_list',
-    #    'command': VMSizeListScenarioTest()
-    #},
-    #{
-    #    'test_name': 'vm_image_list_offers',
-    #    'command': VMImageListOffersScenarioTest()
-    #},
-    #{
-    #    'test_name': 'vm_image_list_publishers',
-    #    'command': VMImageListPublishersScenarioTest()
-    #},
-    #{
-    #    'test_name': 'vm_image_list_skus',
-    #    'command': VMImageListSkusScenarioTest()
-    #},
-    #{
-    #    'test_name': 'vm_image_show',
-    #    'command': VMImageShowScenarioTest()
-    #},
-    #{
-    #    'test_name': 'vm_generalize',
-    #    'command': VMGeneralizeScenarioTest()
-    #},
-    #{
-    #    'test_name': 'vm_create_state_modifications',
-    #    'command': VMCreateAndStateModificationsScenarioTest()
-    #},
-    #{
-    #    'test_name': 'vm_availset',
-    #    'command': VMAvailSetScenarioTest()
-    #},
-    #{
-    #    'test_name': 'vm_extension',
-    #    'command': VMExtensionsScenarioTest()
-    #},
-    #{
-    #    'test_name': 'vm_machine_extension_image',
-    #    'command': VMMachineExtensionImageScenarioTest()
-    #},
-    #{
-    #    'test_name': 'vm_combined_list',
-    #    'command': VMListFoldedScenarioTest()
-    #},
-    #{
-    #    'test_name': 'vm_scaleset_gets',
-    #    'command': VMScaleSetGetsScenarioTest()
-    #},
-    #{
-    #    'test_name': 'vm_scaleset_states',
-    #    'command': VMScaleSetStatesScenarioTest()
-    #},
-    #{
-    #    'test_name': 'vm_scaleset_delete',
-    #    'command': VMScaleSetDeleteScenarioTest()
-    #},
-    #{
-    #    'test_name': 'vm_scaleset_vms',
-    #    'command': VMScaleSetVMsScenarioTest()
-    #},
-    #{
-    #    'test_name': 'vm_add_remove_linux_user',
-    #    'command': VMAccessAddRemoveLinuxUser()
-    #}
+    {
+        'test_name': 'vm_usage_list_westus',
+        'command': VMUsageScenarioTest()
+    },
+    {
+        'test_name': 'vm_show_list_sizes_list_ip_addresses',
+        'command': VMShowListSizesListIPAddressesScenarioTest()
+    },
+    {
+        'test_name': 'vm_images_list_by_aliases',
+        'command': VMImageListByAliasesScenarioTest()
+    },
+    {
+        'test_name': 'vm_images_list_thru_services',
+        'command': VMImageListThruServiceScenarioTest()
+    },
+    {
+        'test_name': 'vm_size_list',
+        'command': VMSizeListScenarioTest()
+    },
+    {
+        'test_name': 'vm_image_list_offers',
+        'command': VMImageListOffersScenarioTest()
+    },
+    {
+        'test_name': 'vm_image_list_publishers',
+        'command': VMImageListPublishersScenarioTest()
+    },
+    {
+        'test_name': 'vm_image_list_skus',
+        'command': VMImageListSkusScenarioTest()
+    },
+    {
+        'test_name': 'vm_image_show',
+        'command': VMImageShowScenarioTest()
+    },
+    {
+        'test_name': 'vm_generalize',
+        'command': VMGeneralizeScenarioTest()
+    },
+    {
+        'test_name': 'vm_create_state_modifications',
+        'command': VMCreateAndStateModificationsScenarioTest()
+    },
+    {
+        'test_name': 'vm_availset',
+        'command': VMAvailSetScenarioTest()
+    },
+    {
+        'test_name': 'vm_extension',
+        'command': VMExtensionsScenarioTest()
+    },
+    {
+        'test_name': 'vm_machine_extension_image',
+        'command': VMMachineExtensionImageScenarioTest()
+    },
+    {
+        'test_name': 'vm_extension_image_search',
+        'command': VMExtensionImageSearchScenarioTest()
+    },
+    {
+        'test_name': 'vm_combined_list',
+        'command': VMListFoldedScenarioTest()
+    },
+    {
+        'test_name': 'vm_scaleset_gets',
+        'command': VMScaleSetGetsScenarioTest()
+    },
+    {
+        'test_name': 'vm_scaleset_states',
+        'command': VMScaleSetStatesScenarioTest()
+    },
+    {
+        'test_name': 'vm_scaleset_delete',
+        'command': VMScaleSetDeleteScenarioTest()
+    },
+    {
+        'test_name': 'vm_scaleset_vms',
+        'command': VMScaleSetVMsScenarioTest()
+    },
+    {
+        'test_name': 'vm_add_remove_linux_user',
+        'command': VMAccessAddRemoveLinuxUser()
+    },
+    {
+        'test_name': 'vm_create_ubuntu',
+        'command': VMCreateUbuntuScenarioTest()
+    },
+    {
+        'test_name': 'vm_enable_disable_boot_diagnostic',
+        'command': VMBootDiagnostics()
+    },
+    {
+        'test_name': 'vm_extension_install',
+        'command': VMExtensionInstallTest()
+    }
 ]
-
-

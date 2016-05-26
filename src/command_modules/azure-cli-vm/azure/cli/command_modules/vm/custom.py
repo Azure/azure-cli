@@ -1,17 +1,22 @@
 ﻿# pylint: disable=no-self-use,too-many-arguments
-import os
 import re
+try:
+    from urllib.parse import urlparse
+except ImportError:
+    from urlparse import urlparse # pylint: disable=import-error
+from six.moves.urllib.request import urlopen #pylint: disable=import-error,unused-import
 
 from azure.mgmt.compute.models import DataDisk
 from azure.mgmt.compute.models.compute_management_client_enums import DiskCreateOptionTypes
 from azure.cli.commands import CommandTable, LongRunningOperation
-from azure.cli.commands._command_creation import get_mgmt_service_client
+from azure.cli.commands._command_creation import get_mgmt_service_client, get_data_service_client
 from azure.cli._util import CLIError
+from ._vm_utils import read_content_if_is_file, load_json
 
-from ._actions import load_images_from_aliases_doc, load_images_thru_services
+from ._actions import (load_images_from_aliases_doc,
+                       load_extension_images_thru_services,
+                       load_images_thru_services)
 from ._factory import _compute_client_factory
-
-from six.moves.urllib.request import urlopen #pylint: disable=import-error,unused-import
 
 command_table = CommandTable()
 
@@ -98,6 +103,22 @@ class ConvenienceVmCommands(object): # pylint: disable=too-few-public-methods
         for i in all_images:
             i['urn'] = ':'.join([i['publisher'], i['offer'], i['sku'], i['version']])
         return all_images
+
+    def list_vm_extension_images(self,
+                                 image_location=None,
+                                 publisher=None,
+                                 name=None,
+                                 version=None):
+        '''vm extension image list
+        :param str image_location:Image location
+        :param str publisher:Image publisher name
+        :param str name:Image name
+        :param str version:Image version
+        '''
+        return load_extension_images_thru_services(publisher,
+                                                   name,
+                                                   version,
+                                                   image_location)
 
     def list_ip_addresses(self, resource_group_name=None, vm_name=None):
         ''' Get IP addresses from one or more Virtual Machines
@@ -242,10 +263,7 @@ class ConvenienceVmCommands(object): # pylint: disable=too-few-public-methods
             protected_settings['password'] = password
 
         if ssh_key_value:
-            if os.path.exists(ssh_key_value):
-                with open(ssh_key_value, 'r') as f:
-                    ssh_key_value = f.read()
-            protected_settings['ssh_key'] = ssh_key_value
+            protected_settings['ssh_key'] = read_content_if_is_file(ssh_key_value)
 
         publisher, extension_name, version, auto_upgrade = _get_access_extension_upgrade_info(
             vm.resources, is_linux=True)
@@ -289,3 +307,147 @@ class ConvenienceVmCommands(object): # pylint: disable=too-few-public-methods
                                                                   extension_name,
                                                                   ext)
 
+    def disable_boot_diagnostics(self, resource_group_name, vm_name):
+        vm = _vm_get(resource_group_name, vm_name)
+        diag_profile = vm.diagnostics_profile
+        if not (diag_profile and
+                diag_profile.boot_diagnostics and
+                diag_profile.boot_diagnostics.enabled):
+            return
+
+        # Issue: https://github.com/Azure/autorest/issues/934
+        vm.resources = None
+        diag_profile.boot_diagnostics.enabled = False
+        diag_profile.boot_diagnostics.storage_uri = None
+        _vm_set(vm, "Disabling boot diagnostics", "Done")
+
+    def enable_boot_diagnostics(self, resource_group_name, vm_name, storage_uri):
+        '''Enable boot diagnostics
+        :param storage_uri:the storage account uri for boot diagnostics. A valid uri
+           in format like https://your_stoage_account_name.blob.core.windows.net/
+        '''
+        vm = _vm_get(resource_group_name, vm_name)
+
+        if (vm.diagnostics_profile and
+                vm.diagnostics_profile.boot_diagnostics and
+                vm.diagnostics_profile.boot_diagnostics.enabled and
+                vm.diagnostics_profile.boot_diagnostics.storage_uri and
+                vm.diagnostics_profile.boot_diagnostics.storage_uri.lower() == storage_uri.lower()):
+            return
+
+        from azure.mgmt.compute.models import DiagnosticsProfile, BootDiagnostics
+        boot_diag = BootDiagnostics(True, storage_uri)
+        if vm.diagnostics_profile is None:
+            vm.diagnostics_profile = DiagnosticsProfile(boot_diag)
+        else:
+            vm.diagnostics_profile.boot_diagnostics = boot_diag
+
+        # Issue: https://github.com/Azure/autorest/issues/934
+        vm.resources = None
+        _vm_set(vm, "Enabling boot diagnostics", "Done")
+
+    def get_boot_log(self, resource_group_name, vm_name):
+        import sys
+        import io
+
+        from azure.mgmt.storage import StorageManagementClient, StorageManagementClientConfiguration
+        from azure.storage.blob import BlockBlobService
+
+        client = _compute_client_factory()
+
+        virtual_machine = client.virtual_machines.get(
+            resource_group_name,
+            vm_name,
+            expand='instanceView')
+
+        blob_uri = virtual_machine.instance_view.boot_diagnostics.serial_console_log_blob_uri # pylint: disable=no-member
+
+        # Find storage account for diagnostics
+        storage_mgmt_client = get_mgmt_service_client(StorageManagementClient,
+                                                      StorageManagementClientConfiguration)
+        if not blob_uri:
+            raise CLIError('No console log available')
+        try:
+            storage_accounts = storage_mgmt_client.storage_accounts.list()
+            matching_storage_account = (a for a in list(storage_accounts)
+                                        if blob_uri.startswith(a.primary_endpoints.blob))
+            storage_account = next(matching_storage_account)
+        except StopIteration:
+            raise CLIError('Failed to find storage accont for console log file')
+
+        regex = r'/subscriptions/[^/]+/resourceGroups/(?P<rg>[^/]+)/.+'
+        match = re.search(regex, storage_account.id, re.I)
+        rg = match.group('rg')
+        # Get account key
+        keys = storage_mgmt_client.storage_accounts.list_keys(rg,
+                                                              storage_account.name)
+
+        # Extract container and blob name from url...
+        container, blob = urlparse(blob_uri).path.split('/')[-2:]
+
+        storage_client = get_data_service_client(
+            BlockBlobService,
+            storage_account.name,
+            keys.key1) # pylint: disable=no-member
+
+        class StreamWriter(object): # pylint: disable=too-few-public-methods
+
+            def __init__(self, out):
+                self.out = out
+
+            def write(self, str_or_bytes):
+                if isinstance(str_or_bytes, bytes):
+                    self.out.write(str_or_bytes.decode())
+                else:
+                    self.out.write(str_or_bytes)
+
+        storage_client.get_blob_to_stream(container, blob, StreamWriter(sys.stdout))
+
+    def list_extensions(self, resource_group_name, vm_name):
+        vm = _vm_get(resource_group_name, vm_name)
+        extension_type = 'Microsoft.Compute/virtualMachines/extensions'
+        result = [r for r in vm.resources if r.type == extension_type]
+        return result
+
+    def set_extension(self,
+                      resource_group_name,
+                      vm_name,
+                      vm_extension_name,
+                      publisher,
+                      version,
+                      public_config=None,
+                      private_config=None,
+                      auto_upgrade_minor_version=False):
+        '''create/update extensions for a VM in a resource group'
+        :param vm_name: the name of virtual machine.
+        :param vm_extension_name: the name of the extension
+        :param publisher: the name of extension publisher
+        :param version: the version of extension, must be in the format of "major.minor"
+        :param public_config: public configuration content or a file path
+        :param private_config: private configuration content or a file path
+        :param auto_upgrade_minor_version: auto upgrade to the newer version if available
+        '''
+        vm = _vm_get(resource_group_name, vm_name)
+        client = _compute_client_factory()
+
+        from azure.mgmt.compute.models import VirtualMachineExtension
+
+        protected_settings = load_json(private_config) if not private_config else {}
+        settings = load_json(public_config) if not public_config else None
+
+        #workaround a known issue: the version must only contain "major.minor", even though
+        #"extension image list" gives more detail
+        version = '.'.join(version.split('.')[0:2])
+
+        ext = VirtualMachineExtension(vm.location,#pylint: disable=no-member
+                                      publisher=publisher,
+                                      virtual_machine_extension_type=vm_extension_name,
+                                      protected_settings=protected_settings,
+                                      type_handler_version=version,
+                                      settings=settings,
+                                      auto_upgrade_minor_version=auto_upgrade_minor_version)
+
+        return client.virtual_machine_extensions.create_or_update(resource_group_name,
+                                                                  vm_name,
+                                                                  vm_extension_name,
+                                                                  ext)

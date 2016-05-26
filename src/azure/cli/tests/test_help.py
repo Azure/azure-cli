@@ -81,7 +81,7 @@ class Test_argparse(unittest.TestCase):
 
         with self.assertRaises(SystemExit):
             app.execute('n1 -h'.split())
-        self.assertEqual(True, 'n1: the description' in io.getvalue())
+        self.assertEqual(True, 'n1: The description.' in io.getvalue())
 
     @redirect_io
     def test_help_plain_long_description(self):
@@ -104,7 +104,7 @@ class Test_argparse(unittest.TestCase):
 
         with self.assertRaises(SystemExit):
             app.execute('n1 -h'.split())
-        self.assertEqual(True, io.getvalue().startswith('\nCommand\n    az n1\n        long description'))
+        self.assertEqual(True, io.getvalue().startswith('\nCommand\n    az n1\n        Long description.'))
 
     @redirect_io
     def test_help_long_description_and_short_description(self):
@@ -128,7 +128,7 @@ class Test_argparse(unittest.TestCase):
 
         with self.assertRaises(SystemExit):
             app.execute('n1 -h'.split())
-        self.assertEqual(True, io.getvalue().startswith('\nCommand\n    az n1: short description\n        long description'))
+        self.assertEqual(True, io.getvalue().startswith('\nCommand\n    az n1: Short description.\n        Long description.'))
 
     @redirect_io
     def test_help_docstring_description_overrides_short_description(self):
@@ -152,7 +152,7 @@ class Test_argparse(unittest.TestCase):
 
         with self.assertRaises(SystemExit):
             app.execute('n1 -h'.split())
-        self.assertEqual(True, 'n1: docstring summary' in io.getvalue())
+        self.assertEqual(True, 'n1: Docstring summary.' in io.getvalue())
 
     @redirect_io
     def test_help_long_description_multi_line(self):
@@ -180,7 +180,7 @@ class Test_argparse(unittest.TestCase):
         with self.assertRaises(SystemExit):
             app.execute('n1 -h'.split())
 
-        self.assertEqual(True, io.getvalue().startswith('\nCommand\n    az n1\n        line1\n        line2'))
+        self.assertEqual(True, io.getvalue().startswith('\nCommand\n    az n1\n        Line1\n        line2.'))
 
     @redirect_io
     @mock.patch('azure.cli.application.Application.register', return_value=None)
@@ -226,17 +226,17 @@ Command
     az n1
 
 Arguments
-    --foobar2 -fb2 [Required]: one line partial sentence
-    paragraph(s)
+    --foobar2 -fb2 [Required]: One line partial sentence.
+        Paragraph(s).
 
-    --foobar -fb             : one line partial sentence
-    text, markdown, etc.
-    Values from: az vm list, default
+    --foobar -fb             : One line partial sentence.
+        Text, markdown, etc.
+        Values from: az vm list, default.
 
-    --foobar3 -fb3           : the foobar3
+    --foobar3 -fb3           : The foobar3.
 
 Global Arguments
-    --help -h                : show this help message and exit
+    --help -h                : Show this help message and exit.
 '''
         self.assertEqual(s, io.getvalue())
 
@@ -287,21 +287,21 @@ Global Arguments
             app.execute('n1 -h'.split())
         s = '''
 Command
-    az n1: this module does xyz one-line or so
-        this module.... kjsdflkj... klsfkj paragraph1
-        this module.... kjsdflkj... klsfkj paragraph2
+    az n1: This module does xyz one-line or so.
+        This module.... kjsdflkj... klsfkj paragraph1
+        this module.... kjsdflkj... klsfkj paragraph2.
 
 Arguments
-    --foobar2 -fb2 [Required]: one line partial sentence
-    paragraph(s)
+    --foobar2 -fb2 [Required]: One line partial sentence.
+        Paragraph(s).
 
-    --foobar -fb             : one line partial sentence
-    text, markdown, etc.
-    Values from: az vm list, default
+    --foobar -fb             : One line partial sentence.
+        Text, markdown, etc.
+        Values from: az vm list, default.
 
 
 Global Arguments
-    --help -h                : show this help message and exit
+    --help -h                : Show this help message and exit.
 
 Examples
     foo example
@@ -375,7 +375,7 @@ Arguments
     -b
 
 Global Arguments
-    --help -h: show this help message and exit
+    --help -h: Show this help message and exit.
 '''
 
         self.assertEqual(s, io.getvalue())
@@ -498,12 +498,12 @@ Global Arguments
             app.execute('test_group1 test_group2 --help'.split())
         s = '''
 Group
-    az test_group1 test_group2: this module does xyz one-line or so
-        this module.... kjsdflkj... klsfkj paragraph1
-        this module.... kjsdflkj... klsfkj paragraph2
+    az test_group1 test_group2: This module does xyz one-line or so.
+        This module.... kjsdflkj... klsfkj paragraph1
+        this module.... kjsdflkj... klsfkj paragraph2.
 
 Sub-Commands
-    n1: this module does xyz one-line or so
+    n1: This module does xyz one-line or so.
 
 
 Examples
@@ -552,15 +552,15 @@ Examples
         s = """
 Command
     az n1
-        line1
-        line2
+        Line1
+        line2.
 
 Arguments
     --arg -a
     -b
 
 Global Arguments
-    --help -h: show this help message and exit
+    --help -h: Show this help message and exit.
     --query2 : JMESPath query string. See http://jmespath.org/ for more information and examples.
 """
 
