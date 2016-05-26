@@ -1,7 +1,6 @@
 # AZURE CLI STORAGE TEST DEFINITIONS
 
 import collections
-import json
 import os
 import sys
 
@@ -258,13 +257,13 @@ class StorageBlobCopyScenarioTest(CommandTestScript):
         s.run('storage container create --container-name {} --fail-on-exist'.format(src_cont))
         s.run('storage container create --container-name {} --fail-on-exist'.format(dst_cont))
 
-        s.run('storage blob upload -b {} -c {} --type block --upload-from {}'.format(src_blob, src_cont, os.path.join(TEST_DIR, 'testfile.rst')))
+        s.run('storage blob upload -b {} -c {} --type block --upload-from "{}"'.format(src_blob, src_cont, os.path.join(TEST_DIR, 'testfile.rst')))
         s.test('storage blob exists -b {} -c {}'.format(src_blob, src_cont), True)
 
         # test that a blob can be successfully copied
         src_uri = s.run('storage blob url -b {} -c {}'.format(src_blob, src_cont))
-        copy_status = json.loads(s.run('storage blob copy start -c {0} -n {1} -u {2} -o json'.format(
-            dst_cont, dst_blob, src_uri)))
+        copy_status = s.run('storage blob copy start -c {0} -n {1} -u {2} -o json'.format(
+            dst_cont, dst_blob, src_uri))
         assert copy_status['status'] == 'success'
         copy_id = copy_status['id']
         s.test('storage blob show -c {} -b {}'.format(dst_cont, dst_blob),
@@ -443,21 +442,21 @@ class StorageFileCopyScenarioTest(CommandTestScript):
         s.run('storage directory create --share-name {} -d {}'.format(src_share, src_dir))
         s.run('storage directory create --share-name {} -d {}'.format(dst_share, dst_dir))
 
-        s.run('storage file upload -f {} --share-name {} -d {} --local-file-name {}'.format(src_file, src_share, src_dir, os.path.join(TEST_DIR, 'testfile.rst')))
+        s.run('storage file upload -f {} --share-name {} -d {} --local-file-name "{}"'.format(src_file, src_share, src_dir, os.path.join(TEST_DIR, 'testfile.rst')))
         s.test('storage file exists -f {} --share-name {} -d {}'.format(src_file, src_share, src_dir), True)
 
         # test that a file can be successfully copied to root
         src_uri = s.run('storage file url -f {} --share-name {} -d {}'.format(src_file, src_share, src_dir))
-        copy_status = json.loads(s.run('storage file copy start --destination-share {0} -n {1} -u {2} -o json'.format(
-            dst_share, dst_file, src_uri)))
+        copy_status = s.run('storage file copy start --destination-share {0} -n {1} -u {2} -o json'.format(
+            dst_share, dst_file, src_uri))
         assert copy_status['status'] == 'success'
         copy_id = copy_status['id']
         s.test('storage file show --share-name {} -f {}'.format(dst_share, dst_file),
             {'name': dst_file, 'properties': {'copy': {'id': copy_id, 'status': 'success'}}})
 
         # test that a file can be successfully copied to a directory
-        copy_status = json.loads(s.run('storage file copy start --destination-share {0} -n {1} -d {3} -u {2} -o json'.format(
-            dst_share, dst_file, src_uri, dst_dir)))
+        copy_status = s.run('storage file copy start --destination-share {0} -n {1} -d {3} -u {2} -o json'.format(
+            dst_share, dst_file, src_uri, dst_dir))
         assert copy_status['status'] == 'success'
         copy_id = copy_status['id']
         s.test('storage file show --share-name {} -f {} -d {}'.format(dst_share, dst_file, dst_dir),
