@@ -146,6 +146,19 @@ VM_CREATE_PARAMETER_ALIASES = {
         'choices': ['new', 'existing'],
         'default': 'new',
         'help': ''
+    },
+    'network_security_group_rule': {
+        'name': '--network-security-group-rule',
+        'choices': ['RDP', 'SSH'],
+        'default': None,
+        'help': 'Network security group rule to create.  '
+                'Defaults to RDP for Windows and SSH for Linux'
+    },
+    'network_security_group_type': {
+        'name': '--network-security-group-type',
+        'choices': ['new', 'existing', 'none'],
+        'default': 'new',
+        'help': ''
     }
 }
 

@@ -240,7 +240,9 @@ build_operation("vm availability-set",
                                       LongRunningOperation(L('Creating availability set'), L('Availability set created')),
                                       'create')
                 ],
-                command_table)
+                command_table, patch_aliases(PARAMETER_ALIASES, {
+                    'name': {'name': '--name -n'}
+                    }))
 
 build_operation('vm access',
                 None,

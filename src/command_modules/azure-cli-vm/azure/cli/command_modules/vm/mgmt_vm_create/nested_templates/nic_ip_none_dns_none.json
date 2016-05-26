@@ -25,21 +25,49 @@
     },
     "privateIpAllocation": {
       "type": "string"
+    },
+    "networkSecurityGroupName": {
+      "type": "string"
+    },
+    "networkSecurityGroupType": {
+      "type": "string"
     }
   },
   "variables": {
-  },
-  "resources": [
-    {
-      "apiVersion": "2015-06-15",
-      "type": "Microsoft.Network/networkInterfaces",
-      "name": "[parameters('nicName')]",
-      "location": "[parameters('location')]",
-      "tags": {
-        "displayName": "NetworkInterface"
+    "nsgProperties": {
+      "new": {
+        "ipConfigurations": [
+          {
+            "name": "[concat('ipconfig', parameters('VirtualMachineName'))]",
+            "properties": {
+              "privateIPAllocationMethod": "[parameters('privateIpAllocation')]",
+              "subnet": {
+                "id": "[parameters('subnetRef')]"
+              }
+            }
+          }
+        ],
+        "networkSecurityGroup": {
+          "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroupName'))]"
+        }
       },
-      "dependsOn": [ ],
-      "properties": {
+      "existing": {
+        "ipConfigurations": [
+          {
+            "name": "[concat('ipconfig', parameters('VirtualMachineName'))]",
+            "properties": {
+              "privateIPAllocationMethod": "[parameters('privateIpAllocation')]",
+              "subnet": {
+                "id": "[parameters('subnetRef')]"
+              }
+            }
+          }
+        ],
+        "networkSecurityGroup": {
+          "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroupName'))]"
+        }
+      },
+      "none": {
         "ipConfigurations": [
           {
             "name": "[concat('ipconfig', parameters('VirtualMachineName'))]",
@@ -52,6 +80,19 @@
           }
         ]
       }
+    }
+  },
+  "resources": [
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "[parameters('nicName')]",
+      "location": "[parameters('location')]",
+      "tags": {
+        "displayName": "NetworkInterface"
+      },
+      "dependsOn": [ ],
+      "properties": "[variables('nsgProperties')[parameters('networkSecurityGroupType')]]"
     }
   ],
   "outputs": {

@@ -56,8 +56,10 @@ def _handle_auth_types(**kwargs):
 
     args = kwargs['args']
 
+    is_windows = 'Windows' in args.os_offer
+
     if not args.authentication_type:
-        args.authentication_type = 'password' if 'Windows' in args.os_offer else 'ssh'
+        args.authentication_type = 'password' if is_windows else 'ssh'
 
     if args.authentication_type == 'password':
         if args.ssh_dest_key_path or args.ssh_key_value:
@@ -75,6 +77,9 @@ def _handle_auth_types(**kwargs):
                     args.ssh_key_value = f.read()
             else:
                 raise CLIError('An RSA key file or key value must be supplied to SSH Key Value')
+
+    if args.network_security_group_type == 'new':
+        args.network_security_group_rule = 'RDP' if is_windows else 'SSH'
 
 APPLICATION.register(APPLICATION.COMMAND_PARSER_PARSED, _handle_auth_types)
 
