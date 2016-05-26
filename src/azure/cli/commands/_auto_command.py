@@ -120,7 +120,7 @@ def _extract_args_from_signature(command, operation):
                             if sig.defaults
                             else {})
             default = arg_defaults.get(arg_name)
-            required = arg not in arg_defaults
+            required = arg_name not in arg_defaults
 
         action = 'store_' + str(not default).lower() if isinstance(default, bool) else None
 
