@@ -69,7 +69,7 @@ class ResourceScenarioTest(CommandTestScript):
             s.run('resource list --tag displayName=StorageAccount -o json')
         assert len(all_tagged_displayname) > len(storage_acc_tagged_displayname)
 
-        s.run('resource set -n testserver23456 -g {} --resource-type '
+        s.run('resource tag -n testserver23456 -g {} --resource-type '
                'Microsoft.Sql/servers --tags test=pass'.format(rg))
 
         # check for simple resource with tag
@@ -90,7 +90,7 @@ class ResourceScenarioTest(CommandTestScript):
             {'name': 'testsql23456', 'location': 'West US', 'resourceGroup': rg})
 
         # clear tag and verify
-        s.run('resource set -n testserver23456 -g {} --resource-type '
+        s.run('resource tag -n testserver23456 -g {} --resource-type '
                'Microsoft.Sql/servers --tags'.format(rg))
         s.test('resource show -n testserver23456 -g {} --resource-type '
                'Microsoft.Sql/servers'.format(rg), {'tags': {}})
@@ -157,4 +157,3 @@ TEST_DEF = [
         'script': TagScenarioTest()
     },
 ]
-

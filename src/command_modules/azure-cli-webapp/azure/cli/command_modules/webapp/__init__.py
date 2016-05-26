@@ -1,2 +1,3 @@
 # pylint: disable=unused-import
-from .generated import command_table
+from azure.cli.command_modules.webapp.generated import command_table
+import azure.cli.command_modules.webapp._params

@@ -681,10 +681,6 @@ TEST_DEF = [
         'command': VMUsageScenarioTest()
     },
     {
-        'test_name': 'vm_show_list_sizes_list_ip_addresses',
-        'command': VMShowListSizesListIPAddressesScenarioTest()
-    },
-    {
         'test_name': 'vm_images_list_by_aliases',
         'command': VMImageListByAliasesScenarioTest()
     },

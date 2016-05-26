@@ -5,8 +5,7 @@ from sys import stderr
 
 from azure.cli.commands import CommandTable, LongRunningOperation
 
-from azure.cli.command_modules.storage._factory import \
-    storage_client_factory, blob_data_service_factory, file_data_service_factory
+from azure.cli.command_modules.storage._factory import storage_client_factory
 
 command_table = CommandTable()
 
@@ -22,7 +21,7 @@ def _update_progress(current, total):
 
 # CUSTOM METHODS
 
-def list_storage_accounts(client, resource_group_name=None):
+def list_storage_accounts(resource_group_name=None):
     ''' List storage accounts. '''
     from azure.mgmt.storage.models import StorageAccount
     from msrestazure.azure_active_directory import UserPassCredentials
@@ -33,7 +32,7 @@ def list_storage_accounts(client, resource_group_name=None):
         accounts = scf.storage_accounts.list()
     return list(accounts)
 
-def renew_storage_account_keys(client, resource_group_name, account_name, key=None):
+def renew_storage_account_keys(resource_group_name, account_name, key=None):
     ''' Regenerate one or both keys for a storage account.
     :param str key:Key to renew.'''
     from azure.cli.command_modules.storage._params import storage_account_key_options
@@ -46,12 +45,12 @@ def renew_storage_account_keys(client, resource_group_name, account_name, key=No
             key_name=k)
     return result
 
-def show_storage_account_usage(client):
+def show_storage_account_usage():
     ''' Show the current count and limit of the storage accounts under the subscription. '''
     scf = storage_client_factory()
     return next((x for x in scf.usage.list() if x.name.value == 'StorageAccounts'), None)
 
-def show_storage_account_connection_string(client, resource_group_name, account_name, use_http='https'):
+def show_storage_account_connection_string(resource_group_name, account_name, use_http='https'):
     ''' Show the connection string for a storage account.
     :param str use_http:use http as the default endpoint protocol '''
     scf = storage_client_factory()
@@ -62,7 +61,7 @@ def show_storage_account_connection_string(client, resource_group_name, account_
         keys.key1) #pylint: disable=no-member
     return {'ConnectionString':connection_string}
 
-def create_storage_account(client, resource_group_name, account_name, location, account_type, tags=None):
+def create_storage_account(resource_group_name, account_name, location, account_type, tags=None):
     ''' Create a storage account. '''
     from azure.mgmt.storage.models import StorageAccountCreateParameters
     scf = storage_client_factory()
@@ -71,8 +70,8 @@ def create_storage_account(client, resource_group_name, account_name, location, 
     poller = scf.storage_accounts.create(resource_group_name, account_name, params)
     return op(poller)
 
-def set_storage_account_properties(client, resource_group_name, account_name,
-        account_type=None, tags=None, custom_domain=None):
+def set_storage_account_properties(
+        resource_group_name, account_name, account_type=None, tags=None, custom_domain=None):
     ''' Update storage account property (only one at a time).
     :param str custom_domain:the custom domain name
     '''
@@ -90,10 +89,11 @@ def container_exists(client, container_name, snapshot=None, timeout=None):
         snapshot=snapshot,
         timeout=timeout)
 
-def upload_blob(client, container_name, blob_name, blob_type, upload_from,
-            content_type=None, content_disposition=None,
-            content_encoding=None, content_language=None, content_md5=None,
-            content_cache_control=None):
+def upload_blob(
+        client, container_name, blob_name, blob_type, upload_from,
+        content_type=None, content_disposition=None,
+        content_encoding=None, content_language=None, content_md5=None,
+        content_cache_control=None):
     '''Upload a blob to a container.
     :param str blob_type:type of blob to upload
     :param str upload_from:local path to upload from
@@ -141,9 +141,8 @@ def download_blob(client, container_name, blob_name, download_to):
     ''' Download the specified blob.
     :param str download_to:the file path to download to
     '''
-    # show dot indicator of download progress (one for every 10%)
     client.get_blob_to_path(container_name, blob_name, download_to,
-                                    progress_callback=_update_progress)
+                            progress_callback=_update_progress)
 
 def blob_exists(client, container_name, blob_name, snapshot=None, timeout=None):
     ''' Check if a storage blob exists. '''
@@ -173,9 +172,7 @@ def file_exists(client, share_name, file_name, directory_name=None):
     :param str file_name:the file name to check
     :param str directory_name:subdirectory path to the file
     '''
-    return client.exists(share_name=share_name,
-                        directory_name=directory_name,
-                        file_name=file_name)
+    return client.exists(share_name=share_name, directory_name=directory_name, file_name=file_name)
 
 def upload_file(client, share_name, file_name, local_file_name, directory_name=None):
     ''' Upload a file to a file share path.
@@ -183,4 +180,4 @@ def upload_file(client, share_name, file_name, local_file_name, directory_name=N
     :param str local_file_name:the path and file name to upload
     :param str directory_name:the destination directory to upload to'''
     client.create_file_from_path(share_name, directory_name, file_name, local_file_name,
-                                progress_callback=_update_progress)
+                                 progress_callback=_update_progress)

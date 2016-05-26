@@ -1,8 +1,8 @@
 ﻿import unittest
 import mock
 import azure.cli.application as application
-from azure.cli.command_modules.vm.custom import (_get_access_extension_upgrade_info,
-                                                 ConvenienceVmCommands)
+from azure.cli.command_modules.vm.custom import enable_boot_diagnostics, disable_boot_diagnostics
+from azure.cli.command_modules.vm.custom import _get_access_extension_upgrade_info
 
 class Test_Vm_Custom(unittest.TestCase):
 
@@ -72,8 +72,7 @@ class Test_Vm_Custom(unittest.TestCase):
     def test_enable_boot_diagnostics_on_vm_never_enabled(self, mock_vm_set, mock_vm_get):
         vm_fake = mock.MagicMock()
         mock_vm_get.return_value = vm_fake
-        commands = ConvenienceVmCommands()
-        commands.enable_boot_diagnostics('g1', 'vm1', 'storage_uri1')
+        enable_boot_diagnostics('g1', 'vm1', 'storage_uri1')
         self.assertTrue(vm_fake.diagnostics_profile.boot_diagnostics.enabled)
         self.assertEqual('storage_uri1', vm_fake.diagnostics_profile.boot_diagnostics.storage_uri)
         self.assertTrue(mock_vm_get.called)
@@ -86,8 +85,7 @@ class Test_Vm_Custom(unittest.TestCase):
         mock_vm_get.return_value = vm_fake
         vm_fake.diagnostics_profile.boot_diagnostics.enabled = True
         vm_fake.diagnostics_profile.boot_diagnostics.storage_uri = 'storage_uri1'
-        commands = ConvenienceVmCommands()
-        commands.enable_boot_diagnostics('g1', 'vm1', 'storage_uri1')
+        enable_boot_diagnostics('g1', 'vm1', 'storage_uri1')
         self.assertTrue(mock_vm_get.called)
         self.assertFalse(mock_vm_set.called)
 
@@ -98,8 +96,7 @@ class Test_Vm_Custom(unittest.TestCase):
         mock_vm_get.return_value = vm_fake
         vm_fake.diagnostics_profile.boot_diagnostics.enabled = True
         vm_fake.diagnostics_profile.boot_diagnostics.storage_uri = 'storage_uri1'
-        commands = ConvenienceVmCommands()
-        commands.disable_boot_diagnostics('g1', 'vm1')
+        disable_boot_diagnostics('g1', 'vm1')
         self.assertFalse(vm_fake.diagnostics_profile.boot_diagnostics.enabled)
         self.assertIsNone(vm_fake.diagnostics_profile.boot_diagnostics.storage_uri)
         self.assertTrue(mock_vm_get.called)

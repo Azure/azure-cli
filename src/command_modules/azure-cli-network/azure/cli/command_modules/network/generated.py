@@ -18,6 +18,8 @@
     VirtualNetworkGatewaysOperations,
     VirtualNetworksOperations)
 
+from azure.cli.commands import CommandTable
+from azure.cli.commands.command_types import cli_command
 from azure.cli.commands._command_creation import get_mgmt_service_client
 from azure.cli.command_modules.network.mgmt_vnet.lib \
     import (ResourceManagementClient as VNetClient,
@@ -32,148 +34,145 @@ from azure.cli.command_modules.network.mgmt_lb.lib import (LBCreationClient as L
                                                            as LBClientConfig)
 from azure.cli.command_modules.network.mgmt_lb.lib.operations import LBOperations
 from azure.cli.command_modules.network._params import _network_client_factory
-from azure.cli.commands._auto_command import build_operation, CommandDefinition, cli_command
-from azure.cli.commands import CommandTable, LongRunningOperation
-from azure.cli._locale import L
 from .custom import create_update_subnet
 
 command_table = CommandTable()
 
 # pylint: disable=line-too-long
 # Application gateways
-factory = lambda **kwargs: _network_client_factory(**kwargs).application_gateways
-cli_command('network application-gateway delete', factory, ApplicationGatewaysOperations.delete, None, command_table)
-cli_command('network application-gateway show', factory, ApplicationGatewaysOperations.get, 'ApplicationGateway', command_table)
-cli_command('network application-gateway list', factory, ApplicationGatewaysOperations.list, '[ApplicationGateway]', command_table)
-cli_command('network application-gateway list-all', factory, ApplicationGatewaysOperations.list_all, '[ApplicationGateway]', command_table)
-cli_command('network application-gateway start', factory, ApplicationGatewaysOperations.start, None, command_table)
-cli_command('network application-gateway stop', factory, ApplicationGatewaysOperations.stop, None, command_table)
+factory = lambda _: _network_client_factory().application_gateways
+cli_command(command_table, 'network application-gateway delete', ApplicationGatewaysOperations.delete, None, factory)
+cli_command(command_table, 'network application-gateway show', ApplicationGatewaysOperations.get, 'ApplicationGateway', factory)
+cli_command(command_table, 'network application-gateway list', ApplicationGatewaysOperations.list, '[ApplicationGateway]', factory)
+cli_command(command_table, 'network application-gateway list-all', ApplicationGatewaysOperations.list_all, '[ApplicationGateway]', factory)
+cli_command(command_table, 'network application-gateway start', ApplicationGatewaysOperations.start, None, factory)
+cli_command(command_table, 'network application-gateway stop', ApplicationGatewaysOperations.stop, None, factory)
 
 # ExpressRouteCircuitAuthorizationsOperations
-factory = lambda **kwargs: _network_client_factory(**kwargs).express_route_circuit_authorizations
-cli_command('network express-route circuit-auth delete', factory, ExpressRouteCircuitAuthorizationsOperations.delete, None, command_table)
-cli_command('network express-route circuit-auth show', factory, ExpressRouteCircuitAuthorizationsOperations.get, 'ExpressRouteCircuitAuthorization', command_table)
-cli_command('network express-route circuit-auth list', factory, ExpressRouteCircuitAuthorizationsOperations.list, '[ExpressRouteCircuitAuthorization]', command_table)
+factory = lambda _: _network_client_factory().express_route_circuit_authorizations
+cli_command(command_table, 'network express-route circuit-auth delete', ExpressRouteCircuitAuthorizationsOperations.delete, None, factory)
+cli_command(command_table, 'network express-route circuit-auth show', ExpressRouteCircuitAuthorizationsOperations.get, 'ExpressRouteCircuitAuthorization', factory)
+cli_command(command_table, 'network express-route circuit-auth list', ExpressRouteCircuitAuthorizationsOperations.list, '[ExpressRouteCircuitAuthorization]', factory)
 
 # ExpressRouteCircuitPeeringsOperations
-factory = lambda **kwargs: _network_client_factory(**kwargs).express_route_circuit_peerings
-cli_command('network express-route circuit-peering delete', factory, ExpressRouteCircuitPeeringsOperations.delete, None, command_table)
-cli_command('network express-route circuit-peering show', factory, ExpressRouteCircuitPeeringsOperations.get, 'ExpressRouteCircuitPeering', command_table)
-cli_command('network express-route circuit-peering list', factory, ExpressRouteCircuitPeeringsOperations.list, '[ExpressRouteCircuitPeering]', command_table)
+factory = lambda _: _network_client_factory().express_route_circuit_peerings
+cli_command(command_table, 'network express-route circuit-peering delete', ExpressRouteCircuitPeeringsOperations.delete, None, factory)
+cli_command(command_table, 'network express-route circuit-peering show', ExpressRouteCircuitPeeringsOperations.get, 'ExpressRouteCircuitPeering', factory)
+cli_command(command_table, 'network express-route circuit-peering list', ExpressRouteCircuitPeeringsOperations.list, '[ExpressRouteCircuitPeering]', factory)
 
 # ExpressRouteCircuitsOperations
-factory = lambda **kwargs: _network_client_factory(**kwargs).express_route_circuits
-cli_command('network express-route circuit delete', factory, ExpressRouteCircuitsOperations.delete, None, command_table)
-cli_command('network express-route circuit show', factory, ExpressRouteCircuitsOperations.get, 'ExpressRouteCircuit', command_table)
-cli_command('network express-route circuit list-arp', factory, ExpressRouteCircuitsOperations.list_arp_table, '[ExpressRouteCircuitArpTable]', command_table)
-cli_command('network express-route circuit list-routes', factory, ExpressRouteCircuitsOperations.list_routes_table, '[ExpressRouteCircuitRoutesTable]', command_table)
-cli_command('network express-route circuit list', factory, ExpressRouteCircuitsOperations.delete, '[ExpressRouteCircuit]', command_table)
-cli_command('network express-route circuit list-all', factory, ExpressRouteCircuitsOperations.delete, '[ExpressRouteCircuit]', command_table)
+factory = lambda _: _network_client_factory().express_route_circuits
+cli_command(command_table, 'network express-route circuit delete', ExpressRouteCircuitsOperations.delete, None, factory)
+cli_command(command_table, 'network express-route circuit show', ExpressRouteCircuitsOperations.get, 'ExpressRouteCircuit', factory)
+cli_command(command_table, 'network express-route circuit get-stats', ExpressRouteCircuitsOperations.get_stats, 'Result', factory)
+cli_command(command_table, 'network express-route circuit list-arp', ExpressRouteCircuitsOperations.list_arp_table, '[ExpressRouteCircuitArpTable]', factory)
+cli_command(command_table, 'network express-route circuit list-routes', ExpressRouteCircuitsOperations.list_routes_table, '[ExpressRouteCircuitRoutesTable]', factory)
+cli_command(command_table, 'network express-route circuit list', ExpressRouteCircuitsOperations.list, '[ExpressRouteCircuit]', factory)
+cli_command(command_table, 'network express-route circuit list-all', ExpressRouteCircuitsOperations.list_all, '[ExpressRouteCircuit]', factory)
 
 # ExpressRouteServiceProvidersOperations
-factory = lambda **kwargs: _network_client_factory(**kwargs).load_balancers
-cli_command('network express-route service-provider list', factory, ExpressRouteServiceProvidersOperations.list, '[ExpressRouteServiceProvider]', command_table)
+factory = lambda _: _network_client_factory().load_balancers
+cli_command(command_table, 'network express-route service-provider list', ExpressRouteServiceProvidersOperations.list, '[ExpressRouteServiceProvider]', factory)
 
 # LoadBalancersOperations
-factory = lambda **kwargs: _network_client_factory(**kwargs).load_balancers
-cli_command('network lb delete', factory, LoadBalancersOperations.delete, None, command_table)
-cli_command('network lb show', factory, LoadBalancersOperations.get, 'LoadBalancer', command_table)
-cli_command('network lb list', factory, LoadBalancersOperations.list_all, '[LoadBalancer]', command_table)
-cli_command('network lb list-all', factory, LoadBalancersOperations.delete, '[LoadBalancer]', command_table)
+factory = lambda _: _network_client_factory().load_balancers
+cli_command(command_table, 'network lb delete', LoadBalancersOperations.delete, None, factory)
+cli_command(command_table, 'network lb show', LoadBalancersOperations.get, 'LoadBalancer', factory)
+cli_command(command_table, 'network lb list', LoadBalancersOperations.list, '[LoadBalancer]', factory)
+cli_command(command_table, 'network lb list-all', LoadBalancersOperations.list_all, '[LoadBalancer]', factory)
 
 factory = lambda **_: get_mgmt_service_client(LBClient, LBClientConfig).lb
-cli_command('network lb create', factory, LBOperations.create_or_update, 'LoadBalancer', command_table)
+cli_command(command_table, 'network lb create', LBOperations.create_or_update, 'LoadBalancer', factory)
 
 # LocalNetworkGatewaysOperations
-factory = lambda **kwargs: _network_client_factory(**kwargs).local_network_gateways
-cli_command('network local-gateway delete', factory, LocalNetworkGatewaysOperations.delete, None, command_table)
-cli_command('network local-gateway show', factory, LocalNetworkGatewaysOperations.get, 'LocalNetworkGateway', command_table)
-cli_command('network local-gateway list', factory, LocalNetworkGatewaysOperations.list, '[LocalNetworkGateway]', command_table)
+factory = lambda _: _network_client_factory().local_network_gateways
+cli_command(command_table, 'network local-gateway delete', LocalNetworkGatewaysOperations.delete, None, factory)
+cli_command(command_table, 'network local-gateway show', LocalNetworkGatewaysOperations.get, 'LocalNetworkGateway', factory)
+cli_command(command_table, 'network local-gateway list', LocalNetworkGatewaysOperations.list, '[LocalNetworkGateway]', factory)
 
 # NetworkInterfacesOperations
-factory = lambda **kwargs: _network_client_factory(**kwargs).network_interfaces
-cli_command('network nic delete', factory, NetworkInterfacesOperations.delete, None, command_table)
-cli_command('network nic show', factory, NetworkInterfacesOperations.get, 'NetworkInterface', command_table)
-cli_command('network nic list', factory, NetworkInterfacesOperations.list, '[NetworkInterface]', command_table)
-cli_command('network nic list-all', factory, NetworkInterfacesOperations.list_all, '[NetworkInterface]', command_table)
+factory = lambda _: _network_client_factory().network_interfaces
+cli_command(command_table, 'network nic delete', NetworkInterfacesOperations.delete, None, factory)
+cli_command(command_table, 'network nic show', NetworkInterfacesOperations.get, 'NetworkInterface', factory)
+cli_command(command_table, 'network nic list', NetworkInterfacesOperations.list, '[NetworkInterface]', factory)
+cli_command(command_table, 'network nic list-all', NetworkInterfacesOperations.list_all, '[NetworkInterface]', factory)
 
 # NetworkInterfacesOperations: scaleset
-cli_command('network nic scale-set list-vm-nics', factory, NetworkInterfacesOperations.list_virtual_machine_scale_set_vm_network_interfaces, '[NetworkInterface]', command_table)
-cli_command('network nic scale-set list', factory, NetworkInterfacesOperations.list_virtual_machine_scale_set_network_interfaces, '[NetworkInterface]', command_table)
-cli_command('network nic scale-set show', factory, NetworkInterfacesOperations.get_virtual_machine_scale_set_network_interface, 'NetworkInterface', command_table)
+cli_command(command_table, 'network nic scale-set list-vm-nics', NetworkInterfacesOperations.list_virtual_machine_scale_set_vm_network_interfaces, '[NetworkInterface]', factory)
+cli_command(command_table, 'network nic scale-set list', NetworkInterfacesOperations.list_virtual_machine_scale_set_network_interfaces, '[NetworkInterface]', factory)
+cli_command(command_table, 'network nic scale-set show', NetworkInterfacesOperations.get_virtual_machine_scale_set_network_interface, 'NetworkInterface', factory)
 
 # NetworkSecurityGroupsOperations
-factory = lambda **kwargs: _network_client_factory(**kwargs).network_security_groups
-cli_command('network nsg delete', factory, NetworkSecurityGroupsOperations.delete, None, command_table)
-cli_command('network nsg show', factory, NetworkSecurityGroupsOperations.get, 'NetworkSecurityGroup', command_table)
-cli_command('network nsg list', factory, NetworkSecurityGroupsOperations.list, '[NetworkSecurityGroup]', command_table)
-cli_command('network nsg list-all', factory, NetworkSecurityGroupsOperations.list_all, '[NetworkSecurityGroup]', command_table)
+factory = lambda _: _network_client_factory().network_security_groups
+cli_command(command_table, 'network nsg delete', NetworkSecurityGroupsOperations.delete, None, factory)
+cli_command(command_table, 'network nsg show', NetworkSecurityGroupsOperations.get, 'NetworkSecurityGroup', factory)
+cli_command(command_table, 'network nsg list', NetworkSecurityGroupsOperations.list, '[NetworkSecurityGroup]', factory)
+cli_command(command_table, 'network nsg list-all', NetworkSecurityGroupsOperations.list_all, '[NetworkSecurityGroup]', factory)
 
 # PublicIPAddressesOperations
-factory = lambda **kwargs: _network_client_factory(**kwargs).public_ip_addresses
-cli_command('network public-ip delete', factory, PublicIPAddressesOperations.delete, None, command_table)
-cli_command('network public-ip show', factory, PublicIPAddressesOperations.get, 'PublicIPAddress', command_table)
-cli_command('network public-ip list', factory, PublicIPAddressesOperations.list, '[PublicIPAddress]', command_table)
-cli_command('network public-ip list-all', factory, PublicIPAddressesOperations.list_all, '[PublicIPAddress]', command_table)
+factory = lambda _: _network_client_factory().public_ip_addresses
+cli_command(command_table, 'network public-ip delete', PublicIPAddressesOperations.delete, None, factory)
+cli_command(command_table, 'network public-ip show', PublicIPAddressesOperations.get, 'PublicIPAddress', factory)
+cli_command(command_table, 'network public-ip list', PublicIPAddressesOperations.list, '[PublicIPAddress]', factory)
+cli_command(command_table, 'network public-ip list-all', PublicIPAddressesOperations.list_all, '[PublicIPAddress]', factory)
 
 factory = lambda **_: get_mgmt_service_client(PublicIPClient, PublicIPClientConfig).public_ip
-cli_command('network public-ip create', factory, PublicIPOperations.create_or_update, 'PublicIPAddress', command_table)
+cli_command(command_table, 'network public-ip create', PublicIPOperations.create_or_update, 'PublicIPAddress', factory)
 
 # RouteTablesOperations
-factory = lambda **kwargs: _network_client_factory(**kwargs).route_tables
-cli_command('network route-table delete', factory, RouteTablesOperations.delete, None, command_table)
-cli_command('network route-table show', factory, RouteTablesOperations.get, 'RouteTable', command_table)
-cli_command('network route-table list', factory, RouteTablesOperations.list, '[RouteTable]', command_table)
-cli_command('network route-table list-all', factory, RouteTablesOperations.list_all, '[RouteTable]', command_table)
-
+factory = lambda _: _network_client_factory().route_tables
+cli_command(command_table, 'network route-table delete', RouteTablesOperations.delete, None, factory)
+cli_command(command_table, 'network route-table show', RouteTablesOperations.get, 'RouteTable', factory)
+cli_command(command_table, 'network route-table list', RouteTablesOperations.list, '[RouteTable]', factory)
+cli_command(command_table, 'network route-table list-all', RouteTablesOperations.list_all, '[RouteTable]', factory)
 
 # RoutesOperations
-factory = lambda **kwargs: _network_client_factory(**kwargs).routes
-cli_command('network route-operation delete', factory, RoutesOperations.delete, None, command_table)
-cli_command('network route-operation show', factory, RoutesOperations.get, 'Route', command_table)
-cli_command('network route-operation list', factory, RoutesOperations.delete, '[Route]', command_table)
+factory = lambda _: _network_client_factory().routes
+cli_command(command_table, 'network route-operation delete', RoutesOperations.delete, None, factory)
+cli_command(command_table, 'network route-operation show', RoutesOperations.get, 'Route', factory)
+cli_command(command_table, 'network route-operation list', RoutesOperations.list, '[Route]', factory)
 
 # SecurityRulesOperations
-factory = lambda **kwargs: _network_client_factory(**kwargs).security_rules
-cli_command('network nsg-rule delete', factory, SecurityRulesOperations.delete, None, command_table)
-cli_command('network nsg-rule show', factory, SecurityRulesOperations.get, 'SecurityRule', command_table)
-cli_command('network nsg-rule list', factory, SecurityRulesOperations.list, '[SecurityRule]', command_table)
+factory = lambda _: _network_client_factory().security_rules
+cli_command(command_table, 'network nsg-rule delete', SecurityRulesOperations.delete, None, factory)
+cli_command(command_table, 'network nsg-rule show', SecurityRulesOperations.get, 'SecurityRule', factory)
+cli_command(command_table, 'network nsg-rule list', SecurityRulesOperations.list, '[SecurityRule]', factory)
 
 # SubnetsOperations
-factory = lambda **kwargs: _network_client_factory(**kwargs).subnets
-cli_command('network vnet subnet delete', factory, SubnetsOperations.delete, None, command_table)
-cli_command('network vnet subnet show', factory, SubnetsOperations.get, 'Subnet', command_table)
-cli_command('network vnet subnet list', factory, SubnetsOperations.list, '[Subnet]', command_table)
-cli_command('network vnet subnet create', None, create_update_subnet, 'Object', command_table)
+factory = lambda _: _network_client_factory().subnets
+cli_command(command_table, 'network vnet subnet delete', SubnetsOperations.delete, None, factory)
+cli_command(command_table, 'network vnet subnet show', SubnetsOperations.get, 'Subnet', factory)
+cli_command(command_table, 'network vnet subnet list', SubnetsOperations.list, '[Subnet]', factory)
+cli_command(command_table, 'network vnet subnet create', create_update_subnet, 'Object')
 
 # Usages operations
-factory = lambda **kwargs: _network_client_factory(**kwargs).usages
-cli_command('network list-usages', factory, UsagesOperations.list, '[Usage]', command_table)
+factory = lambda _: _network_client_factory().usages
+cli_command(command_table, 'network list-usages', UsagesOperations.list, '[Usage]', factory)
 
-factory = lambda **kwargs: _network_client_factory(**kwargs).virtual_network_gateway_connections
+factory = lambda _: _network_client_factory().virtual_network_gateway_connections
 # VirtualNetworkGatewayConnectionsOperations
-cli_command('network vpn-connection delete', factory, VirtualNetworkGatewayConnectionsOperations.delete, None, command_table)
-cli_command('network vpn-connection show', factory, VirtualNetworkGatewayConnectionsOperations.get, 'VirtualNetworkGatewayConnection', command_table)
-cli_command('network vpn-connection list', factory, VirtualNetworkGatewayConnectionsOperations.list, '[VirtualNetworkGatewayConnection]', command_table)
-cli_command('network vpn-connection shared-key show', factory, VirtualNetworkGatewayConnectionsOperations.get_shared_key, 'ConnectionSharedKeyResult', command_table)
-cli_command('network vpn-connection shared-key reset', factory, VirtualNetworkGatewayConnectionsOperations.reset_shared_key, 'ConnectionResetSharedKey', command_table)
-cli_command('network vpn-connection shared-key set', factory, VirtualNetworkGatewayConnectionsOperations.set_shared_key, 'ConnectionSharedKey', command_table)
+cli_command(command_table, 'network vpn-connection delete', VirtualNetworkGatewayConnectionsOperations.delete, None, factory)
+cli_command(command_table, 'network vpn-connection show', VirtualNetworkGatewayConnectionsOperations.get, 'VirtualNetworkGatewayConnection', factory)
+cli_command(command_table, 'network vpn-connection list', VirtualNetworkGatewayConnectionsOperations.list, '[VirtualNetworkGatewayConnection]', factory)
+cli_command(command_table, 'network vpn-connection shared-key show', VirtualNetworkGatewayConnectionsOperations.get_shared_key, 'ConnectionSharedKeyResult', factory)
+cli_command(command_table, 'network vpn-connection shared-key reset', VirtualNetworkGatewayConnectionsOperations.reset_shared_key, 'ConnectionResetSharedKey', factory)
+cli_command(command_table, 'network vpn-connection shared-key set', VirtualNetworkGatewayConnectionsOperations.set_shared_key, 'ConnectionSharedKey', factory)
 
 # VirtualNetworkGatewaysOperations
-factory = lambda **kwargs: _network_client_factory(**kwargs).virtual_network_gateways
-cli_command('network vpn-gateway delete', factory, VirtualNetworkGatewaysOperations.delete, None, command_table)
-cli_command('network vpn-gateway show', factory, VirtualNetworkGatewaysOperations.get, 'VirtualNetworkGateway', command_table)
-cli_command('network vpn-gateway list', factory, VirtualNetworkGatewaysOperations.list, '[VirtualNetworkGateway]', command_table)
-cli_command('network vpn-gateway reset', factory, VirtualNetworkGatewaysOperations.reset, 'VirtualNetworkGateway', command_table)
+factory = lambda _: _network_client_factory().virtual_network_gateways
+cli_command(command_table, 'network vpn-gateway delete', VirtualNetworkGatewaysOperations.delete, None, factory)
+cli_command(command_table, 'network vpn-gateway show', VirtualNetworkGatewaysOperations.get, 'VirtualNetworkGateway', factory)
+cli_command(command_table, 'network vpn-gateway list', VirtualNetworkGatewaysOperations.list, '[VirtualNetworkGateway]', factory)
+cli_command(command_table, 'network vpn-gateway reset', VirtualNetworkGatewaysOperations.reset, 'VirtualNetworkGateway', factory)
 
 # VirtualNetworksOperations
-factory = lambda **kwargs: _network_client_factory(**kwargs).virtual_networks
-cli_command('network vnet delete', factory, VirtualNetworksOperations.delete, None, command_table)
-cli_command('network vnet show', factory, VirtualNetworksOperations.get, 'VirtualNetwork', command_table)
-cli_command('network vnet list', factory, VirtualNetworksOperations.list, '[VirtualNetwork]', command_table)
-cli_command('network vnet list-all', factory, VirtualNetworksOperations.list_all, '[VirtualNetwork]', command_table)
+factory = lambda _: _network_client_factory().virtual_networks
+cli_command(command_table, 'network vnet delete', VirtualNetworksOperations.delete, None, factory)
+cli_command(command_table, 'network vnet show', VirtualNetworksOperations.get, 'VirtualNetwork', factory)
+cli_command(command_table, 'network vnet list', VirtualNetworksOperations.list, '[VirtualNetwork]', factory)
+cli_command(command_table, 'network vnet list-all', VirtualNetworksOperations.list_all, '[VirtualNetwork]', factory)
 
 factory = lambda **_: get_mgmt_service_client(VNetClient, VNetClientConfig).vnet
-cli_command('network vnet create', factory, VNetOperations.create, 'object', command_table)
+cli_command(command_table, 'network vnet create', VNetOperations.create, 'object', factory)
 
 

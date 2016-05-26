@@ -9,7 +9,7 @@ class TestVMImage(unittest.TestCase):
     def test_read_images_from_alias_doc(self, mock_urlopen):
         config = application.Configuration([])
         application.APPLICATION = application.Application(config)
-        from azure.cli.command_modules.vm.generated import ConvenienceVmCommands
+        from azure.cli.command_modules.vm.custom import list_vm_images
 
         file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                  'aliases.json')
@@ -21,7 +21,7 @@ class TestVMImage(unittest.TestCase):
         mock_urlopen.return_value = mock_read
 
         #action
-        images = ConvenienceVmCommands().list_vm_images()
+        images = list_vm_images()
 
         #assert
         win_images = [i for i in images if i['publisher'] == 'MicrosoftWindowsServer']

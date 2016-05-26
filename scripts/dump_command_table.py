@@ -19,37 +19,37 @@ class Exporter(json.JSONEncoder):
 
 def _dump_command_table(**kwargs):
     cmd_table = APPLICATION.configuration.get_command_table()
-cmd_list = []
-if cmd_set_names is None :
-    # if no command prefix specified, use all command table entries
+    cmd_list = []
+    if cmd_set_names is None :
+        # if no command prefix specified, use all command table entries
         cmd_list = list(cmd_table.keys())
-else:
-    # if the command name matches a prefix, add it to the output list
-    for name in cmd_table.keys():
-        for prefix in cmd_set_names:
-            if name.startswith(prefix):
-                cmd_list.append(name)
-                break
+    else:
+        # if the command name matches a prefix, add it to the output list
+        for name in cmd_table.keys():
+            for prefix in cmd_set_names:
+                if name.startswith(prefix):
+                    cmd_list.append(name)
+                    break
 
-results = []
-if param_names:
+    results = []
+    if param_names:
         for cmd_name in cmd_list:
             cmd_args = cmd_table[cmd_name].arguments
-        match = False
+            match = False
             for arg in list(cmd_args.keys()):
-            if match:
-                break
+                if match:
+                    break
                 if arg in param_names:
                     results.append(cmd_name)
                 match = True
-else:
-    results = cmd_list
+    else:
+        results = cmd_list
 
-result_dict = {}
-for cmd_name in results:
-    table_entry = cmd_table[cmd_name]
+    result_dict = {}
+    for cmd_name in results:
+        table_entry = cmd_table[cmd_name]
         result_dict[cmd_name] = _format_entry(cmd_table[cmd_name])
-    print(json.dumps(result_dict, indent=4, sort_keys=True))
+        print(json.dumps(result_dict, indent=4, sort_keys=True))
     
     # print the 'lowest common denominator' for scope for each param
     if param_names:
@@ -84,6 +84,9 @@ def _format_entry(obj):
 
 def _get_parameter_scope(param, result):
     cmd_list = [key for key, value in result.items() if param in list(value['arguments'].keys())]
+    if not cmd_list:
+        return 'N/A (NOT FOUND)'
+
     test_list = cmd_list[0].split(' ')
     while len(test_list) > 0:
         test_entry = ' '.join(test_list)

@@ -527,7 +527,7 @@ class NetworkSubnetCreateScenarioTest(CommandTestScript):
         super(NetworkSubnetCreateScenarioTest, self).__init__(None, self.test_body, None)
 
     def test_body(self):
-        self.test('network subnet create --resource-group {0} --name {1} --virtual-network-name {1} --address-prefix {2}'.format( #pylint: disable=line-too-long
+        self.test('network vnet subnet create --resource-group {0} --name {1} --virtual-network-name {1} --address-prefix {2}'.format( #pylint: disable=line-too-long
             self.resource_group, self.placeholder_value, self.address_prefix), None)
 
 ENV_VAR = {}
@@ -598,4 +598,3 @@ TEST_DEF = [
         'command': NetworkSubnetCreateScenarioTest()
     },
 ]
-
