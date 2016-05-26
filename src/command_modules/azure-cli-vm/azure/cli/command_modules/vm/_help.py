@@ -71,7 +71,7 @@ helps['vm availability-set create'] = """
 helps['vm extension set'] = """
             type: command
             examples:
-                - name: Add a new linux user:
+                - name: Add a new linux user
                   text: 
                     az vm extension set -n VMAccessForLinux --publisher Microsoft.OSTCExtensions --version 1.4 --vm-name myvm --resource-group yugangw --private-config "{\\"username\\":\\"user1\\", \\"ssh_key\\":\\"ssh_rsa ....\\"}"
             """

@@ -1,4 +1,5 @@
 from __future__ import print_function
+import argparse
 import copy
 import json
 import time
@@ -27,8 +28,8 @@ COMMON_PARAMETERS = {
     'deployment_name': {
         'name': '--deployment-name',
         'metavar': 'DEPLOYMENTNAME',
-        'help': 'Name of the resource deployment',
-        'default': 'azurecli' + str(random.randint(0, 10000000)),
+        'help': argparse.SUPPRESS,
+        'default': 'azurecli' + str(time.time()) + str(random.randint(0, 100000)),
         'required': False
     },
     'location': {
