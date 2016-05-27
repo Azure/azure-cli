@@ -154,6 +154,10 @@ def main():
     tmp_dir = create_tmp_dir()
     install_dir = get_install_dir()
     exec_dir = get_exec_dir()
+    exec_path = os.path.join(exec_dir, EXECUTABLE_NAME)
+    if install_dir == exec_path:
+        print("ERROR: The executable file '{}' would clash with the install directory of '{}'. Choose either a different install directory or directory to place the executable.".format(exec_path, install_dir), file=sys.stderr)
+        sys.exit(1)
     environment_name = get_environment_name()
     env_dir = os.path.join(install_dir, ENVS_DIR_NAME, environment_name)
     create_dir(env_dir)
