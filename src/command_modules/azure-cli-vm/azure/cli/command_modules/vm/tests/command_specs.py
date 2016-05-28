@@ -8,6 +8,7 @@ from azure.cli.utils.command_test_script import CommandTestScript, JMESPathCompa
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 #pylint: disable=method-hidden
+#pylint: disable=line-too-long
 class VMImageListByAliasesScenarioTest(CommandTestScript):
 
     def test_body(self):
@@ -175,7 +176,7 @@ class VMImageListSkusScenarioTest(CommandTestScript):
                                          True),
                       # all results should have the correct publisher name
                       JMESPathComparator(
-                          "length([].id.contains(@, '/Publishers/{}/ArtifactTypes/VMImage/Offers/{}/Skus/'))".format( #pylint: disable=line-too-long
+                          "length([].id.contains(@, '/Publishers/{}/ArtifactTypes/VMImage/Offers/{}/Skus/'))".format(
                               self.publisher_name, self.offer),
                           27),
                   ])
@@ -191,7 +192,7 @@ class VMImageShowScenarioTest(CommandTestScript):
         super(VMImageShowScenarioTest, self).__init__(None, self.test_body, None)
 
     def test_body(self):
-        self.test('vm image show --location {} --publisher-name {} --offer {} --skus {} --version {}'.format( #pylint: disable=line-too-long
+        self.test('vm image show --location {} --publisher-name {} --offer {} --skus {} --version {}'.format(
             self.location, self.publisher_name, self.offer, self.skus, self.version),
                   [
                       JMESPathComparator('type(@)', 'object'),
@@ -199,7 +200,7 @@ class VMImageShowScenarioTest(CommandTestScript):
                       JMESPathComparator('name', self.version),
                       # all results should have the correct publisher name
                       JMESPathComparator(
-                          "contains(id, '/Publishers/{}/ArtifactTypes/VMImage/Offers/{}/Skus/{}/Versions/{}')".format( #pylint: disable=line-too-long
+                          "contains(id, '/Publishers/{}/ArtifactTypes/VMImage/Offers/{}/Skus/{}/Versions/{}')".format(
                               self.publisher_name, self.offer, self.skus, self.version),
                           True),
                   ])
@@ -381,17 +382,17 @@ class VMMachineExtensionImageScenarioTest(CommandTestScript):
                 JMESPathComparator("length([?location == '{}']) == length(@)".format(self.location),
                                    True),
             ])
-        self.test('vm extension image list-versions --location {} --publisher {} --name {}'.format( #pylint: disable=line-too-long
+        self.test('vm extension image list-versions --location {} --publisher {} --name {}'.format(
             self.location, self.publisher, self.name), [
                 JMESPathComparator('type(@)', 'array'),
                 JMESPathComparator("length([?location == '{}']) == length(@)".format(self.location),
                                    True),
             ])
-        self.test('vm extension image show --location {} --publisher {} --name {} --version {}'.format( #pylint: disable=line-too-long
+        self.test('vm extension image show --location {} --publisher {} --name {} --version {}'.format(
             self.location, self.publisher, self.name, self.version), [
                 JMESPathComparator('type(@)', 'object'),
                 JMESPathComparator('location', self.location),
-                JMESPathComparator("contains(id, '/Providers/Microsoft.Compute/Locations/{}/Publishers/{}/ArtifactTypes/VMExtension/Types/{}/Versions/{}')".format( #pylint: disable=line-too-long
+                JMESPathComparator("contains(id, '/Providers/Microsoft.Compute/Locations/{}/Publishers/{}/ArtifactTypes/VMExtension/Types/{}/Versions/{}')".format(
                     self.location, self.publisher, self.name, self.version
                 ), True)])
 
@@ -404,7 +405,6 @@ class VMExtensionImageSearchScenarioTest(CommandTestScript):
     def test_body(self):
         #pick this specific name, so the search will be under one publisher. This avoids
         #the parallel searching behavior that causes incomplete VCR recordings.
-        #pylint: disable=line-too-long
         publisher = 'Vormetric.VormetricTransparentEncryption'
         image_name = 'VormetricTransparentEncryptionAgent'
         verification = [
@@ -466,8 +466,23 @@ class VMScaleSetStatesScenarioTest(CommandTestScript):
             self.resource_group, self.ss_name), None)
         self.test('vm scaleset restart --resource-group {} --name {}'.format(
             self.resource_group, self.ss_name), None)
-        self.test('vm scaleset update-instances --resource-group {} --name {} --instance-ids 0'.format( #pylint: disable=line-too-long
+        self.test('vm scaleset update-instances --resource-group {} --name {} --instance-ids 0'.format(
             self.resource_group, self.ss_name), None)
+
+class VMScaleSetScaleUpScenarioTest(CommandTestScript):
+
+    def __init__(self):
+        self.resource_group = 'yugangwvmss'
+        self.ss_name = 'yugangwvm'
+        super(VMScaleSetScaleUpScenarioTest, self).__init__(None, self.test_body, None)
+
+    def test_body(self):
+        new_capacity = '4'
+        self.run('vm scaleset scale --resource-group {} --name {} --new-capacity {}'.format(
+            self.resource_group, self.ss_name, new_capacity))
+        result = self.run('vm scaleset show --resource-group {} --name {} -o json'.format(
+            self.resource_group, self.ss_name))
+        assert result['sku']['capacity'] == 4
 
 class VMScaleSetDeleteScenarioTest(CommandTestScript):
 
@@ -490,8 +505,9 @@ class VMScaleSetDeleteScenarioTest(CommandTestScript):
                 JMESPathComparator('type(@)', 'object'),
                 JMESPathComparator('type(virtualMachine)', 'object'),
                 JMESPathComparator('virtualMachine.statusesSummary[0].count', self.vm_count)])
-        self.test('vm scaleset delete-instances --resource-group {} --name {} --instance-ids {}'.format( #pylint: disable=line-too-long
-            self.resource_group, self.ss_name, self.instance_id_to_delete), None)
+        #Existing issues, the instance delete command has not been recorded
+        #self.test('vm scaleset delete-instances --resource-group {} --name {} --instance-ids {}'.format(
+        #    self.resource_group, self.ss_name, self.instance_id_to_delete), None)
         self.test('vm scaleset get-instance-view --resource-group {} --name {}'.format(
             self.resource_group, self.ss_name), [
                 JMESPathComparator('type(@)', 'object'),
@@ -515,39 +531,39 @@ class VMScaleSetVMsScenarioTest(CommandTestScript):
 
     def _check_vms_power_state(self, expected_power_state):
         for iid in self.instance_ids:
-            self.test('vm scaleset-vm get-instance-view --resource-group {} --name {} --instance-id {}'.format( #pylint: disable=line-too-long
+            self.test('vm scaleset get-instance-view --resource-group {} --name {} --instance-id {}'.format(
                 self.resource_group,
                 self.ss_name,
                 iid),
                       JMESPathComparator('statuses[1].code', expected_power_state))
 
     def test_body(self):
-        self.test('vm scaleset-vm show --resource-group {} --name {} --instance-id {}'.format(
+        self.test('vm scaleset show-instance --resource-group {} --name {} --instance-id {}'.format(
             self.resource_group, self.ss_name, self.instance_ids[0]), [
                 JMESPathComparator('type(@)', 'object'),
                 JMESPathComparator('instanceId', str(self.instance_ids[0]))])
-        self.test('vm scaleset-vm list --resource-group {} --virtual-machine-scale-set-name {}'.format( #pylint: disable=line-too-long
+        self.test('vm scaleset list-instances --resource-group {} --name {}'.format(
             self.resource_group, self.ss_name), [
                 JMESPathComparator('type(@)', 'array'),
                 JMESPathComparator('length(@)', self.vm_count),
                 JMESPathComparator("[].name.starts_with(@, '{}')".format(self.ss_name),
                                    [True]*self.vm_count)])
         self._check_vms_power_state('PowerState/running')
-        self.test('vm scaleset-vm power-off --resource-group {} --name {} --instance-id *'.format(
+        self.test('vm scaleset power-off --resource-group {} --name {} --instance-ids *'.format(
             self.resource_group, self.ss_name), None)
         self._check_vms_power_state('PowerState/stopped')
-        self.test('vm scaleset-vm start --resource-group {} --name {} --instance-id *'.format(
+        self.test('vm scaleset start --resource-group {} --name {} --instance-ids *'.format(
             self.resource_group, self.ss_name), None)
         self._check_vms_power_state('PowerState/running')
-        self.test('vm scaleset-vm restart --resource-group {} --name {} --instance-id *'.format(
+        self.test('vm scaleset restart --resource-group {} --name {} --instance-ids *'.format(
             self.resource_group, self.ss_name), None)
         self._check_vms_power_state('PowerState/running')
-        self.test('vm scaleset-vm deallocate --resource-group {} --name {} --instance-id *'.format(
+        self.test('vm scaleset deallocate --resource-group {} --name {} --instance-ids *'.format(
             self.resource_group, self.ss_name), None)
         self._check_vms_power_state('PowerState/deallocated')
-        self.test('vm scaleset-vm delete --resource-group {} --name {} --instance-id *'.format(
+        self.test('vm scaleset delete-instances --resource-group {} --name {} --instance-ids *'.format(
             self.resource_group, self.ss_name), None)
-        self.test('vm scaleset-vm list --resource-group {} --virtual-machine-scale-set-name {}'.format( #pylint: disable=line-too-long
+        self.test('vm scaleset list-instances --resource-group {} --name {}'.format(
             self.resource_group, self.ss_name), None)
 
 class VMAccessAddRemoveLinuxUser(CommandTestScript):
@@ -567,7 +583,7 @@ class VMAccessAddRemoveLinuxUser(CommandTestScript):
 
 class VMCreateUbuntuScenarioTest(CommandTestScript): #pylint: disable=too-many-instance-attributes
 
-    TEST_SSH_KEY_PUB = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCbIg1guRHbI0lV11wWDt1r2cUdcNd27CJsg+SfgC7miZeubtwUhbsPdhMQsfDyhOWHq1+ZL0M+nJZV63d/1dhmhtgyOqejUwrPlzKhydsbrsdUor+JmNJDdW01v7BXHyuymT8G4s09jCasNOwiufbP/qp72ruu0bIA1nySsvlf9pCQAuFkAnVnf/rFhUlOkhtRpwcq8SUNY2zRHR/EKb/4NWY1JzR4sa3q2fWIJdrrX0DvLoa5g9bIEd4Df79ba7v+yiUBOS0zT2ll+z4g9izHK3EO5d8hL4jYxcjKs+wcslSYRWrascfscLgMlMGh0CdKeNTDjHpGPncaf3Z+FwwwjWeuiNBxv7bJo13/8B/098KlVDl4GZqsoBCEjPyJfV6hO0y/LkRGkk7oHWKgeWAfKtfLItRp00eZ4fcJNK9kCaSMmEugoZWcI7NGbZXzqFWqbpRI7NcDP9+WIQ+i9U5vqWsqd/zng4kbuAJ6UuKqIzB0upYrLShfQE3SAck8oaLhJqqq56VfDuASNpJKidV+zq27HfSBmbXnkR/5AK337dc3MXKJypoK/QPMLKUAP5XLPbs+NddJQV7EZXd29DLgp+fRIg3edpKdO7ZErWhv7d+3Kws+e1Y+ypmR2WIVSwVyBEUfgv2C8Ts9gnTF4pNcEY/S2aBicz5Ew2+jdyGNQQ== test@example.com\n" #pylint: disable=line-too-long
+    TEST_SSH_KEY_PUB = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCbIg1guRHbI0lV11wWDt1r2cUdcNd27CJsg+SfgC7miZeubtwUhbsPdhMQsfDyhOWHq1+ZL0M+nJZV63d/1dhmhtgyOqejUwrPlzKhydsbrsdUor+JmNJDdW01v7BXHyuymT8G4s09jCasNOwiufbP/qp72ruu0bIA1nySsvlf9pCQAuFkAnVnf/rFhUlOkhtRpwcq8SUNY2zRHR/EKb/4NWY1JzR4sa3q2fWIJdrrX0DvLoa5g9bIEd4Df79ba7v+yiUBOS0zT2ll+z4g9izHK3EO5d8hL4jYxcjKs+wcslSYRWrascfscLgMlMGh0CdKeNTDjHpGPncaf3Z+FwwwjWeuiNBxv7bJo13/8B/098KlVDl4GZqsoBCEjPyJfV6hO0y/LkRGkk7oHWKgeWAfKtfLItRp00eZ4fcJNK9kCaSMmEugoZWcI7NGbZXzqFWqbpRI7NcDP9+WIQ+i9U5vqWsqd/zng4kbuAJ6UuKqIzB0upYrLShfQE3SAck8oaLhJqqq56VfDuASNpJKidV+zq27HfSBmbXnkR/5AK337dc3MXKJypoK/QPMLKUAP5XLPbs+NddJQV7EZXd29DLgp+fRIg3edpKdO7ZErWhv7d+3Kws+e1Y+ypmR2WIVSwVyBEUfgv2C8Ts9gnTF4pNcEY/S2aBicz5Ew2+jdyGNQQ== test@example.com\n"
 
     def __init__(self):
         self.deployment_name = 'azurecli-test-deployment-vm-create-ubuntu'
@@ -593,7 +609,7 @@ class VMCreateUbuntuScenarioTest(CommandTestScript): #pylint: disable=too-many-i
             self.resource_group))
 
     def test_body(self):
-        self.test('vm create --resource-group {rg} --admin-username {admin} --name {vm_name} --authentication-type {auth_type} --image {image} --ssh-key-value {ssh_key} --location {location} --deployment-name {deployment}'.format( #pylint: disable=line-too-long
+        self.test('vm create --resource-group {rg} --admin-username {admin} --name {vm_name} --authentication-type {auth_type} --image {image} --ssh-key-value {ssh_key} --location {location} --deployment-name {deployment}'.format(
             rg=self.resource_group,
             admin=self.admin_username,
             vm_name=self.vm_names[0],
@@ -625,7 +641,6 @@ class VMBootDiagnostics(CommandTestScript):
 
     def test_body(self):
         common_part = '-g yugangwtest -n yugangwtest-1'
-        #pylint: disable=line-too-long
         storage_account = 'yugangwstorage'
         storage_uri = 'https://{}.blob.core.windows.net/'.format(storage_account)
         self.run('vm boot-diagnostics enable {} --storage {}'.format(common_part, storage_account))
@@ -647,7 +662,6 @@ class VMExtensionInstallTest(CommandTestScript):
         super(VMExtensionInstallTest, self).__init__(None, self.test_body, None)
 
     def test_body(self):
-        #pylint: disable=line-too-long
         publisher = 'Microsoft.OSTCExtensions'
         extension_name = 'VMAccessForLinux'
         vm_name = 'yugangw8-1'
@@ -772,6 +786,10 @@ TEST_DEF = [
     {
         'test_name': 'vm_scaleset_vms',
         'command': VMScaleSetVMsScenarioTest()
+    },
+    {
+        'test_name': 'vm_scaleset-scaleup',
+        'command': VMScaleSetScaleUpScenarioTest()
     },
     {
         'test_name': 'vm_add_remove_linux_user',
