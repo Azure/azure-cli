@@ -2,7 +2,9 @@
 import mock
 import azure.cli.application as application
 from azure.cli.command_modules.vm.custom import (_get_access_extension_upgrade_info,
-                                                 ConvenienceVmCommands)
+                                                 ConvenienceVmCommands,
+                                                 _LINUX_ACCESS_EXT,
+                                                 _WINDOWS_ACCESS_EXT)
 
 class Test_Vm_Custom(unittest.TestCase):
 
@@ -34,36 +36,36 @@ class Test_Vm_Custom(unittest.TestCase):
     def test_get_access_extension_upgrade_info(self):
 
         #when there is no extension installed on linux vm, use the version we like
-        publisher, name, version, auto_upgrade = _get_access_extension_upgrade_info(None, True)
+        publisher, version, auto_upgrade = _get_access_extension_upgrade_info(
+            None, _LINUX_ACCESS_EXT)
         self.assertEqual('Microsoft.OSTCExtensions', publisher)
-        self.assertEqual('VMAccessForLinux', name)
         self.assertEqual('1.4', version)
         self.assertEqual(None, auto_upgrade)
 
         #when there is no extension installed on windows vm, use the version we like
-        publisher, name, version, auto_upgrade = _get_access_extension_upgrade_info(None, False)
+        publisher, version, auto_upgrade = _get_access_extension_upgrade_info(
+            None, _WINDOWS_ACCESS_EXT)
         self.assertEqual('Microsoft.Compute', publisher)
-        self.assertEqual('VMAccessAgent', name)
         self.assertEqual('2.0', version)
         self.assertEqual(None, auto_upgrade)
 
         #when there is existing extension with higher version, stick to that
         extentions = [FakedAccessExtensionEntity(True, '3.0')]
-        publisher, name, version, auto_upgrade = _get_access_extension_upgrade_info(
-            extentions, True)
+        publisher, version, auto_upgrade = _get_access_extension_upgrade_info(
+            extentions, _LINUX_ACCESS_EXT)
         self.assertEqual('3.0', version)
         self.assertEqual(None, auto_upgrade)
 
         extentions = [FakedAccessExtensionEntity(False, '10.0')]
-        publisher, name, version, auto_upgrade = _get_access_extension_upgrade_info(
-            extentions, False)
+        publisher, version, auto_upgrade = _get_access_extension_upgrade_info(
+            extentions, _WINDOWS_ACCESS_EXT)
         self.assertEqual('10.0', version)
         self.assertEqual(None, auto_upgrade)
 
         #when there is existing extension with lower version, upgrade to ours
         extentions = [FakedAccessExtensionEntity(True, '1.0')]
-        publisher, name, version, auto_upgrade = _get_access_extension_upgrade_info(
-            extentions, True)
+        publisher, version, auto_upgrade = _get_access_extension_upgrade_info(
+            extentions, _LINUX_ACCESS_EXT)
         self.assertEqual('1.4', version)
         self.assertEqual(True, auto_upgrade)
 
@@ -73,9 +75,10 @@ class Test_Vm_Custom(unittest.TestCase):
         vm_fake = mock.MagicMock()
         mock_vm_get.return_value = vm_fake
         commands = ConvenienceVmCommands()
-        commands.enable_boot_diagnostics('g1', 'vm1', 'storage_uri1')
+        commands.enable_boot_diagnostics('g1', 'vm1', 'https://storage_uri1')
         self.assertTrue(vm_fake.diagnostics_profile.boot_diagnostics.enabled)
-        self.assertEqual('storage_uri1', vm_fake.diagnostics_profile.boot_diagnostics.storage_uri)
+        self.assertEqual('https://storage_uri1',
+                         vm_fake.diagnostics_profile.boot_diagnostics.storage_uri)
         self.assertTrue(mock_vm_get.called)
         mock_vm_set.assert_called_once_with(vm_fake, 'Enabling boot diagnostics', 'Done')
 
@@ -85,9 +88,9 @@ class Test_Vm_Custom(unittest.TestCase):
         vm_fake = mock.MagicMock()
         mock_vm_get.return_value = vm_fake
         vm_fake.diagnostics_profile.boot_diagnostics.enabled = True
-        vm_fake.diagnostics_profile.boot_diagnostics.storage_uri = 'storage_uri1'
+        vm_fake.diagnostics_profile.boot_diagnostics.storage_uri = 'https://storage_uri1'
         commands = ConvenienceVmCommands()
-        commands.enable_boot_diagnostics('g1', 'vm1', 'storage_uri1')
+        commands.enable_boot_diagnostics('g1', 'vm1', 'https://storage_uri1')
         self.assertTrue(mock_vm_get.called)
         self.assertFalse(mock_vm_set.called)
 
