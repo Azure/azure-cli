@@ -490,8 +490,9 @@ class VMScaleSetDeleteScenarioTest(CommandTestScript):
                 JMESPathComparator('type(@)', 'object'),
                 JMESPathComparator('type(virtualMachine)', 'object'),
                 JMESPathComparator('virtualMachine.statusesSummary[0].count', self.vm_count)])
-        self.test('vm scaleset delete-instances --resource-group {} --name {} --instance-ids {}'.format( #pylint: disable=line-too-long
-            self.resource_group, self.ss_name, self.instance_id_to_delete), None)
+        #Existing issues, the instance delete command has not been recorded
+        #self.test('vm scaleset delete-instances --resource-group {} --name {} --instance-ids {}'.format( #pylint: disable=line-too-long
+        #    self.resource_group, self.ss_name, self.instance_id_to_delete), None)
         self.test('vm scaleset get-instance-view --resource-group {} --name {}'.format(
             self.resource_group, self.ss_name), [
                 JMESPathComparator('type(@)', 'object'),
@@ -515,39 +516,40 @@ class VMScaleSetVMsScenarioTest(CommandTestScript):
 
     def _check_vms_power_state(self, expected_power_state):
         for iid in self.instance_ids:
-            self.test('vm scaleset-vm get-instance-view --resource-group {} --name {} --instance-id {}'.format( #pylint: disable=line-too-long
+            self.test('vm scaleset get-instance-view --resource-group {} --name {} --instance-id {}'.format( #pylint: disable=line-too-long
                 self.resource_group,
                 self.ss_name,
                 iid),
                       JMESPathComparator('statuses[1].code', expected_power_state))
 
     def test_body(self):
-        self.test('vm scaleset-vm show --resource-group {} --name {} --instance-id {}'.format(
+        #pylint: disable=line-too-long
+        self.test('vm scaleset show-instance --resource-group {} --name {} --instance-id {}'.format(
             self.resource_group, self.ss_name, self.instance_ids[0]), [
                 JMESPathComparator('type(@)', 'object'),
                 JMESPathComparator('instanceId', str(self.instance_ids[0]))])
-        self.test('vm scaleset-vm list --resource-group {} --virtual-machine-scale-set-name {}'.format( #pylint: disable=line-too-long
+        self.test('vm scaleset list-instances --resource-group {} --name {}'.format( #pylint: disable=line-too-long
             self.resource_group, self.ss_name), [
                 JMESPathComparator('type(@)', 'array'),
                 JMESPathComparator('length(@)', self.vm_count),
                 JMESPathComparator("[].name.starts_with(@, '{}')".format(self.ss_name),
                                    [True]*self.vm_count)])
         self._check_vms_power_state('PowerState/running')
-        self.test('vm scaleset-vm power-off --resource-group {} --name {} --instance-id *'.format(
+        self.test('vm scaleset power-off --resource-group {} --name {} --instance-ids *'.format(
             self.resource_group, self.ss_name), None)
         self._check_vms_power_state('PowerState/stopped')
-        self.test('vm scaleset-vm start --resource-group {} --name {} --instance-id *'.format(
+        self.test('vm scaleset start --resource-group {} --name {} --instance-ids *'.format(
             self.resource_group, self.ss_name), None)
         self._check_vms_power_state('PowerState/running')
-        self.test('vm scaleset-vm restart --resource-group {} --name {} --instance-id *'.format(
+        self.test('vm scaleset restart --resource-group {} --name {} --instance-ids *'.format(
             self.resource_group, self.ss_name), None)
         self._check_vms_power_state('PowerState/running')
-        self.test('vm scaleset-vm deallocate --resource-group {} --name {} --instance-id *'.format(
+        self.test('vm scaleset deallocate --resource-group {} --name {} --instance-ids *'.format(
             self.resource_group, self.ss_name), None)
         self._check_vms_power_state('PowerState/deallocated')
-        self.test('vm scaleset-vm delete --resource-group {} --name {} --instance-id *'.format(
+        self.test('vm scaleset delete-instances --resource-group {} --name {} --instance-ids *'.format(
             self.resource_group, self.ss_name), None)
-        self.test('vm scaleset-vm list --resource-group {} --virtual-machine-scale-set-name {}'.format( #pylint: disable=line-too-long
+        self.test('vm scaleset list-instances --resource-group {} --name {}'.format(
             self.resource_group, self.ss_name), None)
 
 class VMAccessAddRemoveLinuxUser(CommandTestScript):
