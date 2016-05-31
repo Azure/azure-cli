@@ -56,10 +56,14 @@ build_operation(
     'vm extension image', 'virtual_machine_extension_images', _compute_client_factory,
     [
         CommandDefinition(VirtualMachineExtensionImagesOperations.get, 'VirtualMachineExtensionImage', command_alias='show'),
-        CommandDefinition(VirtualMachineExtensionImagesOperations.list_types, '[VirtualMachineImageResource]'),
+        CommandDefinition(VirtualMachineExtensionImagesOperations.list_types, '[VirtualMachineImageResource]', command_alias='list-names'),
         CommandDefinition(VirtualMachineExtensionImagesOperations.list_versions, '[VirtualMachineImageResource]'),
     ],
-    command_table, PARAMETER_ALIASES)
+    command_table, patch_aliases(PARAMETER_ALIASES, {
+        'publisher_name': {'name': '--publisher'},
+        'type': {'name': '--name -n'},
+        'latest': {'action': 'store_true'}
+        }))
 
 build_operation(
     'vm disk', None, ConvenienceVmCommands,
