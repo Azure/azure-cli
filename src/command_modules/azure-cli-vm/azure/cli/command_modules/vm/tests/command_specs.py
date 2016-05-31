@@ -58,7 +58,7 @@ class VMShowListSizesListIPAddressesScenarioTest(CommandTestScript):
         self.resource_group = 'cliTestRg_VmListIpAddresses'
         self.location = 'westus'
         self.vm_name = 'vm-with-public-ip'
-        self.ip_allocation_method = 'Dynamic'
+        self.ip_allocation_method = 'dynamic'
         super(VMShowListSizesListIPAddressesScenarioTest, self).__init__(
             self.set_up,
             self.test_body,
@@ -101,7 +101,7 @@ class VMShowListSizesListIPAddressesScenarioTest(CommandTestScript):
                           1),
                       JMESPathComparator(
                           '[0].virtualMachine.network.publicIpAddresses[0].ipAllocationMethod',
-                          self.ip_allocation_method),
+                          self.ip_allocation_method.title()),
                       JMESPathComparator(
                           'type([0].virtualMachine.network.publicIpAddresses[0].ipAddress)',
                           'string')]

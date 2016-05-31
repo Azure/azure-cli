@@ -261,6 +261,11 @@
           "$ref": "#/definitions/DeploymentParameter_osVersion",
           "x-ms-client-flatten": true
         },
+        "privateIpAddress": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_privateIpAddress",
+          "x-ms-client-flatten": true
+        },
         "privateIpAddressAllocation": {
           "type": "object",
           "$ref": "#/definitions/DeploymentParameter_privateIpAddressAllocation",
@@ -565,6 +570,15 @@
         }
       }
     },
+    "DeploymentParameter_privateIpAddress": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "The private IP address to use with Private IP Address Allocation type Static.",
+          "x-ms-client-name": "privateIpAddress"
+        }
+      }
+    },
     "DeploymentParameter_privateIpAddressAllocation": {
       "properties": {
         "value": {
@@ -572,10 +586,10 @@
           "description": "Private IP address allocation method.",
           "x-ms-client-name": "privateIpAddressAllocation",
           "enum": [
-            "Dynamic",
-            "Static"
+            "dynamic",
+            "static"
           ],
-          "default": "Dynamic"
+          "default": "dynamic"
         }
       }
     },
@@ -586,10 +600,10 @@
           "description": "Public IP address allocation method.",
           "x-ms-client-name": "publicIpAddressAllocation",
           "enum": [
-            "Dynamic",
-            "Static"
+            "dynamic",
+            "static"
           ],
-          "default": "Dynamic"
+          "default": "dynamic"
         }
       }
     },

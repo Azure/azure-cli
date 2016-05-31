@@ -18,7 +18,7 @@ Execute P0s before any change to VM Create is merged
  - login with SSH
  - verify NSG
 
-**Linux with DNS name, existing availability set, existing NSG, existing public IP
+**Linux with existing availability set, existing NSG, existing public IP
 Size Standard_A3, existing storage account, existing storage container name, existing VNET/Subnet**
 
  - verify VM is in availability set
@@ -29,25 +29,26 @@ Size Standard_A3, existing storage account, existing storage container name, exi
  - verify existing IP used
  - login with SSH
 
-**Linux, path for SSH key, static private IP, static public IP**
+**Linux, path for SSH key, static private IP, static public IP, DNS name**
 
  - create
  - login with SSH
  - verify private/public IPs are static
+ - verify DNS name
 
 ## P1: LESS COMMON ##
 Execute P1 scenarios if a change is made in these areas
 
-**password Linux, custom OS Disk name, custom ssh key path**
+**password Linux**
 
  - create
- - login with SSH and password
+ - login with password
  - verify SSH key path
- - verify OS disk name in storage path
 
-**Linux ssh key on command line (ideally from a machine with no public key)**
-
+**custom ssh key path**
+ - create
  - login with SSH
+ - verify SSH key path
 
 ## P2: ERROR CASES ##
 Be aware of the P2 behavior, execute P2s occassionally or before an important event/ship cycle
