@@ -147,8 +147,10 @@ def load_images_thru_services(publisher, offer, sku, location):
 
     return all_images
 
-def load_extension_images_thru_services(publisher, name, version, location):
+def load_extension_images_thru_services(publisher, name, version, location, show_latest=False):
     from concurrent.futures import ThreadPoolExecutor, as_completed
+    ##pylint: disable=no-name-in-module,import-error
+    from distutils.version import LooseVersion
     all_images = []
     client = _compute_client_factory()
     if location is None:
@@ -164,11 +166,20 @@ def load_extension_images_thru_services(publisher, name, version, location):
                                                                              t.name)
             if version:
                 versions = [v for v in versions if _partial_matched(version, v.name)]
-            for v in versions:
+
+            if show_latest:
+                #pylint: disable=no-member
+                versions.sort(key=lambda v: LooseVersion(v.name), reverse=True)
                 all_images.append({
                     'publisher': publisher,
                     'name': t.name,
-                    'version': v.name})
+                    'version': versions[0].name})
+            else:
+                for v in versions:
+                    all_images.append({
+                        'publisher': publisher,
+                        'name': t.name,
+                        'version': v.name})
 
     publishers = client.virtual_machine_images.list_publishers(location)
     if publisher:

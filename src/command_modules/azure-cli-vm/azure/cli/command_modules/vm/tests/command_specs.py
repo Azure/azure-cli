@@ -370,29 +370,29 @@ class VMMachineExtensionImageScenarioTest(CommandTestScript):
     def __init__(self):
         self.location = 'westus'
         self.publisher = 'Microsoft.Azure.Diagnostics'
-        self.type = 'IaaSDiagnostics'
+        self.name = 'IaaSDiagnostics'
         self.version = '1.6.4.0'
         super(VMMachineExtensionImageScenarioTest, self).__init__(None, self.test_body, None)
 
     def test_body(self):
-        self.test('vm extension image list-types --location {} --publisher-name {}'.format(
+        self.test('vm extension image list-names --location {} --publisher {}'.format(
             self.location, self.publisher), [
                 JMESPathComparator('type(@)', 'array'),
                 JMESPathComparator("length([?location == '{}']) == length(@)".format(self.location),
                                    True),
             ])
-        self.test('vm extension image list-versions --location {} --publisher-name {} --type {}'.format( #pylint: disable=line-too-long
-            self.location, self.publisher, self.type), [
+        self.test('vm extension image list-versions --location {} --publisher {} --name {}'.format( #pylint: disable=line-too-long
+            self.location, self.publisher, self.name), [
                 JMESPathComparator('type(@)', 'array'),
                 JMESPathComparator("length([?location == '{}']) == length(@)".format(self.location),
                                    True),
             ])
-        self.test('vm extension image show --location {} --publisher-name {} --type {} --version {}'.format( #pylint: disable=line-too-long
-            self.location, self.publisher, self.type, self.version), [
+        self.test('vm extension image show --location {} --publisher {} --name {} --version {}'.format( #pylint: disable=line-too-long
+            self.location, self.publisher, self.name, self.version), [
                 JMESPathComparator('type(@)', 'object'),
                 JMESPathComparator('location', self.location),
                 JMESPathComparator("contains(id, '/Providers/Microsoft.Compute/Locations/{}/Publishers/{}/ArtifactTypes/VMExtension/Types/{}/Versions/{}')".format( #pylint: disable=line-too-long
-                    self.location, self.publisher, self.type, self.version
+                    self.location, self.publisher, self.name, self.version
                 ), True)])
 
 
@@ -404,14 +404,19 @@ class VMExtensionImageSearchScenarioTest(CommandTestScript):
     def test_body(self):
         #pick this specific name, so the search will be under one publisher. This avoids
         #the parallel searching behavior that causes incomplete VCR recordings.
+        #pylint: disable=line-too-long
         publisher = 'Vormetric.VormetricTransparentEncryption'
         image_name = 'VormetricTransparentEncryptionAgent'
         verification = [
             JMESPathComparator('type(@)', 'array'),
             JMESPathComparator("length([?name == '{}']) == length(@)".format(image_name), True),
             ]
-        cmd = ('vm extension image list -l westus --publisher {} --name {} -o json'.format(publisher, image_name))#pylint: disable=line-too-long
+        cmd = ('vm extension image list -l westus --publisher {} --name {} -o json'.format(publisher, image_name))
         self.test(cmd, verification)
+
+        cmd = ('vm extension image list -l westus --publisher {} --name {} --latest -o json'.format(publisher, image_name))
+        result = self.run(cmd)
+        assert len(result) == 1
 
 
 class VMScaleSetGetsScenarioTest(CommandTestScript):
@@ -619,10 +624,11 @@ class VMBootDiagnostics(CommandTestScript):
         super(VMBootDiagnostics, self).__init__(None, self.test_body, None)
 
     def test_body(self):
-        common_part = '-g yugangw5 -n yugangw5-1'
+        common_part = '-g yugangwtest -n yugangwtest-1'
         #pylint: disable=line-too-long
-        storage_uri = 'https://yugangwstorage.blob.core.windows.net/'
-        self.run('vm boot-diagnostics enable {} --storage-uri {}'.format(common_part, storage_uri))
+        storage_account = 'yugangwstorage'
+        storage_uri = 'https://{}.blob.core.windows.net/'.format(storage_account)
+        self.run('vm boot-diagnostics enable {} --storage {}'.format(common_part, storage_account))
         verification = [JMESPathComparator('diagnosticsProfile.bootDiagnostics.enabled', True),
                         JMESPathComparator('diagnosticsProfile.bootDiagnostics.storageUri', storage_uri)]
         self.test('vm show {}'.format(common_part), verification)

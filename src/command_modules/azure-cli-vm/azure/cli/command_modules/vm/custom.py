@@ -47,15 +47,27 @@ def _parse_rg_name(strid):
 
     return (parts[4], parts[8])
 
-def _get_access_extension_upgrade_info(extensions, is_linux=True):
-    if is_linux:
-        version = '1.4'
-        name = 'VMAccessForLinux'
-        publisher = 'Microsoft.OSTCExtensions'
-    else:
-        version = '2.0'
-        name = 'VMAccessAgent'
-        publisher = 'Microsoft.Compute'
+_LINUX_ACCESS_EXT = 'VMAccessForLinux'
+_WINDOWS_ACCESS_EXT = 'VMAccessAgent'
+_LINUX_DIAG_EXT = 'LinuxDiagnostic'
+extension_mappings = {
+    _LINUX_ACCESS_EXT: {
+        'version': '1.4',
+        'publisher': 'Microsoft.OSTCExtensions'
+        },
+    _WINDOWS_ACCESS_EXT: {
+        'version': '2.0',
+        'publisher': 'Microsoft.Compute'
+        },
+    _LINUX_DIAG_EXT:{
+        'version': '2.3',
+        'publisher': 'Microsoft.OSTCExtensions'
+        }
+    }
+
+def _get_access_extension_upgrade_info(extensions, name):
+    version = extension_mappings[name]['version']
+    publisher = extension_mappings[name]['publisher']
 
     auto_upgrade = None
 
@@ -68,7 +80,7 @@ def _get_access_extension_upgrade_info(extensions, is_linux=True):
         elif extension and LooseVersion(extension.type_handler_version) > LooseVersion(version):
             version = extension.type_handler_version
 
-    return publisher, name, version, auto_upgrade
+    return publisher, version, auto_upgrade
 
 def _get_storage_management_client():
     from azure.mgmt.storage import StorageManagementClient, StorageManagementClientConfiguration
@@ -118,17 +130,20 @@ class ConvenienceVmCommands(object): # pylint: disable=too-few-public-methods
                                  image_location=None,
                                  publisher=None,
                                  name=None,
-                                 version=None):
+                                 version=None,
+                                 latest=False):
         '''vm extension image list
         :param str image_location:Image location
         :param str publisher:Image publisher name
         :param str name:Image name
         :param str version:Image version
+        :param bool latest: Show the latest version only.
         '''
         return load_extension_images_thru_services(publisher,
                                                    name,
                                                    version,
-                                                   image_location)
+                                                   image_location,
+                                                   latest)
 
     def list_ip_addresses(self, resource_group_name=None, vm_name=None):
         ''' Get IP addresses from one or more Virtual Machines
@@ -234,8 +249,9 @@ class ConvenienceVmCommands(object): # pylint: disable=too-few-public-methods
 
         from azure.mgmt.compute.models import VirtualMachineExtension
 
-        publisher, extension_name, version, auto_upgrade = _get_access_extension_upgrade_info(
-            vm.resources, is_linux=False)
+        extension_name = _WINDOWS_ACCESS_EXT
+        publisher, version, auto_upgrade = _get_access_extension_upgrade_info(
+            vm.resources, extension_name)
 
         ext = VirtualMachineExtension(vm.location,#pylint: disable=no-member
                                       publisher=publisher,
@@ -275,8 +291,9 @@ class ConvenienceVmCommands(object): # pylint: disable=too-few-public-methods
         if ssh_key_value:
             protected_settings['ssh_key'] = read_content_if_is_file(ssh_key_value)
 
-        publisher, extension_name, version, auto_upgrade = _get_access_extension_upgrade_info(
-            vm.resources, is_linux=True)
+        extension_name = _LINUX_ACCESS_EXT
+        publisher, version, auto_upgrade = _get_access_extension_upgrade_info(
+            vm.resources, extension_name)
 
         ext = VirtualMachineExtension(vm.location,#pylint: disable=no-member
                                       publisher=publisher,
@@ -301,8 +318,9 @@ class ConvenienceVmCommands(object): # pylint: disable=too-few-public-methods
 
         from azure.mgmt.compute.models import VirtualMachineExtension
 
-        publisher, extension_name, version, auto_upgrade = _get_access_extension_upgrade_info(
-            vm.resources, is_linux=True)
+        extension_name = _LINUX_ACCESS_EXT
+        publisher, version, auto_upgrade = _get_access_extension_upgrade_info(
+            vm.resources, extension_name)
 
         ext = VirtualMachineExtension(vm.location,#pylint: disable=no-member
                                       publisher=publisher,
@@ -331,12 +349,22 @@ class ConvenienceVmCommands(object): # pylint: disable=too-few-public-methods
         diag_profile.boot_diagnostics.storage_uri = None
         _vm_set(vm, "Disabling boot diagnostics", "Done")
 
-    def enable_boot_diagnostics(self, resource_group_name, vm_name, storage_uri):
+    def enable_boot_diagnostics(self, resource_group_name, vm_name, storage):
         '''Enable boot diagnostics
-        :param storage_uri:the storage account uri for boot diagnostics. A valid uri
-           in format like https://your_stoage_account_name.blob.core.windows.net/
+        :param storage:a storage account name or a uri like
+        https://your_stoage_account_name.blob.core.windows.net/
         '''
         vm = _vm_get(resource_group_name, vm_name)
+        if urlparse(storage).scheme:
+            storage_uri = storage
+        else:
+            storage_mgmt_client = _get_storage_management_client()
+            storage_accounts = storage_mgmt_client.storage_accounts.list()
+            storage_account = next((a for a in list(storage_accounts)
+                                    if a.name.lower() == storage.lower()), None)
+            if storage_account is None:
+                raise CLIError('{} does\'t exist.'.format(storage))
+            storage_uri = storage_account.primary_endpoints.blob
 
         if (vm.diagnostics_profile and
                 vm.diagnostics_profile.boot_diagnostics and
@@ -426,11 +454,12 @@ class ConvenienceVmCommands(object): # pylint: disable=too-few-public-methods
                       public_config=None,
                       private_config=None,
                       auto_upgrade_minor_version=False):
-        '''create/update extensions for a VM in a resource group'
+        '''create/update extensions for a VM in a resource group. You can use
+        'extension image list' to get extension details
         :param vm_name: the name of virtual machine.
         :param vm_extension_name: the name of the extension
         :param publisher: the name of extension publisher
-        :param version: the version of extension, must be in the format of "major.minor"
+        :param version: the version of extension.
         :param public_config: public configuration content or a file path
         :param private_config: private configuration content or a file path
         :param auto_upgrade_minor_version: auto upgrade to the newer version if available
@@ -462,20 +491,17 @@ class ConvenienceVmCommands(object): # pylint: disable=too-few-public-methods
                                   resource_group_name,
                                   vm_name,
                                   storage_account,
-                                  public_config=None,
-                                  version=None):
-        '''add/update diagnostics extensions'
+                                  public_config=None):
+        '''Enable diagnostics
 
         :param vm_name: the name of virtual machine
         :param storage_account: the storage account to upload diagnostics log
         :param public_config: the config file which defines data to be collected.
         Default will be provided if missing
-        :param version: the version of LinuxDiagnostic extension
         '''
-        vm = _vm_get(resource_group_name, vm_name)
+        vm = _vm_get(resource_group_name, vm_name, 'instanceView')
         client = _compute_client_factory()
 
-        from distutils.version import LooseVersion ##pylint: disable=no-name-in-module,import-error
         from azure.mgmt.compute.models import VirtualMachineExtension
         #pylint: disable=no-member
         if public_config:
@@ -492,18 +518,9 @@ class ConvenienceVmCommands(object): # pylint: disable=too-few-public-methods
             'storageAccountKey': keys.key1
             }
 
-        publisher = 'Microsoft.OSTCExtensions'
-        vm_extension_name = 'LinuxDiagnostic'
-        if version is None:
-            result = load_extension_images_thru_services(publisher,
-                                                         vm_extension_name, None, vm.location)
-            if not result:
-                raise CLIError('Can\'t find the image {} from publisher {}.'.format(
-                    vm_extension_name, publisher))
-
-            #look for the highest
-            result.sort(key=lambda x: LooseVersion(x['version']), reverse=True)
-            version = _trim_away_build_number(result[0]['version'])
+        vm_extension_name = _LINUX_DIAG_EXT
+        publisher, version, auto_upgrade = _get_access_extension_upgrade_info(vm.resources,
+                                                                              vm_extension_name)
 
         ext = VirtualMachineExtension(vm.location,
                                       publisher=publisher,
@@ -511,7 +528,7 @@ class ConvenienceVmCommands(object): # pylint: disable=too-few-public-methods
                                       protected_settings=private_config,
                                       type_handler_version=version,
                                       settings=public_config,
-                                      auto_upgrade_minor_version=False)
+                                      auto_upgrade_minor_version=auto_upgrade)
 
         return client.virtual_machine_extensions.create_or_update(resource_group_name,
                                                                   vm_name,
@@ -519,4 +536,5 @@ class ConvenienceVmCommands(object): # pylint: disable=too-few-public-methods
                                                                   ext)
 
     def show_default_diagnostics_configuration(self):
+        '''show the default config file which defines data to be collected'''
         return get_default_linux_diag_config()
