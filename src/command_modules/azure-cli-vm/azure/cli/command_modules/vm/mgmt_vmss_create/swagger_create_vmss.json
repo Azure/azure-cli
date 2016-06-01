@@ -145,7 +145,7 @@
           "type": "string",
           "description": "URI referencing the template.",
           "enum": [
-            "https://azuresdkci.blob.core.windows.net/templatehost/CreateVMSS/azuredeploy.json"
+            "https://azuresdkci.blob.core.windows.net/templatehost/CreateVMSS_2016-06-01/azuredeploy.json"
           ]
         },
         "contentVersion": {
@@ -341,10 +341,11 @@
           "$ref": "#/definitions/DeploymentParameter_vmSku",
           "x-ms-client-flatten": true
         }
-      },
+}
+,
       "required": [
-        "name",
-        "adminUsername"
+        "adminUsername",
+        "name"
       ]
 
     },
@@ -563,10 +564,10 @@
           "description": "Private IP address allocation method.",
           "x-ms-client-name": "privateIpAddressAllocation",
           "enum": [
-            "dynamic",
-            "static"
+        "dynamic",
+        "static"
           ],
-          "default": "dynamic"
+      "default": "dynamic"
         }
       }
     },
@@ -577,10 +578,10 @@
           "description": "Public IP address allocation method.",
           "x-ms-client-name": "publicIpAddressAllocation",
           "enum": [
-            "dynamic",
-            "static"
+        "dynamic",
+        "static"
           ],
-          "default": "dynamic"
+      "default": "dynamic"
         }
       }
     },
@@ -739,7 +740,7 @@
           "description": "Container URI of of the template.",
           "x-ms-client-name": "_artifactsLocation",
           "enum": [
-            "https://azuresdkci.blob.core.windows.net/templatehost/CreateVMSS"
+            "https://azuresdkci.blob.core.windows.net/templatehost/CreateVMSS_2016-06-01"
           ]
         }
       },
