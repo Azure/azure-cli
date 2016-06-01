@@ -42,9 +42,8 @@ def print_welcome_message():
 def print_detailed_help(help_file):
     _print_header(help_file)
 
-    _print_indent(L('Arguments') if help_file.type == 'command' else L('Sub-Commands'))
-
     if help_file.type == 'command':
+        _print_indent(L('Arguments'))
         print_arguments(help_file)
     elif help_file.type == 'group':
         _print_groups(help_file)
@@ -131,16 +130,30 @@ def _print_header(help_file):
     _print_indent('')
 
 def _print_groups(help_file):
+
+    def _print_items(items):
+        for c in sorted(items, key=lambda h: h.name):
+            _print_indent('{0}{1}{2}'.format(c.name,
+                                             _get_column_indent(c.name, max_name_length),
+                                             ': ' + c.short_summary if c.short_summary else ''),
+                          indent)
+
+        _print_indent('')
+
     indent = 1
     max_name_length = max(len(c.name) for c in help_file.children) \
         if len(help_file.children) > 0 \
         else 0
-    for c in sorted(help_file.children, key=lambda h: h.name):
-        _print_indent('{0}{1}{2}'.format(c.name,
-                                         _get_column_indent(c.name, max_name_length),
-                                         ': ' + c.short_summary if c.short_summary else ''),
-                      indent)
-    _print_indent('')
+    subgroups = [c for c in help_file.children if isinstance(c, GroupHelpFile)]
+    subcommands = [c for c in help_file.children if c not in subgroups]
+
+    if subgroups:
+        _print_indent(L('Subgroups:'))
+        _print_items(subgroups)
+
+    if subcommands:
+        _print_indent(L('Commands:'))
+        _print_items(subcommands)
 
 def _get_choices_defaults_str(p):
     choice_str = '  Allowed values: {0}.'.format(', '.join(p.choices)) \
@@ -183,7 +196,7 @@ class HelpObject(object): #pylint: disable=too-few-public-methods
     def long_summary(self, value):
         self._long_summary = _normalize_text(value)
 
-class HelpFile(HelpObject): #pylint: disable=too-few-public-methods
+class HelpFile(HelpObject): #pylint: disable=too-few-public-methods,too-many-instance-attributes
     def __init__(self, delimiters):
         super(HelpFile, self).__init__()
         self.delimiters = delimiters
@@ -236,11 +249,13 @@ class GroupHelpFile(HelpFile): #pylint: disable=too-few-public-methods
         self.type = 'group'
 
         self.children = []
-        for options in parser.choices.values():
-            delimiters = ' '.join(options.prog.split()[1:])
-            child = HelpFile(delimiters)
-            child.load(options)
-            self.children.append(child)
+        if getattr(parser, 'choices', None):
+            for options in parser.choices.values():
+                delimiters = ' '.join(options.prog.split()[1:])
+                child = (GroupHelpFile(delimiters, options) if options.is_group()
+                         else HelpFile(delimiters))
+                child.load(options)
+                self.children.append(child)
 
 class CommandHelpFile(HelpFile): #pylint: disable=too-few-public-methods
     def __init__(self, delimiters, parser):
