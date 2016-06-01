@@ -145,7 +145,7 @@
           "type": "string",
           "description": "URI referencing the template.",
           "enum": [
-            "https://azuresdkci.blob.core.windows.net/templatehost/CreateVM/azuredeploy.json"
+            "https://azuresdkci.blob.core.windows.net/templatehost/CreateVM_2016-05-27/azuredeploy.json"
           ]
         },
         "contentVersion": {
@@ -209,6 +209,21 @@
         "name": {
           "type": "object",
           "$ref": "#/definitions/DeploymentParameter_name",
+          "x-ms-client-flatten": true
+        },
+        "networkSecurityGroupName": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_networkSecurityGroupName",
+          "x-ms-client-flatten": true
+        },
+        "networkSecurityGroupRule": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_networkSecurityGroupRule",
+          "x-ms-client-flatten": true
+        },
+        "networkSecurityGroupType": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_networkSecurityGroupType",
           "x-ms-client-flatten": true
         },
         "osDiskName": {
@@ -328,24 +343,10 @@
         }
       },
       "required": [
-        "virtualMachineName"
+        "name",
+        "adminUsername"
       ]
 
-    },
-    "DeploymentParameter__artifactsLocation": {
-      "properties": {
-        "value": {
-          "type": "string",
-          "description": "Container URI of of the template.",
-          "x-ms-client-name": "_artifactsLocation",
-          "enum": [
-            "https://azuresdkci.blob.core.windows.net/templatehost/CreateVM"
-          ]
-        }
-      },
-      "required": [
-        "value"
-      ]
     },
     "DeploymentParameter_adminPassword": {
       "properties": {
@@ -363,7 +364,11 @@
           "description": "Username for the Virtual Machine.",
           "x-ms-client-name": "adminUsername"
         }
-      }
+      },
+      "required": [
+        "value"
+      ]
+
     },
     "DeploymentParameter_authenticationType": {
       "properties": {
@@ -447,6 +452,44 @@
       ]
 
     },
+    "DeploymentParameter_networkSecurityGroupName": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "Name of the network security group.",
+          "x-ms-client-name": "networkSecurityGroupName"
+        }
+      }
+    },
+    "DeploymentParameter_networkSecurityGroupRule": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "The type of rule to add to a new network security group.",
+          "x-ms-client-name": "networkSecurityGroupRule",
+          "enum": [
+            "RDP",
+            "SSH"
+          ],
+          "default": "RDP"
+        }
+      }
+    },
+    "DeploymentParameter_networkSecurityGroupType": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "Whether to use a network security group or not.",
+          "x-ms-client-name": "networkSecurityGroupType",
+          "enum": [
+            "new",
+            "existing",
+            "none"
+          ],
+          "default": "new"
+        }
+      }
+    },
     "DeploymentParameter_osDiskName": {
       "properties": {
         "value": {
@@ -511,7 +554,6 @@
           "default": "Win2012R2Datacenter"
         }
       }
-
     },
     "DeploymentParameter_osVersion": {
       "properties": {
@@ -697,6 +739,22 @@
           "default": "new"
         }
       }
+    },
+
+    "DeploymentParameter__artifactsLocation": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "Container URI of of the template.",
+          "x-ms-client-name": "_artifactsLocation",
+          "enum": [
+            "https://azuresdkci.blob.core.windows.net/templatehost/CreateVM_2016-05-27"
+          ]
+        }
+      },
+      "required": [
+        "value"
+      ]
     },
     "ParametersLink": {
       "properties": {

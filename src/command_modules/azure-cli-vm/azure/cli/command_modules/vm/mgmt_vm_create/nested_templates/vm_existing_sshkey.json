@@ -55,6 +55,9 @@
     },
     "osDiskUri": {
       "type": "string"
+    },
+    "nicName": {
+      "type": "string"
     }
   },
   "variables": {
@@ -68,7 +71,7 @@
     "vhdStorageName": "[parameters('storageAccountName')]",
     "vhdStorageType": "[parameters('storageType')]",
     "vhdStorageContainerName": "[parameters('storageContainerName')]",
-    "nicName": "[concat('VMNic', parameters('VirtualMachineName'))]"
+    "nicName": "[parameters('nicName')]"
   },
   "resources": [
     {
