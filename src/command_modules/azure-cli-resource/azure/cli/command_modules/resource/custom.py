@@ -157,7 +157,7 @@ def deploy_arm_template(
 
     properties = DeploymentProperties(template=template, parameters=parameters, mode=mode)
 
-    op = LongRunningOperation('Deployment started', 'Deployment complete')
+    op = LongRunningOperation('Deployment started')
     smc = get_mgmt_service_client(ResourceManagementClient,
                                   ResourceManagementClientConfiguration)
     poller = smc.deployments.create_or_update(resource_group, deployment_name, properties)

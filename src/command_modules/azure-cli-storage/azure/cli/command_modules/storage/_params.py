@@ -1,8 +1,8 @@
 # pylint: disable=line-too-long
 from azure.cli.commands.argument_types import (
-    register_cli_argument, CliArgumentType
+    register_cli_argument, CliArgumentType, tags_type
 )
-from azure.cli.commands._validators import validate_key_value_pairs, validate_tags
+from azure.cli.commands._validators import validate_key_value_pairs
 
 from azure.mgmt.storage.models import AccountType
 
@@ -171,13 +171,6 @@ start_type = CliArgumentType(
     options_list=('--start',),
     type=validate_datetime_as_string,
     help='start UTC datetime of SAS token (Y-m-d\'T\'H:M\'Z\'). Defaults to time of request.'
-)
-
-tags_type = CliArgumentType(
-    type=validate_tags,
-    help='multiple semicolon separated tags in \'key[=value]\' format',
-    nargs='?',
-    default=''
 )
 
 timeout_type = CliArgumentType(

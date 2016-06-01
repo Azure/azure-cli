@@ -554,14 +554,6 @@ TEST_DEF = [
         'command': NetworkExpressRouteScenarioTest()
     },
     {
-        'test_name': 'network_express_route_circuit',
-        'command': NetworkExpressRouteCircuitScenarioTest()
-    },
-    {
-        'test_name': 'network_load_balancer',
-        'command': NetworkLoadBalancerScenarioTest()
-    },
-    {
         'test_name': 'network_local_gateway',
         'command': NetworkLocalGatewayScenarioTest()
     },
@@ -582,10 +574,6 @@ TEST_DEF = [
         'command': NetworkRouteTableOperationScenarioTest()
     },
     {
-        'test_name': 'network_vnet',
-        'command': NetworkVNetScenarioTest()
-    },
-    {
         'test_name': 'network_vpn_gateway',
         'command': NetworkVpnGatewayScenarioTest()
     },
@@ -597,4 +585,17 @@ TEST_DEF = [
         'test_name': 'network_subnet_create',
         'command': NetworkSubnetCreateScenarioTest()
     },
+    # TODO: Re-enable these tests pending resolution of Pivotal #120297983
+    #{
+    #    'test_name': 'network_express_route_circuit',
+    #    'command': NetworkExpressRouteCircuitScenarioTest()
+    #},
+    #{
+    #    'test_name': 'network_load_balancer',
+    #    'command': NetworkLoadBalancerScenarioTest()
+    #},
+    #{
+    #    'test_name': 'network_vnet',
+    #    'command': NetworkVNetScenarioTest()
+    #},
 ]

@@ -71,7 +71,7 @@ cli_command(command_table, 'network express-route circuit list', ExpressRouteCir
 cli_command(command_table, 'network express-route circuit list-all', ExpressRouteCircuitsOperations.list_all, '[ExpressRouteCircuit]', factory)
 
 # ExpressRouteServiceProvidersOperations
-factory = lambda _: _network_client_factory().load_balancers
+factory = lambda _: _network_client_factory().express_route_service_providers
 cli_command(command_table, 'network express-route service-provider list', ExpressRouteServiceProvidersOperations.list, '[ExpressRouteServiceProvider]', factory)
 
 # LoadBalancersOperations
