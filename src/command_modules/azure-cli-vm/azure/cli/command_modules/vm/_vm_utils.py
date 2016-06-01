@@ -27,3 +27,65 @@ def _load_json_from_file(file_path, encoding):
     except ValueError:
         pass
 
+def get_default_linux_diag_config(vm_id=None):
+    #pylint: disable=bad-continuation
+    return {
+      'diagnosticMonitorConfiguration': {
+        'metrics': {
+          'resourceId': vm_id or 'resource id of the virtual machine',
+          'metricAggregation': [{
+              'scheduledTransferPeriod': 'PT1H'
+            },
+            {
+              'scheduledTransferPeriod': 'PT1M'
+            }]
+        },
+        'performanceCounters': {
+          'performanceCounterConfiguration': [{
+              'class': 'Memory',
+              'counterSpecifier': 'PercentAvailableMemory',
+              'table': 'LinuxMemory'
+            }, {
+              'class': 'Memory',
+              'counterSpecifier': 'AvailableMemory',
+              'table': 'LinuxMemory'
+            }, {
+              'class': 'Memory',
+              'counterSpecifier': 'UsedMemory',
+              'table': 'LinuxMemory'
+            }, {
+              'class': 'Memory',
+              'counterSpecifier': 'PercentUsedSwap',
+              'table': 'LinuxMemory'
+            }, {
+              'class': 'Processor',
+              'counterSpecifier': 'PercentProcessorTime',
+              'table': 'LinuxCpu'
+            }, {
+              'class': 'Processor',
+              'counterSpecifier': 'PercentIOWaitTime',
+              'table': 'LinuxCpu'
+            }, {
+              'class': 'Processor',
+              'counterSpecifier': 'PercentIdleTime',
+              'table': 'LinuxCpu'
+            }, {
+              'class': 'PhysicalDisk',
+              'counterSpecifier': 'AverageWriteTime',
+              'table': 'LinuxDisk'
+            }, {
+              'class': 'PhysicalDisk',
+              'counterSpecifier': 'AverageReadTime',
+              'table': 'LinuxDisk'
+            }, {
+              'class': 'PhysicalDisk',
+              'counterSpecifier': 'ReadBytesPerSecond',
+              'table': 'LinuxDisk'
+            }, {
+              'class': 'PhysicalDisk',
+              'counterSpecifier': 'WriteBytesPerSecond',
+              'table': 'LinuxDisk'
+            }]
+        }
+      }
+    }

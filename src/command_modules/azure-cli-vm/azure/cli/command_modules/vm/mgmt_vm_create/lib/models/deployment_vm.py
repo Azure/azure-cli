@@ -17,14 +17,16 @@ class DeploymentVM(Model):
     sending a request.
 
     :ivar uri: URI referencing the template. Default value:
-     "https://azuresdkci.blob.core.windows.net/templatehost/CreateVM/azuredeploy.json"
+     "https://azuresdkci.blob.core.windows.net/templatehost/CreateVM_2016-05-27/azuredeploy.json"
      .
     :vartype uri: str
     :param content_version: If included it must match the ContentVersion in
      the template.
     :type content_version: str
     :ivar _artifacts_location: Container URI of of the template. Default
-     value: "https://azuresdkci.blob.core.windows.net/templatehost/CreateVM" .
+     value:
+     "https://azuresdkci.blob.core.windows.net/templatehost/CreateVM_2016-05-27"
+     .
     :vartype _artifacts_location: str
     :param admin_password: Password for the Virtual Machine.  Required if SSH
      (Linux only) is not specified.
@@ -51,6 +53,16 @@ class DeploymentVM(Model):
     :type location: str
     :param name: The VM name.
     :type name: str
+    :param network_security_group_name: Name of the network security group.
+    :type network_security_group_name: str
+    :param network_security_group_rule: The type of rule to add to a new
+     network security group. Possible values include: 'RDP', 'SSH'. Default
+     value: "RDP" .
+    :type network_security_group_rule: str
+    :param network_security_group_type: Whether to use a network security
+     group or not. Possible values include: 'new', 'existing', 'none'.
+     Default value: "new" .
+    :type network_security_group_type: str
     :param os_disk_name: Name of new VM OS disk. Default value: "osdiskimage"
      .
     :type os_disk_name: str
@@ -126,6 +138,7 @@ class DeploymentVM(Model):
     _validation = {
         'uri': {'required': True, 'constant': True},
         '_artifacts_location': {'required': True, 'constant': True},
+        'admin_username': {'required': True},
         'name': {'required': True},
         'mode': {'required': True, 'constant': True},
     }
@@ -143,6 +156,9 @@ class DeploymentVM(Model):
         'dns_name_type': {'key': 'properties.parameters.dnsNameType.value', 'type': 'str'},
         'location': {'key': 'properties.parameters.location.value', 'type': 'str'},
         'name': {'key': 'properties.parameters.name.value', 'type': 'str'},
+        'network_security_group_name': {'key': 'properties.parameters.networkSecurityGroupName.value', 'type': 'str'},
+        'network_security_group_rule': {'key': 'properties.parameters.networkSecurityGroupRule.value', 'type': 'str'},
+        'network_security_group_type': {'key': 'properties.parameters.networkSecurityGroupType.value', 'type': 'str'},
         'os_disk_name': {'key': 'properties.parameters.osDiskName.value', 'type': 'str'},
         'os_disk_uri': {'key': 'properties.parameters.osDiskUri.value', 'type': 'str'},
         'os_offer': {'key': 'properties.parameters.osOffer.value', 'type': 'str'},
@@ -169,13 +185,13 @@ class DeploymentVM(Model):
         'mode': {'key': 'properties.mode', 'type': 'str'},
     }
 
-    uri = "https://azuresdkci.blob.core.windows.net/templatehost/CreateVM/azuredeploy.json"
+    uri = "https://azuresdkci.blob.core.windows.net/templatehost/CreateVM_2016-05-27/azuredeploy.json"
 
-    _artifacts_location = "https://azuresdkci.blob.core.windows.net/templatehost/CreateVM"
+    _artifacts_location = "https://azuresdkci.blob.core.windows.net/templatehost/CreateVM_2016-05-27"
 
     mode = "Incremental"
 
-    def __init__(self, name, content_version=None, admin_password=None, admin_username=None, authentication_type="password", availability_set_id=None, availability_set_type="none", dns_name_for_public_ip=None, dns_name_type="none", location=None, os_disk_name="osdiskimage", os_disk_uri=None, os_offer="WindowsServer", os_publisher="MicrosoftWindowsServer", os_sku="2012-R2-Datacenter", os_type="Win2012R2Datacenter", os_version="latest", private_ip_address_allocation="Dynamic", public_ip_address_allocation="Dynamic", public_ip_address_name=None, public_ip_address_type="new", size="Standard_A2", ssh_dest_key_path=None, ssh_key_value=None, storage_account_name=None, storage_account_type="new", storage_container_name="vhds", storage_redundancy_type="Standard_LRS", subnet_ip_address_prefix="10.0.0.0/24", subnet_name=None, virtual_network_ip_address_prefix="10.0.0.0/16", virtual_network_name=None, virtual_network_type="new"):
+    def __init__(self, admin_username, name, content_version=None, admin_password=None, authentication_type="password", availability_set_id=None, availability_set_type="none", dns_name_for_public_ip=None, dns_name_type="none", location=None, network_security_group_name=None, network_security_group_rule="RDP", network_security_group_type="new", os_disk_name="osdiskimage", os_disk_uri=None, os_offer="WindowsServer", os_publisher="MicrosoftWindowsServer", os_sku="2012-R2-Datacenter", os_type="Win2012R2Datacenter", os_version="latest", private_ip_address_allocation="Dynamic", public_ip_address_allocation="Dynamic", public_ip_address_name=None, public_ip_address_type="new", size="Standard_A2", ssh_dest_key_path=None, ssh_key_value=None, storage_account_name=None, storage_account_type="new", storage_container_name="vhds", storage_redundancy_type="Standard_LRS", subnet_ip_address_prefix="10.0.0.0/24", subnet_name=None, virtual_network_ip_address_prefix="10.0.0.0/16", virtual_network_name=None, virtual_network_type="new"):
         self.content_version = content_version
         self.admin_password = admin_password
         self.admin_username = admin_username
@@ -186,6 +202,9 @@ class DeploymentVM(Model):
         self.dns_name_type = dns_name_type
         self.location = location
         self.name = name
+        self.network_security_group_name = network_security_group_name
+        self.network_security_group_rule = network_security_group_rule
+        self.network_security_group_type = network_security_group_type
         self.os_disk_name = os_disk_name
         self.os_disk_uri = os_disk_uri
         self.os_offer = os_offer

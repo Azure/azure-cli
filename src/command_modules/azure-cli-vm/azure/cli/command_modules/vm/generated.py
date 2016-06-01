@@ -45,6 +45,19 @@ class DeploymentOutputLongRunningOperation(LongRunningOperation): #pylint: disab
         result = super(DeploymentOutputLongRunningOperation, self).__call__(poller)
         return result.properties.outputs
 
+#build_operation(
+#    'vm extension image', 'virtual_machine_extension_images', _compute_client_factory,
+#    [
+#        CommandDefinition(VirtualMachineExtensionImagesOperations.get, 'VirtualMachineExtensionImage', command_alias='show'),
+#        CommandDefinition(VirtualMachineExtensionImagesOperations.list_types, '[VirtualMachineImageResource]', command_alias='list-names'),
+#        CommandDefinition(VirtualMachineExtensionImagesOperations.list_versions, '[VirtualMachineImageResource]'),
+#    ],
+#    command_table, patch_aliases(PARAMETER_ALIASES, {
+#        'publisher_name': {'name': '--publisher'},
+#        'type': {'name': '--name -n'},
+#        'latest': {'action': 'store_true'}
+#        }))
+
 # VM
 factory = lambda _: get_mgmt_service_client(VMClient, VMClientConfig).vm
 cli_command(command_table, 'vm create', VMOperations.create_or_update, DeploymentOutputLongRunningOperation(), factory)
@@ -60,6 +73,25 @@ cli_command(command_table, 'vm restart', VirtualMachinesOperations.restart, None
 cli_command(command_table, 'vm start', VirtualMachinesOperations.start, None, factory)
 cli_command(command_table, 'vm list-ip-addresses', list_ip_addresses, 'object', factory)
 cli_command(command_table, 'vm list', list_vm, '[VirtualMachine]')
+
+#build_operation(
+#    'vm diagnostics', None, ConvenienceVmCommands,
+#    [
+#        CommandDefinition(ConvenienceVmCommands.set_diagnostics_extension, LongRunningOperation(L('Setting extension'), L('Extension was set')), command_alias='set'),
+#        CommandDefinition(ConvenienceVmCommands.show_default_diagnostics_configuration, 'Object', command_alias='get-default-config'),
+#    ],
+#    command_table, PARAMETER_ALIASES)
+
+#build_operation(
+#    'vm extension', 'virtual_machine_extensions', _compute_client_factory,
+#    [
+#        CommandDefinition(VirtualMachineExtensionsOperations.delete, LongRunningOperation(L('Deleting VM extension'), L('VM extension deleted'))),
+#        CommandDefinition(VirtualMachineExtensionsOperations.get, 'VirtualMachineExtension', command_alias='show'),
+#    ],
+#    command_table, patch_aliases(PARAMETER_ALIASES, {
+#        'vm_extension_name': {'name': '--name -n'}
+#        }))
+
 
 # VM Access
 
@@ -135,6 +167,18 @@ cli_command(command_table, 'vm scaleset power-off', VirtualMachineScaleSetsOpera
 cli_command(command_table, 'vm scaleset restart', VirtualMachineScaleSetsOperations.restart, LongRunningOperation(), factory)
 cli_command(command_table, 'vm scaleset start', VirtualMachineScaleSetsOperations.start, LongRunningOperation(), factory)
 cli_command(command_table, 'vm scaleset update-instances', VirtualMachineScaleSetsOperations.update_instances, LongRunningOperation(), factory)
+
+#build_operation("vm availability-set",
+#                'avail_set',
+#                lambda **_: get_mgmt_service_client(AvailSetClient, AvailSetClientConfig),
+#                [
+#                    CommandDefinition(AvailSetOperations.create_or_update,
+#                                      LongRunningOperation(L('Creating availability set'), L('Availability set created')),
+#                                      'create')
+#                ],
+#                command_table, patch_aliases(PARAMETER_ALIASES, {
+#                    'name': {'name': '--name -n'}
+#                    }))
 
 # VM ScaleSet VMs
 factory = lambda _: _compute_client_factory().virtual_machine_scale_set_vms

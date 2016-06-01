@@ -83,6 +83,36 @@
         "description": "The VM name."
       }
     },
+    "networkSecurityGroupType": {
+      "type": "string",
+      "defaultValue": "new",
+      "allowedValues": [
+        "new",
+        "existing",
+        "none"
+      ],
+      "metadata": {
+        "description": "Whether to use a network security group or not."
+      }
+    },
+    "networkSecurityGroupRule": {
+      "type": "string",
+      "defaultValue": "RDP",
+      "allowedValues": [
+        "RDP",
+        "SSH"
+      ],
+      "metadata": {
+        "description": "The type of rule to add to a new network security group."
+      }
+    },
+    "networkSecurityGroupName": {
+      "type": "string",
+      "defaultValue": "[concat(parameters('name'), 'NSG')]",
+      "metadata": {
+        "description": "Name of the network security group."
+      }
+    },
     "osDiskName": {
       "type": "string",
       "defaultValue": "osdiskimage",
@@ -162,7 +192,7 @@
     },
     "publicIpAddressName": {
       "type": "string",
-      "defaultValue": "[concat('PublicIP', parameters('name'))]",
+      "defaultValue": "[concat(parameters('name'), 'PublicIP')]",
       "metadata": {
         "description": "Name of public IP address to use."
       }
@@ -241,7 +271,7 @@
     },
     "subnetName": {
       "type": "string",
-      "defaultValue": "[concat('Subnet', parameters('name'))]",
+      "defaultValue": "[concat(parameters('name'), 'Subnet')]",
       "metadata": {
         "description": "The subnet name."
       }
@@ -255,7 +285,7 @@
     },
     "virtualNetworkName": {
       "type": "string",
-      "defaultValue": "[concat('VNET', parameters('name'))]",
+      "defaultValue": "[concat(parameters('name'), 'VNET')]",
       "metadata": {
         "description": "Name of virtual network to add VM to."
       }
@@ -299,10 +329,10 @@
     },
     "authTypePath": {
       "ssh": "sshkey",
-      "password":  "password"
+      "password": "password"
     },
-    "vnetDeploymentName": "[concat('VNet', variables('vmName'))]",
-    "nicName": "[concat('VMNic', parameters('name'))]",
+    "vnetDeploymentName": "[concat(variables('vmName'), 'VNet')]",
+    "nicName": "[concat(parameters('name'), 'VMNic')]",
     "vnetAddressPrefix": "[parameters('virtualNetworkIpAddressPrefix')]",
     "subnetName": "[parameters('subnetName')]",
     "subnetAddressPrefix": "[parameters('subnetIpAddressPrefix')]",
@@ -312,8 +342,9 @@
     "vhdStorageContainerName": "vhds",
     "vmName": "[parameters('name')]",
     "vmSize": "[parameters('size')]",
-    "vmDeploymentName": "[concat('VM', variables('vmName'))]",
-    "nicDeploymentName": "[concat('NicIp', variables('vmName'))]",
+    "vmDeploymentName": "[concat(variables('vmName'), 'VM')]",
+    "nicDeploymentName": "[concat(variables('vmName'), 'NicIp')]",
+    "nsgDeploymentName": "[concat(variables('vmName'), 'NSG')]",
     "vnetName": "[parameters('virtualNetworkName')]",
     "vnetId": "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]",
     "subnetRef": "[concat(variables('vnetId'), '/subnets/', variables('subnetName'))]",
@@ -321,7 +352,7 @@
       "new": "nested_templates/NewStorageAccount.json",
       "existing": "nested_templates/ExistingStorageAccount.json"
     },
-    "storageDeploymentName": "[concat(parameters('storageAccountName'), variables('vmName'))]",
+    "storageDeploymentName": "[concat(variables('vmName'), parameters('storageAccountName'))]",
     "availSetId": "[resourceId('Microsoft.Compute/availabilitySets', parameters('availabilitySetId'))]",
     "vnetTemplateFilePaths": {
       "new": "nested_templates/NewVNet.json",
@@ -331,6 +362,11 @@
       "none": "[concat('/nested_templates/nic_ip_none_dns_', parameters('dnsNameType'), '.json')]",
       "new": "[concat('/nested_templates/nic_ip_new_dns_', parameters('dnsNameType'), '.json')]",
       "existing": "[concat('/nested_templates/nic_ip_existing_dns_', parameters('dnsNameType'), '.json')]"
+    },
+    "nsgTemplateFilePaths": {
+      "new": "[concat('nested_templates/nsg_new', '.json')]",
+      "none": "[concat('nested_templates/nsg_existing_or_none', '.json')]",
+      "existing": "[concat('nested_templates/nsg_existing_or_none', '.json')]"
     }
   },
   "resources": [
@@ -353,11 +389,29 @@
       }
     },
     {
+      "name": "[variables('nsgDeploymentName')]",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "dependsOn": [ ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(parameters('_artifactsLocation'), '/', variables('nsgTemplateFilePaths')[parameters('networkSecurityGroupType')])]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "networkSecurityGroupRule": { "value": "[parameters('networkSecurityGroupRule')]" },
+          "networkSecurityGroupName": { "value": "[parameters('networkSecurityGroupName')]" }
+        }
+      }
+    },
+    {
       "name": "[variables('nicDeploymentName')]",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
       "dependsOn": [
-        "[concat('Microsoft.Resources/deployments/', variables('vnetDeploymentName'))]"
+        "[concat('Microsoft.Resources/deployments/', variables('vnetDeploymentName'))]",
+        "[concat('Microsoft.Resources/deployments/', variables('nsgDeploymentName'))]"
       ],
       "properties": {
         "mode": "Incremental",
@@ -373,7 +427,9 @@
           "publicIpAddressAllocation": { "value": "[variables('publicIpAddressAllocation')]" },
           "nicName": { "value": "[variables('nicName')]" },
           "subnetRef": { "value": "[variables('subnetRef')]" },
-          "privateIpAllocation": { "value": "[parameters('privateIpAddressAllocation')]" }
+          "privateIpAllocation": { "value": "[parameters('privateIpAddressAllocation')]" },
+          "networkSecurityGroupName": { "value": "[parameters('networkSecurityGroupName')]" },
+          "networkSecurityGroupType": { "value": "[parameters('networkSecurityGroupType')]" }
         }
       }
     },
@@ -426,11 +482,12 @@
           "storageAccountName": { "value": "[parameters('storageAccountName')]" },
           "storageContainerName": { "value": "[parameters('storageContainerName')]" },
           "osDiskName": { "value": "[parameters('osDiskName')]" },
-          "osDiskUri":  { "value": "[parameters('osDiskUri')]"},
+          "osDiskUri": { "value": "[parameters('osDiskUri')]" },
           "sshKeyValue": { "value": "[parameters('sshKeyValue')]" },
           "sshKeyPath": { "value": "[parameters('sshDestKeyPath')]" },
           "availabilitySetId": { "value": "[variables('availSetId')]" },
-          "location": { "value": "[parameters('location')]" }
+          "location": { "value": "[parameters('location')]" },
+          "nicName": { "value": "[variables('nicName')]" }
         }
       }
     }
