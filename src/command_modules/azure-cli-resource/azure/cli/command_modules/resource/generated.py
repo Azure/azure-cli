@@ -20,7 +20,7 @@ command_table = CommandTable()
 
 # Resource group commands
 factory = lambda _: _resource_client_factory().resource_groups
-cli_command(command_table, 'resource group delete', ResourceGroupsOperations.delete, LongRunningOperation(), factory)
+cli_command(command_table, 'resource group delete', ResourceGroupsOperations.delete, LongRunningOperation('Deleting resource group'), factory)
 cli_command(command_table, 'resource group show', ResourceGroupsOperations.get, 'ResourceGroup', factory)
 cli_command(command_table, 'resource group exists', ResourceGroupsOperations.check_existence, 'Bool', factory)
 cli_command(command_table, 'resource group list', list_resource_groups, '[ResourceGroup]')

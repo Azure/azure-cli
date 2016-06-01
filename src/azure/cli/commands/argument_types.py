@@ -1,6 +1,6 @@
 from collections import defaultdict
 
-from azure.cli.application import APPLICATION
+from azure.cli.commands._validators import validate_tags
 
 # pylint: disable=too-many-arguments,too-few-public-methods
 class CliArgumentType(object):
@@ -61,16 +61,10 @@ class _ArgumentRegistry(object):
                 result.validator = override.validator
         return result
 
-_cli_argument_registry = _ArgumentRegistry()
-_cli_extra_argument_registry = defaultdict(lambda: {})
-
 def register_cli_argument(scope, dest, argtype, options_list=None, **kwargs):
     '''Specify CLI specific metadata for a given argument for a given scope.
     '''
     _cli_argument_registry.register_cli_argument(scope, dest, argtype, options_list, **kwargs)
-
-def get_cli_argument(command, argname):
-    return _cli_argument_registry.get_cli_argument(command, argname)
 
 def register_additional_cli_argument(command, dest, options_list=None, **kwargs):
     '''Register extra parameters for the given command. Typically used to augment auto-command built
@@ -78,24 +72,14 @@ def register_additional_cli_argument(command, dest, options_list=None, **kwargs)
     '''
     _cli_extra_argument_registry[command][dest] = CliCommandArgument(dest, options_list, **kwargs)
 
-def _update_command_definitions(command_table):
-    for command_name, command in command_table.items():
-        for argument_name in command.arguments:
-            command.update_argument(argument_name, get_cli_argument(command_name, argument_name))
+def get_cli_argument(command, argname):
+    return _cli_argument_registry.get_cli_argument(command, argname)
 
-        # Add any arguments explicitly registered for this command
-        for argument_name, argument_definition in \
-                _cli_extra_argument_registry[command_name].items():
-            command.arguments[argument_name] = argument_definition
-            command.update_argument(argument_name, get_cli_argument(command_name, argument_name))
+def get_cli_extra_arguments(command):
+    return _cli_extra_argument_registry[command].items()
 
-def _validate_arguments(args, **_):
-    for validator in getattr(args, '_validators', []):
-        validator(args)
-    try:
-        delattr(args, '_validators')
-    except AttributeError:
-        pass
+_cli_argument_registry = _ArgumentRegistry()
+_cli_extra_argument_registry = defaultdict(lambda: {})
 
 # Shared argument type definitions
 resource_group_name_type = CliArgumentType(
@@ -105,10 +89,20 @@ location_type = CliArgumentType(
     help='Location. Use "az locations get" to get a list of valid locations', metavar='LOCATION')
 name_type = CliArgumentType(options_list=('--name', '-n'))
 
+tags_type = CliArgumentType(
+    type=validate_tags,
+    help='multiple semicolon separated tags in \'key[=value]\' format. Omit value to clear tags.',
+    nargs='?',
+    default=''
+)
+
+tag_type = CliArgumentType(
+    type=validate_tags,
+    help='a single tag in \'key[=value]\' format. Omit value to clear tags.',
+    nargs='?',
+    default=''
+)
+
 # Register usage of said argument types
 register_cli_argument('', 'resource_group_name', resource_group_name_type)
 register_cli_argument('', 'location', location_type)
-
-# Handlers to update command definitions before they are fed to the parser
-APPLICATION.register(APPLICATION.COMMAND_TABLE_LOADED, _update_command_definitions)
-APPLICATION.register(APPLICATION.COMMAND_PARSER_PARSED, _validate_arguments)

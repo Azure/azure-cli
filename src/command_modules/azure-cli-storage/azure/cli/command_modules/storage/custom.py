@@ -66,7 +66,7 @@ def create_storage_account(resource_group_name, account_name, location, account_
     from azure.mgmt.storage.models import StorageAccountCreateParameters
     scf = storage_client_factory()
     params = StorageAccountCreateParameters(location, account_type, tags)
-    op = LongRunningOperation('Creating storage account', 'Storage account created')
+    op = LongRunningOperation('Creating storage account')
     poller = scf.storage_accounts.create(resource_group_name, account_name, params)
     return op(poller)
 

@@ -2,9 +2,7 @@
 import mock
 import azure.cli.application as application
 from azure.cli.command_modules.vm.custom import enable_boot_diagnostics, disable_boot_diagnostics
-from azure.cli.command_modules.vm.custom import _get_access_extension_upgrade_info
 from azure.cli.command_modules.vm.custom import (_get_access_extension_upgrade_info,
-                                                 ConvenienceVmCommands,
                                                  _LINUX_ACCESS_EXT,
                                                  _WINDOWS_ACCESS_EXT)
 

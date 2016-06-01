@@ -10,7 +10,7 @@ from ._params import _auth_client_factory
 
 command_table = CommandTable()
 
-factory = lambda _: _auth_client_factory()
+factory = lambda _: _auth_client_factory().role_definitions
 cli_command(command_table, 'role list', RoleDefinitionsOperations.list, '[Role]', factory)
 cli_command(command_table, 'role delete', RoleDefinitionsOperations.delete, 'Result', factory)
 cli_command(command_table, 'role show', RoleDefinitionsOperations.get, 'Role', factory)

@@ -2,26 +2,11 @@
 import argparse
 
 from azure.cli.commands.argument_types import (
-    register_cli_argument, CliArgumentType, resource_group_name_type
+    register_cli_argument, CliArgumentType, resource_group_name_type, tag_type, tags_type
 )
-from azure.cli.commands._validators import validate_tag
 from ._validators import validate_resource_type, validate_parent, resolve_resource_parameters
 
 # BASIC PARAMETER CONFIGURATION
-
-tag_type = CliArgumentType(
-    type=validate_tag,
-    help='a single tag in \'key[=value]\' format',
-    nargs='?',
-    default=''
-)
-
-tags_type = CliArgumentType(
-    type=validate_tag,
-    help='multiple ; separated tags in \'key[=value]\' format',
-    nargs='?',
-    default=''
-)
 
 resource_type_type = CliArgumentType(
     help='The resource type in <namespace>/<type> format.',

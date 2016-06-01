@@ -22,4 +22,4 @@ cli_command(command_table, 'webapp get-sites', SitesOperations.get_sites, '[Site
 
 factory = lambda _: get_mgmt_service_client(WebAppClient, WebAppClientConfig).web_app
 cli_command(command_table, 'webapp create', WebAppOperations.create_or_update,
-            DeploymentOutputLongRunningOperation(), factory)
+            DeploymentOutputLongRunningOperation('Creating webapp'), factory)
