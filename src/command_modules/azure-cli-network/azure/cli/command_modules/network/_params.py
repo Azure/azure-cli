@@ -5,7 +5,8 @@ from azure.mgmt.network import NetworkManagementClient, NetworkManagementClientC
 
 from azure.cli.command_modules.network._actions import LBDNSNameAction
 from azure.cli.commands._command_creation import get_mgmt_service_client
-from azure.cli.commands.argument_types import register_cli_argument, CliArgumentType, location_type
+from azure.cli.commands._params import location_type
+from azure.cli.commands.argument_types import register_cli_argument, CliArgumentType
 # FACTORIES
 
 def _network_client_factory(**_):

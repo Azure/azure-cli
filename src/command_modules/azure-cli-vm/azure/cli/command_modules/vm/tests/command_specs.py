@@ -685,9 +685,9 @@ class VMDiagnosticsTest(CommandTestScript):
 
     def test_body(self):
         #pylint: disable=line-too-long
-        vm_name = 'yugangwtest-1'
-        resource_group = 'yugangwtest'
-        storage_account = 'vhdstorage4jjdhrm754a5g'
+        vm_name = 'linuxtestvm'
+        resource_group = 'travistestresourcegroup'
+        storage_account = 'travistestresourcegr3014'
         extension_name = 'LinuxDiagnostic'
         set_cmd = ('vm diagnostics set --vm-name {} --resource-group {} --storage-account {}'
                    .format(vm_name, resource_group, storage_account))
@@ -697,7 +697,6 @@ class VMDiagnosticsTest(CommandTestScript):
                 JMESPathComparator('type(@)', 'object'),
                 JMESPathComparator('name', extension_name),
                 JMESPathComparator('resourceGroup', resource_group)])
-
 
 ENV_VAR = {}
 
@@ -790,13 +789,12 @@ TEST_DEF = [
         'test_name': 'vm_extension_install',
         'command': VMExtensionInstallTest()
     },
-    # TODO: Re-enable these tests pending resolution of Pivotal #120297983
-    #{
-    #    'test_name': 'vm_diagnostics_install',
-    #    'command': VMDiagnosticsTest()
-    #},
-    #{
-    #    'test_name': 'vm_create_state_modifications',
-    #    'command': VMCreateAndStateModificationsScenarioTest()
-    #},
+    {
+        'test_name': 'vm_diagnostics_install',
+        'command': VMDiagnosticsTest()
+    },
+    {
+        'test_name': 'vm_create_state_modifications',
+        'command': VMCreateAndStateModificationsScenarioTest()
+    },
 ]

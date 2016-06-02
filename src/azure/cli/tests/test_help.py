@@ -39,7 +39,7 @@ class Test_argparse(unittest.TestCase):
 
     @redirect_io
     def test_help_param(self):
-        def test_handler(args):
+        def test_handler():
             pass
 
         command = CliCommand('n1', test_handler)
@@ -59,7 +59,7 @@ class Test_argparse(unittest.TestCase):
 
     @redirect_io
     def test_help_plain_short_description(self):
-        def test_handler(args):
+        def test_handler():
             pass
 
         command = CliCommand('n1', test_handler, description='the description')
@@ -77,7 +77,7 @@ class Test_argparse(unittest.TestCase):
 
     @redirect_io
     def test_help_plain_long_description(self):
-        def test_handler(args):
+        def test_handler():
             pass
 
         command = CliCommand('n1', test_handler)
@@ -96,7 +96,7 @@ class Test_argparse(unittest.TestCase):
 
     @redirect_io
     def test_help_long_description_and_short_description(self):
-        def test_handler(args):
+        def test_handler():
             pass
 
         command = CliCommand('n1', test_handler, description='short description')
@@ -115,7 +115,7 @@ class Test_argparse(unittest.TestCase):
 
     @redirect_io
     def test_help_docstring_description_overrides_short_description(self):
-        def test_handler(args):
+        def test_handler():
             pass
 
         command = CliCommand('n1', test_handler, description='short description')
@@ -134,7 +134,7 @@ class Test_argparse(unittest.TestCase):
 
     @redirect_io
     def test_help_long_description_multi_line(self):
-        def test_handler(args):
+        def test_handler():
             pass
 
         command = CliCommand('n1', test_handler)
@@ -160,7 +160,7 @@ class Test_argparse(unittest.TestCase):
     @mock.patch('azure.cli.application.Application.register', return_value=None)
     def test_help_params_documentations(self, _):
         app = Application(Configuration([]))
-        def test_handler(args):
+        def test_handler():
             pass
 
         command = CliCommand('n1', test_handler)
@@ -214,7 +214,7 @@ Global Arguments
     @mock.patch('azure.cli.application.Application.register', return_value=None)
     def test_help_full_documentations(self, _):
         app = Application(Configuration([]))
-        def test_handler(args):
+        def test_handler():
             pass
 
         command = CliCommand('n1', test_handler)
@@ -275,45 +275,11 @@ Examples
 '''
         self.assertEqual(s, io.getvalue())
 
-    # TODO: Restore test when Python 2.7 bug fix applied
-    #@redirect_io
-    #def test_help_extra_help_params(self):
-    #    app = Application(Configuration([]))
-    #    def test_handler(args):
-    #        pass
-
-    #    cmd_table = {
-    #        test_handler: {
-    #            'name': 'n1',
-    #            'help_file': '''
-    #                parameters: 
-    #                  - name: --foobar -fb
-    #                    type: string
-    #                    required: false
-    #                    short-summary: one line partial sentence
-    #                    long-summary: text, markdown, etc.
-    #                    populator-commands: 
-    #                        - az vm list
-    #                        - default
-    #                ''',
-    #            'arguments': [
-    #                {'name': '--foobar2 -fb2', 'required': True}
-    #                ]
-    #            }
-    #        }
-    #    config = Configuration([])
-    #    config.get_command_table = lambda: cmd_table
-    #    app = Application(config)
-
-    #    self.assertRaisesRegexp(HelpAuthoringException,
-    #                           '.*Extra help param --foobar -fb.*',
-    #                            lambda: app.execute('n1 -h'.split()))
-
     @redirect_io
     @mock.patch('azure.cli.application.Application.register', return_value=None)
     def test_help_with_param_specified(self, _):
         app = Application(Configuration([]))
-        def test_handler(args):
+        def test_handler():
             pass
 
         command = CliCommand('n1', test_handler)
@@ -345,9 +311,9 @@ Global Arguments
     @redirect_io
     def test_help_group_children(self):
         app = Application(Configuration([]))
-        def test_handler(args):
+        def test_handler():
             pass
-        def test_handler2(args):
+        def test_handler2():
             pass
 
         command = CliCommand('group1 group3 n1', test_handler)
@@ -372,7 +338,7 @@ Global Arguments
     @redirect_io
     def test_help_extra_missing_params(self):
         app = Application(Configuration([]))
-        def test_handler(args):
+        def test_handler():
             pass
 
         command = CliCommand('n1', test_handler)
@@ -410,7 +376,7 @@ Global Arguments
     @redirect_io
     def test_help_group_help(self):
         app = Application(Configuration([]))
-        def test_handler(args):
+        def test_handler():
             pass
 
         command = CliCommand('test_group1 test_group2 n1', test_handler)
@@ -476,7 +442,7 @@ Examples
         mock_register_extensions.side_effect = lambda app: \
             app._event_handlers[app.GLOBAL_PARSER_CREATED].append(register_globals)
 
-        def test_handler(args):
+        def test_handler():
             pass
 
         command = CliCommand('n1', test_handler)
@@ -512,7 +478,6 @@ Global Arguments
 """
 
         self.assertEqual(s, io.getvalue())
-
 
 if __name__ == '__main__':
     unittest.main()

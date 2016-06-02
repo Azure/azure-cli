@@ -1,7 +1,6 @@
 # pylint: disable=line-too-long
-from azure.cli.commands.argument_types import (
-    register_cli_argument, CliArgumentType, tags_type
-)
+from azure.cli.commands._params import tags_type
+from azure.cli.commands.argument_types import register_cli_argument, CliArgumentType
 from azure.cli.commands._validators import validate_key_value_pairs
 
 from azure.mgmt.storage.models import AccountType
@@ -206,33 +205,32 @@ register_cli_argument('storage account', 'account_name', account_name_type, opti
 register_cli_argument('storage account', 'account_type', account_type_type, options_list=('--type', '-t'))
 register_cli_argument('storage account', 'tags', tags_type)
 register_cli_argument('storage account keys', 'key', key_type)
+
 register_cli_argument('storage account connection-string', 'use_http', use_http_type)
 register_cli_argument('storage account connection-string', 'account_name', account_name_type)
+
 register_cli_argument('storage account generate-sas', 'resource_types', resource_types_type)
 register_cli_argument('storage account generate-sas', 'services', services_type)
 
 register_cli_argument('storage container', 'container_name', container_name_type)
 register_cli_argument('storage container create', 'public_access', public_access_type)
 
-register_cli_argument('storage blob upload', 'blob_type', blob_type_type, options_list=('--type', '-t'))
 register_cli_argument('storage blob', 'blob_name', blob_name_type)
-register_cli_argument('storage blob copy', 'blob_name', blob_name_type,
-                      options_list=('--destination-name', '-n'),
-                      help='Name of the destination blob. If the exists, it will be overwritten.'
-                     )
+
+register_cli_argument('storage blob copy', 'blob_name', blob_name_type, options_list=('--destination-name', '-n'), help='Name of the destination blob. If the exists, it will be overwritten.')
 register_cli_argument('storage blob copy', 'container_name', container_name_type, options_list=('--destination-container', '-c'))
+
+register_cli_argument('storage blob upload', 'blob_type', blob_type_type, options_list=('--type', '-t'))
+
 register_cli_argument('storage share', 'quota', quota_type)
 register_cli_argument('storage share', 'share_name', share_name_type, options_list=('--name', '-n'))
+
 register_cli_argument('storage file', 'file_name', file_name_type, options_list=('--name', '-n'))
 register_cli_argument('storage file', 'directory_name', directory_type, required=False)
+
 register_cli_argument('storage file metadata', 'directory_name', directory_type, required=False)
-register_cli_argument('storage file copy', 'directory_name', directory_type,
-                      options_list=('--destination-directory', '-d'),
-                      required=False,
-                      default=''
-                     )
+
+register_cli_argument('storage file copy', 'directory_name', directory_type, options_list=('--destination-directory', '-d'), required=False, default='')
+
 register_cli_argument('storage file copy', 'file_name', file_name_type, options_list=('--destination-name', '-n'))
-register_cli_argument('storage file copy', 'share_name', share_name_type,
-                      options_list=('--destination-share', '-s'),
-                      help='Name of the destination share. The share must exist.'
-                     )
+register_cli_argument('storage file copy', 'share_name', share_name_type, options_list=('--destination-share', '-s'), help='Name of the destination share. The share must exist.')

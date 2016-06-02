@@ -82,12 +82,13 @@ def _get_command_table(module_name):
 
 class CliCommand(object):
 
-    def __init__(self, name, handler, description=None):
+    def __init__(self, name, handler, operation=None, description=None):
         self.name = name
         self.handler = handler
         self.description = description
         self.help_file = None
         self.arguments = {}
+        _extract_args_from_signature(self, operation or handler)
 
     def add_argument(self, param_name, *option_strings, **kwargs):
         argument = azure.cli.commands.argument_types.CliCommandArgument(
@@ -149,17 +150,12 @@ def create_command(name, operation, return_type, client_factory):
                 return return_type(result)
             if isinstance(return_type, str):
                 return list(result) if isinstance(result, Paged) else result
-        except TypeError as exception:
-            raise IncorrectUsageError(exception)
         except ClientException as client_exception:
             message = getattr(client_exception, 'message', client_exception)
             raise CLIError(message)
 
     name = ' '.join(name.split())
-    command = CliCommand(name, _execute_command)
-    _extract_args_from_signature(command, operation)
-
-    return command
+    return CliCommand(name, _execute_command, operation)
 
 def _option_descriptions(operation):
     """Pull out parameter help from doccomments of the command

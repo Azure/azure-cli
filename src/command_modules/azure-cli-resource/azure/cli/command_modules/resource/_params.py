@@ -1,9 +1,9 @@
 # pylint: disable=line-too-long
 import argparse
 
-from azure.cli.commands.argument_types import (
-    register_cli_argument, CliArgumentType, resource_group_name_type, tag_type, tags_type
-)
+from azure.cli.commands._params import resource_group_name_type, tag_type, tags_type
+from azure.cli.commands.argument_types import register_cli_argument, CliArgumentType
+
 from ._validators import validate_resource_type, validate_parent, resolve_resource_parameters
 
 # BASIC PARAMETER CONFIGURATION
