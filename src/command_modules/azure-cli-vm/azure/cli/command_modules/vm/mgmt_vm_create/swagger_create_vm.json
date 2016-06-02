@@ -145,7 +145,7 @@
           "type": "string",
           "description": "URI referencing the template.",
           "enum": [
-            "https://azuresdkci.blob.core.windows.net/templatehost/CreateVM_2016-05-27/azuredeploy.json"
+            "https://azuresdkci.blob.core.windows.net/templatehost/CreateVM_2016-05-31/azuredeploy.json"
           ]
         },
         "contentVersion": {
@@ -259,6 +259,11 @@
         "osVersion": {
           "type": "object",
           "$ref": "#/definitions/DeploymentParameter_osVersion",
+          "x-ms-client-flatten": true
+        },
+        "privateIpAddress": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_privateIpAddress",
           "x-ms-client-flatten": true
         },
         "privateIpAddressAllocation": {
@@ -565,6 +570,15 @@
         }
       }
     },
+    "DeploymentParameter_privateIpAddress": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "The private IP address to use with Private IP Address Allocation type Static.",
+          "x-ms-client-name": "privateIpAddress"
+        }
+      }
+    },
     "DeploymentParameter_privateIpAddressAllocation": {
       "properties": {
         "value": {
@@ -572,10 +586,10 @@
           "description": "Private IP address allocation method.",
           "x-ms-client-name": "privateIpAddressAllocation",
           "enum": [
-            "Dynamic",
-            "Static"
+            "dynamic",
+            "static"
           ],
-          "default": "Dynamic"
+          "default": "dynamic"
         }
       }
     },
@@ -586,10 +600,10 @@
           "description": "Public IP address allocation method.",
           "x-ms-client-name": "publicIpAddressAllocation",
           "enum": [
-            "Dynamic",
-            "Static"
+            "dynamic",
+            "static"
           ],
-          "default": "Dynamic"
+          "default": "dynamic"
         }
       }
     },
@@ -748,7 +762,7 @@
           "description": "Container URI of of the template.",
           "x-ms-client-name": "_artifactsLocation",
           "enum": [
-            "https://azuresdkci.blob.core.windows.net/templatehost/CreateVM_2016-05-27"
+            "https://azuresdkci.blob.core.windows.net/templatehost/CreateVM_2016-05-31"
           ]
         }
       },
