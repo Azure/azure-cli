@@ -14,6 +14,9 @@
     "publicIPAddressName": {
       "type": "string"
     },
+    "privateIpAddress": {
+      "type": "string"
+    },
     "publicIpAddressAllocation": {
       "type": "string"
     },
@@ -34,17 +37,27 @@
     }
   },
   "variables": {
+    "ipConfigProperties": {
+      "Static": {
+        "privateIPAllocationMethod": "Static",
+        "privateIPAddress": "[parameters('privateIpAddress')]",
+        "subnet": {
+          "id": "[parameters('subnetRef')]"
+        }
+      },
+      "Dynamic": {
+        "privateIPAllocationMethod": "Dynamic",
+        "subnet": {
+          "id": "[parameters('subnetRef')]"
+        }
+      }
+    },
     "nsgProperties": {
       "new": {
         "ipConfigurations": [
           {
             "name": "[concat('ipconfig', parameters('VirtualMachineName'))]",
-            "properties": {
-              "privateIPAllocationMethod": "[parameters('privateIpAllocation')]",
-              "subnet": {
-                "id": "[parameters('subnetRef')]"
-              }
-            }
+            "properties": "[variables('ipConfigProperties')[parameters('privateIpAllocation')]]"
           }
         ],
         "networkSecurityGroup": {
@@ -55,12 +68,7 @@
         "ipConfigurations": [
           {
             "name": "[concat('ipconfig', parameters('VirtualMachineName'))]",
-            "properties": {
-              "privateIPAllocationMethod": "[parameters('privateIpAllocation')]",
-              "subnet": {
-                "id": "[parameters('subnetRef')]"
-              }
-            }
+            "properties": "[variables('ipConfigProperties')[parameters('privateIpAllocation')]]"
           }
         ],
         "networkSecurityGroup": {
@@ -71,12 +79,7 @@
         "ipConfigurations": [
           {
             "name": "[concat('ipconfig', parameters('VirtualMachineName'))]",
-            "properties": {
-              "privateIPAllocationMethod": "[parameters('privateIpAllocation')]",
-              "subnet": {
-                "id": "[parameters('subnetRef')]"
-              }
-            }
+            "properties": "[variables('ipConfigProperties')[parameters('privateIpAllocation')]]"
           }
         ]
       }

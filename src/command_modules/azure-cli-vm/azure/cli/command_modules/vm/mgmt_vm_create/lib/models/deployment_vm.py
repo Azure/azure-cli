@@ -17,7 +17,7 @@ class DeploymentVM(Model):
     sending a request.
 
     :ivar uri: URI referencing the template. Default value:
-     "https://azuresdkci.blob.core.windows.net/templatehost/CreateVM_2016-05-27/azuredeploy.json"
+     "https://azuresdkci.blob.core.windows.net/templatehost/CreateVM_2016-05-31/azuredeploy.json"
      .
     :vartype uri: str
     :param content_version: If included it must match the ContentVersion in
@@ -25,7 +25,7 @@ class DeploymentVM(Model):
     :type content_version: str
     :ivar _artifacts_location: Container URI of of the template. Default
      value:
-     "https://azuresdkci.blob.core.windows.net/templatehost/CreateVM_2016-05-27"
+     "https://azuresdkci.blob.core.windows.net/templatehost/CreateVM_2016-05-31"
      .
     :vartype _artifacts_location: str
     :param admin_password: Password for the Virtual Machine.  Required if SSH
@@ -83,12 +83,15 @@ class DeploymentVM(Model):
     :type os_type: str
     :param os_version: The OS version to install. Default value: "latest" .
     :type os_version: str
+    :param private_ip_address: The private IP address to use with Private IP
+     Address Allocation type Static.
+    :type private_ip_address: str
     :param private_ip_address_allocation: Private IP address allocation
-     method. Possible values include: 'Dynamic', 'Static'. Default value:
-     "Dynamic" .
+     method. Possible values include: 'dynamic', 'static'. Default value:
+     "dynamic" .
     :type private_ip_address_allocation: str
     :param public_ip_address_allocation: Public IP address allocation method.
-     Possible values include: 'Dynamic', 'Static'. Default value: "Dynamic" .
+     Possible values include: 'dynamic', 'static'. Default value: "dynamic" .
     :type public_ip_address_allocation: str
     :param public_ip_address_name: Name of public IP address to use.
     :type public_ip_address_name: str
@@ -166,6 +169,7 @@ class DeploymentVM(Model):
         'os_sku': {'key': 'properties.parameters.osSKU.value', 'type': 'str'},
         'os_type': {'key': 'properties.parameters.osType.value', 'type': 'str'},
         'os_version': {'key': 'properties.parameters.osVersion.value', 'type': 'str'},
+        'private_ip_address': {'key': 'properties.parameters.privateIpAddress.value', 'type': 'str'},
         'private_ip_address_allocation': {'key': 'properties.parameters.privateIpAddressAllocation.value', 'type': 'str'},
         'public_ip_address_allocation': {'key': 'properties.parameters.publicIpAddressAllocation.value', 'type': 'str'},
         'public_ip_address_name': {'key': 'properties.parameters.publicIpAddressName.value', 'type': 'str'},
@@ -185,13 +189,13 @@ class DeploymentVM(Model):
         'mode': {'key': 'properties.mode', 'type': 'str'},
     }
 
-    uri = "https://azuresdkci.blob.core.windows.net/templatehost/CreateVM_2016-05-27/azuredeploy.json"
+    uri = "https://azuresdkci.blob.core.windows.net/templatehost/CreateVM_2016-05-31/azuredeploy.json"
 
-    _artifacts_location = "https://azuresdkci.blob.core.windows.net/templatehost/CreateVM_2016-05-27"
+    _artifacts_location = "https://azuresdkci.blob.core.windows.net/templatehost/CreateVM_2016-05-31"
 
     mode = "Incremental"
 
-    def __init__(self, admin_username, name, content_version=None, admin_password=None, authentication_type="password", availability_set_id=None, availability_set_type="none", dns_name_for_public_ip=None, dns_name_type="none", location=None, network_security_group_name=None, network_security_group_rule="RDP", network_security_group_type="new", os_disk_name="osdiskimage", os_disk_uri=None, os_offer="WindowsServer", os_publisher="MicrosoftWindowsServer", os_sku="2012-R2-Datacenter", os_type="Win2012R2Datacenter", os_version="latest", private_ip_address_allocation="Dynamic", public_ip_address_allocation="Dynamic", public_ip_address_name=None, public_ip_address_type="new", size="Standard_A2", ssh_dest_key_path=None, ssh_key_value=None, storage_account_name=None, storage_account_type="new", storage_container_name="vhds", storage_redundancy_type="Standard_LRS", subnet_ip_address_prefix="10.0.0.0/24", subnet_name=None, virtual_network_ip_address_prefix="10.0.0.0/16", virtual_network_name=None, virtual_network_type="new"):
+    def __init__(self, admin_username, name, content_version=None, admin_password=None, authentication_type="password", availability_set_id=None, availability_set_type="none", dns_name_for_public_ip=None, dns_name_type="none", location=None, network_security_group_name=None, network_security_group_rule="RDP", network_security_group_type="new", os_disk_name="osdiskimage", os_disk_uri=None, os_offer="WindowsServer", os_publisher="MicrosoftWindowsServer", os_sku="2012-R2-Datacenter", os_type="Win2012R2Datacenter", os_version="latest", private_ip_address=None, private_ip_address_allocation="dynamic", public_ip_address_allocation="dynamic", public_ip_address_name=None, public_ip_address_type="new", size="Standard_A2", ssh_dest_key_path=None, ssh_key_value=None, storage_account_name=None, storage_account_type="new", storage_container_name="vhds", storage_redundancy_type="Standard_LRS", subnet_ip_address_prefix="10.0.0.0/24", subnet_name=None, virtual_network_ip_address_prefix="10.0.0.0/16", virtual_network_name=None, virtual_network_type="new"):
         self.content_version = content_version
         self.admin_password = admin_password
         self.admin_username = admin_username
@@ -212,6 +216,7 @@ class DeploymentVM(Model):
         self.os_sku = os_sku
         self.os_type = os_type
         self.os_version = os_version
+        self.private_ip_address = private_ip_address
         self.private_ip_address_allocation = private_ip_address_allocation
         self.public_ip_address_allocation = public_ip_address_allocation
         self.public_ip_address_name = public_ip_address_name
