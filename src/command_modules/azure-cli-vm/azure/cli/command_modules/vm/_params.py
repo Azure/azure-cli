@@ -54,9 +54,9 @@ register_cli_argument('vm create', 'authentication_type', CliArgumentType(
 ))
 register_cli_argument('vm create', 'availability_set_type', CliArgumentType(choices=['none', 'existing'], help='', default='none'))
 register_cli_argument('vm create', 'private_ip_address_allocation', CliArgumentType(
-    choices=['Dynamic', 'Static'], help='', default='Dynamic'))
+    choices=['dynamic', 'static'], help='', default='dynamic'))
 register_cli_argument('vm create', 'public_ip_address_allocation', CliArgumentType(
-    choices=['Dynamic', 'Static'], help='', default='Dynamic'))
+    choices=['dynamic', 'static'], help='', default='dynamic'))
 register_cli_argument('vm create', 'public_ip_address_type', CliArgumentType(
     choices=['none', 'new', 'existing'], help='', default='new'))
 register_cli_argument('vm create', 'storage_account_type', CliArgumentType(
@@ -85,111 +85,6 @@ register_cli_argument(
 )
 
 register_cli_argument('vm diagnostics', 'vm_name', CliArgumentType(options_list=('--vm-name',)))
-VM_CREATE_PARAMETER_ALIASES = {
-    'location': {
-        'completer': get_location_completion_list
-    },
-    'name': {
-        'name': '--name -n'
-    },
-    'os_disk_uri': {
-        'name': '--os-disk-uri',
-        'help': argparse.SUPPRESS
-    },
-    'os_offer': {
-        'name': '--os_offer',
-        'help': argparse.SUPPRESS
-    },
-    'os_publisher': {
-        'name': '--os-publisher',
-        'help': argparse.SUPPRESS
-    },
-    'os_sku': {
-        'name': '--os-sku',
-        'help': argparse.SUPPRESS
-    },
-    'os_type': {
-        'name': '--os-type',
-        'help': argparse.SUPPRESS
-    },
-    'os_version': {
-        'name': '--os-version',
-        'help': argparse.SUPPRESS
-    },
-    'admin_username': {
-        'name': '--admin-username',
-        'default': getpass.getuser(),
-        'required': False
-    },
-    'ssh_key_value': {
-        'name': '--ssh-key-value',
-        'action': VMSSHFieldAction
-    },
-    'dns_name_for_public_ip': {
-        'name': '--dns-name-for-public-ip',
-        'action': VMDNSNameAction
-    },
-    'dns_name_type': {
-        'name': '--dns-name-type',
-        'help': argparse.SUPPRESS
-    },
-    'authentication_type': {
-        'name': '--authentication-type',
-        'choices': ['ssh', 'password'],
-        'help': 'Password or SSH public key authentication.  '
-                'Defaults to password for Windows and SSH public key for Linux.',
-        'default': None
-    },
-    'availability_set_type': {
-        'name': '--availability-set-type',
-        'choices': ['none', 'existing'],
-        'default': 'none',
-        'help': ''
-    },
-    'private_ip_address_allocation': {
-        'name': '--private-ip-address-allocation',
-        'choices': ['dynamic', 'static'],
-        'default': 'dynamic',
-        'help': ''
-    },
-    'public_ip_address_allocation': {
-        'name': '--public-ip-address-allocation',
-        'choices': ['dynamic', 'static'],
-        'default': 'dynamic',
-        'help': ''
-    },
-    'public_ip_address_type': {
-        'name': '--public-ip-address-type',
-        'choices': ['none', 'new', 'existing'],
-        'default': 'new',
-        'help': ''
-    },
-    'storage_account_type': {
-        'name': '--storage-account-type',
-        'choices': ['new', 'existing'],
-        'default': 'new',
-        'help': ''
-    },
-    'virtual_network_type': {
-        'name': '--virtual-network-type',
-        'choices': ['new', 'existing'],
-        'default': 'new',
-        'help': ''
-    },
-    'network_security_group_rule': {
-        'name': '--network-security-group-rule',
-        'choices': ['RDP', 'SSH'],
-        'default': None,
-        'help': 'Network security group rule to create.  '
-                'Defaults to RDP for Windows and SSH for Linux'
-    },
-    'network_security_group_type': {
-        'name': '--network-security-group-type',
-        'choices': ['new', 'existing', 'none'],
-        'default': 'new',
-        'help': ''
-    }
-}
 
 register_cli_argument('vm extension', 'vm_extension_name', name_arg_type)
 register_cli_argument('vm extension', 'vm_name', CliArgumentType(options_list=('--vm-name',)))
