@@ -11,7 +11,8 @@ from azure.cli.command_modules.vm._actions import (VMImageFieldAction,
                                                    VMDNSNameAction,
                                                    load_images_from_aliases_doc,
                                                    get_subscription_locations)
-from azure.cli.commands.argument_types import register_cli_argument, CliArgumentType, location_type, register_additional_cli_argument
+from azure.cli.commands._params import location_type
+from azure.cli.commands.argument_types import register_cli_argument, CliArgumentType, register_extra_cli_argument
 
 def get_location_completion_list(prefix, **kwargs):#pylint: disable=unused-argument
     result = get_subscription_locations()
@@ -35,41 +36,6 @@ register_cli_argument('vm', 'lun', CliArgumentType(
 register_cli_argument('vm', 'vhd', CliArgumentType(type=VirtualHardDisk))
 
 register_cli_argument('vm availability-set', 'availability_set_name', name_arg_type)
-
-register_cli_argument('vm create', 'name', name_arg_type)
-register_cli_argument('vm create', 'location', CliArgumentType(completer=get_location_completion_list))
-register_cli_argument('vm create', 'os_disk_uri', CliArgumentType(help=argparse.SUPPRESS))
-register_cli_argument('vm create', 'os_offer', CliArgumentType(help=argparse.SUPPRESS))
-register_cli_argument('vm create', 'os_publisher', CliArgumentType(help=argparse.SUPPRESS))
-register_cli_argument('vm create', 'os_sku', CliArgumentType(help=argparse.SUPPRESS))
-register_cli_argument('vm create', 'os_type', CliArgumentType(help=argparse.SUPPRESS))
-register_cli_argument('vm create', 'os_verion', CliArgumentType(help=argparse.SUPPRESS))
-register_cli_argument('vm create', 'dns_name_type', CliArgumentType(help=argparse.SUPPRESS))
-register_cli_argument('vm create', 'admin_username', admin_username_type)
-register_cli_argument('vm create', 'ssh_key_value', CliArgumentType(action=VMSSHFieldAction))
-register_cli_argument('vm create', 'dns_name_for_public_ip', CliArgumentType(action=VMDNSNameAction))
-register_cli_argument('vm create', 'authentication_type', CliArgumentType(
-    choices=['ssh', 'password'], default=None,
-    help='Password or SSH public key authentication. Defaults to password for Windows and SSH public key for Linux.'
-))
-register_cli_argument('vm create', 'availability_set_type', CliArgumentType(choices=['none', 'existing'], help='', default='none'))
-register_cli_argument('vm create', 'private_ip_address_allocation', CliArgumentType(
-    choices=['dynamic', 'static'], help='', default='dynamic'))
-register_cli_argument('vm create', 'public_ip_address_allocation', CliArgumentType(
-    choices=['dynamic', 'static'], help='', default='dynamic'))
-register_cli_argument('vm create', 'public_ip_address_type', CliArgumentType(
-    choices=['none', 'new', 'existing'], help='', default='new'))
-register_cli_argument('vm create', 'storage_account_type', CliArgumentType(
-    choices=['new', 'existing'], help='', default='new'))
-register_cli_argument('vm create', 'virtual_network_type', CliArgumentType(
-    choices=['new', 'existing'], help='', default='new'))
-register_cli_argument('vm create', 'network_security_group_rule', CliArgumentType(
-    choices=['RDP', 'SSH'], default=None,
-    help='Network security group rule to create. Defaults to RDP for Windows and SSH for Linux'
-))
-register_cli_argument('vm create', 'network_security_group_type', CliArgumentType(
-    choices=['new', 'existing', 'none'], help='', default='new'))
-register_additional_cli_argument('vm create', 'image', options_list=('--image',), action=VMImageFieldAction, completer=get_urn_aliases_completion_list)
 
 register_cli_argument('vm access', 'username', CliArgumentType(options_list=('--username', '-u'), help='The user name'))
 register_cli_argument('vm access', 'password', CliArgumentType(options_list=('--password', '-p'), help='The user name'))
@@ -97,4 +63,38 @@ register_cli_argument('vm extension image', 'latest', CliArgumentType(action='st
 
 register_cli_argument('vm image list', 'image_location', location_type)
 
-register_additional_cli_argument('vm scaleset create', 'image', options_list=('--image',), action=VMImageFieldAction, completer=get_urn_aliases_completion_list, default='Win2012R2Datacenter')
+# VM CREATE PARAMETER CONFIGURATION
+
+authentication_type = CliArgumentType(
+    choices=['ssh', 'password'], default=None,
+    help='Password or SSH public key authentication. Defaults to password for Windows and SSH public key for Linux.'
+)
+
+nsg_rule_type = CliArgumentType(
+    choices=['RDP', 'SSH'], default=None,
+    help='Network security group rule to create. Defaults to RDP for Windows and SSH for Linux'
+)
+
+for scope in ['vm create', 'vm scaleset create']:
+    register_cli_argument(scope, 'name', name_arg_type)
+    register_cli_argument(scope, 'location', CliArgumentType(completer=get_location_completion_list))
+    register_cli_argument(scope, 'os_disk_uri', CliArgumentType(help=argparse.SUPPRESS))
+    register_cli_argument(scope, 'os_offer', CliArgumentType(help=argparse.SUPPRESS))
+    register_cli_argument(scope, 'os_publisher', CliArgumentType(help=argparse.SUPPRESS))
+    register_cli_argument(scope, 'os_sku', CliArgumentType(help=argparse.SUPPRESS))
+    register_cli_argument(scope, 'os_type', CliArgumentType(help=argparse.SUPPRESS))
+    register_cli_argument(scope, 'os_verion', CliArgumentType(help=argparse.SUPPRESS))
+    register_cli_argument(scope, 'dns_name_type', CliArgumentType(help=argparse.SUPPRESS))
+    register_cli_argument(scope, 'admin_username', admin_username_type)
+    register_cli_argument(scope, 'ssh_key_value', CliArgumentType(action=VMSSHFieldAction))
+    register_cli_argument(scope, 'dns_name_for_public_ip', CliArgumentType(action=VMDNSNameAction))
+    register_cli_argument(scope, 'authentication_type', authentication_type)
+    register_cli_argument(scope, 'availability_set_type', CliArgumentType(choices=['none', 'existing'], help='', default='none'))
+    register_cli_argument(scope, 'private_ip_address_allocation', CliArgumentType(choices=['dynamic', 'static'], help='', default='dynamic'))
+    register_cli_argument(scope, 'public_ip_address_allocation', CliArgumentType(choices=['dynamic', 'static'], help='', default='dynamic'))
+    register_cli_argument(scope, 'public_ip_address_type', CliArgumentType(choices=['none', 'new', 'existing'], help='', default='new'))
+    register_cli_argument(scope, 'storage_account_type', CliArgumentType(choices=['new', 'existing'], help='', default='new'))
+    register_cli_argument(scope, 'virtual_network_type', CliArgumentType(choices=['new', 'existing'], help='', default='new'))
+    register_cli_argument(scope, 'network_security_group_rule', nsg_rule_type)
+    register_cli_argument(scope, 'network_security_group_type', CliArgumentType(choices=['new', 'existing', 'none'], help='', default='new'))
+    register_extra_cli_argument(scope, 'image', options_list=('--image',), action=VMImageFieldAction, completer=get_urn_aliases_completion_list, default='Win2012R2Datacenter')

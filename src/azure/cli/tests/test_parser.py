@@ -21,10 +21,10 @@ class TestParser(unittest.TestCase):
         self.io.close()
 
     def test_register_simple_commands(self):
-        def test_handler1(args):
+        def test_handler1():
             pass
 
-        def test_handler2(args):
+        def test_handler2():
             pass
 
         command = CliCommand('command the-name', test_handler1)
@@ -62,7 +62,7 @@ class TestParser(unittest.TestCase):
         self.assertTrue(AzCliCommandParser.error.called)
 
     def test_nargs_parameter(self):
-        def test_handler(args):
+        def test_handler():
             pass
 
         command = CliCommand('test command', test_handler)

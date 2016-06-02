@@ -7,7 +7,7 @@ from azure.cli.commands import CommandTable
 from azure.cli.commands.argument_types import CliArgumentType
 from azure.cli.commands.command_types import cli_command
 from azure.cli.commands.argument_types import \
-    (register_cli_argument, register_additional_cli_argument)
+    (register_cli_argument, register_extra_cli_argument)
 from azure.cli.main import main as cli
 
 from six import StringIO
@@ -62,7 +62,7 @@ class Test_command_registration(unittest.TestCase):
         }
 
         for probe in some_expected_arguments:
-            existing = [arg for arg in command_metadata.arguments if arg == probe][0]
+            existing = next(arg for arg in command_metadata.arguments if arg == probe)
             self.assertDictContainsSubset(some_expected_arguments[existing].options,
                                           command_metadata.arguments[existing].options)
 
@@ -81,7 +81,7 @@ class Test_command_registration(unittest.TestCase):
         }
 
         for probe in some_expected_arguments:
-            existing = [arg for arg in command_metadata.arguments if arg == probe][0]            
+            existing = next(arg for arg in command_metadata.arguments if arg == probe)
             self.assertDictContainsSubset(some_expected_arguments[existing].options,
                                           command_metadata.arguments[existing].options)
 
@@ -112,14 +112,13 @@ class Test_command_registration(unittest.TestCase):
         self.assertTrue(command2.options['help'] == 'first modification')
         self.assertTrue(command3.options['help'] == 'second modification')
 
-
-    def test_register_additional_cli_argument(self):
+    def test_register_extra_cli_argument(self):
         command_table = CommandTable()
         
         new_param_type = CliArgumentType(
         )
         cli_command(command_table, 'test command sample-vm-get', Test_command_registration.sample_vm_get, None)
-        register_additional_cli_argument(
+        register_extra_cli_argument(
             'test command sample-vm-get', 'added_param', options_list=('--added-param',),
             metavar='ADDED', help='Just added this right now!', required=True
         )
@@ -135,7 +134,7 @@ class Test_command_registration(unittest.TestCase):
         }
 
         for probe in some_expected_arguments:
-            existing = [arg for arg in command_metadata.arguments if arg == probe][0]
+            existing = next(arg for arg in command_metadata.arguments if arg == probe)
             self.assertDictContainsSubset(some_expected_arguments[existing].options,
                                           command_metadata.arguments[existing].options)
 
@@ -167,7 +166,7 @@ class Test_command_registration(unittest.TestCase):
         }
 
         for probe in some_expected_arguments:
-            existing = [arg for arg in command_metadata.arguments if arg == probe][0]
+            existing = next(arg for arg in command_metadata.arguments if arg == probe)
             self.assertDictContainsSubset(some_expected_arguments[existing].options,
                                           command_metadata.arguments[existing].options)
 

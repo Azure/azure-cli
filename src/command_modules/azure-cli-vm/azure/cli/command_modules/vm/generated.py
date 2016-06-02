@@ -52,19 +52,18 @@ factory = lambda _: get_mgmt_service_client(VMClient, VMClientConfig).vm
 cli_command(command_table, 'vm create', VMOperations.create_or_update, DeploymentOutputLongRunningOperation('Creating virtual machine'), factory)
 
 factory = lambda _: _compute_client_factory().virtual_machines
-cli_command(command_table, 'vm delete', VirtualMachinesOperations.delete, None, factory)
-cli_command(command_table, 'vm deallocate', VirtualMachinesOperations.deallocate, None, factory)
+cli_command(command_table, 'vm delete', VirtualMachinesOperations.delete, LongRunningOperation('Deleting VM'), factory)
+cli_command(command_table, 'vm deallocate', VirtualMachinesOperations.deallocate, LongRunningOperation('Deallocating VM'), factory)
 cli_command(command_table, 'vm generalize', VirtualMachinesOperations.generalize, None, factory)
 cli_command(command_table, 'vm show', VirtualMachinesOperations.get, 'VirtualMachine', factory)
 cli_command(command_table, 'vm list-sizes', VirtualMachinesOperations.list_available_sizes, '[VirtualMachineSize]', factory)
-cli_command(command_table, 'vm power-off', VirtualMachinesOperations.power_off, None, factory)
-cli_command(command_table, 'vm restart', VirtualMachinesOperations.restart, None, factory)
-cli_command(command_table, 'vm start', VirtualMachinesOperations.start, None, factory)
+cli_command(command_table, 'vm power-off', VirtualMachinesOperations.power_off, LongRunningOperation('Powering off VM'), factory)
+cli_command(command_table, 'vm restart', VirtualMachinesOperations.restart, LongRunningOperation('Restarting VM'), factory)
+cli_command(command_table, 'vm start', VirtualMachinesOperations.start, LongRunningOperation('Starting VM'), factory)
 cli_command(command_table, 'vm list-ip-addresses', list_ip_addresses, 'object', factory)
 cli_command(command_table, 'vm list', list_vm, '[VirtualMachine]')
 
 # VM Access
-
 cli_command(command_table, 'vm access set-linux-user', set_linux_user, LongRunningOperation('Setting Linux user'))
 cli_command(command_table, 'vm access delete-linux-user', delete_linux_user, LongRunningOperation('Deleting Linux user'))
 cli_command(command_table, 'vm access set-windows-user-password', set_windows_user_password, LongRunningOperation('Setting Windows user password'))
@@ -89,7 +88,7 @@ factory = lambda _: get_mgmt_service_client(ACSClient, ACSClientConfig).acs
 cli_command(command_table, 'vm container create', ACSOperations.create_or_update, DeploymentOutputLongRunningOperation('Creating container'), factory)
 
 # VM Diagnostics
-cli_command(command_table, 'vm diagnostics set', set_diagnostics_extension, 'Object')
+cli_command(command_table, 'vm diagnostics set', set_diagnostics_extension, LongRunningOperation('Setting VM diagnostics extension'))
 cli_command(command_table, 'vm diagnostics get-default-config', show_default_diagnostics_configuration, 'Object')
 
 # VM Disk
@@ -141,18 +140,6 @@ cli_command(command_table, 'vm scaleset power-off', VirtualMachineScaleSetsOpera
 cli_command(command_table, 'vm scaleset restart', VirtualMachineScaleSetsOperations.restart, LongRunningOperation('Restarting VM scaleset'), factory)
 cli_command(command_table, 'vm scaleset start', VirtualMachineScaleSetsOperations.start, LongRunningOperation('Starting VM scaleset'), factory)
 cli_command(command_table, 'vm scaleset update-instances', VirtualMachineScaleSetsOperations.update_instances, LongRunningOperation('Updating instances in VM scaleset'), factory)
-
-#build_operation("vm availability-set",
-#                'avail_set',
-#                lambda **_: get_mgmt_service_client(AvailSetClient, AvailSetClientConfig),
-#                [
-#                    CommandDefinition(AvailSetOperations.create_or_update,
-#                                      LongRunningOperation(L('Creating availability set'), L('Availability set created')),
-#                                      'create')
-#                ],
-#                command_table, patch_aliases(PARAMETER_ALIASES, {
-#                    'name': {'name': '--name -n'}
-#                    }))
 
 # VM ScaleSet VMs
 factory = lambda _: _compute_client_factory().virtual_machine_scale_set_vms

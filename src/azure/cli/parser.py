@@ -39,7 +39,7 @@ class AzCliCommandParser(argparse.ArgumentParser):
                                                   parents=self.parents, conflict_handler='resolve',
                                                   help_file=metadata.help_file)
             argument_validators = []
-            for _, arg in metadata.arguments.items():
+            for arg in metadata.arguments.values():
                 if arg.validator:
                     argument_validators.append(arg.validator)
                 param = command_parser.add_argument(

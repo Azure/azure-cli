@@ -434,7 +434,7 @@ def set_extension(
     from azure.mgmt.compute.models import VirtualMachineExtension
 
     protected_settings = load_json(private_config) if not private_config else {}
-    settings = load_json(public_config) if not public_config else None
+    settings = load_json(public_config) if public_config else None
 
     version = _trim_away_build_number(version)
 
@@ -445,10 +445,9 @@ def set_extension(
                                   type_handler_version=version,
                                   settings=settings,
                                   auto_upgrade_minor_version=auto_upgrade_minor_version)
-
     return client.virtual_machine_extensions.create_or_update(
         resource_group_name, vm_name, vm_extension_name, ext)
-
+    
 def set_diagnostics_extension(
         resource_group_name, vm_name, storage_account, public_config=None):
     '''Enable diagnostics

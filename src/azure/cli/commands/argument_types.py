@@ -1,7 +1,5 @@
 from collections import defaultdict
 
-from azure.cli.commands._validators import validate_tags
-
 # pylint: disable=too-many-arguments,too-few-public-methods
 class CliArgumentType(object):
 
@@ -10,7 +8,7 @@ class CliArgumentType(object):
         self.options_list = ()
         self.completer = completer
         self.validator = validator
-        if overrides is not None:
+        if overrides:
             self.options_list = overrides.options_list
             self.options = overrides.options.copy()
             self.base_type = overrides.base_type
@@ -28,7 +26,7 @@ class CliArgumentType(object):
 
 class CliCommandArgument(CliArgumentType):
     def __init__(self, dest, options_list=None, completer=None, validator=None, **kwargs):
-        if options_list is None:
+        if not options_list:
             options_list = '--' + dest.replace('_', '-')
 
         super(CliCommandArgument, self).__init__(**kwargs)
@@ -56,9 +54,10 @@ class _ArgumentRegistry(object):
             probe = ' '.join(parts[0:index])
             override = self.arguments.get(probe, {}).get(name, None)
             if override:
-                result.update(override.options_list, **override.options)
-                result.completer = override.completer
-                result.validator = override.validator
+                result.update(override.options_list,
+                              completer=override.completer,
+                              validator=override.validator,
+                              **override.options)
         return result
 
 def register_cli_argument(scope, dest, argtype, options_list=None, **kwargs):
@@ -66,7 +65,7 @@ def register_cli_argument(scope, dest, argtype, options_list=None, **kwargs):
     '''
     _cli_argument_registry.register_cli_argument(scope, dest, argtype, options_list, **kwargs)
 
-def register_additional_cli_argument(command, dest, options_list=None, **kwargs):
+def register_extra_cli_argument(command, dest, options_list=None, **kwargs):
     '''Register extra parameters for the given command. Typically used to augment auto-command built
     commands to add more parameters than the specific SDK method introspected.
     '''
@@ -80,29 +79,3 @@ def get_cli_extra_arguments(command):
 
 _cli_argument_registry = _ArgumentRegistry()
 _cli_extra_argument_registry = defaultdict(lambda: {})
-
-# Shared argument type definitions
-resource_group_name_type = CliArgumentType(
-    options_list=('--resource-group', '-g'), help='Name of resource group')
-location_type = CliArgumentType(
-    options_list=('--location', '-l'),
-    help='Location. Use "az locations get" to get a list of valid locations', metavar='LOCATION')
-name_type = CliArgumentType(options_list=('--name', '-n'))
-
-tags_type = CliArgumentType(
-    type=validate_tags,
-    help='multiple semicolon separated tags in \'key[=value]\' format. Omit value to clear tags.',
-    nargs='?',
-    default=''
-)
-
-tag_type = CliArgumentType(
-    type=validate_tags,
-    help='a single tag in \'key[=value]\' format. Omit value to clear tags.',
-    nargs='?',
-    default=''
-)
-
-# Register usage of said argument types
-register_cli_argument('', 'resource_group_name', resource_group_name_type)
-register_cli_argument('', 'location', location_type)
