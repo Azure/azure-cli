@@ -1,35 +1,52 @@
 # VM Create scenarios before merge #
 
 ## P0: BASIC ##
-Execute P0s before any change to VMSS Create is merged
+Execute P0s before any change to VMSS Create **OR VM CREATE** is merged
 
-**plain windows VM from Windows with Storage Redundancy Standard_RAGRS**
+**simple Windows VMSS**
 
  - create
- - verify puclic IP
+ - verify LB and puclic IP
  - verify storage type
+ - RDP into instance 1
 
-**plain UbuntuLTS from Linux (no extra params)**
+**Windows VMSS with no overprovisioning, instance count 4, ReadWrite caching and Automatic upgrades, static private and static Public IP Addresses**
 
  - create
- - verify public IP
+ - verify LB public/private IP is static
+ - verify overprovisioning, instance count (capacity), caching and upgrade policy
+ - RDP into instance 1
 
-**Linux with existing availability set, existing NSG, existing public IP
-Size Standard_A3, existing storage account, existing storage container name, existing VNET/Subnet**
+**Linux VMSS with custom OS Disk name and storage container name, existing VNet/subnet, existing IP for LB**
 
- - verify VM is in availability set
- - verify NSG
- - verify private and public IP are static
- - verify VHD storage path
+ - verify existing IP is used by LB
+ - verify OS Disk name
  - verify in correct VNet/Subnet
  - verify existing IP used
- - login with SSH
+ - SSH into instance 1
 
-**Linux, path for SSH key, static private IP, static public IP, DNS name**
+**Linux VMSS with existing LB and DNS name**
 
- - create
- - login with SSH
- - verify private/public IPs are static
+ - verify existing LB is used
+ - verify DNS name
+ - SSH into instance 1
+
+**custom Linux image**
+
+ - create VM1, add a customization such as "sudo apt-get install emacs23"
+ - generalize, capture and deallocate VM1's vhd (https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-linux-capture-image/)
+ - create VMSS with OS Disk URI pointing to VM1's vhd
+ - SSH into instance 1
+ - verify emacs is still installed
+
+ **custom Windows image**
+
+ - create VM1, add a customization such as installing an application
+ - generalize, capture and deallocate VM1's vhd (https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-windows-classic-capture-image/ + https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-linux-capture-image/)
+ - create VMSS with OS Disk URI pointing to VM1's vhd
+ - RDP into instance 1
+ - verify application is still installed
+
 
 ## P1: LESS COMMON ##
 Execute P1 scenarios if a change is made in these areas
@@ -44,6 +61,10 @@ Execute P1 scenarios if a change is made in these areas
  - create
  - login with SSH
  - verify SSH key path
+
+**no load balancer**
+ - create without LB
+ - verify no LB
 
 ## P2: ERROR CASES ##
 Be aware of the P2 behavior, execute P2s occassionally or before an important event/ship cycle

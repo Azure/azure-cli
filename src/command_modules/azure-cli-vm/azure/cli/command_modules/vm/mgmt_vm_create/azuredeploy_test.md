@@ -1,7 +1,7 @@
 # VM Create scenarios before merge #
 
 ## P0: BASIC ##
-Execute P0s before any change to VM Create is merged
+Execute P0s before any change to VM Create ***OR VMSS CREATE*** is merged
 
 **plain windows VM from Windows with Storage Redundancy Standard_RAGRS**
 
