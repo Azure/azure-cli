@@ -410,7 +410,7 @@ Global Arguments
 
         with self.assertRaises(SystemExit):
             app.execute('group1 -h'.split())
-        s = '\nGroup\n    az group1\n\nSub-Commands\n    group2\n    group3\n\n'
+        s = '\nGroup\n    az group1\n\nSubgroups:\n    group2\n    group3\n\n'
         self.assertEqual(s, io.getvalue())
 
     @redirect_io
@@ -502,7 +502,7 @@ Group
         This module.... kjsdflkj... klsfkj paragraph1
         this module.... kjsdflkj... klsfkj paragraph2.
 
-Sub-Commands
+Commands:
     n1: This module does xyz one-line or so.
 
 
