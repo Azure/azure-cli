@@ -10,6 +10,7 @@ This assumes a clean install with nothing else previously installed on the box.
 ```
 curl http://azure-cli-nightly.westus.cloudapp.azure.com/install | bash
 ```
+`sudo bash` may be required if you get a 'Permission error'.
 
 ## Ubuntu 12.04 LTS
 On a fresh Ubuntu 12.04 VM, install the CLI by executing the following.  
