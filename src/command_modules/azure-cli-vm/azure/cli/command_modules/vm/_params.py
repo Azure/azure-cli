@@ -119,14 +119,14 @@ VM_CREATE_PARAMETER_ALIASES = {
     },
     'private_ip_address_allocation': {
         'name': '--private-ip-address-allocation',
-        'choices': ['Dynamic', 'Static'],
-        'default': 'Dynamic',
+        'choices': ['dynamic', 'static'],
+        'default': 'dynamic',
         'help': ''
     },
     'public_ip_address_allocation': {
         'name': '--public-ip-address-allocation',
-        'choices': ['Dynamic', 'Static'],
-        'default': 'Dynamic',
+        'choices': ['dynamic', 'static'],
+        'default': 'dynamic',
         'help': ''
     },
     'public_ip_address_type': {

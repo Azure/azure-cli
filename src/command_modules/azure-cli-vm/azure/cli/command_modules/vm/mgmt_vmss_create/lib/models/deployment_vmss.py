@@ -81,11 +81,11 @@ class DeploymentVMSS(Model):
     :param os_version: The OS version to install. Default value: "latest" .
     :type os_version: str
     :param private_ip_address_allocation: Private IP address allocation
-     method. Possible values include: 'Dynamic', 'Static'. Default value:
-     "Dynamic" .
+     method. Possible values include: 'dynamic', 'static'. Default value:
+     "dynamic" .
     :type private_ip_address_allocation: str
     :param public_ip_address_allocation: Public IP address allocation method.
-     Possible values include: 'Dynamic', 'Static'. Default value: "Dynamic" .
+     Possible values include: 'dynamic', 'static'. Default value: "dynamic" .
     :type public_ip_address_allocation: str
     :param public_ip_address_name: Name of public IP address to use.
     :type public_ip_address_name: str
@@ -188,7 +188,7 @@ class DeploymentVMSS(Model):
 
     mode = "Incremental"
 
-    def __init__(self, admin_username, name, content_version=None, admin_password=None, authentication_type="password", dns_name_for_public_ip=None, dns_name_type="none", instance_count="2", load_balancer_backend_pool_name=None, load_balancer_name=None, load_balancer_nat_pool_name=None, load_balancer_type="new", location=None, os_disk_name="osdiskimage", os_disk_uri=None, os_offer="WindowsServer", os_publisher="MicrosoftWindowsServer", os_sku="2012-R2-Datacenter", os_type="Win2012R2Datacenter", os_version="latest", private_ip_address_allocation="Dynamic", public_ip_address_allocation="Dynamic", public_ip_address_name=None, public_ip_address_type="new", ssh_dest_key_path=None, ssh_key_value=None, storage_account_name=None, storage_account_type="new", storage_container_name="vhds", storage_redundancy_type="Standard_LRS", subnet_ip_address_prefix="10.0.0.0/24", subnet_name=None, virtual_network_ip_address_prefix="10.0.0.0/16", virtual_network_name=None, virtual_network_type="new", vm_sku="Standard_D1_v2"):
+    def __init__(self, admin_username, name, content_version=None, admin_password=None, authentication_type="password", dns_name_for_public_ip=None, dns_name_type="none", instance_count="2", load_balancer_backend_pool_name=None, load_balancer_name=None, load_balancer_nat_pool_name=None, load_balancer_type="new", location=None, os_disk_name="osdiskimage", os_disk_uri=None, os_offer="WindowsServer", os_publisher="MicrosoftWindowsServer", os_sku="2012-R2-Datacenter", os_type="Win2012R2Datacenter", os_version="latest", private_ip_address_allocation="dynamic", public_ip_address_allocation="dynamic", public_ip_address_name=None, public_ip_address_type="new", ssh_dest_key_path=None, ssh_key_value=None, storage_account_name=None, storage_account_type="new", storage_container_name="vhds", storage_redundancy_type="Standard_LRS", subnet_ip_address_prefix="10.0.0.0/24", subnet_name=None, virtual_network_ip_address_prefix="10.0.0.0/16", virtual_network_name=None, virtual_network_type="new", vm_sku="Standard_D1_v2"):
         self.content_version = content_version
         self.admin_password = admin_password
         self.admin_username = admin_username

@@ -168,12 +168,19 @@
         "description": "The OS version to install."
       }
     },
+    "privateIpAddress": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "The private IP address to use with Private IP Address Allocation type Static."
+      }
+    },
     "privateIpAddressAllocation": {
       "type": "string",
-      "defaultValue": "Dynamic",
+      "defaultValue": "dynamic",
       "allowedValues": [
-        "Dynamic",
-        "Static"
+        "dynamic",
+        "static"
       ],
       "metadata": {
         "description": "Private IP address allocation method."
@@ -181,10 +188,10 @@
     },
     "publicIpAddressAllocation": {
       "type": "string",
-      "defaultValue": "Dynamic",
+      "defaultValue": "dynamic",
       "allowedValues": [
-        "Dynamic",
-        "Static"
+        "dynamic",
+        "static"
       ],
       "metadata": {
         "description": "Public IP address allocation method."
@@ -427,6 +434,7 @@
           "publicIpAddressAllocation": { "value": "[variables('publicIpAddressAllocation')]" },
           "nicName": { "value": "[variables('nicName')]" },
           "subnetRef": { "value": "[variables('subnetRef')]" },
+          "privateIPAddress": { "value": "[parameters('privateIpAddress')]" },
           "privateIpAllocation": { "value": "[parameters('privateIpAddressAllocation')]" },
           "networkSecurityGroupName": { "value": "[parameters('networkSecurityGroupName')]" },
           "networkSecurityGroupType": { "value": "[parameters('networkSecurityGroupType')]" }

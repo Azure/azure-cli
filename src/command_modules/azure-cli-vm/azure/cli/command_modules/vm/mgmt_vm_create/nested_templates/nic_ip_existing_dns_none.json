@@ -17,6 +17,9 @@
     "publicIpAddressAllocation": {
       "type": "string"
     },
+    "privateIpAddress": {
+      "type": "string"
+    },
     "nicName": {
       "type": "string"
     },
@@ -34,20 +37,33 @@
     }
   },
   "variables": {
+    "ipConfigProperties": {
+      "Dynamic": {
+        "privateIPAllocationMethod": "Dynamic",
+        "publicIPAddress": {
+          "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddressName'))]"
+        },
+        "subnet": {
+          "id": "[parameters('subnetRef')]"
+        }
+      },
+      "Static": {
+        "privateIPAllocationMethod": "Static",
+        "privateIPAddress": "[parameters('privateIpAddress')]",
+        "publicIPAddress": {
+          "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddressName'))]"
+        },
+        "subnet": {
+          "id": "[parameters('subnetRef')]"
+        }
+      }
+    },
     "nsgProperties": {
       "new": {
         "ipConfigurations": [
           {
             "name": "[concat('ipconfig', parameters('VirtualMachineName'))]",
-            "properties": {
-              "privateIPAllocationMethod": "[parameters('privateIpAllocation')]",
-              "publicIPAddress": {
-                "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddressName'))]"
-              },
-              "subnet": {
-                "id": "[parameters('subnetRef')]"
-              }
-            }
+            "properties": "[variables('ipConfigProperties')[parameters('privateIpAllocation')]]"
           }
         ],
         "networkSecurityGroup": {
@@ -58,34 +74,18 @@
         "ipConfigurations": [
           {
             "name": "[concat('ipconfig', parameters('VirtualMachineName'))]",
-            "properties": {
-              "privateIPAllocationMethod": "[parameters('privateIpAllocation')]",
-              "publicIPAddress": {
-                "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddressName'))]"
-              },
-              "subnet": {
-                "id": "[parameters('subnetRef')]"
-              }
-            }
+            "properties": "[variables('ipConfigProperties')[parameters('privateIpAllocation')]]"
           }
         ],
-        "networkSecurityGroup": {
-          "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroupName'))]"
-        }
+      "networkSecurityGroup": {
+        "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroupName'))]"
+      }
       },
       "none": {
         "ipConfigurations": [
           {
             "name": "[concat('ipconfig', parameters('VirtualMachineName'))]",
-            "properties": {
-              "privateIPAllocationMethod": "[parameters('privateIpAllocation')]",
-              "publicIPAddress": {
-                "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddressName'))]"
-              },
-              "subnet": {
-                "id": "[parameters('subnetRef')]"
-              }
-            }
+            "properties": "[variables('ipConfigProperties')[parameters('privateIpAllocation')]]"
           }
         ]
       }
