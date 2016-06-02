@@ -73,10 +73,13 @@ class AzCliCommandParser(argparse.ArgumentParser):
         return parent_subparser
 
     def format_help(self):
-        is_group = not self._defaults.get('func')
+        is_group = self.is_group()
         _help.show_help(self.prog.split()[1:],
                         (self._actions[-1]
                          if is_group
                          else self),
                         is_group)
         self.exit()
+
+    def is_group(self):
+        return getattr(self, '_subparsers', None) is not None
