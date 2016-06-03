@@ -477,19 +477,22 @@ class VMScaleSetScaleUpScenarioTest(CommandTestScript):
         super(VMScaleSetScaleUpScenarioTest, self).__init__(None, self.test_body, None)
 
     def test_body(self):
-        new_capacity = '4'
+        result = self.run('vm scaleset show --resource-group {} --name {} -o json'.format(
+            self.resource_group, self.ss_name))
+        capacity = result['sku']['capacity']
+        new_capacity = capacity + 1 if capacity < 3 else capacity-1
         self.run('vm scaleset scale --resource-group {} --name {} --new-capacity {}'.format(
             self.resource_group, self.ss_name, new_capacity))
         result = self.run('vm scaleset show --resource-group {} --name {} -o json'.format(
             self.resource_group, self.ss_name))
-        assert result['sku']['capacity'] == 4
+        assert result['sku']['capacity'] == new_capacity
 
 class VMScaleSetDeleteScenarioTest(CommandTestScript):
 
     def __init__(self):
-        self.resource_group = 'cliTestRg_ScaleSet1'
-        self.ss_name = 'scaleset1'
-        self.vm_count = 5
+        self.resource_group = 'yugangwvmss'
+        self.ss_name = 'yugangwvm'
+        self.vm_count = 3
         self.instance_id_to_delete = 2
         super(VMScaleSetDeleteScenarioTest, self).__init__(None, self.test_body, None)
 
@@ -506,8 +509,8 @@ class VMScaleSetDeleteScenarioTest(CommandTestScript):
                 JMESPathComparator('type(virtualMachine)', 'object'),
                 JMESPathComparator('virtualMachine.statusesSummary[0].count', self.vm_count)])
         #Existing issues, the instance delete command has not been recorded
-        #self.test('vm scaleset delete-instances --resource-group {} --name {} --instance-ids {}'.format(
-        #    self.resource_group, self.ss_name, self.instance_id_to_delete), None)
+        self.test('vm scaleset delete-instances --resource-group {} --name {} --instance-ids {}'.format(
+            self.resource_group, self.ss_name, self.instance_id_to_delete), None)
         self.test('vm scaleset get-instance-view --resource-group {} --name {}'.format(
             self.resource_group, self.ss_name), [
                 JMESPathComparator('type(@)', 'object'),
@@ -715,104 +718,104 @@ class VMDiagnosticsTest(CommandTestScript):
 ENV_VAR = {}
 
 TEST_DEF = [
-    {
-        'test_name': 'vm_usage_list_westus',
-        'command': VMUsageScenarioTest()
-    },
-    {
-        'test_name': 'vm_images_list_by_aliases',
-        'command': VMImageListByAliasesScenarioTest()
-    },
-    {
-        'test_name': 'vm_images_list_thru_services',
-        'command': VMImageListThruServiceScenarioTest()
-    },
-    {
-        'test_name': 'vm_size_list',
-        'command': VMSizeListScenarioTest()
-    },
-    {
-        'test_name': 'vm_image_list_offers',
-        'command': VMImageListOffersScenarioTest()
-    },
-    {
-        'test_name': 'vm_image_list_publishers',
-        'command': VMImageListPublishersScenarioTest()
-    },
-    {
-        'test_name': 'vm_image_list_skus',
-        'command': VMImageListSkusScenarioTest()
-    },
-    {
-        'test_name': 'vm_image_show',
-        'command': VMImageShowScenarioTest()
-    },
-    {
-        'test_name': 'vm_generalize',
-        'command': VMGeneralizeScenarioTest()
-    },
-    {
-        'test_name': 'vm_availset',
-        'command': VMAvailSetScenarioTest()
-    },
-    {
-        'test_name': 'vm_extension',
-        'command': VMExtensionsScenarioTest()
-    },
-    {
-        'test_name': 'vm_machine_extension_image',
-        'command': VMMachineExtensionImageScenarioTest()
-    },
-    {
-        'test_name': 'vm_extension_image_search',
-        'command': VMExtensionImageSearchScenarioTest()
-    },
-    {
-        'test_name': 'vm_combined_list',
-        'command': VMListFoldedScenarioTest()
-    },
-    {
-        'test_name': 'vm_scaleset_gets',
-        'command': VMScaleSetGetsScenarioTest()
-    },
-    {
-        'test_name': 'vm_scaleset_states',
-        'command': VMScaleSetStatesScenarioTest()
-    },
+    ##{
+    ##    'test_name': 'vm_usage_list_westus',
+    ##    'command': VMUsageScenarioTest()
+    ##},
+    ##{
+    ##    'test_name': 'vm_images_list_by_aliases',
+    ##    'command': VMImageListByAliasesScenarioTest()
+    ##},
+    ##{
+    ##    'test_name': 'vm_images_list_thru_services',
+    ##    'command': VMImageListThruServiceScenarioTest()
+    ##},
+    ##{
+    ##    'test_name': 'vm_size_list',
+    ##    'command': VMSizeListScenarioTest()
+    ##},
+    ##{
+    ##    'test_name': 'vm_image_list_offers',
+    ##    'command': VMImageListOffersScenarioTest()
+    ##},
+    ##{
+    ##    'test_name': 'vm_image_list_publishers',
+    ##    'command': VMImageListPublishersScenarioTest()
+    ##},
+    ##{
+    ##    'test_name': 'vm_image_list_skus',
+    ##    'command': VMImageListSkusScenarioTest()
+    ##},
+    ##{
+    ##    'test_name': 'vm_image_show',
+    ##    'command': VMImageShowScenarioTest()
+    ##},
+    ##{
+    ##    'test_name': 'vm_generalize',
+    ##    'command': VMGeneralizeScenarioTest()
+    ##},
+    ##{
+    ##    'test_name': 'vm_availset',
+    ##    'command': VMAvailSetScenarioTest()
+    ##},
+    ##{
+    ##    'test_name': 'vm_extension',
+    ##    'command': VMExtensionsScenarioTest()
+    ##},
+    ##{
+    ##    'test_name': 'vm_machine_extension_image',
+    ##    'command': VMMachineExtensionImageScenarioTest()
+    ##},
+    ##{
+    ##    'test_name': 'vm_extension_image_search',
+    ##    'command': VMExtensionImageSearchScenarioTest()
+    ##},
+    ##{
+    ##    'test_name': 'vm_combined_list',
+    ##    'command': VMListFoldedScenarioTest()
+    ##},
+    #{
+    #    'test_name': 'vm_scaleset_gets',
+    #    'command': VMScaleSetGetsScenarioTest()
+    #},
+    ##{
+    ##    'test_name': 'vm_scaleset_states',
+    ##    'command': VMScaleSetStatesScenarioTest()
+    ##},
     {
         'test_name': 'vm_scaleset_delete',
         'command': VMScaleSetDeleteScenarioTest()
     },
-    {
-        'test_name': 'vm_scaleset_vms',
-        'command': VMScaleSetVMsScenarioTest()
-    },
-    {
-        'test_name': 'vm_scaleset-scaleup',
-        'command': VMScaleSetScaleUpScenarioTest()
-    },
-    {
-        'test_name': 'vm_add_remove_linux_user',
-        'command': VMAccessAddRemoveLinuxUser()
-    },
-    {
-        'test_name': 'vm_create_ubuntu',
-        'command': VMCreateUbuntuScenarioTest()
-    },
-    {
-        'test_name': 'vm_enable_disable_boot_diagnostic',
-        'command': VMBootDiagnostics()
-    },
-    {
-        'test_name': 'vm_extension_install',
-        'command': VMExtensionInstallTest()
-    },
-    {
-        'test_name': 'vm_diagnostics_install',
-        'command': VMDiagnosticsTest()
-    },
-    {
-        'test_name': 'vm_create_state_modifications',
-        'command': VMCreateAndStateModificationsScenarioTest()
-    },
+    ##{
+    ##    'test_name': 'vm_scaleset_vms',
+    ##    'command': VMScaleSetVMsScenarioTest()
+    ##},
+    #{
+    #    'test_name': 'vm_scaleset-scaleup',
+    #    'command': VMScaleSetScaleUpScenarioTest()
+    #},
+    ##{
+    ##    'test_name': 'vm_add_remove_linux_user',
+    ##    'command': VMAccessAddRemoveLinuxUser()
+    ##},
+    ##{
+    ##    'test_name': 'vm_create_ubuntu',
+    ##    'command': VMCreateUbuntuScenarioTest()
+    ##},
+    ##{
+    ##    'test_name': 'vm_enable_disable_boot_diagnostic',
+    ##    'command': VMBootDiagnostics()
+    ##},
+    ##{
+    ##    'test_name': 'vm_extension_install',
+    ##    'command': VMExtensionInstallTest()
+    ##},
+    ##{
+    ##    'test_name': 'vm_diagnostics_install',
+    ##    'command': VMDiagnosticsTest()
+    ##},
+    ##{
+    ##    'test_name': 'vm_create_state_modifications',
+    ##    'command': VMCreateAndStateModificationsScenarioTest()
+    ##},
 ]

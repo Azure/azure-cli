@@ -518,7 +518,7 @@ def vmss_scale(resource_group_name, vm_scale_set_name, new_capacity):
 def vmss_update_instances(resource_group_name, vm_scale_set_name, instance_ids):
     '''upgrade virtual machines in a virtual machine scale set
 
-    :param str instance_ids: space separated ids, such as 0 2 3. 
+    :param str instance_ids: space separated ids, such as 0 2 3.
     '''
     client = _compute_client_factory()
     return client.virtual_machine_scale_sets.update_instances(resource_group_name,
