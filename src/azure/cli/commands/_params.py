@@ -14,14 +14,14 @@ tags_type = CliArgumentType(
     type=validate_tags,
     help='multiple semicolon separated tags in \'key[=value]\' format. Omit value to clear tags.',
     nargs='?',
-    default=''
+    const=''
 )
 
 tag_type = CliArgumentType(
     type=validate_tag,
     help='a single tag in \'key[=value]\' format. Omit value to clear tags.',
     nargs='?',
-    default=''
+    const=''
 )
 
 register_cli_argument('', 'resource_group_name', resource_group_name_type)

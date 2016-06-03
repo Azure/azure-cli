@@ -4,8 +4,11 @@ from __future__ import print_function
 from sys import stderr
 
 from azure.cli.commands import CommandTable
-
 from azure.cli.command_modules.storage._factory import storage_client_factory
+from azure.cli._util import CLIError
+
+from azure.storage.blob import BlockBlobService
+from azure.storage.file import FileService
 
 command_table = CommandTable()
 
@@ -69,7 +72,7 @@ def create_storage_account(resource_group_name, account_name, location, account_
     return scf.storage_accounts.create(resource_group_name, account_name, params)
 
 def set_storage_account_properties(
-        resource_group_name, account_name, account_type=None, tags=None, custom_domain=None):
+        resource_group_name, account_name, account_type=None, tags='', custom_domain=None):
     ''' Update storage account property (only one at a time).
     :param str custom_domain:the custom domain name
     '''
@@ -179,3 +182,61 @@ def upload_file(client, share_name, file_name, local_file_name, directory_name=N
     :param str directory_name:the destination directory to upload to'''
     client.create_file_from_path(share_name, directory_name, file_name, local_file_name,
                                  progress_callback=_update_progress)
+
+def _get_service_container_type(client):
+    if isinstance(client, BlockBlobService):
+        return 'container'
+    elif isinstance(client, FileService):
+        return 'share'
+    else:
+        raise ValueError('Unsupported service {}'.format(type(client)))
+
+def _get_acl(client, container_name):
+    container = _get_service_container_type(client)
+    return getattr(client, 'get_{}_acl'.format(container))(container_name)
+
+def _set_acl(client, container_name, acl):
+    container = _get_service_container_type(client)
+    return getattr(client, 'set_{}_acl'.format(container))(container_name, acl)
+
+def create_acl_policy(
+        client, container_name, policy_name, start=None, expiry=None, permission=None):
+    ''' Create a stored access policy on the containing object '''
+    from azure.storage.models import AccessPolicy
+    # TODO: Remove workaround once SDK issue fixed (Pivotal #120873795)
+    if not (start or expiry or permission):
+        raise CLIError('Must specify at least one property (permission, start or expiry) '
+                       'when creating an access policy.')
+
+    acl = _get_acl(client, container_name)
+    acl[policy_name] = AccessPolicy(permission, expiry, start)
+    return _set_acl(client, container_name, acl)
+
+def get_acl_policy(client, container_name, policy_name):
+    ''' Show a stored access policy on a containing object '''
+    from azure.storage.models import AccessPolicy
+    acl = _get_acl(client, container_name)
+    return acl.get(policy_name)
+
+def list_acl_policies(client, container_name):
+    ''' List stored access policies on a containing object '''
+    return list(_get_acl(client, container_name))
+
+def set_acl_policy(client, container_name, policy_name, start=None, expiry=None, permission=None):
+    ''' Set a stored access policy on a containing object '''
+    from azure.storage.models import AccessPolicy
+    if not (start or expiry or permission):
+        raise CLIError('Must specify at least one property when updating an access policy.')
+
+    acl = _get_acl(client, container_name)
+    try:
+        acl[policy_name] = AccessPolicy(permission, expiry, start)
+    except KeyError:
+        raise CLIError('ACL does not contain {}'.format(policy_name))
+    return _set_acl(client, container_name, acl)
+
+def delete_acl_policy(client, container_name, policy_name):
+    ''' Delete a stored access policy on a containing object '''
+    acl = _get_acl(client, container_name)
+    del acl[policy_name]
+    return _set_acl(client, container_name, acl)
