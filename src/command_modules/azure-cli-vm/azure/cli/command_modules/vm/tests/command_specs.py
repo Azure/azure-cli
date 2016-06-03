@@ -272,7 +272,7 @@ class VMCreateAndStateModificationsScenarioTest(CommandTestScript):
         self.test('vm list --resource-group {}'.format(self.resource_group), None)
         self.run('vm create --resource-group {0} --location {1} --name {2} --admin-username ubuntu '
                  '--image Canonical:UbuntuServer:14.04.4-LTS:latest --admin-password testPassword0 '
-                 '--deployment-name {3}'.format(
+                 '--deployment-name {3} --authentication-type password'.format(
                      self.resource_group, self.location, self.vm_name, self.deployment_name))
         # Expecting one result, the one we created
         self.test('vm list --resource-group {}'.format(self.resource_group), [
@@ -685,9 +685,9 @@ class VMDiagnosticsTest(CommandTestScript):
 
     def test_body(self):
         #pylint: disable=line-too-long
-        vm_name = 'yugangwtest-1'
-        resource_group = 'yugangwtest'
-        storage_account = 'vhdstorage4jjdhrm754a5g'
+        vm_name = 'linuxtestvm'
+        resource_group = 'travistestresourcegroup'
+        storage_account = 'travistestresourcegr3014'
         extension_name = 'LinuxDiagnostic'
         set_cmd = ('vm diagnostics set --vm-name {} --resource-group {} --storage-account {}'
                    .format(vm_name, resource_group, storage_account))
@@ -698,17 +698,12 @@ class VMDiagnosticsTest(CommandTestScript):
                 JMESPathComparator('name', extension_name),
                 JMESPathComparator('resourceGroup', resource_group)])
 
-
 ENV_VAR = {}
 
 TEST_DEF = [
     {
         'test_name': 'vm_usage_list_westus',
         'command': VMUsageScenarioTest()
-    },
-    {
-        'test_name': 'vm_show_list_sizes_list_ip_addresses',
-        'command': VMShowListSizesListIPAddressesScenarioTest()
     },
     {
         'test_name': 'vm_images_list_by_aliases',
@@ -741,10 +736,6 @@ TEST_DEF = [
     {
         'test_name': 'vm_generalize',
         'command': VMGeneralizeScenarioTest()
-    },
-    {
-        'test_name': 'vm_create_state_modifications',
-        'command': VMCreateAndStateModificationsScenarioTest()
     },
     {
         'test_name': 'vm_availset',
@@ -801,5 +792,9 @@ TEST_DEF = [
     {
         'test_name': 'vm_diagnostics_install',
         'command': VMDiagnosticsTest()
-    }
+    },
+    {
+        'test_name': 'vm_create_state_modifications',
+        'command': VMCreateAndStateModificationsScenarioTest()
+    },
 ]

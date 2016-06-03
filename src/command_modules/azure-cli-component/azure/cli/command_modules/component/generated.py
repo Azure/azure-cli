@@ -1,28 +1,19 @@
 from __future__ import print_function
 
 from azure.cli.commands import CommandTable
-from azure.cli.commands._auto_command import build_operation, CommandDefinition
+from azure.cli.commands.command_types import cli_command
 
-from ._params import PARAMETER_ALIASES
-from .custom import ComponentCommands
+from .custom import (list_components, install, update, update_all, update_self, remove,
+                     check_component)
 
 command_table = CommandTable()
 
 # HELPER METHODS
 
-def _patch_aliases(alias_items):
-    aliases = PARAMETER_ALIASES.copy()
-    aliases.update(alias_items)
-    return aliases
-
-build_operation(
-    'component', None, ComponentCommands,
-    [
-        CommandDefinition(ComponentCommands.list, '[Component]'),
-        CommandDefinition(ComponentCommands.install, 'Result'),
-        CommandDefinition(ComponentCommands.update, 'Result'),
-        CommandDefinition(ComponentCommands.update_all, 'Result'),
-        CommandDefinition(ComponentCommands.update_self, 'Result'),
-        CommandDefinition(ComponentCommands.remove, 'Result'),
-        CommandDefinition(ComponentCommands.check_component, 'Result', 'check')
-    ], command_table, PARAMETER_ALIASES)
+cli_command(command_table, 'component list', list_components)
+cli_command(command_table, 'component install', install)
+cli_command(command_table, 'component update', update)
+cli_command(command_table, 'component update-all', update_all)
+cli_command(command_table, 'component update-self', update_self)
+cli_command(command_table, 'component remove', remove)
+cli_command(command_table, 'component check', check_component)

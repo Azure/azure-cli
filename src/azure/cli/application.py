@@ -8,6 +8,7 @@ from .parser import AzCliCommandParser
 import azure.cli.extensions
 import azure.cli._help as _help
 import azure.cli._logging as _logging
+from azure.cli.commands.argument_types import get_cli_argument, get_cli_extra_arguments
 
 logger = _logging.get_az_logger(__name__)
 
@@ -38,6 +39,7 @@ class Application(object):
     GLOBAL_PARSER_CREATED = 'GlobalParser.Created'
     COMMAND_PARSER_LOADED = 'CommandParser.Loaded'
     COMMAND_PARSER_PARSED = 'CommandParser.Parsed'
+    COMMAND_TABLE_LOADED = 'CommandTable.Loaded'
 
     def __init__(self, config=None):
         self._event_handlers = defaultdict(lambda: [])
@@ -64,6 +66,7 @@ class Application(object):
 
     def execute(self, argv):
         command_table = self.configuration.get_command_table()
+        self.raise_event(self.COMMAND_TABLE_LOADED, command_table=command_table)
         self.parser.load_command_table(command_table)
         self.raise_event(self.COMMAND_PARSER_LOADED, parser=self.parser)
 
@@ -162,4 +165,26 @@ class Application(object):
         self.configuration.output_format = args._output_format #pylint: disable=protected-access
         del args._output_format
 
+def _update_command_definitions(command_table):
+    for command_name, command in command_table.items():
+        for argument_name in command.arguments:
+            command.update_argument(argument_name, get_cli_argument(command_name, argument_name))
+
+        # Add any arguments explicitly registered for this command
+        for argument_name, argument_definition in get_cli_extra_arguments(command_name):
+            command.arguments[argument_name] = argument_definition
+            command.update_argument(argument_name, get_cli_argument(command_name, argument_name))
+
+def _validate_arguments(args, **_):
+    for validator in getattr(args, '_validators', []):
+        validator(args)
+    try:
+        delattr(args, '_validators')
+    except AttributeError:
+        pass
+
 APPLICATION = Application()
+
+# Handlers to update command definitions before they are fed to the parser
+APPLICATION.register(APPLICATION.COMMAND_TABLE_LOADED, _update_command_definitions)
+APPLICATION.register(APPLICATION.COMMAND_PARSER_PARSED, _validate_arguments)

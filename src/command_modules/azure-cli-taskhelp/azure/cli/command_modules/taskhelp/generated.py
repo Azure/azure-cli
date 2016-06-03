@@ -1,14 +1,10 @@
 from __future__ import print_function
 
 from azure.cli.commands import CommandTable
-from azure.cli.commands._auto_command import build_operation, CommandDefinition
+from azure.cli.commands.command_types import cli_command
 
-from .custom import TaskHelpCommands
+from .custom import deploy_arm_template
 
 command_table = CommandTable()
 
-build_operation(
-    'taskhelp', None, TaskHelpCommands,
-    [
-        CommandDefinition(TaskHelpCommands.deploy_arm_template, 'Help'),
-    ], command_table)
+cli_command(command_table, 'taskhelp deploy-arm-template', deploy_arm_template)

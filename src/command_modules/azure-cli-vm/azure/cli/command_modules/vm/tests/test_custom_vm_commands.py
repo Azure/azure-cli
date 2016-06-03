@@ -1,8 +1,8 @@
 ﻿import unittest
 import mock
 import azure.cli.application as application
+from azure.cli.command_modules.vm.custom import enable_boot_diagnostics, disable_boot_diagnostics
 from azure.cli.command_modules.vm.custom import (_get_access_extension_upgrade_info,
-                                                 ConvenienceVmCommands,
                                                  _LINUX_ACCESS_EXT,
                                                  _WINDOWS_ACCESS_EXT)
 
@@ -74,13 +74,12 @@ class Test_Vm_Custom(unittest.TestCase):
     def test_enable_boot_diagnostics_on_vm_never_enabled(self, mock_vm_set, mock_vm_get):
         vm_fake = mock.MagicMock()
         mock_vm_get.return_value = vm_fake
-        commands = ConvenienceVmCommands()
-        commands.enable_boot_diagnostics('g1', 'vm1', 'https://storage_uri1')
+        enable_boot_diagnostics('g1', 'vm1', 'https://storage_uri1')
         self.assertTrue(vm_fake.diagnostics_profile.boot_diagnostics.enabled)
         self.assertEqual('https://storage_uri1',
                          vm_fake.diagnostics_profile.boot_diagnostics.storage_uri)
         self.assertTrue(mock_vm_get.called)
-        mock_vm_set.assert_called_once_with(vm_fake, 'Enabling boot diagnostics', 'Done')
+        mock_vm_set.assert_called_once_with(vm_fake)
 
     @mock.patch('azure.cli.command_modules.vm.custom._vm_get', autospec=True)
     @mock.patch('azure.cli.command_modules.vm.custom._vm_set', autospec=True)
@@ -89,8 +88,7 @@ class Test_Vm_Custom(unittest.TestCase):
         mock_vm_get.return_value = vm_fake
         vm_fake.diagnostics_profile.boot_diagnostics.enabled = True
         vm_fake.diagnostics_profile.boot_diagnostics.storage_uri = 'https://storage_uri1'
-        commands = ConvenienceVmCommands()
-        commands.enable_boot_diagnostics('g1', 'vm1', 'https://storage_uri1')
+        enable_boot_diagnostics('g1', 'vm1', 'https://storage_uri1')
         self.assertTrue(mock_vm_get.called)
         self.assertFalse(mock_vm_set.called)
 
@@ -101,12 +99,11 @@ class Test_Vm_Custom(unittest.TestCase):
         mock_vm_get.return_value = vm_fake
         vm_fake.diagnostics_profile.boot_diagnostics.enabled = True
         vm_fake.diagnostics_profile.boot_diagnostics.storage_uri = 'storage_uri1'
-        commands = ConvenienceVmCommands()
-        commands.disable_boot_diagnostics('g1', 'vm1')
+        disable_boot_diagnostics('g1', 'vm1')
         self.assertFalse(vm_fake.diagnostics_profile.boot_diagnostics.enabled)
         self.assertIsNone(vm_fake.diagnostics_profile.boot_diagnostics.storage_uri)
         self.assertTrue(mock_vm_get.called)
-        mock_vm_set.assert_called_once_with(vm_fake, 'Disabling boot diagnostics', 'Done')
+        mock_vm_set.assert_called_once_with(vm_fake)
 
 class FakedAccessExtensionEntity:#pylint: disable=too-few-public-methods,old-style-class
     def __init__(self, is_linux, version):
