@@ -34,7 +34,11 @@ from .custom import (
     attach_existing_disk, detach_disk, list_disks, set_windows_user_password, set_linux_user,
     delete_linux_user, disable_boot_diagnostics, enable_boot_diagnostics, get_boot_log,
     list_extensions, set_extension, set_diagnostics_extension,
-    show_default_diagnostics_configuration)
+    show_default_diagnostics_configuration,
+    vmss_start, vmss_restart, vmss_delete_instances, vmss_deallocate, vmss_get_instance_view,
+    vmss_power_off, vmss_reimage, vmss_scale, vmss_update_instances
+    )
+
 
 from ._factory import _compute_client_factory
 
@@ -128,30 +132,27 @@ factory = lambda _: get_mgmt_service_client(VMSSClient, VMSSClientConfig).vmss
 cli_command(command_table, 'vm scaleset create', VMSSOperations.create_or_update, factory, transform=DeploymentOutputLongRunningOperation('Starting vm scaleset create'))
 
 factory = lambda _: _compute_client_factory().virtual_machine_scale_sets
-cli_command(command_table, 'vm scaleset deallocate', VirtualMachineScaleSetsOperations.deallocate, factory)
+cli_command(command_table, 'vm scaleset show', VirtualMachineScaleSetsOperations.get, factory)
 cli_command(command_table, 'vm scaleset delete', VirtualMachineScaleSetsOperations.delete, factory)
-cli_command(command_table, 'vm scaleset show ', VirtualMachineScaleSetsOperations.get, factory)
-cli_command(command_table, 'vm scaleset delete-instances', VirtualMachineScaleSetsOperations.delete_instances, factory)
-cli_command(command_table, 'vm scaleset get-instance-view', VirtualMachineScaleSetsOperations.get_instance_view, factory)
-cli_command(command_table, 'vm scaleset list', VirtualMachineScaleSetsOperations.list, factory)
-cli_command(command_table, 'vm scaleset list-all', VirtualMachineScaleSetsOperations.list_all, factory)
+cli_command(command_table, 'vm scaleset list ', VirtualMachineScaleSetsOperations.list, factory)
+cli_command(command_table, 'vm scaleset list-all', VirtualMachineScaleSetsOperations.list_all, factory) #TODO get rid of list and list-all
 cli_command(command_table, 'vm scaleset list-skus', VirtualMachineScaleSetsOperations.list_skus, factory)
-cli_command(command_table, 'vm scaleset power-off', VirtualMachineScaleSetsOperations.power_off, factory)
-cli_command(command_table, 'vm scaleset restart', VirtualMachineScaleSetsOperations.restart, factory)
-cli_command(command_table, 'vm scaleset start', VirtualMachineScaleSetsOperations.start, factory)
-cli_command(command_table, 'vm scaleset update-instances', VirtualMachineScaleSetsOperations.update_instances, factory)
 
-# VM ScaleSet VMs
 factory = lambda _: _compute_client_factory().virtual_machine_scale_set_vms
-cli_command(command_table, 'vm scaleset-vm deallocate', VirtualMachineScaleSetVMsOperations.deallocate, factory)
-cli_command(command_table, 'vm scaleset-vm delete', VirtualMachineScaleSetVMsOperations.delete, factory)
-cli_command(command_table, 'vm scaleset-vm show', VirtualMachineScaleSetVMsOperations.get, factory)
-cli_command(command_table, 'vm scaleset-vm get-instance-view', VirtualMachineScaleSetVMsOperations.get_instance_view, factory)
-cli_command(command_table, 'vm scaleset-vm list', VirtualMachineScaleSetVMsOperations.list, factory)
-cli_command(command_table, 'vm scaleset-vm power-off', VirtualMachineScaleSetVMsOperations.power_off, factory)
-cli_command(command_table, 'vm scaleset-vm restart', VirtualMachineScaleSetVMsOperations.restart, factory)
-cli_command(command_table, 'vm scaleset-vm start', VirtualMachineScaleSetVMsOperations.start, factory)
+cli_command(command_table, 'vm scaleset show-instance', VirtualMachineScaleSetVMsOperations.get, factory)
+cli_command(command_table, 'vm scaleset list-instances', VirtualMachineScaleSetVMsOperations.list, factory)
+
+cli_command(command_table, 'vm scaleset deallocate', vmss_deallocate)
+cli_command(command_table, 'vm scaleset delete-instances', vmss_delete_instances)
+cli_command(command_table, 'vm scaleset get-instance-view', vmss_get_instance_view)
+cli_command(command_table, 'vm scaleset power-off', vmss_power_off)
+cli_command(command_table, 'vm scaleset restart', vmss_restart)
+cli_command(command_table, 'vm scaleset start', vmss_start)
+cli_command(command_table, 'vm scaleset update-instances', vmss_update_instances)
+cli_command(command_table, 'vm scaleset reimage', vmss_reimage)
+cli_command(command_table, 'vm scaleset scale', vmss_scale)
 
 # VM Size
 factory = lambda _: _compute_client_factory().virtual_machine_sizes
 cli_command(command_table, 'vm size list', VirtualMachineSizesOperations.list, factory)
+
