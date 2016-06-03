@@ -14,7 +14,6 @@ tags_type = CliArgumentType(
     type=validate_tags,
     help='multiple semicolon separated tags in \'key[=value]\' format. Omit value to clear tags.',
     nargs='?',
-    default=None,
     const=''
 )
 
@@ -22,7 +21,6 @@ tag_type = CliArgumentType(
     type=validate_tag,
     help='a single tag in \'key[=value]\' format. Omit value to clear tags.',
     nargs='?',
-    default=None,
     const=''
 )
 
