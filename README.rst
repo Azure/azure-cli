@@ -18,6 +18,8 @@ To install via cURL on Linux, Unix and OS X, type:
 
     curl http://azure-cli-nightly.westus.cloudapp.azure.com/install | bash
 
+``sudo bash`` may be required if you get a 'Permission error'.
+
 If you chose to enable tab completion, type ``exec -l $SHELL`` to restart your shell.
 
 Note: This will install the latest nightly builds.
