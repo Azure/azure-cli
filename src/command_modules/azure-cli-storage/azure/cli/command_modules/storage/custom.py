@@ -203,6 +203,7 @@ def create_acl_policy(
         client, container_name, policy_name, start=None, expiry=None, permission=None):
     ''' Create a stored access policy on the containing object '''
     from azure.storage.models import AccessPolicy
+    # TODO: Remove workaround once SDK issue fixed (Pivotal #120873795)
     if not (start or expiry or permission):
         raise CLIError('Must specify at least one property (permission, start or expiry) '
                        'when creating an access policy.')

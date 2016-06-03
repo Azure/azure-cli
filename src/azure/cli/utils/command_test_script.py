@@ -1,6 +1,5 @@
 from __future__ import print_function
 
-import ast
 import json
 import os
 import traceback
@@ -183,7 +182,7 @@ class CommandTestScript(object): #pylint: disable=too-many-instance-attributes
                     for comparator in checks:
                         comparator.compare(result)
                 else:
-                    result_set = set(ast.literal_eval(result))
+                    result_set = set(json.loads(result))
                     assert result_set == set(checks)
             elif isinstance(checks, JMESPathComparator):
                 checks.compare(result)
