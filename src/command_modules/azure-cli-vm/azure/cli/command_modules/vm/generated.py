@@ -35,7 +35,7 @@ from ._params import (PARAMETER_ALIASES, VM_CREATE_EXTRA_PARAMETERS, VM_CREATE_P
                       VM_PATCH_EXTRA_PARAMETERS, ACS_CREATE_PARAMETER_ALIASES)
 from ._factory import _compute_client_factory
 from ._help import helps # pylint: disable=unused-import
-from .custom import ConvenienceVmCommands
+from .custom import ConvenienceVmCommands, ConvinienceVmSSCommands
 
 command_table = CommandTable()
 
@@ -180,7 +180,7 @@ build_operation(
     command_table, VM_CREATE_PARAMETER_ALIASES, VM_CREATE_EXTRA_PARAMETERS)
 
 build_operation(
-    'vm scaleset', 'vmss', lambda **_: get_mgmt_service_client(VMSSClient, VMSSClientConfig),
+    'vm scaleset', None, lambda **_: get_mgmt_service_client(VMSSClient, VMSSClientConfig),
     [
         CommandDefinition(
             VMSSOperations.create_or_update,
@@ -193,37 +193,44 @@ build_operation(
 build_operation(
     'vm scaleset', 'virtual_machine_scale_sets', _compute_client_factory,
     [
-        CommandDefinition(VirtualMachineScaleSetsOperations.deallocate, LongRunningOperation(L('Deallocating VM scale set'), L('VM scale set deallocated'))),
-        CommandDefinition(VirtualMachineScaleSetsOperations.delete, LongRunningOperation(L('Deleting VM scale set'), L('VM scale set deleted'))),
         CommandDefinition(VirtualMachineScaleSetsOperations.get, 'VirtualMachineScaleSet', command_alias='show'),
-        CommandDefinition(VirtualMachineScaleSetsOperations.delete_instances, LongRunningOperation(L('Deleting VM scale set instances'), L('VM scale set instances deleted'))),
-        CommandDefinition(VirtualMachineScaleSetsOperations.get_instance_view, 'VirtualMachineScaleSetInstanceView'),
+        CommandDefinition(VirtualMachineScaleSetsOperations.delete, LongRunningOperation(L('Deleting VM scale set'), L('VM scale set deleted'))),
         CommandDefinition(VirtualMachineScaleSetsOperations.list, '[VirtualMachineScaleSet]'),
         CommandDefinition(VirtualMachineScaleSetsOperations.list_all, '[VirtualMachineScaleSet]'),
         CommandDefinition(VirtualMachineScaleSetsOperations.list_skus, '[VirtualMachineScaleSet]'),
-        CommandDefinition(VirtualMachineScaleSetsOperations.power_off, LongRunningOperation(L('Powering off VM scale set'), L('VM scale set powered off'))),
-        CommandDefinition(VirtualMachineScaleSetsOperations.restart, LongRunningOperation(L('Restarting VM scale set'), L('VM scale set restarted'))),
-        CommandDefinition(VirtualMachineScaleSetsOperations.start, LongRunningOperation(L('Starting VM scale set'), L('VM scale set started'))),
-        CommandDefinition(VirtualMachineScaleSetsOperations.update_instances, LongRunningOperation(L('Updating VM scale set instances'), L('VM scale set instances updated'))),
     ],
     command_table, patch_aliases(PARAMETER_ALIASES, {
-        'vm_scale_set_name': {'name': '--name -n'}
+        'virtual_machine_scale_set_name': {'name': '--name -n'},
+        'vm_scale_set_name': {'name': '--name -n'},
         }))
 
 build_operation(
-    'vm scaleset-vm', 'virtual_machine_scale_set_vms', _compute_client_factory,
+    'vm scaleset', 'virtual_machine_scale_set_vms', _compute_client_factory,
     [
-        CommandDefinition(VirtualMachineScaleSetVMsOperations.deallocate, LongRunningOperation(L('Deallocating VM scale set VMs'), L('VM scale set VMs deallocated'))),
-        CommandDefinition(VirtualMachineScaleSetVMsOperations.delete, LongRunningOperation(L('Deleting VM scale set VMs'), L('VM scale set VMs deleted'))),
-        CommandDefinition(VirtualMachineScaleSetVMsOperations.get, 'VirtualMachineScaleSetVM', command_alias='show'),
-        CommandDefinition(VirtualMachineScaleSetVMsOperations.get_instance_view, 'VirtualMachineScaleSetVMInstanceView'),
-        CommandDefinition(VirtualMachineScaleSetVMsOperations.list, '[VirtualMachineScaleSetVM]'),
-        CommandDefinition(VirtualMachineScaleSetVMsOperations.power_off, LongRunningOperation(L('Powering off VM scale set VMs'), L('VM scale set VMs powered off'))),
-        CommandDefinition(VirtualMachineScaleSetVMsOperations.restart, LongRunningOperation(L('Restarting VM scale set VMs'), L('VM scale set VMs restarted'))),
-        CommandDefinition(VirtualMachineScaleSetVMsOperations.start, LongRunningOperation(L('Starting VM scale set VMs'), L('VM scale set VMs started'))),
+        CommandDefinition(VirtualMachineScaleSetVMsOperations.get, '[VirtualMachineScaleSetVM]', 'show-instance'),
+        CommandDefinition(VirtualMachineScaleSetVMsOperations.list, '[VirtualMachineScaleSetVM]', 'list-instances'),
     ],
     command_table, patch_aliases(PARAMETER_ALIASES, {
-        'vm_scale_set_name': {'name': '--name -n'}
+        'virtual_machine_scale_set_name': {'name': '--name -n'},
+        'vm_scale_set_name': {'name': '--name -n'},
+        }))
+
+build_operation(
+    'vm scaleset', None, ConvinienceVmSSCommands,
+    [
+        CommandDefinition(ConvinienceVmSSCommands.deallocate, LongRunningOperation(L('Deallocating'), L('Deallocated'))),
+        CommandDefinition(ConvinienceVmSSCommands.delete_instances, LongRunningOperation(L('Deleting VM instances'), L('VM instances deleted'))),
+        CommandDefinition(ConvinienceVmSSCommands.get_instance_view, 'VirtualMachineScaleSetVMInstanceView'),
+        CommandDefinition(ConvinienceVmSSCommands.power_off, LongRunningOperation(L('Powering off VM instances'), L('VM instances powered off'))),
+        CommandDefinition(ConvinienceVmSSCommands.restart, LongRunningOperation(L('Restarting VM instances'), L('VM instances restarted'))),
+        CommandDefinition(ConvinienceVmSSCommands.start, LongRunningOperation(L('Starting VM instances'), L('VM instances started'))),
+        CommandDefinition(ConvinienceVmSSCommands.update_instances, LongRunningOperation(L('Updating VM scale set instances'), L('VM scale set instances updated'))),
+        CommandDefinition(ConvinienceVmSSCommands.reimage, LongRunningOperation(L('Re-imaging VM scale set instances'), L('VM scale set instances re-imaged'))),
+        CommandDefinition(ConvinienceVmSSCommands.scale, LongRunningOperation(L('Updating instance count'), L('Instance count was updated')))
+    ],
+    command_table, patch_aliases(PARAMETER_ALIASES, {
+        'virtual_machine_scale_set_name': {'name': '--name -n'},
+        'vm_scale_set_name': {'name': '--name -n'},
         }))
 
 build_operation(

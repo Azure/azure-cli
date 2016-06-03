@@ -6,7 +6,7 @@ except ImportError:
     from urlparse import urlparse # pylint: disable=import-error
 from six.moves.urllib.request import urlopen #pylint: disable=import-error,unused-import
 
-from azure.mgmt.compute.models import DataDisk
+from azure.mgmt.compute.models import DataDisk, VirtualMachineScaleSet
 from azure.mgmt.compute.models.compute_management_client_enums import DiskCreateOptionTypes
 from azure.cli.commands import CommandTable, LongRunningOperation
 from azure.cli.commands._command_creation import get_mgmt_service_client, get_data_service_client
@@ -538,3 +538,148 @@ class ConvenienceVmCommands(object): # pylint: disable=too-few-public-methods
     def show_default_diagnostics_configuration(self):
         '''show the default config file which defines data to be collected'''
         return get_default_linux_diag_config()
+
+class ConvinienceVmSSCommands(object):
+
+    def __init__(self, **kwargs):
+        pass
+
+    def scale(self, resource_group_name, vm_scale_set_name, new_capacity):
+        '''change the number of VMs in an virtual machine scale set
+
+        :param str name:the name of vm scale set
+        :param int new_capacity: number of vms
+        '''
+        client = _compute_client_factory()
+        vmss = client.virtual_machine_scale_sets.get(resource_group_name, vm_scale_set_name)
+        #pylint: disable=no-member
+        if vmss.sku.capacity == new_capacity:
+            return
+        else:
+            vmss.sku.capacity = new_capacity
+        vmss_new = VirtualMachineScaleSet(vmss.location, sku=vmss.sku)
+        return client.virtual_machine_scale_sets.create_or_update(resource_group_name,
+                                                                  vm_scale_set_name,
+                                                                  vmss_new)
+
+    def update_instances(self, resource_group_name, vm_scale_set_name, instance_ids):
+        '''upgrade virtual machines in a virtual machine scale set
+
+        :param str instance_ids: comma separated instance ids, such as 0,2,3
+        '''
+        client = _compute_client_factory()
+        ids = self._split_instance_ids(instance_ids)
+        return client.virtual_machine_scale_sets.update_instances(resource_group_name,
+                                                                  vm_scale_set_name,
+                                                                  ids)
+
+    def get_instance_view(self, resource_group_name, vm_scale_set_name, instance_id=None):
+        '''get instance view.
+
+        :param str instance_id: vm instance id
+        '''
+        client = _compute_client_factory()
+        if instance_id:
+            return client.virtual_machine_scale_set_vms.get_instance_view(resource_group_name,
+                                                                          vm_scale_set_name,
+                                                                          instance_id)
+        else:
+            return client.virtual_machine_scale_sets.get_instance_view(resource_group_name,
+                                                                       vm_scale_set_name)
+
+    def deallocate(self, resource_group_name, vm_scale_set_name, instance_ids=None):
+        '''deallocate virtual machines in a virtual machine scale set.
+
+        :param str instance_ids: comma separated instance ids, such as 0,2,3
+        '''
+        client = _compute_client_factory()
+        ids = self._split_instance_ids(instance_ids)
+        if  ids and len(ids) == 1:
+            return client.virtual_machine_scale_set_vms.deallocate(resource_group_name,
+                                                                   vm_scale_set_name,
+                                                                   ids[0])
+        else:
+            return client.virtual_machine_scale_sets.deallocate(resource_group_name,
+                                                                vm_scale_set_name,
+                                                                ids)
+
+    def delete_instances(self, resource_group_name, vm_scale_set_name, instance_ids):
+        '''delete virtual machines in a virtual machine scale set.
+
+        :param str instance_ids: comma separated instance ids, such as 0,2,3
+        '''
+        client = _compute_client_factory()
+        ids = self._split_instance_ids(instance_ids)
+        if len(ids) == 1:
+            return client.virtual_machine_scale_set_vms.delete(resource_group_name,
+                                                               vm_scale_set_name,
+                                                               ids[0])
+        else:
+            return client.virtual_machine_scale_sets.delete_instances(resource_group_name,
+                                                                      vm_scale_set_name,
+                                                                      ids)
+
+    def power_off(self, resource_group_name, vm_scale_set_name, instance_ids=None):
+        '''power off (stop) virtual machines in a virtual machine scale set.
+
+        :param str instance_ids: comma separated instance ids, such as 0,2,3
+        '''
+        client = _compute_client_factory()
+        ids = self._split_instance_ids(instance_ids)
+        if ids and len(ids) == 1:
+            return client.virtual_machine_scale_set_vms.power_off(resource_group_name,
+                                                                  vm_scale_set_name,
+                                                                  ids[0])
+        else:
+            return client.virtual_machine_scale_sets.power_off(resource_group_name,
+                                                               vm_scale_set_name,
+                                                               ids)
+
+    def reimage(self, resource_group_name, vm_scale_set_name, instance_id=None):
+        '''reimage virtual machines in a virtual machine scale set.
+
+        :param str instance_id: vm instance id
+        '''
+        client = _compute_client_factory()
+        if instance_id:
+            return client.virtual_machine_scale_set_vms.reimage(resource_group_name,
+                                                                vm_scale_set_name,
+                                                                instance_id)
+        else:
+            return client.virtual_machine_scale_sets.reimage(resource_group_name,
+                                                             vm_scale_set_name)
+
+    def restart(self, resource_group_name, vm_scale_set_name, instance_ids=None):
+        '''restart virtual machines in a virtual machine scale set.
+
+        :param str instance_ids: comma separated instance ids, such as 0,2,3
+        '''
+        client = _compute_client_factory()
+        ids = self._split_instance_ids(instance_ids)
+        if ids and len(ids) == 1:
+            return client.virtual_machine_scale_set_vms.restart(resource_group_name,
+                                                                vm_scale_set_name,
+                                                                ids[0])
+        else:
+            return client.virtual_machine_scale_sets.restart(resource_group_name,
+                                                             vm_scale_set_name,
+                                                             ids)
+
+    def start(self, resource_group_name, vm_scale_set_name, instance_ids=None):
+        '''start virtual machines in a virtual machine scale set.
+
+        :param str instance_ids: comma separated instance ids, such as 0,2,3
+        '''
+        client = _compute_client_factory()
+        ids = self._split_instance_ids(instance_ids)
+        if ids and len(ids) == 1:
+            return client.virtual_machine_scale_set_vms.start(resource_group_name,
+                                                              vm_scale_set_name,
+                                                              ids[0])
+        else:
+            return client.virtual_machine_scale_sets.start(resource_group_name,
+                                                           vm_scale_set_name,
+                                                           ids)
+
+    def _split_instance_ids(self, instance_ids):
+        return instance_ids.split(',') if instance_ids else None
