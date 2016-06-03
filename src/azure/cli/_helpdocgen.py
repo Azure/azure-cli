@@ -3,7 +3,6 @@ import os
 import sys
 
 from ._help import GroupHelpFile, CommandHelpFile
-from ._locale import L
 
 _help_location = os.path.join(os.path.expanduser('~'), 'azurecli', 'help')
 
@@ -49,7 +48,7 @@ def _generate_help(noun_map):
 def _handle_command(doc):
     _print_summary(doc)
 
-    _h2(L('Arguments'))
+    _h2('Arguments')
     print('')
 
     for p in doc.parameters:
@@ -60,7 +59,7 @@ def _handle_command(doc):
         print('')
 
         if p.value_sources and len(p.value_sources) > 0:
-            print(L('To get values:'))
+            print('To get values:')
             print('')
             print('')
             for v in p.value_sources:
@@ -72,7 +71,7 @@ def _handle_command(doc):
 def _handle_group(doc):
     _print_summary(doc)
 
-    _h2(L('Child Commands'))
+    _h2('Child Commands')
     print('')
 
     for c in doc.children:
@@ -83,7 +82,7 @@ def _handle_group(doc):
 
 def _print_summary(doc):
     _h1('{0}: {1}'.format(doc.type.title(), doc.delimiters))
-    _h2(L('Summary'))
+    _h2('Summary')
     print('')
     print(doc.short_summary or '')
     print('')
@@ -92,10 +91,10 @@ def _print_summary(doc):
 
 def _print_examples(doc):
     if len(doc.examples) > 0:
-        _h2(L('Examples'))
+        _h2('Examples')
         for e in doc.examples:
-            _h3(L(e.name))
-            print(L(e.text))
+            _h3(e.name)
+            print(e.text)
             print('')
 
 def _h1(s):

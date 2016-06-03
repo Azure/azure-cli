@@ -10,7 +10,6 @@ from azure.mgmt.resource.subscriptions import (SubscriptionClient,
                                                SubscriptionClientConfiguration)
 from .main import ACCOUNT
 from ._util import CLIError
-from ._locale import L
 from ._azure_env import (get_authority_url, CLIENT_ID, get_management_endpoint_url,
                          ENV_DEFAULT, COMMON_TENANT)
 import azure.cli._logging as _logging
@@ -81,7 +80,7 @@ class Profile(object):
         else:
             if is_service_principal:
                 if not tenant:
-                    raise CLIError(L('Please supply tenant using "--tenant"'))
+                    raise CLIError('Please supply tenant using "--tenant"')
 
                 subscriptions = self._subscription_finder.find_from_service_principal_id(username,
                                                                                          password,
@@ -90,7 +89,7 @@ class Profile(object):
                 subscriptions = self._subscription_finder.find_from_user_account(username, password)
 
         if not subscriptions:
-            raise CLIError(L('No subscriptions found for this account.'))
+            raise CLIError('No subscriptions found for this account.')
 
         if is_service_principal:
             self._creds_cache.save_service_principal_cred(username,
@@ -330,7 +329,7 @@ class CredsCache(object):
     def retrieve_token_for_service_principal(self, sp_id):
         matched = [x for x in self._service_principal_creds if sp_id == x[_SERVICE_PRINCIPAL_ID]]
         if not matched:
-            raise CLIError(L('Please run "account set" to select active account.'))
+            raise CLIError('Please run "account set" to select active account.')
         cred = matched[0]
         authority_url = get_authority_url(cred[_SERVICE_PRINCIPAL_TENANT], ENV_DEFAULT)
         context = self._auth_ctx_factory(authority_url, None)

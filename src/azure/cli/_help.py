@@ -4,7 +4,6 @@ import sys
 import textwrap
 import yaml
 
-from ._locale import L
 from ._help_files import _load_help_file
 
 __all__ = ['print_detailed_help', 'print_welcome_message', 'GroupHelpFile', 'CommandHelpFile']
@@ -30,20 +29,20 @@ def show_welcome(parser):
     print_description_list(help_file.children)
 
 def print_welcome_message():
-    _print_indent(L(r"""
+    _print_indent(r"""
      /\                        
     /  \    _____   _ _ __ ___ 
    / /\ \  |_  / | | | \'__/ _ \
   / ____ \  / /| |_| | | |  __/
  /_/    \_\/___|\__,_|_|  \___|
-"""))
-    _print_indent(L('\nWelcome to the cool new Azure CLI!\n\nHere are the base commands:\n'))
+""")
+    _print_indent('\nWelcome to the cool new Azure CLI!\n\nHere are the base commands:\n')
 
 def print_detailed_help(help_file):
     _print_header(help_file)
 
     if help_file.type == 'command':
-        _print_indent(L('Arguments'))
+        _print_indent('Arguments')
         print_arguments(help_file)
     elif help_file.type == 'group':
         _print_groups(help_file)
@@ -71,7 +70,7 @@ def print_arguments(help_file):
 
     if len(help_file.parameters) == 0:
         _print_indent('none', indent)
-    required_tag = L(' [Required]')
+    required_tag = ' [Required]'
     max_name_length = max(len(p.name) + (len(required_tag) if p.required else 0)
                           for p in help_file.parameters)
     last_group_name = None
@@ -106,7 +105,7 @@ def print_arguments(help_file):
             _print_indent('{0}'.format(p.long_summary.rstrip()), indent)
 
         if p.value_sources:
-            _print_indent(L("Values from: {0}.").format(', '.join(p.value_sources)), indent)
+            _print_indent("Values from: {0}.".format(', '.join(p.value_sources)), indent)
 
         if p.long_summary or p.value_sources:
             print('')
@@ -115,7 +114,7 @@ def print_arguments(help_file):
 def _print_header(help_file):
     indent = 0
     _print_indent('')
-    _print_indent(L('Command') if help_file.type == 'command' else L('Group'), indent)
+    _print_indent('Command' if help_file.type == 'command' else 'Group', indent)
 
     indent += 1
     _print_indent('{0}{1}'.format('az ' + help_file.command,
@@ -148,11 +147,11 @@ def _print_groups(help_file):
     subcommands = [c for c in help_file.children if c not in subgroups]
 
     if subgroups:
-        _print_indent(L('Subgroups:'))
+        _print_indent('Subgroups:')
         _print_items(subgroups)
 
     if subcommands:
-        _print_indent(L('Commands:'))
+        _print_indent('Commands:')
         _print_items(subcommands)
 
 def _get_choices_defaults_str(p):
@@ -165,7 +164,7 @@ def _get_choices_defaults_str(p):
 def _print_examples(help_file):
     indent = 0
     print('')
-    _print_indent(L('Examples'), indent)
+    _print_indent('Examples', indent)
 
     for e in help_file.examples:
         indent = 1
