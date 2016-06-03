@@ -1,5 +1,5 @@
 # pylint: disable=line-too-long
-from azure.cli.commands._params import tags_type
+from azure.cli.commands._params import tags_type, name_type
 from azure.cli.commands.argument_types import register_cli_argument, CliArgumentType
 from azure.cli.commands._validators import validate_key_value_pairs
 
@@ -36,6 +36,7 @@ blob_types = {'block': BlockBlobService, 'page': PageBlobService, 'append': Appe
 
 # PARAMETER TYPE DEFINITIONS
 account_name_type = CliArgumentType(
+    options_list=('--account-name', '-n'),
     help='the storage account name'
 )
 
@@ -114,6 +115,7 @@ lease_duration_type = CliArgumentType(
 )
 
 lease_id_type = CliArgumentType(
+    options_list=('--id',),
     metavar='ID',
     help='lease ID in GUID format'
 )
@@ -124,20 +126,19 @@ metadata_type = CliArgumentType(
     help='metadata in semicolon separated key=value pairs'
 )
 
-name_arg_type = CliArgumentType(
-    options_list=('--name', '-n'),
-    metavar='NAME'
-)
-
 permission_type = CliArgumentType(
     metavar='PERMISSIONS',
     help='permissions granted: (r)ead (w)rite (d)elete (l)ist. Can be combined',
     type=validate_container_permission
 )
 
+policy_name_type = CliArgumentType(
+    metavar='NAME',
+    help='the stored access policy name'
+)
+
 public_access_type = CliArgumentType(
-    metavar='SPECIFIERS',
-    choices=['blob', 'container']
+    choices=list(public_access_types.keys())
 )
 
 quota_type = CliArgumentType(
@@ -201,7 +202,7 @@ register_cli_argument('storage', 'permission', permission_type)
 register_cli_argument('storage', 'start', start_type)
 register_cli_argument('storage', 'timeout', timeout_type)
 
-register_cli_argument('storage account', 'account_name', account_name_type, options_list=('--name', '-n'))
+register_cli_argument('storage account', 'account_name', name_type)
 register_cli_argument('storage account', 'account_type', account_type_type, options_list=('--type', '-t'))
 register_cli_argument('storage account', 'tags', tags_type)
 register_cli_argument('storage account keys', 'key', key_type)
@@ -212,20 +213,25 @@ register_cli_argument('storage account connection-string', 'account_name', accou
 register_cli_argument('storage account generate-sas', 'resource_types', resource_types_type)
 register_cli_argument('storage account generate-sas', 'services', services_type)
 
-register_cli_argument('storage container', 'container_name', container_name_type)
+register_cli_argument('storage container', 'container_name', name_type)
 register_cli_argument('storage container create', 'public_access', public_access_type)
+register_cli_argument('storage container policy', 'policy_name', policy_name_type, options_list=('--policy',))
 
-register_cli_argument('storage blob', 'blob_name', blob_name_type)
+register_cli_argument('storage blob', 'blob_name', name_type)
 
 register_cli_argument('storage blob copy', 'blob_name', blob_name_type, options_list=('--destination-name', '-n'), help='Name of the destination blob. If the exists, it will be overwritten.')
 register_cli_argument('storage blob copy', 'container_name', container_name_type, options_list=('--destination-container', '-c'))
 
 register_cli_argument('storage blob upload', 'blob_type', blob_type_type, options_list=('--type', '-t'))
 
+register_cli_argument('storage share', 'share_name', name_type)
 register_cli_argument('storage share', 'quota', quota_type)
-register_cli_argument('storage share', 'share_name', share_name_type, options_list=('--name', '-n'))
+register_cli_argument('storage share policy', 'container_name', name_type)
+register_cli_argument('storage share policy', 'policy_name', policy_name_type, options_list=('--policy',))
 
-register_cli_argument('storage file', 'file_name', file_name_type, options_list=('--name', '-n'))
+register_cli_argument('storage directory', 'directory_name', name_type)
+
+register_cli_argument('storage file', 'file_name', name_type)
 register_cli_argument('storage file', 'directory_name', directory_type, required=False)
 
 register_cli_argument('storage file metadata', 'directory_name', directory_type, required=False)
