@@ -2,6 +2,7 @@ import unittest
 from six import StringIO
 from collections import namedtuple
 from azure.cli.parser import AzCliCommandParser
+from azure.cli.commands import CliCommand
 
 class TestParser(unittest.TestCase):
 
@@ -20,25 +21,18 @@ class TestParser(unittest.TestCase):
         self.io.close()
 
     def test_register_simple_commands(self):
-        def test_handler1(args):
+        def test_handler1():
             pass
 
-        def test_handler2(args):
+        def test_handler2():
             pass
 
-        command_table = {
-            'command the-name': {
-                'handler': test_handler1,
-                'arguments': []
-                },
-            'sub-command the-second-name': {
-                'handler': test_handler2,
-                'arguments': []
-                }
-            }
+        command = CliCommand('command the-name', test_handler1)
+        command2 = CliCommand('sub-command the-second-name', test_handler2)
+        cmd_table = {'command the-name': command, 'sub-command the-second-name': command2}
+
         parser = AzCliCommandParser()
-        
-        parser.load_command_table(command_table)
+        parser.load_command_table(cmd_table)
         args = parser.parse_args('command the-name'.split())
         self.assertIs(args.func, test_handler1)
 
@@ -53,16 +47,12 @@ class TestParser(unittest.TestCase):
         def test_handler(args):
             pass
 
-        command_table = {
-            'test command': {
-                'handler': test_handler,
-                'arguments': [
-                    {'name': '--req', 'required': True}
-                    ]
-                }
-            }
+        command = CliCommand('test command', test_handler)
+        command.add_argument('req', '--req', required=True)
+        cmd_table = {'test command': command}
+
         parser = AzCliCommandParser()
-        parser.load_command_table(command_table)
+        parser.load_command_table(cmd_table)
 
         args = parser.parse_args('test command --req yep'.split())
         self.assertIs(args.func, test_handler)
@@ -72,19 +62,15 @@ class TestParser(unittest.TestCase):
         self.assertTrue(AzCliCommandParser.error.called)
 
     def test_nargs_parameter(self):
-        def test_handler(args):
+        def test_handler():
             pass
 
-        command_table = {
-            'test command': {
-                'handler': test_handler,
-                'arguments': [
-                    {'name': '--req', 'required': True, 'nargs': 2}
-                    ]
-                }
-            }
+        command = CliCommand('test command', test_handler)
+        command.add_argument('req', '--req', required=True, nargs=2)
+        cmd_table = {'test command': command}
+
         parser = AzCliCommandParser()
-        parser.load_command_table(command_table)
+        parser.load_command_table(cmd_table)
 
         args = parser.parse_args('test command --req yep nope'.split())
         self.assertIs(args.func, test_handler)
