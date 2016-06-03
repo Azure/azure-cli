@@ -32,11 +32,6 @@ def main(args, file=sys.stdout): #pylint: disable=redefined-builtin
     CONFIG.load(os.path.join(azure_folder, 'az.json'))
     SESSION.load(os.path.join(azure_folder, 'az.sess'), max_age=3600)
 
-    from ._locale import install as locale_install
-    locale_install(os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                'locale',
-                                CONFIG.get('locale', 'en-US')))
-
     config = Configuration(args)
     APPLICATION.initialize(config)
 

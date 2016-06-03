@@ -6,7 +6,6 @@ from adal.adal_error import AdalError
 from azure.cli._profile import Profile
 from azure.cli._util import CLIError
 import azure.cli._logging as _logging
-from azure.cli._locale import L
 
 logger = _logging.get_az_logger(__name__)
 
@@ -21,7 +20,7 @@ def list_subscriptions():
 def set_active_subscription(subscription_name_or_id):
     '''Set the current subscription'''
     if not id:
-        raise CLIError(L('Please provide subscription id or unique name.'))
+        raise CLIError('Please provide subscription id or unique name.')
     profile = Profile()
     profile.set_active_subscription(subscription_name_or_id)
 
@@ -37,7 +36,7 @@ def login(username=None, password=None, service_principal=None, tenant=None):
     if username:
         if not password:
             import getpass
-            password = getpass.getpass(L('Password: '))
+            password = getpass.getpass('Password: ')
     else:
         interactive = True
 
