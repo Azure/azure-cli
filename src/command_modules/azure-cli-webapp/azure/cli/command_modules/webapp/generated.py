@@ -18,8 +18,8 @@ class DeploymentOutputLongRunningOperation(LongRunningOperation): #pylint: disab
         return result.properties.outputs
 
 factory = lambda _: _web_client_factory()
-cli_command(command_table, 'webapp get-sites', SitesOperations.get_sites, '[Site]', factory)
+cli_command(command_table, 'webapp get-sites', SitesOperations.get_sites, factory)
 
 factory = lambda _: get_mgmt_service_client(WebAppClient, WebAppClientConfig).web_app
-cli_command(command_table, 'webapp create', WebAppOperations.create_or_update,
-            DeploymentOutputLongRunningOperation('Creating webapp'), factory)
+cli_command(command_table, 'webapp create', WebAppOperations.create_or_update, factory,
+            return_type=DeploymentOutputLongRunningOperation('Creating webapp'))

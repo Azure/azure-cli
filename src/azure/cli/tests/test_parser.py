@@ -31,7 +31,7 @@ class TestParser(unittest.TestCase):
         command2 = CliCommand('sub-command the-second-name', test_handler2)
         cmd_table = {'command the-name': command, 'sub-command the-second-name': command2}
 
-        parser = AzCliCommandParser()        
+        parser = AzCliCommandParser()
         parser.load_command_table(cmd_table)
         args = parser.parse_args('command the-name'.split())
         self.assertIs(args.func, test_handler1)

@@ -12,7 +12,6 @@ from azure.cli.parser import IncorrectUsageError
 from azure.cli.commands import CommandTable
 from azure.cli._util import CLIError
 import azure.cli._logging as _logging
-from azure.cli.commands import LongRunningOperation
 from azure.cli.commands._command_creation import get_mgmt_service_client
 
 from ._factory import _resource_client_factory
@@ -157,11 +156,9 @@ def deploy_arm_template(
 
     properties = DeploymentProperties(template=template, parameters=parameters, mode=mode)
 
-    op = LongRunningOperation('Deployment started')
     smc = get_mgmt_service_client(ResourceManagementClient,
                                   ResourceManagementClientConfiguration)
-    poller = smc.deployments.create_or_update(resource_group, deployment_name, properties)
-    return op(poller)
+    return smc.deployments.create_or_update(resource_group, deployment_name, properties)
 
 def tag_resource(
         resource_group_name, resource_name, resource_type, tags, parent_resource_path=None,

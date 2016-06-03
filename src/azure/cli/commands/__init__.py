@@ -9,8 +9,8 @@ from collections import defaultdict, OrderedDict
 from pip import get_installed_distributions
 from msrest.exceptions import ClientException
 from msrest.paging import Paged
+from msrestazure.azure_operation import AzureOperationPoller
 
-from azure.cli.parser import IncorrectUsageError
 from azure.cli._util import CLIError
 import azure.cli._logging as _logging
 import azure.cli.commands.argument_types
@@ -86,7 +86,7 @@ class CliCommand(object):
         self.name = name
         self.handler = handler
         self.description = description
-        self.help_file = None
+        self.help = None
         self.arguments = {}
         _extract_args_from_signature(self, operation or handler)
 
@@ -144,12 +144,20 @@ def create_command(name, operation, return_type, client_factory):
         client = client_factory(kwargs) if client_factory else None
         try:
             result = operation(client, **kwargs) if client else operation(**kwargs)
-            if not return_type:
-                return {}
-            if callable(return_type):
-                return return_type(result)
-            if isinstance(return_type, str):
-                return list(result) if isinstance(result, Paged) else result
+            if return_type:
+                if callable(return_type):
+                    return return_type(result)
+                elif isinstance(return_type, str):
+                    return list(result) if isinstance(result, Paged) else result
+                else:
+                    raise CLIError('Unsupported \'return_type\': {}'.format(type(return_type)))
+            else:
+                if isinstance(result, AzureOperationPoller):
+                    return LongRunningOperation('Starting {}'.format(name))(result)
+                elif isinstance(result, Paged):
+                    return list(result)
+                else:
+                    return result
         except ClientException as client_exception:
             message = getattr(client_exception, 'message', client_exception)
             raise CLIError(message)

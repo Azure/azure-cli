@@ -12,18 +12,17 @@ interactions:
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test1/providers/Microsoft.Network/expressRouteCircuits/test_route/authorizations/none_existent?api-version=2016-03-30
   response:
-    body: {string: "{\r\n  \"error\": {\r\n    \"code\": \"NotFound\",\r\n    \"message\"\
-        : \"Resource /subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/cli_test1/providers/Microsoft.Network/expressRouteCircuits/test_route/authorizations/none_existent\
-        \ not found.\",\r\n    \"details\": []\r\n  }\r\n}"}
+    body: {string: '{"error":{"code":"ResourceGroupNotFound","message":"Resource group
+        ''cli_test1'' could not be found."}}'}
     headers:
       Cache-Control: [no-cache]
-      Content-Length: ['272']
+      Content-Length: ['101']
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Wed, 18 May 2016 17:31:15 GMT']
+      Date: ['Fri, 03 Jun 2016 15:32:11 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
-      Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      x-ms-failure-cause: [gateway]
     status: {code: 404, message: Not Found}
 - request:
     body: null
@@ -39,17 +38,18 @@ interactions:
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test1/providers/Microsoft.Network/expressRouteCircuits/test_route/authorizations/none_existent?api-version=2016-03-30
   response:
-    body: {string: ''}
+    body: {string: '{"error":{"code":"ResourceGroupNotFound","message":"Resource group
+        ''cli_test1'' could not be found."}}'}
     headers:
       Cache-Control: [no-cache]
-      Content-Length: ['0']
-      Date: ['Wed, 18 May 2016 17:31:15 GMT']
+      Content-Length: ['101']
+      Content-Type: [application/json; charset=utf-8]
+      Date: ['Fri, 03 Jun 2016 15:32:12 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
-      Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1197']
-    status: {code: 204, message: No Content}
+      x-ms-failure-cause: [gateway]
+    status: {code: 404, message: Not Found}
 - request:
     body: null
     headers:
@@ -64,17 +64,18 @@ interactions:
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test1/providers/Microsoft.Network/expressRouteCircuits/test_route/peerings/none_existent?api-version=2016-03-30
   response:
-    body: {string: ''}
+    body: {string: '{"error":{"code":"ResourceGroupNotFound","message":"Resource group
+        ''cli_test1'' could not be found."}}'}
     headers:
       Cache-Control: [no-cache]
-      Content-Length: ['0']
-      Date: ['Wed, 18 May 2016 17:31:16 GMT']
+      Content-Length: ['101']
+      Content-Type: [application/json; charset=utf-8]
+      Date: ['Fri, 03 Jun 2016 15:32:12 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
-      Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1197']
-    status: {code: 204, message: No Content}
+      x-ms-failure-cause: [gateway]
+    status: {code: 404, message: Not Found}
 - request:
     body: null
     headers:
@@ -88,17 +89,68 @@ interactions:
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test1/providers/Microsoft.Network/expressRouteCircuits/test_route/peerings/none_existent?api-version=2016-03-30
   response:
-    body: {string: "{\r\n  \"error\": {\r\n    \"code\": \"NotFound\",\r\n    \"message\"\
-        : \"Resource /subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/cli_test1/providers/Microsoft.Network/expressRouteCircuits/test_route/peerings/none_existent\
-        \ not found.\",\r\n    \"details\": []\r\n  }\r\n}"}
+    body: {string: '{"error":{"code":"ResourceGroupNotFound","message":"Resource group
+        ''cli_test1'' could not be found."}}'}
     headers:
       Cache-Control: [no-cache]
-      Content-Length: ['266']
+      Content-Length: ['101']
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Wed, 18 May 2016 17:31:17 GMT']
+      Date: ['Fri, 03 Jun 2016 15:32:14 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
-      Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      x-ms-failure-cause: [gateway]
+    status: {code: 404, message: Not Found}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.1 requests/2.9.1 msrest/0.3.0 msrest_azure/0.3.0 networkmanagementclient/2016-03-30
+          Azure-SDK-For-Python AZURECLI_0.0.32]
+      accept-language: [en-US]
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test1/providers/Microsoft.Network/expressRouteCircuits/test_route/peerings/none_existent/arpTables/none_existent?api-version=2016-03-30
+  response:
+    body: {string: '{"error":{"code":"ResourceGroupNotFound","message":"Resource group
+        ''cli_test1'' could not be found."}}'}
+    headers:
+      Cache-Control: [no-cache]
+      Content-Length: ['101']
+      Content-Type: [application/json; charset=utf-8]
+      Date: ['Fri, 03 Jun 2016 15:32:14 GMT']
+      Expires: ['-1']
+      Pragma: [no-cache]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      x-ms-failure-cause: [gateway]
+    status: {code: 404, message: Not Found}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.1 requests/2.9.1 msrest/0.3.0 msrest_azure/0.3.0 networkmanagementclient/2016-03-30
+          Azure-SDK-For-Python AZURECLI_0.0.32]
+      accept-language: [en-US]
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test1/providers/Microsoft.Network/expressRouteCircuits/test_route/peerings/none_existent/routesTable/none_existent?api-version=2016-03-30
+  response:
+    body: {string: '{"error":{"code":"ResourceGroupNotFound","message":"Resource group
+        ''cli_test1'' could not be found."}}'}
+    headers:
+      Cache-Control: [no-cache]
+      Content-Length: ['101']
+      Content-Type: [application/json; charset=utf-8]
+      Date: ['Fri, 03 Jun 2016 15:32:15 GMT']
+      Expires: ['-1']
+      Pragma: [no-cache]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      x-ms-failure-cause: [gateway]
     status: {code: 404, message: Not Found}
 version: 1

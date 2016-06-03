@@ -7,4 +7,4 @@ from .custom import deploy_arm_template
 
 command_table = CommandTable()
 
-cli_command(command_table, 'taskhelp deploy-arm-template', deploy_arm_template, 'Help')
+cli_command(command_table, 'taskhelp deploy-arm-template', deploy_arm_template)
