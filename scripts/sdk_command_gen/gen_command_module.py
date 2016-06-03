@@ -25,7 +25,7 @@ README_TEMPLATE = """Microsoft Azure CLI '{command_module_name}' Command Module
 This package is for the '{command_module_name}' module.
 i.e. 'az {command_module_name}'
 
-This package has [not] been tested [much] with Python 2.7, 3.4 and 3.5.
+This package has [not] been tested [much] with Python 2.7, and 3.5.
 
 """
 
