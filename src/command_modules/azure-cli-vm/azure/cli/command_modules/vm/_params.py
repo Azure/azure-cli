@@ -24,11 +24,16 @@ def get_urn_aliases_completion_list(prefix, **kwargs):#pylint: disable=unused-ar
 
 # BASIC PARAMETER CONFIGURATION
 name_arg_type = CliArgumentType(options_list=('--name', '-n'), metavar='NAME')
+instance_ids_type = CliArgumentType(
+    nargs='+'
+)
 
 admin_username_type = CliArgumentType(options_list=('--admin-username',), default=getpass.getuser(), required=False)
 
 register_cli_argument('vm', 'vm_name', name_arg_type)
-register_cli_argument('vm', 'vm_scale_set_name', name_arg_type)
+register_cli_argument('vm scaleset', 'vm_scale_set_name', name_arg_type)
+register_cli_argument('vm scaleset', 'virtual_machine_scale_set_name', name_arg_type)
+register_cli_argument('vm scaleset', 'instance_ids', instance_ids_type)
 register_cli_argument('vm', 'diskname', CliArgumentType(options_list=('--name', '-n')))
 register_cli_argument('vm', 'disksize', CliArgumentType(help='Size of disk (Gb)', default=1023, type=MinMaxValue(1, 1023)))
 register_cli_argument('vm', 'lun', CliArgumentType(
