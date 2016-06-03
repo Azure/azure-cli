@@ -83,7 +83,7 @@ class Test_argparse(unittest.TestCase):
         command = CliCommand('n1', test_handler)
         command.add_argument('arg', '--arg','-a', required=False)
         command.add_argument('b', '-b', required=False)
-        command.help_file = 'long description'
+        command.help = 'long description'
         cmd_table = {'n1': command}
 
         config = Configuration([])
@@ -102,7 +102,7 @@ class Test_argparse(unittest.TestCase):
         command = CliCommand('n1', test_handler, description='short description')
         command.add_argument('arg', '--arg','-a', required=False)
         command.add_argument('b', '-b', required=False)
-        command.help_file = 'long description'
+        command.help = 'long description'
         cmd_table = {'n1': command}
 
         config = Configuration([])
@@ -121,7 +121,7 @@ class Test_argparse(unittest.TestCase):
         command = CliCommand('n1', test_handler, description='short description')
         command.add_argument('arg', '--arg','-a', required=False)
         command.add_argument('b', '-b', required=False)
-        command.help_file = 'short-summary: docstring summary'
+        command.help = 'short-summary: docstring summary'
         cmd_table = {'n1': command}
 
         config = Configuration([])
@@ -140,7 +140,7 @@ class Test_argparse(unittest.TestCase):
         command = CliCommand('n1', test_handler)
         command.add_argument('arg', '--arg','-a', required=False)
         command.add_argument('b', '-b', required=False)
-        command.help_file = '''
+        command.help = '''
             long-summary: |
                 line1
                 line2
@@ -167,7 +167,7 @@ class Test_argparse(unittest.TestCase):
         command.add_argument('foobar', '--foobar', '-fb', required=False)
         command.add_argument('foobar2', '--foobar2', '-fb2', required=True)
         command.add_argument('foobar3', '--foobar3', '-fb3', required=False, help='the foobar3')
-        command.help_file = '''
+        command.help = '''
             parameters: 
                 - name: --foobar -fb
                   type: string
@@ -220,7 +220,7 @@ Global Arguments
         command = CliCommand('n1', test_handler)
         command.add_argument('foobar', '--foobar', '-fb', required=False)
         command.add_argument('foobar2', '--foobar2', '-fb2', required=True)
-        command.help_file = '''
+        command.help = '''
                 short-summary: this module does xyz one-line or so
                 long-summary: |
                     this module.... kjsdflkj... klsfkj paragraph1
@@ -382,7 +382,7 @@ Global Arguments
         command = CliCommand('test_group1 test_group2 n1', test_handler)
         command.add_argument('foobar', '--foobar', '-fb', required=False)
         command.add_argument('foobar2', '--foobar2', '-fb2', required=True)
-        command.help_file = '''
+        command.help = '''
             short-summary: this module does xyz one-line or so
             long-summary: |
                 this module.... kjsdflkj... klsfkj paragraph1
@@ -448,7 +448,7 @@ Examples
         command = CliCommand('n1', test_handler)
         command.add_argument('arg', '--arg','-a', required=False)
         command.add_argument('b', '-b', required=False)
-        command.help_file = '''
+        command.help = '''
             long-summary: |
                 line1
                 line2

@@ -3,7 +3,7 @@
 from __future__ import print_function
 from sys import stderr
 
-from azure.cli.commands import CommandTable, LongRunningOperation
+from azure.cli.commands import CommandTable
 
 from azure.cli.command_modules.storage._factory import storage_client_factory
 
@@ -66,9 +66,7 @@ def create_storage_account(resource_group_name, account_name, location, account_
     from azure.mgmt.storage.models import StorageAccountCreateParameters
     scf = storage_client_factory()
     params = StorageAccountCreateParameters(location, account_type, tags)
-    op = LongRunningOperation('Creating storage account')
-    poller = scf.storage_accounts.create(resource_group_name, account_name, params)
-    return op(poller)
+    return scf.storage_accounts.create(resource_group_name, account_name, params)
 
 def set_storage_account_properties(
         resource_group_name, account_name, account_type=None, tags=None, custom_domain=None):

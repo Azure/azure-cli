@@ -27,7 +27,7 @@ def _vm_get(resource_group_name, vm_name, expand=None):
                                        vm_name,
                                        expand=expand)
 
-def _vm_set(instance, start_msg, end_msg):
+def _vm_set(instance):
     '''Update the given Virtual Machine instance'''
     instance.resources = None # Issue: https://github.com/Azure/autorest/issues/934
     client = _compute_client_factory()
@@ -36,7 +36,7 @@ def _vm_set(instance, start_msg, end_msg):
         resource_group_name=parsed_id[0],
         vm_name=parsed_id[1],
         parameters=instance)
-    return LongRunningOperation(start_msg, end_msg)(poller)
+    return LongRunningOperation()(poller)
 
 def _parse_rg_name(strid):
     '''From an ID, extract the contained (resource group, name) tuple
@@ -192,7 +192,7 @@ def attach_new_disk(resource_group_name, vm_name, lun, diskname, vhd, disksize=1
                     create_option=DiskCreateOptionTypes.empty,
                     disk_size_gb=disksize)
     vm.storage_profile.data_disks.append(disk) # pylint: disable=no-member
-    _vm_set(vm, 'Attaching disk', 'Disk attached')
+    _vm_set(vm)
 
 def attach_existing_disk(resource_group_name, vm_name, lun, diskname, vhd, disksize=1023):
     ''' Attach an existing disk to an existing Virtual Machine '''
@@ -202,7 +202,7 @@ def attach_existing_disk(resource_group_name, vm_name, lun, diskname, vhd, disks
                     create_option=DiskCreateOptionTypes.attach,
                     disk_size_gb=disksize)
     vm.storage_profile.data_disks.append(disk) # pylint: disable=no-member
-    _vm_set(vm, 'Attaching disk', 'Disk attached')
+    _vm_set(vm)
 
 def detach_disk(resource_group_name, vm_name, diskname):
     ''' Detach a disk from a Virtual Machine '''
@@ -214,7 +214,7 @@ def detach_disk(resource_group_name, vm_name, diskname):
         vm.storage_profile.data_disks.remove(disk) # pylint: disable=no-member
     except StopIteration:
         raise CLIError("No disk with the name '{}' found".format(diskname))
-    _vm_set(vm, 'Detaching disk', 'Disk detached')
+    _vm_set(vm)
 
 def list_disks(resource_group_name, vm_name):
     ''' List disks for a Virtual Machine '''
@@ -318,7 +318,7 @@ def disable_boot_diagnostics(resource_group_name, vm_name):
     vm.resources = None
     diag_profile.boot_diagnostics.enabled = False
     diag_profile.boot_diagnostics.storage_uri = None
-    _vm_set(vm, "Disabling boot diagnostics", "Done")
+    _vm_set(vm)
 
 def enable_boot_diagnostics(resource_group_name, vm_name, storage):
     '''Enable boot diagnostics
@@ -353,7 +353,7 @@ def enable_boot_diagnostics(resource_group_name, vm_name, storage):
 
     # Issue: https://github.com/Azure/autorest/issues/934
     vm.resources = None
-    _vm_set(vm, "Enabling boot diagnostics", "Done")
+    _vm_set(vm)
 
 def get_boot_log(resource_group_name, vm_name):
     import sys
@@ -447,7 +447,7 @@ def set_extension(
                                   auto_upgrade_minor_version=auto_upgrade_minor_version)
     return client.virtual_machine_extensions.create_or_update(
         resource_group_name, vm_name, vm_extension_name, ext)
-    
+
 def set_diagnostics_extension(
         resource_group_name, vm_name, storage_account, public_config=None):
     '''Enable diagnostics

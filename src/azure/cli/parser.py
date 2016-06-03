@@ -37,7 +37,7 @@ class AzCliCommandParser(argparse.ArgumentParser):
             command_parser = subparser.add_parser(command_verb,
                                                   description=metadata.description,
                                                   parents=self.parents, conflict_handler='resolve',
-                                                  help_file=metadata.help_file)
+                                                  help_file=metadata.help)
             argument_validators = []
             for arg in metadata.arguments.values():
                 if arg.validator:

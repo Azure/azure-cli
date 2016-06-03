@@ -37,11 +37,6 @@ class CommandTestGenerator(object):
         self.test_def = test_def
         self.recording_dir = recording_dir
         logging.getLogger('vcr').setLevel(logging.ERROR)
-        self.my_vcr = vcr.VCR(
-            cassette_library_dir=recording_dir,
-            before_record_request=CommandTestGenerator.before_record_request,
-            before_record_response=CommandTestGenerator.before_record_response
-        )
         # use default environment variables if not currently set in the system
         env_var = env_var or {}
         for var in env_var.keys():
@@ -94,46 +89,54 @@ class CommandTestGenerator(object):
                 """ Test implementation, augmented with prompted recording of expected result
                 if not provided. """
                 io = StringIO()
-                if expected is None:
-                    print('\n === RECORDING: {} ==='.format(test_name), file=sys.stderr)
-                if isinstance(action, str):
-                    cli(action.split(), file=io)
-                    actual_result = io.getvalue()
-                    display_result = actual_result
-                    auto_validated = False
-                    fail = False
-                else:
-                    test_runner = action
-                    test_runner.run_test()
-                    actual_result = test_runner.raw_result
-                    display_result = test_runner.display_result
-                    auto_validated = test_runner.auto
-                    fail = test_runner.fail
-                if expected is None:
-                    expected_results = _get_expected_results_from_file(recording_dir)
-                    header = '| RECORDED RESULT FOR {} |'.format(test_name)
-                    print('\n' + ('-' * len(header)), file=sys.stderr)
-                    print(header, file=sys.stderr)
-                    print('-' * len(header) + '\n', file=sys.stderr)
-                    print(display_result, file=sys.stderr)
-                    if not auto_validated and not fail:
-                        ans = input('Save result for \'{}\'? [y/N]: '.format(test_name))
-                        fail = False if ans and ans.lower()[0] == 'y' else True
+                my_vcr = vcr.VCR(
+                    cassette_library_dir=recording_dir,
+                    before_record_request=CommandTestGenerator.before_record_request,
+                    before_record_response=CommandTestGenerator.before_record_response
+                )
+                with my_vcr.use_cassette(
+                    cassette_path, filter_headers=CommandTestGenerator.FILTER_HEADERS):
 
-                    if not fail:
-                        print('*** SAVING TEST {} ***'.format(test_name), file=sys.stderr)
-                        expected_results = _get_expected_results_from_file(recording_dir)
-                        expected_results[test_name] = actual_result
-                        expected = actual_result
-                        _save_expected_results_file(recording_dir, expected_results)
+                    if expected is None:
+                        print('\n === RECORDING: {} ==='.format(test_name), file=sys.stderr)
+                    if isinstance(action, str):
+                        cli(action.split(), file=io)
+                        actual_result = io.getvalue()
+                        display_result = actual_result
+                        auto_validated = False
+                        fail = False
                     else:
-                        print('*** TEST {} FAILED ***'.format(test_name), file=sys.stderr)
-                        _remove_expected_result(test_name, recording_dir)
+                        test_runner = action
+                        test_runner.run_test()
+                        actual_result = test_runner.raw_result
+                        display_result = test_runner.display_result
+                        auto_validated = test_runner.auto
+                        fail = test_runner.fail
+                    if expected is None:
+                        expected_results = _get_expected_results_from_file(recording_dir)
+                        header = '| RECORDED RESULT FOR {} |'.format(test_name)
+                        print('\n' + ('-' * len(header)), file=sys.stderr)
+                        print(header, file=sys.stderr)
+                        print('-' * len(header) + '\n', file=sys.stderr)
+                        print(display_result, file=sys.stderr)
+                        if not auto_validated and not fail:
+                            ans = input('Save result for \'{}\'? [y/N]: '.format(test_name))
+                            fail = False if ans and ans.lower()[0] == 'y' else True
 
-                io.close()
-                if fail:
-                    self.fail(display_result)
-                self.assertEqual(actual_result, expected)
+                        if not fail:
+                            print('*** SAVING TEST {} ***'.format(test_name), file=sys.stderr)
+                            expected_results = _get_expected_results_from_file(recording_dir)
+                            expected_results[test_name] = actual_result
+                            expected = actual_result
+                            _save_expected_results_file(recording_dir, expected_results)
+                        else:
+                            print('*** TEST {} FAILED ***'.format(test_name), file=sys.stderr)
+                            _remove_expected_result(test_name, recording_dir)
+
+                    io.close()
+                    if fail:
+                        self.fail(display_result)
+                    self.assertEqual(actual_result, expected)
 
             expected_results = _get_expected_results_from_file(recording_dir)
             expected = expected_results.get(test_name, None)
@@ -160,8 +163,6 @@ class CommandTestGenerator(object):
                             operation_delay_mock)
                 @mock.patch('azure.cli.commands.LongRunningOperation._delay',
                             operation_delay_mock)
-                @self.my_vcr.use_cassette(cassette_path,
-                                          filter_headers=CommandTestGenerator.FILTER_HEADERS)
                 def test(self):
                     _test_impl(self, test_name, expected, recording_dir)
                 return test
@@ -173,8 +174,6 @@ class CommandTestGenerator(object):
                         self.fail('No recorded result provided for {}.'.format(test_name))
                     return null_test
 
-                @self.my_vcr.use_cassette(cassette_path,
-                                          filter_headers=CommandTestGenerator.FILTER_HEADERS)
                 def test(self):
                     _test_impl(self, test_name, expected, recording_dir)
             else:
