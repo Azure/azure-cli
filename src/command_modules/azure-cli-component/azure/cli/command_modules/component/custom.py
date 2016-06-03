@@ -5,7 +5,6 @@ import pip
 from six.moves import input #pylint: disable=redefined-builtin
 
 from azure.cli.parser import IncorrectUsageError
-from azure.cli._locale import L
 from azure.cli._help_files import helps
 from azure.cli.utils.update_checker import check_for_component_update
 from azure.cli._util import CLIError
@@ -20,7 +19,7 @@ PRIVATE_PYPI_HOST = os.environ.get(PRIVATE_PYPI_HOST_ENV_NAME)
 
 def _install_or_update(component_name, version, link, private, upgrade=False):
     if not component_name:
-        raise IncorrectUsageError(L('Specify a component name.'))
+        raise IncorrectUsageError('Specify a component name.')
     found = bool([dist for dist in pip.get_installed_distributions(local_only=True)
                   if dist.key == COMPONENT_PREFIX + component_name])
     if found and not upgrade:
@@ -108,7 +107,7 @@ def check_component(component_name, private=False):
     found = bool([dist for dist in pip.get_installed_distributions(local_only=True)
                   if dist.key == COMPONENT_PREFIX + component_name])
     if not found:
-        raise CLIError(L("Component not installed."))
+        raise CLIError("Component not installed.")
     update_status = check_for_component_update(component_name, private)
     result = {}
     result['currentVersion'] = str(update_status['current_version'])
@@ -134,4 +133,4 @@ def remove(component_name, force=False):
         pip.main(['uninstall', '--quiet', '--isolated', '--yes',
                   '--disable-pip-version-check', COMPONENT_PREFIX + component_name])
     else:
-        raise CLIError(L("Component not installed."))
+        raise CLIError("Component not installed.")
