@@ -36,6 +36,22 @@ Size Standard_A3, existing storage account, existing storage container name, exi
  - verify private/public IPs are static
  - verify DNS name
 
+ **custom Linux image**
+
+ - create VM1, add a customization such as "sudo apt-get install emacs23"
+ - generalize, capture and deallocate VM1's vhd (https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-linux-capture-image/)
+ - create VM with OS Disk URI pointing to VM1's vhd
+ - SSH into instance
+ - verify emacs is still installed
+
+ **custom Windows image**
+
+ - create VM1, add a customization such as installing an application
+ - generalize, capture and deallocate VM1's vhd (https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-windows-classic-capture-image/ + https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-linux-capture-image/)
+ - create VM with OS Disk URI pointing to VM1's vhd
+ - RDP into instance
+ - verify application is still installed
+
 ## P1: LESS COMMON ##
 Execute P1 scenarios if a change is made in these areas
 
