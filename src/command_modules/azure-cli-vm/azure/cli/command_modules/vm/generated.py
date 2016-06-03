@@ -49,7 +49,7 @@ class DeploymentOutputLongRunningOperation(LongRunningOperation): #pylint: disab
 
 # VM
 factory = lambda _: get_mgmt_service_client(VMClient, VMClientConfig).vm
-cli_command(command_table, 'vm create', VMOperations.create_or_update, factory, return_type=DeploymentOutputLongRunningOperation('Starting vm create'))
+cli_command(command_table, 'vm create', VMOperations.create_or_update, factory, transform=DeploymentOutputLongRunningOperation('Starting vm create'))
 
 factory = lambda _: _compute_client_factory().virtual_machines
 cli_command(command_table, 'vm delete', VirtualMachinesOperations.delete, factory)
@@ -85,7 +85,7 @@ cli_command(command_table, 'vm boot-diagnostics get-boot-log', get_boot_log)
 
 # VM Container (ACS)
 factory = lambda _: get_mgmt_service_client(ACSClient, ACSClientConfig).acs
-cli_command(command_table, 'vm container create', ACSOperations.create_or_update, factory, return_type=DeploymentOutputLongRunningOperation('Starting vm container create'))
+cli_command(command_table, 'vm container create', ACSOperations.create_or_update, factory, transform=DeploymentOutputLongRunningOperation('Starting vm container create'))
 
 # VM Diagnostics
 cli_command(command_table, 'vm diagnostics set', set_diagnostics_extension)
@@ -125,7 +125,7 @@ cli_command(command_table, 'vm usage list', UsageOperations.list, factory)
 
 # VM ScaleSet
 factory = lambda _: get_mgmt_service_client(VMSSClient, VMSSClientConfig).vmss
-cli_command(command_table, 'vm scaleset create', VMSSOperations.create_or_update, factory, return_type=DeploymentOutputLongRunningOperation('Starting vm scaleset create'))
+cli_command(command_table, 'vm scaleset create', VMSSOperations.create_or_update, factory, transform=DeploymentOutputLongRunningOperation('Starting vm scaleset create'))
 
 factory = lambda _: _compute_client_factory().virtual_machine_scale_sets
 cli_command(command_table, 'vm scaleset deallocate', VirtualMachineScaleSetsOperations.deallocate, factory)

@@ -139,25 +139,22 @@ def get_command_table(module_name=None):
     ordered_commands = OrderedDict(command_table)
     return ordered_commands
 
-def create_command(name, operation, return_type, client_factory):
+def create_command(name, operation, transform, client_factory):
     def _execute_command(kwargs):
         client = client_factory(kwargs) if client_factory else None
         try:
             result = operation(client, **kwargs) if client else operation(**kwargs)
-            if return_type:
-                if callable(return_type):
-                    return return_type(result)
-                elif isinstance(return_type, str):
-                    return list(result) if isinstance(result, Paged) else result
-                else:
-                    raise CLIError('Unsupported \'return_type\': {}'.format(type(return_type)))
+            # apply results transform if specified
+            if transform:
+                return transform(result)
+
+            # otherwise handle based on return type of results
+            if isinstance(result, AzureOperationPoller):
+                return LongRunningOperation('Starting {}'.format(name))(result)
+            elif isinstance(result, Paged):
+                return list(result)
             else:
-                if isinstance(result, AzureOperationPoller):
-                    return LongRunningOperation('Starting {}'.format(name))(result)
-                elif isinstance(result, Paged):
-                    return list(result)
-                else:
-                    return result
+                return result
         except ClientException as client_exception:
             message = getattr(client_exception, 'message', client_exception)
             raise CLIError(message)
