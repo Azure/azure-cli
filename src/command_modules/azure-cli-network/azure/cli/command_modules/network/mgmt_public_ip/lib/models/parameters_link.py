@@ -13,11 +13,11 @@ class ParametersLink(Model):
     """
     Entity representing the reference to the deployment paramaters.
 
-    :param uri: URI referencing the template.
-    :type uri: str
     :param content_version: If included it must match the ContentVersion in
      the template.
     :type content_version: str
+    :param uri: URI referencing the template.
+    :type uri: str
     """ 
 
     _validation = {
@@ -25,10 +25,10 @@ class ParametersLink(Model):
     }
 
     _attribute_map = {
-        'uri': {'key': 'uri', 'type': 'str'},
         'content_version': {'key': 'contentVersion', 'type': 'str'},
+        'uri': {'key': 'uri', 'type': 'str'},
     }
 
     def __init__(self, uri, content_version=None):
-        self.uri = uri
         self.content_version = content_version
+        self.uri = uri

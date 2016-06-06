@@ -13,28 +13,28 @@ class Provider(Model):
     """
     Resource provider information.
 
-    :param id: Gets or sets the provider id.
-    :type id: str
+    :param resource_types: Gets or sets the collection of provider resource
+     types.
+    :type resource_types: list of :class:`ProviderResourceType
+     <default.models.ProviderResourceType>`
     :param namespace: Gets or sets the namespace of the provider.
     :type namespace: str
     :param registration_state: Gets or sets the registration state of the
      provider.
     :type registration_state: str
-    :param resource_types: Gets or sets the collection of provider resource
-     types.
-    :type resource_types: list of :class:`ProviderResourceType
-     <mynamespace.models.ProviderResourceType>`
+    :param id: Gets or sets the provider id.
+    :type id: str
     """ 
 
     _attribute_map = {
-        'id': {'key': 'id', 'type': 'str'},
+        'resource_types': {'key': 'resourceTypes', 'type': '[ProviderResourceType]'},
         'namespace': {'key': 'namespace', 'type': 'str'},
         'registration_state': {'key': 'registrationState', 'type': 'str'},
-        'resource_types': {'key': 'resourceTypes', 'type': '[ProviderResourceType]'},
+        'id': {'key': 'id', 'type': 'str'},
     }
 
-    def __init__(self, id=None, namespace=None, registration_state=None, resource_types=None):
-        self.id = id
+    def __init__(self, resource_types=None, namespace=None, registration_state=None, id=None):
+        self.resource_types = resource_types
         self.namespace = namespace
         self.registration_state = registration_state
-        self.resource_types = resource_types
+        self.id = id
