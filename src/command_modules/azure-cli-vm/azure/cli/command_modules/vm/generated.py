@@ -64,7 +64,7 @@ cli_command(command_table, 'vm list-sizes', VirtualMachinesOperations.list_avail
 cli_command(command_table, 'vm power-off', VirtualMachinesOperations.power_off, factory)
 cli_command(command_table, 'vm restart', VirtualMachinesOperations.restart, factory)
 cli_command(command_table, 'vm start', VirtualMachinesOperations.start, factory)
-cli_command(command_table, 'vm list-ip-addresses', list_ip_addresses, factory)
+cli_command(command_table, 'vm list-ip-addresses', list_ip_addresses)
 cli_command(command_table, 'vm list', list_vm)
 
 # VM Access
