@@ -2,8 +2,6 @@
 import argparse
 import getpass
 import os
-import random
-import time
 
 from azure.mgmt.compute.models import VirtualHardDisk
 
@@ -33,8 +31,6 @@ instance_ids_type = CliArgumentType(
 admin_username_type = CliArgumentType(options_list=('--admin-username',), default=getpass.getuser(), required=False)
 
 register_cli_argument('vm', 'vm_name', name_arg_type)
-register_cli_argument('vm', 'deployment_name', CliArgumentType(help=argparse.SUPPRESS, required=False,
-                                                               default='azurecli' + str(time.time()) + str(random.randint(1, 100000))))
 register_cli_argument('vm scaleset', 'vm_scale_set_name', name_arg_type)
 register_cli_argument('vm scaleset', 'virtual_machine_scale_set_name', name_arg_type)
 register_cli_argument('vm scaleset', 'instance_ids', instance_ids_type)

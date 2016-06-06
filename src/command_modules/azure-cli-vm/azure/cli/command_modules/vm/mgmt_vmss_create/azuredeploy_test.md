@@ -6,7 +6,7 @@ Execute P0s before any change to VMSS Create **OR VM CREATE** is merged
 **simple Windows VMSS**
 
  - create
- - verify LB and puclic IP
+ - verify LB and public IP
  - verify storage type
  - RDP into instance 1
 
