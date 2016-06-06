@@ -2,6 +2,8 @@
 import argparse
 import getpass
 import os
+import random
+import time
 
 from azure.mgmt.compute.models import VirtualHardDisk
 
