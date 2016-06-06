@@ -66,6 +66,8 @@ register_cli_argument('network lb create', 'dns_name_type', CliArgumentType(help
 register_cli_argument('network lb create', 'private_ip_address_allocation', CliArgumentType(help='', choices=['dynamic', 'static'], default='dynamic'))
 register_cli_argument('network lb create', 'public_ip_address_allocation', CliArgumentType(help='', choices=['dynamic', 'static'], default='dynamic'))
 
+register_cli_argument('network nsg create', 'name', name_arg_type)
+
 register_cli_argument('network public-ip create', 'public_ip_address_type', CliArgumentType(options_list=('--public-ip-address-type',)), help=argparse.SUPPRESS)
 
 register_cli_argument('network vpn-gateway', 'virtual_network_gateway_name', CliArgumentType(options_list=('--name', '-n')))
