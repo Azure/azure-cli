@@ -10,24 +10,24 @@ from msrest.service_client import ServiceClient
 from msrest import Serializer, Deserializer
 from msrestazure import AzureConfiguration
 from .version import VERSION
-from .operations.public_ip_operations import PublicIPOperations
+from .operations.public_ip_operations import PublicIpOperations
 from . import models
 
 
-class PublicIPCreationClientConfiguration(AzureConfiguration):
-    """Configuration for PublicIPCreationClient
+class PublicIpCreationClientConfiguration(AzureConfiguration):
+    """Configuration for PublicIpCreationClient
     Note that all parameters used to create this instance are saved as instance
     attributes.
 
     :param credentials: Gets Azure subscription credentials.
     :type credentials: :mod:`A msrestazure Credentials
      object<msrestazure.azure_active_directory>`
+    :param api_version: Client Api Version.
+    :type api_version: str
     :param subscription_id: Gets subscription credentials which uniquely
      identify Microsoft Azure subscription. The subscription ID forms part of
      the URI for every service call.
     :type subscription_id: str
-    :param api_version: Client Api Version.
-    :type api_version: str
     :param accept_language: Gets or sets the preferred language for the
      response.
     :type accept_language: str
@@ -47,35 +47,35 @@ class PublicIPCreationClientConfiguration(AzureConfiguration):
 
         if credentials is None:
             raise ValueError("Parameter 'credentials' must not be None.")
+        if api_version is not None and not isinstance(api_version, str):
+            raise TypeError("Optional parameter 'api_version' must be str.")
         if subscription_id is None:
             raise ValueError("Parameter 'subscription_id' must not be None.")
         if not isinstance(subscription_id, str):
             raise TypeError("Parameter 'subscription_id' must be str.")
-        if api_version is not None and not isinstance(api_version, str):
-            raise TypeError("Optional parameter 'api_version' must be str.")
         if accept_language is not None and not isinstance(accept_language, str):
             raise TypeError("Optional parameter 'accept_language' must be str.")
         if not base_url:
             base_url = 'https://management.azure.com'
 
-        super(PublicIPCreationClientConfiguration, self).__init__(base_url, filepath)
+        super(PublicIpCreationClientConfiguration, self).__init__(base_url, filepath)
 
         self.add_user_agent('publicipcreationclient/{}'.format(VERSION))
         self.add_user_agent('Azure-SDK-For-Python')
 
         self.credentials = credentials
-        self.subscription_id = subscription_id
         self.api_version = api_version
+        self.subscription_id = subscription_id
         self.accept_language = accept_language
         self.long_running_operation_retry_timeout = long_running_operation_retry_timeout
         self.generate_client_request_id = generate_client_request_id
 
 
-class PublicIPCreationClient(object):
-    """PublicIPCreationClient
+class PublicIpCreationClient(object):
+    """PublicIpCreationClient
 
     :ivar config: Configuration for client.
-    :vartype config: PublicIPCreationClientConfiguration
+    :vartype config: PublicIpCreationClientConfiguration
 
     :ivar public_ip: PublicIP operations
     :vartype public_ip: .operations.PublicIPOperations
@@ -113,5 +113,5 @@ class PublicIPCreationClient(object):
         self._serialize = Serializer(client_models)
         self._deserialize = Deserializer(client_models)
 
-        self.public_ip = PublicIPOperations(
+        self.public_ip = PublicIpOperations(
             self._client, self.config, self._serialize, self._deserialize)

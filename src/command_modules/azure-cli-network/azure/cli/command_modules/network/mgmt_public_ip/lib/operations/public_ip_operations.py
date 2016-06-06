@@ -14,8 +14,8 @@ import uuid
 from .. import models
 
 
-class PublicIPOperations(object):
-    """PublicIPOperations operations.
+class PublicIpOperations(object):
+    """PublicIpOperations operations.
 
     :param client: Client for service requests.
     :param config: Configuration of service client.
@@ -43,30 +43,30 @@ class PublicIPOperations(object):
         :type deployment_name: str
         :param name: Name of the Public IP address.
         :type name: str
-        :param content_version: If included it must match the ContentVersion
-         in the template.
-        :type content_version: str
         :param allocation_method: IP address Allocation method. Possible
          values include: 'Dynamic', 'Static'
         :type allocation_method: str
-        :param dns_name: Globally unique DNS entry.
-        :type dns_name: str
         :param location: Location (e.g. eastus).
         :type location: str
+        :param dns_name: Globally unique DNS entry.
+        :type dns_name: str
         :param public_ip_address_type: Whether to include a DNS entry or not.
          Possible values include: 'dns', 'noDns'
         :type public_ip_address_type: str
+        :param content_version: If included it must match the ContentVersion
+         in the template.
+        :type content_version: str
         :param dict custom_headers: headers that will be added to the request
         :param bool raw: returns the direct response alongside the
          deserialized response
         :rtype:
          :class:`AzureOperationPoller<msrestazure.azure_operation.AzureOperationPoller>`
          instance that returns :class:`DeploymentExtended
-         <mynamespace.models.DeploymentExtended>`
+         <default.models.DeploymentExtended>`
         :rtype: :class:`ClientRawResponse<msrest.pipeline.ClientRawResponse>`
          if raw=true
         """
-        parameters = models.DeploymentPublicIP(content_version=content_version, allocation_method=allocation_method, dns_name=dns_name, location=location, name=name, public_ip_address_type=public_ip_address_type)
+        parameters = models.DeploymentPublicIp(allocation_method=allocation_method, name=name, location=location, dns_name=dns_name, public_ip_address_type=public_ip_address_type, content_version=content_version)
 
         # Construct URL
         url = '/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Resources/deployments/{deploymentName}'
@@ -92,7 +92,7 @@ class PublicIPOperations(object):
             header_parameters['accept-language'] = self._serialize.header("self.config.accept_language", self.config.accept_language, 'str')
 
         # Construct body
-        body_content = self._serialize.body(parameters, 'DeploymentPublicIP')
+        body_content = self._serialize.body(parameters, 'DeploymentPublicIp')
 
         # Construct and send request
         def long_running_send():
