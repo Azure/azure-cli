@@ -76,7 +76,7 @@ class VMShowListSizesListIPAddressesScenarioTest(CommandTestScript):
         self.run('vm create --resource-group {0} --location {1} -n {2} --admin-username ubuntu '
                  '--image Canonical:UbuntuServer:14.04.4-LTS:latest --admin-password testPassword0 '
                  '--deployment-name {3} --public-ip-address-allocation {4} '
-                 '--public-ip-address-type new'.format(
+                 '--public-ip-address-type new --authentication-type password'.format(
                      self.resource_group, self.location, self.vm_name, self.deployment_name,
                      self.ip_allocation_method))
         self.test('vm show --resource-group {} --name {} --expand instanceView'.format(
@@ -818,4 +818,8 @@ TEST_DEF = [
         'test_name': 'vm_create_state_modifications',
         'command': VMCreateAndStateModificationsScenarioTest()
     },
+    {
+        'test_name': 'vm_list_ip_addresses',
+        'command': VMShowListSizesListIPAddressesScenarioTest()
+    }
 ]
