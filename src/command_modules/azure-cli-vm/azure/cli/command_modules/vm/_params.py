@@ -9,14 +9,9 @@ from azure.cli.command_modules.vm._validators import MinMaxValue
 from azure.cli.command_modules.vm._actions import (VMImageFieldAction,
                                                    VMSSHFieldAction,
                                                    VMDNSNameAction,
-                                                   load_images_from_aliases_doc,
-                                                   get_subscription_locations)
+                                                   load_images_from_aliases_doc)
 from azure.cli.commands.parameters import location_type
 from azure.cli.commands import register_cli_argument, CliArgumentType, register_extra_cli_argument
-
-def get_location_completion_list(prefix, **kwargs):#pylint: disable=unused-argument
-    result = get_subscription_locations()
-    return [l.name for l in result]
 
 def get_urn_aliases_completion_list(prefix, **kwargs):#pylint: disable=unused-argument
     images = load_images_from_aliases_doc()
@@ -82,7 +77,6 @@ nsg_rule_type = CliArgumentType(
 
 for scope in ['vm create', 'vm scaleset create']:
     register_cli_argument(scope, 'name', name_arg_type)
-    register_cli_argument(scope, 'location', CliArgumentType(completer=get_location_completion_list))
     register_cli_argument(scope, 'custom_os_disk_uri', CliArgumentType(help=argparse.SUPPRESS))
     register_cli_argument(scope, 'custom_os_disk_type', CliArgumentType(choices=['windows', 'linux']))
     register_cli_argument(scope, 'os_disk_type', CliArgumentType(help=argparse.SUPPRESS))

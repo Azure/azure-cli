@@ -11,6 +11,19 @@ import azure.cli._logging as _logging
 
 logger = _logging.get_az_logger(__name__)
 
+def completion_finder_init(self, argument_parser=None, always_complete_options=True, exclude=None, # pylint: disable=too-many-arguments
+                           validator=None, print_suppressed=False, default_completer=lambda _: ()):
+    self._parser = argument_parser # pylint: disable=protected-access
+    self.always_complete_options = always_complete_options
+    self.exclude = exclude
+    if validator is None:
+        validator = lambda c, p: c.startswith(p)
+    self.validator = validator
+    self.print_suppressed = print_suppressed
+    self.completing = False
+    self._display_completions = {} # pylint: disable=protected-access
+    self.default_completer = default_completer
+
 class Configuration(object): # pylint: disable=too-few-public-methods
     """The configuration object tracks session specific data such
     as output formats, available commands etc.
@@ -143,7 +156,10 @@ class Application(object):
     @staticmethod
     def _enable_autocomplete(**kwargs):
         import argcomplete
-        argcomplete.autocomplete(kwargs['parser'])
+        # Workaround for argcomplete(1.3.0). Redefine __init__ so we can set the default_completer
+        argcomplete.CompletionFinder.__init__ = completion_finder_init
+        argcomplete.autocomplete(kwargs['parser'],
+                                 validator=lambda c, p: c.lower().startswith(p.lower()))
 
     @staticmethod
     def _register_builtin_arguments(**kwargs):
