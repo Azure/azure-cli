@@ -116,13 +116,13 @@ def _get_log_file_path():
 def _init_logfile_handlers(root_logger, az_logger):
     if not ENABLE_LOG_FILE:
         return
-    log_file_path = _get_log_file_path()
-    logfile_handler = RotatingFileHandler(log_file_path, maxBytes=10*1024*1024, backupCount=5)
-    lfmt = logging.Formatter('%(process)d : %(asctime)s : %(levelname)s : %(name)s : %(message)s')
-    logfile_handler.setFormatter(lfmt)
-    logfile_handler.setLevel(logging.DEBUG)
-    root_logger.addHandler(logfile_handler)
-    az_logger.addHandler(logfile_handler)
+    #log_file_path = _get_log_file_path()
+    #logfile_handler = RotatingFileHandler(log_file_path, maxBytes=10*1024*1024, backupCount=5)
+    #lfmt = logging.Formatter('%(process)d : %(asctime)s : %(levelname)s : %(name)s : %(message)s')
+    #logfile_handler.setFormatter(lfmt)
+    #logfile_handler.setLevel(logging.DEBUG)
+    #root_logger.addHandler(logfile_handler)
+    #az_logger.addHandler(logfile_handler)
 
 def configure_logging(argv):
     verbose_level = _determine_verbose_level(argv)

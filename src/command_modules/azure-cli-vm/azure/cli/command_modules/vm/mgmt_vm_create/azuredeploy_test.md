@@ -3,20 +3,11 @@
 ## P0: BASIC ##
 Execute P0s before any change to VM Create ***OR VMSS CREATE*** is merged
 
-**plain windows VM from Windows with Storage Redundancy Standard_RAGRS**
+**simple VM**
 
- - create
- - get public IP
- - login with RDP
- - verify NSG
- - verify storage type
-
-**plain UbuntuLTS from Linux (no extra params)**
-
- - create
- - get public IP
- - login with SSH
- - verify NSG
+ - delete vm_create_ubuntu.yaml
+ - delete vm_create_state_modifications.yaml
+ - re-record tests
 
 **Linux with existing availability set, existing NSG, existing public IP
 Size Standard_A3, existing storage account, existing storage container name, existing VNET/Subnet**
@@ -29,12 +20,21 @@ Size Standard_A3, existing storage account, existing storage container name, exi
  - verify existing IP used
  - login with SSH
 
-**Linux, path for SSH key, static private IP, static public IP, DNS name**
+ OR
+
+ - delete test_vm_create_existing_options.yaml
+ - re-record test
+
+**Linux, static private IP, static public IP, DNS name**
 
  - create
- - login with SSH
  - verify private/public IPs are static
  - verify DNS name
+
+ OR 
+
+ - delete test_vm_create_custom_ip.yaml
+ - re-record test
 
  **custom Linux image**
 
@@ -44,6 +44,15 @@ Size Standard_A3, existing storage account, existing storage container name, exi
  - SSH into instance
  - verify emacs is still installed
 
+Commands to verify (Linux):
+ vmname=cusvm01
+ rg=myvms
+ az vm create -n $vmname -g $rg --image https://vhdstorage33jojgic4cpuu.blob.core.windows.net/vhds/osdiskimage.vhd --authentication-type ssh --custom-os-disk-type linux --storage-account-name vhdstorage33jojgic4cpuu --storage-account-type existing --storage-container-name ${vmname}vhdcopy --os-disk-name osdiskimage
+ az vm list-ip-addresses -g $rg --vm-name $vmname
+ then 
+ ssh <IPAddress> (don't specify username or password)
+ verify emacs/application is installed
+
  **custom Windows image**
 
  - create VM, add a customization such as installing an application
@@ -52,6 +61,15 @@ Size Standard_A3, existing storage account, existing storage container name, exi
  - RDP into instance
  - verify application is still installed
 
+Commands to verify (Windows):
+ set vmname=cusvm05abc
+ set rg=myvms
+ call az vm create -n %vmname% -g %rg% --image http://genwinimg001100.blob.core.windows.net/vhds/osdiskimage.vhd --authentication-type password --admin-password Admin_007 --storage-account-name genwinimg001100 --storage-container-name %vmname%mygenimg --storage-account-type existing
+ call az vm list-ip-addresses -g %rg% --vm-name %vmname%
+ then
+ RDP <IPAddress>
+ verify WinMerge/application is installed
+
 ## P1: LESS COMMON ##
 Execute P1 scenarios if a change is made in these areas
 
@@ -59,7 +77,6 @@ Execute P1 scenarios if a change is made in these areas
 
  - create
  - login with password
- - verify SSH key path
 
 **custom ssh key path**
  - create
