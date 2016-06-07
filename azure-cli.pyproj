@@ -26,15 +26,12 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="azure\cli\application.py" />
-    <Compile Include="azure\cli\commands\argument_types.py">
+    <Compile Include="azure\cli\commands\_introspection.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="azure\cli\commands\command_types.py">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="azure\cli\commands\_command_creation.py" />
-    <Compile Include="azure\cli\commands\_params.py" />
-    <Compile Include="azure\cli\commands\_validators.py" />
+    <Compile Include="azure\cli\commands\client_factory.py" />
+    <Compile Include="azure\cli\commands\parameters.py" />
+    <Compile Include="azure\cli\commands\validators.py" />
     <Compile Include="azure\cli\commands\__init__.py" />
     <Compile Include="azure\cli\command_modules\__init__.py" />
     <Compile Include="azure\cli\extensions\query.py">
@@ -53,6 +50,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="azure\cli\utils\command_test_script.py" />
+    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\_factory.py" />
     <Compile Include="command_modules\azure-cli-resource\azure\cli\command_modules\resource\_factory.py">
       <SubType>Code</SubType>
     </Compile>
@@ -158,7 +156,6 @@
     <Compile Include="command_modules\azure-cli-resource\azure\cli\command_modules\resource\_validators.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="command_modules\azure-cli-role\azure\cli\command_modules\role\custom.py" />
     <Compile Include="command_modules\azure-cli-role\azure\cli\command_modules\role\generated.py" />
     <Compile Include="command_modules\azure-cli-role\azure\cli\command_modules\role\tests\command_specs.py" />
     <Compile Include="command_modules\azure-cli-role\azure\cli\command_modules\role\tests\test_commands.py" />

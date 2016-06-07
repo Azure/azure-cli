@@ -1,4 +1,4 @@
-from azure.cli.commands.argument_types import register_cli_argument, CliArgumentType
+from azure.cli.commands import register_cli_argument, CliArgumentType
 
 # BASIC PARAMETER CONFIGURATION
 

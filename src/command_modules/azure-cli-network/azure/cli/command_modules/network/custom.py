@@ -1,7 +1,6 @@
 # pylint: disable=no-self-use,too-many-arguments
 from azure.mgmt.network.models import Subnet
-
-from azure.cli.command_modules.network._params import _network_client_factory
+from ._factory import _network_client_factory
 
 def create_update_subnet(resource_group_name, subnet_name, virtual_network_name, address_prefix):
     '''Create or update a virtual network (VNet) subnet'''
