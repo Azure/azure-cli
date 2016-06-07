@@ -7,8 +7,8 @@ from .custom import login, logout, list_subscriptions, set_active_subscription, 
 
 command_table = CommandTable()
 
-cli_command(command_table, 'login', login, 'Result')
-cli_command(command_table, 'logout', logout, 'Result')
+cli_command(command_table, 'login', login)
+cli_command(command_table, 'logout', logout)
 
 cli_command(command_table, 'account list', list_subscriptions)
 cli_command(command_table, 'account set', set_active_subscription)
