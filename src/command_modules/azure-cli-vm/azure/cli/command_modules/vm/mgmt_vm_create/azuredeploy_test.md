@@ -1,12 +1,12 @@
 # VM Create scenarios before merge #
 
 ## P0: BASIC ##
-Execute P0s before any change to VM Create is merged
+Execute P0s before any change to VM Create ***OR VMSS CREATE*** is merged
 
 **plain windows VM from Windows with Storage Redundancy Standard_RAGRS**
 
  - create
- - get puclic IP
+ - get public IP
  - login with RDP
  - verify NSG
  - verify storage type
@@ -35,6 +35,22 @@ Size Standard_A3, existing storage account, existing storage container name, exi
  - login with SSH
  - verify private/public IPs are static
  - verify DNS name
+
+ **custom Linux image**
+
+ - create VM, add a customization such as "sudo apt-get install emacs23"
+ - generalize, capture and deallocate VM's vhd (https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-linux-capture-image/)
+ - create VM with OS Disk URI pointing to VM's vhd
+ - SSH into instance
+ - verify emacs is still installed
+
+ **custom Windows image**
+
+ - create VM, add a customization such as installing an application
+ - generalize, capture and deallocate VM's vhd (https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-windows-classic-capture-image/ + https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-linux-capture-image/)
+ - create VM with OS Disk URI pointing to VM's vhd
+ - RDP into instance
+ - verify application is still installed
 
 ## P1: LESS COMMON ##
 Execute P1 scenarios if a change is made in these areas

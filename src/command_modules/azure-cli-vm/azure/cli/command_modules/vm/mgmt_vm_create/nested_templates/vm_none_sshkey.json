@@ -59,6 +59,18 @@
     },
     "nicName": {
       "type": "string"
+    },
+    "storageCaching": {
+      "type": "string"
+    },
+    "customOsDiskType": {
+      "type": "string"
+    },
+    "customOsDiskUri": {
+      "type": "string"
+    },
+    "osDiskType": {
+      "type": "string"
     }
   },
   "variables": {
@@ -72,7 +84,39 @@
     "vhdStorageName": "[parameters('storageAccountName')]",
     "vhdStorageType": "[parameters('storageType')]",
     "vhdStorageContainerName": "[parameters('storageContainerName')]",
-    "nicName": "[parameters('nicName')]"
+    "nicName": "[parameters('nicName')]",
+    "storageProfilesCustomImage": {
+      "custom": {
+        "osDisk": {
+          "name": "[parameters('osDiskName')]",
+          "caching": "[parameters('storageCaching')]",
+          "createOption": "FromImage",
+          "osType": "[parameters('customOsDiskType')]",
+          "image": {
+            "uri": "[parameters('customOsDiskUri')]"
+          },
+          "vhd": {
+            "uri": "[parameters('osDiskUri')]"
+          }
+        }
+      },
+      "provided": {
+        "osDisk": {
+          "name": "[parameters('osDiskName')]",
+          "caching": "[parameters('storageCaching')]",
+          "createOption": "FromImage",
+          "vhd": {
+            "uri": "[parameters('osDiskUri')]"
+          }
+        },
+        "imageReference": {
+          "publisher": "[parameters('osPublisher')]",
+          "offer": "[parameters('osOffer')]",
+          "sku": "[parameters('osSKU')]",
+          "version": "[parameters('osVersion')]"
+        }
+      }
+    }
   },
   "resources": [
     {
@@ -103,22 +147,7 @@
             }
           }
         },
-        "storageProfile": {
-          "imageReference": {
-            "publisher": "[variables('imagePublisher')]",
-            "offer": "[variables('imageOffer')]",
-            "sku": "[variables('imageSku')]",
-            "version": "[variables('imageVersion')]"
-          },
-          "osDisk": {
-            "name": "[concat('osdisk', parameters('virtualMachineName'))]",
-            "vhd": {
-              "uri": "[parameters('osDiskUri')]"
-            },
-            "caching": "ReadWrite",
-            "createOption": "FromImage"
-          }
-        },
+        "storageProfile": "[variables('storageProfilesCustomImage')[parameters('osDiskType')]]",
         "networkProfile": {
           "networkInterfaces": [
             {

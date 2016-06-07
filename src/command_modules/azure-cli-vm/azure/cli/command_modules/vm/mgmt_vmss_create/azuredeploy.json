@@ -33,6 +33,24 @@
         "description": "Password or SSH Public Key authentication."
       }
     },
+    "customOsDiskType": {
+      "type": "string",
+      "defaultValue": "windows",
+      "allowedValues": [
+        "windows",
+        "linux"
+      ],
+      "metadata": {
+        "description": "Custom image OS type."
+      }
+    },
+    "customOsDiskUri": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "URI to a custom disk image."
+      }
+    },
     "dnsNameForPublicIP": {
       "type": "string",
       "defaultValue": "",
@@ -105,6 +123,27 @@
         "description": "The VM name."
       }
     },
+    "natBackendPort": {
+      "type": "string",
+      "defaultValue": "22",
+      "metadata": {
+        "description": "Backend NAT port to map."
+      }
+    },
+    "natEndPort": {
+      "type": "string",
+      "defaultValue": "50099",
+      "metadata": {
+        "description": "End of NAT port range."
+      }
+    },
+    "natStartPort": {
+      "type": "string",
+      "defaultValue": "50000",
+      "metadata": {
+        "description": "Begining of NAT port range."
+      }
+    },
     "osDiskName": {
       "type": "string",
       "defaultValue": "osdiskimage",
@@ -112,11 +151,15 @@
         "description": "Name of new VM OS disk."
       }
     },
-    "osDiskUri": {
+    "osDiskType": {
       "type": "string",
-      "defaultValue": "[concat('http://', parameters('storageAccountName'), '.blob.core.windows.net/', parameters('storageContainerName'), '/', parameters('osDiskName'), '.vhd')]",
+      "defaultValue": "provided",
+      "allowedValues": [
+        "provided",
+        "custom"
+      ],
       "metadata": {
-        "description": "URI for a custom VHD image."
+        "description": "Use a custom image URI from the OS Disk URI parameter or use a provider's image."
       }
     },
     "osOffer": {
@@ -160,6 +203,26 @@
         "description": "The OS version to install."
       }
     },
+    "overprovision": {
+      "type": "string",
+      "defaultValue": "true",
+      "allowedValues": [
+        "true",
+        "false",
+        "True",
+        "False"
+      ],
+      "metadata": {
+        "description": "Overprovision option (see https://azure.microsoft.com/en-us/documentation/articles/virtual-machine-scale-sets-overview/ for details)."
+      }
+    },
+    "privateIpAddress": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "The private IP address to use with Private IP Address Allocation type Static."
+      }
+    },
     "privateIpAddressAllocation": {
       "type": "string",
       "defaultValue": "dynamic",
@@ -184,7 +247,7 @@
     },
     "publicIpAddressName": {
       "type": "string",
-      "defaultValue": "[concat('PublicIP', parameters('name'))]",
+      "defaultValue": "[concat(parameters('name'), 'PublicIP')]",
       "metadata": {
         "description": "Name of public IP address to use."
       }
@@ -215,22 +278,15 @@
         "description": "SSH key file data."
       }
     },
-    "storageAccountName": {
+    "storageCaching": {
       "type": "string",
-      "defaultValue": "[concat('vhdstorage', uniqueString(parameters('name')))]",
-      "metadata": {
-        "description": "Name of storage account for the VM OS disk."
-      }
-    },
-    "storageAccountType": {
-      "type": "string",
-      "defaultValue": "new",
+      "defaultValue": "ReadOnly",
       "allowedValues": [
-        "new",
-        "existing"
+        "ReadOnly",
+        "ReadWrite"
       ],
       "metadata": {
-        "description": "Whether to use an existing storage account or create a new one."
+        "description": "Storage caching type."
       }
     },
     "storageContainerName": {
@@ -256,9 +312,20 @@
     },
     "subnetName": {
       "type": "string",
-      "defaultValue": "[concat('Subnet', parameters('name'))]",
+      "defaultValue": "[concat(parameters('name'), 'Subnet')]",
       "metadata": {
         "description": "The subnet name."
+      }
+    },
+    "upgradePolicyMode": {
+      "type": "string",
+      "defaultValue": "manual",
+      "allowedValues": [
+        "manual",
+        "automatic"
+      ],
+      "metadata": {
+        "description": "Manual or Automatic upgrade mode."
       }
     },
     "virtualNetworkIpAddressPrefix": {
@@ -270,7 +337,7 @@
     },
     "virtualNetworkName": {
       "type": "string",
-      "defaultValue": "[concat('VNET', parameters('name'))]",
+      "defaultValue": "[concat(parameters('name'), 'VNET')]",
       "metadata": {
         "description": "Name of virtual network to add VM to."
       }
@@ -323,9 +390,9 @@
     "lbID": "[resourceId('Microsoft.Network/loadBalancers',variables('loadBalancerName'))]",
     "natPoolName": "[parameters('loadBalancerNatPoolName')]",
     "bePoolName": "[parameters('loadBalancerBackendPoolName')]",
-    "natStartPort": 50000,
-    "natEndPort": 50099,
-    "natBackendPort": 22,
+    "natStartPort": "[parameters('natStartPort')]",
+    "natEndPort": "[parameters('natEndPort')]",
+    "natBackendPort": "[parameters('natBackendPort')]",
     "nicName": "[concat(variables('namingInfix'), 'nic')]",
     "ipConfigName": "[concat(variables('namingInfix'), 'ipconfig')]",
     "frontEndIPConfigID": "[concat(variables('lbID'),'/frontendIPConfigurations/loadBalancerFrontEnd')]",
@@ -338,7 +405,6 @@
     "osProfilessh": {
       "computerNamePrefix": "[variables('namingInfix')]",
       "adminUsername": "[parameters('adminUsername')]",
-      "adminPassword": "[parameters('adminPassword')]",
       "linuxConfiguration": {
         "disablePasswordAuthentication": "true",
         "ssh": {
@@ -380,9 +446,9 @@
       "ssh": "sshkey",
       "password": "password"
     },
-    "vnetDeploymentName": "[concat('VNet', parameters('name'))]",
-    "ipDeploymentName": "[concat('IP', parameters('name'))]",
-    "lbDeploymentName": "[concat('LB', parameters('name'))]",
+    "vnetDeploymentName": "[concat(parameters('name'), 'VNet')]",
+    "ipDeploymentName": "[concat(parameters('name'), 'IP')]",
+    "lbDeploymentName": "[concat(parameters('name'), 'LB')]",
     "vnetAddressPrefix": "[parameters('virtualNetworkIpAddressPrefix')]",
     "subnetAddressPrefix": "[parameters('subnetIpAddressPrefix')]",
     "vhdStorageType": "[parameters('storageRedundancyType')]",
@@ -390,8 +456,8 @@
     "publicIpAddressAllocation": "[parameters('publicIpAddressAllocation')]",
     "vhdStorageContainerName": "vhds",
     "vmSize": "[parameters('vmSku')]",
-    "vmDeploymentName": "[concat('VM', parameters('name'))]",
-    "nicDeploymentName": "[concat('NicIp', parameters('name'))]",
+    "vmDeploymentName": "[concat(parameters('name'), 'VM')]",
+    "nicDeploymentName": "[concat(parameters('name'), 'NicIp')]",
     "vnetName": "[parameters('virtualNetworkName')]",
     "vnetId": "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]",
     "subnetRef": "[concat(variables('vnetId'), '/subnets/', variables('subnetName'))]",
@@ -451,7 +517,6 @@
       "new": "nested_templates/NewStorageAccount.json",
       "existing": "nested_templates/ExistingStorageAccount.json"
     },
-    "storageDeploymentName": "[concat(parameters('storageAccountName'), parameters('name'))]",
     "vnetTemplateFilePaths": {
       "new": "nested_templates/VNet_new.json",
       "existing": "nested_templates/VNet_existing.json"
@@ -470,6 +535,40 @@
       "none": "[concat('/nested_templates/nic_ip_none_dns_', parameters('dnsNameType'), '.json')]",
       "new": "[concat('/nested_templates/nic_ip_new_dns_', parameters('dnsNameType'), '.json')]",
       "existing": "[concat('/nested_templates/nic_ip_existing_dns_', parameters('dnsNameType'), '.json')]"
+    },
+    "vhdContainers": [
+      "[concat('https://', variables('uniqueStringArray')[0], variables('newStorageAccountSuffix'), '.blob.core.windows.net/', variables('vhdContainerName'))]",
+      "[concat('https://', variables('uniqueStringArray')[1], variables('newStorageAccountSuffix'), '.blob.core.windows.net/', variables('vhdContainerName'))]",
+      "[concat('https://', variables('uniqueStringArray')[2], variables('newStorageAccountSuffix'), '.blob.core.windows.net/', variables('vhdContainerName'))]",
+      "[concat('https://', variables('uniqueStringArray')[3], variables('newStorageAccountSuffix'), '.blob.core.windows.net/', variables('vhdContainerName'))]",
+      "[concat('https://', variables('uniqueStringArray')[4], variables('newStorageAccountSuffix'), '.blob.core.windows.net/', variables('vhdContainerName'))]"
+    ],
+    "storageProfilesCustomImage": {
+      "custom": {
+        "osDisk": {
+          "name": "[variables('osDiskName')]",
+          "caching": "[parameters('storageCaching')]",
+          "createOption": "FromImage",
+          "osType": "[parameters('customOsDiskType')]",
+          "image": {
+            "uri": "[parameters('customOsDiskUri')]"
+          }
+        }
+      },
+      "provided": {
+        "osDisk": {
+          "vhdContainers": "[variables('vhdContainers')]",
+          "name": "[variables('osDiskName')]",
+          "caching": "[parameters('storageCaching')]",
+          "createOption": "FromImage"
+        },
+        "imageReference": {
+          "publisher": "[parameters('osPublisher')]",
+          "offer": "[parameters('osOffer')]",
+          "sku": "[parameters('osSKU')]",
+          "version": "[parameters('osVersion')]"
+        }
+      }
     }
   },
   "resources": [
@@ -510,7 +609,8 @@
           "publicIpAddressAllocation": { "value": "[variables('publicIpAddressAllocation')]" },
           "privateIpAllocation": { "value": "[parameters('privateIpAddressAllocation')]" },
           "location": { "value": "[parameters('location')]" },
-          "dnsNameType": { "value": "[parameters('dnsNameType')]" }
+          "dnsNameType": { "value": "[parameters('dnsNameType')]" },
+          "privateIpAddress": { "value": "[parameters('privateIpAddress')]" }
         }
       }
     },
@@ -573,31 +673,12 @@
         "capacity": "[variables('instanceCount')]"
       },
       "properties": {
-        "overprovision": "true",
+        "overprovision": "[parameters('overprovision')]",
         "upgradePolicy": {
-          "mode": "Manual"
+          "mode": "[parameters('upgradePolicyMode')]"
         },
         "virtualMachineProfile": {
-          "storageProfile": {
-            "osDisk": {
-              "vhdContainers": [
-                "[concat('https://', variables('uniqueStringArray')[0], variables('newStorageAccountSuffix'), '.blob.core.windows.net/', variables('vhdContainerName'))]",
-                "[concat('https://', variables('uniqueStringArray')[1], variables('newStorageAccountSuffix'), '.blob.core.windows.net/', variables('vhdContainerName'))]",
-                "[concat('https://', variables('uniqueStringArray')[2], variables('newStorageAccountSuffix'), '.blob.core.windows.net/', variables('vhdContainerName'))]",
-                "[concat('https://', variables('uniqueStringArray')[3], variables('newStorageAccountSuffix'), '.blob.core.windows.net/', variables('vhdContainerName'))]",
-                "[concat('https://', variables('uniqueStringArray')[4], variables('newStorageAccountSuffix'), '.blob.core.windows.net/', variables('vhdContainerName'))]"
-              ],
-              "name": "[variables('osDiskName')]",
-              "caching": "ReadOnly",
-              "createOption": "FromImage"
-            },
-            "imageReference": {
-              "publisher": "[parameters('osPublisher')]",
-              "offer": "[parameters('osOffer')]",
-              "sku": "[parameters('osSKU')]",
-              "version": "[parameters('osVersion')]"
-            }
-          },
+          "storageProfile": "[variables('storageProfilesCustomImage')[parameters('osDiskType')]]",
           "osProfile": "[variables('osProfileReference')]",
           "networkProfile": {
             "networkInterfaceConfigurations": [
