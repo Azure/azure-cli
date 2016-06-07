@@ -1,4 +1,4 @@
-from __future__ import print_function
+﻿from __future__ import print_function
 
 from azure.cli.commands import CommandTable
 from azure.cli.commands.command_types import cli_command

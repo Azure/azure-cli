@@ -68,6 +68,21 @@ class VMCombinedListTest(VCRTestBase):
         some_vms = self.run_command_no_verify('vm list -g travistestresourcegroup -o json')
         assert len(all_vms) > len(some_vms)
 
+class VMResizeTest(VCRTestBase):
+    def __init__(self, test_method):
+        super(VMResizeTest, self).__init__(__file__, test_method)
+
+    def test_vm_resize(self):
+        self.execute(verify_test_output=True)
+
+    def body(self):
+        group = 'yugangw4'
+        vm_name = 'yugangw4-1'
+        vm = self.run_command_no_verify('vm show -g {} -n {} -o json'.format(group, vm_name))
+        new_size = 'Standard_A4' if vm['hardwareProfile']['vmSize'] == 'Standard_A3' else 'Standard_A3'
+        check = [JMESPathComparator('hardwareProfile.vmSize', new_size)]
+        self.run_command_and_verify('vm resize -g {} -n {} --size {}'.format(group, vm_name, new_size), check)
+
 class VMShowListSizesListIPAddressesScenarioTest(VCRTestBase):
 
     def __init__(self, test_method):
