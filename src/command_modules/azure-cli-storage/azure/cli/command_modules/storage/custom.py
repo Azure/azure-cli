@@ -3,14 +3,10 @@
 from __future__ import print_function
 from sys import stderr
 
-from azure.cli.commands import CommandTable
 from azure.cli.command_modules.storage._factory import storage_client_factory
 from azure.cli._util import CLIError
-
 from azure.storage.blob import BlockBlobService
 from azure.storage.file import FileService
-
-command_table = CommandTable()
 
 def _update_progress(current, total):
     if total:

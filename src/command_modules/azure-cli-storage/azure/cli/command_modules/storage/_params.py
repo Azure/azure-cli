@@ -1,7 +1,7 @@
 # pylint: disable=line-too-long
-from azure.cli.commands._params import tags_type, name_type
-from azure.cli.commands.argument_types import register_cli_argument, CliArgumentType
-from azure.cli.commands._validators import validate_key_value_pairs
+from azure.cli.commands.parameters import tags_type, name_type
+from azure.cli.commands import register_cli_argument, CliArgumentType
+from azure.cli.commands.validators import validate_key_value_pairs
 
 from azure.mgmt.storage.models import AccountType
 

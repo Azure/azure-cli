@@ -1,2 +1,4 @@
 # pylint: disable=unused-import
-from .generated import command_table
+
+import azure.cli.command_modules.taskhelp.generated
+import azure.cli.command_modules.taskhelp.custom

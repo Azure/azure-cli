@@ -8,15 +8,12 @@ from azure.mgmt.resource.resources.operations.deployments_operations import Depl
 from azure.mgmt.resource.resources.operations.deployment_operations_operations \
     import DeploymentOperationsOperations
 
-from azure.cli.commands import CommandTable
-from azure.cli.commands.command_types import cli_command
+from azure.cli.commands import cli_command, command_table
 from azure.cli.command_modules.resource._factory import _resource_client_factory
 from azure.cli.command_modules.resource.custom import (
     list_resource_groups, create_resource_group, export_group_as_template, list_resources,
     deploy_arm_template, tag_resource
 )
-
-command_table = CommandTable()
 
 # Resource group commands
 factory = lambda _: _resource_client_factory().resource_groups

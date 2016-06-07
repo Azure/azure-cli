@@ -1,7 +1,7 @@
 import unittest
 from six import StringIO
 
-from azure.cli.commands._validators import *
+from azure.cli.commands.validators import *
 
 from azure.cli.command_modules.resource._validators import *
 

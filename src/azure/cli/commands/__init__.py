@@ -1,19 +1,16 @@
 from __future__ import print_function
-import inspect
 import json
-import re
 import time
 import traceback
 from importlib import import_module
-from collections import defaultdict, OrderedDict
+from collections import OrderedDict, defaultdict
 from pip import get_installed_distributions
-from msrest.exceptions import ClientException
 from msrest.paging import Paged
+from msrest.exceptions import ClientException
 from msrestazure.azure_operation import AzureOperationPoller
-
 from azure.cli._util import CLIError
 import azure.cli._logging as _logging
-import azure.cli.commands.argument_types
+from ._introspection import extract_args_from_signature
 
 logger = _logging.get_az_logger(__name__)
 
@@ -24,8 +21,42 @@ INSTALLED_COMMAND_MODULES = [dist.key.replace('azure-cli-', '')
 
 logger.info('Installed command modules %s', INSTALLED_COMMAND_MODULES)
 
-EXCLUDED_PARAMS = frozenset(['self', 'raw', 'custom_headers', 'operation_config',
-                             'content_version', 'kwargs', 'client'])
+# pylint: disable=too-many-arguments,too-few-public-methods
+class CliArgumentType(object):
+
+    def __init__(self, options_list=None, base_type=str, overrides=None, completer=None,
+                 validator=None, **kwargs):
+        self.options_list = ()
+        self.completer = completer
+        self.validator = validator
+        if overrides:
+            self.options_list = overrides.options_list
+            self.options = overrides.options.copy()
+            self.base_type = overrides.base_type
+        else:
+            self.options = {}
+
+        self.base_type = base_type
+        self.update(options_list=options_list, **kwargs)
+
+    def update(self, options_list=None, completer=None, validator=None, **kwargs):
+        self.options_list = options_list or self.options_list
+        self.completer = completer or self.completer
+        self.validator = validator or self.validator
+        self.options.update(**kwargs)
+
+class CliCommandArgument(CliArgumentType):
+    def __init__(self, dest, options_list=None, completer=None, validator=None, **kwargs):
+        if options_list is None:
+            options_list = '--' + dest.replace('_', '-')
+
+        super(CliCommandArgument, self).__init__(**kwargs)
+        self.update(options_list=options_list, completer=completer, validator=validator, **kwargs)
+        self.options['dest'] = dest
+
+    def name(self):
+        return self.options['dest']
+
 
 class LongRunningOperation(object): #pylint: disable=too-few-public-methods
 
@@ -62,36 +93,30 @@ class LongRunningOperation(object): #pylint: disable=too-few-public-methods
         logger.warning(self.finish_msg)
         return result
 
-class CommandTable(defaultdict):
-    """A command table is a dictionary of func -> {name,
-                                                   func,
-                                                   **kwargs}
-    objects.
+class CommandTable(dict):
+    """A command table is a dictionary of name -> CliCommand
+    instances.
 
-    The `name` is the space separated name - i.e. 'az vm list'
-    `func` represents the handler for the method, and will be called with the parsed
-    args from argparse.ArgumentParser. The remaining keyword arguments will be passed to
-    ArgumentParser.add_parser.
+    The `name` is the space separated name - i.e. 'vm list'
     """
-    def __init__(self):
-        super(CommandTable, self).__init__(lambda: {'arguments': []})
 
-def _get_command_table(module_name):
-    module = import_module('azure.cli.command_modules.' + module_name)
-    return module.command_table
+    def register(self, name):
+        def wrapped(func):
+            cli_command(self, name, func)
+            return func
+        return wrapped
 
 class CliCommand(object):
 
-    def __init__(self, name, handler, operation=None, description=None):
+    def __init__(self, name, handler, description=None):
         self.name = name
         self.handler = handler
         self.description = description
         self.help = None
         self.arguments = {}
-        _extract_args_from_signature(self, operation or handler)
 
     def add_argument(self, param_name, *option_strings, **kwargs):
-        argument = azure.cli.commands.argument_types.CliCommandArgument(
+        argument = CliCommandArgument(
             param_name, options_list=option_strings, **kwargs)
         self.arguments[param_name] = argument
 
@@ -106,6 +131,8 @@ class CliCommand(object):
     def execute(self, **kwargs):
         return self.handler(**kwargs)
 
+command_table = CommandTable()
+
 def get_command_table(module_name=None):
     '''Loads command table(s)
 
@@ -115,7 +142,7 @@ def get_command_table(module_name=None):
     loaded = False
     if module_name:
         try:
-            command_table = _get_command_table(module_name)
+            import_module('azure.cli.command_modules.' + module_name)
             logger.info("Successfully loaded command table from module '%s'.", module_name)
             loaded = True
         except ImportError:
@@ -127,26 +154,41 @@ def get_command_table(module_name=None):
             pass
 
     if not loaded:
-        command_table = {}
         logger.info('Loading command tables from all installed modules.')
         for mod in INSTALLED_COMMAND_MODULES:
             try:
-                command_table.update(_get_command_table(mod))
+                import_module('azure.cli.command_modules.' + mod)
             except Exception: #pylint: disable=broad-except
                 logger.error("Error loading command module '%s'", mod)
                 logger.debug(traceback.format_exc())
 
+    _update_command_definitions(command_table)
     ordered_commands = OrderedDict(command_table)
     return ordered_commands
 
-def create_command(name, operation, transform, client_factory):
+def register_cli_argument(scope, dest, argtype, options_list=None, **kwargs):
+    '''Specify CLI specific metadata for a given argument for a given scope.
+    '''
+    _cli_argument_registry.register_cli_argument(scope, dest, argtype, options_list, **kwargs)
+
+def register_extra_cli_argument(command, dest, options_list=None, **kwargs):
+    '''Register extra parameters for the given command. Typically used to augment auto-command built
+    commands to add more parameters than the specific SDK method introspected.
+    '''
+    _cli_extra_argument_registry[command][dest] = CliCommandArgument(dest, options_list, **kwargs)
+
+def cli_command(command_table_to_add_to, name, operation, client_factory=None, transform=None):
+    """ Registers a default Azure CLI command. These commands require no special parameters. """
+    command_table_to_add_to[name] = create_command(name, operation, transform, client_factory)
+
+def create_command(name, operation, transform_result, client_factory):
     def _execute_command(kwargs):
         client = client_factory(kwargs) if client_factory else None
         try:
             result = operation(client, **kwargs) if client else operation(**kwargs)
             # apply results transform if specified
-            if transform:
-                return transform(result)
+            if transform_result:
+                return transform_result(result)
 
             # otherwise handle based on return type of results
             if isinstance(result, AzureOperationPoller):
@@ -160,76 +202,50 @@ def create_command(name, operation, transform, client_factory):
             raise CLIError(message)
 
     name = ' '.join(name.split())
-    return CliCommand(name, _execute_command, operation)
+    cmd = CliCommand(name, _execute_command)
+    extract_args_from_signature(cmd, operation)
+    return cmd
 
-def _option_descriptions(operation):
-    """Pull out parameter help from doccomments of the command
-    """
-    option_descs = {}
-    lines = inspect.getdoc(operation)
-    if lines:
-        lines = lines.splitlines()
-        index = 0
-        while index < len(lines):
-            l = lines[index]
-            regex = r'\s*(:param)\s+(.+)\s*:(.*)'
-            match = re.search(regex, l)
-            if match:
-                # 'arg name' portion might have type info, we don't need it
-                arg_name = str.split(match.group(2))[-1]
-                arg_desc = match.group(3).strip()
-                #look for more descriptions on subsequent lines
-                index += 1
-                while index < len(lines):
-                    temp = lines[index].strip()
-                    if temp.startswith(':'):
-                        break
-                    else:
-                        if temp:
-                            arg_desc += (' ' + temp)
-                        index += 1
 
-                option_descs[arg_name] = arg_desc
-            else:
-                index += 1
-    return option_descs
+def _get_cli_argument(command, argname):
+    return _cli_argument_registry.get_cli_argument(command, argname)
 
-def _extract_args_from_signature(command, operation):
-    """ Extracts basic argument data from an operation's signature and docstring """
-    args = []
-    try:
-        # only supported in python3 - falling back to argspec if not available
-        sig = inspect.signature(operation)
-        args = sig.parameters
-    except AttributeError:
-        sig = inspect.getargspec(operation) #pylint: disable=deprecated-method
-        args = sig.args
+def _get_cli_extra_arguments(command):
+    return _cli_extra_argument_registry[command].items()
 
-    arg_docstring_help = _option_descriptions(operation)
-    for arg_name in [a for a in args if not a in EXCLUDED_PARAMS]:
-        try:
-            # this works in python3
-            default = args[arg_name].default
-            required = default == inspect.Parameter.empty #pylint: disable=no-member
-        except TypeError:
-            arg_defaults = (dict(zip(sig.args[-len(sig.defaults):], sig.defaults))
-                            if sig.defaults
-                            else {})
-            default = arg_defaults.get(arg_name)
-            required = arg_name not in arg_defaults
+class _ArgumentRegistry(object):
 
-        action = 'store_' + str(not default).lower() if isinstance(default, bool) else None
+    def __init__(self):
+        self.arguments = defaultdict(lambda: {})
 
-        try:
-            default = (default
-                       if default != inspect._empty #pylint: disable=protected-access, no-member
-                       else None)
-        except AttributeError:
-            pass
+    def register_cli_argument(self, scope, dest, argtype, options_list, **kwargs):
+        argument = CliArgumentType(options_list=options_list, overrides=argtype,
+                                   completer=argtype.completer, validator=argtype.validator,
+                                   **kwargs)
+        self.arguments[scope][dest] = argument
 
-        command.add_argument(arg_name,
-                             *['--' + arg_name.replace('_', '-')],
-                             required=required,
-                             default=default,
-                             help=arg_docstring_help.get(arg_name),
-                             action=action)
+    def get_cli_argument(self, command, name):
+        parts = command.split()
+        result = CliArgumentType()
+        for index in range(0, len(parts) + 1):
+            probe = ' '.join(parts[0:index])
+            override = self.arguments.get(probe, {}).get(name, None)
+            if override:
+                result.update(override.options_list,
+                              completer=override.completer,
+                              validator=override.validator,
+                              **override.options)
+        return result
+
+_cli_argument_registry = _ArgumentRegistry()
+_cli_extra_argument_registry = defaultdict(lambda: {})
+
+def _update_command_definitions(command_table_to_update):
+    for command_name, command in command_table_to_update.items():
+        for argument_name in command.arguments:
+            command.update_argument(argument_name, _get_cli_argument(command_name, argument_name))
+
+        # Add any arguments explicitly registered for this command
+        for argument_name, argument_definition in _get_cli_extra_arguments(command_name):
+            command.arguments[argument_name] = argument_definition
+            command.update_argument(argument_name, _get_cli_argument(command_name, argument_name))

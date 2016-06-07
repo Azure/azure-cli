@@ -1,6 +1,6 @@
 # pylint: disable=line-too-long
-from azure.cli.commands.argument_types import CliArgumentType, register_cli_argument
-from azure.cli.commands._validators import validate_tag, validate_tags
+from azure.cli.commands import CliArgumentType, register_cli_argument
+from azure.cli.commands.validators import validate_tag, validate_tags
 
 resource_group_name_type = CliArgumentType(options_list=('--resource-group', '-g'), help='Name of resource group')
 

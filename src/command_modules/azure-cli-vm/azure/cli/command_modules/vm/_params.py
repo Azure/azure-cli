@@ -11,8 +11,8 @@ from azure.cli.command_modules.vm._actions import (VMImageFieldAction,
                                                    VMDNSNameAction,
                                                    load_images_from_aliases_doc,
                                                    get_subscription_locations)
-from azure.cli.commands._params import location_type
-from azure.cli.commands.argument_types import register_cli_argument, CliArgumentType, register_extra_cli_argument
+from azure.cli.commands.parameters import location_type
+from azure.cli.commands import register_cli_argument, CliArgumentType, register_extra_cli_argument
 
 def get_location_completion_list(prefix, **kwargs):#pylint: disable=unused-argument
     result = get_subscription_locations()

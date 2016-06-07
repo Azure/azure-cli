@@ -2,7 +2,7 @@ from datetime import datetime
 import os
 import re
 
-from azure.cli.commands._validators import validate_key_value_pairs
+from azure.cli.commands.validators import validate_key_value_pairs
 from azure.storage.models import ResourceTypes, Services
 from azure.storage.blob.models import ContainerPermissions
 

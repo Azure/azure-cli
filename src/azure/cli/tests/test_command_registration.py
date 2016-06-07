@@ -2,12 +2,14 @@ from collections import defaultdict
 import logging
 import unittest
 
-from azure.cli.application import _update_command_definitions
-from azure.cli.commands import CommandTable
-from azure.cli.commands.argument_types import CliArgumentType
-from azure.cli.commands.command_types import cli_command
-from azure.cli.commands.argument_types import \
-    (register_cli_argument, register_extra_cli_argument)
+from azure.cli.commands import _update_command_definitions
+from azure.cli.commands import (
+    CommandTable, 
+    CliArgumentType,
+    cli_command,
+    register_cli_argument,
+    register_extra_cli_argument)
+
 from azure.cli.main import main as cli
 
 from six import StringIO
