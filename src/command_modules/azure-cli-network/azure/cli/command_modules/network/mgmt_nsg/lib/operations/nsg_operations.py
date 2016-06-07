@@ -32,7 +32,7 @@ class NSGOperations(object):
         self.config = config
 
     def create_or_update(
-            self, resource_group_name, deployment_name, destination_port_range, name, content_version=None, access_type="allow", destination_address_prefix="*", direction="inbound", location=None, priority="1000", protocol="*", rule_name="defaultRule", source_address_prefix="*", source_port_range="*", custom_headers={}, raw=False, **operation_config):
+            self, resource_group_name, deployment_name, name, content_version=None, location=None, custom_headers={}, raw=False, **operation_config):
         """
         Create or update a virtual machine.
 
@@ -41,37 +41,13 @@ class NSGOperations(object):
         :type resource_group_name: str
         :param deployment_name: The name of the deployment.
         :type deployment_name: str
-        :param destination_port_range: Range of destination ports the rule
-         applies to.  Example: Use 3389 for RDP access or 22 for SSH access.
-        :type destination_port_range: str
         :param name: Name of the network security group.
         :type name: str
         :param content_version: If included it must match the ContentVersion
          in the template.
         :type content_version: str
-        :param access_type: Type of access controlled by rule. Possible
-         values include: 'allow', 'deny'
-        :type access_type: str
-        :param destination_address_prefix: Destination address prefix the
-         rule applies to.
-        :type destination_address_prefix: str
-        :param direction: Direction the rule applies to. Possible values
-         include: 'inbound', 'outbound'
-        :type direction: str
         :param location: Location for the network security group.
         :type location: str
-        :param priority: Rule priority.
-        :type priority: str
-        :param protocol: Protocol the rule applies to. Possible values
-         include: '*', 'tcp', 'udp'
-        :type protocol: str
-        :param rule_name: Name of network security group rule.
-        :type rule_name: str
-        :param source_address_prefix: Source address prefix the rule applies
-         to.
-        :type source_address_prefix: str
-        :param source_port_range: Range of source ports the rule applies to.
-        :type source_port_range: str
         :param dict custom_headers: headers that will be added to the request
         :param bool raw: returns the direct response alongside the
          deserialized response
@@ -82,7 +58,7 @@ class NSGOperations(object):
         :rtype: :class:`ClientRawResponse<msrest.pipeline.ClientRawResponse>`
          if raw=true
         """
-        parameters = models.DeploymentNSG(content_version=content_version, access_type=access_type, destination_address_prefix=destination_address_prefix, destination_port_range=destination_port_range, direction=direction, location=location, name=name, priority=priority, protocol=protocol, rule_name=rule_name, source_address_prefix=source_address_prefix, source_port_range=source_port_range)
+        parameters = models.DeploymentNSG(content_version=content_version, location=location, name=name)
 
         # Construct URL
         url = '/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Resources/deployments/{deploymentName}'

@@ -2,41 +2,6 @@
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "accessType": {
-      "type": "string",
-      "defaultValue": "allow",
-      "allowedValues": [
-        "allow",
-        "deny"
-      ],
-      "metadata": {
-        "description": "Type of access controlled by rule."
-      }
-    },
-    "destinationAddressPrefix": {
-      "type": "string",
-      "defaultValue": "*",
-      "metadata": {
-        "description": "Destination address prefix the rule applies to."
-      }
-    },
-    "destinationPortRange": {
-      "type": "string",
-      "metadata": {
-        "description": "Range of destination ports the rule applies to.  Example: Use 3389 for RDP access or 22 for SSH access."
-      }
-    },
-    "direction": {
-      "type": "string",
-      "defaultValue": "inbound",
-      "allowedValues": [
-        "inbound",
-        "outbound"
-      ],
-      "metadata": {
-        "description": "Direction the rule applies to."
-      }
-    },
     "location": {
       "type": "string",
       "defaultValue": "[resourceGroup().location]",
@@ -48,46 +13,6 @@
       "type": "string",
       "metadata": {
         "description": "Name of the network security group."
-      }
-    },
-    "priority": {
-      "type": "string",
-      "defaultValue": "1000",
-      "metadata": {
-        "description": "Rule priority."
-      }
-    },
-    "protocol": {
-      "type": "string",
-      "defaultValue": "*",
-      "allowedValues": [
-        "*",
-        "tcp",
-        "udp"
-      ],
-      "metadata": {
-        "description": "Protocol the rule applies to."
-      }
-    },
-    "ruleName": {
-      "type": "string",
-      "defaultValue": "defaultRule",
-      "metadata": {
-        "description": "Name of network security group rule."
-      }
-    },
-    "sourceAddressPrefix": {
-      "type": "string",
-      "defaultValue": "*",
-      "metadata": {
-        "description": "Source address prefix the rule applies to."
-      }
-    },
-    "sourcePortRange": {
-      "type": "string",
-      "defaultValue": "*",
-      "metadata": {
-        "description": "Range of source ports the rule applies to."
       }
     }
   },
@@ -101,19 +26,6 @@
       "location": "[parameters('location')]",
       "properties": {
         "securityRules": [
-          {
-            "name": "[parameters('ruleName')]",
-            "properties": {
-              "protocol": "[parameters('protocol')]",
-              "sourcePortRange": "[parameters('sourcePortRange')]",
-              "destinationPortRange": "[parameters('destinationPortRange')]",
-              "sourceAddressPrefix": "[parameters('sourceAddressPrefix')]",
-              "destinationAddressPrefix": "[parameters('destinationAddressPrefix')]",
-              "access": "[parameters('accessType')]",
-              "priority": "[parameters('priority')]",
-              "direction": "[parameters('direction')]"
-            }
-          }
         ]
       },
       "dependsOn": [ ]

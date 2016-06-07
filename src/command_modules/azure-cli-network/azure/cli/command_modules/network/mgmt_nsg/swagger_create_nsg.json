@@ -159,198 +159,47 @@
       "description": "Entity representing the reference to the template."
     },
     "NSGParameters": {
-
-      "properties": {
-        "accessType": {
-          "type": "object",
-          "$ref": "#/definitions/DeploymentParameter_accessType",
-          "x-ms-client-flatten": true
-        },
-        "destinationAddressPrefix": {
-          "type": "object",
-          "$ref": "#/definitions/DeploymentParameter_destinationAddressPrefix",
-          "x-ms-client-flatten": true
-        },
-        "destinationPortRange": {
-          "type": "object",
-          "$ref": "#/definitions/DeploymentParameter_destinationPortRange",
-          "x-ms-client-flatten": true
-        },
-        "direction": {
-          "type": "object",
-          "$ref": "#/definitions/DeploymentParameter_direction",
-          "x-ms-client-flatten": true
-        },
-        "location": {
-          "type": "object",
-          "$ref": "#/definitions/DeploymentParameter_location",
-          "x-ms-client-flatten": true
-        },
-        "name": {
-          "type": "object",
-          "$ref": "#/definitions/DeploymentParameter_name",
-          "x-ms-client-flatten": true
-        },
-        "priority": {
-          "type": "object",
-          "$ref": "#/definitions/DeploymentParameter_priority",
-          "x-ms-client-flatten": true
-        },
-        "protocol": {
-          "type": "object",
-          "$ref": "#/definitions/DeploymentParameter_protocol",
-          "x-ms-client-flatten": true
-        },
-        "ruleName": {
-          "type": "object",
-          "$ref": "#/definitions/DeploymentParameter_ruleName",
-          "x-ms-client-flatten": true
-        },
-        "sourceAddressPrefix": {
-          "type": "object",
-          "$ref": "#/definitions/DeploymentParameter_sourceAddressPrefix",
-          "x-ms-client-flatten": true
-        },
-        "sourcePortRange": {
-          "type": "object",
-          "$ref": "#/definitions/DeploymentParameter_sourcePortRange",
-          "x-ms-client-flatten": true
-        }
-      },
+      
+"properties": {
+  "location": {
+    "type": "object",
+    "$ref": "#/definitions/DeploymentParameter_location",
+    "x-ms-client-flatten": true
+  },
+          "name": {
+    "type": "object",
+    "$ref": "#/definitions/DeploymentParameter_name",
+    "x-ms-client-flatten": true
+  }
+}
+,
       "required": [
-        "name",
-        "destinationPortRange"
+        "name"
       ]
 
-    },
-    "DeploymentParameter_accessType": {
-      "properties": {
-        "value": {
-          "type": "string",
-          "description": "Type of access controlled by rule.",
-          "x-ms-client-name": "accessType",
-          "enum": [
-            "allow",
-            "deny"
-          ],
-          "default": "allow"
-        }
-      }
-    },
-    "DeploymentParameter_destinationAddressPrefix": {
-      "properties": {
-        "value": {
-          "type": "string",
-          "description": "Destination address prefix the rule applies to.",
-          "x-ms-client-name": "destinationAddressPrefix",
-          "default": "*"
-        }
-      }
-    },
-    "DeploymentParameter_destinationPortRange": {
-      "properties": {
-        "value": {
-          "type": "string",
-          "description": "Range of destination ports the rule applies to.  Example: Use 3389 for RDP access or 22 for SSH access.",
-          "x-ms-client-name": "destinationPortRange"
-        }
-      },
-      "required": [
-        "value"
-      ]
-
-    },
-    "DeploymentParameter_direction": {
-      "properties": {
-        "value": {
-          "type": "string",
-          "description": "Direction the rule applies to.",
-          "x-ms-client-name": "direction",
-          "enum": [
-            "inbound",
-            "outbound"
-          ],
-          "default": "inbound"
-        }
-      }
     },
     "DeploymentParameter_location": {
-      "properties": {
-        "value": {
-          "type": "string",
-          "description": "Location for the network security group.",
-          "x-ms-client-name": "location"
-        }
-      }
-    },
-    "DeploymentParameter_name": {
-      "properties": {
-        "value": {
-          "type": "string",
-          "description": "Name of the network security group.",
-          "x-ms-client-name": "name"
-        }
-      },
+  "properties": {
+    "value": {
+      "type": "string",
+      "description": "Location for the network security group.",
+      "x-ms-client-name": "location"
+    }
+  }
+},
+"DeploymentParameter_name": {
+  "properties": {
+    "value": {
+      "type": "string",
+      "description": "Name of the network security group.",
+      "x-ms-client-name": "name"
+    }
+  },
       "required": [
         "value"
       ]
 
-    },
-    "DeploymentParameter_priority": {
-      "properties": {
-        "value": {
-          "type": "string",
-          "description": "Rule priority.",
-          "x-ms-client-name": "priority",
-          "default": "1000"
-        }
-      }
-    },
-    "DeploymentParameter_protocol": {
-      "properties": {
-        "value": {
-          "type": "string",
-          "description": "Protocol the rule applies to.",
-          "x-ms-client-name": "protocol",
-          "enum": [
-            "*",
-            "tcp",
-            "udp"
-          ],
-          "default": "*"
-        }
-      }
-    },
-    "DeploymentParameter_ruleName": {
-      "properties": {
-        "value": {
-          "type": "string",
-          "description": "Name of network security group rule.",
-          "x-ms-client-name": "ruleName",
-          "default": "defaultRule"
-        }
-      }
-    },
-    "DeploymentParameter_sourceAddressPrefix": {
-      "properties": {
-        "value": {
-          "type": "string",
-          "description": "Source address prefix the rule applies to.",
-          "x-ms-client-name": "sourceAddressPrefix",
-          "default": "*"
-        }
-      }
-    },
-    "DeploymentParameter_sourcePortRange": {
-      "properties": {
-        "value": {
-          "type": "string",
-          "description": "Range of source ports the rule applies to.",
-          "x-ms-client-name": "sourcePortRange",
-          "default": "*"
-        }
-      }
-    },
+},
     "ParametersLink": {
       "properties": {
         "uri": {
