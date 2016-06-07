@@ -17,22 +17,38 @@
     "privateIpAllocation": {
       "type": "string"
     },
+    "privateIpAddress": {
+      "type": "string"
+    },
     "dnsNameType": {
       "type": "string"
     }
   },
   "variables": {
     "properties_dns": {
-      "new": {
+      "new_dynamic": {
         "publicIPAllocationMethod": "[parameters('publicIpAddressAllocation')]",
-        "privateIPAllocationMethod": "[parameters('privateIpAllocation')]",
+        "privateIPAllocationMethod": "Dynamic",
         "dnsSettings": {
           "domainNameLabel": "[parameters('dnsNameForPublicIP')]"
         }
       },
-      "none": {
+      "none_dynamic": {
         "publicIPAllocationMethod": "[parameters('publicIpAddressAllocation')]",
-        "privateIPAllocationMethod": "[parameters('privateIpAllocation')]"
+        "privateIPAllocationMethod": "Dynamic"
+      },
+      "new_static": {
+        "publicIPAllocationMethod": "[parameters('publicIpAddressAllocation')]",
+        "privateIPAllocationMethod": "Static",
+        "privateIPAddress": "[parameters('privateIpAddress')]",
+        "dnsSettings": {
+          "domainNameLabel": "[parameters('dnsNameForPublicIP')]"
+        }
+      },
+      "none_static": {
+        "publicIPAllocationMethod": "[parameters('publicIpAddressAllocation')]",
+        "privateIPAllocationMethod": "Static",
+        "privateIPAddress": "[parameters('privateIpAddress')]"
       }
     }
   },
@@ -42,7 +58,7 @@
       "name": "[parameters('publicIPAddressName')]",
       "location": "[parameters('location')]",
       "apiVersion": "2015-06-15",
-      "properties": "[variables('properties_dns')[parameters('dnsNameType')]]"
+      "properties": "[variables('properties_dns')[concat(parameters('dnsNameType'), '_', parameters('privateIpAllocation'))]]"
     }
   ]
 }
