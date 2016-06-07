@@ -8,7 +8,7 @@
     VirtualMachinesOperations,
     VirtualMachineScaleSetsOperations,
     VirtualMachineScaleSetVMsOperations)
-from azure.cli.commands import LongRunningOperation, cli_command, command_table
+from azure.cli.commands import LongRunningOperation, cli_command
 from azure.cli.commands.client_factory import get_mgmt_service_client
 from azure.cli.command_modules.vm.mgmt_avail_set.lib import (AvailSetCreationClient
                                                              as AvailSetClient,
@@ -49,106 +49,106 @@ class DeploymentOutputLongRunningOperation(LongRunningOperation): #pylint: disab
 
 # VM
 factory = lambda _: get_mgmt_service_client(VMClient, VMClientConfig).vm
-cli_command(command_table, 'vm create', VMOperations.create_or_update, factory, transform=DeploymentOutputLongRunningOperation('Starting vm create'))
+cli_command('vm create', VMOperations.create_or_update, factory, transform=DeploymentOutputLongRunningOperation('Starting vm create'))
 
 factory = lambda _: _compute_client_factory().virtual_machines
-cli_command(command_table, 'vm delete', VirtualMachinesOperations.delete, factory)
-cli_command(command_table, 'vm deallocate', VirtualMachinesOperations.deallocate, factory)
-cli_command(command_table, 'vm generalize', VirtualMachinesOperations.generalize, factory)
-cli_command(command_table, 'vm show', VirtualMachinesOperations.get, factory)
-cli_command(command_table, 'vm list-sizes', VirtualMachinesOperations.list_available_sizes, factory)
-cli_command(command_table, 'vm power-off', VirtualMachinesOperations.power_off, factory)
-cli_command(command_table, 'vm restart', VirtualMachinesOperations.restart, factory)
-cli_command(command_table, 'vm start', VirtualMachinesOperations.start, factory)
-cli_command(command_table, 'vm list-ip-addresses', list_ip_addresses)
-cli_command(command_table, 'vm list', list_vm)
+cli_command('vm delete', VirtualMachinesOperations.delete, factory)
+cli_command('vm deallocate', VirtualMachinesOperations.deallocate, factory)
+cli_command('vm generalize', VirtualMachinesOperations.generalize, factory)
+cli_command('vm show', VirtualMachinesOperations.get, factory)
+cli_command('vm list-sizes', VirtualMachinesOperations.list_available_sizes, factory)
+cli_command('vm power-off', VirtualMachinesOperations.power_off, factory)
+cli_command('vm restart', VirtualMachinesOperations.restart, factory)
+cli_command('vm start', VirtualMachinesOperations.start, factory)
+cli_command('vm list-ip-addresses', list_ip_addresses)
+cli_command('vm list', list_vm)
 
 # VM Access
-cli_command(command_table, 'vm access set-linux-user', set_linux_user)
-cli_command(command_table, 'vm access delete-linux-user', delete_linux_user)
-cli_command(command_table, 'vm access set-windows-user-password', set_windows_user_password)
+cli_command('vm access set-linux-user', set_linux_user)
+cli_command('vm access delete-linux-user', delete_linux_user)
+cli_command('vm access set-windows-user-password', set_windows_user_password)
 
 # VM Availability Set
 factory = lambda _: get_mgmt_service_client(AvailSetClient, AvailSetClientConfig).avail_set
-cli_command(command_table, 'vm availability-set create', AvailSetOperations.create_or_update, factory)
+cli_command('vm availability-set create', AvailSetOperations.create_or_update, factory)
 
 factory = lambda _: _compute_client_factory().availability_sets
-cli_command(command_table, 'vm availability-set delete', AvailabilitySetsOperations.delete, factory)
-cli_command(command_table, 'vm availability-set show', AvailabilitySetsOperations.get, factory)
-cli_command(command_table, 'vm availability-set list', AvailabilitySetsOperations.list, factory)
-cli_command(command_table, 'vm availability-set list-sizes', AvailabilitySetsOperations.list_available_sizes, factory)
+cli_command('vm availability-set delete', AvailabilitySetsOperations.delete, factory)
+cli_command('vm availability-set show', AvailabilitySetsOperations.get, factory)
+cli_command('vm availability-set list', AvailabilitySetsOperations.list, factory)
+cli_command('vm availability-set list-sizes', AvailabilitySetsOperations.list_available_sizes, factory)
 
 # VM Boot Diagnostics
-cli_command(command_table, 'vm boot-diagnostics disable', disable_boot_diagnostics)
-cli_command(command_table, 'vm boot-diagnostics enable', enable_boot_diagnostics)
-cli_command(command_table, 'vm boot-diagnostics get-boot-log', get_boot_log)
+cli_command('vm boot-diagnostics disable', disable_boot_diagnostics)
+cli_command('vm boot-diagnostics enable', enable_boot_diagnostics)
+cli_command('vm boot-diagnostics get-boot-log', get_boot_log)
 
 # VM Container (ACS)
 factory = lambda _: get_mgmt_service_client(ACSClient, ACSClientConfig).acs
-cli_command(command_table, 'vm container create', ACSOperations.create_or_update, factory, transform=DeploymentOutputLongRunningOperation('Starting vm container create'))
+cli_command('vm container create', ACSOperations.create_or_update, factory, transform=DeploymentOutputLongRunningOperation('Starting vm container create'))
 
 # VM Diagnostics
-cli_command(command_table, 'vm diagnostics set', set_diagnostics_extension)
-cli_command(command_table, 'vm diagnostics get-default-config', show_default_diagnostics_configuration)
+cli_command('vm diagnostics set', set_diagnostics_extension)
+cli_command('vm diagnostics get-default-config', show_default_diagnostics_configuration)
 
 # VM Disk
-cli_command(command_table, 'vm disk attach-new', attach_new_disk)
-cli_command(command_table, 'vm disk attach-existing', attach_existing_disk)
-cli_command(command_table, 'vm disk attach-detach', detach_disk)
-cli_command(command_table, 'vm disk list', list_disks)
+cli_command('vm disk attach-new', attach_new_disk)
+cli_command('vm disk attach-existing', attach_existing_disk)
+cli_command('vm disk attach-detach', detach_disk)
+cli_command('vm disk list', list_disks)
 
 # VM Extension
 factory = lambda _: _compute_client_factory().virtual_machine_extensions
-cli_command(command_table, 'vm extension delete', VirtualMachineExtensionsOperations.delete, factory)
-cli_command(command_table, 'vm extension show', VirtualMachineExtensionsOperations.get, factory)
-cli_command(command_table, 'vm extension set', set_extension)
-cli_command(command_table, 'vm extension list', list_extensions)
+cli_command('vm extension delete', VirtualMachineExtensionsOperations.delete, factory)
+cli_command('vm extension show', VirtualMachineExtensionsOperations.get, factory)
+cli_command('vm extension set', set_extension)
+cli_command('vm extension list', list_extensions)
 
 # VM Extension Image
 factory = lambda _: _compute_client_factory().virtual_machine_extension_images
-cli_command(command_table, 'vm extension image show', VirtualMachineExtensionImagesOperations.get, factory)
-cli_command(command_table, 'vm extension image list-names', VirtualMachineExtensionImagesOperations.list_types, factory)
-cli_command(command_table, 'vm extension image list-versions', VirtualMachineExtensionImagesOperations.list_versions, factory)
-cli_command(command_table, 'vm extension image list', list_vm_extension_images)
+cli_command('vm extension image show', VirtualMachineExtensionImagesOperations.get, factory)
+cli_command('vm extension image list-names', VirtualMachineExtensionImagesOperations.list_types, factory)
+cli_command('vm extension image list-versions', VirtualMachineExtensionImagesOperations.list_versions, factory)
+cli_command('vm extension image list', list_vm_extension_images)
 
 # VM Image
 factory = lambda _: _compute_client_factory().virtual_machine_images
-cli_command(command_table, 'vm image show', VirtualMachineImagesOperations.get, factory)
-cli_command(command_table, 'vm image list-offers', VirtualMachineImagesOperations.list_offers, factory)
-cli_command(command_table, 'vm image list-publishers', VirtualMachineImagesOperations.list_publishers, factory)
-cli_command(command_table, 'vm image list-skus', VirtualMachineImagesOperations.list_skus, factory)
-cli_command(command_table, 'vm image list', list_vm_images)
+cli_command('vm image show', VirtualMachineImagesOperations.get, factory)
+cli_command('vm image list-offers', VirtualMachineImagesOperations.list_offers, factory)
+cli_command('vm image list-publishers', VirtualMachineImagesOperations.list_publishers, factory)
+cli_command('vm image list-skus', VirtualMachineImagesOperations.list_skus, factory)
+cli_command('vm image list', list_vm_images)
 
 # VM Usage
 factory = lambda _: _compute_client_factory().usage
-cli_command(command_table, 'vm usage list', UsageOperations.list, factory)
+cli_command('vm usage list', UsageOperations.list, factory)
 
 # VM ScaleSet
 factory = lambda _: get_mgmt_service_client(VMSSClient, VMSSClientConfig).vmss
-cli_command(command_table, 'vm scaleset create', VMSSOperations.create_or_update, factory, transform=DeploymentOutputLongRunningOperation('Starting vm scaleset create'))
+cli_command('vm scaleset create', VMSSOperations.create_or_update, factory, transform=DeploymentOutputLongRunningOperation('Starting vm scaleset create'))
 
 factory = lambda _: _compute_client_factory().virtual_machine_scale_sets
-cli_command(command_table, 'vm scaleset show', VirtualMachineScaleSetsOperations.get, factory)
-cli_command(command_table, 'vm scaleset delete', VirtualMachineScaleSetsOperations.delete, factory)
-cli_command(command_table, 'vm scaleset list ', VirtualMachineScaleSetsOperations.list, factory)
-cli_command(command_table, 'vm scaleset list-all', VirtualMachineScaleSetsOperations.list_all, factory) #TODO get rid of list and list-all
-cli_command(command_table, 'vm scaleset list-skus', VirtualMachineScaleSetsOperations.list_skus, factory)
+cli_command('vm scaleset show', VirtualMachineScaleSetsOperations.get, factory)
+cli_command('vm scaleset delete', VirtualMachineScaleSetsOperations.delete, factory)
+cli_command('vm scaleset list ', VirtualMachineScaleSetsOperations.list, factory)
+cli_command('vm scaleset list-all', VirtualMachineScaleSetsOperations.list_all, factory) #TODO get rid of list and list-all
+cli_command('vm scaleset list-skus', VirtualMachineScaleSetsOperations.list_skus, factory)
 
 factory = lambda _: _compute_client_factory().virtual_machine_scale_set_vms
-cli_command(command_table, 'vm scaleset show-instance', VirtualMachineScaleSetVMsOperations.get, factory)
-cli_command(command_table, 'vm scaleset list-instances', VirtualMachineScaleSetVMsOperations.list, factory)
+cli_command('vm scaleset show-instance', VirtualMachineScaleSetVMsOperations.get, factory)
+cli_command('vm scaleset list-instances', VirtualMachineScaleSetVMsOperations.list, factory)
 
-cli_command(command_table, 'vm scaleset deallocate', vmss_deallocate)
-cli_command(command_table, 'vm scaleset delete-instances', vmss_delete_instances)
-cli_command(command_table, 'vm scaleset get-instance-view', vmss_get_instance_view)
-cli_command(command_table, 'vm scaleset power-off', vmss_power_off)
-cli_command(command_table, 'vm scaleset restart', vmss_restart)
-cli_command(command_table, 'vm scaleset start', vmss_start)
-cli_command(command_table, 'vm scaleset update-instances', vmss_update_instances)
-cli_command(command_table, 'vm scaleset reimage', vmss_reimage)
-cli_command(command_table, 'vm scaleset scale', vmss_scale)
+cli_command('vm scaleset deallocate', vmss_deallocate)
+cli_command('vm scaleset delete-instances', vmss_delete_instances)
+cli_command('vm scaleset get-instance-view', vmss_get_instance_view)
+cli_command('vm scaleset power-off', vmss_power_off)
+cli_command('vm scaleset restart', vmss_restart)
+cli_command('vm scaleset start', vmss_start)
+cli_command('vm scaleset update-instances', vmss_update_instances)
+cli_command('vm scaleset reimage', vmss_reimage)
+cli_command('vm scaleset scale', vmss_scale)
 
 # VM Size
 factory = lambda _: _compute_client_factory().virtual_machine_sizes
-cli_command(command_table, 'vm size list', VirtualMachineSizesOperations.list, factory)
+cli_command('vm size list', VirtualMachineSizesOperations.list, factory)
 

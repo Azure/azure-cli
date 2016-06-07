@@ -177,9 +177,9 @@ def register_extra_cli_argument(command, dest, options_list=None, **kwargs):
     '''
     _cli_extra_argument_registry[command][dest] = CliCommandArgument(dest, options_list, **kwargs)
 
-def cli_command(command_table_to_add_to, name, operation, client_factory=None, transform=None):
+def cli_command(name, operation, client_factory=None, transform=None):
     """ Registers a default Azure CLI command. These commands require no special parameters. """
-    command_table_to_add_to[name] = create_command(name, operation, transform, client_factory)
+    command_table[name] = create_command(name, operation, transform, client_factory)
 
 def create_command(name, operation, transform_result, client_factory):
     def _execute_command(kwargs):
