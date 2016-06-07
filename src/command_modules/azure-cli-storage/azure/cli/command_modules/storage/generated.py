@@ -6,8 +6,7 @@ from azure.storage.blob import BlockBlobService
 from azure.storage.file import FileService
 from azure.storage import CloudStorageAccount
 
-from azure.cli.commands import CommandTable
-from azure.cli.commands.command_types import cli_command
+from azure.cli.commands import cli_command, command_table
 from azure.cli.command_modules.storage._command_type import cli_storage_data_plane_command
 from azure.cli.command_modules.storage._factory import \
     (storage_client_factory, blob_data_service_factory, file_data_service_factory,
@@ -18,8 +17,6 @@ from azure.cli.command_modules.storage.custom import \
      renew_storage_account_keys, container_exists, blob_exists, download_blob, upload_blob,
      share_exists, dir_exists, file_exists, upload_file, download_file, get_acl_policy,
      create_acl_policy, delete_acl_policy, list_acl_policies, set_acl_policy)
-
-command_table = CommandTable()
 
 # storage account commands
 factory = lambda kwargs: storage_client_factory().storage_accounts

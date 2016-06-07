@@ -1,16 +1,13 @@
 ﻿#pylint: disable=unused-import
 from azure.mgmt.web.operations import SitesOperations
 
-from azure.cli.commands import CommandTable, LongRunningOperation
-from azure.cli.commands._command_creation import get_mgmt_service_client
-from azure.cli.commands.command_types import cli_command
+from azure.cli.commands import command_table, LongRunningOperation, cli_command
+from azure.cli.commands.client_factory import get_mgmt_service_client
 from azure.cli.command_modules.webapp._params import _web_client_factory
 from azure.cli.command_modules.webapp.mgmt_webapp.lib \
     import (WebAppCreationClient as WebAppClient,
             WebAppCreationClientConfiguration as WebAppClientConfig)
 from azure.cli.command_modules.webapp.mgmt_webapp.lib.operations import WebAppOperations
-
-command_table = CommandTable()
 
 class DeploymentOutputLongRunningOperation(LongRunningOperation): #pylint: disable=too-few-public-methods
     def __call__(self, poller):

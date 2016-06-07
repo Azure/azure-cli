@@ -1,7 +1,7 @@
 import unittest
 from six import StringIO
 
-from azure.cli.commands._validators import *
+from azure.cli.commands.validators import *
 
 class Test_storage_validators(unittest.TestCase):
 
