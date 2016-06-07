@@ -17,7 +17,7 @@ class DeploymentVMSS(Model):
     sending a request.
 
     :ivar uri: URI referencing the template. Default value:
-     "https://azuresdkci.blob.core.windows.net/templatehost/CreateVMSS/azuredeploy.json"
+     "https://azuresdkci.blob.core.windows.net/templatehost/CreateVMSS_2016-06-01/azuredeploy.json"
      .
     :vartype uri: str
     :param content_version: If included it must match the ContentVersion in
@@ -25,7 +25,8 @@ class DeploymentVMSS(Model):
     :type content_version: str
     :ivar _artifacts_location: Container URI of of the template. Default
      value:
-     "https://azuresdkci.blob.core.windows.net/templatehost/CreateVMSS" .
+     "https://azuresdkci.blob.core.windows.net/templatehost/CreateVMSS_2016-06-01"
+     .
     :vartype _artifacts_location: str
     :param admin_password: Password for the Virtual Machine.  Required if SSH
      (Linux only) is not specified.
@@ -35,6 +36,11 @@ class DeploymentVMSS(Model):
     :param authentication_type: Password or SSH Public Key authentication.
      Possible values include: 'password', 'ssh'. Default value: "password" .
     :type authentication_type: str
+    :param custom_os_disk_type: Custom image OS type. Possible values
+     include: 'windows', 'linux'. Default value: "windows" .
+    :type custom_os_disk_type: str
+    :param custom_os_disk_uri: URI to a custom disk image.
+    :type custom_os_disk_uri: str
     :param dns_name_for_public_ip: Globally unique DNS Name for the Public IP
      used to access the Virtual Machine.  Requires a new public IP to be
      created by setting Public IP Address Type to New.
@@ -60,11 +66,20 @@ class DeploymentVMSS(Model):
     :type location: str
     :param name: The VM name.
     :type name: str
+    :param nat_backend_port: End of NAT port range. Default value: "22" .
+    :type nat_backend_port: str
+    :param nat_end_port: End of NAT port range. Default value: "50099" .
+    :type nat_end_port: str
+    :param nat_start_port: Begining of NAT port range. Default value: "50000"
+     .
+    :type nat_start_port: str
     :param os_disk_name: Name of new VM OS disk. Default value: "osdiskimage"
      .
     :type os_disk_name: str
-    :param os_disk_uri: URI for a custom VHD image.
-    :type os_disk_uri: str
+    :param os_disk_type: Use a custom image URI from the OS Disk URI
+     parameter or use a provider's image. Possible values include:
+     'provided', 'custom'. Default value: "provided" .
+    :type os_disk_type: str
     :param os_offer: The OS Offer to install. Default value: "WindowsServer" .
     :type os_offer: str
     :param os_publisher: The OS publisher of the OS image. Default value:
@@ -80,6 +95,14 @@ class DeploymentVMSS(Model):
     :type os_type: str
     :param os_version: The OS version to install. Default value: "latest" .
     :type os_version: str
+    :param overprovision: Overprovision option (see
+     https://azure.microsoft.com/en-us/documentation/articles/virtual-machine-scale-sets-overview/
+     for details). Possible values include: 'true', 'false', 'True', 'False'.
+     Default value: "true" .
+    :type overprovision: str
+    :param private_ip_address: The private IP address to use with Private IP
+     Address Allocation type Static.
+    :type private_ip_address: str
     :param private_ip_address_allocation: Private IP address allocation
      method. Possible values include: 'dynamic', 'static'. Default value:
      "dynamic" .
@@ -97,12 +120,9 @@ class DeploymentVMSS(Model):
     :type ssh_dest_key_path: str
     :param ssh_key_value: SSH key file data.
     :type ssh_key_value: str
-    :param storage_account_name: Name of storage account for the VM OS disk.
-    :type storage_account_name: str
-    :param storage_account_type: Whether to use an existing storage account
-     or create a new one. Possible values include: 'new', 'existing'. Default
-     value: "new" .
-    :type storage_account_type: str
+    :param storage_caching: Storage caching type. Possible values include:
+     'ReadOnly', 'ReadWrite'. Default value: "ReadOnly" .
+    :type storage_caching: str
     :param storage_container_name: Name of storage container for the VM OS
      disk. Default value: "vhds" .
     :type storage_container_name: str
@@ -114,6 +134,9 @@ class DeploymentVMSS(Model):
     :type subnet_ip_address_prefix: str
     :param subnet_name: The subnet name.
     :type subnet_name: str
+    :param upgrade_policy_mode: Manual or Automatic upgrade mode. Possible
+     values include: 'manual', 'automatic'. Default value: "manual" .
+    :type upgrade_policy_mode: str
     :param virtual_network_ip_address_prefix: The virtual network IP address
      prefix in CIDR format. Default value: "10.0.0.0/16" .
     :type virtual_network_ip_address_prefix: str
@@ -147,6 +170,8 @@ class DeploymentVMSS(Model):
         'admin_password': {'key': 'properties.parameters.adminPassword.value', 'type': 'str'},
         'admin_username': {'key': 'properties.parameters.adminUsername.value', 'type': 'str'},
         'authentication_type': {'key': 'properties.parameters.authenticationType.value', 'type': 'str'},
+        'custom_os_disk_type': {'key': 'properties.parameters.customOsDiskType.value', 'type': 'str'},
+        'custom_os_disk_uri': {'key': 'properties.parameters.customOsDiskUri.value', 'type': 'str'},
         'dns_name_for_public_ip': {'key': 'properties.parameters.dnsNameForPublicIP.value', 'type': 'str'},
         'dns_name_type': {'key': 'properties.parameters.dnsNameType.value', 'type': 'str'},
         'instance_count': {'key': 'properties.parameters.instanceCount.value', 'type': 'str'},
@@ -156,25 +181,30 @@ class DeploymentVMSS(Model):
         'load_balancer_type': {'key': 'properties.parameters.loadBalancerType.value', 'type': 'str'},
         'location': {'key': 'properties.parameters.location.value', 'type': 'str'},
         'name': {'key': 'properties.parameters.name.value', 'type': 'str'},
+        'nat_backend_port': {'key': 'properties.parameters.natBackendPort.value', 'type': 'str'},
+        'nat_end_port': {'key': 'properties.parameters.natEndPort.value', 'type': 'str'},
+        'nat_start_port': {'key': 'properties.parameters.natStartPort.value', 'type': 'str'},
         'os_disk_name': {'key': 'properties.parameters.osDiskName.value', 'type': 'str'},
-        'os_disk_uri': {'key': 'properties.parameters.osDiskUri.value', 'type': 'str'},
+        'os_disk_type': {'key': 'properties.parameters.osDiskType.value', 'type': 'str'},
         'os_offer': {'key': 'properties.parameters.osOffer.value', 'type': 'str'},
         'os_publisher': {'key': 'properties.parameters.osPublisher.value', 'type': 'str'},
         'os_sku': {'key': 'properties.parameters.osSKU.value', 'type': 'str'},
         'os_type': {'key': 'properties.parameters.osType.value', 'type': 'str'},
         'os_version': {'key': 'properties.parameters.osVersion.value', 'type': 'str'},
+        'overprovision': {'key': 'properties.parameters.overprovision.value', 'type': 'str'},
+        'private_ip_address': {'key': 'properties.parameters.privateIpAddress.value', 'type': 'str'},
         'private_ip_address_allocation': {'key': 'properties.parameters.privateIpAddressAllocation.value', 'type': 'str'},
         'public_ip_address_allocation': {'key': 'properties.parameters.publicIpAddressAllocation.value', 'type': 'str'},
         'public_ip_address_name': {'key': 'properties.parameters.publicIpAddressName.value', 'type': 'str'},
         'public_ip_address_type': {'key': 'properties.parameters.publicIpAddressType.value', 'type': 'str'},
         'ssh_dest_key_path': {'key': 'properties.parameters.sshDestKeyPath.value', 'type': 'str'},
         'ssh_key_value': {'key': 'properties.parameters.sshKeyValue.value', 'type': 'str'},
-        'storage_account_name': {'key': 'properties.parameters.storageAccountName.value', 'type': 'str'},
-        'storage_account_type': {'key': 'properties.parameters.storageAccountType.value', 'type': 'str'},
+        'storage_caching': {'key': 'properties.parameters.storageCaching.value', 'type': 'str'},
         'storage_container_name': {'key': 'properties.parameters.storageContainerName.value', 'type': 'str'},
         'storage_redundancy_type': {'key': 'properties.parameters.storageRedundancyType.value', 'type': 'str'},
         'subnet_ip_address_prefix': {'key': 'properties.parameters.subnetIpAddressPrefix.value', 'type': 'str'},
         'subnet_name': {'key': 'properties.parameters.subnetName.value', 'type': 'str'},
+        'upgrade_policy_mode': {'key': 'properties.parameters.upgradePolicyMode.value', 'type': 'str'},
         'virtual_network_ip_address_prefix': {'key': 'properties.parameters.virtualNetworkIpAddressPrefix.value', 'type': 'str'},
         'virtual_network_name': {'key': 'properties.parameters.virtualNetworkName.value', 'type': 'str'},
         'virtual_network_type': {'key': 'properties.parameters.virtualNetworkType.value', 'type': 'str'},
@@ -182,17 +212,19 @@ class DeploymentVMSS(Model):
         'mode': {'key': 'properties.mode', 'type': 'str'},
     }
 
-    uri = "https://azuresdkci.blob.core.windows.net/templatehost/CreateVMSS/azuredeploy.json"
+    uri = "https://azuresdkci.blob.core.windows.net/templatehost/CreateVMSS_2016-06-01/azuredeploy.json"
 
-    _artifacts_location = "https://azuresdkci.blob.core.windows.net/templatehost/CreateVMSS"
+    _artifacts_location = "https://azuresdkci.blob.core.windows.net/templatehost/CreateVMSS_2016-06-01"
 
     mode = "Incremental"
 
-    def __init__(self, admin_username, name, content_version=None, admin_password=None, authentication_type="password", dns_name_for_public_ip=None, dns_name_type="none", instance_count="2", load_balancer_backend_pool_name=None, load_balancer_name=None, load_balancer_nat_pool_name=None, load_balancer_type="new", location=None, os_disk_name="osdiskimage", os_disk_uri=None, os_offer="WindowsServer", os_publisher="MicrosoftWindowsServer", os_sku="2012-R2-Datacenter", os_type="Win2012R2Datacenter", os_version="latest", private_ip_address_allocation="dynamic", public_ip_address_allocation="dynamic", public_ip_address_name=None, public_ip_address_type="new", ssh_dest_key_path=None, ssh_key_value=None, storage_account_name=None, storage_account_type="new", storage_container_name="vhds", storage_redundancy_type="Standard_LRS", subnet_ip_address_prefix="10.0.0.0/24", subnet_name=None, virtual_network_ip_address_prefix="10.0.0.0/16", virtual_network_name=None, virtual_network_type="new", vm_sku="Standard_D1_v2"):
+    def __init__(self, admin_username, name, content_version=None, admin_password=None, authentication_type="password", custom_os_disk_type="windows", custom_os_disk_uri=None, dns_name_for_public_ip=None, dns_name_type="none", instance_count="2", load_balancer_backend_pool_name=None, load_balancer_name=None, load_balancer_nat_pool_name=None, load_balancer_type="new", location=None, nat_backend_port="22", nat_end_port="50099", nat_start_port="50000", os_disk_name="osdiskimage", os_disk_type="provided", os_offer="WindowsServer", os_publisher="MicrosoftWindowsServer", os_sku="2012-R2-Datacenter", os_type="Win2012R2Datacenter", os_version="latest", overprovision="true", private_ip_address=None, private_ip_address_allocation="dynamic", public_ip_address_allocation="dynamic", public_ip_address_name=None, public_ip_address_type="new", ssh_dest_key_path=None, ssh_key_value=None, storage_caching="ReadOnly", storage_container_name="vhds", storage_redundancy_type="Standard_LRS", subnet_ip_address_prefix="10.0.0.0/24", subnet_name=None, upgrade_policy_mode="manual", virtual_network_ip_address_prefix="10.0.0.0/16", virtual_network_name=None, virtual_network_type="new", vm_sku="Standard_D1_v2"):
         self.content_version = content_version
         self.admin_password = admin_password
         self.admin_username = admin_username
         self.authentication_type = authentication_type
+        self.custom_os_disk_type = custom_os_disk_type
+        self.custom_os_disk_uri = custom_os_disk_uri
         self.dns_name_for_public_ip = dns_name_for_public_ip
         self.dns_name_type = dns_name_type
         self.instance_count = instance_count
@@ -202,25 +234,30 @@ class DeploymentVMSS(Model):
         self.load_balancer_type = load_balancer_type
         self.location = location
         self.name = name
+        self.nat_backend_port = nat_backend_port
+        self.nat_end_port = nat_end_port
+        self.nat_start_port = nat_start_port
         self.os_disk_name = os_disk_name
-        self.os_disk_uri = os_disk_uri
+        self.os_disk_type = os_disk_type
         self.os_offer = os_offer
         self.os_publisher = os_publisher
         self.os_sku = os_sku
         self.os_type = os_type
         self.os_version = os_version
+        self.overprovision = overprovision
+        self.private_ip_address = private_ip_address
         self.private_ip_address_allocation = private_ip_address_allocation
         self.public_ip_address_allocation = public_ip_address_allocation
         self.public_ip_address_name = public_ip_address_name
         self.public_ip_address_type = public_ip_address_type
         self.ssh_dest_key_path = ssh_dest_key_path
         self.ssh_key_value = ssh_key_value
-        self.storage_account_name = storage_account_name
-        self.storage_account_type = storage_account_type
+        self.storage_caching = storage_caching
         self.storage_container_name = storage_container_name
         self.storage_redundancy_type = storage_redundancy_type
         self.subnet_ip_address_prefix = subnet_ip_address_prefix
         self.subnet_name = subnet_name
+        self.upgrade_policy_mode = upgrade_policy_mode
         self.virtual_network_ip_address_prefix = virtual_network_ip_address_prefix
         self.virtual_network_name = virtual_network_name
         self.virtual_network_type = virtual_network_type
