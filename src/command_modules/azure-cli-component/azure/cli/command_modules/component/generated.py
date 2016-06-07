@@ -1,12 +1,9 @@
 from __future__ import print_function
 
-from azure.cli.commands import CommandTable
-from azure.cli.commands.command_types import cli_command
+from azure.cli.commands import command_table, cli_command
 
 from .custom import (list_components, install, update, update_all, update_self, remove,
                      check_component)
-
-command_table = CommandTable()
 
 # HELPER METHODS
 

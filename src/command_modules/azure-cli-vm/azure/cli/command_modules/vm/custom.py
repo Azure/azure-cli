@@ -8,8 +8,8 @@ from six.moves.urllib.request import urlopen #pylint: disable=import-error,unuse
 
 from azure.mgmt.compute.models import DataDisk, VirtualMachineScaleSet
 from azure.mgmt.compute.models.compute_management_client_enums import DiskCreateOptionTypes
-from azure.cli.commands import CommandTable, LongRunningOperation
-from azure.cli.commands._command_creation import get_mgmt_service_client, get_data_service_client
+from azure.cli.commands import LongRunningOperation
+from azure.cli.commands.client_factory import get_mgmt_service_client, get_data_service_client
 from azure.cli._util import CLIError
 from ._vm_utils import read_content_if_is_file, load_json, get_default_linux_diag_config
 
@@ -17,8 +17,6 @@ from ._actions import (load_images_from_aliases_doc,
                        load_extension_images_thru_services,
                        load_images_thru_services)
 from ._factory import _compute_client_factory
-
-command_table = CommandTable()
 
 def _vm_get(resource_group_name, vm_name, expand=None):
     '''Retrieves a VM'''

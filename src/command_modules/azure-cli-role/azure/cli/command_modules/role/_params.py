@@ -1,7 +1,7 @@
 from azure.mgmt.authorization import (AuthorizationManagementClient,
                                       AuthorizationManagementClientConfiguration)
 
-from azure.cli.commands._command_creation import get_mgmt_service_client
+from azure.cli.commands.client_factory import get_mgmt_service_client
 
 # FACTORIES
 

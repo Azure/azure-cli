@@ -9,16 +9,13 @@ from azure.mgmt.resource.resources.models.resource_group import ResourceGroup
 from azure.mgmt.resource.resources.models import GenericResource
 
 from azure.cli.parser import IncorrectUsageError
-from azure.cli.commands import CommandTable
 from azure.cli._util import CLIError
 import azure.cli._logging as _logging
-from azure.cli.commands._command_creation import get_mgmt_service_client
+from azure.cli.commands.client_factory import get_mgmt_service_client
 
 from ._factory import _resource_client_factory
 
 logger = _logging.get_az_logger(__name__)
-
-command_table = CommandTable()
 
 def _list_resources_odata_filter_builder(location=None, resource_type=None,
                                          resource_group_name=None, tag=None, name=None):

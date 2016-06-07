@@ -18,9 +18,8 @@
     VirtualNetworkGatewaysOperations,
     VirtualNetworksOperations)
 
-from azure.cli.commands import CommandTable
-from azure.cli.commands.command_types import cli_command
-from azure.cli.commands._command_creation import get_mgmt_service_client
+
+from azure.cli.commands.client_factory import get_mgmt_service_client
 from azure.cli.command_modules.network.mgmt_vnet.lib \
     import (ResourceManagementClient as VNetClient,
             ResourceManagementClientConfiguration as VNetClientConfig)
@@ -33,10 +32,9 @@ from azure.cli.command_modules.network.mgmt_lb.lib import (LBCreationClient as L
                                                            LBCreationClientConfiguration
                                                            as LBClientConfig)
 from azure.cli.command_modules.network.mgmt_lb.lib.operations import LBOperations
-from azure.cli.command_modules.network._params import _network_client_factory
+from azure.cli.commands import command_table, cli_command
 from .custom import create_update_subnet
-
-command_table = CommandTable()
+from ._factory import _network_client_factory
 
 # pylint: disable=line-too-long
 # Application gateways

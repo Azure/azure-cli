@@ -3,12 +3,9 @@ from __future__ import print_function
 
 from azure.mgmt.authorization.operations import RoleAssignmentsOperations, RoleDefinitionsOperations
 
-from azure.cli.commands import CommandTable
-from azure.cli.commands.command_types import cli_command
+from azure.cli.commands import command_table, cli_command
 
 from ._params import _auth_client_factory
-
-command_table = CommandTable()
 
 factory = lambda _: _auth_client_factory().role_definitions
 cli_command(command_table, 'role list', RoleDefinitionsOperations.list, factory)

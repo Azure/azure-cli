@@ -8,10 +8,8 @@
     VirtualMachinesOperations,
     VirtualMachineScaleSetsOperations,
     VirtualMachineScaleSetVMsOperations)
-from azure.cli.commands import LongRunningOperation
-from azure.cli.commands.command_types import cli_command
-from azure.cli.commands._command_creation import get_mgmt_service_client
-from azure.cli.commands import CommandTable
+from azure.cli.commands import LongRunningOperation, cli_command, command_table
+from azure.cli.commands.client_factory import get_mgmt_service_client
 from azure.cli.command_modules.vm.mgmt_avail_set.lib import (AvailSetCreationClient
                                                              as AvailSetClient,
                                                              AvailSetCreationClientConfiguration
@@ -41,8 +39,6 @@ from .custom import (
 
 
 from ._factory import _compute_client_factory
-
-command_table = CommandTable()
 
 # pylint: disable=line-too-long
 

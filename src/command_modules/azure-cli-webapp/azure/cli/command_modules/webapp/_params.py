@@ -1,10 +1,10 @@
 #pylint: disable=unused-import
 import argparse
 
-from azure.cli.commands.argument_types import CliArgumentType, register_cli_argument
+from azure.cli.commands import CliArgumentType, register_cli_argument
 
 from azure.mgmt.web import WebSiteManagementClient, WebSiteManagementClientConfiguration
-from azure.cli.commands._command_creation import get_mgmt_service_client
+from azure.cli.commands.client_factory import get_mgmt_service_client
 
 # FACTORIES
 
