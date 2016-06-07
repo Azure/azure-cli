@@ -114,7 +114,7 @@ cli_command(command_table, 'network public-ip show', PublicIPAddressesOperations
 cli_command(command_table, 'network public-ip list', PublicIPAddressesOperations.list, factory)
 cli_command(command_table, 'network public-ip list-all', PublicIPAddressesOperations.list_all, factory)
 
-factory = lambda **_: get_mgmt_service_client(PublicIPClient, PublicIPClientConfig).public_ip
+factory = lambda _: get_mgmt_service_client(PublicIPClient, PublicIPClientConfig).public_ip
 cli_command(command_table, 'network public-ip create', PublicIPOperations.create_or_update, factory)
 
 # RouteTablesOperations

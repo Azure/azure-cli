@@ -32,7 +32,7 @@ class VMSSOperations(object):
         self.config = config
 
     def create_or_update(
-            self, resource_group_name, deployment_name, admin_username, name, content_version=None, admin_password=None, authentication_type="password", dns_name_for_public_ip=None, dns_name_type="none", instance_count="2", load_balancer_backend_pool_name=None, load_balancer_name=None, load_balancer_nat_pool_name=None, load_balancer_type="new", location=None, os_disk_name="osdiskimage", os_disk_uri=None, os_offer="WindowsServer", os_publisher="MicrosoftWindowsServer", os_sku="2012-R2-Datacenter", os_type="Win2012R2Datacenter", os_version="latest", private_ip_address_allocation="dynamic", public_ip_address_allocation="dynamic", public_ip_address_name=None, public_ip_address_type="new", ssh_dest_key_path=None, ssh_key_value=None, storage_account_name=None, storage_account_type="new", storage_container_name="vhds", storage_redundancy_type="Standard_LRS", subnet_ip_address_prefix="10.0.0.0/24", subnet_name=None, virtual_network_ip_address_prefix="10.0.0.0/16", virtual_network_name=None, virtual_network_type="new", vm_sku="Standard_D1_v2", custom_headers={}, raw=False, **operation_config):
+            self, resource_group_name, deployment_name, admin_username, name, content_version=None, admin_password=None, authentication_type="password", custom_os_disk_type="windows", custom_os_disk_uri=None, dns_name_for_public_ip=None, dns_name_type="none", instance_count="2", load_balancer_backend_pool_name=None, load_balancer_name=None, load_balancer_nat_pool_name=None, load_balancer_type="new", location=None, nat_backend_port="22", nat_end_port="50099", nat_start_port="50000", os_disk_name="osdiskimage", os_disk_type="provided", os_offer="WindowsServer", os_publisher="MicrosoftWindowsServer", os_sku="2012-R2-Datacenter", os_type="Win2012R2Datacenter", os_version="latest", overprovision="true", private_ip_address=None, private_ip_address_allocation="dynamic", public_ip_address_allocation="dynamic", public_ip_address_name=None, public_ip_address_type="new", ssh_dest_key_path=None, ssh_key_value=None, storage_caching="ReadOnly", storage_container_name="vhds", storage_redundancy_type="Standard_LRS", subnet_ip_address_prefix="10.0.0.0/24", subnet_name=None, upgrade_policy_mode="manual", virtual_network_ip_address_prefix="10.0.0.0/16", virtual_network_name=None, virtual_network_type="new", vm_sku="Standard_D1_v2", custom_headers={}, raw=False, **operation_config):
         """
         Create or update a virtual machine.
 
@@ -54,6 +54,11 @@ class VMSSOperations(object):
         :param authentication_type: Password or SSH Public Key
          authentication. Possible values include: 'password', 'ssh'
         :type authentication_type: str
+        :param custom_os_disk_type: Custom image OS type. Possible values
+         include: 'windows', 'linux'
+        :type custom_os_disk_type: str
+        :param custom_os_disk_uri: URI to a custom disk image.
+        :type custom_os_disk_uri: str
         :param dns_name_for_public_ip: Globally unique DNS Name for the
          Public IP used to access the Virtual Machine.  Requires a new public
          IP to be created by setting Public IP Address Type to New.
@@ -77,10 +82,18 @@ class VMSSOperations(object):
         :type load_balancer_type: str
         :param location: Location for VM resources.
         :type location: str
+        :param nat_backend_port: End of NAT port range.
+        :type nat_backend_port: str
+        :param nat_end_port: End of NAT port range.
+        :type nat_end_port: str
+        :param nat_start_port: Begining of NAT port range.
+        :type nat_start_port: str
         :param os_disk_name: Name of new VM OS disk.
         :type os_disk_name: str
-        :param os_disk_uri: URI for a custom VHD image.
-        :type os_disk_uri: str
+        :param os_disk_type: Use a custom image URI from the OS Disk URI
+         parameter or use a provider's image. Possible values include:
+         'provided', 'custom'
+        :type os_disk_type: str
         :param os_offer: The OS Offer to install.
         :type os_offer: str
         :param os_publisher: The OS publisher of the OS image.
@@ -94,6 +107,14 @@ class VMSSOperations(object):
         :type os_type: str
         :param os_version: The OS version to install.
         :type os_version: str
+        :param overprovision: Overprovision option (see
+         https://azure.microsoft.com/en-us/documentation/articles/virtual-machine-scale-sets-overview/
+         for details). Possible values include: 'true', 'false', 'True',
+         'False'
+        :type overprovision: str
+        :param private_ip_address: The private IP address to use with Private
+         IP Address Allocation type Static.
+        :type private_ip_address: str
         :param private_ip_address_allocation: Private IP address allocation
          method. Possible values include: 'dynamic', 'static'
         :type private_ip_address_allocation: str
@@ -109,13 +130,9 @@ class VMSSOperations(object):
         :type ssh_dest_key_path: str
         :param ssh_key_value: SSH key file data.
         :type ssh_key_value: str
-        :param storage_account_name: Name of storage account for the VM OS
-         disk.
-        :type storage_account_name: str
-        :param storage_account_type: Whether to use an existing storage
-         account or create a new one. Possible values include: 'new',
-         'existing'
-        :type storage_account_type: str
+        :param storage_caching: Storage caching type. Possible values
+         include: 'ReadOnly', 'ReadWrite'
+        :type storage_caching: str
         :param storage_container_name: Name of storage container for the VM
          OS disk.
         :type storage_container_name: str
@@ -127,6 +144,9 @@ class VMSSOperations(object):
         :type subnet_ip_address_prefix: str
         :param subnet_name: The subnet name.
         :type subnet_name: str
+        :param upgrade_policy_mode: Manual or Automatic upgrade mode.
+         Possible values include: 'manual', 'automatic'
+        :type upgrade_policy_mode: str
         :param virtual_network_ip_address_prefix: The virtual network IP
          address prefix in CIDR format.
         :type virtual_network_ip_address_prefix: str
@@ -149,7 +169,7 @@ class VMSSOperations(object):
         :rtype: :class:`ClientRawResponse<msrest.pipeline.ClientRawResponse>`
          if raw=true
         """
-        parameters = models.DeploymentVMSS(content_version=content_version, admin_password=admin_password, admin_username=admin_username, authentication_type=authentication_type, dns_name_for_public_ip=dns_name_for_public_ip, dns_name_type=dns_name_type, instance_count=instance_count, load_balancer_backend_pool_name=load_balancer_backend_pool_name, load_balancer_name=load_balancer_name, load_balancer_nat_pool_name=load_balancer_nat_pool_name, load_balancer_type=load_balancer_type, location=location, name=name, os_disk_name=os_disk_name, os_disk_uri=os_disk_uri, os_offer=os_offer, os_publisher=os_publisher, os_sku=os_sku, os_type=os_type, os_version=os_version, private_ip_address_allocation=private_ip_address_allocation, public_ip_address_allocation=public_ip_address_allocation, public_ip_address_name=public_ip_address_name, public_ip_address_type=public_ip_address_type, ssh_dest_key_path=ssh_dest_key_path, ssh_key_value=ssh_key_value, storage_account_name=storage_account_name, storage_account_type=storage_account_type, storage_container_name=storage_container_name, storage_redundancy_type=storage_redundancy_type, subnet_ip_address_prefix=subnet_ip_address_prefix, subnet_name=subnet_name, virtual_network_ip_address_prefix=virtual_network_ip_address_prefix, virtual_network_name=virtual_network_name, virtual_network_type=virtual_network_type, vm_sku=vm_sku)
+        parameters = models.DeploymentVMSS(content_version=content_version, admin_password=admin_password, admin_username=admin_username, authentication_type=authentication_type, custom_os_disk_type=custom_os_disk_type, custom_os_disk_uri=custom_os_disk_uri, dns_name_for_public_ip=dns_name_for_public_ip, dns_name_type=dns_name_type, instance_count=instance_count, load_balancer_backend_pool_name=load_balancer_backend_pool_name, load_balancer_name=load_balancer_name, load_balancer_nat_pool_name=load_balancer_nat_pool_name, load_balancer_type=load_balancer_type, location=location, name=name, nat_backend_port=nat_backend_port, nat_end_port=nat_end_port, nat_start_port=nat_start_port, os_disk_name=os_disk_name, os_disk_type=os_disk_type, os_offer=os_offer, os_publisher=os_publisher, os_sku=os_sku, os_type=os_type, os_version=os_version, overprovision=overprovision, private_ip_address=private_ip_address, private_ip_address_allocation=private_ip_address_allocation, public_ip_address_allocation=public_ip_address_allocation, public_ip_address_name=public_ip_address_name, public_ip_address_type=public_ip_address_type, ssh_dest_key_path=ssh_dest_key_path, ssh_key_value=ssh_key_value, storage_caching=storage_caching, storage_container_name=storage_container_name, storage_redundancy_type=storage_redundancy_type, subnet_ip_address_prefix=subnet_ip_address_prefix, subnet_name=subnet_name, upgrade_policy_mode=upgrade_policy_mode, virtual_network_ip_address_prefix=virtual_network_ip_address_prefix, virtual_network_name=virtual_network_name, virtual_network_type=virtual_network_type, vm_sku=vm_sku)
 
         # Construct URL
         url = '/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Resources/deployments/{deploymentName}'

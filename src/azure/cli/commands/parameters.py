@@ -1,3 +1,7 @@
+import argparse
+import time
+import random
+
 # pylint: disable=line-too-long
 from azure.cli.commands import CliArgumentType, register_cli_argument
 from azure.cli.commands.validators import validate_tag, validate_tags
@@ -26,3 +30,7 @@ tag_type = CliArgumentType(
 
 register_cli_argument('', 'resource_group_name', resource_group_name_type)
 register_cli_argument('', 'location', location_type)
+register_cli_argument('', 'deployment_name',
+                      CliArgumentType(help=argparse.SUPPRESS, required=False,
+                                      default='azurecli' + str(time.time())
+                                      + str(random.randint(1, 100000))))

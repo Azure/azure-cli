@@ -145,7 +145,7 @@
           "type": "string",
           "description": "URI referencing the template.",
           "enum": [
-            "https://azuresdkci.blob.core.windows.net/templatehost/CreateVM_2016-05-31/azuredeploy.json"
+            "https://azuresdkci.blob.core.windows.net/templatehost/CreateVM_2016-06-03/azuredeploy.json"
           ]
         },
         "contentVersion": {
@@ -191,6 +191,16 @@
           "$ref": "#/definitions/DeploymentParameter_availabilitySetType",
           "x-ms-client-flatten": true
         },
+        "customOsDiskType": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_customOsDiskType",
+          "x-ms-client-flatten": true
+        },
+        "customOsDiskUri": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_customOsDiskUri",
+          "x-ms-client-flatten": true
+        },
         "dnsNameForPublicIP": {
           "type": "object",
           "$ref": "#/definitions/DeploymentParameter_dnsNameForPublicIP",
@@ -229,6 +239,11 @@
         "osDiskName": {
           "type": "object",
           "$ref": "#/definitions/DeploymentParameter_osDiskName",
+          "x-ms-client-flatten": true
+        },
+        "osDiskType": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_osDiskType",
           "x-ms-client-flatten": true
         },
         "osDiskUri": {
@@ -311,6 +326,11 @@
           "$ref": "#/definitions/DeploymentParameter_storageAccountType",
           "x-ms-client-flatten": true
         },
+        "storageCaching": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_storageCaching",
+          "x-ms-client-flatten": true
+        },
         "storageContainerName": {
           "type": "object",
           "$ref": "#/definitions/DeploymentParameter_storageContainerName",
@@ -348,8 +368,8 @@
         }
       },
       "required": [
-        "name",
-        "adminUsername"
+        "adminUsername",
+        "name"
       ]
 
     },
@@ -409,6 +429,29 @@
             "existing"
           ],
           "default": "none"
+        }
+      }
+    },
+    "DeploymentParameter_customOsDiskType": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "Custom image OS type.",
+          "x-ms-client-name": "customOsDiskType",
+          "enum": [
+            "windows",
+            "linux"
+          ],
+          "default": "windows"
+        }
+      }
+    },
+    "DeploymentParameter_customOsDiskUri": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "URI to a custom disk image.",
+          "x-ms-client-name": "customOsDiskUri"
         }
       }
     },
@@ -502,6 +545,20 @@
           "description": "Name of new VM OS disk.",
           "x-ms-client-name": "osDiskName",
           "default": "osdiskimage"
+        }
+      }
+    },
+    "DeploymentParameter_osDiskType": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "Use a custom image URI from the OS Disk URI parameter or use a provider's image.",
+          "x-ms-client-name": "osDiskType",
+          "enum": [
+            "provided",
+            "custom"
+          ],
+          "default": "provided"
         }
       }
     },
@@ -682,6 +739,20 @@
         }
       }
     },
+    "DeploymentParameter_storageCaching": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "Storage caching type.",
+          "x-ms-client-name": "storageCaching",
+          "enum": [
+            "ReadOnly",
+            "ReadWrite"
+          ],
+          "default": "ReadOnly"
+        }
+      }
+    },
     "DeploymentParameter_storageContainerName": {
       "properties": {
         "value": {
@@ -762,7 +833,7 @@
           "description": "Container URI of of the template.",
           "x-ms-client-name": "_artifactsLocation",
           "enum": [
-            "https://azuresdkci.blob.core.windows.net/templatehost/CreateVM_2016-05-31"
+            "https://azuresdkci.blob.core.windows.net/templatehost/CreateVM_2016-06-03"
           ]
         }
       },

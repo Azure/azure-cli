@@ -36,6 +36,7 @@ register_cli_argument('network nsg-rule', 'security_rule_name', name_arg_type)
 register_cli_argument('network nsg-rule', 'network_security_group_name', CliArgumentType(('--nsg-name',), metavar='NSGNAME'))
 
 register_cli_argument('network public-ip', 'public_ip_address_name', name_arg_type)
+register_cli_argument('network public-ip', 'name', name_arg_type)
 
 register_cli_argument('network route-operation', 'route_name', name_arg_type)
 

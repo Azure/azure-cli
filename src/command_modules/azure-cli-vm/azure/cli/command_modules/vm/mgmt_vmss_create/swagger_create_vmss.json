@@ -145,7 +145,7 @@
           "type": "string",
           "description": "URI referencing the template.",
           "enum": [
-            "https://azuresdkci.blob.core.windows.net/templatehost/CreateVMSS/azuredeploy.json"
+            "https://azuresdkci.blob.core.windows.net/templatehost/CreateVMSS_2016-06-01/azuredeploy.json"
           ]
         },
         "contentVersion": {
@@ -179,6 +179,16 @@
         "authenticationType": {
           "type": "object",
           "$ref": "#/definitions/DeploymentParameter_authenticationType",
+          "x-ms-client-flatten": true
+        },
+        "customOsDiskType": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_customOsDiskType",
+          "x-ms-client-flatten": true
+        },
+        "customOsDiskUri": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_customOsDiskUri",
           "x-ms-client-flatten": true
         },
         "dnsNameForPublicIP": {
@@ -226,14 +236,29 @@
           "$ref": "#/definitions/DeploymentParameter_name",
           "x-ms-client-flatten": true
         },
+        "natBackendPort": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_natBackendPort",
+          "x-ms-client-flatten": true
+        },
+        "natEndPort": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_natEndPort",
+          "x-ms-client-flatten": true
+        },
+        "natStartPort": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_natStartPort",
+          "x-ms-client-flatten": true
+        },
         "osDiskName": {
           "type": "object",
           "$ref": "#/definitions/DeploymentParameter_osDiskName",
           "x-ms-client-flatten": true
         },
-        "osDiskUri": {
+        "osDiskType": {
           "type": "object",
-          "$ref": "#/definitions/DeploymentParameter_osDiskUri",
+          "$ref": "#/definitions/DeploymentParameter_osDiskType",
           "x-ms-client-flatten": true
         },
         "osOffer": {
@@ -259,6 +284,16 @@
         "osVersion": {
           "type": "object",
           "$ref": "#/definitions/DeploymentParameter_osVersion",
+          "x-ms-client-flatten": true
+        },
+        "overprovision": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_overprovision",
+          "x-ms-client-flatten": true
+        },
+        "privateIpAddress": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_privateIpAddress",
           "x-ms-client-flatten": true
         },
         "privateIpAddressAllocation": {
@@ -291,14 +326,9 @@
           "$ref": "#/definitions/DeploymentParameter_sshKeyValue",
           "x-ms-client-flatten": true
         },
-        "storageAccountName": {
+        "storageCaching": {
           "type": "object",
-          "$ref": "#/definitions/DeploymentParameter_storageAccountName",
-          "x-ms-client-flatten": true
-        },
-        "storageAccountType": {
-          "type": "object",
-          "$ref": "#/definitions/DeploymentParameter_storageAccountType",
+          "$ref": "#/definitions/DeploymentParameter_storageCaching",
           "x-ms-client-flatten": true
         },
         "storageContainerName": {
@@ -319,6 +349,11 @@
         "subnetName": {
           "type": "object",
           "$ref": "#/definitions/DeploymentParameter_subnetName",
+          "x-ms-client-flatten": true
+        },
+        "upgradePolicyMode": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_upgradePolicyMode",
           "x-ms-client-flatten": true
         },
         "virtualNetworkIpAddressPrefix": {
@@ -343,8 +378,8 @@
         }
       },
       "required": [
-        "name",
-        "adminUsername"
+        "adminUsername",
+        "name"
       ]
 
     },
@@ -381,6 +416,29 @@
             "ssh"
           ],
           "default": "password"
+        }
+      }
+    },
+    "DeploymentParameter_customOsDiskType": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "Custom image OS type.",
+          "x-ms-client-name": "customOsDiskType",
+          "enum": [
+            "windows",
+            "linux"
+          ],
+          "default": "windows"
+        }
+      }
+    },
+    "DeploymentParameter_customOsDiskUri": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "URI to a custom disk image.",
+          "x-ms-client-name": "customOsDiskUri"
         }
       }
     },
@@ -481,6 +539,36 @@
       ]
 
     },
+    "DeploymentParameter_natBackendPort": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "End of NAT port range.",
+          "x-ms-client-name": "natBackendPort",
+          "default": "22"
+        }
+      }
+    },
+    "DeploymentParameter_natEndPort": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "End of NAT port range.",
+          "x-ms-client-name": "natEndPort",
+          "default": "50099"
+        }
+      }
+    },
+    "DeploymentParameter_natStartPort": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "Begining of NAT port range.",
+          "x-ms-client-name": "natStartPort",
+          "default": "50000"
+        }
+      }
+    },
     "DeploymentParameter_osDiskName": {
       "properties": {
         "value": {
@@ -491,12 +579,17 @@
         }
       }
     },
-    "DeploymentParameter_osDiskUri": {
+    "DeploymentParameter_osDiskType": {
       "properties": {
         "value": {
           "type": "string",
-          "description": "URI for a custom VHD image.",
-          "x-ms-client-name": "osDiskUri"
+          "description": "Use a custom image URI from the OS Disk URI parameter or use a provider's image.",
+          "x-ms-client-name": "osDiskType",
+          "enum": [
+            "provided",
+            "custom"
+          ],
+          "default": "provided"
         }
       }
     },
@@ -553,6 +646,31 @@
           "description": "The OS version to install.",
           "x-ms-client-name": "osVersion",
           "default": "latest"
+        }
+      }
+    },
+    "DeploymentParameter_overprovision": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "Overprovision option (see https://azure.microsoft.com/en-us/documentation/articles/virtual-machine-scale-sets-overview/ for details).",
+          "x-ms-client-name": "overprovision",
+          "enum": [
+            "true",
+            "false",
+            "True",
+            "False"
+          ],
+          "default": "true"
+        }
+      }
+    },
+    "DeploymentParameter_privateIpAddress": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "The private IP address to use with Private IP Address Allocation type Static.",
+          "x-ms-client-name": "privateIpAddress"
         }
       }
     },
@@ -626,26 +744,17 @@
         }
       }
     },
-    "DeploymentParameter_storageAccountName": {
+    "DeploymentParameter_storageCaching": {
       "properties": {
         "value": {
           "type": "string",
-          "description": "Name of storage account for the VM OS disk.",
-          "x-ms-client-name": "storageAccountName"
-        }
-      }
-    },
-    "DeploymentParameter_storageAccountType": {
-      "properties": {
-        "value": {
-          "type": "string",
-          "description": "Whether to use an existing storage account or create a new one.",
-          "x-ms-client-name": "storageAccountType",
+          "description": "Storage caching type.",
+          "x-ms-client-name": "storageCaching",
           "enum": [
-            "new",
-            "existing"
+            "ReadOnly",
+            "ReadWrite"
           ],
-          "default": "new"
+          "default": "ReadOnly"
         }
       }
     },
@@ -685,6 +794,20 @@
           "type": "string",
           "description": "The subnet name.",
           "x-ms-client-name": "subnetName"
+        }
+      }
+    },
+    "DeploymentParameter_upgradePolicyMode": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "Manual or Automatic upgrade mode.",
+          "x-ms-client-name": "upgradePolicyMode",
+          "enum": [
+            "manual",
+            "automatic"
+          ],
+          "default": "manual"
         }
       }
     },
@@ -739,7 +862,7 @@
           "description": "Container URI of of the template.",
           "x-ms-client-name": "_artifactsLocation",
           "enum": [
-            "https://azuresdkci.blob.core.windows.net/templatehost/CreateVMSS"
+            "https://azuresdkci.blob.core.windows.net/templatehost/CreateVMSS_2016-06-01"
           ]
         }
       },

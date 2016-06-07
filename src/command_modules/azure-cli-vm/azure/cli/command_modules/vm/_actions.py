@@ -17,7 +17,8 @@ class VMImageFieldAction(argparse.Action): #pylint: disable=too-few-public-metho
         match = re.match('([^:]*):([^:]*):([^:]*):([^:]*)', image)
 
         if image.lower().endswith('.vhd'):
-            namespace.os_disk_uri = image
+            namespace.os_disk_type = 'custom'
+            namespace.custom_os_disk_uri = image
         elif match:
             namespace.os_type = 'Custom'
             namespace.os_publisher = match.group(1)
@@ -51,12 +52,13 @@ class VMDNSNameAction(argparse.Action): #pylint: disable=too-few-public-methods
         namespace.dns_name_for_public_ip = dns_value
 
 def _handle_auth_types(**kwargs):
-    if kwargs['command'] != 'vm create':
+    if kwargs['command'] != 'vm create' and kwargs['command'] != 'vm scaleset create':
         return
 
     args = kwargs['args']
 
-    is_windows = 'Windows' in args.os_offer
+    is_windows = 'Windows' in args.os_offer \
+        and getattr(args, 'custom_os_disk_type', None) != 'linux'
 
     if not args.authentication_type:
         args.authentication_type = 'password' if is_windows else 'ssh'
@@ -78,8 +80,11 @@ def _handle_auth_types(**kwargs):
             else:
                 raise CLIError('An RSA key file or key value must be supplied to SSH Key Value')
 
-    if args.network_security_group_type == 'new':
+    if hasattr(args, 'network_security_group_type') and args.network_security_group_type == 'new':
         args.network_security_group_rule = 'RDP' if is_windows else 'SSH'
+
+    if hasattr(args, 'nat_backend_port') and not args.nat_backend_port:
+        args.nat_backend_port = '3389' if is_windows else '22'
 
 APPLICATION.register(APPLICATION.COMMAND_PARSER_PARSED, _handle_auth_types)
 

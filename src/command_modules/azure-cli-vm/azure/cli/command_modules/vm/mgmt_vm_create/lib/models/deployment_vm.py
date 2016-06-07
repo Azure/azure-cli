@@ -17,7 +17,7 @@ class DeploymentVM(Model):
     sending a request.
 
     :ivar uri: URI referencing the template. Default value:
-     "https://azuresdkci.blob.core.windows.net/templatehost/CreateVM_2016-05-31/azuredeploy.json"
+     "https://azuresdkci.blob.core.windows.net/templatehost/CreateVM_2016-06-03/azuredeploy.json"
      .
     :vartype uri: str
     :param content_version: If included it must match the ContentVersion in
@@ -25,7 +25,7 @@ class DeploymentVM(Model):
     :type content_version: str
     :ivar _artifacts_location: Container URI of of the template. Default
      value:
-     "https://azuresdkci.blob.core.windows.net/templatehost/CreateVM_2016-05-31"
+     "https://azuresdkci.blob.core.windows.net/templatehost/CreateVM_2016-06-03"
      .
     :vartype _artifacts_location: str
     :param admin_password: Password for the Virtual Machine.  Required if SSH
@@ -42,6 +42,11 @@ class DeploymentVM(Model):
      availability set. Possible values include: 'none', 'existing'. Default
      value: "none" .
     :type availability_set_type: str
+    :param custom_os_disk_type: Custom image OS type. Possible values
+     include: 'windows', 'linux'. Default value: "windows" .
+    :type custom_os_disk_type: str
+    :param custom_os_disk_uri: URI to a custom disk image.
+    :type custom_os_disk_uri: str
     :param dns_name_for_public_ip: Globally unique DNS Name for the Public IP
      used to access the Virtual Machine.  Requires a new public IP to be
      created by setting Public IP Address Type to New.
@@ -66,6 +71,10 @@ class DeploymentVM(Model):
     :param os_disk_name: Name of new VM OS disk. Default value: "osdiskimage"
      .
     :type os_disk_name: str
+    :param os_disk_type: Use a custom image URI from the OS Disk URI
+     parameter or use a provider's image. Possible values include:
+     'provided', 'custom'. Default value: "provided" .
+    :type os_disk_type: str
     :param os_disk_uri: URI for a custom VHD image.
     :type os_disk_uri: str
     :param os_offer: The OS Offer to install. Default value: "WindowsServer" .
@@ -113,6 +122,9 @@ class DeploymentVM(Model):
      or create a new one. Possible values include: 'new', 'existing'. Default
      value: "new" .
     :type storage_account_type: str
+    :param storage_caching: Storage caching type. Possible values include:
+     'ReadOnly', 'ReadWrite'. Default value: "ReadOnly" .
+    :type storage_caching: str
     :param storage_container_name: Name of storage container for the VM OS
      disk. Default value: "vhds" .
     :type storage_container_name: str
@@ -155,6 +167,8 @@ class DeploymentVM(Model):
         'authentication_type': {'key': 'properties.parameters.authenticationType.value', 'type': 'str'},
         'availability_set_id': {'key': 'properties.parameters.availabilitySetId.value', 'type': 'str'},
         'availability_set_type': {'key': 'properties.parameters.availabilitySetType.value', 'type': 'str'},
+        'custom_os_disk_type': {'key': 'properties.parameters.customOsDiskType.value', 'type': 'str'},
+        'custom_os_disk_uri': {'key': 'properties.parameters.customOsDiskUri.value', 'type': 'str'},
         'dns_name_for_public_ip': {'key': 'properties.parameters.dnsNameForPublicIP.value', 'type': 'str'},
         'dns_name_type': {'key': 'properties.parameters.dnsNameType.value', 'type': 'str'},
         'location': {'key': 'properties.parameters.location.value', 'type': 'str'},
@@ -163,6 +177,7 @@ class DeploymentVM(Model):
         'network_security_group_rule': {'key': 'properties.parameters.networkSecurityGroupRule.value', 'type': 'str'},
         'network_security_group_type': {'key': 'properties.parameters.networkSecurityGroupType.value', 'type': 'str'},
         'os_disk_name': {'key': 'properties.parameters.osDiskName.value', 'type': 'str'},
+        'os_disk_type': {'key': 'properties.parameters.osDiskType.value', 'type': 'str'},
         'os_disk_uri': {'key': 'properties.parameters.osDiskUri.value', 'type': 'str'},
         'os_offer': {'key': 'properties.parameters.osOffer.value', 'type': 'str'},
         'os_publisher': {'key': 'properties.parameters.osPublisher.value', 'type': 'str'},
@@ -179,6 +194,7 @@ class DeploymentVM(Model):
         'ssh_key_value': {'key': 'properties.parameters.sshKeyValue.value', 'type': 'str'},
         'storage_account_name': {'key': 'properties.parameters.storageAccountName.value', 'type': 'str'},
         'storage_account_type': {'key': 'properties.parameters.storageAccountType.value', 'type': 'str'},
+        'storage_caching': {'key': 'properties.parameters.storageCaching.value', 'type': 'str'},
         'storage_container_name': {'key': 'properties.parameters.storageContainerName.value', 'type': 'str'},
         'storage_redundancy_type': {'key': 'properties.parameters.storageRedundancyType.value', 'type': 'str'},
         'subnet_ip_address_prefix': {'key': 'properties.parameters.subnetIpAddressPrefix.value', 'type': 'str'},
@@ -189,19 +205,21 @@ class DeploymentVM(Model):
         'mode': {'key': 'properties.mode', 'type': 'str'},
     }
 
-    uri = "https://azuresdkci.blob.core.windows.net/templatehost/CreateVM_2016-05-31/azuredeploy.json"
+    uri = "https://azuresdkci.blob.core.windows.net/templatehost/CreateVM_2016-06-03/azuredeploy.json"
 
-    _artifacts_location = "https://azuresdkci.blob.core.windows.net/templatehost/CreateVM_2016-05-31"
+    _artifacts_location = "https://azuresdkci.blob.core.windows.net/templatehost/CreateVM_2016-06-03"
 
     mode = "Incremental"
 
-    def __init__(self, admin_username, name, content_version=None, admin_password=None, authentication_type="password", availability_set_id=None, availability_set_type="none", dns_name_for_public_ip=None, dns_name_type="none", location=None, network_security_group_name=None, network_security_group_rule="RDP", network_security_group_type="new", os_disk_name="osdiskimage", os_disk_uri=None, os_offer="WindowsServer", os_publisher="MicrosoftWindowsServer", os_sku="2012-R2-Datacenter", os_type="Win2012R2Datacenter", os_version="latest", private_ip_address=None, private_ip_address_allocation="dynamic", public_ip_address_allocation="dynamic", public_ip_address_name=None, public_ip_address_type="new", size="Standard_A2", ssh_dest_key_path=None, ssh_key_value=None, storage_account_name=None, storage_account_type="new", storage_container_name="vhds", storage_redundancy_type="Standard_LRS", subnet_ip_address_prefix="10.0.0.0/24", subnet_name=None, virtual_network_ip_address_prefix="10.0.0.0/16", virtual_network_name=None, virtual_network_type="new"):
+    def __init__(self, admin_username, name, content_version=None, admin_password=None, authentication_type="password", availability_set_id=None, availability_set_type="none", custom_os_disk_type="windows", custom_os_disk_uri=None, dns_name_for_public_ip=None, dns_name_type="none", location=None, network_security_group_name=None, network_security_group_rule="RDP", network_security_group_type="new", os_disk_name="osdiskimage", os_disk_type="provided", os_disk_uri=None, os_offer="WindowsServer", os_publisher="MicrosoftWindowsServer", os_sku="2012-R2-Datacenter", os_type="Win2012R2Datacenter", os_version="latest", private_ip_address=None, private_ip_address_allocation="dynamic", public_ip_address_allocation="dynamic", public_ip_address_name=None, public_ip_address_type="new", size="Standard_A2", ssh_dest_key_path=None, ssh_key_value=None, storage_account_name=None, storage_account_type="new", storage_caching="ReadOnly", storage_container_name="vhds", storage_redundancy_type="Standard_LRS", subnet_ip_address_prefix="10.0.0.0/24", subnet_name=None, virtual_network_ip_address_prefix="10.0.0.0/16", virtual_network_name=None, virtual_network_type="new"):
         self.content_version = content_version
         self.admin_password = admin_password
         self.admin_username = admin_username
         self.authentication_type = authentication_type
         self.availability_set_id = availability_set_id
         self.availability_set_type = availability_set_type
+        self.custom_os_disk_type = custom_os_disk_type
+        self.custom_os_disk_uri = custom_os_disk_uri
         self.dns_name_for_public_ip = dns_name_for_public_ip
         self.dns_name_type = dns_name_type
         self.location = location
@@ -210,6 +228,7 @@ class DeploymentVM(Model):
         self.network_security_group_rule = network_security_group_rule
         self.network_security_group_type = network_security_group_type
         self.os_disk_name = os_disk_name
+        self.os_disk_type = os_disk_type
         self.os_disk_uri = os_disk_uri
         self.os_offer = os_offer
         self.os_publisher = os_publisher
@@ -226,6 +245,7 @@ class DeploymentVM(Model):
         self.ssh_key_value = ssh_key_value
         self.storage_account_name = storage_account_name
         self.storage_account_type = storage_account_type
+        self.storage_caching = storage_caching
         self.storage_container_name = storage_container_name
         self.storage_redundancy_type = storage_redundancy_type
         self.subnet_ip_address_prefix = subnet_ip_address_prefix

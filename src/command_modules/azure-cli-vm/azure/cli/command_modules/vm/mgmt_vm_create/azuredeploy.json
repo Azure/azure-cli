@@ -51,6 +51,24 @@
         "description": "Flag to add the VM to an existing availability set."
       }
     },
+    "customOsDiskType": {
+      "type": "string",
+      "defaultValue": "windows",
+      "allowedValues": [
+        "windows",
+        "linux"
+      ],
+      "metadata": {
+        "description": "Custom image OS type."
+      }
+    },
+    "customOsDiskUri": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "URI to a custom disk image."
+      }
+    },
     "dnsNameForPublicIP": {
       "type": "string",
       "defaultValue": "",
@@ -83,16 +101,11 @@
         "description": "The VM name."
       }
     },
-    "networkSecurityGroupType": {
+    "networkSecurityGroupName": {
       "type": "string",
-      "defaultValue": "new",
-      "allowedValues": [
-        "new",
-        "existing",
-        "none"
-      ],
+      "defaultValue": "[concat(parameters('name'), 'NSG')]",
       "metadata": {
-        "description": "Whether to use a network security group or not."
+        "description": "Name of the network security group."
       }
     },
     "networkSecurityGroupRule": {
@@ -106,11 +119,16 @@
         "description": "The type of rule to add to a new network security group."
       }
     },
-    "networkSecurityGroupName": {
+    "networkSecurityGroupType": {
       "type": "string",
-      "defaultValue": "[concat(parameters('name'), 'NSG')]",
+      "defaultValue": "new",
+      "allowedValues": [
+        "new",
+        "existing",
+        "none"
+      ],
       "metadata": {
-        "description": "Name of the network security group."
+        "description": "Whether to use a network security group or not."
       }
     },
     "osDiskName": {
@@ -118,6 +136,17 @@
       "defaultValue": "osdiskimage",
       "metadata": {
         "description": "Name of new VM OS disk."
+      }
+    },
+    "osDiskType": {
+      "type": "string",
+      "defaultValue": "provided",
+      "allowedValues": [
+        "provided",
+        "custom"
+      ],
+      "metadata": {
+        "description": "Use a custom image URI from the OS Disk URI parameter or use a provider's image."
       }
     },
     "osDiskUri": {
@@ -253,6 +282,17 @@
       ],
       "metadata": {
         "description": "Whether to use an existing storage account or create a new one."
+      }
+    },
+    "storageCaching": {
+      "type": "string",
+      "defaultValue": "ReadOnly",
+      "allowedValues": [
+        "ReadOnly",
+        "ReadWrite"
+      ],
+      "metadata": {
+        "description": "Storage caching type."
       }
     },
     "storageContainerName": {
@@ -495,7 +535,11 @@
           "sshKeyPath": { "value": "[parameters('sshDestKeyPath')]" },
           "availabilitySetId": { "value": "[variables('availSetId')]" },
           "location": { "value": "[parameters('location')]" },
-          "nicName": { "value": "[variables('nicName')]" }
+          "nicName": { "value": "[variables('nicName')]" },
+          "storageCaching": { "value": "[parameters('storageCaching')]" },
+          "customOsDiskType": { "value": "[parameters('customOsDiskType')]" },
+          "customOsDiskUri": { "value": "[parameters('customOsDiskUri')]" },
+          "osDiskType": { "value": "[parameters('osDiskType')]" }
         }
       }
     }
