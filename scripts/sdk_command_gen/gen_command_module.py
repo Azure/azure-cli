@@ -8,7 +8,7 @@ from importlib import import_module
 
 from gen_generated_file import main as get_generated_file
 
-AZURE_SDK = 'azure==2.0.0rc3'
+AZURE_SDK = 'azure==2.0.0rc4'
 COMMAND_MODULE_PREFIX = 'azure-cli-'
 
 INIT_TEMPLATE = """import pkg_resources
