@@ -9,7 +9,7 @@ from azure.cli.application import Application, Configuration
 from azure.cli.commands import CliCommand
 from azure.cli.parser import AzCliCommandParser
 from azure.cli.commands import CommandTable
-import azure.cli._help_files
+import azure.cli.help_files
 import azure.cli._util as util
 from azure.cli._help import HelpAuthoringException
 
@@ -140,11 +140,11 @@ class Test_argparse(unittest.TestCase):
         command = CliCommand('n1', test_handler)
         command.add_argument('arg', '--arg','-a', required=False)
         command.add_argument('b', '-b', required=False)
-        command.help = '''
+        command.help = """
             long-summary: |
                 line1
                 line2
-            '''
+            """
         cmd_table = {'n1': command}
 
         config = Configuration([])
@@ -167,7 +167,7 @@ class Test_argparse(unittest.TestCase):
         command.add_argument('foobar', '--foobar', '-fb', required=False)
         command.add_argument('foobar2', '--foobar2', '-fb2', required=True)
         command.add_argument('foobar3', '--foobar3', '-fb3', required=False, help='the foobar3')
-        command.help = '''
+        command.help = """
             parameters: 
                 - name: --foobar -fb
                   type: string
@@ -182,7 +182,7 @@ class Test_argparse(unittest.TestCase):
                   required: true
                   short-summary: one line partial sentence
                   long-summary: paragraph(s)
-            '''
+            """
         cmd_table = {'n1': command}
 
         config = Configuration([])
@@ -191,7 +191,7 @@ class Test_argparse(unittest.TestCase):
 
         with self.assertRaises(SystemExit):
             app.execute('n1 -h'.split())
-        s = '''
+        s = """
 Command
     az n1
 
@@ -207,7 +207,7 @@ Arguments
 
 Global Arguments
     --help -h                : Show this help message and exit.
-'''
+"""
         self.assertEqual(s, io.getvalue())
 
     @redirect_io
@@ -220,7 +220,7 @@ Global Arguments
         command = CliCommand('n1', test_handler)
         command.add_argument('foobar', '--foobar', '-fb', required=False)
         command.add_argument('foobar2', '--foobar2', '-fb2', required=True)
-        command.help = '''
+        command.help = """
                 short-summary: this module does xyz one-line or so
                 long-summary: |
                     this module.... kjsdflkj... klsfkj paragraph1
@@ -242,7 +242,7 @@ Global Arguments
                 examples:
                     - name: foo example
                       text: example details
-            '''
+            """
         cmd_table = {'n1': command}
 
         config = Configuration([])
@@ -251,7 +251,7 @@ Global Arguments
 
         with self.assertRaises(SystemExit):
             app.execute('n1 -h'.split())
-        s = '''
+        s = """
 Command
     az n1: This module does xyz one-line or so.
         This module.... kjsdflkj... klsfkj paragraph1
@@ -272,7 +272,7 @@ Global Arguments
 Examples
     foo example
         example details
-'''
+"""
         self.assertEqual(s, io.getvalue())
 
     @redirect_io
@@ -294,7 +294,7 @@ Examples
         with self.assertRaises(SystemExit):
             cmd_result = app.execute('n1 --arg foo -h'.split())
 
-        s = '''
+        s = """
 Command
     az n1
 
@@ -304,7 +304,7 @@ Arguments
 
 Global Arguments
     --help -h: Show this help message and exit.
-'''
+"""
 
         self.assertEqual(s, io.getvalue())
 
@@ -338,7 +338,7 @@ Global Arguments
     @redirect_io
     def test_help_extra_missing_params(self):
         app = Application(Configuration([]))
-        def test_handler():
+        def test_handler(foobar2, foobar=None):
             pass
 
         command = CliCommand('n1', test_handler)
@@ -379,10 +379,21 @@ Global Arguments
         def test_handler():
             pass
 
+        azure.cli.help_files.helps['test_group1 test_group2'] = """
+            type: group
+            short-summary: this module does xyz one-line or so
+            long-summary: |
+                this module.... kjsdflkj... klsfkj paragraph1
+                this module.... kjsdflkj... klsfkj paragraph2
+            examples:
+                - name: foo example
+                  text: example details
+            """
+
         command = CliCommand('test_group1 test_group2 n1', test_handler)
         command.add_argument('foobar', '--foobar', '-fb', required=False)
         command.add_argument('foobar2', '--foobar2', '-fb2', required=True)
-        command.help = '''
+        command.help = """
             short-summary: this module does xyz one-line or so
             long-summary: |
                 this module.... kjsdflkj... klsfkj paragraph1
@@ -404,7 +415,7 @@ Global Arguments
             examples:
                 - name: foo example
                   text: example details        
-        '''
+        """
         cmd_table = {'test_group1 test_group2 n1': command}
 
         config = Configuration([])
@@ -413,7 +424,7 @@ Global Arguments
 
         with self.assertRaises(SystemExit):
             app.execute('test_group1 test_group2 --help'.split())
-        s = '''
+        s = """
 Group
     az test_group1 test_group2: This module does xyz one-line or so.
         This module.... kjsdflkj... klsfkj paragraph1
@@ -426,7 +437,7 @@ Commands:
 Examples
     foo example
         example details
-'''
+"""
         self.assertEqual(s, io.getvalue())
 
     @redirect_io
@@ -448,11 +459,11 @@ Examples
         command = CliCommand('n1', test_handler)
         command.add_argument('arg', '--arg','-a', required=False)
         command.add_argument('b', '-b', required=False)
-        command.help = '''
+        command.help = """
             long-summary: |
                 line1
                 line2
-        '''
+        """
         cmd_table = {'n1': command}
 
         config = Configuration([])
