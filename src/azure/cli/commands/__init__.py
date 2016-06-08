@@ -220,7 +220,8 @@ class _ArgumentRegistry(object):
 
     def register_cli_argument(self, scope, dest, argtype, options_list, **kwargs):
         argument = CliArgumentType(options_list=options_list, overrides=argtype,
-                                   completer=argtype.completer, validator=argtype.validator,
+                                   completer=kwargs.pop('completer', argtype.completer),
+                                   validator=kwargs.pop('validator', argtype.validator),
                                    **kwargs)
         self.arguments[scope][dest] = argument
 
