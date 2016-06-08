@@ -214,6 +214,14 @@ def detach_disk(resource_group_name, vm_name, diskname):
         raise CLIError("No disk with the name '{}' found".format(diskname))
     _vm_set(vm)
 
+def resize_vm(resource_group_name, vm_name, size):
+    '''Update vm size
+    :param str size: sizes such as Standard_A4, Standard_F4s, etc
+    '''
+    vm = _vm_get(resource_group_name, vm_name)
+    vm.hardware_profile.vm_size = size #pylint: disable=no-member
+    return _vm_set(vm)
+
 def list_disks(resource_group_name, vm_name):
     ''' List disks for a Virtual Machine '''
     vm = _vm_get(resource_group_name, vm_name)
