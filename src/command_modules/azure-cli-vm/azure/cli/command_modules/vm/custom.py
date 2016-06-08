@@ -439,7 +439,7 @@ def set_extension(
 
     from azure.mgmt.compute.models import VirtualMachineExtension
 
-    protected_settings = load_json(private_config) if not private_config else {}
+    protected_settings = load_json(private_config) if private_config else {}
     settings = load_json(public_config) if public_config else None
 
     version = _trim_away_build_number(version)
