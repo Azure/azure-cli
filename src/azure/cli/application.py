@@ -3,8 +3,8 @@ from datetime import datetime
 import sys
 import re
 import argparse
-import argcomplete
 from enum import Enum
+import argcomplete
 from .parser import AzCliCommandParser
 import azure.cli.extensions
 import azure.cli._help as _help
