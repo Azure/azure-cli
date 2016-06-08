@@ -30,7 +30,7 @@ instance_ids_type = CliArgumentType(
 
 admin_username_type = CliArgumentType(options_list=('--admin-username',), default=getpass.getuser(), required=False)
 
-register_cli_argument('vm', 'vm_name', name_arg_type)
+register_cli_argument('vm', 'vm_name', name_arg_type, help='The name of the virtual machine')
 register_cli_argument('vm scaleset', 'vm_scale_set_name', name_arg_type)
 register_cli_argument('vm scaleset', 'virtual_machine_scale_set_name', name_arg_type)
 register_cli_argument('vm scaleset', 'instance_ids', instance_ids_type)
@@ -43,7 +43,7 @@ register_cli_argument('vm', 'vhd', CliArgumentType(type=VirtualHardDisk))
 register_cli_argument('vm availability-set', 'availability_set_name', name_arg_type)
 
 register_cli_argument('vm access', 'username', CliArgumentType(options_list=('--username', '-u'), help='The user name'))
-register_cli_argument('vm access', 'password', CliArgumentType(options_list=('--password', '-p'), help='The user name'))
+register_cli_argument('vm access', 'password', CliArgumentType(options_list=('--password', '-p'), help='The user password'))
 
 register_cli_argument('vm container', 'orchestrator_type', CliArgumentType(choices=['docs', 'swarm']))
 register_cli_argument('vm container', 'admin_username', admin_username_type)

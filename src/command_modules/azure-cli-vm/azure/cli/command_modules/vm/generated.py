@@ -28,9 +28,10 @@ from azure.cli.command_modules.vm.mgmt_acs.lib import (ACSCreationClient as ACSC
                                                        as ACSClientConfig)
 from azure.cli.command_modules.vm.mgmt_acs.lib.operations import ACSOperations
 from .custom import (
-    list_vm, list_vm_images, list_vm_extension_images, list_ip_addresses, attach_new_disk,
-    attach_existing_disk, detach_disk, list_disks, set_windows_user_password, set_linux_user,
-    delete_linux_user, disable_boot_diagnostics, enable_boot_diagnostics, get_boot_log,
+    list_vm, resize_vm, list_vm_images, list_vm_extension_images, list_ip_addresses,
+    attach_new_disk, attach_existing_disk, detach_disk, list_disks,
+    set_windows_user_password, set_linux_user, delete_linux_user,
+    disable_boot_diagnostics, enable_boot_diagnostics, get_boot_log,
     list_extensions, set_extension, set_diagnostics_extension,
     show_default_diagnostics_configuration,
     vmss_start, vmss_restart, vmss_delete_instances, vmss_deallocate, vmss_get_instance_view,
@@ -62,7 +63,7 @@ cli_command('vm restart', VirtualMachinesOperations.restart, factory)
 cli_command('vm start', VirtualMachinesOperations.start, factory)
 cli_command('vm list-ip-addresses', list_ip_addresses)
 cli_command('vm list', list_vm)
-
+cli_command('vm resize', resize_vm)
 # VM Access
 cli_command('vm access set-linux-user', set_linux_user)
 cli_command('vm access delete-linux-user', delete_linux_user)
