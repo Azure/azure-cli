@@ -10,7 +10,6 @@ from azure.cli.commands import register_cli_argument, CliArgumentType
 # BASIC PARAMETER CONFIGURATION
 
 name_arg_type = CliArgumentType(options_list=('--name', '-n'), metavar='NAME', help='Name of the resource')
-rule_arg_type = CliArgumentType(options_list=('--name', '-n'), metavar='NAME', help='Name of the rule', required=False)
 
 virtual_network_name_type = CliArgumentType(options_list=('--virtual-network-name',), metavar='VNET', help='the name of the VNET')
 
@@ -33,10 +32,10 @@ register_cli_argument('network nic scale-set', 'virtualmachine_index', CliArgume
 
 register_cli_argument('network nsg', 'network_security_group_name', name_arg_type)
 
-register_cli_argument('network nsg-rule', 'security_rule_name', name_arg_type)
-register_cli_argument('network nsg-rule create', 'security_rule_name', rule_arg_type)
-register_cli_argument('network nsg-rule', 'network_security_group_name', CliArgumentType(('--nsg-name',), metavar='NSGNAME',
+register_cli_argument('network nsg rule', 'security_rule_name', name_arg_type)
+register_cli_argument('network nsg rule', 'network_security_group_name', CliArgumentType(('--nsg-name',), metavar='NSGNAME',
                                                                                          help='Name of the network securty group'))
+register_cli_argument('network nsg rule create', 'priority', CliArgumentType(default=1000))
 
 register_cli_argument('network public-ip', 'public_ip_address_name', name_arg_type)
 register_cli_argument('network public-ip', 'name', name_arg_type)

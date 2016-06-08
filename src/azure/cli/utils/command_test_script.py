@@ -197,11 +197,11 @@ class CommandTestScript(object): #pylint: disable=too-many-instance-attributes
                 assert _check_json(json_val, checks)
             else:
                 raise IncorrectUsageError('unsupported type \'{}\' in test'.format(type(checks)))
-        except AssertionError:
+        except AssertionError as err:
             if self.debug or debug:
                 print('\tFAILED: {}'.format(checks))
-            raise CLIError('COMMAND {} FAILED.\nResult: {}\nChecks: {}'.format(
-                command, result, checks))
+            raise CLIError('COMMAND {} FAILED.\nResult: {}\nChecks: {}\nDetails: {}\n'.format(
+                command, result, checks, err.message)) #pylint: disable=no-member
     def set_env(self, key, val): #pylint: disable=no-self-use
         os.environ[key] = val
 

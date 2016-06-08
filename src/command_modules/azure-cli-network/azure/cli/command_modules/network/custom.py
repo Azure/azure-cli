@@ -11,15 +11,14 @@ def create_update_subnet(resource_group_name, subnet_name, virtual_network_name,
 
 def create_update_nsg_rule(resource_group_name, network_security_group_name, security_rule_name,
                            protocol, source_address_prefix, destination_address_prefix,
-                           access, direction, description=None, source_port_range=None,
-                           destination_port_range=None, priority=None, provisioning_state=None,
-                           name=None):
+                           access, direction, source_port_range, destination_port_range,
+                           description=None, priority=None, name=None):
     settings = SecurityRule(protocol=protocol, source_address_prefix=source_address_prefix,
                             destination_address_prefix=destination_address_prefix, access=access,
                             direction=direction,
                             description=description, source_port_range=source_port_range,
                             destination_port_range=destination_port_range, priority=priority,
-                            provisioning_state=provisioning_state, name=name)
+                            name=name)
     ncf = _network_client_factory()
     return ncf.security_rules.create_or_update(
         resource_group_name, network_security_group_name, security_rule_name, settings)

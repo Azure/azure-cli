@@ -37,7 +37,7 @@ from azure.cli.command_modules.network.mgmt_nsg.lib import (NSGCreationClient as
                                                             as NSGClientConfig)
 from azure.cli.command_modules.network.mgmt_nsg.lib.operations import NSGOperations
 
-from azure.cli.commands import command_table, cli_command
+from azure.cli.commands import cli_command
 from .custom import create_update_subnet, create_update_nsg_rule
 from ._factory import _network_client_factory
 
@@ -145,10 +145,10 @@ cli_command('network route-operation list', RoutesOperations.list, factory)
 
 # SecurityRulesOperations
 factory = lambda _: _network_client_factory().security_rules
-cli_command('network nsg-rule delete', SecurityRulesOperations.delete, factory)
-cli_command('network nsg-rule show', SecurityRulesOperations.get, factory)
-cli_command('network nsg-rule list', SecurityRulesOperations.list, factory)
-cli_command('network nsg-rule create', create_update_nsg_rule, factory)
+cli_command('network nsg rule delete', SecurityRulesOperations.delete, factory)
+cli_command('network nsg rule show', SecurityRulesOperations.get, factory)
+cli_command('network nsg rule list', SecurityRulesOperations.list, factory)
+cli_command('network nsg rule create', create_update_nsg_rule)
 
 # SubnetsOperations
 factory = lambda _: _network_client_factory().subnets
