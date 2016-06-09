@@ -44,7 +44,7 @@ Use the defaults for the install location and location of the executable.
 
 This will install the CLI globally on the system.
 
-## Ubuntu 14.04 LTS
+## Ubuntu 14.04 LTS and BASH on Windows (Build 14362+)
 Python 2.7.6 should be already on the machine.
 
 ```
