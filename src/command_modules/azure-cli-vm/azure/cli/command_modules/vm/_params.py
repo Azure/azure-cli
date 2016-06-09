@@ -9,9 +9,14 @@ from azure.cli.command_modules.vm._validators import MinMaxValue
 from azure.cli.command_modules.vm._actions import (VMImageFieldAction,
                                                    VMSSHFieldAction,
                                                    VMDNSNameAction,
-                                                   load_images_from_aliases_doc)
+                                                   load_images_from_aliases_doc,
+                                                   get_subscription_locations)
 from azure.cli.commands.parameters import location_type
 from azure.cli.commands import register_cli_argument, CliArgumentType, register_extra_cli_argument
+
+def get_location_completion_list(prefix, **kwargs):#pylint: disable=unused-argument
+    result = get_subscription_locations()
+    return [l.name for l in result]
 
 def get_urn_aliases_completion_list(prefix, **kwargs):#pylint: disable=unused-argument
     images = load_images_from_aliases_doc()
@@ -79,10 +84,11 @@ nsg_rule_type = CliArgumentType(
 
 for scope in ['vm create', 'vm scaleset create']:
     register_cli_argument(scope, 'name', name_arg_type)
+    register_cli_argument(scope, 'location', CliArgumentType(completer=get_location_completion_list))
     register_cli_argument(scope, 'custom_os_disk_uri', CliArgumentType(help=argparse.SUPPRESS))
     register_cli_argument(scope, 'custom_os_disk_type', CliArgumentType(choices=['windows', 'linux']))
     register_cli_argument(scope, 'os_disk_type', CliArgumentType(help=argparse.SUPPRESS))
-    register_cli_argument(scope, 'overprovision', CliArgumentType(action='store_false', default=None))
+    register_cli_argument(scope, 'overprovision', CliArgumentType(action='store_false', default=None, options_list=('--disable-overprovision',)))
     register_cli_argument(scope, 'load_balancer_type', CliArgumentType(choices=['new', 'existing', 'none']))
     register_cli_argument(scope, 'storage_caching', CliArgumentType(choices=['ReadOnly', 'ReadWrite']))
     register_cli_argument(scope, 'upgrade_policy_mode', CliArgumentType(choices=['manual', 'automatic'], default='manual', help=None))
@@ -92,7 +98,7 @@ for scope in ['vm create', 'vm scaleset create']:
     register_cli_argument(scope, 'os_publisher', CliArgumentType(help=argparse.SUPPRESS))
     register_cli_argument(scope, 'os_sku', CliArgumentType(help=argparse.SUPPRESS))
     register_cli_argument(scope, 'os_type', CliArgumentType(help=argparse.SUPPRESS))
-    register_cli_argument(scope, 'os_verion', CliArgumentType(help=argparse.SUPPRESS))
+    register_cli_argument(scope, 'os_version', CliArgumentType(help=argparse.SUPPRESS))
     register_cli_argument(scope, 'dns_name_type', CliArgumentType(help=argparse.SUPPRESS))
     register_cli_argument(scope, 'admin_username', admin_username_type)
     register_cli_argument(scope, 'ssh_key_value', CliArgumentType(action=VMSSHFieldAction))

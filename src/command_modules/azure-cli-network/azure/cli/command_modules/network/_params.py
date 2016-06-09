@@ -10,6 +10,7 @@ from azure.cli.commands import register_cli_argument, CliArgumentType
 # BASIC PARAMETER CONFIGURATION
 
 name_arg_type = CliArgumentType(options_list=('--name', '-n'), metavar='NAME', help='Name of the resource')
+register_cli_argument('network', 'name', name_arg_type)
 
 virtual_network_name_type = CliArgumentType(options_list=('--virtual-network-name',), metavar='VNET', help='the name of the VNET')
 
@@ -65,8 +66,9 @@ register_cli_argument('network vnet subnet', 'virtual_network_name', virtual_net
 
 register_cli_argument('network lb create', 'dns_name_for_public_ip', CliArgumentType(action=LBDNSNameAction))
 register_cli_argument('network lb create', 'dns_name_type', CliArgumentType(help=argparse.SUPPRESS))
-register_cli_argument('network lb create', 'private_ip_address_allocation', CliArgumentType(help='', choices=['dynamic', 'static'], default='dynamic'))
-register_cli_argument('network lb create', 'public_ip_address_allocation', CliArgumentType(help='', choices=['dynamic', 'static'], default='dynamic'))
+register_cli_argument('network lb create', 'private_ip_address_allocation', CliArgumentType(help='', choices=['Dynamic', 'Static'], default='Dynamic'))
+register_cli_argument('network lb create', 'public_ip_address_allocation', CliArgumentType(help='', choices=['Dynamic', 'Static'], default='Dynamic'))
+register_cli_argument('network lb create', 'subnet_name', CliArgumentType(options_list=('--subnet-name',)))
 
 register_cli_argument('network nsg create', 'name', name_arg_type)
 
