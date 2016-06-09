@@ -18,7 +18,7 @@
     VirtualNetworkGatewaysOperations,
     VirtualNetworksOperations)
 
-
+from azure.cli.commands import LongRunningOperation
 from azure.cli.commands.client_factory import get_mgmt_service_client
 from azure.cli.command_modules.network.mgmt_vnet.lib \
     import (ResourceManagementClient as VNetClient,
@@ -32,9 +32,19 @@ from azure.cli.command_modules.network.mgmt_lb.lib import (LBCreationClient as L
                                                            LBCreationClientConfiguration
                                                            as LBClientConfig)
 from azure.cli.command_modules.network.mgmt_lb.lib.operations import LBOperations
+from azure.cli.command_modules.network.mgmt_nsg.lib import (NSGCreationClient as NSGClient,
+                                                            NSGCreationClientConfiguration
+                                                            as NSGClientConfig)
+from azure.cli.command_modules.network.mgmt_nsg.lib.operations import NSGOperations
+
 from azure.cli.commands import cli_command
-from .custom import create_update_subnet
+from .custom import create_update_subnet, create_update_nsg_rule
 from ._factory import _network_client_factory
+
+class DeploymentOutputLongRunningOperation(LongRunningOperation): #pylint: disable=too-few-public-methods
+    def __call__(self, poller):
+        result = super(DeploymentOutputLongRunningOperation, self).__call__(poller)
+        return result.properties.outputs
 
 # pylint: disable=line-too-long
 # Application gateways
@@ -79,8 +89,11 @@ cli_command('network lb show', LoadBalancersOperations.get, factory)
 cli_command('network lb list', LoadBalancersOperations.list, factory)
 cli_command('network lb list-all', LoadBalancersOperations.list_all, factory)
 
-factory = lambda **_: get_mgmt_service_client(LBClient, LBClientConfig).lb
-cli_command('network lb create', LBOperations.create_or_update, 'LoadBalancer', factory)
+factory = lambda _: get_mgmt_service_client(LBClient, LBClientConfig).lb
+cli_command('network lb create', LBOperations.create_or_update, factory, transform=DeploymentOutputLongRunningOperation('Starting network lb create'))
+
+factory = lambda _: get_mgmt_service_client(NSGClient, NSGClientConfig).nsg
+cli_command('network nsg create', NSGOperations.create_or_update, factory, transform=DeploymentOutputLongRunningOperation('Starting network nsg create'))
 
 # LocalNetworkGatewaysOperations
 factory = lambda _: _network_client_factory().local_network_gateways
@@ -132,9 +145,10 @@ cli_command('network route-operation list', RoutesOperations.list, factory)
 
 # SecurityRulesOperations
 factory = lambda _: _network_client_factory().security_rules
-cli_command('network nsg-rule delete', SecurityRulesOperations.delete, factory)
-cli_command('network nsg-rule show', SecurityRulesOperations.get, factory)
-cli_command('network nsg-rule list', SecurityRulesOperations.list, factory)
+cli_command('network nsg rule delete', SecurityRulesOperations.delete, factory)
+cli_command('network nsg rule show', SecurityRulesOperations.get, factory)
+cli_command('network nsg rule list', SecurityRulesOperations.list, factory)
+cli_command('network nsg rule create', create_update_nsg_rule)
 
 # SubnetsOperations
 factory = lambda _: _network_client_factory().subnets
@@ -170,5 +184,5 @@ cli_command('network vnet show', VirtualNetworksOperations.get, factory)
 cli_command('network vnet list', VirtualNetworksOperations.list, factory)
 cli_command('network vnet list-all', VirtualNetworksOperations.list_all, factory)
 
-factory = lambda **_: get_mgmt_service_client(VNetClient, VNetClientConfig).vnet
+factory = lambda _: get_mgmt_service_client(VNetClient, VNetClientConfig).vnet
 cli_command('network vnet create', VNetOperations.create, factory)
