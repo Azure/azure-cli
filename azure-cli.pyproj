@@ -51,7 +51,29 @@
     </Compile>
     <Compile Include="azure\cli\utils\vcr_test_base.py" />
     <Compile Include="azure\cli\utils\command_test_script.py" />
+    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\tests\test_network_commands.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\_factory.py" />
+    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_nsg\lib\credentials.py" />
+    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_nsg\lib\exceptions.py" />
+    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_nsg\lib\models\basic_dependency.py" />
+    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_nsg\lib\models\dependency.py" />
+    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_nsg\lib\models\deployment_extended.py" />
+    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_nsg\lib\models\deployment_nsg.py" />
+    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_nsg\lib\models\deployment_properties_extended.py" />
+    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_nsg\lib\models\nsg_creation_client_enums.py" />
+    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_nsg\lib\models\parameters_link.py" />
+    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_nsg\lib\models\provider.py" />
+    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_nsg\lib\models\provider_resource_type.py" />
+    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_nsg\lib\models\template_link.py" />
+    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_nsg\lib\models\__init__.py" />
+    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_nsg\lib\nsg_creation_client.py" />
+    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_nsg\lib\operations\nsg_operations.py" />
+    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_nsg\lib\operations\__init__.py" />
+    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_nsg\lib\version.py" />
+    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_nsg\lib\__init__.py" />
+    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_nsg\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="command_modules\azure-cli-resource\azure\cli\command_modules\resource\_factory.py">
       <SubType>Code</SubType>
     </Compile>
@@ -283,10 +305,6 @@
     <Compile Include="azure\__init__.py" />
     <Compile Include="command_modules\azure-cli-component\azure\cli\command_modules\component\__init__.py" />
     <Compile Include="command_modules\azure-cli-component\setup.py" />
-    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\tests\command_specs.py">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\tests\test_commands.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\__init__.py" />
     <Compile Include="command_modules\azure-cli-network\setup.py" />
     <Compile Include="command_modules\azure-cli-profile\azure\cli\command_modules\profile\__init__.py" />
@@ -370,6 +388,10 @@
     <Folder Include="command_modules\azure-cli-component\azure\cli\" />
     <Folder Include="command_modules\azure-cli-component\azure\cli\command_modules\" />
     <Folder Include="command_modules\azure-cli-component\azure\cli\command_modules\component\" />
+    <Folder Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_nsg\" />
+    <Folder Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_nsg\lib\" />
+    <Folder Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_nsg\lib\models\" />
+    <Folder Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_nsg\lib\operations\" />
     <Folder Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_acs\" />
     <Folder Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_acs\lib\" />
     <Folder Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_acs\lib\models\" />
@@ -462,6 +484,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="command_modules\azure-cli-component\requirements.txt" />
+    <Content Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_nsg\azuredeploy.json" />
+    <Content Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_nsg\azuredeploy_test.md" />
+    <Content Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_nsg\swagger_create_nsg.json" />
     <Content Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_public_ip\azuredeploy.json" />
     <Content Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_public_ip\nested_templates\publicIpDeployment_dns.json" />
     <Content Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_public_ip\nested_templates\publicIpDeployment_nodns.json" />
