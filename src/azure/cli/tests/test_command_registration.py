@@ -4,7 +4,7 @@ import unittest
 
 from azure.cli.commands import _update_command_definitions
 from azure.cli.commands import (
-    CommandTable, 
+    command_table,
     CliArgumentType,
     cli_command,
     register_cli_argument,
@@ -46,14 +46,14 @@ class Test_command_registration(unittest.TestCase):
         """
 
     def test_register_cli_argument(self):
-        command_table = CommandTable()
-        cli_command(command_table, 'test register sample-vm-get', Test_command_registration.sample_vm_get, None)
+        command_table.clear()
+        cli_command('test register sample-vm-get', Test_command_registration.sample_vm_get)
         register_cli_argument('test register sample-vm-get', 'vm_name', CliArgumentType(
             options_list=('--wonky-name', '-n'), metavar='VMNAME', help='Completely WONKY name...',
             required=False
         ))
 
-        _update_command_definitions(command_table)        
+        _update_command_definitions(command_table)
 
         self.assertEqual(len(command_table), 1, 'We expect exactly one command in the command table')
         command_metadata = command_table['test register sample-vm-get']
@@ -69,8 +69,8 @@ class Test_command_registration(unittest.TestCase):
                                           command_metadata.arguments[existing].options)
 
     def test_register_command(self):
-        command_table = CommandTable()
-        cli_command(command_table, 'test command sample-vm-get', Test_command_registration.sample_vm_get, None)
+        command_table.clear()
+        cli_command('test command sample-vm-get', Test_command_registration.sample_vm_get, None)
 
         self.assertEqual(len(command_table), 1, 'We expect exactly one command in the command table')
         command_metadata = command_table['test command sample-vm-get']
@@ -88,16 +88,16 @@ class Test_command_registration(unittest.TestCase):
                                           command_metadata.arguments[existing].options)
 
     def test_register_cli_argument_with_overrides(self):
-        command_table = CommandTable()
+        command_table.clear()
 
         global_vm_name_type = CliArgumentType(
             options_list=('--foo', '-f'), metavar='FOO', help='foo help'
         )
         derived_vm_name_type = CliArgumentType(base_type=global_vm_name_type, help='first modification')
 
-        cli_command(command_table, 'test vm-get', Test_command_registration.sample_vm_get, None)
-        cli_command(command_table, 'test command vm-get-1', Test_command_registration.sample_vm_get, None)
-        cli_command(command_table, 'test command vm-get-2', Test_command_registration.sample_vm_get, None)
+        cli_command('test vm-get', Test_command_registration.sample_vm_get, None)
+        cli_command('test command vm-get-1', Test_command_registration.sample_vm_get, None)
+        cli_command('test command vm-get-2', Test_command_registration.sample_vm_get, None)
 
         register_cli_argument('test', 'vm_name', global_vm_name_type)
         register_cli_argument('test command', 'vm_name', derived_vm_name_type)
@@ -115,11 +115,11 @@ class Test_command_registration(unittest.TestCase):
         self.assertTrue(command3.options['help'] == 'second modification')
 
     def test_register_extra_cli_argument(self):
-        command_table = CommandTable()
+        command_table.clear()
         
         new_param_type = CliArgumentType(
         )
-        cli_command(command_table, 'test command sample-vm-get', Test_command_registration.sample_vm_get, None)
+        cli_command('test command sample-vm-get', Test_command_registration.sample_vm_get, None)
         register_extra_cli_argument(
             'test command sample-vm-get', 'added_param', options_list=('--added-param',),
             metavar='ADDED', help='Just added this right now!', required=True
@@ -154,8 +154,8 @@ class Test_command_registration(unittest.TestCase):
 
             nothing2.
             """        
-        command_table = CommandTable()
-        cli_command(command_table, 'test command foo', sample_sdk_method_with_weird_docstring, None)
+        command_table.clear()
+        cli_command('test command foo', sample_sdk_method_with_weird_docstring, None)
 
         _update_command_definitions(command_table)
 
