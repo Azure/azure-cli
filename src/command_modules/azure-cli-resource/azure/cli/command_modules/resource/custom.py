@@ -142,8 +142,7 @@ def deploy_arm_template(
         :param str template_file_path:path to deployment template JSON file
         :param str parameters_file_path:path to deployment parameters JSON file
     '''
-    from azure.mgmt.resource.resources import (ResourceManagementClientConfiguration,
-                                               ResourceManagementClient)
+    from azure.mgmt.resource.resources import ResourceManagementClient
     from azure.mgmt.resource.resources.models import DeploymentProperties
 
     parameters = _get_file_json(parameters_file_path)
@@ -153,8 +152,7 @@ def deploy_arm_template(
 
     properties = DeploymentProperties(template=template, parameters=parameters, mode=mode)
 
-    smc = get_mgmt_service_client(ResourceManagementClient,
-                                  ResourceManagementClientConfiguration)
+    smc = get_mgmt_service_client(ResourceManagementClient)
     return smc.deployments.create_or_update(resource_group, deployment_name, properties)
 
 def tag_resource(
