@@ -21,20 +21,14 @@
 from azure.cli.commands import LongRunningOperation
 from azure.cli.commands.client_factory import get_mgmt_service_client
 from azure.cli.command_modules.network.mgmt_vnet.lib \
-    import (ResourceManagementClient as VNetClient,
-            ResourceManagementClientConfiguration as VNetClientConfig)
+    import ResourceManagementClient as VNetClient
 from azure.cli.command_modules.network.mgmt_vnet.lib.operations import VNetOperations
 from azure.cli.command_modules.network.mgmt_public_ip.lib \
-    import (PublicIPCreationClient as PublicIPClient,
-            PublicIPCreationClientConfiguration as PublicIPClientConfig)
+    import PublicIPCreationClient as PublicIPClient
 from azure.cli.command_modules.network.mgmt_public_ip.lib.operations import PublicIPOperations
-from azure.cli.command_modules.network.mgmt_lb.lib import (LBCreationClient as LBClient,
-                                                           LBCreationClientConfiguration
-                                                           as LBClientConfig)
+from azure.cli.command_modules.network.mgmt_lb.lib import LBCreationClient as LBClient
 from azure.cli.command_modules.network.mgmt_lb.lib.operations import LBOperations
-from azure.cli.command_modules.network.mgmt_nsg.lib import (NSGCreationClient as NSGClient,
-                                                            NSGCreationClientConfiguration
-                                                            as NSGClientConfig)
+from azure.cli.command_modules.network.mgmt_nsg.lib import NSGCreationClient as NSGClient
 from azure.cli.command_modules.network.mgmt_nsg.lib.operations import NSGOperations
 
 from azure.cli.commands import cli_command
@@ -89,10 +83,10 @@ cli_command('network lb show', LoadBalancersOperations.get, factory)
 cli_command('network lb list', LoadBalancersOperations.list, factory)
 cli_command('network lb list-all', LoadBalancersOperations.list_all, factory)
 
-factory = lambda _: get_mgmt_service_client(LBClient, LBClientConfig).lb
-cli_command('network lb create', LBOperations.create_or_update, factory, transform=DeploymentOutputLongRunningOperation('Starting network lb create'))
+factory = lambda _: get_mgmt_service_client(LBClient).lb
+cli_command('network lb create', LBOperations.create_or_update, 'LoadBalancer', factory, transform=DeploymentOutputLongRunningOperation('Starting network lb create'))
 
-factory = lambda _: get_mgmt_service_client(NSGClient, NSGClientConfig).nsg
+factory = lambda _: get_mgmt_service_client(NSGClient).nsg
 cli_command('network nsg create', NSGOperations.create_or_update, factory, transform=DeploymentOutputLongRunningOperation('Starting network nsg create'))
 
 # LocalNetworkGatewaysOperations
@@ -127,7 +121,7 @@ cli_command('network public-ip show', PublicIPAddressesOperations.get, factory)
 cli_command('network public-ip list', PublicIPAddressesOperations.list, factory)
 cli_command('network public-ip list-all', PublicIPAddressesOperations.list_all, factory)
 
-factory = lambda _: get_mgmt_service_client(PublicIPClient, PublicIPClientConfig).public_ip
+factory = lambda _: get_mgmt_service_client(PublicIPClient).public_ip
 cli_command('network public-ip create', PublicIPOperations.create_or_update, factory)
 
 # RouteTablesOperations
@@ -184,5 +178,5 @@ cli_command('network vnet show', VirtualNetworksOperations.get, factory)
 cli_command('network vnet list', VirtualNetworksOperations.list, factory)
 cli_command('network vnet list-all', VirtualNetworksOperations.list_all, factory)
 
-factory = lambda _: get_mgmt_service_client(VNetClient, VNetClientConfig).vnet
+factory = lambda _: get_mgmt_service_client(VNetClient).vnet
 cli_command('network vnet create', VNetOperations.create, factory)

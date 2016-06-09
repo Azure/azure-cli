@@ -86,9 +86,8 @@ def _get_access_extension_upgrade_info(extensions, name):
 
 
 def _get_storage_management_client():
-    from azure.mgmt.storage import StorageManagementClient, StorageManagementClientConfiguration
-    return get_mgmt_service_client(StorageManagementClient,
-                                   StorageManagementClientConfiguration)
+    from azure.mgmt.storage import StorageManagementClient
+    return get_mgmt_service_client(StorageManagementClient)
 
 def _trim_away_build_number(version):
     #workaround a known issue: the version must only contain "major.minor", even though
@@ -138,7 +137,7 @@ def list_ip_addresses(resource_group_name=None, vm_name=None):
     :param str resource_group_name:Name of resource group.
     :param str vm_name:Name of virtual machine.
     '''
-    from azure.mgmt.network import NetworkManagementClient, NetworkManagementClientConfiguration
+    from azure.mgmt.network import NetworkManagementClient
 
     # We start by getting NICs as they are the smack in the middle of all data that we
     # want to collect for a VM (as long as we don't need any info on the VM than what
@@ -146,8 +145,7 @@ def list_ip_addresses(resource_group_name=None, vm_name=None):
     #
     # Since there is no guarantee that a NIC is in the same resource group as a given
     # Virtual Machine, we can't constrain the lookup to only a single group...
-    network_client = get_mgmt_service_client(NetworkManagementClient,
-                                             NetworkManagementClientConfiguration)
+    network_client = get_mgmt_service_client(NetworkManagementClient)
     nics = network_client.network_interfaces.list_all()
     public_ip_addresses = network_client.public_ip_addresses.list_all()
 

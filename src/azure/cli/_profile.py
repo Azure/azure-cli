@@ -6,8 +6,7 @@ import os.path
 import errno
 from msrest.authentication import BasicTokenAuthentication
 import adal
-from azure.mgmt.resource.subscriptions import (SubscriptionClient,
-                                               SubscriptionClientConfiguration)
+from azure.mgmt.resource.subscriptions import SubscriptionClient
 from .main import ACCOUNT
 from ._util import CLIError
 from ._azure_env import (get_authority_url, CLIENT_ID, get_management_endpoint_url,
@@ -265,7 +264,7 @@ class SubscriptionFinder(object):
     def _find_using_common_tenant(self, access_token):
         all_subscriptions = []
         token_credential = BasicTokenAuthentication({'access_token': access_token})
-        client = self._arm_client_factory(SubscriptionClientConfiguration(token_credential))
+        client = self._arm_client_factory(token_credential)
         tenants = client.tenants.list()
         for t in tenants:
             tenant_id = t.tenant_id
@@ -280,7 +279,7 @@ class SubscriptionFinder(object):
 
     def _find_using_specific_tenant(self, tenant, access_token):
         token_credential = BasicTokenAuthentication({'access_token': access_token})
-        client = self._arm_client_factory(SubscriptionClientConfiguration(token_credential))
+        client = self._arm_client_factory(token_credential)
         subscriptions = client.subscriptions.list()
         all_subscriptions = []
         for s in subscriptions:
