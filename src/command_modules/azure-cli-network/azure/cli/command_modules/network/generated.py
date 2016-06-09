@@ -18,7 +18,6 @@
     VirtualNetworkGatewaysOperations,
     VirtualNetworksOperations)
 
-from azure.cli.commands import LongRunningOperation
 from azure.cli.commands.client_factory import get_mgmt_service_client
 from azure.cli.command_modules.network.mgmt_vnet.lib \
     import ResourceManagementClient as VNetClient
@@ -31,14 +30,9 @@ from azure.cli.command_modules.network.mgmt_lb.lib.operations import LBOperation
 from azure.cli.command_modules.network.mgmt_nsg.lib import NSGCreationClient as NSGClient
 from azure.cli.command_modules.network.mgmt_nsg.lib.operations import NSGOperations
 
-from azure.cli.commands import cli_command
+from azure.cli.commands import DeploymentOutputLongRunningOperation, cli_command
 from .custom import create_update_subnet, create_update_nsg_rule
 from ._factory import _network_client_factory
-
-class DeploymentOutputLongRunningOperation(LongRunningOperation): #pylint: disable=too-few-public-methods
-    def __call__(self, poller):
-        result = super(DeploymentOutputLongRunningOperation, self).__call__(poller)
-        return result.properties.outputs
 
 # pylint: disable=line-too-long
 # Application gateways
@@ -121,8 +115,8 @@ cli_command('network public-ip show', PublicIPAddressesOperations.get, factory)
 cli_command('network public-ip list', PublicIPAddressesOperations.list, factory)
 cli_command('network public-ip list-all', PublicIPAddressesOperations.list_all, factory)
 
-factory = lambda _: get_mgmt_service_client(PublicIPClient).public_ip
-cli_command('network public-ip create', PublicIPOperations.create_or_update, factory)
+factory = lambda _: get_mgmt_service_client(PublicIpClient).public_ip
+cli_command('network public-ip create', PublicIpOperations.create_or_update, factory)
 
 # RouteTablesOperations
 factory = lambda _: _network_client_factory().route_tables

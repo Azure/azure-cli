@@ -16,12 +16,25 @@ class DeploymentPropertiesExtended(Model):
     :param outputs: Gets or sets key/value pairs that represent
      deploymentoutput.
     :type outputs: object
-    :param template: Gets or sets the template content. Use only one of
-     Template or TemplateLink.
-    :type template: object
+    :param correlation_id: Gets or sets the correlation ID of the deployment.
+    :type correlation_id: str
+    :param provisioning_state: Gets or sets the state of the provisioning.
+    :type provisioning_state: str
+    :param mode: Gets or sets the deployment mode. Possible values include:
+     'Incremental', 'Complete'
+    :type mode: str
     :param dependencies: Gets the list of deployment dependencies.
     :type dependencies: list of :class:`Dependency
      <default.models.Dependency>`
+    :param template: Gets or sets the template content. Use only one of
+     Template or TemplateLink.
+    :type template: object
+    :param parameters: Deployment parameters. Use only one of Parameters or
+     ParametersLink.
+    :type parameters: object
+    :param template_link: Gets or sets the URI referencing the template. Use
+     only one of Template or TemplateLink.
+    :type template_link: :class:`TemplateLink <default.models.TemplateLink>`
     :param parameters_link: Gets or sets the URI referencing the parameters.
      Use only one of Parameters or ParametersLink.
     :type parameters_link: :class:`ParametersLink
@@ -34,27 +47,27 @@ class DeploymentPropertiesExtended(Model):
 
     _attribute_map = {
         'outputs': {'key': 'outputs', 'type': 'object'},
-        'template': {'key': 'template', 'type': 'object'},
-        'dependencies': {'key': 'dependencies', 'type': '[Dependency]'},
-        'parameters_link': {'key': 'parametersLink', 'type': 'ParametersLink'},
-        'mode': {'key': 'mode', 'type': 'DeploymentMode'},
-        'provisioning_state': {'key': 'provisioningState', 'type': 'str'},
-        'providers': {'key': 'providers', 'type': '[Provider]'},
-        'template_link': {'key': 'TemplateLink', 'type': 'TemplateLink'},
-        'timestamp': {'key': 'timestamp', 'type': 'iso-8601'},
-        'parameters': {'key': 'parameters', 'type': 'object'},
         'correlation_id': {'key': 'correlationId', 'type': 'str'},
+        'provisioning_state': {'key': 'provisioningState', 'type': 'str'},
+        'mode': {'key': 'mode', 'type': 'DeploymentMode'},
+        'dependencies': {'key': 'dependencies', 'type': '[Dependency]'},
+        'template': {'key': 'template', 'type': 'object'},
+        'parameters': {'key': 'parameters', 'type': 'object'},
+        'template_link': {'key': 'TemplateLink', 'type': 'TemplateLink'},
+        'parameters_link': {'key': 'parametersLink', 'type': 'ParametersLink'},
+        'timestamp': {'key': 'timestamp', 'type': 'iso-8601'},
+        'providers': {'key': 'providers', 'type': '[Provider]'},
     }
 
-    def __init__(self, outputs=None, template=None, dependencies=None, parameters_link=None, mode=None, provisioning_state=None, providers=None, template_link=None, timestamp=None, parameters=None, correlation_id=None):
+    def __init__(self, outputs=None, correlation_id=None, provisioning_state=None, mode=None, dependencies=None, template=None, parameters=None, template_link=None, parameters_link=None, timestamp=None, providers=None):
         self.outputs = outputs
-        self.template = template
-        self.dependencies = dependencies
-        self.parameters_link = parameters_link
-        self.mode = mode
-        self.provisioning_state = provisioning_state
-        self.providers = providers
-        self.template_link = template_link
-        self.timestamp = timestamp
-        self.parameters = parameters
         self.correlation_id = correlation_id
+        self.provisioning_state = provisioning_state
+        self.mode = mode
+        self.dependencies = dependencies
+        self.template = template
+        self.parameters = parameters
+        self.template_link = template_link
+        self.parameters_link = parameters_link
+        self.timestamp = timestamp
+        self.providers = providers

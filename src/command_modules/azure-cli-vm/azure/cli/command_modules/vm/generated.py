@@ -8,7 +8,7 @@
     VirtualMachinesOperations,
     VirtualMachineScaleSetsOperations,
     VirtualMachineScaleSetVMsOperations)
-from azure.cli.commands import LongRunningOperation, cli_command
+from azure.cli.commands import DeploymentOutputLongRunningOperation, cli_command
 from azure.cli.commands.client_factory import get_mgmt_service_client
 from azure.cli.command_modules.vm.mgmt_avail_set.lib import (AvailSetCreationClient
                                                              as AvailSetClient)
@@ -35,11 +35,6 @@ from .custom import (
 from ._factory import _compute_client_factory
 
 # pylint: disable=line-too-long
-
-class DeploymentOutputLongRunningOperation(LongRunningOperation): #pylint: disable=too-few-public-methods
-    def __call__(self, poller):
-        result = super(DeploymentOutputLongRunningOperation, self).__call__(poller)
-        return result.properties.outputs
 
 # VM
 factory = lambda _: get_mgmt_service_client(VMClient).vm

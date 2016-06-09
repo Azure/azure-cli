@@ -105,6 +105,12 @@ class LongRunningOperation(object): #pylint: disable=too-few-public-methods
         logger.warning(self.finish_msg)
         return result
 
+class DeploymentOutputLongRunningOperation(LongRunningOperation): #pylint: disable=too-few-public-methods
+    def __call__(self, poller):
+        result = super(DeploymentOutputLongRunningOperation, self).__call__(poller)
+        return result.properties.outputs
+
+
 class CommandTable(dict):
     """A command table is a dictionary of name -> CliCommand
     instances.

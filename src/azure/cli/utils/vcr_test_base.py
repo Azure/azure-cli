@@ -133,62 +133,75 @@ class VCRTestBase(unittest.TestCase):#pylint: disable=too-many-instance-attribut
             f.write(' '.join(command))
             f.write('\n')
 
-    def run_command_no_verify(self, command): #pylint: disable=no-self-use
+    def run_command_no_verify(self, command, debug=False): #pylint: disable=no-self-use
         ''' Run a command without recording the output as part of expected results. Useful if you
         need to run a command for branching logic or just to reset back to a known condition. '''
-        if self.debug:
+        if self.debug or debug:
             print('\n\tRUNNING: {}'.format(command))
         command_list = shlex.split(command)
         result = self._core_vcr_test(command_list, record_output=False)
+        self._track_executed_commands(command_list)
+        if self.debug or debug:
+            print('\tRESULT: {}\n'.format(result))
         # if json output was specified, return result as json object
         if isinstance(command, str) and '-o json' in command:
             result = json.loads(result) if result else []
         return result
 
-    def run_command_and_verify(self, command, checks):
+    def run_command_and_verify(self, command, checks, debug=False):
         ''' Runs a command with the json output format and validates the input against the provided
         checks. Multiple JSON properties can be submitted as a dictionary and are treated as an AND
         condition. '''
 
-        if self.debug:
+        if self.debug or debug:
             print('\n\tTESTING: {}'.format(command))
         command_list = shlex.split(command)
         command_list += ['-o', 'json']
 
         result = self._core_vcr_test(command_list, record_output=True)
-        if self.debug:
+        if self.debug or debug:
             print('\tRESULT: {}\n'.format(result))
-        if self.playback:
-            try:
-                if result is None or result == '':
-                    assert checks is None or checks is False
-                elif isinstance(checks, list):
-                    if all(isinstance(comparator, JMESPathComparator) for comparator in checks):
-                        for comparator in checks:
-                            comparator.compare(result)
-                    else:
-                        result_set = set(json.loads(result))
-                        assert result_set == set(checks)
-                elif isinstance(checks, JMESPathComparator):
-                    checks.compare(result)
-                elif isinstance(checks, bool):
-                    result_val = str(result).lower().replace('"', '')
-                    result = result_val in ('yes', 'true', 't', '1')
-                    assert result == checks
-                elif isinstance(checks, str):
-                    assert result.replace('"', '') == checks
-                elif isinstance(checks, dict):
-                    json_val = json.loads(result)
-                    assert _check_json(json_val, checks)
+        try:
+            if result is None or result == '':
+                assert checks is None or checks is False
+            elif isinstance(checks, list):
+                if all(isinstance(comparator, JMESPathComparator) for comparator in checks):
+                    for comparator in checks:
+                        comparator.compare(result)
                 else:
-                    raise IncorrectUsageError(
-                        'unsupported type \'{}\' in test'.format(type(checks)))
-            except AssertionError:
-                if self.debug:
-                    print('\tFAILED: {}'.format(checks))
-                raise CLIError('COMMAND {} FAILED.\nResult: {}\nChecks: {}'.format(
-                    command, result, checks))
+                    result_set = set(json.loads(result))
+                    assert result_set == set(checks)
+            elif isinstance(checks, JMESPathComparator):
+                checks.compare(result)
+            elif isinstance(checks, bool):
+                result_val = str(result).lower().replace('"', '')
+                result = result_val in ('yes', 'true', 't', '1')
+                assert result == checks
+            elif isinstance(checks, str):
+                assert result.replace('"', '') == checks
+            elif isinstance(checks, dict):
+                json_val = json.loads(result)
+                assert _check_json(json_val, checks)
+            else:
+                raise IncorrectUsageError(
+                    'unsupported type \'{}\' in test'.format(type(checks)))
+        except AssertionError:
+            if self.debug:
+                print('\tFAILED: {}'.format(checks))
+            raise CLIError('COMMAND {} FAILED.\nResult: {}\nChecks: {}'.format(
+                command, result, checks))
 
+    def set_env(self, key, val): #pylint: disable=no-self-use
+        os.environ[key] = val
+
+    def pop_env(self, key): #pylint: disable=no-self-use
+        return os.environ.pop(key, None)
+
+    def display(self, string):
+        ''' Write free text to the display output only. This text will not be included in the
+        raw saved output and using this command does not flag a test as requiring manual
+        verification. '''
+        self._display.write('\n{}'.format(string))
 
     def _core_vcr_test(self, command_list, record_output):
         output = StringIO()
@@ -222,44 +235,34 @@ class VCRTestBase(unittest.TestCase):#pylint: disable=too-many-instance-attribut
         #pylint: disable=no-member
         set_up = getattr(self, "set_up", None)
         if callable(set_up):
+            if self.debug:
+                print('\n==ENTERING TEST SET UP==')
             self.set_up()
 
         with self.my_vcr.use_cassette(self.cassette_path):
+            if self.debug:
+                print('\n==ENTERING TEST BODY==')
             self.body()
 
         tear_down = getattr(self, "tear_down", None)
         if callable(tear_down):
+            if self.debug:
+                print('\n==ENTERING TEST TEAR DOWN==')
             self.tear_down()
 
         expected_results = self._get_expected_results_from_file()
         expected_results[self.test_name] = self._raw.getvalue()
         self._save_expected_results_file(expected_results)
 
-    @mock.patch('azure.cli._profile.Profile.load_cached_subscriptions',
-                load_subscriptions_mock)
-    @mock.patch('azure.cli._profile.CredsCache.retrieve_token_for_user',
-                get_user_access_token_mock)
-    @mock.patch('msrestazure.azure_operation.AzureOperationPoller._delay',
-                operation_delay_mock)
+    @mock.patch('azure.cli._profile.Profile.load_cached_subscriptions', load_subscriptions_mock)
+    @mock.patch('azure.cli._profile.CredsCache.retrieve_token_for_user', get_user_access_token_mock)
+    @mock.patch('msrestazure.azure_operation.AzureOperationPoller._delay', operation_delay_mock)
     @mock.patch('time.sleep', operation_delay_mock)
-    @mock.patch('azure.cli.commands.LongRunningOperation._delay',
-                operation_delay_mock)
+    @mock.patch('azure.cli.commands.LongRunningOperation._delay', operation_delay_mock)
     def _execute_playback(self):
         #pylint: disable=no-member
         with self.my_vcr.use_cassette(self.cassette_path):
             self.body()
-
-    def set_env(self, key, val): #pylint: disable=no-self-use
-        os.environ[key] = val
-
-    def pop_env(self, key): #pylint: disable=no-self-use
-        return os.environ.pop(key, None)
-
-    def display(self, string):
-        ''' Write free text to the display output only. This text will not be included in the
-        raw saved output and using this command does not flag a test as requiring manual
-        verification. '''
-        self._display.write('\n{}'.format(string))
 
     @staticmethod
     def before_record_request(request):

@@ -13,8 +13,6 @@ class Dependency(Model):
     """
     Deployment dependency information.
 
-    :param resource_name: Gets or sets the dependency resource name.
-    :type resource_name: str
     :param resource_type: Gets or sets the dependency resource type.
     :type resource_type: str
     :param id: Gets or sets the ID of the dependency.
@@ -22,17 +20,19 @@ class Dependency(Model):
     :param depends_on: Gets the list of dependencies.
     :type depends_on: list of :class:`BasicDependency
      <default.models.BasicDependency>`
+    :param resource_name: Gets or sets the dependency resource name.
+    :type resource_name: str
     """ 
 
     _attribute_map = {
-        'resource_name': {'key': 'resourceName', 'type': 'str'},
         'resource_type': {'key': 'resourceType', 'type': 'str'},
         'id': {'key': 'id', 'type': 'str'},
         'depends_on': {'key': 'dependsOn', 'type': '[BasicDependency]'},
+        'resource_name': {'key': 'resourceName', 'type': 'str'},
     }
 
-    def __init__(self, resource_name=None, resource_type=None, id=None, depends_on=None):
-        self.resource_name = resource_name
+    def __init__(self, resource_type=None, id=None, depends_on=None, resource_name=None):
         self.resource_type = resource_type
         self.id = id
         self.depends_on = depends_on
+        self.resource_name = resource_name

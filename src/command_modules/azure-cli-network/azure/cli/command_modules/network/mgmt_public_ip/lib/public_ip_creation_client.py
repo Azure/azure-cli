@@ -22,12 +22,12 @@ class PublicIpCreationClientConfiguration(AzureConfiguration):
     :param credentials: Gets Azure subscription credentials.
     :type credentials: :mod:`A msrestazure Credentials
      object<msrestazure.azure_active_directory>`
-    :param api_version: Client Api Version.
-    :type api_version: str
     :param subscription_id: Gets subscription credentials which uniquely
      identify Microsoft Azure subscription. The subscription ID forms part of
      the URI for every service call.
     :type subscription_id: str
+    :param api_version: Client Api Version.
+    :type api_version: str
     :param accept_language: Gets or sets the preferred language for the
      response.
     :type accept_language: str
@@ -47,12 +47,12 @@ class PublicIpCreationClientConfiguration(AzureConfiguration):
 
         if credentials is None:
             raise ValueError("Parameter 'credentials' must not be None.")
-        if api_version is not None and not isinstance(api_version, str):
-            raise TypeError("Optional parameter 'api_version' must be str.")
         if subscription_id is None:
             raise ValueError("Parameter 'subscription_id' must not be None.")
         if not isinstance(subscription_id, str):
             raise TypeError("Parameter 'subscription_id' must be str.")
+        if api_version is not None and not isinstance(api_version, str):
+            raise TypeError("Optional parameter 'api_version' must be str.")
         if accept_language is not None and not isinstance(accept_language, str):
             raise TypeError("Optional parameter 'accept_language' must be str.")
         if not base_url:
@@ -64,8 +64,8 @@ class PublicIpCreationClientConfiguration(AzureConfiguration):
         self.add_user_agent('Azure-SDK-For-Python')
 
         self.credentials = credentials
-        self.api_version = api_version
         self.subscription_id = subscription_id
+        self.api_version = api_version
         self.accept_language = accept_language
         self.long_running_operation_retry_timeout = long_running_operation_retry_timeout
         self.generate_client_request_id = generate_client_request_id
