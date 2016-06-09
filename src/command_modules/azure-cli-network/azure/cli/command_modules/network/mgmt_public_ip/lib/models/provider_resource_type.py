@@ -13,26 +13,26 @@ class ProviderResourceType(Model):
     """
     Resource type managed by the resource provider.
 
-    :param properties: Gets or sets the properties.
-    :type properties: dict
     :param resource_type: Gets or sets the resource type.
     :type resource_type: str
-    :param api_versions: Gets or sets the api version.
-    :type api_versions: list of str
+    :param properties: Gets or sets the properties.
+    :type properties: dict
     :param locations: Gets or sets the collection of locations where this
      resource type can be created in.
     :type locations: list of str
+    :param api_versions: Gets or sets the api version.
+    :type api_versions: list of str
     """ 
 
     _attribute_map = {
-        'properties': {'key': 'properties', 'type': '{str}'},
         'resource_type': {'key': 'resourceType', 'type': 'str'},
-        'api_versions': {'key': 'apiVersions', 'type': '[str]'},
+        'properties': {'key': 'properties', 'type': '{str}'},
         'locations': {'key': 'locations', 'type': '[str]'},
+        'api_versions': {'key': 'apiVersions', 'type': '[str]'},
     }
 
-    def __init__(self, properties=None, resource_type=None, api_versions=None, locations=None):
-        self.properties = properties
+    def __init__(self, resource_type=None, properties=None, locations=None, api_versions=None):
         self.resource_type = resource_type
-        self.api_versions = api_versions
+        self.properties = properties
         self.locations = locations
+        self.api_versions = api_versions

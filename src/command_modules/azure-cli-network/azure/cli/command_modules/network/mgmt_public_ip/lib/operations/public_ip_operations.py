@@ -43,9 +43,9 @@ class PublicIpOperations(object):
         :type deployment_name: str
         :param name: Name of the Public IP address.
         :type name: str
-        :param allocation_method: IP address Allocation method. Possible
-         values include: 'Dynamic', 'Static'
-        :type allocation_method: str
+        :param content_version: If included it must match the ContentVersion
+         in the template.
+        :type content_version: str
         :param location: Location (e.g. eastus).
         :type location: str
         :param dns_name: Globally unique DNS entry.
@@ -53,9 +53,9 @@ class PublicIpOperations(object):
         :param public_ip_address_type: Whether to include a DNS entry or not.
          Possible values include: 'dns', 'noDns'
         :type public_ip_address_type: str
-        :param content_version: If included it must match the ContentVersion
-         in the template.
-        :type content_version: str
+        :param allocation_method: IP address Allocation method. Possible
+         values include: 'dynamic', 'static'
+        :type allocation_method: str
         :param dict custom_headers: headers that will be added to the request
         :param bool raw: returns the direct response alongside the
          deserialized response
@@ -66,7 +66,7 @@ class PublicIpOperations(object):
         :rtype: :class:`ClientRawResponse<msrest.pipeline.ClientRawResponse>`
          if raw=true
         """
-        parameters = models.DeploymentPublicIp(allocation_method=allocation_method, name=name, location=location, dns_name=dns_name, public_ip_address_type=public_ip_address_type, content_version=content_version)
+        parameters = models.DeploymentPublicIp(content_version=content_version, name=name, location=location, dns_name=dns_name, public_ip_address_type=public_ip_address_type, allocation_method=allocation_method)
 
         # Construct URL
         url = '/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Resources/deployments/{deploymentName}'

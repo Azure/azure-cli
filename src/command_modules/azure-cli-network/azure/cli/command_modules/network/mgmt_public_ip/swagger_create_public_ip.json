@@ -1,186 +1,5 @@
 {
-  "consumes": [
-    "application/json"
-  ],
-  "schemes": [
-    "https"
-  ],
-  "swagger": "2.0",
-  "produces": [
-    "application/json"
-  ],
-  "securityDefinitions": {
-    "azure_auth": {
-      "authorizationUrl": "https://login.microsoftonline.com/common/oauth2/authorize",
-      "description": "Azure Active Directory OAuth2 Flow",
-      "scopes": {
-        "user_impersonation": "impersonate your user account"
-      },
-      "flow": "implicit",
-      "type": "oauth2"
-    }
-  },
-  "security": [
-    {
-      "azure_auth": [
-        "user_impersonation"
-      ]
-    }
-  ],
-  "info": {
-    "title": "PublicIpCreationClient",
-    "version": "2015-11-01"
-  },
-  "host": "management.azure.com",
-  "paths": {
-    "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Resources/deployments/{deploymentName}": {
-      "put": {
-        "operationId": "PublicIp_CreateOrUpdate",
-        "description": "Create or update a virtual machine.",
-        "responses": {
-          "200": {
-            "description": "",
-            "schema": {
-              "$ref": "#/definitions/DeploymentExtended"
-            }
-          },
-          "201": {
-            "description": "",
-            "schema": {
-              "$ref": "#/definitions/DeploymentExtended"
-            }
-          }
-        },
-        "x-ms-long-running-operation": true,
-        "tags": [
-          "PublicIp"
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "description": "The name of the resource group. The name is case insensitive.",
-            "required": true,
-            "minLength": 1,
-            "name": "resourceGroupName",
-            "pattern": "^[-\\w\\._]+$",
-            "maxLength": 64,
-            "type": "string"
-          },
-          {
-            "in": "path",
-            "description": "The name of the deployment.",
-            "required": true,
-            "minLength": 1,
-            "name": "deploymentName",
-            "pattern": "^[-\\w\\._]+$",
-            "maxLength": 64,
-            "type": "string"
-          },
-          {
-            "in": "body",
-            "x-ms-client-flatten": true,
-            "name": "parameters",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/Deployment_PublicIp"
-            },
-            "description": "Additional parameters supplied to the operation."
-          },
-          {
-            "$ref": "#/parameters/ApiVersionParameter"
-          },
-          {
-            "$ref": "#/parameters/SubscriptionIdParameter"
-          }
-        ]
-      }
-    }
-  },
-  "parameters": {
-    "ApiVersionParameter": {
-      "in": "query",
-      "description": "Client Api Version.",
-      "name": "api-version",
-      "required": true,
-      "type": "string"
-    },
-    "SubscriptionIdParameter": {
-      "in": "path",
-      "description": "Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.",
-      "name": "subscriptionId",
-      "required": true,
-      "type": "string"
-    }
-  },
   "definitions": {
-    "DeploymentProperties_PublicIp": {
-      "properties": {
-        "parameters": {
-          "x-ms-client-flatten": true,
-          "type": "object",
-          "description": "Deployment parameters. Use only one of Parameters or ParametersLink.",
-          "$ref": "#/definitions/PublicIpParameters"
-        },
-        "templateLink": {
-          "x-ms-client-flatten": true,
-          "description": "Gets or sets the URI referencing the template. Use only one of Template or TemplateLink.",
-          "$ref": "#/definitions/TemplateLink"
-        },
-        "mode": {
-          "x-ms-enum": {
-            "modelAsString": false,
-            "name": "DeploymentMode"
-          },
-          "description": "Gets or sets the deployment mode.",
-          "enum": [
-            "Incremental"
-          ],
-          "type": "string"
-        }
-      },
-      "description": "Deployment properties.",
-      "required": [
-        "templateLink",
-        "parameters",
-        "mode"
-      ]
-    },
-    "DeploymentParameter_name": {
-      "properties": {
-        "value": {
-          "x-ms-client-name": "name",
-          "description": "Name of the Public IP address.",
-          "type": "string"
-        }
-      },
-      "required": [
-        "value"
-      ]
-    },
-    "Provider": {
-      "properties": {
-        "resourceTypes": {
-          "items": {
-            "$ref": "#/definitions/ProviderResourceType"
-          },
-          "description": "Gets or sets the collection of provider resource types.",
-          "type": "array"
-        },
-        "namespace": {
-          "description": "Gets or sets the namespace of the provider.",
-          "type": "string"
-        },
-        "registrationState": {
-          "description": "Gets or sets the registration state of the provider.",
-          "type": "string"
-        },
-        "id": {
-          "description": "Gets or sets the provider id.",
-          "type": "string"
-        }
-      },
-      "description": "Resource provider information."
-    },
     "BasicDependency": {
       "properties": {
         "resourceType": {
@@ -198,77 +17,55 @@
       },
       "description": "Deployment dependency information."
     },
+    "Deployment_PublicIp": {
+      "properties": {
+        "properties": {
+          "description": "Gets or sets the deployment properties.",
+          "x-ms-client-flatten": true,
+          "$ref": "#/definitions/DeploymentProperties_PublicIp"
+        }
+      },
+      "description": "Deployment operation parameters."
+    },
     "PublicIpParameters": {
       "properties": {
-        "allocationMethod": {
-          "x-ms-client-flatten": true,
-          "$ref": "#/definitions/DeploymentParameter_allocationMethod",
-          "type": "object"
-        },
         "name": {
-          "x-ms-client-flatten": true,
+          "type": "object",
           "$ref": "#/definitions/DeploymentParameter_name",
-          "type": "object"
-        },
-        "_artifactsLocation": {
-          "x-ms-client-flatten": true,
-          "$ref": "#/definitions/DeploymentParameter__artifactsLocation",
-          "type": "object"
+          "x-ms-client-flatten": true
         },
         "location": {
-          "x-ms-client-flatten": true,
+          "type": "object",
           "$ref": "#/definitions/DeploymentParameter_location",
-          "type": "object"
+          "x-ms-client-flatten": true
         },
         "dnsName": {
-          "x-ms-client-flatten": true,
+          "type": "object",
           "$ref": "#/definitions/DeploymentParameter_dnsName",
-          "type": "object"
+          "x-ms-client-flatten": true
         },
         "publicIpAddressType": {
-          "x-ms-client-flatten": true,
+          "type": "object",
           "$ref": "#/definitions/DeploymentParameter_publicIpAddressType",
-          "type": "object"
+          "x-ms-client-flatten": true
+        },
+        "_artifactsLocation": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter__artifactsLocation",
+          "x-ms-client-flatten": true
+        },
+        "allocationMethod": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_allocationMethod",
+          "x-ms-client-flatten": true
         }
       },
       "required": [
         "name"
       ]
     },
-    "DeploymentParameter_dnsName": {
-      "properties": {
-        "value": {
-          "x-ms-client-name": "dnsName",
-          "description": "Globally unique DNS entry.",
-          "type": "string"
-        }
-      }
-    },
-    "TemplateLink": {
-      "properties": {
-        "contentVersion": {
-          "description": "If included it must match the ContentVersion in the template.",
-          "type": "string"
-        },
-        "uri": {
-          "description": "URI referencing the template.",
-          "enum": [
-            "https://azuresdkci.blob.core.windows.net/templatehost/CreatePublicIp_2016-06-06/azuredeploy.json"
-          ],
-          "type": "string"
-        }
-      },
-      "description": "Entity representing the reference to the template.",
-      "required": [
-        "uri"
-      ]
-    },
     "DeploymentExtended": {
       "properties": {
-        "properties": {
-          "description": "Gets or sets deployment properties.",
-          "$ref": "#/definitions/DeploymentPropertiesExtended"
-        },
         "name": {
           "description": "Gets or sets the name of the deployment.",
           "type": "string"
@@ -276,6 +73,10 @@
         "id": {
           "description": "Gets or sets the ID of the deployment.",
           "type": "string"
+        },
+        "properties": {
+          "description": "Gets or sets deployment properties.",
+          "$ref": "#/definitions/DeploymentPropertiesExtended"
         }
       },
       "description": "Deployment information.",
@@ -283,123 +84,17 @@
         "name"
       ]
     },
-    "DeploymentParameter_location": {
+    "DeploymentParameter_name": {
       "properties": {
         "value": {
-          "x-ms-client-name": "location",
-          "description": "Location (e.g. eastus).",
-          "type": "string"
-        }
-      }
-    },
-    "ProviderResourceType": {
-      "properties": {
-        "properties": {
-          "description": "Gets or sets the properties.",
-          "additionalProperties": {
-            "type": "string"
-          },
-          "type": "object"
-        },
-        "resourceType": {
-          "description": "Gets or sets the resource type.",
-          "type": "string"
-        },
-        "apiVersions": {
-          "items": {
-            "type": "string"
-          },
-          "description": "Gets or sets the api version.",
-          "type": "array"
-        },
-        "locations": {
-          "items": {
-            "type": "string"
-          },
-          "description": "Gets or sets the collection of locations where this resource type can be created in.",
-          "type": "array"
-        }
-      },
-      "description": "Resource type managed by the resource provider."
-    },
-    "DeploymentParameter__artifactsLocation": {
-      "properties": {
-        "value": {
-          "x-ms-client-name": "_artifactsLocation",
-          "description": "Container URI of of the template.",
-          "enum": [
-            "https://azuresdkci.blob.core.windows.net/templatehost/CreatePublicIp_2016-06-06"
-          ],
-          "type": "string"
+          "description": "Name of the Public IP address.",
+          "type": "string",
+          "x-ms-client-name": "name"
         }
       },
       "required": [
         "value"
       ]
-    },
-    "DeploymentPropertiesExtended": {
-      "properties": {
-        "outputs": {
-          "description": "Gets or sets key/value pairs that represent deploymentoutput.",
-          "type": "object"
-        },
-        "template": {
-          "description": "Gets or sets the template content. Use only one of Template or TemplateLink.",
-          "type": "object"
-        },
-        "dependencies": {
-          "items": {
-            "$ref": "#/definitions/Dependency"
-          },
-          "description": "Gets the list of deployment dependencies.",
-          "type": "array"
-        },
-        "parametersLink": {
-          "description": "Gets or sets the URI referencing the parameters. Use only one of Parameters or ParametersLink.",
-          "$ref": "#/definitions/ParametersLink"
-        },
-        "mode": {
-          "x-ms-enum": {
-            "modelAsString": false,
-            "name": "DeploymentMode"
-          },
-          "description": "Gets or sets the deployment mode.",
-          "enum": [
-            "Incremental",
-            "Complete"
-          ],
-          "type": "string"
-        },
-        "provisioningState": {
-          "description": "Gets or sets the state of the provisioning.",
-          "type": "string"
-        },
-        "providers": {
-          "items": {
-            "$ref": "#/definitions/Provider"
-          },
-          "description": "Gets the list of resource providers needed for the deployment.",
-          "type": "array"
-        },
-        "TemplateLink": {
-          "description": "Gets or sets the URI referencing the template. Use only one of Template or TemplateLink.",
-          "$ref": "#/definitions/TemplateLink"
-        },
-        "timestamp": {
-          "description": "Gets or sets the timestamp of the template deployment.",
-          "format": "date-time",
-          "type": "string"
-        },
-        "parameters": {
-          "description": "Deployment parameters. Use only one of Parameters or ParametersLink.",
-          "type": "object"
-        },
-        "correlationId": {
-          "description": "Gets or sets the correlation ID of the deployment.",
-          "type": "string"
-        }
-      },
-      "description": "Deployment properties with additional details."
     },
     "ParametersLink": {
       "properties": {
@@ -417,36 +112,238 @@
         "uri"
       ]
     },
-    "Deployment_PublicIp": {
+    "DeploymentProperties_PublicIp": {
       "properties": {
-        "properties": {
+        "templateLink": {
+          "description": "Gets or sets the URI referencing the template. Use only one of Template or TemplateLink.",
           "x-ms-client-flatten": true,
-          "description": "Gets or sets the deployment properties.",
-          "$ref": "#/definitions/DeploymentProperties_PublicIp"
+          "$ref": "#/definitions/TemplateLink"
+        },
+        "mode": {
+          "description": "Gets or sets the deployment mode.",
+          "type": "string",
+          "enum": [
+            "Incremental"
+          ],
+          "x-ms-enum": {
+            "name": "DeploymentMode",
+            "modelAsString": false
+          }
+        },
+        "parameters": {
+          "description": "Deployment parameters. Use only one of Parameters or ParametersLink.",
+          "type": "object",
+          "$ref": "#/definitions/PublicIpParameters",
+          "x-ms-client-flatten": true
         }
       },
-      "description": "Deployment operation parameters."
+      "description": "Deployment properties.",
+      "required": [
+        "templateLink",
+        "parameters",
+        "mode"
+      ]
+    },
+    "DeploymentParameter__artifactsLocation": {
+      "properties": {
+        "value": {
+          "description": "Container URI of of the template.",
+          "type": "string",
+          "x-ms-client-name": "_artifactsLocation",
+          "enum": [
+            "https://azuresdkci.blob.core.windows.net/templatehost/CreatePublicIp_2016-06-06"
+          ]
+        }
+      },
+      "required": [
+        "value"
+      ]
+    },
+    "DeploymentParameter_dnsName": {
+      "properties": {
+        "value": {
+          "description": "Globally unique DNS entry.",
+          "type": "string",
+          "x-ms-client-name": "dnsName"
+        }
+      }
+    },
+    "DeploymentParameter_allocationMethod": {
+      "properties": {
+        "value": {
+          "description": "IP address Allocation method.",
+          "type": "string",
+          "x-ms-client-name": "allocationMethod",
+          "enum": [
+            "dynamic",
+            "static"
+          ],
+          "default": "dynamic"
+        }
+      }
+    },
+    "DeploymentPropertiesExtended": {
+      "properties": {
+        "outputs": {
+          "description": "Gets or sets key/value pairs that represent deploymentoutput.",
+          "type": "object"
+        },
+        "correlationId": {
+          "description": "Gets or sets the correlation ID of the deployment.",
+          "type": "string"
+        },
+        "provisioningState": {
+          "description": "Gets or sets the state of the provisioning.",
+          "type": "string"
+        },
+        "mode": {
+          "description": "Gets or sets the deployment mode.",
+          "type": "string",
+          "enum": [
+            "Incremental",
+            "Complete"
+          ],
+          "x-ms-enum": {
+            "name": "DeploymentMode",
+            "modelAsString": false
+          }
+        },
+        "dependencies": {
+          "description": "Gets the list of deployment dependencies.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Dependency"
+          }
+        },
+        "template": {
+          "description": "Gets or sets the template content. Use only one of Template or TemplateLink.",
+          "type": "object"
+        },
+        "parameters": {
+          "description": "Deployment parameters. Use only one of Parameters or ParametersLink.",
+          "type": "object"
+        },
+        "TemplateLink": {
+          "description": "Gets or sets the URI referencing the template. Use only one of Template or TemplateLink.",
+          "$ref": "#/definitions/TemplateLink"
+        },
+        "parametersLink": {
+          "description": "Gets or sets the URI referencing the parameters. Use only one of Parameters or ParametersLink.",
+          "$ref": "#/definitions/ParametersLink"
+        },
+        "timestamp": {
+          "description": "Gets or sets the timestamp of the template deployment.",
+          "type": "string",
+          "format": "date-time"
+        },
+        "providers": {
+          "description": "Gets the list of resource providers needed for the deployment.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Provider"
+          }
+        }
+      },
+      "description": "Deployment properties with additional details."
+    },
+    "TemplateLink": {
+      "properties": {
+        "contentVersion": {
+          "description": "If included it must match the ContentVersion in the template.",
+          "type": "string"
+        },
+        "uri": {
+          "description": "URI referencing the template.",
+          "type": "string",
+          "enum": [
+            "https://azuresdkci.blob.core.windows.net/templatehost/CreatePublicIp_2016-06-06/azuredeploy.json"
+          ]
+        }
+      },
+      "description": "Entity representing the reference to the template.",
+      "required": [
+        "uri"
+      ]
+    },
+    "DeploymentParameter_location": {
+      "properties": {
+        "value": {
+          "description": "Location (e.g. eastus).",
+          "type": "string",
+          "x-ms-client-name": "location"
+        }
+      }
+    },
+    "Provider": {
+      "properties": {
+        "id": {
+          "description": "Gets or sets the provider id.",
+          "type": "string"
+        },
+        "namespace": {
+          "description": "Gets or sets the namespace of the provider.",
+          "type": "string"
+        },
+        "registrationState": {
+          "description": "Gets or sets the registration state of the provider.",
+          "type": "string"
+        },
+        "resourceTypes": {
+          "description": "Gets or sets the collection of provider resource types.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ProviderResourceType"
+          }
+        }
+      },
+      "description": "Resource provider information."
+    },
+    "ProviderResourceType": {
+      "properties": {
+        "resourceType": {
+          "description": "Gets or sets the resource type.",
+          "type": "string"
+        },
+        "properties": {
+          "description": "Gets or sets the properties.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "locations": {
+          "description": "Gets or sets the collection of locations where this resource type can be created in.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "apiVersions": {
+          "description": "Gets or sets the api version.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Resource type managed by the resource provider."
     },
     "DeploymentParameter_publicIpAddressType": {
       "properties": {
         "value": {
-          "default": "noDns",
-          "x-ms-client-name": "publicIpAddressType",
           "description": "Whether to include a DNS entry or not.",
+          "type": "string",
+          "x-ms-client-name": "publicIpAddressType",
           "enum": [
             "dns",
             "noDns"
           ],
-          "type": "string"
+          "default": "noDns"
         }
       }
     },
     "Dependency": {
       "properties": {
-        "resourceName": {
-          "description": "Gets or sets the dependency resource name.",
-          "type": "string"
-        },
         "resourceType": {
           "description": "Gets or sets the dependency resource type.",
           "type": "string"
@@ -456,28 +353,131 @@
           "type": "string"
         },
         "dependsOn": {
+          "description": "Gets the list of dependencies.",
+          "type": "array",
           "items": {
             "$ref": "#/definitions/BasicDependency"
-          },
-          "description": "Gets the list of dependencies.",
-          "type": "array"
+          }
+        },
+        "resourceName": {
+          "description": "Gets or sets the dependency resource name.",
+          "type": "string"
         }
       },
       "description": "Deployment dependency information."
-    },
-    "DeploymentParameter_allocationMethod": {
-      "properties": {
-        "value": {
-          "default": "Dynamic",
-          "x-ms-client-name": "allocationMethod",
-          "description": "IP address Allocation method.",
-          "enum": [
-            "Dynamic",
-            "Static"
-          ],
-          "type": "string"
+    }
+  },
+  "security": [
+    {
+      "azure_auth": [
+        "user_impersonation"
+      ]
+    }
+  ],
+  "host": "management.azure.com",
+  "produces": [
+    "application/json"
+  ],
+  "info": {
+    "title": "PublicIpCreationClient",
+    "version": "2015-11-01"
+  },
+  "schemes": [
+    "https"
+  ],
+  "paths": {
+    "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Resources/deployments/{deploymentName}": {
+      "put": {
+        "description": "Create or update a virtual machine.",
+        "parameters": [
+          {
+            "name": "resourceGroupName",
+            "type": "string",
+            "in": "path",
+            "required": true,
+            "maxLength": 64,
+            "description": "The name of the resource group. The name is case insensitive.",
+            "minLength": 1,
+            "pattern": "^[-\\w\\._]+$"
+          },
+          {
+            "name": "deploymentName",
+            "type": "string",
+            "in": "path",
+            "required": true,
+            "maxLength": 64,
+            "description": "The name of the deployment.",
+            "minLength": 1,
+            "pattern": "^[-\\w\\._]+$"
+          },
+          {
+            "name": "parameters",
+            "x-ms-client-flatten": true,
+            "in": "body",
+            "required": true,
+            "description": "Additional parameters supplied to the operation.",
+            "schema": {
+              "$ref": "#/definitions/Deployment_PublicIp"
+            }
+          },
+          {
+            "$ref": "#/parameters/ApiVersionParameter"
+          },
+          {
+            "$ref": "#/parameters/SubscriptionIdParameter"
+          }
+        ],
+        "x-ms-long-running-operation": true,
+        "operationId": "PublicIp_CreateOrUpdate",
+        "tags": [
+          "PublicIp"
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/DeploymentExtended"
+            }
+          },
+          "201": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/DeploymentExtended"
+            }
+          }
         }
       }
+    }
+  },
+  "consumes": [
+    "application/json"
+  ],
+  "swagger": "2.0",
+  "securityDefinitions": {
+    "azure_auth": {
+      "description": "Azure Active Directory OAuth2 Flow",
+      "type": "oauth2",
+      "flow": "implicit",
+      "authorizationUrl": "https://login.microsoftonline.com/common/oauth2/authorize",
+      "scopes": {
+        "user_impersonation": "impersonate your user account"
+      }
+    }
+  },
+  "parameters": {
+    "SubscriptionIdParameter": {
+      "name": "subscriptionId",
+      "type": "string",
+      "description": "Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.",
+      "in": "path",
+      "required": true
+    },
+    "ApiVersionParameter": {
+      "name": "api-version",
+      "type": "string",
+      "description": "Client Api Version.",
+      "in": "query",
+      "required": true
     }
   }
 }
