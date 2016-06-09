@@ -50,6 +50,8 @@ register_cli_argument(
     )
 )
 
+register_cli_argument('vm capture', 'overwrite', CliArgumentType(action='store_true'))
+
 register_cli_argument('vm diagnostics', 'vm_name', CliArgumentType(options_list=('--vm-name',)))
 
 register_cli_argument('vm extension', 'vm_extension_name', name_arg_type)

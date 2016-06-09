@@ -257,7 +257,6 @@ class VMImageShowScenarioTest(VCRTestBase):
 class VMGeneralizeScenarioTest(VCRTestBase):
 
     def __init__(self, test_method):
-        self.deployment_name = 'azurecli-test-deployment-vm-generalize'
         self.resource_group = 'cliTestRg_VmGeneralize'
         self.location = 'westus'
         self.vm_name = 'vm-generalize'
@@ -270,9 +269,10 @@ class VMGeneralizeScenarioTest(VCRTestBase):
 
     def body(self):
         self.run_command_no_verify('vm create --resource-group {0} --location {1} --name {2} --admin-username ubuntu '
-                 '--image Canonical:UbuntuServer:14.04.4-LTS:latest --admin-password testPassword0 '
-                 '--deployment-name {3}'.format(
-                     self.resource_group, self.location, self.vm_name, self.deployment_name))
+                 '--image UbuntuLTS --admin-password testPassword0 --authentication-type password'
+                 .format(
+                     self.resource_group, self.location, self.vm_name))
+
         self.run_command_no_verify('vm power-off --resource-group {} --name {}'.format(
             self.resource_group, self.vm_name))
         # Should be able to generalize the VM after it has been stopped
@@ -281,11 +281,16 @@ class VMGeneralizeScenarioTest(VCRTestBase):
                 self.resource_group,
                 self.vm_name), None)
 
+        self.run_command_and_verify(
+            'vm capture --resource-group {} --name {} --vhd-name-prefix vmtest'.format(
+                self.resource_group,
+                self.vm_name), None)
+
     def tear_down(self):
         self.run_command_no_verify('resource group delete --name {}'.format(self.resource_group))
 
     def test_vm_generalize(self):
-        self.execute(verify_test_output=False)
+        self.execute(verify_test_output=True)
 
 class VMCreateAndStateModificationsScenarioTest(VCRTestBase):
 

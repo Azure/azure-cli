@@ -1,4 +1,6 @@
 ﻿# pylint: disable=no-self-use,too-many-arguments
+from __future__ import print_function
+import json
 import re
 try:
     from urllib.parse import urlparse
@@ -6,7 +8,9 @@ except ImportError:
     from urlparse import urlparse # pylint: disable=import-error
 from six.moves.urllib.request import urlopen #pylint: disable=import-error,unused-import
 
-from azure.mgmt.compute.models import DataDisk, VirtualMachineScaleSet
+from azure.mgmt.compute.models import (DataDisk,
+                                       VirtualMachineScaleSet,
+                                       VirtualMachineCaptureParameters)
 from azure.mgmt.compute.models.compute_management_client_enums import DiskCreateOptionTypes
 from azure.cli.commands import LongRunningOperation
 from azure.cli.commands.client_factory import get_mgmt_service_client, get_data_service_client
@@ -227,6 +231,20 @@ def list_disks(resource_group_name, vm_name):
     vm = _vm_get(resource_group_name, vm_name)
     return vm.storage_profile.data_disks # pylint: disable=no-member
 
+def capture_vm(resource_group_name, vm_name, vhd_name_prefix,
+               storage_container='vhds', overwrite=True):
+    '''Captures the VM by copying virtual hard disks of the VM and outputs a
+    template that can be used to create similar VMs.
+    :param str vhd_name_prefix: the VHD name prefix specify for the VM disks
+    :param str storage_container: the storage account container name to save the disks
+    :param str overwrite: overwrite the existing disk file
+    '''
+    client = _compute_client_factory()
+    parameter = VirtualMachineCaptureParameters(vhd_name_prefix, storage_container, overwrite)
+    poller = client.virtual_machines.capture(resource_group_name, vm_name, parameter)
+    result = LongRunningOperation()(poller)
+    print(json.dumps(result.output, indent=2))
+
 def set_windows_user_password(
         resource_group_name, vm_name, username, password):
     '''Update the password.
@@ -426,7 +444,6 @@ def set_extension(
         private_config=None, auto_upgrade_minor_version=False):
     '''create/update extensions for a VM in a resource group. You can use
     'extension image list' to get extension details
-    :param vm_name: the name of virtual machine.
     :param vm_extension_name: the name of the extension
     :param publisher: the name of extension publisher
     :param version: the version of extension.
@@ -458,7 +475,6 @@ def set_diagnostics_extension(
         resource_group_name, vm_name, storage_account, public_config=None):
     '''Enable diagnostics
 
-    :param vm_name: the name of virtual machine
     :param storage_account: the storage account to upload diagnostics log
     :param public_config: the config file which defines data to be collected.
     Default will be provided if missing
