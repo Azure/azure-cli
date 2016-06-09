@@ -241,7 +241,7 @@ def capture_vm(resource_group_name, vm_name, vhd_name_prefix,
     parameter = VirtualMachineCaptureParameters(vhd_name_prefix, storage_container, overwrite)
     poller = client.virtual_machines.capture(resource_group_name, vm_name, parameter)
     result = LongRunningOperation()(poller)
-    print(json.dumps(result.output, indent=2))
+    print(json.dumps(result.output, indent=2)) # pylint: disable=no-member
 
 def set_windows_user_password(
         resource_group_name, vm_name, username, password):
