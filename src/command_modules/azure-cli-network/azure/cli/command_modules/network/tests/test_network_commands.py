@@ -1,4 +1,5 @@
-﻿from azure.cli.utils.vcr_test_base import VCRTestBase, JMESPathComparator
+﻿from azure.cli.utils.vcr_test_base import (VCRTestBase, ResourceGroupVCRTestBase, JMESPathCheck,
+                                           NoneCheck)
 
 #pylint: disable=method-hidden
 #pylint: disable=line-too-long
@@ -7,319 +8,319 @@
 # TODO Make these full scenario tests when we can create the resources through network commands.
 # So currently, the tests assume the resources have been created through some other means.
 
-class ResourceGroupVCRTestBase(VCRTestBase):
-    def __init__(self, test_file, test_name, debug=False):
-        super(ResourceGroupVCRTestBase, self).__init__(test_file, test_name, debug)
-        self.resource_group = 'vcr_resource_group'
-        self.location = 'westus'
-
-    def set_up(self):
-        self.run_command_no_verify('resource group create --location {} --name {}'
-                                   .format(self.location, self.resource_group))
-
-    def tear_down(self):
-        self.run_command_no_verify('resource group delete --name {}'.format(self.resource_group))
-
 class NetworkUsageListScenarioTest(VCRTestBase):
 
     def __init__(self, test_method):
         super(NetworkUsageListScenarioTest, self).__init__(__file__, test_method)
 
-    def test_network_usage_list(self): #start with 'test' and same name with the recording file
-        self.execute(verify_test_output=True)
+    def test_network_usage_list(self):
+        self.execute()
 
     def body(self):
-        self.run_command_and_verify('network list-usages --location westus', JMESPathComparator('type(@)', 'array'))
+        self.cmd('network list-usages --location westus', checks=JMESPathCheck('type(@)', 'array'))
 
 class NetworkNicListScenarioTest(VCRTestBase):
 
     def __init__(self, test_method):
-        self.resource_group = 'TravisTestResourceGroup'
         super(NetworkNicListScenarioTest, self).__init__(__file__, test_method)
+        self.resource_group = 'TravisTestResourceGroup'
 
     def test_network_nic_list(self):
-        self.execute(verify_test_output=True)
+        self.execute()
 
     def body(self):
-        self.run_command_and_verify('network nic list --resource-group {}'.format(self.resource_group), [
-            JMESPathComparator('type(@)', 'array'),
-            JMESPathComparator(
-                "length([?resourceGroup == '{}' || resourceGroup =='{}']) == length(@)".format(
-                    self.resource_group, self.resource_group.lower()),
-                True)])
+        self.cmd('network nic list --resource-group {}'.format(self.resource_group), checks=[
+            JMESPathCheck('type(@)', 'array'),
+            JMESPathCheck("length([?resourceGroup == '{}' || resourceGroup =='{}']) == length(@)".format(self.resource_group, self.resource_group.lower()), True)
+        ])
 
 class NetworkAppGatewayScenarioTest(VCRTestBase):
 
     def __init__(self, test_method):
+        super(NetworkAppGatewayScenarioTest, self).__init__(__file__, test_method)
         self.resource_group = 'cli_tmp_test1'
         self.name = 'applicationGateway1'
-        super(NetworkAppGatewayScenarioTest, self).__init__(__file__, test_method)
 
     def test_network_app_gateway(self):
-        self.execute(verify_test_output=True)
+        self.execute()
 
     def set_up(self):
-        if not self.run_command_no_verify('network application-gateway show --resource-group {} --name {}'.format(
+        if not self.cmd('network application-gateway show --resource-group {} --name {}'.format(
             self.resource_group, self.name)):
             raise RuntimeError('Application gateway must be manually created in order to support this test.')
 
     def body(self):
-        self.run_command_and_verify('network application-gateway list-all', [
-            JMESPathComparator('type(@)', 'array'),
-            JMESPathComparator('length(@)', 1)])
-        self.run_command_and_verify('network application-gateway list --resource-group {}'.format(
-            self.resource_group), [
-            JMESPathComparator('type(@)', 'array'),
-            JMESPathComparator('length(@)', 1),
-            JMESPathComparator("length([?resourceGroup == '{}']) == length(@)".format(
-                          self.resource_group), True)])
-        self.run_command_and_verify('network application-gateway show --resource-group {} --name {}'.format(
-            self.resource_group, self.name), [
-            JMESPathComparator('type(@)', 'object'),
-            JMESPathComparator('name', self.name),
-            JMESPathComparator('resourceGroup', self.resource_group),
-            ])
-        self.run_command_and_verify('network application-gateway stop --resource-group {} --name {}'.format(
-            self.resource_group, self.name), None)
-        self.run_command_and_verify('network application-gateway start --resource-group {} --name {}'.format(
-            self.resource_group, self.name), None)
-        self.run_command_and_verify('network application-gateway delete --resource-group {} --name {}'.format(
-            self.resource_group, self.name), None)
+        rg = self.resource_group
+        name = self.name
+        self.cmd('network application-gateway list-all', checks=[
+            JMESPathCheck('type(@)', 'array'),
+            JMESPathCheck('length(@)', 1)
+        ])
+        self.cmd('network application-gateway list --resource-group {}'.format(rg), checks=[
+            JMESPathCheck('type(@)', 'array'),
+            JMESPathCheck('length(@)', 1),
+            JMESPathCheck("length([?resourceGroup == '{}']) == length(@)".format(rg), True)
+        ])
+        self.cmd('network application-gateway show --resource-group {} --name {}'.format(rg, name), checks=[
+            JMESPathCheck('type(@)', 'object'),
+            JMESPathCheck('name', self.name),
+            JMESPathCheck('resourceGroup', self.resource_group),
+        ])
+        self.cmd('network application-gateway stop --resource-group {} --name {}'.format(rg, name))
+        self.cmd('network application-gateway start --resource-group {} --name {}'.format(rg, name))
+        self.cmd('network application-gateway delete --resource-group {} --name {}'.format(rg, name))
         # Expecting the resource to no longer appear in the list
-        self.run_command_and_verify('network application-gateway list --resource-group {}'.format(
-            self.resource_group), None)
+        self.cmd('network application-gateway list --resource-group {}'.format(rg), checks=NoneCheck())
+
+class NetworkPublicIpScenarioTest(VCRTestBase):
+
+    def __init__(self, test_method):
+        super(NetworkPublicIpScenarioTest, self).__init__(__file__, test_method)
+        self.resource_group = 'cli_test1'
+        self.public_ip_name = 'windowsvm'
+
+    def test_network_public_ip(self):
+        self.execute()
+
+    def set_up(self):
+        if not self.cmd('network public-ip show --resource-group {} --name {}'.format(
+            self.resource_group, self.public_ip_name)):
+            raise RuntimeError('Public IP must be manually created in order to support this test.')
+
+    def body(self):
+        self.cmd('network public-ip list-all', checks=JMESPathCheck('type(@)', 'array'))
+        self.cmd('network public-ip list --resource-group {}'.format(self.resource_group), checks=[
+            JMESPathCheck('type(@)', 'array'),
+            JMESPathCheck("length([?resourceGroup == '{}']) == length(@)".format(self.resource_group), True)
+        ])
+        self.cmd('network public-ip show --resource-group {} --name {}'.format(
+            self.resource_group, self.public_ip_name), checks=[
+            JMESPathCheck('type(@)', 'object'),
+            JMESPathCheck('name', self.public_ip_name),
+            JMESPathCheck('resourceGroup', self.resource_group),
+        ])
+        self.cmd('network public-ip delete --resource-group {} --name {}'.format(
+            self.resource_group, self.public_ip_name))
+        self.cmd('network public-ip list --resource-group {}'.format(self.resource_group), checks=NoneCheck())
 
 class NetworkExpressRouteScenarioTest(VCRTestBase):
 
     def __init__(self, test_method):
+        super(NetworkExpressRouteScenarioTest, self).__init__(__file__, test_method)
         self.resource_group = 'cli_test1'
         self.express_route_name = 'test_route'
         self.resource_type = 'Microsoft.Network/expressRouteCircuits'
-        super(NetworkExpressRouteScenarioTest, self).__init__(__file__, test_method)
 
     def test_network_express_route(self):
-        self.execute(verify_test_output=True)
+        self.execute()
 
     def set_up(self):
-        if not self.run_command_no_verify('network express-route circuit show --resource-group {} --name {}'.format(
+        if not self.cmd('network express-route circuit show --resource-group {} --name {}'.format(
             self.resource_group, self.express_route_name)):
             raise RuntimeError('Express route must be manually created in order to support this test.')
 
     def body(self):
-        self.run_command_and_verify('network express-route circuit list-all', [
-            JMESPathComparator('type(@)', 'array'),
-            JMESPathComparator("length([?type == '{}']) == length(@)".format(
-                          self.resource_type), True),
-            JMESPathComparator("length([?resourceGroup == '{}']) == length(@)".format(
-                          self.resource_group), True)
-            ])
-        self.run_command_and_verify('network express-route circuit list --resource-group {}'.format(
-            self.resource_group),
-        [
-            JMESPathComparator('type(@)', 'array'),
-            JMESPathComparator("length([?type == '{}']) == length(@)".format(
-                          self.resource_type), True),
-            JMESPathComparator("length([?resourceGroup == '{}']) == length(@)".format(
-                          self.resource_group), True)
+        self.cmd('network express-route circuit list-all', checks=[
+            JMESPathCheck('type(@)', 'array'),
+            JMESPathCheck("length([?type == '{}']) == length(@)".format(self.resource_type), True),
+            JMESPathCheck("length([?resourceGroup == '{}']) == length(@)".format(self.resource_group), True)
         ])
-        self.run_command_and_verify('network express-route circuit show --resource-group {} --name {}'.format(
-            self.resource_group, self.express_route_name), [
-                JMESPathComparator('type(@)', 'object'),
-                JMESPathComparator('type', self.resource_type),
-                JMESPathComparator('name', self.express_route_name),
-                JMESPathComparator('resourceGroup', self.resource_group),
-            ])
-        self.run_command_and_verify('network express-route circuit get-stats --resource-group {} --name {}'.format(
-            self.resource_group, self.express_route_name), JMESPathComparator('type(@)', 'object'))
-        self.run_command_and_verify('network express-route circuit-auth list --resource-group {} --circuit-name {}'.format( #pylint: disable=line-too-long
-            self.resource_group, self.express_route_name), None)
-        self.run_command_and_verify('network express-route circuit-peering list --resource-group {} --circuit-name {}'.format( #pylint: disable=line-too-long
-            self.resource_group, self.express_route_name), None)
-        self.run_command_and_verify('network express-route service-provider list', [
-            JMESPathComparator('type(@)', 'array'),
-            JMESPathComparator("length([?type == '{}']) == length(@)".format(
-                          'Microsoft.Network/expressRouteServiceProviders'), True)])
-        self.run_command_and_verify('network express-route circuit delete --resource-group {} --name {}'.format(
-            self.resource_group, self.express_route_name), None)
+        self.cmd('network express-route circuit list --resource-group {}'.format(self.resource_group), checks=[
+            JMESPathCheck('type(@)', 'array'),
+            JMESPathCheck("length([?type == '{}']) == length(@)".format(self.resource_type), True),
+            JMESPathCheck("length([?resourceGroup == '{}']) == length(@)".format(self.resource_group), True)
+        ])
+        self.cmd('network express-route circuit show --resource-group {} --name {}'.format(self.resource_group, self.express_route_name), checks=[
+            JMESPathCheck('type(@)', 'object'),
+            JMESPathCheck('type', self.resource_type),
+            JMESPathCheck('name', self.express_route_name),
+            JMESPathCheck('resourceGroup', self.resource_group),
+        ])
+        self.cmd('network express-route circuit get-stats --resource-group {} --name {}'.format(
+            self.resource_group, self.express_route_name), checks=JMESPathCheck('type(@)', 'object'))
+        self.cmd('network express-route circuit-auth list --resource-group {} --circuit-name {}'.format(
+            self.resource_group, self.express_route_name), checks=NoneCheck())
+        self.cmd('network express-route circuit-peering list --resource-group {} --circuit-name {}'.format(
+            self.resource_group, self.express_route_name), checks=NoneCheck())
+        self.cmd('network express-route service-provider list', checks=[
+            JMESPathCheck('type(@)', 'array'),
+            JMESPathCheck("length([?type == '{}']) == length(@)".format('Microsoft.Network/expressRouteServiceProviders'), True)
+        ])
+        self.cmd('network express-route circuit delete --resource-group {} --name {}'.format(
+            self.resource_group, self.express_route_name), checks=NoneCheck())
         # Expecting no results as we just deleted the only express route in the resource group
-        self.run_command_and_verify('network express-route circuit list --resource-group {}'.format(
-            self.resource_group), None)
+        self.cmd('network express-route circuit list --resource-group {}'.format(self.resource_group),
+            checks=NoneCheck())
 
 class NetworkExpressRouteCircuitScenarioTest(VCRTestBase):
 
     def __init__(self, test_method):
-        # The resources for this test did not exist so the commands will return 404 errors.
-        # So this test is for the command execution itself.
+         # The resources for this test did not exist so the commands will return 404 errors.
+         # So this test is for the command execution itself.
+        super(NetworkExpressRouteCircuitScenarioTest, self).__init__(__file__, test_method)
         self.resource_group = 'cli_test1'
         self.express_route_name = 'test_route'
         self.placeholder_value = 'none_existent'
-        super(NetworkExpressRouteCircuitScenarioTest, self).__init__(__file__, test_method)
 
     def test_network_express_route_circuit(self):
-        self.execute(verify_test_output=True)
+        self.execute()
 
     def body(self):
-        self.run_command_and_verify('network express-route circuit-auth show --resource-group {0} --circuit-name {1} --name {2}'.format( #pylint: disable=line-too-long
-            self.resource_group, self.express_route_name, self.placeholder_value), None)
-        self.run_command_and_verify('network express-route circuit-auth delete --resource-group {0} --circuit-name {1} --name {2}'.format( #pylint: disable=line-too-long
-            self.resource_group, self.express_route_name, self.placeholder_value), None)
-        self.run_command_and_verify('network express-route circuit-peering delete --resource-group {0} --circuit-name {1} --name {2}'.format( #pylint: disable=line-too-long
-            self.resource_group, self.express_route_name, self.placeholder_value), None)
-        self.run_command_and_verify('network express-route circuit-peering show --resource-group {0} --circuit-name {1} --name {2}'.format( #pylint: disable=line-too-long
-            self.resource_group, self.express_route_name, self.placeholder_value), None)
-        self.run_command_and_verify('network express-route circuit list-arp --resource-group {0} --name {1} --peering-name {2} --device-path {2}'.format( #pylint: disable=line-too-long
-            self.resource_group, self.express_route_name, self.placeholder_value), None)
-        self.run_command_and_verify('network express-route circuit list-routes --resource-group {0} --name {1} --peering-name {2} --device-path {2}'.format( #pylint: disable=line-too-long
-            self.resource_group, self.express_route_name, self.placeholder_value), None)
+        rg = self.resource_group
+        ern = self.express_route_name
+        pv = self.placeholder_value
+        allowed_exceptions = "The Resource 'Microsoft.Network/expressRouteCircuits/{}' under resource group '{}' was not found.".format(ern, rg)
+        self.cmd('network express-route circuit-auth show --resource-group {0} --circuit-name {1} --name {2}'.format(
+            rg, ern, pv), allowed_exceptions=allowed_exceptions)
+        self.cmd('network express-route circuit-auth delete --resource-group {0} --circuit-name {1} --name {2}'.format(
+            rg, ern, pv), allowed_exceptions=allowed_exceptions)
+        self.cmd('network express-route circuit-peering delete --resource-group {0} --circuit-name {1} --name {2}'.format(
+            rg, ern, pv), allowed_exceptions=allowed_exceptions)
+        self.cmd('network express-route circuit-peering show --resource-group {0} --circuit-name {1} --name {2}'.format(
+            rg, ern, pv), allowed_exceptions=allowed_exceptions)
+        self.cmd('network express-route circuit list-arp --resource-group {0} --name {1} --peering-name {2} --device-path {2}'.format(
+            rg, ern, pv), allowed_exceptions=allowed_exceptions)
+        self.cmd('network express-route circuit list-routes --resource-group {0} --name {1} --peering-name {2} --device-path {2}'.format(
+            rg, ern, pv), allowed_exceptions=allowed_exceptions)
 
 class NetworkLoadBalancerScenarioTest(VCRTestBase):
 
     def __init__(self, test_method):
+        super(NetworkLoadBalancerScenarioTest, self).__init__(__file__, test_method)
         self.resource_group = 'cli_test1'
         self.lb_name = 'cli-test-lb'
         self.resource_type = 'Microsoft.Network/loadBalancers'
-        super(NetworkLoadBalancerScenarioTest, self).__init__(__file__, test_method)
 
     def test_network_load_balancer(self):
-        self.execute(verify_test_output=True)
+        self.execute()
 
     def set_up(self):
-        if not self.run_command_no_verify('network lb show --resource-group {} --name {}'.format(
+        if not self.cmd('network lb show --resource-group {} --name {}'.format(
             self.resource_group, self.lb_name)):
             raise RuntimeError('Load balancer must be manually created in order to support this test.')
 
     def body(self):
-        self.run_command_and_verify('network lb list-all', [
-            JMESPathComparator('type(@)', 'array'),
-            JMESPathComparator("length([?type == '{}']) == length(@)".format(
-                          self.resource_type), True)])
-        self.run_command_and_verify('network lb list --resource-group {}'.format(self.resource_group), [
-            JMESPathComparator('type(@)', 'array'),
-            JMESPathComparator("length([?type == '{}']) == length(@)".format(
-                          self.resource_type), True),
-            JMESPathComparator("length([?resourceGroup == '{}']) == length(@)".format(
-                          self.resource_group), True)])
-        self.run_command_and_verify('network lb show --resource-group {} --name {}'.format(
-            self.resource_group, self.lb_name), [
-            JMESPathComparator('type(@)', 'object'),
-            JMESPathComparator('type', self.resource_type),
-            JMESPathComparator('resourceGroup', self.resource_group),
-            JMESPathComparator('name', self.lb_name)])
-        self.run_command_and_verify('network lb delete --resource-group {} --name {}'.format(
-            self.resource_group, self.lb_name), None)
+        self.cmd('network lb list-all', checks=[
+            JMESPathCheck('type(@)', 'array'),
+            JMESPathCheck("length([?type == '{}']) == length(@)".format(self.resource_type), True)
+        ])
+        self.cmd('network lb list --resource-group {}'.format(self.resource_group), checks=[
+            JMESPathCheck('type(@)', 'array'),
+            JMESPathCheck("length([?type == '{}']) == length(@)".format(self.resource_type), True),
+            JMESPathCheck("length([?resourceGroup == '{}']) == length(@)".format(self.resource_group), True)
+        ])
+        self.cmd('network lb show --resource-group {} --name {}'.format(self.resource_group, self.lb_name), checks=[
+            JMESPathCheck('type(@)', 'object'),
+            JMESPathCheck('type', self.resource_type),
+            JMESPathCheck('resourceGroup', self.resource_group),
+            JMESPathCheck('name', self.lb_name)
+        ])
+        self.cmd('network lb delete --resource-group {} --name {}'.format(self.resource_group, self.lb_name))
         # Expecting no results as we just deleted the only lb in the resource group
-        self.run_command_and_verify('network lb list --resource-group {}'.format(self.resource_group), None)
+        self.cmd('network lb list --resource-group {}'.format(self.resource_group), checks=NoneCheck())
 
 class NetworkLocalGatewayScenarioTest(VCRTestBase):
 
     def __init__(self, test_method):
+        super(NetworkLocalGatewayScenarioTest, self).__init__(__file__, test_method)
         self.resource_group = 'cli_test1'
         self.name = 'cli-test-loc-gateway'
         self.resource_type = 'Microsoft.Network/localNetworkGateways'
-        super(NetworkLocalGatewayScenarioTest, self).__init__(__file__, test_method)
 
     def test_network_local_gateway(self):
-        self.execute(verify_test_output=True)
+        self.execute()
 
     def set_up(self):
-        if not self.run_command_no_verify('network local-gateway show --resource-group {} --name {}'.format(
+        if not self.cmd('network local-gateway show --resource-group {} --name {}'.format(
             self.resource_group, self.name)):
             raise RuntimeError('Local gateway must be manually created in order to support this test.')
 
     def body(self):
-        self.run_command_and_verify('network local-gateway list --resource-group {}'.format(self.resource_group), [
-            JMESPathComparator('type(@)', 'array'),
-            JMESPathComparator("length([?type == '{}']) == length(@)".format(
-                          self.resource_type), True),
-            JMESPathComparator("length([?resourceGroup == '{}']) == length(@)".format(
-                          self.resource_group), True)])
-        self.run_command_and_verify('network local-gateway show --resource-group {} --name {}'.format(
-            self.resource_group, self.name), [
-            JMESPathComparator('type(@)', 'object'),
-            JMESPathComparator('type', self.resource_type),
-            JMESPathComparator('resourceGroup', self.resource_group),
-            JMESPathComparator('name', self.name)])
-        self.run_command_and_verify('network local-gateway delete --resource-group {} --name {}'.format(
-            self.resource_group, self.name), None)
+        self.cmd('network local-gateway list --resource-group {}'.format(self.resource_group), checks=[
+            JMESPathCheck('type(@)', 'array'),
+            JMESPathCheck("length([?type == '{}']) == length(@)".format(self.resource_type), True),
+            JMESPathCheck("length([?resourceGroup == '{}']) == length(@)".format(self.resource_group), True)
+        ])
+        self.cmd('network local-gateway show --resource-group {} --name {}'.format(self.resource_group, self.name), checks=[
+            JMESPathCheck('type(@)', 'object'),
+            JMESPathCheck('type', self.resource_type),
+            JMESPathCheck('resourceGroup', self.resource_group),
+            JMESPathCheck('name', self.name)
+        ])
+        self.cmd('network local-gateway delete --resource-group {} --name {}'.format(self.resource_group, self.name))
         # Expecting no results as we just deleted the only local gateway in the resource group
-        self.run_command_and_verify('network local-gateway list --resource-group {}'.format(self.resource_group),
-                  None)
+        self.cmd('network local-gateway list --resource-group {}'.format(self.resource_group), checks=NoneCheck())
 
 class NetworkNicScenarioTest(VCRTestBase):
 
     def __init__(self, test_method):
+        super(NetworkNicScenarioTest, self).__init__(__file__, test_method)
         self.resource_group = 'cli_test1'
         self.name = 'cli-test-nic'
         self.resource_type = 'Microsoft.Network/networkInterfaces'
-        super(NetworkNicScenarioTest, self).__init__(__file__, test_method)
 
     def test_network_nic(self):
-        self.execute(verify_test_output=True)
+        self.execute()
 
     def set_up(self):
-        if not self.run_command_no_verify('network nic show --resource-group {} --name {}'.format(
+        if not self.cmd('network nic show --resource-group {} --name {}'.format(
             self.resource_group, self.name)):
             raise RuntimeError('NIC must be manually created in order to support this test.')
 
     def body(self):
-        self.run_command_and_verify('network nic list-all', [
-            JMESPathComparator('type(@)', 'array'),
-            JMESPathComparator("length([?type == '{}']) == length(@)".format(
-                          self.resource_type), True)])
-        self.run_command_and_verify('network nic list --resource-group {}'.format(self.resource_group), [
-            JMESPathComparator('type(@)', 'array'),
-            JMESPathComparator("length([?type == '{}']) == length(@)".format(
-                          self.resource_type), True),
-            JMESPathComparator("length([?resourceGroup == '{}']) == length(@)".format(
-                          self.resource_group), True)])
-        self.run_command_and_verify('network nic show --resource-group {} --name {}'.format(
-            self.resource_group, self.name), [
-            JMESPathComparator('type(@)', 'object'),
-            JMESPathComparator('type', self.resource_type),
-            JMESPathComparator('resourceGroup', self.resource_group),
-            JMESPathComparator('name', self.name)])
-        self.run_command_and_verify('network nic delete --resource-group {} --name {}'.format(
-            self.resource_group, self.name), None)
+        self.cmd('network nic list-all', checks=[
+            JMESPathCheck('type(@)', 'array'),
+            JMESPathCheck("length([?type == '{}']) == length(@)".format(self.resource_type), True)
+        ])
+        self.cmd('network nic list --resource-group {}'.format(self.resource_group), checks=[
+            JMESPathCheck('type(@)', 'array'),
+            JMESPathCheck("length([?type == '{}']) == length(@)".format(self.resource_type), True),
+            JMESPathCheck("length([?resourceGroup == '{}']) == length(@)".format(self.resource_group), True)
+        ])
+        self.cmd('network nic show --resource-group {} --name {}'.format(self.resource_group, self.name), checks=[
+            JMESPathCheck('type(@)', 'object'),
+            JMESPathCheck('type', self.resource_type),
+            JMESPathCheck('resourceGroup', self.resource_group),
+            JMESPathCheck('name', self.name)
+        ])
+        self.cmd('network nic delete --resource-group {} --name {}'.format(self.resource_group, self.name))
 
 class NetworkNicScaleSetScenarioTest(VCRTestBase):
 
     def __init__(self, test_method):
+        super(NetworkNicScaleSetScenarioTest, self).__init__(__file__, test_method)
         self.resource_group = 'cli_test1'
         self.vmss_name = 'clitestvm'
         self.nic_name = 'clitestvmnic'
         self.vm_index = 0
         self.resource_type = 'Microsoft.Network/networkInterfaces'
-        super(NetworkNicScaleSetScenarioTest, self).__init__(__file__, test_method)
 
     def test_network_nic_scaleset(self):
-        self.execute(verify_test_output=True)
+        self.execute()
 
     def set_up(self):
-        if not self.run_command_no_verify('network nic scale-set show --resource-group {} --vm-scale-set {} --vm-index {} --name {}'.format( #pylint: disable=line-too-long
+        if not self.cmd('network nic scale-set show --resource-group {} --vm-scale-set {} --vm-index {} --name {}'.format(
             self.resource_group, self.vmss_name, self.vm_index, self.nic_name)):
             raise RuntimeError('VM scale set NIC must be manually created in order to support this test.')
 
     def body(self):
-        self.run_command_and_verify('network nic scale-set list --resource-group {} --vm-scale-set {}'.format(
-                  self.resource_group, self.vmss_name), [
-                JMESPathComparator('type(@)', 'array'),
-                JMESPathComparator("length([?type == '{}']) == length(@)".format(
-                            self.resource_type), True),
-                JMESPathComparator("length([?resourceGroup == '{}']) == length(@)".format(
-                            self.resource_group), True)])
-        self.run_command_and_verify('network nic scale-set list-vm-nics --resource-group {} --vm-scale-set {} --vm-index {}'.format( #pylint: disable=line-too-long
-                  self.resource_group, self.vmss_name, self.vm_index), [
-                JMESPathComparator('type(@)', 'array'),
-                JMESPathComparator("length([?type == '{}']) == length(@)".format(
-                            self.resource_type), True),
-                JMESPathComparator("length([?resourceGroup == '{}']) == length(@)".format(
-                            self.resource_group), True)])
-        self.run_command_and_verify('network nic scale-set show --resource-group {} --vm-scale-set {} --vm-index {} --name {}'.format( #pylint: disable=line-too-long
-            self.resource_group, self.vmss_name, self.vm_index, self.nic_name), [
-                JMESPathComparator('type(@)', 'object'),
-                JMESPathComparator('name', self.nic_name),
-                JMESPathComparator('resourceGroup', self.resource_group),
-                JMESPathComparator('type', self.resource_type)])
+        self.cmd('network nic scale-set list --resource-group {} --vm-scale-set {}'.format(
+                  self.resource_group, self.vmss_name), checks=[
+                JMESPathCheck('type(@)', 'array'),
+                JMESPathCheck("length([?type == '{}']) == length(@)".format(self.resource_type), True),
+                JMESPathCheck("length([?resourceGroup == '{}']) == length(@)".format(self.resource_group), True)
+        ])
+        self.cmd('network nic scale-set list-vm-nics --resource-group {} --vm-scale-set {} --vm-index {}'.format(self.resource_group, self.vmss_name, self.vm_index), checks=[
+                JMESPathCheck('type(@)', 'array'),
+                JMESPathCheck("length([?type == '{}']) == length(@)".format(self.resource_type), True),
+                JMESPathCheck("length([?resourceGroup == '{}']) == length(@)".format(self.resource_group), True)
+        ])
+        self.cmd('network nic scale-set show --resource-group {} --vm-scale-set {} --vm-index {} --name {}'.format(self.resource_group, self.vmss_name, self.vm_index, self.nic_name), checks=[
+                JMESPathCheck('type(@)', 'object'),
+                JMESPathCheck('name', self.nic_name),
+                JMESPathCheck('resourceGroup', self.resource_group),
+                JMESPathCheck('type', self.resource_type)
+        ])
 
 class NetworkSecurityGroupScenarioTest(ResourceGroupVCRTestBase):
 
@@ -332,271 +333,223 @@ class NetworkSecurityGroupScenarioTest(ResourceGroupVCRTestBase):
         self.deployment_name = 'nsgDeployment'
 
     def test_network_nsg(self):
-        self.execute(verify_test_output=True)
+        self.execute()
 
     def body(self):
-        self.run_command_no_verify('network nsg create --name {nsg_name} -g {resource_group} --deployment-name deployment'
-                                   .format(nsg_name=self.nsg_name, resource_group=self.resource_group))
-        self.run_command_no_verify('network nsg rule create --access allow --destination-address-prefix 1234'
-                                   ' --direction inbound --nsg-name {nsg_name} --protocol * -g {resource_group}'
-                                   ' --source-address-prefix 789 -n {nsg_rule_name} --source-port-range *'
-                                   ' --destination-port-range 4444'
-                                   .format(nsg_name=self.nsg_name, nsg_rule_name=self.nsg_rule_name, resource_group=self.resource_group))
+        rg = self.resource_group
+        nsg = self.nsg_name
+        nrn = self.nsg_rule_name
+        rt = self.resource_type
 
-        self.run_command_and_verify('network nsg list-all', [
-            JMESPathComparator('type(@)', 'array'),
-            JMESPathComparator("length([?type == '{}']) == length(@)".format(self.resource_type), True)
+        self.cmd('network nsg create --name {} -g {} --deployment-name deployment'.format(nsg, rg))
+        self.cmd('network nsg rule create --access allow --destination-address-prefix 1234 --direction inbound --nsg-name {} --protocol * -g {} --source-address-prefix 789 -n {} --source-port-range * --destination-port-range 4444'.format(nsg, rg, nrn))
+
+        self.cmd('network nsg list-all', checks=[
+            JMESPathCheck('type(@)', 'array'),
+            JMESPathCheck("length([?type == '{}']) == length(@)".format(rt), True)
         ])
-        self.run_command_and_verify('network nsg list --resource-group {}'.format(self.resource_group), [
-            JMESPathComparator('type(@)', 'array'),
-            JMESPathComparator("length([?type == '{}']) == length(@)".format(self.resource_type), True),
-            JMESPathComparator("length([?resourceGroup == '{}']) == length(@)".format(self.resource_group), True)
+        self.cmd('network nsg list --resource-group {}'.format(rg), checks=[
+            JMESPathCheck('type(@)', 'array'),
+            JMESPathCheck("length([?type == '{}']) == length(@)".format(rt), True),
+            JMESPathCheck("length([?resourceGroup == '{}']) == length(@)".format(rg), True)
         ])
-        self.run_command_and_verify('network nsg show --resource-group {} --name {}'.format(
-            self.resource_group, self.nsg_name), [
-                JMESPathComparator('type(@)', 'object'),
-                JMESPathComparator('type', self.resource_type),
-                JMESPathComparator('resourceGroup', self.resource_group),
-                JMESPathComparator('name', self.nsg_name)
-            ])
+        self.cmd('network nsg show --resource-group {} --name {}'.format(rg, nsg), checks=[
+                JMESPathCheck('type(@)', 'object'),
+                JMESPathCheck('type', rt),
+                JMESPathCheck('resourceGroup', rg),
+                JMESPathCheck('name', nsg)
+        ])
         # Test for the manually added nsg rule
-        self.run_command_and_verify('network nsg rule list --resource-group {} --nsg-name {}'.format(
-            self.resource_group, self.nsg_name), [
-                JMESPathComparator('type(@)', 'array'),
-                JMESPathComparator('length(@)', 1),
-                JMESPathComparator("length([?resourceGroup == '{}']) == length(@)".format(self.resource_group), True)
-            ])
-        self.run_command_and_verify('network nsg rule show --resource-group {} --nsg-name {} --name {}'.format(
-            self.resource_group, self.nsg_name, self.nsg_rule_name), [
-                JMESPathComparator('type(@)', 'object'),
-                JMESPathComparator('resourceGroup', self.resource_group),
-                JMESPathComparator('name', self.nsg_rule_name)
-            ])
-        self.run_command_and_verify('network nsg rule delete --resource-group {} --nsg-name {} --name {}'.format(
-            self.resource_group, self.nsg_name, self.nsg_rule_name), None)
+        self.cmd('network nsg rule list --resource-group {} --nsg-name {}'.format(rg, nsg), checks=[
+                JMESPathCheck('type(@)', 'array'),
+                JMESPathCheck('length(@)', 1),
+                JMESPathCheck("length([?resourceGroup == '{}']) == length(@)".format(rg), True)
+        ])
+        self.cmd('network nsg rule show --resource-group {} --nsg-name {} --name {}'.format(rg, nsg, nrn), checks=[
+                JMESPathCheck('type(@)', 'object'),
+                JMESPathCheck('resourceGroup', rg),
+                JMESPathCheck('name', nrn)
+        ])
+        self.cmd('network nsg rule delete --resource-group {} --nsg-name {} --name {}'.format(rg, nsg, nrn))
         # Delete the network security group
-        self.run_command_and_verify('network nsg delete --resource-group {} --name {}'.format(
-            self.resource_group, self.nsg_name), None)
+        self.cmd('network nsg delete --resource-group {} --name {}'.format(rg, nsg))
         # Expecting no results as we just deleted the only security group in the resource group
-        self.run_command_and_verify('network nsg list --resource-group {}'.format(self.resource_group), None)
+        self.cmd('network nsg list --resource-group {}'.format(rg), checks=NoneCheck())
 
 class NetworkRouteTableOperationScenarioTest(VCRTestBase):
 
     def __init__(self, test_method):
+        super(NetworkRouteTableOperationScenarioTest, self).__init__(__file__, test_method)
         self.resource_group = 'cli_test1'
         self.route_table_name = 'cli-test-route-table'
         self.route_operation_name = 'my-route'
         self.resource_type = 'Microsoft.Network/routeTables'
-        super(NetworkRouteTableOperationScenarioTest, self).__init__(__file__, test_method)
 
     def test_network_route_table_operation(self):
-        self.execute(verify_test_output=True)
+        self.execute()
 
     def set_up(self):
-        if not self.run_command_no_verify('network route-table show --resource-group {} --name {}'.format(
+        if not self.cmd('network route-table show --resource-group {} --name {}'.format(
                 self.resource_group, self.route_table_name)):
             raise RuntimeError('Network route table must be manually created in order to support this test.')
-        if not self.run_command_no_verify('network route-operation show --resource-group {} --route-table-name {} --name {}'.format( #pylint: disable=line-too-long
+        if not self.cmd('network route-operation show --resource-group {} --route-table-name {} --name {}'.format( #pylint: disable=line-too-long
                 self.resource_group, self.route_table_name, self.route_operation_name)):
             raise RuntimeError('Network route operation must be manually created in order to support this test.')
 
     def body(self):
-        self.run_command_and_verify('network route-table list-all', [
-                JMESPathComparator('type(@)', 'array')])
-        self.run_command_and_verify('network route-table list --resource-group {}'.format(self.resource_group), [
-                JMESPathComparator('type(@)', 'array'),
-                JMESPathComparator('length(@)', 1),
-                JMESPathComparator('[0].name', self.route_table_name),
-                JMESPathComparator('[0].resourceGroup', self.resource_group),
-                JMESPathComparator('[0].type', self.resource_type)])
-        self.run_command_and_verify('network route-table show --resource-group {} --name {}'.format(
-                self.resource_group, self.route_table_name), [
-                JMESPathComparator('type(@)', 'object'),
-                JMESPathComparator('name', self.route_table_name),
-                JMESPathComparator('resourceGroup', self.resource_group),
-                JMESPathComparator('type', self.resource_type)])
-        self.run_command_and_verify('network route-operation list --resource-group {} --route-table-name {}'.format(
-                self.resource_group, self.route_table_name), [
-                JMESPathComparator('type(@)', 'array')])
-        self.run_command_and_verify('network route-operation show --resource-group {} --route-table-name {} --name {}'.format( #pylint: disable=line-too-long
-                self.resource_group, self.route_table_name, self.route_operation_name), [
-                JMESPathComparator('type(@)', 'object'),
-                JMESPathComparator('name', self.route_operation_name),
-                JMESPathComparator('resourceGroup', self.resource_group)])
-        self.run_command_and_verify('network route-operation delete --resource-group {} --route-table-name {} --name {}'.format( #pylint: disable=line-too-long
-                self.resource_group, self.route_table_name, self.route_operation_name), None)
+        self.cmd('network route-table list-all',
+            checks=JMESPathCheck('type(@)', 'array'))
+        self.cmd('network route-table list --resource-group {}'.format(self.resource_group), checks=[
+                JMESPathCheck('type(@)', 'array'),
+                JMESPathCheck('length(@)', 1),
+                JMESPathCheck('[0].name', self.route_table_name),
+                JMESPathCheck('[0].resourceGroup', self.resource_group),
+                JMESPathCheck('[0].type', self.resource_type)
+        ])
+        self.cmd('network route-table show --resource-group {} --name {}'.format(self.resource_group, self.route_table_name), checks=[
+                JMESPathCheck('type(@)', 'object'),
+                JMESPathCheck('name', self.route_table_name),
+                JMESPathCheck('resourceGroup', self.resource_group),
+                JMESPathCheck('type', self.resource_type)
+        ])
+        self.cmd('network route-operation list --resource-group {} --route-table-name {}'.format(self.resource_group, self.route_table_name),
+            checks=JMESPathCheck('type(@)', 'array'))
+        self.cmd('network route-operation show --resource-group {} --route-table-name {} --name {}'.format(self.resource_group, self.route_table_name, self.route_operation_name), checks=[
+                JMESPathCheck('type(@)', 'object'),
+                JMESPathCheck('name', self.route_operation_name),
+                JMESPathCheck('resourceGroup', self.resource_group)
+        ])
+        self.cmd('network route-operation delete --resource-group {} --route-table-name {} --name {}'.format(self.resource_group, self.route_table_name, self.route_operation_name))
         # Expecting no results as the route operation was just deleted
-        self.run_command_and_verify('network route-operation list --resource-group {} --route-table-name {}'.format(
-                self.resource_group, self.route_table_name), None)
-        self.run_command_and_verify('network route-table delete --resource-group {} --name {}'.format(
-                self.resource_group, self.route_table_name), None)
+        self.cmd('network route-operation list --resource-group {} --route-table-name {}'.format(self.resource_group, self.route_table_name),
+            checks=NoneCheck())
+        self.cmd('network route-table delete --resource-group {} --name {}'.format(self.resource_group, self.route_table_name))
         # Expecting no results as the route table was just deleted
-        self.run_command_and_verify('network route-table list --resource-group {}'.format(self.resource_group), None)
+        self.cmd('network route-table list --resource-group {}'.format(self.resource_group), checks=NoneCheck())
 
 class NetworkVNetScenarioTest(VCRTestBase):
 
     def __init__(self, test_method):
+        super(NetworkVNetScenarioTest, self).__init__(__file__, test_method)
         self.resource_group = 'cli_test1'
         self.vnet_name = 'test-vnet'
         self.vnet_subnet_name = 'test-subnet1'
         self.resource_type = 'Microsoft.Network/virtualNetworks'
-        super(NetworkVNetScenarioTest, self).__init__(__file__, test_method)
 
     def test_network_vnet(self):
-        self.execute(verify_test_output=True)
+        self.execute()
 
     def set_up(self):
-        if not self.run_command_no_verify('network vnet show --resource-group {} --name {}'.format(
+        if not self.cmd('network vnet show --resource-group {} --name {}'.format(
             self.resource_group, self.vnet_name)):
             raise RuntimeError('Network vnet must be manually created in order to support this test.')
-        if not self.run_command_no_verify('network vnet subnet show --resource-group {} --virtual-network-name {} --name {}'.format( #pylint: disable=line-too-long
+        if not self.cmd('network vnet subnet show --resource-group {} --virtual-network-name {} --name {}'.format( #pylint: disable=line-too-long
             self.resource_group, self.vnet_name, self.vnet_subnet_name)):
             raise RuntimeError('Network vnet subnet must be manually created in order to support this test.')
 
     def body(self):
-        self.run_command_and_verify('network vnet list-all', [
-            JMESPathComparator('type(@)', 'array'),
-            JMESPathComparator("length([?type == '{}']) == length(@)".format(
-                          self.resource_type), True)])
-        self.run_command_and_verify('network vnet list --resource-group {}'.format(self.resource_group), [
-            JMESPathComparator('type(@)', 'array'),
-            JMESPathComparator("length([?type == '{}']) == length(@)".format(
-                          self.resource_type), True),
-            JMESPathComparator("length([?resourceGroup == '{}']) == length(@)".format(
-                          self.resource_group), True)])
-        self.run_command_and_verify('network vnet show --resource-group {} --name {}'.format(
-            self.resource_group, self.vnet_name), [
-            JMESPathComparator('type(@)', 'object'),
-            JMESPathComparator('name', self.vnet_name),
-            JMESPathComparator('resourceGroup', self.resource_group),
-            JMESPathComparator('type', self.resource_type)])
-        self.run_command_and_verify('network vnet subnet list --resource-group {} --virtual-network-name {}'.format(
-            self.resource_group, self.vnet_name), JMESPathComparator('type(@)', 'array'))
-        self.run_command_and_verify('network vnet subnet show --resource-group {} --virtual-network-name {} --name {}'.format( #pylint: disable=line-too-long
-            self.resource_group, self.vnet_name, self.vnet_subnet_name), [
-            JMESPathComparator('type(@)', 'object'),
-            JMESPathComparator('name', self.vnet_subnet_name),
-            JMESPathComparator('resourceGroup', self.resource_group)])
+        self.cmd('network vnet list-all', checks=[
+            JMESPathCheck('type(@)', 'array'),
+            JMESPathCheck("length([?type == '{}']) == length(@)".format(self.resource_type), True)
+        ])
+        self.cmd('network vnet list --resource-group {}'.format(self.resource_group), checks=[
+            JMESPathCheck('type(@)', 'array'),
+            JMESPathCheck("length([?type == '{}']) == length(@)".format(self.resource_type), True),
+            JMESPathCheck("length([?resourceGroup == '{}']) == length(@)".format(self.resource_group), True)
+        ])
+        self.cmd('network vnet show --resource-group {} --name {}'.format(self.resource_group, self.vnet_name), checks=[
+            JMESPathCheck('type(@)', 'object'),
+            JMESPathCheck('name', self.vnet_name),
+            JMESPathCheck('resourceGroup', self.resource_group),
+            JMESPathCheck('type', self.resource_type)
+        ])
+        self.cmd('network vnet subnet list --resource-group {} --virtual-network-name {}'.format(self.resource_group, self.vnet_name),
+            checks=JMESPathCheck('type(@)', 'array'))
+        self.cmd('network vnet subnet show --resource-group {} --virtual-network-name {} --name {}'.format(self.resource_group, self.vnet_name, self.vnet_subnet_name), checks=[
+            JMESPathCheck('type(@)', 'object'),
+            JMESPathCheck('name', self.vnet_subnet_name),
+            JMESPathCheck('resourceGroup', self.resource_group)
+        ])
         # Expecting the subnet to be listed
-        self.run_command_and_verify('network vnet subnet list --resource-group {} --virtual-network-name {}'.format(
-                      self.resource_group, self.vnet_name),
-                  JMESPathComparator("length([?name == '{}'])".format(self.vnet_subnet_name), 1))
-        self.run_command_and_verify('network vnet subnet delete --resource-group {} --virtual-network-name {} --name {}'.format( #pylint: disable=line-too-long
-                  self.resource_group, self.vnet_name, self.vnet_subnet_name), None)
+        self.cmd('network vnet subnet list --resource-group {} --virtual-network-name {}'.format(self.resource_group, self.vnet_name),
+            checks=JMESPathCheck("length([?name == '{}'])".format(self.vnet_subnet_name), 1))
+        self.cmd('network vnet subnet delete --resource-group {} --virtual-network-name {} --name {}'.format(self.resource_group, self.vnet_name, self.vnet_subnet_name))
         # Expecting the subnet to not be listed
-        self.run_command_and_verify('network vnet subnet list --resource-group {} --virtual-network-name {}'.format(
-                      self.resource_group, self.vnet_name), None)
+        self.cmd('network vnet subnet list --resource-group {} --virtual-network-name {}'.format(self.resource_group, self.vnet_name),
+            checks=NoneCheck())
         # Expecting the vnet to appear in the list
-        self.run_command_and_verify('network vnet list --resource-group {}'.format(self.resource_group),
-                  JMESPathComparator("length([?name == '{}'])".format(self.vnet_name), 1))
-        self.run_command_and_verify('network vnet delete --resource-group {} --name {}'.format(
-            self.resource_group, self.vnet_name), None)
+        self.cmd('network vnet list --resource-group {}'.format(self.resource_group),
+            checks=JMESPathCheck("length([?name == '{}'])".format(self.vnet_name), 1))
+        self.cmd('network vnet delete --resource-group {} --name {}'.format(self.resource_group, self.vnet_name))
         # Expecting the vnet we deleted to not appear in the list
-        self.run_command_and_verify('network vnet list --resource-group {}'.format(self.resource_group),
-                  JMESPathComparator("length([?name == '{}'])".format(self.vnet_name), 0))
+        self.cmd('network vnet list --resource-group {}'.format(self.resource_group),
+            checks=JMESPathCheck("length([?name == '{}'])".format(self.vnet_name), 0))
 
 class NetworkVpnGatewayScenarioTest(VCRTestBase):
 
     def __init__(self, test_method):
         # The resources for this test did not exist so the commands will return 404 errors.
         # So this test is for the command execution itself.
+        super(NetworkVpnGatewayScenarioTest, self).__init__(__file__, test_method)
         self.resource_group = 'cli_test1'
         self.placeholder_value = 'none_existent'
-        super(NetworkVpnGatewayScenarioTest, self).__init__(__file__, test_method)
 
     def test_network_vpn_gateway(self):
-        self.execute(verify_test_output=True)
+        self.execute()
 
     def body(self):
-        self.run_command_and_verify('network vpn-gateway delete --resource-group {0} --name {1}'.format(
-            self.resource_group, self.placeholder_value), None)
-        self.run_command_and_verify('network vpn-gateway list --resource-group {0}'.format(self.resource_group), None)
-        self.run_command_and_verify('network vpn-gateway show --resource-group {0} --name {1}'.format(
-            self.resource_group, self.placeholder_value), None)
+        rg = self.resource_group
+        pv = self.placeholder_value
+        allowed_exceptions = "The Resource 'Microsoft.Network/virtualNetworkGateways/{}' under resource group '{}' was not found.".format(pv, rg)
+        self.cmd('network vpn-gateway delete --resource-group {0} --name {1}'.format(rg, pv))
+        self.cmd('network vpn-gateway list --resource-group {0}'.format(rg), checks=NoneCheck())
+        self.cmd('network vpn-gateway show --resource-group {0} --name {1}'.format(rg, pv),
+            allowed_exceptions=allowed_exceptions)
 
 class NetworkVpnConnectionScenarioTest(VCRTestBase):
 
     def __init__(self, test_method):
         # The resources for this test did not exist so the commands will return 404 errors.
         # So this test is for the command execution itself.
+        super(NetworkVpnConnectionScenarioTest, self).__init__(__file__, test_method)
         self.resource_group = 'cli_test1'
         self.placeholder_value = 'none_existent'
-        super(NetworkVpnConnectionScenarioTest, self).__init__(__file__, test_method)
 
     def test_network_vpn_connection(self):
-        self.execute(verify_test_output=True)
+        self.execute()
 
     def body(self):
-        self.run_command_and_verify('network vpn-connection list --resource-group {0}'.format(
-            self.resource_group), None)
-        self.run_command_and_verify('network vpn-connection show --resource-group {0} --name {1}'.format(
-            self.resource_group, self.placeholder_value), None)
-        self.run_command_and_verify('network vpn-connection shared-key show --resource-group {0} --name {1}'.format( #pylint: disable=line-too-long
-            self.resource_group, self.placeholder_value), None)
-        self.run_command_and_verify('network vpn-connection delete --resource-group {0} --name {1}'.format(
-            self.resource_group, self.placeholder_value), None)
-        self.run_command_and_verify('network vpn-connection shared-key reset --resource-group {0} --connection-name {1}'.format( #pylint: disable=line-too-long
-            self.resource_group, self.placeholder_value), None)
-        self.run_command_and_verify('network vpn-connection shared-key set --resource-group {0} --connection-name {1} --value {2}'.format( #pylint: disable=line-too-long
-            self.resource_group, self.placeholder_value, 'S4auzEfwZ6fN'), None)
+        rg = self.resource_group
+        pv = self.placeholder_value
+        allowed_exceptions = "The Resource 'Microsoft.Network/connections/{}' under resource group '{}' was not found.".format(pv, rg)
+        self.cmd('network vpn-connection list --resource-group {0}'.format(rg))
+        self.cmd('network vpn-connection show --resource-group {0} --name {1}'.format(rg, pv),
+            allowed_exceptions=allowed_exceptions)
+        self.cmd('network vpn-connection shared-key show --resource-group {0} --name {1}'.format(rg, pv),
+            allowed_exceptions=allowed_exceptions)
+        self.cmd('network vpn-connection delete --resource-group {0} --name {1}'.format(rg, pv))
+        self.cmd('network vpn-connection shared-key reset --resource-group {0} --connection-name {1}'.format(rg, pv),
+            allowed_exceptions=allowed_exceptions)
+        self.cmd('network vpn-connection shared-key set --resource-group {0} --connection-name {1} --value {2}'.format(rg, pv, 'S4auzEfwZ6fN'),
+            allowed_exceptions=allowed_exceptions)
 
 class NetworkSubnetCreateScenarioTest(VCRTestBase):
 
     def __init__(self, test_method):
         # The resources for this test did not exist so the commands will return 404 errors.
         # So this test is for the command execution itself.
+        super(NetworkSubnetCreateScenarioTest, self).__init__(__file__, test_method)
         self.resource_group = 'cli_test1'
         self.placeholder_value = 'none_existent'
         self.address_prefix = '192.168.0/16'
-        super(NetworkSubnetCreateScenarioTest, self).__init__(__file__, test_method)
 
     def test_network_subnet_create(self):
-        self.execute(verify_test_output=True)
+        self.execute()
 
     def body(self):
-        self.run_command_and_verify('network vnet subnet create --resource-group {0} --name {1} --virtual-network-name {1} --address-prefix {2}'.format( #pylint: disable=line-too-long
-            self.resource_group, self.placeholder_value, self.address_prefix), None)
-
-class NetworkPublicIpScenarioTest(ResourceGroupVCRTestBase):
-
-    def __init__(self, test_method):
-        super(NetworkPublicIpScenarioTest, self).__init__(__file__, test_method)
-        self.public_ip_name = 'pubipdns'
-        self.public_ip_no_dns_name = 'pubipnodns'
-        self.dns = 'woot'
-
-    def test_network_public_ip(self):
-        self.execute(verify_test_output=True)
-
-    def body(self):
-        s = self
-        rg = s.resource_group
-        # See documentation for guidance regarding deployment name in tests
-        count = 11
-        deploy1 = 'ipdeploy{}'.format(count)
-        deploy2 = 'ipnodnsdeploy{}'.format(count)
-        s.run_command_and_verify('network public-ip create -g {} -n {} --dns-name {} --allocation-method static --deployment-name {}'.format(rg, s.public_ip_name, s.dns, deploy1), [
-            JMESPathComparator('publicIp.value.provisioningState', 'Succeeded'),
-            JMESPathComparator('publicIp.value.publicIPAllocationMethod', 'Static'),
-            JMESPathComparator('publicIp.value.dnsSettings.domainNameLabel', s.dns)
-        ])
-        s.run_command_and_verify('network public-ip create -g {} -n {} --deployment-name {}'.format(rg, s.public_ip_no_dns_name, deploy2), [
-            JMESPathComparator('publicIp.value.provisioningState', 'Succeeded'),
-            JMESPathComparator('publicIp.value.publicIPAllocationMethod', 'Dynamic'),
-            JMESPathComparator('publicIp.value.dnsSettings', None)
-        ])
-
-        s.run_command_and_verify('network public-ip list-all', JMESPathComparator('type(@)', 'array'))
-        ip_list = s.run_command_no_verify('network public-ip list -g {} -o json'.format(rg))
-        assert not [x for x in ip_list if x['resourceGroup'].lower() != rg]
-
-        s.run_command_and_verify('network public-ip show -g {} -n {}'.format(rg, s.public_ip_name),
-        [
-            JMESPathComparator('type(@)', 'object'),
-            JMESPathComparator('name', s.public_ip_name),
-            JMESPathComparator('resourceGroup', rg),
-        ])
-        s.run_command_and_verify('network public-ip delete -g {} -n {}'.format(rg, s.public_ip_name), None)
-        s.run_command_and_verify('network public-ip list -g {}'.format(rg), [
-            JMESPathComparator("length[?name == '{}']".format(s.public_ip_name), None)
-        ])
+        rg = self.resource_group
+        pv = self.placeholder_value
+        ap = self.address_prefix
+        allowed_exceptions = "The Resource 'Microsoft.Network/virtualNetworks/{}' under resource group '{}' was not found.".format(pv, rg)
+        self.cmd('network vnet subnet create --resource-group {0} --name {1} --virtual-network-name {1} --address-prefix {2}'.format(rg, pv, ap),
+            allowed_exceptions=allowed_exceptions)

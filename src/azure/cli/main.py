@@ -19,7 +19,7 @@ CONFIG = Session()
 # SESSION provides read-write session variables
 SESSION = Session()
 
-def main(args, file=sys.stdout): #pylint: disable=redefined-builtin
+def main(args, file=sys.stdout, surface_exceptions=False): #pylint: disable=redefined-builtin
     _logging.configure_logging(args)
 
     if len(args) > 0 and args[0] == '--version':
@@ -43,11 +43,17 @@ def main(args, file=sys.stdout): #pylint: disable=redefined-builtin
             formatter = OutputProducer.get_formatter(APPLICATION.configuration.output_format)
             OutputProducer(formatter=formatter, file=file).out(cmd_result)
     except CLIError as ex:
+        if surface_exceptions:
+            raise ex
         logger.error(ex.args[0])
         return ex.args[1] if len(ex.args) >= 2 else -1
-    except KeyboardInterrupt:
+    except KeyboardInterrupt as ex:
+        if surface_exceptions:
+            raise KeyboardInterrupt
         return -1
     except Exception as ex: # pylint: disable=broad-except
         logger.exception(ex)
+        if surface_exceptions:
+            raise ex
         return -1
 
