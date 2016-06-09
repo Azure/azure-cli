@@ -232,24 +232,18 @@ def list_disks(resource_group_name, vm_name):
     return vm.storage_profile.data_disks # pylint: disable=no-member
 
 def capture_vm(resource_group_name, vm_name, vhd_name_prefix,
-            storage_container='vhds', overwrite=True, template=None):
+               storage_container='vhds', overwrite=True):
     '''Captures the VM by copying virtual hard disks of the VM and outputs a
     template that can be used to create similar VMs.
     :param str vhd_name_prefix: the VHD name prefix specify for the VM disks
     :param str storage_container: the storage account container name to save the disks
     :param str overwrite: overwrite the existing disk file
-    :param str template: file to save exported template to create similar VM.
-    When missing, content goes to stdout.
     '''
     client = _compute_client_factory()
     parameter = VirtualMachineCaptureParameters(vhd_name_prefix, storage_container, overwrite)
     poller = client.virtual_machines.capture(resource_group_name, vm_name, parameter)
     result = LongRunningOperation()(poller)
-    if template is None:
-        print(json.dumps(result.output, indent=2))
-    else:
-        with open(template, 'w') as t:
-            json.dump(result.output, t)
+    print(json.dumps(result.output, indent=2))
 
 def set_windows_user_password(
         resource_group_name, vm_name, username, password):

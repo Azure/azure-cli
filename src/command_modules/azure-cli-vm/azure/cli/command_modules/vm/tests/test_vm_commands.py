@@ -260,8 +260,6 @@ class VMGeneralizeScenarioTest(VCRTestBase):
         self.resource_group = 'cliTestRg_VmGeneralize'
         self.location = 'westus'
         self.vm_name = 'vm-generalize'
-        self.exported_file = os.path.join(TEST_DIR, 'private_config.json')
-
         super(VMGeneralizeScenarioTest, self).__init__(__file__, test_method)
 
     def set_up(self):
@@ -284,19 +282,12 @@ class VMGeneralizeScenarioTest(VCRTestBase):
                 self.vm_name), None)
 
         self.run_command_and_verify(
-            'vm capture --resource-group {} --name {} --vhd-name-prefix vmtest --template {}'.format(
+            'vm capture --resource-group {} --name {} --vhd-name-prefix vmtest'.format(
                 self.resource_group,
-                self.vm_name,
-                self.exported_file.replace('\\', '\\\\')), None)
-
-        with open(self.exported_file) as template:
-            data = json.load(template)
-            #sanity check that 'capture' did something
-            self.assertEqual(data.get('contentVersion'), '1.0.0.0')
+                self.vm_name), None)
 
     def tear_down(self):
         self.run_command_no_verify('resource group delete --name {}'.format(self.resource_group))
-        os.remove(self.exported_file)
 
     def test_vm_generalize(self):
         self.execute(verify_test_output=True)
