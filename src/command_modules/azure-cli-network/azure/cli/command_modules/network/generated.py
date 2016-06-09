@@ -84,7 +84,7 @@ cli_command('network lb list', LoadBalancersOperations.list, factory)
 cli_command('network lb list-all', LoadBalancersOperations.list_all, factory)
 
 factory = lambda _: get_mgmt_service_client(LBClient).lb
-cli_command('network lb create', LBOperations.create_or_update, 'LoadBalancer', factory, transform=DeploymentOutputLongRunningOperation('Starting network lb create'))
+cli_command('network lb create', LBOperations.create_or_update, factory, transform=DeploymentOutputLongRunningOperation('Starting network lb create'))
 
 factory = lambda _: get_mgmt_service_client(NSGClient).nsg
 cli_command('network nsg create', NSGOperations.create_or_update, factory, transform=DeploymentOutputLongRunningOperation('Starting network nsg create'))
