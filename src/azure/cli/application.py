@@ -12,9 +12,9 @@ import azure.cli._logging as _logging
 
 logger = _logging.get_az_logger(__name__)
 
-class AlternateCompletionFinder(argcomplete.CompletionFinder):
+class EmptyDefaultCompletionFinder(argcomplete.CompletionFinder):
     def __init__(self, *args, **kwargs):
-        super(AlternateCompletionFinder, self).__init__(*args, default_completer=lambda _: (),
+        super(EmptyDefaultCompletionFinder, self).__init__(*args, default_completer=lambda _: (),
                                                         **kwargs)
 
 class Configuration(object): # pylint: disable=too-few-public-methods
@@ -148,7 +148,7 @@ class Application(object):
 
     @staticmethod
     def _enable_autocomplete(**kwargs):
-        argcomplete.autocomplete = AlternateCompletionFinder()
+        argcomplete.autocomplete = EmptyDefaultCompletionFinder()
         argcomplete.autocomplete(kwargs['parser'],
                                  validator=lambda c, p: c.lower().startswith(p.lower()))
 
