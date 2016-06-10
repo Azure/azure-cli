@@ -271,7 +271,8 @@ class VMGeneralizeScenarioTest(ResourceGroupVCRTestBase):
 
     def body(self):
         self.run_command_no_verify('vm create --resource-group {0} --location {1} --name {2} --admin-username ubuntu '
-                 '--image UbuntuLTS --admin-password testPassword0 --authentication-type password'
+                 '--image UbuntuLTS --admin-password testPassword0 --authentication-type password '
+                 '--deployment-name azurecli_test_vm_generalize'
                  .format(
                      self.resource_group, self.location, self.vm_name))
 

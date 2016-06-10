@@ -169,7 +169,8 @@ factory = lambda _: _network_client_factory().virtual_network_gateways
 cli_command('network vpn-gateway delete', VirtualNetworkGatewaysOperations.delete, factory)
 cli_command('network vpn-gateway show', VirtualNetworkGatewaysOperations.get, factory)
 cli_command('network vpn-gateway list', VirtualNetworkGatewaysOperations.list, factory)
-cli_command('network vpn-gateway reset', VirtualNetworkGatewaysOperations.reset, factory)
+# TODO Convert to a convenience command as we can't use the SDK method directly due to complete param
+# cli_command('network vpn-gateway reset', VirtualNetworkGatewaysOperations.reset, factory)
 
 # VirtualNetworksOperations
 factory = lambda _: _network_client_factory().virtual_networks
