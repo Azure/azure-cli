@@ -519,6 +519,97 @@ def show_default_diagnostics_configuration():
     '''show the default config file which defines data to be collected'''
     return get_default_linux_diag_config()
 
+def vm_add_nics(resource_group_name, vm_name, nic_ids=None, nic_names=None, primary_nic=None):
+    '''add network interface configurations to the virtual machine
+    :param str nic_ids: NIC resource IDs
+    :param str nic_names: NIC names, assuming under the same resource group
+    :param str primary_nic: name or id of the primary NIC. If missing, the first of the
+    NIC list will be the primary
+    '''
+    vm = _vm_get(resource_group_name, vm_name)
+    new_nics = _build_nic_list(resource_group_name, nic_ids or [], nic_names or [])
+    existing_nics = _get_existing_nics(vm)
+    return _update_vm_nics(vm, existing_nics + new_nics, primary_nic)
+
+def vm_delete_nics(resource_group_name, vm_name, nic_ids=None, nic_names=None, primary_nic=None):
+    '''remove network interface configurations from the virtual machine
+    :param str nic_ids: NIC resource IDs
+    :param str nic_names: NIC names, assuming under the same resource group
+    :param str primary_nic: name or id of the primary NIC. If missing, the first of the
+    NIC list will be the primary
+    '''
+    def to_delete(nic_id):
+        return [n for n in nics_to_delete if n.id.lower() == nic_id.lower()]
+    vm = _vm_get(resource_group_name, vm_name)
+    nics_to_delete = _build_nic_list(resource_group_name, nic_ids or [], nic_names or [])
+    existing_nics = _get_existing_nics(vm)
+    survived = [x for x in existing_nics if not to_delete(x.id)]
+    return _update_vm_nics(vm, survived, primary_nic)
+
+def vm_update_nics(resource_group_name, vm_name, nic_ids=None, nic_names=None, primary_nic=None):
+    '''update network interface configurations of the virtual machine
+    :param str nic_ids: NIC resource IDs
+    :param str nic_names: NIC names, assuming under the same resource group
+    :param str primary_nic: name or id of the primary nic. If missing, the first element of
+    nic list will be set to the primary
+    '''
+    vm = _vm_get(resource_group_name, vm_name)
+    nics = _build_nic_list(resource_group_name, nic_ids or [], nic_names or [])
+    return _update_vm_nics(vm, nics, primary_nic)
+
+def _build_nic_list(resource_group_name, nic_ids, nic_names):
+    from azure.mgmt.network import NetworkManagementClient, NetworkManagementClientConfiguration
+    from azure.mgmt.compute.models import NetworkInterfaceReference
+    nics = []
+    if nic_names or nic_ids:
+        #pylint: disable=no-member
+        network_client = get_mgmt_service_client(NetworkManagementClient,
+                                                 NetworkManagementClientConfiguration)
+        for n in nic_names:
+            nic = network_client.network_interfaces.get(resource_group_name, n)
+            nics.append(NetworkInterfaceReference(nic.id, False))
+
+        for n in nic_ids:
+            rg, name = _parse_rg_name(n)
+            nic = network_client.network_interfaces.get(rg, name)
+            nics.append(NetworkInterfaceReference(nic.id, False))
+    return nics
+
+def _get_existing_nics(vm):
+    network_profile = getattr(vm, 'network_profile', None)
+    nics = []
+    if network_profile is not None:
+        nics = network_profile.network_interfaces or []
+    return nics
+
+def _update_vm_nics(vm, nics, primary_nic):
+    from azure.mgmt.compute.models import NetworkProfile
+
+    if primary_nic:
+        try:
+            _, primary_nic_name = _parse_rg_name(primary_nic)
+        except IndexError:
+            primary_nic_name = primary_nic
+
+        matched = [n for n in nics if _parse_rg_name(n.id)[1].lower() == primary_nic_name.lower()]
+        if not matched:
+            raise CLIError('Primary Nic {} is not found'.format(primary_nic))
+        if len(matched) > 1:
+            raise CLIError('Duplicate Nic entries with name {}'.format(primary_nic))
+        for n in nics:
+            n.primary = False
+        matched[0].primary = True
+    elif nics:
+        if not [n for n in nics if n.primary]:
+            nics[0].primary = True
+
+    network_profile = getattr(vm, 'network_profile', None)
+    if network_profile is None:
+        vm.network_profile = NetworkProfile(nics)
+    else:
+        network_profile.network_interfaces = nics
+
+    return _vm_set(vm)
 
 def vmss_scale(resource_group_name, vm_scale_set_name, new_capacity):
     '''change the number of VMs in an virtual machine scale set

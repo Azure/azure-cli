@@ -19,7 +19,7 @@ def get_urn_aliases_completion_list(prefix, **kwargs):#pylint: disable=unused-ar
 
 # BASIC PARAMETER CONFIGURATION
 name_arg_type = CliArgumentType(options_list=('--name', '-n'), metavar='NAME')
-instance_ids_type = CliArgumentType(
+multi_ids_type = CliArgumentType(
     nargs='+'
 )
 
@@ -28,7 +28,7 @@ admin_username_type = CliArgumentType(options_list=('--admin-username',), defaul
 register_cli_argument('vm', 'vm_name', name_arg_type, help='The name of the virtual machine')
 register_cli_argument('vm scaleset', 'vm_scale_set_name', name_arg_type)
 register_cli_argument('vm scaleset', 'virtual_machine_scale_set_name', name_arg_type)
-register_cli_argument('vm scaleset', 'instance_ids', instance_ids_type)
+register_cli_argument('vm scaleset', 'instance_ids', multi_ids_type)
 register_cli_argument('vm', 'diskname', CliArgumentType(options_list=('--name', '-n')))
 register_cli_argument('vm', 'disksize', CliArgumentType(help='Size of disk (Gb)', default=1023, type=MinMaxValue(1, 1023)))
 register_cli_argument('vm', 'lun', CliArgumentType(
@@ -51,7 +51,8 @@ register_cli_argument(
 )
 
 register_cli_argument('vm capture', 'overwrite', CliArgumentType(action='store_true'))
-
+register_cli_argument('vm nic', 'nic_ids', multi_ids_type)
+register_cli_argument('vm nic', 'nic_names', multi_ids_type)
 register_cli_argument('vm diagnostics', 'vm_name', CliArgumentType(options_list=('--vm-name',)))
 
 register_cli_argument('vm extension', 'vm_extension_name', name_arg_type)
