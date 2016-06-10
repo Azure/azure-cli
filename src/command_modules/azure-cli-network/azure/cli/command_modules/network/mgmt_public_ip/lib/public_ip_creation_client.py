@@ -77,8 +77,8 @@ class PublicIpCreationClient(object):
     :ivar config: Configuration for client.
     :vartype config: PublicIpCreationClientConfiguration
 
-    :ivar public_ip: PublicIP operations
-    :vartype public_ip: .operations.PublicIPOperations
+    :ivar public_ip: PublicIp operations
+    :vartype public_ip: .operations.PublicIpOperations
 
     :param credentials: Gets Azure subscription credentials.
     :type credentials: :mod:`A msrestazure Credentials
@@ -106,7 +106,7 @@ class PublicIpCreationClient(object):
     def __init__(
             self, credentials, subscription_id, api_version='2015-11-01', accept_language='en-US', long_running_operation_retry_timeout=30, generate_client_request_id=True, base_url=None, filepath=None):
 
-        self.config = PublicIPCreationClientConfiguration(credentials, subscription_id, api_version, accept_language, long_running_operation_retry_timeout, generate_client_request_id, base_url, filepath)
+        self.config = PublicIpCreationClientConfiguration(credentials, subscription_id, api_version, accept_language, long_running_operation_retry_timeout, generate_client_request_id, base_url, filepath)
         self._client = ServiceClient(self.config.credentials, self.config)
 
         client_models = {k: v for k, v in models.__dict__.items() if isinstance(v, type)}

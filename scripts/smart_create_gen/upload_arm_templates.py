@@ -1,6 +1,5 @@
 from __future__ import print_function
 
-import configparser
 import json
 import os
 import re
@@ -8,10 +7,11 @@ import sys
 
 import argparse
 
-from _common import get_name_from_path, validate_src, parser
+from _common import get_config
 
-config = configparser.ConfigParser()
-config.read('config.ini')
+config = get_config()
+if not config:
+    sys.exit(-1)
 
 STORAGE_ACCOUNT_NAME = config['storage']['account']
 TEMPLATE_CONTAINER_NAME = config['storage']['container']
@@ -39,12 +39,16 @@ def _upload_templates(name, api_version, path, dir=None):
 def upload_template_files(*args):
 
     print('\n== UPLOAD ARM TEMPLATES ==')
-
+    
+    parser = argparse.ArgumentParser(description='Upload ARM Templates')
+    parser.add_argument('--name', metavar='NAME', required=True, help='Name of the thing being uploaded (in CamelCase)')
+    parser.add_argument('--src', metavar='PATH', required=True, help='Path to the directory containing ARM templates to upload. Subdirectories will automatically be crawled.')
+    parser.add_argument('--api-version', metavar='VERSION', required=True, help='API version for the templates being uploaded in yyyy-MM-dd format. (ex: 2016-07-01)')
     args = parser.parse_args(args)
 
+    name = args.name
     api_version = args.api_version
     src = args.src
-    name = get_name_from_path(src)
     
     _upload_templates(name, api_version, src)
 

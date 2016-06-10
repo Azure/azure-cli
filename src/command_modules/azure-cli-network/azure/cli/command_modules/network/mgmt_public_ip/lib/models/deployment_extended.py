@@ -13,10 +13,10 @@ class DeploymentExtended(Model):
     """
     Deployment information.
 
-    :param name: Gets or sets the name of the deployment.
-    :type name: str
     :param id: Gets or sets the ID of the deployment.
     :type id: str
+    :param name: Gets or sets the name of the deployment.
+    :type name: str
     :param properties: Gets or sets deployment properties.
     :type properties: :class:`DeploymentPropertiesExtended
      <default.models.DeploymentPropertiesExtended>`
@@ -27,12 +27,12 @@ class DeploymentExtended(Model):
     }
 
     _attribute_map = {
-        'name': {'key': 'name', 'type': 'str'},
         'id': {'key': 'id', 'type': 'str'},
+        'name': {'key': 'name', 'type': 'str'},
         'properties': {'key': 'properties', 'type': 'DeploymentPropertiesExtended'},
     }
 
     def __init__(self, name, id=None, properties=None):
-        self.name = name
         self.id = id
+        self.name = name
         self.properties = properties

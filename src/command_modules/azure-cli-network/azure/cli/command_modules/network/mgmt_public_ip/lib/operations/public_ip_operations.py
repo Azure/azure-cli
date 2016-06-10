@@ -32,7 +32,7 @@ class PublicIpOperations(object):
         self.config = config
 
     def create_or_update(
-            self, resource_group_name, deployment_name, name, content_version=None, allocation_method="Dynamic", dns_name=None, location=None, public_ip_address_type="noDns", custom_headers=None, raw=False, **operation_config):
+            self, resource_group_name, deployment_name, name, content_version=None, allocation_method="dynamic", dns_name=None, location=None, public_ip_address_type="noDns", custom_headers=None, raw=False, **operation_config):
         """
         Create or update a virtual machine.
 
@@ -46,16 +46,16 @@ class PublicIpOperations(object):
         :param content_version: If included it must match the ContentVersion
          in the template.
         :type content_version: str
-        :param location: Location (e.g. eastus).
-        :type location: str
-        :param dns_name: Globally unique DNS entry.
-        :type dns_name: str
-        :param public_ip_address_type: Whether to include a DNS entry or not.
-         Possible values include: 'dns', 'noDns'
-        :type public_ip_address_type: str
         :param allocation_method: IP address Allocation method. Possible
          values include: 'dynamic', 'static'
         :type allocation_method: str
+        :param dns_name: Globally unique DNS entry.
+        :type dns_name: str
+        :param location: Location (e.g. eastus).
+        :type location: str
+        :param public_ip_address_type: Whether to include a DNS entry or not.
+         Possible values include: 'dns', 'noDns'
+        :type public_ip_address_type: str
         :param dict custom_headers: headers that will be added to the request
         :param bool raw: returns the direct response alongside the
          deserialized response
@@ -66,7 +66,7 @@ class PublicIpOperations(object):
         :rtype: :class:`ClientRawResponse<msrest.pipeline.ClientRawResponse>`
          if raw=true
         """
-        parameters = models.DeploymentPublicIp(content_version=content_version, name=name, location=location, dns_name=dns_name, public_ip_address_type=public_ip_address_type, allocation_method=allocation_method)
+        parameters = models.DeploymentPublicIp(content_version=content_version, allocation_method=allocation_method, dns_name=dns_name, location=location, name=name, public_ip_address_type=public_ip_address_type)
 
         # Construct URL
         url = '/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Resources/deployments/{deploymentName}'

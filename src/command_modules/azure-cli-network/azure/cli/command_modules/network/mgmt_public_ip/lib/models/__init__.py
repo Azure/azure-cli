@@ -6,28 +6,28 @@
 # regenerated.
 # --------------------------------------------------------------------------
 
-from .basic_dependency import BasicDependency
 from .deployment_public_ip import DeploymentPublicIp
 from .template_link import TemplateLink
-from .deployment_extended import DeploymentExtended
-from .deployment_properties_extended import DeploymentPropertiesExtended
-from .dependency import Dependency
 from .parameters_link import ParametersLink
-from .provider import Provider
 from .provider_resource_type import ProviderResourceType
+from .provider import Provider
+from .basic_dependency import BasicDependency
+from .dependency import Dependency
+from .deployment_properties_extended import DeploymentPropertiesExtended
+from .deployment_extended import DeploymentExtended
 from .public_ip_creation_client_enums import (
     DeploymentMode,
 )
 
 __all__ = [
-    'BasicDependency',
     'DeploymentPublicIp',
     'TemplateLink',
-    'DeploymentExtended',
-    'DeploymentPropertiesExtended',
-    'Dependency',
     'ParametersLink',
-    'Provider',
     'ProviderResourceType',
+    'Provider',
+    'BasicDependency',
+    'Dependency',
+    'DeploymentPropertiesExtended',
+    'DeploymentExtended',
     'DeploymentMode',
 ]

@@ -1,5 +1,6 @@
 from __future__ import print_function
 
+from collections import OrderedDict
 import json
 import os
 import re
@@ -7,7 +8,7 @@ import sys
 
 import argparse
 
-from _common import to_snake_case, get_name_from_path, validate_src, parser
+from _common import snake_to_camel
 
 # HELPER FUNCTIONS
 
@@ -476,43 +477,51 @@ def convert_template_to_swagger(*args):
 
     print('\n== CONVERT TEMPLATE TO SWAGGER ==')
 
+    parser = argparse.ArgumentParser(description='ARM Template to Swagger')
+    parser.add_argument('--name', metavar='NAME', required=True, help='Name of the thing being created (in snake_case)')
+    parser.add_argument('--src', metavar='PATH', required=True, help='Path to the ARM template file to convert.')
+    parser.add_argument('--api-version', metavar='VERSION', required=True, help='API version for the template being generated in yyyy-MM-dd format. (ex: 2016-07-01)')
     args = parser.parse_args(args)
 
     api_version = args.api_version
-    root = args.src or os.getcwd()
-    name = get_name_from_path(root)
-    src = os.path.join(root, 'azuredeploy.json')
-    validate_src(src)
-    dest = os.path.join(root, 'swagger_create_{}.json'.format(to_snake_case(name)))
+    src = args.src
+    name = args.name
+
+    if not os.path.isfile(src):
+        raise RuntimeError('File {} not found.'.format(src))
+
+    root, src_file = os.path.split(src)
+    dest = os.path.join(root, 'swagger_create_{}.json'.format(name))
 
     # Convert template to swagger
     with open(src) as f:
         j = json.load(f)
     
-        print('Converting ARM template {} to swagger.'.format(src))
-        prms = j['parameters']
-        propstrs = [swagger_template_prop.format(name)
-                    for name, value in sorted(prms.items(), key=lambda item: item[0])]
-        tml = swagger_props_template.format(',\n        '.join(propstrs))
+        print('Converting ARM template {} to swagger.'.format(src_file))
+        params = j['parameters']
+        prop_strings = [swagger_template_prop.format(key) 
+            for key, value in sorted(params.items(), key=lambda item: item[0])]
+        props_section = swagger_props_template.format(',\n        '.join(prop_strings))
 
-        prmstrs = [swagger_template_param.format(name,
-                                                 value['metadata']['description'],
-                                                 get_required(value),
-                                                 get_enum(value),
-                                                 get_default(value))
-                   for name, value in sorted(prms.items(), key=lambda item: item[0])]
+        param_strs = []
+        for key, value in sorted(params.items(), key=lambda item: item[0]):
+            comment = value['metadata'].get('description')
+            if not comment:
+                print('No comment found for {}'.format(value))
+            param_strs.append(swagger_template_param.format(
+                key, comment or '', get_required(value), get_enum(value), get_default(value)))
 
         # artifacts special case
-        artifacts_prmstr = next((p for p in prmstrs if '_artifacts' in p), None)
-        if artifacts_prmstr:
-            prmstrs.remove(artifacts_prmstr)
-            prmstrs.append(swagger_template_artifacts_location.format(name, api_version))
+        artifacts_paramstr = next((p for p in param_strs if '_artifacts' in p), None)
+        if artifacts_paramstr:
+            param_strs.remove(artifacts_paramstr)
+            param_strs.append(swagger_template_artifacts_location.format(name, api_version))
 
-        tml2 = ',\n'.join(prmstrs)
+        params_section = ',\n'.join(param_strs)
 
         with open(dest, 'w') as output_file:
-            raw_swagger = swagger_template_master.format(tml, get_required_list(prms.items()), tml2, name, api_version)
-            output_file.write(json.dumps(json.loads(raw_swagger), indent=2))
+            raw_swagger = swagger_template_master.format(props_section, get_required_list(params.items()), params_section, snake_to_camel(name), api_version)
+            output_file.write(json.dumps(json.loads(raw_swagger, object_pairs_hook=OrderedDict), indent=2))
             print('{} generated successfully.'.format(dest))
 
     return dest
