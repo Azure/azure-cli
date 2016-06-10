@@ -1,7 +1,4 @@
-﻿import time
-
-from azure.cli.utils.vcr_test_base import VCRTestBase, JMESPathComparator
-from azure.cli._util import CLIError
+﻿from azure.cli.utils.vcr_test_base import VCRTestBase, JMESPathComparator
 
 #pylint: disable=method-hidden
 #pylint: disable=line-too-long
@@ -563,32 +560,22 @@ class NetworkSubnetCreateScenarioTest(VCRTestBase):
         self.run_command_and_verify('network vnet subnet create --resource-group {0} --name {1} --virtual-network-name {1} --address-prefix {2}'.format( #pylint: disable=line-too-long
             self.resource_group, self.placeholder_value, self.address_prefix), None)
 
-class NetworkPublicIpScenarioTest(VCRTestBase):
+class NetworkPublicIpScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-        self.resource_group = 'travistestresourcegroup'
+        super(NetworkPublicIpScenarioTest, self).__init__(__file__, test_method)
         self.public_ip_name = 'pubipdns'
         self.public_ip_no_dns_name = 'pubipnodns'
         self.dns = 'woot'
-        super(NetworkPublicIpScenarioTest, self).__init__(__file__, test_method)
 
     def test_network_public_ip(self):
         self.execute(verify_test_output=True)
-
-    def set_up(self):
-        s = self
-        for name in [s.public_ip_name, s.public_ip_no_dns_name]:
-            s.run_command_no_verify('network public-ip delete -g {} -n {}'.format(
-                s.resource_group, name))
-            if s.run_command_no_verify('network public-ip show -g {} -n {}'.format(
-                s.resource_group, name)):
-                raise CLIError('Failed to delete pre-existing public-ip {}. Unable to continue test.'.format(name))
 
     def body(self):
         s = self
         rg = s.resource_group
         # See documentation for guidance regarding deployment name in tests
-        count = 5
+        count = 11
         deploy1 = 'ipdeploy{}'.format(count)
         deploy2 = 'ipnodnsdeploy{}'.format(count)
         s.run_command_and_verify('network public-ip create -g {} -n {} --dns-name {} --allocation-method static --deployment-name {}'.format(rg, s.public_ip_name, s.dns, deploy1), [
@@ -613,6 +600,6 @@ class NetworkPublicIpScenarioTest(VCRTestBase):
             JMESPathComparator('resourceGroup', rg),
         ])
         s.run_command_and_verify('network public-ip delete -g {} -n {}'.format(rg, s.public_ip_name), None)
-        s.run_command_and_verify('network public-ip list -g {}'.format(rg, s.public_ip_name), [
+        s.run_command_and_verify('network public-ip list -g {}'.format(rg), [
             JMESPathComparator("length[?name == '{}']".format(s.public_ip_name), None)
         ])

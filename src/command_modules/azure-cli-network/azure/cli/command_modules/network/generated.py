@@ -23,8 +23,8 @@ from azure.cli.command_modules.network.mgmt_vnet.lib \
     import ResourceManagementClient as VNetClient
 from azure.cli.command_modules.network.mgmt_vnet.lib.operations import VNetOperations
 from azure.cli.command_modules.network.mgmt_public_ip.lib \
-    import PublicIPCreationClient as PublicIPClient
-from azure.cli.command_modules.network.mgmt_public_ip.lib.operations import PublicIPOperations
+    import PublicIpCreationClient as PublicIPClient
+from azure.cli.command_modules.network.mgmt_public_ip.lib.operations import PublicIpOperations
 from azure.cli.command_modules.network.mgmt_lb.lib import LBCreationClient as LBClient
 from azure.cli.command_modules.network.mgmt_lb.lib.operations import LBOperations
 from azure.cli.command_modules.network.mgmt_nsg.lib import NSGCreationClient as NSGClient
@@ -115,8 +115,8 @@ cli_command('network public-ip show', PublicIPAddressesOperations.get, factory)
 cli_command('network public-ip list', PublicIPAddressesOperations.list, factory)
 cli_command('network public-ip list-all', PublicIPAddressesOperations.list_all, factory)
 
-factory = lambda _: get_mgmt_service_client(PublicIpClient).public_ip
-cli_command('network public-ip create', PublicIpOperations.create_or_update, factory)
+factory = lambda _: get_mgmt_service_client(PublicIPClient).public_ip
+cli_command('network public-ip create', PublicIpOperations.create_or_update, factory, transform=DeploymentOutputLongRunningOperation('Starting network public-ip create'))
 
 # RouteTablesOperations
 factory = lambda _: _network_client_factory().route_tables
