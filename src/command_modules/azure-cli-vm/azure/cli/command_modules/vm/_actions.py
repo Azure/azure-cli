@@ -5,10 +5,11 @@ import re
 
 from azure.cli._util import CLIError
 from azure.cli.application import APPLICATION
+from azure.cli.commands.parameters import get_one_of_subscription_locations
 
 from six.moves.urllib.request import urlopen #pylint: disable=import-error
 
-from ._factory import _compute_client_factory, _subscription_client_factory
+from ._factory import _compute_client_factory
 from ._vm_utils import read_content_if_is_file
 
 class VMImageFieldAction(argparse.Action): #pylint: disable=too-few-public-methods
@@ -202,17 +203,8 @@ def load_extension_images_thru_services(publisher, name, version, location, show
 
     return all_images
 
-def get_subscription_locations():
-    subscription_client, subscription_id = _subscription_client_factory()
-    return list(subscription_client.subscriptions.list_locations(subscription_id))
-
-def get_one_of_subscription_locations():
-    result = get_subscription_locations()
-    if result:
-        return next((r.name for r in result if r.name.lower() == 'westus'), result[0].name)
-    else:
-        #this should never happen, just in case
-        raise CLIError('Current subscription does not have valid location list')
+def get_vm_sizes(location):
+    return list(_compute_client_factory().virtual_machine_sizes.list(location))
 
 def _partial_matched(pattern, string):
     if not pattern:
