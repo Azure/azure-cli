@@ -338,7 +338,7 @@ Global Arguments
     @redirect_io
     def test_help_extra_missing_params(self):
         app = Application(Configuration([]))
-        def test_handler():
+        def test_handler(foobar2, foobar=None):
             pass
 
         command = CliCommand('n1', test_handler)
