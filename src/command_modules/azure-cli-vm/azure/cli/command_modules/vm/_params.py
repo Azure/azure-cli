@@ -12,13 +12,10 @@ from azure.cli.command_modules.vm._actions import (VMImageFieldAction,
                                                    load_images_from_aliases_doc,
                                                    get_vm_sizes)
 from azure.cli.commands.parameters import (location_type,
+                                           get_location_completion_list,
                                            get_one_of_subscription_locations,
                                            get_resource_name_completion_list)
 from azure.cli.commands import register_cli_argument, CliArgumentType, register_extra_cli_argument
-
-def get_location_completion_list(prefix, **kwargs):#pylint: disable=unused-argument
-    result = get_subscription_locations()
-    return [l.name for l in result]
 
 def get_urn_aliases_completion_list(prefix, **kwargs):#pylint: disable=unused-argument
     images = load_images_from_aliases_doc()
