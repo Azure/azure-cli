@@ -95,7 +95,7 @@ cli_command('vm diagnostics get-default-config', show_default_diagnostics_config
 # VM Disk
 cli_command('vm disk attach-new', attach_new_disk)
 cli_command('vm disk attach-existing', attach_existing_disk)
-cli_command('vm disk attach-detach', detach_disk)
+cli_command('vm disk detach', detach_disk)
 cli_command('vm disk list', list_disks)
 
 # VM Extension

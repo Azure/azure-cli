@@ -1,11 +1,10 @@
-# pylint: disable=line-too-long
+﻿# pylint: disable=line-too-long
 import argparse
 import getpass
 import os
 
 from azure.mgmt.compute.models import VirtualHardDisk
 
-from azure.cli.command_modules.vm._validators import MinMaxValue
 from azure.cli.command_modules.vm._actions import (VMImageFieldAction,
                                                    VMSSHFieldAction,
                                                    VMDNSNameAction,
@@ -40,11 +39,13 @@ register_cli_argument('vm', 'size', CliArgumentType(completer=get_vm_size_comple
 register_cli_argument('vm scaleset', 'vm_scale_set_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'))
 register_cli_argument('vm scaleset', 'virtual_machine_scale_set_name', name_arg_type)
 register_cli_argument('vm scaleset', 'instance_ids', multi_ids_type)
-register_cli_argument('vm', 'diskname', CliArgumentType(options_list=('--name', '-n')))
-register_cli_argument('vm', 'disksize', CliArgumentType(help='Size of disk (Gb)', default=1023, type=MinMaxValue(1, 1023)))
-register_cli_argument('vm', 'lun', CliArgumentType(
-    type=int, help='0-based logical unit number (LUN). Max value depends on the Virtual Machine size.'))
-register_cli_argument('vm', 'vhd', CliArgumentType(type=VirtualHardDisk))
+register_cli_argument('vm disk', 'vm_name', arg_type=existing_vm_name, options_list=('--vm-name',))
+register_cli_argument('vm disk', 'disk_name', CliArgumentType(options_list=('--name', '-n'), help='The data disk name. If missing, will retrieve from vhd uri'))
+register_cli_argument('vm disk', 'disk_size', CliArgumentType(help='Size of disk (Gb)', default=1023, type=int))
+register_cli_argument('vm disk', 'lun', CliArgumentType(
+    type=int, help='0-based logical unit number (LUN). Max value depends on the Virutal Machine size.'))
+register_cli_argument('vm disk', 'vhd', CliArgumentType(type=VirtualHardDisk, help='virtual hard disk\'s uri. For example:https://mystorage.blob.core.windows.net/vhds/d1.vhd'))
+register_cli_argument('vm disk', 'caching', CliArgumentType(help='Host caching policy', default='None', choices=['None', 'ReadOnly', 'ReadWrite']))
 
 register_cli_argument('vm availability-set', 'availability_set_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Compute/availabilitySets'))
 
@@ -63,7 +64,6 @@ register_cli_argument(
 register_cli_argument('vm container create', 'agent_vm_size', CliArgumentType(completer=get_vm_size_completion_list))
 
 register_cli_argument('vm capture', 'overwrite', CliArgumentType(action='store_true'))
-register_cli_argument('vm disk', 'vm_name', arg_type=existing_vm_name, options_list=('--vm-name',))
 register_cli_argument('vm nic', 'nic_ids', multi_ids_type)
 register_cli_argument('vm nic', 'nic_names', multi_ids_type)
 register_cli_argument('vm diagnostics', 'vm_name', arg_type=existing_vm_name, options_list=('--vm-name',))
