@@ -5,7 +5,7 @@ import pip
 from six.moves import input #pylint: disable=redefined-builtin
 
 from azure.cli.parser import IncorrectUsageError
-from azure.cli._help_files import helps
+from azure.cli.help_files import helps
 from azure.cli.utils.update_checker import check_for_component_update
 from azure.cli._util import CLIError
 
