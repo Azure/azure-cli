@@ -663,7 +663,7 @@ def vmss_deallocate(resource_group_name, vm_scale_set_name, instance_ids=None):
     else:
         return client.virtual_machine_scale_sets.deallocate(resource_group_name,
                                                             vm_scale_set_name,
-                                                            instance_ids)
+                                                            instance_ids=instance_ids)
 
 def vmss_delete_instances(resource_group_name, vm_scale_set_name, instance_ids):
     '''delete virtual machines in a virtual machine scale set.
@@ -693,7 +693,7 @@ def vmss_power_off(resource_group_name, vm_scale_set_name, instance_ids=None):
     else:
         return client.virtual_machine_scale_sets.power_off(resource_group_name,
                                                            vm_scale_set_name,
-                                                           instance_ids)
+                                                           instance_ids=instance_ids)
 
 def vmss_reimage(resource_group_name, vm_scale_set_name, instance_id=None):
     '''reimage virtual machines in a virtual machine scale set.
@@ -722,7 +722,7 @@ def vmss_restart(resource_group_name, vm_scale_set_name, instance_ids=None):
     else:
         return client.virtual_machine_scale_sets.restart(resource_group_name,
                                                          vm_scale_set_name,
-                                                         instance_ids)
+                                                         instance_ids=instance_ids)
 
 def vmss_start(resource_group_name, vm_scale_set_name, instance_ids=None):
     '''start virtual machines in a virtual machine scale set.
@@ -737,5 +737,5 @@ def vmss_start(resource_group_name, vm_scale_set_name, instance_ids=None):
     else:
         return client.virtual_machine_scale_sets.start(resource_group_name,
                                                        vm_scale_set_name,
-                                                       instance_ids)
+                                                       instance_ids=instance_ids)
 
