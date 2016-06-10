@@ -556,13 +556,12 @@ def vm_update_nics(resource_group_name, vm_name, nic_ids=None, nic_names=None, p
     return _update_vm_nics(vm, nics, primary_nic)
 
 def _build_nic_list(resource_group_name, nic_ids, nic_names):
-    from azure.mgmt.network import NetworkManagementClient, NetworkManagementClientConfiguration
+    from azure.mgmt.network import NetworkManagementClient
     from azure.mgmt.compute.models import NetworkInterfaceReference
     nics = []
     if nic_names or nic_ids:
         #pylint: disable=no-member
-        network_client = get_mgmt_service_client(NetworkManagementClient,
-                                                 NetworkManagementClientConfiguration)
+        network_client = get_mgmt_service_client(NetworkManagementClient)
         for n in nic_names:
             nic = network_client.network_interfaces.get(resource_group_name, n)
             nics.append(NetworkInterfaceReference(nic.id, False))
