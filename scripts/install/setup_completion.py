@@ -28,7 +28,7 @@ _python_argcomplete() {
         unset COMPREPLY
     fi
 }
-complete -o nospace -o default -F _python_argcomplete "az"
+complete -o nospace -F _python_argcomplete "az"
 """
 
 USER_BASH_RC = os.path.expanduser(os.path.join('~', '.bashrc'))

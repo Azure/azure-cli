@@ -45,7 +45,6 @@ class Application(object):
 
         # Register presence of and handlers for global parameters
         self.register(self.GLOBAL_PARSER_CREATED, Application._register_builtin_arguments)
-        self.register(self.COMMAND_PARSER_LOADED, Application._enable_autocomplete)
         self.register(self.COMMAND_PARSER_PARSED, self._handle_builtin_arguments)
 
         # Let other extensions make their presence known
@@ -139,11 +138,6 @@ class Application(object):
                          if not callable(v) and not k.startswith('_')])
         else:
             return obj
-
-    @staticmethod
-    def _enable_autocomplete(**kwargs):
-        import argcomplete
-        argcomplete.autocomplete(kwargs['parser'])
 
     @staticmethod
     def _register_builtin_arguments(**kwargs):

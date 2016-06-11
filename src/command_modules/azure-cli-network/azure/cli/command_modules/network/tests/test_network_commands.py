@@ -7,6 +7,18 @@
 # TODO Make these full scenario tests when we can create the resources through network commands.
 # So currently, the tests assume the resources have been created through some other means.
 
+class ResourceGroupVCRTestBase(VCRTestBase):
+    def __init__(self, test_file, test_name, debug=False):
+        super(ResourceGroupVCRTestBase, self).__init__(test_file, test_name, debug)
+        self.resource_group = 'vcr_resource_group'
+        self.location = 'westus'
+
+    def set_up(self):
+        self.run_command_no_verify('resource group create --location {} --name {}'
+                                   .format(self.location, self.resource_group))
+
+    def tear_down(self):
+        self.run_command_no_verify('resource group delete --name {}'.format(self.resource_group))
 class NetworkUsageListScenarioTest(VCRTestBase):
 
     def __init__(self, test_method):
@@ -342,27 +354,28 @@ class NetworkNicScaleSetScenarioTest(VCRTestBase):
                 JMESPathComparator('resourceGroup', self.resource_group),
                 JMESPathComparator('type', self.resource_type)])
 
-class NetworkSecurityGroupScenarioTest(VCRTestBase):
+class NetworkSecurityGroupScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
+        super(NetworkSecurityGroupScenarioTest, self).__init__(__file__, test_method)
         self.resource_group = 'cliTestRg_securityGroups'
         self.nsg_name = 'cli-test-nsg'
         self.nsg_rule_name = 'web'
         self.resource_type = 'Microsoft.Network/networkSecurityGroups'
-        super(NetworkSecurityGroupScenarioTest, self).__init__(__file__, test_method)
+        self.deployment_name = 'nsgDeployment'
 
     def test_network_nsg(self):
         self.execute(verify_test_output=True)
 
-    def set_up(self):
-        if not self.run_command_no_verify('network nsg show --resource-group {} --name {}'.format(
-            self.resource_group, self.nsg_name)):
-            raise RuntimeError('Network security group must be manually created in order to support this test.')
-        if not self.run_command_no_verify('network nsg-rule show --resource-group {} --nsg-name {} --name {}'.format(
-            self.resource_group, self.nsg_name, self.nsg_rule_name)):
-            raise RuntimeError('Network security group rule must be manually created in order to support this test.')
-
     def body(self):
+        self.run_command_no_verify('network nsg create --name {nsg_name} -g {resource_group} --deployment-name deployment'
+                                   .format(nsg_name=self.nsg_name, resource_group=self.resource_group))
+        self.run_command_no_verify('network nsg rule create --access allow --destination-address-prefix 1234'
+                                   ' --direction inbound --nsg-name {nsg_name} --protocol * -g {resource_group}'
+                                   ' --source-address-prefix 789 -n {nsg_rule_name} --source-port-range *'
+                                   ' --destination-port-range 4444'
+                                   .format(nsg_name=self.nsg_name, nsg_rule_name=self.nsg_rule_name, resource_group=self.resource_group))
+
         self.run_command_and_verify('network nsg list-all', [
             JMESPathComparator('type(@)', 'array'),
             JMESPathComparator("length([?type == '{}']) == length(@)".format(
@@ -380,18 +393,18 @@ class NetworkSecurityGroupScenarioTest(VCRTestBase):
                 JMESPathComparator('resourceGroup', self.resource_group),
                 JMESPathComparator('name', self.nsg_name)])
         # Test for the manually added nsg rule
-        self.run_command_and_verify('network nsg-rule list --resource-group {} --nsg-name {}'.format(
+        self.run_command_and_verify('network nsg rule list --resource-group {} --nsg-name {}'.format(
             self.resource_group, self.nsg_name), [
                 JMESPathComparator('type(@)', 'array'),
                 JMESPathComparator('length(@)', 1),
                 JMESPathComparator("length([?resourceGroup == '{}']) == length(@)".format(
                           self.resource_group), True)])
-        self.run_command_and_verify('network nsg-rule show --resource-group {} --nsg-name {} --name {}'.format(
+        self.run_command_and_verify('network nsg rule show --resource-group {} --nsg-name {} --name {}'.format(
             self.resource_group, self.nsg_name, self.nsg_rule_name), [
                 JMESPathComparator('type(@)', 'object'),
                 JMESPathComparator('resourceGroup', self.resource_group),
                 JMESPathComparator('name', self.nsg_rule_name)])
-        self.run_command_and_verify('network nsg-rule delete --resource-group {} --nsg-name {} --name {}'.format(
+        self.run_command_and_verify('network nsg rule delete --resource-group {} --nsg-name {} --name {}'.format(
             self.resource_group, self.nsg_name, self.nsg_rule_name), None)
         # Delete the network security group
         self.run_command_and_verify('network nsg delete --resource-group {} --name {}'.format(

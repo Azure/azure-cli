@@ -1,4 +1,5 @@
 import argparse
+import argcomplete
 import azure.cli._help as _help
 from azure.cli._util import CLIError
 
@@ -7,6 +8,15 @@ class IncorrectUsageError(CLIError):
     displayed to the user.
     '''
     pass
+
+class EmptyDefaultCompletionFinder(argcomplete.CompletionFinder):
+    def __init__(self, *args, **kwargs):
+        super(EmptyDefaultCompletionFinder, self).__init__(*args, default_completer=lambda _: (),
+                                                           **kwargs)
+
+def enable_autocomplete(parser):
+    argcomplete.autocomplete = EmptyDefaultCompletionFinder()
+    argcomplete.autocomplete(parser, validator=lambda c, p: c.lower().startswith(p.lower()))
 
 class AzCliCommandParser(argparse.ArgumentParser):
     """ArgumentParser implementation specialized for the
@@ -48,6 +58,7 @@ class AzCliCommandParser(argparse.ArgumentParser):
 
             command_parser.set_defaults(func=metadata.handler, command=command_name,
                                         _validators=argument_validators)
+        enable_autocomplete(self)
 
     def _get_subparser(self, path):
         """For each part of the path, walk down the tree of
