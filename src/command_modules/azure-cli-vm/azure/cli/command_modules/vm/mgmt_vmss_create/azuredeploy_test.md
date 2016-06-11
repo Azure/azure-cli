@@ -7,15 +7,22 @@ Execute P0s before any change to VMSS Create **OR VM CREATE** is merged
 
  - create
  - verify LB and public IP
- - verify storage type
- - RDP into instance 1
+
+OR
+
+ - Delete test_vm_scaleset_create_simple.yaml
+ - Re-record the tests
 
 **Windows VMSS with no overprovisioning, instance count 4, ReadWrite caching and Automatic upgrades, static private and static Public IP Addresses**
 
  - create
  - verify LB public/private IP is static
  - verify overprovisioning, instance count (capacity), caching and upgrade policy
- - RDP into instance 1
+
+ OR
+
+ - Delete test_vm_scaleset_create_options.yaml
+ - Re-record tests
 
 **Linux VMSS with custom OS Disk name and storage container name, existing VNet/subnet, existing IP for LB**
 
@@ -23,13 +30,11 @@ Execute P0s before any change to VMSS Create **OR VM CREATE** is merged
  - verify OS Disk name
  - verify in correct VNet/Subnet
  - verify existing IP used
- - SSH into instance 1
 
-**Linux VMSS with existing LB and DNS name**
+OR
 
- - verify existing LB is used
- - verify DNS name
- - SSH into instance 1
+ - Delete test_vm_scaleset_create_existing_options.yaml
+ - Re-record tests
 
 **custom Linux image**
 
@@ -39,14 +44,31 @@ Execute P0s before any change to VMSS Create **OR VM CREATE** is merged
  - SSH into instance 1
  - verify emacs is still installed
 
+Commands to verify (Linux):
+ vmssname=myvmss16e
+ rg=myvmsss
+ az vm scaleset create --image https://vhdstorage33jojgic4cpuu.blob.core.windows.net/vhds/osdiskimage.vhd --custom-os-disk-type linux -g $rg --name $vmssname --authentication-type ssh
+ az vm scaleset show -n $vmssname -g $rg
+ az network public-ip show -n ${vmssname}PublicIP -g $rg --query ipAddress 
+ SSH into the VM, Ssh format for instance 0: ssh <ipAddress> -p 50000
+ Type 'emacs', it should start (exit with Ctrl-X Ctrl-C)
+
  **custom Windows image**
 
- - create VM1, add a customization such as installing an application
+ - create VM1, add a customization such as installing an application (e.g WinMerge)
  - generalize, capture and deallocate VM1's vhd (https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-windows-classic-capture-image/ + https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-linux-capture-image/)
  - create VMSS with OS Disk URI pointing to VM1's vhd
  - RDP into instance 1
- - verify application is still installed
+ - verify application is still installed (e.g. launch WinMerge)
 
+Commands to verify (windows):
+ set vmssname=myvmss16f
+ set rg=myvmsss
+ call az vm scaleset create --image http://genwinimg001100.blob.core.windows.net/vhds/osdiskimage.vhd --custom-os-disk-type windows -g %rg% --name %vmssname% --admin-password Admin_007
+ call az vm scaleset show -n %vmssname% -g %rg%
+ call az network public-ip show -n %vmssname%PublicIP -g %rg% --query ipAddress 
+ Then RDP in and look for app being installed already
+ mstsc /v:<vmname>:50000, launch application
 
 ## P1: LESS COMMON ##
 Execute P1 scenarios if a change is made in these areas

@@ -4,7 +4,7 @@ import sys
 import textwrap
 import yaml
 
-from ._help_files import _load_help_file
+from .help_files import _load_help_file
 
 __all__ = ['print_detailed_help', 'print_welcome_message', 'GroupHelpFile', 'CommandHelpFile']
 

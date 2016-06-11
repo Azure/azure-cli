@@ -31,6 +31,7 @@ register_cli_argument('resource group', 'resource_group_name', resource_group_na
 register_cli_argument('resource group deployment', 'deployment_name', CliArgumentType(options_list=('--name', '-n'), required=True))
 register_cli_argument('resource group export', 'include_comments', CliArgumentType(action='store_true'))
 register_cli_argument('resource group export', 'include_parameter_default_value', CliArgumentType(action='store_true'))
+register_cli_argument('resource group create', 'resource_group_name', CliArgumentType(completer=lambda _: ()))
 
 register_cli_argument('tag', 'tag_name', CliArgumentType(options_list=('--name', '-n')))
 register_cli_argument('tag', 'tag_value', CliArgumentType(options_list=('--value',)))

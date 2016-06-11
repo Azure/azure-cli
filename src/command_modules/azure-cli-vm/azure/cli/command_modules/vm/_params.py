@@ -10,37 +10,43 @@ from azure.cli.command_modules.vm._actions import (VMImageFieldAction,
                                                    VMSSHFieldAction,
                                                    VMDNSNameAction,
                                                    load_images_from_aliases_doc,
-                                                   get_subscription_locations)
-from azure.cli.commands.parameters import location_type
+                                                   get_vm_sizes)
+from azure.cli.commands.parameters import (location_type,
+                                           get_location_completion_list,
+                                           get_one_of_subscription_locations,
+                                           get_resource_name_completion_list)
 from azure.cli.commands import register_cli_argument, CliArgumentType, register_extra_cli_argument
-
-def get_location_completion_list(prefix, **kwargs):#pylint: disable=unused-argument
-    result = get_subscription_locations()
-    return [l.name for l in result]
 
 def get_urn_aliases_completion_list(prefix, **kwargs):#pylint: disable=unused-argument
     images = load_images_from_aliases_doc()
     return [i['urn alias'] for i in images]
 
+def get_vm_size_completion_list(prefix, action, parsed_args, **kwargs):#pylint: disable=unused-argument
+    location = parsed_args.location if parsed_args.location else get_one_of_subscription_locations()
+    result = get_vm_sizes(location)
+    return [r.name for r in result]
+
 # BASIC PARAMETER CONFIGURATION
 name_arg_type = CliArgumentType(options_list=('--name', '-n'), metavar='NAME')
-instance_ids_type = CliArgumentType(
+multi_ids_type = CliArgumentType(
     nargs='+'
 )
 
 admin_username_type = CliArgumentType(options_list=('--admin-username',), default=getpass.getuser(), required=False)
 
-register_cli_argument('vm', 'vm_name', name_arg_type, help='The name of the virtual machine')
-register_cli_argument('vm scaleset', 'vm_scale_set_name', name_arg_type)
+register_cli_argument('vm', 'vm_name', name_arg_type, help='The name of the virtual machine', completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachines'))
+register_cli_argument('vm', 'size', CliArgumentType(completer=get_vm_size_completion_list))
+
+register_cli_argument('vm scaleset', 'vm_scale_set_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'))
 register_cli_argument('vm scaleset', 'virtual_machine_scale_set_name', name_arg_type)
-register_cli_argument('vm scaleset', 'instance_ids', instance_ids_type)
+register_cli_argument('vm scaleset', 'instance_ids', multi_ids_type)
 register_cli_argument('vm', 'diskname', CliArgumentType(options_list=('--name', '-n')))
 register_cli_argument('vm', 'disksize', CliArgumentType(help='Size of disk (Gb)', default=1023, type=MinMaxValue(1, 1023)))
 register_cli_argument('vm', 'lun', CliArgumentType(
-    type=int, help='0-based logical unit number (LUN). Max value depends on the Virutal Machine size.'))
+    type=int, help='0-based logical unit number (LUN). Max value depends on the Virtual Machine size.'))
 register_cli_argument('vm', 'vhd', CliArgumentType(type=VirtualHardDisk))
 
-register_cli_argument('vm availability-set', 'availability_set_name', name_arg_type)
+register_cli_argument('vm availability-set', 'availability_set_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Compute/availabilitySets'))
 
 register_cli_argument('vm access', 'username', CliArgumentType(options_list=('--username', '-u'), help='The user name'))
 register_cli_argument('vm access', 'password', CliArgumentType(options_list=('--password', '-p'), help='The user password'))
@@ -54,7 +60,11 @@ register_cli_argument(
         default=os.path.join(os.path.expanduser('~'), '.ssh', 'id_rsa.pub')
     )
 )
+register_cli_argument('vm container create', 'agent_vm_size', CliArgumentType(completer=get_vm_size_completion_list))
 
+register_cli_argument('vm capture', 'overwrite', CliArgumentType(action='store_true'))
+register_cli_argument('vm nic', 'nic_ids', multi_ids_type)
+register_cli_argument('vm nic', 'nic_names', multi_ids_type)
 register_cli_argument('vm diagnostics', 'vm_name', CliArgumentType(options_list=('--vm-name',)))
 
 register_cli_argument('vm extension', 'vm_extension_name', name_arg_type)
@@ -86,7 +96,7 @@ for scope in ['vm create', 'vm scaleset create']:
     register_cli_argument(scope, 'custom_os_disk_uri', CliArgumentType(help=argparse.SUPPRESS))
     register_cli_argument(scope, 'custom_os_disk_type', CliArgumentType(choices=['windows', 'linux']))
     register_cli_argument(scope, 'os_disk_type', CliArgumentType(help=argparse.SUPPRESS))
-    register_cli_argument(scope, 'overprovision', CliArgumentType(action='store_false', default=None))
+    register_cli_argument(scope, 'overprovision', CliArgumentType(action='store_false', default=None, options_list=('--disable-overprovision',)))
     register_cli_argument(scope, 'load_balancer_type', CliArgumentType(choices=['new', 'existing', 'none']))
     register_cli_argument(scope, 'storage_caching', CliArgumentType(choices=['ReadOnly', 'ReadWrite']))
     register_cli_argument(scope, 'upgrade_policy_mode', CliArgumentType(choices=['manual', 'automatic'], default='manual', help=None))
@@ -96,7 +106,7 @@ for scope in ['vm create', 'vm scaleset create']:
     register_cli_argument(scope, 'os_publisher', CliArgumentType(help=argparse.SUPPRESS))
     register_cli_argument(scope, 'os_sku', CliArgumentType(help=argparse.SUPPRESS))
     register_cli_argument(scope, 'os_type', CliArgumentType(help=argparse.SUPPRESS))
-    register_cli_argument(scope, 'os_verion', CliArgumentType(help=argparse.SUPPRESS))
+    register_cli_argument(scope, 'os_version', CliArgumentType(help=argparse.SUPPRESS))
     register_cli_argument(scope, 'dns_name_type', CliArgumentType(help=argparse.SUPPRESS))
     register_cli_argument(scope, 'admin_username', admin_username_type)
     register_cli_argument(scope, 'ssh_key_value', CliArgumentType(action=VMSSHFieldAction))

@@ -1,4 +1,4 @@
-from azure.cli._help_files import helps
+from azure.cli.help_files import helps
 
 #pylint: disable=line-too-long
 

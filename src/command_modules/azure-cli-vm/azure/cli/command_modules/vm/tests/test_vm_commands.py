@@ -10,6 +10,22 @@ TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 #pylint: disable=method-hidden
 #pylint: disable=line-too-long
 #pylint: disable=bad-continuation
+#pylint: disable=too-many-lines
+
+TEST_SSH_KEY_PUB = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCbIg1guRHbI0lV11wWDt1r2cUdcNd27CJsg+SfgC7miZeubtwUhbsPdhMQsfDyhOWHq1+ZL0M+nJZV63d/1dhmhtgyOqejUwrPlzKhydsbrsdUor+JmNJDdW01v7BXHyuymT8G4s09jCasNOwiufbP/qp72ruu0bIA1nySsvlf9pCQAuFkAnVnf/rFhUlOkhtRpwcq8SUNY2zRHR/EKb/4NWY1JzR4sa3q2fWIJdrrX0DvLoa5g9bIEd4Df79ba7v+yiUBOS0zT2ll+z4g9izHK3EO5d8hL4jYxcjKs+wcslSYRWrascfscLgMlMGh0CdKeNTDjHpGPncaf3Z+FwwwjWeuiNBxv7bJo13/8B/098KlVDl4GZqsoBCEjPyJfV6hO0y/LkRGkk7oHWKgeWAfKtfLItRp00eZ4fcJNK9kCaSMmEugoZWcI7NGbZXzqFWqbpRI7NcDP9+WIQ+i9U5vqWsqd/zng4kbuAJ6UuKqIzB0upYrLShfQE3SAck8oaLhJqqq56VfDuASNpJKidV+zq27HfSBmbXnkR/5AK337dc3MXKJypoK/QPMLKUAP5XLPbs+NddJQV7EZXd29DLgp+fRIg3edpKdO7ZErWhv7d+3Kws+e1Y+ypmR2WIVSwVyBEUfgv2C8Ts9gnTF4pNcEY/S2aBicz5Ew2+jdyGNQQ== test@example.com\n"
+
+class ResourceGroupVCRTestBase(VCRTestBase):
+    def __init__(self, test_file, test_name, debug=False):
+        super(ResourceGroupVCRTestBase, self).__init__(test_file, test_name, debug)
+        self.resource_group = 'vcr_resource_group'
+        self.location = 'westus'
+
+    def set_up(self):
+        self.run_command_no_verify('resource group create --location {} --name {}'
+                                   .format(self.location, self.resource_group))
+
+    def tear_down(self):
+        self.run_command_no_verify('resource group delete --name {}'.format(self.resource_group))
 
 class VMImageListByAliasesScenarioTest(VCRTestBase):
 
@@ -83,25 +99,18 @@ class VMResizeTest(VCRTestBase):
         check = [JMESPathComparator('hardwareProfile.vmSize', new_size)]
         self.run_command_and_verify('vm resize -g {} -n {} --size {}'.format(group, vm_name, new_size), check)
 
-class VMShowListSizesListIPAddressesScenarioTest(VCRTestBase):
+class VMShowListSizesListIPAddressesScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
+        super(VMShowListSizesListIPAddressesScenarioTest, self).__init__(__file__, test_method)
         self.deployment_name = 'azurecli-test-deployment-vm-list-ips'
         self.resource_group = 'cliTestRg_VmListIpAddresses'
         self.location = 'westus'
         self.vm_name = 'vm-with-public-ip'
         self.ip_allocation_method = 'dynamic'
-        super(VMShowListSizesListIPAddressesScenarioTest, self).__init__(
-            __file__,
-            test_method)
 
     def test_vm_show_list_sizes_list_ip_addresses(self):
         self.execute(verify_test_output=True)
-
-    def set_up(self):
-        self.run_command_no_verify('resource group create --location {} --name {}'.format(
-            self.location,
-            self.resource_group))
 
     def body(self):
         # Expecting no results at the beginning
@@ -140,9 +149,6 @@ class VMShowListSizesListIPAddressesScenarioTest(VCRTestBase):
                           'type([0].virtualMachine.network.publicIpAddresses[0].ipAddress)',
                           'string')]
                  )
-
-    def tear_down(self):
-        self.run_command_no_verify('resource group delete --name {}'.format(self.resource_group))
 
 class VMSizeListScenarioTest(VCRTestBase):
 
@@ -254,25 +260,21 @@ class VMImageShowScenarioTest(VCRTestBase):
                           True),
                   ])
 
-class VMGeneralizeScenarioTest(VCRTestBase):
+class VMGeneralizeScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
+        super(VMGeneralizeScenarioTest, self).__init__(__file__, test_method)
         self.deployment_name = 'azurecli-test-deployment-vm-generalize'
         self.resource_group = 'cliTestRg_VmGeneralize'
         self.location = 'westus'
         self.vm_name = 'vm-generalize'
-        super(VMGeneralizeScenarioTest, self).__init__(__file__, test_method)
-
-    def set_up(self):
-        self.run_command_no_verify('resource group create --location {} --name {}'.format(
-            self.location,
-            self.resource_group))
 
     def body(self):
         self.run_command_no_verify('vm create --resource-group {0} --location {1} --name {2} --admin-username ubuntu '
-                 '--image Canonical:UbuntuServer:14.04.4-LTS:latest --admin-password testPassword0 '
-                 '--deployment-name {3}'.format(
-                     self.resource_group, self.location, self.vm_name, self.deployment_name))
+                 '--image UbuntuLTS --admin-password testPassword0 --authentication-type password'
+                 .format(
+                     self.resource_group, self.location, self.vm_name))
+
         self.run_command_no_verify('vm power-off --resource-group {} --name {}'.format(
             self.resource_group, self.vm_name))
         # Should be able to generalize the VM after it has been stopped
@@ -281,30 +283,25 @@ class VMGeneralizeScenarioTest(VCRTestBase):
                 self.resource_group,
                 self.vm_name), None)
 
-    def tear_down(self):
-        self.run_command_no_verify('resource group delete --name {}'.format(self.resource_group))
+        self.run_command_and_verify(
+            'vm capture --resource-group {} --name {} --vhd-name-prefix vmtest'.format(
+                self.resource_group,
+                self.vm_name), None)
 
     def test_vm_generalize(self):
-        self.execute(verify_test_output=False)
+        self.execute(verify_test_output=True)
 
-class VMCreateAndStateModificationsScenarioTest(VCRTestBase):
+class VMCreateAndStateModificationsScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
+        super(VMCreateAndStateModificationsScenarioTest, self).__init__(__file__, test_method)
         self.deployment_name = 'azurecli-test-deployment-vm-state-mod'
         self.resource_group = 'cliTestRg_VmStateMod'
         self.location = 'westus'
         self.vm_name = 'vm-state-mod'
-        super(VMCreateAndStateModificationsScenarioTest, self).__init__(
-            __file__,
-            test_method)
 
     def test_vm_create_state_modifications(self):
         self.execute(verify_test_output=True)
-
-    def set_up(self):
-        self.run_command_no_verify('resource group create --location {} --name {}'.format(
-            self.location,
-            self.resource_group))
 
     def _check_vm_power_state(self, expected_power_state):
         self.run_command_and_verify(
@@ -354,9 +351,6 @@ class VMCreateAndStateModificationsScenarioTest(VCRTestBase):
             self.resource_group, self.vm_name))
         # Expecting no results
         self.run_command_and_verify('vm list --resource-group {}'.format(self.resource_group), None)
-
-    def tear_down(self):
-        self.run_command_no_verify('resource group delete --name {}'.format(self.resource_group))
 
 class VMAvailSetScenarioTest(VCRTestBase):
 
@@ -641,6 +635,131 @@ class VMScaleSetVMsScenarioTest(VCRTestBase):
         self.run_command_and_verify('vm scaleset list-instances --resource-group {} --name {}'.format(
             self.resource_group, self.ss_name), None)
 
+class VMScaleSetCreateSimple(ResourceGroupVCRTestBase):
+    def __init__(self, test_method):
+        super(VMScaleSetCreateSimple, self).__init__(__file__, test_method)
+        self.resource_group = 'scaleset_create_simple_rg'
+
+    def test_vm_scaleset_create_simple(self):
+        self.execute(verify_test_output=True)
+
+    def body(self):
+        vmss_name = 'vrfvmss'
+        # Note: all parameters that are dynamically generated client-side must be overridden here.
+        # This includes deployment name, admin name and ssh key.
+        self.run_command_no_verify('vm scaleset create --admin-password Test1234@! --name {vmss_name} -g {resource_group}'
+                                   ' --admin-username myadmin --deployment-name deployment'
+                                   .format(resource_group=self.resource_group, vmss_name=vmss_name))
+
+        self.run_command_and_verify('vm scaleset show --name {vmss_name} -g {resource_group}'
+                                    .format(resource_group=self.resource_group, vmss_name=vmss_name), [
+                                        JMESPathComparator('virtualMachineProfile.osProfile.windowsConfiguration.enableAutomaticUpdates',
+                                                           True)
+                                        ])
+
+class VMScaleSetCreateOptions(ResourceGroupVCRTestBase):
+    def __init__(self, test_method):
+        super(VMScaleSetCreateOptions, self).__init__(__file__, test_method)
+        self.resource_group = 'scaleset_create_options_rg'
+
+    def test_vm_scaleset_create_options(self):
+        self.execute(verify_test_output=True)
+
+    def body(self):
+        vmss_name = 'vrfvmss'
+        instance_count = 4
+        caching = 'ReadWrite'
+        upgrade_policy = 'automatic'
+        ip_name = 'vrfpubip'
+
+        self.run_command_no_verify('network public-ip create --name {ip_name} -g {resource_group} --deployment-name deployment1'
+                                   .format(ip_name=ip_name, resource_group=self.resource_group))
+
+        self.run_command_no_verify('vm scaleset create --image Win2012R2Datacenter --admin-password Test1234@! -l westus'
+                                   ' --name {vmss_name} -g {resource_group} --disable-overprovision --instance-count {instance_count}'
+                                   ' --storage-caching {caching} --upgrade-policy-mode {upgrade_policy}'
+                                   ' --private-ip-address-allocation static --private-ip-address 10.0.0.5 --admin-username myadmin'
+                                   ' --public-ip-address-type existing --public-ip-address-name {ip_name} --deployment-name deployment2'
+                                   .format(vmss_name=vmss_name, resource_group=self.resource_group, instance_count=instance_count,
+                                           caching=caching, upgrade_policy=upgrade_policy, ip_name=ip_name))
+
+        self.run_command_and_verify('network lb show --name {vmss_name}lb -g {resource_group}'
+                                    .format(vmss_name=vmss_name, resource_group=self.resource_group), [
+                                        JMESPathComparator('frontendIpConfigurations[0].publicIpAddress.id.ends_with(@, \'{ip_name}\')'
+                                                           .format(ip_name=ip_name), True)
+                                        ])
+
+        self.run_command_and_verify('vm scaleset show --name {vmss_name} -g {resource_group}'
+                                    .format(resource_group=self.resource_group, vmss_name=vmss_name), [
+                                        JMESPathComparator('sku.capacity', instance_count),
+                                        JMESPathComparator('virtualMachineProfile.storageProfile.osDisk.caching', caching),
+                                        JMESPathComparator('upgradePolicy.mode', upgrade_policy.title())
+                                        ])
+
+        self.run_command_and_verify('vm scaleset show-instance -n {vmss_name} -g {resource_group} --instance-id 0'
+                                    .format(vmss_name=vmss_name, resource_group=self.resource_group), [
+                                        JMESPathComparator('osProfile.windowsConfiguration.provisionVmAgent', True)
+                                        ])
+
+class VMScaleSetCreateExistingOptions(ResourceGroupVCRTestBase):
+    def __init__(self, test_method):
+        super(VMScaleSetCreateExistingOptions, self).__init__(__file__, test_method)
+        self.resource_group = 'scaleset_create_existing_options_rg'
+
+    def test_vm_scaleset_create_existing_options(self):
+        self.execute(verify_test_output=True)
+
+    def body(self):
+        vmss_name = 'vrfvmss'
+        vnet_name = 'vrfvnet'
+        subnet_name = 'vrfsubnet'
+        lb_name = 'vrflb'
+        os_disk_name = 'vrfosdisk'
+        container_name = 'vrfcontainer'
+        be_pool_name = 'vrflbbepool'
+        nat_pool_name = 'vrflbnatpool'
+        sku_name = 'Standard_A3'
+
+
+        self.run_command_no_verify('network vnet create -n {vnet_name} -g {resource_group} --subnet-name {subnet_name}'
+                                   ' --deployment-name deployment'
+                                   .format(vnet_name=vnet_name, resource_group=self.resource_group, subnet_name=subnet_name))
+        self.run_command_no_verify('network lb create --name {lb_name} -g {resource_group} --deployment-name deployment2'
+                                   ' --nat-pool-name {nat_pool_name} --backend-pool-name {be_pool_name}'
+                                   .format(lb_name=lb_name, resource_group=self.resource_group,
+                                           nat_pool_name=nat_pool_name, be_pool_name=be_pool_name))
+
+        self.run_command_no_verify('vm scaleset create --image CentOS --os-disk-name {os_disk_name}'
+                                   ' --virtual-network-type existing --virtual-network-name {vnet_name}'
+                                   ' --subnet-name {subnet_name} -l "West US" --vm-sku {sku_name}'
+                                   ' --storage-container-name {container_name} -g {resource_group} --name {vmss_name}'
+                                   ' --load-balancer-type existing --load-balancer-name {lb_name}'
+                                   ' --ssh-key-value \'{key_value}\' --deployment-name deployment3a'
+                                   ' --load-balancer-backend-pool-name {be_pool_name} --load-balancer-nat-pool-name {nat_pool_name}'
+                                   .format(os_disk_name=os_disk_name, vnet_name=vnet_name, subnet_name=subnet_name, lb_name=lb_name,
+                                           container_name=container_name, resource_group=self.resource_group, vmss_name=vmss_name,
+                                           key_value=TEST_SSH_KEY_PUB, nat_pool_name=nat_pool_name, be_pool_name=be_pool_name,
+                                           sku_name=sku_name))
+
+        self.run_command_and_verify('vm scaleset show --name {vmss_name} -g {resource_group}'
+                                    .format(resource_group=self.resource_group, vmss_name=vmss_name), [
+                                        JMESPathComparator('sku.name', sku_name),
+                                        JMESPathComparator('virtualMachineProfile.storageProfile.osDisk.name', os_disk_name),
+                                        JMESPathComparator('virtualMachineProfile.storageProfile.osDisk.vhdContainers[0]'
+                                                           '.ends_with(@, \'{container_name}\')'
+                                                           .format(container_name=container_name), True)
+                                        ])
+        self.run_command_and_verify('network lb show --name {lb_name} -g {resource_group}'
+                                    .format(resource_group=self.resource_group, lb_name=lb_name), [
+                                        JMESPathComparator('backendAddressPools[0].backendIpConfigurations[0].id.contains(@, \'{vmss_name}\')'
+                                                           .format(vmss_name=vmss_name), True)
+                                        ])
+        self.run_command_and_verify('network vnet show --name {vnet_name} -g {resource_group}'
+                                    .format(resource_group=self.resource_group, vnet_name=vnet_name), [
+                                        JMESPathComparator('subnets[0].ipConfigurations[0].id.contains(@, \'{vmss_name}\')'
+                                                           .format(vmss_name=vmss_name), True)
+                                        ])
+
 class VMAccessAddRemoveLinuxUser(VCRTestBase):
 
     def __init__(self, test_method):
@@ -659,11 +778,10 @@ class VMAccessAddRemoveLinuxUser(VCRTestBase):
         self.run_command_and_verify('vm access delete-linux-user {}'.format(common_part),
                   verification)
 
-class VMCreateUbuntuScenarioTest(VCRTestBase): #pylint: disable=too-many-instance-attributes
-
-    TEST_SSH_KEY_PUB = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCbIg1guRHbI0lV11wWDt1r2cUdcNd27CJsg+SfgC7miZeubtwUhbsPdhMQsfDyhOWHq1+ZL0M+nJZV63d/1dhmhtgyOqejUwrPlzKhydsbrsdUor+JmNJDdW01v7BXHyuymT8G4s09jCasNOwiufbP/qp72ruu0bIA1nySsvlf9pCQAuFkAnVnf/rFhUlOkhtRpwcq8SUNY2zRHR/EKb/4NWY1JzR4sa3q2fWIJdrrX0DvLoa5g9bIEd4Df79ba7v+yiUBOS0zT2ll+z4g9izHK3EO5d8hL4jYxcjKs+wcslSYRWrascfscLgMlMGh0CdKeNTDjHpGPncaf3Z+FwwwjWeuiNBxv7bJo13/8B/098KlVDl4GZqsoBCEjPyJfV6hO0y/LkRGkk7oHWKgeWAfKtfLItRp00eZ4fcJNK9kCaSMmEugoZWcI7NGbZXzqFWqbpRI7NcDP9+WIQ+i9U5vqWsqd/zng4kbuAJ6UuKqIzB0upYrLShfQE3SAck8oaLhJqqq56VfDuASNpJKidV+zq27HfSBmbXnkR/5AK337dc3MXKJypoK/QPMLKUAP5XLPbs+NddJQV7EZXd29DLgp+fRIg3edpKdO7ZErWhv7d+3Kws+e1Y+ypmR2WIVSwVyBEUfgv2C8Ts9gnTF4pNcEY/S2aBicz5Ew2+jdyGNQQ== test@example.com\n"
+class VMCreateUbuntuScenarioTest(ResourceGroupVCRTestBase): #pylint: disable=too-many-instance-attributes
 
     def __init__(self, test_method):
+        super(VMCreateUbuntuScenarioTest, self).__init__(__file__, test_method)
         self.deployment_name = 'azurecli-test-deployment-vm-create-ubuntu'
         self.resource_group = 'cliTestRg_VMCreate_Ubuntu'
         self.admin_username = 'ubuntu'
@@ -672,21 +790,16 @@ class VMCreateUbuntuScenarioTest(VCRTestBase): #pylint: disable=too-many-instanc
         self.vm_image = 'UbuntuLTS'
         self.auth_type = 'ssh'
         self.pub_ssh_filename = None
-        super(VMCreateUbuntuScenarioTest, self).__init__(
-            __file__,
-            test_method)
 
     def test_vm_create_ubuntu(self):
         self.execute(verify_test_output=True)
 
     def set_up(self):
+        super(VMCreateUbuntuScenarioTest, self).set_up()
         _, pathname = tempfile.mkstemp()
         with open(pathname, 'w') as key_file:
-            key_file.write(VMCreateUbuntuScenarioTest.TEST_SSH_KEY_PUB)
+            key_file.write(TEST_SSH_KEY_PUB)
         self.pub_ssh_filename = pathname
-        self.run_command_no_verify('resource group create --location {} --name {}'.format(
-            self.location,
-            self.resource_group))
 
     def body(self):
         self.run_command_and_verify('vm create --resource-group {rg} --admin-username {admin} --name {vm_name} --authentication-type {auth_type} --image {image} --ssh-key-value {ssh_key} --location {location} --deployment-name {deployment}'.format(
@@ -708,11 +821,8 @@ class VMCreateUbuntuScenarioTest(VCRTestBase): #pylint: disable=too-many-instanc
                 True),
             JMESPathComparator(
                 'vm.value.osProfile.linuxConfiguration.ssh.publicKeys[0].keyData',
-                VMCreateUbuntuScenarioTest.TEST_SSH_KEY_PUB),
+                TEST_SSH_KEY_PUB),
         ])
-
-    def tear_down(self):
-        self.run_command_no_verify('resource group delete --name {}'.format(self.resource_group))
 
 class VMBootDiagnostics(VCRTestBase):
 
@@ -799,3 +909,94 @@ class VMDiagnosticsInstallTest(VCRTestBase):
                 JMESPathComparator('type(@)', 'object'),
                 JMESPathComparator('name', extension_name),
                 JMESPathComparator('resourceGroup', resource_group)])
+
+class VMCreateExistingOptions(ResourceGroupVCRTestBase):
+    def __init__(self, test_method):
+        super(VMCreateExistingOptions, self).__init__(__file__, test_method, debug=True)
+        self.resource_group = 'vm_create_existing_options_rg'
+
+    def test_vm_create_existing_options(self):
+        self.execute(verify_test_output=True)
+
+    def body(self):
+        availset_name = 'vrfavailset'
+        pubip_name = 'vrfpubip'
+        storage_name = 'vrfstorage00110011'
+        vnet_name = 'vrfvnet'
+        subnet_name = 'vrfsubnet'
+        nsg_name = 'vrfnsg'
+        vm_name = 'vrfvm'
+        disk_name = 'vrfosdisk'
+        container_name = 'vrfcontainer'
+
+        self.run_command_no_verify('vm availability-set create --name {} -g {} --deployment-name deployment1'.format(availset_name, self.resource_group))
+        self.run_command_no_verify('network public-ip create --name {} -g {} --deployment-name deployment2'.format(pubip_name, self.resource_group))
+        self.run_command_no_verify('storage account create --name {} -g {} -l westus -t Standard_LRS'.format(storage_name, self.resource_group))
+        self.run_command_no_verify('network vnet create --name {} -g {} --subnet-name {} --deployment-name deployment3'
+                 .format(vnet_name, self.resource_group, subnet_name))
+        self.run_command_no_verify('network nsg create --name {} -g {} --deployment-name deploymet4'
+                                   .format(nsg_name, self.resource_group))
+
+        self.run_command_no_verify('vm create --image UbuntuLTS --os-disk-name {disk_name} --virtual-network-type existing'
+                 ' --virtual-network-name {vnet_name} --subnet-name {subnet_name} --availability-set-type existing'
+                 ' --availability-set-id {availset_name} --public-ip-address-type existing'
+                 ' --public-ip-address-name {pubip_name} -l "West US" --deployment-name deployment4'
+                 ' --network-security-group-name {nsg_name} --network-security-group-type existing'
+                 ' --size Standard_A3 --storage-account-type existing'
+                 ' --storage-account-name {storage_name} --storage-container-name {container_name} -g {resource_group}'
+                 ' --name {vm_name} --ssh-key-value \'{key_value}\''
+                 .format(vnet_name=vnet_name, subnet_name=subnet_name, availset_name=availset_name,
+                         pubip_name=pubip_name, resource_group=self.resource_group, nsg_name=nsg_name,
+                         vm_name=vm_name, disk_name=disk_name, container_name=container_name,
+                         storage_name=storage_name, key_value=TEST_SSH_KEY_PUB))
+
+        self.run_command_and_verify('vm availability-set show -n {availset_name} -g {resource_group}'
+                  .format(availset_name=availset_name, resource_group=self.resource_group), [
+                      JMESPathComparator('virtualMachines[0].id.ends_with(@, \'{}\')'
+                                         .format(vm_name.upper()), True),
+                      ])
+        self.run_command_and_verify('network nsg show -n {nsg_name} -g {resource_group}'
+                  .format(nsg_name=nsg_name, resource_group=self.resource_group), [
+                      JMESPathComparator('networkInterfaces[0].id.ends_with(@, \'{}\')'
+                                         .format(vm_name + 'VMNic'), True)
+                      ])
+        self.run_command_and_verify('network nic show -n {vm_name}VMNic -g {resource_group}'
+                  .format(vm_name=vm_name, resource_group=self.resource_group), [
+                      JMESPathComparator('ipConfigurations[0].publicIpAddress.id.ends_with(@, \'{}\')'
+                                         .format(pubip_name), True)
+                      ])
+        self.run_command_and_verify('vm show -n {vm_name} -g {resource_group}'
+                                    .format(vm_name=vm_name, resource_group=self.resource_group), [
+                                        JMESPathComparator('storageProfile.osDisk.vhd.uri',
+                                                           'http://{storage_name}.blob.core.windows.net/{container_name}/{disk_name}.vhd'
+                                                           .format(storage_name=storage_name,
+                                                                   container_name=container_name,
+                                                                   disk_name=disk_name))
+                      ])
+
+class VMCreateCustomIP(ResourceGroupVCRTestBase):
+    def __init__(self, test_method):
+        super(VMCreateCustomIP, self).__init__(__file__, test_method)
+        self.resource_group = 'vm_create_custom_ip_rg'
+
+    def test_vm_create_custom_ip(self):
+        self.execute(verify_test_output=True)
+
+    def body(self):
+        vm_name = 'vrfvm'
+        dns_name = 'vrfmyvm00110011'
+
+        self.run_command_no_verify('vm create -n {vm_name} -g {resource_group} --image openSUSE --private-ip-address-allocation static'
+                                   ' --private-ip-address 10.0.0.5 --public-ip-address-allocation static --deployment-name deployment'
+                                   ' --dns-name-for-public-ip {dns_name} --ssh-key-value \'{key_value}\''
+                                   .format(vm_name=vm_name, resource_group=self.resource_group, dns_name=dns_name, key_value=TEST_SSH_KEY_PUB))
+
+        self.run_command_and_verify('network public-ip show -n {vm_name}PublicIP -g {resource_group}'
+                                    .format(vm_name=vm_name, resource_group=self.resource_group), [
+                                        JMESPathComparator('publicIpAllocationMethod', 'Static'),
+                                        JMESPathComparator('dnsSettings.domainNameLabel', dns_name)
+                                        ])
+        self.run_command_and_verify('network nic show -n {vm_name}VMNic -g {resource_group}'
+                                    .format(vm_name=vm_name, resource_group=self.resource_group), [
+                                        JMESPathComparator('ipConfigurations[0].privateIpAllocationMethod', 'Static')
+                                        ])
