@@ -39,7 +39,6 @@ class CliArgumentType(object):
         if other:
             self.settings.update(**other.settings)
         self.settings.update(**kwargs)
-        self.settings = {key:value for key, value in self.settings.items() if value != self.REMOVE}
 
 class CliCommandArgument(object):
 
@@ -66,7 +65,8 @@ class CliCommandArgument(object):
             return self.type.settings.get('options_list', None)
         elif name == 'options':
             return {key: value for key, value in self.type.settings.items()
-                    if key != 'options' and not key in self._NAMED_ARGUMENTS}
+                    if key != 'options' and not key in self._NAMED_ARGUMENTS
+                    and not value == CliArgumentType.REMOVE}
         else:
             raise AttributeError(message=name)
 
