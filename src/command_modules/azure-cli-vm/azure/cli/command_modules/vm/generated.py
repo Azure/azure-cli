@@ -63,6 +63,7 @@ cli_command('vm list-sizes', VirtualMachinesOperations.list_available_sizes, fac
 cli_command('vm power-off', VirtualMachinesOperations.power_off, factory)
 cli_command('vm restart', VirtualMachinesOperations.restart, factory)
 cli_command('vm start', VirtualMachinesOperations.start, factory)
+cli_command('vm redeploy', VirtualMachinesOperations.redeploy, factory)
 cli_command('vm list-ip-addresses', list_ip_addresses)
 cli_command('vm list', list_vm)
 cli_command('vm resize', resize_vm)
