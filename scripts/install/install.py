@@ -81,27 +81,28 @@ def create_virtualenv(tmp_dir, version, install_dir):
     working_dir = os.path.join(tmp_dir, virtualenv_dir_name)
     exec_command('{0} virtualenv.py --python {0} {1}'.format(sys.executable, install_dir), cwd=working_dir)
 
-def get_pip_install_command(module_name, path_to_pip):
+def get_pip_install_command(module_name, path_to_pip, tmp_dir):
     version = '==' + PACKAGE_VERSION if PACKAGE_VERSION else ''
     param_extra_index_url = '--extra-index-url '+PRIVATE_PYPI_URL if PRIVATE_PYPI_URL else ''
     param_trusted_host = '--trusted-host '+PRIVATE_PYPI_HOST if PRIVATE_PYPI_HOST else ''
-    return '{pip} install --no-cache-dir {module_name}{version} {param_extra_index_url} {param_trusted_host}'.format(
+    return '{pip} install --cache-dir {cache_dir} {module_name}{version} {param_extra_index_url} {param_trusted_host}'.format(
         pip=path_to_pip,
+        cache_dir=tmp_dir,
         module_name=module_name,
         version=version,
         param_extra_index_url=param_extra_index_url,
         param_trusted_host=param_trusted_host,
     )
 
-def install_cli(install_dir):
+def install_cli(install_dir, tmp_dir):
     path_to_pip = os.path.join(install_dir, BIN_DIR_NAME, 'pip')
-    exec_command(get_pip_install_command('azure-cli', path_to_pip),
+    exec_command(get_pip_install_command('azure-cli', path_to_pip, tmp_dir),
                  env=dict(os.environ, AZURE_CLI_DISABLE_POST_INSTALL='1'))
     modules_to_install = ['azure-cli-component', 'azure-cli-profile', 'azure-cli-storage',
                           'azure-cli-vm', 'azure-cli-network', 'azure-cli-resource', 
-                          'azure-cli-role']
+                          'azure-cli-role', 'azure-cli-taskhelp']
     for module_name in modules_to_install:
-        exec_command(get_pip_install_command(module_name, path_to_pip))
+        exec_command(get_pip_install_command(module_name, path_to_pip, tmp_dir))
 
 def create_executable(exec_dir, install_dir, environment_name):
     create_dir(exec_dir)
@@ -153,11 +154,15 @@ def main():
     tmp_dir = create_tmp_dir()
     install_dir = get_install_dir()
     exec_dir = get_exec_dir()
+    exec_path = os.path.join(exec_dir, EXECUTABLE_NAME)
+    if install_dir == exec_path:
+        print("ERROR: The executable file '{}' would clash with the install directory of '{}'. Choose either a different install directory or directory to place the executable.".format(exec_path, install_dir), file=sys.stderr)
+        sys.exit(1)
     environment_name = get_environment_name()
     env_dir = os.path.join(install_dir, ENVS_DIR_NAME, environment_name)
     create_dir(env_dir)
     create_virtualenv(tmp_dir, VIRTUALENV_VERSION, env_dir)
-    install_cli(env_dir)
+    install_cli(env_dir, tmp_dir)
     exec_filepath = create_executable(exec_dir, install_dir, environment_name)
     print("Installation successful.")
     try:
