@@ -47,8 +47,6 @@ register_cli_argument('network route-table', 'route_table_name', name_arg_type)
 
 register_cli_argument('network vnet', 'virtual_network_name', virtual_network_name_type, options_list=('--name', '-n'))
 
-# BUG: we are waiting on autorest to support this rename
-# (https://github.com/Azure/autorest/issues/941)
 register_cli_argument('network vnet create', 'location', location_type)
 register_cli_argument('network vnet create', 'subnet_prefix', CliArgumentType(
     options_list=('--subnet-prefix',), metavar='SUBNET_PREFIX', default='10.0.0.0/24'))
