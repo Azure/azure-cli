@@ -11,9 +11,16 @@ def _decode_str(output):
         output = u(str(output))
     return output
 
+class ComplexEncoder(json.JSONEncoder):
+    def default(self, obj): #pylint: disable=method-hidden
+        if isinstance(obj, bytes) and not isinstance(obj, str):
+            return obj.decode()
+        return json.JSONEncoder.default(self, obj)
+
 def format_json(obj):
     input_dict = obj.__dict__ if hasattr(obj, '__dict__') else obj
-    return json.dumps(input_dict, indent=2, sort_keys=True, separators=(',', ': ')) + '\n'
+    return json.dumps(input_dict, indent=2, sort_keys=True, cls=ComplexEncoder,
+                      separators=(',', ': ')) + '\n'
 
 def format_table(obj):
     obj_list = obj if isinstance(obj, list) else [obj]
