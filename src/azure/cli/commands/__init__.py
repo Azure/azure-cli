@@ -21,42 +21,54 @@ INSTALLED_COMMAND_MODULES = [dist.key.replace('azure-cli-', '')
 
 logger.info('Installed command modules %s', INSTALLED_COMMAND_MODULES)
 
+
 # pylint: disable=too-many-arguments,too-few-public-methods
+
+
 class CliArgumentType(object):
 
-    def __init__(self, options_list=None, base_type=str, overrides=None, completer=None,
-                 validator=None, **kwargs):
-        self.options_list = ()
-        self.completer = completer
-        self.validator = validator
-        if overrides:
-            self.options_list = overrides.options_list
-            self.options = overrides.options.copy()
-            self.base_type = overrides.base_type
+    REMOVE = '---REMOVE---'
+
+    def __init__(self, overrides=None, **kwargs):
+        if isinstance(overrides, str):
+            raise ValueError("Overrides has to be a CliArgumentType (cannot be a string)")
+        self.settings = {}
+        self.update(overrides, **kwargs)
+
+    def update(self, other=None, **kwargs):
+        if other:
+            self.settings.update(**other.settings)
+        self.settings.update(**kwargs)
+
+class CliCommandArgument(object):
+
+    _NAMED_ARGUMENTS = ('options_list', 'validator', 'completer')
+
+    def __init__(self, dest=None, argtype=None, **kwargs):
+        self.type = CliArgumentType(overrides=argtype, **kwargs)
+        if dest:
+            self.type.update(dest=dest)
+
+        # We'll do an early fault detection to find any instances where we have inconsistent
+        # set of parameters for argparse
+        if not self.options_list and 'required' in self.options:
+            raise ValueError(message="You can't specify both required and an options_list")
+        if not self.options.get('dest', False):
+            raise ValueError('Missing dest')
+
+    def __getattr__(self, name):
+        if name in self._NAMED_ARGUMENTS:
+            return self.type.settings.get(name, None)
+        elif name == 'name':
+            return self.type.settings.get('dest', None)
+        elif name == 'options_list':
+            return self.type.settings.get('options_list', None)
+        elif name == 'options':
+            return {key: value for key, value in self.type.settings.items()
+                    if key != 'options' and not key in self._NAMED_ARGUMENTS
+                    and not value == CliArgumentType.REMOVE}
         else:
-            self.options = {}
-
-        self.base_type = base_type
-        self.update(options_list=options_list, **kwargs)
-
-    def update(self, options_list=None, completer=None, validator=None, **kwargs):
-        self.options_list = options_list or self.options_list
-        self.completer = completer or self.completer
-        self.validator = validator or self.validator
-        self.options.update(**kwargs)
-
-class CliCommandArgument(CliArgumentType):
-    def __init__(self, dest, options_list=None, completer=None, validator=None, **kwargs):
-        if options_list is None:
-            options_list = '--' + dest.replace('_', '-')
-
-        super(CliCommandArgument, self).__init__(**kwargs)
-        self.update(options_list=options_list, completer=completer, validator=validator, **kwargs)
-        self.options['dest'] = dest
-
-    def name(self):
-        return self.options['dest']
-
+            raise AttributeError(message=name)
 
 class LongRunningOperation(object): #pylint: disable=too-few-public-methods
 
@@ -122,11 +134,7 @@ class CliCommand(object):
 
     def update_argument(self, param_name, argtype):
         arg = self.arguments[param_name]
-        arg.update(
-            argtype.options_list,
-            completer=argtype.completer,
-            validator=argtype.validator,
-            **argtype.options)
+        arg.type.update(other=argtype)
 
     def execute(self, **kwargs):
         return self.handler(**kwargs)
@@ -166,16 +174,16 @@ def get_command_table(module_name=None):
     ordered_commands = OrderedDict(command_table)
     return ordered_commands
 
-def register_cli_argument(scope, dest, argtype, options_list=None, **kwargs):
+def register_cli_argument(scope, dest, arg_type=None, **kwargs):
     '''Specify CLI specific metadata for a given argument for a given scope.
     '''
-    _cli_argument_registry.register_cli_argument(scope, dest, argtype, options_list, **kwargs)
+    _cli_argument_registry.register_cli_argument(scope, dest, arg_type, **kwargs)
 
-def register_extra_cli_argument(command, dest, options_list=None, **kwargs):
+def register_extra_cli_argument(command, dest, **kwargs):
     '''Register extra parameters for the given command. Typically used to augment auto-command built
     commands to add more parameters than the specific SDK method introspected.
     '''
-    _cli_extra_argument_registry[command][dest] = CliCommandArgument(dest, options_list, **kwargs)
+    _cli_extra_argument_registry[command][dest] = CliCommandArgument(dest, **kwargs)
 
 def cli_command(name, operation, client_factory=None, transform=None):
     """ Registers a default Azure CLI command. These commands require no special parameters. """
@@ -218,10 +226,8 @@ class _ArgumentRegistry(object):
     def __init__(self):
         self.arguments = defaultdict(lambda: {})
 
-    def register_cli_argument(self, scope, dest, argtype, options_list, **kwargs):
-        argument = CliArgumentType(options_list=options_list, overrides=argtype,
-                                   completer=kwargs.pop('completer', argtype.completer),
-                                   validator=kwargs.pop('validator', argtype.validator),
+    def register_cli_argument(self, scope, dest, argtype, **kwargs):
+        argument = CliArgumentType(overrides=argtype,
                                    **kwargs)
         self.arguments[scope][dest] = argument
 
@@ -232,10 +238,7 @@ class _ArgumentRegistry(object):
             probe = ' '.join(parts[0:index])
             override = self.arguments.get(probe, {}).get(name, None)
             if override:
-                result.update(override.options_list,
-                              completer=override.completer,
-                              validator=override.validator,
-                              **override.options)
+                result.update(override)
         return result
 
 _cli_argument_registry = _ArgumentRegistry()
@@ -244,7 +247,8 @@ _cli_extra_argument_registry = defaultdict(lambda: {})
 def _update_command_definitions(command_table_to_update):
     for command_name, command in command_table_to_update.items():
         for argument_name in command.arguments:
-            command.update_argument(argument_name, _get_cli_argument(command_name, argument_name))
+            overrides = _get_cli_argument(command_name, argument_name)
+            command.update_argument(argument_name, overrides)
 
         # Add any arguments explicitly registered for this command
         for argument_name, argument_definition in _get_cli_extra_arguments(command_name):
