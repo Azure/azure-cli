@@ -8,14 +8,12 @@ from azure.cli.commands.validators import validate_tag, validate_tags
 from azure.cli._util import CLIError
 from azure.cli.commands.client_factory import (get_subscription_service_client,
                                                get_mgmt_service_client)
-from azure.mgmt.resource.subscriptions import (SubscriptionClient,
-                                               SubscriptionClientConfiguration)
+from azure.mgmt.resource.subscriptions import SubscriptionClient
 
-from azure.mgmt.resource.resources import (ResourceManagementClient,
-                                           ResourceManagementClientConfiguration)
+from azure.mgmt.resource.resources import ResourceManagementClient
 
 def get_subscription_locations():
-    subscription_client, subscription_id = get_subscription_service_client(SubscriptionClient, SubscriptionClientConfiguration)
+    subscription_client, subscription_id = get_subscription_service_client(SubscriptionClient)
     return list(subscription_client.subscriptions.list_locations(subscription_id))
 
 def get_location_completion_list(prefix, **kwargs):#pylint: disable=unused-argument
@@ -30,7 +28,7 @@ def get_one_of_subscription_locations():
         raise CLIError('Current subscription does not have valid location list')
 
 def get_resource_groups():
-    rcf = get_mgmt_service_client(ResourceManagementClient, ResourceManagementClientConfiguration)
+    rcf = get_mgmt_service_client(ResourceManagementClient)
     return list(rcf.resource_groups.list())
 
 def get_resource_group_completion_list(prefix, **kwargs):#pylint: disable=unused-argument
@@ -38,12 +36,12 @@ def get_resource_group_completion_list(prefix, **kwargs):#pylint: disable=unused
     return [l.name for l in result]
 
 def get_resources_in_resource_group(resource_group_name, resource_type=None):
-    rcf = get_mgmt_service_client(ResourceManagementClient, ResourceManagementClientConfiguration)
+    rcf = get_mgmt_service_client(ResourceManagementClient)
     filter_str = "resourceType eq '{}'".format(resource_type) if resource_type else None
     return list(rcf.resource_groups.list_resources(resource_group_name, filter=filter_str))
 
 def get_resources_in_subscription(resource_type=None):
-    rcf = get_mgmt_service_client(ResourceManagementClient, ResourceManagementClientConfiguration)
+    rcf = get_mgmt_service_client(ResourceManagementClient)
     filter_str = "resourceType eq '{}'".format(resource_type) if resource_type else None
     return list(rcf.resources.list(filter=filter_str))
 

@@ -271,7 +271,8 @@ class VMGeneralizeScenarioTest(ResourceGroupVCRTestBase):
 
     def body(self):
         self.run_command_no_verify('vm create --resource-group {0} --location {1} --name {2} --admin-username ubuntu '
-                 '--image UbuntuLTS --admin-password testPassword0 --authentication-type password'
+                 '--image UbuntuLTS --admin-password testPassword0 --authentication-type password '
+                 '--deployment-name azurecli_test_vm_generalize'
                  .format(
                      self.resource_group, self.location, self.vm_name))
 
@@ -896,7 +897,6 @@ class VMDiagnosticsInstallTest(VCRTestBase):
         self.execute(verify_test_output=True)
 
     def body(self):
-        #pylint: disable=line-too-long
         vm_name = 'linuxtestvm'
         resource_group = 'travistestresourcegroup'
         storage_account = 'travistestresourcegr3014'
@@ -912,7 +912,7 @@ class VMDiagnosticsInstallTest(VCRTestBase):
 
 class VMCreateExistingOptions(ResourceGroupVCRTestBase):
     def __init__(self, test_method):
-        super(VMCreateExistingOptions, self).__init__(__file__, test_method, debug=True)
+        super(VMCreateExistingOptions, self).__init__(__file__, test_method)
         self.resource_group = 'vm_create_existing_options_rg'
 
     def test_vm_create_existing_options(self):
@@ -921,7 +921,7 @@ class VMCreateExistingOptions(ResourceGroupVCRTestBase):
     def body(self):
         availset_name = 'vrfavailset'
         pubip_name = 'vrfpubip'
-        storage_name = 'vrfstorage00110011'
+        storage_name = 'azureclivrfstorage0011'
         vnet_name = 'vrfvnet'
         subnet_name = 'vrfsubnet'
         nsg_name = 'vrfnsg'

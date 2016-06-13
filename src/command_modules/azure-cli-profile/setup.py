@@ -37,7 +37,7 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
-    'azure==2.0.0rc3',
+    'azure==2.0.0rc4',
     'adal==0.2.3rc1', #from libs/adal-*.zip
 ]
 

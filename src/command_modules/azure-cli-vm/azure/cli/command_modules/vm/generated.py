@@ -11,21 +11,13 @@
 from azure.cli.commands import LongRunningOperation, cli_command
 from azure.cli.commands.client_factory import get_mgmt_service_client
 from azure.cli.command_modules.vm.mgmt_avail_set.lib import (AvailSetCreationClient
-                                                             as AvailSetClient,
-                                                             AvailSetCreationClientConfiguration
-                                                             as AvailSetClientConfig)
+                                                             as AvailSetClient)
 from azure.cli.command_modules.vm.mgmt_avail_set.lib.operations import AvailSetOperations
-from azure.cli.command_modules.vm.mgmt_vm_create.lib import (VMCreationClient as VMClient,
-                                                             VMCreationClientConfiguration
-                                                             as VMClientConfig)
+from azure.cli.command_modules.vm.mgmt_vm_create.lib import VMCreationClient as VMClient
 from azure.cli.command_modules.vm.mgmt_vm_create.lib.operations import VMOperations
-from azure.cli.command_modules.vm.mgmt_vmss_create.lib import (VMSSCreationClient as VMSSClient,
-                                                               VMSSCreationClientConfiguration
-                                                               as VMSSClientConfig)
+from azure.cli.command_modules.vm.mgmt_vmss_create.lib import VMSSCreationClient as VMSSClient
 from azure.cli.command_modules.vm.mgmt_vmss_create.lib.operations import VMSSOperations
-from azure.cli.command_modules.vm.mgmt_acs.lib import (ACSCreationClient as ACSClient,
-                                                       ACSCreationClientConfiguration
-                                                       as ACSClientConfig)
+from azure.cli.command_modules.vm.mgmt_acs.lib import ACSCreationClient as ACSClient
 from azure.cli.command_modules.vm.mgmt_acs.lib.operations import ACSOperations
 from .custom import (
     list_vm, resize_vm, list_vm_images, list_vm_extension_images, list_ip_addresses,
@@ -50,7 +42,7 @@ class DeploymentOutputLongRunningOperation(LongRunningOperation): #pylint: disab
         return result.properties.outputs
 
 # VM
-factory = lambda _: get_mgmt_service_client(VMClient, VMClientConfig).vm
+factory = lambda _: get_mgmt_service_client(VMClient).vm
 cli_command('vm create', VMOperations.create_or_update, factory, transform=DeploymentOutputLongRunningOperation('Starting vm create'))
 
 factory = lambda _: _compute_client_factory().virtual_machines
@@ -78,7 +70,7 @@ cli_command('vm access delete-linux-user', delete_linux_user)
 cli_command('vm access set-windows-user-password', set_windows_user_password)
 
 # VM Availability Set
-factory = lambda _: get_mgmt_service_client(AvailSetClient, AvailSetClientConfig).avail_set
+factory = lambda _: get_mgmt_service_client(AvailSetClient).avail_set
 cli_command('vm availability-set create', AvailSetOperations.create_or_update, factory)
 
 factory = lambda _: _compute_client_factory().availability_sets
@@ -93,7 +85,7 @@ cli_command('vm boot-diagnostics enable', enable_boot_diagnostics)
 cli_command('vm boot-diagnostics get-boot-log', get_boot_log)
 
 # VM Container (ACS)
-factory = lambda _: get_mgmt_service_client(ACSClient, ACSClientConfig).acs
+factory = lambda _: get_mgmt_service_client(ACSClient).acs
 cli_command('vm container create', ACSOperations.create_or_update, factory, transform=DeploymentOutputLongRunningOperation('Starting vm container create'))
 
 # VM Diagnostics
@@ -133,7 +125,7 @@ factory = lambda _: _compute_client_factory().usage
 cli_command('vm usage list', UsageOperations.list, factory)
 
 # VM ScaleSet
-factory = lambda _: get_mgmt_service_client(VMSSClient, VMSSClientConfig).vmss
+factory = lambda _: get_mgmt_service_client(VMSSClient).vmss
 cli_command('vm scaleset create', VMSSOperations.create_or_update, factory, transform=DeploymentOutputLongRunningOperation('Starting vm scaleset create'))
 
 factory = lambda _: _compute_client_factory().virtual_machine_scale_sets
