@@ -37,6 +37,26 @@ class TestOutput(unittest.TestCase):
 }
 """))
 
+    def test_out_json_byte(self):
+        output_producer = OutputProducer(formatter=format_json, file=self.io)
+        output_producer.out({'active': True, 'contents': b'0b1f6472'})
+        self.assertEqual(util.normalize_newlines(self.io.getvalue()), util.normalize_newlines(
+"""{
+  "active": true,
+  "contents": "0b1f6472"
+}
+"""))
+
+    def test_out_json_byte_empty(self):
+        output_producer = OutputProducer(formatter=format_json, file=self.io)
+        output_producer.out({'active': True, 'contents': b''})
+        self.assertEqual(util.normalize_newlines(self.io.getvalue()), util.normalize_newlines(
+"""{
+  "active": true,
+  "contents": ""
+}
+"""))
+
     def test_out_boolean_valid(self):
         output_producer = OutputProducer(formatter=format_list, file=self.io)
         output_producer.out(True)
