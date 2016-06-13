@@ -72,6 +72,10 @@ setup(
         'azure.cli.command_modules.network.mgmt_lb.lib',
         'azure.cli.command_modules.network.mgmt_lb.lib.models',
         'azure.cli.command_modules.network.mgmt_lb.lib.operations',
+        'azure.cli.command_modules.network.mgmt_nsg',
+        'azure.cli.command_modules.network.mgmt_nsg.lib',
+        'azure.cli.command_modules.network.mgmt_nsg.lib.models',
+        'azure.cli.command_modules.network.mgmt_nsg.lib.operations',
     ],
     install_requires=DEPENDENCIES,
 )
