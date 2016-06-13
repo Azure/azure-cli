@@ -28,15 +28,15 @@ register_cli_argument('network local-gateway', 'local_network_gateway_name', nam
 
 register_cli_argument('network nic', 'network_interface_name', name_arg_type)
 
-register_cli_argument('network nic scale-set', 'virtual_machine_scale_set_name', CliArgumentType(('--vm-scale-set',)))
-register_cli_argument('network nic scale-set', 'virtualmachine_index', CliArgumentType(('--vm-index',)))
+register_cli_argument('network nic scale-set', 'virtual_machine_scale_set_name', options_list=('--vm-scale-set',))
+register_cli_argument('network nic scale-set', 'virtualmachine_index', options_list=('--vm-index',))
 
 register_cli_argument('network nsg', 'network_security_group_name', name_arg_type)
 
 register_cli_argument('network nsg rule', 'security_rule_name', name_arg_type)
-register_cli_argument('network nsg rule', 'network_security_group_name', CliArgumentType(('--nsg-name',), metavar='NSGNAME',
-                                                                                         help='Name of the network securty group'))
-register_cli_argument('network nsg rule create', 'priority', CliArgumentType(default=1000))
+register_cli_argument('network nsg rule', 'network_security_group_name', options_list=('--nsg-name',), metavar='NSGNAME',
+                      help='Name of the network security group')
+register_cli_argument('network nsg rule create', 'priority', default=1000)
 
 register_cli_argument('network public-ip', 'public_ip_address_name', name_arg_type)
 register_cli_argument('network public-ip', 'name', name_arg_type)
@@ -58,15 +58,15 @@ register_cli_argument('network vnet create', 'virtual_network_name', CliArgument
     options_list=('--name', '-n'), metavar='VNET_NAME', required=True
 ))
 
-register_cli_argument('network vnet subnet', 'subnet_name', CliArgumentType(options_list=('--name', '-n'), help='the subnet name'))
-register_cli_argument('network vnet subnet', 'address_prefix', CliArgumentType(metavar='PREFIX', help='the address prefix in CIDR format.'))
+register_cli_argument('network vnet subnet', 'subnet_name', options_list=('--name', '-n'), help='the subnet name')
+register_cli_argument('network vnet subnet', 'address_prefix', metavar='PREFIX', help='the address prefix in CIDR format.')
 register_cli_argument('network vnet subnet', 'virtual_network_name', virtual_network_name_type)
 
 register_cli_argument('network lb create', 'dns_name_for_public_ip', CliArgumentType(action=LBDNSNameAction))
 register_cli_argument('network lb create', 'dns_name_type', CliArgumentType(help=argparse.SUPPRESS))
-register_cli_argument('network lb create', 'private_ip_address_allocation', CliArgumentType(help='', choices=['Dynamic', 'Static'], default='Dynamic'))
-register_cli_argument('network lb create', 'public_ip_address_allocation', CliArgumentType(help='', choices=['Dynamic', 'Static'], default='Dynamic'))
-register_cli_argument('network lb create', 'subnet_name', CliArgumentType(options_list=('--subnet-name',)))
+register_cli_argument('network lb create', 'private_ip_address_allocation', help='', choices=['Dynamic', 'Static'], default='Dynamic')
+register_cli_argument('network lb create', 'public_ip_address_allocation', help='', choices=['Dynamic', 'Static'], default='Dynamic')
+register_cli_argument('network lb create', 'subnet_name', options_list=('--subnet-name',))
 
 register_cli_argument('network nsg create', 'name', name_arg_type)
 

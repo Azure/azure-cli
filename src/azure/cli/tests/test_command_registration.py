@@ -6,6 +6,7 @@ from azure.cli.commands import _update_command_definitions
 from azure.cli.commands import (
     command_table,
     CliArgumentType,
+    CliCommandArgument,
     cli_command,
     register_cli_argument,
     register_extra_cli_argument)
@@ -59,14 +60,15 @@ class Test_command_registration(unittest.TestCase):
         command_metadata = command_table['test register sample-vm-get']
         self.assertEqual(len(command_metadata.arguments), 4, 'We expected exactly 4 arguments')
         some_expected_arguments = {
-            'resource_group_name': CliArgumentType(options_list=('--resource-group', '-g'), dest='resource_group_name', required=True),
-            'vm_name': CliArgumentType(options_list=('--wonky-name', '-n'), dest='vm_name', required=False),
+            'resource_group_name': CliArgumentType(dest='resource_group_name', required=True),
+            'vm_name': CliArgumentType(dest='vm_name', required=False),
         }
 
         for probe in some_expected_arguments:
             existing = next(arg for arg in command_metadata.arguments if arg == probe)
-            self.assertDictContainsSubset(some_expected_arguments[existing].options,
+            self.assertDictContainsSubset(some_expected_arguments[existing].settings,
                                           command_metadata.arguments[existing].options)
+        self.assertEqual(command_metadata.arguments['vm_name'].options_list, ('--wonky-name', '-n'))
 
     def test_register_command(self):
         command_table.clear()
@@ -76,16 +78,17 @@ class Test_command_registration(unittest.TestCase):
         command_metadata = command_table['test command sample-vm-get']
         self.assertEqual(len(command_metadata.arguments), 4, 'We expected exactly 4 arguments')
         some_expected_arguments = {
-            'resource_group_name': CliArgumentType(options_list=('--resource-group', '-g'), dest='resource_group_name', required=True, help='The name of the resource group.'),
-            'vm_name': CliArgumentType(options_list=('--vm-name',), dest='vm_name', required=True, help='The name of the virtual machine.'),
-            'opt_param': CliArgumentType(options_list=('--opt-param',), required=False, help='Used to verify reflection correctly identifies optional params.'),
+            'resource_group_name': CliArgumentType(dest='resource_group_name', required=True, help='The name of the resource group.'),
+            'vm_name': CliArgumentType(dest='vm_name', required=True, help='The name of the virtual machine.'),
+            'opt_param': CliArgumentType(required=False, help='Used to verify reflection correctly identifies optional params.'),
             'expand': CliArgumentType(required=False, help='The expand expression to apply on the operation.')
         }
 
         for probe in some_expected_arguments:
             existing = next(arg for arg in command_metadata.arguments if arg == probe)
-            self.assertDictContainsSubset(some_expected_arguments[existing].options,
+            self.assertDictContainsSubset(some_expected_arguments[existing].settings,
                                           command_metadata.arguments[existing].options)
+        self.assertEqual(command_metadata.arguments['resource_group_name'].options_list, ('--resource-group-name',))
 
     def test_register_cli_argument_with_overrides(self):
         command_table.clear()
@@ -132,12 +135,12 @@ class Test_command_registration(unittest.TestCase):
         self.assertEqual(len(command_metadata.arguments), 5, 'We expected exactly 5 arguments')
 
         some_expected_arguments = {
-            'added_param': CliArgumentType(options_list=('--added-param',), dest='added_param', required=True)
+            'added_param': CliArgumentType(dest='added_param', required=True)
         }
 
         for probe in some_expected_arguments:
             existing = next(arg for arg in command_metadata.arguments if arg == probe)
-            self.assertDictContainsSubset(some_expected_arguments[existing].options,
+            self.assertDictContainsSubset(some_expected_arguments[existing].settings,
                                           command_metadata.arguments[existing].options)
 
     def test_command_build_argument_help_text(self):
@@ -162,15 +165,79 @@ class Test_command_registration(unittest.TestCase):
         command_metadata = command_table['test command foo']
         self.assertEqual(len(command_metadata.arguments), 3, 'We expected exactly 3 arguments')
         some_expected_arguments = {
-            'param_a': CliArgumentType(options_list=('--param-a',), dest='param_a', required=True, help=''),
-            'param_b': CliArgumentType(options_list=('--param-b',), dest='param_b', required=True, help='The name of nothing.'),
-            'param_c': CliArgumentType(options_list=('--param-c',), dest='param_c', required=True, help='The name of nothing2.')
+            'param_a': CliArgumentType(dest='param_a', required=True, help=''),
+            'param_b': CliArgumentType(dest='param_b', required=True, help='The name of nothing.'),
+            'param_c': CliArgumentType(dest='param_c', required=True, help='The name of nothing2.')
         }
 
         for probe in some_expected_arguments:
             existing = next(arg for arg in command_metadata.arguments if arg == probe)
-            self.assertDictContainsSubset(some_expected_arguments[existing].options,
+            self.assertDictContainsSubset(some_expected_arguments[existing].settings,
                                           command_metadata.arguments[existing].options)
+
+    def test_override_existing_option_string(self):
+        arg = CliArgumentType(options_list=('--funky', '-f'))
+        updated_options_list = ('--something-else', '-s')
+        arg.update(options_list=updated_options_list, validator=lambda: (), completer=lambda: ())
+        self.assertEquals(arg.settings['options_list'], updated_options_list)
+        self.assertIsNotNone(arg.settings['validator'])
+        self.assertIsNotNone(arg.settings['completer'])
+
+    def test_dont_override_existing_option_string(self):
+        existing_options_list = ('--something-else', '-s')
+        arg = CliArgumentType(options_list=existing_options_list)
+        arg.update()
+        self.assertEquals(arg.settings['options_list'], existing_options_list)
+
+    def test_override_remove_validator(self):
+        existing_options_list = ('--something-else', '-s')
+        arg = CliArgumentType(options_list=existing_options_list, validator=lambda *args, **kwargs: ())
+        arg.update(validator=None)
+        self.assertIsNone(arg.settings['validator'])
+
+    def test_override_using_register_cli_argument(self):
+        def sample_sdk_method(param_a):
+            pass
+        
+        def test_validator_completer():
+            pass
+
+        command_table.clear()
+        cli_command('override_using_register_cli_argument foo',
+                    sample_sdk_method,
+                    None)
+        register_cli_argument('override_using_register_cli_argument',
+                              'param_a',
+                              options_list=('--overridden', '-r'),
+                              validator=test_validator_completer,
+                              completer=test_validator_completer,
+                              required=False)
+
+        _update_command_definitions(command_table)
+
+        command_metadata = command_table['override_using_register_cli_argument foo']
+        self.assertEqual(len(command_metadata.arguments), 1, 'We expected exactly 1 arguments')
+
+        actual_arg = command_metadata.arguments['param_a']
+        self.assertEqual(actual_arg.options_list, ('--overridden', '-r'))
+        self.assertEqual(actual_arg.validator, test_validator_completer)
+        self.assertEqual(actual_arg.completer, test_validator_completer)
+        self.assertFalse(actual_arg.options['required'])
+
+
+    def test_override_argtype_with_argtype(self):
+        existing_options_list = ('--default', '-d')
+        arg = CliArgumentType(options_list=existing_options_list, validator=None, completer='base', help='base', required=True)
+        overriding_argtype = CliArgumentType(options_list=('--overridden',), validator='overridden', completer=None, overrides=arg, help='overridden', required=CliArgumentType.REMOVE)
+        self.assertEqual(overriding_argtype.settings['validator'], 'overridden')
+        self.assertEqual(overriding_argtype.settings['completer'], None)
+        self.assertEqual(overriding_argtype.settings['options_list'], ('--overridden',))
+        self.assertEqual(overriding_argtype.settings['help'], 'overridden')
+        self.assertEqual(overriding_argtype.settings['required'], CliArgumentType.REMOVE)
+
+        cmd_arg = CliCommandArgument(dest='whatever', argtype=overriding_argtype, help=CliArgumentType.REMOVE)
+        self.assertFalse('required' in cmd_arg.options)
+        self.assertFalse('help' in cmd_arg.options)
 
 if __name__ == '__main__':
     unittest.main()
