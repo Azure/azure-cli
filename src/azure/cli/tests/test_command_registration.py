@@ -6,6 +6,7 @@ from azure.cli.commands import _update_command_definitions
 from azure.cli.commands import (
     command_table,
     CliArgumentType,
+    CliCommandArgument,
     cli_command,
     register_cli_argument,
     register_extra_cli_argument)
@@ -232,7 +233,11 @@ class Test_command_registration(unittest.TestCase):
         self.assertEqual(overriding_argtype.settings['completer'], None)
         self.assertEqual(overriding_argtype.settings['options_list'], ('--overridden',))
         self.assertEqual(overriding_argtype.settings['help'], 'overridden')
-        self.assertFalse('required' in overriding_argtype.settings)
+        self.assertEqual(overriding_argtype.settings['required'], CliArgumentType.REMOVE)
+
+        cmd_arg = CliCommandArgument(dest='whatever', argtype=overriding_argtype, help=CliArgumentType.REMOVE)
+        self.assertFalse('required' in cmd_arg.options)
+        self.assertFalse('help' in cmd_arg.options)
 
 if __name__ == '__main__':
     unittest.main()
