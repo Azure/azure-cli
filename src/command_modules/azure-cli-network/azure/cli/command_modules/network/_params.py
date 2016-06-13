@@ -12,7 +12,7 @@ from azure.cli.commands import register_cli_argument, CliArgumentType
 name_arg_type = CliArgumentType(options_list=('--name', '-n'), metavar='NAME', help='Name of the resource')
 register_cli_argument('network', 'name', name_arg_type)
 
-virtual_network_name_type = CliArgumentType(options_list=('--virtual-network-name',), metavar='VNET', help='the name of the VNET')
+virtual_network_name_type = CliArgumentType(options_list=('--virtual-network-name',), metavar='VNET', help='Name of the virtual network.')
 
 register_cli_argument('network', 'subnet_name', name_arg_type)
 
@@ -47,16 +47,14 @@ register_cli_argument('network route-table', 'route_table_name', name_arg_type)
 
 register_cli_argument('network vnet', 'virtual_network_name', virtual_network_name_type, options_list=('--name', '-n'))
 
-# BUG: we are waiting on autorest to support this rename
-# (https://github.com/Azure/autorest/issues/941)
-register_cli_argument('network vnet create', 'deployment_parameter_location_value', location_type)
-register_cli_argument('network vnet create', 'deployment_parameter_subnet_prefix_value', CliArgumentType(
+register_cli_argument('network vnet create', 'location', location_type)
+register_cli_argument('network vnet create', 'subnet_prefix', CliArgumentType(
     options_list=('--subnet-prefix',), metavar='SUBNET_PREFIX', default='10.0.0.0/24'))
-register_cli_argument('network vnet create', 'deployment_parameter_subnet_name_value', CliArgumentType(
+register_cli_argument('network vnet create', 'subnet_name', CliArgumentType(
     options_list=('--subnet-name',), metavar='SUBNET_NAME', default='Subnet1'))
-register_cli_argument('network vnet create', 'deployment_parameter_virtual_network_prefix_value', CliArgumentType(
+register_cli_argument('network vnet create', 'virtual_network_prefix', CliArgumentType(
     options_list=('--vnet-prefix',), metavar='VNET_PREFIX', default='10.0.0.0/16'))
-register_cli_argument('network vnet create', 'deployment_parameter_virtual_network_name_value', CliArgumentType(
+register_cli_argument('network vnet create', 'virtual_network_name', CliArgumentType(
     options_list=('--name', '-n'), metavar='VNET_NAME', required=True
 ))
 

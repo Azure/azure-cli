@@ -68,7 +68,7 @@ DEPENDENCIES = [
     'adal==0.2.3rc1', # from libs/adal-*.zip
     'applicationinsights',
     'argcomplete>=1.3.0',
-    'azure==2.0.0rc3',
+    'azure==2.0.0rc4',
     'colorama',
     'jmespath',
     'msrest',

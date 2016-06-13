@@ -1,4 +1,4 @@
-from azure.mgmt.storage import StorageManagementClient, StorageManagementClientConfiguration
+from azure.mgmt.storage import StorageManagementClient
 
 from azure.storage import CloudStorageAccount
 from azure.storage.blob import BlockBlobService
@@ -29,7 +29,7 @@ def _get_data_service_client(service, name=None, key=None, connection_string=Non
         raise CLIError(message)
 
 def storage_client_factory(**_):
-    return get_mgmt_service_client(StorageManagementClient, StorageManagementClientConfiguration)
+    return get_mgmt_service_client(StorageManagementClient)
 
 def file_data_service_factory(kwargs):
     return _get_data_service_client(

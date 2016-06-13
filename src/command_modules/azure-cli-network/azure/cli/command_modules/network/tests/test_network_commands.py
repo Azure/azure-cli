@@ -18,7 +18,8 @@ class ResourceGroupVCRTestBase(VCRTestBase):
                                    .format(self.location, self.resource_group))
 
     def tear_down(self):
-        self.run_command_no_verify('resource group delete --name {}'.format(self.resource_group))
+        self.run_command_no_verify('resource group delete --name {}'.format(self.resource_group))
+
 class NetworkUsageListScenarioTest(VCRTestBase):
 
     def __init__(self, test_method):
@@ -545,8 +546,9 @@ class NetworkVpnGatewayScenarioTest(VCRTestBase):
         self.run_command_and_verify('network vpn-gateway list --resource-group {0}'.format(self.resource_group), None)
         self.run_command_and_verify('network vpn-gateway show --resource-group {0} --name {1}'.format(
             self.resource_group, self.placeholder_value), None)
-        self.run_command_and_verify('network vpn-gateway reset --resource-group {0} --name {1} --parameters {1}'.format(
-            self.resource_group, self.placeholder_value), None)
+        # TODO Add this once the command is updated.
+        # self.run_command_and_verify('network vpn-gateway reset --resource-group {0} --name {1} --parameters {1}'.format(
+        #     self.resource_group, self.placeholder_value), None)
 
 class NetworkVpnConnectionScenarioTest(VCRTestBase):
 

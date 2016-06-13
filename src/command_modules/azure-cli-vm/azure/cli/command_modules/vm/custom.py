@@ -86,9 +86,8 @@ def _get_access_extension_upgrade_info(extensions, name):
 
 
 def _get_storage_management_client():
-    from azure.mgmt.storage import StorageManagementClient, StorageManagementClientConfiguration
-    return get_mgmt_service_client(StorageManagementClient,
-                                   StorageManagementClientConfiguration)
+    from azure.mgmt.storage import StorageManagementClient
+    return get_mgmt_service_client(StorageManagementClient)
 
 def _trim_away_build_number(version):
     #workaround a known issue: the version must only contain "major.minor", even though
@@ -138,7 +137,7 @@ def list_ip_addresses(resource_group_name=None, vm_name=None):
     :param str resource_group_name:Name of resource group.
     :param str vm_name:Name of virtual machine.
     '''
-    from azure.mgmt.network import NetworkManagementClient, NetworkManagementClientConfiguration
+    from azure.mgmt.network import NetworkManagementClient
 
     # We start by getting NICs as they are the smack in the middle of all data that we
     # want to collect for a VM (as long as we don't need any info on the VM than what
@@ -146,8 +145,7 @@ def list_ip_addresses(resource_group_name=None, vm_name=None):
     #
     # Since there is no guarantee that a NIC is in the same resource group as a given
     # Virtual Machine, we can't constrain the lookup to only a single group...
-    network_client = get_mgmt_service_client(NetworkManagementClient,
-                                             NetworkManagementClientConfiguration)
+    network_client = get_mgmt_service_client(NetworkManagementClient)
     nics = network_client.network_interfaces.list_all()
     public_ip_addresses = network_client.public_ip_addresses.list_all()
 
@@ -243,7 +241,7 @@ def capture_vm(resource_group_name, vm_name, vhd_name_prefix,
     parameter = VirtualMachineCaptureParameters(vhd_name_prefix, storage_container, overwrite)
     poller = client.virtual_machines.capture(resource_group_name, vm_name, parameter)
     result = LongRunningOperation()(poller)
-    print(json.dumps(result.output, indent=2))
+    print(json.dumps(result.output, indent=2)) # pylint: disable=no-member
 
 def set_windows_user_password(
         resource_group_name, vm_name, username, password):
@@ -558,13 +556,12 @@ def vm_update_nics(resource_group_name, vm_name, nic_ids=None, nic_names=None, p
     return _update_vm_nics(vm, nics, primary_nic)
 
 def _build_nic_list(resource_group_name, nic_ids, nic_names):
-    from azure.mgmt.network import NetworkManagementClient, NetworkManagementClientConfiguration
+    from azure.mgmt.network import NetworkManagementClient
     from azure.mgmt.compute.models import NetworkInterfaceReference
     nics = []
     if nic_names or nic_ids:
         #pylint: disable=no-member
-        network_client = get_mgmt_service_client(NetworkManagementClient,
-                                                 NetworkManagementClientConfiguration)
+        network_client = get_mgmt_service_client(NetworkManagementClient)
         for n in nic_names:
             nic = network_client.network_interfaces.get(resource_group_name, n)
             nics.append(NetworkInterfaceReference(nic.id, False))
@@ -665,7 +662,7 @@ def vmss_deallocate(resource_group_name, vm_scale_set_name, instance_ids=None):
     else:
         return client.virtual_machine_scale_sets.deallocate(resource_group_name,
                                                             vm_scale_set_name,
-                                                            instance_ids)
+                                                            instance_ids=instance_ids)
 
 def vmss_delete_instances(resource_group_name, vm_scale_set_name, instance_ids):
     '''delete virtual machines in a virtual machine scale set.
@@ -695,7 +692,7 @@ def vmss_power_off(resource_group_name, vm_scale_set_name, instance_ids=None):
     else:
         return client.virtual_machine_scale_sets.power_off(resource_group_name,
                                                            vm_scale_set_name,
-                                                           instance_ids)
+                                                           instance_ids=instance_ids)
 
 def vmss_reimage(resource_group_name, vm_scale_set_name, instance_id=None):
     '''reimage virtual machines in a virtual machine scale set.
@@ -724,7 +721,7 @@ def vmss_restart(resource_group_name, vm_scale_set_name, instance_ids=None):
     else:
         return client.virtual_machine_scale_sets.restart(resource_group_name,
                                                          vm_scale_set_name,
-                                                         instance_ids)
+                                                         instance_ids=instance_ids)
 
 def vmss_start(resource_group_name, vm_scale_set_name, instance_ids=None):
     '''start virtual machines in a virtual machine scale set.
@@ -739,5 +736,5 @@ def vmss_start(resource_group_name, vm_scale_set_name, instance_ids=None):
     else:
         return client.virtual_machine_scale_sets.start(resource_group_name,
                                                        vm_scale_set_name,
-                                                       instance_ids)
+                                                       instance_ids=instance_ids)
 
