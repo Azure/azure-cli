@@ -4,13 +4,12 @@ import argparse
 from azure.cli.command_modules.network._actions import LBDNSNameAction, PublicIpDnsNameAction
 from azure.cli.commands.parameters import (location_type, get_resource_name_completion_list)
 from azure.cli.commands import register_cli_argument, CliArgumentType
-# FACTORIES
-
 
 # BASIC PARAMETER CONFIGURATION
 
-name_arg_type = CliArgumentType(options_list=('--name', '-n'), metavar='NAME', help='Name of the resource')
-register_cli_argument('network', 'name', name_arg_type)
+name_arg_type = CliArgumentType(options_list=('--name', '-n'), metavar='NAME')
+virtual_network_name_type = CliArgumentType(options_list=('--virtual-network-name',), metavar='VNET_NAME')
+subnet_name_type = CliArgumentType(options_list=('--subnet-name',), metavar='SUBNET_NAME')
 
 virtual_network_name_type = CliArgumentType(options_list=('--virtual-network-name',), metavar='VNET', help='Name of the virtual network.', completer=get_resource_name_completion_list('Microsoft.Network/virtualNetworks'))
 
@@ -21,8 +20,6 @@ register_cli_argument('network application-gateway', 'application_gateway_name',
 register_cli_argument('network express-route circuit-auth', 'authorization_name', name_arg_type)
 register_cli_argument('network express-route circuit-peering', 'peering_name', name_arg_type)
 register_cli_argument('network express-route circuit', 'circuit_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/expressRouteCircuits'))
-
-register_cli_argument('network lb', 'load_balancer_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/loadBalancers'))
 
 register_cli_argument('network local-gateway', 'local_network_gateway_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/localNetworkGateways'))
 
@@ -53,24 +50,22 @@ register_cli_argument('network route-table', 'route_table_name', name_arg_type, 
 register_cli_argument('network vnet', 'virtual_network_name', virtual_network_name_type, options_list=('--name', '-n'))
 
 register_cli_argument('network vnet create', 'location', location_type)
-register_cli_argument('network vnet create', 'subnet_prefix', CliArgumentType(
-    options_list=('--subnet-prefix',), metavar='SUBNET_PREFIX', default='10.0.0.0/24'))
-register_cli_argument('network vnet create', 'subnet_name', CliArgumentType(
-    options_list=('--subnet-name',), metavar='SUBNET_NAME', default='Subnet1'))
-register_cli_argument('network vnet create', 'virtual_network_prefix', CliArgumentType(
-    options_list=('--vnet-prefix',), metavar='VNET_PREFIX', default='10.0.0.0/16'))
-register_cli_argument('network vnet create', 'virtual_network_name', CliArgumentType(
-    options_list=('--name', '-n'), metavar='VNET_NAME', required=True, completer=None
-))
+register_cli_argument('network vnet create', 'subnet_prefix', CliArgumentType(options_list=('--subnet-prefix',), metavar='SUBNET_PREFIX', default='10.0.0.0/24'))
+register_cli_argument('network vnet create', 'subnet_name', CliArgumentType(options_list=('--subnet-name',), metavar='SUBNET_NAME', default='Subnet1'))
+register_cli_argument('network vnet create', 'virtual_network_prefix', CliArgumentType(options_list=('--vnet-prefix',), metavar='VNET_PREFIX', default='10.0.0.0/16'))
+register_cli_argument('network vnet create', 'virtual_network_name', CliArgumentType(options_list=('--name', '-n'), metavar='VNET_NAME', required=True, completer=None))
 
 register_cli_argument('network vnet subnet', 'subnet_name', options_list=('--name', '-n'), help='the subnet name')
 register_cli_argument('network vnet subnet', 'address_prefix', metavar='PREFIX', help='the address prefix in CIDR format.')
 register_cli_argument('network vnet subnet', 'virtual_network_name', virtual_network_name_type)
 
+register_cli_argument('network lb', 'load_balancer_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/loadBalancers'))
+
 register_cli_argument('network lb create', 'dns_name_for_public_ip', CliArgumentType(action=LBDNSNameAction))
 register_cli_argument('network lb create', 'dns_name_type', CliArgumentType(help=argparse.SUPPRESS))
 register_cli_argument('network lb create', 'private_ip_address_allocation', CliArgumentType(help='', choices=['dynamic', 'static'], default='dynamic'))
 register_cli_argument('network lb create', 'public_ip_address_allocation', CliArgumentType(help='', choices=['dynamic', 'static'], default='dynamic'))
+register_cli_argument('network lb create', 'public_ip_address_type', CliArgumentType(help='', choices=['new', 'existing', 'none'], default='new'))
 register_cli_argument('network lb create', 'subnet_name', CliArgumentType(options_list=('--subnet-name',)))
 
 register_cli_argument('network nsg create', 'name', name_arg_type)

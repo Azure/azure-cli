@@ -10,7 +10,7 @@
     },
     "backendPoolName": {
       "type": "string",
-      "defaultValue": "[concat(parameters('name'), 'bepool')]",
+      "defaultValue": "[concat(parameters('loadBalancerName'), 'bepool')]",
       "metadata": {
         "description": "Name of load balancer backend pool."
       }
@@ -40,7 +40,7 @@
         "description": "Location for load balancer resource."
       }
     },
-    "name": {
+    "loadBalancerName": {
       "type": "string",
       "metadata": {
         "description": "Name for load balancer."
@@ -62,7 +62,7 @@
     },
     "natPoolName": {
       "type": "string",
-      "defaultValue": "[concat(parameters('name'), 'natpool')]",
+      "defaultValue": "[concat(parameters('loadBalancerName'), 'natpool')]",
       "metadata": {
         "description": "Name of load balancer NAT (network address translation) pool."
       }
@@ -76,10 +76,10 @@
     },
     "privateIpAddressAllocation": {
       "type": "string",
-      "defaultValue": "Dynamic",
+      "defaultValue": "dynamic",
       "allowedValues": [
-        "Dynamic",
-        "Static"
+        "dynamic",
+        "static"
       ],
       "metadata": {
         "description": "Private IP address allocation method."
@@ -87,10 +87,10 @@
     },
     "publicIpAddressAllocation": {
       "type": "string",
-      "defaultValue": "Dynamic",
+      "defaultValue": "dynamic",
       "allowedValues": [
-        "Dynamic",
-        "Static"
+        "dynamic",
+        "static"
       ],
       "metadata": {
         "description": "Public IP address allocation method."
@@ -98,7 +98,7 @@
     },
     "publicIpAddressName": {
       "type": "string",
-      "defaultValue": "[concat('PublicIP', parameters('name'))]",
+      "defaultValue": "[concat('PublicIP', parameters('loadBalancerName'))]",
       "metadata": {
         "description": "Name of public IP address to use."
       }
@@ -107,7 +107,7 @@
       "type": "string",
       "defaultValue": "",
       "metadata": {
-        "description": "If Public IP address is turned off, this is the VNET to associate with the load balancer ."
+        "description": "If Public IP address is turned off, this is the VNET to associate with the load balancer."
       }
     },
     "subnetName": {
@@ -126,7 +126,7 @@
         "existing"
       ],
       "metadata": {
-        "description": "Type of Public IP Address to associate with the laod balancer."
+        "description": "Type of Public IP Address to associate with the load balancer."
       }
     }
   },
@@ -135,9 +135,9 @@
     "vnetId": "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]",
     "subnetRef": "[concat(variables('vnetId'), '/subnets/', parameters('subnetName'))]",
     "publicIPAddressID": "[resourceId('Microsoft.Network/publicIPAddresses',parameters('publicIPAddressName'))]",
-    "lbID": "[resourceId('Microsoft.Network/loadBalancers',parameters('name'))]",
+    "lbID": "[resourceId('Microsoft.Network/loadBalancers',parameters('loadBalancerName'))]",
     "frontEndIPConfigID": "[concat(variables('lbID'),'/frontendIPConfigurations/loadBalancerFrontEnd')]",
-    "ipDeploymentName": "[concat('IP', parameters('name'))]",
+    "ipDeploymentName": "[concat('IP', parameters('loadBalancerName'))]",
     "frontendConfig": {
       "new": [
         {
@@ -179,7 +179,7 @@
   "resources": [
     {
       "type": "Microsoft.Network/loadBalancers",
-      "name": "[parameters('name')]",
+      "name": "[parameters('loadBalancerName')]",
       "location": "[parameters('location')]",
       "apiVersion": "2015-06-15",
       "dependsOn": [
@@ -229,5 +229,11 @@
         }
       }
     }
-  ]
+  ],
+  "outputs": {
+    "loadBalancer": {
+      "type": "object",
+      "value": "[reference(parameters('loadBalancerName'))]"
+    }
+  }
 }

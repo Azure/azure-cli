@@ -193,7 +193,7 @@ class NetworkExpressRouteCircuitScenarioTest(VCRTestBase):
         self.cmd('network express-route circuit list-routes --resource-group {0} --name {1} --peering-name {2} --device-path {2}'.format(
             rg, ern, pv), allowed_exceptions=allowed_exceptions)
 
-class NetworkLoadBalancerScenarioTest(VCRTestBase):
+class NetworkLoadBalancerScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
         super(NetworkLoadBalancerScenarioTest, self).__init__(__file__, test_method)
@@ -204,12 +204,36 @@ class NetworkLoadBalancerScenarioTest(VCRTestBase):
     def test_network_load_balancer(self):
         self.execute()
 
-    def set_up(self):
-        if not self.cmd('network lb show --resource-group {} --name {}'.format(
-            self.resource_group, self.lb_name)):
-            raise RuntimeError('Load balancer must be manually created in order to support this test.')
-
     def body(self):
+        # test lb create with min params (new ip)
+        self.cmd('network lb create -n {} -g {} --deployment-name deployLb1'.format(self.lb_name, self.resource_group), checks=[
+            JMESPathCheck('loadBalancer.value.provisioningState', 'Succeeded'),
+            JMESPathCheck('loadBalancer.value.frontendIPConfigurations[0].properties.privateIPAllocationMethod', 'Dynamic'),
+            JMESPathCheck('loadBalancer.value.frontendIPConfigurations[0].resourceGroup', self.resource_group)
+        ])
+
+        # test lb create with no ip
+        vnet_name = 'mytestvnet'
+        vnet = self.cmd('network vnet create -n {} -g {} --deployment-name deployvnet'.format(vnet_name, self.resource_group))
+        subnet_name = vnet['newVNet']['value']['subnets'][0]['name']
+        self.cmd('network lb create -n {} -g {} --deployment-name deployLb2 --public-ip-address-type none --virtual-network-name {} --subnet-name {}'.format(self.lb_name, self.resource_group, vnet_name, subnet_name), checks=[
+            JMESPathCheck('loadBalancer.value.provisioningState', 'Succeeded'),
+            JMESPathCheck('loadBalancer.value.frontendIPConfigurations[0].properties.privateIPAllocationMethod', 'Dynamic'),
+            JMESPathCheck('loadBalancer.value.frontendIPConfigurations[0].resourceGroup', self.resource_group),
+            JMESPathCheck("loadBalancer.value.frontendIPConfigurations[0].properties.subnet.contains(id, '{}')".format(subnet_name), True)
+        ])
+
+        # test lb create with existing ip
+        pub_ip_name = 'mytestpubip'
+        self.cmd('network public-ip create -n {} -g {} --deployment-name deploypublicip'.format(pub_ip_name, self.resource_group))
+        self.cmd('network lb create -n {} -g {} --deployment-name deployLb3 --public-ip-address-type existing --public-ip-address-name {}'.format(
+            self.lb_name, self.resource_group, pub_ip_name), checks=[
+                JMESPathCheck('loadBalancer.value.provisioningState', 'Succeeded'),
+                JMESPathCheck('loadBalancer.value.frontendIPConfigurations[0].properties.privateIPAllocationMethod', 'Dynamic'),
+                JMESPathCheck('loadBalancer.value.frontendIPConfigurations[0].resourceGroup', self.resource_group),
+                JMESPathCheck("loadBalancer.value.frontendIPConfigurations[0].properties.publicIPAddress.contains(id, '{}')".format(pub_ip_name), True)
+            ])
+
         self.cmd('network lb list-all', checks=[
             JMESPathCheck('type(@)', 'array'),
             JMESPathCheck("length([?type == '{}']) == length(@)".format(self.resource_type), True)

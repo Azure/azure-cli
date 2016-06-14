@@ -6,8 +6,8 @@
 # regenerated.
 # --------------------------------------------------------------------------
 
-from .lb_operations import LBOperations
+from .lb_operations import LbOperations
 
 __all__ = [
-    'LBOperations',
+    'LbOperations',
 ]

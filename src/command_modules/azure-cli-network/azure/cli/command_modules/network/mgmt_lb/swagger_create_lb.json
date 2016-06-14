@@ -1,7 +1,7 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "LBCreationClient",
+    "title": "LbCreationClient",
     "version": "2015-11-01"
   },
   "host": "management.azure.com",
@@ -36,9 +36,9 @@
     "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Resources/deployments/{deploymentName}": {
       "put": {
         "tags": [
-          "LB"
+          "Lb"
         ],
-        "operationId": "LB_CreateOrUpdate",
+        "operationId": "Lb_CreateOrUpdate",
         "description": "Create or update a virtual machine.",
         "parameters": [
           {
@@ -67,7 +67,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/Deployment_LB"
+              "$ref": "#/definitions/Deployment_Lb"
             },
             "description": "Additional parameters supplied to the operation."
           },
@@ -97,17 +97,17 @@
     }
   },
   "definitions": {
-    "Deployment_LB": {
+    "Deployment_Lb": {
       "properties": {
         "properties": {
-          "$ref": "#/definitions/DeploymentProperties_LB",
+          "$ref": "#/definitions/DeploymentProperties_Lb",
           "description": "Gets or sets the deployment properties.",
           "x-ms-client-flatten": true
         }
       },
       "description": "Deployment operation parameters."
     },
-    "DeploymentProperties_LB": {
+    "DeploymentProperties_Lb": {
       "properties": {
         "templateLink": {
           "$ref": "#/definitions/TemplateLink",
@@ -115,7 +115,7 @@
           "x-ms-client-flatten": true
         },
         "parameters": {
-          "$ref": "#/definitions/LBParameters",
+          "$ref": "#/definitions/LbParameters",
           "type": "object",
           "description": "Deployment parameters. Use only one of Parameters or ParametersLink.",
           "x-ms-client-flatten": true
@@ -145,7 +145,7 @@
           "type": "string",
           "description": "URI referencing the template.",
           "enum": [
-            "https://azuresdkci.blob.core.windows.net/templatehost/CreateLB/azuredeploy.json"
+            "https://azuresdkci.blob.core.windows.net/templatehost/CreateLb_2016-06-14/azuredeploy.json"
           ]
         },
         "contentVersion": {
@@ -158,269 +158,264 @@
       ],
       "description": "Entity representing the reference to the template."
     },
-    "LBParameters": {
-      
-"properties": {
-  "_artifactsLocation": {
-    "type": "object",
-    "$ref": "#/definitions/DeploymentParameter__artifactsLocation",
-    "x-ms-client-flatten": true
-  },
-          "backendPoolName": {
-    "type": "object",
-    "$ref": "#/definitions/DeploymentParameter_backendPoolName",
-    "x-ms-client-flatten": true
-  },
-          "dnsNameForPublicIP": {
-    "type": "object",
-    "$ref": "#/definitions/DeploymentParameter_dnsNameForPublicIP",
-    "x-ms-client-flatten": true
-  },
-          "dnsNameType": {
-    "type": "object",
-    "$ref": "#/definitions/DeploymentParameter_dnsNameType",
-    "x-ms-client-flatten": true
-  },
-          "location": {
-    "type": "object",
-    "$ref": "#/definitions/DeploymentParameter_location",
-    "x-ms-client-flatten": true
-  },
-          "name": {
-    "type": "object",
-    "$ref": "#/definitions/DeploymentParameter_name",
-    "x-ms-client-flatten": true
-  },
-          "natBackendPort": {
-    "type": "object",
-    "$ref": "#/definitions/DeploymentParameter_natBackendPort",
-    "x-ms-client-flatten": true
-  },
-          "natEndPort": {
-    "type": "object",
-    "$ref": "#/definitions/DeploymentParameter_natEndPort",
-    "x-ms-client-flatten": true
-  },
-          "natPoolName": {
-    "type": "object",
-    "$ref": "#/definitions/DeploymentParameter_natPoolName",
-    "x-ms-client-flatten": true
-  },
-          "natStartPort": {
-    "type": "object",
-    "$ref": "#/definitions/DeploymentParameter_natStartPort",
-    "x-ms-client-flatten": true
-  },
-          "privateIpAddressAllocation": {
-    "type": "object",
-    "$ref": "#/definitions/DeploymentParameter_privateIpAddressAllocation",
-    "x-ms-client-flatten": true
-  },
-          "publicIpAddressAllocation": {
-    "type": "object",
-    "$ref": "#/definitions/DeploymentParameter_publicIpAddressAllocation",
-    "x-ms-client-flatten": true
-  },
-          "publicIpAddressName": {
-    "type": "object",
-    "$ref": "#/definitions/DeploymentParameter_publicIpAddressName",
-    "x-ms-client-flatten": true
-  },
-          "publicIpAddressType": {
-    "type": "object",
-    "$ref": "#/definitions/DeploymentParameter_publicIpAddressType",
-    "x-ms-client-flatten": true
-  },
-          "subnetName": {
-    "type": "object",
-    "$ref": "#/definitions/DeploymentParameter_subnetName",
-    "x-ms-client-flatten": true
-  },
-          "virtualNetworkName": {
-    "type": "object",
-    "$ref": "#/definitions/DeploymentParameter_virtualNetworkName",
-    "x-ms-client-flatten": true
-  }
-}
-,
+    "LbParameters": {
+      "properties": {
+        "_artifactsLocation": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter__artifactsLocation",
+          "x-ms-client-flatten": true
+        },
+        "backendPoolName": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_backendPoolName",
+          "x-ms-client-flatten": true
+        },
+        "dnsNameForPublicIP": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_dnsNameForPublicIP",
+          "x-ms-client-flatten": true
+        },
+        "dnsNameType": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_dnsNameType",
+          "x-ms-client-flatten": true
+        },
+        "loadBalancerName": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_loadBalancerName",
+          "x-ms-client-flatten": true
+        },
+        "location": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_location",
+          "x-ms-client-flatten": true
+        },
+        "natBackendPort": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_natBackendPort",
+          "x-ms-client-flatten": true
+        },
+        "natEndPort": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_natEndPort",
+          "x-ms-client-flatten": true
+        },
+        "natPoolName": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_natPoolName",
+          "x-ms-client-flatten": true
+        },
+        "natStartPort": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_natStartPort",
+          "x-ms-client-flatten": true
+        },
+        "privateIpAddressAllocation": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_privateIpAddressAllocation",
+          "x-ms-client-flatten": true
+        },
+        "publicIpAddressAllocation": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_publicIpAddressAllocation",
+          "x-ms-client-flatten": true
+        },
+        "publicIpAddressName": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_publicIpAddressName",
+          "x-ms-client-flatten": true
+        },
+        "publicIpAddressType": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_publicIpAddressType",
+          "x-ms-client-flatten": true
+        },
+        "subnetName": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_subnetName",
+          "x-ms-client-flatten": true
+        },
+        "virtualNetworkName": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_virtualNetworkName",
+          "x-ms-client-flatten": true
+        }
+      },
       "required": [
-        "name",
+        "loadBalancerName",
         "_artifactsLocation"
       ]
-
     },
     "DeploymentParameter_backendPoolName": {
-  "properties": {
-    "value": {
-      "type": "string",
-      "description": "Name of load balancer backend pool.",
-      "x-ms-client-name": "backendPoolName"
-    }
-  }
-},
-"DeploymentParameter_dnsNameForPublicIP": {
-  "properties": {
-    "value": {
-      "type": "string",
-      "description": "Globally unique DNS Name for the Public IP used to access the Virtual Machine.  Requires a new public IP to be created by setting Public IP Address Type to New.",
-      "x-ms-client-name": "dnsNameForPublicIP"
-    }
-  }
-},
-"DeploymentParameter_dnsNameType": {
-  "properties": {
-    "value": {
-      "type": "string",
-      "description": "Associate VMs with a public IP address to a DNS name.",
-      "x-ms-client-name": "dnsNameType",
-      "enum": [
-        "none",
-        "new"
-      ],
-      "default": "none"
-    }
-  }
-},
-"DeploymentParameter_location": {
-  "properties": {
-    "value": {
-      "type": "string",
-      "description": "Location for load balancer resource.",
-      "x-ms-client-name": "location"
-    }
-  }
-},
-"DeploymentParameter_name": {
-  "properties": {
-    "value": {
-      "type": "string",
-      "description": "Name for load balancer.",
-      "x-ms-client-name": "name"
-    }
-  },
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "Name of load balancer backend pool.",
+          "x-ms-client-name": "backendPoolName"
+        }
+      }
+    },
+    "DeploymentParameter_dnsNameForPublicIP": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "Globally unique DNS Name for the Public IP used to access the Virtual Machine.  Requires a new public IP to be created by setting Public IP Address Type to New.",
+          "x-ms-client-name": "dnsNameForPublicIP"
+        }
+      }
+    },
+    "DeploymentParameter_dnsNameType": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "Associate VMs with a public IP address to a DNS name.",
+          "x-ms-client-name": "dnsNameType",
+          "enum": [
+            "none",
+            "new"
+          ],
+          "default": "none"
+        }
+      }
+    },
+    "DeploymentParameter_loadBalancerName": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "Name for load balancer.",
+          "x-ms-client-name": "loadBalancerName"
+        }
+      },
       "required": [
         "value"
       ]
-
-},
-"DeploymentParameter_natBackendPort": {
-  "properties": {
-    "value": {
-      "type": "string",
-      "description": "Port number for NAT backend.",
-      "x-ms-client-name": "natBackendPort",
-      "default": "22"
-    }
-  }
-},
-"DeploymentParameter_natEndPort": {
-  "properties": {
-    "value": {
-      "type": "string",
-      "description": "End of NAT port range.",
-      "x-ms-client-name": "natEndPort",
-      "default": "50099"
-    }
-  }
-},
-"DeploymentParameter_natPoolName": {
-  "properties": {
-    "value": {
-      "type": "string",
-      "description": "Name of load balancer NAT (network address translation) pool.",
-      "x-ms-client-name": "natPoolName"
-    }
-  }
-},
-"DeploymentParameter_natStartPort": {
-  "properties": {
-    "value": {
-      "type": "string",
-      "description": "Start of NAT port range.",
-      "x-ms-client-name": "natStartPort",
-      "default": "50000"
-    }
-  }
-},
-"DeploymentParameter_privateIpAddressAllocation": {
-  "properties": {
-    "value": {
-      "type": "string",
-      "description": "Private IP address allocation method.",
-      "x-ms-client-name": "privateIpAddressAllocation",
-      "enum": [
-        "Dynamic",
-        "Static"
-      ],
-      "default": "Dynamic"
-    }
-  }
-},
-"DeploymentParameter_publicIpAddressAllocation": {
-  "properties": {
-    "value": {
-      "type": "string",
-      "description": "Public IP address allocation method.",
-      "x-ms-client-name": "publicIpAddressAllocation",
-      "enum": [
-        "Dynamic",
-        "Static"
-      ],
-      "default": "Dynamic"
-    }
-  }
-},
-"DeploymentParameter_publicIpAddressName": {
-  "properties": {
-    "value": {
-      "type": "string",
-      "description": "Name of public IP address to use.",
-      "x-ms-client-name": "publicIpAddressName"
-    }
-  }
-},
-"DeploymentParameter_publicIpAddressType": {
-  "properties": {
-    "value": {
-      "type": "string",
-      "description": "Type of Public IP Address to associate with the laod balancer.",
-      "x-ms-client-name": "publicIpAddressType",
-      "enum": [
-        "none",
-        "new",
-        "existing"
-      ],
-      "default": "new"
-    }
-  }
-},
-"DeploymentParameter_subnetName": {
-  "properties": {
-    "value": {
-      "type": "string",
-      "description": "If Public IP address is turned off, this is the subnet to associate with the load balancer.",
-      "x-ms-client-name": "subnetName"
-    }
-  }
-},
-"DeploymentParameter_virtualNetworkName": {
-  "properties": {
-    "value": {
-      "type": "string",
-      "description": "If Public IP address is turned off, this is the VNET to associate with the load balancer .",
-      "x-ms-client-name": "virtualNetworkName"
-    }
-  }
-},
-
-"DeploymentParameter__artifactsLocation": {
+    },
+    "DeploymentParameter_location": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "Location for load balancer resource.",
+          "x-ms-client-name": "location"
+        }
+      }
+    },
+    "DeploymentParameter_natBackendPort": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "Port number for NAT backend.",
+          "x-ms-client-name": "natBackendPort",
+          "default": "22"
+        }
+      }
+    },
+    "DeploymentParameter_natEndPort": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "End of NAT port range.",
+          "x-ms-client-name": "natEndPort",
+          "default": "50099"
+        }
+      }
+    },
+    "DeploymentParameter_natPoolName": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "Name of load balancer NAT (network address translation) pool.",
+          "x-ms-client-name": "natPoolName"
+        }
+      }
+    },
+    "DeploymentParameter_natStartPort": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "Start of NAT port range.",
+          "x-ms-client-name": "natStartPort",
+          "default": "50000"
+        }
+      }
+    },
+    "DeploymentParameter_privateIpAddressAllocation": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "Private IP address allocation method.",
+          "x-ms-client-name": "privateIpAddressAllocation",
+          "enum": [
+            "dynamic",
+            "static"
+          ],
+          "default": "dynamic"
+        }
+      }
+    },
+    "DeploymentParameter_publicIpAddressAllocation": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "Public IP address allocation method.",
+          "x-ms-client-name": "publicIpAddressAllocation",
+          "enum": [
+            "dynamic",
+            "static"
+          ],
+          "default": "dynamic"
+        }
+      }
+    },
+    "DeploymentParameter_publicIpAddressName": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "Name of public IP address to use.",
+          "x-ms-client-name": "publicIpAddressName"
+        }
+      }
+    },
+    "DeploymentParameter_publicIpAddressType": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "Type of Public IP Address to associate with the load balancer.",
+          "x-ms-client-name": "publicIpAddressType",
+          "enum": [
+            "none",
+            "new",
+            "existing"
+          ],
+          "default": "new"
+        }
+      }
+    },
+    "DeploymentParameter_subnetName": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "If Public IP address is turned off, this is the subnet to associate with the load balancer.",
+          "x-ms-client-name": "subnetName"
+        }
+      }
+    },
+    "DeploymentParameter_virtualNetworkName": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "If Public IP address is turned off, this is the VNET to associate with the load balancer.",
+          "x-ms-client-name": "virtualNetworkName"
+        }
+      }
+    },
+    "DeploymentParameter__artifactsLocation": {
       "properties": {
         "value": {
           "type": "string",
           "description": "Container URI of of the template.",
           "x-ms-client-name": "_artifactsLocation",
           "enum": [
-            "https://azuresdkci.blob.core.windows.net/templatehost/CreateLB"
+            "https://azuresdkci.blob.core.windows.net/templatehost/CreateLb_2016-06-14"
           ]
         }
       },
