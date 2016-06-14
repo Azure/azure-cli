@@ -2,6 +2,7 @@
 import azure.cli._debug as _debug
 import azure.cli as cli
 import azure.cli._logging as _logging
+from azure.cli.application import APPLICATION
 
 logger = _logging.get_az_logger(__name__)
 
@@ -22,7 +23,18 @@ def _get_mgmt_service_client(client_type, subscription_bound=True):
         client = client_type(cred)
 
     _debug.allow_debug_connection(client)
-    client.config.add_user_agent("AZURECLI_{}".format(cli.__version__))
+
+    client.config.add_user_agent("AZURECLI/{}/{}".format(
+        cli.__version__,
+        APPLICATION.session['command']))
+
+    for header, value in APPLICATION.session['headers'].items():
+        # We are working with the autorest team to expose the add_header
+        # functionality of the generated client to avoid having to access
+        # private members
+        client._client.add_header(header, value) #pylint: disable=protected-access
+    client.config.generate_client_request_id = \
+        'x-ms-client-request-id' not in APPLICATION.session['headers']
 
     return (client, subscription_id)
 

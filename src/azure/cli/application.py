@@ -2,6 +2,7 @@ from collections import defaultdict
 from datetime import datetime
 import sys
 import re
+import uuid
 import argparse
 from enum import Enum
 from .parser import AzCliCommandParser
@@ -42,6 +43,13 @@ class Application(object):
 
     def __init__(self, config=None):
         self._event_handlers = defaultdict(lambda: [])
+        self.session = {
+            'headers': {
+                'x-ms-client-request-id': str(uuid.uuid1())
+                },
+            'command': 'unknown'
+            }
+
 
         # Register presence of and handlers for global parameters
         self.register(self.GLOBAL_PARSER_CREATED, Application._register_builtin_arguments)
@@ -77,8 +85,8 @@ class Application(object):
             argv[0] = '--help'
 
         args = self.parser.parse_args(argv)
+        self.session['command'] = args.command
         self.raise_event(self.COMMAND_PARSER_PARSED, command=args.command, args=args)
-
         # Consider - we are using any args that start with an underscore (_) as 'private'
         # arguments and remove them from the arguments that we pass to the actual function.
         # This does not feel quite right.
