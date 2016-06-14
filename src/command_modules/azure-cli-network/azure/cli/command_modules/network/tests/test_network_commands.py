@@ -546,9 +546,6 @@ class NetworkVpnGatewayScenarioTest(VCRTestBase):
         self.run_command_and_verify('network vpn-gateway list --resource-group {0}'.format(self.resource_group), None)
         self.run_command_and_verify('network vpn-gateway show --resource-group {0} --name {1}'.format(
             self.resource_group, self.placeholder_value), None)
-        # TODO Add this once the command is updated.
-        # self.run_command_and_verify('network vpn-gateway reset --resource-group {0} --name {1} --parameters {1}'.format(
-        #     self.resource_group, self.placeholder_value), None)
 
 class NetworkVpnConnectionScenarioTest(VCRTestBase):
 
