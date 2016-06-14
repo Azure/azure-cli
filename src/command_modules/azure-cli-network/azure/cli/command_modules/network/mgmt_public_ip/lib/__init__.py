@@ -6,10 +6,10 @@
 # regenerated.
 # --------------------------------------------------------------------------
 
-from .public_ip_creation_client import PublicIPCreationClient
+from .public_ip_creation_client import PublicIpCreationClient
 from .version import VERSION
 
-__all__ = ['PublicIPCreationClient']
+__all__ = ['PublicIpCreationClient']
 
 __version__ = VERSION
 

@@ -6,8 +6,8 @@
 # regenerated.
 # --------------------------------------------------------------------------
 
-from .public_ip_operations import PublicIPOperations
+from .public_ip_operations import PublicIpOperations
 
 __all__ = [
-    'PublicIPOperations',
+    'PublicIpOperations',
 ]

@@ -89,40 +89,6 @@ class NetworkAppGatewayScenarioTest(VCRTestBase):
         self.run_command_and_verify('network application-gateway list --resource-group {}'.format(
             self.resource_group), None)
 
-class NetworkPublicIpScenarioTest(VCRTestBase):
-
-    def __init__(self, test_method):
-        self.resource_group = 'cli_test1'
-        self.public_ip_name = 'windowsvm'
-        super(NetworkPublicIpScenarioTest, self).__init__(__file__, test_method)
-
-    def test_network_public_ip(self):
-        self.execute(verify_test_output=True)
-
-    def set_up(self):
-        if not self.run_command_no_verify('network public-ip show --resource-group {} --name {}'.format(
-            self.resource_group, self.public_ip_name)):
-            raise RuntimeError('Public IP must be manually created in order to support this test.')
-
-    def body(self):
-        self.run_command_and_verify('network public-ip list-all', JMESPathComparator('type(@)', 'array'))
-        self.run_command_and_verify('network public-ip list --resource-group {}'.format(self.resource_group),
-        [
-            JMESPathComparator('type(@)', 'array'),
-            JMESPathComparator("length([?resourceGroup == '{}']) == length(@)".format(
-                          self.resource_group), True)
-        ])
-        self.run_command_and_verify('network public-ip show --resource-group {} --name {}'.format(
-            self.resource_group, self.public_ip_name),
-        [
-            JMESPathComparator('type(@)', 'object'),
-            JMESPathComparator('name', self.public_ip_name),
-            JMESPathComparator('resourceGroup', self.resource_group),
-        ])
-        self.run_command_and_verify('network public-ip delete --resource-group {} --name {}'.format(
-            self.resource_group, self.public_ip_name), None)
-        self.run_command_and_verify('network public-ip list --resource-group {}'.format(self.resource_group), None)
-
 class NetworkExpressRouteScenarioTest(VCRTestBase):
 
     def __init__(self, test_method):
@@ -379,32 +345,33 @@ class NetworkSecurityGroupScenarioTest(ResourceGroupVCRTestBase):
 
         self.run_command_and_verify('network nsg list-all', [
             JMESPathComparator('type(@)', 'array'),
-            JMESPathComparator("length([?type == '{}']) == length(@)".format(
-                          self.resource_type), True)])
+            JMESPathComparator("length([?type == '{}']) == length(@)".format(self.resource_type), True)
+        ])
         self.run_command_and_verify('network nsg list --resource-group {}'.format(self.resource_group), [
             JMESPathComparator('type(@)', 'array'),
-            JMESPathComparator("length([?type == '{}']) == length(@)".format(
-                          self.resource_type), True),
-            JMESPathComparator("length([?resourceGroup == '{}']) == length(@)".format(
-                          self.resource_group), True)])
+            JMESPathComparator("length([?type == '{}']) == length(@)".format(self.resource_type), True),
+            JMESPathComparator("length([?resourceGroup == '{}']) == length(@)".format(self.resource_group), True)
+        ])
         self.run_command_and_verify('network nsg show --resource-group {} --name {}'.format(
             self.resource_group, self.nsg_name), [
                 JMESPathComparator('type(@)', 'object'),
                 JMESPathComparator('type', self.resource_type),
                 JMESPathComparator('resourceGroup', self.resource_group),
-                JMESPathComparator('name', self.nsg_name)])
+                JMESPathComparator('name', self.nsg_name)
+            ])
         # Test for the manually added nsg rule
         self.run_command_and_verify('network nsg rule list --resource-group {} --nsg-name {}'.format(
             self.resource_group, self.nsg_name), [
                 JMESPathComparator('type(@)', 'array'),
                 JMESPathComparator('length(@)', 1),
-                JMESPathComparator("length([?resourceGroup == '{}']) == length(@)".format(
-                          self.resource_group), True)])
+                JMESPathComparator("length([?resourceGroup == '{}']) == length(@)".format(self.resource_group), True)
+            ])
         self.run_command_and_verify('network nsg rule show --resource-group {} --nsg-name {} --name {}'.format(
             self.resource_group, self.nsg_name, self.nsg_rule_name), [
                 JMESPathComparator('type(@)', 'object'),
                 JMESPathComparator('resourceGroup', self.resource_group),
-                JMESPathComparator('name', self.nsg_rule_name)])
+                JMESPathComparator('name', self.nsg_rule_name)
+            ])
         self.run_command_and_verify('network nsg rule delete --resource-group {} --nsg-name {} --name {}'.format(
             self.resource_group, self.nsg_name, self.nsg_rule_name), None)
         # Delete the network security group
@@ -593,3 +560,46 @@ class NetworkSubnetCreateScenarioTest(VCRTestBase):
         self.run_command_and_verify('network vnet subnet create --resource-group {0} --name {1} --virtual-network-name {1} --address-prefix {2}'.format( #pylint: disable=line-too-long
             self.resource_group, self.placeholder_value, self.address_prefix), None)
 
+class NetworkPublicIpScenarioTest(ResourceGroupVCRTestBase):
+
+    def __init__(self, test_method):
+        super(NetworkPublicIpScenarioTest, self).__init__(__file__, test_method)
+        self.public_ip_name = 'pubipdns'
+        self.public_ip_no_dns_name = 'pubipnodns'
+        self.dns = 'woot'
+
+    def test_network_public_ip(self):
+        self.execute(verify_test_output=True)
+
+    def body(self):
+        s = self
+        rg = s.resource_group
+        # See documentation for guidance regarding deployment name in tests
+        count = 11
+        deploy1 = 'ipdeploy{}'.format(count)
+        deploy2 = 'ipnodnsdeploy{}'.format(count)
+        s.run_command_and_verify('network public-ip create -g {} -n {} --dns-name {} --allocation-method static --deployment-name {}'.format(rg, s.public_ip_name, s.dns, deploy1), [
+            JMESPathComparator('publicIp.value.provisioningState', 'Succeeded'),
+            JMESPathComparator('publicIp.value.publicIPAllocationMethod', 'Static'),
+            JMESPathComparator('publicIp.value.dnsSettings.domainNameLabel', s.dns)
+        ])
+        s.run_command_and_verify('network public-ip create -g {} -n {} --deployment-name {}'.format(rg, s.public_ip_no_dns_name, deploy2), [
+            JMESPathComparator('publicIp.value.provisioningState', 'Succeeded'),
+            JMESPathComparator('publicIp.value.publicIPAllocationMethod', 'Dynamic'),
+            JMESPathComparator('publicIp.value.dnsSettings', None)
+        ])
+
+        s.run_command_and_verify('network public-ip list-all', JMESPathComparator('type(@)', 'array'))
+        ip_list = s.run_command_no_verify('network public-ip list -g {} -o json'.format(rg))
+        assert not [x for x in ip_list if x['resourceGroup'].lower() != rg]
+
+        s.run_command_and_verify('network public-ip show -g {} -n {}'.format(rg, s.public_ip_name),
+        [
+            JMESPathComparator('type(@)', 'object'),
+            JMESPathComparator('name', s.public_ip_name),
+            JMESPathComparator('resourceGroup', rg),
+        ])
+        s.run_command_and_verify('network public-ip delete -g {} -n {}'.format(rg, s.public_ip_name), None)
+        s.run_command_and_verify('network public-ip list -g {}'.format(rg), [
+            JMESPathComparator("length[?name == '{}']".format(s.public_ip_name), None)
+        ])

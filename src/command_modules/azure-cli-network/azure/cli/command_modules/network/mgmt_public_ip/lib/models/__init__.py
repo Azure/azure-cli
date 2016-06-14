@@ -6,7 +6,7 @@
 # regenerated.
 # --------------------------------------------------------------------------
 
-from .deployment_public_ip import DeploymentPublicIP
+from .deployment_public_ip import DeploymentPublicIp
 from .template_link import TemplateLink
 from .parameters_link import ParametersLink
 from .provider_resource_type import ProviderResourceType
@@ -20,7 +20,7 @@ from .public_ip_creation_client_enums import (
 )
 
 __all__ = [
-    'DeploymentPublicIP',
+    'DeploymentPublicIp',
     'TemplateLink',
     'ParametersLink',
     'ProviderResourceType',
