@@ -1,7 +1,7 @@
 # pylint: disable=line-too-long
 import argparse
 
-from azure.cli.command_modules.network._actions import LBDNSNameAction
+from azure.cli.command_modules.network._actions import LBDNSNameAction, PublicIpDnsNameAction
 from azure.cli.commands.parameters import location_type
 from azure.cli.commands import register_cli_argument, CliArgumentType
 # FACTORIES
@@ -41,6 +41,10 @@ register_cli_argument('network nsg rule create', 'priority', default=1000)
 register_cli_argument('network public-ip', 'public_ip_address_name', name_arg_type)
 register_cli_argument('network public-ip', 'name', name_arg_type)
 
+register_cli_argument('network public-ip create', 'dns_name', CliArgumentType(action=PublicIpDnsNameAction))
+register_cli_argument('network public-ip create', 'public_ip_address_type', CliArgumentType(help=argparse.SUPPRESS))
+register_cli_argument('network public-ip create', 'allocation_method', CliArgumentType(choices=['dynamic', 'static'], default='dynamic'))
+
 register_cli_argument('network route-operation', 'route_name', name_arg_type)
 
 register_cli_argument('network route-table', 'route_table_name', name_arg_type)
@@ -64,13 +68,11 @@ register_cli_argument('network vnet subnet', 'virtual_network_name', virtual_net
 
 register_cli_argument('network lb create', 'dns_name_for_public_ip', CliArgumentType(action=LBDNSNameAction))
 register_cli_argument('network lb create', 'dns_name_type', CliArgumentType(help=argparse.SUPPRESS))
-register_cli_argument('network lb create', 'private_ip_address_allocation', help='', choices=['Dynamic', 'Static'], default='Dynamic')
-register_cli_argument('network lb create', 'public_ip_address_allocation', help='', choices=['Dynamic', 'Static'], default='Dynamic')
-register_cli_argument('network lb create', 'subnet_name', options_list=('--subnet-name',))
+register_cli_argument('network lb create', 'private_ip_address_allocation', CliArgumentType(help='', choices=['dynamic', 'static'], default='dynamic'))
+register_cli_argument('network lb create', 'public_ip_address_allocation', CliArgumentType(help='', choices=['dynamic', 'static'], default='dynamic'))
+register_cli_argument('network lb create', 'subnet_name', CliArgumentType(options_list=('--subnet-name',)))
 
 register_cli_argument('network nsg create', 'name', name_arg_type)
-
-register_cli_argument('network public-ip create', 'public_ip_address_type', CliArgumentType(options_list=('--public-ip-address-type',)), help=argparse.SUPPRESS)
 
 register_cli_argument('network vpn-gateway', 'virtual_network_gateway_name', CliArgumentType(options_list=('--name', '-n')))
 

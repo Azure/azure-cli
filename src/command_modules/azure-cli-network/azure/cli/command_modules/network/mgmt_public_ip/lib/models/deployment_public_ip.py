@@ -9,7 +9,7 @@
 from msrest.serialization import Model
 
 
-class DeploymentPublicIP(Model):
+class DeploymentPublicIp(Model):
     """
     Deployment operation parameters.
 
@@ -17,7 +17,7 @@ class DeploymentPublicIP(Model):
     sending a request.
 
     :ivar uri: URI referencing the template. Default value:
-     "https://azuresdkci.blob.core.windows.net/templatehost/CreatePublicIP/azuredeploy.json"
+     "https://azuresdkci.blob.core.windows.net/templatehost/CreatePublicIp_2016-06-06/azuredeploy.json"
      .
     :vartype uri: str
     :param content_version: If included it must match the ContentVersion in
@@ -25,10 +25,11 @@ class DeploymentPublicIP(Model):
     :type content_version: str
     :ivar _artifacts_location: Container URI of of the template. Default
      value:
-     "https://azuresdkci.blob.core.windows.net/templatehost/CreatePublicIP" .
+     "https://azuresdkci.blob.core.windows.net/templatehost/Createpublic_ip_2016-06-06"
+     .
     :vartype _artifacts_location: str
     :param allocation_method: IP address Allocation method. Possible values
-     include: 'Dynamic', 'Static'. Default value: "Dynamic" .
+     include: 'dynamic', 'static'. Default value: "dynamic" .
     :type allocation_method: str
     :param dns_name: Globally unique DNS entry.
     :type dns_name: str
@@ -63,13 +64,13 @@ class DeploymentPublicIP(Model):
         'mode': {'key': 'properties.mode', 'type': 'str'},
     }
 
-    uri = "https://azuresdkci.blob.core.windows.net/templatehost/CreatePublicIP/azuredeploy.json"
+    uri = "https://azuresdkci.blob.core.windows.net/templatehost/CreatePublicIp_2016-06-06/azuredeploy.json"
 
-    _artifacts_location = "https://azuresdkci.blob.core.windows.net/templatehost/CreatePublicIP"
+    _artifacts_location = "https://azuresdkci.blob.core.windows.net/templatehost/Createpublic_ip_2016-06-06"
 
     mode = "Incremental"
 
-    def __init__(self, name, content_version=None, allocation_method="Dynamic", dns_name=None, location=None, public_ip_address_type="noDns"):
+    def __init__(self, name, content_version=None, allocation_method="dynamic", dns_name=None, location=None, public_ip_address_type="noDns"):
         self.content_version = content_version
         self.allocation_method = allocation_method
         self.dns_name = dns_name

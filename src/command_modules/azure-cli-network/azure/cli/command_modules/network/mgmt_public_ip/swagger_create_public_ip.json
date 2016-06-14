@@ -1,7 +1,7 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "PublicIPCreationClient",
+    "title": "PublicIpCreationClient",
     "version": "2015-11-01"
   },
   "host": "management.azure.com",
@@ -36,9 +36,9 @@
     "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Resources/deployments/{deploymentName}": {
       "put": {
         "tags": [
-          "PublicIP"
+          "PublicIp"
         ],
-        "operationId": "PublicIP_CreateOrUpdate",
+        "operationId": "PublicIp_CreateOrUpdate",
         "description": "Create or update a virtual machine.",
         "parameters": [
           {
@@ -67,7 +67,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/Deployment_PublicIP"
+              "$ref": "#/definitions/Deployment_PublicIp"
             },
             "description": "Additional parameters supplied to the operation."
           },
@@ -97,17 +97,17 @@
     }
   },
   "definitions": {
-    "Deployment_PublicIP": {
+    "Deployment_PublicIp": {
       "properties": {
         "properties": {
-          "$ref": "#/definitions/DeploymentProperties_PublicIP",
+          "$ref": "#/definitions/DeploymentProperties_PublicIp",
           "description": "Gets or sets the deployment properties.",
           "x-ms-client-flatten": true
         }
       },
       "description": "Deployment operation parameters."
     },
-    "DeploymentProperties_PublicIP": {
+    "DeploymentProperties_PublicIp": {
       "properties": {
         "templateLink": {
           "$ref": "#/definitions/TemplateLink",
@@ -115,7 +115,7 @@
           "x-ms-client-flatten": true
         },
         "parameters": {
-          "$ref": "#/definitions/PublicIPParameters",
+          "$ref": "#/definitions/PublicIpParameters",
           "type": "object",
           "description": "Deployment parameters. Use only one of Parameters or ParametersLink.",
           "x-ms-client-flatten": true
@@ -145,7 +145,7 @@
           "type": "string",
           "description": "URI referencing the template.",
           "enum": [
-            "https://azuresdkci.blob.core.windows.net/templatehost/CreatePublicIP/azuredeploy.json"
+            "https://azuresdkci.blob.core.windows.net/templatehost/CreatePublicIp_2016-06-06/azuredeploy.json"
           ]
         },
         "contentVersion": {
@@ -158,8 +158,7 @@
       ],
       "description": "Entity representing the reference to the template."
     },
-    "PublicIPParameters": {
-
+    "PublicIpParameters": {
       "properties": {
         "_artifactsLocation": {
           "type": "object",
@@ -195,7 +194,6 @@
       "required": [
         "name"
       ]
-
     },
     "DeploymentParameter_allocationMethod": {
       "properties": {
@@ -204,10 +202,10 @@
           "description": "IP address Allocation method.",
           "x-ms-client-name": "allocationMethod",
           "enum": [
-            "Dynamic",
-            "Static"
+            "dynamic",
+            "static"
           ],
-          "default": "Dynamic"
+          "default": "dynamic"
         }
       }
     },
@@ -240,7 +238,6 @@
       "required": [
         "value"
       ]
-
     },
     "DeploymentParameter_publicIpAddressType": {
       "properties": {
@@ -256,7 +253,6 @@
         }
       }
     },
-
     "DeploymentParameter__artifactsLocation": {
       "properties": {
         "value": {
@@ -264,7 +260,7 @@
           "description": "Container URI of of the template.",
           "x-ms-client-name": "_artifactsLocation",
           "enum": [
-            "https://azuresdkci.blob.core.windows.net/templatehost/CreatePublicIP"
+            "https://azuresdkci.blob.core.windows.net/templatehost/Createpublic_ip_2016-06-06"
           ]
         }
       },

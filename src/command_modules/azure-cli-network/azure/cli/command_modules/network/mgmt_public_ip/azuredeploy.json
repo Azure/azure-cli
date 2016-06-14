@@ -12,10 +12,10 @@
     "allocationMethod": {
       "type": "string",
       "allowedValues": [
-        "Dynamic",
-        "Static"
+        "dynamic",
+        "static"
       ],
-      "defaultValue": "Dynamic",
+      "defaultValue": "dynamic",
       "metadata": {
         "description": "IP address Allocation method."
       }
@@ -59,30 +59,33 @@
     "templateFilePaths": {
       "dns": "nested_templates/publicIpDeployment_dns.json",
       "noDns": "nested_templates/publicIpDeployment_nodns.json"
+    },
+    "ipConfiguration": {
+      "dns": {
+        "publicIPAllocationMethod": "[parameters('allocationMethod')]",
+        "dnsSettings": {
+          "domainNameLabel": "[parameters('dnsName')]"
+        }
+      },
+      "noDns": {
+        "publicIPAllocationMethod": "[parameters('allocationMethod')]"
+      }
     }
   },
   "resources": [
     {
-      "name": "[variables('deploymentName')]",
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2015-01-01",
-      "dependsOn": [
-      ],
-      "properties": {
-        "mode": "Incremental",
-        "templateLink": {
-          "uri": "[concat(parameters('_artifactsLocation'), '/', variables('templateFilePaths')[parameters('publicIpAddressType')])]",
-          "contentVersion": "1.0.0.0"
-        },
-        "parameters": {
-          "allocationMethod": { "value": "[parameters('allocationMethod')]" },
-          "location": { "value": "[parameters('location')]" },
-          "name": { "value": "[parameters('name')]" },
-          "publicIpDnsName": { "value": "[parameters('dnsName')]" }
-        }
-      }
+      "name": "[parameters('name')]",
+      "type": "Microsoft.Network/publicIPAddresses",
+      "location": "[parameters('location')]",
+      "apiVersion": "2015-06-15",
+      "dependsOn": [ ],
+      "properties": "[variables('ipConfiguration')[parameters('publicIpAddressType')]]"
     }
   ],
   "outputs": {
+    "publicIp": {
+      "type": "object",
+      "value": "[reference(parameters('name'))]"
+    }
   }
 }
