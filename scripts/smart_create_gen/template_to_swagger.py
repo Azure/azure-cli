@@ -507,7 +507,8 @@ def convert_template_to_swagger(*args):
         for key, value in sorted(params.items(), key=lambda item: item[0]):
             comment = value['metadata'].get('description')
             if not comment:
-                print('No comment found for {}'.format(value))
+                print('FAILURE: Description metadata is required for all parameters. Not found for {}'.format(value))
+                sys.exit(-1)
             param_strs.append(swagger_template_param.format(
                 key, comment or '', get_required(value), get_enum(value), get_default(value)))
 

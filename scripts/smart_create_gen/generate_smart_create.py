@@ -73,7 +73,6 @@ def generate_smart_create(*args):
                 with open(os.path.join(root, file), 'r') as original: data = original.read()
                 with open(os.path.join(root, file), 'w') as modified: modified.write("#pylint: skip-file\n" + data)    
 
-    print('SRC: {}\nDST: {}'.format(autorest_generated_path, os.path.join(dest, 'lib')))
     # Rename the generated file directory to lib
     distutils.dir_util.copy_tree(autorest_generated_path, os.path.join(dest, 'lib'))
     
