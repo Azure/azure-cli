@@ -31,7 +31,7 @@ def _get_mgmt_service_client(client_type, subscription_bound=True):
         # functionality of the generated client to avoid having to access
         # private members
         client._client.add_header(header, value) #pylint: disable=protected-access
-    
+
     client._client.add_header('CommandName', APPLICATION.session['command']) #pylint: disable=protected-access
     client.config.generate_client_request_id = \
         'x-ms-client-request-id' not in APPLICATION.session['headers']
