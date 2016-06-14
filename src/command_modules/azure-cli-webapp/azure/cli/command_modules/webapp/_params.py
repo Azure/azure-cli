@@ -1,7 +1,5 @@
-#pylint: disable=unused-import
-import argparse
-
 from azure.cli.commands import CliArgumentType, register_cli_argument
+import azure.cli.commands.parameters #pylint: disable=unused-import
 
 from azure.mgmt.web import WebSiteManagementClient
 from azure.cli.commands.client_factory import get_mgmt_service_client

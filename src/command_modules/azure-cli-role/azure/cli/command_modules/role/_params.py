@@ -1,5 +1,7 @@
 from azure.mgmt.authorization import AuthorizationManagementClient
 
+import azure.cli.commands.parameters #pylint: disable=unused-import
+
 from azure.cli.commands.client_factory import get_mgmt_service_client
 
 # FACTORIES
