@@ -243,7 +243,7 @@ def capture_vm(resource_group_name, vm_name, vhd_name_prefix,
     result = LongRunningOperation()(poller)
     print(json.dumps(result.output, indent=2)) # pylint: disable=no-member
 
-def set_windows_user_password(
+def reset_windows_admin(
         resource_group_name, vm_name, username, password):
     '''Update the password.
     You can only change the password. Adding a new user is not supported.
