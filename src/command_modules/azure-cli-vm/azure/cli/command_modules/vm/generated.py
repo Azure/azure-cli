@@ -23,7 +23,7 @@ from .custom import (
     list_vm, resize_vm, list_vm_images, list_vm_extension_images, list_ip_addresses,
     attach_new_disk, attach_existing_disk, detach_disk, list_disks, capture_vm,
     vm_update_nics, vm_delete_nics, vm_add_nics,
-    set_windows_user_password, set_linux_user, delete_linux_user,
+    reset_windows_admin, set_linux_user, delete_linux_user,
     disable_boot_diagnostics, enable_boot_diagnostics, get_boot_log,
     list_extensions, set_extension, set_diagnostics_extension,
     show_default_diagnostics_configuration,
@@ -67,7 +67,7 @@ cli_command('vm nic update', vm_update_nics)
 # VM Access
 cli_command('vm access set-linux-user', set_linux_user)
 cli_command('vm access delete-linux-user', delete_linux_user)
-cli_command('vm access set-windows-user-password', set_windows_user_password)
+cli_command('vm access reset-windows-admin', reset_windows_admin)
 
 # VM Availability Set
 factory = lambda _: get_mgmt_service_client(AvailSetClient).avail_set
