@@ -1,5 +1,7 @@
 # pylint: disable=line-too-long
-from azure.cli.commands.parameters import tags_type, name_type
+from azure.cli.commands.parameters import (tags_type,
+                                           name_type,
+                                           get_resource_name_completion_list)
 from azure.cli.commands import register_cli_argument, CliArgumentType
 from azure.cli.commands.validators import validate_key_value_pairs
 
@@ -202,13 +204,14 @@ register_cli_argument('storage', 'permission', permission_type)
 register_cli_argument('storage', 'start', start_type)
 register_cli_argument('storage', 'timeout', timeout_type)
 
-register_cli_argument('storage account', 'account_name', name_type)
+register_cli_argument('storage account', 'account_name', name_type, help='the storage account name', completer=get_resource_name_completion_list('Microsoft.Storage/storageAccounts'))
 register_cli_argument('storage account', 'account_type', account_type_type, options_list=('--type', '-t'))
 register_cli_argument('storage account', 'tags', tags_type)
 register_cli_argument('storage account keys', 'key', key_type)
 
 register_cli_argument('storage account connection-string', 'use_http', use_http_type)
-register_cli_argument('storage account connection-string', 'account_name', account_name_type)
+register_cli_argument('storage account connection-string', 'account_name', account_name_type, completer=get_resource_name_completion_list('Microsoft.Storage/storageAccounts'))
+register_cli_argument('storage account create', 'account_name', completer=None)
 
 register_cli_argument('storage account generate-sas', 'resource_types', resource_types_type)
 register_cli_argument('storage account generate-sas', 'services', services_type)
