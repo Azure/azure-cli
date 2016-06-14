@@ -63,8 +63,8 @@ class VMCombinedListTest(VCRTestBase):
         self.execute()
 
     def body(self):
-        all_vms = self.cmd('vm list -o json')
-        some_vms = self.cmd('vm list -g travistestresourcegroup -o json')
+        all_vms = self.cmd('vm list')
+        some_vms = self.cmd('vm list -g travistestresourcegroup')
         assert len(all_vms) > len(some_vms)
 
 class VMResizeTest(VCRTestBase):
@@ -77,7 +77,7 @@ class VMResizeTest(VCRTestBase):
     def body(self):
         group = 'yugangw4'
         vm_name = 'yugangw4-1'
-        vm = self.cmd('vm show -g {} -n {} -o json'.format(group, vm_name))
+        vm = self.cmd('vm show -g {} -n {}'.format(group, vm_name))
         new_size = 'Standard_A4' if vm['hardwareProfile']['vmSize'] == 'Standard_A3' else 'Standard_A3'
         self.cmd('vm resize -g {} -n {} --size {}'.format(group, vm_name, new_size),
             checks=JMESPathCheck('hardwareProfile.vmSize', new_size))
@@ -394,11 +394,11 @@ class VMExtensionImageSearchScenarioTest(VCRTestBase):
         #the parallel searching behavior that causes incomplete VCR recordings.
         publisher = 'Vormetric.VormetricTransparentEncryption'
         image_name = 'VormetricTransparentEncryptionAgent'
-        self.cmd('vm extension image list -l westus --publisher {} --name {} -o json'.format(publisher, image_name), checks=[
+        self.cmd('vm extension image list -l westus --publisher {} --name {}'.format(publisher, image_name), checks=[
             JMESPathCheck('type(@)', 'array'),
             JMESPathCheck("length([?name == '{}']) == length(@)".format(image_name), True)
         ])
-        result = self.cmd('vm extension image list -l westus --publisher {} --name {} --latest -o json'.format(publisher, image_name))
+        result = self.cmd('vm extension image list -l westus --publisher {} --name {} --latest'.format(publisher, image_name))
         assert len(result) == 1
 
 class VMScaleSetGetsScenarioTest(VCRTestBase):
@@ -467,11 +467,11 @@ class VMScaleSetScaleUpScenarioTest(VCRTestBase):
         self.execute()
 
     def body(self):
-        result = self.cmd('vm scaleset show --resource-group {} --name {} -o json'.format(self.resource_group, self.ss_name))
+        result = self.cmd('vm scaleset show --resource-group {} --name {}'.format(self.resource_group, self.ss_name))
         capacity = result['sku']['capacity']
         new_capacity = capacity + 1 if capacity < 3 else capacity-1
         self.cmd('vm scaleset scale --resource-group {} --name {} --new-capacity {}'.format(self.resource_group, self.ss_name, new_capacity))
-        result = self.cmd('vm scaleset show --resource-group {} --name {} -o json'.format(self.resource_group, self.ss_name))
+        result = self.cmd('vm scaleset show --resource-group {} --name {}'.format(self.resource_group, self.ss_name))
         assert result['sku']['capacity'] == new_capacity
 
 class VMScaleSetDeleteScenarioTest(VCRTestBase):
@@ -878,16 +878,16 @@ class VMDataDiskVCRTest(ResourceGroupVCRTestBase):
         self.vm_name = 'vm-datadisk-test'
 
     def test_vm_data_disk(self):
-        self.execute(verify_test_output=True)
+        self.execute()
 
     def body(self):
-        self.run_command_no_verify('vm create -g {} --location {} -n {} --admin-username ubuntu '
+        self.cmd('vm create -g {} --location {} -n {} --admin-username ubuntu '
                  '--image UbuntuLTS --admin-password testPassword0 '
                  '--deployment-name {} --authentication-type password'.format(
                      self.resource_group, self.location, self.vm_name, self.deployment_name))
 
         #check we have no data disk
-        result = self.run_command_no_verify('vm show -g {} -n {} -o json'.format(self.resource_group, self.vm_name))
+        result = self.cmd('vm show -g {} -n {}'.format(self.resource_group, self.vm_name))
         self.assertFalse(bool(result['storageProfile']['dataDisks']))
 
         #get the vhd uri from VM's storage_profile
@@ -895,10 +895,10 @@ class VMDataDiskVCRTest(ResourceGroupVCRTestBase):
         disk_name = 'd1'
 
         #now attach
-        self.run_command_no_verify('vm disk attach-new -g {} --vm-name {} -n {} --vhd {} --caching ReadWrite --disk-size 8 --lun 1'.format(
+        self.cmd('vm disk attach-new -g {} --vm-name {} -n {} --vhd {} --caching ReadWrite --disk-size 8 --lun 1'.format(
             self.resource_group, self.vm_name, disk_name, vhd_uri))
         #check we have a data disk
-        result = self.run_command_no_verify('vm show -g {} -n {} -o json'.format(self.resource_group, self.vm_name))
+        result = self.cmd('vm show -g {} -n {}'.format(self.resource_group, self.vm_name))
         self.assertEqual(1, len(result['storageProfile']['dataDisks']))
         disk = {
             "caching": "ReadWrite",
@@ -913,19 +913,19 @@ class VMDataDiskVCRTest(ResourceGroupVCRTestBase):
             }
         self.assertEqual(result['storageProfile']['dataDisks'][0], disk)
         #now detach
-        self.run_command_no_verify('vm disk detach -g {} --vm-name {} -n {}'.format(
+        self.cmd('vm disk detach -g {} --vm-name {} -n {}'.format(
             self.resource_group, self.vm_name, disk_name))
 
         #check we have no data disk
-        result = self.run_command_no_verify('vm show -g {} -n {} -o json'.format(self.resource_group, self.vm_name))
+        result = self.cmd('vm show -g {} -n {}'.format(self.resource_group, self.vm_name))
         self.assertFalse(bool(result['storageProfile']['dataDisks']))
 
         #now attach to existing
-        self.run_command_no_verify('vm disk attach-existing -g {} --vm-name {} -n {} --vhd {} --caching ReadOnly'.format(
+        self.cmd('vm disk attach-existing -g {} --vm-name {} -n {} --vhd {} --caching ReadOnly'.format(
             self.resource_group, self.vm_name, disk_name, vhd_uri))
 
         #check we have a data disk
-        result = self.run_command_no_verify('vm show -g {} -n {} -o json'.format(self.resource_group, self.vm_name))
+        result = self.cmd('vm show -g {} -n {}'.format(self.resource_group, self.vm_name))
         self.assertEqual(1, len(result['storageProfile']['dataDisks']))
         disk2 = {
             "lun": 0,

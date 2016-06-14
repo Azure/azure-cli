@@ -25,6 +25,9 @@ COMMAND_COVERAGE_FILENAME = 'command_coverage.txt'
 
 # MOCK METHODS
 
+def _mock_handle_exceptions(ex):
+    raise ex
+
 def _mock_subscriptions(self): #pylint: disable=unused-argument
     return [{
         "id": "00000000-0000-0000-0000-000000000000",
@@ -78,7 +81,7 @@ class BooleanCheck(object): # pylint: disable=too-few-public-methods
         self.expected_result = expected_result
 
     def compare(self, data):
-        result = str(data.lower() in ('yes', 'true', 't', '1'))
+        result = str(str(data).lower() in ['yes', 'true', '1'])
         try:
             assert result == str(self.expected_result)
         except AssertionError:
@@ -178,6 +181,7 @@ class VCRTestBase(unittest.TestCase):#pylint: disable=too-many-instance-attribut
                 del response['headers'][key]
         return response
 
+    @mock.patch('azure.cli.main._handle_exception', _mock_handle_exceptions)
     def _execute_live_or_recording(self):
         #pylint: disable=no-member
         try:
@@ -200,6 +204,7 @@ class VCRTestBase(unittest.TestCase):#pylint: disable=too-many-instance-attribut
 
     @mock.patch('azure.cli._profile.Profile.load_cached_subscriptions', _mock_subscriptions)
     @mock.patch('azure.cli._profile.CredsCache.retrieve_token_for_user', _mock_user_access_token)
+    @mock.patch('azure.cli.main._handle_exception', _mock_handle_exceptions)
     @mock.patch('msrestazure.azure_operation.AzureOperationPoller._delay', _mock_operation_delay)
     @mock.patch('time.sleep', _mock_operation_delay)
     @mock.patch('azure.cli.commands.LongRunningOperation._delay', _mock_operation_delay)
@@ -212,13 +217,13 @@ class VCRTestBase(unittest.TestCase):#pylint: disable=too-many-instance-attribut
     # COMMAND METHODS
 
     def cmd(self, command, checks=None, allowed_exceptions=None, debug=False): #pylint: disable=no-self-use
-        allowed_exceptions = allowed_exceptions if allowed_exceptions else []
+        allowed_exceptions = allowed_exceptions or []
         if self._debug or debug:
             print('\n\tRUNNING: {}'.format(command))
         command_list = shlex.split(command)
         output = StringIO()
         try:
-            cli(command_list, file=output, surface_exceptions=True)
+            cli(command_list, file=output)
         except Exception as ex: # pylint: disable=broad-except
             if not isinstance(allowed_exceptions, list):
                 allowed_exceptions = [allowed_exceptions]
@@ -230,16 +235,17 @@ class VCRTestBase(unittest.TestCase):#pylint: disable=too-many-instance-attribut
 
         if self._debug or debug:
             print('\tRESULT: {}\n'.format(result))
-        if not checks:
-            if '-o json' in command:
-                result = result if result else '{}'
-                return json.loads(result)
-            else:
-                return result
-        else:
+
+        if checks:
             checks = [checks] if not isinstance(checks, list) else checks
             for check in checks:
                 check.compare(result)
+
+        result = result or '{}'
+        try:
+            return json.loads(result)
+        except Exception: # pylint: disable=broad-except
+            return result
 
     def set_env(self, key, val): #pylint: disable=no-self-use
         os.environ[key] = val

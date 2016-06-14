@@ -51,8 +51,8 @@ class ResourceScenarioTest(VCRTestBase):
     def body(self):
         s = self
         rg = 'travistestresourcegroup'
-        all_resources = s.cmd('resource list -o json')
-        some_resources = s.cmd('resource list -l centralus -o json')
+        all_resources = s.cmd('resource list')
+        some_resources = s.cmd('resource list -l centralus')
         assert len(all_resources) > len(some_resources)
 
         s.cmd('resource list -l centralus',
@@ -68,9 +68,9 @@ class ResourceScenarioTest(VCRTestBase):
         s.cmd('resource list -g yugangw',
             checks=JMESPathCheck("length([?resourceGroup == 'yugangw']) == length(@)", True))
 
-        all_tagged_displayname = s.cmd('resource list --tag displayName -o json')
+        all_tagged_displayname = s.cmd('resource list --tag displayName')
         storage_acc_tagged_displayname = \
-            s.cmd('resource list --tag displayName=StorageAccount -o json')
+            s.cmd('resource list --tag displayName=StorageAccount')
         assert len(all_tagged_displayname) > len(storage_acc_tagged_displayname)
 
         s.cmd('resource tag -n testserver23456 -g {} --resource-type Microsoft.Sql/servers --tags test=pass'.format(rg))
@@ -113,7 +113,7 @@ class TagScenarioTest(VCRTestBase):
 
     def set_up(self):
         tn = self.tag_name
-        tags = self.cmd('tag list --query "[?tagName == \'{}\'].values[].tagValue" -o json'.format(tn))
+        tags = self.cmd('tag list --query "[?tagName == \'{}\'].values[].tagValue"'.format(tn))
         for tag in tags:
             self.cmd('tag remove-value -n {} --value {}'.format(tn, tag))
         self.cmd('tag delete -n {}'.format(tn))

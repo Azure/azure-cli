@@ -48,13 +48,13 @@ class RoleAssignmentScenarioTest(VCRTestBase):
         resource = 'testsql23456/'
         parent_path = 'servers/testserver23456'
 
-        list_all = s.cmd('role assignment list -o json')
-        list_some = s.cmd('role assignment list --filter "principalId eq \'{}\'" -o json'.format(principal_id))
+        list_all = s.cmd('role assignment list')
+        list_some = s.cmd('role assignment list --filter "principalId eq \'{}\'"'.format(principal_id))
         assert len(list_all) > len(list_some)
 
         s.cmd('role assignment list-for-scope --scope {}'.format(scope),
             checks=JMESPathCheck("length([].properties.contains(scope, '{}')) == length(@)".format(scope), True))
 
         id = '/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst39112/providers/Microsoft.Authorization/roleAssignments/b022bb45-7fc4-4125-b781-72b49c38ba18'
-        res = s.cmd("role assignment show-by-id --role-assignment-id {} -o json".format(id))['id']
+        res = s.cmd("role assignment show-by-id --role-assignment-id {}".format(id))['id']
         assert res == id

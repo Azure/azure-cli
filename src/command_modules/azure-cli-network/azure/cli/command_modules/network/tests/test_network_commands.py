@@ -1,9 +1,9 @@
-﻿from azure.cli.utils.vcr_test_base import (VCRTestBase, ResourceGroupVCRTestBase, JMESPathCheck,
-                                           NoneCheck)
-
-#pylint: disable=method-hidden
+﻿#pylint: disable=method-hidden
 #pylint: disable=line-too-long
 #pylint: disable=bad-continuation
+
+from azure.cli.utils.vcr_test_base import (VCRTestBase, ResourceGroupVCRTestBase, JMESPathCheck,
+                                           NoneCheck)
 
 # TODO Make these full scenario tests when we can create the resources through network commands.
 # So currently, the tests assume the resources have been created through some other means.
@@ -72,36 +72,46 @@ class NetworkAppGatewayScenarioTest(VCRTestBase):
         # Expecting the resource to no longer appear in the list
         self.cmd('network application-gateway list --resource-group {}'.format(rg), checks=NoneCheck())
 
-class NetworkPublicIpScenarioTest(VCRTestBase):
+class NetworkPublicIpScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
         super(NetworkPublicIpScenarioTest, self).__init__(__file__, test_method)
-        self.resource_group = 'cli_test1'
-        self.public_ip_name = 'windowsvm'
+        self.public_ip_name = 'pubipdns'
+        self.public_ip_no_dns_name = 'pubipnodns'
+        self.dns = 'woot'
 
     def test_network_public_ip(self):
         self.execute()
 
-    def set_up(self):
-        if not self.cmd('network public-ip show --resource-group {} --name {}'.format(
-            self.resource_group, self.public_ip_name)):
-            raise RuntimeError('Public IP must be manually created in order to support this test.')
-
     def body(self):
-        self.cmd('network public-ip list-all', checks=JMESPathCheck('type(@)', 'array'))
-        self.cmd('network public-ip list --resource-group {}'.format(self.resource_group), checks=[
-            JMESPathCheck('type(@)', 'array'),
-            JMESPathCheck("length([?resourceGroup == '{}']) == length(@)".format(self.resource_group), True)
+        s = self
+        rg = s.resource_group
+        # See documentation for guidance regarding deployment name in tests
+        count = 12
+        deploy1 = 'ipdeploy{}'.format(count)
+        deploy2 = 'ipnodnsdeploy{}'.format(count)
+        s.cmd('network public-ip create -g {} -n {} --dns-name {} --allocation-method static --deployment-name {}'.format(rg, s.public_ip_name, s.dns, deploy1), checks=[
+            JMESPathCheck('publicIp.value.provisioningState', 'Succeeded'),
+            JMESPathCheck('publicIp.value.publicIPAllocationMethod', 'Static'),
+            JMESPathCheck('publicIp.value.dnsSettings.domainNameLabel', s.dns)
         ])
-        self.cmd('network public-ip show --resource-group {} --name {}'.format(
-            self.resource_group, self.public_ip_name), checks=[
+        s.cmd('network public-ip create -g {} -n {} --deployment-name {}'.format(rg, s.public_ip_no_dns_name, deploy2), checks=[
+            JMESPathCheck('publicIp.value.provisioningState', 'Succeeded'),
+            JMESPathCheck('publicIp.value.publicIPAllocationMethod', 'Dynamic'),
+            JMESPathCheck('publicIp.value.dnsSettings', None)
+        ])
+        s.cmd('network public-ip list-all', checks=JMESPathCheck('type(@)', 'array'))
+        ip_list = s.cmd('network public-ip list -g {}'.format(rg))
+        assert not [x for x in ip_list if x['resourceGroup'].lower() != rg]
+
+        s.cmd('network public-ip show -g {} -n {}'.format(rg, s.public_ip_name), checks=[
             JMESPathCheck('type(@)', 'object'),
-            JMESPathCheck('name', self.public_ip_name),
-            JMESPathCheck('resourceGroup', self.resource_group),
+            JMESPathCheck('name', s.public_ip_name),
+            JMESPathCheck('resourceGroup', rg),
         ])
-        self.cmd('network public-ip delete --resource-group {} --name {}'.format(
-            self.resource_group, self.public_ip_name))
-        self.cmd('network public-ip list --resource-group {}'.format(self.resource_group), checks=NoneCheck())
+        s.cmd('network public-ip delete -g {} -n {}'.format(rg, s.public_ip_name))
+        s.cmd('network public-ip list -g {}'.format(rg),
+            checks=JMESPathCheck("length[?name == '{}']".format(s.public_ip_name), None))
 
 class NetworkExpressRouteScenarioTest(VCRTestBase):
 

@@ -39,7 +39,7 @@ class StorageAccountCreateAndDeleteTest(VCRTestBase):
 
     def set_up(self):
         self.cmd('storage account delete -g {} -n {}'.format(RESOURCE_GROUP_NAME, self.account))
-        result = self.cmd('storage account check-name --name {} -o json'.format(self.account))
+        result = self.cmd('storage account check-name --name {}'.format(self.account))
         if not result['nameAvailable']:
             raise CLIError('Failed to delete pre-existing storage account {}. Unable to continue test.'.format(self.account))
 
@@ -96,19 +96,20 @@ class StorageAccountScenarioTest(VCRTestBase):
             JMESPathCheck('resourceGroup', rg)
         ])
         s.cmd('storage account show-usage', checks=JMESPathCheck('name.value', 'StorageAccounts'))
-        cs = s.cmd('storage account connection-string -g {} -n {} --use-http'.format(rg, account))
-        assert 'https' not in cs
-        assert account in cs
-        keys = s.cmd('storage account keys list -g {} -n {} -o json'.format(rg, account))
+        s.cmd('storage account connection-string -g {} -n {} --use-http'.format(rg, account), checks=[
+            JMESPathCheck("contains(ConnectionString, 'https')", False),
+            JMESPathCheck("contains(ConnectionString, '{}')".format(account), True)
+        ])
+        keys = s.cmd('storage account keys list -g {} -n {}'.format(rg, account))
         key1 = keys['key1']
         key2 = keys['key2']
         assert key1 and key2
-        keys = s.cmd('storage account keys renew -g {} -n {} -o json'.format(rg, account))
+        keys = s.cmd('storage account keys renew -g {} -n {}'.format(rg, account))
         assert key1 != keys['key1']
         key1 = keys['key1']
         assert key2 != keys['key2']
         key2 = keys['key2']
-        keys = s.cmd('storage account keys renew -g {} -n {} --key secondary -o json'.format(rg, account))
+        keys = s.cmd('storage account keys renew -g {} -n {} --key secondary'.format(rg, account))
         assert key1 == keys['key1']
         assert key2 != keys['key2']
         s.cmd('storage account set -g {} -n {} --tags foo=bar;cat'.format(rg, account),
@@ -179,7 +180,7 @@ class StorageBlobScenarioTest(VCRTestBase):
         s.cmd('storage blob metadata set -n {} -c {}'.format(blob, container))
         s.cmd('storage blob metadata show -n {} -c {}'.format(blob, container), checks=NoneCheck())
 
-        res = s.cmd('storage blob list --container-name {} -o json'.format(container))['items']
+        res = s.cmd('storage blob list --container-name {}'.format(container))['items']
         blob_list = [block_blob, append_blob, page_blob]
         for item in res:
             assert item['name'] in blob_list
@@ -220,7 +221,7 @@ class StorageBlobScenarioTest(VCRTestBase):
             JMESPathCheck('properties.lease.state', 'available'),
             JMESPathCheck('properties.lease.status', 'unlocked')
         ])
-        json_result = s.cmd('storage blob snapshot -c {} -n {} -o json'.format(container, append_blob))
+        json_result = s.cmd('storage blob snapshot -c {} -n {}'.format(container, append_blob))
         snapshot_dt = json_result['snapshot']
         s.cmd('storage blob exists -n {} -c {} --snapshot {}'.format(append_blob, container, snapshot_dt),
             checks=BooleanCheck(True))
@@ -246,7 +247,7 @@ class StorageBlobScenarioTest(VCRTestBase):
         s.cmd('storage container exists -n {}'.format(container), checks=BooleanCheck(True))
 
         s.cmd('storage container show -n {}'.format(container), checks=JMESPathCheck('name', container))
-        res = s.cmd('storage container list -o json')['items']
+        res = s.cmd('storage container list')['items']
         assert container in [x['name'] for x in res]
 
         s.cmd('storage container metadata set -n {} --metadata foo=bar;moo=bak;'.format(container))
@@ -330,7 +331,7 @@ class StorageBlobCopyScenarioTest(VCRTestBase):
 
         # test that a blob can be successfully copied
         src_uri = s.cmd('storage blob url -n {} -c {}'.format(src_blob, src_cont))
-        copy_status = s.cmd('storage blob copy start -c {0} -n {1} -u {2} -o json'.format(
+        copy_status = s.cmd('storage blob copy start -c {0} -n {1} -u {2}'.format(
             dst_cont, dst_blob, src_uri))
         assert copy_status['status'] == 'success'
         copy_id = copy_status['id']
@@ -431,7 +432,7 @@ class StorageFileScenarioTest(VCRTestBase):
         s.cmd('storage file url --share-name {} --name {}'.format(share, filename),
             checks=StringCheck(file_url))
 
-        res = [x['name'] for x in s.cmd('storage share contents -n {} -o json'.format(share))['items']]
+        res = [x['name'] for x in s.cmd('storage share contents -n {}'.format(share))['items']]
         assert filename in res
 
         s.cmd('storage file delete --share-name {} --name {}'.format(share, filename))
@@ -454,7 +455,7 @@ class StorageFileScenarioTest(VCRTestBase):
         else:
             io.print_('\nDownload failed. Test failed!')
 
-        res = [x['name'] for x in s.cmd('storage share contents --name {} --directory-name {} -o json'.format(share, dir))['items']]
+        res = [x['name'] for x in s.cmd('storage share contents --name {} --directory-name {}'.format(share, dir))['items']]
         assert filename in res
 
         s.cmd('storage share stats --name {}'.format(share),
@@ -484,7 +485,7 @@ class StorageFileScenarioTest(VCRTestBase):
             JMESPathCheck('cat', 'hat'),
             JMESPathCheck('foo', 'bar')
         ])
-        res = [x['name'] for x in s.cmd('storage share list -o json')['items']]
+        res = [x['name'] for x in s.cmd('storage share list')['items']]
         assert share1 in res
         assert share2 in res
 
@@ -560,7 +561,7 @@ class StorageFileCopyScenarioTest(VCRTestBase):
 
         # test that a file can be successfully copied to root
         src_uri = s.cmd('storage file url -n {} -s {} -d {}'.format(src_file, src_share, src_dir))
-        copy_status = s.cmd('storage file copy start -s {0} -n {1} -u {2} -o json'.format(
+        copy_status = s.cmd('storage file copy start -s {0} -n {1} -u {2}'.format(
             dst_share, dst_file, src_uri))
         assert copy_status['status'] == 'success'
         copy_id = copy_status['id']
@@ -571,7 +572,7 @@ class StorageFileCopyScenarioTest(VCRTestBase):
         ])
 
         # test that a file can be successfully copied to a directory
-        copy_status = s.cmd('storage file copy start -s {0} -n {1} -d {3} -u {2} -o json'.format(
+        copy_status = s.cmd('storage file copy start -s {0} -n {1} -d {3} -u {2}'.format(
             dst_share, dst_file, src_uri, dst_dir))
         assert copy_status['status'] == 'success'
         copy_id = copy_status['id']
@@ -608,7 +609,7 @@ def _acl_body(test):
     s.cmd('storage {} policy create {} --policy test2 --start 2016-01-01T00:00Z'.format(service, container_param))
     s.cmd('storage {} policy create {} --policy test3 --expiry 2018-01-01T00:00Z'.format(service, container_param))
     s.cmd('storage {} policy create {} --policy test4 --permission rwdl --start 2016-01-01T00:00Z --expiry 2016-05-01T00:00Z'.format(service, container_param))
-    acl = sorted(ast.literal_eval(json.dumps(s.cmd('storage {} policy list {} -o json'.format(service, container_param)))))
+    acl = sorted(ast.literal_eval(json.dumps(s.cmd('storage {} policy list {}'.format(service, container_param)))))
     assert acl == ['test1', 'test2', 'test3', 'test4']
     s.cmd('storage {} policy show {} --policy test1'.format(service, container_param),
         checks=JMESPathCheck('permission', 'l'))
@@ -625,7 +626,7 @@ def _acl_body(test):
     s.cmd('storage {} policy show {} --policy test1'.format(service, container_param),
         checks=JMESPathCheck('permission', 'r'))
     s.cmd('storage {} policy delete {} --policy test1'.format(service, container_param))
-    acl = sorted(ast.literal_eval(json.dumps(s.cmd('storage {} policy list {} -o json'.format(service, container_param)))))
+    acl = sorted(ast.literal_eval(json.dumps(s.cmd('storage {} policy list {}'.format(service, container_param)))))
     assert acl == ['test2', 'test3', 'test4']
 
 def _acl_tear_down(test):
