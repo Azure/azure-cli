@@ -5,7 +5,7 @@ import sys
 import fileinput
 import pip
 import imp
-
+import subprocess
 from _common import get_all_command_modules, exec_command, print_summary, COMMAND_MODULE_PREFIX
 
 LIBS_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..', '..', '..', 'libs'))
@@ -79,8 +79,14 @@ if failed_module_names:
 print_heading('Installed command package(s).')
 
 # STEP 3:: Validate the installation
+try:
+    az_output = subprocess.check_output(['az', '--debug'], stderr=subprocess.STDOUT, universal_newlines=True)
+    success = 'Error loading command module' not in az_output
+    print(az_output, file=sys.stderr)
+except subprocess.CalledProcessError as err:
+    success = False
+    print(err, file=sys.stderr)
 
-success = exec_command('az')
 if not success:
     print_heading('Error running the CLI!', file=sys.stderr)
     sys.exit(1)
