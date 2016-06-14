@@ -81,7 +81,7 @@ print_heading('Installed command package(s).')
 # STEP 3:: Validate the installation
 try:
     az_output = subprocess.check_output(['az', '--debug'], stderr=subprocess.STDOUT, universal_newlines=True)
-    success = False if 'Error loading command module' in az_output else True
+    success = 'Error loading command module' not in az_output
     print(az_output, file=sys.stderr)
 except subprocess.CalledProcessError as err:
     success = False
