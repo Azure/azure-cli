@@ -24,15 +24,15 @@ def _get_mgmt_service_client(client_type, subscription_bound=True):
 
     _debug.allow_debug_connection(client)
 
-    client.config.add_user_agent("AZURECLI/{}/{}".format(
-        cli.__version__,
-        APPLICATION.session['command']))
+    client.config.add_user_agent("AZURECLI/{}".format(cli.__version__))
 
     for header, value in APPLICATION.session['headers'].items():
         # We are working with the autorest team to expose the add_header
         # functionality of the generated client to avoid having to access
         # private members
         client._client.add_header(header, value) #pylint: disable=protected-access
+    
+    client._client.add_header('CommandName', APPLICATION.session['command']) #pylint: disable=protected-access
     client.config.generate_client_request_id = \
         'x-ms-client-request-id' not in APPLICATION.session['headers']
 
