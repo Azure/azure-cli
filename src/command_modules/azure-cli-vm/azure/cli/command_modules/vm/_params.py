@@ -3,6 +3,8 @@ import argparse
 import getpass
 import os
 
+from argcomplete.completers import FilesCompleter
+
 from azure.mgmt.compute.models import VirtualHardDisk
 
 from azure.cli.command_modules.vm._validators import MinMaxValue
@@ -57,7 +59,8 @@ register_cli_argument(
     'vm container', 'ssh_key_value', CliArgumentType(
         required=False,
         help='SSH key file value or key file path.',
-        default=os.path.join(os.path.expanduser('~'), '.ssh', 'id_rsa.pub')
+        default=os.path.join(os.path.expanduser('~'), '.ssh', 'id_rsa.pub'),
+        completer=FilesCompleter()
     )
 )
 register_cli_argument('vm container create', 'agent_vm_size', CliArgumentType(completer=get_vm_size_completion_list))
@@ -111,6 +114,7 @@ for scope in ['vm create', 'vm scaleset create']:
     register_cli_argument(scope, 'dns_name_type', CliArgumentType(help=argparse.SUPPRESS))
     register_cli_argument(scope, 'admin_username', admin_username_type)
     register_cli_argument(scope, 'ssh_key_value', CliArgumentType(action=VMSSHFieldAction))
+    register_cli_argument(scope, 'ssh_dest_key_path', completer=FilesCompleter())
     register_cli_argument(scope, 'dns_name_for_public_ip', CliArgumentType(action=VMDNSNameAction))
     register_cli_argument(scope, 'authentication_type', authentication_type)
     register_cli_argument(scope, 'availability_set_type', CliArgumentType(choices=['none', 'existing'], help='', default='none'))
