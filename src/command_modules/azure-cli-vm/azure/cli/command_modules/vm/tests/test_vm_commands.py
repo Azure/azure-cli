@@ -1000,3 +1000,76 @@ class VMCreateCustomIP(ResourceGroupVCRTestBase):
                                     .format(vm_name=vm_name, resource_group=self.resource_group), [
                                         JMESPathComparator('ipConfigurations[0].privateIpAllocationMethod', 'Static')
                                         ])
+
+class VMDataDiskVCRTest(ResourceGroupVCRTestBase):
+
+    def __init__(self, test_method):
+        super(VMDataDiskVCRTest, self).__init__(__file__, test_method)
+        self.deployment_name = 'azurecli-test-datadisk'
+        self.resource_group = 'cliTestRg_datadisk'
+        self.location = 'westus'
+        self.vm_name = 'vm-datadisk-test'
+
+    def test_vm_data_disk(self):
+        self.execute(verify_test_output=True)
+
+    def body(self):
+        self.run_command_no_verify('vm create -g {} --location {} -n {} --admin-username ubuntu '
+                 '--image UbuntuLTS --admin-password testPassword0 '
+                 '--deployment-name {} --authentication-type password'.format(
+                     self.resource_group, self.location, self.vm_name, self.deployment_name))
+
+        #check we have no data disk
+        result = self.run_command_no_verify('vm show -g {} -n {} -o json'.format(self.resource_group, self.vm_name))
+        self.assertFalse(bool(result['storageProfile']['dataDisks']))
+
+        #get the vhd uri from VM's storage_profile
+        vhd_uri = result['storageProfile']['osDisk']['vhd']['uri'].replace('.vhd', '-datadisk.vhd')
+        disk_name = 'd1'
+
+        #now attach
+        self.run_command_no_verify('vm disk attach-new -g {} --vm-name {} -n {} --vhd {} --caching ReadWrite --disk-size 8 --lun 1'.format(
+            self.resource_group, self.vm_name, disk_name, vhd_uri))
+        #check we have a data disk
+        result = self.run_command_no_verify('vm show -g {} -n {} -o json'.format(self.resource_group, self.vm_name))
+        self.assertEqual(1, len(result['storageProfile']['dataDisks']))
+        disk = {
+            "caching": "ReadWrite",
+            "lun": 1,
+            "diskSizeGb": 8,
+            "createOption": "empty",
+            "image": None,
+            "vhd": {
+                "uri": vhd_uri
+                },
+            "name": "d1"
+            }
+        self.assertEqual(result['storageProfile']['dataDisks'][0], disk)
+        #now detach
+        self.run_command_no_verify('vm disk detach -g {} --vm-name {} -n {}'.format(
+            self.resource_group, self.vm_name, disk_name))
+
+        #check we have no data disk
+        result = self.run_command_no_verify('vm show -g {} -n {} -o json'.format(self.resource_group, self.vm_name))
+        self.assertFalse(bool(result['storageProfile']['dataDisks']))
+
+        #now attach to existing
+        self.run_command_no_verify('vm disk attach-existing -g {} --vm-name {} -n {} --vhd {} --caching ReadOnly'.format(
+            self.resource_group, self.vm_name, disk_name, vhd_uri))
+
+        #check we have a data disk
+        result = self.run_command_no_verify('vm show -g {} -n {} -o json'.format(self.resource_group, self.vm_name))
+        self.assertEqual(1, len(result['storageProfile']['dataDisks']))
+        disk2 = {
+            "lun": 0,
+            "vhd": {
+                "uri": vhd_uri
+                },
+            "createOption": "attach",
+            "diskSizeGb": None,
+            "name": "d1",
+            "caching":
+            "ReadOnly",
+            "image": None
+            }
+        self.assertEqual(result['storageProfile']['dataDisks'][0], disk2)
