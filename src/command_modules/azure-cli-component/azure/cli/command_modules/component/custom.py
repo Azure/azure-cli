@@ -58,7 +58,7 @@ helps['component install'] = """
         - name: --name -n
           short-summary: The component name to install.
 """
-def install(component_name, link, private=False, version=None):
+def install(component_name, link=None, private=False, version=None):
     _install_or_update(component_name, version, link, private, upgrade=False)
 
 helps['component update'] = """
@@ -67,7 +67,7 @@ helps['component update'] = """
         - name: --name -n
           short-summary: The component name to update.
 """
-def update(component_name, link, private=False):
+def update(component_name, link=None, private=False):
     _install_or_update(component_name, None, link, private, upgrade=True)
 
 helps['component update-self'] = """
@@ -90,7 +90,7 @@ def update_self(private=False):
 helps['component update-all'] = """
     short-summary: Update all components
 """
-def update_all(link, private=False):
+def update_all(link=None, private=False):
     component_names = [dist.key.replace(COMPONENT_PREFIX, '')
                        for dist in pip.get_installed_distributions(local_only=True)
                        if dist.key.startswith(COMPONENT_PREFIX)]
