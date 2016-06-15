@@ -1,6 +1,7 @@
 ﻿# pylint: disable=no-self-use,too-many-arguments
 from __future__ import print_function
 import json
+import os
 import re
 try:
     from urllib.parse import urlparse
@@ -185,36 +186,56 @@ def list_ip_addresses(resource_group_name=None, vm_name=None):
 
     return result
 
-def attach_new_disk(resource_group_name, vm_name, lun, diskname, vhd, disksize=1023):
+def attach_new_disk(resource_group_name, vm_name, vhd, lun=None,
+                    disk_name=None, disk_size=1023, caching=None):
     ''' Attach a new disk to an existing Virtual Machine'''
-    vm = _vm_get(resource_group_name, vm_name)
-    disk = DataDisk(lun=lun, vhd=vhd, name=diskname,
-                    create_option=DiskCreateOptionTypes.empty,
-                    disk_size_gb=disksize)
-    vm.storage_profile.data_disks.append(disk) # pylint: disable=no-member
-    _vm_set(vm)
+    return _attach_disk(resource_group_name, vm_name, vhd, DiskCreateOptionTypes.empty,
+                        lun, disk_name, caching, disk_size)
 
-def attach_existing_disk(resource_group_name, vm_name, lun, diskname, vhd, disksize=1023):
+def attach_existing_disk(resource_group_name, vm_name, vhd, lun=None, disk_name=None, caching=None):
     ''' Attach an existing disk to an existing Virtual Machine '''
-    # TODO: figure out size of existing disk instead of making the default value 1023
-    vm = _vm_get(resource_group_name, vm_name)
-    disk = DataDisk(lun=lun, vhd=vhd, name=diskname,
-                    create_option=DiskCreateOptionTypes.attach,
-                    disk_size_gb=disksize)
-    vm.storage_profile.data_disks.append(disk) # pylint: disable=no-member
-    _vm_set(vm)
+    return _attach_disk(resource_group_name, vm_name, vhd, DiskCreateOptionTypes.attach,
+                        lun, disk_name, caching)
 
-def detach_disk(resource_group_name, vm_name, diskname):
+def _attach_disk(resource_group_name, vm_name, vhd, create_option, lun=None,
+                 disk_name=None, caching=None, disk_size=None):
+    vm = _vm_get(resource_group_name, vm_name)
+    if disk_name is None:
+        file_name = vhd.uri.split('/')[-1]
+        disk_name = os.path.splitext(file_name)[0]
+    #pylint: disable=no-member
+    if lun is None:
+        lun = _get_disk_lun(vm.storage_profile.data_disks)
+    disk = DataDisk(lun=lun, vhd=vhd, name=disk_name,
+                    create_option=create_option,
+                    caching=caching, disk_size_gb=disk_size)
+    if  vm.storage_profile.data_disks is None:
+        vm.storage_profile.data_disks = []
+    vm.storage_profile.data_disks.append(disk) # pylint: disable=no-member
+    return _vm_set(vm)
+
+def detach_disk(resource_group_name, vm_name, disk_name):
     ''' Detach a disk from a Virtual Machine '''
     vm = _vm_get(resource_group_name, vm_name)
     # Issue: https://github.com/Azure/autorest/issues/934
     vm.resources = None
     try:
-        disk = next(d for d in vm.storage_profile.data_disks if d.name == diskname) # pylint: disable=no-member
+        disk = next(d for d in vm.storage_profile.data_disks if d.name.lower() == disk_name.lower()) # pylint: disable=no-member
         vm.storage_profile.data_disks.remove(disk) # pylint: disable=no-member
-    except StopIteration:
-        raise CLIError("No disk with the name '{}' found".format(diskname))
-    _vm_set(vm)
+    except (StopIteration, AttributeError):
+        raise CLIError("No disk with the name '{}' found".format(disk_name))
+    return _vm_set(vm)
+
+def _get_disk_lun(data_disks):
+    #start from 0, search for unused int for lun
+    if data_disks:
+        existing_luns = sorted([d.lun for d in data_disks])
+        for i in range(len(existing_luns)):#pylint: disable=consider-using-enumerate
+            if existing_luns[i] != i:
+                return i
+        return len(existing_luns)
+    else:
+        return 0
 
 def resize_vm(resource_group_name, vm_name, size):
     '''Update vm size
