@@ -1,0 +1,129 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "enableIpForwarding": {
+      "type": "string",
+      "defaultValue": "false",
+      "metadata": {
+        "description": "Specify whether to enable IP forwarding."
+      }
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": {
+        "description": "Location for NIC resource."
+      }
+    },
+    "networkInterfaceName": {
+      "type": "string",
+      "minLength": 1,
+      "metadata": {
+        "description": "Name of the new NIC."
+      }
+    },
+    "networkSecurityGroupName": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Network security group to associate with the NIC."
+      }
+    },
+    "networkSecurityGroupType": {
+      "type": "string",
+      "defaultValue": "none",
+      "allowedValues": [ "none", "existing" ],
+      "metadata": {
+        "description": "Specify whether to use an existing NSG or not."
+      }
+    },
+    "privateIpAddress": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "The private IP address to use if static address allocation is specified."
+      }
+    },
+    "privateIpAddressAllocation": {
+      "type": "string",
+      "defaultValue": "dynamic",
+      "allowedValues": [
+        "dynamic",
+        "static"
+      ],
+      "metadata": {
+        "description": "Private IP address allocation method."
+      }
+    },
+    "subnetName": {
+      "type": "string",
+      "metadata": {
+        "description": "Subnet to associate with the NIC."
+      }
+    },
+    "virtualNetworkName": {
+      "type": "string",
+      "metadata": {
+        "description": "Virtual network to associate with the NIC."
+      }
+    }
+  },
+  "variables": {
+    "name": "[parameters('networkInterfaceName')]",
+    "networkInterfaceSubnetRef": "[concat(variables('networkInterfaceVnetID'), '/subnets/', parameters('subnetName'))]",
+    "networkInterfaceVnetID": "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]",
+    "networkSecurityGroupID": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroupName'))]",
+    "nsgProperties": {
+      "none": {
+        "enableIPForwarding": "[parameters('enableIpForwarding')]",
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "privateIPAllocationMethod": "[parameters('privateIpAddressAllocation')]",
+              "privateIPAddress": "[parameters('privateIpAddress')]",
+              "subnet": {
+                "id": "[variables('networkInterfaceSubnetRef')]"
+              }
+            }
+          }
+        ]
+      },
+      "existing": {
+        "enableIPForwarding": "[parameters('enableIpForwarding')]",
+        "networkSecurityGroup": {
+          "id": "[variables('networkSecurityGroupID')]"
+        },
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "privateIPAllocationMethod": "[parameters('privateIpAddressAllocation')]",
+              "privateIPAddress": "[parameters('privateIpAddress')]",
+              "subnet": {
+                "id": "[variables('networkInterfaceSubnetRef')]"
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  "resources": [
+    {
+      "apiVersion": "2015-06-15",
+      "dependsOn": [ ],
+      "location": "[parameters('location')]",
+      "name": "[variables('name')]",
+      "properties": "[variables('nsgProperties')[parameters('networkSecurityGroupType')]]",
+      "type": "Microsoft.Network/networkInterfaces"
+    }
+  ],
+  "outputs": {
+    "NewNIC": {
+      "type": "object",
+      "value": "[reference(variables('name'))]"
+    }
+  }
+}

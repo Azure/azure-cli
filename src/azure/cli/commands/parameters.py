@@ -12,6 +12,11 @@ from azure.mgmt.resource.subscriptions import SubscriptionClient
 
 from azure.mgmt.resource.resources import ResourceManagementClient
 
+def generate_deployment_name(value):
+    if value != '_GENERATE_':
+        return value
+    return 'azurecli{}{}'.format(str(time.time()), str(random.randint(1, 100000)))
+
 def get_subscription_locations():
     subscription_client, subscription_id = get_subscription_service_client(SubscriptionClient)
     return list(subscription_client.subscriptions.list_locations(subscription_id))
@@ -66,6 +71,13 @@ location_type = CliArgumentType(
     completer=get_location_completion_list,
     help='Location.', metavar='LOCATION')
 
+deployment_name_type = CliArgumentType(
+    help=argparse.SUPPRESS,
+    required=False,
+    default='_GENERATE_',
+    type=generate_deployment_name
+)
+
 tags_type = CliArgumentType(
     type=validate_tags,
     help='multiple semicolon separated tags in \'key[=value]\' format. Omit value to clear tags.',
@@ -82,7 +94,4 @@ tag_type = CliArgumentType(
 
 register_cli_argument('', 'resource_group_name', resource_group_name_type)
 register_cli_argument('', 'location', location_type)
-register_cli_argument('', 'deployment_name',
-                      CliArgumentType(help=argparse.SUPPRESS, required=False,
-                                      default='azurecli' + str(time.time())
-                                      + str(random.randint(1, 100000))))
+register_cli_argument('', 'deployment_name', deployment_name_type)
