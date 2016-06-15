@@ -173,6 +173,8 @@ def get_command_table(module_name=None):
             try:
                 import_module('azure.cli.command_modules.' + mod)
             except Exception: #pylint: disable=broad-except
+                # Changing this error message requires updating CI script that checks for failed
+                # module loading.
                 logger.error("Error loading command module '%s'", mod)
                 logger.debug(traceback.format_exc())
 
