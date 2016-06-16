@@ -3,6 +3,8 @@ import argparse
 import getpass
 import os
 
+from argcomplete.completers import FilesCompleter
+
 from azure.mgmt.compute.models import VirtualHardDisk
 
 from azure.cli.command_modules.vm._actions import (VMImageFieldAction,
@@ -58,7 +60,8 @@ register_cli_argument(
     'vm container', 'ssh_key_value', CliArgumentType(
         required=False,
         help='SSH key file value or key file path.',
-        default=os.path.join(os.path.expanduser('~'), '.ssh', 'id_rsa.pub')
+        default=os.path.join(os.path.expanduser('~'), '.ssh', 'id_rsa.pub'),
+        completer=FilesCompleter()
     )
 )
 register_cli_argument('vm container create', 'agent_vm_size', CliArgumentType(completer=get_vm_size_completion_list))
@@ -67,8 +70,9 @@ register_cli_argument('vm capture', 'overwrite', CliArgumentType(action='store_t
 register_cli_argument('vm nic', 'nic_ids', multi_ids_type)
 register_cli_argument('vm nic', 'nic_names', multi_ids_type)
 register_cli_argument('vm diagnostics', 'vm_name', arg_type=existing_vm_name, options_list=('--vm-name',))
+register_cli_argument('vm diagnostics set', 'storage_account', completer=get_resource_name_completion_list('Microsoft.Storage/storageAccounts'))
 
-register_cli_argument('vm extension', 'vm_extension_name', name_arg_type)
+register_cli_argument('vm extension', 'vm_extension_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachines/extensions'))
 register_cli_argument('vm extension', 'vm_name', arg_type=existing_vm_name, options_list=('--vm-name',))
 register_cli_argument('vm extension', 'auto_upgrade_minor_version', CliArgumentType(action='store_true'))
 
@@ -111,6 +115,7 @@ for scope in ['vm create', 'vm scaleset create']:
     register_cli_argument(scope, 'dns_name_type', CliArgumentType(help=argparse.SUPPRESS))
     register_cli_argument(scope, 'admin_username', admin_username_type)
     register_cli_argument(scope, 'ssh_key_value', CliArgumentType(action=VMSSHFieldAction))
+    register_cli_argument(scope, 'ssh_dest_key_path', completer=FilesCompleter())
     register_cli_argument(scope, 'dns_name_for_public_ip', CliArgumentType(action=VMDNSNameAction))
     register_cli_argument(scope, 'authentication_type', authentication_type)
     register_cli_argument(scope, 'availability_set_type', CliArgumentType(choices=['none', 'existing'], help='', default='none'))
