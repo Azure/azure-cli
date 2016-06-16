@@ -6,7 +6,7 @@
 # regenerated.
 # --------------------------------------------------------------------------
 
-from .deployment_vm import DeploymentVm
+from .deployment_vm_create import DeploymentVmCreate
 from .template_link import TemplateLink
 from .parameters_link import ParametersLink
 from .provider_resource_type import ProviderResourceType
@@ -15,12 +15,12 @@ from .basic_dependency import BasicDependency
 from .dependency import Dependency
 from .deployment_properties_extended import DeploymentPropertiesExtended
 from .deployment_extended import DeploymentExtended
-from .vm_creation_client_enums import (
+from .vm_create_creation_client_enums import (
     DeploymentMode,
 )
 
 __all__ = [
-    'DeploymentVm',
+    'DeploymentVmCreate',
     'TemplateLink',
     'ParametersLink',
     'ProviderResourceType',
