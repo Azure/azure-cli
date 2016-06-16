@@ -318,7 +318,7 @@ class CredsCache(object):
         authority = get_authority_url(tenant, ENV_DEFAULT)
         context = self._auth_ctx_factory(authority, cache=self.adal_token_cache)
         token_entry = context.acquire_token(self._resource, username, CLIENT_ID)
-        if not token_entry: #TODO: consider to letting adal-python throw
+        if not token_entry:
             raise CLIError('Could not retrieve token from local cache, please run \'login\'.')
 
         if self.adal_token_cache.has_state_changed:
