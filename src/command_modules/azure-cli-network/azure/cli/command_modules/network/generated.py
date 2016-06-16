@@ -172,4 +172,4 @@ cli_command('network vnet list', VirtualNetworksOperations.list, factory)
 cli_command('network vnet list-all', VirtualNetworksOperations.list_all, factory)
 
 factory = lambda _: get_mgmt_service_client(VNetClient).vnet
-cli_command('network vnet create', VNetOperations.create, factory, DeploymentOutputLongRunningOperation('Starting network vnet create'))
+cli_command('network vnet create', VNetOperations.create, factory, transform=DeploymentOutputLongRunningOperation('Starting network vnet create'))
