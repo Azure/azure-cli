@@ -5,77 +5,60 @@ Azure CLI uses the VCR.py library to record the HTTP messages exchanged during a
 
 ##Overview
 
-Each command module has a `tests` folder with the following files: `command_specs.py` and `test_commands.py`. The second is largely boilerplate; you will add your test definitions to `command_specs.py`. These files contain three important sections: `TEST_DEF` which names your test and specifies its test class (or simple command), `ENV_VAR` where you can set any environment variables you might need when replaying on TravisCI, and a section where you define your test classes.
+Each command module has a `tests` folder with a file called: `test_<module>_commands.py`. This is where you will define tests. 
 
-The structure of `TEST_DEF` is straightforward:
+Tests all derive from the `VCRBTestBase` class found in `azure.cli.utils.vcr_test_base`. This class exposes the VCR tests using the standard Python `unittest` framework and allows the tests to be discovered by and debugged in Visual Studio.
 
-```
-TEST_DEF = [
-  {
-    'test_name': 'name1',
-    'command': 'command1'
-  },
-  {
-    'test_name': 'name2',
-    'script': script_class()
-  }
-]
-```
-
-Simply add your new entries and run all tests. The test driver will automatically detect unrecorded tests and, if necessary, query the user if the output is correct. If so, it will save the HTTP recording into a YAML file, as well as the raw output into a dictionary called `expected_results.res`. When the test is replayed, as long as the test has an entry in `expected_results.res` and a corresponding .yaml file, the test will proceed automatically. If either the entry or the .yaml file are missing, the test will be re-recorded.
+After adding your test, run it. The test driver will automatically detect the test is unrecorded and record the HTTP requests and responses in a cassette .yaml file. If the test succeeds, the cassette will be preserved and future playthroughs of the test will come from the cassette.
 
 If the tests are run on TravisCI, any tests which cannot be replayed will automatically fail. 
 
-##Types of Tests
+##Authoring Tests
 
-The system currently accepts individual commands and script test objects. Individual commands will always display the output and query the user if the results are correct. These are the "old" style tests and are not recommended. The new style test classes are preferred because they allow for powerful automated result validation, eliminating user evaluation of the results when re-recording.
-
-To allow for more complex testing scenarios involving creating and deleting resources, long-running operations, or automated verification, use the script object method. To do so, simply create a class in the `command_specs.py` file with the following structure:
+To create a new test, simply create a class in the `test_<module>_commands.py` file with the following structure:
 
 ```Python
-class MyScenarioTest(CommandTestScript):
-  def __init__(self):
-    super(MyScenarioTest, self).__init__(self.set_up, self.test_body, self.tear_down)
-  
-  def set_up(self):
-    # Setup logic here
-    pass
+
+class MyTestClass(VCRTestBase):
+
+  def __init__(self, test_method):
+    # TODO: replace MyTestClass with your class name
+    super(MyTestClass, self).__init__(__file__, test_method, debug=False, run_live=False)
+      
+  def test_my_test_class(self): # TODO: rename to 'test_<your name here>'
+    self.execute()
+
+  def body(self):
+    # TODO: insert your test logic here
     
-  def test_body(self):
-    # Main test logic
-    pass
+  def set_up(self):
+    # TODO: Optional setup logic here (will not be replayed on playback)
     
   def tear_down(self):
-    # clean up logic here
-    pass
+    # TODO: Optional tear down logic here (will not be replayed on playback)
 ```
+
+The `debug` and `run_live` parameters in the `__init__` method are shown with their defaults and can be omitted. `debug` is the equivalent of specifying `debug=True` for all calls to `cmd` in the test (see below). Specifying `run_live=True` will cause the test to always be run with actual HTTP requests, ignoring VCR entirely.
 
 The `set_up` and `tear_down` methods are optional and can be omitted. A number of helper methods are available for structuring your script tests.
 
-####run(command_string)
+####cmd(command_string, checks=None, allowed_exceptions=None, debug=False)
 
-This method executes a given command and returns the output. The results are not sent to the display or to expected results. Use this for:
+This method executes a given command and returns the output. If the output is in JSON format, the method will return the results as a JSON object for easier manuipulation.
 
-- running commands that produce no output (the next statement will usually be a test)
-- running commands that are needed for conditional logic or in setup/cleanup logic
+The `debug` parameter can be specified as `True` on a single call to `cmd` or in the init of the test class. Turning this on will print the command string, the results and, if a failure occurred, the failure.
 
-If you specify `-o json` to format the output in JSON format, the `run` method will return the results as a JSON object for easier manuipulation.
+The `allowed_exceptions` parameter allows you to specify one or more (as a list) exception messages that will allow the test to still pass. Exception types are not used because the CLI wraps many types of errors in a `CLIError`. There are some tests where a specific exception is intended. Add the exception message to this list to allow the test to continue successfully in the presence of this message.
 
-####rec(command_string)
+The `checks` parameter allows you to specify one or more (as a list) checks to automatically validate the output. A number of Check objects exist for this purpose. You can create your own as long as they implement the compare method (see existing checks for examples):
 
-This method runs a given command and records its output to the display for manual verification. Using this command will force the user to verify the output via a Y/N prompt. If the user accepts the output, it will be saved to `expected_results.res`. This should be used sparingly, as it requires the person recording the test to understand what the expected result should be. In general, it is better to write a proper `test` call to provide an automated verification.
+#####JMESPathCheck(query, expected_result)
 
-####test(command_string, checks)
-
-This method runs a given command and automatically validates the output. The results are saved to `expected_results.res` if valid, but nothing is displayed on the screen. Valid checks include: `bool`, `str`, `dict` and JMESPath checks (see below). A check with a `dict` can be used to check for multiple matching parameters (and logic). Child `dict` objects can be used as values to verify properties within nested objects.
-
-#####JMESPath Comparator
-
-You can use the JMESPathComparator object to validate the result from a command. This is useful for checking that the JSON result has fields you were expecting, arrays of certain lengths etc. See www.jmespath.org for guidance on writing JMESPath queries.
+Use the JMESPathCheck object to validate the result using any valid JMESPath query. This is useful for checking that the JSON result has fields you were expecting, arrays of certain lengths etc. See www.jmespath.org for guidance on writing JMESPath queries.
 
 ######Usage
 ```
-JMESPathComparator(query, expected_result)
+JMESPathCheck(query, expected_result)
 ```
 - `query` - JMESPath query as a string.
 - `expected_result` - The expected result from the JMESPath query (see [jmespath.search()](https://github.com/jmespath/jmespath.py#api))
@@ -85,15 +68,24 @@ JMESPathComparator(query, expected_result)
 The example below shows how you can use a JMESPath query to validate the values from a command.
 When calling `test(command_string, checks)` you can pass in just one JMESPathComparator or a list of JMESPathComparators.
 
-```
-from azure.cli.utils.command_test_script import JMESPathComparator
-
-self.test('vm list-ip-addresses --resource-group myResourceGroup',
-    [
-        JMESPathComparator('length(@)', 1),
-        JMESPathComparator('[0].virtualMachine.name', 'myVMName')])
+```Python
+self.cmd('vm list-ip-addresses --resource-group myResourceGroup', checks=[
+  JMESPathCheck('length(@)', 1),
+  JMESPathCheck('[0].virtualMachine.name', 'myVMName')
+])
 ```
 
+#####NoneCheck()
+
+Use this to verify that the output contains nothing. Note that this is different from `checks=None` which will skip any validation.
+
+#####StringCheck(expected_result)
+
+Matches string output to expected.
+
+#####BooleanCheck(expected_result)
+
+Compares truthy responses (True, 'true', 1, etc.) to a Boolean True or False.
 
 ####set_env(variable_name, value)
 
@@ -103,14 +95,12 @@ This method is a wrapper around `os.environ` and simply sets an environment vari
 
 Another wrapper around `os.environ` this pops the value of the indicated environment variable.
 
-####display(string)
+##Test Issues
 
-This method allows you to write to the display output, but does not add to the `expected_results.res` file. One application of this would be to print information ahead of a `rec` statement so the person validating the output knows what to look for.
+Here are some common issues that occur when authoring tests that you should be aware of.
 
-##Long Running Operations (LRO)
-
-The system now allows the testing of long running operations. Regardless of the time required to record the test, playback will truncate the long running operation to finish very quickly. However, because re-recording these actions can take a very long time, it is recommended that each LRO scenario be individually tested (possibly in tandem with a delete operation) rather than as part of a larger scenario.
-
-##Limitations
-
-+ You can't test for things like 'this input results in an exception'. It simply tests that the response equals an expected response.
+- **deployment_name**: Commands (typically smart creates) which utilize ARM templates accept a hidden `deployment_name` parameter. During normal use, this value is generated automatically, but when authoring a test, this value must be specified or a match request will not be found on playback. Azure keeps deployment names reserved for a time--if you try to re-record a test while the deployment name is still reserved, your test will fail. The symptom will usually be an empty result. If this happens, try changing the deployment name and re-recording.
+- **Non-deterministic results**: If you find that a test will pass on some playbacks but fail on others, there are a couple possible things to check:
+  1. check if your command makes use of concurrency.
+  2. check your parameter aliasing (particularly if it complains that a required parameter is missing that you know is there)
+- **Paths**: When including paths in your tests as parameter values, always wrap them in double quotes. While this isn't necessary when running from the command line (depending on your shell environment) it will likely cause issues with the test framework.

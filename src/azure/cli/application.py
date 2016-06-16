@@ -123,6 +123,18 @@ class Application(object):
         self._event_handlers[name].append(handler)
         logger.info("Registered application event handler '%s' at %s", name, handler)
 
+    def remove(self, name, handler):
+        '''Remove a callable that is registered to be called when the
+        event `name` is raised.
+
+        param: name: The name of the event
+        param: handler: Function that takes two parameters;
+          name: name of the event raised
+          event_data: `dict` with event specific data.
+        '''
+        self._event_handlers[name].remove(handler)
+        logger.info("Removed application event handler '%s' at %s", name, handler)
+
     KEYS_CAMELCASE_PATTERN = re.compile('(?!^)_([a-zA-Z])')
     @classmethod
     def todict(cls, obj): #pylint: disable=too-many-return-statements
