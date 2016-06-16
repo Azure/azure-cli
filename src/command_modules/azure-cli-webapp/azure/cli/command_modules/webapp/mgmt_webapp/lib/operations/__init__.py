@@ -6,8 +6,8 @@
 # regenerated.
 # --------------------------------------------------------------------------
 
-from .web_app_operations import WebAppOperations
+from .webapp_operations import WebappOperations
 
 __all__ = [
-    'WebAppOperations',
+    'WebappOperations',
 ]

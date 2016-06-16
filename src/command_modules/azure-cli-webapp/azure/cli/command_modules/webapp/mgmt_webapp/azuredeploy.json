@@ -9,11 +9,11 @@
         "description": "Container URI of the template."
       }
     },
-    "hostingPlanName": {
+    "hostingPlan": {
       "type": "string",
       "defaultValue": "[concat('hostingPlan', parameters('name'))]",
       "metadata": {
-        "description": "Name for the web application's hosting plan."
+        "description": "Name or ID of the web application's hosting plan."
       }
     },
     "hostingPlanType": {
@@ -21,7 +21,8 @@
       "defaultValue": "new",
       "allowedValues": [
         "new",
-        "existing"
+        "existingName",
+        "existingId"
       ],
       "metadata": {
         "description": "Use a new or existing hosting plan."
@@ -56,10 +57,16 @@
     }
   },
   "variables": {
-    "hostingPlanDeploymentName": "[concat(parameters('hostingPlanName'), parameters('name'), 'deployment')]",
+    "hostingPlanDeploymentName": "[concat(parameters('name'), 'HostingPlanDeployment')]",
+    "hostingPlanIds": {
+      "new": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Web/serverfarms/', parameters('hostingPlan'))]",
+      "existingName": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Web/serverfarms/', parameters('hostingPlan'))]",
+      "existingId": "[parameters('hostingPlan')]"
+    },
     "hostingPlanTemplatePaths": {
       "new": "nested_templates/hostingplan_new.json",
-      "existing": "nested_templates/hostingplan_existing.json"
+      "existingName": "nested_templates/hostingplan_existing.json",
+      "existingId": "nested_templates/hostingplan_existing.json"
     }
   },
   "resources": [
@@ -75,7 +82,7 @@
           "contentVersion": "1.0.0.0"
         },
         "parameters": {
-          "hostingPlanName": { "value": "[parameters('hostingPlanName')]" },
+          "hostingPlanName": { "value": "[parameters('hostingPlan')]" },
           "skuName": { "value": "[parameters('skuName')]" },
           "skuCapacity": { "value": "[parameters('skuCapacity')]" },
           "numberOfWorkers": { "value": "[parameters('numberOfWorkers')]"}
@@ -88,7 +95,7 @@
       "type": "Microsoft.Web/sites",
       "location": "[resourceGroup().location]",
       "tags": {
-        "[concat('hidden-related:', resourceGroup().id, '/providers/Microsoft.Web/serverfarms/', parameters('hostingPlanName'))]": "Resource",
+        "[concat('hidden-related:', variables('hostingPlanIds')[parameters('hostingPlanType')])]": "Resource",
         "displayName": "Website"
       },
       "dependsOn": [
@@ -96,7 +103,7 @@
       ],
       "properties": {
         "name": "[parameters('name')]",
-        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('hostingPlanName'))]"
+        "serverFarmId": "[variables('hostingPlanIds')[parameters('hostingPlanType')]]"
       }
     },
     {

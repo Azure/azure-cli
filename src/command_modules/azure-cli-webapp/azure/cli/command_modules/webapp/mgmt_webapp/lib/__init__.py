@@ -6,10 +6,10 @@
 # regenerated.
 # --------------------------------------------------------------------------
 
-from .web_app_creation_client import WebAppCreationClient
+from .webapp_creation_client import WebappCreationClient
 from .version import VERSION
 
-__all__ = ['WebAppCreationClient']
+__all__ = ['WebappCreationClient']
 
 __version__ = VERSION
 
