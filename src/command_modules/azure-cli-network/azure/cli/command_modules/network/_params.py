@@ -8,12 +8,11 @@ from azure.cli.commands import register_cli_argument, CliArgumentType
 # BASIC PARAMETER CONFIGURATION
 
 name_arg_type = CliArgumentType(options_list=('--name', '-n'), metavar='NAME')
-virtual_network_name_type = CliArgumentType(options_list=('--virtual-network-name',), metavar='VNET_NAME')
+virtual_network_name_type = CliArgumentType(options_list=('--vnet-name',), metavar='VNET_NAME', help='Name of the virtual network.', completer=get_resource_name_completion_list('Microsoft.Network/virtualNetworks'))
 subnet_name_type = CliArgumentType(options_list=('--subnet-name',), metavar='SUBNET_NAME')
 
-virtual_network_name_type = CliArgumentType(options_list=('--virtual-network-name',), metavar='VNET', help='Name of the virtual network.', completer=get_resource_name_completion_list('Microsoft.Network/virtualNetworks'))
-
 register_cli_argument('network', 'subnet_name', name_arg_type)
+register_cli_argument('network', 'virtual_network_name', virtual_network_name_type)
 
 register_cli_argument('network application-gateway', 'application_gateway_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/applicationGateways'))
 
@@ -53,7 +52,7 @@ register_cli_argument('network vnet create', 'location', location_type)
 register_cli_argument('network vnet create', 'subnet_prefix', CliArgumentType(options_list=('--subnet-prefix',), metavar='SUBNET_PREFIX', default='10.0.0.0/24'))
 register_cli_argument('network vnet create', 'subnet_name', CliArgumentType(options_list=('--subnet-name',), metavar='SUBNET_NAME', default='Subnet1'))
 register_cli_argument('network vnet create', 'virtual_network_prefix', CliArgumentType(options_list=('--vnet-prefix',), metavar='VNET_PREFIX', default='10.0.0.0/16'))
-register_cli_argument('network vnet create', 'virtual_network_name', CliArgumentType(options_list=('--name', '-n'), metavar='VNET_NAME', required=True, completer=None))
+register_cli_argument('network vnet create', 'virtual_network_name', virtual_network_name_type, options_list=('--name', '-n'), required=True, completer=None)
 
 register_cli_argument('network vnet subnet', 'subnet_name', options_list=('--name', '-n'), help='the subnet name')
 register_cli_argument('network vnet subnet', 'address_prefix', metavar='PREFIX', help='the address prefix in CIDR format.')

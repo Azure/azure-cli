@@ -214,14 +214,17 @@ class NetworkLoadBalancerScenarioTest(ResourceGroupVCRTestBase):
 
         # test lb create with no ip
         vnet_name = 'mytestvnet'
+        private_ip = '10.0.0.15'
         vnet = self.cmd('network vnet create -n {} -g {} --deployment-name deployvnet'.format(vnet_name, self.resource_group))
         subnet_name = vnet['newVNet']['value']['subnets'][0]['name']
-        self.cmd('network lb create -n {} -g {} --deployment-name deployLb2 --public-ip-address-type none --virtual-network-name {} --subnet-name {}'.format(self.lb_name, self.resource_group, vnet_name, subnet_name), checks=[
-            JMESPathCheck('loadBalancer.value.provisioningState', 'Succeeded'),
-            JMESPathCheck('loadBalancer.value.frontendIPConfigurations[0].properties.privateIPAllocationMethod', 'Dynamic'),
-            JMESPathCheck('loadBalancer.value.frontendIPConfigurations[0].resourceGroup', self.resource_group),
-            JMESPathCheck("loadBalancer.value.frontendIPConfigurations[0].properties.subnet.contains(id, '{}')".format(subnet_name), True)
-        ])
+        self.cmd('network lb create -n {} -g {} --deployment-name deployLb2 --public-ip-address-type none --vnet-name {} --subnet-name {} --private-ip-address-allocation static --private-ip-address {}'.format(
+            self.lb_name, self.resource_group, vnet_name, subnet_name, private_ip), checks=[
+                JMESPathCheck('loadBalancer.value.provisioningState', 'Succeeded'),
+                JMESPathCheck('loadBalancer.value.frontendIPConfigurations[0].properties.privateIPAllocationMethod', 'Static'),
+                JMESPathCheck('loadBalancer.value.frontendIPConfigurations[0].properties.privateIPAddress', private_ip),
+                JMESPathCheck('loadBalancer.value.frontendIPConfigurations[0].resourceGroup', self.resource_group),
+                JMESPathCheck("loadBalancer.value.frontendIPConfigurations[0].properties.subnet.contains(id, '{}')".format(subnet_name), True)
+            ])
 
         # test lb create with existing ip
         pub_ip_name = 'mytestpubip'
@@ -477,7 +480,7 @@ class NetworkVNetScenarioTest(VCRTestBase):
         if not self.cmd('network vnet show --resource-group {} --name {}'.format(
             self.resource_group, self.vnet_name)):
             raise RuntimeError('Network vnet must be manually created in order to support this test.')
-        if not self.cmd('network vnet subnet show --resource-group {} --virtual-network-name {} --name {}'.format( #pylint: disable=line-too-long
+        if not self.cmd('network vnet subnet show --resource-group {} --vnet-name {} --name {}'.format( #pylint: disable=line-too-long
             self.resource_group, self.vnet_name, self.vnet_subnet_name)):
             raise RuntimeError('Network vnet subnet must be manually created in order to support this test.')
 
@@ -497,19 +500,19 @@ class NetworkVNetScenarioTest(VCRTestBase):
             JMESPathCheck('resourceGroup', self.resource_group),
             JMESPathCheck('type', self.resource_type)
         ])
-        self.cmd('network vnet subnet list --resource-group {} --virtual-network-name {}'.format(self.resource_group, self.vnet_name),
+        self.cmd('network vnet subnet list --resource-group {} --vnet-name {}'.format(self.resource_group, self.vnet_name),
             checks=JMESPathCheck('type(@)', 'array'))
-        self.cmd('network vnet subnet show --resource-group {} --virtual-network-name {} --name {}'.format(self.resource_group, self.vnet_name, self.vnet_subnet_name), checks=[
+        self.cmd('network vnet subnet show --resource-group {} --vnet-name {} --name {}'.format(self.resource_group, self.vnet_name, self.vnet_subnet_name), checks=[
             JMESPathCheck('type(@)', 'object'),
             JMESPathCheck('name', self.vnet_subnet_name),
             JMESPathCheck('resourceGroup', self.resource_group)
         ])
         # Expecting the subnet to be listed
-        self.cmd('network vnet subnet list --resource-group {} --virtual-network-name {}'.format(self.resource_group, self.vnet_name),
+        self.cmd('network vnet subnet list --resource-group {} --vnet-name {}'.format(self.resource_group, self.vnet_name),
             checks=JMESPathCheck("length([?name == '{}'])".format(self.vnet_subnet_name), 1))
-        self.cmd('network vnet subnet delete --resource-group {} --virtual-network-name {} --name {}'.format(self.resource_group, self.vnet_name, self.vnet_subnet_name))
+        self.cmd('network vnet subnet delete --resource-group {} --vnet-name {} --name {}'.format(self.resource_group, self.vnet_name, self.vnet_subnet_name))
         # Expecting the subnet to not be listed
-        self.cmd('network vnet subnet list --resource-group {} --virtual-network-name {}'.format(self.resource_group, self.vnet_name),
+        self.cmd('network vnet subnet list --resource-group {} --vnet-name {}'.format(self.resource_group, self.vnet_name),
             checks=NoneCheck())
         # Expecting the vnet to appear in the list
         self.cmd('network vnet list --resource-group {}'.format(self.resource_group),
@@ -585,5 +588,5 @@ class NetworkSubnetCreateScenarioTest(VCRTestBase):
         pv = self.placeholder_value
         ap = self.address_prefix
         allowed_exceptions = "The Resource 'Microsoft.Network/virtualNetworks/{}' under resource group '{}' was not found.".format(pv, rg)
-        self.cmd('network vnet subnet create --resource-group {0} --name {1} --virtual-network-name {1} --address-prefix {2}'.format(rg, pv, ap),
+        self.cmd('network vnet subnet create --resource-group {0} --name {1} --vnet-name {1} --address-prefix {2}'.format(rg, pv, ap),
             allowed_exceptions=allowed_exceptions)

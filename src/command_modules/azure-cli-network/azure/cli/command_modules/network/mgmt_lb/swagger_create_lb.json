@@ -210,6 +210,11 @@
           "$ref": "#/definitions/DeploymentParameter_natStartPort",
           "x-ms-client-flatten": true
         },
+        "privateIpAddress": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_privateIpAddress",
+          "x-ms-client-flatten": true
+        },
         "privateIpAddressAllocation": {
           "type": "object",
           "$ref": "#/definitions/DeploymentParameter_privateIpAddressAllocation",
@@ -335,6 +340,15 @@
           "description": "Start of NAT port range.",
           "x-ms-client-name": "natStartPort",
           "default": "50000"
+        }
+      }
+    },
+    "DeploymentParameter_privateIpAddress": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "Private IP address to use when allocation method is set to 'static'.",
+          "x-ms-client-name": "privateIpAddress"
         }
       }
     },

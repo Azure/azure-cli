@@ -51,6 +51,9 @@ class DeploymentLb(Model):
     :type nat_pool_name: str
     :param nat_start_port: Start of NAT port range. Default value: "50000" .
     :type nat_start_port: str
+    :param private_ip_address: Private IP address to use when allocation
+     method is set to 'static'.
+    :type private_ip_address: str
     :param private_ip_address_allocation: Private IP address allocation
      method. Possible values include: 'dynamic', 'static'. Default value:
      "dynamic" .
@@ -95,6 +98,7 @@ class DeploymentLb(Model):
         'nat_end_port': {'key': 'properties.parameters.natEndPort.value', 'type': 'str'},
         'nat_pool_name': {'key': 'properties.parameters.natPoolName.value', 'type': 'str'},
         'nat_start_port': {'key': 'properties.parameters.natStartPort.value', 'type': 'str'},
+        'private_ip_address': {'key': 'properties.parameters.privateIpAddress.value', 'type': 'str'},
         'private_ip_address_allocation': {'key': 'properties.parameters.privateIpAddressAllocation.value', 'type': 'str'},
         'public_ip_address_allocation': {'key': 'properties.parameters.publicIpAddressAllocation.value', 'type': 'str'},
         'public_ip_address_name': {'key': 'properties.parameters.publicIpAddressName.value', 'type': 'str'},
@@ -110,7 +114,7 @@ class DeploymentLb(Model):
 
     mode = "Incremental"
 
-    def __init__(self, load_balancer_name, content_version=None, backend_pool_name=None, dns_name_for_public_ip=None, dns_name_type="none", location=None, nat_backend_port="22", nat_end_port="50099", nat_pool_name=None, nat_start_port="50000", private_ip_address_allocation="dynamic", public_ip_address_allocation="dynamic", public_ip_address_name=None, public_ip_address_type="new", subnet_name=None, virtual_network_name=None):
+    def __init__(self, load_balancer_name, content_version=None, backend_pool_name=None, dns_name_for_public_ip=None, dns_name_type="none", location=None, nat_backend_port="22", nat_end_port="50099", nat_pool_name=None, nat_start_port="50000", private_ip_address=None, private_ip_address_allocation="dynamic", public_ip_address_allocation="dynamic", public_ip_address_name=None, public_ip_address_type="new", subnet_name=None, virtual_network_name=None):
         self.content_version = content_version
         self.backend_pool_name = backend_pool_name
         self.dns_name_for_public_ip = dns_name_for_public_ip
@@ -121,6 +125,7 @@ class DeploymentLb(Model):
         self.nat_end_port = nat_end_port
         self.nat_pool_name = nat_pool_name
         self.nat_start_port = nat_start_port
+        self.private_ip_address = private_ip_address
         self.private_ip_address_allocation = private_ip_address_allocation
         self.public_ip_address_allocation = public_ip_address_allocation
         self.public_ip_address_name = public_ip_address_name

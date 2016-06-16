@@ -74,6 +74,13 @@
         "description": "Start of NAT port range."
       }
     },
+    "privateIpAddress": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Private IP address to use when allocation method is set to 'static'."
+      }
+    },
     "privateIpAddressAllocation": {
       "type": "string",
       "defaultValue": "dynamic",
@@ -156,6 +163,8 @@
         {
           "name": "LoadBalancerFrontEnd",
           "properties": {
+            "privateIPAllocationMethod": "[parameters('privateIpAddressAllocation')]",
+            "privateIPAddress":  "[parameters('privateIpAddress')]",
             "subnet": {
               "id": "[variables('subnetRef')]"
             }
@@ -166,9 +175,9 @@
     "frontEndIPConfigID": "[concat(variables('lbID'),'/frontendIPConfigurations/loadBalancerFrontEnd')]",
     "ipDeploymentName": "[concat('IP', parameters('loadBalancerName'))]",
     "ipTemplateFilePaths": {
-      "new": "nested_templates/PublicIP_new.json",
-      "existing": "nested_templates/PublicIP_none_or_existing.json",
-      "none": "nested_templates/PublicIP_none_or_existing.json"
+      "new": "nested_templates/publicIp_new.json",
+      "existing": "nested_templates/publicIp_none_or_existing.json",
+      "none": "nested_templates/publicIp_none_or_existing.json"
     },
     "lbID": "[resourceId('Microsoft.Network/loadBalancers',parameters('loadBalancerName'))]",
     "publicIPAddressID": "[resourceId('Microsoft.Network/publicIPAddresses',parameters('publicIPAddressName'))]",
@@ -223,7 +232,6 @@
           "dnsNameForPublicIP": { "value": "[parameters('dnsNameForPublicIP')]" },
           "publicIPAddressName": { "value": "[parameters('publicIPAddressName')]" },
           "publicIpAddressAllocation": { "value": "[parameters('publicIpAddressAllocation')]" },
-          "privateIpAllocation": { "value": "[parameters('privateIpAddressAllocation')]" },
           "location": { "value": "[parameters('location')]" },
           "dnsNameType": { "value": "[parameters('dnsNameType')]" }
         }
