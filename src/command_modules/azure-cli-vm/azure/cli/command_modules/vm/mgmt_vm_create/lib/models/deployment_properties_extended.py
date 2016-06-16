@@ -24,28 +24,27 @@ class DeploymentPropertiesExtended(Model):
     :type outputs: object
     :param providers: Gets the list of resource providers needed for the
      deployment.
-    :type providers: list of :class:`Provider <mynamespace.models.Provider>`
+    :type providers: list of :class:`Provider <default.models.Provider>`
     :param dependencies: Gets the list of deployment dependencies.
     :type dependencies: list of :class:`Dependency
-     <mynamespace.models.Dependency>`
+     <default.models.Dependency>`
     :param template: Gets or sets the template content. Use only one of
      Template or TemplateLink.
     :type template: object
     :param template_link: Gets or sets the URI referencing the template. Use
      only one of Template or TemplateLink.
-    :type template_link: :class:`TemplateLink
-     <mynamespace.models.TemplateLink>`
+    :type template_link: :class:`TemplateLink <default.models.TemplateLink>`
     :param parameters: Deployment parameters. Use only one of Parameters or
      ParametersLink.
     :type parameters: object
     :param parameters_link: Gets or sets the URI referencing the parameters.
      Use only one of Parameters or ParametersLink.
     :type parameters_link: :class:`ParametersLink
-     <mynamespace.models.ParametersLink>`
+     <default.models.ParametersLink>`
     :param mode: Gets or sets the deployment mode. Possible values include:
      'Incremental', 'Complete'
     :type mode: str or :class:`DeploymentMode
-     <vmcreationclient.models.DeploymentMode>`
+     <vmcreatecreationclient.models.DeploymentMode>`
     """ 
 
     _attribute_map = {

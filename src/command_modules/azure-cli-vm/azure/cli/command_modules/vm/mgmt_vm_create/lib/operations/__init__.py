@@ -6,8 +6,8 @@
 # regenerated.
 # --------------------------------------------------------------------------
 
-from .vm_operations import VMOperations
+from .vm_create_operations import VmCreateOperations
 
 __all__ = [
-    'VMOperations',
+    'VmCreateOperations',
 ]

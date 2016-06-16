@@ -11,7 +11,8 @@ from azure.cli.command_modules.vm._actions import (VMImageFieldAction,
                                                    VMSSHFieldAction,
                                                    VMDNSNameAction,
                                                    load_images_from_aliases_doc,
-                                                   get_vm_sizes)
+                                                   get_vm_sizes,
+                                                   _handle_vm_nics)
 from azure.cli.commands.parameters import (location_type,
                                            get_location_completion_list,
                                            get_one_of_subscription_locations,
@@ -95,6 +96,11 @@ nsg_rule_type = CliArgumentType(
     choices=['RDP', 'SSH'], default=None,
     help='Network security group rule to create. Defaults to RDP for Windows and SSH for Linux'
 )
+
+register_cli_argument('vm create', 'network_interface_type', choices=['new', 'existing'], help=None)
+register_cli_argument('vm create', 'network_interface_ids', options_list=('--network-interfaces',), nargs='+',
+                      help='Names or IDs of existing NICs to reference.  The first NIC will be the primary NIC.',
+                      validator=_handle_vm_nics)
 
 for scope in ['vm create', 'vm scaleset create']:
     register_cli_argument(scope, 'name', name_arg_type)

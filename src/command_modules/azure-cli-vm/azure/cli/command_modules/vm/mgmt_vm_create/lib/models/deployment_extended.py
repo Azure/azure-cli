@@ -19,7 +19,7 @@ class DeploymentExtended(Model):
     :type name: str
     :param properties: Gets or sets deployment properties.
     :type properties: :class:`DeploymentPropertiesExtended
-     <mynamespace.models.DeploymentPropertiesExtended>`
+     <default.models.DeploymentPropertiesExtended>`
     """ 
 
     _validation = {

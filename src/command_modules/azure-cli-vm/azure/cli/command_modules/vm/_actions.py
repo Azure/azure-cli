@@ -6,6 +6,7 @@ import re
 from azure.cli._util import CLIError
 from azure.cli.application import APPLICATION
 from azure.cli.commands.parameters import get_one_of_subscription_locations
+from azure.cli.commands.azure_resource_id import AzureResourceId
 
 from six.moves.urllib.request import urlopen #pylint: disable=import-error
 
@@ -51,6 +52,29 @@ class VMDNSNameAction(argparse.Action): #pylint: disable=too-few-public-methods
             namespace.dns_name_type = 'new'
 
         namespace.dns_name_for_public_ip = dns_value
+
+def _handle_vm_nics(namespace):
+    nics_value = namespace.network_interface_ids
+    nics = []
+
+    if not nics_value:
+        return
+
+    if not isinstance(nics_value, list):
+        nics_value = [nics_value]
+
+    for n in nics_value:
+        nics.append({
+            'id': n if '/' in n else str(AzureResourceId(n, namespace.resource_group_name,
+                                                         'Microsoft.Network/networkInterfaces',
+                                                         _get_subscription_id())),
+            'properties': {
+                'primary': nics_value[0] == n
+            }
+        })
+
+    namespace.network_interface_ids = nics
+    namespace.network_interface_type = 'existing'
 
 def _handle_auth_types(**kwargs):
     if kwargs['command'] != 'vm create' and kwargs['command'] != 'vm scaleset create':
@@ -230,3 +254,8 @@ def _handle_container_ssh_file(**kwargs):
 
 APPLICATION.register(APPLICATION.COMMAND_PARSER_PARSED, _handle_container_ssh_file)
 
+def _get_subscription_id():
+    from azure.cli.commands.client_factory import Profile
+    profile = Profile()
+    _, subscription_id = profile.get_login_credentials()
+    return subscription_id

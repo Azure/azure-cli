@@ -56,8 +56,8 @@
     "osDiskUri": {
       "type": "string"
     },
-    "nicName": {
-      "type": "string"
+    "nics": {
+      "type": "array"
     },
     "storageCaching": {
       "type": "string"
@@ -83,7 +83,6 @@
     "vhdStorageName": "[parameters('storageAccountName')]",
     "vhdStorageType": "[parameters('storageType')]",
     "vhdStorageContainerName": "[parameters('storageContainerName')]",
-    "nicName": "[parameters('nicName')]",
     "storageProfilesCustomImage": {
       "custom": {
         "osDisk": {
@@ -151,11 +150,7 @@
         },
         "storageProfile": "[variables('storageProfilesCustomImage')[parameters('osDiskType')]]",
         "networkProfile": {
-          "networkInterfaces": [
-            {
-              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('nicName'))]"
-            }
-          ]
+          "networkInterfaces": "[parameters('nics')]"
         }
       },
       "resources": [

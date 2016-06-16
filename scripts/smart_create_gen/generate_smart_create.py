@@ -36,6 +36,7 @@ def generate_smart_create(*args):
     parser = argparse.ArgumentParser(description='Smart Create Generation')
     parser.add_argument('--src', metavar='PATH', required=True, help='Path to the directory containing the main ARM template. Must contain a directory in the format \'mgmt_<name>\'. Default name of main template is \'azuredeploy.json\' but a different name can be specified.')
     parser.add_argument('--api-version', metavar='VERSION', required=True, help='API version for the template being generated in yyyy-MM-dd format. (ex: 2016-07-01)')
+    parser.add_argument('--no-upload', action='store_true', help='Turn off upload to only regenerate the client-side code.')
     args = parser.parse_args(args)
 
     api_version = args.api_version
@@ -80,8 +81,9 @@ def generate_smart_create(*args):
     with open(os.path.join(dest, '__init__.py'), 'w') as f:
         f.write(INIT_FILE_CONTENTS)
 
-    # Publish template files into blob storage
-    upload_template_files(*_args_to_list(src=dest, api_version=api_version, name=name))
+    if not args.no_upload:
+        # Publish template files into blob storage
+        upload_template_files(*_args_to_list(src=dest, api_version=api_version, name=name))
     
     # Delete the Generated folder
     shutil.rmtree(autorest_generated_path)
