@@ -110,7 +110,6 @@ class DeploymentOutputLongRunningOperation(LongRunningOperation): #pylint: disab
         result = super(DeploymentOutputLongRunningOperation, self).__call__(poller)
         return result.properties.outputs
 
-
 class CommandTable(dict):
     """A command table is a dictionary of name -> CliCommand
     instances.

@@ -14,9 +14,6 @@
     "publicIpAddressAllocation": {
       "type": "string"
     },
-    "privateIpAllocation": {
-      "type": "string"
-    },
     "dnsNameType": {
       "type": "string"
     }
@@ -25,14 +22,12 @@
     "properties_dns": {
       "new": {
         "publicIPAllocationMethod": "[parameters('publicIpAddressAllocation')]",
-        "privateIPAllocationMethod": "[parameters('privateIpAllocation')]",
         "dnsSettings": {
           "domainNameLabel": "[parameters('dnsNameForPublicIP')]"
         }
       },
       "none": {
-        "publicIPAllocationMethod": "[parameters('publicIpAddressAllocation')]",
-        "privateIPAllocationMethod": "[parameters('privateIpAllocation')]"
+        "publicIPAllocationMethod": "[parameters('publicIpAddressAllocation')]"
       }
     }
   },

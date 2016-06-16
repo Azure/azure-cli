@@ -25,8 +25,8 @@ from azure.cli.command_modules.network.mgmt_vnet.lib.operations import VNetOpera
 from azure.cli.command_modules.network.mgmt_public_ip.lib \
     import PublicIpCreationClient as PublicIPClient
 from azure.cli.command_modules.network.mgmt_public_ip.lib.operations import PublicIpOperations
-from azure.cli.command_modules.network.mgmt_lb.lib import LBCreationClient as LBClient
-from azure.cli.command_modules.network.mgmt_lb.lib.operations import LBOperations
+from azure.cli.command_modules.network.mgmt_lb.lib import LbCreationClient as LBClient
+from azure.cli.command_modules.network.mgmt_lb.lib.operations import LbOperations
 from azure.cli.command_modules.network.mgmt_nsg.lib import NSGCreationClient as NSGClient
 from azure.cli.command_modules.network.mgmt_nsg.lib.operations import NSGOperations
 
@@ -78,7 +78,7 @@ cli_command('network lb list', LoadBalancersOperations.list, factory)
 cli_command('network lb list-all', LoadBalancersOperations.list_all, factory)
 
 factory = lambda _: get_mgmt_service_client(LBClient).lb
-cli_command('network lb create', LBOperations.create_or_update, factory, transform=DeploymentOutputLongRunningOperation('Starting network lb create'))
+cli_command('network lb create', LbOperations.create_or_update, factory, transform=DeploymentOutputLongRunningOperation('Starting network lb create'))
 
 factory = lambda _: get_mgmt_service_client(NSGClient).nsg
 cli_command('network nsg create', NSGOperations.create_or_update, factory, transform=DeploymentOutputLongRunningOperation('Starting network nsg create'))
@@ -172,4 +172,4 @@ cli_command('network vnet list', VirtualNetworksOperations.list, factory)
 cli_command('network vnet list-all', VirtualNetworksOperations.list_all, factory)
 
 factory = lambda _: get_mgmt_service_client(VNetClient).vnet
-cli_command('network vnet create', VNetOperations.create, factory)
+cli_command('network vnet create', VNetOperations.create, factory, transform=DeploymentOutputLongRunningOperation('Starting network vnet create'))

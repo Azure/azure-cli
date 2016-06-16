@@ -14,8 +14,8 @@ import uuid
 from .. import models
 
 
-class LBOperations(object):
-    """LBOperations operations.
+class LbOperations(object):
+    """LbOperations operations.
 
     :param client: Client for service requests.
     :param config: Configuration of service client.
@@ -32,7 +32,7 @@ class LBOperations(object):
         self.config = config
 
     def create_or_update(
-            self, resource_group_name, deployment_name, name, content_version=None, backend_pool_name=None, dns_name_for_public_ip=None, dns_name_type="none", location=None, nat_backend_port="22", nat_end_port="50099", nat_pool_name=None, nat_start_port="50000", private_ip_address_allocation="Dynamic", public_ip_address_allocation="Dynamic", public_ip_address_name=None, public_ip_address_type="new", subnet_name=None, virtual_network_name=None, custom_headers=None, raw=False, **operation_config):
+            self, resource_group_name, deployment_name, load_balancer_name, content_version=None, backend_pool_name=None, dns_name_for_public_ip=None, dns_name_type="none", location=None, nat_backend_port="22", nat_end_port="50099", nat_pool_name=None, nat_start_port="50000", private_ip_address=None, private_ip_address_allocation="dynamic", public_ip_address_allocation="dynamic", public_ip_address_name=None, public_ip_address_type="new", subnet_name=None, virtual_network_name=None, custom_headers=None, raw=False, **operation_config):
         """
         Create or update a virtual machine.
 
@@ -41,8 +41,8 @@ class LBOperations(object):
         :type resource_group_name: str
         :param deployment_name: The name of the deployment.
         :type deployment_name: str
-        :param name: Name for load balancer.
-        :type name: str
+        :param load_balancer_name: Name for load balancer.
+        :type load_balancer_name: str
         :param content_version: If included it must match the ContentVersion
          in the template.
         :type content_version: str
@@ -66,23 +66,26 @@ class LBOperations(object):
         :type nat_pool_name: str
         :param nat_start_port: Start of NAT port range.
         :type nat_start_port: str
+        :param private_ip_address: Private IP address to use when allocation
+         method is set to 'static'.
+        :type private_ip_address: str
         :param private_ip_address_allocation: Private IP address allocation
-         method. Possible values include: 'Dynamic', 'Static'
+         method. Possible values include: 'dynamic', 'static'
         :type private_ip_address_allocation: str
         :param public_ip_address_allocation: Public IP address allocation
-         method. Possible values include: 'Dynamic', 'Static'
+         method. Possible values include: 'dynamic', 'static'
         :type public_ip_address_allocation: str
         :param public_ip_address_name: Name of public IP address to use.
         :type public_ip_address_name: str
         :param public_ip_address_type: Type of Public IP Address to associate
-         with the laod balancer. Possible values include: 'none', 'new',
+         with the load balancer. Possible values include: 'none', 'new',
          'existing'
         :type public_ip_address_type: str
         :param subnet_name: If Public IP address is turned off, this is the
          subnet to associate with the load balancer.
         :type subnet_name: str
         :param virtual_network_name: If Public IP address is turned off, this
-         is the VNET to associate with the load balancer .
+         is the VNET to associate with the load balancer.
         :type virtual_network_name: str
         :param dict custom_headers: headers that will be added to the request
         :param bool raw: returns the direct response alongside the
@@ -90,11 +93,11 @@ class LBOperations(object):
         :rtype:
          :class:`AzureOperationPoller<msrestazure.azure_operation.AzureOperationPoller>`
          instance that returns :class:`DeploymentExtended
-         <mynamespace.models.DeploymentExtended>`
+         <default.models.DeploymentExtended>`
         :rtype: :class:`ClientRawResponse<msrest.pipeline.ClientRawResponse>`
          if raw=true
         """
-        parameters = models.DeploymentLB(content_version=content_version, backend_pool_name=backend_pool_name, dns_name_for_public_ip=dns_name_for_public_ip, dns_name_type=dns_name_type, location=location, name=name, nat_backend_port=nat_backend_port, nat_end_port=nat_end_port, nat_pool_name=nat_pool_name, nat_start_port=nat_start_port, private_ip_address_allocation=private_ip_address_allocation, public_ip_address_allocation=public_ip_address_allocation, public_ip_address_name=public_ip_address_name, public_ip_address_type=public_ip_address_type, subnet_name=subnet_name, virtual_network_name=virtual_network_name)
+        parameters = models.DeploymentLb(content_version=content_version, backend_pool_name=backend_pool_name, dns_name_for_public_ip=dns_name_for_public_ip, dns_name_type=dns_name_type, load_balancer_name=load_balancer_name, location=location, nat_backend_port=nat_backend_port, nat_end_port=nat_end_port, nat_pool_name=nat_pool_name, nat_start_port=nat_start_port, private_ip_address=private_ip_address, private_ip_address_allocation=private_ip_address_allocation, public_ip_address_allocation=public_ip_address_allocation, public_ip_address_name=public_ip_address_name, public_ip_address_type=public_ip_address_type, subnet_name=subnet_name, virtual_network_name=virtual_network_name)
 
         # Construct URL
         url = '/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Resources/deployments/{deploymentName}'
@@ -120,7 +123,7 @@ class LBOperations(object):
             header_parameters['accept-language'] = self._serialize.header("self.config.accept_language", self.config.accept_language, 'str')
 
         # Construct body
-        body_content = self._serialize.body(parameters, 'DeploymentLB')
+        body_content = self._serialize.body(parameters, 'DeploymentLb')
 
         # Construct and send request
         def long_running_send():

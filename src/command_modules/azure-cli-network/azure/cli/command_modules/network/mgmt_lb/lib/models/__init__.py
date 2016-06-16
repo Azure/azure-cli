@@ -6,7 +6,7 @@
 # regenerated.
 # --------------------------------------------------------------------------
 
-from .deployment_lb import DeploymentLB
+from .deployment_lb import DeploymentLb
 from .template_link import TemplateLink
 from .parameters_link import ParametersLink
 from .provider_resource_type import ProviderResourceType
@@ -20,7 +20,7 @@ from .lb_creation_client_enums import (
 )
 
 __all__ = [
-    'DeploymentLB',
+    'DeploymentLb',
     'TemplateLink',
     'ParametersLink',
     'ProviderResourceType',
