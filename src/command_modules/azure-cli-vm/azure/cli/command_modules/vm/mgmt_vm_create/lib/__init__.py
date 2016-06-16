@@ -6,10 +6,10 @@
 # regenerated.
 # --------------------------------------------------------------------------
 
-from .vm_creation_client import VmCreationClient
+from .vm_create_creation_client import VmCreateCreationClient
 from .version import VERSION
 
-__all__ = ['VmCreationClient']
+__all__ = ['VmCreateCreationClient']
 
 __version__ = VERSION
 

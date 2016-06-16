@@ -44,7 +44,7 @@ class DeploymentPropertiesExtended(Model):
     :param mode: Gets or sets the deployment mode. Possible values include:
      'Incremental', 'Complete'
     :type mode: str or :class:`DeploymentMode
-     <vmcreationclient.models.DeploymentMode>`
+     <vmcreatecreationclient.models.DeploymentMode>`
     """ 
 
     _attribute_map = {
