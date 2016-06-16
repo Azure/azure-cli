@@ -31,32 +31,36 @@ def _dump_command_table(**kwargs):
                     cmd_list.append(name)
                     break
 
-    results = []
+    filtered_cmd_list = []
+    param_dict = {k : [] for k in param_names} if param_names else {}
     if param_names:
         for cmd_name in cmd_list:
-            cmd_args = cmd_table[cmd_name].arguments
-            match = False
-            for arg in list(cmd_args.keys()):
-                if match:
-                    break
+            cmd_args = list(cmd_table[cmd_name].arguments.keys())
+            for arg in cmd_args:
                 if arg in param_names:
-                    results.append(cmd_name)
-                match = True
+                    param_dict[arg].append(cmd_name)
+                    if cmd_name not in filtered_cmd_list:
+                        filtered_cmd_list.append(cmd_name)
     else:
-        results = cmd_list
+        filtered_cmd_list = cmd_list
 
-    result_dict = {}
-    for cmd_name in results:
+    table_entries = []
+    for cmd_name in filtered_cmd_list:
         table_entry = cmd_table[cmd_name]
-        result_dict[cmd_name] = _format_entry(cmd_table[cmd_name])
-        print(json.dumps(result_dict, indent=4, sort_keys=True))
+        table_entries.append(_format_entry(cmd_table[cmd_name]))
     
-    # print the 'lowest common denominator' for scope for each param
-    if param_names:
-        print('\nPARAMETER SCOPES\n')
-        for param in param_names:
-            print('{} = {}'.format(param, _get_parameter_scope(param, result_dict)))
+    # output results to STDOUT
+    result_dict = {'commands': table_entries}
+    print(json.dumps(result_dict, indent=2, sort_keys=True))
     
+    # display summary info with STDERR
+    print('\n===RESULTS===', file=sys.stderr)
+    print('{} commands dumped within {} scope with {} parameters'.format(len(table_entries),
+        cmd_set_names or '*', param_names or 'ANY'), file=sys.stderr)
+    for param, commands in param_dict.items():
+        print('\nPARAM: "{}" - {} commands - scope "{}" - {}'.format(
+            param, len(commands), _get_parameter_scope(param, commands), commands), file=sys.stderr)
+
     sys.exit(0)
 
 def _format_entry(obj):
@@ -82,11 +86,10 @@ def _format_entry(obj):
         _process_null_values(new_dict)
         return new_dict
 
-def _get_parameter_scope(param, result):
-    cmd_list = [key for key, value in result.items() if param in list(value['arguments'].keys())]
+def _get_parameter_scope(param, cmd_list):
+        
     if not cmd_list:
         return 'N/A (NOT FOUND)'
-
     test_list = cmd_list[0].split(' ')
     while len(test_list) > 0:
         test_entry = ' '.join(test_list)
@@ -102,22 +105,25 @@ def _get_parameter_scope(param, result):
     return '_ROOT_'
 
 def _process_null_values(dict_):
-    if not show_nulls:
+    if hide_nulls:
         null_values = [x for x in dict_.keys() if dict_[x] is None]
         for key in null_values:
             dict_.pop(key)
 
+def _dashed_to_camel(string):
+    return string.replace('-', '_')
+
 parser = argparse.ArgumentParser(description='Command Table Parser')
 parser.add_argument('--commands', metavar='N', nargs='+', help='Filter by first level command (OR)')
 parser.add_argument('--params', metavar='N', nargs='+', help='Filter by parameters (OR)')
-parser.add_argument('--show-nulls', action='store_true', default=False, help='Show null entries')
+parser.add_argument('--hide-nulls', action='store_true', default=False, help='Show null entries')
 args = parser.parse_args()
 cmd_set_names = args.commands
-param_names = args.params
-show_nulls = args.show_nulls
+param_names = [_dashed_to_camel(x) for x in args.params or []]
+hide_nulls = args.hide_nulls
 
 PRIMITIVES = (str, int, bool, float)
-IGNORE_ARGS = ['help', 'help_file', 'name', 'base_type']
+IGNORE_ARGS = ['help', 'help_file', 'base_type']
     
 APPLICATION = Application(Configuration([]))
 APPLICATION.register(Application.COMMAND_TABLE_LOADED, _dump_command_table)
