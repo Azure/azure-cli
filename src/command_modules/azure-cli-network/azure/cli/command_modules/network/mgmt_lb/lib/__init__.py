@@ -6,10 +6,10 @@
 # regenerated.
 # --------------------------------------------------------------------------
 
-from .lb_creation_client import LBCreationClient
+from .lb_creation_client import LbCreationClient
 from .version import VERSION
 
-__all__ = ['LBCreationClient']
+__all__ = ['LbCreationClient']
 
 __version__ = VERSION
 

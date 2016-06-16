@@ -516,7 +516,7 @@ def convert_template_to_swagger(*args):
         artifacts_paramstr = next((p for p in param_strs if '_artifacts' in p), None)
         if artifacts_paramstr:
             param_strs.remove(artifacts_paramstr)
-            param_strs.append(swagger_template_artifacts_location.format(name, api_version))
+            param_strs.append(swagger_template_artifacts_location.format(snake_to_camel(name), api_version))
 
         params_section = ',\n'.join(param_strs)
 

@@ -10,12 +10,12 @@ from msrest.service_client import ServiceClient
 from msrest import Serializer, Deserializer
 from msrestazure import AzureConfiguration
 from .version import VERSION
-from .operations.lb_operations import LBOperations
+from .operations.lb_operations import LbOperations
 from . import models
 
 
-class LBCreationClientConfiguration(AzureConfiguration):
-    """Configuration for LBCreationClient
+class LbCreationClientConfiguration(AzureConfiguration):
+    """Configuration for LbCreationClient
     Note that all parameters used to create this instance are saved as instance
     attributes.
 
@@ -58,7 +58,7 @@ class LBCreationClientConfiguration(AzureConfiguration):
         if not base_url:
             base_url = 'https://management.azure.com'
 
-        super(LBCreationClientConfiguration, self).__init__(base_url, filepath)
+        super(LbCreationClientConfiguration, self).__init__(base_url, filepath)
 
         self.add_user_agent('lbcreationclient/{}'.format(VERSION))
         self.add_user_agent('Azure-SDK-For-Python')
@@ -71,14 +71,14 @@ class LBCreationClientConfiguration(AzureConfiguration):
         self.generate_client_request_id = generate_client_request_id
 
 
-class LBCreationClient(object):
-    """LBCreationClient
+class LbCreationClient(object):
+    """LbCreationClient
 
     :ivar config: Configuration for client.
-    :vartype config: LBCreationClientConfiguration
+    :vartype config: LbCreationClientConfiguration
 
-    :ivar lb: LB operations
-    :vartype lb: .operations.LBOperations
+    :ivar lb: Lb operations
+    :vartype lb: .operations.LbOperations
 
     :param credentials: Gets Azure subscription credentials.
     :type credentials: :mod:`A msrestazure Credentials
@@ -106,12 +106,12 @@ class LBCreationClient(object):
     def __init__(
             self, credentials, subscription_id, api_version='2015-11-01', accept_language='en-US', long_running_operation_retry_timeout=30, generate_client_request_id=True, base_url=None, filepath=None):
 
-        self.config = LBCreationClientConfiguration(credentials, subscription_id, api_version, accept_language, long_running_operation_retry_timeout, generate_client_request_id, base_url, filepath)
+        self.config = LbCreationClientConfiguration(credentials, subscription_id, api_version, accept_language, long_running_operation_retry_timeout, generate_client_request_id, base_url, filepath)
         self._client = ServiceClient(self.config.credentials, self.config)
 
         client_models = {k: v for k, v in models.__dict__.items() if isinstance(v, type)}
         self._serialize = Serializer(client_models)
         self._deserialize = Deserializer(client_models)
 
-        self.lb = LBOperations(
+        self.lb = LbOperations(
             self._client, self.config, self._serialize, self._deserialize)
