@@ -18,6 +18,7 @@ def register(application):
                     kwargs['event_data']['result'] = search(query_value,
                                                             kwargs['event_data']['result'],
                                                             Options(collections.OrderedDict))
+                    application.remove(application.FILTER_RESULT, filter_output)
                 application.register(application.FILTER_RESULT, filter_output)
 
         except AttributeError:
