@@ -65,6 +65,7 @@ register_cli_argument(
     )
 )
 register_cli_argument('vm container create', 'agent_vm_size', CliArgumentType(completer=get_vm_size_completion_list))
+register_cli_argument('vm container', 'container_service_name', CliArgumentType(overrides=name_arg_type, help='The name of the container service'))
 
 register_cli_argument('vm capture', 'overwrite', CliArgumentType(action='store_true'))
 register_cli_argument('vm nic', 'nic_ids', multi_ids_type)

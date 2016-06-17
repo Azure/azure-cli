@@ -7,7 +7,8 @@
     VirtualMachineSizesOperations,
     VirtualMachinesOperations,
     VirtualMachineScaleSetsOperations,
-    VirtualMachineScaleSetVMsOperations)
+    VirtualMachineScaleSetVMsOperations,
+    ContainerServiceOperations)
 from azure.cli.commands import DeploymentOutputLongRunningOperation, cli_command
 from azure.cli.commands.client_factory import get_mgmt_service_client
 from azure.cli.command_modules.vm.mgmt_avail_set.lib import (AvailSetCreationClient
@@ -82,6 +83,17 @@ cli_command('vm boot-diagnostics get-boot-log', get_boot_log)
 # VM Container (ACS)
 factory = lambda _: get_mgmt_service_client(ACSClient).acs
 cli_command('vm container create', ACSOperations.create_or_update, factory, transform=DeploymentOutputLongRunningOperation('Starting vm container create'))
+
+factory = lambda _: _compute_client_factory().container_service
+#Remove the hack after https://github.com/Azure/azure-rest-api-specs/issues/352 fixed
+from azure.mgmt.compute.models import ContainerService#pylint: disable=wrong-import-position
+for a in ['id', 'name', 'type', 'location']:
+    ContainerService._attribute_map[a]['type'] = 'str'#pylint: disable=protected-access
+ContainerService._attribute_map['tags']['type'] = '{str}'#pylint: disable=protected-access
+######
+cli_command('vm container show', ContainerServiceOperations.get, factory)
+cli_command('vm container list', ContainerServiceOperations.list, factory)
+cli_command('vm container delete', ContainerServiceOperations.delete, factory)
 
 # VM Diagnostics
 cli_command('vm diagnostics set', set_diagnostics_extension)
