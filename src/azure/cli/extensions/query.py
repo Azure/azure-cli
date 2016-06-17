@@ -1,5 +1,7 @@
 import collections
 
+from azure.cli._util import CLIError
+
 def _register_global_parameter(global_group):
     # Let the program know that we are adding a parameter --query
     global_group.add_argument('--query', dest='_jmespath_query', metavar='JMESPATH',
@@ -15,10 +17,15 @@ def register(application):
             if query_value:
                 def filter_output(**kwargs):
                     from jmespath import search, Options
-                    kwargs['event_data']['result'] = search(query_value,
-                                                            kwargs['event_data']['result'],
-                                                            Options(collections.OrderedDict))
-                    application.remove(application.FILTER_RESULT, filter_output)
+                    from jmespath.exceptions import ParseError
+                    try:
+                        kwargs['event_data']['result'] = search(query_value,
+                                                                kwargs['event_data']['result'],
+                                                                Options(collections.OrderedDict))
+                    except ParseError as ex:
+                        raise CLIError(ex)
+                    finally:
+                        application.remove(application.FILTER_RESULT, filter_output)
                 application.register(application.FILTER_RESULT, filter_output)
 
         except AttributeError:
