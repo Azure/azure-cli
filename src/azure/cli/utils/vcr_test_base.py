@@ -294,8 +294,9 @@ class ResourceGroupVCRTestBase(VCRTestBase):
     def set_up(self):
         self.cmd('resource group create --location {} --name {}'.format(
             self.location, self.resource_group))
-        #self.cmd('resource group create --location {} --name {}'.format(
-        #    self.location, self.resource_group),
+        #self.cmd(
+        #    'resource group create --location {} --name {}'.format(
+        #        self.location, self.resource_group),
         #    allowed_exceptions="resource group {} already exists".format(self.resource_group))
 
     def tear_down(self):

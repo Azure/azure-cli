@@ -165,6 +165,16 @@
           "$ref": "#/definitions/DeploymentParameter_enableIpForwarding",
           "x-ms-client-flatten": true
         },
+        "loadBalancerBackendAddressPoolIds": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_loadBalancerBackendAddressPoolIds",
+          "x-ms-client-flatten": true
+        },
+        "loadBalancerIncomingNatRuleIds": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_loadBalancerIncomingNatRuleIds",
+          "x-ms-client-flatten": true
+        },
         "location": {
           "type": "object",
           "$ref": "#/definitions/DeploymentParameter_location",
@@ -195,6 +205,16 @@
           "$ref": "#/definitions/DeploymentParameter_privateIpAddressAllocation",
           "x-ms-client-flatten": true
         },
+        "publicIpAddressName": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_publicIpAddressName",
+          "x-ms-client-flatten": true
+        },
+        "publicIpAddressType": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_publicIpAddressType",
+          "x-ms-client-flatten": true
+        },
         "subnetName": {
           "type": "object",
           "$ref": "#/definitions/DeploymentParameter_subnetName",
@@ -219,6 +239,24 @@
           "description": "Specify whether to enable IP forwarding.",
           "x-ms-client-name": "enableIpForwarding",
           "default": "false"
+        }
+      }
+    },
+    "DeploymentParameter_loadBalancerBackendAddressPoolIds": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "Space separated list of load balancer backend address pool IDs.",
+          "x-ms-client-name": "loadBalancerBackendAddressPoolIds"
+        }
+      }
+    },
+    "DeploymentParameter_loadBalancerIncomingNatRuleIds": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "Space separated list of load balancer incoming NAT rule IDs.",
+          "x-ms-client-name": "loadBalancerIncomingNatRuleIds"
         }
       }
     },
@@ -256,7 +294,7 @@
       "properties": {
         "value": {
           "type": "string",
-          "description": "Specify whether to use an existing NSG or not.",
+          "description": "Identifies whether to use an existing NSG.",
           "x-ms-client-name": "networkSecurityGroupType",
           "enum": [
             "none",
@@ -286,6 +324,29 @@
             "static"
           ],
           "default": "dynamic"
+        }
+      }
+    },
+    "DeploymentParameter_publicIpAddressName": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "Name of an existing public IP address to associate with the NIC.",
+          "x-ms-client-name": "publicIpAddressName"
+        }
+      }
+    },
+    "DeploymentParameter_publicIpAddressType": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "Specify whether to associate an existing public IP address with the NIC.",
+          "x-ms-client-name": "publicIpAddressType",
+          "enum": [
+            "none",
+            "existing"
+          ],
+          "default": "none"
         }
       }
     },

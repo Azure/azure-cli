@@ -26,6 +26,12 @@ class DeploymentNic(Model):
     :param enable_ip_forwarding: Specify whether to enable IP forwarding.
      Default value: "false" .
     :type enable_ip_forwarding: str
+    :param load_balancer_backend_address_pool_ids: Space separated list of
+     load balancer backend address pool IDs.
+    :type load_balancer_backend_address_pool_ids: str
+    :param load_balancer_incoming_nat_rule_ids: Space separated list of load
+     balancer incoming NAT rule IDs.
+    :type load_balancer_incoming_nat_rule_ids: str
     :param location: Location for NIC resource.
     :type location: str
     :param network_interface_name: Name of the new NIC.
@@ -33,9 +39,8 @@ class DeploymentNic(Model):
     :param network_security_group_name: Network security group to associate
      with the NIC.
     :type network_security_group_name: str
-    :param network_security_group_type: Specify whether to use an existing
-     NSG or not. Possible values include: 'none', 'existing'. Default value:
-     "none" .
+    :param network_security_group_type: Identifies whether to use an existing
+     NSG. Possible values include: 'none', 'existing'. Default value: "none" .
     :type network_security_group_type: str
     :param private_ip_address: The private IP address to use if static
      address allocation is specified.
@@ -44,6 +49,13 @@ class DeploymentNic(Model):
      method. Possible values include: 'dynamic', 'static'. Default value:
      "dynamic" .
     :type private_ip_address_allocation: str
+    :param public_ip_address_name: Name of an existing public IP address to
+     associate with the NIC.
+    :type public_ip_address_name: str
+    :param public_ip_address_type: Specify whether to associate an existing
+     public IP address with the NIC. Possible values include: 'none',
+     'existing'. Default value: "none" .
+    :type public_ip_address_type: str
     :param subnet_name: Subnet to associate with the NIC.
     :type subnet_name: str
     :param virtual_network_name: Virtual network to associate with the NIC.
@@ -65,12 +77,16 @@ class DeploymentNic(Model):
         'uri': {'key': 'properties.templateLink.uri', 'type': 'str'},
         'content_version': {'key': 'properties.templateLink.contentVersion', 'type': 'str'},
         'enable_ip_forwarding': {'key': 'properties.parameters.enableIpForwarding.value', 'type': 'str'},
+        'load_balancer_backend_address_pool_ids': {'key': 'properties.parameters.loadBalancerBackendAddressPoolIds.value', 'type': 'str'},
+        'load_balancer_incoming_nat_rule_ids': {'key': 'properties.parameters.loadBalancerIncomingNatRuleIds.value', 'type': 'str'},
         'location': {'key': 'properties.parameters.location.value', 'type': 'str'},
         'network_interface_name': {'key': 'properties.parameters.networkInterfaceName.value', 'type': 'str'},
         'network_security_group_name': {'key': 'properties.parameters.networkSecurityGroupName.value', 'type': 'str'},
         'network_security_group_type': {'key': 'properties.parameters.networkSecurityGroupType.value', 'type': 'str'},
         'private_ip_address': {'key': 'properties.parameters.privateIpAddress.value', 'type': 'str'},
         'private_ip_address_allocation': {'key': 'properties.parameters.privateIpAddressAllocation.value', 'type': 'str'},
+        'public_ip_address_name': {'key': 'properties.parameters.publicIpAddressName.value', 'type': 'str'},
+        'public_ip_address_type': {'key': 'properties.parameters.publicIpAddressType.value', 'type': 'str'},
         'subnet_name': {'key': 'properties.parameters.subnetName.value', 'type': 'str'},
         'virtual_network_name': {'key': 'properties.parameters.virtualNetworkName.value', 'type': 'str'},
         'mode': {'key': 'properties.mode', 'type': 'str'},
@@ -80,14 +96,18 @@ class DeploymentNic(Model):
 
     mode = "Incremental"
 
-    def __init__(self, network_interface_name, subnet_name, virtual_network_name, content_version=None, enable_ip_forwarding="false", location=None, network_security_group_name=None, network_security_group_type="none", private_ip_address=None, private_ip_address_allocation="dynamic"):
+    def __init__(self, network_interface_name, subnet_name, virtual_network_name, content_version=None, enable_ip_forwarding="false", load_balancer_backend_address_pool_ids=None, load_balancer_incoming_nat_rule_ids=None, location=None, network_security_group_name=None, network_security_group_type="none", private_ip_address=None, private_ip_address_allocation="dynamic", public_ip_address_name=None, public_ip_address_type="none"):
         self.content_version = content_version
         self.enable_ip_forwarding = enable_ip_forwarding
+        self.load_balancer_backend_address_pool_ids = load_balancer_backend_address_pool_ids
+        self.load_balancer_incoming_nat_rule_ids = load_balancer_incoming_nat_rule_ids
         self.location = location
         self.network_interface_name = network_interface_name
         self.network_security_group_name = network_security_group_name
         self.network_security_group_type = network_security_group_type
         self.private_ip_address = private_ip_address
         self.private_ip_address_allocation = private_ip_address_allocation
+        self.public_ip_address_name = public_ip_address_name
+        self.public_ip_address_type = public_ip_address_type
         self.subnet_name = subnet_name
         self.virtual_network_name = virtual_network_name

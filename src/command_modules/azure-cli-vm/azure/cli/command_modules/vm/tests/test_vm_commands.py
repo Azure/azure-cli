@@ -695,14 +695,14 @@ class VMCreateUbuntuScenarioTest(ResourceGroupVCRTestBase): #pylint: disable=too
         self.pub_ssh_filename = pathname
 
     def body(self):
-        self.cmd('vm create --resource-group {rg} --admin-username {admin} --name {vm_name} --authentication-type {auth_type} --image {image} --ssh-key-value {ssh_key} --location {location} --deployment-name {deployment}'.format(
+        self.cmd('vm create --resource-group {rg} --admin-username {admin} --name {vm_name} --authentication-type {auth_type} --image {image} --ssh-key-value {ssh_key} --location {location}'.format(
             rg=self.resource_group,
             admin=self.admin_username,
             vm_name=self.vm_names[0],
             image=self.vm_image,
             auth_type=self.auth_type,
             ssh_key=self.pub_ssh_filename,
-            location=self.location,
+            location=self.location
         ), checks=[
             JMESPathCheck('type(@)', 'object'),
             JMESPathCheck('vm.value.provisioningState', 'Succeeded'),

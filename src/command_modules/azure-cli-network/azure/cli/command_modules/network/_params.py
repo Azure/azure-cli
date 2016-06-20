@@ -27,8 +27,12 @@ register_cli_argument('network local-gateway', 'local_network_gateway_name', nam
 
 register_cli_argument('network nic', 'network_interface_name', name_arg_type)
 register_cli_argument('network nic', 'subnet_name', options_list=('--subnet-name',))
-register_cli_argument('network nic', 'enable_ip_forwarding', CliArgumentType(action='store_true'))
+register_cli_argument('network nic', 'enable_ip_forwarding', options_list=('--ip-forwarding',), action='store_true')
+register_cli_argument('network nic', 'private_ip_address_allocation', help=argparse.SUPPRESS)
 register_cli_argument('network nic', 'network_security_group_type', help=argparse.SUPPRESS, validator=_process_nic_namespace)
+register_cli_argument('network nic', 'public_ip_address_type', help=argparse.SUPPRESS)
+register_cli_argument('network nic', 'load_balancer_backend_address_pool_ids', options_list=('--lb-address-pool-ids',))
+register_cli_argument('network nic', 'load_balancer_incoming_nat_rule_ids', options_list=('--lb-nat-rule-ids',))
 
 register_cli_argument('network nic scale-set', 'virtual_machine_scale_set_name', options_list=('--vm-scale-set',), completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'))
 register_cli_argument('network nic scale-set', 'virtualmachine_index', options_list=('--vm-index',))
@@ -81,3 +85,4 @@ register_cli_argument('network vpn-connection', 'virtual_network_gateway_connect
 
 register_cli_argument('network vpn-connection shared-key', 'connection_shared_key_name', CliArgumentType(options_list=('--name', '-n')))
 register_cli_argument('network vpn-connection shared-key', 'virtual_network_gateway_connection_name', CliArgumentType(options_list=('--connection-name',), metavar='NAME'))
+

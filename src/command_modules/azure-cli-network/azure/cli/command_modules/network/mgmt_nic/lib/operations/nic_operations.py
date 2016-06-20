@@ -32,7 +32,7 @@ class NicOperations(object):
         self.config = config
 
     def create_or_update(
-            self, resource_group_name, deployment_name, network_interface_name, subnet_name, virtual_network_name, content_version=None, enable_ip_forwarding="false", location=None, network_security_group_name=None, network_security_group_type="none", private_ip_address=None, private_ip_address_allocation="dynamic", custom_headers=None, raw=False, **operation_config):
+            self, resource_group_name, deployment_name, network_interface_name, subnet_name, virtual_network_name, content_version=None, enable_ip_forwarding="false", load_balancer_backend_address_pool_ids=None, load_balancer_incoming_nat_rule_ids=None, location=None, network_security_group_name=None, network_security_group_type="none", private_ip_address=None, private_ip_address_allocation="dynamic", public_ip_address_name=None, public_ip_address_type="none", custom_headers=None, raw=False, **operation_config):
         """
         Create or update a virtual machine.
 
@@ -53,13 +53,19 @@ class NicOperations(object):
         :type content_version: str
         :param enable_ip_forwarding: Specify whether to enable IP forwarding.
         :type enable_ip_forwarding: str
+        :param load_balancer_backend_address_pool_ids: Space separated list
+         of load balancer backend address pool IDs.
+        :type load_balancer_backend_address_pool_ids: str
+        :param load_balancer_incoming_nat_rule_ids: Space separated list of
+         load balancer incoming NAT rule IDs.
+        :type load_balancer_incoming_nat_rule_ids: str
         :param location: Location for NIC resource.
         :type location: str
         :param network_security_group_name: Network security group to
          associate with the NIC.
         :type network_security_group_name: str
-        :param network_security_group_type: Specify whether to use an
-         existing NSG or not. Possible values include: 'none', 'existing'
+        :param network_security_group_type: Identifies whether to use an
+         existing NSG. Possible values include: 'none', 'existing'
         :type network_security_group_type: str
         :param private_ip_address: The private IP address to use if static
          address allocation is specified.
@@ -67,6 +73,13 @@ class NicOperations(object):
         :param private_ip_address_allocation: Private IP address allocation
          method. Possible values include: 'dynamic', 'static'
         :type private_ip_address_allocation: str
+        :param public_ip_address_name: Name of an existing public IP address
+         to associate with the NIC.
+        :type public_ip_address_name: str
+        :param public_ip_address_type: Specify whether to associate an
+         existing public IP address with the NIC. Possible values include:
+         'none', 'existing'
+        :type public_ip_address_type: str
         :param dict custom_headers: headers that will be added to the request
         :param bool raw: returns the direct response alongside the
          deserialized response
@@ -77,7 +90,7 @@ class NicOperations(object):
         :rtype: :class:`ClientRawResponse<msrest.pipeline.ClientRawResponse>`
          if raw=true
         """
-        parameters = models.DeploymentNic(content_version=content_version, enable_ip_forwarding=enable_ip_forwarding, location=location, network_interface_name=network_interface_name, network_security_group_name=network_security_group_name, network_security_group_type=network_security_group_type, private_ip_address=private_ip_address, private_ip_address_allocation=private_ip_address_allocation, subnet_name=subnet_name, virtual_network_name=virtual_network_name)
+        parameters = models.DeploymentNic(content_version=content_version, enable_ip_forwarding=enable_ip_forwarding, load_balancer_backend_address_pool_ids=load_balancer_backend_address_pool_ids, load_balancer_incoming_nat_rule_ids=load_balancer_incoming_nat_rule_ids, location=location, network_interface_name=network_interface_name, network_security_group_name=network_security_group_name, network_security_group_type=network_security_group_type, private_ip_address=private_ip_address, private_ip_address_allocation=private_ip_address_allocation, public_ip_address_name=public_ip_address_name, public_ip_address_type=public_ip_address_type, subnet_name=subnet_name, virtual_network_name=virtual_network_name)
 
         # Construct URL
         url = '/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Resources/deployments/{deploymentName}'
