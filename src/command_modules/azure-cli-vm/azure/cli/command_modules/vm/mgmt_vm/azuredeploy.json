@@ -420,6 +420,9 @@
       "existing": "nested_templates/ExistingStorageAccount.json"
     },
     "storageDeploymentName": "[concat(variables('vmName'), parameters('storageAccountName'))]",
+    "ipOutputDeploymentName": "[concat(variables('vmName'), parameters('publicIpAddressName'), parameters('publicIpAddressType'))]",
+    "fqdnOutputDeploymentName": "[concat(variables('vmName'), parameters('publicIpAddressName'), parameters('publicIpAddressType'), 'fqdn')]",
+    "macOutputDeploymentName": "[concat(variables('vmName'), variables('nicName'), 'mac')]",
     "availSetId": "[resourceId('Microsoft.Compute/availabilitySets', parameters('availabilitySetId'))]",
     "vnetTemplateFilePaths": {
       "new": "nested_templates/NewVNet.json",
@@ -442,6 +445,15 @@
       "new": "[concat('nested_templates/nsg_new', '.json')]",
       "none": "[concat('nested_templates/nsg_existing_or_none', '.json')]",
       "existing": "[concat('nested_templates/nsg_existing_or_none', '.json')]"
+    },
+    "ipOutputTemplateFilePaths": {
+      "new": "[concat('nested_templates/output_ip_new_existing', '.json')]",
+      "existing": "[concat('nested_templates/output_ip_new_existing', '.json')]",
+      "none": "[concat('nested_templates/output_ip_none', '.json')]"
+    },
+    "fqdnOutputTemplateFilePaths": {
+      "new": "[concat('nested_templates/output_fqdn_new', '.json')]",
+      "none": "[concat('nested_templates/output_fqdn_none', '.json')]"
     }
   },
   "resources": [
@@ -570,16 +582,78 @@
           "osDiskType": { "value": "[parameters('osDiskType')]" }
         }
       }
+    },
+    {
+      "name": "[variables('ipOutputDeploymentName')]",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "dependsOn": [
+        "[concat('Microsoft.Resources/deployments/', variables('vmDeploymentName'))]"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(parameters('_artifactsLocation'), '/', variables('ipOutputTemplateFilePaths')[parameters('publicIpAddressType')])]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "publicIpAddressName": { "value": "[parameters('publicIpAddressName')]" }
+        }
+      }
+    },
+    {
+      "name": "[variables('fqdnOutputDeploymentName')]",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "dependsOn": [
+        "[concat('Microsoft.Resources/deployments/', variables('vmDeploymentName'))]"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(parameters('_artifactsLocation'), '/', variables('fqdnOutputTemplateFilePaths')[parameters('dnsNameType')])]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "publicIpAddressName": { "value": "[parameters('publicIpAddressName')]" }
+        }
+      }
+    },
+    {
+      "name": "[variables('macOutputDeploymentName')]",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "dependsOn": [
+        "[concat('Microsoft.Resources/deployments/', variables('vmDeploymentName'))]"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(parameters('_artifactsLocation'), '/', 'nested_templates/output_mac.json')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "nicName": { "value": "[variables('nicName')]" }
+        }
+      }
     }
   ],
   "outputs": {
-    "vm": {
-      "value": "[reference(variables('vmDeploymentName')).outputs.vm.value]",
-      "type": "object"
+    "publicIpAddress": {
+      "value": "[reference(variables('ipOutputDeploymentName')).outputs.ipAddress.value]",
+      "type": "string"
     },
-    "vmNic": {
-      "value": "[reference(variables('nicDeploymentName')).outputs.vmNic.value]",
-      "type": "object"
+    "fqdn": {
+      "value": "[reference(variables('fqdnOutputDeploymentName')).outputs.fqdn.value]",
+      "type": "string"
+    },
+    "privateIpAddress": {
+      "value": "[reference(variables('nicDeploymentName')).outputs.VMNic.value.ipConfigurations[0].properties.privateIPAddress]",
+      "type": "string"
+    },
+    "macAddress": {
+      "value": "[reference(variables('macOutputDeploymentName')).outputs.macAddress.value]",
+      "type": "string"
     }
   }
 }

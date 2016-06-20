@@ -18,6 +18,8 @@ TEMPLATE_CONTAINER_NAME = config['storage']['container']
 STORAGE_ACCOUNT_KEY = config['storage']['key']
 SUBSCRIPTION_ID = config['storage']['subscription']
 
+uploads = []
+
 def _upload_templates(name, api_version, path, dir=None):
     for item in os.listdir(path):
         item_path = os.path.join(path, item) 
@@ -34,7 +36,7 @@ def _upload_templates(name, api_version, path, dir=None):
                 blob_dest, STORAGE_ACCOUNT_NAME, STORAGE_ACCOUNT_KEY, TEMPLATE_CONTAINER_NAME, blob_src, SUBSCRIPTION_ID
             )
             print('\nUPLOADING {}...'.format(blob_dest))
-            os.system(cmd)
+            uploads.append(cmd)
 
 def upload_template_files(*args):
 
@@ -51,6 +53,13 @@ def upload_template_files(*args):
     src = args.src
     
     _upload_templates(name, api_version, src)
+
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+    with ThreadPoolExecutor(max_workers=40) as executor:
+        tasks = [executor.submit(lambda cmd: os.system(cmd), u) for u in uploads]
+        for t in as_completed(tasks):
+            t.result() # don't use the result but expose exceptions from the threads
+
 
 if __name__ == '__main__':
     upload_template_files(*sys.argv[1:])
