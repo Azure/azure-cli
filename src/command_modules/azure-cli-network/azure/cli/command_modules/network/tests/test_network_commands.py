@@ -190,7 +190,11 @@ class NetworkLoadBalancerScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck('loadBalancer.value.frontendIPConfigurations[0].resourceGroup', self.resource_group)
         ])
 
-        # test lb create with no ip
+        # test internet facing load balancer with new static public IP
+        self.cmd('network lb create -n {} -g {} --deployment-name deployLb1 --public-ip-address-allocation static'.format(self.lb_name, self.resource_group))
+        self.cmd('network public-ip show -g {} -n PublicIP{}'.format(self.resource_group, self.lb_name), checks=JMESPathCheck('publicIpAllocationMethod', 'Static'))
+
+        # test internal load balancer create
         vnet_name = 'mytestvnet'
         private_ip = '10.0.0.15'
         vnet = self.cmd('network vnet create -n {} -g {}'.format(vnet_name, self.resource_group))
@@ -204,7 +208,7 @@ class NetworkLoadBalancerScenarioTest(ResourceGroupVCRTestBase):
                 JMESPathCheck("loadBalancer.value.frontendIPConfigurations[0].properties.subnet.contains(id, '{}')".format(subnet_name), True)
             ])
 
-        # test lb create with existing ip
+        # test internet facing load balancer with existing public IP
         pub_ip_name = 'mytestpubip'
         self.cmd('network public-ip create -n {} -g {}'.format(pub_ip_name, self.resource_group))
         self.cmd('network lb create -n {} -g {} --public-ip-address-type existing --public-ip-address-name {}'.format(

@@ -31,3 +31,11 @@ def process_nic_namespace(namespace):
 
     namespace.load_balancer_inbound_nat_rule_ids = _convert_id_list_to_object(
         namespace.load_balancer_inbound_nat_rule_ids)
+
+def process_network_lb_create_namespace(namespace):
+
+    if namespace.dns_name_for_public_ip:
+        namespace.dns_name_type = 'new'
+
+    if namespace.private_ip_address:
+        namespace.private_ip_address_allocation = 'static'

@@ -8,13 +8,6 @@
         "description": "URL of the template to deploy."
       }
     },
-    "backendPoolName": {
-      "type": "string",
-      "defaultValue": "[concat(parameters('loadBalancerName'), 'bepool')]",
-      "metadata": {
-        "description": "Name of load balancer backend pool."
-      }
-    },
     "dnsNameForPublicIP": {
       "type": "string",
       "defaultValue": "",
@@ -46,39 +39,11 @@
         "description": "Location for load balancer resource."
       }
     },
-    "natBackendPort": {
-      "type": "string",
-      "defaultValue": "22",
-      "metadata": {
-        "description": "Port number for NAT backend."
-      }
-    },
-    "natEndPort": {
-      "type": "string",
-      "defaultValue": "50099",
-      "metadata": {
-        "description": "End of NAT port range."
-      }
-    },
-    "natPoolName": {
-      "type": "string",
-      "defaultValue": "[concat(parameters('loadBalancerName'), 'natpool')]",
-      "metadata": {
-        "description": "Name of load balancer NAT (network address translation) pool."
-      }
-    },
-    "natStartPort": {
-      "type": "string",
-      "defaultValue": "50000",
-      "metadata": {
-        "description": "Start of NAT port range."
-      }
-    },
     "privateIpAddress": {
       "type": "string",
       "defaultValue": "",
       "metadata": {
-        "description": "Private IP address to use when allocation method is set to 'static'."
+        "description": "Static private IP address to use."
       }
     },
     "privateIpAddressAllocation": {
@@ -195,26 +160,7 @@
         "[concat('Microsoft.Resources/deployments/', variables('ipDeploymentName'))]"
       ],
       "properties": {
-        "frontendIPConfigurations": "[variables('frontendConfig')[parameters('publicIpAddressType')]]",
-        "backendAddressPools": [
-          {
-            "name": "[parameters('backendPoolName')]"
-          }
-        ],
-        "inboundNatPools": [
-          {
-            "name": "[parameters('natPoolName')]",
-            "properties": {
-              "frontendIPConfiguration": {
-                "id": "[variables('frontEndIPConfigID')]"
-              },
-              "protocol": "tcp",
-              "frontendPortRangeStart": "[parameters('natStartPort')]",
-              "frontendPortRangeEnd": "[parameters('natEndPort')]",
-              "backendPort": "[parameters('natBackendPort')]"
-            }
-          }
-        ]
+        "frontendIPConfigurations": "[variables('frontendConfig')[parameters('publicIpAddressType')]]"
       }
     },
     {

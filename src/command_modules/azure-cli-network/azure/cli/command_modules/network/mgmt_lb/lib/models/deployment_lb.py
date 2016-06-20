@@ -17,7 +17,7 @@ class DeploymentLb(Model):
     sending a request.
 
     :ivar uri: URI referencing the template. Default value:
-     "https://azuresdkci.blob.core.windows.net/templatehost/CreateLb_2016-06-14/azuredeploy.json"
+     "https://azuresdkci.blob.core.windows.net/templatehost/CreateLb_2016-06-20/azuredeploy.json"
      .
     :vartype uri: str
     :param content_version: If included it must match the ContentVersion in
@@ -25,11 +25,9 @@ class DeploymentLb(Model):
     :type content_version: str
     :ivar _artifacts_location: Container URI of of the template. Default
      value:
-     "https://azuresdkci.blob.core.windows.net/templatehost/CreateLb_2016-06-14"
+     "https://azuresdkci.blob.core.windows.net/templatehost/CreateLb_2016-06-20"
      .
     :vartype _artifacts_location: str
-    :param backend_pool_name: Name of load balancer backend pool.
-    :type backend_pool_name: str
     :param dns_name_for_public_ip: Globally unique DNS Name for the Public IP
      used to access the Virtual Machine.  Requires a new public IP to be
      created by setting Public IP Address Type to New.
@@ -41,16 +39,6 @@ class DeploymentLb(Model):
     :type load_balancer_name: str
     :param location: Location for load balancer resource.
     :type location: str
-    :param nat_backend_port: Port number for NAT backend. Default value: "22"
-     .
-    :type nat_backend_port: str
-    :param nat_end_port: End of NAT port range. Default value: "50099" .
-    :type nat_end_port: str
-    :param nat_pool_name: Name of load balancer NAT (network address
-     translation) pool.
-    :type nat_pool_name: str
-    :param nat_start_port: Start of NAT port range. Default value: "50000" .
-    :type nat_start_port: str
     :param private_ip_address: Private IP address to use when allocation
      method is set to 'static'.
     :type private_ip_address: str
@@ -89,15 +77,10 @@ class DeploymentLb(Model):
         'uri': {'key': 'properties.templateLink.uri', 'type': 'str'},
         'content_version': {'key': 'properties.templateLink.contentVersion', 'type': 'str'},
         '_artifacts_location': {'key': 'properties.parameters._artifactsLocation.value', 'type': 'str'},
-        'backend_pool_name': {'key': 'properties.parameters.backendPoolName.value', 'type': 'str'},
         'dns_name_for_public_ip': {'key': 'properties.parameters.dnsNameForPublicIP.value', 'type': 'str'},
         'dns_name_type': {'key': 'properties.parameters.dnsNameType.value', 'type': 'str'},
         'load_balancer_name': {'key': 'properties.parameters.loadBalancerName.value', 'type': 'str'},
         'location': {'key': 'properties.parameters.location.value', 'type': 'str'},
-        'nat_backend_port': {'key': 'properties.parameters.natBackendPort.value', 'type': 'str'},
-        'nat_end_port': {'key': 'properties.parameters.natEndPort.value', 'type': 'str'},
-        'nat_pool_name': {'key': 'properties.parameters.natPoolName.value', 'type': 'str'},
-        'nat_start_port': {'key': 'properties.parameters.natStartPort.value', 'type': 'str'},
         'private_ip_address': {'key': 'properties.parameters.privateIpAddress.value', 'type': 'str'},
         'private_ip_address_allocation': {'key': 'properties.parameters.privateIpAddressAllocation.value', 'type': 'str'},
         'public_ip_address_allocation': {'key': 'properties.parameters.publicIpAddressAllocation.value', 'type': 'str'},
@@ -108,23 +91,18 @@ class DeploymentLb(Model):
         'mode': {'key': 'properties.mode', 'type': 'str'},
     }
 
-    uri = "https://azuresdkci.blob.core.windows.net/templatehost/CreateLb_2016-06-14/azuredeploy.json"
+    uri = "https://azuresdkci.blob.core.windows.net/templatehost/CreateLb_2016-06-20/azuredeploy.json"
 
-    _artifacts_location = "https://azuresdkci.blob.core.windows.net/templatehost/CreateLb_2016-06-14"
+    _artifacts_location = "https://azuresdkci.blob.core.windows.net/templatehost/CreateLb_2016-06-20"
 
     mode = "Incremental"
 
-    def __init__(self, load_balancer_name, content_version=None, backend_pool_name=None, dns_name_for_public_ip=None, dns_name_type="none", location=None, nat_backend_port="22", nat_end_port="50099", nat_pool_name=None, nat_start_port="50000", private_ip_address=None, private_ip_address_allocation="dynamic", public_ip_address_allocation="dynamic", public_ip_address_name=None, public_ip_address_type="new", subnet_name=None, virtual_network_name=None):
+    def __init__(self, load_balancer_name, content_version=None, dns_name_for_public_ip=None, dns_name_type="none", location=None, private_ip_address=None, private_ip_address_allocation="dynamic", public_ip_address_allocation="dynamic", public_ip_address_name=None, public_ip_address_type="new", subnet_name=None, virtual_network_name=None):
         self.content_version = content_version
-        self.backend_pool_name = backend_pool_name
         self.dns_name_for_public_ip = dns_name_for_public_ip
         self.dns_name_type = dns_name_type
         self.load_balancer_name = load_balancer_name
         self.location = location
-        self.nat_backend_port = nat_backend_port
-        self.nat_end_port = nat_end_port
-        self.nat_pool_name = nat_pool_name
-        self.nat_start_port = nat_start_port
         self.private_ip_address = private_ip_address
         self.private_ip_address_allocation = private_ip_address_allocation
         self.public_ip_address_allocation = public_ip_address_allocation

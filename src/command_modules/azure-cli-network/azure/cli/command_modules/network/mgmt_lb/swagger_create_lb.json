@@ -145,7 +145,7 @@
           "type": "string",
           "description": "URI referencing the template.",
           "enum": [
-            "https://azuresdkci.blob.core.windows.net/templatehost/CreateLb_2016-06-14/azuredeploy.json"
+            "https://azuresdkci.blob.core.windows.net/templatehost/CreateLb_2016-06-20/azuredeploy.json"
           ]
         },
         "contentVersion": {
@@ -163,11 +163,6 @@
         "_artifactsLocation": {
           "type": "object",
           "$ref": "#/definitions/DeploymentParameter__artifactsLocation",
-          "x-ms-client-flatten": true
-        },
-        "backendPoolName": {
-          "type": "object",
-          "$ref": "#/definitions/DeploymentParameter_backendPoolName",
           "x-ms-client-flatten": true
         },
         "dnsNameForPublicIP": {
@@ -188,26 +183,6 @@
         "location": {
           "type": "object",
           "$ref": "#/definitions/DeploymentParameter_location",
-          "x-ms-client-flatten": true
-        },
-        "natBackendPort": {
-          "type": "object",
-          "$ref": "#/definitions/DeploymentParameter_natBackendPort",
-          "x-ms-client-flatten": true
-        },
-        "natEndPort": {
-          "type": "object",
-          "$ref": "#/definitions/DeploymentParameter_natEndPort",
-          "x-ms-client-flatten": true
-        },
-        "natPoolName": {
-          "type": "object",
-          "$ref": "#/definitions/DeploymentParameter_natPoolName",
-          "x-ms-client-flatten": true
-        },
-        "natStartPort": {
-          "type": "object",
-          "$ref": "#/definitions/DeploymentParameter_natStartPort",
           "x-ms-client-flatten": true
         },
         "privateIpAddress": {
@@ -247,18 +222,9 @@
         }
       },
       "required": [
-        "loadBalancerName",
-        "_artifactsLocation"
+        "_artifactsLocation",
+        "loadBalancerName"
       ]
-    },
-    "DeploymentParameter_backendPoolName": {
-      "properties": {
-        "value": {
-          "type": "string",
-          "description": "Name of load balancer backend pool.",
-          "x-ms-client-name": "backendPoolName"
-        }
-      }
     },
     "DeploymentParameter_dnsNameForPublicIP": {
       "properties": {
@@ -301,45 +267,6 @@
           "type": "string",
           "description": "Location for load balancer resource.",
           "x-ms-client-name": "location"
-        }
-      }
-    },
-    "DeploymentParameter_natBackendPort": {
-      "properties": {
-        "value": {
-          "type": "string",
-          "description": "Port number for NAT backend.",
-          "x-ms-client-name": "natBackendPort",
-          "default": "22"
-        }
-      }
-    },
-    "DeploymentParameter_natEndPort": {
-      "properties": {
-        "value": {
-          "type": "string",
-          "description": "End of NAT port range.",
-          "x-ms-client-name": "natEndPort",
-          "default": "50099"
-        }
-      }
-    },
-    "DeploymentParameter_natPoolName": {
-      "properties": {
-        "value": {
-          "type": "string",
-          "description": "Name of load balancer NAT (network address translation) pool.",
-          "x-ms-client-name": "natPoolName"
-        }
-      }
-    },
-    "DeploymentParameter_natStartPort": {
-      "properties": {
-        "value": {
-          "type": "string",
-          "description": "Start of NAT port range.",
-          "x-ms-client-name": "natStartPort",
-          "default": "50000"
         }
       }
     },
@@ -429,7 +356,7 @@
           "description": "Container URI of of the template.",
           "x-ms-client-name": "_artifactsLocation",
           "enum": [
-            "https://azuresdkci.blob.core.windows.net/templatehost/CreateLb_2016-06-14"
+            "https://azuresdkci.blob.core.windows.net/templatehost/CreateLb_2016-06-20"
           ]
         }
       },
