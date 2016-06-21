@@ -9,25 +9,23 @@ def _register_global_parameter(global_group):
 
 def register(application):
     def handle_query_parameter(**kwargs):
+        from jmespath import compile as compile_jmespath
+        from jmespath.exceptions import ParseError
         args = kwargs['args']
         try:
-            query_value = args._jmespath_query #  pylint: disable=protected-access
-            del args._jmespath_query
+            jmespath_query = args._jmespath_query # pylint: disable=protected-access
+            query_expression = compile_jmespath(jmespath_query) if jmespath_query else None
+            del jmespath_query
 
-            if query_value:
+            if query_expression:
                 def filter_output(**kwargs):
                     from jmespath import search, Options
-                    from jmespath.exceptions import ParseError
-                    try:
-                        kwargs['event_data']['result'] = search(query_value,
-                                                                kwargs['event_data']['result'],
-                                                                Options(collections.OrderedDict))
-                    except ParseError as ex:
-                        raise CLIError(ex)
-                    finally:
-                        application.remove(application.FILTER_RESULT, filter_output)
+                    kwargs['event_data']['result'] = query_expression.search(
+                        kwargs['event_data']['result'], Options(collections.OrderedDict))
+                    application.remove(application.FILTER_RESULT, filter_output)
                 application.register(application.FILTER_RESULT, filter_output)
-
+        except ParseError as ex:
+            raise CLIError(ex)
         except AttributeError:
             pass
 
