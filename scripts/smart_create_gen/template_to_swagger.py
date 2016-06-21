@@ -13,7 +13,9 @@ from _common import snake_to_camel
 # HELPER FUNCTIONS
 
 def get_required(value):
-    if not value.get('defaultValue') and value.get('defaultValue') != '':
+    default_value = value.get('defaultValue')
+    if not default_value and default_value != '' \
+        and not isinstance(default_value, list) and not isinstance(default_value, dict):
         return swagger_template_required
     return ''
 
@@ -23,9 +25,26 @@ def get_enum(value):
     return ''
 
 def get_default(value):
-    if value.get('defaultValue') and (isinstance(value.get('defaultValue'), int) or '[' not in value.get('defaultValue')):
-        return swagger_template_default.format(value.get('defaultValue', ''))
+    default_value = value.get('defaultValue')
+    if default_value and (isinstance(default_value, int) or '[' not in default_value) \
+        and not isinstance(default_value, list) and not isinstance(default_value, dict):
+        return swagger_template_default.format(default_value)
     return ''
+
+def get_type_string(value):
+    type = value.get('type')
+
+    type_string = '"type": "{}"'.format(type if type != 'securestring' else 'string')
+    if type == 'array':
+        type_string = '''
+            "type": "{0}",
+            "items": {{
+              "type": "{1}"
+            }}
+        '''.format(type, 'object') # Currently only support arrays of objects
+
+    return type_string
+
 
 def get_required_list(items):
     list = ',\n        '.join(['"{0}"'.format(name) for name, value in items if get_required(value)])
@@ -427,7 +446,7 @@ swagger_template_prop = '''  "{0}": {{
 swagger_template_param = '''"DeploymentParameter_{0}": {{
   "properties": {{
     "value": {{
-      "type": "string",
+      {5},
       "description": "{1}",
       "x-ms-client-name": "{0}"{3}{4}
     }}
@@ -505,12 +524,12 @@ def convert_template_to_swagger(*args):
 
         param_strs = []
         for key, value in sorted(params.items(), key=lambda item: item[0]):
-            comment = value['metadata'].get('description')
+            comment = value['metadata'].get('description') if value['metadata'] else None
             if not comment:
                 print('FAILURE: Description metadata is required for all parameters. Not found for {}'.format(value))
                 sys.exit(-1)
             param_strs.append(swagger_template_param.format(
-                key, comment or '', get_required(value), get_enum(value), get_default(value)))
+                key, comment or '', get_required(value), get_enum(value), get_default(value), get_type_string(value)))
 
         # artifacts special case
         artifacts_paramstr = next((p for p in param_strs if '_artifacts' in p), None)

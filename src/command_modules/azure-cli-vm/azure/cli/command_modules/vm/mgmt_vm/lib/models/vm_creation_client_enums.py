@@ -6,8 +6,10 @@
 # regenerated.
 # --------------------------------------------------------------------------
 
-from .vm_operations import VMOperations
+from enum import Enum
 
-__all__ = [
-    'VMOperations',
-]
+
+class DeploymentMode(Enum):
+
+    incremental = "Incremental"
+    complete = "Complete"

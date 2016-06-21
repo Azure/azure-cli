@@ -45,10 +45,10 @@ Size Standard_A3, existing storage account, existing storage container name, exi
  - verify emacs is still installed
 
 Commands to verify (Linux):
- vmname=cusvm01
- rg=myvms
- az vm create -n $vmname -g $rg --image https://vhdstorage33jojgic4cpuu.blob.core.windows.net/vhds/osdiskimage.vhd --authentication-type ssh --custom-os-disk-type linux --storage-account-name vhdstorage33jojgic4cpuu --storage-account-type existing --storage-container-name ${vmname}vhdcopy --os-disk-name osdiskimage
- az vm list-ip-addresses -g $rg --vm-name $vmname
+ vmname=cusvm0101
+ rg=myvms2
+ az vm create -n $vmname -g $rg --image https://genlinuximg001100.blob.core.windows.net/vhds/linuximage.vhd --authentication-type ssh --custom-os-disk-type linux --storage-account-name genlinuximg001100 --storage-account-type existing --storage-container-name ${vmname}vhdcopy --os-disk-name osdiskimage
+ az vm list-ip-addresses -g $rg -n $vmname
  then 
  ssh <IPAddress> (don't specify username or password)
  verify emacs/application is installed
@@ -64,8 +64,8 @@ Commands to verify (Linux):
 Commands to verify (Windows):
  set vmname=cusvm05abc
  set rg=myvms
- call az vm create -n %vmname% -g %rg% --image http://genwinimg001100.blob.core.windows.net/vhds/osdiskimage.vhd --authentication-type password --admin-password Admin_007 --storage-account-name genwinimg001100 --storage-container-name %vmname%mygenimg --storage-account-type existing
- call az vm list-ip-addresses -g %rg% --vm-name %vmname%
+ call az vm create -n %vmname% -g %rg% --image http://genwinimg001100.blob.core.windows.net/vhds/osdiskimage.vhd --authentication-type password --admin-password Test1234@! --storage-account-name genwinimg001100 --storage-container-name %vmname%mygenimg --storage-account-type existing
+ call az vm list-ip-addresses -g %rg% -n %vmname%
  then
  RDP <IPAddress>
  verify WinMerge/application is installed

@@ -675,11 +675,11 @@ class VMCreateUbuntuScenarioTest(ResourceGroupVCRTestBase): #pylint: disable=too
 
     def __init__(self, test_method):
         super(VMCreateUbuntuScenarioTest, self).__init__(__file__, test_method)
-        self.deployment_name = 'azurecli-test-deployment-vm-create-ubuntu'
-        self.resource_group = 'cliTestRg_VMCreate_Ubuntu'
+        self.deployment_name = 'azurecli-test-deployment-vm-create-ubuntu2'
+        self.resource_group = 'cliTestRg_VMCreate_Ubuntu2'
         self.admin_username = 'ubuntu'
         self.location = 'westus'
-        self.vm_names = ['cli-test-vm1']
+        self.vm_names = ['cli-test-vm2']
         self.vm_image = 'UbuntuLTS'
         self.auth_type = 'ssh'
         self.pub_ssh_filename = None
@@ -695,7 +695,7 @@ class VMCreateUbuntuScenarioTest(ResourceGroupVCRTestBase): #pylint: disable=too
         self.pub_ssh_filename = pathname
 
     def body(self):
-        self.cmd('vm create --resource-group {rg} --admin-username {admin} --name {vm_name} --authentication-type {auth_type} --image {image} --ssh-key-value {ssh_key} --location {location} --deployment-name {deployment}'.format(
+        self.cmd('vm create --resource-group {rg} --admin-username {admin} --name {vm_name} --authentication-type {auth_type} --image {image} --ssh-key-value \'{ssh_key}\' --location {location} --deployment-name {deployment}'.format(
             rg=self.resource_group,
             admin=self.admin_username,
             vm_name=self.vm_names[0],
@@ -852,8 +852,8 @@ class VMCreateCustomIP(ResourceGroupVCRTestBase):
         self.execute()
 
     def body(self):
-        vm_name = 'vrfvm'
-        dns_name = 'vrfmyvm00110011'
+        vm_name = 'vrfvmz'
+        dns_name = 'vrfmyvm00110011z'
 
         self.cmd('vm create -n {vm_name} -g {resource_group} --image openSUSE --private-ip-address-allocation static'
                  ' --private-ip-address 10.0.0.5 --public-ip-address-allocation static --deployment-name deployment'
