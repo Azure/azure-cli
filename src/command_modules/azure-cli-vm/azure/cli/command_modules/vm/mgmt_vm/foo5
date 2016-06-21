@@ -1,7 +1,7 @@
 {
   "swagger": "2.0", 
   "info": {
-    "title": "VmCreateCreationClient", 
+    "title": "VmCreationClient", 
     "version": "2015-11-01"
   }, 
   "host": "management.azure.com", 
@@ -36,9 +36,9 @@
     "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Resources/deployments/{deploymentName}": {
       "put": {
         "tags": [
-          "VmCreate"
+          "Vm"
         ], 
-        "operationId": "VmCreate_CreateOrUpdate", 
+        "operationId": "Vm_CreateOrUpdate", 
         "description": "Create or update a virtual machine.", 
         "parameters": [
           {
@@ -67,7 +67,7 @@
             "in": "body", 
             "required": true, 
             "schema": {
-              "$ref": "#/definitions/Deployment_VmCreate"
+              "$ref": "#/definitions/Deployment_Vm"
             }, 
             "description": "Additional parameters supplied to the operation."
           }, 
@@ -97,17 +97,17 @@
     }
   }, 
   "definitions": {
-    "Deployment_VmCreate": {
+    "Deployment_Vm": {
       "properties": {
         "properties": {
-          "$ref": "#/definitions/DeploymentProperties_VmCreate", 
+          "$ref": "#/definitions/DeploymentProperties_Vm", 
           "description": "Gets or sets the deployment properties.", 
           "x-ms-client-flatten": true
         }
       }, 
       "description": "Deployment operation parameters."
     }, 
-    "DeploymentProperties_VmCreate": {
+    "DeploymentProperties_Vm": {
       "properties": {
         "templateLink": {
           "$ref": "#/definitions/TemplateLink", 
@@ -115,7 +115,7 @@
           "x-ms-client-flatten": true
         }, 
         "parameters": {
-          "$ref": "#/definitions/VmCreateParameters", 
+          "$ref": "#/definitions/VmParameters", 
           "type": "object", 
           "description": "Deployment parameters. Use only one of Parameters or ParametersLink.", 
           "x-ms-client-flatten": true
@@ -145,7 +145,7 @@
           "type": "string", 
           "description": "URI referencing the template.", 
           "enum": [
-            "https://azuresdkci.blob.core.windows.net/templatehost/CreateVmCreate_2016-06-16/azuredeploy.json"
+            "https://azuresdkci.blob.core.windows.net/templatehost/CreateVm_2016-06-20/azuredeploy.json"
           ]
         }, 
         "contentVersion": {
@@ -158,7 +158,7 @@
       ], 
       "description": "Entity representing the reference to the template."
     }, 
-    "VmCreateParameters": {
+    "VmParameters": {
       "properties": {
         "_artifactsLocation": {
           "type": "object", 
@@ -864,7 +864,7 @@
           "description": "Container URI of of the template.", 
           "x-ms-client-name": "_artifactsLocation", 
           "enum": [
-            "https://azuresdkci.blob.core.windows.net/templatehost/CreateVmCreate_2016-06-16"
+            "https://azuresdkci.blob.core.windows.net/templatehost/CreateVm_2016-06-20"
           ]
         }
       }, 
