@@ -62,7 +62,7 @@ register_cli_argument('network vnet subnet', 'virtual_network_name', virtual_net
 register_cli_argument('network lb', 'load_balancer_name', name_arg_type)
 
 register_cli_argument('network lb probe', 'load_balancer_name', load_balancer_name_type)
-register_cli_argument('network lb probe', 'probe_name', name_arg_type)
+register_cli_argument('network lb probe', 'probe_name', arg_type=name_arg_type, help='The name of the health probe.')
 register_cli_argument('network lb probe', 'interval', CliArgumentType(help='Probing time interval in seconds.'))
 register_cli_argument('network lb probe', 'path', CliArgumentType(help='The endpoint to interrogate (http only).'))
 register_cli_argument('network lb probe', 'port', CliArgumentType(help='The port to interrogate.'))

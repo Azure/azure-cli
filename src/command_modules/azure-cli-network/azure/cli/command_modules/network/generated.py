@@ -83,9 +83,9 @@ cli_command('network lb list-all', LoadBalancersOperations.list_all, factory)
 factory = lambda _: get_mgmt_service_client(LBClient).lb
 cli_command('network lb create', LbOperations.create_or_update, factory, transform=DeploymentOutputLongRunningOperation('Starting network lb create'))
 
-cli_command('network lb probe add', add_lb_probe)
-cli_command('network lb probe remove', remove_lb_probe)
-cli_command('network lb probe update', update_lb_probe)
+cli_command('network lb probe create', add_lb_probe)
+cli_command('network lb probe delete', remove_lb_probe)
+cli_command('network lb probe set', update_lb_probe)
 cli_command('network lb probe list', list_lb_probes)
 cli_command('network lb probe show', get_lb_probe)
 

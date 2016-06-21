@@ -39,7 +39,7 @@ def get_lb_probe(resource_group_name, load_balancer_name, probe_name):
     probes = _network_client_factory().load_balancers.get(
         resource_group_name, load_balancer_name).probes
     try:
-        return next(x for x in probes if x.name == probe_name)
+        return next(x for x in probes if x.name.lower() == probe_name.lower())
     except StopIteration:
         raise CLIError("Probe '{}' does not exist on load balancer '{}'".format(
             probe_name, load_balancer_name))
@@ -48,7 +48,7 @@ def remove_lb_probe(resource_group_name, load_balancer_name, probe_name):
     ''' Remove a probe from the specified load balancer. '''
     ncf = _network_client_factory()
     lb = ncf.load_balancers.get(resource_group_name, load_balancer_name)
-    keep_probes = [x for x in lb.probes if x.name != probe_name]
+    keep_probes = [x for x in lb.probes if x.name.lower() != probe_name.lower()]
     lb.probes = keep_probes
     return ncf.load_balancers.create_or_update(resource_group_name, load_balancer_name, lb)
 
@@ -69,7 +69,7 @@ def update_lb_probe(resource_group_name, load_balancer_name, probe_name, protoco
     ncf = _network_client_factory()
     lb = ncf.load_balancers.get(resource_group_name, load_balancer_name)
     try:
-        probe = next(x for x in lb.probes if x.name == probe_name)
+        probe = next(x for x in lb.probes if x.name.lower() == probe_name.lower())
     except StopIteration:
         raise CLIError("Probe '{}' does not exist on load balancer '{}'".format(
             probe_name, load_balancer_name))
