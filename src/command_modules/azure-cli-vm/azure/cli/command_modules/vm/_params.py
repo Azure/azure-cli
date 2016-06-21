@@ -43,7 +43,7 @@ register_cli_argument('vm scaleset', 'virtual_machine_scale_set_name', name_arg_
 register_cli_argument('vm scaleset', 'instance_ids', multi_ids_type)
 register_cli_argument('vm disk', 'vm_name', arg_type=existing_vm_name, options_list=('--vm-name',))
 register_cli_argument('vm disk', 'disk_name', CliArgumentType(options_list=('--name', '-n'), help='The data disk name. If missing, will retrieve from vhd uri'))
-register_cli_argument('vm disk', 'disk_size', CliArgumentType(help='Size of disk (Gb)', default=1023, type=int))
+register_cli_argument('vm disk', 'disk_size', CliArgumentType(help='Size of disk (GiB)', default=1023, type=int))
 register_cli_argument('vm disk', 'lun', CliArgumentType(
     type=int, help='0-based logical unit number (LUN). Max value depends on the Virutal Machine size.'))
 register_cli_argument('vm disk', 'vhd', CliArgumentType(type=VirtualHardDisk, help='virtual hard disk\'s uri. For example:https://mystorage.blob.core.windows.net/vhds/d1.vhd'))

@@ -410,8 +410,12 @@ def get_boot_log(resource_group_name, vm_name):
         resource_group_name,
         vm_name,
         expand='instanceView')
+    # pylint: disable=no-member
+    if (not virtual_machine.instance_view.boot_diagnostics or
+            not virtual_machine.instance_view.boot_diagnostics.serial_console_log_blob_uri):
+        raise CLIError('Please enable boot diagnostics.')
 
-    blob_uri = virtual_machine.instance_view.boot_diagnostics.serial_console_log_blob_uri # pylint: disable=no-member
+    blob_uri = virtual_machine.instance_view.boot_diagnostics.serial_console_log_blob_uri
 
     # Find storage account for diagnostics
     storage_mgmt_client = _get_storage_management_client()
@@ -450,7 +454,8 @@ def get_boot_log(resource_group_name, vm_name):
             else:
                 self.out.write(str_or_bytes)
 
-    storage_client.get_blob_to_stream(container, blob, StreamWriter(sys.stdout))
+    #our streamwriter not seekable, so no parallel.
+    storage_client.get_blob_to_stream(container, blob, StreamWriter(sys.stdout), max_connections=1)
 
 def list_extensions(resource_group_name, vm_name):
     vm = _vm_get(resource_group_name, vm_name)

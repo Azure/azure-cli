@@ -56,3 +56,8 @@ def logout(username):
     '''Log out from Azure subscription using Active Directory.'''
     profile = Profile()
     profile.logout(username)
+
+def list_location():
+    from azure.cli.commands.parameters import get_subscription_locations
+    return get_subscription_locations()
+
