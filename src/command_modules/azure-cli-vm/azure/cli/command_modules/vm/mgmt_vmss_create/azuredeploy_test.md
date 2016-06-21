@@ -1,4 +1,4 @@
-# VM Create scenarios before merge #
+# VMSS Create scenarios before merge #
 
 ## P0: BASIC ##
 Execute P0s before any change to VMSS Create **OR VM CREATE** is merged

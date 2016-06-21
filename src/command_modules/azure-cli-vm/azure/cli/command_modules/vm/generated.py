@@ -14,8 +14,8 @@ from azure.cli.commands.client_factory import get_mgmt_service_client
 from azure.cli.command_modules.vm.mgmt_avail_set.lib import (AvailSetCreationClient
                                                              as AvailSetClient)
 from azure.cli.command_modules.vm.mgmt_avail_set.lib.operations import AvailSetOperations
-from azure.cli.command_modules.vm.mgmt_vm_create.lib import VmCreateCreationClient as VMClient
-from azure.cli.command_modules.vm.mgmt_vm_create.lib.operations import VmCreateOperations
+from azure.cli.command_modules.vm.mgmt_vm.lib import VmCreationClient as VMClient
+from azure.cli.command_modules.vm.mgmt_vm.lib.operations import VmOperations
 from azure.cli.command_modules.vm.mgmt_vmss_create.lib import VMSSCreationClient as VMSSClient
 from azure.cli.command_modules.vm.mgmt_vmss_create.lib.operations import VMSSOperations
 from azure.cli.command_modules.vm.mgmt_acs.lib import ACSCreationClient as ACSClient
@@ -38,8 +38,8 @@ from ._factory import _compute_client_factory
 # pylint: disable=line-too-long
 
 # VM
-factory = lambda _: get_mgmt_service_client(VMClient).vm_create
-cli_command('vm create', VmCreateOperations.create_or_update, factory, transform=DeploymentOutputLongRunningOperation('Starting vm create'))
+factory = lambda _: get_mgmt_service_client(VMClient).vm
+cli_command('vm create', VmOperations.create_or_update, factory, transform=DeploymentOutputLongRunningOperation('Starting vm create'))
 
 factory = lambda _: _compute_client_factory().virtual_machines
 
