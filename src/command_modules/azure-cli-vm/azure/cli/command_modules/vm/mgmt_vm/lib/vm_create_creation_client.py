@@ -10,12 +10,12 @@ from msrest.service_client import ServiceClient
 from msrest import Serializer, Deserializer
 from msrestazure import AzureConfiguration
 from .version import VERSION
-from .operations.vm_operations import VMOperations
+from .operations.vm_create_operations import VmCreateOperations
 from . import models
 
 
-class VMCreationClientConfiguration(AzureConfiguration):
-    """Configuration for VMCreationClient
+class VmCreateCreationClientConfiguration(AzureConfiguration):
+    """Configuration for VmCreateCreationClient
     Note that all parameters used to create this instance are saved as instance
     attributes.
 
@@ -58,9 +58,9 @@ class VMCreationClientConfiguration(AzureConfiguration):
         if not base_url:
             base_url = 'https://management.azure.com'
 
-        super(VMCreationClientConfiguration, self).__init__(base_url, filepath)
+        super(VmCreateCreationClientConfiguration, self).__init__(base_url, filepath)
 
-        self.add_user_agent('vmcreationclient/{}'.format(VERSION))
+        self.add_user_agent('vmcreatecreationclient/{}'.format(VERSION))
         self.add_user_agent('Azure-SDK-For-Python')
 
         self.credentials = credentials
@@ -71,14 +71,14 @@ class VMCreationClientConfiguration(AzureConfiguration):
         self.generate_client_request_id = generate_client_request_id
 
 
-class VMCreationClient(object):
-    """VMCreationClient
+class VmCreateCreationClient(object):
+    """VmCreateCreationClient
 
     :ivar config: Configuration for client.
-    :vartype config: VMCreationClientConfiguration
+    :vartype config: VmCreateCreationClientConfiguration
 
-    :ivar vm: VM operations
-    :vartype vm: .operations.VMOperations
+    :ivar vm_create: VmCreate operations
+    :vartype vm_create: .operations.VmCreateOperations
 
     :param credentials: Gets Azure subscription credentials.
     :type credentials: :mod:`A msrestazure Credentials
@@ -106,12 +106,12 @@ class VMCreationClient(object):
     def __init__(
             self, credentials, subscription_id, api_version='2015-11-01', accept_language='en-US', long_running_operation_retry_timeout=30, generate_client_request_id=True, base_url=None, filepath=None):
 
-        self.config = VMCreationClientConfiguration(credentials, subscription_id, api_version, accept_language, long_running_operation_retry_timeout, generate_client_request_id, base_url, filepath)
+        self.config = VmCreateCreationClientConfiguration(credentials, subscription_id, api_version, accept_language, long_running_operation_retry_timeout, generate_client_request_id, base_url, filepath)
         self._client = ServiceClient(self.config.credentials, self.config)
 
         client_models = {k: v for k, v in models.__dict__.items() if isinstance(v, type)}
         self._serialize = Serializer(client_models)
         self._deserialize = Deserializer(client_models)
 
-        self.vm = VMOperations(
+        self.vm_create = VmCreateOperations(
             self._client, self.config, self._serialize, self._deserialize)

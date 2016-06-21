@@ -48,8 +48,7 @@
       "type": "string"
     },
     "availabilitySetId": {
-      "type": "string",
-      "defaultValue": ""
+      "type": "string"
     },
     "location": {
       "type": "string"
@@ -57,8 +56,8 @@
     "osDiskUri": {
       "type": "string"
     },
-    "nicName": {
-      "type": "string"
+    "nics": {
+      "type": "array"
     },
     "storageCaching": {
       "type": "string"
@@ -84,7 +83,6 @@
     "vhdStorageName": "[parameters('storageAccountName')]",
     "vhdStorageType": "[parameters('storageType')]",
     "vhdStorageContainerName": "[parameters('storageContainerName')]",
-    "nicName": "[parameters('nicName')]",
     "storageProfilesCustomImage": {
       "custom": {
         "osDisk": {
@@ -129,6 +127,9 @@
       },
       "dependsOn": [ ],
       "properties": {
+        "availabilitySet": {
+          "id": "[parameters('availabilitySetId')]"
+        },
         "hardwareProfile": {
           "vmSize": "[variables('vmSize')]"
         },
@@ -149,11 +150,7 @@
         },
         "storageProfile": "[variables('storageProfilesCustomImage')[parameters('osDiskType')]]",
         "networkProfile": {
-          "networkInterfaces": [
-            {
-              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('nicName'))]"
-            }
-          ]
+          "networkInterfaces": "[parameters('nics')]"
         }
       },
       "resources": [
