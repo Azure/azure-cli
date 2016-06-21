@@ -31,7 +31,10 @@ from azure.cli.command_modules.network.mgmt_nsg.lib import NSGCreationClient as 
 from azure.cli.command_modules.network.mgmt_nsg.lib.operations import NSGOperations
 
 from azure.cli.commands import DeploymentOutputLongRunningOperation, cli_command
-from .custom import create_update_subnet, create_update_nsg_rule
+
+from .custom import \
+    (create_update_subnet, create_update_nsg_rule, list_lb_probes, get_lb_probe, remove_lb_probe,
+     add_lb_probe, update_lb_probe)
 from ._factory import _network_client_factory
 
 # pylint: disable=line-too-long
@@ -79,6 +82,12 @@ cli_command('network lb list-all', LoadBalancersOperations.list_all, factory)
 
 factory = lambda _: get_mgmt_service_client(LBClient).lb
 cli_command('network lb create', LbOperations.create_or_update, factory, transform=DeploymentOutputLongRunningOperation('Starting network lb create'))
+
+cli_command('network lb probe create', add_lb_probe)
+cli_command('network lb probe delete', remove_lb_probe)
+cli_command('network lb probe set', update_lb_probe)
+cli_command('network lb probe list', list_lb_probes)
+cli_command('network lb probe show', get_lb_probe)
 
 factory = lambda _: get_mgmt_service_client(NSGClient).nsg
 cli_command('network nsg create', NSGOperations.create_or_update, factory, transform=DeploymentOutputLongRunningOperation('Starting network nsg create'))

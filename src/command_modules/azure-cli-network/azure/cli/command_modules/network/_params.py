@@ -10,6 +10,7 @@ from azure.cli.commands import register_cli_argument, CliArgumentType
 name_arg_type = CliArgumentType(options_list=('--name', '-n'), metavar='NAME')
 virtual_network_name_type = CliArgumentType(options_list=('--vnet-name',), metavar='VNET_NAME', help='Name of the virtual network.', completer=get_resource_name_completion_list('Microsoft.Network/virtualNetworks'))
 subnet_name_type = CliArgumentType(options_list=('--subnet-name',), metavar='SUBNET_NAME')
+load_balancer_name_type = CliArgumentType(options_list=('--lb-name',), metavar='LB_NAME', help='Name of the load balancer.', completer=get_resource_name_completion_list('Microsoft.Network/loadBalancers'))
 
 register_cli_argument('network', 'subnet_name', name_arg_type)
 register_cli_argument('network', 'virtual_network_name', virtual_network_name_type)
@@ -58,7 +59,15 @@ register_cli_argument('network vnet subnet', 'subnet_name', options_list=('--nam
 register_cli_argument('network vnet subnet', 'address_prefix', metavar='PREFIX', help='the address prefix in CIDR format.')
 register_cli_argument('network vnet subnet', 'virtual_network_name', virtual_network_name_type)
 
-register_cli_argument('network lb', 'load_balancer_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/loadBalancers'))
+register_cli_argument('network lb', 'load_balancer_name', name_arg_type)
+
+register_cli_argument('network lb probe', 'load_balancer_name', load_balancer_name_type)
+register_cli_argument('network lb probe', 'probe_name', arg_type=name_arg_type, help='The name of the health probe.')
+register_cli_argument('network lb probe', 'interval', CliArgumentType(help='Probing time interval in seconds.'))
+register_cli_argument('network lb probe', 'path', CliArgumentType(help='The endpoint to interrogate (http only).'))
+register_cli_argument('network lb probe', 'port', CliArgumentType(help='The port to interrogate.'))
+register_cli_argument('network lb probe', 'protocol', CliArgumentType(help='The protocol to probe.', choices=['http', 'tcp']))
+register_cli_argument('network lb probe', 'threshold', CliArgumentType(help='The number of consecutive probe failures before an instance is deemed unhealthy.'))
 
 register_cli_argument('network lb create', 'dns_name_for_public_ip', CliArgumentType(action=LBDNSNameAction))
 register_cli_argument('network lb create', 'dns_name_type', CliArgumentType(help=argparse.SUPPRESS))
