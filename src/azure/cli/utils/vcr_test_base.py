@@ -41,7 +41,7 @@ def _mock_subscriptions(self): #pylint: disable=unused-argument
         "isDefault": True}]
 
 def _mock_user_access_token(_, _1, _2): #pylint: disable=unused-argument
-    return 'top-secret-token-for-you'
+    return ('Bearer', 'top-secret-token-for-you')
 
 def _mock_operation_delay(_):
     # don't run time.sleep()
