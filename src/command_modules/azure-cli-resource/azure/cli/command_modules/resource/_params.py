@@ -39,7 +39,7 @@ register_cli_argument('resource provider', 'resource_provider_namespace', CliArg
 
 register_cli_argument('resource group', 'resource_group_name', resource_group_name_type, options_list=('--name', '-n'))
 register_cli_argument('resource group deployment', 'resource_group_name', arg_type=resource_group_name_type)
-register_cli_argument('resource group deployment', 'deployment_name', CliArgumentType(options_list=('--name', '-n'), required=True))
+register_cli_argument('resource group deployment', 'deployment_name', CliArgumentType(options_list=('--name', '-n'), required=True, help='The deployment name.'))
 register_cli_argument('resource group export', 'include_comments', CliArgumentType(action='store_true'))
 register_cli_argument('resource group export', 'include_parameter_default_value', CliArgumentType(action='store_true'))
 register_cli_argument('resource group create', 'resource_group_name', completer=None)

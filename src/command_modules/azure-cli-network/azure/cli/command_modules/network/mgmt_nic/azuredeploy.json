@@ -1,0 +1,207 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "enableIpForwarding": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Enable IP forwarding."
+      }
+    },
+    "loadBalancerBackendAddressPoolIds": {
+      "type": "array",
+      "defaultValue": [ ],
+      "metadata": {
+        "description": "Space separated list of load balancer backend address pool IDs."
+      }
+    },
+    "loadBalancerInboundNatRuleIds": {
+      "type": "array",
+      "defaultValue": [ ],
+      "metadata": {
+        "description": "Space separated list of load balancer inbound NAT rule IDs."
+      }
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": {
+        "description": "Location for NIC resource."
+      }
+    },
+    "networkInterfaceName": {
+      "type": "string",
+      "minLength": 1,
+      "metadata": {
+        "description": "Name of the new NIC."
+      }
+    },
+    "networkSecurityGroupName": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Network security group to associate with the NIC."
+      }
+    },
+    "networkSecurityGroupType": {
+      "type": "string",
+      "defaultValue": "none",
+      "allowedValues": ["none", "existing"],
+      "metadata": {
+        "description": "Identifies whether to use an existing NSG."
+      }
+    },
+    "publicIpAddressName": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Name of an existing public IP address to associate with the NIC."
+      }
+    },
+    "publicIpAddressType": {
+      "type": "string",
+      "defaultValue": "none",
+      "allowedValues": [ "none", "existing" ],
+      "metadata": {
+        "description": "Specify whether to associate an existing public IP address with the NIC."
+      }
+    },
+    "privateIpAddress": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Static private IP address to associate with the NIC."
+      }
+    },
+    "privateIpAddressAllocation": {
+      "type": "string",
+      "defaultValue": "dynamic",
+      "allowedValues": [
+        "dynamic",
+        "static"
+      ],
+      "metadata": {
+        "description": "Private IP address allocation method."
+      }
+    },
+    "subnetName": {
+      "type": "string",
+      "metadata": {
+        "description": "Subnet to associate with the NIC."
+      }
+    },
+    "virtualNetworkName": {
+      "type": "string",
+      "metadata": {
+        "description": "Virtual network to associate with the NIC."
+      }
+    }
+  },
+  "variables": {
+    "nicPropertiesKey": "[concat('nsg_', parameters('networkSecurityGroupType'), '_pub_ip_', parameters('publicIpAddressType'))]",
+    "name": "[parameters('networkInterfaceName')]",
+    "networkInterfaceSubnetRef": "[concat(variables('networkInterfaceVnetID'), '/subnets/', parameters('subnetName'))]",
+    "publicIpAddressID": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIpAddressName'))]",
+    "networkInterfaceVnetID": "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]",
+    "networkSecurityGroupID": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroupName'))]",
+    "nicProperties": {
+      "nsg_none_pub_ip_none": {
+        "enableIPForwarding": "[parameters('enableIpForwarding')]",
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "loadBalancerBackendAddressPools": "[parameters('loadBalancerBackendAddressPoolIds')]",
+              "loadBalancerInboundNatRules": "[parameters('loadBalancerInboundNatRuleIds')]",
+              "privateIPAllocationMethod": "[parameters('privateIpAddressAllocation')]",
+              "privateIPAddress": "[parameters('privateIpAddress')]",
+              "subnet": {
+                "id": "[variables('networkInterfaceSubnetRef')]"
+              }
+            }
+          }
+        ]
+      },
+      "nsg_none_pub_ip_existing": {
+        "enableIPForwarding": "[parameters('enableIpForwarding')]",
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "loadBalancerBackendAddressPools": "[parameters('loadBalancerBackendAddressPoolIds')]",
+              "loadBalancerInboundNatRules": "[parameters('loadBalancerInboundNatRuleIds')]",
+              "publicIpAddress": {
+                "id": "[variables('publicIpAddressID')]"
+              },
+              "privateIPAllocationMethod": "[parameters('privateIpAddressAllocation')]",
+              "privateIPAddress": "[parameters('privateIpAddress')]",
+              "subnet": {
+                "id": "[variables('networkInterfaceSubnetRef')]"
+              }
+            }
+          }
+        ]
+      },
+      "nsg_existing_pub_ip_none": {
+        "enableIPForwarding": "[parameters('enableIpForwarding')]",
+        "networkSecurityGroup": {
+          "id": "[variables('networkSecurityGroupID')]"
+        },
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "loadBalancerBackendAddressPools": "[parameters('loadBalancerBackendAddressPoolIds')]",
+              "loadBalancerInboundNatRules": "[parameters('loadBalancerInboundNatRuleIds')]",
+              "privateIPAddress": "[parameters('privateIpAddress')]",
+              "privateIPAllocationMethod": "[parameters('privateIpAddressAllocation')]",
+              "subnet": {
+                "id": "[variables('networkInterfaceSubnetRef')]"
+              }
+            }
+          }
+        ]
+      },
+      "nsg_existing_pub_ip_existing": {
+        "enableIPForwarding": "[parameters('enableIpForwarding')]",
+        "networkSecurityGroup": {
+          "id": "[variables('networkSecurityGroupID')]"
+        },
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "loadBalancerBackendAddressPools": "[parameters('loadBalancerBackendAddressPoolIds')]",
+              "loadBalancerInboundNatRules": "[parameters('loadBalancerInboundNatRuleIds')]",
+              "publicIpAddress": {
+                "id": "[variables('publicIpAddressID')]"
+              },
+              "privateIPAllocationMethod": "[parameters('privateIpAddressAllocation')]",
+              "privateIPAddress": "[parameters('privateIpAddress')]",
+              "subnet": {
+                "id": "[variables('networkInterfaceSubnetRef')]"
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  "resources": [
+    {
+      "apiVersion": "2015-06-15",
+      "dependsOn": [ ],
+      "location": "[parameters('location')]",
+      "name": "[variables('name')]",
+      "properties": "[variables('nicProperties')[variables('nicPropertiesKey')]]",
+      "type": "Microsoft.Network/networkInterfaces"
+    }
+  ],
+  "outputs": {
+    "NewNIC": {
+      "type": "object",
+      "value": "[reference(variables('name'))]"
+    }
+  }
+}

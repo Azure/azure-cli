@@ -5,9 +5,6 @@
 from azure.cli.utils.vcr_test_base import (VCRTestBase, ResourceGroupVCRTestBase, JMESPathCheck,
                                            NoneCheck)
 
-# TODO Make these full scenario tests when we can create the resources through network commands.
-# So currently, the tests assume the resources have been created through some other means.
-
 class NetworkUsageListScenarioTest(VCRTestBase):
 
     def __init__(self, test_method):
@@ -18,21 +15,6 @@ class NetworkUsageListScenarioTest(VCRTestBase):
 
     def body(self):
         self.cmd('network list-usages --location westus', checks=JMESPathCheck('type(@)', 'array'))
-
-class NetworkNicListScenarioTest(VCRTestBase):
-
-    def __init__(self, test_method):
-        super(NetworkNicListScenarioTest, self).__init__(__file__, test_method)
-        self.resource_group = 'TravisTestResourceGroup'
-
-    def test_network_nic_list(self):
-        self.execute()
-
-    def body(self):
-        self.cmd('network nic list --resource-group {}'.format(self.resource_group), checks=[
-            JMESPathCheck('type(@)', 'array'),
-            JMESPathCheck("length([?resourceGroup == '{}' || resourceGroup =='{}']) == length(@)".format(self.resource_group, self.resource_group.lower()), True)
-        ])
 
 class NetworkAppGatewayScenarioTest(VCRTestBase):
 
@@ -86,16 +68,12 @@ class NetworkPublicIpScenarioTest(ResourceGroupVCRTestBase):
     def body(self):
         s = self
         rg = s.resource_group
-        # See documentation for guidance regarding deployment name in tests
-        count = 12
-        deploy1 = 'ipdeploy{}'.format(count)
-        deploy2 = 'ipnodnsdeploy{}'.format(count)
-        s.cmd('network public-ip create -g {} -n {} --dns-name {} --allocation-method static --deployment-name {}'.format(rg, s.public_ip_name, s.dns, deploy1), checks=[
+        s.cmd('network public-ip create -g {} -n {} --dns-name {} --allocation-method static'.format(rg, s.public_ip_name, s.dns), checks=[
             JMESPathCheck('publicIp.value.provisioningState', 'Succeeded'),
             JMESPathCheck('publicIp.value.publicIPAllocationMethod', 'Static'),
             JMESPathCheck('publicIp.value.dnsSettings.domainNameLabel', s.dns)
         ])
-        s.cmd('network public-ip create -g {} -n {} --deployment-name {}'.format(rg, s.public_ip_no_dns_name, deploy2), checks=[
+        s.cmd('network public-ip create -g {} -n {}'.format(rg, s.public_ip_no_dns_name), checks=[
             JMESPathCheck('publicIp.value.provisioningState', 'Succeeded'),
             JMESPathCheck('publicIp.value.publicIPAllocationMethod', 'Dynamic'),
             JMESPathCheck('publicIp.value.dnsSettings', None)
@@ -206,7 +184,7 @@ class NetworkLoadBalancerScenarioTest(ResourceGroupVCRTestBase):
 
     def body(self):
         # test lb create with min params (new ip)
-        self.cmd('network lb create -n {} -g {} --deployment-name deployLb1'.format(self.lb_name, self.resource_group), checks=[
+        self.cmd('network lb create -n {} -g {}'.format(self.lb_name, self.resource_group), checks=[
             JMESPathCheck('loadBalancer.value.provisioningState', 'Succeeded'),
             JMESPathCheck('loadBalancer.value.frontendIPConfigurations[0].properties.privateIPAllocationMethod', 'Dynamic'),
             JMESPathCheck('loadBalancer.value.frontendIPConfigurations[0].resourceGroup', self.resource_group)
@@ -215,9 +193,9 @@ class NetworkLoadBalancerScenarioTest(ResourceGroupVCRTestBase):
         # test lb create with no ip
         vnet_name = 'mytestvnet'
         private_ip = '10.0.0.15'
-        vnet = self.cmd('network vnet create -n {} -g {} --deployment-name deployvnet'.format(vnet_name, self.resource_group))
+        vnet = self.cmd('network vnet create -n {} -g {}'.format(vnet_name, self.resource_group))
         subnet_name = vnet['newVNet']['value']['subnets'][0]['name']
-        self.cmd('network lb create -n {} -g {} --deployment-name deployLb2 --public-ip-address-type none --vnet-name {} --subnet-name {} --private-ip-address-allocation static --private-ip-address {}'.format(
+        self.cmd('network lb create -n {} -g {} --public-ip-address-type none --vnet-name {} --subnet-name {} --private-ip-address-allocation static --private-ip-address {}'.format(
             self.lb_name, self.resource_group, vnet_name, subnet_name, private_ip), checks=[
                 JMESPathCheck('loadBalancer.value.provisioningState', 'Succeeded'),
                 JMESPathCheck('loadBalancer.value.frontendIPConfigurations[0].properties.privateIPAllocationMethod', 'Static'),
@@ -228,8 +206,8 @@ class NetworkLoadBalancerScenarioTest(ResourceGroupVCRTestBase):
 
         # test lb create with existing ip
         pub_ip_name = 'mytestpubip'
-        self.cmd('network public-ip create -n {} -g {} --deployment-name deploypublicip'.format(pub_ip_name, self.resource_group))
-        self.cmd('network lb create -n {} -g {} --deployment-name deployLb3 --public-ip-address-type existing --public-ip-address-name {}'.format(
+        self.cmd('network public-ip create -n {} -g {}'.format(pub_ip_name, self.resource_group))
+        self.cmd('network lb create -n {} -g {} --public-ip-address-type existing --public-ip-address-name {}'.format(
             self.lb_name, self.resource_group, pub_ip_name), checks=[
                 JMESPathCheck('loadBalancer.value.provisioningState', 'Succeeded'),
                 JMESPathCheck('loadBalancer.value.frontendIPConfigurations[0].properties.privateIPAllocationMethod', 'Dynamic'),
@@ -288,39 +266,73 @@ class NetworkLocalGatewayScenarioTest(VCRTestBase):
         # Expecting no results as we just deleted the only local gateway in the resource group
         self.cmd('network local-gateway list --resource-group {}'.format(self.resource_group), checks=NoneCheck())
 
-class NetworkNicScenarioTest(VCRTestBase):
+class NetworkNicScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
         super(NetworkNicScenarioTest, self).__init__(__file__, test_method)
         self.resource_group = 'cli_test1'
-        self.name = 'cli-test-nic'
-        self.resource_type = 'Microsoft.Network/networkInterfaces'
 
     def test_network_nic(self):
         self.execute()
 
-    def set_up(self):
-        if not self.cmd('network nic show --resource-group {} --name {}'.format(
-            self.resource_group, self.name)):
-            raise RuntimeError('NIC must be manually created in order to support this test.')
-
     def body(self):
+        rg = self.resource_group
+        nic = 'cli-test-nic'
+        rt = 'Microsoft.Network/networkInterfaces'
+        subnet = 'mysubnet'
+        vnet = 'myvnet'
+        nsg = 'mynsg'
+        private_ip = '10.0.0.15'
+        public_ip_name = 'publicip1'
+
+        self.cmd('network vnet create -g {} -n {} --subnet-name {}'.format(rg, vnet, subnet))
+        self.cmd('network nsg create -g {} -n {}'.format(rg, nsg))
+        self.cmd('network public-ip create -g {} -n {}'.format(rg, public_ip_name))
+
+        # create with minimum parameters
+        self.cmd('network nic create -g {} -n {} --subnet-name {} --vnet-name {}'.format(rg, nic, subnet, vnet), checks=[
+            JMESPathCheck('newNIC.value.ipConfigurations[0].properties.privateIPAllocationMethod', 'Dynamic'),
+            JMESPathCheck('newNIC.value.provisioningState', 'Succeeded')
+        ])
+        # exercise optional parameters
+        self.cmd('network nic create -g {} -n {} --subnet-name {} --vnet-name {} --ip-forwarding --private-ip-address {} --public-ip-address-name "{}"'.format(rg, nic, subnet, vnet, private_ip, public_ip_name), checks=[
+            JMESPathCheck('newNIC.value.ipConfigurations[0].properties.privateIPAllocationMethod', 'Static'),
+            JMESPathCheck('newNIC.value.ipConfigurations[0].properties.privateIPAddress', private_ip),
+            JMESPathCheck('newNIC.value.enableIPForwarding', True),
+            JMESPathCheck('newNIC.value.provisioningState', 'Succeeded')
+        ])
+        # exercise creating with NSG
+        self.cmd('network nic create -g {} -n {} --subnet-name {} --vnet-name {} --nsg-name {}'.format(rg, nic, subnet, vnet, nsg), checks=[
+            JMESPathCheck('newNIC.value.ipConfigurations[0].properties.privateIPAllocationMethod', 'Dynamic'),
+            JMESPathCheck('newNIC.value.enableIPForwarding', False),
+            JMESPathCheck("newNIC.value.networkSecurityGroup.contains(id, '{}')".format(nsg), True),
+            JMESPathCheck('newNIC.value.provisioningState', 'Succeeded')
+        ])
+        # exercise creating with NSG and Public IP
+        self.cmd('network nic create -g {} -n {} --subnet-name {} --vnet-name {} --nsg-name {} --public-ip-address-name "{}"'.format(rg, nic, subnet, vnet, nsg, public_ip_name), checks=[
+            JMESPathCheck('newNIC.value.ipConfigurations[0].properties.privateIPAllocationMethod', 'Dynamic'),
+            JMESPathCheck('newNIC.value.enableIPForwarding', False),
+            JMESPathCheck("newNIC.value.networkSecurityGroup.contains(id, '{}')".format(nsg), True),
+            JMESPathCheck('newNIC.value.provisioningState', 'Succeeded')
+        ])
         self.cmd('network nic list-all', checks=[
             JMESPathCheck('type(@)', 'array'),
-            JMESPathCheck("length([?type == '{}']) == length(@)".format(self.resource_type), True)
+            JMESPathCheck("length([?contains(id, 'networkInterfaces')]) == length(@)", True)
         ])
-        self.cmd('network nic list --resource-group {}'.format(self.resource_group), checks=[
+        self.cmd('network nic list --resource-group {}'.format(rg), checks=[
+
             JMESPathCheck('type(@)', 'array'),
-            JMESPathCheck("length([?type == '{}']) == length(@)".format(self.resource_type), True),
-            JMESPathCheck("length([?resourceGroup == '{}']) == length(@)".format(self.resource_group), True)
+            JMESPathCheck("length([?type == '{}']) == length(@)".format(rt), True),
+            JMESPathCheck("length([?resourceGroup == '{}']) == length(@)".format(rg), True)
         ])
-        self.cmd('network nic show --resource-group {} --name {}'.format(self.resource_group, self.name), checks=[
+        self.cmd('network nic show --resource-group {} --name {}'.format(rg, nic), checks=[
             JMESPathCheck('type(@)', 'object'),
-            JMESPathCheck('type', self.resource_type),
-            JMESPathCheck('resourceGroup', self.resource_group),
-            JMESPathCheck('name', self.name)
+            JMESPathCheck('type', rt),
+            JMESPathCheck('resourceGroup', rg),
+            JMESPathCheck('name', nic)
         ])
-        self.cmd('network nic delete --resource-group {} --name {}'.format(self.resource_group, self.name))
+        self.cmd('network nic delete --resource-group {} --name {}'.format(rg, nic))
+        self.cmd('network nic list -g {}'.format(rg), checks=NoneCheck())
 
 class NetworkNicScaleSetScenarioTest(VCRTestBase):
 
@@ -378,7 +390,7 @@ class NetworkSecurityGroupScenarioTest(ResourceGroupVCRTestBase):
         nrn = self.nsg_rule_name
         rt = self.resource_type
 
-        self.cmd('network nsg create --name {} -g {} --deployment-name deployment'.format(nsg, rg))
+        self.cmd('network nsg create --name {} -g {}'.format(nsg, rg))
         self.cmd('network nsg rule create --access allow --destination-address-prefix 1234 --direction inbound --nsg-name {} --protocol * -g {} --source-address-prefix 789 -n {} --source-port-range * --destination-port-range 4444'.format(nsg, rg, nrn))
 
         self.cmd('network nsg list-all', checks=[
@@ -429,7 +441,7 @@ class NetworkRouteTableOperationScenarioTest(VCRTestBase):
         if not self.cmd('network route-table show --resource-group {} --name {}'.format(
                 self.resource_group, self.route_table_name)):
             raise RuntimeError('Network route table must be manually created in order to support this test.')
-        if not self.cmd('network route-operation show --resource-group {} --route-table-name {} --name {}'.format( #pylint: disable=line-too-long
+        if not self.cmd('network route-operation show --resource-group {} --route-table-name {} --name {}'.format(
                 self.resource_group, self.route_table_name, self.route_operation_name)):
             raise RuntimeError('Network route operation must be manually created in order to support this test.')
 
@@ -480,7 +492,7 @@ class NetworkVNetScenarioTest(VCRTestBase):
         if not self.cmd('network vnet show --resource-group {} --name {}'.format(
             self.resource_group, self.vnet_name)):
             raise RuntimeError('Network vnet must be manually created in order to support this test.')
-        if not self.cmd('network vnet subnet show --resource-group {} --vnet-name {} --name {}'.format( #pylint: disable=line-too-long
+        if not self.cmd('network vnet subnet show --resource-group {} --vnet-name {} --name {}'.format(
             self.resource_group, self.vnet_name, self.vnet_subnet_name)):
             raise RuntimeError('Network vnet subnet must be manually created in order to support this test.')
 
