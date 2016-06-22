@@ -20,14 +20,15 @@ CONFIG = Session()
 SESSION = Session()
 
 def _handle_exception(ex):
+    #For error code, follow guidelines at https://docs.python.org/2/library/sys.html#sys.exit,
     if isinstance(ex, CLIError):
         logger.error(ex.args[0])
-        return ex.args[1] if len(ex.args) >= 2 else -1
+        return ex.args[1] if len(ex.args) >= 2 else 1
     elif isinstance(ex, KeyboardInterrupt):
-        return -1
+        return 1
     else:
         logger.exception(ex)
-        return -1
+        return 1
 
 def main(args, file=sys.stdout): #pylint: disable=redefined-builtin
     _logging.configure_logging(args)
@@ -53,4 +54,6 @@ def main(args, file=sys.stdout): #pylint: disable=redefined-builtin
             formatter = OutputProducer.get_formatter(APPLICATION.configuration.output_format)
             OutputProducer(formatter=formatter, file=file).out(cmd_result)
     except Exception as ex: # pylint: disable=broad-except
-        _handle_exception(ex)
+        error_code = _handle_exception(ex)
+        return error_code
+
