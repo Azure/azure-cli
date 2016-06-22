@@ -101,6 +101,6 @@ e.g.
 @classmethod
 def setUpClass(cls):
     import sh
-    sh.ssh.bake('-oStrictHostKeyChecking=no', '-tt', "{}@{}".format('myuser', '138.91.197.83'))
+    cls.vm = sh.ssh.bake('-oStrictHostKeyChecking=no', '-tt', "{}@{}".format('myuser', '138.91.197.83'))
 ```
 

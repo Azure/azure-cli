@@ -1,6 +1,6 @@
 import os
 import sys
-from six import StringIO
+from six import StringIO, text_type, u
 import sh
 from sh import az, ssh
 
@@ -44,15 +44,16 @@ def _get_install_command(install_url, nightly_version, sudo):
         install_url=install_url,
         sudo_str = 'sudo -E' if sudo else '')
 
+def _decode_str(output):
+    if not isinstance(output, text_type):
+        output = u(str(output))
+    return output
+
 def install_cli_interactive(vm, install_directory=None, exec_directory=None, tab_completion_ans=None, install_url=INSTALL_URL, nightly_version=AZURE_CLI_PACKAGE_VERSION, sudo=False):
     # Follows pattern suggested at https://amoffat.github.io/sh/tutorials/2-interacting_with_processes.html#tutorial2
     io = StringIO()
     def interact(char, stdin):
-        try:
-            io.write(char.encode())
-        except UnicodeDecodeError:
-            # ignore chars that can't be decoded for now
-            pass
+        io.write(_decode_str(char))
         aggregated_out = io.getvalue()
         if aggregated_out.endswith(INSTALL_DIRECTORY_PROMPT_MSG):
             stdin.put('{}\n'.format(install_directory if install_directory else ''))
