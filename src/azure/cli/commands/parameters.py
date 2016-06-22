@@ -1,6 +1,4 @@
 import argparse
-import time
-import random
 
 # pylint: disable=line-too-long
 from azure.cli.commands import CliArgumentType, register_cli_argument
@@ -8,14 +6,10 @@ from azure.cli.commands.validators import validate_tag, validate_tags
 from azure.cli._util import CLIError
 from azure.cli.commands.client_factory import (get_subscription_service_client,
                                                get_mgmt_service_client)
+from azure.cli.commands.validators import generate_deployment_name
 from azure.mgmt.resource.subscriptions import SubscriptionClient
 
 from azure.mgmt.resource.resources import ResourceManagementClient
-
-def generate_deployment_name(value):
-    if value != '_GENERATE_':
-        return value
-    return 'azurecli{}{}'.format(str(time.time()), str(random.randint(1, 100000)))
 
 def get_subscription_locations():
     subscription_client, subscription_id = get_subscription_service_client(SubscriptionClient)
@@ -74,8 +68,7 @@ location_type = CliArgumentType(
 deployment_name_type = CliArgumentType(
     help=argparse.SUPPRESS,
     required=False,
-    default='_GENERATE_',
-    type=generate_deployment_name
+    validator=generate_deployment_name
 )
 
 tags_type = CliArgumentType(

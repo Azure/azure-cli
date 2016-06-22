@@ -170,9 +170,9 @@
           "$ref": "#/definitions/DeploymentParameter_loadBalancerBackendAddressPoolIds",
           "x-ms-client-flatten": true
         },
-        "loadBalancerIncomingNatRuleIds": {
+        "loadBalancerInboundNatRuleIds": {
           "type": "object",
-          "$ref": "#/definitions/DeploymentParameter_loadBalancerIncomingNatRuleIds",
+          "$ref": "#/definitions/DeploymentParameter_loadBalancerInboundNatRuleIds",
           "x-ms-client-flatten": true
         },
         "location": {
@@ -228,35 +228,45 @@
       },
       "required": [
         "networkInterfaceName",
-        "subnetName",
-        "virtualNetworkName"
+        "enableIpForwarding",
+        "virtualNetworkName",
+        "subnetName"
       ]
     },
     "DeploymentParameter_enableIpForwarding": {
       "properties": {
         "value": {
-          "type": "string",
-          "description": "Specify whether to enable IP forwarding.",
+          "type": "boolean",
+          "description": "Enable IP forwarding.",
           "x-ms-client-name": "enableIpForwarding",
-          "default": "false"
+          "default": "False"
         }
-      }
+      },
+      "required": [
+        "value"
+      ]
     },
     "DeploymentParameter_loadBalancerBackendAddressPoolIds": {
       "properties": {
         "value": {
-          "type": "string",
+          "type": "array",
+          "items": {
+            "type": "object"
+          },
           "description": "Space separated list of load balancer backend address pool IDs.",
           "x-ms-client-name": "loadBalancerBackendAddressPoolIds"
         }
       }
     },
-    "DeploymentParameter_loadBalancerIncomingNatRuleIds": {
+    "DeploymentParameter_loadBalancerInboundNatRuleIds": {
       "properties": {
         "value": {
-          "type": "string",
-          "description": "Space separated list of load balancer incoming NAT rule IDs.",
-          "x-ms-client-name": "loadBalancerIncomingNatRuleIds"
+          "type": "array",
+          "items": {
+            "type": "object"
+          },
+          "description": "Space separated list of load balancer inbound NAT rule IDs.",
+          "x-ms-client-name": "loadBalancerInboundNatRuleIds"
         }
       }
     },
@@ -308,7 +318,7 @@
       "properties": {
         "value": {
           "type": "string",
-          "description": "The private IP address to use if static address allocation is specified.",
+          "description": "Static private IP address to associate with the NIC.",
           "x-ms-client-name": "privateIpAddress"
         }
       }

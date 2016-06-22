@@ -2,7 +2,7 @@
 import argparse
 
 from azure.cli.command_modules.network._actions import LBDNSNameAction, PublicIpDnsNameAction
-from azure.cli.command_modules.network._validators import _process_nic_namespace
+from azure.cli.command_modules.network._validators import process_nic_namespace
 from azure.cli.commands.parameters import (location_type, get_resource_name_completion_list)
 from azure.cli.commands import register_cli_argument, CliArgumentType
 
@@ -29,10 +29,11 @@ register_cli_argument('network nic', 'network_interface_name', name_arg_type)
 register_cli_argument('network nic', 'subnet_name', options_list=('--subnet-name',))
 register_cli_argument('network nic', 'enable_ip_forwarding', options_list=('--ip-forwarding',), action='store_true')
 register_cli_argument('network nic', 'private_ip_address_allocation', help=argparse.SUPPRESS)
-register_cli_argument('network nic', 'network_security_group_type', help=argparse.SUPPRESS, validator=_process_nic_namespace)
+register_cli_argument('network nic', 'network_security_group_type', help=argparse.SUPPRESS)
 register_cli_argument('network nic', 'public_ip_address_type', help=argparse.SUPPRESS)
-register_cli_argument('network nic', 'load_balancer_backend_address_pool_ids', options_list=('--lb-address-pool-ids',))
-register_cli_argument('network nic', 'load_balancer_incoming_nat_rule_ids', options_list=('--lb-nat-rule-ids',))
+register_cli_argument('network nic', 'load_balancer_backend_address_pool_ids', options_list=('--lb-address-pool-ids',), nargs='+')
+register_cli_argument('network nic', 'load_balancer_inbound_nat_rule_ids', options_list=('--lb-nat-rule-ids',), nargs='+')
+register_cli_argument('network nic create', 'network_interface_name', name_arg_type, validator=process_nic_namespace)
 
 register_cli_argument('network nic scale-set', 'virtual_machine_scale_set_name', options_list=('--vm-scale-set',), completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'))
 register_cli_argument('network nic scale-set', 'virtualmachine_index', options_list=('--vm-index',))
@@ -65,7 +66,7 @@ register_cli_argument('network vnet create', 'virtual_network_prefix', CliArgume
 register_cli_argument('network vnet create', 'virtual_network_name', virtual_network_name_type, options_list=('--name', '-n'), required=True, completer=None)
 
 register_cli_argument('network vnet subnet', 'subnet_name', options_list=('--name', '-n'), help='the subnet name')
-register_cli_argument('network vnet subnet', 'address_prefix', metavar='PREFIX', help='the address prefix in CIDR format.', default='10.0.0.0/24')
+register_cli_argument('network vnet subnet', 'address_prefix', metavar='PREFIX', help='the address prefix in CIDR format.')
 register_cli_argument('network vnet subnet', 'virtual_network_name', virtual_network_name_type)
 
 register_cli_argument('network lb', 'load_balancer_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/loadBalancers'))

@@ -23,15 +23,14 @@ class DeploymentNic(Model):
     :param content_version: If included it must match the ContentVersion in
      the template.
     :type content_version: str
-    :param enable_ip_forwarding: Specify whether to enable IP forwarding.
-     Default value: "false" .
-    :type enable_ip_forwarding: str
+    :param enable_ip_forwarding: Enable IP forwarding. Default value: False .
+    :type enable_ip_forwarding: bool
     :param load_balancer_backend_address_pool_ids: Space separated list of
      load balancer backend address pool IDs.
-    :type load_balancer_backend_address_pool_ids: str
-    :param load_balancer_incoming_nat_rule_ids: Space separated list of load
-     balancer incoming NAT rule IDs.
-    :type load_balancer_incoming_nat_rule_ids: str
+    :type load_balancer_backend_address_pool_ids: list of object
+    :param load_balancer_inbound_nat_rule_ids: Space separated list of load
+     balancer inbound NAT rule IDs.
+    :type load_balancer_inbound_nat_rule_ids: list of object
     :param location: Location for NIC resource.
     :type location: str
     :param network_interface_name: Name of the new NIC.
@@ -42,8 +41,8 @@ class DeploymentNic(Model):
     :param network_security_group_type: Identifies whether to use an existing
      NSG. Possible values include: 'none', 'existing'. Default value: "none" .
     :type network_security_group_type: str
-    :param private_ip_address: The private IP address to use if static
-     address allocation is specified.
+    :param private_ip_address: Static private IP address to associate with
+     the NIC.
     :type private_ip_address: str
     :param private_ip_address_allocation: Private IP address allocation
      method. Possible values include: 'dynamic', 'static'. Default value:
@@ -67,6 +66,7 @@ class DeploymentNic(Model):
 
     _validation = {
         'uri': {'required': True, 'constant': True},
+        'enable_ip_forwarding': {'required': True},
         'network_interface_name': {'required': True},
         'subnet_name': {'required': True},
         'virtual_network_name': {'required': True},
@@ -76,9 +76,9 @@ class DeploymentNic(Model):
     _attribute_map = {
         'uri': {'key': 'properties.templateLink.uri', 'type': 'str'},
         'content_version': {'key': 'properties.templateLink.contentVersion', 'type': 'str'},
-        'enable_ip_forwarding': {'key': 'properties.parameters.enableIpForwarding.value', 'type': 'str'},
-        'load_balancer_backend_address_pool_ids': {'key': 'properties.parameters.loadBalancerBackendAddressPoolIds.value', 'type': 'str'},
-        'load_balancer_incoming_nat_rule_ids': {'key': 'properties.parameters.loadBalancerIncomingNatRuleIds.value', 'type': 'str'},
+        'enable_ip_forwarding': {'key': 'properties.parameters.enableIpForwarding.value', 'type': 'bool'},
+        'load_balancer_backend_address_pool_ids': {'key': 'properties.parameters.loadBalancerBackendAddressPoolIds.value', 'type': '[object]'},
+        'load_balancer_inbound_nat_rule_ids': {'key': 'properties.parameters.loadBalancerInboundNatRuleIds.value', 'type': '[object]'},
         'location': {'key': 'properties.parameters.location.value', 'type': 'str'},
         'network_interface_name': {'key': 'properties.parameters.networkInterfaceName.value', 'type': 'str'},
         'network_security_group_name': {'key': 'properties.parameters.networkSecurityGroupName.value', 'type': 'str'},
@@ -96,11 +96,11 @@ class DeploymentNic(Model):
 
     mode = "Incremental"
 
-    def __init__(self, network_interface_name, subnet_name, virtual_network_name, content_version=None, enable_ip_forwarding="false", load_balancer_backend_address_pool_ids=None, load_balancer_incoming_nat_rule_ids=None, location=None, network_security_group_name=None, network_security_group_type="none", private_ip_address=None, private_ip_address_allocation="dynamic", public_ip_address_name=None, public_ip_address_type="none"):
+    def __init__(self, network_interface_name, subnet_name, virtual_network_name, content_version=None, enable_ip_forwarding=False, load_balancer_backend_address_pool_ids=None, load_balancer_inbound_nat_rule_ids=None, location=None, network_security_group_name=None, network_security_group_type="none", private_ip_address=None, private_ip_address_allocation="dynamic", public_ip_address_name=None, public_ip_address_type="none"):
         self.content_version = content_version
         self.enable_ip_forwarding = enable_ip_forwarding
         self.load_balancer_backend_address_pool_ids = load_balancer_backend_address_pool_ids
-        self.load_balancer_incoming_nat_rule_ids = load_balancer_incoming_nat_rule_ids
+        self.load_balancer_inbound_nat_rule_ids = load_balancer_inbound_nat_rule_ids
         self.location = location
         self.network_interface_name = network_interface_name
         self.network_security_group_name = network_security_group_name

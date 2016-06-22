@@ -695,7 +695,7 @@ class VMCreateUbuntuScenarioTest(ResourceGroupVCRTestBase): #pylint: disable=too
         self.pub_ssh_filename = pathname
 
     def body(self):
-        self.cmd('vm create --resource-group {rg} --admin-username {admin} --name {vm_name} --authentication-type {auth_type} --image {image} --ssh-key-value {ssh_key} --location {location}'.format(
+        self.cmd('vm create --resource-group {rg} --admin-username {admin} --name {vm_name} --authentication-type {auth_type} --image {image} --ssh-key-value \'{ssh_key}\' --location {location}'.format(
             rg=self.resource_group,
             admin=self.admin_username,
             vm_name=self.vm_names[0],
