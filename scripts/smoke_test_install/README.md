@@ -7,11 +7,10 @@ The scripts in this directory allow automated testing of the install.
 Set Up
 ------
 
-[Nose](http://nose.readthedocs.io/en/latest/) and [Sh](https://amoffat.github.io/sh/) are required to run these tests.
+[Nose](http://nose.readthedocs.io/en/latest/) and [Sh](https://amoffat.github.io/sh/) are required to run these tests as well as [six](https://pypi.python.org/pypi/six).
 
 ```
-pip install nose
-pip install sh
+pip install nose sh six
 ```
 
 `az` also needs to be installed on the machine you will run the tests from.  
@@ -54,7 +53,7 @@ The following are optional and have defaults:
 #### Recommended commands
 Collect the number of tests that exist.
 ```
-nosetests `--collect-only`
+nosetests --collect-only
 ```
 
 Now you know how many tests there are, run them all in parallel.
