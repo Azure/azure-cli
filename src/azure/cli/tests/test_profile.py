@@ -185,8 +185,9 @@ class Test_Profile(unittest.TestCase):
     @mock.patch('azure.cli._profile._read_file_content', autospec=True)
     @mock.patch('azure.cli._profile.CredsCache.retrieve_token_for_user', autospec=True)
     def test_get_login_credentials(self, mock_get_token, mock_read_cred_file):
+        some_token_type = 'Bearer'
         mock_read_cred_file.return_value = json.dumps([Test_Profile.token_entry1])
-        mock_get_token.return_value = Test_Profile.raw_token1
+        mock_get_token.return_value = (some_token_type, Test_Profile.raw_token1)
         #setup
         storage_mock = {'subscriptions': None}
         profile = Profile(storage_mock)
@@ -200,7 +201,11 @@ class Test_Profile(unittest.TestCase):
 
         #verify
         self.assertEqual(subscription_id, '1')
-        self.assertEqual(cred.token['access_token'], self.raw_token1)
+
+        #verify the cred._tokenRetriever is a working lambda
+        token_type, token = cred._token_retriever()
+        self.assertEqual(token, self.raw_token1)
+        self.assertEqual(some_token_type, token_type)
         self.assertEqual(mock_read_cred_file.call_count, 1)
         self.assertEqual(mock_get_token.call_count, 1)
  
@@ -392,6 +397,7 @@ class Test_Profile(unittest.TestCase):
     def test_credscache_new_token_added_by_adal(self, mock_adal_auth_context, mock_open_for_write, mock_read_file):
         token_entry2 = {
             "accessToken": "new token",
+            "tokenType": "Bearer",
             "userId": self.user1
         }
         def acquire_token_side_effect(*args):
@@ -405,9 +411,9 @@ class Test_Profile(unittest.TestCase):
         mock_open_for_write.return_value = FileHandleStub()
         mock_read_file.return_value = json.dumps([self.token_entry1])
         creds_cache = CredsCache(auth_ctx_factory=get_auth_context)
-        token = creds_cache.retrieve_token_for_user(self.user1, self.tenant_id)
         
         #action
+        token_type, token = creds_cache.retrieve_token_for_user(self.user1, self.tenant_id)
         mock_adal_auth_context.acquire_token.assert_called_once_with(
              'https://management.core.windows.net/',
              self.user1,
@@ -416,6 +422,7 @@ class Test_Profile(unittest.TestCase):
         #assert
         mock_open_for_write.assert_called_with(mock.ANY, 'w', encoding='ascii')
         self.assertEqual(token, 'new token')
+        self.assertEqual(token_type, token_entry2['tokenType'])
 
 class FileHandleStub:
     def write(self, content):
