@@ -2,6 +2,7 @@
 import argparse
 
 from azure.cli.command_modules.network._actions import LBDNSNameAction, PublicIpDnsNameAction
+from azure.cli.command_modules.network._validators import process_nic_namespace
 from azure.cli.commands.parameters import (location_type, get_resource_name_completion_list)
 from azure.cli.commands import register_cli_argument, CliArgumentType
 
@@ -10,9 +11,11 @@ from azure.cli.commands import register_cli_argument, CliArgumentType
 name_arg_type = CliArgumentType(options_list=('--name', '-n'), metavar='NAME')
 virtual_network_name_type = CliArgumentType(options_list=('--vnet-name',), metavar='VNET_NAME', help='Name of the virtual network.', completer=get_resource_name_completion_list('Microsoft.Network/virtualNetworks'))
 subnet_name_type = CliArgumentType(options_list=('--subnet-name',), metavar='SUBNET_NAME')
+nsg_name_type = CliArgumentType(options_list=('--nsg-name',), metavar='NSG', help='Name of the network security group.')
 
 register_cli_argument('network', 'subnet_name', name_arg_type)
 register_cli_argument('network', 'virtual_network_name', virtual_network_name_type)
+register_cli_argument('network', 'network_security_group_name', nsg_name_type)
 
 register_cli_argument('network application-gateway', 'application_gateway_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/applicationGateways'))
 
@@ -22,7 +25,15 @@ register_cli_argument('network express-route circuit', 'circuit_name', name_arg_
 
 register_cli_argument('network local-gateway', 'local_network_gateway_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/localNetworkGateways'))
 
-register_cli_argument('network nic', 'network_interface_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/networkInterfaces'))
+register_cli_argument('network nic', 'network_interface_name', name_arg_type)
+register_cli_argument('network nic', 'subnet_name', options_list=('--subnet-name',))
+register_cli_argument('network nic', 'enable_ip_forwarding', options_list=('--ip-forwarding',), action='store_true')
+register_cli_argument('network nic', 'private_ip_address_allocation', help=argparse.SUPPRESS)
+register_cli_argument('network nic', 'network_security_group_type', help=argparse.SUPPRESS)
+register_cli_argument('network nic', 'public_ip_address_type', help=argparse.SUPPRESS)
+register_cli_argument('network nic', 'load_balancer_backend_address_pool_ids', options_list=('--lb-address-pool-ids',), nargs='+')
+register_cli_argument('network nic', 'load_balancer_inbound_nat_rule_ids', options_list=('--lb-nat-rule-ids',), nargs='+')
+register_cli_argument('network nic create', 'network_interface_name', name_arg_type, validator=process_nic_namespace)
 
 register_cli_argument('network nic scale-set', 'virtual_machine_scale_set_name', options_list=('--vm-scale-set',), completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'))
 register_cli_argument('network nic scale-set', 'virtualmachine_index', options_list=('--vm-index',))
@@ -75,3 +86,4 @@ register_cli_argument('network vpn-connection', 'virtual_network_gateway_connect
 
 register_cli_argument('network vpn-connection shared-key', 'connection_shared_key_name', CliArgumentType(options_list=('--name', '-n')))
 register_cli_argument('network vpn-connection shared-key', 'virtual_network_gateway_connection_name', CliArgumentType(options_list=('--connection-name',), metavar='NAME'))
+

@@ -25,6 +25,9 @@ COMMAND_COVERAGE_FILENAME = 'command_coverage.txt'
 
 # MOCK METHODS
 
+def _mock_generate_deployment_name(value):
+    return value if value != '_GENERATE_' else 'mock-deployment'
+
 def _mock_handle_exceptions(ex):
     raise ex
 
@@ -113,6 +116,11 @@ class StringCheck(object): # pylint: disable=too-few-public-methods
             raise AssertionError("Actual value '{}' != Expected value {}".format(
                 data, self.expected_result))
 
+# HELPER METHODS
+
+def _scrub_deployment_name(uri):
+    return re.sub('/deployments/([^/?]+)', '/deployments/mock-deployment', uri)
+
 # MAIN CLASS
 
 class VCRTestBase(unittest.TestCase):#pylint: disable=too-many-instance-attributes
@@ -165,6 +173,7 @@ class VCRTestBase(unittest.TestCase):#pylint: disable=too-many-instance-attribut
         request.uri = re.sub('/subscriptions/([^/]+)/',
                              '/subscriptions/00000000-0000-0000-0000-000000000000/', request.uri)
         request.uri = re.sub('/sig=([^/]+)&', '/sig=0000&', request.uri)
+        request.uri = _scrub_deployment_name(request.uri)
         # prevents URI mismatch between Python 2 and 3 if request URI has extra / chars
         request.uri = re.sub('//', '/', request.uri)
         request.uri = re.sub('/', '//', request.uri, count=1)
@@ -208,6 +217,8 @@ class VCRTestBase(unittest.TestCase):#pylint: disable=too-many-instance-attribut
     @mock.patch('msrestazure.azure_operation.AzureOperationPoller._delay', _mock_operation_delay)
     @mock.patch('time.sleep', _mock_operation_delay)
     @mock.patch('azure.cli.commands.LongRunningOperation._delay', _mock_operation_delay)
+    @mock.patch('azure.cli.commands.parameters.generate_deployment_name',
+                _mock_generate_deployment_name)
     def _execute_playback(self):
         # pylint: disable=no-member
         with self.my_vcr.use_cassette(self.cassette_path):

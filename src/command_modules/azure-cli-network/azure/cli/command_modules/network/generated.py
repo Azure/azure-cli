@@ -27,6 +27,8 @@ from azure.cli.command_modules.network.mgmt_public_ip.lib \
 from azure.cli.command_modules.network.mgmt_public_ip.lib.operations import PublicIpOperations
 from azure.cli.command_modules.network.mgmt_lb.lib import LbCreationClient as LBClient
 from azure.cli.command_modules.network.mgmt_lb.lib.operations import LbOperations
+from azure.cli.command_modules.network.mgmt_nic.lib import NicCreationClient as NicClient
+from azure.cli.command_modules.network.mgmt_nic.lib.operations import NicOperations
 from azure.cli.command_modules.network.mgmt_nsg.lib import NSGCreationClient as NSGClient
 from azure.cli.command_modules.network.mgmt_nsg.lib.operations import NSGOperations
 
@@ -90,6 +92,9 @@ cli_command('network local-gateway show', LocalNetworkGatewaysOperations.get, fa
 cli_command('network local-gateway list', LocalNetworkGatewaysOperations.list, factory)
 
 # NetworkInterfacesOperations
+factory = lambda _: get_mgmt_service_client(NicClient).nic
+cli_command('network nic create', NicOperations.create_or_update, factory, transform=DeploymentOutputLongRunningOperation('Starting network nic create'))
+
 factory = lambda _: _network_client_factory().network_interfaces
 cli_command('network nic delete', NetworkInterfacesOperations.delete, factory)
 cli_command('network nic show', NetworkInterfacesOperations.get, factory)

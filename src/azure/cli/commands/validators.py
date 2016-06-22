@@ -1,3 +1,6 @@
+import time
+import random
+
 def validate_tags(string):
     ''' Extracts multiple tags in key[=value] format, separated by semicolons '''
     result = {}
@@ -22,3 +25,8 @@ def validate_key_value_pairs(string):
         kv_list = [x for x in string.split(';') if '=' in x]     # key-value pairs
         result = dict(x.split('=', 1) for x in kv_list)
     return result
+
+def generate_deployment_name(namespace):
+    if not namespace.deployment_name:
+        namespace.deployment_name = \
+            'azurecli{}{}'.format(str(time.time()), str(random.randint(1, 100000)))

@@ -26,15 +26,23 @@ def get_enum(value):
 
 def get_default(value):
     default_value = value.get('defaultValue')
+    swagger = ''
     if default_value and (isinstance(default_value, int) or '[' not in default_value) \
         and not isinstance(default_value, list) and not isinstance(default_value, dict):
-        return swagger_template_default.format(default_value)
-    return ''
+        swagger = swagger_template_default.format(default_value)
+    elif (isinstance(default_value, bool)):
+        swagger = swagger_template_default.format(default_value)
+    return swagger
 
 def get_type_string(value):
     type = value.get('type')
+    type_conversion = {
+        'securestring': 'string',
+        'bool': 'boolean'
+    }
+    type = type_conversion.get(type, type)
 
-    type_string = '"type": "{}"'.format(type if type != 'securestring' else 'string')
+    type_string = '"type": "{}"'.format(type)
     if type == 'array':
         type_string = '''
             "type": "{0}",
