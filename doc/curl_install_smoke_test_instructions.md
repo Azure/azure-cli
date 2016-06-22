@@ -352,7 +352,7 @@ See [Basic verification](#heading1_2).
 ### Steps
 Set the environment variable to point to the version you wish to install.
 
-e.g. `set AZURE_CLI_NIGHTLY_VERSION=2016.05.31.nightly`.
+e.g. `set AZURE_CLI_NIGHTLY_VERSION=2016.06.21.nightly`.
 
 ```
 set AZURE_CLI_DISABLE_POST_INSTALL=1
@@ -374,6 +374,7 @@ pip install azure-cli-storage==%AZURE_CLI_NIGHTLY_VERSION% --extra-index-url %AZ
 pip install azure-cli-vm==%AZURE_CLI_NIGHTLY_VERSION% --extra-index-url %AZURE_CLI_PRIVATE_PYPI_URL% --trusted-host %AZURE_CLI_PRIVATE_PYPI_HOST%
 pip install azure-cli-network==%AZURE_CLI_NIGHTLY_VERSION% --extra-index-url %AZURE_CLI_PRIVATE_PYPI_URL% --trusted-host %AZURE_CLI_PRIVATE_PYPI_HOST%
 pip install azure-cli-resource==%AZURE_CLI_NIGHTLY_VERSION% --extra-index-url %AZURE_CLI_PRIVATE_PYPI_URL% --trusted-host %AZURE_CLI_PRIVATE_PYPI_HOST%
+pip install azure-cli-role==%AZURE_CLI_NIGHTLY_VERSION% --extra-index-url %AZURE_CLI_PRIVATE_PYPI_URL% --trusted-host %AZURE_CLI_PRIVATE_PYPI_HOST%
 ```
 
 ### Verification
