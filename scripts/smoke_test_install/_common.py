@@ -18,6 +18,10 @@ assert (RESOURCE_GROUP and AZURE_CLI_PACKAGE_VERSION_PREV and AZURE_CLI_PACKAGE_
 INSTALL_URL = os.environ.get('AZ_TEST_INSTALL_URL') or 'http://azure-cli-nightly.westus.cloudapp.azure.com/install-dev-latest'
 VM_USERNAME = os.environ.get('AZ_TEST_VM_USERNAME') or 'myuser'
 
+INSTALL_DIRECTORY_PROMPT_MSG = "In what directory would you like to place the install? (leave blank to use /usr/local/az): "
+INSTALL_EXEC_DIRECTORY_PROMPT_MSG = "In what directory would you like to place the executable? (leave blank to use /usr/local/bin): "
+INSTALL_TAB_COMPLETE_PROMPT_MSG = "Enable shell/tab completion? [y/N]: "
+
 # By default, sh will truncate stdout/stderr output.
 # But we want to see everything to make test debugging easier.
 # see: https://github.com/amoffat/sh/blob/master/sh.py#L171
@@ -50,11 +54,11 @@ def install_cli_interactive(vm, install_directory=None, exec_directory=None, tab
             # ignore chars that can't be decoded for now
             pass
         aggregated_out = io.getvalue()
-        if aggregated_out.endswith("In what directory would you like to place the install? (leave blank to use /usr/local/az): "):
+        if aggregated_out.endswith(INSTALL_DIRECTORY_PROMPT_MSG):
             stdin.put('{}\n'.format(install_directory if install_directory else ''))
-        elif aggregated_out.endswith("In what directory would you like to place the executable? (leave blank to use /usr/local/bin): "):
+        elif aggregated_out.endswith(INSTALL_EXEC_DIRECTORY_PROMPT_MSG):
             stdin.put('{}\n'.format(exec_directory if exec_directory else ''))
-        elif aggregated_out.endswith("Enable shell/tab completion? [y/N]: "):
+        elif aggregated_out.endswith(INSTALL_TAB_COMPLETE_PROMPT_MSG):
             stdin.put('{}\n'.format(tab_completion_ans if tab_completion_ans else ''))
     vm(_get_install_command(install_url, nightly_version, sudo), _out=interact, _err=interact, _out_bufsize=0, _tty_in=True).wait()
     io.close()
