@@ -32,7 +32,7 @@ class LbOperations(object):
         self.config = config
 
     def create_or_update(
-            self, resource_group_name, deployment_name, load_balancer_name, content_version=None, dns_name_for_public_ip=None, dns_name_type="none", location=None, private_ip_address=None, private_ip_address_allocation="dynamic", public_ip_address_allocation="dynamic", public_ip_address_name=None, public_ip_address_type="new", subnet_name=None, virtual_network_name=None, custom_headers=None, raw=False, **operation_config):
+            self, resource_group_name, deployment_name, load_balancer_name, content_version=None, backend_pool_name=None, dns_name_for_public_ip=None, dns_name_type="none", location=None, private_ip_address=None, private_ip_address_allocation="dynamic", public_ip_address_allocation="dynamic", public_ip_address_name=None, public_ip_address_type="new", subnet_name=None, virtual_network_name=None, custom_headers=None, raw=False, **operation_config):
         """
         Create or update a virtual machine.
 
@@ -46,6 +46,8 @@ class LbOperations(object):
         :param content_version: If included it must match the ContentVersion
          in the template.
         :type content_version: str
+        :param backend_pool_name: Name of load balancer backend pool.
+        :type backend_pool_name: str
         :param dns_name_for_public_ip: Globally unique DNS Name for the
          Public IP used to access the Virtual Machine.  Requires a new public
          IP to be created by setting Public IP Address Type to New.
@@ -55,8 +57,7 @@ class LbOperations(object):
         :type dns_name_type: str
         :param location: Location for load balancer resource.
         :type location: str
-        :param private_ip_address: Private IP address to use when allocation
-         method is set to 'static'.
+        :param private_ip_address: Static private IP address to use.
         :type private_ip_address: str
         :param private_ip_address_allocation: Private IP address allocation
          method. Possible values include: 'dynamic', 'static'
@@ -86,7 +87,7 @@ class LbOperations(object):
         :rtype: :class:`ClientRawResponse<msrest.pipeline.ClientRawResponse>`
          if raw=true
         """
-        parameters = models.DeploymentLb(content_version=content_version, dns_name_for_public_ip=dns_name_for_public_ip, dns_name_type=dns_name_type, load_balancer_name=load_balancer_name, location=location, private_ip_address=private_ip_address, private_ip_address_allocation=private_ip_address_allocation, public_ip_address_allocation=public_ip_address_allocation, public_ip_address_name=public_ip_address_name, public_ip_address_type=public_ip_address_type, subnet_name=subnet_name, virtual_network_name=virtual_network_name)
+        parameters = models.DeploymentLb(content_version=content_version, backend_pool_name=backend_pool_name, dns_name_for_public_ip=dns_name_for_public_ip, dns_name_type=dns_name_type, load_balancer_name=load_balancer_name, location=location, private_ip_address=private_ip_address, private_ip_address_allocation=private_ip_address_allocation, public_ip_address_allocation=public_ip_address_allocation, public_ip_address_name=public_ip_address_name, public_ip_address_type=public_ip_address_type, subnet_name=subnet_name, virtual_network_name=virtual_network_name)
 
         # Construct URL
         url = '/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Resources/deployments/{deploymentName}'

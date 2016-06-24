@@ -28,6 +28,8 @@ class DeploymentLb(Model):
      "https://azuresdkci.blob.core.windows.net/templatehost/CreateLb_2016-06-20"
      .
     :vartype _artifacts_location: str
+    :param backend_pool_name: Name of load balancer backend pool.
+    :type backend_pool_name: str
     :param dns_name_for_public_ip: Globally unique DNS Name for the Public IP
      used to access the Virtual Machine.  Requires a new public IP to be
      created by setting Public IP Address Type to New.
@@ -39,8 +41,7 @@ class DeploymentLb(Model):
     :type load_balancer_name: str
     :param location: Location for load balancer resource.
     :type location: str
-    :param private_ip_address: Private IP address to use when allocation
-     method is set to 'static'.
+    :param private_ip_address: Static private IP address to use.
     :type private_ip_address: str
     :param private_ip_address_allocation: Private IP address allocation
      method. Possible values include: 'dynamic', 'static'. Default value:
@@ -77,6 +78,7 @@ class DeploymentLb(Model):
         'uri': {'key': 'properties.templateLink.uri', 'type': 'str'},
         'content_version': {'key': 'properties.templateLink.contentVersion', 'type': 'str'},
         '_artifacts_location': {'key': 'properties.parameters._artifactsLocation.value', 'type': 'str'},
+        'backend_pool_name': {'key': 'properties.parameters.backendPoolName.value', 'type': 'str'},
         'dns_name_for_public_ip': {'key': 'properties.parameters.dnsNameForPublicIP.value', 'type': 'str'},
         'dns_name_type': {'key': 'properties.parameters.dnsNameType.value', 'type': 'str'},
         'load_balancer_name': {'key': 'properties.parameters.loadBalancerName.value', 'type': 'str'},
@@ -97,8 +99,9 @@ class DeploymentLb(Model):
 
     mode = "Incremental"
 
-    def __init__(self, load_balancer_name, content_version=None, dns_name_for_public_ip=None, dns_name_type="none", location=None, private_ip_address=None, private_ip_address_allocation="dynamic", public_ip_address_allocation="dynamic", public_ip_address_name=None, public_ip_address_type="new", subnet_name=None, virtual_network_name=None):
+    def __init__(self, load_balancer_name, content_version=None, backend_pool_name=None, dns_name_for_public_ip=None, dns_name_type="none", location=None, private_ip_address=None, private_ip_address_allocation="dynamic", public_ip_address_allocation="dynamic", public_ip_address_name=None, public_ip_address_type="new", subnet_name=None, virtual_network_name=None):
         self.content_version = content_version
+        self.backend_pool_name = backend_pool_name
         self.dns_name_for_public_ip = dns_name_for_public_ip
         self.dns_name_type = dns_name_type
         self.load_balancer_name = load_balancer_name

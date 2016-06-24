@@ -56,7 +56,7 @@ def delete_load_balancer_property_entry(prop):
         lb = ncf.load_balancers.get(resource_group_name, load_balancer_name)
         keep_items = \
             [x for x in lb.__getattribute__(prop) if x.name.lower() != item_name.lower()]
-        lb.__setattr__(prop, keep_items)
+        _set_param(lb, prop, keep_items)
         return ncf.load_balancers.create_or_update(resource_group_name, load_balancer_name, lb)
     return delete_func
 
@@ -64,7 +64,7 @@ def _get_lb_property(items, name):
     try:
         return next(x for x in items if x.name.lower() == name.lower())
     except StopIteration:
-        raise CLIError("Item '{}' does not exist on load balancer".format(name))
+        raise CLIError("Property '{}' does not exist on load balancer".format(name))
 
 def _set_param(item, prop, value):
     if value == "":

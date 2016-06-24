@@ -8,6 +8,13 @@
         "description": "URL of the template to deploy."
       }
     },
+    "backendPoolName": {
+      "type": "string",
+      "defaultValue": "[concat(parameters('loadBalancerName'), 'bepool')]",
+      "metadata": {
+        "description": "Name of load balancer backend pool."
+      }
+    },
     "dnsNameForPublicIP": {
       "type": "string",
       "defaultValue": "",
@@ -160,6 +167,11 @@
         "[concat('Microsoft.Resources/deployments/', variables('ipDeploymentName'))]"
       ],
       "properties": {
+        "backendAddressPools": [
+          {
+            "name": "[parameters('backendPoolName')]"
+          }
+        ],
         "frontendIPConfigurations": "[variables('frontendConfig')[parameters('publicIpAddressType')]]"
       }
     },
