@@ -6,7 +6,6 @@ import collections
 import shlex
 import re
 import sys
-
 import unittest
 try:
     import unittest.mock as mock
@@ -17,13 +16,31 @@ import vcr
 import jmespath
 from six import StringIO
 
-from azure.cli.main import main as cli
+import azure.cli as cli
+from azure.cli.main import main as cli_main
+import azure.cli._debug as _debug
+from azure.cli._profile import Profile
 from azure.cli._util import CLIError
 
 TRACK_COMMANDS = os.environ.get('AZURE_CLI_TEST_TRACK_COMMANDS')
 COMMAND_COVERAGE_FILENAME = 'command_coverage.txt'
 
 # MOCK METHODS
+
+def _mock_get_mgmt_service_client(client_type, subscription_bound=True):
+    # version of _get_mgmt_service_client to use when recording or playing tests
+    profile = Profile()
+    cred, subscription_id = profile.get_login_credentials()
+    if subscription_bound:
+        client = client_type(cred, subscription_id)
+    else:
+        client = client_type(cred)
+
+    _debug.allow_debug_connection(client)
+
+    client.config.add_user_agent("AZURECLI/TEST/{}".format(cli.__version__))
+
+    return (client, subscription_id)
 
 def _mock_generate_deployment_name(value):
     return value if value != '_GENERATE_' else 'mock-deployment'
@@ -191,6 +208,7 @@ class VCRTestBase(unittest.TestCase):#pylint: disable=too-many-instance-attribut
         return response
 
     @mock.patch('azure.cli.main._handle_exception', _mock_handle_exceptions)
+    @mock.patch('azure.cli.commands.client_factory._get_mgmt_service_client', _mock_get_mgmt_service_client) # pylint: disable=line-too-long
     def _execute_live_or_recording(self):
         #pylint: disable=no-member
         try:
@@ -214,6 +232,7 @@ class VCRTestBase(unittest.TestCase):#pylint: disable=too-many-instance-attribut
     @mock.patch('azure.cli._profile.Profile.load_cached_subscriptions', _mock_subscriptions)
     @mock.patch('azure.cli._profile.CredsCache.retrieve_token_for_user', _mock_user_access_token)
     @mock.patch('azure.cli.main._handle_exception', _mock_handle_exceptions)
+    @mock.patch('azure.cli.commands.client_factory._get_mgmt_service_client', _mock_get_mgmt_service_client) # pylint: disable=line-too-long
     @mock.patch('msrestazure.azure_operation.AzureOperationPoller._delay', _mock_operation_delay)
     @mock.patch('time.sleep', _mock_operation_delay)
     @mock.patch('azure.cli.commands.LongRunningOperation._delay', _mock_operation_delay)
@@ -234,7 +253,7 @@ class VCRTestBase(unittest.TestCase):#pylint: disable=too-many-instance-attribut
         command_list = shlex.split(command)
         output = StringIO()
         try:
-            cli(command_list, file=output)
+            cli_main(command_list, file=output)
         except Exception as ex: # pylint: disable=broad-except
             if not isinstance(allowed_exceptions, list):
                 allowed_exceptions = [allowed_exceptions]
