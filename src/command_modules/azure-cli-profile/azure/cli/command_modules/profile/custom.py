@@ -9,10 +9,14 @@ import azure.cli._logging as _logging
 
 logger = _logging.get_az_logger(__name__)
 
-def list_subscriptions():
-    '''List the imported subscriptions.'''
+def load_subscriptions():
     profile = Profile()
     subscriptions = profile.load_cached_subscriptions()
+    return subscriptions
+
+def list_subscriptions():
+    '''List the imported subscriptions.'''
+    subscriptions = load_subscriptions()
     if not subscriptions:
         logger.warning('Please run "az login" to access your accounts.')
     return subscriptions

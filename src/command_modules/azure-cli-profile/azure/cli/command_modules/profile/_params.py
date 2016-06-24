@@ -1,6 +1,14 @@
 from azure.cli.commands import CliArgumentType, register_cli_argument
-
+from .custom import load_subscriptions
 # BASIC PARAMETER CONFIGURATION
+
+def get_subscription_id_list(prefix, **kwargs):#pylint: disable=unused-argument
+    subscriptions = load_subscriptions()
+    result = []
+    for subscription in subscriptions:
+        result.append(subscription['id'])
+        result.append(subscription['name'])
+    return result
 
 password_type = CliArgumentType(
     options_list=('--password', '-p'),
@@ -15,7 +23,8 @@ service_principal_type = CliArgumentType(
 subscription_name_or_id_type = CliArgumentType(
     options_list=('--subscription-name-or-id', '-n'),
     metavar='SUBSCRIPTION_NAME_OR_ID',
-    help='Subscription id. Unique name also works.'
+    help='Subscription id. Unique name also works.',
+    completer=get_subscription_id_list
 )
 
 tenant_type = CliArgumentType(
