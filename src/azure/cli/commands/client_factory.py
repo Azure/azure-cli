@@ -13,6 +13,22 @@ def get_mgmt_service_client(client_type):
 def get_subscription_service_client(client_type):
     return _get_mgmt_service_client(client_type, False)
 
+def _mock_get_mgmt_service_client(client_type, subscription_bound=True):
+    # version of _get_mgmt_service_client to use when recording or playing tests
+    logger.info('Getting management service client client_type=%s', client_type.__name__)
+    profile = Profile()
+    cred, subscription_id = profile.get_login_credentials()
+    if subscription_bound:
+        client = client_type(cred, subscription_id)
+    else:
+        client = client_type(cred)
+
+    _debug.allow_debug_connection(client)
+
+    client.config.add_user_agent("AZURECLI/TEST/{}".format(cli.__version__))
+
+    return (client, subscription_id)
+
 def _get_mgmt_service_client(client_type, subscription_bound=True):
     logger.info('Getting management service client client_type=%s', client_type.__name__)
     profile = Profile()
