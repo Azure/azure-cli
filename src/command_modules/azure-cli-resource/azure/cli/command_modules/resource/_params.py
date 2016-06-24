@@ -27,19 +27,17 @@ register_cli_argument('resource', 'parent_resource_path', CliArgumentType(help='
 register_cli_argument('resource', 'tag', tag_type)
 register_cli_argument('resource', 'tags', tags_type)
 
-register_cli_argument('resource deploy', 'mode', CliArgumentType(
-    choices=['incremental', 'complete'], default='incremental', type=str.lower,
-    help='Incremental (only add resources to resource group) or Complete (remove extra resources from resource group)'))
-register_cli_argument('resource deploy', 'resource_group', completer=get_resource_group_completion_list)
-register_cli_argument('resource deploy', 'parameters_file_path', completer=FilesCompleter())
-register_cli_argument('resource deploy', 'template_file_path', completer=FilesCompleter())
-
 register_cli_argument('resource provider', 'top', CliArgumentType(help=argparse.SUPPRESS))
-register_cli_argument('resource provider', 'resource_provider_namespace', CliArgumentType(options_list=('--namespace', '-n'), help='the resource provider namespace to retrieve'))
+register_cli_argument('resource provider', 'resource_provider_namespace', CliArgumentType(options_list=('--namespace', '-n'), help='the resource provider name, aka \'namespace\''))
 
 register_cli_argument('resource group', 'resource_group_name', resource_group_name_type, options_list=('--name', '-n'))
-register_cli_argument('resource group deployment', 'resource_group_name', arg_type=resource_group_name_type)
+register_cli_argument('resource group deployment', 'resource_group_name', arg_type=resource_group_name_type, completer=get_resource_group_completion_list)
 register_cli_argument('resource group deployment', 'deployment_name', CliArgumentType(options_list=('--name', '-n'), required=True, help='The deployment name.'))
+register_cli_argument('resource group deployment', 'parameters_file_path', completer=FilesCompleter())
+register_cli_argument('resource group deployment', 'template_file_path', completer=FilesCompleter())
+register_cli_argument('resource group deployment', 'mode', CliArgumentType(
+    choices=['incremental', 'complete'], default='incremental', type=str.lower,
+    help='Incremental (only add resources to resource group) or Complete (remove extra resources from resource group)'))
 register_cli_argument('resource group export', 'include_comments', CliArgumentType(action='store_true'))
 register_cli_argument('resource group export', 'include_parameter_default_value', CliArgumentType(action='store_true'))
 register_cli_argument('resource group create', 'resource_group_name', completer=None)

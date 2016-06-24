@@ -2,6 +2,7 @@
 
 from __future__ import print_function
 import json
+import time
 from codecs import open as codecs_open
 
 from msrestazure.azure_exceptions import CloudError
@@ -132,10 +133,10 @@ def list_resources(
     return list(resources)
 
 def deploy_arm_template(
-        resource_group, deployment_name, template_file_path,
+        resource_group_name, deployment_name, template_file_path,
         parameters_file_path, mode='incremental'):
     ''' Deploy resources with an ARM template.
-        :param str resource_group:resource group for deployment
+        :param str resource_group_name:resource group for deployment
         :param str location:location for deployment
         :param str deployment_name:name for deployment
         (use different values for simultaneous deployments)
@@ -153,7 +154,7 @@ def deploy_arm_template(
     properties = DeploymentProperties(template=template, parameters=parameters, mode=mode)
 
     smc = get_mgmt_service_client(ResourceManagementClient)
-    return smc.deployments.create_or_update(resource_group, deployment_name, properties)
+    return smc.deployments.create_or_update(resource_group_name, deployment_name, properties)
 
 def tag_resource(
         resource_group_name, resource_name, resource_type, tags, parent_resource_path=None,
@@ -182,6 +183,31 @@ def tag_resource(
         # TODO: Remove workaround once Swagger and SDK fix is implemented (#120123723)
         if '202' not in str(ex):
             raise ex
+
+def register_provider(resource_provider_namespace):
+    _update_provider(resource_provider_namespace, registering=True)
+
+def unregister_provider(resource_provider_namespace):
+    _update_provider(resource_provider_namespace, registering=False)
+
+def _update_provider(namespace, registering):
+    target_state = 'Registered' if registering else 'Unregistered'
+    rcf = _resource_client_factory()
+    if registering:
+        rcf.providers.register(namespace)
+    else:
+        rcf.providers.unregister(namespace)
+
+    #polling up to 3*10 seconds
+    for _ in range(0, 3):
+        provider = rcf.providers.get(namespace)
+        if provider.registration_state == target_state:#pylint: disable=no-member
+            return
+        time.sleep(10)
+    #timeout'd, normal for resources with many regions, but let users know.
+    action = 'Registering' if registering else 'Unregistering'
+    msg_template = '%s is still on-going. You can monitor using \'az resource provider show -n %s\''
+    logger.warning(msg_template, action, namespace)
 
 def _get_file_json(file_path):
     return _load_json(file_path, 'utf-8') \
