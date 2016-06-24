@@ -85,7 +85,6 @@ register_cli_argument('network lb', 'floating_ip', help='Enable floating IP.', c
 register_cli_argument('network lb', 'idle_timeout', help='Idle timeout in minutes.')
 register_cli_argument('network lb', 'protocol', help='', choices=['udp', 'tcp'], type=str.lower)
 
-
 register_cli_argument('network lb create', 'load_balancer_name', load_balancer_name_type, options_list=('--name', '-n'))
 register_cli_argument('network lb delete', 'load_balancer_name', load_balancer_name_type, options_list=('--name', '-n'))
 register_cli_argument('network lb show', 'load_balancer_name', load_balancer_name_type, options_list=('--name', '-n'))
@@ -98,7 +97,7 @@ register_cli_argument('network lb create', 'public_ip_address_type', help='', ch
 register_cli_argument('network lb create', 'subnet_name', options_list=('--subnet-name',))
 
 register_cli_argument('network lb inbound-nat-rule', 'item_name', options_list=('--name', '-n'), help='The name of the inbound NAT rule.')
-register_cli_argument('network lb inbound-nat-pool', 'item_name', options_list=('--name', '-n'), help='The name of the  inbound NAT pool.')
+register_cli_argument('network lb inbound-nat-pool', 'item_name', options_list=('--name', '-n'), help='The name of the inbound NAT pool.')
 register_cli_argument('network lb probe', 'item_name', options_list=('--name', '-n'), help='The name of the health probe.')
 register_cli_argument('network lb frontend-ip', 'item_name', options_list=('--name', '-n'), help='The name of the frontend IP configuration.')
 register_cli_argument('network lb address-pool', 'item_name', options_list=('--name', '-n'), help='The name of the backend address pool.')

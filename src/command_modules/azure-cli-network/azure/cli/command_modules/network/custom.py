@@ -178,7 +178,9 @@ def set_lb_frontend_ip_configuration(
         item.private_ip_address = private_ip_address
     if subnet_name == "":
         item.subnet = None
-    elif virtual_network_name is not None and subnet_name is not None:
+    elif virtual_network_name is not None and not subnet_name:
+        raise CLIError('You must specify --subnet-name when using --vnet-name.')
+    elif subnet_name is not None:
         item.subnet = ncf.subnets.get(resource_group_name, virtual_network_name, subnet_name)
     if public_ip_address_name == "":
         item.public_ip_address = None
@@ -225,7 +227,7 @@ def set_lb_probe(resource_group_name, load_balancer_name, item_name, protocol=No
 def create_lb_rule(
         resource_group_name, load_balancer_name, item_name,
         protocol, frontend_port, backend_port, frontend_ip_name,
-        backend_address_pool_name, probe_name, load_distribution='default',
+        backend_address_pool_name, probe_name=None, load_distribution='default',
         floating_ip='false', idle_timeout=None):
     from azure.mgmt.network.models import LoadBalancingRule
     ncf = _network_client_factory()
@@ -240,7 +242,7 @@ def create_lb_rule(
                                                        frontend_ip_name),
             backend_address_pool=_get_lb_property(lb.backend_address_pools,
                                                   backend_address_pool_name),
-            probe=_get_lb_property(lb.probes, probe_name),
+            probe=_get_lb_property(lb.probes, probe_name) if probe_name else None,
             load_distribution=load_distribution,
             enable_floating_ip=floating_ip == 'true',
             idle_timeout_in_minutes=idle_timeout))
@@ -248,8 +250,8 @@ def create_lb_rule(
 
 def set_lb_rule(
         resource_group_name, load_balancer_name, item_name, protocol=None, frontend_port=None,
-        frontend_ip_name=None, backend_port=None, load_distribution='default', floating_ip=None,
-        idle_timeout=None):
+        frontend_ip_name=None, backend_port=None, backend_address_pool_name=None, probe_name=None,
+        load_distribution='default', floating_ip=None, idle_timeout=None):
     ncf = _network_client_factory()
     lb = ncf.load_balancers.get(resource_group_name, load_balancer_name)
     item = _get_lb_property(lb.load_balancing_rules, item_name)
@@ -263,4 +265,11 @@ def set_lb_rule(
             _get_lb_property(lb.frontend_ip_configurations, frontend_ip_name)
     if floating_ip is not None:
         item.enable_floating_ip = floating_ip == 'true'
+    if backend_address_pool_name is not None:
+        item.backend_address_pool = \
+            _get_lb_property(lb.backend_address_pools, backend_address_pool_name)
+    if probe_name == "":
+        item.probe = None
+    elif probe_name is not None:
+        item.probe = _get_lb_property(lb.probes, probe_name)
     return ncf.load_balancers.create_or_update(resource_group_name, load_balancer_name, lb)

@@ -238,6 +238,122 @@ class NetworkLoadBalancerScenarioTest(ResourceGroupVCRTestBase):
         # Expecting no results as we just deleted the only lb in the resource group
         self.cmd('network lb list --resource-group {}'.format(self.resource_group), checks=NoneCheck())
 
+class NetworkLoadBalancerSubresourceScenarioTest(ResourceGroupVCRTestBase):
+
+    def __init__(self, test_method):
+        super(NetworkLoadBalancerSubresourceScenarioTest, self).__init__(__file__, test_method)
+        self.resource_group = 'lbrg'
+        self.lb_name = 'lb1'
+        self.vnet_name = 'vnet1'
+        self.subnet_name = 'subnet1'
+
+    def test_network_load_balancer_subresources(self):
+        self.execute()
+
+    def set_up(self):
+        super(NetworkLoadBalancerSubresourceScenarioTest, self).set_up()
+        rg = self.resource_group
+        lb = self.lb_name
+        self.cmd('network vnet create -g {} -n {} --subnet-name {}'.format(rg, self.vnet_name, self.subnet_name))
+        for i in range(1, 4):
+            self.cmd('network public-ip create -g {} -n publicip{}'.format(rg, i))
+        self.cmd('network lb create -g {} -n {}'.format(rg, lb))
+
+    def body(self):
+        rg = self.resource_group
+        lb = self.lb_name
+        lb_rg = '-g {} --lb-name {}'.format(rg, lb)
+
+        # Test inbound NAT rules
+        for count in range(1, 4):
+            self.cmd('network lb inbound-nat-rule create {} -n rule{} --protocol tcp --frontend-port {} --backend-port {} --frontend-ip-name LoadBalancerFrontEnd'.format(lb_rg, count, count, count))
+        self.cmd('network lb inbound-nat-rule list {}'.format(lb_rg),
+            checks=JMESPathCheck('length(@)', 3))
+        self.cmd('network lb inbound-nat-rule set {} -n rule1 --floating-ip true --idle-timeout 10'.format(lb_rg))
+        self.cmd('network lb inbound-nat-rule show {} -n rule1'.format(lb_rg), checks=[
+            JMESPathCheck('enableFloatingIp', True),
+            JMESPathCheck('idleTimeoutInMinutes', 10)
+        ])
+        for count in range(1, 4):
+            self.cmd('network lb inbound-nat-rule delete {} -n rule{}'.format(lb_rg, count))
+        self.cmd('network lb inbound-nat-rule list {}'.format(lb_rg),
+            checks=JMESPathCheck('length(@)', 0))
+
+        # Test inbound NAT pools
+        for count in range(1000, 4000, 1000):
+            self.cmd('network lb inbound-nat-pool create {} -n rule{} --protocol tcp --frontend-port-range-start {}  --frontend-port-range-end {} --backend-port {}'.format(lb_rg, count, count, count+999, count))
+        self.cmd('network lb inbound-nat-pool list {}'.format(lb_rg),
+            checks=JMESPathCheck('length(@)', 3))
+        self.cmd('network lb inbound-nat-pool set {} -n rule1000 --protocol udp --backend-port 50'.format(lb_rg))
+        self.cmd('network lb inbound-nat-pool show {} -n rule1000'.format(lb_rg), checks=[
+            JMESPathCheck('protocol', 'Udp'),
+            JMESPathCheck('backendPort', 50)
+        ])
+        for count in range(1000, 4000, 1000):
+            self.cmd('network lb inbound-nat-pool delete {} -n rule{}'.format(lb_rg, count))
+        self.cmd('network lb inbound-nat-pool list {}'.format(lb_rg),
+            checks=JMESPathCheck('length(@)', 0))
+
+        # Test frontend IP configuration
+        self.cmd('network lb frontend-ip create {} -n ipconfig1 --public-ip-address-name publicip1'.format(lb_rg))
+        self.cmd('network lb frontend-ip create {} -n ipconfig2 --public-ip-address-name publicip2'.format(lb_rg))
+        self.cmd('network lb frontend-ip create {} -n ipconfig3 --vnet-name {} --subnet-name {} --private-ip-address 10.0.0.99'.format(lb_rg, self.vnet_name, self.subnet_name),
+            allowed_exceptions='is not registered for feature Microsoft.Network/AllowMultiVipIlb required to carry out the requested operation.')
+        # Note that the ipconfig3 won't be added. The 3 that will be found are the default and two created ones
+        self.cmd('network lb frontend-ip list {}'.format(lb_rg), checks=JMESPathCheck('length(@)', 3))
+        self.cmd('network lb frontend-ip set {} -n ipconfig1 --public-ip-address-name publicip3'.format(lb_rg))
+        self.cmd('network lb frontend-ip show {} -n ipconfig1'.format(lb_rg),
+            checks=JMESPathCheck("publicIpAddress.contains(id, 'publicip3')", True))
+        self.cmd('network lb frontend-ip delete {} -n ipconfig2'.format(lb_rg))
+        self.cmd('network lb frontend-ip list {}'.format(lb_rg), checks=JMESPathCheck('length(@)', 2))
+
+        # Test backend address pool
+        for i in range(1, 4):
+            self.cmd('network lb address-pool create {} -n bap{}'.format(lb_rg, i))
+        self.cmd('network lb address-pool list {}'.format(lb_rg), checks=JMESPathCheck('length(@)', 3))
+        self.cmd('network lb address-pool show {} -n bap1'.format(lb_rg),
+            checks=JMESPathCheck('name', 'bap1'))
+        self.cmd('network lb address-pool delete {} -n bap3'.format(lb_rg))
+        self.cmd('network lb address-pool list {}'.format(lb_rg), checks=JMESPathCheck('length(@)', 2))
+
+        # Test probes
+        for i in range(1, 4):
+            self.cmd('network lb probe create {} -n probe{} --port {} --protocol http --path "/test{}"'.format(lb_rg, i, i, i))
+        self.cmd('network lb probe list {}'.format(lb_rg), checks=JMESPathCheck('length(@)', 3))
+        self.cmd('network lb probe set {} -n probe1 --interval 20 --threshold 5'.format(lb_rg))
+        self.cmd('network lb probe set {} -n probe2 --protocol tcp --path ""'.format(lb_rg))
+        self.cmd('network lb probe show {} -n probe1'.format(lb_rg), checks=[
+            JMESPathCheck('intervalInSeconds', 20),
+            JMESPathCheck('numberOfProbes', 5)
+        ])
+        self.cmd('network lb probe show {} -n probe2'.format(lb_rg), checks=[
+            JMESPathCheck('protocol', 'Tcp'),
+            JMESPathCheck('path', None)
+        ])
+        self.cmd('network lb probe delete {} -n probe3'.format(lb_rg))
+        self.cmd('network lb probe list {}'.format(lb_rg), checks=JMESPathCheck('length(@)', 2))
+
+        # Test load balancing rules
+        self.cmd('network lb rule create {} -n rule1 --frontend-ip-name LoadBalancerFrontEnd --frontend-port 40 --backend-address-pool-name bap1 --backend-port 40 --protocol tcp'.format(lb_rg))
+        self.cmd('network lb rule create {} -n rule2 --frontend-ip-name LoadBalancerFrontEnd --frontend-port 60 --backend-address-pool-name bap1 --backend-port 60 --protocol tcp'.format(lb_rg))
+        self.cmd('network lb rule list {}'.format(lb_rg), checks=JMESPathCheck('length(@)', 2))
+        self.cmd('network lb rule set {} -n rule1 --floating-ip true --idle-timeout 20 --load-distribution sourceip --protocol udp'.format(lb_rg))
+        self.cmd('network lb rule set {} -n rule2 --frontend-ip-name ipconfig1 --backend-address-pool-name bap2 --load-distribution sourceipprotocol'.format(lb_rg))
+        self.cmd('network lb rule show {} -n rule1'.format(lb_rg), checks=[
+            JMESPathCheck('enableFloatingIp', True),
+            JMESPathCheck('idleTimeoutInMinutes', 20),
+            JMESPathCheck('loadDistribution', 'SourceIP'),
+            JMESPathCheck('protocol', 'Udp')
+        ])
+        self.cmd('network lb rule show {} -n rule2'.format(lb_rg), checks=[
+            JMESPathCheck("backendAddressPool.contains(id, 'bap2')", True),
+            JMESPathCheck("frontendIpConfiguration.contains(id, 'ipconfig1')", True),
+            JMESPathCheck('loadDistribution', 'SourceIPProtocol')
+        ])
+        self.cmd('network lb rule delete {} -n rule1'.format(lb_rg))
+        self.cmd('network lb rule delete {} -n rule2'.format(lb_rg))
+        self.cmd('network lb rule list {}'.format(lb_rg), checks=JMESPathCheck('length(@)', 0))
+
 class NetworkLocalGatewayScenarioTest(VCRTestBase):
 
     def __init__(self, test_method):
