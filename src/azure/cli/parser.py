@@ -9,6 +9,13 @@ class IncorrectUsageError(CLIError):
     '''
     pass
 
+class CaseInsensitiveChoicesCompleter(argcomplete.completers.ChoicesCompleter): #pylint: disable=too-few-public-methods
+    def __call__(self, prefix, **kwargs):
+        return (c for c in self.choices if c.lower().startswith(prefix.lower()))
+
+# Override the choices completer with one that is case insensitive
+argcomplete.completers.ChoicesCompleter = CaseInsensitiveChoicesCompleter
+
 class EmptyDefaultCompletionFinder(argcomplete.CompletionFinder):
     def __init__(self, *args, **kwargs):
         super(EmptyDefaultCompletionFinder, self).__init__(*args, default_completer=lambda _: (),
