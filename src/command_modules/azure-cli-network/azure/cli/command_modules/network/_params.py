@@ -51,7 +51,7 @@ register_cli_argument('network public-ip', 'name', name_arg_type, completer=get_
 register_cli_argument('network public-ip create', 'name', completer=None)
 register_cli_argument('network public-ip create', 'dns_name', CliArgumentType(action=PublicIpDnsNameAction))
 register_cli_argument('network public-ip create', 'public_ip_address_type', CliArgumentType(help=argparse.SUPPRESS))
-register_cli_argument('network public-ip create', 'allocation_method', CliArgumentType(choices=['dynamic', 'static'], default='dynamic'))
+register_cli_argument('network public-ip create', 'allocation_method', CliArgumentType(choices=['dynamic', 'static'], default='dynamic', type=str.lower))
 
 register_cli_argument('network route-operation', 'route_name', name_arg_type)
 
@@ -73,9 +73,9 @@ register_cli_argument('network lb', 'load_balancer_name', name_arg_type, complet
 
 register_cli_argument('network lb create', 'dns_name_for_public_ip', CliArgumentType(action=LBDNSNameAction))
 register_cli_argument('network lb create', 'dns_name_type', CliArgumentType(help=argparse.SUPPRESS))
-register_cli_argument('network lb create', 'private_ip_address_allocation', CliArgumentType(help='', choices=['dynamic', 'static'], default='dynamic'))
-register_cli_argument('network lb create', 'public_ip_address_allocation', CliArgumentType(help='', choices=['dynamic', 'static'], default='dynamic'))
-register_cli_argument('network lb create', 'public_ip_address_type', CliArgumentType(help='', choices=['new', 'existing', 'none'], default='new'))
+register_cli_argument('network lb create', 'private_ip_address_allocation', CliArgumentType(help='', choices=['dynamic', 'static'], default='dynamic', type=str.lower))
+register_cli_argument('network lb create', 'public_ip_address_allocation', CliArgumentType(help='', choices=['dynamic', 'static'], default='dynamic', type=str.lower))
+register_cli_argument('network lb create', 'public_ip_address_type', CliArgumentType(help='', choices=['new', 'existing', 'none'], default='new', type=str.lower))
 register_cli_argument('network lb create', 'subnet_name', CliArgumentType(options_list=('--subnet-name',)))
 
 register_cli_argument('network nsg create', 'name', name_arg_type)

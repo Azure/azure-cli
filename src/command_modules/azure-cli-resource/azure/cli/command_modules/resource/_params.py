@@ -28,7 +28,7 @@ register_cli_argument('resource', 'tag', tag_type)
 register_cli_argument('resource', 'tags', tags_type)
 
 register_cli_argument('resource deploy', 'mode', CliArgumentType(
-    choices=['incremental', 'complete'], default='incremental',
+    choices=['incremental', 'complete'], default='incremental', type=str.lower,
     help='Incremental (only add resources to resource group) or Complete (remove extra resources from resource group)'))
 register_cli_argument('resource deploy', 'resource_group', completer=get_resource_group_completion_list)
 register_cli_argument('resource deploy', 'parameters_file_path', completer=FilesCompleter())

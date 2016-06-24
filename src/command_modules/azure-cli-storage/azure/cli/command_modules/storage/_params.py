@@ -54,7 +54,8 @@ blob_name_type = CliArgumentType(
 
 blob_type_type = CliArgumentType(
     options_list=('--blob-type',),
-    choices=list(blob_types.keys())
+    choices=list(blob_types.keys()),
+    type=str.lower
 )
 
 container_name_type = CliArgumentType(
@@ -101,7 +102,8 @@ ip_type = CliArgumentType(
 
 key_type = CliArgumentType(
     help='the key to renew (omit to renew both)',
-    choices=list(storage_account_key_options.keys())
+    choices=list(storage_account_key_options.keys()),
+    type=str.lower
 )
 
 lease_break_period_type = CliArgumentType(
@@ -140,7 +142,8 @@ policy_name_type = CliArgumentType(
 )
 
 public_access_type = CliArgumentType(
-    choices=list(public_access_types.keys())
+    choices=list(public_access_types.keys()),
+    type=str.lower
 )
 
 quota_type = CliArgumentType(
