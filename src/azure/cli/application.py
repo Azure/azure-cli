@@ -166,7 +166,8 @@ class Application(object):
         global_group.add_argument('--output', '-o', dest='_output_format',
                                   choices=['json', 'tsv', 'list'],
                                   default='json',
-                                  help='Output format')
+                                  help='Output format',
+                                  type=str.lower)
         # The arguments for verbosity don't get parsed by argparse but we add it here for help.
         global_group.add_argument('--verbose', dest='_log_verbosity_verbose', action='store_true',
                                   help='Increase logging verbosity. Use --debug for full debug logs.') #pylint: disable=line-too-long

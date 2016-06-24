@@ -55,7 +55,7 @@ register_cli_argument('vm availability-set', 'availability_set_name', name_arg_t
 register_cli_argument('vm access', 'username', CliArgumentType(options_list=('--username', '-u'), help='The user name'))
 register_cli_argument('vm access', 'password', CliArgumentType(options_list=('--password', '-p'), help='The user password'))
 
-register_cli_argument('vm container', 'orchestrator_type', CliArgumentType(choices=['docs', 'swarm']))
+register_cli_argument('vm container', 'orchestrator_type', CliArgumentType(choices=['docs', 'swarm'], type=str.lower))
 register_cli_argument('vm container', 'admin_username', admin_username_type)
 register_cli_argument(
     'vm container', 'ssh_key_value', CliArgumentType(
@@ -89,15 +89,17 @@ register_cli_argument('vm image list', 'image_location', location_type)
 
 authentication_type = CliArgumentType(
     choices=['ssh', 'password'], default=None,
-    help='Password or SSH public key authentication. Defaults to password for Windows and SSH public key for Linux.'
+    help='Password or SSH public key authentication. Defaults to password for Windows and SSH public key for Linux.',
+    type=str.lower
 )
 
 nsg_rule_type = CliArgumentType(
     choices=['RDP', 'SSH'], default=None,
-    help='Network security group rule to create. Defaults to RDP for Windows and SSH for Linux'
+    help='Network security group rule to create. Defaults to RDP for Windows and SSH for Linux',
+    type=str.upper
 )
 
-register_cli_argument('vm create', 'network_interface_type', choices=['new', 'existing'], help=None)
+register_cli_argument('vm create', 'network_interface_type', choices=['new', 'existing'], help=None, type=str.lower)
 register_cli_argument('vm create', 'network_interface_ids', options_list=('--network-interfaces',), nargs='+',
                       help='Names or IDs of existing NICs to reference.  The first NIC will be the primary NIC.',
                       validator=_handle_vm_nics)
@@ -106,12 +108,12 @@ for scope in ['vm create', 'vm scaleset create']:
     register_cli_argument(scope, 'name', name_arg_type)
     register_cli_argument(scope, 'location', CliArgumentType(completer=get_location_completion_list))
     register_cli_argument(scope, 'custom_os_disk_uri', CliArgumentType(help=argparse.SUPPRESS))
-    register_cli_argument(scope, 'custom_os_disk_type', CliArgumentType(choices=['windows', 'linux']))
+    register_cli_argument(scope, 'custom_os_disk_type', CliArgumentType(choices=['windows', 'linux'], type=str.lower))
     register_cli_argument(scope, 'os_disk_type', CliArgumentType(help=argparse.SUPPRESS))
     register_cli_argument(scope, 'overprovision', CliArgumentType(action='store_false', default=None, options_list=('--disable-overprovision',)))
-    register_cli_argument(scope, 'load_balancer_type', CliArgumentType(choices=['new', 'existing', 'none']))
+    register_cli_argument(scope, 'load_balancer_type', CliArgumentType(choices=['new', 'existing', 'none'], type=str.lower))
     register_cli_argument(scope, 'storage_caching', CliArgumentType(choices=['ReadOnly', 'ReadWrite']))
-    register_cli_argument(scope, 'upgrade_policy_mode', CliArgumentType(choices=['manual', 'automatic'], default='manual', help=None))
+    register_cli_argument(scope, 'upgrade_policy_mode', CliArgumentType(choices=['manual', 'automatic'], default='manual', help=None, type=str.lower))
     register_cli_argument(scope, 'nat_backend_port', CliArgumentType(help='Backend NAT port to map.  Defaults to 22 for Linux and 3389 for Windows.', default=None))
     register_cli_argument(scope, 'os_disk_uri', CliArgumentType(help=argparse.SUPPRESS))
     register_cli_argument(scope, 'os_offer', CliArgumentType(help=argparse.SUPPRESS))
@@ -125,12 +127,12 @@ for scope in ['vm create', 'vm scaleset create']:
     register_cli_argument(scope, 'ssh_dest_key_path', completer=FilesCompleter())
     register_cli_argument(scope, 'dns_name_for_public_ip', CliArgumentType(action=VMDNSNameAction))
     register_cli_argument(scope, 'authentication_type', authentication_type)
-    register_cli_argument(scope, 'availability_set_type', CliArgumentType(choices=['none', 'existing'], help='', default='none'))
-    register_cli_argument(scope, 'private_ip_address_allocation', CliArgumentType(choices=['dynamic', 'static'], help='', default='dynamic'))
-    register_cli_argument(scope, 'public_ip_address_allocation', CliArgumentType(choices=['dynamic', 'static'], help='', default='dynamic'))
-    register_cli_argument(scope, 'public_ip_address_type', CliArgumentType(choices=['none', 'new', 'existing'], help='', default='new'))
-    register_cli_argument(scope, 'storage_account_type', CliArgumentType(choices=['new', 'existing'], help='', default='new'))
-    register_cli_argument(scope, 'virtual_network_type', CliArgumentType(choices=['new', 'existing'], help='', default='new'))
+    register_cli_argument(scope, 'availability_set_type', CliArgumentType(choices=['none', 'existing'], help='', default='none', type=str.lower))
+    register_cli_argument(scope, 'private_ip_address_allocation', CliArgumentType(choices=['dynamic', 'static'], help='', default='dynamic', type=str.lower))
+    register_cli_argument(scope, 'public_ip_address_allocation', CliArgumentType(choices=['dynamic', 'static'], help='', default='dynamic', type=str.lower))
+    register_cli_argument(scope, 'public_ip_address_type', CliArgumentType(choices=['none', 'new', 'existing'], help='', default='new', type=str.lower))
+    register_cli_argument(scope, 'storage_account_type', CliArgumentType(choices=['new', 'existing'], help='', default='new', type=str.lower))
+    register_cli_argument(scope, 'virtual_network_type', CliArgumentType(choices=['new', 'existing'], help='', default='new', type=str.lower))
     register_cli_argument(scope, 'network_security_group_rule', nsg_rule_type)
-    register_cli_argument(scope, 'network_security_group_type', CliArgumentType(choices=['new', 'existing', 'none'], help='', default='new'))
+    register_cli_argument(scope, 'network_security_group_type', CliArgumentType(choices=['new', 'existing', 'none'], help='', default='new', type=str.lower))
     register_extra_cli_argument(scope, 'image', options_list=('--image',), action=VMImageFieldAction, completer=get_urn_aliases_completion_list, default='Win2012R2Datacenter')
