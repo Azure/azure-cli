@@ -142,4 +142,25 @@ class TagScenarioTest(VCRTestBase):
             JMESPathCheck('[].values[].tagValue', [])
         ])
         s.cmd('tag delete -n {}'.format(tn))
-        s.cmd('tag list --query "[?tagName == \'{}\']"'.format(self.tag_name), checks=NoneCheck())        
+        s.cmd('tag list --query "[?tagName == \'{}\']"'.format(self.tag_name), checks=NoneCheck())
+
+class ProviderRegistrationTest(VCRTestBase):
+    def __init__(self, test_method):
+        super(ProviderRegistrationTest, self).__init__(__file__, test_method)
+
+    def test_provider_registration(self):
+        self.execute()
+
+    def body(self):
+        provider = 'TrendMicro.DeepSecurity'
+        result = self.cmd('resource provider show -n {}'.format(provider), checks=None)
+        if result['registrationState'] == 'Unregistered':
+            self.cmd('resource provider register -n {}'.format(provider), checks=None)
+            self.cmd('resource provider show -n {}'.format(provider), checks=[JMESPathCheck('registrationState', 'Registered')])
+            self.cmd('resource provider unregister -n {}'.format(provider), checks=None)
+            self.cmd('resource provider show -n {}'.format(provider), checks=[JMESPathCheck('registrationState', 'Unregistered')])
+        else:
+            self.cmd('resource provider unregister -n {}'.format(provider), checks=None)
+            self.cmd('resource provider show -n {}'.format(provider), checks=[JMESPathCheck('registrationState', 'Unregistered')])
+            self.cmd('resource provider register -n {}'.format(provider), checks=None)
+            self.cmd('resource provider show -n {}'.format(provider), checks=[JMESPathCheck('registrationState', 'Registered')])
