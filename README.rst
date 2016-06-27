@@ -57,7 +57,7 @@ Activate the environment.
 
 Set the environment variable to point to the version you wish to install.
 
-e.g. ``export AZURE_CLI_NIGHTLY_VERSION=2016.05.19.nightly``
+e.g. ``export AZURE_CLI_NIGHTLY_VERSION=2016.06.21.nightly``
 
 .. code:: shell
 
