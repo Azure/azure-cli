@@ -145,7 +145,7 @@
           "type": "string", 
           "description": "URI referencing the template.", 
           "enum": [
-            "https://azuresdkci.blob.core.windows.net/templatehost/CreateVm_2016-06-21/azuredeploy.json"
+            "https://azuresdkci.blob.core.windows.net/templatehost/CreateVm_2016-06-24/azuredeploy.json"
           ]
         }, 
         "contentVersion": {
@@ -726,7 +726,7 @@
           "type": "string", 
           "description": "The VM Size that should be created.  See https://azure.microsoft.com/en-us/pricing/details/virtual-machines/ for size info.", 
           "x-ms-client-name": "size", 
-          "default": "Standard_A2"
+          "default": "Standard_DS1"
         }
       }
     }, 
@@ -775,13 +775,13 @@
       "properties": {
         "value": {
           "type": "string", 
-          "description": "Storage caching type.", 
+          "description": "Storage caching type for the VM OS disk.", 
           "x-ms-client-name": "storageCaching", 
           "enum": [
             "ReadOnly", 
             "ReadWrite"
           ], 
-          "default": "ReadOnly"
+          "default": "ReadWrite"
         }
       }
     }, 
@@ -799,9 +799,9 @@
       "properties": {
         "value": {
           "type": "string", 
-          "description": "The VM storage type (Standard_LRS, Standard_GRS, Standard_RAGRS).", 
+          "description": "The VM storage type (Standard_LRS, Standard_GRS, Standard_RAGRS, ...).", 
           "x-ms-client-name": "storageRedundancyType", 
-          "default": "Standard_LRS"
+          "default": "Premium_LRS"
         }
       }
     }, 
@@ -864,7 +864,7 @@
           "description": "Container URI of of the template.", 
           "x-ms-client-name": "_artifactsLocation", 
           "enum": [
-            "https://azuresdkci.blob.core.windows.net/templatehost/CreateVm_2016-06-21"
+            "https://azuresdkci.blob.core.windows.net/templatehost/CreateVm_2016-06-24"
           ]
         }
       }, 

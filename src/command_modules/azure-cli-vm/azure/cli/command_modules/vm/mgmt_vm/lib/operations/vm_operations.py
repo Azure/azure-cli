@@ -32,7 +32,7 @@ class VmOperations(object):
         self.config = config
 
     def create_or_update(
-            self, resource_group_name, deployment_name, admin_username, name, content_version=None, admin_password=None, authentication_type="password", availability_set_id=None, availability_set_type="none", custom_os_disk_type="windows", custom_os_disk_uri=None, dns_name_for_public_ip=None, dns_name_type="none", location=None, network_interface_ids=None, network_interface_type="new", network_security_group_name=None, network_security_group_rule="RDP", network_security_group_type="new", os_disk_name="osdiskimage", os_disk_type="provided", os_disk_uri=None, os_offer="WindowsServer", os_publisher="MicrosoftWindowsServer", os_sku="2012-R2-Datacenter", os_type="Win2012R2Datacenter", os_version="latest", private_ip_address=None, private_ip_address_allocation="dynamic", public_ip_address_allocation="dynamic", public_ip_address_name=None, public_ip_address_type="new", size="Standard_A2", ssh_dest_key_path=None, ssh_key_value=None, storage_account_name=None, storage_account_type="new", storage_caching="ReadOnly", storage_container_name="vhds", storage_redundancy_type="Standard_LRS", subnet_ip_address_prefix="10.0.0.0/24", subnet_name=None, virtual_network_ip_address_prefix="10.0.0.0/16", virtual_network_name=None, virtual_network_type="new", custom_headers=None, raw=False, **operation_config):
+            self, resource_group_name, deployment_name, admin_username, name, content_version=None, admin_password=None, authentication_type="password", availability_set_id=None, availability_set_type="none", custom_os_disk_type="windows", custom_os_disk_uri=None, dns_name_for_public_ip=None, dns_name_type="none", location=None, network_interface_ids=None, network_interface_type="new", network_security_group_name=None, network_security_group_rule="RDP", network_security_group_type="new", os_disk_name="osdiskimage", os_disk_type="provided", os_disk_uri=None, os_offer="WindowsServer", os_publisher="MicrosoftWindowsServer", os_sku="2012-R2-Datacenter", os_type="Win2012R2Datacenter", os_version="latest", private_ip_address=None, private_ip_address_allocation="dynamic", public_ip_address_allocation="dynamic", public_ip_address_name=None, public_ip_address_type="new", size="Standard_DS1", ssh_dest_key_path=None, ssh_key_value=None, storage_account_name=None, storage_account_type="new", storage_caching="ReadWrite", storage_container_name="vhds", storage_redundancy_type="Premium_LRS", subnet_ip_address_prefix="10.0.0.0/24", subnet_name=None, virtual_network_ip_address_prefix="10.0.0.0/16", virtual_network_name=None, virtual_network_type="new", custom_headers=None, raw=False, **operation_config):
         """
         Create or update a virtual machine.
 
@@ -139,14 +139,14 @@ class VmOperations(object):
          account or create a new one. Possible values include: 'new',
          'existing'
         :type storage_account_type: str
-        :param storage_caching: Storage caching type. Possible values
-         include: 'ReadOnly', 'ReadWrite'
+        :param storage_caching: Storage caching type for the VM OS disk.
+         Possible values include: 'ReadOnly', 'ReadWrite'
         :type storage_caching: str
         :param storage_container_name: Name of storage container for the VM
          OS disk.
         :type storage_container_name: str
         :param storage_redundancy_type: The VM storage type (Standard_LRS,
-         Standard_GRS, Standard_RAGRS).
+         Standard_GRS, Standard_RAGRS, ...).
         :type storage_redundancy_type: str
         :param subnet_ip_address_prefix: The subnet address prefix in CIDR
          format.

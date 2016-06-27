@@ -10,14 +10,14 @@ regex = re.compile('/subscriptions/(?P<subscription>[^/]*)/resourceGroups/(?P<re
 class AzureResourceId(object): #pylint: disable=too-many-instance-attributes,too-few-public-methods
     def __init__(self, name_or_id, resource_group=None, full_type=None, #pylint: disable=too-many-arguments
                  subscription_id=None, child_type=None, child_name=None):
-        self.name = _clean_name(name_or_id)
-        self.resource_group = _clean_name(resource_group)
-        self.full_type = _clean_name(full_type)
+        self.name = self._clean_name(name_or_id)
+        self.resource_group = self._clean_name(resource_group)
+        self.full_type = self._clean_name(full_type)
         self.namespace = self.full_type.split('/')[0] if self.full_type else None
         self.type = self.full_type.split('/')[1] if self.full_type else None
-        self.child_type = _clean_name(child_type)
-        self.child_name = _clean_name(child_name)
-        self.subscription_id = _clean_name(subscription_id)
+        self.child_type = self._clean_name(child_type)
+        self.child_name = self._clean_name(child_name)
+        self.subscription_id = self._clean_name(subscription_id)
 
         id_parts = regex.match(name_or_id)
         if id_parts:
@@ -41,7 +41,8 @@ class AzureResourceId(object): #pylint: disable=too-many-instance-attributes,too
                     namespace=self.namespace, type=self.type, name=self.name,
                     child_resource=child_id)
 
-    def _clean_name(self, name):
+    @staticmethod
+    def _clean_name(name):
         return name.strip().strip('\'"') if name else None
 
 def resource_exists(r_id):

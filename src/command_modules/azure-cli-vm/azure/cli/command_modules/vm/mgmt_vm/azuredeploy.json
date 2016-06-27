@@ -171,7 +171,7 @@
     },
     "osDiskUri": {
       "type": "string",
-      "defaultValue": "[concat('http://', parameters('storageAccountName'), '.blob.core.windows.net/', parameters('storageContainerName'), '/', parameters('osDiskName'), '.vhd')]",
+      "defaultValue": "[concat('https://', parameters('storageAccountName'), '.blob.core.windows.net/', parameters('storageContainerName'), '/', parameters('osDiskName'), '.vhd')]",
       "metadata": {
         "description": "URI for a custom VHD image."
       }
@@ -267,7 +267,7 @@
     },
     "size": {
       "type": "string",
-      "defaultValue": "Standard_A2",
+      "defaultValue": "Standard_DS1",
       "metadata": {
         "description": "The VM Size that should be created.  See https://azure.microsoft.com/en-us/pricing/details/virtual-machines/ for size info."
       }
@@ -306,13 +306,13 @@
     },
     "storageCaching": {
       "type": "string",
-      "defaultValue": "ReadOnly",
+      "defaultValue": "ReadWrite",
       "allowedValues": [
         "ReadOnly",
         "ReadWrite"
       ],
       "metadata": {
-        "description": "Storage caching type."
+        "description": "Storage caching type for the VM OS disk."
       }
     },
     "storageContainerName": {
@@ -324,9 +324,9 @@
     },
     "storageRedundancyType": {
       "type": "string",
-      "defaultValue": "Standard_LRS",
+      "defaultValue": "Premium_LRS",
       "metadata": {
-        "description": "The VM storage type (Standard_LRS, Standard_GRS, Standard_RAGRS)."
+        "description": "The VM storage type (Standard_LRS, Standard_GRS, Standard_RAGRS, ...)."
       }
     },
     "subnetIpAddressPrefix": {
@@ -454,6 +454,10 @@
     "fqdnOutputTemplateFilePaths": {
       "new": "[concat('nested_templates/output_fqdn_new', '.json')]",
       "none": "[concat('nested_templates/output_fqdn_none', '.json')]"
+    },
+    "macOutputTemplateFilePaths": {
+      "new": "[concat('nested_templates/output_mac_new', '.json')]",
+      "existing": "[concat('nested_templates/output_mac_none', '.json')]"
     }
   },
   "resources": [
@@ -629,7 +633,7 @@
       "properties": {
         "mode": "Incremental",
         "templateLink": {
-          "uri": "[concat(parameters('_artifactsLocation'), '/', 'nested_templates/output_mac.json')]",
+          "uri": "[concat(parameters('_artifactsLocation'), '/', variables('macOutputTemplateFilePaths')[parameters('networkInterfaceType')])]",
           "contentVersion": "1.0.0.0"
         },
         "parameters": {
@@ -652,7 +656,7 @@
       "type": "string"
     },
     "privateIpAddress": {
-      "value": "[reference(variables('nicDeploymentName')).outputs.VMNic.value.ipConfigurations[0].properties.privateIPAddress]",
+      "value": "[reference(variables('nicDeploymentName')).outputs.privateIp.value]",
       "type": "string"
     },
     "macAddress": {

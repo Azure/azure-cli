@@ -102,6 +102,10 @@
     "VMNic": {
       "type": "object",
       "value": "[reference(parameters('nicName'))]"
+    },
+    "privateIp": {
+      "type": "string",
+      "value": "[reference(parameters('nicName')).ipConfigurations[0].properties.privateIPAddress]"
     }
   }
 }
