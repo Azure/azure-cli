@@ -6,6 +6,7 @@ import time
 from codecs import open as codecs_open
 
 from msrestazure.azure_exceptions import CloudError
+from azure.mgmt.resource.resources import ResourceManagementClient
 from azure.mgmt.resource.resources.models.resource_group import ResourceGroup
 from azure.mgmt.resource.resources.models import GenericResource
 
@@ -143,7 +144,23 @@ def deploy_arm_template(
         :param str template_file_path:path to deployment template JSON file
         :param str parameters_file_path:path to deployment parameters JSON file
     '''
-    from azure.mgmt.resource.resources import ResourceManagementClient
+    return _deploy_arm_template_core(resource_group_name, deployment_name, template_file_path,
+                                     parameters_file_path, mode)
+
+def validate_arm_template(resource_group_name, template_file_path,
+                          parameters_file_path, mode='incremental'):
+    ''' Validate an ARM template.
+        :param str resource_group_name:resource group for deployment
+        :param str location:location for deployment
+        (use different values for simultaneous deployments)
+        :param str template_file_path:path to deployment template JSON file
+        :param str parameters_file_path:path to deployment parameters JSON file
+    '''
+    return _deploy_arm_template_core(resource_group_name, 'deployment_dry_run', template_file_path,
+                                     parameters_file_path, mode, validate_only=True)
+
+def _deploy_arm_template_core(resource_group_name, deployment_name, template_file_path,
+                              parameters_file_path, mode, validate_only=False):
     from azure.mgmt.resource.resources.models import DeploymentProperties
 
     parameters = _get_file_json(parameters_file_path)
@@ -154,7 +171,15 @@ def deploy_arm_template(
     properties = DeploymentProperties(template=template, parameters=parameters, mode=mode)
 
     smc = get_mgmt_service_client(ResourceManagementClient)
-    return smc.deployments.create_or_update(resource_group_name, deployment_name, properties)
+    if validate_only:
+        return smc.deployments.validate(resource_group_name, deployment_name, properties)
+    else:
+        return smc.deployments.create_or_update(resource_group_name, deployment_name, properties)
+
+def export_deployment_as_template(resource_group_name, deployment_name):
+    smc = get_mgmt_service_client(ResourceManagementClient)
+    result = smc.deployments.export_template(resource_group_name, deployment_name)
+    print(json.dumps(result.template, indent=2))#pylint: disable=no-member
 
 def tag_resource(
         resource_group_name, resource_name, resource_type, tags, parent_resource_path=None,
