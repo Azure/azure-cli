@@ -16,7 +16,8 @@ from azure.cli.command_modules.vm._actions import (VMImageFieldAction,
 from azure.cli.commands.parameters import (location_type,
                                            get_location_completion_list,
                                            get_one_of_subscription_locations,
-                                           get_resource_name_completion_list)
+                                           get_resource_name_completion_list,
+                                           register_id_parameter)
 from azure.cli.commands import register_cli_argument, CliArgumentType, register_extra_cli_argument
 
 def get_urn_aliases_completion_list(prefix, **kwargs):#pylint: disable=unused-argument
@@ -51,6 +52,8 @@ register_cli_argument('vm disk', 'vhd', CliArgumentType(type=VirtualHardDisk, he
 register_cli_argument('vm disk', 'caching', CliArgumentType(help='Host caching policy', default='None', choices=['None', 'ReadOnly', 'ReadWrite']))
 
 register_cli_argument('vm availability-set', 'availability_set_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Compute/availabilitySets'))
+for name in ('delete', 'list-sizes', 'show'):
+    register_id_parameter('vm availability-set ' + name, 'resource_group_name', 'availability_set_name')
 
 register_cli_argument('vm access', 'username', CliArgumentType(options_list=('--username', '-u'), help='The user name'))
 register_cli_argument('vm access', 'password', CliArgumentType(options_list=('--password', '-p'), help='The user password'))
@@ -136,3 +139,36 @@ for scope in ['vm create', 'vm scaleset create']:
     register_cli_argument(scope, 'network_security_group_rule', nsg_rule_type)
     register_cli_argument(scope, 'network_security_group_type', CliArgumentType(choices=['new', 'existing', 'none'], help='', default='new', type=str.lower))
     register_extra_cli_argument(scope, 'image', options_list=('--image',), action=VMImageFieldAction, completer=get_urn_aliases_completion_list, default='Win2012R2Datacenter')
+
+for name in ('access delete-linux-user',
+             'access set-linux-user',
+             'boot-diagnostics enable',
+             'boot-diagnostics disable',
+             'capture',
+             'deallocate',
+             'delete',
+             'generalize',
+             'list-sizes',
+             'resize',
+             'restart',
+             'power-off',
+             'show',
+             'start'):
+    register_id_parameter('vm ' + name, 'resource_group_name', 'vm_name')
+
+for name in ('deallocate',
+             'delete',
+             'delete-instances',
+             'get-instance-view',
+             'list-skus',
+             'power-off',
+             'restart',
+             'scale',
+             'show',
+             'show-instance',
+             'start',
+             'update-instances'):
+    register_id_parameter('vm scaleset ' + name, 'resource_group_name', 'vm_scale_set_name')
+
+for name in ('list-instances',):
+    register_id_parameter('vm scaleset ' + name, 'resource_group_name', 'virtual_machine_scale_set_name')

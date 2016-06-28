@@ -1,4 +1,5 @@
 import argparse
+import re
 
 # pylint: disable=line-too-long
 from azure.cli.commands import CliArgumentType, register_cli_argument
@@ -10,6 +11,7 @@ from azure.cli.commands.validators import generate_deployment_name
 from azure.mgmt.resource.subscriptions import SubscriptionClient
 
 from azure.mgmt.resource.resources import ResourceManagementClient
+from azure.cli.application import APPLICATION
 
 def get_subscription_locations():
     subscription_client, subscription_id = get_subscription_service_client(SubscriptionClient)
@@ -88,3 +90,70 @@ tag_type = CliArgumentType(
 register_cli_argument('', 'resource_group_name', resource_group_name_type)
 register_cli_argument('', 'location', location_type)
 register_cli_argument('', 'deployment_name', deployment_name_type)
+
+
+def split_id_rg_rn_crn(id):
+    raw_parts = id.split('/')
+    result = []
+    try:
+        for id_part in (4, 8, 10):
+            result.append(raw_parts[id_part])
+    except IndexError:
+        pass
+
+    return result
+
+def register_id_parameter(command_name, *arguments, split_func_or_regex=split_id_rg_rn_crn):
+
+    class SplitAction(argparse.Action):
+
+        def __call__(self, parser, namespace, values, option_string=None):
+            if callable(split_func_or_regex):
+                parts = split_func_or_regex(values)
+            else:
+                parts = re.match(split_func_or_regex, values)
+
+            if parts and len(parts) >= len(arguments):
+                for name, value in zip(arguments, parts):
+                    setattr(namespace, name, value)
+            else:
+                setattr(namespace, arguments[-1], values)
+
+    def command_loaded_handler(command_table):
+        command = command_table[command_name]
+        required_arguments = []
+        optional_arguments = []
+        for argument in arguments:
+            arg = command.arguments[argument]
+            if arg.options.get('required', False):
+                required_arguments.append(arg)
+            else:
+                optional_arguments.append(arg)
+            arg.required = False
+
+        last_arg = command.arguments[arguments[-1]]
+        command.arguments.pop(arguments[-1])
+        arguments_if_not_id_specified = []
+        for non_last_arg in arguments[:-1]:
+            arg = command.arguments[non_last_arg]
+            option_metavar = '{} {}'.format(arg.options_list[0], arg.options.get('metavar', arg.name.upper()))
+            if not arg in required_arguments:
+                option_metavar = '[{}]'.format(option_metavar)
+            arguments_if_not_id_specified.append(option_metavar)
+        metavar = '(RESOURCE_ID | {} {})'.format(
+                last_arg.options.get('metavar', last_arg.name.upper()),
+                ' '.join(arguments_if_not_id_specified))
+
+        def required_values_validator(namespace):
+            for arg in required_arguments:
+                if getattr(namespace, arg.name, None) is None:
+                    raise CLIError('{} is required if {} is not specified'.format(arg.name.upper(), 'RESOURCE_ID'))
+
+        command.add_argument(param_name=argparse.SUPPRESS,
+                             metavar=metavar,
+                             help='ResourceId or {}'.format(last_arg.options.get('help', last_arg.options.get('metavar', 'Resource Name'))),
+                             action=SplitAction,
+                             validator=required_values_validator)
+        APPLICATION.remove(APPLICATION.COMMAND_TABLE_LOADED, command_loaded_handler)
+
+    APPLICATION.register(APPLICATION.COMMAND_TABLE_LOADED, command_loaded_handler)
