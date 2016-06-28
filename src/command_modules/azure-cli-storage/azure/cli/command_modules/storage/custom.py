@@ -47,24 +47,28 @@ def renew_storage_account_keys(resource_group_name, account_name, key=None):
 def show_storage_account_usage():
     ''' Show the current count and limit of the storage accounts under the subscription. '''
     scf = storage_client_factory()
-    return next((x for x in scf.usage.list() if x.name.value == 'StorageAccounts'), None)
+    return next((x for x in scf.usage.list().value if x.name.value == 'StorageAccounts'), None) #pylint: disable=no-member
 
 def show_storage_account_connection_string(resource_group_name, account_name, use_http='https'):
     ''' Show the connection string for a storage account.
     :param str use_http:use http as the default endpoint protocol '''
     scf = storage_client_factory()
-    keys = scf.storage_accounts.list_keys(resource_group_name, account_name)
+    keys = scf.storage_accounts.list_keys(resource_group_name, account_name).keys #pylint: disable=no-member
     connection_string = 'DefaultEndpointsProtocol={};AccountName={};AccountKey={}'.format(
         use_http,
         account_name,
-        keys.key1) #pylint: disable=no-member
+        keys[0].value) #pylint: disable=no-member
     return {'ConnectionString':connection_string}
 
 def create_storage_account(resource_group_name, account_name, location, account_type, tags=None):
     ''' Create a storage account. '''
-    from azure.mgmt.storage.models import StorageAccountCreateParameters
+    from azure.mgmt.storage.models import StorageAccountCreateParameters, Sku
     scf = storage_client_factory()
-    params = StorageAccountCreateParameters(location, account_type, tags)
+    # TODO Add the other new params from rc5
+    # https://github.com/Azure/azure-sdk-for-python/blob/v2.0.0rc5/
+    # azure-mgmt-storage/azure/mgmt/storage/models/storage_account_create_parameters.py
+    # accountType is now called sku.name also.
+    params = StorageAccountCreateParameters(Sku(account_type), 'Storage', location, tags)
     return scf.storage_accounts.create(resource_group_name, account_name, params)
 
 def set_storage_account_properties(
@@ -72,9 +76,11 @@ def set_storage_account_properties(
     ''' Update storage account property (only one at a time).
     :param str custom_domain:the custom domain name
     '''
-    from azure.mgmt.storage.models import StorageAccountUpdateParameters, CustomDomain
+    from azure.mgmt.storage.models import StorageAccountUpdateParameters, CustomDomain, Sku
     scf = storage_client_factory()
-    params = StorageAccountUpdateParameters(tags, account_type, custom_domain)
+    # TODO Add the new params encryption and access_tier after rc5 update
+    sku = Sku(account_type) if account_type else None
+    params = StorageAccountUpdateParameters(sku=sku, tags=tags, custom_domain=custom_domain)
     return scf.storage_accounts.update(resource_group_name, account_name, params)
 
 def container_exists(client, container_name, snapshot=None, timeout=None):

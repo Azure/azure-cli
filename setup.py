@@ -68,7 +68,7 @@ DEPENDENCIES = [
     'adal>=0.3.0',
     'applicationinsights',
     'argcomplete>=1.3.0',
-    'azure==2.0.0rc4',
+    'azure==2.0.0rc5',
     'colorama',
     'jmespath',
     'msrest>=0.4.0',
