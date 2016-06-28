@@ -101,24 +101,24 @@ class StorageAccountScenarioTest(VCRTestBase):
             JMESPathCheck("contains(ConnectionString, 'https')", False),
             JMESPathCheck("contains(ConnectionString, '{}')".format(account), True)
         ])
-        keys_result = s.cmd('storage account keys list -g {} -n {}'.format(rg, account))
+        keys_result = s.cmd('storage account keys list -g {} {}'.format(rg, account))
         key1 = keys_result['keys'][0]
         key2 = keys_result['keys'][1]
         assert key1 and key2
-        keys_result = s.cmd('storage account keys renew -g {} -n {}'.format(rg, account))
+        keys_result = s.cmd('storage account keys renew -g {} {}'.format(rg, account))
         renewed_key1 = keys_result['keys'][0]
         renewed_key2 = keys_result['keys'][1]
         assert key1 != renewed_key1
         assert key2 != renewed_key2
         key1 = renewed_key1
-        keys_result = s.cmd('storage account keys renew -g {} -n {} --key secondary'.format(rg, account))
+        keys_result = s.cmd('storage account keys renew -g {} {} --key secondary'.format(rg, account))
         assert key1 == keys_result['keys'][0]
         assert key2 != keys_result['keys'][1]
-        s.cmd('storage account set -g {} -n {} --tags foo=bar;cat'.format(rg, account),
+        s.cmd('storage account set -g {} {} --tags foo=bar;cat'.format(rg, account),
             checks=JMESPathCheck('tags', {'cat':'', 'foo':'bar'}))
         s.cmd('storage account set -g {} {} --tags'.format(rg, account),
             checks=JMESPathCheck('tags', {}))
-        s.cmd('storage account set -g {} -n {} --type Standard_GRS'.format(rg, account),
+        s.cmd('storage account set -g {} {} --type Standard_GRS'.format(rg, account),
             checks=JMESPathCheck('sku.name', 'Standard_GRS'))
 
 class StorageBlobScenarioTest(VCRTestBase):
