@@ -37,7 +37,7 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
-    'azure==2.0.0rc4',
+    'azure==2.0.0rc5',
     'adal>=0.3.0'
 ]
 
