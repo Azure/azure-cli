@@ -110,7 +110,7 @@ class Application(object):
         logger.info("Application event '%s' with event data %s", name, kwargs)
         for func in list(self._event_handlers[name]): # Make copy in case handler modifies the list
             func(**kwargs)
-        
+
     def register(self, name, handler):
         '''Register a callable that will be called when the
         event `name` is raised.

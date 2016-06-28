@@ -2,8 +2,7 @@
 from azure.cli.commands.parameters import (tags_type,
                                            name_type,
                                            get_resource_name_completion_list,
-                                           register_id_parameter
-                                           )
+                                           register_id_parameter)
 from azure.cli.commands import register_cli_argument, CliArgumentType
 from azure.cli.commands.validators import validate_key_value_pairs
 

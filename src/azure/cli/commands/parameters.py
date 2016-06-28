@@ -92,8 +92,8 @@ register_cli_argument('', 'location', location_type)
 register_cli_argument('', 'deployment_name', deployment_name_type)
 
 
-def split_id_rg_rn_crn(id):
-    raw_parts = id.split('/')
+def split_id_rg_rn_crn(idval):
+    raw_parts = idval.split('/')
     result = []
     try:
         for id_part in (4, 8, 10):
@@ -105,7 +105,7 @@ def split_id_rg_rn_crn(id):
 
 def register_id_parameter(command_name, *arguments, **kwargs):
 
-    class SplitAction(argparse.Action):
+    class SplitAction(argparse.Action): #pylint: disable=too-few-public-methods
 
         def __call__(self, parser, namespace, values, option_string=None):
             split_func_or_regex = kwargs.get('split_func_or_regex', split_id_rg_rn_crn)
@@ -142,8 +142,8 @@ def register_id_parameter(command_name, *arguments, **kwargs):
                 option_metavar = '[{}]'.format(option_metavar)
             arguments_if_not_id_specified.append(option_metavar)
         metavar = '(RESOURCE_ID | {} {})'.format(
-                last_arg.options.get('metavar', last_arg.name.upper()),
-                ' '.join(arguments_if_not_id_specified))
+            last_arg.options.get('metavar', last_arg.name.upper()),
+            ' '.join(arguments_if_not_id_specified))
 
         def required_values_validator(namespace):
             for arg in required_arguments:
@@ -158,3 +158,4 @@ def register_id_parameter(command_name, *arguments, **kwargs):
         APPLICATION.remove(APPLICATION.COMMAND_TABLE_LOADED, command_loaded_handler)
 
     APPLICATION.register(APPLICATION.COMMAND_TABLE_LOADED, command_loaded_handler)
+    
