@@ -10,19 +10,23 @@ COMMON_TENANT = 'common'
 class ENDPOINT_URLS: #pylint: disable=too-few-public-methods,old-style-class,no-init
     MANAGEMENT = 'management'
     ACTIVE_DIRECTORY_AUTHORITY = 'active_directory_authority'
+    ACTIVE_DIRECTORY_GRAPH_RESOURCE_ID = 'active_directory_graph_resource_id'
 
 _environments = {
     ENV_DEFAULT: {
         ENDPOINT_URLS.MANAGEMENT: 'https://management.core.windows.net/',
-        ENDPOINT_URLS.ACTIVE_DIRECTORY_AUTHORITY : 'https://login.microsoftonline.com'
+        ENDPOINT_URLS.ACTIVE_DIRECTORY_AUTHORITY : 'https://login.microsoftonline.com',
+        ENDPOINT_URLS.ACTIVE_DIRECTORY_GRAPH_RESOURCE_ID: 'https://graph.windows.net/'
         },
     ENV_CHINA: {
         ENDPOINT_URLS.MANAGEMENT: 'https://management.core.chinacloudapi.cn/',
-        ENDPOINT_URLS.ACTIVE_DIRECTORY_AUTHORITY: 'https://login.chinacloudapi.cn'
+        ENDPOINT_URLS.ACTIVE_DIRECTORY_AUTHORITY: 'https://login.chinacloudapi.cn',
+        ENDPOINT_URLS.ACTIVE_DIRECTORY_GRAPH_RESOURCE_ID: 'https://graph.chinacloudapi.cn/'
         },
     ENV_US_GOVERNMENT: {
         ENDPOINT_URLS.MANAGEMENT: 'https://management.core.usgovcloudapi.net/',
-        ENDPOINT_URLS.ACTIVE_DIRECTORY_AUTHORITY: 'https://login.microsoftonline.com'
+        ENDPOINT_URLS.ACTIVE_DIRECTORY_AUTHORITY: 'https://login.microsoftonline.com',
+        ENDPOINT_URLS.ACTIVE_DIRECTORY_GRAPH_RESOURCE_ID: 'https://graph.windows.net/'
         }
 }
 
@@ -36,8 +40,3 @@ def get_env(env_name=None):
 def get_authority_url(tenant=None, env_name=None):
     env = get_env(env_name)
     return env[ENDPOINT_URLS.ACTIVE_DIRECTORY_AUTHORITY] + '/' + (tenant or COMMON_TENANT)
-
-def get_management_endpoint_url(env_name=None):
-    env = get_env(env_name)
-    return env[ENDPOINT_URLS.MANAGEMENT]
-
