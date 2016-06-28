@@ -47,7 +47,23 @@ thrown whilst attempting to load your module.
 Currently, all command modules should start with `azure-cli-`.  
 When the CLI loads, it search for packages installed via pip that start with that prefix.
 
-The `example_module_template` directory gives the basic structure for a command module.
+The `example_module_template` directory gives a basic command module with 1 command.
+
+Command modules should have the following structure:
+```
+.
+|-- README.rst
+|-- azure
+|   |-- __init__.py
+|   `-- cli
+|       |-- __init__.py
+|       `-- command_modules
+|           |-- __init__.py
+|           `-- <MODULE_NAME>
+|               `-- __init__.py
+|-- requirements.txt
+`-- setup.py
+```
 
 ```python
 from azure.cli.commands import cli_command
