@@ -14,8 +14,8 @@ import uuid
 from .. import models
 
 
-class WebAppOperations(object):
-    """WebAppOperations operations.
+class WebappOperations(object):
+    """WebappOperations operations.
 
     :param client: Client for service requests.
     :param config: Configuration of service client.
@@ -32,7 +32,7 @@ class WebAppOperations(object):
         self.config = config
 
     def create_or_update(
-            self, resource_group_name, deployment_name, name, content_version=None, hosting_plan_name=None, hosting_plan_type="new", number_of_workers="1", sku_capacity="1", sku_name="F1", custom_headers=None, raw=False, **operation_config):
+            self, resource_group_name, deployment_name, name, content_version=None, hosting_plan=None, hosting_plan_type="new", number_of_workers="1", sku_capacity="1", sku_name="F1", custom_headers=None, raw=False, **operation_config):
         """
         Create or update a virtual machine.
 
@@ -46,10 +46,10 @@ class WebAppOperations(object):
         :param content_version: If included it must match the ContentVersion
          in the template.
         :type content_version: str
-        :param hosting_plan_name: Name for the web application's hosting plan.
-        :type hosting_plan_name: str
+        :param hosting_plan: Name or ID of the web application's hosting plan.
+        :type hosting_plan: str
         :param hosting_plan_type: Use a new or existing hosting plan.
-         Possible values include: 'new', 'existing'
+         Possible values include: 'new', 'existingName', 'existingId'
         :type hosting_plan_type: str
         :param number_of_workers: Number of dedicated VMs in the farm.
         :type number_of_workers: str
@@ -65,11 +65,11 @@ class WebAppOperations(object):
         :rtype:
          :class:`AzureOperationPoller<msrestazure.azure_operation.AzureOperationPoller>`
          instance that returns :class:`DeploymentExtended
-         <mynamespace.models.DeploymentExtended>`
+         <default.models.DeploymentExtended>`
         :rtype: :class:`ClientRawResponse<msrest.pipeline.ClientRawResponse>`
          if raw=true
         """
-        parameters = models.DeploymentWebApp(content_version=content_version, hosting_plan_name=hosting_plan_name, hosting_plan_type=hosting_plan_type, name=name, number_of_workers=number_of_workers, sku_capacity=sku_capacity, sku_name=sku_name)
+        parameters = models.DeploymentWebapp(content_version=content_version, hosting_plan=hosting_plan, hosting_plan_type=hosting_plan_type, name=name, number_of_workers=number_of_workers, sku_capacity=sku_capacity, sku_name=sku_name)
 
         # Construct URL
         url = '/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Resources/deployments/{deploymentName}'
@@ -95,7 +95,7 @@ class WebAppOperations(object):
             header_parameters['accept-language'] = self._serialize.header("self.config.accept_language", self.config.accept_language, 'str')
 
         # Construct body
-        body_content = self._serialize.body(parameters, 'DeploymentWebApp')
+        body_content = self._serialize.body(parameters, 'DeploymentWebapp')
 
         # Construct and send request
         def long_running_send():

@@ -10,12 +10,12 @@ from msrest.service_client import ServiceClient
 from msrest import Serializer, Deserializer
 from msrestazure import AzureConfiguration
 from .version import VERSION
-from .operations.web_app_operations import WebAppOperations
+from .operations.webapp_operations import WebappOperations
 from . import models
 
 
-class WebAppCreationClientConfiguration(AzureConfiguration):
-    """Configuration for WebAppCreationClient
+class WebappCreationClientConfiguration(AzureConfiguration):
+    """Configuration for WebappCreationClient
     Note that all parameters used to create this instance are saved as instance
     attributes.
 
@@ -58,7 +58,7 @@ class WebAppCreationClientConfiguration(AzureConfiguration):
         if not base_url:
             base_url = 'https://management.azure.com'
 
-        super(WebAppCreationClientConfiguration, self).__init__(base_url, filepath)
+        super(WebappCreationClientConfiguration, self).__init__(base_url, filepath)
 
         self.add_user_agent('webappcreationclient/{}'.format(VERSION))
         self.add_user_agent('Azure-SDK-For-Python')
@@ -71,14 +71,14 @@ class WebAppCreationClientConfiguration(AzureConfiguration):
         self.generate_client_request_id = generate_client_request_id
 
 
-class WebAppCreationClient(object):
-    """WebAppCreationClient
+class WebappCreationClient(object):
+    """WebappCreationClient
 
     :ivar config: Configuration for client.
-    :vartype config: WebAppCreationClientConfiguration
+    :vartype config: WebappCreationClientConfiguration
 
-    :ivar web_app: WebApp operations
-    :vartype web_app: .operations.WebAppOperations
+    :ivar webapp: Webapp operations
+    :vartype webapp: .operations.WebappOperations
 
     :param credentials: Gets Azure subscription credentials.
     :type credentials: :mod:`A msrestazure Credentials
@@ -106,12 +106,12 @@ class WebAppCreationClient(object):
     def __init__(
             self, credentials, subscription_id, api_version='2015-11-01', accept_language='en-US', long_running_operation_retry_timeout=30, generate_client_request_id=True, base_url=None, filepath=None):
 
-        self.config = WebAppCreationClientConfiguration(credentials, subscription_id, api_version, accept_language, long_running_operation_retry_timeout, generate_client_request_id, base_url, filepath)
+        self.config = WebappCreationClientConfiguration(credentials, subscription_id, api_version, accept_language, long_running_operation_retry_timeout, generate_client_request_id, base_url, filepath)
         self._client = ServiceClient(self.config.credentials, self.config)
 
         client_models = {k: v for k, v in models.__dict__.items() if isinstance(v, type)}
         self._serialize = Serializer(client_models)
         self._deserialize = Deserializer(client_models)
 
-        self.web_app = WebAppOperations(
+        self.webapp = WebappOperations(
             self._client, self.config, self._serialize, self._deserialize)

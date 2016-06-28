@@ -9,7 +9,7 @@
 from msrest.serialization import Model
 
 
-class DeploymentWebApp(Model):
+class DeploymentWebapp(Model):
     """
     Deployment operation parameters.
 
@@ -17,7 +17,7 @@ class DeploymentWebApp(Model):
     sending a request.
 
     :ivar uri: URI referencing the template. Default value:
-     "https://azuresdkci.blob.core.windows.net/templatehost/CreateWebApp/azuredeploy.json"
+     "https://azuresdkci.blob.core.windows.net/templatehost/CreateWebapp_2016-06-22/azuredeploy.json"
      .
     :vartype uri: str
     :param content_version: If included it must match the ContentVersion in
@@ -25,12 +25,14 @@ class DeploymentWebApp(Model):
     :type content_version: str
     :ivar _artifacts_location: Container URI of of the template. Default
      value:
-     "https://azuresdkci.blob.core.windows.net/templatehost/CreateWebApp" .
+     "https://azuresdkci.blob.core.windows.net/templatehost/CreateWebapp_2016-06-22"
+     .
     :vartype _artifacts_location: str
-    :param hosting_plan_name: Name for the web application's hosting plan.
-    :type hosting_plan_name: str
+    :param hosting_plan: Name or ID of the web application's hosting plan.
+    :type hosting_plan: str
     :param hosting_plan_type: Use a new or existing hosting plan. Possible
-     values include: 'new', 'existing'. Default value: "new" .
+     values include: 'new', 'existingName', 'existingId'. Default value:
+     "new" .
     :type hosting_plan_type: str
     :param name: Name for the web application.
     :type name: str
@@ -60,7 +62,7 @@ class DeploymentWebApp(Model):
         'uri': {'key': 'properties.templateLink.uri', 'type': 'str'},
         'content_version': {'key': 'properties.templateLink.contentVersion', 'type': 'str'},
         '_artifacts_location': {'key': 'properties.parameters._artifactsLocation.value', 'type': 'str'},
-        'hosting_plan_name': {'key': 'properties.parameters.hostingPlanName.value', 'type': 'str'},
+        'hosting_plan': {'key': 'properties.parameters.hostingPlan.value', 'type': 'str'},
         'hosting_plan_type': {'key': 'properties.parameters.hostingPlanType.value', 'type': 'str'},
         'name': {'key': 'properties.parameters.name.value', 'type': 'str'},
         'number_of_workers': {'key': 'properties.parameters.numberOfWorkers.value', 'type': 'str'},
@@ -69,15 +71,15 @@ class DeploymentWebApp(Model):
         'mode': {'key': 'properties.mode', 'type': 'str'},
     }
 
-    uri = "https://azuresdkci.blob.core.windows.net/templatehost/CreateWebApp/azuredeploy.json"
+    uri = "https://azuresdkci.blob.core.windows.net/templatehost/CreateWebapp_2016-06-22/azuredeploy.json"
 
-    _artifacts_location = "https://azuresdkci.blob.core.windows.net/templatehost/CreateWebApp"
+    _artifacts_location = "https://azuresdkci.blob.core.windows.net/templatehost/CreateWebapp_2016-06-22"
 
     mode = "Incremental"
 
-    def __init__(self, name, content_version=None, hosting_plan_name=None, hosting_plan_type="new", number_of_workers="1", sku_capacity="1", sku_name="F1"):
+    def __init__(self, name, content_version=None, hosting_plan=None, hosting_plan_type="new", number_of_workers="1", sku_capacity="1", sku_name="F1"):
         self.content_version = content_version
-        self.hosting_plan_name = hosting_plan_name
+        self.hosting_plan = hosting_plan
         self.hosting_plan_type = hosting_plan_type
         self.name = name
         self.number_of_workers = number_of_workers
