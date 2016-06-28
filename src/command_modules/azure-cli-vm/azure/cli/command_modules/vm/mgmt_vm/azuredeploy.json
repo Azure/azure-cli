@@ -33,11 +33,11 @@
         "description": "Password or SSH Public Key authentication."
       }
     },
-    "availabilitySetId": {
+    "availabilitySet": {
       "type": "string",
       "defaultValue": "",
       "metadata": {
-        "description": "Existing availability set for the VM."
+        "description": "Name or ID of existing availability set for the VM."
       }
     },
     "availabilitySetType": {
@@ -45,7 +45,8 @@
       "defaultValue": "none",
       "allowedValues": [
         "none",
-        "existing"
+        "existingName",
+        "existingId"
       ],
       "metadata": {
         "description": "Flag to add the VM to an existing availability set."
@@ -423,7 +424,7 @@
     "ipOutputDeploymentName": "[concat(variables('vmName'), parameters('publicIpAddressName'), parameters('publicIpAddressType'))]",
     "fqdnOutputDeploymentName": "[concat(variables('vmName'), parameters('publicIpAddressName'), parameters('publicIpAddressType'), 'fqdn')]",
     "macOutputDeploymentName": "[concat(variables('vmName'), variables('nicName'), 'mac')]",
-    "availSetId": "[resourceId('Microsoft.Compute/availabilitySets', parameters('availabilitySetId'))]",
+    "availSetId": "[resourceId('Microsoft.Compute/availabilitySets', parameters('availabilitySet'))]",
     "vnetTemplateFilePaths": {
       "new": "nested_templates/NewVNet.json",
       "existing": "nested_templates/ExistingVNet.json"
