@@ -37,6 +37,7 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
+    'applicationinsights',
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
