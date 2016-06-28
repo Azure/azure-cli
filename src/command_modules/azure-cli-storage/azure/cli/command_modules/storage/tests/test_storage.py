@@ -1,4 +1,5 @@
 # AZURE CLI STORAGE TEST DEFINITIONS
+#pylint: skip-file
 
 import ast
 import collections
@@ -49,7 +50,7 @@ class StorageAccountCreateAndDeleteTest(VCRTestBase):
         s = self
         s.cmd('storage account create --type Standard_LRS -l westus -n {} -g {}'.format(account, rg), checks=[
             JMESPathCheck('location', 'westus'),
-            JMESPathCheck('accountType', 'Standard_LRS')
+            JMESPathCheck('sku.name', 'Standard_LRS')
         ])
         s.cmd('storage account check-name --name {}'.format(account), checks=[
             JMESPathCheck('nameAvailable', False),
@@ -86,13 +87,13 @@ class StorageAccountScenarioTest(VCRTestBase):
         s.cmd('storage account list -g {} --query "[?name == \'{}\']"'.format(rg, account), checks=[
             JMESPathCheck('[0].name', account),
             JMESPathCheck('[0].location', 'westus'),
-            JMESPathCheck('[0].accountType', 'Standard_LRS'),
+            JMESPathCheck('[0].sku.name', 'Standard_LRS'),
             JMESPathCheck('[0].resourceGroup', rg)
         ])
         s.cmd('storage account show --resource-group {} {}'.format(rg, account), checks=[
             JMESPathCheck('name', account),
             JMESPathCheck('location', 'westus'),
-            JMESPathCheck('accountType', 'Standard_LRS'),
+            JMESPathCheck('sku.name', 'Standard_LRS'),
             JMESPathCheck('resourceGroup', rg)
         ])
         s.cmd('storage account show-usage', checks=JMESPathCheck('name.value', 'StorageAccounts'))
@@ -100,24 +101,25 @@ class StorageAccountScenarioTest(VCRTestBase):
             JMESPathCheck("contains(ConnectionString, 'https')", False),
             JMESPathCheck("contains(ConnectionString, '{}')".format(account), True)
         ])
-        keys = s.cmd('storage account keys list -g {} {}'.format(rg, account))
-        key1 = keys['key1']
-        key2 = keys['key2']
+        keys_result = s.cmd('storage account keys list -g {} -n {}'.format(rg, account))
+        key1 = keys_result['keys'][0]
+        key2 = keys_result['keys'][1]
         assert key1 and key2
-        keys = s.cmd('storage account keys renew -g {} {}'.format(rg, account))
-        assert key1 != keys['key1']
-        key1 = keys['key1']
-        assert key2 != keys['key2']
-        key2 = keys['key2']
-        keys = s.cmd('storage account keys renew -g {} {} --key secondary'.format(rg, account))
-        assert key1 == keys['key1']
-        assert key2 != keys['key2']
-        s.cmd('storage account set -g {} {} --tags foo=bar;cat'.format(rg, account),
+        keys_result = s.cmd('storage account keys renew -g {} -n {}'.format(rg, account))
+        renewed_key1 = keys_result['keys'][0]
+        renewed_key2 = keys_result['keys'][1]
+        assert key1 != renewed_key1
+        assert key2 != renewed_key2
+        key1 = renewed_key1
+        keys_result = s.cmd('storage account keys renew -g {} -n {} --key secondary'.format(rg, account))
+        assert key1 == keys_result['keys'][0]
+        assert key2 != keys_result['keys'][1]
+        s.cmd('storage account set -g {} -n {} --tags foo=bar;cat'.format(rg, account),
             checks=JMESPathCheck('tags', {'cat':'', 'foo':'bar'}))
         s.cmd('storage account set -g {} {} --tags'.format(rg, account),
             checks=JMESPathCheck('tags', {}))
-        s.cmd('storage account set -g {} {} --type Standard_GRS'.format(rg, account),
-            checks=JMESPathCheck('accountType', 'Standard_GRS'))
+        s.cmd('storage account set -g {} -n {} --type Standard_GRS'.format(rg, account),
+            checks=JMESPathCheck('sku.name', 'Standard_GRS'))
 
 class StorageBlobScenarioTest(VCRTestBase):
 

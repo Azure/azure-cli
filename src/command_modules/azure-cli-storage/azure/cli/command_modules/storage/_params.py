@@ -7,7 +7,7 @@ from azure.cli.commands.parameters import (tags_type,
 from azure.cli.commands import register_cli_argument, CliArgumentType
 from azure.cli.commands.validators import validate_key_value_pairs
 
-from azure.mgmt.storage.models import AccountType
+from azure.mgmt.storage.models import SkuName
 
 from azure.storage.blob import PublicAccess, BlockBlobService, PageBlobService, AppendBlobService
 
@@ -21,11 +21,11 @@ from ._validators import (
 storage_account_key_options = {'primary': 'key1', 'secondary': 'key2'}
 
 # TODO: update this once enums are supported in commands first-class (task #115175885)
-storage_account_types = {'Standard_LRS': AccountType.standard_lrs,
-                         'Standard_ZRS': AccountType.standard_zrs,
-                         'Standard_GRS': AccountType.standard_grs,
-                         'Standard_RAGRS': AccountType.standard_ragrs,
-                         'Premium_LRS': AccountType.premium_lrs}
+storage_account_types = {'Standard_LRS': SkuName.standard_lrs,
+                         'Standard_ZRS': SkuName.standard_zrs,
+                         'Standard_GRS': SkuName.standard_grs,
+                         'Standard_RAGRS': SkuName.standard_ragrs,
+                         'Premium_LRS': SkuName.premium_lrs}
 
 # TODO: update this once enums are supported in commands first-class (task #115175885)
 public_access_types = {'none': None, 'blob': PublicAccess.Blob, 'container': PublicAccess.Container}

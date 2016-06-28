@@ -514,11 +514,11 @@ def set_diagnostics_extension(
         public_config = get_default_linux_diag_config(vm.id)
 
     storage_mgmt_client = _get_storage_management_client()
-    keys = storage_mgmt_client.storage_accounts.list_keys(resource_group_name, storage_account)
+    keys = storage_mgmt_client.storage_accounts.list_keys(resource_group_name, storage_account).keys
 
     private_config = {
         'storageAccountName': storage_account,
-        'storageAccountKey': keys.key1
+        'storageAccountKey': keys[0].value
         }
 
     vm_extension_name = _LINUX_DIAG_EXT
