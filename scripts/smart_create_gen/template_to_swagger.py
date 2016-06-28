@@ -37,8 +37,9 @@ def get_default(value):
 def get_type_string(value):
     type = value.get('type')
     type_conversion = {
-        'securestring': 'string',
-        'bool': 'boolean'
+        'bool': 'boolean',
+        'int': 'integer',
+        'securestring': 'string'
     }
     type = type_conversion.get(type, type)
 

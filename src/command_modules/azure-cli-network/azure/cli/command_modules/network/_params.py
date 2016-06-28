@@ -9,6 +9,11 @@ from azure.cli.commands.template_create import register_folded_cli_argument
 from azure.cli.commands.arm import is_valid_resource_id
 from azure.cli.commands.parameters import (location_type, get_resource_name_completion_list)
 from azure.cli.commands import register_cli_argument, CliArgumentType
+from azure.cli.commands.parameters import (location_type, get_resource_name_completion_list)
+from azure.cli.command_modules.network._actions import LBDNSNameAction, PublicIpDnsNameAction
+from azure.cli.command_modules.network._validators import \
+    (process_nic_namespace, process_app_gateway_namespace, validate_servers, validate_cert)
+from azure.cli.command_modules.network._param_folding import register_folded_cli_argument
 
 # BASIC PARAMETER CONFIGURATION
 
@@ -25,6 +30,15 @@ register_cli_argument('network', 'virtual_network_name', virtual_network_name_ty
 register_cli_argument('network', 'network_security_group_name', nsg_name_type)
 
 register_cli_argument('network application-gateway', 'application_gateway_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/applicationGateways'))
+register_cli_argument('network application-gateway', 'virtual_network_name', virtual_network_name_type)
+register_folded_cli_argument('network application-gateway', 'subnet', 'Microsoft.Network/subnets')
+register_folded_cli_argument('network application-gateway', 'public_ip', 'Microsoft.Network/publicIPAddresses')
+register_cli_argument('network application-gateway', 'virtual_network_type', help=argparse.SUPPRESS)
+register_cli_argument('network application-gateway', 'private_ip_address_allocation', help=argparse.SUPPRESS)
+register_cli_argument('network application-gateway', 'frontend_type', help=argparse.SUPPRESS, validator=process_app_gateway_namespace)
+register_cli_argument('network application-gateway', 'servers', nargs='+', validator=validate_servers)
+register_cli_argument('network application-gateway', 'cert_data', options_list=('--cert-file',), help='The path to the PFX certificate file.', validator=validate_cert)
+register_cli_argument('network application-gateway', 'http_listener_protocol', help=argparse.SUPPRESS)
 
 register_cli_argument('network express-route circuit-auth', 'authorization_name', name_arg_type)
 register_cli_argument('network express-route circuit-peering', 'peering_name', name_arg_type)
@@ -130,4 +144,3 @@ register_cli_argument('network vpn-connection', 'virtual_network_gateway_connect
 
 register_cli_argument('network vpn-connection shared-key', 'connection_shared_key_name', CliArgumentType(options_list=('--name', '-n')))
 register_cli_argument('network vpn-connection shared-key', 'virtual_network_gateway_connection_name', CliArgumentType(options_list=('--connection-name',), metavar='NAME'))
-

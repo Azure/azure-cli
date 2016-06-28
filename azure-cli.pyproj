@@ -62,6 +62,25 @@
     <Compile Include="command_modules\azure-cli-feedback\azure\__init__.py" />
     <Compile Include="command_modules\azure-cli-feedback\setup.py" />
     <Compile Include="azure\cli\utils\vcr_test_base.py" />
+    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_app_gateway\lib\app_gateway_creation_client.py" />
+    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_app_gateway\lib\credentials.py" />
+    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_app_gateway\lib\exceptions.py" />
+    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_app_gateway\lib\models\app_gateway_creation_client_enums.py" />
+    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_app_gateway\lib\models\basic_dependency.py" />
+    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_app_gateway\lib\models\dependency.py" />
+    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_app_gateway\lib\models\deployment_app_gateway.py" />
+    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_app_gateway\lib\models\deployment_extended.py" />
+    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_app_gateway\lib\models\deployment_properties_extended.py" />
+    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_app_gateway\lib\models\parameters_link.py" />
+    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_app_gateway\lib\models\provider.py" />
+    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_app_gateway\lib\models\provider_resource_type.py" />
+    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_app_gateway\lib\models\template_link.py" />
+    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_app_gateway\lib\models\__init__.py" />
+    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_app_gateway\lib\operations\app_gateway_operations.py" />
+    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_app_gateway\lib\operations\__init__.py" />
+    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_app_gateway\lib\version.py" />
+    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_app_gateway\lib\__init__.py" />
+    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_app_gateway\__init__.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_nic\lib\credentials.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_nic\lib\exceptions.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_nic\lib\models\basic_dependency.py" />
@@ -248,7 +267,6 @@
     <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_avail_set\lib\models\template_link.py" />
     <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_avail_set\lib\models\__init__.py" />
     <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_avail_set\lib\operations\avail_set_operations.py" />
-    <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_avail_set\lib\operations\vm_operations.py" />
     <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_avail_set\lib\operations\__init__.py" />
     <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_avail_set\lib\version.py" />
     <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_avail_set\lib\__init__.py" />
@@ -412,6 +430,11 @@
     <Folder Include="command_modules\azure-cli-feedback\azure\cli\" />
     <Folder Include="command_modules\azure-cli-feedback\azure\cli\command_modules\" />
     <Folder Include="command_modules\azure-cli-feedback\azure\cli\command_modules\feedback\" />
+    <Folder Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_app_gateway\" />
+    <Folder Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_app_gateway\lib\" />
+    <Folder Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_app_gateway\lib\models\" />
+    <Folder Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_app_gateway\lib\operations\" />
+    <Folder Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_app_gateway\nested_templates\" />
     <Folder Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_nic\" />
     <Folder Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_nic\lib\" />
     <Folder Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_nic\lib\models\" />
@@ -509,6 +532,19 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="command_modules\azure-cli-component\requirements.txt" />
+    <Content Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_app_gateway\azuredeploy.json" />
+    <Content Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_app_gateway\azuredeploy_tests.md">
+      <SubType>Code</SubType>
+    </Content>
+    <Content Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_app_gateway\nested_templates\public_ip_new.json">
+      <SubType>Code</SubType>
+    </Content>
+    <Content Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_app_gateway\nested_templates\public_ip_none_or_existing.json">
+      <SubType>Code</SubType>
+    </Content>
+    <Content Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_app_gateway\nested_templates\vnet_existing.json" />
+    <Content Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_app_gateway\nested_templates\vnet_new.json" />
+    <Content Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_app_gateway\swagger_create_app_gateway.json" />
     <Content Include="command_modules\azure-cli-feedback\README.rst" />
     <Content Include="command_modules\azure-cli-feedback\requirements.txt" />
     <Content Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_lb\azuredeploy_test.md" />
