@@ -103,11 +103,12 @@ def split_id_rg_rn_crn(id):
 
     return result
 
-def register_id_parameter(command_name, *arguments, split_func_or_regex=split_id_rg_rn_crn):
+def register_id_parameter(command_name, *arguments, **kwargs):
 
     class SplitAction(argparse.Action):
 
         def __call__(self, parser, namespace, values, option_string=None):
+            split_func_or_regex = kwargs.get('split_func_or_regex', split_id_rg_rn_crn)
             if callable(split_func_or_regex):
                 parts = split_func_or_regex(values)
             else:
