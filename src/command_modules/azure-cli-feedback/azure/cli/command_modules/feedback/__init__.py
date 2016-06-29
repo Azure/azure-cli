@@ -21,12 +21,12 @@ EVENT_NAME = 'FeedbackEvent'
 
 COMPONENT_PREFIX = 'azure-cli-'
 
-def _prompt_likely_score():
+def _prompt_net_promoter_score():
     while True:
         try:
-            likely_score = int(input(MESSAGES['prompt_how_likely']))
-            if 0 <= likely_score <= 10:
-                return likely_score
+            score = int(input(MESSAGES['prompt_how_likely']))
+            if 0 <= score <= 10:
+                return score
         except ValueError:
             pass
 
@@ -59,7 +59,7 @@ def _send_feedback(score, response_what_changes, response_do_well, email_address
 def handle_feedback():
     try:
         print(MESSAGES['intro'])
-        score = _prompt_likely_score()
+        score = _prompt_net_promoter_score()
         response_do_well = None
         response_what_changes = None
         if score == 10:
