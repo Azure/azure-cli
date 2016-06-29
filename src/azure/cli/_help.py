@@ -264,7 +264,7 @@ class CommandHelpFile(HelpFile): #pylint: disable=too-few-public-methods
         self.parameters = []
 
         for action in [a for a in parser._actions if a.help != argparse.SUPPRESS]: # pylint: disable=protected-access
-            self.parameters.append(HelpParameter(' '.join(sorted(action.option_strings)),
+            self.parameters.append(HelpParameter(' '.join(sorted(action.option_strings)) if action.option_strings else action.metavar,
                                                  action.help,
                                                  required=action.required,
                                                  choices=action.choices,
