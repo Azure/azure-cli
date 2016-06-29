@@ -20,7 +20,7 @@ import os
 from codecs import open
 from setuptools import setup
 
-VERSION = '0.0.32'
+VERSION = '0.0.1.dev0'
 
 DISABLE_POST_INSTALL = os.environ.get('AZURE_CLI_DISABLE_POST_INSTALL')
 
