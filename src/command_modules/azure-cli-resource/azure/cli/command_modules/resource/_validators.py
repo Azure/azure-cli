@@ -36,7 +36,7 @@ def _resolve_api_version(rcf, resource_type, parent=None):
     rt = [t for t in provider.resource_types if t.resource_type == resource_type_str]
     if not rt:
         raise ArgumentTypeError('Resource type {} not found.'
-                                  .format(resource_type_str))
+                                .format(resource_type_str))
     if len(rt) == 1 and rt[0].api_versions:
         npv = [v for v in rt[0].api_versions if 'preview' not in v.lower()]
         return npv[0] if npv else rt[0].api_versions[0]
