@@ -1,7 +1,7 @@
-import json
+import os
 # AZURE CLI RESOURCE TEST DEFINITIONS
 
-from azure.cli.utils.vcr_test_base import VCRTestBase, JMESPathCheck, NoneCheck, BooleanCheck
+from azure.cli.utils.vcr_test_base import VCRTestBase, JMESPathCheck, NoneCheck, BooleanCheck, ResourceGroupVCRTestBase
 
 #pylint: disable=method-hidden
 class ResourceGroupScenarioTest(VCRTestBase):
@@ -164,3 +164,36 @@ class ProviderRegistrationTest(VCRTestBase):
             self.cmd('resource provider show -n {}'.format(provider), checks=[JMESPathCheck('registrationState', 'Unregistered')])
             self.cmd('resource provider register -n {}'.format(provider), checks=None)
             self.cmd('resource provider show -n {}'.format(provider), checks=[JMESPathCheck('registrationState', 'Registered')])
+
+class DeploymentTest(ResourceGroupVCRTestBase):
+    def __init__(self, test_method):
+        super(DeploymentTest, self).__init__(__file__, test_method)
+        self.resource_group = 'azure-cli-deployment-test'
+
+    def test_group_deployment(self):
+        self.execute()
+
+    def body(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        template_file = os.path.join(curr_dir, 'simple_deploy.json').replace('\\', '\\\\')
+        parameters_file = os.path.join(curr_dir, 'simple_deploy_parameters.json').replace('\\', '\\\\')
+        deployment_name = 'azure-cli-deployment'
+        result = self.cmd('resource group deployment validate -g {} --template-file-path {} --parameters-file-path {}'.format(
+            self.resource_group, template_file, parameters_file), checks=None)
+        self.assertEqual('Accepted', result['properties']['provisioningState'])
+        result = self.cmd('resource group deployment create -g {} -n {} --template-file-path {} --parameters-file-path {}'.format(
+            self.resource_group, deployment_name, template_file, parameters_file), checks=None)
+        self.assertEqual('Succeeded', result['properties']['provisioningState'])
+        self.assertEqual(self.resource_group, result['resourceGroup'])
+        result = self.cmd('resource group deployment list -g {}'.format(self.resource_group), checks=None)
+        self.assertEqual(deployment_name, result[0]['name'])
+        self.assertEqual(self.resource_group, result[0]['resourceGroup'])
+        result = self.cmd('resource group deployment show -g {} -n {}'.format(self.resource_group, deployment_name), checks=None)
+        self.assertEqual(deployment_name, result['name'])
+        self.assertEqual(self.resource_group, result['resourceGroup'])
+        result = self.cmd('resource group deployment exists -g {} -n {}'.format(self.resource_group, deployment_name), checks=None)
+        self.assertTrue(result)
+        result = self.cmd('resource group deployment operation list -g {} -n {}'.format(self.resource_group, deployment_name), checks=None)
+        self.assertEqual(2, len(result))
+        self.assertEqual(self.resource_group, result[0]['resourceGroup'])
+
