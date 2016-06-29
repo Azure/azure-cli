@@ -87,7 +87,7 @@ class Application(object):
         args = self.parser.parse_args(argv)
         try:
             _validate_arguments(args)
-        except:
+        except: # pylint disable=bare-except
             err = sys.exc_info()[1]
             self.parser.error(str(err))
 

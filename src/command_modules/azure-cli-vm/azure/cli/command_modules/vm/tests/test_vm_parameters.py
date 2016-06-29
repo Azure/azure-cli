@@ -54,12 +54,12 @@ class Test_ArgumentParser(unittest.TestCase):
 
         # Invalid resource ID should trigger the missing resource group
         # parameter failure
-        with self.assertRaises(CLIError):
+        with self.assertRaises(SystemExit):
             mock_echo_args('vm show', '/broken')
 
         # Got to provide a resource group if you are using a simple name and
         # not an ID as a parameter
-        with self.assertRaises(CLIError):
+        with self.assertRaises(SystemExit):
             mock_echo_args('vm show', 'missing-resource-group')
 
     def test_parse_vm_list(self):
