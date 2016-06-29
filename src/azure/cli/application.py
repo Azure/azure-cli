@@ -85,6 +85,12 @@ class Application(object):
             argv[0] = '--help'
 
         args = self.parser.parse_args(argv)
+        try:
+            _validate_arguments(args)
+        except:
+            err = sys.exc_info()[1]
+            self.parser.error(str(err))
+
         self.session['command'] = args.command
         self.raise_event(self.COMMAND_PARSER_PARSED, command=args.command, args=args)
         # Consider - we are using any args that start with an underscore (_) as 'private'
@@ -188,6 +194,3 @@ def _validate_arguments(args, **_):
         pass
 
 APPLICATION = Application()
-
-# Handlers to update command definitions before they are fed to the parser
-APPLICATION.register(APPLICATION.COMMAND_PARSER_PARSED, _validate_arguments)
