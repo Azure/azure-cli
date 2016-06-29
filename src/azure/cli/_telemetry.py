@@ -7,7 +7,7 @@ client = {}
 
 def init_telemetry():
     try:
-        instrumentation_key = 'eb6e9d3a-b6ee-41a6-804f-70e152fdfc36'
+        instrumentation_key = '02b91c82-6729-4241-befc-e6d02ca4fbba'
 
         global client #pylint: disable=global-statement
         client = TelemetryClient(instrumentation_key)
