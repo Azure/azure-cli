@@ -16,7 +16,7 @@ MESSAGES = {
     'thanks': '\nThanks for your feedback!'
 }
 
-INSTRUMENTATION_KEY = 'eb6e9d3a-b6ee-41a6-804f-70e152fdfc36'
+INSTRUMENTATION_KEY = '02b91c82-6729-4241-befc-e6d02ca4fbba'
 EVENT_NAME = 'FeedbackEvent'
 
 COMPONENT_PREFIX = 'azure-cli-'
