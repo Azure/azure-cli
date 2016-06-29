@@ -1,7 +1,6 @@
 ﻿import unittest
 
 from azure.cli.application import APPLICATION, Configuration
-from azure.cli._util import CLIError
 
 def mock_echo_args(command_name, parameters):
     try:
