@@ -21,6 +21,7 @@ from azure.cli.commands.parameters import (location_type,
                                            get_one_of_subscription_locations,
                                            get_resource_name_completion_list)
 from azure.cli.commands import register_cli_argument, CliArgumentType, register_extra_cli_argument
+from azure.cli.command_modules.vm._param_folding import register_folded_cli_argument
 
 def get_urn_aliases_completion_list(prefix, **kwargs):#pylint: disable=unused-argument
     images = load_images_from_aliases_doc()
@@ -107,7 +108,7 @@ nsg_rule_type = CliArgumentType(
     type=str.upper
 )
 
-register_cli_argument('vm create', 'network_interface_type', choices=['new', 'existing'], help=None, type=str.lower)
+register_cli_argument('vm create', 'network_interface_type', help=argparse.SUPPRESS)
 register_cli_argument('vm create', 'network_interface_ids', options_list=('--network-interfaces',), nargs='+',
                       help='Names or IDs of existing NICs to reference.  The first NIC will be the primary NIC.',
                       validator=_handle_vm_nics)
@@ -135,12 +136,13 @@ for scope in ['vm create', 'vm scaleset create']:
     register_cli_argument(scope, 'ssh_dest_key_path', completer=FilesCompleter())
     register_cli_argument(scope, 'dns_name_for_public_ip', CliArgumentType(action=VMDNSNameAction))
     register_cli_argument(scope, 'authentication_type', authentication_type)
-    register_cli_argument(scope, 'availability_set_type', CliArgumentType(choices=['none', 'existing'], help='', type=str.lower))
-    register_cli_argument(scope, 'private_ip_address_allocation', CliArgumentType(choices=choices_ip_allocation_method, help='', type=str.lower))
-    register_cli_argument(scope, 'public_ip_address_allocation', CliArgumentType(choices=choices_ip_allocation_method, help='', type=str.lower))
-    register_cli_argument(scope, 'public_ip_address_type', CliArgumentType(choices=['none', 'new', 'existing'], help='', type=str.lower))
-    register_cli_argument(scope, 'storage_account_type', CliArgumentType(choices=['new', 'existing'], help='', type=str.lower))
-    register_cli_argument(scope, 'virtual_network_type', CliArgumentType(choices=['new', 'existing'], help='', type=str.lower))
+    register_folded_cli_argument(scope, 'availability_set', 'Microsoft.Compute/availabilitySets')
+    register_cli_argument(scope, 'private_ip_address_allocation', help=argparse.SUPPRESS)
+    register_cli_argument(scope, 'private_ip_address', help='Static private IP address.  Specify nothing for dynamic private IP.', options_list=('--private-ip',))
+    register_cli_argument(scope, 'public_ip_address_allocation', CliArgumentType(choices=['dynamic', 'static'], help='', default='dynamic', type=str.lower))
+    register_folded_cli_argument(scope, 'public_ip_address', 'Microsoft.Network/publicIPAddresses')
+    register_folded_cli_argument(scope, 'storage_account', 'Microsoft.Storage/storageAccounts')
+    register_folded_cli_argument(scope, 'virtual_network', 'Microsoft.Network/virtualNetworks')
+    register_folded_cli_argument('vm create', 'network_security_group', 'Microsoft.Network/networkSecurityGroups')
     register_cli_argument(scope, 'network_security_group_rule', nsg_rule_type)
-    register_cli_argument(scope, 'network_security_group_type', CliArgumentType(choices=['new', 'existing', 'none'], help='', type=str.lower))
     register_extra_cli_argument(scope, 'image', options_list=('--image',), action=VMImageFieldAction, completer=get_urn_aliases_completion_list, default='Win2012R2Datacenter')

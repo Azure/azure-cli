@@ -53,12 +53,23 @@ class VMDNSNameAction(argparse.Action): #pylint: disable=too-few-public-methods
 
         namespace.dns_name_for_public_ip = dns_value
 
+class PrivateIpAction(argparse.Action):
+    def __call__(self, parser, namespace, values, option_string=None):
+        private_ip = values
+        namespace.private_ip_address = private_ip
+
+        if private_ip:
+            namespace.private_ip_address_allocation = 'static' 
+
 def _handle_vm_nics(namespace):
     nics_value = namespace.network_interface_ids
     nics = []
 
     if not nics_value:
+        namespace.network_interface_type = 'new'
         return
+
+    namespace.network_interface_type = 'existing'
 
     if not isinstance(nics_value, list):
         nics_value = [nics_value]
