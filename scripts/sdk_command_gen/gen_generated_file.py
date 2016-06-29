@@ -35,12 +35,9 @@ def _output_imports(command_module_name, sdk_package_operations, operation_class
     for op_class in operation_classes:
         print('from {} import {}'.format(sdk_package_operations, op_class.__name__), file=OUT_FILE)
     print(file=OUT_FILE)
-    print('from azure.cli.commands import CommandTable', file=OUT_FILE)
-    print('from azure.cli.commands.command_types import cli_command', file=OUT_FILE)
+    print('from azure.cli.commands import cli_command', file=OUT_FILE)
     print(file=OUT_FILE)
     print('from azure.cli.command_modules.{}._factory import client_factory'.format(command_module_name), file=OUT_FILE)
-    print(file=OUT_FILE)
-    print('command_table = CommandTable()', file=OUT_FILE)
     print(file=OUT_FILE)
 
 def _create_command_name(command_module_name, op_class_name, method_name):
@@ -132,7 +129,7 @@ def _output_gen_operation_commands(sdk_package_str, op_class, command_module_nam
         command_name = _create_command_name(command_module_name, op_class.__name__, method_name)
         is_complex = _is_complex_command(op_class, method_name)
         return_type = _get_return_type(op_class, method_name)
-        cli_command_str = "cli_command(command_table, '{}', {}.{}, factory)".format(command_name, op_class.__name__, method_name)
+        cli_command_str = "cli_command('{}', {}.{}, factory)".format(command_name, op_class.__name__, method_name)
         if is_complex:
             FILTERED_COMPLEX_COMMANDS.append(cli_command_str)
         elif return_type == "'<Stream>'":
