@@ -16,7 +16,7 @@ pkg_resources.declare_namespace(__name__)
 """
 
 PACKAGE_INIT_TEMPLATE = """# pylint: disable=unused-import
-from .generated import command_table
+import generated
 """
 
 README_TEMPLATE = """Microsoft Azure CLI '{command_module_name}' Command Module
@@ -107,39 +107,16 @@ from azure.cli.command_modules.{command_module_name}._factory import client_fact
 
 FACTORY_TEMPLATE = """# Factory for the client.
 
-from {sdk_package_str} import {mgmt_client_name}, {mgmt_client_config_name}
+from {sdk_package_str} import {mgmt_client_name}
 
-from azure.cli.commands._command_creation import get_mgmt_service_client
+from azure.cli.commands.client_factory import get_mgmt_service_client
 
 def client_factory(**_):
-    return get_mgmt_service_client({mgmt_client_name}, {mgmt_client_config_name})
+    return get_mgmt_service_client({mgmt_client_name})
 
 """
 
-TEST_COMMAND_SPECS_TEMPLATE = """# TEST DEFINITIONS
-
-ENV_VAR = {}
-
-TEST_DEF = [
-]
-"""
-
-TEST_COMMANDS_TEMPLATE = """import os
-import unittest
-from azure.cli.utils.command_test_util import CommandTestGenerator
-from command_specs import TEST_DEF, ENV_VAR
-
-class TestCommands(unittest.TestCase):
-    pass
-
-recording_dir = os.path.join(os.path.dirname(__file__), 'recordings')
-generator = CommandTestGenerator(recording_dir, TEST_DEF, ENV_VAR)
-tests = generator.generate_tests()
-for test_name in tests:
-    setattr(TestCommands, test_name, tests[test_name])
-
-if __name__ == '__main__':
-    unittest.main()
+TEST_COMMANDS_TEMPLATE = """# TODO Write your tests here.
 """
 
 def _error_exit(msg):
@@ -222,14 +199,12 @@ def _create_params_file(main_source_path):
 def _create_factory_file(main_source_path, sdk_package):
     filename = os.path.join(main_source_path, '_factory.py')
     mgmt_clients = [module_obj for module_name, module_obj in sdk_package.__dict__.iteritems() if module_name.endswith('ManagementClient')]
-    mgmt_client_configs = [module_obj for module_name, module_obj in sdk_package.__dict__.iteritems() if module_name.endswith('ClientConfiguration')]
-    if len(mgmt_clients) != 1 or len(mgmt_client_configs) != 1:
-        _error_exit("Unable to create _factory.py file. Client/ClientConfig error.")
+    if len(mgmt_clients) != 1:
+        _error_exit("Unable to create _factory.py file. Client error.")
     with open(filename, 'w') as file:
         file.write(FACTORY_TEMPLATE.format(
             sdk_package_str=sdk_package.__name__,
             mgmt_client_name=mgmt_clients[0].__name__,
-            mgmt_client_config_name=mgmt_client_configs[0].__name__,
         ))
 
 def _create_generated_command_file(main_source_path, sdk_package_str, command_module_name):
@@ -262,8 +237,6 @@ def main():
     # Create test framework
     tests_dir = os.path.join(main_source_path, 'tests')
     _create_dir(tests_dir)
-    with open(os.path.join(tests_dir, 'command_specs.py'), 'w') as file:
-        file.write(TEST_COMMAND_SPECS_TEMPLATE)
     with open(os.path.join(tests_dir, 'test_commands.py'), 'w') as file:
         file.write(TEST_COMMANDS_TEMPLATE)
     
