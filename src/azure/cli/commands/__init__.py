@@ -109,7 +109,7 @@ class DeploymentOutputLongRunningOperation(LongRunningOperation): #pylint: disab
     def __call__(self, poller):
         result = super(DeploymentOutputLongRunningOperation, self).__call__(poller)
         outputs = result.properties.outputs
-        return {key: val['value'] for key, val in outputs.items()}
+        return {key: val['value'] for key, val in outputs.items()} if outputs else {}
 
 class CommandTable(dict):
     """A command table is a dictionary of name -> CliCommand

@@ -30,7 +30,7 @@ class AzureResourceId(object): #pylint: disable=too-many-instance-attributes,too
             self.subscription_id = id_parts.group('subscription')
         elif not self.resource_group or not self.full_type or not subscription_id:
             raise ValueError('Provide either an ID for name_or_id or provide a name and values for '
-                             'resource_group, full_type and subscription_id')
+                             'resource_group, full_type and subscription_id.  {}'.format(self))
 
     def __str__(self):
         child_id = '/{type}/{name}'.format(type=self.child_type, name=self.child_name) \

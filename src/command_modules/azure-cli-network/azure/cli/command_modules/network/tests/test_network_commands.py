@@ -69,14 +69,14 @@ class NetworkPublicIpScenarioTest(ResourceGroupVCRTestBase):
         s = self
         rg = s.resource_group
         s.cmd('network public-ip create -g {} -n {} --dns-name {} --allocation-method static'.format(rg, s.public_ip_name, s.dns), checks=[
-            JMESPathCheck('publicIp.value.provisioningState', 'Succeeded'),
-            JMESPathCheck('publicIp.value.publicIPAllocationMethod', 'Static'),
-            JMESPathCheck('publicIp.value.dnsSettings.domainNameLabel', s.dns)
+            JMESPathCheck('publicIp.provisioningState', 'Succeeded'),
+            JMESPathCheck('publicIp.publicIPAllocationMethod', 'Static'),
+            JMESPathCheck('publicIp.dnsSettings.domainNameLabel', s.dns)
         ])
         s.cmd('network public-ip create -g {} -n {}'.format(rg, s.public_ip_no_dns_name), checks=[
-            JMESPathCheck('publicIp.value.provisioningState', 'Succeeded'),
-            JMESPathCheck('publicIp.value.publicIPAllocationMethod', 'Dynamic'),
-            JMESPathCheck('publicIp.value.dnsSettings', None)
+            JMESPathCheck('publicIp.provisioningState', 'Succeeded'),
+            JMESPathCheck('publicIp.publicIPAllocationMethod', 'Dynamic'),
+            JMESPathCheck('publicIp.dnsSettings', None)
         ])
         s.cmd('network public-ip list-all', checks=JMESPathCheck('type(@)', 'array'))
         ip_list = s.cmd('network public-ip list -g {}'.format(rg))
@@ -185,10 +185,9 @@ class NetworkLoadBalancerScenarioTest(ResourceGroupVCRTestBase):
 
     def body(self):
         # test lb create with min params (new ip)
-        self.cmd('network lb create -n {}1 -g {}'.format(self.lb_name, self.resource_group), checks=[
-            JMESPathCheck('loadBalancer.value.provisioningState', 'Succeeded'),
-            JMESPathCheck('loadBalancer.value.frontendIPConfigurations[0].properties.privateIPAllocationMethod', 'Dynamic'),
-            JMESPathCheck('loadBalancer.value.frontendIPConfigurations[0].resourceGroup', self.resource_group)
+        self.cmd('network lb create -n {} -g {}'.format(self.lb_name, self.resource_group), checks=[
+            JMESPathCheck('loadBalancer.frontendIPConfigurations[0].properties.privateIPAllocationMethod', 'Dynamic'),
+            JMESPathCheck('loadBalancer.frontendIPConfigurations[0].resourceGroup', self.resource_group)
         ])
 
         # test internet facing load balancer with new static public IP
@@ -203,7 +202,6 @@ class NetworkLoadBalancerScenarioTest(ResourceGroupVCRTestBase):
         subnet_id = vnet['newVNet']['value']['subnets'][0]['id']
         self.cmd('network lb create -n {}3 -g {} --vnet-name {} --subnet {} --private-ip-address {}'.format(
             self.lb_name, self.resource_group, vnet_name, subnet_id, private_ip), checks=[
-                JMESPathCheck('loadBalancer.value.provisioningState', 'Succeeded'),
                 JMESPathCheck('loadBalancer.value.frontendIPConfigurations[0].properties.privateIPAllocationMethod', 'Static'),
                 JMESPathCheck('loadBalancer.value.frontendIPConfigurations[0].properties.privateIPAddress', private_ip),
                 JMESPathCheck('loadBalancer.value.frontendIPConfigurations[0].resourceGroup', self.resource_group),
@@ -215,10 +213,9 @@ class NetworkLoadBalancerScenarioTest(ResourceGroupVCRTestBase):
         self.cmd('network public-ip create -n {} -g {}'.format(pub_ip_name, self.resource_group))
         self.cmd('network lb create -n {}4 -g {} --public-ip-address {}'.format(
             self.lb_name, self.resource_group, pub_ip_name), checks=[
-                JMESPathCheck('loadBalancer.value.provisioningState', 'Succeeded'),
-                JMESPathCheck('loadBalancer.value.frontendIPConfigurations[0].properties.privateIPAllocationMethod', 'Dynamic'),
-                JMESPathCheck('loadBalancer.value.frontendIPConfigurations[0].resourceGroup', self.resource_group),
-                JMESPathCheck("loadBalancer.value.frontendIPConfigurations[0].properties.publicIPAddress.contains(id, '{}')".format(pub_ip_name), True)
+                JMESPathCheck('loadBalancer.frontendIPConfigurations[0].properties.privateIPAllocationMethod', 'Dynamic'),
+                JMESPathCheck('loadBalancer.frontendIPConfigurations[0].resourceGroup', self.resource_group),
+                JMESPathCheck("loadBalancer.frontendIPConfigurations[0].properties.publicIPAddress.contains(id, '{}')".format(pub_ip_name), True)
             ])
 
         self.cmd('network lb list-all', checks=[
@@ -414,29 +411,29 @@ class NetworkNicScenarioTest(ResourceGroupVCRTestBase):
 
         # create with minimum parameters
         self.cmd('network nic create -g {} -n {} --subnet-name {} --vnet-name {}'.format(rg, nic, subnet, vnet), checks=[
-            JMESPathCheck('newNIC.value.ipConfigurations[0].properties.privateIPAllocationMethod', 'Dynamic'),
-            JMESPathCheck('newNIC.value.provisioningState', 'Succeeded')
+            JMESPathCheck('newNIC.ipConfigurations[0].properties.privateIPAllocationMethod', 'Dynamic'),
+            JMESPathCheck('newNIC.provisioningState', 'Succeeded')
         ])
         # exercise optional parameters
         self.cmd('network nic create -g {} -n {} --subnet-name {} --vnet-name {} --ip-forwarding --private-ip-address {} --public-ip-address-name "{}"'.format(rg, nic, subnet, vnet, private_ip, public_ip_name), checks=[
-            JMESPathCheck('newNIC.value.ipConfigurations[0].properties.privateIPAllocationMethod', 'Static'),
-            JMESPathCheck('newNIC.value.ipConfigurations[0].properties.privateIPAddress', private_ip),
-            JMESPathCheck('newNIC.value.enableIPForwarding', True),
-            JMESPathCheck('newNIC.value.provisioningState', 'Succeeded')
+            JMESPathCheck('newNIC.ipConfigurations[0].properties.privateIPAllocationMethod', 'Static'),
+            JMESPathCheck('newNIC.ipConfigurations[0].properties.privateIPAddress', private_ip),
+            JMESPathCheck('newNIC.enableIPForwarding', True),
+            JMESPathCheck('newNIC.provisioningState', 'Succeeded')
         ])
         # exercise creating with NSG
         self.cmd('network nic create -g {} -n {} --subnet-name {} --vnet-name {} --nsg-name {}'.format(rg, nic, subnet, vnet, nsg), checks=[
-            JMESPathCheck('newNIC.value.ipConfigurations[0].properties.privateIPAllocationMethod', 'Dynamic'),
-            JMESPathCheck('newNIC.value.enableIPForwarding', False),
-            JMESPathCheck("newNIC.value.networkSecurityGroup.contains(id, '{}')".format(nsg), True),
-            JMESPathCheck('newNIC.value.provisioningState', 'Succeeded')
+            JMESPathCheck('newNIC.ipConfigurations[0].properties.privateIPAllocationMethod', 'Dynamic'),
+            JMESPathCheck('newNIC.enableIPForwarding', False),
+            JMESPathCheck("newNIC.networkSecurityGroup.contains(id, '{}')".format(nsg), True),
+            JMESPathCheck('newNIC.provisioningState', 'Succeeded')
         ])
         # exercise creating with NSG and Public IP
         self.cmd('network nic create -g {} -n {} --subnet-name {} --vnet-name {} --nsg-name {} --public-ip-address-name "{}"'.format(rg, nic, subnet, vnet, nsg, public_ip_name), checks=[
-            JMESPathCheck('newNIC.value.ipConfigurations[0].properties.privateIPAllocationMethod', 'Dynamic'),
-            JMESPathCheck('newNIC.value.enableIPForwarding', False),
-            JMESPathCheck("newNIC.value.networkSecurityGroup.contains(id, '{}')".format(nsg), True),
-            JMESPathCheck('newNIC.value.provisioningState', 'Succeeded')
+            JMESPathCheck('newNIC.ipConfigurations[0].properties.privateIPAllocationMethod', 'Dynamic'),
+            JMESPathCheck('newNIC.enableIPForwarding', False),
+            JMESPathCheck("newNIC.networkSecurityGroup.contains(id, '{}')".format(nsg), True),
+            JMESPathCheck('newNIC.provisioningState', 'Succeeded')
         ])
         self.cmd('network nic list-all', checks=[
             JMESPathCheck('type(@)', 'array'),

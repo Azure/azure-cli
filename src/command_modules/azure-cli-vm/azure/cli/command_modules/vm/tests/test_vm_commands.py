@@ -101,7 +101,7 @@ class VMShowListSizesListIPAddressesScenarioTest(ResourceGroupVCRTestBase):
         self.cmd('vm create --resource-group {0} --location {1} -n {2} --admin-username ubuntu '
                  '--image Canonical:UbuntuServer:14.04.4-LTS:latest --admin-password testPassword0 '
                  '--deployment-name {3} --public-ip-address-allocation {4} '
-                 '--public-ip-address-type new --authentication-type password'.format(
+                 '--authentication-type password'.format(
                      self.resource_group, self.location, self.vm_name, self.deployment_name,
                      self.ip_allocation_method))
         self.cmd('vm show --resource-group {} --name {} --expand instanceView'.format(
@@ -612,7 +612,7 @@ class VMScaleSetCreateOptions(ResourceGroupVCRTestBase):
 class VMScaleSetCreateExistingOptions(ResourceGroupVCRTestBase):
     def __init__(self, test_method):
         super(VMScaleSetCreateExistingOptions, self).__init__(__file__, test_method)
-        self.resource_group = 'scaleset_create_existing_options_rg'
+        self.resource_group = 'scaleset_create_existing_options_rg2'
 
     def test_vm_scaleset_create_existing_options(self):
         self.execute()
@@ -694,14 +694,16 @@ class VMCreateUbuntuScenarioTest(ResourceGroupVCRTestBase): #pylint: disable=too
             auth_type=self.auth_type,
             ssh_key=self.pub_ssh_filename,
             location=self.location
-        ), checks=[
-            JMESPathCheck('type(@)', 'object'),
-            JMESPathCheck('vm.value.provisioningState', 'Succeeded'),
-            JMESPathCheck('vm.value.osProfile.adminUsername', self.admin_username),
-            JMESPathCheck('vm.value.osProfile.computerName', self.vm_names[0]),
-            JMESPathCheck('vm.value.osProfile.linuxConfiguration.disablePasswordAuthentication', True),
-            JMESPathCheck('vm.value.osProfile.linuxConfiguration.ssh.publicKeys[0].keyData', TEST_SSH_KEY_PUB),
+        ))
+
+        self.cmd('vm show -g {rg} -n {vm_name}'.format(rg=self.resource_group, vm_name=self.vm_names[0]), checks=[
+            JMESPathCheck('provisioningState', 'Succeeded'),
+            JMESPathCheck('osProfile.adminUsername', self.admin_username),
+            JMESPathCheck('osProfile.computerName', self.vm_names[0]),
+            JMESPathCheck('osProfile.linuxConfiguration.disablePasswordAuthentication', True),
+            JMESPathCheck('osProfile.linuxConfiguration.ssh.publicKeys[0].keyData', TEST_SSH_KEY_PUB),
         ])
+
 
 class VMBootDiagnostics(VCRTestBase):
 
@@ -810,13 +812,13 @@ class VMCreateExistingOptions(ResourceGroupVCRTestBase):
         self.cmd('network vnet create --name {} -g {} --subnet-name {}'.format(vnet_name, self.resource_group, subnet_name))
         self.cmd('network nsg create --name {} -g {}'.format(nsg_name, self.resource_group))
 
-        self.cmd('vm create --image UbuntuLTS --os-disk-name {disk_name} --virtual-network-type existing'
-                 ' --virtual-network-name {vnet_name} --subnet-name {subnet_name} --availability-set-type existing'
-                 ' --availability-set-id {availset_name} --public-ip-address-type existing'
-                 ' --public-ip-address-name {pubip_name} -l "West US"'
-                 ' --network-security-group-name {nsg_name} --network-security-group-type existing'
-                 ' --size Standard_A3 --storage-account-type existing'
-                 ' --storage-account-name {storage_name} --storage-container-name {container_name} -g {resource_group}'
+        self.cmd('vm create --image UbuntuLTS --os-disk-name {disk_name}'
+                 ' --virtual-network {vnet_name} --subnet-name {subnet_name}'
+                 ' --availability-set {availset_name}'
+                 ' --public-ip-address {pubip_name} -l "West US"'
+                 ' --network-security-group {nsg_name}'
+                 ' --size Standard_DS2'
+                 ' --storage-account {storage_name} --storage-container-name {container_name} -g {resource_group}'
                  ' --name {vm_name} --ssh-key-value \'{key_value}\''
                  .format(vnet_name=vnet_name, subnet_name=subnet_name, availset_name=availset_name,
                          pubip_name=pubip_name, resource_group=self.resource_group, nsg_name=nsg_name,
@@ -830,7 +832,7 @@ class VMCreateExistingOptions(ResourceGroupVCRTestBase):
         self.cmd('network nic show -n {vm_name}VMNic -g {resource_group}'.format(vm_name=vm_name, resource_group=self.resource_group),
             checks=JMESPathCheck('ipConfigurations[0].publicIpAddress.id.ends_with(@, \'{}\')'.format(pubip_name), True))
         self.cmd('vm show -n {vm_name} -g {resource_group}'.format(vm_name=vm_name, resource_group=self.resource_group),
-            checks=JMESPathCheck('storageProfile.osDisk.vhd.uri', 'http://{storage_name}.blob.core.windows.net/{container_name}/{disk_name}.vhd'.format(storage_name=storage_name, container_name=container_name, disk_name=disk_name)))
+            checks=JMESPathCheck('storageProfile.osDisk.vhd.uri', 'https://{storage_name}.blob.core.windows.net/{container_name}/{disk_name}.vhd'.format(storage_name=storage_name, container_name=container_name, disk_name=disk_name)))
 
 class VMCreateCustomIP(ResourceGroupVCRTestBase):
 

@@ -15,7 +15,8 @@ from azure.cli.command_modules.vm._actions import (VMImageFieldAction,
                                                    VMDNSNameAction,
                                                    load_images_from_aliases_doc,
                                                    get_vm_sizes,
-                                                   _handle_vm_nics)
+                                                   _handle_vm_nics,
+                                                   PrivateIpAction)
 from azure.cli.commands.parameters import (location_type,
                                            get_location_completion_list,
                                            get_one_of_subscription_locations,
@@ -138,7 +139,7 @@ for scope in ['vm create', 'vm scaleset create']:
     register_cli_argument(scope, 'authentication_type', authentication_type)
     register_folded_cli_argument(scope, 'availability_set', 'Microsoft.Compute/availabilitySets')
     register_cli_argument(scope, 'private_ip_address_allocation', help=argparse.SUPPRESS)
-    register_cli_argument(scope, 'private_ip_address', help='Static private IP address.  Specify nothing for dynamic private IP.', options_list=('--private-ip',))
+    register_cli_argument(scope, 'private_ip_address', help='Static private IP address.  Specify nothing for dynamic private IP.', options_list=('--private-ip-address',), action=PrivateIpAction)
     register_cli_argument(scope, 'public_ip_address_allocation', CliArgumentType(choices=['dynamic', 'static'], help='', default='dynamic', type=str.lower))
     register_folded_cli_argument(scope, 'public_ip_address', 'Microsoft.Network/publicIPAddresses')
     register_folded_cli_argument(scope, 'storage_account', 'Microsoft.Storage/storageAccounts')
