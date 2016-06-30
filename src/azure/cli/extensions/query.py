@@ -12,6 +12,7 @@ def register(application):
         from jmespath import compile as compile_jmespath
         from jmespath.exceptions import ParseError
         args = kwargs['args']
+        jmespath_query = None
         try:
             jmespath_query = args._jmespath_query # pylint: disable=protected-access
             query_expression = compile_jmespath(jmespath_query) if jmespath_query else None
@@ -26,6 +27,8 @@ def register(application):
                 application.register(application.FILTER_RESULT, filter_output)
         except ParseError as ex:
             raise CLIError(ex)
+        except KeyError:
+            raise CLIError("Error processing query {}".format(jmespath_query if jmespath_query else ''))
         except AttributeError:
             pass
 
