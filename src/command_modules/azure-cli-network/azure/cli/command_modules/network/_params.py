@@ -1,6 +1,7 @@
 # pylint: disable=line-too-long
 import argparse
 
+from azure.mgmt.network.models import IPAllocationMethod
 from azure.cli.command_modules.network._actions import LBDNSNameAction, PublicIpDnsNameAction
 from azure.cli.command_modules.network._validators import process_nic_namespace
 from azure.cli.commands.parameters import (location_type, get_resource_name_completion_list, register_id_parameter)
@@ -12,6 +13,8 @@ name_arg_type = CliArgumentType(options_list=('--name', '-n'), metavar='NAME')
 virtual_network_name_type = CliArgumentType(options_list=('--vnet-name',), metavar='VNET_NAME', help='Name of the virtual network.', completer=get_resource_name_completion_list('Microsoft.Network/virtualNetworks'))
 subnet_name_type = CliArgumentType(options_list=('--subnet-name',), metavar='SUBNET_NAME')
 nsg_name_type = CliArgumentType(options_list=('--nsg-name',), metavar='NSG', help='Name of the network security group.')
+
+choices_ip_allocation_method = [e.value.lower() for e in IPAllocationMethod]
 
 register_cli_argument('network', 'subnet_name', name_arg_type)
 register_cli_argument('network', 'virtual_network_name', virtual_network_name_type)
@@ -98,7 +101,7 @@ register_cli_argument('network public-ip', 'name', name_arg_type, completer=get_
 register_cli_argument('network public-ip create', 'name', completer=None)
 register_cli_argument('network public-ip create', 'dns_name', CliArgumentType(action=PublicIpDnsNameAction))
 register_cli_argument('network public-ip create', 'public_ip_address_type', CliArgumentType(help=argparse.SUPPRESS))
-register_cli_argument('network public-ip create', 'allocation_method', CliArgumentType(choices=['dynamic', 'static'], default='dynamic', type=str.lower))
+register_cli_argument('network public-ip create', 'allocation_method', CliArgumentType(choices=choices_ip_allocation_method, default='dynamic', type=str.lower))
 for name in ('delete',
              'show'):
     register_id_parameter('network public-ip ' + name, 'resource_group_name', 'public_ip_address_name')
@@ -141,9 +144,9 @@ register_cli_argument('network lb', 'load_balancer_name', name_arg_type, complet
 
 register_cli_argument('network lb create', 'dns_name_for_public_ip', CliArgumentType(action=LBDNSNameAction))
 register_cli_argument('network lb create', 'dns_name_type', CliArgumentType(help=argparse.SUPPRESS))
-register_cli_argument('network lb create', 'private_ip_address_allocation', CliArgumentType(help='', choices=['dynamic', 'static'], default='dynamic', type=str.lower))
-register_cli_argument('network lb create', 'public_ip_address_allocation', CliArgumentType(help='', choices=['dynamic', 'static'], default='dynamic', type=str.lower))
-register_cli_argument('network lb create', 'public_ip_address_type', CliArgumentType(help='', choices=['new', 'existing', 'none'], default='new', type=str.lower))
+register_cli_argument('network lb create', 'private_ip_address_allocation', CliArgumentType(help='', choices=choices_ip_allocation_method, type=str.lower))
+register_cli_argument('network lb create', 'public_ip_address_allocation', CliArgumentType(help='', choices=choices_ip_allocation_method, type=str.lower))
+register_cli_argument('network lb create', 'public_ip_address_type', CliArgumentType(help='', choices=['new', 'existing', 'none'], type=str.lower))
 register_cli_argument('network lb create', 'subnet_name', CliArgumentType(options_list=('--subnet-name',)))
 for name in ('delete',
              'show'):

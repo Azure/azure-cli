@@ -5,8 +5,11 @@ import os
 
 from argcomplete.completers import FilesCompleter
 
-from azure.mgmt.compute.models import VirtualHardDisk
-
+from azure.mgmt.compute.models import (VirtualHardDisk,
+                                       CachingTypes,
+                                       ContainerServiceOchestratorTypes,
+                                       UpgradeMode)
+from azure.mgmt.network.models import IPAllocationMethod
 from azure.cli.command_modules.vm._actions import (VMImageFieldAction,
                                                    VMSSHFieldAction,
                                                    VMDNSNameAction,
@@ -30,6 +33,11 @@ def get_vm_size_completion_list(prefix, action, parsed_args, **kwargs):#pylint: 
     return [r.name for r in result]
 
 # BASIC PARAMETER CONFIGURATION
+choices_caching_types = [e.value for e in CachingTypes]
+choices_container_service_orchestrator_types = [e.value for e in ContainerServiceOchestratorTypes]
+choices_upgrade_mode = [e.value.lower() for e in UpgradeMode]
+choices_ip_allocation_method = [e.value.lower() for e in IPAllocationMethod]
+
 name_arg_type = CliArgumentType(options_list=('--name', '-n'), metavar='NAME')
 multi_ids_type = CliArgumentType(
     nargs='+'
@@ -49,7 +57,7 @@ register_cli_argument('vm disk', 'disk_size', CliArgumentType(help='Size of disk
 register_cli_argument('vm disk', 'lun', CliArgumentType(
     type=int, help='0-based logical unit number (LUN). Max value depends on the Virutal Machine size.'))
 register_cli_argument('vm disk', 'vhd', CliArgumentType(type=VirtualHardDisk, help='virtual hard disk\'s uri. For example:https://mystorage.blob.core.windows.net/vhds/d1.vhd'))
-register_cli_argument('vm disk', 'caching', CliArgumentType(help='Host caching policy', default='None', choices=['None', 'ReadOnly', 'ReadWrite']))
+register_cli_argument('vm disk', 'caching', CliArgumentType(help='Host caching policy', default=CachingTypes.none.value, choices=choices_caching_types))
 
 register_cli_argument('vm availability-set', 'availability_set_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Compute/availabilitySets'))
 for name in ('delete', 'list-sizes', 'show'):
@@ -58,7 +66,7 @@ for name in ('delete', 'list-sizes', 'show'):
 register_cli_argument('vm access', 'username', CliArgumentType(options_list=('--username', '-u'), help='The user name'))
 register_cli_argument('vm access', 'password', CliArgumentType(options_list=('--password', '-p'), help='The user password'))
 
-register_cli_argument('vm container', 'orchestrator_type', CliArgumentType(choices=['docs', 'swarm'], type=str.lower))
+register_cli_argument('vm container', 'orchestrator_type', CliArgumentType(choices=choices_container_service_orchestrator_types))
 register_cli_argument('vm container', 'admin_username', admin_username_type)
 register_cli_argument(
     'vm container', 'ssh_key_value', CliArgumentType(
@@ -116,7 +124,7 @@ for scope in ['vm create', 'vm scaleset create']:
     register_cli_argument(scope, 'overprovision', CliArgumentType(action='store_false', default=None, options_list=('--disable-overprovision',)))
     register_cli_argument(scope, 'load_balancer_type', CliArgumentType(choices=['new', 'existing', 'none'], type=str.lower))
     register_cli_argument(scope, 'storage_caching', CliArgumentType(choices=['ReadOnly', 'ReadWrite']))
-    register_cli_argument(scope, 'upgrade_policy_mode', CliArgumentType(choices=['manual', 'automatic'], default='manual', help=None, type=str.lower))
+    register_cli_argument(scope, 'upgrade_policy_mode', CliArgumentType(choices=choices_upgrade_mode, help=None, type=str.lower))
     register_cli_argument(scope, 'nat_backend_port', CliArgumentType(help='Backend NAT port to map.  Defaults to 22 for Linux and 3389 for Windows.', default=None))
     register_cli_argument(scope, 'os_disk_uri', CliArgumentType(help=argparse.SUPPRESS))
     register_cli_argument(scope, 'os_offer', CliArgumentType(help=argparse.SUPPRESS))
@@ -130,14 +138,14 @@ for scope in ['vm create', 'vm scaleset create']:
     register_cli_argument(scope, 'ssh_dest_key_path', completer=FilesCompleter())
     register_cli_argument(scope, 'dns_name_for_public_ip', CliArgumentType(action=VMDNSNameAction))
     register_cli_argument(scope, 'authentication_type', authentication_type)
-    register_cli_argument(scope, 'availability_set_type', CliArgumentType(choices=['none', 'existing'], help='', default='none', type=str.lower))
-    register_cli_argument(scope, 'private_ip_address_allocation', CliArgumentType(choices=['dynamic', 'static'], help='', default='dynamic', type=str.lower))
-    register_cli_argument(scope, 'public_ip_address_allocation', CliArgumentType(choices=['dynamic', 'static'], help='', default='dynamic', type=str.lower))
-    register_cli_argument(scope, 'public_ip_address_type', CliArgumentType(choices=['none', 'new', 'existing'], help='', default='new', type=str.lower))
-    register_cli_argument(scope, 'storage_account_type', CliArgumentType(choices=['new', 'existing'], help='', default='new', type=str.lower))
-    register_cli_argument(scope, 'virtual_network_type', CliArgumentType(choices=['new', 'existing'], help='', default='new', type=str.lower))
+    register_cli_argument(scope, 'availability_set_type', CliArgumentType(choices=['none', 'existing'], help='', type=str.lower))
+    register_cli_argument(scope, 'private_ip_address_allocation', CliArgumentType(choices=choices_ip_allocation_method, help='', type=str.lower))
+    register_cli_argument(scope, 'public_ip_address_allocation', CliArgumentType(choices=choices_ip_allocation_method, help='', type=str.lower))
+    register_cli_argument(scope, 'public_ip_address_type', CliArgumentType(choices=['none', 'new', 'existing'], help='', type=str.lower))
+    register_cli_argument(scope, 'storage_account_type', CliArgumentType(choices=['new', 'existing'], help='', type=str.lower))
+    register_cli_argument(scope, 'virtual_network_type', CliArgumentType(choices=['new', 'existing'], help='', type=str.lower))
     register_cli_argument(scope, 'network_security_group_rule', nsg_rule_type)
-    register_cli_argument(scope, 'network_security_group_type', CliArgumentType(choices=['new', 'existing', 'none'], help='', default='new', type=str.lower))
+    register_cli_argument(scope, 'network_security_group_type', CliArgumentType(choices=['new', 'existing', 'none'], help='', type=str.lower))
     register_extra_cli_argument(scope, 'image', options_list=('--image',), action=VMImageFieldAction, completer=get_urn_aliases_completion_list, default='Win2012R2Datacenter')
 
 for name in ('access delete-linux-user',

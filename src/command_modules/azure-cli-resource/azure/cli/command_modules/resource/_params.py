@@ -3,6 +3,7 @@ import argparse
 
 from argcomplete.completers import FilesCompleter
 
+from azure.mgmt.resource.resources.models import DeploymentMode
 from azure.cli.commands import register_cli_argument, CliArgumentType
 from azure.cli.commands.parameters import (resource_group_name_type,
                                            tag_type,
@@ -12,6 +13,8 @@ from azure.cli.commands.parameters import (resource_group_name_type,
 from ._validators import validate_resource_type, validate_parent, resolve_resource_parameters
 
 # BASIC PARAMETER CONFIGURATION
+
+choices_deployment_mode = [e.value.lower() for e in DeploymentMode]
 
 resource_type_type = CliArgumentType(
     help='The resource type in <namespace>/<type> format.',
@@ -36,7 +39,7 @@ register_cli_argument('resource group deployment', 'deployment_name', CliArgumen
 register_cli_argument('resource group deployment', 'parameters_file_path', completer=FilesCompleter())
 register_cli_argument('resource group deployment', 'template_file_path', completer=FilesCompleter())
 register_cli_argument('resource group deployment', 'mode', CliArgumentType(
-    choices=['incremental', 'complete'], default='incremental', type=str.lower,
+    choices=choices_deployment_mode, type=str.lower,
     help='Incremental (only add resources to resource group) or Complete (remove extra resources from resource group)'))
 register_cli_argument('resource group export', 'include_comments', CliArgumentType(action='store_true'))
 register_cli_argument('resource group export', 'include_parameter_default_value', CliArgumentType(action='store_true'))

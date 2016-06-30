@@ -17,16 +17,10 @@ from ._validators import (
 
 # PARAMETER CHOICE LISTS
 
+choices_sku_name = [e.value for e in SkuName]
+
 storage_account_key_options = {'primary': 'key1', 'secondary': 'key2'}
 
-# TODO: update this once enums are supported in commands first-class (task #115175885)
-storage_account_types = {'Standard_LRS': SkuName.standard_lrs,
-                         'Standard_ZRS': SkuName.standard_zrs,
-                         'Standard_GRS': SkuName.standard_grs,
-                         'Standard_RAGRS': SkuName.standard_ragrs,
-                         'Premium_LRS': SkuName.premium_lrs}
-
-# TODO: update this once enums are supported in commands first-class (task #115175885)
 public_access_types = {'none': None, 'blob': PublicAccess.Blob, 'container': PublicAccess.Container}
 
 lease_duration_values = {'min':15, 'max':60, 'infinite':-1}
@@ -45,7 +39,7 @@ account_name_type = CliArgumentType(
 
 account_type_type = CliArgumentType(
     options_list=('--account-type',),
-    choices=storage_account_types,
+    choices=choices_sku_name,
     help='the storage account type'
 )
 
