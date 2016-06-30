@@ -132,8 +132,7 @@ def register_id_parameter(command_name, *arguments, **kwargs):
                 optional_arguments.append(arg)
             arg.required = False
 
-        last_arg = command.arguments[arguments[-1]]
-        command.arguments.pop(arguments[-1])
+        last_arg = command.arguments.pop(arguments[-1])
         arguments_if_not_id_specified = []
         for non_last_arg in arguments[:-1]:
             arg = command.arguments[non_last_arg]
