@@ -6,7 +6,7 @@ import re
 from azure.cli._util import CLIError
 from azure.cli.application import APPLICATION
 from azure.cli.commands.parameters import get_one_of_subscription_locations
-from azure.cli.commands.azure_resource_id import AzureResourceId
+from azure.cli.commands.azure_resource_id import AzureResourceId, resource_exists
 
 from six.moves.urllib.request import urlopen #pylint: disable=import-error
 
@@ -86,6 +86,15 @@ def _handle_vm_nics(namespace):
 
     namespace.network_interface_ids = nics
     namespace.network_interface_type = 'existing'
+
+def _resource_not_exists(resource_type):
+    def _handle_resource_not_exists(namespace):
+        # TODO: hook up namespace._subscription_id once we support it
+        r_id = AzureResourceId(namespace.name, namespace.resource_group_name, resource_type,
+                               _get_subscription_id())
+        if not namespace.force and resource_exists(r_id):
+            raise CLIError('Resource {} already exists.'.format(str(r_id)))
+    return _handle_resource_not_exists
 
 def _handle_auth_types(**kwargs):
     if kwargs['command'] != 'vm create' and kwargs['command'] != 'vm scaleset create':

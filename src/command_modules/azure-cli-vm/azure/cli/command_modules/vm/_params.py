@@ -16,7 +16,8 @@ from azure.cli.command_modules.vm._actions import (VMImageFieldAction,
                                                    load_images_from_aliases_doc,
                                                    get_vm_sizes,
                                                    _handle_vm_nics,
-                                                   PrivateIpAction)
+                                                   PrivateIpAction,
+                                                   _resource_not_exists)
 from azure.cli.commands.parameters import (location_type,
                                            get_location_completion_list,
                                            get_one_of_subscription_locations,
@@ -114,8 +115,10 @@ register_cli_argument('vm create', 'network_interface_ids', options_list=('--net
                       help='Names or IDs of existing NICs to reference.  The first NIC will be the primary NIC.',
                       validator=_handle_vm_nics)
 
+register_cli_argument('vm create', 'name', name_arg_type, validator=_resource_not_exists('Microsoft.Compute/virtualMachines'))
+register_cli_argument('vm scaleset create', 'name', name_arg_type, validator=_resource_not_exists('Microsoft.Compute/virtualMachineScaleSets'))
+
 for scope in ['vm create', 'vm scaleset create']:
-    register_cli_argument(scope, 'name', name_arg_type)
     register_cli_argument(scope, 'location', CliArgumentType(completer=get_location_completion_list))
     register_cli_argument(scope, 'custom_os_disk_uri', CliArgumentType(help=argparse.SUPPRESS))
     register_cli_argument(scope, 'custom_os_disk_type', CliArgumentType(choices=['windows', 'linux'], type=str.lower))
@@ -147,3 +150,4 @@ for scope in ['vm create', 'vm scaleset create']:
     register_folded_cli_argument('vm create', 'network_security_group', 'Microsoft.Network/networkSecurityGroups')
     register_cli_argument(scope, 'network_security_group_rule', nsg_rule_type)
     register_extra_cli_argument(scope, 'image', options_list=('--image',), action=VMImageFieldAction, completer=get_urn_aliases_completion_list, default='Win2012R2Datacenter')
+    register_extra_cli_argument(scope, 'force', options_list=('--force',), action='store_true', help='Force create and ignore parameter validation')

@@ -76,8 +76,7 @@ class DeploymentVm(Model):
      group or not. Possible values include: 'new', 'existingName',
      'existingId', 'none'. Default value: "new" .
     :type network_security_group_type: str
-    :param os_disk_name: Name of new VM OS disk. Default value: "osdiskimage"
-     .
+    :param os_disk_name: Name of new VM OS disk.
     :type os_disk_name: str
     :param os_disk_type: Use a custom image URI from the OS Disk URI
      parameter or use a provider's image. Possible values include:
@@ -221,7 +220,7 @@ class DeploymentVm(Model):
 
     mode = "Incremental"
 
-    def __init__(self, admin_username, name, content_version=None, admin_password=None, authentication_type="password", availability_set=None, availability_set_type="none", custom_os_disk_type="windows", custom_os_disk_uri=None, dns_name_for_public_ip=None, dns_name_type="none", location=None, network_interface_ids=None, network_interface_type="new", network_security_group=None, network_security_group_rule="RDP", network_security_group_type="new", os_disk_name="osdiskimage", os_disk_type="provided", os_disk_uri=None, os_offer="WindowsServer", os_publisher="MicrosoftWindowsServer", os_sku="2012-R2-Datacenter", os_type="Win2012R2Datacenter", os_version="latest", private_ip_address=None, private_ip_address_allocation="dynamic", public_ip_address=None, public_ip_address_allocation="dynamic", public_ip_address_type="new", size="Standard_DS1", ssh_dest_key_path=None, ssh_key_value=None, storage_account=None, storage_account_type="new", storage_caching="ReadWrite", storage_container_name="vhds", storage_type="Premium_LRS", subnet_ip_address_prefix="10.0.0.0/24", subnet_name=None, virtual_network=None, virtual_network_ip_address_prefix="10.0.0.0/16", virtual_network_type="new"):
+    def __init__(self, admin_username, name, content_version=None, admin_password=None, authentication_type="password", availability_set=None, availability_set_type="none", custom_os_disk_type="windows", custom_os_disk_uri=None, dns_name_for_public_ip=None, dns_name_type="none", location=None, network_interface_ids=None, network_interface_type="new", network_security_group=None, network_security_group_rule="RDP", network_security_group_type="new", os_disk_name=None, os_disk_type="provided", os_disk_uri=None, os_offer="WindowsServer", os_publisher="MicrosoftWindowsServer", os_sku="2012-R2-Datacenter", os_type="Win2012R2Datacenter", os_version="latest", private_ip_address=None, private_ip_address_allocation="dynamic", public_ip_address=None, public_ip_address_allocation="dynamic", public_ip_address_type="new", size="Standard_DS1", ssh_dest_key_path=None, ssh_key_value=None, storage_account=None, storage_account_type="new", storage_caching="ReadWrite", storage_container_name="vhds", storage_type="Premium_LRS", subnet_ip_address_prefix="10.0.0.0/24", subnet_name=None, virtual_network=None, virtual_network_ip_address_prefix="10.0.0.0/16", virtual_network_type="new"):
         self.content_version = content_version
         self.admin_password = admin_password
         self.admin_username = admin_username
