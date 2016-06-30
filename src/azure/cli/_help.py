@@ -353,7 +353,7 @@ def _print_indent(s, indent=0, subsequent_spaces=-1):
         print(tw.fill(p), file=sys.stdout)
 
 def _get_column_indent(text, max_name_length):
-    return ' '*(_name_wrap_limit - min(_name_wrap_limit, len(text)))
+    return ' '*(min(max_name_length, _name_wrap_limit) - min(_name_wrap_limit, len(text)))
 
 
 def _normalize_text(s):
