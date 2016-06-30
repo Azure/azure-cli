@@ -1,3 +1,4 @@
+#pylint: skip-file
 from collections import defaultdict
 import logging
 import unittest

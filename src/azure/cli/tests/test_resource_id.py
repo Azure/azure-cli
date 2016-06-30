@@ -1,3 +1,4 @@
+#pylint: skip-file
 import unittest
 from six import StringIO
 from azure.cli.commands.azure_resource_id import AzureResourceId

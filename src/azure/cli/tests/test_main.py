@@ -1,3 +1,4 @@
+#pylint: skip-file
 import unittest
 
 from azure.cli.main import main as cli

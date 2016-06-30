@@ -1,3 +1,4 @@
+#pylint: skip-file
 import unittest
 import azure.cli._logging as _logging
 
