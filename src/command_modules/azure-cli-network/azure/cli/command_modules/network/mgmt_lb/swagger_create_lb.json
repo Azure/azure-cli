@@ -170,11 +170,6 @@
           "$ref": "#/definitions/DeploymentParameter_backendPoolName",
           "x-ms-client-flatten": true
         },
-        "dnsNameForPublicIP": {
-          "type": "object",
-          "$ref": "#/definitions/DeploymentParameter_dnsNameForPublicIP",
-          "x-ms-client-flatten": true
-        },
         "dnsNameType": {
           "type": "object",
           "$ref": "#/definitions/DeploymentParameter_dnsNameType",
@@ -200,14 +195,14 @@
           "$ref": "#/definitions/DeploymentParameter_privateIpAddressAllocation",
           "x-ms-client-flatten": true
         },
+        "publicIpAddress": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_publicIpAddress",
+          "x-ms-client-flatten": true
+        },
         "publicIpAddressAllocation": {
           "type": "object",
           "$ref": "#/definitions/DeploymentParameter_publicIpAddressAllocation",
-          "x-ms-client-flatten": true
-        },
-        "publicIpAddressName": {
-          "type": "object",
-          "$ref": "#/definitions/DeploymentParameter_publicIpAddressName",
           "x-ms-client-flatten": true
         },
         "publicIpAddressType": {
@@ -215,20 +210,40 @@
           "$ref": "#/definitions/DeploymentParameter_publicIpAddressType",
           "x-ms-client-flatten": true
         },
-        "subnetName": {
+        "publicIpDnsName": {
           "type": "object",
-          "$ref": "#/definitions/DeploymentParameter_subnetName",
+          "$ref": "#/definitions/DeploymentParameter_publicIpDnsName",
+          "x-ms-client-flatten": true
+        },
+        "subnet": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_subnet",
+          "x-ms-client-flatten": true
+        },
+        "subnetAddressPrefix": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_subnetAddressPrefix",
+          "x-ms-client-flatten": true
+        },
+        "subnetType": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_subnetType",
           "x-ms-client-flatten": true
         },
         "virtualNetworkName": {
           "type": "object",
           "$ref": "#/definitions/DeploymentParameter_virtualNetworkName",
           "x-ms-client-flatten": true
+        },
+        "vnetAddressPrefix": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_vnetAddressPrefix",
+          "x-ms-client-flatten": true
         }
       },
       "required": [
-        "loadBalancerName",
-        "_artifactsLocation"
+        "_artifactsLocation",
+        "loadBalancerName"
       ]
     },
     "DeploymentParameter_backendPoolName": {
@@ -237,15 +252,6 @@
           "type": "string",
           "description": "Name of load balancer backend pool.",
           "x-ms-client-name": "backendPoolName"
-        }
-      }
-    },
-    "DeploymentParameter_dnsNameForPublicIP": {
-      "properties": {
-        "value": {
-          "type": "string",
-          "description": "Globally unique DNS Name for the Public IP used to access the Virtual Machine.  Requires a new public IP to be created by setting Public IP Address Type to New.",
-          "x-ms-client-name": "dnsNameForPublicIP"
         }
       }
     },
@@ -307,6 +313,15 @@
         }
       }
     },
+    "DeploymentParameter_publicIpAddress": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "Name or ID of the public IP address to use.",
+          "x-ms-client-name": "publicIpAddress"
+        }
+      }
+    },
     "DeploymentParameter_publicIpAddressAllocation": {
       "properties": {
         "value": {
@@ -321,15 +336,6 @@
         }
       }
     },
-    "DeploymentParameter_publicIpAddressName": {
-      "properties": {
-        "value": {
-          "type": "string",
-          "description": "Name of public IP address to use.",
-          "x-ms-client-name": "publicIpAddressName"
-        }
-      }
-    },
     "DeploymentParameter_publicIpAddressType": {
       "properties": {
         "value": {
@@ -339,18 +345,54 @@
           "enum": [
             "none",
             "new",
-            "existing"
+            "existingName",
+            "existingId"
           ],
           "default": "new"
         }
       }
     },
-    "DeploymentParameter_subnetName": {
+    "DeploymentParameter_publicIpDnsName": {
       "properties": {
         "value": {
           "type": "string",
-          "description": "If Public IP address is turned off, this is the subnet to associate with the load balancer.",
-          "x-ms-client-name": "subnetName"
+          "description": "Globally unique DNS Name for the Public IP used to access the Virtual Machine (new public IP only).",
+          "x-ms-client-name": "publicIpDnsName"
+        }
+      }
+    },
+    "DeploymentParameter_subnet": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "The subnet name or ID to associate with the load balancer. Cannot be used in conjunction with a Public IP.",
+          "x-ms-client-name": "subnet"
+        }
+      }
+    },
+    "DeploymentParameter_subnetAddressPrefix": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "The subnet address prefix in CIDR format (new subnet only).",
+          "x-ms-client-name": "subnetAddressPrefix",
+          "default": "10.0.0.0/24"
+        }
+      }
+    },
+    "DeploymentParameter_subnetType": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "Use new, existing or no subnet.",
+          "x-ms-client-name": "subnetType",
+          "enum": [
+            "none",
+            "new",
+            "existingName",
+            "existingId"
+          ],
+          "default": "none"
         }
       }
     },
@@ -358,8 +400,18 @@
       "properties": {
         "value": {
           "type": "string",
-          "description": "If Public IP address is turned off, this is the VNET to associate with the load balancer.",
+          "description": "The VNet name containing the subnet. Cannot be used in conjunction with a Public IP.",
           "x-ms-client-name": "virtualNetworkName"
+        }
+      }
+    },
+    "DeploymentParameter_vnetAddressPrefix": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "The virtual network IP address prefix in CIDR format (new subnet only).",
+          "x-ms-client-name": "vnetAddressPrefix",
+          "default": "10.0.0.0/16"
         }
       }
     },

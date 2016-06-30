@@ -15,13 +15,6 @@
         "description": "Name of load balancer backend pool."
       }
     },
-    "dnsNameForPublicIP": {
-      "type": "string",
-      "defaultValue": "",
-      "metadata": {
-        "description": "Globally unique DNS Name for the Public IP used to access the Virtual Machine.  Requires a new public IP to be created by setting Public IP Address Type to New."
-      }
-    },
     "dnsNameType": {
       "type": "string",
       "defaultValue": "none",
@@ -64,6 +57,13 @@
         "description": "Private IP address allocation method."
       }
     },
+    "publicIpAddress": {
+      "type": "string",
+      "defaultValue": "[concat('PublicIP', parameters('loadBalancerName'))]",
+      "metadata": {
+        "description": "Name or ID of the public IP address to use."
+      }
+    },
     "publicIpAddressAllocation": {
       "type": "string",
       "defaultValue": "dynamic",
@@ -75,37 +75,65 @@
         "description": "Public IP address allocation method."
       }
     },
-    "publicIpAddressName": {
-      "type": "string",
-      "defaultValue": "[concat('PublicIP', parameters('loadBalancerName'))]",
-      "metadata": {
-        "description": "Name of public IP address to use."
-      }
-    },
     "publicIpAddressType": {
       "type": "string",
       "defaultValue": "new",
       "allowedValues": [
         "none",
         "new",
-        "existing"
+        "existingName",
+        "existingId"
       ],
       "metadata": {
         "description": "Type of Public IP Address to associate with the load balancer."
       }
     },
-    "subnetName": {
+    "publicIpDnsName": {
       "type": "string",
       "defaultValue": "",
       "metadata": {
-        "description": "If Public IP address is turned off, this is the subnet to associate with the load balancer."
+        "description": "Globally unique DNS Name for the Public IP used to access the Virtual Machine (new public IP only)."
+      }
+    },
+    "subnet": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "The subnet name or ID to associate with the load balancer. Cannot be used in conjunction with a Public IP."
+      }
+    },
+    "subnetAddressPrefix": {
+      "type": "string",
+      "defaultValue": "10.0.0.0/24",
+      "metadata": {
+        "description": "The subnet address prefix in CIDR format (new subnet only)."
+      }
+    },
+    "subnetType": {
+      "type": "string",
+      "defaultValue": "none",
+      "allowedValues": [
+        "none",
+        "new",
+        "existingName",
+        "existingId"
+      ],
+      "metadata": {
+        "description": "Use new, existing or no subnet."
       }
     },
     "virtualNetworkName": {
       "type": "string",
       "defaultValue": "",
       "metadata": {
-        "description": "If Public IP address is turned off, this is the VNET to associate with the load balancer."
+        "description": "The VNet name containing the subnet. Cannot be used in conjunction with a Public IP."
+      }
+    },
+    "vnetAddressPrefix": {
+      "type": "string",
+      "defaultValue": "10.0.0.0/16",
+      "metadata": {
+        "description": "The virtual network IP address prefix in CIDR format (new subnet only)."
       }
     }
   },
@@ -116,17 +144,27 @@
           "name": "LoadBalancerFrontEnd",
           "properties": {
             "publicIPAddress": {
-              "id": "[variables('publicIPAddressID')]"
+              "id": "[variables('publicIpAddressIds')[parameters('publicIpAddressType')]]"
             }
           }
         }
       ],
-      "existing": [
+      "existingId": [
         {
           "name": "LoadBalancerFrontEnd",
           "properties": {
             "publicIPAddress": {
-              "id": "[variables('publicIPAddressID')]"
+              "id": "[variables('publicIpAddressIds')[parameters('publicIpAddressType')]]"
+            }
+          }
+        }
+      ],
+      "existingName": [
+        {
+          "name": "LoadBalancerFrontEnd",
+          "properties": {
+            "publicIPAddress": {
+              "id": "[variables('publicIpAddressIds')[parameters('publicIpAddressType')]]"
             }
           }
         }
@@ -136,26 +174,43 @@
           "name": "LoadBalancerFrontEnd",
           "properties": {
             "privateIPAllocationMethod": "[parameters('privateIpAddressAllocation')]",
-            "privateIPAddress":  "[parameters('privateIpAddress')]",
+            "privateIPAddress": "[parameters('privateIpAddress')]",
             "subnet": {
-              "id": "[variables('subnetRef')]"
+              "id": "[variables('subnetIds')[parameters('subnetType')]]"
             }
           }
         }
       ]
     },
-    "frontEndIPConfigID": "[concat(variables('lbID'),'/frontendIPConfigurations/loadBalancerFrontEnd')]",
+    "frontEndIpConfigId": "[concat(variables('lbId'),'/frontendIPConfigurations/loadBalancerFrontEnd')]",
     "ipDeploymentName": "[concat('IP', parameters('loadBalancerName'))]",
     "ipTemplateFilePaths": {
+      "existingId": "nested_templates/publicIp_none_or_existing.json",
+      "existingName": "nested_templates/publicIp_none_or_existing.json",
       "new": "nested_templates/publicIp_new.json",
-      "existing": "nested_templates/publicIp_none_or_existing.json",
       "none": "nested_templates/publicIp_none_or_existing.json"
     },
-    "lbID": "[resourceId('Microsoft.Network/loadBalancers',parameters('loadBalancerName'))]",
-    "publicIPAddressID": "[resourceId('Microsoft.Network/publicIPAddresses',parameters('publicIPAddressName'))]",
-    "subnetRef": "[concat(variables('vnetId'), '/subnets/', parameters('subnetName'))]",
-    "vnetId": "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]",
-    "vnetName": "[parameters('virtualNetworkName')]"
+    "lbId": "[resourceId('Microsoft.Network/loadBalancers',parameters('loadBalancerName'))]",
+    "publicIpAddressIds": {
+      "existingId": "[parameters('publicIpAddress')]",
+      "existingName": "[concat('/subscriptions/',subscription().subscriptionId,'/resourceGroups/',resourceGroup().name,'/providers/Microsoft.Network/publicIPAddresses/',parameters('publicIpAddress'))]",
+      "new": "[concat('/subscriptions/',subscription().subscriptionId,'/resourceGroups/',resourceGroup().name,'/providers/Microsoft.Network/publicIPAddresses/',parameters('publicIpAddress'))]",
+      "none": null
+    },
+    "subnetDeploymentName": "[concat('Subnet',parameters('loadBalancerName'))]",
+    "subnetIds": {
+      "existingId": "[parameters('subnet')]",
+      "existingName": "[concat(variables('vnetId'),'/subnets/',parameters('subnet'))]",
+      "new": "[concat(variables('vnetId'),'/subnets/',parameters('subnet'))]",
+      "none": null
+    },
+    "subnetTemplateFilePaths": {
+      "existingId": "nested_templates/vnet_none_or_existing.json",
+      "existingName": "nested_templates/vnet_none_or_existing.json",
+      "new": "nested_templates/vnet_new.json",
+      "none": "nested_templates/vnet_none_or_existing.json"
+    },
+    "vnetId": "[concat('/subscriptions/',subscription().subscriptionId,'/resourceGroups/',resourceGroup().name,'/providers/Microsoft.Network/virtualNetworks/',parameters('virtualNetworkName'))]"
   },
   "resources": [
     {
@@ -164,7 +219,8 @@
       "location": "[parameters('location')]",
       "apiVersion": "2015-06-15",
       "dependsOn": [
-        "[concat('Microsoft.Resources/deployments/', variables('ipDeploymentName'))]"
+        "[concat('Microsoft.Resources/deployments/', variables('ipDeploymentName'))]",
+        "[concat('Microsoft.Resources/deployments/', variables('subnetDeploymentName'))]"
       ],
       "properties": {
         "backendAddressPools": [
@@ -187,11 +243,31 @@
           "contentVersion": "1.0.0.0"
         },
         "parameters": {
-          "dnsNameForPublicIP": { "value": "[parameters('dnsNameForPublicIP')]" },
-          "publicIPAddressName": { "value": "[parameters('publicIPAddressName')]" },
+          "dnsNameForPublicIP": { "value": "[parameters('publicIpDnsName')]" },
+          "publicIPAddressName": { "value": "[parameters('publicIPAddress')]" },
           "publicIpAddressAllocation": { "value": "[parameters('publicIpAddressAllocation')]" },
           "location": { "value": "[parameters('location')]" },
           "dnsNameType": { "value": "[parameters('dnsNameType')]" }
+        }
+      }
+    },
+    {
+      "name": "[variables('subnetDeploymentName')]",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "dependsOn": [ ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(parameters('_artifactsLocation'), '/', variables('subnetTemplateFilePaths')[parameters('subnetType')])]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "location": { "value": "[parameters('location')]" },
+          "subnetAddressPrefix": { "value": "[parameters('subnetAddressPrefix')]" },
+          "subnetName": { "value": "[parameters('subnet')]" },
+          "virtualNetworkName": { "value": "[parameters('virtualNetworkName')]" },
+          "vnetAddressPrefix": { "value": "[parameters('vnetAddressPrefix')]" }
         }
       }
     }

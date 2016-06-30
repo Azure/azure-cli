@@ -30,10 +30,6 @@ class DeploymentLb(Model):
     :vartype _artifacts_location: str
     :param backend_pool_name: Name of load balancer backend pool.
     :type backend_pool_name: str
-    :param dns_name_for_public_ip: Globally unique DNS Name for the Public IP
-     used to access the Virtual Machine.  Requires a new public IP to be
-     created by setting Public IP Address Type to New.
-    :type dns_name_for_public_ip: str
     :param dns_name_type: Associate VMs with a public IP address to a DNS
      name. Possible values include: 'none', 'new'. Default value: "none" .
     :type dns_name_type: str
@@ -47,21 +43,34 @@ class DeploymentLb(Model):
      method. Possible values include: 'dynamic', 'static'. Default value:
      "dynamic" .
     :type private_ip_address_allocation: str
+    :param public_ip_address: Name or ID of the public IP address to use.
+    :type public_ip_address: str
     :param public_ip_address_allocation: Public IP address allocation method.
      Possible values include: 'dynamic', 'static'. Default value: "dynamic" .
     :type public_ip_address_allocation: str
-    :param public_ip_address_name: Name of public IP address to use.
-    :type public_ip_address_name: str
     :param public_ip_address_type: Type of Public IP Address to associate
      with the load balancer. Possible values include: 'none', 'new',
-     'existing'. Default value: "new" .
+     'existingName', 'existingId'. Default value: "new" .
     :type public_ip_address_type: str
-    :param subnet_name: If Public IP address is turned off, this is the
-     subnet to associate with the load balancer.
-    :type subnet_name: str
-    :param virtual_network_name: If Public IP address is turned off, this is
-     the VNET to associate with the load balancer.
+    :param public_ip_dns_name: Globally unique DNS Name for the Public IP
+     used to access the Virtual Machine (new public IP only).
+    :type public_ip_dns_name: str
+    :param subnet: The subnet name or ID to associate with the load balancer.
+     Cannot be used in conjunction with a Public IP.
+    :type subnet: str
+    :param subnet_address_prefix: The subnet address prefix in CIDR format
+     (new subnet only). Default value: "10.0.0.0/24" .
+    :type subnet_address_prefix: str
+    :param subnet_type: Use new, existing or no subnet. Possible values
+     include: 'none', 'new', 'existingName', 'existingId'. Default value:
+     "none" .
+    :type subnet_type: str
+    :param virtual_network_name: The VNet name containing the subnet. Cannot
+     be used in conjunction with a Public IP.
     :type virtual_network_name: str
+    :param vnet_address_prefix: The virtual network IP address prefix in CIDR
+     format (new subnet only). Default value: "10.0.0.0/16" .
+    :type vnet_address_prefix: str
     :ivar mode: Gets or sets the deployment mode. Default value:
      "Incremental" .
     :vartype mode: str
@@ -79,17 +88,20 @@ class DeploymentLb(Model):
         'content_version': {'key': 'properties.templateLink.contentVersion', 'type': 'str'},
         '_artifacts_location': {'key': 'properties.parameters._artifactsLocation.value', 'type': 'str'},
         'backend_pool_name': {'key': 'properties.parameters.backendPoolName.value', 'type': 'str'},
-        'dns_name_for_public_ip': {'key': 'properties.parameters.dnsNameForPublicIP.value', 'type': 'str'},
         'dns_name_type': {'key': 'properties.parameters.dnsNameType.value', 'type': 'str'},
         'load_balancer_name': {'key': 'properties.parameters.loadBalancerName.value', 'type': 'str'},
         'location': {'key': 'properties.parameters.location.value', 'type': 'str'},
         'private_ip_address': {'key': 'properties.parameters.privateIpAddress.value', 'type': 'str'},
         'private_ip_address_allocation': {'key': 'properties.parameters.privateIpAddressAllocation.value', 'type': 'str'},
+        'public_ip_address': {'key': 'properties.parameters.publicIpAddress.value', 'type': 'str'},
         'public_ip_address_allocation': {'key': 'properties.parameters.publicIpAddressAllocation.value', 'type': 'str'},
-        'public_ip_address_name': {'key': 'properties.parameters.publicIpAddressName.value', 'type': 'str'},
         'public_ip_address_type': {'key': 'properties.parameters.publicIpAddressType.value', 'type': 'str'},
-        'subnet_name': {'key': 'properties.parameters.subnetName.value', 'type': 'str'},
+        'public_ip_dns_name': {'key': 'properties.parameters.publicIpDnsName.value', 'type': 'str'},
+        'subnet': {'key': 'properties.parameters.subnet.value', 'type': 'str'},
+        'subnet_address_prefix': {'key': 'properties.parameters.subnetAddressPrefix.value', 'type': 'str'},
+        'subnet_type': {'key': 'properties.parameters.subnetType.value', 'type': 'str'},
         'virtual_network_name': {'key': 'properties.parameters.virtualNetworkName.value', 'type': 'str'},
+        'vnet_address_prefix': {'key': 'properties.parameters.vnetAddressPrefix.value', 'type': 'str'},
         'mode': {'key': 'properties.mode', 'type': 'str'},
     }
 
@@ -99,17 +111,20 @@ class DeploymentLb(Model):
 
     mode = "Incremental"
 
-    def __init__(self, load_balancer_name, content_version=None, backend_pool_name=None, dns_name_for_public_ip=None, dns_name_type="none", location=None, private_ip_address=None, private_ip_address_allocation="dynamic", public_ip_address_allocation="dynamic", public_ip_address_name=None, public_ip_address_type="new", subnet_name=None, virtual_network_name=None):
+    def __init__(self, load_balancer_name, content_version=None, backend_pool_name=None, dns_name_type="none", location=None, private_ip_address=None, private_ip_address_allocation="dynamic", public_ip_address=None, public_ip_address_allocation="dynamic", public_ip_address_type="new", public_ip_dns_name=None, subnet=None, subnet_address_prefix="10.0.0.0/24", subnet_type="none", virtual_network_name=None, vnet_address_prefix="10.0.0.0/16"):
         self.content_version = content_version
         self.backend_pool_name = backend_pool_name
-        self.dns_name_for_public_ip = dns_name_for_public_ip
         self.dns_name_type = dns_name_type
         self.load_balancer_name = load_balancer_name
         self.location = location
         self.private_ip_address = private_ip_address
         self.private_ip_address_allocation = private_ip_address_allocation
+        self.public_ip_address = public_ip_address
         self.public_ip_address_allocation = public_ip_address_allocation
-        self.public_ip_address_name = public_ip_address_name
         self.public_ip_address_type = public_ip_address_type
-        self.subnet_name = subnet_name
+        self.public_ip_dns_name = public_ip_dns_name
+        self.subnet = subnet
+        self.subnet_address_prefix = subnet_address_prefix
+        self.subnet_type = subnet_type
         self.virtual_network_name = virtual_network_name
+        self.vnet_address_prefix = vnet_address_prefix

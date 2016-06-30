@@ -174,9 +174,10 @@ class NetworkExpressRouteCircuitScenarioTest(VCRTestBase):
 class NetworkLoadBalancerScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-        super(NetworkLoadBalancerScenarioTest, self).__init__(__file__, test_method)
-        self.resource_group = 'cli_test1'
-        self.lb_name = 'cli-test-lb'
+        super(NetworkLoadBalancerScenarioTest, self).__init__(
+            __file__, test_method)
+        self.resource_group = 'lbrg'
+        self.lb_name = 'lb'
         self.resource_type = 'Microsoft.Network/loadBalancers'
 
     def test_network_load_balancer(self):
@@ -184,34 +185,35 @@ class NetworkLoadBalancerScenarioTest(ResourceGroupVCRTestBase):
 
     def body(self):
         # test lb create with min params (new ip)
-        self.cmd('network lb create -n {} -g {}'.format(self.lb_name, self.resource_group), checks=[
+        self.cmd('network lb create -n {}1 -g {}'.format(self.lb_name, self.resource_group), checks=[
             JMESPathCheck('loadBalancer.value.provisioningState', 'Succeeded'),
             JMESPathCheck('loadBalancer.value.frontendIPConfigurations[0].properties.privateIPAllocationMethod', 'Dynamic'),
             JMESPathCheck('loadBalancer.value.frontendIPConfigurations[0].resourceGroup', self.resource_group)
         ])
 
         # test internet facing load balancer with new static public IP
-        self.cmd('network lb create -n {} -g {} --deployment-name deployLb1 --public-ip-address-allocation static'.format(self.lb_name, self.resource_group))
-        self.cmd('network public-ip show -g {} -n PublicIP{}'.format(self.resource_group, self.lb_name), checks=JMESPathCheck('publicIpAllocationMethod', 'Static'))
+        self.cmd('network lb create -n {}2 -g {} --public-ip-address-allocation static'.format(self.lb_name, self.resource_group))
+        self.cmd('network public-ip show -g {} -n PublicIP{}2'.format(self.resource_group, self.lb_name),
+            checks=JMESPathCheck('publicIpAllocationMethod', 'Static'))
 
-        # test internal load balancer create
+        # test internal load balancer create (existing subnet ID)
         vnet_name = 'mytestvnet'
         private_ip = '10.0.0.15'
         vnet = self.cmd('network vnet create -n {} -g {}'.format(vnet_name, self.resource_group))
-        subnet_name = vnet['newVNet']['value']['subnets'][0]['name']
-        self.cmd('network lb create -n {} -g {} --public-ip-address-type none --vnet-name {} --subnet-name {} --private-ip-address-allocation static --private-ip-address {}'.format(
-            self.lb_name, self.resource_group, vnet_name, subnet_name, private_ip), checks=[
+        subnet_id = vnet['newVNet']['value']['subnets'][0]['id']
+        self.cmd('network lb create -n {}3 -g {} --vnet-name {} --subnet {} --private-ip-address {}'.format(
+            self.lb_name, self.resource_group, vnet_name, subnet_id, private_ip), checks=[
                 JMESPathCheck('loadBalancer.value.provisioningState', 'Succeeded'),
                 JMESPathCheck('loadBalancer.value.frontendIPConfigurations[0].properties.privateIPAllocationMethod', 'Static'),
                 JMESPathCheck('loadBalancer.value.frontendIPConfigurations[0].properties.privateIPAddress', private_ip),
                 JMESPathCheck('loadBalancer.value.frontendIPConfigurations[0].resourceGroup', self.resource_group),
-                JMESPathCheck("loadBalancer.value.frontendIPConfigurations[0].properties.subnet.contains(id, '{}')".format(subnet_name), True)
+                JMESPathCheck("loadBalancer.value.frontendIPConfigurations[0].properties.subnet.id", subnet_id)
             ])
 
-        # test internet facing load balancer with existing public IP
-        pub_ip_name = 'mytestpubip'
+        # test internet facing load balancer with existing public IP (by name)
+        pub_ip_name = 'publicip4'
         self.cmd('network public-ip create -n {} -g {}'.format(pub_ip_name, self.resource_group))
-        self.cmd('network lb create -n {} -g {} --public-ip-address-type existing --public-ip-address-name {}'.format(
+        self.cmd('network lb create -n {}4 -g {} --public-ip-address {}'.format(
             self.lb_name, self.resource_group, pub_ip_name), checks=[
                 JMESPathCheck('loadBalancer.value.provisioningState', 'Succeeded'),
                 JMESPathCheck('loadBalancer.value.frontendIPConfigurations[0].properties.privateIPAllocationMethod', 'Dynamic'),
@@ -228,21 +230,22 @@ class NetworkLoadBalancerScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck("length([?type == '{}']) == length(@)".format(self.resource_type), True),
             JMESPathCheck("length([?resourceGroup == '{}']) == length(@)".format(self.resource_group), True)
         ])
-        self.cmd('network lb show --resource-group {} --name {}'.format(self.resource_group, self.lb_name), checks=[
+        self.cmd('network lb show --resource-group {} --name {}1'.format(self.resource_group, self.lb_name), checks=[
             JMESPathCheck('type(@)', 'object'),
             JMESPathCheck('type', self.resource_type),
             JMESPathCheck('resourceGroup', self.resource_group),
-            JMESPathCheck('name', self.lb_name)
+            JMESPathCheck('name', '{}1'.format(self.lb_name))
         ])
-        self.cmd('network lb delete --resource-group {} --name {}'.format(self.resource_group, self.lb_name))
+        self.cmd('network lb delete --resource-group {} --name {}1'.format(self.resource_group, self.lb_name))
         # Expecting no results as we just deleted the only lb in the resource group
-        self.cmd('network lb list --resource-group {}'.format(self.resource_group), checks=NoneCheck())
+        self.cmd('network lb list --resource-group {}'.format(self.resource_group), checks=JMESPathCheck('length(@)', 3))
 
 class NetworkLoadBalancerSubresourceScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-        super(NetworkLoadBalancerSubresourceScenarioTest, self).__init__(__file__, test_method)
-        self.resource_group = 'lbrg'
+        super(NetworkLoadBalancerSubresourceScenarioTest, self).__init__(
+            __file__, test_method)
+        self.resource_group = 'lbsrg'
         self.lb_name = 'lb1'
         self.vnet_name = 'vnet1'
         self.subnet_name = 'subnet1'
@@ -310,11 +313,11 @@ class NetworkLoadBalancerSubresourceScenarioTest(ResourceGroupVCRTestBase):
         # Test backend address pool
         for i in range(1, 4):
             self.cmd('network lb address-pool create {} -n bap{}'.format(lb_rg, i))
-        self.cmd('network lb address-pool list {}'.format(lb_rg), checks=JMESPathCheck('length(@)', 3))
+        self.cmd('network lb address-pool list {}'.format(lb_rg), checks=JMESPathCheck('length(@)', 4))
         self.cmd('network lb address-pool show {} -n bap1'.format(lb_rg),
             checks=JMESPathCheck('name', 'bap1'))
         self.cmd('network lb address-pool delete {} -n bap3'.format(lb_rg))
-        self.cmd('network lb address-pool list {}'.format(lb_rg), checks=JMESPathCheck('length(@)', 2))
+        self.cmd('network lb address-pool list {}'.format(lb_rg), checks=JMESPathCheck('length(@)', 3))
 
         # Test probes
         for i in range(1, 4):

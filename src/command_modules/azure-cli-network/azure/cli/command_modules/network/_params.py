@@ -2,8 +2,10 @@
 import argparse
 
 from azure.mgmt.network.models import IPAllocationMethod
-from azure.cli.command_modules.network._validators import (process_nic_namespace,
-                                                           process_network_lb_create_namespace)
+from azure.cli.command_modules.network._validators import \
+    (process_nic_namespace, process_network_lb_create_namespace, process_public_ip_create_namespace,
+     validate_subnet_type, validate_public_ip_type)
+from azure.cli.command_modules.network._param_folding import register_folded_cli_argument
 from azure.cli.commands.parameters import (location_type, get_resource_name_completion_list)
 from azure.cli.commands import register_cli_argument, CliArgumentType
 
@@ -52,7 +54,7 @@ register_cli_argument('network public-ip', 'public_ip_address_name', name_arg_ty
 register_cli_argument('network public-ip', 'name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'))
 
 register_cli_argument('network public-ip create', 'name', completer=None)
-register_cli_argument('network public-ip create', 'dns_name', CliArgumentType(action=PublicIpDnsNameAction))
+register_cli_argument('network public-ip create', 'dns_name', CliArgumentType(validator=process_public_ip_create_namespace))
 register_cli_argument('network public-ip create', 'public_ip_address_type', CliArgumentType(help=argparse.SUPPRESS))
 register_cli_argument('network public-ip create', 'allocation_method', CliArgumentType(choices=choices_ip_allocation_method, type=str.lower))
 
@@ -89,12 +91,12 @@ register_cli_argument('network lb create', 'load_balancer_name', load_balancer_n
 register_cli_argument('network lb delete', 'load_balancer_name', load_balancer_name_type, options_list=('--name', '-n'))
 register_cli_argument('network lb show', 'load_balancer_name', load_balancer_name_type, options_list=('--name', '-n'))
 
-register_cli_argument('network lb create', 'dns_name_for_public_ip', validator=process_network_lb_create_namespace)
+register_cli_argument('network lb create', 'public_ip_dns_name', validator=process_network_lb_create_namespace)
 register_cli_argument('network lb create', 'dns_name_type', help=argparse.SUPPRESS)
 register_cli_argument('network lb create', 'private_ip_address_allocation', help=argparse.SUPPRESS)
 register_cli_argument('network lb create', 'public_ip_address_allocation', choices=choices_ip_allocation_method, default='dynamic', type=str.lower)
-register_cli_argument('network lb create', 'public_ip_address_type', help='', choices=['new', 'existing', 'none'], default='new', type=str.lower)
-register_cli_argument('network lb create', 'subnet_name', options_list=('--subnet-name',))
+register_folded_cli_argument('network lb create', 'public_ip_address', 'Microsoft.Network/publicIPAddresses', post_validator=validate_public_ip_type)
+register_folded_cli_argument('network lb create', 'subnet', 'subnets', parent_name='virtual_network_name', parent_type='Microsoft.Network/virtualNetworks', post_validator=validate_subnet_type)
 
 register_cli_argument('network lb inbound-nat-rule', 'item_name', options_list=('--name', '-n'), help='The name of the inbound NAT rule.')
 register_cli_argument('network lb inbound-nat-pool', 'item_name', options_list=('--name', '-n'), help='The name of the inbound NAT pool.')

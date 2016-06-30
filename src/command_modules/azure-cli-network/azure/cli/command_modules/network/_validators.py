@@ -1,5 +1,6 @@
+import argparse
+
 from azure.cli.commands.azure_resource_id import AzureResourceId
-from azure.cli._util import CLIError
 
 def _convert_id_list_to_object(data):
     if not data:
@@ -13,7 +14,8 @@ def _convert_id_list_to_object(data):
         try:
             data_list.append({'id': str(AzureResourceId(val))})
         except ValueError:
-            raise CLIError('Please supply a space-separated list of well-formed IDs.')
+            raise argparse.ArgumentError(
+                None, 'Please supply a space-separated list of well-formed IDs.')
     return data_list
 
 def process_nic_namespace(namespace):
@@ -34,8 +36,29 @@ def process_nic_namespace(namespace):
 
 def process_network_lb_create_namespace(namespace):
 
-    if namespace.dns_name_for_public_ip:
+    if namespace.public_ip_dns_name:
         namespace.dns_name_type = 'new'
 
     if namespace.private_ip_address:
         namespace.private_ip_address_allocation = 'static'
+
+    if namespace.subnet and namespace.public_ip_address:
+        raise argparse.ArgumentError(
+            None, 'Must specify a subnet OR a public IP address, not both.')
+
+def validate_public_ip_type(namespace): # pylint: disable=unused-argument
+    if namespace.subnet:
+        namespace.public_ip_address_type = 'none'
+
+def validate_subnet_type(namespace): # pylint: disable=unused-argument
+    # TODO Implement fix to detect if default value is being submitted
+    #if namespace.subnet_type != 'new' and \
+    #    (namespace.subnet_address_prefix or namespace.vnet_address_prefix):
+    #        raise argparse.ArgumentError(
+    #            None,
+    #            'Can only specify VNet and subnet address prefix when creating a new subnet.')
+    pass
+
+def process_public_ip_create_namespace(namespace):
+    if namespace.dns_name:
+        namespace.public_ip_address_type = 'dns'

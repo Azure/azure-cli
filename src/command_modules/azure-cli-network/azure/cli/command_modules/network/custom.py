@@ -42,11 +42,13 @@ def get_load_balancer_property_entry(prop):
     def get_func(resource_group_name, load_balancer_name, item_name):
         items = _network_client_factory().load_balancers.get(
             resource_group_name, load_balancer_name).__getattribute__(prop)
-        try:
-            return next(x for x in items if x.name.lower() == item_name.lower())
-        except StopIteration:
+
+        result = next((x for x in items if x.name.lower() == item_name.lower()), None)
+        if not result:
             raise CLIError("Item '{}' does not exist on load balancer '{}'".format(
                 item_name, load_balancer_name))
+        else:
+            return result
     return get_func
 
 def delete_load_balancer_property_entry(prop):
@@ -61,10 +63,11 @@ def delete_load_balancer_property_entry(prop):
     return delete_func
 
 def _get_lb_property(items, name):
-    try:
-        return next(x for x in items if x.name.lower() == name.lower())
-    except StopIteration:
+    result = next((x for x in items if x.name.lower() == name.lower()), None)
+    if not result:
         raise CLIError("Property '{}' does not exist on load balancer".format(name))
+    else:
+        return result
 
 def _set_param(item, prop, value):
     if value == "":
