@@ -94,11 +94,14 @@ def print_arguments(help_file):
                 print('')
                 print(p.group_name)
             last_group_name = p.group_name
+        line_break_if_too_long = ('\n' + ' '*_name_wrap_limit
+                                  if len(p.name + required_text) > _name_wrap_limit else ''),
+
         _print_indent('{0}{1}{2}{3}{4}'.format(p.name,
                                                _get_column_indent(p.name + required_text,
                                                                   max_name_length),
                                                required_text,
-                                               '\n' + ' '*_name_wrap_limit if len(p.name + required_text) > _name_wrap_limit else '',
+                                               line_break_if_too_long,
                                                ': ' + short_summary if short_summary else ''),
                       indent,
                       max_name_length + indent*4 + 2)
