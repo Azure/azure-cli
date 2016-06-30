@@ -136,7 +136,7 @@ for scope in ['vm create', 'vm scaleset create']:
     register_cli_argument(scope, 'os_version', CliArgumentType(help=argparse.SUPPRESS))
     register_cli_argument(scope, 'dns_name_type', CliArgumentType(help=argparse.SUPPRESS))
     register_cli_argument(scope, 'admin_username', admin_username_type)
-    register_cli_argument(scope, 'ssh_key_value', CliArgumentType(action=VMSSHFieldAction))
+    register_cli_argument(scope, 'ssh_key_value', CliArgumentType(action=VMSSHFieldAction), default=os.path.join(os.path.expanduser('~'), '.ssh', 'id_rsa.pub'))
     register_cli_argument(scope, 'ssh_dest_key_path', completer=FilesCompleter())
     register_cli_argument(scope, 'dns_name_for_public_ip', CliArgumentType(action=VMDNSNameAction))
     register_cli_argument(scope, 'authentication_type', authentication_type)
