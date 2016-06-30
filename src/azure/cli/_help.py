@@ -8,6 +8,8 @@ from .help_files import _load_help_file
 
 __all__ = ['print_detailed_help', 'print_welcome_message', 'GroupHelpFile', 'CommandHelpFile']
 
+_name_wrap_limit = 35
+
 def show_help(nouns, parser, is_group):
     delimiters = ' '.join(nouns)
     help_file = CommandHelpFile(delimiters, parser) \
@@ -92,10 +94,11 @@ def print_arguments(help_file):
                 print('')
                 print(p.group_name)
             last_group_name = p.group_name
-        _print_indent('{0}{1}{2}{3}'.format(p.name,
+        _print_indent('{0}{1}{2}{3}{4}'.format(p.name,
                                             _get_column_indent(p.name + required_text,
                                                                max_name_length),
                                             required_text,
+                                            '\n' + ' '*_name_wrap_limit if len(p.name + required_text) > _name_wrap_limit else '',
                                             ': ' + short_summary if short_summary else ''),
                       indent,
                       max_name_length + indent*4 + 2)
@@ -338,6 +341,7 @@ class HelpExample(object): #pylint: disable=too-few-public-methods
 
 
 def _print_indent(s, indent=0, subsequent_spaces=-1):
+    subsequent_spaces = min(subsequent_spaces, _name_wrap_limit + 6)
     tw = textwrap.TextWrapper(initial_indent='    '*indent,
                               subsequent_indent=('    '*indent
                                                  if subsequent_spaces == -1
@@ -349,7 +353,8 @@ def _print_indent(s, indent=0, subsequent_spaces=-1):
         print(tw.fill(p), file=sys.stdout)
 
 def _get_column_indent(text, max_name_length):
-    return ' '*(max_name_length - len(text))
+    return ' '*(_name_wrap_limit - min(_name_wrap_limit, len(text)))
+
 
 def _normalize_text(s):
     if not s or len(s) < 2:
