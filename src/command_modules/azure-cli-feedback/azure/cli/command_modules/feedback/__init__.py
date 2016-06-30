@@ -34,7 +34,7 @@ def _prompt_net_promoter_score():
                 return score
             raise ValueError
         except ValueError:
-            logger.warning('Valid values are {}'.format(list(range(11))))
+            logger.warning('Valid values are %s' % list(range(11)))
 
 def _get_version_info():
     from pip import get_installed_distributions
