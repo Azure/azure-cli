@@ -28,7 +28,9 @@ Click on your OS for steps:
 * Windows
   * [Command Prompt / cmd](#windows-cmd)
   * [Bash on Windows](#ubuntu-1404-lts-and-bash-on-windows-build-14362)
-* [PIP / Developer Setup](https://github.com/Azure/azure-cli/blob/master/doc/configuring_your_machine.md)
+* Python/PIP
+  * [Install via PIP](#pip)
+  * [Developer Setup](https://github.com/Azure/azure-cli/blob/master/doc/configuring_your_machine.md)
 * [Installation troubleshooting](#installation-troubleshooting)
 
 # Instructions per Platform and Version
@@ -185,6 +187,14 @@ curl http://azure-cli-nightly.westus.cloudapp.azure.com/install | sudo bash
 ## CoreOS Stable-899.15.0 / Beta-1010.1.0 / Alpha-1010.1.0
 
 Doesn't have python installed by default and is not currently supported.
+
+## PIP
+
+To install via the Python Package Index (PyPI), type:
+
+```shell
+    pip install azure-cli
+```
 
 ## Windows (cmd)
 
