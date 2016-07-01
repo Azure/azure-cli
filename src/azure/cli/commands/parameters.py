@@ -132,26 +132,15 @@ def register_id_parameter(command_name, *arguments, **kwargs):
                 optional_arguments.append(arg)
             arg.required = False
 
-        last_arg = command.arguments.pop(arguments[-1])
-        arguments_if_not_id_specified = []
-        for non_last_arg in arguments[:-1]:
-            arg = command.arguments[non_last_arg]
-            option_metavar = '{} {}'.format(arg.options_list[0], arg.options.get('metavar', arg.name.upper()))
-            if not arg in required_arguments:
-                option_metavar = '[{}]'.format(option_metavar)
-            arguments_if_not_id_specified.append(option_metavar)
-        metavar = '(RESOURCE_ID | {} {})'.format(
-            last_arg.options.get('metavar', last_arg.name.upper()),
-            ' '.join(arguments_if_not_id_specified))
-
         def required_values_validator(namespace):
             for arg in required_arguments:
                 if getattr(namespace, arg.name, None) is None:
-                    raise CLIError('{} is required if {} is not specified'.format(arg.name.upper(), 'RESOURCE_ID'))
+                    raise CLIError('{} is required if {} is not specified'.format(arg.options_list[0], '--id'))
 
-        command.add_argument(param_name=argparse.SUPPRESS,
-                             metavar=metavar,
-                             help='ResourceId or {}'.format(last_arg.options.get('help', last_arg.options.get('metavar', 'Resource Name'))),
+        command.add_argument(argparse.SUPPRESS,
+                             '--id',
+                             metavar='RESOURCE_ID',
+                             help='ID of resource',
                              action=SplitAction,
                              validator=required_values_validator)
         APPLICATION.remove(APPLICATION.COMMAND_TABLE_LOADED, command_loaded_handler)
