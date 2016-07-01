@@ -1,7 +1,9 @@
 ﻿# pylint: disable=line-too-long
 import argparse
 import getpass
+import math
 import os
+import time
 
 from argcomplete.completers import FilesCompleter
 
@@ -123,6 +125,7 @@ for scope in ['vm create', 'vm scaleset create']:
     register_cli_argument(scope, 'custom_os_disk_uri', CliArgumentType(help=argparse.SUPPRESS))
     register_cli_argument(scope, 'custom_os_disk_type', CliArgumentType(choices=['windows', 'linux'], type=str.lower))
     register_cli_argument(scope, 'os_disk_type', CliArgumentType(help=argparse.SUPPRESS))
+    register_cli_argument(scope, 'os_disk_name', CliArgumentType(default='osdisk{}'.format(str(int(math.ceil(time.time()))))))
     register_cli_argument(scope, 'overprovision', CliArgumentType(action='store_false', default=None, options_list=('--disable-overprovision',)))
     register_cli_argument(scope, 'load_balancer_type', CliArgumentType(choices=['new', 'existing', 'none'], type=str.lower))
     register_cli_argument(scope, 'storage_caching', CliArgumentType(choices=['ReadOnly', 'ReadWrite']))
@@ -136,7 +139,7 @@ for scope in ['vm create', 'vm scaleset create']:
     register_cli_argument(scope, 'os_version', CliArgumentType(help=argparse.SUPPRESS))
     register_cli_argument(scope, 'dns_name_type', CliArgumentType(help=argparse.SUPPRESS))
     register_cli_argument(scope, 'admin_username', admin_username_type)
-    register_cli_argument(scope, 'ssh_key_value', CliArgumentType(action=VMSSHFieldAction), default=os.path.join(os.path.expanduser('~'), '.ssh', 'id_rsa.pub'))
+    register_cli_argument(scope, 'ssh_key_value', CliArgumentType(action=VMSSHFieldAction))
     register_cli_argument(scope, 'ssh_dest_key_path', completer=FilesCompleter())
     register_cli_argument(scope, 'dns_name_for_public_ip', CliArgumentType(action=VMDNSNameAction))
     register_cli_argument(scope, 'authentication_type', authentication_type)
@@ -147,7 +150,7 @@ for scope in ['vm create', 'vm scaleset create']:
     register_folded_cli_argument(scope, 'public_ip_address', 'Microsoft.Network/publicIPAddresses')
     register_folded_cli_argument(scope, 'storage_account', 'Microsoft.Storage/storageAccounts')
     register_folded_cli_argument(scope, 'virtual_network', 'Microsoft.Network/virtualNetworks')
-    register_folded_cli_argument('vm create', 'network_security_group', 'Microsoft.Network/networkSecurityGroups')
+    register_folded_cli_argument(scope, 'network_security_group', 'Microsoft.Network/networkSecurityGroups')
     register_cli_argument(scope, 'network_security_group_rule', nsg_rule_type)
     register_extra_cli_argument(scope, 'image', options_list=('--image',), action=VMImageFieldAction, completer=get_urn_aliases_completion_list, default='Win2012R2Datacenter')
     register_extra_cli_argument(scope, 'force', options_list=('--force',), action='store_true', help='Force create and ignore parameter validation')

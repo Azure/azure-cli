@@ -109,7 +109,7 @@ def _handle_auth_types(**kwargs):
         args.authentication_type = 'password' if is_windows else 'ssh'
 
     if args.authentication_type == 'password':
-        if args.ssh_dest_key_path or args.ssh_key_value:
+        if args.ssh_dest_key_path:
             raise CLIError('SSH parameters cannot be used with password authentication type')
         elif not args.admin_password:
             raise CLIError('Admin password is required with password authentication type')
