@@ -1,10 +1,36 @@
-cURL Install Examples
+Preview Install Guide
 ========================================
 
-You can use cURL to install the CLI.
+Looking to get started with Project Az?  
 
-This document provides step-by-step instructions on installing on different systems.  
+We've provided some step-by-step instructions on installing for different platforms and versions.  
 This assumes a clean install with nothing else previously installed on the box.
+
+Click on your OS for steps:
+
+* [OS X](#os-x)
+* Ubuntu
+  * [12.04 LTS](#ubuntu-1204-lts)
+  * [14.04 LTS](#ubuntu-1404-lts-and-bash-on-windows-build-14362)
+  * [15.10](#ubuntu-1510)
+  * [16.04 LTS](#ubuntu-1604-lts)
+* Debian
+  * [7](#debian-7)
+  * [8](#debian-8)
+* CentOS
+  * [6.5 - 6.7](#centos-65--66--67)
+  * [7.1 - 7.2](#centos-71--72)
+* RHEL
+  * [6.7](#redhat-rhel-67)
+  * [7.2](#redhat-rhel-72)
+* [SUSE](#suse-opensuse-132)
+* [CoreOS](#coreos-stable-899150--beta-101010--alpha-101010)
+* Windows
+  * [Command Prompt / cmd](#windows-cmd)
+  * [Bash on Windows](#ubuntu-1404-lts-and-bash-on-windows-build-14362)
+* [PIP / Developer Setup](https://github.com/Azure/azure-cli/blob/master/doc/configuring_your_machine.md)
+
+# Instructions per Platform and Version
 
 ## OS X
 ```
@@ -157,4 +183,33 @@ curl http://azure-cli-nightly.westus.cloudapp.azure.com/install | sudo bash
 
 ## CoreOS Stable-899.15.0 / Beta-1010.1.0 / Alpha-1010.1.0
 
-Doesn't have python installed by default.
+Doesn't have python installed by default and is not currently supported.
+
+## Windows (cmd)
+
+Set the environment variable to point to the version you wish to install.
+
+```shell
+    set AZURE_CLI_NIGHTLY_VERSION=2016.06.29.nightly
+```
+
+Run the following from a command prompt
+
+```shell
+    set AZURE_CLI_DISABLE_POST_INSTALL=1
+    set AZURE_CLI_PRIVATE_PYPI_URL=http://40.112.211.51:8080
+    set AZURE_CLI_PRIVATE_PYPI_HOST=40.112.211.51
+    pip install azure-cli==%AZURE_CLI_NIGHTLY_VERSION% --extra-index-url %AZURE_CLI_PRIVATE_PYPI_URL% --trusted-host %AZURE_CLI_PRIVATE_PYPI_HOST%
+    pip install azure-cli-component==%AZURE_CLI_NIGHTLY_VERSION% --extra-index-url %AZURE_CLI_PRIVATE_PYPI_URL% --trusted-host %AZURE_CLI_PRIVATE_PYPI_HOST%
+    pip install azure-cli-profile==%AZURE_CLI_NIGHTLY_VERSION% --extra-index-url %AZURE_CLI_PRIVATE_PYPI_URL% --trusted-host %AZURE_CLI_PRIVATE_PYPI_HOST%
+    pip install azure-cli-storage==%AZURE_CLI_NIGHTLY_VERSION% --extra-index-url %AZURE_CLI_PRIVATE_PYPI_URL% --trusted-host %AZURE_CLI_PRIVATE_PYPI_HOST%
+    pip install azure-cli-vm==%AZURE_CLI_NIGHTLY_VERSION% --extra-index-url %AZURE_CLI_PRIVATE_PYPI_URL% --trusted-host %AZURE_CLI_PRIVATE_PYPI_HOST%
+    pip install azure-cli-network==%AZURE_CLI_NIGHTLY_VERSION% --extra-index-url %AZURE_CLI_PRIVATE_PYPI_URL% --trusted-host %AZURE_CLI_PRIVATE_PYPI_HOST%
+    pip install azure-cli-resource==%AZURE_CLI_NIGHTLY_VERSION% --extra-index-url %AZURE_CLI_PRIVATE_PYPI_URL% --trusted-host %AZURE_CLI_PRIVATE_PYPI_HOST%
+```
+
+Run the CLI
+
+```shell
+   az
+```
