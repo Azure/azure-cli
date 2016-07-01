@@ -37,7 +37,7 @@ Click on your OS for steps:
 
 ## OS X
 ```
-curl http://azure-cli-nightly.westus.cloudapp.azure.com/install | bash
+curl -L https://aka.ms/ProjectAzInstall | sudo bash
 ```
 `sudo bash` instead of just `bash` may be required if you get a 'Permission error'.
 
@@ -49,7 +49,7 @@ Python 2.7.3 should be already on the machine.
 sudo apt-get update
 sudo apt-get install -y libssl-dev libffi-dev
 sudo apt-get install -y python-dev
-curl http://azure-cli-nightly.westus.cloudapp.azure.com/install | sudo bash
+curl -L https://aka.ms/ProjectAzInstall | sudo bash
 ```
 
 **Known warnings**
@@ -80,7 +80,7 @@ Python 2.7.6 should be already on the machine.
 sudo apt-get update
 sudo apt-get install -y libssl-dev libffi-dev
 sudo apt-get install -y python-dev
-curl http://azure-cli-nightly.westus.cloudapp.azure.com/install | sudo bash
+curl -L https://aka.ms/ProjectAzInstall | sudo bash
 ```
 
 Use the defaults for the install location and location of the executable.
@@ -101,7 +101,7 @@ sudo apt-get update
 sudo apt-get install -y libssl-dev libffi-dev
 sudo apt-get install -y python-dev
 sudo apt-get install -y build-essential
-curl http://azure-cli-nightly.westus.cloudapp.azure.com/install | sudo bash
+curl -L https://aka.ms/ProjectAzInstall | sudo bash
 ```
 
 Use the defaults for the install location and location of the executable.
@@ -115,7 +115,7 @@ sudo apt-get update
 sudo apt-get install -y libssl-dev libffi-dev
 sudo apt-get install -y python-dev
 sudo apt-get install -y build-essential
-curl http://azure-cli-nightly.westus.cloudapp.azure.com/install | sudo bash
+curl -L https://aka.ms/ProjectAzInstall | sudo bash
 ```
 
 ## Debian 7
@@ -124,7 +124,7 @@ Python 2.7.3 should be already on the machine.
 sudo apt-get update
 sudo apt-get install -y libssl-dev libffi-dev
 sudo apt-get install -y python-dev
-curl http://azure-cli-nightly.westus.cloudapp.azure.com/install | sudo bash
+curl -L https://aka.ms/ProjectAzInstall | sudo bash
 ```
 
 Tab completion gets set up for the root user, not all users if installed globally.
@@ -136,7 +136,7 @@ sudo apt-get update
 sudo apt-get install -y libssl-dev libffi-dev
 sudo apt-get install -y python-dev
 sudo apt-get install -y build-essential
-curl http://azure-cli-nightly.westus.cloudapp.azure.com/install | sudo bash
+curl -L https://aka.ms/ProjectAzInstall | sudo bash
 ```
 
 Tab completion gets set up for the root user, not all users if installed globally.
@@ -151,7 +151,7 @@ Python 2.7.5 should be already on the machine.
 ```
 sudo yum check-update
 sudo yum install -y gcc libffi-devel python-devel openssl-devel
-curl http://azure-cli-nightly.westus.cloudapp.azure.com/install | sudo bash
+curl -L https://aka.ms/ProjectAzInstall | sudo bash
 ```
 
 Tab completion gets set up for the root user, not all users if installed globally.
@@ -168,7 +168,7 @@ Python 2.7.5 should be already on the machine.
 ```
 sudo yum check-update
 sudo yum install -y gcc libffi-devel python-devel openssl-devel
-curl http://azure-cli-nightly.westus.cloudapp.azure.com/install | sudo bash
+curl -L https://aka.ms/ProjectAzInstall | sudo bash
 ```
 
 Tab completion gets set up for the root user, not all users if installed globally.
@@ -181,7 +181,7 @@ Python 2.7.8 should be already on the machine.
 ```
 sudo zypper refresh
 sudo zypper --non-interactive install gcc libffi-devel python-devel openssl-devel
-curl http://azure-cli-nightly.westus.cloudapp.azure.com/install | sudo bash
+curl -L https://aka.ms/ProjectAzInstall | sudo bash
 ```
 
 ## CoreOS Stable-899.15.0 / Beta-1010.1.0 / Alpha-1010.1.0
@@ -228,6 +228,23 @@ Run the CLI
 
 Installation Troubleshooting
 ----------------------------
+
+**Errors with curl redirection**
+
+If you get an error with the curl command regarding the `-L` parameter or an error saying `Object Moved`, try using the full url instead of the aka.ms url:
+```shell
+# If you see this:
+$ curl -L https://aka.ms/ProjectAzInstall | sudo bash
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   175  100   175    0     0    562      0 --:--:-- --:--:-- --:--:--   560
+bash: line 1: syntax error near unexpected token `<'
+'ash: line 1: `<html><head><title>Object moved</title></head><body>
+
+# Try this instead:
+$ curl http://azure-cli-nightly.westus.cloudapp.azure.com/install | sudo bash
+```
+
 
 **Errors on install with cffi or cryptography:**
 
