@@ -115,7 +115,8 @@ class VMShowListSizesListIPAddressesScenarioTest(ResourceGroupVCRTestBase):
             self.resource_group, self.vm_name), checks=JMESPathCheck('type(@)', 'array'))
 
         # Expecting the one we just added
-        self.cmd('vm list-ip-addresses --resource-group {}'.format(self.resource_group), checks=[
+        rg_name_all_upper = self.resource_group.upper() #test the command handles name with casing diff.
+        self.cmd('vm list-ip-addresses --resource-group {}'.format(rg_name_all_upper), checks=[
             JMESPathCheck('length(@)', 1),
             JMESPathCheck('[0].virtualMachine.name', self.vm_name),
             JMESPathCheck('[0].virtualMachine.resourceGroup', self.resource_group),

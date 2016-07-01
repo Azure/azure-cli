@@ -158,8 +158,8 @@ def list_ip_addresses(resource_group_name=None, vm_name=None):
 
         # If provided, make sure that resource group name and vm name match the NIC we are
         # looking at before adding it to the result...
-        if (resource_group_name in (None, nic_resource_group)
-                and vm_name in (None, nic_vm_name)):
+        if ((resource_group_name is None or resource_group_name.lower() == nic_resource_group.lower()) and #pylint: disable=line-too-long
+                (vm_name is None or vm_name.lower() == nic_vm_name.lower())):
 
             network_info = {
                 'privateIpAddresses': [],
