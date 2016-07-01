@@ -133,9 +133,14 @@ def register_id_parameter(command_name, *arguments, **kwargs):
             arg.required = False
 
         def required_values_validator(namespace):
+            errors = []
             for arg in required_arguments:
                 if getattr(namespace, arg.name, None) is None:
-                    raise CLIError('{} is required if {} is not specified'.format(arg.options_list[0], '--id'))
+                    errors.append(arg)
+
+            if errors:
+                missing_requried = ' '.join((arg.options_list[0] for arg in errors))
+                raise CLIError('({} | {}) are required'.format(missing_requried, '--id'))
 
         command.add_argument(argparse.SUPPRESS,
                              '--id',
