@@ -3,16 +3,21 @@ import sys
 from six.moves import input #pylint: disable=redefined-builtin
 import azure.cli as cli
 from azure.cli.commands import cli_command
+import azure.cli._logging as _logging
+
+logger = _logging.get_az_logger(__name__)
 
 MESSAGES = {
-    'intro': 'We appreciate your feedback!',
+    'intro': 'We appreciate your feedback! This survey is only two questions and should take less '\
+             'than a minute.',
     'prompt_how_likely': '\nHow likely is it you would recommend our Azure CLI to a friend or '\
-    'colleague? [0 to 10]: ',
+                         'colleague? [0 to 10]: ',
     'prompt_what_changes': '\nWhat changes would we have to make for you to give us a higher '\
-    'rating? ',
+                           'rating? ',
     'prompt_do_well': '\nWhat do we do really well? ',
-    'prompt_email_addr': '\nIf you would be open to providing more feedback, '\
-    'let us know by leaving your email address (leave blank to skip): ',
+    'prompt_email_addr': '\nIf you would like to join our insiders program and receive tips, '\
+                         'tricks, and early access to new features, let us know by leaving your '\
+                         'email address (leave blank to skip): ',
     'thanks': '\nThanks for your feedback!'
 }
 
@@ -27,8 +32,9 @@ def _prompt_net_promoter_score():
             score = int(input(MESSAGES['prompt_how_likely']))
             if 0 <= score <= 10:
                 return score
+            raise ValueError
         except ValueError:
-            pass
+            logger.warning('Valid values are %s', list(range(11)))
 
 def _get_version_info():
     from pip import get_installed_distributions
