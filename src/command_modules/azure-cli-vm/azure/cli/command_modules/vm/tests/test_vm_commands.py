@@ -77,9 +77,9 @@ class VMResizeTest(VCRTestBase):
     def body(self):
         group = 'yugangw4'
         vm_name = 'yugangw4-1'
-        vm = self.cmd('vm show -g {} -n {}'.format(group, vm_name))
+        vm = self.cmd('vm show -g {} {}'.format(group, vm_name))
         new_size = 'Standard_A4' if vm['hardwareProfile']['vmSize'] == 'Standard_A3' else 'Standard_A3'
-        self.cmd('vm resize -g {} -n {} --size {}'.format(group, vm_name, new_size),
+        self.cmd('vm resize -g {} {} --size {}'.format(group, vm_name, new_size),
             checks=JMESPathCheck('hardwareProfile.vmSize', new_size))
 
 class VMShowListSizesListIPAddressesScenarioTest(ResourceGroupVCRTestBase):
@@ -104,14 +104,14 @@ class VMShowListSizesListIPAddressesScenarioTest(ResourceGroupVCRTestBase):
                  '--public-ip-address-type new --authentication-type password'.format(
                      self.resource_group, self.location, self.vm_name, self.deployment_name,
                      self.ip_allocation_method))
-        self.cmd('vm show --resource-group {} --name {} --expand instanceView'.format(
+        self.cmd('vm show --resource-group {} {} --expand instanceView'.format(
             self.resource_group, self.vm_name), checks=[
                 JMESPathCheck('type(@)', 'object'),
                 JMESPathCheck('name', self.vm_name),
                 JMESPathCheck('location', self.location),
                 JMESPathCheck('resourceGroup', self.resource_group),
             ])
-        self.cmd('vm list-sizes --resource-group {} --name {}'.format(
+        self.cmd('vm list-sizes --resource-group {} {}'.format(
             self.resource_group, self.vm_name), checks=JMESPathCheck('type(@)', 'array'))
 
         # Expecting the one we just added
@@ -226,12 +226,12 @@ class VMGeneralizeScenarioTest(ResourceGroupVCRTestBase):
                  '--image UbuntuLTS --admin-password testPassword0 --authentication-type password '
                  '--deployment-name {3}'.format(
                      self.resource_group, self.location, self.vm_name, self.deployment_name))
-        self.cmd('vm power-off --resource-group {} --name {}'.format(self.resource_group, self.vm_name))
+        self.cmd('vm power-off --resource-group {} {}'.format(self.resource_group, self.vm_name))
         # Should be able to generalize the VM after it has been stopped
-        self.cmd('vm generalize --resource-group {} --name {}'.format(self.resource_group, self.vm_name),
+        self.cmd('vm generalize --resource-group {} {}'.format(self.resource_group, self.vm_name),
             checks=NoneCheck())
 
-        self.cmd('vm capture --resource-group {} --name {} --vhd-name-prefix vmtest'.format(self.resource_group, self.vm_name),
+        self.cmd('vm capture --resource-group {} {} --vhd-name-prefix vmtest'.format(self.resource_group, self.vm_name),
             checks=NoneCheck())
 
     def test_vm_generalize(self):
@@ -250,7 +250,7 @@ class VMCreateAndStateModificationsScenarioTest(ResourceGroupVCRTestBase):
         self.execute()
 
     def _check_vm_power_state(self, expected_power_state):
-        self.cmd('vm show --resource-group {} --name {} --expand instanceView'.format(
+        self.cmd('vm show --resource-group {} {} --expand instanceView'.format(
             self.resource_group, self.vm_name), checks=[
                 JMESPathCheck('type(@)', 'object'),
                 JMESPathCheck('name', self.vm_name),
@@ -276,19 +276,19 @@ class VMCreateAndStateModificationsScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck('[0].provisioningState', 'Succeeded'),
         ])
         self._check_vm_power_state('PowerState/running')
-        self.cmd('vm power-off --resource-group {} --name {}'.format(
+        self.cmd('vm power-off --resource-group {} {}'.format(
             self.resource_group, self.vm_name))
         self._check_vm_power_state('PowerState/stopped')
-        self.cmd('vm start --resource-group {} --name {}'.format(
+        self.cmd('vm start --resource-group {} {}'.format(
             self.resource_group, self.vm_name))
         self._check_vm_power_state('PowerState/running')
-        self.cmd('vm restart --resource-group {} --name {}'.format(
+        self.cmd('vm restart --resource-group {} {}'.format(
             self.resource_group, self.vm_name))
         self._check_vm_power_state('PowerState/running')
-        self.cmd('vm deallocate --resource-group {} --name {}'.format(
+        self.cmd('vm deallocate --resource-group {} {}'.format(
             self.resource_group, self.vm_name))
         self._check_vm_power_state('PowerState/deallocated')
-        self.cmd('vm delete --resource-group {} --name {}'.format(
+        self.cmd('vm delete --resource-group {} {}'.format(
             self.resource_group, self.vm_name))
         # Expecting no results
         self.cmd('vm list --resource-group {}'.format(self.resource_group), checks=NoneCheck())
@@ -315,15 +315,15 @@ class VMAvailSetScenarioTest(VCRTestBase):
             JMESPathCheck('[0].resourceGroup', self.resource_group),
             JMESPathCheck('[0].location', self.location),
         ])
-        self.cmd('vm availability-set list-sizes --resource-group {} --name {}'.format(
+        self.cmd('vm availability-set list-sizes --resource-group {} {}'.format(
             self.resource_group, self.name), checks=JMESPathCheck('type(@)', 'array'))
-        self.cmd('vm availability-set show --resource-group {} --name {}'.format(
+        self.cmd('vm availability-set show --resource-group {} {}'.format(
             self.resource_group, self.name), checks=[
                 JMESPathCheck('type(@)', 'object'),
                 JMESPathCheck('name', self.name),
                 JMESPathCheck('resourceGroup', self.resource_group),
                 JMESPathCheck('location', self.location)])
-        self.cmd('vm availability-set delete --resource-group {} --name {}'.format(
+        self.cmd('vm availability-set delete --resource-group {} {}'.format(
             self.resource_group, self.name), checks=NoneCheck())
         self.cmd('vm availability-set list --resource-group {}'.format(
             self.resource_group), checks=NoneCheck())
@@ -423,15 +423,15 @@ class VMScaleSetGetsScenarioTest(VCRTestBase):
                 JMESPathCheck('[0].location', self.location),
                 JMESPathCheck('[0].resourceGroup', self.resource_group)
         ])
-        self.cmd('vm scaleset list-skus --resource-group {} --name {}'.format(self.resource_group, self.ss_name),
+        self.cmd('vm scaleset list-skus --resource-group {} {}'.format(self.resource_group, self.ss_name),
             checks=JMESPathCheck('type(@)', 'array'))
-        self.cmd('vm scaleset show --resource-group {} --name {}'.format(self.resource_group, self.ss_name), checks=[
+        self.cmd('vm scaleset show --resource-group {} {}'.format(self.resource_group, self.ss_name), checks=[
             JMESPathCheck('type(@)', 'object'),
             JMESPathCheck('name', self.ss_name),
             JMESPathCheck('location', self.location),
             JMESPathCheck('resourceGroup', self.resource_group)
         ])
-        self.cmd('vm scaleset get-instance-view --resource-group {} --name {}'.format(self.resource_group, self.ss_name), checks=[
+        self.cmd('vm scaleset get-instance-view --resource-group {} {}'.format(self.resource_group, self.ss_name), checks=[
             JMESPathCheck('type(@)', 'object'),
             JMESPathCheck('type(virtualMachine)', 'object'),
             JMESPathCheck('type(statuses)', 'array')
@@ -448,12 +448,12 @@ class VMScaleSetStatesScenarioTest(VCRTestBase):
         self.execute()
 
     def body(self):
-        self.cmd('vm scaleset power-off --resource-group {} --name {}'.format(self.resource_group, self.ss_name))
-        self.cmd('vm scaleset start --resource-group {} --name {}'.format(self.resource_group, self.ss_name),
+        self.cmd('vm scaleset power-off --resource-group {} {}'.format(self.resource_group, self.ss_name))
+        self.cmd('vm scaleset start --resource-group {} {}'.format(self.resource_group, self.ss_name),
             checks=NoneCheck())
-        self.cmd('vm scaleset restart --resource-group {} --name {}'.format(self.resource_group, self.ss_name),
+        self.cmd('vm scaleset restart --resource-group {} {}'.format(self.resource_group, self.ss_name),
             checks=NoneCheck())
-        self.cmd('vm scaleset update-instances --resource-group {} --name {} --instance-ids 0'.format(self.resource_group, self.ss_name),
+        self.cmd('vm scaleset update-instances --resource-group {} {} --instance-ids 0'.format(self.resource_group, self.ss_name),
             checks=NoneCheck())
 
 class VMScaleSetScaleUpScenarioTest(VCRTestBase):
@@ -467,11 +467,11 @@ class VMScaleSetScaleUpScenarioTest(VCRTestBase):
         self.execute()
 
     def body(self):
-        result = self.cmd('vm scaleset show --resource-group {} --name {}'.format(self.resource_group, self.ss_name))
+        result = self.cmd('vm scaleset show --resource-group {} {}'.format(self.resource_group, self.ss_name))
         capacity = result['sku']['capacity']
         new_capacity = capacity + 1 if capacity < 3 else capacity-1
-        self.cmd('vm scaleset scale --resource-group {} --name {} --new-capacity {}'.format(self.resource_group, self.ss_name, new_capacity))
-        result = self.cmd('vm scaleset show --resource-group {} --name {}'.format(self.resource_group, self.ss_name))
+        self.cmd('vm scaleset scale --resource-group {} {} --new-capacity {}'.format(self.resource_group, self.ss_name, new_capacity))
+        result = self.cmd('vm scaleset show --resource-group {} {}'.format(self.resource_group, self.ss_name))
         assert result['sku']['capacity'] == new_capacity
 
 class VMScaleSetDeleteScenarioTest(VCRTestBase):
@@ -493,22 +493,22 @@ class VMScaleSetDeleteScenarioTest(VCRTestBase):
             JMESPathCheck('[0].name', self.ss_name),
             JMESPathCheck('[0].resourceGroup', self.resource_group)
         ])
-        self.cmd('vm scaleset get-instance-view --resource-group {} --name {}'.format(self.resource_group, self.ss_name), checks=[
+        self.cmd('vm scaleset get-instance-view --resource-group {} {}'.format(self.resource_group, self.ss_name), checks=[
             JMESPathCheck('type(@)', 'object'),
             JMESPathCheck('type(virtualMachine)', 'object'),
             JMESPathCheck('virtualMachine.statusesSummary[0].count', self.vm_count)
         ])
         #Existing issues, the instance delete command has not been recorded
-        self.cmd('vm scaleset delete-instances --resource-group {} --name {} --instance-ids {}'.format(self.resource_group, self.ss_name, self.instance_id_to_delete),
+        self.cmd('vm scaleset delete-instances --resource-group {} {} --instance-ids {}'.format(self.resource_group, self.ss_name, self.instance_id_to_delete),
             checks=NoneCheck())
-        self.cmd('vm scaleset get-instance-view --resource-group {} --name {}'.format(self.resource_group, self.ss_name), checks=[
+        self.cmd('vm scaleset get-instance-view --resource-group {} {}'.format(self.resource_group, self.ss_name), checks=[
             JMESPathCheck('type(@)', 'object'),
             JMESPathCheck('type(virtualMachine)', 'object'),
             JMESPathCheck('virtualMachine.statusesSummary[0].count', self.vm_count-1)
         ])
-        self.cmd('vm scaleset deallocate --resource-group {} --name {}'.format(self.resource_group, self.ss_name),
+        self.cmd('vm scaleset deallocate --resource-group {} {}'.format(self.resource_group, self.ss_name),
             checks=NoneCheck())
-        self.cmd('vm scaleset delete --resource-group {} --name {}'.format(self.resource_group, self.ss_name),
+        self.cmd('vm scaleset delete --resource-group {} {}'.format(self.resource_group, self.ss_name),
             checks=NoneCheck())
         self.cmd('vm scaleset list --resource-group {}'.format(self.resource_group),
             checks=NoneCheck())
@@ -527,35 +527,35 @@ class VMScaleSetVMsScenarioTest(VCRTestBase):
 
     def _check_vms_power_state(self, expected_power_state):
         for iid in self.instance_ids:
-            self.cmd('vm scaleset get-instance-view --resource-group {} --name {} --instance-id {}'.format(self.resource_group, self.ss_name, iid),
+            self.cmd('vm scaleset get-instance-view --resource-group {} {} --instance-id {}'.format(self.resource_group, self.ss_name, iid),
                 checks=JMESPathCheck('statuses[1].code', expected_power_state))
 
     def body(self):
-        self.cmd('vm scaleset show-instance --resource-group {} --name {} --instance-id {}'.format(self.resource_group, self.ss_name, self.instance_ids[0]), checks=[
+        self.cmd('vm scaleset show-instance --resource-group {} {} --instance-id {}'.format(self.resource_group, self.ss_name, self.instance_ids[0]), checks=[
             JMESPathCheck('type(@)', 'object'),
             JMESPathCheck('instanceId', str(self.instance_ids[0]))
         ])
-        self.cmd('vm scaleset list-instances --resource-group {} --name {}'.format(self.resource_group, self.ss_name), checks=[
+        self.cmd('vm scaleset list-instances --resource-group {} {}'.format(self.resource_group, self.ss_name), checks=[
             JMESPathCheck('type(@)', 'array'),
             JMESPathCheck('length(@)', self.vm_count),
             JMESPathCheck("[].name.starts_with(@, '{}')".format(self.ss_name), [True] * self.vm_count)
         ])
         self._check_vms_power_state('PowerState/running')
-        self.cmd('vm scaleset power-off --resource-group {} --name {} --instance-ids *'.format(self.resource_group, self.ss_name),
+        self.cmd('vm scaleset power-off --resource-group {} {} --instance-ids *'.format(self.resource_group, self.ss_name),
             checks=NoneCheck())
         self._check_vms_power_state('PowerState/stopped')
-        self.cmd('vm scaleset start --resource-group {} --name {} --instance-ids *'.format(self.resource_group, self.ss_name),
+        self.cmd('vm scaleset start --resource-group {} {} --instance-ids *'.format(self.resource_group, self.ss_name),
             checks=NoneCheck())
         self._check_vms_power_state('PowerState/running')
-        self.cmd('vm scaleset restart --resource-group {} --name {} --instance-ids *'.format(self.resource_group, self.ss_name),
+        self.cmd('vm scaleset restart --resource-group {} {} --instance-ids *'.format(self.resource_group, self.ss_name),
             checks=NoneCheck())
         self._check_vms_power_state('PowerState/running')
-        self.cmd('vm scaleset deallocate --resource-group {} --name {} --instance-ids *'.format(self.resource_group, self.ss_name),
+        self.cmd('vm scaleset deallocate --resource-group {} {} --instance-ids *'.format(self.resource_group, self.ss_name),
             checks=NoneCheck())
         self._check_vms_power_state('PowerState/deallocated')
-        self.cmd('vm scaleset delete-instances --resource-group {} --name {} --instance-ids *'.format(self.resource_group, self.ss_name),
+        self.cmd('vm scaleset delete-instances --resource-group {} {} --instance-ids *'.format(self.resource_group, self.ss_name),
             checks=NoneCheck())
-        self.cmd('vm scaleset list-instances --resource-group {} --name {}'.format(self.resource_group, self.ss_name),
+        self.cmd('vm scaleset list-instances --resource-group {} {}'.format(self.resource_group, self.ss_name),
             checks=NoneCheck())
 
 class VMScaleSetCreateSimple(ResourceGroupVCRTestBase):
@@ -571,7 +571,7 @@ class VMScaleSetCreateSimple(ResourceGroupVCRTestBase):
         # Note: all parameters that are dynamically generated client-side must be overridden here.
         # This includes deployment name, admin name and ssh key.
         self.cmd('vm scaleset create --admin-password Test1234@! --name {vmss_name} -g {resource_group} --admin-username myadmin'.format(resource_group=self.resource_group, vmss_name=vmss_name))
-        self.cmd('vm scaleset show --name {vmss_name} -g {resource_group}'.format(resource_group=self.resource_group, vmss_name=vmss_name),
+        self.cmd('vm scaleset show {vmss_name} -g {resource_group}'.format(resource_group=self.resource_group, vmss_name=vmss_name),
             checks=JMESPathCheck('virtualMachineProfile.osProfile.windowsConfiguration.enableAutomaticUpdates', True))
 
 class VMScaleSetCreateOptions(ResourceGroupVCRTestBase):
@@ -598,14 +598,14 @@ class VMScaleSetCreateOptions(ResourceGroupVCRTestBase):
                  ' --public-ip-address-type existing --public-ip-address-name {ip_name}'
                  .format(vmss_name=vmss_name, resource_group=self.resource_group, instance_count=instance_count,
                          caching=caching, upgrade_policy=upgrade_policy, ip_name=ip_name))
-        self.cmd('network lb show --name {vmss_name}lb -g {resource_group}'.format(vmss_name=vmss_name, resource_group=self.resource_group),
+        self.cmd('network lb show {vmss_name}lb -g {resource_group}'.format(vmss_name=vmss_name, resource_group=self.resource_group),
             checks=JMESPathCheck('frontendIpConfigurations[0].publicIpAddress.id.ends_with(@, \'{ip_name}\')'.format(ip_name=ip_name), True))
-        self.cmd('vm scaleset show --name {vmss_name} -g {resource_group}'.format(resource_group=self.resource_group, vmss_name=vmss_name), checks=[
+        self.cmd('vm scaleset show {vmss_name} -g {resource_group}'.format(resource_group=self.resource_group, vmss_name=vmss_name), checks=[
             JMESPathCheck('sku.capacity', instance_count),
             JMESPathCheck('virtualMachineProfile.storageProfile.osDisk.caching', caching),
             JMESPathCheck('upgradePolicy.mode', upgrade_policy.title())
         ])
-        self.cmd('vm scaleset show-instance -n {vmss_name} -g {resource_group} --instance-id 0'.format(vmss_name=vmss_name, resource_group=self.resource_group),
+        self.cmd('vm scaleset show-instance {vmss_name} -g {resource_group} --instance-id 0'.format(vmss_name=vmss_name, resource_group=self.resource_group),
             checks=JMESPathCheck('osProfile.windowsConfiguration.provisionVmAgent', True))
 
 class VMScaleSetCreateExistingOptions(ResourceGroupVCRTestBase):
@@ -641,14 +641,14 @@ class VMScaleSetCreateExistingOptions(ResourceGroupVCRTestBase):
                          container_name=container_name, resource_group=self.resource_group, vmss_name=vmss_name,
                          key_value=TEST_SSH_KEY_PUB, nat_pool_name=nat_pool_name, be_pool_name=be_pool_name,
                          sku_name=sku_name))
-        self.cmd('vm scaleset show --name {vmss_name} -g {resource_group}'.format(resource_group=self.resource_group, vmss_name=vmss_name), checks=[
+        self.cmd('vm scaleset show {vmss_name} -g {resource_group}'.format(resource_group=self.resource_group, vmss_name=vmss_name), checks=[
             JMESPathCheck('sku.name', sku_name),
             JMESPathCheck('virtualMachineProfile.storageProfile.osDisk.name', os_disk_name),
             JMESPathCheck('virtualMachineProfile.storageProfile.osDisk.vhdContainers[0].ends_with(@, \'{container_name}\')'.format(container_name=container_name), True)
         ])
-        self.cmd('network lb show --name {lb_name} -g {resource_group}'.format(resource_group=self.resource_group, lb_name=lb_name),
+        self.cmd('network lb show {lb_name} -g {resource_group}'.format(resource_group=self.resource_group, lb_name=lb_name),
             checks=JMESPathCheck('backendAddressPools[0].backendIpConfigurations[0].id.contains(@, \'{vmss_name}\')'.format(vmss_name=vmss_name), True))
-        self.cmd('network vnet show --name {vnet_name} -g {resource_group}'.format(resource_group=self.resource_group, vnet_name=vnet_name),
+        self.cmd('network vnet show {vnet_name} -g {resource_group}'.format(resource_group=self.resource_group, vnet_name=vnet_name),
             checks=JMESPathCheck('subnets[0].ipConfigurations[0].id.contains(@, \'{vmss_name}\')'.format(vmss_name=vmss_name), True))
 
 class VMAccessAddRemoveLinuxUser(VCRTestBase):
@@ -660,7 +660,7 @@ class VMAccessAddRemoveLinuxUser(VCRTestBase):
         self.execute()
 
     def body(self):
-        common_part = '-g yugangw4 -n yugangw4-1 -u foouser1'
+        common_part = '-g yugangw4 yugangw4-1 -u foouser1'
         self.cmd('vm access set-linux-user {} -p Foo12345 '.format(common_part), checks=[
             JMESPathCheck('provisioningState', 'Succeeded'),
             JMESPathCheck('name', 'VMAccessForLinux')
@@ -721,7 +721,7 @@ class VMBootDiagnostics(VCRTestBase):
         self.execute()
 
     def body(self):
-        common_part = '-g yugangwtest -n yugangwtest-1'
+        common_part = '-g yugangwtest yugangwtest-1'
         storage_account = 'yugangwstorage'
         storage_uri = 'https://{}.blob.core.windows.net/'.format(storage_account)
         self.cmd('vm boot-diagnostics enable {} --storage {}'.format(common_part, storage_account))
@@ -832,13 +832,13 @@ class VMCreateExistingOptions(ResourceGroupVCRTestBase):
                          vm_name=vm_name, disk_name=disk_name, container_name=container_name,
                          storage_name=storage_name, key_value=TEST_SSH_KEY_PUB))
 
-        self.cmd('vm availability-set show -n {availset_name} -g {resource_group}'.format(availset_name=availset_name, resource_group=self.resource_group),
+        self.cmd('vm availability-set show {availset_name} -g {resource_group}'.format(availset_name=availset_name, resource_group=self.resource_group),
             checks=JMESPathCheck('virtualMachines[0].id.ends_with(@, \'{}\')'.format(vm_name.upper()), True))
-        self.cmd('network nsg show -n {nsg_name} -g {resource_group}'.format(nsg_name=nsg_name, resource_group=self.resource_group),
+        self.cmd('network nsg show {nsg_name} -g {resource_group}'.format(nsg_name=nsg_name, resource_group=self.resource_group),
             checks=JMESPathCheck('networkInterfaces[0].id.ends_with(@, \'{}\')'.format(vm_name + 'VMNic'), True))
-        self.cmd('network nic show -n {vm_name}VMNic -g {resource_group}'.format(vm_name=vm_name, resource_group=self.resource_group),
+        self.cmd('network nic show {vm_name}VMNic -g {resource_group}'.format(vm_name=vm_name, resource_group=self.resource_group),
             checks=JMESPathCheck('ipConfigurations[0].publicIpAddress.id.ends_with(@, \'{}\')'.format(pubip_name), True))
-        self.cmd('vm show -n {vm_name} -g {resource_group}'.format(vm_name=vm_name, resource_group=self.resource_group),
+        self.cmd('vm show {vm_name} -g {resource_group}'.format(vm_name=vm_name, resource_group=self.resource_group),
             checks=JMESPathCheck('storageProfile.osDisk.vhd.uri', 'http://{storage_name}.blob.core.windows.net/{container_name}/{disk_name}.vhd'.format(storage_name=storage_name, container_name=container_name, disk_name=disk_name)))
 
 class VMCreateCustomIP(ResourceGroupVCRTestBase):
@@ -859,11 +859,11 @@ class VMCreateCustomIP(ResourceGroupVCRTestBase):
                  ' --dns-name-for-public-ip {dns_name} --ssh-key-value \'{key_value}\''
                  .format(vm_name=vm_name, resource_group=self.resource_group, dns_name=dns_name, key_value=TEST_SSH_KEY_PUB))
 
-        self.cmd('network public-ip show -n {vm_name}PublicIP -g {resource_group}'.format(vm_name=vm_name, resource_group=self.resource_group), checks=[
+        self.cmd('network public-ip show {vm_name}PublicIP -g {resource_group}'.format(vm_name=vm_name, resource_group=self.resource_group), checks=[
             JMESPathCheck('publicIpAllocationMethod', 'Static'),
             JMESPathCheck('dnsSettings.domainNameLabel', dns_name)
         ])
-        self.cmd('network nic show -n {vm_name}VMNic -g {resource_group}'.format(vm_name=vm_name, resource_group=self.resource_group),
+        self.cmd('network nic show {vm_name}VMNic -g {resource_group}'.format(vm_name=vm_name, resource_group=self.resource_group),
             checks=JMESPathCheck('ipConfigurations[0].privateIpAllocationMethod', 'Static'))
 
 
@@ -886,7 +886,7 @@ class VMDataDiskVCRTest(ResourceGroupVCRTestBase):
                      self.resource_group, self.location, self.vm_name, self.deployment_name))
 
         #check we have no data disk
-        result = self.cmd('vm show -g {} -n {}'.format(self.resource_group, self.vm_name))
+        result = self.cmd('vm show -g {} {}'.format(self.resource_group, self.vm_name))
         self.assertFalse(bool(result['storageProfile']['dataDisks']))
 
         #get the vhd uri from VM's storage_profile
@@ -897,7 +897,7 @@ class VMDataDiskVCRTest(ResourceGroupVCRTestBase):
         self.cmd('vm disk attach-new -g {} --vm-name {} -n {} --vhd {} --caching ReadWrite --disk-size 8 --lun 1'.format(
             self.resource_group, self.vm_name, disk_name, vhd_uri))
         #check we have a data disk
-        result = self.cmd('vm show -g {} -n {}'.format(self.resource_group, self.vm_name))
+        result = self.cmd('vm show -g {} {}'.format(self.resource_group, self.vm_name))
         self.assertEqual(1, len(result['storageProfile']['dataDisks']))
         disk = {
             "caching": "ReadWrite",
@@ -916,7 +916,7 @@ class VMDataDiskVCRTest(ResourceGroupVCRTestBase):
             self.resource_group, self.vm_name, disk_name))
 
         #check we have no data disk
-        result = self.cmd('vm show -g {} -n {}'.format(self.resource_group, self.vm_name))
+        result = self.cmd('vm show -g {} {}'.format(self.resource_group, self.vm_name))
         self.assertFalse(bool(result['storageProfile']['dataDisks']))
 
         #now attach to existing
@@ -924,7 +924,7 @@ class VMDataDiskVCRTest(ResourceGroupVCRTestBase):
             self.resource_group, self.vm_name, disk_name, vhd_uri))
 
         #check we have a data disk
-        result = self.cmd('vm show -g {} -n {}'.format(self.resource_group, self.vm_name))
+        result = self.cmd('vm show -g {} {}'.format(self.resource_group, self.vm_name))
         self.assertEqual(1, len(result['storageProfile']['dataDisks']))
         disk2 = {
             "lun": 0,

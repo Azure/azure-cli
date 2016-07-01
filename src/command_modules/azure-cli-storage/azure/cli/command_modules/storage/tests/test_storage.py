@@ -39,7 +39,7 @@ class StorageAccountCreateAndDeleteTest(VCRTestBase):
         super(StorageAccountCreateAndDeleteTest, self).__init__(__file__, test_method)
 
     def set_up(self):
-        self.cmd('storage account delete -g {} -n {}'.format(RESOURCE_GROUP_NAME, self.account))
+        self.cmd('storage account delete -g {} {}'.format(RESOURCE_GROUP_NAME, self.account))
         result = self.cmd('storage account check-name --name {}'.format(self.account))
         if not result['nameAvailable']:
             raise CLIError('Failed to delete pre-existing storage account {}. Unable to continue test.'.format(self.account))
@@ -56,11 +56,11 @@ class StorageAccountCreateAndDeleteTest(VCRTestBase):
             JMESPathCheck('nameAvailable', False),
             JMESPathCheck('reason', 'AlreadyExists')
         ])
-        s.cmd('storage account delete -g {} -n {}'.format(RESOURCE_GROUP_NAME, account))
+        s.cmd('storage account delete -g {} {}'.format(RESOURCE_GROUP_NAME, account))
         s.cmd('storage account check-name --name {}'.format(account), checks=JMESPathCheck('nameAvailable', True))
 
     def tear_down(self):
-        self.cmd('storage account delete -g {} -n {}'.format(RESOURCE_GROUP_NAME, self.account))
+        self.cmd('storage account delete -g {} {}'.format(RESOURCE_GROUP_NAME, self.account))
 
 class StorageAccountScenarioTest(VCRTestBase):
 
@@ -73,7 +73,7 @@ class StorageAccountScenarioTest(VCRTestBase):
         super(StorageAccountScenarioTest, self).__init__(__file__, test_method)
 
     def set_up(self):
-        self.cmd('storage account set -g {} -n {} --type Standard_LRS'.format(self.rg, self.account))
+        self.cmd('storage account set -g {} {} --type Standard_LRS'.format(self.rg, self.account))
 
     def body(self):
         s = self
@@ -90,35 +90,35 @@ class StorageAccountScenarioTest(VCRTestBase):
             JMESPathCheck('[0].sku.name', 'Standard_LRS'),
             JMESPathCheck('[0].resourceGroup', rg)
         ])
-        s.cmd('storage account show --resource-group {} --name {}'.format(rg, account), checks=[
+        s.cmd('storage account show --resource-group {} {}'.format(rg, account), checks=[
             JMESPathCheck('name', account),
             JMESPathCheck('location', 'westus'),
             JMESPathCheck('sku.name', 'Standard_LRS'),
             JMESPathCheck('resourceGroup', rg)
         ])
         s.cmd('storage account show-usage', checks=JMESPathCheck('name.value', 'StorageAccounts'))
-        s.cmd('storage account connection-string -g {} -n {} --use-http'.format(rg, account), checks=[
+        s.cmd('storage account connection-string -g {} {} --use-http'.format(rg, account), checks=[
             JMESPathCheck("contains(ConnectionString, 'https')", False),
             JMESPathCheck("contains(ConnectionString, '{}')".format(account), True)
         ])
-        keys_result = s.cmd('storage account keys list -g {} -n {}'.format(rg, account))
+        keys_result = s.cmd('storage account keys list -g {} {}'.format(rg, account))
         key1 = keys_result['keys'][0]
         key2 = keys_result['keys'][1]
         assert key1 and key2
-        keys_result = s.cmd('storage account keys renew -g {} -n {}'.format(rg, account))
+        keys_result = s.cmd('storage account keys renew -g {} {}'.format(rg, account))
         renewed_key1 = keys_result['keys'][0]
         renewed_key2 = keys_result['keys'][1]
         assert key1 != renewed_key1
         assert key2 != renewed_key2
         key1 = renewed_key1
-        keys_result = s.cmd('storage account keys renew -g {} -n {} --key secondary'.format(rg, account))
+        keys_result = s.cmd('storage account keys renew -g {} {} --key secondary'.format(rg, account))
         assert key1 == keys_result['keys'][0]
         assert key2 != keys_result['keys'][1]
-        s.cmd('storage account set -g {} -n {} --tags foo=bar;cat'.format(rg, account),
+        s.cmd('storage account set -g {} {} --tags foo=bar;cat'.format(rg, account),
             checks=JMESPathCheck('tags', {'cat':'', 'foo':'bar'}))
-        s.cmd('storage account set -g {} -n {} --tags'.format(rg, account),
+        s.cmd('storage account set -g {} {} --tags'.format(rg, account),
             checks=JMESPathCheck('tags', {}))
-        s.cmd('storage account set -g {} -n {} --type Standard_GRS'.format(rg, account),
+        s.cmd('storage account set -g {} {} --type Standard_GRS'.format(rg, account),
             checks=JMESPathCheck('sku.name', 'Standard_GRS'))
 
 class StorageBlobScenarioTest(VCRTestBase):
