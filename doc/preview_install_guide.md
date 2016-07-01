@@ -29,6 +29,7 @@ Click on your OS for steps:
   * [Command Prompt / cmd](#windows-cmd)
   * [Bash on Windows](#ubuntu-1404-lts-and-bash-on-windows-build-14362)
 * [PIP / Developer Setup](https://github.com/Azure/azure-cli/blob/master/doc/configuring_your_machine.md)
+* [Installation troubleshooting](#installation-troubleshooting)
 
 # Instructions per Platform and Version
 
@@ -280,4 +281,4 @@ Ubuntu 15 may require `build-essential` also:
     Failed building wheel for cryptography
 ```
 
-`See Stack Overflow question - Failed to install Python Cryptography package with PIP and setup.py <http://stackoverflow.com/questions/22073516/failed-to-install-python-cryptography-package-with-pip-and-setup-py>`__
+`See Stack Overflow question - Failed to install Python Cryptography package with PIP and setup.py <http://stackoverflow.com/questions/22073516/failed-to-install-python-cryptography-package-with-pip-and-setup-py>`
