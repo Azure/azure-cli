@@ -43,19 +43,24 @@ class DeploymentAppGateway(Model):
     :param frontend_type: Specify which kind of frontend configuration to
      create. Possible values include: 'subnet', 'publicIp', 'privateIp'.
      Default value: "subnet" .
-    :type frontend_type: str
+    :type frontend_type: str or :class:`frontendType
+     <appgatewaycreationclient.models.frontendType>`
     :param http_listener_protocol: The HTTP listener protocol. Possible
      values include: 'http', 'https'. Default value: "http" .
-    :type http_listener_protocol: str
+    :type http_listener_protocol: str or :class:`httpListenerProtocol
+     <appgatewaycreationclient.models.httpListenerProtocol>`
     :param http_settings_cookie_based_affinity: Enable or disable HTTP
      settings cookie based affinity. Possible values include: 'enabled',
      'disabled'. Default value: "disabled" .
-    :type http_settings_cookie_based_affinity: str
+    :type http_settings_cookie_based_affinity: str or
+     :class:`httpSettingsCookieBasedAffinity
+     <appgatewaycreationclient.models.httpSettingsCookieBasedAffinity>`
     :param http_settings_port: The HTTP settings port. Default value: 80 .
     :type http_settings_port: int
     :param http_settings_protocol: The HTTP settings protocol. Possible
      values include: 'http'. Default value: "http" .
-    :type http_settings_protocol: str
+    :type http_settings_protocol: str or :class:`httpSettingsProtocol
+     <appgatewaycreationclient.models.httpSettingsProtocol>`
     :param location: The location in which to create the application gateway.
     :type location: str
     :param private_ip_address: The static private IP address to associate
@@ -64,33 +69,36 @@ class DeploymentAppGateway(Model):
     :param private_ip_address_allocation: Specify whether to use static or
      dynamic private IP allocation. Possible values include: 'dynamic',
      'static'. Default value: "dynamic" .
-    :type private_ip_address_allocation: str
+    :type private_ip_address_allocation: str or
+     :class:`privateIpAddressAllocation
+     <appgatewaycreationclient.models.privateIpAddressAllocation>`
     :param public_ip: The name or ID of the public IP address.
     :type public_ip: str
     :param public_ip_type: Specify the type of public IP address. Possible
      values include: 'none', 'new', 'existingName', 'existingId'. Default
      value: "none" .
-    :type public_ip_type: str
-    :param routing_rule_type: The request routing rule type. Default value:
-     "Basic" .
+    :type public_ip_type: str or :class:`publicIpType
+     <appgatewaycreationclient.models.publicIpType>`
+    :param routing_rule_type: The request routing rule type (Basic,
+     PathBasedRouting, ...). Default value: "Basic" .
     :type routing_rule_type: str
     :param servers: The list of IP addresses or DNS names corresponding to
      backend servers.
     :type servers: list of object
-    :param sku_name: The name of the SKU. Possible values include:
-     'Standard_Small', 'Standard_Medium', 'Standard_Large'. Default value:
-     "Standard_Medium" .
+    :param sku_name: The name of the SKU. (Standard_Small, Standard_Medium,
+     Standard_Large, ...). Default value: "Standard_Medium" .
     :type sku_name: str
-    :param sku_tier: The SKU tier. Default value: "Standard" .
+    :param sku_tier: The SKU tier (Standard, ...). Default value: "Standard" .
     :type sku_tier: str
-    :param subnet: The name or ID of the subnet.
+    :param subnet: The name or ID of the subnet. Default value: "subnet1" .
     :type subnet: str
     :param subnet_prefix: The subnet prefix in CIDR format. Default value:
      "10.0.0.0/24" .
     :type subnet_prefix: str
     :param subnet_type: Use a new or existing subnet. Possible values
      include: 'new', 'existingId', 'existingName'. Default value: "new" .
-    :type subnet_type: str
+    :type subnet_type: str or :class:`subnetType
+     <appgatewaycreationclient.models.subnetType>`
     :param virtual_network_name: The name of the virtual network (VNet)
      associated with the subnet.
     :type virtual_network_name: str
@@ -106,7 +114,6 @@ class DeploymentAppGateway(Model):
         'uri': {'required': True, 'constant': True},
         '_artifacts_location': {'required': True, 'constant': True},
         'application_gateway_name': {'required': True},
-        'subnet': {'required': True},
         'mode': {'required': True, 'constant': True},
     }
 
@@ -119,23 +126,23 @@ class DeploymentAppGateway(Model):
         'cert_data': {'key': 'properties.parameters.certData.value', 'type': 'str'},
         'cert_password': {'key': 'properties.parameters.certPassword.value', 'type': 'str'},
         'frontend_port': {'key': 'properties.parameters.frontendPort.value', 'type': 'int'},
-        'frontend_type': {'key': 'properties.parameters.frontendType.value', 'type': 'str'},
-        'http_listener_protocol': {'key': 'properties.parameters.httpListenerProtocol.value', 'type': 'str'},
-        'http_settings_cookie_based_affinity': {'key': 'properties.parameters.httpSettingsCookieBasedAffinity.value', 'type': 'str'},
+        'frontend_type': {'key': 'properties.parameters.frontendType.value', 'type': 'frontendType'},
+        'http_listener_protocol': {'key': 'properties.parameters.httpListenerProtocol.value', 'type': 'httpListenerProtocol'},
+        'http_settings_cookie_based_affinity': {'key': 'properties.parameters.httpSettingsCookieBasedAffinity.value', 'type': 'httpSettingsCookieBasedAffinity'},
         'http_settings_port': {'key': 'properties.parameters.httpSettingsPort.value', 'type': 'int'},
-        'http_settings_protocol': {'key': 'properties.parameters.httpSettingsProtocol.value', 'type': 'str'},
+        'http_settings_protocol': {'key': 'properties.parameters.httpSettingsProtocol.value', 'type': 'httpSettingsProtocol'},
         'location': {'key': 'properties.parameters.location.value', 'type': 'str'},
         'private_ip_address': {'key': 'properties.parameters.privateIpAddress.value', 'type': 'str'},
-        'private_ip_address_allocation': {'key': 'properties.parameters.privateIpAddressAllocation.value', 'type': 'str'},
+        'private_ip_address_allocation': {'key': 'properties.parameters.privateIpAddressAllocation.value', 'type': 'privateIpAddressAllocation'},
         'public_ip': {'key': 'properties.parameters.publicIp.value', 'type': 'str'},
-        'public_ip_type': {'key': 'properties.parameters.publicIpType.value', 'type': 'str'},
+        'public_ip_type': {'key': 'properties.parameters.publicIpType.value', 'type': 'publicIpType'},
         'routing_rule_type': {'key': 'properties.parameters.routingRuleType.value', 'type': 'str'},
         'servers': {'key': 'properties.parameters.servers.value', 'type': '[object]'},
         'sku_name': {'key': 'properties.parameters.skuName.value', 'type': 'str'},
         'sku_tier': {'key': 'properties.parameters.skuTier.value', 'type': 'str'},
         'subnet': {'key': 'properties.parameters.subnet.value', 'type': 'str'},
         'subnet_prefix': {'key': 'properties.parameters.subnetPrefix.value', 'type': 'str'},
-        'subnet_type': {'key': 'properties.parameters.subnetType.value', 'type': 'str'},
+        'subnet_type': {'key': 'properties.parameters.subnetType.value', 'type': 'subnetType'},
         'virtual_network_name': {'key': 'properties.parameters.virtualNetworkName.value', 'type': 'str'},
         'vnet_address_prefix': {'key': 'properties.parameters.vnetAddressPrefix.value', 'type': 'str'},
         'mode': {'key': 'properties.mode', 'type': 'str'},
@@ -147,7 +154,7 @@ class DeploymentAppGateway(Model):
 
     mode = "Incremental"
 
-    def __init__(self, application_gateway_name, subnet, content_version=None, capacity=2, cert_data=None, cert_password=None, frontend_port=None, frontend_type="subnet", http_listener_protocol="http", http_settings_cookie_based_affinity="disabled", http_settings_port=80, http_settings_protocol="http", location=None, private_ip_address=None, private_ip_address_allocation="dynamic", public_ip=None, public_ip_type="none", routing_rule_type="Basic", servers=None, sku_name="Standard_Medium", sku_tier="Standard", subnet_prefix="10.0.0.0/24", subnet_type="new", virtual_network_name=None, vnet_address_prefix="10.0.0.0/16"):
+    def __init__(self, application_gateway_name, content_version=None, capacity=2, cert_data=None, cert_password=None, frontend_port=None, frontend_type="subnet", http_listener_protocol="http", http_settings_cookie_based_affinity="disabled", http_settings_port=80, http_settings_protocol="http", location=None, private_ip_address=None, private_ip_address_allocation="dynamic", public_ip=None, public_ip_type="none", routing_rule_type="Basic", servers=None, sku_name="Standard_Medium", sku_tier="Standard", subnet="subnet1", subnet_prefix="10.0.0.0/24", subnet_type="new", virtual_network_name=None, vnet_address_prefix="10.0.0.0/16"):
         self.content_version = content_version
         self.application_gateway_name = application_gateway_name
         self.capacity = capacity

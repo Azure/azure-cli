@@ -5,8 +5,12 @@ Execute P0s before any change is merged
 
 **Automated Test**
 
- - delete test_network_application_gateway.yaml
- - Run test twice (first records, second verifies stability)
+ - delete the following:
+	- test_network_app_gateway_with_defaults.yaml
+	- test_network_app_gateway_with_internal_load_balancer.yaml
+	- test_network_app_gateway_with_public_ip.yaml
+	- test_network_app_gateway_with_subnet.yaml
+ - Run the tests twice (first records, second verifies stability)
 
 OR
 

@@ -9,6 +9,51 @@
 from enum import Enum
 
 
+class frontendType(Enum):
+
+    subnet = "subnet"
+    public_ip = "publicIp"
+    private_ip = "privateIp"
+
+
+class httpListenerProtocol(Enum):
+
+    http = "http"
+    https = "https"
+
+
+class httpSettingsCookieBasedAffinity(Enum):
+
+    enabled = "enabled"
+    disabled = "disabled"
+
+
+class httpSettingsProtocol(Enum):
+
+    http = "http"
+
+
+class privateIpAddressAllocation(Enum):
+
+    dynamic = "dynamic"
+    static = "static"
+
+
+class publicIpType(Enum):
+
+    none = "none"
+    new = "new"
+    existing_name = "existingName"
+    existing_id = "existingId"
+
+
+class subnetType(Enum):
+
+    new = "new"
+    existing_id = "existingId"
+    existing_name = "existingName"
+
+
 class DeploymentMode(Enum):
 
     incremental = "Incremental"

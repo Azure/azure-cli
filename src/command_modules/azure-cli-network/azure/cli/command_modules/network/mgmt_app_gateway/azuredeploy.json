@@ -125,7 +125,7 @@
       "type": "string",
       "defaultValue": "Basic",
       "metadata": {
-        "description": "The request routing rule type."
+        "description": "The request routing rule type (Basic, PathBasedRouting, ...)."
       }
     },
     "servers": {
@@ -144,25 +144,21 @@
     },
     "skuName": {
       "type": "string",
-      "allowedValues": [
-        "Standard_Small",
-        "Standard_Medium",
-        "Standard_Large"
-      ],
       "defaultValue": "Standard_Medium",
       "metadata": {
-        "description": "The name of the SKU"
+        "description": "The name of the SKU. (Standard_Small, Standard_Medium, Standard_Large, ...)."
       }
     },
     "skuTier": {
       "type": "string",
       "defaultValue": "Standard",
       "metadata": {
-        "description": "The SKU tier"
+        "description": "The SKU tier (Standard, ...)."
       }
     },
     "subnet": {
       "type": "string",
+      "defaultValue": "subnet1",
       "metadata": {
         "description": "The name or ID of the subnet."
       }
@@ -415,8 +411,9 @@
     "vnetDeploymentName": "[concat('VNET',parameters('applicationGatewayName'))]",
     "vnetId": "[concat('/subscriptions/',subscription().subscriptionId,'/resourceGroups/',resourceGroup().name,'/providers/Microsoft.Network/virtualNetworks/',parameters('virtualNetworkName'))]",
     "vnetTemplateFilePaths": {
-      "new": "nested_templates/vnet_new.json",
-      "existing": "nested_templates/vnet_existing.json"
+      "existingId": "nested_templates/vnet_existing.json",
+      "existingName": "nested_templates/vnet_existing.json",
+      "new": "nested_templates/vnet_new.json"
     }
   },
   "resources": [
@@ -468,5 +465,11 @@
         }
       }
     }
-  ]
+  ],
+  "outputs": {
+    "applicationGateway": {
+      "type": "object",
+      "value": "[reference(parameters('applicationGatewayName'))]"
+    }
+  }
 }

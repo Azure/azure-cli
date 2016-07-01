@@ -53,6 +53,13 @@ def validate_servers(namespace):
     namespace.servers = servers
 
 def validate_cert(namespace):
+
+    default_frontend_port = namespace.frontend_port is None
+
+    # default to frontend port 80 for http
+    if default_frontend_port:
+        namespace.frontend_port = 80
+
     params = [namespace.cert_data, namespace.cert_password]
     if all([not x for x in params]):
         return
@@ -71,7 +78,7 @@ def validate_cert(namespace):
         except UnicodeDecodeError:
             namespace.cert_data = str(base64_data)
 
-    # set the protocol and default frontend port if one is not specified
+    # change default to frontend port 443 for https
     namespace.http_listener_protocol = 'https'
     if not namespace.frontend_port:
         namespace.frontend_port = 443 if namespace.http_listener_protocol == 'https' else 80
