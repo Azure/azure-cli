@@ -29,7 +29,6 @@ Click on your OS for steps:
   * [Command Prompt / cmd](#windows-cmd)
   * [Bash on Windows](#ubuntu-1404-lts-and-bash-on-windows-build-14362)
 * Python/PIP
-  * [Install via PIP](#pip)
   * [Developer Setup](https://github.com/Azure/azure-cli/blob/master/doc/configuring_your_machine.md)
 * [Installation troubleshooting](#installation-troubleshooting)
 
@@ -188,20 +187,13 @@ curl -L https://aka.ms/ProjectAzInstall | sudo bash
 
 Doesn't have python installed by default and is not currently supported.
 
-## PIP
-
-To install via the Python Package Index (PyPI), type:
-
-```shell
-    pip install azure-cli
-```
 
 ## Windows (cmd)
 
 Set the environment variable to point to the version you wish to install.
 
 ```shell
-    set AZURE_CLI_NIGHTLY_VERSION=2016.06.29.nightly
+    set AZURE_CLI_NIGHTLY_VERSION=2016.06.30.nightly
 ```
 
 Run the following from a command prompt
@@ -309,4 +301,4 @@ Ubuntu 15 may require `build-essential` also:
     Failed building wheel for cryptography
 ```
 
-`See Stack Overflow question - Failed to install Python Cryptography package with PIP and setup.py <http://stackoverflow.com/questions/22073516/failed-to-install-python-cryptography-package-with-pip-and-setup-py>`
+See Stack Overflow question - [Failed to install Python Cryptography package with PIP and setup.py](http://stackoverflow.com/questions/22073516/failed-to-install-python-cryptography-package-with-pip-and-setup-py)
