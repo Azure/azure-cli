@@ -705,7 +705,7 @@ def vmss_delete_instances(resource_group_name, vm_scale_set_name, instance_ids):
                                                                   vm_scale_set_name,
                                                                   instance_ids)
 
-def vmss_power_off(resource_group_name, vm_scale_set_name, instance_ids=None):
+def vmss_stop(resource_group_name, vm_scale_set_name, instance_ids=None):
     '''power off (stop) virtual machines in a virtual machine scale set.
 
     :param str instance_ids: space separated ids, such as 0 2 3

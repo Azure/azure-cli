@@ -29,7 +29,7 @@ from .custom import (
     list_extensions, set_extension, set_diagnostics_extension,
     show_default_diagnostics_configuration,
     vmss_start, vmss_restart, vmss_delete_instances, vmss_deallocate, vmss_get_instance_view,
-    vmss_power_off, vmss_reimage, vmss_scale, vmss_update_instances
+    vmss_stop, vmss_reimage, vmss_scale, vmss_update_instances
     )
 
 
@@ -48,7 +48,7 @@ cli_command('vm deallocate', VirtualMachinesOperations.deallocate, factory)
 cli_command('vm generalize', VirtualMachinesOperations.generalize, factory)
 cli_command('vm show', VirtualMachinesOperations.get, factory)
 cli_command('vm list-sizes', VirtualMachinesOperations.list_available_sizes, factory)
-cli_command('vm power-off', VirtualMachinesOperations.power_off, factory)
+cli_command('vm stop', VirtualMachinesOperations.power_off, factory)
 cli_command('vm restart', VirtualMachinesOperations.restart, factory)
 cli_command('vm start', VirtualMachinesOperations.start, factory)
 cli_command('vm redeploy', VirtualMachinesOperations.redeploy, factory)
@@ -149,7 +149,7 @@ cli_command('vm scaleset list-instances', VirtualMachineScaleSetVMsOperations.li
 cli_command('vm scaleset deallocate', vmss_deallocate)
 cli_command('vm scaleset delete-instances', vmss_delete_instances)
 cli_command('vm scaleset get-instance-view', vmss_get_instance_view)
-cli_command('vm scaleset power-off', vmss_power_off)
+cli_command('vm scaleset stop', vmss_stop)
 cli_command('vm scaleset restart', vmss_restart)
 cli_command('vm scaleset start', vmss_start)
 cli_command('vm scaleset update-instances', vmss_update_instances)
