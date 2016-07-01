@@ -6,7 +6,7 @@ import re
 from azure.cli._util import CLIError
 from azure.cli.application import APPLICATION
 from azure.cli.commands.parameters import get_one_of_subscription_locations
-from azure.cli.commands.azure_resource_id import AzureResourceId
+from azure.cli.commands.arm import resource_id
 
 from six.moves.urllib.request import urlopen #pylint: disable=import-error
 
@@ -65,9 +65,11 @@ def _handle_vm_nics(namespace):
 
     for n in nics_value:
         nics.append({
-            'id': n if '/' in n else str(AzureResourceId(n, namespace.resource_group_name,
-                                                         'Microsoft.Network/networkInterfaces',
-                                                         _get_subscription_id())),
+            'id': n if '/' in n else resource_id(name=n,
+                                                 resource_group=namespace.resource_group_name,
+                                                 namespace='Microsoft.Network',
+                                                 type='networkInterfaces',
+                                                 subscription=_get_subscription_id()),
             'properties': {
                 'primary': nics_value[0] == n
             }

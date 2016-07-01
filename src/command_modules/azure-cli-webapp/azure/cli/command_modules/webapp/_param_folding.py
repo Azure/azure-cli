@@ -2,7 +2,7 @@ import argparse
 
 from azure.cli._util import CLIError
 from azure.cli.commands import register_cli_argument
-from azure.cli.commands.azure_resource_id import AzureResourceId, resource_exists
+from azure.cli.commands.arm import is_valid_resource_id, resource_id, resource_exists
 
 def register_folded_cli_argument(scope, base_name, resource_type, type_field=None, #pylint: disable=too-many-arguments
                                  existing_id_flag_value='existingId', new_flag_value='new',
@@ -29,8 +29,13 @@ def _name_id_fold(base_name, resource_type, type_field, #pylint: disable=too-man
                 return
 
             # TODO: hook up namespace._subscription_id once we support it
-            r_id = AzureResourceId(name_or_id, namespace.resource_group_name, resource_type,
-                                   get_subscription_id())
+            if is_valid_resource_id(name_or_id):
+                r_id = name_or_id
+            else:
+                r_id = resource_id(name=name_or_id,
+                                   resource_group=namespace.resource_group_name,
+                                   type=resource_type,
+                                   subscription=get_subscription_id())
 
             if resource_exists(r_id):
                 setattr(namespace, type_field, existing_id_flag_value)
