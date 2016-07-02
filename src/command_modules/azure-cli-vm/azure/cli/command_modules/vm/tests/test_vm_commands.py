@@ -227,7 +227,7 @@ class VMGeneralizeScenarioTest(ResourceGroupVCRTestBase):
                  '--image UbuntuLTS --admin-password testPassword0 --authentication-type password '
                  '--deployment-name {3}'.format(
                      self.resource_group, self.location, self.vm_name, self.deployment_name))
-        self.cmd('vm power-off --resource-group {} --name {}'.format(self.resource_group, self.vm_name))
+        self.cmd('vm stop --resource-group {} --name {}'.format(self.resource_group, self.vm_name))
         # Should be able to generalize the VM after it has been stopped
         self.cmd('vm generalize --resource-group {} --name {}'.format(self.resource_group, self.vm_name),
             checks=NoneCheck())
@@ -277,7 +277,7 @@ class VMCreateAndStateModificationsScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck('[0].provisioningState', 'Succeeded'),
         ])
         self._check_vm_power_state('PowerState/running')
-        self.cmd('vm power-off --resource-group {} --name {}'.format(
+        self.cmd('vm stop --resource-group {} --name {}'.format(
             self.resource_group, self.vm_name))
         self._check_vm_power_state('PowerState/stopped')
         self.cmd('vm start --resource-group {} --name {}'.format(
@@ -449,7 +449,7 @@ class VMScaleSetStatesScenarioTest(VCRTestBase):
         self.execute()
 
     def body(self):
-        self.cmd('vm scaleset power-off --resource-group {} --name {}'.format(self.resource_group, self.ss_name))
+        self.cmd('vm scaleset stop --resource-group {} --name {}'.format(self.resource_group, self.ss_name))
         self.cmd('vm scaleset start --resource-group {} --name {}'.format(self.resource_group, self.ss_name),
             checks=NoneCheck())
         self.cmd('vm scaleset restart --resource-group {} --name {}'.format(self.resource_group, self.ss_name),
@@ -542,7 +542,7 @@ class VMScaleSetVMsScenarioTest(VCRTestBase):
             JMESPathCheck("[].name.starts_with(@, '{}')".format(self.ss_name), [True] * self.vm_count)
         ])
         self._check_vms_power_state('PowerState/running')
-        self.cmd('vm scaleset power-off --resource-group {} --name {} --instance-ids *'.format(self.resource_group, self.ss_name),
+        self.cmd('vm scaleset stop --resource-group {} --name {} --instance-ids *'.format(self.resource_group, self.ss_name),
             checks=NoneCheck())
         self._check_vms_power_state('PowerState/stopped')
         self.cmd('vm scaleset start --resource-group {} --name {} --instance-ids *'.format(self.resource_group, self.ss_name),
