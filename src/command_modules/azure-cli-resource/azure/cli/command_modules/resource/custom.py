@@ -108,7 +108,11 @@ def export_group_as_template(
     #pylint: disable=no-member
     # On error, server still returns 200, with details in the error attribute
     if result.error:
-        raise CLIError(result.error)
+        error = result.error
+        if (hasattr(error, 'details') and error.details and
+                hasattr(error.details[0], 'message')):
+            error = error.details[0].message
+        raise CLIError(error)
 
     print(json.dumps(result.template, indent=2))
 

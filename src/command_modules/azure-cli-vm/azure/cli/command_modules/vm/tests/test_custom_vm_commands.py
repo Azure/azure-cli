@@ -85,7 +85,7 @@ class Test_Vm_Custom(unittest.TestCase):
         self.assertEqual('https://storage_uri1',
                          vm_fake.diagnostics_profile.boot_diagnostics.storage_uri)
         self.assertTrue(mock_vm_get.called)
-        mock_vm_set.assert_called_once_with(vm_fake)
+        mock_vm_set.assert_called_once_with(vm_fake, mock.ANY)
 
     @mock.patch('azure.cli.command_modules.vm.custom._vm_get', autospec=True)
     @mock.patch('azure.cli.command_modules.vm.custom._vm_set', autospec=True)
@@ -109,7 +109,7 @@ class Test_Vm_Custom(unittest.TestCase):
         self.assertFalse(vm_fake.diagnostics_profile.boot_diagnostics.enabled)
         self.assertIsNone(vm_fake.diagnostics_profile.boot_diagnostics.storage_uri)
         self.assertTrue(mock_vm_get.called)
-        mock_vm_set.assert_called_once_with(vm_fake)
+        mock_vm_set.assert_called_once_with(vm_fake, mock.ANY)
 
     @mock.patch('azure.cli.command_modules.vm.custom._vm_get', autospec=True)
     @mock.patch('azure.cli.command_modules.vm.custom._vm_set', autospec=True)

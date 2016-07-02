@@ -30,7 +30,7 @@ def _vm_get(resource_group_name, vm_name, expand=None):
                                        vm_name,
                                        expand=expand)
 
-def _vm_set(instance):
+def _vm_set(instance, lro_operation=None):
     '''Update the given Virtual Machine instance'''
     instance.resources = None # Issue: https://github.com/Azure/autorest/issues/934
     client = _compute_client_factory()
@@ -39,7 +39,10 @@ def _vm_set(instance):
         resource_group_name=parsed_id[0],
         vm_name=parsed_id[1],
         parameters=instance)
-    return LongRunningOperation()(poller)
+    if lro_operation:
+        return lro_operation(poller)
+    else:
+        return LongRunningOperation()(poller)
 
 def _parse_rg_name(strid):
     '''From an ID, extract the contained (resource group, name) tuple
@@ -49,6 +52,10 @@ def _parse_rg_name(strid):
         raise KeyError()
 
     return (parts[4], parts[8])
+
+#Use the same name by portal, so people can update from both cli and portal
+#(VM doesn't allow multiple handlers for the same extension)
+_ACCESS_EXT_HANDLER_NAME = 'enablevmaccess'
 
 _LINUX_ACCESS_EXT = 'VMAccessForLinux'
 _WINDOWS_ACCESS_EXT = 'VMAccessAgent'
@@ -94,6 +101,15 @@ def _trim_away_build_number(version):
     #workaround a known issue: the version must only contain "major.minor", even though
     #"extension image list" gives more detail
     return '.'.join(version.split('.')[0:2])
+
+#Hide extension information from output as the info is not correct and unhelpful; also
+#commands using it mean to hide the extension concept from users.
+class ExtensionUpdateLongRunningOperation(LongRunningOperation): #pylint: disable=too-few-public-methods
+    def __call__(self, poller):
+        super(ExtensionUpdateLongRunningOperation, self).__call__(poller)
+        #That said, we surppress the output. Operation failures will still
+        #be caught through the base class
+        return None
 
 def list_vm(resource_group_name=None):
     ''' List Virtual Machines. '''
@@ -287,12 +303,15 @@ def reset_windows_admin(
                                   settings={'UserName': username},
                                   auto_upgrade_minor_version=auto_upgrade)
 
-    return client.virtual_machine_extensions.create_or_update(
-        resource_group_name, vm_name, extension_name, ext)
+    poller = client.virtual_machine_extensions.create_or_update(resource_group_name, vm_name,
+                                                                _ACCESS_EXT_HANDLER_NAME, ext)
+    return ExtensionUpdateLongRunningOperation('resetting admin', 'done')(poller)
 
 def set_linux_user(
         resource_group_name, vm_name, username, password=None, ssh_key_value=None):
     '''create or update a user credential
+    :param username: user name
+    :param password: user password.
     :param ssh_key_value: SSH key file value or key file path
     '''
     vm = _vm_get(resource_group_name, vm_name, 'instanceView')
@@ -300,13 +319,13 @@ def set_linux_user(
 
     from azure.mgmt.compute.models import VirtualMachineExtension
 
-    if password is None and ssh_key_value is None:
-        raise CLIError('Please provide either password or ssh public key.')
-
     protected_settings = {}
+
     protected_settings['username'] = username
     if password:
         protected_settings['password'] = password
+    elif not ssh_key_value and not password: #default to ssh
+        ssh_key_value = os.path.join(os.path.expanduser('~'), '.ssh', 'id_rsa.pub')
 
     if ssh_key_value:
         protected_settings['ssh_key'] = read_content_if_is_file(ssh_key_value)
@@ -323,8 +342,9 @@ def set_linux_user(
                                   settings={},
                                   auto_upgrade_minor_version=auto_upgrade)
 
-    return client.virtual_machine_extensions.create_or_update(
-        resource_group_name, vm_name, extension_name, ext)
+    poller = client.virtual_machine_extensions.create_or_update(
+        resource_group_name, vm_name, _ACCESS_EXT_HANDLER_NAME, ext)
+    return ExtensionUpdateLongRunningOperation('setting user', 'done')(poller)
 
 def delete_linux_user(
         resource_group_name, vm_name, username):
@@ -346,8 +366,9 @@ def delete_linux_user(
                                   settings={},
                                   auto_upgrade_minor_version=auto_upgrade)
 
-    return client.virtual_machine_extensions.create_or_update(
-        resource_group_name, vm_name, extension_name, ext)
+    poller = client.virtual_machine_extensions.create_or_update(resource_group_name, vm_name,
+                                                                _ACCESS_EXT_HANDLER_NAME, ext)
+    return ExtensionUpdateLongRunningOperation('deleting user', 'done')(poller)
 
 def disable_boot_diagnostics(resource_group_name, vm_name):
     vm = _vm_get(resource_group_name, vm_name)
@@ -361,7 +382,7 @@ def disable_boot_diagnostics(resource_group_name, vm_name):
     vm.resources = None
     diag_profile.boot_diagnostics.enabled = False
     diag_profile.boot_diagnostics.storage_uri = None
-    _vm_set(vm)
+    _vm_set(vm, ExtensionUpdateLongRunningOperation('disabling boot diagnostics', 'done'))
 
 def enable_boot_diagnostics(resource_group_name, vm_name, storage):
     '''Enable boot diagnostics
@@ -396,7 +417,7 @@ def enable_boot_diagnostics(resource_group_name, vm_name, storage):
 
     # Issue: https://github.com/Azure/autorest/issues/934
     vm.resources = None
-    _vm_set(vm)
+    _vm_set(vm, ExtensionUpdateLongRunningOperation('enabling boot diagnostics', 'done'))
 
 def get_boot_log(resource_group_name, vm_name):
     import sys
@@ -464,15 +485,16 @@ def list_extensions(resource_group_name, vm_name):
     return result
 
 def set_extension(
-        resource_group_name, vm_name, vm_extension_name, publisher, version, public_config=None,
-        private_config=None, auto_upgrade_minor_version=False):
+        resource_group_name, vm_name, vm_extension_name, publisher,
+        version=None, settings=None,
+        protected_settings=None, auto_upgrade_minor_version=False):
     '''create/update extensions for a VM in a resource group. You can use
     'extension image list' to get extension details
     :param vm_extension_name: the name of the extension
     :param publisher: the name of extension publisher
     :param version: the version of extension.
-    :param public_config: public configuration content or a file path
-    :param private_config: private configuration content or a file path
+    :param settings: public settings or a file path with such contents
+    :param protected_settings: protected settings or a file path with such contents
     :param auto_upgrade_minor_version: auto upgrade to the newer version if available
     '''
     vm = _vm_get(resource_group_name, vm_name)
@@ -480,12 +502,23 @@ def set_extension(
 
     from azure.mgmt.compute.models import VirtualMachineExtension
 
-    protected_settings = load_json(private_config) if private_config else {}
-    settings = load_json(public_config) if public_config else None
+    protected_settings = load_json(protected_settings) if protected_settings else {}
+    settings = load_json(settings) if settings else None
+
+    #pylint: disable=no-member
+    if not version:
+        result = load_extension_images_thru_services(publisher, vm_extension_name,
+                                                     None, vm.location, show_latest=True)
+        if not result:
+            raise CLIError('Failed to find the latest version for the extension "{}"'
+                           .format(vm_extension_name))
+
+        #with 'show_latest' enabled, we will only get one result.
+        version = result[0]['version']
 
     version = _trim_away_build_number(version)
 
-    ext = VirtualMachineExtension(vm.location,#pylint: disable=no-member
+    ext = VirtualMachineExtension(vm.location,
                                   publisher=publisher,
                                   virtual_machine_extension_type=vm_extension_name,
                                   protected_settings=protected_settings,
@@ -496,11 +529,11 @@ def set_extension(
         resource_group_name, vm_name, vm_extension_name, ext)
 
 def set_diagnostics_extension(
-        resource_group_name, vm_name, storage_account, public_config=None):
-    '''Enable diagnostics
+        resource_group_name, vm_name, storage_account, settings=None):
+    '''Enable diagnostics on a linux virtual machine
 
     :param storage_account: the storage account to upload diagnostics log
-    :param public_config: the config file which defines data to be collected.
+    :param settings: the settings file which defines data to be collected.
     Default will be provided if missing
     '''
     vm = _vm_get(resource_group_name, vm_name, 'instanceView')
@@ -508,10 +541,10 @@ def set_diagnostics_extension(
 
     from azure.mgmt.compute.models import VirtualMachineExtension
     #pylint: disable=no-member
-    if public_config:
-        public_config = load_json(public_config)
+    if settings:
+        settings = load_json(settings)
     else:
-        public_config = get_default_linux_diag_config(vm.id)
+        settings = get_default_linux_diag_config(vm.id)
 
     storage_mgmt_client = _get_storage_management_client()
     keys = storage_mgmt_client.storage_accounts.list_keys(resource_group_name, storage_account).keys
@@ -531,13 +564,15 @@ def set_diagnostics_extension(
                                   virtual_machine_extension_type=vm_extension_name,
                                   protected_settings=private_config,
                                   type_handler_version=version,
-                                  settings=public_config,
+                                  settings=settings,
                                   auto_upgrade_minor_version=auto_upgrade)
 
-    return client.virtual_machine_extensions.create_or_update(resource_group_name,
-                                                              vm_name,
-                                                              vm_extension_name,
-                                                              ext)
+    poller = client.virtual_machine_extensions.create_or_update(resource_group_name,
+                                                                vm_name,
+                                                                'LinuxDiagnostic',
+                                                                ext)
+    return ExtensionUpdateLongRunningOperation('updating diagnostics', 'done')(poller)
+
 
 def show_default_diagnostics_configuration():
     '''show the default config file which defines data to be collected'''
