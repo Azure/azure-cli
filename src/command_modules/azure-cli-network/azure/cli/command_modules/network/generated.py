@@ -33,7 +33,18 @@ from azure.cli.command_modules.network.mgmt_nsg.lib import NSGCreationClient as 
 from azure.cli.command_modules.network.mgmt_nsg.lib.operations import NSGOperations
 
 from azure.cli.commands import DeploymentOutputLongRunningOperation, cli_command
-from .custom import create_update_subnet, create_update_nsg_rule
+
+from .custom import \
+    (create_update_subnet,
+     create_update_nsg_rule,
+     create_lb_inbound_nat_rule, set_lb_inbound_nat_rule,
+     create_lb_frontend_ip_configuration, set_lb_frontend_ip_configuration,
+     create_lb_inbound_nat_pool, set_lb_inbound_nat_pool,
+     create_lb_backend_address_pool,
+     create_lb_probe, set_lb_probe,
+     create_lb_rule, set_lb_rule,
+     list_load_balancer_property, get_load_balancer_property_entry,
+     delete_load_balancer_property_entry)
 from ._factory import _network_client_factory
 
 # pylint: disable=line-too-long
@@ -81,6 +92,47 @@ cli_command('network lb list-all', LoadBalancersOperations.list_all, factory)
 
 factory = lambda _: get_mgmt_service_client(LBClient).lb
 cli_command('network lb create', LbOperations.create_or_update, factory, transform=DeploymentOutputLongRunningOperation('Starting network lb create'))
+
+subresource = 'frontend_ip_configurations'
+cli_command('network lb frontend-ip create', create_lb_frontend_ip_configuration)
+cli_command('network lb frontend-ip set', set_lb_frontend_ip_configuration)
+cli_command('network lb frontend-ip list', list_load_balancer_property(subresource))
+cli_command('network lb frontend-ip show', get_load_balancer_property_entry(subresource))
+cli_command('network lb frontend-ip delete', delete_load_balancer_property_entry(subresource))
+
+subresource = 'inbound_nat_rules'
+cli_command('network lb inbound-nat-rule create', create_lb_inbound_nat_rule)
+cli_command('network lb inbound-nat-rule set', set_lb_inbound_nat_rule)
+cli_command('network lb inbound-nat-rule list', list_load_balancer_property(subresource))
+cli_command('network lb inbound-nat-rule show', get_load_balancer_property_entry(subresource))
+cli_command('network lb inbound-nat-rule delete', delete_load_balancer_property_entry(subresource))
+
+subresource = 'inbound_nat_pools'
+cli_command('network lb inbound-nat-pool create', create_lb_inbound_nat_pool)
+cli_command('network lb inbound-nat-pool set', set_lb_inbound_nat_pool)
+cli_command('network lb inbound-nat-pool list', list_load_balancer_property(subresource))
+cli_command('network lb inbound-nat-pool show', get_load_balancer_property_entry(subresource))
+cli_command('network lb inbound-nat-pool delete', delete_load_balancer_property_entry(subresource))
+
+subresource = 'backend_address_pools'
+cli_command('network lb address-pool create', create_lb_backend_address_pool)
+cli_command('network lb address-pool list', list_load_balancer_property(subresource))
+cli_command('network lb address-pool show', get_load_balancer_property_entry(subresource))
+cli_command('network lb address-pool delete', delete_load_balancer_property_entry(subresource))
+
+subresource = 'load_balancing_rules'
+cli_command('network lb rule create', create_lb_rule)
+cli_command('network lb rule set', set_lb_rule)
+cli_command('network lb rule list', list_load_balancer_property(subresource))
+cli_command('network lb rule show', get_load_balancer_property_entry(subresource))
+cli_command('network lb rule delete', delete_load_balancer_property_entry(subresource))
+
+subresource = 'probes'
+cli_command('network lb probe create', create_lb_probe)
+cli_command('network lb probe set', set_lb_probe)
+cli_command('network lb probe list', list_load_balancer_property(subresource))
+cli_command('network lb probe show', get_load_balancer_property_entry(subresource))
+cli_command('network lb probe delete', delete_load_balancer_property_entry(subresource))
 
 factory = lambda _: get_mgmt_service_client(NSGClient).nsg
 cli_command('network nsg create', NSGOperations.create_or_update, factory, transform=DeploymentOutputLongRunningOperation('Starting network nsg create'))
