@@ -187,7 +187,7 @@ class Test_command_registration(unittest.TestCase):
         arg = CliArgumentType(options_list=('--funky', '-f'))
         updated_options_list = ('--something-else', '-s')
         arg.update(options_list=updated_options_list, validator=lambda: (), completer=lambda: ())
-        self.assertEquals(arg.settings['options_list'], updated_options_list)
+        self.assertEqual(arg.settings['options_list'], updated_options_list)
         self.assertIsNotNone(arg.settings['validator'])
         self.assertIsNotNone(arg.settings['completer'])
 
@@ -195,7 +195,7 @@ class Test_command_registration(unittest.TestCase):
         existing_options_list = ('--something-else', '-s')
         arg = CliArgumentType(options_list=existing_options_list)
         arg.update()
-        self.assertEquals(arg.settings['options_list'], existing_options_list)
+        self.assertEqual(arg.settings['options_list'], existing_options_list)
 
     def test_override_remove_validator(self):
         existing_options_list = ('--something-else', '-s')
