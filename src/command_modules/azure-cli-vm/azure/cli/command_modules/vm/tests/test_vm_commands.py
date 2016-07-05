@@ -624,8 +624,6 @@ class VMScaleSetCreateExistingOptions(ResourceGroupVCRTestBase):
         lb_name = 'vrflb'
         os_disk_name = 'vrfosdisk'
         container_name = 'vrfcontainer'
-        be_pool_name = 'vrflbbepool'
-        nat_pool_name = 'vrflbnatpool'
         sku_name = 'Standard_A3'
 
         self.cmd('network vnet create -n {vnet_name} -g {resource_group} --subnet-name {subnet_name}'.format(vnet_name=vnet_name, resource_group=self.resource_group, subnet_name=subnet_name))
@@ -636,11 +634,9 @@ class VMScaleSetCreateExistingOptions(ResourceGroupVCRTestBase):
                  ' --storage-container-name {container_name} -g {resource_group} --name {vmss_name}'
                  ' --load-balancer-type existing --load-balancer-name {lb_name}'
                  ' --ssh-key-value \'{key_value}\''
-                 ' --load-balancer-backend-pool-name {be_pool_name} --load-balancer-nat-pool-name {nat_pool_name}'
                  .format(os_disk_name=os_disk_name, vnet_name=vnet_name, subnet_name=subnet_name, lb_name=lb_name,
                          container_name=container_name, resource_group=self.resource_group, vmss_name=vmss_name,
-                         key_value=TEST_SSH_KEY_PUB, nat_pool_name=nat_pool_name, be_pool_name=be_pool_name,
-                         sku_name=sku_name))
+                         key_value=TEST_SSH_KEY_PUB, sku_name=sku_name))
         self.cmd('vm scaleset show --name {vmss_name} -g {resource_group}'.format(resource_group=self.resource_group, vmss_name=vmss_name), checks=[
             JMESPathCheck('sku.name', sku_name),
             JMESPathCheck('virtualMachineProfile.storageProfile.osDisk.name', os_disk_name),

@@ -34,7 +34,7 @@ def _name_id_fold(base_name, resource_type, type_field, #pylint: disable=too-man
         elif base_name_val == '\'\'' or base_name_val == '""' or base_name_val == '':
             setattr(namespace, type_field, none_flag_value)
         else:
-            has_parent = parent_name_val is not None and parent_type is not None
+            has_parent = parent_name is not None and parent_type is not None
             resource_id = base_name_val if '/' in base_name_val else None
             name = None
             if not resource_id:
@@ -58,7 +58,7 @@ def _name_id_fold(base_name, resource_type, type_field, #pylint: disable=too-man
             else:
                 setattr(namespace, type_field, new_flag_value)
 
-        if post_validator and callable(post_validator):
+        if post_validator:
             post_validator(namespace)
 
     return handle_folding

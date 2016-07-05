@@ -50,15 +50,6 @@ def validate_public_ip_type(namespace): # pylint: disable=unused-argument
     if namespace.subnet:
         namespace.public_ip_address_type = 'none'
 
-def validate_subnet_type(namespace): # pylint: disable=unused-argument
-    # TODO Implement fix to detect if default value is being submitted
-    #if namespace.subnet_type != 'new' and \
-    #    (namespace.subnet_address_prefix or namespace.vnet_address_prefix):
-    #        raise argparse.ArgumentError(
-    #            None,
-    #            'Can only specify VNet and subnet address prefix when creating a new subnet.')
-    pass
-
 def process_public_ip_create_namespace(namespace):
     if namespace.dns_name:
         namespace.public_ip_address_type = 'dns'
