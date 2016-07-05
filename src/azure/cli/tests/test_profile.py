@@ -1,5 +1,4 @@
-﻿#pylint: skip-file
-import json
+﻿import json
 import unittest
 import mock
 import adal

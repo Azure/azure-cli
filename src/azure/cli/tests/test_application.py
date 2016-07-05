@@ -1,4 +1,3 @@
-#pylint: skip-file
 import unittest
 from six import StringIO
 from collections import namedtuple
