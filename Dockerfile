@@ -1,6 +1,10 @@
 FROM python:3.5
 
+# Set the working directory
 WORKDIR azure-cli
+
+# bundle source code
+COPY . /azure-cli
 
 # Build and install CLI
 RUN python setup.py sdist
@@ -15,6 +19,7 @@ RUN for d in src/command_modules/azure-cli-*/; \
     cd -; \
     done
 
-# TODO Need to enable tab completion
+# Enable tab completion
+RUN eval "$(register-python-argcomplete az)"
 
 CMD az
