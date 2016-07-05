@@ -29,7 +29,10 @@ def parse_resource_id(id):
     return {key:value for key, value in result.items() if value is not None}
 
 def is_valid_resource_id(id):
-    return resource_id(**parse_resource_id(id)) == id
+    try:
+        return id and resource_id(**parse_resource_id(id)) == id
+    except KeyError:
+        return False
 
 def resource_exists(r_id):
     odata_filter = "resourceGroup eq '{0}' and name eq '{1}'" \
