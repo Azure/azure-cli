@@ -596,11 +596,11 @@ class NetworkRouteTableOperationScenarioTest(VCRTestBase):
         # Expecting no results as the route table was just deleted
         self.cmd('network route-table list --resource-group {}'.format(self.resource_group), checks=NoneCheck())
 
-class NetworkVNetScenarioTest(VCRTestBase):
+class NetworkVNetScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
         super(NetworkVNetScenarioTest, self).__init__(__file__, test_method)
-        self.resource_group = 'cli_test1'
+        self.resource_group = 'cli_vnet_test1'
         self.vnet_name = 'test-vnet'
         self.vnet_subnet_name = 'test-subnet1'
         self.resource_type = 'Microsoft.Network/virtualNetworks'
@@ -608,15 +608,12 @@ class NetworkVNetScenarioTest(VCRTestBase):
     def test_network_vnet(self):
         self.execute()
 
-    def set_up(self):
-        if not self.cmd('network vnet show --resource-group {} --name {}'.format(
-            self.resource_group, self.vnet_name)):
-            raise RuntimeError('Network vnet must be manually created in order to support this test.')
-        if not self.cmd('network vnet subnet show --resource-group {} --vnet-name {} --name {}'.format(
-            self.resource_group, self.vnet_name, self.vnet_subnet_name)):
-            raise RuntimeError('Network vnet subnet must be manually created in order to support this test.')
-
     def body(self):
+        self.cmd('network vnet create --resource-group {} --name {}'.format(self.resource_group, self.vnet_name), checks=[
+                JMESPathCheck('newVNet.provisioningState', 'Succeeded'), # verify the deployment result
+                JMESPathCheck('newVNet.addressSpace.addressPrefixes[0]', '10.0.0.0/16')
+            ])
+
         self.cmd('network vnet list-all', checks=[
             JMESPathCheck('type(@)', 'array'),
             JMESPathCheck("length([?type == '{}']) == length(@)".format(self.resource_type), True)
@@ -632,6 +629,14 @@ class NetworkVNetScenarioTest(VCRTestBase):
             JMESPathCheck('resourceGroup', self.resource_group),
             JMESPathCheck('type', self.resource_type)
         ])
+
+        vnet_addr_prefixes = '20.0.0.0/16 10.0.0.0/16'
+        self.cmd('network vnet set --resource-group {} --name {} --address-prefixes {}'.format(
+            self.resource_group, self.vnet_name, vnet_addr_prefixes))
+
+        self.cmd('network vnet subnet create --resource-group {} --vnet-name {} --name {} --address-prefix {}'.format(
+            self.resource_group, self.vnet_name, self.vnet_subnet_name, '20.0.0.0/24'))
+
         self.cmd('network vnet subnet list --resource-group {} --vnet-name {}'.format(self.resource_group, self.vnet_name),
             checks=JMESPathCheck('type(@)', 'array'))
         self.cmd('network vnet subnet show --resource-group {} --vnet-name {} --name {}'.format(self.resource_group, self.vnet_name, self.vnet_subnet_name), checks=[
@@ -639,20 +644,53 @@ class NetworkVNetScenarioTest(VCRTestBase):
             JMESPathCheck('name', self.vnet_subnet_name),
             JMESPathCheck('resourceGroup', self.resource_group)
         ])
-        # Expecting the subnet to be listed
-        self.cmd('network vnet subnet list --resource-group {} --vnet-name {}'.format(self.resource_group, self.vnet_name),
-            checks=JMESPathCheck("length([?name == '{}'])".format(self.vnet_subnet_name), 1))
+
+        # Test delete subnet
         self.cmd('network vnet subnet delete --resource-group {} --vnet-name {} --name {}'.format(self.resource_group, self.vnet_name, self.vnet_subnet_name))
-        # Expecting the subnet to not be listed
+        # Expecting the subnet to not be listed after delete
         self.cmd('network vnet subnet list --resource-group {} --vnet-name {}'.format(self.resource_group, self.vnet_name),
-            checks=NoneCheck())
-        # Expecting the vnet to appear in the list
+                  checks=JMESPathCheck("length([?name == '{}'])".format(self.vnet_subnet_name), 0))
+
+        # Test delete vnet
         self.cmd('network vnet list --resource-group {}'.format(self.resource_group),
             checks=JMESPathCheck("length([?name == '{}'])".format(self.vnet_name), 1))
         self.cmd('network vnet delete --resource-group {} --name {}'.format(self.resource_group, self.vnet_name))
-        # Expecting the vnet we deleted to not appear in the list
-        self.cmd('network vnet list --resource-group {}'.format(self.resource_group),
-            checks=JMESPathCheck("length([?name == '{}'])".format(self.vnet_name), 0))
+        # Expecting the vnet we deleted to not be listed after delete
+        self.cmd('network vnet list --resource-group {}'.format(self.resource_group), NoneCheck())
+
+class NetworkSubnetSetScenarioTest(ResourceGroupVCRTestBase):
+    def __init__(self, test_method):
+        super(NetworkSubnetSetScenarioTest, self).__init__(__file__, test_method)
+        self.resource_group = 'cli_subnet_set_test'
+        self.vnet_name = 'test-vnet2'
+
+    def test_subnet_set(self):
+        self.execute()
+
+    def body(self):
+        vnet_addr_prefix = '123.0.0.0/16'
+        subnet_name = 'default'
+        subnet_addr_prefix = '123.0.0.0/24'
+        subnet_addr_prefix_new = '123.0.5.0/24'
+        nsg_name = 'test-vnet-nsg'
+
+        self.cmd('network vnet create --resource-group {} --name {} --vnet-prefix {} --subnet-name {} --subnet-prefix {}'.format(
+            self.resource_group, self.vnet_name, vnet_addr_prefix, subnet_name, subnet_addr_prefix))
+        self.cmd('network nsg create --resource-group {} --name {}'.format(self.resource_group, nsg_name))
+
+        #Test we can update the address space and nsg
+        self.cmd('network vnet subnet set --resource-group {} --vnet-name {} --name {} --address-prefix {} --network-security-group {}'.format(self.resource_group, self.vnet_name, subnet_name, subnet_addr_prefix_new, nsg_name),
+                 checks=[
+                     JMESPathCheck('addressPrefix', subnet_addr_prefix_new),
+                     JMESPathCheck('ends_with(@.networkSecurityGroup.id, `{}`)'.format('/' + nsg_name), True)
+                     ])
+
+        #Test we can get rid of the nsg.
+        self.cmd('network vnet subnet set --resource-group {} --vnet-name {} --name {} --address-prefix {} --network-security-group {}'.format(self.resource_group, self.vnet_name, subnet_name, subnet_addr_prefix_new, '\"\"'),
+                 checks=JMESPathCheck('networkSecurityGroup', None))
+
+        self.cmd('network vnet delete --resource-group {} --name {}'.format(self.resource_group, self.vnet_name))
+        self.cmd('network nsg delete --resource-group {} --name {}'.format(self.resource_group, nsg_name))
 
 class NetworkVpnGatewayScenarioTest(VCRTestBase):
 
@@ -700,25 +738,4 @@ class NetworkVpnConnectionScenarioTest(VCRTestBase):
         self.cmd('network vpn-connection shared-key reset --resource-group {0} --connection-name {1}'.format(rg, pv),
             allowed_exceptions=allowed_exceptions)
         self.cmd('network vpn-connection shared-key set --resource-group {0} --connection-name {1} --value {2}'.format(rg, pv, 'S4auzEfwZ6fN'),
-            allowed_exceptions=allowed_exceptions)
-
-class NetworkSubnetCreateScenarioTest(VCRTestBase):
-
-    def __init__(self, test_method):
-        # The resources for this test did not exist so the commands will return 404 errors.
-        # So this test is for the command execution itself.
-        super(NetworkSubnetCreateScenarioTest, self).__init__(__file__, test_method)
-        self.resource_group = 'cli_test1'
-        self.placeholder_value = 'none_existent'
-        self.address_prefix = '192.168.0/16'
-
-    def test_network_subnet_create(self):
-        self.execute()
-
-    def body(self):
-        rg = self.resource_group
-        pv = self.placeholder_value
-        ap = self.address_prefix
-        allowed_exceptions = "The Resource 'Microsoft.Network/virtualNetworks/{}' under resource group '{}' was not found.".format(pv, rg)
-        self.cmd('network vnet subnet create --resource-group {0} --name {1} --vnet-name {1} --address-prefix {2}'.format(rg, pv, ap),
             allowed_exceptions=allowed_exceptions)

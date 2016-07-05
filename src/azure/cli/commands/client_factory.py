@@ -50,3 +50,8 @@ def get_data_service_client(service_type, account_name, account_key, connection_
                           sas_token=sas_token)
     # TODO: enable Fiddler and user agent (task #115270703, #115270881)
     return client
+
+def get_subscription_id():
+    profile = Profile()
+    _, subscription_id, _ = profile.get_login_credentials()
+    return subscription_id
