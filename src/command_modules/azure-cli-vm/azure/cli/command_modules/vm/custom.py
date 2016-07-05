@@ -621,7 +621,8 @@ def vm_open_port(resource_group_name, vm_name, network_security_group_name=None,
                  apply_to_subnet=False):
     """ Opens a VM to all inbound traffic and protocols by adding a security rule to the network
     security group (NSG) that is attached to the VM's network interface (NIC) or subnet. The
-    existing NSG will be used or a new one will be created. For multi-NIC VMs, or for more fine
+    existing NSG will be used or a new one will be created. The rule name is 'open-port-cmd' and
+    will overwrite an existing rule with this name. For multi-NIC VMs, or for more fine
     grained control, use the appropriate network commands directly (nsg rule create, etc).
     """
     from azure.mgmt.network import NetworkManagementClient
