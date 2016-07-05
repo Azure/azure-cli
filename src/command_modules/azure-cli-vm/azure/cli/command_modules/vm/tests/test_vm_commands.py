@@ -115,7 +115,8 @@ class VMShowListSizesListIPAddressesScenarioTest(ResourceGroupVCRTestBase):
             self.resource_group, self.vm_name), checks=JMESPathCheck('type(@)', 'array'))
 
         # Expecting the one we just added
-        self.cmd('vm list-ip-addresses --resource-group {}'.format(self.resource_group), checks=[
+        rg_name_all_upper = self.resource_group.upper() #test the command handles name with casing diff.
+        self.cmd('vm list-ip-addresses --resource-group {}'.format(rg_name_all_upper), checks=[
             JMESPathCheck('length(@)', 1),
             JMESPathCheck('[0].virtualMachine.name', self.vm_name),
             JMESPathCheck('[0].virtualMachine.resourceGroup', self.resource_group),
@@ -226,7 +227,7 @@ class VMGeneralizeScenarioTest(ResourceGroupVCRTestBase):
                  '--image UbuntuLTS --admin-password testPassword0 --authentication-type password '
                  '--deployment-name {3}'.format(
                      self.resource_group, self.location, self.vm_name, self.deployment_name))
-        self.cmd('vm power-off --resource-group {} --name {}'.format(self.resource_group, self.vm_name))
+        self.cmd('vm stop --resource-group {} --name {}'.format(self.resource_group, self.vm_name))
         # Should be able to generalize the VM after it has been stopped
         self.cmd('vm generalize --resource-group {} --name {}'.format(self.resource_group, self.vm_name),
             checks=NoneCheck())
@@ -276,7 +277,7 @@ class VMCreateAndStateModificationsScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck('[0].provisioningState', 'Succeeded'),
         ])
         self._check_vm_power_state('PowerState/running')
-        self.cmd('vm power-off --resource-group {} --name {}'.format(
+        self.cmd('vm stop --resource-group {} --name {}'.format(
             self.resource_group, self.vm_name))
         self._check_vm_power_state('PowerState/stopped')
         self.cmd('vm start --resource-group {} --name {}'.format(
@@ -448,7 +449,7 @@ class VMScaleSetStatesScenarioTest(VCRTestBase):
         self.execute()
 
     def body(self):
-        self.cmd('vm scaleset power-off --resource-group {} --name {}'.format(self.resource_group, self.ss_name))
+        self.cmd('vm scaleset stop --resource-group {} --name {}'.format(self.resource_group, self.ss_name))
         self.cmd('vm scaleset start --resource-group {} --name {}'.format(self.resource_group, self.ss_name),
             checks=NoneCheck())
         self.cmd('vm scaleset restart --resource-group {} --name {}'.format(self.resource_group, self.ss_name),
@@ -541,7 +542,7 @@ class VMScaleSetVMsScenarioTest(VCRTestBase):
             JMESPathCheck("[].name.starts_with(@, '{}')".format(self.ss_name), [True] * self.vm_count)
         ])
         self._check_vms_power_state('PowerState/running')
-        self.cmd('vm scaleset power-off --resource-group {} --name {} --instance-ids *'.format(self.resource_group, self.ss_name),
+        self.cmd('vm scaleset stop --resource-group {} --name {} --instance-ids *'.format(self.resource_group, self.ss_name),
             checks=NoneCheck())
         self._check_vms_power_state('PowerState/stopped')
         self.cmd('vm scaleset start --resource-group {} --name {} --instance-ids *'.format(self.resource_group, self.ss_name),
@@ -660,16 +661,11 @@ class VMAccessAddRemoveLinuxUser(VCRTestBase):
         self.execute()
 
     def body(self):
-        common_part = '-g yugangw4 -n yugangw4-1 -u foouser1'
-        self.cmd('vm access set-linux-user {} -p Foo12345 '.format(common_part), checks=[
-            JMESPathCheck('provisioningState', 'Succeeded'),
-            JMESPathCheck('name', 'VMAccessForLinux')
-        ])
-        #Ensure to get rid of the user
-        self.cmd('vm access delete-linux-user {}'.format(common_part), checks=[
-            JMESPathCheck('provisioningState', 'Succeeded'),
-            JMESPathCheck('name', 'VMAccessForLinux')
-        ])
+        #It is rather hard for the automation test to verify we can log uers in
+        #but at least we tested the command was wired up and ran.
+        common_part = '-g yugangw9 -n yugangw9-1 -u foouser1'
+        self.cmd('vm access set-linux-user {} -p Foo12345 '.format(common_part), checks=None)
+        self.cmd('vm access delete-linux-user {}'.format(common_part), checks=None)
 
 class VMCreateUbuntuScenarioTest(ResourceGroupVCRTestBase): #pylint: disable=too-many-instance-attributes
 
@@ -764,7 +760,7 @@ class VMExtensionInstallTest(VCRTestBase):
             json.dump(config, outfile)
 
         try:
-            self.cmd('vm extension set -n {} --publisher {} --version 1.4  --vm-name {} --resource-group {} --private-config "{}"'
+            self.cmd('vm extension set -n {} --publisher {} --version 1.4  --vm-name {} --resource-group {} --protected-settings "{}"'
                 .format(extension_name, publisher, vm_name, resource_group, config_file))
             self.cmd('vm extension show --resource-group {} --vm-name {} --name {}'.format(resource_group, vm_name, extension_name), checks=[
                 JMESPathCheck('type(@)', 'object'),
@@ -783,9 +779,9 @@ class VMDiagnosticsInstallTest(VCRTestBase):
         self.execute()
 
     def body(self):
-        vm_name = 'linuxtestvm'
-        resource_group = 'travistestresourcegroup'
-        storage_account = 'travistestresourcegr3014'
+        vm_name = 'yugangw9-1'
+        resource_group = 'yugangw9'
+        storage_account = 'vhdstorage5axnt5aafuojc'
         extension_name = 'LinuxDiagnostic'
         self.cmd('vm diagnostics set --vm-name {} --resource-group {} --storage-account {}'.format(vm_name, resource_group, storage_account))
         self.cmd('vm extension show --resource-group {} --vm-name {} --name {}'.format(resource_group, vm_name, extension_name), checks=[

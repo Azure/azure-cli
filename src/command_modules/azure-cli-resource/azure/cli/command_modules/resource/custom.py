@@ -108,7 +108,11 @@ def export_group_as_template(
     #pylint: disable=no-member
     # On error, server still returns 200, with details in the error attribute
     if result.error:
-        raise CLIError(result.error)
+        error = result.error
+        if (hasattr(error, 'details') and error.details and
+                hasattr(error.details[0], 'message')):
+            error = error.details[0].message
+        raise CLIError(error)
 
     print(json.dumps(result.template, indent=2))
 
@@ -135,7 +139,7 @@ def list_resources(
 
 def deploy_arm_template(
         resource_group_name, deployment_name, template_file_path,
-        parameters_file_path, mode='incremental'):
+        parameters_file_path=None, mode='incremental'):
     ''' Deploy resources with an ARM template.
         :param str resource_group_name:resource group for deployment
         :param str location:location for deployment
@@ -148,7 +152,7 @@ def deploy_arm_template(
                                      parameters_file_path, mode)
 
 def validate_arm_template(resource_group_name, template_file_path,
-                          parameters_file_path, mode='incremental'):
+                          parameters_file_path=None, mode='incremental'):
     ''' Validate an ARM template.
         :param str resource_group_name:resource group for deployment
         :param str location:location for deployment
@@ -160,11 +164,14 @@ def validate_arm_template(resource_group_name, template_file_path,
                                      parameters_file_path, mode, validate_only=True)
 
 def _deploy_arm_template_core(resource_group_name, deployment_name, template_file_path,
-                              parameters_file_path, mode, validate_only=False):
+                              parameters_file_path=None, mode='incremental', validate_only=False):
     from azure.mgmt.resource.resources.models import DeploymentProperties
 
-    parameters = _get_file_json(parameters_file_path)
-    parameters = parameters.get('parameters', parameters)
+    parameters = None
+    if parameters_file_path:
+        parameters = _get_file_json(parameters_file_path)
+        if parameters:
+            parameters = parameters.get('parameters', parameters)
 
     template = _get_file_json(template_file_path)
 
