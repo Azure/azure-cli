@@ -11,9 +11,9 @@ def register_folded_cli_argument(scope, base_name, resource_type, parent_name=No
                                  none_flag_value='none', post_validator=None, **kwargs):
     type_field_name = type_field or base_name + '_type'
     register_cli_argument(scope, base_name, validator=_name_id_fold(base_name,
-                                                                 resource_type,
-                                                                 type_field_name,
-                                                                 existing_id_flag_value,
+                                                                    resource_type,
+                                                                    type_field_name,
+                                                                    existing_id_flag_value,
                                                                     new_flag_value,
                                                                     none_flag_value,
                                                                     parent_name,

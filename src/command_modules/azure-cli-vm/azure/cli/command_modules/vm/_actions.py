@@ -1,7 +1,9 @@
 ﻿import argparse
 import json
+import math
 import os
 import re
+import time
 
 from azure.cli._util import CLIError
 from azure.cli.application import APPLICATION
@@ -92,9 +94,12 @@ def _resource_not_exists(resource_type):
         # TODO: hook up namespace._subscription_id once we support it
         r_id = AzureResourceId(namespace.name, namespace.resource_group_name, resource_type,
                                _get_subscription_id())
-        if not namespace.force and resource_exists(r_id):
+        if resource_exists(r_id):
             raise CLIError('Resource {} already exists.'.format(str(r_id)))
     return _handle_resource_not_exists
+
+def _os_disk_default(namespace):
+    namespace.os_disk_name = 'osdisk{}'.format(str(int(math.ceil(time.time()))))
 
 def _handle_auth_types(**kwargs):
     if kwargs['command'] != 'vm create' and kwargs['command'] != 'vm scaleset create':

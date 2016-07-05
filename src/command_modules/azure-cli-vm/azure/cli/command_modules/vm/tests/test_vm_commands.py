@@ -813,10 +813,10 @@ class VMCreateExistingOptions(ResourceGroupVCRTestBase):
         self.cmd('network nsg create --name {} -g {}'.format(nsg_name, self.resource_group))
 
         self.cmd('vm create --image UbuntuLTS --os-disk-name {disk_name}'
-                 ' --virtual-network {vnet_name} --subnet-name {subnet_name}'
+                 ' --vnet {vnet_name} --subnet-name {subnet_name}'
                  ' --availability-set {availset_name}'
                  ' --public-ip-address {pubip_name} -l "West US"'
-                 ' --network-security-group {nsg_name}'
+                 ' --nsg {nsg_name}'
                  ' --size Standard_DS2'
                  ' --storage-account {storage_name} --storage-container-name {container_name} -g {resource_group}'
                  ' --name {vm_name} --ssh-key-value \'{key_value}\''

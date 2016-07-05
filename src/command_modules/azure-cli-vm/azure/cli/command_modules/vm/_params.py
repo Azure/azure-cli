@@ -1,9 +1,7 @@
 ﻿# pylint: disable=line-too-long
 import argparse
 import getpass
-import math
 import os
-import time
 
 from argcomplete.completers import FilesCompleter
 
@@ -19,7 +17,8 @@ from azure.cli.command_modules.vm._actions import (VMImageFieldAction,
                                                    get_vm_sizes,
                                                    _handle_vm_nics,
                                                    PrivateIpAction,
-                                                   _resource_not_exists)
+                                                   _resource_not_exists,
+                                                   _os_disk_default)
 from azure.cli.commands.parameters import (location_type,
                                            get_location_completion_list,
                                            get_one_of_subscription_locations,
@@ -125,7 +124,7 @@ for scope in ['vm create', 'vm scaleset create']:
     register_cli_argument(scope, 'custom_os_disk_uri', CliArgumentType(help=argparse.SUPPRESS))
     register_cli_argument(scope, 'custom_os_disk_type', CliArgumentType(choices=['windows', 'linux'], type=str.lower))
     register_cli_argument(scope, 'os_disk_type', CliArgumentType(help=argparse.SUPPRESS))
-    register_cli_argument(scope, 'os_disk_name', CliArgumentType(default='osdisk{}'.format(str(int(math.ceil(time.time()))))))
+    register_cli_argument(scope, 'os_disk_name', CliArgumentType(validator=_os_disk_default, default='osdisk<timestamp>'))
     register_cli_argument(scope, 'overprovision', CliArgumentType(action='store_false', default=None, options_list=('--disable-overprovision',)))
     register_cli_argument(scope, 'load_balancer_type', CliArgumentType(choices=['new', 'existing', 'none'], type=str.lower))
     register_cli_argument(scope, 'storage_caching', CliArgumentType(choices=['ReadOnly', 'ReadWrite']))
@@ -147,10 +146,9 @@ for scope in ['vm create', 'vm scaleset create']:
     register_cli_argument(scope, 'private_ip_address_allocation', help=argparse.SUPPRESS)
     register_cli_argument(scope, 'private_ip_address', help='Static private IP address.  Specify nothing for dynamic private IP.', options_list=('--private-ip-address',), action=PrivateIpAction)
     register_cli_argument(scope, 'public_ip_address_allocation', CliArgumentType(choices=['dynamic', 'static'], help='', default='dynamic', type=str.lower))
-    register_folded_cli_argument(scope, 'public_ip_address', 'Microsoft.Network/publicIPAddresses')
-    register_folded_cli_argument(scope, 'storage_account', 'Microsoft.Storage/storageAccounts')
-    register_folded_cli_argument(scope, 'virtual_network', 'Microsoft.Network/virtualNetworks')
-    register_folded_cli_argument(scope, 'network_security_group', 'Microsoft.Network/networkSecurityGroups')
+    register_folded_cli_argument(scope, 'public_ip_address', 'Microsoft.Network/publicIPAddresses', help='Name or ID of public IP address (creates if doesn\'t exist)')
+    register_folded_cli_argument(scope, 'storage_account', 'Microsoft.Storage/storageAccounts', help='Name or ID of storage account (creates if doesn\'t exist)')
+    register_folded_cli_argument(scope, 'virtual_network', 'Microsoft.Network/virtualNetworks', help='Name or ID of virtual network (creates if doesn\'t exist)', options_list=('--vnet',))
+    register_folded_cli_argument(scope, 'network_security_group', 'Microsoft.Network/networkSecurityGroups', help='Name or ID of network security group (creates if doesn\'t exist)', options_list=('--nsg',))
     register_cli_argument(scope, 'network_security_group_rule', nsg_rule_type)
     register_extra_cli_argument(scope, 'image', options_list=('--image',), action=VMImageFieldAction, completer=get_urn_aliases_completion_list, default='Win2012R2Datacenter')
-    register_extra_cli_argument(scope, 'force', options_list=('--force',), action='store_true', help='Force create and ignore parameter validation')

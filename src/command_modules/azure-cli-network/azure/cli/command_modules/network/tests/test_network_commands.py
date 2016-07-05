@@ -199,13 +199,13 @@ class NetworkLoadBalancerScenarioTest(ResourceGroupVCRTestBase):
         vnet_name = 'mytestvnet'
         private_ip = '10.0.0.15'
         vnet = self.cmd('network vnet create -n {} -g {}'.format(vnet_name, self.resource_group))
-        subnet_id = vnet['newVNet']['value']['subnets'][0]['id']
+        subnet_id = vnet['newVNet']['subnets'][0]['id']
         self.cmd('network lb create -n {}3 -g {} --vnet-name {} --subnet {} --private-ip-address {}'.format(
             self.lb_name, self.resource_group, vnet_name, subnet_id, private_ip), checks=[
-                JMESPathCheck('loadBalancer.value.frontendIPConfigurations[0].properties.privateIPAllocationMethod', 'Static'),
-                JMESPathCheck('loadBalancer.value.frontendIPConfigurations[0].properties.privateIPAddress', private_ip),
-                JMESPathCheck('loadBalancer.value.frontendIPConfigurations[0].resourceGroup', self.resource_group),
-                JMESPathCheck("loadBalancer.value.frontendIPConfigurations[0].properties.subnet.id", subnet_id)
+                JMESPathCheck('loadBalancer.frontendIPConfigurations[0].properties.privateIPAllocationMethod', 'Static'),
+                JMESPathCheck('loadBalancer.frontendIPConfigurations[0].properties.privateIPAddress', private_ip),
+                JMESPathCheck('loadBalancer.frontendIPConfigurations[0].resourceGroup', self.resource_group),
+                JMESPathCheck("loadBalancer.frontendIPConfigurations[0].properties.subnet.id", subnet_id)
             ])
 
         # test internet facing load balancer with existing public IP (by name)
