@@ -1,6 +1,7 @@
 from collections import defaultdict
 from datetime import datetime
 import sys
+import os
 import re
 import uuid
 import argparse
@@ -11,6 +12,8 @@ import azure.cli._help as _help
 import azure.cli._logging as _logging
 
 logger = _logging.get_az_logger(__name__)
+
+ARGCOMPLETE_ENV_NAME = '_ARGCOMPLETE'
 
 class Configuration(object): # pylint: disable=too-few-public-methods
     """The configuration object tracks session specific data such
@@ -47,7 +50,8 @@ class Application(object):
             'headers': {
                 'x-ms-client-request-id': str(uuid.uuid1())
                 },
-            'command': 'unknown'
+            'command': 'unknown',
+            'completer_active': ARGCOMPLETE_ENV_NAME in os.environ
             }
 
 
