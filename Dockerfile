@@ -1,4 +1,5 @@
 FROM ubuntu:14.04
+RUN pwd; ls; printenv; git rev-parse --short HEAD
 RUN apt-get update -qq
 # install *-dev packages below so cryptography package can install
 RUN apt-get install -qqy curl libssl-dev libffi-dev python3-dev
