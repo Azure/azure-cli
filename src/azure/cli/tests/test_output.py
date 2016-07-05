@@ -1,11 +1,10 @@
 from __future__ import print_function
-
+ # pylint: disable=protected-access, bad-continuation, too-many-public-methods, trailing-whitespace
 import unittest
 from six import StringIO
-from collections import namedtuple
 
-from azure.cli._output import (OutputProducer, format_json, format_table, format_list, format_text,
-                                format_tsv, ListOutput)
+from azure.cli._output import (OutputProducer, format_json, format_table, format_list,
+                               format_tsv, ListOutput)
 import azure.cli._util as util
 
 class TestOutput(unittest.TestCase):
@@ -13,17 +12,17 @@ class TestOutput(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         pass
-        
+
     @classmethod
     def tearDownClass(cls):
         pass
 
     def setUp(self):
         self.io = StringIO()
-        
+
     def tearDown(self):
         self.io.close()
-        
+
     def test_out_json_valid(self):
         """
         The JSON output when the input is a dict should be the dict serialized to JSON
@@ -106,7 +105,10 @@ Hosts  :
 
     def test_out_list_valid_array_complex(self):
         output_producer = OutputProducer(formatter=format_list, file=self.io)
-        output_producer.out([{'active': True, 'id': '783yesdf'}, {'active': False, 'id': '3hjnme32'}, {'active': False, 'id': '23hiujbs'}])
+        output_producer.out([
+                             {'active': True, 'id': '783yesdf'},
+                             {'active': False, 'id': '3hjnme32'},
+                             {'active': False, 'id': '23hiujbs'}])
         self.assertEqual(util.normalize_newlines(self.io.getvalue()), util.normalize_newlines(
 """Active : True
 Id     : 783yesdf
