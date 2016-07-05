@@ -1,5 +1,7 @@
 FROM python:3.5
 
+WORKDIR azure-cli
+
 # Build and install CLI
 RUN python setup.py sdist
 ENV AZURE_CLI_DISABLE_POST_INSTALL 1
