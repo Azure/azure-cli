@@ -85,6 +85,13 @@ class Application(object):
             argv[0] = '--help'
 
         args = self.parser.parse_args(argv)
+        parser = getattr(args, '_parser', None)
+        try:
+            _validate_arguments(args)
+        except: # pylint: disable=bare-except
+            err = sys.exc_info()[1]
+            (parser or self.parser).error(str(err))
+
         self.session['command'] = args.command
         self.raise_event(self.COMMAND_PARSER_PARSED, command=args.command, args=args)
         # Consider - we are using any args that start with an underscore (_) as 'private'
@@ -108,7 +115,7 @@ class Application(object):
         '''Raise the event `name`.
         '''
         logger.info("Application event '%s' with event data %s", name, kwargs)
-        for func in self._event_handlers[name]:
+        for func in list(self._event_handlers[name]): # Make copy in case handler modifies the list
             func(**kwargs)
 
     def register(self, name, handler):
@@ -188,6 +195,3 @@ def _validate_arguments(args, **_):
         pass
 
 APPLICATION = Application()
-
-# Handlers to update command definitions before they are fed to the parser
-APPLICATION.register(APPLICATION.COMMAND_PARSER_PARSED, _validate_arguments)
