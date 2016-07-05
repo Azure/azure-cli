@@ -20,6 +20,7 @@ from azure.cli.commands.parameters import (location_type,
                                            get_location_completion_list,
                                            get_one_of_subscription_locations,
                                            get_resource_name_completion_list)
+from azure.cli.command_modules.vm._validators import nsg_name_validator
 from azure.cli.commands import register_cli_argument, CliArgumentType, register_extra_cli_argument
 
 def get_urn_aliases_completion_list(prefix, **kwargs):#pylint: disable=unused-argument
@@ -92,6 +93,10 @@ register_cli_argument('vm extension image', 'type', CliArgumentType(options_list
 register_cli_argument('vm extension image', 'latest', CliArgumentType(action='store_true'))
 
 register_cli_argument('vm image list', 'image_location', location_type)
+
+register_cli_argument('vm open-port', 'vm_name', name_arg_type, help='The name of the virtual machine to open inbound traffic on.')
+register_cli_argument('vm open-port', 'network_security_group_name', options_list=('--nsg-name',), help='The name of the network security group to create if one does not exist. Ignored if an NSG already exists.', validator=nsg_name_validator)
+register_cli_argument('vm open-port', 'apply_to_subnet', help='Allow inbound traffic on the subnet instead of the NIC', action='store_true')
 
 # VM CREATE PARAMETER CONFIGURATION
 

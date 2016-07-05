@@ -67,6 +67,40 @@ class VMCombinedListTest(VCRTestBase):
         some_vms = self.cmd('vm list -g travistestresourcegroup')
         assert len(all_vms) > len(some_vms)
 
+class VMOpenPortTest(ResourceGroupVCRTestBase):
+    def __init__(self, test_method):
+        super(VMOpenPortTest, self).__init__(__file__, test_method)
+        self.resource_group = 'open_port_test_rg1'
+        self.vm_name = 'vm1'
+
+    def set_up(self):
+        super(VMOpenPortTest, self).set_up()
+        rg = self.resource_group
+        vm = self.vm_name
+        self.cmd('vm create -g {0} -l westus -n {1} --admin-username ubuntu '
+            '--image Canonical:UbuntuServer:14.04.4-LTS:latest --admin-password PasswordPassword1! '
+            '--public-ip-address-allocation dynamic --public-ip-address-type new '
+            '--authentication-type password'.format(rg, vm))
+
+    def test_vm_open_port(self):
+        self.execute()
+
+    def body(self):
+        rg = self.resource_group
+        vm = self.vm_name
+
+        # min params - apply to existing NIC (updates existing NSG)
+        nsg_id = self.cmd('vm open-port -g {} -n {}'.format(rg, vm))['networkSecurityGroup']['id']
+        nsg_name = os.path.split(nsg_id)[1]
+        self.cmd('network nsg show -g {} -n {}'.format(rg, nsg_name),
+            checks=JMESPathCheck("length(securityRules[?name == 'open-port-cmd'])", 1))
+
+        # apply to subnet (creates new NSG)
+        new_nsg = 'newNsg'
+        self.cmd('vm open-port -g {} -n {} --apply-to-subnet --nsg-name {}'.format(rg, vm, new_nsg))
+        self.cmd('network nsg show -g {} -n {}'.format(rg, new_nsg),
+            checks=JMESPathCheck("length(securityRules[?name == 'open-port-cmd'])", 1))
+
 class VMResizeTest(VCRTestBase):
     def __init__(self, test_method):
         super(VMResizeTest, self).__init__(__file__, test_method)
