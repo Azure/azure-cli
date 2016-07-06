@@ -3,6 +3,7 @@ import base64
 import socket
 
 from azure.cli.commands.arm import is_valid_resource_id, resource_id
+from azure.cli._util import CLIError
 
 def _convert_id_list_to_object(data):
     if not data:
@@ -35,12 +36,24 @@ def process_app_gateway_namespace(namespace):
 
     if namespace.public_ip:
         namespace.frontend_type = "publicIp"
+
     elif namespace.private_ip_address:
         namespace.private_ip_address_allocation = "static"
         namespace.frontend_type = "privateIp"
 
     if not namespace.public_ip_type:
         namespace.public_ip_type = "none"
+
+def validate_address_prefixes(namespace):
+
+    subnet_prefix_set = '__SET__' in namespace.subnet_prefix
+    vnet_prefix_set = '__SET__' in namespace.vnet_address_prefix
+    namespace.subnet_prefix = namespace.subnet_prefix.replace('__SET__', '')
+    namespace.vnet_address_prefix = namespace.vnet_address_prefix.replace('__SET__', '')
+
+    if namespace.subnet_type != 'new' and (subnet_prefix_set or vnet_prefix_set):
+        raise CLIError('Existing subnet ({}) found. Cannot specify address prefixes when '
+                       'reusing an existing subnet.'.format(namespace.subnet))
 
 def validate_servers(namespace):
     servers = []
@@ -117,4 +130,8 @@ def validate_nsg_name_or_id(namespace):
                 type='networkSecurityGroups',
                 name=namespace.network_security_group)
 
-
+class markSpecifiedAction(argparse.Action): # pylint: disable=too-few-public-methods
+    """ Use this to identify when a parameter is explicitly set by the user (as opposed to a
+    default). You must remove the __SET__ sentinel substring in a follow-up validator."""
+    def __call__(self, parser, args, values, option_string=None):
+        setattr(args, self.dest, '__SET__{}'.format(values))
