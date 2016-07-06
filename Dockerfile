@@ -6,6 +6,8 @@ WORKDIR azure-cli
 # bundle source code
 COPY . /azure-cli
 
+RUN pip install --upgrade pip
+
 # Build and install CLI
 RUN python setup.py sdist
 ENV AZURE_CLI_DISABLE_POST_INSTALL 1
@@ -20,6 +22,16 @@ RUN for d in src/command_modules/azure-cli-*/; \
     done
 
 # Enable tab completion
-RUN eval "$(register-python-argcomplete az)"
+RUN echo "\
+_python_argcomplete() {\n\
+    local IFS='\v'\n\
+    COMPREPLY=( \$(IFS=\"\$IFS\"                   COMP_LINE=\"\$COMP_LINE\"                   COMP_POINT=\"\$COMP_POINT\"                   _ARGCOMPLETE_COMP_WORDBREAKS=\"\$COMP_WORDBREAKS\"                   _ARGCOMPLETE=1                   \"\$1\" 8>&1 9>&2 1>/dev/null 2>/dev/null) )\n\
+    if [[ \$? != 0 ]]; then\n\
+        unset COMPREPLY\n\
+    fi\n\
+}\n\
+complete -o nospace -F _python_argcomplete \"az\"\n\
+" > /etc/az.completion
+RUN echo "\nsource '/etc/az.completion'\n" >> /etc/bash.bashrc
 
 CMD az
