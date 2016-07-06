@@ -1,5 +1,7 @@
-from azure.cli.commands.client_factory import (get_mgmt_service_client,
-                                               get_subscription_service_client)
+﻿from azure.cli.commands.client_factory import (
+    get_mgmt_service_client,
+    get_subscription_service_client)
+
 from azure.mgmt.compute import ComputeManagementClient
 
 def _compute_client_factory(**_):

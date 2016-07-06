@@ -47,7 +47,7 @@ cli_command('vm delete', VirtualMachinesOperations.delete, factory)
 cli_command('vm deallocate', VirtualMachinesOperations.deallocate, factory)
 cli_command('vm generalize', VirtualMachinesOperations.generalize, factory)
 cli_command('vm show', VirtualMachinesOperations.get, factory)
-cli_command('vm list-sizes', VirtualMachinesOperations.list_available_sizes, factory)
+cli_command('vm list-vm-resize-options', VirtualMachinesOperations.list_available_sizes, factory)
 cli_command('vm stop', VirtualMachinesOperations.power_off, factory)
 cli_command('vm restart', VirtualMachinesOperations.restart, factory)
 cli_command('vm start', VirtualMachinesOperations.start, factory)
@@ -159,5 +159,5 @@ cli_command('vm scaleset scale', vmss_scale)
 
 # VM Size
 factory = lambda _: _compute_client_factory().virtual_machine_sizes
-cli_command('vm size list', VirtualMachineSizesOperations.list, factory)
+cli_command('vm list-sizes', VirtualMachineSizesOperations.list, factory)
 
