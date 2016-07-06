@@ -85,6 +85,7 @@ class JMESPathCheck(object): # pylint: disable=too-few-public-methods
         self.expected_result = expected_result
 
     def compare(self, json_data):
+
         if not json_data:
             json_data = '{}'
         json_val = json.loads(json_data)

@@ -39,7 +39,7 @@ def _name_id_fold(base_name, resource_type, type_field, #pylint: disable=too-man
             setattr(namespace, type_field, none_flag_value)
         else:
             has_parent = parent_name is not None and parent_type is not None
-            if valid_resource_id(base_name_val):
+            if is_valid_resource_id(base_name_val):
                 resource_id = base_name_val
             elif has_parent:
                 resource_id = resource_id(
@@ -59,7 +59,7 @@ def _name_id_fold(base_name, resource_type, type_field, #pylint: disable=too-man
             if resource_exists(resource_id):
                 setattr(namespace, type_field, existing_id_flag_value)
                 setattr(namespace, base_name, resource_id)
-            elif valid_resource_id(base_name_val):
+            elif is_valid_resource_id(base_name_val):
                 raise CLIError('ID {} does not exist. Please specify '
                                'a name to create a new resource.'.format(resource_id))
             else:

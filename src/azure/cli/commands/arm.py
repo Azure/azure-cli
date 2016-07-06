@@ -34,9 +34,9 @@ def is_valid_resource_id(id):
     except KeyError:
         return False
 
-def resource_exists(r_id):
-    odata_filter = "resourceGroup eq '{0}' and name eq '{1}'" \
-        " and resourceType eq '{2}'".format(r_id.resource_group, r_id.name, r_id.full_type)
+def resource_exists(**kwargs):
+    odata_filter = "resourceGroup eq '{resource_group}' and name eq '{name}'" \
+        " and resourceType eq '{namespace}/{type}'".format(**kwargs)
     client = get_mgmt_service_client(ResourceManagementClient).resources
     existing = len(list(client.list(filter=odata_filter))) == 1
     return existing
