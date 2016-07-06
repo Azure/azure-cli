@@ -21,7 +21,7 @@ helps['vm create'] = """
                   - az vm image list
                   - az vm image show
                 - name: --ssh-key-value
-                  short-summary: SSH key file value or key file path.
+                  short-summary: SSH public key or public key file path.
             examples:
                 - name: Create a simple Windows Server VM with private IP address only
                   text: >
@@ -30,14 +30,14 @@ helps['vm create'] = """
                 - name: Create a simple Windows Server VM with public IP address and DNS entry
                   text: >
                     az vm create -n my_vm_name -g myrg --admin-username myadmin --admin-password Password@1234
-                    --dns-name-for-public-ip my_globally_unique_vm_dns_name
+                    --public-ip-address-dns-name my_globally_unique_vm_dns_name
                 - name: Create a Linux VM with SSH key authentication, add a public DNS entry and add to an existing Virtual Network and Availability Set.
                   text: >
                     az vm create -n my_vm_name -g myrg --image <linux image from 'az vm image list'>
                     --authentication-type ssh
-                    --virtual-network my_existing_vnet --subnet-name subnet1
+                    --vnet my_existing_vnet --subnet-name subnet1
                     --availability-set my_existing_availability_set
-                    --dns-name-for-public-ip my_globally_unique_vm_dns_name
+                    --public-ip-address-dns-name my_globally_unique_vm_dns_name
                     --ssh-key-value "<ssh-rsa-key, key-file-path or not specified for default-key-path>"
             """.format(image_long_summary)
 

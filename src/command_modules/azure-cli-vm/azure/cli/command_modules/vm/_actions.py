@@ -99,7 +99,8 @@ def _resource_not_exists(resource_type):
     return _handle_resource_not_exists
 
 def _os_disk_default(namespace):
-    namespace.os_disk_name = 'osdisk{}'.format(str(int(math.ceil(time.time()))))
+    if not namespace.os_disk_name:
+        namespace.os_disk_name = 'osdisk{}'.format(str(int(math.ceil(time.time()))))
 
 def _handle_auth_types(**kwargs):
     if kwargs['command'] != 'vm create' and kwargs['command'] != 'vm scaleset create':
@@ -130,7 +131,7 @@ def _handle_auth_types(**kwargs):
             else:
                 raise CLIError('An RSA key file or key value must be supplied to SSH Key Value')
 
-    if hasattr(args, 'network_security_group_type') and args.network_security_group_type == 'new':
+    if hasattr(args, 'network_security_group_type'):
         args.network_security_group_rule = 'RDP' if is_windows else 'SSH'
 
     if hasattr(args, 'nat_backend_port') and not args.nat_backend_port:
