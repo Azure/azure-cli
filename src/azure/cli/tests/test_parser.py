@@ -1,22 +1,13 @@
 import unittest
 from six import StringIO
-from collections import namedtuple
 from azure.cli.parser import AzCliCommandParser
 from azure.cli.commands import CliCommand
 
 class TestParser(unittest.TestCase):
 
-    @classmethod
-    def setUpClass(cls):
-        pass
-        
-    @classmethod
-    def tearDownClass(cls):
-        pass
-
     def setUp(self):
         self.io = StringIO()
-        
+
     def tearDown(self):
         self.io.close()
 
@@ -44,7 +35,7 @@ class TestParser(unittest.TestCase):
         self.assertTrue(AzCliCommandParser.error.called)
 
     def test_required_parameter(self):
-        def test_handler(args):
+        def test_handler(args): # pylint: disable=unused-argument
             pass
 
         command = CliCommand('test command', test_handler)
@@ -79,11 +70,11 @@ class TestParser(unittest.TestCase):
         parser.parse_args('test command -req yep'.split())
         self.assertTrue(AzCliCommandParser.error.called)
 
-class VerifyError(object):
+class VerifyError(object): # pylint: disable=too-few-public-methods
 
     def __init__(self, test, substr=None):
         self.test = test
-        self.substr= substr
+        self.substr = substr
         self.called = False
 
     def __call__(self, message):

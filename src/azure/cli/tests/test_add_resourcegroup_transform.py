@@ -1,22 +1,20 @@
 import unittest
 from six import StringIO
-from collections import namedtuple
-from azure.cli.parser import AzCliCommandParser
-from azure.cli.extensions.transform import _parse_id, _add_resource_group, _resource_group_transform
+from azure.cli.extensions.transform import _parse_id, _add_resource_group
 
 class TestResourceGroupTransform(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
         pass
-        
+
     @classmethod
     def tearDownClass(cls):
         pass
 
     def setUp(self):
         self.io = StringIO()
-        
+
     def tearDown(self):
         self.io.close()
 
