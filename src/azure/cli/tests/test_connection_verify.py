@@ -1,12 +1,11 @@
 import os
+import logging
 import unittest
 try:
     from unittest.mock import MagicMock
 except ImportError:
     from mock import MagicMock
 
-from azure.cli.parser import IncorrectUsageError
-import logging
 import azure.cli._debug as _debug
 
 

@@ -1,20 +1,13 @@
+# pylint: disable=line-too-long
 import unittest
 from six import StringIO
 from azure.cli.commands.arm import parse_resource_id, resource_id, is_valid_resource_id
 
 class TestApplication(unittest.TestCase):
 
-    @classmethod
-    def setUpClass(cls):
-        pass
-        
-    @classmethod
-    def tearDownClass(cls):
-        pass
-
     def setUp(self):
         self.io = StringIO()
-        
+
     def tearDown(self):
         self.io.close()
 

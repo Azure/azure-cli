@@ -8,28 +8,28 @@ class TestLogging(unittest.TestCase):
 
     def test_determine_verbose_level_default(self):
         argv = []
-        actual_level = _logging._determine_verbose_level(argv)
+        actual_level = _logging._determine_verbose_level(argv) # pylint: disable=protected-access
         expected_level = 0
         self.assertEqual(actual_level, expected_level)
         self.assertFalse(argv)
 
     def test_determine_verbose_level_verbose(self):
         argv = ['--verbose']
-        actual_level = _logging._determine_verbose_level(argv)
+        actual_level = _logging._determine_verbose_level(argv) # pylint: disable=protected-access
         expected_level = 1
         self.assertEqual(actual_level, expected_level)
         self.assertFalse(argv)
 
     def test_determine_verbose_level_debug(self):
         argv = ['--debug']
-        actual_level = _logging._determine_verbose_level(argv)
+        actual_level = _logging._determine_verbose_level(argv) # pylint: disable=protected-access
         expected_level = 2
         self.assertEqual(actual_level, expected_level)
         self.assertFalse(argv)
 
     def test_determine_verbose_level_v_v_v_default(self):
         argv = ['--verbose', '--debug']
-        actual_level = _logging._determine_verbose_level(argv)
+        actual_level = _logging._determine_verbose_level(argv) # pylint: disable=protected-access
         expected_level = 2
         self.assertEqual(actual_level, expected_level)
         # We still consumed the arguments
@@ -37,7 +37,7 @@ class TestLogging(unittest.TestCase):
 
     def test_determine_verbose_level_other_args_verbose(self):
         argv = ['account', '--verbose']
-        actual_level = _logging._determine_verbose_level(argv)
+        actual_level = _logging._determine_verbose_level(argv) # pylint: disable=protected-access
         expected_level = 1
         self.assertEqual(actual_level, expected_level)
         # We consumed 1 argument
@@ -45,7 +45,7 @@ class TestLogging(unittest.TestCase):
 
     def test_determine_verbose_level_other_args_debug(self):
         argv = ['account', '--debug']
-        actual_level = _logging._determine_verbose_level(argv)
+        actual_level = _logging._determine_verbose_level(argv) # pylint: disable=protected-access
         expected_level = 2
         self.assertEqual(actual_level, expected_level)
         # We consumed 1 argument
