@@ -1,22 +1,18 @@
 from __future__ import print_function
+import sys
 import unittest
 import logging
 import mock
-import sys
 from six import StringIO
 
 from azure.cli.application import Application, Configuration
 from azure.cli.commands import CliCommand
-from azure.cli.parser import AzCliCommandParser
-from azure.cli.commands import CommandTable
 import azure.cli.help_files
-import azure.cli._util as util
-from azure.cli._help import HelpAuthoringException
 
 io = {}
 def redirect_io(func):
     def wrapper(self):
-        global io
+        global io # pylint: disable=global-statement
         old_stdout = sys.stdout
         old_stderr = sys.stderr
         sys.stdout = sys.stderr = io = StringIO()
@@ -30,7 +26,7 @@ class Test_argparse(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         # Ensure initialization has occurred correctly
-        import azure.cli.main
+        import azure.cli.main # pylint: disable=redefined-outer-name
         logging.basicConfig(level=logging.DEBUG)
 
     @classmethod
@@ -43,7 +39,7 @@ class Test_argparse(unittest.TestCase):
             pass
 
         command = CliCommand('n1', test_handler)
-        command.add_argument('arg', '--arg','-a', required=False)
+        command.add_argument('arg', '--arg', '-a', required=False)
         command.add_argument('b', '-b', required=False)
         cmd_table = {'n1': command}
 
@@ -63,7 +59,7 @@ class Test_argparse(unittest.TestCase):
             pass
 
         command = CliCommand('n1', test_handler, description='the description')
-        command.add_argument('arg', '--arg','-a', required=False)
+        command.add_argument('arg', '--arg', '-a', required=False)
         command.add_argument('b', '-b', required=False)
         cmd_table = {'n1': command}
 
@@ -81,7 +77,7 @@ class Test_argparse(unittest.TestCase):
             pass
 
         command = CliCommand('n1', test_handler)
-        command.add_argument('arg', '--arg','-a', required=False)
+        command.add_argument('arg', '--arg', '-a', required=False)
         command.add_argument('b', '-b', required=False)
         command.help = 'long description'
         cmd_table = {'n1': command}
@@ -92,7 +88,7 @@ class Test_argparse(unittest.TestCase):
 
         with self.assertRaises(SystemExit):
             app.execute('n1 -h'.split())
-        self.assertEqual(True, io.getvalue().startswith('\nCommand\n    az n1\n        Long description.'))
+        self.assertEqual(True, io.getvalue().startswith('\nCommand\n    az n1\n        Long description.')) # pylint: disable=line-too-long
 
     @redirect_io
     def test_help_long_description_and_short_description(self):
@@ -100,7 +96,7 @@ class Test_argparse(unittest.TestCase):
             pass
 
         command = CliCommand('n1', test_handler, description='short description')
-        command.add_argument('arg', '--arg','-a', required=False)
+        command.add_argument('arg', '--arg', '-a', required=False)
         command.add_argument('b', '-b', required=False)
         command.help = 'long description'
         cmd_table = {'n1': command}
@@ -111,7 +107,7 @@ class Test_argparse(unittest.TestCase):
 
         with self.assertRaises(SystemExit):
             app.execute('n1 -h'.split())
-        self.assertEqual(True, io.getvalue().startswith('\nCommand\n    az n1: Short description.\n        Long description.'))
+        self.assertEqual(True, io.getvalue().startswith('\nCommand\n    az n1: Short description.\n        Long description.')) # pylint: disable=line-too-long
 
     @redirect_io
     def test_help_docstring_description_overrides_short_description(self):
@@ -119,7 +115,7 @@ class Test_argparse(unittest.TestCase):
             pass
 
         command = CliCommand('n1', test_handler, description='short description')
-        command.add_argument('arg', '--arg','-a', required=False)
+        command.add_argument('arg', '--arg', '-a', required=False)
         command.add_argument('b', '-b', required=False)
         command.help = 'short-summary: docstring summary'
         cmd_table = {'n1': command}
@@ -138,7 +134,7 @@ class Test_argparse(unittest.TestCase):
             pass
 
         command = CliCommand('n1', test_handler)
-        command.add_argument('arg', '--arg','-a', required=False)
+        command.add_argument('arg', '--arg', '-a', required=False)
         command.add_argument('b', '-b', required=False)
         command.help = """
             long-summary: |
@@ -154,7 +150,7 @@ class Test_argparse(unittest.TestCase):
         with self.assertRaises(SystemExit):
             app.execute('n1 -h'.split())
 
-        self.assertEqual(True, io.getvalue().startswith('\nCommand\n    az n1\n        Line1\n        line2.'))
+        self.assertEqual(True, io.getvalue().startswith('\nCommand\n    az n1\n        Line1\n        line2.')) # pylint: disable=line-too-long
 
     @redirect_io
     @mock.patch('azure.cli.application.Application.register', return_value=None)
@@ -283,7 +279,7 @@ Examples
             pass
 
         command = CliCommand('n1', test_handler)
-        command.add_argument('arg', '--arg','-a', required=False)
+        command.add_argument('arg', '--arg', '-a', required=False)
         command.add_argument('b', '-b', required=False)
         cmd_table = {'n1': command}
 
@@ -292,7 +288,7 @@ Examples
         app = Application(config)
 
         with self.assertRaises(SystemExit):
-            cmd_result = app.execute('n1 --arg foo -h'.split())
+            app.execute('n1 --arg foo -h'.split())
 
         s = """
 Command
@@ -338,7 +334,7 @@ Global Arguments
     @redirect_io
     def test_help_extra_missing_params(self):
         app = Application(Configuration([]))
-        def test_handler(foobar2, foobar=None):
+        def test_handler(foobar2, foobar=None): # pylint: disable=unused-argument
             pass
 
         command = CliCommand('n1', test_handler)
@@ -446,18 +442,18 @@ Examples
     def test_help_global_params(self, mock_register_extensions, _):
         def register_globals(global_group):
             global_group.add_argument('--query2', dest='_jmespath_query', metavar='JMESPATH',
-                              help='JMESPath query string. See http://jmespath.org/ '
-                              'for more information and examples.')
+                                      help='JMESPath query string. See http://jmespath.org/ '
+                                      'for more information and examples.')
 
         mock_register_extensions.return_value = None
         mock_register_extensions.side_effect = lambda app: \
-            app._event_handlers[app.GLOBAL_PARSER_CREATED].append(register_globals)
+            app._event_handlers[app.GLOBAL_PARSER_CREATED].append(register_globals) # pylint: disable=protected-access
 
         def test_handler():
             pass
 
         command = CliCommand('n1', test_handler)
-        command.add_argument('arg', '--arg','-a', required=False)
+        command.add_argument('arg', '--arg', '-a', required=False)
         command.add_argument('b', '-b', required=False)
         command.help = """
             long-summary: |
