@@ -32,7 +32,7 @@ class LbOperations(object):
         self.config = config
 
     def create_or_update(
-            self, resource_group_name, deployment_name, load_balancer_name, content_version=None, backend_pool_name=None, dns_name_for_public_ip=None, dns_name_type="none", location=None, nat_backend_port="22", nat_end_port="50099", nat_pool_name=None, nat_start_port="50000", private_ip_address=None, private_ip_address_allocation="dynamic", public_ip_address_allocation="dynamic", public_ip_address_name=None, public_ip_address_type="new", subnet_name=None, virtual_network_name=None, custom_headers=None, raw=False, **operation_config):
+            self, resource_group_name, deployment_name, load_balancer_name, content_version=None, backend_pool_name=None, dns_name_type="none", location=None, private_ip_address=None, private_ip_address_allocation="dynamic", public_ip_address=None, public_ip_address_allocation="dynamic", public_ip_address_type="new", public_ip_dns_name=None, subnet=None, subnet_address_prefix="10.0.0.0/24", subnet_type="none", virtual_network_name=None, vnet_address_prefix="10.0.0.0/16", custom_headers=None, raw=False, **operation_config):
         """
         Create or update a virtual machine.
 
@@ -48,45 +48,43 @@ class LbOperations(object):
         :type content_version: str
         :param backend_pool_name: Name of load balancer backend pool.
         :type backend_pool_name: str
-        :param dns_name_for_public_ip: Globally unique DNS Name for the
-         Public IP used to access the Virtual Machine.  Requires a new public
-         IP to be created by setting Public IP Address Type to New.
-        :type dns_name_for_public_ip: str
         :param dns_name_type: Associate VMs with a public IP address to a DNS
          name. Possible values include: 'none', 'new'
         :type dns_name_type: str
         :param location: Location for load balancer resource.
         :type location: str
-        :param nat_backend_port: Port number for NAT backend.
-        :type nat_backend_port: str
-        :param nat_end_port: End of NAT port range.
-        :type nat_end_port: str
-        :param nat_pool_name: Name of load balancer NAT (network address
-         translation) pool.
-        :type nat_pool_name: str
-        :param nat_start_port: Start of NAT port range.
-        :type nat_start_port: str
-        :param private_ip_address: Private IP address to use when allocation
-         method is set to 'static'.
+        :param private_ip_address: Static private IP address to use.
         :type private_ip_address: str
         :param private_ip_address_allocation: Private IP address allocation
          method. Possible values include: 'dynamic', 'static'
         :type private_ip_address_allocation: str
+        :param public_ip_address: Name or ID of the public IP address to use.
+        :type public_ip_address: str
         :param public_ip_address_allocation: Public IP address allocation
          method. Possible values include: 'dynamic', 'static'
         :type public_ip_address_allocation: str
-        :param public_ip_address_name: Name of public IP address to use.
-        :type public_ip_address_name: str
         :param public_ip_address_type: Type of Public IP Address to associate
          with the load balancer. Possible values include: 'none', 'new',
-         'existing'
+         'existingName', 'existingId'
         :type public_ip_address_type: str
-        :param subnet_name: If Public IP address is turned off, this is the
-         subnet to associate with the load balancer.
-        :type subnet_name: str
-        :param virtual_network_name: If Public IP address is turned off, this
-         is the VNET to associate with the load balancer.
+        :param public_ip_dns_name: Globally unique DNS Name for the Public IP
+         used to access the Virtual Machine (new public IP only).
+        :type public_ip_dns_name: str
+        :param subnet: The subnet name or ID to associate with the load
+         balancer. Cannot be used in conjunction with a Public IP.
+        :type subnet: str
+        :param subnet_address_prefix: The subnet address prefix in CIDR
+         format (new subnet only).
+        :type subnet_address_prefix: str
+        :param subnet_type: Use new, existing or no subnet. Possible values
+         include: 'none', 'new', 'existingName', 'existingId'
+        :type subnet_type: str
+        :param virtual_network_name: The VNet name containing the subnet.
+         Cannot be used in conjunction with a Public IP.
         :type virtual_network_name: str
+        :param vnet_address_prefix: The virtual network IP address prefix in
+         CIDR format (new subnet only).
+        :type vnet_address_prefix: str
         :param dict custom_headers: headers that will be added to the request
         :param bool raw: returns the direct response alongside the
          deserialized response
@@ -97,7 +95,7 @@ class LbOperations(object):
         :rtype: :class:`ClientRawResponse<msrest.pipeline.ClientRawResponse>`
          if raw=true
         """
-        parameters = models.DeploymentLb(content_version=content_version, backend_pool_name=backend_pool_name, dns_name_for_public_ip=dns_name_for_public_ip, dns_name_type=dns_name_type, load_balancer_name=load_balancer_name, location=location, nat_backend_port=nat_backend_port, nat_end_port=nat_end_port, nat_pool_name=nat_pool_name, nat_start_port=nat_start_port, private_ip_address=private_ip_address, private_ip_address_allocation=private_ip_address_allocation, public_ip_address_allocation=public_ip_address_allocation, public_ip_address_name=public_ip_address_name, public_ip_address_type=public_ip_address_type, subnet_name=subnet_name, virtual_network_name=virtual_network_name)
+        parameters = models.DeploymentLb(content_version=content_version, backend_pool_name=backend_pool_name, dns_name_type=dns_name_type, load_balancer_name=load_balancer_name, location=location, private_ip_address=private_ip_address, private_ip_address_allocation=private_ip_address_allocation, public_ip_address=public_ip_address, public_ip_address_allocation=public_ip_address_allocation, public_ip_address_type=public_ip_address_type, public_ip_dns_name=public_ip_dns_name, subnet=subnet, subnet_address_prefix=subnet_address_prefix, subnet_type=subnet_type, virtual_network_name=virtual_network_name, vnet_address_prefix=vnet_address_prefix)
 
         # Construct URL
         url = '/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Resources/deployments/{deploymentName}'
