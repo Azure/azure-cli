@@ -145,7 +145,7 @@ class VMShowListSizesListIPAddressesScenarioTest(ResourceGroupVCRTestBase):
                 JMESPathCheck('location', self.location),
                 JMESPathCheck('resourceGroup', self.resource_group),
             ])
-        self.cmd('vm list-sizes --resource-group {} --name {}'.format(
+        self.cmd('vm list-vm-resize-options --resource-group {} --name {}'.format(
             self.resource_group, self.vm_name), checks=JMESPathCheck('type(@)', 'array'))
 
         # Expecting the one we just added
@@ -168,7 +168,7 @@ class VMSizeListScenarioTest(VCRTestBase):
         self.execute()
 
     def body(self):
-        self.cmd('vm size list --location westus',
+        self.cmd('vm list-sizes --location westus',
             checks=JMESPathCheck('type(@)', 'array'))
 
 class VMImageListOffersScenarioTest(VCRTestBase):
