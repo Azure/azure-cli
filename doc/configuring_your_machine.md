@@ -5,14 +5,6 @@ The Azure Python CLI projects sources are located on GitHub (https://github.com/
 -	Fork the  https://github.com/Azure/azure-cli/ repository into your private GitHub account
 -	Create pull requests against the https://github.com/azure/azure-cli repository to get your code changes merged into the project repository.
 
-##Docker Setup
-If you have not previously done so, configure your Docker client engine [here](https://docs.docker.com/engine/installation/).
-
-Then:
-+ Run `docker login` (contact the team for credentials).
-+ Run `docker pull azuresdk/azure-cli-python:latest`
-+ Run `docker run -i -t azuresdk/azure-cli-python:latest`
-
 ##Preparing your machine
 1.	Install Python 3.5.x from http://python.org. Please note that the version of Python that comes preinstalled on OSX is 2.7. 
 2.	Clone your repository and check out the master branch.
@@ -78,11 +70,22 @@ The repo has a launch.json file that will launch the version of Python that is f
 ####Command line
 1.  Activate your virtual environment if not already done
 
+  #####OSX/Ubuntu (bash):
+  ```Shell
+  <clone root>/env/scripts/activate
+  ```
+
   #####Windows:
   ```BatchFile
   <clone root>\env\scripts\activate.bat
   ```
+
 2.  Invoke the CLI using:
+
+  #####OSX/Ubuntu (bash):
+  ```Shell
+  az
+  ```
 
   #####Windows:
   ```BatchFile
