@@ -642,9 +642,9 @@ def vm_open_port(resource_group_name, vm_name, network_security_group_name=None,
     if not apply_to_subnet:
         nsg = nic.network_security_group
     else:
-        from azure.cli.commands.azure_resource_id import AzureResourceId
-        subnet_id = AzureResourceId(nic.ip_configurations[0].subnet.id)
-        subnet = network.subnets.get(resource_group_name, subnet_id.name, subnet_id.child_name)
+        from azure.cli.commands.arm import parse_resource_id
+        subnet_id = parse_resource_id(nic.ip_configurations[0].subnet.id)
+        subnet = network.subnets.get(resource_group_name, subnet_id['name'], subnet_id['child_name'])
         nsg = subnet.network_security_group
 
     if not nsg:
@@ -681,8 +681,8 @@ def vm_open_port(resource_group_name, vm_name, network_security_group_name=None,
         return LongRunningOperation('Updating subnet')(
             network.subnets.create_or_update(
                 resource_group_name=resource_group_name,
-                virtual_network_name=subnet_id.name,
-                subnet_name=subnet_id.child_name,
+                virtual_network_name=subnet_id['name'],
+                subnet_name=subnet_id['child_name'],
                 subnet_parameters=subnet
             )
         )
