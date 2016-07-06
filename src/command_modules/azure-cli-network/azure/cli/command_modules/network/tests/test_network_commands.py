@@ -294,8 +294,7 @@ class NetworkLoadBalancerScenarioTest(ResourceGroupVCRTestBase):
 class NetworkLoadBalancerSubresourceScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-        super(NetworkLoadBalancerSubresourceScenarioTest, self).__init__(
-            __file__, test_method)
+        super(NetworkLoadBalancerSubresourceScenarioTest, self).__init__(__file__, test_method)
         self.resource_group = 'lbsrg'
         self.lb_name = 'lb1'
         self.vnet_name = 'vnet1'
@@ -321,7 +320,7 @@ class NetworkLoadBalancerSubresourceScenarioTest(ResourceGroupVCRTestBase):
         # Test inbound NAT rules
         for count in range(1, 4):
             self.cmd('network lb inbound-nat-rule create {} -n rule{} --protocol tcp --frontend-port {} --backend-port {} --frontend-ip-name LoadBalancerFrontEnd'.format(lb_rg, count, count, count))
-        self.cmd('network lb inbound-nat-rule list {}'.format(lb_rg),
+        self.cmd('network lb inbound-nat-rule list -g {} -n {}'.format(rg, lb),
             checks=JMESPathCheck('length(@)', 3))
         self.cmd('network lb inbound-nat-rule set {} -n rule1 --floating-ip true --idle-timeout 10'.format(lb_rg))
         self.cmd('network lb inbound-nat-rule show {} -n rule1'.format(lb_rg), checks=[
@@ -330,13 +329,13 @@ class NetworkLoadBalancerSubresourceScenarioTest(ResourceGroupVCRTestBase):
         ])
         for count in range(1, 4):
             self.cmd('network lb inbound-nat-rule delete {} -n rule{}'.format(lb_rg, count))
-        self.cmd('network lb inbound-nat-rule list {}'.format(lb_rg),
+        self.cmd('network lb inbound-nat-rule list -g {} -n {}'.format(rg, lb),
             checks=JMESPathCheck('length(@)', 0))
 
         # Test inbound NAT pools
         for count in range(1000, 4000, 1000):
             self.cmd('network lb inbound-nat-pool create {} -n rule{} --protocol tcp --frontend-port-range-start {}  --frontend-port-range-end {} --backend-port {}'.format(lb_rg, count, count, count+999, count))
-        self.cmd('network lb inbound-nat-pool list {}'.format(lb_rg),
+        self.cmd('network lb inbound-nat-pool list -g {} -n {}'.format(rg, lb),
             checks=JMESPathCheck('length(@)', 3))
         self.cmd('network lb inbound-nat-pool set {} -n rule1000 --protocol udp --backend-port 50'.format(lb_rg))
         self.cmd('network lb inbound-nat-pool show {} -n rule1000'.format(lb_rg), checks=[
@@ -345,35 +344,35 @@ class NetworkLoadBalancerSubresourceScenarioTest(ResourceGroupVCRTestBase):
         ])
         for count in range(1000, 4000, 1000):
             self.cmd('network lb inbound-nat-pool delete {} -n rule{}'.format(lb_rg, count))
-        self.cmd('network lb inbound-nat-pool list {}'.format(lb_rg),
+        self.cmd('network lb inbound-nat-pool list -g {} -n {}'.format(rg, lb),
             checks=JMESPathCheck('length(@)', 0))
 
         # Test frontend IP configuration
-        self.cmd('network lb frontend-ip create {} -n ipconfig1 --public-ip-address-name publicip1'.format(lb_rg))
-        self.cmd('network lb frontend-ip create {} -n ipconfig2 --public-ip-address-name publicip2'.format(lb_rg))
-        self.cmd('network lb frontend-ip create {} -n ipconfig3 --vnet-name {} --subnet-name {} --private-ip-address 10.0.0.99'.format(lb_rg, self.vnet_name, self.subnet_name),
+        self.cmd('network lb frontend-ip create {} -n ipconfig1 --public-ip-address publicip1'.format(lb_rg))
+        self.cmd('network lb frontend-ip create {} -n ipconfig2 --public-ip-address publicip2'.format(lb_rg))
+        self.cmd('network lb frontend-ip create {} -n ipconfig3 --vnet-name {} --subnet {} --private-ip-address 10.0.0.99'.format(lb_rg, self.vnet_name, self.subnet_name),
             allowed_exceptions='is not registered for feature Microsoft.Network/AllowMultiVipIlb required to carry out the requested operation.')
         # Note that the ipconfig3 won't be added. The 3 that will be found are the default and two created ones
-        self.cmd('network lb frontend-ip list {}'.format(lb_rg), checks=JMESPathCheck('length(@)', 3))
-        self.cmd('network lb frontend-ip set {} -n ipconfig1 --public-ip-address-name publicip3'.format(lb_rg))
+        self.cmd('network lb frontend-ip list -g {} -n {}'.format(rg, lb), checks=JMESPathCheck('length(@)', 3))
+        self.cmd('network lb frontend-ip set {} -n ipconfig1 --public-ip-address publicip3'.format(lb_rg))
         self.cmd('network lb frontend-ip show {} -n ipconfig1'.format(lb_rg),
             checks=JMESPathCheck("publicIpAddress.contains(id, 'publicip3')", True))
         self.cmd('network lb frontend-ip delete {} -n ipconfig2'.format(lb_rg))
-        self.cmd('network lb frontend-ip list {}'.format(lb_rg), checks=JMESPathCheck('length(@)', 2))
+        self.cmd('network lb frontend-ip list -g {} -n {}'.format(rg, lb), checks=JMESPathCheck('length(@)', 2))
 
         # Test backend address pool
         for i in range(1, 4):
             self.cmd('network lb address-pool create {} -n bap{}'.format(lb_rg, i))
-        self.cmd('network lb address-pool list {}'.format(lb_rg), checks=JMESPathCheck('length(@)', 4))
+        self.cmd('network lb address-pool list -g {} -n {}'.format(rg, lb), checks=JMESPathCheck('length(@)', 4))
         self.cmd('network lb address-pool show {} -n bap1'.format(lb_rg),
             checks=JMESPathCheck('name', 'bap1'))
         self.cmd('network lb address-pool delete {} -n bap3'.format(lb_rg))
-        self.cmd('network lb address-pool list {}'.format(lb_rg), checks=JMESPathCheck('length(@)', 3))
+        self.cmd('network lb address-pool list -g {} -n {}'.format(rg, lb), checks=JMESPathCheck('length(@)', 3))
 
         # Test probes
         for i in range(1, 4):
             self.cmd('network lb probe create {} -n probe{} --port {} --protocol http --path "/test{}"'.format(lb_rg, i, i, i))
-        self.cmd('network lb probe list {}'.format(lb_rg), checks=JMESPathCheck('length(@)', 3))
+        self.cmd('network lb probe list -g {} -n {}'.format(rg, lb), checks=JMESPathCheck('length(@)', 3))
         self.cmd('network lb probe set {} -n probe1 --interval 20 --threshold 5'.format(lb_rg))
         self.cmd('network lb probe set {} -n probe2 --protocol tcp --path ""'.format(lb_rg))
         self.cmd('network lb probe show {} -n probe1'.format(lb_rg), checks=[
@@ -385,7 +384,7 @@ class NetworkLoadBalancerSubresourceScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck('path', None)
         ])
         self.cmd('network lb probe delete {} -n probe3'.format(lb_rg))
-        self.cmd('network lb probe list {}'.format(lb_rg), checks=JMESPathCheck('length(@)', 2))
+        self.cmd('network lb probe list -g {} -n {}'.format(rg, lb), checks=JMESPathCheck('length(@)', 2))
 
         # Test load balancing rules
         self.cmd('network lb rule create {} -n rule1 --frontend-ip-name LoadBalancerFrontEnd --frontend-port 40 --backend-pool-name bap1 --backend-port 40 --protocol tcp'.format(lb_rg))
@@ -406,7 +405,7 @@ class NetworkLoadBalancerSubresourceScenarioTest(ResourceGroupVCRTestBase):
         ])
         self.cmd('network lb rule delete {} -n rule1'.format(lb_rg))
         self.cmd('network lb rule delete {} -n rule2'.format(lb_rg))
-        self.cmd('network lb rule list {}'.format(lb_rg), checks=JMESPathCheck('length(@)', 0))
+        self.cmd('network lb rule list -g {} -n {}'.format(rg, lb), checks=JMESPathCheck('length(@)', 0))
 
 class NetworkLocalGatewayScenarioTest(VCRTestBase):
 
@@ -456,34 +455,47 @@ class NetworkNicScenarioTest(ResourceGroupVCRTestBase):
         subnet = 'mysubnet'
         vnet = 'myvnet'
         nsg = 'mynsg'
+        alt_nsg = 'myothernsg'
+        lb = 'mylb'
         private_ip = '10.0.0.15'
         public_ip_name = 'publicip1'
 
-        self.cmd('network vnet create -g {} -n {} --subnet-name {}'.format(rg, vnet, subnet))
+        subnet_id = self.cmd('network vnet create -g {} -n {} --subnet-name {}'.format(rg, vnet, subnet))['newVNet']['subnets'][0]['id']
         self.cmd('network nsg create -g {} -n {}'.format(rg, nsg))
+        nsg_id = self.cmd('network nsg show -g {} -n {}'.format(rg, nsg))['id']
+        self.cmd('network nsg create -g {} -n {}'.format(rg, alt_nsg))
         self.cmd('network public-ip create -g {} -n {}'.format(rg, public_ip_name))
+        public_ip_id = self.cmd('network public-ip show -g {} -n {}'.format(rg, public_ip_name))['id']
+        self.cmd('network lb create -g {} -n {}'.format(rg, lb))
+        self.cmd('network lb inbound-nat-rule create -g {} --lb-name {} -n rule1 --protocol tcp --frontend-port 100 --backend-port 100 --frontend-ip-name LoadBalancerFrontEnd'.format(rg, lb))
+        self.cmd('network lb inbound-nat-rule create -g {} --lb-name {} -n rule2 --protocol tcp --frontend-port 200 --backend-port 200 --frontend-ip-name LoadBalancerFrontEnd'.format(rg, lb))
+        rule_ids = ' '.join(self.cmd('network lb inbound-nat-rule list -g {} -n {} --query "[].id"'.format(rg, lb)))
+        self.cmd('network lb address-pool create -g {} --lb-name {} -n bap1'.format(rg, lb))
+        self.cmd('network lb address-pool create -g {} --lb-name {} -n bap2'.format(rg, lb))
+        address_pool_ids = ' '.join(self.cmd('network lb address-pool list -g {} -n {} --query "[].id"'.format(rg, lb)))
 
         # create with minimum parameters
-        self.cmd('network nic create -g {} -n {} --subnet-name {} --vnet-name {}'.format(rg, nic, subnet, vnet), checks=[
+        self.cmd('network nic create -g {} -n {} --subnet {} --vnet-name {}'.format(rg, nic, subnet, vnet), checks=[
             JMESPathCheck('newNIC.ipConfigurations[0].properties.privateIPAllocationMethod', 'Dynamic'),
             JMESPathCheck('newNIC.provisioningState', 'Succeeded')
         ])
         # exercise optional parameters
-        self.cmd('network nic create -g {} -n {} --subnet-name {} --vnet-name {} --ip-forwarding --private-ip-address {} --public-ip-address-name "{}"'.format(rg, nic, subnet, vnet, private_ip, public_ip_name), checks=[
+        self.cmd('network nic create -g {} -n {} --subnet {} --ip-forwarding --private-ip-address {} --public-ip-address {} --internal-dns-name test --lb-address-pool-ids {} --lb-nat-rule-ids {}'.format(rg, nic, subnet_id, private_ip, public_ip_name, address_pool_ids, rule_ids), checks=[
             JMESPathCheck('newNIC.ipConfigurations[0].properties.privateIPAllocationMethod', 'Static'),
             JMESPathCheck('newNIC.ipConfigurations[0].properties.privateIPAddress', private_ip),
             JMESPathCheck('newNIC.enableIPForwarding', True),
-            JMESPathCheck('newNIC.provisioningState', 'Succeeded')
+            JMESPathCheck('newNIC.provisioningState', 'Succeeded'),
+            JMESPathCheck('newNIC.dnsSettings.internalDnsNameLabel', 'test')
         ])
         # exercise creating with NSG
-        self.cmd('network nic create -g {} -n {} --subnet-name {} --vnet-name {} --nsg-name {}'.format(rg, nic, subnet, vnet, nsg), checks=[
+        self.cmd('network nic create -g {} -n {} --subnet {} --vnet-name {} --nsg {}'.format(rg, nic, subnet, vnet, nsg), checks=[
             JMESPathCheck('newNIC.ipConfigurations[0].properties.privateIPAllocationMethod', 'Dynamic'),
             JMESPathCheck('newNIC.enableIPForwarding', False),
             JMESPathCheck("newNIC.networkSecurityGroup.contains(id, '{}')".format(nsg), True),
             JMESPathCheck('newNIC.provisioningState', 'Succeeded')
         ])
         # exercise creating with NSG and Public IP
-        self.cmd('network nic create -g {} -n {} --subnet-name {} --vnet-name {} --nsg-name {} --public-ip-address-name "{}"'.format(rg, nic, subnet, vnet, nsg, public_ip_name), checks=[
+        self.cmd('network nic create -g {} -n {} --subnet {} --vnet-name {} --nsg {} --public-ip-address {}'.format(rg, nic, subnet, vnet, nsg_id, public_ip_id), checks=[
             JMESPathCheck('newNIC.ipConfigurations[0].properties.privateIPAllocationMethod', 'Dynamic'),
             JMESPathCheck('newNIC.enableIPForwarding', False),
             JMESPathCheck("newNIC.networkSecurityGroup.contains(id, '{}')".format(nsg), True),
@@ -505,8 +517,87 @@ class NetworkNicScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck('resourceGroup', rg),
             JMESPathCheck('name', nic)
         ])
+        self.cmd('network nic set -g {} -n {} --internal-dns-name noodle --ip-forwarding true --nsg {}'.format(rg, nic, alt_nsg), checks=[
+            JMESPathCheck('enableIpForwarding', True),
+            JMESPathCheck('dnsSettings.internalDnsNameLabel', 'noodle'),
+            JMESPathCheck("networkSecurityGroup.contains(id, '{}')".format(alt_nsg), True),
+        ])
         self.cmd('network nic delete --resource-group {} --name {}'.format(rg, nic))
         self.cmd('network nic list -g {}'.format(rg), checks=NoneCheck())
+
+class NetworkNicSubresourceScenarioTest(ResourceGroupVCRTestBase):
+
+    def __init__(self, test_method):
+        super(NetworkNicSubresourceScenarioTest, self).__init__(__file__, test_method)
+        self.resource_group = 'cli_test1_nic_subresource'
+
+    def test_network_nic_subresources(self):
+        self.execute()
+
+    def body(self):
+        rg = self.resource_group
+        nic = 'nic1'
+        subnet = 'subnet1'
+        vnet = 'vnet1'
+
+        self.cmd('network vnet create -g {} -n {} --subnet-name {}'.format(rg, vnet, subnet))
+        self.cmd('network nic create -g {} -n {} --subnet {} --vnet-name {}'.format(rg, nic, subnet, vnet))
+        self.cmd('network nic ip-config list -g {} -n {}'.format(rg, nic),
+            checks=JMESPathCheck('length(@)', 1))
+        self.cmd('network nic ip-config show -g {} --nic-name {} -n ipconfig1'.format(rg, nic), checks=[
+            JMESPathCheck('name', 'ipconfig1'),
+            JMESPathCheck('privateIpAllocationMethod', 'Dynamic')
+        ])
+        # TODO: Creating multiple ip-configurations per NIC currently not supported per rest-api-spec issue #305
+        expected_exception = 'Network Interface {} specifies multiple IPConfigurations but none of the IPConfigurations is specified as Primary.'.format(nic)
+        self.cmd('network nic ip-config create -g {} --nic-name {} -n ipconfig2'.format(rg, nic), allowed_exceptions=expected_exception)
+        expected_exception = 'Network interface {} must have one or more IP configurations.'.format(nic)
+        self.cmd('network nic ip-config delete -g {} --nic-name {} -n ipconfig1'.format(rg, nic), allowed_exceptions=expected_exception)
+
+        # test various sets
+        vnet = 'vnet2'
+        subnet = 'subnet2'
+        public_ip = 'publicip2'
+        lb = 'lb1'
+        config = 'ipconfig1'
+        self.cmd('network vnet create -g {} -n {} --subnet-name {}'.format(rg, vnet, subnet))
+        self.cmd('network public-ip create -g {} -n {}'.format(rg, public_ip))
+        public_ip_id = self.cmd('network public-ip show -g {} -n {}'.format(rg, public_ip))['id']
+        self.cmd('network lb create -g {} -n {}'.format(rg, lb))
+        self.cmd('network lb inbound-nat-rule create -g {} --lb-name {} -n rule1 --protocol tcp --frontend-port 100 --backend-port 100 --frontend-ip-name LoadBalancerFrontEnd'.format(rg, lb))
+        self.cmd('network lb inbound-nat-rule create -g {} --lb-name {} -n rule2 --protocol tcp --frontend-port 200 --backend-port 200 --frontend-ip-name LoadBalancerFrontEnd'.format(rg, lb))
+        rule_ids = ' '.join(self.cmd('network lb inbound-nat-rule list -g {} -n {} --query "[].id"'.format(rg, lb)))
+        self.cmd('network lb address-pool create -g {} --lb-name {} -n bap1'.format(rg, lb))
+        self.cmd('network lb address-pool create -g {} --lb-name {} -n bap2'.format(rg, lb))
+        address_pool_ids = ' '.join(self.cmd('network lb address-pool list -g {} -n {} --query "[].id"'.format(rg, lb)))
+
+        private_ip = '10.0.0.15'
+        # test ability to set load balancer IDs
+        self.cmd('network nic ip-config set -g {} --nic-name {} -n {} --lb-address-pool-ids {} --lb-nat-rule-ids {} --private-ip-address {}'.format(rg, nic, config, address_pool_ids, rule_ids, private_ip), checks=[
+            JMESPathCheck('length(ipConfigurations[0].loadBalancerBackendAddressPools)', 3), # includes the default backend pool
+            JMESPathCheck('length(ipConfigurations[0].loadBalancerInboundNatRules)', 2),
+            JMESPathCheck('ipConfigurations[0].privateIpAddress', private_ip),
+            JMESPathCheck('ipConfigurations[0].privateIpAllocationMethod', 'Static')
+        ])
+
+        # test ability to add and remove IDs one at a time with subcommands
+        self.cmd('network nic ip-config inbound-nat-rule remove -g {} --lb-name {} --nic-name {} --ip-config-name {} -n rule1'.format(rg, lb, nic, config),
+            checks=JMESPathCheck('length(ipConfigurations[0].loadBalancerInboundNatRules)', 1))
+        self.cmd('network nic ip-config inbound-nat-rule add -g {} --lb-name {} --nic-name {} --ip-config-name {} -n rule1'.format(rg, lb, nic, config),
+            checks=JMESPathCheck('length(ipConfigurations[0].loadBalancerInboundNatRules)', 2))
+
+        self.cmd('network nic ip-config address-pool remove -g {} --lb-name {} --nic-name {} --ip-config-name {} -n bap1'.format(rg, lb, nic, config),
+            checks=JMESPathCheck('length(ipConfigurations[0].loadBalancerBackendAddressPools)', 2))
+        self.cmd('network nic ip-config address-pool add -g {} --lb-name {} --nic-name {} --ip-config-name {} -n bap1'.format(rg, lb, nic, config),
+            checks=JMESPathCheck('length(ipConfigurations[0].loadBalancerBackendAddressPools)', 3))
+
+        self.cmd('network nic ip-config set -g {} --nic-name {} -n {} --private-ip-address "" --public-ip-address {}'.format(rg, nic, config, public_ip_id), checks=[
+            JMESPathCheck('ipConfigurations[0].privateIpAllocationMethod', 'Dynamic'),
+            JMESPathCheck("ipConfigurations[0].publicIpAddress.contains(id, '{}')".format(public_ip), True)
+        ])
+
+        self.cmd('network nic ip-config set -g {} --nic-name {} -n {} --subnet {} --vnet-name {}'.format(rg, nic, config, subnet, vnet),
+            checks=JMESPathCheck("ipConfigurations[0].subnet.contains(id, '{}')".format(subnet), True))
 
 class NetworkNicScaleSetScenarioTest(VCRTestBase):
 

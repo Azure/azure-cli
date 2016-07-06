@@ -23,7 +23,8 @@ Execute the follow scenarios manually:
   - create new nic with newly created vnet specifying optional parameters:
     "--ip-forwarding" (verify enabled)
 	"--private-ip-address" (verify address and allocation method 'static')
-	"--public-ip-address-name" (verify public ip address name)
+	"--internal-dns-name" (verify DNS settings)
+	"--public-ip-address" (verify public ip address name)
 	"--lb-nat-rule-ids" (verify rules)
 	"--lb-backend-address-pool-ids" (verify address pools)
 
