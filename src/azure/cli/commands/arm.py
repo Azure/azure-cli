@@ -8,29 +8,28 @@ regex = re.compile('/subscriptions/(?P<subscription>[^/]*)/resourceGroups/(?P<re
                    '(/(?P<child_type>[^/]*)/(?P<child_name>[^/]*))?')
 
 def resource_id(**kwargs):
-    id = '/subscriptions/{subscription}'.format(**kwargs)
+    rid = '/subscriptions/{subscription}'.format(**kwargs)
     try:
-        id = '/'.join((id, 'resourceGroups/{resource_group}'.format(**kwargs)))
-        id = '/'.join((id, 'providers/{namespace}'.format(**kwargs)))
-        id = '/'.join((id, '{type}/{name}'.format(**kwargs)))
-        id = '/'.join((id, '{child_type}/{child_name}'.format(**kwargs)))
+        rid = '/'.join((rid, 'resourceGroups/{resource_group}'.format(**kwargs)))
+        rid = '/'.join((rid, 'providers/{namespace}'.format(**kwargs)))
+        rid = '/'.join((rid, '{type}/{name}'.format(**kwargs)))
+        rid = '/'.join((rid, '{child_type}/{child_name}'.format(**kwargs)))
     except KeyError:
         pass
-    return id
+    return rid
 
-def parse_resource_id(id):
-    m = regex.match(id)
+def parse_resource_id(rid):
+    m = regex.match(rid)
     if m:
         result = m.groupdict()
     else:
-        result = {
-            'name': id
-            }
+        result = dict(name=rid)
+
     return {key:value for key, value in result.items() if value is not None}
 
-def is_valid_resource_id(id):
+def is_valid_resource_id(rid):
     try:
-        return id and resource_id(**parse_resource_id(id)) == id
+        return rid and resource_id(**parse_resource_id(rid)) == rid
     except KeyError:
         return False
 

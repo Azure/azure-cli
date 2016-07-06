@@ -49,18 +49,18 @@ def _name_id_fold(base_name, resource_type, type_field, #pylint: disable=too-man
                 resource_id_parts = dict(
                     name=parent_name_val,
                     resource_group=namespace.resource_group_name,
-                    namespace=parent_type.split()[0],
-                    type=parent_type.split()[1],
-                    subscription_id=get_subscription_id(),
+                    namespace=parent_type.split('/')[0],
+                    type=parent_type.split('/')[1],
+                    subscription=get_subscription_id(),
                     child_name=base_name_val,
                     child_type=resource_type)
             else:
                 resource_id_parts = dict(
                     name=base_name_val,
                     resource_group=namespace.resource_group_name,
-                    namespace=resource_type.split()[0],
-                    type=resource_type.split()[1],
-                    subscription_id=get_subscription_id())
+                    namespace=resource_type.split('/')[0],
+                    type=resource_type.split('/')[1],
+                    subscription=get_subscription_id())
 
             if resource_exists(**resource_id_parts):
                 setattr(namespace, type_field, existing_id_flag_value)

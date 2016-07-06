@@ -1,3 +1,4 @@
+import argparse
 from azure.cli.commands.arm import is_valid_resource_id
 
 

@@ -3,7 +3,11 @@ import argparse
 
 from azure.cli._util import CLIError
 from azure.cli.commands import register_cli_argument
-from azure.cli.commands.arm import is_valid_resource_id, resource_id, resource_exists
+from azure.cli.commands.arm import (
+    is_valid_resource_id,
+    parse_resource_id,
+    resource_id,
+    resource_exists)
 
 def register_folded_cli_argument(scope, base_name, resource_type, parent_name=None, # pylint: disable=too-many-arguments
                                  parent_type=None, type_field=None,
@@ -40,25 +44,27 @@ def _name_id_fold(base_name, resource_type, type_field, #pylint: disable=too-man
         else:
             has_parent = parent_name is not None and parent_type is not None
             if is_valid_resource_id(base_name_val):
-                resource_id = base_name_val
+                resource_id_parts = parse_resource_id(base_name_val)
             elif has_parent:
-                resource_id = resource_id(
-                    name_or_id=parent_name_val,
+                resource_id_parts = dict(
+                    name=parent_name_val,
                     resource_group=namespace.resource_group_name,
-                    full_type=parent_type,
-                    subscription_id=get_subscription_id(),
+                    namespace=parent_type.split('/')[0],
+                    type=parent_type.split('/')[1],
+                    subscription=get_subscription_id(),
                     child_name=base_name_val,
                     child_type=resource_type)
             else:
-                resource_id = resource_id(
-                    name_or_id=base_name_val,
+                resource_id_parts = dict(
+                    name=base_name_val,
                     resource_group=namespace.resource_group_name,
-                    full_type= resource_type,
-                    subscription_id=get_subscription_id())
+                    namespace=resource_type.split('/')[0],
+                    type=resource_type.split('/')[1],
+                    subscription=get_subscription_id())
 
-            if resource_exists(resource_id):
+            if resource_exists(**resource_id_parts):
                 setattr(namespace, type_field, existing_id_flag_value)
-                setattr(namespace, base_name, resource_id)
+                setattr(namespace, base_name, resource_id(**resource_id_parts))
             elif is_valid_resource_id(base_name_val):
                 raise CLIError('ID {} does not exist. Please specify '
                                'a name to create a new resource.'.format(resource_id))
