@@ -185,7 +185,7 @@ class NetworkLoadBalancerScenarioTest(ResourceGroupVCRTestBase):
 
     def body(self):
         # test lb create with min params (new ip)
-        self.cmd('network lb create -n {} -g {}'.format(self.lb_name, self.resource_group), checks=[
+        self.cmd('network lb create -n {}1 -g {}'.format(self.lb_name, self.resource_group), checks=[
             JMESPathCheck('loadBalancer.frontendIPConfigurations[0].properties.privateIPAllocationMethod', 'Dynamic'),
             JMESPathCheck('loadBalancer.frontendIPConfigurations[0].resourceGroup', self.resource_group)
         ])
