@@ -49,5 +49,5 @@ def _name_id_fold(base_name, resource_type, type_field, #pylint: disable=too-man
 def get_subscription_id():
     from azure.cli.commands.client_factory import Profile
     profile = Profile()
-    _, subscription_id = profile.get_login_credentials()
+    _, subscription_id, _ = profile.get_login_credentials()
     return subscription_id
