@@ -37,9 +37,11 @@ def _name_id_fold(base_name, resource_type, type_field, #pylint: disable=too-man
             # Either no name was specified, or the user specified the type of resource
             # (i.e. new/existing/none)
             pass
-        elif base_name_val == '':
+        elif base_name_val in ('', '""', "''"):
             # An empty name specified - that means that we are neither referencing an existing
             # field, or the name is set to an empty string
+            # Since DOS doesn't like passing in empty strings as arguments, we also treat
+            # "" and '' as empty strings
             setattr(namespace, type_field, none_flag_value)
         else:
             has_parent = parent_name is not None and parent_type is not None

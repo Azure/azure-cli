@@ -22,6 +22,7 @@ from azure.cli.commands.parameters import (location_type,
                                            get_resource_name_completion_list)
 from azure.cli.command_modules.vm._validators import nsg_name_validator
 from azure.cli.commands import register_cli_argument, CliArgumentType, register_extra_cli_argument
+from azure.cli.commands.arm import is_valid_resource_id
 
 def get_urn_aliases_completion_list(prefix, **kwargs):#pylint: disable=unused-argument
     images = load_images_from_aliases_doc()
@@ -115,6 +116,7 @@ nsg_rule_type = CliArgumentType(
 register_cli_argument('vm create', 'network_interface_type', choices=['new', 'existing'], help=None, type=str.lower)
 register_cli_argument('vm create', 'network_interface_ids', options_list=('--network-interfaces',), nargs='+',
                       help='Names or IDs of existing NICs to reference.  The first NIC will be the primary NIC.',
+                      type=lambda val: val if (not '/' in val or is_valid_resource_id(val, ValueError)) else '',
                       validator=_handle_vm_nics)
 
 for scope in ['vm create', 'vm scaleset create']:

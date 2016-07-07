@@ -1,6 +1,4 @@
 import argparse
-from azure.cli.commands.arm import is_valid_resource_id
-
 
 def _convert_id_list_to_object(data):
     if not data:
@@ -10,11 +8,7 @@ def _convert_id_list_to_object(data):
         data = [data]
     data_list = []
     for val in data:
-        # currently only supports accepting ids, not names
-        if is_valid_resource_id(val):
-            data_list.append({'id': val})
-        else:
-            raise ValueError()
+        data_list.append({'id': val})
     return data_list
 
 def process_nic_namespace(namespace):

@@ -644,7 +644,9 @@ def vm_open_port(resource_group_name, vm_name, network_security_group_name=None,
     else:
         from azure.cli.commands.arm import parse_resource_id
         subnet_id = parse_resource_id(nic.ip_configurations[0].subnet.id)
-        subnet = network.subnets.get(resource_group_name, subnet_id['name'], subnet_id['child_name'])
+        subnet = network.subnets.get(resource_group_name,
+                                     subnet_id['name'],
+                                     subnet_id['child_name'])
         nsg = subnet.network_security_group
 
     if not nsg:
