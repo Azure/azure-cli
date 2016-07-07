@@ -30,7 +30,7 @@ COMMAND_COVERAGE_FILENAME = 'command_coverage.txt'
 def _mock_get_mgmt_service_client(client_type, subscription_bound=True):
     # version of _get_mgmt_service_client to use when recording or playing tests
     profile = Profile()
-    cred, subscription_id = profile.get_login_credentials()
+    cred, subscription_id, _ = profile.get_login_credentials()
     if subscription_bound:
         client = client_type(cred, subscription_id)
     else:
@@ -60,7 +60,7 @@ def _mock_subscriptions(self): #pylint: disable=unused-argument
         "tenantId": "123",
         "isDefault": True}]
 
-def _mock_user_access_token(_, _1, _2): #pylint: disable=unused-argument
+def _mock_user_access_token(_, _1, _2, _3): #pylint: disable=unused-argument
     return ('Bearer', 'top-secret-token-for-you')
 
 def _mock_operation_delay(_):
