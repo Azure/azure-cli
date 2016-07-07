@@ -17,10 +17,6 @@ from .deployment_properties_extended import DeploymentPropertiesExtended
 from .deployment_extended import DeploymentExtended
 from .app_gateway_creation_client_enums import (
     frontendType,
-    httpListenerProtocol,
-    httpSettingsCookieBasedAffinity,
-    httpSettingsProtocol,
-    privateIpAddressAllocation,
     publicIpType,
     subnetType,
     DeploymentMode,
@@ -37,10 +33,6 @@ __all__ = [
     'DeploymentPropertiesExtended',
     'DeploymentExtended',
     'frontendType',
-    'httpListenerProtocol',
-    'httpSettingsCookieBasedAffinity',
-    'httpSettingsProtocol',
-    'privateIpAddressAllocation',
     'publicIpType',
     'subnetType',
     'DeploymentMode',

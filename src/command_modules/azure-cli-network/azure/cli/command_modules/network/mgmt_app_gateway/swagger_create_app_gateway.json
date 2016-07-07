@@ -235,6 +235,11 @@
           "$ref": "#/definitions/DeploymentParameter_publicIp",
           "x-ms-client-flatten": true
         },
+        "publicIpAddressAllocation": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_publicIpAddressAllocation",
+          "x-ms-client-flatten": true
+        },
         "publicIpType": {
           "type": "object",
           "$ref": "#/definitions/DeploymentParameter_publicIpType",
@@ -265,9 +270,9 @@
           "$ref": "#/definitions/DeploymentParameter_subnet",
           "x-ms-client-flatten": true
         },
-        "subnetPrefix": {
+        "subnetAddressPrefix": {
           "type": "object",
-          "$ref": "#/definitions/DeploymentParameter_subnetPrefix",
+          "$ref": "#/definitions/DeploymentParameter_subnetAddressPrefix",
           "x-ms-client-flatten": true
         },
         "subnetType": {
@@ -287,8 +292,8 @@
         }
       },
       "required": [
-        "_artifactsLocation",
-        "applicationGatewayName"
+        "applicationGatewayName",
+        "_artifactsLocation"
       ]
     },
     "DeploymentParameter_applicationGatewayName": {
@@ -347,7 +352,6 @@
           "description": "Specify which kind of frontend configuration to create.",
           "x-ms-client-name": "frontendType",
           "enum": [
-            "subnet",
             "publicIp",
             "privateIp"
           ],
@@ -355,7 +359,7 @@
             "name": "frontendType",
             "modelAsString": false
           },
-          "default": "subnet"
+          "default": "privateIp"
         }
       }
     },
@@ -363,16 +367,8 @@
       "properties": {
         "value": {
           "type": "string",
-          "description": "The HTTP listener protocol",
+          "description": "The HTTP listener protocol (http, https).",
           "x-ms-client-name": "httpListenerProtocol",
-          "enum": [
-            "http",
-            "https"
-          ],
-          "x-ms-enum": {
-            "name": "httpListenerProtocol",
-            "modelAsString": false
-          },
           "default": "http"
         }
       }
@@ -381,16 +377,8 @@
       "properties": {
         "value": {
           "type": "string",
-          "description": "Enable or disable HTTP settings cookie based affinity.",
+          "description": "Enable or disable HTTP settings cookie based affinity (enabled, disabled).",
           "x-ms-client-name": "httpSettingsCookieBasedAffinity",
-          "enum": [
-            "enabled",
-            "disabled"
-          ],
-          "x-ms-enum": {
-            "name": "httpSettingsCookieBasedAffinity",
-            "modelAsString": false
-          },
           "default": "disabled"
         }
       }
@@ -409,15 +397,8 @@
       "properties": {
         "value": {
           "type": "string",
-          "description": "The HTTP settings protocol.",
+          "description": "The HTTP settings protocol (http, https).",
           "x-ms-client-name": "httpSettingsProtocol",
-          "enum": [
-            "http"
-          ],
-          "x-ms-enum": {
-            "name": "httpSettingsProtocol",
-            "modelAsString": false
-          },
           "default": "http"
         }
       }
@@ -444,16 +425,8 @@
       "properties": {
         "value": {
           "type": "string",
-          "description": "Specify whether to use static or dynamic private IP allocation.",
+          "description": "Specify the kind of private IP allocation (dynamic, static).",
           "x-ms-client-name": "privateIpAddressAllocation",
-          "enum": [
-            "dynamic",
-            "static"
-          ],
-          "x-ms-enum": {
-            "name": "privateIpAddressAllocation",
-            "modelAsString": false
-          },
           "default": "dynamic"
         }
       }
@@ -464,6 +437,16 @@
           "type": "string",
           "description": "The name or ID of the public IP address.",
           "x-ms-client-name": "publicIp"
+        }
+      }
+    },
+    "DeploymentParameter_publicIpAddressAllocation": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "Specify the kind of public IP allocation for new public IPs (static, dynamic).",
+          "x-ms-client-name": "publicIpAddressAllocation",
+          "default": "dynamic"
         }
       }
     },
@@ -491,7 +474,7 @@
       "properties": {
         "value": {
           "type": "string",
-          "description": "The request routing rule type (Basic, PathBasedRouting, ...).",
+          "description": "The request routing rule type (Basic, PathBasedRouting).",
           "x-ms-client-name": "routingRuleType",
           "default": "Basic"
         }
@@ -513,7 +496,7 @@
       "properties": {
         "value": {
           "type": "string",
-          "description": "The name of the SKU. (Standard_Small, Standard_Medium, Standard_Large, ...).",
+          "description": "The name of the SKU. (Standard_Small, Standard_Medium, Standard_Large).",
           "x-ms-client-name": "skuName",
           "default": "Standard_Medium"
         }
@@ -523,7 +506,7 @@
       "properties": {
         "value": {
           "type": "string",
-          "description": "The SKU tier (Standard, ...).",
+          "description": "The SKU tier.",
           "x-ms-client-name": "skuTier",
           "default": "Standard"
         }
@@ -535,16 +518,16 @@
           "type": "string",
           "description": "The name or ID of the subnet.",
           "x-ms-client-name": "subnet",
-          "default": "subnet1"
+          "default": "default"
         }
       }
     },
-    "DeploymentParameter_subnetPrefix": {
+    "DeploymentParameter_subnetAddressPrefix": {
       "properties": {
         "value": {
           "type": "string",
           "description": "The subnet prefix in CIDR format.",
-          "x-ms-client-name": "subnetPrefix",
+          "x-ms-client-name": "subnetAddressPrefix",
           "default": "10.0.0.0/24"
         }
       }

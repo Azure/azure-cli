@@ -27,10 +27,11 @@ Execute the follow scenarios manually:
   - create new application gateway with existing vnet/subnet
   - verify frontend IP configuration set to existing subnet
 
-**Create with Static ILB Endpoint**
+**Create with Static Private IP Endpoint and SSL**
 
-  - create new application gateway specifying a private IP address
+  - create new application gateway specifying a private IP address and SSL credentials
   - verify frontend IP configuration is a static private IP
+  - verify listner protocol is set to HTTPS
 
 **Create with Public IP**
 

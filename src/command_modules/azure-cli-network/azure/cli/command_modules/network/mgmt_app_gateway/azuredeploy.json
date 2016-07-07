@@ -44,8 +44,8 @@
     },
     "frontendType": {
       "type": "string",
-      "defaultValue": "subnet",
-      "allowedValues": [ "subnet", "publicIp", "privateIp" ],
+      "defaultValue": "privateIp",
+      "allowedValues": [ "publicIp", "privateIp" ],
       "metadata": {
         "description": "Specify which kind of frontend configuration to create."
       }
@@ -53,20 +53,15 @@
     "httpListenerProtocol": {
       "type": "string",
       "defaultValue": "http",
-      "allowedValues": [ "http", "https" ],
       "metadata": {
-        "description": "The HTTP listener protocol"
+        "description": "The HTTP listener protocol (http, https)."
       }
     },
     "httpSettingsCookieBasedAffinity": {
       "type": "string",
-      "allowedValues": [
-        "enabled",
-        "disabled"
-      ],
       "defaultValue": "disabled",
       "metadata": {
-        "description": "Enable or disable HTTP settings cookie based affinity."
+        "description": "Enable or disable HTTP settings cookie based affinity (enabled, disabled)."
       }
     },
     "httpSettingsPort": {
@@ -79,9 +74,8 @@
     "httpSettingsProtocol": {
       "type": "string",
       "defaultValue": "http",
-      "allowedValues": [ "http" ],
       "metadata": {
-        "description": "The HTTP settings protocol."
+        "description": "The HTTP settings protocol (http, https)."
       }
     },
     "location": {
@@ -101,9 +95,8 @@
     "privateIpAddressAllocation": {
       "type": "string",
       "defaultValue": "dynamic",
-      "allowedValues": [ "dynamic", "static" ],
       "metadata": {
-        "description": "Specify whether to use static or dynamic private IP allocation."
+        "description": "Specify the kind of private IP allocation (dynamic, static)."
       }
     },
     "publicIp": {
@@ -121,23 +114,23 @@
         "description": "Specify the type of public IP address."
       }
     },
+    "publicIpAddressAllocation": {
+      "type": "string",
+      "defaultValue": "dynamic",
+      "metadata": {
+        "description": "Specify the kind of public IP allocation for new public IPs (static, dynamic)."
+      }
+    },
     "routingRuleType": {
       "type": "string",
       "defaultValue": "Basic",
       "metadata": {
-        "description": "The request routing rule type (Basic, PathBasedRouting, ...)."
+        "description": "The request routing rule type (Basic, PathBasedRouting)."
       }
     },
     "servers": {
       "type": "array",
-      "defaultValue": [
-        {
-          "IpAddress": "10.0.0.1"
-        },
-        {
-          "IpAddress": "10.0.0.2"
-        }
-      ],
+      "defaultValue": [],
       "metadata": {
         "description": "The list of IP addresses or DNS names corresponding to backend servers."
       }
@@ -146,24 +139,24 @@
       "type": "string",
       "defaultValue": "Standard_Medium",
       "metadata": {
-        "description": "The name of the SKU. (Standard_Small, Standard_Medium, Standard_Large, ...)."
+        "description": "The name of the SKU. (Standard_Small, Standard_Medium, Standard_Large)."
       }
     },
     "skuTier": {
       "type": "string",
       "defaultValue": "Standard",
       "metadata": {
-        "description": "The SKU tier (Standard, ...)."
+        "description": "The SKU tier."
       }
     },
     "subnet": {
       "type": "string",
-      "defaultValue": "subnet1",
+      "defaultValue": "default",
       "metadata": {
         "description": "The name or ID of the subnet."
       }
     },
-    "subnetPrefix": {
+    "subnetAddressPrefix": {
       "type": "string",
       "defaultValue": "10.0.0.0/24",
       "metadata": {
@@ -371,11 +364,6 @@
       }
     },
     "frontendIpProperties": {
-      "subnet": {
-        "subnet": {
-          "id": "[variables('subnetIds')[parameters('subnetType')]]"
-        }
-      },
       "publicIp": {
         "publicIpAddress": {
           "id": "[variables('publicIpIds')[parameters('publicIpType')]]"
@@ -441,7 +429,7 @@
         },
         "parameters": {
           "subnetName": { "value": "[parameters('subnet')]" },
-          "subnetPrefix": { "value": "[parameters('subnetPrefix')]" },
+          "subnetAddressPrefix": { "value": "[parameters('subnetAddressPrefix')]" },
           "virtualNetworkName": { "value": "[parameters('virtualNetworkName')]" },
           "vnetAddressPrefix": { "value": "[parameters('vnetAddressPrefix')]" }
         }
@@ -461,7 +449,8 @@
         "parameters": {
           "location": { "value": "[parameters('location')]" },
           "publicIpName": { "value": "[parameters('publicIp')]" },
-          "publicIpType": { "value": "[parameters('publicIpType')]" }
+          "publicIpType": { "value": "[parameters('publicIpType')]" },
+          "publicIpAddressAllocation": { "value": "[parameters('publicIpAddressAllocation')]" }
         }
       }
     }

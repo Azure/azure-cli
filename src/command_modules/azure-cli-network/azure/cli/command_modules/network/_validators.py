@@ -4,6 +4,7 @@ import socket
 
 from azure.cli.commands.arm import is_valid_resource_id, resource_id
 from azure.cli._util import CLIError
+from azure.cli.commands.validators import SPECIFIED_SENTINEL
 
 def _convert_id_list_to_object(data):
     if not data:
@@ -35,21 +36,22 @@ def process_nic_namespace(namespace):
 def process_app_gateway_namespace(namespace):
 
     if namespace.public_ip:
-        namespace.frontend_type = "publicIp"
-
-    elif namespace.private_ip_address:
-        namespace.private_ip_address_allocation = "static"
-        namespace.frontend_type = "privateIp"
+        namespace.frontend_type = 'publicIp'
+    else:
+        namespace.frontend_type = 'privateIp'
+        namespace.private_ip_address_allocation = 'static' if namespace.private_ip_address \
+            else 'dynamic'
 
     if not namespace.public_ip_type:
-        namespace.public_ip_type = "none"
+        namespace.public_ip_type = 'none'
 
 def validate_address_prefixes(namespace):
 
-    subnet_prefix_set = '__SET__' in namespace.subnet_prefix
-    vnet_prefix_set = '__SET__' in namespace.vnet_address_prefix
-    namespace.subnet_prefix = namespace.subnet_prefix.replace('__SET__', '')
-    namespace.vnet_address_prefix = namespace.vnet_address_prefix.replace('__SET__', '')
+    subnet_prefix_set = SPECIFIED_SENTINEL in namespace.subnet_address_prefix
+    vnet_prefix_set = SPECIFIED_SENTINEL in namespace.vnet_address_prefix
+    namespace.subnet_address_prefix = \
+        namespace.subnet_address_prefix.replace(SPECIFIED_SENTINEL, '')
+    namespace.vnet_address_prefix = namespace.vnet_address_prefix.replace(SPECIFIED_SENTINEL, '')
 
     if namespace.subnet_type != 'new' and (subnet_prefix_set or vnet_prefix_set):
         raise CLIError('Existing subnet ({}) found. Cannot specify address prefixes when '
@@ -67,34 +69,31 @@ def validate_servers(namespace):
 
 def validate_cert(namespace):
 
-    default_frontend_port = namespace.frontend_port is None
-
-    # default to frontend port 80 for http
-    if default_frontend_port:
-        namespace.frontend_port = 80
-
     params = [namespace.cert_data, namespace.cert_password]
     if all([not x for x in params]):
-        return
+        # no cert supplied -- use HTTP
+        namespace.http_listener_protocol = 'http'
+        if not namespace.frontend_port:
+            namespace.frontend_port = 80
+    else:
+        # cert supplied -- use HTTPS
+        if not all(params):
+            raise argparse.ArgumentError(
+                None, 'To use SSL certificate, you must specify both the filename and password')
 
-    # if any param specified but not both
-    if not all(params):
-        raise argparse.ArgumentError(
-            None, 'To use SSL certificate, you must specify both the filename and password')
+        # extract the certificate data from the provided file
+        with open(namespace.cert_data, 'rb') as f:
+            contents = f.read()
+            base64_data = base64.b64encode(contents)
+            try:
+                namespace.cert_data = base64_data.decode('utf-8')
+            except UnicodeDecodeError:
+                namespace.cert_data = str(base64_data)
 
-    # extract the certificate data from the provided file
-    with open(namespace.cert_data, 'rb') as f:
-        contents = f.read()
-        base64_data = base64.b64encode(contents)
-        try:
-            namespace.cert_data = base64_data.decode('utf-8')
-        except UnicodeDecodeError:
-            namespace.cert_data = str(base64_data)
-
-    # change default to frontend port 443 for https
-    namespace.http_listener_protocol = 'https'
-    if not namespace.frontend_port:
-        namespace.frontend_port = 443 if namespace.http_listener_protocol == 'https' else 80
+        # change default to frontend port 443 for https
+        namespace.http_listener_protocol = 'https'
+        if not namespace.frontend_port:
+            namespace.frontend_port = 443
 
 def process_network_lb_create_namespace(namespace):
 

@@ -1,9 +1,12 @@
 ﻿#pylint: disable=method-hidden
 #pylint: disable=line-too-long
 #pylint: disable=bad-continuation
+import os
 
 from azure.cli.utils.vcr_test_base import (VCRTestBase, ResourceGroupVCRTestBase, JMESPathCheck,
                                            NoneCheck)
+
+TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 class NetworkUsageListScenarioTest(VCRTestBase):
 
@@ -28,8 +31,8 @@ class NetworkAppGatewayDefaultScenarioTest(ResourceGroupVCRTestBase):
     def body(self):
         rg = self.resource_group
         self.cmd('network application-gateway create -g {} -n ag1'.format(rg), checks=[
-            JMESPathCheck('applicationGateway.value.frontendIPConfigurations[0].properties.privateIPAllocationMethod', 'Dynamic'),
-            JMESPathCheck("applicationGateway.value.frontendIPConfigurations[0].properties.subnet.contains(id, 'subnet1')", True)
+            JMESPathCheck('applicationGateway.frontendIPConfigurations[0].properties.privateIPAllocationMethod', 'Dynamic'),
+            JMESPathCheck("applicationGateway.frontendIPConfigurations[0].properties.subnet.contains(id, 'default')", True)
         ])
 
         self.cmd('network application-gateway list-all')
@@ -57,39 +60,41 @@ class NetworkAppGatewayExistingSubnetScenarioTest(ResourceGroupVCRTestBase):
         super(NetworkAppGatewayExistingSubnetScenarioTest, self).__init__(__file__, test_method)
         self.resource_group = 'ag2rg'
 
-    def test_network_app_gateway_with_subnet(self):
+    def test_network_app_gateway_with_existing_subnet(self):
         self.execute()
 
     def body(self):
         rg = self.resource_group
         vnet = self.cmd('network vnet create -g {} -n vnet2 --subnet-name subnet1'.format(rg))
-        subnet_id = vnet['newVNet']['value']['subnets'][0]['id']
+        subnet_id = vnet['newVNet']['subnets'][0]['id']
         self.cmd('network application-gateway create -g {} -n ag2 --subnet {}'.format(rg, subnet_id), checks=[
-            JMESPathCheck('applicationGateway.value.frontendIPConfigurations[0].properties.privateIPAllocationMethod', 'Dynamic'),
-            JMESPathCheck('applicationGateway.value.frontendIPConfigurations[0].properties.subnet.id', subnet_id)
+            JMESPathCheck('applicationGateway.frontendIPConfigurations[0].properties.privateIPAllocationMethod', 'Dynamic'),
+            JMESPathCheck('applicationGateway.frontendIPConfigurations[0].properties.subnet.id', subnet_id)
         ])
 
-class NetworkAppGatewayInternalLBScenarioTest(ResourceGroupVCRTestBase):
+class NetworkAppGatewayPrivateIpScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-        super(NetworkAppGatewayInternalLBScenarioTest, self).__init__(__file__, test_method)
+        super(NetworkAppGatewayPrivateIpScenarioTest, self).__init__(__file__, test_method)
         self.resource_group = 'ag3rg'
 
-    def test_network_app_gateway_with_internal_load_balancer(self):
+    def test_network_app_gateway_with_private_ip(self):
         self.execute()
 
     def body(self):
         rg = self.resource_group
         private_ip = '10.0.0.15'
-        self.cmd('network application-gateway create -g {} -n ag3 --subnet subnet1 --private-ip-address {}'.format(rg, private_ip), checks=[
-            JMESPathCheck('applicationGateway.value.frontendIPConfigurations[0].properties.privateIPAddress', private_ip),
-            JMESPathCheck('applicationGateway.value.frontendIPConfigurations[0].properties.privateIPAllocationMethod', 'Static')
+        cert_path = os.path.join(TEST_DIR, 'TestCert.pfx')
+        cert_pass = 'password'
+        self.cmd('network application-gateway create -g {} -n ag3 --subnet subnet1 --private-ip-address {} --cert-file "{}" --cert-password {}'.format(rg, private_ip, cert_path, cert_pass), checks=[
+            JMESPathCheck('applicationGateway.frontendIPConfigurations[0].properties.privateIPAddress', private_ip),
+            JMESPathCheck('applicationGateway.frontendIPConfigurations[0].properties.privateIPAllocationMethod', 'Static')
         ])
 
-class NetworkAppGatewayPublicIPScenarioTest(ResourceGroupVCRTestBase):
+class NetworkAppGatewayPublicIpScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-        super(NetworkAppGatewayPublicIPScenarioTest, self).__init__(__file__, test_method)
+        super(NetworkAppGatewayPublicIpScenarioTest, self).__init__(__file__, test_method)
         self.resource_group = 'ag4rg'
 
     def test_network_app_gateway_with_public_ip(self):
@@ -99,8 +104,8 @@ class NetworkAppGatewayPublicIPScenarioTest(ResourceGroupVCRTestBase):
         rg = self.resource_group
         public_ip_name = 'publicip4'
         self.cmd('network application-gateway create -g {} -n test4 --subnet subnet1 --vnet-name vnet4 --public-ip {}'.format(rg, public_ip_name), checks=[
-            JMESPathCheck("applicationGateway.value.frontendIPConfigurations[0].properties.publicIPAddress.contains(id, '{}')".format(public_ip_name), True),
-            JMESPathCheck('applicationGateway.value.frontendIPConfigurations[0].properties.privateIPAllocationMethod', 'Dynamic')
+            JMESPathCheck("applicationGateway.frontendIPConfigurations[0].properties.publicIPAddress.contains(id, '{}')".format(public_ip_name), True),
+            JMESPathCheck('applicationGateway.frontendIPConfigurations[0].properties.privateIPAllocationMethod', 'Dynamic')
         ])
 
 class NetworkPublicIpScenarioTest(ResourceGroupVCRTestBase):

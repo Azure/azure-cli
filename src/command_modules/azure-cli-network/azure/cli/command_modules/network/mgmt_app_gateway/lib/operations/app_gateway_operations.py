@@ -32,7 +32,7 @@ class AppGatewayOperations(object):
         self.config = config
 
     def create_or_update(
-            self, resource_group_name, deployment_name, application_gateway_name, content_version=None, capacity=2, cert_data=None, cert_password=None, frontend_port=None, frontend_type="subnet", http_listener_protocol="http", http_settings_cookie_based_affinity="disabled", http_settings_port=80, http_settings_protocol="http", location=None, private_ip_address=None, private_ip_address_allocation="dynamic", public_ip=None, public_ip_type="none", routing_rule_type="Basic", servers=None, sku_name="Standard_Medium", sku_tier="Standard", subnet="subnet1", subnet_prefix="10.0.0.0/24", subnet_type="new", virtual_network_name=None, vnet_address_prefix="10.0.0.0/16", custom_headers=None, raw=False, **operation_config):
+            self, resource_group_name, deployment_name, application_gateway_name, content_version=None, capacity=2, cert_data=None, cert_password=None, frontend_port=None, frontend_type="privateIp", http_listener_protocol="http", http_settings_cookie_based_affinity="disabled", http_settings_port=80, http_settings_protocol="http", location=None, private_ip_address=None, private_ip_address_allocation="dynamic", public_ip=None, public_ip_address_allocation="dynamic", public_ip_type="none", routing_rule_type="Basic", servers=None, sku_name="Standard_Medium", sku_tier="Standard", subnet="default", subnet_address_prefix="10.0.0.0/24", subnet_type="new", virtual_network_name=None, vnet_address_prefix="10.0.0.0/16", custom_headers=None, raw=False, **operation_config):
         """
         Create or update a virtual machine.
 
@@ -57,58 +57,53 @@ class AppGatewayOperations(object):
          HTTP and 443 for HTTPS.
         :type frontend_port: int
         :param frontend_type: Specify which kind of frontend configuration to
-         create. Possible values include: 'subnet', 'publicIp', 'privateIp'
+         create. Possible values include: 'publicIp', 'privateIp'
         :type frontend_type: str or :class:`frontendType
          <appgatewaycreationclient.models.frontendType>`
-        :param http_listener_protocol: The HTTP listener protocol. Possible
-         values include: 'http', 'https'
-        :type http_listener_protocol: str or :class:`httpListenerProtocol
-         <appgatewaycreationclient.models.httpListenerProtocol>`
+        :param http_listener_protocol: The HTTP listener protocol (http,
+         https).
+        :type http_listener_protocol: str
         :param http_settings_cookie_based_affinity: Enable or disable HTTP
-         settings cookie based affinity. Possible values include: 'enabled',
-         'disabled'
-        :type http_settings_cookie_based_affinity: str or
-         :class:`httpSettingsCookieBasedAffinity
-         <appgatewaycreationclient.models.httpSettingsCookieBasedAffinity>`
+         settings cookie based affinity (enabled, disabled).
+        :type http_settings_cookie_based_affinity: str
         :param http_settings_port: The HTTP settings port.
         :type http_settings_port: int
-        :param http_settings_protocol: The HTTP settings protocol. Possible
-         values include: 'http'
-        :type http_settings_protocol: str or :class:`httpSettingsProtocol
-         <appgatewaycreationclient.models.httpSettingsProtocol>`
+        :param http_settings_protocol: The HTTP settings protocol (http,
+         https).
+        :type http_settings_protocol: str
         :param location: The location in which to create the application
          gateway.
         :type location: str
         :param private_ip_address: The static private IP address to associate
          with the application gateway frontend.
         :type private_ip_address: str
-        :param private_ip_address_allocation: Specify whether to use static
-         or dynamic private IP allocation. Possible values include:
-         'dynamic', 'static'
-        :type private_ip_address_allocation: str or
-         :class:`privateIpAddressAllocation
-         <appgatewaycreationclient.models.privateIpAddressAllocation>`
+        :param private_ip_address_allocation: Specify the kind of private IP
+         allocation (dynamic, static).
+        :type private_ip_address_allocation: str
         :param public_ip: The name or ID of the public IP address.
         :type public_ip: str
+        :param public_ip_address_allocation: Specify the kind of public IP
+         allocation for new public IPs (static, dynamic).
+        :type public_ip_address_allocation: str
         :param public_ip_type: Specify the type of public IP address.
          Possible values include: 'none', 'new', 'existingName', 'existingId'
         :type public_ip_type: str or :class:`publicIpType
          <appgatewaycreationclient.models.publicIpType>`
         :param routing_rule_type: The request routing rule type (Basic,
-         PathBasedRouting, ...).
+         PathBasedRouting).
         :type routing_rule_type: str
         :param servers: The list of IP addresses or DNS names corresponding
          to backend servers.
         :type servers: list of object
         :param sku_name: The name of the SKU. (Standard_Small,
-         Standard_Medium, Standard_Large, ...).
+         Standard_Medium, Standard_Large).
         :type sku_name: str
-        :param sku_tier: The SKU tier (Standard, ...).
+        :param sku_tier: The SKU tier.
         :type sku_tier: str
         :param subnet: The name or ID of the subnet.
         :type subnet: str
-        :param subnet_prefix: The subnet prefix in CIDR format.
-        :type subnet_prefix: str
+        :param subnet_address_prefix: The subnet prefix in CIDR format.
+        :type subnet_address_prefix: str
         :param subnet_type: Use a new or existing subnet. Possible values
          include: 'new', 'existingId', 'existingName'
         :type subnet_type: str or :class:`subnetType
@@ -129,7 +124,7 @@ class AppGatewayOperations(object):
         :rtype: :class:`ClientRawResponse<msrest.pipeline.ClientRawResponse>`
          if raw=true
         """
-        parameters = models.DeploymentAppGateway(content_version=content_version, application_gateway_name=application_gateway_name, capacity=capacity, cert_data=cert_data, cert_password=cert_password, frontend_port=frontend_port, frontend_type=frontend_type, http_listener_protocol=http_listener_protocol, http_settings_cookie_based_affinity=http_settings_cookie_based_affinity, http_settings_port=http_settings_port, http_settings_protocol=http_settings_protocol, location=location, private_ip_address=private_ip_address, private_ip_address_allocation=private_ip_address_allocation, public_ip=public_ip, public_ip_type=public_ip_type, routing_rule_type=routing_rule_type, servers=servers, sku_name=sku_name, sku_tier=sku_tier, subnet=subnet, subnet_prefix=subnet_prefix, subnet_type=subnet_type, virtual_network_name=virtual_network_name, vnet_address_prefix=vnet_address_prefix)
+        parameters = models.DeploymentAppGateway(content_version=content_version, application_gateway_name=application_gateway_name, capacity=capacity, cert_data=cert_data, cert_password=cert_password, frontend_port=frontend_port, frontend_type=frontend_type, http_listener_protocol=http_listener_protocol, http_settings_cookie_based_affinity=http_settings_cookie_based_affinity, http_settings_port=http_settings_port, http_settings_protocol=http_settings_protocol, location=location, private_ip_address=private_ip_address, private_ip_address_allocation=private_ip_address_allocation, public_ip=public_ip, public_ip_address_allocation=public_ip_address_allocation, public_ip_type=public_ip_type, routing_rule_type=routing_rule_type, servers=servers, sku_name=sku_name, sku_tier=sku_tier, subnet=subnet, subnet_address_prefix=subnet_address_prefix, subnet_type=subnet_type, virtual_network_name=virtual_network_name, vnet_address_prefix=vnet_address_prefix)
 
         # Construct URL
         url = '/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Resources/deployments/{deploymentName}'

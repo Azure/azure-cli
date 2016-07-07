@@ -2,21 +2,16 @@
 import argparse
 
 from azure.mgmt.network.models import IPAllocationMethod
-from azure.cli.command_modules.network._validators import \
-    (process_nic_namespace, process_network_lb_create_namespace, process_public_ip_create_namespace,
-     validate_public_ip_type, validate_nsg_name_or_id)
-from azure.cli.commands.template_create import register_folded_cli_argument
+
+from azure.cli.commands import CliArgumentType, register_cli_argument
 from azure.cli.commands.arm import is_valid_resource_id
 from azure.cli.commands.parameters import (location_type, get_resource_name_completion_list)
-from azure.cli.commands import register_cli_argument, CliArgumentType
-from azure.cli.commands.parameters import (location_type, get_resource_name_completion_list)
+from azure.cli.commands.template_create import register_folded_cli_argument
+from azure.cli.commands.validators import MarkSpecifiedAction
 from azure.cli.command_modules.network._validators import \
     (process_nic_namespace, process_network_lb_create_namespace, process_public_ip_create_namespace,
      validate_public_ip_type, process_app_gateway_namespace, validate_servers, validate_cert,
-     validate_address_prefixes, markSpecifiedAction)
-from azure.cli.command_modules.network.mgmt_app_gateway.lib.models.app_gateway_creation_client_enums \
-    import (httpSettingsCookieBasedAffinity, httpSettingsProtocol)
-from azure.cli.command_modules.network._param_folding import register_folded_cli_argument
+     validate_address_prefixes, validate_nsg_name_or_id)
 
 # BASIC PARAMETER CONFIGURATION
 
@@ -27,8 +22,6 @@ subnet_name_type = CliArgumentType(options_list=('--subnet-name',), metavar='SUB
 load_balancer_name_type = CliArgumentType(options_list=('--lb-name',), metavar='LB_NAME', help='The load balancer name.', completer=get_resource_name_completion_list('Microsoft.Network/loadBalancers'))
 
 choices_ip_allocation_method = [e.value.lower() for e in IPAllocationMethod]
-choices_cookie_based_affinity = [e.value.lower() for e in httpSettingsCookieBasedAffinity]
-choices_http_settings_protocol = [e.value.lower() for e in httpSettingsProtocol]
 
 register_cli_argument('network', 'subnet_name', subnet_name_type)
 register_cli_argument('network', 'virtual_network_name', virtual_network_name_type)
@@ -36,7 +29,7 @@ register_cli_argument('network', 'network_security_group_name', nsg_name_type)
 
 register_cli_argument('network application-gateway', 'application_gateway_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/applicationGateways'))
 register_cli_argument('network application-gateway', 'virtual_network_name', virtual_network_name_type)
-register_folded_cli_argument('network application-gateway', 'subnet', 'subnets', parent_name='virtual_network_name', parent_type='Microsoft.Network/virtualNetworks', post_validator=validate_address_prefixes)
+register_folded_cli_argument('network application-gateway', 'subnet', 'subnets', parent_name='virtual_network_name', parent_type='Microsoft.Network/virtualNetworks', validator=validate_address_prefixes)
 register_folded_cli_argument('network application-gateway', 'public_ip', 'Microsoft.Network/publicIPAddresses')
 register_cli_argument('network application-gateway', 'virtual_network_type', help=argparse.SUPPRESS)
 register_cli_argument('network application-gateway', 'private_ip_address_allocation', help=argparse.SUPPRESS)
@@ -44,10 +37,10 @@ register_cli_argument('network application-gateway', 'frontend_type', help=argpa
 register_cli_argument('network application-gateway', 'servers', nargs='+', validator=validate_servers)
 register_cli_argument('network application-gateway', 'cert_data', options_list=('--cert-file',), help='The path to the PFX certificate file.', validator=validate_cert)
 register_cli_argument('network application-gateway', 'http_listener_protocol', help=argparse.SUPPRESS)
-register_cli_argument('network application-gateway', 'http_settings_cookie_based_affinity', choices=choices_cookie_based_affinity, type=str.lower)
-register_cli_argument('network application-gateway', 'http_settings_protocol', choices=choices_http_settings_protocol, type=str.lower)
-register_cli_argument('network application-gateway', 'subnet_prefix', action=markSpecifiedAction)
-register_cli_argument('network application-gateway', 'vnet_address_prefix', action=markSpecifiedAction)
+register_cli_argument('network application-gateway', 'http_settings_cookie_based_affinity', type=str.lower)
+register_cli_argument('network application-gateway', 'http_settings_protocol', type=str.lower)
+register_cli_argument('network application-gateway', 'subnet_address_prefix', action=MarkSpecifiedAction)
+register_cli_argument('network application-gateway', 'vnet_address_prefix', action=MarkSpecifiedAction)
 
 register_cli_argument('network express-route circuit-auth', 'authorization_name', name_arg_type)
 register_cli_argument('network express-route circuit-peering', 'peering_name', name_arg_type)
