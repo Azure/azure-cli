@@ -16,7 +16,7 @@ def get_subscription_service_client(client_type):
 def _get_mgmt_service_client(client_type, subscription_bound=True):
     logger.info('Getting management service client client_type=%s', client_type.__name__)
     profile = Profile()
-    cred, subscription_id = profile.get_login_credentials()
+    cred, subscription_id, _ = profile.get_login_credentials()
     if subscription_bound:
         client = client_type(cred, subscription_id)
     else:

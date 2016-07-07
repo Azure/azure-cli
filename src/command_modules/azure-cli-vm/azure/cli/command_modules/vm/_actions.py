@@ -283,5 +283,5 @@ APPLICATION.register(APPLICATION.COMMAND_PARSER_PARSED, _handle_container_ssh_fi
 def _get_subscription_id():
     from azure.cli.commands.client_factory import Profile
     profile = Profile()
-    _, subscription_id = profile.get_login_credentials()
+    _, subscription_id, _ = profile.get_login_credentials()
     return subscription_id
