@@ -7,7 +7,10 @@ Execute P0s before any change is merged
 
  - delete test_network_load_balancer.yaml
  - Run test twice (first records, second verifies stability)
- 
+
+ - delete test test_vm_scaleset_create_existing_options.yaml
+ - Run test twice (first records, second verifies stability)
+
 OR
 
 Execute the follow scenarios manually:
@@ -34,3 +37,10 @@ Execute the follow scenarios manually:
   - create new public IP
   - create new lb using the public IP
   - verify lb is associated with the newly created public IP
+
+**Create LB and use it in a VM Scale Set **
+
+  - create new vnet
+  - create new plain lb
+  - create a vmss, referencing vnet and lb
+  - verify vmss is added to vnet and lb 

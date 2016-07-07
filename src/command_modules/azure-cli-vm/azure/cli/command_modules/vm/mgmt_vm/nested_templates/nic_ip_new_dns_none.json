@@ -14,7 +14,7 @@
     "privateIpAddress": {
       "type": "string"
     },
-    "publicIPAddressName": {
+    "publicIpAddress": {
       "type": "string"
     },
     "publicIpAddressAllocation": {
@@ -29,7 +29,7 @@
     "privateIpAllocation": {
       "type": "string"
     },
-    "networkSecurityGroupName": {
+    "networkSecurityGroupId": {
       "type": "string"
     },
     "networkSecurityGroupType": {
@@ -42,7 +42,7 @@
         "privateIPAllocationMethod": "Static",
         "privateIPAddress": "[parameters('privateIpAddress')]",
         "publicIPAddress": {
-          "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddressName'))]"
+          "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIpAddress'))]"
         },
         "subnet": {
           "id": "[parameters('subnetRef')]"
@@ -51,7 +51,7 @@
       "Dynamic": {
         "privateIPAllocationMethod": "Dynamic",
         "publicIPAddress": {
-          "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddressName'))]"
+          "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddress'))]"
         },
         "subnet": {
           "id": "[parameters('subnetRef')]"
@@ -67,7 +67,7 @@
           }
         ],
         "networkSecurityGroup": {
-          "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroupName'))]"
+          "id": "[parameters('networkSecurityGroupId')]"
         }
       },
       "existing": {
@@ -78,7 +78,7 @@
           }
         ],
         "networkSecurityGroup": {
-          "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroupName'))]"
+          "id": "[parameters('networkSecurityGroupId')]"
         }
       },
       "none": {
@@ -95,7 +95,7 @@
     {
       "apiVersion": "2015-06-15",
       "type": "Microsoft.Network/publicIPAddresses",
-      "name": "[parameters('publicIPAddressName')]",
+      "name": "[parameters('publicIpAddress')]",
       "location": "[parameters('location')]",
       "tags": {
         "displayName": "PublicIPAddress"
@@ -113,7 +113,7 @@
         "displayName": "NetworkInterface"
       },
       "dependsOn": [
-        "[concat('Microsoft.Network/publicIPAddresses/', parameters('publicIPAddressName'))]"
+        "[concat('Microsoft.Network/publicIPAddresses/', parameters('publicIpAddress'))]"
       ],
       "properties": "[variables('nsgProperties')[parameters('networkSecurityGroupType')]]"
     }
@@ -122,6 +122,10 @@
     "VMNic": {
       "type": "object",
       "value": "[reference(parameters('nicName'))]"
+    },
+    "privateIp": {
+      "type": "string",
+      "value": "[reference(parameters('nicName')).ipConfigurations[0].properties.privateIPAddress]"
     }
   }
 }
