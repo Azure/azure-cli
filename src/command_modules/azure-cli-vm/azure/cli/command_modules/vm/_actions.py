@@ -1,7 +1,9 @@
 ﻿import argparse
 import json
+import math
 import os
 import re
+import time
 
 from azure.cli._util import CLIError
 from azure.cli.application import APPLICATION
@@ -53,12 +55,23 @@ class VMDNSNameAction(argparse.Action): #pylint: disable=too-few-public-methods
 
         namespace.dns_name_for_public_ip = dns_value
 
+class PrivateIpAction(argparse.Action): #pylint: disable=too-few-public-methods
+    def __call__(self, parser, namespace, values, option_string=None):
+        private_ip = values
+        namespace.private_ip_address = private_ip
+
+        if private_ip:
+            namespace.private_ip_address_allocation = 'static'
+
 def _handle_vm_nics(namespace):
     nics_value = namespace.network_interface_ids
     nics = []
 
     if not nics_value:
+        namespace.network_interface_type = 'new'
         return
+
+    namespace.network_interface_type = 'existing'
 
     if not isinstance(nics_value, list):
         nics_value = [nics_value]
@@ -78,6 +91,19 @@ def _handle_vm_nics(namespace):
     namespace.network_interface_ids = nics
     namespace.network_interface_type = 'existing'
 
+def _resource_not_exists(resource_type):
+    def _handle_resource_not_exists(namespace):
+        # TODO: hook up namespace._subscription_id once we support it
+        r_id = AzureResourceId(namespace.name, namespace.resource_group_name, resource_type,
+                               _get_subscription_id())
+        if resource_exists(r_id):
+            raise CLIError('Resource {} already exists.'.format(str(r_id)))
+    return _handle_resource_not_exists
+
+def _os_disk_default(namespace):
+    if not namespace.os_disk_name:
+        namespace.os_disk_name = 'osdisk{}'.format(str(int(math.ceil(time.time()))))
+
 def _handle_auth_types(**kwargs):
     if kwargs['command'] != 'vm create' and kwargs['command'] != 'vm scaleset create':
         return
@@ -91,7 +117,7 @@ def _handle_auth_types(**kwargs):
         args.authentication_type = 'password' if is_windows else 'ssh'
 
     if args.authentication_type == 'password':
-        if args.ssh_dest_key_path or args.ssh_key_value:
+        if args.ssh_dest_key_path:
             raise CLIError('SSH parameters cannot be used with password authentication type')
         elif not args.admin_password:
             raise CLIError('Admin password is required with password authentication type')
@@ -107,7 +133,7 @@ def _handle_auth_types(**kwargs):
             else:
                 raise CLIError('An RSA key file or key value must be supplied to SSH Key Value')
 
-    if hasattr(args, 'network_security_group_type') and args.network_security_group_type == 'new':
+    if hasattr(args, 'network_security_group_type'):
         args.network_security_group_rule = 'RDP' if is_windows else 'SSH'
 
     if hasattr(args, 'nat_backend_port') and not args.nat_backend_port:
