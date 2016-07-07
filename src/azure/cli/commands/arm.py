@@ -1,5 +1,4 @@
 import re
-from collections import namedtuple
 from azure.cli.commands.client_factory import get_mgmt_service_client
 from azure.mgmt.resource.resources import ResourceManagementClient
 
@@ -57,11 +56,11 @@ def is_valid_resource_id(rid, exception_type=None):
         pass
     if not is_valid and exception_type:
         raise exception_type()
-    return False
+    return is_valid
 
 
 
-def resource_exists(resource_group, name, namespace, type, **kwargs):
+def resource_exists(resource_group, name, namespace, type, **_): # pylint: disable=redefined-builtin
     '''Checks if the given resource exists.
     '''
     odata_filter = "resourceGroup eq '{}' and name eq '{}'" \
