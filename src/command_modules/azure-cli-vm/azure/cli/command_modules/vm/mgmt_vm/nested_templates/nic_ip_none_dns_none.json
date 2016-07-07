@@ -11,7 +11,7 @@
     "VirtualMachineName": {
       "type": "string"
     },
-    "publicIPAddressName": {
+    "publicIpAddress": {
       "type": "string"
     },
     "privateIpAddress": {
@@ -29,7 +29,7 @@
     "privateIpAllocation": {
       "type": "string"
     },
-    "networkSecurityGroupName": {
+    "networkSecurityGroupId": {
       "type": "string"
     },
     "networkSecurityGroupType": {
@@ -61,7 +61,7 @@
           }
         ],
         "networkSecurityGroup": {
-          "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroupName'))]"
+          "id": "[parameters('networkSecurityGroupId')]"
         }
       },
       "existing": {
@@ -72,7 +72,7 @@
           }
         ],
         "networkSecurityGroup": {
-          "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroupName'))]"
+          "id": "[parameters('networkSecurityGroupId')]"
         }
       },
       "none": {
@@ -102,6 +102,10 @@
     "VMNic": {
       "type": "object",
       "value": "[reference(parameters('nicName'))]"
+    },
+    "privateIp": {
+      "type": "string",
+      "value": "[reference(parameters('nicName')).ipConfigurations[0].properties.privateIPAddress]"
     }
   }
 }

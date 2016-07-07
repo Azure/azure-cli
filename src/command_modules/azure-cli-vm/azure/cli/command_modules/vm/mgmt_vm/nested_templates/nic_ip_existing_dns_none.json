@@ -11,7 +11,7 @@
     "VirtualMachineName": {
       "type": "string"
     },
-    "publicIPAddressName": {
+    "publicIpAddress": {
       "type": "string"
     },
     "publicIpAddressAllocation": {
@@ -29,7 +29,7 @@
     "privateIpAllocation": {
       "type": "string"
     },
-    "networkSecurityGroupName": {
+    "networkSecurityGroupId": {
       "type": "string"
     },
     "networkSecurityGroupType": {
@@ -41,7 +41,7 @@
       "Dynamic": {
         "privateIPAllocationMethod": "Dynamic",
         "publicIPAddress": {
-          "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddressName'))]"
+          "id": "[parameters('publicIPAddress')]"
         },
         "subnet": {
           "id": "[parameters('subnetRef')]"
@@ -51,7 +51,7 @@
         "privateIPAllocationMethod": "Static",
         "privateIPAddress": "[parameters('privateIpAddress')]",
         "publicIPAddress": {
-          "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddressName'))]"
+          "id": "[parameters('publicIPAddress')]"
         },
         "subnet": {
           "id": "[parameters('subnetRef')]"
@@ -67,7 +67,7 @@
           }
         ],
         "networkSecurityGroup": {
-          "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroupName'))]"
+          "id": "[parameters('networkSecurityGroupId')]"
         }
       },
       "existing": {
@@ -78,7 +78,7 @@
           }
         ],
       "networkSecurityGroup": {
-        "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroupName'))]"
+        "id": "[parameters('networkSecurityGroupId')]"
       }
       },
       "none": {
@@ -108,6 +108,10 @@
     "VMNic": {
       "type": "object",
       "value": "[reference(parameters('nicName'))]"
+    },
+    "privateIp": {
+      "type": "string",
+      "value": "[reference(parameters('nicName')).ipConfigurations[0].properties.privateIPAddress]"
     }
   }
 }
