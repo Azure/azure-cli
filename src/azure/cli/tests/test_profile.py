@@ -197,7 +197,7 @@ class Test_Profile(unittest.TestCase):
                                                      ENV_DEFAULT)
         profile._set_subscriptions(consolidated)
         #action
-        cred, subscription_id = profile.get_login_credentials()
+        cred, subscription_id, _ = profile.get_login_credentials()
 
         #verify
         self.assertEqual(subscription_id, '1')
@@ -207,7 +207,29 @@ class Test_Profile(unittest.TestCase):
         self.assertEqual(token, self.raw_token1)
         self.assertEqual(some_token_type, token_type)
         self.assertEqual(mock_read_cred_file.call_count, 1)
+        mock_get_token.assert_called_once_with(mock.ANY, self.user1, self.tenant_id,
+                                               'https://management.core.windows.net/')
         self.assertEqual(mock_get_token.call_count, 1)
+
+    @mock.patch('azure.cli._profile._read_file_content', autospec=True)
+    @mock.patch('azure.cli._profile.CredsCache.retrieve_token_for_user', autospec=True)
+    def test_get_login_credentials_for_graph_client(self, mock_get_token, mock_read_cred_file):
+        some_token_type = 'Bearer'
+        mock_read_cred_file.return_value = json.dumps([Test_Profile.token_entry1])
+        mock_get_token.return_value = (some_token_type, Test_Profile.raw_token1)
+        #setup
+        storage_mock = {'subscriptions': None}
+        profile = Profile(storage_mock)
+        consolidated = Profile._normalize_properties(self.user1, [self.subscription1],
+                                                     False, ENV_DEFAULT)
+        profile._set_subscriptions(consolidated)
+        #action
+        cred, _, tenant_id = profile.get_login_credentials(for_graph_client=True)
+        _, _ = cred._token_retriever()
+        #verify
+        mock_get_token.assert_called_once_with(mock.ANY, self.user1, self.tenant_id,
+                                               'https://graph.windows.net/')
+        self.assertEqual(tenant_id, self.tenant_id)
 
     @mock.patch('azure.cli._profile._read_file_content', autospec=True)
     @mock.patch('azure.cli._profile.CredsCache.persist_cached_creds', autospec=True)
@@ -264,16 +286,16 @@ class Test_Profile(unittest.TestCase):
         finder = SubscriptionFinder(lambda _, _2: mock_auth_context,
                                     None,
                                     lambda _: mock_arm_client)
-
+        mgmt_resource = 'https://management.core.windows.net/'
         #action
-        subs = finder.find_from_user_account(self.user1, 'bar')
+        subs = finder.find_from_user_account(self.user1, 'bar', mgmt_resource)
 
         #assert
         self.assertEqual([self.subscription1], subs)
         mock_auth_context.acquire_token_with_username_password.assert_called_once_with(
-            'https://management.core.windows.net/', self.user1, 'bar', mock.ANY)
+            mgmt_resource, self.user1, 'bar', mock.ANY)
         mock_auth_context.acquire_token.assert_called_once_with(
-            'https://management.core.windows.net/', self.user1, mock.ANY)
+            mgmt_resource, self.user1, mock.ANY)
 
     @mock.patch('adal.AuthenticationContext', autospec=True)
     def test_find_subscriptions_through_interactive_flow(self, mock_auth_context):
@@ -286,18 +308,18 @@ class Test_Profile(unittest.TestCase):
         finder = SubscriptionFinder(lambda _, _2: mock_auth_context,
                                     None,
                                     lambda _: mock_arm_client)
-
+        mgmt_resource = 'https://management.core.windows.net/'
         #action
-        subs = finder.find_through_interactive_flow()
+        subs = finder.find_through_interactive_flow(mgmt_resource)
 
         #assert
         self.assertEqual([self.subscription1], subs)
         mock_auth_context.acquire_user_code.assert_called_once_with(
-            'https://management.core.windows.net/', mock.ANY)
+            mgmt_resource, mock.ANY)
         mock_auth_context.acquire_token_with_device_code.assert_called_once_with(
-            'https://management.core.windows.net/', test_nonsense_code, mock.ANY)
+            mgmt_resource, test_nonsense_code, mock.ANY)
         mock_auth_context.acquire_token.assert_called_once_with(
-            'https://management.core.windows.net/', self.user1, mock.ANY)
+            mgmt_resource, self.user1, mock.ANY)
 
     @mock.patch('adal.AuthenticationContext', autospec=True)
     def test_find_subscriptions_from_service_principal_id(self, mock_auth_context):
@@ -307,15 +329,17 @@ class Test_Profile(unittest.TestCase):
         finder = SubscriptionFinder(lambda _, _2: mock_auth_context,
                                     None,
                                     lambda _: mock_arm_client)
+        mgmt_resource = 'https://management.core.windows.net/'
         #action
-        subs = finder.find_from_service_principal_id('my app', 'my secret', self.tenant_id)
+        subs = finder.find_from_service_principal_id('my app', 'my secret',
+                                                     self.tenant_id, mgmt_resource)
 
         #assert
         self.assertEqual([self.subscription1], subs)
         mock_arm_client.tenants.list.assert_not_called()
         mock_auth_context.acquire_token.assert_not_called()
         mock_auth_context.acquire_token_with_client_credentials.assert_called_once_with(
-            'https://management.core.windows.net/', 'my app', 'my secret')
+            mgmt_resource, 'my app', 'my secret')
 
     @mock.patch('azure.cli._profile._read_file_content', autospec=True)
     def test_credscache_load_tokens_and_sp_creds(self, mock_read_file):
@@ -413,7 +437,9 @@ class Test_Profile(unittest.TestCase):
         creds_cache = CredsCache(auth_ctx_factory=get_auth_context)
 
         #action
-        token_type, token = creds_cache.retrieve_token_for_user(self.user1, self.tenant_id)
+        mgmt_resource = 'https://management.core.windows.net/'
+        token_type, token = creds_cache.retrieve_token_for_user(self.user1, self.tenant_id,
+                                                                mgmt_resource)
         mock_adal_auth_context.acquire_token.assert_called_once_with(
             'https://management.core.windows.net/',
             self.user1,

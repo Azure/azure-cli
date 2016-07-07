@@ -10,6 +10,17 @@ Installation
 
 For installation steps for common platforms, please take a look at our `preview installation guide <http://github.com/Azure/azure-cli/blob/master/doc/preview_install_guide.md>`__.
 
+Docker Setup (optional)
+------------
+We have automated Docker images of the latest code in the master branch.
+
+If you have not previously done so, configure your Docker client engine [here](https://docs.docker.com/engine/installation/).
+
+Then:
++ Run `docker login` (contact the team for credentials as the images are not public yet).
++ Run `docker pull azuresdk/azure-cli-python:latest`
++ Run `docker run -it azuresdk/azure-cli-python:latest`
+
 Usage
 =====
     
