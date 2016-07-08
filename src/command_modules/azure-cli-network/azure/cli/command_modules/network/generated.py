@@ -39,7 +39,7 @@ from azure.cli.commands import DeploymentOutputLongRunningOperation, cli_command
 
 from .custom import \
     (update_vnet, update_subnet, create_subnet,
-     create_update_nsg_rule,
+     create_nsg_rule, update_nsg_rule,
      create_lb_inbound_nat_rule, set_lb_inbound_nat_rule,
      create_lb_frontend_ip_configuration, set_lb_frontend_ip_configuration,
      create_lb_inbound_nat_pool, set_lb_inbound_nat_pool,
@@ -200,7 +200,8 @@ factory = lambda _: _network_client_factory().security_rules
 cli_command('network nsg rule delete', SecurityRulesOperations.delete, factory)
 cli_command('network nsg rule show', SecurityRulesOperations.get, factory)
 cli_command('network nsg rule list', SecurityRulesOperations.list, factory)
-cli_command('network nsg rule create', create_update_nsg_rule)
+cli_command('network nsg rule create', create_nsg_rule)
+cli_command('network nsg rule set', update_nsg_rule)
 
 # SubnetsOperations
 factory = lambda _: _network_client_factory().subnets

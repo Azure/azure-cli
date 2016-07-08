@@ -549,11 +549,10 @@ class NetworkSecurityGroupScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
         super(NetworkSecurityGroupScenarioTest, self).__init__(__file__, test_method)
-        self.resource_group = 'cliTestRg_securityGroups'
-        self.nsg_name = 'cli-test-nsg'
+        self.resource_group = 'cli_nsg_test1'
+        self.nsg_name = 'test-nsg1'
         self.nsg_rule_name = 'web'
         self.resource_type = 'Microsoft.Network/networkSecurityGroups'
-        self.deployment_name = 'nsgDeployment'
 
     def test_network_nsg(self):
         self.execute()
@@ -593,6 +592,28 @@ class NetworkSecurityGroupScenarioTest(ResourceGroupVCRTestBase):
                 JMESPathCheck('resourceGroup', rg),
                 JMESPathCheck('name', nrn)
         ])
+
+        #Test for updating the rule
+        new_access = 'DENY'
+        new_addr_prefix = '111'
+        new_direction = 'Outbound'
+        new_protocol = 'tcp'
+        new_port_range = '1234-1235'
+        description = 'greatrule'
+        priority = 888
+        self.cmd('network nsg rule set -g {} --nsg-name {} -n {} --direction {} --access {} --destination-address-prefix {} --protocol {} --source-address-prefix {} --source-port-range {} --destination-port-range {} --priority {} --description {}'.format(
+            rg, nsg, nrn, new_direction, new_access, new_addr_prefix, new_protocol, new_addr_prefix, new_port_range, new_port_range, priority, description),
+                 checks=[
+                     JMESPathCheck('access', 'Deny'),
+                     JMESPathCheck('direction', new_direction),
+                     JMESPathCheck('destinationAddressPrefix', new_addr_prefix),
+                     JMESPathCheck('protocol', new_protocol),
+                     JMESPathCheck('sourceAddressPrefix', new_addr_prefix),
+                     JMESPathCheck('sourcePortRange', new_port_range),
+                     JMESPathCheck('priority', priority),
+                     JMESPathCheck('description', description),
+                     ])
+
         self.cmd('network nsg rule delete --resource-group {} --nsg-name {} --name {}'.format(rg, nsg, nrn))
         # Delete the network security group
         self.cmd('network nsg delete --resource-group {} --name {}'.format(rg, nsg))
