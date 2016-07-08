@@ -96,7 +96,7 @@ register_cli_argument('network lb create', 'public_ip_dns_name', validator=proce
 register_cli_argument('network lb create', 'dns_name_type', help=argparse.SUPPRESS)
 register_cli_argument('network lb create', 'private_ip_address_allocation', help=argparse.SUPPRESS)
 register_cli_argument('network lb create', 'public_ip_address_allocation', choices=choices_ip_allocation_method, default='dynamic', type=str.lower)
-register_folded_cli_argument('network lb create', 'public_ip_address', 'Microsoft.Network/publicIPAddresses', post_validator=validate_public_ip_type)
+register_folded_cli_argument('network lb create', 'public_ip_address', 'Microsoft.Network/publicIPAddresses', validator=validate_public_ip_type)
 register_folded_cli_argument('network lb create', 'subnet', 'subnets', parent_name='virtual_network_name', parent_type='Microsoft.Network/virtualNetworks')
 
 register_cli_argument('network lb inbound-nat-rule', 'item_name', options_list=('--name', '-n'), help='The name of the inbound NAT rule.')
