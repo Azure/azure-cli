@@ -35,7 +35,7 @@ from azure.cli.command_modules.network.mgmt_nsg.lib.operations import NSGOperati
 from azure.cli.commands import DeploymentOutputLongRunningOperation, cli_command
 
 from .custom import \
-    (create_update_subnet,
+    (update_vnet, update_subnet, create_subnet,
      create_update_nsg_rule,
      create_lb_inbound_nat_rule, set_lb_inbound_nat_rule,
      create_lb_frontend_ip_configuration, set_lb_frontend_ip_configuration,
@@ -45,6 +45,7 @@ from .custom import \
      create_lb_rule, set_lb_rule,
      list_load_balancer_property, get_load_balancer_property_entry,
      delete_load_balancer_property_entry)
+
 from ._factory import _network_client_factory
 
 # pylint: disable=line-too-long
@@ -200,7 +201,8 @@ factory = lambda _: _network_client_factory().subnets
 cli_command('network vnet subnet delete', SubnetsOperations.delete, factory)
 cli_command('network vnet subnet show', SubnetsOperations.get, factory)
 cli_command('network vnet subnet list', SubnetsOperations.list, factory)
-cli_command('network vnet subnet create', create_update_subnet)
+cli_command('network vnet subnet create', create_subnet)
+cli_command('network vnet subnet set', update_subnet)
 
 # Usages operations
 factory = lambda _: _network_client_factory().usages
@@ -227,6 +229,8 @@ cli_command('network vnet delete', VirtualNetworksOperations.delete, factory)
 cli_command('network vnet show', VirtualNetworksOperations.get, factory)
 cli_command('network vnet list', VirtualNetworksOperations.list, factory)
 cli_command('network vnet list-all', VirtualNetworksOperations.list_all, factory)
+
+cli_command('network vnet set', update_vnet)
 
 factory = lambda _: get_mgmt_service_client(VNetClient).vnet
 cli_command('network vnet create', VNetOperations.create, factory, transform=DeploymentOutputLongRunningOperation('Starting network vnet create'))

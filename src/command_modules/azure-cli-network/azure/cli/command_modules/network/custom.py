@@ -1,16 +1,9 @@
-# pylint: disable=no-self-use,too-many-arguments,no-member
-from azure.mgmt.network.models import Subnet, SecurityRule
+﻿# pylint: disable=no-self-use,too-many-arguments,no-member
+from azure.mgmt.network.models import Subnet, SecurityRule, NetworkSecurityGroup
 
 from azure.cli._util import CLIError
-from ._factory import _network_client_factory
 
-def create_update_subnet(resource_group_name, subnet_name, virtual_network_name,
-                         address_prefix='10.0.0.0/24'):
-    '''Create or update a virtual network (VNet) subnet'''
-    subnet_settings = Subnet(name=subnet_name, address_prefix=address_prefix)
-    ncf = _network_client_factory()
-    return ncf.subnets.create_or_update(
-        resource_group_name, virtual_network_name, subnet_name, subnet_settings)
+from ._factory import _network_client_factory
 
 def create_update_nsg_rule(resource_group_name, network_security_group_name, security_rule_name,
                            protocol, source_address_prefix, destination_address_prefix,
@@ -25,6 +18,56 @@ def create_update_nsg_rule(resource_group_name, network_security_group_name, sec
     ncf = _network_client_factory()
     return ncf.security_rules.create_or_update(
         resource_group_name, network_security_group_name, security_rule_name, settings)
+
+def update_vnet(resource_group_name, virtual_network_name, address_prefixes):
+    '''update existing virtual network
+    :param address_prefixes: update address spaces. Use space separated address prefixes,
+        for example, "10.0.0.0/24 10.0.1.0/24"
+    '''
+    ncf = _network_client_factory()
+    vnet = ncf.virtual_networks.get(resource_group_name, virtual_network_name)
+    #server side validation reports pretty good error message on invalid CIDR,
+    #so we don't validate at client side
+    vnet.address_space.address_prefixes = address_prefixes
+    return ncf.virtual_networks.create_or_update(resource_group_name, virtual_network_name, vnet)
+
+def create_subnet(resource_group_name, virtual_network_name, subnet_name,
+                  address_prefix='10.0.0.0/24', network_security_group=None):
+    '''Create a virtual network (VNet) subnet
+    :param str address_prefix: address prefix in CIDR format.
+    :param str network_security_group: attach with existing network security group,
+        both name or id are accepted.
+    '''
+    ncf = _network_client_factory()
+    subnet = Subnet(name=subnet_name, address_prefix=address_prefix)
+    subnet.address_prefix = address_prefix
+
+    if network_security_group:
+        subnet.network_security_group = NetworkSecurityGroup(network_security_group)
+
+    return ncf.subnets.create_or_update(resource_group_name, virtual_network_name,
+                                        subnet_name, subnet)
+
+def update_subnet(resource_group_name, virtual_network_name, subnet_name,
+                  address_prefix=None, network_security_group=None):
+    '''update existing virtual sub network
+    :param str address_prefix: New address prefix in CIDR format, for example 10.0.0.0/24.
+    :param str network_security_group: attach with existing network security group,
+        both name or id are accepted. Use empty string "" to detach it.
+    '''
+    ncf = _network_client_factory()
+    subnet = ncf.subnets.get(resource_group_name, virtual_network_name, subnet_name)#pylint: disable=redefined-variable-type
+
+    if address_prefix:
+        subnet.address_prefix = address_prefix
+
+    if network_security_group:
+        subnet.network_security_group = NetworkSecurityGroup(network_security_group)
+    elif network_security_group == '': #clear it
+        subnet.network_security_group = None
+
+    return ncf.subnets.create_or_update(resource_group_name, virtual_network_name,
+                                        subnet_name, subnet)
 
 create_update_nsg_rule.__doc__ = SecurityRule.__doc__
 
