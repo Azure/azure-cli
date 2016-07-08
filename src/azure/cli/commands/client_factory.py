@@ -16,7 +16,7 @@ def get_subscription_service_client(client_type):
 def _get_mgmt_service_client(client_type, subscription_bound=True):
     logger.info('Getting management service client client_type=%s', client_type.__name__)
     profile = Profile()
-    cred, subscription_id = profile.get_login_credentials()
+    cred, subscription_id, _ = profile.get_login_credentials()
     if subscription_bound:
         client = client_type(cred, subscription_id)
     else:
@@ -32,7 +32,9 @@ def _get_mgmt_service_client(client_type, subscription_bound=True):
         # private members
         client._client.add_header(header, value) #pylint: disable=protected-access
 
-    client._client.add_header('CommandName', APPLICATION.session['command']) #pylint: disable=protected-access
+    command_name_suffix = ';completer-request' if APPLICATION.session['completer_active'] else ''
+    client._client.add_header('CommandName', #pylint: disable=protected-access
+                              "{}{}".format(APPLICATION.session['command'], command_name_suffix))
     client.config.generate_client_request_id = \
         'x-ms-client-request-id' not in APPLICATION.session['headers']
 

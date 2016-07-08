@@ -616,6 +616,79 @@ def vm_update_nics(resource_group_name, vm_name, nic_ids=None, nic_names=None, p
     nics = _build_nic_list(resource_group_name, nic_ids or [], nic_names or [])
     return _update_vm_nics(vm, nics, primary_nic)
 
+# pylint: disable=no-member
+def vm_open_port(resource_group_name, vm_name, network_security_group_name=None,
+                 apply_to_subnet=False):
+    """ Opens a VM to all inbound traffic and protocols by adding a security rule to the network
+    security group (NSG) that is attached to the VM's network interface (NIC) or subnet. The
+    existing NSG will be used or a new one will be created. The rule name is 'open-port-cmd' and
+    will overwrite an existing rule with this name. For multi-NIC VMs, or for more fine
+    grained control, use the appropriate network commands directly (nsg rule create, etc).
+    """
+    from azure.mgmt.network import NetworkManagementClient
+    network = get_mgmt_service_client(NetworkManagementClient)
+
+    vm = _vm_get(resource_group_name, vm_name)
+    location = vm.location
+    nic_ids = list(vm.network_profile.network_interfaces)
+    if len(nic_ids) > 1:
+        raise CLIError('Multiple NICs is not supported for this command. Create rules on the NSG '
+                       'directly.')
+    elif not nic_ids:
+        raise CLIError("No NIC associated with VM '{}'".format(vm_name))
+
+    # get existing NSG or create a new one
+    nic = network.network_interfaces.get(resource_group_name, os.path.split(nic_ids[0].id)[1])
+    if not apply_to_subnet:
+        nsg = nic.network_security_group
+    else:
+        from azure.cli.commands.arm import parse_resource_id
+        subnet_id = parse_resource_id(nic.ip_configurations[0].subnet.id)
+        subnet = network.subnets.get(resource_group_name,
+                                     subnet_id['name'],
+                                     subnet_id['child_name'])
+        nsg = subnet.network_security_group
+
+    if not nsg:
+        from azure.mgmt.network.models import NetworkSecurityGroup
+        nsg = LongRunningOperation('Creating network security group')(
+            network.network_security_groups.create_or_update(
+                resource_group_name=resource_group_name,
+                network_security_group_name=network_security_group_name,
+                parameters=NetworkSecurityGroup(location=location)
+            )
+        )
+
+    # update the NSG with the new rule to allow inbound traffic
+    from azure.mgmt.network.models import SecurityRule
+    rule = SecurityRule(protocol='*', access='allow', direction='inbound', name='open-port-cmd',
+                        source_port_range='*', destination_port_range='*', priority=900,
+                        source_address_prefix='*', destination_address_prefix='*')
+    nsg_name = nsg.name or os.path.split(nsg.id)[1]
+    LongRunningOperation('Adding security rule')(
+        network.security_rules.create_or_update(
+            resource_group_name, nsg_name, 'open-port-cmd', rule)
+    )
+
+    # update the NIC or subnet
+    if not apply_to_subnet:
+        nic.network_security_group = nsg
+        return LongRunningOperation('Updating NIC')(
+            network.network_interfaces.create_or_update(
+                resource_group_name, nic.name, nic)
+        )
+    else:
+        from azure.mgmt.network.models import Subnet
+        subnet.network_security_group = nsg
+        return LongRunningOperation('Updating subnet')(
+            network.subnets.create_or_update(
+                resource_group_name=resource_group_name,
+                virtual_network_name=subnet_id['name'],
+                subnet_name=subnet_id['child_name'],
+                subnet_parameters=subnet
+            )
+        )
+
 def _build_nic_list(resource_group_name, nic_ids, nic_names):
     from azure.mgmt.network import NetworkManagementClient
     from azure.mgmt.compute.models import NetworkInterfaceReference
@@ -798,4 +871,3 @@ def vmss_start(resource_group_name, vm_scale_set_name, instance_ids=None):
         return client.virtual_machine_scale_sets.start(resource_group_name,
                                                        vm_scale_set_name,
                                                        instance_ids=instance_ids)
-

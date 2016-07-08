@@ -15,13 +15,20 @@ from azure.cli.command_modules.vm._actions import (VMImageFieldAction,
                                                    VMDNSNameAction,
                                                    load_images_from_aliases_doc,
                                                    get_vm_sizes,
-                                                   _handle_vm_nics)
+                                                   _handle_vm_nics,
+                                                   PrivateIpAction,
+                                                   _resource_not_exists,
+                                                   _os_disk_default,
+                                                   _find_default_vnet,
+                                                   _find_default_storage_account)
 from azure.cli.commands.parameters import (location_type,
                                            get_location_completion_list,
                                            get_one_of_subscription_locations,
-                                           get_resource_name_completion_list,
-                                           register_id_parameter)
+                                           get_resource_name_completion_list)
+from azure.cli.command_modules.vm._validators import nsg_name_validator
 from azure.cli.commands import register_cli_argument, CliArgumentType, register_extra_cli_argument
+from azure.cli.commands.arm import is_valid_resource_id
+from azure.cli.commands.template_create import register_folded_cli_argument
 
 def get_urn_aliases_completion_list(prefix, **kwargs):#pylint: disable=unused-argument
     images = load_images_from_aliases_doc()
@@ -60,8 +67,6 @@ register_cli_argument('vm disk', 'vhd', CliArgumentType(type=VirtualHardDisk, he
 register_cli_argument('vm disk', 'caching', CliArgumentType(help='Host caching policy', default=CachingTypes.none.value, choices=choices_caching_types))
 
 register_cli_argument('vm availability-set', 'availability_set_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Compute/availabilitySets'))
-for name in ('delete', 'list-sizes', 'show'):
-    register_id_parameter('vm availability-set ' + name, 'resource_group_name', 'availability_set_name')
 
 register_cli_argument('vm access', 'username', CliArgumentType(options_list=('--username', '-u'), help='The user name'))
 register_cli_argument('vm access', 'password', CliArgumentType(options_list=('--password', '-p'), help='The user password'))
@@ -96,6 +101,10 @@ register_cli_argument('vm extension image', 'latest', CliArgumentType(action='st
 
 register_cli_argument('vm image list', 'image_location', location_type)
 
+register_cli_argument('vm open-port', 'vm_name', name_arg_type, help='The name of the virtual machine to open inbound traffic on.')
+register_cli_argument('vm open-port', 'network_security_group_name', options_list=('--nsg-name',), help='The name of the network security group to create if one does not exist. Ignored if an NSG already exists.', validator=nsg_name_validator)
+register_cli_argument('vm open-port', 'apply_to_subnet', help='Allow inbound traffic on the subnet instead of the NIC', action='store_true')
+
 # VM CREATE PARAMETER CONFIGURATION
 
 authentication_type = CliArgumentType(
@@ -106,21 +115,25 @@ authentication_type = CliArgumentType(
 
 nsg_rule_type = CliArgumentType(
     choices=['RDP', 'SSH'], default=None,
-    help='Network security group rule to create. Defaults to RDP for Windows and SSH for Linux',
+    help='Network security group rule to create. Defaults open ports for allowing RDP on Windows and allowing SSH on Linux.',
     type=str.upper
 )
 
-register_cli_argument('vm create', 'network_interface_type', choices=['new', 'existing'], help=None, type=str.lower)
-register_cli_argument('vm create', 'network_interface_ids', options_list=('--network-interfaces',), nargs='+',
+register_cli_argument('vm create', 'network_interface_type', help=argparse.SUPPRESS)
+register_cli_argument('vm create', 'network_interface_ids', options_list=('--nics',), nargs='+',
                       help='Names or IDs of existing NICs to reference.  The first NIC will be the primary NIC.',
+                      type=lambda val: val if (not '/' in val or is_valid_resource_id(val, ValueError)) else '',
                       validator=_handle_vm_nics)
 
+register_cli_argument('vm create', 'name', name_arg_type, validator=_resource_not_exists('Microsoft.Compute/virtualMachines'))
+register_cli_argument('vm scaleset create', 'name', name_arg_type, validator=_resource_not_exists('Microsoft.Compute/virtualMachineScaleSets'))
+
 for scope in ['vm create', 'vm scaleset create']:
-    register_cli_argument(scope, 'name', name_arg_type)
     register_cli_argument(scope, 'location', CliArgumentType(completer=get_location_completion_list))
     register_cli_argument(scope, 'custom_os_disk_uri', CliArgumentType(help=argparse.SUPPRESS))
-    register_cli_argument(scope, 'custom_os_disk_type', CliArgumentType(choices=['windows', 'linux'], type=str.lower))
+    register_cli_argument(scope, 'custom_os_disk_type', CliArgumentType(choices=['windows', 'linux'], type=str.lower), options_list=('--custom-disk-os-type',))
     register_cli_argument(scope, 'os_disk_type', CliArgumentType(help=argparse.SUPPRESS))
+    register_cli_argument(scope, 'os_disk_name', CliArgumentType(validator=_os_disk_default))
     register_cli_argument(scope, 'overprovision', CliArgumentType(action='store_false', default=None, options_list=('--disable-overprovision',)))
     register_cli_argument(scope, 'load_balancer_type', CliArgumentType(choices=['new', 'existing', 'none'], type=str.lower))
     register_cli_argument(scope, 'storage_caching', CliArgumentType(choices=['ReadOnly', 'ReadWrite']))
@@ -134,49 +147,22 @@ for scope in ['vm create', 'vm scaleset create']:
     register_cli_argument(scope, 'os_version', CliArgumentType(help=argparse.SUPPRESS))
     register_cli_argument(scope, 'dns_name_type', CliArgumentType(help=argparse.SUPPRESS))
     register_cli_argument(scope, 'admin_username', admin_username_type)
+    register_cli_argument(scope, 'storage_type', help='The VM storage type.')
+    register_cli_argument(scope, 'subnet_name', help='The subnet name.  Creates if creating a new VNet, references if referencing an existing VNet.')
+    register_cli_argument(scope, 'admin_password', help='Password for the Virtual Machine if Authentication Type is Password.')
     register_cli_argument(scope, 'ssh_key_value', CliArgumentType(action=VMSSHFieldAction))
     register_cli_argument(scope, 'ssh_dest_key_path', completer=FilesCompleter())
-    register_cli_argument(scope, 'dns_name_for_public_ip', CliArgumentType(action=VMDNSNameAction))
+    register_cli_argument(scope, 'dns_name_for_public_ip', CliArgumentType(action=VMDNSNameAction), options_list=('--public-ip-address-dns-name',), help='Globally unique DNS Name for the Public IP used to access the Virtual Machine.')
     register_cli_argument(scope, 'authentication_type', authentication_type)
-    register_cli_argument(scope, 'availability_set_type', CliArgumentType(choices=['none', 'existing'], help='', type=str.lower))
-    register_cli_argument(scope, 'private_ip_address_allocation', CliArgumentType(choices=choices_ip_allocation_method, help='', type=str.lower))
-    register_cli_argument(scope, 'public_ip_address_allocation', CliArgumentType(choices=choices_ip_allocation_method, help='', type=str.lower))
-    register_cli_argument(scope, 'public_ip_address_type', CliArgumentType(choices=['none', 'new', 'existing'], help='', type=str.lower))
-    register_cli_argument(scope, 'storage_account_type', CliArgumentType(choices=['new', 'existing'], help='', type=str.lower))
-    register_cli_argument(scope, 'virtual_network_type', CliArgumentType(choices=['new', 'existing'], help='', type=str.lower))
-    register_cli_argument(scope, 'network_security_group_rule', nsg_rule_type)
-    register_cli_argument(scope, 'network_security_group_type', CliArgumentType(choices=['new', 'existing', 'none'], help='', type=str.lower))
+    register_folded_cli_argument(scope, 'availability_set', 'Microsoft.Compute/availabilitySets')
+    register_cli_argument(scope, 'private_ip_address_allocation', help=argparse.SUPPRESS)
+    register_cli_argument(scope, 'virtual_network_ip_address_prefix', options_list=('--vnet-ip-address-prefix',))
+    register_cli_argument(scope, 'subnet_ip_address_prefix', options_list=('--subnet-ip-address-prefix',))
+    register_cli_argument(scope, 'private_ip_address', help='Static private IP address (e.g. 10.0.0.5).', options_list=('--private-ip-address',), action=PrivateIpAction)
+    register_cli_argument(scope, 'public_ip_address_allocation', CliArgumentType(choices=['dynamic', 'static'], help='', default='dynamic', type=str.lower))
+    register_folded_cli_argument(scope, 'public_ip_address', 'Microsoft.Network/publicIPAddresses', help='Name or ID of public IP address (creates if doesn\'t exist)')
+    register_folded_cli_argument(scope, 'storage_account', 'Microsoft.Storage/storageAccounts', help='Name or ID of storage account (creates if doesn\'t exist).  Chooses an existing storage account if none specified.', validator=_find_default_storage_account)
+    register_folded_cli_argument(scope, 'virtual_network', 'Microsoft.Network/virtualNetworks', help='Name or ID of virtual network (creates if doesn\'t exist).  Chooses an existing VNet if none specified.', options_list=('--vnet',), validator=_find_default_vnet)
+    register_folded_cli_argument(scope, 'network_security_group', 'Microsoft.Network/networkSecurityGroups', help='Name or ID of network security group (creates if doesn\'t exist)', options_list=('--nsg',))
+    register_cli_argument(scope, 'network_security_group_rule', nsg_rule_type, options_list=('--nsg-rule',))
     register_extra_cli_argument(scope, 'image', options_list=('--image',), action=VMImageFieldAction, completer=get_urn_aliases_completion_list, default='Win2012R2Datacenter')
-
-for name in ('access delete-linux-user',
-             'access set-linux-user',
-             'boot-diagnostics enable',
-             'boot-diagnostics disable',
-             'capture',
-             'deallocate',
-             'delete',
-             'generalize',
-             'list-sizes',
-             'resize',
-             'restart',
-             'show',
-             'start',
-             'stop'):
-    register_id_parameter('vm ' + name, 'resource_group_name', 'vm_name')
-
-for name in ('deallocate',
-             'delete',
-             'delete-instances',
-             'get-instance-view',
-             'list-skus',
-             'restart',
-             'scale',
-             'show',
-             'show-instance',
-             'start',
-             'stop',
-             'update-instances'):
-    register_id_parameter('vm scaleset ' + name, 'resource_group_name', 'vm_scale_set_name')
-
-for name in ('list-instances',):
-    register_id_parameter('vm scaleset ' + name, 'resource_group_name', 'virtual_machine_scale_set_name')

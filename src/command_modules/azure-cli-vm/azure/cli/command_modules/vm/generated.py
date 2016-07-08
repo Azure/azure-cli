@@ -23,7 +23,7 @@ from azure.cli.command_modules.vm.mgmt_acs.lib.operations import ACSOperations
 from .custom import (
     list_vm, resize_vm, list_vm_images, list_vm_extension_images, list_ip_addresses,
     attach_new_disk, attach_existing_disk, detach_disk, list_disks, capture_vm,
-    vm_update_nics, vm_delete_nics, vm_add_nics,
+    vm_update_nics, vm_delete_nics, vm_add_nics, vm_open_port,
     reset_windows_admin, set_linux_user, delete_linux_user,
     disable_boot_diagnostics, enable_boot_diagnostics, get_boot_log,
     list_extensions, set_extension, set_diagnostics_extension,
@@ -47,7 +47,7 @@ cli_command('vm delete', VirtualMachinesOperations.delete, factory)
 cli_command('vm deallocate', VirtualMachinesOperations.deallocate, factory)
 cli_command('vm generalize', VirtualMachinesOperations.generalize, factory)
 cli_command('vm show', VirtualMachinesOperations.get, factory)
-cli_command('vm list-sizes', VirtualMachinesOperations.list_available_sizes, factory)
+cli_command('vm list-vm-resize-options', VirtualMachinesOperations.list_available_sizes, factory)
 cli_command('vm stop', VirtualMachinesOperations.power_off, factory)
 cli_command('vm restart', VirtualMachinesOperations.restart, factory)
 cli_command('vm start', VirtualMachinesOperations.start, factory)
@@ -59,6 +59,7 @@ cli_command('vm capture', capture_vm)
 cli_command('vm nic add', vm_add_nics)
 cli_command('vm nic delete', vm_delete_nics)
 cli_command('vm nic update', vm_update_nics)
+cli_command('vm open-port', vm_open_port)
 
 # VM Access
 cli_command('vm access set-linux-user', set_linux_user)
@@ -158,5 +159,5 @@ cli_command('vm scaleset scale', vmss_scale)
 
 # VM Size
 factory = lambda _: _compute_client_factory().virtual_machine_sizes
-cli_command('vm size list', VirtualMachineSizesOperations.list, factory)
+cli_command('vm list-sizes', VirtualMachineSizesOperations.list, factory)
 

@@ -21,10 +21,7 @@ def _add_resource_group(obj):
         try:
             if 'resourceGroup' not in obj:
                 if obj['id']:
-                    id_str = str(obj['id'])
-                    if isinstance(id_str, dict):
-                        id_str = id_str['value']
-                    obj['resourceGroup'] = _parse_id(id_str)['resource-group']
+                    obj['resourceGroup'] = _parse_id(obj['id'])['resource-group']
         except (KeyError, IndexError):
             pass
         for item_key in obj:

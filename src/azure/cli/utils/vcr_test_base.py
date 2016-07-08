@@ -30,7 +30,7 @@ COMMAND_COVERAGE_FILENAME = 'command_coverage.txt'
 def _mock_get_mgmt_service_client(client_type, subscription_bound=True):
     # version of _get_mgmt_service_client to use when recording or playing tests
     profile = Profile()
-    cred, subscription_id = profile.get_login_credentials()
+    cred, subscription_id, _ = profile.get_login_credentials()
     if subscription_bound:
         client = client_type(cred, subscription_id)
     else:
@@ -60,7 +60,7 @@ def _mock_subscriptions(self): #pylint: disable=unused-argument
         "tenantId": "123",
         "isDefault": True}]
 
-def _mock_user_access_token(_, _1, _2): #pylint: disable=unused-argument
+def _mock_user_access_token(_, _1, _2, _3): #pylint: disable=unused-argument
     return ('Bearer', 'top-secret-token-for-you')
 
 def _mock_operation_delay(_):
@@ -155,13 +155,17 @@ class VCRTestBase(unittest.TestCase):#pylint: disable=too-many-instance-attribut
         'x-ms-served-by',
     ]
 
-    def __init__(self, test_file, test_name, run_live=False, debug=False):
+    # pylint: disable=too-many-arguments
+    def __init__(self, test_file, test_name, run_live=False, debug=False,
+                 skip_setup=False, skip_teardown=False):
         super(VCRTestBase, self).__init__(test_name)
         self.test_name = test_name
         self.recording_dir = os.path.join(os.path.dirname(test_file), 'recordings')
         self.cassette_path = os.path.join(self.recording_dir, '{}.yaml'.format(test_name))
         self.playback = os.path.isfile(self.cassette_path)
         self.run_live = run_live
+        self.skip_setup = skip_setup
+        self.skip_teardown = skip_teardown
         self.success = False
         self.exception = None
         self.track_commands = False
@@ -213,7 +217,7 @@ class VCRTestBase(unittest.TestCase):#pylint: disable=too-many-instance-attribut
         #pylint: disable=no-member
         try:
             set_up = getattr(self, "set_up", None)
-            if callable(set_up):
+            if callable(set_up) and not self.skip_setup:
                 self.set_up()
 
             if self.run_live:
@@ -226,7 +230,7 @@ class VCRTestBase(unittest.TestCase):#pylint: disable=too-many-instance-attribut
             raise ex
         finally:
             tear_down = getattr(self, "tear_down", None)
-            if callable(tear_down):
+            if callable(tear_down) and not self.skip_teardown:
                 self.tear_down()
 
     @mock.patch('azure.cli._profile.Profile.load_cached_subscriptions', _mock_subscriptions)
@@ -255,9 +259,12 @@ class VCRTestBase(unittest.TestCase):#pylint: disable=too-many-instance-attribut
         try:
             cli_main(command_list, file=output)
         except Exception as ex: # pylint: disable=broad-except
+            ex_msg = str(ex)
             if not isinstance(allowed_exceptions, list):
                 allowed_exceptions = [allowed_exceptions]
-            if str(ex) not in allowed_exceptions:
+            try:
+                next(x for x in allowed_exceptions if x in ex_msg)
+            except StopIteration:
                 raise ex
         self._track_executed_commands(command_list)
         result = output.getvalue().strip()
@@ -304,9 +311,12 @@ class VCRTestBase(unittest.TestCase):#pylint: disable=too-many-instance-attribut
                 os.remove(self.cassette_path)
 
 class ResourceGroupVCRTestBase(VCRTestBase):
-    def __init__(self, test_file, test_name, run_live=False, debug=False):
-        super(ResourceGroupVCRTestBase, self).__init__(test_file, test_name,
-                                                       run_live=run_live, debug=debug)
+    # pylint: disable=too-many-arguments
+    def __init__(self, test_file, test_name, run_live=False, debug=False,
+                 skip_setup=False, skip_teardown=False):
+        super(ResourceGroupVCRTestBase, self).__init__(test_file, test_name, run_live=run_live,
+                                                       debug=debug, skip_setup=skip_setup,
+                                                       skip_teardown=skip_teardown)
         self.resource_group = 'vcr_resource_group'
         self.location = 'westus'
 

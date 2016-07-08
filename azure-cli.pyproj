@@ -27,7 +27,8 @@
   <ItemGroup>
     <Compile Include="azure\cli\adal_authentication.py" />
     <Compile Include="azure\cli\application.py" />
-    <Compile Include="azure\cli\commands\azure_resource_id.py">
+    <Compile Include="azure\cli\commands\template_create.py" />
+    <Compile Include="azure\cli\commands\arm.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="azure\cli\commands\client_factory.py" />
@@ -43,6 +44,7 @@
     <Compile Include="azure\cli\extensions\__init__.py" />
     <Compile Include="azure\cli\main.py" />
     <Compile Include="azure\cli\tests\test_add_resourcegroup_transform.py" />
+    <Compile Include="azure\cli\tests\test_extensions_query.py" />
     <Compile Include="azure\cli\tests\test_logging.py" />
     <Compile Include="azure\cli\tests\test_resource_id.py">
       <SubType>Code</SubType>
@@ -54,7 +56,11 @@
     <Compile Include="azure\cli\tests\test_vcr_security.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="command_modules\azure-cli-webapp\azure\cli\command_modules\webapp\_param_folding.py" />
+    <Compile Include="command_modules\azure-cli-feedback\azure\cli\command_modules\feedback\__init__.py" />
+    <Compile Include="command_modules\azure-cli-feedback\azure\cli\command_modules\__init__.py" />
+    <Compile Include="command_modules\azure-cli-feedback\azure\cli\__init__.py" />
+    <Compile Include="command_modules\azure-cli-feedback\azure\__init__.py" />
+    <Compile Include="command_modules\azure-cli-feedback\setup.py" />
     <Compile Include="azure\cli\utils\vcr_test_base.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_nic\lib\credentials.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_nic\lib\exceptions.py" />
@@ -117,9 +123,7 @@
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_nsg\__init__.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\_validators.py">
-      <SubType>Code</SubType>
-    </Compile>
+    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\_validators.py" />
     <Compile Include="command_modules\azure-cli-resource\azure\cli\command_modules\resource\_factory.py">
       <SubType>Code</SubType>
     </Compile>
@@ -184,7 +188,6 @@
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_lb\lib\version.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_lb\lib\__init__.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_lb\__init__.py" />
-    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\_actions.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\_params.py">
       <SubType>Code</SubType>
     </Compile>
@@ -274,7 +277,6 @@
     <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\lib\models\basic_dependency.py" />
     <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\lib\models\dependency.py" />
     <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\lib\models\deployment_extended.py" />
-    <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\lib\models\deployment_parameter_virtual_network_ip_address_prefix.py" />
     <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\lib\models\deployment_properties_extended.py" />
     <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\lib\models\deployment_vm.py" />
     <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\lib\models\parameters_link.py" />
@@ -405,6 +407,11 @@
     <Folder Include="command_modules\azure-cli-component\azure\cli\" />
     <Folder Include="command_modules\azure-cli-component\azure\cli\command_modules\" />
     <Folder Include="command_modules\azure-cli-component\azure\cli\command_modules\component\" />
+    <Folder Include="command_modules\azure-cli-feedback\" />
+    <Folder Include="command_modules\azure-cli-feedback\azure\" />
+    <Folder Include="command_modules\azure-cli-feedback\azure\cli\" />
+    <Folder Include="command_modules\azure-cli-feedback\azure\cli\command_modules\" />
+    <Folder Include="command_modules\azure-cli-feedback\azure\cli\command_modules\feedback\" />
     <Folder Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_nic\" />
     <Folder Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_nic\lib\" />
     <Folder Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_nic\lib\models\" />
@@ -485,7 +492,6 @@
     <Folder Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\lib\" />
     <Folder Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\lib\models\" />
     <Folder Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\lib\operations\" />
-    <Folder Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\lib\__pycache__\" />
     <Folder Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\nested_templates\" />
     <Folder Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_avail_set\" />
     <Folder Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\tests\" />
@@ -503,7 +509,11 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="command_modules\azure-cli-component\requirements.txt" />
+    <Content Include="command_modules\azure-cli-feedback\README.rst" />
+    <Content Include="command_modules\azure-cli-feedback\requirements.txt" />
     <Content Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_lb\azuredeploy_test.md" />
+    <Content Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_lb\nested_templates\vnet_new.json" />
+    <Content Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_lb\nested_templates\vnet_none_or_existing.json" />
     <Content Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_lb\swagger_create_lb.json" />
     <Content Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_nic\azuredeploy.json" />
     <Content Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_nic\azuredeploy_tests.md">
@@ -523,7 +533,6 @@
     <Content Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_lb\nested_templates\publicIp_none_or_existing.json" />
     <Content Include="command_modules\azure-cli-network\requirements.txt" />
     <Content Include="command_modules\azure-cli-profile\requirements.txt" />
-    <Content Include="command_modules\azure-cli-resource\azure\cli\command_modules\resource\tests\arm_deploy_parameters.json" />
     <Content Include="command_modules\azure-cli-resource\azure\cli\command_modules\resource\tests\simple_deploy.json" />
     <Content Include="command_modules\azure-cli-resource\requirements.txt" />
     <Content Include="command_modules\azure-cli-role\azure\cli\command_modules\role\tests\recordings\expected_results.res" />
@@ -550,9 +559,6 @@
     <Content Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vmss_create\nested_templates\VNet_new.json" />
     <Content Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vmss_create\swagger_create_vmss.json" />
     <Content Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\azuredeploy.json" />
-    <Content Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\lib\__pycache__\version.cpython-35.pyc" />
-    <Content Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\lib\__pycache__\vm_creation_client.cpython-35.pyc" />
-    <Content Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\lib\__pycache__\__init__.cpython-35.pyc" />
     <Content Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\nested_templates\ExistingStorageAccount.json" />
     <Content Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\nested_templates\ExistingVNet.json" />
     <Content Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\nested_templates\NewStorageAccount.json" />
@@ -566,9 +572,11 @@
     <Content Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\nested_templates\nsg_new.json" />
     <Content Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\nested_templates\output_fqdn_new.json" />
     <Content Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\nested_templates\output_fqdn_none.json" />
-    <Content Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\nested_templates\output_ip_new_existing.json" />
+    <Content Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\nested_templates\output_ip_existing.json" />
+    <Content Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\nested_templates\output_ip_new.json" />
     <Content Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\nested_templates\output_ip_none.json" />
-    <Content Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\nested_templates\output_mac.json" />
+    <Content Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\nested_templates\output_mac_none.json" />
+    <Content Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\nested_templates\output_mac_new.json" />
     <Content Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\nested_templates\vm_existing_password.json" />
     <Content Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\nested_templates\vm_existing_sshkey.json" />
     <Content Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\nested_templates\vm_none_password.json" />

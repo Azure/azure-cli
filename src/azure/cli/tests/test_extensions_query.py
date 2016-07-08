@@ -1,4 +1,3 @@
-#pylint: skip-file
 import unittest
 
 from azure.cli.extensions.query import jmespath_type
@@ -10,12 +9,12 @@ class TestQuery(unittest.TestCase):
     (We are not testing JMESPath itself here.)
     '''
 
-    def test_query_valid_1(self):
+    def test_query_valid_1(self): # pylint: disable=no-self-use
         query = 'length(@)'
         # Should not raise any exception as it is valid
         jmespath_type(query)
 
-    def test_query_valid_1(self):
+    def test_query_valid_2(self): # pylint: disable=no-self-use
         query = "[?storageProfile.osDisk.osType=='Linux'].[resourceGroup,name]"
         # Should not raise any exception as it is valid
         jmespath_type(query)
