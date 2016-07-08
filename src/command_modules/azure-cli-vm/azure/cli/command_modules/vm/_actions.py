@@ -64,6 +64,7 @@ class PrivateIpAction(argparse.Action): #pylint: disable=too-few-public-methods
             namespace.private_ip_address_allocation = 'static'
 
 def _handle_vm_nics(namespace):
+    from azure.cli.commands.client_factory import get_subscription_id
     nics_value = namespace.network_interface_ids
     nics = []
 
@@ -82,7 +83,7 @@ def _handle_vm_nics(namespace):
                                                  resource_group=namespace.resource_group_name,
                                                  namespace='Microsoft.Network',
                                                  type='networkInterfaces',
-                                                 subscription=_get_subscription_id()),
+                                                 subscription=get_subscription_id()),
             'properties': {
                 'primary': nics_value[0] == n
             }
@@ -317,8 +318,3 @@ def _handle_container_ssh_file(**kwargs):
 
 APPLICATION.register(APPLICATION.COMMAND_PARSER_PARSED, _handle_container_ssh_file)
 
-def _get_subscription_id():
-    from azure.cli.commands.client_factory import Profile
-    profile = Profile()
-    _, subscription_id, _ = profile.get_login_credentials()
-    return subscription_id
