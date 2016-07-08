@@ -3,7 +3,7 @@ import azure.cli.commands.parameters #pylint: disable=unused-import
 
 from azure.mgmt.web import WebSiteManagementClient
 from azure.cli.commands.client_factory import get_mgmt_service_client
-from ._param_folding import register_folded_cli_argument
+from azure.cli.commands.template_create import register_folded_cli_argument
 
 # FACTORIES
 

@@ -5,7 +5,8 @@ from azure.mgmt.network.models import IPAllocationMethod
 from azure.cli.command_modules.network._validators import \
     (process_nic_namespace, process_network_lb_create_namespace, process_public_ip_create_namespace,
      validate_public_ip_type)
-from azure.cli.command_modules.network._param_folding import register_folded_cli_argument
+from azure.cli.commands.template_create import register_folded_cli_argument
+from azure.cli.commands.arm import is_valid_resource_id
 from azure.cli.commands.parameters import (location_type, get_resource_name_completion_list)
 from azure.cli.commands import register_cli_argument, CliArgumentType
 
@@ -37,8 +38,8 @@ register_cli_argument('network nic', 'enable_ip_forwarding', options_list=('--ip
 register_cli_argument('network nic', 'private_ip_address_allocation', help=argparse.SUPPRESS)
 register_cli_argument('network nic', 'network_security_group_type', help=argparse.SUPPRESS)
 register_cli_argument('network nic', 'public_ip_address_type', help=argparse.SUPPRESS)
-register_cli_argument('network nic', 'load_balancer_backend_address_pool_ids', options_list=('--lb-address-pool-ids',), nargs='+')
-register_cli_argument('network nic', 'load_balancer_inbound_nat_rule_ids', options_list=('--lb-nat-rule-ids',), nargs='+')
+register_cli_argument('network nic', 'load_balancer_backend_address_pool_ids', options_list=('--lb-address-pool-ids',), nargs='+', type=lambda val: val if is_valid_resource_id(val, ValueError) else '')
+register_cli_argument('network nic', 'load_balancer_inbound_nat_rule_ids', options_list=('--lb-nat-rule-ids',), nargs='+', type=lambda val: val if is_valid_resource_id(val, ValueError) else '')
 register_cli_argument('network nic create', 'network_interface_name', name_arg_type, validator=process_nic_namespace)
 
 register_cli_argument('network nic scale-set', 'virtual_machine_scale_set_name', options_list=('--vm-scale-set',), completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'))

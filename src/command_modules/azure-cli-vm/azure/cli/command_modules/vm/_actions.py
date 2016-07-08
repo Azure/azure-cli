@@ -8,7 +8,7 @@ import time
 from azure.cli._util import CLIError
 from azure.cli.application import APPLICATION
 from azure.cli.commands.parameters import get_one_of_subscription_locations
-from azure.cli.commands.azure_resource_id import AzureResourceId, resource_exists
+from azure.cli.commands.arm import resource_id, resource_exists
 
 from six.moves.urllib.request import urlopen #pylint: disable=import-error
 
@@ -78,9 +78,11 @@ def _handle_vm_nics(namespace):
 
     for n in nics_value:
         nics.append({
-            'id': n if '/' in n else str(AzureResourceId(n, namespace.resource_group_name,
-                                                         'Microsoft.Network/networkInterfaces',
-                                                         _get_subscription_id())),
+            'id': n if '/' in n else resource_id(name=n,
+                                                 resource_group=namespace.resource_group_name,
+                                                 namespace='Microsoft.Network',
+                                                 type='networkInterfaces',
+                                                 subscription=_get_subscription_id()),
             'properties': {
                 'primary': nics_value[0] == n
             }
@@ -92,10 +94,12 @@ def _handle_vm_nics(namespace):
 def _resource_not_exists(resource_type):
     def _handle_resource_not_exists(namespace):
         # TODO: hook up namespace._subscription_id once we support it
-        r_id = AzureResourceId(namespace.name, namespace.resource_group_name, resource_type,
-                               _get_subscription_id())
-        if resource_exists(r_id):
-            raise CLIError('Resource {} already exists.'.format(str(r_id)))
+        ns, t = resource_type.split('/')
+        if resource_exists(namespace.resource_group_name, namespace.name, ns, t):
+            raise CLIError('Resource {} of type {} in group {} already exists.'.format(
+                namespace.name,
+                resource_type,
+                namespace.resource_group_name))
     return _handle_resource_not_exists
 
 def _os_disk_default(namespace):
