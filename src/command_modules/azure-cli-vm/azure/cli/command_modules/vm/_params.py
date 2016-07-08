@@ -18,7 +18,9 @@ from azure.cli.command_modules.vm._actions import (VMImageFieldAction,
                                                    _handle_vm_nics,
                                                    PrivateIpAction,
                                                    _resource_not_exists,
-                                                   _os_disk_default)
+                                                   _os_disk_default,
+                                                   _find_default_vnet,
+                                                   _find_default_storage_account)
 from azure.cli.commands.parameters import (location_type,
                                            get_location_completion_list,
                                            get_one_of_subscription_locations,
@@ -159,8 +161,8 @@ for scope in ['vm create', 'vm scaleset create']:
     register_cli_argument(scope, 'private_ip_address', help='Static private IP address (e.g. 10.0.0.5).', options_list=('--private-ip-address',), action=PrivateIpAction)
     register_cli_argument(scope, 'public_ip_address_allocation', CliArgumentType(choices=['dynamic', 'static'], help='', default='dynamic', type=str.lower))
     register_folded_cli_argument(scope, 'public_ip_address', 'Microsoft.Network/publicIPAddresses', help='Name or ID of public IP address (creates if doesn\'t exist)')
-    register_folded_cli_argument(scope, 'storage_account', 'Microsoft.Storage/storageAccounts', help='Name or ID of storage account (creates if doesn\'t exist)')
-    register_folded_cli_argument(scope, 'virtual_network', 'Microsoft.Network/virtualNetworks', help='Name or ID of virtual network (creates if doesn\'t exist)', options_list=('--vnet',))
+    register_folded_cli_argument(scope, 'storage_account', 'Microsoft.Storage/storageAccounts', help='Name or ID of storage account (creates if doesn\'t exist).  Chooses an existing storage account if none specified.', validator=_find_default_storage_account)
+    register_folded_cli_argument(scope, 'virtual_network', 'Microsoft.Network/virtualNetworks', help='Name or ID of virtual network (creates if doesn\'t exist).  Chooses an existing VNet if none specified.', options_list=('--vnet',), validator=_find_default_vnet)
     register_folded_cli_argument(scope, 'network_security_group', 'Microsoft.Network/networkSecurityGroups', help='Name or ID of network security group (creates if doesn\'t exist)', options_list=('--nsg',))
     register_cli_argument(scope, 'network_security_group_rule', nsg_rule_type, options_list=('--nsg-rule',))
     register_extra_cli_argument(scope, 'image', options_list=('--image',), action=VMImageFieldAction, completer=get_urn_aliases_completion_list, default='Win2012R2Datacenter')

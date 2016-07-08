@@ -102,6 +102,39 @@ def _resource_not_exists(resource_type):
                 namespace.resource_group_name))
     return _handle_resource_not_exists
 
+def _find_default_vnet(namespace):
+    if not namespace.virtual_network and not namespace.virtual_network_type:
+        from azure.mgmt.network import NetworkManagementClient
+        from azure.cli.commands.client_factory import get_mgmt_service_client
+
+        client = get_mgmt_service_client(NetworkManagementClient).virtual_networks
+
+        vnet = next((v for v in
+                     client.list(namespace.resource_group_name)),
+                    None)
+        if vnet:
+            try:
+                namespace.subnet_name = vnet.subnets[0].name
+                namespace.virtual_network = vnet.name
+                namespace.virtual_network_type = 'existingName'
+            except KeyError:
+                pass
+
+def _find_default_storage_account(namespace):
+    if not namespace.storage_account and not namespace.storage_account_type:
+        from azure.mgmt.storage import StorageManagementClient
+        from azure.cli.commands.client_factory import get_mgmt_service_client
+
+        client = get_mgmt_service_client(StorageManagementClient).storage_accounts
+
+        sku_tier = 'Premium' if 'Premium' in namespace.storage_type else 'Standard'
+        account = next((a for a in client.list_by_resource_group(namespace.resource_group_name)
+                        if a.sku.tier.value == sku_tier), None)
+
+        if account:
+            namespace.storage_account = account.name
+            namespace.storage_account_type = 'existingName'
+
 def _os_disk_default(namespace):
     if not namespace.os_disk_name:
         namespace.os_disk_name = 'osdisk{}'.format(str(int(math.ceil(time.time()))))
