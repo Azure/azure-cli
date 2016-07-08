@@ -54,6 +54,7 @@ def _name_id_fold(base_name, resource_type, type_field, #pylint: disable=too-man
             # "" and '' as empty strings
             setattr(namespace, type_field, none_flag_value)
         else:
+            from azure.cli.commands.client_factory import get_subscription_id
             has_parent = parent_name is not None and parent_type is not None
             if is_valid_resource_id(base_name_val):
                 resource_id_parts = parse_resource_id(base_name_val)
@@ -85,8 +86,3 @@ def _name_id_fold(base_name, resource_type, type_field, #pylint: disable=too-man
 
     return handle_folding
 
-def get_subscription_id():
-    from azure.cli.commands.client_factory import Profile
-    profile = Profile()
-    _, subscription_id, _ = profile.get_login_credentials()
-    return subscription_id
