@@ -1,7 +1,5 @@
 import argparse
 
-from azure.cli.commands.azure_resource_id import AzureResourceId
-
 def _convert_id_list_to_object(data):
     if not data:
         return None
@@ -10,12 +8,7 @@ def _convert_id_list_to_object(data):
         data = [data]
     data_list = []
     for val in data:
-        # currently only supports accepting ids, not names
-        try:
-            data_list.append({'id': str(AzureResourceId(val))})
-        except ValueError:
-            raise argparse.ArgumentError(
-                None, 'Please supply a space-separated list of well-formed IDs.')
+        data_list.append({'id': val})
     return data_list
 
 def process_nic_namespace(namespace):
