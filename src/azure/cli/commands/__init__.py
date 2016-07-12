@@ -42,7 +42,7 @@ class CliArgumentType(object):
 
 class CliCommandArgument(object):
 
-    _NAMED_ARGUMENTS = ('options_list', 'validator', 'completer')
+    _NAMED_ARGUMENTS = ('options_list', 'validator', 'completer', 'id_part')
 
     def __init__(self, dest=None, argtype=None, **kwargs):
         self.type = CliArgumentType(overrides=argtype, **kwargs)

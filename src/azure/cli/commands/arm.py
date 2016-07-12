@@ -1,6 +1,9 @@
+import argparse
 import re
 from azure.cli.commands.client_factory import get_mgmt_service_client
 from azure.mgmt.resource.resources import ResourceManagementClient
+from azure.cli.application import APPLICATION
+from azure.cli._util import CLIError
 
 regex = re.compile('/subscriptions/(?P<subscription>[^/]*)/resourceGroups/(?P<resource_group>[^/]*)'
                    '/providers/(?P<namespace>[^/]*)/(?P<type>[^/]*)/(?P<name>[^/]*)'
@@ -58,7 +61,13 @@ def is_valid_resource_id(rid, exception_type=None):
         raise exception_type()
     return is_valid
 
+class ResourceId(dict):
 
+    def __init__(self, value):
+        super(ResourceId, self).__init__()
+        if not is_valid_resource_id(value):
+            raise ValueError()
+        self.update(parse_resource_id(value))
 
 def resource_exists(resource_group, name, namespace, type, **_): # pylint: disable=redefined-builtin
     '''Checks if the given resource exists.
@@ -68,3 +77,64 @@ def resource_exists(resource_group, name, namespace, type, **_): # pylint: disab
     client = get_mgmt_service_client(ResourceManagementClient).resources
     existing = len(list(client.list(filter=odata_filter))) == 1
     return existing
+
+def register_id_parameter(command_name, *dummies, split_func=parse_resource_id, **kwargs): # pylint: disable=unused-variable, unused-argument
+    pass
+
+
+def add_id_parameters(command_table):
+
+    def split_action(arguments):
+        class SplitAction(argparse.Action): #pylint: disable=too-few-public-methods
+
+            def __call__(self, parser, namespace, values, option_string=None):
+                try:
+                    for arg in [arg for arg in arguments.values() if arg.id_part]:
+                        setattr(namespace, arg.name, values[arg.id_part])
+                except Exception as ex:
+                    raise ValueError(ex)
+
+        return SplitAction
+
+    def command_loaded_handler(command):
+        if not 'name' in [arg.id_part for arg in command.arguments.values() if arg.id_part]:
+            # Only commands with a resource name are candidates for an id parameter
+            return
+        if command.name.split()[-1] == 'create':
+            # Somewhat blunt hammer, but any create commands will not have an automatic id
+            # parameter
+            return
+
+        required_arguments = []
+        optional_arguments = []
+        for arg in [arg for arg in command.arguments.values() if arg.id_part]:
+            if arg.options.get('required', False):
+                required_arguments.append(arg)
+            else:
+                optional_arguments.append(arg)
+            arg.required = False
+
+        def required_values_validator(namespace):
+            errors = []
+            for arg in required_arguments:
+                if getattr(namespace, arg.name, None) is None:
+                    errors.append(arg)
+
+            if errors:
+                missing_requried = ' '.join((arg.options_list[0] for arg in errors))
+                raise CLIError('({} | {}) are required'.format(missing_requried, '--id'))
+
+        command.add_argument(argparse.SUPPRESS,
+                             '--id',
+                             metavar='RESOURCE_ID',
+                             help='ID of resource',
+                             action=split_action(command.arguments),
+                             type=ResourceId,
+                             validator=required_values_validator)
+
+    for command in command_table.values():
+        command_loaded_handler(command)
+
+    APPLICATION.remove(APPLICATION.COMMAND_TABLE_LOADED, add_id_parameters)
+
+APPLICATION.register(APPLICATION.COMMAND_TABLE_LOADED, add_id_parameters)
