@@ -388,11 +388,11 @@ class NetworkLoadBalancerSubresourceScenarioTest(ResourceGroupVCRTestBase):
         self.cmd('network lb probe list {}'.format(lb_rg), checks=JMESPathCheck('length(@)', 2))
 
         # Test load balancing rules
-        self.cmd('network lb rule create {} -n rule1 --frontend-ip-name LoadBalancerFrontEnd --frontend-port 40 --backend-address-pool-name bap1 --backend-port 40 --protocol tcp'.format(lb_rg))
-        self.cmd('network lb rule create {} -n rule2 --frontend-ip-name LoadBalancerFrontEnd --frontend-port 60 --backend-address-pool-name bap1 --backend-port 60 --protocol tcp'.format(lb_rg))
+        self.cmd('network lb rule create {} -n rule1 --frontend-ip-name LoadBalancerFrontEnd --frontend-port 40 --backend-pool-name bap1 --backend-port 40 --protocol tcp'.format(lb_rg))
+        self.cmd('network lb rule create {} -n rule2 --frontend-ip-name LoadBalancerFrontEnd --frontend-port 60 --backend-pool-name bap1 --backend-port 60 --protocol tcp'.format(lb_rg))
         self.cmd('network lb rule list {}'.format(lb_rg), checks=JMESPathCheck('length(@)', 2))
         self.cmd('network lb rule set {} -n rule1 --floating-ip true --idle-timeout 20 --load-distribution sourceip --protocol udp'.format(lb_rg))
-        self.cmd('network lb rule set {} -n rule2 --frontend-ip-name ipconfig1 --backend-address-pool-name bap2 --load-distribution sourceipprotocol'.format(lb_rg))
+        self.cmd('network lb rule set {} -n rule2 --frontend-ip-name ipconfig1 --backend-pool-name bap2 --load-distribution sourceipprotocol'.format(lb_rg))
         self.cmd('network lb rule show {} -n rule1'.format(lb_rg), checks=[
             JMESPathCheck('enableFloatingIp', True),
             JMESPathCheck('idleTimeoutInMinutes', 20),
@@ -728,7 +728,7 @@ class NetworkSubnetSetScenarioTest(ResourceGroupVCRTestBase):
         subnet_addr_prefix_new = '123.0.5.0/24'
         nsg_name = 'test-vnet-nsg'
 
-        self.cmd('network vnet create --resource-group {} --name {} --vnet-prefix {} --subnet-name {} --subnet-prefix {}'.format(
+        self.cmd('network vnet create --resource-group {} --name {} --address-prefix {} --subnet-name {} --subnet-prefix {}'.format(
             self.resource_group, self.vnet_name, vnet_addr_prefix, subnet_name, subnet_addr_prefix))
         self.cmd('network nsg create --resource-group {} --name {}'.format(self.resource_group, nsg_name))
 
