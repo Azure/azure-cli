@@ -480,7 +480,7 @@ class NetworkNicScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck('newNIC.provisioningState', 'Succeeded')
         ])
         # exercise optional parameters
-        self.cmd('network nic create -g {} -n {} --subnet {} --ip-forwarding --private-ip-address {} --public-ip-address {} --internal-dns-name test --lb-address-pool-ids {} --lb-nat-rule-ids {}'.format(rg, nic, subnet_id, private_ip, public_ip_name, address_pool_ids, rule_ids), checks=[
+        self.cmd('network nic create -g {} -n {} --subnet {} --ip-forwarding --private-ip-address {} --public-ip-address {} --internal-dns-name test --lb-address-pools {} --lb-inbound-nat-rules {}'.format(rg, nic, subnet_id, private_ip, public_ip_name, address_pool_ids, rule_ids), checks=[
             JMESPathCheck('newNIC.ipConfigurations[0].properties.privateIPAllocationMethod', 'Static'),
             JMESPathCheck('newNIC.ipConfigurations[0].properties.privateIPAddress', private_ip),
             JMESPathCheck('newNIC.enableIPForwarding', True),
@@ -488,14 +488,14 @@ class NetworkNicScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck('newNIC.dnsSettings.internalDnsNameLabel', 'test')
         ])
         # exercise creating with NSG
-        self.cmd('network nic create -g {} -n {} --subnet {} --vnet-name {} --nsg {}'.format(rg, nic, subnet, vnet, nsg), checks=[
+        self.cmd('network nic create -g {} -n {} --subnet {} --vnet-name {} --network-security-group {}'.format(rg, nic, subnet, vnet, nsg), checks=[
             JMESPathCheck('newNIC.ipConfigurations[0].properties.privateIPAllocationMethod', 'Dynamic'),
             JMESPathCheck('newNIC.enableIPForwarding', False),
             JMESPathCheck("newNIC.networkSecurityGroup.contains(id, '{}')".format(nsg), True),
             JMESPathCheck('newNIC.provisioningState', 'Succeeded')
         ])
         # exercise creating with NSG and Public IP
-        self.cmd('network nic create -g {} -n {} --subnet {} --vnet-name {} --nsg {} --public-ip-address {}'.format(rg, nic, subnet, vnet, nsg_id, public_ip_id), checks=[
+        self.cmd('network nic create -g {} -n {} --subnet {} --vnet-name {} --network-security-group {} --public-ip-address {}'.format(rg, nic, subnet, vnet, nsg_id, public_ip_id), checks=[
             JMESPathCheck('newNIC.ipConfigurations[0].properties.privateIPAllocationMethod', 'Dynamic'),
             JMESPathCheck('newNIC.enableIPForwarding', False),
             JMESPathCheck("newNIC.networkSecurityGroup.contains(id, '{}')".format(nsg), True),
@@ -517,7 +517,7 @@ class NetworkNicScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck('resourceGroup', rg),
             JMESPathCheck('name', nic)
         ])
-        self.cmd('network nic set -g {} -n {} --internal-dns-name noodle --ip-forwarding true --nsg {}'.format(rg, nic, alt_nsg), checks=[
+        self.cmd('network nic set -g {} -n {} --internal-dns-name noodle --ip-forwarding true --network-security-group {}'.format(rg, nic, alt_nsg), checks=[
             JMESPathCheck('enableIpForwarding', True),
             JMESPathCheck('dnsSettings.internalDnsNameLabel', 'noodle'),
             JMESPathCheck("networkSecurityGroup.contains(id, '{}')".format(alt_nsg), True),
@@ -566,15 +566,15 @@ class NetworkNicSubresourceScenarioTest(ResourceGroupVCRTestBase):
         self.cmd('network lb create -g {} -n {}'.format(rg, lb))
         self.cmd('network lb inbound-nat-rule create -g {} --lb-name {} -n rule1 --protocol tcp --frontend-port 100 --backend-port 100 --frontend-ip-name LoadBalancerFrontEnd'.format(rg, lb))
         self.cmd('network lb inbound-nat-rule create -g {} --lb-name {} -n rule2 --protocol tcp --frontend-port 200 --backend-port 200 --frontend-ip-name LoadBalancerFrontEnd'.format(rg, lb))
-        rule_ids = ' '.join(self.cmd('network lb inbound-nat-rule list -g {} -n {} --query "[].id"'.format(rg, lb)))
+        rule1_id = self.cmd('network lb inbound-nat-rule show -g {} --lb-name {} -n rule1'.format(rg, lb))['id']
         self.cmd('network lb address-pool create -g {} --lb-name {} -n bap1'.format(rg, lb))
         self.cmd('network lb address-pool create -g {} --lb-name {} -n bap2'.format(rg, lb))
-        address_pool_ids = ' '.join(self.cmd('network lb address-pool list -g {} -n {} --query "[].id"'.format(rg, lb)))
+        bap1_id = self.cmd('network lb address-pool show -g {} --lb-name {} -n bap1'.format(rg, lb))['id']
 
         private_ip = '10.0.0.15'
         # test ability to set load balancer IDs
-        self.cmd('network nic ip-config set -g {} --nic-name {} -n {} --lb-address-pool-ids {} --lb-nat-rule-ids {} --private-ip-address {}'.format(rg, nic, config, address_pool_ids, rule_ids, private_ip), checks=[
-            JMESPathCheck('length(ipConfigurations[0].loadBalancerBackendAddressPools)', 3), # includes the default backend pool
+        self.cmd('network nic ip-config set -g {} --nic-name {} -n {} --lb-name {} --lb-address-pools {} bap2 --lb-inbound-nat-rules {} rule2 --private-ip-address {}'.format(rg, nic, config, lb, bap1_id, rule1_id, private_ip), checks=[
+            JMESPathCheck('length(ipConfigurations[0].loadBalancerBackendAddressPools)', 2), # includes the default backend pool
             JMESPathCheck('length(ipConfigurations[0].loadBalancerInboundNatRules)', 2),
             JMESPathCheck('ipConfigurations[0].privateIpAddress', private_ip),
             JMESPathCheck('ipConfigurations[0].privateIpAllocationMethod', 'Static')
@@ -587,9 +587,9 @@ class NetworkNicSubresourceScenarioTest(ResourceGroupVCRTestBase):
             checks=JMESPathCheck('length(ipConfigurations[0].loadBalancerInboundNatRules)', 2))
 
         self.cmd('network nic ip-config address-pool remove -g {} --lb-name {} --nic-name {} --ip-config-name {} -n bap1'.format(rg, lb, nic, config),
-            checks=JMESPathCheck('length(ipConfigurations[0].loadBalancerBackendAddressPools)', 2))
+            checks=JMESPathCheck('length(ipConfigurations[0].loadBalancerBackendAddressPools)', 1))
         self.cmd('network nic ip-config address-pool add -g {} --lb-name {} --nic-name {} --ip-config-name {} -n bap1'.format(rg, lb, nic, config),
-            checks=JMESPathCheck('length(ipConfigurations[0].loadBalancerBackendAddressPools)', 3))
+            checks=JMESPathCheck('length(ipConfigurations[0].loadBalancerBackendAddressPools)', 2))
 
         self.cmd('network nic ip-config set -g {} --nic-name {} -n {} --private-ip-address "" --public-ip-address {}'.format(rg, nic, config, public_ip_id), checks=[
             JMESPathCheck('ipConfigurations[0].privateIpAllocationMethod', 'Dynamic'),

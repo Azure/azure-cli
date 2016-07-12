@@ -7,8 +7,7 @@ from azure.mgmt.network.models.network_management_client_enums import \
      ApplicationGatewayTier, ApplicationGatewayProtocol,
      ApplicationGatewayRequestRoutingRuleType)
 
-from azure.cli.commands import CliArgumentType, register_cli_argument
-from azure.cli.commands.arm import is_valid_resource_id
+from azure.cli.commands import register_cli_argument, register_extra_cli_argument, CliArgumentType
 from azure.cli.commands.parameters import (location_type, get_resource_name_completion_list, get_enum_type_completion_list)
 from azure.cli.commands.validators import MarkSpecifiedAction
 from azure.cli.command_modules.network._validators import \
@@ -25,7 +24,9 @@ from azure.cli.command_modules.network._validators import \
      process_public_ip_create_namespace, validate_public_ip_type, validate_private_ip_address,
      validate_subnet_name_or_id, validate_public_ip_name_or_id, validate_nsg_name_or_id,
      validate_inbound_nat_rule_id_list, validate_address_pool_id_list,
-     validate_inbound_nat_rule_name_or_id, validate_address_pool_name_or_id)
+     validate_inbound_nat_rule_name_or_id, validate_address_pool_name_or_id,
+     validate_public_ip_type, validate_private_ip_address, validate_servers, validate_cert,
+     validate_address_prefixes)
 from azure.cli.command_modules.network.mgmt_nic.lib.models.nic_creation_client_enums import privateIpAddressVersion
 
 # BASIC PARAMETER CONFIGURATION
@@ -88,8 +89,6 @@ register_cli_argument('network nic', 'subnet_name', options_list=('--subnet-name
 register_cli_argument('network nic', 'private_ip_address_allocation', help=argparse.SUPPRESS)
 register_cli_argument('network nic', 'network_security_group_type', help=argparse.SUPPRESS)
 register_cli_argument('network nic', 'public_ip_address_type', help=argparse.SUPPRESS)
-register_cli_argument('network nic', 'load_balancer_backend_address_pool_ids', options_list=('--lb-address-pool-ids',), nargs='+', validator=validate_address_pool_id_list)
-register_cli_argument('network nic', 'load_balancer_inbound_nat_rule_ids', options_list=('--lb-nat-rule-ids',), nargs='+', validator=validate_inbound_nat_rule_id_list)
 register_cli_argument('network nic', 'internal_dns_name_label', options_list=('--internal-dns-name',))
 
 register_cli_argument('network nic create', 'network_interface_name', name_arg_type, validator=process_nic_create_namespace)
@@ -97,10 +96,15 @@ register_cli_argument('network nic create', 'enable_ip_forwarding', options_list
 register_cli_argument('network nic create', 'use_dns_settings', help=argparse.SUPPRESS)
 register_folded_cli_argument('network nic create', 'public_ip_address', 'Microsoft.Network/publicIPAddresses')
 register_folded_cli_argument('network nic create', 'subnet', 'subnets', parent_name='virtual_network_name', parent_type='Microsoft.Network/virtualNetworks')
-register_folded_cli_argument('network nic create', 'network_security_group', 'Microsoft.Network/networkSecurityGroups', options_list=('--nsg',))
+register_folded_cli_argument('network nic create', 'network_security_group', 'Microsoft.Network/networkSecurityGroups')
 
 register_cli_argument('network nic set', 'enable_ip_forwarding', options_list=('--ip-forwarding',), choices=['true', 'false'])
-register_cli_argument('network nic set', 'network_security_group', options_list=('--nsg',), validator=validate_nsg_name_or_id)
+register_cli_argument('network nic set', 'network_security_group', validator=validate_nsg_name_or_id)
+
+for item in ['create', 'ip-config set', 'ip-config create']:
+    register_extra_cli_argument('network nic {}'.format(item), 'load_balancer_name', options_list=('--lb-name',), completer=get_resource_name_completion_list('Microsoft.Network/loadBalancers'), help='The name of the load balancer to use when adding NAT rules or address pools by name (ignored when IDs are specified).')
+    register_cli_argument('network nic {}'.format(item), 'load_balancer_backend_address_pool_ids', options_list=('--lb-address-pools',), nargs='+', validator=validate_address_pool_id_list, help='Space separated list of names or IDs of load balancer address pools to associate with the NIC. If names are used, --lb-name must be specified.')
+    register_cli_argument('network nic {}'.format(item), 'load_balancer_inbound_nat_rule_ids', options_list=('--lb-inbound-nat-rules',), nargs='+', validator=validate_inbound_nat_rule_id_list, help='Space separated list of names or IDs of load balancer inbound NAT rules to associate with the NIC. If names are used, --lb-name must be specified.')
 
 # NIC ScaleSet
 register_cli_argument('network nic scale-set', 'virtual_machine_scale_set_name', options_list=('--vm-scale-set',), completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'), id_part='name')
@@ -185,7 +189,7 @@ register_cli_argument('network lb create', 'load_balancer_name', load_balancer_n
 register_cli_argument('network lb delete', 'load_balancer_name', load_balancer_name_type, options_list=('--name', '-n'))
 register_cli_argument('network lb show', 'load_balancer_name', load_balancer_name_type, options_list=('--name', '-n'))
 
-register_cli_argument('network lb create', 'public_ip_dns_name', validator=process_network_lb_create_namespace)
+register_cli_argument('network lb create', 'public_ip_dns_name', validator=process_lb_create_namespace)
 register_cli_argument('network lb create', 'dns_name_type', help=argparse.SUPPRESS)
 register_cli_argument('network lb create', 'public_ip_address_allocation', choices=choices_ip_allocation_method, default='dynamic', type=str.lower)
 register_folded_cli_argument('network lb create', 'public_ip_address', 'Microsoft.Network/publicIPAddresses', validator=validate_public_ip_type)

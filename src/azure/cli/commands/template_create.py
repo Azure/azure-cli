@@ -78,7 +78,8 @@ def _name_id_fold(base_name, resource_type, type_field, #pylint: disable=too-man
                 setattr(namespace, base_name, resource_id(**resource_id_parts))
             elif is_valid_resource_id(base_name_val):
                 raise CLIError('ID {} does not exist. Please specify '
-                               'a name to create a new resource.'.format(resource_id))
+                               'a name to create a new resource.'.format(
+                                   resource_id(**resource_id_parts)))
             else:
                 setattr(namespace, type_field, new_flag_value)
 

@@ -340,7 +340,7 @@ def set_nic(resource_group_name, network_interface_name, network_security_group=
 set_nic.__doc__ = NicOperations.create_or_update.__doc__
 
 def create_nic_ip_config(resource_group_name, network_interface_name, ip_config_name, subnet=None,
-                         virtual_network_name=None, public_ip_address=None, # pylint: disable=unused-argument
+                         virtual_network_name=None, public_ip_address=None, load_balancer_name=None, # pylint: disable=unused-argument
                          load_balancer_backend_address_pool_ids=None,
                          load_balancer_inbound_nat_rule_ids=None,
                          private_ip_address=None, private_ip_address_allocation='dynamic',
@@ -365,7 +365,7 @@ def create_nic_ip_config(resource_group_name, network_interface_name, ip_config_
 create_nic_ip_config.__doc__ = NicOperations.create_or_update.__doc__
 
 def set_nic_ip_config(resource_group_name, network_interface_name, ip_config_name, subnet=None,
-                      virtual_network_name=None, public_ip_address=None, # pylint: disable=unused-argument
+                      virtual_network_name=None, public_ip_address=None, load_balancer_name=None, # pylint: disable=unused-argument
                       load_balancer_backend_address_pool_ids=None,
                       load_balancer_inbound_nat_rule_ids=None,
                       private_ip_address=None, private_ip_address_allocation=None, # pylint: disable=unused-argument
