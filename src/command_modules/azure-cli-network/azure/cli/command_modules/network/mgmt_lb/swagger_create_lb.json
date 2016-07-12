@@ -145,7 +145,7 @@
           "type": "string",
           "description": "URI referencing the template.",
           "enum": [
-            "https://azuresdkci.blob.core.windows.net/templatehost/CreateLb_2016-06-20/azuredeploy.json"
+            "https://azuresdkci.blob.core.windows.net/templatehost/CreateLb_2016-07-11/azuredeploy.json"
           ]
         },
         "contentVersion": {
@@ -173,6 +173,11 @@
         "dnsNameType": {
           "type": "object",
           "$ref": "#/definitions/DeploymentParameter_dnsNameType",
+          "x-ms-client-flatten": true
+        },
+        "frontendIpName": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_frontendIpName",
           "x-ms-client-flatten": true
         },
         "loadBalancerName": {
@@ -242,8 +247,8 @@
         }
       },
       "required": [
-        "_artifactsLocation",
-        "loadBalancerName"
+        "loadBalancerName",
+        "_artifactsLocation"
       ]
     },
     "DeploymentParameter_backendPoolName": {
@@ -266,6 +271,16 @@
             "new"
           ],
           "default": "none"
+        }
+      }
+    },
+    "DeploymentParameter_frontendIpName": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "Name of the frontend IP configuration.",
+          "x-ms-client-name": "frontendIpName",
+          "default": "LoadBalancerFrontEnd"
         }
       }
     },
@@ -422,7 +437,7 @@
           "description": "Container URI of of the template.",
           "x-ms-client-name": "_artifactsLocation",
           "enum": [
-            "https://azuresdkci.blob.core.windows.net/templatehost/CreateLb_2016-06-20"
+            "https://azuresdkci.blob.core.windows.net/templatehost/CreateLb_2016-07-11"
           ]
         }
       },

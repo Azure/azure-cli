@@ -17,7 +17,7 @@ class DeploymentLb(Model):
     sending a request.
 
     :ivar uri: URI referencing the template. Default value:
-     "https://azuresdkci.blob.core.windows.net/templatehost/CreateLb_2016-06-20/azuredeploy.json"
+     "https://azuresdkci.blob.core.windows.net/templatehost/CreateLb_2016-07-11/azuredeploy.json"
      .
     :vartype uri: str
     :param content_version: If included it must match the ContentVersion in
@@ -25,7 +25,7 @@ class DeploymentLb(Model):
     :type content_version: str
     :ivar _artifacts_location: Container URI of of the template. Default
      value:
-     "https://azuresdkci.blob.core.windows.net/templatehost/CreateLb_2016-06-20"
+     "https://azuresdkci.blob.core.windows.net/templatehost/CreateLb_2016-07-11"
      .
     :vartype _artifacts_location: str
     :param backend_pool_name: Name of load balancer backend pool.
@@ -33,6 +33,9 @@ class DeploymentLb(Model):
     :param dns_name_type: Associate VMs with a public IP address to a DNS
      name. Possible values include: 'none', 'new'. Default value: "none" .
     :type dns_name_type: str
+    :param frontend_ip_name: Name of the frontend IP configuration. Default
+     value: "LoadBalancerFrontEnd" .
+    :type frontend_ip_name: str
     :param load_balancer_name: Name for load balancer.
     :type load_balancer_name: str
     :param location: Location for load balancer resource.
@@ -89,6 +92,7 @@ class DeploymentLb(Model):
         '_artifacts_location': {'key': 'properties.parameters._artifactsLocation.value', 'type': 'str'},
         'backend_pool_name': {'key': 'properties.parameters.backendPoolName.value', 'type': 'str'},
         'dns_name_type': {'key': 'properties.parameters.dnsNameType.value', 'type': 'str'},
+        'frontend_ip_name': {'key': 'properties.parameters.frontendIpName.value', 'type': 'str'},
         'load_balancer_name': {'key': 'properties.parameters.loadBalancerName.value', 'type': 'str'},
         'location': {'key': 'properties.parameters.location.value', 'type': 'str'},
         'private_ip_address': {'key': 'properties.parameters.privateIpAddress.value', 'type': 'str'},
@@ -105,16 +109,17 @@ class DeploymentLb(Model):
         'mode': {'key': 'properties.mode', 'type': 'str'},
     }
 
-    uri = "https://azuresdkci.blob.core.windows.net/templatehost/CreateLb_2016-06-20/azuredeploy.json"
+    uri = "https://azuresdkci.blob.core.windows.net/templatehost/CreateLb_2016-07-11/azuredeploy.json"
 
-    _artifacts_location = "https://azuresdkci.blob.core.windows.net/templatehost/CreateLb_2016-06-20"
+    _artifacts_location = "https://azuresdkci.blob.core.windows.net/templatehost/CreateLb_2016-07-11"
 
     mode = "Incremental"
 
-    def __init__(self, load_balancer_name, content_version=None, backend_pool_name=None, dns_name_type="none", location=None, private_ip_address=None, private_ip_address_allocation="dynamic", public_ip_address=None, public_ip_address_allocation="dynamic", public_ip_address_type="new", public_ip_dns_name=None, subnet=None, subnet_address_prefix="10.0.0.0/24", subnet_type="none", virtual_network_name=None, vnet_address_prefix="10.0.0.0/16"):
+    def __init__(self, load_balancer_name, content_version=None, backend_pool_name=None, dns_name_type="none", frontend_ip_name="LoadBalancerFrontEnd", location=None, private_ip_address=None, private_ip_address_allocation="dynamic", public_ip_address=None, public_ip_address_allocation="dynamic", public_ip_address_type="new", public_ip_dns_name=None, subnet=None, subnet_address_prefix="10.0.0.0/24", subnet_type="none", virtual_network_name=None, vnet_address_prefix="10.0.0.0/16"):
         self.content_version = content_version
         self.backend_pool_name = backend_pool_name
         self.dns_name_type = dns_name_type
+        self.frontend_ip_name = frontend_ip_name
         self.load_balancer_name = load_balancer_name
         self.location = location
         self.private_ip_address = private_ip_address
