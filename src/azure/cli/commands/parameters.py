@@ -54,8 +54,9 @@ def get_resource_name_completion_list(resource_type=None):
     return completer
 
 def get_enum_type_completion_list(enum_type=None):
+    ENUM_MAPPING_KEY = '_value2member_map_'
     def completer(prefix, action, parsed_args, **kwargs): # pylint: disable=unused-argument
-        return list(enum_type.__dict__['_value2member_map_'].keys())
+        return list(enum_type.__dict__[ENUM_MAPPING_KEY].keys())
     return completer
 
 resource_group_name_type = CliArgumentType(
