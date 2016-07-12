@@ -89,12 +89,11 @@ class Application(object):
             argv[0] = '--help'
 
         args = self.parser.parse_args(argv)
-        parser = getattr(args, '_parser', None)
         try:
             _validate_arguments(args)
         except: # pylint: disable=bare-except
             err = sys.exc_info()[1]
-            (parser or self.parser).error(str(err))
+            getattr(args, '_parser', self.parser).error(str(err))
 
         self.session['command'] = args.command
         self.raise_event(self.COMMAND_PARSER_PARSED, command=args.command, args=args)

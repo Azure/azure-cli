@@ -3,7 +3,6 @@ from azure.cli.commands.parameters import (tags_type,
                                            name_type,
                                            get_resource_name_completion_list)
 from azure.cli.commands import register_cli_argument, CliArgumentType
-from azure.cli.commands.arm import register_id_parameter
 from azure.cli.commands.validators import validate_key_value_pairs
 
 from azure.mgmt.storage.models import SkuName
@@ -214,10 +213,6 @@ register_cli_argument('storage account create', 'account_name', completer=None)
 
 register_cli_argument('storage account generate-sas', 'resource_types', resource_types_type)
 register_cli_argument('storage account generate-sas', 'services', services_type)
-
-for name in ('connection-string', 'delete', 'keys renew', 'keys list', 'set', 'show'):
-    register_id_parameter('storage account ' + name)
-
 
 register_cli_argument('storage container', 'container_name', name_type)
 register_cli_argument('storage container create', 'public_access', public_access_type)

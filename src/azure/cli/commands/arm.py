@@ -78,10 +78,6 @@ def resource_exists(resource_group, name, namespace, type, **_): # pylint: disab
     existing = len(list(client.list(filter=odata_filter))) == 1
     return existing
 
-def register_id_parameter(command_name, *dummies, split_func=parse_resource_id, **kwargs): # pylint: disable=unused-variable, unused-argument
-    pass
-
-
 def add_id_parameters(command_table):
 
     def split_action(arguments):
