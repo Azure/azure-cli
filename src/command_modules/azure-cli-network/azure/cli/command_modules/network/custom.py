@@ -19,8 +19,6 @@ def create_nsg_rule(resource_group_name, network_security_group_name, security_r
     ncf = _network_client_factory()
     return ncf.security_rules.create_or_update(
         resource_group_name, network_security_group_name, security_rule_name, settings)
-create_update_nsg_rule.__doc__ = SecurityRule.__doc__
-
 create_nsg_rule.__doc__ = SecurityRule.__doc__
 
 def update_vnet(resource_group_name, virtual_network_name, address_prefixes):
@@ -145,15 +143,19 @@ def set_lb_inbound_nat_rule(
     ncf = _network_client_factory()
     lb = ncf.load_balancers.get(resource_group_name, load_balancer_name)
     item = _get_property(lb.inbound_nat_rules, item_name)
+
     if frontend_ip_name:
         item.frontend_ip_configuration = \
             _get_property(lb.frontend_ip_configurations, frontend_ip_name)
+
     if floating_ip is not None:
         item.enable_floating_ip = floating_ip == 'true'
+
     _set_param(item, 'protocol', protocol)
     _set_param(item, 'frontend_port', frontend_port)
     _set_param(item, 'backend_port', backend_port)
     _set_param(item, 'idle_timeout_in_minutes', idle_timeout)
+
     return ncf.load_balancers.create_or_update(resource_group_name, load_balancer_name, lb)
 
 # Inbound NAT Pools
@@ -182,15 +184,18 @@ def set_lb_inbound_nat_pool(
     ncf = _network_client_factory()
     lb = ncf.load_balancers.get(resource_group_name, load_balancer_name)
     item = _get_property(lb.inbound_nat_pools, item_name)
+
     _set_param(item, 'protocol', protocol)
     _set_param(item, 'frontend_port_range_start', frontend_port_range_start)
     _set_param(item, 'frontend_port_range_end', frontend_port_range_end)
     _set_param(item, 'backend_port', backend_port)
+
     if frontend_ip_name == '':
         item.frontend_ip_configuration = None
     elif frontend_ip_name is not None:
         item.frontend_ip_configuration = \
             _get_property(lb.frontend_ip_configurations, frontend_ip_name)
+
     return ncf.load_balancers.create_or_update(resource_group_name, load_balancer_name, lb)
 
 # Frontend IP Configuration
@@ -217,20 +222,24 @@ def set_lb_frontend_ip_configuration(
     ncf = _network_client_factory()
     lb = ncf.load_balancers.get(resource_group_name, load_balancer_name)
     item = _get_property(lb.frontend_ip_configurations, item_name)
+
     if private_ip_address == '':
         item.private_ip_allocation_method = private_ip_address_allocation
         item.private_ip_address = None
     elif private_ip_address is not None:
         item.private_ip_allocation_method = private_ip_address_allocation
         item.private_ip_address = private_ip_address
+
     if subnet == '':
         item.subnet = None
     elif subnet is not None:
         item.subnet = Subnet(subnet)
+
     if public_ip_address == '':
         item.public_ip_address = None
     elif public_ip_address is not None:
         item.public_ip_address = PublicIPAddress(public_ip_address)
+
     return ncf.load_balancers.create_or_update(resource_group_name, load_balancer_name, lb)
 
 # Backend Address Pools
@@ -259,11 +268,13 @@ def set_lb_probe(resource_group_name, load_balancer_name, item_name, protocol=No
     ncf = _network_client_factory()
     lb = ncf.load_balancers.get(resource_group_name, load_balancer_name)
     item = _get_property(lb.probes, item_name)
+
     _set_param(item, 'protocol', protocol)
     _set_param(item, 'port', port)
     _set_param(item, 'request_path', path)
     _set_param(item, 'interval_in_seconds', interval)
     _set_param(item, 'number_of_probes', threshold)
+
     return ncf.load_balancers.create_or_update(resource_group_name, load_balancer_name, lb)
 
 # Load Balancer Rule
@@ -299,23 +310,29 @@ def set_lb_rule(
     ncf = _network_client_factory()
     lb = ncf.load_balancers.get(resource_group_name, load_balancer_name)
     item = _get_property(lb.load_balancing_rules, item_name)
+
     _set_param(item, 'protocol', protocol)
     _set_param(item, 'frontend_port', frontend_port)
     _set_param(item, 'backend_port', backend_port)
     _set_param(item, 'idle_timeout_in_minutes', idle_timeout)
     _set_param(item, 'load_distribution', load_distribution)
+
     if frontend_ip_name is not None:
         item.frontend_ip_configuration = \
             _get_property(lb.frontend_ip_configurations, frontend_ip_name)
+
     if floating_ip is not None:
         item.enable_floating_ip = floating_ip == 'true'
+
     if backend_address_pool_name is not None:
         item.backend_address_pool = \
             _get_property(lb.backend_address_pools, backend_address_pool_name)
+
     if probe_name == '':
         item.probe = None
     elif probe_name is not None:
         item.probe = _get_property(lb.probes, probe_name)
+
     return ncf.load_balancers.create_or_update(resource_group_name, load_balancer_name, lb)
 
 # NIC commands
@@ -324,17 +341,21 @@ def set_nic(resource_group_name, network_interface_name, network_security_group=
             enable_ip_forwarding=None, internal_dns_name_label=None):
     ncf = _network_client_factory()
     nic = ncf.network_interfaces.get(resource_group_name, network_interface_name)
+
     if enable_ip_forwarding is not None:
         nic.enable_ip_forwarding = enable_ip_forwarding == 'true'
+
     if network_security_group == '':
         nic.network_security_group = None
     elif network_security_group is not None:
         from azure.mgmt.network.models import NetworkSecurityGroup
         nic.network_security_group = NetworkSecurityGroup(network_security_group)
+
     if internal_dns_name_label == '':
         nic.dns_settings.internal_dns_name_label = None
     elif internal_dns_name_label is not None:
         nic.dns_settings.internal_dns_name_label = internal_dns_name_label
+
     return ncf.network_interfaces.create_or_update(
         resource_group_name, network_interface_name, nic)
 set_nic.__doc__ = NicOperations.create_or_update.__doc__
@@ -373,6 +394,7 @@ def set_nic_ip_config(resource_group_name, network_interface_name, ip_config_nam
     ncf = _network_client_factory()
     nic = ncf.network_interfaces.get(resource_group_name, network_interface_name)
     ip_config = _get_property(nic.ip_configurations, ip_config_name)
+
     if private_ip_address == '':
         ip_config.private_ip_address = None
         ip_config.private_ip_allocation_method = 'dynamic'
@@ -382,22 +404,27 @@ def set_nic_ip_config(resource_group_name, network_interface_name, ip_config_nam
         ip_config.private_ip_allocation_method = 'static'
         if private_ip_address_version is not None:
             ip_config.private_ip_address_version = private_ip_address_version
+
     if subnet == '':
         ip_config.subnet = None
     elif subnet is not None:
         ip_config.subnet = Subnet(subnet)
+
     if public_ip_address == '':
         ip_config.public_ip_address = None
     elif public_ip_address is not None:
         ip_config.public_ip_address = PublicIPAddress(public_ip_address)
+
     if load_balancer_backend_address_pool_ids == '':
         ip_config.load_balancer_backend_address_pools = None
     elif load_balancer_backend_address_pool_ids is not None:
         ip_config.load_balancer_backend_address_pools = load_balancer_backend_address_pool_ids
+
     if load_balancer_inbound_nat_rule_ids == '':
         ip_config.load_balancer_inbound_nat_rules = None
     elif load_balancer_inbound_nat_rule_ids is not None:
         ip_config.load_balancer_inbound_nat_rules = load_balancer_inbound_nat_rule_ids
+
     return ncf.network_interfaces.create_or_update(
         resource_group_name, network_interface_name, nic)
 set_nic_ip_config.__doc__ = NicOperations.create_or_update.__doc__
@@ -424,6 +451,8 @@ def remove_nic_ip_config_address_pool(
     nic = client.get(resource_group_name, network_interface_name)
     ip_config = next(
         (x for x in nic.ip_configurations if x.name.lower() == ip_config_name.lower()), None)
+    if not ip_config:
+        raise CLIError('IP configuration {} not found.'.format(ip_config_name))
     keep_items = \
         [x for x in ip_config.load_balancer_backend_address_pools or [] \
             if x.id != backend_address_pool]
@@ -451,6 +480,8 @@ def remove_nic_ip_config_inbound_nat_rule(
     nic = client.get(resource_group_name, network_interface_name)
     ip_config = next(
         (x for x in nic.ip_configurations or [] if x.name.lower() == ip_config_name.lower()), None)
+    if not ip_config:
+        raise CLIError('IP configuration {} not found.'.format(ip_config_name))
     keep_items = \
         [x for x in ip_config.load_balancer_inbound_nat_rules if x.id != inbound_nat_rule]
     ip_config.load_balancer_inbound_nat_rules = keep_items

@@ -389,7 +389,7 @@ class NetworkLoadBalancerSubresourceScenarioTest(ResourceGroupVCRTestBase):
         # Test load balancing rules
         self.cmd('network lb rule create {} -n rule1 --frontend-ip-name LoadBalancerFrontEnd --frontend-port 40 --backend-pool-name bap1 --backend-port 40 --protocol tcp'.format(lb_rg))
         self.cmd('network lb rule create {} -n rule2 --frontend-ip-name LoadBalancerFrontEnd --frontend-port 60 --backend-pool-name bap1 --backend-port 60 --protocol tcp'.format(lb_rg))
-        self.cmd('network lb rule list {}'.format(lb_rg), checks=JMESPathCheck('length(@)', 2))
+        self.cmd('network lb rule list -g {} -n {}'.format(rg, lb), checks=JMESPathCheck('length(@)', 2))
         self.cmd('network lb rule set {} -n rule1 --floating-ip true --idle-timeout 20 --load-distribution sourceip --protocol udp'.format(lb_rg))
         self.cmd('network lb rule set {} -n rule2 --frontend-ip-name ipconfig1 --backend-pool-name bap2 --load-distribution sourceipprotocol'.format(lb_rg))
         self.cmd('network lb rule show {} -n rule1'.format(lb_rg), checks=[

@@ -10,23 +10,14 @@ from azure.mgmt.network.models.network_management_client_enums import \
 from azure.cli.commands import register_cli_argument, register_extra_cli_argument, CliArgumentType
 from azure.cli.commands.parameters import (location_type, get_resource_name_completion_list, get_enum_type_completion_list)
 from azure.cli.commands.validators import MarkSpecifiedAction
-from azure.cli.command_modules.network._validators import \
-    (process_nic_namespace, process_network_lb_create_namespace, process_public_ip_create_namespace,
-     validate_public_ip_type, validate_nsg_name_or_id, validate_address_prefixes, process_app_gateway_namespace,
-     validate_servers, validate_cert)
 from azure.cli.commands.template_create import register_folded_cli_argument
-
-from azure.cli.commands import register_cli_argument, CliArgumentType
-from azure.cli.commands.template_create import register_folded_cli_argument
-from azure.cli.commands.parameters import (location_type, get_resource_name_completion_list)
 from azure.cli.command_modules.network._validators import \
-    (process_nic_create_namespace, process_network_lb_create_namespace,
+    (process_app_gateway_namespace, process_nic_create_namespace, process_lb_create_namespace,
      process_public_ip_create_namespace, validate_public_ip_type, validate_private_ip_address,
      validate_subnet_name_or_id, validate_public_ip_name_or_id, validate_nsg_name_or_id,
      validate_inbound_nat_rule_id_list, validate_address_pool_id_list,
      validate_inbound_nat_rule_name_or_id, validate_address_pool_name_or_id,
-     validate_public_ip_type, validate_private_ip_address, validate_servers, validate_cert,
-     validate_address_prefixes)
+     validate_servers, validate_cert, validate_address_prefixes)
 from azure.cli.command_modules.network.mgmt_nic.lib.models.nic_creation_client_enums import privateIpAddressVersion
 
 # BASIC PARAMETER CONFIGURATION
@@ -115,10 +106,9 @@ for item in ['show', 'create', 'set', 'delete']:
     register_cli_argument('network nic ip-config {}'.format(item), 'network_interface_name', options_list=('--nic-name',), help='The network interface (NIC).')
     register_cli_argument('network nic ip-config {}'.format(item), 'ip_config_name', options_list=('--name', '-n'), help='The name of the IP configuration.')
 
-for item in ['address-pool', 'ip-config']:
-    register_cli_argument('network nic {}'.format(item), 'resource_name', options_list=('--nic-name',), help='The network interface (NIC).')
-    register_cli_argument('network nic {}'.format(item), 'item_name', options_list=('--name', '-n'), help='The name of the {}'.format(item))
-    register_cli_argument('network nic {} list'.format(item), 'resource_name', options_list=('--name', '-n'), help='The network interface (NIC).')
+register_cli_argument('network nic ip-config', 'resource_name', options_list=('--nic-name',), help='The network interface (NIC).')
+register_cli_argument('network nic ip-config', 'item_name', options_list=('--name', '-n'), help='The name of the {}'.format(item))
+register_cli_argument('network nic ip-config list', 'resource_name', options_list=('--name', '-n'), help='The network interface (NIC).')
 
 for item in ['address-pool', 'inbound-nat-rule']:
     register_cli_argument('network nic ip-config {}'.format(item), 'ip_config_name', help='The name of the IP configuration.')

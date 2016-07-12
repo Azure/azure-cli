@@ -20,7 +20,7 @@ def _generate_lb_subproperty_id(
         child_type=child_type,
         child_name=child_name)
 
-def _generate_id_list_from_names_or_ids(namespace, prop, child_type):
+def _generate_lb_id_list_from_names_or_ids(namespace, prop, child_type):
     raw = getattr(namespace, prop)
     if not raw:
         return
@@ -33,7 +33,8 @@ def _generate_id_list_from_names_or_ids(namespace, prop, child_type):
             result.append({'id': item})
         else:
             if not lb_name:
-                raise CLIError('Unable to process {}. Please supply a well-formed ID or --lb-name.')
+                raise CLIError('Unable to process {}. Please supply a well-formed ID or '
+                               '--lb-name.'.format(item))
             else:
                 result.append({'id': _generate_lb_subproperty_id(
                     subscription=subscription,
@@ -44,11 +45,11 @@ def _generate_id_list_from_names_or_ids(namespace, prop, child_type):
     setattr(namespace, prop, result)
 
 def validate_inbound_nat_rule_id_list(namespace):
-    _generate_id_list_from_names_or_ids(
+    _generate_lb_id_list_from_names_or_ids(
         namespace, 'load_balancer_inbound_nat_rule_ids', 'inboundNatRules')
 
 def validate_address_pool_id_list(namespace):
-    _generate_id_list_from_names_or_ids(
+    _generate_lb_id_list_from_names_or_ids(
         namespace, 'load_balancer_backend_address_pool_ids', 'backendAddressPools')
 
 def validate_inbound_nat_rule_name_or_id(namespace):
@@ -85,7 +86,6 @@ def validate_address_pool_name_or_id(namespace):
 
 def validate_subnet_name_or_id(namespace):
     """ Validates a subnet ID or, if a name is provided, formats it as an ID. """
-    # no validation if params not specified or clear sigal is used
     if namespace.virtual_network_name is None and namespace.subnet is None:
         return
     if namespace.subnet == '':
@@ -134,6 +134,16 @@ def validate_public_ip_name_or_id(namespace):
 def validate_public_ip_type(namespace): # pylint: disable=unused-argument
     if namespace.subnet:
         namespace.public_ip_address_type = 'none'
+        if namespace.public_ip_address:
+            raise argparse.ArgumentError(
+                None, 'Cannot specify --subnet and --public-ip-address when creating a '
+                      'load balancer.')
+
+    if namespace.public_ip_address:
+        if namespace.public_ip_dns_name and namespace.public_ip_address_type != 'new':
+            raise argparse.ArgumentError(
+                None, 'Can only specify --public-ip-dns-name when creating a new public '
+                      'IP address.')
 
 def validate_nsg_name_or_id(namespace):
     """ Validates a NSG ID or, if a name is provided, formats it as an ID. """
