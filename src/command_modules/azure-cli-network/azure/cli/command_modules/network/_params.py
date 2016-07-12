@@ -4,7 +4,7 @@ import argparse
 from azure.mgmt.network.models import IPAllocationMethod
 from azure.cli.command_modules.network._validators import \
     (process_nic_namespace, process_network_lb_create_namespace, process_public_ip_create_namespace,
-     validate_public_ip_type)
+     validate_public_ip_type, validate_nsg_name_or_id)
 from azure.cli.commands.template_create import register_folded_cli_argument
 from azure.cli.commands.arm import is_valid_resource_id
 from azure.cli.commands.parameters import (location_type,
@@ -84,14 +84,17 @@ register_cli_argument('network route-table', 'route_table_name', name_arg_type, 
 register_cli_argument('network vnet', 'virtual_network_name', virtual_network_name_type, options_list=('--name', '-n'), id_part='name')
 
 register_cli_argument('network vnet create', 'location', location_type)
-register_cli_argument('network vnet create', 'subnet_prefix', CliArgumentType(options_list=('--subnet-prefix',), metavar='SUBNET_PREFIX', default='10.0.0.0/24'))
-register_cli_argument('network vnet create', 'subnet_name', CliArgumentType(options_list=('--subnet-name',), metavar='SUBNET_NAME', default='Subnet1'))
-register_cli_argument('network vnet create', 'virtual_network_prefix', CliArgumentType(options_list=('--vnet-prefix',), metavar='VNET_PREFIX', default='10.0.0.0/16'))
+register_cli_argument('network vnet create', 'subnet_prefix', options_list=('--subnet-prefix',), metavar='SUBNET_PREFIX', default='10.0.0.0/24')
+register_cli_argument('network vnet create', 'subnet_name', options_list=('--subnet-name',), metavar='SUBNET_NAME', default='Subnet1')
+register_cli_argument('network vnet create', 'virtual_network_prefix', options_list=('--vnet-prefix',), metavar='VNET_PREFIX', default='10.0.0.0/16')
 register_cli_argument('network vnet create', 'virtual_network_name', virtual_network_name_type, options_list=('--name', '-n'), required=True, completer=None)
 
 register_cli_argument('network vnet subnet', 'subnet_name', arg_type=subnet_name_type, options_list=('--name', '-n'), id_part='child_name')
+register_cli_argument('network vnet set', 'address_prefixes', nargs='+')
+
 register_cli_argument('network vnet subnet', 'address_prefix', metavar='PREFIX', help='the address prefix in CIDR format.')
 register_cli_argument('network vnet subnet', 'virtual_network_name', virtual_network_name_type)
+register_cli_argument('network vnet subnet', 'network_security_group', validator=validate_nsg_name_or_id)
 
 register_cli_argument('network lb', 'item', help=argparse.SUPPRESS, default=None)
 register_cli_argument('network lb', 'lb', help=argparse.SUPPRESS, default=None)

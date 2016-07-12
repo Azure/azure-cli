@@ -1,5 +1,7 @@
 import argparse
 
+from azure.cli.commands.arm import is_valid_resource_id, resource_id
+
 def _convert_id_list_to_object(data):
     if not data:
         return None
@@ -46,3 +48,19 @@ def validate_public_ip_type(namespace): # pylint: disable=unused-argument
 def process_public_ip_create_namespace(namespace):
     if namespace.dns_name:
         namespace.public_ip_address_type = 'dns'
+
+def validate_nsg_name_or_id(namespace):
+    """ Validates a NSG ID or, if a name is provided, formats it as an ID. """
+    if namespace.network_security_group:
+        from azure.cli.commands.client_factory import get_subscription_id
+        # determine if network_security_group is name or ID
+        is_id = is_valid_resource_id(namespace.network_security_group)
+        if not is_id:
+            namespace.network_security_group = resource_id(
+                subscription=get_subscription_id(),
+                resource_group=namespace.resource_group_name,
+                namespace='Microsoft.Network',
+                type='networkSecurityGroups',
+                name=namespace.network_security_group)
+
+
