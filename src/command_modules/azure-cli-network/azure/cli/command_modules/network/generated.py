@@ -19,6 +19,9 @@
     VirtualNetworksOperations)
 
 from azure.cli.commands.client_factory import get_mgmt_service_client
+from azure.cli.command_modules.network.mgmt_app_gateway.lib.operations import AppGatewayOperations
+from azure.cli.command_modules.network.mgmt_app_gateway.lib \
+    import AppGatewayCreationClient as AppGatewayClient
 from azure.cli.command_modules.network.mgmt_vnet.lib \
     import ResourceManagementClient as VNetClient
 from azure.cli.command_modules.network.mgmt_vnet.lib.operations import VNetOperations
@@ -57,6 +60,9 @@ cli_command('network application-gateway list', ApplicationGatewaysOperations.li
 cli_command('network application-gateway list-all', ApplicationGatewaysOperations.list_all, factory)
 cli_command('network application-gateway start', ApplicationGatewaysOperations.start, factory)
 cli_command('network application-gateway stop', ApplicationGatewaysOperations.stop, factory)
+
+factory = lambda _: get_mgmt_service_client(AppGatewayClient).app_gateway
+cli_command('network application-gateway create', AppGatewayOperations.create_or_update, factory, transform=DeploymentOutputLongRunningOperation('Starting network application-gateway create'))
 
 # ExpressRouteCircuitAuthorizationsOperations
 factory = lambda _: _network_client_factory().express_route_circuit_authorizations

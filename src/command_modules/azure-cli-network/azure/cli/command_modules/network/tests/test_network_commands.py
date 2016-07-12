@@ -1,9 +1,12 @@
 ﻿#pylint: disable=method-hidden
 #pylint: disable=line-too-long
 #pylint: disable=bad-continuation
+import os
 
 from azure.cli.utils.vcr_test_base import (VCRTestBase, ResourceGroupVCRTestBase, JMESPathCheck,
                                            NoneCheck)
+
+TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 class NetworkUsageListScenarioTest(VCRTestBase):
 
@@ -16,43 +19,94 @@ class NetworkUsageListScenarioTest(VCRTestBase):
     def body(self):
         self.cmd('network list-usages --location westus', checks=JMESPathCheck('type(@)', 'array'))
 
-class NetworkAppGatewayScenarioTest(VCRTestBase):
+class NetworkAppGatewayDefaultScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-        super(NetworkAppGatewayScenarioTest, self).__init__(__file__, test_method)
-        self.resource_group = 'cli_tmp_test1'
-        self.name = 'applicationGateway1'
+        super(NetworkAppGatewayDefaultScenarioTest, self).__init__(__file__, test_method)
+        self.resource_group = 'ag1rg'
 
-    def test_network_app_gateway(self):
+    def test_network_app_gateway_with_defaults(self):
         self.execute()
-
-    def set_up(self):
-        if not self.cmd('network application-gateway show --resource-group {} --name {}'.format(
-            self.resource_group, self.name)):
-            raise RuntimeError('Application gateway must be manually created in order to support this test.')
 
     def body(self):
         rg = self.resource_group
-        name = self.name
-        self.cmd('network application-gateway list-all', checks=[
-            JMESPathCheck('type(@)', 'array'),
-            JMESPathCheck('length(@)', 1)
+        self.cmd('network application-gateway create -g {} -n ag1'.format(rg), checks=[
+            JMESPathCheck('applicationGateway.frontendIPConfigurations[0].properties.privateIPAllocationMethod', 'Dynamic'),
+            JMESPathCheck("applicationGateway.frontendIPConfigurations[0].properties.subnet.contains(id, 'default')", True)
         ])
-        self.cmd('network application-gateway list --resource-group {}'.format(rg), checks=[
+
+        self.cmd('network application-gateway list-all')
+
+        ag_list = self.cmd('network application-gateway list --resource-group {}'.format(rg), checks=[
             JMESPathCheck('type(@)', 'array'),
-            JMESPathCheck('length(@)', 1),
             JMESPathCheck("length([?resourceGroup == '{}']) == length(@)".format(rg), True)
         ])
-        self.cmd('network application-gateway show --resource-group {} --name {}'.format(rg, name), checks=[
+        ag_count = len(ag_list)
+
+        self.cmd('network application-gateway show --resource-group {} --name ag1'.format(rg), checks=[
             JMESPathCheck('type(@)', 'object'),
-            JMESPathCheck('name', self.name),
-            JMESPathCheck('resourceGroup', self.resource_group),
+            JMESPathCheck('name', 'ag1'),
+            JMESPathCheck('resourceGroup', rg),
         ])
-        self.cmd('network application-gateway stop --resource-group {} --name {}'.format(rg, name))
-        self.cmd('network application-gateway start --resource-group {} --name {}'.format(rg, name))
-        self.cmd('network application-gateway delete --resource-group {} --name {}'.format(rg, name))
-        # Expecting the resource to no longer appear in the list
-        self.cmd('network application-gateway list --resource-group {}'.format(rg), checks=NoneCheck())
+
+        self.cmd('network application-gateway stop --resource-group {} -n ag1'.format(rg))
+        self.cmd('network application-gateway start --resource-group {} -n ag1'.format(rg))
+        self.cmd('network application-gateway delete --resource-group {} -n ag1'.format(rg))
+        self.cmd('network application-gateway list --resource-group {}'.format(rg), checks=JMESPathCheck('length(@)', ag_count - 1))
+
+class NetworkAppGatewayExistingSubnetScenarioTest(ResourceGroupVCRTestBase):
+
+    def __init__(self, test_method):
+        super(NetworkAppGatewayExistingSubnetScenarioTest, self).__init__(__file__, test_method)
+        self.resource_group = 'ag2rg'
+
+    def test_network_app_gateway_with_existing_subnet(self):
+        self.execute()
+
+    def body(self):
+        rg = self.resource_group
+        vnet = self.cmd('network vnet create -g {} -n vnet2 --subnet-name subnet1'.format(rg))
+        subnet_id = vnet['newVNet']['subnets'][0]['id']
+        self.cmd('network application-gateway create -g {} -n ag2 --subnet {}'.format(rg, subnet_id), checks=[
+            JMESPathCheck('applicationGateway.frontendIPConfigurations[0].properties.privateIPAllocationMethod', 'Dynamic'),
+            JMESPathCheck('applicationGateway.frontendIPConfigurations[0].properties.subnet.id', subnet_id)
+        ])
+
+class NetworkAppGatewayPrivateIpScenarioTest(ResourceGroupVCRTestBase):
+
+    def __init__(self, test_method):
+        super(NetworkAppGatewayPrivateIpScenarioTest, self).__init__(__file__, test_method)
+        self.resource_group = 'ag3rg'
+
+    def test_network_app_gateway_with_private_ip(self):
+        self.execute()
+
+    def body(self):
+        rg = self.resource_group
+        private_ip = '10.0.0.15'
+        cert_path = os.path.join(TEST_DIR, 'TestCert.pfx')
+        cert_pass = 'password'
+        self.cmd('network application-gateway create -g {} -n ag3 --subnet subnet1 --private-ip-address {} --cert-file "{}" --cert-password {}'.format(rg, private_ip, cert_path, cert_pass), checks=[
+            JMESPathCheck('applicationGateway.frontendIPConfigurations[0].properties.privateIPAddress', private_ip),
+            JMESPathCheck('applicationGateway.frontendIPConfigurations[0].properties.privateIPAllocationMethod', 'Static')
+        ])
+
+class NetworkAppGatewayPublicIpScenarioTest(ResourceGroupVCRTestBase):
+
+    def __init__(self, test_method):
+        super(NetworkAppGatewayPublicIpScenarioTest, self).__init__(__file__, test_method)
+        self.resource_group = 'ag4rg'
+
+    def test_network_app_gateway_with_public_ip(self):
+        self.execute()
+
+    def body(self):
+        rg = self.resource_group
+        public_ip_name = 'publicip4'
+        self.cmd('network application-gateway create -g {} -n test4 --subnet subnet1 --vnet-name vnet4 --public-ip {}'.format(rg, public_ip_name), checks=[
+            JMESPathCheck("applicationGateway.frontendIPConfigurations[0].properties.publicIPAddress.contains(id, '{}')".format(public_ip_name), True),
+            JMESPathCheck('applicationGateway.frontendIPConfigurations[0].properties.privateIPAllocationMethod', 'Dynamic')
+        ])
 
 class NetworkPublicIpScenarioTest(ResourceGroupVCRTestBase):
 
