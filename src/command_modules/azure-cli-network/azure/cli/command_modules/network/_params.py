@@ -12,13 +12,17 @@ from azure.mgmt.network.models.network_management_client_enums import \
      ApplicationGatewayTier, ApplicationGatewayProtocol,
      ApplicationGatewayRequestRoutingRuleType)
 
+from azure.cli._util import CLIError
 from azure.cli.commands import CliArgumentType, register_cli_argument, register_extra_cli_argument
 from azure.cli.commands.parameters import (location_type, get_resource_name_completion_list, get_enum_type_completion_list, tags_type)
 from azure.cli.commands.validators import MarkSpecifiedAction
 from azure.cli.commands.template_create import register_folded_cli_argument
 from azure.cli.command_modules.network._factory import _network_client_factory
 from azure.cli.command_modules.network._validators import \
-    (process_app_gateway_namespace, process_nic_create_namespace, process_lb_create_namespace,
+    (process_app_gateway_namespace, process_ag_listener_create_namespace,
+     process_ag_http_settings_create_namespace, process_ag_url_path_map_create_namespace,
+     process_nic_create_namespace, process_lb_create_namespace, process_ag_rule_create_namespace,
+     process_ag_url_path_map_rule_create_namespace,
      process_public_ip_create_namespace, validate_public_ip_type, validate_private_ip_address,
      validate_subnet_name_or_id, validate_public_ip_name_or_id, validate_nsg_name_or_id,
      validate_inbound_nat_rule_id_list, validate_address_pool_id_list,
@@ -55,6 +59,32 @@ def get_lb_inbound_nat_rule_completion_list():
             return [r.name for r in client.load_balancers.get(resource_group_name=rg, load_balancer_name=lb).inbound_nat_rules] # pylint: disable=no-member
     return completer
 
+def get_ag_subresource_completion_list(prop):
+    def completer(prefix, action, parsed_args, **kwargs): # pylint: disable=unused-argument
+        client = _network_client_factory()
+        try:
+            ag_name = parsed_args.application_gateway_name
+        except AttributeError:
+            ag_name = parsed_args.resource_name
+        if parsed_args.resource_group_name and ag_name:
+            ag = client.application_gateways.get(parsed_args.resource_group_name, ag_name)
+            return [r.name for r in getattr(ag, prop)]
+    return completer
+
+def get_ag_url_map_rule_completion_list():
+    def completer(prefix, action, parsed_args, **kwargs): # pylint: disable=unused-argument
+        client = _network_client_factory()
+        try:
+            ag_name = parsed_args.application_gateway_name
+        except AttributeError:
+            ag_name = parsed_args.resource_name
+        if parsed_args.resource_group_name and ag_name:
+            ag = client.application_gateways.get(parsed_args.resource_group_name, ag_name)
+            url_map = next((x for x in ag.url_path_maps if x.name == parsed_args.url_path_map_name), None) # pylint: disable=no-member
+            if not url_map:
+                raise CLIError('URL path map "{}" not found.'.format(parsed_args.url_path_map_name))
+            return [r.name for r in url_map.path_rules]
+    return completer
 
 # BASIC PARAMETER CONFIGURATION
 
@@ -64,6 +94,8 @@ virtual_network_name_type = CliArgumentType(options_list=('--vnet-name',), metav
 subnet_name_type = CliArgumentType(options_list=('--subnet-name',), metavar='SUBNET_NAME', help='The subnet name.')
 load_balancer_name_type = CliArgumentType(options_list=('--lb-name',), metavar='LB_NAME', help='The load balancer name.', completer=get_resource_name_completion_list('Microsoft.Network/loadBalancers'), id_part='name')
 private_ip_address_type = CliArgumentType(help='Static private IP address to use.', validator=validate_private_ip_address)
+cookie_based_affinity_type = CliArgumentType(type=str.lower, completer=get_enum_type_completion_list(ApplicationGatewayCookieBasedAffinity))
+http_protocol_type = CliArgumentType(type=str.lower, completer=get_enum_type_completion_list(ApplicationGatewayProtocol))
 
 choices_ip_allocation_method = [e.value.lower() for e in IPAllocationMethod]
 choices_private_ip_address_version = [e.value.lower() for e in privateIpAddressVersion]
@@ -86,21 +118,85 @@ register_cli_argument('network application-gateway', 'sku_name', completer=get_e
 register_cli_argument('network application-gateway', 'sku_tier', completer=get_enum_type_completion_list(ApplicationGatewayTier))
 register_cli_argument('network application-gateway', 'routing_rule_type', completer=get_enum_type_completion_list(ApplicationGatewayRequestRoutingRuleType))
 register_cli_argument('network application-gateway', 'virtual_network_name', virtual_network_name_type)
-register_folded_cli_argument('network application-gateway', 'subnet', 'subnets', parent_name='virtual_network_name', parent_type='Microsoft.Network/virtualNetworks', validator=validate_address_prefixes)
-register_folded_cli_argument('network application-gateway', 'public_ip', 'Microsoft.Network/publicIPAddresses')
+register_folded_cli_argument('network application-gateway', 'subnet', 'subnets', parent_name='virtual_network_name', parent_type='Microsoft.Network/virtualNetworks', validator=validate_address_prefixes, completer=get_subnet_completion_list())
+register_folded_cli_argument('network application-gateway', 'public_ip', 'Microsoft.Network/publicIPAddresses', completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'))
 register_cli_argument('network application-gateway', 'virtual_network_type', help=argparse.SUPPRESS)
 register_cli_argument('network application-gateway', 'private_ip_address_allocation', help=argparse.SUPPRESS)
 register_cli_argument('network application-gateway', 'frontend_type', help=argparse.SUPPRESS, validator=process_app_gateway_namespace)
 register_cli_argument('network application-gateway', 'servers', nargs='+', validator=validate_servers)
 register_cli_argument('network application-gateway', 'cert_data', options_list=('--cert-file',), help='The path to the PFX certificate file.', validator=validate_cert)
 register_cli_argument('network application-gateway', 'http_listener_protocol', help=argparse.SUPPRESS)
-register_cli_argument('network application-gateway', 'http_settings_cookie_based_affinity', type=str.lower, completer=get_enum_type_completion_list(ApplicationGatewayCookieBasedAffinity))
-register_cli_argument('network application-gateway', 'http_settings_protocol', type=str.lower, completer=get_enum_type_completion_list(ApplicationGatewayProtocol))
+register_cli_argument('network application-gateway', 'http_settings_cookie_based_affinity', cookie_based_affinity_type)
+register_cli_argument('network application-gateway', 'http_settings_protocol', http_protocol_type)
+
 register_cli_argument('network application-gateway', 'subnet_address_prefix', action=MarkSpecifiedAction)
 register_cli_argument('network application-gateway', 'vnet_address_prefix', action=MarkSpecifiedAction)
 
+ag_subresources = [
+    {'name': 'ssl-cert', 'display': 'SSL certificate', 'ref': 'ssl_certificates'},
+    {'name': 'frontend-ip', 'display': 'frontend IP configuration', 'ref': 'frontend_ip_configurations'},
+    {'name': 'frontend-port', 'display': 'frontend port', 'ref': 'frontend_ports'},
+    {'name': 'address-pool', 'display': 'backend address pool', 'ref': 'backend_address_pools'},
+    {'name': 'http-settings', 'display': 'backed HTTP settings', 'ref': 'backend_http_settings_collection'},
+    {'name': 'http-listener', 'display': 'HTTP listener', 'ref': 'http_listeners'},
+    {'name': 'rule', 'display': 'request routing rule', 'ref': 'request_routing_rules'},
+    {'name': 'probe', 'display': 'probe', 'ref': 'probes'},
+    {'name': 'url-path-map', 'display': 'URL path map', 'ref': 'url_path_maps'},
+]
+for item in ag_subresources:
+    register_cli_argument('network application-gateway {}'.format(item['name']), 'item_name', options_list=('--name', '-n'), help='The name of the {}.'.format(item['display']), completer=get_ag_subresource_completion_list(item['ref']))
+    register_cli_argument('network application-gateway {} create'.format(item['name']), 'item_name', options_list=('--name', '-n'), help='The name of the {}.'.format(item['display']), completer=None)
+    register_cli_argument('network application-gateway {}'.format(item['name']), 'resource_name', options_list=('--gateway-name',), help='The name of the application gateway.')
+    register_cli_argument('network application-gateway {}'.format(item['name']), 'application_gateway_name', options_list=('--gateway-name',), help='The name of the application gateway.')
+    register_cli_argument('network application-gateway {} list'.format(item['name']), 'resource_name', options_list=('--name', '-n'))
+
+register_cli_argument('network application-gateway frontend-ip', 'subnet', validator=validate_subnet_name_or_id)
+register_cli_argument('network application-gateway frontend-ip', 'public_ip_address', validator=validate_public_ip_name_or_id, help='The name or ID of the public IP address.', completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'))
+
+for item in ['frontend-port', 'http-settings']:
+    register_cli_argument('network application-gateway {}'.format(item), 'port', help='The port number.', type=int)
+
+for item in ['http-settings', 'probe']:
+    register_cli_argument('network application-gateway {}'.format(item), 'protocol', http_protocol_type, help='The HTTP settings protocol. (http, https)')
+
+register_cli_argument('network application-gateway http-listener', 'frontend_ip', help='The name or ID of the frontend IP configuration.', validator=process_ag_listener_create_namespace, completer=get_ag_subresource_completion_list('frontend_ip_configurations'))
+register_cli_argument('network application-gateway http-listener', 'frontend_port', help='The name or ID of the frontend port.', completer=get_ag_subresource_completion_list('frontend_ports'))
+register_cli_argument('network application-gateway http-listener', 'ssl_cert', help='The name or ID of the SSL certificate to use.', completer=get_ag_subresource_completion_list('ssl_certificates'))
+
+register_cli_argument('network application-gateway http-settings', 'cookie_based_affinity', cookie_based_affinity_type, help='Enable or disable cookie based affinity. (Enabled, Disabled)')
+register_cli_argument('network application-gateway http-settings', 'timeout', help='Request timeout in seconds.')
+register_cli_argument('network application-gateway http-settings', 'probe', help='Name or ID of the probe to associatie with the HTTP settings.', validator=process_ag_http_settings_create_namespace, completer=get_ag_subresource_completion_list('probes'))
+
+register_cli_argument('network application-gateway probe', 'host', help='The name of the host to send the probe.')
+register_cli_argument('network application-gateway probe', 'path', help='The relative path of the probe. Valid paths start from "/"')
+register_cli_argument('network application-gateway probe', 'interval', help='The time interval in seconds between consecutive probes.')
+register_cli_argument('network application-gateway probe', 'threshold', help='The number of failed probes after which the back end server is marked down.')
+register_cli_argument('network application-gateway probe', 'timeout', help='The probe timeout in seconds.')
+
+register_cli_argument('network application-gateway rule', 'address_pool', help='The name or ID of the backend address pool.', validator=process_ag_rule_create_namespace, completer=get_ag_subresource_completion_list('backend_address_pools'))
+register_cli_argument('network application-gateway rule', 'http_listener', help='The name or ID of the HTTP listener.', completer=get_ag_subresource_completion_list('http_listeners'))
+register_cli_argument('network application-gateway rule', 'http_settings', help='The name or ID of the backend HTTP settings.', completer=get_ag_subresource_completion_list('backend_http_settings_collection'))
+register_cli_argument('network application-gateway rule', 'rule_type', help='The rule type (Basic, PathBasedRouting).')
+register_cli_argument('network application-gateway rule', 'url_path_map', help='The name or ID of the URL path map.', completer=get_ag_subresource_completion_list('url_path_maps'))
+
+register_cli_argument('network application-gateway url-path-map', 'default_address_pool', help='The name or ID of the default backend address pool, if different from --address-pool.', validator=process_ag_url_path_map_create_namespace, completer=get_ag_subresource_completion_list('backend_address_pools'))
+register_cli_argument('network application-gateway url-path-map', 'default_http_settings', help='The name or ID of the default HTTP settings, if different from --http-settings.', completer=get_ag_subresource_completion_list('backend_http_settings_collection'))
+register_cli_argument('network application-gateway url-path-map', 'rule_name', help='The name of the url-path-map rule.')
+register_cli_argument('network application-gateway url-path-map', 'paths', nargs='+', help='Space separated list of paths to associate with the rule. Valid paths start and end with "/" (ex: "/bar/")')
+register_cli_argument('network application-gateway url-path-map', 'address_pool', help='The name or ID of the backend address pool to use with the created rule.', completer=get_ag_subresource_completion_list('backend_address_pools'))
+register_cli_argument('network application-gateway url-path-map', 'http_settings', help='The name or ID of the HTTP settings to use with the created rule.', completer=get_ag_subresource_completion_list('backend_http_settings_collection'))
+
+
+register_cli_argument('network application-gateway url-path-map rule', 'item_name', options_list=('--name', '-n'), help='The name of the url-path-map rule.', completer=get_ag_url_map_rule_completion_list())
+register_cli_argument('network application-gateway url-path-map rule create', 'item_name', options_list=('--name', '-n'), help='The name of the url-path-map rule.', completer=None)
+register_cli_argument('network application-gateway url-path-map rule', 'url_path_map_name', options_list=('--path-map-name',), help='The name of the URL path map.', completer=get_ag_subresource_completion_list('url_path_maps'))
+register_cli_argument('network application-gateway url-path-map rule', 'address_pool', help='The name or ID of the backend address pool. If not specified, the default for the map will be used.', validator=process_ag_url_path_map_rule_create_namespace, completer=get_ag_subresource_completion_list('backend_address_pools'))
+register_cli_argument('network application-gateway url-path-map rule', 'http_settings', help='The name or ID of the HTTP settings. If not specified, the default for the map will be used.', completer=get_ag_subresource_completion_list('backend_http_settings_collection'))
+
 # Express Route Circuit Auth
-register_cli_argument('network express-route circuit-auth', 'authorization_name', name_arg_type, id_part='child_name')
+register_cli_argument('network express-route circuit-auth', 'authorization_name', name_arg_type)
+register_cli_argument('network express-route circuit-peering', 'peering_name', name_arg_type)
+register_cli_argument('network express-route circuit', 'circuit_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/expressRouteCircuits'))
 
 # Express Route Circuit Peering
 register_cli_argument('network express-route circuit-peering', 'peering_name', name_arg_type, id_part='child_name')
@@ -158,8 +254,7 @@ register_cli_argument('network nsg', 'network_security_group_name', name_arg_typ
 register_cli_argument('network nsg create', 'name', name_arg_type)
 
 # NSG Rule
-register_cli_argument('network nsg rule', 'security_rule_name', name_arg_type, id_part='child_name',
-                      help='Name of the network security group rule')
+register_cli_argument('network nsg rule', 'security_rule_name', name_arg_type, id_part='child_name', help='Name of the network security group rule')
 register_cli_argument('network nsg rule', 'network_security_group_name', options_list=('--nsg-name',), metavar='NSGNAME', help='Name of the network security group', id_part='name')
 register_cli_argument('network nsg rule create', 'priority', default=1000)
 
@@ -195,8 +290,10 @@ register_cli_argument('network vnet subnet', 'address_prefix', metavar='PREFIX',
 register_cli_argument('network vnet subnet', 'virtual_network_name', virtual_network_name_type)
 register_cli_argument('network vnet subnet', 'network_security_group', validator=validate_nsg_name_or_id)
 
-register_cli_argument('network lb', 'item', help=argparse.SUPPRESS, default=None)
-register_cli_argument('network lb', 'lb', help=argparse.SUPPRESS, default=None)
+for item in ['address-pool', 'frontend-ip', 'inbound-nat-rule', 'inbound-nat-pool', 'probe', 'rule']:
+    register_cli_argument('network lb {}'.format(item), 'item_name', options_list=('--name', '-n'), help='The name of the {}'.format(item))
+    register_cli_argument('network lb {}'.format(item), 'resource_name', options_list=('--lb-name',), help='The name of the load balancer.')
+
 register_cli_argument('network lb', 'load_balancer_name', load_balancer_name_type)
 register_cli_argument('network lb', 'frontend_port', help='Port number')
 register_cli_argument('network lb', 'frontend_port_range_start', help='Port number')
@@ -223,6 +320,7 @@ for item in ['inbound-nat-rule', 'inbound-nat-pool', 'probe', 'frontend-ip', 'ad
     register_cli_argument('network lb {}'.format(item), 'item_name', options_list=('--name', '-n'), help='The name of the {}.'.format(item))
 
 register_cli_argument('network lb frontend-ip', 'public_ip_address', help='Name or ID of the existing public IP to associate with the configuration.', validator=validate_public_ip_name_or_id)
+register_cli_argument('network lb frontend-ip', 'private_ip_address', help='Static private IP address to associate with the configuration.')
 register_cli_argument('network lb frontend-ip', 'virtual_network_name', arg_type=virtual_network_name_type, help='The VNET name associated with the subnet name.')
 
 register_cli_argument('network lb probe', 'interval', help='Probing time interval in seconds.')
@@ -231,7 +329,6 @@ register_cli_argument('network lb probe', 'port', help='The port to interrogate.
 register_cli_argument('network lb probe', 'protocol', help='The protocol to probe.', choices=['http', 'tcp'], type=str.lower)
 register_cli_argument('network lb probe', 'threshold', help='The number of consecutive probe failures before an instance is deemed unhealthy.')
 
-register_cli_argument('network lb rule', 'probe_name', help='The name of the health probe associated with the rule.')
 register_cli_argument('network lb rule', 'load_distribution', help='Affinity rule settings.', choices=['default', 'sourceip', 'sourceipprotocol'], type=str.lower)
 
 register_cli_argument('network nsg create', 'name', name_arg_type)
