@@ -1,3 +1,4 @@
+import argparse
 import time
 import random
 
@@ -30,3 +31,10 @@ def generate_deployment_name(namespace):
     if not namespace.deployment_name:
         namespace.deployment_name = \
             'azurecli{}{}'.format(str(time.time()), str(random.randint(1, 100000)))
+
+SPECIFIED_SENTINEL = '__SET__'
+class MarkSpecifiedAction(argparse.Action): # pylint: disable=too-few-public-methods
+    """ Use this to identify when a parameter is explicitly set by the user (as opposed to a
+    default). You must remove the __SET__ sentinel substring in a follow-up validator."""
+    def __call__(self, parser, args, values, option_string=None):
+        setattr(args, self.dest, '{}{}'.format(SPECIFIED_SENTINEL, values))
