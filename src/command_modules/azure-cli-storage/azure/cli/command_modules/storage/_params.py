@@ -201,14 +201,14 @@ register_cli_argument('storage', 'permission', permission_type)
 register_cli_argument('storage', 'start', start_type)
 register_cli_argument('storage', 'timeout', timeout_type)
 
-register_cli_argument('storage account', 'account_name', name_type, help='the storage account name', completer=get_resource_name_completion_list('Microsoft.Storage/storageAccounts'))
+register_cli_argument('storage account', 'account_name', name_type, help='the storage account name', completer=get_resource_name_completion_list('Microsoft.Storage/storageAccounts'), id_part='name')
 register_cli_argument('storage account', 'account_type', account_type_type, options_list=('--type', '-t'))
 register_cli_argument('storage account', 'tags', tags_type)
 register_cli_argument('storage account set', 'tags', tags_type, default=None)
 register_cli_argument('storage account keys', 'key', key_type)
 
 register_cli_argument('storage account connection-string', 'use_http', use_http_type)
-register_cli_argument('storage account connection-string', 'account_name', account_name_type, completer=get_resource_name_completion_list('Microsoft.Storage/storageAccounts'))
+register_cli_argument('storage account connection-string', 'account_name', account_name_type, completer=get_resource_name_completion_list('Microsoft.Storage/storageAccounts'), id_part='name')
 register_cli_argument('storage account create', 'account_name', completer=None)
 
 register_cli_argument('storage account generate-sas', 'resource_types', resource_types_type)

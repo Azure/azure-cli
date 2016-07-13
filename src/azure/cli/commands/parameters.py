@@ -62,6 +62,7 @@ def get_enum_type_completion_list(enum_type=None):
 resource_group_name_type = CliArgumentType(
     options_list=('--resource-group', '-g'),
     completer=get_resource_group_completion_list,
+    id_part='resource_group',
     help='Name of resource group')
 
 name_type = CliArgumentType(options_list=('--name', '-n'), help='the primary resource name')
@@ -94,3 +95,5 @@ tag_type = CliArgumentType(
 register_cli_argument('', 'resource_group_name', resource_group_name_type)
 register_cli_argument('', 'location', location_type)
 register_cli_argument('', 'deployment_name', deployment_name_type)
+
+

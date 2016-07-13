@@ -51,11 +51,11 @@ multi_ids_type = CliArgumentType(
 )
 
 admin_username_type = CliArgumentType(options_list=('--admin-username',), default=getpass.getuser(), required=False)
-existing_vm_name = CliArgumentType(overrides=name_arg_type, help='The name of the virtual machine', completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachines'))
+existing_vm_name = CliArgumentType(overrides=name_arg_type, help='The name of the virtual machine', completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachines'), id_part='name')
 register_cli_argument('vm', 'vm_name', existing_vm_name)
 register_cli_argument('vm', 'size', CliArgumentType(completer=get_vm_size_completion_list))
 
-register_cli_argument('vm scaleset', 'vm_scale_set_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'))
+register_cli_argument('vm scaleset', 'vm_scale_set_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'), id_part='name')
 register_cli_argument('vm scaleset', 'virtual_machine_scale_set_name', name_arg_type)
 register_cli_argument('vm scaleset', 'instance_ids', multi_ids_type)
 register_cli_argument('vm disk', 'vm_name', arg_type=existing_vm_name, options_list=('--vm-name',))

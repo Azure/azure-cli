@@ -64,8 +64,10 @@ class AzCliCommandParser(argparse.ArgumentParser):
                     *arg.options_list, **arg.options)
                 param.completer = arg.completer
 
-            command_parser.set_defaults(func=metadata.handler, command=command_name,
-                                        _validators=argument_validators)
+            command_parser.set_defaults(func=metadata.handler,
+                                        command=command_name,
+                                        _validators=argument_validators,
+                                        _parser=command_parser)
         enable_autocomplete(self)
 
     def _get_subparser(self, path):
