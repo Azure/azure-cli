@@ -14,7 +14,8 @@ from azure.cli.commands.template_create import register_folded_cli_argument
 from azure.cli.commands.validators import MarkSpecifiedAction
 from azure.cli.command_modules.network._validators import \
     (process_nic_namespace, process_network_lb_create_namespace, process_public_ip_create_namespace,
-     validate_public_ip_type, validate_nsg_name_or_id)
+     validate_public_ip_type, validate_nsg_name_or_id, validate_address_prefixes, process_app_gateway_namespace,
+     validate_servers, validate_cert)
 from azure.cli.commands.template_create import register_folded_cli_argument
 from azure.cli.commands.arm import is_valid_resource_id
 from azure.cli.commands.parameters import (location_type,
