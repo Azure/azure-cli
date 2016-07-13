@@ -61,13 +61,12 @@ def is_valid_resource_id(rid, exception_type=None):
         raise exception_type()
     return is_valid
 
-class ResourceId(dict):
+class ResourceId(str):
 
-    def __init__(self, value):
-        super(ResourceId, self).__init__()
-        if not is_valid_resource_id(value):
+    def __new__(cls, val):
+        if not is_valid_resource_id(val):
             raise ValueError()
-        self.update(parse_resource_id(value))
+        return str.__new__(cls, val)
 
 def resource_exists(resource_group, name, namespace, type, **_): # pylint: disable=redefined-builtin
     '''Checks if the given resource exists.
@@ -85,8 +84,9 @@ def add_id_parameters(command_table):
 
             def __call__(self, parser, namespace, values, option_string=None):
                 try:
+                    parts = parse_resource_id(values)
                     for arg in [arg for arg in arguments.values() if arg.id_part]:
-                        setattr(namespace, arg.name, values[arg.id_part])
+                        setattr(namespace, arg.name, parts[arg.id_part])
                 except Exception as ex:
                     raise ValueError(ex)
 
