@@ -19,9 +19,10 @@ def get_required(value):
         return swagger_template_required
     return ''
 
-def get_enum(value):
+def get_enum(value, name):
     if value.get('allowedValues'):
-        return swagger_template_enum.format(',\n        '.join(['"{0}"'.format(v) for v in value['allowedValues']]))
+        enum_text = ',\n'.join(['"{0}"'.format(v) for v in value['allowedValues']])
+        return swagger_template_enum.format(enum_text, name)
     return ''
 
 def get_default(value):
@@ -37,8 +38,9 @@ def get_default(value):
 def get_type_string(value):
     type = value.get('type')
     type_conversion = {
-        'securestring': 'string',
-        'bool': 'boolean'
+        'bool': 'boolean',
+        'int': 'integer',
+        'securestring': 'string'
     }
     type = type_conversion.get(type, type)
 
@@ -487,7 +489,11 @@ swagger_template_required = ''',
 swagger_template_enum = ''',
       "enum": [
         {0}
-      ]'''
+      ],
+      "x-ms-enum": {{
+        "name": "{1}",
+        "modelAsString": false
+      }}'''
 
 swagger_template_default = ''',
       "default": "{0}"'''
@@ -537,7 +543,7 @@ def convert_template_to_swagger(*args):
                 print('FAILURE: Description metadata is required for all parameters. Not found for {}'.format(value))
                 sys.exit(-1)
             param_strs.append(swagger_template_param.format(
-                key, comment or '', get_required(value), get_enum(value), get_default(value), get_type_string(value)))
+                key, comment or '', get_required(value), get_enum(value, key), get_default(value), get_type_string(value)))
 
         # artifacts special case
         artifacts_paramstr = next((p for p in param_strs if '_artifacts' in p), None)

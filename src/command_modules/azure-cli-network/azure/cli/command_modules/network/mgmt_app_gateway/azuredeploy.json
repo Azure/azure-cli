@@ -1,0 +1,464 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "_artifactsLocation": {
+      "type": "string",
+      "metadata": {
+        "description": "URL of the template to deploy."
+      }
+    },
+    "applicationGatewayName": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the application gateway."
+      }
+    },
+    "capacity": {
+      "type": "int",
+      "defaultValue": 2,
+      "metadata": {
+        "description": "The number of instances to use with the application gateway."
+      }
+    },
+    "certData": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "The contents of the PFX certificate file."
+      }
+    },
+    "certPassword": {
+      "type": "securestring",
+      "defaultValue": "",
+      "metadata": {
+        "description": "The certificate password."
+      }
+    },
+    "frontendPort": {
+      "type": "int",
+      "defaultValue": "",
+      "metadata": {
+        "description": "The front end port number. Defaults to 80 for HTTP and 443 for HTTPS."
+      }
+    },
+    "frontendType": {
+      "type": "string",
+      "defaultValue": "privateIp",
+      "allowedValues": [ "publicIp", "privateIp" ],
+      "metadata": {
+        "description": "Specify which kind of frontend configuration to create."
+      }
+    },
+    "httpListenerProtocol": {
+      "type": "string",
+      "defaultValue": "http",
+      "metadata": {
+        "description": "The HTTP listener protocol (http, https)."
+      }
+    },
+    "httpSettingsCookieBasedAffinity": {
+      "type": "string",
+      "defaultValue": "disabled",
+      "metadata": {
+        "description": "Enable or disable HTTP settings cookie based affinity (enabled, disabled)."
+      }
+    },
+    "httpSettingsPort": {
+      "type": "int",
+      "defaultValue": 80,
+      "metadata": {
+        "description": "The HTTP settings port."
+      }
+    },
+    "httpSettingsProtocol": {
+      "type": "string",
+      "defaultValue": "http",
+      "metadata": {
+        "description": "The HTTP settings protocol (http, https)."
+      }
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": {
+        "description": "The location in which to create the application gateway."
+      }
+    },
+    "privateIpAddress": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "The static private IP address to associate with the application gateway frontend."
+      }
+    },
+    "privateIpAddressAllocation": {
+      "type": "string",
+      "defaultValue": "dynamic",
+      "metadata": {
+        "description": "Specify the kind of private IP allocation (dynamic, static)."
+      }
+    },
+    "publicIp": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "The name or ID of the public IP address."
+      }
+    },
+    "publicIpType": {
+      "type": "string",
+      "defaultValue": "none",
+      "allowedValues": [ "none", "new", "existingName", "existingId" ],
+      "metadata": {
+        "description": "Specify the type of public IP address."
+      }
+    },
+    "publicIpAddressAllocation": {
+      "type": "string",
+      "defaultValue": "dynamic",
+      "metadata": {
+        "description": "Specify the kind of public IP allocation for new public IPs (static, dynamic)."
+      }
+    },
+    "routingRuleType": {
+      "type": "string",
+      "defaultValue": "Basic",
+      "metadata": {
+        "description": "The request routing rule type (Basic, PathBasedRouting)."
+      }
+    },
+    "servers": {
+      "type": "array",
+      "defaultValue": [],
+      "metadata": {
+        "description": "The list of IP addresses or DNS names corresponding to backend servers."
+      }
+    },
+    "skuName": {
+      "type": "string",
+      "defaultValue": "Standard_Medium",
+      "metadata": {
+        "description": "The name of the SKU. (Standard_Small, Standard_Medium, Standard_Large)."
+      }
+    },
+    "skuTier": {
+      "type": "string",
+      "defaultValue": "Standard",
+      "metadata": {
+        "description": "The SKU tier."
+      }
+    },
+    "subnet": {
+      "type": "string",
+      "defaultValue": "default",
+      "metadata": {
+        "description": "The name or ID of the subnet."
+      }
+    },
+    "subnetAddressPrefix": {
+      "type": "string",
+      "defaultValue": "10.0.0.0/24",
+      "metadata": {
+        "description": "The subnet prefix in CIDR format."
+      }
+    },
+    "subnetType": {
+      "type": "string",
+      "allowedValues": [ "new", "existingId", "existingName" ],
+      "defaultValue": "new",
+      "metadata": {
+        "description": "Use a new or existing subnet."
+      }
+    },
+    "virtualNetworkName": {
+      "type": "string",
+      "defaultValue": "[concat(parameters('applicationGatewayName'),'Vnet')]",
+      "metadata": {
+        "description": "The name of the virtual network (VNet) associated with the subnet."
+      }
+    },
+    "vnetAddressPrefix": {
+      "type": "string",
+      "defaultValue": "10.0.0.0/16",
+      "metadata": {
+        "description": "The virtual network address range in CIDR format."
+      }
+    }
+  },
+  "variables": {
+    "applicationGatewayId": "[concat('/subscriptions/',subscription().subscriptionId,'/resourceGroups/',resourceGroup().name,'/providers/Microsoft.Network/applicationGateways/',parameters('applicationGatewayName'))]",
+    "applicationGatewayProperties": {
+      "http": {
+        "sku": {
+          "name": "[parameters('skuName')]",
+          "tier": "[parameters('skuTier')]",
+          "capacity": "[parameters('capacity')]"
+        },
+        "gatewayIPConfigurations": [
+          {
+            "name": "appGatewayIpConfig",
+            "properties": {
+              "subnet": {
+                "id": "[variables('subnetIds')[parameters('subnetType')]]"
+              }
+            }
+          }
+        ],
+        "frontendIPConfigurations": [
+          {
+            "name": "appGatewayFrontendIP",
+            "properties": "[variables('frontendIpProperties')[parameters('frontendType')]]"
+          }
+        ],
+        "frontendPorts": [
+          {
+            "name": "appGatewayFrontendPort",
+            "properties": {
+              "Port": "[parameters('frontendPort')]"
+            }
+          }
+        ],
+        "backendAddressPools": [
+          {
+            "name": "appGatewayBackendPool",
+            "properties": {
+              "BackendAddresses": "[parameters('servers')]"
+            }
+          }
+        ],
+        "backendHttpSettingsCollection": [
+          {
+            "name": "appGatewayBackendHttpSettings",
+            "properties": {
+              "Port": "[parameters('httpSettingsPort')]",
+              "Protocol": "[parameters('httpSettingsProtocol')]",
+              "CookieBasedAffinity": "[parameters('httpSettingsCookieBasedAffinity')]"
+            }
+          }
+        ],
+        "httpListeners": [
+          {
+            "name": "appGatewayHttpListener",
+            "properties": {
+              "FrontendIpConfiguration": {
+                "Id": "[concat(resourceId('Microsoft.Network/applicationGateways',parameters('applicationGatewayName')),'/frontendIPConfigurations/appGatewayFrontendIP')]"
+              },
+              "FrontendPort": {
+                "Id": "[concat(resourceId('Microsoft.Network/applicationGateways',parameters('applicationGatewayName')),'/frontendPorts/appGatewayFrontendPort')]"
+              },
+              "Protocol": "http",
+              "SslCertificate": null
+            }
+          }
+        ],
+        "requestRoutingRules": [
+          {
+            "Name": "rule1",
+            "properties": {
+              "RuleType": "[parameters('routingRuleType')]",
+              "httpListener": {
+                "id": "[concat(resourceId('Microsoft.Network/applicationGateways',parameters('applicationGatewayName')),'/httpListeners/appGatewayHttpListener')]"
+              },
+              "backendAddressPool": {
+                "id": "[concat(resourceId('Microsoft.Network/applicationGateways',parameters('applicationGatewayName')),'/backendAddressPools/appGatewayBackendPool')]"
+              },
+              "backendHttpSettings": {
+                "id": "[concat(resourceId('Microsoft.Network/applicationGateways',parameters('applicationGatewayName')),'/backendHttpSettingsCollection/appGatewayBackendHttpSettings')]"
+              }
+            }
+          }
+        ]
+      },
+      "https": {
+        "sku": {
+          "name": "[parameters('skuName')]",
+          "tier": "[parameters('skuTier')]",
+          "capacity": "[parameters('capacity')]"
+        },
+        "gatewayIPConfigurations": [
+          {
+            "name": "appGatewayIpConfig",
+            "properties": {
+              "subnet": {
+                "id": "[variables('subnetIds')[parameters('subnetType')]]"
+              }
+            }
+          }
+        ],
+        "frontendIPConfigurations": [
+          {
+            "name": "appGatewayFrontendIP",
+            "properties": "[variables('frontendIpProperties')[parameters('frontendType')]]"
+          }
+        ],
+        "frontendPorts": [
+          {
+            "name": "appGatewayFrontendPort",
+            "properties": {
+              "Port": "[parameters('frontendPort')]"
+            }
+          }
+        ],
+        "backendAddressPools": [
+          {
+            "name": "appGatewayBackendPool",
+            "properties": {
+              "BackendAddresses": "[parameters('servers')]"
+            }
+          }
+        ],
+        "backendHttpSettingsCollection": [
+          {
+            "name": "appGatewayBackendHttpSettings",
+            "properties": {
+              "Port": "[parameters('httpSettingsPort')]",
+              "Protocol": "[parameters('httpSettingsProtocol')]",
+              "CookieBasedAffinity": "[parameters('httpSettingsCookieBasedAffinity')]"
+            }
+          }
+        ],
+        "httpListeners": [
+          {
+            "name": "appGatewayHttpListener",
+            "properties": {
+              "FrontendIpConfiguration": {
+                "Id": "[concat(resourceId('Microsoft.Network/applicationGateways',parameters('applicationGatewayName')),'/frontendIPConfigurations/appGatewayFrontendIP')]"
+              },
+              "FrontendPort": {
+                "Id": "[concat(resourceId('Microsoft.Network/applicationGateways',parameters('applicationGatewayName')),'/frontendPorts/appGatewayFrontendPort')]"
+              },
+              "Protocol": "https",
+              "SslCertificate": {
+                "Id": "[concat(variables('applicationGatewayId'),'/sslCertificates/',variables('sslCertificateName'))]"
+              }
+            }
+          }
+        ],
+        "requestRoutingRules": [
+          {
+            "Name": "rule1",
+            "properties": {
+              "RuleType": "[parameters('routingRuleType')]",
+              "httpListener": {
+                "id": "[concat(resourceId('Microsoft.Network/applicationGateways',parameters('applicationGatewayName')),'/httpListeners/appGatewayHttpListener')]"
+              },
+              "backendAddressPool": {
+                "id": "[concat(resourceId('Microsoft.Network/applicationGateways',parameters('applicationGatewayName')),'/backendAddressPools/appGatewayBackendPool')]"
+              },
+              "backendHttpSettings": {
+                "id": "[concat(resourceId('Microsoft.Network/applicationGateways',parameters('applicationGatewayName')),'/backendHttpSettingsCollection/appGatewayBackendHttpSettings')]"
+              }
+            }
+          }
+        ],
+        "sslCertificates": [
+          {
+            "name": "[variables('sslCertificateName')]",
+            "properties": {
+              "data": "[parameters('certData')]",
+              "password": "[parameters('certPassword')]"
+            }
+          }
+        ]
+      }
+    },
+    "frontendIpProperties": {
+      "publicIp": {
+        "publicIpAddress": {
+          "id": "[variables('publicIpIds')[parameters('publicIpType')]]"
+        }
+      },
+      "privateIp": {
+        "privateIPAddress": "[parameters('privateIpAddress')]",
+        "privateIPAllocationMethod": "[parameters('privateIpAddressAllocation')]",
+        "subnet": {
+          "id": "[variables('subnetIds')[parameters('subnetType')]]"
+        }
+      }
+    },
+    "publicIpDeploymentName": "[concat('PublicIp',parameters('applicationGatewayName'))]",
+    "publicIpIds": {
+      "none": "[parameters('publicIp')]",
+      "new": "[concat('/subscriptions/',subscription().subscriptionId,'/resourceGroups/',resourceGroup().name,'/providers/Microsoft.Network/publicIpAddresses/',parameters('publicIp'))]",
+      "existingName": "[concat('/subscriptions/',subscription().subscriptionId,'/resourceGroups/',resourceGroup().name,'/providers/Microsoft.Network/publicIpAddresses/',parameters('publicIp'))]",
+      "existingId": "[parameters('publicIp')]"
+    },
+    "publicIpTemplateFilePaths": {
+      "existingName": "nested_templates/public_ip_none_or_existing.json",
+      "existingId": "nested_templates/public_ip_none_or_existing.json",
+      "new": "nested_templates/public_ip_new.json",
+      "none": "nested_templates/public_ip_none_or_existing.json"
+    },
+    "sslCertificateName": "[concat(parameters('applicationGatewayName'),'SslCert')]",
+    "subnetIds": {
+      "existingId": "[parameters('subnet')]",
+      "existingName": "[concat(variables('vnetId'),'/subnets/',parameters('subnet'))]",
+      "new": "[concat(variables('vnetId'),'/subnets/',parameters('subnet'))]"
+    },
+    "vnetDeploymentName": "[concat('VNET',parameters('applicationGatewayName'))]",
+    "vnetId": "[concat('/subscriptions/',subscription().subscriptionId,'/resourceGroups/',resourceGroup().name,'/providers/Microsoft.Network/virtualNetworks/',parameters('virtualNetworkName'))]",
+    "vnetTemplateFilePaths": {
+      "existingId": "nested_templates/vnet_existing.json",
+      "existingName": "nested_templates/vnet_existing.json",
+      "new": "nested_templates/vnet_new.json"
+    }
+  },
+  "resources": [
+    {
+      "apiVersion": "2015-06-15",
+      "dependsOn": [
+        "[concat('Microsoft.Resources/deployments/', variables('vnetDeploymentName'))]",
+        "[concat('Microsoft.Resources/deployments/', variables('publicIpDeploymentName'))]"
+      ],
+      "location": "[resourceGroup().location]",
+      "name": "[parameters('applicationGatewayName')]",
+      "properties": "[variables('applicationGatewayProperties')[parameters('httpListenerProtocol')]]",
+      "type": "Microsoft.Network/applicationGateways"
+    },
+    {
+      "name": "[variables('vnetDeploymentName')]",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "dependsOn": [ ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(parameters('_artifactsLocation'),'/',variables('vnetTemplateFilePaths')[parameters('subnetType')])]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "subnetName": { "value": "[parameters('subnet')]" },
+          "subnetAddressPrefix": { "value": "[parameters('subnetAddressPrefix')]" },
+          "virtualNetworkName": { "value": "[parameters('virtualNetworkName')]" },
+          "vnetAddressPrefix": { "value": "[parameters('vnetAddressPrefix')]" }
+        }
+      }
+    },
+    {
+      "name": "[variables('publicIpDeploymentName')]",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "dependsOn": [ ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(parameters('_artifactsLocation'),'/',variables('publicIpTemplateFilePaths')[parameters('publicIpType')])]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "location": { "value": "[parameters('location')]" },
+          "publicIpName": { "value": "[parameters('publicIp')]" },
+          "publicIpType": { "value": "[parameters('publicIpType')]" },
+          "publicIpAddressAllocation": { "value": "[parameters('publicIpAddressAllocation')]" }
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "applicationGateway": {
+      "type": "object",
+      "value": "[reference(parameters('applicationGatewayName'))]"
+    }
+  }
+}

@@ -1,7 +1,7 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "LbCreationClient",
+    "title": "AppGatewayCreationClient",
     "version": "2015-11-01"
   },
   "host": "management.azure.com",
@@ -36,9 +36,9 @@
     "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Resources/deployments/{deploymentName}": {
       "put": {
         "tags": [
-          "Lb"
+          "AppGateway"
         ],
-        "operationId": "Lb_CreateOrUpdate",
+        "operationId": "AppGateway_CreateOrUpdate",
         "description": "Create or update a virtual machine.",
         "parameters": [
           {
@@ -67,7 +67,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/Deployment_Lb"
+              "$ref": "#/definitions/Deployment_AppGateway"
             },
             "description": "Additional parameters supplied to the operation."
           },
@@ -97,17 +97,17 @@
     }
   },
   "definitions": {
-    "Deployment_Lb": {
+    "Deployment_AppGateway": {
       "properties": {
         "properties": {
-          "$ref": "#/definitions/DeploymentProperties_Lb",
+          "$ref": "#/definitions/DeploymentProperties_AppGateway",
           "description": "Gets or sets the deployment properties.",
           "x-ms-client-flatten": true
         }
       },
       "description": "Deployment operation parameters."
     },
-    "DeploymentProperties_Lb": {
+    "DeploymentProperties_AppGateway": {
       "properties": {
         "templateLink": {
           "$ref": "#/definitions/TemplateLink",
@@ -115,7 +115,7 @@
           "x-ms-client-flatten": true
         },
         "parameters": {
-          "$ref": "#/definitions/LbParameters",
+          "$ref": "#/definitions/AppGatewayParameters",
           "type": "object",
           "description": "Deployment parameters. Use only one of Parameters or ParametersLink.",
           "x-ms-client-flatten": true
@@ -145,7 +145,7 @@
           "type": "string",
           "description": "URI referencing the template.",
           "enum": [
-            "https://azuresdkci.blob.core.windows.net/templatehost/CreateLb_2016-07-11/azuredeploy.json"
+            "https://azuresdkci.blob.core.windows.net/templatehost/CreateAppGateway_2016-06-27/azuredeploy.json"
           ]
         },
         "contentVersion": {
@@ -158,31 +158,61 @@
       ],
       "description": "Entity representing the reference to the template."
     },
-    "LbParameters": {
+    "AppGatewayParameters": {
       "properties": {
         "_artifactsLocation": {
           "type": "object",
           "$ref": "#/definitions/DeploymentParameter__artifactsLocation",
           "x-ms-client-flatten": true
         },
-        "backendPoolName": {
+        "applicationGatewayName": {
           "type": "object",
-          "$ref": "#/definitions/DeploymentParameter_backendPoolName",
+          "$ref": "#/definitions/DeploymentParameter_applicationGatewayName",
           "x-ms-client-flatten": true
         },
-        "dnsNameType": {
+        "capacity": {
           "type": "object",
-          "$ref": "#/definitions/DeploymentParameter_dnsNameType",
+          "$ref": "#/definitions/DeploymentParameter_capacity",
           "x-ms-client-flatten": true
         },
-        "frontendIpName": {
+        "certData": {
           "type": "object",
-          "$ref": "#/definitions/DeploymentParameter_frontendIpName",
+          "$ref": "#/definitions/DeploymentParameter_certData",
           "x-ms-client-flatten": true
         },
-        "loadBalancerName": {
+        "certPassword": {
           "type": "object",
-          "$ref": "#/definitions/DeploymentParameter_loadBalancerName",
+          "$ref": "#/definitions/DeploymentParameter_certPassword",
+          "x-ms-client-flatten": true
+        },
+        "frontendPort": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_frontendPort",
+          "x-ms-client-flatten": true
+        },
+        "frontendType": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_frontendType",
+          "x-ms-client-flatten": true
+        },
+        "httpListenerProtocol": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_httpListenerProtocol",
+          "x-ms-client-flatten": true
+        },
+        "httpSettingsCookieBasedAffinity": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_httpSettingsCookieBasedAffinity",
+          "x-ms-client-flatten": true
+        },
+        "httpSettingsPort": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_httpSettingsPort",
+          "x-ms-client-flatten": true
+        },
+        "httpSettingsProtocol": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_httpSettingsProtocol",
           "x-ms-client-flatten": true
         },
         "location": {
@@ -200,9 +230,9 @@
           "$ref": "#/definitions/DeploymentParameter_privateIpAddressAllocation",
           "x-ms-client-flatten": true
         },
-        "publicIpAddress": {
+        "publicIp": {
           "type": "object",
-          "$ref": "#/definitions/DeploymentParameter_publicIpAddress",
+          "$ref": "#/definitions/DeploymentParameter_publicIp",
           "x-ms-client-flatten": true
         },
         "publicIpAddressAllocation": {
@@ -210,14 +240,29 @@
           "$ref": "#/definitions/DeploymentParameter_publicIpAddressAllocation",
           "x-ms-client-flatten": true
         },
-        "publicIpAddressType": {
+        "publicIpType": {
           "type": "object",
-          "$ref": "#/definitions/DeploymentParameter_publicIpAddressType",
+          "$ref": "#/definitions/DeploymentParameter_publicIpType",
           "x-ms-client-flatten": true
         },
-        "publicIpDnsName": {
+        "routingRuleType": {
           "type": "object",
-          "$ref": "#/definitions/DeploymentParameter_publicIpDnsName",
+          "$ref": "#/definitions/DeploymentParameter_routingRuleType",
+          "x-ms-client-flatten": true
+        },
+        "servers": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_servers",
+          "x-ms-client-flatten": true
+        },
+        "skuName": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_skuName",
+          "x-ms-client-flatten": true
+        },
+        "skuTier": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_skuTier",
           "x-ms-client-flatten": true
         },
         "subnet": {
@@ -247,60 +292,122 @@
         }
       },
       "required": [
-        "loadBalancerName",
+        "applicationGatewayName",
         "_artifactsLocation"
       ]
     },
-    "DeploymentParameter_backendPoolName": {
+    "DeploymentParameter_applicationGatewayName": {
       "properties": {
         "value": {
           "type": "string",
-          "description": "Name of load balancer backend pool.",
-          "x-ms-client-name": "backendPoolName"
-        }
-      }
-    },
-    "DeploymentParameter_dnsNameType": {
-      "properties": {
-        "value": {
-          "type": "string",
-          "description": "Associate VMs with a public IP address to a DNS name.",
-          "x-ms-client-name": "dnsNameType",
-          "enum": [
-            "none",
-            "new"
-          ],
-          "default": "none"
-        }
-      }
-    },
-    "DeploymentParameter_frontendIpName": {
-      "properties": {
-        "value": {
-          "type": "string",
-          "description": "Name of the frontend IP configuration.",
-          "x-ms-client-name": "frontendIpName",
-          "default": "LoadBalancerFrontEnd"
-        }
-      }
-    },
-    "DeploymentParameter_loadBalancerName": {
-      "properties": {
-        "value": {
-          "type": "string",
-          "description": "Name for load balancer.",
-          "x-ms-client-name": "loadBalancerName"
+          "description": "The name of the application gateway.",
+          "x-ms-client-name": "applicationGatewayName"
         }
       },
       "required": [
         "value"
       ]
     },
+    "DeploymentParameter_capacity": {
+      "properties": {
+        "value": {
+          "type": "integer",
+          "description": "The number of instances to use with the application gateway.",
+          "x-ms-client-name": "capacity",
+          "default": "2"
+        }
+      }
+    },
+    "DeploymentParameter_certData": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "The contents of the PFX certificate file.",
+          "x-ms-client-name": "certData"
+        }
+      }
+    },
+    "DeploymentParameter_certPassword": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "The certificate password.",
+          "x-ms-client-name": "certPassword"
+        }
+      }
+    },
+    "DeploymentParameter_frontendPort": {
+      "properties": {
+        "value": {
+          "type": "integer",
+          "description": "The front end port number. Defaults to 80 for HTTP and 443 for HTTPS.",
+          "x-ms-client-name": "frontendPort"
+        }
+      }
+    },
+    "DeploymentParameter_frontendType": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "Specify which kind of frontend configuration to create.",
+          "x-ms-client-name": "frontendType",
+          "enum": [
+            "publicIp",
+            "privateIp"
+          ],
+          "x-ms-enum": {
+            "name": "frontendType",
+            "modelAsString": false
+          },
+          "default": "privateIp"
+        }
+      }
+    },
+    "DeploymentParameter_httpListenerProtocol": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "The HTTP listener protocol (http, https).",
+          "x-ms-client-name": "httpListenerProtocol",
+          "default": "http"
+        }
+      }
+    },
+    "DeploymentParameter_httpSettingsCookieBasedAffinity": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "Enable or disable HTTP settings cookie based affinity (enabled, disabled).",
+          "x-ms-client-name": "httpSettingsCookieBasedAffinity",
+          "default": "disabled"
+        }
+      }
+    },
+    "DeploymentParameter_httpSettingsPort": {
+      "properties": {
+        "value": {
+          "type": "integer",
+          "description": "The HTTP settings port.",
+          "x-ms-client-name": "httpSettingsPort",
+          "default": "80"
+        }
+      }
+    },
+    "DeploymentParameter_httpSettingsProtocol": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "The HTTP settings protocol (http, https).",
+          "x-ms-client-name": "httpSettingsProtocol",
+          "default": "http"
+        }
+      }
+    },
     "DeploymentParameter_location": {
       "properties": {
         "value": {
           "type": "string",
-          "description": "Location for load balancer resource.",
+          "description": "The location in which to create the application gateway.",
           "x-ms-client-name": "location"
         }
       }
@@ -309,7 +416,7 @@
       "properties": {
         "value": {
           "type": "string",
-          "description": "Static private IP address to use.",
+          "description": "The static private IP address to associate with the application gateway frontend.",
           "x-ms-client-name": "privateIpAddress"
         }
       }
@@ -318,22 +425,18 @@
       "properties": {
         "value": {
           "type": "string",
-          "description": "Private IP address allocation method.",
+          "description": "Specify the kind of private IP allocation (dynamic, static).",
           "x-ms-client-name": "privateIpAddressAllocation",
-          "enum": [
-            "dynamic",
-            "static"
-          ],
           "default": "dynamic"
         }
       }
     },
-    "DeploymentParameter_publicIpAddress": {
+    "DeploymentParameter_publicIp": {
       "properties": {
         "value": {
           "type": "string",
-          "description": "Name or ID of the public IP address to use.",
-          "x-ms-client-name": "publicIpAddress"
+          "description": "The name or ID of the public IP address.",
+          "x-ms-client-name": "publicIp"
         }
       }
     },
@@ -341,38 +444,71 @@
       "properties": {
         "value": {
           "type": "string",
-          "description": "Public IP address allocation method.",
+          "description": "Specify the kind of public IP allocation for new public IPs (static, dynamic).",
           "x-ms-client-name": "publicIpAddressAllocation",
-          "enum": [
-            "dynamic",
-            "static"
-          ],
           "default": "dynamic"
         }
       }
     },
-    "DeploymentParameter_publicIpAddressType": {
+    "DeploymentParameter_publicIpType": {
       "properties": {
         "value": {
           "type": "string",
-          "description": "Type of Public IP Address to associate with the load balancer.",
-          "x-ms-client-name": "publicIpAddressType",
+          "description": "Specify the type of public IP address.",
+          "x-ms-client-name": "publicIpType",
           "enum": [
             "none",
             "new",
             "existingName",
             "existingId"
           ],
-          "default": "new"
+          "x-ms-enum": {
+            "name": "publicIpType",
+            "modelAsString": false
+          },
+          "default": "none"
         }
       }
     },
-    "DeploymentParameter_publicIpDnsName": {
+    "DeploymentParameter_routingRuleType": {
       "properties": {
         "value": {
           "type": "string",
-          "description": "Globally unique DNS Name for the Public IP used to access the Virtual Machine (new public IP only).",
-          "x-ms-client-name": "publicIpDnsName"
+          "description": "The request routing rule type (Basic, PathBasedRouting).",
+          "x-ms-client-name": "routingRuleType",
+          "default": "Basic"
+        }
+      }
+    },
+    "DeploymentParameter_servers": {
+      "properties": {
+        "value": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          },
+          "description": "The list of IP addresses or DNS names corresponding to backend servers.",
+          "x-ms-client-name": "servers"
+        }
+      }
+    },
+    "DeploymentParameter_skuName": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "The name of the SKU. (Standard_Small, Standard_Medium, Standard_Large).",
+          "x-ms-client-name": "skuName",
+          "default": "Standard_Medium"
+        }
+      }
+    },
+    "DeploymentParameter_skuTier": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "The SKU tier.",
+          "x-ms-client-name": "skuTier",
+          "default": "Standard"
         }
       }
     },
@@ -380,8 +516,9 @@
       "properties": {
         "value": {
           "type": "string",
-          "description": "The subnet name or ID to associate with the load balancer. Cannot be used in conjunction with a Public IP.",
-          "x-ms-client-name": "subnet"
+          "description": "The name or ID of the subnet.",
+          "x-ms-client-name": "subnet",
+          "default": "default"
         }
       }
     },
@@ -389,7 +526,7 @@
       "properties": {
         "value": {
           "type": "string",
-          "description": "The subnet address prefix in CIDR format (new subnet only).",
+          "description": "The subnet prefix in CIDR format.",
           "x-ms-client-name": "subnetAddressPrefix",
           "default": "10.0.0.0/24"
         }
@@ -399,15 +536,18 @@
       "properties": {
         "value": {
           "type": "string",
-          "description": "Use new, existing or no subnet.",
+          "description": "Use a new or existing subnet.",
           "x-ms-client-name": "subnetType",
           "enum": [
-            "none",
             "new",
-            "existingName",
-            "existingId"
+            "existingId",
+            "existingName"
           ],
-          "default": "none"
+          "x-ms-enum": {
+            "name": "subnetType",
+            "modelAsString": false
+          },
+          "default": "new"
         }
       }
     },
@@ -415,7 +555,7 @@
       "properties": {
         "value": {
           "type": "string",
-          "description": "The VNet name containing the subnet. Cannot be used in conjunction with a Public IP.",
+          "description": "The name of the virtual network (VNet) associated with the subnet.",
           "x-ms-client-name": "virtualNetworkName"
         }
       }
@@ -424,7 +564,7 @@
       "properties": {
         "value": {
           "type": "string",
-          "description": "The virtual network IP address prefix in CIDR format (new subnet only).",
+          "description": "The virtual network address range in CIDR format.",
           "x-ms-client-name": "vnetAddressPrefix",
           "default": "10.0.0.0/16"
         }
@@ -437,7 +577,7 @@
           "description": "Container URI of of the template.",
           "x-ms-client-name": "_artifactsLocation",
           "enum": [
-            "https://azuresdkci.blob.core.windows.net/templatehost/CreateLb_2016-07-11"
+            "https://azuresdkci.blob.core.windows.net/templatehost/CreateAppGateway_2016-06-27"
           ]
         }
       },

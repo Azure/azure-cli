@@ -2,6 +2,16 @@
 import argparse
 
 from azure.mgmt.network.models import IPAllocationMethod
+from azure.mgmt.network.models.network_management_client_enums import \
+    (ApplicationGatewaySkuName, ApplicationGatewayCookieBasedAffinity,
+     ApplicationGatewayTier, ApplicationGatewayProtocol,
+     ApplicationGatewayRequestRoutingRuleType)
+
+from azure.cli.commands import CliArgumentType, register_cli_argument
+from azure.cli.commands.arm import is_valid_resource_id
+from azure.cli.commands.parameters import (location_type, get_resource_name_completion_list, get_enum_type_completion_list)
+from azure.cli.commands.template_create import register_folded_cli_argument
+from azure.cli.commands.validators import MarkSpecifiedAction
 from azure.cli.command_modules.network._validators import \
     (process_nic_namespace, process_network_lb_create_namespace, process_public_ip_create_namespace,
      validate_public_ip_type, validate_nsg_name_or_id)
@@ -25,8 +35,23 @@ register_cli_argument('network', 'subnet_name', subnet_name_type)
 register_cli_argument('network', 'virtual_network_name', virtual_network_name_type, id_part='name')
 register_cli_argument('network', 'network_security_group_name', nsg_name_type, id_part='name')
 
-# Application-Gateway
-register_cli_argument('network application-gateway', 'application_gateway_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/applicationGateways'), id_part='resource_name')
+register_cli_argument('network application-gateway', 'application_gateway_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/applicationGateways'), id_part='name')
+register_cli_argument('network application-gateway', 'sku_name', completer=get_enum_type_completion_list(ApplicationGatewaySkuName))
+register_cli_argument('network application-gateway', 'sku_tier', completer=get_enum_type_completion_list(ApplicationGatewayTier))
+register_cli_argument('network application-gateway', 'routing_rule_type', completer=get_enum_type_completion_list(ApplicationGatewayRequestRoutingRuleType))
+register_cli_argument('network application-gateway', 'virtual_network_name', virtual_network_name_type)
+register_folded_cli_argument('network application-gateway', 'subnet', 'subnets', parent_name='virtual_network_name', parent_type='Microsoft.Network/virtualNetworks', validator=validate_address_prefixes)
+register_folded_cli_argument('network application-gateway', 'public_ip', 'Microsoft.Network/publicIPAddresses')
+register_cli_argument('network application-gateway', 'virtual_network_type', help=argparse.SUPPRESS)
+register_cli_argument('network application-gateway', 'private_ip_address_allocation', help=argparse.SUPPRESS)
+register_cli_argument('network application-gateway', 'frontend_type', help=argparse.SUPPRESS, validator=process_app_gateway_namespace)
+register_cli_argument('network application-gateway', 'servers', nargs='+', validator=validate_servers)
+register_cli_argument('network application-gateway', 'cert_data', options_list=('--cert-file',), help='The path to the PFX certificate file.', validator=validate_cert)
+register_cli_argument('network application-gateway', 'http_listener_protocol', help=argparse.SUPPRESS)
+register_cli_argument('network application-gateway', 'http_settings_cookie_based_affinity', type=str.lower, completer=get_enum_type_completion_list(ApplicationGatewayCookieBasedAffinity))
+register_cli_argument('network application-gateway', 'http_settings_protocol', type=str.lower, completer=get_enum_type_completion_list(ApplicationGatewayProtocol))
+register_cli_argument('network application-gateway', 'subnet_address_prefix', action=MarkSpecifiedAction)
+register_cli_argument('network application-gateway', 'vnet_address_prefix', action=MarkSpecifiedAction)
 
 # Express Route Circuit Auth
 register_cli_argument('network express-route circuit-auth', 'authorization_name', name_arg_type, id_part='child_name')
@@ -86,7 +111,7 @@ register_cli_argument('network vnet', 'virtual_network_name', virtual_network_na
 register_cli_argument('network vnet create', 'location', location_type)
 register_cli_argument('network vnet create', 'subnet_prefix', options_list=('--subnet-prefix',), metavar='SUBNET_PREFIX', default='10.0.0.0/24')
 register_cli_argument('network vnet create', 'subnet_name', options_list=('--subnet-name',), metavar='SUBNET_NAME', default='Subnet1')
-register_cli_argument('network vnet create', 'virtual_network_prefix', options_list=('--vnet-prefix',), metavar='VNET_PREFIX', default='10.0.0.0/16')
+register_cli_argument('network vnet create', 'virtual_network_prefix', options_list=('--address-prefix',), metavar='PREFIX', default='10.0.0.0/16')
 register_cli_argument('network vnet create', 'virtual_network_name', virtual_network_name_type, options_list=('--name', '-n'), required=True, completer=None)
 
 register_cli_argument('network vnet subnet', 'subnet_name', arg_type=subnet_name_type, options_list=('--name', '-n'), id_part='child_name')
@@ -103,7 +128,7 @@ register_cli_argument('network lb', 'frontend_port', help='Port number')
 register_cli_argument('network lb', 'frontend_port_range_start', help='Port number')
 register_cli_argument('network lb', 'frontend_port_range_end', help='Port number')
 register_cli_argument('network lb', 'backend_port', help='Port number')
-register_cli_argument('network lb', 'backend_address_pool_name', help='The name of the backend address pool.')
+register_cli_argument('network lb', 'backend_address_pool_name', options_list=('--backend-pool-name',), help='The name of the backend address pool.')
 register_cli_argument('network lb', 'frontend_ip_name', help='The name of the frontend IP configuration.')
 register_cli_argument('network lb', 'floating_ip', help='Enable floating IP.', choices=['true', 'false'], type=str.lower)
 register_cli_argument('network lb', 'idle_timeout', help='Idle timeout in minutes.')
