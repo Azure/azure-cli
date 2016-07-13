@@ -42,7 +42,7 @@ class CliArgumentType(object):
 
 class CliCommandArgument(object):
 
-    _NAMED_ARGUMENTS = ('options_list', 'validator', 'completer')
+    _NAMED_ARGUMENTS = ('options_list', 'validator', 'completer', 'id_part')
 
     def __init__(self, dest=None, argtype=None, **kwargs):
         self.type = CliArgumentType(overrides=argtype, **kwargs)
@@ -61,14 +61,17 @@ class CliCommandArgument(object):
             return self.type.settings.get(name, None)
         elif name == 'name':
             return self.type.settings.get('dest', None)
-        elif name == 'options_list':
-            return self.type.settings.get('options_list', None)
         elif name == 'options':
             return {key: value for key, value in self.type.settings.items()
                     if key != 'options' and not key in self._NAMED_ARGUMENTS
                     and not value == CliArgumentType.REMOVE}
         else:
             raise AttributeError(message=name)
+
+    def __setattr__(self, name, value):
+        if name == 'type':
+            return super(CliCommandArgument, self).__setattr__(name, value)
+        self.type.settings[name] = value
 
 class LongRunningOperation(object): #pylint: disable=too-few-public-methods
 
