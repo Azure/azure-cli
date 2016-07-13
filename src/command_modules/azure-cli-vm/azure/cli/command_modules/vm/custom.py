@@ -760,34 +760,55 @@ def vmss_scale(resource_group_name, vm_scale_set_name, new_capacity):
                                                               vmss_new)
 
 def vmss_update_instances(resource_group_name, vm_scale_set_name, instance_ids):
-    '''upgrade virtual machines in a virtual machine scale set
-
-    :param str instance_ids: space separated ids, such as 0 2 3.
-    '''
+    '''upgrade virtual machines in a virtual machine scale set'''
     client = _compute_client_factory()
     return client.virtual_machine_scale_sets.update_instances(resource_group_name,
                                                               vm_scale_set_name,
                                                               instance_ids)
 
 def vmss_get_instance_view(resource_group_name, vm_scale_set_name, instance_id=None):
-    '''get instance view.
+    '''get instance view for a scale set or its VM instances
 
-    :param str instance_id: instance id
+    :param str instance_id: an VM instance id, or use "*" to list instance view for
+    all VMs in a scale set
     '''
     client = _compute_client_factory()
     if instance_id:
-        return client.virtual_machine_scale_set_vms.get_instance_view(resource_group_name,
-                                                                      vm_scale_set_name,
-                                                                      instance_id)
+        if instance_id == '*':
+            return client.virtual_machine_scale_set_vms.list(resource_group_name,
+                                                             vm_scale_set_name)
+        else:
+            return client.virtual_machine_scale_set_vms.get_instance_view(resource_group_name,
+                                                                          vm_scale_set_name,
+                                                                          instance_id)
     else:
         return client.virtual_machine_scale_sets.get_instance_view(resource_group_name,
                                                                    vm_scale_set_name)
 
-def vmss_deallocate(resource_group_name, vm_scale_set_name, instance_ids=None):
-    '''deallocate virtual machines in a virtual machine scale set.
+def vmss_show(resource_group_name, vm_scale_set_name, instance_id=None):
+    '''show scale set or its VM instance
 
-    :param str instance_ids: space separated ids, such as 0 2 3
+    :param str instance_id: VM instance id. If missing, show scale set
     '''
+    client = _compute_client_factory()
+    if instance_id:
+        return client.virtual_machine_scale_set_vms.get(resource_group_name,
+                                                        vm_scale_set_name,
+                                                        instance_id)
+    else:
+        return client.virtual_machine_scale_sets.get(resource_group_name,
+                                                     vm_scale_set_name)
+
+def vmss_list(resource_group_name=None):
+    '''list scale sets'''
+    client = _compute_client_factory()
+    if resource_group_name:
+        return client.virtual_machine_scale_sets.list(resource_group_name)
+    else:
+        return client.virtual_machine_scale_sets.list_all()
+
+def vmss_deallocate(resource_group_name, vm_scale_set_name, instance_ids=None):
+    '''deallocate virtual machines in a scale set. '''
     client = _compute_client_factory()
     if  instance_ids and len(instance_ids) == 1:
         return client.virtual_machine_scale_set_vms.deallocate(resource_group_name,
@@ -799,10 +820,7 @@ def vmss_deallocate(resource_group_name, vm_scale_set_name, instance_ids=None):
                                                             instance_ids=instance_ids)
 
 def vmss_delete_instances(resource_group_name, vm_scale_set_name, instance_ids):
-    '''delete virtual machines in a virtual machine scale set.
-
-    :param str instance_ids: space separated ids, such as 0 2 3
-    '''
+    '''delete virtual machines in a scale set.'''
     client = _compute_client_factory()
     if len(instance_ids) == 1:
         return client.virtual_machine_scale_set_vms.delete(resource_group_name,
@@ -814,10 +832,7 @@ def vmss_delete_instances(resource_group_name, vm_scale_set_name, instance_ids):
                                                                   instance_ids)
 
 def vmss_stop(resource_group_name, vm_scale_set_name, instance_ids=None):
-    '''power off (stop) virtual machines in a virtual machine scale set.
-
-    :param str instance_ids: space separated ids, such as 0 2 3
-    '''
+    '''power off (stop) virtual machines in a virtual machine scale set.'''
     client = _compute_client_factory()
     if instance_ids and len(instance_ids) == 1:
         return client.virtual_machine_scale_set_vms.power_off(resource_group_name,
@@ -831,7 +846,7 @@ def vmss_stop(resource_group_name, vm_scale_set_name, instance_ids=None):
 def vmss_reimage(resource_group_name, vm_scale_set_name, instance_id=None):
     '''reimage virtual machines in a virtual machine scale set.
 
-    :param str instance_id: instance id
+    :param str instance_id: VM instance id. If missing, reimage all instances
     '''
     client = _compute_client_factory()
     if instance_id:
@@ -843,10 +858,7 @@ def vmss_reimage(resource_group_name, vm_scale_set_name, instance_id=None):
                                                          vm_scale_set_name)
 
 def vmss_restart(resource_group_name, vm_scale_set_name, instance_ids=None):
-    '''restart virtual machines in a virtual machine scale set.
-
-    :param str instance_ids: space separated ids, such as 0 2 3
-    '''
+    '''restart virtual machines in a scale set.'''
     client = _compute_client_factory()
     if instance_ids and len(instance_ids) == 1:
         return client.virtual_machine_scale_set_vms.restart(resource_group_name,
@@ -858,10 +870,7 @@ def vmss_restart(resource_group_name, vm_scale_set_name, instance_ids=None):
                                                          instance_ids=instance_ids)
 
 def vmss_start(resource_group_name, vm_scale_set_name, instance_ids=None):
-    '''start virtual machines in a virtual machine scale set.
-
-    :param str instance_ids: space separated ids, such as 0 2 3
-    '''
+    '''start virtual machines in a virtual machine scale set.'''
     client = _compute_client_factory()
     if instance_ids and len(instance_ids) == 1:
         return client.virtual_machine_scale_set_vms.start(resource_group_name,
