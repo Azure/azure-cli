@@ -102,23 +102,20 @@ register_cli_argument('network nic scale-set', 'virtual_machine_scale_set_name',
 register_cli_argument('network nic scale-set', 'virtualmachine_index', options_list=('--vm-index',))
 register_cli_argument('network nic scale-set', 'network_interface_name', id_part='child_name')
 
-for item in ['show', 'create', 'set', 'delete']:
-    register_cli_argument('network nic ip-config {}'.format(item), 'network_interface_name', options_list=('--nic-name',), help='The network interface (NIC).')
-    register_cli_argument('network nic ip-config {}'.format(item), 'ip_config_name', options_list=('--name', '-n'), help='The name of the IP configuration.')
-
-register_cli_argument('network nic ip-config', 'resource_name', options_list=('--nic-name',), help='The network interface (NIC).')
-register_cli_argument('network nic ip-config', 'item_name', options_list=('--name', '-n'), help='The name of the {}'.format(item))
-register_cli_argument('network nic ip-config list', 'resource_name', options_list=('--name', '-n'), help='The network interface (NIC).')
+register_cli_argument('network nic ip-config', 'network_interface_name', options_list=('--nic-name',), metavar='NIC_NAME', help='The network interface (NIC).', id_part='name')
+register_cli_argument('network nic ip-config', 'ip_config_name', options_list=('--name', '-n'), metavar='IP_CONFIG_NAME', help='The name of the IP configuration.', id_part='child_name')
+register_cli_argument('network nic ip-config', 'resource_name', options_list=('--nic-name',), metavar='NIC_NAME', help='The network interface (NIC).', id_part='name')
+register_cli_argument('network nic ip-config', 'item_name', options_list=('--name', '-n'), metavar='IP_CONFIG_NAME', help='The name of the IP configuration.', id_part='child_name')
 
 for item in ['address-pool', 'inbound-nat-rule']:
-    register_cli_argument('network nic ip-config {}'.format(item), 'ip_config_name', help='The name of the IP configuration.')
-    register_cli_argument('network nic ip-config {}'.format(item), 'network_interface_name', options_list=('--nic-name',), help='The network interface (NIC).')
+    register_cli_argument('network nic ip-config {}'.format(item), 'ip_config_name', options_list=('--ip-config-name', '-n'), metavar='IP_CONFIG_NAME', help='The name of the IP configuration.', id_part='child_name')
+    register_cli_argument('network nic ip-config {}'.format(item), 'network_interface_name', options_list=('--nic-name',), metavar='NIC_NAME', help='The network interface (NIC).', id_part='name')
 
 register_cli_argument('network nic ip-config address-pool', 'load_balancer_name', options_list=('--lb-name',), help='The name of the load balancer associated with the address pool (Omit if suppying an address pool ID).')
-register_cli_argument('network nic ip-config address-pool', 'backend_address_pool', options_list=('--name', '-n'), help='The name or ID of an existing backend address pool.', validator=validate_address_pool_name_or_id)
-
 register_cli_argument('network nic ip-config inbound-nat-rule', 'load_balancer_name', options_list=('--lb-name',), help='The name of the load balancer associated with the NAT rule (Omit if suppying a NAT rule ID).')
-register_cli_argument('network nic ip-config inbound-nat-rule', 'inbound_nat_rule', options_list=('--name', '-n'), help='The name or ID of an existing inbound NAT rule.', validator=validate_inbound_nat_rule_name_or_id)
+
+register_cli_argument('network nic ip-config address-pool', 'backend_address_pool', options_list=('--address-pool',), help='The name or ID of an existing backend address pool.', validator=validate_address_pool_name_or_id)
+register_cli_argument('network nic ip-config inbound-nat-rule', 'inbound_nat_rule', options_list=('--inbound-nat-rule',), help='The name or ID of an existing inbound NAT rule.', validator=validate_inbound_nat_rule_name_or_id)
 
 register_cli_argument('network nsg', 'network_security_group_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/networkSecurityGroups'))
 # NSG
@@ -186,9 +183,8 @@ register_folded_cli_argument('network lb create', 'public_ip_address', 'Microsof
 register_folded_cli_argument('network lb create', 'subnet', 'subnets', parent_name='virtual_network_name', parent_type='Microsoft.Network/virtualNetworks')
 
 for item in ['inbound-nat-rule', 'inbound-nat-pool', 'probe', 'frontend-ip', 'address-pool', 'rule']:
-    register_cli_argument('network lb {}'.format(item), 'resource_name', load_balancer_name_type)
+    register_cli_argument('network lb {}'.format(item), 'resource_name', options_list=('--lb-name',), help='The name of the load balancer.')
     register_cli_argument('network lb {}'.format(item), 'item_name', options_list=('--name', '-n'), help='The name of the {}.'.format(item))
-    register_cli_argument('network lb {} list'.format(item), 'resource_name', options_list=('--name', '-n'), help='The name of the load balancer.')
 
 register_cli_argument('network lb frontend-ip', 'public_ip_address_name', help='Name of the existing public IP to associate with the configuration.')
 register_cli_argument('network lb frontend-ip', 'virtual_network_name', arg_type=virtual_network_name_type, help='The VNET name associated with the subnet name.')
