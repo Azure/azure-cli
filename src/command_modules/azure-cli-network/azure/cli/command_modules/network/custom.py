@@ -5,10 +5,10 @@ from azure.cli._util import CLIError
 
 from ._factory import _network_client_factory
 
-def create_update_nsg_rule(resource_group_name, network_security_group_name, security_rule_name,
-                           protocol, source_address_prefix, destination_address_prefix,
-                           access, direction, source_port_range, destination_port_range,
-                           description=None, priority=None):
+def create_nsg_rule(resource_group_name, network_security_group_name, security_rule_name,
+                    protocol, source_address_prefix, destination_address_prefix,
+                    access, direction, source_port_range, destination_port_range,
+                    description=None, priority=None):
     settings = SecurityRule(protocol=protocol, source_address_prefix=source_address_prefix,
                             destination_address_prefix=destination_address_prefix, access=access,
                             direction=direction,
@@ -18,6 +18,8 @@ def create_update_nsg_rule(resource_group_name, network_security_group_name, sec
     ncf = _network_client_factory()
     return ncf.security_rules.create_or_update(
         resource_group_name, network_security_group_name, security_rule_name, settings)
+
+create_nsg_rule.__doc__ = SecurityRule.__doc__
 
 def update_vnet(resource_group_name, virtual_network_name, address_prefixes):
     '''update existing virtual network
@@ -69,7 +71,6 @@ def update_subnet(resource_group_name, virtual_network_name, subnet_name,
     return ncf.subnets.create_or_update(resource_group_name, virtual_network_name,
                                         subnet_name, subnet)
 
-create_update_nsg_rule.__doc__ = SecurityRule.__doc__
 
 # Load Balancer factory methods
 
@@ -319,3 +320,37 @@ def set_lb_rule(
     elif probe_name is not None:
         item.probe = _get_lb_property(lb.probes, probe_name)
     return ncf.load_balancers.create_or_update(resource_group_name, load_balancer_name, lb)
+
+def update_nsg_rule(resource_group_name, network_security_group_name, security_rule_name,
+                    protocol=None, source_address_prefix=None, destination_address_prefix=None,
+                    access=None, direction=None, description=None, source_port_range=None,
+                    destination_port_range=None, priority=None):
+    ncf = _network_client_factory()
+
+    nsg = ncf.network_security_groups.get(resource_group_name, network_security_group_name)
+
+    r = next((r for r in nsg.security_rules if r.name.lower() == security_rule_name.lower()), None)
+    if not r:
+        raise CLIError("Rule '{}' doesn't exist in the network security group of '{}'".format(
+            security_rule_name, network_security_group_name))
+
+    #No client validation as server side returns pretty good errors
+
+    r.protocol = protocol if protocol is not None else r.protocol
+    #pylint: disable=line-too-long
+    r.source_address_prefix = (source_address_prefix if source_address_prefix is not None
+                               else r.source_address_prefix)
+    r.destination_address_prefix = (destination_address_prefix if destination_address_prefix is not None
+                                    else r.destination_address_prefix)
+    r.access = access if access is not None else r.access
+    r.direction = direction if direction is not None else r.direction
+    r.description = description if description is not None else r.description
+    r.source_port_range = source_port_range if source_port_range is not None else r.source_port_range
+    r.destination_port_range = (destination_port_range if destination_port_range is not None
+                                else r.destination_port_range)
+    r.priority = priority if priority is not None else r.priority
+
+    return ncf.security_rules.create_or_update(resource_group_name, network_security_group_name, security_rule_name, r)
+
+update_nsg_rule.__doc__ = SecurityRule.__doc__
+

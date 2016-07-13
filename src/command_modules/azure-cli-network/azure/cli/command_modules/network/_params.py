@@ -82,7 +82,8 @@ register_cli_argument('network nsg', 'network_security_group_name', name_arg_typ
 register_cli_argument('network nsg create', 'name', name_arg_type)
 
 # NSG Rule
-register_cli_argument('network nsg rule', 'security_rule_name', name_arg_type, id_part='child_name')
+register_cli_argument('network nsg rule', 'security_rule_name', name_arg_type, id_part='child_name',
+                      help='Name of the network security group rule')
 register_cli_argument('network nsg rule', 'network_security_group_name', options_list=('--nsg-name',), metavar='NSGNAME', help='Name of the network security group', id_part='name')
 register_cli_argument('network nsg rule create', 'priority', default=1000)
 
