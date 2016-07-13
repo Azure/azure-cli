@@ -103,7 +103,7 @@ def add_id_parameters(command_table):
 
         required_arguments = []
         optional_arguments = []
-        for arg in [arg for arg in command.arguments.values() if arg.id_part]:
+        for arg in [argument for argument in command.arguments.values() if argument.id_part]:
             if arg.options.get('required', False):
                 required_arguments.append(arg)
             else:
