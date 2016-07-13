@@ -10,17 +10,12 @@ from azure.mgmt.network.models.network_management_client_enums import \
 from azure.cli.commands import CliArgumentType, register_cli_argument
 from azure.cli.commands.arm import is_valid_resource_id
 from azure.cli.commands.parameters import (location_type, get_resource_name_completion_list, get_enum_type_completion_list)
-from azure.cli.commands.template_create import register_folded_cli_argument
 from azure.cli.commands.validators import MarkSpecifiedAction
 from azure.cli.command_modules.network._validators import \
     (process_nic_namespace, process_network_lb_create_namespace, process_public_ip_create_namespace,
      validate_public_ip_type, validate_nsg_name_or_id, validate_address_prefixes, process_app_gateway_namespace,
      validate_servers, validate_cert)
 from azure.cli.commands.template_create import register_folded_cli_argument
-from azure.cli.commands.arm import is_valid_resource_id
-from azure.cli.commands.parameters import (location_type,
-                                           get_resource_name_completion_list)
-from azure.cli.commands import register_cli_argument, CliArgumentType
 
 # BASIC PARAMETER CONFIGURATION
 
@@ -98,7 +93,7 @@ register_cli_argument('network public-ip', 'name', name_arg_type, completer=get_
 register_cli_argument('network public-ip create', 'name', completer=None)
 register_cli_argument('network public-ip create', 'dns_name', CliArgumentType(validator=process_public_ip_create_namespace))
 register_cli_argument('network public-ip create', 'public_ip_address_type', CliArgumentType(help=argparse.SUPPRESS))
-register_cli_argument('network public-ip create', 'allocation_method', CliArgumentType(choices=choices_ip_allocation_method, default='dynamic', type=str.lower))
+register_cli_argument('network public-ip create', 'allocation_method', CliArgumentType(choices=choices_ip_allocation_method, type=str.lower))
 
 # Route Operation
 register_cli_argument('network route-operation', 'route_name', name_arg_type, id_part='child_name')

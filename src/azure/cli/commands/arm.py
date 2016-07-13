@@ -111,14 +111,12 @@ def add_id_parameters(command_table):
             arg.required = False
 
         def required_values_validator(namespace):
-            errors = []
-            for arg in required_arguments:
-                if getattr(namespace, arg.name, None) is None:
-                    errors.append(arg)
+            errors = [arg for arg in required_arguments
+                      if getattr(namespace, arg.name, None) is None]
 
             if errors:
-                missing_requried = ' '.join((arg.options_list[0] for arg in errors))
-                raise CLIError('({} | {}) are required'.format(missing_requried, '--id'))
+                missing_required = ' '.join((arg.options_list[0] for arg in errors))
+                raise CLIError('({} | {}) are required'.format(missing_required, '--id'))
 
         command.add_argument(argparse.SUPPRESS,
                              '--id',
