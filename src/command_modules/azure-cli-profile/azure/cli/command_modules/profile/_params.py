@@ -1,4 +1,4 @@
-from azure.cli.commands import CliArgumentType, register_cli_argument
+﻿from azure.cli.commands import CliArgumentType, register_cli_argument
 from .custom import load_subscriptions
 # BASIC PARAMETER CONFIGURATION
 
@@ -46,7 +46,8 @@ register_cli_argument('login', 'service_principal', service_principal_type)
 register_cli_argument('login', 'username', username_type)
 register_cli_argument('login', 'tenant', tenant_type)
 
-register_cli_argument('logout', 'username', username_type)
+register_cli_argument('logout', 'username', username_type,
+                      help='account user, if missing, logout the current active account')
 
 register_cli_argument('account', 'subscription_name_or_id', subscription_name_or_id_type)
 

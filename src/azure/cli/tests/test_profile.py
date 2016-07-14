@@ -162,6 +162,24 @@ class Test_Profile(unittest.TestCase):
         self.assertFalse(subscription2['isDefault'])
         self.assertTrue(subscription1['isDefault'])
 
+    @mock.patch('azure.cli._profile._read_file_content', autospec=True)
+    def test_get_current_account_user(self, mock_read_cred_file):
+        #setup
+        mock_read_cred_file.return_value = json.dumps([Test_Profile.token_entry1])
+
+        storage_mock = {'subscriptions': None}
+        profile = Profile(storage_mock)
+        consolidated = Profile._normalize_properties(self.user1,
+                                                     [self.subscription1],
+                                                     False,
+                                                     ENV_DEFAULT)
+        profile._set_subscriptions(consolidated)
+        #action
+        user = profile.get_current_account_user()
+
+        #verify
+        self.assertEqual(user, self.user1)
+
     @mock.patch('azure.cli._profile._read_file_content', return_value=None)
     def test_create_token_cache(self, mock_read_file):
         profile = Profile()
