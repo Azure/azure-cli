@@ -65,9 +65,11 @@ def login(username=None, password=None, service_principal=None, tenant=None):
         raise CLIError(err)
     return list(subscriptions)
 
-def logout(username):
-    '''Log out from Azure subscription using Active Directory.'''
+def logout(username=None):
+    '''Log out from Azure subscription using Active Directory'''
     profile = Profile()
+    if not username:
+        username = profile.get_current_account_user()
     profile.logout(username)
 
 def list_location():
