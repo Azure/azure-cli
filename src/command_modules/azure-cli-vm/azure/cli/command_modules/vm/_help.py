@@ -41,7 +41,7 @@ helps['vm create'] = """
                     --ssh-key-value "<ssh-rsa-key, key-file-path or not specified for default-key-path>"
             """.format(image_long_summary)
 
-helps['vm scaleset create'] = """
+helps['vmss create'] = """
             type: command
             short-summary: Create an Azure Virtual Machine Scale Set
             long-summary: See https://azure.microsoft.com/en-us/blog/azure-virtual-machine-scale-sets-ga/ for an introduction to scale sets.
@@ -54,10 +54,10 @@ helps['vm scaleset create'] = """
             examples:
                 - name: Windows scaleset with 5 instances, a load balancer and a public IP address
                   text: >
-                    az vm scaleset create -n myName -g myResourceGroup --admin-password MyPassword123 --instance-count 5
+                    az vmss create -n myName -g myResourceGroup --admin-password MyPassword123 --instance-count 5
                 - name: Linux scaleset with SSH authentication, a public IP address, a DNS entry, an existing load balancer, and an existing virtual network
                   text: >
-                    az vm scaleset create  -n myName -g myResourceGroup --dns-name-for-public-ip myGloballyUnieqDnsName
+                    az vmss create  -n myName -g myResourceGroup --dns-name-for-public-ip myGloballyUnieqDnsName
                     --load-balancer-type existing --load-balancer-name myLoadBalancer
                     --virtual-network-type existing --virtual-network-name myVNET --subnet-name mySubnet --image canonical:Ubuntu_Snappy_Core:15.04:2016.0318.1949
                     --authentication-type ssh --ssh-key-value "<ssh-key-value or ssh-key-file-path"

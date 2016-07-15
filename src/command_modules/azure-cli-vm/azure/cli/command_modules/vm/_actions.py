@@ -141,7 +141,7 @@ def _os_disk_default(namespace):
         namespace.os_disk_name = 'osdisk{}'.format(str(int(math.ceil(time.time()))))
 
 def _handle_auth_types(**kwargs):
-    if kwargs['command'] != 'vm create' and kwargs['command'] != 'vm scaleset create':
+    if kwargs['command'] != 'vm create' and kwargs['command'] != 'vmss create':
         return
 
     args = kwargs['args']
