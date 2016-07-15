@@ -24,7 +24,7 @@ from azure.cli._util import CLIError
 
 TRACK_COMMANDS = os.environ.get('AZURE_CLI_TEST_TRACK_COMMANDS')
 COMMAND_COVERAGE_FILENAME = 'command_coverage.txt'
-
+MOCKED_SUBSCRIPTION_ID = '00000000-0000-0000-0000-000000000000'
 # MOCK METHODS
 
 def _mock_get_mgmt_service_client(client_type, subscription_bound=True):
@@ -50,7 +50,7 @@ def _mock_handle_exceptions(ex):
 
 def _mock_subscriptions(self): #pylint: disable=unused-argument
     return [{
-        "id": "00000000-0000-0000-0000-000000000000",
+        "id": MOCKED_SUBSCRIPTION_ID,
         "user": {
             "name": "example@example.com",
             "type": "user"
@@ -192,7 +192,7 @@ class VCRTestBase(unittest.TestCase):#pylint: disable=too-many-instance-attribut
     def _before_record_request(request):
         # scrub subscription from the uri
         request.uri = re.sub('/subscriptions/([^/]+)/',
-                             '/subscriptions/00000000-0000-0000-0000-000000000000/', request.uri)
+                             '/subscriptions/{}/'.format(MOCKED_SUBSCRIPTION_ID), request.uri)
         request.uri = re.sub('/sig=([^/]+)&', '/sig=0000&', request.uri)
         request.uri = _scrub_deployment_name(request.uri)
         # prevents URI mismatch between Python 2 and 3 if request URI has extra / chars
