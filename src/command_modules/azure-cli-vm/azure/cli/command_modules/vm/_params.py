@@ -127,6 +127,9 @@ register_cli_argument('vm create', 'network_interface_ids', options_list=('--nic
 
 register_cli_argument('vm create', 'name', name_arg_type, validator=_resource_not_exists('Microsoft.Compute/virtualMachines'))
 register_cli_argument('vm scaleset create', 'name', name_arg_type, validator=_resource_not_exists('Microsoft.Compute/virtualMachineScaleSets'))
+register_cli_argument('vm scaleset', 'vm_scale_set_name', name_arg_type, help='scale set name')
+register_cli_argument('vm scaleset', 'instance_ids',
+                      help='Space separated ids such as "0 2 3", or use "*" for all instances')
 
 for scope in ['vm create', 'vm scaleset create']:
     register_cli_argument(scope, 'location', CliArgumentType(completer=get_location_completion_list))
