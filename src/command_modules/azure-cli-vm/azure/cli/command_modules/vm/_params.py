@@ -55,9 +55,9 @@ existing_vm_name = CliArgumentType(overrides=name_arg_type, help='The name of th
 register_cli_argument('vm', 'vm_name', existing_vm_name)
 register_cli_argument('vm', 'size', CliArgumentType(completer=get_vm_size_completion_list))
 
-register_cli_argument('vm scaleset', 'vm_scale_set_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'), id_part='name')
-register_cli_argument('vm scaleset', 'virtual_machine_scale_set_name', name_arg_type)
-register_cli_argument('vm scaleset', 'instance_ids', multi_ids_type)
+register_cli_argument('vmss', 'vm_scale_set_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'), id_part='name')
+register_cli_argument('vmss', 'virtual_machine_scale_set_name', name_arg_type)
+register_cli_argument('vmss', 'instance_ids', multi_ids_type)
 register_cli_argument('vm disk', 'vm_name', arg_type=existing_vm_name, options_list=('--vm-name',))
 register_cli_argument('vm disk', 'disk_name', CliArgumentType(options_list=('--name', '-n'), help='The data disk name. If missing, will retrieve from vhd uri'))
 register_cli_argument('vm disk', 'disk_size', CliArgumentType(help='Size of disk (GiB)', default=1023, type=int))
@@ -126,12 +126,12 @@ register_cli_argument('vm create', 'network_interface_ids', options_list=('--nic
                       validator=_handle_vm_nics)
 
 register_cli_argument('vm create', 'name', name_arg_type, validator=_resource_not_exists('Microsoft.Compute/virtualMachines'))
-register_cli_argument('vm scaleset create', 'name', name_arg_type, validator=_resource_not_exists('Microsoft.Compute/virtualMachineScaleSets'))
-register_cli_argument('vm scaleset', 'vm_scale_set_name', name_arg_type, help='scale set name')
-register_cli_argument('vm scaleset', 'instance_ids',
+register_cli_argument('vmss create', 'name', name_arg_type, validator=_resource_not_exists('Microsoft.Compute/virtualMachineScaleSets'))
+register_cli_argument('vmss', 'vm_scale_set_name', name_arg_type, help='scale set name')
+register_cli_argument('vmss', 'instance_ids',
                       help='Space separated ids such as "0 2 3", or use "*" for all instances')
 
-for scope in ['vm create', 'vm scaleset create']:
+for scope in ['vm create', 'vmss create']:
     register_cli_argument(scope, 'location', CliArgumentType(completer=get_location_completion_list))
     register_cli_argument(scope, 'custom_os_disk_uri', CliArgumentType(help=argparse.SUPPRESS))
     register_cli_argument(scope, 'custom_os_disk_type', CliArgumentType(choices=['windows', 'linux'], type=str.lower), options_list=('--custom-disk-os-type',))

@@ -47,8 +47,8 @@ OR
 Commands to verify (Linux):
  vmssname=myvmss16e
  rg=myvmsss
- ./az vm scaleset create --image https://vhdstorage33jojgic4cpuu.blob.core.windows.net/vhds/osdiskimage.vhd --custom-os-disk-type linux -g $rg --name $vmssname --authentication-type ssh
- ./az vm scaleset show -n $vmssname -g $rg
+ ./az vmss create --image https://vhdstorage33jojgic4cpuu.blob.core.windows.net/vhds/osdiskimage.vhd --custom-os-disk-type linux -g $rg --name $vmssname --authentication-type ssh
+ ./az vmss show -n $vmssname -g $rg
  ./az network public-ip show -n ${vmssname}PublicIP -g $rg --query ipAddress 
  SSH into the VM, Ssh format for instance 0: ssh <ipAddress> -p 50000
  Type 'emacs', it should start (exit with Ctrl-X Ctrl-C)
@@ -64,8 +64,8 @@ Commands to verify (Linux):
 Commands to verify (windows):
  set vmssname=myvmss16g
  set rg=myvmsss
- call az vm scaleset create --image http://genwinimg001100.blob.core.windows.net/vhds/osdiskimage.vhd --custom-os-disk-type windows -g %rg% --name %vmssname% --admin-password Admin_007
- call az vm scaleset show -n %vmssname% -g %rg%
+ call az vmss create --image http://genwinimg001100.blob.core.windows.net/vhds/osdiskimage.vhd --custom-os-disk-type windows -g %rg% --name %vmssname% --admin-password Admin_007
+ call az vmss show -n %vmssname% -g %rg%
  call az network public-ip show -n %vmssname%PublicIP -g %rg% --query ipAddress 
  Then RDP in and look for app being installed already
  mstsc /v:<vmname>:50000, launch application

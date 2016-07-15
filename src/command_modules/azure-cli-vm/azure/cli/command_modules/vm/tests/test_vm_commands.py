@@ -448,25 +448,25 @@ class VMScaleSetGetsScenarioTest(VCRTestBase):
         self.execute()
 
     def body(self):
-        self.cmd('vm scaleset list', checks=[
+        self.cmd('vmss list', checks=[
             JMESPathCheck('type(@)', 'array')
         ])
-        self.cmd('vm scaleset list --resource-group {}'.format(self.resource_group), checks=[
+        self.cmd('vmss list --resource-group {}'.format(self.resource_group), checks=[
                 JMESPathCheck('type(@)', 'array'),
                 JMESPathCheck('length(@)', 1),
                 JMESPathCheck('[0].name', self.ss_name),
                 JMESPathCheck('[0].location', self.location),
                 JMESPathCheck('[0].resourceGroup', self.resource_group)
         ])
-        self.cmd('vm scaleset list-skus --resource-group {} --name {}'.format(self.resource_group, self.ss_name),
+        self.cmd('vmss list-skus --resource-group {} --name {}'.format(self.resource_group, self.ss_name),
             checks=JMESPathCheck('type(@)', 'array'))
-        self.cmd('vm scaleset show --resource-group {} --name {}'.format(self.resource_group, self.ss_name), checks=[
+        self.cmd('vmss show --resource-group {} --name {}'.format(self.resource_group, self.ss_name), checks=[
             JMESPathCheck('type(@)', 'object'),
             JMESPathCheck('name', self.ss_name),
             JMESPathCheck('location', self.location),
             JMESPathCheck('resourceGroup', self.resource_group)
         ])
-        self.cmd('vm scaleset get-instance-view --resource-group {} --name {}'.format(self.resource_group, self.ss_name), checks=[
+        self.cmd('vmss get-instance-view --resource-group {} --name {}'.format(self.resource_group, self.ss_name), checks=[
             JMESPathCheck('type(@)', 'object'),
             JMESPathCheck('type(virtualMachine)', 'object'),
             JMESPathCheck('type(statuses)', 'array')
@@ -483,12 +483,12 @@ class VMScaleSetStatesScenarioTest(VCRTestBase):
         self.execute()
 
     def body(self):
-        self.cmd('vm scaleset stop --resource-group {} --name {}'.format(self.resource_group, self.ss_name))
-        self.cmd('vm scaleset start --resource-group {} --name {}'.format(self.resource_group, self.ss_name),
+        self.cmd('vmss stop --resource-group {} --name {}'.format(self.resource_group, self.ss_name))
+        self.cmd('vmss start --resource-group {} --name {}'.format(self.resource_group, self.ss_name),
             checks=NoneCheck())
-        self.cmd('vm scaleset restart --resource-group {} --name {}'.format(self.resource_group, self.ss_name),
+        self.cmd('vmss restart --resource-group {} --name {}'.format(self.resource_group, self.ss_name),
             checks=NoneCheck())
-        self.cmd('vm scaleset update-instances --resource-group {} --name {} --instance-ids 0'.format(self.resource_group, self.ss_name),
+        self.cmd('vmss update-instances --resource-group {} --name {} --instance-ids 0'.format(self.resource_group, self.ss_name),
             checks=NoneCheck())
 
 class VMScaleSetScaleUpScenarioTest(VCRTestBase):
@@ -502,11 +502,11 @@ class VMScaleSetScaleUpScenarioTest(VCRTestBase):
         self.execute()
 
     def body(self):
-        result = self.cmd('vm scaleset show --resource-group {} --name {}'.format(self.resource_group, self.ss_name))
+        result = self.cmd('vmss show --resource-group {} --name {}'.format(self.resource_group, self.ss_name))
         capacity = result['sku']['capacity']
         new_capacity = capacity + 1 if capacity < 3 else capacity-1
-        self.cmd('vm scaleset scale --resource-group {} --name {} --new-capacity {}'.format(self.resource_group, self.ss_name, new_capacity))
-        result = self.cmd('vm scaleset show --resource-group {} --name {}'.format(self.resource_group, self.ss_name))
+        self.cmd('vmss scale --resource-group {} --name {} --new-capacity {}'.format(self.resource_group, self.ss_name, new_capacity))
+        result = self.cmd('vmss show --resource-group {} --name {}'.format(self.resource_group, self.ss_name))
         assert result['sku']['capacity'] == new_capacity
 
 class VMScaleSetDeleteScenarioTest(VCRTestBase):
@@ -522,30 +522,30 @@ class VMScaleSetDeleteScenarioTest(VCRTestBase):
         self.execute()
 
     def body(self):
-        self.cmd('vm scaleset list --resource-group {}'.format(self.resource_group), checks=[
+        self.cmd('vmss list --resource-group {}'.format(self.resource_group), checks=[
             JMESPathCheck('type(@)', 'array'),
             JMESPathCheck('length(@)', 1),
             JMESPathCheck('[0].name', self.ss_name),
             JMESPathCheck('[0].resourceGroup', self.resource_group)
         ])
-        self.cmd('vm scaleset get-instance-view --resource-group {} --name {}'.format(self.resource_group, self.ss_name), checks=[
+        self.cmd('vmss get-instance-view --resource-group {} --name {}'.format(self.resource_group, self.ss_name), checks=[
             JMESPathCheck('type(@)', 'object'),
             JMESPathCheck('type(virtualMachine)', 'object'),
             JMESPathCheck('virtualMachine.statusesSummary[0].count', self.vm_count)
         ])
         #Existing issues, the instance delete command has not been recorded
-        self.cmd('vm scaleset delete-instances --resource-group {} --name {} --instance-ids {}'.format(self.resource_group, self.ss_name, self.instance_id_to_delete),
+        self.cmd('vmss delete-instances --resource-group {} --name {} --instance-ids {}'.format(self.resource_group, self.ss_name, self.instance_id_to_delete),
             checks=NoneCheck())
-        self.cmd('vm scaleset get-instance-view --resource-group {} --name {}'.format(self.resource_group, self.ss_name), checks=[
+        self.cmd('vmss get-instance-view --resource-group {} --name {}'.format(self.resource_group, self.ss_name), checks=[
             JMESPathCheck('type(@)', 'object'),
             JMESPathCheck('type(virtualMachine)', 'object'),
             JMESPathCheck('virtualMachine.statusesSummary[0].count', self.vm_count-1)
         ])
-        self.cmd('vm scaleset deallocate --resource-group {} --name {}'.format(self.resource_group, self.ss_name),
+        self.cmd('vmss deallocate --resource-group {} --name {}'.format(self.resource_group, self.ss_name),
             checks=NoneCheck())
-        self.cmd('vm scaleset delete --resource-group {} --name {}'.format(self.resource_group, self.ss_name),
+        self.cmd('vmss delete --resource-group {} --name {}'.format(self.resource_group, self.ss_name),
             checks=NoneCheck())
-        self.cmd('vm scaleset list --resource-group {}'.format(self.resource_group),
+        self.cmd('vmss list --resource-group {}'.format(self.resource_group),
             checks=NoneCheck())
 
 class VMScaleSetVMsScenarioTest(VCRTestBase):
@@ -562,35 +562,35 @@ class VMScaleSetVMsScenarioTest(VCRTestBase):
 
     def _check_vms_power_state(self, expected_power_state):
         for iid in self.instance_ids:
-            self.cmd('vm scaleset get-instance-view --resource-group {} --name {} --instance-id {}'.format(self.resource_group, self.ss_name, iid),
+            self.cmd('vmss get-instance-view --resource-group {} --name {} --instance-id {}'.format(self.resource_group, self.ss_name, iid),
                 checks=JMESPathCheck('statuses[1].code', expected_power_state))
 
     def body(self):
-        self.cmd('vm scaleset show --resource-group {} --name {} --instance-id {}'.format(self.resource_group, self.ss_name, self.instance_ids[0]), checks=[
+        self.cmd('vmss show --resource-group {} --name {} --instance-id {}'.format(self.resource_group, self.ss_name, self.instance_ids[0]), checks=[
             JMESPathCheck('type(@)', 'object'),
             JMESPathCheck('instanceId', str(self.instance_ids[0]))
         ])
-        self.cmd('vm scaleset list-instances --resource-group {} --name {}'.format(self.resource_group, self.ss_name), checks=[
+        self.cmd('vmss list-instances --resource-group {} --name {}'.format(self.resource_group, self.ss_name), checks=[
             JMESPathCheck('type(@)', 'array'),
             JMESPathCheck('length(@)', self.vm_count),
             JMESPathCheck("[].name.starts_with(@, '{}')".format(self.ss_name), [True] * self.vm_count)
         ])
         self._check_vms_power_state('PowerState/running')
-        self.cmd('vm scaleset stop --resource-group {} --name {} --instance-ids *'.format(self.resource_group, self.ss_name),
+        self.cmd('vmss stop --resource-group {} --name {} --instance-ids *'.format(self.resource_group, self.ss_name),
             checks=NoneCheck())
         self._check_vms_power_state('PowerState/stopped')
-        self.cmd('vm scaleset start --resource-group {} --name {} --instance-ids *'.format(self.resource_group, self.ss_name),
+        self.cmd('vmss start --resource-group {} --name {} --instance-ids *'.format(self.resource_group, self.ss_name),
             checks=NoneCheck())
         self._check_vms_power_state('PowerState/running')
-        self.cmd('vm scaleset restart --resource-group {} --name {} --instance-ids *'.format(self.resource_group, self.ss_name),
+        self.cmd('vmss restart --resource-group {} --name {} --instance-ids *'.format(self.resource_group, self.ss_name),
             checks=NoneCheck())
         self._check_vms_power_state('PowerState/running')
-        self.cmd('vm scaleset deallocate --resource-group {} --name {} --instance-ids *'.format(self.resource_group, self.ss_name),
+        self.cmd('vmss deallocate --resource-group {} --name {} --instance-ids *'.format(self.resource_group, self.ss_name),
             checks=NoneCheck())
         self._check_vms_power_state('PowerState/deallocated')
-        self.cmd('vm scaleset delete-instances --resource-group {} --name {} --instance-ids *'.format(self.resource_group, self.ss_name),
+        self.cmd('vmss delete-instances --resource-group {} --name {} --instance-ids *'.format(self.resource_group, self.ss_name),
             checks=NoneCheck())
-        self.cmd('vm scaleset list-instances --resource-group {} --name {}'.format(self.resource_group, self.ss_name),
+        self.cmd('vmss list-instances --resource-group {} --name {}'.format(self.resource_group, self.ss_name),
             checks=NoneCheck())
 
 class VMScaleSetCreateSimple(ResourceGroupVCRTestBase):
@@ -605,8 +605,8 @@ class VMScaleSetCreateSimple(ResourceGroupVCRTestBase):
         vmss_name = 'vrfvmss'
         # Note: all parameters that are dynamically generated client-side must be overridden here.
         # This includes deployment name, admin name and ssh key.
-        self.cmd('vm scaleset create --admin-password Test1234@! --name {vmss_name} -g {resource_group} --admin-username myadmin'.format(resource_group=self.resource_group, vmss_name=vmss_name))
-        self.cmd('vm scaleset show --name {vmss_name} -g {resource_group}'.format(resource_group=self.resource_group, vmss_name=vmss_name),
+        self.cmd('vmss create --admin-password Test1234@! --name {vmss_name} -g {resource_group} --admin-username myadmin'.format(resource_group=self.resource_group, vmss_name=vmss_name))
+        self.cmd('vmss show --name {vmss_name} -g {resource_group}'.format(resource_group=self.resource_group, vmss_name=vmss_name),
             checks=JMESPathCheck('virtualMachineProfile.osProfile.windowsConfiguration.enableAutomaticUpdates', True))
 
 class VMScaleSetCreateOptions(ResourceGroupVCRTestBase):
@@ -626,7 +626,7 @@ class VMScaleSetCreateOptions(ResourceGroupVCRTestBase):
         ip_name = 'vrfpubip'
 
         self.cmd('network public-ip create --name {ip_name} -g {resource_group}'.format(ip_name=ip_name, resource_group=self.resource_group))
-        self.cmd('vm scaleset create --image Win2012R2Datacenter --admin-password Test1234@! -l westus'
+        self.cmd('vmss create --image Win2012R2Datacenter --admin-password Test1234@! -l westus'
                  ' --name {vmss_name} -g {resource_group} --disable-overprovision --instance-count {instance_count}'
                  ' --storage-caching {caching} --upgrade-policy-mode {upgrade_policy}'
                  ' --private-ip-address-allocation static --private-ip-address 10.0.0.5 --admin-username myadmin'
@@ -635,12 +635,12 @@ class VMScaleSetCreateOptions(ResourceGroupVCRTestBase):
                          caching=caching, upgrade_policy=upgrade_policy, ip_name=ip_name))
         self.cmd('network lb show --name {vmss_name}lb -g {resource_group}'.format(vmss_name=vmss_name, resource_group=self.resource_group),
             checks=JMESPathCheck('frontendIpConfigurations[0].publicIpAddress.id.ends_with(@, \'{ip_name}\')'.format(ip_name=ip_name), True))
-        self.cmd('vm scaleset show --name {vmss_name} -g {resource_group}'.format(resource_group=self.resource_group, vmss_name=vmss_name), checks=[
+        self.cmd('vmss show --name {vmss_name} -g {resource_group}'.format(resource_group=self.resource_group, vmss_name=vmss_name), checks=[
             JMESPathCheck('sku.capacity', instance_count),
             JMESPathCheck('virtualMachineProfile.storageProfile.osDisk.caching', caching),
             JMESPathCheck('upgradePolicy.mode', upgrade_policy.title())
         ])
-        self.cmd('vm scaleset show -n {vmss_name} -g {resource_group} --instance-id 0'.format(vmss_name=vmss_name, resource_group=self.resource_group),
+        self.cmd('vmss show -n {vmss_name} -g {resource_group} --instance-id 0'.format(vmss_name=vmss_name, resource_group=self.resource_group),
             checks=JMESPathCheck('osProfile.windowsConfiguration.provisionVmAgent', True))
 
 class VMScaleSetCreateExistingOptions(ResourceGroupVCRTestBase):
@@ -663,7 +663,7 @@ class VMScaleSetCreateExistingOptions(ResourceGroupVCRTestBase):
         self.cmd('network vnet create -n {vnet_name} -g {resource_group} --subnet-name {subnet_name}'.format(vnet_name=vnet_name, resource_group=self.resource_group, subnet_name=subnet_name))
         self.cmd('network lb create --name {lb_name} -g {resource_group}'.format(lb_name=lb_name, resource_group=self.resource_group))
         # TODO: scaleset create needs to be fixed after changes were made to LB create.  Issue #510
-        #self.cmd('vm scaleset create --image CentOS --os-disk-name {os_disk_name}'
+        #self.cmd('vmss create --image CentOS --os-disk-name {os_disk_name}'
         #         ' --virtual-network-type existing --virtual-network-name {vnet_name}'
         #         ' --subnet-name {subnet_name} -l "West US" --vm-sku {sku_name}'
         #         ' --storage-container-name {container_name} -g {resource_group} --name {vmss_name}'
@@ -672,7 +672,7 @@ class VMScaleSetCreateExistingOptions(ResourceGroupVCRTestBase):
         #         .format(os_disk_name=os_disk_name, vnet_name=vnet_name, subnet_name=subnet_name, lb_name=lb_name,
         #                 container_name=container_name, resource_group=self.resource_group, vmss_name=vmss_name,
         #                 key_value=TEST_SSH_KEY_PUB, sku_name=sku_name))
-        #self.cmd('vm scaleset show --name {vmss_name} -g {resource_group}'.format(resource_group=self.resource_group, vmss_name=vmss_name), checks=[
+        #self.cmd('vmss show --name {vmss_name} -g {resource_group}'.format(resource_group=self.resource_group, vmss_name=vmss_name), checks=[
         #    JMESPathCheck('sku.name', sku_name),
         #    JMESPathCheck('virtualMachineProfile.storageProfile.osDisk.name', os_disk_name),
         #    JMESPathCheck('virtualMachineProfile.storageProfile.osDisk.vhdContainers[0].ends_with(@, \'{container_name}\')'.format(container_name=container_name), True)
