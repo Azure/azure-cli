@@ -29,7 +29,7 @@ from .custom import (
     list_extensions, set_extension, set_diagnostics_extension,
     show_default_diagnostics_configuration,
     vmss_start, vmss_restart, vmss_delete_instances, vmss_deallocate, vmss_get_instance_view,
-    vmss_stop, vmss_reimage, vmss_scale, vmss_update_instances
+    vmss_stop, vmss_reimage, vmss_scale, vmss_update_instances, vmss_show, vmss_list
     )
 
 
@@ -137,19 +137,17 @@ factory = lambda _: get_mgmt_service_client(VMSSClient).vmss
 cli_command('vm scaleset create', VMSSOperations.create_or_update, factory, transform=DeploymentOutputLongRunningOperation('Starting vm scaleset create'))
 
 factory = lambda _: _compute_client_factory().virtual_machine_scale_sets
-cli_command('vm scaleset show', VirtualMachineScaleSetsOperations.get, factory)
 cli_command('vm scaleset delete', VirtualMachineScaleSetsOperations.delete, factory)
-cli_command('vm scaleset list ', VirtualMachineScaleSetsOperations.list, factory)
-cli_command('vm scaleset list-all', VirtualMachineScaleSetsOperations.list_all, factory) #TODO get rid of list and list-all
 cli_command('vm scaleset list-skus', VirtualMachineScaleSetsOperations.list_skus, factory)
 
 factory = lambda _: _compute_client_factory().virtual_machine_scale_set_vms
-cli_command('vm scaleset show-instance', VirtualMachineScaleSetVMsOperations.get, factory)
 cli_command('vm scaleset list-instances', VirtualMachineScaleSetVMsOperations.list, factory)
 
 cli_command('vm scaleset deallocate', vmss_deallocate)
 cli_command('vm scaleset delete-instances', vmss_delete_instances)
 cli_command('vm scaleset get-instance-view', vmss_get_instance_view)
+cli_command('vm scaleset show', vmss_show)
+cli_command('vm scaleset list ', vmss_list)
 cli_command('vm scaleset stop', vmss_stop)
 cli_command('vm scaleset restart', vmss_restart)
 cli_command('vm scaleset start', vmss_start)

@@ -448,7 +448,7 @@ class VMScaleSetGetsScenarioTest(VCRTestBase):
         self.execute()
 
     def body(self):
-        self.cmd('vm scaleset list-all', checks=[
+        self.cmd('vm scaleset list', checks=[
             JMESPathCheck('type(@)', 'array')
         ])
         self.cmd('vm scaleset list --resource-group {}'.format(self.resource_group), checks=[
@@ -566,7 +566,7 @@ class VMScaleSetVMsScenarioTest(VCRTestBase):
                 checks=JMESPathCheck('statuses[1].code', expected_power_state))
 
     def body(self):
-        self.cmd('vm scaleset show-instance --resource-group {} --name {} --instance-id {}'.format(self.resource_group, self.ss_name, self.instance_ids[0]), checks=[
+        self.cmd('vm scaleset show --resource-group {} --name {} --instance-id {}'.format(self.resource_group, self.ss_name, self.instance_ids[0]), checks=[
             JMESPathCheck('type(@)', 'object'),
             JMESPathCheck('instanceId', str(self.instance_ids[0]))
         ])
@@ -640,7 +640,7 @@ class VMScaleSetCreateOptions(ResourceGroupVCRTestBase):
             JMESPathCheck('virtualMachineProfile.storageProfile.osDisk.caching', caching),
             JMESPathCheck('upgradePolicy.mode', upgrade_policy.title())
         ])
-        self.cmd('vm scaleset show-instance -n {vmss_name} -g {resource_group} --instance-id 0'.format(vmss_name=vmss_name, resource_group=self.resource_group),
+        self.cmd('vm scaleset show -n {vmss_name} -g {resource_group} --instance-id 0'.format(vmss_name=vmss_name, resource_group=self.resource_group),
             checks=JMESPathCheck('osProfile.windowsConfiguration.provisionVmAgent', True))
 
 class VMScaleSetCreateExistingOptions(ResourceGroupVCRTestBase):
