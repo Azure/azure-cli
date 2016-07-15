@@ -145,7 +145,7 @@
           "type": "string",
           "description": "URI referencing the template.",
           "enum": [
-            "https://azuresdkci.blob.core.windows.net/templatehost/CreateNic_2016-06-15/azuredeploy.json"
+            "https://azuresdkci.blob.core.windows.net/templatehost/CreateNic_2016-07-06/azuredeploy.json"
           ]
         },
         "contentVersion": {
@@ -163,6 +163,11 @@
         "enableIpForwarding": {
           "type": "object",
           "$ref": "#/definitions/DeploymentParameter_enableIpForwarding",
+          "x-ms-client-flatten": true
+        },
+        "internalDnsNameLabel": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_internalDnsNameLabel",
           "x-ms-client-flatten": true
         },
         "loadBalancerBackendAddressPoolIds": {
@@ -185,9 +190,9 @@
           "$ref": "#/definitions/DeploymentParameter_networkInterfaceName",
           "x-ms-client-flatten": true
         },
-        "networkSecurityGroupName": {
+        "networkSecurityGroup": {
           "type": "object",
-          "$ref": "#/definitions/DeploymentParameter_networkSecurityGroupName",
+          "$ref": "#/definitions/DeploymentParameter_networkSecurityGroup",
           "x-ms-client-flatten": true
         },
         "networkSecurityGroupType": {
@@ -205,9 +210,14 @@
           "$ref": "#/definitions/DeploymentParameter_privateIpAddressAllocation",
           "x-ms-client-flatten": true
         },
-        "publicIpAddressName": {
+        "privateIpAddressVersion": {
           "type": "object",
-          "$ref": "#/definitions/DeploymentParameter_publicIpAddressName",
+          "$ref": "#/definitions/DeploymentParameter_privateIpAddressVersion",
+          "x-ms-client-flatten": true
+        },
+        "publicIpAddress": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_publicIpAddress",
           "x-ms-client-flatten": true
         },
         "publicIpAddressType": {
@@ -215,9 +225,19 @@
           "$ref": "#/definitions/DeploymentParameter_publicIpAddressType",
           "x-ms-client-flatten": true
         },
-        "subnetName": {
+        "subnet": {
           "type": "object",
-          "$ref": "#/definitions/DeploymentParameter_subnetName",
+          "$ref": "#/definitions/DeploymentParameter_subnet",
+          "x-ms-client-flatten": true
+        },
+        "subnetType": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_subnetType",
+          "x-ms-client-flatten": true
+        },
+        "useDnsSettings": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_useDnsSettings",
           "x-ms-client-flatten": true
         },
         "virtualNetworkName": {
@@ -228,9 +248,8 @@
       },
       "required": [
         "networkInterfaceName",
-        "enableIpForwarding",
-        "virtualNetworkName",
-        "subnetName"
+        "subnet",
+        "enableIpForwarding"
       ]
     },
     "DeploymentParameter_enableIpForwarding": {
@@ -245,6 +264,15 @@
       "required": [
         "value"
       ]
+    },
+    "DeploymentParameter_internalDnsNameLabel": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "The internal DNS name label.",
+          "x-ms-client-name": "internalDnsNameLabel"
+        }
+      }
     },
     "DeploymentParameter_loadBalancerBackendAddressPoolIds": {
       "properties": {
@@ -291,12 +319,12 @@
         "value"
       ]
     },
-    "DeploymentParameter_networkSecurityGroupName": {
+    "DeploymentParameter_networkSecurityGroup": {
       "properties": {
         "value": {
           "type": "string",
-          "description": "Network security group to associate with the NIC.",
-          "x-ms-client-name": "networkSecurityGroupName"
+          "description": "Name or ID of an existing network security group to associate with the NIC.",
+          "x-ms-client-name": "networkSecurityGroup"
         }
       }
     },
@@ -308,8 +336,13 @@
           "x-ms-client-name": "networkSecurityGroupType",
           "enum": [
             "none",
-            "existing"
+            "existingName",
+            "existingId"
           ],
+          "x-ms-enum": {
+            "name": "networkSecurityGroupType",
+            "modelAsString": false
+          },
           "default": "none"
         }
       }
@@ -333,16 +366,38 @@
             "dynamic",
             "static"
           ],
+          "x-ms-enum": {
+            "name": "privateIpAddressAllocation",
+            "modelAsString": false
+          },
           "default": "dynamic"
         }
       }
     },
-    "DeploymentParameter_publicIpAddressName": {
+    "DeploymentParameter_privateIpAddressVersion": {
       "properties": {
         "value": {
           "type": "string",
-          "description": "Name of an existing public IP address to associate with the NIC.",
-          "x-ms-client-name": "publicIpAddressName"
+          "description": "The private IP address version to use.",
+          "x-ms-client-name": "privateIpAddressVersion",
+          "enum": [
+            "ipv4",
+            "ipv6"
+          ],
+          "x-ms-enum": {
+            "name": "privateIpAddressVersion",
+            "modelAsString": false
+          },
+          "default": "ipv4"
+        }
+      }
+    },
+    "DeploymentParameter_publicIpAddress": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "Name or ID an existing public IP address to associate with the NIC.",
+          "x-ms-client-name": "publicIpAddress"
         }
       }
     },
@@ -354,23 +409,64 @@
           "x-ms-client-name": "publicIpAddressType",
           "enum": [
             "none",
-            "existing"
+            "existingName",
+            "existingId"
           ],
+          "x-ms-enum": {
+            "name": "publicIpAddressType",
+            "modelAsString": false
+          },
           "default": "none"
         }
       }
     },
-    "DeploymentParameter_subnetName": {
+    "DeploymentParameter_subnet": {
       "properties": {
         "value": {
           "type": "string",
-          "description": "Subnet to associate with the NIC.",
-          "x-ms-client-name": "subnetName"
+          "description": "Name or ID of an existing subnet to associate with the NIC.",
+          "x-ms-client-name": "subnet"
         }
       },
       "required": [
         "value"
       ]
+    },
+    "DeploymentParameter_subnetType": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "Specify whether supplied subnet is by name or ID.",
+          "x-ms-client-name": "subnetType",
+          "enum": [
+            "existingName",
+            "existingId"
+          ],
+          "x-ms-enum": {
+            "name": "subnetType",
+            "modelAsString": false
+          },
+          "default": "existingName"
+        }
+      }
+    },
+    "DeploymentParameter_useDnsSettings": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "Flag to specify whether to use DNS settings.",
+          "x-ms-client-name": "useDnsSettings",
+          "enum": [
+            "true",
+            "false"
+          ],
+          "x-ms-enum": {
+            "name": "useDnsSettings",
+            "modelAsString": false
+          },
+          "default": "false"
+        }
+      }
     },
     "DeploymentParameter_virtualNetworkName": {
       "properties": {
@@ -379,10 +475,7 @@
           "description": "Virtual network to associate with the NIC.",
           "x-ms-client-name": "virtualNetworkName"
         }
-      },
-      "required": [
-        "value"
-      ]
+      }
     },
     "ParametersLink": {
       "properties": {

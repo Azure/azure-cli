@@ -262,10 +262,8 @@ class VCRTestBase(unittest.TestCase):#pylint: disable=too-many-instance-attribut
             ex_msg = str(ex)
             if not isinstance(allowed_exceptions, list):
                 allowed_exceptions = [allowed_exceptions]
-            try:
-                next(x for x in allowed_exceptions if x in ex_msg)
-            except StopIteration:
-                raise ex
+                if not next((x for x in allowed_exceptions if x in ex_msg), None):
+                    raise ex
         self._track_executed_commands(command_list)
         result = output.getvalue().strip()
         output.close()

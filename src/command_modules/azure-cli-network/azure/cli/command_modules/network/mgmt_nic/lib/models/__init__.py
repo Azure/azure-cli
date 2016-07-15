@@ -16,6 +16,12 @@ from .dependency import Dependency
 from .deployment_properties_extended import DeploymentPropertiesExtended
 from .deployment_extended import DeploymentExtended
 from .nic_creation_client_enums import (
+    networkSecurityGroupType,
+    privateIpAddressAllocation,
+    privateIpAddressVersion,
+    publicIpAddressType,
+    subnetType,
+    useDnsSettings,
     DeploymentMode,
 )
 
@@ -29,5 +35,11 @@ __all__ = [
     'Dependency',
     'DeploymentPropertiesExtended',
     'DeploymentExtended',
+    'networkSecurityGroupType',
+    'privateIpAddressAllocation',
+    'privateIpAddressVersion',
+    'publicIpAddressType',
+    'subnetType',
+    'useDnsSettings',
     'DeploymentMode',
 ]

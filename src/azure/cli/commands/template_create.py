@@ -47,11 +47,9 @@ def _name_id_fold(base_name, resource_type, type_field, #pylint: disable=too-man
             # Either no name was specified, or the user specified the type of resource
             # (i.e. new/existing/none)
             pass
-        elif base_name_val in ('', '""', "''"):
+        elif base_name_val == '':
             # An empty name specified - that means that we are neither referencing an existing
             # field, or the name is set to an empty string
-            # Since DOS doesn't like passing in empty strings as arguments, we also treat
-            # "" and '' as empty strings
             setattr(namespace, type_field, none_flag_value)
         else:
             from azure.cli.commands.client_factory import get_subscription_id
@@ -80,7 +78,8 @@ def _name_id_fold(base_name, resource_type, type_field, #pylint: disable=too-man
                 setattr(namespace, base_name, resource_id(**resource_id_parts))
             elif is_valid_resource_id(base_name_val):
                 raise CLIError('ID {} does not exist. Please specify '
-                               'a name to create a new resource.'.format(resource_id))
+                               'a name to create a new resource.'.format(
+                                   resource_id(**resource_id_parts)))
             else:
                 setattr(namespace, type_field, new_flag_value)
 

@@ -739,7 +739,6 @@ class VMCreateUbuntuScenarioTest(ResourceGroupVCRTestBase): #pylint: disable=too
             JMESPathCheck('osProfile.linuxConfiguration.ssh.publicKeys[0].keyData', TEST_SSH_KEY_PUB),
         ])
 
-
 class VMBootDiagnostics(VCRTestBase):
 
     def __init__(self, test_method):
@@ -893,7 +892,6 @@ class VMCreateCustomIP(ResourceGroupVCRTestBase):
         ])
         self.cmd('network nic show -n {vm_name}VMNic -g {resource_group}'.format(vm_name=vm_name, resource_group=self.resource_group),
             checks=JMESPathCheck('ipConfigurations[0].privateIpAllocationMethod', 'Static'))
-
 
 class VMDataDiskVCRTest(ResourceGroupVCRTestBase):
 

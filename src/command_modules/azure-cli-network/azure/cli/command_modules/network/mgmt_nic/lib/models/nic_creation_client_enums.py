@@ -9,6 +9,44 @@
 from enum import Enum
 
 
+class networkSecurityGroupType(Enum):
+
+    none = "none"
+    existing_name = "existingName"
+    existing_id = "existingId"
+
+
+class privateIpAddressAllocation(Enum):
+
+    dynamic = "dynamic"
+    static = "static"
+
+
+class privateIpAddressVersion(Enum):
+
+    ipv4 = "ipv4"
+    ipv6 = "ipv6"
+
+
+class publicIpAddressType(Enum):
+
+    none = "none"
+    existing_name = "existingName"
+    existing_id = "existingId"
+
+
+class subnetType(Enum):
+
+    existing_name = "existingName"
+    existing_id = "existingId"
+
+
+class useDnsSettings(Enum):
+
+    true = "true"
+    false = "false"
+
+
 class DeploymentMode(Enum):
 
     incremental = "Incremental"
