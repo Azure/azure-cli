@@ -27,6 +27,17 @@
       },
       "defaultValue": ""
     },
+    "dnsNameType": {
+      "type": "string",
+      "allowedValues": [
+        "new",
+        "none"
+      ],
+      "defaultValue": "none",
+      "metadata": {
+        "description": "Whether to include a DNS entry or not."
+      }
+    },
     "location": {
       "type": "string",
       "defaultValue": "[resourceGroup().location]",
@@ -41,17 +52,6 @@
         "description": "Name of the Public IP address."
       }
     },
-    "publicIpAddressType": {
-      "type": "string",
-      "allowedValues": [
-        "dns",
-        "noDns"
-      ],
-      "defaultValue": "noDns",
-      "metadata": {
-        "description": "Whether to include a DNS entry or not."
-      }
-    },
     "tags": {
       "type": "object",
       "defaultValue": { },
@@ -61,10 +61,10 @@
     }
   },
   "variables": {
-    
+
   },
   "resources": [
-    
+
   ],
   "outputs": {
     "publicIp": {

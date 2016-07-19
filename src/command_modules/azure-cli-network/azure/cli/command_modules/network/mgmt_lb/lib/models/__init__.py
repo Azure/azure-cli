@@ -16,6 +16,11 @@ from .dependency import Dependency
 from .deployment_properties_extended import DeploymentPropertiesExtended
 from .deployment_extended import DeploymentExtended
 from .lb_creation_client_enums import (
+    dnsNameType,
+    privateIpAddressAllocation,
+    publicIpAddressAllocation,
+    publicIpAddressType,
+    subnetType,
     DeploymentMode,
 )
 
@@ -29,5 +34,10 @@ __all__ = [
     'Dependency',
     'DeploymentPropertiesExtended',
     'DeploymentExtended',
+    'dnsNameType',
+    'privateIpAddressAllocation',
+    'publicIpAddressAllocation',
+    'publicIpAddressType',
+    'subnetType',
     'DeploymentMode',
 ]
