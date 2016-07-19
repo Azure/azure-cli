@@ -15,12 +15,48 @@ class frontendType(Enum):
     private_ip = "privateIp"
 
 
+class httpListenerProtocol(Enum):
+
+    http = "http"
+    https = "https"
+
+
+class httpSettingsCookieBasedAffinity(Enum):
+
+    enabled = "enabled"
+    disabled = "disabled"
+
+
+class httpSettingsProtocol(Enum):
+
+    http = "http"
+    https = "https"
+
+
+class privateIpAddressAllocation(Enum):
+
+    dynamic = "dynamic"
+    static = "static"
+
+
+class publicIpAddressAllocation(Enum):
+
+    dynamic = "dynamic"
+    static = "static"
+
+
 class publicIpType(Enum):
 
     none = "none"
     new = "new"
     existing_name = "existingName"
     existing_id = "existingId"
+
+
+class routingRuleType(Enum):
+
+    basic = "Basic"
+    path_based_routing = "PathBasedRouting"
 
 
 class subnetType(Enum):

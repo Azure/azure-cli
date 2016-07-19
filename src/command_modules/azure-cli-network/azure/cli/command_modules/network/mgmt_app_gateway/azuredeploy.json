@@ -39,7 +39,7 @@
       "type": "int",
       "defaultValue": "",
       "metadata": {
-        "description": "The front end port number. Defaults to 80 for HTTP and 443 for HTTPS."
+        "description": "The front end port number."
       }
     },
     "frontendType": {
@@ -53,15 +53,17 @@
     "httpListenerProtocol": {
       "type": "string",
       "defaultValue": "http",
+      "allowedValues": [ "http", "https" ],
       "metadata": {
-        "description": "The HTTP listener protocol (http, https)."
+        "description": "The HTTP listener protocol."
       }
     },
     "httpSettingsCookieBasedAffinity": {
       "type": "string",
       "defaultValue": "disabled",
+      "allowedValues": [ "enabled", "disabled" ],
       "metadata": {
-        "description": "Enable or disable HTTP settings cookie based affinity (enabled, disabled)."
+        "description": "Enable or disable HTTP settings cookie based affinity."
       }
     },
     "httpSettingsPort": {
@@ -74,8 +76,9 @@
     "httpSettingsProtocol": {
       "type": "string",
       "defaultValue": "http",
+      "allowedValues": [ "http", "https" ],
       "metadata": {
-        "description": "The HTTP settings protocol (http, https)."
+        "description": "The HTTP settings protocol."
       }
     },
     "location": {
@@ -95,13 +98,14 @@
     "privateIpAddressAllocation": {
       "type": "string",
       "defaultValue": "dynamic",
+      "allowedValues": [ "dynamic", "static" ],
       "metadata": {
-        "description": "Specify the kind of private IP allocation (dynamic, static)."
+        "description": "Specify the kind of private IP allocation."
       }
     },
     "publicIp": {
       "type": "string",
-      "defaultValue": "",
+      "defaultValue": "[concat('PublicIP', parameters('applicationGatewayName'))]",
       "metadata": {
         "description": "The name or ID of the public IP address."
       }
@@ -117,20 +121,22 @@
     "publicIpAddressAllocation": {
       "type": "string",
       "defaultValue": "dynamic",
+      "allowedValues": [ "dynamic", "static" ],
       "metadata": {
-        "description": "Specify the kind of public IP allocation for new public IPs (static, dynamic)."
+        "description": "Specify the kind of public IP allocation for new public IPs."
       }
     },
     "routingRuleType": {
       "type": "string",
       "defaultValue": "Basic",
+      "allowedValues": [ "Basic", "PathBasedRouting" ],
       "metadata": {
-        "description": "The request routing rule type (Basic, PathBasedRouting)."
+        "description": "The request routing rule type."
       }
     },
     "servers": {
       "type": "array",
-      "defaultValue": [],
+      "defaultValue": [ ],
       "metadata": {
         "description": "The list of IP addresses or DNS names corresponding to backend servers."
       }
@@ -169,6 +175,13 @@
       "defaultValue": "new",
       "metadata": {
         "description": "Use a new or existing subnet."
+      }
+    },
+    "tags": {
+      "type": "object",
+      "defaultValue": { },
+      "metadata": {
+        "description": "Tags object."
       }
     },
     "virtualNetworkName": {
@@ -384,11 +397,13 @@
       "existingName": "[concat('/subscriptions/',subscription().subscriptionId,'/resourceGroups/',resourceGroup().name,'/providers/Microsoft.Network/publicIpAddresses/',parameters('publicIp'))]",
       "existingId": "[parameters('publicIp')]"
     },
+    "publicIpTemplateUri": "https://azuresdkci.blob.core.windows.net/templatehost/CreatePublicIp_2016-07-19/azuredeploy.json",
+    "publicIpTemplateUriEmpty": "https://azuresdkci.blob.core.windows.net/templatehost/CreatePublicIp_2016-07-19/azuredeploy_empty.json",
     "publicIpTemplateFilePaths": {
-      "existingName": "nested_templates/public_ip_none_or_existing.json",
-      "existingId": "nested_templates/public_ip_none_or_existing.json",
-      "new": "nested_templates/public_ip_new.json",
-      "none": "nested_templates/public_ip_none_or_existing.json"
+      "existingId": "[variables('publicIpTemplateUriEmpty')]",
+      "existingName": "[variables('publicIpTemplateUriEmpty')]",
+      "new": "[variables('publicIpTemplateUri')]",
+      "none": "[variables('publicIpTemplateUriEmpty')]"
     },
     "sslCertificateName": "[concat(parameters('applicationGatewayName'),'SslCert')]",
     "subnetIds": {
@@ -398,10 +413,12 @@
     },
     "vnetDeploymentName": "[concat('VNET',parameters('applicationGatewayName'))]",
     "vnetId": "[concat('/subscriptions/',subscription().subscriptionId,'/resourceGroups/',resourceGroup().name,'/providers/Microsoft.Network/virtualNetworks/',parameters('virtualNetworkName'))]",
+    "vnetTemplateUri": "https://azuresdkci.blob.core.windows.net/templatehost/CreateVnet_2016-07-18/azuredeploy.json",
+    "vnetTemplateUriEmpty": "https://azuresdkci.blob.core.windows.net/templatehost/CreateVnet_2016-07-18/azuredeploy_empty.json",
     "vnetTemplateFilePaths": {
-      "existingId": "nested_templates/vnet_existing.json",
-      "existingName": "nested_templates/vnet_existing.json",
-      "new": "nested_templates/vnet_new.json"
+      "existingId": "[variables('vnetTemplateUriEmpty')]",
+      "existingName": "[variables('vnetTemplateUriEmpty')]",
+      "new": "[variables('vnetTemplateUri')]"
     }
   },
   "resources": [
@@ -412,6 +429,7 @@
         "[concat('Microsoft.Resources/deployments/', variables('publicIpDeploymentName'))]"
       ],
       "location": "[resourceGroup().location]",
+      "tags": "[parameters('tags')]",
       "name": "[parameters('applicationGatewayName')]",
       "properties": "[variables('applicationGatewayProperties')[parameters('httpListenerProtocol')]]",
       "type": "Microsoft.Network/applicationGateways"
@@ -424,14 +442,15 @@
       "properties": {
         "mode": "Incremental",
         "templateLink": {
-          "uri": "[concat(parameters('_artifactsLocation'),'/',variables('vnetTemplateFilePaths')[parameters('subnetType')])]",
+          "uri": "[variables('vnetTemplateFilePaths')[parameters('subnetType')]]",
           "contentVersion": "1.0.0.0"
         },
         "parameters": {
           "subnetName": { "value": "[parameters('subnet')]" },
-          "subnetAddressPrefix": { "value": "[parameters('subnetAddressPrefix')]" },
+          "subnetPrefix": { "value": "[parameters('subnetAddressPrefix')]" },
           "virtualNetworkName": { "value": "[parameters('virtualNetworkName')]" },
-          "vnetAddressPrefix": { "value": "[parameters('vnetAddressPrefix')]" }
+          "virtualNetworkPrefix": { "value": "[parameters('vnetAddressPrefix')]" },
+          "tags": { "value": "[parameters('tags')]" }
         }
       }
     },
@@ -443,14 +462,14 @@
       "properties": {
         "mode": "Incremental",
         "templateLink": {
-          "uri": "[concat(parameters('_artifactsLocation'),'/',variables('publicIpTemplateFilePaths')[parameters('publicIpType')])]",
+          "uri": "[variables('publicIpTemplateFilePaths')[parameters('publicIpType')]]",
           "contentVersion": "1.0.0.0"
         },
         "parameters": {
           "location": { "value": "[parameters('location')]" },
-          "publicIpName": { "value": "[parameters('publicIp')]" },
-          "publicIpType": { "value": "[parameters('publicIpType')]" },
-          "publicIpAddressAllocation": { "value": "[parameters('publicIpAddressAllocation')]" }
+          "name": { "value": "[parameters('publicIp')]" },
+          "allocationMethod": { "value": "[parameters('publicIpAddressAllocation')]" },
+          "tags": { "value": "[parameters('tags')]" }
         }
       }
     }
