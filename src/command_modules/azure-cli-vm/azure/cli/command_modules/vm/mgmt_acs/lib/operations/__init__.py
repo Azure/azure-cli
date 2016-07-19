@@ -6,8 +6,8 @@
 # regenerated.
 # --------------------------------------------------------------------------
 
-from .acs_operations import ACSOperations
+from .acs_operations import AcsOperations
 
 __all__ = [
-    'ACSOperations',
+    'AcsOperations',
 ]

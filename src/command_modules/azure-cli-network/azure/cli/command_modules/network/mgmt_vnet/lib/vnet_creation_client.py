@@ -10,12 +10,12 @@ from msrest.service_client import ServiceClient
 from msrest import Serializer, Deserializer
 from msrestazure import AzureConfiguration
 from .version import VERSION
-from .operations.acs_operations import AcsOperations
+from .operations.vnet_operations import VnetOperations
 from . import models
 
 
-class AcsCreationClientConfiguration(AzureConfiguration):
-    """Configuration for AcsCreationClient
+class VnetCreationClientConfiguration(AzureConfiguration):
+    """Configuration for VnetCreationClient
     Note that all parameters used to create this instance are saved as instance
     attributes.
 
@@ -58,9 +58,9 @@ class AcsCreationClientConfiguration(AzureConfiguration):
         if not base_url:
             base_url = 'https://management.azure.com'
 
-        super(AcsCreationClientConfiguration, self).__init__(base_url, filepath)
+        super(VnetCreationClientConfiguration, self).__init__(base_url, filepath)
 
-        self.add_user_agent('acscreationclient/{}'.format(VERSION))
+        self.add_user_agent('vnetcreationclient/{}'.format(VERSION))
         self.add_user_agent('Azure-SDK-For-Python')
 
         self.credentials = credentials
@@ -71,14 +71,14 @@ class AcsCreationClientConfiguration(AzureConfiguration):
         self.generate_client_request_id = generate_client_request_id
 
 
-class AcsCreationClient(object):
-    """AcsCreationClient
+class VnetCreationClient(object):
+    """VnetCreationClient
 
     :ivar config: Configuration for client.
-    :vartype config: AcsCreationClientConfiguration
+    :vartype config: VnetCreationClientConfiguration
 
-    :ivar acs: Acs operations
-    :vartype acs: .operations.AcsOperations
+    :ivar vnet: Vnet operations
+    :vartype vnet: .operations.VnetOperations
 
     :param credentials: Gets Azure subscription credentials.
     :type credentials: :mod:`A msrestazure Credentials
@@ -106,12 +106,12 @@ class AcsCreationClient(object):
     def __init__(
             self, credentials, subscription_id, api_version='2015-11-01', accept_language='en-US', long_running_operation_retry_timeout=30, generate_client_request_id=True, base_url=None, filepath=None):
 
-        self.config = AcsCreationClientConfiguration(credentials, subscription_id, api_version, accept_language, long_running_operation_retry_timeout, generate_client_request_id, base_url, filepath)
+        self.config = VnetCreationClientConfiguration(credentials, subscription_id, api_version, accept_language, long_running_operation_retry_timeout, generate_client_request_id, base_url, filepath)
         self._client = ServiceClient(self.config.credentials, self.config)
 
         client_models = {k: v for k, v in models.__dict__.items() if isinstance(v, type)}
         self._serialize = Serializer(client_models)
         self._deserialize = Deserializer(client_models)
 
-        self.acs = AcsOperations(
+        self.vnet = VnetOperations(
             self._client, self.config, self._serialize, self._deserialize)

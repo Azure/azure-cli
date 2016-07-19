@@ -18,8 +18,8 @@ from azure.cli.command_modules.vm.mgmt_vm.lib import VmCreationClient as VMClien
 from azure.cli.command_modules.vm.mgmt_vm.lib.operations import VmOperations
 from azure.cli.command_modules.vm.mgmt_vmss_create.lib import VMSSCreationClient as VMSSClient
 from azure.cli.command_modules.vm.mgmt_vmss_create.lib.operations import VMSSOperations
-from azure.cli.command_modules.vm.mgmt_acs.lib import ACSCreationClient as ACSClient
-from azure.cli.command_modules.vm.mgmt_acs.lib.operations import ACSOperations
+from azure.cli.command_modules.vm.mgmt_acs.lib import AcsCreationClient as ACSClient
+from azure.cli.command_modules.vm.mgmt_acs.lib.operations import AcsOperations
 from .custom import (
     list_vm, resize_vm, list_vm_images, list_vm_extension_images, list_ip_addresses,
     attach_new_disk, attach_existing_disk, detach_disk, list_disks, capture_vm,
@@ -83,7 +83,7 @@ cli_command('vm boot-diagnostics get-boot-log', get_boot_log)
 
 # VM Container (ACS)
 factory = lambda _: get_mgmt_service_client(ACSClient).acs
-cli_command('vm container create', ACSOperations.create_or_update, factory, transform=DeploymentOutputLongRunningOperation('Starting vm container create'))
+cli_command('vm container create', AcsOperations.create_or_update, factory, transform=DeploymentOutputLongRunningOperation('Starting vm container create'))
 
 factory = lambda _: _compute_client_factory().container_service
 #Remove the hack after https://github.com/Azure/azure-rest-api-specs/issues/352 fixed

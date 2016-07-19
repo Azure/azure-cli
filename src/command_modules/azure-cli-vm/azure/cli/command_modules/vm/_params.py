@@ -24,7 +24,8 @@ from azure.cli.command_modules.vm._actions import (VMImageFieldAction,
 from azure.cli.commands.parameters import (location_type,
                                            get_location_completion_list,
                                            get_one_of_subscription_locations,
-                                           get_resource_name_completion_list)
+                                           get_resource_name_completion_list,
+                                           tags_type)
 from azure.cli.command_modules.vm._validators import nsg_name_validator
 from azure.cli.commands import register_cli_argument, CliArgumentType, register_extra_cli_argument
 from azure.cli.commands.arm import is_valid_resource_id
@@ -54,6 +55,8 @@ admin_username_type = CliArgumentType(options_list=('--admin-username',), defaul
 existing_vm_name = CliArgumentType(overrides=name_arg_type, help='The name of the virtual machine', completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachines'), id_part='name')
 register_cli_argument('vm', 'vm_name', existing_vm_name)
 register_cli_argument('vm', 'size', CliArgumentType(completer=get_vm_size_completion_list))
+register_cli_argument('vm', 'tags', tags_type)
+register_cli_argument('vm', 'name', arg_type=name_arg_type)
 
 register_cli_argument('vmss', 'vm_scale_set_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'), id_part='name')
 register_cli_argument('vmss', 'virtual_machine_scale_set_name', name_arg_type)

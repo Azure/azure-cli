@@ -65,6 +65,13 @@
       "metadata": {
         "description": "Configure all linux machines with the SSH RSA public key string.  Your key should include three parts, for example 'ssh-rsa AAAAB...snip...UcyupgH azureuser@linuxvm"
       }
+    },
+    "tags": {
+      "type": "object",
+      "defaultValue": { },
+      "metadata": {
+        "description": "Tags object."
+      }
     }
   },
   "variables": {
@@ -82,6 +89,7 @@
       "apiVersion": "2016-03-30",
       "type": "Microsoft.ContainerService/containerServices",
       "location": "[parameters('location')]",
+      "tags": "[parameters('tags')]",
       "name": "[parameters('name')]",
       "properties": {
         "orchestratorProfile": {

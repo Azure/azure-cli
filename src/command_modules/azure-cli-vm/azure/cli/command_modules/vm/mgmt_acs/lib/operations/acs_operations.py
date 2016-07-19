@@ -14,8 +14,8 @@ import uuid
 from .. import models
 
 
-class ACSOperations(object):
-    """ACSOperations operations.
+class AcsOperations(object):
+    """AcsOperations operations.
 
     :param client: Client for service requests.
     :param config: Configuration of service client.
@@ -32,7 +32,7 @@ class ACSOperations(object):
         self.config = config
 
     def create_or_update(
-            self, resource_group_name, deployment_name, dns_name_prefix, name, ssh_key_value, content_version=None, admin_username="azureuser", agent_count="1", agent_vm_size="Standard_D2", location=None, master_count="1", orchestrator_type="dcos", custom_headers=None, raw=False, **operation_config):
+            self, resource_group_name, deployment_name, dns_name_prefix, name, ssh_key_value, content_version=None, admin_username="azureuser", agent_count="1", agent_vm_size="Standard_D2", location=None, master_count="1", orchestrator_type="dcos", tags=None, custom_headers=None, raw=False, **operation_config):
         """
         Create or update a virtual machine.
 
@@ -69,18 +69,21 @@ class ACSOperations(object):
         :type master_count: str
         :param orchestrator_type: The type of orchestrator used to manage the
          applications on the cluster. Possible values include: 'dcos', 'swarm'
-        :type orchestrator_type: str
+        :type orchestrator_type: str or :class:`orchestratorType
+         <acscreationclient.models.orchestratorType>`
+        :param tags: Tags object.
+        :type tags: object
         :param dict custom_headers: headers that will be added to the request
         :param bool raw: returns the direct response alongside the
          deserialized response
         :rtype:
          :class:`AzureOperationPoller<msrestazure.azure_operation.AzureOperationPoller>`
          instance that returns :class:`DeploymentExtended
-         <mynamespace.models.DeploymentExtended>`
+         <default.models.DeploymentExtended>`
         :rtype: :class:`ClientRawResponse<msrest.pipeline.ClientRawResponse>`
          if raw=true
         """
-        parameters = models.DeploymentACS(content_version=content_version, admin_username=admin_username, agent_count=agent_count, agent_vm_size=agent_vm_size, dns_name_prefix=dns_name_prefix, location=location, master_count=master_count, name=name, orchestrator_type=orchestrator_type, ssh_key_value=ssh_key_value)
+        parameters = models.DeploymentAcs(content_version=content_version, admin_username=admin_username, agent_count=agent_count, agent_vm_size=agent_vm_size, dns_name_prefix=dns_name_prefix, location=location, master_count=master_count, name=name, orchestrator_type=orchestrator_type, ssh_key_value=ssh_key_value, tags=tags)
 
         # Construct URL
         url = '/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Resources/deployments/{deploymentName}'
@@ -106,7 +109,7 @@ class ACSOperations(object):
             header_parameters['accept-language'] = self._serialize.header("self.config.accept_language", self.config.accept_language, 'str')
 
         # Construct body
-        body_content = self._serialize.body(parameters, 'DeploymentACS')
+        body_content = self._serialize.body(parameters, 'DeploymentAcs')
 
         # Construct and send request
         def long_running_send():

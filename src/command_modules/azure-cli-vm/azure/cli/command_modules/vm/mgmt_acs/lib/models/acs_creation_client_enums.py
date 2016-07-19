@@ -9,6 +9,12 @@
 from enum import Enum
 
 
+class orchestratorType(Enum):
+
+    dcos = "dcos"
+    swarm = "swarm"
+
+
 class DeploymentMode(Enum):
 
     incremental = "Incremental"

@@ -13,14 +13,14 @@
       "type": "array",
       "defaultValue": [ ],
       "metadata": {
-        "description": "Space separated list of load balancer backend address pool IDs."
+        "description": "Array of load balancer backend address pool IDs."
       }
     },
     "loadBalancerInboundNatRuleIds": {
       "type": "array",
       "defaultValue": [ ],
       "metadata": {
-        "description": "Space separated list of load balancer inbound NAT rule IDs."
+        "description": "Array of load balancer inbound NAT rule IDs."
       }
     },
     "location": {
@@ -47,24 +47,9 @@
     "networkSecurityGroupType": {
       "type": "string",
       "defaultValue": "none",
-      "allowedValues": ["none", "existing"],
-      "metadata": {
-        "description": "Identifies whether to use an existing NSG."
-      }
-    },
-    "publicIpAddressName": {
-      "type": "string",
-      "defaultValue": "",
-      "metadata": {
-        "description": "Name of an existing public IP address to associate with the NIC."
-      }
-    },
-    "publicIpAddressType": {
-      "type": "string",
-      "defaultValue": "none",
       "allowedValues": [ "none", "existing" ],
       "metadata": {
-        "description": "Specify whether to associate an existing public IP address with the NIC."
+        "description": "Identifies whether to use an existing NSG."
       }
     },
     "privateIpAddress": {
@@ -85,10 +70,32 @@
         "description": "Private IP address allocation method."
       }
     },
+    "publicIpAddressName": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Name of an existing public IP address to associate with the NIC."
+      }
+    },
+    "publicIpAddressType": {
+      "type": "string",
+      "defaultValue": "none",
+      "allowedValues": [ "none", "existing" ],
+      "metadata": {
+        "description": "Specify whether to associate an existing public IP address with the NIC."
+      }
+    },
     "subnetName": {
       "type": "string",
       "metadata": {
         "description": "Subnet to associate with the NIC."
+      }
+    },
+    "tags": {
+      "type": "object",
+      "defaultValue": { },
+      "metadata": {
+        "description": "Tags object."
       }
     },
     "virtualNetworkName": {
@@ -194,6 +201,7 @@
       "dependsOn": [ ],
       "location": "[parameters('location')]",
       "name": "[variables('name')]",
+      "tags": "[parameters('tags')]",
       "properties": "[variables('nicProperties')[variables('nicPropertiesKey')]]",
       "type": "Microsoft.Network/networkInterfaces"
     }

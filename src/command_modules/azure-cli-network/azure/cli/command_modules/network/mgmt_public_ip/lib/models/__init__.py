@@ -16,6 +16,8 @@ from .dependency import Dependency
 from .deployment_properties_extended import DeploymentPropertiesExtended
 from .deployment_extended import DeploymentExtended
 from .public_ip_creation_client_enums import (
+    allocationMethod,
+    publicIpAddressType,
     DeploymentMode,
 )
 
@@ -29,5 +31,7 @@ __all__ = [
     'Dependency',
     'DeploymentPropertiesExtended',
     'DeploymentExtended',
+    'allocationMethod',
+    'publicIpAddressType',
     'DeploymentMode',
 ]

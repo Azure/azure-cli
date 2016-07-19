@@ -6,10 +6,10 @@
 # regenerated.
 # --------------------------------------------------------------------------
 
-from .nsg_creation_client import NSGCreationClient
+from .nsg_creation_client import NsgCreationClient
 from .version import VERSION
 
-__all__ = ['NSGCreationClient']
+__all__ = ['NsgCreationClient']
 
 __version__ = VERSION
 
