@@ -17,7 +17,7 @@ class DeploymentPublicIp(Model):
     sending a request.
 
     :ivar uri: URI referencing the template. Default value:
-     "https://azuresdkci.blob.core.windows.net/templatehost/CreatePublicIp_2016-06-06/azuredeploy.json"
+     "https://azuresdkci.blob.core.windows.net/templatehost/CreatePublicIp_2016-07-18/azuredeploy.json"
      .
     :vartype uri: str
     :param content_version: If included it must match the ContentVersion in
@@ -25,12 +25,13 @@ class DeploymentPublicIp(Model):
     :type content_version: str
     :ivar _artifacts_location: Container URI of of the template. Default
      value:
-     "https://azuresdkci.blob.core.windows.net/templatehost/Createpublic_ip_2016-06-06"
+     "https://azuresdkci.blob.core.windows.net/templatehost/CreatePublicIp_2016-07-18"
      .
     :vartype _artifacts_location: str
     :param allocation_method: IP address Allocation method. Possible values
      include: 'dynamic', 'static'. Default value: "dynamic" .
-    :type allocation_method: str
+    :type allocation_method: str or :class:`allocationMethod
+     <publicipcreationclient.models.allocationMethod>`
     :param dns_name: Globally unique DNS entry.
     :type dns_name: str
     :param location: Location (e.g. eastus).
@@ -39,7 +40,10 @@ class DeploymentPublicIp(Model):
     :type name: str
     :param public_ip_address_type: Whether to include a DNS entry or not.
      Possible values include: 'dns', 'noDns'. Default value: "noDns" .
-    :type public_ip_address_type: str
+    :type public_ip_address_type: str or :class:`publicIpAddressType
+     <publicipcreationclient.models.publicIpAddressType>`
+    :param tags: Tags object.
+    :type tags: object
     :ivar mode: Gets or sets the deployment mode. Default value:
      "Incremental" .
     :vartype mode: str
@@ -56,24 +60,26 @@ class DeploymentPublicIp(Model):
         'uri': {'key': 'properties.templateLink.uri', 'type': 'str'},
         'content_version': {'key': 'properties.templateLink.contentVersion', 'type': 'str'},
         '_artifacts_location': {'key': 'properties.parameters._artifactsLocation.value', 'type': 'str'},
-        'allocation_method': {'key': 'properties.parameters.allocationMethod.value', 'type': 'str'},
+        'allocation_method': {'key': 'properties.parameters.allocationMethod.value', 'type': 'allocationMethod'},
         'dns_name': {'key': 'properties.parameters.dnsName.value', 'type': 'str'},
         'location': {'key': 'properties.parameters.location.value', 'type': 'str'},
         'name': {'key': 'properties.parameters.name.value', 'type': 'str'},
-        'public_ip_address_type': {'key': 'properties.parameters.publicIpAddressType.value', 'type': 'str'},
+        'public_ip_address_type': {'key': 'properties.parameters.publicIpAddressType.value', 'type': 'publicIpAddressType'},
+        'tags': {'key': 'properties.parameters.tags.value', 'type': 'object'},
         'mode': {'key': 'properties.mode', 'type': 'str'},
     }
 
-    uri = "https://azuresdkci.blob.core.windows.net/templatehost/CreatePublicIp_2016-06-06/azuredeploy.json"
+    uri = "https://azuresdkci.blob.core.windows.net/templatehost/CreatePublicIp_2016-07-18/azuredeploy.json"
 
-    _artifacts_location = "https://azuresdkci.blob.core.windows.net/templatehost/Createpublic_ip_2016-06-06"
+    _artifacts_location = "https://azuresdkci.blob.core.windows.net/templatehost/CreatePublicIp_2016-07-18"
 
     mode = "Incremental"
 
-    def __init__(self, name, content_version=None, allocation_method="dynamic", dns_name=None, location=None, public_ip_address_type="noDns"):
+    def __init__(self, name, content_version=None, allocation_method="dynamic", dns_name=None, location=None, public_ip_address_type="noDns", tags=None):
         self.content_version = content_version
         self.allocation_method = allocation_method
         self.dns_name = dns_name
         self.location = location
         self.name = name
         self.public_ip_address_type = public_ip_address_type
+        self.tags = tags

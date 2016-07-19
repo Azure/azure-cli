@@ -45,40 +45,15 @@
     }
   },
   "variables": {
-    "NewVNetName": "[parameters('virtualNetworkName')]",
-    "NewVNetPrefix": "[parameters('virtualNetworkPrefix')]",
-    "NewVNetSubnet1Name": "[parameters('subnetName')]",
-    "NewVNetSubnet1Prefix": "[parameters('subnetPrefix')]"
+    
   },
   "resources": [
-    {
-      "name": "[variables('NewVNetName')]",
-      "type": "Microsoft.Network/virtualNetworks",
-      "location": "[parameters('location')]",
-      "apiVersion": "2015-06-15",
-      "dependsOn": [ ],
-      "tags": "[parameters('tags')]",
-      "properties": {
-        "addressSpace": {
-          "addressPrefixes": [
-            "[variables('NewVNetPrefix')]"
-          ]
-        },
-        "subnets": [
-          {
-            "name": "[variables('NewVNetSubnet1Name')]",
-            "properties": {
-              "addressPrefix": "[variables('NewVNetSubnet1Prefix')]"
-            }
-          }
-        ]
-      }
-    }
+    
   ],
   "outputs": {
     "NewVNet": {
       "type": "object",
-      "value": "[reference(variables('NewVNetName'))]"
+      "value": { }
     }
   }
 }

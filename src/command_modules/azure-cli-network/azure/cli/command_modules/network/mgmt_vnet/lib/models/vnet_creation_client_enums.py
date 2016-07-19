@@ -6,10 +6,10 @@
 # regenerated.
 # --------------------------------------------------------------------------
 
-from .vnet_creation_client import VnetCreationClient
-from .version import VERSION
+from enum import Enum
 
-__all__ = ['VnetCreationClient']
 
-__version__ = VERSION
+class DeploymentMode(Enum):
 
+    incremental = "Incremental"
+    complete = "Complete"

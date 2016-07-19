@@ -6,7 +6,7 @@
 # regenerated.
 # --------------------------------------------------------------------------
 
-from .deployment_nsg import DeploymentNSG
+from .deployment_nsg import DeploymentNsg
 from .template_link import TemplateLink
 from .parameters_link import ParametersLink
 from .provider_resource_type import ProviderResourceType
@@ -20,7 +20,7 @@ from .nsg_creation_client_enums import (
 )
 
 __all__ = [
-    'DeploymentNSG',
+    'DeploymentNsg',
     'TemplateLink',
     'ParametersLink',
     'ProviderResourceType',

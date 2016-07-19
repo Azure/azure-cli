@@ -14,8 +14,8 @@ import uuid
 from .. import models
 
 
-class VNetOperations(object):
-    """VNetOperations operations.
+class VnetOperations(object):
+    """VnetOperations operations.
 
     :param client: Client for service requests.
     :param config: Configuration of service client.
@@ -31,10 +31,10 @@ class VNetOperations(object):
 
         self.config = config
 
-    def create(
-            self, resource_group_name, deployment_name, virtual_network_name, content_version=None, virtual_network_prefix=None, subnet_prefix=None, subnet_name=None, location=None, custom_headers=None, raw=False, **operation_config):
+    def create_or_update(
+            self, resource_group_name, deployment_name, virtual_network_name, content_version=None, location=None, subnet_name="Subnet1", subnet_prefix="10.0.0.0/24", tags=None, virtual_network_prefix="10.0.0.0/16", custom_headers=None, raw=False, **operation_config):
         """
-        Create a named template deployment using a template.
+        Create or update a virtual machine.
 
         :param resource_group_name: The name of the resource group. The name
          is case insensitive.
@@ -46,26 +46,28 @@ class VNetOperations(object):
         :param content_version: If included it must match the ContentVersion
          in the template.
         :type content_version: str
+        :param location: Virtual network location.
+        :type location: str
+        :param subnet_name: Name of the subnet.
+        :type subnet_name: str
+        :param subnet_prefix: IP address for the subnet.
+        :type subnet_prefix: str
+        :param tags: Tags object.
+        :type tags: object
         :param virtual_network_prefix: IP address prefix for the virtual
          network.
         :type virtual_network_prefix: str
-        :param subnet_prefix: IP address prefix for the subnet.
-        :type subnet_prefix: str
-        :param subnet_name: Name of the subnet.
-        :type subnet_name: str
-        :param location: Location of the virtual network.
-        :type location: str
         :param dict custom_headers: headers that will be added to the request
         :param bool raw: returns the direct response alongside the
          deserialized response
         :rtype:
          :class:`AzureOperationPoller<msrestazure.azure_operation.AzureOperationPoller>`
          instance that returns :class:`DeploymentExtended
-         <mynamespace.models.DeploymentExtended>`
+         <default.models.DeploymentExtended>`
         :rtype: :class:`ClientRawResponse<msrest.pipeline.ClientRawResponse>`
          if raw=true
         """
-        parameters = models.DeploymentVNet(content_version=content_version, virtual_network_prefix=virtual_network_prefix, subnet_prefix=subnet_prefix, virtual_network_name=virtual_network_name, subnet_name=subnet_name, location=location)
+        parameters = models.DeploymentVnet(content_version=content_version, location=location, subnet_name=subnet_name, subnet_prefix=subnet_prefix, tags=tags, virtual_network_name=virtual_network_name, virtual_network_prefix=virtual_network_prefix)
 
         # Construct URL
         url = '/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Resources/deployments/{deploymentName}'
@@ -91,7 +93,7 @@ class VNetOperations(object):
             header_parameters['accept-language'] = self._serialize.header("self.config.accept_language", self.config.accept_language, 'str')
 
         # Construct body
-        body_content = self._serialize.body(parameters, 'DeploymentVNet')
+        body_content = self._serialize.body(parameters, 'DeploymentVnet')
 
         # Construct and send request
         def long_running_send():

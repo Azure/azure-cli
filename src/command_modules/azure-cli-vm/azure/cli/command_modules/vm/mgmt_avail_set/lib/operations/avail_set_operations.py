@@ -32,7 +32,7 @@ class AvailSetOperations(object):
         self.config = config
 
     def create_or_update(
-            self, resource_group_name, deployment_name, name, content_version=None, location=None, platform_fault_domain_count="1", platform_update_domain_count="1", custom_headers=None, raw=False, **operation_config):
+            self, resource_group_name, deployment_name, name, content_version=None, location=None, platform_fault_domain_count="3", platform_update_domain_count="5", tags=None, custom_headers=None, raw=False, **operation_config):
         """
         Create or update a virtual machine.
 
@@ -52,17 +52,19 @@ class AvailSetOperations(object):
         :type platform_fault_domain_count: str
         :param platform_update_domain_count: Number of Update Domains.
         :type platform_update_domain_count: str
+        :param tags: Tags object.
+        :type tags: object
         :param dict custom_headers: headers that will be added to the request
         :param bool raw: returns the direct response alongside the
          deserialized response
         :rtype:
          :class:`AzureOperationPoller<msrestazure.azure_operation.AzureOperationPoller>`
          instance that returns :class:`DeploymentExtended
-         <mynamespace.models.DeploymentExtended>`
+         <default.models.DeploymentExtended>`
         :rtype: :class:`ClientRawResponse<msrest.pipeline.ClientRawResponse>`
          if raw=true
         """
-        parameters = models.DeploymentAvailSet(content_version=content_version, location=location, name=name, platform_fault_domain_count=platform_fault_domain_count, platform_update_domain_count=platform_update_domain_count)
+        parameters = models.DeploymentAvailSet(content_version=content_version, location=location, name=name, platform_fault_domain_count=platform_fault_domain_count, platform_update_domain_count=platform_update_domain_count, tags=tags)
 
         # Construct URL
         url = '/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Resources/deployments/{deploymentName}'

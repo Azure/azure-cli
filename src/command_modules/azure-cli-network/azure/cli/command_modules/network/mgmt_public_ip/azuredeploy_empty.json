@@ -61,39 +61,15 @@
     }
   },
   "variables": {
-    "publicIpName": "[parameters('name')]",
-    "deploymentName": "[concat(parameters('name'), 'IP')]",
-    "templateFilePaths": {
-      "dns": "nested_templates/publicIpDeployment_dns.json",
-      "noDns": "nested_templates/publicIpDeployment_nodns.json"
-    },
-    "ipConfiguration": {
-      "dns": {
-        "publicIPAllocationMethod": "[parameters('allocationMethod')]",
-        "dnsSettings": {
-          "domainNameLabel": "[parameters('dnsName')]"
-        }
-      },
-      "noDns": {
-        "publicIPAllocationMethod": "[parameters('allocationMethod')]"
-      }
-    }
+    
   },
   "resources": [
-    {
-      "name": "[parameters('name')]",
-      "type": "Microsoft.Network/publicIPAddresses",
-      "location": "[parameters('location')]",
-      "apiVersion": "2015-06-15",
-      "tags": "[parameters('tags')]",
-      "dependsOn": [ ],
-      "properties": "[variables('ipConfiguration')[parameters('publicIpAddressType')]]"
-    }
+    
   ],
   "outputs": {
     "publicIp": {
       "type": "object",
-      "value": "[reference(parameters('name'))]"
+      "value": { }
     }
   }
 }

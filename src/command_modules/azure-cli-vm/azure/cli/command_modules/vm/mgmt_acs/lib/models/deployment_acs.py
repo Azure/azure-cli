@@ -9,7 +9,7 @@
 from msrest.serialization import Model
 
 
-class DeploymentACS(Model):
+class DeploymentAcs(Model):
     """
     Deployment operation parameters.
 
@@ -17,7 +17,7 @@ class DeploymentACS(Model):
     sending a request.
 
     :ivar uri: URI referencing the template. Default value:
-     "https://azuresdkci.blob.core.windows.net/templatehost/CreateACS/azuredeploy.json"
+     "https://azuresdkci.blob.core.windows.net/templatehost/CreateAcs_2016-07-18/azuredeploy.json"
      .
     :vartype uri: str
     :param content_version: If included it must match the ContentVersion in
@@ -47,11 +47,14 @@ class DeploymentACS(Model):
     :param orchestrator_type: The type of orchestrator used to manage the
      applications on the cluster. Possible values include: 'dcos', 'swarm'.
      Default value: "dcos" .
-    :type orchestrator_type: str
+    :type orchestrator_type: str or :class:`orchestratorType
+     <acscreationclient.models.orchestratorType>`
     :param ssh_key_value: Configure all linux machines with the SSH RSA
      public key string.  Your key should include three parts, for example
      'ssh-rsa AAAAB...snip...UcyupgH azureuser@linuxvm
     :type ssh_key_value: str
+    :param tags: Tags object.
+    :type tags: object
     :ivar mode: Gets or sets the deployment mode. Default value:
      "Incremental" .
     :vartype mode: str
@@ -75,16 +78,17 @@ class DeploymentACS(Model):
         'location': {'key': 'properties.parameters.location.value', 'type': 'str'},
         'master_count': {'key': 'properties.parameters.masterCount.value', 'type': 'str'},
         'name': {'key': 'properties.parameters.name.value', 'type': 'str'},
-        'orchestrator_type': {'key': 'properties.parameters.orchestratorType.value', 'type': 'str'},
+        'orchestrator_type': {'key': 'properties.parameters.orchestratorType.value', 'type': 'orchestratorType'},
         'ssh_key_value': {'key': 'properties.parameters.sshKeyValue.value', 'type': 'str'},
+        'tags': {'key': 'properties.parameters.tags.value', 'type': 'object'},
         'mode': {'key': 'properties.mode', 'type': 'str'},
     }
 
-    uri = "https://azuresdkci.blob.core.windows.net/templatehost/CreateACS/azuredeploy.json"
+    uri = "https://azuresdkci.blob.core.windows.net/templatehost/CreateAcs_2016-07-18/azuredeploy.json"
 
     mode = "Incremental"
 
-    def __init__(self, dns_name_prefix, name, ssh_key_value, content_version=None, admin_username="azureuser", agent_count="1", agent_vm_size="Standard_D2", location=None, master_count="1", orchestrator_type="dcos"):
+    def __init__(self, dns_name_prefix, name, ssh_key_value, content_version=None, admin_username="azureuser", agent_count="1", agent_vm_size="Standard_D2", location=None, master_count="1", orchestrator_type="dcos", tags=None):
         self.content_version = content_version
         self.admin_username = admin_username
         self.agent_count = agent_count
@@ -95,3 +99,4 @@ class DeploymentACS(Model):
         self.name = name
         self.orchestrator_type = orchestrator_type
         self.ssh_key_value = ssh_key_value
+        self.tags = tags
