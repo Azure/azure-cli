@@ -9,6 +9,24 @@
 from enum import Enum
 
 
+class networkSecurityGroupType(Enum):
+
+    none = "none"
+    existing = "existing"
+
+
+class privateIpAddressAllocation(Enum):
+
+    dynamic = "dynamic"
+    static = "static"
+
+
+class publicIpAddressType(Enum):
+
+    none = "none"
+    existing = "existing"
+
+
 class DeploymentMode(Enum):
 
     incremental = "Incremental"

@@ -18,16 +18,23 @@
     },
     "platformUpdateDomainCount": {
       "type": "string",
-      "defaultValue": 1,
+      "defaultValue": 5,
       "metadata": {
         "description": "Number of Update Domains."
       }
     },
     "platformFaultDomainCount": {
       "type": "string",
-      "defaultValue": 1,
+      "defaultValue": 3,
       "metadata": {
         "description": "Number of Fault Domains."
+      }
+    },
+    "tags": {
+      "type": "object",
+      "defaultValue": { },
+      "metadata": {
+        "description": "Tags object."
       }
     }
   },
@@ -40,9 +47,7 @@
       "location": "[parameters('location')]",
       "apiVersion": "2015-06-15",
       "dependsOn": [ ],
-      "tags": {
-        "displayName": "AvailabilitySet"
-      },
+      "tags": "[parameters('tags')]",
       "properties": {
         "platformUpdateDomainCount": "[parameters('platformUpdateDomainCount')]",
         "platformFaultDomainCount": "[parameters('platformFaultDomainCount')]"
@@ -50,5 +55,9 @@
     }
   ],
   "outputs": {
+    "NewAvailabilitySet": {
+      "type": "object",
+      "value": "[reference(parameters('name'))]"
+    }
   }
 }

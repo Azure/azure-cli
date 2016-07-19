@@ -6,8 +6,8 @@
 # regenerated.
 # --------------------------------------------------------------------------
 
-from .nsg_operations import NSGOperations
+from .nsg_operations import NsgOperations
 
 __all__ = [
-    'NSGOperations',
+    'NsgOperations',
 ]

@@ -9,7 +9,7 @@
 from msrest.serialization import Model
 
 
-class DeploymentNSG(Model):
+class DeploymentNsg(Model):
     """
     Deployment operation parameters.
 
@@ -17,7 +17,7 @@ class DeploymentNSG(Model):
     sending a request.
 
     :ivar uri: URI referencing the template. Default value:
-     "https://azuresdkci.blob.core.windows.net/templatehost/CreateNSG_2016-06-06/azuredeploy.json"
+     "https://azuresdkci.blob.core.windows.net/templatehost/CreateNsg_2016-07-18/azuredeploy.json"
      .
     :vartype uri: str
     :param content_version: If included it must match the ContentVersion in
@@ -27,6 +27,8 @@ class DeploymentNSG(Model):
     :type location: str
     :param name: Name of the network security group.
     :type name: str
+    :param tags: Tags object.
+    :type tags: object
     :ivar mode: Gets or sets the deployment mode. Default value:
      "Incremental" .
     :vartype mode: str
@@ -43,14 +45,16 @@ class DeploymentNSG(Model):
         'content_version': {'key': 'properties.templateLink.contentVersion', 'type': 'str'},
         'location': {'key': 'properties.parameters.location.value', 'type': 'str'},
         'name': {'key': 'properties.parameters.name.value', 'type': 'str'},
+        'tags': {'key': 'properties.parameters.tags.value', 'type': 'object'},
         'mode': {'key': 'properties.mode', 'type': 'str'},
     }
 
-    uri = "https://azuresdkci.blob.core.windows.net/templatehost/CreateNSG_2016-06-06/azuredeploy.json"
+    uri = "https://azuresdkci.blob.core.windows.net/templatehost/CreateNsg_2016-07-18/azuredeploy.json"
 
     mode = "Incremental"
 
-    def __init__(self, name, content_version=None, location=None):
+    def __init__(self, name, content_version=None, location=None, tags=None):
         self.content_version = content_version
         self.location = location
         self.name = name
+        self.tags = tags

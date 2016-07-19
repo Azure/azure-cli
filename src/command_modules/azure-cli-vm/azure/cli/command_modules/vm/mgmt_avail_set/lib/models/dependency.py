@@ -15,7 +15,7 @@ class Dependency(Model):
 
     :param depends_on: Gets the list of dependencies.
     :type depends_on: list of :class:`BasicDependency
-     <mynamespace.models.BasicDependency>`
+     <default.models.BasicDependency>`
     :param id: Gets or sets the ID of the dependency.
     :type id: str
     :param resource_type: Gets or sets the dependency resource type.

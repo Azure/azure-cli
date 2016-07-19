@@ -17,7 +17,7 @@ class DeploymentNic(Model):
     sending a request.
 
     :ivar uri: URI referencing the template. Default value:
-     "https://azuresdkci.blob.core.windows.net/templatehost/CreateNic_2016-06-15/azuredeploy.json"
+     "https://azuresdkci.blob.core.windows.net/templatehost/CreateNic_2016-07-18/azuredeploy.json"
      .
     :vartype uri: str
     :param content_version: If included it must match the ContentVersion in
@@ -25,11 +25,11 @@ class DeploymentNic(Model):
     :type content_version: str
     :param enable_ip_forwarding: Enable IP forwarding. Default value: False .
     :type enable_ip_forwarding: bool
-    :param load_balancer_backend_address_pool_ids: Space separated list of
-     load balancer backend address pool IDs.
+    :param load_balancer_backend_address_pool_ids: Array of load balancer
+     backend address pool IDs.
     :type load_balancer_backend_address_pool_ids: list of object
-    :param load_balancer_inbound_nat_rule_ids: Space separated list of load
-     balancer inbound NAT rule IDs.
+    :param load_balancer_inbound_nat_rule_ids: Array of load balancer inbound
+     NAT rule IDs.
     :type load_balancer_inbound_nat_rule_ids: list of object
     :param location: Location for NIC resource.
     :type location: str
@@ -40,23 +40,29 @@ class DeploymentNic(Model):
     :type network_security_group_name: str
     :param network_security_group_type: Identifies whether to use an existing
      NSG. Possible values include: 'none', 'existing'. Default value: "none" .
-    :type network_security_group_type: str
+    :type network_security_group_type: str or
+     :class:`networkSecurityGroupType <niccreationclient.models.networkSecurityGroupType>`
     :param private_ip_address: Static private IP address to associate with
      the NIC.
     :type private_ip_address: str
     :param private_ip_address_allocation: Private IP address allocation
      method. Possible values include: 'dynamic', 'static'. Default value:
      "dynamic" .
-    :type private_ip_address_allocation: str
+    :type private_ip_address_allocation: str or
+     :class:`privateIpAddressAllocation
+     <niccreationclient.models.privateIpAddressAllocation>`
     :param public_ip_address_name: Name of an existing public IP address to
      associate with the NIC.
     :type public_ip_address_name: str
     :param public_ip_address_type: Specify whether to associate an existing
      public IP address with the NIC. Possible values include: 'none',
      'existing'. Default value: "none" .
-    :type public_ip_address_type: str
+    :type public_ip_address_type: str or :class:`publicIpAddressType
+     <niccreationclient.models.publicIpAddressType>`
     :param subnet_name: Subnet to associate with the NIC.
     :type subnet_name: str
+    :param tags: Tags object.
+    :type tags: object
     :param virtual_network_name: Virtual network to associate with the NIC.
     :type virtual_network_name: str
     :ivar mode: Gets or sets the deployment mode. Default value:
@@ -82,21 +88,22 @@ class DeploymentNic(Model):
         'location': {'key': 'properties.parameters.location.value', 'type': 'str'},
         'network_interface_name': {'key': 'properties.parameters.networkInterfaceName.value', 'type': 'str'},
         'network_security_group_name': {'key': 'properties.parameters.networkSecurityGroupName.value', 'type': 'str'},
-        'network_security_group_type': {'key': 'properties.parameters.networkSecurityGroupType.value', 'type': 'str'},
+        'network_security_group_type': {'key': 'properties.parameters.networkSecurityGroupType.value', 'type': 'networkSecurityGroupType'},
         'private_ip_address': {'key': 'properties.parameters.privateIpAddress.value', 'type': 'str'},
-        'private_ip_address_allocation': {'key': 'properties.parameters.privateIpAddressAllocation.value', 'type': 'str'},
+        'private_ip_address_allocation': {'key': 'properties.parameters.privateIpAddressAllocation.value', 'type': 'privateIpAddressAllocation'},
         'public_ip_address_name': {'key': 'properties.parameters.publicIpAddressName.value', 'type': 'str'},
-        'public_ip_address_type': {'key': 'properties.parameters.publicIpAddressType.value', 'type': 'str'},
+        'public_ip_address_type': {'key': 'properties.parameters.publicIpAddressType.value', 'type': 'publicIpAddressType'},
         'subnet_name': {'key': 'properties.parameters.subnetName.value', 'type': 'str'},
+        'tags': {'key': 'properties.parameters.tags.value', 'type': 'object'},
         'virtual_network_name': {'key': 'properties.parameters.virtualNetworkName.value', 'type': 'str'},
         'mode': {'key': 'properties.mode', 'type': 'str'},
     }
 
-    uri = "https://azuresdkci.blob.core.windows.net/templatehost/CreateNic_2016-06-15/azuredeploy.json"
+    uri = "https://azuresdkci.blob.core.windows.net/templatehost/CreateNic_2016-07-18/azuredeploy.json"
 
     mode = "Incremental"
 
-    def __init__(self, network_interface_name, subnet_name, virtual_network_name, content_version=None, enable_ip_forwarding=False, load_balancer_backend_address_pool_ids=None, load_balancer_inbound_nat_rule_ids=None, location=None, network_security_group_name=None, network_security_group_type="none", private_ip_address=None, private_ip_address_allocation="dynamic", public_ip_address_name=None, public_ip_address_type="none"):
+    def __init__(self, network_interface_name, subnet_name, virtual_network_name, content_version=None, enable_ip_forwarding=False, load_balancer_backend_address_pool_ids=None, load_balancer_inbound_nat_rule_ids=None, location=None, network_security_group_name=None, network_security_group_type="none", private_ip_address=None, private_ip_address_allocation="dynamic", public_ip_address_name=None, public_ip_address_type="none", tags=None):
         self.content_version = content_version
         self.enable_ip_forwarding = enable_ip_forwarding
         self.load_balancer_backend_address_pool_ids = load_balancer_backend_address_pool_ids
@@ -110,4 +117,5 @@ class DeploymentNic(Model):
         self.public_ip_address_name = public_ip_address_name
         self.public_ip_address_type = public_ip_address_type
         self.subnet_name = subnet_name
+        self.tags = tags
         self.virtual_network_name = virtual_network_name

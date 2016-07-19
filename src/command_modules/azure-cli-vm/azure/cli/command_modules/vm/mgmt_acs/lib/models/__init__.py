@@ -6,7 +6,7 @@
 # regenerated.
 # --------------------------------------------------------------------------
 
-from .deployment_acs import DeploymentACS
+from .deployment_acs import DeploymentAcs
 from .template_link import TemplateLink
 from .parameters_link import ParametersLink
 from .provider_resource_type import ProviderResourceType
@@ -16,11 +16,12 @@ from .dependency import Dependency
 from .deployment_properties_extended import DeploymentPropertiesExtended
 from .deployment_extended import DeploymentExtended
 from .acs_creation_client_enums import (
+    orchestratorType,
     DeploymentMode,
 )
 
 __all__ = [
-    'DeploymentACS',
+    'DeploymentAcs',
     'TemplateLink',
     'ParametersLink',
     'ProviderResourceType',
@@ -29,5 +30,6 @@ __all__ = [
     'Dependency',
     'DeploymentPropertiesExtended',
     'DeploymentExtended',
+    'orchestratorType',
     'DeploymentMode',
 ]

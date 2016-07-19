@@ -9,6 +9,18 @@
 from enum import Enum
 
 
+class allocationMethod(Enum):
+
+    dynamic = "dynamic"
+    static = "static"
+
+
+class publicIpAddressType(Enum):
+
+    dns = "dns"
+    no_dns = "noDns"
+
+
 class DeploymentMode(Enum):
 
     incremental = "Incremental"
