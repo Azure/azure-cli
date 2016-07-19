@@ -1,6 +1,11 @@
 Microsoft Project AZ - Preview
 ==================================
 
+.. image:: https://travis-ci.com/Azure/azure-cli.svg?branch=master
+    :target: https://travis-ci.com/Azure/azure-cli
+
+==================================
+
 A great cloud needs great tools; we're excited to introduce *Project Az*, our prototype for building a great, multiplatform commandline experience for Azure.
 
 Project Az is built on Python (2.7, 3.4 and 3.5).
@@ -11,15 +16,15 @@ Installation
 For installation steps for common platforms, please take a look at our `preview installation guide <http://github.com/Azure/azure-cli/blob/master/doc/preview_install_guide.md>`__.
 
 Docker Setup (optional)
-------------
+-----------------------
 We have automated Docker images of the latest code in the master branch.
 
-If you have not previously done so, configure your Docker client engine [here](https://docs.docker.com/engine/installation/).
+If you have not previously done so, `configure your Docker client engine <https://docs.docker.com/engine/installation/>`__.
 
 Then:
-+ Run `docker login` (contact the team for credentials as the images are not public yet).
-+ Run `docker pull azuresdk/azure-cli-python:latest`
-+ Run `docker run -it azuresdk/azure-cli-python:latest`
+ + Run :code:`docker login` (contact the team for credentials as the images are not public yet).
+ + Run :code:`docker pull azuresdk/azure-cli-python:latest`
+ + Run :code:`docker run -it azuresdk/azure-cli-python:latest`
 
 Usage
 =====
@@ -31,7 +36,7 @@ Usage
 For sample scripts and commands, please visit the `Demo Scripts <https://github.com/Azure/azure-cli/blob/master/doc/preview_demo_scripts.md>`__ page.  
 
 Download Source Code
---------------------
+====================
 
 To get the source code of the SDK via **git** type
 
@@ -51,7 +56,9 @@ To provide feedback from the command line, try the ``az feedback`` command.
 Contribute Code
 ===================================
 
-This project has adopted the `Microsoft Open Source Code of Conduct <https://opensource.microsoft.com/codeofconduct/>`__. For more information see the `Code of Conduct FAQ <https://opensource.microsoft.com/codeofconduct/faq/>`__ or contact `opencode@microsoft.com <mailto:opencode@microsoft.com>`__ with any additional questions or comments.
+This project has adopted the `Microsoft Open Source Code of Conduct <https://opensource.microsoft.com/codeofconduct/>`__.
+
+For more information see the `Code of Conduct FAQ <https://opensource.microsoft.com/codeofconduct/faq/>`__ or contact `opencode@microsoft.com <mailto:opencode@microsoft.com>`__ with any additional questions or comments.
 
 If you would like to become an active contributor to this project please
 follow the instructions provided in `Microsoft Azure Projects Contribution Guidelines <http://azure.github.io/guidelines.html>`__
@@ -60,3 +67,8 @@ Learn More
 ==========
 
 `Microsoft Azure Python Developer Center <http://azure.microsoft.com/en-us/develop/python/>`__
+
+License
+=======
+
+`MIT <https://github.com/Azure/azure-cli/blob/master/LICENSE.txt>`__
