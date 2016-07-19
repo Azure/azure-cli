@@ -241,6 +241,34 @@ def _update_provider(namespace, registering):
     msg_template = '%s is still on-going. You can monitor using \'az resource provider show -n %s\''
     logger.warning(msg_template, action, namespace)
 
+def move_resource(ids, destination_group, destination_subscription_id=None):
+    '''Moves resources from one resource group to another(can be under different subscription)
+
+    :param ids: the space separated resource ids to be moved
+    :param destination_group: the destination resource group name
+    :param destination_subscription_id: the destination subscription identifier
+    '''
+    from azure.cli.commands.arm import parse_resource_id, is_valid_resource_id, resource_id
+
+    #verify all resource ids are valid and under the same group
+    resources = []
+    for i in ids:
+        if is_valid_resource_id(i):
+            resources.append(parse_resource_id(i))
+        else:
+            raise CLIError('Invalid id "{}", as it has no group or subscription field'.format(i))
+
+    if len(set([r['subscription'] for r in resources])) > 1:
+        raise CLIError('All resources should be under the same subscription')
+    if len(set([r['resource_group'] for r in resources])) > 1:
+        raise CLIError('All resources should be under the same group')
+
+    rcf = _resource_client_factory()
+    target = resource_id(subscription=(destination_subscription_id or rcf.config.subscription_id),
+                         resource_group=destination_group)
+
+    return rcf.resources.move_resources(resources[0]['resource_group'], ids, target)
+
 def _get_file_json(file_path):
     return _load_json(file_path, 'utf-8') \
         or _load_json(file_path, 'utf-8-sig') \
