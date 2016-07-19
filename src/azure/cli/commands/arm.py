@@ -2,8 +2,9 @@ import argparse
 import re
 from azure.cli.commands.client_factory import get_mgmt_service_client
 from azure.mgmt.resource.resources import ResourceManagementClient
-from azure.cli.application import APPLICATION
+from azure.cli.application import APPLICATION, ListValue
 from azure.cli._util import CLIError
+
 
 regex = re.compile('/subscriptions/(?P<subscription>[^/]*)/resourceGroups/(?P<resource_group>[^/]*)'
                    '/providers/(?P<namespace>[^/]*)/(?P<type>[^/]*)/(?P<name>[^/]*)'
@@ -83,10 +84,24 @@ def add_id_parameters(command_table):
         class SplitAction(argparse.Action): #pylint: disable=too-few-public-methods
 
             def __call__(self, parser, namespace, values, option_string=None):
+                ''' The SplitAction will take the given ID parameter and spread the parsed
+                parts of the id into the individual backing fields.
+
+                Since the id value is expected to be of type `ListValue`, all the backing
+                (dest) fields will also be of type `ListValue`
+                '''
                 try:
-                    parts = parse_resource_id(values)
-                    for arg in [arg for arg in arguments.values() if arg.id_part]:
-                        setattr(namespace, arg.name, parts[arg.id_part])
+                    for value in [values] if isinstance(values, str) else values:
+                        parts = parse_resource_id(value)
+                        for arg in [arg for arg in arguments.values() if arg.id_part]:
+                            try:
+                                list = getattr(namespace, arg.name)
+                            except AttributeError:
+                                pass
+                            if not list:
+                                list = ListValue()
+                            list.append(parts[arg.id_part])
+                            setattr(namespace, arg.name, list)
                 except Exception as ex:
                     raise ValueError(ex)
 
@@ -123,6 +138,7 @@ def add_id_parameters(command_table):
                              metavar='RESOURCE_ID',
                              help='ID of resource',
                              action=split_action(command.arguments),
+                             nargs='+',
                              type=ResourceId,
                              validator=required_values_validator)
 

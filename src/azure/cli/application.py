@@ -89,30 +89,52 @@ class Application(object):
             argv[0] = '--help'
 
         args = self.parser.parse_args(argv)
-        try:
-            _validate_arguments(args)
-        except: # pylint: disable=bare-except
-            err = sys.exc_info()[1]
-            getattr(args, '_parser', self.parser).error(str(err))
-
-        self.session['command'] = args.command
         self.raise_event(self.COMMAND_PARSER_PARSED, command=args.command, args=args)
-        # Consider - we are using any args that start with an underscore (_) as 'private'
-        # arguments and remove them from the arguments that we pass to the actual function.
-        # This does not feel quite right.
-        params = dict([(key, value)
-                       for key, value in args.__dict__.items() if not key.startswith('_')])
-        params.pop('subcommand', None)
-        params.pop('func', None)
-        params.pop('command', None)
+        results = []
+        for expanded_arg in self.explode_list_args(args):
+            try:
+                _validate_arguments(expanded_arg)
+            except: # pylint: disable=bare-except
+                err = sys.exc_info()[1]
+                getattr(expanded_arg, '_parser', self.parser).error(str(err))
 
-        result = args.func(params)
+            self.session['command'] = expanded_arg.command
+            # Consider - we are using any args that start with an underscore (_) as 'private'
+            # arguments and remove them from the arguments that we pass to the actual function.
+            # This does not feel quite right.
+            params = dict([(key, value)
+                           for key, value in expanded_arg.__dict__.items() if not key.startswith('_')])
+            params.pop('subcommand', None)
+            params.pop('func', None)
+            params.pop('command', None)
 
-        result = self.todict(result)
-        event_data = {'result': result}
+            result = expanded_arg.func(params)
+            result = self.todict(result)
+            results.append(result)
+
+        if len(results) == 1:
+            results = results[0]
+
+        event_data = {'result': results}
         self.raise_event(self.TRANSFORM_RESULT, event_data=event_data)
         self.raise_event(self.FILTER_RESULT, event_data=event_data)
         return event_data['result']
+
+    def explode_list_args(self, args):
+        list_args = {argname:argvalue for argname, argvalue in vars(args).items()
+                     if isinstance(argvalue, ListValue)}
+        if not list_args:
+            yield args
+        else:
+            values = list(zip(*list_args.values()))
+            for key in list_args:
+                delattr(args, key)
+
+            for value in values:
+                new_ns = argparse.Namespace(**vars(args))
+                for key_index, key in enumerate(list_args.keys()):
+                    setattr(new_ns, key, value[key_index])
+                yield new_ns
 
     def raise_event(self, name, **kwargs):
         '''Raise the event `name`.
@@ -196,5 +218,8 @@ def _validate_arguments(args, **_):
         delattr(args, '_validators')
     except AttributeError:
         pass
+
+class ListValue(list):
+    pass
 
 APPLICATION = Application()
