@@ -43,16 +43,20 @@ from azure.cli.command_modules.network.mgmt_nsg.lib.operations import NsgOperati
 from azure.cli.commands import DeploymentOutputLongRunningOperation, cli_command
 
 from .custom import \
-    (update_vnet, update_subnet, create_subnet,
-     create_nsg_rule, update_nsg_rule,
+    (update_vnet, update_subnet, create_subnet, list_vnet,
+     create_nsg_rule, update_nsg_rule, list_nsgs,
      create_lb_inbound_nat_rule, set_lb_inbound_nat_rule,
      create_lb_frontend_ip_configuration, set_lb_frontend_ip_configuration,
      create_lb_inbound_nat_pool, set_lb_inbound_nat_pool,
      create_lb_backend_address_pool,
      create_lb_probe, set_lb_probe,
      create_lb_rule, set_lb_rule,
-     list_load_balancer_property, get_load_balancer_property_entry,
-     delete_load_balancer_property_entry)
+     list_load_balancer_property, get_load_balancer_property_entry, list_lbs,
+     delete_load_balancer_property_entry,
+     list_express_route_circuits,
+     list_public_ips, list_nics,
+     list_route_tables,
+     list_application_gateways)
 
 from ._factory import _network_client_factory
 
@@ -61,8 +65,7 @@ from ._factory import _network_client_factory
 factory = lambda _: _network_client_factory().application_gateways
 cli_command('network application-gateway delete', ApplicationGatewaysOperations.delete, factory)
 cli_command('network application-gateway show', ApplicationGatewaysOperations.get, factory)
-cli_command('network application-gateway list', ApplicationGatewaysOperations.list, factory)
-cli_command('network application-gateway list-all', ApplicationGatewaysOperations.list_all, factory)
+cli_command('network application-gateway list', list_application_gateways)
 cli_command('network application-gateway start', ApplicationGatewaysOperations.start, factory)
 cli_command('network application-gateway stop', ApplicationGatewaysOperations.stop, factory)
 
@@ -88,8 +91,7 @@ cli_command('network express-route circuit show', ExpressRouteCircuitsOperations
 cli_command('network express-route circuit get-stats', ExpressRouteCircuitsOperations.get_stats, factory)
 cli_command('network express-route circuit list-arp', ExpressRouteCircuitsOperations.list_arp_table, factory)
 cli_command('network express-route circuit list-routes', ExpressRouteCircuitsOperations.list_routes_table, factory)
-cli_command('network express-route circuit list', ExpressRouteCircuitsOperations.list, factory)
-cli_command('network express-route circuit list-all', ExpressRouteCircuitsOperations.list_all, factory)
+cli_command('network express-route circuit list', list_express_route_circuits)
 
 # ExpressRouteServiceProvidersOperations
 factory = lambda _: _network_client_factory().express_route_service_providers
@@ -99,8 +101,7 @@ cli_command('network express-route service-provider list', ExpressRouteServicePr
 factory = lambda _: _network_client_factory().load_balancers
 cli_command('network lb delete', LoadBalancersOperations.delete, factory)
 cli_command('network lb show', LoadBalancersOperations.get, factory)
-cli_command('network lb list', LoadBalancersOperations.list, factory)
-cli_command('network lb list-all', LoadBalancersOperations.list_all, factory)
+cli_command('network lb list', list_lbs)
 
 factory = lambda _: get_mgmt_service_client(LBClient).lb
 cli_command('network lb create', LbOperations.create_or_update, factory, transform=DeploymentOutputLongRunningOperation('Starting network lb create'))
@@ -162,8 +163,7 @@ cli_command('network nic create', NicOperations.create_or_update, factory, trans
 factory = lambda _: _network_client_factory().network_interfaces
 cli_command('network nic delete', NetworkInterfacesOperations.delete, factory)
 cli_command('network nic show', NetworkInterfacesOperations.get, factory)
-cli_command('network nic list', NetworkInterfacesOperations.list, factory)
-cli_command('network nic list-all', NetworkInterfacesOperations.list_all, factory)
+cli_command('network nic list', list_nics)
 
 # NetworkInterfacesOperations: scaleset
 cli_command('network nic scale-set list-vm-nics', NetworkInterfacesOperations.list_virtual_machine_scale_set_vm_network_interfaces, factory)
@@ -174,15 +174,13 @@ cli_command('network nic scale-set show', NetworkInterfacesOperations.get_virtua
 factory = lambda _: _network_client_factory().network_security_groups
 cli_command('network nsg delete', NetworkSecurityGroupsOperations.delete, factory)
 cli_command('network nsg show', NetworkSecurityGroupsOperations.get, factory)
-cli_command('network nsg list', NetworkSecurityGroupsOperations.list, factory)
-cli_command('network nsg list-all', NetworkSecurityGroupsOperations.list_all, factory)
+cli_command('network nsg list', list_nsgs)
 
 # PublicIPAddressesOperations
 factory = lambda _: _network_client_factory().public_ip_addresses
 cli_command('network public-ip delete', PublicIPAddressesOperations.delete, factory)
 cli_command('network public-ip show', PublicIPAddressesOperations.get, factory)
-cli_command('network public-ip list', PublicIPAddressesOperations.list, factory)
-cli_command('network public-ip list-all', PublicIPAddressesOperations.list_all, factory)
+cli_command('network public-ip list', list_public_ips)
 
 factory = lambda _: get_mgmt_service_client(PublicIPClient).public_ip
 cli_command('network public-ip create', PublicIpOperations.create_or_update, factory, transform=DeploymentOutputLongRunningOperation('Starting network public-ip create'))
@@ -191,14 +189,13 @@ cli_command('network public-ip create', PublicIpOperations.create_or_update, fac
 factory = lambda _: _network_client_factory().route_tables
 cli_command('network route-table delete', RouteTablesOperations.delete, factory)
 cli_command('network route-table show', RouteTablesOperations.get, factory)
-cli_command('network route-table list', RouteTablesOperations.list, factory)
-cli_command('network route-table list-all', RouteTablesOperations.list_all, factory)
+cli_command('network route-table list', list_route_tables)
 
 # RoutesOperations
 factory = lambda _: _network_client_factory().routes
-cli_command('network route-operation delete', RoutesOperations.delete, factory)
-cli_command('network route-operation show', RoutesOperations.get, factory)
-cli_command('network route-operation list', RoutesOperations.list, factory)
+cli_command('network route-table route delete', RoutesOperations.delete, factory)
+cli_command('network route-table route show', RoutesOperations.get, factory)
+cli_command('network route-table route list', RoutesOperations.list, factory)
 
 # SecurityRulesOperations
 factory = lambda _: _network_client_factory().security_rules
@@ -239,8 +236,7 @@ cli_command('network vpn-gateway list', VirtualNetworkGatewaysOperations.list, f
 factory = lambda _: _network_client_factory().virtual_networks
 cli_command('network vnet delete', VirtualNetworksOperations.delete, factory)
 cli_command('network vnet show', VirtualNetworksOperations.get, factory)
-cli_command('network vnet list', VirtualNetworksOperations.list, factory)
-cli_command('network vnet list-all', VirtualNetworksOperations.list_all, factory)
+cli_command('network vnet list', list_vnet)
 
 cli_command('network vnet set', update_vnet)
 
