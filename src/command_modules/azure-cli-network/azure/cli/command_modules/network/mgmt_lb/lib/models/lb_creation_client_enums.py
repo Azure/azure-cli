@@ -9,6 +9,40 @@
 from enum import Enum
 
 
+class dnsNameType(Enum):
+
+    none = "none"
+    new = "new"
+
+
+class privateIpAddressAllocation(Enum):
+
+    dynamic = "dynamic"
+    static = "static"
+
+
+class publicIpAddressAllocation(Enum):
+
+    dynamic = "dynamic"
+    static = "static"
+
+
+class publicIpAddressType(Enum):
+
+    none = "none"
+    new = "new"
+    existing_name = "existingName"
+    existing_id = "existingId"
+
+
+class subnetType(Enum):
+
+    none = "none"
+    new = "new"
+    existing_name = "existingName"
+    existing_id = "existingId"
+
+
 class DeploymentMode(Enum):
 
     incremental = "Incremental"

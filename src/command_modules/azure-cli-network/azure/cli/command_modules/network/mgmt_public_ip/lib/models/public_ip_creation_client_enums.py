@@ -15,10 +15,10 @@ class allocationMethod(Enum):
     static = "static"
 
 
-class publicIpAddressType(Enum):
+class dnsNameType(Enum):
 
-    dns = "dns"
-    no_dns = "noDns"
+    new = "new"
+    none = "none"
 
 
 class DeploymentMode(Enum):

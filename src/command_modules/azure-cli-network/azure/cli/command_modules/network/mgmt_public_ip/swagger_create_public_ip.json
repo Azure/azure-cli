@@ -145,7 +145,7 @@
           "type": "string", 
           "description": "URI referencing the template.", 
           "enum": [
-            "https://azuresdkci.blob.core.windows.net/templatehost/CreatePublicIp_2016-07-18/azuredeploy.json"
+            "https://azuresdkci.blob.core.windows.net/templatehost/CreatePublicIp_2016-07-19/azuredeploy.json"
           ]
         }, 
         "contentVersion": {
@@ -175,6 +175,11 @@
           "$ref": "#/definitions/DeploymentParameter_dnsName", 
           "x-ms-client-flatten": true
         }, 
+        "dnsNameType": {
+          "type": "object", 
+          "$ref": "#/definitions/DeploymentParameter_dnsNameType", 
+          "x-ms-client-flatten": true
+        }, 
         "location": {
           "type": "object", 
           "$ref": "#/definitions/DeploymentParameter_location", 
@@ -183,11 +188,6 @@
         "name": {
           "type": "object", 
           "$ref": "#/definitions/DeploymentParameter_name", 
-          "x-ms-client-flatten": true
-        }, 
-        "publicIpAddressType": {
-          "type": "object", 
-          "$ref": "#/definitions/DeploymentParameter_publicIpAddressType", 
           "x-ms-client-flatten": true
         }, 
         "tags": {
@@ -227,6 +227,24 @@
         }
       }
     }, 
+    "DeploymentParameter_dnsNameType": {
+      "properties": {
+        "value": {
+          "type": "string", 
+          "description": "Whether to include a DNS entry or not.", 
+          "x-ms-client-name": "dnsNameType", 
+          "enum": [
+            "new", 
+            "none"
+          ], 
+          "x-ms-enum": {
+            "name": "dnsNameType", 
+            "modelAsString": false
+          }, 
+          "default": "none"
+        }
+      }
+    }, 
     "DeploymentParameter_location": {
       "properties": {
         "value": {
@@ -248,24 +266,6 @@
         "value"
       ]
     }, 
-    "DeploymentParameter_publicIpAddressType": {
-      "properties": {
-        "value": {
-          "type": "string", 
-          "description": "Whether to include a DNS entry or not.", 
-          "x-ms-client-name": "publicIpAddressType", 
-          "enum": [
-            "dns", 
-            "noDns"
-          ], 
-          "x-ms-enum": {
-            "name": "publicIpAddressType", 
-            "modelAsString": false
-          }, 
-          "default": "noDns"
-        }
-      }
-    }, 
     "DeploymentParameter_tags": {
       "properties": {
         "value": {
@@ -282,7 +282,7 @@
           "description": "Container URI of of the template.", 
           "x-ms-client-name": "_artifactsLocation", 
           "enum": [
-            "https://azuresdkci.blob.core.windows.net/templatehost/CreatePublicIp_2016-07-18"
+            "https://azuresdkci.blob.core.windows.net/templatehost/CreatePublicIp_2016-07-19"
           ]
         }
       }, 
