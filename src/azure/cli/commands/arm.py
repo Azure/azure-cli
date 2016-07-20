@@ -2,7 +2,7 @@ import argparse
 import re
 from azure.cli.commands.client_factory import get_mgmt_service_client
 from azure.mgmt.resource.resources import ResourceManagementClient
-from azure.cli.application import APPLICATION, ListValue
+from azure.cli.application import APPLICATION, IterateValue
 from azure.cli._util import CLIError
 
 
@@ -87,21 +87,21 @@ def add_id_parameters(command_table):
                 ''' The SplitAction will take the given ID parameter and spread the parsed
                 parts of the id into the individual backing fields.
 
-                Since the id value is expected to be of type `ListValue`, all the backing
-                (dest) fields will also be of type `ListValue`
+                Since the id value is expected to be of type `IterateValue`, all the backing
+                (dest) fields will also be of type `IterateValue`
                 '''
                 try:
                     for value in [values] if isinstance(values, str) else values:
                         parts = parse_resource_id(value)
                         for arg in [arg for arg in arguments.values() if arg.id_part]:
                             try:
-                                list = getattr(namespace, arg.name)
+                                existing_values = getattr(namespace, arg.name)
                             except AttributeError:
                                 pass
-                            if not list:
-                                list = ListValue()
-                            list.append(parts[arg.id_part])
-                            setattr(namespace, arg.name, list)
+                            if not existing_values:
+                                existing_values = IterateValue()
+                            existing_values.append(parts[arg.id_part])
+                            setattr(namespace, arg.name, existing_values)
                 except Exception as ex:
                     raise ValueError(ex)
 

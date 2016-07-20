@@ -91,7 +91,7 @@ class Application(object):
         args = self.parser.parse_args(argv)
         self.raise_event(self.COMMAND_PARSER_PARSED, command=args.command, args=args)
         results = []
-        for expanded_arg in self.explode_list_args(args):
+        for expanded_arg in _explode_list_args(args):
             try:
                 _validate_arguments(expanded_arg)
             except: # pylint: disable=bare-except
@@ -103,7 +103,8 @@ class Application(object):
             # arguments and remove them from the arguments that we pass to the actual function.
             # This does not feel quite right.
             params = dict([(key, value)
-                           for key, value in expanded_arg.__dict__.items() if not key.startswith('_')])
+                           for key, value in expanded_arg.__dict__.items()
+                           if not key.startswith('_')])
             params.pop('subcommand', None)
             params.pop('func', None)
             params.pop('command', None)
@@ -119,22 +120,6 @@ class Application(object):
         self.raise_event(self.TRANSFORM_RESULT, event_data=event_data)
         self.raise_event(self.FILTER_RESULT, event_data=event_data)
         return event_data['result']
-
-    def explode_list_args(self, args):
-        list_args = {argname:argvalue for argname, argvalue in vars(args).items()
-                     if isinstance(argvalue, ListValue)}
-        if not list_args:
-            yield args
-        else:
-            values = list(zip(*list_args.values()))
-            for key in list_args:
-                delattr(args, key)
-
-            for value in values:
-                new_ns = argparse.Namespace(**vars(args))
-                for key_index, key in enumerate(list_args.keys()):
-                    setattr(new_ns, key, value[key_index])
-                yield new_ns
 
     def raise_event(self, name, **kwargs):
         '''Raise the event `name`.
@@ -219,7 +204,40 @@ def _validate_arguments(args, **_):
     except AttributeError:
         pass
 
-class ListValue(list):
+def _explode_list_args(args):
+    list_args = {argname:argvalue for argname, argvalue in vars(args).items()
+                 if isinstance(argvalue, IterateValue)}
+    if not list_args:
+        yield args
+    else:
+        values = list(zip(*list_args.values()))
+        for key in list_args:
+            delattr(args, key)
+
+        for value in values:
+            new_ns = argparse.Namespace(**vars(args))
+            for key_index, key in enumerate(list_args.keys()):
+                setattr(new_ns, key, value[key_index])
+            yield new_ns
+
+
+class IterateAction(argparse.Action):
+    '''Action used to collect argument values in an IterateValue list
+    The application will loop through each value in the IterateValue
+    and execeute the associated handler for each
+    '''
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        setattr(namespace, self.dest, IterateValue(values))
+
+
+class IterateValue(list):
+    '''Marker class to indicate that, when found as a value in the parsed namespace
+    from argparse, the handler should be invoked once per value in the list with all
+    other values in the parsed namespace frozen.
+
+    Typical use is to allow multiple ID parameter to a show command etc.
+    '''
     pass
 
 APPLICATION = Application()

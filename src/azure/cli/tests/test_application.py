@@ -1,9 +1,11 @@
+import argparse
 import unittest
 from collections import namedtuple
 
 from six import StringIO
 
-from azure.cli.application import Application, Configuration
+from azure.cli.application import Application, Configuration, IterateAction
+from azure.cli.commands import CliCommand
 
 class TestApplication(unittest.TestCase):
 
@@ -88,6 +90,31 @@ class TestApplication(unittest.TestCase):
         self.assertTrue(handler_called[0], "Handler didn't get called")
 
         app.raise_event('other_handler_called', args='secret sauce')
+
+
+
+    def test_list_value_parameter(self):
+        hellos = []
+
+        def handler(args):
+            hellos.append(args)
+
+        command = CliCommand('test command', handler)
+        command.add_argument('hello', '--hello', nargs='+', action=IterateAction)
+        command.add_argument('something', '--something')
+        cmd_table = {'test command': command}
+
+        argv = 'az test command --hello world dude --something else'.split()
+        config = Configuration(argv)
+        config.get_command_table = lambda: cmd_table
+        application = Application(config)
+        application.execute(argv[1:])
+
+        self.assertEqual(2, len(hellos))
+        self.assertEqual(hellos[0]['hello'], 'world')
+        self.assertEqual(hellos[0]['something'], 'else')
+        self.assertEqual(hellos[1]['hello'], 'dude')
+        self.assertEqual(hellos[1]['something'], 'else')
 
 if __name__ == '__main__':
     unittest.main()
