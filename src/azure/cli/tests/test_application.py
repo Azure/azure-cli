@@ -1,4 +1,3 @@
-import argparse
 import unittest
 from collections import namedtuple
 

@@ -227,7 +227,7 @@ def _explode_list_args(args):
             yield new_ns
 
 
-class IterateAction(argparse.Action):
+class IterateAction(argparse.Action): # pylint: disable=too-few-public-methods
     '''Action used to collect argument values in an IterateValue list
     The application will loop through each value in the IterateValue
     and execeute the associated handler for each
