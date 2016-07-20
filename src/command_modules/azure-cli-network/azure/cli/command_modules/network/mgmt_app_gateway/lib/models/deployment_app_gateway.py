@@ -17,7 +17,7 @@ class DeploymentAppGateway(Model):
     sending a request.
 
     :ivar uri: URI referencing the template. Default value:
-     "https://azuresdkci.blob.core.windows.net/templatehost/CreateAppGateway_2016-06-27/azuredeploy.json"
+     "https://azuresdkci.blob.core.windows.net/templatehost/CreateAppGateway_2016-07-19/azuredeploy.json"
      .
     :vartype uri: str
     :param content_version: If included it must match the ContentVersion in
@@ -25,7 +25,7 @@ class DeploymentAppGateway(Model):
     :type content_version: str
     :ivar _artifacts_location: Container URI of of the template. Default
      value:
-     "https://azuresdkci.blob.core.windows.net/templatehost/CreateAppGateway_2016-06-27"
+     "https://azuresdkci.blob.core.windows.net/templatehost/CreateAppGateway_2016-07-19"
      .
     :vartype _artifacts_location: str
     :param application_gateway_name: The name of the application gateway.
@@ -37,48 +37,57 @@ class DeploymentAppGateway(Model):
     :type cert_data: str
     :param cert_password: The certificate password.
     :type cert_password: str
-    :param frontend_port: The front end port number. Defaults to 80 for HTTP
-     and 443 for HTTPS.
+    :param frontend_port: The front end port number.
     :type frontend_port: int
     :param frontend_type: Specify which kind of frontend configuration to
      create. Possible values include: 'publicIp', 'privateIp'. Default value:
      "privateIp" .
     :type frontend_type: str or :class:`frontendType
      <appgatewaycreationclient.models.frontendType>`
-    :param http_listener_protocol: The HTTP listener protocol (http, https).
-     Default value: "http" .
-    :type http_listener_protocol: str
+    :param http_listener_protocol: The HTTP listener protocol. Possible
+     values include: 'http', 'https'. Default value: "http" .
+    :type http_listener_protocol: str or :class:`httpListenerProtocol
+     <appgatewaycreationclient.models.httpListenerProtocol>`
     :param http_settings_cookie_based_affinity: Enable or disable HTTP
-     settings cookie based affinity (enabled, disabled). Default value:
-     "disabled" .
-    :type http_settings_cookie_based_affinity: str
+     settings cookie based affinity. Possible values include: 'enabled',
+     'disabled'. Default value: "disabled" .
+    :type http_settings_cookie_based_affinity: str or
+     :class:`httpSettingsCookieBasedAffinity
+     <appgatewaycreationclient.models.httpSettingsCookieBasedAffinity>`
     :param http_settings_port: The HTTP settings port. Default value: 80 .
     :type http_settings_port: int
-    :param http_settings_protocol: The HTTP settings protocol (http, https).
-     Default value: "http" .
-    :type http_settings_protocol: str
+    :param http_settings_protocol: The HTTP settings protocol. Possible
+     values include: 'http', 'https'. Default value: "http" .
+    :type http_settings_protocol: str or :class:`httpSettingsProtocol
+     <appgatewaycreationclient.models.httpSettingsProtocol>`
     :param location: The location in which to create the application gateway.
     :type location: str
     :param private_ip_address: The static private IP address to associate
      with the application gateway frontend.
     :type private_ip_address: str
     :param private_ip_address_allocation: Specify the kind of private IP
-     allocation (dynamic, static). Default value: "dynamic" .
-    :type private_ip_address_allocation: str
+     allocation. Possible values include: 'dynamic', 'static'. Default value:
+     "dynamic" .
+    :type private_ip_address_allocation: str or
+     :class:`privateIpAddressAllocation
+     <appgatewaycreationclient.models.privateIpAddressAllocation>`
     :param public_ip: The name or ID of the public IP address.
     :type public_ip: str
     :param public_ip_address_allocation: Specify the kind of public IP
-     allocation for new public IPs (static, dynamic). Default value:
-     "dynamic" .
-    :type public_ip_address_allocation: str
+     allocation for new public IPs. Possible values include: 'dynamic',
+     'static'. Default value: "dynamic" .
+    :type public_ip_address_allocation: str or
+     :class:`publicIpAddressAllocation
+     <appgatewaycreationclient.models.publicIpAddressAllocation>`
     :param public_ip_type: Specify the type of public IP address. Possible
      values include: 'none', 'new', 'existingName', 'existingId'. Default
      value: "none" .
     :type public_ip_type: str or :class:`publicIpType
      <appgatewaycreationclient.models.publicIpType>`
-    :param routing_rule_type: The request routing rule type (Basic,
-     PathBasedRouting). Default value: "Basic" .
-    :type routing_rule_type: str
+    :param routing_rule_type: The request routing rule type. Possible values
+     include: 'Basic', 'PathBasedRouting'. Default value: "Basic" .
+    :type routing_rule_type: str or :class:`routingRuleType
+     <appgatewaycreationclient.models.routingRuleType>`
     :param servers: The list of IP addresses or DNS names corresponding to
      backend servers.
     :type servers: list of object
@@ -96,6 +105,8 @@ class DeploymentAppGateway(Model):
      include: 'new', 'existingId', 'existingName'. Default value: "new" .
     :type subnet_type: str or :class:`subnetType
      <appgatewaycreationclient.models.subnetType>`
+    :param tags: Tags object.
+    :type tags: object
     :param virtual_network_name: The name of the virtual network (VNet)
      associated with the subnet.
     :type virtual_network_name: str
@@ -124,35 +135,36 @@ class DeploymentAppGateway(Model):
         'cert_password': {'key': 'properties.parameters.certPassword.value', 'type': 'str'},
         'frontend_port': {'key': 'properties.parameters.frontendPort.value', 'type': 'int'},
         'frontend_type': {'key': 'properties.parameters.frontendType.value', 'type': 'frontendType'},
-        'http_listener_protocol': {'key': 'properties.parameters.httpListenerProtocol.value', 'type': 'str'},
-        'http_settings_cookie_based_affinity': {'key': 'properties.parameters.httpSettingsCookieBasedAffinity.value', 'type': 'str'},
+        'http_listener_protocol': {'key': 'properties.parameters.httpListenerProtocol.value', 'type': 'httpListenerProtocol'},
+        'http_settings_cookie_based_affinity': {'key': 'properties.parameters.httpSettingsCookieBasedAffinity.value', 'type': 'httpSettingsCookieBasedAffinity'},
         'http_settings_port': {'key': 'properties.parameters.httpSettingsPort.value', 'type': 'int'},
-        'http_settings_protocol': {'key': 'properties.parameters.httpSettingsProtocol.value', 'type': 'str'},
+        'http_settings_protocol': {'key': 'properties.parameters.httpSettingsProtocol.value', 'type': 'httpSettingsProtocol'},
         'location': {'key': 'properties.parameters.location.value', 'type': 'str'},
         'private_ip_address': {'key': 'properties.parameters.privateIpAddress.value', 'type': 'str'},
-        'private_ip_address_allocation': {'key': 'properties.parameters.privateIpAddressAllocation.value', 'type': 'str'},
+        'private_ip_address_allocation': {'key': 'properties.parameters.privateIpAddressAllocation.value', 'type': 'privateIpAddressAllocation'},
         'public_ip': {'key': 'properties.parameters.publicIp.value', 'type': 'str'},
-        'public_ip_address_allocation': {'key': 'properties.parameters.publicIpAddressAllocation.value', 'type': 'str'},
+        'public_ip_address_allocation': {'key': 'properties.parameters.publicIpAddressAllocation.value', 'type': 'publicIpAddressAllocation'},
         'public_ip_type': {'key': 'properties.parameters.publicIpType.value', 'type': 'publicIpType'},
-        'routing_rule_type': {'key': 'properties.parameters.routingRuleType.value', 'type': 'str'},
+        'routing_rule_type': {'key': 'properties.parameters.routingRuleType.value', 'type': 'routingRuleType'},
         'servers': {'key': 'properties.parameters.servers.value', 'type': '[object]'},
         'sku_name': {'key': 'properties.parameters.skuName.value', 'type': 'str'},
         'sku_tier': {'key': 'properties.parameters.skuTier.value', 'type': 'str'},
         'subnet': {'key': 'properties.parameters.subnet.value', 'type': 'str'},
         'subnet_address_prefix': {'key': 'properties.parameters.subnetAddressPrefix.value', 'type': 'str'},
         'subnet_type': {'key': 'properties.parameters.subnetType.value', 'type': 'subnetType'},
+        'tags': {'key': 'properties.parameters.tags.value', 'type': 'object'},
         'virtual_network_name': {'key': 'properties.parameters.virtualNetworkName.value', 'type': 'str'},
         'vnet_address_prefix': {'key': 'properties.parameters.vnetAddressPrefix.value', 'type': 'str'},
         'mode': {'key': 'properties.mode', 'type': 'str'},
     }
 
-    uri = "https://azuresdkci.blob.core.windows.net/templatehost/CreateAppGateway_2016-06-27/azuredeploy.json"
+    uri = "https://azuresdkci.blob.core.windows.net/templatehost/CreateAppGateway_2016-07-19/azuredeploy.json"
 
-    _artifacts_location = "https://azuresdkci.blob.core.windows.net/templatehost/CreateAppGateway_2016-06-27"
+    _artifacts_location = "https://azuresdkci.blob.core.windows.net/templatehost/CreateAppGateway_2016-07-19"
 
     mode = "Incremental"
 
-    def __init__(self, application_gateway_name, content_version=None, capacity=2, cert_data=None, cert_password=None, frontend_port=None, frontend_type="privateIp", http_listener_protocol="http", http_settings_cookie_based_affinity="disabled", http_settings_port=80, http_settings_protocol="http", location=None, private_ip_address=None, private_ip_address_allocation="dynamic", public_ip=None, public_ip_address_allocation="dynamic", public_ip_type="none", routing_rule_type="Basic", servers=None, sku_name="Standard_Medium", sku_tier="Standard", subnet="default", subnet_address_prefix="10.0.0.0/24", subnet_type="new", virtual_network_name=None, vnet_address_prefix="10.0.0.0/16"):
+    def __init__(self, application_gateway_name, content_version=None, capacity=2, cert_data=None, cert_password=None, frontend_port=None, frontend_type="privateIp", http_listener_protocol="http", http_settings_cookie_based_affinity="disabled", http_settings_port=80, http_settings_protocol="http", location=None, private_ip_address=None, private_ip_address_allocation="dynamic", public_ip=None, public_ip_address_allocation="dynamic", public_ip_type="none", routing_rule_type="Basic", servers=None, sku_name="Standard_Medium", sku_tier="Standard", subnet="default", subnet_address_prefix="10.0.0.0/24", subnet_type="new", tags=None, virtual_network_name=None, vnet_address_prefix="10.0.0.0/16"):
         self.content_version = content_version
         self.application_gateway_name = application_gateway_name
         self.capacity = capacity
@@ -177,5 +189,6 @@ class DeploymentAppGateway(Model):
         self.subnet = subnet
         self.subnet_address_prefix = subnet_address_prefix
         self.subnet_type = subnet_type
+        self.tags = tags
         self.virtual_network_name = virtual_network_name
         self.vnet_address_prefix = vnet_address_prefix

@@ -27,6 +27,17 @@
       },
       "defaultValue": ""
     },
+    "dnsNameType": {
+      "type": "string",
+      "allowedValues": [
+        "new",
+        "none"
+      ],
+      "defaultValue": "none",
+      "metadata": {
+        "description": "Whether to include a DNS entry or not."
+      }
+    },
     "location": {
       "type": "string",
       "defaultValue": "[resourceGroup().location]",
@@ -39,17 +50,6 @@
       "minLength": 1,
       "metadata": {
         "description": "Name of the Public IP address."
-      }
-    },
-    "publicIpAddressType": {
-      "type": "string",
-      "allowedValues": [
-        "dns",
-        "noDns"
-      ],
-      "defaultValue": "noDns",
-      "metadata": {
-        "description": "Whether to include a DNS entry or not."
       }
     },
     "tags": {
@@ -68,13 +68,13 @@
       "noDns": "nested_templates/publicIpDeployment_nodns.json"
     },
     "ipConfiguration": {
-      "dns": {
+      "new": {
         "publicIPAllocationMethod": "[parameters('allocationMethod')]",
         "dnsSettings": {
           "domainNameLabel": "[parameters('dnsName')]"
         }
       },
-      "noDns": {
+      "none": {
         "publicIPAllocationMethod": "[parameters('allocationMethod')]"
       }
     }
@@ -87,7 +87,7 @@
       "apiVersion": "2015-06-15",
       "tags": "[parameters('tags')]",
       "dependsOn": [ ],
-      "properties": "[variables('ipConfiguration')[parameters('publicIpAddressType')]]"
+      "properties": "[variables('ipConfiguration')[parameters('dnsNameType')]]"
     }
   ],
   "outputs": {

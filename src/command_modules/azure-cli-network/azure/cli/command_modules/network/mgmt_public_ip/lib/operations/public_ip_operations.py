@@ -32,7 +32,7 @@ class PublicIpOperations(object):
         self.config = config
 
     def create_or_update(
-            self, resource_group_name, deployment_name, name, content_version=None, allocation_method="dynamic", dns_name=None, location=None, public_ip_address_type="noDns", tags=None, custom_headers=None, raw=False, **operation_config):
+            self, resource_group_name, deployment_name, name, content_version=None, allocation_method="dynamic", dns_name=None, dns_name_type="none", location=None, tags=None, custom_headers=None, raw=False, **operation_config):
         """
         Create or update a virtual machine.
 
@@ -52,12 +52,12 @@ class PublicIpOperations(object):
          <publicipcreationclient.models.allocationMethod>`
         :param dns_name: Globally unique DNS entry.
         :type dns_name: str
+        :param dns_name_type: Whether to include a DNS entry or not. Possible
+         values include: 'new', 'none'
+        :type dns_name_type: str or :class:`dnsNameType
+         <publicipcreationclient.models.dnsNameType>`
         :param location: Location (e.g. eastus).
         :type location: str
-        :param public_ip_address_type: Whether to include a DNS entry or not.
-         Possible values include: 'dns', 'noDns'
-        :type public_ip_address_type: str or :class:`publicIpAddressType
-         <publicipcreationclient.models.publicIpAddressType>`
         :param tags: Tags object.
         :type tags: object
         :param dict custom_headers: headers that will be added to the request
@@ -70,7 +70,7 @@ class PublicIpOperations(object):
         :rtype: :class:`ClientRawResponse<msrest.pipeline.ClientRawResponse>`
          if raw=true
         """
-        parameters = models.DeploymentPublicIp(content_version=content_version, allocation_method=allocation_method, dns_name=dns_name, location=location, name=name, public_ip_address_type=public_ip_address_type, tags=tags)
+        parameters = models.DeploymentPublicIp(content_version=content_version, allocation_method=allocation_method, dns_name=dns_name, dns_name_type=dns_name_type, location=location, name=name, tags=tags)
 
         # Construct URL
         url = '/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Resources/deployments/{deploymentName}'

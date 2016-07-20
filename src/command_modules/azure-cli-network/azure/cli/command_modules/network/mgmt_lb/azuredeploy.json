@@ -129,6 +129,13 @@
         "description": "Use new, existing or no subnet."
       }
     },
+    "tags": {
+      "type": "object",
+      "defaultValue": { },
+      "metadata": {
+        "description": "Tags object."
+      }
+    },
     "virtualNetworkName": {
       "type": "string",
       "defaultValue": "",
@@ -191,11 +198,13 @@
     },
     "frontEndIpConfigId": "[concat(variables('lbId'),'/frontendIPConfigurations/loadBalancerFrontEnd')]",
     "ipDeploymentName": "[concat('IP', parameters('loadBalancerName'))]",
+    "publicIpTemplateUri": "https://azuresdkci.blob.core.windows.net/templatehost/CreatePublicIp_2016-07-19/azuredeploy.json",
+    "publicIpTemplateUriEmpty": "https://azuresdkci.blob.core.windows.net/templatehost/CreatePublicIp_2016-07-19/azuredeploy_empty.json",
     "ipTemplateFilePaths": {
-      "existingId": "nested_templates/publicIp_none_or_existing.json",
-      "existingName": "nested_templates/publicIp_none_or_existing.json",
-      "new": "nested_templates/publicIp_new.json",
-      "none": "nested_templates/publicIp_none_or_existing.json"
+      "existingId": "[variables('publicIpTemplateUriEmpty')]",
+      "existingName": "[variables('publicIpTemplateUriEmpty')]",
+      "new": "[variables('publicIpTemplateUri')]",
+      "none": "[variables('publicIpTemplateUriEmpty')]"
     },
     "lbId": "[resourceId('Microsoft.Network/loadBalancers',parameters('loadBalancerName'))]",
     "publicIpAddressIds": {
@@ -211,11 +220,13 @@
       "new": "[concat(variables('vnetId'),'/subnets/',parameters('subnet'))]",
       "none": null
     },
+    "vnetTemplateUri": "https://azuresdkci.blob.core.windows.net/templatehost/CreateVnet_2016-07-18/azuredeploy.json",
+    "vnetTemplateUriEmpty": "https://azuresdkci.blob.core.windows.net/templatehost/CreateVnet_2016-07-18/azuredeploy_empty.json",
     "subnetTemplateFilePaths": {
-      "existingId": "nested_templates/vnet_none_or_existing.json",
-      "existingName": "nested_templates/vnet_none_or_existing.json",
-      "new": "nested_templates/vnet_new.json",
-      "none": "nested_templates/vnet_none_or_existing.json"
+      "existingId": "[variables('vnetTemplateUriEmpty')]",
+      "existingName": "[variables('vnetTemplateUriEmpty')]",
+      "new": "[variables('vnetTemplateUri')]",
+      "none": "[variables('vnetTemplateUriEmpty')]"
     },
     "vnetId": "[concat('/subscriptions/',subscription().subscriptionId,'/resourceGroups/',resourceGroup().name,'/providers/Microsoft.Network/virtualNetworks/',parameters('virtualNetworkName'))]"
   },
@@ -224,6 +235,7 @@
       "type": "Microsoft.Network/loadBalancers",
       "name": "[parameters('loadBalancerName')]",
       "location": "[parameters('location')]",
+      "tags": "[parameters('tags')]",
       "apiVersion": "2015-06-15",
       "dependsOn": [
         "[concat('Microsoft.Resources/deployments/', variables('ipDeploymentName'))]",
@@ -246,15 +258,16 @@
       "properties": {
         "mode": "Incremental",
         "templateLink": {
-          "uri": "[concat(parameters('_artifactsLocation'), '/', variables('ipTemplateFilePaths')[parameters('publicIpAddressType')])]",
+          "uri": "[variables('ipTemplateFilePaths')[parameters('publicIpAddressType')]]",
           "contentVersion": "1.0.0.0"
         },
         "parameters": {
-          "dnsNameForPublicIP": { "value": "[parameters('publicIpDnsName')]" },
-          "publicIPAddressName": { "value": "[parameters('publicIPAddress')]" },
-          "publicIpAddressAllocation": { "value": "[parameters('publicIpAddressAllocation')]" },
+          "dnsName": { "value": "[parameters('publicIpDnsName')]" },
+          "name": { "value": "[parameters('publicIPAddress')]" },
+          "allocationMethod": { "value": "[parameters('publicIpAddressAllocation')]" },
           "location": { "value": "[parameters('location')]" },
-          "dnsNameType": { "value": "[parameters('dnsNameType')]" }
+          "dnsNameType": { "value": "[parameters('dnsNameType')]" },
+          "tags": { "value": "[parameters('tags')]" }
         }
       }
     },
@@ -266,15 +279,16 @@
       "properties": {
         "mode": "Incremental",
         "templateLink": {
-          "uri": "[concat(parameters('_artifactsLocation'), '/', variables('subnetTemplateFilePaths')[parameters('subnetType')])]",
+          "uri": "[variables('subnetTemplateFilePaths')[parameters('subnetType')]]",
           "contentVersion": "1.0.0.0"
         },
         "parameters": {
           "location": { "value": "[parameters('location')]" },
-          "subnetAddressPrefix": { "value": "[parameters('subnetAddressPrefix')]" },
+          "subnetPrefix": { "value": "[parameters('subnetAddressPrefix')]" },
           "subnetName": { "value": "[parameters('subnet')]" },
           "virtualNetworkName": { "value": "[parameters('virtualNetworkName')]" },
-          "vnetAddressPrefix": { "value": "[parameters('vnetAddressPrefix')]" }
+          "virtualNetworkPrefix": { "value": "[parameters('vnetAddressPrefix')]" },
+          "tags": { "value": "[parameters('tags')]" }
         }
       }
     }

@@ -32,7 +32,7 @@ class LbOperations(object):
         self.config = config
 
     def create_or_update(
-            self, resource_group_name, deployment_name, load_balancer_name, content_version=None, backend_pool_name=None, dns_name_type="none", frontend_ip_name="LoadBalancerFrontEnd", location=None, private_ip_address=None, private_ip_address_allocation="dynamic", public_ip_address=None, public_ip_address_allocation="dynamic", public_ip_address_type="new", public_ip_dns_name=None, subnet=None, subnet_address_prefix="10.0.0.0/24", subnet_type="none", virtual_network_name=None, vnet_address_prefix="10.0.0.0/16", custom_headers=None, raw=False, **operation_config):
+            self, resource_group_name, deployment_name, load_balancer_name, content_version=None, backend_pool_name=None, dns_name_type="none", frontend_ip_name="LoadBalancerFrontEnd", location=None, private_ip_address=None, private_ip_address_allocation="dynamic", public_ip_address=None, public_ip_address_allocation="dynamic", public_ip_address_type="new", public_ip_dns_name=None, subnet=None, subnet_address_prefix="10.0.0.0/24", subnet_type="none", tags=None, virtual_network_name=None, vnet_address_prefix="10.0.0.0/16", custom_headers=None, raw=False, **operation_config):
         """
         Create or update a virtual machine.
 
@@ -50,7 +50,8 @@ class LbOperations(object):
         :type backend_pool_name: str
         :param dns_name_type: Associate VMs with a public IP address to a DNS
          name. Possible values include: 'none', 'new'
-        :type dns_name_type: str
+        :type dns_name_type: str or :class:`dnsNameType
+         <lbcreationclient.models.dnsNameType>`
         :param frontend_ip_name: Name of the frontend IP configuration.
         :type frontend_ip_name: str
         :param location: Location for load balancer resource.
@@ -59,16 +60,21 @@ class LbOperations(object):
         :type private_ip_address: str
         :param private_ip_address_allocation: Private IP address allocation
          method. Possible values include: 'dynamic', 'static'
-        :type private_ip_address_allocation: str
+        :type private_ip_address_allocation: str or
+         :class:`privateIpAddressAllocation
+         <lbcreationclient.models.privateIpAddressAllocation>`
         :param public_ip_address: Name or ID of the public IP address to use.
         :type public_ip_address: str
         :param public_ip_address_allocation: Public IP address allocation
          method. Possible values include: 'dynamic', 'static'
-        :type public_ip_address_allocation: str
+        :type public_ip_address_allocation: str or
+         :class:`publicIpAddressAllocation
+         <lbcreationclient.models.publicIpAddressAllocation>`
         :param public_ip_address_type: Type of Public IP Address to associate
          with the load balancer. Possible values include: 'none', 'new',
          'existingName', 'existingId'
-        :type public_ip_address_type: str
+        :type public_ip_address_type: str or :class:`publicIpAddressType
+         <lbcreationclient.models.publicIpAddressType>`
         :param public_ip_dns_name: Globally unique DNS Name for the Public IP
          used to access the Virtual Machine (new public IP only).
         :type public_ip_dns_name: str
@@ -80,7 +86,10 @@ class LbOperations(object):
         :type subnet_address_prefix: str
         :param subnet_type: Use new, existing or no subnet. Possible values
          include: 'none', 'new', 'existingName', 'existingId'
-        :type subnet_type: str
+        :type subnet_type: str or :class:`subnetType
+         <lbcreationclient.models.subnetType>`
+        :param tags: Tags object.
+        :type tags: object
         :param virtual_network_name: The VNet name containing the subnet.
          Cannot be used in conjunction with a Public IP.
         :type virtual_network_name: str
@@ -97,7 +106,7 @@ class LbOperations(object):
         :rtype: :class:`ClientRawResponse<msrest.pipeline.ClientRawResponse>`
          if raw=true
         """
-        parameters = models.DeploymentLb(content_version=content_version, backend_pool_name=backend_pool_name, dns_name_type=dns_name_type, frontend_ip_name=frontend_ip_name, load_balancer_name=load_balancer_name, location=location, private_ip_address=private_ip_address, private_ip_address_allocation=private_ip_address_allocation, public_ip_address=public_ip_address, public_ip_address_allocation=public_ip_address_allocation, public_ip_address_type=public_ip_address_type, public_ip_dns_name=public_ip_dns_name, subnet=subnet, subnet_address_prefix=subnet_address_prefix, subnet_type=subnet_type, virtual_network_name=virtual_network_name, vnet_address_prefix=vnet_address_prefix)
+        parameters = models.DeploymentLb(content_version=content_version, backend_pool_name=backend_pool_name, dns_name_type=dns_name_type, frontend_ip_name=frontend_ip_name, load_balancer_name=load_balancer_name, location=location, private_ip_address=private_ip_address, private_ip_address_allocation=private_ip_address_allocation, public_ip_address=public_ip_address, public_ip_address_allocation=public_ip_address_allocation, public_ip_address_type=public_ip_address_type, public_ip_dns_name=public_ip_dns_name, subnet=subnet, subnet_address_prefix=subnet_address_prefix, subnet_type=subnet_type, tags=tags, virtual_network_name=virtual_network_name, vnet_address_prefix=vnet_address_prefix)
 
         # Construct URL
         url = '/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Resources/deployments/{deploymentName}'
