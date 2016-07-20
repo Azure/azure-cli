@@ -1,4 +1,9 @@
-﻿import unittest
+﻿#---------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for license information.
+#---------------------------------------------------------------------------------------------
+
+import unittest
 import mock
 from azure.cli.command_modules.vm.custom import enable_boot_diagnostics, disable_boot_diagnostics
 from azure.cli.command_modules.vm.custom import (_get_access_extension_upgrade_info,

@@ -1,4 +1,9 @@
-﻿# pylint: disable=too-few-public-methods,too-many-arguments,no-self-use
+﻿#---------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for license information.
+#---------------------------------------------------------------------------------------------
+
+# pylint: disable=too-few-public-methods,too-many-arguments,no-self-use
 #TODO: update adal-python to support it
 #from azure.cli._debug import should_disable_connection_verify
 import datetime

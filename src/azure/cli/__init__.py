@@ -1,3 +1,8 @@
+#---------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for license information.
+#---------------------------------------------------------------------------------------------
+
 '''The Azure Command-line tool.
 
 This tools provides a command-line interface to Azure's management and storage

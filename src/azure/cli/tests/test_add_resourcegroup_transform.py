@@ -1,3 +1,8 @@
+#---------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for license information.
+#---------------------------------------------------------------------------------------------
+
 import unittest
 from six import StringIO
 from azure.cli.extensions.transform import _parse_id, _add_resource_group

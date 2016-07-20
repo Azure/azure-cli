@@ -1,4 +1,9 @@
-﻿from azure.mgmt.compute.operations import (
+﻿#---------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for license information.
+#---------------------------------------------------------------------------------------------
+
+from azure.mgmt.compute.operations import (
     AvailabilitySetsOperations,
     VirtualMachineExtensionImagesOperations,
     VirtualMachineExtensionsOperations,
