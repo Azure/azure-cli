@@ -205,6 +205,12 @@ def _validate_arguments(args, **_):
         pass
 
 def _explode_list_args(args):
+    '''Iterate through each attribute member of args and create a copy with
+    the IterateValues 'flattened' to only contain a single value
+
+    Ex.
+        { a1:'x', a2:IterateValue(['y', 'z']) } => [{ a1:'x', a2:'y'),{ a1:'x', a2:'z'}]
+    '''
     list_args = {argname:argvalue for argname, argvalue in vars(args).items()
                  if isinstance(argvalue, IterateValue)}
     if not list_args:
