@@ -10,8 +10,6 @@ from setuptools import setup
 
 VERSION = '0.0.9'
 
-# The full list of classifiers is available at
-# https://pypi.python.org/pypi?%3Aaction=list_classifiers
 CLASSIFIERS = [
     'Development Status :: 3 - Alpha',
     'Intended Audience :: Developers',
@@ -22,8 +20,7 @@ CLASSIFIERS = [
     'Programming Language :: Python :: 3',
     'Programming Language :: Python :: 3.4',
     'Programming Language :: Python :: 3.5',
-    #'License :: OSI Approved :: Apache Software License',
-    #'License :: OSI Approved :: MIT License',
+    'License :: OSI Approved :: MIT License',
 ]
 
 DEPENDENCIES = [
