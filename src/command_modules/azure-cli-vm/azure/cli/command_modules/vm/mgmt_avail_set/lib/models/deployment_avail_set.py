@@ -17,7 +17,7 @@ class DeploymentAvailSet(Model):
     sending a request.
 
     :ivar uri: URI referencing the template. Default value:
-     "https://azuresdkci.blob.core.windows.net/templatehost/CreateAvailSet/azuredeploy.json"
+     "https://azuresdkci.blob.core.windows.net/templatehost/CreateAvailSet_2016-07-18/azuredeploy.json"
      .
     :vartype uri: str
     :param content_version: If included it must match the ContentVersion in
@@ -28,11 +28,13 @@ class DeploymentAvailSet(Model):
     :param name: Name of the availability set.
     :type name: str
     :param platform_fault_domain_count: Number of Fault Domains. Default
-     value: "1" .
+     value: "3" .
     :type platform_fault_domain_count: str
     :param platform_update_domain_count: Number of Update Domains. Default
-     value: "1" .
+     value: "5" .
     :type platform_update_domain_count: str
+    :param tags: Tags object.
+    :type tags: object
     :ivar mode: Gets or sets the deployment mode. Default value:
      "Incremental" .
     :vartype mode: str
@@ -51,16 +53,18 @@ class DeploymentAvailSet(Model):
         'name': {'key': 'properties.parameters.name.value', 'type': 'str'},
         'platform_fault_domain_count': {'key': 'properties.parameters.platformFaultDomainCount.value', 'type': 'str'},
         'platform_update_domain_count': {'key': 'properties.parameters.platformUpdateDomainCount.value', 'type': 'str'},
+        'tags': {'key': 'properties.parameters.tags.value', 'type': 'object'},
         'mode': {'key': 'properties.mode', 'type': 'str'},
     }
 
-    uri = "https://azuresdkci.blob.core.windows.net/templatehost/CreateAvailSet/azuredeploy.json"
+    uri = "https://azuresdkci.blob.core.windows.net/templatehost/CreateAvailSet_2016-07-18/azuredeploy.json"
 
     mode = "Incremental"
 
-    def __init__(self, name, content_version=None, location=None, platform_fault_domain_count="1", platform_update_domain_count="1"):
+    def __init__(self, name, content_version=None, location=None, platform_fault_domain_count="3", platform_update_domain_count="5", tags=None):
         self.content_version = content_version
         self.location = location
         self.name = name
         self.platform_fault_domain_count = platform_fault_domain_count
         self.platform_update_domain_count = platform_update_domain_count
+        self.tags = tags

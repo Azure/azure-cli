@@ -51,6 +51,13 @@
       "metadata": {
         "description": "Whether to include a DNS entry or not."
       }
+    },
+    "tags": {
+      "type": "object",
+      "defaultValue": { },
+      "metadata": {
+        "description": "Tags object."
+      }
     }
   },
   "variables": {
@@ -78,6 +85,7 @@
       "type": "Microsoft.Network/publicIPAddresses",
       "location": "[parameters('location')]",
       "apiVersion": "2015-06-15",
+      "tags": "[parameters('tags')]",
       "dependsOn": [ ],
       "properties": "[variables('ipConfiguration')[parameters('publicIpAddressType')]]"
     }

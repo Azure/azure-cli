@@ -1,7 +1,8 @@
 import os
 # AZURE CLI RESOURCE TEST DEFINITIONS
 
-from azure.cli.utils.vcr_test_base import VCRTestBase, JMESPathCheck, NoneCheck, BooleanCheck, ResourceGroupVCRTestBase
+from azure.cli.utils.vcr_test_base import (VCRTestBase, JMESPathCheck, NoneCheck, BooleanCheck,
+                                           ResourceGroupVCRTestBase, MOCKED_SUBSCRIPTION_ID)
 
 #pylint: disable=method-hidden
 class ResourceGroupScenarioTest(VCRTestBase):
@@ -197,3 +198,43 @@ class DeploymentTest(ResourceGroupVCRTestBase):
         self.assertEqual(2, len(result))
         self.assertEqual(self.resource_group, result[0]['resourceGroup'])
 
+class ResourceMoveScenarioTest(VCRTestBase):
+
+    def __init__(self, test_method):
+        super(ResourceMoveScenarioTest, self).__init__(__file__, test_method)    
+        self.source_group = 'res_move_src_group'
+        self.destination_group = 'res_move_dest_group'
+       
+    def test_resource_move(self):
+        self.execute()
+
+    def set_up(self):
+        self.cmd('resource group create --location westus --name {}'.format(self.source_group))
+        self.cmd('resource group create --location westus --name {}'.format(self.destination_group))
+
+    def tear_down(self):
+        self.cmd('resource group delete --name {}'.format(self.source_group))
+        self.cmd('resource group delete --name {}'.format(self.destination_group))
+
+    def body(self):
+        if self.playback:
+            subscription_id = MOCKED_SUBSCRIPTION_ID
+        else:
+            subscription_id = self.cmd('account list --query "[?isDefault].id" -o tsv')
+
+        #use 'network security group' for testing as it is fast to create
+        nsg1 = 'nsg1'
+        nsg1_id = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/networkSecurityGroups/{}'.format(
+            subscription_id, self.source_group, nsg1)
+        nsg2 = 'nsg2'
+        nsg2_id = nsg1_id.replace(nsg1, nsg2)
+
+        self.cmd('network nsg create -g {} --name {}'.format(self.source_group, nsg1))
+        self.cmd('network nsg create -g {} --name {}'.format(self.source_group, nsg2))
+
+        #move
+        self.cmd('resource move --ids {} {} --destination-group {}'.format(nsg1_id, nsg2_id, self.destination_group))
+
+        #see they show up at destination
+        self.cmd('network nsg show -g {} -n {}'.format(self.destination_group, nsg1), [JMESPathCheck('name', nsg1)])
+        self.cmd('network nsg show -g {} -n {}'.format(self.destination_group, nsg2), [JMESPathCheck('name', nsg2)])

@@ -1,0 +1,75 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "_artifactsLocation": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Container URI of the template."
+      }
+    },
+    "allocationMethod": {
+      "type": "string",
+      "allowedValues": [
+        "dynamic",
+        "static"
+      ],
+      "defaultValue": "dynamic",
+      "metadata": {
+        "description": "IP address Allocation method."
+      }
+    },
+    "dnsName": {
+      "type": "string",
+      "metadata": {
+        "description": "Globally unique DNS entry."
+      },
+      "defaultValue": ""
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": {
+        "description": "Location (e.g. eastus)."
+      }
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "metadata": {
+        "description": "Name of the Public IP address."
+      }
+    },
+    "publicIpAddressType": {
+      "type": "string",
+      "allowedValues": [
+        "dns",
+        "noDns"
+      ],
+      "defaultValue": "noDns",
+      "metadata": {
+        "description": "Whether to include a DNS entry or not."
+      }
+    },
+    "tags": {
+      "type": "object",
+      "defaultValue": { },
+      "metadata": {
+        "description": "Tags object."
+      }
+    }
+  },
+  "variables": {
+    
+  },
+  "resources": [
+    
+  ],
+  "outputs": {
+    "publicIp": {
+      "type": "object",
+      "value": { }
+    }
+  }
+}

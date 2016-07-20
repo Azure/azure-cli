@@ -14,6 +14,13 @@
       "metadata": {
         "description": "Name of the network security group."
       }
+    },
+    "tags": {
+      "type": "object",
+      "defaultValue": { },
+      "metadata": {
+        "description": "Tags object."
+      }
     }
   },
   "variables": {
@@ -23,6 +30,7 @@
       "type": "Microsoft.Network/networkSecurityGroups",
       "name": "[parameters('name')]",
       "apiVersion": "2015-06-15",
+      "tags": "[parameters('tags')]",
       "location": "[parameters('location')]",
       "properties": {
         "securityRules": [

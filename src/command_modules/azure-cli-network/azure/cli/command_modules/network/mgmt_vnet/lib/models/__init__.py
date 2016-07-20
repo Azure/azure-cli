@@ -6,7 +6,7 @@
 # regenerated.
 # --------------------------------------------------------------------------
 
-from .deployment_vnet import DeploymentVNet
+from .deployment_vnet import DeploymentVnet
 from .template_link import TemplateLink
 from .parameters_link import ParametersLink
 from .provider_resource_type import ProviderResourceType
@@ -15,12 +15,12 @@ from .basic_dependency import BasicDependency
 from .dependency import Dependency
 from .deployment_properties_extended import DeploymentPropertiesExtended
 from .deployment_extended import DeploymentExtended
-from .resource_management_client_enums import (
+from .vnet_creation_client_enums import (
     DeploymentMode,
 )
 
 __all__ = [
-    'DeploymentVNet',
+    'DeploymentVnet',
     'TemplateLink',
     'ParametersLink',
     'ProviderResourceType',

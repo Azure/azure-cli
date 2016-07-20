@@ -32,7 +32,7 @@ class NicOperations(object):
         self.config = config
 
     def create_or_update(
-            self, resource_group_name, deployment_name, network_interface_name, subnet_name, virtual_network_name, enable_ip_forwarding=False, content_version=None, load_balancer_backend_address_pool_ids=None, load_balancer_inbound_nat_rule_ids=None, location=None, network_security_group_name=None, network_security_group_type="none", private_ip_address=None, private_ip_address_allocation="dynamic", public_ip_address_name=None, public_ip_address_type="none", custom_headers=None, raw=False, **operation_config):
+            self, resource_group_name, deployment_name, network_interface_name, subnet_name, virtual_network_name, enable_ip_forwarding=False, content_version=None, load_balancer_backend_address_pool_ids=None, load_balancer_inbound_nat_rule_ids=None, location=None, network_security_group_name=None, network_security_group_type="none", private_ip_address=None, private_ip_address_allocation="dynamic", public_ip_address_name=None, public_ip_address_type="none", tags=None, custom_headers=None, raw=False, **operation_config):
         """
         Create or update a virtual machine.
 
@@ -53,11 +53,11 @@ class NicOperations(object):
         :param content_version: If included it must match the ContentVersion
          in the template.
         :type content_version: str
-        :param load_balancer_backend_address_pool_ids: Space separated list
-         of load balancer backend address pool IDs.
+        :param load_balancer_backend_address_pool_ids: Array of load balancer
+         backend address pool IDs.
         :type load_balancer_backend_address_pool_ids: list of object
-        :param load_balancer_inbound_nat_rule_ids: Space separated list of
-         load balancer inbound NAT rule IDs.
+        :param load_balancer_inbound_nat_rule_ids: Array of load balancer
+         inbound NAT rule IDs.
         :type load_balancer_inbound_nat_rule_ids: list of object
         :param location: Location for NIC resource.
         :type location: str
@@ -66,20 +66,27 @@ class NicOperations(object):
         :type network_security_group_name: str
         :param network_security_group_type: Identifies whether to use an
          existing NSG. Possible values include: 'none', 'existing'
-        :type network_security_group_type: str
+        :type network_security_group_type: str or
+         :class:`networkSecurityGroupType
+         <niccreationclient.models.networkSecurityGroupType>`
         :param private_ip_address: Static private IP address to associate
          with the NIC.
         :type private_ip_address: str
         :param private_ip_address_allocation: Private IP address allocation
          method. Possible values include: 'dynamic', 'static'
-        :type private_ip_address_allocation: str
+        :type private_ip_address_allocation: str or
+         :class:`privateIpAddressAllocation
+         <niccreationclient.models.privateIpAddressAllocation>`
         :param public_ip_address_name: Name of an existing public IP address
          to associate with the NIC.
         :type public_ip_address_name: str
         :param public_ip_address_type: Specify whether to associate an
          existing public IP address with the NIC. Possible values include:
          'none', 'existing'
-        :type public_ip_address_type: str
+        :type public_ip_address_type: str or :class:`publicIpAddressType
+         <niccreationclient.models.publicIpAddressType>`
+        :param tags: Tags object.
+        :type tags: object
         :param dict custom_headers: headers that will be added to the request
         :param bool raw: returns the direct response alongside the
          deserialized response
@@ -90,7 +97,7 @@ class NicOperations(object):
         :rtype: :class:`ClientRawResponse<msrest.pipeline.ClientRawResponse>`
          if raw=true
         """
-        parameters = models.DeploymentNic(content_version=content_version, enable_ip_forwarding=enable_ip_forwarding, load_balancer_backend_address_pool_ids=load_balancer_backend_address_pool_ids, load_balancer_inbound_nat_rule_ids=load_balancer_inbound_nat_rule_ids, location=location, network_interface_name=network_interface_name, network_security_group_name=network_security_group_name, network_security_group_type=network_security_group_type, private_ip_address=private_ip_address, private_ip_address_allocation=private_ip_address_allocation, public_ip_address_name=public_ip_address_name, public_ip_address_type=public_ip_address_type, subnet_name=subnet_name, virtual_network_name=virtual_network_name)
+        parameters = models.DeploymentNic(content_version=content_version, enable_ip_forwarding=enable_ip_forwarding, load_balancer_backend_address_pool_ids=load_balancer_backend_address_pool_ids, load_balancer_inbound_nat_rule_ids=load_balancer_inbound_nat_rule_ids, location=location, network_interface_name=network_interface_name, network_security_group_name=network_security_group_name, network_security_group_type=network_security_group_type, private_ip_address=private_ip_address, private_ip_address_allocation=private_ip_address_allocation, public_ip_address_name=public_ip_address_name, public_ip_address_type=public_ip_address_type, subnet_name=subnet_name, tags=tags, virtual_network_name=virtual_network_name)
 
         # Construct URL
         url = '/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Resources/deployments/{deploymentName}'

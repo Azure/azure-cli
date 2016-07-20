@@ -29,6 +29,7 @@ register_cli_argument('resource', 'resource_type', resource_type_type)
 register_cli_argument('resource', 'parent_resource_path', CliArgumentType(help='The parent resource type in <type>/<name> format.', type=validate_parent, required=False, options_list=('--parent',)))
 register_cli_argument('resource', 'tag', tag_type)
 register_cli_argument('resource', 'tags', tags_type)
+register_cli_argument('resource move', 'ids', nargs='+')
 
 register_cli_argument('resource provider', 'top', CliArgumentType(help=argparse.SUPPRESS))
 register_cli_argument('resource provider', 'resource_provider_namespace', CliArgumentType(options_list=('--namespace', '-n'), help='the resource provider name, aka \'namespace\''))

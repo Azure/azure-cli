@@ -2,17 +2,11 @@
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "virtualNetworkName": {
+    "location": {
       "type": "string",
+      "defaultValue": "[resourceGroup().location]",
       "metadata": {
-        "description": "Name of the virtual network."
-      }
-    },
-    "virtualNetworkPrefix": {
-      "type": "string",
-      "defaultValue": "10.0.0.0/16",
-      "metadata": {
-        "description": "IP address prefix for the virtual network."
+        "description": "Virtual network location."
       }
     },
     "subnetName": {
@@ -29,11 +23,24 @@
         "description": "IP address for the subnet."
       }
     },
-    "location": {
-      "type": "string",
-      "defaultValue": "[resourceGroup().location]",
+    "tags": {
+      "type": "object",
+      "defaultValue": { },
       "metadata": {
-        "description": "Virtual network location."
+        "description": "Tags object."
+      }
+    },
+    "virtualNetworkName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the virtual network."
+      }
+    },
+    "virtualNetworkPrefix": {
+      "type": "string",
+      "defaultValue": "10.0.0.0/16",
+      "metadata": {
+        "description": "IP address prefix for the virtual network."
       }
     }
   },
@@ -50,9 +57,7 @@
       "location": "[parameters('location')]",
       "apiVersion": "2015-06-15",
       "dependsOn": [ ],
-      "tags": {
-        "displayName": "NewVNet"
-      },
+      "tags": "[parameters('tags')]",
       "properties": {
         "addressSpace": {
           "addressPrefixes": [

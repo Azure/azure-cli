@@ -6,8 +6,8 @@
 # regenerated.
 # --------------------------------------------------------------------------
 
-from .vnet_operations import VNetOperations
+from .vnet_operations import VnetOperations
 
 __all__ = [
-    'VNetOperations',
+    'VnetOperations',
 ]

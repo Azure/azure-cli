@@ -11,7 +11,8 @@ from azure.mgmt.resource.resources.operations.deployment_operations_operations \
 from azure.cli.commands import cli_command
 from azure.cli.command_modules.resource._factory import _resource_client_factory
 from azure.cli.command_modules.resource.custom import (
-    list_resource_groups, create_resource_group, export_group_as_template, list_resources,
+    list_resource_groups, create_resource_group, export_group_as_template,
+    list_resources, move_resource,
     deploy_arm_template, validate_arm_template, tag_resource, export_deployment_as_template,
     register_provider, unregister_provider
 )
@@ -32,6 +33,7 @@ cli_command('resource delete', ResourcesOperations.delete, factory)
 cli_command('resource show', ResourcesOperations.get, factory)
 cli_command('resource list', list_resources)
 cli_command('resource tag', tag_resource)
+cli_command('resource move', move_resource)
 
 # Resource provider commands
 factory = lambda _: _resource_client_factory().providers

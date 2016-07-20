@@ -9,7 +9,7 @@ from azure.mgmt.network.models.network_management_client_enums import \
 
 from azure.cli.commands import CliArgumentType, register_cli_argument
 from azure.cli.commands.arm import is_valid_resource_id
-from azure.cli.commands.parameters import (location_type, get_resource_name_completion_list, get_enum_type_completion_list)
+from azure.cli.commands.parameters import (location_type, get_resource_name_completion_list, get_enum_type_completion_list, tags_type)
 from azure.cli.commands.validators import MarkSpecifiedAction
 from azure.cli.command_modules.network._validators import \
     (process_nic_namespace, process_network_lb_create_namespace, process_public_ip_create_namespace,
@@ -30,6 +30,7 @@ choices_ip_allocation_method = [e.value.lower() for e in IPAllocationMethod]
 register_cli_argument('network', 'subnet_name', subnet_name_type)
 register_cli_argument('network', 'virtual_network_name', virtual_network_name_type, id_part='name')
 register_cli_argument('network', 'network_security_group_name', nsg_name_type, id_part='name')
+register_cli_argument('network', 'tags', tags_type)
 
 register_cli_argument('network application-gateway', 'application_gateway_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/applicationGateways'), id_part='name')
 register_cli_argument('network application-gateway', 'sku_name', completer=get_enum_type_completion_list(ApplicationGatewaySkuName))

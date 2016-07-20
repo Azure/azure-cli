@@ -9,7 +9,7 @@
 from msrest.serialization import Model
 
 
-class DeploymentVNet(Model):
+class DeploymentVnet(Model):
     """
     Deployment operation parameters.
 
@@ -17,22 +17,26 @@ class DeploymentVNet(Model):
     sending a request.
 
     :ivar uri: URI referencing the template. Default value:
-     "https://azuresdkci.blob.core.windows.net/templatehost/CreateVNet/azuredeploy.json"
+     "https://azuresdkci.blob.core.windows.net/templatehost/CreateVnet_2016-07-18/azuredeploy.json"
      .
     :vartype uri: str
     :param content_version: If included it must match the ContentVersion in
      the template.
     :type content_version: str
-    :param virtual_network_prefix: IP address prefix for the virtual network.
-    :type virtual_network_prefix: str
-    :param subnet_prefix: IP address prefix for the subnet.
+    :param location: Virtual network location.
+    :type location: str
+    :param subnet_name: Name of the subnet. Default value: "Subnet1" .
+    :type subnet_name: str
+    :param subnet_prefix: IP address for the subnet. Default value:
+     "10.0.0.0/24" .
     :type subnet_prefix: str
+    :param tags: Tags object.
+    :type tags: object
     :param virtual_network_name: Name of the virtual network.
     :type virtual_network_name: str
-    :param subnet_name: Name of the subnet.
-    :type subnet_name: str
-    :param location: Location of the virtual network.
-    :type location: str
+    :param virtual_network_prefix: IP address prefix for the virtual network.
+     Default value: "10.0.0.0/16" .
+    :type virtual_network_prefix: str
     :ivar mode: Gets or sets the deployment mode. Default value:
      "Incremental" .
     :vartype mode: str
@@ -40,32 +44,31 @@ class DeploymentVNet(Model):
 
     _validation = {
         'uri': {'required': True, 'constant': True},
-        'virtual_network_prefix': {'pattern': '^[\d\./]+$'},
-        'subnet_prefix': {'pattern': '^[\d\./]+$'},
-        'virtual_network_name': {'required': True, 'max_length': 80, 'min_length': 2, 'pattern': '^[-\w\._]+$'},
-        'subnet_name': {'max_length': 80, 'min_length': 2, 'pattern': '^[-\w\._]+$'},
+        'virtual_network_name': {'required': True},
         'mode': {'required': True, 'constant': True},
     }
 
     _attribute_map = {
         'uri': {'key': 'properties.templateLink.uri', 'type': 'str'},
         'content_version': {'key': 'properties.templateLink.contentVersion', 'type': 'str'},
-        'virtual_network_prefix': {'key': 'properties.parameters.virtualNetworkPrefix.value', 'type': 'str'},
-        'subnet_prefix': {'key': 'properties.parameters.subnetPrefix.value', 'type': 'str'},
-        'virtual_network_name': {'key': 'properties.parameters.virtualNetworkName.value', 'type': 'str'},
-        'subnet_name': {'key': 'properties.parameters.subnetName.value', 'type': 'str'},
         'location': {'key': 'properties.parameters.location.value', 'type': 'str'},
+        'subnet_name': {'key': 'properties.parameters.subnetName.value', 'type': 'str'},
+        'subnet_prefix': {'key': 'properties.parameters.subnetPrefix.value', 'type': 'str'},
+        'tags': {'key': 'properties.parameters.tags.value', 'type': 'object'},
+        'virtual_network_name': {'key': 'properties.parameters.virtualNetworkName.value', 'type': 'str'},
+        'virtual_network_prefix': {'key': 'properties.parameters.virtualNetworkPrefix.value', 'type': 'str'},
         'mode': {'key': 'properties.mode', 'type': 'str'},
     }
 
-    uri = "https://azuresdkci.blob.core.windows.net/templatehost/CreateVNet/azuredeploy.json"
+    uri = "https://azuresdkci.blob.core.windows.net/templatehost/CreateVnet_2016-07-18/azuredeploy.json"
 
     mode = "Incremental"
 
-    def __init__(self, virtual_network_name, content_version=None, virtual_network_prefix=None, subnet_prefix=None, subnet_name=None, location=None):
+    def __init__(self, virtual_network_name, content_version=None, location=None, subnet_name="Subnet1", subnet_prefix="10.0.0.0/24", tags=None, virtual_network_prefix="10.0.0.0/16"):
         self.content_version = content_version
-        self.virtual_network_prefix = virtual_network_prefix
-        self.subnet_prefix = subnet_prefix
-        self.virtual_network_name = virtual_network_name
-        self.subnet_name = subnet_name
         self.location = location
+        self.subnet_name = subnet_name
+        self.subnet_prefix = subnet_prefix
+        self.tags = tags
+        self.virtual_network_name = virtual_network_name
+        self.virtual_network_prefix = virtual_network_prefix

@@ -6,10 +6,10 @@
 # regenerated.
 # --------------------------------------------------------------------------
 
-from .acs_creation_client import ACSCreationClient
+from .acs_creation_client import AcsCreationClient
 from .version import VERSION
 
-__all__ = ['ACSCreationClient']
+__all__ = ['AcsCreationClient']
 
 __version__ = VERSION
 

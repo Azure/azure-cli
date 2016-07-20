@@ -6,10 +6,10 @@
 # regenerated.
 # --------------------------------------------------------------------------
 
-from .resource_management_client import ResourceManagementClient
+from .vnet_creation_client import VnetCreationClient
 from .version import VERSION
 
-__all__ = ['ResourceManagementClient']
+__all__ = ['VnetCreationClient']
 
 __version__ = VERSION
 

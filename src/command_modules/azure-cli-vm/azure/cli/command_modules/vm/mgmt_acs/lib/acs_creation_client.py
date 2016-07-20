@@ -10,12 +10,12 @@ from msrest.service_client import ServiceClient
 from msrest import Serializer, Deserializer
 from msrestazure import AzureConfiguration
 from .version import VERSION
-from .operations.acs_operations import ACSOperations
+from .operations.acs_operations import AcsOperations
 from . import models
 
 
-class ACSCreationClientConfiguration(AzureConfiguration):
-    """Configuration for ACSCreationClient
+class AcsCreationClientConfiguration(AzureConfiguration):
+    """Configuration for AcsCreationClient
     Note that all parameters used to create this instance are saved as instance
     attributes.
 
@@ -58,7 +58,7 @@ class ACSCreationClientConfiguration(AzureConfiguration):
         if not base_url:
             base_url = 'https://management.azure.com'
 
-        super(ACSCreationClientConfiguration, self).__init__(base_url, filepath)
+        super(AcsCreationClientConfiguration, self).__init__(base_url, filepath)
 
         self.add_user_agent('acscreationclient/{}'.format(VERSION))
         self.add_user_agent('Azure-SDK-For-Python')
@@ -71,14 +71,14 @@ class ACSCreationClientConfiguration(AzureConfiguration):
         self.generate_client_request_id = generate_client_request_id
 
 
-class ACSCreationClient(object):
-    """ACSCreationClient
+class AcsCreationClient(object):
+    """AcsCreationClient
 
     :ivar config: Configuration for client.
-    :vartype config: ACSCreationClientConfiguration
+    :vartype config: AcsCreationClientConfiguration
 
-    :ivar acs: ACS operations
-    :vartype acs: .operations.ACSOperations
+    :ivar acs: Acs operations
+    :vartype acs: .operations.AcsOperations
 
     :param credentials: Gets Azure subscription credentials.
     :type credentials: :mod:`A msrestazure Credentials
@@ -106,12 +106,12 @@ class ACSCreationClient(object):
     def __init__(
             self, credentials, subscription_id, api_version='2015-11-01', accept_language='en-US', long_running_operation_retry_timeout=30, generate_client_request_id=True, base_url=None, filepath=None):
 
-        self.config = ACSCreationClientConfiguration(credentials, subscription_id, api_version, accept_language, long_running_operation_retry_timeout, generate_client_request_id, base_url, filepath)
+        self.config = AcsCreationClientConfiguration(credentials, subscription_id, api_version, accept_language, long_running_operation_retry_timeout, generate_client_request_id, base_url, filepath)
         self._client = ServiceClient(self.config.credentials, self.config)
 
         client_models = {k: v for k, v in models.__dict__.items() if isinstance(v, type)}
         self._serialize = Serializer(client_models)
         self._deserialize = Deserializer(client_models)
 
-        self.acs = ACSOperations(
+        self.acs = AcsOperations(
             self._client, self.config, self._serialize, self._deserialize)
