@@ -94,11 +94,8 @@ def add_id_parameters(command_table):
                     for value in [values] if isinstance(values, str) else values:
                         parts = parse_resource_id(value)
                         for arg in [arg for arg in arguments.values() if arg.id_part]:
-                            try:
-                                existing_values = getattr(namespace, arg.name)
-                            except AttributeError:
-                                pass
-                            if not existing_values:
+                            existing_values = getattr(namespace, arg.name, None)
+                            if existing_values is None:
                                 existing_values = IterateValue()
                             existing_values.append(parts[arg.id_part])
                             setattr(namespace, arg.name, existing_values)

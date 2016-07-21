@@ -103,7 +103,7 @@ class TestApplication(unittest.TestCase):
         command.add_argument('something', '--something')
         cmd_table = {'test command': command}
 
-        argv = 'az test command --hello world dude --something else'.split()
+        argv = 'az test command --hello world sir --something else'.split()
         config = Configuration(argv)
         config.get_command_table = lambda: cmd_table
         application = Application(config)
@@ -112,7 +112,7 @@ class TestApplication(unittest.TestCase):
         self.assertEqual(2, len(hellos))
         self.assertEqual(hellos[0]['hello'], 'world')
         self.assertEqual(hellos[0]['something'], 'else')
-        self.assertEqual(hellos[1]['hello'], 'dude')
+        self.assertEqual(hellos[1]['hello'], 'sir')
         self.assertEqual(hellos[1]['something'], 'else')
 
 if __name__ == '__main__':
