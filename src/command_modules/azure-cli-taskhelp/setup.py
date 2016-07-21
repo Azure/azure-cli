@@ -34,7 +34,7 @@ setup(
     version=VERSION,
     description='Microsoft Azure Command-Line Tools',
     long_description=README,
-    license='TBD',
+    license='MIT',
     author='Microsoft Corporation',
     author_email='azpycli@microsoft.com',
     url='https://github.com/Azure/azure-cli',
