@@ -1,3 +1,7 @@
+#---------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for license information.
+#---------------------------------------------------------------------------------------------
 #pylint: skip-file
 # coding=utf-8
 # --------------------------------------------------------------------------
@@ -17,7 +21,7 @@ class DeploymentWebapp(Model):
     sending a request.
 
     :ivar uri: URI referencing the template. Default value:
-     "https://azuresdkci.blob.core.windows.net/templatehost/CreateWebapp_2016-06-22/azuredeploy.json"
+     "https://azuresdkci.blob.core.windows.net/templatehost/CreateWebapp_2016-07-19/azuredeploy.json"
      .
     :vartype uri: str
     :param content_version: If included it must match the ContentVersion in
@@ -25,7 +29,7 @@ class DeploymentWebapp(Model):
     :type content_version: str
     :ivar _artifacts_location: Container URI of of the template. Default
      value:
-     "https://azuresdkci.blob.core.windows.net/templatehost/CreateWebapp_2016-06-22"
+     "https://azuresdkci.blob.core.windows.net/templatehost/CreateWebapp_2016-07-19"
      .
     :vartype _artifacts_location: str
     :param hosting_plan: Name or ID of the web application's hosting plan.
@@ -33,7 +37,8 @@ class DeploymentWebapp(Model):
     :param hosting_plan_type: Use a new or existing hosting plan. Possible
      values include: 'new', 'existingName', 'existingId'. Default value:
      "new" .
-    :type hosting_plan_type: str
+    :type hosting_plan_type: str or :class:`hostingPlanType
+     <webappcreationclient.models.hostingPlanType>`
     :param name: Name for the web application.
     :type name: str
     :param number_of_workers: Number of dedicated VMs in the farm. Default
@@ -46,6 +51,8 @@ class DeploymentWebapp(Model):
      https://azure.microsoft.com/en-us/pricing/details/app-service/. Default
      value: "F1" .
     :type sku_name: str
+    :param tags: Tags object.
+    :type tags: object
     :ivar mode: Gets or sets the deployment mode. Default value:
      "Incremental" .
     :vartype mode: str
@@ -63,21 +70,22 @@ class DeploymentWebapp(Model):
         'content_version': {'key': 'properties.templateLink.contentVersion', 'type': 'str'},
         '_artifacts_location': {'key': 'properties.parameters._artifactsLocation.value', 'type': 'str'},
         'hosting_plan': {'key': 'properties.parameters.hostingPlan.value', 'type': 'str'},
-        'hosting_plan_type': {'key': 'properties.parameters.hostingPlanType.value', 'type': 'str'},
+        'hosting_plan_type': {'key': 'properties.parameters.hostingPlanType.value', 'type': 'hostingPlanType'},
         'name': {'key': 'properties.parameters.name.value', 'type': 'str'},
         'number_of_workers': {'key': 'properties.parameters.numberOfWorkers.value', 'type': 'str'},
         'sku_capacity': {'key': 'properties.parameters.skuCapacity.value', 'type': 'str'},
         'sku_name': {'key': 'properties.parameters.skuName.value', 'type': 'str'},
+        'tags': {'key': 'properties.parameters.tags.value', 'type': 'object'},
         'mode': {'key': 'properties.mode', 'type': 'str'},
     }
 
-    uri = "https://azuresdkci.blob.core.windows.net/templatehost/CreateWebapp_2016-06-22/azuredeploy.json"
+    uri = "https://azuresdkci.blob.core.windows.net/templatehost/CreateWebapp_2016-07-19/azuredeploy.json"
 
-    _artifacts_location = "https://azuresdkci.blob.core.windows.net/templatehost/CreateWebapp_2016-06-22"
+    _artifacts_location = "https://azuresdkci.blob.core.windows.net/templatehost/CreateWebapp_2016-07-19"
 
     mode = "Incremental"
 
-    def __init__(self, name, content_version=None, hosting_plan=None, hosting_plan_type="new", number_of_workers="1", sku_capacity="1", sku_name="F1"):
+    def __init__(self, name, content_version=None, hosting_plan=None, hosting_plan_type="new", number_of_workers="1", sku_capacity="1", sku_name="F1", tags=None):
         self.content_version = content_version
         self.hosting_plan = hosting_plan
         self.hosting_plan_type = hosting_plan_type
@@ -85,3 +93,4 @@ class DeploymentWebapp(Model):
         self.number_of_workers = number_of_workers
         self.sku_capacity = sku_capacity
         self.sku_name = sku_name
+        self.tags = tags

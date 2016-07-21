@@ -1,3 +1,7 @@
+#---------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for license information.
+#---------------------------------------------------------------------------------------------
 #pylint: skip-file
 # coding=utf-8
 # --------------------------------------------------------------------------
@@ -32,7 +36,7 @@ class WebappOperations(object):
         self.config = config
 
     def create_or_update(
-            self, resource_group_name, deployment_name, name, content_version=None, hosting_plan=None, hosting_plan_type="new", number_of_workers="1", sku_capacity="1", sku_name="F1", custom_headers=None, raw=False, **operation_config):
+            self, resource_group_name, deployment_name, name, content_version=None, hosting_plan=None, hosting_plan_type="new", number_of_workers="1", sku_capacity="1", sku_name="F1", tags=None, custom_headers=None, raw=False, **operation_config):
         """
         Create or update a virtual machine.
 
@@ -50,7 +54,8 @@ class WebappOperations(object):
         :type hosting_plan: str
         :param hosting_plan_type: Use a new or existing hosting plan.
          Possible values include: 'new', 'existingName', 'existingId'
-        :type hosting_plan_type: str
+        :type hosting_plan_type: str or :class:`hostingPlanType
+         <webappcreationclient.models.hostingPlanType>`
         :param number_of_workers: Number of dedicated VMs in the farm.
         :type number_of_workers: str
         :param sku_capacity: Describes plan's instance count
@@ -59,6 +64,8 @@ class WebappOperations(object):
          Check details at
          https://azure.microsoft.com/en-us/pricing/details/app-service/
         :type sku_name: str
+        :param tags: Tags object.
+        :type tags: object
         :param dict custom_headers: headers that will be added to the request
         :param bool raw: returns the direct response alongside the
          deserialized response
@@ -69,7 +76,7 @@ class WebappOperations(object):
         :rtype: :class:`ClientRawResponse<msrest.pipeline.ClientRawResponse>`
          if raw=true
         """
-        parameters = models.DeploymentWebapp(content_version=content_version, hosting_plan=hosting_plan, hosting_plan_type=hosting_plan_type, name=name, number_of_workers=number_of_workers, sku_capacity=sku_capacity, sku_name=sku_name)
+        parameters = models.DeploymentWebapp(content_version=content_version, hosting_plan=hosting_plan, hosting_plan_type=hosting_plan_type, name=name, number_of_workers=number_of_workers, sku_capacity=sku_capacity, sku_name=sku_name, tags=tags)
 
         # Construct URL
         url = '/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Resources/deployments/{deploymentName}'

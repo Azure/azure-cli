@@ -7,6 +7,9 @@
     },
     "networkSecurityGroupRule": {
       "type": "string"
+    },
+    "tags": {
+      "type": "object"
     }
   },
   "variables": {
@@ -45,6 +48,7 @@
       "name": "[parameters('networkSecurityGroup')]",
       "apiVersion": "2015-06-15",
       "location": "westus",
+      "tags": "[parameters('tags')]",
       "properties": {
         "securityRules": [
           "[variables('rules')[parameters('networkSecurityGroupRule')]]"

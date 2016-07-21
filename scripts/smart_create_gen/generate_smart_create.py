@@ -20,8 +20,14 @@ from _common import get_name_from_path, get_config, to_snake_case
 def _autorest_client_name(name):
     return '{}creationclient'.format(str.lower(name))
 
-INIT_FILE_CONTENTS = """#pylint: skip-file 
-import pkg_resources
+HEADER = """#---------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for license information.
+#---------------------------------------------------------------------------------------------
+#pylint: skip-file
+"""
+
+INIT_FILE_CONTENTS = HEADER + """import pkg_resources
 pkg_resources.declare_namespace(__name__)
 
 """
@@ -77,7 +83,7 @@ def generate_smart_create(*args):
         for file in files:
             if file.endswith('.py'):
                 with open(os.path.join(root, file), 'r') as original: data = original.read()
-                with open(os.path.join(root, file), 'w') as modified: modified.write("#pylint: skip-file\n" + data)    
+                with open(os.path.join(root, file), 'w') as modified: modified.write(HEADER + '\n' + data)
 
     # Rename the generated file directory to lib
     distutils.dir_util.copy_tree(autorest_generated_path, os.path.join(dest, 'lib'))

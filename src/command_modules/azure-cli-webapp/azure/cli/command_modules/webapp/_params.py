@@ -4,7 +4,7 @@
 #---------------------------------------------------------------------------------------------
 
 from azure.cli.commands import CliArgumentType, register_cli_argument
-import azure.cli.commands.parameters #pylint: disable=unused-import
+from azure.cli.commands.parameters import tags_type
 
 from azure.mgmt.web import WebSiteManagementClient
 from azure.cli.commands.client_factory import get_mgmt_service_client
@@ -18,6 +18,7 @@ def _web_client_factory(**_):
 # PARAMETER REGISTRATION
 
 register_cli_argument('webapp', 'name', CliArgumentType(options_list=('--name', '-n')))
+register_cli_argument('webapp', 'tags', tags_type)
 
 register_folded_cli_argument('webapp create', 'hosting_plan', 'Microsoft.Web/serverfarms',
                              help='Name or ID of the web application\'s hosting plan.'

@@ -54,6 +54,13 @@
       "metadata": {
         "description": "Describes plan's pricing tier and instance size. Check details at https://azure.microsoft.com/en-us/pricing/details/app-service/"
       }
+    },
+    "tags": {
+      "type": "object",
+      "defaultValue": { },
+      "metadata": {
+        "description": "Tags object."
+      }
     }
   },
   "variables": {
@@ -85,7 +92,8 @@
           "hostingPlanName": { "value": "[parameters('hostingPlan')]" },
           "skuName": { "value": "[parameters('skuName')]" },
           "skuCapacity": { "value": "[parameters('skuCapacity')]" },
-          "numberOfWorkers": { "value": "[parameters('numberOfWorkers')]"}
+          "numberOfWorkers": { "value": "[parameters('numberOfWorkers')]" },
+          "tags": { "value": "[parameters('tags')]" }
         }
       }
     },
@@ -94,32 +102,13 @@
       "name": "[parameters('name')]",
       "type": "Microsoft.Web/sites",
       "location": "[resourceGroup().location]",
-      "tags": {
-        "[concat('hidden-related:', variables('hostingPlanIds')[parameters('hostingPlanType')])]": "Resource",
-        "displayName": "Website"
-      },
+      "tags": "[parameters('tags')]",
       "dependsOn": [
         "[concat('Microsoft.Resources/deployments/', variables('hostingPlanDeploymentName'))]"
       ],
       "properties": {
         "name": "[parameters('name')]",
         "serverFarmId": "[variables('hostingPlanIds')[parameters('hostingPlanType')]]"
-      }
-    },
-    {
-      "apiVersion": "2014-04-01",
-      "name": "[parameters('name')]",
-      "type": "Microsoft.Insights/components",
-      "location": "Central US",
-      "dependsOn": [
-        "[concat('Microsoft.Web/sites/', parameters('name'))]"
-      ],
-      "tags": {
-        "[concat('hidden-link:', resourceGroup().id, '/providers/Microsoft.Web/sites/', parameters('name'))]": "Resource",
-        "displayName": "AppInsightsComponent"
-      },
-      "properties": {
-        "applicationId": "[parameters('name')]"
       }
     }
   ]
