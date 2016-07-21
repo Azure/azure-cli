@@ -8,11 +8,11 @@ Installation via CURL
 
 To install via cURL on Linux, Unix and OS X, type:
 
-    curl http://azure-cli-nightly.westus.cloudapp.azure.com/install | bash
+    curl -L https://aka.ms/ProjectAzInstall | bash
 
 If you chose to enable tab completion, type `exec -l $SHELL` to restart your shell.
 
-Note: This will install the latest nightly builds.  You may re-run this script later to safely update to the latest version.
+Note: This will install the latest verified nightly builds.  You may re-run this script later to safely update to the latest version.
 
 Example Demo Script
 -------------------
