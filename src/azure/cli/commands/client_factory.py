@@ -1,4 +1,9 @@
-﻿from .._profile import Profile
+﻿#---------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for license information.
+#---------------------------------------------------------------------------------------------
+
+from .._profile import Profile
 import azure.cli._debug as _debug
 import azure.cli as cli
 import azure.cli._logging as _logging

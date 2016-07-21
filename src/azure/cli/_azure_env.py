@@ -1,4 +1,9 @@
-﻿CLIENT_ID = '04b07795-8ddb-461a-bbee-02f9e1bf7b46'
+﻿#---------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for license information.
+#---------------------------------------------------------------------------------------------
+
+CLIENT_ID = '04b07795-8ddb-461a-bbee-02f9e1bf7b46'
 
 ENV_DEFAULT = 'AzureCloud'
 ENV_US_GOVERNMENT = 'AzureUSGovernment'

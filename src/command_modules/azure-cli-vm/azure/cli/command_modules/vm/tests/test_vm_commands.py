@@ -1,4 +1,9 @@
-﻿# AZURE CLI VM TEST DEFINITIONS
+﻿#---------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for license information.
+#---------------------------------------------------------------------------------------------
+
+# AZURE CLI VM TEST DEFINITIONS
 import json
 import os
 import tempfile

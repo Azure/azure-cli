@@ -1,3 +1,8 @@
+#---------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for license information.
+#---------------------------------------------------------------------------------------------
+
 """
 Generate a command module using the SDK.
 """
@@ -79,7 +84,7 @@ setup(
     version=VERSION,
     description='Microsoft Azure Command-Line Tools',
     long_description=README,
-    license='TBD',
+    license='MIT',
     author='Microsoft Corporation',
     author_email='azpycli@microsoft.com',
     url='https://github.com/Azure/azure-cli',
