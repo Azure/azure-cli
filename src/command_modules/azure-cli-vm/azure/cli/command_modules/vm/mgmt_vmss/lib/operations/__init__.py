@@ -6,10 +6,8 @@
 # regenerated.
 # --------------------------------------------------------------------------
 
-from .vmss_creation_client import VMSSCreationClient
-from .version import VERSION
+from .vmss_operations import VmssOperations
 
-__all__ = ['VMSSCreationClient']
-
-__version__ = VERSION
-
+__all__ = [
+    'VmssOperations',
+]

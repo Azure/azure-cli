@@ -6,7 +6,7 @@
 # regenerated.
 # --------------------------------------------------------------------------
 
-from .deployment_vmss import DeploymentVMSS
+from .deployment_vmss import DeploymentVmss
 from .template_link import TemplateLink
 from .parameters_link import ParametersLink
 from .provider_resource_type import ProviderResourceType
@@ -16,11 +16,22 @@ from .dependency import Dependency
 from .deployment_properties_extended import DeploymentPropertiesExtended
 from .deployment_extended import DeploymentExtended
 from .vmss_creation_client_enums import (
+    authenticationType,
+    customOsDiskType,
+    dnsNameType,
+    loadBalancerType,
+    osDiskType,
+    osType,
+    publicIpAddressAllocation,
+    publicIpAddressType,
+    storageCaching,
+    upgradePolicyMode,
+    virtualNetworkType,
     DeploymentMode,
 )
 
 __all__ = [
-    'DeploymentVMSS',
+    'DeploymentVmss',
     'TemplateLink',
     'ParametersLink',
     'ProviderResourceType',
@@ -29,5 +40,16 @@ __all__ = [
     'Dependency',
     'DeploymentPropertiesExtended',
     'DeploymentExtended',
+    'authenticationType',
+    'customOsDiskType',
+    'dnsNameType',
+    'loadBalancerType',
+    'osDiskType',
+    'osType',
+    'publicIpAddressAllocation',
+    'publicIpAddressType',
+    'storageCaching',
+    'upgradePolicyMode',
+    'virtualNetworkType',
     'DeploymentMode',
 ]

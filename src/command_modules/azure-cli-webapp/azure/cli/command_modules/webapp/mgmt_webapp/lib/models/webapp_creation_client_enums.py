@@ -9,6 +9,13 @@
 from enum import Enum
 
 
+class hostingPlanType(Enum):
+
+    new = "new"
+    existing_name = "existingName"
+    existing_id = "existingId"
+
+
 class DeploymentMode(Enum):
 
     incremental = "Incremental"

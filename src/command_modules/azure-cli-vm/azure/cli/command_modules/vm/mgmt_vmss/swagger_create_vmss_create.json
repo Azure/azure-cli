@@ -1,7 +1,7 @@
 {
   "swagger": "2.0", 
   "info": {
-    "title": "VmCreationClient", 
+    "title": "VmssCreateCreationClient", 
     "version": "2015-11-01"
   }, 
   "host": "management.azure.com", 
@@ -36,9 +36,9 @@
     "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Resources/deployments/{deploymentName}": {
       "put": {
         "tags": [
-          "Vm"
+          "VmssCreate"
         ], 
-        "operationId": "Vm_CreateOrUpdate", 
+        "operationId": "VmssCreate_CreateOrUpdate", 
         "description": "Create or update a virtual machine.", 
         "parameters": [
           {
@@ -67,7 +67,7 @@
             "in": "body", 
             "required": true, 
             "schema": {
-              "$ref": "#/definitions/Deployment_Vm"
+              "$ref": "#/definitions/Deployment_VmssCreate"
             }, 
             "description": "Additional parameters supplied to the operation."
           }, 
@@ -97,17 +97,17 @@
     }
   }, 
   "definitions": {
-    "Deployment_Vm": {
+    "Deployment_VmssCreate": {
       "properties": {
         "properties": {
-          "$ref": "#/definitions/DeploymentProperties_Vm", 
+          "$ref": "#/definitions/DeploymentProperties_VmssCreate", 
           "description": "Gets or sets the deployment properties.", 
           "x-ms-client-flatten": true
         }
       }, 
       "description": "Deployment operation parameters."
     }, 
-    "DeploymentProperties_Vm": {
+    "DeploymentProperties_VmssCreate": {
       "properties": {
         "templateLink": {
           "$ref": "#/definitions/TemplateLink", 
@@ -115,7 +115,7 @@
           "x-ms-client-flatten": true
         }, 
         "parameters": {
-          "$ref": "#/definitions/VmParameters", 
+          "$ref": "#/definitions/VmssCreateParameters", 
           "type": "object", 
           "description": "Deployment parameters. Use only one of Parameters or ParametersLink.", 
           "x-ms-client-flatten": true
@@ -145,7 +145,7 @@
           "type": "string", 
           "description": "URI referencing the template.", 
           "enum": [
-            "https://azuresdkci.blob.core.windows.net/templatehost/CreateVm_2016-07-19/azuredeploy.json"
+            "https://azuresdkci.blob.core.windows.net/templatehost/CreateVmssCreate_2016-07-19/azuredeploy.json"
           ]
         }, 
         "contentVersion": {
@@ -158,7 +158,7 @@
       ], 
       "description": "Entity representing the reference to the template."
     }, 
-    "VmParameters": {
+    "VmssCreateParameters": {
       "properties": {
         "_artifactsLocation": {
           "type": "object", 
@@ -178,16 +178,6 @@
         "authenticationType": {
           "type": "object", 
           "$ref": "#/definitions/DeploymentParameter_authenticationType", 
-          "x-ms-client-flatten": true
-        }, 
-        "availabilitySet": {
-          "type": "object", 
-          "$ref": "#/definitions/DeploymentParameter_availabilitySet", 
-          "x-ms-client-flatten": true
-        }, 
-        "availabilitySetType": {
-          "type": "object", 
-          "$ref": "#/definitions/DeploymentParameter_availabilitySetType", 
           "x-ms-client-flatten": true
         }, 
         "customOsDiskType": {
@@ -210,6 +200,26 @@
           "$ref": "#/definitions/DeploymentParameter_dnsNameType", 
           "x-ms-client-flatten": true
         }, 
+        "instanceCount": {
+          "type": "object", 
+          "$ref": "#/definitions/DeploymentParameter_instanceCount", 
+          "x-ms-client-flatten": true
+        }, 
+        "loadBalancerBackendPoolName": {
+          "type": "object", 
+          "$ref": "#/definitions/DeploymentParameter_loadBalancerBackendPoolName", 
+          "x-ms-client-flatten": true
+        }, 
+        "loadBalancerName": {
+          "type": "object", 
+          "$ref": "#/definitions/DeploymentParameter_loadBalancerName", 
+          "x-ms-client-flatten": true
+        }, 
+        "loadBalancerType": {
+          "type": "object", 
+          "$ref": "#/definitions/DeploymentParameter_loadBalancerType", 
+          "x-ms-client-flatten": true
+        }, 
         "location": {
           "type": "object", 
           "$ref": "#/definitions/DeploymentParameter_location", 
@@ -220,29 +230,19 @@
           "$ref": "#/definitions/DeploymentParameter_name", 
           "x-ms-client-flatten": true
         }, 
-        "networkInterfaceIds": {
+        "natBackendPort": {
           "type": "object", 
-          "$ref": "#/definitions/DeploymentParameter_networkInterfaceIds", 
+          "$ref": "#/definitions/DeploymentParameter_natBackendPort", 
           "x-ms-client-flatten": true
         }, 
-        "networkInterfaceType": {
+        "natEndPort": {
           "type": "object", 
-          "$ref": "#/definitions/DeploymentParameter_networkInterfaceType", 
+          "$ref": "#/definitions/DeploymentParameter_natEndPort", 
           "x-ms-client-flatten": true
         }, 
-        "networkSecurityGroup": {
+        "natStartPort": {
           "type": "object", 
-          "$ref": "#/definitions/DeploymentParameter_networkSecurityGroup", 
-          "x-ms-client-flatten": true
-        }, 
-        "networkSecurityGroupRule": {
-          "type": "object", 
-          "$ref": "#/definitions/DeploymentParameter_networkSecurityGroupRule", 
-          "x-ms-client-flatten": true
-        }, 
-        "networkSecurityGroupType": {
-          "type": "object", 
-          "$ref": "#/definitions/DeploymentParameter_networkSecurityGroupType", 
+          "$ref": "#/definitions/DeploymentParameter_natStartPort", 
           "x-ms-client-flatten": true
         }, 
         "osDiskName": {
@@ -253,11 +253,6 @@
         "osDiskType": {
           "type": "object", 
           "$ref": "#/definitions/DeploymentParameter_osDiskType", 
-          "x-ms-client-flatten": true
-        }, 
-        "osDiskUri": {
-          "type": "object", 
-          "$ref": "#/definitions/DeploymentParameter_osDiskUri", 
           "x-ms-client-flatten": true
         }, 
         "osOffer": {
@@ -285,19 +280,9 @@
           "$ref": "#/definitions/DeploymentParameter_osVersion", 
           "x-ms-client-flatten": true
         }, 
-        "privateIpAddress": {
+        "overprovision": {
           "type": "object", 
-          "$ref": "#/definitions/DeploymentParameter_privateIpAddress", 
-          "x-ms-client-flatten": true
-        }, 
-        "privateIpAddressAllocation": {
-          "type": "object", 
-          "$ref": "#/definitions/DeploymentParameter_privateIpAddressAllocation", 
-          "x-ms-client-flatten": true
-        }, 
-        "publicIpAddress": {
-          "type": "object", 
-          "$ref": "#/definitions/DeploymentParameter_publicIpAddress", 
+          "$ref": "#/definitions/DeploymentParameter_overprovision", 
           "x-ms-client-flatten": true
         }, 
         "publicIpAddressAllocation": {
@@ -305,14 +290,14 @@
           "$ref": "#/definitions/DeploymentParameter_publicIpAddressAllocation", 
           "x-ms-client-flatten": true
         }, 
+        "publicIpAddressName": {
+          "type": "object", 
+          "$ref": "#/definitions/DeploymentParameter_publicIpAddressName", 
+          "x-ms-client-flatten": true
+        }, 
         "publicIpAddressType": {
           "type": "object", 
           "$ref": "#/definitions/DeploymentParameter_publicIpAddressType", 
-          "x-ms-client-flatten": true
-        }, 
-        "size": {
-          "type": "object", 
-          "$ref": "#/definitions/DeploymentParameter_size", 
           "x-ms-client-flatten": true
         }, 
         "sshDestKeyPath": {
@@ -325,16 +310,6 @@
           "$ref": "#/definitions/DeploymentParameter_sshKeyValue", 
           "x-ms-client-flatten": true
         }, 
-        "storageAccount": {
-          "type": "object", 
-          "$ref": "#/definitions/DeploymentParameter_storageAccount", 
-          "x-ms-client-flatten": true
-        }, 
-        "storageAccountType": {
-          "type": "object", 
-          "$ref": "#/definitions/DeploymentParameter_storageAccountType", 
-          "x-ms-client-flatten": true
-        }, 
         "storageCaching": {
           "type": "object", 
           "$ref": "#/definitions/DeploymentParameter_storageCaching", 
@@ -345,9 +320,9 @@
           "$ref": "#/definitions/DeploymentParameter_storageContainerName", 
           "x-ms-client-flatten": true
         }, 
-        "storageType": {
+        "storageRedundancyType": {
           "type": "object", 
-          "$ref": "#/definitions/DeploymentParameter_storageType", 
+          "$ref": "#/definitions/DeploymentParameter_storageRedundancyType", 
           "x-ms-client-flatten": true
         }, 
         "subnetIpAddressPrefix": {
@@ -365,9 +340,9 @@
           "$ref": "#/definitions/DeploymentParameter_tags", 
           "x-ms-client-flatten": true
         }, 
-        "virtualNetwork": {
+        "upgradePolicyMode": {
           "type": "object", 
-          "$ref": "#/definitions/DeploymentParameter_virtualNetwork", 
+          "$ref": "#/definitions/DeploymentParameter_upgradePolicyMode", 
           "x-ms-client-flatten": true
         }, 
         "virtualNetworkIpAddressPrefix": {
@@ -375,9 +350,19 @@
           "$ref": "#/definitions/DeploymentParameter_virtualNetworkIpAddressPrefix", 
           "x-ms-client-flatten": true
         }, 
+        "virtualNetworkName": {
+          "type": "object", 
+          "$ref": "#/definitions/DeploymentParameter_virtualNetworkName", 
+          "x-ms-client-flatten": true
+        }, 
         "virtualNetworkType": {
           "type": "object", 
           "$ref": "#/definitions/DeploymentParameter_virtualNetworkType", 
+          "x-ms-client-flatten": true
+        }, 
+        "vmSku": {
+          "type": "object", 
+          "$ref": "#/definitions/DeploymentParameter_vmSku", 
           "x-ms-client-flatten": true
         }
       }, 
@@ -422,34 +407,6 @@
             "modelAsString": false
           }, 
           "default": "password"
-        }
-      }
-    }, 
-    "DeploymentParameter_availabilitySet": {
-      "properties": {
-        "value": {
-          "type": "string", 
-          "description": "Name or ID of existing availability set for the VM.", 
-          "x-ms-client-name": "availabilitySet"
-        }
-      }
-    }, 
-    "DeploymentParameter_availabilitySetType": {
-      "properties": {
-        "value": {
-          "type": "string", 
-          "description": "Flag to add the VM to an existing availability set.", 
-          "x-ms-client-name": "availabilitySetType", 
-          "enum": [
-            "none", 
-            "existingName", 
-            "existingId"
-          ], 
-          "x-ms-enum": {
-            "name": "availabilitySetType", 
-            "modelAsString": false
-          }, 
-          "default": "none"
         }
       }
     }, 
@@ -507,6 +464,53 @@
         }
       }
     }, 
+    "DeploymentParameter_instanceCount": {
+      "properties": {
+        "value": {
+          "type": "string", 
+          "description": "Number of VMs in scale set.", 
+          "x-ms-client-name": "instanceCount", 
+          "default": "2"
+        }
+      }
+    }, 
+    "DeploymentParameter_loadBalancerBackendPoolName": {
+      "properties": {
+        "value": {
+          "type": "string", 
+          "description": "Name of load balancer backend pool.", 
+          "x-ms-client-name": "loadBalancerBackendPoolName"
+        }
+      }
+    }, 
+    "DeploymentParameter_loadBalancerName": {
+      "properties": {
+        "value": {
+          "type": "string", 
+          "description": "Name for load balancer.", 
+          "x-ms-client-name": "loadBalancerName"
+        }
+      }
+    }, 
+    "DeploymentParameter_loadBalancerType": {
+      "properties": {
+        "value": {
+          "type": "string", 
+          "description": "Whether to use an existing load balancer, create a new one, or use no load balancer.", 
+          "x-ms-client-name": "loadBalancerType", 
+          "enum": [
+            "new", 
+            "existing", 
+            "none"
+          ], 
+          "x-ms-enum": {
+            "name": "loadBalancerType", 
+            "modelAsString": false
+          }, 
+          "default": "new"
+        }
+      }
+    }, 
     "DeploymentParameter_location": {
       "properties": {
         "value": {
@@ -528,80 +532,33 @@
         "value"
       ]
     }, 
-    "DeploymentParameter_networkInterfaceIds": {
-      "properties": {
-        "value": {
-          "type": "array", 
-          "items": {
-            "type": "object"
-          }, 
-          "description": "One or more existing network intreface Ids to attach to the VM.", 
-          "x-ms-client-name": "networkInterfaceIds"
-        }
-      }
-    }, 
-    "DeploymentParameter_networkInterfaceType": {
+    "DeploymentParameter_natBackendPort": {
       "properties": {
         "value": {
           "type": "string", 
-          "description": "Whether to create a new network interface or use existing ones.", 
-          "x-ms-client-name": "networkInterfaceType", 
-          "enum": [
-            "new", 
-            "existing"
-          ], 
-          "x-ms-enum": {
-            "name": "networkInterfaceType", 
-            "modelAsString": false
-          }, 
-          "default": "new"
+          "description": "Backend NAT port to map.", 
+          "x-ms-client-name": "natBackendPort", 
+          "default": "22"
         }
       }
     }, 
-    "DeploymentParameter_networkSecurityGroup": {
+    "DeploymentParameter_natEndPort": {
       "properties": {
         "value": {
           "type": "string", 
-          "description": "Name or ID of the network security group.", 
-          "x-ms-client-name": "networkSecurityGroup"
+          "description": "End of NAT port range.", 
+          "x-ms-client-name": "natEndPort", 
+          "default": "50099"
         }
       }
     }, 
-    "DeploymentParameter_networkSecurityGroupRule": {
+    "DeploymentParameter_natStartPort": {
       "properties": {
         "value": {
           "type": "string", 
-          "description": "The type of rule to add to a new network security group.", 
-          "x-ms-client-name": "networkSecurityGroupRule", 
-          "enum": [
-            "RDP", 
-            "SSH"
-          ], 
-          "x-ms-enum": {
-            "name": "networkSecurityGroupRule", 
-            "modelAsString": false
-          }, 
-          "default": "RDP"
-        }
-      }
-    }, 
-    "DeploymentParameter_networkSecurityGroupType": {
-      "properties": {
-        "value": {
-          "type": "string", 
-          "description": "Whether to use a network security group or not.", 
-          "x-ms-client-name": "networkSecurityGroupType", 
-          "enum": [
-            "new", 
-            "existingName", 
-            "existingId", 
-            "none"
-          ], 
-          "x-ms-enum": {
-            "name": "networkSecurityGroupType", 
-            "modelAsString": false
-          }, 
-          "default": "new"
+          "description": "Begining of NAT port range.", 
+          "x-ms-client-name": "natStartPort", 
+          "default": "50000"
         }
       }
     }, 
@@ -610,7 +567,8 @@
         "value": {
           "type": "string", 
           "description": "Name of new VM OS disk.", 
-          "x-ms-client-name": "osDiskName"
+          "x-ms-client-name": "osDiskName", 
+          "default": "osdiskimage"
         }
       }
     }, 
@@ -629,15 +587,6 @@
             "modelAsString": false
           }, 
           "default": "provided"
-        }
-      }
-    }, 
-    "DeploymentParameter_osDiskUri": {
-      "properties": {
-        "value": {
-          "type": "string", 
-          "description": "URI for a custom VHD image.", 
-          "x-ms-client-name": "osDiskUri"
         }
       }
     }, 
@@ -701,39 +650,23 @@
         }
       }
     }, 
-    "DeploymentParameter_privateIpAddress": {
+    "DeploymentParameter_overprovision": {
       "properties": {
         "value": {
           "type": "string", 
-          "description": "The private IP address to use with Private IP Address Allocation type Static.", 
-          "x-ms-client-name": "privateIpAddress"
-        }
-      }
-    }, 
-    "DeploymentParameter_privateIpAddressAllocation": {
-      "properties": {
-        "value": {
-          "type": "string", 
-          "description": "Private IP address allocation method.", 
-          "x-ms-client-name": "privateIpAddressAllocation", 
+          "description": "Overprovision option (see https://azure.microsoft.com/en-us/documentation/articles/virtual-machine-scale-sets-overview/ for details).", 
+          "x-ms-client-name": "overprovision", 
           "enum": [
-            "dynamic", 
-            "static"
+            "true", 
+            "false", 
+            "True", 
+            "False"
           ], 
           "x-ms-enum": {
-            "name": "privateIpAddressAllocation", 
+            "name": "overprovision", 
             "modelAsString": false
           }, 
-          "default": "dynamic"
-        }
-      }
-    }, 
-    "DeploymentParameter_publicIpAddress": {
-      "properties": {
-        "value": {
-          "type": "string", 
-          "description": "Name or ID of public IP address to use.", 
-          "x-ms-client-name": "publicIpAddress"
+          "default": "true"
         }
       }
     }, 
@@ -755,6 +688,15 @@
         }
       }
     }, 
+    "DeploymentParameter_publicIpAddressName": {
+      "properties": {
+        "value": {
+          "type": "string", 
+          "description": "Name of public IP address to use.", 
+          "x-ms-client-name": "publicIpAddressName"
+        }
+      }
+    }, 
     "DeploymentParameter_publicIpAddressType": {
       "properties": {
         "value": {
@@ -764,24 +706,13 @@
           "enum": [
             "none", 
             "new", 
-            "existingName", 
-            "existingId"
+            "existingName"
           ], 
           "x-ms-enum": {
             "name": "publicIpAddressType", 
             "modelAsString": false
           }, 
           "default": "new"
-        }
-      }
-    }, 
-    "DeploymentParameter_size": {
-      "properties": {
-        "value": {
-          "type": "string", 
-          "description": "The VM Size that should be created.  See https://azure.microsoft.com/en-us/pricing/details/virtual-machines/ for size info.", 
-          "x-ms-client-name": "size", 
-          "default": "Standard_DS1"
         }
       }
     }, 
@@ -803,39 +734,11 @@
         }
       }
     }, 
-    "DeploymentParameter_storageAccount": {
-      "properties": {
-        "value": {
-          "type": "string", 
-          "description": "Name or ID of storage account for the VM OS disk.", 
-          "x-ms-client-name": "storageAccount"
-        }
-      }
-    }, 
-    "DeploymentParameter_storageAccountType": {
-      "properties": {
-        "value": {
-          "type": "string", 
-          "description": "Whether to use an existing storage account or create a new one.", 
-          "x-ms-client-name": "storageAccountType", 
-          "enum": [
-            "new", 
-            "existingName", 
-            "existingId"
-          ], 
-          "x-ms-enum": {
-            "name": "storageAccountType", 
-            "modelAsString": false
-          }, 
-          "default": "new"
-        }
-      }
-    }, 
     "DeploymentParameter_storageCaching": {
       "properties": {
         "value": {
           "type": "string", 
-          "description": "Storage caching type for the VM OS disk.", 
+          "description": "Storage caching type.", 
           "x-ms-client-name": "storageCaching", 
           "enum": [
             "ReadOnly", 
@@ -845,7 +748,7 @@
             "name": "storageCaching", 
             "modelAsString": false
           }, 
-          "default": "ReadWrite"
+          "default": "ReadOnly"
         }
       }
     }, 
@@ -859,13 +762,13 @@
         }
       }
     }, 
-    "DeploymentParameter_storageType": {
+    "DeploymentParameter_storageRedundancyType": {
       "properties": {
         "value": {
           "type": "string", 
-          "description": "The VM storage type (Standard_LRS, Standard_GRS, Standard_RAGRS, ...).", 
-          "x-ms-client-name": "storageType", 
-          "default": "Premium_LRS"
+          "description": "The VM storage type (Standard_LRS, Standard_GRS, Standard_RAGRS).", 
+          "x-ms-client-name": "storageRedundancyType", 
+          "default": "Standard_LRS"
         }
       }
     }, 
@@ -897,12 +800,21 @@
         }
       }
     }, 
-    "DeploymentParameter_virtualNetwork": {
+    "DeploymentParameter_upgradePolicyMode": {
       "properties": {
         "value": {
           "type": "string", 
-          "description": "Name or ID of virtual network to add VM to.", 
-          "x-ms-client-name": "virtualNetwork"
+          "description": "Manual or Automatic upgrade mode.", 
+          "x-ms-client-name": "upgradePolicyMode", 
+          "enum": [
+            "manual", 
+            "automatic"
+          ], 
+          "x-ms-enum": {
+            "name": "upgradePolicyMode", 
+            "modelAsString": false
+          }, 
+          "default": "manual"
         }
       }
     }, 
@@ -916,6 +828,15 @@
         }
       }
     }, 
+    "DeploymentParameter_virtualNetworkName": {
+      "properties": {
+        "value": {
+          "type": "string", 
+          "description": "Name of virtual network to add VM to.", 
+          "x-ms-client-name": "virtualNetworkName"
+        }
+      }
+    }, 
     "DeploymentParameter_virtualNetworkType": {
       "properties": {
         "value": {
@@ -924,14 +845,23 @@
           "x-ms-client-name": "virtualNetworkType", 
           "enum": [
             "new", 
-            "existingName", 
-            "existingId"
+            "existing"
           ], 
           "x-ms-enum": {
             "name": "virtualNetworkType", 
             "modelAsString": false
           }, 
           "default": "new"
+        }
+      }
+    }, 
+    "DeploymentParameter_vmSku": {
+      "properties": {
+        "value": {
+          "type": "string", 
+          "description": "Size of VMs in the VM Scale Set.  See https://azure.microsoft.com/en-us/pricing/details/virtual-machines/ for size info.", 
+          "x-ms-client-name": "vmSku", 
+          "default": "Standard_D1_v2"
         }
       }
     }, 
@@ -942,7 +872,7 @@
           "description": "Container URI of of the template.", 
           "x-ms-client-name": "_artifactsLocation", 
           "enum": [
-            "https://azuresdkci.blob.core.windows.net/templatehost/CreateVm_2016-07-19"
+            "https://azuresdkci.blob.core.windows.net/templatehost/CreateVmssCreate_2016-07-19"
           ]
         }
       }, 

@@ -277,14 +277,18 @@ class VMGeneralizeScenarioTest(ResourceGroupVCRTestBase):
     def test_vm_generalize(self):
         self.execute()
 
-class VMCreateAndStateModificationsScenarioTest(ResourceGroupVCRTestBase):
+class VMCreateAndStateModificationsScenarioTest(ResourceGroupVCRTestBase): #pylint:disable=too-many-instance-attributes
 
     def __init__(self, test_method):
         super(VMCreateAndStateModificationsScenarioTest, self).__init__(__file__, test_method)
-        self.deployment_name = 'azurecli-test-deployment-vm-state-mod'
-        self.resource_group = 'cliTestRg_VmStateMod'
+        self.deployment_name = 'azurecli-test-deployment-vm-state-mod2'
+        self.resource_group = 'cliTestRg_VmStateMod2'
         self.location = 'westus'
         self.vm_name = 'vm-state-mod'
+        self.nsg_name = 'mynsg'
+        self.ip_name = 'mypubip'
+        self.storage_name = 'mystorage010101abcd'
+        self.vnet_name = 'myvnet'
 
     def test_vm_create_state_modifications(self):
         self.execute()
@@ -305,8 +309,12 @@ class VMCreateAndStateModificationsScenarioTest(ResourceGroupVCRTestBase):
         self.cmd('vm list --resource-group {}'.format(self.resource_group), checks=NoneCheck())
         self.cmd('vm create --resource-group {0} --location {1} --name {2} --admin-username ubuntu '
                  '--image Canonical:UbuntuServer:14.04.4-LTS:latest --admin-password testPassword0 '
-                 '--deployment-name {3} --authentication-type password'.format(
-                     self.resource_group, self.location, self.vm_name, self.deployment_name))
+                 '--deployment-name {3} --authentication-type password '
+                 '--tags firsttag=1;secondtag=2;thirdtag --nsg {4} --public-ip-address {5} '
+                 '--storage-account {6} --vnet {7}'.format(
+                     self.resource_group, self.location, self.vm_name, self.deployment_name,
+                     self.nsg_name, self.ip_name, self.storage_name, self.vnet_name))
+
         # Expecting one result, the one we created
         self.cmd('vm list --resource-group {}'.format(self.resource_group), [
             JMESPathCheck('length(@)', 1),
@@ -315,6 +323,39 @@ class VMCreateAndStateModificationsScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck('[0].location', self.location),
             JMESPathCheck('[0].provisioningState', 'Succeeded'),
         ])
+
+        # Verify tags were set
+        self.cmd('vm show --resource-group {} --name {}'.format(
+            self.resource_group, self.vm_name), checks=[
+                JMESPathCheck('tags.firsttag', '1'),
+                JMESPathCheck('tags.secondtag', '2'),
+                JMESPathCheck('tags.thirdtag', ''),
+            ])
+        self.cmd('network nsg show --resource-group {} --name {}'.format(
+            self.resource_group, self.nsg_name), checks=[
+                JMESPathCheck('tags.firsttag', '1'),
+                JMESPathCheck('tags.secondtag', '2'),
+                JMESPathCheck('tags.thirdtag', ''),
+            ])
+        self.cmd('network public-ip show --resource-group {} --name {}'.format(
+            self.resource_group, self.ip_name), checks=[
+                JMESPathCheck('tags.firsttag', '1'),
+                JMESPathCheck('tags.secondtag', '2'),
+                JMESPathCheck('tags.thirdtag', ''),
+            ])
+        self.cmd('network vnet show --resource-group {} --name {}'.format(
+            self.resource_group, self.vnet_name), checks=[
+                JMESPathCheck('tags.firsttag', '1'),
+                JMESPathCheck('tags.secondtag', '2'),
+                JMESPathCheck('tags.thirdtag', ''),
+            ])
+        self.cmd('storage account show --resource-group {} --name {}'.format(
+            self.resource_group, self.storage_name), checks=[
+                JMESPathCheck('tags.firsttag', '1'),
+                JMESPathCheck('tags.secondtag', '2'),
+                JMESPathCheck('tags.thirdtag', ''),
+            ])
+
         self._check_vm_power_state('PowerState/running')
         self.cmd('vm stop --resource-group {} --name {}'.format(
             self.resource_group, self.vm_name))
@@ -634,8 +675,7 @@ class VMScaleSetCreateOptions(ResourceGroupVCRTestBase):
         self.cmd('vmss create --image Win2012R2Datacenter --admin-password Test1234@! -l westus'
                  ' --name {vmss_name} -g {resource_group} --disable-overprovision --instance-count {instance_count}'
                  ' --storage-caching {caching} --upgrade-policy-mode {upgrade_policy}'
-                 ' --private-ip-address-allocation static --private-ip-address 10.0.0.5 --admin-username myadmin'
-                 ' --public-ip-address-type existing --public-ip-address-name {ip_name}'
+                 ' --admin-username myadmin --public-ip-address-type existingName --public-ip-address-name {ip_name}'
                  .format(vmss_name=vmss_name, resource_group=self.resource_group, instance_count=instance_count,
                          caching=caching, upgrade_policy=upgrade_policy, ip_name=ip_name))
         self.cmd('network lb show --name {vmss_name}lb -g {resource_group}'.format(vmss_name=vmss_name, resource_group=self.resource_group),

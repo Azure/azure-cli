@@ -21,8 +21,8 @@ from azure.cli.command_modules.vm.mgmt_avail_set.lib import (AvailSetCreationCli
 from azure.cli.command_modules.vm.mgmt_avail_set.lib.operations import AvailSetOperations
 from azure.cli.command_modules.vm.mgmt_vm.lib import VmCreationClient as VMClient
 from azure.cli.command_modules.vm.mgmt_vm.lib.operations import VmOperations
-from azure.cli.command_modules.vm.mgmt_vmss_create.lib import VMSSCreationClient as VMSSClient
-from azure.cli.command_modules.vm.mgmt_vmss_create.lib.operations import VMSSOperations
+from azure.cli.command_modules.vm.mgmt_vmss.lib import VmssCreationClient as VMSSClient
+from azure.cli.command_modules.vm.mgmt_vmss.lib.operations import VmssOperations
 from azure.cli.command_modules.vm.mgmt_acs.lib import AcsCreationClient as ACSClient
 from azure.cli.command_modules.vm.mgmt_acs.lib.operations import AcsOperations
 from .custom import (
@@ -139,7 +139,7 @@ cli_command('vm usage list', UsageOperations.list, factory)
 
 # VM ScaleSet
 factory = lambda _: get_mgmt_service_client(VMSSClient).vmss
-cli_command('vmss create', VMSSOperations.create_or_update, factory, transform=DeploymentOutputLongRunningOperation('Starting vm scaleset create'))
+cli_command('vmss create', VmssOperations.create_or_update, factory, transform=DeploymentOutputLongRunningOperation('Starting vmss create'))
 
 factory = lambda _: _compute_client_factory().virtual_machine_scale_sets
 cli_command('vmss delete', VirtualMachineScaleSetsOperations.delete, factory)

@@ -15,13 +15,6 @@ class authenticationType(Enum):
     ssh = "ssh"
 
 
-class availabilitySetType(Enum):
-
-    none = "none"
-    existing_name = "existingName"
-    existing_id = "existingId"
-
-
 class customOsDiskType(Enum):
 
     windows = "windows"
@@ -34,23 +27,10 @@ class dnsNameType(Enum):
     new = "new"
 
 
-class networkInterfaceType(Enum):
+class loadBalancerType(Enum):
 
     new = "new"
     existing = "existing"
-
-
-class networkSecurityGroupRule(Enum):
-
-    rdp = "RDP"
-    ssh = "SSH"
-
-
-class networkSecurityGroupType(Enum):
-
-    new = "new"
-    existing_name = "existingName"
-    existing_id = "existingId"
     none = "none"
 
 
@@ -68,12 +48,6 @@ class osType(Enum):
     custom = "Custom"
 
 
-class privateIpAddressAllocation(Enum):
-
-    dynamic = "dynamic"
-    static = "static"
-
-
 class publicIpAddressAllocation(Enum):
 
     dynamic = "dynamic"
@@ -85,14 +59,6 @@ class publicIpAddressType(Enum):
     none = "none"
     new = "new"
     existing_name = "existingName"
-    existing_id = "existingId"
-
-
-class storageAccountType(Enum):
-
-    new = "new"
-    existing_name = "existingName"
-    existing_id = "existingId"
 
 
 class storageCaching(Enum):
@@ -101,11 +67,16 @@ class storageCaching(Enum):
     read_write = "ReadWrite"
 
 
+class upgradePolicyMode(Enum):
+
+    manual = "manual"
+    automatic = "automatic"
+
+
 class virtualNetworkType(Enum):
 
     new = "new"
-    existing_name = "existingName"
-    existing_id = "existingId"
+    existing = "existing"
 
 
 class DeploymentMode(Enum):
