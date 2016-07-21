@@ -128,10 +128,10 @@ def add_id_parameters(command_table):
 
             if errors:
                 missing_required = ' '.join((arg.options_list[0] for arg in errors))
-                raise CLIError('({} | {}) are required'.format(missing_required, '--id'))
+                raise CLIError('({} | {}) are required'.format(missing_required, '--ids'))
 
         command.add_argument(argparse.SUPPRESS,
-                             '--id',
+                             '--ids',
                              metavar='RESOURCE_ID',
                              help='ID of resource',
                              action=split_action(command.arguments),
