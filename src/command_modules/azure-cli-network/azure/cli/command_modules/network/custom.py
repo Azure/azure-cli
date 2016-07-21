@@ -1,4 +1,9 @@
-﻿# pylint: disable=no-self-use,too-many-arguments,no-member
+﻿#---------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for license information.
+#---------------------------------------------------------------------------------------------
+
+# pylint: disable=no-self-use,too-many-arguments,no-member
 from azure.mgmt.network.models import Subnet, SecurityRule, NetworkSecurityGroup
 
 from azure.cli._util import CLIError

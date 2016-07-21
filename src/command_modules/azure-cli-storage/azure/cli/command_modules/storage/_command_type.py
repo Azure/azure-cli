@@ -1,3 +1,8 @@
+#---------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for license information.
+#---------------------------------------------------------------------------------------------
+
 from azure.cli.commands import create_command, command_table
 
 from azure.cli.command_modules.storage._validators import validate_client_parameters

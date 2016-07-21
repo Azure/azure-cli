@@ -28,7 +28,7 @@ setup(
     version='0.0.1',
     description='Microsoft Azure Command-Line Tools Example Command Module',
     long_description=README,
-    license='TBD',
+    license='MIT',
     author='Example Author',
     author_email='author@example.com',
     url='https://github.com/example/repo',

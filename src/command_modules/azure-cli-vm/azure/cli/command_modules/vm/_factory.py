@@ -1,4 +1,9 @@
-﻿from azure.cli.commands.client_factory import (
+﻿#---------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for license information.
+#---------------------------------------------------------------------------------------------
+
+from azure.cli.commands.client_factory import (
     get_mgmt_service_client,
     get_subscription_service_client)
 
