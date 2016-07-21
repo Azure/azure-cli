@@ -1,3 +1,7 @@
+#---------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for license information.
+#---------------------------------------------------------------------------------------------
 #pylint: skip-file
 # coding=utf-8
 # --------------------------------------------------------------------------
@@ -16,6 +20,7 @@ from .dependency import Dependency
 from .deployment_properties_extended import DeploymentPropertiesExtended
 from .deployment_extended import DeploymentExtended
 from .webapp_creation_client_enums import (
+    hostingPlanType,
     DeploymentMode,
 )
 
@@ -29,5 +34,6 @@ __all__ = [
     'Dependency',
     'DeploymentPropertiesExtended',
     'DeploymentExtended',
+    'hostingPlanType',
     'DeploymentMode',
 ]

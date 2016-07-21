@@ -145,7 +145,7 @@
           "type": "string", 
           "description": "URI referencing the template.", 
           "enum": [
-            "https://azuresdkci.blob.core.windows.net/templatehost/CreateVm_2016-06-30/azuredeploy.json"
+            "https://azuresdkci.blob.core.windows.net/templatehost/CreateVm_2016-07-19/azuredeploy.json"
           ]
         }, 
         "contentVersion": {
@@ -360,6 +360,11 @@
           "$ref": "#/definitions/DeploymentParameter_subnetName", 
           "x-ms-client-flatten": true
         }, 
+        "tags": {
+          "type": "object", 
+          "$ref": "#/definitions/DeploymentParameter_tags", 
+          "x-ms-client-flatten": true
+        }, 
         "virtualNetwork": {
           "type": "object", 
           "$ref": "#/definitions/DeploymentParameter_virtualNetwork", 
@@ -412,6 +417,10 @@
             "password", 
             "ssh"
           ], 
+          "x-ms-enum": {
+            "name": "authenticationType", 
+            "modelAsString": false
+          }, 
           "default": "password"
         }
       }
@@ -436,6 +445,10 @@
             "existingName", 
             "existingId"
           ], 
+          "x-ms-enum": {
+            "name": "availabilitySetType", 
+            "modelAsString": false
+          }, 
           "default": "none"
         }
       }
@@ -450,6 +463,10 @@
             "windows", 
             "linux"
           ], 
+          "x-ms-enum": {
+            "name": "customOsDiskType", 
+            "modelAsString": false
+          }, 
           "default": "windows"
         }
       }
@@ -482,6 +499,10 @@
             "none", 
             "new"
           ], 
+          "x-ms-enum": {
+            "name": "dnsNameType", 
+            "modelAsString": false
+          }, 
           "default": "none"
         }
       }
@@ -529,6 +550,10 @@
             "new", 
             "existing"
           ], 
+          "x-ms-enum": {
+            "name": "networkInterfaceType", 
+            "modelAsString": false
+          }, 
           "default": "new"
         }
       }
@@ -552,6 +577,10 @@
             "RDP", 
             "SSH"
           ], 
+          "x-ms-enum": {
+            "name": "networkSecurityGroupRule", 
+            "modelAsString": false
+          }, 
           "default": "RDP"
         }
       }
@@ -568,6 +597,10 @@
             "existingId", 
             "none"
           ], 
+          "x-ms-enum": {
+            "name": "networkSecurityGroupType", 
+            "modelAsString": false
+          }, 
           "default": "new"
         }
       }
@@ -591,6 +624,10 @@
             "provided", 
             "custom"
           ], 
+          "x-ms-enum": {
+            "name": "osDiskType", 
+            "modelAsString": false
+          }, 
           "default": "provided"
         }
       }
@@ -646,6 +683,10 @@
             "Win2008R2SP1", 
             "Custom"
           ], 
+          "x-ms-enum": {
+            "name": "osType", 
+            "modelAsString": false
+          }, 
           "default": "Win2012R2Datacenter"
         }
       }
@@ -679,6 +720,10 @@
             "dynamic", 
             "static"
           ], 
+          "x-ms-enum": {
+            "name": "privateIpAddressAllocation", 
+            "modelAsString": false
+          }, 
           "default": "dynamic"
         }
       }
@@ -702,6 +747,10 @@
             "dynamic", 
             "static"
           ], 
+          "x-ms-enum": {
+            "name": "publicIpAddressAllocation", 
+            "modelAsString": false
+          }, 
           "default": "dynamic"
         }
       }
@@ -718,6 +767,10 @@
             "existingName", 
             "existingId"
           ], 
+          "x-ms-enum": {
+            "name": "publicIpAddressType", 
+            "modelAsString": false
+          }, 
           "default": "new"
         }
       }
@@ -770,6 +823,10 @@
             "existingName", 
             "existingId"
           ], 
+          "x-ms-enum": {
+            "name": "storageAccountType", 
+            "modelAsString": false
+          }, 
           "default": "new"
         }
       }
@@ -784,6 +841,10 @@
             "ReadOnly", 
             "ReadWrite"
           ], 
+          "x-ms-enum": {
+            "name": "storageCaching", 
+            "modelAsString": false
+          }, 
           "default": "ReadWrite"
         }
       }
@@ -827,6 +888,15 @@
         }
       }
     }, 
+    "DeploymentParameter_tags": {
+      "properties": {
+        "value": {
+          "type": "object", 
+          "description": "Tags object.", 
+          "x-ms-client-name": "tags"
+        }
+      }
+    }, 
     "DeploymentParameter_virtualNetwork": {
       "properties": {
         "value": {
@@ -857,6 +927,10 @@
             "existingName", 
             "existingId"
           ], 
+          "x-ms-enum": {
+            "name": "virtualNetworkType", 
+            "modelAsString": false
+          }, 
           "default": "new"
         }
       }
@@ -868,7 +942,7 @@
           "description": "Container URI of of the template.", 
           "x-ms-client-name": "_artifactsLocation", 
           "enum": [
-            "https://azuresdkci.blob.core.windows.net/templatehost/CreateVm_2016-06-30"
+            "https://azuresdkci.blob.core.windows.net/templatehost/CreateVm_2016-07-19"
           ]
         }
       }, 

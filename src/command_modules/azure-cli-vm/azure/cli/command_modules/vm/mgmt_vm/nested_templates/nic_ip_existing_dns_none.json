@@ -2,13 +2,25 @@
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "location": {
-      "type": "string"
-    },
     "dnsNameForPublicIP": {
       "type": "string"
     },
-    "VirtualMachineName": {
+    "location": {
+      "type": "string"
+    },
+    "networkSecurityGroupId": {
+      "type": "string"
+    },
+    "networkSecurityGroupType": {
+      "type": "string"
+    },
+    "nicName": {
+      "type": "string"
+    },
+    "privateIpAddress": {
+      "type": "string"
+    },
+    "privateIpAllocation": {
       "type": "string"
     },
     "publicIpAddress": {
@@ -17,22 +29,13 @@
     "publicIpAddressAllocation": {
       "type": "string"
     },
-    "privateIpAddress": {
-      "type": "string"
-    },
-    "nicName": {
-      "type": "string"
-    },
     "subnetRef": {
       "type": "string"
     },
-    "privateIpAllocation": {
-      "type": "string"
+    "tags": {
+      "type": "object"
     },
-    "networkSecurityGroupId": {
-      "type": "string"
-    },
-    "networkSecurityGroupType": {
+    "VirtualMachineName": {
       "type": "string"
     }
   },
@@ -77,9 +80,9 @@
             "properties": "[variables('ipConfigProperties')[parameters('privateIpAllocation')]]"
           }
         ],
-      "networkSecurityGroup": {
-        "id": "[parameters('networkSecurityGroupId')]"
-      }
+        "networkSecurityGroup": {
+          "id": "[parameters('networkSecurityGroupId')]"
+        }
       },
       "none": {
         "ipConfigurations": [
@@ -97,9 +100,7 @@
       "type": "Microsoft.Network/networkInterfaces",
       "name": "[parameters('nicName')]",
       "location": "[parameters('location')]",
-      "tags": {
-        "displayName": "NetworkInterface"
-      },
+      "tags": "[parameters('tags')]",
       "dependsOn": [ ],
       "properties": "[variables('nsgProperties')[parameters('networkSecurityGroupType')]]"
     }

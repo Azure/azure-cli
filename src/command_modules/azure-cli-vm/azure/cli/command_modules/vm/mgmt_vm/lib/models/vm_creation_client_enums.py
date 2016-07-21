@@ -1,3 +1,7 @@
+#---------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for license information.
+#---------------------------------------------------------------------------------------------
 #pylint: skip-file
 # coding=utf-8
 # --------------------------------------------------------------------------
@@ -7,6 +11,105 @@
 # --------------------------------------------------------------------------
 
 from enum import Enum
+
+
+class authenticationType(Enum):
+
+    password = "password"
+    ssh = "ssh"
+
+
+class availabilitySetType(Enum):
+
+    none = "none"
+    existing_name = "existingName"
+    existing_id = "existingId"
+
+
+class customOsDiskType(Enum):
+
+    windows = "windows"
+    linux = "linux"
+
+
+class dnsNameType(Enum):
+
+    none = "none"
+    new = "new"
+
+
+class networkInterfaceType(Enum):
+
+    new = "new"
+    existing = "existing"
+
+
+class networkSecurityGroupRule(Enum):
+
+    rdp = "RDP"
+    ssh = "SSH"
+
+
+class networkSecurityGroupType(Enum):
+
+    new = "new"
+    existing_name = "existingName"
+    existing_id = "existingId"
+    none = "none"
+
+
+class osDiskType(Enum):
+
+    provided = "provided"
+    custom = "custom"
+
+
+class osType(Enum):
+
+    win2012_r2_datacenter = "Win2012R2Datacenter"
+    win2012_datacenter = "Win2012Datacenter"
+    win2008_r2_sp1 = "Win2008R2SP1"
+    custom = "Custom"
+
+
+class privateIpAddressAllocation(Enum):
+
+    dynamic = "dynamic"
+    static = "static"
+
+
+class publicIpAddressAllocation(Enum):
+
+    dynamic = "dynamic"
+    static = "static"
+
+
+class publicIpAddressType(Enum):
+
+    none = "none"
+    new = "new"
+    existing_name = "existingName"
+    existing_id = "existingId"
+
+
+class storageAccountType(Enum):
+
+    new = "new"
+    existing_name = "existingName"
+    existing_id = "existingId"
+
+
+class storageCaching(Enum):
+
+    read_only = "ReadOnly"
+    read_write = "ReadWrite"
+
+
+class virtualNetworkType(Enum):
+
+    new = "new"
+    existing_name = "existingName"
+    existing_id = "existingId"
 
 
 class DeploymentMode(Enum):

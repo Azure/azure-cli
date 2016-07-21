@@ -8,6 +8,9 @@
     "location": {
       "type": "string"
     },
+    "tags": {
+      "type": "object"
+    },
     "vhdStorageType": {
       "type": "string"
     }
@@ -21,9 +24,7 @@
       "name": "[parameters('storageAccountName')]",
       "apiVersion": "2015-06-15",
       "location": "[parameters('location')]",
-      "tags": {
-        "displayName": "StorageAccount"
-      },
+      "tags": "[parameters('tags')]",
       "properties": {
         "accountType": "[parameters('vhdStorageType')]"
       }

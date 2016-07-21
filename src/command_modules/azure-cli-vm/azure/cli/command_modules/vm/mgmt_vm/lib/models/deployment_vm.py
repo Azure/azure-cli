@@ -1,3 +1,7 @@
+#---------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for license information.
+#---------------------------------------------------------------------------------------------
 #pylint: skip-file
 # coding=utf-8
 # --------------------------------------------------------------------------
@@ -17,7 +21,7 @@ class DeploymentVm(Model):
     sending a request.
 
     :ivar uri: URI referencing the template. Default value:
-     "https://azuresdkci.blob.core.windows.net/templatehost/CreateVm_2016-06-30/azuredeploy.json"
+     "https://azuresdkci.blob.core.windows.net/templatehost/CreateVm_2016-07-19/azuredeploy.json"
      .
     :vartype uri: str
     :param content_version: If included it must match the ContentVersion in
@@ -25,7 +29,7 @@ class DeploymentVm(Model):
     :type content_version: str
     :ivar _artifacts_location: Container URI of of the template. Default
      value:
-     "https://azuresdkci.blob.core.windows.net/templatehost/CreateVm_2016-06-30"
+     "https://azuresdkci.blob.core.windows.net/templatehost/CreateVm_2016-07-19"
      .
     :vartype _artifacts_location: str
     :param admin_password: Password for the Virtual Machine.  Required if SSH
@@ -35,17 +39,20 @@ class DeploymentVm(Model):
     :type admin_username: str
     :param authentication_type: Password or SSH Public Key authentication.
      Possible values include: 'password', 'ssh'. Default value: "password" .
-    :type authentication_type: str
+    :type authentication_type: str or :class:`authenticationType
+     <vmcreationclient.models.authenticationType>`
     :param availability_set: Name or ID of existing availability set for the
      VM.
     :type availability_set: str
     :param availability_set_type: Flag to add the VM to an existing
      availability set. Possible values include: 'none', 'existingName',
      'existingId'. Default value: "none" .
-    :type availability_set_type: str
+    :type availability_set_type: str or :class:`availabilitySetType
+     <vmcreationclient.models.availabilitySetType>`
     :param custom_os_disk_type: Custom image OS type. Possible values
      include: 'windows', 'linux'. Default value: "windows" .
-    :type custom_os_disk_type: str
+    :type custom_os_disk_type: str or :class:`customOsDiskType
+     <vmcreationclient.models.customOsDiskType>`
     :param custom_os_disk_uri: URI to a custom disk image.
     :type custom_os_disk_uri: str
     :param dns_name_for_public_ip: Globally unique DNS Name for the Public IP
@@ -54,7 +61,8 @@ class DeploymentVm(Model):
     :type dns_name_for_public_ip: str
     :param dns_name_type: Associate VMs with a public IP address to a DNS
      name. Possible values include: 'none', 'new'. Default value: "none" .
-    :type dns_name_type: str
+    :type dns_name_type: str or :class:`dnsNameType
+     <vmcreationclient.models.dnsNameType>`
     :param location: Location for VM resources.
     :type location: str
     :param name: The VM name.
@@ -65,23 +73,27 @@ class DeploymentVm(Model):
     :param network_interface_type: Whether to create a new network interface
      or use existing ones. Possible values include: 'new', 'existing'.
      Default value: "new" .
-    :type network_interface_type: str
+    :type network_interface_type: str or :class:`networkInterfaceType
+     <vmcreationclient.models.networkInterfaceType>`
     :param network_security_group: Name or ID of the network security group.
     :type network_security_group: str
     :param network_security_group_rule: The type of rule to add to a new
      network security group. Possible values include: 'RDP', 'SSH'. Default
      value: "RDP" .
-    :type network_security_group_rule: str
+    :type network_security_group_rule: str or
+     :class:`networkSecurityGroupRule <vmcreationclient.models.networkSecurityGroupRule>`
     :param network_security_group_type: Whether to use a network security
      group or not. Possible values include: 'new', 'existingName',
      'existingId', 'none'. Default value: "new" .
-    :type network_security_group_type: str
+    :type network_security_group_type: str or
+     :class:`networkSecurityGroupType <vmcreationclient.models.networkSecurityGroupType>`
     :param os_disk_name: Name of new VM OS disk.
     :type os_disk_name: str
     :param os_disk_type: Use a custom image URI from the OS Disk URI
      parameter or use a provider's image. Possible values include:
      'provided', 'custom'. Default value: "provided" .
-    :type os_disk_type: str
+    :type os_disk_type: str or :class:`osDiskType
+     <vmcreationclient.models.osDiskType>`
     :param os_disk_uri: URI for a custom VHD image.
     :type os_disk_uri: str
     :param os_offer: The OS Offer to install. Default value: "WindowsServer" .
@@ -96,7 +108,7 @@ class DeploymentVm(Model):
      with the osPublisher, osOffer, osSKU, and osVersion parameters. Possible
      values include: 'Win2012R2Datacenter', 'Win2012Datacenter',
      'Win2008R2SP1', 'Custom'. Default value: "Win2012R2Datacenter" .
-    :type os_type: str
+    :type os_type: str or :class:`osType <vmcreationclient.models.osType>`
     :param os_version: The OS version to install. Default value: "latest" .
     :type os_version: str
     :param private_ip_address: The private IP address to use with Private IP
@@ -105,16 +117,21 @@ class DeploymentVm(Model):
     :param private_ip_address_allocation: Private IP address allocation
      method. Possible values include: 'dynamic', 'static'. Default value:
      "dynamic" .
-    :type private_ip_address_allocation: str
+    :type private_ip_address_allocation: str or
+     :class:`privateIpAddressAllocation
+     <vmcreationclient.models.privateIpAddressAllocation>`
     :param public_ip_address: Name or ID of public IP address to use.
     :type public_ip_address: str
     :param public_ip_address_allocation: Public IP address allocation method.
      Possible values include: 'dynamic', 'static'. Default value: "dynamic" .
-    :type public_ip_address_allocation: str
+    :type public_ip_address_allocation: str or
+     :class:`publicIpAddressAllocation
+     <vmcreationclient.models.publicIpAddressAllocation>`
     :param public_ip_address_type: Use a public IP Address for the VM Nic.
      Possible values include: 'none', 'new', 'existingName', 'existingId'.
      Default value: "new" .
-    :type public_ip_address_type: str
+    :type public_ip_address_type: str or :class:`publicIpAddressType
+     <vmcreationclient.models.publicIpAddressType>`
     :param size: The VM Size that should be created.  See
      https://azure.microsoft.com/en-us/pricing/details/virtual-machines/ for
      size info. Default value: "Standard_DS1" .
@@ -128,10 +145,12 @@ class DeploymentVm(Model):
     :param storage_account_type: Whether to use an existing storage account
      or create a new one. Possible values include: 'new', 'existingName',
      'existingId'. Default value: "new" .
-    :type storage_account_type: str
+    :type storage_account_type: str or :class:`storageAccountType
+     <vmcreationclient.models.storageAccountType>`
     :param storage_caching: Storage caching type for the VM OS disk. Possible
      values include: 'ReadOnly', 'ReadWrite'. Default value: "ReadWrite" .
-    :type storage_caching: str
+    :type storage_caching: str or :class:`storageCaching
+     <vmcreationclient.models.storageCaching>`
     :param storage_container_name: Name of storage container for the VM OS
      disk. Default value: "vhds" .
     :type storage_container_name: str
@@ -143,6 +162,8 @@ class DeploymentVm(Model):
     :type subnet_ip_address_prefix: str
     :param subnet_name: The subnet name.
     :type subnet_name: str
+    :param tags: Tags object.
+    :type tags: object
     :param virtual_network: Name or ID of virtual network to add VM to.
     :type virtual_network: str
     :param virtual_network_ip_address_prefix: The virtual network IP address
@@ -151,7 +172,8 @@ class DeploymentVm(Model):
     :param virtual_network_type: Whether to use an existing VNet or create a
      new one. Possible values include: 'new', 'existingName', 'existingId'.
      Default value: "new" .
-    :type virtual_network_type: str
+    :type virtual_network_type: str or :class:`virtualNetworkType
+     <vmcreationclient.models.virtualNetworkType>`
     :ivar mode: Gets or sets the deployment mode. Default value:
      "Incremental" .
     :vartype mode: str
@@ -171,56 +193,57 @@ class DeploymentVm(Model):
         '_artifacts_location': {'key': 'properties.parameters._artifactsLocation.value', 'type': 'str'},
         'admin_password': {'key': 'properties.parameters.adminPassword.value', 'type': 'str'},
         'admin_username': {'key': 'properties.parameters.adminUsername.value', 'type': 'str'},
-        'authentication_type': {'key': 'properties.parameters.authenticationType.value', 'type': 'str'},
+        'authentication_type': {'key': 'properties.parameters.authenticationType.value', 'type': 'authenticationType'},
         'availability_set': {'key': 'properties.parameters.availabilitySet.value', 'type': 'str'},
-        'availability_set_type': {'key': 'properties.parameters.availabilitySetType.value', 'type': 'str'},
-        'custom_os_disk_type': {'key': 'properties.parameters.customOsDiskType.value', 'type': 'str'},
+        'availability_set_type': {'key': 'properties.parameters.availabilitySetType.value', 'type': 'availabilitySetType'},
+        'custom_os_disk_type': {'key': 'properties.parameters.customOsDiskType.value', 'type': 'customOsDiskType'},
         'custom_os_disk_uri': {'key': 'properties.parameters.customOsDiskUri.value', 'type': 'str'},
         'dns_name_for_public_ip': {'key': 'properties.parameters.dnsNameForPublicIP.value', 'type': 'str'},
-        'dns_name_type': {'key': 'properties.parameters.dnsNameType.value', 'type': 'str'},
+        'dns_name_type': {'key': 'properties.parameters.dnsNameType.value', 'type': 'dnsNameType'},
         'location': {'key': 'properties.parameters.location.value', 'type': 'str'},
         'name': {'key': 'properties.parameters.name.value', 'type': 'str'},
         'network_interface_ids': {'key': 'properties.parameters.networkInterfaceIds.value', 'type': '[object]'},
-        'network_interface_type': {'key': 'properties.parameters.networkInterfaceType.value', 'type': 'str'},
+        'network_interface_type': {'key': 'properties.parameters.networkInterfaceType.value', 'type': 'networkInterfaceType'},
         'network_security_group': {'key': 'properties.parameters.networkSecurityGroup.value', 'type': 'str'},
-        'network_security_group_rule': {'key': 'properties.parameters.networkSecurityGroupRule.value', 'type': 'str'},
-        'network_security_group_type': {'key': 'properties.parameters.networkSecurityGroupType.value', 'type': 'str'},
+        'network_security_group_rule': {'key': 'properties.parameters.networkSecurityGroupRule.value', 'type': 'networkSecurityGroupRule'},
+        'network_security_group_type': {'key': 'properties.parameters.networkSecurityGroupType.value', 'type': 'networkSecurityGroupType'},
         'os_disk_name': {'key': 'properties.parameters.osDiskName.value', 'type': 'str'},
-        'os_disk_type': {'key': 'properties.parameters.osDiskType.value', 'type': 'str'},
+        'os_disk_type': {'key': 'properties.parameters.osDiskType.value', 'type': 'osDiskType'},
         'os_disk_uri': {'key': 'properties.parameters.osDiskUri.value', 'type': 'str'},
         'os_offer': {'key': 'properties.parameters.osOffer.value', 'type': 'str'},
         'os_publisher': {'key': 'properties.parameters.osPublisher.value', 'type': 'str'},
         'os_sku': {'key': 'properties.parameters.osSKU.value', 'type': 'str'},
-        'os_type': {'key': 'properties.parameters.osType.value', 'type': 'str'},
+        'os_type': {'key': 'properties.parameters.osType.value', 'type': 'osType'},
         'os_version': {'key': 'properties.parameters.osVersion.value', 'type': 'str'},
         'private_ip_address': {'key': 'properties.parameters.privateIpAddress.value', 'type': 'str'},
-        'private_ip_address_allocation': {'key': 'properties.parameters.privateIpAddressAllocation.value', 'type': 'str'},
+        'private_ip_address_allocation': {'key': 'properties.parameters.privateIpAddressAllocation.value', 'type': 'privateIpAddressAllocation'},
         'public_ip_address': {'key': 'properties.parameters.publicIpAddress.value', 'type': 'str'},
-        'public_ip_address_allocation': {'key': 'properties.parameters.publicIpAddressAllocation.value', 'type': 'str'},
-        'public_ip_address_type': {'key': 'properties.parameters.publicIpAddressType.value', 'type': 'str'},
+        'public_ip_address_allocation': {'key': 'properties.parameters.publicIpAddressAllocation.value', 'type': 'publicIpAddressAllocation'},
+        'public_ip_address_type': {'key': 'properties.parameters.publicIpAddressType.value', 'type': 'publicIpAddressType'},
         'size': {'key': 'properties.parameters.size.value', 'type': 'str'},
         'ssh_dest_key_path': {'key': 'properties.parameters.sshDestKeyPath.value', 'type': 'str'},
         'ssh_key_value': {'key': 'properties.parameters.sshKeyValue.value', 'type': 'str'},
         'storage_account': {'key': 'properties.parameters.storageAccount.value', 'type': 'str'},
-        'storage_account_type': {'key': 'properties.parameters.storageAccountType.value', 'type': 'str'},
-        'storage_caching': {'key': 'properties.parameters.storageCaching.value', 'type': 'str'},
+        'storage_account_type': {'key': 'properties.parameters.storageAccountType.value', 'type': 'storageAccountType'},
+        'storage_caching': {'key': 'properties.parameters.storageCaching.value', 'type': 'storageCaching'},
         'storage_container_name': {'key': 'properties.parameters.storageContainerName.value', 'type': 'str'},
         'storage_type': {'key': 'properties.parameters.storageType.value', 'type': 'str'},
         'subnet_ip_address_prefix': {'key': 'properties.parameters.subnetIpAddressPrefix.value', 'type': 'str'},
         'subnet_name': {'key': 'properties.parameters.subnetName.value', 'type': 'str'},
+        'tags': {'key': 'properties.parameters.tags.value', 'type': 'object'},
         'virtual_network': {'key': 'properties.parameters.virtualNetwork.value', 'type': 'str'},
         'virtual_network_ip_address_prefix': {'key': 'properties.parameters.virtualNetworkIpAddressPrefix.value', 'type': 'str'},
-        'virtual_network_type': {'key': 'properties.parameters.virtualNetworkType.value', 'type': 'str'},
+        'virtual_network_type': {'key': 'properties.parameters.virtualNetworkType.value', 'type': 'virtualNetworkType'},
         'mode': {'key': 'properties.mode', 'type': 'str'},
     }
 
-    uri = "https://azuresdkci.blob.core.windows.net/templatehost/CreateVm_2016-06-30/azuredeploy.json"
+    uri = "https://azuresdkci.blob.core.windows.net/templatehost/CreateVm_2016-07-19/azuredeploy.json"
 
-    _artifacts_location = "https://azuresdkci.blob.core.windows.net/templatehost/CreateVm_2016-06-30"
+    _artifacts_location = "https://azuresdkci.blob.core.windows.net/templatehost/CreateVm_2016-07-19"
 
     mode = "Incremental"
 
-    def __init__(self, admin_username, name, content_version=None, admin_password=None, authentication_type="password", availability_set=None, availability_set_type="none", custom_os_disk_type="windows", custom_os_disk_uri=None, dns_name_for_public_ip=None, dns_name_type="none", location=None, network_interface_ids=None, network_interface_type="new", network_security_group=None, network_security_group_rule="RDP", network_security_group_type="new", os_disk_name=None, os_disk_type="provided", os_disk_uri=None, os_offer="WindowsServer", os_publisher="MicrosoftWindowsServer", os_sku="2012-R2-Datacenter", os_type="Win2012R2Datacenter", os_version="latest", private_ip_address=None, private_ip_address_allocation="dynamic", public_ip_address=None, public_ip_address_allocation="dynamic", public_ip_address_type="new", size="Standard_DS1", ssh_dest_key_path=None, ssh_key_value=None, storage_account=None, storage_account_type="new", storage_caching="ReadWrite", storage_container_name="vhds", storage_type="Premium_LRS", subnet_ip_address_prefix="10.0.0.0/24", subnet_name=None, virtual_network=None, virtual_network_ip_address_prefix="10.0.0.0/16", virtual_network_type="new"):
+    def __init__(self, admin_username, name, content_version=None, admin_password=None, authentication_type="password", availability_set=None, availability_set_type="none", custom_os_disk_type="windows", custom_os_disk_uri=None, dns_name_for_public_ip=None, dns_name_type="none", location=None, network_interface_ids=None, network_interface_type="new", network_security_group=None, network_security_group_rule="RDP", network_security_group_type="new", os_disk_name=None, os_disk_type="provided", os_disk_uri=None, os_offer="WindowsServer", os_publisher="MicrosoftWindowsServer", os_sku="2012-R2-Datacenter", os_type="Win2012R2Datacenter", os_version="latest", private_ip_address=None, private_ip_address_allocation="dynamic", public_ip_address=None, public_ip_address_allocation="dynamic", public_ip_address_type="new", size="Standard_DS1", ssh_dest_key_path=None, ssh_key_value=None, storage_account=None, storage_account_type="new", storage_caching="ReadWrite", storage_container_name="vhds", storage_type="Premium_LRS", subnet_ip_address_prefix="10.0.0.0/24", subnet_name=None, tags=None, virtual_network=None, virtual_network_ip_address_prefix="10.0.0.0/16", virtual_network_type="new"):
         self.content_version = content_version
         self.admin_password = admin_password
         self.admin_username = admin_username
@@ -261,6 +284,7 @@ class DeploymentVm(Model):
         self.storage_type = storage_type
         self.subnet_ip_address_prefix = subnet_ip_address_prefix
         self.subnet_name = subnet_name
+        self.tags = tags
         self.virtual_network = virtual_network
         self.virtual_network_ip_address_prefix = virtual_network_ip_address_prefix
         self.virtual_network_type = virtual_network_type

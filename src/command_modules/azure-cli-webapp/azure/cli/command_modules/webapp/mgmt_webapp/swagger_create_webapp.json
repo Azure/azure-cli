@@ -145,7 +145,7 @@
           "type": "string", 
           "description": "URI referencing the template.", 
           "enum": [
-            "https://azuresdkci.blob.core.windows.net/templatehost/CreateWebapp_2016-06-22/azuredeploy.json"
+            "https://azuresdkci.blob.core.windows.net/templatehost/CreateWebapp_2016-07-19/azuredeploy.json"
           ]
         }, 
         "contentVersion": {
@@ -194,6 +194,11 @@
           "type": "object", 
           "$ref": "#/definitions/DeploymentParameter_skuName", 
           "x-ms-client-flatten": true
+        }, 
+        "tags": {
+          "type": "object", 
+          "$ref": "#/definitions/DeploymentParameter_tags", 
+          "x-ms-client-flatten": true
         }
       }, 
       "required": [
@@ -220,6 +225,10 @@
             "existingName", 
             "existingId"
           ], 
+          "x-ms-enum": {
+            "name": "hostingPlanType", 
+            "modelAsString": false
+          }, 
           "default": "new"
         }
       }
@@ -266,6 +275,15 @@
         }
       }
     }, 
+    "DeploymentParameter_tags": {
+      "properties": {
+        "value": {
+          "type": "object", 
+          "description": "Tags object.", 
+          "x-ms-client-name": "tags"
+        }
+      }
+    }, 
     "DeploymentParameter__artifactsLocation": {
       "properties": {
         "value": {
@@ -273,7 +291,7 @@
           "description": "Container URI of of the template.", 
           "x-ms-client-name": "_artifactsLocation", 
           "enum": [
-            "https://azuresdkci.blob.core.windows.net/templatehost/CreateWebapp_2016-06-22"
+            "https://azuresdkci.blob.core.windows.net/templatehost/CreateWebapp_2016-07-19"
           ]
         }
       }, 

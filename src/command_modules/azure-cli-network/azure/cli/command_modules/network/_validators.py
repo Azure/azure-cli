@@ -66,9 +66,9 @@ def validate_servers(namespace):
     servers = []
     for item in namespace.servers if namespace.servers else []:
         try:
-            socket.inet_aton(item)
+            socket.inet_aton(item) #pylint:disable=no-member
             servers.append({'IpAddress': item})
-        except socket.error:
+        except socket.error: #pylint:disable=no-member
             servers.append({'Fqdn': item})
     namespace.servers = servers
 

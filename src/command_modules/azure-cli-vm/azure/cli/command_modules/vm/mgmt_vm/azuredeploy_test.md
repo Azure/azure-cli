@@ -47,7 +47,7 @@ Size Standard_A3, existing storage account, existing storage container name, exi
 Commands to verify (Linux):
  vmname=cusvm0101z
  rg=myvms2
- ./az vm create -n $vmname -g $rg --image https://genlinuximg001100.blob.core.windows.net/vhds/linuximage.vhd --authentication-type ssh --custom-os-disk-type linux --storage-account <ID ending in genlinuximg001100> --storage-container-name ${vmname}vhdcopy --os-disk-name osdiskimage
+ ./az vm create -n $vmname -g $rg --image https://genlinuximg001100.blob.core.windows.net/vhds/linuximage.vhd --authentication-type ssh --custom-disk-os-type linux --storage-account <ID ending in genlinuximg001100> --storage-container-name ${vmname}vhdcopy --os-disk-name osdiskimage
  then 
  ssh <IPAddress> (don't specify username or password)
  verify emacs/application is installed
