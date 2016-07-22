@@ -5,6 +5,7 @@
 
 import argparse
 import re
+from collections import defaultdict
 from azure.cli.commands.client_factory import get_mgmt_service_client
 from azure.mgmt.resource.resources import ResourceManagementClient
 from azure.cli.application import APPLICATION, IterateValue
@@ -150,3 +151,195 @@ def add_id_parameters(command_table):
     APPLICATION.remove(APPLICATION.COMMAND_TABLE_LOADED, add_id_parameters)
 
 APPLICATION.register(APPLICATION.COMMAND_TABLE_LOADED, add_id_parameters)
+
+def register_generic_update(name, getter, setter, setter_arg_name='parameters'):
+    from msrestazure.azure_operation import AzureOperationPoller
+    from azure.cli.commands import CliCommand, command_table
+    from azure.cli.commands._introspection import extract_args_from_signature
+
+    get_arguments = dict(extract_args_from_signature(getter))
+    set_arguments = dict(extract_args_from_signature(setter))
+
+    ordered_arguments = []
+
+    def handler(args):
+        getterargs = {key: val for key, val in args.items()
+                      if key in get_arguments}
+        instance = getter(**getterargs)
+
+        # Update properties
+        try:
+            for arg in ordered_arguments:
+                arg_type, expressions = arg
+                if arg_type == '--set':
+                    try:
+                        for expression in expressions:
+                            set_properties(instance, expression)
+                    except ValueError:
+                        raise CLIError('--set should be of the form:'
+                                       ' --set property.property=<value>'
+                                       ' property2.property=<value>')
+                elif arg_type == '--add':
+                    try:
+                        add_properties(instance, expressions)
+                    except ValueError:
+                        raise CLIError('--add should be of the form:'
+                                       ' --add property.list key1=value1 key2=value2')
+                elif arg_type == '--remove':
+                    try:
+                        remove_properties(instance, expressions)
+                    except ValueError:
+                        raise CLIError('--remove should be of the form: --remove'
+                                       ' property.propertyToRemove or'
+                                       ' --remove property.list <indexToRemove>')
+                else:
+                    raise ValueError('Unsupported arg type {}'.format(arg_type))
+        finally:
+            del ordered_arguments[:]
+
+        # Done... update the instance!
+        getterargs[setter_arg_name] = instance
+        opres = setter(**getterargs)
+        return opres.result() if isinstance(opres, AzureOperationPoller) else opres
+
+    class OrderedArgsAction(argparse.Action): #pylint:disable=too-few-public-methods
+        def __call__(self, parser, namespace, values, option_string=None):
+            ordered_arguments.append((option_string, values))
+
+    cmd = CliCommand(name, handler)
+    cmd.arguments.update(set_arguments)
+    cmd.arguments.update(get_arguments)
+    cmd.arguments.pop(setter_arg_name, None)
+    cmd.add_argument('properties_to_set', '--set', nargs='+', action=OrderedArgsAction, default=[],
+                     help='Update an object by specifying a property path and value to set.'
+                     '  Example: --set property1.property2=value')
+    cmd.add_argument('properties_to_add', '--add', nargs='+', action=OrderedArgsAction, default=[],
+                     help='Add an object to a list of objects by specifying a path and key'
+                     ' value pairs.  Example: --add property1.list id=<id>')
+    cmd.add_argument('properties_to_remove', '--remove', nargs='+', action=OrderedArgsAction,
+                     default=[], help='Remove a property or an element from a list.  Example: '
+                     '--remove property1.list <index>')
+    command_table[name] = cmd
+
+index_regex = re.compile(r'\[(.*)\]')
+def set_properties(instance, expression):
+    key, value = expression.split('=', 1)
+
+    #pylint:disable=redefined-variable-type
+    if value in ('{}', '{ }'):
+        value = {}
+    elif value in ('[]', '[ ]'):
+        value = []
+    elif value.lower() == 'false':
+        value = False
+    elif value.lower() == 'true':
+        value = True
+
+    name, path = _get_name_path(key)
+    instance = _find_property(instance, path)
+    match = index_regex.match(name)
+    index_value = int(match.group(1)) if match else None
+    try:
+        if index_value is not None:
+            instance[index_value] = value
+        elif isinstance(instance, dict):
+            instance[name] = value
+        else:
+            setattr(instance, name, value)
+    except IndexError:
+        raise CLIError('index {} doesn\'t exist on {}'.format(index_value, _make_camel_case(name)))
+    except (AttributeError, KeyError):
+        show_options(instance, name, key.split('.'))
+
+def add_properties(instance, argument_values):
+    # The first argument indicates the path to the collection to add to.
+    list_attribute_path = _get_internal_path(argument_values.pop(0))
+    list_to_add_to = _find_property(instance, list_attribute_path)
+
+    new_value = defaultdict(lambda: {})
+    for expression in argument_values:
+        set_properties(new_value, expression)
+    list_to_add_to.append(new_value)
+
+def remove_properties(instance, argument_values):
+    # The first argument indicates the path to the collection to add to.
+    argument_values = argument_values if isinstance(argument_values, list) else [argument_values]
+
+    list_attribute_path = _get_internal_path(argument_values.pop(0))
+    list_index = None
+    try:
+        list_index = argument_values.pop(0)
+    except IndexError:
+        pass
+
+    if not list_index:
+        _find_property(instance, list_attribute_path)
+        parent_to_remove_from = _find_property(instance, list_attribute_path[:-1])
+        del parent_to_remove_from[list_attribute_path[-1]]
+    else:
+        list_to_remove_from = _find_property(instance, list_attribute_path)
+        try:
+            list_to_remove_from.pop(int(list_index))
+        except IndexError:
+            raise CLIError('index {} doesn\'t exist on {}'
+                           .format(list_index,
+                                   _make_camel_case(list_attribute_path[-1])))
+
+def show_options(instance, part, path):
+    options = instance.__dict__ if hasattr(instance, '__dict__') else instance
+    options = options.keys() if isinstance(options, dict) else options
+    options = [_make_camel_case(x) for x in options]
+    raise CLIError('Couldn\'t find "{}" in "{}".  Available options: {}'
+                   .format(_make_camel_case(part),
+                           _make_camel_case('.'.join(path[:-1]).replace('.[', '[')),
+                           sorted(list(options), key=str)))
+
+snake_regex_1 = re.compile('(.)([A-Z][a-z]+)')
+snake_regex_2 = re.compile('([a-z0-9])([A-Z])')
+def _make_snake_case(s):
+    if isinstance(s, str):
+        s1 = re.sub(snake_regex_1, r'\1_\2', s)
+        return re.sub(snake_regex_2, r'\1_\2', s1).lower()
+    return s
+
+def _make_camel_case(s):
+    if isinstance(s, str):
+        parts = s.split('_')
+        return parts[0].lower() + ''.join(p.capitalize() for p in parts[1:])
+    return s
+
+def _get_internal_path(path):
+    # to handle indexing in the same way as other dot qualifiers,
+    # we split paths like foo[0][1] into foo.[0].[1]
+    _path = path.split('.') \
+        if '.[' in path \
+        else path.replace('[', '.[').split('.')
+    return [_make_snake_case(x) for x in _path]
+
+def _get_name_path(path):
+    pathlist = _get_internal_path(path)
+    return pathlist.pop(), pathlist
+
+def _update_instance(instance, part, path):
+    try:
+        index = index_regex.match(part)
+        if index:
+            try:
+                index_value = int(index.group(1))
+                instance = instance[index_value]
+            except IndexError:
+                raise CLIError('index {} doesn\'t exist on {}'.format(index_value,
+                                                                      _make_camel_case(path[-2])))
+        elif isinstance(instance, dict):
+            instance = instance[part]
+        else:
+            instance = getattr(instance, part)
+    except (AttributeError, KeyError):
+        show_options(instance, part, path)
+    return instance
+
+def _find_property(instance, path):
+    for part in path:
+        instance = _update_instance(instance, part, path)
+    return instance
+

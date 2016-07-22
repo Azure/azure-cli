@@ -227,7 +227,7 @@ def create_command(name, operation, transform_result, client_factory):
 
     name = ' '.join(name.split())
     cmd = CliCommand(name, _execute_command)
-    extract_args_from_signature(cmd, operation)
+    cmd.arguments.update(extract_args_from_signature(operation))
     return cmd
 
 

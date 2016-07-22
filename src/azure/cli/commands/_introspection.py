@@ -41,8 +41,9 @@ def _option_descriptions(operation):
 EXCLUDED_PARAMS = frozenset(['self', 'raw', 'custom_headers', 'operation_config',
                              'content_version', 'kwargs', 'client'])
 
-def extract_args_from_signature(command, operation):
+def extract_args_from_signature(operation):
     """ Extracts basic argument data from an operation's signature and docstring """
+    from azure.cli.commands import CliCommandArgument
     args = []
     try:
         # only supported in python3 - falling back to argspec if not available
@@ -74,10 +75,10 @@ def extract_args_from_signature(command, operation):
         except AttributeError:
             pass
 
-        command.add_argument(arg_name,
-                             *['--' + arg_name.replace('_', '-')],
-                             required=required,
-                             default=default,
-                             help=arg_docstring_help.get(arg_name),
-                             action=action)
+        yield (arg_name, CliCommandArgument(arg_name,
+                                            options_list=['--' + arg_name.replace('_', '-')],
+                                            required=required,
+                                            default=default,
+                                            help=arg_docstring_help.get(arg_name),
+                                            action=action))
 
