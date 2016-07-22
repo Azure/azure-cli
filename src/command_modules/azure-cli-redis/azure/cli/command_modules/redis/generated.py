@@ -1,0 +1,28 @@
+import azure.cli.commands.parameters
+from .custom import cli_redis_import_method, cli_redis_export, cli_redis_update_settings
+from azure.mgmt.redis import (
+    RedisManagementClient
+)
+from azure.mgmt.redis.operations import (
+    RedisOperations
+)
+from azure.cli.commands import cli_command
+from azure.cli.commands.client_factory import get_mgmt_service_client
+
+def _redis_client_factory(**_):
+    return get_mgmt_service_client(RedisManagementClient)
+
+factory = lambda args: _redis_client_factory(**args).redis
+
+#cli_command('redis create', RedisOperations.create_or_update, factory)
+cli_command('redis delete', RedisOperations.delete, factory)
+cli_command('redis export', cli_redis_export, factory)
+cli_command('redis force-reboot', RedisOperations.force_reboot, factory)
+cli_command('redis import-method', cli_redis_import_method, factory)
+cli_command('redis list', RedisOperations.list_by_resource_group, factory)
+cli_command('redis list-all', RedisOperations.list, factory)
+cli_command('redis list-keys', RedisOperations.list_keys, factory)
+cli_command('redis regenerate-keys', RedisOperations.regenerate_key, factory)
+cli_command('redis show', RedisOperations.get, factory)
+
+cli_command('redis update-settings', cli_redis_update_settings, factory)
