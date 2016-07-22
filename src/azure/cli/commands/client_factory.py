@@ -18,15 +18,7 @@ def get_mgmt_service_client(client_type):
 def get_subscription_service_client(client_type):
     return _get_mgmt_service_client(client_type, False)
 
-def _get_mgmt_service_client(client_type, subscription_bound=True):
-    logger.info('Getting management service client client_type=%s', client_type.__name__)
-    profile = Profile()
-    cred, subscription_id, _ = profile.get_login_credentials()
-    if subscription_bound:
-        client = client_type(cred, subscription_id)
-    else:
-        client = client_type(cred)
-
+def configure_common_settings(client):
     _debug.allow_debug_connection(client)
 
     client.config.add_user_agent("AZURECLI/{}".format(cli.__version__))
@@ -43,8 +35,18 @@ def _get_mgmt_service_client(client_type, subscription_bound=True):
     client.config.generate_client_request_id = \
         'x-ms-client-request-id' not in APPLICATION.session['headers']
 
-    return (client, subscription_id)
+def _get_mgmt_service_client(client_type, subscription_bound=True):
+    logger.info('Getting management service client client_type=%s', client_type.__name__)
+    profile = Profile()
+    cred, subscription_id, _ = profile.get_login_credentials()
+    if subscription_bound:
+        client = client_type(cred, subscription_id)
+    else:
+        client = client_type(cred)
 
+    configure_common_settings(client)
+
+    return (client, subscription_id)
 
 def get_data_service_client(service_type, account_name, account_key, connection_string=None,
                             sas_token=None):

@@ -156,7 +156,7 @@ def _build_output_content(sp_name, sp_object_id, secret, tenant):
     logger.warning("Service principal has been configured with name: '%s', secret: '%s'",
                    sp_name, secret)
     logger.warning('Useful commands to manage azure:')
-    logger.warning('  Assign a role: "az role assignment create --object-id %s --role Contributor"',
+    logger.warning('  Assign a role: "az role assignment create --assignee %s --role Contributor"',
                    sp_object_id)
     logger.warning('  Log in: "az login --service-principal -u %s -p %s --tenant %s"',
                    sp_name, secret, tenant)
