@@ -3,8 +3,8 @@ from azure.cli.commands.parameters import (
     get_resource_name_completion_list,
     get_enum_type_completion_list,
     name_type)
-from azure.cli.commands import register_cli_argument, CliArgumentType
-import azure.cli.commands.arm
+from azure.cli.commands import register_cli_argument
+import azure.cli.commands.arm # pylint: disable=unused-import
 from azure.mgmt.redis.models.redis_management_client_enums import RebootType, RedisKeyType
 
 from azure.mgmt.redis.models import (
@@ -14,6 +14,7 @@ from azure.mgmt.redis.models import (
 class JsonString(dict):
 
     def __init__(self, value):
+        super(JsonString, self).__init__()
         import json
         if value[0] in ("'", '"') and value[-1] == value[0]:
             # Remove leading and trailing quotes for dos/cmd.exe users
@@ -23,6 +24,7 @@ class JsonString(dict):
 
 class ScheduleEntryList(list):
     def __init__(self, value):
+        super(ScheduleEntryList, self).__init__()
         import json
         if value[0] in ("'", '"') and value[-1] == value[0]:
             # Remove leading and trailing quotes for dos/cmd.exe users

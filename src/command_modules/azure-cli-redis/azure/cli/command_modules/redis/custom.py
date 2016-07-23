@@ -4,12 +4,13 @@ from azure.mgmt.redis.models import (
     RedisCreateOrUpdateParameters,
 )
 
-def cli_redis_export(client, resource_group_name, name, prefix, container, format=None):
-    parameters = ExportRDBParameters(prefix, container, format)
-    return client.export(resource_group, resource_name, parameters)
+def cli_redis_export(client, resource_group_name, name, prefix, container, file_format=None):
+    # pylint:disable=too-many-arguments
+    parameters = ExportRDBParameters(prefix, container, file_format)
+    return client.export(resource_group_name, name, parameters)
 
-def cli_redis_import_method(client, resource_group_name, name, format, files):
-    parameters = ImportRDBParameters(files, format)
+def cli_redis_import_method(client, resource_group_name, name, file_format, files):
+    parameters = ImportRDBParameters(files, file_format)
     return client.import_method(resource_group_name, name, files, parameters)
 
 def cli_redis_update_settings(client, resource_group_name, name, redis_configuration):
