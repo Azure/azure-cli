@@ -4,7 +4,7 @@
 #---------------------------------------------------------------------------------------------
 
 from collections import defaultdict
-from datetime import datetime
+from datetime import datetime, timedelta
 import sys
 import os
 import re
@@ -172,6 +172,8 @@ class Application(object):
             return obj.value
         elif isinstance(obj, datetime):
             return obj.isoformat()
+        elif isinstance(obj, timedelta):
+            return str(obj)
         elif hasattr(obj, '_asdict'):
             return cls.todict(obj._asdict())
         elif hasattr(obj, '__dict__'):
