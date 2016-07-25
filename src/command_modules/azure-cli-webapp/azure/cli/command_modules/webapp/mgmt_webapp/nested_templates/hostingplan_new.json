@@ -13,6 +13,13 @@
     },
     "numberOfWorkers": {
       "type": "string"
+    },
+    "tags": {
+      "type": "object",
+      "defaultValue": { },
+      "metadata": {
+        "description": "Tags object."
+      }
     }
   },
   "variables": {
@@ -23,9 +30,7 @@
       "name": "[parameters('hostingPlanName')]",
       "type": "Microsoft.Web/serverfarms",
       "location": "[resourceGroup().location]",
-      "tags": {
-        "displayName": "HostingPlan"
-      },
+      "tags": "[parameters('tags')]",
       "sku": {
         "name": "[parameters('skuName')]",
         "capacity": "[parameters('skuCapacity')]"

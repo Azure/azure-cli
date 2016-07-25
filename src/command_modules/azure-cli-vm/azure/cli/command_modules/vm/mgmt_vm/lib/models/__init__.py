@@ -1,3 +1,7 @@
+#---------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for license information.
+#---------------------------------------------------------------------------------------------
 #pylint: skip-file
 # coding=utf-8
 # --------------------------------------------------------------------------
@@ -16,6 +20,21 @@ from .dependency import Dependency
 from .deployment_properties_extended import DeploymentPropertiesExtended
 from .deployment_extended import DeploymentExtended
 from .vm_creation_client_enums import (
+    authenticationType,
+    availabilitySetType,
+    customOsDiskType,
+    dnsNameType,
+    networkInterfaceType,
+    networkSecurityGroupRule,
+    networkSecurityGroupType,
+    osDiskType,
+    osType,
+    privateIpAddressAllocation,
+    publicIpAddressAllocation,
+    publicIpAddressType,
+    storageAccountType,
+    storageCaching,
+    virtualNetworkType,
     DeploymentMode,
 )
 
@@ -29,5 +48,20 @@ __all__ = [
     'Dependency',
     'DeploymentPropertiesExtended',
     'DeploymentExtended',
+    'authenticationType',
+    'availabilitySetType',
+    'customOsDiskType',
+    'dnsNameType',
+    'networkInterfaceType',
+    'networkSecurityGroupRule',
+    'networkSecurityGroupType',
+    'osDiskType',
+    'osType',
+    'privateIpAddressAllocation',
+    'publicIpAddressAllocation',
+    'publicIpAddressType',
+    'storageAccountType',
+    'storageCaching',
+    'virtualNetworkType',
     'DeploymentMode',
 ]

@@ -347,6 +347,13 @@
         "description": "The subnet name."
       }
     },
+    "tags": {
+      "type": "object",
+      "defaultValue": { },
+      "metadata": {
+        "description": "Tags object."
+      }
+    },
     "virtualNetworkIpAddressPrefix": {
       "type": "string",
       "defaultValue": "10.0.0.0/16",
@@ -456,9 +463,11 @@
       "existingId": "existing",
       "none": "none"
     },
+    "vnetTemplateUri": "https://azuresdkci.blob.core.windows.net/templatehost/CreateVnet_2016-07-18/azuredeploy.json",
+    "vnetTemplateUriEmpty": "https://azuresdkci.blob.core.windows.net/templatehost/CreateVnet_2016-07-18/azuredeploy_empty.json",
     "vnetTemplateFilePaths": {
-      "new": "nested_templates/NewVNet.json",
-      "existing": "nested_templates/ExistingVNet.json"
+      "existing": "[variables('vnetTemplateUriEmpty')]",
+      "new": "[variables('vnetTemplateUri')]"
     },
     "nicTemplateFilePaths": {
       "new": "[variables('newNicTemplateFilePaths')]",
@@ -507,7 +516,8 @@
         "parameters": {
           "storageAccountName": { "value": "[parameters('storageAccount')]" },
           "location": { "value": "[parameters('location')]" },
-          "vhdStorageType": { "value": "[variables('vhdStorageType')]" }
+          "vhdStorageType": { "value": "[variables('vhdStorageType')]" },
+          "tags": { "value": "[parameters('tags')]" }
         }
       }
     },
@@ -524,7 +534,8 @@
         },
         "parameters": {
           "networkSecurityGroupRule": { "value": "[parameters('networkSecurityGroupRule')]" },
-          "networkSecurityGroup": { "value": "[parameters('networkSecurityGroup')]" }
+          "networkSecurityGroup": { "value": "[parameters('networkSecurityGroup')]" },
+          "tags": { "value": "[parameters('tags')]" }
         }
       }
     },
@@ -553,7 +564,8 @@
           "privateIPAddress": { "value": "[parameters('privateIpAddress')]" },
           "privateIpAllocation": { "value": "[parameters('privateIpAddressAllocation')]" },
           "networkSecurityGroupId": { "value": "[variables('nsgIds')[parameters('networkSecurityGroupType')]]" },
-          "networkSecurityGroupType": { "value": "[variables('simplifiedTypeNames')[parameters('networkSecurityGroupType')]]" }
+          "networkSecurityGroupType": { "value": "[variables('simplifiedTypeNames')[parameters('networkSecurityGroupType')]]" },
+          "tags": { "value": "[parameters('tags')]" }
         }
       }
     },
@@ -565,16 +577,16 @@
       "properties": {
         "mode": "Incremental",
         "templateLink": {
-          "uri": "[concat(parameters('_artifactsLocation'), '/', variables('vnetTemplateFilePaths')[variables('simplifiedTypeNames')[parameters('virtualNetworkType')]])]",
+          "uri": "[variables('vnetTemplateFilePaths')[variables('simplifiedTypeNames')[parameters('virtualNetworkType')]]]",
           "contentVersion": "1.0.0.0"
         },
         "parameters": {
-          "vnetName": { "value": "[variables('vnetName')]" },
-          "vnetIpAddressType": { "value": "[parameters('publicIpAddressAllocation')]" },
-          "vnetIpAddressPrefix": { "value": "[variables('vnetAddressPrefix')]" },
-          "subnetIpAddressPrefix": { "value": "[variables('subnetAddressPrefix')]" },
+          "virtualNetworkName": { "value": "[variables('vnetName')]" },
+          "virtualNetworkPrefix": { "value": "[variables('vnetAddressPrefix')]" },
+          "subnetPrefix": { "value": "[variables('subnetAddressPrefix')]" },
           "subnetName": { "value": "[variables('subnetName')]" },
-          "location": { "value": "[parameters('location')]" }
+          "location": { "value": "[parameters('location')]" },
+          "tags": { "value": "[parameters('tags')]" }
         }
       }
     },
@@ -615,7 +627,8 @@
           "storageCaching": { "value": "[parameters('storageCaching')]" },
           "customOsDiskType": { "value": "[parameters('customOsDiskType')]" },
           "customOsDiskUri": { "value": "[parameters('customOsDiskUri')]" },
-          "osDiskType": { "value": "[parameters('osDiskType')]" }
+          "osDiskType": { "value": "[parameters('osDiskType')]" },
+          "tags": { "value": "[parameters('tags')]" }
         }
       }
     },

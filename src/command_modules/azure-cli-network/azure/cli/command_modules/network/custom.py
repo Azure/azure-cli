@@ -10,6 +10,38 @@ from azure.cli._util import CLIError
 
 from ._factory import _network_client_factory
 
+def _generic_list(operation_name, resource_group_name):
+    ncf = _network_client_factory()
+    operation_group = getattr(ncf, operation_name)
+    if resource_group_name:
+        return operation_group.list(resource_group_name)
+    else:
+        return operation_group.list_all()
+
+def list_vnet(resource_group_name=None):
+    return _generic_list('virtual_networks', resource_group_name)
+
+def list_express_route_circuits(resource_group_name=None):
+    return _generic_list('express_route_circuits', resource_group_name)
+
+def list_lbs(resource_group_name=None):
+    return _generic_list('load_balancers', resource_group_name)
+
+def list_nics(resource_group_name=None):
+    return _generic_list('network_interfaces', resource_group_name)
+
+def list_nsgs(resource_group_name=None):
+    return _generic_list('network_security_groups', resource_group_name)
+
+def list_public_ips(resource_group_name=None):
+    return _generic_list('public_ip_addresses', resource_group_name)
+
+def list_route_tables(resource_group_name=None):
+    return _generic_list('route_tables', resource_group_name)
+
+def list_application_gateways(resource_group_name=None):
+    return _generic_list('application_gateways', resource_group_name)
+
 def create_nsg_rule(resource_group_name, network_security_group_name, security_rule_name,
                     protocol, source_address_prefix, destination_address_prefix,
                     access, direction, source_port_range, destination_port_range,
@@ -358,4 +390,3 @@ def update_nsg_rule(resource_group_name, network_security_group_name, security_r
     return ncf.security_rules.create_or_update(resource_group_name, network_security_group_name, security_rule_name, r)
 
 update_nsg_rule.__doc__ = SecurityRule.__doc__
-

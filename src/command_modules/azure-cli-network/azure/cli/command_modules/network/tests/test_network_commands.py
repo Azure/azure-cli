@@ -40,7 +40,7 @@ class NetworkAppGatewayDefaultScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck("applicationGateway.frontendIPConfigurations[0].properties.subnet.contains(id, 'default')", True)
         ])
 
-        self.cmd('network application-gateway list-all')
+        self.cmd('network application-gateway list')
 
         ag_list = self.cmd('network application-gateway list --resource-group {}'.format(rg), checks=[
             JMESPathCheck('type(@)', 'array'),
@@ -137,7 +137,7 @@ class NetworkPublicIpScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck('publicIp.publicIPAllocationMethod', 'Dynamic'),
             JMESPathCheck('publicIp.dnsSettings', None)
         ])
-        s.cmd('network public-ip list-all', checks=JMESPathCheck('type(@)', 'array'))
+        s.cmd('network public-ip list', checks=JMESPathCheck('type(@)', 'array'))
         ip_list = s.cmd('network public-ip list -g {}'.format(rg))
         assert not [x for x in ip_list if x['resourceGroup'].lower() != rg]
 
@@ -167,7 +167,7 @@ class NetworkExpressRouteScenarioTest(VCRTestBase):
             raise RuntimeError('Express route must be manually created in order to support this test.')
 
     def body(self):
-        self.cmd('network express-route circuit list-all', checks=[
+        self.cmd('network express-route circuit list', checks=[
             JMESPathCheck('type(@)', 'array'),
             JMESPathCheck("length([?type == '{}']) == length(@)".format(self.resource_type), True),
             JMESPathCheck("length([?resourceGroup == '{}']) == length(@)".format(self.resource_group), True)
@@ -277,7 +277,7 @@ class NetworkLoadBalancerScenarioTest(ResourceGroupVCRTestBase):
                 JMESPathCheck("loadBalancer.frontendIPConfigurations[0].properties.publicIPAddress.contains(id, '{}')".format(pub_ip_name), True)
             ])
 
-        self.cmd('network lb list-all', checks=[
+        self.cmd('network lb list', checks=[
             JMESPathCheck('type(@)', 'array'),
             JMESPathCheck("length([?type == '{}']) == length(@)".format(self.resource_type), True)
         ])
@@ -494,7 +494,7 @@ class NetworkNicScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck("newNIC.networkSecurityGroup.contains(id, '{}')".format(nsg), True),
             JMESPathCheck('newNIC.provisioningState', 'Succeeded')
         ])
-        self.cmd('network nic list-all', checks=[
+        self.cmd('network nic list', checks=[
             JMESPathCheck('type(@)', 'array'),
             JMESPathCheck("length([?contains(id, 'networkInterfaces')]) == length(@)", True)
         ])
@@ -571,7 +571,7 @@ class NetworkSecurityGroupScenarioTest(ResourceGroupVCRTestBase):
         self.cmd('network nsg create --name {} -g {}'.format(nsg, rg))
         self.cmd('network nsg rule create --access allow --destination-address-prefix 1234 --direction inbound --nsg-name {} --protocol * -g {} --source-address-prefix 789 -n {} --source-port-range * --destination-port-range 4444'.format(nsg, rg, nrn))
 
-        self.cmd('network nsg list-all', checks=[
+        self.cmd('network nsg list', checks=[
             JMESPathCheck('type(@)', 'array'),
             JMESPathCheck("length([?type == '{}']) == length(@)".format(rt), True)
         ])
@@ -641,12 +641,12 @@ class NetworkRouteTableOperationScenarioTest(VCRTestBase):
         if not self.cmd('network route-table show --resource-group {} --name {}'.format(
                 self.resource_group, self.route_table_name)):
             raise RuntimeError('Network route table must be manually created in order to support this test.')
-        if not self.cmd('network route-operation show --resource-group {} --route-table-name {} --name {}'.format(
+        if not self.cmd('network route-table route show --resource-group {} --route-table-name {} --name {}'.format(
                 self.resource_group, self.route_table_name, self.route_operation_name)):
             raise RuntimeError('Network route operation must be manually created in order to support this test.')
 
     def body(self):
-        self.cmd('network route-table list-all',
+        self.cmd('network route-table list',
             checks=JMESPathCheck('type(@)', 'array'))
         self.cmd('network route-table list --resource-group {}'.format(self.resource_group), checks=[
                 JMESPathCheck('type(@)', 'array'),
@@ -661,16 +661,16 @@ class NetworkRouteTableOperationScenarioTest(VCRTestBase):
                 JMESPathCheck('resourceGroup', self.resource_group),
                 JMESPathCheck('type', self.resource_type)
         ])
-        self.cmd('network route-operation list --resource-group {} --route-table-name {}'.format(self.resource_group, self.route_table_name),
+        self.cmd('network route-table route list --resource-group {} --route-table-name {}'.format(self.resource_group, self.route_table_name),
             checks=JMESPathCheck('type(@)', 'array'))
-        self.cmd('network route-operation show --resource-group {} --route-table-name {} --name {}'.format(self.resource_group, self.route_table_name, self.route_operation_name), checks=[
+        self.cmd('network route-table route show --resource-group {} --route-table-name {} --name {}'.format(self.resource_group, self.route_table_name, self.route_operation_name), checks=[
                 JMESPathCheck('type(@)', 'object'),
                 JMESPathCheck('name', self.route_operation_name),
                 JMESPathCheck('resourceGroup', self.resource_group)
         ])
-        self.cmd('network route-operation delete --resource-group {} --route-table-name {} --name {}'.format(self.resource_group, self.route_table_name, self.route_operation_name))
+        self.cmd('network route-table route delete --resource-group {} --route-table-name {} --name {}'.format(self.resource_group, self.route_table_name, self.route_operation_name))
         # Expecting no results as the route operation was just deleted
-        self.cmd('network route-operation list --resource-group {} --route-table-name {}'.format(self.resource_group, self.route_table_name),
+        self.cmd('network route-table route list --resource-group {} --route-table-name {}'.format(self.resource_group, self.route_table_name),
             checks=NoneCheck())
         self.cmd('network route-table delete --resource-group {} --name {}'.format(self.resource_group, self.route_table_name))
         # Expecting no results as the route table was just deleted
@@ -694,7 +694,7 @@ class NetworkVNetScenarioTest(ResourceGroupVCRTestBase):
                 JMESPathCheck('newVNet.addressSpace.addressPrefixes[0]', '10.0.0.0/16')
             ])
 
-        self.cmd('network vnet list-all', checks=[
+        self.cmd('network vnet list', checks=[
             JMESPathCheck('type(@)', 'array'),
             JMESPathCheck("length([?type == '{}']) == length(@)".format(self.resource_type), True)
         ])

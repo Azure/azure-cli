@@ -103,7 +103,8 @@ register_cli_argument('network public-ip create', 'public_ip_address_type', CliA
 register_cli_argument('network public-ip create', 'allocation_method', CliArgumentType(choices=choices_ip_allocation_method, type=str.lower))
 
 # Route Operation
-register_cli_argument('network route-operation', 'route_name', name_arg_type, id_part='child_name')
+register_cli_argument('network route-table route', 'route_name', name_arg_type, id_part='child_name')
+register_cli_argument('network route-table route', 'route_table_name', options_list=('--route-table-name',))
 
 # Route table
 register_cli_argument('network route-table', 'route_table_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/routeTables'), id_part='name')
