@@ -13,9 +13,6 @@ import imp
 import subprocess
 from _common import get_all_command_modules, exec_command, print_summary, COMMAND_MODULE_PREFIX
 
-LIBS_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..', '..', '..', 'libs'))
-INCLUDE_LOCAL_LIBS = os.environ.get('AZURE_CLI_INCLUDE_LOCAL_LIBS')
-
 def print_heading(heading, file=None):
     print('=' * len(heading), file=file)
     print(heading + '\n', file=file)
@@ -60,7 +57,6 @@ print_heading('Built command package(s).')
 print_heading('Installing CLI package...')
 cli_package_dir = os.path.join(PATH_TO_CLI_PACKAGE, 'dist')
 cmd = 'python -m pip install azure-cli --find-links file://{}'.format(cli_package_dir)
-cmd += ' --find-links file://{}'.format(LIBS_DIR) if INCLUDE_LOCAL_LIBS else ''
 success = exec_command(cmd)
 if not success:
     print_heading('Error installing CLI!', file=sys.stderr)
@@ -72,7 +68,6 @@ failed_module_names = []
 for name, fullpath in all_command_modules:
     package_dir = os.path.join(fullpath, 'dist')
     cmd = 'python -m pip install {} --find-links file://{}'.format(name, package_dir)
-    cmd += ' --find-links file://{}'.format(LIBS_DIR) if INCLUDE_LOCAL_LIBS else ''
     success = exec_command(cmd)
     if not success:
         failed_module_names.append(name)
