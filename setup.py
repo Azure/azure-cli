@@ -7,6 +7,7 @@
 
 from __future__ import print_function
 import os
+import sys
 from codecs import open
 from setuptools import setup
 
@@ -66,6 +67,14 @@ DEPENDENCIES = [
     'six',
 ]
 
+if sys.version_info < (3, 4):
+    DEPENDENCIES.append('enum34')
+
+if sys.version_info < (2, 7, 9):
+    DEPENDENCIES.append('pyopenssl')
+    DEPENDENCIES.append('ndg-httpsclient')
+    DEPENDENCIES.append('pyasn1')
+
 with open('README.rst', 'r', encoding='utf-8') as f:
     README = f.read()
 
@@ -123,10 +132,5 @@ setup(
     ],
     package_data={'azure.cli': ['locale/**/*.txt']},
     install_requires=DEPENDENCIES,
-    extras_require={
-        "python_version < '3.4'": [
-            'enum34',
-        ],
-    },
     cmdclass={'install': OnInstall},
 )
