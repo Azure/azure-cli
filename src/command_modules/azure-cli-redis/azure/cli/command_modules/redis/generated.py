@@ -1,3 +1,8 @@
+#---------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for license information.
+#---------------------------------------------------------------------------------------------
+
 from .custom import cli_redis_import_method, cli_redis_export, cli_redis_update_settings
 from azure.mgmt.redis import (
     RedisManagementClient
