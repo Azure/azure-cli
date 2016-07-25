@@ -23,7 +23,8 @@
 #
 import os
 import sys
-sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), os.path.sep, 'azhelpgen')))
+#sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), os.path.sep, 'azhelpgen')))
+sys.path.insert(0, os.getcwd())
 
 # -- General configuration ------------------------------------------------
 
@@ -40,6 +41,7 @@ extensions = [
     'sphinx.ext.ifconfig',
     'sphinx.ext.viewcode',
     'sphinx.ext.autodoc',
+    'cligroup.cligroup',
     'azhelpgen.azhelpgen'
 ]
 
