@@ -1,8 +1,8 @@
 Microsoft Project AZ - Preview
 ==================================
 
-.. image:: https://travis-ci.com/Azure/azure-cli.svg?branch=master
-    :target: https://travis-ci.com/Azure/azure-cli
+.. image:: https://travis-ci.org/Azure/azure-cli.svg?branch=master
+    :target: https://travis-ci.org/Azure/azure-cli
 
 ==================================
 
