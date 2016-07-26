@@ -4,8 +4,6 @@ Microsoft Project AZ - Preview
 .. image:: https://travis-ci.org/Azure/azure-cli.svg?branch=master
     :target: https://travis-ci.org/Azure/azure-cli
 
-==================================
-
 A great cloud needs great tools; we're excited to introduce *Project Az*, our prototype for building a great, multiplatform commandline experience for Azure.
 
 Project Az is built on Python (2.7, 3.4 and 3.5).
