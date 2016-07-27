@@ -3,9 +3,6 @@ Preview Install Guide
 
 Looking to get started with Project Az?
 
-We've provided some step-by-step instructions on installing for different platforms and versions.
-This assumes a clean install with nothing else previously installed on the box.
-
 Click on your OS for steps:
 
 * [OS X](#os-x)
@@ -25,6 +22,7 @@ Click on your OS for steps:
   * [7.2](#redhat-rhel-72)
 * [SUSE](#suse-opensuse-132)
 * [CoreOS](#coreos-stable-899150--beta-101010--alpha-101010)
+* [Docker](#docker)
 * Windows
   * [Command Prompt / cmd](#windows-cmd)
   * [Bash on Windows](#ubuntu-1404-lts-and-bash-on-windows-build-14362)
@@ -38,7 +36,6 @@ Click on your OS for steps:
 ```
 curl -L https://aka.ms/ProjectAzInstall | sudo bash
 ```
-`sudo bash` instead of just `bash` may be required if you get a 'Permission error'.
 
 ## Ubuntu 12.04 LTS
 On a fresh Ubuntu 12.04 VM, install the CLI by executing the following.
@@ -143,7 +140,7 @@ Tab completion gets set up for the root user, not all users if installed globall
 
 ## CentOS 6.5 / 6.6 / 6.7
 
-Not supported with the default version of Python (2.6.6) on the machine.
+Not supported with the default version of Python (2.6.6) on the machine.  We recommend using [Docker](#docker) to access the CLI on this platform.
 
 ## CentOS 7.1 / 7.2
 Python 2.7.5 should be already on the machine.
@@ -160,7 +157,7 @@ https://bugs.centos.org/view.php?id=5707
 
 ## RedHat RHEL 6.7
 
-Not supported with the default version of Python (2.6.6) on the machine.
+Not supported with the default version of Python (2.6.6) on the machine.  We recommend using [Docker](#docker) to access the CLI on this platform.
 
 ## RedHat RHEL 7.2
 Python 2.7.5 should be already on the machine.
@@ -185,15 +182,23 @@ curl -L https://aka.ms/ProjectAzInstall | sudo bash
 
 ## CoreOS Stable-899.15.0 / Beta-1010.1.0 / Alpha-1010.1.0
 
-Doesn't have python installed by default and is not currently supported.
+Doesn't have python installed by default and is not currently supported.  We recommend using [Docker](#docker) to access the CLI on this platform.
 
+## Docker
+
+> Note that our docker images contain the latest code from the master branch and **does not match** the 
+> same "partner build" as the other methods in this document.
+
+Run `docker run -it azuresdk/azure-cli-python:latest bash`
 
 ## Windows (cmd)
+
+The CLI is available for Windows though PIP using the steps below.  If you do not have Python/PIP installed, consider using [Docker](#docker) to access the CLI.
 
 Set the environment variable to point to the version you wish to install.
 
 ```shell
-    set AZURE_CLI_NIGHTLY_VERSION=2016.06.30.nightly
+    set AZURE_CLI_NIGHTLY_VERSION=2016.07.07.nightly
 ```
 
 Run the following from a command prompt
