@@ -20,7 +20,8 @@ except:
 
 class AzHelpGenDirective(Directive):
     def make_rst(self):
-        INDENT = ''
+        INDENT = '   '
+        DOUBLEINDENT = INDENT * 2
         parser_dict = {}
         _store_parsers(app.parser, parser_dict)
         parser_dict.pop('')
@@ -33,53 +34,41 @@ class AzHelpGenDirective(Directive):
         help_files = sorted(help_files, key=lambda x: x.command)
 
         for help_file in help_files:
-            title= '{}: {}'.format('Command' if isinstance(help_file, _help.CommandHelpFile)
-                                 else 'Group', help_file.command)
-            yield title
-            yield '=' * len(title)
-            yield help_file.short_summary
+            is_command = isinstance(help_file, _help.CommandHelpFile)
+            yield '.. cli{}:: {}'.format('command' if is_command else 'group', help_file.command)
             yield ''
-            yield help_file.long_summary
-            yield ''
-            if isinstance(help_file, _help.CommandHelpFile):
-                yield '**Arguments**'
-                yield ''
-                if not help_file.parameters:
-                    yield INDENT + 'None'
-                    yield ''
-                else:
-                    for arg in sorted(help_file.parameters,
-                                      key=lambda p: str(p.group_name or 'A')
-                                      + str(not p.required) + p.name):
-                        yield '{} {}'.format(arg.name, '[Required]' if arg.required else '')
-                        yield ''
-                        yield ''
-
-                        short_summary = arg.short_summary or ''
-                        possible_values_index = short_summary.find(' Possible values include')
-                        short_summary = short_summary[0:possible_values_index
-                                                      if possible_values_index >= 0 else len(short_summary)]
-                        short_summary += _get_choices_defaults_str(arg)
-                        short_summary = short_summary.strip()
-                        yield INDENT + short_summary
-                        yield ''
-
-                        yield INDENT + arg.long_summary
-                        yield ''
-
-                        if arg.value_sources:
-                            yield "Values from: {0}.".format(', '.join(arg.value_sources))
-                            yield ''
+            yield '{}:summary: {}'.format(INDENT, help_file.short_summary)
+            yield '{}:description: {}'.format(INDENT, help_file.long_summary)
             yield ''
 
+            if is_command and help_file.parameters:
+               for arg in sorted(help_file.parameters,
+                                key=lambda p: str(p.group_name or 'A')
+                                + str(not p.required) + p.name):
+                  yield '{}.. cliarg:: {}'.format(INDENT, arg.name)
+                  yield ''
+                  yield '{}:required: {}'.format(DOUBLEINDENT, arg.required)
+                  short_summary = arg.short_summary or ''
+                  possible_values_index = short_summary.find(' Possible values include')
+                  short_summary = short_summary[0:possible_values_index
+                                                if possible_values_index >= 0 else len(short_summary)]
+                  short_summary = short_summary.strip()
+                  yield '{}:summary: {}'.format(DOUBLEINDENT, short_summary)
+                  yield '{}:description: {}'.format(DOUBLEINDENT, arg.long_summary)
+                  if arg.choices:
+                     yield '{}:values: {}'.format(DOUBLEINDENT, ', '.join(arg.choices))
+                  if arg.default and arg.default != argparse.SUPPRESS:
+                     yield '{}:default: {}'.format(DOUBLEINDENT, arg.default)
+                  if arg.value_sources:
+                     yield '{}:source: {}'.format(DOUBLEINDENT, ', '.join(arg.value_sources))
+                  yield ''
+            yield ''
             if len(help_file.examples) > 0:
-                yield '**Examples**'
-                yield ''
-                for e in help_file.examples:
-                    yield '--' + e.name
-                    yield ''
-                    yield e.text
-                    yield ''
+               for e in help_file.examples:
+                  yield '{}.. cliexample:: {}'.format(INDENT, e.name)
+                  yield ''
+                  yield DOUBLEINDENT + e.text
+                  yield ''
 
     def run(self):
         node = nodes.section()
@@ -92,13 +81,6 @@ class AzHelpGenDirective(Directive):
 
 def setup(app):
     app.add_directive('azhelpgen', AzHelpGenDirective)
-
-def _get_choices_defaults_str(p):
-    choice_str = '  Allowed values: {0}.'.format(', '.join(p.choices)) \
-        if p.choices else ''
-    default_str = '  Default: {0}.'.format(p.default) \
-        if p.default and p.default != argparse.SUPPRESS else ''
-    return '{0}{1}'.format(choice_str, default_str)
 
 def _store_parsers(parser, d):
     for s in parser.subparsers.values():
