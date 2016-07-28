@@ -20,7 +20,6 @@ We have automated Docker images of the latest code in the master branch.
 If you have not previously done so, `configure your Docker client engine <https://docs.docker.com/engine/installation/>`__.
 
 Then:
- + Run :code:`docker login` (contact the team for credentials as the images are not public yet).
  + Run :code:`docker pull azuresdk/azure-cli-python:latest`
  + Run :code:`docker run -it azuresdk/azure-cli-python:latest`
 
