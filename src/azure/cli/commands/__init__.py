@@ -20,6 +20,8 @@ from ._introspection import extract_args_from_signature
 logger = _logging.get_az_logger(__name__)
 
 # Find our command modules, they start with 'azure-cli-'
+# TODO Other parts of the CLI will have the same prefix so we can't only do this.
+# For example azure-cli-core
 INSTALLED_COMMAND_MODULES = [dist.key.replace('azure-cli-', '')
                              for dist in get_installed_distributions(local_only=True)
                              if dist.key.startswith('azure-cli-')]

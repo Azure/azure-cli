@@ -56,7 +56,7 @@ print_heading('Built command package(s).')
 
 print_heading('Installing CLI package...')
 cli_package_dir = os.path.join(PATH_TO_CLI_PACKAGE, 'dist')
-cmd = 'python -m pip install azure-cli --find-links file://{}'.format(cli_package_dir)
+cmd = 'python -m pip install azure-cli2 --find-links file://{}'.format(cli_package_dir)
 success = exec_command(cmd)
 if not success:
     print_heading('Error installing CLI!', file=sys.stderr)
