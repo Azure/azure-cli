@@ -1,12 +1,13 @@
-#---------------------------------------------------------------------------------------------
+﻿#---------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 #---------------------------------------------------------------------------------------------
 
 # AZURE CLI RBAC TEST DEFINITIONS
-import json
+import mock
+import time
 
-from azure.cli.utils.vcr_test_base import VCRTestBase, JMESPathCheck
+from azure.cli.utils.vcr_test_base import VCRTestBase, JMESPathCheck, ResourceGroupVCRTestBase
 
 class RoleScenarioTest(VCRTestBase):
 
@@ -37,29 +38,55 @@ class RoleScenarioTest(VCRTestBase):
             JMESPathCheck('properties.type', 'BuiltInRole')
         ])
 
-class RoleAssignmentScenarioTest(VCRTestBase):
-
-    def test_role_assignment_scenario(self):
-        self.execute()
+class RoleAssignmentScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
         super(RoleAssignmentScenarioTest, self).__init__(__file__, test_method)
+        self.resource_group = 'cli-role-assignment-test'
+        self.user = 'testuser1@azuresdkteam.onmicrosoft.com'
 
-    def body(self):
-        s = self
-        principal_id = '7a938a30-4226-420e-996f-4d48bca6d537'
-        scope = '/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590'
-        rg = 'travistestresourcegroup'
-        resource = 'testsql23456/'
-        parent_path = 'servers/testserver23456'
+    def set_up(self):
+        super().set_up()
+        self.cmd('ad user create --display-name tester123 --password Test123456789 --user-principal-name {}'.format(self.user), None)
+        time.sleep(15) #By-design, it takes some time for RBAC system propagated with graph object change
 
-        list_all = s.cmd('role assignment list')
-        list_some = s.cmd('role assignment list --filter "principalId eq \'{}\'"'.format(principal_id))
-        assert len(list_all) > len(list_some)
+    def tear_down(self):
+        self.cmd('ad user delete --upn-or-object-id {}'.format(self.user), None)
+        super().tear_down()
 
-        s.cmd('role assignment list-for-scope --scope {}'.format(scope),
-            checks=JMESPathCheck("length([].properties.contains(scope, '{}')) == length(@)".format(scope), True))
+    def test_role_assignment_scenario(self):
 
-        id = '/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clutst39112/providers/Microsoft.Authorization/roleAssignments/b022bb45-7fc4-4125-b781-72b49c38ba18'
-        res = s.cmd("role assignment show-by-id --role-assignment-id {}".format(id))['id']
-        assert res == id
+        if self.playback:
+            #TODO: we should auto record generated guids and use them under playback.
+            #For now, get the values from the .yaml file and put in here.
+            with mock.patch('uuid.uuid4') as m:
+                m.side_effect = ['1518cef5-a2c8-48e1-acb5-eaadf2474f79', 'f13b65c4-7c62-4dd2-b2eb-2a348b57c25b']
+                self.execute()
+        else:
+            self.execute()
+
+    def body(self):       
+        nsg_name = 'nsg1'
+        self.cmd('network nsg create -n {} -g {}'.format(nsg_name, self.resource_group), None)
+        result = self.cmd('network nsg show -n {} -g {}'.format(nsg_name, self.resource_group), None)
+        resource_id = result['id']
+
+        #test role assignments on a resource group
+        result = self.cmd('role assignment create --assignee {} --role contributor -g {}'.format(self.user, self.resource_group), None)
+        scope = result['properties']['scope']
+        self.cmd('role assignment list-for-resource-group -g {}'.format(self.resource_group),
+                 checks=[JMESPathCheck("length([?properties.scope == '{}'])".format(scope), 1)])
+        self.cmd('role assignment delete -n {} --scope {}'.format(result['name'], result['properties']['scope']), None)
+        self.cmd('role assignment list-for-resource-group -g {}'.format(self.resource_group),
+                 checks=[JMESPathCheck("length([?properties.scope == '{}'])".format(scope), 0)])
+
+        #test role assignments on a resource
+        result2 = self.cmd('role assignment create --assignee {} --role contributor --resource-id {}'.format(self.user, resource_id), None)
+        scope = result2['properties']['scope']
+        self.cmd('role assignment list-for-scope --scope {}'.format(scope),
+                 checks=[JMESPathCheck("length([?properties.scope == '{}'])".format(scope), 1)])
+        self.cmd('role assignment delete -n {} --scope {}'.format(result2['name'], scope), None)
+        self.cmd('role assignment list-for-scope --scope {}'.format(scope),
+                 checks=[JMESPathCheck("length([?properties.scope == '{}'])".format(scope), 0)])
+
+        #TODO: test role assignment on subscription level will be done after the 'list' command gets improved

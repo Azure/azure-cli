@@ -30,6 +30,7 @@ from azure.cli._util import CLIError
 TRACK_COMMANDS = os.environ.get('AZURE_CLI_TEST_TRACK_COMMANDS')
 COMMAND_COVERAGE_FILENAME = 'command_coverage.txt'
 MOCKED_SUBSCRIPTION_ID = '00000000-0000-0000-0000-000000000000'
+MOCKED_TENANT_ID = '00000000-0000-0000-0000-000000000000'
 # MOCK METHODS
 
 def _mock_get_mgmt_service_client(client_type, subscription_bound=True):
@@ -62,7 +63,7 @@ def _mock_subscriptions(self): #pylint: disable=unused-argument
             },
         "state": "Enabled",
         "name": "Example",
-        "tenantId": "123",
+        "tenantId": MOCKED_TENANT_ID,
         "isDefault": True}]
 
 def _mock_user_access_token(_, _1, _2, _3): #pylint: disable=unused-argument
@@ -198,6 +199,8 @@ class VCRTestBase(unittest.TestCase):#pylint: disable=too-many-instance-attribut
         # scrub subscription from the uri
         request.uri = re.sub('/subscriptions/([^/]+)/',
                              '/subscriptions/{}/'.format(MOCKED_SUBSCRIPTION_ID), request.uri)
+        request.uri = re.sub('/graph.windows.net/([^/]+)/',
+                             '/graph.windows.net/{}/'.format(MOCKED_TENANT_ID), request.uri)
         request.uri = re.sub('/sig=([^/]+)&', '/sig=0000&', request.uri)
         request.uri = _scrub_deployment_name(request.uri)
         # prevents URI mismatch between Python 2 and 3 if request URI has extra / chars
