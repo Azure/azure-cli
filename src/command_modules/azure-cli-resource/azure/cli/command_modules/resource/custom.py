@@ -275,16 +275,13 @@ def move_resource(ids, destination_group, destination_subscription_id=None):
     return rcf.resources.move_resources(resources[0]['resource_group'], ids, target)
 
 def _get_file_json(file_path):
-    return _load_json(file_path, 'utf-8') \
-        or _load_json(file_path, 'utf-8-sig') \
-        or _load_json(file_path, 'utf-16') \
-        or _load_json(file_path, 'utf-16le') \
-        or _load_json(file_path, 'utf-16be')
+    exception = None
+    for encoding in ('utf-8', 'utf-8-sig', 'utf-16', 'utf-16le', 'utf-16be'):
+        try:
+            with codecs_open(file_path, encoding=encoding) as f:
+                text = f.read()
+            return json.loads(text)
+        except UnicodeError as uex:
+            pass
 
-def _load_json(file_path, encoding):
-    try:
-        with codecs_open(file_path, encoding=encoding) as f:
-            text = f.read()
-        return json.loads(text)
-    except ValueError:
-        pass
+    raise CLIError('Failed to decode file {} - unknown decoding'.format(file_path))
