@@ -275,7 +275,6 @@ def move_resource(ids, destination_group, destination_subscription_id=None):
     return rcf.resources.move_resources(resources[0]['resource_group'], ids, target)
 
 def _get_file_json(file_path):
-    exception = None
     for encoding in ('utf-8', 'utf-8-sig', 'utf-16', 'utf-16le', 'utf-16be'):
         try:
             with codecs_open(file_path, encoding=encoding) as f:
