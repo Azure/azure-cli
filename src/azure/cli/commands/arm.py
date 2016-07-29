@@ -157,7 +157,7 @@ def add_id_parameters(command_table):
 
 APPLICATION.register(APPLICATION.COMMAND_TABLE_LOADED, add_id_parameters)
 
-def register_generic_update(name, getter, setter, setter_arg_name='parameters'):
+def register_generic_update(name, getter, setter, factory=None, setter_arg_name='parameters'):
 
     get_arguments = dict(extract_args_from_signature(getter))
     set_arguments = dict(extract_args_from_signature(setter))
@@ -165,9 +165,11 @@ def register_generic_update(name, getter, setter, setter_arg_name='parameters'):
     def handler(args):
         ordered_arguments = args.pop('ordered_arguments')
 
+        client = factory() if factory else None
+
         getterargs = {key: val for key, val in args.items()
                       if key in get_arguments}
-        instance = getter(**getterargs)
+        instance = result = getter(client, **getterargs) if client else getter(**getterargs)
 
         # Update properties
         for arg in ordered_arguments:
@@ -198,7 +200,7 @@ def register_generic_update(name, getter, setter, setter_arg_name='parameters'):
 
         # Done... update the instance!
         getterargs[setter_arg_name] = instance
-        opres = setter(**getterargs)
+        opres = setter(client, **getterargs) if client else setter(**getterargs)
         return opres.result() if isinstance(opres, AzureOperationPoller) else opres
 
     class OrderedArgsAction(argparse.Action): #pylint:disable=too-few-public-methods
