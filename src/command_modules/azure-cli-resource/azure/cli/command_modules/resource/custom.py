@@ -281,7 +281,7 @@ def _get_file_json(file_path):
             with codecs_open(file_path, encoding=encoding) as f:
                 text = f.read()
             return json.loads(text)
-        except UnicodeError as uex:
+        except UnicodeError:
             pass
 
     raise CLIError('Failed to decode file {} - unknown decoding'.format(file_path))
