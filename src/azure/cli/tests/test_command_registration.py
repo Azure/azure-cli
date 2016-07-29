@@ -99,7 +99,7 @@ class Test_command_registration(unittest.TestCase):
             self.assertDictContainsSubset(some_expected_arguments[existing].settings,
                                           command_metadata.arguments[existing].options)
         self.assertEqual(command_metadata.arguments['resource_group_name'].options_list,
-                         ('--resource-group-name',))
+                         ['--resource-group-name'])
 
     def test_register_cli_argument_with_overrides(self):
         command_table.clear()
@@ -130,6 +130,7 @@ class Test_command_registration(unittest.TestCase):
         self.assertTrue(command1.options['help'] == 'foo help')
         self.assertTrue(command2.options['help'] == 'first modification')
         self.assertTrue(command3.options['help'] == 'second modification')
+        command_table.clear()
 
     def test_register_extra_cli_argument(self):
         command_table.clear()
@@ -155,6 +156,8 @@ class Test_command_registration(unittest.TestCase):
             existing = next(arg for arg in command_metadata.arguments if arg == probe)
             self.assertDictContainsSubset(some_expected_arguments[existing].settings,
                                           command_metadata.arguments[existing].options)
+
+        command_table.clear()
 
     def test_command_build_argument_help_text(self):
         def sample_sdk_method_with_weird_docstring(param_a, param_b, param_c): # pylint: disable=unused-argument
@@ -187,6 +190,7 @@ class Test_command_registration(unittest.TestCase):
             existing = next(arg for arg in command_metadata.arguments if arg == probe)
             self.assertDictContainsSubset(some_expected_arguments[existing].settings,
                                           command_metadata.arguments[existing].options)
+        command_table.clear()
 
     def test_override_existing_option_string(self):
         arg = CliArgumentType(options_list=('--funky', '-f'))
@@ -237,7 +241,7 @@ class Test_command_registration(unittest.TestCase):
         self.assertEqual(actual_arg.validator, test_validator_completer)
         self.assertEqual(actual_arg.completer, test_validator_completer)
         self.assertFalse(actual_arg.options['required'])
-
+        command_table.clear()
 
     def test_override_argtype_with_argtype(self):
         existing_options_list = ('--default', '-d')
