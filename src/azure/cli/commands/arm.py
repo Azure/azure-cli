@@ -5,7 +5,12 @@
 
 import argparse
 import re
+import json
+
 from collections import defaultdict
+from msrestazure.azure_operation import AzureOperationPoller
+from azure.cli.commands import CliCommand, command_table as main_command_table
+from azure.cli.commands._introspection import extract_args_from_signature
 from azure.cli.commands.client_factory import get_mgmt_service_client
 from azure.mgmt.resource.resources import ResourceManagementClient
 from azure.cli.application import APPLICATION, IterateValue
@@ -153,49 +158,43 @@ def add_id_parameters(command_table):
 APPLICATION.register(APPLICATION.COMMAND_TABLE_LOADED, add_id_parameters)
 
 def register_generic_update(name, getter, setter, setter_arg_name='parameters'):
-    from msrestazure.azure_operation import AzureOperationPoller
-    from azure.cli.commands import CliCommand, command_table
-    from azure.cli.commands._introspection import extract_args_from_signature
 
     get_arguments = dict(extract_args_from_signature(getter))
     set_arguments = dict(extract_args_from_signature(setter))
 
-    ordered_arguments = []
-
     def handler(args):
+        ordered_arguments = args.pop('ordered_arguments')
+
         getterargs = {key: val for key, val in args.items()
                       if key in get_arguments}
         instance = getter(**getterargs)
 
         # Update properties
-        try:
-            for arg in ordered_arguments:
-                arg_type, expressions = arg
-                if arg_type == '--set':
-                    try:
-                        for expression in expressions:
-                            set_properties(instance, expression)
-                    except ValueError:
-                        raise CLIError('--set should be of the form:'
-                                       ' --set property.property=<value>'
-                                       ' property2.property=<value>')
-                elif arg_type == '--add':
-                    try:
-                        add_properties(instance, expressions)
-                    except ValueError:
-                        raise CLIError('--add should be of the form:'
-                                       ' --add property.list key1=value1 key2=value2')
-                elif arg_type == '--remove':
-                    try:
-                        remove_properties(instance, expressions)
-                    except ValueError:
-                        raise CLIError('--remove should be of the form: --remove'
-                                       ' property.propertyToRemove or'
-                                       ' --remove property.list <indexToRemove>')
-                else:
-                    raise ValueError('Unsupported arg type {}'.format(arg_type))
-        finally:
-            del ordered_arguments[:]
+        for arg in ordered_arguments:
+            arg_type, expressions = arg
+            if arg_type == '--set':
+                try:
+                    for expression in expressions:
+                        set_properties(instance, expression)
+                except ValueError:
+                    raise CLIError('--set should be of the form:'
+                                   ' --set property.property=<value>'
+                                   ' property2.property=<value>')
+            elif arg_type == '--add':
+                try:
+                    add_properties(instance, expressions)
+                except ValueError:
+                    raise CLIError('--add should be of the form:'
+                                   ' --add property.list key1=value1 key2=value2')
+            elif arg_type == '--remove':
+                try:
+                    remove_properties(instance, expressions)
+                except ValueError:
+                    raise CLIError('--remove should be of the form: --remove'
+                                   ' property.propertyToRemove or'
+                                   ' --remove property.list <indexToRemove>')
+            else:
+                raise ValueError('Unsupported arg type {}'.format(arg_type))
 
         # Done... update the instance!
         getterargs[setter_arg_name] = instance
@@ -204,7 +203,13 @@ def register_generic_update(name, getter, setter, setter_arg_name='parameters'):
 
     class OrderedArgsAction(argparse.Action): #pylint:disable=too-few-public-methods
         def __call__(self, parser, namespace, values, option_string=None):
-            ordered_arguments.append((option_string, values))
+            if not getattr(namespace, 'ordered_arguments', None):
+                setattr(namespace, 'ordered_arguments', [])
+            namespace.ordered_arguments.append((option_string, values))
+
+    def one_required(namespace):
+        if not getattr(namespace, 'ordered_arguments', None):
+            raise ValueError('At least one must be specified: --add, --set, --remove')
 
     cmd = CliCommand(name, handler)
     cmd.arguments.update(set_arguments)
@@ -212,28 +217,26 @@ def register_generic_update(name, getter, setter, setter_arg_name='parameters'):
     cmd.arguments.pop(setter_arg_name, None)
     cmd.add_argument('properties_to_set', '--set', nargs='+', action=OrderedArgsAction, default=[],
                      help='Update an object by specifying a property path and value to set.'
-                     '  Example: --set property1.property2=value')
+                     '  Example: --set property1.property2=value',
+                     metavar='KEY=VALUE')
     cmd.add_argument('properties_to_add', '--add', nargs='+', action=OrderedArgsAction, default=[],
                      help='Add an object to a list of objects by specifying a path and key'
-                     ' value pairs.  Example: --add property1.list id=<id>')
+                     ' value pairs.  Example: --add property.list key=<value>',
+                     metavar='LIST KEY=VALUE')
     cmd.add_argument('properties_to_remove', '--remove', nargs='+', action=OrderedArgsAction,
                      default=[], help='Remove a property or an element from a list.  Example: '
-                     '--remove property1.list <index>')
-    command_table[name] = cmd
+                     '--remove property.list <index>', metavar='LIST INDEX',
+                     validator=one_required)
+    main_command_table[name] = cmd
 
 index_regex = re.compile(r'\[(.*)\]')
 def set_properties(instance, expression):
     key, value = expression.split('=', 1)
 
-    #pylint:disable=redefined-variable-type
-    if value in ('{}', '{ }'):
-        value = {}
-    elif value in ('[]', '[ ]'):
-        value = []
-    elif value.lower() == 'false':
-        value = False
-    elif value.lower() == 'true':
-        value = True
+    try:
+        value = json.loads(value)
+    except: #pylint:disable=bare-except
+        pass
 
     name, path = _get_name_path(key)
     instance = _find_property(instance, path)

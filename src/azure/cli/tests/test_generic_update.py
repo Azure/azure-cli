@@ -5,8 +5,10 @@
 
 import logging
 import unittest
+import sys
 
-from azure.cli.application import Application, Configuration
+from azure.cli.application import APPLICATION, Application, Configuration
+from azure.cli.commands import CliArgumentType, register_cli_argument
 from azure.cli.commands.arm import register_generic_update
 from azure.cli._util import CLIError
 
@@ -146,3 +148,48 @@ class GenericUpdateTest(unittest.TestCase):
         _execute_with_error('gencommand --a1 1 --a2 2 --set list[2][3].doesnt_exist=foo',
                             "index 3 doesn't exist on [2]",
                             'index out of range in path')
+
+    def test_generic_update_ids(self):
+        my_objs = [
+            {
+                'prop': 'val',
+                'list': [
+                    'a',
+                    'b',
+                    ['c', {'d': 'e'}]
+                    ]
+            },
+            {
+                'prop': 'val',
+                'list': [
+                    'a',
+                    'b',
+                    ['c', {'d': 'e'}]
+                    ]
+            }]
+
+        def my_get(name, resource_group): #pylint:disable=unused-argument
+            # name is None when tests are run in a batch on Python <=2.7.9
+            if sys.version_info < (2, 7, 10):
+                return my_objs[0]
+            return my_objs[int(name)]
+
+        def my_set(**kwargs): #pylint:disable=unused-argument
+            return my_objs
+
+        register_cli_argument('gencommand', 'name', CliArgumentType(options_list=('--name', '-n'),
+                                                                    metavar='NAME', id_part='name'))
+        register_generic_update('gencommand', my_get, my_set)
+
+        config = Configuration([])
+        APPLICATION.initialize(config)
+
+        id_str = ('/subscriptions/00000000-0000-0000-0000-0000000000000/resourceGroups/rg/'
+                  'providers/Microsoft.Compute/virtualMachines/')
+
+        APPLICATION.execute('gencommand --ids {0}0 {0}1 --resource-group bar --set prop=newval'
+                            .format(id_str).split())
+        self.assertEqual(my_objs[0]['prop'], 'newval', 'first object updated')
+        # name is None when tests are run in a batch on Python <=2.7.9
+        if not sys.version_info < (2, 7, 10):
+            self.assertEqual(my_objs[1]['prop'], 'newval', 'second object updated')

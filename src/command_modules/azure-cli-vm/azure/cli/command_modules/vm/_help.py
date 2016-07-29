@@ -100,9 +100,9 @@ helps['vm update'] = """
             examples:
 {0}
                 - name: Set primary NIC
-                  text: az <command> -n name -g group --set network_profile.network_interfaces[1].primary=false network_profile.network_interfaces[0].primary=true
+                  text: az <command> -n name -g group --set networkProfile.networkInterfaces[1].primary=false networkProfile.networkInterfaces[0].primary=true
                 - name: Add new non-primary NIC
-                  text: az <command> -n name -g group --add network_profile.network_interfaces primary=false id=<NIC_ID>
+                  text: az <command> -n name -g group --add networkProfile.networkInterfaces primary=false id=<NIC_ID>
                 - name: Remove fourth NIC
-                  text: az <command> -n name -g group --remove network_profile.network_interfaces 3
+                  text: az <command> -n name -g group --remove networkProfile.networkInterfaces 3
             """.format(generic_update_help)
