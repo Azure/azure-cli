@@ -5,9 +5,12 @@
 
 from __future__ import print_function
 from codecs import open as codecs_open
+from datetime import datetime, timedelta
 import json
-import sys
 import platform
+import re
+import sys
+from enum import Enum
 
 CLI_PACKAGE_NAME = 'azure-cli'
 COMPONENT_PREFIX = 'azure-cli-'
@@ -60,3 +63,27 @@ def get_file_json(file_path):
             raise CLIError("File '{}' contains error: {}".format(file_path, str(ex)))
 
     raise CLIError('Failed to decode file {} - unknown decoding'.format(file_path))
+
+KEYS_CAMELCASE_PATTERN = re.compile('(?!^)_([a-zA-Z])')
+def todict(obj): #pylint: disable=too-many-return-statements
+    def to_camelcase(s):
+        return re.sub(KEYS_CAMELCASE_PATTERN, lambda x: x.group(1).upper(), s)
+
+    if isinstance(obj, dict):
+        return {k: todict(v) for (k, v) in obj.items()}
+    elif isinstance(obj, list):
+        return [todict(a) for a in obj]
+    elif isinstance(obj, Enum):
+        return obj.value
+    elif isinstance(obj, datetime):
+        return obj.isoformat()
+    elif isinstance(obj, timedelta):
+        return str(obj)
+    elif hasattr(obj, '_asdict'):
+        return todict(obj._asdict())
+    elif hasattr(obj, '__dict__'):
+        return dict([(to_camelcase(k), todict(v))
+                     for k, v in obj.__dict__.items()
+                     if not callable(v) and not k.startswith('_')])
+    else:
+        return obj

@@ -4,12 +4,52 @@
 #---------------------------------------------------------------------------------------------
 
 # pylint: disable=line-too-long
+from collections import namedtuple
 import unittest
 import tempfile
 
-from azure.cli._util import get_file_json
+from azure.cli._util import get_file_json, todict
 
 class TestUtils(unittest.TestCase):
+
+    def test_application_todict_none(self):
+        the_input = None
+        actual = todict(the_input)
+        expected = None
+        self.assertEqual(actual, expected)
+
+    def test_application_todict_dict_empty(self):
+        the_input = {}
+        actual = todict(the_input)
+        expected = {}
+        self.assertEqual(actual, expected)
+
+    def test_application_todict_dict(self):
+        the_input = {'a': 'b'}
+        actual = todict(the_input)
+        expected = {'a': 'b'}
+        self.assertEqual(actual, expected)
+
+    def test_application_todict_list(self):
+        the_input = [{'a': 'b'}]
+        actual = todict(the_input)
+        expected = [{'a': 'b'}]
+        self.assertEqual(actual, expected)
+
+    def test_application_todict_obj(self):
+        MyObject = namedtuple('MyObject', 'a b')
+        the_input = MyObject('x', 'y')
+        actual = todict(the_input)
+        expected = {'a': 'x', 'b': 'y'}
+        self.assertEqual(actual, expected)
+
+    def test_application_todict_dict_with_obj(self):
+        MyObject = namedtuple('MyObject', 'a b')
+        mo = MyObject('x', 'y')
+        the_input = {'a': mo}
+        actual = todict(the_input)
+        expected = {'a': {'a': 'x', 'b': 'y'}}
+        self.assertEqual(actual, expected)
 
     def test_load_json_from_file(self):
         _, pathname = tempfile.mkstemp()

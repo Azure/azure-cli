@@ -2,7 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 #---------------------------------------------------------------------------------------------
-
+#pylint: disable=line-too-long
 import azure.cli.commands.parameters #pylint: disable=unused-import
 
 from azure.cli.commands import register_cli_argument
@@ -18,6 +18,16 @@ register_cli_argument('ad', 'query_filter', options_list=('--filter',), help='OD
 register_cli_argument('role assignment', 'role_assignment_name',
                       options_list=('--role-assignment-name', '-n'))
 register_cli_argument('role assignment', 'role', help='role name or id')
+register_cli_argument('role assignment', 'show_all', options_list=('--all',), action='store_true',
+                      help='show all assignments under the current subscription')
+register_cli_argument('role assignment', 'include_inherited', action='store_true',
+                      help='include assignments applied on parent scopes')
+register_cli_argument('role assignment', 'assignee', help='represent a user, group, or service principal. supported format: object id, user sign-in name, or service principal name')
+register_cli_argument('role assignment', 'ids', nargs='+', help='space separated role assignment ids')
+register_cli_argument('role', 'role_id', help='the role id')
+register_cli_argument('role', 'resource_id', help='resource id')
+register_cli_argument('role', 'role_resource_id', help='the resource id of the role')
+register_cli_argument('role', 'custom_role_only', action='store_true', help='show custom roles(vs. build-in ones)')
 register_cli_argument('ad user', 'mail_nickname',
                       help='mail alias. Defaults to user principal name')
 register_cli_argument('ad user', 'force_change_password_next_login', action='store_true')
