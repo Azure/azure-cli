@@ -85,3 +85,24 @@ helps['container create'] = """
             type: command
             long-summary: See https://azure.microsoft.com/en-us/documentation/articles/container-service-intro/ for an intro to Container Service.
 """
+
+generic_update_help = """
+                - name: Add or update a tag
+                  text: az <command> -n name -g group --set tags.tagName=tagValue
+                - name: Remove a tag
+                  text: az <command> -n name -g group --remove tags.tagName
+"""
+
+helps['vm update'] = """
+            type: command
+            short-summary: Update VM properties.
+            long-summary: Update VM objects and properties using paths that correspond to 'az vm show'.  See examples.
+            examples:
+{0}
+                - name: Set primary NIC
+                  text: az <command> -n name -g group --set networkProfile.networkInterfaces[1].primary=false networkProfile.networkInterfaces[0].primary=true
+                - name: Add new non-primary NIC
+                  text: az <command> -n name -g group --add networkProfile.networkInterfaces primary=false id=<NIC_ID>
+                - name: Remove fourth NIC
+                  text: az <command> -n name -g group --remove networkProfile.networkInterfaces 3
+            """.format(generic_update_help)
