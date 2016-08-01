@@ -328,7 +328,7 @@ class NetworkLoadBalancerSubresourceScenarioTest(ResourceGroupVCRTestBase):
             self.cmd('network lb inbound-nat-rule create {} -n rule{} --protocol tcp --frontend-port {} --backend-port {} --frontend-ip-name LoadBalancerFrontEnd'.format(lb_rg, count, count, count))
         self.cmd('network lb inbound-nat-rule list {}'.format(lb_rg),
             checks=JMESPathCheck('length(@)', 3))
-        self.cmd('network lb inbound-nat-rule set {} -n rule1 --floating-ip true --idle-timeout 10'.format(lb_rg))
+        self.cmd('network lb inbound-nat-rule update {} -n rule1 --floating-ip true --idle-timeout 10'.format(lb_rg))
         self.cmd('network lb inbound-nat-rule show {} -n rule1'.format(lb_rg), checks=[
             JMESPathCheck('enableFloatingIp', True),
             JMESPathCheck('idleTimeoutInMinutes', 10)
@@ -343,7 +343,7 @@ class NetworkLoadBalancerSubresourceScenarioTest(ResourceGroupVCRTestBase):
             self.cmd('network lb inbound-nat-pool create {} -n rule{} --protocol tcp --frontend-port-range-start {}  --frontend-port-range-end {} --backend-port {}'.format(lb_rg, count, count, count+999, count))
         self.cmd('network lb inbound-nat-pool list {}'.format(lb_rg),
             checks=JMESPathCheck('length(@)', 3))
-        self.cmd('network lb inbound-nat-pool set {} -n rule1000 --protocol udp --backend-port 50'.format(lb_rg))
+        self.cmd('network lb inbound-nat-pool update {} -n rule1000 --protocol udp --backend-port 50'.format(lb_rg))
         self.cmd('network lb inbound-nat-pool show {} -n rule1000'.format(lb_rg), checks=[
             JMESPathCheck('protocol', 'Udp'),
             JMESPathCheck('backendPort', 50)
@@ -360,7 +360,7 @@ class NetworkLoadBalancerSubresourceScenarioTest(ResourceGroupVCRTestBase):
             allowed_exceptions='is not registered for feature Microsoft.Network/AllowMultiVipIlb required to carry out the requested operation.')
         # Note that the ipconfig3 won't be added. The 3 that will be found are the default and two created ones
         self.cmd('network lb frontend-ip list {}'.format(lb_rg), checks=JMESPathCheck('length(@)', 3))
-        self.cmd('network lb frontend-ip set {} -n ipconfig1 --public-ip-address-name publicip3'.format(lb_rg))
+        self.cmd('network lb frontend-ip update {} -n ipconfig1 --public-ip-address-name publicip3'.format(lb_rg))
         self.cmd('network lb frontend-ip show {} -n ipconfig1'.format(lb_rg),
             checks=JMESPathCheck("publicIpAddress.contains(id, 'publicip3')", True))
         self.cmd('network lb frontend-ip delete {} -n ipconfig2'.format(lb_rg))
@@ -379,8 +379,8 @@ class NetworkLoadBalancerSubresourceScenarioTest(ResourceGroupVCRTestBase):
         for i in range(1, 4):
             self.cmd('network lb probe create {} -n probe{} --port {} --protocol http --path "/test{}"'.format(lb_rg, i, i, i))
         self.cmd('network lb probe list {}'.format(lb_rg), checks=JMESPathCheck('length(@)', 3))
-        self.cmd('network lb probe set {} -n probe1 --interval 20 --threshold 5'.format(lb_rg))
-        self.cmd('network lb probe set {} -n probe2 --protocol tcp --path ""'.format(lb_rg))
+        self.cmd('network lb probe update {} -n probe1 --interval 20 --threshold 5'.format(lb_rg))
+        self.cmd('network lb probe update {} -n probe2 --protocol tcp --path ""'.format(lb_rg))
         self.cmd('network lb probe show {} -n probe1'.format(lb_rg), checks=[
             JMESPathCheck('intervalInSeconds', 20),
             JMESPathCheck('numberOfProbes', 5)
@@ -396,8 +396,8 @@ class NetworkLoadBalancerSubresourceScenarioTest(ResourceGroupVCRTestBase):
         self.cmd('network lb rule create {} -n rule1 --frontend-ip-name LoadBalancerFrontEnd --frontend-port 40 --backend-pool-name bap1 --backend-port 40 --protocol tcp'.format(lb_rg))
         self.cmd('network lb rule create {} -n rule2 --frontend-ip-name LoadBalancerFrontEnd --frontend-port 60 --backend-pool-name bap1 --backend-port 60 --protocol tcp'.format(lb_rg))
         self.cmd('network lb rule list {}'.format(lb_rg), checks=JMESPathCheck('length(@)', 2))
-        self.cmd('network lb rule set {} -n rule1 --floating-ip true --idle-timeout 20 --load-distribution sourceip --protocol udp'.format(lb_rg))
-        self.cmd('network lb rule set {} -n rule2 --frontend-ip-name ipconfig1 --backend-pool-name bap2 --load-distribution sourceipprotocol'.format(lb_rg))
+        self.cmd('network lb rule update {} -n rule1 --floating-ip true --idle-timeout 20 --load-distribution sourceip --protocol udp'.format(lb_rg))
+        self.cmd('network lb rule update {} -n rule2 --frontend-ip-name ipconfig1 --backend-pool-name bap2 --load-distribution sourceipprotocol'.format(lb_rg))
         self.cmd('network lb rule show {} -n rule1'.format(lb_rg), checks=[
             JMESPathCheck('enableFloatingIp', True),
             JMESPathCheck('idleTimeoutInMinutes', 20),
@@ -606,7 +606,7 @@ class NetworkSecurityGroupScenarioTest(ResourceGroupVCRTestBase):
         new_port_range = '1234-1235'
         description = 'greatrule'
         priority = 888
-        self.cmd('network nsg rule set -g {} --nsg-name {} -n {} --direction {} --access {} --destination-address-prefix {} --protocol {} --source-address-prefix {} --source-port-range {} --destination-port-range {} --priority {} --description {}'.format(
+        self.cmd('network nsg rule update -g {} --nsg-name {} -n {} --direction {} --access {} --destination-address-prefix {} --protocol {} --source-address-prefix {} --source-port-range {} --destination-port-range {} --priority {} --description {}'.format(
             rg, nsg, nrn, new_direction, new_access, new_addr_prefix, new_protocol, new_addr_prefix, new_port_range, new_port_range, priority, description),
                  checks=[
                      JMESPathCheck('access', 'Deny'),
@@ -711,7 +711,7 @@ class NetworkVNetScenarioTest(ResourceGroupVCRTestBase):
         ])
 
         vnet_addr_prefixes = '20.0.0.0/16 10.0.0.0/16'
-        self.cmd('network vnet set --resource-group {} --name {} --address-prefixes {}'.format(
+        self.cmd('network vnet update --resource-group {} --name {} --address-prefixes {}'.format(
             self.resource_group, self.vnet_name, vnet_addr_prefixes))
 
         self.cmd('network vnet subnet create --resource-group {} --vnet-name {} --name {} --address-prefix {}'.format(
@@ -759,14 +759,14 @@ class NetworkSubnetSetScenarioTest(ResourceGroupVCRTestBase):
         self.cmd('network nsg create --resource-group {} --name {}'.format(self.resource_group, nsg_name))
 
         #Test we can update the address space and nsg
-        self.cmd('network vnet subnet set --resource-group {} --vnet-name {} --name {} --address-prefix {} --network-security-group {}'.format(self.resource_group, self.vnet_name, subnet_name, subnet_addr_prefix_new, nsg_name),
+        self.cmd('network vnet subnet update --resource-group {} --vnet-name {} --name {} --address-prefix {} --network-security-group {}'.format(self.resource_group, self.vnet_name, subnet_name, subnet_addr_prefix_new, nsg_name),
                  checks=[
                      JMESPathCheck('addressPrefix', subnet_addr_prefix_new),
                      JMESPathCheck('ends_with(@.networkSecurityGroup.id, `{}`)'.format('/' + nsg_name), True)
                      ])
 
         #Test we can get rid of the nsg.
-        self.cmd('network vnet subnet set --resource-group {} --vnet-name {} --name {} --address-prefix {} --network-security-group {}'.format(self.resource_group, self.vnet_name, subnet_name, subnet_addr_prefix_new, '\"\"'),
+        self.cmd('network vnet subnet update --resource-group {} --vnet-name {} --name {} --address-prefix {} --network-security-group {}'.format(self.resource_group, self.vnet_name, subnet_name, subnet_addr_prefix_new, '\"\"'),
                  checks=JMESPathCheck('networkSecurityGroup', None))
 
         self.cmd('network vnet delete --resource-group {} --name {}'.format(self.resource_group, self.vnet_name))
@@ -817,5 +817,5 @@ class NetworkVpnConnectionScenarioTest(VCRTestBase):
         self.cmd('network vpn-connection delete --resource-group {0} --name {1}'.format(rg, pv))
         self.cmd('network vpn-connection shared-key reset --resource-group {0} --connection-name {1}'.format(rg, pv),
             allowed_exceptions=allowed_exceptions)
-        self.cmd('network vpn-connection shared-key set --resource-group {0} --connection-name {1} --value {2}'.format(rg, pv, 'S4auzEfwZ6fN'),
+        self.cmd('network vpn-connection shared-key update --resource-group {0} --connection-name {1} --value {2}'.format(rg, pv, 'S4auzEfwZ6fN'),
             allowed_exceptions=allowed_exceptions)

@@ -164,7 +164,10 @@ def register_generic_update(name, getter, setter, factory=None, setter_arg_name=
     def handler(args):
         ordered_arguments = args.pop('ordered_arguments')
 
-        client = factory() if factory else None
+        try:
+            client = factory() if factory else None
+        except TypeError:
+            client = factory(None) if factory else None
 
         getterargs = {key: val for key, val in args.items()
                       if key in get_arguments}
