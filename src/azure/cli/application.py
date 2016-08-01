@@ -12,6 +12,7 @@ import uuid
 import argparse
 from enum import Enum
 from .parser import AzCliCommandParser
+from azure.cli._output import CommandResultItem
 import azure.cli.extensions
 import azure.cli._help as _help
 import azure.cli._logging as _logging
@@ -56,7 +57,8 @@ class Application(object):
                 'x-ms-client-request-id': str(uuid.uuid1())
                 },
             'command': 'unknown',
-            'completer_active': ARGCOMPLETE_ENV_NAME in os.environ
+            'completer_active': ARGCOMPLETE_ENV_NAME in os.environ,
+            'query_active': False
             }
 
 
@@ -124,7 +126,10 @@ class Application(object):
         event_data = {'result': results}
         self.raise_event(self.TRANSFORM_RESULT, event_data=event_data)
         self.raise_event(self.FILTER_RESULT, event_data=event_data)
-        return event_data['result']
+        return CommandResultItem(event_data['result'],
+                                 simple_output_query=
+                                 command_table[args.command].simple_output_query,
+                                 is_query_active=self.session['query_active'])
 
     def raise_event(self, name, **kwargs):
         '''Raise the event `name`.
@@ -188,7 +193,7 @@ class Application(object):
         global_group = kwargs['global_group']
         global_group.add_argument('--subscription', dest='_subscription_id', help=argparse.SUPPRESS)
         global_group.add_argument('--output', '-o', dest='_output_format',
-                                  choices=['json', 'tsv', 'list'],
+                                  choices=['json', 'tsv', 'list', 'table'],
                                   default='json',
                                   help='Output format',
                                   type=str.lower)
