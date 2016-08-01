@@ -53,7 +53,7 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
-    'adal>=0.3.0',
+    'adal>=0.4.0',
     'applicationinsights',
     'argcomplete>=1.3.0',
     'azure==2.0.0rc5',
