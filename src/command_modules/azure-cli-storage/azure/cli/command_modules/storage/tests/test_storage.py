@@ -78,7 +78,7 @@ class StorageAccountScenarioTest(VCRTestBase):
         super(StorageAccountScenarioTest, self).__init__(__file__, test_method)
 
     def set_up(self):
-        self.cmd('storage account set -g {} -n {} --type Standard_LRS'.format(self.rg, self.account))
+        self.cmd('storage account update -g {} -n {} --type Standard_LRS'.format(self.rg, self.account))
 
     def body(self):
         s = self
@@ -119,11 +119,11 @@ class StorageAccountScenarioTest(VCRTestBase):
         keys_result = s.cmd('storage account keys renew -g {} -n {} --key secondary'.format(rg, account))
         assert key1 == keys_result['keys'][0]
         assert key2 != keys_result['keys'][1]
-        s.cmd('storage account set -g {} -n {} --tags foo=bar;cat'.format(rg, account),
+        s.cmd('storage account update -g {} -n {} --tags foo=bar;cat'.format(rg, account),
             checks=JMESPathCheck('tags', {'cat':'', 'foo':'bar'}))
-        s.cmd('storage account set -g {} -n {} --tags'.format(rg, account),
+        s.cmd('storage account update -g {} -n {} --tags'.format(rg, account),
             checks=JMESPathCheck('tags', {}))
-        s.cmd('storage account set -g {} -n {} --type Standard_GRS'.format(rg, account),
+        s.cmd('storage account update -g {} -n {} --type Standard_GRS'.format(rg, account),
             checks=JMESPathCheck('sku.name', 'Standard_GRS'))
 
 class StorageBlobScenarioTest(VCRTestBase):
@@ -179,12 +179,12 @@ class StorageBlobScenarioTest(VCRTestBase):
         blob_url = 'https://{}.blob.core.windows.net/{}/{}'.format(STORAGE_ACCOUNT_NAME, container, blob)
         s.cmd('storage blob url -n {} -c {}'.format(blob, container), checks=StringCheck(blob_url))
 
-        s.cmd('storage blob metadata set -n {} -c {} --metadata a=b;c=d'.format(blob, container))
+        s.cmd('storage blob metadata update -n {} -c {} --metadata a=b;c=d'.format(blob, container))
         s.cmd('storage blob metadata show -n {} -c {}'.format(blob, container), checks=[
             JMESPathCheck('a', 'b'),
             JMESPathCheck('c', 'd')
         ])
-        s.cmd('storage blob metadata set -n {} -c {}'.format(blob, container))
+        s.cmd('storage blob metadata update -n {} -c {}'.format(blob, container))
         s.cmd('storage blob metadata show -n {} -c {}'.format(blob, container), checks=NoneCheck())
 
         res = s.cmd('storage blob list --container-name {}'.format(container))['items']
@@ -257,12 +257,12 @@ class StorageBlobScenarioTest(VCRTestBase):
         res = s.cmd('storage container list')['items']
         assert container in [x['name'] for x in res]
 
-        s.cmd('storage container metadata set -n {} --metadata foo=bar;moo=bak;'.format(container))
+        s.cmd('storage container metadata update -n {} --metadata foo=bar;moo=bak;'.format(container))
         s.cmd('storage container metadata show -n {}'.format(container), checks=[
             JMESPathCheck('foo', 'bar'),
             JMESPathCheck('moo', 'bak')
         ])
-        s.cmd('storage container metadata set -n {}'.format(container)) # reset metadata
+        s.cmd('storage container metadata update -n {}'.format(container)) # reset metadata
         s.cmd('storage container metadata show -n {}'.format(container), checks=NoneCheck())
         s._storage_blob_scenario()
         
@@ -375,7 +375,7 @@ class StorageFileScenarioTest(VCRTestBase):
             checks=BooleanCheck(True))
         s.cmd('storage directory exists --share-name {} -n {}'.format(share, dir),
             checks=BooleanCheck(True))
-        s.cmd('storage directory metadata set --share-name {} -n {} --metadata a=b;c=d'.format(share, dir))
+        s.cmd('storage directory metadata update --share-name {} -n {} --metadata a=b;c=d'.format(share, dir))
         s.cmd('storage directory metadata show --share-name {} -n {}'.format(share, dir), checks=[
             JMESPathCheck('a', 'b'),
             JMESPathCheck('c', 'd')
@@ -384,7 +384,7 @@ class StorageFileScenarioTest(VCRTestBase):
             JMESPathCheck('metadata', {'a': 'b', 'c': 'd'}),
             JMESPathCheck('name', dir)
         ])
-        s.cmd('storage directory metadata set --share-name {} --name {}'.format(share, dir))
+        s.cmd('storage directory metadata update --share-name {} --name {}'.format(share, dir))
         s.cmd('storage directory metadata show --share-name {} --name {}'.format(share, dir),
             checks=NoneCheck())
         s._storage_file_in_subdir_scenario(share, dir)
@@ -426,12 +426,12 @@ class StorageFileScenarioTest(VCRTestBase):
             checks=JMESPathCheck('properties.contentLength', 1234))
 
         # test ability to set and reset metadata
-        s.cmd('storage file metadata set --share-name {} --name {} --metadata a=b;c=d'.format(share, filename))
+        s.cmd('storage file metadata update --share-name {} --name {} --metadata a=b;c=d'.format(share, filename))
         s.cmd('storage file metadata show --share-name {} -n {}'.format(share, filename), checks=[
             JMESPathCheck('a', 'b'),
             JMESPathCheck('c', 'd')
         ])
-        s.cmd('storage file metadata set --share-name {} --name {}'.format(share, filename))
+        s.cmd('storage file metadata update --share-name {} --name {}'.format(share, filename))
         s.cmd('storage file metadata show --share-name {} -n {}'.format(share, filename),
             checks=NoneCheck())
 
@@ -497,15 +497,15 @@ class StorageFileScenarioTest(VCRTestBase):
         assert share2 in res
 
         # verify metadata can be set, queried, and cleared
-        s.cmd('storage share metadata set --name {} --metadata a=b;c=d'.format(share1))
+        s.cmd('storage share metadata update --name {} --metadata a=b;c=d'.format(share1))
         s.cmd('storage share metadata show -n {}'.format(share1), checks=[
             JMESPathCheck('a', 'b'),
             JMESPathCheck('c', 'd')
         ])
-        s.cmd('storage share metadata set -n {}'.format(share1))
+        s.cmd('storage share metadata update -n {}'.format(share1))
         s.cmd('storage share metadata show -n {}'.format(share1), checks=NoneCheck())
 
-        s.cmd('storage share set --name {} --quota 3'.format(share1))
+        s.cmd('storage share update --name {} --quota 3'.format(share1))
         s.cmd('storage share show --name {}'.format(share1),
             checks=JMESPathCheck('properties.quota', 3))
 
@@ -629,7 +629,7 @@ def _acl_body(test):
         JMESPathCheck('expiry', '2016-05-01T00:00:00+00:00'),
         JMESPathCheck('permission', 'rwdl')
     ])
-    s.cmd('storage {} policy set {} --policy test1 --permission r'.format(service, container_param))
+    s.cmd('storage {} policy update {} --policy test1 --permission r'.format(service, container_param))
     s.cmd('storage {} policy show {} --policy test1'.format(service, container_param),
         checks=JMESPathCheck('permission', 'r'))
     s.cmd('storage {} policy delete {} --policy test1'.format(service, container_param))

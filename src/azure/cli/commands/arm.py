@@ -7,7 +7,6 @@ import argparse
 import re
 import json
 
-from collections import defaultdict
 from msrestazure.azure_operation import AzureOperationPoller
 from azure.cli.commands import CliCommand, command_table as main_command_table
 from azure.cli.commands._introspection import extract_args_from_signature
@@ -169,7 +168,7 @@ def register_generic_update(name, getter, setter, factory=None, setter_arg_name=
 
         getterargs = {key: val for key, val in args.items()
                       if key in get_arguments}
-        instance = result = getter(client, **getterargs) if client else getter(**getterargs)
+        instance = getter(client, **getterargs) if client else getter(**getterargs)
 
         # Update properties
         for arg in ordered_arguments:
@@ -241,7 +240,13 @@ def set_properties(instance, expression):
         pass
 
     name, path = _get_name_path(key)
+    root = instance
     instance = _find_property(instance, path)
+    if instance is None:
+        parent = _find_property(root, path[:-1])
+        set_properties(parent, '{}={{}}'.format(path[-1]))
+        instance = _find_property(root, path)
+
     match = index_regex.match(name)
     index_value = int(match.group(1)) if match else None
     try:
@@ -261,7 +266,12 @@ def add_properties(instance, argument_values):
     list_attribute_path = _get_internal_path(argument_values.pop(0))
     list_to_add_to = _find_property(instance, list_attribute_path)
 
-    new_value = defaultdict(lambda: {})
+    if list_to_add_to is None:
+        parent = _find_property(instance, list_attribute_path[:-1])
+        set_properties(parent, '{}=[]'.format(list_attribute_path[-1]))
+        list_to_add_to = _find_property(instance, list_attribute_path)
+
+    new_value = {}
     for expression in argument_values:
         set_properties(new_value, expression)
     list_to_add_to.append(new_value)
