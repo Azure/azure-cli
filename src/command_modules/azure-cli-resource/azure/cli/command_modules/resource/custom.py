@@ -8,7 +8,6 @@
 from __future__ import print_function
 import json
 import time
-from codecs import open as codecs_open
 
 from msrestazure.azure_exceptions import CloudError
 from azure.mgmt.resource.resources import ResourceManagementClient
@@ -16,7 +15,7 @@ from azure.mgmt.resource.resources.models.resource_group import ResourceGroup
 from azure.mgmt.resource.resources.models import GenericResource
 
 from azure.cli.parser import IncorrectUsageError
-from azure.cli._util import CLIError
+from azure.cli._util import CLIError, get_file_json
 import azure.cli._logging as _logging
 from azure.cli.commands.client_factory import get_mgmt_service_client
 
@@ -174,11 +173,11 @@ def _deploy_arm_template_core(resource_group_name, deployment_name, template_fil
 
     parameters = None
     if parameters_file_path:
-        parameters = _get_file_json(parameters_file_path)
+        parameters = get_file_json(parameters_file_path)
         if parameters:
             parameters = parameters.get('parameters', parameters)
 
-    template = _get_file_json(template_file_path)
+    template = get_file_json(template_file_path)
 
     properties = DeploymentProperties(template=template, parameters=parameters, mode=mode)
 
@@ -274,17 +273,3 @@ def move_resource(ids, destination_group, destination_subscription_id=None):
 
     return rcf.resources.move_resources(resources[0]['resource_group'], ids, target)
 
-def _get_file_json(file_path):
-    return _load_json(file_path, 'utf-8') \
-        or _load_json(file_path, 'utf-8-sig') \
-        or _load_json(file_path, 'utf-16') \
-        or _load_json(file_path, 'utf-16le') \
-        or _load_json(file_path, 'utf-16be')
-
-def _load_json(file_path, encoding):
-    try:
-        with codecs_open(file_path, encoding=encoding) as f:
-            text = f.read()
-        return json.loads(text)
-    except ValueError:
-        pass
