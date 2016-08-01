@@ -89,7 +89,6 @@ class LongRunningOperation(object): #pylint: disable=too-few-public-methods
         time.sleep(self.poll_interval_ms / 1000.0)
 
     def __call__(self, poller):
-        logger.warning(self.start_msg)
         logger.info("Starting long running operation '%s' with polling interval %s ms",
                     self.start_msg, self.poll_interval_ms)
         while not poller.done():
@@ -110,7 +109,6 @@ class LongRunningOperation(object): #pylint: disable=too-few-public-methods
 
         logger.info("Long running operation '%s' completed with result %s",
                     self.start_msg, result)
-        logger.warning(self.finish_msg)
         return result
 
 class DeploymentOutputLongRunningOperation(LongRunningOperation): #pylint: disable=too-few-public-methods
