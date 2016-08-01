@@ -36,7 +36,7 @@ class Test_ArgumentParser(unittest.TestCase):
             'expand': None,
             'resource_group_name': 'thisisaresourcegroup',
             'vm_name': 'thisisavmname'
-            }, args)
+            }, args.result)
 
         # Invalid resource ID should trigger the missing resource group
         # parameter failure
@@ -54,14 +54,14 @@ class Test_ArgumentParser(unittest.TestCase):
         args = mock_echo_args('vm list', '')
         self.assertDictEqual({
             'resource_group_name': None,
-            }, args)
+            }, args.result)
 
         # if resource group name is specified, however,
         # it should get passed through...
         args = mock_echo_args('vm list', '-g hullo')
         self.assertDictEqual({
             'resource_group_name': 'hullo',
-            }, args)
+            }, args.result)
 
     consistent_arguments = {
         'resource_group_name': ('--resource-group', '-g'),

@@ -16,6 +16,7 @@ from msrest.exceptions import ClientException
 from msrestazure.azure_operation import AzureOperationPoller
 from azure.cli._util import CLIError
 import azure.cli._logging as _logging
+
 from ._introspection import extract_args_from_signature
 
 logger = _logging.get_az_logger(__name__)
@@ -134,12 +135,13 @@ class CommandTable(dict):
 
 class CliCommand(object):
 
-    def __init__(self, name, handler, description=None):
+    def __init__(self, name, handler, description=None, simple_output_query=None):
         self.name = name
         self.handler = handler
         self.description = description
         self.help = None
         self.arguments = {}
+        self.simple_output_query = simple_output_query
 
     def add_argument(self, param_name, *option_strings, **kwargs):
         argument = CliCommandArgument(
@@ -201,11 +203,13 @@ def register_extra_cli_argument(command, dest, **kwargs):
     '''
     _cli_extra_argument_registry[command][dest] = CliCommandArgument(dest, **kwargs)
 
-def cli_command(name, operation, client_factory=None, transform=None):
+def cli_command(name, operation, client_factory=None, transform=None, simple_output_query=None):
     """ Registers a default Azure CLI command. These commands require no special parameters. """
-    command_table[name] = create_command(name, operation, transform, client_factory)
+    command_table[name] = create_command(name, operation, transform, simple_output_query,
+                                         client_factory)
 
-def create_command(name, operation, transform_result, client_factory):
+def create_command(name, operation, transform_result, simple_output_query, client_factory):
+
     def _execute_command(kwargs):
         client = client_factory(kwargs) if client_factory else None
         try:
@@ -226,7 +230,7 @@ def create_command(name, operation, transform_result, client_factory):
             raise CLIError(message)
 
     name = ' '.join(name.split())
-    cmd = CliCommand(name, _execute_command)
+    cmd = CliCommand(name, _execute_command, simple_output_query=simple_output_query)
     cmd.arguments.update(extract_args_from_signature(operation))
     return cmd
 

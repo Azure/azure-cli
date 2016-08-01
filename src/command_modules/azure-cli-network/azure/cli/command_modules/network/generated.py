@@ -206,7 +206,7 @@ register_generic_update('network nsg update', NetworkSecurityGroupsOperations.ge
 factory = lambda _: _network_client_factory().public_ip_addresses
 cli_command('network public-ip delete', PublicIPAddressesOperations.delete, factory)
 cli_command('network public-ip show', PublicIPAddressesOperations.get, factory)
-cli_command('network public-ip list', list_public_ips)
+cli_command('network public-ip list', list_public_ips, simple_output_query="[*].{Name:name, ResourceGroup:resourceGroup, Location:location, IpAddress:ipAddress, FQDN:dnsSettings.fqdn} | sort_by(@, &Name)")
 register_generic_update('network public-ip update', PublicIPAddressesOperations.get, PublicIPAddressesOperations.create_or_update, factory)
 
 factory = lambda _: get_mgmt_service_client(PublicIPClient).public_ip
