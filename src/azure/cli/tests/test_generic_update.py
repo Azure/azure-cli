@@ -13,6 +13,7 @@ from azure.cli.commands.arm import register_generic_update
 from azure.cli._util import CLIError
 
 #pylint:disable=invalid-sequence-index
+#pylint:disable=unsubscriptable-object
 
 class GenericUpdateTest(unittest.TestCase):
     @classmethod
@@ -193,3 +194,46 @@ class GenericUpdateTest(unittest.TestCase):
         # name is None when tests are run in a batch on Python <=2.7.9
         if not sys.version_info < (2, 7, 10):
             self.assertEqual(my_objs[1]['prop'], 'newval', 'second object updated')
+
+
+    def test_generic_update_empty_nodes(self):
+        my_obj = {
+            'prop': None,
+            'list': [],
+            'dict': {
+                'dict2': None
+                },
+            'dict3': {}
+            }
+
+        def my_get():
+            return my_obj
+
+        def my_set(**kwargs): #pylint:disable=unused-argument
+            return my_obj
+
+        config = Configuration([])
+        app = Application(config)
+
+        register_generic_update('gencommand', my_get, my_set)
+
+        # add to prop
+        app.execute('gencommand --add prop a=b'.split())
+        self.assertEqual(my_obj['prop'][0]['a'], 'b', 'verify object added to null list')
+        self.assertEqual(len(my_obj['prop'][0]), 1, 'verify only one object added to null list')
+
+        #add to list
+        app.execute('gencommand --add list c=d'.split())
+        self.assertEqual(my_obj['list'][0]['c'], 'd', 'verify object added to empty list')
+        self.assertEqual(len(my_obj['list']), 1, 'verify only one object added to empty list')
+
+        # set dict2
+        app.execute('gencommand --set dict.dict2.e=f'.split())
+        self.assertEqual(my_obj['dict']['dict2']['e'], 'f', 'verify object added to null dict')
+        self.assertEqual(len(my_obj['dict']['dict2']), 1,
+                         'verify only one object added to null dict')
+
+        #set dict3
+        app.execute('gencommand --set dict3.g=h'.split())
+        self.assertEqual(my_obj['dict3']['g'], 'h', 'verify object added to empty dict')
+        self.assertEqual(len(my_obj['dict3']), 1, 'verify only one object added to empty dict')

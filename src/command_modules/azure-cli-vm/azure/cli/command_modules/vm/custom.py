@@ -14,12 +14,12 @@ except ImportError:
     from urlparse import urlparse # pylint: disable=import-error
 from six.moves.urllib.request import urlopen #pylint: disable=import-error,unused-import
 
-from azure.cli.commands.arm import register_generic_update
 from azure.mgmt.compute.models import (DataDisk,
                                        VirtualMachineScaleSet,
                                        VirtualMachineCaptureParameters)
 from azure.mgmt.compute.models.compute_management_client_enums import DiskCreateOptionTypes
 from azure.cli.commands import LongRunningOperation
+from azure.cli.commands.arm import register_generic_update
 from azure.cli.commands.client_factory import get_mgmt_service_client, get_data_service_client
 from azure.cli._util import CLIError
 from ._vm_utils import read_content_if_is_file, load_json, get_default_linux_diag_config
@@ -887,12 +887,18 @@ def vmss_start(resource_group_name, vm_scale_set_name, instance_ids=None):
                                                        vm_scale_set_name,
                                                        instance_ids=instance_ids)
 
-def get_vm(resource_group_name, vm_name):
-    vmsc = _compute_client_factory().virtual_machines
-    return vmsc.get(resource_group_name, vm_name)
+def availset_get(resource_group_name, name):
+    return _compute_client_factory().availability_sets.get(resource_group_name, name)
 
-def set_vm(**kwargs):
-    vmsc = _compute_client_factory().virtual_machines
-    return vmsc.create_or_update(**kwargs)
+def availset_set(**kwargs):
+    return _compute_client_factory().availability_sets.create_or_update(**kwargs)
 
-register_generic_update('vm update', get_vm, set_vm)
+register_generic_update('vm availability-set update', availset_get, availset_set)
+
+def vmss_get(resource_group_name, name):
+    return _compute_client_factory().virtual_machine_scale_sets.get(resource_group_name, name)
+
+def vmss_set(**kwargs):
+    return _compute_client_factory().virtual_machine_scale_sets.create_or_update(**kwargs)
+
+register_generic_update('vmss update', vmss_get, vmss_set)

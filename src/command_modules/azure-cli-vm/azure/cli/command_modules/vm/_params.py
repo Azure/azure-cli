@@ -67,6 +67,7 @@ register_cli_argument('vmss', 'vm_scale_set_name', name_arg_type, completer=get_
 register_cli_argument('vmss', 'virtual_machine_scale_set_name', name_arg_type)
 register_cli_argument('vmss', 'instance_ids', multi_ids_type)
 register_cli_argument('vmss', 'tags', tags_type)
+register_cli_argument('vmss', 'name', arg_type=name_arg_type)
 register_cli_argument('vm disk', 'vm_name', arg_type=existing_vm_name, options_list=('--vm-name',))
 register_cli_argument('vm disk', 'disk_name', CliArgumentType(options_list=('--name', '-n'), help='The data disk name. If missing, will retrieve from vhd uri'))
 register_cli_argument('vm disk', 'disk_size', CliArgumentType(help='Size of disk (GiB)', default=1023, type=int))
@@ -75,7 +76,7 @@ register_cli_argument('vm disk', 'lun', CliArgumentType(
 register_cli_argument('vm disk', 'vhd', CliArgumentType(type=VirtualHardDisk, help='virtual hard disk\'s uri. For example:https://mystorage.blob.core.windows.net/vhds/d1.vhd'))
 register_cli_argument('vm disk', 'caching', CliArgumentType(help='Host caching policy', default=CachingTypes.none.value, choices=choices_caching_types))
 
-register_cli_argument('vm availability-set', 'availability_set_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Compute/availabilitySets'))
+register_cli_argument('vm availability-set', 'availability_set_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Compute/availabilitySets'), help='Name of the availability set')
 
 register_cli_argument('vm access', 'username', CliArgumentType(options_list=('--username', '-u'), help='The user name'))
 register_cli_argument('vm access', 'password', CliArgumentType(options_list=('--password', '-p'), help='The user password'))

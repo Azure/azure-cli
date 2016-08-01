@@ -15,6 +15,7 @@ from azure.mgmt.compute.operations import (
     VirtualMachineScaleSetVMsOperations,
     ContainerServiceOperations)
 from azure.cli.commands import DeploymentOutputLongRunningOperation, cli_command
+from azure.cli.commands.arm import register_generic_update
 from azure.cli.commands.client_factory import get_mgmt_service_client
 from azure.cli.command_modules.vm.mgmt_avail_set.lib import (AvailSetCreationClient
                                                              as AvailSetClient)
@@ -65,6 +66,7 @@ cli_command('vm nic add', vm_add_nics)
 cli_command('vm nic delete', vm_delete_nics)
 cli_command('vm nic update', vm_update_nics)
 cli_command('vm open-port', vm_open_port)
+register_generic_update('vm update', VirtualMachinesOperations.get, VirtualMachinesOperations.create_or_update, factory)
 
 # VM Access
 cli_command('vm access set-linux-user', set_linux_user)
@@ -100,6 +102,7 @@ ContainerService._attribute_map['tags']['type'] = '{str}'#pylint: disable=protec
 cli_command('vm container show', ContainerServiceOperations.get, factory)
 cli_command('vm container list', ContainerServiceOperations.list, factory)
 cli_command('vm container delete', ContainerServiceOperations.delete, factory)
+register_generic_update('vm container update', ContainerServiceOperations.get, ContainerServiceOperations.create_or_update, lambda: _compute_client_factory().container_service)
 
 # VM Diagnostics
 cli_command('vm diagnostics set', set_diagnostics_extension)
@@ -163,4 +166,3 @@ cli_command('vmss scale', vmss_scale)
 # VM Size
 factory = lambda _: _compute_client_factory().virtual_machine_sizes
 cli_command('vm list-sizes', VirtualMachineSizesOperations.list, factory)
-

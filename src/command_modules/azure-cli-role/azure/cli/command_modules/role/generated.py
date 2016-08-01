@@ -10,6 +10,7 @@ from azure.mgmt.authorization.operations import RoleAssignmentsOperations, RoleD
 from azure.graphrbac.operations import (ApplicationsOperations, ServicePrincipalsOperations,
                                         UsersOperations, GroupsOperations)
 from azure.cli.commands import cli_command
+from azure.cli.commands.arm import register_generic_update
 
 from .custom import (create_role_assignment, list_sps, list_users, create_user, list_groups, list_apps,
                      _auth_client_factory, _graph_client_factory)
@@ -19,6 +20,10 @@ cli_command('role list', RoleDefinitionsOperations.list, factory)
 cli_command('role delete', RoleDefinitionsOperations.delete, factory)
 cli_command('role show', RoleDefinitionsOperations.get, factory)
 cli_command('role show-by-id', RoleDefinitionsOperations.get_by_id, factory)
+register_generic_update('role update',
+                        RoleDefinitionsOperations.get,
+                        RoleDefinitionsOperations.create_or_update,
+                        factory)
 
 factory = lambda _: _auth_client_factory().role_assignments
 cli_command('role assignment delete', RoleAssignmentsOperations.delete, factory)
