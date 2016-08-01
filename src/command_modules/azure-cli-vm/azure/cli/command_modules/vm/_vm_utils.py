@@ -1,11 +1,11 @@
-#---------------------------------------------------------------------------------------------
+﻿#---------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 #---------------------------------------------------------------------------------------------
 
-from codecs import open as codecs_open
 import json
 import os
+from azure.cli._util import get_file_json
 
 def read_content_if_is_file(string_or_file):
     content = string_or_file
@@ -16,21 +16,9 @@ def read_content_if_is_file(string_or_file):
 
 def load_json(string_or_file_path):
     if os.path.exists(string_or_file_path):
-        return _load_json_from_file(string_or_file_path, 'utf-8') \
-            or _load_json_from_file(string_or_file_path, 'utf-8-sig') \
-            or _load_json_from_file(string_or_file_path, 'utf-16') \
-            or _load_json_from_file(string_or_file_path, 'utf-16le') \
-            or _load_json_from_file(string_or_file_path, 'utf-16be')
+        return get_file_json(string_or_file_path)
     else:
         return json.loads(string_or_file_path)
-
-def _load_json_from_file(file_path, encoding):
-    try:
-        with codecs_open(file_path, encoding=encoding) as f:
-            text = f.read()
-        return json.loads(text)
-    except ValueError:
-        pass
 
 def get_default_linux_diag_config(vm_id=None):
     #pylint: disable=bad-continuation
