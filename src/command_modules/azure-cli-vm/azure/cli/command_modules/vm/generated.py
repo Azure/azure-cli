@@ -102,7 +102,7 @@ ContainerService._attribute_map['tags']['type'] = '{str}'#pylint: disable=protec
 cli_command('vm container show', ContainerServiceOperations.get, factory)
 cli_command('vm container list', ContainerServiceOperations.list, factory)
 cli_command('vm container delete', ContainerServiceOperations.delete, factory)
-register_generic_update('vm container update', ContainerServiceOperations.get, ContainerServiceOperations.create_or_update, lambda: _compute_client_factory().container_service)
+register_generic_update('vm container update', ContainerServiceOperations.get, ContainerServiceOperations.create_or_update, factory)
 
 # VM Diagnostics
 cli_command('vm diagnostics set', set_diagnostics_extension)

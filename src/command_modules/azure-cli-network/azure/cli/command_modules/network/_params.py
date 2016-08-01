@@ -119,7 +119,7 @@ register_cli_argument('network vnet create', 'virtual_network_prefix', options_l
 register_cli_argument('network vnet create', 'virtual_network_name', virtual_network_name_type, options_list=('--name', '-n'), required=True, completer=None)
 
 register_cli_argument('network vnet subnet', 'subnet_name', arg_type=subnet_name_type, options_list=('--name', '-n'), id_part='child_name')
-register_cli_argument('network vnet set', 'address_prefixes', nargs='+')
+register_cli_argument('network vnet update', 'address_prefixes', nargs='+')
 
 register_cli_argument('network vnet subnet', 'address_prefix', metavar='PREFIX', help='the address prefix in CIDR format.')
 register_cli_argument('network vnet subnet', 'virtual_network_name', virtual_network_name_type)
