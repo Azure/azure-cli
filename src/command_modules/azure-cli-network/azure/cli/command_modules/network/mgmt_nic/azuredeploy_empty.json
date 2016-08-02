@@ -9,6 +9,13 @@
         "description": "Enable IP forwarding."
       }
     },
+    "internalDnsNameLabel": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "The internal DNS name label."
+      }
+    },
     "loadBalancerBackendAddressPoolIds": {
       "type": "array",
       "defaultValue": [ ],
@@ -37,17 +44,17 @@
         "description": "Name of the new NIC."
       }
     },
-    "networkSecurityGroupName": {
+    "networkSecurityGroup": {
       "type": "string",
       "defaultValue": "",
       "metadata": {
-        "description": "Network security group to associate with the NIC."
+        "description": "Name or ID of an existing network security group to associate with the NIC."
       }
     },
     "networkSecurityGroupType": {
       "type": "string",
       "defaultValue": "none",
-      "allowedValues": [ "none", "existing" ],
+      "allowedValues": [ "none", "existingName", "existingId" ],
       "metadata": {
         "description": "Identifies whether to use an existing NSG."
       }
@@ -56,39 +63,55 @@
       "type": "string",
       "defaultValue": "",
       "metadata": {
-        "description": "Static private IP address to associate with the NIC."
+        "description": "Static private IP address to use."
       }
     },
     "privateIpAddressAllocation": {
       "type": "string",
       "defaultValue": "dynamic",
-      "allowedValues": [
-        "dynamic",
-        "static"
-      ],
+      "allowedValues": [ "dynamic", "static" ],
       "metadata": {
         "description": "Private IP address allocation method."
       }
     },
-    "publicIpAddressName": {
+    "privateIpAddressVersion": {
+      "type": "string",
+      "defaultValue": "ipv4",
+      "allowedValues": [
+        "ipv4",
+        "ipv6"
+      ],
+      "metadata": {
+        "description": "The private IP address version to use."
+      }
+    },
+    "publicIpAddress": {
       "type": "string",
       "defaultValue": "",
       "metadata": {
-        "description": "Name of an existing public IP address to associate with the NIC."
+        "description": "Name or ID an existing public IP address to associate with the NIC."
       }
     },
     "publicIpAddressType": {
       "type": "string",
       "defaultValue": "none",
-      "allowedValues": [ "none", "existing" ],
+      "allowedValues": [ "none", "existingName", "existingId" ],
       "metadata": {
         "description": "Specify whether to associate an existing public IP address with the NIC."
       }
     },
-    "subnetName": {
+    "subnet": {
       "type": "string",
       "metadata": {
-        "description": "Subnet to associate with the NIC."
+        "description": "Name or ID of an existing subnet to associate with the NIC."
+      }
+    },
+    "subnetType": {
+      "type": "string",
+      "defaultValue": "existingName",
+      "allowedValues": [ "existingName", "existingId" ],
+      "metadata": {
+        "description": "Specify whether supplied subnet is by name or ID."
       }
     },
     "tags": {
@@ -98,8 +121,17 @@
         "description": "Tags object."
       }
     },
+    "useDnsSettings": {
+      "type": "string",
+      "defaultValue": "false",
+      "allowedValues": [ "true", "false" ],
+      "metadata": {
+        "description": "Flag to specify whether to use DNS settings."
+      }
+    },
     "virtualNetworkName": {
       "type": "string",
+      "defaultValue": "",
       "metadata": {
         "description": "Virtual network to associate with the NIC."
       }

@@ -52,13 +52,17 @@ from .custom import \
      create_lb_backend_address_pool,
      create_lb_probe, set_lb_probe,
      create_lb_rule, set_lb_rule,
-     list_load_balancer_property, get_load_balancer_property_entry, list_lbs,
-     delete_load_balancer_property_entry,
+     create_nic_ip_config, set_nic_ip_config,
+     add_nic_ip_config_address_pool, remove_nic_ip_config_address_pool,
+     add_nic_ip_config_inbound_nat_rule, remove_nic_ip_config_inbound_nat_rule,
+     list_network_resource_property, get_network_resource_property_entry,
+     delete_network_resource_property_entry,
+     set_nic,
+     list_lbs,
      list_express_route_circuits,
      list_public_ips, list_nics,
      list_route_tables,
      list_application_gateways)
-
 from ._factory import _network_client_factory
 
 # pylint: disable=line-too-long
@@ -112,46 +116,47 @@ register_generic_update('network lb update', LoadBalancersOperations.get, LoadBa
 factory = lambda _: get_mgmt_service_client(LBClient).lb
 cli_command('network lb create', LbOperations.create_or_update, factory, transform=DeploymentOutputLongRunningOperation('Starting network lb create'))
 
+resource = 'load_balancers'
 subresource = 'frontend_ip_configurations'
 cli_command('network lb frontend-ip create', create_lb_frontend_ip_configuration)
 cli_command('network lb frontend-ip update', set_lb_frontend_ip_configuration)
-cli_command('network lb frontend-ip list', list_load_balancer_property(subresource))
-cli_command('network lb frontend-ip show', get_load_balancer_property_entry(subresource))
-cli_command('network lb frontend-ip delete', delete_load_balancer_property_entry(subresource))
+cli_command('network lb frontend-ip list', list_network_resource_property(resource, subresource))
+cli_command('network lb frontend-ip show', get_network_resource_property_entry(resource, subresource))
+cli_command('network lb frontend-ip delete', delete_network_resource_property_entry(resource, subresource))
 
 subresource = 'inbound_nat_rules'
 cli_command('network lb inbound-nat-rule create', create_lb_inbound_nat_rule)
 cli_command('network lb inbound-nat-rule update', set_lb_inbound_nat_rule)
-cli_command('network lb inbound-nat-rule list', list_load_balancer_property(subresource))
-cli_command('network lb inbound-nat-rule show', get_load_balancer_property_entry(subresource))
-cli_command('network lb inbound-nat-rule delete', delete_load_balancer_property_entry(subresource))
+cli_command('network lb inbound-nat-rule list', list_network_resource_property(resource, subresource))
+cli_command('network lb inbound-nat-rule show', get_network_resource_property_entry(resource, subresource))
+cli_command('network lb inbound-nat-rule delete', delete_network_resource_property_entry(resource, subresource))
 
 subresource = 'inbound_nat_pools'
 cli_command('network lb inbound-nat-pool create', create_lb_inbound_nat_pool)
 cli_command('network lb inbound-nat-pool update', set_lb_inbound_nat_pool)
-cli_command('network lb inbound-nat-pool list', list_load_balancer_property(subresource))
-cli_command('network lb inbound-nat-pool show', get_load_balancer_property_entry(subresource))
-cli_command('network lb inbound-nat-pool delete', delete_load_balancer_property_entry(subresource))
+cli_command('network lb inbound-nat-pool list', list_network_resource_property(resource, subresource))
+cli_command('network lb inbound-nat-pool show', get_network_resource_property_entry(resource, subresource))
+cli_command('network lb inbound-nat-pool delete', delete_network_resource_property_entry(resource, subresource))
 
 subresource = 'backend_address_pools'
 cli_command('network lb address-pool create', create_lb_backend_address_pool)
-cli_command('network lb address-pool list', list_load_balancer_property(subresource))
-cli_command('network lb address-pool show', get_load_balancer_property_entry(subresource))
-cli_command('network lb address-pool delete', delete_load_balancer_property_entry(subresource))
+cli_command('network lb address-pool list', list_network_resource_property(resource, subresource))
+cli_command('network lb address-pool show', get_network_resource_property_entry(resource, subresource))
+cli_command('network lb address-pool delete', delete_network_resource_property_entry(resource, subresource))
 
 subresource = 'load_balancing_rules'
 cli_command('network lb rule create', create_lb_rule)
 cli_command('network lb rule update', set_lb_rule)
-cli_command('network lb rule list', list_load_balancer_property(subresource))
-cli_command('network lb rule show', get_load_balancer_property_entry(subresource))
-cli_command('network lb rule delete', delete_load_balancer_property_entry(subresource))
+cli_command('network lb rule list', list_network_resource_property(resource, subresource))
+cli_command('network lb rule show', get_network_resource_property_entry(resource, subresource))
+cli_command('network lb rule delete', delete_network_resource_property_entry(resource, subresource))
 
 subresource = 'probes'
 cli_command('network lb probe create', create_lb_probe)
 cli_command('network lb probe update', set_lb_probe)
-cli_command('network lb probe list', list_load_balancer_property(subresource))
-cli_command('network lb probe show', get_load_balancer_property_entry(subresource))
-cli_command('network lb probe delete', delete_load_balancer_property_entry(subresource))
+cli_command('network lb probe list', list_network_resource_property(resource, subresource))
+cli_command('network lb probe show', get_network_resource_property_entry(resource, subresource))
+cli_command('network lb probe delete', delete_network_resource_property_entry(resource, subresource))
 
 factory = lambda _: get_mgmt_service_client(NSGClient).nsg
 cli_command('network nsg create', NsgOperations.create_or_update, factory, transform=DeploymentOutputLongRunningOperation('Starting network nsg create'))
@@ -171,12 +176,24 @@ factory = lambda _: _network_client_factory().network_interfaces
 cli_command('network nic delete', NetworkInterfacesOperations.delete, factory)
 cli_command('network nic show', NetworkInterfacesOperations.get, factory)
 cli_command('network nic list', list_nics)
-register_generic_update('network nic update', NetworkInterfacesOperations.get, NetworkInterfacesOperations.create_or_update, factory)
+cli_command('network nic update', set_nic)
 
 # NetworkInterfacesOperations: scaleset
 cli_command('network nic scale-set list-vm-nics', NetworkInterfacesOperations.list_virtual_machine_scale_set_vm_network_interfaces, factory)
 cli_command('network nic scale-set list', NetworkInterfacesOperations.list_virtual_machine_scale_set_network_interfaces, factory)
 cli_command('network nic scale-set show', NetworkInterfacesOperations.get_virtual_machine_scale_set_network_interface, factory)
+
+resource = 'network_interfaces'
+subresource = 'ip_configurations'
+cli_command('network nic ip-config create', create_nic_ip_config)
+cli_command('network nic ip-config update', set_nic_ip_config)
+cli_command('network nic ip-config list', list_network_resource_property(resource, subresource))
+cli_command('network nic ip-config show', get_network_resource_property_entry(resource, subresource))
+cli_command('network nic ip-config delete', delete_network_resource_property_entry(resource, subresource))
+cli_command('network nic ip-config address-pool add', add_nic_ip_config_address_pool)
+cli_command('network nic ip-config address-pool remove', remove_nic_ip_config_address_pool)
+cli_command('network nic ip-config inbound-nat-rule add', add_nic_ip_config_inbound_nat_rule)
+cli_command('network nic ip-config inbound-nat-rule remove', remove_nic_ip_config_inbound_nat_rule)
 
 # NetworkSecurityGroupsOperations
 factory = lambda _: _network_client_factory().network_security_groups
