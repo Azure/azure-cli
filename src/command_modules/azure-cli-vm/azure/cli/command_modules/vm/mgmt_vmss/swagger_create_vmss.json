@@ -145,7 +145,7 @@
           "type": "string", 
           "description": "URI referencing the template.", 
           "enum": [
-            "https://azuresdkci.blob.core.windows.net/templatehost/CreateVmss_2016-07-19/azuredeploy.json"
+            "https://azuresdkci.blob.core.windows.net/templatehost/CreateVmss_2016-08-02/azuredeploy.json"
           ]
         }, 
         "contentVersion": {
@@ -205,14 +205,14 @@
           "$ref": "#/definitions/DeploymentParameter_instanceCount", 
           "x-ms-client-flatten": true
         }, 
+        "loadBalancer": {
+          "type": "object", 
+          "$ref": "#/definitions/DeploymentParameter_loadBalancer", 
+          "x-ms-client-flatten": true
+        }, 
         "loadBalancerBackendPoolName": {
           "type": "object", 
           "$ref": "#/definitions/DeploymentParameter_loadBalancerBackendPoolName", 
-          "x-ms-client-flatten": true
-        }, 
-        "loadBalancerName": {
-          "type": "object", 
-          "$ref": "#/definitions/DeploymentParameter_loadBalancerName", 
           "x-ms-client-flatten": true
         }, 
         "loadBalancerType": {
@@ -270,14 +270,14 @@
           "$ref": "#/definitions/DeploymentParameter_overprovision", 
           "x-ms-client-flatten": true
         }, 
+        "publicIpAddress": {
+          "type": "object", 
+          "$ref": "#/definitions/DeploymentParameter_publicIpAddress", 
+          "x-ms-client-flatten": true
+        }, 
         "publicIpAddressAllocation": {
           "type": "object", 
           "$ref": "#/definitions/DeploymentParameter_publicIpAddressAllocation", 
-          "x-ms-client-flatten": true
-        }, 
-        "publicIpAddressName": {
-          "type": "object", 
-          "$ref": "#/definitions/DeploymentParameter_publicIpAddressName", 
           "x-ms-client-flatten": true
         }, 
         "publicIpAddressType": {
@@ -305,9 +305,9 @@
           "$ref": "#/definitions/DeploymentParameter_storageContainerName", 
           "x-ms-client-flatten": true
         }, 
-        "storageRedundancyType": {
+        "storageType": {
           "type": "object", 
-          "$ref": "#/definitions/DeploymentParameter_storageRedundancyType", 
+          "$ref": "#/definitions/DeploymentParameter_storageType", 
           "x-ms-client-flatten": true
         }, 
         "subnetIpAddressPrefix": {
@@ -330,14 +330,14 @@
           "$ref": "#/definitions/DeploymentParameter_upgradePolicyMode", 
           "x-ms-client-flatten": true
         }, 
+        "virtualNetwork": {
+          "type": "object", 
+          "$ref": "#/definitions/DeploymentParameter_virtualNetwork", 
+          "x-ms-client-flatten": true
+        }, 
         "virtualNetworkIpAddressPrefix": {
           "type": "object", 
           "$ref": "#/definitions/DeploymentParameter_virtualNetworkIpAddressPrefix", 
-          "x-ms-client-flatten": true
-        }, 
-        "virtualNetworkName": {
-          "type": "object", 
-          "$ref": "#/definitions/DeploymentParameter_virtualNetworkName", 
           "x-ms-client-flatten": true
         }, 
         "virtualNetworkType": {
@@ -459,21 +459,21 @@
         }
       }
     }, 
+    "DeploymentParameter_loadBalancer": {
+      "properties": {
+        "value": {
+          "type": "string", 
+          "description": "Name or ID of load balancer.", 
+          "x-ms-client-name": "loadBalancer"
+        }
+      }
+    }, 
     "DeploymentParameter_loadBalancerBackendPoolName": {
       "properties": {
         "value": {
           "type": "string", 
           "description": "Name of load balancer backend pool.", 
           "x-ms-client-name": "loadBalancerBackendPoolName"
-        }
-      }
-    }, 
-    "DeploymentParameter_loadBalancerName": {
-      "properties": {
-        "value": {
-          "type": "string", 
-          "description": "Name for load balancer.", 
-          "x-ms-client-name": "loadBalancerName"
         }
       }
     }, 
@@ -485,7 +485,8 @@
           "x-ms-client-name": "loadBalancerType", 
           "enum": [
             "new", 
-            "existing", 
+            "existingName", 
+            "existingId", 
             "none"
           ], 
           "x-ms-enum": {
@@ -615,6 +616,15 @@
         }
       }
     }, 
+    "DeploymentParameter_publicIpAddress": {
+      "properties": {
+        "value": {
+          "type": "string", 
+          "description": "Name or ID of public IP address to use.", 
+          "x-ms-client-name": "publicIpAddress"
+        }
+      }
+    }, 
     "DeploymentParameter_publicIpAddressAllocation": {
       "properties": {
         "value": {
@@ -633,15 +643,6 @@
         }
       }
     }, 
-    "DeploymentParameter_publicIpAddressName": {
-      "properties": {
-        "value": {
-          "type": "string", 
-          "description": "Name of public IP address to use.", 
-          "x-ms-client-name": "publicIpAddressName"
-        }
-      }
-    }, 
     "DeploymentParameter_publicIpAddressType": {
       "properties": {
         "value": {
@@ -651,7 +652,8 @@
           "enum": [
             "none", 
             "new", 
-            "existingName"
+            "existingName", 
+            "existingId"
           ], 
           "x-ms-enum": {
             "name": "publicIpAddressType", 
@@ -707,12 +709,12 @@
         }
       }
     }, 
-    "DeploymentParameter_storageRedundancyType": {
+    "DeploymentParameter_storageType": {
       "properties": {
         "value": {
           "type": "string", 
           "description": "The VM storage type (Standard_LRS, Standard_GRS, Standard_RAGRS).", 
-          "x-ms-client-name": "storageRedundancyType", 
+          "x-ms-client-name": "storageType", 
           "default": "Standard_LRS"
         }
       }
@@ -763,6 +765,15 @@
         }
       }
     }, 
+    "DeploymentParameter_virtualNetwork": {
+      "properties": {
+        "value": {
+          "type": "string", 
+          "description": "Name or ID of virtual network.", 
+          "x-ms-client-name": "virtualNetwork"
+        }
+      }
+    }, 
     "DeploymentParameter_virtualNetworkIpAddressPrefix": {
       "properties": {
         "value": {
@@ -770,15 +781,6 @@
           "description": "The virtual network IP address prefix in CIDR format.", 
           "x-ms-client-name": "virtualNetworkIpAddressPrefix", 
           "default": "10.0.0.0/16"
-        }
-      }
-    }, 
-    "DeploymentParameter_virtualNetworkName": {
-      "properties": {
-        "value": {
-          "type": "string", 
-          "description": "Name of virtual network to add VM to.", 
-          "x-ms-client-name": "virtualNetworkName"
         }
       }
     }, 
@@ -790,7 +792,8 @@
           "x-ms-client-name": "virtualNetworkType", 
           "enum": [
             "new", 
-            "existing"
+            "existingName", 
+            "existingId"
           ], 
           "x-ms-enum": {
             "name": "virtualNetworkType", 
@@ -817,7 +820,7 @@
           "description": "Container URI of of the template.", 
           "x-ms-client-name": "_artifactsLocation", 
           "enum": [
-            "https://azuresdkci.blob.core.windows.net/templatehost/CreateVmss_2016-07-19"
+            "https://azuresdkci.blob.core.windows.net/templatehost/CreateVmss_2016-08-02"
           ]
         }
       }, 

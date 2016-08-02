@@ -675,7 +675,7 @@ class VMScaleSetCreateOptions(ResourceGroupVCRTestBase):
         self.cmd('vmss create --image Win2012R2Datacenter --admin-password Test1234@! -l westus'
                  ' --name {vmss_name} -g {resource_group} --disable-overprovision --instance-count {instance_count}'
                  ' --storage-caching {caching} --upgrade-policy-mode {upgrade_policy}'
-                 ' --admin-username myadmin --public-ip-address-type existingName --public-ip-address-name {ip_name}'
+                 ' --admin-username myadmin --public-ip-address {ip_name}'
                  .format(vmss_name=vmss_name, resource_group=self.resource_group, instance_count=instance_count,
                          caching=caching, upgrade_policy=upgrade_policy, ip_name=ip_name))
         self.cmd('network lb show --name {vmss_name}lb -g {resource_group}'.format(vmss_name=vmss_name, resource_group=self.resource_group),
@@ -697,35 +697,38 @@ class VMScaleSetCreateExistingOptions(ResourceGroupVCRTestBase):
         self.execute()
 
     def body(self):
-        #vmss_name = 'vrfvmss'
+        vmss_name = 'vrfvmss'
         vnet_name = 'vrfvnet'
         subnet_name = 'vrfsubnet'
         lb_name = 'vrflb'
-        #os_disk_name = 'vrfosdisk'
-        #container_name = 'vrfcontainer'
-        #sku_name = 'Standard_A3'
+        os_disk_name = 'vrfosdisk'
+        container_name = 'vrfcontainer'
+        sku_name = 'Standard_A3'
+        bepool_name = 'mybepool'
 
-        self.cmd('network vnet create -n {vnet_name} -g {resource_group} --subnet-name {subnet_name}'.format(vnet_name=vnet_name, resource_group=self.resource_group, subnet_name=subnet_name))
-        self.cmd('network lb create --name {lb_name} -g {resource_group}'.format(lb_name=lb_name, resource_group=self.resource_group))
-        # TODO: scaleset create needs to be fixed after changes were made to LB create.  Issue #510
-        #self.cmd('vmss create --image CentOS --os-disk-name {os_disk_name}'
-        #         ' --virtual-network-type existing --virtual-network-name {vnet_name}'
-        #         ' --subnet-name {subnet_name} -l "West US" --vm-sku {sku_name}'
-        #         ' --storage-container-name {container_name} -g {resource_group} --name {vmss_name}'
-        #         ' --load-balancer-type existing --load-balancer-name {lb_name}'
-        #         ' --ssh-key-value \'{key_value}\''
-        #         .format(os_disk_name=os_disk_name, vnet_name=vnet_name, subnet_name=subnet_name, lb_name=lb_name,
-        #                 container_name=container_name, resource_group=self.resource_group, vmss_name=vmss_name,
-        #                 key_value=TEST_SSH_KEY_PUB, sku_name=sku_name))
-        #self.cmd('vmss show --name {vmss_name} -g {resource_group}'.format(resource_group=self.resource_group, vmss_name=vmss_name), checks=[
-        #    JMESPathCheck('sku.name', sku_name),
-        #    JMESPathCheck('virtualMachineProfile.storageProfile.osDisk.name', os_disk_name),
-        #    JMESPathCheck('virtualMachineProfile.storageProfile.osDisk.vhdContainers[0].ends_with(@, \'{container_name}\')'.format(container_name=container_name), True)
-        #])
-        #self.cmd('network lb show --name {lb_name} -g {resource_group}'.format(resource_group=self.resource_group, lb_name=lb_name),
-        #    checks=JMESPathCheck('backendAddressPools[0].backendIpConfigurations[0].id.contains(@, \'{vmss_name}\')'.format(vmss_name=vmss_name), True))
-        #self.cmd('network vnet show --name {vnet_name} -g {resource_group}'.format(resource_group=self.resource_group, vnet_name=vnet_name),
-        #    checks=JMESPathCheck('subnets[0].ipConfigurations[0].id.contains(@, \'{vmss_name}\')'.format(vmss_name=vmss_name), True))
+        self.cmd('network vnet create -n {vnet_name} -g {resource_group} --subnet-name {subnet_name}'
+                 .format(vnet_name=vnet_name, resource_group=self.resource_group, subnet_name=subnet_name))
+        self.cmd('network lb create --name {lb_name} -g {resource_group} --backend-pool-name {bepool_name}'
+                 .format(lb_name=lb_name, resource_group=self.resource_group, bepool_name=bepool_name))
+        self.cmd('vmss create --image CentOS --os-disk-name {os_disk_name}'
+                 ' --vnet {vnet_name}'
+                 ' --subnet-name {subnet_name} -l "West US" --vm-sku {sku_name}'
+                 ' --storage-container-name {container_name} -g {resource_group} --name {vmss_name}'
+                 ' --load-balancer {lb_name}'
+                 ' --ssh-key-value \'{key_value}\' --load-balancer-backend-pool-name {bepool_name}'
+                 .format(os_disk_name=os_disk_name, vnet_name=vnet_name, subnet_name=subnet_name, lb_name=lb_name,
+                         container_name=container_name, resource_group=self.resource_group, vmss_name=vmss_name,
+                         key_value=TEST_SSH_KEY_PUB, sku_name=sku_name, bepool_name=bepool_name))
+        self.cmd('vmss show --name {vmss_name} -g {resource_group}'.format(resource_group=self.resource_group, vmss_name=vmss_name), checks=[
+            JMESPathCheck('sku.name', sku_name),
+            JMESPathCheck('virtualMachineProfile.storageProfile.osDisk.name', os_disk_name),
+            JMESPathCheck('virtualMachineProfile.storageProfile.osDisk.vhdContainers[0].ends_with(@, \'{container_name}\')'
+                          .format(container_name=container_name), True)
+        ])
+        self.cmd('network lb show --name {lb_name} -g {resource_group}'.format(resource_group=self.resource_group, lb_name=lb_name),
+            checks=JMESPathCheck('backendAddressPools[0].backendIpConfigurations[0].id.contains(@, \'{vmss_name}\')'.format(vmss_name=vmss_name), True))
+        self.cmd('network vnet show --name {vnet_name} -g {resource_group}'.format(resource_group=self.resource_group, vnet_name=vnet_name),
+            checks=JMESPathCheck('subnets[0].ipConfigurations[0].id.contains(@, \'{vmss_name}\')'.format(vmss_name=vmss_name), True))
 
 class VMAccessAddRemoveLinuxUser(VCRTestBase):
 
@@ -782,6 +785,40 @@ class VMCreateUbuntuScenarioTest(ResourceGroupVCRTestBase): #pylint: disable=too
             JMESPathCheck('osProfile.computerName', self.vm_names[0]),
             JMESPathCheck('osProfile.linuxConfiguration.disablePasswordAuthentication', True),
             JMESPathCheck('osProfile.linuxConfiguration.ssh.publicKeys[0].keyData', TEST_SSH_KEY_PUB),
+        ])
+
+class VMCreateMultiNicTest(ResourceGroupVCRTestBase): #pylint: disable=too-many-instance-attributes
+
+    def __init__(self, test_method):
+        super(VMCreateMultiNicTest, self).__init__(__file__, test_method)
+        self.resource_group = 'cliTestRg_VMCreate_multinic'
+
+    def test_vm_create_multinic(self):
+        self.execute()
+
+    def body(self):
+        deployment_name = 'azurecli-test-deployment-vm-multinic-create'
+        vnet_name = 'myvnet'
+        subnet_name = 'mysubnet'
+        vm_name = 'multinicvm1'
+        nic_names = ['mynic1', 'mynic2']
+
+        self.cmd('network vnet create -n {vnet_name} -g {resource_group} --subnet-name {subnet_name}'
+                 .format(vnet_name=vnet_name, resource_group=self.resource_group, subnet_name=subnet_name))
+        self.cmd('network nic create -n {nic_name} -g {resource_group} --subnet {subnet_name} --vnet-name {vnet_name}'
+                 .format(nic_name=nic_names[0], resource_group=self.resource_group, subnet_name=subnet_name, vnet_name=vnet_name))
+        self.cmd('network nic create -n {nic_name} -g {resource_group} --subnet {subnet_name} --vnet-name {vnet_name}'
+                 .format(nic_name=nic_names[1], resource_group=self.resource_group, subnet_name=subnet_name, vnet_name=vnet_name))
+
+        self.cmd('vm create -n {vm_name} -g {resource_group} --image RHEL --nics {nic_name1} {nic_name2} --size Standard_DS4'
+                 ' --ssh-key-value \'{ssh_key}\' --deployment-name {deployment_name}'
+                 .format(vm_name=vm_name, resource_group=self.resource_group, nic_name1=nic_names[0], nic_name2=nic_names[1],
+                         ssh_key=TEST_SSH_KEY_PUB, deployment_name=deployment_name))
+
+        self.cmd('vm show -n {vm_name} -g {resource_group}'.format(vm_name=vm_name, resource_group=self.resource_group), [
+            JMESPathCheck('networkProfile.networkInterfaces[0].id.ends_with(@, \'{}\')'.format(nic_names[0]), True),
+            JMESPathCheck('networkProfile.networkInterfaces[1].id.ends_with(@, \'{}\')'.format(nic_names[1]), True),
+            JMESPathCheck('length(networkProfile.networkInterfaces)', 2)
         ])
 
 class VMBootDiagnostics(VCRTestBase):
