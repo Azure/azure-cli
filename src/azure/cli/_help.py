@@ -23,7 +23,7 @@ def show_help(nouns, parser, is_group):
 
     if len(nouns) == 0:
         print('\nSpecial intro help for az')
-        help_file.command = 'az'
+        help_file.command = ''
 
     print_detailed_help(help_file)
 
