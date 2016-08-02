@@ -37,6 +37,8 @@ def format_json(obj):
 def format_table(obj):
     result = obj.result
     try:
+        if not obj.simple_output_query and not obj.is_query_active:
+            raise ValueError('No query specified and no built-in query available.')
         if obj.simple_output_query and not obj.is_query_active:
             from jmespath import compile as compile_jmespath, search, Options
             result = compile_jmespath(obj.simple_output_query).search(result, Options(OrderedDict))
