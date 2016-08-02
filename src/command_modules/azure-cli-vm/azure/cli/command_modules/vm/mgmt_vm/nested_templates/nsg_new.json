@@ -2,6 +2,9 @@
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
+    "location": {
+      "type": "string"
+    },
     "networkSecurityGroup": {
       "type": "string"
     },
@@ -47,7 +50,7 @@
       "type": "Microsoft.Network/networkSecurityGroups",
       "name": "[parameters('networkSecurityGroup')]",
       "apiVersion": "2015-06-15",
-      "location": "westus",
+      "location": "[parameters('location')]",
       "tags": "[parameters('tags')]",
       "properties": {
         "securityRules": [

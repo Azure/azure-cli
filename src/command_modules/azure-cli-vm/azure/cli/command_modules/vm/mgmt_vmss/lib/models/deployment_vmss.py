@@ -22,7 +22,7 @@ class DeploymentVmss(Model):
     sending a request.
 
     :ivar uri: URI referencing the template. Default value:
-     "https://azuresdkci.blob.core.windows.net/templatehost/CreateVmss_2016-07-19/azuredeploy.json"
+     "https://azuresdkci.blob.core.windows.net/templatehost/CreateVmss_2016-08-02/azuredeploy.json"
      .
     :vartype uri: str
     :param content_version: If included it must match the ContentVersion in
@@ -30,7 +30,7 @@ class DeploymentVmss(Model):
     :type content_version: str
     :ivar _artifacts_location: Container URI of of the template. Default
      value:
-     "https://azuresdkci.blob.core.windows.net/templatehost/CreateVmss_2016-07-19"
+     "https://azuresdkci.blob.core.windows.net/templatehost/CreateVmss_2016-08-02"
      .
     :vartype _artifacts_location: str
     :param admin_password: Password for the Virtual Machine.  Required if SSH
@@ -58,14 +58,14 @@ class DeploymentVmss(Model):
      <vmsscreationclient.models.dnsNameType>`
     :param instance_count: Number of VMs in scale set. Default value: "2" .
     :type instance_count: str
+    :param load_balancer: Name or ID of load balancer.
+    :type load_balancer: str
     :param load_balancer_backend_pool_name: Name of load balancer backend
      pool.
     :type load_balancer_backend_pool_name: str
-    :param load_balancer_name: Name for load balancer.
-    :type load_balancer_name: str
     :param load_balancer_type: Whether to use an existing load balancer,
      create a new one, or use no load balancer. Possible values include:
-     'new', 'existing', 'none'. Default value: "new" .
+     'new', 'existingName', 'existingId', 'none'. Default value: "new" .
     :type load_balancer_type: str or :class:`loadBalancerType
      <vmsscreationclient.models.loadBalancerType>`
     :param location: Location for VM resources.
@@ -99,16 +99,16 @@ class DeploymentVmss(Model):
      https://azure.microsoft.com/en-us/documentation/articles/virtual-machine-scale-sets-overview/
      for details). Default value: False .
     :type overprovision: bool
+    :param public_ip_address: Name or ID of public IP address to use.
+    :type public_ip_address: str
     :param public_ip_address_allocation: Public IP address allocation method.
      Possible values include: 'dynamic', 'static'. Default value: "dynamic" .
     :type public_ip_address_allocation: str or
      :class:`publicIpAddressAllocation
      <vmsscreationclient.models.publicIpAddressAllocation>`
-    :param public_ip_address_name: Name of public IP address to use.
-    :type public_ip_address_name: str
     :param public_ip_address_type: Use a public IP Address for the VM Nic.
-     Possible values include: 'none', 'new', 'existingName'. Default value:
-     "new" .
+     Possible values include: 'none', 'new', 'existingName', 'existingId'.
+     Default value: "new" .
     :type public_ip_address_type: str or :class:`publicIpAddressType
      <vmsscreationclient.models.publicIpAddressType>`
     :param ssh_dest_key_path: Destination file path on VM for SSH key.
@@ -122,9 +122,9 @@ class DeploymentVmss(Model):
     :param storage_container_name: Name of storage container for the VM OS
      disk. Default value: "vhds" .
     :type storage_container_name: str
-    :param storage_redundancy_type: The VM storage type (Standard_LRS,
-     Standard_GRS, Standard_RAGRS). Default value: "Standard_LRS" .
-    :type storage_redundancy_type: str
+    :param storage_type: The VM storage type (Standard_LRS, Standard_GRS,
+     Standard_RAGRS). Default value: "Standard_LRS" .
+    :type storage_type: str
     :param subnet_ip_address_prefix: The subnet address prefix in CIDR
      format. Default value: "10.0.0.0/24" .
     :type subnet_ip_address_prefix: str
@@ -136,14 +136,14 @@ class DeploymentVmss(Model):
      values include: 'manual', 'automatic'. Default value: "manual" .
     :type upgrade_policy_mode: str or :class:`upgradePolicyMode
      <vmsscreationclient.models.upgradePolicyMode>`
+    :param virtual_network: Name or ID of virtual network.
+    :type virtual_network: str
     :param virtual_network_ip_address_prefix: The virtual network IP address
      prefix in CIDR format. Default value: "10.0.0.0/16" .
     :type virtual_network_ip_address_prefix: str
-    :param virtual_network_name: Name of virtual network to add VM to.
-    :type virtual_network_name: str
     :param virtual_network_type: Whether to use an existing VNet or create a
-     new one. Possible values include: 'new', 'existing'. Default value:
-     "new" .
+     new one. Possible values include: 'new', 'existingName', 'existingId'.
+     Default value: "new" .
     :type virtual_network_type: str or :class:`virtualNetworkType
      <vmsscreationclient.models.virtualNetworkType>`
     :param vm_sku: Size of VMs in the VM Scale Set.  See
@@ -175,8 +175,8 @@ class DeploymentVmss(Model):
         'dns_name_for_public_ip': {'key': 'properties.parameters.dnsNameForPublicIP.value', 'type': 'str'},
         'dns_name_type': {'key': 'properties.parameters.dnsNameType.value', 'type': 'dnsNameType'},
         'instance_count': {'key': 'properties.parameters.instanceCount.value', 'type': 'str'},
+        'load_balancer': {'key': 'properties.parameters.loadBalancer.value', 'type': 'str'},
         'load_balancer_backend_pool_name': {'key': 'properties.parameters.loadBalancerBackendPoolName.value', 'type': 'str'},
-        'load_balancer_name': {'key': 'properties.parameters.loadBalancerName.value', 'type': 'str'},
         'load_balancer_type': {'key': 'properties.parameters.loadBalancerType.value', 'type': 'loadBalancerType'},
         'location': {'key': 'properties.parameters.location.value', 'type': 'str'},
         'name': {'key': 'properties.parameters.name.value', 'type': 'str'},
@@ -188,32 +188,32 @@ class DeploymentVmss(Model):
         'os_type': {'key': 'properties.parameters.osType.value', 'type': 'osType'},
         'os_version': {'key': 'properties.parameters.osVersion.value', 'type': 'str'},
         'overprovision': {'key': 'properties.parameters.overprovision.value', 'type': 'bool'},
+        'public_ip_address': {'key': 'properties.parameters.publicIpAddress.value', 'type': 'str'},
         'public_ip_address_allocation': {'key': 'properties.parameters.publicIpAddressAllocation.value', 'type': 'publicIpAddressAllocation'},
-        'public_ip_address_name': {'key': 'properties.parameters.publicIpAddressName.value', 'type': 'str'},
         'public_ip_address_type': {'key': 'properties.parameters.publicIpAddressType.value', 'type': 'publicIpAddressType'},
         'ssh_dest_key_path': {'key': 'properties.parameters.sshDestKeyPath.value', 'type': 'str'},
         'ssh_key_value': {'key': 'properties.parameters.sshKeyValue.value', 'type': 'str'},
         'storage_caching': {'key': 'properties.parameters.storageCaching.value', 'type': 'storageCaching'},
         'storage_container_name': {'key': 'properties.parameters.storageContainerName.value', 'type': 'str'},
-        'storage_redundancy_type': {'key': 'properties.parameters.storageRedundancyType.value', 'type': 'str'},
+        'storage_type': {'key': 'properties.parameters.storageType.value', 'type': 'str'},
         'subnet_ip_address_prefix': {'key': 'properties.parameters.subnetIpAddressPrefix.value', 'type': 'str'},
         'subnet_name': {'key': 'properties.parameters.subnetName.value', 'type': 'str'},
         'tags': {'key': 'properties.parameters.tags.value', 'type': 'object'},
         'upgrade_policy_mode': {'key': 'properties.parameters.upgradePolicyMode.value', 'type': 'upgradePolicyMode'},
+        'virtual_network': {'key': 'properties.parameters.virtualNetwork.value', 'type': 'str'},
         'virtual_network_ip_address_prefix': {'key': 'properties.parameters.virtualNetworkIpAddressPrefix.value', 'type': 'str'},
-        'virtual_network_name': {'key': 'properties.parameters.virtualNetworkName.value', 'type': 'str'},
         'virtual_network_type': {'key': 'properties.parameters.virtualNetworkType.value', 'type': 'virtualNetworkType'},
         'vm_sku': {'key': 'properties.parameters.vmSku.value', 'type': 'str'},
         'mode': {'key': 'properties.mode', 'type': 'str'},
     }
 
-    uri = "https://azuresdkci.blob.core.windows.net/templatehost/CreateVmss_2016-07-19/azuredeploy.json"
+    uri = "https://azuresdkci.blob.core.windows.net/templatehost/CreateVmss_2016-08-02/azuredeploy.json"
 
-    _artifacts_location = "https://azuresdkci.blob.core.windows.net/templatehost/CreateVmss_2016-07-19"
+    _artifacts_location = "https://azuresdkci.blob.core.windows.net/templatehost/CreateVmss_2016-08-02"
 
     mode = "Incremental"
 
-    def __init__(self, admin_username, name, content_version=None, admin_password=None, authentication_type="password", custom_os_disk_type="windows", custom_os_disk_uri=None, dns_name_for_public_ip=None, dns_name_type="none", instance_count="2", load_balancer_backend_pool_name=None, load_balancer_name=None, load_balancer_type="new", location=None, os_disk_name="osdiskimage", os_disk_type="provided", os_offer="WindowsServer", os_publisher="MicrosoftWindowsServer", os_sku="2012-R2-Datacenter", os_type="Win2012R2Datacenter", os_version="latest", overprovision=False, public_ip_address_allocation="dynamic", public_ip_address_name=None, public_ip_address_type="new", ssh_dest_key_path=None, ssh_key_value=None, storage_caching="ReadOnly", storage_container_name="vhds", storage_redundancy_type="Standard_LRS", subnet_ip_address_prefix="10.0.0.0/24", subnet_name=None, tags=None, upgrade_policy_mode="manual", virtual_network_ip_address_prefix="10.0.0.0/16", virtual_network_name=None, virtual_network_type="new", vm_sku="Standard_D1_v2"):
+    def __init__(self, admin_username, name, content_version=None, admin_password=None, authentication_type="password", custom_os_disk_type="windows", custom_os_disk_uri=None, dns_name_for_public_ip=None, dns_name_type="none", instance_count="2", load_balancer=None, load_balancer_backend_pool_name=None, load_balancer_type="new", location=None, os_disk_name="osdiskimage", os_disk_type="provided", os_offer="WindowsServer", os_publisher="MicrosoftWindowsServer", os_sku="2012-R2-Datacenter", os_type="Win2012R2Datacenter", os_version="latest", overprovision=False, public_ip_address=None, public_ip_address_allocation="dynamic", public_ip_address_type="new", ssh_dest_key_path=None, ssh_key_value=None, storage_caching="ReadOnly", storage_container_name="vhds", storage_type="Standard_LRS", subnet_ip_address_prefix="10.0.0.0/24", subnet_name=None, tags=None, upgrade_policy_mode="manual", virtual_network=None, virtual_network_ip_address_prefix="10.0.0.0/16", virtual_network_type="new", vm_sku="Standard_D1_v2"):
         self.content_version = content_version
         self.admin_password = admin_password
         self.admin_username = admin_username
@@ -223,8 +223,8 @@ class DeploymentVmss(Model):
         self.dns_name_for_public_ip = dns_name_for_public_ip
         self.dns_name_type = dns_name_type
         self.instance_count = instance_count
+        self.load_balancer = load_balancer
         self.load_balancer_backend_pool_name = load_balancer_backend_pool_name
-        self.load_balancer_name = load_balancer_name
         self.load_balancer_type = load_balancer_type
         self.location = location
         self.name = name
@@ -236,19 +236,19 @@ class DeploymentVmss(Model):
         self.os_type = os_type
         self.os_version = os_version
         self.overprovision = overprovision
+        self.public_ip_address = public_ip_address
         self.public_ip_address_allocation = public_ip_address_allocation
-        self.public_ip_address_name = public_ip_address_name
         self.public_ip_address_type = public_ip_address_type
         self.ssh_dest_key_path = ssh_dest_key_path
         self.ssh_key_value = ssh_key_value
         self.storage_caching = storage_caching
         self.storage_container_name = storage_container_name
-        self.storage_redundancy_type = storage_redundancy_type
+        self.storage_type = storage_type
         self.subnet_ip_address_prefix = subnet_ip_address_prefix
         self.subnet_name = subnet_name
         self.tags = tags
         self.upgrade_policy_mode = upgrade_policy_mode
+        self.virtual_network = virtual_network
         self.virtual_network_ip_address_prefix = virtual_network_ip_address_prefix
-        self.virtual_network_name = virtual_network_name
         self.virtual_network_type = virtual_network_type
         self.vm_sku = vm_sku
