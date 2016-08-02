@@ -69,15 +69,6 @@ class TestOutput(unittest.TestCase):
 
     # TABLE output tests
 
-    def test_out_table_valid(self):
-        output_producer = OutputProducer(formatter=format_table, file=self.io)
-        output_producer.out(CommandResultItem({'active': True, 'id': '0b1f6472'}))
-        self.assertEqual(util.normalize_newlines(self.io.getvalue()), util.normalize_newlines(
-"""active |    id   
--------|---------
-True   | 0b1f6472
-"""))
-
     def test_out_table_valid_query1(self):
         output_producer = OutputProducer(formatter=format_table, file=self.io)
         result_item = CommandResultItem([{'name': 'qwerty', 'id': '0b1f6472qwerty'},
@@ -91,6 +82,11 @@ qwerty | 0b1f6472qwerty
 asdf   | 0b1f6472asdf  
 """))
 
+    def test_out_table_no_query(self):
+        output_producer = OutputProducer(formatter=format_table, file=self.io)
+        with self.assertRaises(util.CLIError):
+            output_producer.out(CommandResultItem({'active': True, 'id': '0b1f6472'}))
+
     def test_out_table_valid_query2(self):
         output_producer = OutputProducer(formatter=format_table, file=self.io)
         result_item = CommandResultItem([{'name': 'qwerty', 'id': '0b1f6472qwerty'},
@@ -102,21 +98,6 @@ asdf   | 0b1f6472asdf
 ------
 qwerty
 asdf  
-"""))
-
-    def test_out_table_valid_query_but_query_active(self):
-        """Query has been set but there is an active query so do not apply simple_output_query"""
-        output_producer = OutputProducer(formatter=format_table, file=self.io)
-        result_item = CommandResultItem([{'name': 'qwerty', 'id': '0b1f6472qwerty'},
-                                         {'name': 'asdf', 'id': '0b1f6472asdf'}],
-                                              simple_output_query='[*].{Name:name}',
-                                              is_query_active=True)
-        output_producer.out(result_item)
-        self.assertEqual(util.normalize_newlines(self.io.getvalue()), util.normalize_newlines(
-""" name  |       id      
--------|---------------
-qwerty | 0b1f6472qwerty
-asdf   | 0b1f6472asdf  
 """))
 
     def test_out_table_bad_query(self):
