@@ -4,6 +4,7 @@
 #---------------------------------------------------------------------------------------------
 
 from __future__ import print_function
+import sys
 import json
 import time
 import traceback
@@ -89,6 +90,7 @@ class LongRunningOperation(object): #pylint: disable=too-few-public-methods
         time.sleep(self.poll_interval_ms / 1000.0)
 
     def __call__(self, poller):
+        print(self.start_msg, file=sys.stderr)
         logger.info("Starting long running operation '%s' with polling interval %s ms",
                     self.start_msg, self.poll_interval_ms)
         while not poller.done():
