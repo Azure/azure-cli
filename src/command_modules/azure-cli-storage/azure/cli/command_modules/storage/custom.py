@@ -8,10 +8,12 @@
 from __future__ import print_function
 from sys import stderr
 
+from azure.storage.blob import BlockBlobService#, AppendBlobService, PageBlobService
+#from azure.storage.blob.baseblobservice import BaseBlobService
+from azure.storage.file import FileService
+
 from azure.cli.command_modules.storage._factory import storage_client_factory
 from azure.cli._util import CLIError
-from azure.storage.blob import BlockBlobService
-from azure.storage.file import FileService
 
 def _update_progress(current, total):
     if total:
@@ -36,13 +38,11 @@ def list_storage_accounts(resource_group_name=None):
         accounts = scf.storage_accounts.list()
     return list(accounts)
 
-def renew_storage_account_keys(resource_group_name, account_name, key=None):
-    ''' Regenerate one or both keys for a storage account.
-    :param str key:Key to renew.'''
+def renew_storage_account_keys(resource_group_name, account_name, key='both'):
+    """ Regenerate one or both keys for a storage account. """
     from azure.cli.command_modules.storage._params import storage_account_key_options
     scf = storage_client_factory()
-    for k in [storage_account_key_options[key]] if key \
-        else storage_account_key_options.values():
+    for k in storage_account_key_options[key]:
         result = scf.storage_accounts.regenerate_key(
             resource_group_name=resource_group_name,
             account_name=account_name,
@@ -54,58 +54,55 @@ def show_storage_account_usage():
     scf = storage_client_factory()
     return next((x for x in scf.usage.list().value if x.name.value == 'StorageAccounts'), None) #pylint: disable=no-member
 
-def show_storage_account_connection_string(resource_group_name, account_name, use_http='https'):
-    ''' Show the connection string for a storage account.
-    :param str use_http:use http as the default endpoint protocol '''
+def show_storage_account_connection_string(resource_group_name, account_name, protocol='https'):
+    """ Show the connection string for a storage account."""
     scf = storage_client_factory()
     keys = scf.storage_accounts.list_keys(resource_group_name, account_name).keys #pylint: disable=no-member
     connection_string = 'DefaultEndpointsProtocol={};AccountName={};AccountKey={}'.format(
-        use_http,
+        protocol,
         account_name,
         keys[0].value) #pylint: disable=no-member
     return {'ConnectionString':connection_string}
 
-def create_storage_account(resource_group_name, account_name, location, account_type, tags=None):
+def create_storage_account(resource_group_name, account_name, sku, location, kind='Storage',
+                           tags=None, custom_domain=None, encryption=None, access_tier=None):
     ''' Create a storage account. '''
-    from azure.mgmt.storage.models import StorageAccountCreateParameters, Sku
+    from azure.mgmt.storage.models import \
+        (StorageAccountCreateParameters, Sku, CustomDomain, Encryption, Kind, AccessTier)
     scf = storage_client_factory()
-    # TODO Add the other new params from rc5
-    # https://github.com/Azure/azure-sdk-for-python/blob/v2.0.0rc5/
-    # azure-mgmt-storage/azure/mgmt/storage/models/storage_account_create_parameters.py
-    # accountType is now called sku.name also.
-    params = StorageAccountCreateParameters(Sku(account_type), 'Storage', location, tags)
+    params = StorageAccountCreateParameters(
+        sku=Sku(sku),
+        kind=Kind(kind),
+        location=location,
+        tags=tags,
+        custom_domain=CustomDomain(custom_domain) if custom_domain else None,
+        encryption=Encryption(encryption) if encryption else None,
+        access_tier=AccessTier(access_tier) if access_tier else None)
     return scf.storage_accounts.create(resource_group_name, account_name, params)
 
 def set_storage_account_properties(
-        resource_group_name, account_name, account_type=None, tags='', custom_domain=None):
-    ''' Update storage account property (only one at a time).
-    :param str custom_domain:the custom domain name
-    '''
-    from azure.mgmt.storage.models import StorageAccountUpdateParameters, CustomDomain, Sku
+        resource_group_name, account_name, sku=None, tags=None, custom_domain=None,
+        encryption=None, access_tier=None):
+    ''' Update storage account property (only one at a time).'''
+    from azure.mgmt.storage.models import \
+        (StorageAccountUpdateParameters, Sku, CustomDomain, Encryption, AccessTier)
     scf = storage_client_factory()
-    # TODO Add the new params encryption and access_tier after rc5 update
-    sku = Sku(account_type) if account_type else None
-    params = StorageAccountUpdateParameters(sku=sku, tags=tags, custom_domain=custom_domain)
+    params = StorageAccountUpdateParameters(
+        sku=Sku(sku) if sku else None,
+        tags=tags,
+        custom_domain=CustomDomain(custom_domain) if custom_domain else None,
+        encryption=Encryption(encryption) if encryption else None,
+        access_tier=AccessTier(access_tier) if access_tier else None)
     return scf.storage_accounts.update(resource_group_name, account_name, params)
 
-def container_exists(client, container_name, snapshot=None, timeout=None):
-    '''Check if a storage container exists.
-    :param str snapshot:UTC datetime value which specifies a snapshot
-    '''
-    return client.exists(
-        container_name=container_name,
-        snapshot=snapshot,
-        timeout=timeout)
-
-def upload_blob(
-        client, container_name, blob_name, blob_type, upload_from,
+def upload_blob( # pylint: disable=too-many-locals
+        client, container_name, blob_name, blob_type, file_path,
         content_type=None, content_disposition=None,
         content_encoding=None, content_language=None, content_md5=None,
-        content_cache_control=None):
-    '''Upload a blob to a container.
-    :param str blob_type:type of blob to upload
-    :param str upload_from:local path to upload from
-    '''
+        content_cache_control=None, metadata=None, validate_content=False, maxsize_condition=None,
+        max_connections=2, max_retries=5, retry_wait=1, lease_id=None, if_modified_since=None,
+        if_unmodified_since=None, if_match=None, if_none_match=None, timeout=None):
+    '''Upload a blob to a container.'''
     from azure.storage.blob import ContentSettings
     content_settings = ContentSettings(
         content_type=content_type,
@@ -121,21 +118,43 @@ def upload_blob(
             client.create_blob(
                 container_name=container_name,
                 blob_name=blob_name,
-                content_settings=content_settings)
+                content_settings=content_settings,
+                metadata=metadata,
+                lease_id=lease_id,
+                if_modified_since=if_modified_since,
+                if_match=if_match,
+                if_none_match=if_none_match,
+                timeout=timeout)
         return client.append_blob_from_path(
             container_name=container_name,
             blob_name=blob_name,
-            file_path=upload_from,
-            progress_callback=_update_progress
-        )
+            file_path=file_path,
+            progress_callback=_update_progress,
+            validate_content=validate_content,
+            maxsize_condition=maxsize_condition,
+            lease_id=lease_id,
+            max_retries=max_retries,
+            retry_wait=retry_wait,
+            timeout=timeout)
 
     def upload_block_blob():
         return client.create_blob_from_path(
             container_name=container_name,
             blob_name=blob_name,
-            file_path=upload_from,
+            file_path=file_path,
             progress_callback=_update_progress,
-            content_settings=content_settings
+            content_settings=content_settings,
+            metadata=metadata,
+            validate_content=validate_content,
+            max_connections=max_connections,
+            max_retries=max_retries,
+            retry_wait=retry_wait,
+            lease_id=lease_id,
+            if_modified_since=if_modified_since,
+            if_unmodified_since=if_unmodified_since,
+            if_match=if_match,
+            if_none_match=if_none_match,
+            timeout=timeout
         )
 
     type_func = {
@@ -144,51 +163,7 @@ def upload_blob(
         'page': upload_block_blob  # same implementation
     }
     return type_func[blob_type]()
-
-def download_blob(client, container_name, blob_name, download_to):
-    ''' Download the specified blob.
-    :param str download_to:the file path to download to
-    '''
-    client.get_blob_to_path(container_name, blob_name, download_to,
-                            progress_callback=_update_progress)
-
-def blob_exists(client, container_name, blob_name, snapshot=None, timeout=None):
-    ''' Check if a storage blob exists. '''
-    return client.exists(
-        blob_name=blob_name,
-        container_name=container_name,
-        snapshot=snapshot,
-        timeout=timeout)
-
-def share_exists(client, share_name):
-    ''' Check if a file share exists.'''
-    return client.exists(share_name=share_name)
-
-def dir_exists(client, share_name, directory_name):
-    ''' Check if a share directory exists.'''
-    return client.exists(share_name=share_name, directory_name=directory_name)
-
-def download_file(client, share_name, file_name, local_file_name, directory_name=None):
-    ''' Download a file from a file share.
-    :param str file_name:the file name
-    :param str local_file_name:the path to the local file to download to'''
-    client.get_file_to_path(share_name, directory_name, file_name, local_file_name,
-                            progress_callback=_update_progress)
-
-def file_exists(client, share_name, file_name, directory_name=None):
-    ''' Check if a file exists at a specified path.
-    :param str file_name:the file name to check
-    :param str directory_name:subdirectory path to the file
-    '''
-    return client.exists(share_name=share_name, directory_name=directory_name, file_name=file_name)
-
-def upload_file(client, share_name, file_name, local_file_name, directory_name=None):
-    ''' Upload a file to a file share path.
-    :param str file_name:the destination file name
-    :param str local_file_name:the path and file name to upload
-    :param str directory_name:the destination directory to upload to'''
-    client.create_file_from_path(share_name, directory_name, file_name, local_file_name,
-                                 progress_callback=_update_progress)
+upload_blob.__doc__ = BlockBlobService.create_blob_from_path.__doc__
 
 def _get_service_container_type(client):
     if isinstance(client, BlockBlobService):
@@ -227,7 +202,7 @@ def get_acl_policy(client, container_name, policy_name):
 
 def list_acl_policies(client, container_name):
     ''' List stored access policies on a containing object '''
-    return list(_get_acl(client, container_name))
+    return _get_acl(client, container_name)
 
 def set_acl_policy(client, container_name, policy_name, start=None, expiry=None, permission=None):
     ''' Set a stored access policy on a containing object '''
@@ -237,7 +212,10 @@ def set_acl_policy(client, container_name, policy_name, start=None, expiry=None,
 
     acl = _get_acl(client, container_name)
     try:
-        acl[policy_name] = AccessPolicy(permission, expiry, start)
+        policy = acl[policy_name]
+        policy.start = start or policy.start
+        policy.expiry = expiry or policy.expiry
+        policy.permission = permission or policy.permission
     except KeyError:
         raise CLIError('ACL does not contain {}'.format(policy_name))
     return _set_acl(client, container_name, acl)
