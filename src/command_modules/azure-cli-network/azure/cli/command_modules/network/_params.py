@@ -16,6 +16,7 @@ from azure.cli.commands import CliArgumentType, register_cli_argument, register_
 from azure.cli.commands.parameters import (location_type, get_resource_name_completion_list, get_enum_type_completion_list, tags_type)
 from azure.cli.commands.validators import MarkSpecifiedAction
 from azure.cli.commands.template_create import register_folded_cli_argument
+from azure.cli.command_modules.network._factory import _network_client_factory
 from azure.cli.command_modules.network._validators import \
     (process_app_gateway_namespace, process_nic_create_namespace, process_lb_create_namespace,
      process_public_ip_create_namespace, validate_public_ip_type, validate_private_ip_address,
@@ -29,7 +30,6 @@ from azure.cli.command_modules.network.mgmt_nic.lib.models.nic_creation_client_e
 
 def get_subnet_completion_list():
     def completer(prefix, action, parsed_args, **kwargs): # pylint: disable=unused-argument
-        from azure.cli.command_modules.network._factory import _network_client_factory
         client = _network_client_factory()
         if parsed_args.resource_group_name and parsed_args.virtual_network_name:
             rg = parsed_args.resource_group_name
@@ -39,7 +39,6 @@ def get_subnet_completion_list():
 
 def get_lb_backend_address_pool_completion_list():
     def completer(prefix, action, parsed_args, **kwargs): # pylint: disable=unused-argument
-        from azure.cli.command_modules.network._factory import _network_client_factory
         client = _network_client_factory()
         if parsed_args.resource_group_name and parsed_args.load_balancer_name:
             rg = parsed_args.resource_group_name
@@ -49,7 +48,6 @@ def get_lb_backend_address_pool_completion_list():
 
 def get_lb_inbound_nat_rule_completion_list():
     def completer(prefix, action, parsed_args, **kwargs): # pylint: disable=unused-argument
-        from azure.cli.command_modules.network._factory import _network_client_factory
         client = _network_client_factory()
         if parsed_args.resource_group_name and parsed_args.load_balancer_name:
             rg = parsed_args.resource_group_name
@@ -132,7 +130,6 @@ register_cli_argument('network nic update', 'network_security_group', validator=
 
 for item in ['create', 'ip-config update', 'ip-config create']:
     register_extra_cli_argument('network nic {}'.format(item), 'load_balancer_name', options_list=('--lb-name',), completer=get_resource_name_completion_list('Microsoft.Network/loadBalancers'), help='The name of the load balancer to use when adding NAT rules or address pools by name (ignored when IDs are specified).')
-    # TODO: Completers for pool and rule ids
     register_cli_argument('network nic {}'.format(item), 'load_balancer_backend_address_pool_ids', options_list=('--lb-address-pools',), nargs='+', validator=validate_address_pool_id_list, help='Space separated list of names or IDs of load balancer address pools to associate with the NIC. If names are used, --lb-name must be specified.', completer=get_lb_backend_address_pool_completion_list())
     register_cli_argument('network nic {}'.format(item), 'load_balancer_inbound_nat_rule_ids', options_list=('--lb-inbound-nat-rules',), nargs='+', validator=validate_inbound_nat_rule_id_list, help='Space separated list of names or IDs of load balancer inbound NAT rules to associate with the NIC. If names are used, --lb-name must be specified.', completer=get_lb_inbound_nat_rule_completion_list())
 

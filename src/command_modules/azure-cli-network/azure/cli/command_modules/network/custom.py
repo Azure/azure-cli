@@ -4,7 +4,10 @@
 #---------------------------------------------------------------------------------------------
 
 # pylint: disable=no-self-use,too-many-arguments,no-member
-from azure.mgmt.network.models import Subnet, SecurityRule, PublicIPAddress
+from azure.mgmt.network.models import \
+    (Subnet, SecurityRule, PublicIPAddress, NetworkSecurityGroup, InboundNatRule, InboundNatPool,
+     FrontendIPConfiguration, BackendAddressPool, Probe, LoadBalancingRule,
+     NetworkInterfaceIPConfiguration)
 
 from azure.cli._util import CLIError
 
@@ -82,7 +85,6 @@ def create_subnet(resource_group_name, virtual_network_name, subnet_name,
     subnet.address_prefix = address_prefix
 
     if network_security_group:
-        from azure.mgmt.network.models import NetworkSecurityGroup
         subnet.network_security_group = NetworkSecurityGroup(network_security_group)
 
     return ncf.subnets.create_or_update(resource_group_name, virtual_network_name,
@@ -102,7 +104,6 @@ def update_subnet(resource_group_name, virtual_network_name, subnet_name,
         subnet.address_prefix = address_prefix
 
     if network_security_group:
-        from azure.mgmt.network.models import NetworkSecurityGroup
         subnet.network_security_group = NetworkSecurityGroup(network_security_group)
     elif network_security_group == '': #clear it
         subnet.network_security_group = None
@@ -123,7 +124,7 @@ def get_network_resource_property_entry(resource, prop):
     """ Factory method for creating get functions. """
     def get_func(resource_group_name, resource_name, item_name):
         client = getattr(_network_client_factory(), resource)
-        items = client.get(resource_group_name, resource_name).__getattribute__(prop)
+        items = getattr(client.get(resource_group_name, resource_name), prop)
 
         result = next((x for x in items if x.name.lower() == item_name.lower()), None)
         if not result:
@@ -162,7 +163,6 @@ def _set_param(item, prop, value):
 def create_lb_inbound_nat_rule(
         resource_group_name, load_balancer_name, item_name, protocol, frontend_port,
         frontend_ip_name, backend_port, floating_ip="false", idle_timeout=None):
-    from azure.mgmt.network.models import InboundNatRule
     ncf = _network_client_factory()
     lb = ncf.load_balancers.get(resource_group_name, load_balancer_name)
     frontend_ip = _get_property(lb.frontend_ip_configurations, frontend_ip_name) # pylint: disable=no-member
@@ -200,7 +200,6 @@ def set_lb_inbound_nat_rule(
 def create_lb_inbound_nat_pool(
         resource_group_name, load_balancer_name, item_name, protocol, frontend_port_range_start,
         frontend_port_range_end, backend_port, frontend_ip_name=None):
-    from azure.mgmt.network.models import InboundNatPool
     ncf = _network_client_factory()
     lb = ncf.load_balancers.get(resource_group_name, load_balancer_name)
     frontend_ip = _get_property(lb.frontend_ip_configurations, frontend_ip_name) \
@@ -241,7 +240,6 @@ def create_lb_frontend_ip_configuration(
         resource_group_name, load_balancer_name, item_name, public_ip_address=None,
         subnet=None, virtual_network_name=None, private_ip_address=None, # pylint: disable=unused-argument
         private_ip_address_allocation='dynamic'):
-    from azure.mgmt.network.models import FrontendIPConfiguration
     ncf = _network_client_factory()
     lb = ncf.load_balancers.get(resource_group_name, load_balancer_name)
     lb.frontend_ip_configurations.append(FrontendIPConfiguration(
@@ -282,7 +280,6 @@ def set_lb_frontend_ip_configuration(
 # Backend Address Pools
 
 def create_lb_backend_address_pool(resource_group_name, load_balancer_name, item_name):
-    from azure.mgmt.network.models import BackendAddressPool
     ncf = _network_client_factory()
     lb = ncf.load_balancers.get(resource_group_name, load_balancer_name)
     lb.backend_address_pools.append(BackendAddressPool(name=item_name))
@@ -292,7 +289,6 @@ def create_lb_backend_address_pool(resource_group_name, load_balancer_name, item
 
 def create_lb_probe(resource_group_name, load_balancer_name, item_name, protocol, port,
                     path=None, interval=None, threshold=None):
-    from azure.mgmt.network.models import Probe
     ncf = _network_client_factory()
     lb = ncf.load_balancers.get(resource_group_name, load_balancer_name)
     lb.probes.append(
@@ -321,7 +317,6 @@ def create_lb_rule(
         protocol, frontend_port, backend_port, frontend_ip_name,
         backend_address_pool_name, probe_name=None, load_distribution='default',
         floating_ip='false', idle_timeout=None):
-    from azure.mgmt.network.models import LoadBalancingRule
     ncf = _network_client_factory()
     lb = ncf.load_balancers.get(resource_group_name, load_balancer_name)
     lb.load_balancing_rules.append(
@@ -385,7 +380,6 @@ def set_nic(resource_group_name, network_interface_name, network_security_group=
     if network_security_group == '':
         nic.network_security_group = None
     elif network_security_group is not None:
-        from azure.mgmt.network.models import NetworkSecurityGroup
         nic.network_security_group = NetworkSecurityGroup(network_security_group)
 
     if internal_dns_name_label == '':
@@ -403,7 +397,6 @@ def create_nic_ip_config(resource_group_name, network_interface_name, ip_config_
                          load_balancer_inbound_nat_rule_ids=None,
                          private_ip_address=None, private_ip_address_allocation='dynamic',
                          private_ip_address_version='ipv4'):
-    from azure.mgmt.network.models import NetworkInterfaceIPConfiguration
     ncf = _network_client_factory()
     nic = ncf.network_interfaces.get(resource_group_name, network_interface_name)
     nic.ip_configurations.append(
@@ -469,7 +462,6 @@ set_nic_ip_config.__doc__ = NicOperations.create_or_update.__doc__
 def add_nic_ip_config_address_pool(
         resource_group_name, network_interface_name, ip_config_name, backend_address_pool,
         load_balancer_name=None): # pylint: disable=unused-argument
-    from azure.mgmt.network.models import BackendAddressPool
     client = _network_client_factory().network_interfaces
     nic = client.get(resource_group_name, network_interface_name)
     ip_config = next(
@@ -499,7 +491,6 @@ def remove_nic_ip_config_address_pool(
 def add_nic_ip_config_inbound_nat_rule(
         resource_group_name, network_interface_name, ip_config_name, inbound_nat_rule,
         load_balancer_name=None): # pylint: disable=unused-argument
-    from azure.mgmt.network.models import InboundNatRule
     client = _network_client_factory().network_interfaces
     nic = client.get(resource_group_name, network_interface_name)
     ip_config = next(
