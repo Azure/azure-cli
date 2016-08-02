@@ -97,6 +97,8 @@ def _handle_vm_nics(namespace):
     namespace.network_interface_ids = nics
     namespace.network_interface_type = 'existing'
 
+    namespace.public_ip_address_type = 'none'
+
 def _resource_not_exists(resource_type):
     def _handle_resource_not_exists(namespace):
         # TODO: hook up namespace._subscription_id once we support it

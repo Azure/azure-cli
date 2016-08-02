@@ -83,11 +83,11 @@
         "description": "Name of load balancer backend pool."
       }
     },
-    "loadBalancerName": {
+    "loadBalancer": {
       "type": "string",
       "defaultValue": "[concat(parameters('name'), 'lb')]",
       "metadata": {
-        "description": "Name for load balancer."
+        "description": "Name or ID of load balancer."
       }
     },
     "loadBalancerType": {
@@ -95,7 +95,8 @@
       "defaultValue": "new",
       "allowedValues": [
         "new",
-        "existing",
+        "existingName",
+        "existingId",
         "none"
       ],
       "metadata": {
@@ -193,11 +194,11 @@
         "description": "Public IP address allocation method."
       }
     },
-    "publicIpAddressName": {
+    "publicIpAddress": {
       "type": "string",
       "defaultValue": "[concat(parameters('name'), 'PublicIP')]",
       "metadata": {
-        "description": "Name of public IP address to use."
+        "description": "Name or ID of public IP address to use."
       }
     },
     "publicIpAddressType": {
@@ -206,7 +207,8 @@
       "allowedValues": [
         "none",
         "new",
-        "existingName"
+        "existingName",
+        "existingId"
       ],
       "metadata": {
         "description": "Use a public IP Address for the VM Nic."
@@ -244,7 +246,7 @@
         "description": "Name of storage container for the VM OS disk."
       }
     },
-    "storageRedundancyType": {
+    "storageType": {
       "type": "string",
       "defaultValue": "Standard_LRS",
       "metadata": {
@@ -290,11 +292,11 @@
         "description": "The virtual network IP address prefix in CIDR format."
       }
     },
-    "virtualNetworkName": {
+    "virtualNetwork": {
       "type": "string",
       "defaultValue": "[concat(parameters('name'), 'VNET')]",
       "metadata": {
-        "description": "Name of virtual network to add VM to."
+        "description": "Name or ID of virtual network."
       }
     },
     "virtualNetworkType": {
@@ -302,7 +304,8 @@
       "defaultValue": "new",
       "allowedValues": [
         "new",
-        "existing"
+        "existingName",
+        "existingId"
       ],
       "metadata": {
         "description": "Whether to use an existing VNet or create a new one."
@@ -321,7 +324,7 @@
     "apiVersion": "2015-06-15",
     "vmssApiVersion": "2016-03-30",
     "resourceLocation": "[parameters('location')]",
-    "storageAccountType": "[parameters('storageRedundancyType')]",
+    "storageAccountType": "[parameters('storageType')]",
     "saCount": 5,
     "namingInfix": "[toLower(substring(concat(parameters('name'), uniqueString(resourceGroup().id)), 0, 9))]",
     "longNamingInfix": "[toLower(parameters('name'))]",
@@ -337,16 +340,31 @@
     "osDiskName": "[parameters('osDiskName')]",
     "addressPrefix": "10.0.0.0/16",
     "subnetPrefix": "10.0.0.0/24",
-    "virtualNetworkName": "[parameters('virtualNetworkName')]",
-    "publicIPAddressName": "[parameters('publicIpAddressName')]",
+    "virtualNetworkIds": {
+      "existingId": "[parameters('virtualNetwork')]",
+      "existingName": "[concat('/subscriptions/',subscription().subscriptionId,'/resourceGroups/',resourceGroup().name,'/providers/Microsoft.Network/virtualNetworks/',parameters('virtualNetwork'))]",
+      "new": "[concat('/subscriptions/',subscription().subscriptionId,'/resourceGroups/',resourceGroup().name,'/providers/Microsoft.Network/virtualNetworks/',parameters('virtualNetwork'))]"
+    },
+    "virtualNetworkId": "[variables('virtualNetworkIds')[parameters('virtualNetworkType')]]",
+    "publicIpAddressIds": {
+      "existingId": "[parameters('publicIpAddress')]",
+      "existingName": "[concat('/subscriptions/',subscription().subscriptionId,'/resourceGroups/',resourceGroup().name,'/providers/Microsoft.Network/publicIPAddresses/',parameters('publicIpAddress'))]",
+      "new": "[concat('/subscriptions/',subscription().subscriptionId,'/resourceGroups/',resourceGroup().name,'/providers/Microsoft.Network/publicIPAddresses/',parameters('publicIpAddress'))]",
+      "none": null
+    },
+    "publicIpAddressId": "[variables('publicIpAddressIds')[parameters('publicIpAddressType')]]",
+    "loadBalancerIds": {
+      "existingId": "[parameters('loadBalancer')]",
+      "existingName": "[concat('/subscriptions/',subscription().subscriptionId,'/resourceGroups/',resourceGroup().name,'/providers/Microsoft.Network/loadBalancers/',parameters('loadBalancer'))]",
+      "new": "[concat('/subscriptions/',subscription().subscriptionId,'/resourceGroups/',resourceGroup().name,'/providers/Microsoft.Network/loadBalancers/',parameters('loadBalancer'))]",
+      "none": null
+    },
+    "loadBalancerId": "[variables('loadBalancerIds')[parameters('loadBalancerType')]]",
     "subnetName": "[parameters('subnetName')]",
-    "loadBalancerName": "[parameters('loadBalancerName')]",
-    "publicIPAddressID": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]",
-    "lbID": "[resourceId('Microsoft.Network/loadBalancers',variables('loadBalancerName'))]",
     "bePoolName": "[parameters('loadBalancerBackendPoolName')]",
     "nicName": "[concat(variables('namingInfix'), 'nic')]",
     "ipConfigName": "[concat(variables('namingInfix'), 'ipconfig')]",
-    "frontEndIPConfigID": "[concat(variables('lbID'),'/frontendIPConfigurations/loadBalancerFrontEnd')]",
+    "frontEndIPConfigID": "[concat(variables('loadBalancerId'),'/frontendIPConfigurations/loadBalancerFrontEnd')]",
     "osProfilepassword": {
       "computerNamePrefix": "[variables('namingInfix')]",
       "adminUsername": "[parameters('adminUsername')]",
@@ -402,42 +420,54 @@
     "lbDeploymentName": "[concat(parameters('name'), 'LB')]",
     "vnetAddressPrefix": "[parameters('virtualNetworkIpAddressPrefix')]",
     "subnetAddressPrefix": "[parameters('subnetIpAddressPrefix')]",
-    "vhdStorageType": "[parameters('storageRedundancyType')]",
-    "publicIPName": "[parameters('publicIpAddressName')]",
+    "vhdStorageType": "[parameters('storageType')]",
     "publicIpAddressAllocation": "[parameters('publicIpAddressAllocation')]",
     "vhdStorageContainerName": "vhds",
     "vmSize": "[parameters('vmSku')]",
     "vmDeploymentName": "[concat(parameters('name'), 'VM')]",
     "nicDeploymentName": "[concat(parameters('name'), 'NicIp')]",
-    "vnetName": "[parameters('virtualNetworkName')]",
-    "vnetId": "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]",
-    "subnetRef": "[concat(variables('vnetId'), '/subnets/', variables('subnetName'))]",
+    "subnetRef": "[concat(variables('virtualNetworkId'), '/subnets/', variables('subnetName'))]",
     "ipConfigurations": {
       "new": [
         {
           "name": "[variables('ipConfigName')]",
           "properties": {
             "subnet": {
-              "id": "[concat('/subscriptions/', subscription().subscriptionId,'/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'), '/subnets/', variables('subnetName'))]"
+              "id": "[variables('subnetRef')]"
             },
             "loadBalancerBackendAddressPools": [
               {
-                "id": "[concat('/subscriptions/', subscription().subscriptionId,'/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/loadBalancers/', variables('loadBalancerName'), '/backendAddressPools/', variables('bePoolName'))]"
+                "id": "[concat(variables('loadBalancerId'), '/backendAddressPools/', variables('bePoolName'))]"
               }
             ]
           }
         }
       ],
-      "existing": [
+      "existingName": [
         {
           "name": "[variables('ipConfigName')]",
           "properties": {
             "subnet": {
-              "id": "[concat('/subscriptions/', subscription().subscriptionId,'/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'), '/subnets/', variables('subnetName'))]"
+              "id": "[variables('subnetRef')]"
             },
             "loadBalancerBackendAddressPools": [
               {
-                "id": "[concat('/subscriptions/', subscription().subscriptionId,'/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/loadBalancers/', variables('loadBalancerName'), '/backendAddressPools/', variables('bePoolName'))]"
+                "id": "[concat(variables('loadBalancerId'), '/backendAddressPools/', variables('bePoolName'))]"
+              }
+            ]
+          }
+        }
+      ],
+      "existingId": [
+        {
+          "name": "[variables('ipConfigName')]",
+          "properties": {
+            "subnet": {
+              "id": "[variables('subnetRef')]"
+            },
+            "loadBalancerBackendAddressPools": [
+              {
+                "id": "[concat(variables('loadBalancerId'), '/backendAddressPools/', variables('bePoolName'))]"
               }
             ]
           }
@@ -448,7 +478,7 @@
           "name": "[variables('ipConfigName')]",
           "properties": {
             "subnet": {
-              "id": "[concat('/subscriptions/', subscription().subscriptionId,'/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'), '/subnets/', variables('subnetName'))]"
+              "id": "[variables('subnetRef')]"
             }
           }
         }
@@ -461,12 +491,14 @@
     "vnetTemplateUri": "https://azuresdkci.blob.core.windows.net/templatehost/CreateVnet_2016-07-18/azuredeploy.json",
     "vnetTemplateUriEmpty": "https://azuresdkci.blob.core.windows.net/templatehost/CreateVnet_2016-07-18/azuredeploy_empty.json",
     "vnetTemplateFilePaths": {
-      "existing": "[variables('vnetTemplateUriEmpty')]",
+      "existingId": "[variables('vnetTemplateUriEmpty')]",
+      "existingName": "[variables('vnetTemplateUriEmpty')]",
       "new": "[variables('vnetTemplateUri')]"
     },
     "publicIpTemplateUri": "https://azuresdkci.blob.core.windows.net/templatehost/CreatePublicIp_2016-07-19/azuredeploy.json",
     "publicIpTemplateUriEmpty": "https://azuresdkci.blob.core.windows.net/templatehost/CreatePublicIp_2016-07-19/azuredeploy_empty.json",
     "ipTemplateFilePaths": {
+      "existingId": "[variables('publicIpTemplateUriEmpty')]",
       "existingName": "[variables('publicIpTemplateUriEmpty')]",
       "new": "[variables('publicIpTemplateUri')]",
       "none": "[variables('publicIpTemplateUriEmpty')]"
@@ -474,14 +506,10 @@
     "lbTemplateUri": "https://azuresdkci.blob.core.windows.net/templatehost/CreateLb_2016-07-19/azuredeploy.json",
     "lbTemplateUriEmpty": "https://azuresdkci.blob.core.windows.net/templatehost/CreateLb_2016-07-19/azuredeploy_empty.json",
     "lbTemplateFilePaths": {
-      "existing": "[variables('lbTemplateUriEmpty')]",
+      "existingId": "[variables('lbTemplateUriEmpty')]",
+      "existingName": "[variables('lbTemplateUriEmpty')]",
       "new": "[variables('lbTemplateUri')]",
       "none": "[variables('lbTemplateUriEmpty')]"
-    },
-    "nicTemplateFilePaths": {
-      "none": "[concat('/nested_templates/nic_ip_none_dns_', parameters('dnsNameType'), '.json')]",
-      "new": "[concat('/nested_templates/nic_ip_new_dns_', parameters('dnsNameType'), '.json')]",
-      "existing": "[concat('/nested_templates/nic_ip_existing_dns_', parameters('dnsNameType'), '.json')]"
     },
     "vhdContainers": [
       "[concat('https://', variables('uniqueStringArray')[0], variables('newStorageAccountSuffix'), '.blob.core.windows.net/', variables('vhdContainerName'))]",
@@ -537,7 +565,7 @@
           "contentVersion": "1.0.0.0"
         },
         "parameters": {
-          "virtualNetworkName": { "value": "[variables('vnetName')]" },
+          "virtualNetworkName": { "value": "[parameters('virtualNetwork')]" },
           "virtualNetworkPrefix": { "value": "[variables('vnetAddressPrefix')]" },
           "subnetPrefix": { "value": "[variables('subnetAddressPrefix')]" },
           "subnetName": { "value": "[variables('subnetName')]" },
@@ -559,7 +587,7 @@
         },
         "parameters": {
           "dnsName": { "value": "[parameters('dnsNameForPublicIP')]" },
-          "name": { "value": "[variables('publicIPAddressName')]" },
+          "name": { "value": "[parameters('publicIpAddress')]" },
           "allocationMethod": { "value": "[variables('publicIpAddressAllocation')]" },
           "location": { "value": "[parameters('location')]" },
           "dnsNameType": { "value": "[parameters('dnsNameType')]" },
@@ -581,7 +609,7 @@
           "contentVersion": "1.0.0.0"
         },
         "parameters": {
-          "loadBalancerName": { "value": "[variables('loadBalancerName')]" },
+          "loadBalancerName": { "value": "[parameters('loadBalancer')]" },
           "location": { "value": "[variables('resourceLocation')]" },
           "publicIpAddress": { "value": "[variables('publicIPAddressID')]" },
           "backendPoolName": { "value": "[variables('bePoolName')]" },

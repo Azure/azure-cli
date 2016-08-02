@@ -35,7 +35,8 @@ class dnsNameType(Enum):
 class loadBalancerType(Enum):
 
     new = "new"
-    existing = "existing"
+    existing_name = "existingName"
+    existing_id = "existingId"
     none = "none"
 
 
@@ -64,6 +65,7 @@ class publicIpAddressType(Enum):
     none = "none"
     new = "new"
     existing_name = "existingName"
+    existing_id = "existingId"
 
 
 class storageCaching(Enum):
@@ -81,7 +83,8 @@ class upgradePolicyMode(Enum):
 class virtualNetworkType(Enum):
 
     new = "new"
-    existing = "existing"
+    existing_name = "existingName"
+    existing_id = "existingId"
 
 
 class DeploymentMode(Enum):
