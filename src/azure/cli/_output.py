@@ -8,8 +8,14 @@ from __future__ import print_function, unicode_literals
 import sys
 import json
 import re
+import traceback
 from collections import OrderedDict
 from six import StringIO, text_type, u
+
+from azure.cli._util import CLIError
+import azure.cli._logging as _logging
+
+logger = _logging.get_az_logger(__name__)
 
 def _decode_str(output):
     if not isinstance(output, text_type):
@@ -23,27 +29,39 @@ class ComplexEncoder(json.JSONEncoder):
         return json.JSONEncoder.default(self, obj)
 
 def format_json(obj):
-    input_dict = obj.__dict__ if hasattr(obj, '__dict__') else obj
+    result = obj.result
+    input_dict = result.__dict__ if hasattr(result, '__dict__') else result
     return json.dumps(input_dict, indent=2, sort_keys=True, cls=ComplexEncoder,
                       separators=(',', ': ')) + '\n'
 
 def format_table(obj):
-    obj_list = obj if isinstance(obj, list) else [obj]
-    to = TableOutput()
+    result = obj.result
     try:
+        if not obj.simple_output_query and not obj.is_query_active:
+            raise ValueError('No query specified and no built-in query available.')
+        if obj.simple_output_query and not obj.is_query_active:
+            from jmespath import compile as compile_jmespath, search, Options
+            result = compile_jmespath(obj.simple_output_query).search(result, Options(OrderedDict))
+        obj_list = result if isinstance(result, list) else [result]
+        to = TableOutput()
         for item in obj_list:
-            for item_key in sorted(item):
+            for item_key in item:
                 to.cell(item_key, item[item_key])
             to.end_row()
         return to.dump()
-    except TypeError:
-        return ''
+    except (ValueError, KeyError, TypeError):
+        logger.debug(traceback.format_exc())
+        raise CLIError("Table output unavailable. "\
+                       "Change output type with --output or use "\
+                       "the --query option to specify an appropriate query. "\
+                       "Use --debug for more info.")
 
 def format_text(obj):
-    obj_list = obj if isinstance(obj, list) else [obj]
+    result = obj.result
+    result_list = result if isinstance(result, list) else [result]
     to = TextOutput()
     try:
-        for item in obj_list:
+        for item in result_list:
             for item_key in sorted(item):
                 to.add(item_key, item[item_key])
         return to.dump()
@@ -51,13 +69,22 @@ def format_text(obj):
         return ''
 
 def format_list(obj):
-    obj_list = obj if isinstance(obj, list) else [obj]
+    result = obj.result
+    result_list = result if isinstance(result, list) else [result]
     lo = ListOutput()
-    return lo.dump(obj_list)
+    return lo.dump(result_list)
 
 def format_tsv(obj):
-    obj_list = obj if isinstance(obj, list) else [obj]
-    return TsvOutput.dump(obj_list)
+    result = obj.result
+    result_list = result if isinstance(result, list) else [result]
+    return TsvOutput.dump(result_list)
+
+class CommandResultItem(object): #pylint: disable=too-few-public-methods
+
+    def __init__(self, result, simple_output_query=None, is_query_active=False):
+        self.result = result
+        self.simple_output_query = simple_output_query
+        self.is_query_active = is_query_active
 
 class OutputProducer(object): #pylint: disable=too-few-public-methods
 
@@ -80,7 +107,6 @@ class OutputProducer(object): #pylint: disable=too-few-public-methods
         except UnicodeEncodeError:
             print(output.encode('ascii', 'ignore').decode('utf-8', 'ignore'),
                   file=self.file, end='')
-
 
     @staticmethod
     def get_formatter(format_type):
@@ -158,6 +184,9 @@ class ListOutput(object): #pylint: disable=too-few-public-methods
         return result
 
 class TableOutput(object):
+
+    unsupported_types = (list, dict, set)
+
     def __init__(self):
         self._rows = [{}]
         self._columns = {}
@@ -185,6 +214,10 @@ class TableOutput(object):
         return len(self._rows) > 1
 
     def cell(self, name, value):
+        if isinstance(value, TableOutput.unsupported_types):
+            raise TypeError('Table output does not support objects of type {}.\n'\
+                            'Offending object name={} value={}'.format(
+                                [ut.__name__ for ut in TableOutput.unsupported_types], name, value))
         n = str(name)
         v = str(value)
         max_width = self._columns.get(n)

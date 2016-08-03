@@ -40,6 +40,7 @@ def register(application):
                     kwargs['event_data']['result'], Options(collections.OrderedDict))
                 application.remove(application.FILTER_RESULT, filter_output)
             application.register(application.FILTER_RESULT, filter_output)
+            application.session['query_active'] = True
 
     application.register(application.GLOBAL_PARSER_CREATED, _register_global_parameter)
     application.register(application.COMMAND_PARSER_PARSED, handle_query_parameter)
