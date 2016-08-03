@@ -12,6 +12,7 @@ from azure.storage.file import FileService
 from azure.storage import CloudStorageAccount
 
 from azure.cli.commands import cli_command
+
 from azure.cli.command_modules.storage._command_type import cli_storage_data_plane_command
 from azure.cli.command_modules.storage._factory import \
     (storage_client_factory, blob_data_service_factory, file_data_service_factory,
@@ -29,7 +30,7 @@ cli_command('storage account check-name', StorageAccountsOperations.check_name_a
 cli_command('storage account delete', StorageAccountsOperations.delete, factory)
 cli_command('storage account show', StorageAccountsOperations.get_properties, factory)
 cli_command('storage account create', create_storage_account)
-cli_command('storage account list', list_storage_accounts)
+cli_command('storage account list', list_storage_accounts, simple_output_query='[*].{Name: name, ResourceGroup: resourceGroup, Location: location, SkuName: sku.name, SkuTier: sku.tier} | sort_by(@, &Name)')
 cli_command('storage account show-usage', show_storage_account_usage)
 cli_command('storage account update', set_storage_account_properties)
 cli_command('storage account connection-string', show_storage_account_connection_string)

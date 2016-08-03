@@ -39,4 +39,6 @@ complete -o nospace -F _python_argcomplete \"az\"\n\
 " > /etc/az.completion
 RUN echo "\nsource '/etc/az.completion'\n" >> /etc/bash.bashrc
 
-CMD az
+WORKDIR /
+
+CMD az; bash
