@@ -5,6 +5,7 @@
 
 import os
 import sys
+import hashlib
 from six import StringIO, text_type, u
 import sh
 from sh import az, ssh
@@ -20,7 +21,7 @@ assert (RESOURCE_GROUP and AZURE_CLI_PACKAGE_VERSION_PREV and AZURE_CLI_PACKAGE_
         "Not all required environment variables have been set. Set AZ_TEST_RG, AZ_TEST_CLI_VERSION_PREV, "\
         "AZ_TEST_CLI_VERSION, AZ_TEST_LOGIN_USERNAME and AZ_TEST_LOGIN_PASSWORD"
 
-INSTALL_URL = os.environ.get('AZ_TEST_INSTALL_URL') or 'http://azure-cli-nightly.westus.cloudapp.azure.com/install-dev-latest'
+INSTALL_URL = os.environ.get('AZ_TEST_INSTALL_URL') or 'https://aka.ms/projectazinstalldev'
 VM_USERNAME = os.environ.get('AZ_TEST_VM_USERNAME') or 'myuser'
 
 INSTALL_DIRECTORY_PROMPT_MSG = "In what directory would you like to place the install? (leave blank to use /usr/local/az): "
@@ -35,7 +36,8 @@ sh.ErrorReturnCode.truncate_cap = None
 def create_vm(vm_name_prefix, vm_image):
     # _ is not valid in a vm name
     vm_name = '{}-{}'.format(vm_name_prefix.replace('_', '-'), RESOURCE_GROUP)
-    az(['vm', 'create', '-g', RESOURCE_GROUP, '-n', vm_name, '--authentication-type', 'ssh', '--image', vm_image, '--admin-username', VM_USERNAME])
+    vm_name = hashlib.md5(vm_name.encode()).hexdigest()[:10]
+    az(['vm', 'create', '-g', RESOURCE_GROUP, '-n', vm_name, '--authentication-type', 'ssh', '--image', vm_image, '--admin-username', VM_USERNAME, '--deployment-name', vm_name])
     io = StringIO()
     az(['vm', 'list-ip-addresses', '--resource-group', RESOURCE_GROUP, '--name', vm_name, '--query', '[0].virtualMachine.network.publicIpAddresses[0].ipAddress'], _out=io)
     vm_ip_address = io.getvalue().strip().replace('"', '')
@@ -44,7 +46,7 @@ def create_vm(vm_name_prefix, vm_image):
     return vm
 
 def _get_install_command(install_url, nightly_version, sudo):
-    return "export AZURE_CLI_PACKAGE_VERSION={nightly_version}; curl {install_url} | {sudo_str} bash".format(
+    return "export AZURE_CLI_PACKAGE_VERSION={nightly_version}; curl -L {install_url} | {sudo_str} bash".format(
         nightly_version=nightly_version,
         install_url=install_url,
         sudo_str = 'sudo -E' if sudo else '')
