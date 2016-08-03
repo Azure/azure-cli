@@ -36,6 +36,16 @@ Size Standard_A3, existing storage account, existing storage container name, exi
  - delete test_vm_create_custom_ip.yaml
  - re-record test
 
+ **Multi-NIC VM**
+
+ - create vm with multiple nics
+ - verify create succeeds and that nics are added in the correct order
+
+ OR
+
+ - delete test_vm_create_multinic.yaml
+ - re-record test
+
  **custom Linux image**
 
  - create VM, add a customization such as "sudo apt-get install emacs23"
