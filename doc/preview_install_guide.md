@@ -58,13 +58,6 @@ You may see the following warning message during install and execution of `az`.
 See also https://github.com/pypa/pip/issues/1074.
 
 
-Warning 2:
-InsecurePlatformWarning
-```
-/usr/local/az/envs/default/local/lib/python2.7/site-packages/requests/packages/urllib3/util/ssl_.py:122: InsecurePlatformWarning: A true SSLContext object is not available. This prevents urllib3 from configuring SSL appropriately and may cause certain SSL connections to fail. You can upgrade to a newer version of Python to solve this. For more information, see https://urllib3.readthedocs.org/en/latest/security.html#insecureplatformwarning.
-  InsecurePlatformWarning
-```
-
 Use the defaults for the install location and location of the executable.
 
 This will install the CLI globally on the system.
@@ -82,13 +75,6 @@ curl -L https://aka.ms/ProjectAzInstall | sudo bash
 Use the defaults for the install location and location of the executable.
 
 This will install the CLI globally on the system.
-
-**Known warnings**
-InsecurePlatformWarning
-```
-/usr/local/az/envs/default/local/lib/python2.7/site-packages/requests/packages/urllib3/util/ssl_.py:122: InsecurePlatformWarning: A true SSLContext object is not available. This prevents urllib3 from configuring SSL appropriately and may cause certain SSL connections to fail. You can upgrade to a newer version of Python to solve this. For more information, see https://urllib3.readthedocs.org/en/latest/security.html#insecureplatformwarning.
-  InsecurePlatformWarning
-```
 
 ## Ubuntu 15.10
 Python 2.7.10 should be already on the machine.
