@@ -112,7 +112,7 @@ register_cli_argument('network express-route circuit', 'circuit_name', name_arg_
 register_cli_argument('network local-gateway', 'local_network_gateway_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/localNetworkGateways'), id_part='name')
 
 # NIC
-register_cli_argument('network nic', 'network_interface_name', name_arg_type, id_part='name')
+register_cli_argument('network nic', 'network_interface_name', name_arg_type, id_part='name', completer=get_resource_name_completion_list('Microsoft.Network/networkInterfaces'))
 register_cli_argument('network nic', 'private_ip_address_allocation', help=argparse.SUPPRESS)
 register_cli_argument('network nic', 'network_security_group_type', help=argparse.SUPPRESS)
 register_cli_argument('network nic', 'public_ip_address_type', help=argparse.SUPPRESS)
