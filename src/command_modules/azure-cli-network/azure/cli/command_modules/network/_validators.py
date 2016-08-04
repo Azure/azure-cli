@@ -14,25 +14,23 @@ from azure.cli.commands.client_factory import get_subscription_id
 
 # PARAMETER VALIDATORS
 
-def _generate_ag_subproperty_id(
-        resource_group, application_gateway_name, child_type, child_name, subscription=None):
+def _generate_ag_subproperty_id(namespace, child_type, child_name, subscription=None):
     return resource_id(
         subscription=subscription or get_subscription_id(),
-        resource_group=resource_group,
+        resource_group=namespace.resource_group_name,
         namespace='Microsoft.Network',
         type='applicationGateways',
-        name=application_gateway_name,
+        name=namespace.application_gateway_name,
         child_type=child_type,
         child_name=child_name)
 
-def _generate_lb_subproperty_id(
-        resource_group, load_balancer_name, child_type, child_name, subscription=None):
+def _generate_lb_subproperty_id(namespace, child_type, child_name, subscription=None):
     return resource_id(
         subscription=subscription or get_subscription_id(),
-        resource_group=resource_group,
+        resource_group=namespace.resource_group_name,
         namespace='Microsoft.Network',
         type='loadBalancers',
-        name=load_balancer_name,
+        name=namespace.load_balancer_name,
         child_type=child_type,
         child_name=child_name)
 
@@ -42,22 +40,16 @@ def _generate_lb_id_list_from_names_or_ids(namespace, prop, child_type):
         return
     raw = raw if isinstance(raw, list) else [raw]
     result = []
-    subscription = get_subscription_id()
-    lb_name = namespace.load_balancer_name
     for item in raw:
         if is_valid_resource_id(item):
             result.append({'id': item})
         else:
-            if not lb_name:
+            if not namespace.load_balancer_name:
                 raise CLIError('Unable to process {}. Please supply a well-formed ID or '
                                '--lb-name.'.format(item))
             else:
                 result.append({'id': _generate_lb_subproperty_id(
-                    subscription=subscription,
-                    resource_group=namespace.resource_group_name,
-                    load_balancer_name=lb_name,
-                    child_type=child_type,
-                    child_name=item)})
+                    namespace, child_type, item)})
     setattr(namespace, prop, result)
 
 def validate_address_pool_id_list(namespace):
@@ -75,10 +67,7 @@ def validate_address_pool_name_or_id(namespace):
         if not lb_name:
             raise CLIError('Please specify --lb-name when specifying an address pool name.')
         namespace.backend_address_pool = _generate_lb_subproperty_id(
-            resource_group=namespace.resource_group_name,
-            load_balancer_name=lb_name,
-            child_type='backendAddressPools',
-            child_name=pool_name)
+            namespace, 'backendAddressPools', pool_name)
 
 def validate_address_prefixes(namespace):
 
@@ -93,6 +82,9 @@ def validate_address_prefixes(namespace):
                        'reusing an existing subnet.'.format(namespace.subnet))
 
 def validate_cert(namespace):
+
+    if namespace.http_listener_protocol:
+        raise argparse.ArgumentError(None, 'unrecognized arguments: --http-listener-protocol')
 
     params = [namespace.cert_data, namespace.cert_password]
     if all([not x for x in params]):
@@ -139,10 +131,7 @@ def validate_inbound_nat_rule_name_or_id(namespace):
         if not lb_name:
             raise CLIError('Please specify --lb-name when specifying an inbound NAT rule name.')
         namespace.inbound_nat_rule = _generate_lb_subproperty_id(
-            resource_group=namespace.resource_group_name,
-            load_balancer_name=lb_name,
-            child_type='inboundNatRules',
-            child_name=rule_name)
+            namespace, 'inboundNatRules', rule_name)
 
 def validate_nsg_name_or_id(namespace):
     """ Validates a NSG ID or, if a name is provided, formats it as an ID. """
@@ -233,95 +222,59 @@ def validate_subnet_name_or_id(namespace):
 def process_ag_listener_create_namespace(namespace): # pylint: disable=unused-argument
     if not is_valid_resource_id(namespace.frontend_ip):
         namespace.frontend_ip = _generate_ag_subproperty_id(
-            resource_group=namespace.resource_group_name,
-            application_gateway_name=namespace.application_gateway_name,
-            child_type='frontendIpConfigurations',
-            child_name=namespace.frontend_ip)
+            namespace, 'frontendIpConfigurations', namespace.frontend_ip)
 
     if not is_valid_resource_id(namespace.frontend_port):
         namespace.frontend_port = _generate_ag_subproperty_id(
-            resource_group=namespace.resource_group_name,
-            application_gateway_name=namespace.application_gateway_name,
-            child_type='frontendPorts',
-            child_name=namespace.frontend_port)
+            namespace, 'frontendPorts', namespace.frontend_port)
 
     if not is_valid_resource_id(namespace.ssl_cert):
         namespace.ssl_cert = _generate_ag_subproperty_id(
-            resource_group=namespace.resource_group_name,
-            application_gateway_name=namespace.application_gateway_name,
-            child_type='sslCertificates',
-            child_name=namespace.ssl_cert)
+            namespace, 'sslCertificates', namespace.ssl_cert)
 
 def process_ag_http_settings_create_namespace(namespace): # pylint: disable=unused-argument
     if not is_valid_resource_id(namespace.probe):
         namespace.probe = _generate_ag_subproperty_id(
-            resource_group=namespace.resource_group_name,
-            application_gateway_name=namespace.application_gateway_name,
-            child_type='probes',
-            child_name=namespace.probe)
+            namespace, 'probes', namespace.probe)
 
 def process_ag_rule_create_namespace(namespace): # pylint: disable=unused-argument
     if not is_valid_resource_id(namespace.address_pool):
         namespace.address_pool = _generate_ag_subproperty_id(
-            resource_group=namespace.resource_group_name,
-            application_gateway_name=namespace.application_gateway_name,
-            child_type='backendAddressPools',
-            child_name=namespace.address_pool)
+            namespace, 'backendAddressPools', namespace.address_pool)
 
     if not is_valid_resource_id(namespace.http_listener):
         namespace.http_listener = _generate_ag_subproperty_id(
-            resource_group=namespace.resource_group_name,
-            application_gateway_name=namespace.application_gateway_name,
-            child_type='httpListeners',
-            child_name=namespace.http_listener)
+            namespace, 'httpListeners', namespace.http_listener)
 
     if not is_valid_resource_id(namespace.http_settings):
         namespace.http_settings = _generate_ag_subproperty_id(
-            resource_group=namespace.resource_group_name,
-            application_gateway_name=namespace.application_gateway_name,
-            child_type='backendHttpSettingsCollection',
-            child_name=namespace.http_settings)
+            namespace, 'backendHttpSettingsCollection', namespace.http_settings)
 
     if not is_valid_resource_id(namespace.url_path_map):
         namespace.url_path_map = _generate_ag_subproperty_id(
-            resource_group=namespace.resource_group_name,
-            application_gateway_name=namespace.application_gateway_name,
-            child_type='urlPathMaps',
-            child_name=namespace.url_path_map)
+            namespace, 'urlPathMaps', namespace.url_path_map)
 
 def process_ag_url_path_map_create_namespace(namespace): # pylint: disable=unused-argument
     if namespace.default_address_pool and not is_valid_resource_id(namespace.default_address_pool):
         namespace.default_address_pool = _generate_ag_subproperty_id(
-            resource_group=namespace.resource_group_name,
-            application_gateway_name=namespace.application_gateway_name,
-            child_type='backendAddressPools',
-            child_name=namespace.default_address_pool)
+            namespace, 'backendAddressPools', namespace.default_address_pool)
 
     if namespace.default_http_settings and not is_valid_resource_id(namespace.default_http_settings): # pylint: disable=line-too-long
         namespace.default_http_settings = _generate_ag_subproperty_id(
-            resource_group=namespace.resource_group_name,
-            application_gateway_name=namespace.application_gateway_name,
-            child_type='backendHttpSettingsCollection',
-            child_name=namespace.default_http_settings)
+            namespace, 'backendHttpSettingsCollection', namespace.default_http_settings)
 
     process_ag_url_path_map_rule_create_namespace(namespace)
 
 def process_ag_url_path_map_rule_create_namespace(namespace): # pylint: disable=unused-argument
     if namespace.address_pool and not is_valid_resource_id(namespace.address_pool):
         namespace.address_pool = _generate_ag_subproperty_id(
-            resource_group=namespace.resource_group_name,
-            application_gateway_name=namespace.application_gateway_name,
-            child_type='backendAddressPools',
-            child_name=namespace.address_pool)
+            namespace, 'backendAddressPools', namespace.address_pool)
 
     if namespace.http_settings and not is_valid_resource_id(namespace.http_settings):
         namespace.http_settings = _generate_ag_subproperty_id(
-            resource_group=namespace.resource_group_name,
-            application_gateway_name=namespace.application_gateway_name,
-            child_type='backendHttpSettingsCollection',
-            child_name=namespace.http_settings)
+            namespace, 'backendHttpSettingsCollection', namespace.http_settings)
 
-def process_app_gateway_namespace(namespace):
+def process_ag_create_namespace(namespace):
 
     if namespace.public_ip:
         namespace.frontend_type = 'publicIp'
@@ -350,10 +303,6 @@ def process_nic_create_namespace(namespace):
 
     if not namespace.network_security_group:
         namespace.network_security_group_type = 'none'
-
-def process_nic_namespace(namespace):
-    if namespace.public_ip_address_name:
-        namespace.public_ip_address_type = 'existing'
 
 def process_public_ip_create_namespace(namespace):
     if namespace.dns_name:

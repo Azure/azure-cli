@@ -12,14 +12,13 @@ from azure.mgmt.network.models.network_management_client_enums import \
      ApplicationGatewayTier, ApplicationGatewayProtocol,
      ApplicationGatewayRequestRoutingRuleType)
 
-from azure.cli._util import CLIError
 from azure.cli.commands import CliArgumentType, register_cli_argument, register_extra_cli_argument
 from azure.cli.commands.parameters import (location_type, get_resource_name_completion_list, get_enum_type_completion_list, tags_type)
 from azure.cli.commands.validators import MarkSpecifiedAction
 from azure.cli.commands.template_create import register_folded_cli_argument
 from azure.cli.command_modules.network._factory import _network_client_factory
 from azure.cli.command_modules.network._validators import \
-    (process_app_gateway_namespace, process_ag_listener_create_namespace,
+    (process_ag_create_namespace, process_ag_listener_create_namespace,
      process_ag_http_settings_create_namespace, process_ag_url_path_map_create_namespace,
      process_nic_create_namespace, process_lb_create_namespace, process_ag_rule_create_namespace,
      process_ag_url_path_map_rule_create_namespace,
@@ -81,8 +80,6 @@ def get_ag_url_map_rule_completion_list():
         if parsed_args.resource_group_name and ag_name:
             ag = client.application_gateways.get(parsed_args.resource_group_name, ag_name)
             url_map = next((x for x in ag.url_path_maps if x.name == parsed_args.url_path_map_name), None) # pylint: disable=no-member
-            if not url_map:
-                raise CLIError('URL path map "{}" not found.'.format(parsed_args.url_path_map_name))
             return [r.name for r in url_map.path_rules]
     return completer
 
@@ -122,10 +119,10 @@ register_folded_cli_argument('network application-gateway', 'subnet', 'subnets',
 register_folded_cli_argument('network application-gateway', 'public_ip', 'Microsoft.Network/publicIPAddresses', completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'))
 register_cli_argument('network application-gateway', 'virtual_network_type', help=argparse.SUPPRESS)
 register_cli_argument('network application-gateway', 'private_ip_address_allocation', help=argparse.SUPPRESS)
-register_cli_argument('network application-gateway', 'frontend_type', help=argparse.SUPPRESS, validator=process_app_gateway_namespace)
+register_cli_argument('network application-gateway', 'frontend_type', help=argparse.SUPPRESS, validator=process_ag_create_namespace)
 register_cli_argument('network application-gateway', 'servers', nargs='+', validator=validate_servers)
 register_cli_argument('network application-gateway', 'cert_data', options_list=('--cert-file',), help='The path to the PFX certificate file.', validator=validate_cert)
-register_cli_argument('network application-gateway', 'http_listener_protocol', help=argparse.SUPPRESS)
+register_cli_argument('network application-gateway', 'http_listener_protocol', default=None, help=argparse.SUPPRESS)
 register_cli_argument('network application-gateway', 'http_settings_cookie_based_affinity', cookie_based_affinity_type)
 register_cli_argument('network application-gateway', 'http_settings_protocol', http_protocol_type)
 
