@@ -4,42 +4,52 @@
 #---------------------------------------------------------------------------------------------
 
 # AZURE CLI RBAC TEST DEFINITIONS
+import json
 import mock
 import re
+import tempfile
 import time
 
 from azure.cli.utils.vcr_test_base import VCRTestBase, JMESPathCheck, ResourceGroupVCRTestBase, NoneCheck, MOCKED_SUBSCRIPTION_ID
 
-class RoleScenarioTest(VCRTestBase):
-
-    def test_role_scenario(self):
-        self.execute()
+class RoleCreateScenarioTest(VCRTestBase):
 
     def __init__(self, test_method):
-        super(RoleScenarioTest, self).__init__(__file__, test_method)
+        super(RoleCreateScenarioTest, self).__init__(__file__, test_method)
+
+    def test_role_create_scenario(self):
+        self.execute()
 
     def body(self):
-        s = self
-        scope = '/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590'
-        role_def_id = 'de139f84-1756-47ae-9be6-808fbbe84772'
-        role_resource_id = '{}/providers/Microsoft.Authorization/roleDefinitions/{}'.format(scope, role_def_id)
+        if self.playback:
+            subscription_id = MOCKED_SUBSCRIPTION_ID
+        else:
+            subscription_id = self.cmd('account list --query "[?isDefault].id" -o tsv')
+        role_name = 'cli-test-role'
+        template = {
+            "Name": "Contoso On-call",
+            "Description": "Can monitor compute, network and storage, and restart virtual machines",
+            "Actions": ["Microsoft.Compute/*/read",
+                "Microsoft.Compute/virtualMachines/start/action",
+                "Microsoft.Compute/virtualMachines/restart/action",
+                "Microsoft.Network/*/read",
+                "Microsoft.Storage/*/read",
+                "Microsoft.Authorization/*/read",
+                "Microsoft.Resources/subscriptions/resourceGroups/read",
+                "Microsoft.Resources/subscriptions/resourceGroups/resources/read",
+                "Microsoft.Insights/alertRules/*",
+                "Microsoft.Support/*"],
+            "AssignableScopes": ["/subscriptions/{}".format(subscription_id)]
+            }        
+        template['Name'] = role_name
+        _, temp_file = tempfile.mkstemp()
+        with open(temp_file, 'w') as f:
+            json.dump(template, f)
+        role = self.cmd('role create --role-definition {}'.format(temp_file.replace('\\', '\\\\')), None)
+        self.cmd('role list -n {}'.format(role_name), checks=[JMESPathCheck('[0].properties.roleName', role_name)])
+        self.cmd('role delete -n {}'.format(role_name), None)
+        self.cmd('role list -n {}'.format(role_name), NoneCheck())
 
-        s.cmd('role list'.format(scope),
-            checks=JMESPathCheck("length([].contains(id, '{}')) == length(@)".format(scope), True))
-
-        s.cmd('role show --role-id {}'.format(role_def_id), checks=[
-            JMESPathCheck('name', role_def_id),
-            JMESPathCheck('properties.roleName', 'Website Contributor'),
-            JMESPathCheck('properties.type', 'BuiltInRole')
-        ])
-
-        s.cmd('role show --role-resource-id {}'.format(role_resource_id), checks=[
-            JMESPathCheck('name', role_def_id),
-            JMESPathCheck('properties.roleName', 'Website Contributor'),
-            JMESPathCheck('properties.type', 'BuiltInRole')
-        ])
-
-        #TODO: when role creation is supported, test custom roles
 
 class RoleAssignmentScenarioTest(ResourceGroupVCRTestBase):
 
@@ -78,10 +88,10 @@ class RoleAssignmentScenarioTest(ResourceGroupVCRTestBase):
 
         #test couple of more general filters
         result = self.cmd('role assignment list -g {} --include-inherited'.format(self.resource_group), None)
-        self.assertTrue(len(result)>=1)
+        self.assertTrue(len(result) >= 1)
 
         result = self.cmd('role assignment list --all'.format(self.user, self.resource_group), None)
-        self.assertTrue(len(result)>=1)
+        self.assertTrue(len(result) >= 1)
 
         self.cmd('role assignment delete --assignee {} --role contributor -g {}'.format(self.user, self.resource_group), None)
         self.cmd('role assignment list -g {}'.format(self.resource_group), checks=NoneCheck())

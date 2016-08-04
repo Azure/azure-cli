@@ -2,15 +2,22 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 #---------------------------------------------------------------------------------------------
+import json
 import re
+import os
 import uuid
 
-from azure.cli._util import CLIError, todict
+from azure.cli._util import CLIError, todict, get_file_json
+from azure.cli.help_files import helps
+
 from azure.cli.commands.client_factory import get_mgmt_service_client, configure_common_settings
 from azure.mgmt.authorization import AuthorizationManagementClient
 from azure.graphrbac import GraphRbacManagementClient
-from azure.mgmt.authorization.models import RoleAssignmentProperties
+from azure.mgmt.authorization.models import (RoleAssignmentProperties, Permission, RoleDefinition,
+                                             RoleDefinitionProperties)
 from azure.graphrbac.models import UserCreateParameters, PasswordProfile
+
+_CUSTOM_RULE = 'CustomRole'
 
 def _auth_client_factory(**_):
     return get_mgmt_service_client(AuthorizationManagementClient)
@@ -25,27 +32,88 @@ def _graph_client_factory(**_):
 
 def list_role_definitions(name=None, resource_group_name=None, resource_id=None,
                           custom_role_only=False):
-    '''
-    :param name: the role logical name
-    '''
     definitions_client = _auth_client_factory().role_definitions
     scope = _build_role_scope(resource_group_name, resource_id,
                               definitions_client.config.subscription_id)
+    return _search_role_definitions(definitions_client, name, scope, custom_role_only)
 
+helps['role create'] = """
+            type: command
+            short-summary: Create a custom role 
+            parameters: 
+                - name: --role-definition
+                  type: string
+                  short-summary: 'JSON formatted string or a path to a file with such content'
+            examples:
+                - name: Create a role with following definition content
+                  text: |
+                        {
+                            "Name": "Contoso On-call",
+                            "Description": "Can monitor compute, network and storage, and restart virtual machines",
+                            "Actions": [
+                                "Microsoft.Compute/*/read",
+                                "Microsoft.Compute/virtualMachines/start/action",
+                                "Microsoft.Compute/virtualMachines/restart/action",
+                                "Microsoft.Network/*/read",
+                                "Microsoft.Storage/*/read",
+                                "Microsoft.Authorization/*/read",
+                                "Microsoft.Resources/subscriptions/resourceGroups/read",
+                                "Microsoft.Resources/subscriptions/resourceGroups/resources/read",
+                                "Microsoft.Insights/alertRules/*",
+                                "Microsoft.Support/*"
+                            ],
+                            "AssignableScopes": ["/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"]
+                        }
+
+            """
+def create_role_definition(role_definition):
+    role_id = uuid.uuid4()
+    if os.path.exists(role_definition):
+        role_definition = get_file_json(role_definition)
+    else:
+        role_definition = json.loads(role_definition)
+
+    #to workaround service defects, ensure property names are camel case
+    names = [p for p in role_definition if p[:1].isupper()]
+    for n in names:
+        new_name = n[:1].lower() + n[1:]
+        role_definition[new_name] = role_definition.pop(n)
+
+    if not 'name' in role_definition:
+        raise CLIError("please provide 'name'")
+    if not 'assignableScopes' in role_definition:
+        raise CLIError("please provide 'assignableScopes'")
+
+    permission = Permission(actions=role_definition.get('actions', None),
+                            not_actions=role_definition.get('notActions', None))
+    properties = RoleDefinitionProperties(role_name=role_definition['name'],
+                                          description=role_definition.get('description', None),
+                                          type=_CUSTOM_RULE,
+                                          assignable_scopes=role_definition['assignableScopes'],
+                                          permissions=[permission])
+
+    definition = RoleDefinition(name=role_id, properties=properties)
+
+    definitions_client = _auth_client_factory().role_definitions
+    return definitions_client.create_or_update(role_definition_id=role_id,
+                                               scope=properties.assignable_scopes[0],
+                                               role_definition=definition)
+
+
+def delete_role_definition(name, resource_group_name=None, resource_id=None,
+                           custom_role_only=False):
+    definitions_client = _auth_client_factory().role_definitions
+    scope = _build_role_scope(resource_group_name, resource_id,
+                              definitions_client.config.subscription_id)
+    roles = _search_role_definitions(definitions_client, name, scope, custom_role_only)
+    for r in roles:
+        definitions_client.delete(role_definition_id=r.name, scope=scope)
+
+def _search_role_definitions(definitions_client, name, scope, custom_role_only=False):
     roles = definitions_client.list(scope, filter="roleName eq '{}'".format(name) if name else None)
     if custom_role_only:
-        roles = [r for r in roles if r.properties.type == 'CustomRole']
+        roles = [r for r in roles if r.properties.type == _CUSTOM_RULE]
     return roles
-
-def show_role_definition(role_resource_id=None, role_id=None):
-    definitions_client = _auth_client_factory().role_definitions
-    if (not role_resource_id and not role_id) or (role_resource_id and role_id):
-        raise CLIError('Please provide either role id or role resource id, but not both')
-    elif role_resource_id:
-        return definitions_client.get_by_id(role_resource_id)
-    else:
-        scope = '/subscriptions/' + definitions_client.config.subscription_id
-        return definitions_client.get(scope=scope, role_definition_id=role_id)
 
 def create_role_assignment(role, assignee, resource_group_name=None, resource_id=None):
     factory = _auth_client_factory()
@@ -104,11 +172,19 @@ def list_role_assignments(assignee=None, role=None, resource_group_name=None,#py
     principal_ids = set(i['properties']['principalId'] for i in results)
     if principal_ids:
         principals = _get_object_stubs(graph_client, principal_ids)
-        principal_dics = {i.object_id:(i.user_principal_name or i.service_principal_names) for i in principals}
+        principal_dics = {i.object_id:_get_displayable_name(i) for i in principals}
         for i in results:
             i['properties']['principalName'] = principal_dics.get(i['properties']['principalId'], None)
 
     return results
+
+def _get_displayable_name(graph_object):
+    if graph_object.user_principal_name:
+        return graph_object.user_principal_name
+    elif graph_object.service_principal_names:
+        return graph_object.service_principal_names[0]
+    else:
+        return ''
 
 def delete_role_assignments(ids=None, assignee=None, role=None, #pylint: disable=too-many-arguments
                             resource_group_name=None, resource_id=None, include_inherited=False):
@@ -192,7 +268,7 @@ def _resolve_role_id(role, scope, definitions_client):
             raise CLIError("Role '{}' doesn't exist.".format(role))
         elif len(role_defs) > 1:
             ids = [r.id for r in role_defs]
-            err = "More than one roles match the given name '{}'. Please pick a value from '{}'"
+            err = "More than one role matches the given name '{}'. Please pick a value from '{}'"
             raise CLIError(err.format(role, ids))
         role_id = role_defs[0].id
     return role_id
