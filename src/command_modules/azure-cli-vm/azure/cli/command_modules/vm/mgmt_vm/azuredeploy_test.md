@@ -46,6 +46,16 @@ Size Standard_A3, existing storage account, existing storage container name, exi
  - delete test_vm_create_multinic.yaml
  - re-record test
 
+ **Minimum VM**
+
+ - create vm with no availability set, NSG, public ip or tags
+ - verify create succeeds and that the other resources aren't created
+
+ OR
+
+ - delete test_vm_create_none_options.yaml
+ - re-record test
+
  **custom Linux image**
 
  - create VM, add a customization such as "sudo apt-get install emacs23"

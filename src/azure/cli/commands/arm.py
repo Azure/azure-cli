@@ -260,7 +260,7 @@ def set_properties(instance, expression):
         else:
             setattr(instance, name, value)
     except IndexError:
-        raise CLIError('index {} doesn\'t exist on {}'.format(index_value, _make_camel_case(name)))
+        raise CLIError('index {} doesn\'t exist on {}'.format(index_value, make_camel_case(name)))
     except (AttributeError, KeyError):
         show_options(instance, name, key.split('.'))
 
@@ -301,26 +301,26 @@ def remove_properties(instance, argument_values):
         except IndexError:
             raise CLIError('index {} doesn\'t exist on {}'
                            .format(list_index,
-                                   _make_camel_case(list_attribute_path[-1])))
+                                   make_camel_case(list_attribute_path[-1])))
 
 def show_options(instance, part, path):
     options = instance.__dict__ if hasattr(instance, '__dict__') else instance
     options = options.keys() if isinstance(options, dict) else options
-    options = [_make_camel_case(x) for x in options]
+    options = [make_camel_case(x) for x in options]
     raise CLIError('Couldn\'t find "{}" in "{}".  Available options: {}'
-                   .format(_make_camel_case(part),
-                           _make_camel_case('.'.join(path[:-1]).replace('.[', '[')),
+                   .format(make_camel_case(part),
+                           make_camel_case('.'.join(path[:-1]).replace('.[', '[')),
                            sorted(list(options), key=str)))
 
 snake_regex_1 = re.compile('(.)([A-Z][a-z]+)')
 snake_regex_2 = re.compile('([a-z0-9])([A-Z])')
-def _make_snake_case(s):
+def make_snake_case(s):
     if isinstance(s, str):
         s1 = re.sub(snake_regex_1, r'\1_\2', s)
         return re.sub(snake_regex_2, r'\1_\2', s1).lower()
     return s
 
-def _make_camel_case(s):
+def make_camel_case(s):
     if isinstance(s, str):
         parts = s.split('_')
         return parts[0].lower() + ''.join(p.capitalize() for p in parts[1:])
@@ -332,7 +332,7 @@ def _get_internal_path(path):
     _path = path.split('.') \
         if '.[' in path \
         else path.replace('[', '.[').split('.')
-    return [_make_snake_case(x) for x in _path]
+    return [make_snake_case(x) for x in _path]
 
 def _get_name_path(path):
     pathlist = _get_internal_path(path)
@@ -347,7 +347,7 @@ def _update_instance(instance, part, path):
                 instance = instance[index_value]
             except IndexError:
                 raise CLIError('index {} doesn\'t exist on {}'.format(index_value,
-                                                                      _make_camel_case(path[-2])))
+                                                                      make_camel_case(path[-2])))
         elif isinstance(instance, dict):
             instance = instance[part]
         else:

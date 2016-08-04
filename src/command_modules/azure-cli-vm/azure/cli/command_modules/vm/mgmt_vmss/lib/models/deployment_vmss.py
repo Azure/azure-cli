@@ -22,7 +22,7 @@ class DeploymentVmss(Model):
     sending a request.
 
     :ivar uri: URI referencing the template. Default value:
-     "https://azuresdkci.blob.core.windows.net/templatehost/CreateVmss_2016-08-02/azuredeploy.json"
+     "https://azuresdkci.blob.core.windows.net/templatehost/CreateVmss_2016-08-04/azuredeploy.json"
      .
     :vartype uri: str
     :param content_version: If included it must match the ContentVersion in
@@ -30,7 +30,7 @@ class DeploymentVmss(Model):
     :type content_version: str
     :ivar _artifacts_location: Container URI of of the template. Default
      value:
-     "https://azuresdkci.blob.core.windows.net/templatehost/CreateVmss_2016-08-02"
+     "https://azuresdkci.blob.core.windows.net/templatehost/CreateVmss_2016-08-04"
      .
     :vartype _artifacts_location: str
     :param admin_password: Password for the Virtual Machine.  Required if SSH
@@ -207,9 +207,9 @@ class DeploymentVmss(Model):
         'mode': {'key': 'properties.mode', 'type': 'str'},
     }
 
-    uri = "https://azuresdkci.blob.core.windows.net/templatehost/CreateVmss_2016-08-02/azuredeploy.json"
+    uri = "https://azuresdkci.blob.core.windows.net/templatehost/CreateVmss_2016-08-04/azuredeploy.json"
 
-    _artifacts_location = "https://azuresdkci.blob.core.windows.net/templatehost/CreateVmss_2016-08-02"
+    _artifacts_location = "https://azuresdkci.blob.core.windows.net/templatehost/CreateVmss_2016-08-04"
 
     mode = "Incremental"
 

@@ -7,6 +7,7 @@
 import json
 import os
 import tempfile
+import platform
 
 from azure.cli.utils.vcr_test_base import (VCRTestBase, ResourceGroupVCRTestBase, JMESPathCheck,
                                            NoneCheck)
@@ -688,6 +689,34 @@ class VMScaleSetCreateOptions(ResourceGroupVCRTestBase):
         self.cmd('vmss show -n {vmss_name} -g {resource_group} --instance-id 0'.format(vmss_name=vmss_name, resource_group=self.resource_group),
             checks=JMESPathCheck('osProfile.windowsConfiguration.provisionVmAgent', True))
 
+class VMSSCreateNoneOptionsTest(ResourceGroupVCRTestBase): #pylint: disable=too-many-instance-attributes
+
+    def __init__(self, test_method):
+        super(VMSSCreateNoneOptionsTest, self).__init__(__file__, test_method)
+        self.resource_group = 'cliTestRg_VMSSCreate_none_options'
+
+    def test_vmss_create_none_options(self):
+        self.execute()
+
+    def body(self):
+        deployment_name = 'azurecli-test-deployment-vmss-none-options-create'
+        vmss_name = 'nooptvmss8'
+
+        self.cmd('vmss create -n {vmss_name} -g {resource_group} --image Debian --load-balancer {quotes}'
+                 ' --ssh-key-value \'{ssh_key}\' --deployment-name {deployment_name} --public-ip-address {quotes} --tags {quotes}'
+                 .format(vmss_name=vmss_name, resource_group=self.resource_group,
+                         ssh_key=TEST_SSH_KEY_PUB, deployment_name=deployment_name,
+                         quotes='""' if platform.system() == 'Windows' else "''"))
+
+        self.cmd('vmss show -n {vmss_name} -g {resource_group}'.format(vmss_name=vmss_name, resource_group=self.resource_group), [
+            JMESPathCheck('availabilitySet', None),
+            JMESPathCheck('tags', {}),
+            JMESPathCheck('virtualMachineProfile.networkProfile.networkInterfaceConfigurations.ipConfigurations.loadBalancerBackendAddressPools', None)
+        ])
+        self.cmd('network public-ip show -n {vmss_name}PublicIP -g {resource_group}'.format(vmss_name=vmss_name, resource_group=self.resource_group), checks=[
+            NoneCheck()
+        ], allowed_exceptions='was not found')
+
 class VMScaleSetCreateExistingOptions(ResourceGroupVCRTestBase):
     def __init__(self, test_method):
         super(VMScaleSetCreateExistingOptions, self).__init__(__file__, test_method)
@@ -820,6 +849,33 @@ class VMCreateMultiNicTest(ResourceGroupVCRTestBase): #pylint: disable=too-many-
             JMESPathCheck('networkProfile.networkInterfaces[1].id.ends_with(@, \'{}\')'.format(nic_names[1]), True),
             JMESPathCheck('length(networkProfile.networkInterfaces)', 2)
         ])
+
+class VMCreateNoneOptionsTest(ResourceGroupVCRTestBase): #pylint: disable=too-many-instance-attributes
+
+    def __init__(self, test_method):
+        super(VMCreateNoneOptionsTest, self).__init__(__file__, test_method)
+        self.resource_group = 'cliTestRg_VMCreate_none_options'
+
+    def test_vm_create_none_options(self):
+        self.execute()
+
+    def body(self):
+        deployment_name = 'azurecli-test-deployment-vm-none-options-create'
+        vm_name = 'nooptvm'
+
+        self.cmd('vm create -n {vm_name} -g {resource_group} --image Debian --availability-set {quotes} --nsg {quotes}'
+                 ' --ssh-key-value \'{ssh_key}\' --deployment-name {deployment_name} --public-ip-address {quotes} --tags {quotes}'
+                 .format(vm_name=vm_name, resource_group=self.resource_group,
+                         ssh_key=TEST_SSH_KEY_PUB, deployment_name=deployment_name,
+                         quotes='""' if platform.system() == 'Windows' else "''"))
+
+        self.cmd('vm show -n {vm_name} -g {resource_group}'.format(vm_name=vm_name, resource_group=self.resource_group), [
+            JMESPathCheck('availabilitySet', None),
+            JMESPathCheck('length(tags)', 0)
+        ])
+        self.cmd('network public-ip show -n {vm_name}PublicIP -g {resource_group}'.format(vm_name=vm_name, resource_group=self.resource_group), checks=[
+            NoneCheck()
+        ], allowed_exceptions='was not found')
 
 class VMBootDiagnostics(VCRTestBase):
 

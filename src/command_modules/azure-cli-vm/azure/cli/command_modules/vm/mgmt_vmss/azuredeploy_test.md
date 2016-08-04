@@ -36,6 +36,16 @@ OR
  - Delete test_vm_scaleset_create_existing_options.yaml
  - Re-record tests
 
+ **Minimum VMSS**
+
+ - create vmss with no load balancer, public ip or tags
+ - verify create succeeds and that the other resources aren't created
+
+ OR
+
+ - delete test_vmss_create_none_options.yaml
+ - re-record test
+
 **custom Linux image**
 
  - create VM1, add a customization such as "sudo apt-get install emacs23"

@@ -20,6 +20,4 @@ def _web_client_factory(**_):
 register_cli_argument('webapp', 'name', CliArgumentType(options_list=('--name', '-n')))
 register_cli_argument('webapp', 'tags', tags_type)
 
-register_folded_cli_argument('webapp create', 'hosting_plan', 'Microsoft.Web/serverfarms',
-                             help='Name or ID of the web application\'s hosting plan.'
-                             '  Creates if resource doesn\'t exist.')
+register_folded_cli_argument('webapp create', 'hosting_plan', 'Microsoft.Web/serverfarms')

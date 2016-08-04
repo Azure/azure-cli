@@ -350,14 +350,14 @@
       "existingId": "[parameters('publicIpAddress')]",
       "existingName": "[concat('/subscriptions/',subscription().subscriptionId,'/resourceGroups/',resourceGroup().name,'/providers/Microsoft.Network/publicIPAddresses/',parameters('publicIpAddress'))]",
       "new": "[concat('/subscriptions/',subscription().subscriptionId,'/resourceGroups/',resourceGroup().name,'/providers/Microsoft.Network/publicIPAddresses/',parameters('publicIpAddress'))]",
-      "none": null
+      "none": ""
     },
     "publicIpAddressId": "[variables('publicIpAddressIds')[parameters('publicIpAddressType')]]",
     "loadBalancerIds": {
       "existingId": "[parameters('loadBalancer')]",
       "existingName": "[concat('/subscriptions/',subscription().subscriptionId,'/resourceGroups/',resourceGroup().name,'/providers/Microsoft.Network/loadBalancers/',parameters('loadBalancer'))]",
       "new": "[concat('/subscriptions/',subscription().subscriptionId,'/resourceGroups/',resourceGroup().name,'/providers/Microsoft.Network/loadBalancers/',parameters('loadBalancer'))]",
-      "none": null
+      "none": ""
     },
     "loadBalancerId": "[variables('loadBalancerIds')[parameters('loadBalancerType')]]",
     "subnetName": "[parameters('subnetName')]",
@@ -611,9 +611,9 @@
         "parameters": {
           "loadBalancerName": { "value": "[parameters('loadBalancer')]" },
           "location": { "value": "[variables('resourceLocation')]" },
-          "publicIpAddress": { "value": "[variables('publicIPAddressID')]" },
-          "backendPoolName": { "value": "[variables('bePoolName')]" },
+          "publicIpAddress": { "value": "[variables('publicIpAddressId')]" },
           "publicIpAddressType": { "value": "[variables('lbPublicIpAddressType')[parameters('publicIpAddressType')]]" },
+          "backendPoolName": { "value": "[variables('bePoolName')]" },
           "subnet": { "value": "[variables('subnetRef')]" }
         }
       }

@@ -5,6 +5,7 @@
 
 from __future__ import print_function
 import argparse
+import platform
 
 from azure.cli._util import CLIError
 from azure.cli.commands import register_cli_argument
@@ -12,12 +13,14 @@ from azure.cli.commands.arm import (
     is_valid_resource_id,
     parse_resource_id,
     resource_id,
-    resource_exists)
+    resource_exists,
+    make_camel_case)
 
 def register_folded_cli_argument(scope, base_name, resource_type, parent_name=None, # pylint: disable=too-many-arguments
                                  parent_type=None, type_field=None,
                                  existing_id_flag_value='existingId', new_flag_value='new',
-                                 none_flag_value='none', **kwargs):
+                                 none_flag_value='none', default_value_flag='new', allow_none=True,
+                                 **kwargs):
     type_field_name = type_field or base_name + '_type'
 
     fold_validator = _name_id_fold(base_name,
@@ -26,6 +29,7 @@ def register_folded_cli_argument(scope, base_name, resource_type, parent_name=No
                                    existing_id_flag_value,
                                    new_flag_value,
                                    none_flag_value,
+                                   allow_none,
                                    parent_name,
                                    parent_type)
     custom_validator = kwargs.pop('validator', None)
@@ -37,12 +41,22 @@ def register_folded_cli_argument(scope, base_name, resource_type, parent_name=No
     else:
         validator = fold_validator
 
-    register_cli_argument(scope, base_name, validator=validator, **kwargs)
+    quotes = '""' if platform.system() == 'Windows' else "''"
+    quote_text = '  Use {} for none.'.format(quotes) if allow_none else ''
+    flag_texts = {
+        new_flag_value: '  Creates new by default.{}'.format(quote_text),
+        existing_id_flag_value: '  Uses existing by default or creates if none found.{}'
+                                .format(quote_text),
+        none_flag_value: '  None by default.'
+    }
+    help_text = 'Name or ID of the resource.' + flag_texts[default_value_flag]
+
+    register_cli_argument(scope, base_name, validator=validator, help=help_text, **kwargs)
     register_cli_argument(scope, type_field_name, help=argparse.SUPPRESS, default=None)
 
 def _name_id_fold(base_name, resource_type, type_field, #pylint: disable=too-many-arguments
-                  existing_id_flag_value, new_flag_value, none_flag_value, parent_name=None,
-                  parent_type=None):
+                  existing_id_flag_value, new_flag_value, none_flag_value, allow_none=True,
+                  parent_name=None, parent_type=None):
     def handle_folding(namespace):
         base_name_val = getattr(namespace, base_name)
         type_field_val = getattr(namespace, type_field)
@@ -52,10 +66,14 @@ def _name_id_fold(base_name, resource_type, type_field, #pylint: disable=too-man
             # Either no name was specified, or the user specified the type of resource
             # (i.e. new/existing/none)
             pass
-        elif base_name_val == '':
+        elif base_name_val in ('', '""', "''"):
             # An empty name specified - that means that we are neither referencing an existing
-            # field, or the name is set to an empty string
+            # field, or the name is set to an empty string.  We check for all types of quotes
+            # so scripts can run cross-platform.
+            if not allow_none:
+                raise CLIError('Field {} cannot be none.'.format(make_camel_case(base_name)))
             setattr(namespace, type_field, none_flag_value)
+            setattr(namespace, base_name, None)
         else:
             from azure.cli.commands.client_factory import get_subscription_id
             has_parent = parent_name is not None and parent_type is not None
