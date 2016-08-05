@@ -382,8 +382,9 @@ class Test_Profile(unittest.TestCase):
         self.assertEqual(creds_cache._service_principal_creds, [test_sp])
 
     @mock.patch('azure.cli._profile._read_file_content', autospec=True)
-    @mock.patch('azure.cli._profile.codecs_open', autospec=True)
-    def test_credscache_add_new_sp_creds(self, mock_open_for_write, mock_read_file):
+    @mock.patch('os.fdopen', autospec=True)
+    @mock.patch('os.open', autospec=True)
+    def test_credscache_add_new_sp_creds(self, _, mock_open_for_write, mock_read_file):
         test_sp = {
             "servicePrincipalId": "myapp",
             "servicePrincipalTenant": "mytenant",
@@ -408,11 +409,12 @@ class Test_Profile(unittest.TestCase):
         token_entries = [entry for _, entry in creds_cache.adal_token_cache.read_items()]
         self.assertEqual(token_entries, [self.token_entry1])
         self.assertEqual(creds_cache._service_principal_creds, [test_sp, test_sp2])
-        mock_open_for_write.assert_called_with(mock.ANY, 'w', encoding='ascii')
+        mock_open_for_write.assert_called_with(mock.ANY, 'w+')
 
     @mock.patch('azure.cli._profile._read_file_content', autospec=True)
-    @mock.patch('azure.cli._profile.codecs_open', autospec=True)
-    def test_credscache_remove_creds(self, mock_open_for_write, mock_read_file):
+    @mock.patch('os.fdopen', autospec=True)
+    @mock.patch('os.open', autospec=True)
+    def test_credscache_remove_creds(self, _, mock_open_for_write, mock_read_file):
         test_sp = {
             "servicePrincipalId": "myapp",
             "servicePrincipalTenant": "mytenant",
@@ -435,13 +437,14 @@ class Test_Profile(unittest.TestCase):
         #assert #2
         self.assertEqual(creds_cache._service_principal_creds, [])
 
-        mock_open_for_write.assert_called_with(mock.ANY, 'w', encoding='ascii')
+        mock_open_for_write.assert_called_with(mock.ANY, 'w+')
         self.assertEqual(mock_open_for_write.call_count, 2)
 
     @mock.patch('azure.cli._profile._read_file_content', autospec=True)
-    @mock.patch('azure.cli._profile.codecs_open', autospec=True)
+    @mock.patch('os.fdopen', autospec=True)
+    @mock.patch('os.open', autospec=True)
     @mock.patch('adal.AuthenticationContext', autospec=True)
-    def test_credscache_new_token_added_by_adal(self, mock_adal_auth_context, mock_open_for_write, mock_read_file): # pylint: disable=line-too-long
+    def test_credscache_new_token_added_by_adal(self, mock_adal_auth_context, _, mock_open_for_write, mock_read_file): # pylint: disable=line-too-long
         token_entry2 = {
             "accessToken": "new token",
             "tokenType": "Bearer",
@@ -469,7 +472,7 @@ class Test_Profile(unittest.TestCase):
             mock.ANY)
 
         #assert
-        mock_open_for_write.assert_called_with(mock.ANY, 'w', encoding='ascii')
+        mock_open_for_write.assert_called_with(mock.ANY, 'w+')
         self.assertEqual(token, 'new token')
         self.assertEqual(token_type, token_entry2['tokenType'])
 
