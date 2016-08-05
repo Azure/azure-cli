@@ -4,39 +4,52 @@
 #---------------------------------------------------------------------------------------------
 
 # AZURE CLI RBAC TEST DEFINITIONS
+import json
 import mock
+import re
+import tempfile
 import time
 
-from azure.cli.utils.vcr_test_base import VCRTestBase, JMESPathCheck, ResourceGroupVCRTestBase
+from azure.cli.utils.vcr_test_base import VCRTestBase, JMESPathCheck, ResourceGroupVCRTestBase, NoneCheck, MOCKED_SUBSCRIPTION_ID
 
-class RoleScenarioTest(VCRTestBase):
-
-    def test_role_scenario(self):
-        self.execute()
+class RoleCreateScenarioTest(VCRTestBase):
 
     def __init__(self, test_method):
-        super(RoleScenarioTest, self).__init__(__file__, test_method)
+        super(RoleCreateScenarioTest, self).__init__(__file__, test_method)
+
+    def test_role_create_scenario(self):
+        self.execute()
 
     def body(self):
-        s = self
-        scope = '/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590'
-        role_def_id = 'de139f84-1756-47ae-9be6-808fbbe84772'
-        full_role_def_id = '{}/providers/Microsoft.Authorization/roleDefinitions/{}'.format(scope, role_def_id)
+        if self.playback:
+            subscription_id = MOCKED_SUBSCRIPTION_ID
+        else:
+            subscription_id = self.cmd('account list --query "[?isDefault].id" -o tsv')
+        role_name = 'cli-test-role'
+        template = {
+            "Name": "Contoso On-call",
+            "Description": "Can monitor compute, network and storage, and restart virtual machines",
+            "Actions": ["Microsoft.Compute/*/read",
+                "Microsoft.Compute/virtualMachines/start/action",
+                "Microsoft.Compute/virtualMachines/restart/action",
+                "Microsoft.Network/*/read",
+                "Microsoft.Storage/*/read",
+                "Microsoft.Authorization/*/read",
+                "Microsoft.Resources/subscriptions/resourceGroups/read",
+                "Microsoft.Resources/subscriptions/resourceGroups/resources/read",
+                "Microsoft.Insights/alertRules/*",
+                "Microsoft.Support/*"],
+            "AssignableScopes": ["/subscriptions/{}".format(subscription_id)]
+            }        
+        template['Name'] = role_name
+        _, temp_file = tempfile.mkstemp()
+        with open(temp_file, 'w') as f:
+            json.dump(template, f)
+        role = self.cmd('role create --role-definition {}'.format(temp_file.replace('\\', '\\\\')), None)
+        self.cmd('role list -n {}'.format(role_name), checks=[JMESPathCheck('[0].properties.roleName', role_name)])
+        self.cmd('role delete -n {}'.format(role_name), None)
+        self.cmd('role list -n {}'.format(role_name), NoneCheck())
 
-        s.cmd('role list --scope {}'.format(scope),
-            checks=JMESPathCheck("length([].contains(id, '{}')) == length(@)".format(scope), True))
-
-        s.cmd('role show --scope {} --role-definition-id {}'.format(scope, role_def_id), checks=[
-            JMESPathCheck('name', role_def_id),
-            JMESPathCheck('properties.roleName', 'Website Contributor'),
-            JMESPathCheck('properties.type', 'BuiltInRole')
-        ])
-
-        s.cmd('role show-by-id --role-definition-id {}'.format(full_role_def_id), checks=[
-            JMESPathCheck('name', role_def_id),
-            JMESPathCheck('properties.roleName', 'Website Contributor'),
-            JMESPathCheck('properties.type', 'BuiltInRole')
-        ])
 
 class RoleAssignmentScenarioTest(ResourceGroupVCRTestBase):
 
@@ -55,38 +68,45 @@ class RoleAssignmentScenarioTest(ResourceGroupVCRTestBase):
         super().tear_down()
 
     def test_role_assignment_scenario(self):
-
         if self.playback:
-            #TODO: we should auto record generated guids and use them under playback.
-            #For now, get the values from the .yaml file and put in here.
-            with mock.patch('uuid.uuid4') as m:
-                m.side_effect = ['1518cef5-a2c8-48e1-acb5-eaadf2474f79', 'f13b65c4-7c62-4dd2-b2eb-2a348b57c25b']
-                self.execute()
+            return #live-only test, so far unable to replace guid in binary encoded body
         else:
             self.execute()
 
-    def body(self):       
+    def body(self):
         nsg_name = 'nsg1'
         self.cmd('network nsg create -n {} -g {}'.format(nsg_name, self.resource_group), None)
         result = self.cmd('network nsg show -n {} -g {}'.format(nsg_name, self.resource_group), None)
         resource_id = result['id']
 
         #test role assignments on a resource group
-        result = self.cmd('role assignment create --assignee {} --role contributor -g {}'.format(self.user, self.resource_group), None)
-        scope = result['properties']['scope']
-        self.cmd('role assignment list-for-resource-group -g {}'.format(self.resource_group),
-                 checks=[JMESPathCheck("length([?properties.scope == '{}'])".format(scope), 1)])
-        self.cmd('role assignment delete -n {} --scope {}'.format(result['name'], result['properties']['scope']), None)
-        self.cmd('role assignment list-for-resource-group -g {}'.format(self.resource_group),
-                 checks=[JMESPathCheck("length([?properties.scope == '{}'])".format(scope), 0)])
+        self.cmd('role assignment create --assignee {} --role contributor -g {}'.format(self.user, self.resource_group), None)      
+        self.cmd('role assignment list -g {}'.format(self.resource_group),
+                 checks=[JMESPathCheck("length([])", 1)])
+        self.cmd('role assignment list --assignee {} --role contributor -g {}'.format(self.user, self.resource_group),
+                 checks=[JMESPathCheck("length([])", 1)])
+
+        #test couple of more general filters
+        result = self.cmd('role assignment list -g {} --include-inherited'.format(self.resource_group), None)
+        self.assertTrue(len(result) >= 1)
+
+        result = self.cmd('role assignment list --all'.format(self.user, self.resource_group), None)
+        self.assertTrue(len(result) >= 1)
+
+        self.cmd('role assignment delete --assignee {} --role contributor -g {}'.format(self.user, self.resource_group), None)
+        self.cmd('role assignment list -g {}'.format(self.resource_group), checks=NoneCheck())
 
         #test role assignments on a resource
-        result2 = self.cmd('role assignment create --assignee {} --role contributor --resource-id {}'.format(self.user, resource_id), None)
-        scope = result2['properties']['scope']
-        self.cmd('role assignment list-for-scope --scope {}'.format(scope),
-                 checks=[JMESPathCheck("length([?properties.scope == '{}'])".format(scope), 1)])
-        self.cmd('role assignment delete -n {} --scope {}'.format(result2['name'], scope), None)
-        self.cmd('role assignment list-for-scope --scope {}'.format(scope),
-                 checks=[JMESPathCheck("length([?properties.scope == '{}'])".format(scope), 0)])
+        self.cmd('role assignment create --assignee {} --role contributor --resource-id {}'.format(self.user, resource_id), None)
+        self.cmd('role assignment list --assignee {} --role contributor --resource-id {}'.format(self.user, resource_id),
+                 checks=[JMESPathCheck("length([])", 1)])
+        self.cmd('role assignment delete --assignee {} --role contributor --resource-id {}'.format(self.user, resource_id), None)
+        self.cmd('role assignment list --resource-id {}'.format(resource_id), checks=NoneCheck())
 
-        #TODO: test role assignment on subscription level will be done after the 'list' command gets improved
+        #test role assignment on subscription level
+        self.cmd('role assignment create --assignee {} --role reader'.format(self.user), None)
+        self.cmd('role assignment list --assignee {} --role reader'.format(self.user),
+                 checks=[JMESPathCheck("length([])", 1)])
+        self.cmd('role assignment list --assignee {}'.format(self.user),
+                 checks=[JMESPathCheck("length([])", 1)])
+        self.cmd('role assignment delete --assignee {} --role reader'.format(self.user), None)

@@ -4,18 +4,16 @@
 #---------------------------------------------------------------------------------------------
 
 from collections import defaultdict
-from datetime import datetime, timedelta
 import sys
 import os
-import re
 import uuid
 import argparse
-from enum import Enum
 from .parser import AzCliCommandParser
 from azure.cli._output import CommandResultItem
 import azure.cli.extensions
 import azure.cli._help as _help
 import azure.cli._logging as _logging
+from azure.cli._util import todict
 
 logger = _logging.get_az_logger(__name__)
 
@@ -117,7 +115,7 @@ class Application(object):
             params.pop('command', None)
 
             result = expanded_arg.func(params)
-            result = self.todict(result)
+            result = todict(result)
             results.append(result)
 
         if len(results) == 1:
@@ -161,32 +159,6 @@ class Application(object):
         '''
         self._event_handlers[name].remove(handler)
         logger.info("Removed application event handler '%s' at %s", name, handler)
-
-    KEYS_CAMELCASE_PATTERN = re.compile('(?!^)_([a-zA-Z])')
-    @classmethod
-    def todict(cls, obj): #pylint: disable=too-many-return-statements
-
-        def to_camelcase(s):
-            return re.sub(cls.KEYS_CAMELCASE_PATTERN, lambda x: x.group(1).upper(), s)
-
-        if isinstance(obj, dict):
-            return {k: cls.todict(v) for (k, v) in obj.items()}
-        elif isinstance(obj, list):
-            return [cls.todict(a) for a in obj]
-        elif isinstance(obj, Enum):
-            return obj.value
-        elif isinstance(obj, datetime):
-            return obj.isoformat()
-        elif isinstance(obj, timedelta):
-            return str(obj)
-        elif hasattr(obj, '_asdict'):
-            return cls.todict(obj._asdict())
-        elif hasattr(obj, '__dict__'):
-            return dict([(to_camelcase(k), cls.todict(v))
-                         for k, v in obj.__dict__.items()
-                         if not callable(v) and not k.startswith('_')])
-        else:
-            return obj
 
     @staticmethod
     def _register_builtin_arguments(**kwargs):
