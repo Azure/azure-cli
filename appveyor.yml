@@ -1,0 +1,12 @@
+install:
+  - pip install -r requirements.txt
+  - pip install -e . # Install the CLI as a package
+  - python scripts/command_modules/install.py # Install the command modules as packages
+
+build_script:
+  - cd doc\sphinx 
+  - make xml
+  - make html
+
+artifacts:
+  - path: doc\sphinx\_build
