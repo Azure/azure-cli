@@ -6,35 +6,32 @@
 # pylint: disable=line-too-long
 from __future__ import print_function
 
-from azure.mgmt.authorization.operations import RoleAssignmentsOperations, RoleDefinitionsOperations
+from azure.mgmt.authorization.operations import RoleDefinitionsOperations
 from azure.graphrbac.operations import (ApplicationsOperations, ServicePrincipalsOperations,
                                         UsersOperations, GroupsOperations)
 from azure.cli.commands import cli_command
 from azure.cli.commands.arm import register_generic_update
 
-from .custom import (create_role_assignment, list_sps, list_users, create_user, list_groups, list_apps,
+from .custom import (create_role_assignment, list_role_assignments, delete_role_assignments,
+                     list_role_definitions, delete_role_definition, create_role_definition,
+                     list_sps, list_users, create_user, list_groups, list_apps,
                      _auth_client_factory, _graph_client_factory)
 
 factory = lambda _: _auth_client_factory().role_definitions
-cli_command('role list', RoleDefinitionsOperations.list, factory)
-cli_command('role delete', RoleDefinitionsOperations.delete, factory)
-cli_command('role show', RoleDefinitionsOperations.get, factory)
-cli_command('role show-by-id', RoleDefinitionsOperations.get_by_id, factory)
+simple_output_query = '[*].{Name:properties.roleName, Id:name, Type:properties.type}'
+cli_command('role list', list_role_definitions, simple_output_query=simple_output_query)
+cli_command('role delete', delete_role_definition)
+cli_command('role create', create_role_definition, simple_output_query=simple_output_query)
 register_generic_update('role update',
                         RoleDefinitionsOperations.get,
                         RoleDefinitionsOperations.create_or_update,
                         factory)
 
+simple_output_query = '[*].{Name:name, PrincipalName:properties.principalName, Role:properties.roleDefinitionName, Scope:properties.scope}'
 factory = lambda _: _auth_client_factory().role_assignments
-cli_command('role assignment delete', RoleAssignmentsOperations.delete, factory)
-cli_command('role assignment delete-by-id', RoleAssignmentsOperations.delete_by_id, factory)
-cli_command('role assignment show', RoleAssignmentsOperations.get, factory)
-cli_command('role assignment show-by-id', RoleAssignmentsOperations.get_by_id, factory)
-cli_command('role assignment list', RoleAssignmentsOperations.list, factory)
-cli_command('role assignment list-for-resource', RoleAssignmentsOperations.list_for_resource, factory)
-cli_command('role assignment list-for-resource-group', RoleAssignmentsOperations.list_for_resource_group, factory)
-cli_command('role assignment list-for-scope', RoleAssignmentsOperations.list_for_scope, factory)
-cli_command('role assignment create', create_role_assignment)
+cli_command('role assignment delete', delete_role_assignments)
+cli_command('role assignment list', list_role_assignments, simple_output_query=simple_output_query)
+cli_command('role assignment create', create_role_assignment, simple_output_query=simple_output_query)
 
 factory = lambda _: _graph_client_factory().applications
 cli_command('ad app delete', ApplicationsOperations.delete, factory)
