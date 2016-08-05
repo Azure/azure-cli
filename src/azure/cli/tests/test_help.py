@@ -10,9 +10,10 @@ import logging
 import mock
 from six import StringIO
 
-from azure.cli.application import Application, Configuration
+from azure.cli.application import Application, APPLICATION, Configuration
 from azure.cli.commands import CliCommand
 import azure.cli.help_files
+import azure.cli._help as _help
 
 io = {}
 def redirect_io(func):
@@ -27,7 +28,7 @@ def redirect_io(func):
         sys.stderr = old_stderr
     return wrapper
 
-class Test_argparse(unittest.TestCase):
+class HelpTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         # Ensure initialization has occurred correctly
@@ -441,6 +442,8 @@ Examples
 """
         self.assertEqual(s, io.getvalue())
 
+        del azure.cli.help_files.helps['test_group1 test_group2']
+
     @redirect_io
     @mock.patch('azure.cli.application.Application.register', return_value=None)
     @mock.patch('azure.cli.extensions.register_extensions', return_value=None)
@@ -490,6 +493,37 @@ Global Arguments
 """
 
         self.assertEqual(s, io.getvalue())
+
+    def test_help_loads(self):
+        parser_dict = {}
+        _store_parsers(APPLICATION.parser, parser_dict)
+
+        for name, parser in parser_dict.items():
+            try:
+                help_file = _help.GroupHelpFile(name, parser) \
+                    if _is_group(parser) \
+                    else _help.CommandHelpFile(name, parser)
+                help_file.load(parser)
+            except Exception as ex:
+                raise _help.HelpAuthoringException('{}, {}'.format(name, ex))
+
+        extras = [k for k in azure.cli.help_files.helps.keys() if k not in parser_dict]
+        self.assertTrue(len(extras) == 0,
+                        'Found help files that don\'t map to a command: '+ str(extras))
+
+def _store_parsers(parser, d):
+    for s in parser.subparsers.values():
+        d[_get_parser_name(s)] = s
+        if _is_group(s):
+            for c in s.choices.values():
+                d[_get_parser_name(c)] = c
+                _store_parsers(c, d)
+
+def _is_group(parser):
+    return getattr(parser, 'choices', None) is not None
+
+def _get_parser_name(parser):
+    return (parser._prog_prefix if hasattr(parser, '_prog_prefix') else parser.prog).lstrip('az ') #pylint:disable=protected-access
 
 if __name__ == '__main__':
     unittest.main()
