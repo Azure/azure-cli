@@ -4,6 +4,7 @@
 #---------------------------------------------------------------------------------------------
 
 import argparse
+import platform
 
 # pylint: disable=line-too-long
 from azure.cli.commands import CliArgumentType, register_cli_argument
@@ -83,16 +84,19 @@ deployment_name_type = CliArgumentType(
     validator=generate_deployment_name
 )
 
+quotes = '""' if platform.system() == 'Windows' else "''"
+quote_text = 'Use {} for none.'.format(quotes)
+
 tags_type = CliArgumentType(
     type=validate_tags,
-    help='multiple semicolon separated tags in \'key[=value]\' format. Omit value to clear tags.',
+    help='multiple semicolon separated tags in \'key[=value]\' format.  {}'.format(quote_text),
     nargs='?',
     const=''
 )
 
 tag_type = CliArgumentType(
     type=validate_tag,
-    help='a single tag in \'key[=value]\' format. Omit value to clear tags.',
+    help='a single tag in \'key[=value]\' format.  {}'.format(quote_text),
     nargs='?',
     const=''
 )

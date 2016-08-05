@@ -260,6 +260,9 @@ class VCRTestBase(unittest.TestCase):#pylint: disable=too-many-instance-attribut
 
     def cmd(self, command, checks=None, allowed_exceptions=None, debug=False): #pylint: disable=no-self-use
         allowed_exceptions = allowed_exceptions or []
+        if not isinstance(allowed_exceptions, list):
+            allowed_exceptions = [allowed_exceptions]
+
         if self._debug or debug:
             print('\n\tRUNNING: {}'.format(command))
         command_list = shlex.split(command)
@@ -268,10 +271,8 @@ class VCRTestBase(unittest.TestCase):#pylint: disable=too-many-instance-attribut
             cli_main(command_list, file=output)
         except Exception as ex: # pylint: disable=broad-except
             ex_msg = str(ex)
-            if not isinstance(allowed_exceptions, list):
-                allowed_exceptions = [allowed_exceptions]
-                if not next((x for x in allowed_exceptions if x in ex_msg), None):
-                    raise ex
+            if not next((x for x in allowed_exceptions if x in ex_msg), None):
+                raise ex
         self._track_executed_commands(command_list)
         result = output.getvalue().strip()
         output.close()
