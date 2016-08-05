@@ -41,7 +41,10 @@ def get_urn_aliases_completion_list(prefix, **kwargs):#pylint: disable=unused-ar
     return [i['urn alias'] for i in images]
 
 def get_vm_size_completion_list(prefix, action, parsed_args, **kwargs):#pylint: disable=unused-argument
-    location = parsed_args.location if parsed_args.location else get_one_of_subscription_locations()
+    try:
+        location = parsed_args.location
+    except AttributeError:
+        location = get_one_of_subscription_locations()
     result = get_vm_sizes(location)
     return [r.name for r in result]
 
