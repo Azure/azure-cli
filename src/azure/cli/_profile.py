@@ -320,8 +320,8 @@ class CredsCache(object):
         self._load_creds()
 
     def persist_cached_creds(self):
-       #be compatible with azure-xplat-cli, use 'ascii' so to save w/o a BOM
-        with codecs_open(self._token_file, 'w', encoding='ascii') as cred_file:
+        with os.fdopen(os.open(self._token_file, os.O_RDWR|os.O_CREAT|os.O_TRUNC, 0o600),
+                       'w+') as cred_file:
             items = self.adal_token_cache.read_items()
             all_creds = [entry for _, entry in items]
 
@@ -332,6 +332,7 @@ class CredsCache(object):
 
             all_creds.extend(self._service_principal_creds)
             cred_file.write(json.dumps(all_creds))
+
         self.adal_token_cache.has_state_changed = False
 
     def retrieve_token_for_user(self, username, tenant, resource):
