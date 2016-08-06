@@ -2,20 +2,33 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 #---------------------------------------------------------------------------------------------
+import datetime
 import json
 import re
 import os
 import uuid
+from dateutil.relativedelta import relativedelta
+import dateutil.parser
 
 from azure.cli._util import CLIError, todict, get_file_json
+import azure.cli._logging as _logging
 from azure.cli.help_files import helps
 
 from azure.cli.commands.client_factory import get_mgmt_service_client, configure_common_settings
 from azure.mgmt.authorization import AuthorizationManagementClient
-from azure.graphrbac import GraphRbacManagementClient
 from azure.mgmt.authorization.models import (RoleAssignmentProperties, Permission, RoleDefinition,
                                              RoleDefinitionProperties)
-from azure.graphrbac.models import UserCreateParameters, PasswordProfile
+from azure.graphrbac import GraphRbacManagementClient
+
+from azure.graphrbac.models import (ApplicationCreateParameters,
+                                    ApplicationUpdateParameters,
+                                    PasswordCredential,
+                                    KeyCredential,
+                                    UserCreateParameters,
+                                    PasswordProfile)
+
+logger = _logging.get_az_logger(__name__)
+
 
 _CUSTOM_RULE = 'CustomRole'
 
@@ -331,6 +344,189 @@ def list_groups(client, display_name=None, query_filter=None):
         sub_filters.append("startswith(displayName,'{}')".format(display_name))
 
     return client.list(filter=(' and ').join(sub_filters))
+
+def create_application(client, display_name, homepage, identifier_uris, #pylint: disable=too-many-arguments
+                       available_to_other_tenant=False, password=None, reply_urls=None,
+                       key_value=None, key_type=None, key_usage=None, start_date=None,
+                       end_date=None):
+    password_creds, key_creds = _build_application_creds(password, key_value, key_type,
+                                                         key_usage, start_date, end_date)
+
+    app_create_param = ApplicationCreateParameters(available_to_other_tenant, display_name,
+                                                   homepage, identifier_uris, reply_urls,
+                                                   key_creds, password_creds)
+    return client.create(app_create_param)
+
+def update_application(client, identifier, display_name=None, homepage=None, identifier_uris=None,#pylint: disable=too-many-arguments
+                       password=None, reply_urls=None, key_value=None, key_type=None,
+                       key_usage=None, start_date=None, end_date=None):
+    object_id = _resolve_application(client, identifier)
+    password_creds, key_creds = _build_application_creds(password, key_value, key_type,
+                                                         key_usage, start_date, end_date)
+
+    app_patch_param = ApplicationUpdateParameters(display_name, homepage, identifier_uris,
+                                                  reply_urls, key_creds, password_creds)
+    return client.patch(object_id, app_patch_param)
+
+def show_application(client, identifier):
+    object_id = _resolve_application(client, identifier)
+    return client.get(object_id)
+
+def delete_application(client, identifier):
+    object_id = _resolve_application(client, identifier)
+    client.delete(object_id)
+
+def _resolve_application(client, identifier):
+    try:
+        uuid.UUID(identifier)
+        result = list(client.list(filter="appId eq '{}'".format(identifier)))
+    except ValueError:
+        result = list(client.list(filter="identifierUris/any(s:s eq '{}')".format(identifier)))
+
+    #identifier is unique, no need to verify multiple matches.
+    return result[0].object_id if result else identifier
+
+def _build_application_creds(password=None, key_value=None, key_type=None,#pylint: disable=too-many-arguments
+                             key_usage=None, start_date=None, end_date=None):
+    if password and key_value:
+        raise CLIError('specify either --password or --key-value, but not both.')
+
+    if not start_date:
+        start_date = datetime.datetime.now()
+    elif isinstance(start_date, str):
+        start_date = dateutil.parser.parse(start_date)
+
+    if not end_date:
+        end_date = start_date + relativedelta(years=1)
+    elif isinstance(end_date, str):
+        end_date = dateutil.parser.parse(end_date)#pylint: disable=redefined-variable-type
+
+    key_type = key_type or 'AsymmetricX509Cert'
+    key_usage = key_usage or 'Verify'
+
+    password_creds = None
+    key_creds = None
+    if password:
+        password_creds = [PasswordCredential(start_date, end_date, str(uuid.uuid4()), password)]
+    elif key_value:
+        key_creds = [KeyCredential(start_date, end_date, key_value, str(uuid.uuid4()),
+                                   key_usage, key_type)]
+
+    return (password_creds, key_creds)
+
+def create_service_principal(identifier):
+    client = _graph_client_factory()
+    try:
+        uuid.UUID(identifier)
+        result = list(client.applications.list(filter="appId eq '{}'".format(identifier)))
+    except ValueError:
+        result = list(client.applications.list(
+            filter="identifierUris/any(s:s eq '{}')".format(identifier)))
+
+    if not result: #assume we get an object id
+        result = [client.applications.get(identifier)]
+    app_id = result[0].app_id
+
+    return client.service_principals.create(app_id, True)
+
+def show_service_principal(client, identifier):
+    object_id = _resolve_service_principal(client, identifier)
+    return client.get(object_id)
+
+def delete_service_principal(client, identifier):
+    object_id = _resolve_service_principal(client, identifier)
+    client.delete(object_id)
+
+def _resolve_service_principal(client, identifier):
+    #todo: confirm with graph team that a service principal name must be unique
+    result = list(client.list(filter="servicePrincipalNames/any(c:c eq '{}')".format(identifier)))
+    if result:
+        return result[0].object_id
+    try:
+        uuid.UUID(identifier)
+        return identifier
+    except ValueError:
+        raise CLIError("service principal {} doesn't exist".format(identifier))
+
+def create_service_principal_for_rbac(name=None, secret=None, years=1):
+    '''create a service principal you can use with login command
+
+    :param str name: an unique uri. If missing, the command will generate one.
+    :param str secret: the secret used to login. If missing, command will generate one.
+    :param str years: Years the secret will be valid.
+    '''
+    client = _graph_client_factory()
+    start_date = datetime.datetime.now()
+    app_display_name = 'azure-cli-' + start_date.strftime('%Y-%m-%d-%H-%M-%S')
+    if name is None:
+        name = 'http://' + app_display_name # just a valid uri, no need to exist
+
+    end_date = start_date + relativedelta(years=years)
+    secret = secret or str(uuid.uuid4())
+    aad_application = create_application(client.applications, display_name=app_display_name, #pylint: disable=too-many-function-args
+                                         homepage='http://'+app_display_name,
+                                         identifier_uris=[name],
+                                         available_to_other_tenant=False,
+                                         password=secret,
+                                         start_date=start_date,
+                                         end_date=end_date)
+    #pylint: disable=no-member
+    aad_sp = create_service_principal(aad_application.app_id)
+    _build_output_content(name, aad_sp.object_id, secret, client.config.tenant_id)
+
+def reset_service_principal_credential(name, secret=None, years=1):
+    '''reset credential, on expiration or you forget it.
+
+    :param str name: the uri representing the name of the service principal
+    :param str secret: the secret used to login. If missing, command will generate one.
+    :param str years: Years the secret will be valid.
+    '''
+    client = _graph_client_factory()
+
+    #pylint: disable=no-member
+
+    #look for the existing application
+    query_exp = 'identifierUris/any(x:x eq \'{}\')'.format(name)
+    aad_apps = list(client.applications.list(filter=query_exp))
+    if not aad_apps:
+        raise CLIError('can\'t find an application matching \'{}\''.format(name))
+    #no need to check 2+ matches, as app id uri is unique
+    app = aad_apps[0]
+
+    #look for the existing service principal
+    query_exp = 'servicePrincipalNames/any(x:x eq \'{}\')'.format(name)
+    aad_sps = list(client.service_principals.list(filter=query_exp))
+    if not aad_sps:
+        raise CLIError('can\'t find a service principal matching \'{}\''.format(name))
+    sp_object_id = aad_sps[0].object_id
+
+    #build a new password credential and patch it
+    secret = secret or str(uuid.uuid4())
+    start_date = datetime.datetime.now()
+    end_date = start_date + relativedelta(years=years)
+    key_id = str(uuid.uuid4())
+    app_cred = PasswordCredential(start_date, end_date, key_id, secret)
+    app_create_param = ApplicationUpdateParameters(password_credentials=[app_cred])
+
+    client.applications.patch(app.object_id, app_create_param)
+
+    _build_output_content(name, sp_object_id, secret, client.config.tenant_id)
+
+def _build_output_content(sp_name, sp_object_id, secret, tenant):
+    logger.warning("Service principal has been configured with name: '%s', secret: '%s'",
+                   sp_name, secret)
+    logger.warning('Useful commands to manage azure:')
+    logger.warning('Assign a role:')
+    logger.warning('    az role assignment create --assignee %s --role Contributor', sp_object_id)
+    logger.warning('Log in:')
+    logger.warning('    az login --service-principal -u %s -p %s --tenant %s',
+                   sp_name, secret, tenant)
+    logger.warning('Reset credentials:')
+    logger.warning('    az ad sp reset-sp-credentials --name %s', sp_name)
+    logger.warning('Revoke:')
+    logger.warning('    az ad sp delete --id %s', sp_name)
+    logger.warning('    az ad app delete --id %s', sp_name)
+
 
 def _resolve_object_id(assignee):
     client = _graph_client_factory()
