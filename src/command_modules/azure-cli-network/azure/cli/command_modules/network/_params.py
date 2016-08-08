@@ -37,6 +37,7 @@ from azure.cli.command_modules.network.mgmt_traffic_manager_profile.lib.models.t
     import routingMethod
 from azure.cli.command_modules.network.custom import list_traffic_manager_endpoints
 
+
 # COMPLETERS
 
 def get_subnet_completion_list():
