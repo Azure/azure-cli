@@ -22,7 +22,7 @@ def show_help(nouns, parser, is_group):
     help_file.load(parser)
 
     if len(nouns) == 0:
-        print('\nSpecial intro help for az')
+        print("\nFor version info, use 'az --version'")
         help_file.command = ''
 
     print_detailed_help(help_file)
