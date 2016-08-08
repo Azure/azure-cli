@@ -19,7 +19,7 @@ on_success:
   - git clone -q --branch=master https://github.com/formulahendry/azure-cli-content-test.git %TEMP%\azure-cli-content
   - cd %TEMP%\azure-cli-content
   - if exist %TEMP%\azure-cli-content\test rmdir /s /q %TEMP%\azure-cli-content\test
-  - robocopy %APPVEYOR_BUILD_FOLDER%\doc\sphinx\_build %TEMP%\azure-cli-content\test /e
+  - robocopy %APPVEYOR_BUILD_FOLDER%\doc\sphinx\_build %TEMP%\azure-cli-content\test /e ^& IF %ERRORLEVEL% LEQ 1 exit 0
   - git config --global credential.helper store
   - ps: Add-Content "$env:USERPROFILE\.git-credentials" "https://$($env:access_token):x-oauth-basic@github.com`n"
   - git config --global user.email "test@azure-cli-content-test.com"
