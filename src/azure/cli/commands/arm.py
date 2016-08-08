@@ -155,13 +155,13 @@ def add_id_parameters(command_table):
 APPLICATION.register(APPLICATION.COMMAND_TABLE_LOADED, add_id_parameters)
 
 def register_generic_update(name, getter, setter, factory=None, setter_arg_name='parameters', #pylint:disable=too-many-arguments
-                            simple_output_query=None):
+                            simple_output_query=None, custom_handlers=None):
 
     get_arguments = dict(extract_args_from_signature(getter))
     set_arguments = dict(extract_args_from_signature(setter))
 
     def handler(args):
-        ordered_arguments = args.pop('ordered_arguments')
+        ordered_arguments = args.pop('ordered_arguments') if 'ordered_arguments' in args else []
 
         try:
             client = factory() if factory else None
@@ -172,12 +172,19 @@ def register_generic_update(name, getter, setter, factory=None, setter_arg_name=
                       if key in get_arguments}
         instance = getter(client, **getterargs) if client else getter(**getterargs)
 
+        for k in args.copy().keys():
+            if k in get_arguments or k in set_arguments \
+                or k in ('properties_to_add', 'properties_to_remove', 'properties_to_set'):
+                args.pop(k)
+        for key, val in args.items():
+            ordered_arguments.append((key, val))
+
         # Update properties
         for arg in ordered_arguments:
-            arg_type, expressions = arg
+            arg_type, arg_values = arg
             if arg_type == '--set':
                 try:
-                    for expression in expressions:
+                    for expression in arg_values:
                         set_properties(instance, expression)
                 except ValueError:
                     raise CLIError('--set should be of the form:'
@@ -185,19 +192,19 @@ def register_generic_update(name, getter, setter, factory=None, setter_arg_name=
                                    ' property2.property=<value>')
             elif arg_type == '--add':
                 try:
-                    add_properties(instance, expressions)
+                    add_properties(instance, arg_values)
                 except ValueError:
                     raise CLIError('--add should be of the form:'
                                    ' --add property.list key1=value1 key2=value2')
             elif arg_type == '--remove':
                 try:
-                    remove_properties(instance, expressions)
+                    remove_properties(instance, arg_values)
                 except ValueError:
                     raise CLIError('--remove should be of the form: --remove'
                                    ' property.propertyToRemove or'
                                    ' --remove property.list <indexToRemove>')
             else:
-                raise ValueError('Unsupported arg type {}'.format(arg_type))
+                custom_handlers[arg_type](instance, arg_type, arg_values)
 
         # Done... update the instance!
         getterargs[setter_arg_name] = instance
@@ -209,10 +216,6 @@ def register_generic_update(name, getter, setter, factory=None, setter_arg_name=
             if not getattr(namespace, 'ordered_arguments', None):
                 setattr(namespace, 'ordered_arguments', [])
             namespace.ordered_arguments.append((option_string, values))
-
-    def one_required(namespace):
-        if not getattr(namespace, 'ordered_arguments', None):
-            raise ValueError('At least one must be specified: --add, --set, --remove')
 
     cmd = CliCommand(name, handler, simple_output_query=simple_output_query)
     cmd.arguments.update(set_arguments)
@@ -228,8 +231,7 @@ def register_generic_update(name, getter, setter, factory=None, setter_arg_name=
                      metavar='LIST KEY=VALUE')
     cmd.add_argument('properties_to_remove', '--remove', nargs='+', action=OrderedArgsAction,
                      default=[], help='Remove a property or an element from a list.  Example: '
-                     '--remove property.list <index>', metavar='LIST INDEX',
-                     validator=one_required)
+                     '--remove property.list <index>', metavar='LIST INDEX')
     main_command_table[name] = cmd
 
 index_regex = re.compile(r'\[(.*)\]')

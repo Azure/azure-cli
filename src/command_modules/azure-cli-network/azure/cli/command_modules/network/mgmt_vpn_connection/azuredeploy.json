@@ -1,0 +1,118 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "virtualNetworkGatewayConnectionName": {
+      "type": "string",
+      "metadata": {
+        "description": "Connection name."
+      }
+    },
+    "connectionType": {
+      "type": "string",
+      "allowedValues": [
+        "IPSec",
+        "Vnet2Vnet",
+        "ExpressRoute"
+      ],
+      "metadata": {
+        "description": "Connection type."
+      }
+    },
+    "localGateway2Id": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Connect to this local gateway from vnet gateway 1 using connection type IPSec."
+      }
+    },
+    "expressRouteCircuit2Id": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Connect to this express route circuit from vnet gateway 1 using connection type ExpressRoute."
+      }
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": {
+        "description": "Location for resource."
+      }
+    },
+    "routingWeight": {
+      "type": "int",
+      "defaultValue": 10,
+      "metadata": {
+        "description": "Connection routing weight."
+      }
+    },
+    "sharedKey": {
+      "type": "string",
+      "defaultValue": "none",
+      "metadata": {
+        "description": "IPSec shared key."
+      }
+    },
+    "vnetGateway1Id": {
+      "type": "string",
+      "metadata": {
+        "description": "Connect from this gateway to another gateway or express route circuit."
+      }
+    },
+    "vnetGateway2Id": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Connect to this vnet gateway from vnet gateway 1 using connection type Vnet2Vnet."
+      }
+    }
+  },
+  "variables": {
+    "connectionProperties": {
+      "IPSec": {
+        "virtualNetworkGateway1": {
+          "id": "[parameters('vnetGateway1Id')]"
+        },
+        "localNetworkGateway2": {
+          "id": "[parameters('localGateway2Id')]"
+        },
+        "connectionType": "[parameters('connectionType')]",
+        "routingWeight": "[parameters('routingWeight')]",
+        "sharedKey": "[parameters('sharedKey')]"
+      },
+      "Vnet2Vnet": {
+        "virtualNetworkGateway1": {
+          "id": "[parameters('vnetGateway1Id')]"
+        },
+        "virtualNetworkGateway2": {
+          "id": "[parameters('vnetGateway2Id')]"
+        },
+        "connectionType": "[parameters('connectionType')]",
+        "routingWeight": "[parameters('routingWeight')]"
+      },
+      "ExpressRoute": {
+        "virtualNetworkGateway1": {
+          "id": "[parameters('vnetGateway1Id')]"
+        },
+        "peer": {
+          "id": "[parameters('expressRouteCircuit2')]"
+        },
+        "connectionType": "[parameters('connectionType')]",
+        "routingWeight": "[parameters('routingWeight')]"
+      },
+      "VpnClient": {}
+    }
+  },
+  "resources": [
+    {
+      "apiVersion": "2015-06-15",
+      "name": "[parameters('virtualNetworkGatewayConnectionName')]",
+      "type": "Microsoft.Network/connections",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+      ],
+      "properties": "[variables('connectionProperties')[parameters('connectionType')]]"
+    }
+  ]
+}

@@ -45,7 +45,7 @@ def register_folded_cli_argument(scope, base_name, resource_type, parent_name=No
     quote_text = '  Use {} for none.'.format(quotes) if allow_none else ''
     flag_texts = {
         new_flag_value: '  Creates new by default.{}'.format(quote_text),
-        existing_id_flag_value: '  Uses existing by default.{}'
+        existing_id_flag_value: '  Uses existing resource.{}'
                                 .format(quote_text),
         none_flag_value: '  None by default.'
     }
