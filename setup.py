@@ -62,6 +62,7 @@ DEPENDENCIES = [
     'msrest>=0.4.0',
     'msrestazure>=0.4.0',
     'pip',
+    'pygments',
     'pyyaml',
     'requests',
     'six',

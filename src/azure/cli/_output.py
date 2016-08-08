@@ -34,6 +34,10 @@ def format_json(obj):
     return json.dumps(input_dict, indent=2, sort_keys=True, cls=ComplexEncoder,
                       separators=(',', ': ')) + '\n'
 
+def format_json_color(obj):
+    from pygments import highlight, lexers, formatters
+    return highlight(format_json(obj), lexers.JsonLexer(), formatters.TerminalFormatter()) # pylint: disable=no-member
+
 def format_table(obj):
     result = obj.result
     try:
@@ -90,6 +94,7 @@ class OutputProducer(object): #pylint: disable=too-few-public-methods
 
     format_dict = {
         'json': format_json,
+        'jsonc': format_json_color,
         'table': format_table,
         'text': format_text,
         'list': format_list,

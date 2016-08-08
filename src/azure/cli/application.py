@@ -165,7 +165,7 @@ class Application(object):
         global_group = kwargs['global_group']
         global_group.add_argument('--subscription', dest='_subscription_id', help=argparse.SUPPRESS)
         global_group.add_argument('--output', '-o', dest='_output_format',
-                                  choices=['json', 'tsv', 'list', 'table'],
+                                  choices=['json', 'tsv', 'list', 'table', 'jsonc'],
                                   default='json',
                                   help='Output format',
                                   type=str.lower)
