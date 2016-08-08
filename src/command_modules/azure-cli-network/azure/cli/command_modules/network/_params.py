@@ -15,7 +15,8 @@ from azure.mgmt.network.models.network_management_client_enums import \
 
 from azure.cli.commands import CliArgumentType, register_cli_argument, register_extra_cli_argument
 from azure.cli.commands.parameters import (location_type, get_resource_name_completion_list,
-                                           get_enum_type_completion_list, tags_type, get_enum_choices)
+                                           get_enum_type_completion_list, tags_type, get_enum_choices,
+                                           get_generic_completion_list)
 from azure.cli.commands.validators import MarkSpecifiedAction
 from azure.cli.commands.template_create import register_folded_cli_argument
 from azure.cli.command_modules.network._factory import _network_client_factory
@@ -32,6 +33,9 @@ from azure.cli.command_modules.network._validators import \
 from azure.cli.command_modules.network.mgmt_nic.lib.models.nic_creation_client_enums import privateIpAddressVersion
 from azure.cli.command_modules.network.mgmt_vnet_gateway.lib.models.vnet_gateway_creation_client_enums import \
     (gatewayType, sku, vpnType)
+from azure.cli.command_modules.network.mgmt_traffic_manager_profile.lib.models.traffic_manager_profile_creation_client_enums \
+    import routingMethod
+from azure.cli.command_modules.network.custom import list_traffic_manager_endpoints
 
 # COMPLETERS
 
@@ -85,6 +89,13 @@ def get_ag_url_map_rule_completion_list():
             ag = client.application_gateways.get(parsed_args.resource_group_name, ag_name)
             url_map = next((x for x in ag.url_path_maps if x.name == parsed_args.url_path_map_name), None) # pylint: disable=no-member
             return [r.name for r in url_map.path_rules]
+    return completer
+
+def get_tm_endpoint_completion_list():
+    def completer(prefix, action, parsed_args, **kwargs): # pylint: disable=unused-argument
+        return list_traffic_manager_endpoints(parsed_args.resource_group_name, parsed_args.profile_name) \
+            if parsed_args.resource_group_name and parsed_args.profile_name \
+            else []
     return completer
 
 # BASIC PARAMETER CONFIGURATION
@@ -351,6 +362,8 @@ register_cli_argument('network vpn-gateway', 'gateway_name', help='Virtual netwo
 register_cli_argument('network vpn-gateway root-cert create', 'public_cert_data', help='Base64 contents of the root certificate file or file path.', validator=load_cert_file('public_cert_data'))
 register_cli_argument('network vpn-gateway revoked-cert create', 'thumbprint', help='Certificate thumbprint.')
 register_extra_cli_argument('network vpn-gateway update', 'address_prefixes', options_list=('--address-prefixes',), help='List of address prefixes for the VPN gateway.  Prerequisite for uploading certificates.', nargs='+')
+register_cli_argument('network vpn-gateway root-cert create', 'cert_name', help='Root certificate name', options_list=('--name', '-n'))
+register_cli_argument('network vpn-gateway root-cert create', 'gateway_name', help='Virtual network gateway name')
 
 # VPN connection
 register_cli_argument('network vpn-connection', 'virtual_network_gateway_connection_name', CliArgumentType(options_list=('--name', '-n'), metavar='NAME', id_part='name'))
@@ -360,3 +373,16 @@ register_cli_argument('network vpn-connection create', 'shared_key', validator=l
 # VPN connection shared key
 register_cli_argument('network vpn-connection shared-key', 'connection_shared_key_name', CliArgumentType(options_list=('--name', '-n')), id_part='name')
 register_cli_argument('network vpn-connection shared-key', 'virtual_network_gateway_connection_name', CliArgumentType(options_list=('--connection-name',), metavar='NAME'), id_part='name')
+
+# Traffic manager profiles
+register_cli_argument('network traffic-manager profile', 'traffic_manager_profile_name', name_arg_type, id_part='name', completer=get_resource_name_completion_list('Microsoft.Network/trafficManagerProfiles'))
+register_cli_argument('network traffic-manager profile', 'profile_name', name_arg_type, id_part='name', completer=get_resource_name_completion_list('Microsoft.Network/trafficManagerProfiles'))
+register_cli_argument('network traffic-manager profile create', 'routing_method', choices=get_enum_choices(routingMethod), completer=get_enum_type_completion_list(routingMethod))
+register_cli_argument('network traffic-manager profile check-dns', 'name', name_arg_type, help='DNS prefix to verify availability for.', required=True)
+register_cli_argument('network traffic-manager profile check-dns', 'type', help=argparse.SUPPRESS, default='Microsoft.Network/trafficManagerProfiles')
+
+# Traffic manager endpoints
+register_cli_argument('network traffic-manager endpoint', 'endpoint_name', name_arg_type, id_part='name', help='Endpoint name.', completer=get_tm_endpoint_completion_list())
+endpoint_types = ['azureEndpoints', 'externalEndpoints', 'nestedEndpoints']
+register_cli_argument('network traffic-manager endpoint', 'endpoint_type', options_list=('--type',), help='Endpoint type.  Values include: {}.'.format(', '.join(endpoint_types)), completer=get_generic_completion_list(endpoint_types))
+register_cli_argument('network traffic-manager endpoint', 'profile_name', help='Name of parent profile.', completer=get_resource_name_completion_list('Microsoft.Network/trafficManagerProfiles'))

@@ -65,6 +65,11 @@ def get_enum_type_completion_list(enum_type=None):
         return list(enum_type.__dict__[ENUM_MAPPING_KEY].keys())
     return completer
 
+def get_generic_completion_list(generic_list):
+    def completer(prefix, action, parsed_args, **kwargs): # pylint: disable=unused-argument
+        return generic_list
+    return completer
+
 def get_enum_choices(enum_type):
     return [x.value for x in enum_type]
 

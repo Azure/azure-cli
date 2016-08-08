@@ -907,3 +907,38 @@ class NetworkVpnGatewayScenarioTest(ResourceGroupVCRTestBase):
 
         self.cmd('network vpn-connection create -n myconnection -g {0} --shared-key 123' \
             ' --vnet-gateway1-id {1} --vnet-gateway2-id {2}'.format(rg, gateway1_id, gateway2_id))
+
+class NetworkTrafficManagerScenarioTest(ResourceGroupVCRTestBase):
+
+    def __init__(self, test_method):
+        super(NetworkTrafficManagerScenarioTest, self).__init__(__file__, test_method)
+        self.resource_group = 'cli_traffic_manager_test1'
+
+    def test_network_traffic_manager(self):
+        self.execute()
+
+    def body(self):
+        tm_name = 'mytmprofile'
+        endpoint_name = 'myendpoint'
+        unique_dns_name = 'mytrafficmanager001100a'
+
+        self.cmd('network traffic-manager profile check-dns -n myfoobar1')
+        self.cmd('network traffic-manager profile create -n {tm_name} -g {resource_group}'
+                 ' --routing-method weighted --unique-dns-name {unique_dns_name}'
+                 .format(tm_name=tm_name, resource_group=self.resource_group, unique_dns_name=unique_dns_name), checks=[
+                     JMESPathCheck('trafficManagerProfile.trafficRoutingMethod', 'Weighted')
+                     ])
+        self.cmd('network traffic-manager profile show -g {resource_group} -n {tm_name}'
+                 .format(resource_group=self.resource_group, tm_name=tm_name), checks=[
+                     JMESPathCheck('dnsConfig.relativeName', unique_dns_name)
+                     ])
+        self.cmd('network traffic-manager endpoint create -n {endpoint_name} --profile-name {tm_name} -g {resource_group}'
+                 ' --type externalEndpoints --weight 50 --target www.microsoft.com'
+                 .format(endpoint_name=endpoint_name, tm_name=tm_name, resource_group=self.resource_group), checks=[
+                     JMESPathCheck('type', 'Microsoft.Network/trafficManagerProfiles/externalEndpoints')
+                     ])
+        self.cmd('network traffic-manager endpoint show --profile-name {tm_name} --type  externalEndpoints'
+                 ' -n {endpoint_name} -g {resource_group}'
+                 .format(tm_name=tm_name, endpoint_name=endpoint_name, resource_group=self.resource_group), checks=[
+                     JMESPathCheck('target', 'www.microsoft.com')
+                     ])
