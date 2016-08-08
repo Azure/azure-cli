@@ -1,0 +1,51 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "localAddressPrefix": {
+      "type": "string",
+      "defaultValue": "192.168.0.0/16",
+      "metadata": {
+        "description": "CIDR block representing the address space of the OnPremise VPN network's Subnet."
+      }
+    },
+    "gatewayIpAddress": {
+      "type": "string",
+      "metadata": {
+        "description": "Gateway's Public IP address."
+      }
+    },
+    "localNetworkGatewayName": {
+      "type": "string",
+      "metadata": {
+        "description": "Gateway name."
+      }
+    },
+    "tags": {
+      "type": "object",
+      "defaultValue": { },
+      "metadata": {
+        "description": "Tags object."
+      }
+    }
+  },
+  "variables": {
+  },
+  "resources": [
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Network/localNetworkGateways",
+      "name": "[parameters('localNetworkGatewayName')]",
+      "location": "[resourceGroup().location]",
+      "tags": "[parameters('tags')]",
+      "properties": {
+        "localNetworkAddressSpace": {
+          "addressPrefixes": [
+            "[parameters('localAddressPrefix')]"
+          ]
+        },
+        "gatewayIpAddress": "[parameters('gatewayIpAddress')]"
+      }
+    }
+  ]
+}

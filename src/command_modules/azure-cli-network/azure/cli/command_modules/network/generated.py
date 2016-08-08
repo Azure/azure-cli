@@ -43,6 +43,9 @@ from azure.cli.command_modules.network.mgmt_nsg.lib.operations import NsgOperati
 from azure.cli.command_modules.network.mgmt_vnet_gateway.lib.operations import VnetGatewayOperations
 from azure.cli.command_modules.network.mgmt_vnet_gateway.lib \
     import VnetGatewayCreationClient as VnetGatewayClient
+from azure.cli.command_modules.network.mgmt_local_gateway.lib.operations import LocalGatewayOperations
+from azure.cli.command_modules.network.mgmt_local_gateway.lib \
+    import LocalGatewayCreationClient as LocalGatewayClient
 
 from azure.cli.commands import DeploymentOutputLongRunningOperation, cli_command
 
@@ -167,6 +170,9 @@ cli_command('network local-gateway delete', LocalNetworkGatewaysOperations.delet
 cli_command('network local-gateway show', LocalNetworkGatewaysOperations.get, factory)
 cli_command('network local-gateway list', LocalNetworkGatewaysOperations.list, factory)
 register_generic_update('network local-gateway update', LocalNetworkGatewaysOperations.get, LocalNetworkGatewaysOperations.create_or_update, factory)
+
+factory = lambda _: get_mgmt_service_client(LocalGatewayClient).local_gateway
+cli_command('network local-gateway create', LocalGatewayOperations.create_or_update, factory, transform=DeploymentOutputLongRunningOperation('Starting network local-gateway create'))
 
 # NetworkInterfacesOperations
 factory = lambda _: get_mgmt_service_client(NicClient).nic
