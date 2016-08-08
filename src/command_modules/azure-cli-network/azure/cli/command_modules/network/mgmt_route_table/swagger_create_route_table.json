@@ -1,7 +1,7 @@
 {
   "swagger": "2.0", 
   "info": {
-    "title": "LocalGatewayCreationClient", 
+    "title": "RouteTableCreationClient", 
     "version": "2015-11-01"
   }, 
   "host": "management.azure.com", 
@@ -36,9 +36,9 @@
     "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Resources/deployments/{deploymentName}": {
       "put": {
         "tags": [
-          "LocalGateway"
+          "RouteTable"
         ], 
-        "operationId": "LocalGateway_CreateOrUpdate", 
+        "operationId": "RouteTable_CreateOrUpdate", 
         "description": "Create or update a virtual machine.", 
         "parameters": [
           {
@@ -67,7 +67,7 @@
             "in": "body", 
             "required": true, 
             "schema": {
-              "$ref": "#/definitions/Deployment_LocalGateway"
+              "$ref": "#/definitions/Deployment_RouteTable"
             }, 
             "description": "Additional parameters supplied to the operation."
           }, 
@@ -97,17 +97,17 @@
     }
   }, 
   "definitions": {
-    "Deployment_LocalGateway": {
+    "Deployment_RouteTable": {
       "properties": {
         "properties": {
-          "$ref": "#/definitions/DeploymentProperties_LocalGateway", 
+          "$ref": "#/definitions/DeploymentProperties_RouteTable", 
           "description": "Gets or sets the deployment properties.", 
           "x-ms-client-flatten": true
         }
       }, 
       "description": "Deployment operation parameters."
     }, 
-    "DeploymentProperties_LocalGateway": {
+    "DeploymentProperties_RouteTable": {
       "properties": {
         "templateLink": {
           "$ref": "#/definitions/TemplateLink", 
@@ -115,7 +115,7 @@
           "x-ms-client-flatten": true
         }, 
         "parameters": {
-          "$ref": "#/definitions/LocalGatewayParameters", 
+          "$ref": "#/definitions/RouteTableParameters", 
           "type": "object", 
           "description": "Deployment parameters. Use only one of Parameters or ParametersLink.", 
           "x-ms-client-flatten": true
@@ -145,7 +145,7 @@
           "type": "string", 
           "description": "URI referencing the template.", 
           "enum": [
-            "https://azuresdkci.blob.core.windows.net/templatehost/CreateLocalGateway_2016-08-08/azuredeploy.json"
+            "https://azuresdkci.blob.core.windows.net/templatehost/CreateRouteTable_2016-08-08/azuredeploy.json"
           ]
         }, 
         "contentVersion": {
@@ -158,21 +158,16 @@
       ], 
       "description": "Entity representing the reference to the template."
     }, 
-    "LocalGatewayParameters": {
+    "RouteTableParameters": {
       "properties": {
-        "gatewayIpAddress": {
+        "location": {
           "type": "object", 
-          "$ref": "#/definitions/DeploymentParameter_gatewayIpAddress", 
+          "$ref": "#/definitions/DeploymentParameter_location", 
           "x-ms-client-flatten": true
         }, 
-        "localAddressPrefix": {
+        "routeTableName": {
           "type": "object", 
-          "$ref": "#/definitions/DeploymentParameter_localAddressPrefix", 
-          "x-ms-client-flatten": true
-        }, 
-        "localNetworkGatewayName": {
-          "type": "object", 
-          "$ref": "#/definitions/DeploymentParameter_localNetworkGatewayName", 
+          "$ref": "#/definitions/DeploymentParameter_routeTableName", 
           "x-ms-client-flatten": true
         }, 
         "tags": {
@@ -182,38 +177,24 @@
         }
       }, 
       "required": [
-        "localNetworkGatewayName", 
-        "gatewayIpAddress"
+        "routeTableName"
       ]
     }, 
-    "DeploymentParameter_gatewayIpAddress": {
+    "DeploymentParameter_location": {
       "properties": {
         "value": {
           "type": "string", 
-          "description": "Gateway's Public IP address.  (e.g. 10.1.1.1)", 
-          "x-ms-client-name": "gatewayIpAddress"
-        }
-      }, 
-      "required": [
-        "value"
-      ]
-    }, 
-    "DeploymentParameter_localAddressPrefix": {
-      "properties": {
-        "value": {
-          "type": "string", 
-          "description": "CIDR block representing the address space of the OnPremise VPN network's Subnet.", 
-          "x-ms-client-name": "localAddressPrefix", 
-          "default": "192.168.0.0/16"
+          "description": "Location for resource.", 
+          "x-ms-client-name": "location"
         }
       }
     }, 
-    "DeploymentParameter_localNetworkGatewayName": {
+    "DeploymentParameter_routeTableName": {
       "properties": {
         "value": {
           "type": "string", 
-          "description": "Gateway name.", 
-          "x-ms-client-name": "localNetworkGatewayName"
+          "description": "Name for route table.", 
+          "x-ms-client-name": "routeTableName"
         }
       }, 
       "required": [

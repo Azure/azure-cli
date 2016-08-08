@@ -14,7 +14,7 @@
 from msrest.serialization import Model
 
 
-class DeploymentLocalGateway(Model):
+class DeploymentRouteTable(Model):
     """
     Deployment operation parameters.
 
@@ -22,19 +22,16 @@ class DeploymentLocalGateway(Model):
     sending a request.
 
     :ivar uri: URI referencing the template. Default value:
-     "https://azuresdkci.blob.core.windows.net/templatehost/CreateLocalGateway_2016-08-08/azuredeploy.json"
+     "https://azuresdkci.blob.core.windows.net/templatehost/CreateRouteTable_2016-08-08/azuredeploy.json"
      .
     :vartype uri: str
     :param content_version: If included it must match the ContentVersion in
      the template.
     :type content_version: str
-    :param gateway_ip_address: Gateway's Public IP address.  (e.g. 10.1.1.1)
-    :type gateway_ip_address: str
-    :param local_address_prefix: CIDR block representing the address space of
-     the OnPremise VPN network's Subnet. Default value: "192.168.0.0/16" .
-    :type local_address_prefix: str
-    :param local_network_gateway_name: Gateway name.
-    :type local_network_gateway_name: str
+    :param location: Location for resource.
+    :type location: str
+    :param route_table_name: Name for route table.
+    :type route_table_name: str
     :param tags: Tags object.
     :type tags: object
     :ivar mode: Gets or sets the deployment mode. Default value:
@@ -44,28 +41,25 @@ class DeploymentLocalGateway(Model):
 
     _validation = {
         'uri': {'required': True, 'constant': True},
-        'gateway_ip_address': {'required': True},
-        'local_network_gateway_name': {'required': True},
+        'route_table_name': {'required': True},
         'mode': {'required': True, 'constant': True},
     }
 
     _attribute_map = {
         'uri': {'key': 'properties.templateLink.uri', 'type': 'str'},
         'content_version': {'key': 'properties.templateLink.contentVersion', 'type': 'str'},
-        'gateway_ip_address': {'key': 'properties.parameters.gatewayIpAddress.value', 'type': 'str'},
-        'local_address_prefix': {'key': 'properties.parameters.localAddressPrefix.value', 'type': 'str'},
-        'local_network_gateway_name': {'key': 'properties.parameters.localNetworkGatewayName.value', 'type': 'str'},
+        'location': {'key': 'properties.parameters.location.value', 'type': 'str'},
+        'route_table_name': {'key': 'properties.parameters.routeTableName.value', 'type': 'str'},
         'tags': {'key': 'properties.parameters.tags.value', 'type': 'object'},
         'mode': {'key': 'properties.mode', 'type': 'str'},
     }
 
-    uri = "https://azuresdkci.blob.core.windows.net/templatehost/CreateLocalGateway_2016-08-08/azuredeploy.json"
+    uri = "https://azuresdkci.blob.core.windows.net/templatehost/CreateRouteTable_2016-08-08/azuredeploy.json"
 
     mode = "Incremental"
 
-    def __init__(self, gateway_ip_address, local_network_gateway_name, content_version=None, local_address_prefix="192.168.0.0/16", tags=None):
+    def __init__(self, route_table_name, content_version=None, location=None, tags=None):
         self.content_version = content_version
-        self.gateway_ip_address = gateway_ip_address
-        self.local_address_prefix = local_address_prefix
-        self.local_network_gateway_name = local_network_gateway_name
+        self.location = location
+        self.route_table_name = route_table_name
         self.tags = tags

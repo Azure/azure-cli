@@ -40,12 +40,18 @@ from azure.cli.command_modules.network.mgmt_nic.lib import NicCreationClient as 
 from azure.cli.command_modules.network.mgmt_nic.lib.operations import NicOperations
 from azure.cli.command_modules.network.mgmt_nsg.lib import NsgCreationClient as NSGClient
 from azure.cli.command_modules.network.mgmt_nsg.lib.operations import NsgOperations
-from azure.cli.command_modules.network.mgmt_vnet_gateway.lib.operations import VnetGatewayOperations
+from azure.cli.command_modules.network.mgmt_vnet_gateway.lib.operations \
+    import VnetGatewayOperations
 from azure.cli.command_modules.network.mgmt_vnet_gateway.lib \
     import VnetGatewayCreationClient as VnetGatewayClient
-from azure.cli.command_modules.network.mgmt_local_gateway.lib.operations import LocalGatewayOperations
+from azure.cli.command_modules.network.mgmt_local_gateway.lib.operations \
+    import LocalGatewayOperations
 from azure.cli.command_modules.network.mgmt_local_gateway.lib \
     import LocalGatewayCreationClient as LocalGatewayClient
+from azure.cli.command_modules.network.mgmt_route_table.lib.operations import RouteTableOperations
+from azure.cli.command_modules.network.mgmt_route_table.lib \
+    import RouteTableCreationClient as RouteTableClient
+
 
 from azure.cli.commands import DeploymentOutputLongRunningOperation, cli_command
 
@@ -227,6 +233,9 @@ cli_command('network route-table delete', RouteTablesOperations.delete, factory)
 cli_command('network route-table show', RouteTablesOperations.get, factory)
 cli_command('network route-table list', list_route_tables)
 register_generic_update('network route-table update', RouteTablesOperations.get, RouteTablesOperations.create_or_update, factory)
+
+factory = lambda _: get_mgmt_service_client(RouteTableClient).route_table
+cli_command('network route-table create', RouteTableOperations.create_or_update, factory, transform=DeploymentOutputLongRunningOperation('Starting network route-table create'))
 
 # RoutesOperations
 factory = lambda _: _network_client_factory().routes

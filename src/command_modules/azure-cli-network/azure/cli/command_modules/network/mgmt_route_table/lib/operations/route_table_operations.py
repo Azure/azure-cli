@@ -19,8 +19,8 @@ import uuid
 from .. import models
 
 
-class LocalGatewayOperations(object):
-    """LocalGatewayOperations operations.
+class RouteTableOperations(object):
+    """RouteTableOperations operations.
 
     :param client: Client for service requests.
     :param config: Configuration of service client.
@@ -37,7 +37,7 @@ class LocalGatewayOperations(object):
         self.config = config
 
     def create_or_update(
-            self, resource_group_name, deployment_name, gateway_ip_address, local_network_gateway_name, content_version=None, local_address_prefix="192.168.0.0/16", tags=None, custom_headers=None, raw=False, **operation_config):
+            self, resource_group_name, deployment_name, route_table_name, content_version=None, location=None, tags=None, custom_headers=None, raw=False, **operation_config):
         """
         Create or update a virtual machine.
 
@@ -46,17 +46,13 @@ class LocalGatewayOperations(object):
         :type resource_group_name: str
         :param deployment_name: The name of the deployment.
         :type deployment_name: str
-        :param gateway_ip_address: Gateway's Public IP address.  (e.g.
-         10.1.1.1)
-        :type gateway_ip_address: str
-        :param local_network_gateway_name: Gateway name.
-        :type local_network_gateway_name: str
+        :param route_table_name: Name for route table.
+        :type route_table_name: str
         :param content_version: If included it must match the ContentVersion
          in the template.
         :type content_version: str
-        :param local_address_prefix: CIDR block representing the address
-         space of the OnPremise VPN network's Subnet.
-        :type local_address_prefix: str
+        :param location: Location for resource.
+        :type location: str
         :param tags: Tags object.
         :type tags: object
         :param dict custom_headers: headers that will be added to the request
@@ -69,7 +65,7 @@ class LocalGatewayOperations(object):
         :rtype: :class:`ClientRawResponse<msrest.pipeline.ClientRawResponse>`
          if raw=true
         """
-        parameters = models.DeploymentLocalGateway(content_version=content_version, gateway_ip_address=gateway_ip_address, local_address_prefix=local_address_prefix, local_network_gateway_name=local_network_gateway_name, tags=tags)
+        parameters = models.DeploymentRouteTable(content_version=content_version, location=location, route_table_name=route_table_name, tags=tags)
 
         # Construct URL
         url = '/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Resources/deployments/{deploymentName}'
@@ -95,7 +91,7 @@ class LocalGatewayOperations(object):
             header_parameters['accept-language'] = self._serialize.header("self.config.accept_language", self.config.accept_language, 'str')
 
         # Construct body
-        body_content = self._serialize.body(parameters, 'DeploymentLocalGateway')
+        body_content = self._serialize.body(parameters, 'DeploymentRouteTable')
 
         # Construct and send request
         def long_running_send():
