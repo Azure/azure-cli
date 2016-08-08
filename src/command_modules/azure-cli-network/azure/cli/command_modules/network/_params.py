@@ -13,7 +13,8 @@ from azure.mgmt.network.models.network_management_client_enums import \
      ApplicationGatewayRequestRoutingRuleType)
 
 from azure.cli.commands import CliArgumentType, register_cli_argument, register_extra_cli_argument
-from azure.cli.commands.parameters import (location_type, get_resource_name_completion_list, get_enum_type_completion_list, tags_type)
+from azure.cli.commands.parameters import (location_type, get_resource_name_completion_list,
+                                           get_enum_type_completion_list, tags_type, get_enum_choices)
 from azure.cli.commands.validators import MarkSpecifiedAction
 from azure.cli.commands.template_create import register_folded_cli_argument
 from azure.cli.command_modules.network._factory import _network_client_factory
@@ -25,6 +26,8 @@ from azure.cli.command_modules.network._validators import \
      validate_inbound_nat_rule_name_or_id, validate_address_pool_name_or_id,
      validate_servers, validate_cert, validate_address_prefixes)
 from azure.cli.command_modules.network.mgmt_nic.lib.models.nic_creation_client_enums import privateIpAddressVersion
+from azure.cli.command_modules.network.mgmt_vnet_gateway.lib.models.vnet_gateway_creation_client_enums import \
+    (gatewayType, privateIPAllocationMethod, sku, vpnType)
 
 # COMPLETERS
 
@@ -238,6 +241,11 @@ register_cli_argument('network nsg create', 'name', name_arg_type)
 
 # VPN gateway
 register_cli_argument('network vpn-gateway', 'virtual_network_gateway_name', CliArgumentType(options_list=('--name', '-n'), completer=get_resource_name_completion_list('Microsoft.Network/virtualNetworkGateways')), id_part='name')
+register_cli_argument('network vpn-gateway create', 'gateway_type', choices=get_enum_choices(gatewayType))
+register_cli_argument('network vpn-gateway create', 'private_ip_allocation_method', choices=get_enum_choices(privateIPAllocationMethod))
+register_cli_argument('network vpn-gateway create', 'sku', choices=get_enum_choices(sku))
+register_cli_argument('network vpn-gateway create', 'vpn_type', choices=get_enum_choices(vpnType))
+register_folded_cli_argument('network vpn-gateway create', 'public_ip_address', 'Microsoft.Network/publicIPAddresses', default_value_flag='existingId', allow_none=False, required=True)
 
 # VPN connection
 register_cli_argument('network vpn-connection', 'virtual_network_gateway_connection_name', CliArgumentType(options_list=('--name', '-n'), metavar='NAME', id_part='name'))

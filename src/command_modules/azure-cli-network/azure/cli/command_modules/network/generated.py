@@ -40,6 +40,9 @@ from azure.cli.command_modules.network.mgmt_nic.lib import NicCreationClient as 
 from azure.cli.command_modules.network.mgmt_nic.lib.operations import NicOperations
 from azure.cli.command_modules.network.mgmt_nsg.lib import NsgCreationClient as NSGClient
 from azure.cli.command_modules.network.mgmt_nsg.lib.operations import NsgOperations
+from azure.cli.command_modules.network.mgmt_vnet_gateway.lib.operations import VnetGatewayOperations
+from azure.cli.command_modules.network.mgmt_vnet_gateway.lib \
+    import VnetGatewayCreationClient as VnetGatewayClient
 
 from azure.cli.commands import DeploymentOutputLongRunningOperation, cli_command
 
@@ -158,9 +161,6 @@ cli_command('network lb probe list', list_network_resource_property(resource, su
 cli_command('network lb probe show', get_network_resource_property_entry(resource, subresource))
 cli_command('network lb probe delete', delete_network_resource_property_entry(resource, subresource))
 
-factory = lambda _: get_mgmt_service_client(NSGClient).nsg
-cli_command('network nsg create', NsgOperations.create_or_update, factory, transform=DeploymentOutputLongRunningOperation('Starting network nsg create'))
-
 # LocalNetworkGatewaysOperations
 factory = lambda _: _network_client_factory().local_network_gateways
 cli_command('network local-gateway delete', LocalNetworkGatewaysOperations.delete, factory)
@@ -176,7 +176,7 @@ factory = lambda _: _network_client_factory().network_interfaces
 cli_command('network nic delete', NetworkInterfacesOperations.delete, factory)
 cli_command('network nic show', NetworkInterfacesOperations.get, factory)
 cli_command('network nic list', list_nics)
-cli_command('network nic update', set_nic)
+cli_command('network nic update', set_nic) # TODO: no tagging
 
 # NetworkInterfacesOperations: scaleset
 cli_command('network nic scale-set list-vm-nics', NetworkInterfacesOperations.list_virtual_machine_scale_set_vm_network_interfaces, factory)
@@ -201,6 +201,9 @@ cli_command('network nsg delete', NetworkSecurityGroupsOperations.delete, factor
 cli_command('network nsg show', NetworkSecurityGroupsOperations.get, factory)
 cli_command('network nsg list', list_nsgs)
 register_generic_update('network nsg update', NetworkSecurityGroupsOperations.get, NetworkSecurityGroupsOperations.create_or_update, factory)
+
+factory = lambda _: get_mgmt_service_client(NSGClient).nsg
+cli_command('network nsg create', NsgOperations.create_or_update, factory, transform=DeploymentOutputLongRunningOperation('Starting network nsg create'))
 
 # PublicIPAddressesOperations
 factory = lambda _: _network_client_factory().public_ip_addresses
@@ -251,6 +254,7 @@ factory = lambda _: _network_client_factory().virtual_network_gateway_connection
 cli_command('network vpn-connection delete', VirtualNetworkGatewayConnectionsOperations.delete, factory)
 cli_command('network vpn-connection show', VirtualNetworkGatewayConnectionsOperations.get, factory)
 cli_command('network vpn-connection list', VirtualNetworkGatewayConnectionsOperations.list, factory)
+register_generic_update('network vpn-connection update', VirtualNetworkGatewayConnectionsOperations.get, VirtualNetworkGatewayConnectionsOperations.create_or_update, factory)
 cli_command('network vpn-connection shared-key show', VirtualNetworkGatewayConnectionsOperations.get_shared_key, factory)
 cli_command('network vpn-connection shared-key reset', VirtualNetworkGatewayConnectionsOperations.reset_shared_key, factory)
 cli_command('network vpn-connection shared-key update', VirtualNetworkGatewayConnectionsOperations.set_shared_key, factory)
@@ -260,15 +264,18 @@ factory = lambda _: _network_client_factory().virtual_network_gateways
 cli_command('network vpn-gateway delete', VirtualNetworkGatewaysOperations.delete, factory)
 cli_command('network vpn-gateway show', VirtualNetworkGatewaysOperations.get, factory)
 cli_command('network vpn-gateway list', VirtualNetworkGatewaysOperations.list, factory)
+cli_command('network vpn-gateway reset', VirtualNetworkGatewaysOperations.reset, factory)
 register_generic_update('network vpn-gateway update', VirtualNetworkGatewaysOperations.get, VirtualNetworkGatewaysOperations.create_or_update, factory)
+
+factory = lambda _: get_mgmt_service_client(VnetGatewayClient).vnet_gateway
+cli_command('network vpn-gateway create', VnetGatewayOperations.create_or_update, factory, transform=DeploymentOutputLongRunningOperation('Starting network vnet-gateway create'))
 
 # VirtualNetworksOperations
 factory = lambda _: _network_client_factory().virtual_networks
 cli_command('network vnet delete', VirtualNetworksOperations.delete, factory)
 cli_command('network vnet show', VirtualNetworksOperations.get, factory)
 cli_command('network vnet list', list_vnet)
-
-cli_command('network vnet update', update_vnet)
+cli_command('network vnet update', update_vnet) # TODO: no tagging
 
 factory = lambda _: get_mgmt_service_client(VNetClient).vnet
 cli_command('network vnet create', VnetOperations.create_or_update, factory, transform=DeploymentOutputLongRunningOperation('Starting network vnet create'))
