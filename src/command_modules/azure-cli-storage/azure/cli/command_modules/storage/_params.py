@@ -16,10 +16,14 @@ from azure.mgmt.storage.models import SkuName, AccessTier, Kind, EncryptionServi
 from azure.storage.blob import PublicAccess, DeleteSnapshot, BlockBlobService, PageBlobService, AppendBlobService
 from azure.storage.blob.baseblobservice import BaseBlobService
 from azure.storage.file import FileService
+from azure.storage.table import TableService
+from azure.storage.queue import QueueService
 
 from ._validators import \
     (validate_datetime, validate_datetime_as_string, get_file_path_validator, validate_metadata,
-     validate_container_permission, validate_resource_types, validate_services, validate_ip_range)
+     validate_container_permission, validate_resource_types, validate_services, validate_ip_range,
+     validate_table_permission, validate_queue_permission, validate_entity, validate_select,
+     validate_unicode_string, IgnoreAction)
 
 # COMPLETERS
 
@@ -49,6 +53,14 @@ def get_storage_acl_name_completion_list(service, container_param, func):
         return list(getattr(client, func)(container_name))
     return completer
 
+def entity_completer(prefix, action, parsed_args, **kwargs): # pylint: disable=unused-argument
+    # This is a workaround for the fact that argcomplete always inserts a space after completion
+    # In this case, we want the cursor to remain positioned just after the text. We would ideally
+    # like it to append the = sign, but argcomplete irritatingly escapes it.
+    if prefix == 'RowKey' or prefix == 'PartitionKey':
+        return []
+    return ['RowKey!', 'RowKey*', 'PartitionKey!', 'PartitionKey*']
+
 def file_path_completer(prefix, action, parsed_args, **kwargs): # pylint: disable=unused-argument
     client = _get_client(FileService, parsed_args)
     share_name = parsed_args.share_name
@@ -77,8 +89,8 @@ def register_path_argument(scope, default_file_param=None, options_list=None):
     if default_file_param:
         path_help = '{} If the file name is omitted, the source file name will be used.'.format(path_help)
     register_extra_cli_argument(scope, 'path', options_list=options_list or ('--path', '-p'), required=default_file_param is None, help=path_help, validator=get_file_path_validator(default_file_param=default_file_param), completer=file_path_completer)
-    register_cli_argument(scope, 'file_name', options_list=('--file-name',), help=argparse.SUPPRESS, required=False)
-    register_cli_argument(scope, 'directory_name', options_list=('--directory_name',), help=argparse.SUPPRESS, required=False)
+    register_cli_argument(scope, 'file_name', IGNORE_TYPE)
+    register_cli_argument(scope, 'directory_name', IGNORE_TYPE)
 
 # CUSTOM CHOICE LISTS
 
@@ -95,11 +107,15 @@ container_name_type = CliArgumentType(options_list=('--container-name', '-c'), h
 directory_type = CliArgumentType(options_list=('--directory-name', '-d'), help='The directory name.', completer=get_storage_name_completion_list(FileService, 'list_directories_and_files', parent='share_name'))
 file_name_type = CliArgumentType(options_list=('--file-name', '-f'), completer=get_storage_name_completion_list(FileService, 'list_directories_and_files', parent='share_name'))
 share_name_type = CliArgumentType(options_list=('--share-name', '-s'), help='The file share name.', completer=get_storage_name_completion_list(FileService, 'list_shares'))
+table_name_type = CliArgumentType(options_list=('--table-name', '-t'), completer=get_storage_name_completion_list(TableService, 'list_tables'))
+queue_name_type = CliArgumentType(options_list=('--queue-name', '-q'), help='The queue name.', completer=get_storage_name_completion_list(QueueService, 'list_queues'))
+IGNORE_TYPE = CliArgumentType(help=argparse.SUPPRESS, nargs='?', action=IgnoreAction, required=False)
 
 # PARAMETER REGISTRATIONS
 
 register_cli_argument('storage', 'directory_name', directory_type)
 register_cli_argument('storage', 'share_name', share_name_type)
+register_cli_argument('storage', 'table_name', table_name_type)
 register_cli_argument('storage', 'if_modified_since', help='Alter only if modified since supplied UTC datetime (Y-m-d\'T\'H:M\'Z\')', type=validate_datetime)
 register_cli_argument('storage', 'if_unmodified_since', help='Alter only if unmodified since supplied UTC datetime (Y-m-d\'T\'H:M\'Z\')', type=validate_datetime)
 register_cli_argument('storage', 'metadata', nargs='+', help='Metadata in space-separated key=value pairs.', validator=validate_metadata)
@@ -168,15 +184,15 @@ register_cli_argument('storage container create', 'public_access', choices=list(
 
 register_cli_argument('storage container delete', 'fail_not_exist', help='Throw an exception if the container does not exist.')
 
-register_cli_argument('storage container exists', 'blob_name', help=argparse.SUPPRESS)
+register_cli_argument('storage container exists', 'blob_name', IGNORE_TYPE)
 
 register_cli_argument('storage container policy', 'container_name', container_name_type)
 register_cli_argument('storage container policy', 'policy_name', options_list=('--name', '-n'), help='The stored access policy name.', completer=get_storage_acl_name_completion_list(BaseBlobService, 'container_name', 'get_container_acl'))
 
 register_cli_argument('storage share', 'share_name', share_name_type, options_list=('--name', '-n'))
 
-register_cli_argument('storage share exists', 'directory_name', help=argparse.SUPPRESS)
-register_cli_argument('storage share exists', 'file_name', help=argparse.SUPPRESS)
+register_cli_argument('storage share exists', 'directory_name', IGNORE_TYPE)
+register_cli_argument('storage share exists', 'file_name', IGNORE_TYPE)
 
 register_cli_argument('storage share policy', 'container_name', share_name_type)
 register_cli_argument('storage share policy', 'policy_name', options_list=('--name', '-n'), help='The stored access policy name.', completer=get_storage_acl_name_completion_list(FileService, 'container_name', 'get_share_acl'))
@@ -184,7 +200,7 @@ register_cli_argument('storage share policy', 'policy_name', options_list=('--na
 register_cli_argument('storage directory', 'directory_name', directory_type, options_list=('--name', '-n'))
 
 register_cli_argument('storage directory exists', 'directory_name', required=True)
-register_cli_argument('storage directory exists', 'file_name', help=argparse.SUPPRESS)
+register_cli_argument('storage directory exists', 'file_name', IGNORE_TYPE)
 
 register_cli_argument('storage file', 'file_name', file_name_type, options_list=('--name', '-n'))
 register_cli_argument('storage file', 'directory_name', directory_type, required=False)
@@ -196,7 +212,7 @@ register_path_argument('storage file copy cancel', options_list=('--destination-
 register_path_argument('storage file delete')
 
 register_cli_argument('storage file download', 'file_path', options_list=('--dest',))
-register_cli_argument('storage file download', 'progress_callback', help=argparse.SUPPRESS)
+register_cli_argument('storage file download', 'progress_callback', IGNORE_TYPE)
 register_path_argument('storage file download')
 
 register_cli_argument('storage file exists', 'file_name', required=True)
@@ -213,16 +229,47 @@ register_path_argument('storage file show')
 
 register_path_argument('storage file update')
 
-register_cli_argument('storage file upload', 'progress_callback', help=argparse.SUPPRESS)
+register_cli_argument('storage file upload', 'progress_callback', IGNORE_TYPE)
 register_cli_argument('storage file upload', 'local_file_path', options_list=('--source',))
 register_path_argument('storage file upload', default_file_param='local_file_path')
 
 register_path_argument('storage file url')
 
-for item in ['container', 'share']:
+for item in ['container', 'share', 'table', 'queue']:
     register_cli_argument('storage {} policy'.format(item), 'start', type=validate_datetime_as_string, help='start UTC datetime (Y-m-d\'T\'H:M\'Z\'). Defaults to time of request.')
     register_cli_argument('storage {} policy'.format(item), 'expiry', type=validate_datetime_as_string, help='expiration UTC datetime in (Y-m-d\'T\'H:M\'Z\')')
+
+for item in ['container', 'share']:
     register_cli_argument('storage {} policy'.format(item), 'permission', options_list=('--permissions',), type=validate_container_permission, help='permissions granted: (r)ead (w)rite (d)elete (l)ist. Can be combined')
+
+register_cli_argument('storage table', 'table_name', table_name_type, options_list=('--name', '-n'))
+
+register_cli_argument('storage table batch', 'table_name', table_name_type)
+
+register_cli_argument('storage table create', 'table_name', table_name_type, options_list=('--name', '-n'), completer=None)
+register_cli_argument('storage table create', 'fail_on_exist', help='Throw an exception if the table already exists.')
+
+register_cli_argument('storage table policy', 'container_name', table_name_type)
+register_cli_argument('storage table policy', 'policy_name', options_list=('--name', '-n'), help='The stored access policy name.', completer=get_storage_acl_name_completion_list(TableService, 'container_name', 'get_table_acl'))
+register_cli_argument('storage table policy', 'permission', options_list=('--permissions',), type=validate_table_permission, help='permissions granted: (r)ead (a)dd (u)pdate (d)elete. Can be combined')
+
+register_cli_argument('storage entity', 'entity', options_list=('--entity', '-e'), validator=validate_entity, nargs='+', completer=entity_completer)
+register_cli_argument('storage entity', 'property_resolver', IGNORE_TYPE)
+register_cli_argument('storage entity', 'select', nargs='+', validator=validate_select)
+
+register_cli_argument('storage entity insert', 'if_exists', choices=['fail', 'merge', 'replace'])
+
+register_cli_argument('storage queue', 'queue_name', queue_name_type, options_list=('--name', '-n'))
+
+register_cli_argument('storage queue create', 'queue_name', queue_name_type, options_list=('--name', '-n'), completer=None)
+
+register_cli_argument('storage queue policy', 'container_name', queue_name_type)
+register_cli_argument('storage queue policy', 'policy_name', options_list=('--name', '-n'), help='The stored access policy name.', completer=get_storage_acl_name_completion_list(QueueService, 'container_name', 'get_queue_acl'))
+register_cli_argument('storage queue policy', 'permission', options_list=('--permissions',), type=validate_queue_permission, help='permissions granted: (r)ead (a)dd (u)pdate (p)rocess [delete]. Can be combined')
+
+register_cli_argument('storage message', 'queue_name', queue_name_type)
+register_cli_argument('storage message', 'message_id', options_list=('--id',))
+register_cli_argument('storage message', 'content', type=validate_unicode_string)
 
 ###################################################################################################
 

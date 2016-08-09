@@ -10,6 +10,8 @@ from sys import stderr
 
 from azure.storage.blob import BlockBlobService
 from azure.storage.file import FileService
+from azure.storage.table import TableService
+from azure.storage.queue import QueueService
 from azure.mgmt.storage.models import Kind
 
 from azure.cli.command_modules.storage._factory import storage_client_factory
@@ -171,6 +173,10 @@ def _get_service_container_type(client):
         return 'container'
     elif isinstance(client, FileService):
         return 'share'
+    elif isinstance(client, TableService):
+        return 'table'
+    elif isinstance(client, QueueService):
+        return 'queue'
     else:
         raise ValueError('Unsupported service {}'.format(type(client)))
 
@@ -226,3 +232,14 @@ def delete_acl_policy(client, container_name, policy_name):
     acl = _get_acl(client, container_name)
     del acl[policy_name]
     return _set_acl(client, container_name, acl)
+
+def insert_table_entity(client, table_name, entity, if_exists='fail', timeout=None):
+    if if_exists == 'fail':
+        client.insert_entity(table_name, entity, timeout)
+    elif if_exists == 'merge':
+        client.insert_or_merge_entity(table_name, entity, timeout)
+    elif if_exists == 'replace':
+        client.insert_or_replace_entity(table_name, entity, timeout)
+    else:
+        raise CLIError("Unrecognized value '{}' for --if-exists".format(if_exists))
+
