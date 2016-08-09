@@ -40,8 +40,11 @@ def format_table(obj):
         if not obj.simple_output_query and not obj.is_query_active:
             raise ValueError('No query specified and no built-in query available.')
         if obj.simple_output_query and not obj.is_query_active:
-            from jmespath import compile as compile_jmespath, search, Options
-            result = compile_jmespath(obj.simple_output_query).search(result, Options(OrderedDict))
+            if callable(obj.simple_output_query):
+                result = obj.simple_output_query(result)
+            else:
+                from jmespath import compile as compile_jmespath, search, Options
+                result = compile_jmespath(obj.simple_output_query).search(result, Options(OrderedDict))
         obj_list = result if isinstance(result, list) else [result]
         to = TableOutput()
         for item in obj_list:
