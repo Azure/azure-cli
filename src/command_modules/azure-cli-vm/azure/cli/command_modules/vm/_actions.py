@@ -163,7 +163,8 @@ def _handle_auth_types(**kwargs):
         if args.ssh_dest_key_path:
             raise CLIError('SSH parameters cannot be used with password authentication type')
         elif not args.admin_password:
-            raise CLIError('Admin password is required with password authentication type')
+            import getpass
+            args.admin_password = getpass.getpass('Admin Password: ')
     elif args.authentication_type == 'ssh':
         if args.admin_password:
             raise CLIError('Admin password cannot be used with SSH authentication type')

@@ -267,6 +267,9 @@ def resize_vm(resource_group_name, vm_name, size):
     vm.hardware_profile.vm_size = size #pylint: disable=no-member
     return _vm_set(vm)
 
+def get_instance_view(resource_group_name, vm_name):
+    return _vm_get(resource_group_name, vm_name, 'instanceView')
+
 def list_disks(resource_group_name, vm_name):
     ''' List disks for a Virtual Machine '''
     vm = _vm_get(resource_group_name, vm_name)

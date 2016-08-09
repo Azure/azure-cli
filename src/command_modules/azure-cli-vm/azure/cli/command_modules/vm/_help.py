@@ -1,4 +1,4 @@
-#---------------------------------------------------------------------------------------------
+﻿#---------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 #---------------------------------------------------------------------------------------------
@@ -79,6 +79,16 @@ helps['vm extension set'] = """
                 - name: Add a new linux user
                   text: 
                     az vm extension set -n VMAccessForLinux --publisher Microsoft.OSTCExtensions --version 1.4 --vm-name myvm --resource-group yugangw --private-config '{"username":"user1", "ssh_key":"ssh_rsa ..."}'
+            """
+
+helps['vm access set-linux-user'] = """
+            type: command
+            long-summary: Note, the user will have an admin's priviledge.
+            """
+
+helps['vm access reset-windows-admin'] = """
+            type: command
+            long-summary: Note, this resets the admin's credentials. You can't add a new admin.
             """
 
 helps['vm container create'] = """
