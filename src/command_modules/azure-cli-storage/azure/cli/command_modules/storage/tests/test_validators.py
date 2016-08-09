@@ -26,6 +26,12 @@ class Test_storage_validators(unittest.TestCase):
     def tearDown(self):
         self.io.close()
 
+    def test_permission_validator(self):
+        from azure.storage.blob.models import ContainerPermissions
+        self.assertIsNotNone(get_permission_validator(ContainerPermissions)('rwdl'))
+        with self.assertRaises(ValueError):
+            get_permission_validator(ContainerPermissions)('abc')
+
     def test_date_as_string_valid(self):
         input = "2017-01-01T12:30Z"
         actual = validate_datetime_as_string(input)

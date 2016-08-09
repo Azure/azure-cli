@@ -4,6 +4,7 @@
 #---------------------------------------------------------------------------------------------
 
 import argparse
+import ast
 from collections import OrderedDict
 from datetime import datetime
 import os
@@ -13,8 +14,9 @@ from azure.cli.commands.client_factory import get_mgmt_service_client
 from azure.cli.commands.validators import validate_key_value_pairs
 
 from azure.mgmt.storage import StorageManagementClient
-from azure.storage.models import ResourceTypes, Services
-from azure.storage.blob.models import ContainerPermissions
+from azure.storage.models import ResourceTypes, Services, AccountPermissions
+from azure.storage.blob.models import ContainerPermissions, BlobPermissions
+from azure.storage.file.models import SharePermissions, FilePermissions
 from azure.storage.table.models import TablePermissions
 from azure.storage.queue.models import QueuePermissions
 
@@ -23,29 +25,60 @@ class IgnoreAction(argparse.Action): # pylint: disable=too-few-public-methods
         raise argparse.ArgumentError(None, 'unrecognized argument: {} {}'.format(
             option_string, values or ''))
 
-def validate_container_permission(string):
-    ''' Validates that permission string contains only a combination
-    of (r)ead, (w)rite, (d)elete, (l)ist. '''
-    if set(string) - set('rwdl'):
-        raise ValueError('valid values are (r)ead, (w)rite, (d)elete, (l)ist or a combination ' + \
-                         'thereof (ex: rw)')
-    return ContainerPermissions(_str=''.join(set(string)))
+def get_permission_help_string(permission_class):
+    allowed_values = [x.lower() for x in dir(permission_class) if not x.startswith('__')]
+    return ' '.join(['({}){}'.format(x[0], x[1:]) for x in allowed_values])
 
-def validate_table_permission(string):
-    ''' Validates that permission string contains only a combination
-    of (r)ead, (a)dd, (u)pdate, (d)elete. '''
-    if set(string) - set('raud'):
-        raise ValueError('valid values are (r)ead, (a)dd, (u)pdate, (d)elete or a combination ' + \
-                         'thereof (ex: ra)')
-    return TablePermissions(_str=''.join(set(string)))
+def get_permission_validator(permission_class):
+    
+    allowed_values = [x.lower() for x in dir(permission_class) if not x.startswith('__')]
+    allowed_string = ''.join(x[0] for x in allowed_values)
 
-def validate_queue_permission(string):
-    ''' Validates that permission string contains only a combination
-    of (r)ead, (a)dd, (u)pdate, (p)rocess [delete]. '''
-    if set(string) - set('raup'):
-        raise ValueError('valid values are (r)ead, (a)dd, (u)pdate, (p)rocess [delete] or a '
-                         'combination thereof (ex: ra)')
-    return QueuePermissions(_str=''.join(set(string)))
+    def validator(string):
+        if set(string) - set(allowed_string):
+            help_string = get_permission_help_string(permission_class)
+            raise ValueError('valid values are {} or a combination thereof.'.format(help_string))
+        return permission_class(string)
+    return validator
+
+def get_content_setting_validator(settings_class):
+    def validator(namespace):
+        namespace.content_settings = settings_class(
+            content_type=namespace.content_type,
+            content_disposition=namespace.content_disposition,
+            content_encoding=namespace.content_encoding,
+            content_language=namespace.content_language,
+            content_md5=namespace.content_md5,
+            cache_control=namespace.content_cache_control
+        )
+        del namespace.content_type,
+        del namespace.content_disposition,
+        del namespace.content_encoding,
+        del namespace.content_language,
+        del namespace.content_md5,
+        del namespace.content_cache_control
+    return validator
+
+def process_logging_update_namespace(namespace):
+    services = namespace.services
+    if set(services) - set('bqt'):
+        raise ValueError('--services: valid values are (b)lob (q)ueue '
+                         '(t)able or a combination thereof (ex: bt).')
+    log = namespace.log
+    if set(log) - set('rwd'):
+        raise ValueError('--log: valid values are (r)ead (w)rite (d)elete '
+                         'or a combination thereof (ex: rw).')
+
+def process_metric_update_namespace(namespace):
+    namespace.hour = namespace.hour == 'enable'
+    namespace.minute = namespace.minute == 'enable'
+    namespace.api = namespace.api == 'enable' if namespace.api else None
+    if namespace.hour is None and namespace.minute is None:
+        raise argparse.ArgumentError(
+            None, 'incorrect usage: must specify --hour and/or --minute')
+    if (namespace.hour or namespace.minute) and namespace.api is None:
+        raise argparse.ArgumentError(
+            None, 'incorrect usage: specify --api when hour or minute metrics are enabled')
 
 def validate_datetime_as_string(string):
     ''' Validates UTC datettime in format '%Y-%m-%d\'T\'%H:%M\'Z\''. '''
@@ -56,6 +89,14 @@ def validate_datetime(string):
     ''' Validates UTC datettime in format '%Y-%m-%d\'T\'%H:%M\'Z\''. '''
     date_format = '%Y-%m-%dT%H:%MZ'
     return datetime.strptime(string, date_format)
+
+def validate_encryption(namespace):
+    ''' Builds up the encryption object for storage account operations based on the
+    list of services passed in. '''
+    if namespace.encryption:
+        from azure.mgmt.storage.models import Encryption, EncryptionServices, EncryptionService
+        services = { service: EncryptionService(True) for service in namespace.encryption }
+        namespace.encryption = Encryption(EncryptionServices(**services))
 
 def validate_entity(namespace):
     ''' Converts a list of key value pairs into a dictionary. Ensures that required
@@ -78,10 +119,26 @@ def validate_entity(namespace):
     if missing_keys:
         raise argparse.ArgumentError(
             None, 'incorrect usage: entity requires: {}'.format(missing_keys))
+
+    def cast_val(key, val):       
+        """ Attempts to cast numeric values (except RowKey and PartitionKey) to numbers so they
+        can be queried correctly. """ 
+        if key in ['PartitionKey', 'RowKey']:
+            return val
+
+        def try_cast(type):
+            try:
+                return type(val)
+            except ValueError:
+                return None
+        return try_cast(int) or try_cast(float) or val
+
+    # ensure numbers are converted from strings so querying will work correctly
+    values = { key: cast_val(key, val) for key, val in values.items() }
     namespace.entity = values
 
 def validate_ip_range(string):
-    ''' Validates an IP address or IP address range. '''
+    ''' Validates an IPv4 address or address range. '''
     ip_format = r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}'
     if not re.match("^{}$".format(ip_format), string):
         if not re.match("^{}-{}$".format(ip_format, ip_format), string):
@@ -156,6 +213,14 @@ def get_file_path_validator(default_file_param=None):
         namespace.file_name = file_name
         del namespace.path
     return validator
+
+def process_file_download_namespace(namespace):
+
+    get_file_path_validator()(namespace)
+
+    dest = namespace.file_path
+    if not dest or os.path.isdir(dest):
+        namespace.file_path = os.path.join(dest, namespace.file_name) if dest else namespace.file_name
 
 def transform_acl_list_output(result):
     """ Transform to convert SDK output into a form that is more readily
