@@ -203,13 +203,13 @@ class Profile(object):
 
     def get_current_account_user(self):
         try:
-            active_account = self._get_default_subscription()
+            active_account = self.get_default_subscription()
         except CLIError:
             raise CLIError('There are no active accounts.')
 
         return active_account[_USER_ENTITY][_USER_NAME]
 
-    def _get_default_subscription(self):
+    def get_default_subscription(self):
         subscriptions = self.load_cached_subscriptions()
         if not subscriptions:
             raise CLIError('Please run login to setup account.')
@@ -220,7 +220,7 @@ class Profile(object):
         return active[0]
 
     def get_login_credentials(self, for_graph_client=False):
-        active_account = self._get_default_subscription()
+        active_account = self.get_default_subscription()
         user_type = active_account[_USER_ENTITY][_USER_TYPE]
         username_or_sp_id = active_account[_USER_ENTITY][_USER_NAME]
         resource = self._graph_resource_uri if for_graph_client else self._management_resource_uri
