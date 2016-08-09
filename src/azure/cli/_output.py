@@ -44,7 +44,8 @@ def format_table(obj):
                 result = obj.simple_output_query(result)
             else:
                 from jmespath import compile as compile_jmespath, search, Options
-                result = compile_jmespath(obj.simple_output_query).search(result, Options(OrderedDict))
+                result = compile_jmespath(obj.simple_output_query).search(result,
+                                                                          Options(OrderedDict))
         obj_list = result if isinstance(result, list) else [result]
         to = TableOutput()
         for item in obj_list:
