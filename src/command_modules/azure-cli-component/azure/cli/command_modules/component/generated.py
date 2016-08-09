@@ -12,7 +12,7 @@ from .custom import (list_components, install, update, update_all, update_self, 
 
 # HELPER METHODS
 
-cli_command('component list', list_components)
+cli_command('component list', list_components, simple_output_query="[*].{Name:name, Version:version} | sort_by(@, &Name)")
 cli_command('component install', install)
 cli_command('component update', update)
 cli_command('component update-all', update_all)

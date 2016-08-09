@@ -50,19 +50,19 @@ cli_command('vm create', VmOperations.create_or_update, factory, transform=Deplo
 
 factory = lambda _: _compute_client_factory().virtual_machines
 
-cli_command('vm delete', VirtualMachinesOperations.delete, factory) # no output
-cli_command('vm deallocate', VirtualMachinesOperations.deallocate, factory) # no output
-cli_command('vm generalize', VirtualMachinesOperations.generalize, factory) # no output
+cli_command('vm delete', VirtualMachinesOperations.delete, factory)
+cli_command('vm deallocate', VirtualMachinesOperations.deallocate, factory)
+cli_command('vm generalize', VirtualMachinesOperations.generalize, factory)
 cli_command('vm show', VirtualMachinesOperations.get, factory, simple_output_query="{Name:name, ResourceGroup:resourceGroup, Location:location, VmSize:hardwareProfile.vmSize, OsType: storageProfile.osDisk.osType}")
 cli_command('vm list-vm-resize-options', VirtualMachinesOperations.list_available_sizes, factory, simple_output_query="[*].{Name: name, NumberOfCores: numberOfCores, MemoryInMb: memoryInMb, MaxDataDiskCount: maxDataDiskCount, ResourceDiskSizeInMb: resourceDiskSizeInMb, OsDiskSizeInMb: osDiskSizeInMb} | sort_by(@, &Name)")
-cli_command('vm stop', VirtualMachinesOperations.power_off, factory) # no output
-cli_command('vm restart', VirtualMachinesOperations.restart, factory) # no output
-cli_command('vm start', VirtualMachinesOperations.start, factory) # no output
-cli_command('vm redeploy', VirtualMachinesOperations.redeploy, factory) # no output
+cli_command('vm stop', VirtualMachinesOperations.power_off, factory)
+cli_command('vm restart', VirtualMachinesOperations.restart, factory)
+cli_command('vm start', VirtualMachinesOperations.start, factory)
+cli_command('vm redeploy', VirtualMachinesOperations.redeploy, factory)
 cli_command('vm list-ip-addresses', list_ip_addresses, simple_output_query="[*].{VmName: virtualMachine.name, VmResourceGroup: virtualMachine.resourceGroup, PublicIpAddressName: join(', ', virtualMachine.network.publicIpAddresses[].name), PublicIpAddress: join(', ', virtualMachine.network.publicIpAddresses[].ipAddress), PublicIpAllocationMethod: join(', ', virtualMachine.network.publicIpAddresses[].ipAllocationMethod)} | sort_by(@, &VmName)")
 cli_command('vm list', list_vm, simple_output_query="[*].{Name: name, ResourceGroup: resourceGroup, ProvisioningState: provisioningState, Location: location, Size: hardwareProfile.vmSize} | sort_by(@, &Name)")
 cli_command('vm resize', resize_vm, simple_output_query="{Name:name, ResourceGroup:resourceGroup, Location:location, VmSize:hardwareProfile.vmSize, OsType: storageProfile.osDisk.osType}")
-cli_command('vm capture', capture_vm) # no output
+cli_command('vm capture', capture_vm)
 cli_command('vm nic add', vm_add_nics)
 cli_command('vm nic delete', vm_delete_nics)
 cli_command('vm nic update', vm_update_nics)
