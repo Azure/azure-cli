@@ -1,0 +1,29 @@
+environment:
+  access_token:
+    secure: Lp6H0p+ZjwOm/iWKlV1ulqsFes8YvsgCmMcBELicfmGHNu7H09eA91ncjPGtY5Sz
+
+install:
+  - python -m pip install -r requirements.txt
+  - python -m pip install -e . # Install the CLI as a package
+  - python -m pip install sphinx
+  - python scripts/command_modules/install.py # Install the command modules as packages
+
+build_script:
+  - cd doc\sphinx 
+  - make xml
+
+artifacts:
+  - path: doc\sphinx\_build
+
+on_success:
+  - git clone -q --branch=master https://github.com/formulahendry/azure-cli-content-test.git %TEMP%\azure-cli-content
+  - cd %TEMP%\azure-cli-content
+  - if exist %TEMP%\azure-cli-content\test rmdir /s /q %TEMP%\azure-cli-content\test
+  - robocopy %APPVEYOR_BUILD_FOLDER%\doc\sphinx\_build %TEMP%\azure-cli-content\test /e & IF %ERRORLEVEL% LEQ 1 exit 0
+  - git config --global credential.helper store
+  - ps: Add-Content "$env:USERPROFILE\.git-credentials" "https://$($env:access_token):x-oauth-basic@github.com`n"
+  - git config --global user.email "test@azure-cli-content-test.com"
+  - git config --global user.name "Test"
+  - git add -A
+  - git commit -m "Update document content"
+  - git push origin master
