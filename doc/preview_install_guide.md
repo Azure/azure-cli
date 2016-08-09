@@ -174,8 +174,13 @@ Doesn't have python installed by default and is not currently supported.  We rec
 
 > Note that our docker images contain the latest code from the master branch and **does not match** the 
 > same "partner build" as the other methods in this document.
+> 
+> As of 8/9, the docker image contains **incomplete versions** of WebApp and Redis Cache.  
 
-Run `docker run -it azuresdk/azure-cli-python:latest bash`
+Run 
+```shell
+docker run -it azuresdk/azure-cli-python:latest bash`
+```
 
 ## Windows (cmd)
 
