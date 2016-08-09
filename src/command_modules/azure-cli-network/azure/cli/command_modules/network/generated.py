@@ -44,8 +44,18 @@ from azure.cli.command_modules.network.mgmt_nsg.lib.operations import NsgOperati
 from azure.cli.commands import DeploymentOutputLongRunningOperation, cli_command
 
 from .custom import \
-    (update_vnet, update_subnet, create_subnet, list_vnet,
-     create_nsg_rule, update_nsg_rule, list_nsgs,
+    (update_vnet, update_subnet, create_subnet,
+     create_ag_ssl_cert,
+     create_ag_address_pool,
+     create_ag_frontend_ip,
+     create_ag_frontend_port,
+     create_ag_http_listener,
+     create_ag_http_settings,
+     create_ag_probe,
+     create_ag_rule,
+     create_ag_url_path_map,
+     create_ag_url_path_map_rule, delete_ag_url_path_map_rule,
+     create_nsg_rule, update_nsg_rule,
      create_lb_inbound_nat_rule, set_lb_inbound_nat_rule,
      create_lb_frontend_ip_configuration, set_lb_frontend_ip_configuration,
      create_lb_inbound_nat_pool, set_lb_inbound_nat_pool,
@@ -55,14 +65,12 @@ from .custom import \
      create_nic_ip_config, set_nic_ip_config,
      add_nic_ip_config_address_pool, remove_nic_ip_config_address_pool,
      add_nic_ip_config_inbound_nat_rule, remove_nic_ip_config_inbound_nat_rule,
+     set_nic,
      list_network_resource_property, get_network_resource_property_entry,
      delete_network_resource_property_entry,
-     set_nic,
-     list_lbs,
-     list_express_route_circuits,
-     list_public_ips, list_nics,
-     list_route_tables,
-     list_application_gateways)
+     list_application_gateways, list_express_route_circuits, list_lbs, list_nics, list_nsgs,
+     list_public_ips, list_route_tables, list_vnet
+    )
 from ._factory import _network_client_factory
 
 # pylint: disable=line-too-long
@@ -70,13 +78,41 @@ from ._factory import _network_client_factory
 factory = lambda _: _network_client_factory().application_gateways
 cli_command('network application-gateway delete', ApplicationGatewaysOperations.delete, factory)
 cli_command('network application-gateway show', ApplicationGatewaysOperations.get, factory)
-cli_command('network application-gateway list', list_application_gateways)
+cli_command('network application-gateway list', list_application_gateways, simple_output_query="[*].{Name:name, ResourceGroup:resourceGroup, Location:location, State:provisioningState} | sort_by(@, &Name)")
 cli_command('network application-gateway start', ApplicationGatewaysOperations.start, factory)
 cli_command('network application-gateway stop', ApplicationGatewaysOperations.stop, factory)
 register_generic_update('network application-gateway update', ApplicationGatewaysOperations.get, ApplicationGatewaysOperations.create_or_update, factory)
 
 factory = lambda _: get_mgmt_service_client(AppGatewayClient).app_gateway
 cli_command('network application-gateway create', AppGatewayOperations.create_or_update, factory, transform=DeploymentOutputLongRunningOperation('Starting network application-gateway create'))
+
+property_map = {
+    'ssl_certificates': 'ssl-cert',
+    'frontend_ip_configurations': 'frontend-ip',
+    'frontend_ports': 'frontend-port',
+    'backend_address_pools': 'address-pool',
+    'backend_http_settings_collection': 'http-settings',
+    'http_listeners': 'http-listener',
+    'request_routing_rules': 'rule',
+    'probes': 'probe',
+    'url_path_maps': 'url-path-map'
+}
+for subresource, alias in property_map.items():
+    cli_command('network application-gateway {} list'.format(alias), list_network_resource_property('application_gateways', subresource), simple_output_query="[*].{Name:name} | sort_by(@, &Name)")
+    cli_command('network application-gateway {} show'.format(alias), get_network_resource_property_entry('application_gateways', subresource))
+    cli_command('network application-gateway {} delete'.format(alias), delete_network_resource_property_entry('application_gateways', subresource))
+
+cli_command('network application-gateway address-pool create', create_ag_address_pool)
+cli_command('network application-gateway frontend-ip create', create_ag_frontend_ip)
+cli_command('network application-gateway frontend-port create', create_ag_frontend_port)
+cli_command('network application-gateway http-listener create', create_ag_http_listener)
+cli_command('network application-gateway http-settings create', create_ag_http_settings)
+cli_command('network application-gateway probe create', create_ag_probe)
+cli_command('network application-gateway rule create', create_ag_rule)
+cli_command('network application-gateway ssl-cert create', create_ag_ssl_cert)
+cli_command('network application-gateway url-path-map create', create_ag_url_path_map)
+cli_command('network application-gateway url-path-map rule create', create_ag_url_path_map_rule)
+cli_command('network application-gateway url-path-map rule delete', delete_ag_url_path_map_rule)
 
 # ExpressRouteCircuitAuthorizationsOperations
 factory = lambda _: _network_client_factory().express_route_circuit_authorizations
@@ -116,47 +152,30 @@ register_generic_update('network lb update', LoadBalancersOperations.get, LoadBa
 factory = lambda _: get_mgmt_service_client(LBClient).lb
 cli_command('network lb create', LbOperations.create_or_update, factory, transform=DeploymentOutputLongRunningOperation('Starting network lb create'))
 
-resource = 'load_balancers'
-subresource = 'frontend_ip_configurations'
+property_map = {
+    'frontend_ip_configurations': 'frontend-ip',
+    'inbound_nat_rules': 'inbound-nat-rule',
+    'inbound_nat_pools': 'inbound-nat-pool',
+    'backend_address_pools': 'address-pool',
+    'load_balancing_rules': 'rule',
+    'probes': 'probe'
+}
+for subresource, alias in property_map.items():
+    cli_command('network lb {} list'.format(alias), list_network_resource_property('load_balancers', subresource))
+    cli_command('network lb {} show'.format(alias), get_network_resource_property_entry('load_balancers', subresource))
+    cli_command('network lb {} delete'.format(alias), delete_network_resource_property_entry('load_balancers', subresource))
+
 cli_command('network lb frontend-ip create', create_lb_frontend_ip_configuration)
 cli_command('network lb frontend-ip update', set_lb_frontend_ip_configuration)
-cli_command('network lb frontend-ip list', list_network_resource_property(resource, subresource))
-cli_command('network lb frontend-ip show', get_network_resource_property_entry(resource, subresource))
-cli_command('network lb frontend-ip delete', delete_network_resource_property_entry(resource, subresource))
-
-subresource = 'inbound_nat_rules'
 cli_command('network lb inbound-nat-rule create', create_lb_inbound_nat_rule)
 cli_command('network lb inbound-nat-rule update', set_lb_inbound_nat_rule)
-cli_command('network lb inbound-nat-rule list', list_network_resource_property(resource, subresource))
-cli_command('network lb inbound-nat-rule show', get_network_resource_property_entry(resource, subresource))
-cli_command('network lb inbound-nat-rule delete', delete_network_resource_property_entry(resource, subresource))
-
-subresource = 'inbound_nat_pools'
 cli_command('network lb inbound-nat-pool create', create_lb_inbound_nat_pool)
 cli_command('network lb inbound-nat-pool update', set_lb_inbound_nat_pool)
-cli_command('network lb inbound-nat-pool list', list_network_resource_property(resource, subresource))
-cli_command('network lb inbound-nat-pool show', get_network_resource_property_entry(resource, subresource))
-cli_command('network lb inbound-nat-pool delete', delete_network_resource_property_entry(resource, subresource))
-
-subresource = 'backend_address_pools'
 cli_command('network lb address-pool create', create_lb_backend_address_pool)
-cli_command('network lb address-pool list', list_network_resource_property(resource, subresource))
-cli_command('network lb address-pool show', get_network_resource_property_entry(resource, subresource))
-cli_command('network lb address-pool delete', delete_network_resource_property_entry(resource, subresource))
-
-subresource = 'load_balancing_rules'
 cli_command('network lb rule create', create_lb_rule)
 cli_command('network lb rule update', set_lb_rule)
-cli_command('network lb rule list', list_network_resource_property(resource, subresource))
-cli_command('network lb rule show', get_network_resource_property_entry(resource, subresource))
-cli_command('network lb rule delete', delete_network_resource_property_entry(resource, subresource))
-
-subresource = 'probes'
 cli_command('network lb probe create', create_lb_probe)
 cli_command('network lb probe update', set_lb_probe)
-cli_command('network lb probe list', list_network_resource_property(resource, subresource))
-cli_command('network lb probe show', get_network_resource_property_entry(resource, subresource))
-cli_command('network lb probe delete', delete_network_resource_property_entry(resource, subresource))
 
 factory = lambda _: get_mgmt_service_client(NSGClient).nsg
 cli_command('network nsg create', NsgOperations.create_or_update, factory, transform=DeploymentOutputLongRunningOperation('Starting network nsg create'))

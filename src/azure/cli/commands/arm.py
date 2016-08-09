@@ -22,9 +22,7 @@ regex = re.compile('/subscriptions/(?P<subscription>[^/]*)/resourceGroups/(?P<re
 
 def resource_id(**kwargs):
     '''Create a valid resource id string from the given parts
-
     The method accepts the following keyword arguments:
-
         - subscription      Subscription id
         - resource_group    Name of resource group
         - namespace         Namespace for the resource provider (i.e. Microsoft.Compute)
