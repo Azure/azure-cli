@@ -42,7 +42,7 @@ class VMUsageScenarioTest(VCRTestBase):
         self.execute()
 
     def body(self):
-        self.cmd('vm usage list --location westus',
+        self.cmd('vm list-usage --location westus',
             checks=JMESPathCheck('type(@)', 'array'))
 
 class VMImageListThruServiceScenarioTest(VCRTestBase):

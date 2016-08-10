@@ -28,7 +28,7 @@ from azure.cli.command_modules.vm.mgmt_acs.lib import AcsCreationClient as ACSCl
 from azure.cli.command_modules.vm.mgmt_acs.lib.operations import AcsOperations
 from .custom import (
     list_vm, resize_vm, list_vm_images, list_vm_extension_images, list_ip_addresses,
-    attach_new_disk, attach_existing_disk, detach_disk, list_disks, capture_vm,
+    attach_new_disk, attach_existing_disk, detach_disk, list_disks, capture_vm, get_instance_view,
     vm_update_nics, vm_delete_nics, vm_add_nics, vm_open_port,
     reset_windows_admin, set_linux_user, delete_linux_user,
     disable_boot_diagnostics, enable_boot_diagnostics, get_boot_log,
@@ -55,6 +55,8 @@ cli_command('vm deallocate', VirtualMachinesOperations.deallocate, factory)
 cli_command('vm generalize', VirtualMachinesOperations.generalize, factory)
 cli_command('vm show', VirtualMachinesOperations.get, factory, simple_output_query="{Name:name, ResourceGroup:resourceGroup, Location:location, VmSize:hardwareProfile.vmSize, OsType: storageProfile.osDisk.osType}")
 cli_command('vm list-vm-resize-options', VirtualMachinesOperations.list_available_sizes, factory, simple_output_query="[*].{Name: name, NumberOfCores: numberOfCores, MemoryInMb: memoryInMb, MaxDataDiskCount: maxDataDiskCount, ResourceDiskSizeInMb: resourceDiskSizeInMb, OsDiskSizeInMb: osDiskSizeInMb} | sort_by(@, &Name)")
+cli_command('vm get-instance-view', get_instance_view,
+            simple_output_query="{Name:name,  VmSize:hardwareProfile.vmSize, OsType: storageProfile.osDisk.osType, Status1: instanceView.statuses[0].code, Status2: instanceView.statuses[1].code}")
 cli_command('vm stop', VirtualMachinesOperations.power_off, factory)
 cli_command('vm restart', VirtualMachinesOperations.restart, factory)
 cli_command('vm start', VirtualMachinesOperations.start, factory)
@@ -139,7 +141,7 @@ cli_command('vm image list', list_vm_images, simple_output_query="[*].{Publisher
 
 # VM Usage
 factory = lambda _: _compute_client_factory().usage
-cli_command('vm usage list', UsageOperations.list, factory, simple_output_query="[*].{Name:name.localizedValue, CurrentValue:currentValue, Limit:limit} | sort_by(@, &Name)")
+cli_command('vm list-usage', UsageOperations.list, factory, simple_output_query="[*].{Name:name.localizedValue, CurrentValue:currentValue, Limit:limit} | sort_by(@, &Name)")
 
 # VM ScaleSet
 factory = lambda _: get_mgmt_service_client(VMSSClient).vmss
