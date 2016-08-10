@@ -8,9 +8,9 @@
 from __future__ import print_function
 from sys import stderr
 
-from azure.storage.blob import BlockBlobService#, AppendBlobService, PageBlobService
-#from azure.storage.blob.baseblobservice import BaseBlobService
+from azure.storage.blob import BlockBlobService
 from azure.storage.file import FileService
+from azure.mgmt.storage.models import Kind
 
 from azure.cli.command_modules.storage._factory import storage_client_factory
 from azure.cli._util import CLIError
@@ -64,11 +64,12 @@ def show_storage_account_connection_string(resource_group_name, account_name, pr
         keys[0].value) #pylint: disable=no-member
     return {'ConnectionString':connection_string}
 
-def create_storage_account(resource_group_name, account_name, sku, location, kind='Storage',
-                           tags=None, custom_domain=None, encryption=None, access_tier=None):
+def create_storage_account(resource_group_name, account_name, sku, location,
+                           kind=Kind.storage.value, tags=None, custom_domain=None,
+                           encryption=None, access_tier=None):
     ''' Create a storage account. '''
     from azure.mgmt.storage.models import \
-        (StorageAccountCreateParameters, Sku, CustomDomain, Encryption, Kind, AccessTier)
+        (StorageAccountCreateParameters, Sku, CustomDomain, Encryption, AccessTier)
     scf = storage_client_factory()
     params = StorageAccountCreateParameters(
         sku=Sku(sku),
