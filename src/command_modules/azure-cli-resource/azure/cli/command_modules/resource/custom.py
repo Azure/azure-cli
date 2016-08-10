@@ -273,3 +273,10 @@ def move_resource(ids, destination_group, destination_subscription_id=None):
 
     return rcf.resources.move_resources(resources[0]['resource_group'], ids, target)
 
+def list_features(client, resource_provider_namespace=None):
+    if resource_provider_namespace:
+        return client.list(resource_provider_namespace=resource_provider_namespace)
+    else:
+        return client.list_all()
+
+
