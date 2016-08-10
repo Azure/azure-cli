@@ -154,7 +154,7 @@ def add_id_parameters(command_table):
 
 APPLICATION.register(APPLICATION.COMMAND_TABLE_LOADED, add_id_parameters)
 
-def register_generic_update(name, getter, setter, factory=None, setter_arg_name='parameters',
+def register_generic_update(name, getter, setter, factory=None, setter_arg_name='parameters', #pylint:disable=too-many-arguments
                             simple_output_query=None):
 
     get_arguments = dict(extract_args_from_signature(getter))
