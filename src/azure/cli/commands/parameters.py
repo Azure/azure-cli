@@ -65,6 +65,9 @@ def get_enum_type_completion_list(enum_type=None):
         return list(enum_type.__dict__[ENUM_MAPPING_KEY].keys())
     return completer
 
+def get_enum_choices(enum_type):
+    return [x.value for x in enum_type]
+
 resource_group_name_type = CliArgumentType(
     options_list=('--resource-group', '-g'),
     completer=get_resource_group_completion_list,
