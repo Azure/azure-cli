@@ -1,9 +1,10 @@
-#---------------------------------------------------------------------------------------------
+﻿#---------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 #---------------------------------------------------------------------------------------------
 
 import os
+import time
 # AZURE CLI RESOURCE TEST DEFINITIONS
 
 from azure.cli.utils.vcr_test_base import (VCRTestBase, JMESPathCheck, NoneCheck, BooleanCheck,
@@ -260,3 +261,76 @@ class FeatureScenarioTest(VCRTestBase):
             JMESPathCheck("length([?name=='Microsoft.Network/SkipPseudoVipGeneration'])", 1)
             ])
 
+class PolicyScenarioTest(VCRTestBase):#ResourceGroupVCRTestBase
+
+    def __init__(self, test_method):
+        super(PolicyScenarioTest, self).__init__(__file__, test_method)    
+        self.resource_group = 'azurecli-policy-test-group'
+       
+    def test_resource_policy(self):
+        self.execute()
+
+    def body(self):
+        policy_name = 'azurecli-test-policy'
+        policy_display_name = 'test_policy_123'
+        policy_description = 'test_policy_123' 
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        rules_file = os.path.join(curr_dir, 'sample_policy_rule.json').replace('\\', '\\\\')
+        #create a policy
+        self.cmd('resource policy create -n {} --rules {} --display-name {} --description {}'.format(
+            policy_name, rules_file, policy_display_name, policy_description), checks=[
+                JMESPathCheck('name', policy_name),
+                JMESPathCheck('displayName', policy_display_name),
+                JMESPathCheck('description', policy_description)
+                ])
+
+        #update it
+        new_policy_description = policy_description + '_new'
+        self.cmd('resource policy update -n {} --description {}'.format(policy_name, new_policy_description), checks=[
+                JMESPathCheck('description', new_policy_description)
+            ])
+
+        #list and show it
+        self.cmd('resource policy list', checks=[
+            JMESPathCheck("length([?name=='{}'])".format(policy_name),1)
+            ])
+        self.cmd('resource policy show -n {}'.format(policy_name), checks=[
+            JMESPathCheck('name', policy_name),
+            JMESPathCheck('displayName', policy_display_name)
+            ])
+
+        #create a policy assignment on a resource group
+        policy_assignment_name = 'azurecli-test-policy-assignment'
+        policy_assignment_display_name = 'test_assignment_123'
+        self.cmd('resource policy assignment create --policy {} -n {} --display-name {} -g {}'.format(
+            policy_name, policy_assignment_name, policy_assignment_display_name, self.resource_group), checks=[
+                JMESPathCheck('name', policy_assignment_name),
+                JMESPathCheck('displayName', policy_assignment_display_name),
+                ])
+
+        # list at subscription won't work
+        import jmespath
+        try:
+            self.cmd('resource policy assignment list', checks=[
+                JMESPathCheck("length([?name=='{}'])".format(policy_assignment_name), 0),
+                ])
+        except jmespath.exceptions.JMESPathTypeError: #ok if query fails on None result
+            pass 
+
+        # but enable --show-all works
+        self.cmd('resource policy assignment list --show-all', checks=[
+                JMESPathCheck("length([?name=='{}'])".format(policy_assignment_name), 1),
+                ])
+
+        # delete the assignment
+        self.cmd('resource policy assignment delete -n {} -g {}'.format(
+            policy_assignment_name, self.resource_group))
+        result = self.cmd('resource policy assignment list --show-all')
+
+        # delete the policy
+        self.cmd('resource policy delete -n {}'.format(policy_name))
+        time.sleep(10) # ensure the policy is gone when run live.  
+        self.cmd('resource policy list', checks=[
+                JMESPathCheck("length([?name=='{}'])".format(policy_name), 0),
+                ])
+        
