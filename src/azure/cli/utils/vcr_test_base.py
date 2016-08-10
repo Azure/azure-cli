@@ -9,7 +9,9 @@ import json
 import os
 import collections
 import shlex
+from random import choice
 import re
+from string import digits
 import sys
 import unittest
 try:
@@ -31,6 +33,8 @@ TRACK_COMMANDS = os.environ.get('AZURE_CLI_TEST_TRACK_COMMANDS')
 COMMAND_COVERAGE_FILENAME = 'command_coverage.txt'
 MOCKED_SUBSCRIPTION_ID = '00000000-0000-0000-0000-000000000000'
 MOCKED_TENANT_ID = '00000000-0000-0000-0000-000000000000'
+MOCKED_STORAGE_ACCOUNT = 'dummystorage'
+
 # MOCK METHODS
 
 def _mock_get_mgmt_service_client(client_type, subscription_bound=True):
@@ -203,6 +207,9 @@ class VCRTestBase(unittest.TestCase):#pylint: disable=too-many-instance-attribut
                              '/graph.windows.net/{}/'.format(MOCKED_TENANT_ID), request.uri)
         request.uri = re.sub('/sig=([^/]+)&', '/sig=0000&', request.uri)
         request.uri = _scrub_deployment_name(request.uri)
+        # replace random storage account name with dummy name
+        request.uri = re.sub('/vcrstorage([\\d]+).',
+                             '/{}.'.format(MOCKED_STORAGE_ACCOUNT), request.uri)
         # prevents URI mismatch between Python 2 and 3 if request URI has extra / chars
         request.uri = re.sub('//', '/', request.uri)
         request.uri = re.sub('/', '//', request.uri, count=1)
@@ -332,4 +339,26 @@ class ResourceGroupVCRTestBase(VCRTestBase):
             self.location, self.resource_group))
 
     def tear_down(self):
+        self.cmd('resource group delete --name {}'.format(self.resource_group))
+
+class StorageAccountVCRTestBase(VCRTestBase):
+    # pylint: disable=too-many-arguments
+    def __init__(self, test_file, test_name, run_live=False, debug=False,
+                 skip_setup=False, skip_teardown=False):
+        super(StorageAccountVCRTestBase, self).__init__(test_file, test_name, run_live=run_live,
+                                                        debug=debug, skip_setup=skip_setup,
+                                                        skip_teardown=skip_teardown)
+        self.resource_group = 'vcr_resource_group'
+        self.account = MOCKED_STORAGE_ACCOUNT if self.playback else \
+            'vcrstorage{}'.format(''.join(choice(digits) for i in range(12)))
+        self.location = 'westus'
+
+    def set_up(self):
+        self.cmd('resource group create --location {} --name {}'.format(
+            self.location, self.resource_group))
+        self.cmd('storage account create --sku Standard_LRS -l westus -n {} -g {}'.format(
+            self.account, self.resource_group))
+
+    def tear_down(self):
+        self.cmd('storage account delete -g {} -n {}'.format(self.resource_group, self.account))
         self.cmd('resource group delete --name {}'.format(self.resource_group))

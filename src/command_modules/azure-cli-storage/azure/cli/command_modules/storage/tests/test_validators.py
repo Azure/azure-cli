@@ -70,20 +70,6 @@ class Test_storage_validators(unittest.TestCase):
         with self.assertRaises(ValueError):
             actual = validate_ip_range(input)
 
-    def test_lease_duration_valid(self):
-        self.assertEqual(validate_lease_duration('15'), 15)
-        self.assertEqual(validate_lease_duration('45'), 45)
-        self.assertEqual(validate_lease_duration('60'), 60)
-        self.assertEqual(validate_lease_duration('-1'), -1)
-
-    def test_lease_duration_invalid(self):
-        with self.assertRaises(ValueError):
-            validate_lease_duration('14')
-        with self.assertRaises(ValueError):
-            validate_lease_duration('61')
-        with self.assertRaises(ValueError):
-            validate_lease_duration('-10')
-
     def test_container_permission(self):
         input = "llwrwd"
         actual = str(validate_container_permission(input))
@@ -116,11 +102,6 @@ class Test_storage_validators(unittest.TestCase):
         input = "everything"
         with self.assertRaises(ValueError):
             actual = validate_services(input)
-
-    def test_id_invalid(self):
-        input = "x" * 65
-        with self.assertRaises(ValueError):
-            actual = validate_id(input)
 
 if __name__ == '__main__':
     unittest.main()
