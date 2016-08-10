@@ -27,7 +27,7 @@ from azure.cli.command_modules.network._validators import \
      validate_servers, validate_cert, validate_address_prefixes)
 from azure.cli.command_modules.network.mgmt_nic.lib.models.nic_creation_client_enums import privateIpAddressVersion
 from azure.cli.command_modules.network.mgmt_vnet_gateway.lib.models.vnet_gateway_creation_client_enums import \
-    (gatewayType, privateIPAllocationMethod, sku, vpnType)
+    (gatewayType, sku, vpnType)
 
 # COMPLETERS
 
@@ -242,7 +242,6 @@ register_cli_argument('network nsg create', 'name', name_arg_type)
 # VPN gateway
 register_cli_argument('network vpn-gateway', 'virtual_network_gateway_name', CliArgumentType(options_list=('--name', '-n'), completer=get_resource_name_completion_list('Microsoft.Network/virtualNetworkGateways')), id_part='name')
 register_cli_argument('network vpn-gateway create', 'gateway_type', choices=get_enum_choices(gatewayType))
-register_cli_argument('network vpn-gateway create', 'private_ip_allocation_method', choices=get_enum_choices(privateIPAllocationMethod))
 register_cli_argument('network vpn-gateway create', 'sku', choices=get_enum_choices(sku))
 register_cli_argument('network vpn-gateway create', 'vpn_type', choices=get_enum_choices(vpnType))
 register_folded_cli_argument('network vpn-gateway create', 'public_ip_address', 'Microsoft.Network/publicIPAddresses', default_value_flag='existingId', allow_none=False, required=True)

@@ -37,7 +37,7 @@ class VnetGatewayOperations(object):
         self.config = config
 
     def create_or_update(
-            self, resource_group_name, deployment_name, subnet_id, virtual_network_gateway_name, enable_bgp=False, content_version=None, gateway_type="Vpn", location=None, private_ip_allocation_method="dynamic", public_ip_address=None, public_ip_address_type="existingId", sku="Basic", tags=None, vpn_type="RouteBased", custom_headers=None, raw=False, **operation_config):
+            self, resource_group_name, deployment_name, subnet_id, virtual_network_gateway_name, enable_bgp=False, content_version=None, gateway_type="Vpn", location=None, public_ip_address=None, public_ip_address_type="existingId", sku="Basic", tags=None, vpn_type="RouteBased", custom_headers=None, raw=False, **operation_config):
         """
         Create or update a virtual machine.
 
@@ -62,11 +62,6 @@ class VnetGatewayOperations(object):
          <vnetgatewaycreationclient.models.gatewayType>`
         :param location: Location for resources.
         :type location: str
-        :param private_ip_allocation_method: Private IP address allocation.
-         Possible values include: 'static', 'dynamic'
-        :type private_ip_allocation_method: str or
-         :class:`privateIPAllocationMethod
-         <vnetgatewaycreationclient.models.privateIPAllocationMethod>`
         :param public_ip_address: Name or ID of public IP address to use.
         :type public_ip_address: str
         :param public_ip_address_type: Type of Public IP Address to associate
@@ -93,7 +88,7 @@ class VnetGatewayOperations(object):
         :rtype: :class:`ClientRawResponse<msrest.pipeline.ClientRawResponse>`
          if raw=true
         """
-        parameters = models.DeploymentVnetGateway(content_version=content_version, enable_bgp=enable_bgp, gateway_type=gateway_type, location=location, private_ip_allocation_method=private_ip_allocation_method, public_ip_address=public_ip_address, public_ip_address_type=public_ip_address_type, sku=sku, subnet_id=subnet_id, tags=tags, virtual_network_gateway_name=virtual_network_gateway_name, vpn_type=vpn_type)
+        parameters = models.DeploymentVnetGateway(content_version=content_version, enable_bgp=enable_bgp, gateway_type=gateway_type, location=location, public_ip_address=public_ip_address, public_ip_address_type=public_ip_address_type, sku=sku, subnet_id=subnet_id, tags=tags, virtual_network_gateway_name=virtual_network_gateway_name, vpn_type=vpn_type)
 
         # Construct URL
         url = '/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Resources/deployments/{deploymentName}'

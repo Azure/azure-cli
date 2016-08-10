@@ -27,17 +27,6 @@
         "description": "Location for resources."
       }
     },
-    "privateIPAllocationMethod": {
-      "type": "string",
-      "defaultValue": "dynamic",
-      "allowedValues": [
-        "static",
-        "dynamic"
-      ],
-      "metadata": {
-        "description": "Private IP address allocation."
-      }
-    },
     "publicIpAddress": {
       "type": "string",
       "defaultValue": "[concat(parameters('virtualNetworkGatewayName'), 'PublicIP')]",
@@ -116,7 +105,7 @@
         "ipConfigurations": [
           {
             "properties": {
-              "privateIPAllocationMethod": "[parameters('privateIPAllocationMethod')]",
+              "privateIPAllocationMethod": "Dynamic",
               "subnet": {
                 "id": "[parameters('subnetId')]"
               },

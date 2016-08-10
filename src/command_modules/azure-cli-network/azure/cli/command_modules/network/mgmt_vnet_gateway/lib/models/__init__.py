@@ -22,7 +22,6 @@ from .deployment_properties_extended import DeploymentPropertiesExtended
 from .deployment_extended import DeploymentExtended
 from .vnet_gateway_creation_client_enums import (
     gatewayType,
-    privateIPAllocationMethod,
     publicIpAddressType,
     sku,
     vpnType,
@@ -40,7 +39,6 @@ __all__ = [
     'DeploymentPropertiesExtended',
     'DeploymentExtended',
     'gatewayType',
-    'privateIPAllocationMethod',
     'publicIpAddressType',
     'sku',
     'vpnType',

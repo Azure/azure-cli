@@ -20,12 +20,6 @@ class gatewayType(Enum):
     express_route = "ExpressRoute"
 
 
-class privateIPAllocationMethod(Enum):
-
-    static = "static"
-    dynamic = "dynamic"
-
-
 class publicIpAddressType(Enum):
 
     existing_name = "existingName"

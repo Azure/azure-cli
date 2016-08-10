@@ -37,11 +37,6 @@ class DeploymentVnetGateway(Model):
      <vnetgatewaycreationclient.models.gatewayType>`
     :param location: Location for resources.
     :type location: str
-    :param private_ip_allocation_method: Private IP address allocation.
-     Possible values include: 'static', 'dynamic'. Default value: "dynamic" .
-    :type private_ip_allocation_method: str or
-     :class:`privateIPAllocationMethod
-     <vnetgatewaycreationclient.models.privateIPAllocationMethod>`
     :param public_ip_address: Name or ID of public IP address to use.
     :type public_ip_address: str
     :param public_ip_address_type: Type of Public IP Address to associate
@@ -82,7 +77,6 @@ class DeploymentVnetGateway(Model):
         'enable_bgp': {'key': 'properties.parameters.enableBgp.value', 'type': 'bool'},
         'gateway_type': {'key': 'properties.parameters.gatewayType.value', 'type': 'gatewayType'},
         'location': {'key': 'properties.parameters.location.value', 'type': 'str'},
-        'private_ip_allocation_method': {'key': 'properties.parameters.privateIPAllocationMethod.value', 'type': 'privateIPAllocationMethod'},
         'public_ip_address': {'key': 'properties.parameters.publicIpAddress.value', 'type': 'str'},
         'public_ip_address_type': {'key': 'properties.parameters.publicIpAddressType.value', 'type': 'publicIpAddressType'},
         'sku': {'key': 'properties.parameters.sku.value', 'type': 'sku'},
@@ -97,12 +91,11 @@ class DeploymentVnetGateway(Model):
 
     mode = "Incremental"
 
-    def __init__(self, subnet_id, virtual_network_gateway_name, content_version=None, enable_bgp=False, gateway_type="Vpn", location=None, private_ip_allocation_method="dynamic", public_ip_address=None, public_ip_address_type="existingId", sku="Basic", tags=None, vpn_type="RouteBased"):
+    def __init__(self, subnet_id, virtual_network_gateway_name, content_version=None, enable_bgp=False, gateway_type="Vpn", location=None, public_ip_address=None, public_ip_address_type="existingId", sku="Basic", tags=None, vpn_type="RouteBased"):
         self.content_version = content_version
         self.enable_bgp = enable_bgp
         self.gateway_type = gateway_type
         self.location = location
-        self.private_ip_allocation_method = private_ip_allocation_method
         self.public_ip_address = public_ip_address
         self.public_ip_address_type = public_ip_address_type
         self.sku = sku
