@@ -154,7 +154,8 @@ def add_id_parameters(command_table):
 
 APPLICATION.register(APPLICATION.COMMAND_TABLE_LOADED, add_id_parameters)
 
-def register_generic_update(name, getter, setter, factory=None, setter_arg_name='parameters'):
+def register_generic_update(name, getter, setter, factory=None, setter_arg_name='parameters', #pylint:disable=too-many-arguments
+                            simple_output_query=None):
 
     get_arguments = dict(extract_args_from_signature(getter))
     set_arguments = dict(extract_args_from_signature(setter))
@@ -213,7 +214,7 @@ def register_generic_update(name, getter, setter, factory=None, setter_arg_name=
         if not getattr(namespace, 'ordered_arguments', None):
             raise ValueError('At least one must be specified: --add, --set, --remove')
 
-    cmd = CliCommand(name, handler)
+    cmd = CliCommand(name, handler, simple_output_query=simple_output_query)
     cmd.arguments.update(set_arguments)
     cmd.arguments.update(get_arguments)
     cmd.arguments.pop(setter_arg_name, None)
