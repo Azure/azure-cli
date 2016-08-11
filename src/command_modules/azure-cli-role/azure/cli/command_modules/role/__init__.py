@@ -7,3 +7,4 @@
 
 import azure.cli.command_modules.role.generated
 import azure.cli.command_modules.role._params
+import azure.cli.command_modules.role._help
