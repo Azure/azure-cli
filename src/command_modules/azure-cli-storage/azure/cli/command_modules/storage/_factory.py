@@ -8,6 +8,8 @@ from azure.mgmt.storage import StorageManagementClient
 from azure.storage import CloudStorageAccount
 from azure.storage.blob import BlockBlobService
 from azure.storage.file import FileService
+from azure.storage.table import TableService
+from azure.storage.queue import QueueService
 from azure.storage._error import _ERROR_STORAGE_MISSING_INFO
 
 from azure.cli.commands.client_factory import get_mgmt_service_client, get_data_service_client
@@ -49,6 +51,22 @@ def blob_data_service_factory(kwargs):
     blob_service = blob_types.get(blob_type, BlockBlobService)
     return _get_data_service_client(
         blob_service,
+        kwargs.pop('account_name', None),
+        kwargs.pop('account_key', None),
+        connection_string=kwargs.pop('connection_string', None),
+        sas_token=kwargs.pop('sas_token', None))
+
+def table_data_service_factory(kwargs):
+    return _get_data_service_client(
+        TableService,
+        kwargs.pop('account_name', None),
+        kwargs.pop('account_key', None),
+        connection_string=kwargs.pop('connection_string', None),
+        sas_token=kwargs.pop('sas_token', None))
+
+def queue_data_service_factory(kwargs):
+    return _get_data_service_client(
+        QueueService,
         kwargs.pop('account_name', None),
         kwargs.pop('account_key', None),
         connection_string=kwargs.pop('connection_string', None),

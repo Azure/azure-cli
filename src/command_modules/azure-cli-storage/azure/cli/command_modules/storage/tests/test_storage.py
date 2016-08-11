@@ -10,6 +10,7 @@ import collections
 import json
 import os
 import sys
+import time
 
 from six import StringIO
 
@@ -147,8 +148,7 @@ class StorageBlobScenarioTest(StorageAccountVCRTestBase):
 
         s.cmd('storage blob metadata update -n {} -c {} --metadata a=b c=d'.format(blob, container))
         s.cmd('storage blob metadata show -n {} -c {}'.format(blob, container), checks=[
-            JMESPathCheck('a', 'b')
-,
+            JMESPathCheck('a', 'b'),
             JMESPathCheck('c', 'd')
         ])
         s.cmd('storage blob metadata update -n {} -c {}'.format(blob, container))
@@ -524,6 +524,184 @@ class StorageFileCopyScenarioTest(StorageAccountVCRTestBase):
             JMESPathCheck('properties.copy.id', copy_id),
             JMESPathCheck('properties.copy.status', 'success')
         ])
+
+class StorageTableScenarioTest(StorageAccountVCRTestBase):
+
+    def __init__(self, test_method):
+        super(StorageTableScenarioTest, self).__init__(__file__, test_method)
+        self.resource_group = 'test_table_scenario_test'
+        self.table = 'table1'
+
+    def test_storage_table_scenario(self):
+        self.execute()
+            
+    def set_up(self):
+        super(StorageTableScenarioTest, self).set_up()
+        _get_connection_string(self)
+
+    def _storage_entity_scenario(self, table):
+        s = self
+        s.cmd('storage entity insert -t {} -e rowkey=001 partitionkey=001 name=test value=something'.format(table))
+        s.cmd('storage entity show -t {} --row-key 001 --partition-key 001'.format(table), checks=[
+            JMESPathCheck('name', 'test'),
+            JMESPathCheck('value', 'something')
+        ])
+        s.cmd('storage entity show -t {} --row-key 001 --partition-key 001 --select name'.format(table), checks=[
+            JMESPathCheck('name', 'test'),
+            JMESPathCheck('value', None)
+        ])
+        s.cmd('storage entity merge -t {} -e rowkey=001 partitionkey=001 name=test value=newval'.format(table))
+        s.cmd('storage entity show -t {} --row-key 001 --partition-key 001'.format(table), checks=[
+            JMESPathCheck('name', 'test'),
+            JMESPathCheck('value', 'newval')
+        ])
+        s.cmd('storage entity replace -t {} -e rowkey=001 partitionkey=001 cat=hat'.format(table))
+        s.cmd('storage entity show -t {} --row-key 001 --partition-key 001'.format(table), checks=[
+            JMESPathCheck('cat', 'hat'),
+            JMESPathCheck('name', None),
+            JMESPathCheck('value', None),
+        ])
+
+        s.cmd('storage entity delete -t {} --row-key 001 --partition-key 001'.format(table))
+        s.cmd('storage entity show -t {} --row-key 001 --partition-key 001'.format(table),
+            allowed_exceptions='Not Found')
+
+    def _table_acl_scenario(self, table):
+        s = self
+        s.cmd('storage table policy list -t {}'.format(table), checks=NoneCheck())
+        s.cmd('storage table policy create -t {} -n test1 --permission r'.format(table))
+        s.cmd('storage table policy create -t {} -n test2 --start 2016-01-01T00:00Z'.format(table))
+        s.cmd('storage table policy create -t {} -n test3 --expiry 2018-01-01T00:00Z'.format(table))
+        s.cmd('storage table policy create -t {} -n test4 --permission raud --start 2016-01-01T00:00Z --expiry 2016-05-01T00:00Z'.format(table))
+        acl = sorted(s.cmd('storage table policy list -t {}'.format(table)).keys())
+        assert acl == ['test1', 'test2', 'test3', 'test4']
+        s.cmd('storage table policy show -t {} -n test1'.format(table),
+            checks=JMESPathCheck('permission', 'r'))
+        s.cmd('storage table policy show -t {} -n test2'.format(table),
+            checks=JMESPathCheck('start', '2016-01-01T00:00:00+00:00'))
+        s.cmd('storage table policy show -t {} -n test3'.format(table),
+            checks=JMESPathCheck('expiry', '2018-01-01T00:00:00+00:00'))
+        s.cmd('storage table policy show -t {} -n test4'.format(table), checks=[
+            JMESPathCheck('start', '2016-01-01T00:00:00+00:00'),
+            JMESPathCheck('expiry', '2016-05-01T00:00:00+00:00'),
+            JMESPathCheck('permission', 'raud')
+        ])
+        s.cmd('storage table policy update -t {} -n test1 --permission ra'.format(table))
+        s.cmd('storage table policy show -t {} -n test1'.format(table),
+            checks=JMESPathCheck('permission', 'ra'))
+        s.cmd('storage table policy delete -t {} -n test1'.format(table))
+        acl = sorted(s.cmd('storage table policy list -t {}'.format(table)).keys())
+        assert acl == ['test2', 'test3', 'test4']
+
+    def body(self):
+        s = self
+        table = s.table
+        rg = s.resource_group
+        _get_connection_string(self)
+
+        s.cmd('storage table create -n {} --fail-on-exist'.format(table), checks=BooleanCheck(True))
+        s.cmd('storage table exists -n {}'.format(table), checks=BooleanCheck(True))
+
+        res = s.cmd('storage table list')['items']
+        assert table in [x['name'] for x in res]
+
+        s._table_acl_scenario(table)
+
+        s._storage_entity_scenario(table)
+
+        # verify delete operation
+        s.cmd('storage table delete --name {} --fail-not-exist'.format(table), checks=BooleanCheck(True))
+        s.cmd('storage table exists -n {}'.format(table), checks=BooleanCheck(False))
+
+class StorageQueueScenarioTest(StorageAccountVCRTestBase):
+
+    def __init__(self, test_method):
+        super(StorageQueueScenarioTest, self).__init__(__file__, test_method)
+        self.resource_group = 'test_queue_scenario_test'
+        self.queue = 'queue1'
+
+    def test_storage_queue_scenario(self):
+        self.execute()
+            
+    def set_up(self):
+        super(StorageQueueScenarioTest, self).set_up()
+        _get_connection_string(self)
+
+    def _storage_message_scenario(self, queue):
+        s = self
+        s.cmd('storage message put -q {} --content "test message"'.format(queue))
+        s.cmd('storage message peek -q {}'.format(queue), 
+            checks=JMESPathCheck('[0].content', 'test message'))
+        messages = s.cmd('storage message get -q {}'.format(queue))
+        msg_id = messages[0]['id']
+        pop_receipt = messages[0]['popReceipt']
+
+        s.cmd('storage message update -q {} --id {} --pop-receipt {} --visibility-timeout 1 --content "new message!"'.format(queue, msg_id, pop_receipt))
+        time.sleep(2) # ensures message should be back in queue
+        s.cmd('storage message peek -q {}'.format(queue),
+            checks=JMESPathCheck('[0].content', 'new message!'))        
+        s.cmd('storage message put -q {} --content "second message"'.format(queue))
+        s.cmd('storage message put -q {} --content "third message"'.format(queue))
+        s.cmd('storage message peek -q {} --num-messages 32'.format(queue),
+            checks=JMESPathCheck('length(@)', 3))
+        
+        messages = s.cmd('storage message get -q {}'.format(queue))
+        msg_id = messages[0]['id']
+        pop_receipt = messages[0]['popReceipt']
+
+        s.cmd('storage message delete -q {} --id {} --pop-receipt {}'.format(queue, msg_id, pop_receipt))
+        s.cmd('storage message peek -q {} --num-messages 32'.format(queue),
+            checks=JMESPathCheck('length(@)', 2))
+
+        s.cmd('storage message clear -q {}'.format(queue))
+        s.cmd('storage message peek -q {} --num-messages 32'.format(queue), checks=NoneCheck())
+
+    def _queue_acl_scenario(self, queue):
+        s = self
+        s.cmd('storage queue policy list -q {}'.format(queue), checks=NoneCheck())
+        s.cmd('storage queue policy create -q {} -n test1 --permission raup --start 2016-01-01T00:00Z --expiry 2016-05-01T00:00Z'.format(queue))
+        acl = sorted(s.cmd('storage queue policy list -q {}'.format(queue)).keys())
+        assert acl == ['test1']
+        s.cmd('storage queue policy show -q {} -n test1'.format(queue), checks=[
+            JMESPathCheck('start', '2016-01-01T00:00:00+00:00'),
+            JMESPathCheck('expiry', '2016-05-01T00:00:00+00:00'),
+            JMESPathCheck('permission', 'rpau')
+        ])
+        s.cmd('storage queue policy update -q {} -n test1 --permission ra'.format(queue))
+        s.cmd('storage queue policy show -q {} -n test1'.format(queue),
+            checks=JMESPathCheck('permission', 'ra'))
+        s.cmd('storage queue policy delete -q {} -n test1'.format(queue))
+        s.cmd('storage queue policy list -q {}'.format(queue), checks=NoneCheck())
+
+    def body(self):
+        s = self
+        queue = s.queue
+        rg = s.resource_group
+        _get_connection_string(self)
+
+        s.cmd('storage queue create -n {} --fail-on-exist --metadata a=b c=d'.format(queue), checks=BooleanCheck(True))
+        s.cmd('storage queue exists -n {}'.format(queue), checks=BooleanCheck(True))
+
+        res = s.cmd('storage queue list')['items']
+        assert queue in [x['name'] for x in res]
+
+        s.cmd('storage queue metadata show -n {}'.format(queue), checks=[
+            JMESPathCheck('a', 'b'),
+            JMESPathCheck('c', 'd')
+        ])
+        s.cmd('storage queue metadata update -n {} --metadata e=f g=h'.format(queue))
+        s.cmd('storage queue metadata show -n {}'.format(queue), checks=[
+            JMESPathCheck('e', 'f'),
+            JMESPathCheck('g', 'h')
+        ])
+
+        s._queue_acl_scenario(queue)
+
+        s._storage_message_scenario(queue)
+
+        # verify delete operation
+        s.cmd('storage queue delete -n {} --fail-not-exist'.format(queue), checks=BooleanCheck(True))
+        s.cmd('storage queue exists -n {}'.format(queue), checks=BooleanCheck(False))
 
 def _acl_init(test):
     test.container = 'acltest{}'.format(test.service)
