@@ -243,3 +243,20 @@ class ResourceMoveScenarioTest(VCRTestBase):
         #see they show up at destination
         self.cmd('network nsg show -g {} -n {}'.format(self.destination_group, nsg1), [JMESPathCheck('name', nsg1)])
         self.cmd('network nsg show -g {} -n {}'.format(self.destination_group, nsg2), [JMESPathCheck('name', nsg2)])
+
+class FeatureScenarioTest(VCRTestBase):
+    def __init__(self, test_method):
+        super(FeatureScenarioTest, self).__init__(__file__, test_method)
+
+    def test_feature_list(self):
+        self.execute()
+
+    def body(self):
+        self.cmd('resource feature list', checks=[
+            JMESPathCheck("length([?name=='Microsoft.Xrm/uxdevelopment'])", 1)
+            ])
+
+        self.cmd('resource feature list --namespace {}'.format('Microsoft.Network'), checks=[
+            JMESPathCheck("length([?name=='Microsoft.Network/SkipPseudoVipGeneration'])", 1)
+            ])
+
