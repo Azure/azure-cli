@@ -4,6 +4,7 @@
 #---------------------------------------------------------------------------------------------
 
 # pylint: disable=line-too-long
+from azure.mgmt.resource.features.operations.features_operations import FeaturesOperations
 from azure.mgmt.resource.resources.operations.resources_operations import ResourcesOperations
 from azure.mgmt.resource.resources.operations.providers_operations import ProvidersOperations
 from azure.mgmt.resource.resources.operations.resource_groups_operations \
@@ -15,12 +16,14 @@ from azure.mgmt.resource.resources.operations.deployment_operations_operations \
 
 from azure.cli.commands import cli_command
 from azure.cli.commands.arm import register_generic_update
-from azure.cli.command_modules.resource._factory import _resource_client_factory
+from azure.cli.command_modules.resource._factory import (_resource_client_factory,
+                                                         _feature_client_factory)
 from azure.cli.command_modules.resource.custom import (
     list_resource_groups, create_resource_group, export_group_as_template,
     list_resources, move_resource,
     deploy_arm_template, validate_arm_template, tag_resource, export_deployment_as_template,
-    register_provider, unregister_provider
+    register_provider, unregister_provider,
+    list_features
 )
 
 # Resource group commands
@@ -47,6 +50,13 @@ cli_command('resource provider list', ProvidersOperations.list, factory)
 cli_command('resource provider show', ProvidersOperations.get, factory)
 cli_command('resource provider register', register_provider)
 cli_command('resource provider unregister', unregister_provider)
+
+# Resource feature commands
+feature_tab_query = '{Name:name, State:properties.state}'
+factory = lambda _: _feature_client_factory().features
+cli_command('resource feature list', list_features, factory, simple_output_query='[].'+feature_tab_query)
+cli_command('resource feature show', FeaturesOperations.get, factory, simple_output_query=feature_tab_query)
+cli_command('resource feature register', FeaturesOperations.register, factory, simple_output_query=feature_tab_query)
 
 # Tag commands
 factory = lambda _: _resource_client_factory().tags

@@ -38,9 +38,13 @@ register_cli_argument('resource', 'tags', tags_type)
 register_cli_argument('resource list', 'name', resource_name_type)
 register_cli_argument('resource move', 'ids', nargs='+')
 
-
+_PROVIDER_HELP_TEXT = 'the resource namespace, aka \'provider\''
 register_cli_argument('resource provider', 'top', CliArgumentType(help=argparse.SUPPRESS))
-register_cli_argument('resource provider', 'resource_provider_namespace', CliArgumentType(options_list=('--namespace', '-n'), help='the resource provider name, aka \'namespace\''))
+register_cli_argument('resource provider', 'resource_provider_namespace', CliArgumentType(options_list=('--namespace', '-n'), help=_PROVIDER_HELP_TEXT))
+
+register_cli_argument('resource feature', 'resource_provider_namespace', CliArgumentType(options_list=('--namespace',), required=True, help=_PROVIDER_HELP_TEXT))
+register_cli_argument('resource feature list', 'resource_provider_namespace', CliArgumentType(options_list=('--namespace',), required=False, help=_PROVIDER_HELP_TEXT))
+register_cli_argument('resource feature', 'feature_name', CliArgumentType(options_list=('--name', '-n'), help='the feature name'))
 
 register_cli_argument('resource group', 'resource_group_name', resource_group_name_type, options_list=('--name', '-n'))
 register_cli_argument('resource group deployment', 'resource_group_name', arg_type=resource_group_name_type, completer=get_resource_group_completion_list)
