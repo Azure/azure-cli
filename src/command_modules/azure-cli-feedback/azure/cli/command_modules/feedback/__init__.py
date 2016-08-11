@@ -9,6 +9,7 @@ from six.moves import input #pylint: disable=redefined-builtin
 import azure.cli as cli
 from azure.cli.commands import cli_command
 import azure.cli._logging as _logging
+import azure.cli.command_modules.feedback._help # pylint: disable=unused-import
 
 logger = _logging.get_az_logger(__name__)
 
