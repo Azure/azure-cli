@@ -88,8 +88,8 @@ cli_storage_data_plane_command('storage blob copy cancel', BlockBlobService.abor
 
 # share commands
 factory = file_data_service_factory
-cli_storage_data_plane_command('storage share list', FileService.list_shares, factory, simple_output_query='items[*].{Name:name,"Quota (GB)":properties.quota}')
-cli_storage_data_plane_command('storage share contents', FileService.list_directories_and_files, factory, simple_output_query='items[*].{Name:name, Size:properties.contentLength}')
+cli_storage_data_plane_command('storage share list', FileService.list_shares, factory, simple_output_query='items[*].{Name:name,"Quota (GB)":properties.quota} | sort_by(@, &Name)')
+cli_storage_data_plane_command('storage share contents', FileService.list_directories_and_files, factory, simple_output_query='items[*].{Name:name, Size:properties.contentLength} | sort_by(@, &Name)')
 cli_storage_data_plane_command('storage share create', FileService.create_share, factory)
 cli_storage_data_plane_command('storage share delete', FileService.delete_share, factory)
 cli_storage_data_plane_command('storage share generate-sas', FileService.generate_share_shared_access_signature, factory)
@@ -136,7 +136,7 @@ cli_storage_data_plane_command('storage table generate-sas', TableService.genera
 cli_storage_data_plane_command('storage table stats', TableService.get_table_service_stats, factory)
 cli_storage_data_plane_command('storage table service-properties show', TableService.get_table_service_properties, factory)
 cli_storage_data_plane_command('storage table service-properties update', TableService.set_table_service_properties, factory)
-cli_storage_data_plane_command('storage table list', TableService.list_tables, factory, simple_output_query='items[*].{Name:name}')
+cli_storage_data_plane_command('storage table list', TableService.list_tables, factory, simple_output_query='items[*].{Name:name} | sort_by(@, &Name)')
 cli_storage_data_plane_command('storage table create', TableService.create_table, factory)
 cli_storage_data_plane_command('storage table exists', TableService.exists, factory)
 cli_storage_data_plane_command('storage table delete', TableService.delete_table, factory)
@@ -162,7 +162,7 @@ cli_storage_data_plane_command('storage queue generate-sas', QueueService.genera
 cli_storage_data_plane_command('storage queue stats', QueueService.get_queue_service_stats, factory)
 cli_storage_data_plane_command('storage queue service-properties show', QueueService.get_queue_service_properties, factory)
 cli_storage_data_plane_command('storage queue service-properties update', QueueService.set_queue_service_properties, factory)
-cli_storage_data_plane_command('storage queue list', QueueService.list_queues, factory, simple_output_query='items[*].{Name:name}')
+cli_storage_data_plane_command('storage queue list', QueueService.list_queues, factory, simple_output_query='items[*].{Name:name} | sort_by(@, &Name)')
 cli_storage_data_plane_command('storage queue create', QueueService.create_queue, factory)
 cli_storage_data_plane_command('storage queue delete', QueueService.delete_queue, factory)
 cli_storage_data_plane_command('storage queue metadata show', QueueService.get_queue_metadata, factory)
@@ -177,7 +177,7 @@ cli_storage_data_plane_command('storage queue policy update', set_acl_policy, fa
 # queue message commands
 cli_storage_data_plane_command('storage message put', QueueService.put_message, factory)
 cli_storage_data_plane_command('storage message get', QueueService.get_messages, factory)
-cli_storage_data_plane_command('storage message peek', QueueService.peek_messages, factory, simple_output_query='[*].{ID:id, Content:content, Insertion:insertionTime, Expiration:expirationTime}')
+cli_storage_data_plane_command('storage message peek', QueueService.peek_messages, factory, simple_output_query='[*].{ID:id, Content:content, Insertion:insertionTime, Expiration:expirationTime} | sort_by(@, &Insertion)')
 cli_storage_data_plane_command('storage message delete', QueueService.delete_message, factory)
 cli_storage_data_plane_command('storage message clear', QueueService.clear_messages, factory)
 cli_storage_data_plane_command('storage message update', QueueService.update_message, factory)

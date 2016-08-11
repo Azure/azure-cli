@@ -110,14 +110,6 @@ def validate_services(string):
         raise ValueError
     return Services(_str=''.join(set(string)))
 
-def validate_unicode_string(string):
-    try:
-        # Python2
-        return unicode(string)
-    except NameError:
-        # Python3
-        return string
-
 def validate_client_parameters(namespace):
     """ Retrieves storage connection parameters from environment variables and parses out
     connection string into account name and key """

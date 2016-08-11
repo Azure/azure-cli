@@ -7,6 +7,8 @@
 import argparse
 import os
 
+from six import u as unicode_string
+
 from azure.cli.commands.parameters import \
     (tags_type, get_resource_name_completion_list, get_enum_type_completion_list)
 from azure.cli.commands import register_cli_argument, register_extra_cli_argument, CliArgumentType
@@ -23,7 +25,11 @@ from ._validators import \
     (validate_datetime, validate_datetime_as_string, get_file_path_validator, validate_metadata,
      validate_container_permission, validate_resource_types, validate_services, validate_ip_range,
      validate_table_permission, validate_queue_permission, validate_entity, validate_select,
-     validate_unicode_string, IgnoreAction)
+     IgnoreAction)
+
+# CONSTANTS
+
+IGNORE_TYPE = CliArgumentType(help=argparse.SUPPRESS, nargs='?', action=IgnoreAction, required=False)
 
 # COMPLETERS
 
@@ -57,7 +63,7 @@ def entity_completer(prefix, action, parsed_args, **kwargs): # pylint: disable=u
     # This is a workaround for the fact that argcomplete always inserts a space after completion
     # In this case, we want the cursor to remain positioned just after the text. We would ideally
     # like it to append the = sign, but argcomplete irritatingly escapes it.
-    if prefix == 'RowKey' or prefix == 'PartitionKey':
+    if prefix in ['RowKey', 'PartitionKey']:
         return []
     return ['RowKey!', 'RowKey*', 'PartitionKey!', 'PartitionKey*']
 
@@ -109,7 +115,6 @@ file_name_type = CliArgumentType(options_list=('--file-name', '-f'), completer=g
 share_name_type = CliArgumentType(options_list=('--share-name', '-s'), help='The file share name.', completer=get_storage_name_completion_list(FileService, 'list_shares'))
 table_name_type = CliArgumentType(options_list=('--table-name', '-t'), completer=get_storage_name_completion_list(TableService, 'list_tables'))
 queue_name_type = CliArgumentType(options_list=('--queue-name', '-q'), help='The queue name.', completer=get_storage_name_completion_list(QueueService, 'list_queues'))
-IGNORE_TYPE = CliArgumentType(help=argparse.SUPPRESS, nargs='?', action=IgnoreAction, required=False)
 
 # PARAMETER REGISTRATIONS
 
@@ -269,7 +274,7 @@ register_cli_argument('storage queue policy', 'permission', options_list=('--per
 
 register_cli_argument('storage message', 'queue_name', queue_name_type)
 register_cli_argument('storage message', 'message_id', options_list=('--id',))
-register_cli_argument('storage message', 'content', type=validate_unicode_string)
+register_cli_argument('storage message', 'content', type=unicode_string)
 
 ###################################################################################################
 
