@@ -7,3 +7,4 @@
 
 import azure.cli.command_modules.taskhelp.generated
 import azure.cli.command_modules.taskhelp.custom
+import azure.cli.command_modules.taskhelp._help
