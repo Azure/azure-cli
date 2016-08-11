@@ -15,6 +15,13 @@ from azure.cli.commands.validators import validate_key_value_pairs
 from azure.mgmt.storage import StorageManagementClient
 from azure.storage.models import ResourceTypes, Services
 from azure.storage.blob.models import ContainerPermissions
+from azure.storage.table.models import TablePermissions
+from azure.storage.queue.models import QueuePermissions
+
+class IgnoreAction(argparse.Action): # pylint: disable=too-few-public-methods
+    def __call__(self, parser, namespace, values, option_string=None):
+        raise argparse.ArgumentError(None, 'unrecognized argument: {} {}'.format(
+            option_string, values or ''))
 
 def validate_container_permission(string):
     ''' Validates that permission string contains only a combination
@@ -23,6 +30,22 @@ def validate_container_permission(string):
         raise ValueError('valid values are (r)ead, (w)rite, (d)elete, (l)ist or a combination ' + \
                          'thereof (ex: rw)')
     return ContainerPermissions(_str=''.join(set(string)))
+
+def validate_table_permission(string):
+    ''' Validates that permission string contains only a combination
+    of (r)ead, (a)dd, (u)pdate, (d)elete. '''
+    if set(string) - set('raud'):
+        raise ValueError('valid values are (r)ead, (a)dd, (u)pdate, (d)elete or a combination ' + \
+                         'thereof (ex: ra)')
+    return TablePermissions(_str=''.join(set(string)))
+
+def validate_queue_permission(string):
+    ''' Validates that permission string contains only a combination
+    of (r)ead, (a)dd, (u)pdate, (p)rocess [delete]. '''
+    if set(string) - set('raup'):
+        raise ValueError('valid values are (r)ead, (a)dd, (u)pdate, (p)rocess [delete] or a '
+                         'combination thereof (ex: ra)')
+    return QueuePermissions(_str=''.join(set(string)))
 
 def validate_datetime_as_string(string):
     ''' Validates UTC datettime in format '%Y-%m-%d\'T\'%H:%M\'Z\''. '''
@@ -33,6 +56,29 @@ def validate_datetime(string):
     ''' Validates UTC datettime in format '%Y-%m-%d\'T\'%H:%M\'Z\''. '''
     date_format = '%Y-%m-%dT%H:%MZ'
     return datetime.strptime(string, date_format)
+
+def validate_entity(namespace):
+    ''' Converts a list of key value pairs into a dictionary. Ensures that required
+    RowKey and PartitionKey are converted to the correct case and included. '''
+    values = dict(x.split('=', 1) for x in namespace.entity)
+    keys = values.keys()
+    for key in keys:
+        if key.lower() == 'rowkey':
+            val = values[key]
+            del values[key]
+            values['RowKey'] = val
+        elif key.lower() == 'partitionkey':
+            val = values[key]
+            del values[key]
+            values['PartitionKey'] = val
+    keys = values.keys()
+    missing_keys = 'RowKey ' if 'RowKey' not in keys else ''
+    missing_keys = '{}PartitionKey'.format(missing_keys) \
+        if 'PartitionKey' not in keys else missing_keys
+    if missing_keys:
+        raise argparse.ArgumentError(
+            None, 'incorrect usage: entity requires: {}'.format(missing_keys))
+    namespace.entity = values
 
 def validate_ip_range(string):
     ''' Validates an IP address or IP address range. '''
@@ -52,6 +98,10 @@ def validate_resource_types(string):
     if set(string) - set("sco"):
         raise ValueError
     return ResourceTypes(_str=''.join(set(string)))
+
+def validate_select(namespace):
+    if namespace.select:
+        namespace.select = ','.join(namespace.select)
 
 def validate_services(string):
     ''' Validates that services string contains only a combination
@@ -96,15 +146,6 @@ def get_file_path_validator(default_file_param=None):
     """ Creates a namespace validator that splits out 'path' into 'directory_name' and 'file_name'.
     Allows another path-type parameter to be named which can supply a default filename. """
     def validator(namespace):
-        # directory_name and file_name should be treated as unrecognized
-        unrecognized = ''
-        if namespace.directory_name is not None:
-            unrecognized = '--directory-name '
-        if namespace.file_name is not None:
-            unrecognized = '{}{}'.format(unrecognized, '--file-name')
-        if unrecognized:
-            raise argparse.ArgumentError(None, 'unrecognized arguments: {}'.format(unrecognized))
-
         path = namespace.path
         dir_name, file_name = os.path.split(path) if path else (None, '')
 
