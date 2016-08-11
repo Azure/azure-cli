@@ -2,7 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 #---------------------------------------------------------------------------------------------
-
+from msrestazure.azure_exceptions import CloudError
 from azure.mgmt.keyvault.models import (VaultCreateOrUpdateParameters,
                                         VaultProperties,
                                         AccessPolicyEntry,
@@ -96,7 +96,11 @@ def create_keyvault(client, resource_group_name, vault_name, location, #pylint:d
                                         'backup',
                                         'restore'],
                                   secrets=['all'])
-        object_id = _get_current_user_object_id(graph_client)
+        object_id = None
+        try:
+            object_id = _get_current_user_object_id(graph_client)
+        except CloudError:
+            pass
         if not object_id:
             object_id = _get_object_id(graph_client, subscription=subscription)
         if not object_id:
