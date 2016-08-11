@@ -23,9 +23,12 @@ def list_keyvault(client, resource_group_name=None):
     return list(vault_list)
 
 def _get_current_user_object_id(graph_client):
-    current_user = graph_client.objects.get_current_user()
-    if current_user and current_user.object_id: #pylint:disable=no-member
-        return current_user.object_id #pylint:disable=no-member
+    try:
+        current_user = graph_client.objects.get_current_user()
+        if current_user and current_user.object_id: #pylint:disable=no-member
+            return current_user.object_id #pylint:disable=no-member
+    except CloudError:
+        pass
 
 def _get_object_id_by_spn(graph_client, spn):
     accounts = list(graph_client.service_principals.list(
@@ -96,11 +99,7 @@ def create_keyvault(client, resource_group_name, vault_name, location, #pylint:d
                                         'backup',
                                         'restore'],
                                   secrets=['all'])
-        object_id = None
-        try:
-            object_id = _get_current_user_object_id(graph_client)
-        except CloudError:
-            pass
+        object_id = _get_current_user_object_id(graph_client)
         if not object_id:
             object_id = _get_object_id(graph_client, subscription=subscription)
         if not object_id:
