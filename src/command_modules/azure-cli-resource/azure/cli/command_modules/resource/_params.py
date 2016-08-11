@@ -14,7 +14,7 @@ from azure.cli.commands.parameters import (resource_group_name_type,
                                            tag_type,
                                            tags_type,
                                            get_resource_group_completion_list)
-from .custom import get_policy_completion_list
+from .custom import get_policy_completion_list, get_policy_assignment_completion_list
 from ._validators import validate_resource_type, validate_parent, resolve_resource_parameters
 
 # BASIC PARAMETER CONFIGURATION
@@ -46,17 +46,19 @@ register_cli_argument('resource feature', 'resource_provider_namespace', CliArgu
 register_cli_argument('resource feature list', 'resource_provider_namespace', CliArgumentType(options_list=('--namespace',), required=False, help=_PROVIDER_HELP_TEXT))
 register_cli_argument('resource feature', 'feature_name', CliArgumentType(options_list=('--name', '-n'), help='the feature name'))
 
-register_cli_argument('resource policy', 'resource_group_name', arg_type=resource_group_name_type, completer=get_resource_group_completion_list)
-register_cli_argument('resource policy', 'policy_definition_name', options_list=('--name', '-n'), help='name of policy definition')
+register_cli_argument('resource policy', 'resource_group_name', arg_type=resource_group_name_type, help='the resource group where the policy will be applied')
+register_cli_argument('resource policy', 'policy_definition_name', options_list=('--name', '-n'), completer=get_policy_completion_list, help='name of policy definition')
+register_cli_argument('resource policy create', 'policy_definition_name', completer=None)
 register_cli_argument('resource policy create', 'rules', help='JSON formatted string or a path to a file with such content')
 register_cli_argument('resource policy create', 'display_name', help='display name of policy definition')
 register_cli_argument('resource policy create', 'description', help='description of policy definition')
-register_cli_argument('resource policy assignment', 'policy_assignment_name', options_list=('--name', '-n'), help='name of the assignment')
-register_cli_argument('resource policy assignment', 'resource_id', help='id of the associated resource')
+register_cli_argument('resource policy assignment', 'policy_assignment_name', options_list=('--name', '-n'), completer=get_policy_assignment_completion_list, help='name of the assignment')
+register_cli_argument('resource policy assignment', 'resource_id', help='id of the associated resource where the policy will be applied')
 register_cli_argument('resource policy assignment', 'show_all', action='store_true', help='show all the assignment under the current subscription')
 register_cli_argument('resource policy assignment', 'include_inherited', action='store_true', help='show assignments from parent scopes')
 register_cli_argument('resource policy assignment', 'display_name', help='display name of the assignment')
 register_cli_argument('resource policy assignment', 'policy', help='policy name or fully qualified id', completer=get_policy_completion_list)
+register_cli_argument('resource policy assignment create', 'policy_assignment_name', completer=None)
 
 register_cli_argument('resource group', 'resource_group_name', resource_group_name_type, options_list=('--name', '-n'))
 register_cli_argument('resource group deployment', 'resource_group_name', arg_type=resource_group_name_type, completer=get_resource_group_completion_list)

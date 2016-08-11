@@ -390,4 +390,8 @@ def get_policy_completion_list(prefix, **kwargs):#pylint: disable=unused-argumen
     result = policy_client.policy_definitions.list()
     return [i.name for i in result]
 
+def get_policy_assignment_completion_list(prefix, **kwargs):#pylint: disable=unused-argument
+    policy_client = _resource_policy_client_factory()
+    result = policy_client.policy_assignments.list()
+    return [i.name for i in result]
 

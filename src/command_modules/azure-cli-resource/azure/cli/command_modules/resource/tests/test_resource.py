@@ -308,7 +308,7 @@ class PolicyScenarioTest(VCRTestBase):#ResourceGroupVCRTestBase
                 JMESPathCheck('displayName', policy_assignment_display_name),
                 ])
 
-        # list at subscription won't work
+        # listing at subscription level won't find the assignment made at a resource group
         import jmespath
         try:
             self.cmd('resource policy assignment list', checks=[
