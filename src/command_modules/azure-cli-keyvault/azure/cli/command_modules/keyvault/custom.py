@@ -8,7 +8,6 @@ from azure.mgmt.keyvault.models import (VaultCreateOrUpdateParameters,
                                         AccessPolicyEntry,
                                         Permissions,
                                         Sku,
-                                        SkuFamily,
                                         SkuName)
 from azure.graphrbac import GraphRbacManagementClient
 
@@ -71,9 +70,7 @@ def _get_object_id(graph_client, subscription=None, spn=None, upn=None):
     return _get_object_id_from_subscription(graph_client, subscription)
 
 def create_keyvault(client, resource_group_name, vault_name, location, #pylint:disable=too-many-arguments
-                    sku_name=SkuName.standard.value,
-                    sku_family=SkuFamily.a.value,
-                    vault_uri=None,
+                    sku=SkuName.standard.value,
                     enabled_for_deployment=None,
                     enabled_for_disk_encryption=None,
                     enabled_for_template_deployment=None,
@@ -112,9 +109,9 @@ def create_keyvault(client, resource_group_name, vault_name, location, #pylint:d
                                              object_id=object_id,
                                              permissions=permissions)]
     properties = VaultProperties(tenant_id=tenant_id,
-                                 sku=Sku(name=sku_name, family=sku_family),
+                                 sku=Sku(name=sku, family='A'),
                                  access_policies=access_policies,
-                                 vault_uri=vault_uri,
+                                 vault_uri=None,
                                  enabled_for_deployment=enabled_for_deployment,
                                  enabled_for_disk_encryption=enabled_for_disk_encryption,
                                  enabled_for_template_deployment=enabled_for_template_deployment)
@@ -124,6 +121,8 @@ def create_keyvault(client, resource_group_name, vault_name, location, #pylint:d
     return client.create_or_update(resource_group_name=resource_group_name,
                                    vault_name=vault_name,
                                    parameters=parameters)
+
+create_keyvault.__doc__ = VaultProperties.__doc__
 
 def _object_id_args_helper(object_id, spn, upn):
     if not object_id:

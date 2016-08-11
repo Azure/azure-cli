@@ -5,6 +5,7 @@
 
 # pylint: disable=unused-import
 
+import azure.cli.command_modules.keyvault._help
 import azure.cli.command_modules.keyvault.custom
 import azure.cli.command_modules.keyvault._params
 import azure.cli.command_modules.keyvault.generated

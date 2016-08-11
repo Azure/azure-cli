@@ -85,7 +85,7 @@ class KeyVaultMgmtScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck('properties.enabledForDiskEncryption', True),
             JMESPathCheck('properties.enabledForTemplateDeployment', True),
         ])
-        self.cmd('keyvault create -g {} -n {} -l {} --sku-name premium'.format(rg, self.keyvault_names[3], loc), checks=[
+        self.cmd('keyvault create -g {} -n {} -l {} --sku premium'.format(rg, self.keyvault_names[3], loc), checks=[
             JMESPathCheck('properties.sku.name', 'premium'),
         ])
 
