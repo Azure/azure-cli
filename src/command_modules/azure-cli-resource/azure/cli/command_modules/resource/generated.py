@@ -35,7 +35,7 @@ factory = lambda _: _resource_client_factory().resource_groups
 cli_command('resource group delete', ResourceGroupsOperations.delete, factory)
 cli_command('resource group show', ResourceGroupsOperations.get, factory)
 cli_command('resource group exists', ResourceGroupsOperations.check_existence, factory)
-cli_command('resource group list', list_resource_groups)
+cli_command('resource group list', list_resource_groups, simple_output_query="[*].{Name:name, Location:location, ProvisioningState:properties.provisioningState}")
 cli_command('resource group create', create_resource_group)
 cli_command('resource group export', export_group_as_template)
 
@@ -44,13 +44,13 @@ factory = lambda _: _resource_client_factory().resources
 cli_command('resource exists', ResourcesOperations.check_existence, factory)
 cli_command('resource delete', ResourcesOperations.delete, factory)
 cli_command('resource show', ResourcesOperations.get, factory)
-cli_command('resource list', list_resources)
+cli_command('resource list', list_resources, simple_output_query="[*].{Id:id,Name:name,ResourceGroup:resourceGroup,Type:type,Location:location}")
 cli_command('resource tag', tag_resource)
 cli_command('resource move', move_resource)
 
 # Resource provider commands
 factory = lambda _: _resource_client_factory().providers
-cli_command('resource provider list', ProvidersOperations.list, factory)
+cli_command('resource provider list', ProvidersOperations.list, factory, simple_output_query="[*].{Namespace:namespace,Registration:registrationState}")
 cli_command('resource provider show', ProvidersOperations.get, factory)
 cli_command('resource provider register', register_provider)
 cli_command('resource provider unregister', unregister_provider)
@@ -64,7 +64,7 @@ cli_command('resource feature register', FeaturesOperations.register, factory, s
 
 # Tag commands
 factory = lambda _: _resource_client_factory().tags
-cli_command('tag list', TagsOperations.list, factory)
+cli_command('tag list', TagsOperations.list, factory, simple_output_query="[*].{Name:tagName,Count:count.value}")
 cli_command('tag create', TagsOperations.create_or_update, factory)
 cli_command('tag delete', TagsOperations.delete, factory)
 cli_command('tag add-value', TagsOperations.create_or_update_value, factory)
