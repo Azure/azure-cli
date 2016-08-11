@@ -7,19 +7,24 @@
 
 from __future__ import print_function
 import json
+import os
 import time
+import uuid
 
 from msrestazure.azure_exceptions import CloudError
 from azure.mgmt.resource.resources import ResourceManagementClient
 from azure.mgmt.resource.resources.models.resource_group import ResourceGroup
 from azure.mgmt.resource.resources.models import GenericResource
 
+from azure.mgmt.resource.policy.models import (PolicyAssignment, PolicyDefinition)
+
 from azure.cli.parser import IncorrectUsageError
 from azure.cli._util import CLIError, get_file_json
 import azure.cli._logging as _logging
 from azure.cli.commands.client_factory import get_mgmt_service_client
+from azure.cli.commands.arm import is_valid_resource_id, parse_resource_id
 
-from ._factory import _resource_client_factory
+from ._factory import _resource_client_factory, _resource_policy_client_factory
 
 logger = _logging.get_az_logger(__name__)
 
@@ -252,7 +257,7 @@ def move_resource(ids, destination_group, destination_subscription_id=None):
     :param destination_group: the destination resource group name
     :param destination_subscription_id: the destination subscription identifier
     '''
-    from azure.cli.commands.arm import parse_resource_id, is_valid_resource_id, resource_id
+    from azure.cli.commands.arm import resource_id
 
     #verify all resource ids are valid and under the same group
     resources = []
@@ -279,4 +284,114 @@ def list_features(client, resource_provider_namespace=None):
     else:
         return client.list_all()
 
+def create_policy_assignment(policy, policy_assignment_name=None, display_name=None,
+                             resource_group_name=None, resource_id=None):
+    policy_client = _resource_policy_client_factory()
+    scope = _build_policy_scope(policy_client.config.subscription_id,
+                                resource_group_name, resource_id)
+    policy_id = _resolve_policy_id(policy, policy_client)
+    assignment = PolicyAssignment(display_name, policy_id, scope)
+    return policy_client.policy_assignments.create(scope,
+                                                   policy_assignment_name or uuid.uuid4(),
+                                                   assignment)
+
+def delete_policy_assignment(policy_assignment_name, resource_group_name=None, resource_id=None):
+    policy_client = _resource_policy_client_factory()
+    scope = _build_policy_scope(policy_client.config.subscription_id,
+                                resource_group_name, resource_id)
+    policy_client.policy_assignments.delete(scope, policy_assignment_name)
+
+def show_policy_assignment(policy_assignment_name, resource_group_name=None, resource_id=None):
+    policy_client = _resource_policy_client_factory()
+    scope = _build_policy_scope(policy_client.config.subscription_id,
+                                resource_group_name, resource_id)
+    policy_client.policy_assignments.get(scope, policy_assignment_name)
+
+def list_policy_assignment(show_all=False, include_inherited=False,
+                           resource_group_name=None, resource_id=None):
+    policy_client = _resource_policy_client_factory()
+    if show_all:
+        if resource_group_name or resource_id:
+            raise CLIError('group or resource id are not required when --show-all is used')
+
+    scope = _build_policy_scope(policy_client.config.subscription_id,
+                                resource_group_name, resource_id)
+    if resource_group_name:
+        result = policy_client.policy_assignments.list_for_resource_group(resource_group_name)
+    elif resource_id:
+        #pylint: disable=redefined-builtin
+        id = parse_resource_id(resource_id)
+        parent_resource_path = None if not id['child_name'] else (id['type'] + '/' + id['name'])
+        resource_type = id['child_type'] or id['type']
+        resource_name = id['child_name'] or id['name']
+        result = policy_client.policy_assignments.list_for_resource(
+            id['resource_group'], id['namespace'],
+            parent_resource_path, resource_type, resource_name)
+    else:
+        result = policy_client.policy_assignments.list()
+        if show_all:
+            return result
+
+    if not include_inherited:
+        result = [i for i in result if scope.lower() == i.scope.lower()]
+
+    return result
+
+def _build_policy_scope(subscription_id, resource_group_name, resource_id):
+    subscription_scope = '/subscriptions/' + subscription_id
+    if resource_id:
+        if resource_group_name:
+            err = 'Resource group "{}" is redundant because resource id is supplied'
+            raise CLIError(err.format(resource_group_name))
+        scope = resource_id
+    elif resource_group_name:
+        scope = subscription_scope + '/resourceGroups/' + resource_group_name
+    else:
+        scope = subscription_scope
+    return scope
+
+def _resolve_policy_id(policy, client):
+    policy_id = policy
+    if not is_valid_resource_id(policy):
+        policy_def = client.policy_definitions.get(policy)
+        policy_id = policy_def.id
+    return policy_id
+
+def create_policy_definition(policy_definition_name, rules,
+                             display_name=None, description=None):
+    if os.path.exists(rules):
+        rules = get_file_json(rules)
+    else:
+        rules = json.loads(rules)
+
+    policy_client = _resource_policy_client_factory()
+    parameters = PolicyDefinition(policy_rule=rules, description=description,
+                                  display_name=display_name)
+    return policy_client.policy_definitions.create_or_update(policy_definition_name, parameters)
+
+def update_policy_definition(policy_definition_name, rules=None,
+                             display_name=None, description=None):
+    if rules is not None:
+        if os.path.exists(rules):
+            rules = get_file_json(rules)
+        else:
+            rules = json.loads(rules)
+
+    policy_client = _resource_policy_client_factory()
+    definition = policy_client.policy_definitions.get(policy_definition_name)
+    #pylint: disable=line-too-long,no-member
+    parameters = PolicyDefinition(policy_rule=rules if rules is not None else definition.policy_rule,
+                                  description=description if description is not None else definition.description,
+                                  display_name=display_name if display_name is not None else definition.display_name)
+    return policy_client.policy_definitions.create_or_update(policy_definition_name, parameters)
+
+def get_policy_completion_list(prefix, **kwargs):#pylint: disable=unused-argument
+    policy_client = _resource_policy_client_factory()
+    result = policy_client.policy_definitions.list()
+    return [i.name for i in result]
+
+def get_policy_assignment_completion_list(prefix, **kwargs):#pylint: disable=unused-argument
+    policy_client = _resource_policy_client_factory()
+    result = policy_client.policy_assignments.list()
+    return [i.name for i in result]
 
