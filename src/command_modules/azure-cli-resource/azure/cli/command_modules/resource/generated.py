@@ -13,14 +13,18 @@ from azure.mgmt.resource.resources.operations.tags_operations import TagsOperati
 from azure.mgmt.resource.resources.operations.deployments_operations import DeploymentsOperations
 from azure.mgmt.resource.resources.operations.deployment_operations_operations \
     import DeploymentOperationsOperations
+from azure.mgmt.resource.policy.operations import PolicyDefinitionsOperations
 
 from azure.cli.commands import cli_command
 from azure.cli.commands.arm import register_generic_update
 from azure.cli.command_modules.resource._factory import (_resource_client_factory,
-                                                         _feature_client_factory)
+                                                         _resource_feature_client_factory,
+                                                         _resource_policy_client_factory)
 from azure.cli.command_modules.resource.custom import (
     list_resource_groups, create_resource_group, export_group_as_template,
     list_resources, move_resource,
+    create_policy_assignment, delete_policy_assignment, show_policy_assignment, list_policy_assignment,
+    create_policy_definition, update_policy_definition,
     deploy_arm_template, validate_arm_template, tag_resource, export_deployment_as_template,
     register_provider, unregister_provider,
     list_features
@@ -53,7 +57,7 @@ cli_command('resource provider unregister', unregister_provider)
 
 # Resource feature commands
 feature_tab_query = '{Name:name, State:properties.state}'
-factory = lambda _: _feature_client_factory().features
+factory = lambda _: _resource_feature_client_factory().features
 cli_command('resource feature list', list_features, factory, simple_output_query='[].'+feature_tab_query)
 cli_command('resource feature show', FeaturesOperations.get, factory, simple_output_query=feature_tab_query)
 cli_command('resource feature register', FeaturesOperations.register, factory, simple_output_query=feature_tab_query)
@@ -89,3 +93,16 @@ register_generic_update('resource group update',
                         ResourceGroupsOperations.get,
                         ResourceGroupsOperations.create_or_update,
                         lambda: _resource_client_factory().resource_groups)
+
+policy_assignment_tab_query = '{Name:name, Scope:scope, Policy:policyDefinitionId}'
+cli_command('resource policy assignment create', create_policy_assignment, simple_output_query=policy_assignment_tab_query)
+cli_command('resource policy assignment delete', delete_policy_assignment)
+cli_command('resource policy assignment list', list_policy_assignment, simple_output_query='[].'+policy_assignment_tab_query)
+cli_command('resource policy assignment show', show_policy_assignment, simple_output_query=policy_assignment_tab_query)
+factory = lambda _: _resource_policy_client_factory().policy_definitions
+policy_definition_tab_query = '{Name:name, Description:description}'
+cli_command('resource policy create', create_policy_definition, simple_output_query=policy_definition_tab_query)
+cli_command('resource policy delete', PolicyDefinitionsOperations.delete, factory)
+cli_command('resource policy list', PolicyDefinitionsOperations.list, factory, simple_output_query='[].'+policy_definition_tab_query)
+cli_command('resource policy show', PolicyDefinitionsOperations.get, factory, simple_output_query=policy_definition_tab_query)
+cli_command('resource policy update', update_policy_definition, simple_output_query=policy_definition_tab_query)
