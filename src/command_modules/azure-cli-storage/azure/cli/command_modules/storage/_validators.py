@@ -4,7 +4,6 @@
 #---------------------------------------------------------------------------------------------
 
 import argparse
-import ast
 from collections import OrderedDict
 from datetime import datetime
 import os
@@ -14,11 +13,8 @@ from azure.cli.commands.client_factory import get_mgmt_service_client
 from azure.cli.commands.validators import validate_key_value_pairs
 
 from azure.mgmt.storage import StorageManagementClient
-from azure.storage.models import ResourceTypes, Services, AccountPermissions
-from azure.storage.blob.models import ContainerPermissions, BlobPermissions
-from azure.storage.file.models import SharePermissions, FilePermissions
-from azure.storage.table.models import TablePermissions
-from azure.storage.queue.models import QueuePermissions
+from azure.storage.models import ResourceTypes, Services
+from azure.storage.table import TablePermissions
 
 class IgnoreAction(argparse.Action): # pylint: disable=too-few-public-methods
     def __call__(self, parser, namespace, values, option_string=None):
@@ -30,7 +26,7 @@ def get_permission_help_string(permission_class):
     return ' '.join(['({}){}'.format(x[0], x[1:]) for x in allowed_values])
 
 def get_permission_validator(permission_class):
-    
+
     allowed_values = [x.lower() for x in dir(permission_class) if not x.startswith('__')]
     allowed_string = ''.join(x[0] for x in allowed_values)
 
@@ -38,8 +34,15 @@ def get_permission_validator(permission_class):
         if set(string) - set(allowed_string):
             help_string = get_permission_help_string(permission_class)
             raise ValueError('valid values are {} or a combination thereof.'.format(help_string))
-        return permission_class(string)
+        return permission_class(_str=string)
     return validator
+
+def table_permission_validator(string):
+    """ A special case for table because the SDK associates the QUERY permission with 'r' """
+    if set(string) - set('raud'):
+        help_string = '(r)ead/query (a)dd (u)pdate (d)elete'
+        raise ValueError('valid values are {} or a combination thereof.'.format(help_string))
+    return TablePermissions(_str=string)
 
 def get_content_setting_validator(settings_class):
     def validator(namespace):
@@ -95,7 +98,7 @@ def validate_encryption(namespace):
     list of services passed in. '''
     if namespace.encryption:
         from azure.mgmt.storage.models import Encryption, EncryptionServices, EncryptionService
-        services = { service: EncryptionService(True) for service in namespace.encryption }
+        services = {service: EncryptionService(True) for service in namespace.encryption}
         namespace.encryption = Encryption(EncryptionServices(**services))
 
 def validate_entity(namespace):
@@ -120,21 +123,21 @@ def validate_entity(namespace):
         raise argparse.ArgumentError(
             None, 'incorrect usage: entity requires: {}'.format(missing_keys))
 
-    def cast_val(key, val):       
+    def cast_val(key, val):
         """ Attempts to cast numeric values (except RowKey and PartitionKey) to numbers so they
-        can be queried correctly. """ 
+        can be queried correctly. """
         if key in ['PartitionKey', 'RowKey']:
             return val
 
-        def try_cast(type):
+        def try_cast(to_type):
             try:
-                return type(val)
+                return to_type(val)
             except ValueError:
                 return None
         return try_cast(int) or try_cast(float) or val
 
     # ensure numbers are converted from strings so querying will work correctly
-    values = { key: cast_val(key, val) for key, val in values.items() }
+    values = {key: cast_val(key, val) for key, val in values.items()}
     namespace.entity = values
 
 def validate_ip_range(string):
@@ -220,7 +223,8 @@ def process_file_download_namespace(namespace):
 
     dest = namespace.file_path
     if not dest or os.path.isdir(dest):
-        namespace.file_path = os.path.join(dest, namespace.file_name) if dest else namespace.file_name
+        namespace.file_path = os.path.join(dest, namespace.file_name) \
+            if dest else namespace.file_name
 
 def transform_acl_list_output(result):
     """ Transform to convert SDK output into a form that is more readily
@@ -235,11 +239,40 @@ def transform_acl_list_output(result):
         new_result.append(new_entry)
     return new_result
 
+def transform_cors_list_output(result):
+    new_result = []
+    for service in sorted(result.keys()):
+        service_name = service
+        for i, rule in enumerate(result[service]):
+            new_entry = OrderedDict()
+            new_entry['Service'] = service_name
+            service_name = ''
+            new_entry['Rule'] = i + 1
+            new_entry['Methods'] = ', '.join((x for x in rule['allowedMethods']))
+            new_entry['Origins'] = ', '.join((x for x in rule['allowedOrigins']))
+            new_entry['Exposed Headers'] = ', '.join((x for x in rule['exposedHeaders']))
+            new_entry['Allowed Headers'] = ', '.join((x for x in rule['allowedHeaders']))
+            new_entry['Max Age (sec)'] = rule['maxAgeInSeconds']
+            new_result.append(new_entry)
+    return new_result
+
+def transform_entity_query_output(result):
+    new_results = []
+    ignored_keys = ['etag', 'Timestamp', 'RowKey', 'PartitionKey']
+    for row in result['items']:
+        new_entry = OrderedDict()
+        new_entry['PartitionKey'] = row['PartitionKey']
+        new_entry['RowKey'] = row['RowKey']
+        other_keys = sorted([x for x in row.keys() if x not in ignored_keys])
+        for key in other_keys:
+            new_entry[key] = row[key]
+        new_results.append(new_entry)
+    return new_results
+
 def transform_file_list_output(result):
     """ Transform to convert SDK file/dir list output to something that
     more clearly distinguishes between files and directories. """
     new_result = []
-
     for item in result['items']:
         new_entry = OrderedDict()
         item_name = item['name']
@@ -251,10 +284,38 @@ def transform_file_list_output(result):
             is_dir = True
         new_entry['Name'] = item_name
         new_entry['Type'] = 'dir' if is_dir else 'file'
-        new_entry['Size (bytes)'] = '' if is_dir else item['properties']['contentLength'] 
+        new_entry['Size (bytes)'] = '' if is_dir else item['properties']['contentLength']
         new_entry['Modified'] = item['properties']['lastModified']
         new_result.append(new_entry)
     return sorted(new_result, key=lambda k: k['Name'])
+
+def transform_logging_list_output(result):
+    new_result = []
+    for key in sorted(result.keys()):
+        new_entry = OrderedDict()
+        new_entry['Service'] = key
+        new_entry['Read'] = result[key]['read']
+        new_entry['Write'] = result[key]['write']
+        new_entry['Delete'] = result[key]['delete']
+        new_entry['Retain (Days)'] = result[key]['retentionPolicy']['days']
+        new_result.append(new_entry)
+    return new_result
+
+def transform_metrics_list_output(result):
+    new_result = []
+    for service in sorted(result.keys()):
+        service_name = service
+        for interval in sorted(result[service].keys()):
+            item = result[service][interval]
+            new_entry = OrderedDict()
+            new_entry['Service'] = service_name
+            service_name = ''
+            new_entry['Interval'] = interval
+            new_entry['Enabled'] = item['enabled']
+            new_entry['Include APIs'] = item['includeApis']
+            new_entry['Retain (Days)'] = item['retentionPolicy']['days']
+            new_result.append(new_entry)
+    return new_result
 
 def transform_url(result):
     """ Ensures the resulting URL string does not contain extra / characters """

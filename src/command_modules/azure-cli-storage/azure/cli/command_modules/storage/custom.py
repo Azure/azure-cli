@@ -8,8 +8,6 @@
 from __future__ import print_function
 from sys import stderr
 
-from azure.cli.commands.client_factory import get_data_service_client
-
 from azure.mgmt.storage.models import Kind
 from azure.storage.models import Logging, Metrics, CorsRule, RetentionPolicy
 from azure.storage.blob import BlockBlobService
@@ -269,15 +267,14 @@ class ServiceProperties(object):
                     connection_string=None, sas_token=None, timeout=None):
         self.init_client(account_name, account_key, connection_string, sas_token)
         retention_policy = RetentionPolicy(
-            enabled = retention != 0,
-            days = retention
+            enabled=retention != 0,
+            days=retention
         )
         logging = Logging(delete, read, write, retention_policy)
-        self.set_service_properties()(logging=logging, timeout=timeout)
-        return self.get_service_properties()(timeout=timeout).__dict__['logging']
+        return self.set_service_properties()(logging=logging, timeout=timeout)
 
     def get_cors(self, account_name=None, account_key=None, connection_string=None,
-                    sas_token=None, timeout=None):
+                 sas_token=None, timeout=None):
         self.init_client(account_name, account_key, connection_string, sas_token)
         return self.get_service_properties()(timeout=timeout).__dict__['cors']
 
@@ -303,25 +300,20 @@ class ServiceProperties(object):
             metrics['hour'] = props.__dict__['hour_metrics']
             metrics['minute'] = props.__dict__['minute_metrics']
         else:
-            metrics = props.__dict__['{}_metrics'.format(interval)]
+            metrics[interval] = props.__dict__['{}_metrics'.format(interval)]
         return metrics
 
     def set_metrics(self, retention, hour, minute, api=None, account_name=None, account_key=None,
-            connection_string=None, sas_token=None, timeout=None):
+                    connection_string=None, sas_token=None, timeout=None):
         self.init_client(account_name, account_key, connection_string, sas_token)
         retention_policy = RetentionPolicy(
-            enabled = retention != 0,
-            days = retention
+            enabled=retention != 0,
+            days=retention
         )
         hour_metrics = Metrics(hour, api, retention_policy) if hour is not None else None
         minute_metrics = Metrics(minute, api, retention_policy) if minute is not None else None
-        self.set_service_properties()(
+        return self.set_service_properties()(
             hour_metrics=hour_metrics, minute_metrics=minute_metrics, timeout=timeout)
-        props = self.get_service_properties()(timeout=timeout)
-        metrics = {}
-        metrics['hour'] = props.__dict__['hour_metrics']
-        metrics['minute'] = props.__dict__['minute_metrics']
-        return metrics
 
 SERVICES = {
     'b': ServiceProperties('blob', BaseBlobService),
@@ -331,7 +323,7 @@ SERVICES = {
 }
 
 def list_cors(services='bfqt', account_name=None, account_key=None, connection_string=None,
-             sas_token=None, timeout=None):
+              sas_token=None, timeout=None):
     results = {}
     for character in services:
         properties = SERVICES[character]
@@ -342,43 +334,39 @@ def list_cors(services='bfqt', account_name=None, account_key=None, connection_s
 def add_cors(services, origins, methods, max_age=0, exposed_headers=None, allowed_headers=None,
              account_name=None, account_key=None, connection_string=None, sas_token=None,
              timeout=None):
-    results = {}
     for character in services:
         properties = SERVICES[character]
-        results[properties.name] = properties.add_cors(
+        properties.add_cors(
             origins, methods, max_age, exposed_headers, allowed_headers, account_name, account_key,
             connection_string, sas_token, timeout)
-    return results
+    return None
 
 def clear_cors(services, account_name=None, account_key=None, connection_string=None,
-                sas_token=None, timeout=None):
-    results = {}
+               sas_token=None, timeout=None):
     for character in services:
         properties = SERVICES[character]
-        results[properties.name] = properties.clear_cors(
+        properties.clear_cors(
             account_name, account_key, connection_string, sas_token, timeout)
-    return results
+    return None
 
 
 def set_logging(services, log, retention, account_name=None, account_key=None,
                 connection_string=None, sas_token=None, timeout=None):
-    results = {}
     for character in services:
         properties = SERVICES[character]
-        results[properties.name] = properties.set_logging(
+        properties.set_logging(
             'r' in log, 'w' in log, 'd' in log, retention, account_name, account_key,
             connection_string, sas_token, timeout)
-    return results
+    return None
 
 def set_metrics(services, retention, hour=None, minute=None, api=None, account_name=None,
                 account_key=None, connection_string=None, sas_token=None, timeout=None):
-    results = {}
     for character in services:
         properties = SERVICES[character]
-        results[properties.name] = properties.set_metrics(
+        properties.set_metrics(
             retention, hour, minute, api, account_name, account_key, connection_string,
             sas_token, timeout)
-    return results
+    return None
 
 def get_logging(services='bqt', account_name=None, account_key=None, connection_string=None,
                 sas_token=None, timeout=None):

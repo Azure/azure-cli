@@ -26,7 +26,8 @@ No credentials specifed to access storage service. Please provide any of the fol
         option or AZURE_STORAGE_ACCOUNT environment variable)
 """
 
-def generic_data_service_factory(service, name=None, key=None, connection_string=None, sas_token=None):
+def generic_data_service_factory(service, name=None, key=None, connection_string=None,
+                                 sas_token=None):
     try:
         return get_data_service_client(service, name, key, connection_string, sas_token)
     except ValueError as val_exception:

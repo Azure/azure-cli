@@ -28,7 +28,9 @@ from azure.cli.command_modules.storage.custom import \
      insert_table_entity, list_cors, add_cors, clear_cors,
      get_logging, set_logging, get_metrics, set_metrics)
 from azure.cli.command_modules.storage._validators import \
-    (transform_acl_list_output, transform_file_list_output, transform_url)
+    (transform_acl_list_output, transform_cors_list_output, transform_entity_query_output,
+     transform_file_list_output, transform_logging_list_output, transform_metrics_list_output,
+     transform_url)
 
 # storage account commands
 factory = lambda kwargs: storage_client_factory().storage_accounts
@@ -146,7 +148,7 @@ cli_storage_data_plane_command('storage table batch commit', TableService.commit
 cli_storage_data_plane_command('storage table batch create', TableService.batch, factory)
 
 # table entity commands
-cli_storage_data_plane_command('storage entity query', TableService.query_entities, factory)
+cli_storage_data_plane_command('storage entity query', TableService.query_entities, factory, simple_output_query=transform_entity_query_output)
 cli_storage_data_plane_command('storage entity show', TableService.get_entity, factory)
 cli_storage_data_plane_command('storage entity insert', insert_table_entity, factory)
 cli_storage_data_plane_command('storage entity replace', TableService.update_entity, factory)
@@ -178,14 +180,14 @@ cli_storage_data_plane_command('storage message clear', QueueService.clear_messa
 cli_storage_data_plane_command('storage message update', QueueService.update_message, factory)
 
 # cors commands
-cli_storage_data_plane_command('storage cors list', list_cors, None)
+cli_storage_data_plane_command('storage cors list', list_cors, None, simple_output_query=transform_cors_list_output)
 cli_storage_data_plane_command('storage cors add', add_cors, None)
 cli_storage_data_plane_command('storage cors clear', clear_cors, None)
 
 # logging commands
-cli_storage_data_plane_command('storage logging show', get_logging, None)
+cli_storage_data_plane_command('storage logging show', get_logging, None, simple_output_query=transform_logging_list_output)
 cli_storage_data_plane_command('storage logging update', set_logging, None)
 
 # metrics commands
-cli_storage_data_plane_command('storage metrics show', get_metrics, None)
+cli_storage_data_plane_command('storage metrics show', get_metrics, None, simple_output_query=transform_metrics_list_output)
 cli_storage_data_plane_command('storage metrics update', set_metrics, None)

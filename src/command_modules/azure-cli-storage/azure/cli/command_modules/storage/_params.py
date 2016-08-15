@@ -6,7 +6,6 @@
 # pylint: disable=line-too-long
 import argparse
 import os
-import urllib
 
 from six import u as unicode_string
 
@@ -23,15 +22,15 @@ from azure.storage.blob.models import ContentSettings as BlobContentSettings, Co
 from azure.storage.file import FileService
 from azure.storage.file.models import ContentSettings as FileContentSettings, SharePermissions, FilePermissions
 from azure.storage.table import TableService
-from azure.storage.table.models import TablePermissions
 from azure.storage.queue import QueueService
 from azure.storage.queue.models import QueuePermissions
 
 from ._validators import \
     (validate_datetime, validate_datetime_as_string, get_file_path_validator, validate_metadata,
-     get_permission_validator, get_permission_help_string, validate_resource_types,
-     validate_services, validate_ip_range, validate_entity, validate_select,
-     get_content_setting_validator, validate_datetime_as_string, validate_encryption,
+     get_permission_validator, table_permission_validator, get_permission_help_string,
+     validate_resource_types, validate_services, validate_ip_range, validate_entity,
+     validate_select,
+     get_content_setting_validator, validate_encryption,
      process_file_download_namespace, process_logging_update_namespace,
      process_metric_update_namespace, IgnoreAction)
 
@@ -333,18 +332,18 @@ register_cli_argument('storage account generate-sas', 'resource_types', help='Th
 register_cli_argument('storage account generate-sas', 'expiry', help='Specifies the UTC datetime (Y-m-d\'T\'H:M\'Z\') at which the SAS becomes invalid.', type=validate_datetime_as_string)
 register_cli_argument('storage account generate-sas', 'start', help='Specifies the UTC datetime (Y-m-d\'T\'H:M\'Z\') at which the SAS becomes valid. Defaults to the time of the request.', type=validate_datetime_as_string)
 
-help_format='The permissions the SAS grants. Allowed values: {}. Do not use if a stored access policy is referenced with --id that specifies this value. Can be combined.'
+help_format = 'The permissions the SAS grants. Allowed values: {}. Do not use if a stored access policy is referenced with --id that specifies this value. Can be combined.'
 register_cli_argument('storage account generate-sas', 'permission', options_list=('--permissions',), help='The permissions the SAS grants. Allowed values: {}. Can be combined.'.format(get_permission_help_string(AccountPermissions)), type=get_permission_validator(AccountPermissions))
 register_cli_argument('storage container generate-sas', 'permission', options_list=('--permissions',), help=help_format.format(get_permission_help_string(ContainerPermissions)), type=get_permission_validator(ContainerPermissions))
 register_cli_argument('storage blob generate-sas', 'permission', options_list=('--permissions',), help=help_format.format(get_permission_help_string(BlobPermissions),), type=get_permission_validator(BlobPermissions))
 register_cli_argument('storage share generate-sas', 'permission', options_list=('--permissions',), help=help_format.format(get_permission_help_string(SharePermissions)), type=get_permission_validator(SharePermissions))
 register_cli_argument('storage file generate-sas', 'permission', options_list=('--permissions',), help=help_format.format(get_permission_help_string(FilePermissions)), type=get_permission_validator(FilePermissions))
-register_cli_argument('storage table generate-sas', 'permission', options_list=('--permissions',), help=help_format.format(get_permission_help_string(TablePermissions)), type=get_permission_validator(TablePermissions))
+register_cli_argument('storage table generate-sas', 'permission', options_list=('--permissions',), help=help_format.format('(r)ead/query (a)dd (u)pdate (d)elete'), type=table_permission_validator)
 register_cli_argument('storage queue generate-sas', 'permission', options_list=('--permissions',), help=help_format.format(get_permission_help_string(QueuePermissions)), type=get_permission_validator(QueuePermissions))
 
 register_cli_argument('storage container policy', 'permission', options_list=('--permissions',), help='Allowed values: {}. Can be combined.'.format(get_permission_help_string(ContainerPermissions)), type=get_permission_validator(ContainerPermissions))
 register_cli_argument('storage share policy', 'permission', options_list=('--permissions',), help='Allowed values: {}. Can be combined.'.format(get_permission_help_string(SharePermissions)), type=get_permission_validator(SharePermissions))
-register_cli_argument('storage table policy', 'permission', options_list=('--permissions',), help='Allowed values: {}. Can be combined.'.format(get_permission_help_string(TablePermissions)), type=get_permission_validator(TablePermissions))
+register_cli_argument('storage table policy', 'permission', options_list=('--permissions',), help='Allowed values: {}. Can be combined.'.format('(r)ead/query (a)dd (u)pdate (d)elete'), type=table_permission_validator)
 register_cli_argument('storage queue policy', 'permission', options_list=('--permissions',), help='Allowed values: {}. Can be combined.'.format(get_permission_help_string(QueuePermissions)), type=get_permission_validator(QueuePermissions))
 
 register_cli_argument('storage logging show', 'services', help='The storage services from which to retrieve logging info: (b)lob (q)ueue (t)able. Can be combined.')

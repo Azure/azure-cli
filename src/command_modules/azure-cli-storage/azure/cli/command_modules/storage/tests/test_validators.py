@@ -76,17 +76,6 @@ class Test_storage_validators(unittest.TestCase):
         with self.assertRaises(ValueError):
             actual = validate_ip_range(input)
 
-    def test_container_permission(self):
-        input = "llwrwd"
-        actual = str(validate_container_permission(input))
-        expected = "rwdl"
-        self.assertEqual(actual, expected)
-
-    def test_container_permission_fail(self):
-        input = "all"
-        with self.assertRaises(ValueError):
-            actual = str(validate_container_permission(input))
-
     def test_resource_types_valid(self):
         input = "sso"
         actual = str(validate_resource_types(input))
