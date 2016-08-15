@@ -138,6 +138,10 @@ def add_id_parameters(command_table):
                 missing_required = ' '.join((arg.options_list[0] for arg in errors))
                 raise CLIError('({} | {}) are required'.format(missing_required, '--ids'))
 
+        for key, arg in command.arguments.items():
+            if command.arguments[key].id_part:
+                command.arguments[key].arg_group = 'ResourceId'
+
         command.add_argument(argparse.SUPPRESS,
                              '--ids',
                              metavar='RESOURCE_ID',
@@ -145,7 +149,8 @@ def add_id_parameters(command_table):
                              action=split_action(command.arguments),
                              nargs='+',
                              type=ResourceId,
-                             validator=required_values_validator)
+                             validator=required_values_validator,
+                             arg_group='ResourceId')
 
     for command in command_table.values():
         command_loaded_handler(command)
@@ -221,15 +226,15 @@ def register_generic_update(name, getter, setter, factory=None, setter_arg_name=
     cmd.add_argument('properties_to_set', '--set', nargs='+', action=OrderedArgsAction, default=[],
                      help='Update an object by specifying a property path and value to set.'
                      '  Example: --set property1.property2=value',
-                     metavar='KEY=VALUE')
+                     metavar='KEY=VALUE', arg_group='GenericUpdate')
     cmd.add_argument('properties_to_add', '--add', nargs='+', action=OrderedArgsAction, default=[],
                      help='Add an object to a list of objects by specifying a path and key'
                      ' value pairs.  Example: --add property.list key=<value>',
-                     metavar='LIST KEY=VALUE')
+                     metavar='LIST KEY=VALUE', arg_group='GenericUpdate')
     cmd.add_argument('properties_to_remove', '--remove', nargs='+', action=OrderedArgsAction,
                      default=[], help='Remove a property or an element from a list.  Example: '
                      '--remove property.list <index>', metavar='LIST INDEX',
-                     validator=one_required)
+                     validator=one_required, arg_group='GenericUpdate')
     main_command_table[name] = cmd
 
 index_regex = re.compile(r'\[(.*)\]')
