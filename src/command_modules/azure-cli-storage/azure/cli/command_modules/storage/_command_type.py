@@ -15,10 +15,20 @@ def cli_storage_data_plane_command(name, operation, client_factory,
     command = create_command(name, operation, transform, simple_output_query, client_factory)
 
     # add parameters required to create a storage client
-    command.add_argument('account_name', '--account-name', required=False, default=None)
-    command.add_argument('account_key', '--account-key', required=False, default=None)
-    command.add_argument('connection_string', '--connection-string', required=False,
-                         default=None, validator=validate_client_parameters)
-    command.add_argument('sas_token', '--sas-token', required=False, default=None)
-
+    command.add_argument('account_name', '--account-name', required=False, default=None,
+                         arg_group='StorageAccount',
+                         help='Storage account name. Must be used in conjunction with either '
+                         'storage account key or a SAS token. Var: AZURE_STORAGE_ACCOUNT')
+    command.add_argument('account_key', '--account-key', required=False, default=None,
+                         arg_group='StorageAccount',
+                         help='Storage account key. Must be used in conjunction with storage '
+                         'account name. Var: AZURE_STORAGE_KEY')
+    command.add_argument('connection_string', '--connection-string', required=False, default=None,
+                         validator=validate_client_parameters, arg_group='StorageAccount',
+                         help='Storage account connection string. Var: '
+                         'AZURE_STORAGE_CONNECTION_STRING')
+    command.add_argument('sas_token', '--sas-token', required=False, default=None,
+                         arg_group='StorageAccount',
+                         help='A Shared Access Signature (SAS). Must be used in conjunction with '
+                         'storage account name. Var: AZURE_SAS_TOKEN')
     command_table[command.name] = command
