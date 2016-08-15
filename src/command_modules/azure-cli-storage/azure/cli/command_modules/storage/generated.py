@@ -27,7 +27,8 @@ from azure.cli.command_modules.storage.custom import \
      create_acl_policy, delete_acl_policy, list_acl_policies, set_acl_policy,
      insert_table_entity, list_cors, add_cors, clear_cors,
      get_logging, set_logging, get_metrics, set_metrics)
-from azure.cli.command_modules.storage._validators import transform_acl_list_output, transform_url
+from azure.cli.command_modules.storage._validators import \
+    (transform_acl_list_output, transform_file_list_output, transform_url)
 
 # storage account commands
 factory = lambda kwargs: storage_client_factory().storage_accounts
@@ -89,7 +90,6 @@ cli_storage_data_plane_command('storage blob copy cancel', BlockBlobService.abor
 # share commands
 factory = file_data_service_factory
 cli_storage_data_plane_command('storage share list', FileService.list_shares, factory, simple_output_query='items[*].{Name:name,"Quota (GB)":properties.quota} | sort_by(@, &Name)')
-cli_storage_data_plane_command('storage share contents', FileService.list_directories_and_files, factory, simple_output_query='items[*].{Name:name, Size:properties.contentLength} | sort_by(@, &Name)')
 cli_storage_data_plane_command('storage share create', FileService.create_share, factory)
 cli_storage_data_plane_command('storage share delete', FileService.delete_share, factory)
 cli_storage_data_plane_command('storage share generate-sas', FileService.generate_share_shared_access_signature, factory)
@@ -114,6 +114,7 @@ cli_storage_data_plane_command('storage directory metadata show', FileService.ge
 cli_storage_data_plane_command('storage directory metadata update', FileService.set_directory_metadata, factory)
 
 # file commands
+cli_storage_data_plane_command('storage file list', FileService.list_directories_and_files, factory, simple_output_query=transform_file_list_output)
 cli_storage_data_plane_command('storage file delete', FileService.delete_file, factory)
 cli_storage_data_plane_command('storage file resize', FileService.resize_file, factory)
 cli_storage_data_plane_command('storage file url', FileService.make_file_url, factory, transform=transform_url)

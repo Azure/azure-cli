@@ -235,6 +235,27 @@ def transform_acl_list_output(result):
         new_result.append(new_entry)
     return new_result
 
+def transform_file_list_output(result):
+    """ Transform to convert SDK file/dir list output to something that
+    more clearly distinguishes between files and directories. """
+    new_result = []
+
+    for item in result['items']:
+        new_entry = OrderedDict()
+        item_name = item['name']
+        try:
+            _ = item['properties']['contentLength']
+            is_dir = False
+        except KeyError:
+            item_name = '{}/'.format(item_name)
+            is_dir = True
+        new_entry['Name'] = item_name
+        new_entry['Type'] = 'dir' if is_dir else 'file'
+        new_entry['Size (bytes)'] = '' if is_dir else item['properties']['contentLength'] 
+        new_entry['Modified'] = item['properties']['lastModified']
+        new_result.append(new_entry)
+    return sorted(new_result, key=lambda k: k['Name'])
+
 def transform_url(result):
     """ Ensures the resulting URL string does not contain extra / characters """
     result = re.sub('//', '/', result)

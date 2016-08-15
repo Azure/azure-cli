@@ -71,6 +71,26 @@ def get_storage_acl_name_completion_list(service, container_param, func):
         return list(getattr(client, func)(container_name))
     return completer
 
+def dir_path_completer(prefix, action, parsed_args, **kwargs): # pylint: disable=unused-argument
+    client = _get_client(FileService, parsed_args)
+    share_name = parsed_args.share_name
+    directory_name = ''
+    if prefix:
+        directory_name = prefix
+        while directory_name:
+            if not client.exists(share_name, directory_name):
+                directory_name = os.path.split(directory_name)[0]
+            else:
+                break
+    items = list(client.list_directories_and_files(share_name, directory_name))
+    dir_list = [x for x in items if not hasattr(x.properties, 'content_length')]
+    path_format = '{}{}/' if directory_name.endswith('/') or not directory_name else '{}/{}/'
+    names = []
+    for d in dir_list:
+        name = path_format.format(directory_name, d.name)
+        names.append(name)
+    return sorted(names)
+
 def entity_completer(prefix, action, parsed_args, **kwargs): # pylint: disable=unused-argument
     # This is a workaround for the fact that argcomplete always inserts a space after completion
     # In this case, we want the cursor to remain positioned just after the text. We would ideally
@@ -98,7 +118,7 @@ def file_path_completer(prefix, action, parsed_args, **kwargs): # pylint: disabl
         if not hasattr(i.properties, 'content_length'):
             name = '{}/'.format(name)
         names.append(name)
-    return names
+    return sorted(names)
 
 # PATH REGISTRATION
 
@@ -243,6 +263,8 @@ register_cli_argument('storage file exists', 'file_name', required=True)
 register_path_argument('storage file exists')
 
 register_path_argument('storage file generate-sas')
+
+register_cli_argument('storage file list', 'directory_name', options_list=('--path', '-p'), help='The directory path within the file share.', completer=dir_path_completer)
 
 register_path_argument('storage file metadata show')
 register_path_argument('storage file metadata update')
