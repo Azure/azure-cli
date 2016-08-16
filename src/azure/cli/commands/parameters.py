@@ -88,7 +88,7 @@ deployment_name_type = CliArgumentType(
 )
 
 quotes = '""' if platform.system() == 'Windows' else "''"
-quote_text = 'Use {} for none.'.format(quotes)
+quote_text = 'Use {} to clear existing tags.'.format(quotes)
 
 tags_type = CliArgumentType(
     type=validate_tags,

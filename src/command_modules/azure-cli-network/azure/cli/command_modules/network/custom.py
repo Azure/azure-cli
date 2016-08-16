@@ -7,7 +7,8 @@
 from azure.mgmt.network.models import \
     (Subnet, SecurityRule, PublicIPAddress, NetworkSecurityGroup, InboundNatRule, InboundNatPool,
      FrontendIPConfiguration, BackendAddressPool, Probe, LoadBalancingRule,
-     NetworkInterfaceIPConfiguration, SubResource)
+     NetworkInterfaceIPConfiguration, Route, VpnClientRootCertificate, VpnClientConfiguration,
+     AddressSpace, VpnClientRevokedCertificate, ExpressRouteCircuitAuthorization, SubResource)
 
 from azure.cli._util import CLIError
 from azure.cli.command_modules.network._factory import _network_client_factory
@@ -718,4 +719,92 @@ def update_subnet(resource_group_name, virtual_network_name, subnet_name,
     return ncf.subnets.create_or_update(resource_group_name, virtual_network_name,
                                         subnet_name, subnet)
 
+update_nsg_rule.__doc__ = SecurityRule.__doc__
+
+def create_route(resource_group_name, route_table_name, route_name, next_hop_type, address_prefix,
+                 next_hop_ip_address=None):
+    route = Route(next_hop_type, None, address_prefix, next_hop_ip_address, None, route_name)
+    ncf = _network_client_factory()
+    return ncf.routes.create_or_update(resource_group_name, route_table_name, route_name, route)
+
+create_route.__doc__ = Route.__doc__
+
+def create_vpn_gateway_root_cert(resource_group_name, gateway_name, public_cert_data, cert_name):
+    config, gateway, ncf = _prep_cert_create(gateway_name, resource_group_name)
+
+    cert = VpnClientRootCertificate(name=cert_name, public_cert_data=public_cert_data)
+    config.vpn_client_root_certificates.append(cert)
+
+    return ncf.create_or_update(resource_group_name, gateway_name, gateway)
+
+def delete_vpn_gateway_root_cert(resource_group_name, gateway_name, cert_name):
+    ncf = _network_client_factory().virtual_network_gateways
+    gateway = ncf.get(resource_group_name, gateway_name)
+    config = gateway.vpn_client_configuration
+
+    try:
+        cert = next(c for c in config.vpn_client_root_certificates if c.name == cert_name)
+    except (AttributeError, StopIteration):
+        raise CLIError('Certificate "{}" not found in gateway "{}"'.format(cert_name, gateway_name))
+    config.vpn_client_root_certificates.remove(cert)
+
+    return ncf.create_or_update(resource_group_name, gateway_name, gateway)
+
+def create_vpn_gateway_revoked_cert(resource_group_name, gateway_name, thumbprint, cert_name):
+    config, gateway, ncf = _prep_cert_create(gateway_name, resource_group_name)
+
+    cert = VpnClientRevokedCertificate(name=cert_name, thumbprint=thumbprint)
+    config.vpn_client_revoked_certificates.append(cert)
+
+    return ncf.create_or_update(resource_group_name, gateway_name, gateway)
+
+def delete_vpn_gateway_revoked_cert(resource_group_name, gateway_name, cert_name):
+    ncf = _network_client_factory().virtual_network_gateways
+    gateway = ncf.get(resource_group_name, gateway_name)
+    config = gateway.vpn_client_configuration
+
+    try:
+        cert = next(c for c in config.vpn_client_revoked_certificates if c.name == cert_name)
+    except (AttributeError, StopIteration):
+        raise CLIError('Certificate "{}" not found in gateway "{}"'.format(cert_name, gateway_name))
+    config.vpn_client_revoked_certificates.remove(cert)
+
+    return ncf.create_or_update(resource_group_name, gateway_name, gateway)
+
+def _prep_cert_create(gateway_name, resource_group_name):
+    ncf = _network_client_factory().virtual_network_gateways
+    gateway = ncf.get(resource_group_name, gateway_name)
+    if not gateway.vpn_client_configuration:
+        gateway.vpn_client_configuration = VpnClientConfiguration()
+    config = gateway.vpn_client_configuration
+
+    if not config.vpn_client_address_pool or not config.vpn_client_address_pool.address_prefixes:
+        raise CLIError('Address prefixes must be set on VPN gateways before adding'
+                       ' certificates.  Please use "update" with --address-prefixes first.')
+
+    if config.vpn_client_revoked_certificates is None:
+        config.vpn_client_revoked_certificates = []
+    if config.vpn_client_root_certificates is None:
+        config.vpn_client_root_certificates = []
+
+    return config, gateway, ncf
+
+def handle_address_prefixes(instance, _, arg_value):
+    gateway = instance
+    if not gateway.vpn_client_configuration:
+        gateway.vpn_client_configuration = VpnClientConfiguration()
+    config = gateway.vpn_client_configuration
+
+    if not config.vpn_client_address_pool:
+        config.vpn_client_address_pool = AddressSpace()
+    if not config.vpn_client_address_pool.address_prefixes:
+        config.vpn_client_address_pool.address_prefixes = []
+
+    config.vpn_client_address_pool.address_prefixes = arg_value
+
+def create_express_route_auth(resource_group_name, circuit_name, authorization_name,
+                              authorization_key):
+    ncf = _network_client_factory().express_route_circuit_authorizations
+    auth = ExpressRouteCircuitAuthorization(authorization_key=authorization_key)
+    return ncf.create_or_update(resource_group_name, circuit_name, authorization_name, auth)
 #endregion

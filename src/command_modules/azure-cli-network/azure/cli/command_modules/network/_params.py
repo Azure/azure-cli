@@ -6,11 +6,12 @@
 # pylint: disable=line-too-long
 import argparse
 
-from azure.mgmt.network.models import IPAllocationMethod
+from azure.mgmt.network.models import IPAllocationMethod, RouteNextHopType
 from azure.mgmt.network.models.network_management_client_enums import \
     (ApplicationGatewaySkuName, ApplicationGatewayCookieBasedAffinity,
      ApplicationGatewayTier, ApplicationGatewayProtocol,
-     ApplicationGatewayRequestRoutingRuleType)
+     ApplicationGatewayRequestRoutingRuleType, ExpressRouteCircuitSkuFamily,
+     ExpressRouteCircuitSkuTier, ExpressRouteCircuitPeeringType)
 
 from azure.cli.commands import CliArgumentType, register_cli_argument, register_extra_cli_argument
 from azure.cli.commands.parameters import (location_type, get_resource_name_completion_list,
@@ -27,7 +28,7 @@ from azure.cli.command_modules.network._validators import \
      validate_subnet_name_or_id, validate_public_ip_name_or_id, validate_nsg_name_or_id,
      validate_inbound_nat_rule_id_list, validate_address_pool_id_list,
      validate_inbound_nat_rule_name_or_id, validate_address_pool_name_or_id,
-     validate_servers, validate_cert, validate_address_prefixes)
+     validate_servers, validate_cert, validate_address_prefixes, load_cert_file, vnet_gateway_validator)
 from azure.cli.command_modules.network.mgmt_nic.lib.models.nic_creation_client_enums import privateIpAddressVersion
 from azure.cli.command_modules.network.mgmt_vnet_gateway.lib.models.vnet_gateway_creation_client_enums import \
     (gatewayType, sku, vpnType)
@@ -194,15 +195,20 @@ register_cli_argument('network application-gateway url-path-map rule', 'address_
 register_cli_argument('network application-gateway url-path-map rule', 'http_settings', help='The name or ID of the HTTP settings. If not specified, the default for the map will be used.', completer=get_ag_subresource_completion_list('backend_http_settings_collection'))
 
 # Express Route Circuit Auth
-register_cli_argument('network express-route circuit-auth', 'authorization_name', name_arg_type)
-register_cli_argument('network express-route circuit-peering', 'peering_name', name_arg_type)
-register_cli_argument('network express-route circuit', 'circuit_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/expressRouteCircuits'))
+register_cli_argument('network express-route circuit-auth', 'authorization_name', name_arg_type, id_part='child_name', help='Authorization name')
+register_cli_argument('network express-route circuit-auth', 'circuit_name', completer=get_resource_name_completion_list('Microsoft.Network/expressRouteCircuits'), id_part='name', help='Circuit name.')
+register_cli_argument('network express-route circuit-auth', 'authorization_key', help='Authorization key.')
 
 # Express Route Circuit Peering
 register_cli_argument('network express-route circuit-peering', 'peering_name', name_arg_type, id_part='child_name')
+register_cli_argument('network express-route circuit-peering', 'peering_type', completer=get_enum_type_completion_list(ExpressRouteCircuitPeeringType))
+register_cli_argument('network express-route circuit-peering', 'sku_family', completer=get_enum_type_completion_list(ExpressRouteCircuitSkuFamily))
+register_cli_argument('network express-route circuit-peering', 'sku_tier', completer=get_enum_type_completion_list(ExpressRouteCircuitSkuTier))
 
 # Express Route Circuit
 register_cli_argument('network express-route circuit', 'circuit_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/expressRouteCircuits'), id_part='name')
+register_cli_argument('network express-route circuit', 'sku_family', completer=get_enum_type_completion_list(ExpressRouteCircuitSkuFamily))
+register_cli_argument('network express-route circuit', 'sku_tier', completer=get_enum_type_completion_list(ExpressRouteCircuitSkuTier))
 
 # Local Gateway
 register_cli_argument('network local-gateway', 'local_network_gateway_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/localNetworkGateways'), id_part='name')
@@ -268,8 +274,9 @@ register_cli_argument('network public-ip create', 'public_ip_address_type', CliA
 register_cli_argument('network public-ip create', 'allocation_method', CliArgumentType(choices=choices_ip_allocation_method, type=str.lower))
 
 # Route Operation
-register_cli_argument('network route-table route', 'route_name', name_arg_type, id_part='child_name')
-register_cli_argument('network route-table route', 'route_table_name', options_list=('--route-table-name',))
+register_cli_argument('network route-table route', 'route_name', name_arg_type, id_part='child_name', help='Route name')
+register_cli_argument('network route-table route', 'route_table_name', options_list=('--route-table-name',), help='Route table name')
+register_cli_argument('network route-table route', 'next_hop_type', choices=get_enum_choices(RouteNextHopType))
 
 # Route table
 register_cli_argument('network route-table', 'route_table_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/routeTables'), id_part='name')
@@ -339,9 +346,16 @@ register_cli_argument('network vpn-gateway create', 'gateway_type', choices=get_
 register_cli_argument('network vpn-gateway create', 'sku', choices=get_enum_choices(sku))
 register_cli_argument('network vpn-gateway create', 'vpn_type', choices=get_enum_choices(vpnType))
 register_folded_cli_argument('network vpn-gateway create', 'public_ip_address', 'Microsoft.Network/publicIPAddresses', default_value_flag='existingId', allow_none=False, required=True)
+register_cli_argument('network vpn-gateway', 'cert_name', help='Root certificate name', options_list=('--name', '-n'))
+register_cli_argument('network vpn-gateway', 'gateway_name', help='Virtual network gateway name')
+register_cli_argument('network vpn-gateway root-cert create', 'public_cert_data', help='Base64 contents of the root certificate file or file path.', validator=load_cert_file('public_cert_data'))
+register_cli_argument('network vpn-gateway revoked-cert create', 'thumbprint', help='Certificate thumbprint.')
+register_extra_cli_argument('network vpn-gateway update', 'address_prefixes', options_list=('--address-prefixes',), help='List of address prefixes for the VPN gateway.  Prerequisite for uploading certificates.', nargs='+')
 
 # VPN connection
 register_cli_argument('network vpn-connection', 'virtual_network_gateway_connection_name', CliArgumentType(options_list=('--name', '-n'), metavar='NAME', id_part='name'))
+register_cli_argument('network vpn-connection create', 'connection_type', help=argparse.SUPPRESS, validator=vnet_gateway_validator, required=False)
+register_cli_argument('network vpn-connection create', 'shared_key', validator=load_cert_file('shared_key'), help='Shared IPSec key, base64 contents of the certificate file or file path.')
 
 # VPN connection shared key
 register_cli_argument('network vpn-connection shared-key', 'connection_shared_key_name', CliArgumentType(options_list=('--name', '-n')), id_part='name')

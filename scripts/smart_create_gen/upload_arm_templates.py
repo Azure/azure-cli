@@ -37,7 +37,7 @@ def _upload_templates(name, api_version, path, dir=None):
                 blob_dest = 'Create{}_{}/{}/{}'.format(name, api_version, dir, item)
             else:
                 blob_dest = 'Create{}_{}/{}'.format(name, api_version, item)
-            cmd = 'az storage blob upload -n {0} --account-name {1} --type block --account-key {2} --container-name {3} --upload-from {4} --subscription {5}'.format(
+            cmd = 'az storage blob upload -n {0} --account-name {1} --type block --account-key {2} --container-name {3} --file {4} --subscription {5}'.format(
                 blob_dest, STORAGE_ACCOUNT_NAME, STORAGE_ACCOUNT_KEY, TEMPLATE_CONTAINER_NAME, blob_src, SUBSCRIPTION_ID
             )
             print('\nUPLOADING {}...'.format(blob_dest))
