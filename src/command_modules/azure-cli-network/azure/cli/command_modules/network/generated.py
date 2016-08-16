@@ -51,6 +51,18 @@ from azure.cli.command_modules.network.mgmt_local_gateway.lib \
 from azure.cli.command_modules.network.mgmt_route_table.lib.operations import RouteTableOperations
 from azure.cli.command_modules.network.mgmt_route_table.lib \
     import RouteTableCreationClient as RouteTableClient
+from azure.cli.command_modules.network.mgmt_vpn_connection.lib.operations \
+    import VpnConnectionOperations
+from azure.cli.command_modules.network.mgmt_vpn_connection.lib \
+    import VpnConnectionCreationClient as VpnConnectionClient
+from azure.cli.command_modules.network.mgmt_express_route_circuit.lib.operations \
+    import ExpressRouteCircuitOperations
+from azure.cli.command_modules.network.mgmt_express_route_circuit.lib \
+    import ExpressRouteCircuitCreationClient as ExpressRouteCircuitClient
+from azure.cli.command_modules.network.mgmt_express_route_peering.lib.operations \
+    import ExpressRoutePeeringOperations
+from azure.cli.command_modules.network.mgmt_express_route_peering.lib \
+    import ExpressRoutePeeringCreationClient as ExpressRoutePeeringClient
 
 
 from azure.cli.commands import DeploymentOutputLongRunningOperation, cli_command
@@ -81,8 +93,9 @@ from .custom import \
      list_network_resource_property, get_network_resource_property_entry,
      delete_network_resource_property_entry,
      list_application_gateways, list_express_route_circuits, list_lbs, list_nics, list_nsgs,
-     list_public_ips, list_route_tables, list_vnet
-    )
+     list_public_ips, list_route_tables, list_vnet, create_route,
+     handle_address_prefixes, create_vpn_gateway_root_cert, delete_vpn_gateway_root_cert,
+     create_vpn_gateway_revoked_cert, delete_vpn_gateway_revoked_cert, create_express_route_auth)
 from ._factory import _network_client_factory
 
 # pylint: disable=line-too-long
@@ -132,6 +145,7 @@ cli_command('network express-route circuit-auth delete', ExpressRouteCircuitAuth
 cli_command('network express-route circuit-auth show', ExpressRouteCircuitAuthorizationsOperations.get, factory)
 cli_command('network express-route circuit-auth list', ExpressRouteCircuitAuthorizationsOperations.list, factory)
 register_generic_update('network express-route circuit-auth update', ExpressRouteCircuitAuthorizationsOperations.get, ExpressRouteCircuitAuthorizationsOperations.create_or_update, factory)
+cli_command('network express-route circuit-auth create', create_express_route_auth)
 
 # ExpressRouteCircuitPeeringsOperations
 factory = lambda _: _network_client_factory().express_route_circuit_peerings
@@ -139,6 +153,9 @@ cli_command('network express-route circuit-peering delete', ExpressRouteCircuitP
 cli_command('network express-route circuit-peering show', ExpressRouteCircuitPeeringsOperations.get, factory)
 cli_command('network express-route circuit-peering list', ExpressRouteCircuitPeeringsOperations.list, factory)
 register_generic_update('network express-route circuit-peering update', ExpressRouteCircuitPeeringsOperations.get, ExpressRouteCircuitPeeringsOperations.create_or_update, factory)
+
+factory = lambda _: get_mgmt_service_client(ExpressRoutePeeringClient).express_route_peering
+cli_command('network express-route circuit-peering create', ExpressRoutePeeringOperations.create_or_update, factory, transform=DeploymentOutputLongRunningOperation('Starting network express-route circuit-peering create'))
 
 # ExpressRouteCircuitsOperations
 factory = lambda _: _network_client_factory().express_route_circuits
@@ -149,6 +166,9 @@ cli_command('network express-route circuit list-arp', ExpressRouteCircuitsOperat
 cli_command('network express-route circuit list-routes', ExpressRouteCircuitsOperations.list_routes_table, factory)
 cli_command('network express-route circuit list', list_express_route_circuits)
 register_generic_update('network express-route circuit update', ExpressRouteCircuitsOperations.get, ExpressRouteCircuitsOperations.create_or_update, factory)
+
+factory = lambda _: get_mgmt_service_client(ExpressRouteCircuitClient).express_route_circuit
+cli_command('network express-route circuit create', ExpressRouteCircuitOperations.create_or_update, factory, transform=DeploymentOutputLongRunningOperation('Starting network express-route circuit create'))
 
 # ExpressRouteServiceProvidersOperations
 factory = lambda _: _network_client_factory().express_route_service_providers
@@ -262,6 +282,7 @@ cli_command('network route-table route delete', RoutesOperations.delete, factory
 cli_command('network route-table route show', RoutesOperations.get, factory)
 cli_command('network route-table route list', RoutesOperations.list, factory)
 register_generic_update('network route-table route update', RoutesOperations.get, RoutesOperations.create_or_update, factory)
+cli_command('network route-table route create', create_route)
 
 # SecurityRulesOperations
 factory = lambda _: _network_client_factory().security_rules
@@ -293,13 +314,21 @@ cli_command('network vpn-connection shared-key show', VirtualNetworkGatewayConne
 cli_command('network vpn-connection shared-key reset', VirtualNetworkGatewayConnectionsOperations.reset_shared_key, factory)
 cli_command('network vpn-connection shared-key update', VirtualNetworkGatewayConnectionsOperations.set_shared_key, factory)
 
+factory = lambda _: get_mgmt_service_client(VpnConnectionClient).vpn_connection
+cli_command('network vpn-connection create', VpnConnectionOperations.create_or_update, factory, transform=DeploymentOutputLongRunningOperation('Starting network vpn-connection create'))
+
 # VirtualNetworkGatewaysOperations
 factory = lambda _: _network_client_factory().virtual_network_gateways
 cli_command('network vpn-gateway delete', VirtualNetworkGatewaysOperations.delete, factory)
 cli_command('network vpn-gateway show', VirtualNetworkGatewaysOperations.get, factory)
 cli_command('network vpn-gateway list', VirtualNetworkGatewaysOperations.list, factory)
 cli_command('network vpn-gateway reset', VirtualNetworkGatewaysOperations.reset, factory)
-register_generic_update('network vpn-gateway update', VirtualNetworkGatewaysOperations.get, VirtualNetworkGatewaysOperations.create_or_update, factory)
+register_generic_update('network vpn-gateway update', VirtualNetworkGatewaysOperations.get, VirtualNetworkGatewaysOperations.create_or_update, factory,
+                        custom_handlers={'address_prefixes': handle_address_prefixes})
+cli_command('network vpn-gateway root-cert create', create_vpn_gateway_root_cert)
+cli_command('network vpn-gateway root-cert delete', delete_vpn_gateway_root_cert)
+cli_command('network vpn-gateway revoked-cert create', create_vpn_gateway_revoked_cert)
+cli_command('network vpn-gateway revoked-cert delete', delete_vpn_gateway_revoked_cert)
 
 factory = lambda _: get_mgmt_service_client(VnetGatewayClient).vnet_gateway
 cli_command('network vpn-gateway create', VnetGatewayOperations.create_or_update, factory, transform=DeploymentOutputLongRunningOperation('Starting network vnet-gateway create'))

@@ -9,7 +9,7 @@
 import os
 
 from azure.cli.utils.vcr_test_base import (VCRTestBase, ResourceGroupVCRTestBase, JMESPathCheck,
-                                           NoneCheck)
+                                           NoneCheck, MOCKED_SUBSCRIPTION_ID)
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
@@ -716,27 +716,23 @@ class NetworkSecurityGroupScenarioTest(ResourceGroupVCRTestBase):
         # Expecting no results as we just deleted the only security group in the resource group
         self.cmd('network nsg list --resource-group {}'.format(rg), checks=NoneCheck())
 
-class NetworkRouteTableOperationScenarioTest(VCRTestBase):
+class NetworkRouteTableOperationScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
         super(NetworkRouteTableOperationScenarioTest, self).__init__(__file__, test_method)
-        self.resource_group = 'cli_test1'
+        self.resource_group = 'cli_route_table_test1'
         self.route_table_name = 'cli-test-route-table'
-        self.route_operation_name = 'my-route'
+        self.route_name = 'my-route'
         self.resource_type = 'Microsoft.Network/routeTables'
 
     def test_network_route_table_operation(self):
         self.execute()
 
-    def set_up(self):
-        if not self.cmd('network route-table show --resource-group {} --name {}'.format(
-                self.resource_group, self.route_table_name)):
-            raise RuntimeError('Network route table must be manually created in order to support this test.')
-        if not self.cmd('network route-table route show --resource-group {} --route-table-name {} --name {}'.format(
-                self.resource_group, self.route_table_name, self.route_operation_name)):
-            raise RuntimeError('Network route operation must be manually created in order to support this test.')
-
     def body(self):
+        self.cmd('network route-table create -n {} -g {}'.format(self.route_table_name, self.resource_group))
+        self.cmd('network route-table route create --address-prefix 10.0.5.0/24 -n {} -g {} --next-hop-type None'
+                 ' --route-table-name {}'.format(self.route_name, self.resource_group, self.route_table_name))
+
         self.cmd('network route-table list',
             checks=JMESPathCheck('type(@)', 'array'))
         self.cmd('network route-table list --resource-group {}'.format(self.resource_group), checks=[
@@ -754,12 +750,12 @@ class NetworkRouteTableOperationScenarioTest(VCRTestBase):
         ])
         self.cmd('network route-table route list --resource-group {} --route-table-name {}'.format(self.resource_group, self.route_table_name),
             checks=JMESPathCheck('type(@)', 'array'))
-        self.cmd('network route-table route show --resource-group {} --route-table-name {} --name {}'.format(self.resource_group, self.route_table_name, self.route_operation_name), checks=[
+        self.cmd('network route-table route show --resource-group {} --route-table-name {} --name {}'.format(self.resource_group, self.route_table_name, self.route_name), checks=[
                 JMESPathCheck('type(@)', 'object'),
-                JMESPathCheck('name', self.route_operation_name),
+                JMESPathCheck('name', self.route_name),
                 JMESPathCheck('resourceGroup', self.resource_group)
         ])
-        self.cmd('network route-table route delete --resource-group {} --route-table-name {} --name {}'.format(self.resource_group, self.route_table_name, self.route_operation_name))
+        self.cmd('network route-table route delete --resource-group {} --route-table-name {} --name {}'.format(self.resource_group, self.route_table_name, self.route_name))
         # Expecting no results as the route operation was just deleted
         self.cmd('network route-table route list --resource-group {} --route-table-name {}'.format(self.resource_group, self.route_table_name),
             checks=NoneCheck())
@@ -863,50 +859,51 @@ class NetworkSubnetSetScenarioTest(ResourceGroupVCRTestBase):
         self.cmd('network vnet delete --resource-group {} --name {}'.format(self.resource_group, self.vnet_name))
         self.cmd('network nsg delete --resource-group {} --name {}'.format(self.resource_group, nsg_name))
 
-class NetworkVpnGatewayScenarioTest(VCRTestBase):
+class NetworkVpnGatewayScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-        # The resources for this test did not exist so the commands will return 404 errors.
-        # So this test is for the command execution itself.
         super(NetworkVpnGatewayScenarioTest, self).__init__(__file__, test_method)
-        self.resource_group = 'cli_test1'
-        self.placeholder_value = 'none_existent'
+        self.resource_group = 'cli_vpn_gateway_test1'
 
     def test_network_vpn_gateway(self):
         self.execute()
 
     def body(self):
         rg = self.resource_group
-        pv = self.placeholder_value
-        allowed_exceptions = "The Resource 'Microsoft.Network/virtualNetworkGateways/{}' under resource group '{}' was not found.".format(pv, rg)
-        self.cmd('network vpn-gateway delete --resource-group {0} --name {1}'.format(rg, pv))
-        self.cmd('network vpn-gateway list --resource-group {0}'.format(rg), checks=NoneCheck())
-        self.cmd('network vpn-gateway show --resource-group {0} --name {1}'.format(rg, pv),
-            allowed_exceptions=allowed_exceptions)
+        vnet1_name = 'myvnet1'
+        vnet2_name = 'myvnet2'
+        gateway1_name = 'gateway1'
+        gateway2_name = 'gateway2'
+        ip1_name = 'pubip1'
+        ip2_name = 'pubip2'
 
-class NetworkVpnConnectionScenarioTest(VCRTestBase):
+        subscription_id = MOCKED_SUBSCRIPTION_ID \
+            if self.playback \
+            else self.cmd('account list --query "[?isDefault].id" -o tsv')
 
-    def __init__(self, test_method):
-        # The resources for this test did not exist so the commands will return 404 errors.
-        # So this test is for the command execution itself.
-        super(NetworkVpnConnectionScenarioTest, self).__init__(__file__, test_method)
-        self.resource_group = 'cli_test1'
-        self.placeholder_value = 'none_existent'
+        self.cmd('network public-ip create -n {} -g {}'.format(ip1_name, rg))
+        self.cmd('network public-ip create -n {} -g {}'.format(ip2_name, rg))
+        self.cmd('network vnet create -g {} -n {} --subnet-name GatewaySubnet'.format(rg, vnet1_name))
+        self.cmd('network vnet create -g {} -n {} --subnet-name GatewaySubnet --subnet-prefix 10.0.1.0/24'.format(rg, vnet2_name))
 
-    def test_network_vpn_connection(self):
-        self.execute()
+        subnet1_id = '/subscriptions/{subscription_id}/resourceGroups' \
+            '/{rg}/providers/Microsoft.Network/virtualNetworks/{vnet1}/subnets/GatewaySubnet' \
+            .format(subscription_id=subscription_id, rg=rg, vnet1=vnet1_name)
+        subnet2_id = '/subscriptions/{subscription_id}/resourceGroups' \
+            '/{rg}/providers/Microsoft.Network/virtualNetworks/{vnet2}/subnets/GatewaySubnet' \
+            .format(subscription_id=subscription_id, rg=rg, vnet2=vnet2_name)
 
-    def body(self):
-        rg = self.resource_group
-        pv = self.placeholder_value
-        allowed_exceptions = "The Resource 'Microsoft.Network/connections/{}' under resource group '{}' was not found.".format(pv, rg)
-        self.cmd('network vpn-connection list --resource-group {0}'.format(rg))
-        self.cmd('network vpn-connection show --resource-group {0} --name {1}'.format(rg, pv),
-            allowed_exceptions=allowed_exceptions)
-        self.cmd('network vpn-connection shared-key show --resource-group {0} --name {1}'.format(rg, pv),
-            allowed_exceptions=allowed_exceptions)
-        self.cmd('network vpn-connection delete --resource-group {0} --name {1}'.format(rg, pv))
-        self.cmd('network vpn-connection shared-key reset --resource-group {0} --connection-name {1}'.format(rg, pv),
-            allowed_exceptions=allowed_exceptions)
-        self.cmd('network vpn-connection shared-key update --resource-group {0} --connection-name {1} --value {2}'.format(rg, pv, 'S4auzEfwZ6fN'),
-            allowed_exceptions=allowed_exceptions)
+        self.cmd('network vpn-gateway create -g {0} -n {1} --subnet-id {2} --public-ip-address {3}'
+                 .format(rg, gateway1_name, subnet1_id, ip1_name))
+        self.cmd('network vpn-gateway create -g {0} -n {1} --subnet-id {2} --public-ip-address {3}'
+                 .format(rg, gateway2_name, subnet2_id, ip2_name))
+
+        gateway1_id = '/subscriptions/{subscription_id}/resourceGroups' \
+            '/{rg}/providers/Microsoft.Network/virtualNetworkGateways/{gateway1_name}' \
+            .format(subscription_id=subscription_id, rg=rg, gateway1_name=gateway1_name)
+        gateway2_id = '/subscriptions/{subscription_id}/resourceGroups' \
+            '/{rg}/providers/Microsoft.Network/virtualNetworkGateways/{gateway2_name}' \
+            .format(subscription_id=subscription_id, rg=rg, gateway2_name=gateway2_name)
+
+        self.cmd('network vpn-connection create -n myconnection -g {0} --shared-key 123' \
+            ' --vnet-gateway1-id {1} --vnet-gateway2-id {2}'.format(rg, gateway1_id, gateway2_id))

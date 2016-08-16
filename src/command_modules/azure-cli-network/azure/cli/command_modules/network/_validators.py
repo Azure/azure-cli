@@ -6,6 +6,7 @@
 import argparse
 import base64
 import socket
+import os
 
 from azure.cli.commands.arm import is_valid_resource_id, resource_id
 from azure.cli._util import CLIError
@@ -81,6 +82,15 @@ def validate_address_prefixes(namespace):
         raise CLIError('Existing subnet ({}) found. Cannot specify address prefixes when '
                        'reusing an existing subnet.'.format(namespace.subnet))
 
+def read_base_64_file(filename):
+    with open(filename, 'rb') as f:
+        contents = f.read()
+        base64_data = base64.b64encode(contents)
+        try:
+            return base64_data.decode('utf-8')
+        except UnicodeDecodeError:
+            return str(base64_data)
+
 def validate_cert(namespace):
 
     if namespace.http_listener_protocol:
@@ -99,13 +109,7 @@ def validate_cert(namespace):
                 None, 'To use SSL certificate, you must specify both the filename and password')
 
         # extract the certificate data from the provided file
-        with open(namespace.cert_data, 'rb') as f:
-            contents = f.read()
-            base64_data = base64.b64encode(contents)
-            try:
-                namespace.cert_data = base64_data.decode('utf-8')
-            except UnicodeDecodeError:
-                namespace.cert_data = str(base64_data)
+        namespace.cert_data = read_base_64_file(namespace.cert_data)
 
         try:
             # change default to frontend port 443 for https
@@ -307,6 +311,29 @@ def process_nic_create_namespace(namespace):
 def process_public_ip_create_namespace(namespace):
     if namespace.dns_name:
         namespace.public_ip_address_type = 'dns'
+
+def load_cert_file(param_name):
+    def load_cert_validator(namespace):
+        attr = getattr(namespace, param_name)
+        if attr and os.path.isfile(attr):
+            setattr(namespace, param_name, read_base_64_file(attr))
+    return load_cert_validator
+
+def vnet_gateway_validator(namespace):
+    args = [a for a in [namespace.express_route_circuit2_id,
+                        namespace.local_gateway2_id,
+                        namespace.vnet_gateway2_id]
+            if a]
+    if len(args) != 1:
+        raise argparse.ArgumentError(None, 'Specify only one option for express-route-circuit2,'
+                                     ' local-gateway2-id or vnet-gateway2-id')
+
+    if namespace.express_route_circuit2_id:
+        namespace.connection_type = 'ExpressRoute'
+    elif namespace.local_gateway2_id:
+        namespace.connection_type = 'IPSec'
+    elif namespace.vnet_gateway2_id:
+        namespace.connection_type = 'Vnet2Vnet'
 
 # ACTIONS
 
