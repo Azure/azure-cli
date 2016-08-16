@@ -99,7 +99,6 @@ Another wrapper around `os.environ` this pops the value of the indicated environ
 
 Here are some common issues that occur when authoring tests that you should be aware of.
 
-- **deployment_name**: Commands (typically smart creates) which utilize ARM templates accept a hidden `deployment_name` parameter. During normal use, this value is generated automatically, but when authoring a test, this value must be specified or a match request will not be found on playback. Azure keeps deployment names reserved for a time--if you try to re-record a test while the deployment name is still reserved, your test will fail. The symptom will usually be an empty result. If this happens, try changing the deployment name and re-recording.
 - **Non-deterministic results**: If you find that a test will pass on some playbacks but fail on others, there are a couple possible things to check:
   1. check if your command makes use of concurrency.
   2. check your parameter aliasing (particularly if it complains that a required parameter is missing that you know is there)
