@@ -14,6 +14,7 @@ import azure.cli.extensions
 import azure.cli._help as _help
 import azure.cli._logging as _logging
 from azure.cli._util import todict
+from azure.cli._config import az_config
 
 logger = _logging.get_az_logger(__name__)
 
@@ -25,7 +26,7 @@ class Configuration(object): # pylint: disable=too-few-public-methods
     """
     def __init__(self, argv):
         self.argv = argv or sys.argv[1:]
-        self.output_format = 'list'
+        self.output_format = None
 
     def get_command_table(self):
         import azure.cli.commands as commands
@@ -166,7 +167,7 @@ class Application(object):
         global_group.add_argument('--subscription', dest='_subscription_id', help=argparse.SUPPRESS)
         global_group.add_argument('--output', '-o', dest='_output_format',
                                   choices=['json', 'tsv', 'list', 'table', 'jsonc'],
-                                  default='json',
+                                  default=az_config.get('core', 'output', fallback='json'),
                                   help='Output format',
                                   type=str.lower)
         # The arguments for verbosity don't get parsed by argparse but we add it here for help.
