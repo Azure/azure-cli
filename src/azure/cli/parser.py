@@ -4,7 +4,9 @@
 #---------------------------------------------------------------------------------------------
 
 import argparse
+
 import argcomplete
+
 import azure.cli._help as _help
 from azure.cli._util import CLIError
 
@@ -62,11 +64,23 @@ class AzCliCommandParser(argparse.ArgumentParser):
                                                   help_file=metadata.help)
 
             argument_validators = []
+            argument_groups = {}
             for arg in metadata.arguments.values():
                 if arg.validator:
                     argument_validators.append(arg.validator)
-                param = command_parser.add_argument(
-                    *arg.options_list, **arg.options)
+                if arg.arg_group:
+                    try:
+                        group = argument_groups[arg.arg_group]
+                    except KeyError:
+                        # group not found so create
+                        group_name = '{} Arguments'.format(arg.arg_group)
+                        group = command_parser.add_argument_group(arg.arg_group, group_name)
+                        argument_groups[arg.arg_group] = group
+                    param = group.add_argument(
+                        *arg.options_list, **arg.options)
+                else:
+                    param = command_parser.add_argument(
+                        *arg.options_list, **arg.options)
                 param.completer = arg.completer
 
             command_parser.set_defaults(func=metadata.handler,
@@ -103,9 +117,7 @@ class AzCliCommandParser(argparse.ArgumentParser):
     def format_help(self):
         is_group = self.is_group()
         _help.show_help(self.prog.split()[1:],
-                        (self._actions[-1]
-                         if is_group
-                         else self),
+                        self._actions[-1] if is_group else self,
                         is_group)
         self.exit()
 
