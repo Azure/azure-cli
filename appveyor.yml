@@ -1,0 +1,38 @@
+init:
+  - git config --global core.autocrlf false
+
+clone_depth: 5
+
+environment:
+  access_token:
+    secure: VMFbecLLHzDq/09YDPbcM0VDDSwwgY57vr5GXK6cZZ4Ti/Xs5RZoylzV8MMr1350
+
+install:
+  - python -m pip install -r requirements.txt
+  - python -m pip install -e . # Install the CLI as a package
+  - python -m pip install sphinx
+  - python scripts/command_modules/install.py # Install the command modules as packages
+
+build_script:
+  - cd doc\sphinx 
+  - make xml
+  - mkdir %TEMP%\azure-cli-xml2yml
+  - cd %TEMP%\azure-cli-xml2yml
+  - nuget install azure.cli.doc.xml2yml -Source https://ci.appveyor.com/nuget/azure-cli-doc-proc
+  - cd azure.cli.doc.xml2yml*\tools
+  - AzCliDocPreprocessor -s "%APPVEYOR_BUILD_FOLDER%\doc\sphinx\_build\xml\ind.xml" -d "%TEMP%\azure-cli-xml2yml\yml-output"
+
+artifacts:
+  - path: doc\sphinx\_build
+
+on_success:
+  - git clone --depth 5 -q --branch=%TARGET_BRANCH% %GIT_CONTENT_REPO_URL% %TEMP%\azure-cli-content
+  - cd %TEMP%\azure-cli-content
+  - if exist %TEMP%\azure-cli-content\%YML_OUTPUT_FOLDER% rmdir /s /q %TEMP%\azure-cli-content\%YML_OUTPUT_FOLDER%
+  - SETLOCAL EnableDelayedExpansion & robocopy %TEMP%\azure-cli-xml2yml\yml-output %TEMP%\azure-cli-content\%YML_OUTPUT_FOLDER% /e & IF !ERRORLEVEL! EQU 1 (exit 0) ELSE (exit 1)
+  - git config --global credential.helper store
+  - ps: Add-Content "$env:USERPROFILE\.git-credentials" "https://$($env:access_token):x-oauth-basic@github.com`n"
+  - git config --global user.email "%GIT_USER_EMAIL%"
+  - git config --global user.name "%GIT_USER_NAME%"
+  - git add -A
+  - git diff --quiet --exit-code --cached || git commit -m "Update Document Content" && git push origin %TARGET_BRANCH% && appveyor AddMessage "Document Updated"
