@@ -14,6 +14,7 @@ from azure.cli.commands.parameters import \
 from azure.cli.commands import register_cli_argument, register_extra_cli_argument, CliArgumentType
 from azure.cli.commands.client_factory import get_data_service_client
 
+from azure.common import AzureMissingResourceHttpError
 from azure.mgmt.storage.models import SkuName, AccessTier, Kind, EncryptionServices
 from azure.storage.models import AccountPermissions
 from azure.storage.blob import PublicAccess, DeleteSnapshot, BlockBlobService, PageBlobService, AppendBlobService
@@ -73,15 +74,13 @@ def get_storage_acl_name_completion_list(service, container_param, func):
 def dir_path_completer(prefix, action, parsed_args, **kwargs): # pylint: disable=unused-argument
     client = _get_client(FileService, parsed_args)
     share_name = parsed_args.share_name
-    directory_name = ''
-    if prefix:
-        directory_name = prefix
-        while directory_name:
-            if not client.exists(share_name, directory_name):
-                directory_name = os.path.split(directory_name)[0]
-            else:
-                break
-    items = list(client.list_directories_and_files(share_name, directory_name))
+    directory_name = prefix or ''
+    try:
+        items = list(client.list_directories_and_files(share_name, directory_name))
+    except AzureMissingResourceHttpError:
+        directory_name = directory_name.rsplit('/', 1)[0] if '/' in directory_name else ''
+        items = list(client.list_directories_and_files(share_name, directory_name))
+
     dir_list = [x for x in items if not hasattr(x.properties, 'content_length')]
     path_format = '{}{}/' if directory_name.endswith('/') or not directory_name else '{}/{}/'
     names = []
@@ -90,26 +89,16 @@ def dir_path_completer(prefix, action, parsed_args, **kwargs): # pylint: disable
         names.append(name)
     return sorted(names)
 
-def entity_completer(prefix, action, parsed_args, **kwargs): # pylint: disable=unused-argument
-    # This is a workaround for the fact that argcomplete always inserts a space after completion
-    # In this case, we want the cursor to remain positioned just after the text. We would ideally
-    # like it to append the = sign, but argcomplete irritatingly escapes it.
-    if prefix in ['RowKey', 'PartitionKey']:
-        return []
-    return ['RowKey!', 'RowKey*', 'PartitionKey!', 'PartitionKey*']
-
 def file_path_completer(prefix, action, parsed_args, **kwargs): # pylint: disable=unused-argument
     client = _get_client(FileService, parsed_args)
     share_name = parsed_args.share_name
-    directory_name = ''
-    if prefix:
-        directory_name = prefix
-        while directory_name:
-            if not client.exists(share_name, directory_name):
-                directory_name = os.path.split(directory_name)[0]
-            else:
-                break
-    items = list(client.list_directories_and_files(share_name, directory_name))
+    directory_name = prefix or ''
+    try:
+        items = list(client.list_directories_and_files(share_name, directory_name))
+    except AzureMissingResourceHttpError:
+        directory_name = directory_name.rsplit('/', 1)[0] if '/' in directory_name else ''
+        items = list(client.list_directories_and_files(share_name, directory_name))
+
     path_format = '{}{}' if directory_name.endswith('/') or not directory_name else '{}/{}'
     names = []
     for i in items:
@@ -297,7 +286,7 @@ register_cli_argument('storage table create', 'fail_on_exist', help='Throw an ex
 register_cli_argument('storage table policy', 'container_name', table_name_type)
 register_cli_argument('storage table policy', 'policy_name', options_list=('--name', '-n'), help='The stored access policy name.', completer=get_storage_acl_name_completion_list(TableService, 'container_name', 'get_table_acl'))
 
-register_cli_argument('storage entity', 'entity', options_list=('--entity', '-e'), validator=validate_entity, nargs='+', completer=entity_completer)
+register_cli_argument('storage entity', 'entity', options_list=('--entity', '-e'), validator=validate_entity, nargs='+')
 register_cli_argument('storage entity', 'property_resolver', IGNORE_TYPE)
 register_cli_argument('storage entity', 'select', nargs='+', validator=validate_select)
 
