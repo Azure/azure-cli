@@ -3,9 +3,20 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 #---------------------------------------------------------------------------------------------
 
-from azure.cli.help_files import helps
+from azure.cli.help_files import helps #pylint: disable=unused-import
+import os
 
 #pylint: disable=line-too-long
+
+help_path = os.path.realpath(__file__).replace("\\", "/") 
+
+helps['vm'] = """
+            doc-source: {0}
+""".format(help_path)
+
+helps['vmss'] = """
+            doc-source: {0}
+""".format(help_path)
 
 image_long_summary = """                      URN aliases: CentOS, CoreOS, Debian, openSUSE, RHEL, SLES, UbuntuLTS, Win2008SP1, Win2012Datacenter, Win2012R2Datacenter.
                       Example URN: MicrosoftWindowsServer:WindowsServer:2012-R2-Datacenter:latest.

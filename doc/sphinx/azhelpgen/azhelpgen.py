@@ -24,7 +24,6 @@ class AzHelpGenDirective(Directive):
         DOUBLEINDENT = INDENT * 2
         parser_dict = {}
         _store_parsers(app.parser, parser_dict)
-        parser_dict.pop('')
 
         help_files = []
         for cmd, parser in parser_dict.items():
@@ -35,10 +34,11 @@ class AzHelpGenDirective(Directive):
 
         for help_file in help_files:
             is_command = isinstance(help_file, _help.CommandHelpFile)
-            yield '.. cli{}:: {}'.format('command' if is_command else 'group', help_file.command)
+            yield '.. cli{}:: {}'.format('command' if is_command else 'group', help_file.command if help_file.command else 'az') #it is top level group az if command is empty
             yield ''
             yield '{}:summary: {}'.format(INDENT, help_file.short_summary)
             yield '{}:description: {}'.format(INDENT, help_file.long_summary)
+            yield '{}:docsource: {}'.format(INDENT, help_file.doc_source)
             yield ''
 
             if is_command and help_file.parameters:

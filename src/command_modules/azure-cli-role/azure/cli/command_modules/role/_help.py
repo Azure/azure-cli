@@ -4,5 +4,16 @@
 #---------------------------------------------------------------------------------------------
 
 from azure.cli.help_files import helps #pylint: disable=unused-import
+import os
 
 #pylint: disable=line-too-long
+
+help_path = os.path.realpath(__file__).replace("\\", "/") 
+
+helps['role'] = """
+            doc-source: {0}
+""".format(help_path)
+
+helps['ad'] = """
+            doc-source: {0}
+""".format(help_path)

@@ -13,7 +13,9 @@ cli_field_types = [
         Field('summary', label='Summary', has_arg=False,
                    names=('summary', 'shortdesc')),
         Field('description', label='Description', has_arg=False,
-                   names=('description', 'desc', 'longdesc'))
+                   names=('description', 'desc', 'longdesc')),
+        Field('docsource', label='Doc Source', has_arg=False,
+                   names=('docsource', 'documentsource'))
     ]
 
 class CliBaseDirective(ObjectDescription):

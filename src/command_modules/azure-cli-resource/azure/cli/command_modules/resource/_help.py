@@ -4,8 +4,19 @@
 #---------------------------------------------------------------------------------------------
 
 from azure.cli.help_files import helps #pylint: disable=unused-import
+import os
 
 #pylint: disable=line-too-long
+
+help_path = os.path.realpath(__file__).replace("\\", "/") 
+
+helps['resource'] = """
+            doc-source: {0}
+""".format(help_path)
+
+helps['tag'] = """
+            doc-source: {0}
+""".format(help_path)
 
 helps['resource policy create'] = """
             type: command
