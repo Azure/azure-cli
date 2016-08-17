@@ -4,7 +4,6 @@
 #---------------------------------------------------------------------------------------------
 
 import argparse
-import re
 
 import argcomplete
 
@@ -74,8 +73,7 @@ class AzCliCommandParser(argparse.ArgumentParser):
                         group = argument_groups[arg.arg_group]
                     except KeyError:
                         # group not found so create
-                        name_comps = re.findall('[A-Z][^A-Z]*', arg.arg_group)
-                        group_name = '{} Arguments'.format(' '.join(name_comps))
+                        group_name = '{} Arguments'.format(arg.arg_group)
                         group = command_parser.add_argument_group(arg.arg_group, group_name)
                         argument_groups[arg.arg_group] = group
                     param = group.add_argument(
