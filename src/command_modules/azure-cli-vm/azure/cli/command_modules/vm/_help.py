@@ -31,7 +31,7 @@ helps['vm create'] = """
                 - name: Create a simple Windows Server VM with private IP address only
                   text: >
                     az vm create -n my_vm_name -g myrg --admin-username myadmin --admin-password Password@1234 
-                     --public-ip-address-type none
+                     --public-ip-address ""
                 - name: Create a simple Windows Server VM with public IP address and DNS entry
                   text: >
                     az vm create -n my_vm_name -g myrg --admin-username myadmin --admin-password Password@1234

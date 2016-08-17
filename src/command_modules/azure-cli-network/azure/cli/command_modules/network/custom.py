@@ -3,7 +3,9 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 #---------------------------------------------------------------------------------------------
 
-# pylint: disable=no-self-use,too-many-arguments,no-member
+from collections import Counter
+
+# pylint: disable=no-self-use,too-many-arguments,no-member,too-many-lines
 from azure.mgmt.network.models import \
     (Subnet, SecurityRule, PublicIPAddress, NetworkSecurityGroup, InboundNatRule, InboundNatPool,
      FrontendIPConfiguration, BackendAddressPool, Probe, LoadBalancingRule,
@@ -20,6 +22,9 @@ from ._factory import _network_client_factory
 from azure.cli.command_modules.network.mgmt_nic.lib.operations.nic_operations import NicOperations
 from azure.mgmt.trafficmanager import TrafficManagerManagementClient
 from azure.mgmt.trafficmanager.models import Endpoint
+from azure.mgmt.dns import DnsManagementClient
+from azure.mgmt.dns.models import (RecordSet, AaaaRecord, ARecord, CnameRecord, MxRecord,
+                                   NsRecord, PtrRecord, SoaRecord, SrvRecord, TxtRecord)
 
 #region Network subresource factory methods
 
@@ -850,4 +855,172 @@ def list_traffic_manager_endpoints(resource_group_name, profile_name, endpoint_t
     ncf = get_mgmt_service_client(TrafficManagerManagementClient).profiles
     profile = ncf.get(resource_group_name, profile_name)
     return [e for e in profile.endpoints if not endpoint_type or e.type.endswith(endpoint_type)]
+#endregion
+
+#region DNS Commands
+def list_dns_zones(resource_group_name=None):
+    ncf = get_mgmt_service_client(DnsManagementClient).zones
+    if resource_group_name:
+        return ncf.list_in_resource_group(resource_group_name)
+    else:
+        return ncf.list_in_subscription()
+
+def create_dns_record_set(resource_group_name, zone_name, record_set_name, record_set_type,
+                          ttl=None):
+    ncf = get_mgmt_service_client(DnsManagementClient).record_sets
+    record_set = RecordSet(name=record_set_name, type=record_set_type, ttl=ttl)
+    return ncf.create_or_update(resource_group_name, zone_name, record_set_name,
+                                record_set_type, record_set)
+
+def add_dns_aaaa_record(resource_group_name, zone_name, record_set_name, ipv6_address):
+    record = AaaaRecord(ipv6_address)
+    record_type = 'aaaa'
+    return _add_record(record, record_type, record_set_name, resource_group_name, zone_name)
+
+def add_dns_a_record(resource_group_name, zone_name, record_set_name, ipv4_address):
+    record = ARecord(ipv4_address)
+    record_type = 'a'
+    return _add_record(record, record_type, record_set_name, resource_group_name, zone_name,
+                       'arecords')
+
+def add_dns_cname_record(resource_group_name, zone_name, record_set_name, cname):
+    record = CnameRecord(cname)
+    record_type = 'cname'
+    return _add_record(record, record_type, record_set_name, resource_group_name, zone_name,
+                       is_list=False)
+
+def add_dns_mx_record(resource_group_name, zone_name, record_set_name, preference, exchange):
+    record = MxRecord(int(preference), exchange)
+    record_type = 'mx'
+    return _add_record(record, record_type, record_set_name, resource_group_name, zone_name)
+
+def add_dns_ns_record(resource_group_name, zone_name, record_set_name, dname):
+    record = NsRecord(dname)
+    record_type = 'ns'
+    return _add_record(record, record_type, record_set_name, resource_group_name, zone_name)
+
+def add_dns_ptr_record(resource_group_name, zone_name, record_set_name, dname):
+    record = PtrRecord(dname)
+    record_type = 'ptr'
+    return _add_record(record, record_type, record_set_name, resource_group_name, zone_name)
+
+def add_dns_soa_record(resource_group_name, zone_name, record_set_name, host, email,
+                       serial_number, refresh_time, retry_time, expire_time, minimum_ttl):
+    record = SoaRecord(host, email, serial_number, refresh_time, retry_time, expire_time,
+                       minimum_ttl)
+    record_type = 'soa'
+    return _add_record(record, record_type, record_set_name, resource_group_name, zone_name,
+                       is_list=False)
+
+def add_dns_srv_record(resource_group_name, zone_name, record_set_name, priority, weight,
+                       port, target):
+    record = SrvRecord(priority, weight, port, target)
+    record_type = 'srv'
+    return _add_record(record, record_type, record_set_name, resource_group_name, zone_name)
+
+def add_dns_txt_record(resource_group_name, zone_name, record_set_name, value):
+    record = TxtRecord(value)
+    record_type = 'txt'
+    return _add_record(record, record_type, record_set_name, resource_group_name, zone_name)
+
+def remove_dns_aaaa_record(resource_group_name, zone_name, record_set_name, ipv6_address):
+    record = AaaaRecord(ipv6_address)
+    record_type = 'aaaa'
+    return _remove_record(record, record_type, record_set_name, resource_group_name, zone_name)
+
+def remove_dns_a_record(resource_group_name, zone_name, record_set_name, ipv4_address):
+    record = ARecord(ipv4_address)
+    record_type = 'a'
+    return _remove_record(record, record_type, record_set_name, resource_group_name, zone_name,
+                          'arecords')
+
+def remove_dns_cname_record(resource_group_name, zone_name, record_set_name, cname):
+    record = CnameRecord(cname)
+    record_type = 'cname'
+    return _remove_record(record, record_type, record_set_name, resource_group_name, zone_name,
+                          is_list=False)
+
+def remove_dns_mx_record(resource_group_name, zone_name, record_set_name, preference, exchange):
+    record = MxRecord(int(preference), exchange)
+    record_type = 'mx'
+    return _remove_record(record, record_type, record_set_name, resource_group_name, zone_name)
+
+def remove_dns_ns_record(resource_group_name, zone_name, record_set_name, dname):
+    record = NsRecord(dname)
+    record_type = 'ns'
+    return _remove_record(record, record_type, record_set_name, resource_group_name, zone_name)
+
+def remove_dns_ptr_record(resource_group_name, zone_name, record_set_name, dname):
+    record = PtrRecord(dname)
+    record_type = 'ptr'
+    return _remove_record(record, record_type, record_set_name, resource_group_name, zone_name)
+
+def remove_dns_soa_record(resource_group_name, zone_name, record_set_name, host, email,
+                          serial_number, refresh_time, retry_time, expire_time, minimum_ttl):
+    record = SoaRecord(host, email, serial_number, refresh_time, retry_time, expire_time,
+                       minimum_ttl)
+    record_type = 'soa'
+    return _remove_record(record, record_type, record_set_name, resource_group_name, zone_name,
+                          is_list=False)
+
+def remove_dns_srv_record(resource_group_name, zone_name, record_set_name, priority, weight,
+                          port, target):
+    record = SrvRecord(priority, weight, port, target)
+    record_type = 'srv'
+    return _remove_record(record, record_type, record_set_name, resource_group_name, zone_name)
+
+def remove_dns_txt_record(resource_group_name, zone_name, record_set_name, value):
+    record = TxtRecord(value)
+    record_type = 'txt'
+    return _remove_record(record, record_type, record_set_name, resource_group_name, zone_name)
+
+def _add_record(record, record_type, record_set_name, resource_group_name, zone_name,
+                property_name=None, is_list=True):
+    ncf = get_mgmt_service_client(DnsManagementClient).record_sets
+    record_set = ncf.get(resource_group_name, zone_name, record_set_name, record_type)
+
+    record_property = property_name or (record_type + '_record' + ('s' if is_list else ''))
+
+    if is_list:
+        record_list = getattr(record_set, record_property)
+        if record_list is None:
+            setattr(record_set, record_property, [])
+            record_list = getattr(record_set, record_property)
+        record_list.append(record)
+    else:
+        setattr(record_set, record_property, record)
+
+    return ncf.create_or_update(resource_group_name, zone_name, record_set_name,
+                                record_type, record_set)
+
+def _remove_record(record, record_type, record_set_name, resource_group_name, zone_name,
+                   property_name=None, is_list=True):
+    ncf = get_mgmt_service_client(DnsManagementClient).record_sets
+    record_set = ncf.get(resource_group_name, zone_name, record_set_name, record_type)
+
+    record_property = property_name or (record_type + '_record' + ('s' if is_list else ''))
+
+    if is_list:
+        record_list = getattr(record_set, record_property)
+        if record_list is not None:
+            keep_list = [r for r in record_list
+                         if not dict_matches_filter(r.__dict__, record.__dict__)]
+            if len(keep_list) == len(record_list):
+                raise CLIError('Record {} not found.'.format(str(record)))
+            setattr(record_set, record_property, keep_list)
+    else:
+        setattr(record_set, record_property, None)
+
+    return ncf.create_or_update(resource_group_name, zone_name, record_set_name,
+                                record_type, record_set)
+
+def dict_matches_filter(d, filter_dict):
+    sentinel = object()
+    return all(filter_dict.get(key, None) is None
+               or str(filter_dict[key]) == str(d.get(key, sentinel))
+               or lists_match(filter_dict[key], d.get(key, []))
+               for key in filter_dict)
+
+def lists_match(l1, l2):
+    return Counter(l1) == Counter(l2)
 #endregion

@@ -12,6 +12,7 @@ from azure.mgmt.network.models.network_management_client_enums import \
      ApplicationGatewayTier, ApplicationGatewayProtocol,
      ApplicationGatewayRequestRoutingRuleType, ExpressRouteCircuitSkuFamily,
      ExpressRouteCircuitSkuTier, ExpressRouteCircuitPeeringType)
+from azure.mgmt.dns.models.dns_management_client_enums import RecordType
 
 from azure.cli.commands import CliArgumentType, register_cli_argument, register_extra_cli_argument
 from azure.cli.commands.parameters import (location_type, get_resource_name_completion_list,
@@ -36,7 +37,6 @@ from azure.cli.command_modules.network.mgmt_vnet_gateway.lib.models.vnet_gateway
 from azure.cli.command_modules.network.mgmt_traffic_manager_profile.lib.models.traffic_manager_profile_creation_client_enums \
     import routingMethod
 from azure.cli.command_modules.network.custom import list_traffic_manager_endpoints
-
 
 # COMPLETERS
 
@@ -383,7 +383,19 @@ register_cli_argument('network traffic-manager profile check-dns', 'name', name_
 register_cli_argument('network traffic-manager profile check-dns', 'type', help=argparse.SUPPRESS, default='Microsoft.Network/trafficManagerProfiles')
 
 # Traffic manager endpoints
-register_cli_argument('network traffic-manager endpoint', 'endpoint_name', name_arg_type, id_part='name', help='Endpoint name.', completer=get_tm_endpoint_completion_list())
 endpoint_types = ['azureEndpoints', 'externalEndpoints', 'nestedEndpoints']
+register_cli_argument('network traffic-manager endpoint', 'endpoint_name', name_arg_type, id_part='name', help='Endpoint name.', completer=get_tm_endpoint_completion_list())
 register_cli_argument('network traffic-manager endpoint', 'endpoint_type', options_list=('--type',), help='Endpoint type.  Values include: {}.'.format(', '.join(endpoint_types)), completer=get_generic_completion_list(endpoint_types))
 register_cli_argument('network traffic-manager endpoint', 'profile_name', help='Name of parent profile.', completer=get_resource_name_completion_list('Microsoft.Network/trafficManagerProfiles'))
+
+# DNS
+register_cli_argument('network dns zone', 'zone_name', name_arg_type)
+register_cli_argument('network dns', 'record_set_name', name_arg_type, help='The name of the RecordSet, relative to the name of the zone.')
+register_cli_argument('network dns', 'relative_record_set_name', name_arg_type, help='The name of the RecordSet, relative to the name of the zone.')
+register_cli_argument('network dns', 'zone_name', help='The name of the zone without a terminating dot.')
+register_cli_argument('network dns record-set create', 'record_set_type', options_list=('--type',), choices=get_enum_choices(RecordType), type=str.upper)
+register_cli_argument('network dns record-set create', 'ttl', default=3600)
+register_cli_argument('network dns', 'record_type', options_list=('--type',), choices=get_enum_choices(RecordType), type=str.upper)
+register_cli_argument('network dns record', 'record_set_name', options_list=('--record-set-name',))
+register_cli_argument('network dns record txt add', 'value', nargs='+')
+register_cli_argument('network dns record txt remove', 'value', nargs='+')

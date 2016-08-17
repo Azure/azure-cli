@@ -25,6 +25,8 @@ from azure.mgmt.network.operations import (
 
 from azure.mgmt.trafficmanager.operations import EndpointsOperations, ProfilesOperations
 from azure.mgmt.trafficmanager import TrafficManagerManagementClient
+from azure.mgmt.dns.operations import RecordSetsOperations, ZonesOperations
+from azure.mgmt.dns import DnsManagementClient
 
 from azure.cli.commands.client_factory import get_mgmt_service_client
 from azure.cli.commands.arm import register_generic_update
@@ -70,6 +72,10 @@ from azure.cli.command_modules.network.mgmt_traffic_manager_profile.lib.operatio
     import TrafficManagerProfileOperations
 from azure.cli.command_modules.network.mgmt_traffic_manager_profile.lib \
     import TrafficManagerProfileCreationClient as TrafficManagerProfileClient
+from azure.cli.command_modules.network.mgmt_dns_zone.lib.operations \
+    import DnsZoneOperations
+from azure.cli.command_modules.network.mgmt_dns_zone.lib \
+    import DnsZoneCreationClient as DnsZoneClient
 
 
 from azure.cli.commands import DeploymentOutputLongRunningOperation, cli_command
@@ -103,7 +109,13 @@ from .custom import \
      list_public_ips, list_route_tables, list_vnet, create_route,
      handle_address_prefixes, create_vpn_gateway_root_cert, delete_vpn_gateway_root_cert,
      create_vpn_gateway_revoked_cert, delete_vpn_gateway_revoked_cert, create_express_route_auth,
-     list_traffic_manager_profiles, create_traffic_manager_endpoint, list_traffic_manager_endpoints)
+     list_traffic_manager_profiles, create_traffic_manager_endpoint, list_dns_zones,
+     create_dns_record_set, add_dns_aaaa_record, add_dns_a_record, add_dns_cname_record,
+     add_dns_ns_record, add_dns_ptr_record, add_dns_soa_record, add_dns_srv_record,
+     add_dns_txt_record, add_dns_mx_record,
+     remove_dns_aaaa_record, remove_dns_a_record, remove_dns_cname_record,
+     remove_dns_ns_record, remove_dns_ptr_record, remove_dns_soa_record, remove_dns_srv_record,
+     remove_dns_txt_record, remove_dns_mx_record, list_traffic_manager_endpoints)
 from ._factory import _network_client_factory
 
 # pylint: disable=line-too-long
@@ -369,4 +381,39 @@ cli_command('network traffic-manager endpoint delete', EndpointsOperations.delet
 cli_command('network traffic-manager endpoint create', create_traffic_manager_endpoint)
 cli_command('network traffic-manager endpoint list', list_traffic_manager_endpoints)
 register_generic_update('network traffic-manager endpoint update', EndpointsOperations.get, EndpointsOperations.create_or_update, factory)
+
+# DNS ZonesOperations
+factory = lambda _: get_mgmt_service_client(DnsManagementClient).zones
+cli_command('network dns zone show', ZonesOperations.get, factory)
+cli_command('network dns zone delete', ZonesOperations.delete, factory)
+cli_command('network dns zone list', list_dns_zones)
+register_generic_update('network dns zone update', ZonesOperations.get, ZonesOperations.create_or_update, factory)
+
+factory = lambda _: get_mgmt_service_client(DnsZoneClient).dns_zone
+cli_command('network dns zone create', DnsZoneOperations.create_or_update, factory, transform=DeploymentOutputLongRunningOperation('Starting network dns zone create'))
+
+# DNS RecordSetsOperations
+factory = lambda _: get_mgmt_service_client(DnsManagementClient).record_sets
+cli_command('network dns record-set show', RecordSetsOperations.get, factory)
+cli_command('network dns record-set delete', RecordSetsOperations.delete, factory)
+cli_command('network dns record-set create', create_dns_record_set)
+register_generic_update('network dns record-set update', RecordSetsOperations.get, RecordSetsOperations.create_or_update, factory)
+cli_command('network dns record aaaa add', add_dns_aaaa_record)
+cli_command('network dns record a add', add_dns_a_record)
+cli_command('network dns record cname add', add_dns_cname_record)
+cli_command('network dns record ns add', add_dns_ns_record)
+cli_command('network dns record mx add', add_dns_mx_record)
+cli_command('network dns record ptr add', add_dns_ptr_record)
+cli_command('network dns record soa add', add_dns_soa_record)
+cli_command('network dns record srv add', add_dns_srv_record)
+cli_command('network dns record txt add', add_dns_txt_record)
+cli_command('network dns record aaaa remove', remove_dns_aaaa_record)
+cli_command('network dns record a remove', remove_dns_a_record)
+cli_command('network dns record cname remove', remove_dns_cname_record)
+cli_command('network dns record ns remove', remove_dns_ns_record)
+cli_command('network dns record mx remove', remove_dns_mx_record)
+cli_command('network dns record ptr remove', remove_dns_ptr_record)
+cli_command('network dns record soa remove', remove_dns_soa_record)
+cli_command('network dns record srv remove', remove_dns_srv_record)
+cli_command('network dns record txt remove', remove_dns_txt_record)
 

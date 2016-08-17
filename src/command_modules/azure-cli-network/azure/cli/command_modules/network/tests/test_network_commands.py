@@ -6,6 +6,7 @@
 #pylint: disable=method-hidden
 #pylint: disable=line-too-long
 #pylint: disable=bad-continuation
+#pylint: disable=too-many-lines
 import os
 
 from azure.cli.utils.vcr_test_base import (VCRTestBase, ResourceGroupVCRTestBase, JMESPathCheck,
@@ -942,3 +943,74 @@ class NetworkTrafficManagerScenarioTest(ResourceGroupVCRTestBase):
                  .format(tm_name=tm_name, endpoint_name=endpoint_name, resource_group=self.resource_group), checks=[
                      JMESPathCheck('target', 'www.microsoft.com')
                      ])
+
+class NetworkDnsScenarioTest(ResourceGroupVCRTestBase):
+
+    def __init__(self, test_method):
+        super(NetworkDnsScenarioTest, self).__init__(__file__, test_method)
+        self.resource_group = 'cli_dns_test1'
+
+    def test_network_dns(self):
+        self.execute()
+
+    def body(self):
+        zone_name = 'myzone.com'
+        rg = self.resource_group
+
+        self.cmd('network dns zone create -n {} -g {}'.format(zone_name, rg))
+
+        base_records = 2
+        self.cmd('network dns zone show -n {} -g {}'.format(zone_name, rg), checks=[
+            JMESPathCheck('numberOfRecordSets', base_records)
+            ])
+
+        args = {
+            'a': '--ipv4-address 10.0.0.10',
+            'aaaa': '--ipv6-address 2001:db8:0:1:1:1:1:1',
+            'cname': '--cname mycname',
+            'mx': '--exchange 12 --preference 13',
+            'ns': '--dname foobar.com',
+            'ptr': '--dname foobar.com',
+            'soa': '--email foo.com --expire-time 30 --host ns.com --minimum-ttl 20 --refresh-time 60 --retry-time 90 --serial-number 123',
+            'srv': '--port 1234 --priority 1 --target target.com --weight 50',
+            'txt': '--value some_text'
+        }
+
+        record_types = ['a', 'aaaa', 'cname', 'mx', 'ns', 'ptr', 'soa', 'srv', 'txt']
+
+        for t in record_types:
+            self.cmd('network dns record-set create -n myrs{0} -g {1} --zone-name {2} --type {0}'
+                     .format(t, rg, zone_name))
+            self.cmd('network dns record {0} add -g {1} --zone-name {2} --record-set-name myrs{0} {3}'
+                     .format(t, rg, zone_name, args[t]))
+        self.cmd('network dns record {0} add -g {1} --zone-name {2} --record-set-name myrs{0} {3}'
+                 .format('a', rg, zone_name, '--ipv4-address 10.0.0.11'))
+
+        typed_records = 9
+        self.cmd('network dns zone show -n {} -g {}'.format(zone_name, rg), checks=[
+            JMESPathCheck('numberOfRecordSets', base_records + typed_records)
+            ])
+        self.cmd('network dns record-set show -n myrs{0} -g {1} --type {0} --zone-name {2}'
+                 .format('a', rg, zone_name), checks=[
+                     JMESPathCheck('length(arecords)', 2)
+                     ])
+
+        for t in record_types:
+            self.cmd('network dns record {0} remove -g {1} --zone-name {2} --record-set-name myrs{0} {3}'
+                     .format(t, rg, zone_name, args[t]))
+        self.cmd('network dns record-set show -n myrs{0} -g {1} --type {0} --zone-name {2}'
+                 .format('a', rg, zone_name), checks=[
+                     JMESPathCheck('length(arecords)', 1)
+                     ])
+
+        self.cmd('network dns record {0} remove -g {1} --zone-name {2} --record-set-name myrs{0} {3}'
+                     .format('a', rg, zone_name, '--ipv4-address 10.0.0.11'))
+        self.cmd('network dns record-set show -n myrs{0} -g {1} --type {0} --zone-name {2}'
+                 .format('a', rg, zone_name), checks=[
+                     JMESPathCheck('length(arecords)', 0)
+                     ])
+
+        self.cmd('network dns record-set delete -n myrs{0} -g {1} --type {0} --zone-name {2}'
+                 .format('a', rg, zone_name))
+        self.cmd('network dns record-set show -n myrs{0} -g {1} --type {0} --zone-name {2}'
+                 .format('a', rg, zone_name), allowed_exceptions='does not exist in resource group')
