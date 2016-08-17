@@ -29,7 +29,7 @@ from azure.mgmt.dns.operations import RecordSetsOperations, ZonesOperations
 from azure.mgmt.dns import DnsManagementClient
 
 from azure.cli.commands.client_factory import get_mgmt_service_client
-from azure.cli.commands.arm import register_generic_update
+from azure.cli.commands.arm import cli_generic_update_command
 from azure.cli.command_modules.network.mgmt_app_gateway.lib.operations import AppGatewayOperations
 from azure.cli.command_modules.network.mgmt_app_gateway.lib \
     import AppGatewayCreationClient as AppGatewayClient
@@ -107,7 +107,7 @@ from .custom import \
      delete_network_resource_property_entry,
      list_application_gateways, list_express_route_circuits, list_lbs, list_nics, list_nsgs,
      list_public_ips, list_route_tables, list_vnet, create_route,
-     handle_address_prefixes, create_vpn_gateway_root_cert, delete_vpn_gateway_root_cert,
+     update_network_vpn_gateway, create_vpn_gateway_root_cert, delete_vpn_gateway_root_cert,
      create_vpn_gateway_revoked_cert, delete_vpn_gateway_revoked_cert, create_express_route_auth,
      list_traffic_manager_profiles, create_traffic_manager_endpoint, list_dns_zones,
      create_dns_record_set, add_dns_aaaa_record, add_dns_a_record, add_dns_cname_record,
@@ -126,7 +126,7 @@ cli_command('network application-gateway show', ApplicationGatewaysOperations.ge
 cli_command('network application-gateway list', list_application_gateways, simple_output_query="[*].{Name:name, ResourceGroup:resourceGroup, Location:location, State:provisioningState} | sort_by(@, &Name)")
 cli_command('network application-gateway start', ApplicationGatewaysOperations.start, factory)
 cli_command('network application-gateway stop', ApplicationGatewaysOperations.stop, factory)
-register_generic_update('network application-gateway update', ApplicationGatewaysOperations.get, ApplicationGatewaysOperations.create_or_update, factory)
+cli_generic_update_command('network application-gateway update', ApplicationGatewaysOperations.get, ApplicationGatewaysOperations.create_or_update, factory)
 
 factory = lambda _: get_mgmt_service_client(AppGatewayClient).app_gateway
 cli_command('network application-gateway create', AppGatewayOperations.create_or_update, factory, transform=DeploymentOutputLongRunningOperation('Starting network application-gateway create'))
@@ -164,7 +164,7 @@ factory = lambda _: _network_client_factory().express_route_circuit_authorizatio
 cli_command('network express-route circuit-auth delete', ExpressRouteCircuitAuthorizationsOperations.delete, factory)
 cli_command('network express-route circuit-auth show', ExpressRouteCircuitAuthorizationsOperations.get, factory)
 cli_command('network express-route circuit-auth list', ExpressRouteCircuitAuthorizationsOperations.list, factory)
-register_generic_update('network express-route circuit-auth update', ExpressRouteCircuitAuthorizationsOperations.get, ExpressRouteCircuitAuthorizationsOperations.create_or_update, factory)
+cli_generic_update_command('network express-route circuit-auth update', ExpressRouteCircuitAuthorizationsOperations.get, ExpressRouteCircuitAuthorizationsOperations.create_or_update, factory)
 cli_command('network express-route circuit-auth create', create_express_route_auth)
 
 # ExpressRouteCircuitPeeringsOperations
@@ -172,7 +172,7 @@ factory = lambda _: _network_client_factory().express_route_circuit_peerings
 cli_command('network express-route circuit-peering delete', ExpressRouteCircuitPeeringsOperations.delete, factory)
 cli_command('network express-route circuit-peering show', ExpressRouteCircuitPeeringsOperations.get, factory)
 cli_command('network express-route circuit-peering list', ExpressRouteCircuitPeeringsOperations.list, factory)
-register_generic_update('network express-route circuit-peering update', ExpressRouteCircuitPeeringsOperations.get, ExpressRouteCircuitPeeringsOperations.create_or_update, factory)
+cli_generic_update_command('network express-route circuit-peering update', ExpressRouteCircuitPeeringsOperations.get, ExpressRouteCircuitPeeringsOperations.create_or_update, factory)
 
 factory = lambda _: get_mgmt_service_client(ExpressRoutePeeringClient).express_route_peering
 cli_command('network express-route circuit-peering create', ExpressRoutePeeringOperations.create_or_update, factory, transform=DeploymentOutputLongRunningOperation('Starting network express-route circuit-peering create'))
@@ -185,7 +185,7 @@ cli_command('network express-route circuit get-stats', ExpressRouteCircuitsOpera
 cli_command('network express-route circuit list-arp', ExpressRouteCircuitsOperations.list_arp_table, factory)
 cli_command('network express-route circuit list-routes', ExpressRouteCircuitsOperations.list_routes_table, factory)
 cli_command('network express-route circuit list', list_express_route_circuits)
-register_generic_update('network express-route circuit update', ExpressRouteCircuitsOperations.get, ExpressRouteCircuitsOperations.create_or_update, factory)
+cli_generic_update_command('network express-route circuit update', ExpressRouteCircuitsOperations.get, ExpressRouteCircuitsOperations.create_or_update, factory)
 
 factory = lambda _: get_mgmt_service_client(ExpressRouteCircuitClient).express_route_circuit
 cli_command('network express-route circuit create', ExpressRouteCircuitOperations.create_or_update, factory, transform=DeploymentOutputLongRunningOperation('Starting network express-route circuit create'))
@@ -199,7 +199,7 @@ factory = lambda _: _network_client_factory().load_balancers
 cli_command('network lb delete', LoadBalancersOperations.delete, factory)
 cli_command('network lb show', LoadBalancersOperations.get, factory)
 cli_command('network lb list', list_lbs)
-register_generic_update('network lb update', LoadBalancersOperations.get, LoadBalancersOperations.create_or_update, factory)
+cli_generic_update_command('network lb update', LoadBalancersOperations.get, LoadBalancersOperations.create_or_update, factory)
 
 factory = lambda _: get_mgmt_service_client(LBClient).lb
 cli_command('network lb create', LbOperations.create_or_update, factory, transform=DeploymentOutputLongRunningOperation('Starting network lb create'))
@@ -218,23 +218,25 @@ for subresource, alias in property_map.items():
     cli_command('network lb {} delete'.format(alias), delete_network_resource_property_entry('load_balancers', subresource))
 
 cli_command('network lb frontend-ip create', create_lb_frontend_ip_configuration)
-cli_command('network lb frontend-ip update', set_lb_frontend_ip_configuration)
 cli_command('network lb inbound-nat-rule create', create_lb_inbound_nat_rule)
-cli_command('network lb inbound-nat-rule update', set_lb_inbound_nat_rule)
 cli_command('network lb inbound-nat-pool create', create_lb_inbound_nat_pool)
-cli_command('network lb inbound-nat-pool update', set_lb_inbound_nat_pool)
 cli_command('network lb address-pool create', create_lb_backend_address_pool)
 cli_command('network lb rule create', create_lb_rule)
-cli_command('network lb rule update', set_lb_rule)
 cli_command('network lb probe create', create_lb_probe)
-cli_command('network lb probe update', set_lb_probe)
+
+factory = lambda _: _network_client_factory().load_balancers
+cli_generic_update_command('network lb frontend-ip update', LoadBalancersOperations.get, LoadBalancersOperations.create_or_update, factory, child_arg_type='frontend_ip_configurations', custom_function=set_lb_frontend_ip_configuration)
+cli_generic_update_command('network lb inbound-nat-rule update', LoadBalancersOperations.get, LoadBalancersOperations.create_or_update, factory, child_arg_type='inbound_nat_rules', custom_function=set_lb_inbound_nat_rule)
+cli_generic_update_command('network lb inbound-nat-pool update', LoadBalancersOperations.get, LoadBalancersOperations.create_or_update, factory, child_arg_type='inbound_nat_pools', custom_function=set_lb_inbound_nat_pool)
+cli_generic_update_command('network lb rule update', LoadBalancersOperations.get, LoadBalancersOperations.create_or_update, factory, child_arg_type='load_balancing_rules', custom_function=set_lb_rule)
+cli_generic_update_command('network lb probe update', LoadBalancersOperations.get, LoadBalancersOperations.create_or_update, factory, child_arg_type='probes', custom_function=set_lb_probe)
 
 # LocalNetworkGatewaysOperations
 factory = lambda _: _network_client_factory().local_network_gateways
 cli_command('network local-gateway delete', LocalNetworkGatewaysOperations.delete, factory)
 cli_command('network local-gateway show', LocalNetworkGatewaysOperations.get, factory)
 cli_command('network local-gateway list', LocalNetworkGatewaysOperations.list, factory)
-register_generic_update('network local-gateway update', LocalNetworkGatewaysOperations.get, LocalNetworkGatewaysOperations.create_or_update, factory)
+cli_generic_update_command('network local-gateway update', LocalNetworkGatewaysOperations.get, LocalNetworkGatewaysOperations.create_or_update, factory)
 
 factory = lambda _: get_mgmt_service_client(LocalGatewayClient).local_gateway
 cli_command('network local-gateway create', LocalGatewayOperations.create_or_update, factory, transform=DeploymentOutputLongRunningOperation('Starting network local-gateway create'))
@@ -247,7 +249,7 @@ factory = lambda _: _network_client_factory().network_interfaces
 cli_command('network nic delete', NetworkInterfacesOperations.delete, factory)
 cli_command('network nic show', NetworkInterfacesOperations.get, factory)
 cli_command('network nic list', list_nics)
-cli_command('network nic update', set_nic) # TODO: no tagging
+cli_generic_update_command('network nic update', NetworkInterfacesOperations.get, NetworkInterfacesOperations.create_or_update, factory, custom_function=set_nic)
 
 # NetworkInterfacesOperations: scaleset
 cli_command('network nic scale-set list-vm-nics', NetworkInterfacesOperations.list_virtual_machine_scale_set_vm_network_interfaces, factory)
@@ -257,7 +259,7 @@ cli_command('network nic scale-set show', NetworkInterfacesOperations.get_virtua
 resource = 'network_interfaces'
 subresource = 'ip_configurations'
 cli_command('network nic ip-config create', create_nic_ip_config)
-cli_command('network nic ip-config update', set_nic_ip_config)
+cli_generic_update_command('network nic ip-config update', NetworkInterfacesOperations.get, NetworkInterfacesOperations.create_or_update, factory, child_arg_type='ip_configurations', child_arg_name='ip_config_name', custom_function=set_nic_ip_config)
 cli_command('network nic ip-config list', list_network_resource_property(resource, subresource))
 cli_command('network nic ip-config show', get_network_resource_property_entry(resource, subresource))
 cli_command('network nic ip-config delete', delete_network_resource_property_entry(resource, subresource))
@@ -271,7 +273,7 @@ factory = lambda _: _network_client_factory().network_security_groups
 cli_command('network nsg delete', NetworkSecurityGroupsOperations.delete, factory)
 cli_command('network nsg show', NetworkSecurityGroupsOperations.get, factory)
 cli_command('network nsg list', list_nsgs)
-register_generic_update('network nsg update', NetworkSecurityGroupsOperations.get, NetworkSecurityGroupsOperations.create_or_update, factory)
+cli_generic_update_command('network nsg update', NetworkSecurityGroupsOperations.get, NetworkSecurityGroupsOperations.create_or_update, factory)
 
 factory = lambda _: get_mgmt_service_client(NSGClient).nsg
 cli_command('network nsg create', NsgOperations.create_or_update, factory, transform=DeploymentOutputLongRunningOperation('Starting network nsg create'))
@@ -281,7 +283,7 @@ factory = lambda _: _network_client_factory().public_ip_addresses
 cli_command('network public-ip delete', PublicIPAddressesOperations.delete, factory)
 cli_command('network public-ip show', PublicIPAddressesOperations.get, factory)
 cli_command('network public-ip list', list_public_ips, simple_output_query="[*].{Name:name, ResourceGroup:resourceGroup, Location:location, IpAddress:ipAddress, FQDN:dnsSettings.fqdn} | sort_by(@, &Name)")
-register_generic_update('network public-ip update', PublicIPAddressesOperations.get, PublicIPAddressesOperations.create_or_update, factory)
+cli_generic_update_command('network public-ip update', PublicIPAddressesOperations.get, PublicIPAddressesOperations.create_or_update, factory)
 
 factory = lambda _: get_mgmt_service_client(PublicIPClient).public_ip
 cli_command('network public-ip create', PublicIpOperations.create_or_update, factory, transform=DeploymentOutputLongRunningOperation('Starting network public-ip create'))
@@ -291,7 +293,7 @@ factory = lambda _: _network_client_factory().route_tables
 cli_command('network route-table delete', RouteTablesOperations.delete, factory)
 cli_command('network route-table show', RouteTablesOperations.get, factory)
 cli_command('network route-table list', list_route_tables)
-register_generic_update('network route-table update', RouteTablesOperations.get, RouteTablesOperations.create_or_update, factory)
+cli_generic_update_command('network route-table update', RouteTablesOperations.get, RouteTablesOperations.create_or_update, factory)
 
 factory = lambda _: get_mgmt_service_client(RouteTableClient).route_table
 cli_command('network route-table create', RouteTableOperations.create_or_update, factory, transform=DeploymentOutputLongRunningOperation('Starting network route-table create'))
@@ -301,7 +303,7 @@ factory = lambda _: _network_client_factory().routes
 cli_command('network route-table route delete', RoutesOperations.delete, factory)
 cli_command('network route-table route show', RoutesOperations.get, factory)
 cli_command('network route-table route list', RoutesOperations.list, factory)
-register_generic_update('network route-table route update', RoutesOperations.get, RoutesOperations.create_or_update, factory)
+cli_generic_update_command('network route-table route update', RoutesOperations.get, RoutesOperations.create_or_update, factory)
 cli_command('network route-table route create', create_route)
 
 # SecurityRulesOperations
@@ -310,7 +312,7 @@ cli_command('network nsg rule delete', SecurityRulesOperations.delete, factory)
 cli_command('network nsg rule show', SecurityRulesOperations.get, factory)
 cli_command('network nsg rule list', SecurityRulesOperations.list, factory)
 cli_command('network nsg rule create', create_nsg_rule)
-cli_command('network nsg rule update', update_nsg_rule)
+cli_generic_update_command('network nsg rule update', SecurityRulesOperations.get, SecurityRulesOperations.create_or_update, factory, setter_arg_name='security_rule_parameters', custom_function=update_nsg_rule)
 
 # SubnetsOperations
 factory = lambda _: _network_client_factory().subnets
@@ -318,7 +320,7 @@ cli_command('network vnet subnet delete', SubnetsOperations.delete, factory)
 cli_command('network vnet subnet show', SubnetsOperations.get, factory)
 cli_command('network vnet subnet list', SubnetsOperations.list, factory)
 cli_command('network vnet subnet create', create_subnet)
-cli_command('network vnet subnet update', update_subnet)
+cli_generic_update_command('network vnet subnet update', SubnetsOperations.get, SubnetsOperations.create_or_update, factory, setter_arg_name='subnet_parameters', custom_function=update_subnet)
 
 # Usages operations
 factory = lambda _: _network_client_factory().usages
@@ -329,10 +331,10 @@ factory = lambda _: _network_client_factory().virtual_network_gateway_connection
 cli_command('network vpn-connection delete', VirtualNetworkGatewayConnectionsOperations.delete, factory)
 cli_command('network vpn-connection show', VirtualNetworkGatewayConnectionsOperations.get, factory)
 cli_command('network vpn-connection list', VirtualNetworkGatewayConnectionsOperations.list, factory)
-register_generic_update('network vpn-connection update', VirtualNetworkGatewayConnectionsOperations.get, VirtualNetworkGatewayConnectionsOperations.create_or_update, factory)
+cli_generic_update_command('network vpn-connection update', VirtualNetworkGatewayConnectionsOperations.get, VirtualNetworkGatewayConnectionsOperations.create_or_update, factory)
 cli_command('network vpn-connection shared-key show', VirtualNetworkGatewayConnectionsOperations.get_shared_key, factory)
 cli_command('network vpn-connection shared-key reset', VirtualNetworkGatewayConnectionsOperations.reset_shared_key, factory)
-cli_command('network vpn-connection shared-key update', VirtualNetworkGatewayConnectionsOperations.set_shared_key, factory)
+cli_generic_update_command('network vpn-connection shared-key update', VirtualNetworkGatewayConnectionsOperations.get, VirtualNetworkGatewayConnectionsOperations.set_shared_key, factory)
 
 factory = lambda _: get_mgmt_service_client(VpnConnectionClient).vpn_connection
 cli_command('network vpn-connection create', VpnConnectionOperations.create_or_update, factory, transform=DeploymentOutputLongRunningOperation('Starting network vpn-connection create'))
@@ -343,8 +345,8 @@ cli_command('network vpn-gateway delete', VirtualNetworkGatewaysOperations.delet
 cli_command('network vpn-gateway show', VirtualNetworkGatewaysOperations.get, factory)
 cli_command('network vpn-gateway list', VirtualNetworkGatewaysOperations.list, factory)
 cli_command('network vpn-gateway reset', VirtualNetworkGatewaysOperations.reset, factory)
-register_generic_update('network vpn-gateway update', VirtualNetworkGatewaysOperations.get, VirtualNetworkGatewaysOperations.create_or_update, factory,
-                        custom_handlers={'address_prefixes': handle_address_prefixes})
+cli_generic_update_command('network vpn-gateway update', VirtualNetworkGatewaysOperations.get, VirtualNetworkGatewaysOperations.create_or_update, factory,
+                           custom_function=update_network_vpn_gateway)
 cli_command('network vpn-gateway root-cert create', create_vpn_gateway_root_cert)
 cli_command('network vpn-gateway root-cert delete', delete_vpn_gateway_root_cert)
 cli_command('network vpn-gateway revoked-cert create', create_vpn_gateway_revoked_cert)
@@ -358,7 +360,8 @@ factory = lambda _: _network_client_factory().virtual_networks
 cli_command('network vnet delete', VirtualNetworksOperations.delete, factory)
 cli_command('network vnet show', VirtualNetworksOperations.get, factory)
 cli_command('network vnet list', list_vnet)
-cli_command('network vnet update', update_vnet) # TODO: no tagging
+cli_generic_update_command('network vnet update', VirtualNetworksOperations.get, VirtualNetworksOperations.create_or_update, factory,
+                           custom_function=update_vnet)
 
 factory = lambda _: get_mgmt_service_client(VNetClient).vnet
 cli_command('network vnet create', VnetOperations.create_or_update, factory, transform=DeploymentOutputLongRunningOperation('Starting network vnet create'))
@@ -369,7 +372,7 @@ cli_command('network traffic-manager profile check-dns', ProfilesOperations.chec
 cli_command('network traffic-manager profile show', ProfilesOperations.get, factory)
 cli_command('network traffic-manager profile delete', ProfilesOperations.delete, factory)
 cli_command('network traffic-manager profile list', list_traffic_manager_profiles)
-register_generic_update('network traffic-manager profile update', ProfilesOperations.get, ProfilesOperations.create_or_update, factory)
+cli_generic_update_command('network traffic-manager profile update', ProfilesOperations.get, ProfilesOperations.create_or_update, factory)
 
 factory = lambda _: get_mgmt_service_client(TrafficManagerProfileClient).traffic_manager_profile
 cli_command('network traffic-manager profile create', TrafficManagerProfileOperations.create_or_update, factory, transform=DeploymentOutputLongRunningOperation('Starting network traffic-manager profile create'))
@@ -380,14 +383,14 @@ cli_command('network traffic-manager endpoint show', EndpointsOperations.get, fa
 cli_command('network traffic-manager endpoint delete', EndpointsOperations.delete, factory)
 cli_command('network traffic-manager endpoint create', create_traffic_manager_endpoint)
 cli_command('network traffic-manager endpoint list', list_traffic_manager_endpoints)
-register_generic_update('network traffic-manager endpoint update', EndpointsOperations.get, EndpointsOperations.create_or_update, factory)
+cli_generic_update_command('network traffic-manager endpoint update', EndpointsOperations.get, EndpointsOperations.create_or_update, factory)
 
 # DNS ZonesOperations
 factory = lambda _: get_mgmt_service_client(DnsManagementClient).zones
 cli_command('network dns zone show', ZonesOperations.get, factory)
 cli_command('network dns zone delete', ZonesOperations.delete, factory)
 cli_command('network dns zone list', list_dns_zones)
-register_generic_update('network dns zone update', ZonesOperations.get, ZonesOperations.create_or_update, factory)
+cli_generic_update_command('network dns zone update', ZonesOperations.get, ZonesOperations.create_or_update, factory)
 
 factory = lambda _: get_mgmt_service_client(DnsZoneClient).dns_zone
 cli_command('network dns zone create', DnsZoneOperations.create_or_update, factory, transform=DeploymentOutputLongRunningOperation('Starting network dns zone create'))
@@ -397,7 +400,7 @@ factory = lambda _: get_mgmt_service_client(DnsManagementClient).record_sets
 cli_command('network dns record-set show', RecordSetsOperations.get, factory)
 cli_command('network dns record-set delete', RecordSetsOperations.delete, factory)
 cli_command('network dns record-set create', create_dns_record_set)
-register_generic_update('network dns record-set update', RecordSetsOperations.get, RecordSetsOperations.create_or_update, factory)
+cli_generic_update_command('network dns record-set update', RecordSetsOperations.get, RecordSetsOperations.create_or_update, factory)
 cli_command('network dns record aaaa add', add_dns_aaaa_record)
 cli_command('network dns record a add', add_dns_a_record)
 cli_command('network dns record cname add', add_dns_cname_record)

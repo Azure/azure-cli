@@ -160,11 +160,22 @@ def add_id_parameters(command_table):
 
 APPLICATION.register(APPLICATION.COMMAND_TABLE_LOADED, add_id_parameters)
 
-def register_generic_update(name, getter, setter, factory=None, setter_arg_name='parameters', #pylint:disable=too-many-arguments
-                            simple_output_query=None, custom_handlers=None):
+def _get_child_property(parent, collection_name, item_name):
+    items = getattr(parent, collection_name)
+    result = next((x for x in items if x.name.lower() == item_name.lower()), None)
+    if not result:
+        raise CLIError("Property '{}' does not exist".format(item_name))
+    else:
+        return result
+
+def cli_generic_update_command(name, getter, setter, factory=None, setter_arg_name='parameters', #pylint:disable=too-many-arguments
+                               simple_output_query=None, child_arg_type=None,
+                               child_arg_name='item_name', custom_function=None):
 
     get_arguments = dict(extract_args_from_signature(getter))
     set_arguments = dict(extract_args_from_signature(setter))
+    function_arguments = dict(extract_args_from_signature(custom_function)) \
+        if custom_function else None
 
     def handler(args):
         ordered_arguments = args.pop('ordered_arguments') if 'ordered_arguments' in args else []
@@ -176,8 +187,22 @@ def register_generic_update(name, getter, setter, factory=None, setter_arg_name=
 
         getterargs = {key: val for key, val in args.items()
                       if key in get_arguments}
-        instance = getter(client, **getterargs) if client else getter(**getterargs)
+        if child_arg_type:
+            parent = getter(client, **getterargs) if client else getter(**getterargs)
+            instance = _get_child_property(parent, child_arg_type, args.get(child_arg_name))
+        else:
+            parent = None
+            instance = getter(client, **getterargs) if client else getter(**getterargs)
 
+        # pass instance to the custom_function, if provided
+        if custom_function:
+            custom_func_args = {k: v for k, v in args.items() if k in function_arguments.keys()}
+            if child_arg_type:
+                parent = custom_function(instance, parent, **custom_func_args)
+            else:
+                instance = custom_function(instance, **custom_func_args)
+
+        # apply generic updates after custom updates
         for k in args.copy().keys():
             if k in get_arguments or k in set_arguments \
                 or k in ('properties_to_add', 'properties_to_remove', 'properties_to_set'):
@@ -185,7 +210,6 @@ def register_generic_update(name, getter, setter, factory=None, setter_arg_name=
         for key, val in args.items():
             ordered_arguments.append((key, val))
 
-        # Update properties
         for arg in ordered_arguments:
             arg_type, arg_values = arg
             if arg_type == '--set':
@@ -209,13 +233,15 @@ def register_generic_update(name, getter, setter, factory=None, setter_arg_name=
                     raise CLIError('--remove should be of the form: --remove'
                                    ' property.propertyToRemove or'
                                    ' --remove property.list <indexToRemove>')
-            else:
-                custom_handlers[arg_type](instance, arg_type, arg_values)
 
         # Done... update the instance!
-        getterargs[setter_arg_name] = instance
+        getterargs[setter_arg_name] = parent if child_arg_type else instance
         opres = setter(client, **getterargs) if client else setter(**getterargs)
-        return opres.result() if isinstance(opres, AzureOperationPoller) else opres
+        result = opres.result() if isinstance(opres, AzureOperationPoller) else opres
+        if child_arg_type:
+            return _get_child_property(result, child_arg_type, args.get(child_arg_name))
+        else:
+            return result
 
     class OrderedArgsAction(argparse.Action): #pylint:disable=too-few-public-methods
         def __call__(self, parser, namespace, values, option_string=None):
@@ -226,6 +252,11 @@ def register_generic_update(name, getter, setter, factory=None, setter_arg_name=
     cmd = CliCommand(name, handler, simple_output_query=simple_output_query)
     cmd.arguments.update(set_arguments)
     cmd.arguments.update(get_arguments)
+    if function_arguments:
+        cmd.arguments.update(function_arguments)
+    cmd.arguments.pop('instance', None) # inherited from custom_function(instance, ...)
+    cmd.arguments.pop('parent', None)
+    cmd.arguments.pop('expand', None) # possibly inherited from the getter
     cmd.arguments.pop(setter_arg_name, None)
     group_name = 'Generic Update'
     cmd.add_argument('properties_to_set', '--set', nargs='+', action=OrderedArgsAction, default=[],
