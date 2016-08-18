@@ -28,75 +28,73 @@ class Test_storage_validators(unittest.TestCase):
 
     def test_permission_validator(self):
         from azure.storage.blob.models import ContainerPermissions
-        self.assertIsNotNone(get_permission_validator(ContainerPermissions)('rwdl'))
+        from argparse import Namespace
+        
+        ns1 = Namespace(permission='rwdl')
+        ns2 = Namespace(permission='abc')
+        get_permission_validator(ContainerPermissions)(ns1)
+        self.assertTrue(isinstance(ns1.permission, ContainerPermissions))
         with self.assertRaises(ValueError):
-            get_permission_validator(ContainerPermissions)('abc')
+            get_permission_validator(ContainerPermissions)(ns2)
 
-    def test_date_as_string_valid(self):
+    def test_datetime_string_type(self):
         input = "2017-01-01T12:30Z"
-        actual = validate_datetime_as_string(input)
+        actual = datetime_string_type(input)
         expected = "2017-01-01T12:30Z"
         self.assertEqual(actual, expected)
 
-    def test_date_as_string_invalid(self):
         input = "2017-01-01 12:30"
         with self.assertRaises(ValueError):
-            actual = validate_datetime_as_string(input)
+            actual = datetime_string_type(input)
 
-    def test_date_valid(self):
+    def test_datetime_type(self):
         input = "2017-01-01T12:30Z"
-        actual = validate_datetime(input)
+        actual = datetime_type(input)
         expected = datetime(2017, 1, 1, 12, 30, 0)
         self.assertEqual(actual, expected)
 
-    def test_date_invalid(self):
         input = "2017-01-01 12:30"
         with self.assertRaises(ValueError):
-            actual = validate_datetime(input)
+            actual = datetime_type(input)
 
-    def test_ip_address_single(self):
+    def test_ipv4_range_type(self):
         input = "111.22.3.111"
-        actual = validate_ip_range(input)
+        actual = ipv4_range_type(input)
         expected = input
         self.assertEqual(actual, expected)
 
-    def test_ip_address_range(self):
         input = "111.22.3.111-222.11.44.111"
-        actual = validate_ip_range(input)
+        actual = ipv4_range_type(input)
         expected = input
         self.assertEqual(actual, expected)
 
-    def test_ip_address_fail(self):
         input = "111.22"
         with self.assertRaises(ValueError):        
-            actual = validate_ip_range(input)
+            actual = ipv4_range_type(input)
     
-    def test_ip_address_fail2(self):
         input = "111.22.33.44-"
         with self.assertRaises(ValueError):
-            actual = validate_ip_range(input)
+            actual = ipv4_range_type(input)
 
-    def test_resource_types_valid(self):
+    def test_resource_types_type(self):
         input = "sso"
-        actual = str(validate_resource_types(input))
+        actual = str(resource_type_type(input))
         expected = "so"
         self.assertEqual(actual, expected)
 
-    def test_resource_types_invalid(self):
         input = "blob"
         with self.assertRaises(ValueError):
-            actual = validate_resource_types(input)
+            actual = resource_type_type(input)
 
-    def test_services_types_valid(self):
+    def test_services_type(self):
         input = "ttfqbqtf"
-        actual = str(validate_services(input))
+        actual = str(services_type(input))
         expected = "bqtf"
         self.assertEqual(actual, expected)
 
-    def test_services_invalid(self):
         input = "everything"
         with self.assertRaises(ValueError):
-            actual = validate_services(input)
+            actual = services_type(input)
 
 if __name__ == '__main__':
     unittest.main()
