@@ -13,9 +13,7 @@ cli_field_types = [
         Field('summary', label='Summary', has_arg=False,
                    names=('summary', 'shortdesc')),
         Field('description', label='Description', has_arg=False,
-                   names=('description', 'desc', 'longdesc')),
-        Field('docsource', label='Doc Source', has_arg=False,
-                   names=('docsource', 'documentsource'))
+                   names=('description', 'desc', 'longdesc'))
     ]
 
 class CliBaseDirective(ObjectDescription):
@@ -33,7 +31,11 @@ class CliBaseDirective(ObjectDescription):
         return name
 
 class CliGroupDirective(CliBaseDirective):
-    doc_field_types = cli_field_types
+    doc_field_types = copy.copy(cli_field_types)
+    doc_field_types.append(
+        Field('docsource', label='Doc Source', has_arg=False,
+                   names=('docsource', 'documentsource'))
+    )
 
 class CliCommandDirective(CliBaseDirective):
     doc_field_types = cli_field_types

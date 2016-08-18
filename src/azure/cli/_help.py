@@ -209,7 +209,6 @@ class HelpFile(HelpObject): #pylint: disable=too-few-public-methods,too-many-ins
         self.type = ''
         self.short_summary = ''
         self.long_summary = ''
-        self.doc_source = ''
         self.examples = ''
 
     def load(self, options):
@@ -243,9 +242,6 @@ class HelpFile(HelpObject): #pylint: disable=too-few-public-methods,too-many-ins
             self.short_summary = data['short-summary']
 
         self.long_summary = data.get('long-summary')
-
-        if 'doc-source' in data:
-            self.doc_source = data['doc-source']
 
         if 'examples' in data:
             self.examples = [HelpExample(d) for d in data['examples']]
