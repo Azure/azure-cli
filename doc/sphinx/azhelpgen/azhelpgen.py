@@ -24,7 +24,6 @@ class AzHelpGenDirective(Directive):
         DOUBLEINDENT = INDENT * 2
         parser_dict = {}
         _store_parsers(app.parser, parser_dict)
-        parser_dict.pop('')
 
         help_files = []
         for cmd, parser in parser_dict.items():
@@ -35,10 +34,13 @@ class AzHelpGenDirective(Directive):
 
         for help_file in help_files:
             is_command = isinstance(help_file, _help.CommandHelpFile)
-            yield '.. cli{}:: {}'.format('command' if is_command else 'group', help_file.command)
+            yield '.. cli{}:: {}'.format('command' if is_command else 'group', help_file.command if help_file.command else 'az') #it is top level group az if command is empty
             yield ''
             yield '{}:summary: {}'.format(INDENT, help_file.short_summary)
             yield '{}:description: {}'.format(INDENT, help_file.long_summary)
+            if not is_command:
+                top_group_name = help_file.command.split()[0] if help_file.command else '' 
+                yield '{}:docsource: {}'.format(INDENT, _doc_source_map[top_group_name] if top_group_name in _doc_source_map else '')
             yield ''
 
             if is_command and help_file.parameters:
@@ -96,3 +98,21 @@ def _is_group(parser):
 
 def _get_parser_name(s):
     return (s._prog_prefix if hasattr(s, '_prog_prefix') else s.prog)[3:]
+
+_doc_source_map = {
+    '': 'src/command_modules/azure-cli-profile/azure/cli/command_modules/profile/_help.py',
+    'account': 'src/command_modules/azure-cli-profile/azure/cli/command_modules/profile/_help.py',
+    'component': 'src/command_modules/azure-cli-component/azure/cli/command_modules/component/_help.py',
+    'keyvault': 'src/command_modules/azure-cli-keyvault/azure/cli/command_modules/keyvault/_help.py',
+    'network': 'src/command_modules/azure-cli-network/azure/cli/command_modules/network/_help.py',
+    'redis': 'src/command_modules/azure-cli-redis/azure/cli/command_modules/redis/_help.py',
+    'resource': 'src/command_modules/azure-cli-resource/azure/cli/command_modules/resource/_help.py',
+    'tag': 'src/command_modules/azure-cli-resource/azure/cli/command_modules/resource/_help.py',
+    'role': 'src/command_modules/azure-cli-role/azure/cli/command_modules/role/_help.py',
+    'ad': 'src/command_modules/azure-cli-role/azure/cli/command_modules/role/_help.py',
+    'storage': 'src/command_modules/azure-cli-storage/azure/cli/command_modules/storage/_help.py',
+    'taskhelp': 'src/command_modules/azure-cli-taskhelp/azure/cli/command_modules/taskhelp/_help.py',
+    'vm': 'src/command_modules/azure-cli-vm/azure/cli/command_modules/vm/_help.py',
+    'vmss': 'src/command_modules/azure-cli-vm/azure/cli/command_modules/vm/_help.py',
+    'webapp': 'src/command_modules/azure-cli-webapp/azure/cli/command_modules/webapp/_help.py'
+}
