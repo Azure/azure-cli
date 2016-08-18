@@ -23,6 +23,9 @@ from azure.mgmt.network.operations import (
     VirtualNetworkGatewaysOperations,
     VirtualNetworksOperations)
 
+from azure.mgmt.trafficmanager.operations import EndpointsOperations, ProfilesOperations
+from azure.mgmt.trafficmanager import TrafficManagerManagementClient
+
 from azure.cli.commands.client_factory import get_mgmt_service_client
 from azure.cli.commands.arm import register_generic_update
 from azure.cli.command_modules.network.mgmt_app_gateway.lib.operations import AppGatewayOperations
@@ -63,6 +66,10 @@ from azure.cli.command_modules.network.mgmt_express_route_peering.lib.operations
     import ExpressRoutePeeringOperations
 from azure.cli.command_modules.network.mgmt_express_route_peering.lib \
     import ExpressRoutePeeringCreationClient as ExpressRoutePeeringClient
+from azure.cli.command_modules.network.mgmt_traffic_manager_profile.lib.operations \
+    import TrafficManagerProfileOperations
+from azure.cli.command_modules.network.mgmt_traffic_manager_profile.lib \
+    import TrafficManagerProfileCreationClient as TrafficManagerProfileClient
 
 
 from azure.cli.commands import DeploymentOutputLongRunningOperation, cli_command
@@ -95,7 +102,8 @@ from .custom import \
      list_application_gateways, list_express_route_circuits, list_lbs, list_nics, list_nsgs,
      list_public_ips, list_route_tables, list_vnet, create_route,
      handle_address_prefixes, create_vpn_gateway_root_cert, delete_vpn_gateway_root_cert,
-     create_vpn_gateway_revoked_cert, delete_vpn_gateway_revoked_cert, create_express_route_auth)
+     create_vpn_gateway_revoked_cert, delete_vpn_gateway_revoked_cert, create_express_route_auth,
+     list_traffic_manager_profiles, create_traffic_manager_endpoint, list_traffic_manager_endpoints)
 from ._factory import _network_client_factory
 
 # pylint: disable=line-too-long
@@ -342,3 +350,23 @@ cli_command('network vnet update', update_vnet) # TODO: no tagging
 
 factory = lambda _: get_mgmt_service_client(VNetClient).vnet
 cli_command('network vnet create', VnetOperations.create_or_update, factory, transform=DeploymentOutputLongRunningOperation('Starting network vnet create'))
+
+# Traffic Manager ProfileOperations
+factory = lambda _: get_mgmt_service_client(TrafficManagerManagementClient).profiles
+cli_command('network traffic-manager profile check-dns', ProfilesOperations.check_traffic_manager_relative_dns_name_availability, factory)
+cli_command('network traffic-manager profile show', ProfilesOperations.get, factory)
+cli_command('network traffic-manager profile delete', ProfilesOperations.delete, factory)
+cli_command('network traffic-manager profile list', list_traffic_manager_profiles)
+register_generic_update('network traffic-manager profile update', ProfilesOperations.get, ProfilesOperations.create_or_update, factory)
+
+factory = lambda _: get_mgmt_service_client(TrafficManagerProfileClient).traffic_manager_profile
+cli_command('network traffic-manager profile create', TrafficManagerProfileOperations.create_or_update, factory, transform=DeploymentOutputLongRunningOperation('Starting network traffic-manager profile create'))
+
+# Traffic Manager EndpointOperations
+factory = lambda _: get_mgmt_service_client(TrafficManagerManagementClient).endpoints
+cli_command('network traffic-manager endpoint show', EndpointsOperations.get, factory)
+cli_command('network traffic-manager endpoint delete', EndpointsOperations.delete, factory)
+cli_command('network traffic-manager endpoint create', create_traffic_manager_endpoint)
+cli_command('network traffic-manager endpoint list', list_traffic_manager_endpoints)
+register_generic_update('network traffic-manager endpoint update', EndpointsOperations.get, EndpointsOperations.create_or_update, factory)
+

@@ -25,6 +25,7 @@ CLASSIFIERS = [
 
 DEPENDENCIES = [
     'azure==2.0.0rc5',
+    'azure-mgmt-trafficmanager==0.30.0rc5'
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
@@ -103,6 +104,10 @@ setup(
         'azure.cli.command_modules.network.mgmt_express_route_peering.lib',
         'azure.cli.command_modules.network.mgmt_express_route_peering.lib.models',
         'azure.cli.command_modules.network.mgmt_express_route_peering.lib.operations',
+        'azure.cli.command_modules.network.mgmt_traffic_manager_profile',
+        'azure.cli.command_modules.network.mgmt_traffic_manager_profile.lib',
+        'azure.cli.command_modules.network.mgmt_traffic_manager_profile.lib.models',
+        'azure.cli.command_modules.network.mgmt_traffic_manager_profile.lib.operations',
     ],
     install_requires=DEPENDENCIES,
 )
