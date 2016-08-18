@@ -15,8 +15,11 @@ from azure.cli.command_modules.network._factory import _network_client_factory
 from azure.cli.command_modules.network.mgmt_app_gateway.lib.operations.app_gateway_operations \
     import AppGatewayOperations
 
+from azure.cli.commands.client_factory import get_mgmt_service_client
 from ._factory import _network_client_factory
 from azure.cli.command_modules.network.mgmt_nic.lib.operations.nic_operations import NicOperations
+from azure.mgmt.trafficmanager import TrafficManagerManagementClient
+from azure.mgmt.trafficmanager.models import Endpoint
 
 #region Network subresource factory methods
 
@@ -98,6 +101,7 @@ def list_route_tables(resource_group_name=None):
 
 def list_application_gateways(resource_group_name=None):
     return _generic_list('application_gateways', resource_group_name)
+
 #endregion
 
 #region Application Gateway subresource commands
@@ -721,22 +725,6 @@ def update_subnet(resource_group_name, virtual_network_name, subnet_name,
 
 update_nsg_rule.__doc__ = SecurityRule.__doc__
 
-def create_route(resource_group_name, route_table_name, route_name, next_hop_type, address_prefix,
-                 next_hop_ip_address=None):
-    route = Route(next_hop_type, None, address_prefix, next_hop_ip_address, None, route_name)
-    ncf = _network_client_factory()
-    return ncf.routes.create_or_update(resource_group_name, route_table_name, route_name, route)
-
-create_route.__doc__ = Route.__doc__
-
-def create_vpn_gateway_root_cert(resource_group_name, gateway_name, public_cert_data, cert_name):
-    config, gateway, ncf = _prep_cert_create(gateway_name, resource_group_name)
-
-    cert = VpnClientRootCertificate(name=cert_name, public_cert_data=public_cert_data)
-    config.vpn_client_root_certificates.append(cert)
-
-    return ncf.create_or_update(resource_group_name, gateway_name, gateway)
-
 def delete_vpn_gateway_root_cert(resource_group_name, gateway_name, cert_name):
     ncf = _network_client_factory().virtual_network_gateways
     gateway = ncf.get(resource_group_name, gateway_name)
@@ -807,4 +795,59 @@ def create_express_route_auth(resource_group_name, circuit_name, authorization_n
     ncf = _network_client_factory().express_route_circuit_authorizations
     auth = ExpressRouteCircuitAuthorization(authorization_key=authorization_key)
     return ncf.create_or_update(resource_group_name, circuit_name, authorization_name, auth)
+
+def create_route(resource_group_name, route_table_name, route_name, next_hop_type, address_prefix,
+                 next_hop_ip_address=None):
+    route = Route(next_hop_type, None, address_prefix, next_hop_ip_address, None, route_name)
+    ncf = _network_client_factory()
+    return ncf.routes.create_or_update(resource_group_name, route_table_name, route_name, route)
+
+create_route.__doc__ = Route.__doc__
+
+def create_vpn_gateway_root_cert(resource_group_name, gateway_name, public_cert_data, cert_name):
+    ncf = _network_client_factory().virtual_network_gateways
+    gateway = ncf.get(resource_group_name, gateway_name)
+    if not gateway.vpn_client_configuration:
+        gateway.vpn_client_configuration = VpnClientConfiguration()
+    config = gateway.vpn_client_configuration
+
+    if config.vpn_client_root_certificates is None:
+        config.vpn_client_root_certificates = []
+
+    cert = VpnClientRootCertificate(name=cert_name, public_cert_data=public_cert_data)
+    config.vpn_client_root_certificates.append(cert)
+
+    return ncf.create_or_update(resource_group_name, gateway_name, gateway)
+#endregion
+
+#region Traffic Manager Commands
+def list_traffic_manager_profiles(resource_group_name=None):
+    ncf = get_mgmt_service_client(TrafficManagerManagementClient).profiles
+    if resource_group_name:
+        return ncf.list_all_in_resource_group(resource_group_name)
+    else:
+        return ncf.list_all()
+
+def create_traffic_manager_endpoint(resource_group_name, profile_name, endpoint_type, endpoint_name,
+                                    target_resource_id=None, target=None,
+                                    endpoint_status=None, weight=None, priority=None,
+                                    endpoint_location=None, endpoint_monitor_status=None,
+                                    min_child_endpoints=None):
+    ncf = get_mgmt_service_client(TrafficManagerManagementClient).endpoints
+
+    endpoint = Endpoint(target_resource_id=target_resource_id, target=target,
+                        endpoint_status=endpoint_status, weight=weight, priority=priority,
+                        endpoint_location=endpoint_location,
+                        endpoint_monitor_status=endpoint_monitor_status,
+                        min_child_endpoints=min_child_endpoints)
+
+    return ncf.create_or_update(resource_group_name, profile_name, endpoint_type, endpoint_name,
+                                endpoint)
+
+create_traffic_manager_endpoint.__doc__ = Endpoint.__doc__
+
+def list_traffic_manager_endpoints(resource_group_name, profile_name, endpoint_type=None):
+    ncf = get_mgmt_service_client(TrafficManagerManagementClient).profiles
+    profile = ncf.get(resource_group_name, profile_name)
+    return [e for e in profile.endpoints if not endpoint_type or e.type.endswith(endpoint_type)]
 #endregion
