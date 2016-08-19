@@ -23,6 +23,11 @@ Then:
  + Run :code:`docker pull azuresdk/azure-cli-python:latest`
  + Run :code:`docker run -it azuresdk/azure-cli-python:latest`
 
+Alternatively:
+ + Run :code:`docker pull azuresdk/azure-cli-python:latest`
+ + Run :code:`alias az='docker run --rm -v ~/.azure2:/root/.azure azuresdk/azure-cli-python az'`
+ + Then run `az` as normal. e.g. :code:`az account login`
+
 Usage
 =====
     
