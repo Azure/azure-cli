@@ -118,12 +118,12 @@ def register_path_argument(scope, default_file_param=None, options_list=None):
 
 def register_content_settings_argument(scope, settings_class):
     register_cli_argument(scope, 'content_settings', IGNORE_TYPE, validator=get_content_setting_validator(settings_class))
-    register_extra_cli_argument(scope, 'content_type', options_list=('--content-type',), default=None, help='The content MIME type.')
-    register_extra_cli_argument(scope, 'content_encoding', options_list=('--content-encoding',), default=None, help='The content encoding type.')
-    register_extra_cli_argument(scope, 'content_language', options_list=('--content-language',), default=None, help='The content language.')
-    register_extra_cli_argument(scope, 'content_disposition', options_list=('--content-disposition',), default=None, help='Conveys additional information about how to process the response payload, and can also be used to attach additional metadata.')
-    register_extra_cli_argument(scope, 'content_cache_control', options_list=('--content-cache-control',), default=None, help='The cache control string.')
-    register_extra_cli_argument(scope, 'content_md5', options_list=('--content-md5',), default=None, help='The content\'s MD5 hash.')
+    register_extra_cli_argument(scope, 'content_type', default=None, help='The content MIME type.')
+    register_extra_cli_argument(scope, 'content_encoding', default=None, help='The content encoding type.')
+    register_extra_cli_argument(scope, 'content_language', default=None, help='The content language.')
+    register_extra_cli_argument(scope, 'content_disposition', default=None, help='Conveys additional information about how to process the response payload, and can also be used to attach additional metadata.')
+    register_extra_cli_argument(scope, 'content_cache_control', default=None, help='The cache control string.')
+    register_extra_cli_argument(scope, 'content_md5', default=None, help='The content\'s MD5 hash.')
 
 # CUSTOM CHOICE LISTS
 
@@ -305,31 +305,25 @@ for item in ['account', 'blob', 'container', 'file', 'share', 'table', 'queue']:
     register_cli_argument('storage {} generate-sas'.format(item), 'start', help='Specifies the UTC datetime (Y-m-d\'T\'H:M\'Z\') at which the SAS becomes valid. Do not use if a stored access policy is referenced with --id that specifies this value. Defaults to the time of the request.', type=datetime_string_type)
     register_cli_argument('storage {} generate-sas'.format(item), 'protocol', options_list=('--https-only',), help='Only permit requests made with the HTTPS protocol. If omitted, requests from both the HTTP and HTTPS protocol are permitted.', action='store_const', const='https')
 
-register_cli_argument('storage container generate-sas', 'id', options_list=('--policy-name',), help='The name of a stored access policy within the container\'s ACL.', completer=get_storage_acl_name_completion_list(BaseBlobService, 'container_name', 'get_container_acl'))
-register_cli_argument('storage blob generate-sas', 'id', options_list=('--policy-name',), help='The name of a stored access policy within the container\'s ACL.', completer=get_storage_acl_name_completion_list(BaseBlobService, 'container_name', 'get_container_acl'))
-register_cli_argument('storage share generate-sas', 'id', options_list=('--policy-name',), help='The name of a stored access policy within the share\'s ACL.', completer=get_storage_acl_name_completion_list(FileService, 'share_name', 'get_share_acl'))
-register_cli_argument('storage file generate-sas', 'id', options_list=('--policy-name',), help='The name of a stored access policy within the share\'s ACL.', completer=get_storage_acl_name_completion_list(FileService, 'share_name', 'get_share_acl'))
-register_cli_argument('storage table generate-sas', 'id', options_list=('--policy-name',), help='The name of a stored access policy within the table\'s ACL.', completer=get_storage_acl_name_completion_list(TableService, 'table_name', 'get_table_acl'))
-register_cli_argument('storage queue generate-sas', 'id', options_list=('--policy-name',), help='The name of a stored access policy within the queue\'s ACL.', completer=get_storage_acl_name_completion_list(QueueService, 'queue_name', 'get_queue_acl'))
+help_format = 'The permissions the SAS grants. Allowed values: {}. Do not use if a stored access policy is referenced with --id that specifies this value. Can be combined.'
+policies = [
+    {'name': 'account', 'container': '', 'class': '', 'sas_perm_help': 'The permissions the SAS grants. Allowed values: {}. Can be combined.'.format(get_permission_help_string(AccountPermissions)), 'policy_perm_help': '', 'perm_validator': get_permission_validator(AccountPermissions)},
+    {'name': 'container', 'container': 'container', 'class': BaseBlobService, 'sas_perm_help': help_format.format(get_permission_help_string(ContainerPermissions)), 'policy_perm_help': 'Allowed values: {}. Can be combined.'.format(get_permission_help_string(ContainerPermissions)), 'perm_validator': get_permission_validator(ContainerPermissions)},
+    {'name': 'blob', 'container': 'container', 'class': BaseBlobService, 'sas_perm_help': help_format.format(get_permission_help_string(BlobPermissions)), 'policy_perm_help': '', 'perm_validator': get_permission_validator(BlobPermissions)},
+    {'name': 'share', 'container': 'share', 'class': FileService, 'sas_perm_help': help_format.format(get_permission_help_string(SharePermissions)), 'policy_perm_help': 'Allowed values: {}. Can be combined.'.format(get_permission_help_string(SharePermissions)), 'perm_validator': get_permission_validator(SharePermissions)},
+    {'name': 'file', 'container': 'share', 'class': FileService, 'sas_perm_help': help_format.format(get_permission_help_string(FilePermissions)), 'policy_perm_help': '', 'perm_validator': get_permission_validator(FilePermissions)},
+    {'name': 'table', 'container': 'table', 'class': TableService, 'sas_perm_help': help_format.format('(r)ead/query (a)dd (u)pdate (d)elete'), 'policy_perm_help': 'Allowed values: {}. Can be combined.'.format('(r)ead/query (a)dd (u)pdate (d)elete'), 'perm_validator': table_permission_validator},
+    {'name': 'queue', 'container': 'queue', 'class': QueueService, 'sas_perm_help': help_format.format(get_permission_help_string(QueuePermissions)), 'policy_perm_help': 'Allowed values: {}. Can be combined.'.format(get_permission_help_string(QueuePermissions)), 'perm_validator': get_permission_validator(QueuePermissions)}
+]
+for item in policies:
+    register_cli_argument('storage {} generate-sas'.format(item['name']), 'id', options_list=('--policy-name',), help='The name of a stored access policy within the {}\'s ACL.'.format(item['container']), completer=get_storage_acl_name_completion_list(item['class'], '{}_name'.format(item['container']), 'get_{}_acl'.format(item['container'])))
+    register_cli_argument('storage {} generate-sas'.format(item['name']), 'permission', options_list=('--permissions',), help=item['sas_perm_help'], validator=item['perm_validator'])
+    register_cli_argument('storage {} policy'.format(item['name']), 'permission', options_list=('--permissions',), help=item['policy_perm_help'], validator=item['perm_validator'])
 
 register_cli_argument('storage account generate-sas', 'services', help='The storage services the SAS is applicable for. Allowed values: (b)lob (f)ile (q)ueue (t)able. Can be combined.', type=services_type)
 register_cli_argument('storage account generate-sas', 'resource_types', help='The resource types the SAS is applicable for. Allowed values: (s)ervice (c)ontainer (o)bject. Can be combined.', type=resource_type_type)
 register_cli_argument('storage account generate-sas', 'expiry', help='Specifies the UTC datetime (Y-m-d\'T\'H:M\'Z\') at which the SAS becomes invalid.', type=datetime_string_type)
 register_cli_argument('storage account generate-sas', 'start', help='Specifies the UTC datetime (Y-m-d\'T\'H:M\'Z\') at which the SAS becomes valid. Defaults to the time of the request.', type=datetime_string_type)
-
-help_format = 'The permissions the SAS grants. Allowed values: {}. Do not use if a stored access policy is referenced with --id that specifies this value. Can be combined.'
-register_cli_argument('storage account generate-sas', 'permission', options_list=('--permissions',), help='The permissions the SAS grants. Allowed values: {}. Can be combined.'.format(get_permission_help_string(AccountPermissions)), validator=get_permission_validator(AccountPermissions))
-register_cli_argument('storage container generate-sas', 'permission', options_list=('--permissions',), help=help_format.format(get_permission_help_string(ContainerPermissions)), validator=get_permission_validator(ContainerPermissions))
-register_cli_argument('storage blob generate-sas', 'permission', options_list=('--permissions',), help=help_format.format(get_permission_help_string(BlobPermissions),), validator=get_permission_validator(BlobPermissions))
-register_cli_argument('storage share generate-sas', 'permission', options_list=('--permissions',), help=help_format.format(get_permission_help_string(SharePermissions)), validator=get_permission_validator(SharePermissions))
-register_cli_argument('storage file generate-sas', 'permission', options_list=('--permissions',), help=help_format.format(get_permission_help_string(FilePermissions)), validator=get_permission_validator(FilePermissions))
-register_cli_argument('storage table generate-sas', 'permission', options_list=('--permissions',), help=help_format.format('(r)ead/query (a)dd (u)pdate (d)elete'), validator=table_permission_validator)
-register_cli_argument('storage queue generate-sas', 'permission', options_list=('--permissions',), help=help_format.format(get_permission_help_string(QueuePermissions)), validator=get_permission_validator(QueuePermissions))
-
-register_cli_argument('storage container policy', 'permission', options_list=('--permissions',), help='Allowed values: {}. Can be combined.'.format(get_permission_help_string(ContainerPermissions)), validator=get_permission_validator(ContainerPermissions))
-register_cli_argument('storage share policy', 'permission', options_list=('--permissions',), help='Allowed values: {}. Can be combined.'.format(get_permission_help_string(SharePermissions)), validator=get_permission_validator(SharePermissions))
-register_cli_argument('storage table policy', 'permission', options_list=('--permissions',), help='Allowed values: {}. Can be combined.'.format('(r)ead/query (a)dd (u)pdate (d)elete'), validator=table_permission_validator)
-register_cli_argument('storage queue policy', 'permission', options_list=('--permissions',), help='Allowed values: {}. Can be combined.'.format(get_permission_help_string(QueuePermissions)), validator=get_permission_validator(QueuePermissions))
 
 register_cli_argument('storage logging show', 'services', help='The storage services from which to retrieve logging info: (b)lob (q)ueue (t)able. Can be combined.')
 
