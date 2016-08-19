@@ -123,12 +123,6 @@ class StorageBlobScenarioTest(StorageAccountVCRTestBase):
         proposed_lease_id = s.proposed_lease_id
         new_lease_id = s.new_lease_id
         date = s.date
-        s.cmd('storage blob service-properties show', checks=[
-            JMESPathCheck('cors', []),
-            JMESPathCheck('hourMetrics.enabled', True),
-            JMESPathCheck('logging.delete', False),
-            JMESPathCheck('minuteMetrics.enabled', False)
-        ])
 
         # test block blob upload
         s.cmd('storage blob upload -n {} -c {} --type block --file "{}"'.format(block_blob, container, os.path.join(TEST_DIR, 'testfile.rst')))
@@ -389,7 +383,7 @@ class StorageFileScenarioTest(StorageAccountVCRTestBase):
         s.cmd('storage file url --share-name {} -p "{}"'.format(share, filename),
             checks=StringCheck(file_url))
 
-        res = [x['name'] for x in s.cmd('storage share contents -n {}'.format(share))['items']]
+        res = [x['name'] for x in s.cmd('storage file list -s {}'.format(share))['items']]
         assert filename in res
 
         s.cmd('storage file delete --share-name {} -p "{}"'.format(share, filename))
@@ -412,7 +406,7 @@ class StorageFileScenarioTest(StorageAccountVCRTestBase):
         else:
             io.print_('\nDownload failed. Test failed!')
 
-        res = [x['name'] for x in s.cmd('storage share contents --name {} -d {}'.format(share, dir))['items']]
+        res = [x['name'] for x in s.cmd('storage file list -s {} -p {}'.format(share, dir))['items']]
         assert filename in res
 
         s.cmd('storage share stats --name {}'.format(share),
@@ -456,12 +450,6 @@ class StorageFileScenarioTest(StorageAccountVCRTestBase):
 
         self._storage_file_scenario(share1)
         self._storage_directory_scenario(share1)
-
-        s.cmd('storage file service-properties show', checks=[
-            JMESPathCheck('cors', []),
-            JMESPathCheck('hourMetrics.enabled', True),
-            JMESPathCheck('minuteMetrics.enabled', False)
-        ])
 
 class StorageFileCopyScenarioTest(StorageAccountVCRTestBase):
 
@@ -569,14 +557,14 @@ class StorageTableScenarioTest(StorageAccountVCRTestBase):
     def _table_acl_scenario(self, table):
         s = self
         s.cmd('storage table policy list -t {}'.format(table), checks=NoneCheck())
-        s.cmd('storage table policy create -t {} -n test1 --permission r'.format(table))
+        s.cmd('storage table policy create -t {} -n test1 --permission a'.format(table))
         s.cmd('storage table policy create -t {} -n test2 --start 2016-01-01T00:00Z'.format(table))
         s.cmd('storage table policy create -t {} -n test3 --expiry 2018-01-01T00:00Z'.format(table))
         s.cmd('storage table policy create -t {} -n test4 --permission raud --start 2016-01-01T00:00Z --expiry 2016-05-01T00:00Z'.format(table))
         acl = sorted(s.cmd('storage table policy list -t {}'.format(table)).keys())
         assert acl == ['test1', 'test2', 'test3', 'test4']
         s.cmd('storage table policy show -t {} -n test1'.format(table),
-            checks=JMESPathCheck('permission', 'r'))
+            checks=JMESPathCheck('permission', 'a'))
         s.cmd('storage table policy show -t {} -n test2'.format(table),
             checks=JMESPathCheck('start', '2016-01-01T00:00:00+00:00'))
         s.cmd('storage table policy show -t {} -n test3'.format(table),
@@ -586,9 +574,9 @@ class StorageTableScenarioTest(StorageAccountVCRTestBase):
             JMESPathCheck('expiry', '2016-05-01T00:00:00+00:00'),
             JMESPathCheck('permission', 'raud')
         ])
-        s.cmd('storage table policy update -t {} -n test1 --permission ra'.format(table))
+        s.cmd('storage table policy update -t {} -n test1 --permission au'.format(table))
         s.cmd('storage table policy show -t {} -n test1'.format(table),
-            checks=JMESPathCheck('permission', 'ra'))
+            checks=JMESPathCheck('permission', 'au'))
         s.cmd('storage table policy delete -t {} -n test1'.format(table))
         acl = sorted(s.cmd('storage table policy list -t {}'.format(table)).keys())
         assert acl == ['test2', 'test3', 'test4']

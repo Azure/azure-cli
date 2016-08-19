@@ -25,8 +25,12 @@ from azure.cli.command_modules.storage.custom import \
      set_storage_account_properties, show_storage_account_connection_string,
      renew_storage_account_keys, upload_blob, get_acl_policy,
      create_acl_policy, delete_acl_policy, list_acl_policies, set_acl_policy,
-     insert_table_entity)
-from azure.cli.command_modules.storage._validators import transform_acl_list_output, transform_url
+     insert_table_entity, list_cors, add_cors, clear_cors,
+     get_logging, set_logging, get_metrics, set_metrics)
+from azure.cli.command_modules.storage._validators import \
+    (transform_acl_list_output, transform_cors_list_output, transform_entity_query_output,
+     transform_file_list_output, transform_logging_list_output, transform_metrics_list_output,
+     transform_url)
 
 # storage account commands
 factory = lambda kwargs: storage_client_factory().storage_accounts
@@ -74,10 +78,9 @@ cli_storage_data_plane_command('storage blob update', BlockBlobService.set_blob_
 cli_storage_data_plane_command('storage blob exists', BaseBlobService.exists, factory)
 cli_storage_data_plane_command('storage blob download', BaseBlobService.get_blob_to_path, factory)
 cli_storage_data_plane_command('storage blob upload', upload_blob, factory)
-cli_storage_data_plane_command('storage blob service-properties show', BlockBlobService.get_blob_service_properties, factory)
-cli_storage_data_plane_command('storage blob service-properties update', BlockBlobService.set_blob_service_properties, factory)
 cli_storage_data_plane_command('storage blob metadata show', BlockBlobService.get_blob_metadata, factory)
 cli_storage_data_plane_command('storage blob metadata update', BlockBlobService.set_blob_metadata, factory)
+cli_storage_data_plane_command('storage blob service-properties show', BaseBlobService.get_blob_service_properties, factory)
 cli_storage_data_plane_command('storage blob lease acquire', BlockBlobService.acquire_blob_lease, factory)
 cli_storage_data_plane_command('storage blob lease renew', BlockBlobService.renew_blob_lease, factory)
 cli_storage_data_plane_command('storage blob lease release', BlockBlobService.release_blob_lease, factory)
@@ -89,7 +92,6 @@ cli_storage_data_plane_command('storage blob copy cancel', BlockBlobService.abor
 # share commands
 factory = file_data_service_factory
 cli_storage_data_plane_command('storage share list', FileService.list_shares, factory, simple_output_query='items[*].{Name:name,"Quota (GB)":properties.quota} | sort_by(@, &Name)')
-cli_storage_data_plane_command('storage share contents', FileService.list_directories_and_files, factory, simple_output_query='items[*].{Name:name, Size:properties.contentLength} | sort_by(@, &Name)')
 cli_storage_data_plane_command('storage share create', FileService.create_share, factory)
 cli_storage_data_plane_command('storage share delete', FileService.delete_share, factory)
 cli_storage_data_plane_command('storage share generate-sas', FileService.generate_share_shared_access_signature, factory)
@@ -114,6 +116,7 @@ cli_storage_data_plane_command('storage directory metadata show', FileService.ge
 cli_storage_data_plane_command('storage directory metadata update', FileService.set_directory_metadata, factory)
 
 # file commands
+cli_storage_data_plane_command('storage file list', FileService.list_directories_and_files, factory, simple_output_query=transform_file_list_output)
 cli_storage_data_plane_command('storage file delete', FileService.delete_file, factory)
 cli_storage_data_plane_command('storage file resize', FileService.resize_file, factory)
 cli_storage_data_plane_command('storage file url', FileService.make_file_url, factory, transform=transform_url)
@@ -125,8 +128,6 @@ cli_storage_data_plane_command('storage file download', FileService.get_file_to_
 cli_storage_data_plane_command('storage file upload', FileService.create_file_from_path, factory)
 cli_storage_data_plane_command('storage file metadata show', FileService.get_file_metadata, factory)
 cli_storage_data_plane_command('storage file metadata update', FileService.set_file_metadata, factory)
-cli_storage_data_plane_command('storage file service-properties show', FileService.get_file_service_properties, factory)
-cli_storage_data_plane_command('storage file service-properties update', FileService.set_file_service_properties, factory)
 cli_storage_data_plane_command('storage file copy start', FileService.copy_file, factory)
 cli_storage_data_plane_command('storage file copy cancel', FileService.abort_copy_file, factory)
 
@@ -134,8 +135,6 @@ cli_storage_data_plane_command('storage file copy cancel', FileService.abort_cop
 factory = table_data_service_factory
 cli_storage_data_plane_command('storage table generate-sas', TableService.generate_table_shared_access_signature, factory)
 cli_storage_data_plane_command('storage table stats', TableService.get_table_service_stats, factory)
-cli_storage_data_plane_command('storage table service-properties show', TableService.get_table_service_properties, factory)
-cli_storage_data_plane_command('storage table service-properties update', TableService.set_table_service_properties, factory)
 cli_storage_data_plane_command('storage table list', TableService.list_tables, factory, simple_output_query='items[*].{Name:name} | sort_by(@, &Name)')
 cli_storage_data_plane_command('storage table create', TableService.create_table, factory)
 cli_storage_data_plane_command('storage table exists', TableService.exists, factory)
@@ -149,7 +148,7 @@ cli_storage_data_plane_command('storage table batch commit', TableService.commit
 cli_storage_data_plane_command('storage table batch create', TableService.batch, factory)
 
 # table entity commands
-cli_storage_data_plane_command('storage entity query', TableService.query_entities, factory)
+cli_storage_data_plane_command('storage entity query', TableService.query_entities, factory, simple_output_query=transform_entity_query_output)
 cli_storage_data_plane_command('storage entity show', TableService.get_entity, factory)
 cli_storage_data_plane_command('storage entity insert', insert_table_entity, factory)
 cli_storage_data_plane_command('storage entity replace', TableService.update_entity, factory)
@@ -160,8 +159,6 @@ cli_storage_data_plane_command('storage entity delete', TableService.delete_enti
 factory = queue_data_service_factory
 cli_storage_data_plane_command('storage queue generate-sas', QueueService.generate_queue_shared_access_signature, factory)
 cli_storage_data_plane_command('storage queue stats', QueueService.get_queue_service_stats, factory)
-cli_storage_data_plane_command('storage queue service-properties show', QueueService.get_queue_service_properties, factory)
-cli_storage_data_plane_command('storage queue service-properties update', QueueService.set_queue_service_properties, factory)
 cli_storage_data_plane_command('storage queue list', QueueService.list_queues, factory, simple_output_query='items[*].{Name:name} | sort_by(@, &Name)')
 cli_storage_data_plane_command('storage queue create', QueueService.create_queue, factory)
 cli_storage_data_plane_command('storage queue delete', QueueService.delete_queue, factory)
@@ -181,3 +178,16 @@ cli_storage_data_plane_command('storage message peek', QueueService.peek_message
 cli_storage_data_plane_command('storage message delete', QueueService.delete_message, factory)
 cli_storage_data_plane_command('storage message clear', QueueService.clear_messages, factory)
 cli_storage_data_plane_command('storage message update', QueueService.update_message, factory)
+
+# cors commands
+cli_storage_data_plane_command('storage cors list', list_cors, None, simple_output_query=transform_cors_list_output)
+cli_storage_data_plane_command('storage cors add', add_cors, None)
+cli_storage_data_plane_command('storage cors clear', clear_cors, None)
+
+# logging commands
+cli_storage_data_plane_command('storage logging show', get_logging, None, simple_output_query=transform_logging_list_output)
+cli_storage_data_plane_command('storage logging update', set_logging, None)
+
+# metrics commands
+cli_storage_data_plane_command('storage metrics show', get_metrics, None, simple_output_query=transform_metrics_list_output)
+cli_storage_data_plane_command('storage metrics update', set_metrics, None)
