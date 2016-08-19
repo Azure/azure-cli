@@ -22,7 +22,7 @@ build_script:
   - cd %TEMP%\azure-cli-xml2yml
   - nuget install azure.cli.doc.xml2yml -Source https://ci.appveyor.com/nuget/azure-cli-doc-proc
   - cd azure.cli.doc.xml2yml*\tools
-  - AzCliDocPreprocessor -s "%APPVEYOR_BUILD_FOLDER%\doc\sphinx\_build\xml\ind.xml" -d "%TEMP%\azure-cli-xml2yml\yml-output"
+  - AzCliDocPreprocessor -s "%APPVEYOR_BUILD_FOLDER%\doc\sphinx\_build\xml\ind.xml" -d "%TEMP%\azure-cli-xml2yml\yml-output" -r "https://github.com/%APPVEYOR_REPO_NAME%/blob/%APPVEYOR_REPO_BRANCH%/"
 
 artifacts:
   - path: doc\sphinx\_build
