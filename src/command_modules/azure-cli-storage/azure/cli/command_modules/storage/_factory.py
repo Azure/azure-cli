@@ -26,7 +26,8 @@ No credentials specifed to access storage service. Please provide any of the fol
         option or AZURE_STORAGE_ACCOUNT environment variable)
 """
 
-def _get_data_service_client(service, name=None, key=None, connection_string=None, sas_token=None):
+def generic_data_service_factory(service, name=None, key=None, connection_string=None,
+                                 sas_token=None):
     try:
         return get_data_service_client(service, name, key, connection_string, sas_token)
     except ValueError as val_exception:
@@ -39,7 +40,7 @@ def storage_client_factory(**_):
     return get_mgmt_service_client(StorageManagementClient)
 
 def file_data_service_factory(kwargs):
-    return _get_data_service_client(
+    return generic_data_service_factory(
         FileService,
         kwargs.pop('account_name', None),
         kwargs.pop('account_key', None),
@@ -49,7 +50,7 @@ def file_data_service_factory(kwargs):
 def blob_data_service_factory(kwargs):
     blob_type = kwargs.get('blob_type')
     blob_service = blob_types.get(blob_type, BlockBlobService)
-    return _get_data_service_client(
+    return generic_data_service_factory(
         blob_service,
         kwargs.pop('account_name', None),
         kwargs.pop('account_key', None),
@@ -57,7 +58,7 @@ def blob_data_service_factory(kwargs):
         sas_token=kwargs.pop('sas_token', None))
 
 def table_data_service_factory(kwargs):
-    return _get_data_service_client(
+    return generic_data_service_factory(
         TableService,
         kwargs.pop('account_name', None),
         kwargs.pop('account_key', None),
@@ -65,7 +66,7 @@ def table_data_service_factory(kwargs):
         sas_token=kwargs.pop('sas_token', None))
 
 def queue_data_service_factory(kwargs):
-    return _get_data_service_client(
+    return generic_data_service_factory(
         QueueService,
         kwargs.pop('account_name', None),
         kwargs.pop('account_key', None),

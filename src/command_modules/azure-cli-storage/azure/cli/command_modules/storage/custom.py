@@ -8,13 +8,16 @@
 from __future__ import print_function
 from sys import stderr
 
+from azure.mgmt.storage.models import Kind
+from azure.storage.models import Logging, Metrics, CorsRule, RetentionPolicy
 from azure.storage.blob import BlockBlobService
+from azure.storage.blob.baseblobservice import BaseBlobService
 from azure.storage.file import FileService
 from azure.storage.table import TableService
 from azure.storage.queue import QueueService
-from azure.mgmt.storage.models import Kind
 
-from azure.cli.command_modules.storage._factory import storage_client_factory
+from azure.cli.command_modules.storage._factory import \
+    (storage_client_factory, generic_data_service_factory)
 from azure.cli._util import CLIError
 
 def _update_progress(current, total):
@@ -79,7 +82,7 @@ def create_storage_account(resource_group_name, account_name, sku, location,
         location=location,
         tags=tags,
         custom_domain=CustomDomain(custom_domain) if custom_domain else None,
-        encryption=Encryption(encryption) if encryption else None,
+        encryption=encryption,
         access_tier=AccessTier(access_tier) if access_tier else None)
     return scf.storage_accounts.create(resource_group_name, account_name, params)
 
@@ -94,28 +97,16 @@ def set_storage_account_properties(
         sku=Sku(sku) if sku else None,
         tags=tags,
         custom_domain=CustomDomain(custom_domain) if custom_domain else None,
-        encryption=Encryption(encryption) if encryption else None,
+        encryption=encryption,
         access_tier=AccessTier(access_tier) if access_tier else None)
     return scf.storage_accounts.update(resource_group_name, account_name, params)
 
 def upload_blob( # pylint: disable=too-many-locals
         client, container_name, blob_name, blob_type, file_path,
-        content_type=None, content_disposition=None,
-        content_encoding=None, content_language=None, content_md5=None,
-        content_cache_control=None, metadata=None, validate_content=False, maxsize_condition=None,
+        content_settings=None, metadata=None, validate_content=False, maxsize_condition=None,
         max_connections=2, max_retries=5, retry_wait=1, lease_id=None, if_modified_since=None,
         if_unmodified_since=None, if_match=None, if_none_match=None, timeout=None):
     '''Upload a blob to a container.'''
-    from azure.storage.blob import ContentSettings
-    content_settings = ContentSettings(
-        content_type=content_type,
-        content_disposition=content_disposition,
-        content_encoding=content_encoding,
-        content_language=content_language,
-        content_md5=content_md5,
-        cache_control=content_cache_control
-    )
-
     def upload_append_blob():
         if not client.exists(container_name, blob_name):
             client.create_blob(
@@ -243,3 +234,154 @@ def insert_table_entity(client, table_name, entity, if_exists='fail', timeout=No
     else:
         raise CLIError("Unrecognized value '{}' for --if-exists".format(if_exists))
 
+class ServiceProperties(object):
+
+    def __init__(self, name, service):
+
+        self.name = name
+        self.service = service
+        self.client = None
+
+    def init_client(self, account_name=None, account_key=None, connection_string=None,
+                    sas_token=None):
+        if not self.client:
+            self.client = generic_data_service_factory(
+                self.service, account_name, account_key, connection_string, sas_token)
+
+    def get_service_properties(self):
+        if not self.client:
+            raise CLIError('Must call init_client before attempting get_service_properties!')
+        return getattr(self.client, 'get_{}_service_properties'.format(self.name))
+
+    def set_service_properties(self):
+        if not self.client:
+            raise CLIError('Must call init_client before attempting set_service_properties!')
+        return getattr(self.client, 'set_{}_service_properties'.format(self.name))
+
+    def get_logging(self, account_name=None, account_key=None, connection_string=None,
+                    sas_token=None, timeout=None):
+        self.init_client(account_name, account_key, connection_string, sas_token)
+        return self.get_service_properties()(timeout=timeout).__dict__['logging']
+
+    def set_logging(self, read, write, delete, retention, account_name=None, account_key=None,
+                    connection_string=None, sas_token=None, timeout=None):
+        self.init_client(account_name, account_key, connection_string, sas_token)
+        retention_policy = RetentionPolicy(
+            enabled=retention != 0,
+            days=retention
+        )
+        logging = Logging(delete, read, write, retention_policy)
+        return self.set_service_properties()(logging=logging, timeout=timeout)
+
+    def get_cors(self, account_name=None, account_key=None, connection_string=None,
+                 sas_token=None, timeout=None):
+        self.init_client(account_name, account_key, connection_string, sas_token)
+        return self.get_service_properties()(timeout=timeout).__dict__['cors']
+
+    def add_cors(self, origins, methods, max_age, exposed_headers=None, allowed_headers=None,
+                 account_name=None, account_key=None, connection_string=None, sas_token=None,
+                 timeout=None):
+        cors = self.get_cors(account_name, account_key, connection_string, sas_token, timeout)
+        new_rule = CorsRule(origins, methods, max_age, exposed_headers, allowed_headers)
+        cors.append(new_rule)
+        return self.set_service_properties()(cors=cors, timeout=timeout)
+
+    def clear_cors(self, account_name=None, account_key=None, connection_string=None,
+                   sas_token=None, timeout=None):
+        self.init_client(account_name, account_key, connection_string, sas_token)
+        return self.set_service_properties()(cors=[], timeout=timeout)
+
+    def get_metrics(self, interval, account_name=None, account_key=None, connection_string=None,
+                    sas_token=None, timeout=None):
+        self.init_client(account_name, account_key, connection_string, sas_token)
+        props = self.get_service_properties()(timeout=timeout)
+        metrics = {}
+        if interval == 'both':
+            metrics['hour'] = props.__dict__['hour_metrics']
+            metrics['minute'] = props.__dict__['minute_metrics']
+        else:
+            metrics[interval] = props.__dict__['{}_metrics'.format(interval)]
+        return metrics
+
+    def set_metrics(self, retention, hour, minute, api=None, account_name=None, account_key=None,
+                    connection_string=None, sas_token=None, timeout=None):
+        self.init_client(account_name, account_key, connection_string, sas_token)
+        retention_policy = RetentionPolicy(
+            enabled=retention != 0,
+            days=retention
+        )
+        hour_metrics = Metrics(hour, api, retention_policy) if hour is not None else None
+        minute_metrics = Metrics(minute, api, retention_policy) if minute is not None else None
+        return self.set_service_properties()(
+            hour_metrics=hour_metrics, minute_metrics=minute_metrics, timeout=timeout)
+
+SERVICES = {
+    'b': ServiceProperties('blob', BaseBlobService),
+    'f': ServiceProperties('file', FileService),
+    'q': ServiceProperties('queue', QueueService),
+    't': ServiceProperties('table', TableService)
+}
+
+def list_cors(services='bfqt', account_name=None, account_key=None, connection_string=None,
+              sas_token=None, timeout=None):
+    results = {}
+    for character in services:
+        properties = SERVICES[character]
+        results[properties.name] = properties.get_cors(
+            account_name, account_key, connection_string, sas_token, timeout)
+    return results
+
+def add_cors(services, origins, methods, max_age=0, exposed_headers=None, allowed_headers=None,
+             account_name=None, account_key=None, connection_string=None, sas_token=None,
+             timeout=None):
+    for character in services:
+        properties = SERVICES[character]
+        properties.add_cors(
+            origins, methods, max_age, exposed_headers, allowed_headers, account_name, account_key,
+            connection_string, sas_token, timeout)
+    return None
+
+def clear_cors(services, account_name=None, account_key=None, connection_string=None,
+               sas_token=None, timeout=None):
+    for character in services:
+        properties = SERVICES[character]
+        properties.clear_cors(
+            account_name, account_key, connection_string, sas_token, timeout)
+    return None
+
+
+def set_logging(services, log, retention, account_name=None, account_key=None,
+                connection_string=None, sas_token=None, timeout=None):
+    for character in services:
+        properties = SERVICES[character]
+        properties.set_logging(
+            'r' in log, 'w' in log, 'd' in log, retention, account_name, account_key,
+            connection_string, sas_token, timeout)
+    return None
+
+def set_metrics(services, retention, hour=None, minute=None, api=None, account_name=None,
+                account_key=None, connection_string=None, sas_token=None, timeout=None):
+    for character in services:
+        properties = SERVICES[character]
+        properties.set_metrics(
+            retention, hour, minute, api, account_name, account_key, connection_string,
+            sas_token, timeout)
+    return None
+
+def get_logging(services='bqt', account_name=None, account_key=None, connection_string=None,
+                sas_token=None, timeout=None):
+    results = {}
+    for character in services:
+        properties = SERVICES[character]
+        results[properties.name] = properties.get_logging(
+            account_name, account_key, connection_string, sas_token, timeout)
+    return results
+
+def get_metrics(services='bfqt', interval='both', account_name=None, account_key=None,
+                connection_string=None, sas_token=None, timeout=None):
+    results = {}
+    for character in services:
+        properties = SERVICES[character]
+        results[properties.name] = properties.get_metrics(
+            interval, account_name, account_key, connection_string, sas_token, timeout)
+    return results
