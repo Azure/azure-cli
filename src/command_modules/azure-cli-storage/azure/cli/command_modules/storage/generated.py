@@ -23,7 +23,7 @@ from azure.cli.command_modules.storage._factory import \
 from azure.cli.command_modules.storage.custom import \
     (create_storage_account, list_storage_accounts, show_storage_account_usage,
      set_storage_account_properties, show_storage_account_connection_string,
-     renew_storage_account_keys, upload_blob, get_acl_policy,
+     upload_blob, get_acl_policy,
      create_acl_policy, delete_acl_policy, list_acl_policies, set_acl_policy,
      insert_table_entity, list_cors, add_cors, clear_cors,
      get_logging, set_logging, get_metrics, set_metrics)
@@ -41,8 +41,8 @@ cli_command('storage account create', create_storage_account)
 cli_command('storage account list', list_storage_accounts)
 cli_command('storage account show-usage', show_storage_account_usage)
 cli_command('storage account update', set_storage_account_properties)
-cli_command('storage account connection-string', show_storage_account_connection_string)
-cli_command('storage account keys renew', renew_storage_account_keys)
+cli_command('storage account get-connection-string', show_storage_account_connection_string)
+cli_command('storage account keys renew', StorageAccountsOperations.regenerate_key, factory)
 cli_command('storage account keys list', StorageAccountsOperations.list_keys, factory)
 cli_storage_data_plane_command('storage account generate-sas', CloudStorageAccount.generate_shared_access_signature, cloud_storage_account_service_factory)
 
@@ -61,6 +61,7 @@ cli_storage_data_plane_command('storage container lease release', BlockBlobServi
 cli_storage_data_plane_command('storage container lease change', BlockBlobService.change_container_lease, factory)
 cli_storage_data_plane_command('storage container lease break', BlockBlobService.break_container_lease, factory)
 cli_storage_data_plane_command('storage container exists', BaseBlobService.exists, factory)
+cli_storage_data_plane_command('storage container set-permission', BaseBlobService.set_container_acl, factory)
 cli_storage_data_plane_command('storage container policy create', create_acl_policy, factory)
 cli_storage_data_plane_command('storage container policy delete', delete_acl_policy, factory)
 cli_storage_data_plane_command('storage container policy show', get_acl_policy, factory)
@@ -144,8 +145,6 @@ cli_storage_data_plane_command('storage table policy delete', delete_acl_policy,
 cli_storage_data_plane_command('storage table policy show', get_acl_policy, factory)
 cli_storage_data_plane_command('storage table policy list', list_acl_policies, factory, table_transformer=transform_acl_list_output)
 cli_storage_data_plane_command('storage table policy update', set_acl_policy, factory)
-cli_storage_data_plane_command('storage table batch commit', TableService.commit_batch, factory)
-cli_storage_data_plane_command('storage table batch create', TableService.batch, factory)
 
 # table entity commands
 cli_storage_data_plane_command('storage entity query', TableService.query_entities, factory, table_transformer=transform_entity_query_output)
