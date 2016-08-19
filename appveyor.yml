@@ -4,10 +4,12 @@ init:
 clone_depth: 5
 
 environment:
+  PYTHON: "C:\\Python35"
   access_token:
     secure: VMFbecLLHzDq/09YDPbcM0VDDSwwgY57vr5GXK6cZZ4Ti/Xs5RZoylzV8MMr1350
 
 install:
+  - SET PATH=%PYTHON%;%PYTHON%\Scripts;%PATH%
   - python -m pip install -r requirements.txt
   - python -m pip install -e . # Install the CLI as a package
   - python -m pip install sphinx
@@ -20,7 +22,7 @@ build_script:
   - cd %TEMP%\azure-cli-xml2yml
   - nuget install azure.cli.doc.xml2yml -Source https://ci.appveyor.com/nuget/azure-cli-doc-proc
   - cd azure.cli.doc.xml2yml*\tools
-  - AzCliDocPreprocessor -s "%APPVEYOR_BUILD_FOLDER%\doc\sphinx\_build\xml\ind.xml" -d "%TEMP%\azure-cli-xml2yml\yml-output"
+  - AzCliDocPreprocessor -s "%APPVEYOR_BUILD_FOLDER%\doc\sphinx\_build\xml\ind.xml" -d "%TEMP%\azure-cli-xml2yml\yml-output" -r "https://github.com/%APPVEYOR_REPO_NAME%/blob/%APPVEYOR_REPO_BRANCH%/"
 
 artifacts:
   - path: doc\sphinx\_build
