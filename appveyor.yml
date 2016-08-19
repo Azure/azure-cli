@@ -4,10 +4,12 @@ init:
 clone_depth: 5
 
 environment:
+  PYTHON: "C:\\Python35"
   access_token:
     secure: VMFbecLLHzDq/09YDPbcM0VDDSwwgY57vr5GXK6cZZ4Ti/Xs5RZoylzV8MMr1350
 
 install:
+  - SET PATH=%PYTHON%;%PYTHON%\Scripts;%PATH%
   - python -m pip install -r requirements.txt
   - python -m pip install -e . # Install the CLI as a package
   - python -m pip install sphinx
