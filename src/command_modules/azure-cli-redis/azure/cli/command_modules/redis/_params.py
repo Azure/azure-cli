@@ -49,3 +49,13 @@ register_cli_argument('redis', 'shard_id', type=int)
 register_cli_argument('redis import-method', 'files', nargs='+')
 
 register_cli_argument('redis patch-schedule set', 'schedule_entries', type=ScheduleEntryList)
+
+
+register_cli_argument('redis create', 'name', arg_type=name_type, completer=None)
+register_cli_argument('redis create', 'sku_name', choices=('basic', 'standard', 'premium'), type=str.lower, required=True)
+register_cli_argument('redis create', 'sku_family', choices=('c', 'p'), type=str.lower, required=True)
+register_cli_argument('redis create', 'sku_capacity', choices=[str(n) for n in range(0, 6)], required=True)
+register_cli_argument('redis create', 'enable_non_ssl_port', action='store_true')
+register_cli_argument('redis create', 'tenant_settings', type=JsonString)
+register_cli_argument('redis create', 'shard_count', type=int)
+register_cli_argument('redis create', 'subnet_id') # TODO: Create generic id completer similar to name
