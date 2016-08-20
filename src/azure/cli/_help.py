@@ -160,7 +160,7 @@ def _print_groups(help_file):
         _print_items(subcommands)
 
 def _get_choices_defaults_str(p):
-    choice_str = '  Allowed values: {0}.'.format(', '.join(p.choices)) \
+    choice_str = '  Allowed values: {0}.'.format(', '.join([str(x) for x in p.choices])) \
         if p.choices else ''
     default_str = '  Default: {0}.'.format(p.default) \
         if p.default and p.default != argparse.SUPPRESS else ''
