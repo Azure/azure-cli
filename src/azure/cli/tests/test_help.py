@@ -40,6 +40,23 @@ class HelpTest(unittest.TestCase):
         logging.shutdown()
 
     @redirect_io
+    def test_choice_list_with_ints(self):
+        def test_handler():
+            pass
+
+        command = CliCommand('n1', test_handler)
+        command.add_argument('arg', '--arg', '-a', required=False, choices=[1, 2, 3])
+        command.add_argument('b', '-b', required=False, choices=['a', 'b', 'c'])
+        cmd_table = {'n1': command}
+
+        config = Configuration([])
+        config.get_command_table = lambda: cmd_table
+        app = Application()
+        app.initialize(config)
+        with self.assertRaises(SystemExit):
+            app.execute('n1 -h'.split())
+
+    @redirect_io
     def test_help_param(self):
         def test_handler():
             pass
