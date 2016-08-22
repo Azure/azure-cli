@@ -39,10 +39,10 @@ def cli_redis_update_settings(client, resource_group_name, name, redis_configura
         )
     return client.create_or_update(resource_group_name, name, parameters=update_params)
 
-def cli_redis_create(client, resource_group_name, name, location, sku_name=None, # pylint:disable=too-many-arguments
-                     sku_family=None, sku_capacity=None, tags=None,
-                     redis_configuration=None, enable_non_ssl_port=None, tenant_settings=None,
-                     shard_count=None, subnet_id=None, static_ip=None):
+def cli_redis_create(client, resource_group_name, name, location, sku_name, # pylint:disable=too-many-arguments
+                     sku_family, sku_capacity, tags=None, redis_configuration=None,
+                     enable_non_ssl_port=None, tenant_settings=None, shard_count=None,
+                     subnet_id=None, static_ip=None):
     # pylint:disable=line-too-long
     """Create new Redis Cache instance
     :param resource_group_name: Name of resource group
