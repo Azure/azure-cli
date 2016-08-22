@@ -3,7 +3,12 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 #---------------------------------------------------------------------------------------------
 
-from .custom import cli_redis_import_method, cli_redis_export, cli_redis_update_settings
+from .custom import (
+    cli_redis_create,
+    cli_redis_import_method,
+    cli_redis_export,
+    cli_redis_update_settings
+)
 from azure.mgmt.redis import (
     RedisManagementClient
 )
@@ -19,7 +24,7 @@ def _redis_client_factory(**_):
 
 factory = lambda args: _redis_client_factory(**args).redis
 
-#cli_command('redis create', RedisOperations.create_or_update, factory)
+cli_command('redis create', cli_redis_create, factory)
 cli_command('redis delete', RedisOperations.delete, factory)
 cli_command('redis export', cli_redis_export, factory)
 cli_command('redis force-reboot', RedisOperations.force_reboot, factory)
