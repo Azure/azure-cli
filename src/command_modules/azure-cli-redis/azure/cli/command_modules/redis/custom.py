@@ -51,7 +51,7 @@ def cli_redis_create(client, resource_group_name, name, location, sku_name, # py
     :param sku_name: What type of redis cache to deploy. Valid values: (Basic, Standard, Premium).
     :param sku_family: Which family to use. Valid values: (C, P).
     :param sku_capacity: What size of redis cache to deploy. Valid values for C family (0, 1, 2, 3, 4, 5, 6), for P family (1, 2, 3, 4)
-    :param redis_configuration: All Redis Settings. Few possible keys rdb-backup-enabled,rdb-storage-connection-string,rdb-backup-frequency,maxmemory-delta,maxmemory-policy,notify-keyspace-events,maxmemory-samples,slowlog-log-slower-than,slowlog-max-len,list-max-ziplist-entries,list-max-ziplist-value,hash-max-ziplist-entries,hash-max-ziplist-value,set-max-intset-entries,zset-max-ziplist-entries,zset-max-ziplist-value etc.
+    :param redis_configuration: All Redis Settings. Few possible keys rdb-backup-enabled, rdb-storage-connection-string, rdb-backup-frequency, maxmemory-delta, maxmemory-policy, notify-keyspace-events, maxmemory-samples, slowlog-log-slower-than, slowlog-max-len, list-max-ziplist-entries, list-max-ziplist-value, hash-max-ziplist-entries, hash-max-ziplist-value, set-max-intset-entries, zset-max-ziplist-entries, zset-max-ziplist-value etc.
     :param enable_non_ssl_port: If the value is true, then the non-ssl redis server port (6379) will be enabled.
     :param tenant_settings: Json dictionary with tenant settings
     :param shard_count: The number of shards to be created on a Premium Cluster Cache.
