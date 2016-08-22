@@ -58,6 +58,7 @@ DEPENDENCIES = [
     'argcomplete>=1.3.0',
     'azure==2.0.0rc5',
     'azure-mgmt-trafficmanager==0.30.0rc5',
+    'azure-mgmt-dns==0.30.0rc5',
     'colorama',
     'jmespath',
     'msrest>=0.4.0',

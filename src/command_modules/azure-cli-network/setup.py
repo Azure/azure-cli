@@ -25,7 +25,8 @@ CLASSIFIERS = [
 
 DEPENDENCIES = [
     'azure==2.0.0rc5',
-    'azure-mgmt-trafficmanager==0.30.0rc5'
+    'azure-mgmt-trafficmanager==0.30.0rc5',
+    'azure-mgmt-dns==0.30.0rc5'
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
@@ -108,6 +109,10 @@ setup(
         'azure.cli.command_modules.network.mgmt_traffic_manager_profile.lib',
         'azure.cli.command_modules.network.mgmt_traffic_manager_profile.lib.models',
         'azure.cli.command_modules.network.mgmt_traffic_manager_profile.lib.operations',
+        'azure.cli.command_modules.network.mgmt_dns_zone',
+        'azure.cli.command_modules.network.mgmt_dns_zone.lib',
+        'azure.cli.command_modules.network.mgmt_dns_zone.lib.models',
+        'azure.cli.command_modules.network.mgmt_dns_zone.lib.operations'
     ],
     install_requires=DEPENDENCIES,
 )
