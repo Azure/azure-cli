@@ -23,6 +23,7 @@ def _option_descriptions(operation):
     """ Extract parameter help from doccomments of the command. """
     option_descs = {}
     lines = inspect.getdoc(operation)
+    param_breaks = ["'''", '"""', ':param', ':type', ':return', ':rtype']
     if lines:
         lines = lines.splitlines()
         index = 0
@@ -38,7 +39,7 @@ def _option_descriptions(operation):
                 index += 1
                 while index < len(lines):
                     temp = lines[index].strip()
-                    if temp.startswith(':'):
+                    if any(temp.startswith(x) for x in param_breaks):
                         break
                     else:
                         if temp:
