@@ -6,9 +6,21 @@
 import inspect
 import re
 
+def extract_summary_from_docstring(operation):
+    """ Extract the summary from the doccomments of the command. """
+    lines = inspect.getdoc(operation)
+    regex = re.compile('\s*(:param)\s+(.+)\s*:(.*)')
+    summary = ''
+    if lines:
+        match = regex.search(lines)
+        if match:
+            summary = lines[:match.regs[0][0]]
+        else:
+            summary = lines
+    return summary
+
 def _option_descriptions(operation):
-    """Pull out parameter help from doccomments of the command
-    """
+    """ Extract parameter help from doccomments of the command. """
     option_descs = {}
     lines = inspect.getdoc(operation)
     if lines:
