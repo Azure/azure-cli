@@ -914,19 +914,8 @@ class VMExtensionInstallTest(VCRTestBase):
         extension_name = 'VMAccessForLinux'
         vm_name = 'yugangw8-1'
         resource_group = 'yugangw8'
-        public_key = ('ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC8InHIPLAu6lMc0d+5voyXqigZfT5r6fAM1+FQAi+mkPDdk2hNq1BG0Bwfc88G'
-                      'm7BImw8TS+x2bnZmhCbVnHd6BPCDY7a+cHCSqrQMW89Cv6Vl4ueGOeAWHpJTV9CTLVz4IY1x4HBdkLI2lKIHri9+z7NIdvFk7iOk'
-                      'MVGyez5H1xDbF2szURxgc4I2/o5wycSwX+G8DrtsBvWLmFv9YAPx+VkEHQDjR0WWezOjuo1rDn6MQfiKfqAjPuInwNOg5AIxXAOR'
-                      'esrin2PUlArNtdDH1zlvI4RZi36+tJO7mtm3dJiKs4Sj7G6b1CjIU6aaj27MmKy3arIFChYav9yYM3IT')
         user_name = 'yugangw'
-        config_file_name = 'private_config.json'
-        config = {
-            'username': user_name,
-            'ssh_key': public_key
-            }
-        config_file = os.path.join(TEST_DIR, config_file_name)
-        with open(config_file, 'w') as outfile:
-            json.dump(config, outfile)
+        config_file = _write_config_file(user_name)
 
         try:
             self.cmd('vm extension set -n {} --publisher {} --version 1.4  --vm-name {} --resource-group {} --protected-settings "{}"'
@@ -938,6 +927,47 @@ class VMExtensionInstallTest(VCRTestBase):
             ])
         finally:
             os.remove(config_file)
+
+class VMSSExtensionInstallTest(VCRTestBase):
+
+    def __init__(self, test_method):
+        super(VMSSExtensionInstallTest, self).__init__(__file__, test_method)
+
+    def test_vmss_extension_install(self):
+        self.execute()
+
+    def body(self):
+        publisher = 'Microsoft.OSTCExtensions'
+        extension_name = 'VMAccessForLinux'
+        vmss_name = 'myvmss3'
+        resource_group = 'myvmsss'
+        user_name = 'myadmin'
+        config_file = _write_config_file(user_name)
+
+        try:
+            self.cmd('vmss extension set -n {} --publisher {} --version 1.4  --vmss-name {} --resource-group {} --protected-settings "{}"'
+                .format(extension_name, publisher, vmss_name, resource_group, config_file))
+            self.cmd('vmss extension show --resource-group {} --vmss-name {} --name {}'.format(resource_group, vmss_name, extension_name), checks=[
+                JMESPathCheck('type(@)', 'object'),
+                JMESPathCheck('name', extension_name)
+            ])
+        finally:
+            os.remove(config_file)
+
+def _write_config_file(user_name):
+    public_key = ('ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC8InHIPLAu6lMc0d+5voyXqigZfT5r6fAM1+FQAi+mkPDdk2hNq1BG0Bwfc88G'
+                    'm7BImw8TS+x2bnZmhCbVnHd6BPCDY7a+cHCSqrQMW89Cv6Vl4ueGOeAWHpJTV9CTLVz4IY1x4HBdkLI2lKIHri9+z7NIdvFk7iOk'
+                    'MVGyez5H1xDbF2szURxgc4I2/o5wycSwX+G8DrtsBvWLmFv9YAPx+VkEHQDjR0WWezOjuo1rDn6MQfiKfqAjPuInwNOg5AIxXAOR'
+                    'esrin2PUlArNtdDH1zlvI4RZi36+tJO7mtm3dJiKs4Sj7G6b1CjIU6aaj27MmKy3arIFChYav9yYM3IT')
+    config_file_name = 'private_config.json'
+    config = {
+        'username': user_name,
+        'ssh_key': public_key
+        }
+    config_file = os.path.join(TEST_DIR, config_file_name)
+    with open(config_file, 'w') as outfile:
+        json.dump(config, outfile)
+    return config_file
 
 class VMDiagnosticsInstallTest(VCRTestBase):
 
@@ -958,6 +988,26 @@ class VMDiagnosticsInstallTest(VCRTestBase):
             JMESPathCheck('name', extension_name),
             JMESPathCheck('resourceGroup', resource_group)
         ])
+
+class VMSSDiagnosticsInstallTest(VCRTestBase):
+
+    def __init__(self, test_method):
+        super(VMSSDiagnosticsInstallTest, self).__init__(__file__, test_method)
+
+    def test_vmss_diagnostics_install(self):
+        self.execute()
+
+    def body(self):
+        vmss_name = 'myvmss3'
+        resource_group = 'myvmsss'
+        storage_account = 'stog001100'
+        extension_name = 'LinuxDiagnostic'
+        self.cmd('vmss diagnostics set --vmss-name {} --resource-group {} --storage-account {}'.format(vmss_name, resource_group, storage_account))
+        self.cmd('vmss extension show --resource-group {} --vmss-name {} --name {}'.format(resource_group, vmss_name, extension_name), checks=[
+            JMESPathCheck('type(@)', 'object'),
+            JMESPathCheck('name', extension_name)
+        ])
+
 
 class VMCreateExistingOptions(ResourceGroupVCRTestBase):
     def __init__(self, test_method):
