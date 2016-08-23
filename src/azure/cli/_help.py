@@ -137,11 +137,12 @@ def _print_groups(help_file):
 
     def _print_items(items):
         for c in sorted(items, key=lambda h: h.name):
-            _print_indent('{0}{1}{2}'.format(c.name,
-                                             _get_column_indent(c.name, max_name_length),
-                                             ': ' + c.short_summary if c.short_summary else ''),
-                          indent)
-
+            column_indent = _get_column_indent(c.name, max_name_length)
+            summary = ': ' + c.short_summary if c.short_summary else ''
+            summary = summary.replace('\n', ' ')
+            hanging_indent = max_name_length + indent*4 + 2
+            _print_indent(
+                '{0}{1}{2}'.format(c.name, column_indent, summary), indent, hanging_indent)
         _print_indent('')
 
     indent = 1
@@ -160,7 +161,7 @@ def _print_groups(help_file):
         _print_items(subcommands)
 
 def _get_choices_defaults_str(p):
-    choice_str = '  Allowed values: {0}.'.format(', '.join([str(x) for x in p.choices])) \
+    choice_str = '  Allowed values: {0}.'.format(', '.join(sorted([str(x) for x in p.choices]))) \
         if p.choices else ''
     default_str = '  Default: {0}.'.format(p.default) \
         if p.default and p.default != argparse.SUPPRESS else ''
@@ -212,7 +213,14 @@ class HelpFile(HelpObject): #pylint: disable=too-few-public-methods,too-many-ins
         self.examples = ''
 
     def load(self, options):
-        self.short_summary = getattr(options, 'description', None)
+        description = getattr(options, 'description', None)
+        try:
+            self.short_summary = description[:description.index('.')]
+            self.long_summary = description[description.index('.') + 1:].lstrip()
+        except (ValueError, AttributeError):
+            self.short_summary = description
+            self.long_summary = None
+
         file_data = (_load_help_file_from_string(options.help_file)
                      if hasattr(options, '_defaults')
                      else None)

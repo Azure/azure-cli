@@ -148,7 +148,7 @@ Command
 Arguments
     --name -n           [Required]: The storage account name.
     --resource-group -g [Required]: Name of resource group.
-    --key                         : The key(s) to renew.  Allowed values: secondary, both, primary.
+    --key                         : The key(s) to renew.  Allowed values: secondary, primary, both.
                                     Default: both.
 
 Global Arguments
@@ -393,7 +393,7 @@ Arguments
     --container-name -c [Required]: The container name.
     --name -n           [Required]: The blob name.
     --delete-snapshots            : Required if the blob has associated snapshots.  Allowed values:
-                                    only, include.
+                                    include, only.
     --if-match                    : An ETag value, or the wildcard character (*). Specify this
                                     header to perform the operation only if the resource's ETag
                                     matches the value specified.
@@ -1137,7 +1137,7 @@ Arguments
     --container-name -c [Required]: The container name.
     --file -f           [Required]: Path of the file to upload as the blob content.
     --name -n           [Required]: The blob name.
-    --type -t           [Required]: Allowed values: page, append, block.
+    --type -t           [Required]: Allowed values: block, append, page.
     --content-cache-control       : The cache control string.
     --content-disposition         : Conveys additional information about how to process the response
                                     payload, and can also be used to attach additional metadata.
@@ -1235,7 +1235,7 @@ Arguments
     --public-access     : Specifies whether data in the container may be accessed publically. By
                           default, container data is private to the account owner. Use "blob" to
                           allow public read access for blobs. Use "container" to allow public read
-                          and list access to the entire container.  Allowed values: blob, container.
+                          and list access to the entire container.  Allowed values: container, blob.
     --timeout           : Request timeout in seconds. Applies to each call to the service.
 
 Global Arguments
@@ -2202,8 +2202,9 @@ Command
 
 Arguments
     --table-name -t [Required]: The name of the table to query.
-    --accept                  : Specifies the accepted content type of the response payload. See.
-                                Default: application/json;odata=minimalmetadata.
+    --accept                  : Specifies the accepted content type of the response payload. See
+                                :class:`~azure.storage.table.models.TablePayloadFormat` for possible
+                                values.  Default: application/json;odata=minimalmetadata.
     --filter                  : Returns only entities that satisfy the specified filter. Note that
                                 no more than 15 discrete comparisons are permitted within a $filter
                                 string. See http://msdn.microsoft.com/en-
@@ -2284,8 +2285,9 @@ Arguments
     --partition-key [Required]: The PartitionKey of the entity.
     --row-key       [Required]: The RowKey of the entity.
     --table-name -t [Required]: The name of the table to get the entity from.
-    --accept                  : Specifies the accepted content type of the response payload. See.
-                                Default: application/json;odata=minimalmetadata.
+    --accept                  : Specifies the accepted content type of the response payload. See
+                                :class:`~azure.storage.table.models.TablePayloadFormat` for possible
+                                values.  Default: application/json;odata=minimalmetadata.
     --select                  : Returns only the desired properties of an entity from the set.
     --timeout                 : Request timeout in seconds. Applies to each call to the service.
 

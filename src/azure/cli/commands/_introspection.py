@@ -6,10 +6,10 @@
 import inspect
 import re
 
-def extract_summary_from_docstring(operation):
+def extract_full_summary_from_signature(operation):
     """ Extract the summary from the doccomments of the command. """
     lines = inspect.getdoc(operation)
-    regex = re.compile('\s*(:param)\s+(.+)\s*:(.*)')
+    regex = re.compile(r'\s*(:param)\s+(.+)\s*:(.*)')
     summary = ''
     if lines:
         match = regex.search(lines)
