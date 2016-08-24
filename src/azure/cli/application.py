@@ -187,7 +187,7 @@ class Application(object):
     def _load_file(path):
         try:
             if path == '-':
-                content= sys.stdin.read()
+                content = sys.stdin.read()
             else:
                 with open(path, 'r') as input_file:
                     content = input_file.read()
