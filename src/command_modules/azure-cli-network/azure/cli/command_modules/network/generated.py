@@ -225,11 +225,11 @@ cli_command('network lb rule create', create_lb_rule)
 cli_command('network lb probe create', create_lb_probe)
 
 factory = lambda _: _network_client_factory().load_balancers
-cli_generic_update_command('network lb frontend-ip update', LoadBalancersOperations.get, LoadBalancersOperations.create_or_update, factory, child_arg_type='frontend_ip_configurations', custom_function=set_lb_frontend_ip_configuration)
-cli_generic_update_command('network lb inbound-nat-rule update', LoadBalancersOperations.get, LoadBalancersOperations.create_or_update, factory, child_arg_type='inbound_nat_rules', custom_function=set_lb_inbound_nat_rule)
-cli_generic_update_command('network lb inbound-nat-pool update', LoadBalancersOperations.get, LoadBalancersOperations.create_or_update, factory, child_arg_type='inbound_nat_pools', custom_function=set_lb_inbound_nat_pool)
-cli_generic_update_command('network lb rule update', LoadBalancersOperations.get, LoadBalancersOperations.create_or_update, factory, child_arg_type='load_balancing_rules', custom_function=set_lb_rule)
-cli_generic_update_command('network lb probe update', LoadBalancersOperations.get, LoadBalancersOperations.create_or_update, factory, child_arg_type='probes', custom_function=set_lb_probe)
+cli_generic_update_command('network lb frontend-ip update', LoadBalancersOperations.get, LoadBalancersOperations.create_or_update, factory, child_collection_prop_name='frontend_ip_configurations', custom_function=set_lb_frontend_ip_configuration)
+cli_generic_update_command('network lb inbound-nat-rule update', LoadBalancersOperations.get, LoadBalancersOperations.create_or_update, factory, child_collection_prop_name='inbound_nat_rules', custom_function=set_lb_inbound_nat_rule)
+cli_generic_update_command('network lb inbound-nat-pool update', LoadBalancersOperations.get, LoadBalancersOperations.create_or_update, factory, child_collection_prop_name='inbound_nat_pools', custom_function=set_lb_inbound_nat_pool)
+cli_generic_update_command('network lb rule update', LoadBalancersOperations.get, LoadBalancersOperations.create_or_update, factory, child_collection_prop_name='load_balancing_rules', custom_function=set_lb_rule)
+cli_generic_update_command('network lb probe update', LoadBalancersOperations.get, LoadBalancersOperations.create_or_update, factory, child_collection_prop_name='probes', custom_function=set_lb_probe)
 
 # LocalNetworkGatewaysOperations
 factory = lambda _: _network_client_factory().local_network_gateways
@@ -259,7 +259,7 @@ cli_command('network nic scale-set show', NetworkInterfacesOperations.get_virtua
 resource = 'network_interfaces'
 subresource = 'ip_configurations'
 cli_command('network nic ip-config create', create_nic_ip_config)
-cli_generic_update_command('network nic ip-config update', NetworkInterfacesOperations.get, NetworkInterfacesOperations.create_or_update, factory, child_arg_type='ip_configurations', child_arg_name='ip_config_name', custom_function=set_nic_ip_config)
+cli_generic_update_command('network nic ip-config update', NetworkInterfacesOperations.get, NetworkInterfacesOperations.create_or_update, factory, child_collection_prop_name='ip_configurations', child_arg_name='ip_config_name', custom_function=set_nic_ip_config)
 cli_command('network nic ip-config list', list_network_resource_property(resource, subresource))
 cli_command('network nic ip-config show', get_network_resource_property_entry(resource, subresource))
 cli_command('network nic ip-config delete', delete_network_resource_property_entry(resource, subresource))

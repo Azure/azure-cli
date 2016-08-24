@@ -160,17 +160,19 @@ def add_id_parameters(command_table):
 
 APPLICATION.register(APPLICATION.COMMAND_TABLE_LOADED, add_id_parameters)
 
-def _get_child_property(parent, collection_name, item_name):
+def _get_child(parent, collection_name, item_name, collection_key):
     items = getattr(parent, collection_name)
-    result = next((x for x in items if x.name.lower() == item_name.lower()), None)
+    result = next((x for x in items if getattr(x, collection_key, '').lower() == item_name.lower()), None) # pylint: disable=line-too-long
     if not result:
-        raise CLIError("Property '{}' does not exist".format(item_name))
+        raise CLIError("Property '{}' does not exist for key '{}'.".format(
+            item_name, collection_key))
     else:
         return result
 
-def cli_generic_update_command(name, getter, setter, factory=None, setter_arg_name='parameters', #pylint:disable=too-many-arguments
-                               simple_output_query=None, child_arg_type=None,
-                               child_arg_name='item_name', custom_function=None):
+def cli_generic_update_command(name, getter, setter, factory=None, setter_arg_name='parameters', # pylint: disable=too-many-arguments
+                               simple_output_query=None, child_collection_prop_name=None,
+                               child_collection_key='name', child_arg_name='item_name',
+                               custom_function=None):
 
     get_arguments = dict(extract_args_from_signature(getter))
     set_arguments = dict(extract_args_from_signature(setter))
@@ -187,17 +189,22 @@ def cli_generic_update_command(name, getter, setter, factory=None, setter_arg_na
 
         getterargs = {key: val for key, val in args.items()
                       if key in get_arguments}
-        if child_arg_type:
+        if child_collection_prop_name:
             parent = getter(client, **getterargs) if client else getter(**getterargs)
-            instance = _get_child_property(parent, child_arg_type, args.get(child_arg_name))
+            instance = _get_child(
+                parent,
+                child_collection_prop_name,
+                args.get(child_arg_name),
+                child_collection_key
+            )
         else:
             parent = None
             instance = getter(client, **getterargs) if client else getter(**getterargs)
 
         # pass instance to the custom_function, if provided
         if custom_function:
-            custom_func_args = {k: v for k, v in args.items() if k in function_arguments.keys()}
-            if child_arg_type:
+            custom_func_args = {k: v for k, v in args.items() if k in function_arguments}
+            if child_collection_prop_name:
                 parent = custom_function(instance, parent, **custom_func_args)
             else:
                 instance = custom_function(instance, **custom_func_args)
@@ -235,11 +242,16 @@ def cli_generic_update_command(name, getter, setter, factory=None, setter_arg_na
                                    ' --remove property.list <indexToRemove>')
 
         # Done... update the instance!
-        getterargs[setter_arg_name] = parent if child_arg_type else instance
+        getterargs[setter_arg_name] = parent if child_collection_prop_name else instance
         opres = setter(client, **getterargs) if client else setter(**getterargs)
         result = opres.result() if isinstance(opres, AzureOperationPoller) else opres
-        if child_arg_type:
-            return _get_child_property(result, child_arg_type, args.get(child_arg_name))
+        if child_collection_prop_name:
+            return _get_child(
+                result,
+                child_collection_prop_name,
+                args.get(child_arg_name),
+                child_collection_key
+            )
         else:
             return result
 
