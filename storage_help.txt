@@ -116,11 +116,12 @@ Global Arguments
 Storage Account Arguments
     --account-key              : Storage account key. Must be used in conjunction with storage
                                  account name. Var: AZURE_STORAGE_KEY.
+    --account-name             : Storage account name. Must be used in conjunction with either
+                                 storage account key or a SAS token. Var: AZURE_STORAGE_ACCOUNT.
     --connection-string        : Storage account connection string. Var:
                                  AZURE_STORAGE_CONNECTION_STRING.
-    --name -n                  : The storage account name.
     --sas-token                : A Shared Access Signature (SAS). Must be used in conjunction with
-                                 storage account name. Var: AZURE_SAS_TOKEN.
+                                 storage account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -273,7 +274,7 @@ Storage Account Arguments
                                            AZURE_STORAGE_CONNECTION_STRING.
     --sas-token                          : A Shared Access Signature (SAS). Must be used in
                                            conjunction with storage account name. Var:
-                                           AZURE_SAS_TOKEN.
+                                           AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -331,7 +332,8 @@ Arguments
                                            lease ID of the destination blob. If the request does not
                                            include the lease ID or it is not valid, the operation
                                            fails with status code 412 (Precondition Failed).
-    --metadata                           : Metadata in space-separated key=value pairs.
+    --metadata                           : Metadata in space-separated key=value pairs. This
+                                           overwrites any existing metadata.
     --source-if-match                    : An ETag value, or the wildcard character (*). Specify
                                            this conditional header to copy the source blob only if
                                            its ETag matches the value specified. If the ETag values
@@ -382,7 +384,7 @@ Storage Account Arguments
                                            AZURE_STORAGE_CONNECTION_STRING.
     --sas-token                          : A Shared Access Signature (SAS). Must be used in
                                            conjunction with storage account name. Var:
-                                           AZURE_SAS_TOKEN.
+                                           AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -428,7 +430,7 @@ Storage Account Arguments
     --connection-string           : Storage account connection string. Var:
                                     AZURE_STORAGE_CONNECTION_STRING.
     --sas-token                   : A Shared Access Signature (SAS). Must be used in conjunction
-                                    with storage account name. Var: AZURE_SAS_TOKEN.
+                                    with storage account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -474,10 +476,7 @@ Arguments
     --open-mode                   : Mode to use when opening the file. Note that specifying append
                                     only open_mode prevents parallel download. So, max_connections
                                     must be set to 1 if this open_mode is used.  Default: wb.
-    --progress-callback           : Callback for progress with signature function(current, total)
-                                    where current is the number of bytes transfered so far, and
-                                    total is the size of the blob if known.
-    --retry-wait                  : Sleep time in secs between retries.  Default: 1.0.
+    --retry-interval              : Sleep time in secs between retries.  Default: 1.0.
     --snapshot                    : The snapshot parameter is an opaque DateTime value that, when
                                     present, specifies the blob snapshot to retrieve.
     --start-range                 : Start of byte range to use for downloading a section of the
@@ -514,7 +513,7 @@ Storage Account Arguments
     --connection-string           : Storage account connection string. Var:
                                     AZURE_STORAGE_CONNECTION_STRING.
     --sas-token                   : A Shared Access Signature (SAS). Must be used in conjunction
-                                    with storage account name. Var: AZURE_SAS_TOKEN.
+                                    with storage account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -545,7 +544,7 @@ Storage Account Arguments
     --connection-string           : Storage account connection string. Var:
                                     AZURE_STORAGE_CONNECTION_STRING.
     --sas-token                   : A Shared Access Signature (SAS). Must be used in conjunction
-                                    with storage account name. Var: AZURE_SAS_TOKEN.
+                                    with storage account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -598,7 +597,7 @@ Storage Account Arguments
     --connection-string           : Storage account connection string. Var:
                                     AZURE_STORAGE_CONNECTION_STRING.
     --sas-token                   : A Shared Access Signature (SAS). Must be used in conjunction
-                                    with storage account name. Var: AZURE_SAS_TOKEN.
+                                    with storage account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -647,7 +646,7 @@ Storage Account Arguments
     --connection-string           : Storage account connection string. Var:
                                     AZURE_STORAGE_CONNECTION_STRING.
     --sas-token                   : A Shared Access Signature (SAS). Must be used in conjunction
-                                    with storage account name. Var: AZURE_SAS_TOKEN.
+                                    with storage account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -698,7 +697,7 @@ Storage Account Arguments
     --connection-string           : Storage account connection string. Var:
                                     AZURE_STORAGE_CONNECTION_STRING.
     --sas-token                   : A Shared Access Signature (SAS). Must be used in conjunction
-                                    with storage account name. Var: AZURE_SAS_TOKEN.
+                                    with storage account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -743,7 +742,7 @@ Storage Account Arguments
     --connection-string           : Storage account connection string. Var:
                                     AZURE_STORAGE_CONNECTION_STRING.
     --sas-token                   : A Shared Access Signature (SAS). Must be used in conjunction
-                                    with storage account name. Var: AZURE_SAS_TOKEN.
+                                    with storage account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -785,7 +784,7 @@ Storage Account Arguments
     --connection-string           : Storage account connection string. Var:
                                     AZURE_STORAGE_CONNECTION_STRING.
     --sas-token                   : A Shared Access Signature (SAS). Must be used in conjunction
-                                    with storage account name. Var: AZURE_SAS_TOKEN.
+                                    with storage account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -827,7 +826,7 @@ Storage Account Arguments
     --connection-string           : Storage account connection string. Var:
                                     AZURE_STORAGE_CONNECTION_STRING.
     --sas-token                   : A Shared Access Signature (SAS). Must be used in conjunction
-                                    with storage account name. Var: AZURE_SAS_TOKEN.
+                                    with storage account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -877,7 +876,7 @@ Storage Account Arguments
     --connection-string           : Storage account connection string. Var:
                                     AZURE_STORAGE_CONNECTION_STRING.
     --sas-token                   : A Shared Access Signature (SAS). Must be used in conjunction
-                                    with storage account name. Var: AZURE_SAS_TOKEN.
+                                    with storage account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -921,7 +920,7 @@ Storage Account Arguments
     --connection-string           : Storage account connection string. Var:
                                     AZURE_STORAGE_CONNECTION_STRING.
     --sas-token                   : A Shared Access Signature (SAS). Must be used in conjunction
-                                    with storage account name. Var: AZURE_SAS_TOKEN.
+                                    with storage account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -944,7 +943,8 @@ Arguments
     --if-unmodified-since         : Alter only if unmodified since supplied UTC datetime
                                     (Y-m-d'T'H:M'Z').
     --lease-id                    : Required if the blob has an active lease.
-    --metadata                    : Metadata in space-separated key=value pairs.
+    --metadata                    : Metadata in space-separated key=value pairs. This overwrites any
+                                    existing metadata.
     --timeout                     : Request timeout in seconds. Applies to each call to the service.
 
 Global Arguments
@@ -964,7 +964,7 @@ Storage Account Arguments
     --connection-string           : Storage account connection string. Var:
                                     AZURE_STORAGE_CONNECTION_STRING.
     --sas-token                   : A Shared Access Signature (SAS). Must be used in conjunction
-                                    with storage account name. Var: AZURE_SAS_TOKEN.
+                                    with storage account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -990,7 +990,7 @@ Storage Account Arguments
                          account key or a SAS token. Var: AZURE_STORAGE_ACCOUNT.
     --connection-string: Storage account connection string. Var: AZURE_STORAGE_CONNECTION_STRING.
     --sas-token        : A Shared Access Signature (SAS). Must be used in conjunction with storage
-                         account name. Var: AZURE_SAS_TOKEN.
+                         account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -1034,7 +1034,7 @@ Storage Account Arguments
     --connection-string           : Storage account connection string. Var:
                                     AZURE_STORAGE_CONNECTION_STRING.
     --sas-token                   : A Shared Access Signature (SAS). Must be used in conjunction
-                                    with storage account name. Var: AZURE_SAS_TOKEN.
+                                    with storage account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -1057,7 +1057,8 @@ Arguments
     --if-unmodified-since         : Alter only if unmodified since supplied UTC datetime
                                     (Y-m-d'T'H:M'Z').
     --lease-id                    : Required if the blob has an active lease.
-    --metadata                    : Metadata in space-separated key=value pairs.
+    --metadata                    : Metadata in space-separated key=value pairs. This overwrites any
+                                    existing metadata.
     --timeout                     : Request timeout in seconds. Applies to each call to the service.
 
 Global Arguments
@@ -1077,7 +1078,7 @@ Storage Account Arguments
     --connection-string           : Storage account connection string. Var:
                                     AZURE_STORAGE_CONNECTION_STRING.
     --sas-token                   : A Shared Access Signature (SAS). Must be used in conjunction
-                                    with storage account name. Var: AZURE_SAS_TOKEN.
+                                    with storage account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -1126,7 +1127,7 @@ Storage Account Arguments
     --connection-string           : Storage account connection string. Var:
                                     AZURE_STORAGE_CONNECTION_STRING.
     --sas-token                   : A Shared Access Signature (SAS). Must be used in conjunction
-                                    with storage account name. Var: AZURE_SAS_TOKEN.
+                                    with storage account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -1137,7 +1138,6 @@ Arguments
     --container-name -c [Required]: The container name.
     --file -f           [Required]: Path of the file to upload as the blob content.
     --name -n           [Required]: The blob name.
-    --type -t           [Required]: Allowed values: block, page, append.
     --content-cache-control       : The cache control string.
     --content-disposition         : Conveys additional information about how to process the response
                                     payload, and can also be used to attach additional metadata.
@@ -1162,16 +1162,14 @@ Arguments
                                     exceeds 64MB.  Default: 2.
     --max-retries                 : Number of times to retry upload of blob chunk if an error
                                     occurs.  Default: 5.
-    --maxsize-condition
-    --metadata                    : Metadata in space-separated key=value pairs.
-    --retry-wait                  : Sleep time in secs between retries.  Default: 1.
+    --maxsize-condition           : The max length in bytes permitted for an append blob.
+    --metadata                    : Metadata in space-separated key=value pairs. This overwrites any
+                                    existing metadata.
+    --retry-interval              : Sleep time in secs between retries.  Default: 1.
     --timeout                     : Request timeout in seconds. Applies to each call to the service.
-    --validate-content            : If true, calculates an MD5 hash for each chunk of the blob. The
-                                    storage service checks the hash of the content that has arrived
-                                    with the hash that was sent. This is primarily valuable for
-                                    detecting bitflips on the wire if using http instead of https as
-                                    https (the default) will already validate. Note that this MD5
-                                    hash is not stored with the blob.
+    --type -t                     : Allowed values: page, append, block.  Default: block.
+    --validate-content            : Specifies that an MD5 hash shall be calculated for each chunk of
+                                    the blob and verified by the service when the chunk has arrived.
 
 Global Arguments
     --debug                       : Increase logging verbosity to show all debug logs.
@@ -1190,7 +1188,7 @@ Storage Account Arguments
     --connection-string           : Storage account connection string. Var:
                                     AZURE_STORAGE_CONNECTION_STRING.
     --sas-token                   : A Shared Access Signature (SAS). Must be used in conjunction
-                                    with storage account name. Var: AZURE_SAS_TOKEN.
+                                    with storage account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -1200,9 +1198,7 @@ Command
 Arguments
     --container-name -c [Required]: The container name.
     --name -n           [Required]: The blob name.
-    --protocol                    : Protocol to use: 'http' or 'https'. If not specified, uses the
-                                    protocol specified when BaseBlobService was initialized.
-                                    Allowed values: http, https.
+    --protocol                    : Protocol to use.  Allowed values: http, https.  Default: https.
 
 Global Arguments
     --debug                       : Increase logging verbosity to show all debug logs.
@@ -1221,7 +1217,7 @@ Storage Account Arguments
     --connection-string           : Storage account connection string. Var:
                                     AZURE_STORAGE_CONNECTION_STRING.
     --sas-token                   : A Shared Access Signature (SAS). Must be used in conjunction
-                                    with storage account name. Var: AZURE_SAS_TOKEN.
+                                    with storage account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -1231,11 +1227,12 @@ Command
 Arguments
     --name -n [Required]: The container name.
     --fail-on-exist     : Throw an exception if the container already exists.
-    --metadata          : Metadata in space-separated key=value pairs.
+    --metadata          : Metadata in space-separated key=value pairs. This overwrites any existing
+                          metadata.
     --public-access     : Specifies whether data in the container may be accessed publically. By
                           default, container data is private to the account owner. Use "blob" to
                           allow public read access for blobs. Use "container" to allow public read
-                          and list access to the entire container.  Allowed values: blob, container.
+                          and list access to the entire container.  Allowed values: container, blob.
     --timeout           : Request timeout in seconds. Applies to each call to the service.
 
 Global Arguments
@@ -1254,7 +1251,7 @@ Storage Account Arguments
                           account key or a SAS token. Var: AZURE_STORAGE_ACCOUNT.
     --connection-string : Storage account connection string. Var: AZURE_STORAGE_CONNECTION_STRING.
     --sas-token         : A Shared Access Signature (SAS). Must be used in conjunction with storage
-                          account name. Var: AZURE_SAS_TOKEN.
+                          account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -1287,7 +1284,7 @@ Storage Account Arguments
                            account key or a SAS token. Var: AZURE_STORAGE_ACCOUNT.
     --connection-string  : Storage account connection string. Var: AZURE_STORAGE_CONNECTION_STRING.
     --sas-token          : A Shared Access Signature (SAS). Must be used in conjunction with storage
-                           account name. Var: AZURE_SAS_TOKEN.
+                           account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -1296,8 +1293,6 @@ Command
 
 Arguments
     --name -n [Required]: The container name.
-    --snapshot          : The snapshot parameter is an opaque DateTime value that, when present,
-                          specifies the snapshot.
     --timeout           : Request timeout in seconds. Applies to each call to the service.
 
 Global Arguments
@@ -1316,7 +1311,7 @@ Storage Account Arguments
                           account key or a SAS token. Var: AZURE_STORAGE_ACCOUNT.
     --connection-string : Storage account connection string. Var: AZURE_STORAGE_CONNECTION_STRING.
     --sas-token         : A Shared Access Signature (SAS). Must be used in conjunction with storage
-                          account name. Var: AZURE_SAS_TOKEN.
+                          account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -1366,7 +1361,7 @@ Storage Account Arguments
                            account key or a SAS token. Var: AZURE_STORAGE_ACCOUNT.
     --connection-string  : Storage account connection string. Var: AZURE_STORAGE_CONNECTION_STRING.
     --sas-token          : A Shared Access Signature (SAS). Must be used in conjunction with storage
-                           account name. Var: AZURE_SAS_TOKEN.
+                           account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -1401,7 +1396,7 @@ Storage Account Arguments
                            account key or a SAS token. Var: AZURE_STORAGE_ACCOUNT.
     --connection-string  : Storage account connection string. Var: AZURE_STORAGE_CONNECTION_STRING.
     --sas-token          : A Shared Access Signature (SAS). Must be used in conjunction with storage
-                           account name. Var: AZURE_SAS_TOKEN.
+                           account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -1438,7 +1433,7 @@ Storage Account Arguments
                            account key or a SAS token. Var: AZURE_STORAGE_ACCOUNT.
     --connection-string  : Storage account connection string. Var: AZURE_STORAGE_CONNECTION_STRING.
     --sas-token          : A Shared Access Signature (SAS). Must be used in conjunction with storage
-                           account name. Var: AZURE_SAS_TOKEN.
+                           account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -1474,7 +1469,7 @@ Storage Account Arguments
     --connection-string           : Storage account connection string. Var:
                                     AZURE_STORAGE_CONNECTION_STRING.
     --sas-token                   : A Shared Access Signature (SAS). Must be used in conjunction
-                                    with storage account name. Var: AZURE_SAS_TOKEN.
+                                    with storage account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -1504,7 +1499,7 @@ Storage Account Arguments
                            account key or a SAS token. Var: AZURE_STORAGE_ACCOUNT.
     --connection-string  : Storage account connection string. Var: AZURE_STORAGE_CONNECTION_STRING.
     --sas-token          : A Shared Access Signature (SAS). Must be used in conjunction with storage
-                           account name. Var: AZURE_SAS_TOKEN.
+                           account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -1534,7 +1529,7 @@ Storage Account Arguments
                            account key or a SAS token. Var: AZURE_STORAGE_ACCOUNT.
     --connection-string  : Storage account connection string. Var: AZURE_STORAGE_CONNECTION_STRING.
     --sas-token          : A Shared Access Signature (SAS). Must be used in conjunction with storage
-                           account name. Var: AZURE_SAS_TOKEN.
+                           account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -1571,7 +1566,7 @@ Storage Account Arguments
                          account key or a SAS token. Var: AZURE_STORAGE_ACCOUNT.
     --connection-string: Storage account connection string. Var: AZURE_STORAGE_CONNECTION_STRING.
     --sas-token        : A Shared Access Signature (SAS). Must be used in conjunction with storage
-                         account name. Var: AZURE_SAS_TOKEN.
+                         account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -1600,7 +1595,7 @@ Storage Account Arguments
                           account key or a SAS token. Var: AZURE_STORAGE_ACCOUNT.
     --connection-string : Storage account connection string. Var: AZURE_STORAGE_CONNECTION_STRING.
     --sas-token         : A Shared Access Signature (SAS). Must be used in conjunction with storage
-                          account name. Var: AZURE_SAS_TOKEN.
+                          account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -1612,7 +1607,8 @@ Arguments
     --if-modified-since : Alter only if modified since supplied UTC datetime (Y-m-d'T'H:M'Z').
     --lease-id          : If specified, set_container_metadata only succeeds if the container's
                           lease is active and matches this ID.
-    --metadata          : Metadata in space-separated key=value pairs.
+    --metadata          : Metadata in space-separated key=value pairs. This overwrites any existing
+                          metadata.
     --timeout           : Request timeout in seconds. Applies to each call to the service.
 
 Global Arguments
@@ -1631,7 +1627,7 @@ Storage Account Arguments
                           account key or a SAS token. Var: AZURE_STORAGE_ACCOUNT.
     --connection-string : Storage account connection string. Var: AZURE_STORAGE_CONNECTION_STRING.
     --sas-token         : A Shared Access Signature (SAS). Must be used in conjunction with storage
-                          account name. Var: AZURE_SAS_TOKEN.
+                          account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -1663,7 +1659,7 @@ Storage Account Arguments
     --connection-string           : Storage account connection string. Var:
                                     AZURE_STORAGE_CONNECTION_STRING.
     --sas-token                   : A Shared Access Signature (SAS). Must be used in conjunction
-                                    with storage account name. Var: AZURE_SAS_TOKEN.
+                                    with storage account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -1691,7 +1687,7 @@ Storage Account Arguments
     --connection-string           : Storage account connection string. Var:
                                     AZURE_STORAGE_CONNECTION_STRING.
     --sas-token                   : A Shared Access Signature (SAS). Must be used in conjunction
-                                    with storage account name. Var: AZURE_SAS_TOKEN.
+                                    with storage account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -1718,7 +1714,7 @@ Storage Account Arguments
     --connection-string           : Storage account connection string. Var:
                                     AZURE_STORAGE_CONNECTION_STRING.
     --sas-token                   : A Shared Access Signature (SAS). Must be used in conjunction
-                                    with storage account name. Var: AZURE_SAS_TOKEN.
+                                    with storage account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -1746,7 +1742,7 @@ Storage Account Arguments
     --connection-string           : Storage account connection string. Var:
                                     AZURE_STORAGE_CONNECTION_STRING.
     --sas-token                   : A Shared Access Signature (SAS). Must be used in conjunction
-                                    with storage account name. Var: AZURE_SAS_TOKEN.
+                                    with storage account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -1778,7 +1774,7 @@ Storage Account Arguments
     --connection-string           : Storage account connection string. Var:
                                     AZURE_STORAGE_CONNECTION_STRING.
     --sas-token                   : A Shared Access Signature (SAS). Must be used in conjunction
-                                    with storage account name. Var: AZURE_SAS_TOKEN.
+                                    with storage account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -1807,7 +1803,7 @@ Storage Account Arguments
                           account key or a SAS token. Var: AZURE_STORAGE_ACCOUNT.
     --connection-string : Storage account connection string. Var: AZURE_STORAGE_CONNECTION_STRING.
     --sas-token         : A Shared Access Signature (SAS). Must be used in conjunction with storage
-                          account name. Var: AZURE_SAS_TOKEN.
+                          account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -1824,7 +1820,7 @@ Arguments
     --allowed-headers    : List of response headers allowed to be part of the cross-origin request.
     --exposed-headers    : List of response headers to expose to CORS clients.
     --max-age            : The number of seconds the client/browser should cache a preflight
-                           response.
+                           response.  Default: 0.
     --timeout            : Request timeout in seconds. Applies to each call to the service.
 
 Global Arguments
@@ -1843,7 +1839,7 @@ Storage Account Arguments
                            account key or a SAS token. Var: AZURE_STORAGE_ACCOUNT.
     --connection-string  : Storage account connection string. Var: AZURE_STORAGE_CONNECTION_STRING.
     --sas-token          : A Shared Access Signature (SAS). Must be used in conjunction with storage
-                           account name. Var: AZURE_SAS_TOKEN.
+                           account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -1871,7 +1867,7 @@ Storage Account Arguments
                            account key or a SAS token. Var: AZURE_STORAGE_ACCOUNT.
     --connection-string  : Storage account connection string. Var: AZURE_STORAGE_CONNECTION_STRING.
     --sas-token          : A Shared Access Signature (SAS). Must be used in conjunction with storage
-                           account name. Var: AZURE_SAS_TOKEN.
+                           account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -1879,7 +1875,8 @@ Command
     az storage cors list
 
 Arguments
-    --services         : Default: bfqt.
+    --services         : The storage service(s) for which to list the CORS rules: (b)lob (f)ile
+                         (q)ueue (t)able. Can be combined.  Default: bfqt.
     --timeout          : Request timeout in seconds. Applies to each call to the service.
 
 Global Arguments
@@ -1898,7 +1895,7 @@ Storage Account Arguments
                          account key or a SAS token. Var: AZURE_STORAGE_ACCOUNT.
     --connection-string: Storage account connection string. Var: AZURE_STORAGE_CONNECTION_STRING.
     --sas-token        : A Shared Access Signature (SAS). Must be used in conjunction with storage
-                         account name. Var: AZURE_SAS_TOKEN.
+                         account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -1910,7 +1907,8 @@ Arguments
     --share-name -s [Required]: The file share name.
     --fail-on-exist           : Specify whether to throw an exception when the directory exists.
                                 False by default.
-    --metadata                : Metadata in space-separated key=value pairs.
+    --metadata                : Metadata in space-separated key=value pairs. This overwrites any
+                                existing metadata.
     --timeout                 : Request timeout in seconds. Applies to each call to the service.
 
 Global Arguments
@@ -1930,7 +1928,7 @@ Storage Account Arguments
     --connection-string       : Storage account connection string. Var:
                                 AZURE_STORAGE_CONNECTION_STRING.
     --sas-token               : A Shared Access Signature (SAS). Must be used in conjunction with
-                                storage account name. Var: AZURE_SAS_TOKEN.
+                                storage account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -1961,7 +1959,7 @@ Storage Account Arguments
     --connection-string       : Storage account connection string. Var:
                                 AZURE_STORAGE_CONNECTION_STRING.
     --sas-token               : A Shared Access Signature (SAS). Must be used in conjunction with
-                                storage account name. Var: AZURE_SAS_TOKEN.
+                                storage account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -1990,7 +1988,7 @@ Storage Account Arguments
     --connection-string       : Storage account connection string. Var:
                                 AZURE_STORAGE_CONNECTION_STRING.
     --sas-token               : A Shared Access Signature (SAS). Must be used in conjunction with
-                                storage account name. Var: AZURE_SAS_TOKEN.
+                                storage account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -2019,7 +2017,7 @@ Storage Account Arguments
     --connection-string       : Storage account connection string. Var:
                                 AZURE_STORAGE_CONNECTION_STRING.
     --sas-token               : A Shared Access Signature (SAS). Must be used in conjunction with
-                                storage account name. Var: AZURE_SAS_TOKEN.
+                                storage account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -2029,7 +2027,8 @@ Command
 Arguments
     --name -n       [Required]: The directory name.
     --share-name -s [Required]: The file share name.
-    --metadata                : Metadata in space-separated key=value pairs.
+    --metadata                : Metadata in space-separated key=value pairs. This overwrites any
+                                existing metadata.
     --timeout                 : Request timeout in seconds. Applies to each call to the service.
 
 Global Arguments
@@ -2049,7 +2048,7 @@ Storage Account Arguments
     --connection-string       : Storage account connection string. Var:
                                 AZURE_STORAGE_CONNECTION_STRING.
     --sas-token               : A Shared Access Signature (SAS). Must be used in conjunction with
-                                storage account name. Var: AZURE_SAS_TOKEN.
+                                storage account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -2078,7 +2077,7 @@ Storage Account Arguments
     --connection-string       : Storage account connection string. Var:
                                 AZURE_STORAGE_CONNECTION_STRING.
     --sas-token               : A Shared Access Signature (SAS). Must be used in conjunction with
-                                storage account name. Var: AZURE_SAS_TOKEN.
+                                storage account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -2116,7 +2115,7 @@ Storage Account Arguments
     --connection-string       : Storage account connection string. Var:
                                 AZURE_STORAGE_CONNECTION_STRING.
     --sas-token               : A Shared Access Signature (SAS). Must be used in conjunction with
-                                storage account name. Var: AZURE_SAS_TOKEN.
+                                storage account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -2155,7 +2154,7 @@ Storage Account Arguments
     --connection-string       : Storage account connection string. Var:
                                 AZURE_STORAGE_CONNECTION_STRING.
     --sas-token               : A Shared Access Signature (SAS). Must be used in conjunction with
-                                storage account name. Var: AZURE_SAS_TOKEN.
+                                storage account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -2193,7 +2192,7 @@ Storage Account Arguments
     --connection-string       : Storage account connection string. Var:
                                 AZURE_STORAGE_CONNECTION_STRING.
     --sas-token               : A Shared Access Signature (SAS). Must be used in conjunction with
-                                storage account name. Var: AZURE_SAS_TOKEN.
+                                storage account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -2202,8 +2201,8 @@ Command
 
 Arguments
     --table-name -t [Required]: The name of the table to query.
-    --accept                  : Specifies the accepted content type of the response payload. See.
-                                Default: application/json;odata=minimalmetadata.
+    --accept                  : Specifies how much metadata to include in the response payload.
+                                Allowed values: full, minimal, none.  Default: minimal.
     --filter                  : Returns only entities that satisfy the specified filter. Note that
                                 no more than 15 discrete comparisons are permitted within a $filter
                                 string. See http://msdn.microsoft.com/en-
@@ -2215,7 +2214,7 @@ Arguments
                                 specified, this generator will begin returning results from the
                                 point where the previous generator stopped.
     --num-results             : The maximum number of entities to return.
-    --select                  : Returns only the desired properties of an entity from the set.
+    --select                  : Space separated list of properties to return for each entity.
     --timeout                 : Request timeout in seconds. Applies to each call to the service.
 
 Global Arguments
@@ -2235,7 +2234,7 @@ Storage Account Arguments
     --connection-string       : Storage account connection string. Var:
                                 AZURE_STORAGE_CONNECTION_STRING.
     --sas-token               : A Shared Access Signature (SAS). Must be used in conjunction with
-                                storage account name. Var: AZURE_SAS_TOKEN.
+                                storage account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -2273,7 +2272,7 @@ Storage Account Arguments
     --connection-string       : Storage account connection string. Var:
                                 AZURE_STORAGE_CONNECTION_STRING.
     --sas-token               : A Shared Access Signature (SAS). Must be used in conjunction with
-                                storage account name. Var: AZURE_SAS_TOKEN.
+                                storage account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -2286,7 +2285,7 @@ Arguments
     --table-name -t [Required]: The name of the table to get the entity from.
     --accept                  : Specifies the accepted content type of the response payload. See.
                                 Default: application/json;odata=minimalmetadata.
-    --select                  : Returns only the desired properties of an entity from the set.
+    --select                  : Space separated list of properties to return for each entity.
     --timeout                 : Request timeout in seconds. Applies to each call to the service.
 
 Global Arguments
@@ -2306,7 +2305,7 @@ Storage Account Arguments
     --connection-string       : Storage account connection string. Var:
                                 AZURE_STORAGE_CONNECTION_STRING.
     --sas-token               : A Shared Access Signature (SAS). Must be used in conjunction with
-                                storage account name. Var: AZURE_SAS_TOKEN.
+                                storage account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -2339,7 +2338,7 @@ Storage Account Arguments
     --connection-string              : Storage account connection string. Var:
                                        AZURE_STORAGE_CONNECTION_STRING.
     --sas-token                      : A Shared Access Signature (SAS). Must be used in conjunction
-                                       with storage account name. Var: AZURE_SAS_TOKEN.
+                                       with storage account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -2358,7 +2357,8 @@ Arguments
                                        https://myaccount.file.core.windows.net/myshare/mydir/myfile 
                                        https://otheraccount.file.core.windows.net/myshare/mydir/myfi
                                        le?sastoken.
-    --metadata                       : Metadata in space-separated key=value pairs.
+    --metadata                       : Metadata in space-separated key=value pairs. This overwrites
+                                       any existing metadata.
     --timeout                        : Request timeout in seconds. Applies to each call to the
                                        service.
 
@@ -2380,7 +2380,7 @@ Storage Account Arguments
     --connection-string              : Storage account connection string. Var:
                                        AZURE_STORAGE_CONNECTION_STRING.
     --sas-token                      : A Shared Access Signature (SAS). Must be used in conjunction
-                                       with storage account name. Var: AZURE_SAS_TOKEN.
+                                       with storage account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -2409,7 +2409,7 @@ Storage Account Arguments
     --connection-string       : Storage account connection string. Var:
                                 AZURE_STORAGE_CONNECTION_STRING.
     --sas-token               : A Shared Access Signature (SAS). Must be used in conjunction with
-                                storage account name. Var: AZURE_SAS_TOKEN.
+                                storage account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -2443,7 +2443,7 @@ Arguments
     --open-mode               : Mode to use when opening the file. Note that specifying append only
                                 open_mode prevents parallel download. So, max_connections must be
                                 set to 1 if this open_mode is used.  Default: wb.
-    --retry-wait              : Sleep time in secs between retries.  Default: 1.0.
+    --retry-interval          : Sleep time in secs between retries.  Default: 1.0.
     --start-range             : Start of byte range to use for downloading a section of the file. If
                                 no end_range is given, all bytes after the start_range will be
                                 downloaded. The start_range and end_range params are inclusive. Ex:
@@ -2477,7 +2477,7 @@ Storage Account Arguments
     --connection-string       : Storage account connection string. Var:
                                 AZURE_STORAGE_CONNECTION_STRING.
     --sas-token               : A Shared Access Signature (SAS). Must be used in conjunction with
-                                storage account name. Var: AZURE_SAS_TOKEN.
+                                storage account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -2506,7 +2506,7 @@ Storage Account Arguments
     --connection-string       : Storage account connection string. Var:
                                 AZURE_STORAGE_CONNECTION_STRING.
     --sas-token               : A Shared Access Signature (SAS). Must be used in conjunction with
-                                storage account name. Var: AZURE_SAS_TOKEN.
+                                storage account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -2558,7 +2558,7 @@ Storage Account Arguments
     --connection-string       : Storage account connection string. Var:
                                 AZURE_STORAGE_CONNECTION_STRING.
     --sas-token               : A Shared Access Signature (SAS). Must be used in conjunction with
-                                storage account name. Var: AZURE_SAS_TOKEN.
+                                storage account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -2597,7 +2597,7 @@ Storage Account Arguments
     --connection-string       : Storage account connection string. Var:
                                 AZURE_STORAGE_CONNECTION_STRING.
     --sas-token               : A Shared Access Signature (SAS). Must be used in conjunction with
-                                storage account name. Var: AZURE_SAS_TOKEN.
+                                storage account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -2626,7 +2626,7 @@ Storage Account Arguments
     --connection-string       : Storage account connection string. Var:
                                 AZURE_STORAGE_CONNECTION_STRING.
     --sas-token               : A Shared Access Signature (SAS). Must be used in conjunction with
-                                storage account name. Var: AZURE_SAS_TOKEN.
+                                storage account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -2636,7 +2636,8 @@ Command
 Arguments
     --path -p       [Required]: The path to the file within the file share.
     --share-name -s [Required]: The file share name.
-    --metadata                : Metadata in space-separated key=value pairs.
+    --metadata                : Metadata in space-separated key=value pairs. This overwrites any
+                                existing metadata.
     --timeout                 : Request timeout in seconds. Applies to each call to the service.
 
 Global Arguments
@@ -2656,7 +2657,7 @@ Storage Account Arguments
     --connection-string       : Storage account connection string. Var:
                                 AZURE_STORAGE_CONNECTION_STRING.
     --sas-token               : A Shared Access Signature (SAS). Must be used in conjunction with
-                                storage account name. Var: AZURE_SAS_TOKEN.
+                                storage account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -2664,29 +2665,29 @@ Command
     az storage file resize
 
 Arguments
-    --content-length [Required]: The length to resize the file to.
-    --path -p        [Required]: The path to the file within the file share.
-    --share-name -s  [Required]: The file share name.
-    --timeout                  : Request timeout in seconds. Applies to each call to the service.
+    --path -p       [Required]: The path to the file within the file share.
+    --share-name -s [Required]: The file share name.
+    --size          [Required]: The length to resize the file to.
+    --timeout                 : Request timeout in seconds. Applies to each call to the service.
 
 Global Arguments
-    --debug                    : Increase logging verbosity to show all debug logs.
-    --help -h                  : Show this help message and exit.
-    --output -o                : Output format.  Allowed values: json, tsv, list, table, jsonc.
-                                 Default: json.
-    --query                    : JMESPath query string. See http://jmespath.org/ for more
-                                 information and examples.
-    --verbose                  : Increase logging verbosity. Use --debug for full debug logs.
+    --debug                   : Increase logging verbosity to show all debug logs.
+    --help -h                 : Show this help message and exit.
+    --output -o               : Output format.  Allowed values: json, tsv, list, table, jsonc.
+                                Default: json.
+    --query                   : JMESPath query string. See http://jmespath.org/ for more information
+                                and examples.
+    --verbose                 : Increase logging verbosity. Use --debug for full debug logs.
 
 Storage Account Arguments
-    --account-key              : Storage account key. Must be used in conjunction with storage
-                                 account name. Var: AZURE_STORAGE_KEY.
-    --account-name             : Storage account name. Must be used in conjunction with either
-                                 storage account key or a SAS token. Var: AZURE_STORAGE_ACCOUNT.
-    --connection-string        : Storage account connection string. Var:
-                                 AZURE_STORAGE_CONNECTION_STRING.
-    --sas-token                : A Shared Access Signature (SAS). Must be used in conjunction with
-                                 storage account name. Var: AZURE_SAS_TOKEN.
+    --account-key             : Storage account key. Must be used in conjunction with storage
+                                account name. Var: AZURE_STORAGE_KEY.
+    --account-name            : Storage account name. Must be used in conjunction with either
+                                storage account key or a SAS token. Var: AZURE_STORAGE_ACCOUNT.
+    --connection-string       : Storage account connection string. Var:
+                                AZURE_STORAGE_CONNECTION_STRING.
+    --sas-token               : A Shared Access Signature (SAS). Must be used in conjunction with
+                                storage account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -2715,7 +2716,7 @@ Storage Account Arguments
     --connection-string       : Storage account connection string. Var:
                                 AZURE_STORAGE_CONNECTION_STRING.
     --sas-token               : A Shared Access Signature (SAS). Must be used in conjunction with
-                                storage account name. Var: AZURE_SAS_TOKEN.
+                                storage account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -2751,7 +2752,7 @@ Storage Account Arguments
     --connection-string       : Storage account connection string. Var:
                                 AZURE_STORAGE_CONNECTION_STRING.
     --sas-token               : A Shared Access Signature (SAS). Must be used in conjunction with
-                                storage account name. Var: AZURE_SAS_TOKEN.
+                                storage account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -2771,10 +2772,11 @@ Arguments
     --max-connections         : Maximum number of parallel connections to use.  Default: 2.
     --max-retries             : Number of times to retry upload of file chunk if an error occurs.
                                 Default: 5.
-    --metadata                : Metadata in space-separated key=value pairs.
+    --metadata                : Metadata in space-separated key=value pairs. This overwrites any
+                                existing metadata.
     --path -p                 : The path to the file within the file share. If the file name is
                                 omitted, the source file name will be used.
-    --retry-wait              : Sleep time in secs between retries.  Default: 1.0.
+    --retry-interval          : Sleep time in secs between retries.  Default: 1.0.
     --timeout                 : Request timeout in seconds. Applies to each call to the service.
     --validate-content        : If true, calculates an MD5 hash for each range of the file. The
                                 storage service checks the hash of the content that has arrived with
@@ -2800,7 +2802,7 @@ Storage Account Arguments
     --connection-string       : Storage account connection string. Var:
                                 AZURE_STORAGE_CONNECTION_STRING.
     --sas-token               : A Shared Access Signature (SAS). Must be used in conjunction with
-                                storage account name. Var: AZURE_SAS_TOKEN.
+                                storage account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -2810,8 +2812,7 @@ Command
 Arguments
     --path -p       [Required]: The path to the file within the file share.
     --share-name -s [Required]: The file share name.
-    --protocol                : Protocol to use: 'http' or 'https'. If not specified, uses the
-                                protocol specified when FileService was initialized.
+    --protocol                : Protocol to use.  Allowed values: http, https.  Default: https.
 
 Global Arguments
     --debug                   : Increase logging verbosity to show all debug logs.
@@ -2830,7 +2831,7 @@ Storage Account Arguments
     --connection-string       : Storage account connection string. Var:
                                 AZURE_STORAGE_CONNECTION_STRING.
     --sas-token               : A Shared Access Signature (SAS). Must be used in conjunction with
-                                storage account name. Var: AZURE_SAS_TOKEN.
+                                storage account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -2858,7 +2859,7 @@ Storage Account Arguments
                          account key or a SAS token. Var: AZURE_STORAGE_ACCOUNT.
     --connection-string: Storage account connection string. Var: AZURE_STORAGE_CONNECTION_STRING.
     --sas-token        : A Shared Access Signature (SAS). Must be used in conjunction with storage
-                         account name. Var: AZURE_SAS_TOKEN.
+                         account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -2889,7 +2890,7 @@ Storage Account Arguments
                             account key or a SAS token. Var: AZURE_STORAGE_ACCOUNT.
     --connection-string   : Storage account connection string. Var: AZURE_STORAGE_CONNECTION_STRING.
     --sas-token           : A Shared Access Signature (SAS). Must be used in conjunction with
-                            storage account name. Var: AZURE_SAS_TOKEN.
+                            storage account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -2917,7 +2918,7 @@ Storage Account Arguments
     --connection-string       : Storage account connection string. Var:
                                 AZURE_STORAGE_CONNECTION_STRING.
     --sas-token               : A Shared Access Signature (SAS). Must be used in conjunction with
-                                storage account name. Var: AZURE_SAS_TOKEN.
+                                storage account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -2948,7 +2949,7 @@ Storage Account Arguments
     --connection-string       : Storage account connection string. Var:
                                 AZURE_STORAGE_CONNECTION_STRING.
     --sas-token               : A Shared Access Signature (SAS). Must be used in conjunction with
-                                storage account name. Var: AZURE_SAS_TOKEN.
+                                storage account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -2984,7 +2985,7 @@ Storage Account Arguments
     --connection-string       : Storage account connection string. Var:
                                 AZURE_STORAGE_CONNECTION_STRING.
     --sas-token               : A Shared Access Signature (SAS). Must be used in conjunction with
-                                storage account name. Var: AZURE_SAS_TOKEN.
+                                storage account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -3015,7 +3016,7 @@ Storage Account Arguments
     --connection-string       : Storage account connection string. Var:
                                 AZURE_STORAGE_CONNECTION_STRING.
     --sas-token               : A Shared Access Signature (SAS). Must be used in conjunction with
-                                storage account name. Var: AZURE_SAS_TOKEN.
+                                storage account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -3023,9 +3024,7 @@ Command
     az storage message put
 
 Arguments
-    --content       [Required]: Message content. Allowed type is determined by the encode_function
-                                set on the service. Default is str. The encoded message can be up to
-                                64KB in size.
+    --content       [Required]: Message content, up to 64KB in size.
     --queue-name -q [Required]: The queue name.
     --time-to-live            : Specifies the time-to-live interval for the message, in seconds. The
                                 maximum time-to-live allowed is 7 days. If this parameter is
@@ -3055,7 +3054,7 @@ Storage Account Arguments
     --connection-string       : Storage account connection string. Var:
                                 AZURE_STORAGE_CONNECTION_STRING.
     --sas-token               : A Shared Access Signature (SAS). Must be used in conjunction with
-                                storage account name. Var: AZURE_SAS_TOKEN.
+                                storage account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -3073,8 +3072,7 @@ Arguments
                                      timeout of a message cannot be set to a value later than the
                                      expiry time. A message can be updated until it has been deleted
                                      or has expired.
-    --content                      : Message content. Allowed type is determined by the
-                                     encode_function set on the service. Default is str.
+    --content                      : Message content, up to 64KB in size.
     --timeout                      : Request timeout in seconds. Applies to each call to the
                                      service.
 
@@ -3095,7 +3093,7 @@ Storage Account Arguments
     --connection-string            : Storage account connection string. Var:
                                      AZURE_STORAGE_CONNECTION_STRING.
     --sas-token                    : A Shared Access Signature (SAS). Must be used in conjunction
-                                     with storage account name. Var: AZURE_SAS_TOKEN.
+                                     with storage account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -3125,7 +3123,7 @@ Storage Account Arguments
                          account key or a SAS token. Var: AZURE_STORAGE_ACCOUNT.
     --connection-string: Storage account connection string. Var: AZURE_STORAGE_CONNECTION_STRING.
     --sas-token        : A Shared Access Signature (SAS). Must be used in conjunction with storage
-                         account name. Var: AZURE_SAS_TOKEN.
+                         account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -3161,7 +3159,7 @@ Storage Account Arguments
                             account key or a SAS token. Var: AZURE_STORAGE_ACCOUNT.
     --connection-string   : Storage account connection string. Var: AZURE_STORAGE_CONNECTION_STRING.
     --sas-token           : A Shared Access Signature (SAS). Must be used in conjunction with
-                            storage account name. Var: AZURE_SAS_TOKEN.
+                            storage account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -3171,7 +3169,8 @@ Command
 Arguments
     --name -n [Required]: The queue name.
     --fail-on-exist     : Specifies whether to throw an exception if the queue already exists.
-    --metadata          : Metadata in space-separated key=value pairs.
+    --metadata          : Metadata in space-separated key=value pairs. This overwrites any existing
+                          metadata.
     --timeout           : Request timeout in seconds. Applies to each call to the service.
 
 Global Arguments
@@ -3190,7 +3189,7 @@ Storage Account Arguments
                           account key or a SAS token. Var: AZURE_STORAGE_ACCOUNT.
     --connection-string : Storage account connection string. Var: AZURE_STORAGE_CONNECTION_STRING.
     --sas-token         : A Shared Access Signature (SAS). Must be used in conjunction with storage
-                          account name. Var: AZURE_SAS_TOKEN.
+                          account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -3218,7 +3217,7 @@ Storage Account Arguments
                           account key or a SAS token. Var: AZURE_STORAGE_ACCOUNT.
     --connection-string : Storage account connection string. Var: AZURE_STORAGE_CONNECTION_STRING.
     --sas-token         : A Shared Access Signature (SAS). Must be used in conjunction with storage
-                          account name. Var: AZURE_SAS_TOKEN.
+                          account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -3245,7 +3244,7 @@ Storage Account Arguments
                           account key or a SAS token. Var: AZURE_STORAGE_ACCOUNT.
     --connection-string : Storage account connection string. Var: AZURE_STORAGE_CONNECTION_STRING.
     --sas-token         : A Shared Access Signature (SAS). Must be used in conjunction with storage
-                          account name. Var: AZURE_SAS_TOKEN.
+                          account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -3285,7 +3284,7 @@ Storage Account Arguments
                           account key or a SAS token. Var: AZURE_STORAGE_ACCOUNT.
     --connection-string : Storage account connection string. Var: AZURE_STORAGE_CONNECTION_STRING.
     --sas-token         : A Shared Access Signature (SAS). Must be used in conjunction with storage
-                          account name. Var: AZURE_SAS_TOKEN.
+                          account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -3320,7 +3319,7 @@ Storage Account Arguments
                          account key or a SAS token. Var: AZURE_STORAGE_ACCOUNT.
     --connection-string: Storage account connection string. Var: AZURE_STORAGE_CONNECTION_STRING.
     --sas-token        : A Shared Access Signature (SAS). Must be used in conjunction with storage
-                         account name. Var: AZURE_SAS_TOKEN.
+                         account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -3347,7 +3346,7 @@ Storage Account Arguments
                           account key or a SAS token. Var: AZURE_STORAGE_ACCOUNT.
     --connection-string : Storage account connection string. Var: AZURE_STORAGE_CONNECTION_STRING.
     --sas-token         : A Shared Access Signature (SAS). Must be used in conjunction with storage
-                          account name. Var: AZURE_SAS_TOKEN.
+                          account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -3356,7 +3355,8 @@ Command
 
 Arguments
     --name -n [Required]: The queue name.
-    --metadata          : Metadata in space-separated key=value pairs.
+    --metadata          : Metadata in space-separated key=value pairs. This overwrites any existing
+                          metadata.
     --timeout           : Request timeout in seconds. Applies to each call to the service.
 
 Global Arguments
@@ -3375,7 +3375,7 @@ Storage Account Arguments
                           account key or a SAS token. Var: AZURE_STORAGE_ACCOUNT.
     --connection-string : Storage account connection string. Var: AZURE_STORAGE_CONNECTION_STRING.
     --sas-token         : A Shared Access Signature (SAS). Must be used in conjunction with storage
-                          account name. Var: AZURE_SAS_TOKEN.
+                          account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -3406,7 +3406,7 @@ Storage Account Arguments
     --connection-string       : Storage account connection string. Var:
                                 AZURE_STORAGE_CONNECTION_STRING.
     --sas-token               : A Shared Access Signature (SAS). Must be used in conjunction with
-                                storage account name. Var: AZURE_SAS_TOKEN.
+                                storage account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -3434,7 +3434,7 @@ Storage Account Arguments
     --connection-string       : Storage account connection string. Var:
                                 AZURE_STORAGE_CONNECTION_STRING.
     --sas-token               : A Shared Access Signature (SAS). Must be used in conjunction with
-                                storage account name. Var: AZURE_SAS_TOKEN.
+                                storage account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -3461,7 +3461,7 @@ Storage Account Arguments
     --connection-string       : Storage account connection string. Var:
                                 AZURE_STORAGE_CONNECTION_STRING.
     --sas-token               : A Shared Access Signature (SAS). Must be used in conjunction with
-                                storage account name. Var: AZURE_SAS_TOKEN.
+                                storage account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -3489,7 +3489,7 @@ Storage Account Arguments
     --connection-string       : Storage account connection string. Var:
                                 AZURE_STORAGE_CONNECTION_STRING.
     --sas-token               : A Shared Access Signature (SAS). Must be used in conjunction with
-                                storage account name. Var: AZURE_SAS_TOKEN.
+                                storage account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -3520,7 +3520,7 @@ Storage Account Arguments
     --connection-string       : Storage account connection string. Var:
                                 AZURE_STORAGE_CONNECTION_STRING.
     --sas-token               : A Shared Access Signature (SAS). Must be used in conjunction with
-                                storage account name. Var: AZURE_SAS_TOKEN.
+                                storage account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -3546,7 +3546,7 @@ Storage Account Arguments
                          account key or a SAS token. Var: AZURE_STORAGE_ACCOUNT.
     --connection-string: Storage account connection string. Var: AZURE_STORAGE_CONNECTION_STRING.
     --sas-token        : A Shared Access Signature (SAS). Must be used in conjunction with storage
-                         account name. Var: AZURE_SAS_TOKEN.
+                         account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -3557,7 +3557,8 @@ Arguments
     --name -n [Required]: The file share name.
     --fail-on-exist     : Specify whether to throw an exception when the share exists. False by
                           default.
-    --metadata          : Metadata in space-separated key=value pairs.
+    --metadata          : Metadata in space-separated key=value pairs. This overwrites any existing
+                          metadata.
     --quota             : Specifies the maximum size of the share, in gigabytes. Must be greater
                           than 0, and less than or equal to 5TB (5120).
     --timeout           : Request timeout in seconds. Applies to each call to the service.
@@ -3578,7 +3579,7 @@ Storage Account Arguments
                           account key or a SAS token. Var: AZURE_STORAGE_ACCOUNT.
     --connection-string : Storage account connection string. Var: AZURE_STORAGE_CONNECTION_STRING.
     --sas-token         : A Shared Access Signature (SAS). Must be used in conjunction with storage
-                          account name. Var: AZURE_SAS_TOKEN.
+                          account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -3607,7 +3608,7 @@ Storage Account Arguments
                           account key or a SAS token. Var: AZURE_STORAGE_ACCOUNT.
     --connection-string : Storage account connection string. Var: AZURE_STORAGE_CONNECTION_STRING.
     --sas-token         : A Shared Access Signature (SAS). Must be used in conjunction with storage
-                          account name. Var: AZURE_SAS_TOKEN.
+                          account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -3634,7 +3635,7 @@ Storage Account Arguments
                           account key or a SAS token. Var: AZURE_STORAGE_ACCOUNT.
     --connection-string : Storage account connection string. Var: AZURE_STORAGE_CONNECTION_STRING.
     --sas-token         : A Shared Access Signature (SAS). Must be used in conjunction with storage
-                          account name. Var: AZURE_SAS_TOKEN.
+                          account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -3684,7 +3685,7 @@ Storage Account Arguments
                            account key or a SAS token. Var: AZURE_STORAGE_ACCOUNT.
     --connection-string  : Storage account connection string. Var: AZURE_STORAGE_CONNECTION_STRING.
     --sas-token          : A Shared Access Signature (SAS). Must be used in conjunction with storage
-                           account name. Var: AZURE_SAS_TOKEN.
+                           account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -3719,7 +3720,7 @@ Storage Account Arguments
                          account key or a SAS token. Var: AZURE_STORAGE_ACCOUNT.
     --connection-string: Storage account connection string. Var: AZURE_STORAGE_CONNECTION_STRING.
     --sas-token        : A Shared Access Signature (SAS). Must be used in conjunction with storage
-                         account name. Var: AZURE_SAS_TOKEN.
+                         account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -3746,7 +3747,7 @@ Storage Account Arguments
                           account key or a SAS token. Var: AZURE_STORAGE_ACCOUNT.
     --connection-string : Storage account connection string. Var: AZURE_STORAGE_CONNECTION_STRING.
     --sas-token         : A Shared Access Signature (SAS). Must be used in conjunction with storage
-                          account name. Var: AZURE_SAS_TOKEN.
+                          account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -3755,7 +3756,8 @@ Command
 
 Arguments
     --name -n [Required]: The file share name.
-    --metadata          : Metadata in space-separated key=value pairs.
+    --metadata          : Metadata in space-separated key=value pairs. This overwrites any existing
+                          metadata.
     --timeout           : Request timeout in seconds. Applies to each call to the service.
 
 Global Arguments
@@ -3774,7 +3776,7 @@ Storage Account Arguments
                           account key or a SAS token. Var: AZURE_STORAGE_ACCOUNT.
     --connection-string : Storage account connection string. Var: AZURE_STORAGE_CONNECTION_STRING.
     --sas-token         : A Shared Access Signature (SAS). Must be used in conjunction with storage
-                          account name. Var: AZURE_SAS_TOKEN.
+                          account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -3805,7 +3807,7 @@ Storage Account Arguments
     --connection-string       : Storage account connection string. Var:
                                 AZURE_STORAGE_CONNECTION_STRING.
     --sas-token               : A Shared Access Signature (SAS). Must be used in conjunction with
-                                storage account name. Var: AZURE_SAS_TOKEN.
+                                storage account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -3833,7 +3835,7 @@ Storage Account Arguments
     --connection-string       : Storage account connection string. Var:
                                 AZURE_STORAGE_CONNECTION_STRING.
     --sas-token               : A Shared Access Signature (SAS). Must be used in conjunction with
-                                storage account name. Var: AZURE_SAS_TOKEN.
+                                storage account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -3860,7 +3862,7 @@ Storage Account Arguments
     --connection-string       : Storage account connection string. Var:
                                 AZURE_STORAGE_CONNECTION_STRING.
     --sas-token               : A Shared Access Signature (SAS). Must be used in conjunction with
-                                storage account name. Var: AZURE_SAS_TOKEN.
+                                storage account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -3888,7 +3890,7 @@ Storage Account Arguments
     --connection-string       : Storage account connection string. Var:
                                 AZURE_STORAGE_CONNECTION_STRING.
     --sas-token               : A Shared Access Signature (SAS). Must be used in conjunction with
-                                storage account name. Var: AZURE_SAS_TOKEN.
+                                storage account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -3919,7 +3921,7 @@ Storage Account Arguments
     --connection-string       : Storage account connection string. Var:
                                 AZURE_STORAGE_CONNECTION_STRING.
     --sas-token               : A Shared Access Signature (SAS). Must be used in conjunction with
-                                storage account name. Var: AZURE_SAS_TOKEN.
+                                storage account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -3946,7 +3948,7 @@ Storage Account Arguments
                           account key or a SAS token. Var: AZURE_STORAGE_ACCOUNT.
     --connection-string : Storage account connection string. Var: AZURE_STORAGE_CONNECTION_STRING.
     --sas-token         : A Shared Access Signature (SAS). Must be used in conjunction with storage
-                          account name. Var: AZURE_SAS_TOKEN.
+                          account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -3973,7 +3975,7 @@ Storage Account Arguments
                           account key or a SAS token. Var: AZURE_STORAGE_ACCOUNT.
     --connection-string : Storage account connection string. Var: AZURE_STORAGE_CONNECTION_STRING.
     --sas-token         : A Shared Access Signature (SAS). Must be used in conjunction with storage
-                          account name. Var: AZURE_SAS_TOKEN.
+                          account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -4002,7 +4004,7 @@ Storage Account Arguments
                           account key or a SAS token. Var: AZURE_STORAGE_ACCOUNT.
     --connection-string : Storage account connection string. Var: AZURE_STORAGE_CONNECTION_STRING.
     --sas-token         : A Shared Access Signature (SAS). Must be used in conjunction with storage
-                          account name. Var: AZURE_SAS_TOKEN.
+                          account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -4031,7 +4033,7 @@ Storage Account Arguments
     --connection-string       : Storage account connection string. Var:
                                 AZURE_STORAGE_CONNECTION_STRING.
     --sas-token               : A Shared Access Signature (SAS). Must be used in conjunction with
-                                storage account name. Var: AZURE_SAS_TOKEN.
+                                storage account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -4059,7 +4061,7 @@ Storage Account Arguments
     --connection-string       : Storage account connection string. Var:
                                 AZURE_STORAGE_CONNECTION_STRING.
     --sas-token               : A Shared Access Signature (SAS). Must be used in conjunction with
-                                storage account name. Var: AZURE_SAS_TOKEN.
+                                storage account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -4089,7 +4091,7 @@ Storage Account Arguments
                           account key or a SAS token. Var: AZURE_STORAGE_ACCOUNT.
     --connection-string : Storage account connection string. Var: AZURE_STORAGE_CONNECTION_STRING.
     --sas-token         : A Shared Access Signature (SAS). Must be used in conjunction with storage
-                          account name. Var: AZURE_SAS_TOKEN.
+                          account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -4117,7 +4119,7 @@ Storage Account Arguments
                           account key or a SAS token. Var: AZURE_STORAGE_ACCOUNT.
     --connection-string : Storage account connection string. Var: AZURE_STORAGE_CONNECTION_STRING.
     --sas-token         : A Shared Access Signature (SAS). Must be used in conjunction with storage
-                          account name. Var: AZURE_SAS_TOKEN.
+                          account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -4144,7 +4146,7 @@ Storage Account Arguments
                           account key or a SAS token. Var: AZURE_STORAGE_ACCOUNT.
     --connection-string : Storage account connection string. Var: AZURE_STORAGE_CONNECTION_STRING.
     --sas-token         : A Shared Access Signature (SAS). Must be used in conjunction with storage
-                          account name. Var: AZURE_SAS_TOKEN.
+                          account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -4196,7 +4198,7 @@ Storage Account Arguments
                           account key or a SAS token. Var: AZURE_STORAGE_ACCOUNT.
     --connection-string : Storage account connection string. Var: AZURE_STORAGE_CONNECTION_STRING.
     --sas-token         : A Shared Access Signature (SAS). Must be used in conjunction with storage
-                          account name. Var: AZURE_SAS_TOKEN.
+                          account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -4228,7 +4230,7 @@ Storage Account Arguments
                          account key or a SAS token. Var: AZURE_STORAGE_ACCOUNT.
     --connection-string: Storage account connection string. Var: AZURE_STORAGE_CONNECTION_STRING.
     --sas-token        : A Shared Access Signature (SAS). Must be used in conjunction with storage
-                         account name. Var: AZURE_SAS_TOKEN.
+                         account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -4260,7 +4262,7 @@ Storage Account Arguments
     --connection-string       : Storage account connection string. Var:
                                 AZURE_STORAGE_CONNECTION_STRING.
     --sas-token               : A Shared Access Signature (SAS). Must be used in conjunction with
-                                storage account name. Var: AZURE_SAS_TOKEN.
+                                storage account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -4288,7 +4290,7 @@ Storage Account Arguments
     --connection-string       : Storage account connection string. Var:
                                 AZURE_STORAGE_CONNECTION_STRING.
     --sas-token               : A Shared Access Signature (SAS). Must be used in conjunction with
-                                storage account name. Var: AZURE_SAS_TOKEN.
+                                storage account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -4315,7 +4317,7 @@ Storage Account Arguments
     --connection-string       : Storage account connection string. Var:
                                 AZURE_STORAGE_CONNECTION_STRING.
     --sas-token               : A Shared Access Signature (SAS). Must be used in conjunction with
-                                storage account name. Var: AZURE_SAS_TOKEN.
+                                storage account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -4343,7 +4345,7 @@ Storage Account Arguments
     --connection-string       : Storage account connection string. Var:
                                 AZURE_STORAGE_CONNECTION_STRING.
     --sas-token               : A Shared Access Signature (SAS). Must be used in conjunction with
-                                storage account name. Var: AZURE_SAS_TOKEN.
+                                storage account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -4375,7 +4377,7 @@ Storage Account Arguments
     --connection-string       : Storage account connection string. Var:
                                 AZURE_STORAGE_CONNECTION_STRING.
     --sas-token               : A Shared Access Signature (SAS). Must be used in conjunction with
-                                storage account name. Var: AZURE_SAS_TOKEN.
+                                storage account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================
 
@@ -4401,6 +4403,6 @@ Storage Account Arguments
                          account key or a SAS token. Var: AZURE_STORAGE_ACCOUNT.
     --connection-string: Storage account connection string. Var: AZURE_STORAGE_CONNECTION_STRING.
     --sas-token        : A Shared Access Signature (SAS). Must be used in conjunction with storage
-                         account name. Var: AZURE_SAS_TOKEN.
+                         account name. Var: AZURE_STORAGE_SAS_TOKEN.
 
 ===============================

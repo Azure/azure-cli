@@ -32,5 +32,5 @@ def cli_storage_data_plane_command(name, operation, client_factory,
     command.add_argument('sas_token', '--sas-token', required=False, default=None,
                          arg_group=group_name,
                          help='A Shared Access Signature (SAS). Must be used in conjunction with '
-                         'storage account name. Var: AZURE_SAS_TOKEN')
+                         'storage account name. Var: AZURE_STORAGE_SAS_TOKEN')
     command_table[command.name] = command

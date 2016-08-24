@@ -23,7 +23,7 @@ from azure.storage.blob.baseblobservice import BaseBlobService
 from azure.storage.blob.models import ContentSettings as BlobContentSettings, ContainerPermissions, BlobPermissions
 from azure.storage.file import FileService
 from azure.storage.file.models import ContentSettings as FileContentSettings, SharePermissions, FilePermissions
-from azure.storage.table import TableService
+from azure.storage.table import TableService, TablePayloadFormat
 from azure.storage.queue import QueueService
 from azure.storage.queue.models import QueuePermissions
 
@@ -32,7 +32,7 @@ from ._validators import \
      get_permission_validator, table_permission_validator, get_permission_help_string,
      resource_type_type, services_type, ipv4_range_type, validate_entity,
      validate_select,
-     get_content_setting_validator, validate_encryption,
+     get_content_setting_validator, validate_encryption, validate_accept,
      process_file_download_namespace, process_logging_update_namespace,
      process_metric_update_namespace)
 
@@ -42,7 +42,7 @@ def _get_client(service, parsed_args):
     account_name = parsed_args.account_name or os.getenv('AZURE_STORAGE_ACCOUNT')
     account_key = parsed_args.account_key or os.getenv('AZURE_STORAGE_KEY')
     connection_string = parsed_args.connection_string or os.getenv('AZURE_STORAGE_CONNECTION_STRING')
-    sas_token = parsed_args.sas_token or os.getenv('AZURE_SAS_TOKEN')
+    sas_token = parsed_args.sas_token or os.getenv('AZURE_STORAGE_SAS_TOKEN')
     return get_data_service_client(service, account_name, account_key, connection_string, sas_token)
 
 def get_storage_name_completion_list(service, func, parent=None):
@@ -128,6 +128,7 @@ blob_types = {'block': BlockBlobService, 'page': PageBlobService, 'append': Appe
 public_access_types = {'blob': PublicAccess.Blob, 'container': PublicAccess.Container}
 delete_snapshot_types = {'include': DeleteSnapshot.Include, 'only': DeleteSnapshot.Only}
 storage_account_key_options = {'both': ['key1', 'key2'], 'primary': ['key1'], 'secondary': ['key2']}
+table_payload_formats = {'none': TablePayloadFormat.JSON_NO_METADATA, 'minimal': TablePayloadFormat.JSON_MINIMAL_METADATA, 'full': TablePayloadFormat.JSON_FULL_METADATA}
 
 # ARGUMENT TYPES
 
@@ -145,9 +146,11 @@ queue_name_type = CliArgumentType(options_list=('--queue-name', '-q'), help='The
 register_cli_argument('storage', 'directory_name', directory_type)
 register_cli_argument('storage', 'share_name', share_name_type)
 register_cli_argument('storage', 'table_name', table_name_type)
+register_cli_argument('storage', 'retry_wait', options_list=('--retry-interval',))
+register_cli_argument('storage', 'progress_callback', IGNORE_TYPE)
 register_cli_argument('storage', 'if_modified_since', help='Alter only if modified since supplied UTC datetime (Y-m-d\'T\'H:M\'Z\')', type=datetime_type)
 register_cli_argument('storage', 'if_unmodified_since', help='Alter only if unmodified since supplied UTC datetime (Y-m-d\'T\'H:M\'Z\')', type=datetime_type)
-register_cli_argument('storage', 'metadata', nargs='+', help='Metadata in space-separated key=value pairs.', validator=validate_metadata)
+register_cli_argument('storage', 'metadata', nargs='+', help='Metadata in space-separated key=value pairs. This overwrites any existing metadata.', validator=validate_metadata)
 register_cli_argument('storage', 'timeout', help='Request timeout in seconds. Applies to each call to the service.', type=int)
 register_cli_argument('storage', 'container_name', container_name_type)
 
@@ -158,6 +161,7 @@ register_cli_argument('storage account connection-string', 'account_name', accou
 register_cli_argument('storage account connection-string', 'protocol', help='The default endpoint protocol.', choices=['http', 'https'], type=str.lower)
 
 register_cli_argument('storage account create', 'account_name', account_name_type, options_list=('--name', '-n'), completer=None)
+
 register_cli_argument('storage account create', 'kind', help='Indicates the type of storage account. (Storage, BlobStorage)', completer=get_enum_type_completion_list(Kind))
 register_cli_argument('storage account create', 'tags', tags_type)
 
@@ -195,11 +199,12 @@ for item in ['update', 'upload']:
     register_content_settings_argument('storage blob {}'.format(item), BlobContentSettings)
 
 register_cli_argument('storage blob upload', 'blob_type', options_list=('--type', '-t'), choices=list(blob_types.keys()), type=str.lower)
-
-register_cli_argument('storage blob url', 'protocol', choices=['http', 'https'], type=str.lower)
+register_cli_argument('storage blob upload', 'maxsize_condition', help='The max length in bytes permitted for an append blob.')
+register_cli_argument('storage blob upload', 'validate_content', help='Specifies that an MD5 hash shall be calculated for each chunk of the blob and verified by the service when the chunk has arrived.')
 
 for item in ['file', 'blob']:
     register_cli_argument('storage {} copy'.format(item), 'copy_source', options_list=('--source-uri', '-u'))
+    register_cli_argument('storage {} url'.format(item), 'protocol', help='Protocol to use.', choices=['http', 'https'], default='https', type=str.lower)
 
 register_cli_argument('storage container', 'container_name', container_name_type, options_list=('--name', '-n'))
 
@@ -210,6 +215,8 @@ register_cli_argument('storage container create', 'public_access', choices=list(
 register_cli_argument('storage container delete', 'fail_not_exist', help='Throw an exception if the container does not exist.')
 
 register_cli_argument('storage container exists', 'blob_name', ignore_type)
+register_cli_argument('storage container exists', 'blob_name', ignore_type)
+register_cli_argument('storage container exists', 'snapshot', ignore_type)
 
 register_cli_argument('storage container policy', 'container_name', container_name_type)
 register_cli_argument('storage container policy', 'policy_name', options_list=('--name', '-n'), help='The stored access policy name.', completer=get_storage_acl_name_completion_list(BaseBlobService, 'container_name', 'get_container_acl'))
@@ -251,6 +258,7 @@ register_cli_argument('storage file list', 'directory_name', options_list=('--pa
 register_path_argument('storage file metadata show')
 register_path_argument('storage file metadata update')
 
+register_cli_argument('storage file resize', 'content_length', options_list=('--size',))
 register_path_argument('storage file resize')
 
 register_path_argument('storage file show')
@@ -282,9 +290,11 @@ register_cli_argument('storage table policy', 'policy_name', options_list=('--na
 
 register_cli_argument('storage entity', 'entity', options_list=('--entity', '-e'), validator=validate_entity, nargs='+')
 register_cli_argument('storage entity', 'property_resolver', ignore_type)
-register_cli_argument('storage entity', 'select', nargs='+', validator=validate_select)
+register_cli_argument('storage entity', 'select', nargs='+', help='Space separated list of properties to return for each entity.', validator=validate_select)
 
 register_cli_argument('storage entity insert', 'if_exists', choices=['fail', 'merge', 'replace'])
+
+register_cli_argument('storage entity query', 'accept', help='Specifies how much metadata to include in the response payload.', choices=table_payload_formats.keys(), default='minimal', validator=validate_accept)
 
 register_cli_argument('storage queue', 'queue_name', queue_name_type, options_list=('--name', '-n'))
 
@@ -295,7 +305,7 @@ register_cli_argument('storage queue policy', 'policy_name', options_list=('--na
 
 register_cli_argument('storage message', 'queue_name', queue_name_type)
 register_cli_argument('storage message', 'message_id', options_list=('--id',))
-register_cli_argument('storage message', 'content', type=unicode_string)
+register_cli_argument('storage message', 'content', type=unicode_string, help='Message content, up to 64KB in size.')
 
 for item in ['account', 'blob', 'container', 'file', 'share', 'table', 'queue']:
     register_cli_argument('storage {} generate-sas'.format(item), 'ip', help='Specifies the IP address or range of IP addresses from which to accept requests. Supports only IPv4 style addresses.', type=ipv4_range_type)
@@ -322,6 +332,7 @@ register_cli_argument('storage account generate-sas', 'services', help='The stor
 register_cli_argument('storage account generate-sas', 'resource_types', help='The resource types the SAS is applicable for. Allowed values: (s)ervice (c)ontainer (o)bject. Can be combined.', type=resource_type_type)
 register_cli_argument('storage account generate-sas', 'expiry', help='Specifies the UTC datetime (Y-m-d\'T\'H:M\'Z\') at which the SAS becomes invalid.', type=datetime_string_type)
 register_cli_argument('storage account generate-sas', 'start', help='Specifies the UTC datetime (Y-m-d\'T\'H:M\'Z\') at which the SAS becomes valid. Defaults to the time of the request.', type=datetime_string_type)
+register_cli_argument('storage account generate-sas', 'account_name', account_name_type, options_list=('--account-name',), help='Storage account name. Must be used in conjunction with either storage account key or a SAS token. Var: AZURE_STORAGE_ACCOUNT')
 
 register_cli_argument('storage logging show', 'services', help='The storage services from which to retrieve logging info: (b)lob (q)ueue (t)able. Can be combined.')
 
@@ -338,7 +349,7 @@ register_cli_argument('storage metrics update', 'minute', help='Update the by-mi
 register_cli_argument('storage metrics update', 'api', help='Specify whether to include API in metrics. Applies to both hour and minute metrics if both are specified. Must be specified if hour or minute metrics are enabled and being updated.', choices=['enable', 'disable'])
 register_cli_argument('storage metrics update', 'retention', type=int, help='Number of days for which to retain metrics. 0 to disable. Applies to both hour and minute metrics if both are specified.')
 
-register_cli_argument('storage cors', 'max_age', type=int, help='The number of seconds the client/browser should cache a preflight response.')
+register_cli_argument('storage cors', 'max_age', type=int, help='The number of seconds the client/browser should cache a preflight response.', default="0")
 register_cli_argument('storage cors', 'origins', nargs='+', help='List of origin domains that will be allowed via CORS, or "*" to allow all domains.')
 register_cli_argument('storage cors', 'methods', nargs='+', help='List of HTTP methods allowed to be executed by the origin.', choices=['DELETE', 'GET', 'HEAD', 'MERGE', 'POST', 'OPTIONS', 'PUT'], type=str.upper)
 register_cli_argument('storage cors', 'allowed_headers', nargs='+', help='List of response headers allowed to be part of the cross-origin request.')
@@ -347,3 +358,5 @@ register_cli_argument('storage cors', 'exposed_headers', nargs='+', help='List o
 register_cli_argument('storage cors add', 'services', help='The storage service(s) for which to add the CORS rule: (b)lob (f)ile (q)ueue (t)able. Can be combined.')
 
 register_cli_argument('storage cors clear', 'services', help='The storage service(s) for which to clear CORS rules: (b)lob (f)ile (q)ueue (t)able. Can be combined.')
+
+register_cli_argument('storage cors list', 'services', help='The storage service(s) for which to list the CORS rules: (b)lob (f)ile (q)ueue (t)able. Can be combined.')

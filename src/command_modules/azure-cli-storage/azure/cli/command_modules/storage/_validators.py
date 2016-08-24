@@ -15,9 +15,18 @@ from azure.cli.commands.validators import validate_key_value_pairs
 
 from azure.mgmt.storage import StorageManagementClient
 from azure.storage.models import ResourceTypes, Services
-from azure.storage.table import TablePermissions
+from azure.storage.table import TablePermissions, TablePayloadFormat
 
 # region PARAMETER VALIDATORS
+
+def validate_accept(namespace):
+    if namespace.accept:
+        formats = {
+            'none': TablePayloadFormat.JSON_NO_METADATA,
+            'minimal': TablePayloadFormat.JSON_MINIMAL_METADATA,
+            'full': TablePayloadFormat.JSON_FULL_METADATA
+        }
+        namespace.accept = formats[namespace.accept.lower()]
 
 def validate_client_parameters(namespace):
     """ Retrieves storage connection parameters from environment variables and parses out
@@ -39,7 +48,7 @@ def validate_client_parameters(namespace):
     if not n.account_key:
         n.account_key = os.environ.get('AZURE_STORAGE_KEY')
     if not n.sas_token:
-        n.sas_token = os.environ.get('AZURE_SAS_TOKEN')
+        n.sas_token = os.environ.get('AZURE_STORAGE_SAS_TOKEN')
 
     # if account name is specified but no key, attempt to query
     if n.account_name and not n.account_key:

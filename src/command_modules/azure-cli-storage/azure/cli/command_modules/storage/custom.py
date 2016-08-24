@@ -103,7 +103,7 @@ def set_storage_account_properties(
     return scf.storage_accounts.update(resource_group_name, account_name, params)
 
 def upload_blob( # pylint: disable=too-many-locals
-        client, container_name, blob_name, blob_type, file_path,
+        client, container_name, blob_name, file_path, blob_type='block',
         content_settings=None, metadata=None, validate_content=False, maxsize_condition=None,
         max_connections=2, max_retries=5, retry_wait=1, lease_id=None, if_modified_since=None,
         if_unmodified_since=None, if_match=None, if_none_match=None, timeout=None):
