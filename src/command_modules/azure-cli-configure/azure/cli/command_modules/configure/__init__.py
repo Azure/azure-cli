@@ -79,7 +79,7 @@ def _print_cur_configuration(file_config):
 def _handle_global_configuration():
     print(MESSAGES['global_settings_loc'].format(GLOBAL_CONFIG_PATH))
     print(MESSAGES['active_env_settings_loc'].format(ACTIVE_ENV_CONFIG_PATH))
-    # We don't want to use AzConfigParser as we don't want to use get values set by env vars.
+    # We don't want to use AzConfig as we don't want to use get values set by env vars.
     file_config = configparser.SafeConfigParser()
     config_exists = file_config.read([GLOBAL_CONFIG_PATH, ACTIVE_ENV_CONFIG_PATH])
     global_config = configparser.SafeConfigParser()

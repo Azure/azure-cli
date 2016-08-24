@@ -12,10 +12,12 @@ ENV_VAR_PREFIX = 'AZURE_CLI_'
 _UNSET = object()
 _ENV_VAR_FORMAT = ENV_VAR_PREFIX+'{section}_{option}'
 
-class AzConfigParser(configparser.SafeConfigParser, object):
-    """A SafeConfigParser that checks environment variables first."""
+class AzConfig(object):
     _BOOLEAN_STATES = {'1': True, 'yes': True, 'true': True, 'on': True,
                        '0': False, 'no': False, 'false': False, 'off': False}
+
+    def __init__(self):
+        self.config_parser = configparser.SafeConfigParser()
 
     @staticmethod
     def env_var_name(section, option):
@@ -23,32 +25,31 @@ class AzConfigParser(configparser.SafeConfigParser, object):
                                       option=option.upper())
 
     def has_option(self, section, option):
-        if AzConfigParser.env_var_name(section, option) in os.environ:
+        if AzConfig.env_var_name(section, option) in os.environ:
             return True
-        return super(AzConfigParser, self).has_option(section, option)
+        return self.config_parser.has_option(section, option)
 
-    def get(self, section, option, fallback=_UNSET): #pylint: disable=W0221
+    def get(self, section, option, fallback=_UNSET):
         try:
-            env = AzConfigParser.env_var_name(section, option)
-            return os.environ[env] if env in os.environ else super(AzConfigParser,
-                                                                   self).get(section, option)
+            env = AzConfig.env_var_name(section, option)
+            return os.environ[env] if env in os.environ else self.config_parser.get(section, option)
         except (configparser.NoSectionError, configparser.NoOptionError):
             if fallback is _UNSET:
                 raise
             else:
                 return fallback
 
-    def getint(self, section, option, fallback=_UNSET): #pylint: disable=W0221
+    def getint(self, section, option, fallback=_UNSET):
         return int(self.get(section, option, fallback))
 
-    def getfloat(self, section, option, fallback=_UNSET): #pylint: disable=W0221
+    def getfloat(self, section, option, fallback=_UNSET):
         return float(self.get(section, option, fallback))
 
-    def getboolean(self, section, option, fallback=_UNSET): #pylint: disable=W0221
+    def getboolean(self, section, option, fallback=_UNSET):
         val = self.get(section, option, fallback)
-        if val.lower() not in AzConfigParser._BOOLEAN_STATES: #pylint: disable=E1101
+        if val.lower() not in AzConfig._BOOLEAN_STATES: #pylint: disable=E1101
             raise ValueError('Not a boolean: {}'.format(val))
-        return AzConfigParser._BOOLEAN_STATES[val.lower()] #pylint: disable=E1101
+        return AzConfig._BOOLEAN_STATES[val.lower()] #pylint: disable=E1101
 
-az_config = AzConfigParser()
-az_config.read([GLOBAL_CONFIG_PATH, ACTIVE_ENV_CONFIG_PATH])
+az_config = AzConfig()
+az_config.config_parser.read([GLOBAL_CONFIG_PATH, ACTIVE_ENV_CONFIG_PATH])
