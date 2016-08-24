@@ -35,25 +35,25 @@ def _update_progress(current, total):
 # CUSTOM METHODS
 
 
-def iot_hub_create(client, name, resource_group, location=None, sku='F1', unit=1):
+def iot_hub_create(client, name, resource_group_name, location=None, sku='F1', unit=1):
 
     if location is None:
         logger.info('Location is none. Use location of resource group as default.')
         resource_group_client = resource_service_factory().resource_groups
-        group_info = resource_group_client.get(resource_group)
+        group_info = resource_group_client.get(resource_group_name)
         location = group_info.location
         logger.info('Location to use: %s', location)
 
     iot_hub_description = IotHubDescription(location=location,
                                             sku=IotHubSkuInfo(name=sku, capacity=unit))
-    result = client.create_or_update(resource_group_name=resource_group, resource_name=name,
+    result = client.create_or_update(resource_group_name=resource_group_name, resource_name=name,
                                      iot_hub_description=iot_hub_description)
     return result
 
 
-def iot_device_create(client, resource_group, hub, device_id):
+def iot_device_create(client, resource_group_name, hub, device_id):
 
-    access_policies = client.list_keys(resource_group, hub)
+    access_policies = client.list_keys(resource_group_name, hub)
     if access_policies is None:
         raise CLIError('No policy found from IoT Hub: {}.'.format(hub))
     logger.info('Shared Access Polices: ' + str(access_policies))
