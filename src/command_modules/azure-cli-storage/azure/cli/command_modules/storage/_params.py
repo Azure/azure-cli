@@ -4,13 +4,12 @@
 #---------------------------------------------------------------------------------------------
 
 # pylint: disable=line-too-long
-import argparse
 import os
 
 from six import u as unicode_string
 
 from azure.cli.commands.parameters import \
-    (tags_type, get_resource_name_completion_list, get_enum_type_completion_list)
+    (ignore_type, tags_type, get_resource_name_completion_list, get_enum_type_completion_list)
 from azure.cli.commands import register_cli_argument, register_extra_cli_argument, CliArgumentType
 from azure.cli.commands.client_factory import get_data_service_client
 
@@ -33,11 +32,7 @@ from ._validators import \
      validate_select,
      get_content_setting_validator, validate_encryption,
      process_file_download_namespace, process_logging_update_namespace,
-     process_metric_update_namespace, IgnoreAction)
-
-# CONSTANTS
-
-IGNORE_TYPE = CliArgumentType(help=argparse.SUPPRESS, nargs='?', action=IgnoreAction, required=False)
+     process_metric_update_namespace)
 
 # COMPLETERS
 
@@ -111,13 +106,13 @@ def register_path_argument(scope, default_file_param=None, options_list=None):
     if default_file_param:
         path_help = '{} If the file name is omitted, the source file name will be used.'.format(path_help)
     register_extra_cli_argument(scope, 'path', options_list=options_list or ('--path', '-p'), required=default_file_param is None, help=path_help, validator=get_file_path_validator(default_file_param=default_file_param), completer=file_path_completer)
-    register_cli_argument(scope, 'file_name', IGNORE_TYPE)
-    register_cli_argument(scope, 'directory_name', IGNORE_TYPE)
+    register_cli_argument(scope, 'file_name', ignore_type)
+    register_cli_argument(scope, 'directory_name', ignore_type)
 
 # CONTENT SETTINGS REGISTRATION
 
 def register_content_settings_argument(scope, settings_class):
-    register_cli_argument(scope, 'content_settings', IGNORE_TYPE, validator=get_content_setting_validator(settings_class))
+    register_cli_argument(scope, 'content_settings', ignore_type, validator=get_content_setting_validator(settings_class))
     register_extra_cli_argument(scope, 'content_type', default=None, help='The content MIME type.')
     register_extra_cli_argument(scope, 'content_encoding', default=None, help='The content encoding type.')
     register_extra_cli_argument(scope, 'content_language', default=None, help='The content language.')
@@ -211,15 +206,15 @@ register_cli_argument('storage container create', 'public_access', choices=list(
 
 register_cli_argument('storage container delete', 'fail_not_exist', help='Throw an exception if the container does not exist.')
 
-register_cli_argument('storage container exists', 'blob_name', IGNORE_TYPE)
+register_cli_argument('storage container exists', 'blob_name', ignore_type)
 
 register_cli_argument('storage container policy', 'container_name', container_name_type)
 register_cli_argument('storage container policy', 'policy_name', options_list=('--name', '-n'), help='The stored access policy name.', completer=get_storage_acl_name_completion_list(BaseBlobService, 'container_name', 'get_container_acl'))
 
 register_cli_argument('storage share', 'share_name', share_name_type, options_list=('--name', '-n'))
 
-register_cli_argument('storage share exists', 'directory_name', IGNORE_TYPE)
-register_cli_argument('storage share exists', 'file_name', IGNORE_TYPE)
+register_cli_argument('storage share exists', 'directory_name', ignore_type)
+register_cli_argument('storage share exists', 'file_name', ignore_type)
 
 register_cli_argument('storage share policy', 'container_name', share_name_type)
 register_cli_argument('storage share policy', 'policy_name', options_list=('--name', '-n'), help='The stored access policy name.', completer=get_storage_acl_name_completion_list(FileService, 'container_name', 'get_share_acl'))
@@ -227,7 +222,7 @@ register_cli_argument('storage share policy', 'policy_name', options_list=('--na
 register_cli_argument('storage directory', 'directory_name', directory_type, options_list=('--name', '-n'))
 
 register_cli_argument('storage directory exists', 'directory_name', required=True)
-register_cli_argument('storage directory exists', 'file_name', IGNORE_TYPE)
+register_cli_argument('storage directory exists', 'file_name', ignore_type)
 
 register_cli_argument('storage file', 'file_name', file_name_type, options_list=('--name', '-n'))
 register_cli_argument('storage file', 'directory_name', directory_type, required=False)
@@ -240,7 +235,7 @@ register_path_argument('storage file delete')
 
 register_cli_argument('storage file download', 'file_path', options_list=('--dest',), help='Path of the file to write to. The source filename will be used if not specified.', required=False, validator=process_file_download_namespace)
 register_cli_argument('storage file download', 'path', validator=None) # validator called manually from process_file_download_namespace so remove the automatic one
-register_cli_argument('storage file download', 'progress_callback', IGNORE_TYPE)
+register_cli_argument('storage file download', 'progress_callback', ignore_type)
 register_path_argument('storage file download')
 
 register_cli_argument('storage file exists', 'file_name', required=True)
@@ -262,7 +257,7 @@ for item in ['update', 'upload']:
 
 register_path_argument('storage file update')
 
-register_cli_argument('storage file upload', 'progress_callback', IGNORE_TYPE)
+register_cli_argument('storage file upload', 'progress_callback', ignore_type)
 register_cli_argument('storage file upload', 'local_file_path', options_list=('--source',))
 register_path_argument('storage file upload', default_file_param='local_file_path')
 
@@ -283,7 +278,7 @@ register_cli_argument('storage table policy', 'container_name', table_name_type)
 register_cli_argument('storage table policy', 'policy_name', options_list=('--name', '-n'), help='The stored access policy name.', completer=get_storage_acl_name_completion_list(TableService, 'container_name', 'get_table_acl'))
 
 register_cli_argument('storage entity', 'entity', options_list=('--entity', '-e'), validator=validate_entity, nargs='+')
-register_cli_argument('storage entity', 'property_resolver', IGNORE_TYPE)
+register_cli_argument('storage entity', 'property_resolver', ignore_type)
 register_cli_argument('storage entity', 'select', nargs='+', validator=validate_select)
 
 register_cli_argument('storage entity insert', 'if_exists', choices=['fail', 'merge', 'replace'])

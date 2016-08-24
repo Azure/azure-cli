@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 #---------------------------------------------------------------------------------------------
 
-from azure.cli.commands import CliArgumentType, register_cli_argument
+from azure.cli.commands import register_cli_argument
 from .custom import load_subscriptions
 # BASIC PARAMETER CONFIGURATION
 
@@ -15,39 +15,12 @@ def get_subscription_id_list(prefix, **kwargs):#pylint: disable=unused-argument
         result.append(subscription['name'])
     return result
 
-password_type = CliArgumentType(
-    options_list=('--password', '-p'),
-    help='User password or client secret. Will prompt if not given.'
-)
+# pylint: disable=line-too-long
+register_cli_argument('login', 'password', options_list=('--password', '-p'), help='User password or client secret. Will prompt if not given.')
+register_cli_argument('login', 'service_principal', action='store_true', help='The credential representing a service principal.')
+register_cli_argument('login', 'username', options_list=('--username', '-u'), help='Organization id or service principal')
+register_cli_argument('login', 'tenant', options_list=('--tenant', '-t'), help='The tenant associated with the service principal.')
 
-service_principal_type = CliArgumentType(
-    action='store_true',
-    help='The credential representing a service principal.'
-)
+register_cli_argument('logout', 'username', help='account user, if missing, logout the current active account')
 
-subscription_name_or_id_type = CliArgumentType(
-    options_list=('--subscription-name-or-id', '-n'),
-    metavar='SUBSCRIPTION_NAME_OR_ID',
-    help='Subscription id. Unique name also works.',
-    completer=get_subscription_id_list
-)
-
-tenant_type = CliArgumentType(
-    options_list=('--tenant', '-t'),
-    help='The tenant associated with the service principal.'
-)
-
-username_type = CliArgumentType(
-    options_list=('--username', '-u'),
-    help='Organization id or service principal'
-)
-
-register_cli_argument('login', 'password', password_type)
-register_cli_argument('login', 'service_principal', service_principal_type)
-register_cli_argument('login', 'username', username_type)
-register_cli_argument('login', 'tenant', tenant_type)
-
-register_cli_argument('logout', 'username', username_type,
-                      help='account user, if missing, logout the current active account')
-
-register_cli_argument('account', 'subscription_name_or_id', subscription_name_or_id_type)
+register_cli_argument('account', 'subscription_name_or_id', options_list=('--subscription-or-id', '-n'), help='Name or ID of subscription.', completer=get_subscription_id_list)

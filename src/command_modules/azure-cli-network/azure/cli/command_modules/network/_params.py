@@ -276,9 +276,9 @@ register_cli_argument('network public-ip', 'public_ip_address_name', name_arg_ty
 register_cli_argument('network public-ip', 'name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'))
 
 register_cli_argument('network public-ip create', 'name', completer=None)
-register_cli_argument('network public-ip create', 'dns_name', CliArgumentType(validator=process_public_ip_create_namespace))
-register_cli_argument('network public-ip create', 'public_ip_address_type', CliArgumentType(help=argparse.SUPPRESS))
-register_cli_argument('network public-ip create', 'allocation_method', CliArgumentType(choices=choices_ip_allocation_method, type=str.lower))
+register_cli_argument('network public-ip create', 'dns_name', validator=process_public_ip_create_namespace)
+register_cli_argument('network public-ip create', 'public_ip_address_type', help=argparse.SUPPRESS)
+register_cli_argument('network public-ip create', 'allocation_method', choices=choices_ip_allocation_method, type=str.lower)
 
 # Route Operation
 register_cli_argument('network route-table route', 'route_name', name_arg_type, id_part='child_name', help='Route name')
@@ -349,7 +349,7 @@ register_cli_argument('network lb rule', 'load_distribution', help='Affinity rul
 register_cli_argument('network nsg create', 'name', name_arg_type)
 
 # VPN gateway
-register_cli_argument('network vpn-gateway', 'virtual_network_gateway_name', CliArgumentType(options_list=('--name', '-n'), completer=get_resource_name_completion_list('Microsoft.Network/virtualNetworkGateways')), id_part='name')
+register_cli_argument('network vpn-gateway', 'virtual_network_gateway_name', options_list=('--name', '-n'), completer=get_resource_name_completion_list('Microsoft.Network/virtualNetworkGateways'), id_part='name')
 register_cli_argument('network vpn-gateway create', 'gateway_type', choices=get_enum_choices(gatewayType))
 register_cli_argument('network vpn-gateway create', 'sku', choices=get_enum_choices(sku))
 register_cli_argument('network vpn-gateway create', 'vpn_type', choices=get_enum_choices(vpnType))
@@ -363,13 +363,13 @@ register_cli_argument('network vpn-gateway root-cert create', 'cert_name', help=
 register_cli_argument('network vpn-gateway root-cert create', 'gateway_name', help='Virtual network gateway name')
 
 # VPN connection
-register_cli_argument('network vpn-connection', 'virtual_network_gateway_connection_name', CliArgumentType(options_list=('--name', '-n'), metavar='NAME', id_part='name'))
+register_cli_argument('network vpn-connection', 'virtual_network_gateway_connection_name', options_list=('--name', '-n'), metavar='NAME', id_part='name')
 register_cli_argument('network vpn-connection create', 'connection_type', help=argparse.SUPPRESS, validator=vnet_gateway_validator, required=False)
 register_cli_argument('network vpn-connection create', 'shared_key', validator=load_cert_file('shared_key'), help='Shared IPSec key, base64 contents of the certificate file or file path.')
 
 # VPN connection shared key
-register_cli_argument('network vpn-connection shared-key', 'connection_shared_key_name', CliArgumentType(options_list=('--name', '-n')), id_part='name')
-register_cli_argument('network vpn-connection shared-key', 'virtual_network_gateway_connection_name', CliArgumentType(options_list=('--connection-name',), metavar='NAME'), id_part='name')
+register_cli_argument('network vpn-connection shared-key', 'connection_shared_key_name', options_list=('--name', '-n'), id_part='name')
+register_cli_argument('network vpn-connection shared-key', 'virtual_network_gateway_connection_name', options_list=('--connection-name',), metavar='NAME', id_part='name')
 
 # Traffic manager profiles
 register_cli_argument('network traffic-manager profile', 'traffic_manager_profile_name', name_arg_type, id_part='name', completer=get_resource_name_completion_list('Microsoft.Network/trafficManagerProfiles'))
