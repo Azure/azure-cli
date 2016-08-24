@@ -16,15 +16,6 @@ from azure.mgmt.storage import StorageManagementClient
 from azure.storage.models import ResourceTypes, Services
 from azure.storage.table import TablePermissions
 
-# region ACTIONS
-
-class IgnoreAction(argparse.Action): # pylint: disable=too-few-public-methods
-    def __call__(self, parser, namespace, values, option_string=None):
-        raise argparse.ArgumentError(None, 'unrecognized argument: {} {}'.format(
-            option_string, values or ''))
-
-# endregion
-
 # region PARAMETER VALIDATORS
 
 def validate_client_parameters(namespace):

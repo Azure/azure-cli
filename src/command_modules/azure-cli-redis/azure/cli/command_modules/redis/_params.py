@@ -55,7 +55,6 @@ register_cli_argument('redis import-method', 'files', nargs='+')
 
 register_cli_argument('redis patch-schedule set', 'schedule_entries', type=ScheduleEntryList)
 
-
 register_cli_argument('redis create', 'name', arg_type=name_type, completer=None)
 register_cli_argument('redis create', 'sku_name', choices=[c.lower() for c in get_enum_choices(SkuName)], type=str.lower)
 register_cli_argument('redis create', 'sku_family', choices=[c.lower() for c in get_enum_choices(SkuFamily)], type=str.lower)
