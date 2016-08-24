@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 #---------------------------------------------------------------------------------------------
 
-# pylint: disable=no-self-use,too-many-arguments
+# pylint: disable=no-self-use,too-many-arguments,too-many-lines
 from __future__ import print_function
 import json
 import os
@@ -16,7 +16,9 @@ from six.moves.urllib.request import urlopen #pylint: disable=import-error,unuse
 
 from azure.mgmt.compute.models import (DataDisk,
                                        VirtualMachineScaleSet,
-                                       VirtualMachineCaptureParameters)
+                                       VirtualMachineCaptureParameters,
+                                       VirtualMachineScaleSetExtension,
+                                       VirtualMachineScaleSetExtensionProfile)
 from azure.mgmt.compute.models.compute_management_client_enums import DiskCreateOptionTypes
 from azure.cli.commands import LongRunningOperation
 from azure.cli.commands.arm import register_generic_update
@@ -537,6 +539,57 @@ def set_extension(
     return client.virtual_machine_extensions.create_or_update(
         resource_group_name, vm_name, vm_extension_name, ext)
 
+def set_vmss_extension(
+        resource_group_name, vmss_name, extension_name, publisher,
+        version=None, settings=None,
+        protected_settings=None, auto_upgrade_minor_version=False):
+    '''create/update extensions for a VMSS in a resource group. You can use
+    'extension image list' to get extension details
+    :param vm_extension_name: the name of the extension
+    :param publisher: the name of extension publisher
+    :param version: the version of extension.
+    :param settings: public settings or a file path with such contents
+    :param protected_settings: protected settings or a file path with such contents
+    :param auto_upgrade_minor_version: auto upgrade to the newer version if available
+    '''
+    client = _compute_client_factory()
+    vmss = client.virtual_machine_scale_sets.get(resource_group_name,
+                                                 vmss_name)
+
+    from azure.mgmt.compute.models import VirtualMachineExtension
+
+    protected_settings = load_json(protected_settings) if protected_settings else {}
+    settings = load_json(settings) if settings else None
+
+    #pylint: disable=no-member
+    if not version:
+        result = load_extension_images_thru_services(publisher, extension_name,
+                                                     None, vmss.location, show_latest=True)
+        if not result:
+            raise CLIError('Failed to find the latest version for the extension "{}"'
+                           .format(extension_name))
+
+        #with 'show_latest' enabled, we will only get one result.
+        version = result[0]['version']
+
+    version = _trim_away_build_number(version)
+
+    ext = VirtualMachineScaleSetExtension(name=extension_name,
+                                          publisher=publisher,
+                                          type=extension_name,
+                                          protected_settings=protected_settings,
+                                          type_handler_version=version,
+                                          settings=settings,
+                                          auto_upgrade_minor_version=auto_upgrade_minor_version)
+
+    if not vmss.virtual_machine_profile.extension_profile:
+        vmss.virtual_machine_profile.extension_profile = VirtualMachineScaleSetExtensionProfile([])
+    vmss.virtual_machine_profile.extension_profile.extensions.append(ext)
+
+    return client.virtual_machine_scale_sets.create_or_update(resource_group_name,
+                                                              vmss_name,
+                                                              vmss)
+
 def set_diagnostics_extension(
         resource_group_name, vm_name, storage_account, settings=None):
     '''Enable diagnostics on a linux virtual machine
@@ -555,13 +608,7 @@ def set_diagnostics_extension(
     else:
         settings = get_default_linux_diag_config(vm.id)
 
-    storage_mgmt_client = _get_storage_management_client()
-    keys = storage_mgmt_client.storage_accounts.list_keys(resource_group_name, storage_account).keys
-
-    private_config = {
-        'storageAccountName': storage_account,
-        'storageAccountKey': keys[0].value
-        }
+    private_config = _get_private_config(resource_group_name, storage_account)
 
     vm_extension_name = _LINUX_DIAG_EXT
     publisher, version, auto_upgrade = _get_access_extension_upgrade_info(
@@ -582,6 +629,95 @@ def set_diagnostics_extension(
                                                                 ext)
     return ExtensionUpdateLongRunningOperation('updating diagnostics', 'done')(poller)
 
+def set_vmss_diagnostics_extension(
+        resource_group_name, vmss_name, storage_account, settings=None):
+    '''Enable diagnostics on a linux virtual machine scale set
+
+    :param storage_account: the storage account to upload diagnostics log
+    :param settings: the settings file which defines data to be collected.
+    Default will be provided if missing
+    '''
+    client = _compute_client_factory()
+    vmss = client.virtual_machine_scale_sets.get(resource_group_name,
+                                                 vmss_name)
+
+    #pylint: disable=no-member
+    if settings:
+        settings = load_json(settings)
+    else:
+        settings = get_default_linux_diag_config(vmss.id)
+
+    private_config = _get_private_config(resource_group_name, storage_account)
+
+    vm_extension_name = _LINUX_DIAG_EXT
+    if not vmss.virtual_machine_profile.extension_profile:
+        vmss.virtual_machine_profile.extension_profile = VirtualMachineScaleSetExtensionProfile([])
+    publisher, version, auto_upgrade = _get_access_extension_upgrade_info(
+        vmss.virtual_machine_profile.extension_profile.extensions, vm_extension_name
+    )
+
+    ext = VirtualMachineScaleSetExtension(name='LinuxDiagnostic',
+                                          publisher=publisher,
+                                          type=vm_extension_name,
+                                          protected_settings=private_config,
+                                          type_handler_version=version,
+                                          settings=settings,
+                                          auto_upgrade_minor_version=auto_upgrade)
+
+    vmss.virtual_machine_profile.extension_profile.extensions.append(ext)
+
+    poller = client.virtual_machine_scale_sets.create_or_update(resource_group_name,
+                                                                vmss_name,
+                                                                vmss)
+    return ExtensionUpdateLongRunningOperation('updating diagnostics', 'done')(poller)
+
+def get_vmss_extension(resource_group_name, vmss_name, extension_name):
+    client = _compute_client_factory()
+    vmss = client.virtual_machine_scale_sets.get(resource_group_name,
+                                                 vmss_name)
+    #pylint: disable=no-member
+    if not vmss.virtual_machine_profile.extension_profile:
+        return
+    return next((e for e in vmss.virtual_machine_profile.extension_profile.extensions
+                 if e.name == extension_name), None)
+
+def list_vmss_extensions(resource_group_name, vmss_name):
+    client = _compute_client_factory()
+    vmss = client.virtual_machine_scale_sets.get(resource_group_name,
+                                                 vmss_name)
+    #pylint: disable=no-member
+    return None if not vmss.virtual_machine_profile.extension_profile \
+        else vmss.virtual_machine_profile.extension_profile.extensions
+
+def delete_vmss_extension(resource_group_name, vmss_name, extension_name):
+    client = _compute_client_factory()
+    vmss = client.virtual_machine_scale_sets.get(resource_group_name,
+                                                 vmss_name)
+    #pylint: disable=no-member
+    if not vmss.virtual_machine_profile.extension_profile:
+        raise CLIError('Scale set has no extensions to delete')
+
+    keep_list = [e for e in vmss.virtual_machine_profile.extension_profile.extensions
+                 if e.name != extension_name]
+    if len(keep_list) == len(vmss.virtual_machine_profile.extension_profile.extensions):
+        raise CLIError('Extension {} not found'.format(extension_name))
+
+    vmss.virtual_machine_profile.extension_profile.extensions = keep_list
+
+    return client.virtual_machine_scale_sets.create_or_update(resource_group_name,
+                                                              vmss_name,
+                                                              vmss)
+
+def _get_private_config(resource_group_name, storage_account):
+    storage_mgmt_client = _get_storage_management_client()
+    #pylint: disable=no-member
+    keys = storage_mgmt_client.storage_accounts.list_keys(resource_group_name, storage_account).keys
+
+    private_config = {
+        'storageAccountName': storage_account,
+        'storageAccountKey': keys[0].value
+        }
+    return private_config
 
 def show_default_diagnostics_configuration():
     '''show the default config file which defines data to be collected'''

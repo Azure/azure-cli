@@ -35,8 +35,9 @@ from .custom import (
     list_extensions, set_extension, set_diagnostics_extension,
     show_default_diagnostics_configuration,
     vmss_start, vmss_restart, vmss_delete_instances, vmss_deallocate, vmss_get_instance_view,
-    vmss_stop, vmss_reimage, vmss_scale, vmss_update_instances, vmss_show, vmss_list
-    )
+    vmss_stop, vmss_reimage, vmss_scale, vmss_update_instances, vmss_show, vmss_list,
+    set_vmss_diagnostics_extension, set_vmss_extension, get_vmss_extension,
+    list_vmss_extensions, delete_vmss_extension)
 
 
 from ._factory import _compute_client_factory
@@ -111,6 +112,10 @@ register_generic_update('vm container update', ContainerServiceOperations.get, C
 cli_command('vm diagnostics set', set_diagnostics_extension)
 cli_command('vm diagnostics get-default-config', show_default_diagnostics_configuration)
 
+# VMSS Diagnostics
+cli_command('vmss diagnostics set', set_vmss_diagnostics_extension)
+cli_command('vmss diagnostics get-default-config', show_default_diagnostics_configuration)
+
 # VM Disk
 cli_command('vm disk attach-new', attach_new_disk)
 cli_command('vm disk attach-existing', attach_existing_disk)
@@ -124,12 +129,25 @@ cli_command('vm extension show', VirtualMachineExtensionsOperations.get, factory
 cli_command('vm extension set', set_extension)
 cli_command('vm extension list', list_extensions, simple_output_query="[*].{Name:name, ResourceGroup:resourceGroup, ProvisioningState:provisioningState, Publisher:publisher, Version:typeHandlerVersion} | sort_by(@, &Name)")
 
+# VMSS Extension
+cli_command('vmss extension delete', delete_vmss_extension)
+cli_command('vmss extension show', get_vmss_extension)
+cli_command('vmss extension set', set_vmss_extension)
+cli_command('vmss extension list', list_vmss_extensions, simple_output_query="[*].{Name:name, ResourceGroup:resourceGroup, ProvisioningState:provisioningState, Publisher:publisher, Version:typeHandlerVersion} | sort_by(@, &Name)")
+
 # VM Extension Image
 factory = lambda _: _compute_client_factory().virtual_machine_extension_images
 cli_command('vm extension image show', VirtualMachineExtensionImagesOperations.get, factory, simple_output_query="{Name:name, Location:location, OperatingSystem:operatingSystem, SupportsMultipleExtensions:supportsMultipleExtensions, VmScaleSetEnabled:vmScaleSetEnabled, ComputeRole:computeRole}")
 cli_command('vm extension image list-names', VirtualMachineExtensionImagesOperations.list_types, factory, simple_output_query="[*].{Name:name, Location:location} | sort_by(@, &Name)")
 cli_command('vm extension image list-versions', VirtualMachineExtensionImagesOperations.list_versions, factory, simple_output_query="[*].{Name:name, Location:location} | sort_by(@, &Name)")
 cli_command('vm extension image list', list_vm_extension_images, simple_output_query="[*].{Publisher:publisher, Name:name, Version:version} | sort_by(@, &Publisher)")
+
+# VMSS Extension Image (convenience copy of VM Extension Image)
+factory = lambda _: _compute_client_factory().virtual_machine_extension_images
+cli_command('vmss extension image show', VirtualMachineExtensionImagesOperations.get, factory, simple_output_query="{Name:name, Location:location, OperatingSystem:operatingSystem, SupportsMultipleExtensions:supportsMultipleExtensions, VmScaleSetEnabled:vmScaleSetEnabled, ComputeRole:computeRole}")
+cli_command('vmss extension image list-names', VirtualMachineExtensionImagesOperations.list_types, factory, simple_output_query="[*].{Name:name, Location:location} | sort_by(@, &Name)")
+cli_command('vmss extension image list-versions', VirtualMachineExtensionImagesOperations.list_versions, factory, simple_output_query="[*].{Name:name, Location:location} | sort_by(@, &Name)")
+cli_command('vmss extension image list', list_vm_extension_images, simple_output_query="[*].{Publisher:publisher, Name:name, Version:version} | sort_by(@, &Publisher)")
 
 # VM Image
 factory = lambda _: _compute_client_factory().virtual_machine_images
