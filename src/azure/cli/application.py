@@ -13,7 +13,7 @@ from azure.cli._output import CommandResultItem
 import azure.cli.extensions
 import azure.cli._help as _help
 import azure.cli._logging as _logging
-from azure.cli._util import todict
+from azure.cli._util import todict, CLIError
 from azure.cli._config import az_config
 
 logger = _logging.get_az_logger(__name__)
@@ -80,7 +80,8 @@ class Application(object):
     def initialize(self, configuration):
         self.configuration = configuration
 
-    def execute(self, argv):
+    def execute(self, unexpanded_argv):
+        argv = Application._expand_file_prefixed_files(unexpanded_argv)
         command_table = self.configuration.get_command_table()
         self.raise_event(self.COMMAND_TABLE_LOADED, command_table=command_table)
         self.parser.load_command_table(command_table)
@@ -175,6 +176,25 @@ class Application(object):
                                   help='Increase logging verbosity. Use --debug for full debug logs.') #pylint: disable=line-too-long
         global_group.add_argument('--debug', dest='_log_verbosity_debug', action='store_true',
                                   help='Increase logging verbosity to show all debug logs.')
+
+    @staticmethod
+    def _expand_file_prefixed_files(argv):
+        return list(
+            [Application._load_file(arg[1:]) if arg.startswith('@') else arg for arg in argv]
+            )
+
+    @staticmethod
+    def _load_file(path):
+        try:
+            if path == '-':
+                content= sys.stdin.read()
+            else:
+                with open(path, 'r') as input_file:
+                    content = input_file.read()
+
+            return content[0:-1] if content[-1] == '\n' else content
+        except:
+            raise CLIError('Failed to open file {}'.format(path))
 
     def _handle_builtin_arguments(self, **kwargs):
         args = kwargs['args']
