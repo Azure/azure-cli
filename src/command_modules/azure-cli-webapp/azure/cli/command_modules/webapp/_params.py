@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 #---------------------------------------------------------------------------------------------
 
-from azure.cli.commands import CliArgumentType, register_cli_argument
+from azure.cli.commands import register_cli_argument
 from azure.cli.commands.parameters import tags_type
 
 from azure.mgmt.web import WebSiteManagementClient
@@ -17,7 +17,7 @@ def _web_client_factory(**_):
 
 # PARAMETER REGISTRATION
 
-register_cli_argument('webapp', 'name', CliArgumentType(options_list=('--name', '-n')))
+register_cli_argument('webapp', 'name', options_list=('--name', '-n'))
 register_cli_argument('webapp', 'tags', tags_type)
 
 register_folded_cli_argument('webapp create', 'hosting_plan', 'Microsoft.Web/serverfarms')

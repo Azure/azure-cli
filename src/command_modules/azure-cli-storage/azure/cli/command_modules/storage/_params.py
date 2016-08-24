@@ -4,13 +4,12 @@
 #---------------------------------------------------------------------------------------------
 
 # pylint: disable=line-too-long
-import argparse
 import os
 
 from six import u as unicode_string
 
 from azure.cli.commands.parameters import \
-    (tags_type, get_resource_name_completion_list, get_enum_type_completion_list)
+    (IGNORE_TYPE, tags_type, get_resource_name_completion_list, get_enum_type_completion_list)
 from azure.cli.commands import register_cli_argument, register_extra_cli_argument, CliArgumentType
 from azure.cli.commands.client_factory import get_data_service_client
 
@@ -33,11 +32,7 @@ from ._validators import \
      validate_select,
      get_content_setting_validator, validate_encryption,
      process_file_download_namespace, process_logging_update_namespace,
-     process_metric_update_namespace, IgnoreAction)
-
-# CONSTANTS
-
-IGNORE_TYPE = CliArgumentType(help=argparse.SUPPRESS, nargs='?', action=IgnoreAction, required=False)
+     process_metric_update_namespace)
 
 # COMPLETERS
 

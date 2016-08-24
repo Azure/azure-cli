@@ -73,6 +73,19 @@ def get_generic_completion_list(generic_list):
 def get_enum_choices(enum_type):
     return [x.value for x in enum_type]
 
+class IgnoreAction(argparse.Action): # pylint: disable=too-few-public-methods
+    def __call__(self, parser, namespace, values, option_string=None):
+        raise argparse.ArgumentError(None, 'unrecognized argument: {} {}'.format(
+            option_string, values or ''))
+
+# CONSTANTS
+
+IGNORE_TYPE = CliArgumentType(
+    help=argparse.SUPPRESS,
+    nargs='?',
+    action=IgnoreAction,
+    required=False)
+
 resource_group_name_type = CliArgumentType(
     options_list=('--resource-group', '-g'),
     completer=get_resource_group_completion_list,
