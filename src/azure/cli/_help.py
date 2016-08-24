@@ -13,6 +13,8 @@ from .help_files import _load_help_file
 
 __all__ = ['print_detailed_help', 'print_welcome_message', 'GroupHelpFile', 'CommandHelpFile']
 
+FIRST_LINE_PREFIX = ': '
+
 def show_help(nouns, parser, is_group):
     delimiters = ' '.join(nouns)
     help_file = CommandHelpFile(delimiters, parser) \
@@ -61,7 +63,7 @@ def print_description_list(help_files):
     for help_file in sorted(help_files, key=lambda h: h.name):
         _print_indent('{0}{1}{2}'.format(help_file.name,
                                          _get_column_indent(help_file.name, max_name_length),
-                                         ': ' + help_file.short_summary \
+                                         FIRST_LINE_PREFIX + help_file.short_summary \
                                              if help_file.short_summary \
                                              else ''),
                       indent)
@@ -97,13 +99,16 @@ def print_arguments(help_file):
                 print('')
                 print(p.group_name)
             last_group_name = p.group_name
-        _print_indent('{0}{1}{2}{3}'.format(p.name,
-                                            _get_column_indent(p.name + required_text,
-                                                               max_name_length),
-                                            required_text,
-                                            ': ' + short_summary if short_summary else ''),
-                      indent,
-                      max_name_length + indent*4 + 2)
+        _print_indent(
+            '{0}{1}{2}{3}'.format(
+                p.name,
+                _get_column_indent(p.name + required_text, max_name_length),
+                required_text,
+                FIRST_LINE_PREFIX + short_summary if short_summary else ''
+            ),
+            indent,
+            _get_hanging_indent(max_name_length, indent)
+        )
 
         indent = 2
         if p.long_summary:
@@ -123,7 +128,7 @@ def _print_header(help_file):
 
     indent += 1
     _print_indent('{0}{1}'.format('az ' + help_file.command,
-                                  ': ' + help_file.short_summary
+                                  FIRST_LINE_PREFIX + help_file.short_summary
                                   if help_file.short_summary
                                   else ''),
                   indent)
@@ -138,7 +143,7 @@ def _print_groups(help_file):
     def _print_items(items):
         for c in sorted(items, key=lambda h: h.name):
             column_indent = _get_column_indent(c.name, max_name_length)
-            summary = ': ' + c.short_summary if c.short_summary else ''
+            summary = FIRST_LINE_PREFIX + c.short_summary if c.short_summary else ''
             summary = summary.replace('\n', ' ')
             hanging_indent = max_name_length + indent*4 + 2
             _print_indent(
@@ -219,7 +224,6 @@ class HelpFile(HelpObject): #pylint: disable=too-few-public-methods,too-many-ins
             self.long_summary = description[description.index('.') + 1:].lstrip()
         except (ValueError, AttributeError):
             self.short_summary = description
-            self.long_summary = None
 
         file_data = (_load_help_file_from_string(options.help_file)
                      if hasattr(options, '_defaults')
@@ -347,6 +351,9 @@ class HelpExample(object): #pylint: disable=too-few-public-methods
         self.name = _data['name']
         self.text = _data['text']
 
+
+def _get_hanging_indent(max_length, indent):
+    return max_length + (indent * 4) + len(FIRST_LINE_PREFIX)
 
 def _print_indent(s, indent=0, subsequent_spaces=-1):
     tw = textwrap.TextWrapper(initial_indent='    '*indent,
