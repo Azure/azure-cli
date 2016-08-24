@@ -1,3 +1,8 @@
+#---------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for license information.
+#---------------------------------------------------------------------------------------------
+
 import os
 import unittest
 import mock
@@ -34,14 +39,14 @@ class TestAzConfigParser(unittest.TestCase):
         value = 'myvalue'
         self.config.add_section(section)
         self.config.set(section, option, value)
-        self.assertEquals(self.config.get(section, option), value)
+        self.assertEqual(self.config.get(section, option), value)
 
     @mock.patch.dict(os.environ, {AzConfigParser.env_var_name('MySection', 'myoption'): 'myvalue'})
     def test_get_env(self):
         section = 'MySection'
         option = 'myoption'
         value = 'myvalue'
-        self.assertEquals(self.config.get(section, option), value)
+        self.assertEqual(self.config.get(section, option), value)
 
     def test_get_not_found_section(self):
         section = 'MySection'
@@ -59,7 +64,7 @@ class TestAzConfigParser(unittest.TestCase):
     def test_get_fallback(self):
         section = 'MySection'
         option = 'myoption'
-        self.assertEquals(self.config.get(section, option, fallback='fallback'), 'fallback')
+        self.assertEqual(self.config.get(section, option, fallback='fallback'), 'fallback')
 
     def test_getint(self):
         section = 'MySection'
@@ -67,7 +72,7 @@ class TestAzConfigParser(unittest.TestCase):
         value = '123'
         self.config.add_section(section)
         self.config.set(section, option, value)
-        self.assertEquals(self.config.getint(section, option), int(value))
+        self.assertEqual(self.config.getint(section, option), int(value))
 
     def test_getint_error(self):
         section = 'MySection'
@@ -84,7 +89,7 @@ class TestAzConfigParser(unittest.TestCase):
         value = '123.456'
         self.config.add_section(section)
         self.config.set(section, option, value)
-        self.assertEquals(self.config.getfloat(section, option), float(value))
+        self.assertEqual(self.config.getfloat(section, option), float(value))
 
     def test_getfloat_error(self):
         section = 'MySection'
@@ -101,7 +106,7 @@ class TestAzConfigParser(unittest.TestCase):
         value = 'true'
         self.config.add_section(section)
         self.config.set(section, option, value)
-        self.assertEquals(self.config.getboolean(section, option), True)
+        self.assertEqual(self.config.getboolean(section, option), True)
 
     def test_getboolean_error(self):
         section = 'MySection'
