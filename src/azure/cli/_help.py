@@ -351,10 +351,6 @@ class HelpExample(object): #pylint: disable=too-few-public-methods
         self.name = _data['name']
         self.text = _data['text']
 
-
-def _get_hanging_indent(max_length, indent):
-    return max_length + (indent * 4) + len(FIRST_LINE_PREFIX)
-
 def _print_indent(s, indent=0, subsequent_spaces=-1):
     tw = textwrap.TextWrapper(initial_indent='    '*indent,
                               subsequent_indent=('    '*indent
@@ -368,6 +364,9 @@ def _print_indent(s, indent=0, subsequent_spaces=-1):
 
 def _get_column_indent(text, max_name_length):
     return ' '*(max_name_length - len(text))
+
+def _get_hanging_indent(max_length, indent):
+    return max_length + (indent * 4) + len(FIRST_LINE_PREFIX)
 
 def _normalize_text(s):
     if not s or len(s) < 2:
