@@ -49,23 +49,18 @@ def get_subnet_completion_list():
             return [r.name for r in client.subnets.list(resource_group_name=rg, virtual_network_name=vnet)]
     return completer
 
-def get_lb_backend_address_pool_completion_list():
+def get_lb_subresource_completion_list(prop):
     def completer(prefix, action, parsed_args, **kwargs): # pylint: disable=unused-argument
         client = _network_client_factory()
-        if parsed_args.resource_group_name and parsed_args.load_balancer_name:
-            rg = parsed_args.resource_group_name
-            lb = parsed_args.load_balancer_name
-            return [r.name for r in client.load_balancers.get(resource_group_name=rg, load_balancer_name=lb).backend_address_pools] # pylint: disable=no-member
+        try:
+            lb_name = parsed_args.load_balancer_name
+        except AttributeError:
+            lb_name = parsed_args.resource_name
+        if parsed_args.resource_group_name and lb_name:
+            lb = client.load_balancers.get(parsed_args.resource_group_name, lb_name)
+            return [r.name for r in getattr(lb, prop)]
     return completer
 
-def get_lb_inbound_nat_rule_completion_list():
-    def completer(prefix, action, parsed_args, **kwargs): # pylint: disable=unused-argument
-        client = _network_client_factory()
-        if parsed_args.resource_group_name and parsed_args.load_balancer_name:
-            rg = parsed_args.resource_group_name
-            lb = parsed_args.load_balancer_name
-            return [r.name for r in client.load_balancers.get(resource_group_name=rg, load_balancer_name=lb).inbound_nat_rules] # pylint: disable=no-member
-    return completer
 
 def get_ag_subresource_completion_list(prop):
     def completer(prefix, action, parsed_args, **kwargs): # pylint: disable=unused-argument
@@ -123,7 +118,7 @@ register_cli_argument('network', 'tags', tags_type)
 
 for item in ['lb', 'nic']:
     register_cli_argument('network {}'.format(item), 'subnet', validator=validate_subnet_name_or_id, help='Name or ID of an existing subnet.')
-    register_cli_argument('network {}'.format(item), 'virtual_network_name', help='The virtual network (VNet) associated with the provided subnet name (Omit if supplying a subnet id).')
+    register_cli_argument('network {}'.format(item), 'virtual_network_name', help='The virtual network (VNet) associated with the provided subnet name (Omit if supplying a subnet id).', id_part=None)
     register_cli_argument('network {}'.format(item), 'public_ip_address', validator=validate_public_ip_name_or_id)
 
 register_cli_argument('network application-gateway', 'application_gateway_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/applicationGateways'), id_part='name')
@@ -244,8 +239,8 @@ register_cli_argument('network nic update', 'network_security_group', validator=
 
 for item in ['create', 'ip-config update', 'ip-config create']:
     register_extra_cli_argument('network nic {}'.format(item), 'load_balancer_name', options_list=('--lb-name',), completer=get_resource_name_completion_list('Microsoft.Network/loadBalancers'), help='The name of the load balancer to use when adding NAT rules or address pools by name (ignored when IDs are specified).')
-    register_cli_argument('network nic {}'.format(item), 'load_balancer_backend_address_pool_ids', options_list=('--lb-address-pools',), nargs='+', validator=validate_address_pool_id_list, help='Space separated list of names or IDs of load balancer address pools to associate with the NIC. If names are used, --lb-name must be specified.', completer=get_lb_backend_address_pool_completion_list())
-    register_cli_argument('network nic {}'.format(item), 'load_balancer_inbound_nat_rule_ids', options_list=('--lb-inbound-nat-rules',), nargs='+', validator=validate_inbound_nat_rule_id_list, help='Space separated list of names or IDs of load balancer inbound NAT rules to associate with the NIC. If names are used, --lb-name must be specified.', completer=get_lb_inbound_nat_rule_completion_list())
+    register_cli_argument('network nic {}'.format(item), 'load_balancer_backend_address_pool_ids', options_list=('--lb-address-pools',), nargs='+', validator=validate_address_pool_id_list, help='Space separated list of names or IDs of load balancer address pools to associate with the NIC. If names are used, --lb-name must be specified.', completer=get_lb_subresource_completion_list('backendAddresPools'))
+    register_cli_argument('network nic {}'.format(item), 'load_balancer_inbound_nat_rule_ids', options_list=('--lb-inbound-nat-rules',), nargs='+', validator=validate_inbound_nat_rule_id_list, help='Space separated list of names or IDs of load balancer inbound NAT rules to associate with the NIC. If names are used, --lb-name must be specified.', completer=get_lb_subresource_completion_list('inboundNatRules'))
 
 # NIC ScaleSet
 register_cli_argument('network nic scale-set', 'virtual_machine_scale_set_name', options_list=('--vm-scale-set',), completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'), id_part='name')
@@ -309,34 +304,35 @@ register_cli_argument('network vnet subnet', 'address_prefix', metavar='PREFIX',
 register_cli_argument('network vnet subnet', 'virtual_network_name', virtual_network_name_type)
 register_cli_argument('network vnet subnet', 'network_security_group', validator=validate_nsg_name_or_id)
 
-for item in ['address-pool', 'frontend-ip', 'inbound-nat-rule', 'inbound-nat-pool', 'probe', 'rule']:
-    register_cli_argument('network lb {}'.format(item), 'item_name', options_list=('--name', '-n'), help='The name of the {}'.format(item))
-    register_cli_argument('network lb {}'.format(item), 'resource_name', options_list=('--lb-name',), help='The name of the load balancer.')
+lb_subresources = [
+    {'name': 'address-pool', 'display': 'backend address pool', 'ref': 'backend_address_pools'},
+    {'name': 'frontend-ip', 'display': 'frontend IP configuration', 'ref': 'frontend_ip_configurations'},
+    {'name': 'inbound-nat-rule', 'display': 'inbound NAT rule', 'ref': 'inbound_nat_rules'},
+    {'name': 'inbound-nat-pool', 'display': 'inbound NAT pool', 'ref': 'inbound_nat_pools'},
+    {'name': 'rule', 'display': 'load balancing rule', 'ref': 'load_balancing_rules'},
+    {'name': 'probe', 'display': 'probe', 'ref': 'probes'},
+]
+for item in lb_subresources:
+    register_cli_argument('network lb {}'.format(item['name']), 'item_name', options_list=('--name', '-n'), help='The name of the {}'.format(item['display']), completer=get_lb_subresource_completion_list(item['ref']), id_part='child_name')
+    register_cli_argument('network lb {}'.format(item['name']), 'resource_name', options_list=('--lb-name',), help='The name of the load balancer.', completer=get_resource_name_completion_list('Microsoft.Network/loadBalancers'))
+    register_cli_argument('network lb {}'.format(item['name']), 'load_balancer_name', load_balancer_name_type)
 
-register_cli_argument('network lb', 'load_balancer_name', load_balancer_name_type)
+register_cli_argument('network lb', 'load_balancer_name', load_balancer_name_type, options_list=('--name', '-n'))
 register_cli_argument('network lb', 'frontend_port', help='Port number')
 register_cli_argument('network lb', 'frontend_port_range_start', help='Port number')
 register_cli_argument('network lb', 'frontend_port_range_end', help='Port number')
 register_cli_argument('network lb', 'backend_port', help='Port number')
-register_cli_argument('network lb', 'backend_address_pool_name', options_list=('--backend-pool-name',), help='The name of the backend address pool.')
-register_cli_argument('network lb', 'frontend_ip_name', help='The name of the frontend IP configuration.')
+register_cli_argument('network lb', 'backend_address_pool_name', options_list=('--backend-pool-name',), help='The name of the backend address pool.', completer=get_lb_subresource_completion_list('backend_address_pools'))
+register_cli_argument('network lb', 'frontend_ip_name', help='The name of the frontend IP configuration.', completer=get_lb_subresource_completion_list('frontend_ip_configurations'))
 register_cli_argument('network lb', 'floating_ip', help='Enable floating IP.', choices=['true', 'false'], type=str.lower)
 register_cli_argument('network lb', 'idle_timeout', help='Idle timeout in minutes.')
 register_cli_argument('network lb', 'protocol', help='', choices=['udp', 'tcp'], type=str.lower)
-
-register_cli_argument('network lb create', 'load_balancer_name', load_balancer_name_type, options_list=('--name', '-n'))
-register_cli_argument('network lb delete', 'load_balancer_name', load_balancer_name_type, options_list=('--name', '-n'))
-register_cli_argument('network lb show', 'load_balancer_name', load_balancer_name_type, options_list=('--name', '-n'))
 
 register_cli_argument('network lb create', 'public_ip_dns_name', validator=process_lb_create_namespace)
 register_cli_argument('network lb create', 'dns_name_type', help=argparse.SUPPRESS)
 register_cli_argument('network lb create', 'public_ip_address_allocation', choices=choices_ip_allocation_method, default='dynamic', type=str.lower)
 register_folded_cli_argument('network lb create', 'public_ip_address', 'Microsoft.Network/publicIPAddresses', validator=validate_public_ip_type)
 register_folded_cli_argument('network lb create', 'subnet', 'subnets', parent_name='virtual_network_name', parent_type='Microsoft.Network/virtualNetworks')
-
-for item in ['inbound-nat-rule', 'inbound-nat-pool', 'probe', 'frontend-ip', 'address-pool', 'rule']:
-    register_cli_argument('network lb {}'.format(item), 'resource_name', options_list=('--lb-name',), help='The name of the load balancer.', completer=get_resource_name_completion_list('Microsoft.Network/loadBalancers'))
-    register_cli_argument('network lb {}'.format(item), 'item_name', options_list=('--name', '-n'), help='The name of the {}.'.format(item))
 
 register_cli_argument('network lb frontend-ip', 'public_ip_address', help='Name or ID of the existing public IP to associate with the configuration.', validator=validate_public_ip_name_or_id)
 register_cli_argument('network lb frontend-ip', 'private_ip_address', help='Static private IP address to associate with the configuration.')

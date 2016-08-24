@@ -9,7 +9,7 @@ from __future__ import print_function
 from azure.mgmt.authorization.operations import RoleDefinitionsOperations
 from azure.graphrbac.operations import UsersOperations, GroupsOperations
 from azure.cli.commands import cli_command
-from azure.cli.commands.arm import register_generic_update
+from azure.cli.commands.arm import cli_generic_update_command
 
 from .custom import (create_role_assignment, list_role_assignments, delete_role_assignments,
                      list_role_definitions, delete_role_definition, create_role_definition,
@@ -24,10 +24,10 @@ simple_output_query = '[*].{Name:properties.roleName, Id:name, Type:properties.t
 cli_command('role list', list_role_definitions, simple_output_query=simple_output_query)
 cli_command('role delete', delete_role_definition)
 cli_command('role create', create_role_definition, simple_output_query=simple_output_query)
-register_generic_update('role update',
-                        RoleDefinitionsOperations.get,
-                        RoleDefinitionsOperations.create_or_update,
-                        factory)
+cli_generic_update_command('role update',
+                           RoleDefinitionsOperations.get,
+                           RoleDefinitionsOperations.create_or_update,
+                           factory)
 
 simple_output_query = '[*].{Name:name, PrincipalName:properties.principalName, Role:properties.roleDefinitionName, Scope:properties.scope}'
 factory = lambda _: _auth_client_factory().role_assignments

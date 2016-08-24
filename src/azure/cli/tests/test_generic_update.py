@@ -9,7 +9,7 @@ import sys
 
 from azure.cli.application import APPLICATION, Application, Configuration
 from azure.cli.commands import CliArgumentType, register_cli_argument
-from azure.cli.commands.arm import register_generic_update
+from azure.cli.commands.arm import cli_generic_update_command
 from azure.cli._util import CLIError
 
 #pylint:disable=invalid-sequence-index
@@ -39,7 +39,7 @@ class GenericUpdateTest(unittest.TestCase):
         config = Configuration([])
         app = Application(config)
 
-        register_generic_update('gencommand', my_get, my_set)
+        cli_generic_update_command('gencommand', my_get, my_set)
 
         app.execute('gencommand --set prop=val2'.split())
         self.assertEqual(my_obj['prop'], 'val2', 'set simple property')
@@ -108,7 +108,7 @@ class GenericUpdateTest(unittest.TestCase):
         config = Configuration([])
         app = Application(config)
 
-        register_generic_update('gencommand', my_get, my_set)
+        cli_generic_update_command('gencommand', my_get, my_set)
 
         def _execute_with_error(command, error, message):
             try:
@@ -180,7 +180,7 @@ class GenericUpdateTest(unittest.TestCase):
 
         register_cli_argument('gencommand', 'name', CliArgumentType(options_list=('--name', '-n'),
                                                                     metavar='NAME', id_part='name'))
-        register_generic_update('gencommand', my_get, my_set)
+        cli_generic_update_command('gencommand', my_get, my_set)
 
         config = Configuration([])
         APPLICATION.initialize(config)
@@ -215,7 +215,7 @@ class GenericUpdateTest(unittest.TestCase):
         config = Configuration([])
         app = Application(config)
 
-        register_generic_update('gencommand', my_get, my_set)
+        cli_generic_update_command('gencommand', my_get, my_set)
 
         # add to prop
         app.execute('gencommand --add prop a=b'.split())

@@ -11,7 +11,7 @@ from azure.mgmt.keyvault.operations import (
 )
 from azure.cli.commands import cli_command
 from azure.cli.commands.client_factory import get_mgmt_service_client
-from azure.cli.commands.arm import register_generic_update
+from azure.cli.commands.arm import cli_generic_update_command
 
 def _keyvault_client_factory(**_):
     return get_mgmt_service_client(KeyVaultManagementClient)
@@ -41,8 +41,8 @@ def keyvault_update_setter(client, resource_group_name, vault_name, parameters):
                                        location=parameters.location,
                                        properties=parameters.properties))
 
-register_generic_update('keyvault update',
-                        VaultsOperations.get,
-                        keyvault_update_setter,
-                        lambda: _keyvault_client_factory().vaults,
-                        simple_output_query=keyvault_show_query)
+cli_generic_update_command('keyvault update',
+                           VaultsOperations.get,
+                           keyvault_update_setter,
+                           lambda: _keyvault_client_factory().vaults,
+                           simple_output_query=keyvault_show_query)
