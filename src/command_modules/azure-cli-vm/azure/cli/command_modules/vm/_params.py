@@ -143,7 +143,8 @@ register_cli_argument('vm create', 'network_interface_type', help=argparse.SUPPR
 register_cli_argument('vm create', 'network_interface_ids', options_list=('--nics',), nargs='+', help='Names or IDs of existing NICs to reference.  The first NIC will be the primary NIC.', type=lambda val: val if (not '/' in val or is_valid_resource_id(val, ValueError)) else '', validator=_handle_vm_nics)
 
 register_cli_argument('vm create', 'name', name_arg_type, validator=_resource_not_exists('Microsoft.Compute/virtualMachines'))
-register_cli_argument('vmss create', 'name', name_arg_type, validator=_resource_not_exists('Microsoft.Compute/virtualMachineScaleSets'))
+register_cli_argument('vmss create', 'name', name_arg_type)
+register_cli_argument('vmss create', 'nat_backend_port', default=None, help='Backend port to open with NAT rules.  Defaults to 22 on Linux and 3389 on Windows.')
 register_cli_argument('vmss', 'vm_scale_set_name', name_arg_type, help='scale set name')
 register_cli_argument('vmss', 'instance_ids', help='Space separated ids such as "0 2 3", or use "*" for all instances')
 

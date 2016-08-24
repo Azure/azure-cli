@@ -145,7 +145,7 @@
           "type": "string", 
           "description": "URI referencing the template.", 
           "enum": [
-            "https://azuresdkci.blob.core.windows.net/templatehost/CreateVmss_2016-08-04/azuredeploy.json"
+            "https://azuresdkci.blob.core.windows.net/templatehost/CreateVmss_2016-08-24/azuredeploy.json"
           ]
         }, 
         "contentVersion": {
@@ -228,6 +228,11 @@
         "name": {
           "type": "object", 
           "$ref": "#/definitions/DeploymentParameter_name", 
+          "x-ms-client-flatten": true
+        }, 
+        "natBackendPort": {
+          "type": "object", 
+          "$ref": "#/definitions/DeploymentParameter_natBackendPort", 
           "x-ms-client-flatten": true
         }, 
         "osDiskName": {
@@ -452,7 +457,7 @@
     "DeploymentParameter_instanceCount": {
       "properties": {
         "value": {
-          "type": "string", 
+          "type": "integer", 
           "description": "Number of VMs in scale set.", 
           "x-ms-client-name": "instanceCount", 
           "default": "2"
@@ -517,6 +522,16 @@
       "required": [
         "value"
       ]
+    }, 
+    "DeploymentParameter_natBackendPort": {
+      "properties": {
+        "value": {
+          "type": "integer", 
+          "description": "Backend port to open with NAT rules.", 
+          "x-ms-client-name": "natBackendPort", 
+          "default": "22"
+        }
+      }
     }, 
     "DeploymentParameter_osDiskName": {
       "properties": {
@@ -820,7 +835,7 @@
           "description": "Container URI of of the template.", 
           "x-ms-client-name": "_artifactsLocation", 
           "enum": [
-            "https://azuresdkci.blob.core.windows.net/templatehost/CreateVmss_2016-08-04"
+            "https://azuresdkci.blob.core.windows.net/templatehost/CreateVmss_2016-08-24"
           ]
         }
       }, 

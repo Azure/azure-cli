@@ -70,17 +70,10 @@
       }
     },
     "instanceCount": {
-      "type": "string",
+      "type": "int",
       "defaultValue": 2,
       "metadata": {
         "description": "Number of VMs in scale set."
-      }
-    },
-    "loadBalancerBackendPoolName": {
-      "type": "string",
-      "defaultValue": "[concat(parameters('name'), 'bepool')]",
-      "metadata": {
-        "description": "Name of load balancer backend pool."
       }
     },
     "loadBalancer": {
@@ -88,6 +81,13 @@
       "defaultValue": "[concat(parameters('name'), 'lb')]",
       "metadata": {
         "description": "Name or ID of load balancer."
+      }
+    },
+    "loadBalancerBackendPoolName": {
+      "type": "string",
+      "defaultValue": "[concat(parameters('name'), 'bepool')]",
+      "metadata": {
+        "description": "Name of load balancer backend pool."
       }
     },
     "loadBalancerType": {
@@ -115,6 +115,13 @@
       "minLength": 1,
       "metadata": {
         "description": "The VM name."
+      }
+    },
+    "natBackendPort": {
+      "type": "int",
+      "defaultValue": 22,
+      "metadata": {
+        "description": "Backend port to open with NAT rules."
       }
     },
     "osDiskName": {
@@ -183,6 +190,13 @@
         "description": "Overprovision option (see https://azure.microsoft.com/en-us/documentation/articles/virtual-machine-scale-sets-overview/ for details)."
       }
     },
+    "publicIpAddress": {
+      "type": "string",
+      "defaultValue": "[concat(parameters('name'), 'PublicIP')]",
+      "metadata": {
+        "description": "Name or ID of public IP address to use."
+      }
+    },
     "publicIpAddressAllocation": {
       "type": "string",
       "defaultValue": "dynamic",
@@ -192,13 +206,6 @@
       ],
       "metadata": {
         "description": "Public IP address allocation method."
-      }
-    },
-    "publicIpAddress": {
-      "type": "string",
-      "defaultValue": "[concat(parameters('name'), 'PublicIP')]",
-      "metadata": {
-        "description": "Name or ID of public IP address to use."
       }
     },
     "publicIpAddressType": {
@@ -285,18 +292,18 @@
         "description": "Manual or Automatic upgrade mode."
       }
     },
-    "virtualNetworkIpAddressPrefix": {
-      "type": "string",
-      "defaultValue": "10.0.0.0/16",
-      "metadata": {
-        "description": "The virtual network IP address prefix in CIDR format."
-      }
-    },
     "virtualNetwork": {
       "type": "string",
       "defaultValue": "[concat(parameters('name'), 'VNET')]",
       "metadata": {
         "description": "Name or ID of virtual network."
+      }
+    },
+    "virtualNetworkIpAddressPrefix": {
+      "type": "string",
+      "defaultValue": "10.0.0.0/16",
+      "metadata": {
+        "description": "The virtual network IP address prefix in CIDR format."
       }
     },
     "virtualNetworkType": {
@@ -426,6 +433,7 @@
     "vmSize": "[parameters('vmSku')]",
     "vmDeploymentName": "[concat(parameters('name'), 'VM')]",
     "nicDeploymentName": "[concat(parameters('name'), 'NicIp')]",
+    "natRuleDeploymentName": "[concat(parameters('name'), 'NatRules')]",
     "subnetRef": "[concat(variables('virtualNetworkId'), '/subnets/', variables('subnetName'))]",
     "ipConfigurations": {
       "new": [
@@ -510,6 +518,14 @@
       "existingName": "[variables('lbTemplateUriEmpty')]",
       "new": "[variables('lbTemplateUri')]",
       "none": "[variables('lbTemplateUriEmpty')]"
+    },
+    "natTemplateUri": "[concat(parameters('_artifactsLocation'), '/', 'nested_templates/nat_rules_new', '.json')]",
+    "natTemplateUriEmpty": "[concat(parameters('_artifactsLocation'), '/', 'nested_templates/nat_rules_none', '.json')]",
+    "natTemplateFilePaths": {
+      "new": "[variables('natTemplateUri')]",
+      "existingId": "[variables('natTemplateUriEmpty')]",
+      "existingName": "[variables('natTemplateUriEmpty')]",
+      "none": "[variables('natTemplateUriEmpty')]"
     },
     "vhdContainers": [
       "[concat('https://', variables('uniqueStringArray')[0], variables('newStorageAccountSuffix'), '.blob.core.windows.net/', variables('vhdContainerName'))]",
@@ -614,7 +630,30 @@
           "publicIpAddress": { "value": "[variables('publicIpAddressId')]" },
           "publicIpAddressType": { "value": "[variables('lbPublicIpAddressType')[parameters('publicIpAddressType')]]" },
           "backendPoolName": { "value": "[variables('bePoolName')]" },
-          "subnet": { "value": "[variables('subnetRef')]" }
+          "subnet": { "value": "[variables('subnetRef')]" },
+          "frontendIpName": { "value": "LoadBalancerFrontEnd" }
+        }
+      }
+    },
+    {
+      "name": "[variables('natRuleDeploymentName')]",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "dependsOn": [
+        "[concat('Microsoft.Resources/deployments/', variables('lbDeploymentName'))]"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[variables('natTemplateFilePaths')[parameters('loadBalancerType')]]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "loadBalancerName": { "value": "[parameters('loadBalancer')]" },
+          "location": { "value": "[variables('resourceLocation')]" },
+          "backendPort": { "value": "[parameters('natBackendPort')]" },
+          "numberOfInstances": { "value": "[parameters('instanceCount')]" },
+          "frontendIpName": { "value": "LoadBalancerFrontEnd" }
         }
       }
     },
