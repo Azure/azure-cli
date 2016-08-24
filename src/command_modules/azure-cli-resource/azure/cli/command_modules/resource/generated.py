@@ -16,7 +16,7 @@ from azure.mgmt.resource.resources.operations.deployment_operations_operations \
 from azure.mgmt.resource.policy.operations import PolicyDefinitionsOperations
 
 from azure.cli.commands import cli_command
-from azure.cli.commands.arm import register_generic_update
+from azure.cli.commands.arm import cli_generic_update_command
 from azure.cli.command_modules.resource._factory import (_resource_client_factory,
                                                          _resource_feature_client_factory,
                                                          _resource_policy_client_factory)
@@ -84,15 +84,15 @@ factory = lambda _: _resource_client_factory().deployment_operations
 cli_command('resource group deployment operation list', DeploymentOperationsOperations.list, factory)
 cli_command('resource group deployment operation show', DeploymentOperationsOperations.get, factory)
 
-register_generic_update('resource update',
-                        ResourcesOperations.get,
-                        ResourcesOperations.create_or_update,
-                        lambda: _resource_client_factory().resources)
+cli_generic_update_command('resource update',
+                           ResourcesOperations.get,
+                           ResourcesOperations.create_or_update,
+                           lambda: _resource_client_factory().resources)
 
-register_generic_update('resource group update',
-                        ResourceGroupsOperations.get,
-                        ResourceGroupsOperations.create_or_update,
-                        lambda: _resource_client_factory().resource_groups)
+cli_generic_update_command('resource group update',
+                           ResourceGroupsOperations.get,
+                           ResourceGroupsOperations.create_or_update,
+                           lambda: _resource_client_factory().resource_groups)
 
 policy_assignment_tab_query = '{Name:name, Scope:scope, Policy:policyDefinitionId}'
 cli_command('resource policy assignment create', create_policy_assignment, simple_output_query=policy_assignment_tab_query)

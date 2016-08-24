@@ -9,6 +9,8 @@
 #pylint: disable=too-many-lines
 import os
 
+from azure.cli.commands.arm import resource_id
+from azure.cli.commands.client_factory import get_subscription_id
 from azure.cli.utils.vcr_test_base import (VCRTestBase, ResourceGroupVCRTestBase, JMESPathCheck,
                                            NoneCheck, MOCKED_SUBSCRIPTION_ID)
 
@@ -168,6 +170,7 @@ class NetworkExpressRouteScenarioTest(VCRTestBase):
             raise RuntimeError('Express route must be manually created in order to support this test.')
 
     def body(self):
+
         self.cmd('network express-route circuit list', checks=[
             JMESPathCheck('type(@)', 'array'),
             JMESPathCheck("length([?type == '{}']) == length(@)".format(self.resource_type), True),
@@ -318,7 +321,7 @@ class NetworkLoadBalancerSubresourceScenarioTest(ResourceGroupVCRTestBase):
             self.cmd('network public-ip create -g {} -n publicip{}'.format(rg, i))
         self.cmd('network lb create -g {} -n {}'.format(rg, lb))
 
-    def body(self):
+    def body(self): # pylint: disable=too-many-statements
         rg = self.resource_group
         lb = self.lb_name
         lb_rg = '-g {} --lb-name {}'.format(rg, lb)
@@ -333,6 +336,10 @@ class NetworkLoadBalancerSubresourceScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck('enableFloatingIp', True),
             JMESPathCheck('idleTimeoutInMinutes', 10)
         ])
+        # test generic update
+        self.cmd('network lb inbound-nat-rule update {} -n rule1 --set idleTimeoutInMinutes=5'.format(lb_rg),
+            checks=JMESPathCheck('idleTimeoutInMinutes', 5))
+
         for count in range(1, 4):
             self.cmd('network lb inbound-nat-rule delete {} -n rule{}'.format(lb_rg, count))
         self.cmd('network lb inbound-nat-rule list {}'.format(lb_rg),
@@ -348,6 +355,10 @@ class NetworkLoadBalancerSubresourceScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck('protocol', 'Udp'),
             JMESPathCheck('backendPort', 50)
         ])
+        # test generic update
+        self.cmd('network lb inbound-nat-pool update {} -n rule1000 --set protocol=Tcp'.format(lb_rg),
+            checks=JMESPathCheck('protocol', 'Tcp'))
+
         for count in range(1000, 4000, 1000):
             self.cmd('network lb inbound-nat-pool delete {} -n rule{}'.format(lb_rg, count))
         self.cmd('network lb inbound-nat-pool list {}'.format(lb_rg),
@@ -363,6 +374,11 @@ class NetworkLoadBalancerSubresourceScenarioTest(ResourceGroupVCRTestBase):
         self.cmd('network lb frontend-ip update {} -n ipconfig1 --public-ip-address publicip3'.format(lb_rg))
         self.cmd('network lb frontend-ip show {} -n ipconfig1'.format(lb_rg),
             checks=JMESPathCheck("publicIpAddress.contains(id, 'publicip3')", True))
+        # test generic update
+        subscription_id = MOCKED_SUBSCRIPTION_ID if self.playback else get_subscription_id()
+        ip1_id = resource_id(subscription=subscription_id, resource_group=self.resource_group, namespace='Microsoft.Network', type='publicIPAddresses', name='publicip1')
+        self.cmd('network lb frontend-ip update {} -n ipconfig1 --set publicIpAddress.id="{}"'.format(lb_rg, ip1_id),
+            checks=JMESPathCheck("publicIpAddress.contains(id, 'publicip1')", True))
         self.cmd('network lb frontend-ip delete {} -n ipconfig2'.format(lb_rg))
         self.cmd('network lb frontend-ip list {}'.format(lb_rg), checks=JMESPathCheck('length(@)', 2))
 
@@ -385,6 +401,12 @@ class NetworkLoadBalancerSubresourceScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck('intervalInSeconds', 20),
             JMESPathCheck('numberOfProbes', 5)
         ])
+        # test generic update
+        self.cmd('network lb probe update {} -n probe1 --set intervalInSeconds=15 --set numberOfProbes=3'.format(lb_rg), checks=[
+            JMESPathCheck('intervalInSeconds', 15),
+            JMESPathCheck('numberOfProbes', 3)
+        ])
+
         self.cmd('network lb probe show {} -n probe2'.format(lb_rg), checks=[
             JMESPathCheck('protocol', 'Tcp'),
             JMESPathCheck('path', None)
@@ -404,6 +426,10 @@ class NetworkLoadBalancerSubresourceScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck('loadDistribution', 'SourceIP'),
             JMESPathCheck('protocol', 'Udp')
         ])
+        # test generic update
+        self.cmd('network lb rule update {} -n rule1 --set idleTimeoutInMinutes=5'.format(lb_rg),
+            checks=JMESPathCheck('idleTimeoutInMinutes', 5))
+
         self.cmd('network lb rule show {} -n rule2'.format(lb_rg), checks=[
             JMESPathCheck("backendAddressPool.contains(id, 'bap2')", True),
             JMESPathCheck("frontendIpConfiguration.contains(id, 'ipconfig1')", True),
@@ -528,6 +554,12 @@ class NetworkNicScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck('dnsSettings.internalDnsNameLabel', 'noodle'),
             JMESPathCheck("networkSecurityGroup.contains(id, '{}')".format(alt_nsg), True),
         ])
+        # test generic update
+        self.cmd('network nic update -g {} -n {} --set dnsSettings.internalDnsNameLabel=doodle --set enableIpForwarding=false'.format(rg, nic), checks=[
+            JMESPathCheck('enableIpForwarding', False),
+            JMESPathCheck('dnsSettings.internalDnsNameLabel', 'doodle')
+        ])
+
         self.cmd('network nic delete --resource-group {} --name {}'.format(rg, nic))
         self.cmd('network nic list -g {}'.format(rg), checks=NoneCheck())
 
@@ -580,30 +612,33 @@ class NetworkNicSubresourceScenarioTest(ResourceGroupVCRTestBase):
         private_ip = '10.0.0.15'
         # test ability to set load balancer IDs
         self.cmd('network nic ip-config update -g {} --nic-name {} -n {} --lb-name {} --lb-address-pools {} bap2 --lb-inbound-nat-rules {} rule2 --private-ip-address {}'.format(rg, nic, config, lb, bap1_id, rule1_id, private_ip), checks=[
-            JMESPathCheck('length(ipConfigurations[0].loadBalancerBackendAddressPools)', 2), # includes the default backend pool
-            JMESPathCheck('length(ipConfigurations[0].loadBalancerInboundNatRules)', 2),
-            JMESPathCheck('ipConfigurations[0].privateIpAddress', private_ip),
-            JMESPathCheck('ipConfigurations[0].privateIpAllocationMethod', 'Static')
+            JMESPathCheck('length(loadBalancerBackendAddressPools)', 2), # includes the default backend pool
+            JMESPathCheck('length(loadBalancerInboundNatRules)', 2),
+            JMESPathCheck('privateIpAddress', private_ip),
+            JMESPathCheck('privateIpAllocationMethod', 'Static')
         ])
+        # test generic update
+        self.cmd('network nic ip-config update -g {} --nic-name {} -n {} --set privateIpAddress=10.0.0.50'.format(rg, nic, config),
+            checks=JMESPathCheck('privateIpAddress', '10.0.0.50'))
 
         # test ability to add and remove IDs one at a time with subcommands
         self.cmd('network nic ip-config inbound-nat-rule remove -g {} --lb-name {} --nic-name {} --ip-config-name {} --inbound-nat-rule rule1'.format(rg, lb, nic, config),
-            checks=JMESPathCheck('length(ipConfigurations[0].loadBalancerInboundNatRules)', 1))
+            checks=JMESPathCheck('length(loadBalancerInboundNatRules)', 1))
         self.cmd('network nic ip-config inbound-nat-rule add -g {} --lb-name {} --nic-name {} --ip-config-name {} --inbound-nat-rule rule1'.format(rg, lb, nic, config),
-            checks=JMESPathCheck('length(ipConfigurations[0].loadBalancerInboundNatRules)', 2))
+            checks=JMESPathCheck('length(loadBalancerInboundNatRules)', 2))
 
         self.cmd('network nic ip-config address-pool remove -g {} --lb-name {} --nic-name {} --ip-config-name {} --address-pool bap1'.format(rg, lb, nic, config),
-            checks=JMESPathCheck('length(ipConfigurations[0].loadBalancerBackendAddressPools)', 1))
+            checks=JMESPathCheck('length(loadBalancerBackendAddressPools)', 1))
         self.cmd('network nic ip-config address-pool add -g {} --lb-name {} --nic-name {} --ip-config-name {} --address-pool bap1'.format(rg, lb, nic, config),
-            checks=JMESPathCheck('length(ipConfigurations[0].loadBalancerBackendAddressPools)', 2))
+            checks=JMESPathCheck('length(loadBalancerBackendAddressPools)', 2))
 
         self.cmd('network nic ip-config update -g {} --nic-name {} -n {} --private-ip-address "" --public-ip-address {}'.format(rg, nic, config, public_ip_id), checks=[
-            JMESPathCheck('ipConfigurations[0].privateIpAllocationMethod', 'Dynamic'),
-            JMESPathCheck("ipConfigurations[0].publicIpAddress.contains(id, '{}')".format(public_ip), True)
+            JMESPathCheck('privateIpAllocationMethod', 'Dynamic'),
+            JMESPathCheck("publicIpAddress.contains(id, '{}')".format(public_ip), True)
         ])
 
         self.cmd('network nic ip-config update -g {} --nic-name {} -n {} --subnet {} --vnet-name {}'.format(rg, nic, config, subnet, vnet),
-            checks=JMESPathCheck("ipConfigurations[0].subnet.contains(id, '{}')".format(subnet), True))
+            checks=JMESPathCheck("subnet.contains(id, '{}')".format(subnet), True))
 
 class NetworkNicScaleSetScenarioTest(VCRTestBase):
 
@@ -711,6 +746,10 @@ class NetworkSecurityGroupScenarioTest(ResourceGroupVCRTestBase):
                      JMESPathCheck('description', description),
                      ])
 
+        # test generic update
+        self.cmd('network nsg rule update -g {} --nsg-name {} -n {} --set description="cool"'.format(rg, nsg, nrn),
+            checks=JMESPathCheck('description', 'cool'))
+
         self.cmd('network nsg rule delete --resource-group {} --nsg-name {} --name {}'.format(rg, nsg, nrn))
         # Delete the network security group
         self.cmd('network nsg delete --resource-group {} --name {}'.format(rg, nsg))
@@ -800,7 +839,12 @@ class NetworkVNetScenarioTest(ResourceGroupVCRTestBase):
 
         vnet_addr_prefixes = '20.0.0.0/16 10.0.0.0/16'
         self.cmd('network vnet update --resource-group {} --name {} --address-prefixes {}'.format(
-            self.resource_group, self.vnet_name, vnet_addr_prefixes))
+            self.resource_group, self.vnet_name, vnet_addr_prefixes),
+                checks=JMESPathCheck('length(addressSpace.addressPrefixes)', 2))
+
+        # test generic update
+        self.cmd('network vnet update --resource-group {} --name {} --set addressSpace.addressPrefixes[0]="20.0.0.0/24"'.format(
+            self.resource_group, self.vnet_name), checks=JMESPathCheck('addressSpace.addressPrefixes[0]', '20.0.0.0/24'))
 
         self.cmd('network vnet subnet create --resource-group {} --vnet-name {} --name {} --address-prefix {}'.format(
             self.resource_group, self.vnet_name, self.vnet_subnet_name, '20.0.0.0/24'))
@@ -847,15 +891,18 @@ class NetworkSubnetSetScenarioTest(ResourceGroupVCRTestBase):
         self.cmd('network nsg create --resource-group {} --name {}'.format(self.resource_group, nsg_name))
 
         #Test we can update the address space and nsg
-        self.cmd('network vnet subnet update --resource-group {} --vnet-name {} --name {} --address-prefix {} --network-security-group {}'.format(self.resource_group, self.vnet_name, subnet_name, subnet_addr_prefix_new, nsg_name),
-                 checks=[
-                     JMESPathCheck('addressPrefix', subnet_addr_prefix_new),
-                     JMESPathCheck('ends_with(@.networkSecurityGroup.id, `{}`)'.format('/' + nsg_name), True)
-                     ])
+        self.cmd('network vnet subnet update --resource-group {} --vnet-name {} --name {} --address-prefix {} --network-security-group {}'.format(self.resource_group, self.vnet_name, subnet_name, subnet_addr_prefix_new, nsg_name), checks=[
+            JMESPathCheck('addressPrefix', subnet_addr_prefix_new),
+            JMESPathCheck('ends_with(@.networkSecurityGroup.id, `{}`)'.format('/' + nsg_name), True)
+        ])
+
+        # test generic update
+        self.cmd('network vnet subnet update -g {} --vnet-name {} -n {} --set addressPrefix=123.0.0.0/24'.format(self.resource_group, self.vnet_name, subnet_name),
+            checks=JMESPathCheck('addressPrefix', '123.0.0.0/24'))
 
         #Test we can get rid of the nsg.
         self.cmd('network vnet subnet update --resource-group {} --vnet-name {} --name {} --address-prefix {} --network-security-group {}'.format(self.resource_group, self.vnet_name, subnet_name, subnet_addr_prefix_new, '\"\"'),
-                 checks=JMESPathCheck('networkSecurityGroup', None))
+            checks=JMESPathCheck('networkSecurityGroup', None))
 
         self.cmd('network vnet delete --resource-group {} --name {}'.format(self.resource_group, self.vnet_name))
         self.cmd('network nsg delete --resource-group {} --name {}'.format(self.resource_group, nsg_name))
