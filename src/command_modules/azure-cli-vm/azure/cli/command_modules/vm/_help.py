@@ -62,7 +62,7 @@ helps['vmss create'] = """
                     az vmss create -n myName -g myResourceGroup --admin-password MyPassword123 --instance-count 5
                 - name: Linux scaleset with SSH authentication, a public IP address, a DNS entry, an existing load balancer, and an existing virtual network
                   text: >
-                    az vmss create  -n myName -g myResourceGroup --dns-name-for-public-ip myGloballyUnieqDnsName
+                    az vmss create  -n myName -g myResourceGroup --dns-name-for-public-ip myGloballyUniqueDnsName
                     --load-balancer-type existing --load-balancer-name myLoadBalancer
                     --virtual-network-type existing --virtual-network-name myVNET --subnet-name mySubnet --image canonical:Ubuntu_Snappy_Core:15.04:2016.0318.1949
                     --authentication-type ssh --ssh-key-value "<ssh-key-value or ssh-key-file-path"

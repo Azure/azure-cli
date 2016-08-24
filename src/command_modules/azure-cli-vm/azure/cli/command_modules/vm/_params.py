@@ -112,6 +112,18 @@ register_cli_argument('vm extension image', 'publisher_name', CliArgumentType(op
 register_cli_argument('vm extension image', 'type', CliArgumentType(options_list=('--name', '-n')))
 register_cli_argument('vm extension image', 'latest', CliArgumentType(action='store_true'))
 
+register_cli_argument('vmss extension', 'extension_name', name_arg_type, id_part='name', help='Name of extension')
+register_cli_argument('vmss extension', 'vmss_name', help='Scale set name')
+register_cli_argument('vmss extension', 'auto_upgrade_minor_version', CliArgumentType(action='store_true'))
+
+register_cli_argument('vmss extension image', 'publisher_name', CliArgumentType(options_list=('--publisher',), help='Image publisher name'))
+register_cli_argument('vmss extension image', 'type', CliArgumentType(options_list=('--name', '-n'), help='Extension name'))
+register_cli_argument('vmss extension image', 'latest', CliArgumentType(action='store_true'))
+register_cli_argument('vmss extension image', 'image_name', help='Image name')
+register_cli_argument('vmss extension image', 'orderby', help='The sort to apply on the operation')
+register_cli_argument('vmss extension image', 'top', help='Return top number of records')
+register_cli_argument('vmss extension image', 'version', help='Extension version')
+
 register_cli_argument('vm image list', 'image_location', location_type)
 
 register_cli_argument('vm open-port', 'vm_name', name_arg_type, help='The name of the virtual machine to open inbound traffic on.')
