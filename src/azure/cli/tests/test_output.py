@@ -144,6 +144,16 @@ Id     : 0b1f6472
 
 """))
 
+    def test_out_list_valid_caps(self):
+        output_producer = OutputProducer(formatter=format_list, file=self.io)
+        output_producer.out(CommandResultItem({'active': True, 'TESTStuff': 'blah'}))
+        self.assertEqual(util.normalize_newlines(self.io.getvalue()), util.normalize_newlines(
+"""Test Stuff : blah
+Active     : True
+
+
+"""))
+
     def test_out_list_valid_none_val(self):
         output_producer = OutputProducer(formatter=format_list, file=self.io)
         output_producer.out(CommandResultItem({'active': None, 'id': '0b1f6472'}))
@@ -232,7 +242,7 @@ Myarray :
         lo = ListOutput()
         self.assertEqual(lo._formatted_keys_cache, {})
         lo._get_formatted_key('fooIDS')
-        self.assertEqual(lo._formatted_keys_cache, {'fooIDS': 'Foo I D S'})
+        self.assertEqual(lo._formatted_keys_cache, {'fooIDS': 'Foo Ids'})
 
     def test_out_list_format_key_multiple_words(self):
         lo = ListOutput()
