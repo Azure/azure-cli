@@ -287,7 +287,7 @@ def cli_generic_update_command(name, getter, setter, factory=None, setter_arg_na
 
 index_regex = re.compile(r'\[(.*)\]')
 def set_properties(instance, expression):
-    key, value = expression.split('=', 1)
+    key, value = expression.rsplit('=', 1)
 
     try:
         value = json.loads(value)
@@ -295,11 +295,12 @@ def set_properties(instance, expression):
         pass
 
     name, path = _get_name_path(key)
+    parent_name = path[-1] if path else 'root'
     root = instance
     instance = _find_property(instance, path)
     if instance is None:
         parent = _find_property(root, path[:-1])
-        set_properties(parent, '{}={{}}'.format(path[-1]))
+        set_properties(parent, '{}={{}}'.format(parent_name))
         instance = _find_property(root, path)
 
     match = index_regex.match(name)
@@ -309,8 +310,12 @@ def set_properties(instance, expression):
             instance[index_value] = value
         elif isinstance(instance, dict):
             instance[name] = value
-        else:
+        elif isinstance(instance, list):
+            show_options(instance, name, key.split('.'))
+        elif hasattr(instance, name):
             setattr(instance, name, value)
+        else:
+            raise CLIError('Property {} does\'t exist on {}'.format(name, parent_name))
     except IndexError:
         raise CLIError('index {} doesn\'t exist on {}'.format(index_value, make_camel_case(name)))
     except (AttributeError, KeyError):
@@ -357,12 +362,16 @@ def remove_properties(instance, argument_values):
 
 def show_options(instance, part, path):
     options = instance.__dict__ if hasattr(instance, '__dict__') else instance
-    options = options.keys() if isinstance(options, dict) else options
-    options = [make_camel_case(x) for x in options]
+    parent = make_camel_case('.'.join(path[:-1]).replace('.[', '['))
+    if isinstance(options, dict):
+        options = options.keys()
+        options = sorted([make_camel_case(x) for x in options])
+    elif isinstance(options, list):
+        options = 'index into the collection "{}" with [<index>] or [<key=value>]'.format(parent)
+    else:
+        options = sorted([make_camel_case(x) for x in options])
     raise CLIError('Couldn\'t find "{}" in "{}".  Available options: {}'
-                   .format(make_camel_case(part),
-                           make_camel_case('.'.join(path[:-1]).replace('.[', '[')),
-                           sorted(list(options), key=str)))
+                   .format(make_camel_case(part), parent, options))
 
 snake_regex_1 = re.compile('(.)([A-Z][a-z]+)')
 snake_regex_2 = re.compile('([a-z0-9])([A-Z])')
@@ -384,7 +393,10 @@ def _get_internal_path(path):
     _path = path.split('.') \
         if '.[' in path \
         else path.replace('[', '.[').split('.')
-    return [make_snake_case(x) for x in _path]
+    final_paths = []
+    for x in _path:
+        final_paths.append(x if x.startswith('[') else make_snake_case(x))
+    return final_paths
 
 def _get_name_path(path):
     pathlist = _get_internal_path(path)
@@ -394,12 +406,25 @@ def _update_instance(instance, part, path):
     try:
         index = index_regex.match(part)
         if index:
-            try:
-                index_value = int(index.group(1))
-                instance = instance[index_value]
-            except IndexError:
-                raise CLIError('index {} doesn\'t exist on {}'.format(index_value,
-                                                                      make_camel_case(path[-2])))
+            if '=' in index.group(1):
+                key, value = index.group(1).split('=')
+                matches = [x for x in instance if isinstance(x, dict) and x.get(key, None) == value]
+                if len(matches) == 1:
+                    instance = matches[0]
+                elif len(matches) > 1:
+                    raise CLIError("non-unique key '{}' found multiple matches on {}. "
+                                   "Key must be unique.".format(
+                                       key, make_camel_case(path[-2])))
+                else:
+                    raise CLIError("item with value '{}' doesn\'t exist for key '{}' on {}".format(
+                        value, key, make_camel_case(path[-2])))
+            else:
+                try:
+                    index_value = int(index.group(1))
+                    instance = instance[index_value]
+                except IndexError:
+                    raise CLIError('index {} doesn\'t exist on {}'.format(
+                        index_value, make_camel_case(path[-2])))
         elif isinstance(instance, dict):
             instance = instance[part]
         else:
