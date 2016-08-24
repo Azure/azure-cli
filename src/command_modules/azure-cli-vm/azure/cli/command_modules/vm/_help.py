@@ -65,7 +65,7 @@ helps['vmss create'] = """
                     az vmss create  -n myName -g myResourceGroup --dns-name-for-public-ip myGloballyUnieqDnsName
                     --load-balancer-type existing --load-balancer-name myLoadBalancer
                     --virtual-network-type existing --virtual-network-name myVNET --subnet-name mySubnet --image canonical:Ubuntu_Snappy_Core:15.04:2016.0318.1949
-                    --authentication-type ssh --ssh-key-value "<ssh-key-value or ssh-key-file-path"
+                    --authentication-type ssh --ssh-key-value "<ssh-key-value or ssh-key-file-path>"
 """.format(image_long_summary)
 
 helps['vm availability-set create'] = """
