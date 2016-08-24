@@ -78,9 +78,9 @@ class IgnoreAction(argparse.Action): # pylint: disable=too-few-public-methods
         raise argparse.ArgumentError(None, 'unrecognized argument: {} {}'.format(
             option_string, values or ''))
 
-# CONSTANTS
+# GLOBAL ARGUMENT DEFINTIONS
 
-IGNORE_TYPE = CliArgumentType(
+ignore_type = CliArgumentType(
     help=argparse.SUPPRESS,
     nargs='?',
     action=IgnoreAction,
