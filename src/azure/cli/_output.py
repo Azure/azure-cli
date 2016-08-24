@@ -9,12 +9,11 @@ import sys
 import platform
 import json
 import re
-import traceback
 from collections import OrderedDict
 from six import StringIO, text_type, u
 import colorama
+from tabulate import tabulate
 
-from azure.cli._util import CLIError
 import azure.cli._logging as _logging
 
 logger = _logging.get_az_logger(__name__)
@@ -40,31 +39,6 @@ def format_json_color(obj):
     from pygments import highlight, lexers, formatters
     return highlight(format_json(obj), lexers.JsonLexer(), formatters.TerminalFormatter()) # pylint: disable=no-member
 
-def format_table(obj):
-    result = obj.result
-    try:
-        if not obj.simple_output_query and not obj.is_query_active:
-            raise ValueError('No query specified and no built-in query available.')
-        if obj.simple_output_query and not obj.is_query_active:
-            if callable(obj.simple_output_query):
-                result = obj.simple_output_query(result)
-            else:
-                from jmespath import compile as compile_jmespath, search, Options
-                result = compile_jmespath(obj.simple_output_query).search(result,
-                                                                          Options(OrderedDict))
-        obj_list = result if isinstance(result, list) else [result]
-        to = TableOutput()
-        for item in obj_list:
-            for item_key in item:
-                to.cell(item_key, item[item_key])
-            to.end_row()
-        return to.dump()
-    except (ValueError, KeyError, TypeError):
-        logger.debug(traceback.format_exc())
-        raise CLIError("Table output unavailable. "\
-                       "Change output type with --output or use "\
-                       "the --query option to specify an appropriate query. "\
-                       "Use --debug for more info.")
 
 def format_text(obj):
     result = obj.result
@@ -77,6 +51,11 @@ def format_text(obj):
         return to.dump()
     except TypeError:
         return ''
+
+def format_table(obj):
+    result = obj.result
+    result_list = result if isinstance(result, list) else [result]
+    return TableOutput.dump(result_list)
 
 def format_list(obj):
     result = obj.result
@@ -91,9 +70,8 @@ def format_tsv(obj):
 
 class CommandResultItem(object): #pylint: disable=too-few-public-methods
 
-    def __init__(self, result, simple_output_query=None, is_query_active=False):
+    def __init__(self, result, is_query_active=False):
         self.result = result
-        self.simple_output_query = simple_output_query
         self.is_query_active = is_query_active
 
 class OutputProducer(object): #pylint: disable=too-few-public-methods
@@ -124,6 +102,39 @@ class OutputProducer(object): #pylint: disable=too-few-public-methods
     @staticmethod
     def get_formatter(format_type):
         return OutputProducer.format_dict.get(format_type, format_list)
+
+class TableOutput(object): #pylint: disable=too-few-public-methods
+
+    SKIP_KEYS = ['id', 'type']
+
+    @staticmethod
+    def _capitalize_first_char(x):
+        return x[0].upper() + x[1:] if x and len(x) > 0 else x
+
+    @staticmethod
+    def _auto_table_item(item):
+        new_entry = OrderedDict()
+        for k in sorted(item.keys()):
+            if k in TableOutput.SKIP_KEYS:
+                continue
+            if item[k] and not isinstance(item[k], (list, dict, set)):
+                new_entry[TableOutput._capitalize_first_char(k)] = item[k]
+        return new_entry
+
+    @staticmethod
+    def _auto_table(result):
+        if isinstance(result, list):
+            new_result = []
+            for item in result:
+                new_result.append(TableOutput._auto_table_item(item))
+            return new_result
+        else:
+            return TableOutput._auto_table_item(result)
+
+    @staticmethod
+    def dump(data):
+        table_data = TableOutput._auto_table(data)
+        return tabulate(table_data, headers="keys", tablefmt="simple") + '\n' if table_data else ''
 
 class ListOutput(object): #pylint: disable=too-few-public-methods
 
@@ -195,53 +206,6 @@ class ListOutput(object): #pylint: disable=too-few-public-methods
         result = io.getvalue()
         io.close()
         return result
-
-class TableOutput(object):
-
-    unsupported_types = (list, dict, set)
-
-    def __init__(self):
-        self._rows = [{}]
-        self._columns = {}
-        self._column_order = []
-
-    def dump(self):
-        if len(self._rows) == 1:
-            return
-
-        io = StringIO()
-        cols = [(c, self._columns[c]) for c in self._column_order]
-        io.write(' | '.join(c.center(w) for c, w in cols))
-        io.write('\n')
-        io.write('-|-'.join('-' * w for c, w in cols))
-        io.write('\n')
-        for r in self._rows[:-1]:
-            io.write(' | '.join(r.get(c, '-').ljust(w) for c, w in cols))
-            io.write('\n')
-        result = io.getvalue()
-        io.close()
-        return result
-
-    @property
-    def any_rows(self):
-        return len(self._rows) > 1
-
-    def cell(self, name, value):
-        if isinstance(value, TableOutput.unsupported_types):
-            raise TypeError('Table output does not support objects of type {}.\n'\
-                            'Offending object name={} value={}'.format(
-                                [ut.__name__ for ut in TableOutput.unsupported_types], name, value))
-        n = str(name)
-        v = str(value)
-        max_width = self._columns.get(n)
-        if max_width is None:
-            self._column_order.append(n)
-            max_width = len(n)
-        self._rows[-1][n] = v
-        self._columns[n] = max(max_width, len(v))
-
-    def end_row(self):
-        self._rows.append({})
 
 class TextOutput(object):
 

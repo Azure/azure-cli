@@ -69,68 +69,24 @@ class TestOutput(unittest.TestCase):
 
     # TABLE output tests
 
-    def test_out_table_valid_query1(self):
+    def test_out_table(self):
         output_producer = OutputProducer(formatter=format_table, file=self.io)
-        result_item = CommandResultItem([{'name': 'qwerty', 'id': '0b1f6472qwerty'},
-                                         {'name': 'asdf', 'id': '0b1f6472asdf'}],
-                                              simple_output_query='[*].{Name:name, Id:id}')
-        output_producer.out(result_item)
+        output_producer.out(CommandResultItem({'active': True, 'val': '0b1f6472'}))
         self.assertEqual(util.normalize_newlines(self.io.getvalue()), util.normalize_newlines(
-""" Name  |       Id      
--------|---------------
-qwerty | 0b1f6472qwerty
-asdf   | 0b1f6472asdf  
+"""  Active  Val
+--------  --------
+       1  0b1f6472
 """))
-
-    def test_out_table_no_query(self):
-        output_producer = OutputProducer(formatter=format_table, file=self.io)
-        with self.assertRaises(util.CLIError):
-            output_producer.out(CommandResultItem({'active': True, 'id': '0b1f6472'}))
-
-    def test_out_table_valid_query2(self):
-        output_producer = OutputProducer(formatter=format_table, file=self.io)
-        result_item = CommandResultItem([{'name': 'qwerty', 'id': '0b1f6472qwerty'},
-                                         {'name': 'asdf', 'id': '0b1f6472asdf'}],
-                                              simple_output_query='[*].{Name:name}')
-        output_producer.out(result_item)
-        self.assertEqual(util.normalize_newlines(self.io.getvalue()), util.normalize_newlines(
-""" Name 
-------
-qwerty
-asdf  
-"""))
-
-    def test_out_table_bad_query(self):
-        output_producer = OutputProducer(formatter=format_table, file=self.io)
-        result_item = CommandResultItem([{'name': 'qwerty', 'id': '0b1f6472qwerty'},
-                                         {'name': 'asdf', 'id': '0b1f6472asdf'}],
-                                              simple_output_query='[*].{Name:name')
-        with self.assertRaises(util.CLIError):
-            output_producer.out(result_item)
 
     def test_out_table_complex_obj(self):
         output_producer = OutputProducer(formatter=format_table, file=self.io)
-        result_item = CommandResultItem([{'name': 'qwerty', 'id': '0b1f6472qwerty', 'sub': {'1'}}])
-        with self.assertRaises(util.CLIError):
-            output_producer.out(result_item)
-
-    def test_out_table_complex_obj_with_query_ok(self):
-        output_producer = OutputProducer(formatter=format_table, file=self.io)
-        result_item = CommandResultItem([{'name': 'qwerty', 'id': '0b1f6472qwerty', 'sub': {'1'}}],
-                                        simple_output_query='[*].{Name:name}')
+        result_item = CommandResultItem([{'name': 'qwerty', 'val': '0b1f6472qwerty', 'sub': {'1'}}])
         output_producer.out(result_item)
         self.assertEqual(util.normalize_newlines(self.io.getvalue()), util.normalize_newlines(
-""" Name 
-------
-qwerty
+"""Name    Val
+------  --------------
+qwerty  0b1f6472qwerty
 """))
-
-    def test_out_table_complex_obj_with_query_still_complex(self):
-        output_producer = OutputProducer(formatter=format_table, file=self.io)
-        result_item = CommandResultItem([{'name': 'qwerty', 'id': '0b1f6472qwerty', 'sub': {'1'}}],
-                                        simple_output_query='[*].{Name:name, Sub:sub}')
-        with self.assertRaises(util.CLIError):
-            output_producer.out(result_item)
 
     # LIST output tests
 
