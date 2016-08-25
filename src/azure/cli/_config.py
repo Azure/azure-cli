@@ -5,9 +5,9 @@
 import os
 from six.moves import configparser
 
-GLOBAL_CONFIG_PATH = os.path.expanduser(os.path.join('~', '.azure', 'az_config'))
+GLOBAL_CONFIG_PATH = os.path.expanduser(os.path.join('~', '.azure', 'config'))
 ACTIVE_ENV_CONFIG_PATH = os.path.expanduser(os.path.join('~', '.azure', 'env_config', 'default'))
-ENV_VAR_PREFIX = 'AZURE_CLI_'
+ENV_VAR_PREFIX = 'AZURE_'
 
 _UNSET = object()
 _ENV_VAR_FORMAT = ENV_VAR_PREFIX+'{section}_{option}'

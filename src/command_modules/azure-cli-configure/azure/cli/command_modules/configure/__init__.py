@@ -20,21 +20,19 @@ OUTPUT_LIST = [
     {'name': 'tsv', 'desc': 'Tab and Newline delimited, great for GREP, AWK, etc.'}
 ]
 
-MESSAGES = {
-    'intro': '\nWelcome to the Azure CLI! This command will guide you through logging in and '\
-             'setting some default values.\n',
-    'global_settings_loc': 'Your global settings can be found at {}',
-    'active_env_settings_loc': 'Your current environment settings can be found at {}',
-    'current_config_info': 'Your current configuration is as follows:\n',
-    'env_vars_heading': 'Environment variables:',
-    'global_settings_exists': 'Do you wish to change your global settings? (y/N): ',
-    'prompt_global_output': 'What default output format would you like?\n'\
+MESSAGES_INTRO = '\nWelcome to the Azure CLI! This command will guide you through logging in and '\
+             'setting some default values.\n'
+MESSAGES_GLOBAL_SETTINGS_LOCATION = 'Your global settings can be found at {}'
+MESSAGES_ACTIVE_ENV_SETTINGS_LOCATION = 'Your current environment settings can be found at {}'
+MESSAGES_CURRENT_CONFIG_INFO = 'Your current configuration is as follows:\n'
+MESSAGES_ENV_VARS_HEADING = 'Environment variables:'
+MESSAGES_GLOBAL_SETTINGS_EXISTS = 'Do you wish to change your global settings? (y/N): '
+MESSAGES_PROMPT_GLOBAL_OUTPUT = 'What default output format would you like?\n'\
                             '{}\n'\
-                            'Please enter a choice [{}]: ',
-    'closing': '\nYou\'re all set! Here are some commands to try:\n'\
+                            'Please enter a choice [{}]: '
+MESSAGES_CLOSING = '\nYou\'re all set! Here are some commands to try:\n'\
                ' $ az vm create --help\n'\
-               ' $ az feedback\n',
-}
+               ' $ az feedback\n'
 
 def _prompt_global_output(global_config):
     try:
@@ -47,7 +45,7 @@ def _prompt_global_output(global_config):
     allowed_vals = list(range(1, len(OUTPUT_LIST)+1))
     while True:
         try:
-            ans = int(input(MESSAGES['prompt_global_output'].format(options, default_output)) \
+            ans = int(input(MESSAGES_PROMPT_GLOBAL_OUTPUT.format(options, default_output)) \
                             or default_output)
             if ans in allowed_vals:
                 # array index is 0-based, user input is 1-based
@@ -58,7 +56,7 @@ def _prompt_global_output(global_config):
 
 def _prompt_global_settings_exist():
     while True:
-        ans = input(MESSAGES['global_settings_exists'])
+        ans = input(MESSAGES_GLOBAL_SETTINGS_EXISTS)
         if not ans or ans.lower() == 'n':
             return False
         if ans.lower() == 'y':
@@ -72,21 +70,21 @@ def _print_cur_configuration(file_config):
         print()
     env_vars = [ev for ev in os.environ if ev.startswith(ENV_VAR_PREFIX)]
     if env_vars:
-        print(MESSAGES['env_vars_heading'])
+        print(MESSAGES_ENV_VARS_HEADING)
         print('\n'.join(['{} = {}'.format(ev, os.environ[ev]) for ev in env_vars]))
         print()
 
 def _handle_global_configuration():
-    print(MESSAGES['global_settings_loc'].format(GLOBAL_CONFIG_PATH))
-    print(MESSAGES['active_env_settings_loc'].format(ACTIVE_ENV_CONFIG_PATH))
-    # We don't want to use AzConfig as we don't want to use get values set by env vars.
+    print(MESSAGES_GLOBAL_SETTINGS_LOCATION.format(GLOBAL_CONFIG_PATH))
+    print(MESSAGES_ACTIVE_ENV_SETTINGS_LOCATION.format(ACTIVE_ENV_CONFIG_PATH))
+    # We don't want to use AzConfig as we don't want to use values set by env vars.
     file_config = configparser.SafeConfigParser()
     config_exists = file_config.read([GLOBAL_CONFIG_PATH, ACTIVE_ENV_CONFIG_PATH])
     global_config = configparser.SafeConfigParser()
     global_config.read(GLOBAL_CONFIG_PATH)
     change_global_settings = None
     if config_exists:
-        print(MESSAGES['current_config_info'])
+        print(MESSAGES_CURRENT_CONFIG_INFO)
         _print_cur_configuration(file_config)
         change_global_settings = _prompt_global_settings_exist()
     if not config_exists or change_global_settings:
@@ -96,14 +94,14 @@ def _handle_global_configuration():
         except configparser.DuplicateSectionError:
             pass
         global_config.set('core', 'output', OUTPUT_LIST[output_index]['name'])
-        with open(GLOBAL_CONFIG_PATH, 'wb') as configfile:
+        with open(GLOBAL_CONFIG_PATH, 'w') as configfile:
             global_config.write(configfile)
 
 def handle_configure():
     try:
-        print(MESSAGES['intro'])
+        print(MESSAGES_INTRO)
         _handle_global_configuration()
-        print(MESSAGES['closing'])
+        print(MESSAGES_CLOSING)
     except KeyboardInterrupt:
         # Catch to prevent stacktrace and print newline
         print()
