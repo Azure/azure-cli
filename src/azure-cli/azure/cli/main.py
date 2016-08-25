@@ -37,6 +37,9 @@ def main(args, file=sys.stdout): #pylint: disable=redefined-builtin
         if cmd_result and cmd_result.result:
             formatter = OutputProducer.get_formatter(APPLICATION.configuration.output_format)
             OutputProducer(formatter=formatter, file=file).out(cmd_result)
+    except KeyboardInterrupt:
+        logger.warning('KeyboardInterrupt')
+        sys.exit(1)
     except Exception as ex: # pylint: disable=broad-except
         error_code = handle_exception(ex)
         return error_code
