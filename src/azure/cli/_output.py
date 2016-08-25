@@ -9,11 +9,13 @@ import sys
 import platform
 import json
 import re
+import traceback
 from collections import OrderedDict
 from six import StringIO, text_type, u
 import colorama
 from tabulate import tabulate
 
+from azure.cli._util import CLIError
 import azure.cli._logging as _logging
 
 logger = _logging.get_az_logger(__name__)
@@ -54,8 +56,17 @@ def format_text(obj):
 
 def format_table(obj):
     result = obj.result
-    result_list = result if isinstance(result, list) else [result]
-    return TableOutput.dump(result_list)
+    try:
+        if obj.simple_output_query and not obj.is_query_active:
+            if callable(obj.simple_output_query):
+                result = obj.simple_output_query(result)
+        result_list = result if isinstance(result, list) else [result]
+        return TableOutput.dump(result_list)
+    except:
+        logger.debug(traceback.format_exc())
+        raise CLIError("Table output unavailable. "\
+                       "Use the --query option to specify an appropriate query. "\
+                       "Use --debug for more info.")
 
 def format_list(obj):
     result = obj.result
@@ -70,8 +81,9 @@ def format_tsv(obj):
 
 class CommandResultItem(object): #pylint: disable=too-few-public-methods
 
-    def __init__(self, result, is_query_active=False):
+    def __init__(self, result, simple_output_query=None, is_query_active=False):
         self.result = result
+        self.simple_output_query = simple_output_query
         self.is_query_active = is_query_active
 
 class OutputProducer(object): #pylint: disable=too-few-public-methods
@@ -114,7 +126,7 @@ class TableOutput(object): #pylint: disable=too-few-public-methods
     @staticmethod
     def _auto_table_item(item):
         new_entry = OrderedDict()
-        for k in sorted(item.keys()):
+        for k in item.keys():
             if k in TableOutput.SKIP_KEYS:
                 continue
             if item[k] and not isinstance(item[k], (list, dict, set)):
@@ -134,7 +146,10 @@ class TableOutput(object): #pylint: disable=too-few-public-methods
     @staticmethod
     def dump(data):
         table_data = TableOutput._auto_table(data)
-        return tabulate(table_data, headers="keys", tablefmt="simple") + '\n' if table_data else ''
+        table_str = tabulate(table_data, headers="keys", tablefmt="simple") if table_data else ''
+        if table_str == '\n':
+            raise ValueError('Unable to extract fields for table.')
+        return table_str + '\n'
 
 class ListOutput(object): #pylint: disable=too-few-public-methods
 

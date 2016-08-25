@@ -6,6 +6,7 @@
 from __future__ import print_function
  # pylint: disable=protected-access, bad-continuation, too-many-public-methods, trailing-whitespace
 import unittest
+from collections import OrderedDict
 from six import StringIO
 
 from azure.cli._output import (OutputProducer, format_json, format_table, format_list,
@@ -71,7 +72,10 @@ class TestOutput(unittest.TestCase):
 
     def test_out_table(self):
         output_producer = OutputProducer(formatter=format_table, file=self.io)
-        output_producer.out(CommandResultItem({'active': True, 'val': '0b1f6472'}))
+        obj = OrderedDict()
+        obj['active'] = True
+        obj['val'] = '0b1f6472'
+        output_producer.out(CommandResultItem(obj))
         self.assertEqual(util.normalize_newlines(self.io.getvalue()), util.normalize_newlines(
 """  Active  Val
 --------  --------
@@ -80,7 +84,11 @@ class TestOutput(unittest.TestCase):
 
     def test_out_table_complex_obj(self):
         output_producer = OutputProducer(formatter=format_table, file=self.io)
-        result_item = CommandResultItem([{'name': 'qwerty', 'val': '0b1f6472qwerty', 'sub': {'1'}}])
+        obj = OrderedDict()
+        obj['name'] = 'qwerty'
+        obj['val'] = '0b1f6472qwerty'
+        obj['sub'] = {'1'}
+        result_item = CommandResultItem(obj)
         output_producer.out(result_item)
         self.assertEqual(util.normalize_newlines(self.io.getvalue()), util.normalize_newlines(
 """Name    Val
@@ -222,7 +230,6 @@ Myarray :
         self.assertEqual(result, '2\t1\n')
 
     def test_output_format_ordereddict_not_sorted(self):
-        from collections import OrderedDict
         obj = OrderedDict()
         obj['B'] = 1
         obj['A'] = 2
@@ -230,7 +237,6 @@ Myarray :
         self.assertEqual(result, '1\t2\n')
 
     def test_output_format_ordereddict_list_not_sorted(self):
-        from collections import OrderedDict
         obj1 = OrderedDict()
         obj1['B'] = 1
         obj1['A'] = 2

@@ -325,7 +325,7 @@ def transform_metrics_list_output(result):
             new_entry['Interval'] = interval
             new_entry['Enabled'] = item['enabled']
             new_entry['IncludeApis'] = item['includeApis']
-            new_entry['RetentionPolicy)'] = item['retentionPolicy']['days']
+            new_entry['RetentionPolicy'] = item['retentionPolicy']['days']
             new_result.append(new_entry)
     return new_result
 
