@@ -124,7 +124,7 @@ class OutputProducer(object): #pylint: disable=too-few-public-methods
 class ListOutput(object): #pylint: disable=too-few-public-methods
 
     # Match the capital letters in a camel case string
-    FORMAT_KEYS_PATTERN = re.compile('([A-Z][^A-Z]*)')
+    FORMAT_KEYS_PATTERN = re.compile('([A-Z]+(?![a-z])|[A-Z]{1}[a-z]+)')
 
     def __init__(self):
         self._formatted_keys_cache = {}
