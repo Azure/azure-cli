@@ -6,11 +6,13 @@
 from __future__ import print_function, unicode_literals
 
 import sys
+import platform
 import json
 import re
 import traceback
 from collections import OrderedDict
 from six import StringIO, text_type, u
+import colorama
 
 from azure.cli._util import CLIError
 import azure.cli._logging as _logging
@@ -110,6 +112,8 @@ class OutputProducer(object): #pylint: disable=too-few-public-methods
         self.file = file
 
     def out(self, obj):
+        if platform.system() == 'Windows':
+            self.file = colorama.AnsiToWin32(self.file).stream
         output = self.formatter(obj)
         try:
             print(output, file=self.file, end='')
