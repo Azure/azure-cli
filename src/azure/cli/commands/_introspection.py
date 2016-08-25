@@ -6,11 +6,24 @@
 import inspect
 import re
 
+def extract_full_summary_from_signature(operation):
+    """ Extract the summary from the doccomments of the command. """
+    lines = inspect.getdoc(operation)
+    regex = r'\s*(:param)\s+(.+)\s*:(.*)'
+    summary = ''
+    if lines:
+        match = re.search(regex, lines)
+        if match:
+            summary = lines[:match.regs[0][0]]
+        else:
+            summary = lines
+    return summary
+
 def _option_descriptions(operation):
-    """Pull out parameter help from doccomments of the command
-    """
+    """ Extract parameter help from doccomments of the command. """
     option_descs = {}
     lines = inspect.getdoc(operation)
+    param_breaks = ["'''", '"""', ':param', ':type', ':return', ':rtype']
     if lines:
         lines = lines.splitlines()
         index = 0
@@ -26,7 +39,7 @@ def _option_descriptions(operation):
                 index += 1
                 while index < len(lines):
                     temp = lines[index].strip()
-                    if temp.startswith(':'):
+                    if any(temp.startswith(x) for x in param_breaks):
                         break
                     else:
                         if temp:

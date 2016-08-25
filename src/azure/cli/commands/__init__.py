@@ -17,7 +17,7 @@ from msrestazure.azure_operation import AzureOperationPoller
 from azure.cli._util import CLIError
 import azure.cli._logging as _logging
 
-from ._introspection import extract_args_from_signature
+from ._introspection import extract_args_from_signature, extract_full_summary_from_signature
 
 logger = _logging.get_az_logger(__name__)
 
@@ -233,6 +233,7 @@ def create_command(name, operation, transform_result, simple_output_query, clien
 
     name = ' '.join(name.split())
     cmd = CliCommand(name, _execute_command, simple_output_query=simple_output_query)
+    cmd.description = extract_full_summary_from_signature(operation)
     cmd.arguments.update(extract_args_from_signature(operation))
     return cmd
 
