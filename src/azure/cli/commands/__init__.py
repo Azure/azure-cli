@@ -83,20 +83,18 @@ class CliCommandArgument(object):
 
 class LongRunningOperation(object): #pylint: disable=too-few-public-methods
 
-    def __init__(self, start_msg='', finish_msg='', poll_interval_ms=1000.0):
+    def __init__(self, start_msg='', finish_msg='', poller_done_interval_ms=1000.0):
         self.start_msg = start_msg
         self.finish_msg = finish_msg
-        self.poll_interval_ms = poll_interval_ms
+        self.poller_done_interval_ms = poller_done_interval_ms
 
     def _delay(self):
-        time.sleep(self.poll_interval_ms / 1000.0)
+        time.sleep(self.poller_done_interval_ms / 1000.0)
 
     def __call__(self, poller):
-        logger.info("Starting long running operation '%s' with polling interval %s ms",
-                    self.start_msg, self.poll_interval_ms)
+        logger.info("Starting long running operation '%s'", self.start_msg)
         while not poller.done():
             self._delay()
-            logger.info("Long running operation '%s' polling now", self.start_msg)
         try:
             result = poller.result()
         except ClientException as client_exception:
