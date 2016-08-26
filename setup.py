@@ -68,6 +68,7 @@ DEPENDENCIES = [
     'pyyaml',
     'requests',
     'six',
+    'tabulate',
 ]
 
 if sys.version_info < (3, 4):
