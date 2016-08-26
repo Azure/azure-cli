@@ -22,15 +22,24 @@ class SharedAccessSignatureAuthorizationRule(Model):
     :type primary_key: str
     :param secondary_key: The secondary key.
     :type secondary_key: str
-    :param rights: The access rights.
-    :type rights: str
+    :param rights: The access rights. Possible values include:
+     'RegistryRead', 'RegistryWrite', 'ServiceConnect', 'DeviceConnect',
+     'RegistryRead, RegistryWrite', 'RegistryRead, ServiceConnect',
+     'RegistryRead, DeviceConnect', 'RegistryWrite, ServiceConnect',
+     'RegistryWrite, DeviceConnect', 'ServiceConnect, DeviceConnect',
+     'RegistryRead, RegistryWrite, ServiceConnect', 'RegistryRead,
+     RegistryWrite, DeviceConnect', 'RegistryRead, ServiceConnect,
+     DeviceConnect', 'RegistryWrite, ServiceConnect, DeviceConnect',
+     'RegistryRead, RegistryWrite, ServiceConnect, DeviceConnect'
+    :type rights: str or :class:`AccessRights
+     <iothubclient.models.AccessRights>`
     """ 
 
     _attribute_map = {
         'key_name': {'key': 'keyName', 'type': 'str'},
         'primary_key': {'key': 'primaryKey', 'type': 'str'},
         'secondary_key': {'key': 'secondaryKey', 'type': 'str'},
-        'rights': {'key': 'rights', 'type': 'str'},
+        'rights': {'key': 'rights', 'type': 'AccessRights'},
     }
 
     def __init__(self, key_name=None, primary_key=None, secondary_key=None, rights=None):

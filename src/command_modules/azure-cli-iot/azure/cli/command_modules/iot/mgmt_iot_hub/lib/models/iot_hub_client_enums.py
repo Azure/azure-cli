@@ -13,6 +13,33 @@
 from enum import Enum
 
 
+class AccessRights(Enum):
+
+    registry_read = "RegistryRead"
+    registry_write = "RegistryWrite"
+    service_connect = "ServiceConnect"
+    device_connect = "DeviceConnect"
+    registry_read_registry_write = "RegistryRead, RegistryWrite"
+    registry_read_service_connect = "RegistryRead, ServiceConnect"
+    registry_read_device_connect = "RegistryRead, DeviceConnect"
+    registry_write_service_connect = "RegistryWrite, ServiceConnect"
+    registry_write_device_connect = "RegistryWrite, DeviceConnect"
+    service_connect_device_connect = "ServiceConnect, DeviceConnect"
+    registry_read_registry_write_service_connect = "RegistryRead, RegistryWrite, ServiceConnect"
+    registry_read_registry_write_device_connect = "RegistryRead, RegistryWrite, DeviceConnect"
+    registry_read_service_connect_device_connect = "RegistryRead, ServiceConnect, DeviceConnect"
+    registry_write_service_connect_device_connect = "RegistryWrite, ServiceConnect, DeviceConnect"
+    registry_read_registry_write_service_connect_device_connect = "RegistryRead, RegistryWrite, ServiceConnect, DeviceConnect"
+
+
+class SBAccessRights(Enum):
+
+    manage = "Manage"
+    send = "Send"
+    listen = "Listen"
+    manage_notification_hub = "ManageNotificationHub"
+
+
 class OperationMonitoringLevel(Enum):
 
     none = "None"
@@ -38,14 +65,6 @@ class IotHubSkuTier(Enum):
 
     free = "Free"
     standard = "Standard"
-
-
-class SBAccessRights(Enum):
-
-    manage = "Manage"
-    send = "Send"
-    listen = "Listen"
-    manage_notification_hub = "ManageNotificationHub"
 
 
 class JobType(Enum):

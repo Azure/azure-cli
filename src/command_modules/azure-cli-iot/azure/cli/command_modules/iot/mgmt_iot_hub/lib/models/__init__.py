@@ -13,13 +13,13 @@
 from .shared_access_signature_authorization_rule import SharedAccessSignatureAuthorizationRule
 from .iot_hub_properties import IotHubProperties
 from .event_hub_properties import EventHubProperties
+from .shared_access_authorization_rule import SharedAccessAuthorizationRule
 from .storage_endpoint_properties import StorageEndpointProperties
 from .messaging_endpoint_properties import MessagingEndpointProperties
 from .cloud_to_device_properties import CloudToDeviceProperties
 from .feedback_properties import FeedbackProperties
 from .operations_monitoring_properties import OperationsMonitoringProperties
 from .iot_hub_sku_info import IotHubSkuInfo
-from .shared_access_authorization_rule import SharedAccessAuthorizationRule
 from .iot_hub_description import IotHubDescription
 from .resource import Resource
 from .shared_access_signature_authorization_rule_list_result import SharedAccessSignatureAuthorizationRuleListResult
@@ -40,11 +40,12 @@ from .str_paged import strPaged
 from .job_response_paged import JobResponsePaged
 from .iot_hub_quota_metric_info_paged import IotHubQuotaMetricInfoPaged
 from .iot_hub_client_enums import (
+    AccessRights,
+    SBAccessRights,
     OperationMonitoringLevel,
     Capabilities,
     IotHubSku,
     IotHubSkuTier,
-    SBAccessRights,
     JobType,
     JobStatus,
     IotHubScaleType,
@@ -55,13 +56,13 @@ __all__ = [
     'SharedAccessSignatureAuthorizationRule',
     'IotHubProperties',
     'EventHubProperties',
+    'SharedAccessAuthorizationRule',
     'StorageEndpointProperties',
     'MessagingEndpointProperties',
     'CloudToDeviceProperties',
     'FeedbackProperties',
     'OperationsMonitoringProperties',
     'IotHubSkuInfo',
-    'SharedAccessAuthorizationRule',
     'IotHubDescription',
     'Resource',
     'SharedAccessSignatureAuthorizationRuleListResult',
@@ -81,11 +82,12 @@ __all__ = [
     'strPaged',
     'JobResponsePaged',
     'IotHubQuotaMetricInfoPaged',
+    'AccessRights',
+    'SBAccessRights',
     'OperationMonitoringLevel',
     'Capabilities',
     'IotHubSku',
     'IotHubSkuTier',
-    'SBAccessRights',
     'JobType',
     'JobStatus',
     'IotHubScaleType',

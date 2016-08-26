@@ -28,6 +28,10 @@ class CreateDeviceRequest(Model):
     :type status_reason: str
     """ 
 
+    _validation = {
+        'device_id': {'max_length': 128, 'min_length': 1},
+    }
+
     _attribute_map = {
         'device_id': {'key': 'deviceId', 'type': 'str'},
         'authorization': {'key': 'authorization', 'type': 'Authentication'},

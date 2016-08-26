@@ -5,9 +5,10 @@
 # pylint: disable=no-self-use,too-many-arguments,no-member
 
 from __future__ import print_function
-from sys import stderr
 import azure.cli._logging as _logging
 from azure.cli._util import CLIError
+from azure.cli.command_modules.iot.mgmt_iot_hub.lib.models.iot_hub_client_enums import \
+    IotHubSku
 from azure.cli.command_modules.iot.mgmt_iot_hub.lib.models.iot_hub_description import \
     IotHubDescription
 from azure.cli.command_modules.iot.mgmt_iot_hub.lib.models.iot_hub_sku_info import \
@@ -21,21 +22,11 @@ from ._factory import resource_service_factory
 
 logger = _logging.get_az_logger(__name__)
 
-
-def _update_progress(current, total):
-    if total:
-        message = 'Percent complete: %'
-        percent_done = current * 100 / total
-        message += '{: >5.1f}'.format(percent_done)
-        print('\b' * len(message) + message, end='', file=stderr)
-        stderr.flush()
-        if current == total:
-            print('', file=stderr)
-
 # CUSTOM METHODS
 
 
-def iot_hub_create(client, name, resource_group_name, location=None, sku='F1', unit=1):
+def iot_hub_create(client, name, resource_group_name,
+                   location=None, sku=IotHubSku.f1.value, unit=1):
 
     if location is None:
         logger.info('Location is none. Use location of resource group as default.')
@@ -59,7 +50,7 @@ def iot_device_create(client, resource_group_name, hub, device_id):
     logger.info('Shared Access Polices: ' + str(access_policies))
     try:
         access_policy = next(x for x in access_policies.value
-                             if 'registrywrite' in x.rights.lower())
+                             if 'registrywrite' in x.rights.value.lower())
     except StopIteration:
         raise CLIError('No policy found with RegistryWrite permission.')
 

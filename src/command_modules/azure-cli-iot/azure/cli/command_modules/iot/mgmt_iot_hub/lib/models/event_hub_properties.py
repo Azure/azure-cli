@@ -16,9 +16,9 @@ from msrest.serialization import Model
 class EventHubProperties(Model):
     """The properties of the provisioned event hub used by the Iot Hub.
 
-    :param message_retention_in_days: The retention time in days. Range of
+    :param retention_time_in_days: The retention time in days. Range of
      values [For F1: 1-1, S1: 1-7, S2: 1-7, S3: 1-7].
-    :type message_retention_in_days: long
+    :type retention_time_in_days: long
     :param partition_count: The partition count. Range of values [For F1:
      2-2, S1: 2-128, S2: 2-128, S3: 2-128].
     :type partition_count: int
@@ -28,19 +28,31 @@ class EventHubProperties(Model):
     :type path: str
     :param endpoint: The endpoint.
     :type endpoint: str
+    :param internal_authorization_policies: The internal authorization rules.
+    :type internal_authorization_policies: list of
+     :class:`SharedAccessAuthorizationRule
+     <iothubclient.models.SharedAccessAuthorizationRule>`
+    :param authorization_policies: The authorization rules.
+    :type authorization_policies: list of
+     :class:`SharedAccessAuthorizationRule
+     <iothubclient.models.SharedAccessAuthorizationRule>`
     """ 
 
     _attribute_map = {
-        'message_retention_in_days': {'key': 'messageRetentionInDays', 'type': 'long'},
+        'retention_time_in_days': {'key': 'retentionTimeInDays', 'type': 'long'},
         'partition_count': {'key': 'partitionCount', 'type': 'int'},
         'partition_ids': {'key': 'partitionIds', 'type': '[str]'},
         'path': {'key': 'path', 'type': 'str'},
         'endpoint': {'key': 'endpoint', 'type': 'str'},
+        'internal_authorization_policies': {'key': 'internalAuthorizationPolicies', 'type': '[SharedAccessAuthorizationRule]'},
+        'authorization_policies': {'key': 'authorizationPolicies', 'type': '[SharedAccessAuthorizationRule]'},
     }
 
-    def __init__(self, message_retention_in_days=None, partition_count=None, partition_ids=None, path=None, endpoint=None):
-        self.message_retention_in_days = message_retention_in_days
+    def __init__(self, retention_time_in_days=None, partition_count=None, partition_ids=None, path=None, endpoint=None, internal_authorization_policies=None, authorization_policies=None):
+        self.retention_time_in_days = retention_time_in_days
         self.partition_count = partition_count
         self.partition_ids = partition_ids
         self.path = path
         self.endpoint = endpoint
+        self.internal_authorization_policies = internal_authorization_policies
+        self.authorization_policies = authorization_policies

@@ -10,10 +10,10 @@
     "https"
   ],
   "paths": {
-    "devices/{deviceId}": {
+    "/devices/{deviceId}": {
       "put": {
         "tags": [
-          "PUT"
+          "DevicesIoT"
         ],
         "summary": "Creates a new device identity in the identity registry of an IoT Hub.",
         "description": "Creates a new device identity in the identity registry of an IoT Hub.",
@@ -35,7 +35,9 @@
             "in": "path",
             "description": "The Id of the device.",
             "required": true,
-            "type": "string"
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
           },
           {
             "name": "createDeviceRequest",
@@ -100,7 +102,9 @@
       "properties": {
         "deviceId": {
           "description": "Device Id. A case-sensitive string ( up to 128 char long).",
-          "type": "string"
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
         },
         "authorization": {
           "$ref": "#/definitions/Authentication"
@@ -120,11 +124,14 @@
       "properties": {
         "deviceId": {
           "description": "Device Id. A case-sensitive string ( up to 128 char long).",
-          "type": "string"
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
         },
         "generationId": {
           "description": "An IoT hub-generated case-sensitive string (up to 128 char long). Used to distinguish devices with the same deviceId when they have been deleted and recreated.",
-          "type": "string"
+          "type": "string",
+          "readOnly": true
         },
         "etag": {
           "description": "A string representing a weak etag for the device identity, as per RFC7232.",

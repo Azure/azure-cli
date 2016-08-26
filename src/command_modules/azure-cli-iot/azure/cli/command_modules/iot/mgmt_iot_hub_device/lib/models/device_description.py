@@ -16,13 +16,16 @@ from msrest.serialization import Model
 class DeviceDescription(Model):
     """DeviceDescription.
 
+    Variables are only populated by the server, and will be ignored when
+    sending a request.
+
     :param device_id: Device Id. A case-sensitive string ( up to 128 char
      long).
     :type device_id: str
-    :param generation_id: An IoT hub-generated case-sensitive string (up to
+    :ivar generation_id: An IoT hub-generated case-sensitive string (up to
      128 char long). Used to distinguish devices with the same deviceId when
      they have been deleted and recreated.
-    :type generation_id: str
+    :vartype generation_id: str
     :param etag: A string representing a weak etag for the device identity,
      as per RFC7232.
     :type etag: str
@@ -52,6 +55,11 @@ class DeviceDescription(Model):
      <iothubdeviceclient.models.Authentication>`
     """ 
 
+    _validation = {
+        'device_id': {'max_length': 128, 'min_length': 1},
+        'generation_id': {'readonly': True},
+    }
+
     _attribute_map = {
         'device_id': {'key': 'deviceId', 'type': 'str'},
         'generation_id': {'key': 'generationId', 'type': 'str'},
@@ -66,9 +74,9 @@ class DeviceDescription(Model):
         'authentication': {'key': 'authentication', 'type': 'Authentication'},
     }
 
-    def __init__(self, device_id=None, generation_id=None, etag=None, connection_state=None, status=None, status_reason=None, connection_state_updated_time=None, status_updated_time=None, last_activity_time=None, cloud_to_device_message_count=None, authentication=None):
+    def __init__(self, device_id=None, etag=None, connection_state=None, status=None, status_reason=None, connection_state_updated_time=None, status_updated_time=None, last_activity_time=None, cloud_to_device_message_count=None, authentication=None):
         self.device_id = device_id
-        self.generation_id = generation_id
+        self.generation_id = None
         self.etag = etag
         self.connection_state = connection_state
         self.status = status
