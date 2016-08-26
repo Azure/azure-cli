@@ -18,20 +18,13 @@ def _keyvault_client_factory(**_):
 
 factory = lambda args: _keyvault_client_factory(**args).vaults
 
-keyvault_show_query = "{Name:name, ResourceGroup:resourceGroup, Location:location, "\
-                      "SkuFamily:properties.sku.family, SkuName:properties.sku.name, "\
-                      "VaultUri:properties.vaultUri}"
-
-cli_command('keyvault create', create_keyvault, factory, simple_output_query=keyvault_show_query)
-cli_command('keyvault list', list_keyvault, factory,
-            simple_output_query="[*].{Name:name, ResourceGroup:resourceGroup, Location:location} |"\
-            " sort_by(@, &Name)")
-cli_command('keyvault show', VaultsOperations.get, factory, simple_output_query=keyvault_show_query)
+cli_command('keyvault create', create_keyvault, factory)
+cli_command('keyvault list', list_keyvault, factory)
+cli_command('keyvault show', VaultsOperations.get, factory)
 cli_command('keyvault delete', VaultsOperations.delete, factory)
 
-cli_command('keyvault set-policy', set_policy, factory, simple_output_query=keyvault_show_query)
-cli_command('keyvault delete-policy', delete_policy, factory,
-            simple_output_query=keyvault_show_query)
+cli_command('keyvault set-policy', set_policy, factory)
+cli_command('keyvault delete-policy', delete_policy, factory)
 
 def keyvault_update_setter(client, resource_group_name, vault_name, parameters):
     from azure.mgmt.keyvault.models import VaultCreateOrUpdateParameters
@@ -44,5 +37,4 @@ def keyvault_update_setter(client, resource_group_name, vault_name, parameters):
 cli_generic_update_command('keyvault update',
                            VaultsOperations.get,
                            keyvault_update_setter,
-                           lambda: _keyvault_client_factory().vaults,
-                           simple_output_query=keyvault_show_query)
+                           lambda: _keyvault_client_factory().vaults)

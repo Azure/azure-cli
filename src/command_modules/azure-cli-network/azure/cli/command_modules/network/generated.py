@@ -123,7 +123,7 @@ from ._factory import _network_client_factory
 factory = lambda _: _network_client_factory().application_gateways
 cli_command('network application-gateway delete', ApplicationGatewaysOperations.delete, factory)
 cli_command('network application-gateway show', ApplicationGatewaysOperations.get, factory)
-cli_command('network application-gateway list', list_application_gateways, simple_output_query="[*].{Name:name, ResourceGroup:resourceGroup, Location:location, State:provisioningState} | sort_by(@, &Name)")
+cli_command('network application-gateway list', list_application_gateways)
 cli_command('network application-gateway start', ApplicationGatewaysOperations.start, factory)
 cli_command('network application-gateway stop', ApplicationGatewaysOperations.stop, factory)
 cli_generic_update_command('network application-gateway update', ApplicationGatewaysOperations.get, ApplicationGatewaysOperations.create_or_update, factory)
@@ -143,7 +143,7 @@ property_map = {
     'url_path_maps': 'url-path-map'
 }
 for subresource, alias in property_map.items():
-    cli_command('network application-gateway {} list'.format(alias), list_network_resource_property('application_gateways', subresource), simple_output_query="[*].{Name:name} | sort_by(@, &Name)")
+    cli_command('network application-gateway {} list'.format(alias), list_network_resource_property('application_gateways', subresource))
     cli_command('network application-gateway {} show'.format(alias), get_network_resource_property_entry('application_gateways', subresource))
     cli_command('network application-gateway {} delete'.format(alias), delete_network_resource_property_entry('application_gateways', subresource))
 
@@ -282,7 +282,7 @@ cli_command('network nsg create', NsgOperations.create_or_update, factory, trans
 factory = lambda _: _network_client_factory().public_ip_addresses
 cli_command('network public-ip delete', PublicIPAddressesOperations.delete, factory)
 cli_command('network public-ip show', PublicIPAddressesOperations.get, factory)
-cli_command('network public-ip list', list_public_ips, simple_output_query="[*].{Name:name, ResourceGroup:resourceGroup, Location:location, IpAddress:ipAddress, FQDN:dnsSettings.fqdn} | sort_by(@, &Name)")
+cli_command('network public-ip list', list_public_ips)
 cli_generic_update_command('network public-ip update', PublicIPAddressesOperations.get, PublicIPAddressesOperations.create_or_update, factory)
 
 factory = lambda _: get_mgmt_service_client(PublicIPClient).public_ip
