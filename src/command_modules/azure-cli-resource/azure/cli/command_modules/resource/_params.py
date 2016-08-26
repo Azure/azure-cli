@@ -4,16 +4,12 @@
 #---------------------------------------------------------------------------------------------
 
 # pylint: disable=line-too-long
-import argparse
-
 from argcomplete.completers import FilesCompleter
 
 from azure.mgmt.resource.resources.models import DeploymentMode
 from azure.cli.commands import register_cli_argument, CliArgumentType
-from azure.cli.commands.parameters import (resource_group_name_type,
-                                           tag_type,
-                                           tags_type,
-                                           get_resource_group_completion_list)
+from azure.cli.commands.parameters import (ignore_type, resource_group_name_type, tag_type,
+                                           tags_type, get_resource_group_completion_list)
 from .custom import get_policy_completion_list, get_policy_assignment_completion_list
 from ._validators import validate_resource_type, validate_parent, resolve_resource_parameters
 
@@ -25,7 +21,10 @@ resource_name_type = CliArgumentType(options_list=('--name', '-n'), help='The re
 
 register_cli_argument('resource', 'resource_name', resource_name_type)
 register_cli_argument('resource', 'api_version', help='The api version of the resource (omit for latest)', required=False)
-register_cli_argument('resource', 'resource_provider_namespace', help=argparse.SUPPRESS, required=False)
+
+for item in ['tag', 'update', 'show', 'delete', 'exists']:
+    register_cli_argument('resource {}'.format(item), 'resource_provider_namespace', ignore_type)
+
 register_cli_argument('resource', 'resource_type', help='The resource type in <namespace>/<type> format.', type=validate_resource_type, validator=resolve_resource_parameters)
 register_cli_argument('resource', 'parent_resource_path', help='The parent resource type in <type>/<name> format.', type=validate_parent, required=False, options_list=('--parent',))
 register_cli_argument('resource', 'tag', tag_type)
@@ -34,7 +33,7 @@ register_cli_argument('resource list', 'name', resource_name_type)
 register_cli_argument('resource move', 'ids', nargs='+')
 
 _PROVIDER_HELP_TEXT = 'the resource namespace, aka \'provider\''
-register_cli_argument('resource provider', 'top', help=argparse.SUPPRESS)
+register_cli_argument('resource provider', 'top', ignore_type)
 register_cli_argument('resource provider', 'resource_provider_namespace', options_list=('--namespace', '-n'), help=_PROVIDER_HELP_TEXT)
 
 register_cli_argument('resource feature', 'resource_provider_namespace', options_list=('--namespace',), required=True, help=_PROVIDER_HELP_TEXT)
