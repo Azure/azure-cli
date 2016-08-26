@@ -38,8 +38,8 @@ cli_command('storage account check-name', StorageAccountsOperations.check_name_a
 cli_command('storage account delete', StorageAccountsOperations.delete, factory)
 cli_command('storage account show', StorageAccountsOperations.get_properties, factory)
 cli_command('storage account create', create_storage_account)
-cli_command('storage account list', list_storage_accounts, simple_output_query='[*].{Name: name, ResourceGroup: resourceGroup, Location: location, SkuName: sku.name, SkuTier: sku.tier} | sort_by(@, &Name)')
-cli_command('storage account show-usage', show_storage_account_usage, simple_output_query='{Name:name.localizedValue, Current:currentValue, Max:limit}')
+cli_command('storage account list', list_storage_accounts)
+cli_command('storage account show-usage', show_storage_account_usage)
 cli_command('storage account update', set_storage_account_properties)
 cli_command('storage account connection-string', show_storage_account_connection_string)
 cli_command('storage account keys renew', renew_storage_account_keys)
@@ -48,7 +48,7 @@ cli_storage_data_plane_command('storage account generate-sas', CloudStorageAccou
 
 # container commands
 factory = blob_data_service_factory
-cli_storage_data_plane_command('storage container list', BlockBlobService.list_containers, factory, simple_output_query='items[*].{Name: name, LeaseState: properties.leaseState} | sort_by(@, &Name)')
+cli_storage_data_plane_command('storage container list', BlockBlobService.list_containers, factory)
 cli_storage_data_plane_command('storage container delete', BlockBlobService.delete_container, factory)
 cli_storage_data_plane_command('storage container show', BlockBlobService.get_container_properties, factory)
 cli_storage_data_plane_command('storage container create', BlockBlobService.create_container, factory)
@@ -64,11 +64,11 @@ cli_storage_data_plane_command('storage container exists', BaseBlobService.exist
 cli_storage_data_plane_command('storage container policy create', create_acl_policy, factory)
 cli_storage_data_plane_command('storage container policy delete', delete_acl_policy, factory)
 cli_storage_data_plane_command('storage container policy show', get_acl_policy, factory)
-cli_storage_data_plane_command('storage container policy list', list_acl_policies, factory, simple_output_query=transform_acl_list_output)
+cli_storage_data_plane_command('storage container policy list', list_acl_policies, factory, table_transformer=transform_acl_list_output)
 cli_storage_data_plane_command('storage container policy update', set_acl_policy, factory)
 
 # blob commands
-cli_storage_data_plane_command('storage blob list', BlockBlobService.list_blobs, factory, simple_output_query='items[*].{Name: name, Type: properties.blobType, ContentLength: properties.contentLength, LeaseState: properties.lease.state} | sort_by(@, &Name)')
+cli_storage_data_plane_command('storage blob list', BlockBlobService.list_blobs, factory)
 cli_storage_data_plane_command('storage blob delete', BlockBlobService.delete_blob, factory)
 cli_storage_data_plane_command('storage blob generate-sas', BlockBlobService.generate_blob_shared_access_signature, factory)
 cli_storage_data_plane_command('storage blob url', BlockBlobService.make_blob_url, factory, transform=transform_url)
@@ -91,7 +91,7 @@ cli_storage_data_plane_command('storage blob copy cancel', BlockBlobService.abor
 
 # share commands
 factory = file_data_service_factory
-cli_storage_data_plane_command('storage share list', FileService.list_shares, factory, simple_output_query='items[*].{Name:name,"Quota (GB)":properties.quota} | sort_by(@, &Name)')
+cli_storage_data_plane_command('storage share list', FileService.list_shares, factory)
 cli_storage_data_plane_command('storage share create', FileService.create_share, factory)
 cli_storage_data_plane_command('storage share delete', FileService.delete_share, factory)
 cli_storage_data_plane_command('storage share generate-sas', FileService.generate_share_shared_access_signature, factory)
@@ -104,7 +104,7 @@ cli_storage_data_plane_command('storage share exists', FileService.exists, facto
 cli_storage_data_plane_command('storage share policy create', create_acl_policy, factory)
 cli_storage_data_plane_command('storage share policy delete', delete_acl_policy, factory)
 cli_storage_data_plane_command('storage share policy show', get_acl_policy, factory)
-cli_storage_data_plane_command('storage share policy list', list_acl_policies, factory, simple_output_query=transform_acl_list_output)
+cli_storage_data_plane_command('storage share policy list', list_acl_policies, factory, table_transformer=transform_acl_list_output)
 cli_storage_data_plane_command('storage share policy update', set_acl_policy, factory)
 
 # directory commands
@@ -116,7 +116,7 @@ cli_storage_data_plane_command('storage directory metadata show', FileService.ge
 cli_storage_data_plane_command('storage directory metadata update', FileService.set_directory_metadata, factory)
 
 # file commands
-cli_storage_data_plane_command('storage file list', FileService.list_directories_and_files, factory, simple_output_query=transform_file_list_output)
+cli_storage_data_plane_command('storage file list', FileService.list_directories_and_files, factory, table_transformer=transform_file_list_output)
 cli_storage_data_plane_command('storage file delete', FileService.delete_file, factory)
 cli_storage_data_plane_command('storage file resize', FileService.resize_file, factory)
 cli_storage_data_plane_command('storage file url', FileService.make_file_url, factory, transform=transform_url)
@@ -135,20 +135,20 @@ cli_storage_data_plane_command('storage file copy cancel', FileService.abort_cop
 factory = table_data_service_factory
 cli_storage_data_plane_command('storage table generate-sas', TableService.generate_table_shared_access_signature, factory)
 cli_storage_data_plane_command('storage table stats', TableService.get_table_service_stats, factory)
-cli_storage_data_plane_command('storage table list', TableService.list_tables, factory, simple_output_query='items[*].{Name:name} | sort_by(@, &Name)')
+cli_storage_data_plane_command('storage table list', TableService.list_tables, factory)
 cli_storage_data_plane_command('storage table create', TableService.create_table, factory)
 cli_storage_data_plane_command('storage table exists', TableService.exists, factory)
 cli_storage_data_plane_command('storage table delete', TableService.delete_table, factory)
 cli_storage_data_plane_command('storage table policy create', create_acl_policy, factory)
 cli_storage_data_plane_command('storage table policy delete', delete_acl_policy, factory)
 cli_storage_data_plane_command('storage table policy show', get_acl_policy, factory)
-cli_storage_data_plane_command('storage table policy list', list_acl_policies, factory, simple_output_query=transform_acl_list_output)
+cli_storage_data_plane_command('storage table policy list', list_acl_policies, factory, table_transformer=transform_acl_list_output)
 cli_storage_data_plane_command('storage table policy update', set_acl_policy, factory)
 cli_storage_data_plane_command('storage table batch commit', TableService.commit_batch, factory)
 cli_storage_data_plane_command('storage table batch create', TableService.batch, factory)
 
 # table entity commands
-cli_storage_data_plane_command('storage entity query', TableService.query_entities, factory, simple_output_query=transform_entity_query_output)
+cli_storage_data_plane_command('storage entity query', TableService.query_entities, factory, table_transformer=transform_entity_query_output)
 cli_storage_data_plane_command('storage entity show', TableService.get_entity, factory)
 cli_storage_data_plane_command('storage entity insert', insert_table_entity, factory)
 cli_storage_data_plane_command('storage entity replace', TableService.update_entity, factory)
@@ -159,7 +159,7 @@ cli_storage_data_plane_command('storage entity delete', TableService.delete_enti
 factory = queue_data_service_factory
 cli_storage_data_plane_command('storage queue generate-sas', QueueService.generate_queue_shared_access_signature, factory)
 cli_storage_data_plane_command('storage queue stats', QueueService.get_queue_service_stats, factory)
-cli_storage_data_plane_command('storage queue list', QueueService.list_queues, factory, simple_output_query='items[*].{Name:name} | sort_by(@, &Name)')
+cli_storage_data_plane_command('storage queue list', QueueService.list_queues, factory)
 cli_storage_data_plane_command('storage queue create', QueueService.create_queue, factory)
 cli_storage_data_plane_command('storage queue delete', QueueService.delete_queue, factory)
 cli_storage_data_plane_command('storage queue metadata show', QueueService.get_queue_metadata, factory)
@@ -168,26 +168,26 @@ cli_storage_data_plane_command('storage queue exists', QueueService.exists, fact
 cli_storage_data_plane_command('storage queue policy create', create_acl_policy, factory)
 cli_storage_data_plane_command('storage queue policy delete', delete_acl_policy, factory)
 cli_storage_data_plane_command('storage queue policy show', get_acl_policy, factory)
-cli_storage_data_plane_command('storage queue policy list', list_acl_policies, factory, simple_output_query=transform_acl_list_output)
+cli_storage_data_plane_command('storage queue policy list', list_acl_policies, factory, table_transformer=transform_acl_list_output)
 cli_storage_data_plane_command('storage queue policy update', set_acl_policy, factory)
 
 # queue message commands
 cli_storage_data_plane_command('storage message put', QueueService.put_message, factory)
 cli_storage_data_plane_command('storage message get', QueueService.get_messages, factory)
-cli_storage_data_plane_command('storage message peek', QueueService.peek_messages, factory, simple_output_query='[*].{ID:id, Content:content, Insertion:insertionTime, Expiration:expirationTime} | sort_by(@, &Insertion)')
+cli_storage_data_plane_command('storage message peek', QueueService.peek_messages, factory)
 cli_storage_data_plane_command('storage message delete', QueueService.delete_message, factory)
 cli_storage_data_plane_command('storage message clear', QueueService.clear_messages, factory)
 cli_storage_data_plane_command('storage message update', QueueService.update_message, factory)
 
 # cors commands
-cli_storage_data_plane_command('storage cors list', list_cors, None, simple_output_query=transform_cors_list_output)
+cli_storage_data_plane_command('storage cors list', list_cors, None, table_transformer=transform_cors_list_output)
 cli_storage_data_plane_command('storage cors add', add_cors, None)
 cli_storage_data_plane_command('storage cors clear', clear_cors, None)
 
 # logging commands
-cli_storage_data_plane_command('storage logging show', get_logging, None, simple_output_query=transform_logging_list_output)
+cli_storage_data_plane_command('storage logging show', get_logging, None, table_transformer=transform_logging_list_output)
 cli_storage_data_plane_command('storage logging update', set_logging, None)
 
 # metrics commands
-cli_storage_data_plane_command('storage metrics show', get_metrics, None, simple_output_query=transform_metrics_list_output)
+cli_storage_data_plane_command('storage metrics show', get_metrics, None, table_transformer=transform_metrics_list_output)
 cli_storage_data_plane_command('storage metrics update', set_metrics, None)
