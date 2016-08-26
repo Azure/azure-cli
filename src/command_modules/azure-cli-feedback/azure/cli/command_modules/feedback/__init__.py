@@ -81,8 +81,7 @@ def handle_feedback():
         email_address = input(MESSAGES['prompt_email_addr'])
         _send_feedback(score, response_what_changes, response_do_well, email_address)
         print(MESSAGES['thanks'])
-    except KeyboardInterrupt:
-        # Catch to prevent stacktrace and print newline
+    except (EOFError, KeyboardInterrupt):
         print()
 
 cli_command('feedback', handle_feedback)
