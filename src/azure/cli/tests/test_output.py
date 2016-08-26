@@ -6,6 +6,7 @@
 from __future__ import print_function
  # pylint: disable=protected-access, bad-continuation, too-many-public-methods, trailing-whitespace
 import unittest
+from collections import OrderedDict
 from six import StringIO
 
 from azure.cli._output import (OutputProducer, format_json, format_table, format_list,
@@ -69,68 +70,31 @@ class TestOutput(unittest.TestCase):
 
     # TABLE output tests
 
-    def test_out_table_valid_query1(self):
+    def test_out_table(self):
         output_producer = OutputProducer(formatter=format_table, file=self.io)
-        result_item = CommandResultItem([{'name': 'qwerty', 'id': '0b1f6472qwerty'},
-                                         {'name': 'asdf', 'id': '0b1f6472asdf'}],
-                                              simple_output_query='[*].{Name:name, Id:id}')
-        output_producer.out(result_item)
+        obj = OrderedDict()
+        obj['active'] = True
+        obj['val'] = '0b1f6472'
+        output_producer.out(CommandResultItem(obj))
         self.assertEqual(util.normalize_newlines(self.io.getvalue()), util.normalize_newlines(
-""" Name  |       Id      
--------|---------------
-qwerty | 0b1f6472qwerty
-asdf   | 0b1f6472asdf  
+"""  Active  Val
+--------  --------
+       1  0b1f6472
 """))
-
-    def test_out_table_no_query(self):
-        output_producer = OutputProducer(formatter=format_table, file=self.io)
-        with self.assertRaises(util.CLIError):
-            output_producer.out(CommandResultItem({'active': True, 'id': '0b1f6472'}))
-
-    def test_out_table_valid_query2(self):
-        output_producer = OutputProducer(formatter=format_table, file=self.io)
-        result_item = CommandResultItem([{'name': 'qwerty', 'id': '0b1f6472qwerty'},
-                                         {'name': 'asdf', 'id': '0b1f6472asdf'}],
-                                              simple_output_query='[*].{Name:name}')
-        output_producer.out(result_item)
-        self.assertEqual(util.normalize_newlines(self.io.getvalue()), util.normalize_newlines(
-""" Name 
-------
-qwerty
-asdf  
-"""))
-
-    def test_out_table_bad_query(self):
-        output_producer = OutputProducer(formatter=format_table, file=self.io)
-        result_item = CommandResultItem([{'name': 'qwerty', 'id': '0b1f6472qwerty'},
-                                         {'name': 'asdf', 'id': '0b1f6472asdf'}],
-                                              simple_output_query='[*].{Name:name')
-        with self.assertRaises(util.CLIError):
-            output_producer.out(result_item)
 
     def test_out_table_complex_obj(self):
         output_producer = OutputProducer(formatter=format_table, file=self.io)
-        result_item = CommandResultItem([{'name': 'qwerty', 'id': '0b1f6472qwerty', 'sub': {'1'}}])
-        with self.assertRaises(util.CLIError):
-            output_producer.out(result_item)
-
-    def test_out_table_complex_obj_with_query_ok(self):
-        output_producer = OutputProducer(formatter=format_table, file=self.io)
-        result_item = CommandResultItem([{'name': 'qwerty', 'id': '0b1f6472qwerty', 'sub': {'1'}}],
-                                        simple_output_query='[*].{Name:name}')
+        obj = OrderedDict()
+        obj['name'] = 'qwerty'
+        obj['val'] = '0b1f6472qwerty'
+        obj['sub'] = {'1'}
+        result_item = CommandResultItem(obj)
         output_producer.out(result_item)
         self.assertEqual(util.normalize_newlines(self.io.getvalue()), util.normalize_newlines(
-""" Name 
-------
-qwerty
+"""Name    Val
+------  --------------
+qwerty  0b1f6472qwerty
 """))
-
-    def test_out_table_complex_obj_with_query_still_complex(self):
-        output_producer = OutputProducer(formatter=format_table, file=self.io)
-        result_item = CommandResultItem([{'name': 'qwerty', 'id': '0b1f6472qwerty', 'sub': {'1'}}],
-                                        simple_output_query='[*].{Name:name, Sub:sub}')
-        with self.assertRaises(util.CLIError):
-            output_producer.out(result_item)
 
     # LIST output tests
 
@@ -266,7 +230,6 @@ Myarray :
         self.assertEqual(result, '2\t1\n')
 
     def test_output_format_ordereddict_not_sorted(self):
-        from collections import OrderedDict
         obj = OrderedDict()
         obj['B'] = 1
         obj['A'] = 2
@@ -274,7 +237,6 @@ Myarray :
         self.assertEqual(result, '1\t2\n')
 
     def test_output_format_ordereddict_list_not_sorted(self):
-        from collections import OrderedDict
         obj1 = OrderedDict()
         obj1['B'] = 1
         obj1['A'] = 2
