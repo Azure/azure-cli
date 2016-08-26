@@ -6,6 +6,8 @@
 import os
 import sys
 
+from msrestazure.azure_exceptions import CloudError
+
 from azure.cli.application import APPLICATION, Configuration
 import azure.cli._logging as _logging
 from ._session import Session
@@ -26,7 +28,7 @@ SESSION = Session()
 
 def _handle_exception(ex):
     #For error code, follow guidelines at https://docs.python.org/2/library/sys.html#sys.exit,
-    if isinstance(ex, CLIError):
+    if isinstance(ex, CLIError) or isinstance(ex, CloudError):
         logger.error(ex.args[0])
         return ex.args[1] if len(ex.args) >= 2 else 1
     elif isinstance(ex, KeyboardInterrupt):
