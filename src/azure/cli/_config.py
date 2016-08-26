@@ -5,8 +5,10 @@
 import os
 from six.moves import configparser
 
-GLOBAL_CONFIG_PATH = os.path.expanduser(os.path.join('~', '.azure', 'config'))
-ACTIVE_ENV_CONFIG_PATH = os.path.expanduser(os.path.join('~', '.azure', 'env_config', 'default'))
+GLOBAL_CONFIG_DIR = os.path.expanduser(os.path.join('~', '.azure'))
+GLOBAL_CONFIG_PATH = os.path.join(GLOBAL_CONFIG_DIR, 'config')
+ENV_CONFIG_DIR = os.path.expanduser(os.path.join('~', '.azure', 'env_config'))
+ACTIVE_ENV_CONFIG_PATH = os.path.join(ENV_CONFIG_DIR, 'default')
 ENV_VAR_PREFIX = 'AZURE_'
 
 _UNSET = object()
