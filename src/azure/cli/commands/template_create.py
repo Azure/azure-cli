@@ -19,7 +19,7 @@ from azure.cli.commands.arm import (
 def register_folded_cli_argument(scope, base_name, resource_type, parent_name=None, # pylint: disable=too-many-arguments
                                  parent_type=None, type_field=None,
                                  existing_id_flag_value='existingId', new_flag_value='new',
-                                 none_flag_value='none', default_value_flag='new', allow_none=True,
+                                 none_flag_value='none', default_value_flag='new',
                                  **kwargs):
     type_field_name = type_field or base_name + '_type'
 
@@ -29,7 +29,6 @@ def register_folded_cli_argument(scope, base_name, resource_type, parent_name=No
                                    existing_id_flag_value,
                                    new_flag_value,
                                    none_flag_value,
-                                   allow_none,
                                    parent_name,
                                    parent_type)
     custom_validator = kwargs.pop('validator', None)
@@ -42,7 +41,7 @@ def register_folded_cli_argument(scope, base_name, resource_type, parent_name=No
         validator = fold_validator
 
     quotes = '""' if platform.system() == 'Windows' else "''"
-    quote_text = '  Use {} for none.'.format(quotes) if allow_none else ''
+    quote_text = '  Use {} for none.'.format(quotes) if none_flag_value else ''
     flag_texts = {
         new_flag_value: '  Creates new by default.{}'.format(quote_text),
         existing_id_flag_value: '  Uses existing resource.{}'
@@ -55,7 +54,7 @@ def register_folded_cli_argument(scope, base_name, resource_type, parent_name=No
     register_cli_argument(scope, type_field_name, help=argparse.SUPPRESS, default=None)
 
 def _name_id_fold(base_name, resource_type, type_field, #pylint: disable=too-many-arguments
-                  existing_id_flag_value, new_flag_value, none_flag_value, allow_none=True,
+                  existing_id_flag_value, new_flag_value, none_flag_value,
                   parent_name=None, parent_type=None):
     def handle_folding(namespace):
         base_name_val = getattr(namespace, base_name)
@@ -70,7 +69,7 @@ def _name_id_fold(base_name, resource_type, type_field, #pylint: disable=too-man
             # An empty name specified - that means that we are neither referencing an existing
             # field, or the name is set to an empty string.  We check for all types of quotes
             # so scripts can run cross-platform.
-            if not allow_none:
+            if not none_flag_value:
                 raise CLIError('Field {} cannot be none.'.format(make_camel_case(base_name)))
             setattr(namespace, type_field, none_flag_value)
             setattr(namespace, base_name, None)
@@ -103,6 +102,9 @@ def _name_id_fold(base_name, resource_type, type_field, #pylint: disable=too-man
                 raise CLIError('ID {} does not exist. Please specify '
                                'a name to create a new resource.'.format(
                                    resource_id(**resource_id_parts)))
+            elif not new_flag_value:
+                raise CLIError('Referenced resource {} does not exist. Please create the required '
+                               'resource and try again.'.format(resource_id(**resource_id_parts)))
             else:
                 setattr(namespace, type_field, new_flag_value)
 
