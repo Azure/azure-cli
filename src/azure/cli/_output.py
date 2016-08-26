@@ -57,9 +57,8 @@ def format_text(obj):
 def format_table(obj):
     result = obj.result
     try:
-        if obj.simple_output_query and not obj.is_query_active:
-            if callable(obj.simple_output_query):
-                result = obj.simple_output_query(result)
+        if obj.table_transformer and not obj.is_query_active:
+            result = obj.table_transformer(result)
         result_list = result if isinstance(result, list) else [result]
         return TableOutput.dump(result_list)
     except:
@@ -81,9 +80,9 @@ def format_tsv(obj):
 
 class CommandResultItem(object): #pylint: disable=too-few-public-methods
 
-    def __init__(self, result, simple_output_query=None, is_query_active=False):
+    def __init__(self, result, table_transformer=None, is_query_active=False):
         self.result = result
-        self.simple_output_query = simple_output_query
+        self.table_transformer = table_transformer
         self.is_query_active = is_query_active
 
 class OutputProducer(object): #pylint: disable=too-few-public-methods

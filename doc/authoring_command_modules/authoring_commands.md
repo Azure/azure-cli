@@ -34,12 +34,12 @@ from azure.cli.commands import cli_command
 
 The signature of this method is 
 ```Python
-def cli_command(name, operation, client_factory=None, transform=None, simple_output_query=None):
+def cli_command(name, operation, client_factory=None, transform=None, table_transformer=None):
 ```
-You will generally only specify `name`, `operation` and possibly `simple_output_query`.
+You will generally only specify `name`, `operation` and possibly `table_transformer`.
   - `name` - String uniquely naming your command and placing it within the command hierachy. It will be the string that you would type at the command line, omitting `az` (ex: access your command at `az mypackage mycommand` using a name of `mypackage mycommand`).
   - `operation` - Your function's name.
-  - `simple_output_query` (optional) - Supply a JMESPath projection string to enable the table output type for your command. This is most applicable to list-type commands. See www.jmespath.org for guidance on creating JMESPath queries. Alternatively, you can supply a callable that takes, transforms and returns a result. This is appropriate when the structure of the server response makes JMESPath querying difficult.
+  - `table_transformer` (optional) - Supply a callable that takes, transforms and returns a result for table output.
 
 At this point, you should be able to access your command using `az [name]` and access the built-in help with `az [name] -h/--help`. Your command will automatically be 'wired up' with the global parameters.
 

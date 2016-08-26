@@ -170,7 +170,7 @@ def _get_child(parent, collection_name, item_name, collection_key):
         return result
 
 def cli_generic_update_command(name, getter, setter, factory=None, setter_arg_name='parameters', # pylint: disable=too-many-arguments
-                               simple_output_query=None, child_collection_prop_name=None,
+                               table_transformer=None, child_collection_prop_name=None,
                                child_collection_key='name', child_arg_name='item_name',
                                custom_function=None):
 
@@ -261,7 +261,7 @@ def cli_generic_update_command(name, getter, setter, factory=None, setter_arg_na
                 setattr(namespace, 'ordered_arguments', [])
             namespace.ordered_arguments.append((option_string, values))
 
-    cmd = CliCommand(name, handler, simple_output_query=simple_output_query)
+    cmd = CliCommand(name, handler, table_transformer=table_transformer)
     cmd.arguments.update(set_arguments)
     cmd.arguments.update(get_arguments)
     if function_arguments:

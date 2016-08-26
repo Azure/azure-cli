@@ -133,13 +133,13 @@ class CommandTable(dict):
 
 class CliCommand(object):
 
-    def __init__(self, name, handler, description=None, simple_output_query=None):
+    def __init__(self, name, handler, description=None, table_transformer=None):
         self.name = name
         self.handler = handler
         self.description = description
         self.help = None
         self.arguments = {}
-        self.simple_output_query = simple_output_query
+        self.table_transformer = table_transformer
 
     def add_argument(self, param_name, *option_strings, **kwargs):
         argument = CliCommandArgument(
@@ -201,12 +201,12 @@ def register_extra_cli_argument(command, dest, **kwargs):
     '''
     _cli_extra_argument_registry[command][dest] = CliCommandArgument(dest, **kwargs)
 
-def cli_command(name, operation, client_factory=None, transform=None, simple_output_query=None):
+def cli_command(name, operation, client_factory=None, transform=None, table_transformer=None):
     """ Registers a default Azure CLI command. These commands require no special parameters. """
-    command_table[name] = create_command(name, operation, transform, simple_output_query,
+    command_table[name] = create_command(name, operation, transform, table_transformer,
                                          client_factory)
 
-def create_command(name, operation, transform_result, simple_output_query, client_factory):
+def create_command(name, operation, transform_result, table_transformer, client_factory):
 
     def _execute_command(kwargs):
         client = client_factory(kwargs) if client_factory else None
@@ -228,7 +228,7 @@ def create_command(name, operation, transform_result, simple_output_query, clien
             raise CLIError(message)
 
     name = ' '.join(name.split())
-    cmd = CliCommand(name, _execute_command, simple_output_query=simple_output_query)
+    cmd = CliCommand(name, _execute_command, table_transformer=table_transformer)
     cmd.description = extract_full_summary_from_signature(operation)
     cmd.arguments.update(extract_args_from_signature(operation))
     return cmd

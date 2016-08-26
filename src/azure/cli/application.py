@@ -126,8 +126,8 @@ class Application(object):
         self.raise_event(self.TRANSFORM_RESULT, event_data=event_data)
         self.raise_event(self.FILTER_RESULT, event_data=event_data)
         return CommandResultItem(event_data['result'],
-                                 simple_output_query=
-                                 command_table[args.command].simple_output_query,
+                                 table_transformer=
+                                 command_table[args.command].table_transformer,
                                  is_query_active=self.session['query_active'])
 
     def raise_event(self, name, **kwargs):
