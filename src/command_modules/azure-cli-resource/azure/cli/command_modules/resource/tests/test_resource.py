@@ -11,7 +11,7 @@ from azure.cli.utils.vcr_test_base import (VCRTestBase, JMESPathCheck, NoneCheck
                                            ResourceGroupVCRTestBase, MOCKED_SUBSCRIPTION_ID)
 
 #pylint: disable=method-hidden
-class ResourceGroupScenarioTest(VCRTestBase): # Not RG test base because it tests the actual deletion
+class ResourceGroupScenarioTest(VCRTestBase): # Not RG test base because it tests the actual deletion of a resource group
 
     def test_resource_group(self):
         self.execute()
@@ -89,14 +89,6 @@ class ResourceScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck('resourceGroup', rg),
             JMESPathCheck('tags', {'cli-test': 'test'})
         ])
-
-        # check for child resource
-        # TODO: Cannot create a database with the CLI and I know of no other resource type that follows the pattern Microsoft.Sql/servers/databases
-        #s.cmd('resource show -n testsql23456 -g {} --parent servers/testserver23456 --resource-type Microsoft.Sql/databases'.format(rg), checks=[
-        #    JMESPathCheck('name', 'testsql23456'),
-        #    JMESPathCheck('location', 'West US'),
-        #    JMESPathCheck('resourceGroup', rg)
-        #])
 
         # clear tag and verify
         s.cmd('resource tag -n {} -g {} --resource-type Microsoft.Network/virtualNetworks --tags'.format(self.vnet_name, rg))
