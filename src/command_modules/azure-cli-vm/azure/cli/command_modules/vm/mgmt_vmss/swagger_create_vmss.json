@@ -145,7 +145,7 @@
           "type": "string", 
           "description": "URI referencing the template.", 
           "enum": [
-            "https://azuresdkci.blob.core.windows.net/templatehost/CreateVmss_2016-08-24/azuredeploy.json"
+            "https://azuresdkci.blob.core.windows.net/templatehost/CreateVmss_2016-08-25/azuredeploy.json"
           ]
         }, 
         "contentVersion": {
@@ -213,6 +213,11 @@
         "loadBalancerBackendPoolName": {
           "type": "object", 
           "$ref": "#/definitions/DeploymentParameter_loadBalancerBackendPoolName", 
+          "x-ms-client-flatten": true
+        }, 
+        "loadBalancerNatPoolName": {
+          "type": "object", 
+          "$ref": "#/definitions/DeploymentParameter_loadBalancerNatPoolName", 
           "x-ms-client-flatten": true
         }, 
         "loadBalancerType": {
@@ -479,6 +484,15 @@
           "type": "string", 
           "description": "Name of load balancer backend pool.", 
           "x-ms-client-name": "loadBalancerBackendPoolName"
+        }
+      }
+    }, 
+    "DeploymentParameter_loadBalancerNatPoolName": {
+      "properties": {
+        "value": {
+          "type": "string", 
+          "description": "Name of load balancer NAT pool.", 
+          "x-ms-client-name": "loadBalancerNatPoolName"
         }
       }
     }, 
@@ -835,7 +849,7 @@
           "description": "Container URI of of the template.", 
           "x-ms-client-name": "_artifactsLocation", 
           "enum": [
-            "https://azuresdkci.blob.core.windows.net/templatehost/CreateVmss_2016-08-24"
+            "https://azuresdkci.blob.core.windows.net/templatehost/CreateVmss_2016-08-25"
           ]
         }
       }, 
