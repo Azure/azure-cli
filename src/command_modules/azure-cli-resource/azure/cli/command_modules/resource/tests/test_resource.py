@@ -11,7 +11,7 @@ from azure.cli.utils.vcr_test_base import (VCRTestBase, JMESPathCheck, NoneCheck
                                            ResourceGroupVCRTestBase, MOCKED_SUBSCRIPTION_ID)
 
 #pylint: disable=method-hidden
-class ResourceGroupScenarioTest(VCRTestBase):
+class ResourceGroupScenarioTest(VCRTestBase): # Not RG test base because it tests the actual deletion of a resource group
 
     def test_resource_group(self):
         self.execute()
@@ -47,21 +47,26 @@ class ResourceGroupScenarioTest(VCRTestBase):
         if self.cmd('resource group exists -n {}'.format(self.resource_group)):
             self.cmd('resource group delete -n {}'.format(self.resource_group))
 
-class ResourceScenarioTest(VCRTestBase):
+class ResourceScenarioTest(ResourceGroupVCRTestBase):
 
     def test_resource_scenario(self):
         self.execute()
 
     def __init__(self, test_method):
         super(ResourceScenarioTest, self).__init__(__file__, test_method)
+        self.resource_group = 'azure-cli-resource-test'
+        self.vnet_name = 'cli-test-vnet1'
+        self.subnet_name = 'cli-test-subnet1'
+
+    def set_up(self):
+        super(ResourceScenarioTest, self).set_up()
+        rg = self.resource_group
+        self.cmd('network vnet create -g {} -n {} --subnet-name {} --tags cli-test=test'.format(rg, self.vnet_name, self.subnet_name))
 
     def body(self):
         s = self
-        rg = 'travistestresourcegroup'
-        all_resources = s.cmd('resource list')
-        some_resources = s.cmd('resource list -l centralus')
-        assert len(all_resources) > len(some_resources)
-
+        rg = self.resource_group
+        s.cmd('resource list')
         s.cmd('resource list -l centralus',
             checks=JMESPathCheck("length([?location == 'centralus']) == length(@)", True))
         s.cmd('resource list --tag displayName=PublicIPAddress',
@@ -69,47 +74,28 @@ class ResourceScenarioTest(VCRTestBase):
         s.cmd('resource list --resource-type Microsoft.Network/networkInterfaces',
             checks=JMESPathCheck("length([?type == 'Microsoft.Network/networkInterfaces']) == length(@)", True))
 
-        s.cmd('resource list --name TravisTestResourceGroup',
-            checks=JMESPathCheck("length([?name == 'TravisTestResourceGroup']) == length(@)", True))
-
-        s.cmd('resource list -g yugangw',
-            checks=JMESPathCheck("length([?resourceGroup == 'yugangw']) == length(@)", True))
+        s.cmd('resource list --name {}'.format(self.vnet_name),
+            checks=JMESPathCheck("length([?name == '{}']) == length(@)".format(self.vnet_name), True))
 
         all_tagged_displayname = s.cmd('resource list --tag displayName')
         storage_acc_tagged_displayname = \
             s.cmd('resource list --tag displayName=StorageAccount')
         assert len(all_tagged_displayname) > len(storage_acc_tagged_displayname)
 
-        s.cmd('resource tag -n testserver23456 -g {} --resource-type Microsoft.Sql/servers --tags test=pass'.format(rg))
-
         # check for simple resource with tag
-        s.cmd('resource show -n testserver23456 -g {} --resource-type Microsoft.Sql/servers'.format(rg), checks=[
-            JMESPathCheck('name', 'testserver23456'),
-            JMESPathCheck('location', 'West US'),
+        s.cmd('resource show -n {} -g {} --resource-type Microsoft.Network/virtualNetworks'.format(self.vnet_name, rg), checks=[
+            JMESPathCheck('name', self.vnet_name),
+            JMESPathCheck('location', 'westus'),
             JMESPathCheck('resourceGroup', rg),
-            JMESPathCheck('tags', {'test': 'pass'})
-        ])
-
-        # check for child resource
-        s.cmd('resource show -n testsql23456 -g {} --parent servers/testserver23456 --resource-type Microsoft.Sql/databases'.format(rg), checks=[
-            JMESPathCheck('name', 'testsql23456'),
-            JMESPathCheck('location', 'West US'),
-            JMESPathCheck('resourceGroup', rg)
-        ])
-
-        # Check that commands succeeds regardless of parameter order
-        s.cmd('resource show -n testsql23456 -g {} --resource-type Microsoft.Sql/databases --parent servers/testserver23456 '.format(rg), checks=[
-            JMESPathCheck('name', 'testsql23456'),
-            JMESPathCheck('location', 'West US'),
-            JMESPathCheck('resourceGroup', rg)
+            JMESPathCheck('tags', {'cli-test': 'test'})
         ])
 
         # clear tag and verify
-        s.cmd('resource tag -n testserver23456 -g {} --resource-type Microsoft.Sql/servers --tags'.format(rg))
-        s.cmd('resource show -n testserver23456 -g {} --resource-type Microsoft.Sql/servers'.format(rg),
+        s.cmd('resource tag -n {} -g {} --resource-type Microsoft.Network/virtualNetworks --tags'.format(self.vnet_name, rg))
+        s.cmd('resource show -n {} -g {} --resource-type Microsoft.Network/virtualNetworks'.format(self.vnet_name, rg),
             checks=JMESPathCheck('tags', {}))
 
-class TagScenarioTest(VCRTestBase):
+class TagScenarioTest(VCRTestBase): # Not RG test base because it operates only on the subscription
 
     def test_tag_scenario(self):
         self.execute()
@@ -151,7 +137,7 @@ class TagScenarioTest(VCRTestBase):
         s.cmd('tag delete -n {}'.format(tn))
         s.cmd('tag list --query "[?tagName == \'{}\']"'.format(self.tag_name), checks=NoneCheck())
 
-class ProviderRegistrationTest(VCRTestBase):
+class ProviderRegistrationTest(VCRTestBase): # Not RG test base because it operates only on the subscription
     def __init__(self, test_method):
         super(ProviderRegistrationTest, self).__init__(__file__, test_method)
 
@@ -204,7 +190,7 @@ class DeploymentTest(ResourceGroupVCRTestBase):
         self.assertEqual(2, len(result))
         self.assertEqual(self.resource_group, result[0]['resourceGroup'])
 
-class ResourceMoveScenarioTest(VCRTestBase):
+class ResourceMoveScenarioTest(VCRTestBase): # Not RG test base because it uses two RGs and manually cleans them up
 
     def __init__(self, test_method):
         super(ResourceMoveScenarioTest, self).__init__(__file__, test_method)    
@@ -245,7 +231,7 @@ class ResourceMoveScenarioTest(VCRTestBase):
         self.cmd('network nsg show -g {} -n {}'.format(self.destination_group, nsg1), [JMESPathCheck('name', nsg1)])
         self.cmd('network nsg show -g {} -n {}'.format(self.destination_group, nsg2), [JMESPathCheck('name', nsg2)])
 
-class FeatureScenarioTest(VCRTestBase):
+class FeatureScenarioTest(VCRTestBase): # Not RG test base because it operates only on the subscription
     def __init__(self, test_method):
         super(FeatureScenarioTest, self).__init__(__file__, test_method)
 
@@ -261,17 +247,17 @@ class FeatureScenarioTest(VCRTestBase):
             JMESPathCheck("length([?name=='Microsoft.Network/SkipPseudoVipGeneration'])", 1)
             ])
 
-class PolicyScenarioTest(VCRTestBase):#ResourceGroupVCRTestBase
+class PolicyScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-        super(PolicyScenarioTest, self).__init__(__file__, test_method)    
-        self.resource_group = 'azurecli-policy-test-group'
+        super(PolicyScenarioTest, self).__init__(__file__, test_method, debug=True)    
+        self.resource_group = 'azure-cli-policy-test-group'
        
     def test_resource_policy(self):
         self.execute()
 
     def body(self):
-        policy_name = 'azurecli-test-policy'
+        policy_name = 'azure-cli-test-policy'
         policy_display_name = 'test_policy_123'
         policy_description = 'test_policy_123' 
         curr_dir = os.path.dirname(os.path.realpath(__file__))
