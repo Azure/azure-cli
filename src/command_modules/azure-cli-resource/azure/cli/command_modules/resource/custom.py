@@ -210,7 +210,16 @@ def tag_resource(
         resource_type,
         resource_name,
         api_version)
-    parameters = GenericResource(resource.location, tags, None, None) # pylint: disable=no-member
+    # pylint: disable=no-member
+    parameters = GenericResource(
+        location=resource.location,
+        tags=tags,
+        plan=resource.plan,
+        properties=resource.properties,
+        kind=resource.kind,
+        managed_by=resource.managed_by,
+        sku=resource.sku,
+        identity=resource.identity)
     try:
         rcf.resources.create_or_update(
             resource_group_name,
