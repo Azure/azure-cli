@@ -30,6 +30,9 @@ from ._actions import (load_images_from_aliases_doc,
                        load_extension_images_thru_services,
                        load_images_thru_services)
 from ._factory import _compute_client_factory
+import azure.cli._logging as _logging
+
+logger = _logging.get_az_logger(__name__)
 
 def _vm_get(resource_group_name, vm_name, expand=None):
     '''Retrieves a VM'''
@@ -139,6 +142,8 @@ def list_vm_images(image_location=None, publisher=None, offer=None, sku=None, al
     if load_thru_services:
         all_images = load_images_thru_services(publisher, offer, sku, image_location)
     else:
+        logger.warning(
+            'You are viewing an offline list of images, use --all to retrieve an up-to-date list')
         all_images = load_images_from_aliases_doc(publisher, offer, sku)
 
     for i in all_images:
@@ -506,7 +511,8 @@ def set_extension(
     :param version: the version of extension.
     :param settings: public settings or a file path with such contents
     :param protected_settings: protected settings or a file path with such contents
-    :param auto_upgrade_minor_version: auto upgrade to the newer version if available
+    :param auto_upgrade_minor_version: pick the highest minor version for the specified version
+        number, and auto update to the latest build/revision number on any VM updates in future.
     '''
     vm = _vm_get(resource_group_name, vm_name)
     client = _compute_client_factory()

@@ -34,7 +34,7 @@ class TestVMImage(unittest.TestCase):
         ubuntu_image = next(i for i in images if i['publisher'] == 'Canonical')
         self.assertEqual(ubuntu_image['publisher'], 'Canonical')
         self.assertEqual(ubuntu_image['offer'], 'UbuntuServer')
-        self.assertEqual(ubuntu_image['urn alias'], 'UbuntuLTS')
+        self.assertEqual(ubuntu_image['urnAlias'], 'UbuntuLTS')
         parts = ubuntu_image['urn'].split(':')
         self.assertEqual(parts[0], ubuntu_image['publisher'])
         self.assertEqual(parts[1], ubuntu_image['offer'])
