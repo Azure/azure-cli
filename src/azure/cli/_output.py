@@ -107,8 +107,6 @@ class OutputProducer(object): #pylint: disable=too-few-public-methods
         output = self.formatter(obj)
         try:
             print(output, file=self.file, end='')
-        except BrokenPipeError: # pylint: disable=undefined-variable
-            pass
         except IOError as ex:
             if ex.errno == errno.EPIPE:
                 pass
