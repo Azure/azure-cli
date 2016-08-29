@@ -2,7 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 #---------------------------------------------------------------------------------------------
-
+import errno
 import os
 import sys
 
@@ -33,6 +33,11 @@ def _handle_exception(ex):
         return ex.args[1] if len(ex.args) >= 2 else 1
     elif isinstance(ex, KeyboardInterrupt):
         return 1
+    elif isinstance(ex, IOError):
+        if ex.errno == errno.EPIPE:
+            pass
+        else:
+            raise(ex)
     else:
         logger.exception(ex)
         return 1
