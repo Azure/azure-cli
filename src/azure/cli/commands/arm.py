@@ -145,10 +145,11 @@ def add_id_parameters(command_table):
             if command.arguments[key].id_part:
                 command.arguments[key].arg_group = group_name
 
-        command.add_argument(argparse.SUPPRESS,
+        command.add_argument('ids',
                              '--ids',
                              metavar='RESOURCE_ID',
                              help='ID of resource',
+                             dest=argparse.SUPPRESS,
                              action=split_action(command.arguments),
                              nargs='+',
                              type=ResourceId,

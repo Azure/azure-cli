@@ -147,8 +147,9 @@ class CliCommand(object):
         self.table_transformer = table_transformer
 
     def add_argument(self, param_name, *option_strings, **kwargs):
+        dest = kwargs.pop('dest', None)
         argument = CliCommandArgument(
-            param_name, options_list=option_strings, **kwargs)
+            dest or param_name, options_list=option_strings, **kwargs)
         self.arguments[param_name] = argument
 
     def update_argument(self, param_name, argtype):

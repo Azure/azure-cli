@@ -60,7 +60,6 @@ class Application(object):
             'query_active': False
             }
 
-
         # Register presence of and handlers for global parameters
         self.register(self.GLOBAL_PARSER_CREATED, Application._register_builtin_arguments)
         self.register(self.COMMAND_PARSER_PARSED, self._handle_builtin_arguments)
@@ -74,8 +73,7 @@ class Application(object):
 
         self.parser = AzCliCommandParser(prog='az', parents=[self.global_parser])
 
-        if config:
-            self.initialize(config)
+        self.initialize(config or Configuration([]))
 
     def initialize(self, configuration):
         self.configuration = configuration
