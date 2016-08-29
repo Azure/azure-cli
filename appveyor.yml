@@ -33,8 +33,8 @@ on_success:
   - git config --global user.email "%GIT_USER_EMAIL%"
   - git config --global user.name "%GIT_USER_NAME%"
   - git clone --depth 5 -q --branch=%TARGET_BRANCH% %GIT_CONTENT_REPO_URL% %TEMP%\azure-cli-content
+  - if exist %TEMP%\azure-cli-content\%YML_OUTPUT_FOLDER% ((cd %TEMP%\azure-cli-content\%YML_OUTPUT_FOLDER%) & (del %FILES_TO_DELETE% /f /q) & (for /d %%p IN (*) do rmdir "%%p" /s /q))
   - cd %TEMP%\azure-cli-content
-  - if exist %TEMP%\azure-cli-content\%YML_OUTPUT_FOLDER% rmdir /s /q %TEMP%\azure-cli-content\%YML_OUTPUT_FOLDER%
   - SETLOCAL EnableDelayedExpansion & robocopy %TEMP%\azure-cli-xml2yml\yml-output %TEMP%\azure-cli-content\%YML_OUTPUT_FOLDER% /e & IF !ERRORLEVEL! EQU 1 (exit 0) ELSE (exit 1)
   - git add -A
   - git diff --quiet --exit-code --cached || git commit -m "Update Document Content" && git push origin %TARGET_BRANCH% && appveyor AddMessage "Document Updated"
