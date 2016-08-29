@@ -52,7 +52,6 @@ def list_role_definitions(name=None, resource_group_name=None, resource_id=None,
 
 helps['role create'] = """
             type: command
-            short-summary: Create a custom role 
             parameters: 
                 - name: --role-definition
                   type: string
@@ -449,7 +448,7 @@ def _resolve_service_principal(client, identifier):
         raise CLIError("service principal {} doesn't exist".format(identifier))
 
 def create_service_principal_for_rbac(name=None, secret=None, years=1):
-    '''create a service principal you can use with login command
+    '''create a service principal that can access or modify resources
 
     :param str name: an unique uri. If missing, the command will generate one.
     :param str secret: the secret used to login. If missing, command will generate one.
