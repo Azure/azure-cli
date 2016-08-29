@@ -38,7 +38,7 @@ def account_clear():
     profile.logout_all()
 
 def login(username=None, password=None, service_principal=None, tenant=None):
-    '''Log in to an Azure subscription using Active Directory Organization Id'''
+    '''Log in to access Azure subscriptions'''
     interactive = False
 
     if username:
@@ -61,7 +61,7 @@ def login(username=None, password=None, service_principal=None, tenant=None):
     return list(subscriptions)
 
 def logout(username=None):
-    '''Log out from Azure subscription using Active Directory'''
+    '''Log out to remove accesses to Azure subscriptions'''
     profile = Profile()
     if not username:
         username = profile.get_current_account_user()
