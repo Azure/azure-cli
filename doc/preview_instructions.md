@@ -6,13 +6,15 @@ The Project AZ team is excited to offer a preview build for members of the GitHu
 Installation via CURL
 -----------------
 
-To install via cURL on Linux, Unix and OS X, type:
+To install via cURL on Linux and OS X, type:
 
     curl -L https://aka.ms/ProjectAzInstall | bash
 
 If you chose to enable tab completion, type `exec -l $SHELL` to restart your shell.
 
 Note: This will install the latest verified nightly builds.  You may re-run this script later to safely update to the latest version.
+
+For more detailed information on installing the preview, please visit the [Preview Install Guide](https://github.com/Azure/azure-cli/blob/master/doc/preview_install_guide.md) page.
 
 Example Demo Script
 -------------------
