@@ -5,6 +5,7 @@
 
 from __future__ import print_function, unicode_literals
 
+import errno
 import sys
 import platform
 import json
@@ -106,6 +107,13 @@ class OutputProducer(object): #pylint: disable=too-few-public-methods
         output = self.formatter(obj)
         try:
             print(output, file=self.file, end='')
+        except BrokenPipeError: # pylint: disable=undefined-variable
+            pass
+        except IOError as ex:
+            if ex.errno == errno.EPIPE:
+                pass
+            else:
+                raise
         except UnicodeEncodeError:
             print(output.encode('ascii', 'ignore').decode('utf-8', 'ignore'),
                   file=self.file, end='')
