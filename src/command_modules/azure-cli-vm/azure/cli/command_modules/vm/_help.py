@@ -78,7 +78,7 @@ helps['vm extension set'] = """
             examples:
                 - name: Add a new linux user
                   text: 
-                    az vm extension set -n VMAccessForLinux --publisher Microsoft.OSTCExtensions --version 1.4 --vm-name myvm --resource-group yugangw --private-config '{"username":"user1", "ssh_key":"ssh_rsa ..."}'
+                    az vm extension set -n VMAccessForLinux --publisher Microsoft.OSTCExtensions --version 1.4 --vm-name myvm --resource-group mygroup --private-config '{"username":"user1", "ssh_key":"ssh_rsa ..."}'
             """
 
 helps['vm access set-linux-user'] = """

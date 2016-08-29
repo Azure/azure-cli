@@ -36,10 +36,10 @@ class VMImageFieldAction(argparse.Action): #pylint: disable=too-few-public-metho
             namespace.os_version = match.group(4)
         else:
             images = load_images_from_aliases_doc()
-            matched = next((x for x in images if x['urn alias'].lower() == image.lower()), None)
+            matched = next((x for x in images if x['urnAlias'].lower() == image.lower()), None)
             if matched is None:
                 raise CLIError('Invalid image "{}". Please pick one from {}' \
-                    .format(image, [x['urn alias'] for x in images]))
+                    .format(image, [x['urnAlias'] for x in images]))
             namespace.os_type = 'Custom'
             namespace.os_publisher = matched['publisher']
             namespace.os_offer = matched['offer']
@@ -196,7 +196,7 @@ def load_images_from_aliases_doc(publisher=None, offer=None, sku=None):
         for v in result.values(): #loop around os
             for alias, vv in v.items(): #loop around distros
                 all_images.append({
-                    'urn alias': alias,
+                    'urnAlias': alias,
                     'publisher': vv['publisher'],
                     'offer': vv['offer'],
                     'sku': vv['sku'],

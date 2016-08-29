@@ -38,7 +38,7 @@ from azure.cli.commands.template_create import register_folded_cli_argument
 
 def get_urn_aliases_completion_list(prefix, **kwargs):#pylint: disable=unused-argument
     images = load_images_from_aliases_doc()
-    return [i['urn alias'] for i in images]
+    return [i['urnAlias'] for i in images]
 
 def get_vm_size_completion_list(prefix, action, parsed_args, **kwargs):#pylint: disable=unused-argument
     try:

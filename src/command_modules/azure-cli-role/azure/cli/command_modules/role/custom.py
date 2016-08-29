@@ -376,13 +376,15 @@ def delete_application(client, identifier):
     client.delete(object_id)
 
 def _resolve_application(client, identifier):
-    try:
-        uuid.UUID(identifier)
-        result = list(client.list(filter="appId eq '{}'".format(identifier)))
-    except ValueError:
-        result = list(client.list(filter="identifierUris/any(s:s eq '{}')".format(identifier)))
+    result = list(client.list(filter="identifierUris/any(s:s eq '{}')".format(identifier)))
+    if not result:
+        try:
+            uuid.UUID(identifier)
+            #it is either app id or object id, let us verify
+            result = list(client.list(filter="appId eq '{}'".format(identifier)))
+        except ValueError:
+            raise CLIError("Application '{}' doesn't exist".format(identifier))
 
-    #identifier is unique, no need to verify multiple matches.
     return result[0].object_id if result else identifier
 
 def _build_application_creds(password=None, key_value=None, key_type=None,#pylint: disable=too-many-arguments
@@ -443,9 +445,9 @@ def _resolve_service_principal(client, identifier):
         return result[0].object_id
     try:
         uuid.UUID(identifier)
-        return identifier
+        return identifier #assume an object id
     except ValueError:
-        raise CLIError("service principal {} doesn't exist".format(identifier))
+        raise CLIError("service principal '{}' doesn't exist".format(identifier))
 
 def create_service_principal_for_rbac(name=None, secret=None, years=1):
     '''create a service principal that can access or modify resources
