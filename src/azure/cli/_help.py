@@ -360,7 +360,10 @@ def _print_indent(s, indent=0, subsequent_spaces=-1):
                               width=100)
     paragraphs = s.split('\n')
     for p in paragraphs:
-        print(tw.fill(p), file=sys.stdout)
+        try:
+            print(tw.fill(p), file=sys.stdout)
+        except UnicodeEncodeError:
+            print(tw.fill(p).encode('ascii', 'ignore').decode('utf-8', 'ignore'), file=sys.stdout)
 
 def _get_column_indent(text, max_name_length):
     return ' '*(max_name_length - len(text))
