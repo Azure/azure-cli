@@ -13,8 +13,10 @@ from azure.cli.commands._introspection import extract_args_from_signature
 from azure.cli.commands.client_factory import get_mgmt_service_client
 from azure.mgmt.resource.resources import ResourceManagementClient
 from azure.cli.application import APPLICATION, IterateValue
+import azure.cli._logging as _logging
 from azure.cli._util import CLIError
 
+logger = _logging.get_az_logger(__name__)
 
 regex = re.compile('/subscriptions/(?P<subscription>[^/]*)/resourceGroups/(?P<resource_group>[^/]*)'
                    '/providers/(?P<namespace>[^/]*)/(?P<type>[^/]*)/(?P<name>[^/]*)'
@@ -285,9 +287,9 @@ def cli_generic_update_command(name, getter, setter, factory=None, setter_arg_na
                      arg_group=group_name)
     main_command_table[name] = cmd
 
-index_regex = re.compile(r'\[(.*)\]')
+index_or_filter_regex = re.compile(r'\[(.*)\]')
 def set_properties(instance, expression):
-    key, value = expression.split('=', 1)
+    key, value = expression.rsplit('=', 1)
 
     try:
         value = json.loads(value)
@@ -295,21 +297,28 @@ def set_properties(instance, expression):
         pass
 
     name, path = _get_name_path(key)
+    parent_name = path[-1] if path else 'root'
     root = instance
     instance = _find_property(instance, path)
     if instance is None:
         parent = _find_property(root, path[:-1])
-        set_properties(parent, '{}={{}}'.format(path[-1]))
+        set_properties(parent, '{}={{}}'.format(parent_name))
         instance = _find_property(root, path)
 
-    match = index_regex.match(name)
+    match = index_or_filter_regex.match(name)
     index_value = int(match.group(1)) if match else None
     try:
         if index_value is not None:
             instance[index_value] = value
         elif isinstance(instance, dict):
             instance[name] = value
+        elif isinstance(instance, list):
+            show_options(instance, name, key.split('.'))
+        elif hasattr(instance, name):
+            setattr(instance, name, value)
         else:
+            logger.warning(
+                "Property '%s' not found on %s. Update may be ignored.", name, parent_name)
             setattr(instance, name, value)
     except IndexError:
         raise CLIError('index {} doesn\'t exist on {}'.format(index_value, make_camel_case(name)))
@@ -357,12 +366,16 @@ def remove_properties(instance, argument_values):
 
 def show_options(instance, part, path):
     options = instance.__dict__ if hasattr(instance, '__dict__') else instance
-    options = options.keys() if isinstance(options, dict) else options
-    options = [make_camel_case(x) for x in options]
+    parent = make_camel_case('.'.join(path[:-1]).replace('.[', '['))
+    if isinstance(options, dict):
+        options = options.keys()
+        options = sorted([make_camel_case(x) for x in options])
+    elif isinstance(options, list):
+        options = 'index into the collection "{}" with [<index>] or [<key=value>]'.format(parent)
+    else:
+        options = sorted([make_camel_case(x) for x in options])
     raise CLIError('Couldn\'t find "{}" in "{}".  Available options: {}'
-                   .format(make_camel_case(part),
-                           make_camel_case('.'.join(path[:-1]).replace('.[', '[')),
-                           sorted(list(options), key=str)))
+                   .format(make_camel_case(part), parent, options))
 
 snake_regex_1 = re.compile('(.)([A-Z][a-z]+)')
 snake_regex_2 = re.compile('([a-z0-9])([A-Z])')
@@ -384,7 +397,10 @@ def _get_internal_path(path):
     _path = path.split('.') \
         if '.[' in path \
         else path.replace('[', '.[').split('.')
-    return [make_snake_case(x) for x in _path]
+    final_paths = []
+    for x in _path:
+        final_paths.append(x if x.startswith('[') else make_snake_case(x))
+    return final_paths
 
 def _get_name_path(path):
     pathlist = _get_internal_path(path)
@@ -392,14 +408,27 @@ def _get_name_path(path):
 
 def _update_instance(instance, part, path):
     try:
-        index = index_regex.match(part)
+        index = index_or_filter_regex.match(part)
         if index:
-            try:
-                index_value = int(index.group(1))
-                instance = instance[index_value]
-            except IndexError:
-                raise CLIError('index {} doesn\'t exist on {}'.format(index_value,
-                                                                      make_camel_case(path[-2])))
+            if '=' in index.group(1):
+                key, value = index.group(1).split('=')
+                matches = [x for x in instance if isinstance(x, dict) and x.get(key, None) == value]
+                if len(matches) == 1:
+                    instance = matches[0]
+                elif len(matches) > 1:
+                    raise CLIError("non-unique key '{}' found multiple matches on {}. "
+                                   "Key must be unique.".format(
+                                       key, make_camel_case(path[-2])))
+                else:
+                    raise CLIError("item with value '{}' doesn\'t exist for key '{}' on {}".format(
+                        value, key, make_camel_case(path[-2])))
+            else:
+                try:
+                    index_value = int(index.group(1))
+                    instance = instance[index_value]
+                except IndexError:
+                    raise CLIError('index {} doesn\'t exist on {}'.format(
+                        index_value, make_camel_case(path[-2])))
         elif isinstance(instance, dict):
             instance = instance[part]
         else:
