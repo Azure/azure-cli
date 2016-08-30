@@ -229,9 +229,9 @@ class NetworkExpressRouteCircuitScenarioTest(VCRTestBase):
             rg, ern, pv), allowed_exceptions=allowed_exceptions)
         self.cmd('network express-route circuit-peering show --resource-group {0} --circuit-name {1} --name {2}'.format(
             rg, ern, pv), allowed_exceptions=allowed_exceptions)
-        self.cmd('network express-route circuit list-arp --resource-group {0} --name {1} --peering-name {2} --device-path {2}'.format(
+        self.cmd('network express-route circuit list-arp-tables --resource-group {0} --name {1} --peering-name {2} --device-path {2}'.format(
             rg, ern, pv), allowed_exceptions=allowed_exceptions)
-        self.cmd('network express-route circuit list-routes --resource-group {0} --name {1} --peering-name {2} --device-path {2}'.format(
+        self.cmd('network express-route circuit list-route-tables --resource-group {0} --name {1} --peering-name {2} --device-path {2}'.format(
             rg, ern, pv), allowed_exceptions=allowed_exceptions)
 
 class NetworkLoadBalancerScenarioTest(ResourceGroupVCRTestBase):

@@ -67,7 +67,7 @@ def logout(username=None):
         username = profile.get_current_account_user()
     profile.logout(username)
 
-def list_location():
+def list_locations():
     from azure.cli.commands.parameters import get_subscription_locations
     return get_subscription_locations()
 
