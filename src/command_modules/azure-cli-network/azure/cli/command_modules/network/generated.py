@@ -182,8 +182,8 @@ factory = lambda _: _network_client_factory().express_route_circuits
 cli_command('network express-route circuit delete', ExpressRouteCircuitsOperations.delete, factory)
 cli_command('network express-route circuit show', ExpressRouteCircuitsOperations.get, factory)
 cli_command('network express-route circuit get-stats', ExpressRouteCircuitsOperations.get_stats, factory)
-cli_command('network express-route circuit list-arp', ExpressRouteCircuitsOperations.list_arp_table, factory)
-cli_command('network express-route circuit list-routes', ExpressRouteCircuitsOperations.list_routes_table, factory)
+cli_command('network express-route circuit list-arp-tables', ExpressRouteCircuitsOperations.list_arp_table, factory)
+cli_command('network express-route circuit list-route-tables', ExpressRouteCircuitsOperations.list_routes_table, factory)
 cli_command('network express-route circuit list', list_express_route_circuits)
 cli_generic_update_command('network express-route circuit update', ExpressRouteCircuitsOperations.get, ExpressRouteCircuitsOperations.create_or_update, factory)
 
