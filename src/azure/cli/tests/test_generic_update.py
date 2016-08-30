@@ -26,7 +26,7 @@ class GenericUpdateTest(unittest.TestCase):
             'list': [
                 'a',
                 'b',
-                ['c', {'d': 'e'}]
+                ['c', {'d': 'e'}, {'d': 'f'}]
                 ]
             }
 
@@ -66,6 +66,10 @@ class GenericUpdateTest(unittest.TestCase):
         self.assertEqual(my_obj['list'][1][0]['key2'], 'value2',
                          'add a second value to the new list')
 
+        app.execute('gencommand --set list[2][d=f].d=g'.split())
+        self.assertEqual(my_obj['list'][2][2]['d'], 'g',
+                         'index dictionary by unique key=value')
+
         app.execute('gencommand --add list i=j k=l'.split())
         self.assertEqual(my_obj['list'][-1]['k'], 'l',
                          'add multiple values to a list at once (verify last element)')
@@ -95,7 +99,7 @@ class GenericUpdateTest(unittest.TestCase):
             'list': [
                 'a',
                 'b',
-                ['c', {'d': 'e'}]
+                ['c', {'d': 'e'}, {'d': 'e'}]
                 ]
             }
 
@@ -128,7 +132,8 @@ class GenericUpdateTest(unittest.TestCase):
                             'remove non-existent property by index')
 
         remove_prop_message = """Couldn't find "doesntExist" in "list.doesntExist".""" + \
-                              """  Available options: [['c', {'d': 'e'}], 'a', 'b']"""
+                              """  Available options: index into the """ + \
+                              """collection "list.doesntExist" with [<index>] or [<key=value>]"""
         _execute_with_error('gencommand --a1 1 --a2 2 --remove list.doesnt_exist.missing 2',
                             remove_prop_message,
                             'remove non-existent sub-property by index')
@@ -138,7 +143,8 @@ class GenericUpdateTest(unittest.TestCase):
                             'remove out-of-range index')
 
         set_on_list_message = """Couldn't find "doesntExist" in "list".""" + \
-                              """  Available options: [['c', {'d': 'e'}], 'a', 'b']"""
+                              """  Available options: index into the collection "list" with""" + \
+                              """ [<index>] or [<key=value>]"""
         _execute_with_error('gencommand --a1 1 --a2 2 --set list.doesnt_exist=foo',
                             set_on_list_message,
                             'set shouldn\'t work on a list')
@@ -149,6 +155,14 @@ class GenericUpdateTest(unittest.TestCase):
         _execute_with_error('gencommand --a1 1 --a2 2 --set list[2][3].doesnt_exist=foo',
                             "index 3 doesn't exist on [2]",
                             'index out of range in path')
+
+        _execute_with_error('gencommand --a1 1 --a2 2 --set list[2][d=e].doesnt_exist=foo',
+                            "non-unique key 'd' found multiple matches on [2]. Key must be unique.",
+                            'indexing by key must be unique')
+
+        _execute_with_error('gencommand --a1 1 --a2 2 --set list[2][f=a].doesnt_exist=foo',
+                            "item with value 'a' doesn\'t exist for key 'f' on [2]",
+                            'no match found when indexing by key and value')
 
     def test_generic_update_ids(self):
         my_objs = [
