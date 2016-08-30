@@ -410,6 +410,33 @@ class VMAvailSetScenarioTest(VCRTestBase):
         self.cmd('vm availability-set list --resource-group {}'.format(
             self.resource_group), checks=NoneCheck())
 
+class VMExtensionAutoUpgradeTest(ResourceGroupVCRTestBase):
+
+    def __init__(self, test_method):
+        super(VMExtensionAutoUpgradeTest, self).__init__(__file__, test_method)
+        self.resource_group = 'clitest_upgrade_vmext'
+        self.vm_name = 'autoupgradevm1'
+
+    def set_up(self):
+        self.cmd('vm create -n {} -g {} --image UbuntuLTS'.format(self.vm_name, self.resource_group))
+
+    def test_vm_extension_autoupgrade(self):
+        self.execute()
+
+    def body(self):
+        _, protected_settings = tempfile.mkstemp()
+        with open(protected_settings, 'w') as settings:
+            settings.write(json.dumps({'username':'user1', 'password':'Test12345'}))
+        protected_settings = protected_settings.replace('\\', '\\\\')
+
+        #install 1.2 and auto upgrade should install 1.4. Note the 'set' still returns 1.2 which appears a service bug
+        self.cmd('vm extension set -n VMAccessForLinux --publisher Microsoft.OSTCExtensions --version 1.2 --vm-name {} -g {} --protected-settings {}'
+                 .format(self.vm_name, self.resource_group, protected_settings))
+        self.cmd('vm get-instance-view -n {} -g {}'.format(self.vm_name, self.resource_group), checks=[
+                JMESPathCheck('*.extensions[0].name', ['VMAccessForLinux']),
+                JMESPathCheck('*.extensions[0].typeHandlerVersion', ['1.4.1.0']),
+            ])
+
 class VMExtensionsScenarioTest(VCRTestBase):
 
     def __init__(self, test_method):
