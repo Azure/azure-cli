@@ -1,4 +1,3 @@
-# Mod for review
 #---------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
@@ -10,12 +9,16 @@ from datetime import datetime
 import os
 import re
 
-from azure.cli.commands.client_factory import get_mgmt_service_client
+from azure.cli.commands.client_factory import get_mgmt_service_client, get_data_service_client
 from azure.cli.commands.validators import validate_key_value_pairs
 
 from azure.mgmt.storage import StorageManagementClient
 from azure.storage.models import ResourceTypes, Services
 from azure.storage.table import TablePermissions, TablePayloadFormat
+from azure.storage.blob.baseblobservice import BaseBlobService
+from azure.storage.blob.models import ContentSettings as BlobContentSettings
+from azure.storage.file import FileService
+from azure.storage.file.models import ContentSettings as FileContentSettings
 
 # region PARAMETER VALIDATORS
 
@@ -62,22 +65,101 @@ def validate_client_parameters(namespace):
         else:
             raise ValueError("Storage account '{}' not found.".format(n.account_name))
 
-def get_content_setting_validator(settings_class):
+def validate_source_uri(namespace):
+    usage_string = 'invalid usage: supply only one of the following argument sets:' + \
+                   '\n\t   --source-uri' + \
+                   '\n\tOR --source-container --source-blob [--source-snapshot] [--source-sas]' + \
+                   '\n\tOR --source-share --source-path [--source-sas]'
+    ns = vars(namespace)
+    validate_client_parameters(namespace) # must run first to resolve storage account
+    storage_acc = ns.get('account_name', None) or os.environ.get('AZURE_STORAGE_ACCOUNT')
+    uri = ns.get('copy_source', None)
+    container = ns.pop('source_container', None)
+    blob = ns.pop('source_blob', None)
+    sas = ns.pop('source_sas', None)
+    snapshot = ns.pop('source_snapshot', None)
+    share = ns.pop('source_share', None)
+    path = ns.pop('source_path', None)
+    if uri:
+        if any([container, blob, sas, snapshot, share, path]):
+            raise ValueError(usage_string)
+        else:
+            # simplest scenario--no further processing necessary
+            return
+
+    valid_blob_source = container and blob and not share and not path
+    valid_file_source = share and path and not container and not blob and not snapshot
+
+    if valid_blob_source:
+        blob_uri = 'https://{}.blob.core.windows.net/{}/{}{}'.format(
+            storage_acc, container, blob, '?' if snapshot or sas else '')
+        if snapshot:
+            blob_uri = '{}snapshot={}'.format(blob_uri, snapshot)
+        if sas:
+            blob_uri = '{}{}{}'.format(blob_uri, '&' if snapshot else '', sas)
+        namespace.copy_source = blob_uri
+    elif valid_file_source:
+        file_uri = 'https://{}.file.core.windows.net/{}/{}'.format(
+            storage_acc, share, path)
+        if sas:
+            file_uri = '{}?{}'.format(file_uri, sas)
+        namespace.copy_source = file_uri
+    else:
+        raise ValueError(usage_string)
+
+def get_content_setting_validator(settings_class, update):
+    def _class_name(class_type):
+        return class_type.__module__ + "." + class_type.__class__.__name__
+
     def validator(namespace):
-        namespace.content_settings = settings_class(
-            content_type=namespace.content_type,
-            content_disposition=namespace.content_disposition,
-            content_encoding=namespace.content_encoding,
-            content_language=namespace.content_language,
-            content_md5=namespace.content_md5,
-            cache_control=namespace.content_cache_control
+        # must run certain validators first for an update
+        if update:
+            validate_client_parameters(namespace)
+        if update and _class_name(settings_class) == _class_name(FileContentSettings):
+            get_file_path_validator()(namespace)
+        ns = vars(namespace)
+
+        # retrieve the existing object properties for an update
+        if update:
+            account = ns.get('account_name')
+            key = ns.get('account_key')
+            cs = ns.get('connection_string')
+            sas = ns.get('sas_token')
+            if _class_name(settings_class) == _class_name(BlobContentSettings):
+                client = get_data_service_client(BaseBlobService, account, key, cs, sas)
+                container = ns.get('container_name')
+                blob = ns.get('blob_name')
+                lease_id = ns.get('lease_id')
+                props = client.get_blob_properties(container, blob, lease_id=lease_id).properties.content_settings # pylint: disable=line-too-long
+            elif _class_name(settings_class) == _class_name(FileContentSettings):
+                client = get_data_service_client(FileService, account, key, cs, sas) # pylint: disable=redefined-variable-type
+                share = ns.get('share_name')
+                directory = ns.get('directory_name')
+                filename = ns.get('file_name')
+                props = client.get_file_properties(share, directory, filename).properties.content_settings # pylint: disable=line-too-long
+
+        # create new properties
+        new_props = settings_class(
+            content_type=ns.pop('content_type', None),
+            content_disposition=ns.pop('content_disposition', None),
+            content_encoding=ns.pop('content_encoding', None),
+            content_language=ns.pop('content_language', None),
+            content_md5=ns.pop('content_md5', None),
+            cache_control=ns.pop('content_cache_control', None)
         )
-        del namespace.content_type,
-        del namespace.content_disposition,
-        del namespace.content_encoding,
-        del namespace.content_language,
-        del namespace.content_md5,
-        del namespace.content_cache_control
+
+        # if update, fill in any None values with existing
+        if update:
+            new_props.content_type = new_props.content_type or props.content_type
+            new_props.content_disposition = new_props.content_disposition \
+                or props.content_disposition
+            new_props.content_encoding = new_props.content_encoding or props.content_encoding
+            new_props.content_language = new_props.content_language or props.content_language
+            new_props.content_md5 = new_props.content_md5 or props.content_md5
+            new_props.cache_control = new_props.cache_control or props.cache_control
+
+        ns['content_settings'] = new_props
+        namespace = argparse.Namespace(**ns)
     return validator
 
 def validate_encryption(namespace):
@@ -131,6 +213,9 @@ def get_file_path_validator(default_file_param=None):
     """ Creates a namespace validator that splits out 'path' into 'directory_name' and 'file_name'.
     Allows another path-type parameter to be named which can supply a default filename. """
     def validator(namespace):
+        if not hasattr(namespace, 'path'):
+            return
+
         path = namespace.path
         dir_name, file_name = os.path.split(path) if path else (None, '')
 

@@ -1,4 +1,3 @@
-# Mod for review
 #---------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
@@ -31,7 +30,7 @@ from ._validators import \
     (datetime_type, datetime_string_type, get_file_path_validator, validate_metadata,
      get_permission_validator, table_permission_validator, get_permission_help_string,
      resource_type_type, services_type, ipv4_range_type, validate_entity,
-     validate_select,
+     validate_select, validate_source_uri,
      get_content_setting_validator, validate_encryption, validate_accept,
      process_file_download_namespace, process_logging_update_namespace,
      process_metric_update_namespace)
@@ -111,16 +110,26 @@ def register_path_argument(scope, default_file_param=None, options_list=None):
     register_cli_argument(scope, 'file_name', ignore_type)
     register_cli_argument(scope, 'directory_name', ignore_type)
 
-# CONTENT SETTINGS REGISTRATION
+# EXTRA PARAMETER SET REGISTRATION
 
-def register_content_settings_argument(scope, settings_class):
-    register_cli_argument(scope, 'content_settings', ignore_type, validator=get_content_setting_validator(settings_class))
+def register_content_settings_argument(scope, settings_class, update):
+    register_cli_argument(scope, 'content_settings', ignore_type, validator=get_content_setting_validator(settings_class, update))
     register_extra_cli_argument(scope, 'content_type', default=None, help='The content MIME type.')
     register_extra_cli_argument(scope, 'content_encoding', default=None, help='The content encoding type.')
     register_extra_cli_argument(scope, 'content_language', default=None, help='The content language.')
     register_extra_cli_argument(scope, 'content_disposition', default=None, help='Conveys additional information about how to process the response payload, and can also be used to attach additional metadata.')
     register_extra_cli_argument(scope, 'content_cache_control', default=None, help='The cache control string.')
     register_extra_cli_argument(scope, 'content_md5', default=None, help='The content\'s MD5 hash.')
+
+def register_source_uri_arguments(scope):
+    register_cli_argument(scope, 'copy_source', options_list=('--source-uri', '-u'), validator=validate_source_uri, required=False)
+    register_extra_cli_argument(scope, 'source_sas', default=None, help='The shared access signature for the source storage account.')
+    register_extra_cli_argument(scope, 'source_share', default=None, help='The share name for the source storage account.')
+    register_extra_cli_argument(scope, 'source_path', default=None, help='The file path for the source storage account.')
+    register_extra_cli_argument(scope, 'source_container', default=None, help='The container name for the source storage account.')
+    register_extra_cli_argument(scope, 'source_blob', default=None, help='The blob name for the source storage account.')
+    register_extra_cli_argument(scope, 'source_snapshot', default=None, help='The blob snapshot for the source storage account.')
+
 
 # CUSTOM CHOICE LISTS
 
@@ -147,7 +156,7 @@ register_cli_argument('storage', 'directory_name', directory_type)
 register_cli_argument('storage', 'share_name', share_name_type)
 register_cli_argument('storage', 'table_name', table_name_type)
 register_cli_argument('storage', 'retry_wait', options_list=('--retry-interval',))
-register_cli_argument('storage', 'progress_callback', IGNORE_TYPE)
+register_cli_argument('storage', 'progress_callback', ignore_type)
 register_cli_argument('storage', 'if_modified_since', help='Alter only if modified since supplied UTC datetime (Y-m-d\'T\'H:M\'Z\')', type=datetime_type)
 register_cli_argument('storage', 'if_unmodified_since', help='Alter only if unmodified since supplied UTC datetime (Y-m-d\'T\'H:M\'Z\')', type=datetime_type)
 register_cli_argument('storage', 'metadata', nargs='+', help='Metadata in space-separated key=value pairs. This overwrites any existing metadata.', validator=validate_metadata)
@@ -168,8 +177,10 @@ register_cli_argument('storage account create', 'tags', tags_type)
 for item in ['create', 'update']:
     register_cli_argument('storage account {}'.format(item), 'sku', help='The storage account SKU. (Standard_LRS, Standard_GRS, Standard_RAGRS, Standard_ZRS, Premium_LRS)', completer=get_enum_type_completion_list(SkuName))
     register_cli_argument('storage account {}'.format(item), 'access_tier', help='Required for StandardBlob accounts. The access tier used for billing. Cannot be set for StandardLRS, StandardGRS, StandardRAGRS, or PremiumLRS account types. (Hot, Cool)', completer=get_enum_type_completion_list(AccessTier))
-    register_cli_argument('storage account {}'.format(item), 'custom_domain', help='User domain assigned to the storage account. Name is the CNAME source. Use empty string to clear.')
     register_cli_argument('storage account {}'.format(item), 'encryption', nargs='+', help='Specifies which service(s) to encrypt.', choices=list(EncryptionServices._attribute_map.keys()), validator=validate_encryption) # pylint: disable=protected-access
+
+register_cli_argument('storage account create', 'custom_domain', help='User domain assigned to the storage account. Name is the CNAME source.')
+register_cli_argument('storage account update', 'custom_domain', help='User domain assigned to the storage account. Name is the CNAME source. Use "" to clear existing value.')
 
 register_cli_argument('storage account update', 'tags', tags_type, default=None)
 
@@ -196,15 +207,15 @@ for item in ['download', 'upload']:
     register_cli_argument('storage blob {}'.format(item), 'validate_content', action='store_true')
 
 for item in ['update', 'upload']:
-    register_content_settings_argument('storage blob {}'.format(item), BlobContentSettings)
+    register_content_settings_argument('storage blob {}'.format(item), BlobContentSettings, item == 'update')
 
 register_cli_argument('storage blob upload', 'blob_type', options_list=('--type', '-t'), choices=list(blob_types.keys()), type=str.lower)
 register_cli_argument('storage blob upload', 'maxsize_condition', help='The max length in bytes permitted for an append blob.')
 register_cli_argument('storage blob upload', 'validate_content', help='Specifies that an MD5 hash shall be calculated for each chunk of the blob and verified by the service when the chunk has arrived.')
 
 for item in ['file', 'blob']:
-    register_cli_argument('storage {} copy'.format(item), 'copy_source', options_list=('--source-uri', '-u'))
     register_cli_argument('storage {} url'.format(item), 'protocol', help='Protocol to use.', choices=['http', 'https'], default='https', type=str.lower)
+    register_source_uri_arguments('storage {} copy start'.format(item))
 
 register_cli_argument('storage container', 'container_name', container_name_type, options_list=('--name', '-n'))
 
@@ -264,7 +275,7 @@ register_path_argument('storage file resize')
 register_path_argument('storage file show')
 
 for item in ['update', 'upload']:
-    register_content_settings_argument('storage file {}'.format(item), FileContentSettings)
+    register_content_settings_argument('storage file {}'.format(item), FileContentSettings, item == 'update')
 
 register_path_argument('storage file update')
 
