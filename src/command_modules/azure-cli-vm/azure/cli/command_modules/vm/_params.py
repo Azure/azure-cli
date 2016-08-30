@@ -100,7 +100,7 @@ register_cli_argument('vm diagnostics set', 'storage_account', completer=get_res
 
 register_cli_argument('vm extension', 'vm_extension_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachines/extensions'))
 register_cli_argument('vm extension', 'vm_name', arg_type=existing_vm_name, options_list=('--vm-name',))
-register_cli_argument('vm extension', 'auto_upgrade_minor_version', action='store_true')
+register_cli_argument('vm extension', 'no_auto_upgrade', action='store_true')
 
 register_cli_argument('vm extension image', 'image_location', options_list=('--location', '-l'))
 register_cli_argument('vm extension image', 'publisher_name', options_list=('--publisher',))
@@ -109,7 +109,7 @@ register_cli_argument('vm extension image', 'latest', action='store_true')
 
 register_cli_argument('vmss extension', 'extension_name', name_arg_type, id_part='name', help='Name of extension')
 register_cli_argument('vmss extension', 'vmss_name', help='Scale set name')
-register_cli_argument('vmss extension', 'auto_upgrade_minor_version', action='store_true')
+register_cli_argument('vmss extension', 'no_auto_upgrade', action='store_true')
 
 register_cli_argument('vmss extension image', 'publisher_name', options_list=('--publisher',), help='Image publisher name')
 register_cli_argument('vmss extension image', 'type', options_list=('--name', '-n'), help='Extension name')

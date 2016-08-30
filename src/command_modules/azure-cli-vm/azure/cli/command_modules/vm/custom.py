@@ -503,7 +503,7 @@ def list_extensions(resource_group_name, vm_name):
 def set_extension(
         resource_group_name, vm_name, vm_extension_name, publisher,
         version=None, settings=None,
-        protected_settings=None, auto_upgrade_minor_version=False):
+        protected_settings=None, no_auto_upgrade=False):
     '''create/update extensions for a VM in a resource group. You can use
     'extension image list' to get extension details
     :param vm_extension_name: the name of the extension
@@ -511,8 +511,9 @@ def set_extension(
     :param version: the version of extension.
     :param settings: public settings or a file path with such contents
     :param protected_settings: protected settings or a file path with such contents
-    :param auto_upgrade_minor_version: pick the highest minor version for the specified version
-        number, and auto update to the latest build/revision number on any VM updates in future.
+    :param no_auto_upgrade: by doing this, extension system will not pick the highest minor version
+    for the specified version number, and will not auto update to the latest build/revision number
+    on any VM updates in future.
     '''
     vm = _vm_get(resource_group_name, vm_name)
     client = _compute_client_factory()
@@ -541,14 +542,14 @@ def set_extension(
                                   protected_settings=protected_settings,
                                   type_handler_version=version,
                                   settings=settings,
-                                  auto_upgrade_minor_version=auto_upgrade_minor_version)
+                                  auto_upgrade_minor_version=(not no_auto_upgrade))
     return client.virtual_machine_extensions.create_or_update(
         resource_group_name, vm_name, vm_extension_name, ext)
 
 def set_vmss_extension(
         resource_group_name, vmss_name, extension_name, publisher,
         version=None, settings=None,
-        protected_settings=None, auto_upgrade_minor_version=False):
+        protected_settings=None, no_auto_upgrade=False):
     '''create/update extensions for a VMSS in a resource group. You can use
     'extension image list' to get extension details
     :param vm_extension_name: the name of the extension
@@ -556,7 +557,9 @@ def set_vmss_extension(
     :param version: the version of extension.
     :param settings: public settings or a file path with such contents
     :param protected_settings: protected settings or a file path with such contents
-    :param auto_upgrade_minor_version: auto upgrade to the newer version if available
+    :param no_auto_upgrade: by doing this, extension system will not pick the highest minor version
+    for the specified version number, and will not auto update to the latest build/revision number
+    on any scale set updates in future.
     '''
     client = _compute_client_factory()
     vmss = client.virtual_machine_scale_sets.get(resource_group_name,
@@ -586,7 +589,7 @@ def set_vmss_extension(
                                           protected_settings=protected_settings,
                                           type_handler_version=version,
                                           settings=settings,
-                                          auto_upgrade_minor_version=auto_upgrade_minor_version)
+                                          auto_upgrade_minor_version=(not no_auto_upgrade))
 
     if not vmss.virtual_machine_profile.extension_profile:
         vmss.virtual_machine_profile.extension_profile = VirtualMachineScaleSetExtensionProfile([])
