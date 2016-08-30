@@ -1,0 +1,219 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "2016-02-03",
+    "title": "iotHubDeviceClient",
+    "description": "API for IoT Hub Device Identities."
+  },
+  "host": "example.azure-devices.net",
+  "schemes": [
+    "https"
+  ],
+  "paths": {
+    "/devices/{deviceId}": {
+      "put": {
+        "tags": [
+          "IoTDevices"
+        ],
+        "summary": "Creates a new device identity in the identity registry of an IoT Hub.",
+        "description": "Creates a new device identity in the identity registry of an IoT Hub.",
+        "operationId": "IotHubDevices_Create",
+        "consumes": [
+          "application/json",
+          "text/json"
+        ],
+        "produces": [
+          "application/json",
+          "text/json"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/api-version"
+          },
+          {
+            "name": "deviceId",
+            "in": "path",
+            "description": "The Id of the device.",
+            "required": true,
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          {
+            "name": "createDeviceRequest",
+            "in": "body",
+            "description": "request.",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CreateDeviceRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Created",
+            "schema": {
+              "$ref": "#/definitions/DeviceDescription"
+            }
+          },
+          "201": {
+            "description": "Created",
+            "schema": {
+              "$ref": "#/definitions/DeviceDescription"
+            }
+          },
+          "default": {
+            "description": "DefaultErrorResponse",
+            "schema": {
+              "$ref": "#/definitions/ErrorDetails"
+            }
+          }
+        },
+        "deprecated": false
+      }
+    }
+  },
+  "definitions": {
+    "ErrorDetails": {
+      "description": "The properties related to the details of an error.",
+      "type": "object",
+      "properties": {
+        "Code": {
+          "description": "The error code.",
+          "type": "string"
+        },
+        "HttpStatusCode": {
+          "description": "The http status code.",
+          "type": "string",
+          "readOnly": true
+        },
+        "Message": {
+          "description": "The error message.",
+          "type": "string"
+        },
+        "Details": {
+          "description": "The error details.",
+          "type": "string"
+        }
+      }
+    },
+    "CreateDeviceRequest": {
+      "type": "object",
+      "properties": {
+        "deviceId": {
+          "description": "Device Id. A case-sensitive string ( up to 128 char long).",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "authorization": {
+          "$ref": "#/definitions/Authentication"
+        },
+        "status": {
+          "description": "'enabled' or 'disabled', representing status of the device",
+          "type": "string"
+        },
+        "statusReason": {
+          "description": "A string representing reason of the device status",
+          "type": "string"
+        }
+      }
+    },
+    "DeviceDescription": {
+      "type": "object",
+      "properties": {
+        "deviceId": {
+          "description": "Device Id. A case-sensitive string ( up to 128 char long).",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "generationId": {
+          "description": "An IoT hub-generated case-sensitive string (up to 128 char long). Used to distinguish devices with the same deviceId when they have been deleted and recreated.",
+          "type": "string",
+          "readOnly": true
+        },
+        "etag": {
+          "description": "A string representing a weak etag for the device identity, as per RFC7232.",
+          "type": "string"
+        },
+        "connectionState": {
+          "description": "'connected' or 'disconnected', represents the IoT Hub view of the device connection status.",
+          "type": "string"
+        },
+        "status": {
+          "description": "'enabled' or 'disabled', representing status of the device",
+          "type": "string"
+        },
+        "statusReason": {
+          "description": "A string representing reason of the device status",
+          "type": "string"
+        },
+        "connectionStateUpdatedTime": {
+          "description": "Date and time of last time the connection state was updated. In ISO8601 datetime format in UTC, e.g. 2015-01-28T16:24:48.789Z",
+          "type": "string",
+          "format": "date-time"
+        },
+        "statusUpdatedTime": {
+          "description": "Date and time of last time the status was updated. In ISO8601 datetime format in UTC, e.g. 2015-01-28T16:24:48.789Z",
+          "type": "string",
+          "format": "date-time"
+        },
+        "lastActivityTime": {
+          "description": "Datetime of last time the device connected, received or sent a message. In ISO8601 datetime format in UTC, e.g. 2015-01-28T16:24:48.789Z",
+          "type": "string",
+          "format": "date-time"
+        },
+        "cloudToDeviceMessageCount": {
+          "description": "Number of pending commands that are in the device command queue.",
+          "format": "int64",
+          "type": "integer"
+        },
+        "authentication": {
+          "$ref": "#/definitions/Authentication"
+        }
+      }
+    },
+    "Authentication": {
+      "type": "object",
+      "properties": {
+        "symmetricKey": {
+          "$ref": "#/definitions/SymmetricKey"
+        },
+        "x509Thumbprint": {
+          "type": "string"
+        }
+      }
+    },
+    "SymmetricKey": {
+      "type": "object",
+      "properties": {
+        "primaryKey": {
+          "description": "The primary key.",
+          "type": "string"
+        },
+        "secondaryKey": {
+          "description": "The secondary key.",
+          "type": "string"
+        }
+      }
+    }
+  },
+  "parameters": {
+    "subscriptionId": {
+      "name": "subscriptionId",
+      "in": "path",
+      "description": "The subscription identifier.",
+      "required": true,
+      "type": "string"
+    },
+    "api-version": {
+      "name": "api-version",
+      "in": "query",
+      "description": "Version of the Api.",
+      "required": true,
+      "type": "string",
+      "default": "2016-02-03"
+    }
+  }
+}
