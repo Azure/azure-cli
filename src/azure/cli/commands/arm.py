@@ -13,8 +13,10 @@ from azure.cli.commands._introspection import extract_args_from_signature
 from azure.cli.commands.client_factory import get_mgmt_service_client
 from azure.mgmt.resource.resources import ResourceManagementClient
 from azure.cli.application import APPLICATION, IterateValue
+import azure.cli._logging as _logging
 from azure.cli._util import CLIError
 
+logger = _logging.get_az_logger(__name__)
 
 regex = re.compile('/subscriptions/(?P<subscription>[^/]*)/resourceGroups/(?P<resource_group>[^/]*)'
                    '/providers/(?P<namespace>[^/]*)/(?P<type>[^/]*)/(?P<name>[^/]*)'
@@ -285,7 +287,7 @@ def cli_generic_update_command(name, getter, setter, factory=None, setter_arg_na
                      arg_group=group_name)
     main_command_table[name] = cmd
 
-index_regex = re.compile(r'\[(.*)\]')
+index_or_filter_regex = re.compile(r'\[(.*)\]')
 def set_properties(instance, expression):
     key, value = expression.rsplit('=', 1)
 
@@ -303,7 +305,7 @@ def set_properties(instance, expression):
         set_properties(parent, '{}={{}}'.format(parent_name))
         instance = _find_property(root, path)
 
-    match = index_regex.match(name)
+    match = index_or_filter_regex.match(name)
     index_value = int(match.group(1)) if match else None
     try:
         if index_value is not None:
@@ -315,7 +317,9 @@ def set_properties(instance, expression):
         elif hasattr(instance, name):
             setattr(instance, name, value)
         else:
-            raise CLIError('Property {} does\'t exist on {}'.format(name, parent_name))
+            logger.warning(
+                "Property '%s' not found on %s. Update may be ignored.", name, parent_name)
+            setattr(instance, name, value)
     except IndexError:
         raise CLIError('index {} doesn\'t exist on {}'.format(index_value, make_camel_case(name)))
     except (AttributeError, KeyError):
@@ -404,7 +408,7 @@ def _get_name_path(path):
 
 def _update_instance(instance, part, path):
     try:
-        index = index_regex.match(part)
+        index = index_or_filter_regex.match(part)
         if index:
             if '=' in index.group(1):
                 key, value = index.group(1).split('=')

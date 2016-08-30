@@ -14,7 +14,6 @@ from azure.cli._util import CLIError
 
 #pylint:disable=invalid-sequence-index
 #pylint:disable=unsubscriptable-object
-#pylint:disable=line-too-long
 
 class GenericUpdateTest(unittest.TestCase):
     @classmethod
@@ -133,7 +132,8 @@ class GenericUpdateTest(unittest.TestCase):
                             'remove non-existent property by index')
 
         remove_prop_message = """Couldn't find "doesntExist" in "list.doesntExist".""" + \
-                              """  Available options: index into the collection "list.doesntExist" with [<index>] or [<key=value>]"""
+                              """  Available options: index into the """ + \
+                              """collection "list.doesntExist" with [<index>] or [<key=value>]"""
         _execute_with_error('gencommand --a1 1 --a2 2 --remove list.doesnt_exist.missing 2',
                             remove_prop_message,
                             'remove non-existent sub-property by index')
@@ -143,7 +143,8 @@ class GenericUpdateTest(unittest.TestCase):
                             'remove out-of-range index')
 
         set_on_list_message = """Couldn't find "doesntExist" in "list".""" + \
-                              """  Available options: index into the collection "list" with [<index>] or [<key=value>]"""
+                              """  Available options: index into the collection "list" with""" + \
+                              """ [<index>] or [<key=value>]"""
         _execute_with_error('gencommand --a1 1 --a2 2 --set list.doesnt_exist=foo',
                             set_on_list_message,
                             'set shouldn\'t work on a list')
