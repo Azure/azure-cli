@@ -13,7 +13,7 @@ import azure.cli.commands.arm # pylint: disable=unused-import
 
 from azure.cli.command_modules.keyvault._validators import (process_policy_namespace, process_set_policy_perms_namespace)
 
-register_cli_argument('keyvault', 'vault_name', arg_type=name_type, completer=get_resource_name_completion_list('Microsoft.KeyVault/vaults'), id_part='name')
+register_cli_argument('keyvault', 'vault_name', arg_type=name_type, help='Name of the key vault', completer=get_resource_name_completion_list('Microsoft.KeyVault/vaults'), id_part='name')
 register_cli_argument('keyvault', 'object_id', help='a GUID that identifies the principal that will receive permissions')
 register_cli_argument('keyvault', 'spn', help='name of a service principal that will receive permissions')
 register_cli_argument('keyvault', 'upn', help='name of a user principal that will receive permissions')

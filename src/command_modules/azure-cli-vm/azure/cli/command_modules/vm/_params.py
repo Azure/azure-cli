@@ -81,6 +81,9 @@ register_cli_argument('vm disk', 'lun', type=int, help='0-based logical unit num
 register_cli_argument('vm disk', 'vhd', type=VirtualHardDisk, help='virtual hard disk\'s uri. For example:https://mystorage.blob.core.windows.net/vhds/d1.vhd')
 register_cli_argument('vm disk', 'caching', help='Host caching policy', default=CachingTypes.none.value, choices=choices_caching_types)
 
+for item in ['attach-existing', 'attach-new', 'detach']:
+    register_cli_argument('vm disk {}'.format(item), 'vm_name', arg_type=existing_vm_name, options_list=('--vm-name',), id_part=None)
+
 register_cli_argument('vm availability-set', 'availability_set_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Compute/availabilitySets'), help='Name of the availability set')
 
 register_cli_argument('vm access', 'username', options_list=('--username', '-u'), help='The user name')
@@ -97,8 +100,8 @@ register_cli_argument('vm capture', 'overwrite', action='store_true')
 register_cli_argument('vm diagnostics', 'vm_name', arg_type=existing_vm_name, options_list=('--vm-name',))
 register_cli_argument('vm diagnostics set', 'storage_account', completer=get_resource_name_completion_list('Microsoft.Storage/storageAccounts'))
 
-register_cli_argument('vm extension', 'vm_extension_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachines/extensions'))
-register_cli_argument('vm extension', 'vm_name', arg_type=existing_vm_name, options_list=('--vm-name',))
+register_cli_argument('vm extension', 'vm_extension_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachines/extensions'), id_part='child_name')
+register_cli_argument('vm extension', 'vm_name', arg_type=existing_vm_name, options_list=('--vm-name',), id_part='name')
 register_cli_argument('vm extension', 'no_auto_upgrade', action='store_true')
 
 register_cli_argument('vm extension image', 'image_location', options_list=('--location', '-l'))
@@ -106,8 +109,8 @@ register_cli_argument('vm extension image', 'publisher_name', options_list=('--p
 register_cli_argument('vm extension image', 'type', options_list=('--name', '-n'))
 register_cli_argument('vm extension image', 'latest', action='store_true')
 
-register_cli_argument('vmss extension', 'extension_name', name_arg_type, id_part='name', help='Name of extension')
-register_cli_argument('vmss extension', 'vmss_name', help='Scale set name')
+register_cli_argument('vmss extension', 'extension_name', name_arg_type, help='Name of the extension.')
+register_cli_argument('vmss extension', 'vmss_name', help='Scale set name', id_part=None)
 register_cli_argument('vmss extension', 'no_auto_upgrade', action='store_true')
 
 register_cli_argument('vmss extension image', 'publisher_name', options_list=('--publisher',), help='Image publisher name')
@@ -124,12 +127,15 @@ register_cli_argument('vm open-port', 'vm_name', name_arg_type, help='The name o
 register_cli_argument('vm open-port', 'network_security_group_name', options_list=('--nsg-name',), help='The name of the network security group to create if one does not exist. Ignored if an NSG already exists.', validator=nsg_name_validator)
 register_cli_argument('vm open-port', 'apply_to_subnet', help='Allow inbound traffic on the subnet instead of the NIC', action='store_true')
 
+register_cli_argument('vm nic', 'vm_name', existing_vm_name, id_part=None)
 register_cli_argument('vm nic', 'nic_ids', multi_ids_type)
 register_cli_argument('vm nic', 'nic_names', multi_ids_type)
 
-register_cli_argument('vmss nic', 'virtual_machine_scale_set_name', options_list=('--vmss-name',), help='Scale set name.', completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'), id_part='name')
+register_cli_argument('vmss nic', 'virtual_machine_scale_set_name', options_list=('--vmss-name',), help='Scale set name.', completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'), id_part=None)
 register_cli_argument('vmss nic', 'virtualmachine_index', options_list=('--instance-id',))
-register_cli_argument('vmss nic', 'network_interface_name', options_list=('--name', '-n'), id_part='child_name')
+register_cli_argument('vmss nic', 'network_interface_name', nic_type, id_part=None)
+
+register_cli_argument('network nic scale-set list', 'virtual_machine_scale_set_name', options_list=('--vmss-name',), completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'), id_part='name')
 
 # VM CREATE PARAMETER CONFIGURATION
 
