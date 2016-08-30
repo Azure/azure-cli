@@ -43,12 +43,14 @@ def validate_client_parameters(namespace):
     # if account name is specified but no key, attempt to query
     if n.account_name and not n.account_key:
         scf = get_mgmt_service_client(StorageManagementClient)
-        acc_id = next((x for x in scf.storage_accounts.list() if x.name == n.account_name), None).id
-        if acc_id:
+        acc = next((x for x in scf.storage_accounts.list() if x.name == n.account_name), None)
+        if acc:
             from azure.cli.commands.arm import parse_resource_id
-            rg = parse_resource_id(acc_id)['resource_group']
+            rg = parse_resource_id(acc.id)['resource_group']
             n.account_key = \
                 scf.storage_accounts.list_keys(rg, n.account_name).keys[0].value #pylint: disable=no-member
+        else:
+            raise ValueError("Storage account '{}' not found.".format(n.account_name))
 
 def get_content_setting_validator(settings_class):
     def validator(namespace):
