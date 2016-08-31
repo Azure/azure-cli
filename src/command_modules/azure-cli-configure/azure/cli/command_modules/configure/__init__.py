@@ -101,7 +101,7 @@ def _create_or_update_env(env_name=None):
     if not env_name:
         # TODO Support new env creation
         print('This feature is coming soon.\n')
-        sys.exit()
+        sys.exit(1)
     # get the config parser for this env
     env_config = configparser.SafeConfigParser()
     env_config.read(os.path.join(ENV_CONFIG_DIR, env_name))
@@ -114,7 +114,7 @@ def _create_or_update_env(env_name=None):
     if CLOUD_LIST[selected_cloud_index]['name'] != 'public-azure':
         # TODO support other clouds
         print('Support for other clouds is coming soon.\n')
-        sys.exit()
+        sys.exit(1)
     try:
         env_config.add_section('cloud')
     except configparser.DuplicateSectionError:
