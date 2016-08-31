@@ -8,10 +8,10 @@ import base64
 import socket
 import os
 
-from azure.cli.commands.arm import is_valid_resource_id, resource_id
-from azure.cli._util import CLIError
-from azure.cli.commands.validators import SPECIFIED_SENTINEL
-from azure.cli.commands.client_factory import get_subscription_id
+from azure.cli.core.commands.arm import is_valid_resource_id, resource_id
+from azure.cli.core._util import CLIError
+from azure.cli.core.commands.validators import SPECIFIED_SENTINEL
+from azure.cli.core.commands.client_factory import get_subscription_id
 
 # PARAMETER VALIDATORS
 

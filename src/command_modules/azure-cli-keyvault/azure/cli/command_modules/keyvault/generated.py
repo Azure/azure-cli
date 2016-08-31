@@ -9,9 +9,9 @@ from azure.mgmt.keyvault import (
 from azure.mgmt.keyvault.operations import (
     VaultsOperations
 )
-from azure.cli.commands import cli_command
-from azure.cli.commands.client_factory import get_mgmt_service_client
-from azure.cli.commands.arm import cli_generic_update_command
+from azure.cli.core.commands import cli_command
+from azure.cli.core.commands.client_factory import get_mgmt_service_client
+from azure.cli.core.commands.arm import cli_generic_update_command
 
 def _keyvault_client_factory(**_):
     return get_mgmt_service_client(KeyVaultManagementClient)

@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 #---------------------------------------------------------------------------------------------
 
-from azure.cli.utils.vcr_test_base import VCRTestBase, JMESPathCheck, NoneCheck
+from azure.cli.core.utils.vcr_test_base import VCRTestBase, JMESPathCheck, NoneCheck
 
 class ServicePrincipalExpressCreateScenarioTest(VCRTestBase):
 

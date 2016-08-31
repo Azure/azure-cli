@@ -5,7 +5,7 @@
 
 import collections
 
-from azure.cli.parser import IncorrectUsageError
+from azure.cli.core.parser import IncorrectUsageError
 
 from ._factory import _resource_client_factory
 

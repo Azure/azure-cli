@@ -10,11 +10,11 @@ import uuid
 from dateutil.relativedelta import relativedelta
 import dateutil.parser
 
-from azure.cli._util import CLIError, todict, get_file_json
-import azure.cli._logging as _logging
-from azure.cli.help_files import helps
+from azure.cli.core._util import CLIError, todict, get_file_json
+import azure.cli.core._logging as _logging
+from azure.cli.core.help_files import helps
 
-from azure.cli.commands.client_factory import get_mgmt_service_client, configure_common_settings
+from azure.cli.core.commands.client_factory import get_mgmt_service_client, configure_common_settings
 from azure.mgmt.authorization import AuthorizationManagementClient
 from azure.mgmt.authorization.models import (RoleAssignmentProperties, Permission, RoleDefinition,
                                              RoleDefinitionProperties)
@@ -36,7 +36,7 @@ def _auth_client_factory(**_):
     return get_mgmt_service_client(AuthorizationManagementClient)
 
 def _graph_client_factory(**_):
-    from azure.cli._profile import Profile
+    from azure.cli.core._profile import Profile
     profile = Profile()
     cred, _, tenant_id = profile.get_login_credentials(True)
     client = GraphRbacManagementClient(cred, tenant_id)
@@ -169,7 +169,8 @@ def list_role_assignments(assignee=None, role=None, resource_group_name=None,#py
     #fill in logic names to get things understandable.
     #it's possible that associated roles and principals were deleted, and we just do nothing.
 
-    from azure.cli.application import Application
+    # TODO-DEREK Do we really need to import Application here? I don't think so...
+    from azure.cli.core.application import Application
     results = todict(assignments)
 
     #pylint: disable=line-too-long

@@ -14,12 +14,12 @@ from azure.mgmt.network.models.network_management_client_enums import \
      ExpressRouteCircuitSkuTier, ExpressRouteCircuitPeeringType)
 from azure.mgmt.dns.models.dns_management_client_enums import RecordType
 
-from azure.cli.commands import CliArgumentType, register_cli_argument, register_extra_cli_argument
-from azure.cli.commands.parameters import (location_type, get_resource_name_completion_list,
+from azure.cli.core.commands import CliArgumentType, register_cli_argument, register_extra_cli_argument
+from azure.cli.core.commands.parameters import (location_type, get_resource_name_completion_list,
                                            get_enum_type_completion_list, tags_type, get_enum_choices,
                                            get_generic_completion_list)
-from azure.cli.commands.validators import MarkSpecifiedAction
-from azure.cli.commands.template_create import register_folded_cli_argument
+from azure.cli.core.commands.validators import MarkSpecifiedAction
+from azure.cli.core.commands.template_create import register_folded_cli_argument
 from azure.cli.command_modules.network._factory import _network_client_factory
 from azure.cli.command_modules.network._validators import \
     (process_ag_create_namespace, process_ag_listener_create_namespace,

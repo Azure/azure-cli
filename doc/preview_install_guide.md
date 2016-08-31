@@ -195,7 +195,6 @@ Set the environment variable to point to the version you wish to install.
 Run the following from a command prompt
 
 ```shell
-    set AZURE_CLI_DISABLE_POST_INSTALL=1
     set AZURE_CLI_PRIVATE_PYPI_URL=http://40.112.211.51:8080
     set AZURE_CLI_PRIVATE_PYPI_HOST=40.112.211.51
     pip install azure-cli==%AZURE_CLI_NIGHTLY_VERSION% --extra-index-url %AZURE_CLI_PRIVATE_PYPI_URL% --trusted-host %AZURE_CLI_PRIVATE_PYPI_HOST%

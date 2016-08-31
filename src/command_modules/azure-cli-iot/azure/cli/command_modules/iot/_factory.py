@@ -4,9 +4,11 @@
 #---------------------------------------------------------------------------------------------
 #pylint: disable=unused-argument
 
-from azure.cli.commands.client_factory import get_mgmt_service_client
-from azure.cli.command_modules.iot.mgmt_iot_hub.lib.iot_hub_client import IotHubClient
 from azure.mgmt.resource.resources import ResourceManagementClient
+
+from azure.cli.core.commands.client_factory import get_mgmt_service_client
+
+from azure.cli.command_modules.iot.mgmt_iot_hub.lib.iot_hub_client import IotHubClient
 
 
 def iot_hub_service_factory(kwargs):

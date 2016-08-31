@@ -9,11 +9,13 @@ import sys
 from six.moves import input, configparser #pylint: disable=redefined-builtin
 from adal.adal_error import AdalError
 
-from azure.cli.commands import cli_command
-import azure.cli._logging as _logging
-from azure.cli._config import (GLOBAL_CONFIG_DIR, GLOBAL_CONFIG_PATH,
+from azure.cli.core.commands import cli_command
+import azure.cli.core._logging as _logging
+from azure.cli.core._config import (GLOBAL_CONFIG_DIR, GLOBAL_CONFIG_PATH,
                                ENV_CONFIG_DIR, ACTIVE_ENV_CONFIG_PATH,
                                ENV_VAR_PREFIX)
+from azure.cli.core._util import CLIError
+
 from azure.cli.command_modules.configure._consts import (OUTPUT_LIST, CLOUD_LIST, LOGIN_METHOD_LIST,
                                                          MSG_INTRO,
                                                          MSG_CLOSING,
@@ -32,7 +34,6 @@ from azure.cli.command_modules.configure._utils import (prompt_y_n,
                                                         get_default_from_config)
 import azure.cli.command_modules.configure._help # pylint: disable=unused-import
 
-from azure.cli._util import CLIError
 logger = _logging.get_az_logger(__name__)
 
 def _print_cur_configuration(file_config):
@@ -54,9 +55,9 @@ def _get_envs():
     return []
 
 def _config_env_public_azure(_):
-    from azure.cli.commands.client_factory import get_mgmt_service_client
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.mgmt.resource.resources import ResourceManagementClient
-    from azure.cli._profile import Profile
+    from azure.cli.core._profile import Profile
     # Determine if user logged in
     try:
         list(get_mgmt_service_client(ResourceManagementClient).resources.list())
