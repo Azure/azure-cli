@@ -8,7 +8,8 @@ import azure.cli._logging as _logging
 logger = _logging.get_az_logger(__name__)
 
 def prompt_y_n(msg, default=None):
-    default = default.lower() if default else default
+    if default not in [None, 'y', 'n']:
+        raise ValueError("Valid values for default are 'y', 'n' or None")
     y = 'Y' if default == 'y' else 'y'
     n = 'N' if default == 'n' else 'n'
     while True:
@@ -18,7 +19,7 @@ def prompt_y_n(msg, default=None):
         if ans.lower() == y.lower():
             return True
         if default and not ans:
-            return True if default == y.lower() else False
+            return default == y.lower()
 
 def prompt_choice_list(msg, a_list, default=1):
     '''Prompt user to select from a list of possible choices.

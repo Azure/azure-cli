@@ -18,7 +18,7 @@ CLOUD_LIST = [
 ]
 
 LOGIN_METHOD_LIST = [
-    'DeviceAuth, we will provide a code you enter into a web page and log into',
+    'Device code authentication, we will provide a code you enter into a web page and log into',
     'Username and password',
     'Service Principal with secret',
     'Skip this step (login is available with the \'az login\' command)'
