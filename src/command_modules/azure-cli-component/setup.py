@@ -24,6 +24,7 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
+    'azure-cli-core',
     'pip',
 ]
 

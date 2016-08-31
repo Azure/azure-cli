@@ -7,14 +7,17 @@ python:
 install:
   - pip install virtualenv # used by package_verify script
   - pip install -r requirements.txt
-  - pip install -e . # Install the CLI as a package
+  - pip install -e src/azure-cli-core
   - python scripts/command_modules/install.py # Install the command modules as packages
+  - pip install -e src/azure-cli
 script: 
   - export PYTHONPATH=$PATHONPATH:./src
   - python -m azure.cli -h
-  - pylint -r n src/azure
+  - pylint -r n src/azure-cli/azure
+  - pylint -r n src/azure-cli-core/azure
   - python scripts/command_modules/pylint.py
-  - python -m unittest discover -s src/azure/cli/tests --buffer
+  - python -m unittest discover -s src/azure-cli/azure/cli/tests --buffer
+  - python -m unittest discover -s src/azure-cli-core/azure/cli/core/tests --buffer
   - python scripts/command_modules/test.py
   - sh scripts/package_verify.sh
   - python scripts/license/verify.py

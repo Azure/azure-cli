@@ -9,10 +9,9 @@ from datetime import datetime
 import os
 import re
 
-
-from azure.cli._config import az_config
-from azure.cli.commands.client_factory import get_mgmt_service_client, get_data_service_client
-from azure.cli.commands.validators import validate_key_value_pairs
+from azure.cli.core._config import az_config
+from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_data_service_client
+from azure.cli.core.commands.validators import validate_key_value_pairs
 
 from azure.mgmt.storage import StorageManagementClient
 from azure.storage.models import ResourceTypes, Services
@@ -60,7 +59,7 @@ def validate_client_parameters(namespace):
         scf = get_mgmt_service_client(StorageManagementClient)
         acc = next((x for x in scf.storage_accounts.list() if x.name == n.account_name), None)
         if acc:
-            from azure.cli.commands.arm import parse_resource_id
+            from azure.cli.core.commands.arm import parse_resource_id
             rg = parse_resource_id(acc.id)['resource_group']
             n.account_key = \
                 scf.storage_accounts.list_keys(rg, n.account_name).keys[0].value #pylint: disable=no-member

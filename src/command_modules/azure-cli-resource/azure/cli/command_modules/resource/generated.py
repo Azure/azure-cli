@@ -15,8 +15,8 @@ from azure.mgmt.resource.resources.operations.deployment_operations_operations \
     import DeploymentOperationsOperations
 from azure.mgmt.resource.policy.operations import PolicyDefinitionsOperations
 
-from azure.cli.commands import cli_command
-from azure.cli.commands.arm import cli_generic_update_command
+from azure.cli.core.commands import cli_command
+from azure.cli.core.commands.arm import cli_generic_update_command
 from azure.cli.command_modules.resource._factory import (_resource_client_factory,
                                                          _resource_feature_client_factory,
                                                          _resource_policy_client_factory)

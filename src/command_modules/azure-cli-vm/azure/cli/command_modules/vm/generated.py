@@ -16,10 +16,9 @@ from azure.mgmt.compute.operations import (
     ContainerServiceOperations)
 from azure.mgmt.network.operations import NetworkInterfacesOperations
 from azure.mgmt.network import NetworkManagementClient
-
-from azure.cli.commands import DeploymentOutputLongRunningOperation, cli_command
-from azure.cli.commands.arm import cli_generic_update_command
-from azure.cli.commands.client_factory import get_mgmt_service_client
+from azure.cli.core.commands import DeploymentOutputLongRunningOperation, cli_command
+from azure.cli.core.commands.arm import cli_generic_update_command
+from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.command_modules.vm.mgmt_avail_set.lib import (AvailSetCreationClient
                                                              as AvailSetClient)
 from azure.cli.command_modules.vm.mgmt_avail_set.lib.operations import AvailSetOperations
