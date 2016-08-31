@@ -472,8 +472,8 @@ def create_service_principal_for_rbac(name=None, secret=None, years=1):
                                          start_date=start_date,
                                          end_date=end_date)
     #pylint: disable=no-member
-    aad_sp = create_service_principal(aad_application.app_id)
-    _build_output_content(name, aad_sp.object_id, secret, client.config.tenant_id)
+    create_service_principal(aad_application.app_id)
+    _build_output_content(name, secret, client.config.tenant_id)
 
 def reset_service_principal_credential(name, secret=None, years=1):
     '''reset credential, on expiration or you forget it.
@@ -499,7 +499,6 @@ def reset_service_principal_credential(name, secret=None, years=1):
     aad_sps = list(client.service_principals.list(filter=query_exp))
     if not aad_sps:
         raise CLIError('can\'t find a service principal matching \'{}\''.format(name))
-    sp_object_id = aad_sps[0].object_id
 
     #build a new password credential and patch it
     secret = secret or str(uuid.uuid4())
@@ -511,23 +510,23 @@ def reset_service_principal_credential(name, secret=None, years=1):
 
     client.applications.patch(app.object_id, app_create_param)
 
-    _build_output_content(name, sp_object_id, secret, client.config.tenant_id)
+    _build_output_content(name, secret, client.config.tenant_id)
 
-def _build_output_content(sp_name, sp_object_id, secret, tenant):
-    logger.warning("Service principal has been configured with name: '%s', secret: '%s'",
-                   sp_name, secret)
+def _build_output_content(sp_name, secret, tenant):
+    logger.warning("Service principal has been configured.")
+    logger.warning("  id(client_id):           " + sp_name)
+    logger.warning("  password(client_secret): " + secret)
+
     logger.warning('Useful commands to manage azure:')
     logger.warning('Assign a role:')
-    logger.warning('    az role assignment create --assignee %s --role Contributor', sp_object_id)
+    logger.warning('    az role assignment create --assignee %s --role Contributor', sp_name)
     logger.warning('Log in:')
     logger.warning('    az login --service-principal -u %s -p %s --tenant %s',
                    sp_name, secret, tenant)
     logger.warning('Reset credentials:')
-    logger.warning('    az ad sp reset-sp-credentials --name %s', sp_name)
+    logger.warning('    az ad sp reset-credentials --name %s', sp_name)
     logger.warning('Revoke:')
-    logger.warning('    az ad sp delete --id %s', sp_name)
     logger.warning('    az ad app delete --id %s', sp_name)
-
 
 def _resolve_object_id(assignee):
     client = _graph_client_factory()
