@@ -28,7 +28,9 @@ sp_name_type = CliArgumentType(
 register_cli_argument('ad sp', 'identifier', options_list=('--id',), help='service principal name, or object id')
 register_cli_argument('ad sp create', 'identifier', options_list=('--id',), help='identifier uri, application id, or object id of the associated application')
 register_cli_argument('ad sp create-for-rbac', 'name', sp_name_type)
+register_cli_argument('ad sp create-for-rbac', 'years', type=int)
 register_cli_argument('ad sp reset-credentials', 'name', sp_name_type)
+register_cli_argument('ad sp reset-credentials', 'years', type=int)
 
 register_cli_argument('ad', 'display_name', help='object\'s display name or its prefix')
 register_cli_argument('ad', 'identifier_uri',
