@@ -20,7 +20,8 @@ logger = _logging.get_az_logger(__name__)
 
 regex = re.compile('/subscriptions/(?P<subscription>[^/]*)/resourceGroups/(?P<resource_group>[^/]*)'
                    '/providers/(?P<namespace>[^/]*)/(?P<type>[^/]*)/(?P<name>[^/]*)'
-                   '(/(?P<child_type>[^/]*)/(?P<child_name>[^/]*))?')
+                   '(/(?P<child_type>[^/]*)/(?P<child_name>[^/]*))?'
+                   '(/(?P<grandchild_type>[^/]*)/(?P<grandchild_name>[^/]*))?')
 
 def resource_id(**kwargs):
     '''Create a valid resource id string from the given parts
@@ -32,6 +33,8 @@ def resource_id(**kwargs):
         - name              Name of the resource (or parent if child_name is also specified)
         - child_type        Type of the child resource
         - child_name        Name of the child resource
+        - grandchild_type   Type of the grandchild resource
+        - grandchild_name   Name of the grandchild resource
     '''
     rid = '/subscriptions/{subscription}'.format(**kwargs)
     try:
@@ -39,6 +42,7 @@ def resource_id(**kwargs):
         rid = '/'.join((rid, 'providers/{namespace}'.format(**kwargs)))
         rid = '/'.join((rid, '{type}/{name}'.format(**kwargs)))
         rid = '/'.join((rid, '{child_type}/{child_name}'.format(**kwargs)))
+        rid = '/'.join((rid, '{grandchild_type}/{grandchild_name}'.format(**kwargs)))
     except KeyError:
         pass
     return rid
@@ -53,6 +57,8 @@ def parse_resource_id(rid):
         - name              Name of the resource (or parent if child_name is also specified)
         - child_type        Type of the child resource
         - child_name        Name of the child resource
+        - grandchild_type   Type of the grandchild resource
+        - grandchild_name   Name of the grandchild resource
     '''
     m = regex.match(rid)
     if m:

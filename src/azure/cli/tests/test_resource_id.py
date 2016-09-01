@@ -35,15 +35,17 @@ class TestApplication(unittest.TestCase):
         rtype = 'loadBalancers'
         bep = 'mybep'
         bep_type = 'backendAddressPools'
+        grandchild = 'grandchild'
+        gc_type = 'grandchildType'
         sub = '00000000-0000-0000-0000-000000000000'
-        result = resource_id(name=lb, resource_group=rg, namespace=namespace, type=rtype, subscription=sub, child_type=bep_type, child_name=bep)
-        expected = '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/lbrg/providers/Microsoft.Network/loadBalancers/mylb/backendAddressPools/mybep'
+        result = resource_id(name=lb, resource_group=rg, namespace=namespace, type=rtype, subscription=sub, child_type=bep_type, child_name=bep, grandchild_name=grandchild, grandchild_type=gc_type)
+        expected = '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/lbrg/providers/Microsoft.Network/loadBalancers/mylb/backendAddressPools/mybep/grandchildType/grandchild'
         self.assertTrue(is_valid_resource_id(expected))
         self.assertTrue(is_valid_resource_id(result))
         self.assertEqual(result, expected)
 
     def test_resource_id_with_id(self):
-        rid = '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/lbrg/providers/Microsoft.Network/loadBalancers/mylb/backendAddressPools/mybep'
+        rid = '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/lbrg/providers/Microsoft.Network/loadBalancers/mylb/backendAddressPools/mybep/grandchildType/grandchild'
         result = resource_id(**parse_resource_id(rid))
         self.assertEqual(result, rid)
 
