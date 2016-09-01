@@ -103,6 +103,7 @@ _doc_source_map = {
     '': 'src/command_modules/azure-cli-profile/azure/cli/command_modules/profile/_help.py',
     'account': 'src/command_modules/azure-cli-profile/azure/cli/command_modules/profile/_help.py',
     'component': 'src/command_modules/azure-cli-component/azure/cli/command_modules/component/_help.py',
+    'iot': 'src/command_modules/azure-cli-iot/azure/cli/command_modules/iot/_help.py',
     'keyvault': 'src/command_modules/azure-cli-keyvault/azure/cli/command_modules/keyvault/_help.py',
     'network': 'src/command_modules/azure-cli-network/azure/cli/command_modules/network/_help.py',
     'redis': 'src/command_modules/azure-cli-redis/azure/cli/command_modules/redis/_help.py',
