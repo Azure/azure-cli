@@ -654,23 +654,23 @@ class NetworkNicScaleSetScenarioTest(VCRTestBase):
         self.execute()
 
     def set_up(self):
-        if not self.cmd('network nic scale-set show --resource-group {} --vm-scale-set {} --vm-index {} --name {}'.format(
+        if not self.cmd('vmss nic show --resource-group {} --vmss-name {} --vm-index {} --name {}'.format(
             self.resource_group, self.vmss_name, self.vm_index, self.nic_name)):
             raise RuntimeError('VM scale set NIC must be manually created in order to support this test.')
 
     def body(self):
-        self.cmd('network nic scale-set list --resource-group {} --vm-scale-set {}'.format(
+        self.cmd('vmss nic list --resource-group {} --vmss-name {}'.format(
                   self.resource_group, self.vmss_name), checks=[
                 JMESPathCheck('type(@)', 'array'),
                 JMESPathCheck("length([?type == '{}']) == length(@)".format(self.resource_type), True),
                 JMESPathCheck("length([?resourceGroup == '{}']) == length(@)".format(self.resource_group), True)
         ])
-        self.cmd('network nic scale-set list-vm-nics --resource-group {} --vm-scale-set {} --vm-index {}'.format(self.resource_group, self.vmss_name, self.vm_index), checks=[
+        self.cmd('vmss nic list-vm-nics --resource-group {} --vmss-name {} --vm-index {}'.format(self.resource_group, self.vmss_name, self.vm_index), checks=[
                 JMESPathCheck('type(@)', 'array'),
                 JMESPathCheck("length([?type == '{}']) == length(@)".format(self.resource_type), True),
                 JMESPathCheck("length([?resourceGroup == '{}']) == length(@)".format(self.resource_group), True)
         ])
-        self.cmd('network nic scale-set show --resource-group {} --vm-scale-set {} --vm-index {} --name {}'.format(self.resource_group, self.vmss_name, self.vm_index, self.nic_name), checks=[
+        self.cmd('vmss nic show --resource-group {} --vmss-name {} --vm-index {} --name {}'.format(self.resource_group, self.vmss_name, self.vm_index, self.nic_name), checks=[
                 JMESPathCheck('type(@)', 'object'),
                 JMESPathCheck('name', self.nic_name),
                 JMESPathCheck('resourceGroup', self.resource_group),
