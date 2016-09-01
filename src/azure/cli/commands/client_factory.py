@@ -11,6 +11,8 @@ from azure.cli.application import APPLICATION
 
 logger = _logging.get_az_logger(__name__)
 
+UA_AGENT = "AZURECLI/{}".format(cli.__version__)
+
 def get_mgmt_service_client(client_type):
     client, _ = _get_mgmt_service_client(client_type)
     return client
@@ -21,7 +23,7 @@ def get_subscription_service_client(client_type):
 def configure_common_settings(client):
     _debug.allow_debug_connection(client)
 
-    client.config.add_user_agent("AZURECLI/{}".format(cli.__version__))
+    client.config.add_user_agent(UA_AGENT)
 
     for header, value in APPLICATION.session['headers'].items():
         # We are working with the autorest team to expose the add_header
@@ -55,10 +57,19 @@ def get_data_service_client(service_type, account_name, account_key, connection_
                           account_key=account_key,
                           connection_string=connection_string,
                           sas_token=sas_token)
-    # TODO: enable Fiddler and user agent (task #115270703, #115270881)
+    # TODO: enable Fiddler
+    client.request_callback = _add_headers
     return client
 
 def get_subscription_id():
     profile = Profile()
     _, subscription_id, _ = profile.get_login_credentials()
     return subscription_id
+
+
+def _add_headers(request):
+    request.headers['User-Agent'] = ' '.join((request.headers['User-Agent'], UA_AGENT))
+    try:
+        request.headers.update(APPLICATION.session['headers'])
+    except KeyError:
+        pass
