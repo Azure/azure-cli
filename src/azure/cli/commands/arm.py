@@ -96,6 +96,23 @@ def resource_exists(resource_group, name, namespace, type, **_): # pylint: disab
 
 def add_id_parameters(command_table):
 
+    def _extract_ids_help(command):
+        # TODO for performance don't bother with this unless -h or --help is specified
+        # if not help_requested:
+        #   return
+
+        from azure.cli.commands import _cli_argument_registry as aliases
+        components = command.name.split()
+        alias = {}
+        while components:
+            target = ' '.join(components)
+            try:
+                alias = aliases.arguments[target]['ids'].settings['help']
+                break
+            except KeyError:
+                components.pop()
+        return alias or None
+
     def split_action(arguments):
         class SplitAction(argparse.Action): #pylint: disable=too-few-public-methods
 
@@ -129,6 +146,10 @@ def add_id_parameters(command_table):
             # parameter
             return
 
+        ids_help = _extract_ids_help(command) or 'One or more resource IDs.'
+        ids_help = '{} If provided, no other \'Resource Id\' arguments '.format(ids_help) + \
+                   'should be specified.'
+
         required_arguments = []
         optional_arguments = []
         for arg in [argument for argument in command.arguments.values() if argument.id_part]:
@@ -154,8 +175,8 @@ def add_id_parameters(command_table):
         command.add_argument('ids',
                              '--ids',
                              metavar='RESOURCE_ID',
-                             help='ID of resource',
                              dest=argparse.SUPPRESS,
+                             help=ids_help,
                              action=split_action(command.arguments),
                              nargs='+',
                              type=ResourceId,

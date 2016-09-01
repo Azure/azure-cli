@@ -118,6 +118,7 @@ register_cli_argument('vmss', 'instance_id', id_part='child_name')
 register_cli_argument('vmss', 'instance_ids', multi_ids_type)
 register_cli_argument('vmss', 'tags', tags_type)
 register_cli_argument('vmss', 'instance_ids', help='Space separated ids such as "0 2 3", or use "*" for all instances')
+register_cli_argument('vmss', 'ids', help='One or more scale set or specific VM instance IDs.')
 
 register_cli_argument('vmss extension', 'extension_name', name_arg_type, help='Name of the extension.')
 register_cli_argument('vmss extension', 'vmss_name', id_part=None)
