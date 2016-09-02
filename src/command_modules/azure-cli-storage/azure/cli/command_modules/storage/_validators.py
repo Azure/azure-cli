@@ -90,22 +90,24 @@ def validate_source_uri(namespace):
     valid_blob_source = container and blob and not share and not path
     valid_file_source = share and path and not container and not blob and not snapshot
 
-    if valid_blob_source:
-        blob_uri = 'https://{}.blob.core.windows.net/{}/{}{}'.format(
-            storage_acc, container, blob, '?' if snapshot or sas else '')
-        if snapshot:
-            blob_uri = '{}snapshot={}'.format(blob_uri, snapshot)
-        if sas:
-            blob_uri = '{}{}{}'.format(blob_uri, '&' if snapshot else '', sas)
-        namespace.copy_source = blob_uri
-    elif valid_file_source:
-        file_uri = 'https://{}.file.core.windows.net/{}/{}'.format(
-            storage_acc, share, path)
-        if sas:
-            file_uri = '{}?{}'.format(file_uri, sas)
-        namespace.copy_source = file_uri
-    else:
+    if (not valid_blob_source and not valid_file_source) or (valid_blob_source and valid_file_source): # pylint: disable=line-too-long
         raise ValueError(usage_string)
+
+    query_params = []
+    if sas:
+        query_params.append(sas)
+    if snapshot:
+        query_params.append(snapshot)
+
+    uri = 'https://{0}.{1}.core.windows.net/{2}/{3}{4}{5}'.format(
+        storage_acc,
+        'blob' if valid_blob_source else 'share',
+        container if valid_blob_source else share,
+        blob if valid_blob_source else path,
+        '?' if query_params else '',
+        '&'.join(query_params))
+
+    namespace.copy_source = uri
 
 def get_content_setting_validator(settings_class, update):
     def _class_name(class_type):
