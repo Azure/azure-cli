@@ -28,7 +28,21 @@ class TestApplication(unittest.TestCase):
         self.assertTrue(is_valid_resource_id(result))
         self.assertEqual(result, expected)
 
-    def test_resource_id_complex(self):
+    def test_resource_id_with_child(self):
+        rg = 'lbrg'
+        lb = 'mylb'
+        namespace = 'Microsoft.Network'
+        rtype = 'loadBalancers'
+        bep = 'mybep'
+        bep_type = 'backendAddressPools'
+        sub = '00000000-0000-0000-0000-000000000000'
+        result = resource_id(name=lb, resource_group=rg, namespace=namespace, type=rtype, subscription=sub, child_type=bep_type, child_name=bep)
+        expected = '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/lbrg/providers/Microsoft.Network/loadBalancers/mylb/backendAddressPools/mybep'
+        self.assertTrue(is_valid_resource_id(expected))
+        self.assertTrue(is_valid_resource_id(result))
+        self.assertEqual(result, expected)
+
+    def test_resource_id_with_grandchild(self):
         rg = 'lbrg'
         lb = 'mylb'
         namespace = 'Microsoft.Network'

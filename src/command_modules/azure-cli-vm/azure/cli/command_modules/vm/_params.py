@@ -143,7 +143,7 @@ register_cli_argument('vm nic', 'nic_names', multi_ids_type)
 
 register_cli_argument('vmss nic', 'virtual_machine_scale_set_name', options_list=('--vmss-name',), help='Scale set name.', completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'), id_part='name')
 register_cli_argument('vmss nic', 'virtualmachine_index', options_list=('--instance-id',), id_part='child_name')
-register_cli_argument('vmss nic', 'network_interface_name', options_list=('--nic-name',), metavar='NIC_NAME', help='The network interface (NIC).', completer=get_resource_name_completion_list('Microsoft.Network/networkInterfaces'), id_part='grandchild_name')
+register_cli_argument('vmss nic', 'network_interface_name', options_list=('--name', '-n'), metavar='NIC_NAME', help='The network interface (NIC).', completer=get_resource_name_completion_list('Microsoft.Network/networkInterfaces'), id_part='grandchild_name')
 
 register_cli_argument('network nic scale-set list', 'virtual_machine_scale_set_name', options_list=('--vmss-name',), completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'), id_part='name')
 

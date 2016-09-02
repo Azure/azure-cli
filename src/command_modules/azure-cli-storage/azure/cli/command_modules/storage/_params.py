@@ -156,7 +156,7 @@ for item in ['check-name', 'delete', 'list', 'show', 'show-usage', 'update', 'ke
 register_cli_argument('storage account connection-string', 'account_name', account_name_type, options_list=('--name', '-n'))
 register_cli_argument('storage account connection-string', 'protocol', help='The default endpoint protocol.', choices=['http', 'https'], type=str.lower)
 
-register_cli_argument('storage account create', 'account_name', account_name_type, options_list=('--name', '-n'), completer=None, id_part=None)
+register_cli_argument('storage account create', 'account_name', account_name_type, options_list=('--name', '-n'), completer=None)
 register_cli_argument('storage account create', 'kind', help='Indicates the type of storage account. (Storage, BlobStorage)', completer=get_enum_type_completion_list(Kind))
 register_cli_argument('storage account create', 'tags', tags_type)
 
