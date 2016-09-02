@@ -19,10 +19,10 @@ from azure.cli.core.commands import register_cli_argument, CliArgumentType, regi
 from azure.cli.core.commands.arm import is_valid_resource_id
 from azure.cli.core.commands.template_create import register_folded_cli_argument
 from azure.cli.core.commands.parameters import (location_type,
-                                           get_location_completion_list,
-                                           get_one_of_subscription_locations,
-                                           get_resource_name_completion_list,
-                                           tags_type)
+                                                get_location_completion_list,
+                                                get_one_of_subscription_locations,
+                                                get_resource_name_completion_list,
+                                                tags_type)
 from azure.cli.command_modules.vm._actions import (VMImageFieldAction,
                                                    VMSSHFieldAction,
                                                    VMDNSNameAction,

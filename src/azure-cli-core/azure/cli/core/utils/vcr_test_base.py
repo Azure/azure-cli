@@ -26,6 +26,7 @@ from six import StringIO
 # TODO-DEREK Can't depend on azure.cli as we are in the core module.
 import azure.cli as cli
 from azure.cli.main import main as cli_main
+
 import azure.cli.core._debug as _debug
 from azure.cli.core._profile import Profile
 from azure.cli.core._util import CLIError
@@ -49,7 +50,7 @@ def _mock_get_mgmt_service_client(client_type, subscription_bound=True):
 
     _debug.allow_debug_connection(client)
 
-    client.config.add_user_agent("AZURECLI/TEST/{}".format(cli.__version__))
+    client.config.add_user_agent("AZURECLI/TEST/{}".format(cli.__version__)) # pylint: disable=no-member
 
     return (client, subscription_id)
 

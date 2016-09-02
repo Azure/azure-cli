@@ -56,9 +56,7 @@ EXCLUDED_PARAMS = frozenset(['self', 'raw', 'custom_headers', 'operation_config'
 
 def extract_args_from_signature(operation):
     """ Extracts basic argument data from an operation's signature and docstring """
-    # TODO-DEREK there is a circular dependency here so investigate.
-    # from azure.cli.core.commands import CliCommandArgument
-    from . import CliCommandArgument
+    from azure.cli.core.commands import CliCommandArgument
     args = []
     try:
         # only supported in python3 - falling back to argspec if not available

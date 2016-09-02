@@ -11,15 +11,17 @@ import traceback
 import pkgutil
 from importlib import import_module
 from collections import OrderedDict, defaultdict
-from azure.common import AzureException
+
 from msrest.paging import Paged
 from msrest.exceptions import ClientException
 from msrestazure.azure_operation import AzureOperationPoller
+
+from azure.common import AzureException
 from azure.cli.core._util import CLIError
 import azure.cli.core._logging as _logging
 
-from azure.cli.core.commands._introspection import (extract_args_from_signature,
-                                                    extract_full_summary_from_signature)
+from ._introspection import (extract_args_from_signature,
+                             extract_full_summary_from_signature)
 
 logger = _logging.get_az_logger(__name__)
 
@@ -150,7 +152,7 @@ class CliCommand(object):
 
 command_table = CommandTable()
 
-def get_command_table(module_name=None):
+def get_command_table():
     '''Loads command table(s)
     When `module_name` is specified, only commands from that module will be loaded.
     If the module is not found, all commands are loaded.

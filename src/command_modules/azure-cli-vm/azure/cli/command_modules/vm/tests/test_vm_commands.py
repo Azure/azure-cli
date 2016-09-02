@@ -9,8 +9,10 @@ import os
 import tempfile
 import platform
 
-from azure.cli.core.utils.vcr_test_base import (VCRTestBase, ResourceGroupVCRTestBase, JMESPathCheck,
-                                           NoneCheck)
+from azure.cli.core.utils.vcr_test_base import (VCRTestBase,
+                                                ResourceGroupVCRTestBase,
+                                                JMESPathCheck,
+                                                NoneCheck)
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 

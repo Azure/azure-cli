@@ -12,8 +12,8 @@ from adal.adal_error import AdalError
 from azure.cli.core.commands import cli_command
 import azure.cli.core._logging as _logging
 from azure.cli.core._config import (GLOBAL_CONFIG_DIR, GLOBAL_CONFIG_PATH,
-                               ENV_CONFIG_DIR, ACTIVE_ENV_CONFIG_PATH,
-                               ENV_VAR_PREFIX)
+                                    ENV_CONFIG_DIR, ACTIVE_ENV_CONFIG_PATH,
+                                    ENV_VAR_PREFIX)
 from azure.cli.core._util import CLIError
 
 from azure.cli.command_modules.configure._consts import (OUTPUT_LIST, CLOUD_LIST, LOGIN_METHOD_LIST,

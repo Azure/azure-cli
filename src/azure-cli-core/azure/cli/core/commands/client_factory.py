@@ -12,7 +12,7 @@ from azure.cli.core.application import APPLICATION
 
 logger = _logging.get_az_logger(__name__)
 
-UA_AGENT = "AZURECLI/{}".format(cli.__version__)
+UA_AGENT = "AZURECLI/{}".format(cli.__version__) # pylint: disable=no-member
 
 def get_mgmt_service_client(client_type):
     client, _ = _get_mgmt_service_client(client_type)

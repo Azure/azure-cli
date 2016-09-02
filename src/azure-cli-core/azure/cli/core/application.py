@@ -28,16 +28,8 @@ class Configuration(object): # pylint: disable=too-few-public-methods
         self.argv = argv or sys.argv[1:]
         self.output_format = None
 
-    def get_command_table(self):
+    def get_command_table(self): # pylint: disable=no-self-use
         import azure.cli.core.commands as commands
-
-        # Find the first noun on the command line and only load commands from that
-        # module to improve startup time.
-        for a in self.argv:
-            if not a.startswith('-'):
-                return commands.get_command_table(a)
-
-        # No noun found, so load all commands.
         return  commands.get_command_table()
 
 class Application(object):
