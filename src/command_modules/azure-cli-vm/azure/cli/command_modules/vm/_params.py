@@ -118,7 +118,6 @@ register_cli_argument('vmss', 'instance_id', id_part='child_name')
 register_cli_argument('vmss', 'instance_ids', multi_ids_type)
 register_cli_argument('vmss', 'tags', tags_type)
 register_cli_argument('vmss', 'instance_ids', help='Space separated ids such as "0 2 3", or use "*" for all instances')
-register_cli_argument('vmss', 'ids', help='One or more scale set or specific VM instance IDs.')
 
 register_cli_argument('vmss extension', 'extension_name', name_arg_type, help='Name of the extension.')
 register_cli_argument('vmss extension', 'vmss_name', id_part=None)
@@ -142,9 +141,9 @@ register_cli_argument('vm nic', 'vm_name', existing_vm_name, id_part=None)
 register_cli_argument('vm nic', 'nic_ids', multi_ids_type)
 register_cli_argument('vm nic', 'nic_names', multi_ids_type)
 
-register_cli_argument('vmss nic', 'virtual_machine_scale_set_name', options_list=('--vmss-name',), help='Scale set name.', completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'), id_part=None)
-register_cli_argument('vmss nic', 'virtualmachine_index', options_list=('--instance-id',))
-register_cli_argument('vmss nic', 'network_interface_name', nic_type, id_part=None)
+register_cli_argument('vmss nic', 'virtual_machine_scale_set_name', options_list=('--vmss-name',), help='Scale set name.', completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'), id_part='name')
+register_cli_argument('vmss nic', 'virtualmachine_index', options_list=('--instance-id',), id_part='child_name')
+register_cli_argument('vmss nic', 'network_interface_name', options_list=('--nic-name',), metavar='NIC_NAME', help='The network interface (NIC).', completer=get_resource_name_completion_list('Microsoft.Network/networkInterfaces'), id_part='grandchild_name')
 
 register_cli_argument('network nic scale-set list', 'virtual_machine_scale_set_name', options_list=('--vmss-name',), completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'), id_part='name')
 
