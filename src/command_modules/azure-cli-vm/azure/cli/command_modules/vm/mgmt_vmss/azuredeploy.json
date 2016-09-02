@@ -90,6 +90,13 @@
         "description": "Name of load balancer backend pool."
       }
     },
+    "loadBalancerNatPoolName": {
+      "type": "string",
+      "defaultValue": "[concat(parameters('name'), 'natpool')]",
+      "metadata": {
+        "description": "Name of load balancer NAT pool."
+      }
+    },
     "loadBalancerType": {
       "type": "string",
       "defaultValue": "new",
@@ -447,6 +454,11 @@
               {
                 "id": "[concat(variables('loadBalancerId'), '/backendAddressPools/', variables('bePoolName'))]"
               }
+            ],
+            "loadBalancerInboundNatPools": [
+              {
+                "id": "[concat(variables('loadBalancerId'), '/inboundNatPools/', parameters('loadBalancerNatPoolName'))]"
+              }
             ]
           }
         }
@@ -462,6 +474,11 @@
               {
                 "id": "[concat(variables('loadBalancerId'), '/backendAddressPools/', variables('bePoolName'))]"
               }
+            ],
+            "loadBalancerInboundNatPools": [
+              {
+                "id": "[concat(variables('loadBalancerId'), '/inboundNatPools/', parameters('loadBalancerNatPoolName'))]"
+              }
             ]
           }
         }
@@ -476,6 +493,11 @@
             "loadBalancerBackendAddressPools": [
               {
                 "id": "[concat(variables('loadBalancerId'), '/backendAddressPools/', variables('bePoolName'))]"
+              }
+            ],
+            "loadBalancerInboundNatPools": [
+              {
+                "id": "[concat(variables('loadBalancerId'), '/inboundNatPools/', parameters('loadBalancerNatPoolName'))]"
               }
             ]
           }
@@ -511,8 +533,8 @@
       "new": "[variables('publicIpTemplateUri')]",
       "none": "[variables('publicIpTemplateUriEmpty')]"
     },
-    "lbTemplateUri": "https://azuresdkci.blob.core.windows.net/templatehost/CreateLb_2016-07-19/azuredeploy.json",
-    "lbTemplateUriEmpty": "https://azuresdkci.blob.core.windows.net/templatehost/CreateLb_2016-07-19/azuredeploy_empty.json",
+    "lbTemplateUri": "[concat(parameters('_artifactsLocation'), '/', 'nested_templates/load_balancer_new', '.json')]",
+    "lbTemplateUriEmpty": "[concat(parameters('_artifactsLocation'), '/', 'nested_templates/load_balancer_empty', '.json')]",
     "lbTemplateFilePaths": {
       "existingId": "[variables('lbTemplateUriEmpty')]",
       "existingName": "[variables('lbTemplateUriEmpty')]",
@@ -631,29 +653,10 @@
           "publicIpAddressType": { "value": "[variables('lbPublicIpAddressType')[parameters('publicIpAddressType')]]" },
           "backendPoolName": { "value": "[variables('bePoolName')]" },
           "subnet": { "value": "[variables('subnetRef')]" },
-          "frontendIpName": { "value": "LoadBalancerFrontEnd" }
-        }
-      }
-    },
-    {
-      "name": "[variables('natRuleDeploymentName')]",
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2015-01-01",
-      "dependsOn": [
-        "[concat('Microsoft.Resources/deployments/', variables('lbDeploymentName'))]"
-      ],
-      "properties": {
-        "mode": "Incremental",
-        "templateLink": {
-          "uri": "[variables('natTemplateFilePaths')[parameters('loadBalancerType')]]",
-          "contentVersion": "1.0.0.0"
-        },
-        "parameters": {
-          "loadBalancerName": { "value": "[parameters('loadBalancer')]" },
-          "location": { "value": "[variables('resourceLocation')]" },
+          "frontendIpName": { "value": "LoadBalancerFrontEnd" },
           "backendPort": { "value": "[parameters('natBackendPort')]" },
-          "numberOfInstances": { "value": "[parameters('instanceCount')]" },
-          "frontendIpName": { "value": "LoadBalancerFrontEnd" }
+          "natPoolName": { "value": "[parameters('loadBalancerNatPoolName')]" },
+          "numberOfInstances": { "value": "[parameters('instanceCount')]" }
         }
       }
     },
