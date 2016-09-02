@@ -5,14 +5,19 @@
 
 from __future__ import print_function
 import json
+import re
 import time
 import traceback
 from importlib import import_module
 from collections import OrderedDict, defaultdict
 from pip import get_installed_distributions
+
 from msrest.paging import Paged
 from msrest.exceptions import ClientException
 from msrestazure.azure_operation import AzureOperationPoller
+
+from azure.common import AzureException
+
 from azure.cli._util import CLIError
 import azure.cli._logging as _logging
 
@@ -226,6 +231,11 @@ def create_command(name, operation, transform_result, table_transformer, client_
         except ClientException as client_exception:
             message = getattr(client_exception, 'message', client_exception)
             raise CLIError(message)
+        except AzureException as azure_exception:
+            message = re.search(r"([A-Za-z\t .])+", str(azure_exception))
+            raise CLIError('\n{}'.format(message.group(0) if message else str(azure_exception)))
+        except ValueError as value_error:
+            raise CLIError(value_error)
 
     name = ' '.join(name.split())
     cmd = CliCommand(name, _execute_command, table_transformer=table_transformer)
