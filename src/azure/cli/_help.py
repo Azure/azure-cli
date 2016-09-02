@@ -91,7 +91,7 @@ def print_arguments(help_file):
         possible_values_index = short_summary.find(' Possible values include')
         short_summary = short_summary[0:possible_values_index
                                       if possible_values_index >= 0 else len(short_summary)]
-        short_summary += _get_choices_defaults_str(p)
+        short_summary += _get_choices_defaults_sources_str(p)
         short_summary = short_summary.strip()
 
         if p.group_name != last_group_name:
@@ -113,9 +113,6 @@ def print_arguments(help_file):
         indent = 2
         if p.long_summary:
             _print_indent('{0}'.format(p.long_summary.rstrip()), indent)
-
-        if p.value_sources:
-            _print_indent("Values from: {0}.".format(', '.join(p.value_sources)), indent)
 
         if p.long_summary or p.value_sources:
             print('')
@@ -165,12 +162,14 @@ def _print_groups(help_file):
         _print_indent('Commands:')
         _print_items(subcommands)
 
-def _get_choices_defaults_str(p):
+def _get_choices_defaults_sources_str(p):
     choice_str = '  Allowed values: {0}.'.format(', '.join(sorted([str(x) for x in p.choices]))) \
         if p.choices else ''
     default_str = '  Default: {0}.'.format(p.default) \
         if p.default and p.default != argparse.SUPPRESS else ''
-    return '{0}{1}'.format(choice_str, default_str)
+    value_sources_str = '  Values from: {0}.'.format(', '.join(p.value_sources)) \
+        if p.value_sources else ''
+    return '{0}{1}{2}'.format(choice_str, default_str, value_sources_str)
 
 def _print_examples(help_file):
     indent = 0
