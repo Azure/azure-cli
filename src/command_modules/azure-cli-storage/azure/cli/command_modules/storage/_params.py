@@ -11,6 +11,7 @@ from six import u as unicode_string
 from azure.cli.commands.parameters import \
     (ignore_type, tags_type, get_resource_name_completion_list, get_enum_type_completion_list)
 from azure.cli.commands import register_cli_argument, register_extra_cli_argument, CliArgumentType
+import azure.cli.commands.arm # pylint: disable=unused-import
 from azure.cli.commands.client_factory import get_data_service_client
 
 from azure.common import AzureMissingResourceHttpError
@@ -149,7 +150,8 @@ register_cli_argument('storage', 'metadata', nargs='+', help='Metadata in space-
 register_cli_argument('storage', 'timeout', help='Request timeout in seconds. Applies to each call to the service.', type=int)
 register_cli_argument('storage', 'container_name', container_name_type)
 
-register_cli_argument('storage account', 'account_name', account_name_type, options_list=('--name', '-n'))
+for item in ['check-name', 'delete', 'list', 'show', 'show-usage', 'update', 'keys']:
+    register_cli_argument('storage account {}'.format(item), 'account_name', account_name_type, options_list=('--name', '-n'))
 
 register_cli_argument('storage account connection-string', 'account_name', account_name_type, options_list=('--name', '-n'))
 register_cli_argument('storage account connection-string', 'protocol', help='The default endpoint protocol.', choices=['http', 'https'], type=str.lower)

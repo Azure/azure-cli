@@ -46,7 +46,7 @@ class ScheduleEntryList(list):
             row.get('maintenanceWindow', None))
                      for row in dictval])
 
-register_cli_argument('redis', 'name', arg_type=name_type, completer=get_resource_name_completion_list('Microsoft.Cache/redis'), id_part='name')
+register_cli_argument('redis', 'name', arg_type=name_type, help='Name of the redis cache.', completer=get_resource_name_completion_list('Microsoft.Cache/redis'), id_part='name')
 register_cli_argument('redis', 'redis_configuration', type=JsonString)
 register_cli_argument('redis', 'reboot_type', completer=get_enum_type_completion_list(RebootType))
 register_cli_argument('redis', 'key_type', choices=[e.value for e in RedisKeyType])

@@ -116,3 +116,24 @@ helps['vm update'] = """
                 - name: Remove fourth NIC
                   text: az <command> -n name -g group --remove networkProfile.networkInterfaces 3
             """.format(generic_update_help)
+
+helps['vmss get-instance-view'] = """
+    type: command
+    parameters: 
+        - name: --ids
+          short-summary: "One or more scale set or specific VM instance IDs. If provided, no other 'Resource Id' arguments should be specified."
+"""
+
+helps['vmss reimage'] = """
+    type: command
+    parameters: 
+        - name: --ids
+          short-summary: "One or more scale set or specific VM instance IDs. If provided, no other 'Resource Id' arguments should be specified."
+"""
+
+helps['vmss show'] = """
+    type: command
+    parameters: 
+        - name: --ids
+          short-summary: "One or more scale set or specific VM instance IDs. If provided, no other 'Resource Id' arguments should be specified."
+"""
