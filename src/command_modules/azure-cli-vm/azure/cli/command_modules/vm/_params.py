@@ -93,8 +93,7 @@ register_cli_argument('vm container', 'container_service_name', options_list=('-
 register_cli_argument('vm container create', 'agent_vm_size', completer=get_vm_size_completion_list)
 
 register_cli_argument('vm capture', 'overwrite', action='store_true')
-register_cli_argument('vm nic', 'nic_ids', multi_ids_type)
-register_cli_argument('vm nic', 'nic_names', multi_ids_type)
+
 register_cli_argument('vm diagnostics', 'vm_name', arg_type=existing_vm_name, options_list=('--vm-name',))
 register_cli_argument('vm diagnostics set', 'storage_account', completer=get_resource_name_completion_list('Microsoft.Storage/storageAccounts'))
 
@@ -124,6 +123,13 @@ register_cli_argument('vm image list', 'image_location', location_type)
 register_cli_argument('vm open-port', 'vm_name', name_arg_type, help='The name of the virtual machine to open inbound traffic on.')
 register_cli_argument('vm open-port', 'network_security_group_name', options_list=('--nsg-name',), help='The name of the network security group to create if one does not exist. Ignored if an NSG already exists.', validator=nsg_name_validator)
 register_cli_argument('vm open-port', 'apply_to_subnet', help='Allow inbound traffic on the subnet instead of the NIC', action='store_true')
+
+register_cli_argument('vm nic', 'nic_ids', multi_ids_type)
+register_cli_argument('vm nic', 'nic_names', multi_ids_type)
+
+register_cli_argument('vmss nic', 'virtual_machine_scale_set_name', options_list=('--vmss-name',), help='Scale set name.', completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'), id_part='name')
+register_cli_argument('vmss nic', 'virtualmachine_index', options_list=('--instance-id',))
+register_cli_argument('vmss nic', 'network_interface_name', options_list=('--name', '-n'), id_part='child_name')
 
 # VM CREATE PARAMETER CONFIGURATION
 
