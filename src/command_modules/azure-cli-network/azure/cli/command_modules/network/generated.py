@@ -251,11 +251,6 @@ cli_command('network nic show', NetworkInterfacesOperations.get, factory)
 cli_command('network nic list', list_nics)
 cli_generic_update_command('network nic update', NetworkInterfacesOperations.get, NetworkInterfacesOperations.create_or_update, factory, custom_function=set_nic)
 
-# NetworkInterfacesOperations: scaleset
-cli_command('vmss nic list-vm-nics', NetworkInterfacesOperations.list_virtual_machine_scale_set_vm_network_interfaces, factory)
-cli_command('vmss nic list', NetworkInterfacesOperations.list_virtual_machine_scale_set_network_interfaces, factory)
-cli_command('vmss nic show', NetworkInterfacesOperations.get_virtual_machine_scale_set_network_interface, factory)
-
 resource = 'network_interfaces'
 subresource = 'ip_configurations'
 cli_command('network nic ip-config create', create_nic_ip_config)

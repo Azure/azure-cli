@@ -640,43 +640,6 @@ class NetworkNicSubresourceScenarioTest(ResourceGroupVCRTestBase):
         self.cmd('network nic ip-config update -g {} --nic-name {} -n {} --subnet {} --vnet-name {}'.format(rg, nic, config, subnet, vnet),
             checks=JMESPathCheck("subnet.contains(id, '{}')".format(subnet), True))
 
-class NetworkNicScaleSetScenarioTest(VCRTestBase):
-
-    def __init__(self, test_method):
-        super(NetworkNicScaleSetScenarioTest, self).__init__(__file__, test_method)
-        self.resource_group = 'cli_test1'
-        self.vmss_name = 'clitestvm'
-        self.nic_name = 'clitestvmnic'
-        self.vm_index = 0
-        self.resource_type = 'Microsoft.Network/networkInterfaces'
-
-    def test_network_nic_scaleset(self):
-        self.execute()
-
-    def set_up(self):
-        if not self.cmd('vmss nic show --resource-group {} --vmss-name {} --vm-index {} --name {}'.format(
-            self.resource_group, self.vmss_name, self.vm_index, self.nic_name)):
-            raise RuntimeError('VM scale set NIC must be manually created in order to support this test.')
-
-    def body(self):
-        self.cmd('vmss nic list --resource-group {} --vmss-name {}'.format(
-                  self.resource_group, self.vmss_name), checks=[
-                JMESPathCheck('type(@)', 'array'),
-                JMESPathCheck("length([?type == '{}']) == length(@)".format(self.resource_type), True),
-                JMESPathCheck("length([?resourceGroup == '{}']) == length(@)".format(self.resource_group), True)
-        ])
-        self.cmd('vmss nic list-vm-nics --resource-group {} --vmss-name {} --vm-index {}'.format(self.resource_group, self.vmss_name, self.vm_index), checks=[
-                JMESPathCheck('type(@)', 'array'),
-                JMESPathCheck("length([?type == '{}']) == length(@)".format(self.resource_type), True),
-                JMESPathCheck("length([?resourceGroup == '{}']) == length(@)".format(self.resource_group), True)
-        ])
-        self.cmd('vmss nic show --resource-group {} --vmss-name {} --vm-index {} --name {}'.format(self.resource_group, self.vmss_name, self.vm_index, self.nic_name), checks=[
-                JMESPathCheck('type(@)', 'object'),
-                JMESPathCheck('name', self.nic_name),
-                JMESPathCheck('resourceGroup', self.resource_group),
-                JMESPathCheck('type', self.resource_type)
-        ])
-
 class NetworkSecurityGroupScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):

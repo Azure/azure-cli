@@ -250,7 +250,7 @@ class FeatureScenarioTest(VCRTestBase): # Not RG test base because it operates o
 class PolicyScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-        super(PolicyScenarioTest, self).__init__(__file__, test_method, debug=True)    
+        super(PolicyScenarioTest, self).__init__(__file__, test_method)    
         self.resource_group = 'azure-cli-policy-test-group'
        
     def test_resource_policy(self):

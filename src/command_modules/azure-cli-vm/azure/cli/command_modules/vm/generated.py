@@ -14,6 +14,9 @@ from azure.mgmt.compute.operations import (
     VirtualMachineScaleSetsOperations,
     VirtualMachineScaleSetVMsOperations,
     ContainerServiceOperations)
+from azure.mgmt.network.operations import NetworkInterfacesOperations
+from azure.mgmt.network import NetworkManagementClient
+
 from azure.cli.commands import DeploymentOutputLongRunningOperation, cli_command
 from azure.cli.commands.arm import cli_generic_update_command
 from azure.cli.commands.client_factory import get_mgmt_service_client
@@ -64,11 +67,19 @@ cli_command('vm list-ip-addresses', list_ip_addresses)
 cli_command('vm list', list_vm)
 cli_command('vm resize', resize_vm)
 cli_command('vm capture', capture_vm)
+cli_command('vm open-port', vm_open_port)
+cli_generic_update_command('vm update', VirtualMachinesOperations.get, VirtualMachinesOperations.create_or_update, factory)
+
+# VM NIC
 cli_command('vm nic add', vm_add_nics)
 cli_command('vm nic delete', vm_delete_nics)
 cli_command('vm nic update', vm_update_nics)
-cli_command('vm open-port', vm_open_port)
-cli_generic_update_command('vm update', VirtualMachinesOperations.get, VirtualMachinesOperations.create_or_update, factory)
+
+# VMSS NIC
+factory = lambda _: get_mgmt_service_client(NetworkManagementClient).network_interfaces
+cli_command('vmss nic list-vm-nics', NetworkInterfacesOperations.list_virtual_machine_scale_set_vm_network_interfaces, factory)
+cli_command('vmss nic list', NetworkInterfacesOperations.list_virtual_machine_scale_set_network_interfaces, factory)
+cli_command('vmss nic show', NetworkInterfacesOperations.get_virtual_machine_scale_set_network_interface, factory)
 
 # VM Access
 cli_command('vm access set-linux-user', set_linux_user)
