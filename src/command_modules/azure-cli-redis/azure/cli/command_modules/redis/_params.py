@@ -4,13 +4,13 @@
 #---------------------------------------------------------------------------------------------
 
 # pylint: disable=line-too-long
-from azure.cli.commands.parameters import (
+from azure.cli.core.commands.parameters import (
     get_resource_name_completion_list,
     get_enum_choices,
     get_enum_type_completion_list,
     name_type)
-from azure.cli.commands import register_cli_argument
-import azure.cli.commands.arm # pylint: disable=unused-import
+from azure.cli.core.commands import register_cli_argument
+import azure.cli.core.commands.arm # pylint: disable=unused-import
 from azure.mgmt.redis.models.redis_management_client_enums import (
     RebootType,
     RedisKeyType,

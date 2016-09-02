@@ -23,6 +23,8 @@ def exec_command(command):
 print('Running dev setup...')
 print('Root directory \'{}\''.format(root_dir))
 exec_command('pip install -r requirements.txt')
-exec_command('pip install -e .')
 exec_command('python scripts/command_modules/install.py')
+exec_command('pip install -e src/azure-cli-core')
+# azure cli has dependencies on the above packages so install this one last
+exec_command('pip install -e src/azure-cli')
 print('Finished dev setup.')

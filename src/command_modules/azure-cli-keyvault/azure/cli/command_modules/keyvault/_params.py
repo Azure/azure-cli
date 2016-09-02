@@ -5,11 +5,11 @@
 
 # pylint: disable=line-too-long
 from azure.mgmt.keyvault.models.key_vault_management_client_enums import (SkuName)
-from azure.cli.commands.parameters import (
+from azure.cli.core.commands.parameters import (
     get_resource_name_completion_list,
     name_type)
-from azure.cli.commands import register_cli_argument
-import azure.cli.commands.arm # pylint: disable=unused-import
+from azure.cli.core.commands import register_cli_argument
+import azure.cli.core.commands.arm # pylint: disable=unused-import
 
 from azure.cli.command_modules.keyvault._validators import (process_policy_namespace, process_set_policy_perms_namespace)
 

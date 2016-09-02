@@ -5,7 +5,7 @@
 
 from __future__ import print_function
 
-from azure.cli.commands import cli_command
+from azure.cli.core.commands import cli_command
 
 from .custom import (list_components, install, update, update_all, update_self, remove,
                      check_component)

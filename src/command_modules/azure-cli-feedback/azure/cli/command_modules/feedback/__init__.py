@@ -6,9 +6,11 @@
 from __future__ import print_function
 import sys
 from six.moves import input #pylint: disable=redefined-builtin
+# TODO-DEREK Do you need this import?
 import azure.cli as cli
-from azure.cli.commands import cli_command
-import azure.cli._logging as _logging
+from azure.cli.core.commands import cli_command
+import azure.cli.core._logging as _logging
+
 import azure.cli.command_modules.feedback._help # pylint: disable=unused-import
 
 logger = _logging.get_az_logger(__name__)
@@ -43,6 +45,7 @@ def _prompt_net_promoter_score():
             logger.warning('Valid values are %s', list(range(11)))
 
 def _get_version_info():
+    # TODO-DEREK Need to do this without pip now?
     from pip import get_installed_distributions
     installed_dists = get_installed_distributions(local_only=True)
 

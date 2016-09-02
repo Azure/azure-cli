@@ -5,7 +5,7 @@
 
 import unittest
 
-from azure.cli.application import APPLICATION, Configuration
+from azure.cli.core.application import APPLICATION, Configuration
 
 def mock_echo_args(command_name, parameters):
     try:

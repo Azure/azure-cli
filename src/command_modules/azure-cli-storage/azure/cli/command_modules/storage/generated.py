@@ -14,7 +14,7 @@ from azure.storage.table import TableService
 from azure.storage.queue import QueueService
 from azure.storage import CloudStorageAccount
 
-from azure.cli.commands import cli_command
+from azure.cli.core.commands import cli_command
 
 from azure.cli.command_modules.storage._command_type import cli_storage_data_plane_command
 from azure.cli.command_modules.storage._factory import \

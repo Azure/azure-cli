@@ -355,7 +355,6 @@ Set the environment variable to point to the version you wish to install.
 e.g. `set AZURE_CLI_NIGHTLY_VERSION=2016.06.21.nightly`.
 
 ```
-set AZURE_CLI_DISABLE_POST_INSTALL=1
 set AZURE_CLI_PRIVATE_PYPI_URL=http://40.112.211.51:8080
 set AZURE_CLI_PRIVATE_PYPI_HOST=40.112.211.51
 ```

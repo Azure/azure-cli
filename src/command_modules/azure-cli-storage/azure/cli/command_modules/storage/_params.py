@@ -8,11 +8,11 @@ import os
 
 from six import u as unicode_string
 
-from azure.cli.commands.parameters import \
+from azure.cli.core.commands.parameters import \
     (ignore_type, tags_type, get_resource_name_completion_list, get_enum_type_completion_list)
-from azure.cli.commands import register_cli_argument, register_extra_cli_argument, CliArgumentType
-import azure.cli.commands.arm # pylint: disable=unused-import
-from azure.cli.commands.client_factory import get_data_service_client
+import azure.cli.core.commands.arm # pylint: disable=unused-import
+from azure.cli.core.commands import register_cli_argument, register_extra_cli_argument, CliArgumentType
+from azure.cli.core.commands.client_factory import get_data_service_client
 
 from azure.common import AzureMissingResourceHttpError
 from azure.mgmt.storage.models import SkuName, AccessTier, Kind, EncryptionServices
