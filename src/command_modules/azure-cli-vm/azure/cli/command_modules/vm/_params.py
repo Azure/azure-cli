@@ -61,6 +61,7 @@ name_arg_type = CliArgumentType(options_list=('--name', '-n'), metavar='NAME')
 multi_ids_type = CliArgumentType(nargs='+')
 admin_username_type = CliArgumentType(options_list=('--admin-username',), default=getpass.getuser(), required=False)
 existing_vm_name = CliArgumentType(overrides=name_arg_type, help='The name of the virtual machine', completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachines'), id_part='name')
+vmss_name_type = CliArgumentType(name_arg_type, completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'), help='Scale set name.', id_part='name')
 
 # ARGUMENT REGISTRATION
 
@@ -69,17 +70,15 @@ register_cli_argument('vm', 'size', completer=get_vm_size_completion_list)
 register_cli_argument('vm', 'tags', tags_type)
 register_cli_argument('vm', 'name', arg_type=name_arg_type)
 
-register_cli_argument('vmss', 'vm_scale_set_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'), id_part='name')
-register_cli_argument('vmss', 'virtual_machine_scale_set_name', name_arg_type)
-register_cli_argument('vmss', 'instance_ids', multi_ids_type)
-register_cli_argument('vmss', 'tags', tags_type)
-register_cli_argument('vmss', 'name', arg_type=name_arg_type)
 register_cli_argument('vm disk', 'vm_name', arg_type=existing_vm_name, options_list=('--vm-name',))
 register_cli_argument('vm disk', 'disk_name', options_list=('--name', '-n'), help='The data disk name. If missing, will retrieve from vhd uri')
 register_cli_argument('vm disk', 'disk_size', help='Size of disk (GiB)', default=1023, type=int)
 register_cli_argument('vm disk', 'lun', type=int, help='0-based logical unit number (LUN). Max value depends on the Virutal Machine size.')
 register_cli_argument('vm disk', 'vhd', type=VirtualHardDisk, help='virtual hard disk\'s uri. For example:https://mystorage.blob.core.windows.net/vhds/d1.vhd')
 register_cli_argument('vm disk', 'caching', help='Host caching policy', default=CachingTypes.none.value, choices=choices_caching_types)
+
+for item in ['attach-existing', 'attach-new', 'detach']:
+    register_cli_argument('vm disk {}'.format(item), 'vm_name', arg_type=existing_vm_name, options_list=('--vm-name',), id_part=None)
 
 register_cli_argument('vm availability-set', 'availability_set_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Compute/availabilitySets'), help='Name of the availability set')
 
@@ -97,8 +96,8 @@ register_cli_argument('vm capture', 'overwrite', action='store_true')
 register_cli_argument('vm diagnostics', 'vm_name', arg_type=existing_vm_name, options_list=('--vm-name',))
 register_cli_argument('vm diagnostics set', 'storage_account', completer=get_resource_name_completion_list('Microsoft.Storage/storageAccounts'))
 
-register_cli_argument('vm extension', 'vm_extension_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachines/extensions'))
-register_cli_argument('vm extension', 'vm_name', arg_type=existing_vm_name, options_list=('--vm-name',))
+register_cli_argument('vm extension', 'vm_extension_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachines/extensions'), id_part='child_name')
+register_cli_argument('vm extension', 'vm_name', arg_type=existing_vm_name, options_list=('--vm-name',), id_part='name')
 register_cli_argument('vm extension', 'no_auto_upgrade', action='store_true')
 
 register_cli_argument('vm extension image', 'image_location', options_list=('--location', '-l'))
@@ -106,8 +105,22 @@ register_cli_argument('vm extension image', 'publisher_name', options_list=('--p
 register_cli_argument('vm extension image', 'type', options_list=('--name', '-n'))
 register_cli_argument('vm extension image', 'latest', action='store_true')
 
-register_cli_argument('vmss extension', 'extension_name', name_arg_type, id_part='name', help='Name of extension')
-register_cli_argument('vmss extension', 'vmss_name', help='Scale set name')
+for dest in ['vm_scale_set_name', 'virtual_machine_scale_set_name', 'name']:
+    register_cli_argument('vmss', dest, vmss_name_type)
+    register_cli_argument('vmss deallocate', dest, vmss_name_type, id_part=None) # due to instance-ids parameter
+    register_cli_argument('vmss delete-instances', dest, vmss_name_type, id_part=None) # due to instance-ids parameter
+    register_cli_argument('vmss restart', dest, vmss_name_type, id_part=None) # due to instance-ids parameter
+    register_cli_argument('vmss start', dest, vmss_name_type, id_part=None) # due to instance-ids parameter
+    register_cli_argument('vmss stop', dest, vmss_name_type, id_part=None) # due to instance-ids parameter
+    register_cli_argument('vmss update-instances', dest, vmss_name_type, id_part=None) # due to instance-ids parameter
+
+register_cli_argument('vmss', 'instance_id', id_part='child_name')
+register_cli_argument('vmss', 'instance_ids', multi_ids_type)
+register_cli_argument('vmss', 'tags', tags_type)
+register_cli_argument('vmss', 'instance_ids', help='Space separated ids such as "0 2 3", or use "*" for all instances')
+
+register_cli_argument('vmss extension', 'extension_name', name_arg_type, help='Name of the extension.')
+register_cli_argument('vmss extension', 'vmss_name', id_part=None)
 register_cli_argument('vmss extension', 'no_auto_upgrade', action='store_true')
 
 register_cli_argument('vmss extension image', 'publisher_name', options_list=('--publisher',), help='Image publisher name')
@@ -124,12 +137,15 @@ register_cli_argument('vm open-port', 'vm_name', name_arg_type, help='The name o
 register_cli_argument('vm open-port', 'network_security_group_name', options_list=('--nsg-name',), help='The name of the network security group to create if one does not exist. Ignored if an NSG already exists.', validator=nsg_name_validator)
 register_cli_argument('vm open-port', 'apply_to_subnet', help='Allow inbound traffic on the subnet instead of the NIC', action='store_true')
 
+register_cli_argument('vm nic', 'vm_name', existing_vm_name, id_part=None)
 register_cli_argument('vm nic', 'nic_ids', multi_ids_type)
 register_cli_argument('vm nic', 'nic_names', multi_ids_type)
 
 register_cli_argument('vmss nic', 'virtual_machine_scale_set_name', options_list=('--vmss-name',), help='Scale set name.', completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'), id_part='name')
-register_cli_argument('vmss nic', 'virtualmachine_index', options_list=('--instance-id',))
-register_cli_argument('vmss nic', 'network_interface_name', options_list=('--name', '-n'), id_part='child_name')
+register_cli_argument('vmss nic', 'virtualmachine_index', options_list=('--instance-id',), id_part='child_name')
+register_cli_argument('vmss nic', 'network_interface_name', options_list=('--name', '-n'), metavar='NIC_NAME', help='The network interface (NIC).', completer=get_resource_name_completion_list('Microsoft.Network/networkInterfaces'), id_part='grandchild_name')
+
+register_cli_argument('network nic scale-set list', 'virtual_machine_scale_set_name', options_list=('--vmss-name',), completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'), id_part='name')
 
 # VM CREATE PARAMETER CONFIGURATION
 
@@ -147,12 +163,10 @@ nsg_rule_type = CliArgumentType(
 
 register_cli_argument('vm create', 'network_interface_type', help=argparse.SUPPRESS)
 register_cli_argument('vm create', 'network_interface_ids', options_list=('--nics',), nargs='+', help='Names or IDs of existing NICs to reference.  The first NIC will be the primary NIC.', type=lambda val: val if (not '/' in val or is_valid_resource_id(val, ValueError)) else '', validator=_handle_vm_nics)
-
 register_cli_argument('vm create', 'name', name_arg_type, validator=_resource_not_exists('Microsoft.Compute/virtualMachines'))
+
 register_cli_argument('vmss create', 'name', name_arg_type)
 register_cli_argument('vmss create', 'nat_backend_port', default=None, help='Backend port to open with NAT rules.  Defaults to 22 on Linux and 3389 on Windows.')
-register_cli_argument('vmss', 'vm_scale_set_name', name_arg_type, help='scale set name')
-register_cli_argument('vmss', 'instance_ids', help='Space separated ids such as "0 2 3", or use "*" for all instances')
 
 for scope in ['vm create', 'vmss create']:
     register_cli_argument(scope, 'location', completer=get_location_completion_list)

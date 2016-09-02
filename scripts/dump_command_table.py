@@ -12,7 +12,7 @@ import re
 import types
 import sys
 
-from azure.cli.application import Application, Configuration
+from azure.cli.application import APPLICATION, Application
 
 class Exporter(json.JSONEncoder):
 
@@ -129,7 +129,6 @@ hide_nulls = args.hide_nulls
 
 PRIMITIVES = (str, int, bool, float)
 IGNORE_ARGS = ['help', 'help_file', 'base_type']
-    
-APPLICATION = Application(Configuration([]))
-APPLICATION.register(Application.COMMAND_TABLE_LOADED, _dump_command_table)
-APPLICATION.execute([''])
+
+APPLICATION.register(Application.COMMAND_PARSER_LOADED, _dump_command_table)
+APPLICATION.execute([])

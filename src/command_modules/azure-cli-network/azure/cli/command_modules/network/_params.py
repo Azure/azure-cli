@@ -97,6 +97,7 @@ def get_tm_endpoint_completion_list():
 # BASIC PARAMETER CONFIGURATION
 
 name_arg_type = CliArgumentType(options_list=('--name', '-n'), metavar='NAME')
+nic_type = CliArgumentType(options_list=('--nic-name',), metavar='NIC_NAME', help='The network interface (NIC).', id_part='name', completer=get_resource_name_completion_list('Microsoft.Network/networkInterfaces'))
 nsg_name_type = CliArgumentType(options_list=('--nsg-name',), metavar='NSG', help='Name of the network security group.')
 virtual_network_name_type = CliArgumentType(options_list=('--vnet-name',), metavar='VNET_NAME', help='The virtual network (VNET) name.', completer=get_resource_name_completion_list('Microsoft.Network/virtualNetworks'))
 subnet_name_type = CliArgumentType(options_list=('--subnet-name',), metavar='SUBNET_NAME', help='The subnet name.')
@@ -195,9 +196,9 @@ register_cli_argument('network application-gateway url-path-map', 'address_pool'
 register_cli_argument('network application-gateway url-path-map', 'http_settings', help='The name or ID of the HTTP settings to use with the created rule.', completer=get_ag_subresource_completion_list('backend_http_settings_collection'))
 
 
-register_cli_argument('network application-gateway url-path-map rule', 'item_name', options_list=('--name', '-n'), help='The name of the url-path-map rule.', completer=get_ag_url_map_rule_completion_list())
+register_cli_argument('network application-gateway url-path-map rule', 'item_name', options_list=('--name', '-n'), help='The name of the url-path-map rule.', completer=get_ag_url_map_rule_completion_list(), id_part='grandchild_name')
 register_cli_argument('network application-gateway url-path-map rule create', 'item_name', options_list=('--name', '-n'), help='The name of the url-path-map rule.', completer=None)
-register_cli_argument('network application-gateway url-path-map rule', 'url_path_map_name', options_list=('--path-map-name',), help='The name of the URL path map.', completer=get_ag_subresource_completion_list('url_path_maps'))
+register_cli_argument('network application-gateway url-path-map rule', 'url_path_map_name', options_list=('--path-map-name',), help='The name of the URL path map.', completer=get_ag_subresource_completion_list('url_path_maps'), id_part='child_name')
 register_cli_argument('network application-gateway url-path-map rule', 'address_pool', help='The name or ID of the backend address pool. If not specified, the default for the map will be used.', validator=process_ag_url_path_map_rule_create_namespace, completer=get_ag_subresource_completion_list('backend_address_pools'))
 register_cli_argument('network application-gateway url-path-map rule', 'http_settings', help='The name or ID of the HTTP settings. If not specified, the default for the map will be used.', completer=get_ag_subresource_completion_list('backend_http_settings_collection'))
 
@@ -221,13 +222,13 @@ register_cli_argument('network express-route circuit', 'sku_tier', completer=get
 register_cli_argument('network local-gateway', 'local_network_gateway_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/localNetworkGateways'), id_part='name')
 
 # NIC
-register_cli_argument('network nic', 'network_interface_name', name_arg_type, id_part='name', completer=get_resource_name_completion_list('Microsoft.Network/networkInterfaces'))
+register_cli_argument('network nic', 'network_interface_name', nic_type, options_list=('--name', '-n'))
 register_cli_argument('network nic', 'private_ip_address_allocation', help=argparse.SUPPRESS)
 register_cli_argument('network nic', 'network_security_group_type', help=argparse.SUPPRESS)
 register_cli_argument('network nic', 'public_ip_address_type', help=argparse.SUPPRESS)
 register_cli_argument('network nic', 'internal_dns_name_label', options_list=('--internal-dns-name',))
 
-register_cli_argument('network nic create', 'network_interface_name', name_arg_type, validator=process_nic_create_namespace)
+register_cli_argument('network nic create', 'network_interface_name', nic_type, options_list=('--name', '-n'), validator=process_nic_create_namespace, id_part=None)
 register_cli_argument('network nic create', 'enable_ip_forwarding', options_list=('--ip-forwarding',), action='store_true')
 register_cli_argument('network nic create', 'use_dns_settings', help=argparse.SUPPRESS)
 register_folded_cli_argument('network nic create', 'public_ip_address', 'Microsoft.Network/publicIPAddresses', new_flag_value=None, default_value_flag='none', completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'))
@@ -249,7 +250,10 @@ register_cli_argument('network nic ip-config', 'item_name', options_list=('--nam
 
 for item in ['address-pool', 'inbound-nat-rule']:
     register_cli_argument('network nic ip-config {}'.format(item), 'ip_config_name', options_list=('--ip-config-name', '-n'), metavar='IP_CONFIG_NAME', help='The name of the IP configuration.', id_part='child_name')
-    register_cli_argument('network nic ip-config {}'.format(item), 'network_interface_name', options_list=('--nic-name',), metavar='NIC_NAME', help='The network interface (NIC).', id_part='name', completer=get_resource_name_completion_list('Microsoft.Network/networkInterfaces'))
+    register_cli_argument('network nic ip-config {}'.format(item), 'network_interface_name', nic_type)
+
+register_cli_argument('network nic ip-config address-pool remove', 'network_interface_name', nic_type, id_part=None)
+register_cli_argument('network nic ip-config inbound-nat-rule remove', 'network_interface_name', nic_type, id_part=None)
 
 register_cli_argument('network nic ip-config address-pool', 'load_balancer_name', options_list=('--lb-name',), help='The name of the load balancer associated with the address pool (Omit if suppying an address pool ID).', completer=get_resource_name_completion_list('Microsoft.Network/loadBalancers'))
 register_cli_argument('network nic ip-config inbound-nat-rule', 'load_balancer_name', options_list=('--lb-name',), help='The name of the load balancer associated with the NAT rule (Omit if suppying a NAT rule ID).', completer=get_resource_name_completion_list('Microsoft.Network/loadBalancers'))
@@ -375,9 +379,9 @@ register_cli_argument('network traffic-manager profile check-dns', 'type', help=
 
 # Traffic manager endpoints
 endpoint_types = ['azureEndpoints', 'externalEndpoints', 'nestedEndpoints']
-register_cli_argument('network traffic-manager endpoint', 'endpoint_name', name_arg_type, id_part='name', help='Endpoint name.', completer=get_tm_endpoint_completion_list())
+register_cli_argument('network traffic-manager endpoint', 'endpoint_name', name_arg_type, id_part='child_name', help='Endpoint name.', completer=get_tm_endpoint_completion_list())
 register_cli_argument('network traffic-manager endpoint', 'endpoint_type', options_list=('--type',), help='Endpoint type.  Values include: {}.'.format(', '.join(endpoint_types)), completer=get_generic_completion_list(endpoint_types))
-register_cli_argument('network traffic-manager endpoint', 'profile_name', help='Name of parent profile.', completer=get_resource_name_completion_list('Microsoft.Network/trafficManagerProfiles'))
+register_cli_argument('network traffic-manager endpoint', 'profile_name', help='Name of parent profile.', completer=get_resource_name_completion_list('Microsoft.Network/trafficManagerProfiles'), id_part='name')
 
 # DNS
 register_cli_argument('network dns zone', 'zone_name', name_arg_type)
