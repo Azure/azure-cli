@@ -99,13 +99,13 @@ class Application(object):
         self.raise_event(self.COMMAND_PARSER_PARSED, command=args.command, args=args)
         results = []
         for expanded_arg in _explode_list_args(args):
+            self.session['command'] = expanded_arg.command
             try:
                 _validate_arguments(expanded_arg)
             except: # pylint: disable=bare-except
                 err = sys.exc_info()[1]
                 getattr(expanded_arg, '_parser', self.parser).error(str(err))
 
-            self.session['command'] = expanded_arg.command
             # Consider - we are using any args that start with an underscore (_) as 'private'
             # arguments and remove them from the arguments that we pass to the actual function.
             # This does not feel quite right.
