@@ -114,8 +114,6 @@ def print_arguments(help_file):
         if p.long_summary:
             _print_indent('{0}'.format(p.long_summary.rstrip()), indent)
 
-        if p.long_summary or p.value_sources:
-            print('')
     return indent
 
 def _print_header(help_file):
