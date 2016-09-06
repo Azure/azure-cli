@@ -148,13 +148,13 @@ def _handle_global_configuration():
         # no config exists yet so configure global config or user wants to modify global config
         output_index = prompt_choice_list(MSG_PROMPT_GLOBAL_OUTPUT, OUTPUT_LIST,
                                           default=get_default_from_config(global_config, \
-                                          'default', 'output', OUTPUT_LIST))
+                                          'core', 'output', OUTPUT_LIST))
         # save the global config
         try:
-            global_config.add_section('default')
+            global_config.add_section('core')
         except configparser.DuplicateSectionError:
             pass
-        global_config.set('default', 'output', OUTPUT_LIST[output_index]['name'])
+        global_config.set('core', 'output', OUTPUT_LIST[output_index]['name'])
         if not os.path.isdir(GLOBAL_CONFIG_DIR):
             os.makedirs(GLOBAL_CONFIG_DIR)
         with open(GLOBAL_CONFIG_PATH, 'w') as configfile:

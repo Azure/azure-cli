@@ -166,7 +166,7 @@ class Application(object):
         global_group.add_argument('--subscription', dest='_subscription_id', help=argparse.SUPPRESS)
         global_group.add_argument('--output', '-o', dest='_output_format',
                                   choices=['json', 'tsv', 'list', 'table', 'jsonc'],
-                                  default=az_config.get('default', 'output', fallback='json'),
+                                  default=az_config.get('core', 'output', fallback='json'),
                                   help='Output format',
                                   type=str.lower)
         # The arguments for verbosity don't get parsed by argparse but we add it here for help.
