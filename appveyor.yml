@@ -16,13 +16,32 @@ install:
   - python scripts/command_modules/install.py # Install the command modules as packages
 
 build_script:
+  - ps: |
+      $docSourceRaw = Get-Content -Raw -Path "$env:APPVEYOR_BUILD_FOLDER\doc\sphinx\azhelpgen\doc_source_map.json" | ConvertFrom-Json
+      $docFiles = $docSourceRaw | Get-Member -type NoteProperty | %{ $docSourceRaw."$($_.Name)" }
+      $docFiles = $docFiles | select -Unique
+      $fileCommitMap = @{}
+      foreach($file in $docFiles)
+      {
+          $commitId = (git rev-list -1 HEAD $file)
+          if($commitId -match '^[0-9a-f]{40}$')
+          {
+              $fileCommitMap[$file] = $commitId
+          }
+          else
+          {
+              Write-Host -ForegroundColor Red "Failed to get commit id for $file"
+              $host.SetShouldExit(-1)
+          }
+      }
+      $fileCommitMap | ConvertTo-Json | Out-File "$env:APPVEYOR_BUILD_FOLDER\doc\sphinx\doc_commit_map.json"
   - cd doc\sphinx 
   - make xml
   - mkdir %TEMP%\azure-cli-xml2yml
   - cd %TEMP%\azure-cli-xml2yml
   - nuget install azure.cli.doc.xml2yml -Source https://ci.appveyor.com/nuget/azure-cli-doc-proc
   - cd azure.cli.doc.xml2yml*\tools
-  - AzCliDocPreprocessor -s "%APPVEYOR_BUILD_FOLDER%\doc\sphinx\_build\xml\ind.xml" -d "%TEMP%\azure-cli-xml2yml\yml-output" -r "https://github.com/%APPVEYOR_REPO_NAME%/blob/%APPVEYOR_REPO_BRANCH%/"
+  - AzCliDocPreprocessor -s "%APPVEYOR_BUILD_FOLDER%\doc\sphinx\_build\xml\ind.xml" -d "%TEMP%\azure-cli-xml2yml\yml-output" -r "https://github.com/%APPVEYOR_REPO_NAME%" -b "%APPVEYOR_REPO_BRANCH%" -c "%APPVEYOR_BUILD_FOLDER%\doc\sphinx\doc_commit_map.json"
 
 artifacts:
   - path: doc\sphinx\_build
