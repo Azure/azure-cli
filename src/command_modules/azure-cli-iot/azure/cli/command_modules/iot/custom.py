@@ -7,11 +7,12 @@
 from __future__ import print_function
 import azure.cli._logging as _logging
 from azure.cli._util import CLIError
-from azure.cli.command_modules.iot.mgmt_iot_hub.lib.models.iot_hub_client_enums import \
+
+from azure.mgmt.iothub.models.iot_hub_client_enums import \
     IotHubSku
-from azure.cli.command_modules.iot.mgmt_iot_hub.lib.models.iot_hub_description import \
+from azure.mgmt.iothub.models.iot_hub_description import \
     IotHubDescription
-from azure.cli.command_modules.iot.mgmt_iot_hub.lib.models.iot_hub_sku_info import \
+from azure.mgmt.iothub.models.iot_hub_sku_info import \
     IotHubSkuInfo
 from azure.cli.command_modules.iot.mgmt_iot_hub_device.lib.iot_hub_device_client import \
     IotHubDeviceClient
@@ -27,6 +28,11 @@ logger = _logging.get_az_logger(__name__)
 
 def iot_hub_create(client, name, resource_group_name,
                    location=None, sku=IotHubSku.f1.value, unit=1):
+
+    name_availability = client.check_name_availability(name)
+    logger.info('name availability info: %s', name_availability)
+    if name_availability is not None and not name_availability.name_available:
+        raise CLIError(name_availability.message)
 
     if location is None:
         logger.info('Location is none. Use location of resource group as default.')
@@ -44,12 +50,12 @@ def iot_hub_create(client, name, resource_group_name,
 
 def iot_device_create(client, resource_group_name, hub, device_id):
 
-    access_policies = client.list_keys(resource_group_name, hub)
+    access_policies = client.list_keys(resource_group_name, hub).next()
     if access_policies is None:
         raise CLIError('No policy found from IoT Hub: {}.'.format(hub))
-    logger.info('Shared Access Polices: ' + str(access_policies))
+    logger.info('Shared Access Polices: %s', str(access_policies))
     try:
-        access_policy = next(x for x in access_policies.value
+        access_policy = next(x for x in access_policies
                              if 'registrywrite' in x.rights.value.lower())
     except StopIteration:
         raise CLIError('No policy found with RegistryWrite permission.')

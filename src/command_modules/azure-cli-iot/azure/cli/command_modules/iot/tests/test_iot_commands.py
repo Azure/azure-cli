@@ -23,9 +23,7 @@ class IoTHubCreateTest(VCRTestBase):
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('location', 'westus'),
                      JMESPathCheck('name', hub),
-                     JMESPathCheck('sku.name', 'S1'),
-                     JMESPathCheck('properties.state', 'Active'),
-                     JMESPathCheck('properties.provisioningState', 'Succeeded')
+                     JMESPathCheck('sku.name', 'S1')
                  ])
 
 
