@@ -10,10 +10,10 @@ from docutils.statemachine import ViewList
 from sphinx.util.compat import Directive
 from sphinx.util.nodes import nested_parse_with_titles
 
-from azure.cli.application import Application, Configuration
+from azure.cli.application import APPLICATION, Configuration
 import azure.cli._help as _help
 
-app = Application(Configuration([]))
+app = APPLICATION
 try:
     app.execute(['-h'])
 except:
@@ -79,7 +79,8 @@ class AzHelpGenDirective(Directive):
         node.document = self.state.document
         result = ViewList()
         for line in self.make_rst():
-            result.append(line, '<azhelpgen>')
+            result.append(line.decode('utf-8', 'ignore'), '<azhelpgen>')
+
         nested_parse_with_titles(self.state, result, node)
         return node.children
 
