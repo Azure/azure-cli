@@ -61,25 +61,6 @@ for t in ['add', 'remove']:
                       short-summary: PTR target domain name.
     """
 
-    helps['network dns record soa {0}'.format(t)] = """
-                type: command
-                parameters:
-                    - name: --host
-                      short-summary: domain name of the authoritative name server
-                    - name: --email
-                      short-summary: Email address.
-                    - name: --serial-number
-                      short-summary: Serial number.
-                    - name: --refresh-time
-                      short-summary: Refresh value (seconds).
-                    - name: --retry-time
-                      short-summary: Retry time (seconds).
-                    - name: --expire-time
-                      short-summary: Expire time (seconds).
-                    - name: --minimum-ttl
-                      short-summary: Minimum TTL (time-to-live, seconds).
-    """
-
     helps['network dns record srv {0}'.format(t)] = """
                 type: command
                 parameters:
@@ -99,4 +80,21 @@ for t in ['add', 'remove']:
                     - name: --value
                       short-summary: List of text values.
     """
+
+helps['network dns record update-soa'] = """
+            type: command
+            parameters:
+                - name: --email
+                  short-summary: Email address.
+                - name: --serial-number
+                  short-summary: Serial number.
+                - name: --refresh-time
+                  short-summary: Refresh value (seconds).
+                - name: --retry-time
+                  short-summary: Retry time (seconds).
+                - name: --expire-time
+                  short-summary: Expire time (seconds).
+                - name: --minimum-ttl
+                  short-summary: Minimum TTL (time-to-live, seconds).
+"""
 

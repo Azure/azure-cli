@@ -111,10 +111,10 @@ from .custom import \
      create_vpn_gateway_revoked_cert, delete_vpn_gateway_revoked_cert, create_express_route_auth,
      list_traffic_manager_profiles, create_traffic_manager_endpoint, list_dns_zones,
      create_dns_record_set, add_dns_aaaa_record, add_dns_a_record, add_dns_cname_record,
-     add_dns_ns_record, add_dns_ptr_record, add_dns_soa_record, add_dns_srv_record,
+     add_dns_ns_record, add_dns_ptr_record, update_dns_soa_record, add_dns_srv_record,
      add_dns_txt_record, add_dns_mx_record,
      remove_dns_aaaa_record, remove_dns_a_record, remove_dns_cname_record,
-     remove_dns_ns_record, remove_dns_ptr_record, remove_dns_soa_record, remove_dns_srv_record,
+     remove_dns_ns_record, remove_dns_ptr_record, remove_dns_srv_record,
      remove_dns_txt_record, remove_dns_mx_record, list_traffic_manager_endpoints,
      export_zone, import_zone)
 from ._factory import _network_client_factory
@@ -408,16 +408,14 @@ cli_command('network dns record cname add', add_dns_cname_record)
 cli_command('network dns record ns add', add_dns_ns_record)
 cli_command('network dns record mx add', add_dns_mx_record)
 cli_command('network dns record ptr add', add_dns_ptr_record)
-cli_command('network dns record soa add', add_dns_soa_record)
 cli_command('network dns record srv add', add_dns_srv_record)
 cli_command('network dns record txt add', add_dns_txt_record)
+cli_command('network dns record update-soa', update_dns_soa_record)
 cli_command('network dns record aaaa remove', remove_dns_aaaa_record)
 cli_command('network dns record a remove', remove_dns_a_record)
 cli_command('network dns record cname remove', remove_dns_cname_record)
 cli_command('network dns record ns remove', remove_dns_ns_record)
 cli_command('network dns record mx remove', remove_dns_mx_record)
 cli_command('network dns record ptr remove', remove_dns_ptr_record)
-cli_command('network dns record soa remove', remove_dns_soa_record)
 cli_command('network dns record srv remove', remove_dns_srv_record)
 cli_command('network dns record txt remove', remove_dns_txt_record)
-

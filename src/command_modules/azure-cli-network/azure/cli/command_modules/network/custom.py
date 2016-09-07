@@ -1000,11 +1000,23 @@ def add_dns_ptr_record(resource_group_name, zone_name, record_set_name, dname):
     record_type = 'ptr'
     return _add_save_record(record, record_type, record_set_name, resource_group_name, zone_name)
 
-def add_dns_soa_record(resource_group_name, zone_name, record_set_name, host, email,
-                       serial_number, refresh_time, retry_time, expire_time, minimum_ttl):
-    record = SoaRecord(host, email, serial_number, refresh_time, retry_time, expire_time,
-                       minimum_ttl)
+def update_dns_soa_record(resource_group_name, zone_name, email=None,
+                          serial_number=None, refresh_time=None, retry_time=None, expire_time=None,
+                          minimum_ttl=None):
+    record_set_name = '@'
     record_type = 'soa'
+
+    ncf = get_mgmt_service_client(DnsManagementClient).record_sets
+    record_set = ncf.get(resource_group_name, zone_name, record_set_name, record_type)
+    record = record_set.soa_record
+
+    record.email = email or record.email
+    record.serial_number = serial_number or record.serial_number
+    record.refresh_time = refresh_time or record.refresh_time
+    record.retry_time = retry_time or record.retry_time
+    record.expire_time = expire_time or record.expire_time
+    record.minimum_ttl = minimum_ttl or record.minimum_ttl
+
     return _add_save_record(record, record_type, record_set_name, resource_group_name, zone_name,
                             is_list=False)
 
