@@ -4,8 +4,6 @@
 #---------------------------------------------------------------------------------------------
 
 # pylint: disable=line-too-long
-import os
-
 from six import u as unicode_string
 
 from azure.cli._config import az_config
