@@ -221,8 +221,6 @@ register_cli_argument('storage blob list', 'include', help='Specifies additional
 for item in ['download', 'upload']:
     register_cli_argument('storage blob {}'.format(item), 'file_path', options_list=('--file', '-f'))
     register_cli_argument('storage blob {}'.format(item), 'max_connections', type=int)
-    register_cli_argument('storage blob {}'.format(item), 'max_retries', type=int)
-    register_cli_argument('storage blob {}'.format(item), 'retry_wait', type=int)
     register_cli_argument('storage blob {}'.format(item), 'validate_content', action='store_true')
 
 for item in ['update', 'upload']:

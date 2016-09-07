@@ -47,7 +47,7 @@ def list_storage_accounts(resource_group_name=None):
 def show_storage_account_usage():
     """ Show the current count and limit of the storage accounts under the subscription. """
     scf = storage_client_factory()
-    return next((x for x in scf.usage.list().value if x.name.value == 'StorageAccounts'), None) #pylint: disable=no-member
+    return next((x for x in scf.usage.list() if x.name.value == 'StorageAccounts'), None) #pylint: disable=no-member
 
 # pylint: disable=line-too-long
 def show_storage_account_connection_string(
@@ -101,7 +101,7 @@ def set_storage_account_properties(
 def upload_blob( # pylint: disable=too-many-locals
         client, container_name, blob_name, file_path, blob_type=None,
         content_settings=None, metadata=None, validate_content=False, maxsize_condition=None,
-        max_connections=2, max_retries=5, retry_wait=1, lease_id=None, if_modified_since=None,
+        max_connections=2, lease_id=None, if_modified_since=None,
         if_unmodified_since=None, if_match=None, if_none_match=None, timeout=None):
     '''Upload a blob to a container.'''
     def upload_append_blob():
@@ -124,8 +124,6 @@ def upload_blob( # pylint: disable=too-many-locals
             validate_content=validate_content,
             maxsize_condition=maxsize_condition,
             lease_id=lease_id,
-            max_retries=max_retries,
-            retry_wait=retry_wait,
             timeout=timeout)
 
     def upload_block_blob():
@@ -138,8 +136,6 @@ def upload_blob( # pylint: disable=too-many-locals
             metadata=metadata,
             validate_content=validate_content,
             max_connections=max_connections,
-            max_retries=max_retries,
-            retry_wait=retry_wait,
             lease_id=lease_id,
             if_modified_since=if_modified_since,
             if_unmodified_since=if_unmodified_since,

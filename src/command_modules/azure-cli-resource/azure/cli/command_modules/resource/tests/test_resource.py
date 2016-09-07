@@ -8,9 +8,9 @@ import time
 # AZURE CLI RESOURCE TEST DEFINITIONS
 
 from azure.cli.core.utils.vcr_test_base import (VCRTestBase, JMESPathCheck, NoneCheck, BooleanCheck,
-                                           ResourceGroupVCRTestBase, MOCKED_SUBSCRIPTION_ID)
+                                                ResourceGroupVCRTestBase, MOCKED_SUBSCRIPTION_ID)
 
-#pylint: disable=method-hidden
+#pylint: disable=method-hidden, line-too-long
 class ResourceGroupScenarioTest(VCRTestBase): # Not RG test base because it tests the actual deletion of a resource group
 
     def test_resource_group(self):
@@ -68,14 +68,14 @@ class ResourceScenarioTest(ResourceGroupVCRTestBase):
         rg = self.resource_group
         s.cmd('resource list')
         s.cmd('resource list -l centralus',
-            checks=JMESPathCheck("length([?location == 'centralus']) == length(@)", True))
+              checks=JMESPathCheck("length([?location == 'centralus']) == length(@)", True))
         s.cmd('resource list --tag displayName=PublicIPAddress',
-            checks=JMESPathCheck("length([?type == 'Microsoft.Network/publicIPAddresses']) == length(@)", True))
+              checks=JMESPathCheck("length([?type == 'Microsoft.Network/publicIPAddresses']) == length(@)", True))
         s.cmd('resource list --resource-type Microsoft.Network/networkInterfaces',
-            checks=JMESPathCheck("length([?type == 'Microsoft.Network/networkInterfaces']) == length(@)", True))
+              checks=JMESPathCheck("length([?type == 'Microsoft.Network/networkInterfaces']) == length(@)", True))
 
         s.cmd('resource list --name {}'.format(self.vnet_name),
-            checks=JMESPathCheck("length([?name == '{}']) == length(@)".format(self.vnet_name), True))
+              checks=JMESPathCheck("length([?name == '{}']) == length(@)".format(self.vnet_name), True))
 
         all_tagged_displayname = s.cmd('resource list --tag displayName')
         storage_acc_tagged_displayname = \
@@ -93,7 +93,7 @@ class ResourceScenarioTest(ResourceGroupVCRTestBase):
         # clear tag and verify
         s.cmd('resource tag -n {} -g {} --resource-type Microsoft.Network/virtualNetworks --tags'.format(self.vnet_name, rg))
         s.cmd('resource show -n {} -g {} --resource-type Microsoft.Network/virtualNetworks'.format(self.vnet_name, rg),
-            checks=JMESPathCheck('tags', {}))
+              checks=JMESPathCheck('tags', {}))
 
 class TagScenarioTest(VCRTestBase): # Not RG test base because it operates only on the subscription
 
@@ -193,10 +193,10 @@ class DeploymentTest(ResourceGroupVCRTestBase):
 class ResourceMoveScenarioTest(VCRTestBase): # Not RG test base because it uses two RGs and manually cleans them up
 
     def __init__(self, test_method):
-        super(ResourceMoveScenarioTest, self).__init__(__file__, test_method)    
+        super(ResourceMoveScenarioTest, self).__init__(__file__, test_method)
         self.source_group = 'res_move_src_group'
         self.destination_group = 'res_move_dest_group'
-       
+
     def test_resource_move(self):
         self.execute()
 
@@ -250,16 +250,16 @@ class FeatureScenarioTest(VCRTestBase): # Not RG test base because it operates o
 class PolicyScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-        super(PolicyScenarioTest, self).__init__(__file__, test_method)    
+        super(PolicyScenarioTest, self).__init__(__file__, test_method)
         self.resource_group = 'azure-cli-policy-test-group'
-       
+
     def test_resource_policy(self):
         self.execute()
 
     def body(self):
         policy_name = 'azure-cli-test-policy'
         policy_display_name = 'test_policy_123'
-        policy_description = 'test_policy_123' 
+        policy_description = 'test_policy_123'
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         rules_file = os.path.join(curr_dir, 'sample_policy_rule.json').replace('\\', '\\\\')
         #create a policy
@@ -273,12 +273,12 @@ class PolicyScenarioTest(ResourceGroupVCRTestBase):
         #update it
         new_policy_description = policy_description + '_new'
         self.cmd('resource policy update -n {} --description {}'.format(policy_name, new_policy_description), checks=[
-                JMESPathCheck('description', new_policy_description)
+            JMESPathCheck('description', new_policy_description)
             ])
 
         #list and show it
         self.cmd('resource policy list', checks=[
-            JMESPathCheck("length([?name=='{}'])".format(policy_name),1)
+            JMESPathCheck("length([?name=='{}'])".format(policy_name), 1)
             ])
         self.cmd('resource policy show -n {}'.format(policy_name), checks=[
             JMESPathCheck('name', policy_name),
@@ -301,22 +301,20 @@ class PolicyScenarioTest(ResourceGroupVCRTestBase):
                 JMESPathCheck("length([?name=='{}'])".format(policy_assignment_name), 0),
                 ])
         except jmespath.exceptions.JMESPathTypeError: #ok if query fails on None result
-            pass 
+            pass
 
         # but enable --show-all works
         self.cmd('resource policy assignment list --show-all', checks=[
-                JMESPathCheck("length([?name=='{}'])".format(policy_assignment_name), 1),
-                ])
+            JMESPathCheck("length([?name=='{}'])".format(policy_assignment_name), 1),
+            ])
 
         # delete the assignment
         self.cmd('resource policy assignment delete -n {} -g {}'.format(
             policy_assignment_name, self.resource_group))
-        result = self.cmd('resource policy assignment list --show-all')
+        self.cmd('resource policy assignment list --show-all')
 
         # delete the policy
         self.cmd('resource policy delete -n {}'.format(policy_name))
-        time.sleep(10) # ensure the policy is gone when run live.  
+        time.sleep(10) # ensure the policy is gone when run live.
         self.cmd('resource policy list', checks=[
-                JMESPathCheck("length([?name=='{}'])".format(policy_name), 0),
-                ])
-        
+            JMESPathCheck("length([?name=='{}'])".format(policy_name), 0)])

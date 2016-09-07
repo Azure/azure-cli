@@ -38,7 +38,7 @@ def _get_object_id_by_spn(graph_client, spn):
         return
     if len(accounts) > 1:
         logger.warning("Multiple service principals found with spn '%s'. "\
-                    "You can avoid this by specifying object id.", spn)
+                       "You can avoid this by specifying object id.", spn)
         return
     return accounts[0].object_id
 
@@ -49,7 +49,7 @@ def _get_object_id_by_upn(graph_client, upn):
         return
     if len(accounts) > 1:
         logger.warning("Multiple users principals found with upn '%s'. "\
-                    "You can avoid this by specifying object id.", upn)
+                       "You can avoid this by specifying object id.", upn)
         return
     return accounts[0].object_id
 
@@ -63,7 +63,7 @@ def _get_object_id_from_subscription(graph_client, subscription):
             logger.warning("Unknown user type '%s'", subscription['user']['type'])
     else:
         logger.warning('Current credentials are not from a user or service principal. '\
-                    'Azure Key Vault does not work with certificate credentials.')
+                       'Azure Key Vault does not work with certificate credentials.')
 
 def _get_object_id(graph_client, subscription=None, spn=None, upn=None):
     if spn:
@@ -112,7 +112,7 @@ def create_keyvault(client, resource_group_name, vault_name, location, #pylint:d
                                              object_id=object_id,
                                              permissions=permissions)]
     properties = VaultProperties(tenant_id=tenant_id,
-                                 sku=Sku(name=sku, family='A'),
+                                 sku=Sku(name=sku),
                                  access_policies=access_policies,
                                  vault_uri=None,
                                  enabled_for_deployment=enabled_for_deployment,
