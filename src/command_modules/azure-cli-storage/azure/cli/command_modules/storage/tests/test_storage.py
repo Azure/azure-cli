@@ -365,7 +365,7 @@ class StorageFileScenarioTest(StorageAccountVCRTestBase):
             raise CLIError('\nDownload failed. Test failed!')
 
         # test resize command
-        s.cmd('storage file resize --share-name {} -p "{}" --content-length 1234'.format(share, filename))
+        s.cmd('storage file resize --share-name {} -p "{}" --size 1234'.format(share, filename))
         s.cmd('storage file show --share-name {} -p "{}"'.format(share, filename),
             checks=JMESPathCheck('properties.contentLength', 1234))
 

@@ -4,7 +4,6 @@
 #---------------------------------------------------------------------------------------------
 
 from azure.cli.commands import create_command, command_table
-
 from azure.cli.command_modules.storage._validators import validate_client_parameters
 
 def cli_storage_data_plane_command(name, operation, client_factory,
@@ -19,17 +18,20 @@ def cli_storage_data_plane_command(name, operation, client_factory,
     command.add_argument('account_name', '--account-name', required=False, default=None,
                          arg_group=group_name,
                          help='Storage account name. Must be used in conjunction with either '
-                         'storage account key or a SAS token. Var: AZURE_STORAGE_ACCOUNT')
+                         'storage account key or a SAS token. Environment variable: '
+                         'AZURE_STORAGE_ACCOUNT')
     command.add_argument('account_key', '--account-key', required=False, default=None,
                          arg_group=group_name,
                          help='Storage account key. Must be used in conjunction with storage '
-                         'account name. Var: AZURE_STORAGE_KEY')
+                         'account name. Environment variable: '
+                         'AZURE_STORAGE_KEY')
     command.add_argument('connection_string', '--connection-string', required=False, default=None,
                          validator=validate_client_parameters, arg_group=group_name,
-                         help='Storage account connection string. Var: '
+                         help='Storage account connection string. Environment variable: '
                          'AZURE_STORAGE_CONNECTION_STRING')
     command.add_argument('sas_token', '--sas-token', required=False, default=None,
                          arg_group=group_name,
                          help='A Shared Access Signature (SAS). Must be used in conjunction with '
-                         'storage account name. Var: AZURE_SAS_TOKEN')
+                         'storage account name. Environment variable: '
+                         'AZURE_STORAGE_SAS_TOKEN')
     command_table[command.name] = command
