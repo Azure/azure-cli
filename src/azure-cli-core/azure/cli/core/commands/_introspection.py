@@ -28,9 +28,9 @@ def _option_descriptions(operation):
         lines = lines.splitlines()
         index = 0
         while index < len(lines):
-            l = lines[index]
-            regex = r'\s*(:param)\s+(.+)\s*:(.*)'
-            match = re.search(regex, l)
+            line = lines[index]
+            regex = r'\s*(:param)\s+([^:]+):(.*)'
+            match = re.search(regex, line)
             if match:
                 # 'arg name' portion might have type info, we don't need it
                 arg_name = str.split(match.group(2))[-1]
