@@ -8,6 +8,7 @@ import os
 
 from six import u as unicode_string
 
+from azure.cli._config import az_config
 from azure.cli.commands.parameters import \
     (ignore_type, tags_type, get_resource_name_completion_list, get_enum_type_completion_list)
 from azure.cli.commands import register_cli_argument, register_extra_cli_argument, CliArgumentType
@@ -38,10 +39,10 @@ from ._validators import \
 # COMPLETERS
 
 def _get_client(service, parsed_args):
-    account_name = parsed_args.account_name or os.getenv('AZURE_STORAGE_ACCOUNT')
-    account_key = parsed_args.account_key or os.getenv('AZURE_STORAGE_KEY')
-    connection_string = parsed_args.connection_string or os.getenv('AZURE_STORAGE_CONNECTION_STRING')
-    sas_token = parsed_args.sas_token or os.getenv('AZURE_STORAGE_SAS_TOKEN')
+    account_name = parsed_args.account_name or az_config.get('storage', 'account', None)
+    account_key = parsed_args.account_key or az_config.get('storage', 'key', None)
+    connection_string = parsed_args.connection_string or az_config.get('storage', 'connection_string', None)
+    sas_token = parsed_args.sas_token or az_config.get('storage', 'sas_token', None)
     return get_data_service_client(service, account_name, account_key, connection_string, sas_token)
 
 def get_storage_name_completion_list(service, func, parent=None):
