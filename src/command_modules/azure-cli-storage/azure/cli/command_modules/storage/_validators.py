@@ -9,6 +9,8 @@ from datetime import datetime
 import os
 import re
 
+
+from azure.cli._config import az_config
 from azure.cli.commands.client_factory import get_mgmt_service_client, get_data_service_client
 from azure.cli.commands.validators import validate_key_value_pairs
 
@@ -37,7 +39,7 @@ def validate_client_parameters(namespace):
     n = namespace
 
     if not n.connection_string:
-        n.connection_string = os.environ.get('AZURE_STORAGE_CONNECTION_STRING')
+        n.connection_string = az_config.get('storage', 'connection_string', None)
 
     # if connection string supplied or in environment variables, extract account key and name
     if n.connection_string:
@@ -47,11 +49,11 @@ def validate_client_parameters(namespace):
 
     # otherwise, simply try to retrieve the remaining variables from environment variables
     if not n.account_name:
-        n.account_name = os.environ.get('AZURE_STORAGE_ACCOUNT')
+        n.account_name = az_config.get('storage', 'account', None)
     if not n.account_key:
-        n.account_key = os.environ.get('AZURE_STORAGE_KEY')
+        n.account_key = az_config.get('storage', 'key', None)
     if not n.sas_token:
-        n.sas_token = os.environ.get('AZURE_STORAGE_SAS_TOKEN')
+        n.sas_token = az_config.get('storage', 'sas_token', None)
 
     # if account name is specified but no key, attempt to query
     if n.account_name and not n.account_key:
@@ -72,7 +74,7 @@ def validate_source_uri(namespace):
                    '\n\tOR --source-share --source-path [--source-sas]'
     ns = vars(namespace)
     validate_client_parameters(namespace) # must run first to resolve storage account
-    storage_acc = ns.get('account_name', None) or os.environ.get('AZURE_STORAGE_ACCOUNT')
+    storage_acc = ns.get('account_name', None) or az_config.get('storage', 'account', None)
     uri = ns.get('copy_source', None)
     container = ns.pop('source_container', None)
     blob = ns.pop('source_blob', None)

@@ -4,7 +4,6 @@
 #---------------------------------------------------------------------------------------------
 
 from azure.cli.commands import create_command, command_table
-
 from azure.cli.command_modules.storage._validators import validate_client_parameters
 
 def cli_storage_data_plane_command(name, operation, client_factory,
