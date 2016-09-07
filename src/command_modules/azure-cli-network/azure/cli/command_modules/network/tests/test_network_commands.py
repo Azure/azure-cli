@@ -8,6 +8,8 @@
 #pylint: disable=bad-continuation
 #pylint: disable=too-many-lines
 import os
+import re
+import tempfile
 
 from azure.cli.commands.arm import resource_id
 from azure.cli.commands.client_factory import get_subscription_id
@@ -1024,3 +1026,31 @@ class NetworkDnsScenarioTest(ResourceGroupVCRTestBase):
                  .format('a', rg, zone_name))
         self.cmd('network dns record-set show -n myrs{0} -g {1} --type {0} --zone-name {2}'
                  .format('a', rg, zone_name), allowed_exceptions='does not exist in resource group')
+
+class NetworkZoneImportExportTest(ResourceGroupVCRTestBase):
+
+    def __init__(self, test_method):
+        super(NetworkZoneImportExportTest, self).__init__(__file__, test_method)
+        self.resource_group = 'cli_dns_zone_import_export'
+
+    def test_network_dns_zone_import_export(self):
+        self.execute()
+
+    def body(self):
+        zone_name = 'myzone.com'
+        zone_file_path = os.path.join(TEST_DIR, 'zone.txt')
+
+        self.cmd('network dns zone import -n {} -g {} --file-name "{}"'
+                 .format(zone_name, self.resource_group, zone_file_path))
+
+        _, temp_file_path = tempfile.mkstemp()
+        self.cmd('network dns zone export -n {} -g {} --file-name "{}"'
+                 .format(zone_name, self.resource_group, temp_file_path))
+
+        temp_file_text = None
+        with open(temp_file_path, 'r') as f:
+            temp_file_text = f.read()
+        temp_file_text = re.sub('ns..?-..', 'ns0-00', temp_file_text)
+
+        with open(zone_file_path, 'r') as f:
+            self.assertEqual(temp_file_text, f.read(), 'Exported file {} should match imported file'.format(temp_file_path))

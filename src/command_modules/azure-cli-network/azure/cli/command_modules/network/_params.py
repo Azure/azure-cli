@@ -394,3 +394,5 @@ register_cli_argument('network dns', 'record_type', options_list=('--type',), ch
 register_cli_argument('network dns record', 'record_set_name', options_list=('--record-set-name',))
 register_cli_argument('network dns record txt add', 'value', nargs='+')
 register_cli_argument('network dns record txt remove', 'value', nargs='+')
+register_cli_argument('network dns zone import', 'file_name', help='Path to the DNS zone file to import')
+register_cli_argument('network dns zone export', 'file_name', help='Path to the DNS zone file to save')

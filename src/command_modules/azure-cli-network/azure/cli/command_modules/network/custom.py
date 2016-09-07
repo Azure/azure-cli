@@ -4,6 +4,8 @@
 #---------------------------------------------------------------------------------------------
 
 from collections import Counter
+from itertools import groupby
+from msrestazure.azure_exceptions import CloudError
 
 # pylint: disable=no-self-use,too-many-arguments,no-member,too-many-lines
 from azure.mgmt.network.models import \
@@ -24,7 +26,10 @@ from azure.mgmt.trafficmanager import TrafficManagerManagementClient
 from azure.mgmt.trafficmanager.models import Endpoint
 from azure.mgmt.dns import DnsManagementClient
 from azure.mgmt.dns.models import (RecordSet, AaaaRecord, ARecord, CnameRecord, MxRecord,
-                                   NsRecord, PtrRecord, SoaRecord, SrvRecord, TxtRecord)
+                                   NsRecord, PtrRecord, SoaRecord, SrvRecord, TxtRecord, Zone)
+
+from azure.cli.command_modules.network.zone_file.parse_zone_file import parse_zone_file
+from azure.cli.command_modules.network.zone_file.make_zone_file import make_zone_file
 
 #region Network subresource factory methods
 
@@ -837,56 +842,182 @@ def create_dns_record_set(resource_group_name, zone_name, record_set_name, recor
     return ncf.create_or_update(resource_group_name, zone_name, record_set_name,
                                 record_set_type, record_set)
 
+def export_zone(resource_group_name, zone_name, file_name):
+    client = get_mgmt_service_client(DnsManagementClient)
+    record_sets = client.record_sets.list_all_in_resource_group(resource_group_name, zone_name)
+
+    record_property_types = {
+        'arecords': 'a',
+        'aaaa_records': 'aaaa',
+        'cname_record': 'cname',
+        'mx_records': 'mx',
+        'ns_records': 'ns',
+        'ptr_records': 'ptr',
+        'soa_record': 'soa',
+        'srv_records': 'srv',
+        'txt_records': 'txt'
+        }
+
+    zone_obj = {
+        '$origin': zone_name.rstrip('.') + '.'
+        }
+
+    for record_set in record_sets:
+        for property_name, record_type in record_property_types.items():
+            record_data = getattr(record_set, property_name, None)
+            if not record_data:
+                continue
+            if not isinstance(record_data, list):
+                record_data = [record_data]
+            if record_type not in zone_obj:
+                zone_obj[record_type] = []
+            for record in record_data:
+                record_obj = {'ip': record.ipv6_address} if record_type == 'aaaa' \
+                    else {'ip': record.ipv4_address} if record_type == 'a' \
+                    else {'alias': record.cname} if record_type == 'cname' \
+                    else {'preference': record.preference, 'host': record.exchange} \
+                    if record_type == 'mx' \
+                    else {'host': record.nsdname} if record_type == 'ns' \
+                    else {'host': record.ptrdname} if record_type == 'ptr' \
+                    else {'mname': record.host, 'rname': record.email,
+                          'serial': record.serial_number, 'refresh': record.refresh_time,
+                          'retry': record.retry_time, 'expire': record.expire_time,
+                          'minimum': record.minimum_ttl} if record_type == 'soa' \
+                    else {'priority': record.priority, 'weight': record.weight,
+                          'port': record.port, 'target': record.target} if record_type == 'srv' \
+                    else {'txt': ' '.join(record.value)} if record_type == 'txt' \
+                    else None
+                record_obj['name'] = record_set.name
+                record_obj['ttl'] = record_set.ttl
+                zone_obj[record_type].append(record_obj)
+
+    if 'soa' in zone_obj:
+        # there is only 1 soa record allowed, so it shouldn't be a list, take the first element
+        zone_obj['soa'] = zone_obj['soa'][0]
+        zone_obj['soa']['mname'] = zone_obj['soa']['mname'].rstrip('.') + '.'
+        zone_obj['soa']['rname'] = zone_obj['soa']['rname'].rstrip('.') + '.'
+
+    zone_file_text = make_zone_file(zone_obj)
+
+    with open(file_name, 'w') as f:
+        f.write(zone_file_text)
+
+def import_zone(resource_group_name, zone_name, file_name, location='global'):
+    file_text = None
+    with open(file_name) as f:
+        file_text = f.read()
+    zone_obj = parse_zone_file(file_text)
+
+    zone_origin = zone_obj['$origin'].rstrip('.')
+    if zone_name != zone_origin:
+        raise CLIError('Zone file origin "{}" does not match zone name "{}"'
+                       .format(zone_origin, zone_name))
+
+    client = get_mgmt_service_client(DnsManagementClient)
+
+    try:
+        if client.zones.get(resource_group_name, zone_name):
+            raise CLIError('Zone "{}" already exists'.format(zone_name))
+    except CloudError:
+        pass
+
+    zone = Zone(location)
+    client.zones.create_or_update(resource_group_name, zone_name, zone)
+
+    for record_type in [k for k in zone_obj if not k.startswith('$')]:
+        key_func = lambda x: x['name']
+        for name, group in groupby(sorted(zone_obj[record_type], key=key_func), key_func):
+            record_set = RecordSet(name=name, type=record_type, ttl=3600)
+            for record_obj in list(group):
+                record = None
+                try:
+                    record = AaaaRecord(record_obj['ip']) if record_type == 'aaaa' \
+                        else ARecord(record_obj['ip']) if record_type == 'a' \
+                        else CnameRecord(record_obj['alias']) if record_type == 'cname' \
+                        else MxRecord(record_obj['preference'],
+                                      record_obj['host']) if record_type == 'mx' \
+                        else NsRecord(record_obj['host']) if record_type == 'ns' \
+                        else PtrRecord(record_obj['host']) if record_type == 'ptr' \
+                        else SoaRecord(record_obj['mname'], record_obj['rname'],
+                                       record_obj['serial'], record_obj['refresh'],
+                                       record_obj['retry'], record_obj['expire'],
+                                       record_obj['minimum']) if record_type == 'soa' \
+                        else SrvRecord(record_obj['priority'], record_obj['weight'],
+                                       record_obj['port'],
+                                       record_obj['target']) if record_type == 'srv' \
+                        else TxtRecord([record_obj['txt']]) if record_type == 'txt' \
+                        else None
+                except KeyError as ke:
+                    raise CLIError('The {} record "{}" is missing a property.  {}'
+                                   .format(record_type, record_obj, ke))
+
+                if not record:
+                    raise CLIError('Record type "{}" is not supported'.format(record_type))
+
+                record_set.ttl = record_obj['ttl']
+
+                _add_record(record_set, record, record_type,
+                            is_list=record_type != 'soa' and record_type != 'cname',
+                            property_name='arecords' if record_type == 'a' else None)
+
+            # skip built-in records because they can't be predicted or changed
+            if (record_type == 'soa' and name == '@') \
+                or (record_type == 'ns' and name == '@'):
+                continue
+
+            client.record_sets.create_or_update(resource_group_name, zone_name, record_set.name,
+                                                record_type, record_set)
+
 def add_dns_aaaa_record(resource_group_name, zone_name, record_set_name, ipv6_address):
     record = AaaaRecord(ipv6_address)
     record_type = 'aaaa'
-    return _add_record(record, record_type, record_set_name, resource_group_name, zone_name)
+    return _add_save_record(record, record_type, record_set_name, resource_group_name, zone_name)
 
 def add_dns_a_record(resource_group_name, zone_name, record_set_name, ipv4_address):
     record = ARecord(ipv4_address)
     record_type = 'a'
-    return _add_record(record, record_type, record_set_name, resource_group_name, zone_name,
-                       'arecords')
+    return _add_save_record(record, record_type, record_set_name, resource_group_name, zone_name,
+                            'arecords')
 
 def add_dns_cname_record(resource_group_name, zone_name, record_set_name, cname):
     record = CnameRecord(cname)
     record_type = 'cname'
-    return _add_record(record, record_type, record_set_name, resource_group_name, zone_name,
-                       is_list=False)
+    return _add_save_record(record, record_type, record_set_name, resource_group_name, zone_name,
+                            is_list=False)
 
 def add_dns_mx_record(resource_group_name, zone_name, record_set_name, preference, exchange):
     record = MxRecord(int(preference), exchange)
     record_type = 'mx'
-    return _add_record(record, record_type, record_set_name, resource_group_name, zone_name)
+    return _add_save_record(record, record_type, record_set_name, resource_group_name, zone_name)
 
 def add_dns_ns_record(resource_group_name, zone_name, record_set_name, dname):
     record = NsRecord(dname)
     record_type = 'ns'
-    return _add_record(record, record_type, record_set_name, resource_group_name, zone_name)
+    return _add_save_record(record, record_type, record_set_name, resource_group_name, zone_name)
 
 def add_dns_ptr_record(resource_group_name, zone_name, record_set_name, dname):
     record = PtrRecord(dname)
     record_type = 'ptr'
-    return _add_record(record, record_type, record_set_name, resource_group_name, zone_name)
+    return _add_save_record(record, record_type, record_set_name, resource_group_name, zone_name)
 
 def add_dns_soa_record(resource_group_name, zone_name, record_set_name, host, email,
                        serial_number, refresh_time, retry_time, expire_time, minimum_ttl):
     record = SoaRecord(host, email, serial_number, refresh_time, retry_time, expire_time,
                        minimum_ttl)
     record_type = 'soa'
-    return _add_record(record, record_type, record_set_name, resource_group_name, zone_name,
-                       is_list=False)
+    return _add_save_record(record, record_type, record_set_name, resource_group_name, zone_name,
+                            is_list=False)
 
 def add_dns_srv_record(resource_group_name, zone_name, record_set_name, priority, weight,
                        port, target):
     record = SrvRecord(priority, weight, port, target)
     record_type = 'srv'
-    return _add_record(record, record_type, record_set_name, resource_group_name, zone_name)
+    return _add_save_record(record, record_type, record_set_name, resource_group_name, zone_name)
 
 def add_dns_txt_record(resource_group_name, zone_name, record_set_name, value):
     record = TxtRecord(value)
     record_type = 'txt'
-    return _add_record(record, record_type, record_set_name, resource_group_name, zone_name)
+    return _add_save_record(record, record_type, record_set_name, resource_group_name, zone_name)
 
 def remove_dns_aaaa_record(resource_group_name, zone_name, record_set_name, ipv6_address):
     record = AaaaRecord(ipv6_address)
@@ -939,11 +1070,7 @@ def remove_dns_txt_record(resource_group_name, zone_name, record_set_name, value
     record_type = 'txt'
     return _remove_record(record, record_type, record_set_name, resource_group_name, zone_name)
 
-def _add_record(record, record_type, record_set_name, resource_group_name, zone_name,
-                property_name=None, is_list=True):
-    ncf = get_mgmt_service_client(DnsManagementClient).record_sets
-    record_set = ncf.get(resource_group_name, zone_name, record_set_name, record_type)
-
+def _add_record(record_set, record, record_type, property_name=None, is_list=False):
     record_property = property_name or (record_type + '_record' + ('s' if is_list else ''))
 
     if is_list:
@@ -954,6 +1081,13 @@ def _add_record(record, record_type, record_set_name, resource_group_name, zone_
         record_list.append(record)
     else:
         setattr(record_set, record_property, record)
+
+def _add_save_record(record, record_type, record_set_name, resource_group_name, zone_name,
+                     property_name=None, is_list=True):
+    ncf = get_mgmt_service_client(DnsManagementClient).record_sets
+    record_set = ncf.get(resource_group_name, zone_name, record_set_name, record_type)
+
+    _add_record(record_set, record, record_type, property_name, is_list)
 
     return ncf.create_or_update(resource_group_name, zone_name, record_set_name,
                                 record_type, record_set)
