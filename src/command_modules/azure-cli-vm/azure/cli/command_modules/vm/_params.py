@@ -202,4 +202,4 @@ for scope in ['vm create', 'vmss create']:
     register_folded_cli_argument(scope, 'network_security_group', 'Microsoft.Network/networkSecurityGroups', options_list=('--nsg',))
     register_folded_cli_argument(scope, 'load_balancer', 'Microsoft.Network/loadBalancers')
     register_cli_argument(scope, 'network_security_group_rule', nsg_rule_type, options_list=('--nsg-rule',))
-    register_extra_cli_argument(scope, 'image', options_list=('--image',), action=VMImageFieldAction, completer=get_urn_aliases_completion_list, default='Win2012R2Datacenter')
+    register_extra_cli_argument(scope, 'image', options_list=('--image',), action=VMImageFieldAction, completer=get_urn_aliases_completion_list, required=True)

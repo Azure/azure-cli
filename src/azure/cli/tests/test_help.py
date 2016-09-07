@@ -217,10 +217,8 @@ Command
 Arguments
     --foobar2 -fb2 [Required]: One line partial sentence.
         Paragraph(s).
-
     --foobar -fb             : One line partial sentence.  Values from: az vm list, default.
         Text, markdown, etc.
-
     --foobar3 -fb3           : The foobar3.
 
 Global Arguments
@@ -278,10 +276,8 @@ Command
 Arguments
     --foobar2 -fb2 [Required]: One line partial sentence.
         Paragraph(s).
-
     --foobar -fb             : One line partial sentence.  Values from: az vm list, default.
         Text, markdown, etc.
-
 
 Global Arguments
     --help -h                : Show this help message and exit.
