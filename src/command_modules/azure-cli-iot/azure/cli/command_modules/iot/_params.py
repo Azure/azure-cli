@@ -6,8 +6,7 @@
 
 from azure.cli.commands.parameters import (location_type, get_enum_choices)
 from azure.cli.commands import register_cli_argument
-from azure.mgmt.iothub.models.iot_hub_client_enums import \
-    IotHubSku
+from azure.mgmt.iothub.models.iot_hub_client_enums import IotHubSku
 
 
 # Arguments for 'iot hub create'
