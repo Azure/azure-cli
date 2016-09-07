@@ -82,7 +82,7 @@ def print_arguments(help_file):
                           for p in help_file.parameters)
     last_group_name = None
     for p in sorted(help_file.parameters,
-                    key=lambda p: str(p.group_name or 'A')
+                    key=lambda p: _get_group_priority(p.group_name)
                     + str(not p.required) + p.name):
         indent = 1
         required_text = required_tag if p.required else ''
@@ -385,6 +385,14 @@ def _load_help_file_from_string(text):
 def _get_single_metadata(cmd_table):
     assert len(cmd_table) == 1
     return next(metadata for _, metadata in cmd_table.items())
+
+def _get_group_priority(group_name):
+    priorities = {
+        'Resource Id Arguments': 10,
+        'Global Arguments': 1000,
+        }
+    key = priorities.get(group_name, 0)
+    return "%06d" % key
 
 class HelpAuthoringException(Exception):
     pass
