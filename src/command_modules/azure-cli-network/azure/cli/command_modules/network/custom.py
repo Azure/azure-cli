@@ -14,6 +14,7 @@ from azure.mgmt.network.models import \
      NetworkInterfaceIPConfiguration, Route, VpnClientRootCertificate, VpnClientConfiguration,
      AddressSpace, VpnClientRevokedCertificate, ExpressRouteCircuitAuthorization, SubResource)
 
+from azure.cli.commands.arm import parse_resource_id, is_valid_resource_id
 from azure.cli._util import CLIError
 from azure.cli.command_modules.network._factory import _network_client_factory
 from azure.cli.command_modules.network.mgmt_app_gateway.lib.operations.app_gateway_operations \
@@ -665,12 +666,26 @@ def update_vnet(instance, address_prefixes=None):
         instance.address_space.address_prefixes = address_prefixes
     return instance
 
+def _set_route_table(ncf, resource_group_name, route_table, subnet):
+    if route_table:
+        is_id = is_valid_resource_id(route_table)
+        rt = None
+        if is_id:
+            resource_id = parse_resource_id(route_table)
+            rt = ncf.route_tables.get(resource_id['resource_group'], resource_id['name'])
+        else:
+            rt = ncf.route_tables.get(resource_group_name, route_table)
+        subnet.route_table = rt
+    elif route_table == '':
+        subnet.route_table = None
+
 def create_subnet(resource_group_name, virtual_network_name, subnet_name,
-                  address_prefix='10.0.0.0/24', network_security_group=None):
+                  address_prefix='10.0.0.0/24', network_security_group=None,
+                  route_table=None):
     '''Create a virtual network (VNet) subnet
     :param str address_prefix: address prefix in CIDR format.
-    :param str network_security_group: attach with existing network security group,
-        both name or id are accepted.
+    :param str network_security_group: Name or ID of network security
+        group to associate with the subnet.
     '''
     ncf = _network_client_factory()
     subnet = Subnet(name=subnet_name, address_prefix=address_prefix)
@@ -678,11 +693,13 @@ def create_subnet(resource_group_name, virtual_network_name, subnet_name,
 
     if network_security_group:
         subnet.network_security_group = NetworkSecurityGroup(network_security_group)
+    _set_route_table(ncf, resource_group_name, route_table, subnet)
 
     return ncf.subnets.create_or_update(resource_group_name, virtual_network_name,
                                         subnet_name, subnet)
 
-def update_subnet(instance, address_prefix=None, network_security_group=None):
+def update_subnet(instance, resource_group_name, address_prefix=None, network_security_group=None,
+                  route_table=None):
     '''update existing virtual sub network
     :param str address_prefix: New address prefix in CIDR format, for example 10.0.0.0/24.
     :param str network_security_group: attach with existing network security group,
@@ -695,6 +712,8 @@ def update_subnet(instance, address_prefix=None, network_security_group=None):
         instance.network_security_group = NetworkSecurityGroup(network_security_group)
     elif network_security_group == '': #clear it
         instance.network_security_group = None
+
+    _set_route_table(_network_client_factory(), resource_group_name, route_table, instance)
 
     return instance
 update_nsg_rule.__doc__ = SecurityRule.__doc__
