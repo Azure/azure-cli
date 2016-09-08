@@ -310,7 +310,7 @@ def process_nic_create_namespace(namespace):
 
 def process_public_ip_create_namespace(namespace):
     if namespace.dns_name:
-        namespace.public_ip_address_type = 'dns'
+        namespace.dns_name_type = 'new'
 
 def load_cert_file(param_name):
     def load_cert_validator(namespace):

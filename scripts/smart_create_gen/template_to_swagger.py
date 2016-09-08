@@ -108,7 +108,7 @@ swagger_template_master = '''{{
           "{3}"
         ],
         "operationId": "{3}_CreateOrUpdate",
-        "description": "Create or update a virtual machine.",
+        "description": "Create a new {3}.",
         "parameters": [
           {{
             "name": "resourceGroupName",

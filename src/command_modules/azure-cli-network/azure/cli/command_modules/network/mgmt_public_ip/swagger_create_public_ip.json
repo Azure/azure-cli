@@ -39,7 +39,7 @@
           "PublicIp"
         ], 
         "operationId": "PublicIp_CreateOrUpdate", 
-        "description": "Create or update a virtual machine.", 
+        "description": "Create a new PublicIp.", 
         "parameters": [
           {
             "name": "resourceGroupName", 
@@ -145,7 +145,7 @@
           "type": "string", 
           "description": "URI referencing the template.", 
           "enum": [
-            "https://azuresdkci.blob.core.windows.net/templatehost/CreatePublicIp_2016-07-19/azuredeploy.json"
+            "https://azuresdkci.blob.core.windows.net/templatehost/CreatePublicIp_2016-09-14/azuredeploy.json"
           ]
         }, 
         "contentVersion": {
@@ -180,6 +180,11 @@
           "$ref": "#/definitions/DeploymentParameter_dnsNameType", 
           "x-ms-client-flatten": true
         }, 
+        "idleTimeout": {
+          "type": "object", 
+          "$ref": "#/definitions/DeploymentParameter_idleTimeout", 
+          "x-ms-client-flatten": true
+        }, 
         "location": {
           "type": "object", 
           "$ref": "#/definitions/DeploymentParameter_location", 
@@ -190,9 +195,19 @@
           "$ref": "#/definitions/DeploymentParameter_name", 
           "x-ms-client-flatten": true
         }, 
+        "reverseFqdn": {
+          "type": "object", 
+          "$ref": "#/definitions/DeploymentParameter_reverseFqdn", 
+          "x-ms-client-flatten": true
+        }, 
         "tags": {
           "type": "object", 
           "$ref": "#/definitions/DeploymentParameter_tags", 
+          "x-ms-client-flatten": true
+        }, 
+        "version": {
+          "type": "object", 
+          "$ref": "#/definitions/DeploymentParameter_version", 
           "x-ms-client-flatten": true
         }
       }, 
@@ -245,6 +260,16 @@
         }
       }
     }, 
+    "DeploymentParameter_idleTimeout": {
+      "properties": {
+        "value": {
+          "type": "integer", 
+          "description": "Idle timeout in minutes.", 
+          "x-ms-client-name": "idleTimeout", 
+          "default": "4"
+        }
+      }
+    }, 
     "DeploymentParameter_location": {
       "properties": {
         "value": {
@@ -266,12 +291,39 @@
         "value"
       ]
     }, 
+    "DeploymentParameter_reverseFqdn": {
+      "properties": {
+        "value": {
+          "type": "string", 
+          "description": "Reverse FQDN (fully qualified domain name).", 
+          "x-ms-client-name": "reverseFqdn"
+        }
+      }
+    }, 
     "DeploymentParameter_tags": {
       "properties": {
         "value": {
           "type": "object", 
           "description": "Tags object.", 
           "x-ms-client-name": "tags"
+        }
+      }
+    }, 
+    "DeploymentParameter_version": {
+      "properties": {
+        "value": {
+          "type": "string", 
+          "description": "IP address type.", 
+          "x-ms-client-name": "version", 
+          "enum": [
+            "ipv4", 
+            "ipv6"
+          ], 
+          "x-ms-enum": {
+            "name": "version", 
+            "modelAsString": false
+          }, 
+          "default": "ipv4"
         }
       }
     }, 
@@ -282,7 +334,7 @@
           "description": "Container URI of of the template.", 
           "x-ms-client-name": "_artifactsLocation", 
           "enum": [
-            "https://azuresdkci.blob.core.windows.net/templatehost/CreatePublicIp_2016-07-19"
+            "https://azuresdkci.blob.core.windows.net/templatehost/CreatePublicIp_2016-09-14"
           ]
         }
       }, 

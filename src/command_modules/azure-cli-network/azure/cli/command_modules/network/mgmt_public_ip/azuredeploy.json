@@ -38,6 +38,13 @@
         "description": "Whether to include a DNS entry or not."
       }
     },
+    "idleTimeout": {
+      "type": "int",
+      "metadata": {
+        "description": "Idle timeout in minutes."
+      },
+      "defaultValue": 4
+    },
     "location": {
       "type": "string",
       "defaultValue": "[resourceGroup().location]",
@@ -52,12 +59,30 @@
         "description": "Name of the Public IP address."
       }
     },
+    "reverseFqdn": {
+      "type": "string",
+      "metadata": {
+        "description": "Reverse FQDN (fully qualified domain name)."
+      },
+      "defaultValue": ""
+    },
     "tags": {
       "type": "object",
       "defaultValue": { },
       "metadata": {
         "description": "Tags object."
       }
+    },
+    "version": {
+      "type": "string",
+      "metadata": {
+        "description": "IP address type."
+      },
+      "defaultValue": "ipv4",
+      "allowedValues": [
+        "ipv4",
+        "ipv6"
+      ]
     }
   },
   "variables": {
@@ -65,13 +90,18 @@
     "deploymentName": "[concat(parameters('name'), 'IP')]",
     "ipConfiguration": {
       "new": {
+        "publicIPAddressVersion": "[parameters('version')]",
         "publicIPAllocationMethod": "[parameters('allocationMethod')]",
         "dnsSettings": {
-          "domainNameLabel": "[parameters('dnsName')]"
-        }
+          "domainNameLabel": "[parameters('dnsName')]",
+          "reverseFqdn": "[parameters('reverseFqdn')]"
+        },
+        "idleTimeoutInMinutes": "[parameters('idleTimeout')]"
       },
       "none": {
-        "publicIPAllocationMethod": "[parameters('allocationMethod')]"
+        "publicIPAddressVersion": "[parameters('version')]",
+        "publicIPAllocationMethod": "[parameters('allocationMethod')]",
+        "idleTimeoutInMinutes": "[parameters('idleTimeout')]"
       }
     }
   },
