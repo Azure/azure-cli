@@ -2,6 +2,13 @@
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
+    "dnsServers": {
+      "type": "array",
+      "defaultValue": [ ],
+      "metadata": {
+        "description": "List of DNS server IP addresses."
+      }
+    },
     "location": {
       "type": "string",
       "defaultValue": "[resourceGroup().location]",
@@ -20,7 +27,7 @@
       "type": "string",
       "defaultValue": "10.0.0.0/24",
       "metadata": {
-        "description": "IP address for the subnet."
+        "description": "IP address prefix for the subnet."
       }
     },
     "tags": {
@@ -45,10 +52,10 @@
     }
   },
   "variables": {
-    
+
   },
   "resources": [
-    
+
   ],
   "outputs": {
     "NewVNet": {
