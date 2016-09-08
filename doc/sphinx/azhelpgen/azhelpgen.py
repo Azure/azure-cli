@@ -79,7 +79,7 @@ class AzHelpGenDirective(Directive):
         node.document = self.state.document
         result = ViewList()
         for line in self.make_rst():
-            result.append(line.decode('utf-8', 'ignore'), '<azhelpgen>')
+            result.append(line, '<azhelpgen>')
 
         nested_parse_with_titles(self.state, result, node)
         return node.children
