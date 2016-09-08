@@ -145,7 +145,7 @@
           "type": "string", 
           "description": "URI referencing the template.", 
           "enum": [
-            "https://azuresdkci.blob.core.windows.net/templatehost/CreateVnet_2016-07-18/azuredeploy.json"
+            "https://azuresdkci.blob.core.windows.net/templatehost/CreateVnet_2016-09-07/azuredeploy.json"
           ]
         }, 
         "contentVersion": {
@@ -160,6 +160,11 @@
     }, 
     "VnetParameters": {
       "properties": {
+        "dnsServers": {
+          "type": "object", 
+          "$ref": "#/definitions/DeploymentParameter_dnsServers", 
+          "x-ms-client-flatten": true
+        }, 
         "location": {
           "type": "object", 
           "$ref": "#/definitions/DeploymentParameter_location", 
@@ -194,6 +199,18 @@
       "required": [
         "virtualNetworkName"
       ]
+    }, 
+    "DeploymentParameter_dnsServers": {
+      "properties": {
+        "value": {
+          "type": "array", 
+          "items": {
+            "type": "object"
+          }, 
+          "description": "List of DNS server IP addresses.", 
+          "x-ms-client-name": "dnsServers"
+        }
+      }
     }, 
     "DeploymentParameter_location": {
       "properties": {
