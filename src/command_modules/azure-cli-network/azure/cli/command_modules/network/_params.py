@@ -303,6 +303,7 @@ register_cli_argument('network vnet update', 'address_prefixes', nargs='+')
 register_cli_argument('network vnet subnet', 'address_prefix', metavar='PREFIX', help='the address prefix in CIDR format.')
 register_cli_argument('network vnet subnet', 'virtual_network_name', virtual_network_name_type)
 register_cli_argument('network vnet subnet', 'network_security_group', validator=validate_nsg_name_or_id)
+register_cli_argument('network vnet subnet', 'route_table', help='Name or ID of a route table to associate with the subnet.')
 
 lb_subresources = [
     {'name': 'address-pool', 'display': 'backend address pool', 'ref': 'backend_address_pools'},
