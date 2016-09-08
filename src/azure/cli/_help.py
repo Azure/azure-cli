@@ -388,10 +388,12 @@ def _get_single_metadata(cmd_table):
 
 def _get_group_priority(group_name):
     priorities = {
+        None: 0,
+        'Generic Update Arguments': 5,
         'Resource Id Arguments': 10,
         'Global Arguments': 1000,
         }
-    key = priorities.get(group_name, 0)
+    key = priorities.get(group_name, 1)
     return "%06d" % key
 
 class HelpAuthoringException(Exception):
