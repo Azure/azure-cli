@@ -10,10 +10,10 @@ import os
 import re
 import time
 
-from azure.cli._util import CLIError
-from azure.cli.application import APPLICATION
-from azure.cli.commands.parameters import get_one_of_subscription_locations
-from azure.cli.commands.arm import resource_id, resource_exists
+from azure.cli.core._util import CLIError
+from azure.cli.core.application import APPLICATION
+from azure.cli.core.commands.parameters import get_one_of_subscription_locations
+from azure.cli.core.commands.arm import resource_id, resource_exists
 
 from six.moves.urllib.request import urlopen #pylint: disable=import-error
 
@@ -69,7 +69,7 @@ class PrivateIpAction(argparse.Action): #pylint: disable=too-few-public-methods
             namespace.private_ip_address_allocation = 'static'
 
 def _handle_vm_nics(namespace):
-    from azure.cli.commands.client_factory import get_subscription_id
+    from azure.cli.core.commands.client_factory import get_subscription_id
     nics_value = namespace.network_interface_ids
     nics = []
 
@@ -113,7 +113,7 @@ def _resource_not_exists(resource_type):
 def _find_default_vnet(namespace):
     if not namespace.virtual_network and not namespace.virtual_network_type:
         from azure.mgmt.network import NetworkManagementClient
-        from azure.cli.commands.client_factory import get_mgmt_service_client
+        from azure.cli.core.commands.client_factory import get_mgmt_service_client
 
         client = get_mgmt_service_client(NetworkManagementClient).virtual_networks
 
@@ -131,7 +131,7 @@ def _find_default_vnet(namespace):
 def _find_default_storage_account(namespace):
     if not namespace.storage_account and not namespace.storage_account_type:
         from azure.mgmt.storage import StorageManagementClient
-        from azure.cli.commands.client_factory import get_mgmt_service_client
+        from azure.cli.core.commands.client_factory import get_mgmt_service_client
 
         client = get_mgmt_service_client(StorageManagementClient).storage_accounts
 

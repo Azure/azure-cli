@@ -14,10 +14,10 @@ import time
 
 from six import StringIO
 
-from azure.cli.utils.vcr_test_base import \
+from azure.cli.core.utils.vcr_test_base import \
     (VCRTestBase, ResourceGroupVCRTestBase, StorageAccountVCRTestBase, 
      JMESPathCheck, NoneCheck, BooleanCheck, StringCheck)
-from azure.cli._util import CLIError
+from azure.cli.core._util import CLIError
 from azure.common import AzureHttpError
 
 MOCK_ACCOUNT_KEY = '00000000'

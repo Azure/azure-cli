@@ -5,8 +5,8 @@
 # pylint: disable=no-self-use,too-many-arguments,no-member
 
 from __future__ import print_function
-import azure.cli._logging as _logging
-from azure.cli._util import CLIError
+import azure.cli.core._logging as _logging
+from azure.cli.core._util import CLIError
 from azure.cli.command_modules.iot.mgmt_iot_hub.lib.models.iot_hub_client_enums import \
     IotHubSku
 from azure.cli.command_modules.iot.mgmt_iot_hub.lib.models.iot_hub_description import \

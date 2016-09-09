@@ -9,10 +9,10 @@ import os
 import pip
 from six.moves import input #pylint: disable=redefined-builtin
 
-from azure.cli.parser import IncorrectUsageError
-from azure.cli.help_files import helps
-from azure.cli.utils.update_checker import check_for_component_update
-from azure.cli._util import CLIError
+from azure.cli.core.parser import IncorrectUsageError
+from azure.cli.core.help_files import helps
+from azure.cli.core.utils.update_checker import check_for_component_update
+from azure.cli.core._util import CLIError
 
 CLI_PACKAGE_NAME = 'azure-cli'
 COMPONENT_PREFIX = 'azure-cli-'

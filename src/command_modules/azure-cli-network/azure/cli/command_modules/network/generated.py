@@ -28,8 +28,8 @@ from azure.mgmt.trafficmanager import TrafficManagerManagementClient
 from azure.mgmt.dns.operations import RecordSetsOperations, ZonesOperations
 from azure.mgmt.dns import DnsManagementClient
 
-from azure.cli.commands.client_factory import get_mgmt_service_client
-from azure.cli.commands.arm import cli_generic_update_command
+from azure.cli.core.commands.client_factory import get_mgmt_service_client
+from azure.cli.core.commands.arm import cli_generic_update_command
 from azure.cli.command_modules.network.mgmt_app_gateway.lib.operations import AppGatewayOperations
 from azure.cli.command_modules.network.mgmt_app_gateway.lib \
     import AppGatewayCreationClient as AppGatewayClient
@@ -78,7 +78,7 @@ from azure.cli.command_modules.network.mgmt_dns_zone.lib \
     import DnsZoneCreationClient as DnsZoneClient
 
 
-from azure.cli.commands import DeploymentOutputLongRunningOperation, cli_command
+from azure.cli.core.commands import DeploymentOutputLongRunningOperation, cli_command
 
 from .custom import \
     (update_vnet, update_subnet, create_subnet,

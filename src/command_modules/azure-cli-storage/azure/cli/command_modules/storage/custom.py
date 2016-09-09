@@ -16,9 +16,10 @@ from azure.storage.file import FileService
 from azure.storage.table import TableService
 from azure.storage.queue import QueueService
 
+from azure.cli.core._util import CLIError
+
 from azure.cli.command_modules.storage._factory import \
     (storage_client_factory, generic_data_service_factory)
-from azure.cli._util import CLIError
 
 def _update_progress(current, total):
     if total:

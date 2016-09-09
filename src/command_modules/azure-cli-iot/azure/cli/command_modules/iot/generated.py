@@ -6,7 +6,7 @@
 
 from __future__ import print_function
 
-from azure.cli.commands import cli_command, LongRunningOperation
+from azure.cli.core.commands import cli_command, LongRunningOperation
 from ._factory import (iot_hub_service_factory,)
 from azure.cli.command_modules.iot.custom import \
     (iot_hub_create, iot_device_create)

@@ -5,7 +5,7 @@
 
 from __future__ import print_function
 
-from azure.cli.commands import cli_command
+from azure.cli.core.commands import cli_command
 
 from .custom import (login,
                      logout,

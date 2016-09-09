@@ -14,13 +14,13 @@ from azure.mgmt.network.models import \
      NetworkInterfaceIPConfiguration, Route, VpnClientRootCertificate, VpnClientConfiguration,
      AddressSpace, VpnClientRevokedCertificate, ExpressRouteCircuitAuthorization, SubResource)
 
-from azure.cli.commands.arm import parse_resource_id, is_valid_resource_id
-from azure.cli._util import CLIError
+from azure.cli.core.commands.arm import parse_resource_id, is_valid_resource_id
+from azure.cli.core._util import CLIError
 from azure.cli.command_modules.network._factory import _network_client_factory
 from azure.cli.command_modules.network.mgmt_app_gateway.lib.operations.app_gateway_operations \
     import AppGatewayOperations
 
-from azure.cli.commands.client_factory import get_mgmt_service_client
+from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from ._factory import _network_client_factory
 from azure.cli.command_modules.network.mgmt_nic.lib.operations.nic_operations import NicOperations
 from azure.mgmt.trafficmanager import TrafficManagerManagementClient

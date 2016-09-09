@@ -4,7 +4,9 @@
 #---------------------------------------------------------------------------------------------
 
 from six.moves import input, configparser #pylint: disable=redefined-builtin
-import azure.cli._logging as _logging
+
+import azure.cli.core._logging as _logging
+
 logger = _logging.get_az_logger(__name__)
 
 def prompt_y_n(msg, default=None):
