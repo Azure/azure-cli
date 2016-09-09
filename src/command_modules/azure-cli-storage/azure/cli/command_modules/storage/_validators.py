@@ -56,7 +56,7 @@ def validate_client_parameters(namespace):
     if not n.account_key:
         n.account_key = az_config.get('storage', 'key', None)
     if not n.sas_token:
-        n.sas_token = os.environ.get('AZURE_STORAGE_SAS_TOKEN')
+        n.sas_token = az_config.get('storage', 'sas_token', None)
 
     # if account name is specified but no key, attempt to query
     if n.account_name and not n.account_key:
