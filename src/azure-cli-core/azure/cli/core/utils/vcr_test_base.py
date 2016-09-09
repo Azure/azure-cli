@@ -229,7 +229,7 @@ class VCRTestBase(unittest.TestCase):#pylint: disable=too-many-instance-attribut
                 del response['headers'][key]
         return response
 
-    @mock.patch('azure.cli.core._util.handle_exception', _mock_handle_exceptions)
+    @mock.patch('azure.cli.main.handle_exception', _mock_handle_exceptions)
     @mock.patch('azure.cli.core.commands.client_factory._get_mgmt_service_client', _mock_get_mgmt_service_client) # pylint: disable=line-too-long
     def _execute_live_or_recording(self):
         #pylint: disable=no-member
@@ -253,7 +253,7 @@ class VCRTestBase(unittest.TestCase):#pylint: disable=too-many-instance-attribut
 
     @mock.patch('azure.cli.core._profile.Profile.load_cached_subscriptions', _mock_subscriptions)
     @mock.patch('azure.cli.core._profile.CredsCache.retrieve_token_for_user', _mock_user_access_token) # pylint: disable=line-too-long
-    @mock.patch('azure.cli.core._util.handle_exception', _mock_handle_exceptions)
+    @mock.patch('azure.cli.main.handle_exception', _mock_handle_exceptions)
     @mock.patch('azure.cli.core.commands.client_factory._get_mgmt_service_client', _mock_get_mgmt_service_client) # pylint: disable=line-too-long
     @mock.patch('msrestazure.azure_operation.AzureOperationPoller._delay', _mock_operation_delay)
     @mock.patch('time.sleep', _mock_operation_delay)
