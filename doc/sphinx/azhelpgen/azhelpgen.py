@@ -10,8 +10,8 @@ from docutils.statemachine import ViewList
 from sphinx.util.compat import Directive
 from sphinx.util.nodes import nested_parse_with_titles
 
-from azure.cli.application import APPLICATION, Configuration
-import azure.cli._help as _help
+from azure.cli.core.application import APPLICATION, Configuration
+import azure.cli.core._help as _help
 
 app = APPLICATION
 try:

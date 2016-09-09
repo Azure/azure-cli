@@ -11,9 +11,10 @@ environment:
 install:
   - SET PATH=%PYTHON%;%PYTHON%\Scripts;%PATH%
   - python -m pip install -r requirements.txt
-  - python -m pip install -e . # Install the CLI as a package
+  - python -m pip install -e src/azure-cli-core
   - python -m pip install sphinx
   - python scripts/command_modules/install.py # Install the command modules as packages
+  - python -m pip install -e src/azure-cli
 
 build_script:
   - ps: |
