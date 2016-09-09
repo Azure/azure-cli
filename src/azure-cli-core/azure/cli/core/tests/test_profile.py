@@ -9,7 +9,7 @@ import unittest
 import mock
 from azure.mgmt.resource.subscriptions.models import (SubscriptionState, Subscription,
                                                       SubscriptionPolicies, spendingLimit)
-from azure.cli.core._profile import Profile, CredsCache, SubscriptionFinder
+from azure.cli.core._profile import Profile, CredsCache, SubscriptionFinder, CredentialType
 from azure.cli.core._azure_env import ENV_DEFAULT
 
 class Test_Profile(unittest.TestCase):
@@ -253,7 +253,7 @@ class Test_Profile(unittest.TestCase):
                                                      False, ENV_DEFAULT)
         profile._set_subscriptions(consolidated)
         #action
-        cred, _, tenant_id = profile.get_login_credentials(for_graph_client=True)
+        cred, _, tenant_id = profile.get_login_credentials(credential_type=CredentialType.rbac)
         _, _ = cred._token_retriever()
         #verify
         mock_get_token.assert_called_once_with(mock.ANY, self.user1, self.tenant_id,

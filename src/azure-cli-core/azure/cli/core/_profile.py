@@ -8,6 +8,9 @@ import collections
 import json
 import os.path
 import errno
+
+from enum import Enum
+
 import adal
 from azure.cli.core._session import ACCOUNT
 from azure.cli.core._util import CLIError, get_file_json
@@ -63,6 +66,11 @@ def _delete_file(file_path):
         if e.errno != errno.ENOENT:
             raise
 
+class CredentialType(Enum): # pylint: disable=too-few-public-methods
+    management = get_env()[ENDPOINT_URLS.MANAGEMENT]
+    rbac = get_env()[ENDPOINT_URLS.ACTIVE_DIRECTORY_GRAPH_RESOURCE_ID]
+    keyvault = get_env()[ENDPOINT_URLS.KEY_VAULT]
+
 class Profile(object):
     def __init__(self, storage=None, auth_ctx_factory=None):
         self._storage = storage or ACCOUNT
@@ -72,6 +80,7 @@ class Profile(object):
         env = get_env()
         self._management_resource_uri = env[ENDPOINT_URLS.MANAGEMENT]
         self._graph_resource_uri = env[ENDPOINT_URLS.ACTIVE_DIRECTORY_GRAPH_RESOURCE_ID]
+        self._key_vault_resource_uri = env[ENDPOINT_URLS.KEY_VAULT]
 
     def find_subscriptions_on_login(self, #pylint: disable=too-many-arguments
                                     interactive,
@@ -218,18 +227,18 @@ class Profile(object):
             raise CLIError("Please run 'az account set' to select active account.")
         return result[0]
 
-    def get_login_credentials(self, for_graph_client=False, subscription_id=None):
+    def get_login_credentials(self, credential_type=CredentialType.management,
+                              subscription_id=None):
         account = self.get_subscription(subscription_id)
         user_type = account[_USER_ENTITY][_USER_TYPE]
         username_or_sp_id = account[_USER_ENTITY][_USER_NAME]
-        resource = self._graph_resource_uri if for_graph_client else self._management_resource_uri
         if user_type == _USER:
             token_retriever = lambda: self._creds_cache.retrieve_token_for_user(
-                username_or_sp_id, account[_TENANT_ID], resource)
+                username_or_sp_id, account[_TENANT_ID], credential_type.value)
             auth_object = AdalAuthentication(token_retriever)
         else:
             token_retriever = lambda: self._creds_cache.retrieve_token_for_service_principal(
-                username_or_sp_id, resource)
+                username_or_sp_id, credential_type.value)
             auth_object = AdalAuthentication(token_retriever)
 
         return (auth_object,
