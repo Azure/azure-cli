@@ -34,7 +34,7 @@ def _update_progress(current, total):
 # CUSTOM METHODS
 
 def list_storage_accounts(resource_group_name=None):
-    ''' List storage accounts. '''
+    """ List storage accounts within a subscription or resource group. """
     from azure.mgmt.storage.models import StorageAccount
     from msrestazure.azure_active_directory import UserPassCredentials
     scf = storage_client_factory()
@@ -44,30 +44,26 @@ def list_storage_accounts(resource_group_name=None):
         accounts = scf.storage_accounts.list()
     return list(accounts)
 
-def renew_storage_account_keys(resource_group_name, account_name, key='both'):
-    """ Regenerate one or both keys for a storage account. """
-    from azure.cli.command_modules.storage._params import storage_account_key_options
-    scf = storage_client_factory()
-    for k in storage_account_key_options[key]:
-        result = scf.storage_accounts.regenerate_key(
-            resource_group_name=resource_group_name,
-            account_name=account_name,
-            key_name=k)
-    return result
-
 def show_storage_account_usage():
-    ''' Show the current count and limit of the storage accounts under the subscription. '''
+    """ Show the current count and limit of the storage accounts under the subscription. """
     scf = storage_client_factory()
     return next((x for x in scf.usage.list().value if x.name.value == 'StorageAccounts'), None) #pylint: disable=no-member
 
-def show_storage_account_connection_string(resource_group_name, account_name, protocol='https'):
-    """ Show the connection string for a storage account."""
+# pylint: disable=line-too-long
+def show_storage_account_connection_string(
+        resource_group_name, account_name, protocol='https', blob_endpoint=None,
+        file_endpoint=None, queue_endpoint=None, table_endpoint=None, key_name='primary'):
+    """ Generate connection string for a storage account."""
     scf = storage_client_factory()
     keys = scf.storage_accounts.list_keys(resource_group_name, account_name).keys #pylint: disable=no-member
     connection_string = 'DefaultEndpointsProtocol={};AccountName={};AccountKey={}'.format(
         protocol,
         account_name,
-        keys[0].value) #pylint: disable=no-member
+        keys[0].value if key_name == 'primary' else keys[1].value) #pylint: disable=no-member
+    connection_string = '{}{}'.format(connection_string, ';BlobEndpoint={}'.format(blob_endpoint) if blob_endpoint else '')
+    connection_string = '{}{}'.format(connection_string, ';FileEndpoint={}'.format(file_endpoint) if file_endpoint else '')
+    connection_string = '{}{}'.format(connection_string, ';QueueEndpoint={}'.format(queue_endpoint) if queue_endpoint else '')
+    connection_string = '{}{}'.format(connection_string, ';TableEndpoint={}'.format(table_endpoint) if table_endpoint else '')
     return {'ConnectionString':connection_string}
 
 def create_storage_account(resource_group_name, account_name, sku, location,
@@ -103,7 +99,7 @@ def set_storage_account_properties(
     return scf.storage_accounts.update(resource_group_name, account_name, params)
 
 def upload_blob( # pylint: disable=too-many-locals
-        client, container_name, blob_name, file_path, blob_type='block',
+        client, container_name, blob_name, file_path, blob_type=None,
         content_settings=None, metadata=None, validate_content=False, maxsize_condition=None,
         max_connections=2, max_retries=5, retry_wait=1, lease_id=None, if_modified_since=None,
         if_unmodified_since=None, if_match=None, if_none_match=None, timeout=None):
@@ -172,16 +168,21 @@ def _get_service_container_type(client):
     else:
         raise ValueError('Unsupported service {}'.format(type(client)))
 
-def _get_acl(client, container_name):
+def _get_acl(client, container_name, **kwargs):
     container = _get_service_container_type(client)
-    return getattr(client, 'get_{}_acl'.format(container))(container_name)
+    get_acl = getattr(client, 'get_{}_acl'.format(container))
+    lease_id = kwargs.get('lease_id', None)
+    return get_acl(container_name, lease_id=lease_id) if lease_id else get_acl(container_name)
 
-def _set_acl(client, container_name, acl):
+def _set_acl(client, container_name, acl, **kwargs):
     container = _get_service_container_type(client)
-    return getattr(client, 'set_{}_acl'.format(container))(container_name, acl)
+    set_acl = getattr(client, 'set_{}_acl'.format(container))
+    lease_id = kwargs.get('lease_id', None)
+    return set_acl(container_name, acl, lease_id=lease_id) if lease_id \
+        else set_acl(container_name, acl)
 
 def create_acl_policy(
-        client, container_name, policy_name, start=None, expiry=None, permission=None):
+        client, container_name, policy_name, start=None, expiry=None, permission=None, **kwargs):
     ''' Create a stored access policy on the containing object '''
     from azure.storage.models import AccessPolicy
     # TODO: Remove workaround once SDK issue fixed (Pivotal #120873795)
@@ -189,27 +190,28 @@ def create_acl_policy(
         raise CLIError('Must specify at least one property (permission, start or expiry) '
                        'when creating an access policy.')
 
-    acl = _get_acl(client, container_name)
+    acl = _get_acl(client, container_name, **kwargs)
     acl[policy_name] = AccessPolicy(permission, expiry, start)
-    return _set_acl(client, container_name, acl)
+    return _set_acl(client, container_name, acl, **kwargs)
 
-def get_acl_policy(client, container_name, policy_name):
+def get_acl_policy(client, container_name, policy_name, **kwargs):
     ''' Show a stored access policy on a containing object '''
     from azure.storage.models import AccessPolicy
-    acl = _get_acl(client, container_name)
+    acl = _get_acl(client, container_name, **kwargs)
     return acl.get(policy_name)
 
-def list_acl_policies(client, container_name):
+def list_acl_policies(client, container_name, **kwargs):
     ''' List stored access policies on a containing object '''
-    return _get_acl(client, container_name)
+    return _get_acl(client, container_name, **kwargs)
 
-def set_acl_policy(client, container_name, policy_name, start=None, expiry=None, permission=None):
+def set_acl_policy(client, container_name, policy_name, start=None, expiry=None, permission=None,
+                   **kwargs):
     ''' Set a stored access policy on a containing object '''
     from azure.storage.models import AccessPolicy
     if not (start or expiry or permission):
         raise CLIError('Must specify at least one property when updating an access policy.')
 
-    acl = _get_acl(client, container_name)
+    acl = _get_acl(client, container_name, **kwargs)
     try:
         policy = acl[policy_name]
         policy.start = start or policy.start
@@ -217,13 +219,13 @@ def set_acl_policy(client, container_name, policy_name, start=None, expiry=None,
         policy.permission = permission or policy.permission
     except KeyError:
         raise CLIError('ACL does not contain {}'.format(policy_name))
-    return _set_acl(client, container_name, acl)
+    return _set_acl(client, container_name, acl, **kwargs)
 
-def delete_acl_policy(client, container_name, policy_name):
+def delete_acl_policy(client, container_name, policy_name, **kwargs):
     ''' Delete a stored access policy on a containing object '''
-    acl = _get_acl(client, container_name)
+    acl = _get_acl(client, container_name, **kwargs)
     del acl[policy_name]
-    return _set_acl(client, container_name, acl)
+    return _set_acl(client, container_name, acl, **kwargs)
 
 def insert_table_entity(client, table_name, entity, if_exists='fail', timeout=None):
     if if_exists == 'fail':

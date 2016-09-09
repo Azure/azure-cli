@@ -16,7 +16,7 @@ from azure.cli.core.commands.client_factory import get_data_service_client
 from azure.common import AzureMissingResourceHttpError
 from azure.mgmt.storage.models import SkuName, AccessTier, Kind, EncryptionServices
 from azure.storage.models import AccountPermissions
-from azure.storage.blob import PublicAccess, DeleteSnapshot, BlockBlobService, PageBlobService, AppendBlobService
+from azure.storage.blob import DeleteSnapshot, BlockBlobService, PageBlobService, AppendBlobService
 from azure.storage.blob.baseblobservice import BaseBlobService
 from azure.storage.blob.models import ContentSettings as BlobContentSettings, ContainerPermissions, BlobPermissions
 from azure.storage.file import FileService
@@ -29,8 +29,10 @@ from ._validators import \
     (datetime_type, datetime_string_type, get_file_path_validator, validate_metadata,
      get_permission_validator, table_permission_validator, get_permission_help_string,
      resource_type_type, services_type, ipv4_range_type, validate_entity,
-     validate_select, validate_source_uri,
+     validate_select, validate_source_uri, validate_blob_type, validate_included_datasets,
+     validate_custom_domain, validate_public_access, public_access_types,
      get_content_setting_validator, validate_encryption, validate_accept,
+     validate_key, storage_account_key_options,
      process_file_download_namespace, process_logging_update_namespace,
      process_metric_update_namespace)
 
@@ -121,21 +123,18 @@ def register_content_settings_argument(scope, settings_class, update):
     register_extra_cli_argument(scope, 'content_md5', default=None, help='The content\'s MD5 hash.')
 
 def register_source_uri_arguments(scope):
-    register_cli_argument(scope, 'copy_source', options_list=('--source-uri', '-u'), validator=validate_source_uri, required=False)
-    register_extra_cli_argument(scope, 'source_sas', default=None, help='The shared access signature for the source storage account.')
-    register_extra_cli_argument(scope, 'source_share', default=None, help='The share name for the source storage account.')
-    register_extra_cli_argument(scope, 'source_path', default=None, help='The file path for the source storage account.')
-    register_extra_cli_argument(scope, 'source_container', default=None, help='The container name for the source storage account.')
-    register_extra_cli_argument(scope, 'source_blob', default=None, help='The blob name for the source storage account.')
-    register_extra_cli_argument(scope, 'source_snapshot', default=None, help='The blob snapshot for the source storage account.')
-
+    register_cli_argument(scope, 'copy_source', options_list=('--source-uri', '-u'), validator=validate_source_uri, required=False, arg_group='Copy Source')
+    register_extra_cli_argument(scope, 'source_sas', default=None, help='The shared access signature for the source storage account.', arg_group='Copy Source')
+    register_extra_cli_argument(scope, 'source_share', default=None, help='The share name for the source storage account.', arg_group='Copy Source')
+    register_extra_cli_argument(scope, 'source_path', default=None, help='The file path for the source storage account.', arg_group='Copy Source')
+    register_extra_cli_argument(scope, 'source_container', default=None, help='The container name for the source storage account.', arg_group='Copy Source')
+    register_extra_cli_argument(scope, 'source_blob', default=None, help='The blob name for the source storage account.', arg_group='Copy Source')
+    register_extra_cli_argument(scope, 'source_snapshot', default=None, help='The blob snapshot for the source storage account.', arg_group='Copy Source')
 
 # CUSTOM CHOICE LISTS
 
 blob_types = {'block': BlockBlobService, 'page': PageBlobService, 'append': AppendBlobService}
-public_access_types = {'blob': PublicAccess.Blob, 'container': PublicAccess.Container}
 delete_snapshot_types = {'include': DeleteSnapshot.Include, 'only': DeleteSnapshot.Only}
-storage_account_key_options = {'both': ['key1', 'key2'], 'primary': ['key1'], 'secondary': ['key2']}
 table_payload_formats = {'none': TablePayloadFormat.JSON_NO_METADATA, 'minimal': TablePayloadFormat.JSON_MINIMAL_METADATA, 'full': TablePayloadFormat.JSON_FULL_METADATA}
 
 # ARGUMENT TYPES
@@ -156,17 +155,24 @@ register_cli_argument('storage', 'share_name', share_name_type)
 register_cli_argument('storage', 'table_name', table_name_type)
 register_cli_argument('storage', 'retry_wait', options_list=('--retry-interval',))
 register_cli_argument('storage', 'progress_callback', ignore_type)
-register_cli_argument('storage', 'if_modified_since', help='Alter only if modified since supplied UTC datetime (Y-m-d\'T\'H:M\'Z\')', type=datetime_type)
-register_cli_argument('storage', 'if_unmodified_since', help='Alter only if unmodified since supplied UTC datetime (Y-m-d\'T\'H:M\'Z\')', type=datetime_type)
 register_cli_argument('storage', 'metadata', nargs='+', help='Metadata in space-separated key=value pairs. This overwrites any existing metadata.', validator=validate_metadata)
 register_cli_argument('storage', 'timeout', help='Request timeout in seconds. Applies to each call to the service.', type=int)
+
+register_cli_argument('storage', 'if_modified_since', help='Alter only if modified since supplied UTC datetime (Y-m-d\'T\'H:M\'Z\')', type=datetime_type, arg_group='Pre-condition')
+register_cli_argument('storage', 'if_unmodified_since', help='Alter only if unmodified since supplied UTC datetime (Y-m-d\'T\'H:M\'Z\')', type=datetime_type, arg_group='Pre-condition')
+register_cli_argument('storage', 'if_match', arg_group='Pre-condition')
+register_cli_argument('storage', 'if_none_match', arg_group='Pre-condition')
+
 register_cli_argument('storage', 'container_name', container_name_type)
 
 for item in ['check-name', 'delete', 'list', 'show', 'show-usage', 'update', 'keys']:
     register_cli_argument('storage account {}'.format(item), 'account_name', account_name_type, options_list=('--name', '-n'))
 
-register_cli_argument('storage account connection-string', 'account_name', account_name_type, options_list=('--name', '-n'))
-register_cli_argument('storage account connection-string', 'protocol', help='The default endpoint protocol.', choices=['http', 'https'], type=str.lower)
+register_cli_argument('storage account show-connection-string', 'account_name', account_name_type, options_list=('--name', '-n'))
+register_cli_argument('storage account show-connection-string', 'protocol', help='The default endpoint protocol.', choices=['http', 'https'], type=str.lower)
+register_cli_argument('storage account show-connection-string', 'key_name', options_list=('--key',), help='The key to use.', choices=list(storage_account_key_options.keys()), type=str.lower)
+for item in ['blob', 'file', 'queue', 'table']:
+    register_cli_argument('storage account show-connection-string', '{}_endpoint'.format(item), help='Custom endpoint for {}s.'.format(item))
 
 register_cli_argument('storage account create', 'account_name', account_name_type, options_list=('--name', '-n'), completer=None)
 
@@ -175,28 +181,42 @@ register_cli_argument('storage account create', 'tags', tags_type)
 
 for item in ['create', 'update']:
     register_cli_argument('storage account {}'.format(item), 'sku', help='The storage account SKU. (Standard_LRS, Standard_GRS, Standard_RAGRS, Standard_ZRS, Premium_LRS)', completer=get_enum_type_completion_list(SkuName))
-    register_cli_argument('storage account {}'.format(item), 'access_tier', help='Required for StandardBlob accounts. The access tier used for billing. Cannot be set for StandardLRS, StandardGRS, StandardRAGRS, or PremiumLRS account types. (Hot, Cool)', completer=get_enum_type_completion_list(AccessTier))
     register_cli_argument('storage account {}'.format(item), 'encryption', nargs='+', help='Specifies which service(s) to encrypt.', choices=list(EncryptionServices._attribute_map.keys()), validator=validate_encryption) # pylint: disable=protected-access
 
-register_cli_argument('storage account create', 'custom_domain', help='User domain assigned to the storage account. Name is the CNAME source.')
-register_cli_argument('storage account update', 'custom_domain', help='User domain assigned to the storage account. Name is the CNAME source. Use "" to clear existing value.')
+register_cli_argument('storage account create', 'access_tier', help='Required for StandardBlob accounts. The access tier used for billing. Cannot be set for StandardLRS, StandardGRS, StandardRAGRS, or PremiumLRS account types. (Hot, Cool)', completer=get_enum_type_completion_list(AccessTier))
+register_cli_argument('storage account update', 'access_tier', help='The access tier used for billing StandardBlob accounts. Cannot be set for StandardLRS, StandardGRS, StandardRAGRS, or PremiumLRS account types. (Hot, Cool)', completer=get_enum_type_completion_list(AccessTier))
+register_cli_argument('storage account create', 'custom_domain', help='User domain assigned to the storage account. Name is the CNAME source.', validator=validate_custom_domain)
+register_cli_argument('storage account update', 'custom_domain', help='User domain assigned to the storage account. Name is the CNAME source. Use "" to clear existing value.', validator=validate_custom_domain)
+register_extra_cli_argument('storage account create', 'subdomain', options_list=('--use-subdomain',), help='Specify to enable indirect CNAME validation.', action='store_true')
+register_extra_cli_argument('storage account update', 'subdomain', options_list=('--use-subdomain',), help='Specify whether to use indirect CNAME validation.', choices=['true', 'false'], default=None)
 
 register_cli_argument('storage account update', 'tags', tags_type, default=None)
 
-register_cli_argument('storage account keys renew', 'key', help='The key(s) to renew.', choices=list(storage_account_key_options.keys()), type=str.lower)
+register_cli_argument('storage account keys renew', 'key_name', options_list=('--key',), help='The key to regenerate.', choices=list(storage_account_key_options.keys()), validator=validate_key, type=str.lower)
+register_cli_argument('storage account keys renew', 'account_name', account_name_type, id_part=None)
+
+register_cli_argument('storage blob', 'blob_name', blob_name_type, options_list=('--name', '-n'))
 
 for item in ['container', 'blob']:
     register_cli_argument('storage {} lease'.format(item), 'lease_duration', type=int)
     register_cli_argument('storage {} lease'.format(item), 'lease_break_period', type=int)
 
-register_cli_argument('storage blob', 'blob_name', blob_name_type, options_list=('--name', '-n'))
+register_cli_argument('storage blob lease', 'blob_name', blob_name_type)
 
+for source in ['destination', 'source']:
+    register_cli_argument('storage blob copy', '{}_if_modified_since'.format(source), arg_group='Pre-condition')
+    register_cli_argument('storage blob copy', '{}_if_unmodified_since'.format(source), arg_group='Pre-condition')
+    register_cli_argument('storage blob copy', '{}_if_match'.format(source), arg_group='Pre-condition')
+    register_cli_argument('storage blob copy', '{}_if_none_match'.format(source), arg_group='Pre-condition')
 register_cli_argument('storage blob copy', 'container_name', container_name_type, options_list=('--destination-container', '-c'))
 register_cli_argument('storage blob copy', 'blob_name', blob_name_type, options_list=('--destination-blob', '-b'), help='Name of the destination blob. If the exists, it will be overwritten.')
+register_cli_argument('storage blob copy', 'source_lease_id', arg_group='Copy Source')
 
 register_cli_argument('storage blob delete', 'delete_snapshots', choices=list(delete_snapshot_types.keys()), type=str.lower)
 
 register_cli_argument('storage blob exists', 'blob_name', required=True)
+
+register_cli_argument('storage blob list', 'include', help='Specifies additional datasets to include: (c)opy-info, (m)etadata, (s)napshots. Can be combined.', validator=validate_included_datasets)
 
 for item in ['download', 'upload']:
     register_cli_argument('storage blob {}'.format(item), 'file_path', options_list=('--file', '-f'))
@@ -208,7 +228,7 @@ for item in ['download', 'upload']:
 for item in ['update', 'upload']:
     register_content_settings_argument('storage blob {}'.format(item), BlobContentSettings, item == 'update')
 
-register_cli_argument('storage blob upload', 'blob_type', options_list=('--type', '-t'), choices=list(blob_types.keys()), type=str.lower)
+register_cli_argument('storage blob upload', 'blob_type', help="Defaults to 'page' for *.vhd files, or 'block' otherwise.", options_list=('--type', '-t'), choices=list(blob_types.keys()), type=str.lower, validator=validate_blob_type)
 register_cli_argument('storage blob upload', 'maxsize_condition', help='The max length in bytes permitted for an append blob.')
 register_cli_argument('storage blob upload', 'validate_content', help='Specifies that an MD5 hash shall be calculated for each chunk of the blob and verified by the service when the chunk has arrived.')
 
@@ -217,10 +237,10 @@ for item in ['file', 'blob']:
     register_source_uri_arguments('storage {} copy start'.format(item))
 
 register_cli_argument('storage container', 'container_name', container_name_type, options_list=('--name', '-n'))
+register_cli_argument('storage container', 'public_access', choices=list(public_access_types.keys()), validator=validate_public_access, help='Specifies whether data in the container may be accessed publically. By default, container data is private ("off") to the account owner. Use "blob" to allow public read access for blobs. Use "container" to allow public read and list access to the entire container.')
 
 register_cli_argument('storage container create', 'container_name', container_name_type, options_list=('--name', '-n'), completer=None)
 register_cli_argument('storage container create', 'fail_on_exist', help='Throw an exception if the container already exists.')
-register_cli_argument('storage container create', 'public_access', choices=list(public_access_types.keys()), type=str.lower, help='Specifies whether data in the container may be accessed publically. By default, container data is private to the account owner. Use "blob" to allow public read access for blobs. Use "container" to allow public read and list access to the entire container.')
 
 register_cli_argument('storage container delete', 'fail_not_exist', help='Throw an exception if the container does not exist.')
 
@@ -228,8 +248,14 @@ register_cli_argument('storage container exists', 'blob_name', ignore_type)
 register_cli_argument('storage container exists', 'blob_name', ignore_type)
 register_cli_argument('storage container exists', 'snapshot', ignore_type)
 
+register_cli_argument('storage container set-permission', 'signed_identifiers', ignore_type)
+
+register_cli_argument('storage container lease', 'container_name', container_name_type)
+
 register_cli_argument('storage container policy', 'container_name', container_name_type)
 register_cli_argument('storage container policy', 'policy_name', options_list=('--name', '-n'), help='The stored access policy name.', completer=get_storage_acl_name_completion_list(BaseBlobService, 'container_name', 'get_container_acl'))
+for item in ['create', 'delete', 'list', 'show', 'update']:
+    register_extra_cli_argument('storage container policy {}'.format(item), 'lease_id', options_list=('--lease-id',), help='The container lease ID.')
 
 register_cli_argument('storage share', 'share_name', share_name_type, options_list=('--name', '-n'))
 
@@ -342,7 +368,8 @@ register_cli_argument('storage account generate-sas', 'services', help='The stor
 register_cli_argument('storage account generate-sas', 'resource_types', help='The resource types the SAS is applicable for. Allowed values: (s)ervice (c)ontainer (o)bject. Can be combined.', type=resource_type_type)
 register_cli_argument('storage account generate-sas', 'expiry', help='Specifies the UTC datetime (Y-m-d\'T\'H:M\'Z\') at which the SAS becomes invalid.', type=datetime_string_type)
 register_cli_argument('storage account generate-sas', 'start', help='Specifies the UTC datetime (Y-m-d\'T\'H:M\'Z\') at which the SAS becomes valid. Defaults to the time of the request.', type=datetime_string_type)
-register_cli_argument('storage account generate-sas', 'account_name', account_name_type, options_list=('--account-name',), help='Storage account name. Must be used in conjunction with either storage account key or a SAS token. Var: AZURE_STORAGE_ACCOUNT')
+register_cli_argument('storage account generate-sas', 'account_name', account_name_type, options_list=('--account-name',), help='Storage account name. Must be used in conjunction with either storage account key or a SAS token. Environment Variable: AZURE_STORAGE_ACCOUNT')
+register_cli_argument('storage account generate-sas', 'sas_token', ignore_type)
 
 register_cli_argument('storage logging show', 'services', help='The storage services from which to retrieve logging info: (b)lob (q)ueue (t)able. Can be combined.')
 
