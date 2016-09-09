@@ -243,7 +243,7 @@ def cli_generic_update_command(name, getter, setter, factory=None, setter_arg_na
                     add_properties(instance, arg_values)
                 except ValueError:
                     raise CLIError('--add should be of the form:'
-                                   ' --add property.list key1=value1 key2=value2')
+                                   ' --add property.list <key=value, scalar, [], {}>')
             elif arg_type == '--remove':
                 try:
                     remove_properties(instance, arg_values)
@@ -305,6 +305,7 @@ def set_properties(instance, expression):
     except: #pylint:disable=bare-except
         pass
 
+    # name should be the raw casing as it could refer to a property OR a dictionary key
     name, path = _get_name_path(key)
     parent_name = path[-1] if path else 'root'
     root = instance
@@ -323,14 +324,17 @@ def set_properties(instance, expression):
             instance[name] = value
         elif isinstance(instance, list):
             show_options(instance, name, key.split('.'))
-        elif hasattr(instance, name):
-            setattr(instance, name, value)
         else:
-            logger.warning(
-                "Property '%s' not found on %s. Update may be ignored.", name, parent_name)
-            setattr(instance, name, value)
+            # must be a property name
+            name = make_snake_case(name)
+            if hasattr(instance, name):
+                setattr(instance, name, value)
+            else:
+                logger.warning(
+                    "Property '%s' not found on %s. Update may be ignored.", name, parent_name)
+                setattr(instance, name, value)
     except IndexError:
-        raise CLIError('index {} doesn\'t exist on {}'.format(index_value, make_camel_case(name)))
+        raise CLIError('index {} doesn\'t exist on {}'.format(index_value, name))
     except (AttributeError, KeyError):
         show_options(instance, name, key.split('.'))
 
@@ -344,10 +348,30 @@ def add_properties(instance, argument_values):
         set_properties(parent, '{}=[]'.format(list_attribute_path[-1]))
         list_to_add_to = _find_property(instance, list_attribute_path)
 
-    new_value = {}
-    for expression in argument_values:
-        set_properties(new_value, expression)
-    list_to_add_to.append(new_value)
+    dict_entry = {}
+    for argument in argument_values:
+        if '=' in argument:
+            # consecutive key=value entries get added to the same dictionary
+            split_arg = argument.split('=', 1)
+            dict_entry[split_arg[0]] = split_arg[1]
+        else:
+            if dict_entry:
+                # if an argument is supplied that is not key=value, append any dictionary entry
+                # to the list and reset. A subsequent key=value pair will be added to another
+                # dictionary.
+                list_to_add_to.append(dict_entry)
+                dict_entry = {}
+            if argument == '[]':
+                list_to_add_to.append([])
+            elif argument == '{}':
+                list_to_add_to.append({})
+            else:
+                # should handle all other kinds of scalars
+                list_to_add_to.append(argument)
+
+    # if only key=value pairs used, must check at the end to append the dictionary
+    if dict_entry:
+        list_to_add_to.append(dict_entry)
 
 def remove_properties(instance, argument_values):
     # The first argument indicates the path to the collection to add to.
@@ -370,12 +394,11 @@ def remove_properties(instance, argument_values):
             list_to_remove_from.pop(int(list_index))
         except IndexError:
             raise CLIError('index {} doesn\'t exist on {}'
-                           .format(list_index,
-                                   make_camel_case(list_attribute_path[-1])))
+                           .format(list_index, list_attribute_path[-1]))
 
 def show_options(instance, part, path):
     options = instance.__dict__ if hasattr(instance, '__dict__') else instance
-    parent = make_camel_case('.'.join(path[:-1]).replace('.[', '['))
+    parent = '.'.join(path[:-1]).replace('.[', '[')
     if isinstance(options, dict):
         options = options.keys()
         options = sorted([make_camel_case(x) for x in options])
@@ -384,7 +407,7 @@ def show_options(instance, part, path):
     else:
         options = sorted([make_camel_case(x) for x in options])
     raise CLIError('Couldn\'t find "{}" in "{}".  Available options: {}'
-                   .format(make_camel_case(part), parent, options))
+                   .format(part, parent, options))
 
 snake_regex_1 = re.compile('(.)([A-Z][a-z]+)')
 snake_regex_2 = re.compile('([a-z0-9])([A-Z])')
@@ -400,15 +423,16 @@ def make_camel_case(s):
         return parts[0].lower() + ''.join(p.capitalize() for p in parts[1:])
     return s
 
+internal_path_regex = r'(\[.*?\])|([^.]+)'
 def _get_internal_path(path):
     # to handle indexing in the same way as other dot qualifiers,
     # we split paths like foo[0][1] into foo.[0].[1]
-    _path = path.split('.') \
-        if '.[' in path \
-        else path.replace('[', '.[').split('.')
+    path = path.replace('.[', '[').replace('[', '.[')
+    _path = re.findall(internal_path_regex, path)
     final_paths = []
     for x in _path:
-        final_paths.append(x if x.startswith('[') else make_snake_case(x))
+        comp = x[0] or x[1]
+        final_paths.append(comp if comp.startswith('[') else comp)
     return final_paths
 
 def _get_name_path(path):
@@ -421,27 +445,34 @@ def _update_instance(instance, part, path):
         if index:
             if '=' in index.group(1):
                 key, value = index.group(1).split('=')
-                matches = [x for x in instance if isinstance(x, dict) and x.get(key, None) == value]
+                matches = []
+                for x in instance:
+                    if isinstance(x, dict) and x.get(key, None) == value:
+                        matches.append(x)
+                    elif not isinstance(x, dict):
+                        key = make_snake_case(key)
+                        if hasattr(x, key) and getattr(x, key, None) == value:
+                            matches.append(x)
                 if len(matches) == 1:
                     instance = matches[0]
                 elif len(matches) > 1:
                     raise CLIError("non-unique key '{}' found multiple matches on {}. "
                                    "Key must be unique.".format(
-                                       key, make_camel_case(path[-2])))
+                                       key, path[-2]))
                 else:
                     raise CLIError("item with value '{}' doesn\'t exist for key '{}' on {}".format(
-                        value, key, make_camel_case(path[-2])))
+                        value, key, path[-2]))
             else:
                 try:
                     index_value = int(index.group(1))
                     instance = instance[index_value]
                 except IndexError:
                     raise CLIError('index {} doesn\'t exist on {}'.format(
-                        index_value, make_camel_case(path[-2])))
+                        index_value, path[-2]))
         elif isinstance(instance, dict):
             instance = instance[part]
         else:
-            instance = getattr(instance, part)
+            instance = getattr(instance, make_snake_case(part))
     except (AttributeError, KeyError):
         show_options(instance, part, path)
     return instance
