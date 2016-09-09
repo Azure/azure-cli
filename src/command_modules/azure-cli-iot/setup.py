@@ -27,6 +27,7 @@ CLASSIFIERS = [
 
 DEPENDENCIES = [
     'azure==2.0.0rc5',
+    'azure-mgmt-iothub==0.1.0',
     'azure-cli-core',
 ]
 
@@ -50,10 +51,6 @@ setup(
     ],
     packages=[
         'azure.cli.command_modules.iot',
-        'azure.cli.command_modules.iot.mgmt_iot_hub',
-        'azure.cli.command_modules.iot.mgmt_iot_hub.lib',
-        'azure.cli.command_modules.iot.mgmt_iot_hub.lib.models',
-        'azure.cli.command_modules.iot.mgmt_iot_hub.lib.operations',
         'azure.cli.command_modules.iot.mgmt_iot_hub_device',
         'azure.cli.command_modules.iot.mgmt_iot_hub_device.lib',
         'azure.cli.command_modules.iot.mgmt_iot_hub_device.lib.models',
