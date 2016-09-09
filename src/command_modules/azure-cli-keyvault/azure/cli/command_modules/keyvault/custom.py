@@ -11,8 +11,8 @@ from azure.mgmt.keyvault.models import (VaultCreateOrUpdateParameters,
                                         SkuName)
 from azure.graphrbac import GraphRbacManagementClient
 
-from azure.cli._util import CLIError
-import azure.cli._logging as _logging
+from azure.cli.core._util import CLIError
+import azure.cli.core._logging as _logging
 
 logger = _logging.get_az_logger(__name__)
 
@@ -79,7 +79,7 @@ def create_keyvault(client, resource_group_name, vault_name, location, #pylint:d
                     enabled_for_template_deployment=None,
                     no_self_perms=False,
                     tags=None):
-    from azure.cli._profile import Profile
+    from azure.cli.core._profile import Profile
     profile = Profile()
     cred, _, tenant_id = profile.get_login_credentials(for_graph_client=True)
     graph_client = GraphRbacManagementClient(cred, tenant_id)
@@ -129,7 +129,7 @@ create_keyvault.__doc__ = VaultProperties.__doc__
 
 def _object_id_args_helper(object_id, spn, upn):
     if not object_id:
-        from azure.cli._profile import Profile
+        from azure.cli.core._profile import Profile
         profile = Profile()
         cred, _, tenant_id = profile.get_login_credentials(for_graph_client=True)
         graph_client = GraphRbacManagementClient(cred, tenant_id)

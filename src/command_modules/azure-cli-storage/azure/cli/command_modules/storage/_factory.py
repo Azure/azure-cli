@@ -12,8 +12,8 @@ from azure.storage.table import TableService
 from azure.storage.queue import QueueService
 from azure.storage._error import _ERROR_STORAGE_MISSING_INFO
 
-from azure.cli.commands.client_factory import get_mgmt_service_client, get_data_service_client
-from azure.cli.commands import CLIError
+from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_data_service_client
+from azure.cli.core.commands import CLIError
 from ._params import blob_types
 
 NO_CREDENTIALS_ERROR_MESSAGE = """

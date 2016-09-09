@@ -11,9 +11,9 @@ import os
 import re
 import tempfile
 
-from azure.cli.commands.arm import resource_id
-from azure.cli.commands.client_factory import get_subscription_id
-from azure.cli.utils.vcr_test_base import (VCRTestBase, ResourceGroupVCRTestBase, JMESPathCheck,
+from azure.cli.core.commands.arm import resource_id
+from azure.cli.core.commands.client_factory import get_subscription_id
+from azure.cli.core.utils.vcr_test_base import (VCRTestBase, ResourceGroupVCRTestBase, JMESPathCheck,
                                            NoneCheck, MOCKED_SUBSCRIPTION_ID)
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))

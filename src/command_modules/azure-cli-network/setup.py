@@ -25,6 +25,7 @@ CLASSIFIERS = [
 
 DEPENDENCIES = [
     'azure==2.0.0rc5',
+    'azure-cli-core',
     'azure-mgmt-trafficmanager==0.30.0rc5',
     'azure-mgmt-dns==0.30.0rc5'
 ]

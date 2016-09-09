@@ -3,12 +3,12 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 #---------------------------------------------------------------------------------------------
 
-from azure.cli.commands import register_cli_argument
-from azure.cli.commands.parameters import tags_type
+from azure.cli.core.commands import register_cli_argument
+from azure.cli.core.commands.parameters import tags_type
 
 from azure.mgmt.web import WebSiteManagementClient
-from azure.cli.commands.client_factory import get_mgmt_service_client
-from azure.cli.commands.template_create import register_folded_cli_argument
+from azure.cli.core.commands.client_factory import get_mgmt_service_client
+from azure.cli.core.commands.template_create import register_folded_cli_argument
 
 # FACTORIES
 

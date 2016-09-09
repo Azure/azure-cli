@@ -20,17 +20,17 @@ from azure.mgmt.compute.models import (DataDisk,
                                        VirtualMachineScaleSetExtension,
                                        VirtualMachineScaleSetExtensionProfile)
 from azure.mgmt.compute.models.compute_management_client_enums import DiskCreateOptionTypes
-from azure.cli.commands import LongRunningOperation
-from azure.cli.commands.arm import cli_generic_update_command
-from azure.cli.commands.client_factory import get_mgmt_service_client, get_data_service_client
-from azure.cli._util import CLIError
+from azure.cli.core.commands import LongRunningOperation
+from azure.cli.core.commands.arm import cli_generic_update_command
+from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_data_service_client
+from azure.cli.core._util import CLIError
+import azure.cli.core._logging as _logging
 from ._vm_utils import read_content_if_is_file, load_json, get_default_linux_diag_config
 
 from ._actions import (load_images_from_aliases_doc,
                        load_extension_images_thru_services,
                        load_images_thru_services)
 from ._factory import _compute_client_factory
-import azure.cli._logging as _logging
 
 logger = _logging.get_az_logger(__name__)
 
@@ -796,7 +796,7 @@ def vm_open_port(resource_group_name, vm_name, network_security_group_name=None,
     if not apply_to_subnet:
         nsg = nic.network_security_group
     else:
-        from azure.cli.commands.arm import parse_resource_id
+        from azure.cli.core.commands.arm import parse_resource_id
         subnet_id = parse_resource_id(nic.ip_configurations[0].subnet.id)
         subnet = network.subnets.get(resource_group_name,
                                      subnet_id['name'],

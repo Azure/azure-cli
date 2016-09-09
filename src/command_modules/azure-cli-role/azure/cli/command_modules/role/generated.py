@@ -8,8 +8,8 @@ from __future__ import print_function
 
 from azure.mgmt.authorization.operations import RoleDefinitionsOperations
 from azure.graphrbac.operations import UsersOperations, GroupsOperations
-from azure.cli.commands import cli_command
-from azure.cli.commands.arm import cli_generic_update_command
+from azure.cli.core.commands import cli_command
+from azure.cli.core.commands.arm import cli_generic_update_command
 
 from .custom import (create_role_assignment, list_role_assignments, delete_role_assignments,
                      list_role_definitions, delete_role_definition, create_role_definition,

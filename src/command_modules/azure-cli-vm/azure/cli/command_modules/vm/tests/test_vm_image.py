@@ -7,7 +7,7 @@ import os.path
 import unittest
 import mock
 
-import azure.cli.application as application
+import azure.cli.core.application as application
 
 class TestVMImage(unittest.TestCase):
     @mock.patch('azure.cli.command_modules.vm.custom.urlopen', autospec=True)

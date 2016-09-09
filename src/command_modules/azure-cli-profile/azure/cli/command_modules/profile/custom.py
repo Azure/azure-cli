@@ -7,9 +7,9 @@
 
 from adal.adal_error import AdalError
 
-from azure.cli._profile import Profile
-from azure.cli._util import CLIError
-import azure.cli._logging as _logging
+from azure.cli.core._profile import Profile
+from azure.cli.core._util import CLIError
+import azure.cli.core._logging as _logging
 
 logger = _logging.get_az_logger(__name__)
 
@@ -68,6 +68,6 @@ def logout(username=None):
     profile.logout(username)
 
 def list_locations():
-    from azure.cli.commands.parameters import get_subscription_locations
+    from azure.cli.core.commands.parameters import get_subscription_locations
     return get_subscription_locations()
 

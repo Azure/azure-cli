@@ -18,11 +18,11 @@ from azure.mgmt.resource.resources.models import GenericResource
 
 from azure.mgmt.resource.policy.models import (PolicyAssignment, PolicyDefinition)
 
-from azure.cli.parser import IncorrectUsageError
-from azure.cli._util import CLIError, get_file_json
-import azure.cli._logging as _logging
-from azure.cli.commands.client_factory import get_mgmt_service_client
-from azure.cli.commands.arm import is_valid_resource_id, parse_resource_id
+from azure.cli.core.parser import IncorrectUsageError
+from azure.cli.core._util import CLIError, get_file_json
+import azure.cli.core._logging as _logging
+from azure.cli.core.commands.client_factory import get_mgmt_service_client
+from azure.cli.core.commands.arm import is_valid_resource_id, parse_resource_id
 
 from ._factory import _resource_client_factory, _resource_policy_client_factory
 
@@ -266,7 +266,7 @@ def move_resource(ids, destination_group, destination_subscription_id=None):
     :param destination_group: the destination resource group name
     :param destination_subscription_id: the destination subscription identifier
     '''
-    from azure.cli.commands.arm import resource_id
+    from azure.cli.core.commands.arm import resource_id
 
     #verify all resource ids are valid and under the same group
     resources = []

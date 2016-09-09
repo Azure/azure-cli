@@ -7,7 +7,7 @@ import os
 import time
 # AZURE CLI RESOURCE TEST DEFINITIONS
 
-from azure.cli.utils.vcr_test_base import (VCRTestBase, JMESPathCheck, NoneCheck, BooleanCheck,
+from azure.cli.core.utils.vcr_test_base import (VCRTestBase, JMESPathCheck, NoneCheck, BooleanCheck,
                                            ResourceGroupVCRTestBase, MOCKED_SUBSCRIPTION_ID)
 
 #pylint: disable=method-hidden
