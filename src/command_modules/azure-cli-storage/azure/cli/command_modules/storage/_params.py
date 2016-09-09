@@ -168,11 +168,11 @@ register_cli_argument('storage', 'container_name', container_name_type)
 for item in ['check-name', 'delete', 'list', 'show', 'show-usage', 'update', 'keys']:
     register_cli_argument('storage account {}'.format(item), 'account_name', account_name_type, options_list=('--name', '-n'))
 
-register_cli_argument('storage account get-connection-string', 'account_name', account_name_type, options_list=('--name', '-n'))
-register_cli_argument('storage account get-connection-string', 'protocol', help='The default endpoint protocol.', choices=['http', 'https'], type=str.lower)
-register_cli_argument('storage account get-connection-string', 'key_name', options_list=('--key',), help='The key to use.', choices=list(storage_account_key_options.keys()), type=str.lower)
+register_cli_argument('storage account show-connection-string', 'account_name', account_name_type, options_list=('--name', '-n'))
+register_cli_argument('storage account show-connection-string', 'protocol', help='The default endpoint protocol.', choices=['http', 'https'], type=str.lower)
+register_cli_argument('storage account show-connection-string', 'key_name', options_list=('--key',), help='The key to use.', choices=list(storage_account_key_options.keys()), type=str.lower)
 for item in ['blob', 'file', 'queue', 'table']:
-    register_cli_argument('storage account get-connection-string', '{}_endpoint'.format(item), help='Custom endpoint for {}s.'.format(item))
+    register_cli_argument('storage account show-connection-string', '{}_endpoint'.format(item), help='Custom endpoint for {}s.'.format(item))
 
 register_cli_argument('storage account create', 'account_name', account_name_type, options_list=('--name', '-n'), completer=None)
 

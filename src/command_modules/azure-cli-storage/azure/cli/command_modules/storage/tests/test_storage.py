@@ -28,7 +28,7 @@ def _get_connection_string(test):
         test.set_env('AZURE_STORAGE_CONNECTION_STRING', 'DefaultEndpointsProtocol=https;'
                      'AccountName={};AccountKey={}'.format(test.account, MOCK_ACCOUNT_KEY))
     else:
-        connection_string = test.cmd('storage account get-connection-string -g {} --name {} -o json'
+        connection_string = test.cmd('storage account show-connection-string -g {} --name {} -o json'
             .format(test.resource_group, test.account))['ConnectionString']
         test.set_env('AZURE_STORAGE_CONNECTION_STRING', connection_string)
 
@@ -68,7 +68,7 @@ class StorageAccountScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck('resourceGroup', rg)
         ])
         s.cmd('storage account show-usage', checks=JMESPathCheck('name.value', 'StorageAccounts'))
-        s.cmd('storage account get-connection-string -g {} -n {} --protocol http'.format(rg, account), checks=[
+        s.cmd('storage account show-connection-string -g {} -n {} --protocol http'.format(rg, account), checks=[
             JMESPathCheck("contains(ConnectionString, 'https')", False),
             JMESPathCheck("contains(ConnectionString, '{}')".format(account), True)
         ])
