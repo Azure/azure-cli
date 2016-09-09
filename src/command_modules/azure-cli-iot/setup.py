@@ -28,6 +28,7 @@ CLASSIFIERS = [
 DEPENDENCIES = [
     'azure==2.0.0rc5',
     'azure-mgmt-iothub==0.1.0',
+    'azure-cli-core',
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:

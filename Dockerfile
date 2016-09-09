@@ -13,18 +13,18 @@ COPY . /azure-cli
 
 RUN pip install --upgrade pip
 
-# Build and install CLI
-RUN python setup.py sdist
-ENV AZURE_CLI_DISABLE_POST_INSTALL 1
-RUN pip install -f dist/ azure-cli
-
-# Build and install all command modules
-RUN for d in src/command_modules/azure-cli-*/; \
+# 1. Build packages and store in tmp dir
+# 2. Install the cli
+# 3. Install the other command modules that weren't included
+RUN TMP_PKG_DIR=$(mktemp -d); \
+    for d in src/azure-cli src/azure-cli-core src/command_modules/azure-cli-*/; \
+    do cd $d; python setup.py sdist -d $TMP_PKG_DIR; cd -; \
+    done; \
+    pip install azure-cli -f $TMP_PKG_DIR;\
+    for d in src/command_modules/azure-cli-*/; \
     do MODULE_NAME=$(echo $d | cut -d '/' -f 3); \
-    cd $d; python setup.py sdist; \
-    pip install -f dist/ $MODULE_NAME; \
-    cd -; \
-    done
+    pip install $MODULE_NAME -f $TMP_PKG_DIR; \
+    done;
 
 # Enable tab completion
 RUN echo "\

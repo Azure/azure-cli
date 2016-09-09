@@ -186,26 +186,12 @@ docker run -it azuresdk/azure-cli-python:latest bash`
 
 The CLI is available for Windows though PIP using the steps below.  If you do not have Python/PIP installed, consider using [Docker](#docker) to access the CLI.
 
-Set the environment variable to point to the version you wish to install.
-
-```shell
-    set AZURE_CLI_NIGHTLY_VERSION=2016.08.02.nightly
-```
-
 Run the following from a command prompt
 
 ```shell
-    set AZURE_CLI_DISABLE_POST_INSTALL=1
     set AZURE_CLI_PRIVATE_PYPI_URL=http://40.112.211.51:8080
     set AZURE_CLI_PRIVATE_PYPI_HOST=40.112.211.51
-    pip install azure-cli==%AZURE_CLI_NIGHTLY_VERSION% --extra-index-url %AZURE_CLI_PRIVATE_PYPI_URL% --trusted-host %AZURE_CLI_PRIVATE_PYPI_HOST%
-    pip install azure-cli-component==%AZURE_CLI_NIGHTLY_VERSION% --extra-index-url %AZURE_CLI_PRIVATE_PYPI_URL% --trusted-host %AZURE_CLI_PRIVATE_PYPI_HOST%
-    pip install azure-cli-profile==%AZURE_CLI_NIGHTLY_VERSION% --extra-index-url %AZURE_CLI_PRIVATE_PYPI_URL% --trusted-host %AZURE_CLI_PRIVATE_PYPI_HOST%
-    pip install azure-cli-storage==%AZURE_CLI_NIGHTLY_VERSION% --extra-index-url %AZURE_CLI_PRIVATE_PYPI_URL% --trusted-host %AZURE_CLI_PRIVATE_PYPI_HOST%
-    pip install azure-cli-vm==%AZURE_CLI_NIGHTLY_VERSION% --extra-index-url %AZURE_CLI_PRIVATE_PYPI_URL% --trusted-host %AZURE_CLI_PRIVATE_PYPI_HOST%
-    pip install azure-cli-network==%AZURE_CLI_NIGHTLY_VERSION% --extra-index-url %AZURE_CLI_PRIVATE_PYPI_URL% --trusted-host %AZURE_CLI_PRIVATE_PYPI_HOST%
-    pip install azure-cli-resource==%AZURE_CLI_NIGHTLY_VERSION% --extra-index-url %AZURE_CLI_PRIVATE_PYPI_URL% --trusted-host %AZURE_CLI_PRIVATE_PYPI_HOST%
-    pip install azure-cli-feedback==%AZURE_CLI_NIGHTLY_VERSION% --extra-index-url %AZURE_CLI_PRIVATE_PYPI_URL% --trusted-host %AZURE_CLI_PRIVATE_PYPI_HOST%
+    pip install azure-cli==%AZURE_CLI_NIGHTLY_VERSION% --extra-index-url %AZURE_CLI_PRIVATE_PYPI_URL% --trusted-host %AZURE_CLI_PRIVATE_PYPI_HOST% --pre
 ```
 
 Run the CLI

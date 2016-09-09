@@ -14,12 +14,12 @@ from azure.mgmt.network.models.network_management_client_enums import \
      ExpressRouteCircuitSkuTier, ExpressRouteCircuitPeeringType)
 from azure.mgmt.dns.models.dns_management_client_enums import RecordType
 
-from azure.cli.commands import CliArgumentType, register_cli_argument, register_extra_cli_argument
-from azure.cli.commands.parameters import (location_type, get_resource_name_completion_list,
-                                           get_enum_type_completion_list, tags_type, get_enum_choices,
-                                           get_generic_completion_list)
-from azure.cli.commands.validators import MarkSpecifiedAction
-from azure.cli.commands.template_create import register_folded_cli_argument
+from azure.cli.core.commands import CliArgumentType, register_cli_argument, register_extra_cli_argument
+from azure.cli.core.commands.parameters import (location_type, get_resource_name_completion_list,
+                                                get_enum_type_completion_list, tags_type, get_enum_choices,
+                                                get_generic_completion_list)
+from azure.cli.core.commands.validators import MarkSpecifiedAction
+from azure.cli.core.commands.template_create import register_folded_cli_argument
 from azure.cli.command_modules.network._factory import _network_client_factory
 from azure.cli.command_modules.network._validators import \
     (process_ag_create_namespace, process_ag_listener_create_namespace,
@@ -295,6 +295,7 @@ register_cli_argument('network vnet create', 'subnet_prefix', options_list=('--s
 register_cli_argument('network vnet create', 'subnet_name', options_list=('--subnet-name',), metavar='SUBNET_NAME', default='Subnet1')
 register_cli_argument('network vnet create', 'virtual_network_prefix', options_list=('--address-prefix',), metavar='PREFIX', default='10.0.0.0/16')
 register_cli_argument('network vnet create', 'virtual_network_name', virtual_network_name_type, options_list=('--name', '-n'), required=True, completer=None)
+register_cli_argument('network vnet create', 'dns_servers', nargs='+')
 
 register_cli_argument('network vnet subnet', 'subnet_name', arg_type=subnet_name_type, options_list=('--name', '-n'), id_part='child_name')
 register_cli_argument('network vnet update', 'address_prefixes', nargs='+')
@@ -302,6 +303,7 @@ register_cli_argument('network vnet update', 'address_prefixes', nargs='+')
 register_cli_argument('network vnet subnet', 'address_prefix', metavar='PREFIX', help='the address prefix in CIDR format.')
 register_cli_argument('network vnet subnet', 'virtual_network_name', virtual_network_name_type)
 register_cli_argument('network vnet subnet', 'network_security_group', validator=validate_nsg_name_or_id)
+register_cli_argument('network vnet subnet', 'route_table', help='Name or ID of a route table to associate with the subnet.')
 
 lb_subresources = [
     {'name': 'address-pool', 'display': 'backend address pool', 'ref': 'backend_address_pools'},
@@ -394,3 +396,5 @@ register_cli_argument('network dns', 'record_type', options_list=('--type',), ch
 register_cli_argument('network dns record', 'record_set_name', options_list=('--record-set-name',))
 register_cli_argument('network dns record txt add', 'value', nargs='+')
 register_cli_argument('network dns record txt remove', 'value', nargs='+')
+register_cli_argument('network dns zone import', 'file_name', help='Path to the DNS zone file to import')
+register_cli_argument('network dns zone export', 'file_name', help='Path to the DNS zone file to save')

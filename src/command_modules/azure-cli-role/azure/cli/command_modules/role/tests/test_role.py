@@ -10,7 +10,7 @@ import re
 import tempfile
 import time
 
-from azure.cli.utils.vcr_test_base import VCRTestBase, JMESPathCheck, ResourceGroupVCRTestBase, NoneCheck, MOCKED_SUBSCRIPTION_ID
+from azure.cli.core.utils.vcr_test_base import VCRTestBase, JMESPathCheck, ResourceGroupVCRTestBase, NoneCheck, MOCKED_SUBSCRIPTION_ID
 
 class RoleCreateScenarioTest(VCRTestBase):
 

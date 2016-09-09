@@ -28,8 +28,8 @@ from azure.mgmt.trafficmanager import TrafficManagerManagementClient
 from azure.mgmt.dns.operations import RecordSetsOperations, ZonesOperations
 from azure.mgmt.dns import DnsManagementClient
 
-from azure.cli.commands.client_factory import get_mgmt_service_client
-from azure.cli.commands.arm import cli_generic_update_command
+from azure.cli.core.commands.client_factory import get_mgmt_service_client
+from azure.cli.core.commands.arm import cli_generic_update_command
 from azure.cli.command_modules.network.mgmt_app_gateway.lib.operations import AppGatewayOperations
 from azure.cli.command_modules.network.mgmt_app_gateway.lib \
     import AppGatewayCreationClient as AppGatewayClient
@@ -78,7 +78,7 @@ from azure.cli.command_modules.network.mgmt_dns_zone.lib \
     import DnsZoneCreationClient as DnsZoneClient
 
 
-from azure.cli.commands import DeploymentOutputLongRunningOperation, cli_command
+from azure.cli.core.commands import DeploymentOutputLongRunningOperation, cli_command
 
 from .custom import \
     (update_vnet, update_subnet, create_subnet,
@@ -115,7 +115,8 @@ from .custom import \
      add_dns_txt_record, add_dns_mx_record,
      remove_dns_aaaa_record, remove_dns_a_record, remove_dns_cname_record,
      remove_dns_ns_record, remove_dns_ptr_record, remove_dns_soa_record, remove_dns_srv_record,
-     remove_dns_txt_record, remove_dns_mx_record, list_traffic_manager_endpoints)
+     remove_dns_txt_record, remove_dns_mx_record, list_traffic_manager_endpoints,
+     export_zone, import_zone)
 from ._factory import _network_client_factory
 
 # pylint: disable=line-too-long
@@ -386,6 +387,8 @@ cli_command('network dns zone show', ZonesOperations.get, factory)
 cli_command('network dns zone delete', ZonesOperations.delete, factory)
 cli_command('network dns zone list', list_dns_zones)
 cli_generic_update_command('network dns zone update', ZonesOperations.get, ZonesOperations.create_or_update, factory)
+cli_command('network dns zone import', import_zone)
+cli_command('network dns zone export', export_zone)
 
 factory = lambda _: get_mgmt_service_client(DnsZoneClient).dns_zone
 cli_command('network dns zone create', DnsZoneOperations.create_or_update, factory, transform=DeploymentOutputLongRunningOperation('Starting network dns zone create'))
@@ -394,8 +397,11 @@ cli_command('network dns zone create', DnsZoneOperations.create_or_update, facto
 factory = lambda _: get_mgmt_service_client(DnsManagementClient).record_sets
 cli_command('network dns record-set show', RecordSetsOperations.get, factory)
 cli_command('network dns record-set delete', RecordSetsOperations.delete, factory)
+cli_command('network dns record-set list', RecordSetsOperations.list_all_in_resource_group, factory)
 cli_command('network dns record-set create', create_dns_record_set)
 cli_generic_update_command('network dns record-set update', RecordSetsOperations.get, RecordSetsOperations.create_or_update, factory)
+
+# DNS RecordOperations
 cli_command('network dns record aaaa add', add_dns_aaaa_record)
 cli_command('network dns record a add', add_dns_a_record)
 cli_command('network dns record cname add', add_dns_cname_record)

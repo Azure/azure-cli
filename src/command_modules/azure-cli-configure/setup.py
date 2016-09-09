@@ -24,6 +24,7 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
+    'azure-cli-core',
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:

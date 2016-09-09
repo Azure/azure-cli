@@ -14,10 +14,10 @@ import time
 
 from six import StringIO
 
-from azure.cli.utils.vcr_test_base import \
+from azure.cli.core.utils.vcr_test_base import \
     (VCRTestBase, ResourceGroupVCRTestBase, StorageAccountVCRTestBase, 
      JMESPathCheck, NoneCheck, BooleanCheck, StringCheck)
-from azure.cli._util import CLIError
+from azure.cli.core._util import CLIError
 from azure.common import AzureHttpError
 
 MOCK_ACCOUNT_KEY = '00000000'
@@ -365,7 +365,7 @@ class StorageFileScenarioTest(StorageAccountVCRTestBase):
             raise CLIError('\nDownload failed. Test failed!')
 
         # test resize command
-        s.cmd('storage file resize --share-name {} -p "{}" --content-length 1234'.format(share, filename))
+        s.cmd('storage file resize --share-name {} -p "{}" --size 1234'.format(share, filename))
         s.cmd('storage file show --share-name {} -p "{}"'.format(share, filename),
             checks=JMESPathCheck('properties.contentLength', 1234))
 

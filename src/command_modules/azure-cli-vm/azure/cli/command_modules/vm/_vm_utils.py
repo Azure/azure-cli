@@ -5,7 +5,7 @@
 
 import json
 import os
-from azure.cli._util import get_file_json
+from azure.cli.core._util import get_file_json
 
 def read_content_if_is_file(string_or_file):
     content = string_or_file

@@ -9,8 +9,10 @@ import os
 import tempfile
 import platform
 
-from azure.cli.utils.vcr_test_base import (VCRTestBase, ResourceGroupVCRTestBase, JMESPathCheck,
-                                           NoneCheck)
+from azure.cli.core.utils.vcr_test_base import (VCRTestBase,
+                                                ResourceGroupVCRTestBase,
+                                                JMESPathCheck,
+                                                NoneCheck)
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
@@ -679,7 +681,8 @@ class VMScaleSetCreateSimple(ResourceGroupVCRTestBase):
         vmss_name = 'vrfvmss'
         # Note: all parameters that are dynamically generated client-side must be overridden here.
         # This includes deployment name, admin name and ssh key.
-        self.cmd('vmss create --admin-password Test1234@! --name {vmss_name} -g {resource_group} --admin-username myadmin'.format(resource_group=self.resource_group, vmss_name=vmss_name))
+        self.cmd('vmss create --admin-password Test1234@! --name {vmss_name} -g {resource_group} --admin-username myadmin --image Win2012R2Datacenter'
+                 .format(resource_group=self.resource_group, vmss_name=vmss_name))
         self.cmd('vmss show --name {vmss_name} -g {resource_group}'.format(resource_group=self.resource_group, vmss_name=vmss_name),
             checks=JMESPathCheck('virtualMachineProfile.osProfile.windowsConfiguration.enableAutomaticUpdates', True))
 

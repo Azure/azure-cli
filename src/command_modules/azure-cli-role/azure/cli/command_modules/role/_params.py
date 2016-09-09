@@ -3,9 +3,9 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 #---------------------------------------------------------------------------------------------
 #pylint: disable=line-too-long
-import azure.cli.commands.parameters #pylint: disable=unused-import
-from azure.cli.commands import CliArgumentType
-from azure.cli.commands import register_cli_argument
+import azure.cli.core.commands.parameters #pylint: disable=unused-import
+from azure.cli.core.commands import CliArgumentType
+from azure.cli.core.commands import register_cli_argument
 
 register_cli_argument('ad app', 'application_object_id', options_list=('--object-id',))
 register_cli_argument('ad app', 'display_name', help=' the display name of the application')

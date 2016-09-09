@@ -25,52 +25,70 @@
     <PtvsTargetsFile>$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets</PtvsTargetsFile>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="azure\cli\adal_authentication.py" />
-    <Compile Include="azure\cli\application.py" />
-    <Compile Include="azure\cli\commands\template_create.py" />
-    <Compile Include="azure\cli\commands\arm.py">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="azure\cli\commands\client_factory.py" />
-    <Compile Include="azure\cli\commands\parameters.py" />
-    <Compile Include="azure\cli\commands\validators.py" />
-    <Compile Include="azure\cli\commands\_introspection.py" />
-    <Compile Include="azure\cli\commands\__init__.py" />
-    <Compile Include="azure\cli\command_modules\__init__.py" />
-    <Compile Include="azure\cli\extensions\query.py">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="azure\cli\extensions\transform.py" />
-    <Compile Include="azure\cli\extensions\__init__.py" />
-    <Compile Include="azure\cli\main.py" />
-    <Compile Include="azure\cli\tests\test_add_resourcegroup_transform.py" />
-    <Compile Include="azure\cli\tests\test_extensions_query.py" />
-    <Compile Include="azure\cli\tests\test_generic_update.py" />
-    <Compile Include="azure\cli\tests\test_logging.py" />
-    <Compile Include="azure\cli\tests\test_util.py" />
-    <Compile Include="azure\cli\tests\test_resource_id.py">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="azure\cli\tests\test_main.py">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="azure\cli\tests\test_validators.py" />
-    <Compile Include="azure\cli\tests\test_vcr_security.py">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="azure\cli\tests\__init__.py" />
+    <Compile Include="azure-cli-core\azure\cli\core\adal_authentication.py" />
+    <Compile Include="azure-cli-core\azure\cli\core\application.py" />
+    <Compile Include="azure-cli-core\azure\cli\core\commands\arm.py" />
+    <Compile Include="azure-cli-core\azure\cli\core\commands\client_factory.py" />
+    <Compile Include="azure-cli-core\azure\cli\core\commands\parameters.py" />
+    <Compile Include="azure-cli-core\azure\cli\core\commands\template_create.py" />
+    <Compile Include="azure-cli-core\azure\cli\core\commands\validators.py" />
+    <Compile Include="azure-cli-core\azure\cli\core\commands\_introspection.py" />
+    <Compile Include="azure-cli-core\azure\cli\core\commands\__init__.py" />
+    <Compile Include="azure-cli-core\azure\cli\core\extensions\experimental.py" />
+    <Compile Include="azure-cli-core\azure\cli\core\extensions\query.py" />
+    <Compile Include="azure-cli-core\azure\cli\core\extensions\transform.py" />
+    <Compile Include="azure-cli-core\azure\cli\core\extensions\__init__.py" />
+    <Compile Include="azure-cli-core\azure\cli\core\help_files.py" />
+    <Compile Include="azure-cli-core\azure\cli\core\parser.py" />
+    <Compile Include="azure-cli-core\azure\cli\core\tests\test_add_resourcegroup_transform.py" />
+    <Compile Include="azure-cli-core\azure\cli\core\tests\test_application.py" />
+    <Compile Include="azure-cli-core\azure\cli\core\tests\test_command_registration.py" />
+    <Compile Include="azure-cli-core\azure\cli\core\tests\test_config.py" />
+    <Compile Include="azure-cli-core\azure\cli\core\tests\test_connection_verify.py" />
+    <Compile Include="azure-cli-core\azure\cli\core\tests\test_extensions_query.py" />
+    <Compile Include="azure-cli-core\azure\cli\core\tests\test_generic_update.py" />
+    <Compile Include="azure-cli-core\azure\cli\core\tests\test_help.py" />
+    <Compile Include="azure-cli-core\azure\cli\core\tests\test_logging.py" />
+    <Compile Include="azure-cli-core\azure\cli\core\tests\test_output.py" />
+    <Compile Include="azure-cli-core\azure\cli\core\tests\test_parser.py" />
+    <Compile Include="azure-cli-core\azure\cli\core\tests\test_profile.py" />
+    <Compile Include="azure-cli-core\azure\cli\core\tests\test_resource_id.py" />
+    <Compile Include="azure-cli-core\azure\cli\core\tests\test_util.py" />
+    <Compile Include="azure-cli-core\azure\cli\core\tests\test_validators.py" />
+    <Compile Include="azure-cli-core\azure\cli\core\tests\test_vcr_security.py" />
+    <Compile Include="azure-cli-core\azure\cli\core\tests\__init__.py" />
+    <Compile Include="azure-cli-core\azure\cli\core\utils\update_checker.py" />
+    <Compile Include="azure-cli-core\azure\cli\core\utils\vcr_test_base.py" />
+    <Compile Include="azure-cli-core\azure\cli\core\utils\__init__.py" />
+    <Compile Include="azure-cli-core\azure\cli\core\_azure_env.py" />
+    <Compile Include="azure-cli-core\azure\cli\core\_config.py" />
+    <Compile Include="azure-cli-core\azure\cli\core\_debug.py" />
+    <Compile Include="azure-cli-core\azure\cli\core\_help.py" />
+    <Compile Include="azure-cli-core\azure\cli\core\_logging.py" />
+    <Compile Include="azure-cli-core\azure\cli\core\_output.py" />
+    <Compile Include="azure-cli-core\azure\cli\core\_profile.py" />
+    <Compile Include="azure-cli-core\azure\cli\core\_session.py" />
+    <Compile Include="azure-cli-core\azure\cli\core\_telemetry.py" />
+    <Compile Include="azure-cli-core\azure\cli\core\_util.py" />
+    <Compile Include="azure-cli-core\azure\cli\core\__init__.py" />
+    <Compile Include="azure-cli-core\setup.py" />
+    <Compile Include="azure-cli\azure\cli\main.py" />
+    <Compile Include="azure-cli\azure\cli\__init__.py" />
+    <Compile Include="azure-cli\azure\cli\__main__.py" />
+    <Compile Include="azure-cli\setup.py" />
     <Compile Include="command_modules\azure-cli-component\azure\cli\command_modules\component\_help.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="command_modules\azure-cli-configure\azure\cli\command_modules\configure\_consts.py" />
+    <Compile Include="command_modules\azure-cli-configure\azure\cli\command_modules\configure\_help.py" />
+    <Compile Include="command_modules\azure-cli-configure\azure\cli\command_modules\configure\_utils.py" />
+    <Compile Include="command_modules\azure-cli-configure\azure\cli\command_modules\configure\__init__.py" />
+    <Compile Include="command_modules\azure-cli-configure\setup.py" />
     <Compile Include="command_modules\azure-cli-feedback\azure\cli\command_modules\feedback\_help.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="command_modules\azure-cli-feedback\azure\cli\command_modules\feedback\__init__.py" />
-    <Compile Include="command_modules\azure-cli-feedback\azure\cli\command_modules\__init__.py" />
-    <Compile Include="command_modules\azure-cli-feedback\azure\cli\__init__.py" />
-    <Compile Include="command_modules\azure-cli-feedback\azure\__init__.py" />
     <Compile Include="command_modules\azure-cli-feedback\setup.py" />
-    <Compile Include="azure\cli\utils\vcr_test_base.py" />
     <Compile Include="command_modules\azure-cli-iot\azure\cli\command_modules\iot\custom.py" />
     <Compile Include="command_modules\azure-cli-iot\azure\cli\command_modules\iot\generated.py" />
     <Compile Include="command_modules\azure-cli-iot\azure\cli\command_modules\iot\mgmt_iot_hub\lib\credentials.py" />
@@ -111,7 +129,6 @@
     <Compile Include="command_modules\azure-cli-iot\azure\cli\command_modules\iot\mgmt_iot_hub\lib\operations\__init__.py" />
     <Compile Include="command_modules\azure-cli-iot\azure\cli\command_modules\iot\mgmt_iot_hub\lib\version.py" />
     <Compile Include="command_modules\azure-cli-iot\azure\cli\command_modules\iot\mgmt_iot_hub\lib\__init__.py" />
-    <Compile Include="command_modules\azure-cli-iot\azure\cli\command_modules\iot\mgmt_iot_hub\__init__.py" />
     <Compile Include="command_modules\azure-cli-iot\azure\cli\command_modules\iot\mgmt_iot_hub_device\lib\credentials.py" />
     <Compile Include="command_modules\azure-cli-iot\azure\cli\command_modules\iot\mgmt_iot_hub_device\lib\exceptions.py" />
     <Compile Include="command_modules\azure-cli-iot\azure\cli\command_modules\iot\mgmt_iot_hub_device\lib\iot_hub_device_client.py" />
@@ -125,7 +142,6 @@
     <Compile Include="command_modules\azure-cli-iot\azure\cli\command_modules\iot\mgmt_iot_hub_device\lib\operations\__init__.py" />
     <Compile Include="command_modules\azure-cli-iot\azure\cli\command_modules\iot\mgmt_iot_hub_device\lib\version.py" />
     <Compile Include="command_modules\azure-cli-iot\azure\cli\command_modules\iot\mgmt_iot_hub_device\lib\__init__.py" />
-    <Compile Include="command_modules\azure-cli-iot\azure\cli\command_modules\iot\mgmt_iot_hub_device\__init__.py" />
     <Compile Include="command_modules\azure-cli-iot\azure\cli\command_modules\iot\sas_token_auth.py" />
     <Compile Include="command_modules\azure-cli-iot\azure\cli\command_modules\iot\tests\test_iot_commands.py" />
     <Compile Include="command_modules\azure-cli-iot\azure\cli\command_modules\iot\tests\test_sas_token_auth.py" />
@@ -134,9 +150,6 @@
     <Compile Include="command_modules\azure-cli-iot\azure\cli\command_modules\iot\_help.py" />
     <Compile Include="command_modules\azure-cli-iot\azure\cli\command_modules\iot\_params.py" />
     <Compile Include="command_modules\azure-cli-iot\azure\cli\command_modules\iot\__init__.py" />
-    <Compile Include="command_modules\azure-cli-iot\azure\cli\command_modules\__init__.py" />
-    <Compile Include="command_modules\azure-cli-iot\azure\cli\__init__.py" />
-    <Compile Include="command_modules\azure-cli-iot\azure\__init__.py" />
     <Compile Include="command_modules\azure-cli-iot\setup.py" />
     <Compile Include="command_modules\azure-cli-keyvault\azure\cli\command_modules\keyvault\custom.py" />
     <Compile Include="command_modules\azure-cli-keyvault\azure\cli\command_modules\keyvault\generated.py" />
@@ -165,7 +178,6 @@
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_app_gateway\lib\operations\__init__.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_app_gateway\lib\version.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_app_gateway\lib\__init__.py" />
-    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_app_gateway\__init__.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_dns_zone\lib\credentials.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_dns_zone\lib\dns_zone_creation_client.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_dns_zone\lib\exceptions.py" />
@@ -184,7 +196,6 @@
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_dns_zone\lib\operations\__init__.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_dns_zone\lib\version.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_dns_zone\lib\__init__.py" />
-    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_dns_zone\__init__.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_express_route_circuit\lib\credentials.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_express_route_circuit\lib\exceptions.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_express_route_circuit\lib\express_route_circuit_creation_client.py" />
@@ -203,7 +214,6 @@
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_express_route_circuit\lib\operations\__init__.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_express_route_circuit\lib\version.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_express_route_circuit\lib\__init__.py" />
-    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_express_route_circuit\__init__.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_express_route_peering\lib\credentials.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_express_route_peering\lib\exceptions.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_express_route_peering\lib\express_route_peering_creation_client.py" />
@@ -222,7 +232,6 @@
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_express_route_peering\lib\operations\__init__.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_express_route_peering\lib\version.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_express_route_peering\lib\__init__.py" />
-    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_express_route_peering\__init__.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_local_gateway\lib\credentials.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_local_gateway\lib\exceptions.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_local_gateway\lib\local_gateway_creation_client.py" />
@@ -241,7 +250,6 @@
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_local_gateway\lib\operations\__init__.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_local_gateway\lib\version.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_local_gateway\lib\__init__.py" />
-    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_local_gateway\__init__.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_nic\lib\credentials.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_nic\lib\exceptions.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_nic\lib\models\basic_dependency.py" />
@@ -260,7 +268,6 @@
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_nic\lib\operations\__init__.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_nic\lib\version.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_nic\lib\__init__.py" />
-    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_nic\__init__.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_public_ip\lib\credentials.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_public_ip\lib\exceptions.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_public_ip\lib\models\basic_dependency.py" />
@@ -279,7 +286,6 @@
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_public_ip\lib\public_ip_creation_client.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_public_ip\lib\version.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_public_ip\lib\__init__.py" />
-    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_public_ip\__init__.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_route_table\lib\credentials.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_route_table\lib\exceptions.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_route_table\lib\models\basic_dependency.py" />
@@ -298,7 +304,6 @@
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_route_table\lib\route_table_creation_client.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_route_table\lib\version.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_route_table\lib\__init__.py" />
-    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_route_table\__init__.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_traffic_manager_profile\lib\credentials.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_traffic_manager_profile\lib\exceptions.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_traffic_manager_profile\lib\models\basic_dependency.py" />
@@ -317,7 +322,6 @@
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_traffic_manager_profile\lib\traffic_manager_profile_creation_client.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_traffic_manager_profile\lib\version.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_traffic_manager_profile\lib\__init__.py" />
-    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_traffic_manager_profile\__init__.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_vnet\lib\vnet_creation_client.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_vnet_gateway\lib\credentials.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_vnet_gateway\lib\exceptions.py" />
@@ -337,7 +341,6 @@
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_vnet_gateway\lib\version.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_vnet_gateway\lib\vnet_gateway_creation_client.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_vnet_gateway\lib\__init__.py" />
-    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_vnet_gateway\__init__.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_vpn_connection\lib\credentials.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_vpn_connection\lib\exceptions.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_vpn_connection\lib\models\basic_dependency.py" />
@@ -356,8 +359,14 @@
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_vpn_connection\lib\version.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_vpn_connection\lib\vpn_connection_creation_client.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_vpn_connection\lib\__init__.py" />
-    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_vpn_connection\__init__.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\tests\test_network_commands.py" />
+    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\tests\__init__.py" />
+    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\zone_file\configs.py" />
+    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\zone_file\exceptions.py" />
+    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\zone_file\make_zone_file.py" />
+    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\zone_file\parse_zone_file.py" />
+    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\zone_file\record_processors.py" />
+    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\zone_file\__init__.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\_factory.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_nsg\lib\credentials.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_nsg\lib\exceptions.py" />
@@ -377,9 +386,6 @@
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_nsg\lib\operations\__init__.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_nsg\lib\version.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_nsg\lib\__init__.py" />
-    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_nsg\__init__.py">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\_help.py">
       <SubType>Code</SubType>
     </Compile>
@@ -389,14 +395,13 @@
     </Compile>
     <Compile Include="command_modules\azure-cli-redis\azure\cli\command_modules\redis\custom.py" />
     <Compile Include="command_modules\azure-cli-redis\azure\cli\command_modules\redis\generated.py" />
+    <Compile Include="command_modules\azure-cli-redis\azure\cli\command_modules\redis\tests\test_redis_params.py" />
+    <Compile Include="command_modules\azure-cli-redis\azure\cli\command_modules\redis\tests\__init__.py" />
     <Compile Include="command_modules\azure-cli-redis\azure\cli\command_modules\redis\_help.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="command_modules\azure-cli-redis\azure\cli\command_modules\redis\_params.py" />
     <Compile Include="command_modules\azure-cli-redis\azure\cli\command_modules\redis\__init__.py" />
-    <Compile Include="command_modules\azure-cli-redis\azure\cli\command_modules\__init__.py" />
-    <Compile Include="command_modules\azure-cli-redis\azure\cli\__init__.py" />
-    <Compile Include="command_modules\azure-cli-redis\azure\__init__.py" />
     <Compile Include="command_modules\azure-cli-redis\setup.py" />
     <Compile Include="command_modules\azure-cli-resource\azure\cli\command_modules\resource\_factory.py">
       <SubType>Code</SubType>
@@ -409,6 +414,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="command_modules\azure-cli-role\azure\cli\command_modules\role\tests\test_graph.py" />
+    <Compile Include="command_modules\azure-cli-storage\azure\cli\command_modules\storage\tests\__init__.py" />
     <Compile Include="command_modules\azure-cli-storage\azure\cli\command_modules\storage\_command_type.py" />
     <Compile Include="command_modules\azure-cli-storage\azure\cli\command_modules\storage\_factory.py" />
     <Compile Include="command_modules\azure-cli-storage\azure\cli\command_modules\storage\_help.py">
@@ -454,9 +460,6 @@
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_vnet\lib\resource_management_client.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_vnet\lib\version.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_vnet\lib\__init__.py" />
-    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_vnet\__init__.py">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_lb\lib\credentials.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_lb\lib\exceptions.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_lb\lib\lb_creation_client.py" />
@@ -475,7 +478,6 @@
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_lb\lib\operations\__init__.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_lb\lib\version.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_lb\lib\__init__.py" />
-    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_lb\__init__.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\_params.py">
       <SubType>Code</SubType>
     </Compile>
@@ -519,7 +521,6 @@
     <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_acs\lib\operations\__init__.py" />
     <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_acs\lib\version.py" />
     <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_acs\lib\__init__.py" />
-    <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_acs\__init__.py" />
     <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_avail_set\lib\avail_set_creation_client.py" />
     <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_avail_set\lib\credentials.py" />
     <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_avail_set\lib\exceptions.py" />
@@ -538,7 +539,6 @@
     <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_avail_set\lib\operations\__init__.py" />
     <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_avail_set\lib\version.py" />
     <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_avail_set\lib\__init__.py" />
-    <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_avail_set\__init__.py" />
     <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vmss\lib\credentials.py" />
     <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vmss\lib\exceptions.py" />
     <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vmss\lib\models\basic_dependency.py" />
@@ -557,7 +557,6 @@
     <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vmss\lib\version.py" />
     <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vmss\lib\vmss_creation_client.py" />
     <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vmss\lib\__init__.py" />
-    <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vmss\__init__.py" />
     <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\lib\credentials.py" />
     <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\lib\exceptions.py" />
     <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\lib\models\basic_dependency.py" />
@@ -577,41 +576,11 @@
     <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\lib\version.py" />
     <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\lib\vm_creation_client.py" />
     <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\lib\__init__.py" />
-    <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\__init__.py" />
     <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\tests\test_custom_vm_commands.py" />
     <Compile Include="command_modules\azure-cli-resource\azure\cli\command_modules\resource\tests\test_resource_list_odata_filter.py" />
     <Compile Include="command_modules\azure-cli-resource\azure\cli\command_modules\resource\tests\test_api_check.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="azure\cli\parser.py" />
-    <Compile Include="azure\cli\tests\test_add_resourcegroup_transform.py" />
-    <Compile Include="azure\cli\tests\test_parser.py" />
-    <Compile Include="azure\cli\tests\test_command_registration.py" />
-    <Compile Include="azure\cli\tests\test_connection_verify.py" />
-    <Compile Include="azure\cli\tests\test_application.py" />
-    <Compile Include="azure\cli\tests\test_output.py" />
-    <Compile Include="azure\cli\utils\update_checker.py" />
-    <Compile Include="azure\cli\utils\__init__.py" />
-    <Compile Include="azure\cli\_azure_env.py" />
-    <Compile Include="azure\cli\_debug.py" />
-    <Compile Include="azure\cli\tests\test_help.py" />
-    <Compile Include="azure\cli\tests\test_output.py" />
-    <Compile Include="azure\cli\_help.py" />
-    <Compile Include="azure\cli\help_files.py" />
-    <Compile Include="azure\cli\tests\test_profile.py" />
-    <Compile Include="azure\cli\_logging.py" />
-    <Compile Include="azure\cli\_output.py" />
-    <Compile Include="azure\cli\_profile.py" />
-    <Compile Include="azure\cli\_session.py">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="azure\cli\_util.py" />
-    <Compile Include="azure\cli\__init__.py" />
-    <Compile Include="azure\cli\__main__.py" />
-    <Compile Include="azure\cli\_telemetry.py">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="azure\__init__.py" />
     <Compile Include="command_modules\azure-cli-component\azure\cli\command_modules\component\__init__.py" />
     <Compile Include="command_modules\azure-cli-component\setup.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\__init__.py" />
@@ -637,6 +606,7 @@
     <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\custom.py" />
     <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\tests\test_vm_commands.py" />
     <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\tests\test_vm_image.py" />
+    <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\tests\test_vm_parameters.py" />
     <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\tests\__init__.py" />
     <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\_actions.py">
       <SubType>Code</SubType>
@@ -673,9 +643,6 @@
     <Compile Include="command_modules\azure-cli-webapp\azure\cli\command_modules\webapp\mgmt_webapp\lib\version.py" />
     <Compile Include="command_modules\azure-cli-webapp\azure\cli\command_modules\webapp\mgmt_webapp\lib\webapp_creation_client.py" />
     <Compile Include="command_modules\azure-cli-webapp\azure\cli\command_modules\webapp\mgmt_webapp\lib\__init__.py" />
-    <Compile Include="command_modules\azure-cli-webapp\azure\cli\command_modules\webapp\mgmt_webapp\__init__.py">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="command_modules\azure-cli-webapp\azure\cli\command_modules\webapp\_help.py">
       <SubType>Code</SubType>
     </Compile>
@@ -684,19 +651,30 @@
     <Compile Include="command_modules\azure-cli-webapp\setup.py" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="azure" />
-    <Folder Include="azure\cli" />
-    <Folder Include="azure\cli\commands" />
-    <Folder Include="azure\cli\command_modules\" />
-    <Folder Include="azure\cli\extensions\" />
-    <Folder Include="azure\cli\tests\" />
-    <Folder Include="azure\cli\utils\" />
+    <Folder Include="azure-cli-core\" />
+    <Folder Include="azure-cli-core\azure\" />
+    <Folder Include="azure-cli-core\azure\cli\" />
+    <Folder Include="azure-cli-core\azure\cli\core\" />
+    <Folder Include="azure-cli-core\azure\cli\core\commands\" />
+    <Folder Include="azure-cli-core\azure\cli\core\extensions\" />
+    <Folder Include="azure-cli-core\azure\cli\core\tests\" />
+    <Folder Include="azure-cli-core\azure\cli\core\utils\" />
+    <Folder Include="azure-cli\" />
+    <Folder Include="azure-cli\azure\" />
+    <Folder Include="azure-cli\azure\cli\" />
+    <Folder Include="azure-cli\azure\cli\command_modules\" />
+    <Folder Include="azure-cli\azure\cli\tests\" />
     <Folder Include="command_modules\" />
     <Folder Include="command_modules\azure-cli-component\" />
     <Folder Include="command_modules\azure-cli-component\azure\" />
     <Folder Include="command_modules\azure-cli-component\azure\cli\" />
     <Folder Include="command_modules\azure-cli-component\azure\cli\command_modules\" />
     <Folder Include="command_modules\azure-cli-component\azure\cli\command_modules\component\" />
+    <Folder Include="command_modules\azure-cli-configure\" />
+    <Folder Include="command_modules\azure-cli-configure\azure\" />
+    <Folder Include="command_modules\azure-cli-configure\azure\cli\" />
+    <Folder Include="command_modules\azure-cli-configure\azure\cli\command_modules\" />
+    <Folder Include="command_modules\azure-cli-configure\azure\cli\command_modules\configure\" />
     <Folder Include="command_modules\azure-cli-feedback\" />
     <Folder Include="command_modules\azure-cli-feedback\azure\" />
     <Folder Include="command_modules\azure-cli-feedback\azure\cli\" />
@@ -716,15 +694,12 @@
     <Folder Include="command_modules\azure-cli-iot\azure\cli\command_modules\iot\mgmt_iot_hub_device\lib\models\" />
     <Folder Include="command_modules\azure-cli-iot\azure\cli\command_modules\iot\mgmt_iot_hub_device\lib\operations\" />
     <Folder Include="command_modules\azure-cli-iot\azure\cli\command_modules\iot\tests\" />
-    <Folder Include="command_modules\azure-cli-iot\azure\cli\command_modules\iot\tests\recordings\" />
     <Folder Include="command_modules\azure-cli-keyvault\" />
     <Folder Include="command_modules\azure-cli-keyvault\azure\" />
     <Folder Include="command_modules\azure-cli-keyvault\azure\cli\" />
     <Folder Include="command_modules\azure-cli-keyvault\azure\cli\command_modules\" />
     <Folder Include="command_modules\azure-cli-keyvault\azure\cli\command_modules\keyvault\" />
     <Folder Include="command_modules\azure-cli-keyvault\azure\cli\command_modules\keyvault\tests\" />
-    <Folder Include="command_modules\azure-cli-keyvault\azure\cli\command_modules\keyvault\tests\recordings\" />
-    <Folder Include="command_modules\azure-cli-keyvault\azure\cli\command_modules\keyvault\tests\__pycache__\" />
     <Folder Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_app_gateway\" />
     <Folder Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_app_gateway\lib\" />
     <Folder Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_app_gateway\lib\models\" />
@@ -772,11 +747,13 @@
     <Folder Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_express_route_peering\" />
     <Folder Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_traffic_manager_profile\" />
     <Folder Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_dns_zone\" />
+    <Folder Include="command_modules\azure-cli-network\azure\cli\command_modules\network\zone_file\" />
     <Folder Include="command_modules\azure-cli-redis\" />
     <Folder Include="command_modules\azure-cli-redis\azure\" />
     <Folder Include="command_modules\azure-cli-redis\azure\cli\" />
     <Folder Include="command_modules\azure-cli-redis\azure\cli\command_modules\" />
     <Folder Include="command_modules\azure-cli-redis\azure\cli\command_modules\redis\" />
+    <Folder Include="command_modules\azure-cli-redis\azure\cli\command_modules\redis\tests\" />
     <Folder Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_acs\" />
     <Folder Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_acs\lib\" />
     <Folder Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_acs\lib\models\" />
@@ -795,7 +772,6 @@
     <Folder Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_lb\lib\models\" />
     <Folder Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_lb\lib\operations\" />
     <Folder Include="command_modules\azure-cli-network\azure\cli\command_modules\network\tests\" />
-    <Folder Include="command_modules\azure-cli-network\azure\cli\command_modules\network\tests\recordings\" />
     <Folder Include="command_modules\azure-cli-profile\" />
     <Folder Include="command_modules\azure-cli-profile\azure\" />
     <Folder Include="command_modules\azure-cli-profile\azure\cli\" />
@@ -807,21 +783,18 @@
     <Folder Include="command_modules\azure-cli-resource\azure\cli\command_modules\" />
     <Folder Include="command_modules\azure-cli-resource\azure\cli\command_modules\resource\" />
     <Folder Include="command_modules\azure-cli-resource\azure\cli\command_modules\resource\tests\" />
-    <Folder Include="command_modules\azure-cli-resource\azure\cli\command_modules\resource\tests\recordings\" />
     <Folder Include="command_modules\azure-cli-role\" />
     <Folder Include="command_modules\azure-cli-role\azure\" />
     <Folder Include="command_modules\azure-cli-role\azure\cli\" />
     <Folder Include="command_modules\azure-cli-role\azure\cli\command_modules\" />
     <Folder Include="command_modules\azure-cli-role\azure\cli\command_modules\role\" />
     <Folder Include="command_modules\azure-cli-role\azure\cli\command_modules\role\tests\" />
-    <Folder Include="command_modules\azure-cli-role\azure\cli\command_modules\role\tests\recordings\" />
     <Folder Include="command_modules\azure-cli-storage\" />
     <Folder Include="command_modules\azure-cli-storage\azure\" />
     <Folder Include="command_modules\azure-cli-storage\azure\cli\" />
     <Folder Include="command_modules\azure-cli-storage\azure\cli\command_modules\" />
     <Folder Include="command_modules\azure-cli-storage\azure\cli\command_modules\storage\" />
     <Folder Include="command_modules\azure-cli-storage\azure\cli\command_modules\storage\tests\" />
-    <Folder Include="command_modules\azure-cli-storage\azure\cli\command_modules\storage\tests\recordings\" />
     <Folder Include="command_modules\azure-cli-taskhelp\" />
     <Folder Include="command_modules\azure-cli-taskhelp\azure\" />
     <Folder Include="command_modules\azure-cli-taskhelp\azure\cli\" />
@@ -841,6 +814,10 @@
     <Folder Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vmss\lib\models\" />
     <Folder Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vmss\lib\operations\" />
     <Folder Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vmss\nested_templates\" />
+    <Folder Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vmss_create\" />
+    <Folder Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vmss_create\lib\" />
+    <Folder Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vmss_create\lib\models\" />
+    <Folder Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vmss_create\lib\operations\" />
     <Folder Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\" />
     <Folder Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\lib\" />
     <Folder Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\lib\models\" />
@@ -848,7 +825,6 @@
     <Folder Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\nested_templates\" />
     <Folder Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_avail_set\" />
     <Folder Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\tests\" />
-    <Folder Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\tests\recordings\" />
     <Folder Include="command_modules\azure-cli-webapp\" />
     <Folder Include="command_modules\azure-cli-webapp\azure\" />
     <Folder Include="command_modules\azure-cli-webapp\azure\cli\" />
@@ -859,25 +835,25 @@
     <Folder Include="command_modules\azure-cli-webapp\azure\cli\command_modules\webapp\mgmt_webapp\lib\models\" />
     <Folder Include="command_modules\azure-cli-webapp\azure\cli\command_modules\webapp\mgmt_webapp\lib\operations\" />
     <Folder Include="command_modules\azure-cli-webapp\azure\cli\command_modules\webapp\mgmt_webapp\nested_templates\" />
+    <Folder Include="command_modules\azure-cli-webapp\azure\cli\command_modules\webapp\tests\" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="azure-cli-core\setup.cfg" />
+    <Content Include="azure-cli\az" />
+    <Content Include="azure-cli\az.bat" />
+    <Content Include="azure-cli\az.completion.sh" />
+    <Content Include="azure-cli\setup.cfg" />
     <Content Include="command_modules\azure-cli-component\requirements.txt" />
+    <Content Include="command_modules\azure-cli-configure\requirements.txt" />
     <Content Include="command_modules\azure-cli-iot\azure\cli\command_modules\iot\mgmt_iot_hub\swagger_iot_hub_resource_provider.json" />
     <Content Include="command_modules\azure-cli-iot\azure\cli\command_modules\iot\mgmt_iot_hub_device\swagger_iot_hub_device_identity.json" />
-    <Content Include="command_modules\azure-cli-iot\azure\cli\command_modules\iot\tests\recordings\test_iot_device_create.yaml" />
-    <Content Include="command_modules\azure-cli-iot\azure\cli\command_modules\iot\tests\recordings\test_iot_hub_create.yaml" />
-    <Content Include="command_modules\azure-cli-iot\README.rst" />
     <Content Include="command_modules\azure-cli-iot\requirements.txt" />
-    <Content Include="command_modules\azure-cli-keyvault\azure\cli\command_modules\keyvault\tests\recordings\test_key_vault_mgmt.yaml" />
-    <Content Include="command_modules\azure-cli-keyvault\azure\cli\command_modules\keyvault\tests\__pycache__\test_keyvault_commands.cpython-35.pyc" />
-    <Content Include="command_modules\azure-cli-keyvault\README.rst" />
     <Content Include="command_modules\azure-cli-keyvault\requirements.txt" />
     <Content Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_app_gateway\azuredeploy.json" />
     <Content Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_app_gateway\azuredeploy_tests.md">
       <SubType>Code</SubType>
     </Content>
     <Content Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_app_gateway\swagger_create_app_gateway.json" />
-    <Content Include="command_modules\azure-cli-feedback\README.rst" />
     <Content Include="command_modules\azure-cli-feedback\requirements.txt" />
     <Content Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_dns_zone\azuredeploy.json" />
     <Content Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_dns_zone\swagger_create_dns_zone.json" />
@@ -916,15 +892,14 @@
     <Content Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_vnet_gateway\swagger_create_vnet_gateway.json" />
     <Content Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_vpn_connection\azuredeploy.json" />
     <Content Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_vpn_connection\swagger_create_vpn_connection.json" />
+    <Content Include="command_modules\azure-cli-network\azure\cli\command_modules\network\tests\TestCert.pfx" />
+    <Content Include="command_modules\azure-cli-network\azure\cli\command_modules\network\tests\zone.txt" />
     <Content Include="command_modules\azure-cli-network\requirements.txt" />
     <Content Include="command_modules\azure-cli-profile\requirements.txt" />
-    <Content Include="command_modules\azure-cli-redis\README.rst" />
     <Content Include="command_modules\azure-cli-redis\requirements.txt" />
     <Content Include="command_modules\azure-cli-resource\azure\cli\command_modules\resource\tests\simple_deploy.json" />
     <Content Include="command_modules\azure-cli-resource\azure\cli\command_modules\resource\tests\simple_deploy_parameters.json" />
     <Content Include="command_modules\azure-cli-resource\requirements.txt" />
-    <Content Include="command_modules\azure-cli-role\azure\cli\command_modules\role\tests\recordings\test_role_assignment_scenario.yaml" />
-    <Content Include="command_modules\azure-cli-role\README.rst" />
     <Content Include="command_modules\azure-cli-role\requirements.txt" />
     <Content Include="command_modules\azure-cli-storage\requirements.txt" />
     <Content Include="command_modules\azure-cli-taskhelp\requirements.txt" />
@@ -967,7 +942,6 @@
     <Content Include="command_modules\azure-cli-webapp\azure\cli\command_modules\webapp\mgmt_webapp\nested_templates\hostingplan_existing.json" />
     <Content Include="command_modules\azure-cli-webapp\azure\cli\command_modules\webapp\mgmt_webapp\nested_templates\hostingplan_new.json" />
     <Content Include="command_modules\azure-cli-webapp\azure\cli\command_modules\webapp\mgmt_webapp\swagger_create_webapp.json" />
-    <Content Include="command_modules\azure-cli-webapp\README.rst" />
     <Content Include="command_modules\azure-cli-webapp\requirements.txt" />
   </ItemGroup>
   <ItemGroup>

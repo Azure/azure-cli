@@ -25,7 +25,8 @@ CLASSIFIERS = [
 
 DEPENDENCIES = [
     'adal>=0.4.0',
-    'azure==2.0.0rc5'
+    'azure==2.0.0rc5',
+    'azure-cli-core',
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:

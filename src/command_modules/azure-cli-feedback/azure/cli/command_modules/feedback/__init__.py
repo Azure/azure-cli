@@ -6,9 +6,10 @@
 from __future__ import print_function
 import sys
 from six.moves import input #pylint: disable=redefined-builtin
-import azure.cli as cli
-from azure.cli.commands import cli_command
-import azure.cli._logging as _logging
+from azure.cli.core import __version__ as core_version
+from azure.cli.core.commands import cli_command
+import azure.cli.core._logging as _logging
+
 import azure.cli.command_modules.feedback._help # pylint: disable=unused-import
 
 logger = _logging.get_az_logger(__name__)
@@ -56,7 +57,7 @@ def _get_version_info():
 def _send_feedback(score, response_what_changes, response_do_well, email_address):
     from applicationinsights import TelemetryClient
     tc = TelemetryClient(INSTRUMENTATION_KEY)
-    tc.context.application.ver = cli.__version__ #pylint: disable=no-member
+    tc.context.application.ver = core_version
     version_components, version_python = _get_version_info()
     tc.track_event(
         EVENT_NAME,

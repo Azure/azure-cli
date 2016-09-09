@@ -25,6 +25,7 @@ CLASSIFIERS = [
 
 DEPENDENCIES = [
     'azure==2.0.0rc5',
+    'azure-cli-core',
     'azure-mgmt-trafficmanager==0.30.0rc5',
     'azure-mgmt-dns==0.30.0rc5'
 ]
@@ -112,7 +113,8 @@ setup(
         'azure.cli.command_modules.network.mgmt_dns_zone',
         'azure.cli.command_modules.network.mgmt_dns_zone.lib',
         'azure.cli.command_modules.network.mgmt_dns_zone.lib.models',
-        'azure.cli.command_modules.network.mgmt_dns_zone.lib.operations'
+        'azure.cli.command_modules.network.mgmt_dns_zone.lib.operations',
+        'azure.cli.command_modules.network.zone_file'
     ],
     install_requires=DEPENDENCIES,
 )

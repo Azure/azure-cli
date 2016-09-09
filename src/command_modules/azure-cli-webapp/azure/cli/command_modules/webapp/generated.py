@@ -6,8 +6,9 @@
 #pylint: disable=unused-import
 from azure.mgmt.web.operations import SitesOperations
 
-from azure.cli.commands import LongRunningOperation, cli_command
-from azure.cli.commands.client_factory import get_mgmt_service_client
+from azure.cli.core.commands import LongRunningOperation, cli_command
+from azure.cli.core.commands.client_factory import get_mgmt_service_client
+
 from azure.cli.command_modules.webapp._params import _web_client_factory
 from azure.cli.command_modules.webapp.mgmt_webapp.lib \
     import (WebappCreationClient as WebAppClient)
