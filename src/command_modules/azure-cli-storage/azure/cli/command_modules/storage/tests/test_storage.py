@@ -28,7 +28,7 @@ def _get_connection_string(test):
         test.set_env('AZURE_STORAGE_CONNECTION_STRING', 'DefaultEndpointsProtocol=https;'
                      'AccountName={};AccountKey={}'.format(test.account, MOCK_ACCOUNT_KEY))
     else:
-        connection_string = test.cmd('storage account connection-string -g {} --name {} -o json'
+        connection_string = test.cmd('storage account show-connection-string -g {} --name {} -o json'
             .format(test.resource_group, test.account))['ConnectionString']
         test.set_env('AZURE_STORAGE_CONNECTION_STRING', connection_string)
 
@@ -68,7 +68,7 @@ class StorageAccountScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck('resourceGroup', rg)
         ])
         s.cmd('storage account show-usage', checks=JMESPathCheck('name.value', 'StorageAccounts'))
-        s.cmd('storage account connection-string -g {} -n {} --protocol http'.format(rg, account), checks=[
+        s.cmd('storage account show-connection-string -g {} -n {} --protocol http'.format(rg, account), checks=[
             JMESPathCheck("contains(ConnectionString, 'https')", False),
             JMESPathCheck("contains(ConnectionString, '{}')".format(account), True)
         ])
@@ -76,11 +76,11 @@ class StorageAccountScenarioTest(ResourceGroupVCRTestBase):
         key1 = keys_result['keys'][0]
         key2 = keys_result['keys'][1]
         assert key1 and key2
-        keys_result = s.cmd('storage account keys renew -g {} -n {}'.format(rg, account))
+        keys_result = s.cmd('storage account keys renew -g {} -n {} --key primary'.format(rg, account))
         renewed_key1 = keys_result['keys'][0]
         renewed_key2 = keys_result['keys'][1]
         assert key1 != renewed_key1
-        assert key2 != renewed_key2
+        assert key2 == renewed_key2
         key1 = renewed_key1
         keys_result = s.cmd('storage account keys renew -g {} -n {} --key secondary'.format(rg, account))
         assert key1 == keys_result['keys'][0]
@@ -164,26 +164,26 @@ class StorageBlobScenarioTest(StorageAccountVCRTestBase):
             raise CLIError('Download failed. Test failed!')
 
         # test lease operations
-        s.cmd('storage blob lease acquire --lease-duration 60 -n {} -c {} --if-modified-since {} --proposed-lease-id {}'.format(blob, container, date, proposed_lease_id))
+        s.cmd('storage blob lease acquire --lease-duration 60 -b {} -c {} --if-modified-since {} --proposed-lease-id {}'.format(blob, container, date, proposed_lease_id))
         s.cmd('storage blob show -n {} -c {}'.format(blob, container), checks=[
             JMESPathCheck('properties.lease.duration', 'fixed'),
             JMESPathCheck('properties.lease.state', 'leased'),
             JMESPathCheck('properties.lease.status', 'locked')
         ])
-        s.cmd('storage blob lease change -n {} -c {} --lease-id {} --proposed-lease-id {}'.format(blob, container, proposed_lease_id, new_lease_id))
-        s.cmd('storage blob lease renew -n {} -c {} --lease-id {}'.format(blob, container, new_lease_id))
+        s.cmd('storage blob lease change -b {} -c {} --lease-id {} --proposed-lease-id {}'.format(blob, container, proposed_lease_id, new_lease_id))
+        s.cmd('storage blob lease renew -b {} -c {} --lease-id {}'.format(blob, container, new_lease_id))
         s.cmd('storage blob show -n {} -c {}'.format(blob, container), checks=[
             JMESPathCheck('properties.lease.duration', 'fixed'),
             JMESPathCheck('properties.lease.state', 'leased'),
             JMESPathCheck('properties.lease.status', 'locked')
         ])
-        s.cmd('storage blob lease break -n {} -c {} --lease-break-period 30'.format(blob, container))
+        s.cmd('storage blob lease break -b {} -c {} --lease-break-period 30'.format(blob, container))
         s.cmd('storage blob show -n {} -c {}'.format(blob, container), checks=[
             JMESPathCheck('properties.lease.duration', None),
             JMESPathCheck('properties.lease.state', 'breaking'),
             JMESPathCheck('properties.lease.status', 'locked')
         ])
-        s.cmd('storage blob lease release -n {} -c {} --lease-id {}'.format(blob,  container, new_lease_id))
+        s.cmd('storage blob lease release -b {} -c {} --lease-id {}'.format(blob,  container, new_lease_id))
         s.cmd('storage blob show -n {} -c {}'.format(blob, container), checks=[
             JMESPathCheck('properties.lease.duration', None),
             JMESPathCheck('properties.lease.state', 'available'),
@@ -223,26 +223,26 @@ class StorageBlobScenarioTest(StorageAccountVCRTestBase):
         s._storage_blob_scenario()
         
         # test lease operations
-        s.cmd('storage container lease acquire --lease-duration 60 -n {} --if-modified-since {} --proposed-lease-id {}'.format(container, date, proposed_lease_id))
+        s.cmd('storage container lease acquire --lease-duration 60 -c {} --if-modified-since {} --proposed-lease-id {}'.format(container, date, proposed_lease_id))
         s.cmd('storage container show --name {}'.format(container), checks=[
             JMESPathCheck('properties.lease.duration', 'fixed'),
             JMESPathCheck('properties.lease.state', 'leased'),
             JMESPathCheck('properties.lease.status', 'locked')
         ])
-        s.cmd('storage container lease change --name {} --lease-id {} --proposed-lease-id {}'.format(container, proposed_lease_id, new_lease_id))
-        s.cmd('storage container lease renew --name {} --lease-id {}'.format(container, new_lease_id))
+        s.cmd('storage container lease change -c {} --lease-id {} --proposed-lease-id {}'.format(container, proposed_lease_id, new_lease_id))
+        s.cmd('storage container lease renew -c {} --lease-id {}'.format(container, new_lease_id))
         s.cmd('storage container show -n {}'.format(container), checks=[
             JMESPathCheck('properties.lease.duration', 'fixed'),
             JMESPathCheck('properties.lease.state', 'leased'),
             JMESPathCheck('properties.lease.status', 'locked')
         ])
-        s.cmd('storage container lease break --name {} --lease-break-period 30'.format(container))
+        s.cmd('storage container lease break -c {} --lease-break-period 30'.format(container))
         s.cmd('storage container show --name {}'.format(container), checks=[
             JMESPathCheck('properties.lease.duration', None),
             JMESPathCheck('properties.lease.state', 'breaking'),
             JMESPathCheck('properties.lease.status', 'locked')
         ])
-        s.cmd('storage container lease release -n {} --lease-id {}'.format(container, new_lease_id))
+        s.cmd('storage container lease release -c {} --lease-id {}'.format(container, new_lease_id))
         s.cmd('storage container show --name {}'.format(container), checks=[
             JMESPathCheck('properties.lease.duration', None),
             JMESPathCheck('properties.lease.state', 'available'),

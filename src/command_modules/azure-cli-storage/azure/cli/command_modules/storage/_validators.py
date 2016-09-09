@@ -14,12 +14,16 @@ from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_
 from azure.cli.core.commands.validators import validate_key_value_pairs
 
 from azure.mgmt.storage import StorageManagementClient
+from azure.mgmt.storage.models import CustomDomain
 from azure.storage.models import ResourceTypes, Services
 from azure.storage.table import TablePermissions, TablePayloadFormat
+from azure.storage.blob import Include, PublicAccess
 from azure.storage.blob.baseblobservice import BaseBlobService
 from azure.storage.blob.models import ContentSettings as BlobContentSettings
 from azure.storage.file import FileService
 from azure.storage.file.models import ContentSettings as FileContentSettings
+
+storage_account_key_options = {'primary': 'key1', 'secondary': 'key2'}
 
 # region PARAMETER VALIDATORS
 
@@ -110,6 +114,9 @@ def validate_source_uri(namespace):
 
     namespace.copy_source = uri
 
+def validate_blob_type(namespace):
+    namespace.blob_type = 'page' if namespace.file_path.endswith('.vhd') else 'block'
+
 def get_content_setting_validator(settings_class, update):
     def _class_name(class_type):
         return class_type.__module__ + "." + class_type.__class__.__name__
@@ -164,6 +171,13 @@ def get_content_setting_validator(settings_class, update):
         ns['content_settings'] = new_props
         namespace = argparse.Namespace(**ns)
     return validator
+
+def validate_custom_domain(namespace):
+    if namespace.custom_domain:
+        namespace.custom_domain = CustomDomain(namespace.custom_domain, namespace.subdomain)
+    if namespace.subdomain and not namespace.custom_domain:
+        raise ValueError("must specify '--custom-domain' to use the '--use-subdomain' flag")
+    del namespace.subdomain
 
 def validate_encryption(namespace):
     ''' Builds up the encryption object for storage account operations based on the
@@ -230,6 +244,17 @@ def get_file_path_validator(default_file_param=None):
         del namespace.path
     return validator
 
+def validate_included_datasets(namespace):
+    if namespace.include:
+        include = namespace.include
+        if set(include) - set('cms'):
+            help_string = '(c)opy-info (m)etadata (s)napshots'
+            raise ValueError('valid values are {} or a combination thereof.'.format(help_string))
+        namespace.include = Include('s' in include, 'm' in include, False, 'c' in include)
+
+def validate_key(namespace):
+    namespace.key_name = storage_account_key_options[namespace.key_name]
+
 def validate_metadata(namespace):
     if namespace.metadata:
         namespace.metadata = dict(x.split('=', 1) for x in namespace.metadata)
@@ -259,6 +284,25 @@ def table_permission_validator(namespace):
             help_string = '(r)ead/query (a)dd (u)pdate (d)elete'
             raise ValueError('valid values are {} or a combination thereof.'.format(help_string))
         namespace.permission = TablePermissions(_str=namespace.permission)
+
+public_access_types = {'off': None, 'blob': PublicAccess.Blob, 'container': PublicAccess.Container}
+def validate_public_access(namespace):
+    if namespace.public_access:
+        namespace.public_access = public_access_types[namespace.public_access.lower()]
+
+        if hasattr(namespace, 'signed_identifiers'):
+            # must retrieve the existing ACL to simulate a patch operation because these calls
+            # are needlessly conflated
+            ns = vars(namespace)
+            validate_client_parameters(namespace)
+            account = ns.get('account_name')
+            key = ns.get('account_key')
+            cs = ns.get('connection_string')
+            sas = ns.get('sas_token')
+            client = get_data_service_client(BaseBlobService, account, key, cs, sas)
+            container = ns.get('container_name')
+            lease_id = ns.get('lease_id')
+            ns['signed_identifiers'] = client.get_container_acl(container, lease_id=lease_id)
 
 def validate_select(namespace):
     if namespace.select:
