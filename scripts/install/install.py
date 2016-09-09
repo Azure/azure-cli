@@ -83,12 +83,13 @@ def create_virtualenv(tmp_dir, version, install_dir):
     working_dir = os.path.join(tmp_dir, virtualenv_dir_name)
     exec_command('{0} virtualenv.py --python {0} {1}'.format(sys.executable, install_dir), cwd=working_dir)
 
-def get_pip_install_command(module_name, path_to_pip, tmp_dir, pre_release):
+def get_pip_install_command(module_name, path_to_pip, tmp_dir, pre_release, upgrade):
     version = '==' + PACKAGE_VERSION if PACKAGE_VERSION else ''
     param_extra_index_url = '--extra-index-url '+PRIVATE_PYPI_URL if PRIVATE_PYPI_URL else ''
     param_trusted_host = '--trusted-host '+PRIVATE_PYPI_HOST if PRIVATE_PYPI_HOST else ''
     param_pre_release = '--pre' if pre_release else ''
-    return '{pip} install --cache-dir {cache_dir} {module_name}{version} {param_extra_index_url} {param_trusted_host} {param_pre_release}'.format(
+    param_upgrade = '--upgrade' if upgrade else ''
+    return '{pip} install --cache-dir {cache_dir} {module_name}{version} {param_extra_index_url} {param_trusted_host} {param_pre_release} {param_upgrade}'.format(
         pip=path_to_pip,
         cache_dir=tmp_dir,
         module_name=module_name,
@@ -96,11 +97,12 @@ def get_pip_install_command(module_name, path_to_pip, tmp_dir, pre_release):
         param_extra_index_url=param_extra_index_url,
         param_trusted_host=param_trusted_host,
         param_pre_release=param_pre_release,
+        param_upgrade=param_upgrade,
     )
 
 def install_cli(install_dir, tmp_dir):
     path_to_pip = os.path.join(install_dir, BIN_DIR_NAME, 'pip')
-    exec_command(get_pip_install_command('azure-cli', path_to_pip, tmp_dir, True))
+    exec_command(get_pip_install_command('azure-cli', path_to_pip, tmp_dir, True, True))
 
 def create_executable(exec_dir, install_dir):
     create_dir(exec_dir)
