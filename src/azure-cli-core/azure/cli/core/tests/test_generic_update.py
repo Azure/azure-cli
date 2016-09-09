@@ -164,6 +164,38 @@ class GenericUpdateTest(unittest.TestCase):
                             "item with value 'a' doesn\'t exist for key 'f' on [2]",
                             'no match found when indexing by key and value')
 
+    def test_generic_update_filter_index_complex(self):
+        my_obj = {
+            'myObject': {
+                'myCollection': [
+                    {
+                        'name': 'camelCase',
+                        'val': ''
+                    },
+                    {
+                        'name': '1.2.3.4',
+                        'val': ''
+                    }
+                ]
+            }
+        }
+        def my_get(): #pylint: disable=unused-argument
+            return my_obj
+
+        def my_set(**kwargs): #pylint:disable=unused-argument
+            return my_obj
+
+        config = Configuration([])
+        app = Application(config)
+
+        cli_generic_update_command('gencommand', my_get, my_set)
+        
+        my_obj = app.execute('gencommand --set myObject.myCollection[name=camelCase].val=success'.split()).result
+        self.assertEqual(my_obj['myObject']['myCollection'][0]['val'], 'success', 'Allow camel case property names')
+
+        my_obj = app.execute('gencommand --set myObject.myCollection[name=1.2.3.4].val=1.2.3.4'.split()).result
+        self.assertEqual(my_obj['myObject']['myCollection'][1]['val'], '1.2.3.4', 'Allow periods in value')
+
     def test_generic_update_ids(self):
         my_objs = [
             {

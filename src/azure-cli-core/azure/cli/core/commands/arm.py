@@ -320,11 +320,11 @@ def set_properties(instance, expression):
         if index_value is not None:
             instance[index_value] = value
         elif isinstance(instance, dict):
-            instance[name] = value
+            instance[make_camel_case(name)] = value
         elif isinstance(instance, list):
             show_options(instance, name, key.split('.'))
         elif hasattr(instance, name):
-            setattr(instance, name, value)
+            setattr(instance, make_camel_case(name), value)
         else:
             logger.warning(
                 "Property '%s' not found on %s. Update may be ignored.", name, parent_name)
@@ -400,15 +400,16 @@ def make_camel_case(s):
         return parts[0].lower() + ''.join(p.capitalize() for p in parts[1:])
     return s
 
+internal_path_regex = r'(\[.*\])|([^.]+)'
 def _get_internal_path(path):
     # to handle indexing in the same way as other dot qualifiers,
     # we split paths like foo[0][1] into foo.[0].[1]
-    _path = path.split('.') \
-        if '.[' in path \
-        else path.replace('[', '.[').split('.')
+    path = path.replace('.[', '[').replace('[', '.[')
+    _path = re.findall(internal_path_regex, path)
     final_paths = []
     for x in _path:
-        final_paths.append(x if x.startswith('[') else make_snake_case(x))
+        comp = x[0] or x[1]
+        final_paths.append(comp if comp.startswith('[') else make_snake_case(comp))
     return final_paths
 
 def _get_name_path(path):
@@ -439,10 +440,10 @@ def _update_instance(instance, part, path):
                     raise CLIError('index {} doesn\'t exist on {}'.format(
                         index_value, make_camel_case(path[-2])))
         elif isinstance(instance, dict):
-            instance = instance[part]
+            instance = instance[make_camel_case(part)]
         else:
             instance = getattr(instance, part)
-    except (AttributeError, KeyError):
+    except (AttributeError, KeyError) as ex:
         show_options(instance, part, path)
     return instance
 
