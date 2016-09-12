@@ -971,9 +971,9 @@ class NetworkDnsScenarioTest(ResourceGroupVCRTestBase):
 
         self.cmd('network dns zone create -n {} -g {}'.format(zone_name, rg))
 
-        base_records = 2
+        base_record_sets = 2
         self.cmd('network dns zone show -n {} -g {}'.format(zone_name, rg), checks=[
-            JMESPathCheck('numberOfRecordSets', base_records)
+            JMESPathCheck('numberOfRecordSets', base_record_sets)
             ])
 
         args = {
@@ -983,12 +983,12 @@ class NetworkDnsScenarioTest(ResourceGroupVCRTestBase):
             'mx': '--exchange 12 --preference 13',
             'ns': '--dname foobar.com',
             'ptr': '--dname foobar.com',
-            'soa': '--email foo.com --expire-time 30 --host ns.com --minimum-ttl 20 --refresh-time 60 --retry-time 90 --serial-number 123',
+            'soa': '--email foo.com --expire-time 30 --minimum-ttl 20 --refresh-time 60 --retry-time 90 --serial-number 123',
             'srv': '--port 1234 --priority 1 --target target.com --weight 50',
             'txt': '--value some_text'
         }
 
-        record_types = ['a', 'aaaa', 'cname', 'mx', 'ns', 'ptr', 'soa', 'srv', 'txt']
+        record_types = ['a', 'aaaa', 'cname', 'mx', 'ns', 'ptr', 'srv', 'txt']
 
         for t in record_types:
             self.cmd('network dns record-set create -n myrs{0} -g {1} --zone-name {2} --type {0}'
@@ -997,10 +997,12 @@ class NetworkDnsScenarioTest(ResourceGroupVCRTestBase):
                      .format(t, rg, zone_name, args[t]))
         self.cmd('network dns record {0} add -g {1} --zone-name {2} --record-set-name myrs{0} {3}'
                  .format('a', rg, zone_name, '--ipv4-address 10.0.0.11'))
+        self.cmd('network dns record update-soa -g {0} --zone-name {1} {2}'
+                     .format(rg, zone_name, args['soa']))
 
-        typed_records = 9
+        typed_record_sets = len(record_types)
         self.cmd('network dns zone show -n {} -g {}'.format(zone_name, rg), checks=[
-            JMESPathCheck('numberOfRecordSets', base_records + typed_records)
+            JMESPathCheck('numberOfRecordSets', base_record_sets + typed_record_sets)
             ])
         self.cmd('network dns record-set show -n myrs{0} -g {1} --type {0} --zone-name {2}'
                  .format('a', rg, zone_name), checks=[
