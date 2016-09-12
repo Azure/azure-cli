@@ -1,4 +1,3 @@
-#---------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 #---------------------------------------------------------------------------------------------
@@ -301,6 +300,14 @@ register_cli_argument('network vnet create', 'dns_servers', nargs='+')
 
 register_cli_argument('network vnet subnet', 'subnet_name', arg_type=subnet_name_type, options_list=('--name', '-n'), id_part='child_name')
 register_cli_argument('network vnet update', 'address_prefixes', nargs='+')
+
+register_cli_argument('network vnet peering', 'virtual_network_name', virtual_network_name_type)
+register_cli_argument('network vnet peering', 'virtual_network_peering_name', options_list=('--name', '-n'), help='The name of the VNET peering.', id_part='child_name')
+register_cli_argument('network vnet peering', 'remote_virtual_network', options_list=('--remote-vnet-id',), help='ID of the remote VNET.')
+register_cli_argument('network vnet peering create', 'allow_virtual_network_access', options_list=('--allow-vnet-access',), action='store_true', help='Allows VMs in the remote VNET to access all VMs in the local VNET.')
+register_cli_argument('network vnet peering create', 'allow_gateway_transit', action='store_true', help='Allows gateway link to be used in the remote VNET.')
+register_cli_argument('network vnet peering create', 'allow_forwarded_traffic', action='store_true', help='Allows forwarded traffic from the VMs in the remote VNET.')
+register_cli_argument('network vnet peering create', 'use_remote_gateways', action='store_true', help='Allows VNET to use the remote VNET\'s gateway. Remote VNET gateway must have --allow-gateway-transit enabled for remote peering. Only 1 peering can have this flag enabled. Cannot be set if the VNET already has a gateway.')
 
 register_cli_argument('network vnet subnet', 'address_prefix', metavar='PREFIX', help='the address prefix in CIDR format.')
 register_cli_argument('network vnet subnet', 'virtual_network_name', virtual_network_name_type)

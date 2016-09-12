@@ -634,6 +634,31 @@ class NetworkNicSubresourceScenarioTest(ResourceGroupVCRTestBase):
         self.cmd('network nic ip-config update -g {} --nic-name {} -n {} --subnet {} --vnet-name {}'.format(rg, nic, config, subnet, vnet),
             checks=JMESPathCheck("subnet.contains(id, '{}')".format(subnet), True))
 
+class NetworkNicConvenienceCommandsScenarioTest(ResourceGroupVCRTestBase):
+
+    def __init__(self, test_method):
+        super(NetworkNicConvenienceCommandsScenarioTest, self).__init__(__file__, test_method)
+        self.resource_group = 'cli_nic_convenience_test'
+        self.vm_name = 'conveniencevm1'
+
+    def test_network_nic_convenience_commands(self):
+        self.execute()
+
+    def set_up(self):
+        super(NetworkNicConvenienceCommandsScenarioTest, self).set_up()
+        rg = self.resource_group
+        vm = self.vm_name
+        self.cmd('vm create -g {} -n {} --image UbuntuLTS --admin-password aBcD1234!@#$ --authentication-type password'.format(rg, vm))
+
+    def body(self):
+        rg = self.resource_group
+        vm = self.vm_name
+        nic_id = self.cmd('vm show -g {} -n {} --query "networkProfile.networkInterfaces[0].id"'.format(rg, vm))
+        self.cmd('network nic list-effective-nsg --ids {}'.format(nic_id),
+            checks=JMESPathCheck("length(value)", 1))
+        self.cmd('network nic show-effective-route-table --ids {}'.format(nic_id),
+            checks=JMESPathCheck("length(value)", 7))
+
 class NetworkSecurityGroupScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
@@ -774,9 +799,15 @@ class NetworkVNetScenarioTest(ResourceGroupVCRTestBase):
 
     def body(self):
         self.cmd('network vnet create --resource-group {} --name {}'.format(self.resource_group, self.vnet_name), checks=[
-                JMESPathCheck('newVNet.provisioningState', 'Succeeded'), # verify the deployment result
-                JMESPathCheck('newVNet.addressSpace.addressPrefixes[0]', '10.0.0.0/16')
-            ])
+            JMESPathCheck('newVNet.provisioningState', 'Succeeded'), # verify the deployment result
+            JMESPathCheck('newVNet.addressSpace.addressPrefixes[0]', '10.0.0.0/16')
+        ])
+
+        self.cmd('network vnet check-ip-address -g {} -n {} --ip-address 10.0.0.50'.format(self.resource_group, self.vnet_name),
+            checks=JMESPathCheck('available', True))
+
+        self.cmd('network vnet check-ip-address -g {} -n {} --ip-address 10.0.0.0'.format(self.resource_group, self.vnet_name),
+            checks=JMESPathCheck('available', False))
 
         self.cmd('network vnet list', checks=[
             JMESPathCheck('type(@)', 'array'),
@@ -827,13 +858,66 @@ class NetworkVNetScenarioTest(ResourceGroupVCRTestBase):
         # Expecting the vnet we deleted to not be listed after delete
         self.cmd('network vnet list --resource-group {}'.format(self.resource_group), NoneCheck())
 
+class NetworkVNetPeeringScenarioTest(ResourceGroupVCRTestBase):
+    def __init__(self, test_method):
+        super(NetworkVNetPeeringScenarioTest, self).__init__(__file__, test_method, skip_teardown=True)
+        self.resource_group = 'cli_vnet_peering_test'
+
+    def test_network_vnet_peering(self):
+        self.execute()
+
+    def set_up(self):
+        super(NetworkVNetPeeringScenarioTest, self).set_up()
+        rg = self.resource_group
+        # create two vnets with non-overlapping prefixes
+        self.cmd('network vnet create -g {} -n vnet1'.format(rg))
+        self.cmd('network vnet create -g {} -n vnet2 --subnet-name GatewaySubnet --address-prefix 11.0.0.0/16 --subnet-prefix 11.0.0.0/24'.format(rg))
+        # create supporting resources for gateway
+        self.cmd('network public-ip create -g {} -n ip1'.format(rg))
+        ip_id = self.cmd('network public-ip show -g {} -n ip1 --query id'.format(rg))
+        subnet_id = self.cmd('network vnet subnet show -g {} -n GatewaySubnet --vnet-name vnet2 --query id'.format(rg))
+        # create the gateway on vnet2
+        self.cmd('network vpn-gateway create -g {} -n gateway1 --public-ip-address {} --subnet-id {}'.format(rg, ip_id, subnet_id))
+
+    def body(self):
+        rg = self.resource_group
+        vnet1_id = self.cmd('network vnet show -g {} -n vnet1 --query id'.format(rg))
+        vnet2_id = self.cmd('network vnet show -g {} -n vnet2 --query id'.format(rg))
+        # set up gateway sharing from vnet1 to vnet2
+        self.cmd('network vnet peering create -g {} -n peering2 --vnet-name vnet2 --remote-vnet-id {} --allow-gateway-transit'.format(rg, vnet1_id), checks=[
+            JMESPathCheck('allowGatewayTransit', True),
+            JMESPathCheck('remoteVirtualNetwork.id', vnet1_id),
+            JMESPathCheck('peeringState', 'Initiated')
+        ])
+        self.cmd('network vnet peering create -g {} -n peering1 --vnet-name vnet1 --remote-vnet-id {} --use-remote-gateways --allow-forwarded-traffic'.format(rg, vnet2_id), checks=[
+            JMESPathCheck('useRemoteGateways', True),
+            JMESPathCheck('remoteVirtualNetwork.id', vnet2_id),
+            JMESPathCheck('peeringState', 'Connected'),
+            JMESPathCheck('allowVirtualNetworkAccess', False)
+        ])
+        self.cmd('network vnet peering show -g {} -n peering1 --vnet-name vnet1'.format(rg),
+            checks=JMESPathCheck('name', 'peering1'))
+        self.cmd('network vnet peering list -g {} --vnet-name vnet2'.format(rg), checks=[
+            JMESPathCheck('[0].name', 'peering2'),
+            JMESPathCheck('length(@)', 1)
+        ])
+        self.cmd('network vnet peering update -g {} -n peering1 --vnet-name vnet1 --set useRemoteGateways=false'.format(rg), checks=[
+            JMESPathCheck('useRemoteGateways', False),
+            JMESPathCheck('allowForwardedTraffic', True)
+        ])
+        self.cmd('network vnet peering delete -g {} -n peering1 --vnet-name vnet1'.format(rg))
+        self.cmd('network vnet peering list -g {} --vnet-name vnet1'.format(rg), checks=NoneCheck())
+        # must delete the second peering and the gateway or the resource group delete will fail
+        self.cmd('network vnet peering delete -g {} -n peering2 --vnet-name vnet2'.format(rg))
+        self.cmd('network vpn-gateway delete -g {} -n gateway1'.format(rg))
+
 class NetworkSubnetSetScenarioTest(ResourceGroupVCRTestBase):
     def __init__(self, test_method):
         super(NetworkSubnetSetScenarioTest, self).__init__(__file__, test_method)
         self.resource_group = 'cli_subnet_set_test'
         self.vnet_name = 'test-vnet2'
 
-    def test_subnet_set(self):
+    def test_network_subnet_set(self):
         self.execute()
 
     def body(self):

@@ -12,9 +12,10 @@ from azure.mgmt.network.models import \
     (Subnet, SecurityRule, PublicIPAddress, NetworkSecurityGroup, InboundNatRule, InboundNatPool,
      FrontendIPConfiguration, BackendAddressPool, Probe, LoadBalancingRule,
      NetworkInterfaceIPConfiguration, Route, VpnClientRootCertificate, VpnClientConfiguration,
-     AddressSpace, VpnClientRevokedCertificate, ExpressRouteCircuitAuthorization, SubResource)
+     AddressSpace, VpnClientRevokedCertificate, ExpressRouteCircuitAuthorization, SubResource,
+     VirtualNetworkPeering)
 
-from azure.cli.core.commands.arm import parse_resource_id, is_valid_resource_id
+from azure.cli.core.commands.arm import parse_resource_id, is_valid_resource_id, resource_id
 from azure.cli.core._util import CLIError
 from azure.cli.command_modules.network._factory import _network_client_factory
 from azure.cli.command_modules.network.mgmt_app_gateway.lib.operations.app_gateway_operations \
@@ -653,6 +654,32 @@ def update_nsg_rule(instance, protocol=None, source_address_prefix=None,
 update_nsg_rule.__doc__ = SecurityRule.__doc__
 #endregion
 
+#region Vnet Peering commands
+
+def create_vnet_peering(resource_group_name, virtual_network_name, virtual_network_peering_name,
+                        remote_virtual_network, allow_virtual_network_access=False,
+                        allow_forwarded_traffic=False, allow_gateway_transit=False,
+                        use_remote_gateways=False):
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    peering = VirtualNetworkPeering(
+        id=resource_id(
+            subscription=get_subscription_id(),
+            resource_group=resource_group_name,
+            namespace='Microsoft.Network',
+            type='virtualNetworks',
+            name=virtual_network_name),
+        name=virtual_network_peering_name,
+        remote_virtual_network=SubResource(remote_virtual_network),
+        allow_virtual_network_access=allow_virtual_network_access,
+        allow_gateway_transit=allow_gateway_transit,
+        allow_forwarded_traffic=allow_forwarded_traffic,
+        use_remote_gateways=use_remote_gateways)
+    ncf = _network_client_factory()
+    return ncf.virtual_network_peerings.create_or_update(
+        resource_group_name, virtual_network_name, virtual_network_peering_name, peering)
+create_vnet_peering.__doc__ = VirtualNetworkPeering.__doc__
+#endregion
+
 #region Vnet/Subnet commands
 
 def update_vnet(instance, address_prefixes=None):
@@ -671,8 +698,8 @@ def _set_route_table(ncf, resource_group_name, route_table, subnet):
         is_id = is_valid_resource_id(route_table)
         rt = None
         if is_id:
-            resource_id = parse_resource_id(route_table)
-            rt = ncf.route_tables.get(resource_id['resource_group'], resource_id['name'])
+            res_id = parse_resource_id(route_table)
+            rt = ncf.route_tables.get(res_id['resource_group'], res_id['name'])
         else:
             rt = ncf.route_tables.get(resource_group_name, route_table)
         subnet.route_table = rt
