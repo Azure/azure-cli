@@ -534,7 +534,7 @@ def _is_group(parser):
     return getattr(parser, 'choices', None) is not None
 
 def _get_parser_name(parser):
-    return (parser._prog_prefix if hasattr(parser, '_prog_prefix') else parser.prog).lstrip('az ') #pylint:disable=protected-access
+    return (parser._prog_prefix if hasattr(parser, '_prog_prefix') else parser.prog)[len('az '):] #pylint:disable=protected-access
 
 if __name__ == '__main__':
     unittest.main()
