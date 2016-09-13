@@ -15,6 +15,8 @@ from azure.cli.core._util import CLIError
 
 #pylint:disable=invalid-sequence-index
 #pylint:disable=unsubscriptable-object
+#pylint:disable=line-too-long
+#pylint:disable=too-few-public-methods
 
 class ListTestObject(object):
     def __init__(self, val):
@@ -28,7 +30,7 @@ class ObjectTestObject(object):
     def __init__(self, str_val, int_val, bool_val):
         self.my_string = str(str_val)
         self.my_int = int(int_val)
-        self.my_bool = bool(bool_val)    
+        self.my_bool = bool(bool_val)
 
 class TestObject(object):
     def __init__(self):
@@ -75,7 +77,7 @@ class GenericUpdateTest(unittest.TestCase):
         # Test simplest ways of setting properties
         app.execute('update-obj --set myProp=newValue'.split())
         self.assertEqual(my_obj.my_prop, 'newValue', 'set simple property')
-        
+
         app.execute('update-obj --set myProp=val3'.split())
         self.assertEqual(my_obj.my_prop, 'val3', 'set simple property again')
 
@@ -153,8 +155,8 @@ class GenericUpdateTest(unittest.TestCase):
             except CLIError as err:
                 try:
                     self.assertEqual(error in str(err), True, message)
-                except AssertionError as assert_err:
-                    # give the actual conflicting messages instead of a very non-useful 
+                except AssertionError:
+                    # give the actual conflicting messages instead of a very non-useful
                     # False != True.
                     raise AssertionError('Expected: {}\nActual: {}'.format(error, str(err)))
             else:

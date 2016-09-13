@@ -440,7 +440,7 @@ def _get_name_path(path):
     return pathlist.pop(), pathlist
 
 def _update_instance(instance, part, path):
-    try:
+    try: # pylint: disable=too-many-nested-blocks
         index = index_or_filter_regex.match(part)
         if index:
             if '=' in index.group(1):
