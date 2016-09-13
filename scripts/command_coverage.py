@@ -7,7 +7,7 @@ from __future__ import print_function
 import os
 import sys
 from subprocess import check_call, CalledProcessError
-import azure.cli.application as application
+import azure.cli.core.application as application
 
 COVERAGE_FILE = 'command_coverage.txt'
 DEVNULL = open(os.devnull, 'w')

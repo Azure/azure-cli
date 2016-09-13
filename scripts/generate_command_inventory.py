@@ -8,7 +8,7 @@ import json
 import re
 import sys
 
-from azure.cli.application import Configuration
+from azure.cli.core.application import Configuration
 
 class Exporter(json.JSONEncoder):
 

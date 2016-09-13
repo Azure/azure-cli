@@ -10,7 +10,7 @@ import re
 import subprocess
 import sys
 
-from azure.cli.application import Configuration
+from azure.cli.core.application import Configuration
 
 class Exporter(json.JSONEncoder):
 
