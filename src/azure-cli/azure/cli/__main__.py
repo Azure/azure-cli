@@ -27,5 +27,7 @@ try:
             args = comp_line.split()[1:]
 
     sys.exit(azure.cli.main.main(args))
+except KeyboardInterrupt:
+    sys.exit(1)
 finally:
     telemetry_flush()
