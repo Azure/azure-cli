@@ -12,7 +12,7 @@ import re
 import types
 import sys
 
-from azure.cli.application import APPLICATION, Application
+from azure.cli.core.application import APPLICATION, Application
 
 class Exporter(json.JSONEncoder):
 
