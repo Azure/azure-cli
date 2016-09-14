@@ -27,6 +27,7 @@ DEPENDENCIES = [
     'azure==2.0.0rc6',
     'azure-cli-core',
     'azure-mgmt-web==0.30.0rc6',
+    'pycurl'
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
@@ -48,11 +49,7 @@ setup(
         'azure.cli.command_modules',
     ],
     packages=[
-        'azure.cli.command_modules.webapp',
-        'azure.cli.command_modules.webapp.mgmt_webapp',
-        'azure.cli.command_modules.webapp.mgmt_webapp.lib',
-        'azure.cli.command_modules.webapp.mgmt_webapp.lib.models',
-        'azure.cli.command_modules.webapp.mgmt_webapp.lib.operations',
+        'azure.cli.command_modules.webapp'
     ],
     install_requires=DEPENDENCIES,
 )
