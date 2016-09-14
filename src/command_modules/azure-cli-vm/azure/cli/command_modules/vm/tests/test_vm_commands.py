@@ -719,7 +719,7 @@ class VMScaleSetCreateOptions(ResourceGroupVCRTestBase):
         self.cmd('vmss show -n {vmss_name} -g {resource_group} --instance-id 0'.format(vmss_name=vmss_name, resource_group=self.resource_group),
             checks=JMESPathCheck('osProfile.windowsConfiguration.provisionVmAgent', True))
 
-# TODO Add this test once deployment errors resolved
+# TODO Add this test once deployment errors resolved (azure-cli issue#879)
 # class VMSSCreateNoneOptionsTest(ResourceGroupVCRTestBase): #pylint: disable=too-many-instance-attributes
 
 #     def __init__(self, test_method):
@@ -748,7 +748,7 @@ class VMScaleSetCreateOptions(ResourceGroupVCRTestBase):
 #             NoneCheck()
 #         ], allowed_exceptions='was not found')
 
-# TODO Add this test once deployment errors resolved
+# TODO Add this test once deployment errors resolved (azure-cli issue#879)
 # class VMScaleSetCreateExistingOptions(ResourceGroupVCRTestBase):
 #     def __init__(self, test_method):
 #         super(VMScaleSetCreateExistingOptions, self).__init__(__file__, test_method)
@@ -791,7 +791,7 @@ class VMScaleSetCreateOptions(ResourceGroupVCRTestBase):
 #         self.cmd('network vnet show --name {vnet_name} -g {resource_group}'.format(resource_group=self.resource_group, vnet_name=vnet_name),
 #             checks=JMESPathCheck('subnets[0].ipConfigurations[0].id.contains(@, \'{vmss_name}\')'.format(vmss_name=vmss_name), True))
 
-# TODO Add this test once deployment errors resolved
+# TODO Add this test once deployment errors resolved (azure-cli issue#879)
 # class VMScaleSetNicScenarioTest(ResourceGroupVCRTestBase):
 
 #     def __init__(self, test_method):
