@@ -202,7 +202,7 @@ class NetworkExpressRouteScenarioTest(ResourceGroupVCRTestBase):
 class NetworkExpressRouteCircuitScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-         # The resources for this test did not exist so the commands will return 404 errors.
+         # TODO The resources for this test did not exist so the commands will return 404 errors.
          # So this test is for the command execution itself.
         super(NetworkExpressRouteCircuitScenarioTest, self).__init__(__file__, test_method)
         self.resource_group = 'express_route_circuit_scenario'
