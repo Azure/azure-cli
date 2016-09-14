@@ -48,7 +48,7 @@ The Azure Python CLI projects sources are located on GitHub (https://github.com/
   Open Bash or zsh window and run:
   
   ```Shell
-  source ./az.completion.sh
+  source az.completion.sh
   ```
 
 ##Configuring your IDE
