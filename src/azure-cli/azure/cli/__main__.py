@@ -8,7 +8,8 @@ import os
 
 import azure.cli.main
 
-from azure.cli.core._telemetry import init_telemetry, user_agrees_to_telemetry, telemetry_flush
+from azure.cli.core.telemetry import (init_telemetry, user_agrees_to_telemetry,
+                                      telemetry_flush)
 
 try:
     try:
@@ -28,4 +29,8 @@ try:
 
     sys.exit(azure.cli.main.main(args))
 finally:
-    telemetry_flush()
+    try:
+        if user_agrees_to_telemetry():
+            telemetry_flush()
+    except Exception: #pylint: disable=broad-except
+        pass
