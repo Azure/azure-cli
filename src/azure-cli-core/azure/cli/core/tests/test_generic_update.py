@@ -153,11 +153,7 @@ class GenericUpdateTest(unittest.TestCase):
             try:
                 app.execute(command.split())
             except CLIError as err:
-                try:
-                    self.assertEqual(error in str(err), True, message)
-                except AssertionError:
-                    # give the actual conflicting messages instead of a very non-useful
-                    # False != True.
+                if not error in str(err):
                     raise AssertionError('Expected: {}\nActual: {}'.format(error, str(err)))
             else:
                 raise AssertionError('exception not thrown')

@@ -327,12 +327,10 @@ def set_properties(instance, expression):
         else:
             # must be a property name
             name = make_snake_case(name)
-            if hasattr(instance, name):
-                setattr(instance, name, value)
-            else:
+            if not hasattr(instance, name):
                 logger.warning(
                     "Property '%s' not found on %s. Update may be ignored.", name, parent_name)
-                setattr(instance, name, value)
+            setattr(instance, name, value)
     except IndexError:
         raise CLIError('index {} doesn\'t exist on {}'.format(index_value, name))
     except (AttributeError, KeyError):
@@ -423,16 +421,17 @@ def make_camel_case(s):
         return parts[0].lower() + ''.join(p.capitalize() for p in parts[1:])
     return s
 
-internal_path_regex = r'(\[.*?\])|([^.]+)'
+internal_path_regex = re.compile(r'(\[.*?\])|([^.]+)')
 def _get_internal_path(path):
     # to handle indexing in the same way as other dot qualifiers,
     # we split paths like foo[0][1] into foo.[0].[1]
     path = path.replace('.[', '[').replace('[', '.[')
-    _path = re.findall(internal_path_regex, path)
+    path_segment_pairs = internal_path_regex.findall(path)
     final_paths = []
-    for x in _path:
-        comp = x[0] or x[1]
-        final_paths.append(comp if comp.startswith('[') else comp)
+    for regex_result in path_segment_pairs:
+        # the regex matches two capture group, one of which will be None
+        segment = regex_result[0] or regex_result[1]
+        final_paths.append(segment)
     return final_paths
 
 def _get_name_path(path):
