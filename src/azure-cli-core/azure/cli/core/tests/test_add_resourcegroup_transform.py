@@ -26,6 +26,7 @@ class TestResourceGroupTransform(unittest.TestCase):
     CORRECT_ID = "/subscriptions/00000000-0000-0000-0000-0000000000000/resourceGroups/REsourceGROUPname/providers/Microsoft.Compute/virtualMachines/vMName" # pylint: disable=line-too-long
     NON_RG_ID = "/subscriptions/00000000-0000-0000-0000-0000000000000/somethingElse/REsourceGROUPname/providers/Microsoft.Compute/virtualMachines/vMName" # pylint: disable=line-too-long
     BOGUS_ID = "|completely-bogus-id|"
+    DICT_ID = {'value': "/subscriptions/00000000-0000-0000-0000-0000000000000/resourceGroups/REsourceGROUPname/providers/Microsoft.Compute/virtualMachines/vMName"} # pylint: disable=line-too-long
 
     def test_split_correct_id(self):
         result = _parse_id(TestResourceGroupTransform.CORRECT_ID)
@@ -41,6 +42,10 @@ class TestResourceGroupTransform(unittest.TestCase):
     def test_split_bogus_resourcegroup_id(self):
         with self.assertRaises(IndexError):
             _parse_id(TestResourceGroupTransform.BOGUS_ID)
+
+    def test_split_dict_id(self):
+        with self.assertRaises(TypeError):
+            _parse_id(TestResourceGroupTransform.DICT_ID)
 
     def test_add_valid_resourcegroup_id(self):
         instance = {
