@@ -134,11 +134,13 @@ class NetworkPublicIpScenarioTest(ResourceGroupVCRTestBase):
         rg = s.resource_group
         s.cmd('network public-ip create -g {} -n {} --dns-name {} --allocation-method static'.format(rg, s.public_ip_name, s.dns), checks=[
             JMESPathCheck('publicIp.provisioningState', 'Succeeded'),
-            JMESPathCheck('publicIp.publicIPAllocationMethod', 'Static')
+            JMESPathCheck('publicIp.publicIPAllocationMethod', 'Static'),
+            JMESPathCheck('publicIp.dnsSettings.domainNameLabel', s.dns)
         ])
         s.cmd('network public-ip create -g {} -n {}'.format(rg, s.public_ip_no_dns_name), checks=[
             JMESPathCheck('publicIp.provisioningState', 'Succeeded'),
-            JMESPathCheck('publicIp.publicIPAllocationMethod', 'Dynamic')
+            JMESPathCheck('publicIp.publicIPAllocationMethod', 'Dynamic'),
+            JMESPathCheck('publicIp.dnsSettings', None)
         ])
         s.cmd('network public-ip list', checks=JMESPathCheck('type(@)', 'array'))
         ip_list = s.cmd('network public-ip list -g {}'.format(rg))
