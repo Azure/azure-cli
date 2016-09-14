@@ -20,6 +20,11 @@ class AdalAuthentication(Authentication):#pylint: disable=too-few-public-methods
         try:
             scheme, token = self._token_retriever()
         except adal.AdalError as err:
+            #pylint: disable=no-member
+            if (hasattr(err, 'error_response') and ('error_description' in err.error_response)
+                    and ('AADSTS70008:' in err.error_response['error_description'])):
+                raise CLIError("Credentials have expired due to inactivity. Please run 'az login'")
+
             raise CLIError(err)
 
         header = "{} {}".format(scheme, token)
