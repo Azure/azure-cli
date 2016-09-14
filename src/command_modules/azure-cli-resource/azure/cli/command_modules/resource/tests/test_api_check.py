@@ -9,22 +9,24 @@ try:
 except ImportError:
     from mock import MagicMock
 
-from azure.cli.command_modules.resource._validators import _resolve_api_version as resolve_api_version
-from azure.cli.command_modules.resource._validators import *
+# pylint: disable=line-too-long
+from azure.cli.command_modules.resource._validators import (validate_resource_type,
+                                                            validate_parent,
+                                                            _resolve_api_version as resolve_api_version)
 
-class TestApiCheck(unittest.TestCase):   
+class TestApiCheck(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
         pass
-        
+
     @classmethod
     def tearDownClass(cls):
         pass
 
     def setUp(self):
         pass
-        
+
     def tearDown(self):
         pass
 
@@ -62,7 +64,7 @@ class TestApiCheck(unittest.TestCase):
         client.providers.get.return_value = provider
         return client
 
-    def _get_mock_resource_type(self, name, api_versions):
+    def _get_mock_resource_type(self, name, api_versions): #pylint: disable=no-self-use
         rt = MagicMock()
         rt.resource_type = name
         rt.api_versions = api_versions

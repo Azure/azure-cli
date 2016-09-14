@@ -4,50 +4,38 @@
 #---------------------------------------------------------------------------------------------
 
 import unittest
+import collections
 from azure.cli.command_modules.resource.custom import _list_resources_odata_filter_builder
 from azure.cli.core.parser import IncorrectUsageError
 
-class TestListResources(unittest.TestCase):   
-
-    @classmethod
-    def setUpClass(cls):
-        pass
-        
-    @classmethod
-    def tearDownClass(cls):
-        pass
-
-    def setUp(self):
-        pass
-        
-    def tearDown(self):
-        pass
+class TestListResources(unittest.TestCase):
 
     def test_tag_name(self):
-        filter = _list_resources_odata_filter_builder(tag='foo')
-        self.assertEqual(filter, "tagname eq 'foo'")
+        odata_filter = _list_resources_odata_filter_builder(tag='foo')
+        self.assertEqual(odata_filter, "tagname eq 'foo'")
 
     def test_tag_name_starts_with(self):
-        filter = _list_resources_odata_filter_builder(tag='f*')
-        self.assertEqual(filter, "startswith(tagname, 'f')")
+        odata_filter = _list_resources_odata_filter_builder(tag='f*')
+        self.assertEqual(odata_filter, "startswith(tagname, 'f')")
 
     def test_tag_name_value_equals(self):
-        filter = _list_resources_odata_filter_builder(tag={'foo':'bar'})
-        self.assertEqual(filter, "tagname eq 'foo' and tagvalue eq 'bar'")
+        odata_filter = _list_resources_odata_filter_builder(tag={'foo':'bar'})
+        self.assertEqual(odata_filter, "tagname eq 'foo' and tagvalue eq 'bar'")
 
-    def test_name_location_equals(self):
-        filter = _list_resources_odata_filter_builder(
-            name='wonky', location='dory', resource_type='resource/type'
+    def test_name_location_equals_resource_type_equals(self):
+        ResourceType = collections.namedtuple('ResourceType', 'namespace type')
+        odata_filter = _list_resources_odata_filter_builder(
+            name='wonky', location='dory', resource_type=ResourceType(namespace='resource', type='type') #pylint: disable=line-too-long
         )
-        self.assertEqual(filter, "name eq 'wonky' and location eq 'dory' and resourceType eq 'resource/type'")
+        self.assertEqual(odata_filter, "name eq 'wonky' and location eq 'dory' and resourceType eq 'resource/type'") #pylint: disable=line-too-long
 
     def test_name_location_equals(self):
-        filter = _list_resources_odata_filter_builder(name='wonky', location='dory')
-        self.assertEqual(filter, "name eq 'wonky' and location eq 'dory'")
+        odata_filter = _list_resources_odata_filter_builder(name='wonky', location='dory')
+        self.assertEqual(odata_filter, "name eq 'wonky' and location eq 'dory'")
 
     def test_tag_and_name_fails(self):
         with self.assertRaises(IncorrectUsageError):
-            filter = _list_resources_odata_filter_builder(tag='foo=bar', name='should not work')
+            _list_resources_odata_filter_builder(tag='foo=bar', name='should not work')
 
 if __name__ == '__main__':
     unittest.main()
