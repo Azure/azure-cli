@@ -450,10 +450,10 @@ def transform_logging_list_output(result):
     for key in sorted(result.keys()):
         new_entry = OrderedDict()
         new_entry['Service'] = key
-        new_entry['Read'] = result[key]['read']
-        new_entry['Write'] = result[key]['write']
-        new_entry['Delete'] = result[key]['delete']
-        new_entry['RetentionPolicy'] = result[key]['retentionPolicy']['days']
+        new_entry['Read'] = str(result[key]['read'])
+        new_entry['Write'] = str(result[key]['write'])
+        new_entry['Delete'] = str(result[key]['delete'])
+        new_entry['RetentionPolicy'] = str(result[key]['retentionPolicy']['days'])
         new_result.append(new_entry)
     return new_result
 
@@ -466,12 +466,15 @@ def transform_metrics_list_output(result):
             new_entry = OrderedDict()
             new_entry['Service'] = service_name
             service_name = ''
-            new_entry['Interval'] = interval
-            new_entry['Enabled'] = item['enabled']
-            new_entry['IncludeApis'] = item['includeApis']
-            new_entry['RetentionPolicy'] = item['retentionPolicy']['days']
+            new_entry['Interval'] = str(interval)
+            new_entry['Enabled'] = str(item['enabled'])
+            new_entry['IncludeApis'] = str(item['includeApis'])
+            new_entry['RetentionPolicy'] = str(item['retentionPolicy']['days'])
             new_result.append(new_entry)
     return new_result
+
+def transform_storage_list_output(output):
+    return output['items']
 
 def transform_url(result):
     """ Ensures the resulting URL string does not contain extra / characters """

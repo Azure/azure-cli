@@ -131,11 +131,17 @@ class TableOutput(object): #pylint: disable=too-few-public-methods
     @staticmethod
     def _auto_table_item(item):
         new_entry = OrderedDict()
-        for k in item.keys():
-            if k in TableOutput.SKIP_KEYS:
-                continue
-            if item[k] and not isinstance(item[k], (list, dict, set)):
-                new_entry[TableOutput._capitalize_first_char(k)] = item[k]
+        try:
+            for k in item.keys():
+                if k in TableOutput.SKIP_KEYS:
+                    continue
+                if item[k] and not isinstance(item[k], (list, dict, set)):
+                    new_entry[TableOutput._capitalize_first_char(k)] = item[k]
+        except AttributeError:
+            # handles odd cases where a string/bool/etc. is returned
+            if isinstance(item, bool):
+                item = 'Success' if item else 'Fail'
+            new_entry['Result'] = item
         return new_entry
 
     @staticmethod

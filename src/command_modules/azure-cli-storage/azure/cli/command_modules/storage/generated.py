@@ -30,7 +30,7 @@ from azure.cli.command_modules.storage.custom import \
 from azure.cli.command_modules.storage._validators import \
     (transform_acl_list_output, transform_cors_list_output, transform_entity_query_output,
      transform_file_list_output, transform_logging_list_output, transform_metrics_list_output,
-     transform_url)
+     transform_url, transform_storage_list_output)
 
 # storage account commands
 factory = lambda kwargs: storage_client_factory().storage_accounts
@@ -48,7 +48,7 @@ cli_storage_data_plane_command('storage account generate-sas', CloudStorageAccou
 
 # container commands
 factory = blob_data_service_factory
-cli_storage_data_plane_command('storage container list', BlockBlobService.list_containers, factory)
+cli_storage_data_plane_command('storage container list', BlockBlobService.list_containers, factory, table_transformer=transform_storage_list_output)
 cli_storage_data_plane_command('storage container delete', BlockBlobService.delete_container, factory)
 cli_storage_data_plane_command('storage container show', BlockBlobService.get_container_properties, factory)
 cli_storage_data_plane_command('storage container create', BlockBlobService.create_container, factory)
@@ -69,7 +69,7 @@ cli_storage_data_plane_command('storage container policy list', list_acl_policie
 cli_storage_data_plane_command('storage container policy update', set_acl_policy, factory)
 
 # blob commands
-cli_storage_data_plane_command('storage blob list', BlockBlobService.list_blobs, factory)
+cli_storage_data_plane_command('storage blob list', BlockBlobService.list_blobs, factory, table_transformer=transform_storage_list_output)
 cli_storage_data_plane_command('storage blob delete', BlockBlobService.delete_blob, factory)
 cli_storage_data_plane_command('storage blob generate-sas', BlockBlobService.generate_blob_shared_access_signature, factory)
 cli_storage_data_plane_command('storage blob url', BlockBlobService.make_blob_url, factory, transform=transform_url)
@@ -92,7 +92,7 @@ cli_storage_data_plane_command('storage blob copy cancel', BlockBlobService.abor
 
 # share commands
 factory = file_data_service_factory
-cli_storage_data_plane_command('storage share list', FileService.list_shares, factory)
+cli_storage_data_plane_command('storage share list', FileService.list_shares, factory, table_transformer=transform_storage_list_output)
 cli_storage_data_plane_command('storage share create', FileService.create_share, factory)
 cli_storage_data_plane_command('storage share delete', FileService.delete_share, factory)
 cli_storage_data_plane_command('storage share generate-sas', FileService.generate_share_shared_access_signature, factory)
@@ -136,7 +136,7 @@ cli_storage_data_plane_command('storage file copy cancel', FileService.abort_cop
 factory = table_data_service_factory
 cli_storage_data_plane_command('storage table generate-sas', TableService.generate_table_shared_access_signature, factory)
 cli_storage_data_plane_command('storage table stats', TableService.get_table_service_stats, factory)
-cli_storage_data_plane_command('storage table list', TableService.list_tables, factory)
+cli_storage_data_plane_command('storage table list', TableService.list_tables, factory, table_transformer=transform_storage_list_output)
 cli_storage_data_plane_command('storage table create', TableService.create_table, factory)
 cli_storage_data_plane_command('storage table exists', TableService.exists, factory)
 cli_storage_data_plane_command('storage table delete', TableService.delete_table, factory)
@@ -158,7 +158,7 @@ cli_storage_data_plane_command('storage entity delete', TableService.delete_enti
 factory = queue_data_service_factory
 cli_storage_data_plane_command('storage queue generate-sas', QueueService.generate_queue_shared_access_signature, factory)
 cli_storage_data_plane_command('storage queue stats', QueueService.get_queue_service_stats, factory)
-cli_storage_data_plane_command('storage queue list', QueueService.list_queues, factory)
+cli_storage_data_plane_command('storage queue list', QueueService.list_queues, factory, table_transformer=transform_storage_list_output)
 cli_storage_data_plane_command('storage queue create', QueueService.create_queue, factory)
 cli_storage_data_plane_command('storage queue delete', QueueService.delete_queue, factory)
 cli_storage_data_plane_command('storage queue metadata show', QueueService.get_queue_metadata, factory)
