@@ -28,6 +28,8 @@ try:
             args = comp_line.split()[1:]
 
     sys.exit(azure.cli.main.main(args))
+except KeyboardInterrupt:
+    sys.exit(1)
 finally:
     try:
         if user_agrees_to_telemetry():
