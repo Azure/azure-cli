@@ -134,13 +134,11 @@ class NetworkPublicIpScenarioTest(ResourceGroupVCRTestBase):
         rg = s.resource_group
         s.cmd('network public-ip create -g {} -n {} --dns-name {} --allocation-method static'.format(rg, s.public_ip_name, s.dns), checks=[
             JMESPathCheck('publicIp.provisioningState', 'Succeeded'),
-            JMESPathCheck('publicIp.publicIPAllocationMethod', 'Static'),
-            JMESPathCheck('publicIp.dnsSettings.domainNameLabel', s.dns)
+            JMESPathCheck('publicIp.publicIPAllocationMethod', 'Static')
         ])
         s.cmd('network public-ip create -g {} -n {}'.format(rg, s.public_ip_no_dns_name), checks=[
             JMESPathCheck('publicIp.provisioningState', 'Succeeded'),
-            JMESPathCheck('publicIp.publicIPAllocationMethod', 'Dynamic'),
-            JMESPathCheck('publicIp.dnsSettings', None)
+            JMESPathCheck('publicIp.publicIPAllocationMethod', 'Dynamic')
         ])
         s.cmd('network public-ip list', checks=JMESPathCheck('type(@)', 'array'))
         ip_list = s.cmd('network public-ip list -g {}'.format(rg))
@@ -155,7 +153,7 @@ class NetworkPublicIpScenarioTest(ResourceGroupVCRTestBase):
         s.cmd('network public-ip list -g {}'.format(rg),
             checks=JMESPathCheck("length[?name == '{}']".format(s.public_ip_name), None))
 
-class NetworkExpressRouteScenarioTest(VCRTestBase):
+class NetworkExpressRouteScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
         super(NetworkExpressRouteScenarioTest, self).__init__(__file__, test_method)
@@ -166,17 +164,13 @@ class NetworkExpressRouteScenarioTest(VCRTestBase):
     def test_network_express_route(self):
         self.execute()
 
-    def set_up(self):
-        if not self.cmd('network express-route circuit show --resource-group {} --name {}'.format(
-            self.resource_group, self.express_route_name)):
-            raise RuntimeError('Express route must be manually created in order to support this test.')
-
     def body(self):
-
+        self.cmd('network express-route circuit create -g {} -n {} --bandwidth-in-mbps 50 --service-provider-name "AT&T" --peering-location "Silicon Valley"'.format(
+            self.resource_group, self.express_route_name
+        ))
         self.cmd('network express-route circuit list', checks=[
             JMESPathCheck('type(@)', 'array'),
-            JMESPathCheck("length([?type == '{}']) == length(@)".format(self.resource_type), True),
-            JMESPathCheck("length([?resourceGroup == '{}']) == length(@)".format(self.resource_group), True)
+            JMESPathCheck("length([?type == '{}']) == length(@)".format(self.resource_type), True)
         ])
         self.cmd('network express-route circuit list --resource-group {}'.format(self.resource_group), checks=[
             JMESPathCheck('type(@)', 'array'),
@@ -205,13 +199,13 @@ class NetworkExpressRouteScenarioTest(VCRTestBase):
         self.cmd('network express-route circuit list --resource-group {}'.format(self.resource_group),
             checks=NoneCheck())
 
-class NetworkExpressRouteCircuitScenarioTest(VCRTestBase):
+class NetworkExpressRouteCircuitScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-         # The resources for this test did not exist so the commands will return 404 errors.
+         # TODO The resources for this test did not exist so the commands will return 404 errors.
          # So this test is for the command execution itself.
         super(NetworkExpressRouteCircuitScenarioTest, self).__init__(__file__, test_method)
-        self.resource_group = 'cli_test1'
+        self.resource_group = 'express_route_circuit_scenario'
         self.express_route_name = 'test_route'
         self.placeholder_value = 'none_existent'
 
@@ -441,23 +435,19 @@ class NetworkLoadBalancerSubresourceScenarioTest(ResourceGroupVCRTestBase):
         self.cmd('network lb rule delete {} -n rule2'.format(lb_rg))
         self.cmd('network lb rule list {}'.format(lb_rg), checks=JMESPathCheck('length(@)', 0))
 
-class NetworkLocalGatewayScenarioTest(VCRTestBase):
+class NetworkLocalGatewayScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
         super(NetworkLocalGatewayScenarioTest, self).__init__(__file__, test_method)
-        self.resource_group = 'cli_test1'
+        self.resource_group = 'local_gateway_scenario'
         self.name = 'cli-test-loc-gateway'
         self.resource_type = 'Microsoft.Network/localNetworkGateways'
 
     def test_network_local_gateway(self):
         self.execute()
 
-    def set_up(self):
-        if not self.cmd('network local-gateway show --resource-group {} --name {}'.format(
-            self.resource_group, self.name)):
-            raise RuntimeError('Local gateway must be manually created in order to support this test.')
-
     def body(self):
+        self.cmd('network local-gateway create --resource-group {} --name {} --gateway-ip-address 10.1.1.1'.format(self.resource_group, self.name))
         self.cmd('network local-gateway list --resource-group {}'.format(self.resource_group), checks=[
             JMESPathCheck('type(@)', 'array'),
             JMESPathCheck("length([?type == '{}']) == length(@)".format(self.resource_type), True),
@@ -589,8 +579,8 @@ class NetworkNicSubresourceScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck('privateIpAllocationMethod', 'Dynamic')
         ])
         # TODO: Creating multiple ip-configurations per NIC currently not supported per rest-api-spec issue #305
-        expected_exception = 'Network Interface {} specifies multiple IPConfigurations but none of the IPConfigurations is specified as Primary.'.format(nic)
-        self.cmd('network nic ip-config create -g {} --nic-name {} -n ipconfig2'.format(rg, nic), allowed_exceptions=expected_exception)
+        expected_exception = 'not registered for feature Microsoft.Network/AllowMultipleIpConfigurationsPerNic required to carry out the requested operation.'
+        self.cmd('network nic ip-config create -g {} --nic-name {} -n ipconfig2 --subnet {} --vnet-name {}'.format(rg, nic, subnet, vnet), allowed_exceptions=expected_exception)
         expected_exception = 'Network interface {} must have one or more IP configurations.'.format(nic)
         self.cmd('network nic ip-config delete -g {} --nic-name {} -n ipconfig1'.format(rg, nic), allowed_exceptions=expected_exception)
 

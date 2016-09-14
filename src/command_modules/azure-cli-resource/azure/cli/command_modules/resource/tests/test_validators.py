@@ -6,29 +6,18 @@
 import unittest
 from six import StringIO
 
-from azure.cli.core.commands.validators import *
-
-from azure.cli.command_modules.resource._validators import *
+from azure.cli.command_modules.resource._validators import (validate_parent, validate_resource_type)
 
 class Test_resource_validators(unittest.TestCase):
 
-    @classmethod
-    def setUpClass(cls):
-        pass
-        
-    @classmethod
-    def tearDownClass(cls):
-        pass
-
     def setUp(self):
         self.io = StringIO()
-        
+
     def tearDown(self):
         self.io.close()
 
     def test_resource_type_valid(self):
-        input = 'Test.Namespace/testtype'
-        actual = validate_resource_type(input)
+        actual = validate_resource_type('Test.Namespace/testtype')
         self.assertEqual(actual.namespace, 'Test.Namespace')
         self.assertEqual(actual.type, 'testtype')
 
@@ -36,10 +25,9 @@ class Test_resource_validators(unittest.TestCase):
         pass
 
     def test_parent_valid(self):
-        input = 'testtype/mytesttype'
-        actual = validate_parent(input)
+        actual = validate_parent('testtype/mytesttype')
         self.assertEqual(actual.type, 'testtype')
-        self.assertEqual(actual.name, 'mytesttype')        
+        self.assertEqual(actual.name, 'mytesttype')
 
     def test_parent_invalid(self):
         pass

@@ -32,7 +32,6 @@ class Test_ArgumentParser(unittest.TestCase):
         args = mock_echo_args('vm show',
                               '--id /subscriptions/00000000-0000-0000-0000-0123456789abc/resourceGroups/thisisaresourcegroup/providers/Microsoft.Compute/virtualMachines/thisisavmname') # pylint: disable=line-too-long
         self.assertDictEqual({
-            'api_version': '2016-03-30',
             'expand': None,
             'resource_group_name': 'thisisaresourcegroup',
             'vm_name': 'thisisavmname'
