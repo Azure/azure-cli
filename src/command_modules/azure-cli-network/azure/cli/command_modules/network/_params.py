@@ -11,7 +11,7 @@ from azure.mgmt.network.models.network_management_client_enums import \
     (ApplicationGatewaySkuName, ApplicationGatewayCookieBasedAffinity,
      ApplicationGatewayTier, ApplicationGatewayProtocol,
      ApplicationGatewayRequestRoutingRuleType, ExpressRouteCircuitSkuFamily,
-     ExpressRouteCircuitSkuTier, ExpressRouteCircuitPeeringType)
+     ExpressRouteCircuitSkuTier, ExpressRouteCircuitPeeringType, IPVersion)
 from azure.mgmt.dns.models.dns_management_client_enums import RecordType
 
 from azure.cli.core.commands import CliArgumentType, register_cli_argument, register_extra_cli_argument
@@ -108,6 +108,7 @@ http_protocol_type = CliArgumentType(type=str.lower, completer=get_enum_type_com
 
 choices_ip_allocation_method = [e.value.lower() for e in IPAllocationMethod]
 choices_private_ip_address_version = [e.value.lower() for e in privateIpAddressVersion]
+choices_ip_address_version = [e.value.lower() for e in IPVersion]
 
 register_cli_argument('network', 'subnet_name', subnet_name_type)
 register_cli_argument('network', 'virtual_network_name', virtual_network_name_type, id_part='name')
@@ -276,8 +277,9 @@ register_cli_argument('network public-ip', 'name', name_arg_type, completer=get_
 
 register_cli_argument('network public-ip create', 'name', completer=None)
 register_cli_argument('network public-ip create', 'dns_name', validator=process_public_ip_create_namespace)
-register_cli_argument('network public-ip create', 'public_ip_address_type', help=argparse.SUPPRESS)
+register_cli_argument('network public-ip create', 'dns_name_type', help=argparse.SUPPRESS)
 register_cli_argument('network public-ip create', 'allocation_method', choices=choices_ip_allocation_method, type=str.lower)
+register_cli_argument('network public-ip create', 'version', choices=choices_ip_address_version, type=str.lower)
 
 # Route Operation
 register_cli_argument('network route-table route', 'route_name', name_arg_type, id_part='child_name', help='Route name')
