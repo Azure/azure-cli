@@ -7,6 +7,8 @@
 import json
 import unittest
 import mock
+from azure.mgmt.resource.subscriptions.models import (SubscriptionState, Subscription,
+                                                      SubscriptionPolicies, spendingLimit)
 from azure.cli.core._profile import Profile, CredsCache, SubscriptionFinder
 from azure.cli.core._azure_env import ENV_DEFAULT
 
@@ -18,7 +20,7 @@ class Test_Profile(unittest.TestCase):
         cls.user1 = 'foo@foo.com'
         cls.id1 = 'subscriptions/1'
         cls.display_name1 = 'foo account'
-        cls.state1 = 'enabled'
+        cls.state1 = SubscriptionState.enabled
         cls.subscription1 = SubscriptionStub(cls.id1,
                                              cls.display_name1,
                                              cls.state1,
@@ -41,7 +43,7 @@ class Test_Profile(unittest.TestCase):
         cls.user2 = 'bar@bar.com'
         cls.id2 = 'subscriptions/2'
         cls.display_name2 = 'bar account'
-        cls.state2 = 'suspended'
+        cls.state2 = SubscriptionState.past_due
         cls.subscription2 = SubscriptionStub(cls.id2,
                                              cls.display_name2,
                                              cls.state2,
@@ -56,7 +58,7 @@ class Test_Profile(unittest.TestCase):
             'environmentName': 'AzureCloud',
             'id': '1',
             'name': self.display_name1,
-            'state': self.state1,
+            'state': self.state1.value,
             'user': {
                 'name':self.user1,
                 'type':'user'
@@ -65,6 +67,9 @@ class Test_Profile(unittest.TestCase):
             'tenantId': self.tenant_id
             }
         self.assertEqual(expected, consolidated[0])
+        #verify serialization works
+        self.assertIsNotNone(json.dumps(consolidated[0]))
+
 
     def test_update_add_two_different_subscriptions(self):
         storage_mock = {'subscriptions': None}
@@ -83,7 +88,7 @@ class Test_Profile(unittest.TestCase):
             'environmentName': 'AzureCloud',
             'id': '1',
             'name': self.display_name1,
-            'state': self.state1,
+            'state': self.state1.value,
             'user': {
                 'name': self.user1,
                 'type': 'user'
@@ -105,7 +110,7 @@ class Test_Profile(unittest.TestCase):
             'environmentName': 'AzureCloud',
             'id': '2',
             'name': self.display_name2,
-            'state': self.state2,
+            'state': self.state2.value,
             'user': {
                 'name': self.user2,
                 'type': 'user'
@@ -484,8 +489,12 @@ class FileHandleStub(object): # pylint: disable=too-few-public-methods
     def __exit__(self, _2, _3, _4):
         pass
 
-class SubscriptionStub(object): # pylint: disable=too-few-public-methods
+class SubscriptionStub(Subscription): # pylint: disable=too-few-public-methods
     def __init__(self, id, display_name, state, tenant_id): # pylint: disable=redefined-builtin,
+        policies = SubscriptionPolicies()
+        policies.spending_limit = spendingLimit.current_period_off
+        policies.quota_id = 'some quota'
+        super(SubscriptionStub, self).__init__(policies, 'some_authorization_source')
         self.id = id
         self.display_name = display_name
         self.state = state
