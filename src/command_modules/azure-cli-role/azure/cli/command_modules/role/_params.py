@@ -29,6 +29,7 @@ register_cli_argument('ad sp', 'identifier', options_list=('--id',), help='servi
 register_cli_argument('ad sp create', 'identifier', options_list=('--id',), help='identifier uri, application id, or object id of the associated application')
 register_cli_argument('ad sp create-for-rbac', 'name', sp_name_type)
 register_cli_argument('ad sp create-for-rbac', 'years', type=int)
+register_cli_argument('ad sp create-for-rbac', 'resource_ids', nargs='+')
 register_cli_argument('ad sp reset-credentials', 'name', sp_name_type)
 register_cli_argument('ad sp reset-credentials', 'years', type=int)
 
