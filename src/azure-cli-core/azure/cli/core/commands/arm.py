@@ -243,7 +243,7 @@ def cli_generic_update_command(name, getter, setter, factory=None, setter_arg_na
                     add_properties(instance, arg_values)
                 except ValueError:
                     raise CLIError('--add should be of the form:'
-                                   ' --add property.list <key=value, scalar, [], {}>')
+                                   ' --add property.list <key=value, string or JSON string>')
             elif arg_type == '--remove':
                 try:
                     remove_properties(instance, arg_values)
@@ -359,13 +359,13 @@ def add_properties(instance, argument_values):
                 # dictionary.
                 list_to_add_to.append(dict_entry)
                 dict_entry = {}
-            if argument == '[]':
-                list_to_add_to.append([])
-            elif argument == '{}':
-                list_to_add_to.append({})
-            else:
-                # should handle all other kinds of scalars
-                list_to_add_to.append(argument)
+
+            # attempt to convert anything else to JSON and fallback to string if error
+            try:
+                argument = json.loads(argument)
+            except ValueError:
+                pass
+            list_to_add_to.append(argument)
 
     # if only key=value pairs used, must check at the end to append the dictionary
     if dict_entry:
@@ -380,7 +380,7 @@ def remove_properties(instance, argument_values):
     try:
         list_index = argument_values.pop(0)
     except IndexError:
-        pass
+        raise CLIError('invalid syntax: --remove <list> <indices to remove...>')
 
     if not list_index:
         _find_property(instance, list_attribute_path)
