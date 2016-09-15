@@ -13,7 +13,7 @@ For OSX and Linux, you can install with the following curl script.
 
 .. code-block:: console
 
-   $ curl -L https://aka.ms/ProjectAzInstall | sudo bash
+   $ curl -L https://aka.ms/InstallAzureCli | sudo bash
 
 We also maintain a docker image preconfigured with the Azure CLI.
 
@@ -50,6 +50,8 @@ Highlights
 ===========
 
 Here are a few features and concepts that can help you get the most out of the Azure CLI 2.0 Preview
+
+The following examples are showing using the ``--output table`` format, you can change your default using the ``$ az configure`` command.
 
 Tab Completion
 ^^^^^^^^^^^^^^
