@@ -129,6 +129,10 @@ def _search_role_definitions(definitions_client, name, scope, custom_role_only=F
     return roles
 
 def create_role_assignment(role, assignee, resource_group_name=None, resource_id=None):
+    return _create_role_assignment(role, assignee, resource_group_name, resource_id)
+
+def _create_role_assignment(role, assignee, resource_group_name=None, resource_id=None,
+                            ocp_aad_session_key=None):
     factory = _auth_client_factory()
     assignments_client = factory.role_assignments
     definitions_client = factory.role_definitions
@@ -140,7 +144,12 @@ def create_role_assignment(role, assignee, resource_group_name=None, resource_id
     object_id = _resolve_object_id(assignee)
     properties = RoleAssignmentProperties(role_id, object_id)
     assignment_name = uuid.uuid4()
-    return assignments_client.create(scope, assignment_name, properties)
+    custom_headers = None
+    if ocp_aad_session_key:
+        custom_headers = {'ocp-aad-session-key': ocp_aad_session_key}
+
+    return assignments_client.create(scope, assignment_name, properties,
+                                     custom_headers=custom_headers)
 
 def list_role_assignments(assignee=None, role=None, resource_group_name=None,#pylint: disable=too-many-arguments
                           resource_id=None, include_inherited=False,
@@ -257,6 +266,10 @@ def _search_role_assignments(scope, assignee, role, include_inherited, include_g
 def _build_role_scope(resource_group_name, resource_id, subscription_id):
     subscription_scope = '/subscriptions/' + subscription_id
     if resource_id:
+        if not subscription_id.lower() in resource_id.lower():
+            # remove when https://github.com/Azure/azure-cli/issues/807 is fixed
+            raise CLIError("Managing assignments on other subscriptions is not yet supported. "
+                           "Run 'az account set' first")
         if resource_group_name:
             err = 'Resource group "{}" is redundant because resource id is supplied'
             raise CLIError(err.format(resource_group_name))
@@ -331,7 +344,7 @@ def create_user(client, user_principal_name, display_name, password, mail_nickna
                                  immutable_id=immutable_id,
                                  password_profile=PasswordProfile(
                                      password, force_change_password_next_login))
-    return client.create(param)
+    return client.create(param, raw=True)
 
 create_user.__doc__ = UserCreateParameters.__doc__
 
@@ -416,6 +429,9 @@ def _build_application_creds(password=None, key_value=None, key_type=None,#pylin
     return (password_creds, key_creds)
 
 def create_service_principal(identifier):
+    return _create_service_principal(identifier)
+
+def _create_service_principal(identifier, retain_raw_response=False):
     client = _graph_client_factory()
     try:
         uuid.UUID(identifier)
@@ -428,7 +444,7 @@ def create_service_principal(identifier):
         result = [client.applications.get(identifier)]
     app_id = result[0].app_id
 
-    return client.service_principals.create(app_id, True)
+    return client.service_principals.create(app_id, True, raw=retain_raw_response)
 
 def show_service_principal(client, identifier):
     object_id = _resolve_service_principal(client, identifier)
@@ -449,13 +465,17 @@ def _resolve_service_principal(client, identifier):
     except ValueError:
         raise CLIError("service principal '{}' doesn't exist".format(identifier))
 
-def create_service_principal_for_rbac(name=None, secret=None, years=1):
+def create_service_principal_for_rbac(name=None, secret=None, years=1,
+                                      resource_ids=None, role=None):
     '''create a service principal that can access or modify resources
-
     :param str name: an unique uri. If missing, the command will generate one.
     :param str secret: the secret used to login. If missing, command will generate one.
     :param str years: Years the secret will be valid.
+    :param str resource_ids: ids of resources the service principal has access to
+    :param str role: role the service principal has on the resources. only use with 'resource-ids'.
     '''
+    if bool(resource_ids) != bool(role):
+        raise CLIError("'--resource-ids' and '--role' must be used together.")
     client = _graph_client_factory()
     start_date = datetime.datetime.now()
     app_display_name = 'azure-cli-' + start_date.strftime('%Y-%m-%d-%H-%M-%S')
@@ -472,8 +492,17 @@ def create_service_principal_for_rbac(name=None, secret=None, years=1):
                                          start_date=start_date,
                                          end_date=end_date)
     #pylint: disable=no-member
-    create_service_principal(aad_application.app_id)
+    aad_sp = _create_service_principal(aad_application.app_id, bool(resource_ids))
+    oid = aad_sp.output.object_id if bool(resource_ids) else aad_sp.object_id
     _build_output_content(name, secret, client.config.tenant_id)
+
+    if resource_ids:
+        #It is possible the SP has not been propagated to all servers, so creating assignments
+        #might fail. The reliable workaround is to call out the server where creation occurred.
+        #pylint: disable=protected-access
+        session_key = aad_sp.response.headers._store['ocp-aad-session-key'][1]
+        for resource_id in resource_ids:
+            _create_role_assignment(role, oid, None, resource_id, ocp_aad_session_key=session_key)
 
 def reset_service_principal_credential(name, secret=None, years=1):
     '''reset credential, on expiration or you forget it.
