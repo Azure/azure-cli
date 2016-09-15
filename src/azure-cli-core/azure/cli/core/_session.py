@@ -75,8 +75,7 @@ class Session(collections.MutableMapping):
         return len(self.data)
 
 # ACCOUNT contains subscriptions information
-# this file will be shared with azure-xplat-cli, which assumes ascii
-ACCOUNT = Session('ascii')
+ACCOUNT = Session()
 
 # CONFIG provides external configuration options
 CONFIG = Session()
