@@ -121,7 +121,7 @@ class Profile(object):
             consolidated.append({
                 _SUBSCRIPTION_ID: s.id.rpartition('/')[2],
                 _SUBSCRIPTION_NAME: s.display_name,
-                _STATE: s.state,
+                _STATE: s.state.value,
                 _USER_ENTITY: {
                     _USER_NAME: user,
                     _USER_TYPE: _SERVICE_PRINCIPAL if is_service_principal else _USER
