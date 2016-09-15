@@ -14,5 +14,5 @@ helps['ad sp create-for-rbac'] = """
                 - name: Create with a custom name
                   text: az ad sp create-for-rbac -n "http://my-app"
                 - name: Create role assignments at the same time
-                  text: az ad sp create-for-rbac -n "http://my-app" --resource-ids /subscriptions/11111111-2222-3333-4444-555555555555/resourceGroups/mygroup 
+                  text: az ad sp create-for-rbac -n "http://my-app" --role contributor --resource-ids /subscriptions/11111111-2222-3333-4444-555555555555/resourceGroups/mygroup /subscriptions/11111111-2222-3333-4444-555555555555/resourceGroups/my-another-group
             """
