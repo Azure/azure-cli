@@ -10,7 +10,8 @@ try:
 except ImportError:
     from urlparse import urlparse # pylint: disable=import-error
 
-from azure.mgmt.web.models import Site, SiteConfig, User, ServerFarmWithRichSku, SkuDescription
+from azure.mgmt.web.models import (Site, SiteConfig, User, ServerFarmWithRichSku,
+                                   SkuDescription, SslState)
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.arm import is_valid_resource_id, parse_resource_id
@@ -209,10 +210,12 @@ def set_deployment_user(user_name, password=None):
     return result
 
 def view_in_browser(resource_group, name, slot=None):
-    #TODO: handle HTTPS
     import webbrowser
     site = _generic_site_operation(resource_group, name, 'get_site', slot)
     url = site.default_host_name
+    ssl_host = next((h for h in site.host_name_ssl_states
+                     if h.ssl_state != SslState.disabled), None)
+    url = ('https' if ssl_host else 'http') + '://' + url
     webbrowser.open(url, new=2) # 2 means: open in a new tab, if possible
 
 #TODO: expose new blob suport
