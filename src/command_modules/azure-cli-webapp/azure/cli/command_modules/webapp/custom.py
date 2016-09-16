@@ -334,10 +334,8 @@ def _get_site_credential(client, resource_group, name):
     return (creds.publishing_user_name, creds.publishing_password)
 
 def _stream_trace(streaming_url, user_name, password):
-    import pycurl
-    import certifi
-    c = pycurl.Curl()
-    c.setopt(c.URL, streaming_url)
-    c.setopt(pycurl.CAINFO, certifi.where())
-    c.setopt(c.USERPWD, '{}:{}'.format(user_name, password))
-    c.perform()
+    import requests
+    r = requests.get(streaming_url, auth=(user_name, password), stream=True)
+    for line in r.iter_lines(decode_unicode=True):
+        if line:
+            print(line)
