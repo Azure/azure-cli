@@ -60,7 +60,7 @@ class GenericUpdateTest(unittest.TestCase):
     def setUpClass(cls):
         logging.getLogger().setLevel(logging.ERROR)
 
-    def test_generic_update(self):
+    def test_generic_update(self): # pylint: disable=too-many-statements
         my_obj = TestObject()
 
         def my_get():
@@ -83,6 +83,9 @@ class GenericUpdateTest(unittest.TestCase):
 
         app.execute('update-obj --set myList[0]=newValA'.split())
         self.assertEqual(my_obj.my_list[0], 'newValA', 'set simple list element')
+
+        app.execute('update-obj --set myList[-4]=newValB'.split())
+        self.assertEqual(my_obj.my_list[0], 'newValB', 'set simple list element')
 
         app.execute('update-obj --set myDict.myCamelKey=success'.split())
         self.assertEqual(my_obj.my_dict['myCamelKey'], 'success', 'set simple dict element with camel case key')
