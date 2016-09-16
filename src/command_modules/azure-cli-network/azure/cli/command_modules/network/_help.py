@@ -98,3 +98,147 @@ helps['network dns record update-soa'] = """
                   short-summary: Minimum TTL (time-to-live, seconds).
 """
 
+# Network Interface (NIC)
+
+helps['network vnet subnet'] = """
+    type: group
+    short-summary: Manage network interfaces.
+"""
+
+helps['network nic show-effective-route-table'] = """
+    type: command
+    short-summary: Show all route tables applied on a network interface.
+"""
+
+helps['network nic list-effective-nsg'] = """
+    type: command
+    short-summary: List all network security groups applied on a network interface.
+"""
+
+helps['network nic create'] = """
+    type: command
+    short-summary: Create a network interface.
+"""
+
+helps['network nic delete'] = """
+    type: command
+    short-summary: Delete a network interface.
+"""
+
+helps['network nic list'] = """
+    type: command
+    short-summary: List network interfaces within a subscription or resource group.
+    long-summary: |
+        Does not list network interfaces attached to scale set virtual machines. Use 'az vmss nic list' or 'az vmss nic list-vm-nics' to display that information.
+"""
+
+helps['network nic show'] = """
+    type: command
+    short-summary: Show details on a network interface.
+"""
+
+helps['network nic update'] = """
+    type: command
+    short-summary: Update a network interface.
+"""
+
+# Virtual Network (VNET)
+
+helps['network vnet subnet'] = """
+    type: group
+    short-summary: Manage virtual networks.
+"""
+
+helps['network vnet check-ip-address'] = """
+    type: command
+    short-summary: Check whether a private IP address is available for use.
+"""
+
+helps['network vnet create'] = """
+    type: command
+    short-summary: Create a virtual network.
+"""
+
+helps['network vnet delete'] = """
+    type: command
+    short-summary: Delete a virtual network.
+"""
+
+helps['network vnet list'] = """
+    type: command
+    short-summary: List virtual networks within a resource group or subscription.
+"""
+
+helps['network vnet show'] = """
+    type: command
+    short-summary: Show details on a virtual network.
+"""
+
+helps['network vnet update'] = """
+    type: command
+    short-summary: Update a virtual network.
+"""
+
+# VNET Subnet
+
+helps['network vnet subnet'] = """
+    type: group
+    short-summary: Manage virtual network subnets.
+"""
+
+helps['network vnet subnet create'] = """
+    type: command
+    short-summary: Create a virtual network subnet.
+"""
+
+helps['network vnet subnet delete'] = """
+    type: command
+    short-summary: Delete a virtual network subnet.
+"""
+
+helps['network vnet subnet list'] = """
+    type: command
+    short-summary: List subnets within a virtual network.
+"""
+
+helps['network vnet subnet show'] = """
+    type: command
+    short-summary: Show details on a virtual network subnet.
+"""
+
+helps['network vnet subnet update'] = """
+    type: command
+    short-summary: Update a virtual network subnet.
+"""
+
+# Virtual Network (VNET) Peering
+
+helps['network vnet peering'] = """
+    type: group
+    short-summary: Manage peering connections between virtual networks.
+"""
+
+helps['network vnet peering create'] = """
+    type: command
+    short-summary: Create a virtual network peering.
+"""
+
+helps['network vnet peering delete'] = """
+    type: command
+    short-summary: Delete a virtual network peering.
+"""
+
+helps['network vnet peering list'] = """
+    type: command
+    short-summary: List peerings within a virtual network.
+"""
+
+helps['network vnet peering show'] = """
+    type: command
+    short-summary: Show details on a virtual network peering.
+"""
+
+helps['network vnet peering update'] = """
+    type: command
+    short-summary: Update a virtual network peering.
+"""

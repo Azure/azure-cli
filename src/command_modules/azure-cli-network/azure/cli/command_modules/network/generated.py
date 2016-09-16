@@ -21,7 +21,8 @@ from azure.mgmt.network.operations import (
     UsagesOperations,
     VirtualNetworkGatewayConnectionsOperations,
     VirtualNetworkGatewaysOperations,
-    VirtualNetworksOperations)
+    VirtualNetworksOperations,
+    VirtualNetworkPeeringsOperations)
 
 from azure.mgmt.trafficmanager.operations import EndpointsOperations, ProfilesOperations
 from azure.mgmt.trafficmanager import TrafficManagerManagementClient
@@ -77,7 +78,6 @@ from azure.cli.command_modules.network.mgmt_dns_zone.lib.operations \
 from azure.cli.command_modules.network.mgmt_dns_zone.lib \
     import DnsZoneCreationClient as DnsZoneClient
 
-
 from azure.cli.core.commands import DeploymentOutputLongRunningOperation, cli_command
 
 from .custom import \
@@ -106,7 +106,7 @@ from .custom import \
      list_network_resource_property, get_network_resource_property_entry,
      delete_network_resource_property_entry,
      list_application_gateways, list_express_route_circuits, list_lbs, list_nics, list_nsgs,
-     list_public_ips, list_route_tables, list_vnet, create_route,
+     list_public_ips, list_route_tables, list_vnet, create_vnet_peering, create_route,
      update_network_vpn_gateway, create_vpn_gateway_root_cert, delete_vpn_gateway_root_cert,
      create_vpn_gateway_revoked_cert, delete_vpn_gateway_revoked_cert, create_express_route_auth,
      list_traffic_manager_profiles, create_traffic_manager_endpoint, list_dns_zones,
@@ -251,6 +251,8 @@ cli_command('network nic delete', NetworkInterfacesOperations.delete, factory)
 cli_command('network nic show', NetworkInterfacesOperations.get, factory)
 cli_command('network nic list', list_nics)
 cli_generic_update_command('network nic update', NetworkInterfacesOperations.get, NetworkInterfacesOperations.create_or_update, factory, custom_function=set_nic)
+cli_command('network nic show-effective-route-table', NetworkInterfacesOperations.get_effective_route_table, factory)
+cli_command('network nic list-effective-nsg', NetworkInterfacesOperations.list_effective_network_security_groups, factory)
 
 resource = 'network_interfaces'
 subresource = 'ip_configurations'
@@ -356,11 +358,20 @@ factory = lambda _: _network_client_factory().virtual_networks
 cli_command('network vnet delete', VirtualNetworksOperations.delete, factory)
 cli_command('network vnet show', VirtualNetworksOperations.get, factory)
 cli_command('network vnet list', list_vnet)
+cli_command('network vnet check-ip-address', VirtualNetworksOperations.check_ip_address_availability, factory)
 cli_generic_update_command('network vnet update', VirtualNetworksOperations.get, VirtualNetworksOperations.create_or_update, factory,
                            custom_function=update_vnet)
 
 factory = lambda _: get_mgmt_service_client(VNetClient).vnet
 cli_command('network vnet create', VnetOperations.create_or_update, factory, transform=DeploymentOutputLongRunningOperation('Starting network vnet create'))
+
+# VNET Peering Operations
+factory = lambda _: _network_client_factory().virtual_network_peerings
+cli_command('network vnet peering create', create_vnet_peering)
+cli_command('network vnet peering show', VirtualNetworkPeeringsOperations.get, factory)
+cli_command('network vnet peering list', VirtualNetworkPeeringsOperations.list, factory)
+cli_command('network vnet peering delete', VirtualNetworkPeeringsOperations.delete, factory)
+cli_generic_update_command('network vnet peering update', VirtualNetworkPeeringsOperations.get, VirtualNetworkPeeringsOperations.create_or_update, factory, setter_arg_name='virtual_network_peering_parameters')
 
 # Traffic Manager ProfileOperations
 factory = lambda _: get_mgmt_service_client(TrafficManagerManagementClient).profiles
