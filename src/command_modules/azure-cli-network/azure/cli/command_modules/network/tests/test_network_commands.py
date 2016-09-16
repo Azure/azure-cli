@@ -654,10 +654,10 @@ class NetworkNicConvenienceCommandsScenarioTest(ResourceGroupVCRTestBase):
         rg = self.resource_group
         vm = self.vm_name
         nic_id = self.cmd('vm show -g {} -n {} --query "networkProfile.networkInterfaces[0].id"'.format(rg, vm))
-        self.cmd('network nic list-effective-nsg --ids {}'.format(nic_id),
-            checks=JMESPathCheck("length(value)", 1))
-        self.cmd('network nic show-effective-route-table --ids {}'.format(nic_id),
-            checks=JMESPathCheck("length(value)", 7))
+        result = self.cmd('network nic list-effective-nsg --ids {}'.format(nic_id))
+        self.assertTrue(len(result['value']) > 0)
+        result = self.cmd('network nic show-effective-route-table --ids {}'.format(nic_id))
+        self.assertTrue(len(result['value']) > 0)
 
 class NetworkSecurityGroupScenarioTest(ResourceGroupVCRTestBase):
 
