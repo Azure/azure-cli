@@ -171,6 +171,10 @@ def add_id_parameters(command_table):
 
 APPLICATION.register(APPLICATION.COMMAND_TABLE_LOADED, add_id_parameters)
 
+add_usage = '--add property.listProperty <key=value, string or JSON string>'
+set_usage = '--set property1.property2=<value>'
+remove_usage = '--remove property.list <indexToRemove> OR --remove propertyToRemove'
+
 def _get_child(parent, collection_name, item_name, collection_key):
     items = getattr(parent, collection_name)
     result = next((x for x in items if getattr(x, collection_key, '').lower() == item_name.lower()), None) # pylint: disable=line-too-long
@@ -235,22 +239,17 @@ def cli_generic_update_command(name, getter, setter, factory=None, setter_arg_na
                     for expression in arg_values:
                         set_properties(instance, expression)
                 except ValueError:
-                    raise CLIError('--set should be of the form:'
-                                   ' --set property.property=<value>'
-                                   ' property2.property=<value>')
+                    raise CLIError('invalid syntax: {}'.format(set_usage))
             elif arg_type == '--add':
                 try:
                     add_properties(instance, arg_values)
                 except ValueError:
-                    raise CLIError('--add should be of the form:'
-                                   ' --add property.list <key=value, string or JSON string>')
+                    raise CLIError('invalid syntax: {}'.format(add_usage))
             elif arg_type == '--remove':
                 try:
                     remove_properties(instance, arg_values)
                 except ValueError:
-                    raise CLIError('--remove should be of the form: --remove'
-                                   ' property.propertyToRemove or'
-                                   ' --remove property.list <indexToRemove>')
+                    raise CLIError('invalid syntax: {}'.format(remove_usage))
 
         # Done... update the instance!
         getterargs[setter_arg_name] = parent if child_collection_prop_name else instance
@@ -284,15 +283,15 @@ def cli_generic_update_command(name, getter, setter, factory=None, setter_arg_na
     group_name = 'Generic Update'
     cmd.add_argument('properties_to_set', '--set', nargs='+', action=OrderedArgsAction, default=[],
                      help='Update an object by specifying a property path and value to set.'
-                     '  Example: --set property1.property2=value',
+                     '  Example: {}'.format(set_usage),
                      metavar='KEY=VALUE', arg_group=group_name)
     cmd.add_argument('properties_to_add', '--add', nargs='+', action=OrderedArgsAction, default=[],
                      help='Add an object to a list of objects by specifying a path and key'
-                     ' value pairs.  Example: --add property.list key=<value>',
+                     ' value pairs.  Example: {}'.format(add_usage),
                      metavar='LIST KEY=VALUE', arg_group=group_name)
     cmd.add_argument('properties_to_remove', '--remove', nargs='+', action=OrderedArgsAction,
                      default=[], help='Remove a property or an element from a list.  Example: '
-                     '--remove property.list <index>', metavar='LIST INDEX',
+                     '{}'.format(remove_usage), metavar='LIST INDEX',
                      arg_group=group_name)
     main_command_table[name] = cmd
 
@@ -346,6 +345,9 @@ def add_properties(instance, argument_values):
         set_properties(parent, '{}=[]'.format(list_attribute_path[-1]))
         list_to_add_to = _find_property(instance, list_attribute_path)
 
+    if not isinstance(list_to_add_to, list):
+        raise ValueError
+
     dict_entry = {}
     for argument in argument_values:
         if '=' in argument:
@@ -380,12 +382,17 @@ def remove_properties(instance, argument_values):
     try:
         list_index = argument_values.pop(0)
     except IndexError:
-        raise CLIError('invalid syntax: --remove <list> <indices to remove...>')
+        pass
 
     if not list_index:
         _find_property(instance, list_attribute_path)
         parent_to_remove_from = _find_property(instance, list_attribute_path[:-1])
-        del parent_to_remove_from[list_attribute_path[-1]]
+        if isinstance(parent_to_remove_from, dict):
+            del parent_to_remove_from[list_attribute_path[-1]]
+        elif hasattr(parent_to_remove_from, make_snake_case(list_attribute_path[-1])):
+            setattr(parent_to_remove_from, list_attribute_path[-1], None)
+        else:
+            raise ValueError
     else:
         list_to_remove_from = _find_property(instance, list_attribute_path)
         try:
@@ -397,15 +404,17 @@ def remove_properties(instance, argument_values):
 def show_options(instance, part, path):
     options = instance.__dict__ if hasattr(instance, '__dict__') else instance
     parent = '.'.join(path[:-1]).replace('.[', '[')
+    error_message = "Couldn't find '{}' in '{}'.".format(part, parent)
     if isinstance(options, dict):
         options = options.keys()
         options = sorted([make_camel_case(x) for x in options])
+        error_message = '{} Available options: {}'.format(error_message, options)
     elif isinstance(options, list):
         options = 'index into the collection "{}" with [<index>] or [<key=value>]'.format(parent)
+        error_message = '{} Available options: {}'.format(error_message, options)
     else:
-        options = sorted([make_camel_case(x) for x in options])
-    raise CLIError('Couldn\'t find "{}" in "{}".  Available options: {}'
-                   .format(part, parent, options))
+        error_message = "{} '{}' does not support further indexing.".format(error_message, parent)    
+    raise CLIError(error_message)
 
 snake_regex_1 = re.compile('(.)([A-Z][a-z]+)')
 snake_regex_2 = re.compile('([a-z0-9])([A-Z])')
