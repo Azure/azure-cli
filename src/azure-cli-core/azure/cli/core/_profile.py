@@ -31,6 +31,7 @@ _TENANT_ID = 'tenantId'
 _USER_ENTITY = 'user'
 _USER_NAME = 'name'
 _SUBSCRIPTIONS = 'subscriptions'
+_INSTALLATION_ID = 'installationId'
 _ENVIRONMENT_NAME = 'environmentName'
 _STATE = 'state'
 _USER_TYPE = 'type'
@@ -237,6 +238,13 @@ class Profile(object):
                 str(active_account[_SUBSCRIPTION_ID]),
                 str(active_account[_TENANT_ID]))
 
+    def get_installation_id(self):
+        installation_id = self._storage.get(_INSTALLATION_ID)
+        if not installation_id:
+            import uuid
+            installation_id = str(uuid.uuid1())
+            self._storage[_INSTALLATION_ID] = installation_id
+        return installation_id
 
 class SubscriptionFinder(object):
     '''finds all subscriptions for a user or service principal'''

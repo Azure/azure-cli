@@ -15,7 +15,7 @@ import azure.cli.core._help as _help
 import azure.cli.core._logging as _logging
 from azure.cli.core._util import todict, CLIError
 from azure.cli.core._config import az_config
-from azure.cli.core.telemetry import log_event, set_application
+from azure.cli.core.telemetry import log_telemetry, set_application
 
 logger = _logging.get_az_logger(__name__)
 
@@ -87,6 +87,7 @@ class Application(object):
         if len(argv) == 0:
             az_subparser = self.parser.subparsers[tuple()]
             _help.show_welcome(az_subparser)
+            log_telemetry('welcome')
             return None
 
         if argv[0].lower() == 'help':
@@ -112,8 +113,8 @@ class Application(object):
             params.pop('subcommand', None)
             params.pop('func', None)
             params.pop('command', None)
-            log_event('command executing', parameters=[p for p in unexpanded_argv
-                                                       if p.startswith('-')])
+            log_telemetry(expanded_arg.command, log_type='pageview',
+                          parameters=[p for p in unexpanded_argv if p.startswith('-')])
 
             result = expanded_arg.func(params)
             result = todict(result)

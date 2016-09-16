@@ -19,6 +19,7 @@ from msrestazure.azure_operation import AzureOperationPoller
 from azure.common import AzureException
 from azure.cli.core._util import CLIError
 import azure.cli.core._logging as _logging
+from azure.cli.core.telemetry import log_telemetry
 
 from ._introspection import (extract_args_from_signature,
                              extract_full_summary_from_signature)
@@ -184,6 +185,7 @@ def get_command_table(module_name=None):
                 # Changing this error message requires updating CI script that checks for failed
                 # module loading.
                 logger.error("Error loading command module '%s'", mod)
+                log_telemetry('Error loading module', module=mod)
                 logger.debug(traceback.format_exc())
 
     _update_command_definitions(command_table)
