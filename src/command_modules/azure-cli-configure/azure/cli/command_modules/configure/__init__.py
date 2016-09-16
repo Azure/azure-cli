@@ -28,13 +28,17 @@ from azure.cli.command_modules.configure._consts import (OUTPUT_LIST, CLOUD_LIST
                                                          MSG_PROMPT_GLOBAL_OUTPUT,
                                                          MSG_PROMPT_WHICH_ENV,
                                                          MSG_PROMPT_WHICH_CLOUD,
-                                                         MSG_PROMPT_LOGIN)
+                                                         MSG_PROMPT_LOGIN,
+                                                         MSG_PROMPT_TELEMETRY)
 from azure.cli.command_modules.configure._utils import (prompt_y_n,
                                                         prompt_choice_list,
                                                         get_default_from_config)
 import azure.cli.command_modules.configure._help # pylint: disable=unused-import
+from azure.cli.core.telemetry import log_telemetry
 
 logger = _logging.get_az_logger(__name__)
+
+answers = {}
 
 def _print_cur_configuration(file_config):
     print(MSG_HEADING_CURRENT_CONFIG_INFO)
@@ -67,6 +71,8 @@ def _config_env_public_azure(_):
         login_successful = False
         while not login_successful:
             method_index = prompt_choice_list(MSG_PROMPT_LOGIN, LOGIN_METHOD_LIST)
+            answers['login_index'] = method_index
+            answers['login_options'] = str(LOGIN_METHOD_LIST)
             profile = Profile()
             interactive = False
             username = None
@@ -112,6 +118,8 @@ def _create_or_update_env(env_name=None):
                                                                               'cloud',
                                                                               'name',
                                                                               CLOUD_LIST))
+    answers['cloud_prompt'] = selected_cloud_index
+    answers['cloud_options'] = str(CLOUD_LIST)
     if CLOUD_LIST[selected_cloud_index]['name'] != 'public-azure':
         # TODO support other clouds
         print('Support for other clouds is coming soon.\n')
@@ -145,17 +153,23 @@ def _handle_global_configuration():
         # print current config and prompt to allow global config modification
         _print_cur_configuration(file_config)
         should_modify_global_config = prompt_y_n(MSG_PROMPT_MANAGE_GLOBAL, default='n')
+        answers['modify_global_prompt'] = should_modify_global_config
     if not config_exists or should_modify_global_config:
         # no config exists yet so configure global config or user wants to modify global config
         output_index = prompt_choice_list(MSG_PROMPT_GLOBAL_OUTPUT, OUTPUT_LIST,
                                           default=get_default_from_config(global_config, \
                                           'core', 'output', OUTPUT_LIST))
+        answers['output_type_prompt'] = output_index
+        answers['output_type_options'] = str(OUTPUT_LIST)
+        allow_telemetry = prompt_y_n(MSG_PROMPT_TELEMETRY, default='y')
+        answers['telemetry_prompt'] = allow_telemetry
         # save the global config
         try:
             global_config.add_section('core')
         except configparser.DuplicateSectionError:
             pass
         global_config.set('core', 'output', OUTPUT_LIST[output_index]['name'])
+        global_config.set('core', 'collect_telemetry', 'yes' if allow_telemetry else 'no')
         if not os.path.isdir(GLOBAL_CONFIG_DIR):
             os.makedirs(GLOBAL_CONFIG_DIR)
         with open(GLOBAL_CONFIG_PATH, 'w') as configfile:
@@ -165,10 +179,12 @@ def _handle_env_configuration():
     envs = _get_envs()
     if envs:
         should_configure_envs = prompt_y_n(MSG_PROMPT_MANAGE_ENVS, default='n')
+        answers['configure_envs_prompt'] = should_configure_envs
         if not should_configure_envs:
             return
         env_to_configure_index = prompt_choice_list(MSG_PROMPT_WHICH_ENV, envs + \
                                                     ['Create new environment (not yet supported)'])
+        answers['env_to_configure_prompt'] = env_to_configure_index
         if env_to_configure_index == len(envs):
             # The last choice was picked by the user which corresponds to 'create new environment'
             _create_or_update_env()
@@ -185,6 +201,7 @@ def handle_configure():
         _handle_global_configuration()
         _handle_env_configuration()
         print(MSG_CLOSING)
+        log_telemetry('configure', **answers)
     except (EOFError, KeyboardInterrupt):
         print()
 

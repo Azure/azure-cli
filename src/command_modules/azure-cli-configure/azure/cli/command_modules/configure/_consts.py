@@ -42,3 +42,17 @@ MSG_PROMPT_GLOBAL_OUTPUT = '\nWhat default output format would you like?'
 MSG_PROMPT_WHICH_ENV = '\nWhich environment would you like to configure?'
 MSG_PROMPT_WHICH_CLOUD = '\nWhich cloud are you targeting?'
 MSG_PROMPT_LOGIN = '\nHow would you like to log in to access your subscriptions?'
+MSG_PROMPT_TELEMETRY = '\nMicrosoft Azure CLI would like to collect data about how users use CLI' \
+   ' cmdlets and some problems they encounter.  ' \
+  'Microsoft uses this information to improve our CLI.  Participation is voluntary and when you' \
+  ' choose to participate your device ' \
+  'automatically sends information to Microsoft about how you use Azure CLI. ' \
+  '\n\nIf you choose to participate, you can stop at any time later by using Azure CLI' \
+  ' as follows: ' \
+  '\n1.  Update az configuration. ' \
+  '\nTo disable data collection, execute: "az configure" and choose "n" when prompted.' \
+  '\n\nIf you choose to not participate, you can enable at any time later by using Azure' \
+  ' CLI as follows: ' \
+  '\n1.  Update az configuration. ' \
+  '\nTo enable data collection, execute: "az configure" and choose "y" when prompted.' \
+  '\n\nSelect y to enable data collection'

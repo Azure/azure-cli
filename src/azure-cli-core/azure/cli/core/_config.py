@@ -48,7 +48,7 @@ class AzConfig(object):
         return float(self.get(section, option, fallback))
 
     def getboolean(self, section, option, fallback=_UNSET):
-        val = self.get(section, option, fallback)
+        val = str(self.get(section, option, fallback))
         if val.lower() not in AzConfig._BOOLEAN_STATES: #pylint: disable=E1101
             raise ValueError('Not a boolean: {}'.format(val))
         return AzConfig._BOOLEAN_STATES[val.lower()] #pylint: disable=E1101
