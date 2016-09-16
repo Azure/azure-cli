@@ -9,6 +9,7 @@ import math
 import os
 import re
 import time
+import random
 
 from azure.cli.core._util import CLIError
 from azure.cli.core.application import APPLICATION
@@ -142,10 +143,14 @@ def _find_default_storage_account(namespace):
         if account:
             namespace.storage_account = account.name
             namespace.storage_account_type = 'existingName'
+        else:
+            namespace.storage_account = 'vhd{}{}'.format(str(int(math.ceil(time.time())))[:9],
+                                                         str(random.randint(1, 100000)))
 
 def _os_disk_default(namespace):
     if not namespace.os_disk_name:
-        namespace.os_disk_name = 'osdisk{}'.format(str(int(math.ceil(time.time()))))
+        namespace.os_disk_name = 'osdisk{}{}'.format(str(int(math.ceil(time.time())))[:9],
+                                                     str(random.randint(1, 100000)))
 
 def _handle_auth_types(**kwargs):
     if kwargs['command'] != 'vm create' and kwargs['command'] != 'vmss create':
