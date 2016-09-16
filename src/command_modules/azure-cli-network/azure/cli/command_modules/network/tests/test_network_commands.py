@@ -860,7 +860,7 @@ class NetworkVNetScenarioTest(ResourceGroupVCRTestBase):
 
 class NetworkVNetPeeringScenarioTest(ResourceGroupVCRTestBase):
     def __init__(self, test_method):
-        super(NetworkVNetPeeringScenarioTest, self).__init__(__file__, test_method, skip_teardown=True)
+        super(NetworkVNetPeeringScenarioTest, self).__init__(__file__, test_method)
         self.resource_group = 'cli_vnet_peering_test'
 
     def test_network_vnet_peering(self):
