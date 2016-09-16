@@ -8,7 +8,7 @@ from azure.mgmt.web.operations import SitesOperations, ServerFarmsOperations, Pr
 from azure.cli.core.commands import LongRunningOperation, cli_command
 
 from ._params import web_client_factory
-from .custom import (create_webapp, show_webapp,
+from .custom import (create_webapp, show_webapp, list_webapp,
                      delete_webapp, stop_webapp, restart_webapp,
                      enable_local_git, set_deployment_user,
                      get_git_url, view_in_browser, create_app_service_plan,
@@ -18,20 +18,20 @@ from .custom import (create_webapp, show_webapp,
                      get_site_configs, update_site_configs,
                      get_app_settings, update_app_settings, delete_app_settings)
 
-factory = lambda _: web_client_factory().sites
 cli_command('webapp create', create_webapp)
-cli_command('webapp list', SitesOperations.get_sites, factory)
+cli_command('webapp list', list_webapp)
 cli_command('webapp show', show_webapp)
 cli_command('webapp delete', delete_webapp)
 cli_command('webapp stop', stop_webapp)
 cli_command('webapp restart', restart_webapp)
 
-#TODO: finalize command interface after dicussion with webapp team
 cli_command('webapp config update', update_site_configs)
 cli_command('webapp config show', get_site_configs)
 cli_command('webapp config appsettings show', get_app_settings)
 cli_command('webapp config appsettings update', update_app_settings)
 cli_command('webapp config appsettings delete', delete_app_settings)
+
+factory = lambda _: web_client_factory().sites
 cli_command('webapp show-publish-profile',
             SitesOperations.list_site_publishing_credentials, factory)
 
@@ -54,11 +54,11 @@ factory = lambda _: web_client_factory().provider
 cli_command('webapp deployment user show', ProviderOperations.get_publishing_user, factory)
 
 factory = lambda _: web_client_factory().server_farms
-cli_command('webapp plan create', create_app_service_plan)
-cli_command('webapp plan update', update_app_service_plan)
-cli_command('webapp plan delete', ServerFarmsOperations.delete_server_farm, factory)
-cli_command('webapp plan list', ServerFarmsOperations.get_server_farms, factory)
-cli_command('webapp plan show', ServerFarmsOperations.get_server_farm, factory)
+cli_command('app-service-plan create', create_app_service_plan)
+cli_command('app-service-plan update', update_app_service_plan)
+cli_command('app-service-plan delete', ServerFarmsOperations.delete_server_farm, factory)
+cli_command('app-service-plan list', ServerFarmsOperations.get_server_farms, factory)
+cli_command('app-service-plan show', ServerFarmsOperations.get_server_farm, factory)
 
 #Functionalities covered by better custom commands, so not exposed for now
 #cli_command('webapp get-source-control', SitesOperations.get_site_source_control, factory)
