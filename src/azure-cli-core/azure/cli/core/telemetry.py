@@ -4,15 +4,19 @@
 #---------------------------------------------------------------------------------------------
 from __future__ import print_function
 import getpass
-import time
+import datetime
 import subprocess
 import json
 import os
 import sys
+import platform
+import locale
 
 from applicationinsights import TelemetryClient
 from applicationinsights.exceptions import enable
 from azure.cli.core import __version__ as core_version
+from azure.cli.core._profile import Profile
+from azure.cli.core._util import CLIError
 
 _DEBUG_TELEMETRY = 'AZURE_CLI_DEBUG_TELEMETRY'
 client = {}
@@ -35,7 +39,7 @@ def init_telemetry():
 
         client.context.application.id = 'Azure CLI'
         client.context.application.ver = core_version
-        client.context.user.id = hash(getpass.getuser())
+        client.context.user.id = _get_user_machine_id()
 
         enable(instrumentation_key)
     except Exception as ex: #pylint: disable=broad-except
@@ -48,14 +52,14 @@ def user_agrees_to_telemetry():
     # and needs a "skip" param to not show (for scripts)
     return True
 
-def log_event(event_name, **kwargs):
+def log_telemetry(name, log_type='event', **kwargs):
     """
     IMPORTANT: do not log events with quotes in the name, properties or measurements;
     those events may fail to upload.  Also, telemetry events must be verified in
     the backend because successful upload does not guarentee success.
     """
     try:
-        event_name = _remove_quotes(event_name)
+        name = _remove_quotes(name)
         _sanitize_inputs(kwargs)
 
         source = 'az'
@@ -64,19 +68,34 @@ def log_event(event_name, **kwargs):
         elif ARGCOMPLETE_ENV_NAME in os.environ:
             source = 'completer'
 
-        props = {
-            'time': str(time.time()),
-            'x-ms-client-request-id': APPLICATION.session['headers']['x-ms-client-request-id'],
-            'command': APPLICATION.session.get('command', None),
-            'version': core_version,
-            'source': source
-            }
+        types = ['event', 'pageview']
+        if log_type not in types:
+            raise ValueError('Type {} is not supported.  Available types: {}'.format(log_type,
+                                                                                     types))
+
+        profile = Profile()
+        props = {}
+        _safe_exec(props, 'time', lambda: str(datetime.datetime.now()))
+        _safe_exec(props, 'x-ms-client-request-id',
+                   lambda: APPLICATION.session['headers']['x-ms-client-request-id'])
+        _safe_exec(props, 'command', lambda: APPLICATION.session.get('command', None))
+        _safe_exec(props, 'version', lambda: core_version)
+        _safe_exec(props, 'source', lambda: source)
+        _safe_exec(props, 'installation-id', profile.get_installation_id)
+        _safe_exec(props, 'python-version', lambda: _make_safe(str(platform.python_version())))
+        _safe_exec(props, 'shell-type', _get_shell_type)
+        _safe_exec(props, 'locale', lambda: '{},{}'.format(locale.getdefaultlocale()[0],
+                                                           locale.getdefaultlocale()[1]))
+        _safe_exec(props, 'user-machine-id', _get_user_machine_id)
+        _safe_exec(props, 'user-azure-id', _get_user_azure_id)
+        _safe_exec(props, 'azure-subscription-id', _get_azure_subscription_id)
 
         if kwargs:
             props.update(**kwargs)
 
         telemetry_records.append({
-            'name': event_name,
+            'name': name,
+            'type': log_type,
             'properties': props
             })
     except Exception as ex: #pylint: disable=broad-except
@@ -84,17 +103,54 @@ def log_event(event_name, **kwargs):
         if _debugging():
             raise ex
 
-def _sanitize_inputs(kwargs):
-    for key, value in kwargs.items():
+def _safe_exec(props, key, fn):
+    try:
+        props[key] = fn()
+    except Exception as ex: #pylint: disable=broad-except
+        # Never fail the command because of telemetry, unless debugging
+        if _debugging():
+            raise ex
+
+def _get_user_machine_id():
+    return hash(platform.node() + getpass.getuser())
+
+def _get_user_azure_id():
+    try:
+        profile = Profile()
+        return hash(profile.get_current_account_user())
+    except CLIError:
+        pass
+
+def _get_azure_subscription_id():
+    try:
+        profile = Profile()
+        return profile.get_login_credentials()[1]
+    except CLIError:
+        pass
+
+def _get_shell_type():
+    if 'ZSH_VERSION' in os.environ:
+        return 'zsh'
+    elif 'BASH_VERSION' in os.environ:
+        return 'bash'
+    elif 'KSH_VERSION' in os.environ or 'FCEDIT' in os.environ:
+        return 'ksh'
+    elif 'WINDIR' in os.environ:
+        return 'cmd'
+    else:
+        return _make_safe(os.environ.get('SHELL'))
+
+def _sanitize_inputs(d):
+    for key, value in d.items():
         if isinstance(value, str):
-            kwargs[key] = _remove_quotes(value)
+            d[key] = _remove_quotes(value)
         elif isinstance(value, list):
-            kwargs[key] = [_remove_quotes(v) for v in value]
+            d[key] = [_remove_quotes(v) for v in value]
             if next((v for v in value if isinstance(v, list) or isinstance(v, dict)),
                     None) is not None:
                 raise ValueError('List object too complex, will fail server-side')
         elif isinstance(value, dict):
-            kwargs[key] = {key:_remove_quotes(v) for key, v in value.items()}
+            d[key] = {key:_remove_quotes(v) for key, v in value.items()}
             if next((v for v in value.values() if isinstance(v, list) or isinstance(v, dict)),
                     None) is not None:
                 raise ValueError('Dict object too complex, will fail server-side')
@@ -133,8 +189,13 @@ def upload_telemetry(data_to_save):
     data_to_save = json.loads(data_to_save.replace("'", '"'))
 
     for record in data_to_save:
-        client.track_event(record['name'],
-                           record['properties'])
+        if record['type'] == 'event':
+            client.track_event(record['name'],
+                               record['properties'])
+        elif record['type'] == 'pageview':
+            client.track_pageview(record['name'],
+                                  url=record['name'],
+                                  properties=record['properties'])
     client.flush()
     if _debugging():
         print('telemetry upload complete')
