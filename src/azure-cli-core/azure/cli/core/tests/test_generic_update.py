@@ -114,6 +114,14 @@ class GenericUpdateTest(unittest.TestCase):
         app.execute('update-obj --set myProp={} myProp.foo=bar'.split())
         self.assertEqual(my_obj.my_prop['foo'], 'bar', 'replace scalar with dict')
 
+        app.execute('update-obj --set myProp=[] --add myProp key1=value1 --set myProp[0].key2=value2'.split())
+        self.assertEqual(my_obj.my_prop[0]['key1'], 'value1', 'replace scalar with new list and add a dict entry')
+        self.assertEqual(my_obj.my_prop[0]['key2'], 'value2', 'add a second value to the new dict entry')
+
+        app.execute('update-obj --remove myProp --add myProp str1 str2 --remove myProp 0'.split())
+        self.assertEqual(len(my_obj.my_prop), 1, 'nullify property, add two and remove one')
+        self.assertEqual(my_obj.my_prop[0], 'str2', 'nullify property, add two and remove one')
+
         # Test various --add to lists
         app.execute('update-obj --set myList=[]'.split())
         app.execute(shlex.split('update-obj --add myList key1=value1 key2=value2 foo "string in quotes" [] {} foo=bar'))
@@ -123,7 +131,7 @@ class GenericUpdateTest(unittest.TestCase):
         self.assertEqual(my_obj.my_list[2], 'string in quotes', 'add scalar value with quotes to list')
         self.assertEqual(my_obj.my_list[3], [], 'add list to a list')
         self.assertEqual(my_obj.my_list[4], {}, 'add dict to a list')
-        self.assertEqual(my_obj.my_list[5]['foo'], 'bar', 'add second dict and verify when dict is at the end')
+        self.assertEqual(my_obj.my_list[-1]['foo'], 'bar', 'add second dict and verify when dict is at the end')
 
         # Test --remove
         self.assertEqual(len(my_obj.my_list), 6, 'pre-verify length of list')
@@ -135,7 +143,7 @@ class GenericUpdateTest(unittest.TestCase):
         app.execute('update-obj --remove myList[0].key1'.split())
         self.assertEqual('key1' not in my_obj.my_list[0], True, 'verify dict entry can be removed')
 
-    def test_generic_update_errors(self):
+    def test_generic_update_errors(self): #pylint: disable=no-self-use
         my_obj = TestObject()
 
         def my_get(a1, a2): #pylint: disable=unused-argument
@@ -154,14 +162,11 @@ class GenericUpdateTest(unittest.TestCase):
                 app.execute(command.split())
             except CLIError as err:
                 if not error in str(err):
-                    raise AssertionError('Expected: {}\nActual: {}'.format(error, str(err)))
+                    raise AssertionError('{}\nExpected: {}\nActual: {}'.format(message, error, str(err)))
             else:
                 raise AssertionError('exception not thrown')
 
-        missing_remove_message = """Couldn't find "doesntExist" in "".""" + \
-                                """  Available options: ['myDict', 'myList', """ + \
-                                """'myListOfCamelDicts', 'myListOfObjects', """ + \
-                                """'myListOfSnakeDicts', 'myProp']"""
+        missing_remove_message = "Couldn't find 'doesntExist' in ''. Available options: ['myDict', 'myList', 'myListOfCamelDicts', 'myListOfObjects', 'myListOfSnakeDicts', 'myProp']"
         _execute_with_error('gencommand --a1 1 --a2 2 --remove doesntExist',
                             missing_remove_message,
                             'remove non-existent property by name')
@@ -169,9 +174,7 @@ class GenericUpdateTest(unittest.TestCase):
                             missing_remove_message,
                             'remove non-existent property by index')
 
-        remove_prop_message = """Couldn't find "doesntExist" in "myList.doesntExist".""" + \
-                            """  Available options: index into the """ + \
-                            """collection "myList.doesntExist" with [<index>] or [<key=value>]"""
+        remove_prop_message = "Couldn't find 'doesntExist' in 'myList.doesntExist'. Available options: index into the collection 'myList.doesntExist' with [<index>] or [<key=value>]"
         _execute_with_error('gencommand --a1 1 --a2 2 --remove myList.doesntExist.missing 2',
                             remove_prop_message,
                             'remove non-existent sub-property by index')
@@ -180,9 +183,7 @@ class GenericUpdateTest(unittest.TestCase):
                             "index 20 doesn't exist on myList",
                             'remove out-of-range index')
 
-        set_on_list_message = """Couldn't find "doesnt_exist" in "myList".""" + \
-                            """  Available options: index into the collection "myList" with""" + \
-                            """ [<index>] or [<key=value>]"""
+        set_on_list_message = "Couldn't find 'doesnt_exist' in 'myList'. Available options: index into the collection 'myList' with [<index>] or [<key=value>]"
         _execute_with_error('gencommand --a1 1 --a2 2 --set myList.doesnt_exist=foo',
                             set_on_list_message,
                             'set shouldn\'t work on a list')
@@ -193,6 +194,23 @@ class GenericUpdateTest(unittest.TestCase):
         _execute_with_error('gencommand --a1 1 --a2 2 --set myList[5].doesnt_exist=foo',
                             "index 5 doesn't exist on myList",
                             'index out of range in path')
+
+        _execute_with_error('gencommand --a1 1 --a2 2 --remove myList[0]',
+                            'invalid syntax: --remove property.list <indexToRemove> OR --remove propertyToRemove',
+                            'remove requires index to be space-separated')
+
+        app.execute("gencommand --a1 1 --a2 2 --set myDict={'foo':'bar'}".split())
+        _execute_with_error('gencommand --a1 1 --a2 2 --set myDict.foo.doo=boo',
+                            "Couldn't find 'foo' in 'myDict'. 'myDict' does not support further indexing.",
+                            'Cannot dot index from a scalar value')
+
+        _execute_with_error('gencommand --a1 1 --a2 2 --set myDict.foo[0]=boo',
+                            "Couldn't find 'foo' in 'myDict'. 'myDict' does not support further indexing.",
+                            'Cannot list index from a scalar value')
+
+        _execute_with_error('gencommand --a1 1 --a2 2 --add myDict la=da',
+                            "invalid syntax: --add property.listProperty <key=value, string or JSON string>",
+                            'Add only works with lists')
 
         # add an entry which makes 'myKey' no longer unique
         app.execute('gencommand --a1 1 --a2 2 --add myListOfCamelDicts myKey=value_2'.split())

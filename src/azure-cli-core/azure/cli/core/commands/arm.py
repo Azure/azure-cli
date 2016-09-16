@@ -390,7 +390,7 @@ def remove_properties(instance, argument_values):
         if isinstance(parent_to_remove_from, dict):
             del parent_to_remove_from[list_attribute_path[-1]]
         elif hasattr(parent_to_remove_from, make_snake_case(list_attribute_path[-1])):
-            setattr(parent_to_remove_from, list_attribute_path[-1], None)
+            setattr(parent_to_remove_from, make_snake_case(list_attribute_path[-1]), None)
         else:
             raise ValueError
     else:
@@ -410,10 +410,10 @@ def show_options(instance, part, path):
         options = sorted([make_camel_case(x) for x in options])
         error_message = '{} Available options: {}'.format(error_message, options)
     elif isinstance(options, list):
-        options = 'index into the collection "{}" with [<index>] or [<key=value>]'.format(parent)
+        options = "index into the collection '{}' with [<index>] or [<key=value>]".format(parent)
         error_message = '{} Available options: {}'.format(error_message, options)
     else:
-        error_message = "{} '{}' does not support further indexing.".format(error_message, parent)    
+        error_message = "{} '{}' does not support further indexing.".format(error_message, parent)
     raise CLIError(error_message)
 
 snake_regex_1 = re.compile('(.)([A-Z][a-z]+)')
@@ -451,6 +451,10 @@ def _update_instance(instance, part, path):
     try: # pylint: disable=too-many-nested-blocks
         index = index_or_filter_regex.match(part)
         if index:
+            # indexing on anything but a list is not allowed
+            if not isinstance(instance, list):
+                show_options(instance, part, path)
+
             if '=' in index.group(1):
                 key, value = index.group(1).split('=')
                 matches = []
