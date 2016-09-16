@@ -25,7 +25,8 @@ from azure.cli.core.commands.arm import cli_generic_update_command
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_data_service_client
 from azure.cli.core._util import CLIError
 import azure.cli.core._logging as _logging
-from ._vm_utils import read_content_if_is_file, load_json, get_default_linux_diag_config
+from ._vm_utils import read_content_if_is_file, load_json
+from ._vm_diagnostics_templates import get_default_diag_config
 
 from ._actions import (load_images_from_aliases_doc,
                        load_extension_images_thru_services,
@@ -71,6 +72,7 @@ _ACCESS_EXT_HANDLER_NAME = 'enablevmaccess'
 _LINUX_ACCESS_EXT = 'VMAccessForLinux'
 _WINDOWS_ACCESS_EXT = 'VMAccessAgent'
 _LINUX_DIAG_EXT = 'LinuxDiagnostic'
+_WINDOWS_DIAG_EXT = 'IaaSDiagnostics'
 extension_mappings = {
     _LINUX_ACCESS_EXT: {
         'version': '1.4',
@@ -83,6 +85,10 @@ extension_mappings = {
     _LINUX_DIAG_EXT:{
         'version': '2.3',
         'publisher': 'Microsoft.OSTCExtensions'
+        },
+    _WINDOWS_DIAG_EXT:{
+        'version': '1.5',
+        'publisher': 'Microsoft.Azure.Diagnostics'
         }
     }
 
@@ -524,17 +530,7 @@ def set_extension(
     settings = load_json(settings) if settings else None
 
     #pylint: disable=no-member
-    if not version:
-        result = load_extension_images_thru_services(publisher, vm_extension_name,
-                                                     None, vm.location, show_latest=True)
-        if not result:
-            raise CLIError('Failed to find the latest version for the extension "{}"'
-                           .format(vm_extension_name))
-
-        #with 'show_latest' enabled, we will only get one result.
-        version = result[0]['version']
-
-    version = _trim_away_build_number(version)
+    version = _normalize_extension_version(publisher, vm_extension_name, version, vm.location)
 
     ext = VirtualMachineExtension(vm.location,
                                   publisher=publisher,
@@ -571,17 +567,7 @@ def set_vmss_extension(
     settings = load_json(settings) if settings else None
 
     #pylint: disable=no-member
-    if not version:
-        result = load_extension_images_thru_services(publisher, extension_name,
-                                                     None, vmss.location, show_latest=True)
-        if not result:
-            raise CLIError('Failed to find the latest version for the extension "{}"'
-                           .format(extension_name))
-
-        #with 'show_latest' enabled, we will only get one result.
-        version = result[0]['version']
-
-    version = _trim_away_build_number(version)
+    version = _normalize_extension_version(publisher, extension_name, version, vmss.location)
 
     ext = VirtualMachineScaleSetExtension(name=extension_name,
                                           publisher=publisher,
@@ -599,86 +585,61 @@ def set_vmss_extension(
                                                               vmss_name,
                                                               vmss)
 
+def _normalize_extension_version(publisher, vm_extension_name, version, location):
+    if not version:
+        result = load_extension_images_thru_services(publisher, vm_extension_name,
+                                                     None, location, show_latest=True)
+        if not result:
+            raise CLIError('Failed to find the latest version for the extension "{}"'
+                           .format(vm_extension_name))
+
+        #with 'show_latest' enabled, we will only get one result.
+        version = result[0]['version']
+
+    version = _trim_away_build_number(version)
+    return version
+
 def set_diagnostics_extension(
-        resource_group_name, vm_name, storage_account, settings=None):
-    '''Enable diagnostics on a linux virtual machine
-
-    :param storage_account: the storage account to upload diagnostics log
-    :param settings: the settings file which defines data to be collected.
-    Default will be provided if missing
+        resource_group_name, vm_name, settings, protected_settings=None, version=None,
+        no_auto_upgrade=False):
+    '''Enable diagnostics on a virtual machine
     '''
-    vm = _vm_get(resource_group_name, vm_name, 'instanceView')
-    client = _compute_client_factory()
-
-    from azure.mgmt.compute.models import VirtualMachineExtension
+    vm = _vm_get(resource_group_name, vm_name)
     #pylint: disable=no-member
-    if settings:
-        settings = load_json(settings)
-    else:
-        settings = get_default_linux_diag_config(vm.id)
-
-    private_config = _get_private_config(resource_group_name, storage_account)
-
-    vm_extension_name = _LINUX_DIAG_EXT
-    publisher, version, auto_upgrade = _get_access_extension_upgrade_info(
-        vm.resources, vm_extension_name
-    )
-
-    ext = VirtualMachineExtension(vm.location,
-                                  publisher=publisher,
-                                  virtual_machine_extension_type=vm_extension_name,
-                                  protected_settings=private_config,
-                                  type_handler_version=version,
-                                  settings=settings,
-                                  auto_upgrade_minor_version=auto_upgrade)
-
-    poller = client.virtual_machine_extensions.create_or_update(resource_group_name,
-                                                                vm_name,
-                                                                'LinuxDiagnostic',
-                                                                ext)
-    return ExtensionUpdateLongRunningOperation('updating diagnostics', 'done')(poller)
+    is_linux_os = _detect_os_type_for_diagnostics_ext(vm.os_profile)
+    vm_extension_name = _LINUX_DIAG_EXT if is_linux_os else _WINDOWS_DIAG_EXT
+    return set_extension(resource_group_name, vm_name, vm_extension_name,
+                         extension_mappings[vm_extension_name]['publisher'],
+                         version or extension_mappings[vm_extension_name]['version'],
+                         settings,
+                         protected_settings,
+                         no_auto_upgrade)
 
 def set_vmss_diagnostics_extension(
-        resource_group_name, vmss_name, storage_account, settings=None):
-    '''Enable diagnostics on a linux virtual machine scale set
-
-    :param storage_account: the storage account to upload diagnostics log
-    :param settings: the settings file which defines data to be collected.
-    Default will be provided if missing
+        resource_group_name, vmss_name, settings, protected_settings=None, version=None,
+        no_auto_upgrade=False):
+    '''Enable diagnostics on a virtual machine scale set
     '''
     client = _compute_client_factory()
     vmss = client.virtual_machine_scale_sets.get(resource_group_name,
                                                  vmss_name)
-
     #pylint: disable=no-member
-    if settings:
-        settings = load_json(settings)
-    else:
-        settings = get_default_linux_diag_config(vmss.id)
+    is_linux_os = _detect_os_type_for_diagnostics_ext(vmss.virtual_machine_profile.os_profile)
+    vm_extension_name = _LINUX_DIAG_EXT if is_linux_os else _WINDOWS_DIAG_EXT
+    return set_vmss_extension(resource_group_name, vmss_name, vm_extension_name,
+                              extension_mappings[vm_extension_name]['publisher'],
+                              version or extension_mappings[vm_extension_name]['version'],
+                              settings,
+                              protected_settings,
+                              no_auto_upgrade)
 
-    private_config = _get_private_config(resource_group_name, storage_account)
-
-    vm_extension_name = _LINUX_DIAG_EXT
-    if not vmss.virtual_machine_profile.extension_profile:
-        vmss.virtual_machine_profile.extension_profile = VirtualMachineScaleSetExtensionProfile([])
-    publisher, version, auto_upgrade = _get_access_extension_upgrade_info(
-        vmss.virtual_machine_profile.extension_profile.extensions, vm_extension_name
-    )
-
-    ext = VirtualMachineScaleSetExtension(name='LinuxDiagnostic',
-                                          publisher=publisher,
-                                          type=vm_extension_name,
-                                          protected_settings=private_config,
-                                          type_handler_version=version,
-                                          settings=settings,
-                                          auto_upgrade_minor_version=auto_upgrade)
-
-    vmss.virtual_machine_profile.extension_profile.extensions.append(ext)
-
-    poller = client.virtual_machine_scale_sets.create_or_update(resource_group_name,
-                                                                vmss_name,
-                                                                vmss)
-    return ExtensionUpdateLongRunningOperation('updating diagnostics', 'done')(poller)
+#Same logic also applies on vmss
+def _detect_os_type_for_diagnostics_ext(os_profile):
+    is_linux_os = bool(os_profile.linux_configuration)
+    is_windows_os = bool(os_profile.windows_configuration)
+    if not is_linux_os and not is_windows_os:
+        raise CLIError('Diagnostics extension can only be installed on Linux or Windows VM')
+    return is_linux_os
 
 def get_vmss_extension(resource_group_name, vmss_name, extension_name):
     client = _compute_client_factory()
@@ -728,9 +689,9 @@ def _get_private_config(resource_group_name, storage_account):
         }
     return private_config
 
-def show_default_diagnostics_configuration():
+def show_default_diagnostics_configuration(is_windows_os=False):
     '''show the default config file which defines data to be collected'''
-    return get_default_linux_diag_config()
+    return get_default_diag_config(is_windows_os)
 
 def vm_add_nics(resource_group_name, vm_name, nic_ids=None, nic_names=None, primary_nic=None):
     '''add network interface configurations to the virtual machine
