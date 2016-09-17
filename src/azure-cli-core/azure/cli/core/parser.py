@@ -116,7 +116,7 @@ class AzCliCommandParser(argparse.ArgumentParser):
         return parent_subparser
 
     def error(self, message):
-        log_telemetry('parse error', message=message)
+        log_telemetry('parse error')
         return super(AzCliCommandParser, self).error(message)
 
     def format_help(self):

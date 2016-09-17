@@ -8,6 +8,7 @@ import sys
 import os
 import uuid
 import argparse
+import traceback
 from azure.cli.core.parser import AzCliCommandParser
 from azure.cli.core._output import CommandResultItem
 import azure.cli.core.extensions
@@ -101,7 +102,8 @@ class Application(object):
             try:
                 _validate_arguments(expanded_arg)
             except: # pylint: disable=bare-except
-                err = sys.exc_info()[1]
+                _, err, ex_traceback = sys.exc_info()
+                log_telemetry('Validation Error', trace=traceback.format_tb(ex_traceback))
                 getattr(expanded_arg, '_parser', self.parser).error(str(err))
 
             # Consider - we are using any args that start with an underscore (_) as 'private'
