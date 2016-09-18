@@ -204,30 +204,32 @@ class Profile(object):
 
     def get_current_account_user(self):
         try:
-            active_account = self.get_default_subscription()
+            active_account = self.get_subscription()
         except CLIError:
             raise CLIError('There are no active accounts.')
 
         return active_account[_USER_ENTITY][_USER_NAME]
 
-    def get_default_subscription(self):
+    def get_subscription(self, subscription_id=None):
         subscriptions = self.load_cached_subscriptions()
         if not subscriptions:
             raise CLIError('Please run login to setup account.')
 
-        active = [x for x in subscriptions if x.get(_IS_DEFAULT_SUBSCRIPTION)]
-        if len(active) != 1:
+        result = [x for x in subscriptions if (
+            subscription_id is None and x.get(_IS_DEFAULT_SUBSCRIPTION)) or
+                  (subscription_id == x.get(_SUBSCRIPTION_ID))]
+        if len(result) != 1:
             raise CLIError('Please run "account set" to select active account.')
-        return active[0]
+        return result[0]
 
-    def get_login_credentials(self, for_graph_client=False):
-        active_account = self.get_default_subscription()
-        user_type = active_account[_USER_ENTITY][_USER_TYPE]
-        username_or_sp_id = active_account[_USER_ENTITY][_USER_NAME]
+    def get_login_credentials(self, for_graph_client=False, subscription_id=None):
+        account = self.get_subscription(subscription_id)
+        user_type = account[_USER_ENTITY][_USER_TYPE]
+        username_or_sp_id = account[_USER_ENTITY][_USER_NAME]
         resource = self._graph_resource_uri if for_graph_client else self._management_resource_uri
         if user_type == _USER:
             token_retriever = lambda: self._creds_cache.retrieve_token_for_user(
-                username_or_sp_id, active_account[_TENANT_ID], resource)
+                username_or_sp_id, account[_TENANT_ID], resource)
             auth_object = AdalAuthentication(token_retriever)
         else:
             token_retriever = lambda: self._creds_cache.retrieve_token_for_service_principal(
@@ -235,8 +237,8 @@ class Profile(object):
             auth_object = AdalAuthentication(token_retriever)
 
         return (auth_object,
-                str(active_account[_SUBSCRIPTION_ID]),
-                str(active_account[_TENANT_ID]))
+                str(account[_SUBSCRIPTION_ID]),
+                str(account[_TENANT_ID]))
 
     def get_installation_id(self):
         installation_id = self._storage.get(_INSTALLATION_ID)

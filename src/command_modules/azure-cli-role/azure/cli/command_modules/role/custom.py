@@ -16,6 +16,7 @@ from azure.cli.core.help_files import helps
 
 from azure.cli.core.commands.client_factory import (get_mgmt_service_client,
                                                     configure_common_settings)
+
 from azure.mgmt.authorization import AuthorizationManagementClient
 from azure.mgmt.authorization.models import (RoleAssignmentProperties, Permission, RoleDefinition,
                                              RoleDefinitionProperties)
@@ -33,8 +34,13 @@ logger = _logging.get_az_logger(__name__)
 
 _CUSTOM_RULE = 'CustomRole'
 
-def _auth_client_factory(**_):
-    return get_mgmt_service_client(AuthorizationManagementClient)
+def _auth_client_factory(resource_id=None):
+    subscription_id = None
+    if resource_id:
+        matched = re.match('/subscriptions/(?P<subscription>[^/]*)/', resource_id)
+        if matched:
+            subscription_id = matched.groupdict()['subscription']
+    return get_mgmt_service_client(AuthorizationManagementClient, subscription_id=subscription_id)
 
 def _graph_client_factory(**_):
     from azure.cli.core._profile import Profile
@@ -46,7 +52,7 @@ def _graph_client_factory(**_):
 
 def list_role_definitions(name=None, resource_group_name=None, resource_id=None,
                           custom_role_only=False):
-    definitions_client = _auth_client_factory().role_definitions
+    definitions_client = _auth_client_factory(resource_id).role_definitions
     scope = _build_role_scope(resource_group_name, resource_id,
                               definitions_client.config.subscription_id)
     return _search_role_definitions(definitions_client, name, scope, custom_role_only)
@@ -115,7 +121,7 @@ def create_role_definition(role_definition):
 
 def delete_role_definition(name, resource_group_name=None, resource_id=None,
                            custom_role_only=False):
-    definitions_client = _auth_client_factory().role_definitions
+    definitions_client = _auth_client_factory(resource_id).role_definitions
     scope = _build_role_scope(resource_group_name, resource_id,
                               definitions_client.config.subscription_id)
     roles = _search_role_definitions(definitions_client, name, scope, custom_role_only)
@@ -133,7 +139,7 @@ def create_role_assignment(role, assignee, resource_group_name=None, resource_id
 
 def _create_role_assignment(role, assignee, resource_group_name=None, resource_id=None,
                             ocp_aad_session_key=None):
-    factory = _auth_client_factory()
+    factory = _auth_client_factory(resource_id)
     assignments_client = factory.role_assignments
     definitions_client = factory.role_definitions
 
@@ -159,7 +165,9 @@ def list_role_assignments(assignee=None, role=None, resource_group_name=None,#py
     member(transitively). Supported only for a user principal.
     '''
     graph_client = _graph_client_factory()
-    definitions_client = _auth_client_factory().role_definitions
+    factory = _auth_client_factory(resource_id)
+    assignments_client = factory.role_assignments
+    definitions_client = factory.role_definitions
 
     scope = None
     if show_all:
@@ -170,7 +178,8 @@ def list_role_assignments(assignee=None, role=None, resource_group_name=None,#py
         scope = _build_role_scope(resource_group_name, resource_id,
                                   definitions_client.config.subscription_id)
 
-    assignments = _search_role_assignments(scope, assignee, role,
+    assignments = _search_role_assignments(assignments_client, definitions_client,
+                                           scope, assignee, role,
                                            include_inherited, include_groups)
 
     if not assignments:
@@ -209,7 +218,9 @@ def _get_displayable_name(graph_object):
 
 def delete_role_assignments(ids=None, assignee=None, role=None, #pylint: disable=too-many-arguments
                             resource_group_name=None, resource_id=None, include_inherited=False):
-    assignments_client = _auth_client_factory().role_assignments
+    factory = _auth_client_factory(resource_id)
+    assignments_client = factory.role_assignments
+    definitions_client = factory.role_definitions
     ids = ids or []
     if ids:
         if assignee or role or resource_group_name or resource_id or include_inherited:
@@ -220,7 +231,8 @@ def delete_role_assignments(ids=None, assignee=None, role=None, #pylint: disable
 
     scope = _build_role_scope(resource_group_name, resource_id,
                               assignments_client.config.subscription_id)
-    assignments = _search_role_assignments(scope, assignee, role, include_inherited,
+    assignments = _search_role_assignments(assignments_client, definitions_client,
+                                           scope, assignee, role, include_inherited,
                                            include_groups=False)
 
     if assignments:
@@ -229,11 +241,8 @@ def delete_role_assignments(ids=None, assignee=None, role=None, #pylint: disable
     else:
         raise CLIError('No matched assignments were found to delete')
 
-def _search_role_assignments(scope, assignee, role, include_inherited, include_groups):
-    factory = _auth_client_factory()
-    assignments_client = factory.role_assignments
-    definitions_client = factory.role_definitions
-
+def _search_role_assignments(assignments_client, definitions_client,#pylint: disable=too-many-arguments
+                             scope, assignee, role, include_inherited, include_groups):
     assignee_object_id = None
     if assignee:
         assignee_object_id = _resolve_object_id(assignee)
@@ -266,10 +275,6 @@ def _search_role_assignments(scope, assignee, role, include_inherited, include_g
 def _build_role_scope(resource_group_name, resource_id, subscription_id):
     subscription_scope = '/subscriptions/' + subscription_id
     if resource_id:
-        if not subscription_id.lower() in resource_id.lower():
-            # remove when https://github.com/Azure/azure-cli/issues/807 is fixed
-            raise CLIError("Managing assignments on other subscriptions is not yet supported. "
-                           "Run 'az account set' first")
         if resource_group_name:
             err = 'Resource group "{}" is redundant because resource id is supplied'
             raise CLIError(err.format(resource_group_name))
