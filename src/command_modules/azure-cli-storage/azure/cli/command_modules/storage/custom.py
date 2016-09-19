@@ -64,7 +64,7 @@ def show_storage_account_connection_string(
     connection_string = '{}{}'.format(connection_string, ';FileEndpoint={}'.format(file_endpoint) if file_endpoint else '')
     connection_string = '{}{}'.format(connection_string, ';QueueEndpoint={}'.format(queue_endpoint) if queue_endpoint else '')
     connection_string = '{}{}'.format(connection_string, ';TableEndpoint={}'.format(table_endpoint) if table_endpoint else '')
-    return {'ConnectionString':connection_string}
+    return {'connectionString': connection_string}
 
 def create_storage_account(resource_group_name, account_name, sku, location,
                            kind=Kind.storage.value, tags=None, custom_domain=None,
@@ -181,11 +181,6 @@ def create_acl_policy(
         client, container_name, policy_name, start=None, expiry=None, permission=None, **kwargs):
     ''' Create a stored access policy on the containing object '''
     from azure.storage.models import AccessPolicy
-    # TODO: Remove workaround once SDK issue fixed (Pivotal #120873795)
-    if not (start or expiry or permission):
-        raise CLIError('Must specify at least one property (permission, start or expiry) '
-                       'when creating an access policy.')
-
     acl = _get_acl(client, container_name, **kwargs)
     acl[policy_name] = AccessPolicy(permission, expiry, start)
     return _set_acl(client, container_name, acl, **kwargs)
