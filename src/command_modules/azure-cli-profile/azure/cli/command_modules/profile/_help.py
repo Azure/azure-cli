@@ -18,3 +18,8 @@ helps['login'] = """
                   text: >
                     az login --service-principal -u http://azure-cli-2016-08-05-14-31-15 -p VerySecret --tenant contoso.onmicrosoft.com
             """
+
+helps['account'] = """
+    type: group
+    short-summary: Manages stored and default subscriptions
+"""

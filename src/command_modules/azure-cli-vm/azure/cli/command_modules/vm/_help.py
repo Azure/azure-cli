@@ -105,7 +105,7 @@ generic_update_help = """
 
 helps['vm update'] = """
             type: command
-            short-summary: Update VM properties.
+            short-summary: Update VM properties
             long-summary: Update VM objects and properties using paths that correspond to 'az vm show'.  See examples.
             examples:
 {0}
@@ -136,4 +136,70 @@ helps['vmss show'] = """
     parameters: 
         - name: --ids
           short-summary: "One or more scale set or specific VM instance IDs. If provided, no other 'Resource Id' arguments should be specified."
+"""
+
+helps['vm get-instance-view'] = """
+    type: command
+    short-summary: "Get's a vm including instance information (powerState)"
+"""
+
+helps['vm'] = """
+    type: group
+    short-summary: Provision Linux and Windows virtual machines in minutes
+"""
+helps['vm access'] = """
+    type: group
+    short-summary: Manage user access
+"""
+helps['vm availability-set'] = """
+    type: group
+    short-summary: Group resources into availability-sets for high-availability requirements
+"""
+helps['vm boot-diagnostics'] = """
+    type: group
+    short-summary: Troubleshoot virtual machine start-up
+"""
+helps['vm container'] = """
+    type: group
+    short-summary: Use Docker-based tools to deploy and manage containers
+"""
+helps['vm diagnostics'] = """
+    type: group
+    short-summary: Configure the Azure VM diagnostics extension
+"""
+helps['vm disk'] = """
+    type: group
+    short-summary: Manage vm storage disks
+"""
+helps['vm extension'] = """
+    type: group
+    short-summary: Extend the functionality of your VMs with vm extensions
+"""
+helps['vm extension image'] = """
+    type: group
+    short-summary: Find vm extensions available for your subscription and region
+"""
+helps['vm image'] = """
+    type: group
+    short-summary: VM images available on the Azure marketplace
+"""
+helps['vm nic'] = """
+    type: group
+    short-summary: Manage vm network interfaces, see also 'az network nic'
+"""
+helps['vmss'] = """
+    type: group
+    short-summary: Create highly available, auto-scalable Linux or Windows virtual machines
+"""
+helps['vmss diagnostics'] = """
+    type: group
+    short-summary: Configure the Azure VMSS diagnostics extension
+"""
+helps['vmss extension'] = """
+    type: group
+    short-summary: Extend the functionality of your scale-set with vm extensions
+"""
+helps['vmss extension image'] = """
+    type: group
+    short-summary: Find scale-set extensions available for your subscription and region
 """

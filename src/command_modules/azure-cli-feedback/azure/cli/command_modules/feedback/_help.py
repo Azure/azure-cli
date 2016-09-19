@@ -6,3 +6,8 @@
 from azure.cli.core.help_files import helps #pylint: disable=unused-import
 
 #pylint: disable=line-too-long
+
+helps['feedback'] = """
+            type: command
+            short-summary: Loving or hating the CLI?  Let us know!
+"""

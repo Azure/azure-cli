@@ -24,3 +24,128 @@ helps['storage entity insert'] = """
         - name: --timeout
           short-summary: The server timeout, expressed in seconds.
 """
+
+helps['storage'] = """
+    type: group
+    short-summary: Durable, highly available, and massively scalable cloud storage
+"""
+helps['storage account'] = """
+    type: group
+    short-summary: Commands to manage your Storage accounts
+"""
+helps['storage account keys'] = """
+    type: group
+    short-summary: Commands to manage your Storage aaccount keys
+"""
+helps['storage blob'] = """
+    type: group
+    short-summary: REST-bsed object storage for unstructured data
+"""
+helps['storage blob copy'] = """
+    type: group
+    short-summary: Commands to manage your blob copy operations
+"""
+helps['storage blob lease'] = """
+    type: group
+    short-summary: Commands to manage leases of your storage blob
+"""
+helps['storage blob metadata'] = """
+    type: group
+    short-summary: Commands to manage your blob metadata
+"""
+helps['storage blob service-properties'] = """
+    type: group
+    short-summary: Commands to view Storage blob service properties
+"""
+helps['storage container'] = """
+    type: group
+    short-summary: Commands to manage your storage containers
+"""
+helps['storage container lease'] = """
+    type: group
+    short-summary: Commands to manage leases of your storage containers
+"""
+helps['storage container metadata'] = """
+    type: group
+    short-summary: Commands to manage your storage container metadata
+"""
+helps['storage container policy'] = """
+    type: group
+    short-summary: Commands to manage stored access policies of your storage container
+"""
+helps['storage cors'] = """
+    type: group
+    short-summary: Commands to manage your Storage Cross-Orgin Resource Sharing (CORS)
+"""
+helps['storage directory'] = """
+    type: group
+    short-summary: Commands to manage your Storage file directory
+"""
+helps['storage directory metadata'] = """
+    type: group
+    short-summary: Commands to manage your Storage file directory metadata
+"""
+helps['storage entity'] = """
+    type: group
+    short-summary: Commands to manage Storage table entities
+"""
+helps['storage file'] = """
+    type: group
+    short-summary: File shares that use the standard SMB 3.0 protocal
+"""
+helps['storage file copy'] = """
+    type: group
+    short-summary: Commands to manage your file copy operations
+"""
+helps['storage file metadata'] = """
+    type: group
+    short-summary: Commands to manage your file metadata
+"""
+helps['storage logging'] = """
+    type: group
+    short-summary: Commands to view Storage logging information
+"""
+helps['storage message'] = """
+    type: group
+    short-summary: Commands to manage Storage queue messages
+"""
+helps['storage metrics'] = """
+    type: group
+    short-summary: Commands to manage your Storage metrics properties
+"""
+helps['storage queue'] = """
+    type: group
+    short-summary: Effectively scale apps according to traffic using queues
+"""
+helps['storage queue metadata'] = """
+    type: group
+    short-summary: Commands to manage your queue metadata
+"""
+helps['storage queue policy'] = """
+    type: group
+    short-summary: Commands to manage shared access policies of your storage queue
+"""
+helps['storage share'] = """
+    type: group
+    short-summary: Commands to manage Storage file shares
+"""
+helps['storage share metadata'] = """
+    type: group
+    short-summary: Commands to manage file share metadata
+"""
+helps['storage share policy'] = """
+    type: group
+    short-summary: Commands to manage stored access policies of your Storage file share
+"""
+helps['storage table'] = """
+    type: group
+    short-summary: NoSQL key-value storage using semi-structured datasets
+"""
+helps['storage table batch'] = """
+    type: group
+    short-summary: Commands to manage your table batch operations
+"""
+helps['storage table policy'] = """
+    type: group
+    short-summary: Commands to manage stored access policies of your Storage table
+"""

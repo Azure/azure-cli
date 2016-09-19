@@ -29,3 +29,41 @@ helps['resource policy create'] = """
                             }
                         }
             """
+
+helps['resource'] = """
+    type: group
+    short-summary: Generic commands to managing Azure resources
+"""
+helps['resource feature'] = """
+    type: group
+    short-summary: Commands to manage resource provider features, such as previews
+"""
+helps['resource group'] = """
+    type: group
+    short-summary: Commands to manage resource groups
+"""
+helps['resource group deployment'] = """
+    type: group
+    short-summary: Commands to execute or manage ARM deployments
+"""
+helps['resource group deployment operation'] = """
+    type: group
+    short-summary: Commands to manage deployment operations
+"""
+helps['resource policy'] = """
+    type: group
+    short-summary: Commands to manage resource policies
+"""
+helps['resource policy assignment'] = """
+    type: group
+    short-summary: Commands to manage resource policy assignments
+"""
+helps['resource provider'] = """
+    type: group
+    short-summary: Commands to manage resource providers
+"""
+
+helps['tag'] = """
+    type: group
+    short-summary: Manage and track resources quickly with tags
+"""

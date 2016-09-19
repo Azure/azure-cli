@@ -242,3 +242,232 @@ helps['network vnet peering update'] = """
     type: command
     short-summary: Update a virtual network peering.
 """
+
+helps['network'] = """
+    type: group
+    short-summary: Manages Network resources
+"""
+helps['network application-gateway'] = """
+    type: group
+    short-summary: Provides application-level routing and load balancing services 
+"""
+helps['network application-gateway address-pool'] = """
+    type: group
+    short-summary: Commands to manage app gateway address pools
+"""
+helps['network application-gateway frontend-ip'] = """
+    type: group
+    short-summary: Commands to manage app gateway front-end IP addresses
+"""
+helps['network application-gateway frontend-port'] = """
+    type: group
+    short-summary: Commands to manage app gateway front-end ports
+"""
+helps['network application-gateway http-listener'] = """
+    type: group
+    short-summary: Commands to manage app gateway http listeners
+"""
+helps['network application-gateway http-settings'] = """
+    type: group
+    short-summary: Commands to manage app gateway http settings
+"""
+helps['network application-gateway probe'] = """
+    type: group
+    short-summary: Probes gather information, such as utilization, to be evaluated by rules
+"""
+helps['network application-gateway rule'] = """
+    type: group
+    short-summary: Rules evaluate probe information and define routing rules
+"""
+helps['network application-gateway ssl-cert'] = """
+    type: group
+    short-summary: Commands to manage app gateway SSL certificates
+"""
+helps['network application-gateway url-path-map'] = """
+    type: group
+    short-summary: Commands to manage app gateway URL path maps
+"""
+helps['network application-gateway url-path-map rule'] = """
+    type: group
+    short-summary: Commands to manage app gateway URL path map rules
+"""
+helps['network dns'] = """
+    type: group
+    short-summary: Host your DNS domain in Azure
+"""
+helps['network dns record'] = """
+    type: group
+    short-summary: Commands to manage DNS records contained in a record-set
+"""
+helps['network dns record a'] = """
+    type: group
+    short-summary: Manage DNS A records
+"""
+helps['network dns record aaaa'] = """
+    type: group
+    short-summary: Manage DNS AAAA records
+"""
+helps['network dns record cname'] = """
+    type: group
+    short-summary: Manage DNS CNAME records
+"""
+helps['network dns record mx'] = """
+    type: group
+    short-summary: Manage DNS MX (mail) records
+"""
+helps['network dns record ns'] = """
+    type: group
+    short-summary: Manage DNS NS (nameserver) records
+"""
+helps['network dns record ptr'] = """
+    type: group
+    short-summary: Manage DNS PTR (pointer) records
+"""
+helps['network dns record soa'] = """
+    type: group
+    short-summary: Manage DNS SOA records
+"""
+helps['network dns record srv'] = """
+    type: group
+    short-summary: Manage DNS SRV records
+"""
+helps['network dns record txt'] = """
+    type: group
+    short-summary: Manage DNS TXT records
+"""
+helps['network dns record-set'] = """
+    type: group
+    short-summary: Manage DNS record-set
+"""
+helps['network dns zone'] = """
+    type: group
+    short-summary: Commands to manage DNS zones
+"""
+helps['network express-route'] = """
+    type: group
+    short-summary: Dedicated private network fiber connections to Azure
+"""
+helps['network express-route circuit'] = """
+    type: group
+    short-summary: Commands to manage express-route circuits
+"""
+helps['network express-route circuit-auth'] = """
+    type: group
+    short-summary: Commands to manage express-route circuit authentication
+"""
+helps['network express-route circuit-peering'] = """
+    type: group
+    short-summary: Commands to manage express-route peering
+"""
+helps['network express-route service-provider'] = """
+    type: group
+    short-summary: Commands to view express-route service providers
+"""
+helps['network lb'] = """
+    type: group
+    short-summary: Deliver high availability and network performance to your applications
+"""
+helps['network lb address-pool'] = """
+    type: group
+    short-summary: Commands to manage LB address pools
+"""
+helps['network lb frontend-ip'] = """
+    type: group
+    short-summary: Commands to manage LB front-end IP addresses
+"""
+helps['network lb inbound-nat-pool'] = """
+    type: group
+    short-summary: Commands to manage LB inbound NAT address pools
+"""
+helps['network lb inbound-nat-rule'] = """
+    type: group
+    short-summary: Commands to manage LB inbound NAT rules
+"""
+helps['network lb probe'] = """
+    type: group
+    short-summary: Commands to manage LB probes
+"""
+helps['network lb rule'] = """
+    type: group
+    short-summary: Commands to manage LB rules
+"""
+helps['network local-gateway'] = """
+    type: group
+    short-summary: Commands to manage local gateways
+"""
+helps['network nic'] = """
+    type: group
+    short-summary: Commands to manage network interfaces (NIC)
+"""
+helps['network nic ip-config'] = """
+    type: group
+    short-summary: Commands to manage NIC ip configurations
+"""
+helps['network nic ip-config address-pool'] = """
+    type: group
+    short-summary: Commands to manage NIC address pools
+"""
+helps['network nic ip-config inbound-nat-rule'] = """
+    type: group
+    short-summary: Commands to manage NIC inbound NAT rules
+"""
+helps['network nsg'] = """
+    type: group
+    short-summary: Commands to manage Network Security Groups (NSG)
+"""
+helps['network nsg rule'] = """
+    type: group
+    short-summary: Commands to manage NSG rules
+"""
+helps['network public-ip'] = """
+    type: group
+    short-summary: Commands to manage public IP addresses
+"""
+helps['network route-table'] = """
+    type: group
+    short-summary: Commands to manage route-tables
+"""
+helps['network route-table route'] = """
+    type: group
+    short-summary: Commands to manage route-table routes
+"""
+helps['network traffic-manager'] = """
+    type: group
+    short-summary: Route incoming traffic for high performance and availability
+"""
+helps['network traffic-manager endpoint'] = """
+    type: group
+    short-summary: Commands to manage traffic-manager end points
+"""
+helps['network traffic-manager profile'] = """
+    type: group
+    short-summary: Commands to manage traffic-manager profiles
+"""
+helps['network vnet'] = """
+    type: group
+    short-summary: Provision private networks
+"""
+helps['network vnet subnet'] = """
+    type: group
+    short-summary: Commands to manage subnets
+"""
+helps['network vpn-connection'] = """
+    type: group
+    short-summary: Commands to manage VPN connections
+"""
+helps['network vpn-connection shared-key'] = """
+    type: group
+    short-summary: Commands to manage VPN shared keys
+"""
+helps['network vpn-gateway'] = """
+    type: group
+    short-summary: Establish secure, cross-premises connectivity
+"""
+helps['network vpn-gateway revoked-cert'] = """
+    type: group
+    short-summary: Commands to manage VPN gateway revoked certificates
+"""
+helps['network vpn-gateway root-cert'] = """
+    type: group
+    short-summary: Commands to manage VPN gateway root certificates
+"""
