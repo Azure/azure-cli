@@ -141,10 +141,6 @@ helps['storage table'] = """
     type: group
     short-summary: NoSQL key-value storage using semi-structured datasets
 """
-helps['storage table batch'] = """
-    type: group
-    short-summary: Commands to manage your table batch operations
-"""
 helps['storage table policy'] = """
     type: group
     short-summary: Commands to manage stored access policies of your Storage table

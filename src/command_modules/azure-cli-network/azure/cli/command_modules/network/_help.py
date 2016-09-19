@@ -323,10 +323,6 @@ helps['network dns record ptr'] = """
     type: group
     short-summary: Manage DNS PTR (pointer) records
 """
-helps['network dns record soa'] = """
-    type: group
-    short-summary: Manage DNS SOA records
-"""
 helps['network dns record srv'] = """
     type: group
     short-summary: Manage DNS SRV records
