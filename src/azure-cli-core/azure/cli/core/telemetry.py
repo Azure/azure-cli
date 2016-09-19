@@ -11,6 +11,7 @@ import os
 import sys
 import platform
 import locale
+import hashlib
 
 from applicationinsights import TelemetryClient
 from applicationinsights.exceptions import enable
@@ -30,6 +31,8 @@ try:
     from azure.cli.core._config import az_config
 except: #pylint: disable=bare-except
     az_config = {}
+
+TELEMETRY_VERSION = '0.0.1'
 
 _DEBUG_TELEMETRY = 'AZURE_CLI_DEBUG_TELEMETRY'
 client = {}
@@ -88,7 +91,9 @@ def log_telemetry(name, log_type='event', **kwargs):
             raise ValueError('Type {} is not supported.  Available types: {}'.format(log_type,
                                                                                      types))
 
-        props = {}
+        props = {
+            'telemetry-version': TELEMETRY_VERSION
+            }
         _safe_exec(props, 'time', lambda: str(datetime.datetime.now()))
         _safe_exec(props, 'x-ms-client-request-id',
                    lambda: APPLICATION.session['headers']['x-ms-client-request-id'])
@@ -103,8 +108,8 @@ def log_telemetry(name, log_type='event', **kwargs):
         _safe_exec(props, 'user-machine-id', _get_user_machine_id)
         _safe_exec(props, 'user-azure-id', _get_user_azure_id)
         _safe_exec(props, 'azure-subscription-id', _get_azure_subscription_id)
-        _safe_exec(props, 'output-type', lambda: az_config.get('core', 'output',
-                                                               fallback='unknown'))
+        _safe_exec(props, 'default-output-type', lambda: az_config.get('core', 'output',
+                                                                       fallback='unknown'))
         _safe_exec(props, 'environment', _get_env_string)
 
         if kwargs:
@@ -137,14 +142,18 @@ def _get_env_string():
                                                   if v.startswith('AZURE_CLI')])))
 
 def _get_user_machine_id():
-    return hash(platform.node() + getpass.getuser())
+    return _get_hash(platform.node() + getpass.getuser())
 
 def _get_user_azure_id():
     try:
         profile = Profile()
-        return hash(profile.get_current_account_user())
+        return _get_hash(profile.get_current_account_user())
     except CLIError: #pylint: disable=broad-except
         pass
+
+def _get_hash(s):
+    hash_object = hashlib.sha256(s.encode('utf-8'))
+    return str(hash_object.hexdigest())
 
 def _get_azure_subscription_id():
     try:
@@ -225,6 +234,7 @@ def upload_telemetry(data_to_save):
                                   properties=record['properties'])
     client.flush()
     if _debugging():
+        print(json.dumps(data_to_save, indent=2, sort_keys=True))
         print('telemetry upload complete')
 
 if __name__ == '__main__':
