@@ -395,6 +395,9 @@ def transform_acl_list_output(result):
         new_result.append(new_entry)
     return new_result
 
+def transform_container_permission_output(result):
+    return {'publicAccess': result.public_access or 'off'}
+
 def transform_cors_list_output(result):
     new_result = []
     for service in sorted(result.keys()):
@@ -429,7 +432,7 @@ def transform_file_list_output(result):
     """ Transform to convert SDK file/dir list output to something that
     more clearly distinguishes between files and directories. """
     new_result = []
-    for item in result['items']:
+    for item in list(result):
         new_entry = OrderedDict()
         item_name = item['name']
         try:
@@ -450,10 +453,10 @@ def transform_logging_list_output(result):
     for key in sorted(result.keys()):
         new_entry = OrderedDict()
         new_entry['Service'] = key
-        new_entry['Read'] = result[key]['read']
-        new_entry['Write'] = result[key]['write']
-        new_entry['Delete'] = result[key]['delete']
-        new_entry['RetentionPolicy'] = result[key]['retentionPolicy']['days']
+        new_entry['Read'] = str(result[key]['read'])
+        new_entry['Write'] = str(result[key]['write'])
+        new_entry['Delete'] = str(result[key]['delete'])
+        new_entry['RetentionPolicy'] = str(result[key]['retentionPolicy']['days'])
         new_result.append(new_entry)
     return new_result
 
@@ -466,12 +469,21 @@ def transform_metrics_list_output(result):
             new_entry = OrderedDict()
             new_entry['Service'] = service_name
             service_name = ''
-            new_entry['Interval'] = interval
-            new_entry['Enabled'] = item['enabled']
-            new_entry['IncludeApis'] = item['includeApis']
-            new_entry['RetentionPolicy'] = item['retentionPolicy']['days']
+            new_entry['Interval'] = str(interval)
+            new_entry['Enabled'] = str(item['enabled'])
+            new_entry['IncludeApis'] = str(item['includeApis'])
+            new_entry['RetentionPolicy'] = str(item['retentionPolicy']['days'])
             new_result.append(new_entry)
     return new_result
+
+def transform_storage_boolean_output(result):
+    return {'success': result}
+
+def transform_storage_exists_output(result):
+    return {'exists': result}
+
+def transform_storage_list_output(result):
+    return list(result)
 
 def transform_url(result):
     """ Ensures the resulting URL string does not contain extra / characters """
