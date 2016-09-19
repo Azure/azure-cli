@@ -55,7 +55,7 @@ class WebappBasicE2ETest(ResourceGroupVCRTestBase):
 
         self.cmd('webapp git enable-local -g {} -n {}'.format(self.resource_group, webapp_name))
         result = self.cmd('webapp git show-url -g {} -n {}'.format(self.resource_group, webapp_name))
-        self.assertTrue(result.endswith(webapp_name + '.git'))
+        self.assertTrue(result['url'].endswith(webapp_name + '.git'))
 
         #turn on diagnostics
         test_cmd = ('webapp log set -g {} -n {} --level verbose'.format(self.resource_group, webapp_name) + ' '
