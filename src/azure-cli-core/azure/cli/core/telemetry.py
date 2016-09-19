@@ -12,6 +12,7 @@ import sys
 import platform
 import locale
 import hashlib
+import traceback
 
 from applicationinsights import TelemetryClient
 from applicationinsights.exceptions import enable
@@ -32,7 +33,7 @@ try:
 except: #pylint: disable=bare-except
     az_config = {}
 
-TELEMETRY_VERSION = '0.0.1'
+TELEMETRY_VERSION = '0.0.1.1'
 
 _DEBUG_TELEMETRY = 'AZURE_CLI_DEBUG_TELEMETRY'
 client = {}
@@ -86,7 +87,7 @@ def log_telemetry(name, log_type='event', **kwargs):
         elif ARGCOMPLETE_ENV_NAME in os.environ:
             source = 'completer'
 
-        types = ['event', 'pageview']
+        types = ['event', 'pageview', 'trace']
         if log_type not in types:
             raise ValueError('Type {} is not supported.  Available types: {}'.format(log_type,
                                                                                      types))
@@ -111,6 +112,8 @@ def log_telemetry(name, log_type='event', **kwargs):
         _safe_exec(props, 'default-output-type', lambda: az_config.get('core', 'output',
                                                                        fallback='unknown'))
         _safe_exec(props, 'environment', _get_env_string)
+        if log_type == 'trace':
+            _safe_exec(props, 'trace', _get_stack_trace)
 
         if kwargs:
             props.update(**kwargs)
@@ -174,6 +177,22 @@ def _get_shell_type():
     else:
         return _remove_cmd_chars(_remove_symbols(os.environ.get('SHELL')))
 
+def _get_stack_trace():
+    def _get_root_path():
+        dir_path = os.path.dirname(os.path.realpath(__file__))
+        head, tail = os.path.split(dir_path)
+        while tail and tail != 'azure-cli':
+            head, tail = os.path.split(head)
+        return head
+
+    def _remove_root_paths(s):
+        root = _get_root_path()
+        return str([p.replace(root, '') for p in s])
+
+    _, _, ex_traceback = sys.exc_info()
+    trace = traceback.format_tb(ex_traceback)
+    return _remove_cmd_chars(_remove_symbols(_remove_root_paths(trace)))
+
 def _sanitize_inputs(d):
     for key, value in d.items():
         if isinstance(value, str):
@@ -225,13 +244,13 @@ def upload_telemetry(data_to_save):
     data_to_save = json.loads(data_to_save.replace("'", '"'))
 
     for record in data_to_save:
-        if record['type'] == 'event':
-            client.track_event(record['name'],
-                               record['properties'])
-        elif record['type'] == 'pageview':
+        if record['type'] == 'pageview':
             client.track_pageview(record['name'],
                                   url=record['name'],
                                   properties=record['properties'])
+        else:
+            client.track_event(record['name'],
+                               record['properties'])
     client.flush()
     if _debugging():
         print(json.dumps(data_to_save, indent=2, sort_keys=True))
