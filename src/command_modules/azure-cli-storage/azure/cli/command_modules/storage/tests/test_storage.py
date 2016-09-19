@@ -29,7 +29,7 @@ def _get_connection_string(test):
                      'AccountName={};AccountKey={}'.format(test.account, MOCK_ACCOUNT_KEY))
     else:
         connection_string = test.cmd('storage account show-connection-string -g {} --name {} -o json'
-            .format(test.resource_group, test.account))['ConnectionString']
+            .format(test.resource_group, test.account))['connectionString']
         test.set_env('AZURE_STORAGE_CONNECTION_STRING', connection_string)
 
 class StorageAccountScenarioTest(ResourceGroupVCRTestBase):
@@ -69,8 +69,8 @@ class StorageAccountScenarioTest(ResourceGroupVCRTestBase):
         ])
         s.cmd('storage account show-usage', checks=JMESPathCheck('name.value', 'StorageAccounts'))
         s.cmd('storage account show-connection-string -g {} -n {} --protocol http'.format(rg, account), checks=[
-            JMESPathCheck("contains(ConnectionString, 'https')", False),
-            JMESPathCheck("contains(ConnectionString, '{}')".format(account), True)
+            JMESPathCheck("contains(connectionString, 'https')", False),
+            JMESPathCheck("contains(connectionString, '{}')".format(account), True)
         ])
         keys_result = s.cmd('storage account keys list -g {} -n {}'.format(rg, account))
         key1 = keys_result['keys'][0]
@@ -126,16 +126,16 @@ class StorageBlobScenarioTest(StorageAccountVCRTestBase):
 
         # test block blob upload
         s.cmd('storage blob upload -n {} -c {} --type block --file "{}"'.format(block_blob, container, os.path.join(TEST_DIR, 'testfile.rst')))
-        s.cmd('storage blob exists -n {} -c {}'.format(block_blob, container), checks=BooleanCheck(True))
+        s.cmd('storage blob exists -n {} -c {}'.format(block_blob, container), checks=JMESPathCheck('exists', True))
 
         # test page blob upload
         s.cmd('storage blob upload -n {} -c {} --type page --file "{}"'.format(page_blob, container, os.path.join(TEST_DIR, 'testpage.rst')))
-        s.cmd('storage blob exists -n {} -c {}'.format(page_blob, container), checks=BooleanCheck(True))
+        s.cmd('storage blob exists -n {} -c {}'.format(page_blob, container), checks=JMESPathCheck('exists', True))
 
         # test append blob upload
         s.cmd('storage blob upload -n {} -c {} --type append --file "{}"'.format(append_blob, container, os.path.join(TEST_DIR, 'testfile.rst')))
         s.cmd('storage blob upload -n {} -c {} --type append --file "{}"'.format(append_blob, container, os.path.join(TEST_DIR, 'testfile.rst')))
-        s.cmd('storage blob exists -n {} -c {}'.format(append_blob, container), checks=BooleanCheck(True))
+        s.cmd('storage blob exists -n {} -c {}'.format(append_blob, container), checks=JMESPathCheck('exists', True))
 
         blob_url = 'https://{}.blob.core.windows.net/{}/{}'.format(account, container, blob)
         s.cmd('storage blob url -n {} -c {}'.format(blob, container), checks=StringCheck(blob_url))
@@ -148,7 +148,7 @@ class StorageBlobScenarioTest(StorageAccountVCRTestBase):
         s.cmd('storage blob metadata update -n {} -c {}'.format(blob, container))
         s.cmd('storage blob metadata show -n {} -c {}'.format(blob, container), checks=NoneCheck())
 
-        res = s.cmd('storage blob list --container-name {}'.format(container))['items']
+        res = s.cmd('storage blob list --container-name {}'.format(container))
         blob_list = [block_blob, append_blob, page_blob]
         for item in res:
             assert item['name'] in blob_list
@@ -192,10 +192,10 @@ class StorageBlobScenarioTest(StorageAccountVCRTestBase):
         json_result = s.cmd('storage blob snapshot -c {} -n {}'.format(container, append_blob))
         snapshot_dt = json_result['snapshot']
         s.cmd('storage blob exists -n {} -c {} --snapshot {}'.format(append_blob, container, snapshot_dt),
-            checks=BooleanCheck(True))
+            checks=JMESPathCheck('exists', True))
         
         s.cmd('storage blob delete --container-name {} --name {}'.format(container, blob))
-        s.cmd('storage blob exists -n {} -c {}'.format(blob, container), checks=BooleanCheck(False))
+        s.cmd('storage blob exists -n {} -c {}'.format(blob, container), checks=JMESPathCheck('exists', False))
 
     def body(self):
         s = self
@@ -206,11 +206,16 @@ class StorageBlobScenarioTest(StorageAccountVCRTestBase):
         date = s.date
         _get_connection_string(self)
 
-        s.cmd('storage container create --name {} --fail-on-exist'.format(container), checks=BooleanCheck(True))
-        s.cmd('storage container exists -n {}'.format(container), checks=BooleanCheck(True))
+        s.cmd('storage container create --name {} --fail-on-exist'.format(container), checks=JMESPathCheck('success', True))
+        s.cmd('storage container exists -n {}'.format(container), checks=JMESPathCheck('exists', True))
+
+        s.cmd('storage container set-permission -n {} --public-access blob'.format(container))
+        s.cmd('storage container show-permission -n {}'.format(container), checks=JMESPathCheck('publicAccess', 'blob'))
+        s.cmd('storage container set-permission -n {} --public-access off'.format(container))
+        s.cmd('storage container show-permission -n {}'.format(container), checks=JMESPathCheck('publicAccess', 'off'))
 
         s.cmd('storage container show -n {}'.format(container), checks=JMESPathCheck('name', container))
-        res = s.cmd('storage container list')['items']
+        res = s.cmd('storage container list')
         assert container in [x['name'] for x in res]
 
         s.cmd('storage container metadata update -n {} --metadata foo=bar moo=bak'.format(container))
@@ -250,8 +255,8 @@ class StorageBlobScenarioTest(StorageAccountVCRTestBase):
         ])
         
         # verify delete operation
-        s.cmd('storage container delete --name {} --fail-not-exist'.format(container), checks=BooleanCheck(True))
-        s.cmd('storage container exists -n {}'.format(container), checks=BooleanCheck(False))
+        s.cmd('storage container delete --name {} --fail-not-exist'.format(container), checks=JMESPathCheck('success', True))
+        s.cmd('storage container exists -n {}'.format(container), checks=JMESPathCheck('exists', False))
 
 class StorageBlobCopyScenarioTest(StorageAccountVCRTestBase):
 
@@ -282,7 +287,7 @@ class StorageBlobCopyScenarioTest(StorageAccountVCRTestBase):
         s.cmd('storage container create -n {} --fail-on-exist'.format(dst_cont))
 
         s.cmd('storage blob upload -n {} -c {} --type block --file "{}"'.format(src_blob, src_cont, os.path.join(TEST_DIR, 'testfile.rst')))
-        s.cmd('storage blob exists -n {} -c {}'.format(src_blob, src_cont), checks=BooleanCheck(True))
+        s.cmd('storage blob exists -n {} -c {}'.format(src_blob, src_cont), checks=JMESPathCheck('exists', True))
 
         # test that a blob can be successfully copied
         src_uri = s.cmd('storage blob url -n {} -c {}'.format(src_blob, src_cont))
@@ -316,9 +321,9 @@ class StorageFileScenarioTest(StorageAccountVCRTestBase):
         s = self
         dir = 'testdir01'
         s.cmd('storage directory create --share-name {} --name {} --fail-on-exist'.format(share, dir),
-            checks=BooleanCheck(True))
+            checks=JMESPathCheck('success', True))
         s.cmd('storage directory exists --share-name {} -n {}'.format(share, dir),
-            checks=BooleanCheck(True))
+            checks=JMESPathCheck('exists', True))
         s.cmd('storage directory metadata update --share-name {} -n {} --metadata a=b c=d'.format(share, dir))
         s.cmd('storage directory metadata show --share-name {} -n {}'.format(share, dir), checks=[
             JMESPathCheck('a', 'b'),
@@ -333,20 +338,20 @@ class StorageFileScenarioTest(StorageAccountVCRTestBase):
             checks=NoneCheck())
         s._storage_file_in_subdir_scenario(share, dir)
         s.cmd('storage directory delete --share-name {} --name {} --fail-not-exist'.format(share, dir),
-            checks=BooleanCheck(True))
+            checks=JMESPathCheck('success', True))
         s.cmd('storage directory exists --share-name {} --name {}'.format(share, dir),
-            checks=BooleanCheck(False))
+            checks=JMESPathCheck('exists', False))
 
         # verify a directory can be created with metadata and then delete
         dir = 'testdir02'
         s.cmd('storage directory create --share-name {} --name {} --fail-on-exist --metadata foo=bar cat=hat'.format(share, dir),
-            checks=BooleanCheck(True))
+            checks=JMESPathCheck('success', True))
         s.cmd('storage directory metadata show --share-name {} -n {}'.format(share, dir), checks=[
             JMESPathCheck('cat', 'hat'),
             JMESPathCheck('foo', 'bar')
         ])
         s.cmd('storage directory delete --share-name {} --name {} --fail-not-exist'.format(share, dir),
-            checks=BooleanCheck(True))
+            checks=JMESPathCheck('success', True))
 
     def _storage_file_scenario(self, share):
         source_file = os.path.join(TEST_DIR, 'testfile.rst')
@@ -355,7 +360,7 @@ class StorageFileScenarioTest(StorageAccountVCRTestBase):
         s = self
         s.cmd('storage file upload --share-name {} --source "{}" -p "{}"'.format(share, source_file, filename))
         s.cmd('storage file exists --share-name {} -p "{}"'.format(share, filename),
-            checks=BooleanCheck(True))
+            checks=JMESPathCheck('exists', True))
         if os.path.isfile(dest_file):
             os.remove(dest_file)
         s.cmd('storage file download --share-name {} -p "{}" --dest "{}"'.format(share, filename, dest_file))
@@ -383,12 +388,12 @@ class StorageFileScenarioTest(StorageAccountVCRTestBase):
         s.cmd('storage file url --share-name {} -p "{}"'.format(share, filename),
             checks=StringCheck(file_url))
 
-        res = [x['name'] for x in s.cmd('storage file list -s {}'.format(share))['items']]
-        assert filename in res
+        for res in s.cmd('storage file list -s {}'.format(share))['items']:
+            assert filename in res['name']
 
         s.cmd('storage file delete --share-name {} -p "{}"'.format(share, filename))
         s.cmd('storage file exists --share-name {} -p "{}"'.format(share, filename),
-            checks=BooleanCheck(False))
+            checks=JMESPathCheck('exists', False))
 
     def _storage_file_in_subdir_scenario(self, share, dir):
         source_file = os.path.join(TEST_DIR, 'testfile.rst')
@@ -397,7 +402,7 @@ class StorageFileScenarioTest(StorageAccountVCRTestBase):
         s = self
         s.cmd('storage file upload --share-name {} -p "{}/{}" --source "{}"'.format(share, dir, filename, source_file))
         s.cmd('storage file exists --share-name {} -p "{}/{}"'.format(share, dir, filename),
-            checks=BooleanCheck(True))
+            checks=JMESPathCheck('exists', True))
         if os.path.isfile(dest_file):    
             os.remove(dest_file)
         s.cmd('storage file download --share-name {} -p "{}/{}" --dest "{}"'.format(share, dir, filename, dest_file))
@@ -406,14 +411,14 @@ class StorageFileScenarioTest(StorageAccountVCRTestBase):
         else:
             io.print_('\nDownload failed. Test failed!')
 
-        res = [x['name'] for x in s.cmd('storage file list -s {} -p {}'.format(share, dir))['items']]
-        assert filename in res
+        for res in s.cmd('storage file list -s {} -p {}'.format(share, dir))['items']:
+            assert filename in res['name']
 
         s.cmd('storage share stats --name {}'.format(share),
             checks=StringCheck('1'))
         s.cmd('storage file delete --share-name {} -p "{}/{}"'.format(share, dir, filename))
         s.cmd('storage file exists --share-name {} -p "{}"'.format(share, filename),
-            checks=BooleanCheck(False))
+            checks=JMESPathCheck('exists', False))
 
     def body(self):
         s = self
@@ -422,16 +427,16 @@ class StorageFileScenarioTest(StorageAccountVCRTestBase):
         _get_connection_string(self)
 
         s.cmd('storage share create --name {} --fail-on-exist'.format(share1),
-            checks=BooleanCheck(True))
+            checks=JMESPathCheck('success', True))
         s.cmd('storage share create -n {} --fail-on-exist --metadata foo=bar cat=hat'.format(share2),
-            checks=BooleanCheck(True))
+            checks=JMESPathCheck('success', True))
         s.cmd('storage share exists -n {}'.format(share1),
-            checks=BooleanCheck(True))
+            checks=JMESPathCheck('exists', True))
         s.cmd('storage share metadata show --name {}'.format(share2), checks=[
             JMESPathCheck('cat', 'hat'),
             JMESPathCheck('foo', 'bar')
         ])
-        res = [x['name'] for x in s.cmd('storage share list')['items']]
+        res = [x['name'] for x in s.cmd('storage share list')]
         assert share1 in res
         assert share2 in res
 
@@ -488,7 +493,7 @@ class StorageFileCopyScenarioTest(StorageAccountVCRTestBase):
 
         s.cmd('storage file upload -p "{}/{}" --share-name {} --source "{}"'.format(src_dir, src_file, src_share, os.path.join(TEST_DIR, 'testfile.rst')))
         s.cmd('storage file exists -p "{}/{}" --share-name {}'.format(src_dir, src_file, src_share),
-            checks=BooleanCheck(True))
+            checks=JMESPathCheck('exists', True))
 
         # test that a file can be successfully copied to root
         src_uri = s.cmd('storage file url -p "{}" -s {}'.format(os.path.join(src_dir, src_file), src_share))
@@ -587,10 +592,10 @@ class StorageTableScenarioTest(StorageAccountVCRTestBase):
         rg = s.resource_group
         _get_connection_string(self)
 
-        s.cmd('storage table create -n {} --fail-on-exist'.format(table), checks=BooleanCheck(True))
-        s.cmd('storage table exists -n {}'.format(table), checks=BooleanCheck(True))
+        s.cmd('storage table create -n {} --fail-on-exist'.format(table), checks=JMESPathCheck('success', True))
+        s.cmd('storage table exists -n {}'.format(table), checks=JMESPathCheck('exists', True))
 
-        res = s.cmd('storage table list')['items']
+        res = s.cmd('storage table list')
         assert table in [x['name'] for x in res]
 
         s._table_acl_scenario(table)
@@ -598,8 +603,8 @@ class StorageTableScenarioTest(StorageAccountVCRTestBase):
         s._storage_entity_scenario(table)
 
         # verify delete operation
-        s.cmd('storage table delete --name {} --fail-not-exist'.format(table), checks=BooleanCheck(True))
-        s.cmd('storage table exists -n {}'.format(table), checks=BooleanCheck(False))
+        s.cmd('storage table delete --name {} --fail-not-exist'.format(table), checks=JMESPathCheck('success', True))
+        s.cmd('storage table exists -n {}'.format(table), checks=JMESPathCheck('exists', False))
 
 class StorageQueueScenarioTest(StorageAccountVCRTestBase):
 
@@ -667,10 +672,10 @@ class StorageQueueScenarioTest(StorageAccountVCRTestBase):
         rg = s.resource_group
         _get_connection_string(self)
 
-        s.cmd('storage queue create -n {} --fail-on-exist --metadata a=b c=d'.format(queue), checks=BooleanCheck(True))
-        s.cmd('storage queue exists -n {}'.format(queue), checks=BooleanCheck(True))
+        s.cmd('storage queue create -n {} --fail-on-exist --metadata a=b c=d'.format(queue), checks=JMESPathCheck('success', True))
+        s.cmd('storage queue exists -n {}'.format(queue), checks=JMESPathCheck('exists', True))
 
-        res = s.cmd('storage queue list')['items']
+        res = s.cmd('storage queue list')
         assert queue in [x['name'] for x in res]
 
         s.cmd('storage queue metadata show -n {}'.format(queue), checks=[
@@ -688,8 +693,8 @@ class StorageQueueScenarioTest(StorageAccountVCRTestBase):
         s._storage_message_scenario(queue)
 
         # verify delete operation
-        s.cmd('storage queue delete -n {} --fail-not-exist'.format(queue), checks=BooleanCheck(True))
-        s.cmd('storage queue exists -n {}'.format(queue), checks=BooleanCheck(False))
+        s.cmd('storage queue delete -n {} --fail-not-exist'.format(queue), checks=JMESPathCheck('success', True))
+        s.cmd('storage queue exists -n {}'.format(queue), checks=JMESPathCheck('exists', False))
 
 def _acl_init(test):
     test.container = 'acltest{}'.format(test.service)
