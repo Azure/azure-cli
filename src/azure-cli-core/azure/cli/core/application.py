@@ -116,6 +116,7 @@ class Application(object):
             params.pop('func', None)
             params.pop('command', None)
             log_telemetry(expanded_arg.command, log_type='pageview',
+                          output_type=self.configuration.output_format,
                           parameters=[p for p in unexpanded_argv if p.startswith('-')])
 
             result = expanded_arg.func(params)
