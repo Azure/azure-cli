@@ -113,7 +113,7 @@ def enable_local_git(resource_group, name, slot=None):
     else:
         client.sites.create_or_update_site_config_slot(resource_group, name, site_config, slot)
 
-    return _get_git_url(client, resource_group, name, slot)
+    return {'url' : _get_git_url(client, resource_group, name, slot)}
 
 #TODO: logic comes from powershell, cross check with with upcoming xplat styles
 def create_app_service_plan(resource_group, name, tier=None, number_of_workers=None,
@@ -177,7 +177,7 @@ def _get_location_from_app_service_plan(client, resource_group, plan):
 
 def get_git_url(resource_group, name, slot=None):
     client = web_client_factory()
-    return _get_git_url(client, resource_group, name, slot)
+    return {'url' : _get_git_url(client, resource_group, name, slot)}
 
 def _get_git_url(client, resource_group, name, slot=None):
     user = client.provider.get_publishing_user()
