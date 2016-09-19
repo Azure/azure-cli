@@ -5,7 +5,6 @@
 
 import os
 import sys
-import traceback
 
 from azure.cli.core.application import APPLICATION, Configuration
 import azure.cli.core._logging as _logging
@@ -40,8 +39,7 @@ def main(args, file=sys.stdout): #pylint: disable=redefined-builtin
             formatter = OutputProducer.get_formatter(APPLICATION.configuration.output_format)
             OutputProducer(formatter=formatter, file=file).out(cmd_result)
     except Exception as ex: # pylint: disable=broad-except
-        _, _, ex_traceback = sys.exc_info()
-        log_telemetry('Error', trace=traceback.format_tb(ex_traceback))
+        log_telemetry('Error', log_type='trace')
         error_code = handle_exception(ex)
         return error_code
 

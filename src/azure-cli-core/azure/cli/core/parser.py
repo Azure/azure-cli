@@ -115,8 +115,12 @@ class AzCliCommandParser(argparse.ArgumentParser):
                 self.subparsers[tuple(path[0:length])] = parent_subparser
         return parent_subparser
 
+    def validation_error(self, message):
+        log_telemetry('validation error', log_type='trace')
+        return super(AzCliCommandParser, self).error(message)
+
     def error(self, message):
-        log_telemetry('parse error')
+        log_telemetry('parse error', message=message)
         return super(AzCliCommandParser, self).error(message)
 
     def format_help(self):
