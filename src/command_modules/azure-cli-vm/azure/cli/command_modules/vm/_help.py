@@ -140,7 +140,7 @@ helps['vmss show'] = """
 
 helps['vm get-instance-view'] = """
     type: command
-    short-summary: "Get's a vm including instance information (powerState)"
+    short-summary: "Gets a VM including instance information (powerState)"
 """
 
 helps['vm'] = """
@@ -169,7 +169,7 @@ helps['vm diagnostics'] = """
 """
 helps['vm disk'] = """
     type: group
-    short-summary: Manage vm storage disks
+    short-summary: Manage VM storage disks
 """
 helps['vm extension'] = """
     type: group
@@ -177,7 +177,7 @@ helps['vm extension'] = """
 """
 helps['vm extension image'] = """
     type: group
-    short-summary: Find vm extensions available for your subscription and region
+    short-summary: Find VM extensions available for your subscription and region
 """
 helps['vm image'] = """
     type: group
@@ -185,7 +185,7 @@ helps['vm image'] = """
 """
 helps['vm nic'] = """
     type: group
-    short-summary: Manage vm network interfaces, see also 'az network nic'
+    short-summary: Manage VM network interfaces, see also 'az network nic'
 """
 helps['vmss'] = """
     type: group
@@ -197,7 +197,7 @@ helps['vmss diagnostics'] = """
 """
 helps['vmss extension'] = """
     type: group
-    short-summary: Extend the functionality of your scale-set with vm extensions
+    short-summary: Extend the functionality of your scale-set with VM extensions
 """
 helps['vmss extension image'] = """
     type: group
