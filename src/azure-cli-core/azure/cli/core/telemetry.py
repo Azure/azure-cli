@@ -33,7 +33,7 @@ try:
 except: #pylint: disable=bare-except
     az_config = {}
 
-TELEMETRY_VERSION = '0.0.1.1'
+TELEMETRY_VERSION = '0.0.1.2'
 
 _DEBUG_TELEMETRY = 'AZURE_CLI_DEBUG_TELEMETRY'
 client = {}
