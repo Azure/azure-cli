@@ -35,11 +35,11 @@ helps['storage account'] = """
 """
 helps['storage account keys'] = """
     type: group
-    short-summary: Commands to manage your Storage aaccount keys
+    short-summary: Commands to manage your Storage account keys
 """
 helps['storage blob'] = """
     type: group
-    short-summary: REST-bsed object storage for unstructured data
+    short-summary: Object storage for unstructured data
 """
 helps['storage blob copy'] = """
     type: group

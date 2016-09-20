@@ -9,5 +9,5 @@ from azure.cli.core.help_files import helps #pylint: disable=unused-import
 
 helps['configure'] = """
             type: command
-            short-summary: Interactive experience for settting up the Azure CLI
+            short-summary: Interactive experience for setting up the Azure CLI
 """

@@ -19,7 +19,7 @@ helps['ad sp create-for-rbac'] = """
 
 helps['role'] = """
     type: group
-    short-summary: Commands to manage AAD roles
+    short-summary: Commands to manage Azure Active Directory (AAD) roles
 """
 helps['role assignment'] = """
     type: group

@@ -249,47 +249,47 @@ helps['network'] = """
 """
 helps['network application-gateway'] = """
     type: group
-    short-summary: Provides application-level routing and load balancing services 
+    short-summary: Provides application-level routing and load balancing services
 """
 helps['network application-gateway address-pool'] = """
     type: group
-    short-summary: Commands to manage app gateway address pools
+    short-summary: Manage application gateway address pools
 """
 helps['network application-gateway frontend-ip'] = """
     type: group
-    short-summary: Commands to manage app gateway front-end IP addresses
+    short-summary: Manage application gateway front-end IP addresses
 """
 helps['network application-gateway frontend-port'] = """
     type: group
-    short-summary: Commands to manage app gateway front-end ports
+    short-summary: Manage application gateway front-end ports
 """
 helps['network application-gateway http-listener'] = """
     type: group
-    short-summary: Commands to manage app gateway http listeners
+    short-summary: Manage application gateway HTTP listeners
 """
 helps['network application-gateway http-settings'] = """
     type: group
-    short-summary: Commands to manage app gateway http settings
+    short-summary: Manage application gateway HTTP settings
 """
 helps['network application-gateway probe'] = """
     type: group
-    short-summary: Probes gather information, such as utilization, to be evaluated by rules
+    short-summary: Gather information, such as utilization, to be evaluated by rules
 """
 helps['network application-gateway rule'] = """
     type: group
-    short-summary: Rules evaluate probe information and define routing rules
+    short-summary: Evaluate probe information and define routing rules
 """
 helps['network application-gateway ssl-cert'] = """
     type: group
-    short-summary: Commands to manage app gateway SSL certificates
+    short-summary: Manage application gateway SSL certificates
 """
 helps['network application-gateway url-path-map'] = """
     type: group
-    short-summary: Commands to manage app gateway URL path maps
+    short-summary: Manage application gateway URL path maps
 """
 helps['network application-gateway url-path-map rule'] = """
     type: group
-    short-summary: Commands to manage app gateway URL path map rules
+    short-summary: Manage application gateway URL path map rules
 """
 helps['network dns'] = """
     type: group
@@ -297,7 +297,7 @@ helps['network dns'] = """
 """
 helps['network dns record'] = """
     type: group
-    short-summary: Commands to manage DNS records contained in a record-set
+    short-summary: Manage DNS records contained in a record set
 """
 helps['network dns record a'] = """
     type: group
@@ -337,7 +337,7 @@ helps['network dns record-set'] = """
 """
 helps['network dns zone'] = """
     type: group
-    short-summary: Commands to manage DNS zones
+    short-summary: Manage DNS zones
 """
 helps['network express-route'] = """
     type: group
@@ -345,19 +345,19 @@ helps['network express-route'] = """
 """
 helps['network express-route circuit'] = """
     type: group
-    short-summary: Commands to manage express-route circuits
+    short-summary: Manage express route circuits
 """
 helps['network express-route circuit-auth'] = """
     type: group
-    short-summary: Commands to manage express-route circuit authentication
+    short-summary: Manage express route circuit authentication
 """
 helps['network express-route circuit-peering'] = """
     type: group
-    short-summary: Commands to manage express-route peering
+    short-summary: Manage express route peering
 """
 helps['network express-route service-provider'] = """
     type: group
-    short-summary: Commands to view express-route service providers
+    short-summary: View express route service providers
 """
 helps['network lb'] = """
     type: group
@@ -365,67 +365,67 @@ helps['network lb'] = """
 """
 helps['network lb address-pool'] = """
     type: group
-    short-summary: Commands to manage LB address pools
+    short-summary: Manage LB address pools
 """
 helps['network lb frontend-ip'] = """
     type: group
-    short-summary: Commands to manage LB front-end IP addresses
+    short-summary: Manage LB front-end IP addresses
 """
 helps['network lb inbound-nat-pool'] = """
     type: group
-    short-summary: Commands to manage LB inbound NAT address pools
+    short-summary: Manage LB inbound NAT address pools
 """
 helps['network lb inbound-nat-rule'] = """
     type: group
-    short-summary: Commands to manage LB inbound NAT rules
+    short-summary: Manage LB inbound NAT rules
 """
 helps['network lb probe'] = """
     type: group
-    short-summary: Commands to manage LB probes
+    short-summary: Evaluate probe information and define routing rules
 """
 helps['network lb rule'] = """
     type: group
-    short-summary: Commands to manage LB rules
+    short-summary: Gather information, such as utilization, to be evaluated by rules
 """
 helps['network local-gateway'] = """
     type: group
-    short-summary: Commands to manage local gateways
+    short-summary: Manage local gateways
 """
 helps['network nic'] = """
     type: group
-    short-summary: Commands to manage network interfaces (NIC)
+    short-summary: Manage network interfaces (NIC)
 """
 helps['network nic ip-config'] = """
     type: group
-    short-summary: Commands to manage NIC ip configurations
+    short-summary: Manage NIC ip configurations
 """
 helps['network nic ip-config address-pool'] = """
     type: group
-    short-summary: Commands to manage NIC address pools
+    short-summary: Manage NIC address pools
 """
 helps['network nic ip-config inbound-nat-rule'] = """
     type: group
-    short-summary: Commands to manage NIC inbound NAT rules
+    short-summary: Manage NIC inbound NAT rules
 """
 helps['network nsg'] = """
     type: group
-    short-summary: Commands to manage Network Security Groups (NSG)
+    short-summary: Manage Network Security Groups (NSG)
 """
 helps['network nsg rule'] = """
     type: group
-    short-summary: Commands to manage NSG rules
+    short-summary: Manage NSG rules
 """
 helps['network public-ip'] = """
     type: group
-    short-summary: Commands to manage public IP addresses
+    short-summary: Manage public IP addresses
 """
 helps['network route-table'] = """
     type: group
-    short-summary: Commands to manage route-tables
+    short-summary: Manage route tables
 """
 helps['network route-table route'] = """
     type: group
-    short-summary: Commands to manage route-table routes
+    short-summary: Manage route table routes
 """
 helps['network traffic-manager'] = """
     type: group
@@ -433,11 +433,11 @@ helps['network traffic-manager'] = """
 """
 helps['network traffic-manager endpoint'] = """
     type: group
-    short-summary: Commands to manage traffic-manager end points
+    short-summary: Manage traffic manager end points
 """
 helps['network traffic-manager profile'] = """
     type: group
-    short-summary: Commands to manage traffic-manager profiles
+    short-summary: Manage traffic manager profiles
 """
 helps['network vnet'] = """
     type: group
@@ -445,15 +445,15 @@ helps['network vnet'] = """
 """
 helps['network vnet subnet'] = """
     type: group
-    short-summary: Commands to manage subnets
+    short-summary: Manage subnets
 """
 helps['network vpn-connection'] = """
     type: group
-    short-summary: Commands to manage VPN connections
+    short-summary: Manage VPN connections
 """
 helps['network vpn-connection shared-key'] = """
     type: group
-    short-summary: Commands to manage VPN shared keys
+    short-summary: Manage VPN shared keys
 """
 helps['network vpn-gateway'] = """
     type: group
@@ -461,9 +461,9 @@ helps['network vpn-gateway'] = """
 """
 helps['network vpn-gateway revoked-cert'] = """
     type: group
-    short-summary: Commands to manage VPN gateway revoked certificates
+    short-summary: Manage VPN gateway revoked certificates
 """
 helps['network vpn-gateway root-cert'] = """
     type: group
-    short-summary: Commands to manage VPN gateway root certificates
+    short-summary: Manage VPN gateway root certificates
 """

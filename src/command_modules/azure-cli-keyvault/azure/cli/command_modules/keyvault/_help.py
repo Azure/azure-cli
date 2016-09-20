@@ -9,5 +9,5 @@ from azure.cli.core.help_files import helps #pylint: disable=unused-import
 
 helps['keyvault'] = """
     type: group
-    short-summary: Safeguard and maintain control of keys and other secrets
+    short-summary: Safeguard and maintain control of keys, secrets, and certificates.
 """

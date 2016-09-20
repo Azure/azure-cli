@@ -9,8 +9,8 @@ from azure.cli.core.help_files import helps #pylint: disable=unused-import
 
 helps['resource policy create'] = """
             type: command
-            short-summary: Create a policy 
-            parameters: 
+            short-summary: Create a policy
+            parameters:
                 - name: --rules
                   type: string
                   short-summary: 'JSON formatted string or a path to a file with such content'
@@ -18,7 +18,7 @@ helps['resource policy create'] = """
                 - name: Create a policy with following rules
                   text: |
                         {
-                            "if": 
+                            "if":
                             {
                                 "source": "action",
                                 "equals": "Microsoft.Storage/storageAccounts/write"
@@ -32,7 +32,7 @@ helps['resource policy create'] = """
 
 helps['resource'] = """
     type: group
-    short-summary: Generic commands to managing Azure resources
+    short-summary: Generic commands to manage Azure resources
 """
 helps['resource feature'] = """
     type: group
@@ -65,5 +65,5 @@ helps['resource provider'] = """
 
 helps['tag'] = """
     type: group
-    short-summary: Manage and track resources quickly with tags
+    short-summary: Manage resource tags
 """
