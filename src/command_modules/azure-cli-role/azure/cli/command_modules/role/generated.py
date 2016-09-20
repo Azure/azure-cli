@@ -43,7 +43,6 @@ cli_command('ad app update', update_application, factory)
 factory = lambda _: _graph_client_factory().service_principals
 cli_command('ad sp create', create_service_principal)
 cli_command('ad sp delete', delete_service_principal, factory)
-#paging is broken at SDK https://github.com/Azure/azure-cli/issues/540
 cli_command('ad sp list', list_sps, factory)
 cli_command('ad sp show', show_service_principal, factory)
 #RBAC related
@@ -53,12 +52,10 @@ cli_command('ad sp reset-credentials', reset_service_principal_credential)
 factory = lambda _: _graph_client_factory().users
 cli_command('ad user delete', UsersOperations.delete, factory)
 cli_command('ad user show', UsersOperations.get, factory)
-#paging is broken at SDK https://github.com/Azure/azure-cli/issues/540
 cli_command('ad user list', list_users, factory)
 cli_command('ad user create', create_user, factory)
 
 factory = lambda _: _graph_client_factory().groups
 cli_command('ad group delete', GroupsOperations.delete, factory)
 cli_command('ad group show', GroupsOperations.get, factory)
-#paging is broken at SDK https://github.com/Azure/azure-cli/issues/540
 cli_command('ad group list', list_groups, factory)

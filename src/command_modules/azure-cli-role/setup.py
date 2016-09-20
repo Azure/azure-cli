@@ -26,8 +26,8 @@ CLASSIFIERS = [
 DEPENDENCIES = [
     'azure==2.0.0rc6',
     'azure-cli-core',
-    'azure-mgmt-authorization==0.30.0rc5',
-    'azure-graphrbac==0.30.0rc5',
+    'azure-mgmt-authorization==0.30.0rc6',
+    'azure-graphrbac==0.30.0rc6',
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
