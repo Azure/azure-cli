@@ -90,8 +90,20 @@ class LongRunningOperation(object): #pylint: disable=too-few-public-methods
 
     def __call__(self, poller):
         logger.info("Starting long running operation '%s'", self.start_msg)
+        correlation_message = ''
         while not poller.done():
-            self._delay()
+            try:
+                correlation_message = 'Correlation ID: {}' \
+                    .format(json.loads(poller._response.__dict__['_content']) #pylint: disable=protected-access
+                            ['properties']['correlationId'])
+            except: #pylint: disable=bare-except
+                pass
+
+            try:
+                self._delay()
+            except KeyboardInterrupt:
+                logger.error('Long running operation wait cancelled.  %s', correlation_message)
+                raise
         try:
             result = poller.result()
         except ClientException as client_exception:
@@ -104,7 +116,7 @@ class LongRunningOperation(object): #pylint: disable=too-few-public-methods
             except: #pylint: disable=bare-except
                 pass
 
-            raise CLIError(message)
+            raise CLIError('{}  {}'.format(message, correlation_message))
 
         logger.info("Long running operation '%s' completed with result %s",
                     self.start_msg, result)
