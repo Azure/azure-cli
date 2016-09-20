@@ -6,3 +6,8 @@
 from azure.cli.core.help_files import helps #pylint: disable=unused-import
 
 #pylint: disable=line-too-long
+
+helps['component'] = """
+    type: group
+    short-summary: Manages and updates Azure CLI components
+"""

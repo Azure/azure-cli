@@ -6,3 +6,8 @@
 from azure.cli.core.help_files import helps #pylint: disable=unused-import
 
 #pylint: disable=line-too-long
+
+helps['taskhelp'] = """
+    type: group
+    short-summary: Provides long-form help content by topic
+"""
