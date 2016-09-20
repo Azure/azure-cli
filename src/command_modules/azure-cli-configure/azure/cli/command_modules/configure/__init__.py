@@ -199,7 +199,8 @@ def handle_configure():
     try:
         print(MSG_INTRO)
         _handle_global_configuration()
-        _handle_env_configuration()
+        # TODO: uncomment when implemented
+        #_handle_env_configuration()
         print(MSG_CLOSING)
         log_telemetry('configure', **answers)
     except (EOFError, KeyboardInterrupt):
