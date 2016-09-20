@@ -30,8 +30,6 @@ README_TEMPLATE = """Microsoft Azure CLI '{command_module_name}' Command Module
 This package is for the '{command_module_name}' module.
 i.e. 'az {command_module_name}'
 
-This package has [not] been tested [much] with Python 2.7, and 3.5.
-
 """
 
 SETUP_TEMPLATE = """#!/usr/bin/env python
@@ -59,7 +57,7 @@ VERSION = '0.0.1'
 # The full list of classifiers is available at
 # https://pypi.python.org/pypi?%3Aaction=list_classifiers
 CLASSIFIERS = [
-    'Development Status :: 3 - Alpha',
+    'Development Status :: 4 - Beta',
     'Intended Audience :: Developers',
     'Intended Audience :: System Administrators',
     'Programming Language :: Python',
