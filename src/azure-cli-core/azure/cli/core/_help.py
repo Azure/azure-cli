@@ -66,7 +66,8 @@ def print_description_list(help_files):
                                          FIRST_LINE_PREFIX + help_file.short_summary \
                                              if help_file.short_summary \
                                              else ''),
-                      indent)
+                      indent,
+                      _get_hanging_indent(max_name_length, indent))
 
 def print_arguments(help_file):
     indent = 1
