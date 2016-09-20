@@ -8,10 +8,10 @@
 from codecs import open
 from setuptools import setup
 
-VERSION = '0.0.9'
+VERSION = '0.1.0b3'
 
 CLASSIFIERS = [
-    'Development Status :: 3 - Alpha',
+    'Development Status :: 4 - Beta',
     'Intended Audience :: Developers',
     'Intended Audience :: System Administrators',
     'Programming Language :: Python',
@@ -34,7 +34,7 @@ with open('README.rst', 'r', encoding='utf-8') as f:
 setup(
     name='azure-cli-component',
     version=VERSION,
-    description='Microsoft Azure Command-Line Tools',
+    description='Microsoft Azure Command-Line Tools Component Command Module',
     long_description=README,
     license='MIT',
     author='Microsoft Corporation',

@@ -9,7 +9,7 @@ from __future__ import print_function
 from codecs import open
 from setuptools import setup
 
-VERSION = "0.0.1"
+VERSION = "0.1.0b3"
 
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
@@ -29,7 +29,7 @@ else:
         sys.exit(1)
 
 CLASSIFIERS = [
-    'Development Status :: 3 - Alpha',
+    'Development Status :: 4 - Beta',
     'Intended Audience :: Developers',
     'Intended Audience :: System Administrators',
     'Programming Language :: Python',
