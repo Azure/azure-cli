@@ -6,3 +6,8 @@
 from azure.cli.core.help_files import helps #pylint: disable=unused-import
 
 #pylint: disable=line-too-long
+
+helps['configure'] = """
+            type: command
+            short-summary: Interactive experience for setting up the Azure CLI
+"""
