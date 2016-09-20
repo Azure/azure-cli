@@ -26,7 +26,8 @@ from azure.graphrbac.models import (ApplicationCreateParameters,
                                     PasswordCredential,
                                     KeyCredential,
                                     UserCreateParameters,
-                                    PasswordProfile)
+                                    PasswordProfile,
+                                    ServicePrincipalCreateParameters)
 
 logger = _logging.get_az_logger(__name__)
 
@@ -444,7 +445,8 @@ def _create_service_principal(identifier, retain_raw_response=False):
         result = [client.applications.get(identifier)]
     app_id = result[0].app_id
 
-    return client.service_principals.create(app_id, True, raw=retain_raw_response)
+    return client.service_principals.create(ServicePrincipalCreateParameters(app_id, True),
+                                            raw=retain_raw_response)
 
 def show_service_principal(client, identifier):
     object_id = _resolve_service_principal(client, identifier)
