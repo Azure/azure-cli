@@ -15,7 +15,7 @@ class ServicePrincipalExpressCreateScenarioTest(VCRTestBase):
 
     def body(self):
         app_id_uri = "http://azureclitest-graph"
-        #crerate app through express option
+        #create app through express option
         self.cmd('ad sp create-for-rbac -n {}'.format(app_id_uri), None)
 
         #show/list app
