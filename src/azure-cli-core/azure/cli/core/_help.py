@@ -373,7 +373,7 @@ def _normalize_text(s):
         return s or ''
     s = s.strip()
     initial_upper = s[0].upper() + s[1:]
-    trailing_period = '.' if not s.endswith('.') else ''
+    trailing_period = '' if s[-1] in '.!?' else '.'
     return initial_upper + trailing_period
 
 def _load_help_file_from_string(text):

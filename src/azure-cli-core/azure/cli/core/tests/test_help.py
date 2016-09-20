@@ -28,6 +28,25 @@ def redirect_io(func):
         sys.stderr = old_stderr
     return wrapper
 
+class HelpObjectTest(unittest.TestCase):
+    def test_short_summary_no_fullstop(self):
+        obj = _help.HelpObject()
+        original_summary = 'This summary has no fullstop'
+        obj.short_summary = original_summary
+        self.assertEqual(obj.short_summary, original_summary+'.')
+
+    def test_short_summary_fullstop(self):
+        obj = _help.HelpObject()
+        original_summary = 'This summary has fullstop.'
+        obj.short_summary = original_summary
+        self.assertEqual(obj.short_summary, original_summary)
+
+    def test_short_summary_exclamation_point(self):
+        obj = _help.HelpObject()
+        original_summary = 'This summary has exclamation point!'
+        obj.short_summary = original_summary
+        self.assertEqual(obj.short_summary, original_summary)
+
 class HelpTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
