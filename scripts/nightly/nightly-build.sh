@@ -5,10 +5,10 @@ cd azure-cli
 
 # modify versions of the packages (__init__.py and setup.py files)
 for initfile in src/azure-cli/azure/cli/__init__.py src/azure-cli-core/azure/cli/core/__init__.py; \
-    do sed -i 's/^__version__ = [\x22\x27]\(.*\)[\x22\x27]/__version__ = \x27\1.dev'$(date +%Y%m%d)'\x27/' $initfile; \
+    do sed -i 's/^__version__ = [\x22\x27]\(.*\)[\x22\x27]/__version__ = \x27\1+1.dev'$(date +%Y%m%d)'\x27/' $initfile; \
     done;
 for d in src/azure-cli/ src/azure-cli-core/ src/command_modules/azure-cli-*/; \
-    do sed -i 's/^VERSION = [\x22\x27]\(.*\)[\x22\x27]/VERSION = \x27\1.dev'$(date +%Y%m%d)'\x27/' $d/setup.py; \
+    do sed -i 's/^VERSION = [\x22\x27]\(.*\)[\x22\x27]/VERSION = \x27\1+1.dev'$(date +%Y%m%d)'\x27/' $d/setup.py; \
     done;
 
 # build the packages
