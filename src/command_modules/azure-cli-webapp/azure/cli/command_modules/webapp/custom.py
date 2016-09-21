@@ -43,9 +43,22 @@ def _generic_site_operation(resource_group, name, operation_name, slot=None,
         return (m(resource_group, name, slot)
                 if extra_parameter is None else m(resource_group, name, extra_parameter, slot))
 
-#TODO: incorporate 'include_properties' once webapp team makes the decision to do it
 def show_webapp(resource_group, name, slot=None):
-    return _generic_site_operation(resource_group, name, 'get_site', slot)
+    webapp = _generic_site_operation(resource_group, name, 'get_site', slot)
+    return _rename_server_farm_props(webapp)
+
+def list_webapp(resource_group):
+    client = web_client_factory()
+    result = client.sites.get_sites(resource_group)
+    for webapp in result:
+        _rename_server_farm_props(webapp)
+    return result
+
+def _rename_server_farm_props(webapp):
+    #Should be renamed in SDK in a future release
+    setattr(webapp, 'app_service_plan_id', webapp.server_farm_id)
+    del webapp.server_farm_id
+    return webapp
 
 def delete_webapp(resource_group, name, slot=None):
     return _generic_site_operation(resource_group, name, 'delete_site', slot)
@@ -63,11 +76,24 @@ def get_app_settings(resource_group, name, slot=None):
     result = _generic_site_operation(resource_group, name, 'list_site_app_settings', slot)
     return result.properties
 
-def update_site_configs(resource_group, name, name_value_pairs, slot=None):
+#for any modifications to the non-optional parameters, adjust the reflection logic accordingly
+#in the method
+def update_site_configs(resource_group, name, slot=None,
+                        php_version=None, python_version=None,#pylint: disable=unused-argument
+                        net_framework_version=None, #pylint: disable=unused-argument
+                        java_version=None, java_container=None, java_container_version=None,#pylint: disable=unused-argument
+                        remote_debugging_enabled=None, web_sockets_enabled=None,#pylint: disable=unused-argument
+                        always_on=None, auto_heal_enabled=None,#pylint: disable=unused-argument
+                        use32_bit_worker_process=None):#pylint: disable=unused-argument
     configs = get_site_configs(resource_group, name, slot)
-    for name_value in name_value_pairs:
-        name, value = name_value.split('=')
-        setattr(configs.properties, name, value)
+    import inspect
+    frame = inspect.currentframe()
+    #note: getargvalues is used already in azure.cli.core.commands.
+    #and no simple functional replacement for this deprecating method for 3.5
+    args, _, _, values = inspect.getargvalues(frame) #pylint: disable=deprecated-method
+    for arg in args[3:]:
+        if arg is not None:
+            setattr(configs, arg, values[arg])
 
     return _generic_site_operation(resource_group, name, 'update_site_config', slot, configs)
 
@@ -78,8 +104,9 @@ def update_app_settings(resource_group, name, settings, slot=None):
         settings_name, value = name_value.split('=', 1)
         app_settings.properties[settings_name] = value
 
-    return _generic_site_operation(resource_group, name, 'update_site_app_settings',
-                                   slot, app_settings)
+    result = _generic_site_operation(resource_group, name, 'update_site_app_settings',
+                                     slot, app_settings)
+    return result.properties
 
 def delete_app_settings(resource_group, name, setting_names, slot=None):
     app_settings = _generic_site_operation(resource_group, name, 'list_site_app_settings', slot)
@@ -115,34 +142,32 @@ def enable_local_git(resource_group, name, slot=None):
 
     return {'url' : _get_git_url(client, resource_group, name, slot)}
 
-#TODO: logic comes from powershell, cross check with with upcoming xplat styles
 def create_app_service_plan(resource_group, name, tier=None, number_of_workers=None,
-                            worker_size=None, location=None):
+                            location=None):
     client = web_client_factory()
     if location is None:
         location = _get_location_from_resource_group(resource_group)
 
-    sku_name = _get_sku_name(tier, worker_size)
-    sku = SkuDescription(name=sku_name, tier=tier, capacity=number_of_workers)
+    sku_name = _get_sku_name(tier)
+    #the api is odd on parameter naming, have to live with it for now
+    sku = SkuDescription(name=tier, tier=sku_name, capacity=number_of_workers)
     plan_def = ServerFarmWithRichSku(location, server_farm_with_rich_sku_name=name, sku=sku)
     #TODO: handle bad error on creating too many F1 plans:
     #  Operation failed with status: 'Conflict'. Details: 409 Client Error: Conflict for url:
     return client.server_farms.create_or_update_server_farm(resource_group, name, plan_def)
 
 def update_app_service_plan(resource_group, name, tier=None, number_of_workers=None,
-                            worker_size=None, admin_site_name=None):
+                            admin_site_name=None):
     client = web_client_factory()
     plan = client.server_farms.get_server_farm(resource_group, name)
     sku = plan.sku
     if tier is not None:
-        sku.tier = tier
+        sku_name = _get_sku_name(tier)
+        sku.tier = sku_name
+        sku.name = tier
+
     if number_of_workers is not None:
         sku.capacity = number_of_workers
-    if worker_size is not None or tier is not None:
-        if worker_size:
-            sku.name = _get_sku_name(sku.tier.lower(), worker_size)
-        else:
-            sku.name = _get_sku_prefix(sku.tier) + sku.name[1::1]
 
     plan_def = ServerFarmWithRichSku(plan.location, server_farm_with_rich_sku_name=name,
                                      sku=sku, admin_site_name=admin_site_name)
@@ -151,15 +176,18 @@ def update_app_service_plan(resource_group, name, tier=None, number_of_workers=N
 def _get_sku_prefix(tier):
     return 'D' if tier.lower() == 'shared' else tier[0:1]
 
-def _get_sku_name(tier, worker_size):
-    worker_size_mappings = {
-        'small': '1',
-        'medium': '2',
-        'large': '3',
-        'extralarge': '4'
-    }
-    sku = _get_sku_prefix(tier) + worker_size_mappings[worker_size.lower()]
-    return sku
+def _get_sku_name(tier):
+    tier = tier.upper()
+    if tier in ['FREE', 'SHARED']:
+        return tier
+    elif tier in ['B1', 'B2', 'B3']:
+        return 'BASIC'
+    elif tier in ['S1', 'S2', 'S3']:
+        return 'STANDARD'
+    elif tier in ['P1', 'P2', 'P3']:
+        return 'PREMIUM'
+    else:
+        raise CLIError("Invalid pricing tier, please refer to command help for valid values")
 
 def _get_location_from_resource_group(resource_group):
     from azure.mgmt.resource.resources import ResourceManagementClient
@@ -232,8 +260,8 @@ def config_diagnostics(resource_group, name, level=None,
     location = site.location
 
     application_logs = None
-    if application_logging:
-        if application_logging == 'off': #TODO share the same choice list in _params.py
+    if application_logging is not None:
+        if not application_logging:
             level = 'Off'
         elif level is None:
             level = 'Error'
@@ -241,16 +269,16 @@ def config_diagnostics(resource_group, name, level=None,
         application_logs = ApplicationLogsConfig(fs_log)
 
     http_logs = None
-    if web_server_logging:
-        enabled = web_server_logging != 'off'
+    if web_server_logging is not None:
+        enabled = web_server_logging
         #100 mb max log size, retenting last 3 days. Yes we hard code it, portal does too
         fs_server_log = FileSystemHttpLogsConfig(100, 3, enabled)
         http_logs = HttpLogsConfig(fs_server_log)
 
     detailed_error_messages_logs = (None if detailed_error_messages is None
-                                    else EnabledConfig(detailed_error_messages == 'on'))
+                                    else EnabledConfig(detailed_error_messages))
     failed_request_tracing_logs = (None if failed_request_tracing is None
-                                   else EnabledConfig(failed_request_tracing == 'on'))
+                                   else EnabledConfig(failed_request_tracing))
     site_log_config = SiteLogsConfig(location,
                                      application_logs=application_logs,
                                      http_logs=http_logs,
