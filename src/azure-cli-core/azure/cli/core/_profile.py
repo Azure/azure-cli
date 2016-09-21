@@ -5,7 +5,6 @@
 
 from __future__ import print_function
 import collections
-from codecs import open as codecs_open
 import json
 import os.path
 import errno
@@ -13,7 +12,7 @@ from msrest.authentication import BasicTokenAuthentication
 import adal
 from azure.mgmt.resource.subscriptions import SubscriptionClient
 from azure.cli.core._session import ACCOUNT
-from azure.cli.core._util import CLIError
+from azure.cli.core._util import CLIError, get_file_json
 from azure.cli.core._azure_env import (get_authority_url, get_env, ENDPOINT_URLS,
                                        CLIENT_ID, ENV_DEFAULT, COMMON_TENANT)
 from azure.cli.core.adal_authentication import AdalAuthentication
@@ -53,12 +52,11 @@ TOKEN_FIELDS_EXCLUDED_FROM_PERSISTENCE = ['familyName',
 
 _AUTH_CTX_FACTORY = lambda authority, cache: adal.AuthenticationContext(authority, cache=cache)
 
-def _read_file_content(file_path):
-    file_text = None
+def _load_tokens_from_file(file_path):
+    all_entries = []
     if os.path.isfile(file_path):
-        with codecs_open(file_path, 'r', encoding='ascii') as file_to_read:
-            file_text = file_to_read.read()
-    return file_text
+        all_entries = get_file_json(file_path, throw_on_empty=False) or []
+    return all_entries
 
 def _delete_file(file_path):
     try:
@@ -369,14 +367,7 @@ class CredsCache(object):
     def _load_creds(self):
         if self.adal_token_cache is not None:
             return self.adal_token_cache
-
-        json_text = _read_file_content(self._token_file)
-        if json_text:
-            json_text = json_text.replace('\n', '')
-        else:
-            json_text = '[]'
-
-        all_entries = json.loads(json_text)
+        all_entries = _load_tokens_from_file(self._token_file)
         self._load_service_principal_creds(all_entries)
         real_token = [x for x in all_entries if x not in self._service_principal_creds]
         self.adal_token_cache = adal.TokenCache(json.dumps(real_token))

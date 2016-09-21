@@ -172,10 +172,10 @@ class Test_Profile(unittest.TestCase):
         self.assertFalse(subscription2['isDefault'])
         self.assertTrue(subscription1['isDefault'])
 
-    @mock.patch('azure.cli.core._profile._read_file_content', autospec=True)
+    @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
     def test_get_current_account_user(self, mock_read_cred_file):
         #setup
-        mock_read_cred_file.return_value = json.dumps([Test_Profile.token_entry1])
+        mock_read_cred_file.return_value = [Test_Profile.token_entry1]
 
         storage_mock = {'subscriptions': None}
         profile = Profile(storage_mock)
@@ -190,16 +190,17 @@ class Test_Profile(unittest.TestCase):
         #verify
         self.assertEqual(user, self.user1)
 
-    @mock.patch('azure.cli.core._profile._read_file_content', return_value=None)
+    @mock.patch('azure.cli.core._profile._load_tokens_from_file', return_value=None)
     def test_create_token_cache(self, mock_read_file):
+        mock_read_file.return_value = []
         profile = Profile()
         cache = profile._creds_cache.adal_token_cache
         self.assertFalse(cache.read_items())
         self.assertTrue(mock_read_file.called)
 
-    @mock.patch('azure.cli.core._profile._read_file_content', autospec=True)
+    @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
     def test_load_cached_tokens(self, mock_read_file):
-        mock_read_file.return_value = json.dumps([Test_Profile.token_entry1])
+        mock_read_file.return_value = [Test_Profile.token_entry1]
         profile = Profile()
         cache = profile._creds_cache.adal_token_cache
         matched = cache.find({
@@ -210,11 +211,11 @@ class Test_Profile(unittest.TestCase):
         self.assertEqual(len(matched), 1)
         self.assertEqual(matched[0]['accessToken'], self.raw_token1)
 
-    @mock.patch('azure.cli.core._profile._read_file_content', autospec=True)
+    @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
     @mock.patch('azure.cli.core._profile.CredsCache.retrieve_token_for_user', autospec=True)
     def test_get_login_credentials(self, mock_get_token, mock_read_cred_file):
         some_token_type = 'Bearer'
-        mock_read_cred_file.return_value = json.dumps([Test_Profile.token_entry1])
+        mock_read_cred_file.return_value = [Test_Profile.token_entry1]
         mock_get_token.return_value = (some_token_type, Test_Profile.raw_token1)
         #setup
         storage_mock = {'subscriptions': None}
@@ -239,11 +240,11 @@ class Test_Profile(unittest.TestCase):
                                                'https://management.core.windows.net/')
         self.assertEqual(mock_get_token.call_count, 1)
 
-    @mock.patch('azure.cli.core._profile._read_file_content', autospec=True)
+    @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
     @mock.patch('azure.cli.core._profile.CredsCache.retrieve_token_for_user', autospec=True)
     def test_get_login_credentials_for_graph_client(self, mock_get_token, mock_read_cred_file):
         some_token_type = 'Bearer'
-        mock_read_cred_file.return_value = json.dumps([Test_Profile.token_entry1])
+        mock_read_cred_file.return_value = [Test_Profile.token_entry1]
         mock_get_token.return_value = (some_token_type, Test_Profile.raw_token1)
         #setup
         storage_mock = {'subscriptions': None}
@@ -259,11 +260,11 @@ class Test_Profile(unittest.TestCase):
                                                'https://graph.windows.net/')
         self.assertEqual(tenant_id, self.tenant_id)
 
-    @mock.patch('azure.cli.core._profile._read_file_content', autospec=True)
+    @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
     @mock.patch('azure.cli.core._profile.CredsCache.persist_cached_creds', autospec=True)
     def test_logout(self, mock_persist_creds, mock_read_cred_file):
         #setup
-        mock_read_cred_file.return_value = json.dumps([Test_Profile.token_entry1])
+        mock_read_cred_file.return_value = [Test_Profile.token_entry1]
 
         storage_mock = {'subscriptions': None}
         profile = Profile(storage_mock)
@@ -369,14 +370,14 @@ class Test_Profile(unittest.TestCase):
         mock_auth_context.acquire_token_with_client_credentials.assert_called_once_with(
             mgmt_resource, 'my app', 'my secret')
 
-    @mock.patch('azure.cli.core._profile._read_file_content', autospec=True)
+    @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
     def test_credscache_load_tokens_and_sp_creds(self, mock_read_file):
         test_sp = {
             "servicePrincipalId": "myapp",
             "servicePrincipalTenant": "mytenant",
             "accessToken": "Secret"
         }
-        mock_read_file.return_value = json.dumps([self.token_entry1, test_sp])
+        mock_read_file.return_value = [self.token_entry1, test_sp]
 
         #action
         creds_cache = CredsCache()
@@ -386,7 +387,7 @@ class Test_Profile(unittest.TestCase):
         self.assertEqual(token_entries, [self.token_entry1])
         self.assertEqual(creds_cache._service_principal_creds, [test_sp])
 
-    @mock.patch('azure.cli.core._profile._read_file_content', autospec=True)
+    @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
     @mock.patch('os.fdopen', autospec=True)
     @mock.patch('os.open', autospec=True)
     def test_credscache_add_new_sp_creds(self, _, mock_open_for_write, mock_read_file):
@@ -401,7 +402,7 @@ class Test_Profile(unittest.TestCase):
             "accessToken": "Secret2"
         }
         mock_open_for_write.return_value = FileHandleStub()
-        mock_read_file.return_value = json.dumps([self.token_entry1, test_sp])
+        mock_read_file.return_value = [self.token_entry1, test_sp]
         creds_cache = CredsCache()
 
         #action
@@ -416,7 +417,7 @@ class Test_Profile(unittest.TestCase):
         self.assertEqual(creds_cache._service_principal_creds, [test_sp, test_sp2])
         mock_open_for_write.assert_called_with(mock.ANY, 'w+')
 
-    @mock.patch('azure.cli.core._profile._read_file_content', autospec=True)
+    @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
     @mock.patch('os.fdopen', autospec=True)
     @mock.patch('os.open', autospec=True)
     def test_credscache_remove_creds(self, _, mock_open_for_write, mock_read_file):
@@ -426,7 +427,7 @@ class Test_Profile(unittest.TestCase):
             "accessToken": "Secret"
         }
         mock_open_for_write.return_value = FileHandleStub()
-        mock_read_file.return_value = json.dumps([self.token_entry1, test_sp])
+        mock_read_file.return_value = [self.token_entry1, test_sp]
         creds_cache = CredsCache()
 
         #action #1, logout a user
@@ -445,7 +446,7 @@ class Test_Profile(unittest.TestCase):
         mock_open_for_write.assert_called_with(mock.ANY, 'w+')
         self.assertEqual(mock_open_for_write.call_count, 2)
 
-    @mock.patch('azure.cli.core._profile._read_file_content', autospec=True)
+    @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
     @mock.patch('os.fdopen', autospec=True)
     @mock.patch('os.open', autospec=True)
     @mock.patch('adal.AuthenticationContext', autospec=True)
@@ -464,7 +465,7 @@ class Test_Profile(unittest.TestCase):
 
         mock_adal_auth_context.acquire_token.side_effect = acquire_token_side_effect
         mock_open_for_write.return_value = FileHandleStub()
-        mock_read_file.return_value = json.dumps([self.token_entry1])
+        mock_read_file.return_value = [self.token_entry1]
         creds_cache = CredsCache(auth_ctx_factory=get_auth_context)
 
         #action
