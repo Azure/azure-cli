@@ -18,47 +18,47 @@ from .custom import (create_webapp, show_webapp, list_webapp,
                      get_site_configs, update_site_configs,
                      get_app_settings, update_app_settings, delete_app_settings)
 
-cli_command('webapp create', create_webapp)
-cli_command('webapp list', list_webapp)
-cli_command('webapp show', show_webapp)
-cli_command('webapp delete', delete_webapp)
-cli_command('webapp stop', stop_webapp)
-cli_command('webapp restart', restart_webapp)
+cli_command('appservice web create', create_webapp)
+cli_command('appservice web list', list_webapp)
+cli_command('appservice web show', show_webapp)
+cli_command('appservice web delete', delete_webapp)
+cli_command('appservice web stop', stop_webapp)
+cli_command('appservice web restart', restart_webapp)
 
-cli_command('webapp config update', update_site_configs)
-cli_command('webapp config show', get_site_configs)
-cli_command('webapp config appsettings show', get_app_settings)
-cli_command('webapp config appsettings update', update_app_settings)
-cli_command('webapp config appsettings delete', delete_app_settings)
+cli_command('appservice web config update', update_site_configs)
+cli_command('appservice web config show', get_site_configs)
+cli_command('appservice web config appsettings show', get_app_settings)
+cli_command('appservice web config appsettings update', update_app_settings)
+cli_command('appservice web config appsettings delete', delete_app_settings)
 
 factory = lambda _: web_client_factory().sites
-cli_command('webapp show-publish-profile',
+cli_command('appservice web show-publish-profile',
             SitesOperations.list_site_publishing_credentials, factory)
 
-cli_command('webapp git enable-local', enable_local_git)
-cli_command('webapp git show-url', get_git_url)
-cli_command('webapp log tail', get_streaming_log)
-cli_command('webapp log download', download_historical_logs)
-cli_command('webapp log set', config_diagnostics)
-cli_command('webapp browse', view_in_browser)
+cli_command('appservice web git enable-local', enable_local_git)
+cli_command('appservice web git show-url', get_git_url)
+cli_command('appservice web log tail', get_streaming_log)
+cli_command('appservice web log download', download_historical_logs)
+cli_command('appservice web log set', config_diagnostics)
+cli_command('appservice web browse', view_in_browser)
 
-cli_command('webapp deployment slot list', SitesOperations.get_site_slots, factory)
-cli_command('webapp deployment slot auto-swap', config_slot_auto_swap)
-cli_command('webapp deployment slot swap', SitesOperations.swap_slots_slot, factory)
-cli_command('webapp deployment slot create', create_webapp_slot)
-cli_command('webapp deployment user set', set_deployment_user)
-cli_command('webapp deployment list-site-credentials',#TODO add descriptions to differentiate
+cli_command('appservice web deployment slot list', SitesOperations.get_site_slots, factory)
+cli_command('appservice web deployment slot auto-swap', config_slot_auto_swap)
+cli_command('appservice web deployment slot swap', SitesOperations.swap_slots_slot, factory)
+cli_command('appservice web deployment slot create', create_webapp_slot)
+cli_command('appservice web deployment user set', set_deployment_user)
+cli_command('appservice web deployment list-site-credentials',
             SitesOperations.list_site_publishing_credentials, factory)
 
 factory = lambda _: web_client_factory().provider
-cli_command('webapp deployment user show', ProviderOperations.get_publishing_user, factory)
+cli_command('appservice web deployment user show', ProviderOperations.get_publishing_user, factory)
 
 factory = lambda _: web_client_factory().server_farms
-cli_command('app-service-plan create', create_app_service_plan)
-cli_command('app-service-plan update', update_app_service_plan)
-cli_command('app-service-plan delete', ServerFarmsOperations.delete_server_farm, factory)
-cli_command('app-service-plan list', ServerFarmsOperations.get_server_farms, factory)
-cli_command('app-service-plan show', ServerFarmsOperations.get_server_farm, factory)
+cli_command('appservice plan create', create_app_service_plan)
+cli_command('appservice plan update', update_app_service_plan)
+cli_command('appservice plan delete', ServerFarmsOperations.delete_server_farm, factory)
+cli_command('appservice plan list', ServerFarmsOperations.get_server_farms, factory)
+cli_command('appservice plan show', ServerFarmsOperations.get_server_farm, factory)
 
 #Functionalities covered by better custom commands, so not exposed for now
 #cli_command('webapp get-source-control', SitesOperations.get_site_source_control, factory)
