@@ -26,7 +26,8 @@ CLASSIFIERS = [
 DEPENDENCIES = [
     'azure==2.0.0rc6',
     'azure-cli-core',
-    'azure-mgmt-web==0.30.0rc6'
+    'azure-mgmt-web==0.30.0rc6',
+    'urllib3==1.17'
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:

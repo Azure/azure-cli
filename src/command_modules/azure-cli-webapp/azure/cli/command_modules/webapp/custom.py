@@ -4,6 +4,7 @@
 #---------------------------------------------------------------------------------------------
 
 # pylint: disable=no-self-use,too-many-arguments,too-many-lines
+from __future__ import print_function
 import threading
 try:
     from urllib.parse import urlparse
@@ -334,8 +335,16 @@ def _get_site_credential(client, resource_group, name):
     return (creds.publishing_user_name, creds.publishing_password)
 
 def _stream_trace(streaming_url, user_name, password):
-    import requests
-    r = requests.get(streaming_url, auth=(user_name, password), stream=True)
-    for line in r.iter_lines(decode_unicode=True):
-        if line:
-            print(line)
+    import urllib3
+
+    urllib3.disable_warnings()
+    http = urllib3.PoolManager()
+    headers = urllib3.util.make_headers(basic_auth='{0}:{1}'.format(user_name, password))
+    r = http.request(
+        'GET',
+        streaming_url,
+        headers=headers,
+        preload_content=False
+    )
+    for chunk in r.stream(decode_content=True):
+        print(chunk.decode(), end='')
