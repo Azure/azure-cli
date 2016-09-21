@@ -347,4 +347,5 @@ def _stream_trace(streaming_url, user_name, password):
         preload_content=False
     )
     for chunk in r.stream(decode_content=True):
-        print(chunk.decode(), end='')
+        if chunk:
+            print(chunk.decode(), end='') # each line of log has CRLF.
