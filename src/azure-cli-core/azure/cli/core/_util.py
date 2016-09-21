@@ -68,11 +68,16 @@ def show_version_info_exit(out_file):
     print('Python ({}) {}'.format(platform.system(), sys.version), file=out_file)
     sys.exit(0)
 
-def get_file_json(file_path):
-    for encoding in ('utf-8', 'utf-8-sig', 'utf-16', 'utf-16le', 'utf-16be'):
+def get_file_json(file_path, throw_on_empty=True):
+    #always try 'utf-8-sig' first, so that BOM in WinOS won't cause trouble.
+    for encoding in ('utf-8-sig', 'utf-8', 'utf-16', 'utf-16le', 'utf-16be'):
         try:
             with codecs_open(file_path, encoding=encoding) as f:
                 text = f.read()
+
+            if not text and not throw_on_empty:
+                return None
+
             return json.loads(text)
         except UnicodeError:
             pass
