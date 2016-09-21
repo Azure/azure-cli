@@ -95,6 +95,7 @@ class LongRunningOperation(object): #pylint: disable=too-few-public-methods
         try:
             result = poller.result()
         except ClientException as client_exception:
+            log_telemetry('client exception', log_type='trace')
             message = getattr(client_exception, 'message', client_exception)
 
             try:
@@ -226,12 +227,15 @@ def create_command(name, operation, transform_result, table_transformer, client_
             else:
                 return result
         except ClientException as client_exception:
+            log_telemetry('client exception', log_type='trace')
             message = getattr(client_exception, 'message', client_exception)
             raise CLIError(message)
         except AzureException as azure_exception:
+            log_telemetry('azure exception', log_type='trace')
             message = re.search(r"([A-Za-z\t .])+", str(azure_exception))
             raise CLIError('\n{}'.format(message.group(0) if message else str(azure_exception)))
         except ValueError as value_error:
+            log_telemetry('value exception', log_type='trace')
             raise CLIError(value_error)
 
     name = ' '.join(name.split())
