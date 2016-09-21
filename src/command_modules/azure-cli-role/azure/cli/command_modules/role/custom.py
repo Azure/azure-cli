@@ -34,10 +34,10 @@ logger = _logging.get_az_logger(__name__)
 
 _CUSTOM_RULE = 'CustomRole'
 
-def _auth_client_factory(resource_id=None):
+def _auth_client_factory(scope=None):
     subscription_id = None
-    if resource_id:
-        matched = re.match('/subscriptions/(?P<subscription>[^/]*)/', resource_id)
+    if scope:
+        matched = re.match('/subscriptions/(?P<subscription>[^/]*)/', scope)
         if matched:
             subscription_id = matched.groupdict()['subscription']
     return get_mgmt_service_client(AuthorizationManagementClient, subscription_id=subscription_id)
@@ -50,10 +50,10 @@ def _graph_client_factory(**_):
     configure_common_settings(client)
     return client
 
-def list_role_definitions(name=None, resource_group_name=None, resource_id=None,
+def list_role_definitions(name=None, resource_group_name=None, scope=None,
                           custom_role_only=False):
-    definitions_client = _auth_client_factory(resource_id).role_definitions
-    scope = _build_role_scope(resource_group_name, resource_id,
+    definitions_client = _auth_client_factory(scope).role_definitions
+    scope = _build_role_scope(resource_group_name, scope,
                               definitions_client.config.subscription_id)
     return _search_role_definitions(definitions_client, name, scope, custom_role_only)
 
@@ -119,10 +119,10 @@ def create_role_definition(role_definition):
                                                role_definition=definition)
 
 
-def delete_role_definition(name, resource_group_name=None, resource_id=None,
+def delete_role_definition(name, resource_group_name=None, scope=None,
                            custom_role_only=False):
-    definitions_client = _auth_client_factory(resource_id).role_definitions
-    scope = _build_role_scope(resource_group_name, resource_id,
+    definitions_client = _auth_client_factory(scope).role_definitions
+    scope = _build_role_scope(resource_group_name, scope,
                               definitions_client.config.subscription_id)
     roles = _search_role_definitions(definitions_client, name, scope, custom_role_only)
     for r in roles:
@@ -134,16 +134,16 @@ def _search_role_definitions(definitions_client, name, scope, custom_role_only=F
         roles = [r for r in roles if r.properties.type == _CUSTOM_RULE]
     return roles
 
-def create_role_assignment(role, assignee, resource_group_name=None, resource_id=None):
-    return _create_role_assignment(role, assignee, resource_group_name, resource_id)
+def create_role_assignment(role, assignee, resource_group_name=None, scope=None):
+    return _create_role_assignment(role, assignee, resource_group_name, scope)
 
-def _create_role_assignment(role, assignee, resource_group_name=None, resource_id=None,
+def _create_role_assignment(role, assignee, resource_group_name=None, scope=None,
                             ocp_aad_session_key=None):
-    factory = _auth_client_factory(resource_id)
+    factory = _auth_client_factory(scope)
     assignments_client = factory.role_assignments
     definitions_client = factory.role_definitions
 
-    scope = _build_role_scope(resource_group_name, resource_id,
+    scope = _build_role_scope(resource_group_name, scope,
                               assignments_client.config.subscription_id)
 
     role_id = _resolve_role_id(role, scope, definitions_client)
@@ -158,24 +158,24 @@ def _create_role_assignment(role, assignee, resource_group_name=None, resource_i
                                      custom_headers=custom_headers)
 
 def list_role_assignments(assignee=None, role=None, resource_group_name=None,#pylint: disable=too-many-arguments
-                          resource_id=None, include_inherited=False,
+                          scope=None, include_inherited=False,
                           show_all=False, include_groups=False):
     '''
     :param include_groups: include extra assignments to the groups of which the user is a
     member(transitively). Supported only for a user principal.
     '''
     graph_client = _graph_client_factory()
-    factory = _auth_client_factory(resource_id)
+    factory = _auth_client_factory(scope)
     assignments_client = factory.role_assignments
     definitions_client = factory.role_definitions
 
     scope = None
     if show_all:
-        if resource_group_name or resource_id:
-            raise CLIError('group or resource id are not required when --all is used')
+        if resource_group_name or scope:
+            raise CLIError('group or scope are not required when --all is used')
         scope = None
     else:
-        scope = _build_role_scope(resource_group_name, resource_id,
+        scope = _build_role_scope(resource_group_name, scope,
                                   definitions_client.config.subscription_id)
 
     assignments = _search_role_assignments(assignments_client, definitions_client,
@@ -217,19 +217,19 @@ def _get_displayable_name(graph_object):
         return ''
 
 def delete_role_assignments(ids=None, assignee=None, role=None, #pylint: disable=too-many-arguments
-                            resource_group_name=None, resource_id=None, include_inherited=False):
-    factory = _auth_client_factory(resource_id)
+                            resource_group_name=None, scope=None, include_inherited=False):
+    factory = _auth_client_factory(scope)
     assignments_client = factory.role_assignments
     definitions_client = factory.role_definitions
     ids = ids or []
     if ids:
-        if assignee or role or resource_group_name or resource_id or include_inherited:
+        if assignee or role or resource_group_name or scope or include_inherited:
             raise CLIError('When assignment ids are used, other parameter values are not required')
         for i in ids:
             assignments_client.delete_by_id(i)
         return
 
-    scope = _build_role_scope(resource_group_name, resource_id,
+    scope = _build_role_scope(resource_group_name, scope,
                               assignments_client.config.subscription_id)
     assignments = _search_role_assignments(assignments_client, definitions_client,
                                            scope, assignee, role, include_inherited,
@@ -272,13 +272,12 @@ def _search_role_assignments(assignments_client, definitions_client,#pylint: dis
 
     return assignments
 
-def _build_role_scope(resource_group_name, resource_id, subscription_id):
+def _build_role_scope(resource_group_name, scope, subscription_id):
     subscription_scope = '/subscriptions/' + subscription_id
-    if resource_id:
+    if scope:
         if resource_group_name:
-            err = 'Resource group "{}" is redundant because resource id is supplied'
+            err = 'Resource group "{}" is redundant because scope is supplied'
             raise CLIError(err.format(resource_group_name))
-        scope = resource_id
     elif resource_group_name:
         scope = subscription_scope + '/resourceGroups/' + resource_group_name
     else:
@@ -471,16 +470,16 @@ def _resolve_service_principal(client, identifier):
         raise CLIError("service principal '{}' doesn't exist".format(identifier))
 
 def create_service_principal_for_rbac(name=None, secret=None, years=1,
-                                      resource_ids=None, role=None):
+                                      scopes=None, role=None):
     '''create a service principal that can access or modify resources
     :param str name: an unique uri. If missing, the command will generate one.
     :param str secret: the secret used to login. If missing, command will generate one.
     :param str years: Years the secret will be valid.
-    :param str resource_ids: ids of resources the service principal has access to
+    :param str scopes: space separated scopes the service principal's role assignment applies to.
     :param str role: role the service principal has on the resources. only use with 'resource-ids'.
     '''
-    if bool(resource_ids) != bool(role):
-        raise CLIError("'--resource-ids' and '--role' must be used together.")
+    if bool(scopes) != bool(role):
+        raise CLIError("'--scopes' and '--role' must be used together.")
     client = _graph_client_factory()
     start_date = datetime.datetime.now()
     app_display_name = 'azure-cli-' + start_date.strftime('%Y-%m-%d-%H-%M-%S')
@@ -497,17 +496,17 @@ def create_service_principal_for_rbac(name=None, secret=None, years=1,
                                          start_date=start_date,
                                          end_date=end_date)
     #pylint: disable=no-member
-    aad_sp = _create_service_principal(aad_application.app_id, bool(resource_ids))
-    oid = aad_sp.output.object_id if bool(resource_ids) else aad_sp.object_id
+    aad_sp = _create_service_principal(aad_application.app_id, bool(scopes))
+    oid = aad_sp.output.object_id if scopes else aad_sp.object_id
     _build_output_content(name, secret, client.config.tenant_id)
 
-    if resource_ids:
+    if scopes:
         #It is possible the SP has not been propagated to all servers, so creating assignments
         #might fail. The reliable workaround is to call out the server where creation occurred.
         #pylint: disable=protected-access
         session_key = aad_sp.response.headers._store['ocp-aad-session-key'][1]
-        for resource_id in resource_ids:
-            _create_role_assignment(role, oid, None, resource_id, ocp_aad_session_key=session_key)
+        for scope in scopes:
+            _create_role_assignment(role, oid, None, scope, ocp_aad_session_key=session_key)
 
 def reset_service_principal_credential(name, secret=None, years=1):
     '''reset credential, on expiration or you forget it.
