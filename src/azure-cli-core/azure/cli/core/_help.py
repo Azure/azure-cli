@@ -83,7 +83,7 @@ def print_arguments(help_file):
                           for p in help_file.parameters)
     last_group_name = None
     for p in sorted(help_file.parameters,
-                    key=lambda p: _get_group_priority(p.group_name)
+                    key=lambda p: get_group_priority(p.group_name)
                     + str(not p.required) + p.name):
         indent = 1
         required_text = required_tag if p.required else ''
@@ -116,6 +116,16 @@ def print_arguments(help_file):
             _print_indent('{0}'.format(p.long_summary.rstrip()), indent)
 
     return indent
+
+def get_group_priority(group_name):
+    priorities = {
+        None: 0,
+        'Generic Update Arguments': 5,
+        'Resource Id Arguments': 10,
+        'Global Arguments': 1000,
+        }
+    key = priorities.get(group_name, 1)
+    return "%06d" % key
 
 def _print_header(help_file):
     indent = 0
@@ -386,16 +396,6 @@ def _load_help_file_from_string(text):
 def _get_single_metadata(cmd_table):
     assert len(cmd_table) == 1
     return next(metadata for _, metadata in cmd_table.items())
-
-def _get_group_priority(group_name):
-    priorities = {
-        None: 0,
-        'Generic Update Arguments': 5,
-        'Resource Id Arguments': 10,
-        'Global Arguments': 1000,
-        }
-    key = priorities.get(group_name, 1)
-    return "%06d" % key
 
 class HelpAuthoringException(Exception):
     pass
