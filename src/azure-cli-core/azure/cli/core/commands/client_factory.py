@@ -13,8 +13,8 @@ logger = _logging.get_az_logger(__name__)
 
 UA_AGENT = "AZURECLI/{}".format(core_version)
 
-def get_mgmt_service_client(client_type):
-    client, _ = _get_mgmt_service_client(client_type)
+def get_mgmt_service_client(client_type, subscription_id=None):
+    client, _ = _get_mgmt_service_client(client_type, subscription_id=subscription_id)
     return client
 
 def get_subscription_service_client(client_type):
@@ -37,10 +37,10 @@ def configure_common_settings(client):
     client.config.generate_client_request_id = \
         'x-ms-client-request-id' not in APPLICATION.session['headers']
 
-def _get_mgmt_service_client(client_type, subscription_bound=True):
+def _get_mgmt_service_client(client_type, subscription_bound=True, subscription_id=None):
     logger.info('Getting management service client client_type=%s', client_type.__name__)
     profile = Profile()
-    cred, subscription_id, _ = profile.get_login_credentials()
+    cred, subscription_id, _ = profile.get_login_credentials(subscription_id=subscription_id)
     if subscription_bound:
         client = client_type(cred, subscription_id)
     else:

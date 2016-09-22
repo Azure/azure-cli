@@ -99,11 +99,11 @@ class RoleAssignmentScenarioTest(ResourceGroupVCRTestBase):
         self.cmd('role assignment list -g {}'.format(self.resource_group), checks=NoneCheck())
 
         #test role assignments on a resource
-        self.cmd('role assignment create --assignee {} --role contributor --resource-id {}'.format(self.user, resource_id), None)
-        self.cmd('role assignment list --assignee {} --role contributor --resource-id {}'.format(self.user, resource_id),
+        self.cmd('role assignment create --assignee {} --role contributor --scope {}'.format(self.user, resource_id), None)
+        self.cmd('role assignment list --assignee {} --role contributor --scope {}'.format(self.user, resource_id),
                  checks=[JMESPathCheck("length([])", 1)])
-        self.cmd('role assignment delete --assignee {} --role contributor --resource-id {}'.format(self.user, resource_id), None)
-        self.cmd('role assignment list --resource-id {}'.format(resource_id), checks=NoneCheck())
+        self.cmd('role assignment delete --assignee {} --role contributor --scope {}'.format(self.user, resource_id), None)
+        self.cmd('role assignment list --scope {}'.format(resource_id), checks=NoneCheck())
 
         #test role assignment on subscription level
         self.cmd('role assignment create --assignee {} --role reader'.format(self.user), None)

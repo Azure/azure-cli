@@ -83,7 +83,7 @@ def create_keyvault(client, resource_group_name, vault_name, location, #pylint:d
     profile = Profile()
     cred, _, tenant_id = profile.get_login_credentials(for_graph_client=True)
     graph_client = GraphRbacManagementClient(cred, tenant_id)
-    subscription = profile.get_default_subscription()
+    subscription = profile.get_subscription()
     if no_self_perms:
         access_policies = []
     else:
