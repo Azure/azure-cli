@@ -131,7 +131,7 @@ register_cli_argument('vmss extension image', 'top', help='Return top number of 
 register_cli_argument('vmss extension image', 'version', help='Extension version')
 
 for scope in ['vm diagnostics', 'vmss diagnostics']:
-    register_cli_argument(scope, 'is_windows_os', action='store_true', help='VM uses Windows OS')
+    register_cli_argument(scope, 'version', help='version of the diagnostics extension. Will use the latest if not specfied')
     register_cli_argument(scope, 'settings', help='json string or a file path, which defines data to be collected.')
     register_cli_argument(scope, 'protected_settings', help='json string or a file path containing private configurations such as storage account keys, etc.')
 
