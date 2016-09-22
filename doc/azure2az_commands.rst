@@ -182,18 +182,18 @@ azure network vpn-gateway root-cert delete                   az network vpn-gate
 azure network vpn-gateway set                                az network vpn-gateway update
 azure network vpn-gateway show                               az network vpn-gateway show
 azure storage account check                                  az storage account check-name
-azure storage account connectionstring show                  az storage account connection-string
+azure storage account connectionstring show                  az storage account show-connection-string
 azure storage account create                                 az storage account create
 azure storage account delete                                 az storage account delete
 azure storage account keys list                              az storage account keys list
 azure storage account keys renew                             az storage account keys renew
 azure storage account list                                   az storage account list
 azure storage account sas create                             az storage account generate-sas
-azure storage account sas create                             az storage account generate-sas
 azure storage account set                                    az storage account update
 azure storage account show                                   az storage account show
 azure storage account usage show                             az storage account show-usage
 azure storage blob copy start                                az storage blob copy start
+azure storage blob copy show                                 az storage blob show
 azure storage blob copy stop                                 az storage blob copy cancel
 azure storage blob delete                                    az storage blob delete
 azure storage blob download                                  az storage blob download
@@ -224,12 +224,14 @@ azure storage container policy show                          az storage containe
 azure storage container sas create                           az storage container generate-sas
 azure storage container set                                  az storage container set-permission
 azure storage container show                                 az storage container show
+azure storage container show                                 az storage container show-permission
 azure storage cors delete                                    az storage cors clear
 azure storage cors set                                       az storage cors add
 azure storage cors show                                      az storage cors list
 azure storage directory create                               az storage directory create
 azure storage directory delete                               az storage directory delete
 azure storage file copy start                                az storage file copy start
+azure storage file copy show                                 az storage file start
 azure storage file copy stop                                 az storage file copy cancel
 azure storage file delete                                    az storage file delete
 azure storage file download                                  az storage file download
@@ -272,7 +274,7 @@ azure storage table policy show                              az storage table po
 azure storage table sas create                               az storage table generate-sas
 azure vm capture                                             az vm capture
 azure vm create                                              az vm create
-azure vm deallocate                                          az vm dellocate
+azure vm deallocate                                          az vm deallocate
 azure vm delete                                              az vm delete
 azure vm disk attach                                         az vm disk attach
 azure vm disk attach-new                                     az vm disk attach-new
@@ -280,8 +282,7 @@ azure vm disk detach                                         az vm disk detach
 azure vm extension get                                       az vm extension get
 azure vm extension set                                       az vm extension set
 azure vm extension-image list                                az vm extension image list
-azure vm extension-image list-publishers                     az vm extension image list-names
-azure vm extension-image list-types                          az vm extension image list
+azure vm extension-image list-types                          az vm extension image list-names
 azure vm extension-image list-versions                       az vm extension image list-versions
 azure vm extension-image show                                az vm extension image show
 azure vm generalize                                          az vm generalize
