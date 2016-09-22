@@ -313,7 +313,7 @@ class VMCreateAndStateModificationsScenarioTest(ResourceGroupVCRTestBase): #pyli
         self.cmd('vm create --resource-group {0} --location {1} --name {2} --admin-username ubuntu '
                  '--image Canonical:UbuntuServer:14.04.4-LTS:latest --admin-password testPassword0 '
                  '--deployment-name {3} --authentication-type password '
-                 '--tags firsttag=1;secondtag=2;thirdtag --nsg {4} --public-ip-address {5} '
+                 '--tags firsttag=1 secondtag=2 thirdtag --nsg {4} --public-ip-address {5} '
                  '--storage-account {6} --vnet {7}'.format(
                      self.resource_group, self.location, self.vm_name, self.deployment_name,
                      self.nsg_name, self.ip_name, self.storage_name, self.vnet_name))

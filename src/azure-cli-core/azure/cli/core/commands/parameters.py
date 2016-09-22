@@ -110,15 +110,14 @@ quotes = '""' if platform.system() == 'Windows' else "''"
 quote_text = 'Use {} to clear existing tags.'.format(quotes)
 
 tags_type = CliArgumentType(
-    type=validate_tags,
-    help='multiple semicolon separated tags in \'key[=value]\' format.  {}'.format(quote_text),
-    nargs='?',
-    const=''
+    validator=validate_tags,
+    help="space separated tags in 'key[=value]' format. {}".format(quote_text),
+    nargs='*'
 )
 
 tag_type = CliArgumentType(
     type=validate_tag,
-    help='a single tag in \'key[=value]\' format.  {}'.format(quote_text),
+    help="a single tag in 'key[=value]' format. {}".format(quote_text),
     nargs='?',
     const=''
 )
