@@ -47,7 +47,7 @@ class AzHelpGenDirective(Directive):
 
             if is_command and help_file.parameters:
                for arg in sorted(help_file.parameters,
-                                key=lambda p: str(p.group_name or 'A')
+                                key=lambda p: _help.get_group_priority(p.group_name)
                                 + str(not p.required) + p.name):
                   yield '{}.. cliarg:: {}'.format(INDENT, arg.name)
                   yield ''
@@ -60,7 +60,7 @@ class AzHelpGenDirective(Directive):
                   yield '{}:summary: {}'.format(DOUBLEINDENT, short_summary)
                   yield '{}:description: {}'.format(DOUBLEINDENT, arg.long_summary)
                   if arg.choices:
-                     yield '{}:values: {}'.format(DOUBLEINDENT, ', '.join(arg.choices))
+                     yield '{}:values: {}'.format(DOUBLEINDENT, ', '.join(sorted([str(x) for x in arg.choices])))
                   if arg.default and arg.default != argparse.SUPPRESS:
                      yield '{}:default: {}'.format(DOUBLEINDENT, arg.default)
                   if arg.value_sources:
