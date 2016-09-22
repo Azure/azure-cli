@@ -27,7 +27,8 @@ DEPENDENCIES = [
     'azure==2.0.0rc6',
     'azure-cli-core',
     'azure-mgmt-web==0.30.0rc6',
-    'urllib3==1.17'
+    # v1.17 breaks on wildcard cert https://github.com/shazow/urllib3/issues/981
+    'urllib3[secure]==1.16'
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:

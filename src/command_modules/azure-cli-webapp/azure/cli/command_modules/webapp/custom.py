@@ -335,10 +335,15 @@ def _get_site_credential(client, resource_group, name):
     return (creds.publishing_user_name, creds.publishing_password)
 
 def _stream_trace(streaming_url, user_name, password):
+    import certifi
     import urllib3
+    try:
+        import urllib3.contrib.pyopenssl
+        urllib3.contrib.pyopenssl.inject_into_urllib3()
+    except ImportError:
+        pass
 
-    urllib3.disable_warnings()
-    http = urllib3.PoolManager()
+    http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED', ca_certs=certifi.where())
     headers = urllib3.util.make_headers(basic_auth='{0}:{1}'.format(user_name, password))
     r = http.request(
         'GET',
