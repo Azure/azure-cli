@@ -55,9 +55,9 @@ class IotHubDevicesOperations(object):
          if raw=true
         """
         # Construct URL
-        url = 'devices/{deviceId}'
+        url = '/devices/{deviceId}'
         path_format_arguments = {
-            'deviceId': self._serialize.url("device_id", device_id, 'str')
+            'deviceId': self._serialize.url("device_id", device_id, 'str', max_length=128, min_length=1)
         }
         url = self._client.format_url(url, **path_format_arguments)
 
@@ -91,6 +91,63 @@ class IotHubDevicesOperations(object):
         if response.status_code == 200:
             deserialized = self._deserialize('DeviceDescription', response)
         if response.status_code == 201:
+            deserialized = self._deserialize('DeviceDescription', response)
+
+        if raw:
+            client_raw_response = ClientRawResponse(deserialized, response)
+            return client_raw_response
+
+        return deserialized
+
+    def get(
+            self, device_id, custom_headers=None, raw=False, **operation_config):
+        """Get device identity from the identity registry of an IoT Hub.
+
+        Get device identity from the identity registry of an IoT Hub.
+
+        :param device_id: The Id of the device.
+        :type device_id: str
+        :param dict custom_headers: headers that will be added to the request
+        :param bool raw: returns the direct response alongside the
+         deserialized response
+        :param operation_config: :ref:`Operation configuration
+         overrides<msrest:optionsforoperations>`.
+        :rtype: :class:`DeviceDescription
+         <iothubdeviceclient.models.DeviceDescription>`
+        :rtype: :class:`ClientRawResponse<msrest.pipeline.ClientRawResponse>`
+         if raw=true
+        """
+        # Construct URL
+        url = '/devices/{deviceId}'
+        path_format_arguments = {
+            'deviceId': self._serialize.url("device_id", device_id, 'str', max_length=128, min_length=1)
+        }
+        url = self._client.format_url(url, **path_format_arguments)
+
+        # Construct parameters
+        query_parameters = {}
+        query_parameters['api-version'] = self._serialize.query("self.config.api_version", self.config.api_version, 'str')
+
+        # Construct headers
+        header_parameters = {}
+        header_parameters['Content-Type'] = 'application/json; charset=utf-8'
+        if self.config.generate_client_request_id:
+            header_parameters['x-ms-client-request-id'] = str(uuid.uuid1())
+        if custom_headers:
+            header_parameters.update(custom_headers)
+        if self.config.accept_language is not None:
+            header_parameters['accept-language'] = self._serialize.header("self.config.accept_language", self.config.accept_language, 'str')
+
+        # Construct and send request
+        request = self._client.get(url, query_parameters)
+        response = self._client.send(request, header_parameters, **operation_config)
+
+        if response.status_code not in [200]:
+            raise models.ErrorDetailsException(self._deserialize, response)
+
+        deserialized = None
+
+        if response.status_code == 200:
             deserialized = self._deserialize('DeviceDescription', response)
 
         if raw:

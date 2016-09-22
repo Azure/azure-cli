@@ -68,8 +68,51 @@
               "$ref": "#/definitions/ErrorDetails"
             }
           }
-        },
-        "deprecated": false
+        }
+      },
+      "get" : {
+        "tags": [
+          "IoTDevices"
+        ],
+        "summary": "Get device identity from the identity registry of an IoT Hub.",
+        "description": "Get device identity from the identity registry of an IoT Hub.",
+        "operationId": "IotHubDevices_Get",
+        "consumes": [
+          "application/json",
+          "text/json"
+        ],
+        "produces": [
+          "application/json",
+          "text/json"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/api-version"
+          },
+          {
+            "name": "deviceId",
+            "in": "path",
+            "description": "The Id of the device.",
+            "required": true,
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/DeviceDescription"
+            }
+          },
+          "default": {
+            "description": "DefaultErrorResponse",
+            "schema": {
+              "$ref": "#/definitions/ErrorDetails"
+            }
+          }
+        }
       }
     }
   },
