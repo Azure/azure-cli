@@ -1094,26 +1094,6 @@ class DiagnosticsExtensionInstallTest(ResourceGroupVCRTestBase):
                 JMESPathCheck('resources[0].settings.storageAccount', self.storage_account)
             ])
 
-class VMSSDiagnosticsInstallTest(VCRTestBase):
-
-    def __init__(self, test_method):
-        super(VMSSDiagnosticsInstallTest, self).__init__(__file__, test_method)
-
-    def test_vmss_diagnostics_install(self):
-        self.execute()
-
-    def body(self):
-        vmss_name = 'myvmss3'
-        resource_group = 'myvmsss'
-        storage_account = 'stog001100'
-        extension_name = 'LinuxDiagnostic'
-        self.cmd('vmss diagnostics set --vmss-name {} --resource-group {} --storage-account {}'.format(vmss_name, resource_group, storage_account))
-        self.cmd('vmss extension show --resource-group {} --vmss-name {} --name {}'.format(resource_group, vmss_name, extension_name), checks=[
-            JMESPathCheck('type(@)', 'object'),
-            JMESPathCheck('name', extension_name)
-        ])
-
-
 class VMCreateExistingOptions(ResourceGroupVCRTestBase):
     def __init__(self, test_method):
         super(VMCreateExistingOptions, self).__init__(__file__, test_method)
