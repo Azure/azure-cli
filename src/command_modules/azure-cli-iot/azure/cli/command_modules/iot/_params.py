@@ -22,8 +22,18 @@ register_cli_argument('iot hub create', 'sku',
                            'Exception will be thrown if free instances exceed one.')
 register_cli_argument('iot hub create', 'unit', help='Units in your IoT Hub.', type=int)
 
+# Arguments for 'iot hub show-connection-string'
+register_cli_argument('iot hub show-connection-string', 'name', options_list=('--name', '-n'),
+                      help='Target IoT Hub name.')
+register_cli_argument('iot hub show-connection-string', 'policy_name',
+                      help='The access policy you choose to use. Default is iothubowner.')
 
 # Arguments for 'iot device create'
 register_cli_argument('iot device create', 'hub', help='Target IoT Hub name.')
 register_cli_argument('iot device create', 'device_id',
+                      options_list=('--device-id', '-d'), help='Device Id.')
+
+# Arguments for 'iot device show-connection-string'
+register_cli_argument('iot device show-connection-string', 'hub', help='Target IoT Hub name.')
+register_cli_argument('iot device show-connection-string', 'device_id',
                       options_list=('--device-id', '-d'), help='Device Id.')
