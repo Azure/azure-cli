@@ -231,7 +231,7 @@ azure storage cors show                                      az storage cors lis
 azure storage directory create                               az storage directory create
 azure storage directory delete                               az storage directory delete
 azure storage file copy start                                az storage file copy start
-azure storage file copy show                                 az storage file start
+azure storage file copy show                                 az storage file show
 azure storage file copy stop                                 az storage file copy cancel
 azure storage file delete                                    az storage file delete
 azure storage file download                                  az storage file download
