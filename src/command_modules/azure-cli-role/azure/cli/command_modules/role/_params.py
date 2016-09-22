@@ -29,7 +29,7 @@ register_cli_argument('ad sp', 'identifier', options_list=('--id',), help='servi
 register_cli_argument('ad sp create', 'identifier', options_list=('--id',), help='identifier uri, application id, or object id of the associated application')
 register_cli_argument('ad sp create-for-rbac', 'name', sp_name_type)
 register_cli_argument('ad sp create-for-rbac', 'years', type=int)
-register_cli_argument('ad sp create-for-rbac', 'resource_ids', nargs='+')
+register_cli_argument('ad sp create-for-rbac', 'scopes', nargs='+')
 register_cli_argument('ad sp reset-credentials', 'name', sp_name_type)
 register_cli_argument('ad sp reset-credentials', 'years', type=int)
 
@@ -55,7 +55,7 @@ register_cli_argument('role assignment', 'ids', nargs='+', help='space separated
 register_cli_argument('role', 'role_id', help='the role id')
 register_cli_argument('role', 'resource_group_name', options_list=('--resource-group', '-g'),
                       help='use it only if the role or assignment was added at the level of a resource group')
-register_cli_argument('role', 'resource_id', help='use it only if the role or assignment was added at the level of a resource')
+register_cli_argument('role', 'scope', help='scope at which this role assignment applies to, e.g., /subscriptions/0b1f6471-1bf0-4dda-aec3-111122223333, /subscriptions/0b1f6471-1bf0-4dda-aec3-111122223333/resourceGroups/myGroup, or /subscriptions/0b1f6471-1bf0-4dda-aec3-111122223333/resourceGroups/myGroup/providers/Microsoft.Compute/virtualMachines/myVM')
 register_cli_argument('role', 'custom_role_only', action='store_true', help='custom roles only(vs. build-in ones)')
 register_cli_argument('role', 'role_definition', help="json formatted content which defines the new role. run 'show-create-template' to get samples")
 register_cli_argument('role', 'name', options_list=('--name', '-n'), help="the role's logical name")
