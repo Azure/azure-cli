@@ -39,7 +39,7 @@ class VmssOperations(object):
     def create_or_update(
             self, resource_group_name, deployment_name, admin_username, name, content_version=None, admin_password=None, authentication_type="password", custom_os_disk_type="windows", custom_os_disk_uri=None, dns_name_for_public_ip=None, dns_name_type="none", instance_count=2, load_balancer=None, load_balancer_backend_pool_name=None, load_balancer_nat_pool_name=None, load_balancer_type="new", location=None, nat_backend_port=22, os_disk_name="osdiskimage", os_disk_type="provided", os_offer="WindowsServer", os_publisher="MicrosoftWindowsServer", os_sku="2012-R2-Datacenter", os_type="Win2012R2Datacenter", os_version="latest", overprovision=False, public_ip_address=None, public_ip_address_allocation="dynamic", public_ip_address_type="new", ssh_dest_key_path=None, ssh_key_value=None, storage_caching="ReadOnly", storage_container_name="vhds", storage_type="Standard_LRS", subnet_ip_address_prefix="10.0.0.0/24", subnet_name=None, tags=None, upgrade_policy_mode="manual", virtual_network=None, virtual_network_ip_address_prefix="10.0.0.0/16", virtual_network_type="new", vm_sku="Standard_D1_v2", custom_headers=None, raw=False, **operation_config):
         """
-        Create or update a virtual machine.
+        Create a new Vmss.
 
         :param resource_group_name: The name of the resource group. The name
          is case insensitive.

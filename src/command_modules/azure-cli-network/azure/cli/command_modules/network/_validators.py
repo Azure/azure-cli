@@ -168,6 +168,9 @@ def validate_public_ip_name_or_id(namespace):
                 name=namespace.public_ip_address)
 
 def validate_public_ip_type(namespace): # pylint: disable=unused-argument
+    if namespace.public_ip_address_type == 'none' and not namespace.subnet:
+        raise argparse.ArgumentError(None, '--subnet is required if not using --public-ip-address')
+
     if namespace.subnet:
         namespace.public_ip_address_type = 'none'
         if namespace.public_ip_address:
