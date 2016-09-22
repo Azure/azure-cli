@@ -31,11 +31,11 @@ helps['vm create'] = """
                 - name: Create a simple Windows Server VM with private IP address only
                   text: >
                     az vm create -n my_vm_name -g myrg --admin-username myadmin --admin-password Password@1234 
-                     --public-ip-address ""
+                     --public-ip-address "" --image Win2012R2Datacenter
                 - name: Create a simple Windows Server VM with public IP address and DNS entry
                   text: >
                     az vm create -n my_vm_name -g myrg --admin-username myadmin --admin-password Password@1234
-                    --public-ip-address-dns-name my_globally_unique_vm_dns_name
+                    --public-ip-address-dns-name my_globally_unique_vm_dns_name --image Win2012R2Datacenter
                 - name: Create a Linux VM with SSH key authentication, add a public DNS entry and add to an existing Virtual Network and Availability Set.
                   text: >
                     az vm create -n my_vm_name -g myrg --image <linux image from 'az vm image list'>
@@ -59,12 +59,12 @@ helps['vmss create'] = """
             examples:
                 - name: Windows scaleset with 5 instances, a load balancer and a public IP address
                   text: >
-                    az vmss create -n myName -g myResourceGroup --admin-password MyPassword123 --instance-count 5
+                    az vmss create -n myName -g myResourceGroup --admin-password MyPassword123 --instance-count 5 --image Win2012R2Datacenter
                 - name: Linux scaleset with SSH authentication, a public IP address, a DNS entry, an existing load balancer, and an existing virtual network
                   text: >
                     az vmss create  -n myName -g myResourceGroup --dns-name-for-public-ip myGloballyUniqueDnsName
                     --load-balancer-type existing --load-balancer-name myLoadBalancer
-                    --virtual-network-type existing --virtual-network-name myVNET --subnet-name mySubnet --image canonical:Ubuntu_Snappy_Core:15.04:2016.0318.1949
+                    --virtual-network-type existing --virtual-network-name myVNET --subnet-name mySubnet --image <linux image from 'az vm image list'>
                     --authentication-type ssh --ssh-key-value "<ssh-key-value or ssh-key-file-path>"
 """.format(image_long_summary)
 
