@@ -335,6 +335,7 @@ def _get_site_credential(client, resource_group, name):
     return (creds.publishing_user_name, creds.publishing_password)
 
 def _stream_trace(streaming_url, user_name, password):
+    import sys
     import certifi
     import urllib3
     try:
@@ -343,6 +344,7 @@ def _stream_trace(streaming_url, user_name, password):
     except ImportError:
         pass
 
+    std_encoding = sys.stdout.encoding
     http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED', ca_certs=certifi.where())
     headers = urllib3.util.make_headers(basic_auth='{0}:{1}'.format(user_name, password))
     r = http.request(
@@ -351,6 +353,10 @@ def _stream_trace(streaming_url, user_name, password):
         headers=headers,
         preload_content=False
     )
-    for chunk in r.stream(decode_content=True):
+    for chunk in r.stream():
         if chunk:
-            print(chunk.decode(), end='') # each line of log has CRLF.
+            # Extra encode() and decode for stdout which does not surpport 'utf-8'
+            print(chunk.decode(encoding='utf-8', errors='replace')
+                  .encode(std_encoding, errors='replace')
+                  .decode(std_encoding, errors='replace'), end='') # each line of log has CRLF.
+    r.release_conn()
