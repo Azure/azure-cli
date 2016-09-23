@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 #---------------------------------------------------------------------------------------------
 
+import argparse
 import unittest
 from six import StringIO
 
@@ -29,16 +30,17 @@ class Test_storage_validators(unittest.TestCase):
         self.assertEqual(actual, expected)
 
     def test_tags_valid(self):
-        the_input = 'a=b;c=d;e'
-        actual = validate_tags(the_input)
+        the_input = argparse.Namespace()
+        the_input.tags = ['a=b', 'c=d', 'e']
+        validate_tags(the_input)
         expected = {'a':'b', 'c':'d', 'e':''}
-        self.assertEqual(actual, expected)
+        self.assertEqual(the_input.tags, expected)
 
     def test_tags_invalid(self):
-        the_input = ''
-        actual = validate_tags(the_input)
-        expected = {}
-        self.assertEqual(actual, expected)
+        the_input = argparse.Namespace()
+        the_input.tags = []
+        validate_tags(the_input)
+        self.assertEqual(the_input.tags, {})
 
     def test_tag(self):
         self.assertEqual(validate_tag('test'), {'test':''})
