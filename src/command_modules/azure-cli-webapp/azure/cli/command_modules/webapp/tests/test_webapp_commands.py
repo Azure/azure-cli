@@ -20,7 +20,7 @@ class WebappBasicE2ETest(ResourceGroupVCRTestBase):
     def body(self):
         webapp_name = 'webapp-e2e'
         plan = 'webapp-e2e-plan'
-        result = self.cmd('appservice plan create -g {} -n {} --tier B1'.format(self.resource_group, plan))
+        result = self.cmd('appservice plan create -g {} -n {} --sku B1'.format(self.resource_group, plan))
         self.cmd('appservice plan list -g {}'.format(self.resource_group), checks=[
             JMESPathCheck('length(@)', 1),
             JMESPathCheck('[0].name', plan),
@@ -31,7 +31,7 @@ class WebappBasicE2ETest(ResourceGroupVCRTestBase):
             JMESPathCheck('name', plan)
             ])
         #scale up
-        self.cmd('appservice plan update  -g {} -n {} --tier S1'.format(self.resource_group, plan), checks=[
+        self.cmd('appservice plan update  -g {} -n {} --sku S1'.format(self.resource_group, plan), checks=[
             JMESPathCheck('name', plan),
             JMESPathCheck('sku.tier', 'Standard'),
             JMESPathCheck('sku.name', 'S1')
@@ -93,7 +93,7 @@ class WebappConfigureTest(ResourceGroupVCRTestBase):
     def set_up(self):
         super(WebappConfigureTest, self).set_up()
         plan = 'webapp-config-plan'
-        self.cmd('appservice plan create -g {} -n {} --tier B1'.format(self.resource_group, plan))
+        self.cmd('appservice plan create -g {} -n {} --sku B1'.format(self.resource_group, plan))
         self.cmd('appservice web create -g {} -n {} --plan {}'.format(self.resource_group, self.webapp_name, plan))
 
     def body(self):
