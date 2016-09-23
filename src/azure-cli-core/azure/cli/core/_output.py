@@ -139,7 +139,11 @@ class TableOutput(object): #pylint: disable=too-few-public-methods
                     new_entry[TableOutput._capitalize_first_char(k)] = item[k]
         except AttributeError:
             # handles odd cases where a string/bool/etc. is returned
-            new_entry['Result'] = item
+            if isinstance(item, list):
+                for col, val in enumerate(item):
+                    new_entry['column{}'.format(col)] = val
+            else:
+                new_entry['Result'] = item
         return new_entry
 
     @staticmethod
