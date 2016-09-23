@@ -24,15 +24,15 @@ from the following:
   * Examples and links to web content
 * Improved command-line productivity
   * Use `[tab][tab]` to lookup parameters, including resource groups and names (only supported in BASH and BASH on Windows)
-  * Work with either ID values (`--ids`) _or_ resource group and name (`-g -n`)
+  * Work with either Azure resource ID values (`--ids`) _or_ resource group and name (`-g -n`)
   * Built in client-side query engine powered by JMESPath
-* (Coming) Support for more features and services
+* Service support
   * Our preview meets or exceeds XPlat CLI functionality for Compute, Storage, Network, RBAC, and ARM
   * More services coming online soon!
 
 While we believe the above list is compelling, it's important to remember
-**the Azure CLI 2.0 only supports ARM mode**.  You must continue to use
-the Azure XPlat CLI for ASM/Classic mode management.
+**the Azure CLI 2.0 only supports ARM mode**.  If you are managing ASM/Classic 
+resources, you must use the Azure XPlat CLI.
 
 ## Getting both CLI's setup side-by-side
 
@@ -56,9 +56,9 @@ Here is a quick list of some new and changed concepts that can help you understa
   * You will find help to be generally more useful, try `az vm create -h` for an example
   * Positional parameters are not supported, use `az vm list -g MyGroup` instead of `azure vm list MyGroup`
 * Automation and Scripting Concepts
-  * You can refer to resources using their full ID URI with `--ids` or with the resource group and name using `-g [rg] -n [name]`
+  * You can refer to resources using their Azure resource ID with `--ids` or with the resource group and name using `-g [rg] -n [name]`
   * Use `--query "[expression]"` to extract single values
-  * Use `--out tsv` when getting a single value to prevent any extra markup
+  * Use `--out tsv` to get plain (no mark-up) value output
   * Use `@-` to pipe values such as `az vm list --query [0].[id] --out tsv | az vm show --ids @-`
 * Service Specific Concepts
   * VM power state is no longer included in `az vm list`, use `az vm get-instance-view` instead
@@ -118,18 +118,26 @@ $ az vm show
 az vm show: error: (--name --resource-group | --ids) are required
 ```
 
-In addition to use resource groups and names (`-g -n`), you can also refer to
+In addition to using resource groups and names (`-g -n`), you can also refer to
 resources directly by ID value using `--ids`:
 
 ```
 $ MyVar=$(az vm list --query [0].id --out tsv)
 $ echo $MyVar
-/subscriptions/db5eabce-73e2-4fa8-b18a-46abcbe4abc5/resourceGroups/VMGROUP1/providers/Microsoft.Compute/virtualMachines/VM-Data
-$ az vm show --ids $MyVar
+/subscriptions/xxxx/resourceGroups/VMGROUP1/providers/Microsoft.Compute/virtualMachines/VM-Data
+$ az vm show --ids $MyVar --out table
 ResourceGroup    Name     VmId                                  Location    ProvisioningState
 ---------------  -------  ------------------------------------  ----------  -------------------
 VMGROUP1         VM-Data  63edd6a0-2796-49e6-acc1-ad3f8bd94f13  westus      Succeeded
 ```
+
+When working with files, you can use the `@` symbol to indicate the contents of a file or file descriptor.
+
+```
+$ az role create --role-definition @MyOnCallRoleDef.json
+```
+
+> **TIP** Use `@-` as short-hand to pass STDIN as a value. 
 
 ### Working with output formats
 
@@ -137,14 +145,14 @@ The Azure CLI 2.0 supports 4 primary output formats:
 
 1. json  - standard JSON formatted object graphs
 2. jsonc - colorized JSON
-3. tsv   - provides UNIX-style output
+3. tsv   - provides "UNIX-style" output (fields delimited with tabs, records with newlines)
 4. table - simplified human-readable output
 
 You can set your default output format with the `az configure` command or on a
 by-command basis using `--out` parameter.  
 
 Tips:
-* Use `--out tsv` for raw output of single values without extra markup, such as quotes around strings
+* Use `--out tsv` for raw output that is easy to parse with command-line tools
 * Use `--out json` for outputting object graphs (nested objects), both `tsv` and `table` will only show fields from the outer-most object.
 * Avoid using `--out jsonc` output programmatically as not all tools will accept the ANSI values that provide color in the Shell
 * Currently, `--out table` does not work with some formatted outputs.
@@ -215,9 +223,9 @@ $ az vm list --query "[].{name:name,os:storageProfile.osDisk.osType}" --out json
 ]
 ```
 
-You can also extract single values:
+You can also extract single values.  Using `--out tsv` will prevent any unintended quotes:
 
 ```
-az vm list --query "[?name=='VM-Web'].id" --out tsv
-/subscriptions/db5eabce-73e2-4fa8-b18a-46abcbe4abc5/resourceGroups/VMGROUP1/providers/Microsoft.Compute/virtualMachines/VM-Web
+az vm list --query "[0].id" --out tsv
+/subscriptions/xxxx/resourceGroups/VMGROUP1/providers/Microsoft.Compute/virtualMachines/VM-Web
 ```
