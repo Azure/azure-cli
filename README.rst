@@ -51,6 +51,15 @@ Highlights
 
 Here are a few features and concepts that can help you get the most out of the Azure CLI 2.0 Preview
 
+.. image:: doc/assets/AzBlogAnimation4.gif
+    :align: center
+    :alt: Azure CLI 2.0 Highlight Reel
+    :width: 600
+    :height: 300
+
+    
+
+
 The following examples are showing using the ``--output table`` format, you can change your default using the ``$ az configure`` command.
 
 Tab Completion
