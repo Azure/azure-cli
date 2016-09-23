@@ -1032,45 +1032,66 @@ def _write_config_file(user_name):
         json.dump(config, outfile)
     return config_file
 
-class VMDiagnosticsInstallTest(VCRTestBase):
+class DiagnosticsExtensionInstallTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-        super(VMDiagnosticsInstallTest, self).__init__(__file__, test_method)
+        super(DiagnosticsExtensionInstallTest, self).__init__(__file__, test_method)
+        self.resource_group = 'clitestdiagext'
+        self.storage_account = 'diagextstorage'
+        self.vm = 'testdiagvm'
+        self.vmss = 'testdiagvmss'
 
-    def test_vm_diagnostics_install(self):
+    def set_up(self):
+        super(DiagnosticsExtensionInstallTest, self).set_up()
+        self.cmd('vmss create -g {} -n {} --image UbuntuLTS'.format(self.resource_group, self.vmss))
+        self.cmd('vm create -g {} -n {} --image UbuntuLTS'.format(self.resource_group, self.vm))
+        self.cmd('storage account create -g {} -n {} -l westus --sku Standard_LRS'.format(self.resource_group, self.storage_account))
+
+    def test_diagnostics_extension_install(self):
         self.execute()
 
     def body(self):
-        vm_name = 'yugangw9-1'
-        resource_group = 'yugangw9'
-        storage_account = 'vhdstorage5axnt5aafuojc'
-        extension_name = 'LinuxDiagnostic'
-        self.cmd('vm diagnostics set --vm-name {} --resource-group {} --storage-account {}'.format(vm_name, resource_group, storage_account))
-        self.cmd('vm extension show --resource-group {} --vm-name {} --name {}'.format(resource_group, vm_name, extension_name), checks=[
-            JMESPathCheck('type(@)', 'object'),
-            JMESPathCheck('name', extension_name),
-            JMESPathCheck('resourceGroup', resource_group)
-        ])
+        #self.cmd('storage account keys list -g {} -n {}'.format(self.resource_group, self.storage_account)) #
+        storage_key = '123' #use junk keys, do not retrieve real keys which will get into the recording
+        _, protected_settings = tempfile.mkstemp()
+        with open(protected_settings, 'w') as outfile:
+            json.dump({
+                "storageAccountName": self.storage_account,
+                "storageAccountKey": storage_key,
+                "storageAccountEndPoint": "https://{}.blob.core.windows.net/".format(self.storage_account)
+                }, outfile)
+        protected_settings = protected_settings.replace('\\', '\\\\')
 
-class VMSSDiagnosticsInstallTest(VCRTestBase):
+        _, public_settings = tempfile.mkstemp()
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        template_file = os.path.join(curr_dir, 'sample-public.json').replace('\\', '\\\\')
+        with open(template_file) as data_file:
+            data = json.load(data_file)
+        data["storageAccount"] = self.storage_account
+        with open(public_settings, 'w') as outfile:
+            json.dump(data, outfile)
+        public_settings = public_settings.replace('\\', '\\\\')
 
-    def __init__(self, test_method):
-        super(VMSSDiagnosticsInstallTest, self).__init__(__file__, test_method)
+        checks = [
+            JMESPathCheck('virtualMachineProfile.extensionProfile.extensions[0].name', "LinuxDiagnostic"),
+            JMESPathCheck('virtualMachineProfile.extensionProfile.extensions[0].settings.storageAccount', self.storage_account)
+            ]
 
-    def test_vmss_diagnostics_install(self):
-        self.execute()
+        self.cmd("vmss diagnostics set -g {} --vmss-name {} --settings {} --protected-settings {}".format(
+            self.resource_group, self.vmss, public_settings, protected_settings), checks=checks)
 
-    def body(self):
-        vmss_name = 'myvmss3'
-        resource_group = 'myvmsss'
-        storage_account = 'stog001100'
-        extension_name = 'LinuxDiagnostic'
-        self.cmd('vmss diagnostics set --vmss-name {} --resource-group {} --storage-account {}'.format(vmss_name, resource_group, storage_account))
-        self.cmd('vmss extension show --resource-group {} --vmss-name {} --name {}'.format(resource_group, vmss_name, extension_name), checks=[
-            JMESPathCheck('type(@)', 'object'),
-            JMESPathCheck('name', extension_name)
-        ])
+        self.cmd("vmss show -g {} -n {}".format(self.resource_group, self.vmss), checks=checks)
 
+        self.cmd("vm diagnostics set -g {} --vm-name {} --settings {} --protected-settings {}".format(
+            self.resource_group, self.vm, public_settings, protected_settings), checks=[
+                JMESPathCheck('name', 'LinuxDiagnostic'),
+                JMESPathCheck('settings.storageAccount', self.storage_account)
+                ])
+
+        self.cmd("vm show -g {} -n {}".format(self.resource_group, self.vm), checks=[
+                JMESPathCheck('resources[0].name', 'LinuxDiagnostic'),
+                JMESPathCheck('resources[0].settings.storageAccount', self.storage_account)
+            ])
 
 class VMCreateExistingOptions(ResourceGroupVCRTestBase):
     def __init__(self, test_method):
