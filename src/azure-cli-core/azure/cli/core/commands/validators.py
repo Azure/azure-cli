@@ -7,14 +7,13 @@ import argparse
 import time
 import random
 
-def validate_tags(string):
-    ''' Extracts multiple tags in key[=value] format, separated by semicolons '''
-    result = {}
-    if string:
-        result = validate_key_value_pairs(string)
-        s_list = [x for x in string.split(';') if '=' not in x]  # single values
-        result.update(dict((x, '') for x in s_list))
-    return result
+def validate_tags(ns):
+    ''' Extracts multiple space-separated tags in key[=value] format '''
+    if ns.tags is not None:
+        tags_dict = {}
+        for item in ns.tags:
+            tags_dict.update(validate_tag(item))
+        ns.tags = tags_dict
 
 def validate_tag(string):
     ''' Extracts a single tag in key[=value] format '''

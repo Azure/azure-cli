@@ -85,7 +85,7 @@ class StorageAccountScenarioTest(ResourceGroupVCRTestBase):
         keys_result = s.cmd('storage account keys renew -g {} -n {} --key secondary'.format(rg, account))
         assert key1 == keys_result['keys'][0]
         assert key2 != keys_result['keys'][1]
-        s.cmd('storage account update -g {} -n {} --tags foo=bar;cat'.format(rg, account),
+        s.cmd('storage account update -g {} -n {} --tags foo=bar cat'.format(rg, account),
             checks=JMESPathCheck('tags', {'cat':'', 'foo':'bar'}))
         s.cmd('storage account update -g {} -n {} --tags'.format(rg, account),
             checks=JMESPathCheck('tags', {}))
