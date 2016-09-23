@@ -4,6 +4,7 @@
 #---------------------------------------------------------------------------------------------
 
 # pylint: disable=no-self-use,too-many-arguments,too-many-lines
+from __future__ import print_function
 import threading
 try:
     from urllib.parse import urlparse
@@ -334,10 +335,28 @@ def _get_site_credential(client, resource_group, name):
     return (creds.publishing_user_name, creds.publishing_password)
 
 def _stream_trace(streaming_url, user_name, password):
-    import pycurl
+    import sys
     import certifi
-    c = pycurl.Curl()
-    c.setopt(c.URL, streaming_url)
-    c.setopt(pycurl.CAINFO, certifi.where())
-    c.setopt(c.USERPWD, '{}:{}'.format(user_name, password))
-    c.perform()
+    import urllib3
+    try:
+        import urllib3.contrib.pyopenssl
+        urllib3.contrib.pyopenssl.inject_into_urllib3()
+    except ImportError:
+        pass
+
+    std_encoding = sys.stdout.encoding
+    http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED', ca_certs=certifi.where())
+    headers = urllib3.util.make_headers(basic_auth='{0}:{1}'.format(user_name, password))
+    r = http.request(
+        'GET',
+        streaming_url,
+        headers=headers,
+        preload_content=False
+    )
+    for chunk in r.stream():
+        if chunk:
+            # Extra encode() and decode for stdout which does not surpport 'utf-8'
+            print(chunk.decode(encoding='utf-8', errors='replace')
+                  .encode(std_encoding, errors='replace')
+                  .decode(std_encoding, errors='replace'), end='') # each line of log has CRLF.
+    r.release_conn()
