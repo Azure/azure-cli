@@ -13,9 +13,6 @@
 #
 # - Optional Environment Variables Available
 #     AZURE_CLI_DISABLE_PROMPTS  - Disable prompts during installation and use the defaults
-#     AZURE_CLI_PACKAGE_VERSION   - The version of the CLI and its command packages to install
-#     AZURE_CLI_PRIVATE_PYPI_URL  - The URL to a PyPI server to include as an index for pip
-#     AZURE_CLI_PRIVATE_PYPI_HOST - The IP address/hostname of the PyPI server
 #
 # Tab completion info
 #    Call this script with the url to the completion setup script as an argument (i.e. sys.argv[1])
@@ -52,12 +49,8 @@ DEFAULT_EXEC_DIR = os.path.join(os.path.sep, 'usr', 'local', 'bin')
 VIRTUALENV_VERSION = '15.0.0'
 BIN_DIR_NAME = 'Scripts' if platform.system() == 'Windows' else 'bin'
 EXECUTABLE_NAME = 'az'
-DEFAULT_ENVIRONMENT_NAME = 'default'
 
 DISABLE_PROMPTS = os.environ.get('AZURE_CLI_DISABLE_PROMPTS')
-PACKAGE_VERSION = os.environ.get('AZURE_CLI_PACKAGE_VERSION')
-PRIVATE_PYPI_URL = os.environ.get('AZURE_CLI_PRIVATE_PYPI_URL')
-PRIVATE_PYPI_HOST = os.environ.get('AZURE_CLI_PRIVATE_PYPI_HOST')
 
 def exec_command(command, cwd=None, env=None):
     print('Executing: '+str(command))
@@ -83,26 +76,13 @@ def create_virtualenv(tmp_dir, version, install_dir):
     working_dir = os.path.join(tmp_dir, virtualenv_dir_name)
     exec_command('{0} virtualenv.py --python {0} {1}'.format(sys.executable, install_dir), cwd=working_dir)
 
-def get_pip_install_command(module_name, path_to_pip, tmp_dir, pre_release, upgrade):
-    version = '==' + PACKAGE_VERSION if PACKAGE_VERSION else ''
-    param_extra_index_url = '--extra-index-url '+PRIVATE_PYPI_URL if PRIVATE_PYPI_URL else ''
-    param_trusted_host = '--trusted-host '+PRIVATE_PYPI_HOST if PRIVATE_PYPI_HOST else ''
-    param_pre_release = '--pre' if pre_release else ''
-    param_upgrade = '--upgrade' if upgrade else ''
-    return '{pip} install --cache-dir {cache_dir} {module_name}{version} {param_extra_index_url} {param_trusted_host} {param_pre_release} {param_upgrade}'.format(
-        pip=path_to_pip,
-        cache_dir=tmp_dir,
-        module_name=module_name,
-        version=version,
-        param_extra_index_url=param_extra_index_url,
-        param_trusted_host=param_trusted_host,
-        param_pre_release=param_pre_release,
-        param_upgrade=param_upgrade,
-    )
-
 def install_cli(install_dir, tmp_dir):
     path_to_pip = os.path.join(install_dir, BIN_DIR_NAME, 'pip')
-    exec_command(get_pip_install_command('azure-cli', path_to_pip, tmp_dir, True, True))
+    install_cmd = '{pip} install --cache-dir {cache_dir} azure-cli --upgrade'.format(
+        pip=path_to_pip,
+        cache_dir=tmp_dir
+    )
+    exec_command(install_cmd)
 
 def create_executable(exec_dir, install_dir):
     create_dir(exec_dir)
