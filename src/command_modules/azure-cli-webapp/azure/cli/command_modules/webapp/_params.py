@@ -41,7 +41,7 @@ register_cli_argument('appservice plan', 'resource_group', arg_type=resource_gro
 register_cli_argument('appservice plan', 'location', arg_type=location_type)
 register_cli_argument('appservice plan', 'name', arg_type=existing_plan_name)
 register_cli_argument('appservice plan create', 'name', options_list=('--name', '-n'), help="Name of the new app service plan")
-register_cli_argument('appservice plan', 'tier', type=str.upper, choices=['FREE', 'SHARED', 'B1', 'B2', 'B3', 'S1', 'S2', 'S3', 'P1', 'P2', 'P3'], default='B1',
+register_cli_argument('appservice plan', 'tier', options_list=('--sku',), type=str.upper, choices=['FREE', 'SHARED', 'B1', 'B2', 'B3', 'S1', 'S2', 'S3', 'P1', 'P2', 'P3'], default='B1',
                       help='The pricing tiers, e.g., FREE, SHARED, B1(Basic Small), B2(Basic Medium), B3(Basic Large), S1(Standard Small), P1(Premium Small), etc')
 register_cli_argument('appservice plan', 'number_of_workers', help='Number of workers to be allocated.', type=int, default=1)
 register_cli_argument('appservice plan', 'admin_site_name', help='The name of the admin web app.')

@@ -187,7 +187,7 @@ def _get_sku_name(tier):
     elif tier in ['P1', 'P2', 'P3']:
         return 'PREMIUM'
     else:
-        raise CLIError("Invalid pricing tier, please refer to command help for valid values")
+        raise CLIError("Invalid sku(pricing tier), please refer to command help for valid values")
 
 def _get_location_from_resource_group(resource_group):
     from azure.mgmt.resource.resources import ResourceManagementClient
