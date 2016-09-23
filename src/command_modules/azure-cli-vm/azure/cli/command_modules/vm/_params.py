@@ -98,7 +98,6 @@ register_cli_argument('vm diagnostics set', 'storage_account', completer=get_res
 
 register_cli_argument('vm extension', 'vm_extension_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachines/extensions'), id_part='child_name')
 register_cli_argument('vm extension', 'vm_name', arg_type=existing_vm_name, options_list=('--vm-name',), id_part='name')
-register_cli_argument('vm extension', 'no_auto_upgrade', action='store_true')
 
 register_cli_argument('vm extension image', 'image_location', options_list=('--location', '-l'))
 register_cli_argument('vm extension image', 'publisher_name', options_list=('--publisher',))
@@ -121,7 +120,7 @@ register_cli_argument('vmss', 'instance_ids', help='Space separated ids such as 
 
 register_cli_argument('vmss extension', 'extension_name', name_arg_type, help='Name of the extension.')
 register_cli_argument('vmss extension', 'vmss_name', id_part=None)
-register_cli_argument('vmss extension', 'no_auto_upgrade', action='store_true')
+register_cli_argument('vmss diagnostics', 'vmss_name', id_part=None, help='Scale set name')
 
 register_cli_argument('vmss extension image', 'publisher_name', options_list=('--publisher',), help='Image publisher name')
 register_cli_argument('vmss extension image', 'type', options_list=('--name', '-n'), help='Extension name')
@@ -130,6 +129,14 @@ register_cli_argument('vmss extension image', 'image_name', help='Image name')
 register_cli_argument('vmss extension image', 'orderby', help='The sort to apply on the operation')
 register_cli_argument('vmss extension image', 'top', help='Return top number of records')
 register_cli_argument('vmss extension image', 'version', help='Extension version')
+
+for scope in ['vm diagnostics', 'vmss diagnostics']:
+    register_cli_argument(scope, 'version', help='version of the diagnostics extension. Will use the latest if not specfied')
+    register_cli_argument(scope, 'settings', help='json string or a file path, which defines data to be collected.')
+    register_cli_argument(scope, 'protected_settings', help='json string or a file path containing private configurations such as storage account keys, etc.')
+
+for scope in ['vm', 'vmss']:
+    register_cli_argument(scope, 'no_auto_upgrade', action='store_true', help='by doing this, extension system will not pick the highest minor version for the specified version number, and will not auto update to the latest build/revision number on any scale set updates in future.')
 
 register_cli_argument('vm image list', 'image_location', location_type)
 
@@ -203,3 +210,4 @@ for scope in ['vm create', 'vmss create']:
     register_folded_cli_argument(scope, 'load_balancer', 'Microsoft.Network/loadBalancers')
     register_cli_argument(scope, 'network_security_group_rule', nsg_rule_type, options_list=('--nsg-rule',))
     register_extra_cli_argument(scope, 'image', options_list=('--image',), action=VMImageFieldAction, completer=get_urn_aliases_completion_list, required=True)
+
