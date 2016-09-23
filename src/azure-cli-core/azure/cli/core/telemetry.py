@@ -13,6 +13,7 @@ import platform
 import locale
 import hashlib
 import traceback
+import re
 
 from applicationinsights import TelemetryClient
 from applicationinsights.exceptions import enable
@@ -33,7 +34,7 @@ try:
 except: #pylint: disable=bare-except
     az_config = {}
 
-TELEMETRY_VERSION = '0.0.1.3'
+TELEMETRY_VERSION = '0.0.1.4'
 
 _DEBUG_TELEMETRY = 'AZURE_CLI_DEBUG_TELEMETRY'
 client = {}
@@ -114,6 +115,7 @@ def log_telemetry(name, log_type='event', **kwargs):
         _safe_exec(props, 'environment', _get_env_string)
         if log_type == 'trace':
             _safe_exec(props, 'trace', _get_stack_trace)
+            _safe_exec(props, 'error-hash', _get_error_hash)
 
         if kwargs:
             props.update(**kwargs)
@@ -177,6 +179,12 @@ def _get_shell_type():
     else:
         return _remove_cmd_chars(_remove_symbols(os.environ.get('SHELL')))
 
+def _get_error_hash():
+    err = sys.exc_info()[1]
+    return _remove_cmd_chars(_remove_symbols(_get_hash(str(err))))
+
+site_package_regex = re.compile('.*\\\\site-packages\\\\')
+
 def _get_stack_trace():
     def _get_root_path():
         dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -187,7 +195,8 @@ def _get_stack_trace():
 
     def _remove_root_paths(s):
         root = _get_root_path()
-        return str([p.replace(root, '') for p in s])
+        frames = [p.replace(root, '') for p in s]
+        return str([site_package_regex.sub('site-packages\\\\', f) for f in frames])
 
     _, _, ex_traceback = sys.exc_info()
     trace = traceback.format_tb(ex_traceback)
