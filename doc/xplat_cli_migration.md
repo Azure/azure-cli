@@ -23,8 +23,8 @@ from the following:
   * Indicates where to look up required values
   * Examples and links to web content
 * Improved command-line productivity
-  * Use `[tab][tab]` to lookup parameters, including resource groups and names
-  * Work with either ID values (`--ids`) _or_ Group and Name (`-g -n`)
+  * Use `[tab][tab]` to lookup parameters, including resource groups and names (only supported in BASH and BASH on Windows)
+  * Work with either ID values (`--ids`) _or_ resource group and name (`-g -n`)
   * Built in client-side query engine powered by JMESPath
 * (Coming) Support for more features and services
   * Our preview meets or exceeds XPlat CLI functionality for Compute, Storage, Network, RBAC, and ARM
@@ -45,8 +45,7 @@ To install the Azure CLI 2.0, follow the steps for your preferred platform or
 environment on our [Installation Guide](https://github.com/Azure/azure-cli/blob/master/doc/preview_install_guide.md).
 
 Once installed, you can run `az configure` and follow the steps to setup the
-Azure CLI 2.0 as well as help login.  Once this step is complete you should be
-to use both CLIs.  
+Azure CLI 2.0 as well as help login.  Once this step is complete you should be authenticated to use both CLIs.  
 
 ## Important new concepts in the Azure CLI 2.0
 Here is a quick list of some new and changed concepts that can help you understand the new tool.
@@ -78,7 +77,23 @@ Below, we break down each of these steps.
 
 While most commands keep the same group and command names between the Azure XPlat CLI and the Azure CLI 2.0, we've built a [azure to az conversion table](https://github.com/Azure/azure-cli/blob/master/doc/azure2az_commands.rst) for common commands.
 
-Mutate operations now use the `update` verb instead of `set`.  
+#### Set vs. Update
+
+Mutate operations now use the `update` verb instead of `set`.  While the XPlat CLI
+exposed some common operations as parameters, such as:
+
+```
+$ azure vm set -g MyGroup -n MyName --nic-ids $MyNicID
+$ azure vm set -g MyGroup -n MyName --tags myTagName=MyTagValue
+```
+
+The Azure CLI 2.0 `update` commands work generically against the resource, for example:
+```
+$ az vm update -g MyGroup -n MyName --add networkProfile.networkInterfaces primary=false id=$MyNicID
+$ az vm update -g MyGroup -n MyName --set tags.myTagName=MyTagValue
+```
+
+#### Commands with complex input
 
 Some commands which required complex input, such as JSON strings and documents,
 have been changed to add/remove single values, instead of requiring users to
@@ -139,7 +154,9 @@ $ az vm list --query [0].name --out json
 $ az vm list --query [0].name --out tsv
 VM-Data
 $ az vm list --query [0].name --out table
-Table output unavailable. Use the --query option to specify an appropriate query. Use --debug for more info.
+Result
+--------
+VM-Data
 ```
 
 ### Filtering down output values
