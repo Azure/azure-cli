@@ -57,6 +57,14 @@ def login(username=None, password=None, service_principal=None, tenant=None):
             service_principal,
             tenant)
     except AdalError as err:
+        #try polish unfriendly server errors
+        if username:
+            msg = str(err)
+            suggestion = "For cross-check, try 'az login' to authenticate through browser"
+            if ('ID3242:' in msg) or ('Server returned an unknown AccountType' in msg):
+                raise CLIError("The user name might be invalid. " + suggestion)
+            if 'Server returned error in RSTR - ErrorCode' in msg:
+                raise CLIError("Logging in through command line is not supported. " + suggestion)
         raise CLIError(err)
     return list(subscriptions)
 
