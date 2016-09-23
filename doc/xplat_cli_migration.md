@@ -44,8 +44,9 @@ we recommend downloading the latest installer to upgrade.
 To install the Azure CLI 2.0, follow the steps for your preferred platform or
 environment on our [Installation Guide](https://github.com/Azure/azure-cli/blob/master/doc/preview_install_guide.md).
 
-Once installed, you can run `az configure` and follow the steps to setup the
-Azure CLI 2.0 as well as help login.  Once this step is complete you should be authenticated to use both CLIs.  
+Once installed, you can run `az configure` and follow the steps to setup your default output format.  
+
+Then run `az login` to login using device authentication.  Once this step is complete you should be authenticated to use both CLIs.  
 
 ## Important new concepts in the Azure CLI 2.0
 Here is a quick list of some new and changed concepts that can help you understand the new tool.
