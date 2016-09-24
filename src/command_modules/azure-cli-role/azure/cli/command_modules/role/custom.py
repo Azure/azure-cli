@@ -349,7 +349,7 @@ def create_user(client, user_principal_name, display_name, password, mail_nickna
                                  immutable_id=immutable_id,
                                  password_profile=PasswordProfile(
                                      password, force_change_password_next_login))
-    return client.create(param, raw=True)
+    return client.create(param)
 
 create_user.__doc__ = UserCreateParameters.__doc__
 
@@ -363,15 +363,19 @@ def list_groups(client, display_name=None, query_filter=None):
     return client.list(filter=(' and ').join(sub_filters))
 
 def create_application(client, display_name, homepage, identifier_uris, #pylint: disable=too-many-arguments
-                       available_to_other_tenant=False, password=None, reply_urls=None,
+                       available_to_other_tenants=False, password=None, reply_urls=None,
                        key_value=None, key_type=None, key_usage=None, start_date=None,
                        end_date=None):
     password_creds, key_creds = _build_application_creds(password, key_value, key_type,
                                                          key_usage, start_date, end_date)
 
-    app_create_param = ApplicationCreateParameters(available_to_other_tenant, display_name,
-                                                   homepage, identifier_uris, reply_urls,
-                                                   key_creds, password_creds)
+    app_create_param = ApplicationCreateParameters(available_to_other_tenants,
+                                                   display_name,
+                                                   identifier_uris,
+                                                   homepage=homepage,
+                                                   reply_urls=reply_urls,
+                                                   key_credentials=key_creds,
+                                                   password_credentials=password_creds)
     return client.create(app_create_param)
 
 def update_application(client, identifier, display_name=None, homepage=None, identifier_uris=None,#pylint: disable=too-many-arguments
@@ -381,8 +385,12 @@ def update_application(client, identifier, display_name=None, homepage=None, ide
     password_creds, key_creds = _build_application_creds(password, key_value, key_type,
                                                          key_usage, start_date, end_date)
 
-    app_patch_param = ApplicationUpdateParameters(display_name, homepage, identifier_uris,
-                                                  reply_urls, key_creds, password_creds)
+    app_patch_param = ApplicationUpdateParameters(display_name=display_name,
+                                                  homepage=homepage,
+                                                  identifier_uris=identifier_uris,
+                                                  reply_urls=reply_urls,
+                                                  key_credentials=key_creds,
+                                                  password_credentials=password_creds)
     return client.patch(object_id, app_patch_param)
 
 def show_application(client, identifier):
@@ -493,7 +501,7 @@ def create_service_principal_for_rbac(name=None, secret=None, years=1,
     aad_application = create_application(client.applications, display_name=app_display_name, #pylint: disable=too-many-function-args
                                          homepage='http://'+app_display_name,
                                          identifier_uris=[name],
-                                         available_to_other_tenant=False,
+                                         available_to_other_tenants=False,
                                          password=secret,
                                          start_date=start_date,
                                          end_date=end_date)
