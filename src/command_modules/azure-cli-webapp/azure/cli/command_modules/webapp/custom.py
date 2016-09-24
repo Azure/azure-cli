@@ -12,7 +12,7 @@ except ImportError:
     from urlparse import urlparse # pylint: disable=import-error
 
 from azure.mgmt.web.models import (Site, SiteConfig, User, ServerFarmWithRichSku,
-                                   SkuDescription, SslState)
+                                   SkuDescription, SslState, HostNameBinding)
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.arm import is_valid_resource_id, parse_resource_id
@@ -116,6 +116,30 @@ def delete_app_settings(resource_group, name, setting_names, slot=None):
 
     return _generic_site_operation(resource_group, name, 'update_site_app_settings',
                                    slot, app_settings)
+
+def add_hostname(resource_group, name, hostname, slot=None):
+    client = web_client_factory()
+    webapp = client.sites.get_site(resource_group, name)
+    bindings = _generic_site_operation(resource_group, name, 'get_site_host_name_bindings',
+                                   slot)
+    binding = HostNameBinding(webapp.location, host_name_binding_name=hostname, site_name=name)
+    if slot is None:
+        return client.sites.create_or_update_site_host_name_binding(resource_group, name,
+                                                                    hostname, binding)
+    else:
+        return client.sites.create_or_update_site_host_name_binding_slot(resource_group, name,
+                                                                         hostname, binding, slot)
+
+def delete_hostname(resource_group, name, hostname, slot=None):
+    client = web_client_factory()
+    if slot is None:
+        return client.sites.delete_site_host_name_binding(resource_group, name, hostname)
+    else:
+        return client.sites.delete_site_host_name_binding_slot(resource_group, name, slot, hostname)
+
+def list_hostnames(resource_group, name, slot=None):
+    return _generic_site_operation(resource_group, name, 'get_site_host_name_bindings',
+                                   slot)
 
 #TODO: figure out the 'configuration_source' and add related param descriptions
 def create_webapp_slot(resource_group, webapp, slot, configuration_source=None):

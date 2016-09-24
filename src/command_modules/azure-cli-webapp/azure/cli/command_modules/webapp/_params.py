@@ -7,6 +7,7 @@ from azure.cli.core.commands import register_cli_argument
 from azure.mgmt.web import WebSiteManagementClient
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.parameters import (resource_group_name_type, location_type,
+                                                get_resource_name_completion_list,
                                                 CliArgumentType, ignore_type)
 
 # FACTORIES
@@ -30,8 +31,8 @@ def list_app_service_plan_names(prefix, action, parsed_args, **kwargs):#pylint: 
 #pylint: disable=line-too-long
 # PARAMETER REGISTRATION
 name_arg_type = CliArgumentType(options_list=('--name', '-n'), metavar='NAME')
-existing_plan_name = CliArgumentType(overrides=name_arg_type, help='The name of the app service plan', completer=list_app_service_plan_names, id_part='name')
-existing_webapp_name = CliArgumentType(overrides=name_arg_type, help='The name of the web app', completer=list_webapp_names, id_part='name')
+existing_plan_name = CliArgumentType(overrides=name_arg_type, help='The name of the app service plan', completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'), id_part='name')
+existing_webapp_name = CliArgumentType(overrides=name_arg_type, help='The name of the web app', completer=get_resource_name_completion_list('Microsoft.Web/sites'), id_part='name')
 sku_arg_type = CliArgumentType(type=str.upper,
                                choices=['F1', 'FREE', 'D1', 'SHARED', 'B1', 'B2', 'B3', 'S1', 'S2', 'S3', 'P1', 'P2', 'P3'],
                                help='The pricing tiers, e.g., F1(Free), D1(Shared), B1(Basic Small), B2(Basic Medium), B3(Basic Large), S1(Standard Small), P1(Premium Small), etc')
@@ -52,7 +53,8 @@ register_cli_argument('appservice plan', 'admin_site_name', help='The name of th
 
 register_cli_argument('appservice web', 'name', arg_type=existing_webapp_name)
 register_cli_argument('appservice web create', 'name', options_list=('--name', '-n'), help='name of the new webapp')
-register_cli_argument('appservice web create', 'plan', help="name or resource id of the app service plan. Use 'appservice plan create' to get one")
+register_cli_argument('appservice web create', 'plan', arg_type=existing_plan_name, options_list=('--plan',),
+                      help="name or resource id of the app service plan. Use 'appservice plan create' to get one")
 
 register_cli_argument('appservice web deployment user', 'user_name', help='user name')
 register_cli_argument('appservice web deployment user', 'password', help='password, will prompt if not specified')
@@ -88,10 +90,11 @@ register_cli_argument('appservice web config update', 'web_sockets_enabled', cho
 register_cli_argument('appservice web config update', 'always_on', choices=two_states_switch, type=two_states_switch_type, help='ensure webapp gets loaded all the time, rather unloaded after been idle. Recommended when you have continuous web jobs running')
 register_cli_argument('appservice web config update', 'auto_heal_enabled', choices=two_states_switch, type=two_states_switch_type, help='enable or disable auto heal')
 register_cli_argument('appservice web config update', 'use32_bit_worker_process', options_list=('--use-32bit-worker-process',), choices=two_states_switch, type=two_states_switch_type, help='use 32 bits worker process or not')
-
 register_cli_argument('appservice web config update', 'php_version', help='The version used to run your web app if using PHP, e.g., 5.5, 5.6, 7.0')
 register_cli_argument('appservice web config update', 'python_version', help='The version used to run your web app if using Python, e.g., 2.7, 3.4')
 register_cli_argument('appservice web config update', 'net_framework_version', help="The version used to run your web app if using .NET Framework, e.g., 'v4.0' for .NET 4.6 and 'v3.0' for .NET 3.5")
 register_cli_argument('appservice web config update', 'java_version', help="The version used to run your web app if using Java, e.g., '1.7' for Java 7, '1.8' for Java 8")
 register_cli_argument('appservice web config update', 'java_container', help="The java container, e.g., Tomcat, Jetty")
 register_cli_argument('appservice web config update', 'java_container_version', help="The version of the java container, e.g., '8.0.23' for Tomcat")
+
+register_cli_argument('appservice web config hostname', 'hostname', help="hostname assigned to the site, such as custom domains")

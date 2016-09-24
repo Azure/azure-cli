@@ -145,6 +145,11 @@ class WebappConfigureTest(ResourceGroupVCRTestBase):
         self.assertTrue('s2' not in result)
         self.assertTrue('s3' in result)
 
+        self.cmd('appservice web config hostname list -g {} -n {}'.format(self.resource_group, self.webapp_name), checks=[
+            JMESPathCheck('length(@)', 1),
+            JMESPathCheck('[0].name', '{}/{}.azurewebsites.net'.format(self.webapp_name, self.webapp_name))
+            ])
+
 
 class WebappScaleTest(ResourceGroupVCRTestBase):
 

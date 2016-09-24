@@ -26,3 +26,18 @@ helps['appservice plan create'] = """
     type: command
     short-summary: create a new plan
 """
+
+helps['appservice web config hostname add'] = """
+    type: command
+    short-summary: bind a hostname(custom domain) to the app
+"""
+
+helps['appservice web config hostname delete'] = """
+    type: command
+    short-summary: unbind a hostname(custom domain) from the app
+"""
+
+helps['appservice web config hostname list'] = """
+    type: command
+    short-summary: list all hostname bindings
+"""
