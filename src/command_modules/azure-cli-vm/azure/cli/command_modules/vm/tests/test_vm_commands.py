@@ -286,7 +286,7 @@ class VMCreateAndStateModificationsScenarioTest(ResourceGroupVCRTestBase): #pyli
         super(VMCreateAndStateModificationsScenarioTest, self).__init__(__file__, test_method)
         self.deployment_name = 'azurecli-test-deployment-vm-state-mod2'
         self.resource_group = 'cliTestRg_VmStateMod2'
-        self.location = 'westus'
+        self.location = 'eastus'
         self.vm_name = 'vm-state-mod'
         self.nsg_name = 'mynsg'
         self.ip_name = 'mypubip'
@@ -917,7 +917,7 @@ class VMCreateNoneOptionsTest(ResourceGroupVCRTestBase): #pylint: disable=too-ma
 
     def __init__(self, test_method):
         super(VMCreateNoneOptionsTest, self).__init__(__file__, test_method)
-        self.resource_group = 'cliTestRg_VMCreate_none_options'
+        self.resource_group = 'cliTestRg_VMCreate_none_options' # create resource group in westus...
 
     def test_vm_create_none_options(self):
         self.execute()
@@ -925,16 +925,18 @@ class VMCreateNoneOptionsTest(ResourceGroupVCRTestBase): #pylint: disable=too-ma
     def body(self):
         deployment_name = 'azurecli-test-deployment-vm-none-options-create'
         vm_name = 'nooptvm'
+        self.location = 'eastus' # ...but create resources in eastus
 
         self.cmd('vm create -n {vm_name} -g {resource_group} --image Debian --availability-set {quotes} --nsg {quotes}'
-                 ' --ssh-key-value \'{ssh_key}\' --deployment-name {deployment_name} --public-ip-address {quotes} --tags {quotes}'
+                 ' --ssh-key-value \'{ssh_key}\' --deployment-name {deployment_name} --public-ip-address {quotes} --tags {quotes} --location {loc}'
                  .format(vm_name=vm_name, resource_group=self.resource_group,
                          ssh_key=TEST_SSH_KEY_PUB, deployment_name=deployment_name,
-                         quotes='""' if platform.system() == 'Windows' else "''"))
+                         quotes='""' if platform.system() == 'Windows' else "''", loc=self.location))
 
         self.cmd('vm show -n {vm_name} -g {resource_group}'.format(vm_name=vm_name, resource_group=self.resource_group), [
             JMESPathCheck('availabilitySet', None),
-            JMESPathCheck('length(tags)', 0)
+            JMESPathCheck('length(tags)', 0),
+            JMESPathCheck('location', self.location)
         ])
         self.cmd('network public-ip show -n {vm_name}PublicIP -g {resource_group}'.format(vm_name=vm_name, resource_group=self.resource_group), checks=[
             NoneCheck()
