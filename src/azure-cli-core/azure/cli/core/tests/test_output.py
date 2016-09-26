@@ -86,8 +86,6 @@ class TestOutput(unittest.TestCase):
         output_producer = OutputProducer(formatter=format_table, file=self.io)
         obj = [['a', 'b'], ['c', 'd']]
         output_producer.out(CommandResultItem(obj))
-        test = self.io.getvalue()
-        print(test)
         self.assertEqual(util.normalize_newlines(self.io.getvalue()), util.normalize_newlines(
 """Column1    Column2
 ---------  ---------
