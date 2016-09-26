@@ -15,6 +15,21 @@ For OSX and Linux, you can install with the following curl script.
 
    $ curl -L https://aka.ms/InstallAzureCli | sudo bash
 
+For those familiar with pip, use the following:
+
+.. code-block:: console
+
+   $ pip install azure-cli
+
+A Debian package is also available. Install as follows:
+
+.. code-block:: console
+
+   $ echo "deb https://azurecliprod.blob.core.windows.net/repos/apt/debian wheezy main" | sudo tee /etc/apt/sources.list.d/azure-cli.list
+   $ curl https://azurecliprod.blob.core.windows.net/azure-cli-preview.gpg.key | sudo apt-key add -
+   $ sudo apt-get update && sudo apt-get install azure-cli
+
+
 We also maintain a docker image preconfigured with the Azure CLI.
 
 .. code-block:: console
