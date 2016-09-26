@@ -7,6 +7,7 @@ from azure.cli.core import __version__ as core_version
 from azure.cli.core._profile import Profile
 import azure.cli.core._debug as _debug
 import azure.cli.core._logging as _logging
+from azure.cli.core._util import CLIError
 from azure.cli.core.application import APPLICATION
 
 logger = _logging.get_az_logger(__name__)
@@ -53,10 +54,13 @@ def _get_mgmt_service_client(client_type, subscription_bound=True, subscription_
 def get_data_service_client(service_type, account_name, account_key, connection_string=None,
                             sas_token=None):
     logger.info('Getting data service client service_type=%s', service_type.__name__)
-    client = service_type(account_name=account_name,
-                          account_key=account_key,
-                          connection_string=connection_string,
-                          sas_token=sas_token)
+    try:
+        client = service_type(account_name=account_name,
+                              account_key=account_key,
+                              connection_string=connection_string,
+                              sas_token=sas_token)
+    except ValueError:
+        raise CLIError('Unable to obtain data client. Check your connection parameters.')
     # TODO: enable Fiddler
     client.request_callback = _add_headers
     return client
