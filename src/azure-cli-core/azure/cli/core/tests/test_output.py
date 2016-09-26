@@ -82,6 +82,17 @@ class TestOutput(unittest.TestCase):
        1  0b1f6472
 """))
 
+    def test_out_table_list_of_lists(self):
+        output_producer = OutputProducer(formatter=format_table, file=self.io)
+        obj = [['a', 'b'], ['c', 'd']]
+        output_producer.out(CommandResultItem(obj))
+        self.assertEqual(util.normalize_newlines(self.io.getvalue()), util.normalize_newlines(
+"""Column1    Column2
+---------  ---------
+a          b
+c          d
+"""))
+
     def test_out_table_complex_obj(self):
         output_producer = OutputProducer(formatter=format_table, file=self.io)
         obj = OrderedDict()
