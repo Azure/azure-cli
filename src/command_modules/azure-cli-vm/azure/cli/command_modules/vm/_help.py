@@ -203,3 +203,37 @@ helps['vmss extension image'] = """
     type: group
     short-summary: Find scale-set extensions available for your subscription and region
 """
+helps['vm capture'] = """
+            type: command
+            long-summary: See https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-linux-capture-image/ for an end-to-end tutorial
+            examples:
+                - name: Process to deallocate, generalize, and capture a stopped virtual machine
+                  text: >
+                    az vm deallocate -g my_rg -n my_vm_name\n\r
+                    az vm generalize -g my_rg -n my_vm_name\n\r
+                    az vm capture -g my_rg -n my_vm_name --vhd-name-prefix my_prefix\n\r
+                    """
+
+helps['vm deallocate'] = """
+            type: command
+            long-summary: See https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-linux-capture-image/ for an end-to-end tutorial
+            examples:
+                - name: Process to deallocate, generalize, and capture a stopped virtual machine
+                  text: >
+                    az vm deallocate -g my_rg -n my_vm_name\n\r
+                    az vm generalize -g my_rg -n my_vm_name\n\r
+                    az vm capture -g my_rg -n my_vm_name --vhd-name-prefix my_prefix\n\r
+                    """
+
+helps['vm generalize'] = """
+            type: command
+            long-summary: See https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-linux-capture-image/ for an end-to-end tutorial
+            examples:
+                - name: Process to deallocate, generalize, and capture a stopped virtual machine
+                  text: >
+                    az vm deallocate -g my_rg -n my_vm_name\n\r
+                    az vm generalize -g my_rg -n my_vm_name\n\r
+                    az vm capture -g my_rg -n my_vm_name --vhd-name-prefix my_prefix\n\r
+                    """
+
+
