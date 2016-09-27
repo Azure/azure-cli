@@ -9,11 +9,18 @@ A great cloud needs great tools; we're excited to introduce *Azure CLI 2.0 - Pre
 Installation
 ===============
 
-For OSX and Linux, you can install with the following curl script.
+For OSX and Linux, you can install using curl: 
 
 .. code-block:: console
 
    $ curl -L https://aka.ms/InstallAzureCli | sudo bash
+
+or using wget:
+
+.. code-block:: console
+
+   $ wget -q -O - https://aka.ms/InstallAzureCli | bash
+
 
 For those familiar with pip, use the following:
 
