@@ -15,6 +15,7 @@ from azure.mgmt.compute.models import (VirtualHardDisk,
                                        ContainerServiceOchestratorTypes,
                                        UpgradeMode)
 from azure.mgmt.network.models import IPAllocationMethod
+from azure.mgmt.storage.models import SkuName
 from azure.cli.core.commands import register_cli_argument, CliArgumentType, register_extra_cli_argument
 from azure.cli.core.commands.arm import is_valid_resource_id
 from azure.cli.core.commands.template_create import register_folded_cli_argument
@@ -176,7 +177,7 @@ register_cli_argument('vmss create', 'name', name_arg_type)
 register_cli_argument('vmss create', 'nat_backend_port', default=None, help='Backend port to open with NAT rules.  Defaults to 22 on Linux and 3389 on Windows.')
 
 for scope in ['vm create', 'vmss create']:
-    register_cli_argument(scope, 'location', completer=get_location_completion_list)
+    register_cli_argument(scope, 'location', completer=get_location_completion_list, help='Location in which to create the VM and related resources. If not specified, defaults to the resource group\'s location.')
     register_cli_argument(scope, 'custom_os_disk_uri', help=argparse.SUPPRESS)
     register_cli_argument(scope, 'os_disk_type', help=argparse.SUPPRESS)
     register_cli_argument(scope, 'os_disk_name', validator=_os_disk_default)
@@ -190,7 +191,7 @@ for scope in ['vm create', 'vmss create']:
     register_cli_argument(scope, 'os_version', help=argparse.SUPPRESS)
     register_cli_argument(scope, 'dns_name_type', help=argparse.SUPPRESS)
     register_cli_argument(scope, 'admin_username', admin_username_type)
-    register_cli_argument(scope, 'storage_type', help='The VM storage type.')
+    register_cli_argument(scope, 'storage_type', help='The VM storage type.', choices=[x.value for x in SkuName])
     register_cli_argument(scope, 'subnet_name', help='The subnet name.  Creates if creating a new VNet, references if referencing an existing VNet.')
     register_cli_argument(scope, 'admin_password', help='Password for the Virtual Machine if Authentication Type is Password.')
     register_cli_argument(scope, 'ssh_key_value', action=VMSSHFieldAction)
