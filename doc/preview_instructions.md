@@ -8,7 +8,7 @@ Installation via CURL
 
 To install via cURL on Linux and OS X, type:
 
-    curl -L https://aka.ms/ProjectAzInstall | bash
+    curl -L https://aka.ms/InstallAzureCli | bash
 
 If you chose to enable tab completion, type `exec -l $SHELL` to restart your shell.
 
