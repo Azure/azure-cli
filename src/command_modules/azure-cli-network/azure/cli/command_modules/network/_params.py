@@ -11,12 +11,13 @@ from azure.mgmt.network.models.network_management_client_enums import \
     (ApplicationGatewaySkuName, ApplicationGatewayCookieBasedAffinity,
      ApplicationGatewayTier, ApplicationGatewayProtocol,
      ApplicationGatewayRequestRoutingRuleType, ExpressRouteCircuitSkuFamily,
-     ExpressRouteCircuitSkuTier, ExpressRouteCircuitPeeringType, IPVersion)
+     ExpressRouteCircuitSkuTier, ExpressRouteCircuitPeeringType, IPVersion, LoadDistribution,
+     ProbeProtocol, TransportProtocol)
 from azure.mgmt.dns.models.dns_management_client_enums import RecordType
 
 from azure.cli.core.commands import CliArgumentType, register_cli_argument, register_extra_cli_argument
 from azure.cli.core.commands.parameters import (location_type, get_resource_name_completion_list,
-                                                get_enum_type_completion_list, tags_type, get_enum_choices,
+                                                enum_choice_list, tags_type,
                                                 get_generic_completion_list)
 from azure.cli.core.commands.validators import MarkSpecifiedAction
 from azure.cli.core.commands.template_create import register_folded_cli_argument
@@ -103,19 +104,15 @@ virtual_network_name_type = CliArgumentType(options_list=('--vnet-name',), metav
 subnet_name_type = CliArgumentType(options_list=('--subnet-name',), metavar='SUBNET_NAME', help='The subnet name.')
 load_balancer_name_type = CliArgumentType(options_list=('--lb-name',), metavar='LB_NAME', help='The load balancer name.', completer=get_resource_name_completion_list('Microsoft.Network/loadBalancers'), id_part='name')
 private_ip_address_type = CliArgumentType(help='Static private IP address to use.', validator=validate_private_ip_address)
-cookie_based_affinity_type = CliArgumentType(type=str.lower, completer=get_enum_type_completion_list(ApplicationGatewayCookieBasedAffinity))
-http_protocol_type = CliArgumentType(type=str.lower, completer=get_enum_type_completion_list(ApplicationGatewayProtocol))
-
-choices_ip_allocation_method = [e.value.lower() for e in IPAllocationMethod]
-choices_private_ip_address_version = [e.value.lower() for e in privateIpAddressVersion]
-choices_ip_address_version = [e.value.lower() for e in IPVersion]
+cookie_based_affinity_type = CliArgumentType(**enum_choice_list(ApplicationGatewayCookieBasedAffinity))
+http_protocol_type = CliArgumentType(**enum_choice_list(ApplicationGatewayProtocol))
 
 register_cli_argument('network', 'subnet_name', subnet_name_type)
 register_cli_argument('network', 'virtual_network_name', virtual_network_name_type, id_part='name')
 register_cli_argument('network', 'network_security_group_name', nsg_name_type, id_part='name')
 register_cli_argument('network', 'private_ip_address', private_ip_address_type)
 register_cli_argument('network', 'private_ip_address_allocation', help=argparse.SUPPRESS)
-register_cli_argument('network', 'private_ip_address_version', choices=choices_private_ip_address_version, type=str.lower)
+register_cli_argument('network', 'private_ip_address_version', **enum_choice_list(privateIpAddressVersion))
 register_cli_argument('network', 'tags', tags_type)
 
 for item in ['lb', 'nic']:
@@ -124,9 +121,9 @@ for item in ['lb', 'nic']:
     register_cli_argument('network {}'.format(item), 'public_ip_address', validator=validate_public_ip_name_or_id)
 
 register_cli_argument('network application-gateway', 'application_gateway_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/applicationGateways'), id_part='name')
-register_cli_argument('network application-gateway', 'sku_name', completer=get_enum_type_completion_list(ApplicationGatewaySkuName))
-register_cli_argument('network application-gateway', 'sku_tier', completer=get_enum_type_completion_list(ApplicationGatewayTier))
-register_cli_argument('network application-gateway', 'routing_rule_type', completer=get_enum_type_completion_list(ApplicationGatewayRequestRoutingRuleType))
+register_cli_argument('network application-gateway', 'sku_name', **enum_choice_list(ApplicationGatewaySkuName))
+register_cli_argument('network application-gateway', 'sku_tier', **enum_choice_list(ApplicationGatewayTier))
+register_cli_argument('network application-gateway', 'routing_rule_type', **enum_choice_list(ApplicationGatewayRequestRoutingRuleType))
 register_cli_argument('network application-gateway', 'virtual_network_name', virtual_network_name_type)
 register_folded_cli_argument('network application-gateway', 'subnet', 'subnets', parent_name='virtual_network_name', parent_type='Microsoft.Network/virtualNetworks', none_flag_value=None, validator=validate_address_prefixes, completer=get_subnet_completion_list())
 register_folded_cli_argument('network application-gateway', 'public_ip', 'Microsoft.Network/publicIPAddresses', completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'))
@@ -210,14 +207,14 @@ register_cli_argument('network express-route circuit-auth', 'authorization_key',
 
 # Express Route Circuit Peering
 register_cli_argument('network express-route circuit-peering', 'peering_name', name_arg_type, id_part='child_name')
-register_cli_argument('network express-route circuit-peering', 'peering_type', completer=get_enum_type_completion_list(ExpressRouteCircuitPeeringType))
-register_cli_argument('network express-route circuit-peering', 'sku_family', completer=get_enum_type_completion_list(ExpressRouteCircuitSkuFamily))
-register_cli_argument('network express-route circuit-peering', 'sku_tier', completer=get_enum_type_completion_list(ExpressRouteCircuitSkuTier))
+register_cli_argument('network express-route circuit-peering', 'peering_type', **enum_choice_list(ExpressRouteCircuitPeeringType))
+register_cli_argument('network express-route circuit-peering', 'sku_family', **enum_choice_list(ExpressRouteCircuitSkuFamily))
+register_cli_argument('network express-route circuit-peering', 'sku_tier', **enum_choice_list(ExpressRouteCircuitSkuTier))
 
 # Express Route Circuit
 register_cli_argument('network express-route circuit', 'circuit_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/expressRouteCircuits'), id_part='name')
-register_cli_argument('network express-route circuit', 'sku_family', completer=get_enum_type_completion_list(ExpressRouteCircuitSkuFamily))
-register_cli_argument('network express-route circuit', 'sku_tier', completer=get_enum_type_completion_list(ExpressRouteCircuitSkuTier))
+register_cli_argument('network express-route circuit', 'sku_family', **enum_choice_list(ExpressRouteCircuitSkuFamily))
+register_cli_argument('network express-route circuit', 'sku_tier', **enum_choice_list(ExpressRouteCircuitSkuTier))
 
 # Local Gateway
 register_cli_argument('network local-gateway', 'local_network_gateway_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/localNetworkGateways'), id_part='name')
@@ -236,7 +233,7 @@ register_folded_cli_argument('network nic create', 'public_ip_address', 'Microso
 register_folded_cli_argument('network nic create', 'subnet', 'subnets', none_flag_value=None, new_flag_value=None, default_value_flag='existingId', parent_name='virtual_network_name', parent_type='Microsoft.Network/virtualNetworks', completer=get_subnet_completion_list())
 register_folded_cli_argument('network nic create', 'network_security_group', 'Microsoft.Network/networkSecurityGroups', new_flag_value=None, default_value_flag='none', completer=get_resource_name_completion_list('Microsoft.Network/networkSecurityGroups'))
 
-register_cli_argument('network nic update', 'enable_ip_forwarding', options_list=('--ip-forwarding',), choices=['true', 'false'])
+register_cli_argument('network nic update', 'enable_ip_forwarding', options_list=('--ip-forwarding',), choices=['true', 'false'], type=str.lower)
 register_cli_argument('network nic update', 'network_security_group', validator=validate_nsg_name_or_id, completer=get_resource_name_completion_list('Microsoft.Network/networkSecurityGroups'))
 
 for item in ['create', 'ip-config update', 'ip-config create']:
@@ -278,13 +275,13 @@ register_cli_argument('network public-ip', 'name', name_arg_type, completer=get_
 register_cli_argument('network public-ip create', 'name', completer=None)
 register_cli_argument('network public-ip create', 'dns_name', validator=process_public_ip_create_namespace)
 register_cli_argument('network public-ip create', 'dns_name_type', help=argparse.SUPPRESS)
-register_cli_argument('network public-ip create', 'allocation_method', choices=choices_ip_allocation_method, type=str.lower)
-register_cli_argument('network public-ip create', 'version', choices=choices_ip_address_version, type=str.lower)
+register_cli_argument('network public-ip create', 'allocation_method', **enum_choice_list(IPAllocationMethod))
+register_cli_argument('network public-ip create', 'version', **enum_choice_list(IPVersion))
 
 # Route Operation
 register_cli_argument('network route-table route', 'route_name', name_arg_type, id_part='child_name', help='Route name')
 register_cli_argument('network route-table route', 'route_table_name', options_list=('--route-table-name',), help='Route table name')
-register_cli_argument('network route-table route', 'next_hop_type', choices=get_enum_choices(RouteNextHopType))
+register_cli_argument('network route-table route', 'next_hop_type', **enum_choice_list(RouteNextHopType))
 
 # Route table
 register_cli_argument('network route-table', 'route_table_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/routeTables'), id_part='name')
@@ -337,11 +334,11 @@ register_cli_argument('network lb', 'backend_address_pool_name', options_list=('
 register_cli_argument('network lb', 'frontend_ip_name', help='The name of the frontend IP configuration.', completer=get_lb_subresource_completion_list('frontend_ip_configurations'))
 register_cli_argument('network lb', 'floating_ip', help='Enable floating IP.', choices=['true', 'false'], type=str.lower)
 register_cli_argument('network lb', 'idle_timeout', help='Idle timeout in minutes.')
-register_cli_argument('network lb', 'protocol', help='', choices=['udp', 'tcp'], type=str.lower)
+register_cli_argument('network lb', 'protocol', help='', **enum_choice_list(TransportProtocol))
 
 register_cli_argument('network lb create', 'public_ip_dns_name', validator=process_lb_create_namespace)
 register_cli_argument('network lb create', 'dns_name_type', help=argparse.SUPPRESS)
-register_cli_argument('network lb create', 'public_ip_address_allocation', choices=choices_ip_allocation_method, default='dynamic', type=str.lower)
+register_cli_argument('network lb create', 'public_ip_address_allocation', default='dynamic', **enum_choice_list(IPAllocationMethod))
 register_folded_cli_argument('network lb create', 'public_ip_address', 'Microsoft.Network/publicIPAddresses', validator=validate_public_ip_type)
 register_folded_cli_argument('network lb create', 'subnet', 'subnets', parent_name='virtual_network_name', parent_type='Microsoft.Network/virtualNetworks', default_value_flag='none')
 
@@ -352,18 +349,18 @@ register_cli_argument('network lb frontend-ip', 'virtual_network_name', arg_type
 register_cli_argument('network lb probe', 'interval', help='Probing time interval in seconds.')
 register_cli_argument('network lb probe', 'path', help='The endpoint to interrogate (http only).')
 register_cli_argument('network lb probe', 'port', help='The port to interrogate.')
-register_cli_argument('network lb probe', 'protocol', help='The protocol to probe.', choices=['http', 'tcp'], type=str.lower)
+register_cli_argument('network lb probe', 'protocol', help='The protocol to probe.', **enum_choice_list(ProbeProtocol))
 register_cli_argument('network lb probe', 'threshold', help='The number of consecutive probe failures before an instance is deemed unhealthy.')
 
-register_cli_argument('network lb rule', 'load_distribution', help='Affinity rule settings.', choices=['default', 'sourceip', 'sourceipprotocol'], type=str.lower)
+register_cli_argument('network lb rule', 'load_distribution', help='Affinity rule settings.', **enum_choice_list(LoadDistribution))
 
 register_cli_argument('network nsg create', 'name', name_arg_type)
 
 # VPN gateway
 register_cli_argument('network vpn-gateway', 'virtual_network_gateway_name', options_list=('--name', '-n'), completer=get_resource_name_completion_list('Microsoft.Network/virtualNetworkGateways'), id_part='name')
-register_cli_argument('network vpn-gateway create', 'gateway_type', choices=get_enum_choices(gatewayType))
-register_cli_argument('network vpn-gateway create', 'sku', choices=get_enum_choices(sku))
-register_cli_argument('network vpn-gateway create', 'vpn_type', choices=get_enum_choices(vpnType))
+register_cli_argument('network vpn-gateway create', 'gateway_type', **enum_choice_list(gatewayType))
+register_cli_argument('network vpn-gateway create', 'sku', **enum_choice_list(sku))
+register_cli_argument('network vpn-gateway create', 'vpn_type', **enum_choice_list(vpnType))
 register_folded_cli_argument('network vpn-gateway create', 'public_ip_address', 'Microsoft.Network/publicIPAddresses', default_value_flag='existingId', none_flag_value=None, new_flag_value=None, required=True)
 register_cli_argument('network vpn-gateway', 'cert_name', help='Root certificate name', options_list=('--name', '-n'))
 register_cli_argument('network vpn-gateway', 'gateway_name', help='Virtual network gateway name')
@@ -385,7 +382,7 @@ register_cli_argument('network vpn-connection shared-key', 'virtual_network_gate
 # Traffic manager profiles
 register_cli_argument('network traffic-manager profile', 'traffic_manager_profile_name', name_arg_type, id_part='name', completer=get_resource_name_completion_list('Microsoft.Network/trafficManagerProfiles'))
 register_cli_argument('network traffic-manager profile', 'profile_name', name_arg_type, id_part='name', completer=get_resource_name_completion_list('Microsoft.Network/trafficManagerProfiles'))
-register_cli_argument('network traffic-manager profile create', 'routing_method', choices=get_enum_choices(routingMethod), completer=get_enum_type_completion_list(routingMethod))
+register_cli_argument('network traffic-manager profile create', 'routing_method', **enum_choice_list(routingMethod))
 register_cli_argument('network traffic-manager profile check-dns', 'name', name_arg_type, help='DNS prefix to verify availability for.', required=True)
 register_cli_argument('network traffic-manager profile check-dns', 'type', help=argparse.SUPPRESS, default='Microsoft.Network/trafficManagerProfiles')
 
@@ -400,9 +397,9 @@ register_cli_argument('network dns zone', 'zone_name', name_arg_type)
 register_cli_argument('network dns', 'record_set_name', name_arg_type, help='The name of the RecordSet, relative to the name of the zone.')
 register_cli_argument('network dns', 'relative_record_set_name', name_arg_type, help='The name of the RecordSet, relative to the name of the zone.')
 register_cli_argument('network dns', 'zone_name', help='The name of the zone without a terminating dot.')
-register_cli_argument('network dns record-set create', 'record_set_type', options_list=('--type',), choices=get_enum_choices(RecordType), type=str.upper)
+register_cli_argument('network dns record-set create', 'record_set_type', options_list=('--type',), **enum_choice_list(RecordType))
 register_cli_argument('network dns record-set create', 'ttl', default=3600)
-register_cli_argument('network dns', 'record_type', options_list=('--type',), choices=get_enum_choices(RecordType), type=str.upper)
+register_cli_argument('network dns', 'record_type', options_list=('--type',), **enum_choice_list(RecordType))
 register_cli_argument('network dns record', 'record_set_name', options_list=('--record-set-name',))
 register_cli_argument('network dns record txt add', 'value', nargs='+')
 register_cli_argument('network dns record txt remove', 'value', nargs='+')

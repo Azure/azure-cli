@@ -17,6 +17,7 @@ register_cli_argument('ad app', 'reply_urls', nargs='+',
 register_cli_argument('ad app', 'start_date', help='the start date after which password or key would be valid. Default value is current time')
 register_cli_argument('ad app', 'end_date', help='the end date till which password or key is valid. Default value is one year after current time')
 register_cli_argument('ad app', 'key_value', help='the value for the key credentials associated with the application')
+# TODO: Update these with **enum_choice_list(...) when SDK supports proper enums
 register_cli_argument('ad app', 'key_type', choices=['AsymmetricX509Cert', 'Password', 'Symmetric'], default='AsymmetricX509Cert',
                       help='the type of the key credentials associated with the application')
 register_cli_argument('ad app', 'key_usage', choices=['Sign', 'Verify'], default='Verify',

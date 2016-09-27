@@ -7,7 +7,7 @@
 from azure.mgmt.keyvault.models.key_vault_management_client_enums import (SkuName)
 from azure.cli.core.commands.parameters import (
     get_resource_name_completion_list,
-    name_type)
+    name_type, enum_choice_list)
 from azure.cli.core.commands import register_cli_argument
 import azure.cli.core.commands.arm # pylint: disable=unused-import
 
@@ -19,7 +19,7 @@ register_cli_argument('keyvault', 'spn', help='name of a service principal that 
 register_cli_argument('keyvault', 'upn', help='name of a user principal that will receive permissions')
 
 register_cli_argument('keyvault create', 'vault_name', completer=None)
-register_cli_argument('keyvault create', 'sku', choices=[e.value for e in SkuName])
+register_cli_argument('keyvault create', 'sku', **enum_choice_list(SkuName))
 register_cli_argument('keyvault create', 'no_self_perms', action='store_true', help="If specified, don't add permissions for the current user in the new vault")
 
 register_cli_argument('keyvault set-policy', 'object_id', validator=process_policy_namespace)

@@ -9,7 +9,7 @@ from six import u as unicode_string
 
 from azure.cli.core._config import az_config
 from azure.cli.core.commands.parameters import \
-    (ignore_type, tags_type, get_resource_name_completion_list, get_enum_type_completion_list)
+    (ignore_type, tags_type, get_resource_name_completion_list, enum_choice_list)
 import azure.cli.core.commands.arm # pylint: disable=unused-import
 from azure.cli.core.commands import register_cli_argument, register_extra_cli_argument, CliArgumentType
 from azure.cli.core.commands.client_factory import get_data_service_client
@@ -177,15 +177,15 @@ for item in ['blob', 'file', 'queue', 'table']:
 
 register_cli_argument('storage account create', 'account_name', account_name_type, options_list=('--name', '-n'), completer=None)
 
-register_cli_argument('storage account create', 'kind', help='Indicates the type of storage account. (Storage, BlobStorage)', completer=get_enum_type_completion_list(Kind))
+register_cli_argument('storage account create', 'kind', help='Indicates the type of storage account.', **enum_choice_list(Kind))
 register_cli_argument('storage account create', 'tags', tags_type)
 
 for item in ['create', 'update']:
-    register_cli_argument('storage account {}'.format(item), 'sku', help='The storage account SKU. (Standard_LRS, Standard_GRS, Standard_RAGRS, Standard_ZRS, Premium_LRS)', completer=get_enum_type_completion_list(SkuName))
+    register_cli_argument('storage account {}'.format(item), 'sku', help='The storage account SKU.', **enum_choice_list(SkuName))
     register_cli_argument('storage account {}'.format(item), 'encryption', nargs='+', help='Specifies which service(s) to encrypt.', choices=list(EncryptionServices._attribute_map.keys()), validator=validate_encryption) # pylint: disable=protected-access
 
-register_cli_argument('storage account create', 'access_tier', help='Required for StandardBlob accounts. The access tier used for billing. Cannot be set for StandardLRS, StandardGRS, StandardRAGRS, or PremiumLRS account types. (Hot, Cool)', completer=get_enum_type_completion_list(AccessTier))
-register_cli_argument('storage account update', 'access_tier', help='The access tier used for billing StandardBlob accounts. Cannot be set for StandardLRS, StandardGRS, StandardRAGRS, or PremiumLRS account types. (Hot, Cool)', completer=get_enum_type_completion_list(AccessTier))
+register_cli_argument('storage account create', 'access_tier', help='Required for StandardBlob accounts. The access tier used for billing. Cannot be set for StandardLRS, StandardGRS, StandardRAGRS, or PremiumLRS account types.', **enum_choice_list(AccessTier))
+register_cli_argument('storage account update', 'access_tier', help='The access tier used for billing StandardBlob accounts. Cannot be set for StandardLRS, StandardGRS, StandardRAGRS, or PremiumLRS account types.', **enum_choice_list(AccessTier))
 register_cli_argument('storage account create', 'custom_domain', help='User domain assigned to the storage account. Name is the CNAME source.', validator=validate_custom_domain)
 register_cli_argument('storage account update', 'custom_domain', help='User domain assigned to the storage account. Name is the CNAME source. Use "" to clear existing value.', validator=validate_custom_domain)
 register_extra_cli_argument('storage account create', 'subdomain', options_list=('--use-subdomain',), help='Specify to enable indirect CNAME validation.', action='store_true')

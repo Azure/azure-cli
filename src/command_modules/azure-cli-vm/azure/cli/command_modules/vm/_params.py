@@ -14,14 +14,13 @@ from azure.mgmt.compute.models import (VirtualHardDisk,
                                        CachingTypes,
                                        ContainerServiceOchestratorTypes,
                                        UpgradeMode)
-from azure.mgmt.network.models import IPAllocationMethod
 from azure.mgmt.storage.models import SkuName
 from azure.cli.core.commands import register_cli_argument, CliArgumentType, register_extra_cli_argument
 from azure.cli.core.commands.arm import is_valid_resource_id
 from azure.cli.core.commands.template_create import register_folded_cli_argument
 from azure.cli.core.commands.parameters import \
     (location_type, get_location_completion_list, get_one_of_subscription_locations,
-     get_resource_name_completion_list, tags_type)
+     get_resource_name_completion_list, tags_type, enum_choice_list)
 from azure.cli.command_modules.vm._actions import \
     (VMImageFieldAction, VMSSHFieldAction, VMDNSNameAction, load_images_from_aliases_doc,
      get_vm_sizes, PrivateIpAction, _resource_not_exists)
@@ -39,13 +38,6 @@ def get_vm_size_completion_list(prefix, action, parsed_args, **kwargs):#pylint: 
         location = get_one_of_subscription_locations()
     result = get_vm_sizes(location)
     return [r.name for r in result]
-
-# CHOICE LISTS
-
-choices_caching_types = [e.value for e in CachingTypes]
-choices_container_service_orchestrator_types = [e.value for e in ContainerServiceOchestratorTypes]
-choices_upgrade_mode = [e.value.lower() for e in UpgradeMode]
-choices_ip_allocation_method = [e.value.lower() for e in IPAllocationMethod]
 
 # REUSABLE ARGUMENT DEFINITIONS
 
@@ -67,7 +59,7 @@ register_cli_argument('vm disk', 'disk_name', options_list=('--name', '-n'), hel
 register_cli_argument('vm disk', 'disk_size', help='Size of disk (GiB)', default=1023, type=int)
 register_cli_argument('vm disk', 'lun', type=int, help='0-based logical unit number (LUN). Max value depends on the Virutal Machine size.')
 register_cli_argument('vm disk', 'vhd', type=VirtualHardDisk, help='virtual hard disk\'s uri. For example:https://mystorage.blob.core.windows.net/vhds/d1.vhd')
-register_cli_argument('vm disk', 'caching', help='Host caching policy', default=CachingTypes.none.value, choices=choices_caching_types)
+register_cli_argument('vm disk', 'caching', help='Host caching policy', default=CachingTypes.none.value, **enum_choice_list(CachingTypes))
 
 for item in ['attach-existing', 'attach-new', 'detach']:
     register_cli_argument('vm disk {}'.format(item), 'vm_name', arg_type=existing_vm_name, options_list=('--vm-name',), id_part=None)
@@ -77,7 +69,7 @@ register_cli_argument('vm availability-set', 'availability_set_name', name_arg_t
 register_cli_argument('vm access', 'username', options_list=('--username', '-u'), help='The user name')
 register_cli_argument('vm access', 'password', options_list=('--password', '-p'), help='The user password')
 
-register_cli_argument('vm container', 'orchestrator_type', choices=choices_container_service_orchestrator_types)
+register_cli_argument('vm container', 'orchestrator_type', **enum_choice_list(ContainerServiceOchestratorTypes))
 register_cli_argument('vm container', 'admin_username', admin_username_type)
 register_cli_argument('vm container', 'ssh_key_value', required=False, help='SSH key file value or key file path.', default=os.path.join(os.path.expanduser('~'), '.ssh', 'id_rsa.pub'), completer=FilesCompleter())
 register_cli_argument('vm container', 'container_service_name', options_list=('--name', '-n'), help='The name of the container service', completer=get_resource_name_completion_list('Microsoft.ContainerService/ContainerServices'))
@@ -173,7 +165,7 @@ for scope in ['vm create', 'vmss create']:
     register_cli_argument(scope, 'os_disk_type', help=argparse.SUPPRESS)
     register_cli_argument(scope, 'os_disk_name', validator=validate_default_os_disk)
     register_cli_argument(scope, 'overprovision', action='store_false', default=None, options_list=('--disable-overprovision',))
-    register_cli_argument(scope, 'upgrade_policy_mode', choices=choices_upgrade_mode, help=None, type=str.lower)
+    register_cli_argument(scope, 'upgrade_policy_mode', help=None, **enum_choice_list(UpgradeMode))
     register_cli_argument(scope, 'os_disk_uri', help=argparse.SUPPRESS)
     register_cli_argument(scope, 'os_offer', help=argparse.SUPPRESS)
     register_cli_argument(scope, 'os_publisher', help=argparse.SUPPRESS)
@@ -182,7 +174,7 @@ for scope in ['vm create', 'vmss create']:
     register_cli_argument(scope, 'os_version', help=argparse.SUPPRESS)
     register_cli_argument(scope, 'dns_name_type', help=argparse.SUPPRESS)
     register_cli_argument(scope, 'admin_username', admin_username_type)
-    register_cli_argument(scope, 'storage_type', help='The VM storage type.', choices=[x.value for x in SkuName])
+    register_cli_argument(scope, 'storage_type', help='The VM storage type.', **enum_choice_list(SkuName))
     register_cli_argument(scope, 'subnet_name', help='The subnet name.  Creates if creating a new VNet, references if referencing an existing VNet.')
     register_cli_argument(scope, 'admin_password', help='Password for the Virtual Machine if Authentication Type is Password.')
     register_cli_argument(scope, 'ssh_key_value', action=VMSSHFieldAction)

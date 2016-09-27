@@ -7,6 +7,7 @@ import unittest
 from six import StringIO
 from azure.cli.core.parser import AzCliCommandParser
 from azure.cli.core.commands import CliCommand
+from azure.cli.core.commands.parameters import enum_choice_list
 
 class TestParser(unittest.TestCase):
 
@@ -74,6 +75,34 @@ class TestParser(unittest.TestCase):
         AzCliCommandParser.error = VerifyError(self)
         parser.parse_args('test command -req yep'.split())
         self.assertTrue(AzCliCommandParser.error.called)
+
+    def test_case_insensitive_enum_choices(self):
+        from enum import Enum
+
+        class TestEnum(Enum): # pylint: disable=too-few-public-methods
+
+            opt1 = "ALL_CAPS"
+            opt2 = "camelCase"
+            opt3 = "snake_case"
+
+        def test_handler():
+            pass
+
+        command = CliCommand('test command', test_handler)
+        command.add_argument('opt', '--opt', required=True, **enum_choice_list(TestEnum))
+        cmd_table = {'test command': command}
+
+        parser = AzCliCommandParser()
+        parser.load_command_table(cmd_table)
+
+        args = parser.parse_args('test command --opt alL_cAps'.split())
+        self.assertEqual(args.opt, 'ALL_CAPS')
+
+        args = parser.parse_args('test command --opt CAMELCASE'.split())
+        self.assertEqual(args.opt, 'camelCase')
+
+        args = parser.parse_args('test command --opt sNake_CASE'.split())
+        self.assertEqual(args.opt, 'snake_case')
 
 class VerifyError(object): # pylint: disable=too-few-public-methods
 
