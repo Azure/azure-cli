@@ -30,26 +30,26 @@ helps['vm create'] = """
             examples:
                 - name: Create a Linux VM with SSH key authentication, add a public DNS entry and add to an existing Virtual Network and Availability Set.
                   text: >
-                    az vm create -n my_vm_name -g myrg --image (linux image from 'az vm image list') 
-                    --authentication-type ssh 
-                    --vnet my_existing_vnet --subnet-name subnet1 
-                    --availability-set my_existing_availability_set 
-                    --public-ip-address-dns-name my_globally_unique_vm_dns_name 
+                    az vm create -n my_vm_name -g myrg --image (linux image from 'az vm image list') \ 
+                    --authentication-type ssh \ 
+                    --vnet my_existing_vnet --subnet-name subnet1 \ 
+                    --availability-set my_existing_availability_set \ 
+                    --public-ip-address-dns-name my_globally_unique_vm_dns_name \ 
                     --ssh-key-value "(ssh-rsa-key, key-file-path or not specified for default-key-path)" 
                 - name: Create a simple Windows Server VM with private IP address only
                   text: >
-                    az vm create -n my_vm_name -g myrg 
-                     --admin-username myadmin 
-                     --admin-password Password@1234 
-                     --public-ip-address "" 
+                    az vm create -n my_vm_name -g myrg \ 
+                     --admin-username myadmin \ 
+                     --admin-password Password@1234 \ 
+                     --public-ip-address "" \ 
                      --image Win2012R2Datacenter 
                 - name: Create a simple Windows Server VM with public IP address and DNS entry
                   text: >
-                    az vm create -n my_vm_name -g myrg 
-                    --admin-username myadmin 
-                    --admin-password Password@1234 
-                    --public-ip-address-dns-name my_globally_unique_vm_dns_name 
-                    --image Win2012R2Datacenter 
+                    az vm create -n my_vm_name -g myrg \ 
+                    --admin-username myadmin \ 
+                    --admin-password Password@1234 \ 
+                    --public-ip-address-dns-name my_globally_unique_vm_dns_name  \  
+                    --image Win2012R2Datacenter  
             """.format(image_long_summary)
 
 helps['vmss create'] = """
@@ -65,15 +65,18 @@ helps['vmss create'] = """
             examples:
                 - name: Windows scaleset with 5 instances, a load balancer and a public IP address
                   text: >
-                    az vmss create -n myName -g myResourceGroup --admin-password MyPassword123 --instance-count 5 --image Win2012R2Datacenter
+                    az vmss create -n myName -g myResourceGroup \ 
+                    --admin-password MyPassword123 \ 
+                    --instance-count 5 \ 
+                    --image Win2012R2Datacenter
                 - name: Linux scaleset with SSH authentication, a public IP address, a DNS entry, an existing load balancer, and an existing virtual network
                   text: >
-                    az vmss create  -n myName -g myResourceGroup 
-                    --dns-name-for-public-ip myGloballyUniqueDnsName 
-                    --load-balancer-type existing --load-balancer-name myLoadBalancer 
-                    --virtual-network-type existing --virtual-network-name myVNET 
-                    --subnet-name mySubnet --image <linux image from 'az vm image list'> 
-                    --authentication-type ssh --ssh-key-value "<ssh-key-value or ssh-key-file-path>" 
+                    az vmss create  -n myName -g myResourceGroup \ 
+                    --dns-name-for-public-ip myGloballyUniqueDnsName \ 
+                    --load-balancer-type existing --load-balancer-name myLoadBalancer \ 
+                    --virtual-network-type existing --virtual-network-name myVNET \ 
+                    --subnet-name mySubnet --image <linux image from 'az vm image list'> \ 
+                    --authentication-type ssh --ssh-key-value "(ssh-key-value or ssh-key-file-path)"  
 """.format(image_long_summary)
 
 helps['vm availability-set create'] = """
@@ -85,8 +88,13 @@ helps['vm extension set'] = """
             type: command
             examples:
                 - name: Add a new linux user
-                  text: 
-                    az vm extension set -n VMAccessForLinux --publisher Microsoft.OSTCExtensions --version 1.4 --vm-name myvm --resource-group mygroup --protected-settings '{"username":"user1", "ssh_key":"ssh_rsa ..."}'
+                  text: >
+                    az vm extension set -n VMAccessForLinux \ 
+                    --publisher Microsoft.OSTCExtensions \ 
+                    --version 1.4 \ 
+                    --vm-name myvm \ 
+                    --resource-group mygroup \ 
+                    --protected-settings '{"username":"user1", "ssh_key":"ssh_rsa ..."}'
             """
 
 helps['vm access set-linux-user'] = """
