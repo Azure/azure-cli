@@ -144,3 +144,46 @@ class WebappConfigureTest(ResourceGroupVCRTestBase):
         self.assertTrue('s1' not in result)
         self.assertTrue('s2' not in result)
         self.assertTrue('s3' in result)
+
+
+class WebappScaleTest(ResourceGroupVCRTestBase):
+
+    def __init__(self, test_method):
+        super(WebappScaleTest, self).__init__(__file__, test_method)
+        self.resource_group = 'azurecli-webapp-scale'
+
+    def test_webapp_scale(self):
+        self.execute()
+
+    def body(self):
+        plan = 'webapp-scale-plan'
+        #start with shared sku
+        self.cmd('appservice plan create -g {} -n {} --sku SHARED'.format(self.resource_group, plan), checks=[
+            JMESPathCheck('sku.name', 'D1'),
+            JMESPathCheck('sku.tier', 'Shared'),
+            JMESPathCheck('sku.size', 'D1'),
+            JMESPathCheck('sku.family', 'D'),
+            JMESPathCheck('sku.capacity', 0) #0 means the default value: 1 instance
+            ])
+        #scale up
+        self.cmd('appservice plan update -g {} -n {} --sku S2'.format(self.resource_group, plan), checks=[
+            JMESPathCheck('sku.name', 'S2'),
+            JMESPathCheck('sku.tier', 'Standard'),
+            JMESPathCheck('sku.size', 'S2'),
+            JMESPathCheck('sku.family', 'S')
+            ])
+        #scale down
+        self.cmd('appservice plan update -g {} -n {} --sku B1'.format(self.resource_group, plan), checks=[
+            JMESPathCheck('sku.name', 'B1'),
+            JMESPathCheck('sku.tier', 'Basic'),
+            JMESPathCheck('sku.size', 'B1'),
+            JMESPathCheck('sku.family', 'B')
+            ])
+        #scale out
+        self.cmd('appservice plan update -g {} -n {} --number-of-workers 2'.format(self.resource_group, plan), checks=[
+            JMESPathCheck('sku.name', 'B1'),
+            JMESPathCheck('sku.tier', 'Basic'),
+            JMESPathCheck('sku.size', 'B1'),
+            JMESPathCheck('sku.family', 'B'),
+            JMESPathCheck('sku.capacity', 2)
+            ])
