@@ -34,7 +34,7 @@ Click on your OS for steps:
 
 ## OS X
 ```
-curl -L https://aka.ms/ProjectAzInstall | sudo bash
+curl -L https://aka.ms/InstallAzureCli | sudo bash
 ```
 
 ## Ubuntu 12.04 LTS
@@ -45,7 +45,7 @@ Python 2.7.3 should be already on the machine.
 sudo apt-get update
 sudo apt-get install -y libssl-dev libffi-dev
 sudo apt-get install -y python-dev
-curl -L https://aka.ms/ProjectAzInstall | sudo bash
+curl -L https://aka.ms/InstallAzureCli | sudo bash
 ```
 
 **Known warnings**
@@ -69,7 +69,7 @@ Python 2.7.6 should be already on the machine.
 sudo apt-get update
 sudo apt-get install -y libssl-dev libffi-dev
 sudo apt-get install -y python-dev
-curl -L https://aka.ms/ProjectAzInstall | sudo bash
+curl -L https://aka.ms/InstallAzureCli | sudo bash
 ```
 
 Use the defaults for the install location and location of the executable.
@@ -83,7 +83,7 @@ sudo apt-get update
 sudo apt-get install -y libssl-dev libffi-dev
 sudo apt-get install -y python-dev
 sudo apt-get install -y build-essential
-curl -L https://aka.ms/ProjectAzInstall | sudo bash
+curl -L https://aka.ms/InstallAzureCli | sudo bash
 ```
 
 Use the defaults for the install location and location of the executable.
@@ -97,7 +97,7 @@ sudo apt-get update
 sudo apt-get install -y libssl-dev libffi-dev
 sudo apt-get install -y python-dev
 sudo apt-get install -y build-essential
-curl -L https://aka.ms/ProjectAzInstall | sudo bash
+curl -L https://aka.ms/InstallAzureCli | sudo bash
 ```
 
 ## Debian 7
@@ -106,7 +106,7 @@ Python 2.7.3 should be already on the machine.
 sudo apt-get update
 sudo apt-get install -y libssl-dev libffi-dev
 sudo apt-get install -y python-dev
-curl -L https://aka.ms/ProjectAzInstall | sudo bash
+curl -L https://aka.ms/InstallAzureCli | sudo bash
 ```
 
 Tab completion gets set up for the root user, not all users if installed globally.
@@ -118,7 +118,7 @@ sudo apt-get update
 sudo apt-get install -y libssl-dev libffi-dev
 sudo apt-get install -y python-dev
 sudo apt-get install -y build-essential
-curl -L https://aka.ms/ProjectAzInstall | sudo bash
+curl -L https://aka.ms/InstallAzureCli | sudo bash
 ```
 
 Tab completion gets set up for the root user, not all users if installed globally.
@@ -133,7 +133,7 @@ Python 2.7.5 should be already on the machine.
 ```
 sudo yum check-update
 sudo yum install -y gcc libffi-devel python-devel openssl-devel
-curl -L https://aka.ms/ProjectAzInstall | sudo bash
+curl -L https://aka.ms/InstallAzureCli | sudo bash
 ```
 
 Tab completion gets set up for the root user, not all users if installed globally.
@@ -150,7 +150,7 @@ Python 2.7.5 should be already on the machine.
 ```
 sudo yum check-update
 sudo yum install -y gcc libffi-devel python-devel openssl-devel
-curl -L https://aka.ms/ProjectAzInstall | sudo bash
+curl -L https://aka.ms/InstallAzureCli | sudo bash
 ```
 
 Tab completion gets set up for the root user, not all users if installed globally.
@@ -163,7 +163,7 @@ Python 2.7.8 should be already on the machine.
 ```
 sudo zypper refresh
 sudo zypper --non-interactive install gcc libffi-devel python-devel openssl-devel
-curl -L https://aka.ms/ProjectAzInstall | sudo bash
+curl -L https://aka.ms/InstallAzureCli | sudo bash
 ```
 
 ## CoreOS Stable-899.15.0 / Beta-1010.1.0 / Alpha-1010.1.0
@@ -172,10 +172,7 @@ Doesn't have python installed by default and is not currently supported.  We rec
 
 ## Docker
 
-> Note that our docker images contain the latest code from the master branch and **does not match** the 
-> same "partner build" as the other methods in this document.
-> 
-> As of 8/9, the docker image contains **incomplete versions** of WebApp and Redis Cache.  
+> Note that our docker images contain the latest code from the master branch.
 
 Run 
 ```shell
@@ -189,9 +186,7 @@ The CLI is available for Windows though PIP using the steps below.  If you do no
 Run the following from a command prompt
 
 ```shell
-    set AZURE_CLI_PRIVATE_PYPI_URL=http://40.112.211.51:8080
-    set AZURE_CLI_PRIVATE_PYPI_HOST=40.112.211.51
-    pip install azure-cli==%AZURE_CLI_NIGHTLY_VERSION% --extra-index-url %AZURE_CLI_PRIVATE_PYPI_URL% --trusted-host %AZURE_CLI_PRIVATE_PYPI_HOST% --pre
+    pip install azure-cli
 ```
 
 Run the CLI
@@ -208,7 +203,7 @@ Installation Troubleshooting
 If you get an error with the curl command regarding the `-L` parameter or an error saying `Object Moved`, try using the full url instead of the aka.ms url:
 ```shell
 # If you see this:
-$ curl -L https://aka.ms/ProjectAzInstall | sudo bash
+$ curl -L https://aka.ms/InstallAzureCli | sudo bash
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
 100   175  100   175    0     0    562      0 --:--:-- --:--:-- --:--:--   560
@@ -216,7 +211,7 @@ bash: line 1: syntax error near unexpected token `<'
 'ash: line 1: `<html><head><title>Object moved</title></head><body>
 
 # Try this instead:
-$ curl http://azure-cli-nightly.westus.cloudapp.azure.com/install | sudo bash
+$ curl https://azurecliprod.blob.core.windows.net/install | sudo bash
 ```
 
 
