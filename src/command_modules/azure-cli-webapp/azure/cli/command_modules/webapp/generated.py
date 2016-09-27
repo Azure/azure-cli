@@ -6,6 +6,7 @@
 #pylint: disable=unused-import
 from azure.mgmt.web.operations import SitesOperations, ServerFarmsOperations, ProviderOperations
 from azure.cli.core.commands import LongRunningOperation, cli_command
+from azure.cli.core.commands.arm import cli_generic_update_command
 
 from ._params import web_client_factory
 from .custom import (create_webapp, show_webapp, list_webapp,
@@ -55,8 +56,11 @@ cli_command('appservice web deployment user show', ProviderOperations.get_publis
 
 factory = lambda _: web_client_factory().server_farms
 cli_command('appservice plan create', create_app_service_plan)
-cli_command('appservice plan update', update_app_service_plan)
 cli_command('appservice plan delete', ServerFarmsOperations.delete_server_farm, factory)
+cli_generic_update_command('appservice plan update', ServerFarmsOperations.get_server_farm,
+                           ServerFarmsOperations.create_or_update_server_farm,
+                           custom_function=update_app_service_plan,
+                           setter_arg_name='server_farm_envelope', factory=factory)
 cli_command('appservice plan list', ServerFarmsOperations.get_server_farms, factory)
 cli_command('appservice plan show', ServerFarmsOperations.get_server_farm, factory)
 
