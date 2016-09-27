@@ -25,8 +25,9 @@ A Debian package is also available. Install as follows:
 
 .. code-block:: console
 
-   $ echo "deb https://azurecliprod.blob.core.windows.net/repos/apt/debian wheezy main" | sudo tee /etc/apt/sources.list.d/azure-cli.list
+   $ sudo echo "deb https://azurecliprod.blob.core.windows.net/repos/apt/debian wheezy main" | sudo tee /etc/apt/sources.list.d/azure-cli.list
    $ curl https://azurecliprod.blob.core.windows.net/azure-cli-preview.gpg.key | sudo apt-key add -
+   $ sudo apt-get install apt-transport-https
    $ sudo apt-get update && sudo apt-get install azure-cli
 
 
