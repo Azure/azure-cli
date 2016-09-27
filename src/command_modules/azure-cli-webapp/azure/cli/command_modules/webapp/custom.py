@@ -143,44 +143,49 @@ def enable_local_git(resource_group, name, slot=None):
 
     return {'url' : _get_git_url(client, resource_group, name, slot)}
 
-def create_app_service_plan(resource_group, name, tier=None, number_of_workers=None,
+def create_app_service_plan(resource_group, name, sku, number_of_workers=None,
                             location=None):
     client = web_client_factory()
+    sku = _normalize_sku(sku)
     if location is None:
         location = _get_location_from_resource_group(resource_group)
 
-    sku_name = _get_sku_name(tier)
     #the api is odd on parameter naming, have to live with it for now
-    sku = SkuDescription(name=tier, tier=sku_name, capacity=number_of_workers)
-    plan_def = ServerFarmWithRichSku(location, server_farm_with_rich_sku_name=name, sku=sku)
-    #TODO: handle bad error on creating too many F1 plans:
-    #  Operation failed with status: 'Conflict'. Details: 409 Client Error: Conflict for url:
+    sku_def = SkuDescription(tier=_get_sku_name(sku), name=sku, capacity=number_of_workers)
+    plan_def = ServerFarmWithRichSku(location, server_farm_with_rich_sku_name=name, sku=sku_def)
     return client.server_farms.create_or_update_server_farm(resource_group, name, plan_def)
 
-def update_app_service_plan(resource_group, name, tier=None, number_of_workers=None,
+def update_app_service_plan(instance, sku=None, number_of_workers=None,
                             admin_site_name=None):
-    client = web_client_factory()
-    plan = client.server_farms.get_server_farm(resource_group, name)
-    sku = plan.sku
-    if tier is not None:
-        sku_name = _get_sku_name(tier)
-        sku.tier = sku_name
-        sku.name = tier
+    sku_def = instance.sku
+    if sku is not None:
+        sku = _normalize_sku(sku)
+        sku_def.tier = _get_sku_name(sku)
+        sku_def.name = sku
 
     if number_of_workers is not None:
-        sku.capacity = number_of_workers
+        sku_def.capacity = number_of_workers
 
-    plan_def = ServerFarmWithRichSku(plan.location, server_farm_with_rich_sku_name=name,
-                                     sku=sku, admin_site_name=admin_site_name)
-    return client.server_farms.create_or_update_server_farm(resource_group, name, plan_def)
+    instance.sku = sku_def
+    if admin_site_name is not None:
+        instance.admin_site_name = admin_site_name
+    return instance
 
-def _get_sku_prefix(tier):
-    return 'D' if tier.lower() == 'shared' else tier[0:1]
+def _normalize_sku(sku):
+    sku = sku.upper()
+    if sku == 'FREE':
+        return 'F1'
+    elif sku == 'SHARED':
+        return 'D1'
+    else:
+        return sku
 
 def _get_sku_name(tier):
     tier = tier.upper()
-    if tier in ['FREE', 'SHARED']:
-        return tier
+    if tier == 'F1':
+        return 'FREE'
+    elif tier == 'D1':
+        return 'SHARED'
     elif tier in ['B1', 'B2', 'B3']:
         return 'BASIC'
     elif tier in ['S1', 'S2', 'S3']:
