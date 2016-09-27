@@ -75,20 +75,13 @@ def get_generic_completion_list(generic_list):
 
 class CaseInsenstiveList(list): # pylint: disable=too-few-public-methods
     def __contains__(self, other):
-        other_lower = other.lower()
-        for val in self:
-            if other_lower == val.lower():
-                return True
-        return False
+        return next((True for x in self if other.lower() == x.lower()), False)
 
 def enum_choice_list(enum_type):
     """ Creates the argparse choices and type kwargs for a supplied enum type. """
     enum_type_values = [x.value for x in enum_type]
     def _type(value):
-        for val in enum_type_values:
-            if val.lower() == value.lower():
-                return val
-        return value
+        return next((x for x in enum_type_values if x.lower() == value.lower()), value)
     params = {
         'choices': CaseInsenstiveList(enum_type_values),
         'type': _type
