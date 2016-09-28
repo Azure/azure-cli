@@ -14,6 +14,7 @@ from azure.cli.core.application import Application, APPLICATION, Configuration
 from azure.cli.core.commands import CliCommand
 import azure.cli.core.help_files
 import azure.cli.core._help as _help
+from azure.cli.core._help import ArgumentGroupRegistry
 
 io = {}
 def redirect_io(func):
@@ -27,6 +28,25 @@ def redirect_io(func):
         sys.stdout = old_stdout
         sys.stderr = old_stderr
     return wrapper
+
+class HelpArgumentGroupRegistryTest(unittest.TestCase):
+    def test_help_argument_group_registry(self):
+        groups = [
+            'Resource Id Arguments',
+            'Z Arguments',
+            'B Arguments',
+            'Global Arguments',
+            'A Arguments',
+            'Generic Update Arguments',
+            'Resource Id Arguments'
+        ]
+        group_registry = ArgumentGroupRegistry(groups)
+        self.assertEqual(group_registry.get_group_priority('A Arguments'), '000002')
+        self.assertEqual(group_registry.get_group_priority('B Arguments'), '000003')
+        self.assertEqual(group_registry.get_group_priority('Z Arguments'), '000004')
+        self.assertEqual(group_registry.get_group_priority('Resource Id Arguments'), '000001')
+        self.assertEqual(group_registry.get_group_priority('Generic Update Arguments'), '000998')
+        self.assertEqual(group_registry.get_group_priority('Global Arguments'), '001000')
 
 class HelpObjectTest(unittest.TestCase):
     def test_short_summary_no_fullstop(self):
