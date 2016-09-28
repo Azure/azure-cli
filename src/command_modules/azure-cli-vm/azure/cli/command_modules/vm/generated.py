@@ -75,10 +75,14 @@ cli_command('vm nic delete', vm_delete_nics)
 cli_command('vm nic update', vm_update_nics)
 
 # VMSS NIC
-factory = lambda _: get_mgmt_service_client(NetworkManagementClient).network_interfaces
-cli_command('vmss nic list-vm-nics', NetworkInterfacesOperations.list_virtual_machine_scale_set_vm_network_interfaces, factory)
+# TODO: Remove hard coded api-version once https://github.com/Azure/azure-rest-api-specs/issues/570
+# is fixed.
+factory = lambda _: get_mgmt_service_client(NetworkManagementClient, api_version='2016-03-30').network_interfaces
 cli_command('vmss nic list', NetworkInterfacesOperations.list_virtual_machine_scale_set_network_interfaces, factory)
+cli_command('vmss nic list-vm-nics', NetworkInterfacesOperations.list_virtual_machine_scale_set_vm_network_interfaces, factory)
 cli_command('vmss nic show', NetworkInterfacesOperations.get_virtual_machine_scale_set_network_interface, factory)
+
+
 
 # VM Access
 cli_command('vm access set-linux-user', set_linux_user)
