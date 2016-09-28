@@ -28,7 +28,7 @@ For those familiar with pip, use the following:
 
    $ pip install azure-cli
 
-A Debian package is also available. Install as follows:
+A Debian/Ubuntu package is also available. Install as follows:
 
 .. code-block:: console
 
