@@ -63,8 +63,8 @@ def iot_hub_get_connection_string(client, hub_name, resource_group_name=None, po
     except StopIteration:
         raise CLIError('No policy found with name {}'.format(policy_name))
 
-    connection_string_tempalte = 'HostName={}.azure-devices.net;SharedAccessKeyName={};SharedAccessKey={}'
-    connection_string = connection_string_tempalte.format(hub_name, policy_name, access_policy.primary_key)
+    connection_string_template = 'HostName={}.azure-devices.net;SharedAccessKeyName={};SharedAccessKey={}'
+    connection_string = connection_string_template.format(hub_name, policy_name, access_policy.primary_key)
     return {'connectionString': connection_string}
 
 
@@ -77,11 +77,11 @@ def iot_device_create(client, hub_name, device_id, resource_group_name=None):
     return result
 
 
-def iot_device_list(client, hub_name, resource_group_name=None):
+def iot_device_list(client, hub_name, resource_group_name=None, top=10):
     if resource_group_name is None:
         resource_group_name = get_resource_group_by_iot_hub_name(client, hub_name)
     device_client = get_iot_device_client(client, resource_group_name, hub_name, '')
-    return device_client.list()
+    return device_client.list(top)
 
 
 def iot_device_get_connection_string(client, hub_name, device_id, resource_group_name=None):

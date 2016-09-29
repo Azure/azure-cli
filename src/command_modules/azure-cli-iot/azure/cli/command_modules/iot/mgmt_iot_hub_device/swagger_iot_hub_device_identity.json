@@ -141,14 +141,18 @@
             "description": "Maximum number of device identities to return.",
             "required": true,
             "type": "integer",
-            "default": 50
+            "minimum": 1,
+            "maximum": 1000
           }
         ],
         "responses": {
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/DeviceDescription"
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/DeviceDescription"
+              }
             }
           },
           "default": {
