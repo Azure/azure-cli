@@ -6,7 +6,7 @@
 import argparse
 from datetime import datetime, timedelta
 
-from azure.cli.commands.client_factory import get_mgmt_service_client
+from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.command_modules.insights.sdk.insightsclient import InsightsClient
 from azure.cli.command_modules.insights.sdk.insightsclient.operations import \
     (EventOperations)

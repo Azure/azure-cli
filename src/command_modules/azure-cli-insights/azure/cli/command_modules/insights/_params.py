@@ -4,8 +4,8 @@
 #---------------------------------------------------------------------------------------------
 
 # pylint: disable=line-too-long
-from azure.cli.commands import register_cli_argument
-from azure.cli.commands.parameters import ignore_type
+from azure.cli.core.commands import register_cli_argument
+from azure.cli.core.commands.parameters import ignore_type
 
 # ARGUMENT ALIASING
 

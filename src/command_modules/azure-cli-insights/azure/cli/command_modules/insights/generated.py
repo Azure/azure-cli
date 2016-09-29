@@ -8,8 +8,8 @@ from azure.cli.command_modules.insights.sdk.insightsclient.operations import \
     (EventCategoriesOperations, LogDefinitionOperations, LogOperations, MetricOperations,
      MetricDefinitionOperations)
 
-from azure.cli.commands import cli_command
-from azure.cli.commands.client_factory import get_mgmt_service_client
+from azure.cli.core.commands import cli_command
+from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.command_modules.insights.custom import \
     (list_events, list_digest_events, list_tenant_digest_events, list_tenant_events)
 
