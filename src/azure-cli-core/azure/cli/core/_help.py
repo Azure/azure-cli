@@ -229,7 +229,8 @@ class HelpFile(HelpObject): #pylint: disable=too-few-public-methods,too-many-ins
         description = getattr(options, 'description', None)
         try:
             self.short_summary = description[:description.index('.')]
-            self.long_summary = description[description.index('.') + 1:].lstrip()
+            long_summary = description[description.index('.') + 1:].lstrip()
+            self.long_summary = ' '.join(long_summary.splitlines())
         except (ValueError, AttributeError):
             self.short_summary = description
 

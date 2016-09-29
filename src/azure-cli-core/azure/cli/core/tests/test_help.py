@@ -11,7 +11,8 @@ import mock
 from six import StringIO
 
 from azure.cli.core.application import Application, APPLICATION, Configuration
-from azure.cli.core.commands import CliCommand
+from azure.cli.core.commands import \
+    (CliCommand, cli_command, _update_command_definitions, command_table)
 import azure.cli.core.help_files
 import azure.cli.core._help as _help
 
@@ -131,6 +132,26 @@ class HelpTest(unittest.TestCase):
         with self.assertRaises(SystemExit):
             app.execute('n1 -h'.split())
         self.assertEqual(True, io.getvalue().startswith('\nCommand\n    az n1\n        Long description.')) # pylint: disable=line-too-long
+
+    @redirect_io
+    def test_help_long_description_from_docstring(self):
+        """ Verifies that the first sentence of a docstring is extracted as the short description.
+        Verifies that line breaks in the long summary are removed and leaves the text wrapping
+        to the help system. """
+
+        def test_handler():
+            """Short Description. Long description with\nline break."""
+            pass
+
+        cli_command('test', test_handler)
+        _update_command_definitions(command_table)
+
+        config = Configuration([])
+        app = Application(config)
+
+        with self.assertRaises(SystemExit):
+            app.execute('test -h'.split())
+        self.assertEqual(True, io.getvalue().startswith('\nCommand\n    az test: Short Description.\n        Long description with line break.')) # pylint: disable=line-too-long
 
     @redirect_io
     def test_help_long_description_and_short_description(self):
