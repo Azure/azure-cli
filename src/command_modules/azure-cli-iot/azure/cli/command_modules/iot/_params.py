@@ -4,15 +4,17 @@
 #---------------------------------------------------------------------------------------------
 #pylint: disable=line-too-long
 
-from azure.cli.core.commands.parameters import (location_type, get_enum_choices)
-from azure.cli.core.commands import register_cli_argument
+from azure.cli.core.commands.parameters import (location_type, get_enum_choices, get_resource_name_completion_list)
+from azure.cli.core.commands import register_cli_argument, CliArgumentType
 
 from azure.mgmt.iothub.models.iot_hub_client_enums import IotHubSku
 
+hub_name_type = CliArgumentType(options_list=('--hub-name', '--name', '--hub', '-n'), help='The IoT Hub name.',
+                                completer=get_resource_name_completion_list('Microsoft.Devices/IotHubs'))
+device_id_type = CliArgumentType(options_list=('--device-id', '-d'), help='Device Id.')
 
 # Arguments for 'iot hub create'
-register_cli_argument('iot hub create', 'name', options_list=('--name', '-n'),
-                      help='Name for new Azure IoT Hub.')
+register_cli_argument('iot hub create', 'hub_name', hub_name_type)
 register_cli_argument('iot hub create', 'location', location_type,
                       help='Location of your IoT Hub. Default is the location of target resource group.')
 register_cli_argument('iot hub create', 'sku',
@@ -23,19 +25,14 @@ register_cli_argument('iot hub create', 'sku',
 register_cli_argument('iot hub create', 'unit', help='Units in your IoT Hub.', type=int)
 
 # Arguments for 'iot hub show-connection-string'
-# TODO: Add completer for iot hub name
-register_cli_argument('iot hub show-connection-string', 'name', options_list=('--name', '-n'),
-                      help='Target IoT Hub name.')
+register_cli_argument('iot hub show-connection-string', 'hub_name', hub_name_type)
 register_cli_argument('iot hub show-connection-string', 'policy_name',
                       help='The access policy you choose to use.')
 
 # Arguments for 'iot device create'
-register_cli_argument('iot device create', 'hub', help='Target IoT Hub name.')
-register_cli_argument('iot device create', 'device_id',
-                      options_list=('--device-id', '-d'), help='Device Id.')
+register_cli_argument('iot device create', 'hub_name', hub_name_type)
+register_cli_argument('iot device create', 'device_id', device_id_type)
 
 # Arguments for 'iot device show-connection-string'
-# TODO: Add completer for device id
-register_cli_argument('iot device show-connection-string', 'hub', help='Target IoT Hub name.')
-register_cli_argument('iot device show-connection-string', 'device_id',
-                      options_list=('--device-id', '-d'), help='Device Id.')
+register_cli_argument('iot device show-connection-string', 'hub_name', hub_name_type)
+register_cli_argument('iot device show-connection-string', 'device_id', device_id_type)
