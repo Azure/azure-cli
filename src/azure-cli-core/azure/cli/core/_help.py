@@ -132,9 +132,9 @@ class ArgumentGroupRegistry(object): # pylint: disable=too-few-public-methods
             'Global Arguments': 1000,
             }
         priority = 2
-        # get alphabetical list of groups and ensure they are in the group priority dictionary
-        group_list = sorted(list(set(group_list)))
-        for group in [g for g in group_list if g not in self.priorities]:
+        # any groups not already in the static dictionary should be prioritized alphabetically
+        other_groups = [g for g in sorted(list(set(group_list))) if g not in self.priorities]
+        for group in other_groups:
             self.priorities[group] = priority
             priority += 1
 
