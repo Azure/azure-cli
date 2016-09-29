@@ -40,14 +40,17 @@ MOCKED_STORAGE_ACCOUNT = 'dummystorage'
 
 # MOCK METHODS
 
-def _mock_get_mgmt_service_client(client_type, subscription_bound=True, subscription_id=None):
+def _mock_get_mgmt_service_client(client_type, subscription_bound=True, subscription_id=None,
+                                  api_version=None):
     # version of _get_mgmt_service_client to use when recording or playing tests
     profile = Profile()
     cred, subscription_id, _ = profile.get_login_credentials(subscription_id=subscription_id)
     if subscription_bound:
-        client = client_type(cred, subscription_id)
+        client = client_type(cred, subscription_id, api_version=api_version) \
+            if api_version else client_type(cred, subscription_id)
     else:
-        client = client_type(cred)
+        client = client_type(cred, api_version=api_version) \
+            if api_version else client_type(cred)
 
     _debug.allow_debug_connection(client)
 
