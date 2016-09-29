@@ -19,23 +19,14 @@ from azure.mgmt.storage.models import SkuName
 from azure.cli.core.commands import register_cli_argument, CliArgumentType, register_extra_cli_argument
 from azure.cli.core.commands.arm import is_valid_resource_id
 from azure.cli.core.commands.template_create import register_folded_cli_argument
-from azure.cli.core.commands.parameters import (location_type,
-                                                get_location_completion_list,
-                                                get_one_of_subscription_locations,
-                                                get_resource_name_completion_list,
-                                                tags_type)
-from azure.cli.command_modules.vm._actions import (VMImageFieldAction,
-                                                   VMSSHFieldAction,
-                                                   VMDNSNameAction,
-                                                   load_images_from_aliases_doc,
-                                                   get_vm_sizes,
-                                                   _handle_vm_nics,
-                                                   PrivateIpAction,
-                                                   _resource_not_exists,
-                                                   _os_disk_default,
-                                                   _find_default_vnet,
-                                                   _find_default_storage_account)
-from azure.cli.command_modules.vm._validators import nsg_name_validator
+from azure.cli.core.commands.parameters import \
+    (location_type, get_location_completion_list, get_one_of_subscription_locations,
+     get_resource_name_completion_list, tags_type)
+from azure.cli.command_modules.vm._actions import \
+    (VMImageFieldAction, VMSSHFieldAction, VMDNSNameAction, load_images_from_aliases_doc,
+     get_vm_sizes, PrivateIpAction, _resource_not_exists)
+from azure.cli.command_modules.vm._validators import \
+    (validate_nsg_name, validate_vm_nics, validate_default_os_disk, validate_default_vnet, validate_default_storage_account)
 
 def get_urn_aliases_completion_list(prefix, **kwargs):#pylint: disable=unused-argument
     images = load_images_from_aliases_doc()
@@ -142,7 +133,7 @@ for scope in ['vm', 'vmss']:
 register_cli_argument('vm image list', 'image_location', location_type)
 
 register_cli_argument('vm open-port', 'vm_name', name_arg_type, help='The name of the virtual machine to open inbound traffic on.')
-register_cli_argument('vm open-port', 'network_security_group_name', options_list=('--nsg-name',), help='The name of the network security group to create if one does not exist. Ignored if an NSG already exists.', validator=nsg_name_validator)
+register_cli_argument('vm open-port', 'network_security_group_name', options_list=('--nsg-name',), help='The name of the network security group to create if one does not exist. Ignored if an NSG already exists.', validator=validate_nsg_name)
 register_cli_argument('vm open-port', 'apply_to_subnet', help='Allow inbound traffic on the subnet instead of the NIC', action='store_true')
 
 register_cli_argument('vm nic', 'vm_name', existing_vm_name, id_part=None)
@@ -170,7 +161,7 @@ nsg_rule_type = CliArgumentType(
 )
 
 register_cli_argument('vm create', 'network_interface_type', help=argparse.SUPPRESS)
-register_cli_argument('vm create', 'network_interface_ids', options_list=('--nics',), nargs='+', help='Names or IDs of existing NICs to reference.  The first NIC will be the primary NIC.', type=lambda val: val if (not '/' in val or is_valid_resource_id(val, ValueError)) else '', validator=_handle_vm_nics)
+register_cli_argument('vm create', 'network_interface_ids', options_list=('--nics',), nargs='+', help='Names or IDs of existing NICs to reference.  The first NIC will be the primary NIC.', type=lambda val: val if (not '/' in val or is_valid_resource_id(val, ValueError)) else '', validator=validate_vm_nics)
 register_cli_argument('vm create', 'name', name_arg_type, validator=_resource_not_exists('Microsoft.Compute/virtualMachines'))
 
 register_cli_argument('vmss create', 'name', name_arg_type)
@@ -180,7 +171,7 @@ for scope in ['vm create', 'vmss create']:
     register_cli_argument(scope, 'location', completer=get_location_completion_list, help='Location in which to create the VM and related resources. If not specified, defaults to the resource group\'s location.')
     register_cli_argument(scope, 'custom_os_disk_uri', help=argparse.SUPPRESS)
     register_cli_argument(scope, 'os_disk_type', help=argparse.SUPPRESS)
-    register_cli_argument(scope, 'os_disk_name', validator=_os_disk_default)
+    register_cli_argument(scope, 'os_disk_name', validator=validate_default_os_disk)
     register_cli_argument(scope, 'overprovision', action='store_false', default=None, options_list=('--disable-overprovision',))
     register_cli_argument(scope, 'upgrade_policy_mode', choices=choices_upgrade_mode, help=None, type=str.lower)
     register_cli_argument(scope, 'os_disk_uri', help=argparse.SUPPRESS)
@@ -205,8 +196,8 @@ for scope in ['vm create', 'vmss create']:
     register_cli_argument(scope, 'private_ip_address', help='Static private IP address (e.g. 10.0.0.5).', options_list=('--private-ip-address',), action=PrivateIpAction)
     register_cli_argument(scope, 'public_ip_address_allocation', choices=['dynamic', 'static'], help='', default='dynamic', type=str.lower)
     register_folded_cli_argument(scope, 'public_ip_address', 'Microsoft.Network/publicIPAddresses')
-    register_folded_cli_argument(scope, 'storage_account', 'Microsoft.Storage/storageAccounts', validator=_find_default_storage_account, none_flag_value=None, default_value_flag='existingId')
-    register_folded_cli_argument(scope, 'virtual_network', 'Microsoft.Network/virtualNetworks', options_list=('--vnet',), validator=_find_default_vnet, none_flag_value=None, default_value_flag='existingId')
+    register_folded_cli_argument(scope, 'storage_account', 'Microsoft.Storage/storageAccounts', validator=validate_default_storage_account, none_flag_value=None, default_value_flag='existingId')
+    register_folded_cli_argument(scope, 'virtual_network', 'Microsoft.Network/virtualNetworks', options_list=('--vnet',), validator=validate_default_vnet, none_flag_value=None, default_value_flag='existingId')
     register_folded_cli_argument(scope, 'network_security_group', 'Microsoft.Network/networkSecurityGroups', options_list=('--nsg',))
     register_folded_cli_argument(scope, 'load_balancer', 'Microsoft.Network/loadBalancers')
     register_cli_argument(scope, 'network_security_group_rule', nsg_rule_type, options_list=('--nsg-rule',))

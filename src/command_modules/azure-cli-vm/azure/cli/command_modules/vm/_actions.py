@@ -5,16 +5,13 @@
 
 import argparse
 import json
-import math
 import os
 import re
-import time
-import random
 
 from azure.cli.core._util import CLIError
 from azure.cli.core.application import APPLICATION
 from azure.cli.core.commands.parameters import get_one_of_subscription_locations
-from azure.cli.core.commands.arm import resource_id, resource_exists
+from azure.cli.core.commands.arm import resource_exists
 
 from six.moves.urllib.request import urlopen #pylint: disable=import-error
 
@@ -69,37 +66,6 @@ class PrivateIpAction(argparse.Action): #pylint: disable=too-few-public-methods
         if private_ip:
             namespace.private_ip_address_allocation = 'static'
 
-def _handle_vm_nics(namespace):
-    from azure.cli.core.commands.client_factory import get_subscription_id
-    nics_value = namespace.network_interface_ids
-    nics = []
-
-    if not nics_value:
-        namespace.network_interface_type = 'new'
-        return
-
-    namespace.network_interface_type = 'existing'
-
-    if not isinstance(nics_value, list):
-        nics_value = [nics_value]
-
-    for n in nics_value:
-        nics.append({
-            'id': n if '/' in n else resource_id(name=n,
-                                                 resource_group=namespace.resource_group_name,
-                                                 namespace='Microsoft.Network',
-                                                 type='networkInterfaces',
-                                                 subscription=get_subscription_id()),
-            'properties': {
-                'primary': nics_value[0] == n
-            }
-        })
-
-    namespace.network_interface_ids = nics
-    namespace.network_interface_type = 'existing'
-
-    namespace.public_ip_address_type = 'none'
-
 def _resource_not_exists(resource_type):
     def _handle_resource_not_exists(namespace):
         # TODO: hook up namespace._subscription_id once we support it
@@ -110,47 +76,6 @@ def _resource_not_exists(resource_type):
                 resource_type,
                 namespace.resource_group_name))
     return _handle_resource_not_exists
-
-def _find_default_vnet(namespace):
-    if not namespace.virtual_network and not namespace.virtual_network_type:
-        from azure.mgmt.network import NetworkManagementClient
-        from azure.cli.core.commands.client_factory import get_mgmt_service_client
-
-        client = get_mgmt_service_client(NetworkManagementClient).virtual_networks
-
-        vnet = next((v for v in
-                     client.list(namespace.resource_group_name)),
-                    None)
-        if vnet:
-            try:
-                namespace.subnet_name = vnet.subnets[0].name
-                namespace.virtual_network = vnet.name
-                namespace.virtual_network_type = 'existingName'
-            except KeyError:
-                pass
-
-def _find_default_storage_account(namespace):
-    if not namespace.storage_account and not namespace.storage_account_type:
-        from azure.mgmt.storage import StorageManagementClient
-        from azure.cli.core.commands.client_factory import get_mgmt_service_client
-
-        client = get_mgmt_service_client(StorageManagementClient).storage_accounts
-
-        sku_tier = 'Premium' if 'Premium' in namespace.storage_type else 'Standard'
-        account = next((a for a in client.list_by_resource_group(namespace.resource_group_name)
-                        if a.sku.tier.value == sku_tier), None)
-
-        if account:
-            namespace.storage_account = account.name
-            namespace.storage_account_type = 'existingName'
-        else:
-            namespace.storage_account = 'vhd{}{}'.format(str(int(math.ceil(time.time())))[:9],
-                                                         str(random.randint(1, 100000)))
-
-def _os_disk_default(namespace):
-    if not namespace.os_disk_name:
-        namespace.os_disk_name = 'osdisk{}{}'.format(str(int(math.ceil(time.time())))[:9],
-                                                     str(random.randint(1, 100000)))
 
 def _handle_auth_types(**kwargs):
     if kwargs['command'] != 'vm create' and kwargs['command'] != 'vmss create':
@@ -330,4 +255,3 @@ def _handle_container_ssh_file(**kwargs):
     args.ssh_key_value = read_content_if_is_file(args.ssh_key_value)
 
 APPLICATION.register(APPLICATION.COMMAND_PARSER_PARSED, _handle_container_ssh_file)
-
