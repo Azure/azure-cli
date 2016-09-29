@@ -9,6 +9,9 @@ import time
 
 from azure.cli.core.commands.arm import resource_id
 
+def generate_guid():
+    return '{}{}'.format(str(int(math.ceil(time.time())))[:9], str(random.randint(1, 100000)))
+
 def validate_nsg_name(namespace):
     namespace.network_security_group_name = namespace.network_security_group_name \
         or '{}NSG{}'.format(namespace.vm_name, random.randint(1, 999))
@@ -60,12 +63,6 @@ def validate_default_vnet(namespace):
         # find VNET in target resource group that matches the VM's location
         vnet = next((v for v in vnet_client.list(rg.name) if v.location == location), None) # pylint: disable=no-member
 
-        # TODO: if none found, find qualifying VNET in subscription (like portal)
-        # Current ARM templates do not support this
-        #if not vnet:
-        #    # if not matching VNET in the resource group, try the subscription
-        #    vnet = next((v for v in vnet_client.list_all() if v.location == location), None)
-
         if vnet:
             try:
                 ns.subnet_name = vnet.subnets[0].name
@@ -92,21 +89,12 @@ def validate_default_storage_account(namespace):
         account = next((a for a in storage_client.list_by_resource_group(ns.resource_group_name)
                         if a.sku.tier.value == sku_tier and a.location == location), None)
 
-        # TODO: if none found, find qualifying storage account in subscription (like portal)
-        # Current ARM templates do not support this
-        #if not account:
-        #    # if not matching storage account in the resource group, try the subscription
-        #    account = next((a for a in storage_client.list()
-        #                    if a.sku.tier.value == sku_tier and a.location == location), None)
-
         if account:
             ns.storage_account = account.name
             ns.storage_account_type = 'existingName'
         else:
-            ns.storage_account = 'vhd{}{}'.format(str(int(math.ceil(time.time())))[:9],
-                                                  str(random.randint(1, 100000)))
+            ns.storage_account = 'vhd{}'.format(generate_guid())
 
 def validate_default_os_disk(namespace):
     if not namespace.os_disk_name:
-        namespace.os_disk_name = 'osdisk{}{}'.format(str(int(math.ceil(time.time())))[:9],
-                                                     str(random.randint(1, 100000)))
+        namespace.os_disk_name = 'osdisk{}'.format(generate_guid())
