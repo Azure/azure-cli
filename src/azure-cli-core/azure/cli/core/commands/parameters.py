@@ -25,7 +25,7 @@ def get_location_completion_list(prefix, **kwargs):#pylint: disable=unused-argum
 def location_name_type(name):
     if ' ' in name:
         # if display name is provided, attempt to convert to short form name
-        name = next((l.name for l in get_subscription_locations() if l.display_name == name), name)
+        name = next((l.name for l in get_subscription_locations() if l.display_name.lower() == name.lower()), name)
     return name
 
 def get_one_of_subscription_locations():
