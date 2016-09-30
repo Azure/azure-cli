@@ -50,7 +50,7 @@ class AzHelpGenDirective(Directive):
                   [p.group_name for p in help_file.parameters if p.group_name]) 
 
                for arg in sorted(help_file.parameters,
-                                key=lambda p: _help.group_registry.get_group_priority(p.group_name)
+                                key=lambda p: group_registry.get_group_priority(p.group_name)
                                 + str(not p.required) + p.name):
                   yield '{}.. cliarg:: {}'.format(INDENT, arg.name)
                   yield ''
