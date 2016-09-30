@@ -99,9 +99,9 @@ def iot_device_list(client, hub_name, resource_group_name=None, top=10):
     return device_client.list(top)
 
 
-def iot_device_show_connection_string(client, hub_name, device_id=None, resource_group_name=None):
+def iot_device_show_connection_string(client, hub_name, device_id=None, resource_group_name=None, top=10):
     if device_id is None:
-        devices = iot_device_list(client, hub_name, resource_group_name)
+        devices = iot_device_list(client, hub_name, resource_group_name, top)
         if devices is None:
             raise CLIError('No devices found in IoT Hub {}.'.format(hub_name))
         connection_strings = []

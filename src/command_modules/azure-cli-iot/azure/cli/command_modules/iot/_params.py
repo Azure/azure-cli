@@ -40,3 +40,5 @@ register_cli_argument('iot device list', 'top', help='Maximum number of device i
 # Arguments for 'iot device show-connection-string'
 register_cli_argument('iot device show-connection-string', 'hub_name', hub_name_type)
 register_cli_argument('iot device show-connection-string', 'device_id', device_id_type)
+register_cli_argument('iot device show-connection-string', 'top',
+                      help='Maximum number of connection strings to return.', type=int)
