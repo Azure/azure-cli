@@ -154,7 +154,7 @@ def get_resource_group_by_iot_hub_name(client, hub_name):
     if all_hubs is None:
         raise CLIError('No IoT Hub found in current subscription.')
     try:
-        target_hub = next(x for x in all_hubs if hub_name == x.name.lower())
+        target_hub = next(x for x in all_hubs if hub_name.lower() == x.name.lower())
     except StopIteration:
         raise CLIError('No IoT Hub found with name {} in current subscription.'.format(hub_name))
     return target_hub.resourcegroup
