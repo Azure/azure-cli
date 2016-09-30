@@ -14,36 +14,17 @@ from azure.cli.core.commands.parameters import (resource_group_name_type, locati
 def web_client_factory(**_):
     return get_mgmt_service_client(WebSiteManagementClient)
 
-def list_webapp_names(prefix, action, parsed_args, **kwargs):#pylint: disable=unused-argument
-    if parsed_args.resource_group_name:
-        client = web_client_factory()
-        #pylint: disable=no-member
-        result = client.sites.get_sites(parsed_args.resource_group_name).value
-        return [x.name for x in result]
-
-def list_app_service_plan_names(prefix, action, parsed_args, **kwargs):#pylint: disable=unused-argument
-    if parsed_args.resource_group_name:
-        client = web_client_factory()
-        #pylint: disable=no-member
-        result = client.server_farms.get_server_farms(parsed_args.resource_group_name).value
-        return [x.name for x in result]
-
 #pylint: disable=line-too-long
 # PARAMETER REGISTRATION
 name_arg_type = CliArgumentType(options_list=('--name', '-n'), metavar='NAME')
-existing_plan_name = CliArgumentType(overrides=name_arg_type, help='The name of the app service plan', completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'), id_part='name')
-existing_webapp_name = CliArgumentType(overrides=name_arg_type, help='The name of the web app', completer=get_resource_name_completion_list('Microsoft.Web/sites'), id_part='name')
 sku_arg_type = CliArgumentType(type=str.upper,
                                choices=['F1', 'FREE', 'D1', 'SHARED', 'B1', 'B2', 'B3', 'S1', 'S2', 'S3', 'P1', 'P2', 'P3'],
                                help='The pricing tiers, e.g., F1(Free), D1(Shared), B1(Basic Small), B2(Basic Medium), B3(Basic Large), S1(Standard Small), P1(Premium Small), etc')
 
-register_cli_argument('appservice web', 'resource_group', arg_type=resource_group_name_type)
-register_cli_argument('appservice web', 'location', arg_type=location_type)
-register_cli_argument('appservice web', 'slot', help="the name of the slot. Default to the productions slot if not specified")
+register_cli_argument('appservice', 'resource_group_name', arg_type=resource_group_name_type)
+register_cli_argument('appservice', 'location', arg_type=location_type)
 
-register_cli_argument('appservice plan', 'resource_group', arg_type=resource_group_name_type)
-register_cli_argument('appservice plan', 'location', arg_type=location_type)
-register_cli_argument('appservice plan', 'name', arg_type=existing_plan_name)
+register_cli_argument('appservice plan', 'name', arg_type=name_arg_type, help='The name of the app service plan', completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'), id_part='name')
 register_cli_argument('appservice plan create', 'name', options_list=('--name', '-n'), help="Name of the new app service plan")
 register_cli_argument('appservice plan create', 'sku', arg_type=sku_arg_type, default='B1')
 register_cli_argument('appservice plan update', 'sku', arg_type=sku_arg_type)
@@ -51,9 +32,10 @@ register_cli_argument('appservice plan update', 'allow_pending_state', ignore_ty
 register_cli_argument('appservice plan', 'number_of_workers', help='Number of workers to be allocated.', type=int, default=1)
 register_cli_argument('appservice plan', 'admin_site_name', help='The name of the admin web app.')
 
-register_cli_argument('appservice web', 'name', arg_type=existing_webapp_name)
+register_cli_argument('appservice web', 'slot', help="the name of the slot. Default to the productions slot if not specified")
+register_cli_argument('appservice web', 'name', arg_type=name_arg_type, completer=get_resource_name_completion_list('Microsoft.Web/sites'), id_part='name')
 register_cli_argument('appservice web create', 'name', options_list=('--name', '-n'), help='name of the new webapp')
-register_cli_argument('appservice web create', 'plan', arg_type=existing_plan_name, options_list=('--plan',),
+register_cli_argument('appservice web create', 'plan',  options_list=('--plan',), completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
                       help="name or resource id of the app service plan. Use 'appservice plan create' to get one")
 
 register_cli_argument('appservice web deployment user', 'user_name', help='user name')
