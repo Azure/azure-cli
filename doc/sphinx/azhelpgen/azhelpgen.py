@@ -46,7 +46,7 @@ class AzHelpGenDirective(Directive):
             yield ''
 
             if is_command and help_file.parameters:
-               group_registry = ArgumentGroupRegistry(
+               group_registry = _help.ArgumentGroupRegistry(
                   [p.group_name for p in help_file.parameters if p.group_name]) 
 
                for arg in sorted(help_file.parameters,
