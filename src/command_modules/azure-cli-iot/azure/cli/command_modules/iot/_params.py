@@ -5,7 +5,7 @@
 #pylint: disable=line-too-long
 
 from azure.cli.core.commands.parameters import (location_type, get_enum_choices, get_resource_name_completion_list)
-from azure.cli.core.commands import register_cli_argument, CliArgumentType
+from azure.cli.core.commands import register_cli_argument
 from azure.mgmt.iothub.models.iot_hub_client_enums import IotHubSku
 from ._factory import iot_hub_service_factory
 from .custom import iot_device_list
