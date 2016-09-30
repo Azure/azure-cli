@@ -19,13 +19,16 @@ helps['iot hub create'] = """
 helps['iot hub list'] = """
             type: command
             short-summary: List IoT Hubs in your subscription or resource group.
-            long-summary: When resource group is specified, IoT Hubs in target resource group will be listed.
+            long-summary: If resource group is provided, IoT Hubs in target resource group will be listed.
                         Otherwise, IoT Hubs in your subscription will be listed.
 """
 
 helps['iot hub show-connection-string'] = """
             type: command
             short-summary: Show connection string of target Azure IoT Hub.
+            long-summary: If resource group and IoT Hub name are not provided, connection strings for all IoT Hubs in your subscription will be returned.
+                        If only resource group is provided, connection strings for all IoT Hubs in the resource group will be returned.
+                        If both resource group and IoT Hub name are provided, connection string of the IoT Hub will be returned.
 """
 
 helps['iot device create'] = """
@@ -40,5 +43,7 @@ helps['iot device list'] = """
 
 helps['iot device show-connection-string'] = """
             type: command
-            short-summary: Show connection string of a device in target Azure IoT Hub.
+            short-summary: Show connection string of device(s) in target Azure IoT Hub.
+            long-summary: If device id is not provided, connection strings for all devices in your IoT Hub will be returned.
+                        Otherwise, connection string of target device will be returned.
 """
