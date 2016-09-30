@@ -99,7 +99,8 @@ def update_site_configs(resource_group_name, name, slot=None,
     return _generic_site_operation(resource_group_name, name, 'update_site_config', slot, configs)
 
 def update_app_settings(resource_group_name, name, settings, slot=None):
-    app_settings = _generic_site_operation(resource_group_name, name, 'list_site_app_settings', slot)
+    app_settings = _generic_site_operation(resource_group_name, name,
+                                           'list_site_app_settings', slot)
     for name_value in settings:
         #split at the first '=', appsetting should not have '=' in the name
         settings_name, value = name_value.split('=', 1)
@@ -110,7 +111,8 @@ def update_app_settings(resource_group_name, name, settings, slot=None):
     return result.properties
 
 def delete_app_settings(resource_group_name, name, setting_names, slot=None):
-    app_settings = _generic_site_operation(resource_group_name, name, 'list_site_app_settings', slot)
+    app_settings = _generic_site_operation(resource_group_name, name,
+                                           'list_site_app_settings', slot)
     for setting_name in setting_names:
         app_settings.properties.pop(setting_name, None)
 
@@ -120,8 +122,6 @@ def delete_app_settings(resource_group_name, name, setting_names, slot=None):
 def add_hostname(resource_group_name, name, hostname, slot=None):
     client = web_client_factory()
     webapp = client.sites.get_site(resource_group_name, name)
-    bindings = _generic_site_operation(resource_group_name, name, 'get_site_host_name_bindings',
-                                   slot)
     binding = HostNameBinding(webapp.location, host_name_binding_name=hostname, site_name=name)
     if slot is None:
         return client.sites.create_or_update_site_host_name_binding(resource_group_name, name,
@@ -135,7 +135,8 @@ def delete_hostname(resource_group_name, name, hostname, slot=None):
     if slot is None:
         return client.sites.delete_site_host_name_binding(resource_group_name, name, hostname)
     else:
-        return client.sites.delete_site_host_name_binding_slot(resource_group_name, name, slot, hostname)
+        return client.sites.delete_site_host_name_binding_slot(resource_group_name,
+                                                               name, slot, hostname)
 
 def list_hostnames(resource_group_name, name, slot=None):
     return _generic_site_operation(resource_group_name, name, 'get_site_host_name_bindings',

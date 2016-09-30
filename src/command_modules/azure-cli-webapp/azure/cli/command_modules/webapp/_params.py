@@ -35,7 +35,7 @@ register_cli_argument('appservice plan', 'admin_site_name', help='The name of th
 register_cli_argument('appservice web', 'slot', help="the name of the slot. Default to the productions slot if not specified")
 register_cli_argument('appservice web', 'name', arg_type=name_arg_type, completer=get_resource_name_completion_list('Microsoft.Web/sites'), id_part='name')
 register_cli_argument('appservice web create', 'name', options_list=('--name', '-n'), help='name of the new webapp')
-register_cli_argument('appservice web create', 'plan',  options_list=('--plan',), completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
+register_cli_argument('appservice web create', 'plan', options_list=('--plan',), completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
                       help="name or resource id of the app service plan. Use 'appservice plan create' to get one")
 
 register_cli_argument('appservice web deployment user', 'user_name', help='user name')
