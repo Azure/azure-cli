@@ -25,7 +25,7 @@ class IoTHubTest(ResourceGroupVCRTestBase):
         hub = self.hub_name
 
         # Test 'az iot hub create'
-        self.cmd('iot hub create -n {0} -g {1} --sku S1 --debug'.format(hub, rg),
+        self.cmd('iot hub create -n {0} -g {1} --sku S1'.format(hub, rg),
                  checks=[
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('location', location),
