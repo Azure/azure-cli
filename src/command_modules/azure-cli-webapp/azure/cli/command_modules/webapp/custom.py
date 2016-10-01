@@ -18,7 +18,7 @@ from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.arm import is_valid_resource_id, parse_resource_id
 import azure.cli.core._logging as _logging
 from azure.cli.core._util import CLIError
-from ._params import web_client_factory
+from ._params import web_client_factory, _generic_site_operation
 
 logger = _logging.get_az_logger(__name__)
 
@@ -31,18 +31,6 @@ def create_webapp(resource_group_name, name, plan):
     location = _get_location_from_app_service_plan(client, resource_group_name, plan)
     webapp_def = Site(server_farm_id=plan, location=location)
     return client.sites.create_or_update_site(resource_group_name, name, webapp_def)
-
-def _generic_site_operation(resource_group_name, name, operation_name, slot=None,
-                            extra_parameter=None, client=None):
-    client = client or web_client_factory()
-    m = getattr(client.sites,
-                operation_name if slot is None else operation_name + '_slot')
-    if slot is None:
-        return (m(resource_group_name, name)
-                if extra_parameter is None else m(resource_group_name, name, extra_parameter))
-    else:
-        return (m(resource_group_name, name, slot)
-                if extra_parameter is None else m(resource_group_name, name, extra_parameter, slot))
 
 def show_webapp(resource_group_name, name, slot=None):
     webapp = _generic_site_operation(resource_group_name, name, 'get_site', slot)
@@ -119,27 +107,28 @@ def delete_app_settings(resource_group_name, name, setting_names, slot=None):
     return _generic_site_operation(resource_group_name, name, 'update_site_app_settings',
                                    slot, app_settings)
 
-def add_hostname(resource_group_name, name, hostname, slot=None):
+def add_hostname(resource_group_name, webapp, name, slot=None):
     client = web_client_factory()
-    webapp = client.sites.get_site(resource_group_name, name)
-    binding = HostNameBinding(webapp.location, host_name_binding_name=hostname, site_name=name)
+    webapp = client.sites.get_site(resource_group_name, webapp)
+    binding = HostNameBinding(webapp.location, host_name_binding_name=name, site_name=webapp)
     if slot is None:
-        return client.sites.create_or_update_site_host_name_binding(resource_group_name, name,
-                                                                    hostname, binding)
+        return client.sites.create_or_update_site_host_name_binding(resource_group_name, webapp,
+                                                                    name, binding)
     else:
-        return client.sites.create_or_update_site_host_name_binding_slot(resource_group_name, name,
-                                                                         hostname, binding, slot)
+        return client.sites.create_or_update_site_host_name_binding_slot(resource_group_name,
+                                                                         webapp, name,
+                                                                         binding, slot)
 
-def delete_hostname(resource_group_name, name, hostname, slot=None):
+def delete_hostname(resource_group_name, webapp, name, slot=None):
     client = web_client_factory()
     if slot is None:
-        return client.sites.delete_site_host_name_binding(resource_group_name, name, hostname)
+        return client.sites.delete_site_host_name_binding(resource_group_name, webapp, name)
     else:
         return client.sites.delete_site_host_name_binding_slot(resource_group_name,
-                                                               name, slot, hostname)
+                                                               webapp, slot, name)
 
-def list_hostnames(resource_group_name, name, slot=None):
-    return _generic_site_operation(resource_group_name, name, 'get_site_host_name_bindings',
+def list_hostnames(resource_group_name, webapp, slot=None):
+    return _generic_site_operation(resource_group_name, webapp, 'get_site_host_name_bindings',
                                    slot)
 
 #TODO: figure out the 'configuration_source' and add related param descriptions
