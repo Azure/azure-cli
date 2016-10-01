@@ -45,9 +45,9 @@ def iot_hub_create(client, hub_name, resource_group_name,
 
 def iot_hub_list(client, resource_group_name=None):
     if resource_group_name is None:
-        return client.list_by_subscription().next()
+        return client.list_by_subscription()
     else:
-        return client.list_by_resource_group(resource_group_name).next()
+        return client.list_by_resource_group(resource_group_name)
 
 
 def iot_hub_show_connection_string(client, hub_name=None, resource_group_name=None, policy_name='iothubowner'):
@@ -57,19 +57,19 @@ def iot_hub_show_connection_string(client, hub_name=None, resource_group_name=No
             raise CLIError('No IoT Hub found.')
         connection_strings = []
         for h in hubs:
-            connection_string = get_single_iot_hub_connection_string(client, h.name, h.resourcegroup, policy_name)
+            connection_string = _get_single_iot_hub_connection_string(client, h.name, h.resourcegroup, policy_name)
             connection_strings.append({"name": h.name,
                                        "connectionString": connection_string})
         return connection_strings
     else:
         if resource_group_name is None:
             resource_group_name = get_resource_group_by_iot_hub_name(client, hub_name)
-        connection_string = get_single_iot_hub_connection_string(client, hub_name, resource_group_name, policy_name)
+        connection_string = _get_single_iot_hub_connection_string(client, hub_name, resource_group_name, policy_name)
         return {"connectionString": connection_string}
 
 
-def get_single_iot_hub_connection_string(client, hub_name, resource_group_name, policy_name):
-    access_policies = client.list_keys(resource_group_name, hub_name).next()
+def _get_single_iot_hub_connection_string(client, hub_name, resource_group_name, policy_name):
+    access_policies = list(client.list_keys(resource_group_name, hub_name))
     if access_policies is None:
         raise CLIError('No policy found from IoT Hub: {}.'.format(hub_name))
     logger.info('Shared Access Polices: %s', str(access_policies))
@@ -106,18 +106,18 @@ def iot_device_show_connection_string(client, hub_name, device_id=None, resource
             raise CLIError('No devices found in IoT Hub {}.'.format(hub_name))
         connection_strings = []
         for d in devices:
-            connection_string = get_single_iot_device_connection_string(client, hub_name, d.device_id, resource_group_name)
+            connection_string = _get_single_iot_device_connection_string(client, hub_name, d.device_id, resource_group_name)
             connection_strings.append({"deviceId": d.device_id,
                                        "connectionString": connection_string})
         return connection_strings
     else:
         if resource_group_name is None:
             resource_group_name = get_resource_group_by_iot_hub_name(client, hub_name)
-        connection_string = get_single_iot_device_connection_string(client, hub_name, device_id, resource_group_name)
+        connection_string = _get_single_iot_device_connection_string(client, hub_name, device_id, resource_group_name)
         return {"connectionString": connection_string}
 
 
-def get_single_iot_device_connection_string(client, hub_name, device_id, resource_group_name):
+def _get_single_iot_device_connection_string(client, hub_name, device_id, resource_group_name):
     if resource_group_name is None:
         resource_group_name = get_resource_group_by_iot_hub_name(client, hub_name)
     device_client = get_iot_device_client(client, resource_group_name, hub_name, device_id)

@@ -11,21 +11,15 @@ from ._factory import iot_hub_service_factory
 from .custom import iot_device_list
 
 
-def get_device_id_completion_list():
-    def completer(prefix, action, parsed_args, **kwargs):#pylint: disable=unused-argument
-        client = iot_hub_service_factory(kwargs)
-        if parsed_args.hub_name:
-            return [d.device_id for d in iot_device_list(client, parsed_args.hub_name, top=100)]
-        else:
-            return []
-    return completer
-
+def get_device_id_completion_list(prefix, action, parsed_args, **kwargs):#pylint: disable=unused-argument
+    client = iot_hub_service_factory(kwargs)
+    return [d.device_id for d in iot_device_list(client, parsed_args.hub_name, top=100)] if parsed_args.hub_name else []
 
 register_cli_argument('iot', 'hub_name', options_list=('--hub-name', '--name', '--hub', '-n'),
                       completer=get_resource_name_completion_list('Microsoft.Devices/IotHubs'),
                       help='The IoT Hub name.')
 register_cli_argument('iot', 'device_id', options_list=('--device-id', '-d'), help='Device Id.',
-                      completer=get_device_id_completion_list())
+                      completer=get_device_id_completion_list)
 
 # Arguments for 'iot hub create'
 register_cli_argument('iot hub create', 'hub_name', completer=None)
