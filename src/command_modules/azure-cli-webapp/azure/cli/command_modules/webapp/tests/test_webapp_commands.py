@@ -147,7 +147,7 @@ class WebappConfigureTest(ResourceGroupVCRTestBase):
 
         self.cmd('appservice web config hostname list -g {} --webapp {}'.format(self.resource_group, self.webapp_name), checks=[
             JMESPathCheck('length(@)', 1),
-            JMESPathCheck('[0].name', '{}/{}.azurewebsites.net'.format(self.webapp_name, self.webapp_name))
+            JMESPathCheck('[0].name', '{0}/{0}.azurewebsites.net'.format(self.webapp_name))
             ])
 
 

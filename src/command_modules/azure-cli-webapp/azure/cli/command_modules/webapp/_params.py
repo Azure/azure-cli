@@ -26,17 +26,14 @@ def _generic_site_operation(resource_group_name, name, operation_name, slot=None
         return (m(resource_group_name, name, slot)
                 if extra_parameter is None else m(resource_group_name, name, extra_parameter, slot))
 
-def get_hostname_completion_list():
-    def completer(prefix, action, parsed_args, **kwargs): # pylint: disable=unused-argument
-        if parsed_args.resource_group_name and parsed_args.webapp:
-            rg = parsed_args.resource_group_name
-            webapp = parsed_args.webapp
-            slot = getattr(parsed_args, 'slot', None)
-            result = _generic_site_operation(rg, webapp, 'get_site_host_name_bindings', slot)
-            #workaround an api defect, that 'name' is '<webapp>/<hostname>' 
-            return [r.name.split('/', 1)[1] for r in result]
-    return completer
-
+def get_hostname_completion_list(prefix, action, parsed_args, **kwargs): # pylint: disable=unused-argument
+    if parsed_args.resource_group_name and parsed_args.webapp:
+        rg = parsed_args.resource_group_name
+        webapp = parsed_args.webapp
+        slot = getattr(parsed_args, 'slot', None)
+        result = _generic_site_operation(rg, webapp, 'get_site_host_name_bindings', slot)
+        #workaround an api defect, that 'name' is '<webapp>/<hostname>'
+        return [r.name.split('/', 1)[1] for r in result]
 
 #pylint: disable=line-too-long
 # PARAMETER REGISTRATION
@@ -104,4 +101,4 @@ register_cli_argument('appservice web config update', 'java_container', help="Th
 register_cli_argument('appservice web config update', 'java_container_version', help="The version of the java container, e.g., '8.0.23' for Tomcat")
 
 register_cli_argument('appservice web config hostname', 'webapp', help="webapp name", completer=get_resource_name_completion_list('Microsoft.Web/sites'), id_part='name')
-register_cli_argument('appservice web config hostname', 'name', arg_type=name_arg_type, completer=get_hostname_completion_list(), help="hostname assigned to the site, such as custom domains", id_part='child_name')
+register_cli_argument('appservice web config hostname', 'name', arg_type=name_arg_type, completer=get_hostname_completion_list, help="hostname assigned to the site, such as custom domains", id_part='child_name')
