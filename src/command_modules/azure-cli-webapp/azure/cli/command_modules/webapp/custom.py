@@ -12,45 +12,33 @@ except ImportError:
     from urlparse import urlparse # pylint: disable=import-error
 
 from azure.mgmt.web.models import (Site, SiteConfig, User, ServerFarmWithRichSku,
-                                   SkuDescription, SslState)
+                                   SkuDescription, SslState, HostNameBinding)
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.arm import is_valid_resource_id, parse_resource_id
 import azure.cli.core._logging as _logging
 from azure.cli.core._util import CLIError
-from ._params import web_client_factory
+from ._params import web_client_factory, _generic_site_operation
 
 logger = _logging.get_az_logger(__name__)
 
 #pylint:disable=no-member
 
-def create_webapp(resource_group, name, plan):
+def create_webapp(resource_group_name, name, plan):
     client = web_client_factory()
     if is_valid_resource_id(plan):
         plan = parse_resource_id(plan)['name']
-    location = _get_location_from_app_service_plan(client, resource_group, plan)
+    location = _get_location_from_app_service_plan(client, resource_group_name, plan)
     webapp_def = Site(server_farm_id=plan, location=location)
-    return client.sites.create_or_update_site(resource_group, name, webapp_def)
+    return client.sites.create_or_update_site(resource_group_name, name, webapp_def)
 
-def _generic_site_operation(resource_group, name, operation_name, slot=None,
-                            extra_parameter=None, client=None):
-    client = client or web_client_factory()
-    m = getattr(client.sites,
-                operation_name if slot is None else operation_name + '_slot')
-    if slot is None:
-        return (m(resource_group, name)
-                if extra_parameter is None else m(resource_group, name, extra_parameter))
-    else:
-        return (m(resource_group, name, slot)
-                if extra_parameter is None else m(resource_group, name, extra_parameter, slot))
-
-def show_webapp(resource_group, name, slot=None):
-    webapp = _generic_site_operation(resource_group, name, 'get_site', slot)
+def show_webapp(resource_group_name, name, slot=None):
+    webapp = _generic_site_operation(resource_group_name, name, 'get_site', slot)
     return _rename_server_farm_props(webapp)
 
-def list_webapp(resource_group):
+def list_webapp(resource_group_name):
     client = web_client_factory()
-    result = client.sites.get_sites(resource_group)
+    result = client.sites.get_sites(resource_group_name)
     for webapp in result:
         _rename_server_farm_props(webapp)
     return result
@@ -61,32 +49,32 @@ def _rename_server_farm_props(webapp):
     del webapp.server_farm_id
     return webapp
 
-def delete_webapp(resource_group, name, slot=None):
-    return _generic_site_operation(resource_group, name, 'delete_site', slot)
+def delete_webapp(resource_group_name, name, slot=None):
+    return _generic_site_operation(resource_group_name, name, 'delete_site', slot)
 
-def stop_webapp(resource_group, name, slot=None):
-    return _generic_site_operation(resource_group, name, 'stop_site', slot)
+def stop_webapp(resource_group_name, name, slot=None):
+    return _generic_site_operation(resource_group_name, name, 'stop_site', slot)
 
-def restart_webapp(resource_group, name, slot=None):
-    return _generic_site_operation(resource_group, name, 'restart_site', slot)
+def restart_webapp(resource_group_name, name, slot=None):
+    return _generic_site_operation(resource_group_name, name, 'restart_site', slot)
 
-def get_site_configs(resource_group, name, slot=None):
-    return _generic_site_operation(resource_group, name, 'get_site_config', slot)
+def get_site_configs(resource_group_name, name, slot=None):
+    return _generic_site_operation(resource_group_name, name, 'get_site_config', slot)
 
-def get_app_settings(resource_group, name, slot=None):
-    result = _generic_site_operation(resource_group, name, 'list_site_app_settings', slot)
+def get_app_settings(resource_group_name, name, slot=None):
+    result = _generic_site_operation(resource_group_name, name, 'list_site_app_settings', slot)
     return result.properties
 
 #for any modifications to the non-optional parameters, adjust the reflection logic accordingly
 #in the method
-def update_site_configs(resource_group, name, slot=None,
+def update_site_configs(resource_group_name, name, slot=None,
                         php_version=None, python_version=None,#pylint: disable=unused-argument
                         net_framework_version=None, #pylint: disable=unused-argument
                         java_version=None, java_container=None, java_container_version=None,#pylint: disable=unused-argument
                         remote_debugging_enabled=None, web_sockets_enabled=None,#pylint: disable=unused-argument
                         always_on=None, auto_heal_enabled=None,#pylint: disable=unused-argument
                         use32_bit_worker_process=None):#pylint: disable=unused-argument
-    configs = get_site_configs(resource_group, name, slot)
+    configs = get_site_configs(resource_group_name, name, slot)
     import inspect
     frame = inspect.currentframe()
     #note: getargvalues is used already in azure.cli.core.commands.
@@ -96,64 +84,90 @@ def update_site_configs(resource_group, name, slot=None,
         if arg is not None:
             setattr(configs, arg, values[arg])
 
-    return _generic_site_operation(resource_group, name, 'update_site_config', slot, configs)
+    return _generic_site_operation(resource_group_name, name, 'update_site_config', slot, configs)
 
-def update_app_settings(resource_group, name, settings, slot=None):
-    app_settings = _generic_site_operation(resource_group, name, 'list_site_app_settings', slot)
+def update_app_settings(resource_group_name, name, settings, slot=None):
+    app_settings = _generic_site_operation(resource_group_name, name,
+                                           'list_site_app_settings', slot)
     for name_value in settings:
         #split at the first '=', appsetting should not have '=' in the name
         settings_name, value = name_value.split('=', 1)
         app_settings.properties[settings_name] = value
 
-    result = _generic_site_operation(resource_group, name, 'update_site_app_settings',
+    result = _generic_site_operation(resource_group_name, name, 'update_site_app_settings',
                                      slot, app_settings)
     return result.properties
 
-def delete_app_settings(resource_group, name, setting_names, slot=None):
-    app_settings = _generic_site_operation(resource_group, name, 'list_site_app_settings', slot)
+def delete_app_settings(resource_group_name, name, setting_names, slot=None):
+    app_settings = _generic_site_operation(resource_group_name, name,
+                                           'list_site_app_settings', slot)
     for setting_name in setting_names:
         app_settings.properties.pop(setting_name, None)
 
-    return _generic_site_operation(resource_group, name, 'update_site_app_settings',
+    return _generic_site_operation(resource_group_name, name, 'update_site_app_settings',
                                    slot, app_settings)
 
-#TODO: figure out the 'configuration_source' and add related param descriptions
-def create_webapp_slot(resource_group, webapp, slot, configuration_source=None):
+def add_hostname(resource_group_name, webapp, name, slot=None):
     client = web_client_factory()
-    site = client.sites.get_site(resource_group, webapp)
+    webapp = client.sites.get_site(resource_group_name, webapp)
+    binding = HostNameBinding(webapp.location, host_name_binding_name=name, site_name=webapp)
+    if slot is None:
+        return client.sites.create_or_update_site_host_name_binding(resource_group_name, webapp,
+                                                                    name, binding)
+    else:
+        return client.sites.create_or_update_site_host_name_binding_slot(resource_group_name,
+                                                                         webapp, name,
+                                                                         binding, slot)
+
+def delete_hostname(resource_group_name, webapp, name, slot=None):
+    client = web_client_factory()
+    if slot is None:
+        return client.sites.delete_site_host_name_binding(resource_group_name, webapp, name)
+    else:
+        return client.sites.delete_site_host_name_binding_slot(resource_group_name,
+                                                               webapp, slot, name)
+
+def list_hostnames(resource_group_name, webapp, slot=None):
+    return _generic_site_operation(resource_group_name, webapp, 'get_site_host_name_bindings',
+                                   slot)
+
+#TODO: figure out the 'configuration_source' and add related param descriptions
+def create_webapp_slot(resource_group_name, webapp, slot, configuration_source=None):
+    client = web_client_factory()
+    site = client.sites.get_site(resource_group_name, webapp)
     location = site.location
     if configuration_source is None:
         slot_def = Site(server_farm_id=site.server_farm_id, location=location)
     elif configuration_source.lower() == webapp.lower(): #clone from production
         slot_def = site #pylint: disable=redefined-variable-type
     else: # from other slot
-        slot_def = client.sites.get_site_slot(resource_group, webapp, slot)
+        slot_def = client.sites.get_site_slot(resource_group_name, webapp, slot)
 
-    return client.sites.create_or_update_site_slot(resource_group, webapp, slot_def, slot)
+    return client.sites.create_or_update_site_slot(resource_group_name, webapp, slot_def, slot)
 
-def enable_local_git(resource_group, name, slot=None):
+def enable_local_git(resource_group_name, name, slot=None):
     client = web_client_factory()
-    location = _get_location_from_webapp(client, resource_group, name)
+    location = _get_location_from_webapp(client, resource_group_name, name)
     site_config = SiteConfig(location)
     site_config.scm_type = 'LocalGit'
     if slot is None:
-        client.sites.create_or_update_site_config(resource_group, name, site_config)
+        client.sites.create_or_update_site_config(resource_group_name, name, site_config)
     else:
-        client.sites.create_or_update_site_config_slot(resource_group, name, site_config, slot)
+        client.sites.create_or_update_site_config_slot(resource_group_name, name, site_config, slot)
 
-    return {'url' : _get_git_url(client, resource_group, name, slot)}
+    return {'url' : _get_git_url(client, resource_group_name, name, slot)}
 
-def create_app_service_plan(resource_group, name, sku, number_of_workers=None,
+def create_app_service_plan(resource_group_name, name, sku, number_of_workers=None,
                             location=None):
     client = web_client_factory()
     sku = _normalize_sku(sku)
     if location is None:
-        location = _get_location_from_resource_group(resource_group)
+        location = _get_location_from_resource_group(resource_group_name)
 
     #the api is odd on parameter naming, have to live with it for now
     sku_def = SkuDescription(tier=_get_sku_name(sku), name=sku, capacity=number_of_workers)
     plan_def = ServerFarmWithRichSku(location, server_farm_with_rich_sku_name=name, sku=sku_def)
-    return client.server_farms.create_or_update_server_farm(resource_group, name, plan_def)
+    return client.server_farms.create_or_update_server_farm(resource_group_name, name, plan_def)
 
 def update_app_service_plan(instance, sku=None, number_of_workers=None,
                             admin_site_name=None):
@@ -195,34 +209,34 @@ def _get_sku_name(tier):
     else:
         raise CLIError("Invalid sku(pricing tier), please refer to command help for valid values")
 
-def _get_location_from_resource_group(resource_group):
+def _get_location_from_resource_group(resource_group_name):
     from azure.mgmt.resource.resources import ResourceManagementClient
     client = get_mgmt_service_client(ResourceManagementClient)
-    group = client.resource_groups.get(resource_group)
+    group = client.resource_groups.get(resource_group_name)
     return group.location
 
-def _get_location_from_webapp(client, resource_group, webapp):
-    webapp = client.sites.get_site(resource_group, webapp)
+def _get_location_from_webapp(client, resource_group_name, webapp):
+    webapp = client.sites.get_site(resource_group_name, webapp)
     return webapp.location
 
-def _get_location_from_app_service_plan(client, resource_group, plan):
-    plan = client.server_farms.get_server_farm(resource_group, plan)
+def _get_location_from_app_service_plan(client, resource_group_name, plan):
+    plan = client.server_farms.get_server_farm(resource_group_name, plan)
     return plan.location
 
-def get_git_url(resource_group, name, slot=None):
+def get_git_url(resource_group_name, name, slot=None):
     client = web_client_factory()
-    return {'url' : _get_git_url(client, resource_group, name, slot)}
+    return {'url' : _get_git_url(client, resource_group_name, name, slot)}
 
-def _get_git_url(client, resource_group, name, slot=None):
+def _get_git_url(client, resource_group_name, name, slot=None):
     user = client.provider.get_publishing_user()
-    repo_url = _get_repo_url(client, resource_group, name, slot)
+    repo_url = _get_repo_url(client, resource_group_name, name, slot)
     parsed = urlparse(repo_url)
     git_url = '{}://{}@{}/{}.git'.format(parsed.scheme, user.publishing_user_name,
                                          parsed.netloc, name)
     return git_url
 
-def _get_repo_url(client, resource_group, name, slot=None):
-    scc = _generic_site_operation(resource_group, name, 'get_site_source_control',
+def _get_repo_url(client, resource_group_name, name, slot=None):
+    scc = _generic_site_operation(resource_group_name, name, 'get_site_source_control',
                                   slot, client=client)
     if scc.repo_url is None:
         raise CLIError("Please enable Git deployment, say, run 'webapp git enable-local'")
@@ -243,9 +257,9 @@ def set_deployment_user(user_name, password=None):
     result = client.provider.update_publishing_user(user)
     return result
 
-def view_in_browser(resource_group, name, slot=None):
+def view_in_browser(resource_group_name, name, slot=None):
     import webbrowser
-    site = _generic_site_operation(resource_group, name, 'get_site', slot)
+    site = _generic_site_operation(resource_group_name, name, 'get_site', slot)
     url = site.default_host_name
     ssl_host = next((h for h in site.host_name_ssl_states
                      if h.ssl_state != SslState.disabled), None)
@@ -253,7 +267,7 @@ def view_in_browser(resource_group, name, slot=None):
     webbrowser.open(url, new=2) # 2 means: open in a new tab, if possible
 
 #TODO: expose new blob suport
-def config_diagnostics(resource_group, name, level=None,
+def config_diagnostics(resource_group_name, name, level=None,
                        application_logging=None, web_server_logging=None,
                        detailed_error_messages=None, failed_request_tracing=None,
                        slot=None):
@@ -262,7 +276,7 @@ def config_diagnostics(resource_group, name, level=None,
                                        FileSystemHttpLogsConfig, EnabledConfig)
     client = web_client_factory()
     #TODO: ensure we call get_site only once
-    site = client.sites.get_site(resource_group, name)
+    site = client.sites.get_site(resource_group_name, name)
     location = site.location
 
     application_logs = None
@@ -291,25 +305,25 @@ def config_diagnostics(resource_group, name, level=None,
                                      failed_requests_tracing=failed_request_tracing_logs,
                                      detailed_error_messages=detailed_error_messages_logs)
 
-    return _generic_site_operation(resource_group, name, 'update_site_logs_config',
+    return _generic_site_operation(resource_group_name, name, 'update_site_logs_config',
                                    slot, site_log_config)
 
 
-def config_slot_auto_swap(resource_group, webapp, slot, auto_swap_slot=None, disable=None):
+def config_slot_auto_swap(resource_group_name, webapp, slot, auto_swap_slot=None, disable=None):
     client = web_client_factory()
-    site_config = client.sites.get_site_config_slot(resource_group, webapp, slot)
+    site_config = client.sites.get_site_config_slot(resource_group_name, webapp, slot)
     site_config.auto_swap_slot_name = '' if disable else (auto_swap_slot or 'production')
-    return client.sites.update_site_config_slot(resource_group, webapp, site_config, slot)
+    return client.sites.update_site_config_slot(resource_group_name, webapp, site_config, slot)
 
-def get_streaming_log(resource_group, name, provider=None, slot=None):
+def get_streaming_log(resource_group_name, name, provider=None, slot=None):
     client = web_client_factory()
-    repo_url = _get_repo_url(client, resource_group, name, slot)
+    repo_url = _get_repo_url(client, resource_group_name, name, slot)
     streaming_url = repo_url + '/logstream'
     import time
     if provider:
         streaming_url += ('/' + provider.lstrip('/'))
 
-    user, password = _get_site_credential(client, resource_group, name)
+    user, password = _get_site_credential(client, resource_group_name, name)
     t = threading.Thread(target=_stream_trace, args=(streaming_url, user, password))
     t.daemon = True
     t.start()
@@ -317,13 +331,13 @@ def get_streaming_log(resource_group, name, provider=None, slot=None):
     while True:
         time.sleep(100) #so that ctrl+c can stop the command
 
-def download_historical_logs(resource_group, name, log_file=None, slot=None):
+def download_historical_logs(resource_group_name, name, log_file=None, slot=None):
     '''
     Download historical logs as a zip file
     '''
     client = web_client_factory()
-    user, password = _get_site_credential(client, resource_group, name)
-    repo_url = _get_repo_url(client, resource_group, name, slot)
+    user, password = _get_site_credential(client, resource_group_name, name)
+    repo_url = _get_repo_url(client, resource_group_name, name, slot)
     host = urlparse(repo_url).netloc
     url = "https://{}:{}@{}/dump".format(user, password, host)
     import requests
@@ -334,8 +348,8 @@ def download_historical_logs(resource_group, name, log_file=None, slot=None):
                 f.write(chunk)
     logger.warning('Downloaded logs to %s', log_file)
 
-def _get_site_credential(client, resource_group, name):
-    creds = client.sites.list_site_publishing_credentials(resource_group, name)
+def _get_site_credential(client, resource_group_name, name):
+    creds = client.sites.list_site_publishing_credentials(resource_group_name, name)
     creds = creds.result()
     return (creds.publishing_user_name, creds.publishing_password)
 
