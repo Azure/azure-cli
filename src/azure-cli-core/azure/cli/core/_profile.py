@@ -191,7 +191,7 @@ class Profile(object):
         self._creds_cache.remove_cached_creds(user_or_sp)
 
     def logout_all(self):
-        self._cache_subscriptions_to_local_storage({})
+        self._cache_subscriptions_to_local_storage([])
         self._creds_cache.remove_all_cached_creds()
 
     def load_cached_subscriptions(self):
@@ -211,13 +211,13 @@ class Profile(object):
     def get_subscription(self, subscription_id=None):
         subscriptions = self.load_cached_subscriptions()
         if not subscriptions:
-            raise CLIError('Please run login to setup account.')
+            raise CLIError("Please run 'az login' to setup account.")
 
         result = [x for x in subscriptions if (
             subscription_id is None and x.get(_IS_DEFAULT_SUBSCRIPTION)) or
                   (subscription_id == x.get(_SUBSCRIPTION_ID))]
         if len(result) != 1:
-            raise CLIError('Please run "account set" to select active account.')
+            raise CLIError("Please run 'az account set' to select active account.")
         return result[0]
 
     def get_login_credentials(self, for_graph_client=False, subscription_id=None):
@@ -348,7 +348,7 @@ class CredsCache(object):
         context = self._auth_ctx_factory(authority, cache=self.adal_token_cache)
         token_entry = context.acquire_token(resource, username, CLIENT_ID)
         if not token_entry:
-            raise CLIError('Could not retrieve token from local cache, please run \'login\'.')
+            raise CLIError("Could not retrieve token from local cache, please run 'az login'.")
 
         if self.adal_token_cache.has_state_changed:
             self.persist_cached_creds()
@@ -357,7 +357,7 @@ class CredsCache(object):
     def retrieve_token_for_service_principal(self, sp_id, resource):
         matched = [x for x in self._service_principal_creds if sp_id == x[_SERVICE_PRINCIPAL_ID]]
         if not matched:
-            raise CLIError('Please run "account set" to select active account.')
+            raise CLIError("Please run 'az account set' to select active account.")
         cred = matched[0]
         authority_url = get_authority_url(cred[_SERVICE_PRINCIPAL_TENANT], ENV_DEFAULT)
         context = self._auth_ctx_factory(authority_url, None)

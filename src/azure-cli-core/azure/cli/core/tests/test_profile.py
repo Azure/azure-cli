@@ -302,7 +302,7 @@ class Test_Profile(unittest.TestCase):
         profile.logout_all()
 
         #verify
-        self.assertEqual(0, len(storage_mock['subscriptions']))
+        self.assertEqual([], storage_mock['subscriptions'])
         self.assertEqual(mock_delete_cred_file.call_count, 1)
 
     @mock.patch('adal.AuthenticationContext', autospec=True)
