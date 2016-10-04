@@ -69,10 +69,11 @@ setup(
     zip_safe=False,
     classifiers=CLASSIFIERS,
     scripts=[
-        'az',
         'az.completion.sh',
-        'az.bat',
     ],
+    entry_points = {
+        'console_scripts': ['az=azure.cli.__main__:cli']
+    },
     namespace_packages = [
         'azure'
     ],
