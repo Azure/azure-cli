@@ -18,7 +18,7 @@ Install via pip with:
         export AZURE_COMPONENT_PACKAGE_INDEX_URL=https://azureclinightly.blob.core.windows.net/packages
         az component update --additional-component <component_name> --private
     ```
-    To view the list of installed packages, see [the azure-cli setup.py file](https://github.com/Azure/azure-cli/blob/master/src/azure-cli/setup.py).
+    To view the list of installed packages, run `az component list`.
 
 - There is no cURL install link available for nightly builds.
     We recommend creating a virtual environment and running the `pip` command above.
