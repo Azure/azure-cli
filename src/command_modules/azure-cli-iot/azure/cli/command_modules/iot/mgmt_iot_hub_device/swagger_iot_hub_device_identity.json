@@ -114,6 +114,55 @@
           }
         }
       }
+    },
+    "/devices": {
+      "get" : {
+        "tags": [
+          "IoTDevices"
+        ],
+        "summary": "List device identities from the identity registry of an IoT Hub.",
+        "description": "List device identities from the identity registry of an IoT Hub.",
+        "operationId": "IotHubDevices_List",
+        "consumes": [
+          "application/json",
+          "text/json"
+        ],
+        "produces": [
+          "application/json",
+          "text/json"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/api-version"
+          },
+          {
+            "name": "top",
+            "in": "query",
+            "description": "Maximum number of device identities to return.",
+            "required": true,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1000
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/DeviceDescription"
+              }
+            }
+          },
+          "default": {
+            "description": "DefaultErrorResponse",
+            "schema": {
+              "$ref": "#/definitions/ErrorDetails"
+            }
+          }
+        }
+      }
     }
   },
   "definitions": {
