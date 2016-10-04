@@ -9,15 +9,19 @@
 # regenerated.
 # --------------------------------------------------------------------------
 
-from msrest.exceptions import (
-    ClientException,
-    SerializationError,
-    DeserializationError,
-    TokenExpiredError,
-    ClientRequestError,
-    AuthenticationError,
-    HttpOperationError,
-    ValidationError,
-)
+from msrest.paging import Paged
 
-from msrestazure.azure_exceptions import CloudError
+
+class AlertRuleResourcePaged(Paged):
+    """
+    A paging container for iterating over a list of AlertRuleResource object
+    """
+
+    _attribute_map = {
+        'next_link': {'key': 'nextLink', 'type': 'str'},
+        'current_page': {'key': 'value', 'type': '[AlertRuleResource]'}
+    }
+
+    def __init__(self, *args, **kwargs):
+
+        super(AlertRuleResourcePaged, self).__init__(*args, **kwargs)

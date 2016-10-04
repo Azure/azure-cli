@@ -9,25 +9,12 @@
 # regenerated.
 # --------------------------------------------------------------------------
 
-from .resource import Resource
+from msrest.serialization import Model
 
 
-class ServiceDiagnosticSettingsResource(Resource):
-    """Description of a service diagnostic setting.
+class ServiceDiagnosticSettingsCreateOrUpdateParameters(Model):
+    """Parameters supplied to the Create or Update service configuration.
 
-    Variables are only populated by the server, and will be ignored when
-    sending a request.
-
-    :ivar id: Azure resource Id
-    :vartype id: str
-    :param name: Azure resource name
-    :type name: str
-    :ivar type: Azure resource type
-    :vartype type: str
-    :param location: Resource location
-    :type location: str
-    :param tags: Resource tags
-    :type tags: dict
     :param storage_account_id: the resource id of the storage account.
     :type storage_account_id: str
     :param service_bus_rule_id: the id of the service bus rule.
@@ -42,18 +29,7 @@ class ServiceDiagnosticSettingsResource(Resource):
     :type workspace_id: str
     """ 
 
-    _validation = {
-        'id': {'readonly': True},
-        'type': {'readonly': True},
-        'location': {'required': True},
-    }
-
     _attribute_map = {
-        'id': {'key': 'id', 'type': 'str'},
-        'name': {'key': 'name', 'type': 'str'},
-        'type': {'key': 'type', 'type': 'str'},
-        'location': {'key': 'location', 'type': 'str'},
-        'tags': {'key': 'tags', 'type': '{str}'},
         'storage_account_id': {'key': 'properties.storageAccountId', 'type': 'str'},
         'service_bus_rule_id': {'key': 'properties.serviceBusRuleId', 'type': 'str'},
         'metrics': {'key': 'properties.metrics', 'type': '[MetricSettings]'},
@@ -61,8 +37,7 @@ class ServiceDiagnosticSettingsResource(Resource):
         'workspace_id': {'key': 'properties.workspaceId', 'type': 'str'},
     }
 
-    def __init__(self, location, name=None, tags=None, storage_account_id=None, service_bus_rule_id=None, metrics=None, logs=None, workspace_id=None):
-        super(ServiceDiagnosticSettingsResource, self).__init__(name=name, location=location, tags=tags)
+    def __init__(self, storage_account_id=None, service_bus_rule_id=None, metrics=None, logs=None, workspace_id=None):
         self.storage_account_id = storage_account_id
         self.service_bus_rule_id = service_bus_rule_id
         self.metrics = metrics
