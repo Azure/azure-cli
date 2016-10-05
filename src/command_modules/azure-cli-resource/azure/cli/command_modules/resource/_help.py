@@ -7,7 +7,7 @@ from azure.cli.core.help_files import helps #pylint: disable=unused-import
 
 #pylint: disable=line-too-long
 
-helps['resource policy create'] = """
+helps['resource policy definition create'] = """
             type: command
             short-summary: Create a policy
             parameters:

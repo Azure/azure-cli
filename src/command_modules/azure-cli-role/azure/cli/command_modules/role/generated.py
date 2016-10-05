@@ -20,10 +20,10 @@ from .custom import (create_role_assignment, list_role_assignments, delete_role_
                      _auth_client_factory, _graph_client_factory)
 
 factory = lambda _: _auth_client_factory().role_definitions
-cli_command('role list', list_role_definitions)
-cli_command('role delete', delete_role_definition)
-cli_command('role create', create_role_definition)
-cli_generic_update_command('role update',
+cli_command('role definition list', list_role_definitions)
+cli_command('role definition delete', delete_role_definition)
+cli_command('role definition create', create_role_definition)
+cli_generic_update_command('role definition update',
                            RoleDefinitionsOperations.get,
                            RoleDefinitionsOperations.create_or_update,
                            factory)

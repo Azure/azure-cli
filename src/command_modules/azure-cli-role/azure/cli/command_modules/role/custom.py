@@ -58,7 +58,11 @@ def list_role_definitions(name=None, resource_group_name=None, scope=None,
                               definitions_client.config.subscription_id)
     return _search_role_definitions(definitions_client, name, scope, custom_role_only)
 
-helps['role create'] = """
+def get_role_definition_name_completion_list(prefix, **kwargs):#pylint: disable=unused-argument
+    definitions = list_role_definitions()
+    return [x.properties.role_name for x in list(definitions)]
+
+helps['role definition create'] = """
             type: command
             parameters: 
                 - name: --role-definition
