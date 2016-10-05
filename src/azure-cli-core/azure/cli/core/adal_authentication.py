@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 #---------------------------------------------------------------------------------------------
 
+import requests
 import adal
 
 from msrest.authentication import Authentication
@@ -26,6 +27,8 @@ class AdalAuthentication(Authentication):#pylint: disable=too-few-public-methods
                 raise CLIError("Credentials have expired due to inactivity. Please run 'az login'")
 
             raise CLIError(err)
+        except requests.exceptions.ConnectionError as err:
+            raise CLIError('Please ensure you have network connection. Error detail: ' + str(err))
 
         header = "{} {}".format(scheme, token)
         session.headers['Authorization'] = header

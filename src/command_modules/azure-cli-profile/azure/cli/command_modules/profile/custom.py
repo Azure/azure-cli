@@ -4,7 +4,7 @@
 #---------------------------------------------------------------------------------------------
 
 # pylint: disable=too-few-public-methods,too-many-arguments,no-self-use
-
+import requests
 from adal.adal_error import AdalError
 
 from azure.cli.core._profile import Profile
@@ -66,6 +66,8 @@ def login(username=None, password=None, service_principal=None, tenant=None):
             if 'Server returned error in RSTR - ErrorCode' in msg:
                 raise CLIError("Logging in through command line is not supported. " + suggestion)
         raise CLIError(err)
+    except requests.exceptions.ConnectionError as err:
+        raise CLIError('Please ensure you have network connection. Error detail: ' + str(err))
     return list(subscriptions)
 
 def logout(username=None):
