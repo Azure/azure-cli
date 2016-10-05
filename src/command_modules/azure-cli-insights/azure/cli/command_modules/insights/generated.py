@@ -5,8 +5,8 @@
 
 from azure.cli.command_modules.insights.sdk.insightsclient import InsightsClient
 from azure.cli.command_modules.insights.sdk.insightsclient.operations import \
-    (EventCategoriesOperations, LogDefinitionOperations, LogOperations, MetricOperations,
-     MetricDefinitionOperations)
+    (UsageMetricsOperations, EventCategoriesOperations, EventsOperations,
+    TenantEventsOperations, MetricDefinitionsOperations, MetricsOperations)
 
 from azure.cli.core.commands import cli_command
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
@@ -28,17 +28,17 @@ cli_command('insights event list-categories', EventCategoriesOperations.list, fa
 #factory = lambda x: _insights_client_factory(InsightsClient).usage_metric
 #cli_command('insights list-usage', UsageMetricOperations.list, factory)
 
-factory = lambda x: _insights_client_factory(InsightsClient).log
-cli_command('insights logs list', LogOperations.get, factory)
+# factory = lambda x: _insights_client_factory(InsightsClient).log
+# cli_command('insights logs list', LogOperations.get, factory)
 
-factory = lambda x: _insights_client_factory(InsightsClient).log_definition
-cli_command('insights logs list-definitions', LogDefinitionOperations.get, factory)
+# factory = lambda x: _insights_client_factory(InsightsClient).log_definition
+# cli_command('insights logs list-definitions', LogDefinitionOperations.get, factory)
 
 factory = lambda x: _insights_client_factory(InsightsClient).metric
-cli_command('insights metrics list', MetricOperations.get, factory)
+cli_command('insights metrics list', MetricsOperations.list, factory)
 
 factory = lambda x: _insights_client_factory(InsightsClient).metric_definition
-cli_command('insights metrics list-definitions', MetricDefinitionOperations.get, factory)
+cli_command('insights metrics list-definitions', MetricDefinitionsOperations.list, factory)
 
 #factory = lambda x: _insights_client_factory(InsightsManagementClient).alert
 #cli_command('insights alerts incident show', Alert.get_incident, factory)

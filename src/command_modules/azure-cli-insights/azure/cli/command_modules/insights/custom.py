@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.command_modules.insights.sdk.insightsclient import InsightsClient
 from azure.cli.command_modules.insights.sdk.insightsclient.operations import \
-    (EventOperations)
+    (EventsOperations)
 
 def _insights_client_factory(client):
     return get_mgmt_service_client(client)
@@ -44,7 +44,7 @@ def list_events(start_time=None, end_time=None, limit=50, status=None, caller=No
         :param correlation_id: Filter correlation ID.
         :param limit: Maximum number of events to return.
     '''
-    client =  _insights_client_factory(InsightsClient).event
+    client =  _insights_client_factory(InsightsClient).events
 
     count = 0
     for x in [correlation_id, resource_group_name, resource_id, resource_provider]:
