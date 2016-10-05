@@ -15,16 +15,10 @@ import hashlib
 import traceback
 import re
 
-from applicationinsights import TelemetryClient
-from applicationinsights.exceptions import enable
 try:
     from azure.cli.core import __version__ as core_version
 except: #pylint: disable=bare-except
     core_version = None
-try:
-    from azure.cli.core._profile import Profile
-except: #pylint: disable=bare-except
-    Profile = {}
 try:
     from azure.cli.core._util import CLIError
 except: #pylint: disable=bare-except
@@ -49,6 +43,8 @@ def set_application(application, argcomplete_env_name):
     ARGCOMPLETE_ENV_NAME = argcomplete_env_name
 
 def init_telemetry():
+    from applicationinsights import TelemetryClient
+    from applicationinsights.exceptions import enable
     try:
         instrumentation_key = '02b91c82-6729-4241-befc-e6d02ca4fbba'
 
@@ -78,6 +74,13 @@ def log_telemetry(name, log_type='event', **kwargs):
     if not user_agrees_to_telemetry():
         return
 
+    # Now we now we want to log telemetry, get the profile
+    try:
+        from azure.cli.core._profile import Profile
+        profile = Profile()
+    except: #pylint: disable=bare-except
+        profile = None
+
     try:
         name = _remove_cmd_chars(name)
         _sanitize_inputs(kwargs)
@@ -102,14 +105,14 @@ def log_telemetry(name, log_type='event', **kwargs):
         _safe_exec(props, 'command', lambda: APPLICATION.session.get('command', None))
         _safe_exec(props, 'version', lambda: core_version)
         _safe_exec(props, 'source', lambda: source)
-        _safe_exec(props, 'installation-id', _get_installation_id)
+        _safe_exec(props, 'installation-id', lambda: _get_installation_id(profile))
         _safe_exec(props, 'python-version', lambda: _remove_symbols(str(platform.python_version())))
         _safe_exec(props, 'shell-type', _get_shell_type)
         _safe_exec(props, 'locale', lambda: '{},{}'.format(locale.getdefaultlocale()[0],
                                                            locale.getdefaultlocale()[1]))
         _safe_exec(props, 'user-machine-id', _get_user_machine_id)
-        _safe_exec(props, 'user-azure-id', _get_user_azure_id)
-        _safe_exec(props, 'azure-subscription-id', _get_azure_subscription_id)
+        _safe_exec(props, 'user-azure-id', lambda: _get_user_azure_id(profile))
+        _safe_exec(props, 'azure-subscription-id', lambda: _get_azure_subscription_id(profile))
         _safe_exec(props, 'default-output-type', lambda: az_config.get('core', 'output',
                                                                        fallback='unknown'))
         _safe_exec(props, 'environment', _get_env_string)
@@ -138,9 +141,11 @@ def _safe_exec(props, key, fn):
         if _debugging():
             raise ex
 
-def _get_installation_id():
-    profile = Profile()
-    return profile.get_installation_id()
+def _get_installation_id(profile):
+    try:
+        return profile.get_installation_id()
+    except AttributeError:
+        return None
 
 def _get_env_string():
     return _remove_cmd_chars(_remove_symbols(str([v for v in os.environ
@@ -149,22 +154,20 @@ def _get_env_string():
 def _get_user_machine_id():
     return _get_hash(platform.node() + getpass.getuser())
 
-def _get_user_azure_id():
+def _get_user_azure_id(profile):
     try:
-        profile = Profile()
         return _get_hash(profile.get_current_account_user())
-    except CLIError: #pylint: disable=broad-except
-        pass
+    except (AttributeError, CLIError): #pylint: disable=broad-except
+        return None
 
 def _get_hash(s):
     hash_object = hashlib.sha256(s.encode('utf-8'))
     return str(hash_object.hexdigest())
 
-def _get_azure_subscription_id():
+def _get_azure_subscription_id(profile):
     try:
-        profile = Profile()
         return profile.get_login_credentials()[1]
-    except CLIError: #pylint: disable=broad-except
+    except (AttributeError, CLIError): #pylint: disable=broad-except
         pass
 
 def _get_shell_type():
