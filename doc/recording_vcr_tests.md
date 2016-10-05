@@ -7,7 +7,7 @@ Azure CLI uses the VCR.py library to record the HTTP messages exchanged during a
 
 Each command module has a `tests` folder with a file called: `test_<module>_commands.py`. This is where you will define tests. 
 
-Tests all derive from the `VCRBTestBase` class found in `azure.cli.utils.vcr_test_base`. This class exposes the VCR tests using the standard Python `unittest` framework and allows the tests to be discovered by and debugged in Visual Studio.
+Tests all derive from the `VCRTestBase` class found in `azure.cli.test_utils.vcr_test_base`. This class exposes the VCR tests using the standard Python `unittest` framework and allows the tests to be discovered by and debugged in Visual Studio.
 
 After adding your test, run it. The test driver will automatically detect the test is unrecorded and record the HTTP requests and responses in a cassette .yaml file. If the test succeeds, the cassette will be preserved and future playthroughs of the test will come from the cassette.
 
