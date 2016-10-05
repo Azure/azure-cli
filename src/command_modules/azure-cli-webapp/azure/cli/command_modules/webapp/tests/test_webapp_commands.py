@@ -3,9 +3,10 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 #---------------------------------------------------------------------------------------------
 
+import mock
+from msrest.exceptions import ClientException
 from azure.cli.core.test_utils.vcr_test_base import (ResourceGroupVCRTestBase,
                                                      JMESPathCheck)
-
 #pylint: disable=line-too-long
 
 class WebappBasicE2ETest(ResourceGroupVCRTestBase):
@@ -192,3 +193,22 @@ class WebappScaleTest(ResourceGroupVCRTestBase):
             JMESPathCheck('sku.family', 'B'),
             JMESPathCheck('sku.capacity', 2)
             ])
+
+class AppServiceBadErrorPolishTest(ResourceGroupVCRTestBase):
+    def __init__(self, test_method):
+        super(AppServiceBadErrorPolishTest, self).__init__(__file__, test_method)
+        self.resource_group = 'clitest-appservice-error'
+
+    def test_appservice_error_polish(self):
+        self.execute()
+
+    def body(self):
+        response_body = '{"Code":"Conflict","Message":"The maximum number of Free ServerFarms allowed in a Subscription is 10.","Target":null,"Details":[{"Message":"The maximum number of Free ServerFarms allowed in a Subscription is 10."},{"Code":"Conflict"},{"ErrorEntity":{"Code":"Conflict","Message":"The maximum number of Free ServerFarms allowed in a Subscription is 10.","ExtendedCode":"59301","MessageTemplate":"The maximum number of {0} ServerFarms allowed in a Subscription is {1}.","Parameters":["Free","10"],"InnerErrors":null}}],"Innererror":null}'
+        with mock.patch('requests.Response') as mock_response:
+            with mock.patch('msrestazure.azure_operation.AzureOperationPoller') as mock_poller:
+                mock_response.text = response_body
+                exception = ClientException("Operation failed with status: 'Conflict'. Details: 409 Client Error: Conflict for url: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/yugangw/providers/Microsoft.Web/serverfarms/yugangw-junk?api-version=2015-08-01")
+                exception.response = mock_response
+                mock_poller.done = True
+                mock_poller.result = mock.MagicMock(side_effect=exception)
+                self.cmd('appservice plan create -g {} -n {} --sku free'.format(self.resource_group, 'plan-junk'), allowed_exceptions=['The maximum number of Free ServerFarms allowed in a Subscription is 10'])
