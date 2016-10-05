@@ -118,7 +118,7 @@ class LongRunningOperation(object): #pylint: disable=too-few-public-methods
 
             cli_error = CLIError('{}  {}'.format(message, correlation_message))
             #capture response for downstream commands (webapp) to dig out more details
-            setattr(cli_error, 'response', client_exception.response)
+            setattr(cli_error, 'response', getattr(client_exception, 'response', None))
             raise cli_error
 
         logger.info("Long running operation '%s' completed with result %s",
