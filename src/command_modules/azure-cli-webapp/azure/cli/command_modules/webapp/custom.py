@@ -31,7 +31,7 @@ logger = _logging.get_az_logger(__name__)
 class AppServiceLongRunningOperation(LongRunningOperation): #pylint: disable=too-few-public-methods
     def __call__(self, poller):
         try:
-            super(AppServiceLongRunningOperation, self).__call__(poller)
+            return super(AppServiceLongRunningOperation, self).__call__(poller)
         except Exception as ex:
             raise AppServiceLongRunningOperation._get_detail_error(ex)
 
