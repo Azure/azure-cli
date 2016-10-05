@@ -14,14 +14,13 @@ from azure.mgmt.network import NetworkManagementClient
 from azure.mgmt.storage import StorageManagementClient
 from azure.mgmt.resource.resources import ResourceManagementClient
 
-import azure.cli.core.commands.client_factory
 from azure.cli.command_modules.vm._validators import \
     (validate_default_vnet, validate_default_storage_account)
 
-#pylint: disable=method-hidden
-#pylint: disable=line-too-long
-#pylint: disable=bad-continuation
-#pylint: disable=too-many-lines
+# pylint: disable=method-hidden
+# pylint: disable=line-too-long
+# pylint: disable=bad-continuation
+# pylint: disable=too-many-lines
 
 def _mock_resource_client(client_class):
     client = mock.MagicMock()
@@ -79,14 +78,6 @@ def _mock_resource_client(client_class):
 
 class TestVMCreateDefaultVnet(unittest.TestCase):
 
-    @classmethod
-    def setUpClass(cls):
-        azure.cli.core.commands.client_factory.get_mgmt_service_client = _mock_resource_client
-
-    @classmethod
-    def tearDownClass(cls):
-        pass
-
     def _set_ns(self, rg, location=None):
         self.ns.resource_group_name = rg
         self.ns.location = location
@@ -100,9 +91,7 @@ class TestVMCreateDefaultVnet(unittest.TestCase):
         ns.location = None
         self.ns = ns
 
-    def tearDown(self):
-        pass
-
+    @mock.patch('azure.cli.core.commands.client_factory.get_mgmt_service_client', _mock_resource_client)
     def test_no_matching_vnet(self):
         self._set_ns('emptyrg', 'eastus')
         validate_default_vnet(self.ns)
@@ -110,6 +99,7 @@ class TestVMCreateDefaultVnet(unittest.TestCase):
         self.assertIsNone(self.ns.subnet_name)
         self.assertIsNone(self.ns.virtual_network_type)
 
+    @mock.patch('azure.cli.core.commands.client_factory.get_mgmt_service_client', _mock_resource_client)
     def test_matching_vnet_default_location(self):
         self._set_ns('rg1')
         validate_default_vnet(self.ns)
@@ -117,6 +107,7 @@ class TestVMCreateDefaultVnet(unittest.TestCase):
         self.assertEqual(self.ns.subnet_name, 'vnet2subnet')
         self.assertEqual(self.ns.virtual_network_type, 'existingName')
 
+    @mock.patch('azure.cli.core.commands.client_factory.get_mgmt_service_client', _mock_resource_client)
     def test_matching_vnet_specified_location(self):
         self._set_ns('rg1', 'eastus')
         validate_default_vnet(self.ns)
@@ -128,14 +119,6 @@ if __name__ == '__main__':
     unittest.main()
 
 class TestVMCreateDefaultStorageAccount(unittest.TestCase):
-
-    @classmethod
-    def setUpClass(cls):
-        azure.cli.core.commands.client_factory.get_mgmt_service_client = _mock_resource_client
-
-    @classmethod
-    def tearDownClass(cls):
-        pass
 
     def _set_ns(self, rg, location=None, tier='Standard'):
         ns = argparse.Namespace()
@@ -152,6 +135,7 @@ class TestVMCreateDefaultStorageAccount(unittest.TestCase):
     def tearDown(self):
         pass
 
+    @mock.patch('azure.cli.core.commands.client_factory.get_mgmt_service_client', _mock_resource_client)
     def test_no_matching_storage_account(self):
         self._set_ns('emptyrg', 'eastus')
         validate_default_storage_account(self.ns)
@@ -161,6 +145,7 @@ class TestVMCreateDefaultStorageAccount(unittest.TestCase):
             self.assertRegexpMatches(self.ns.storage_account, '^vhd.*') # pylint: disable=deprecated-method
         self.assertIsNone(self.ns.storage_account_type)
 
+    @mock.patch('azure.cli.core.commands.client_factory.get_mgmt_service_client', _mock_resource_client)
     def test_matching_storage_account_default_location(self):
         self._set_ns('rg1')
         validate_default_storage_account(self.ns)
@@ -173,6 +158,7 @@ class TestVMCreateDefaultStorageAccount(unittest.TestCase):
         self.assertEqual(self.ns.storage_account_type, 'existingName')
 
 
+    @mock.patch('azure.cli.core.commands.client_factory.get_mgmt_service_client', _mock_resource_client)
     def test_matching_storage_account_specified_location(self):
         self._set_ns('rg1', 'eastus')
         validate_default_storage_account(self.ns)

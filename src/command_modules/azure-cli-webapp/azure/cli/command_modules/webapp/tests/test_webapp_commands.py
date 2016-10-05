@@ -3,8 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 #---------------------------------------------------------------------------------------------
 
-from azure.cli.core.utils.vcr_test_base import (ResourceGroupVCRTestBase,
-                                                JMESPathCheck)
+from azure.cli.core.test_utils.vcr_test_base import (ResourceGroupVCRTestBase,
+                                                     JMESPathCheck)
 
 #pylint: disable=line-too-long
 
