@@ -6,6 +6,7 @@
 import azure.cli.core.commands.parameters #pylint: disable=unused-import
 from azure.cli.core.commands import CliArgumentType
 from azure.cli.core.commands import register_cli_argument
+from azure.cli.core.commands.parameters import enum_choice_list
 
 register_cli_argument('ad app', 'application_object_id', options_list=('--object-id',))
 register_cli_argument('ad app', 'display_name', help=' the display name of the application')
@@ -18,10 +19,12 @@ register_cli_argument('ad app', 'start_date', help='the start date after which p
 register_cli_argument('ad app', 'end_date', help='the end date till which password or key is valid. Default value is one year after current time')
 register_cli_argument('ad app', 'key_value', help='the value for the key credentials associated with the application')
 # TODO: Update these with **enum_choice_list(...) when SDK supports proper enums
-register_cli_argument('ad app', 'key_type', choices=['AsymmetricX509Cert', 'Password', 'Symmetric'], default='AsymmetricX509Cert',
-                      help='the type of the key credentials associated with the application')
-register_cli_argument('ad app', 'key_usage', choices=['Sign', 'Verify'], default='Verify',
-                      help='the usage of the key credentials associated with the application.')
+register_cli_argument('ad app', 'key_type', default='AsymmetricX509Cert',
+                      help='the type of the key credentials associated with the application',
+                      **enum_choice_list(['AsymmetricX509Cert', 'Password', 'Symmetric']))
+register_cli_argument('ad app', 'key_usage', default='Verify',
+                      help='the usage of the key credentials associated with the application.',
+                      **enum_choice_list(['Sign', 'Verify']))
 
 sp_name_type = CliArgumentType(
     options_list=('--name', '-n')

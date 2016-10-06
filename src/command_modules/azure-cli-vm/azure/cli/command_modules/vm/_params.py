@@ -141,15 +141,15 @@ register_cli_argument('network nic scale-set list', 'virtual_machine_scale_set_n
 # VM CREATE PARAMETER CONFIGURATION
 
 authentication_type = CliArgumentType(
-    choices=['ssh', 'password'], default=None,
+    default=None,
     help='Password or SSH public key authentication. Defaults to password for Windows and SSH public key for Linux.',
-    type=str.lower
+    **enum_choice_list(['ssh', 'password'])
 )
 
 nsg_rule_type = CliArgumentType(
-    choices=['RDP', 'SSH'], default=None,
+    default=None,
     help='Network security group rule to create. Defaults open ports for allowing RDP on Windows and allowing SSH on Linux.',
-    type=str.upper
+    **enum_choice_list(['RDP', 'SSH'])
 )
 
 register_cli_argument('vm create', 'network_interface_type', help=argparse.SUPPRESS)
@@ -186,7 +186,7 @@ for scope in ['vm create', 'vmss create']:
     register_cli_argument(scope, 'virtual_network_ip_address_prefix', options_list=('--vnet-ip-address-prefix',))
     register_cli_argument(scope, 'subnet_ip_address_prefix', options_list=('--subnet-ip-address-prefix',))
     register_cli_argument(scope, 'private_ip_address', help='Static private IP address (e.g. 10.0.0.5).', options_list=('--private-ip-address',), action=PrivateIpAction)
-    register_cli_argument(scope, 'public_ip_address_allocation', choices=['dynamic', 'static'], help='', default='dynamic', type=str.lower)
+    register_cli_argument(scope, 'public_ip_address_allocation', help='', default='dynamic', **enum_choice_list(['dynamic', 'static']))
     register_folded_cli_argument(scope, 'public_ip_address', 'Microsoft.Network/publicIPAddresses')
     register_folded_cli_argument(scope, 'storage_account', 'Microsoft.Storage/storageAccounts', validator=validate_default_storage_account, none_flag_value=None, default_value_flag='existingId')
     register_folded_cli_argument(scope, 'virtual_network', 'Microsoft.Network/virtualNetworks', options_list=('--vnet',), validator=validate_default_vnet, none_flag_value=None, default_value_flag='existingId')
