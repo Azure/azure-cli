@@ -24,7 +24,7 @@ def remove_challenge_for_url(url):
     """ Removes the cached challenge for the specified URL.
     :param url: the URL for which to remove the cached challenge """
     if not url:
-        raise ValueError('URL cannot be None')
+        raise ValueError('URL cannot be empty')
 
     url = urllib.parse.urlparse(url)
     del _cache[url.netloc]
@@ -34,10 +34,10 @@ def set_challenge_for_url(url, challenge):
     :param url: the URL for which to cache the challenge
     :param challenge: the challenge to cache """
     if not url:
-        raise ValueError('URL cannot be None')
+        raise ValueError('URL cannot be empty')
 
     if not challenge:
-        raise ValueError('challenge cannot be None')
+        raise ValueError('Challenge cannot be empty')
 
     src_url = urllib.parse.urlparse(url)
     if src_url.netloc != challenge.source_authority:

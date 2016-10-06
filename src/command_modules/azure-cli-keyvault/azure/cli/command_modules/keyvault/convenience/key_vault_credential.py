@@ -8,19 +8,17 @@
 import adal
 import urllib
 
-from msrest.authentication import authentication
+from msrest.authentication import Authentication
 
-from . import httpbearerchallenge
-from . import httpbearerchallengecache as challengecache
+from . import HttpBearerChallenge
+from . import HttpBearerChallengeCache as ChallengeCache
 
-class keyvaultcredential(authentication):
+class KeyVaultCredential(Authentication):
 
     def __init__(self, token):
-        print('init')
         self._token = token
 
     def signed_session(self):
-        session = super(keyvaultcredential, self).signed_session()
-        session.headers['authorization'] = 'bearer {}'.format(self._token or '')
-        print('signed session w/ auth: {}'.format(session.headers['authorization']))
+        session = super(KeyVaultCredential, self).signed_session()
+        session.headers['Authorization'] = 'Bearer {}'.format(self._token or '')
         return session

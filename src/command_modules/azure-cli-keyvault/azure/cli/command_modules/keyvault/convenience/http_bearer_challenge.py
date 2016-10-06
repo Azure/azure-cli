@@ -67,7 +67,7 @@ class HttpBearerChallenge(object):
         """ Verifies that the challenge is a Bearer challenge and returns the key=value pairs. """
         bearer_string = 'Bearer '
         if not challenge:
-            raise ValueError('Challenge cannot be None')
+            raise ValueError('Challenge cannot be empty')
 
         challenge = challenge.strip()
         if not challenge.startswith(bearer_string):
@@ -79,7 +79,7 @@ class HttpBearerChallenge(object):
     def _validate_request_uri(self, uri):
         """ Extracts the host authority from the given URI. """
         if not uri:
-            raise ValueError('request_uri cannot be None')
+            raise ValueError('request_uri cannot be empty')
 
         uri = urllib.parse.urlparse(uri)
         if not uri.netloc:

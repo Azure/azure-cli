@@ -91,12 +91,9 @@ def validate_policy_permissions(ns):
 
 def validate_principal(ns):
     num_set = sum(1 for p in [ns.object_id, ns.spn, ns.upn] if p)
-    if num_set == 0:
+    if num_set != 1:
         raise argparse.ArgumentError(
             None, 'specify exactly one: --object-id, --spn, --upn')
-    elif num_set > 1:
-        raise argparse.ArgumentError(
-            None, 'specify only one: --object-id, --spn, --upn')
 
 def validate_resource_group_name(ns):
     if not ns.resource_group_name:

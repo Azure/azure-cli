@@ -178,4 +178,7 @@ class KeyVaultClient(object):
         return self.keyvault.merge_certificate(vault_base_url, certificate_name, x509_certificates, certificate_attributes, tags, custom_headers, raw, **operation_config)
     merge_certificate.__doc__ = _KeyVaultClient.merge_certificate.__doc__
 
-KeyVaultClient.__doc__ = _KeyVaultClient.__doc__
+try:
+    KeyVaultClient.__doc__ = _KeyVaultClient.__doc__
+except AttributeError:
+    pass
