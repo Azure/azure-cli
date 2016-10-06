@@ -12,11 +12,6 @@ import pkgutil
 from importlib import import_module
 from collections import OrderedDict, defaultdict
 
-from msrest.paging import Paged
-from msrest.exceptions import ClientException
-from msrestazure.azure_operation import AzureOperationPoller
-
-from azure.common import AzureException
 from azure.cli.core._util import CLIError
 import azure.cli.core._logging as _logging
 from azure.cli.core.telemetry import log_telemetry
@@ -89,6 +84,7 @@ class LongRunningOperation(object): #pylint: disable=too-few-public-methods
         time.sleep(self.poller_done_interval_ms / 1000.0)
 
     def __call__(self, poller):
+        from msrest.exceptions import ClientException
         logger.info("Starting long running operation '%s'", self.start_msg)
         correlation_message = ''
         while not poller.done():
@@ -227,6 +223,11 @@ def cli_command(name, operation, client_factory=None, transform=None, table_tran
 def create_command(name, operation, transform_result, table_transformer, client_factory):
 
     def _execute_command(kwargs):
+        from msrest.paging import Paged
+        from msrest.exceptions import ClientException
+        from msrestazure.azure_operation import AzureOperationPoller
+        from azure.common import AzureException
+
         client = client_factory(kwargs) if client_factory else None
         try:
             result = operation(client, **kwargs) if client else operation(**kwargs)
