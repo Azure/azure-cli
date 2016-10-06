@@ -3,8 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 #---------------------------------------------------------------------------------------------
 
-import mock
-from msrest.exceptions import ClientException
 from azure.cli.core.test_utils.vcr_test_base import (ResourceGroupVCRTestBase,
                                                      JMESPathCheck)
 #pylint: disable=line-too-long
@@ -197,18 +195,26 @@ class WebappScaleTest(ResourceGroupVCRTestBase):
 class AppServiceBadErrorPolishTest(ResourceGroupVCRTestBase):
     def __init__(self, test_method):
         super(AppServiceBadErrorPolishTest, self).__init__(__file__, test_method)
-        self.resource_group = 'clitest-appservice-error'
+        self.resource_group = 'clitest-error'
+        self.resource_group2 = 'clitest-error2'
+        self.webapp_name = 'webapp-error-test123'
+        self.plan = 'webapp-error-plan'
 
     def test_appservice_error_polish(self):
         self.execute()
 
+    def set_up(self):
+        super(AppServiceBadErrorPolishTest, self).set_up()
+        self.cmd('resource group create -n {} -l westus'.format(self.resource_group2))
+        self.cmd('appservice plan create -g {} -n {} --sku b1'.format(self.resource_group, self.plan))
+        self.cmd('appservice web create -g {} -n {} --plan {}'.format(self.resource_group, self.webapp_name, self.plan))
+        self.cmd('appservice plan create -g {} -n {} --sku b1'.format(self.resource_group2, self.plan))
+
+    def tear_down(self):
+        super(AppServiceBadErrorPolishTest, self).tear_down()
+        self.cmd('resource group delete -n {}'.format(self.resource_group2))
+
     def body(self):
-        response_body = '{"Code":"Conflict","Message":"The maximum number of Free ServerFarms allowed in a Subscription is 10.","Target":null,"Details":[{"Message":"The maximum number of Free ServerFarms allowed in a Subscription is 10."},{"Code":"Conflict"},{"ErrorEntity":{"Code":"Conflict","Message":"The maximum number of Free ServerFarms allowed in a Subscription is 10.","ExtendedCode":"59301","MessageTemplate":"The maximum number of {0} ServerFarms allowed in a Subscription is {1}.","Parameters":["Free","10"],"InnerErrors":null}}],"Innererror":null}'
-        with mock.patch('requests.Response') as mock_response:
-            with mock.patch('msrestazure.azure_operation.AzureOperationPoller') as mock_poller:
-                mock_response.text = response_body
-                exception = ClientException("Operation failed with status: 'Conflict'. Details: 409 Client Error: Conflict for url: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/yugangw/providers/Microsoft.Web/serverfarms/yugangw-junk?api-version=2015-08-01")
-                exception.response = mock_response
-                mock_poller.done = True
-                mock_poller.result = mock.MagicMock(side_effect=exception)
-                self.cmd('appservice plan create -g {} -n {} --sku free'.format(self.resource_group, 'plan-junk'), allowed_exceptions=['The maximum number of Free ServerFarms allowed in a Subscription is 10'])
+        # we will try to produce an error by try creating 2 webapp with same name in different groups
+        self.cmd('appservice web create -g {} -n {} --plan {}'.format(self.resource_group2, self.webapp_name, self.plan),
+                 allowed_exceptions='Website with given name {} already exists'.format(self.webapp_name))

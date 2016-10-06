@@ -49,7 +49,8 @@ def create_webapp(resource_group_name, name, plan):
         plan = parse_resource_id(plan)['name']
     location = _get_location_from_app_service_plan(client, resource_group_name, plan)
     webapp_def = Site(server_farm_id=plan, location=location)
-    return client.sites.create_or_update_site(resource_group_name, name, webapp_def)
+    poller = client.sites.create_or_update_site(resource_group_name, name, webapp_def)
+    return AppServiceLongRunningOperation()(poller)
 
 def show_webapp(resource_group_name, name, slot=None):
     webapp = _generic_site_operation(resource_group_name, name, 'get_site', slot)
