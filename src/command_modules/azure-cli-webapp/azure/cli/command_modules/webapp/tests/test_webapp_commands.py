@@ -5,7 +5,6 @@
 
 from azure.cli.core.test_utils.vcr_test_base import (ResourceGroupVCRTestBase,
                                                      JMESPathCheck)
-
 #pylint: disable=line-too-long
 
 class WebappBasicE2ETest(ResourceGroupVCRTestBase):
@@ -192,3 +191,30 @@ class WebappScaleTest(ResourceGroupVCRTestBase):
             JMESPathCheck('sku.family', 'B'),
             JMESPathCheck('sku.capacity', 2)
             ])
+
+class AppServiceBadErrorPolishTest(ResourceGroupVCRTestBase):
+    def __init__(self, test_method):
+        super(AppServiceBadErrorPolishTest, self).__init__(__file__, test_method)
+        self.resource_group = 'clitest-error'
+        self.resource_group2 = 'clitest-error2'
+        self.webapp_name = 'webapp-error-test123'
+        self.plan = 'webapp-error-plan'
+
+    def test_appservice_error_polish(self):
+        self.execute()
+
+    def set_up(self):
+        super(AppServiceBadErrorPolishTest, self).set_up()
+        self.cmd('resource group create -n {} -l westus'.format(self.resource_group2))
+        self.cmd('appservice plan create -g {} -n {} --sku b1'.format(self.resource_group, self.plan))
+        self.cmd('appservice web create -g {} -n {} --plan {}'.format(self.resource_group, self.webapp_name, self.plan))
+        self.cmd('appservice plan create -g {} -n {} --sku b1'.format(self.resource_group2, self.plan))
+
+    def tear_down(self):
+        super(AppServiceBadErrorPolishTest, self).tear_down()
+        self.cmd('resource group delete -n {}'.format(self.resource_group2))
+
+    def body(self):
+        # we will try to produce an error by try creating 2 webapp with same name in different groups
+        self.cmd('appservice web create -g {} -n {} --plan {}'.format(self.resource_group2, self.webapp_name, self.plan),
+                 allowed_exceptions='Website with given name {} already exists'.format(self.webapp_name))
