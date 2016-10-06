@@ -5,6 +5,7 @@
 
 # pylint: disable=no-self-use,too-many-arguments,too-many-lines
 from __future__ import print_function
+import json
 import threading
 try:
     from urllib.parse import urlparse
@@ -16,6 +17,8 @@ from azure.mgmt.web.models import (Site, SiteConfig, User, ServerFarmWithRichSku
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.arm import is_valid_resource_id, parse_resource_id
+from azure.cli.core.commands import LongRunningOperation
+
 import azure.cli.core._logging as _logging
 from azure.cli.core._util import CLIError
 from ._params import web_client_factory, _generic_site_operation
@@ -24,13 +27,30 @@ logger = _logging.get_az_logger(__name__)
 
 #pylint:disable=no-member
 
+#workaround that app service's error doesn't comform to LRO spec
+class AppServiceLongRunningOperation(LongRunningOperation): #pylint: disable=too-few-public-methods
+    def __call__(self, poller):
+        try:
+            return super(AppServiceLongRunningOperation, self).__call__(poller)
+        except Exception as ex:
+            raise AppServiceLongRunningOperation._get_detail_error(ex)
+
+    @staticmethod
+    def _get_detail_error(ex):
+        try:
+            detail = json.loads(ex.response.text)['Message']
+            return CLIError(detail)
+        except: #pylint: disable=bare-except
+            return ex
+
 def create_webapp(resource_group_name, name, plan):
     client = web_client_factory()
     if is_valid_resource_id(plan):
         plan = parse_resource_id(plan)['name']
     location = _get_location_from_app_service_plan(client, resource_group_name, plan)
     webapp_def = Site(server_farm_id=plan, location=location)
-    return client.sites.create_or_update_site(resource_group_name, name, webapp_def)
+    poller = client.sites.create_or_update_site(resource_group_name, name, webapp_def)
+    return AppServiceLongRunningOperation()(poller)
 
 def show_webapp(resource_group_name, name, slot=None):
     webapp = _generic_site_operation(resource_group_name, name, 'get_site', slot)
@@ -167,7 +187,8 @@ def create_app_service_plan(resource_group_name, name, sku, number_of_workers=No
     #the api is odd on parameter naming, have to live with it for now
     sku_def = SkuDescription(tier=_get_sku_name(sku), name=sku, capacity=number_of_workers)
     plan_def = ServerFarmWithRichSku(location, server_farm_with_rich_sku_name=name, sku=sku_def)
-    return client.server_farms.create_or_update_server_farm(resource_group_name, name, plan_def)
+    poller = client.server_farms.create_or_update_server_farm(resource_group_name, name, plan_def)
+    return AppServiceLongRunningOperation()(poller)
 
 def update_app_service_plan(instance, sku=None, number_of_workers=None,
                             admin_site_name=None):
