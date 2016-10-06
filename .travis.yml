@@ -6,10 +6,7 @@ python:
   - "3.5-dev" # 3.5 development branch
 install:
   - pip install virtualenv # used by package_verify script
-  - pip install -r requirements.txt
-  - pip install -e src/azure-cli-core
-  - python scripts/command_modules/install.py # Install the command modules as packages
-  - pip install -e src/azure-cli
+  - python scripts/dev_setup.py
 script: 
   - export PYTHONPATH=$PATHONPATH:./src
   - python -m azure.cli -h
