@@ -4,10 +4,10 @@
 #---------------------------------------------------------------------------------------------
 # pylint: disable=line-too-long
 
-from azure.cli.core.utils.vcr_test_base import (ResourceGroupVCRTestBase, JMESPathCheck)
+from azure.cli.core.test_utils.vcr_test_base import (ResourceGroupVCRTestBase, JMESPathCheck)
 import azure.cli.core._logging as _logging
-logger = _logging.get_az_logger(__name__)
 
+logger = _logging.get_az_logger(__name__)
 
 class IoTHubTest(ResourceGroupVCRTestBase):
     def __init__(self, test_method):

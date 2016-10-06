@@ -40,7 +40,7 @@ class Test_vcr_security(unittest.TestCase):
         self.assertFalse(insecure_cassettes, 'The following cassettes contain refresh tokens: {}'.format(insecure_cassettes))
 
     def test_deployment_name_scrub(self):
-        from azure.cli.core.utils.vcr_test_base import _scrub_deployment_name as scrub_deployment_name
+        from azure.cli.core.test_utils.vcr_test_base import _scrub_deployment_name as scrub_deployment_name
         uri1 = 'https://www.contoso.com/deployments/azurecli1466174372.33571889479?api-version=2015-11-01'
         uri2 = 'https://www.contoso.com/deployments/azurecli1466174372.33571889479/more'
 
