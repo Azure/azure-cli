@@ -9,7 +9,6 @@ import argcomplete
 
 import azure.cli.core._help as _help
 from azure.cli.core._util import CLIError
-from azure.cli.core.telemetry import log_telemetry
 
 class IncorrectUsageError(CLIError):
     '''Raised when a command is incorrectly used and the usage should be
@@ -116,14 +115,17 @@ class AzCliCommandParser(argparse.ArgumentParser):
         return parent_subparser
 
     def validation_error(self, message):
+        from azure.cli.core.telemetry import log_telemetry
         log_telemetry('validation error', log_type='trace', prog=self.prog)
         return super(AzCliCommandParser, self).error(message)
 
     def error(self, message):
+        from azure.cli.core.telemetry import log_telemetry
         log_telemetry('parse error', message=message, prog=self.prog)
         return super(AzCliCommandParser, self).error(message)
 
     def format_help(self):
+        from azure.cli.core.telemetry import log_telemetry
         is_group = self.is_group()
         log_telemetry('show help', prog=self.prog)
         _help.show_help(self.prog.split()[1:],

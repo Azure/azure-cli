@@ -3,8 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 #---------------------------------------------------------------------------------------------
 
-import pip
-
 from azure.cli.core._util import CLIError
 from azure.cli.core._config import az_config
 
@@ -13,12 +11,14 @@ COMPONENT_PREFIX = 'azure-cli-'
 
 def list_components():
     """ List the installed components """
+    import pip
     return sorted([{'name': dist.key.replace(COMPONENT_PREFIX, ''), 'version': dist.version}
                    for dist in pip.get_installed_distributions(local_only=True)
                    if dist.key.startswith(COMPONENT_PREFIX)], key=lambda x: x['name'])
 
 def remove(component_name, show_logs=False):
     """ Remove a component """
+    import pip
     full_component_name = COMPONENT_PREFIX + component_name
     found = bool([dist for dist in pip.get_installed_distributions(local_only=True)
                   if dist.key == full_component_name])
@@ -30,6 +30,7 @@ def remove(component_name, show_logs=False):
         raise CLIError("Component not installed.")
 
 def _install_or_update(package_list, link, private, pre, show_logs=False):
+    import pip
     options = ['--isolated', '--disable-pip-version-check', '--upgrade']
     if pre:
         options.append('--pre')
@@ -50,6 +51,7 @@ def _install_or_update(package_list, link, private, pre, show_logs=False):
 
 def update(private=False, pre=False, link=None, additional_component=None, show_logs=False):
     """ Update the CLI and all installed components """
+    import pip
     package_list = [CLI_PACKAGE_NAME]
     package_list += [dist.key for dist in pip.get_installed_distributions(local_only=True)
                      if dist.key.startswith(COMPONENT_PREFIX)]

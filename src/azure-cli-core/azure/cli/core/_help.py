@@ -7,7 +7,6 @@ from __future__ import print_function
 import argparse
 import sys
 import textwrap
-import yaml
 
 from azure.cli.core.help_files import _load_help_file
 
@@ -404,6 +403,7 @@ def _normalize_text(s):
     return initial_upper + trailing_period
 
 def _load_help_file_from_string(text):
+    import yaml
     try:
         return yaml.load(text) if text else None
     except Exception: #pylint: disable=broad-except

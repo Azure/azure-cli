@@ -8,9 +8,7 @@ import collections
 import json
 import os.path
 import errno
-from msrest.authentication import BasicTokenAuthentication
 import adal
-from azure.mgmt.resource.subscriptions import SubscriptionClient
 from azure.cli.core._session import ACCOUNT
 from azure.cli.core._util import CLIError, get_file_json
 from azure.cli.core._azure_env import (get_authority_url, get_env, ENDPOINT_URLS,
@@ -249,6 +247,8 @@ class Profile(object):
 class SubscriptionFinder(object):
     '''finds all subscriptions for a user or service principal'''
     def __init__(self, auth_context_factory, adal_token_cache, arm_client_factory=None):
+        from azure.mgmt.resource.subscriptions import SubscriptionClient
+
         self._adal_token_cache = adal_token_cache
         self._auth_context_factory = auth_context_factory
         self.user_id = None # will figure out after log user in
@@ -291,6 +291,8 @@ class SubscriptionFinder(object):
         return self._auth_context_factory(authority, token_cache)
 
     def _find_using_common_tenant(self, access_token, resource):
+        from msrest.authentication import BasicTokenAuthentication
+
         all_subscriptions = []
         token_credential = BasicTokenAuthentication({'access_token': access_token})
         client = self._arm_client_factory(token_credential)
@@ -307,6 +309,8 @@ class SubscriptionFinder(object):
         return all_subscriptions
 
     def _find_using_specific_tenant(self, tenant, access_token):
+        from msrest.authentication import BasicTokenAuthentication
+
         token_credential = BasicTokenAuthentication({'access_token': access_token})
         client = self._arm_client_factory(token_credential)
         subscriptions = client.subscriptions.list()

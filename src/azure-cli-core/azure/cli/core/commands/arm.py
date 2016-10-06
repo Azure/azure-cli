@@ -7,9 +7,6 @@ import argparse
 import re
 import json
 
-from msrestazure.azure_operation import AzureOperationPoller
-from azure.mgmt.resource.resources import ResourceManagementClient
-
 from azure.cli.core.commands import CliCommand, command_table as main_command_table
 from azure.cli.core.commands._introspection import extract_args_from_signature
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
@@ -89,6 +86,8 @@ class ResourceId(str):
 def resource_exists(resource_group, name, namespace, type, **_): # pylint: disable=redefined-builtin
     '''Checks if the given resource exists.
     '''
+    from azure.mgmt.resource.resources import ResourceManagementClient
+
     odata_filter = "resourceGroup eq '{}' and name eq '{}'" \
         " and resourceType eq '{}/{}'".format(resource_group, name, namespace, type)
     client = get_mgmt_service_client(ResourceManagementClient).resources
@@ -195,6 +194,8 @@ def cli_generic_update_command(name, getter, setter, factory=None, setter_arg_na
         if custom_function else None
 
     def handler(args):
+        from msrestazure.azure_operation import AzureOperationPoller
+
         ordered_arguments = args.pop('ordered_arguments') if 'ordered_arguments' in args else []
 
         try:

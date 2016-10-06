@@ -4,15 +4,11 @@
 #---------------------------------------------------------------------------------------------
 
 from __future__ import print_function
-from codecs import open as codecs_open
-from datetime import datetime, timedelta
-import json
-import platform
 import re
 import sys
+import json
+from datetime import datetime, timedelta
 from enum import Enum
-
-from msrestazure.azure_exceptions import CloudError
 
 import azure.cli.core._logging as _logging
 
@@ -30,6 +26,7 @@ class CLIError(Exception):
 
 def handle_exception(ex):
     #For error code, follow guidelines at https://docs.python.org/2/library/sys.html#sys.exit,
+    from msrestazure.azure_exceptions import CloudError
     if isinstance(ex, CLIError) or isinstance(ex, CloudError):
         logger.error(ex.args[0])
         return ex.args[1] if len(ex.args) >= 2 else 1
@@ -43,6 +40,7 @@ def normalize_newlines(str_to_normalize):
     return str_to_normalize.replace('\r\n', '\n')
 
 def show_version_info_exit(out_file):
+    import platform
     from pip import get_installed_distributions
     installed_dists = get_installed_distributions(local_only=True)
 
@@ -69,6 +67,7 @@ def show_version_info_exit(out_file):
     sys.exit(0)
 
 def get_file_json(file_path, throw_on_empty=True):
+    from codecs import open as codecs_open
     #always try 'utf-8-sig' first, so that BOM in WinOS won't cause trouble.
     for encoding in ('utf-8-sig', 'utf-8', 'utf-16', 'utf-16le', 'utf-16be'):
         try:
