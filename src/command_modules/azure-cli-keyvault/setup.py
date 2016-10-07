@@ -27,7 +27,6 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
-    'azure==2.0.0rc6',
     'azure-mgmt-keyvault==0.30.0',
     'azure-cli-core',
 ]
