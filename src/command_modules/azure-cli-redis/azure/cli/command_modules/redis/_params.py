@@ -6,8 +6,7 @@
 # pylint: disable=line-too-long
 from azure.cli.core.commands.parameters import (
     get_resource_name_completion_list,
-    get_enum_choices,
-    get_enum_type_completion_list,
+    enum_choice_list,
     name_type)
 from azure.cli.core.commands import register_cli_argument
 import azure.cli.core.commands.arm # pylint: disable=unused-import
@@ -48,16 +47,16 @@ class ScheduleEntryList(list):
 
 register_cli_argument('redis', 'name', arg_type=name_type, help='Name of the redis cache.', completer=get_resource_name_completion_list('Microsoft.Cache/redis'), id_part='name')
 register_cli_argument('redis', 'redis_configuration', type=JsonString)
-register_cli_argument('redis', 'reboot_type', completer=get_enum_type_completion_list(RebootType))
-register_cli_argument('redis', 'key_type', choices=[e.value for e in RedisKeyType])
+register_cli_argument('redis', 'reboot_type', **enum_choice_list(RebootType))
+register_cli_argument('redis', 'key_type', **enum_choice_list(RedisKeyType))
 register_cli_argument('redis', 'shard_id', type=int)
 register_cli_argument('redis import-method', 'files', nargs='+')
 
 register_cli_argument('redis patch-schedule set', 'schedule_entries', type=ScheduleEntryList)
 
 register_cli_argument('redis create', 'name', arg_type=name_type, completer=None)
-register_cli_argument('redis create', 'sku_name', choices=[c.lower() for c in get_enum_choices(SkuName)], type=str.lower)
-register_cli_argument('redis create', 'sku_family', choices=[c.lower() for c in get_enum_choices(SkuFamily)], type=str.lower)
+register_cli_argument('redis create', 'sku_name', **enum_choice_list(SkuName))
+register_cli_argument('redis create', 'sku_family', **enum_choice_list(SkuFamily))
 register_cli_argument('redis create', 'sku_capacity', choices=[str(n) for n in range(0, 7)])
 register_cli_argument('redis create', 'enable_non_ssl_port', action='store_true')
 register_cli_argument('redis create', 'tenant_settings', type=JsonString)

@@ -9,13 +9,12 @@ from argcomplete.completers import FilesCompleter
 from azure.mgmt.resource.resources.models import DeploymentMode
 from azure.cli.core.commands import register_cli_argument, CliArgumentType
 from azure.cli.core.commands.parameters import (ignore_type, resource_group_name_type, tag_type,
-                                                tags_type, get_resource_group_completion_list)
+                                                tags_type, get_resource_group_completion_list,
+                                                enum_choice_list)
 from .custom import get_policy_completion_list, get_policy_assignment_completion_list
 from ._validators import validate_resource_type, validate_parent, resolve_resource_parameters
 
 # BASIC PARAMETER CONFIGURATION
-
-choices_deployment_mode = [e.value.lower() for e in DeploymentMode]
 
 resource_name_type = CliArgumentType(options_list=('--name', '-n'), help='The resource name.')
 
@@ -59,7 +58,7 @@ register_cli_argument('resource group deployment', 'resource_group_name', arg_ty
 register_cli_argument('resource group deployment', 'deployment_name', options_list=('--name', '-n'), required=True, help='The deployment name.')
 register_cli_argument('resource group deployment', 'parameters_file_path', completer=FilesCompleter())
 register_cli_argument('resource group deployment', 'template_file_path', completer=FilesCompleter())
-register_cli_argument('resource group deployment', 'mode', choices=choices_deployment_mode, type=str.lower, help='Incremental (only add resources to resource group) or Complete (remove extra resources from resource group)')
+register_cli_argument('resource group deployment', 'mode', help='Incremental (only add resources to resource group) or Complete (remove extra resources from resource group)', **enum_choice_list(DeploymentMode))
 register_cli_argument('resource group export', 'include_comments', action='store_true')
 register_cli_argument('resource group export', 'include_parameter_default_value', action='store_true')
 register_cli_argument('resource group create', 'resource_group_name', completer=None)

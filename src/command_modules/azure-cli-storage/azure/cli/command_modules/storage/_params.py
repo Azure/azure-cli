@@ -9,7 +9,7 @@ from six import u as unicode_string
 
 from azure.cli.core._config import az_config
 from azure.cli.core.commands.parameters import \
-    (ignore_type, tags_type, get_resource_name_completion_list, get_enum_type_completion_list)
+    (ignore_type, tags_type, get_resource_name_completion_list, enum_choice_list)
 import azure.cli.core.commands.arm # pylint: disable=unused-import
 from azure.cli.core.commands import register_cli_argument, register_extra_cli_argument, CliArgumentType
 from azure.cli.core.commands.client_factory import get_data_service_client
@@ -170,30 +170,30 @@ for item in ['check-name', 'delete', 'list', 'show', 'show-usage', 'update', 'ke
     register_cli_argument('storage account {}'.format(item), 'account_name', account_name_type, options_list=('--name', '-n'))
 
 register_cli_argument('storage account show-connection-string', 'account_name', account_name_type, options_list=('--name', '-n'))
-register_cli_argument('storage account show-connection-string', 'protocol', help='The default endpoint protocol.', choices=['http', 'https'], type=str.lower)
-register_cli_argument('storage account show-connection-string', 'key_name', options_list=('--key',), help='The key to use.', choices=list(storage_account_key_options.keys()), type=str.lower)
+register_cli_argument('storage account show-connection-string', 'protocol', help='The default endpoint protocol.', **enum_choice_list(['http', 'https']))
+register_cli_argument('storage account show-connection-string', 'key_name', options_list=('--key',), help='The key to use.', **enum_choice_list(list(storage_account_key_options.keys())))
 for item in ['blob', 'file', 'queue', 'table']:
     register_cli_argument('storage account show-connection-string', '{}_endpoint'.format(item), help='Custom endpoint for {}s.'.format(item))
 
 register_cli_argument('storage account create', 'account_name', account_name_type, options_list=('--name', '-n'), completer=None)
 
-register_cli_argument('storage account create', 'kind', help='Indicates the type of storage account. (Storage, BlobStorage)', completer=get_enum_type_completion_list(Kind))
+register_cli_argument('storage account create', 'kind', help='Indicates the type of storage account.', **enum_choice_list(Kind))
 register_cli_argument('storage account create', 'tags', tags_type)
 
 for item in ['create', 'update']:
-    register_cli_argument('storage account {}'.format(item), 'sku', help='The storage account SKU. (Standard_LRS, Standard_GRS, Standard_RAGRS, Standard_ZRS, Premium_LRS)', completer=get_enum_type_completion_list(SkuName))
-    register_cli_argument('storage account {}'.format(item), 'encryption', nargs='+', help='Specifies which service(s) to encrypt.', choices=list(EncryptionServices._attribute_map.keys()), validator=validate_encryption) # pylint: disable=protected-access
+    register_cli_argument('storage account {}'.format(item), 'sku', help='The storage account SKU.', **enum_choice_list(SkuName))
+    register_cli_argument('storage account {}'.format(item), 'encryption', nargs='+', help='Specifies which service(s) to encrypt.', validator=validate_encryption, **enum_choice_list(list(EncryptionServices._attribute_map.keys()))) # pylint: disable=protected-access
 
-register_cli_argument('storage account create', 'access_tier', help='Required for StandardBlob accounts. The access tier used for billing. Cannot be set for StandardLRS, StandardGRS, StandardRAGRS, or PremiumLRS account types. (Hot, Cool)', completer=get_enum_type_completion_list(AccessTier))
-register_cli_argument('storage account update', 'access_tier', help='The access tier used for billing StandardBlob accounts. Cannot be set for StandardLRS, StandardGRS, StandardRAGRS, or PremiumLRS account types. (Hot, Cool)', completer=get_enum_type_completion_list(AccessTier))
+register_cli_argument('storage account create', 'access_tier', help='Required for StandardBlob accounts. The access tier used for billing. Cannot be set for StandardLRS, StandardGRS, StandardRAGRS, or PremiumLRS account types.', **enum_choice_list(AccessTier))
+register_cli_argument('storage account update', 'access_tier', help='The access tier used for billing StandardBlob accounts. Cannot be set for StandardLRS, StandardGRS, StandardRAGRS, or PremiumLRS account types.', **enum_choice_list(AccessTier))
 register_cli_argument('storage account create', 'custom_domain', help='User domain assigned to the storage account. Name is the CNAME source.', validator=validate_custom_domain)
 register_cli_argument('storage account update', 'custom_domain', help='User domain assigned to the storage account. Name is the CNAME source. Use "" to clear existing value.', validator=validate_custom_domain)
 register_extra_cli_argument('storage account create', 'subdomain', options_list=('--use-subdomain',), help='Specify to enable indirect CNAME validation.', action='store_true')
-register_extra_cli_argument('storage account update', 'subdomain', options_list=('--use-subdomain',), help='Specify whether to use indirect CNAME validation.', choices=['true', 'false'], default=None)
+register_extra_cli_argument('storage account update', 'subdomain', options_list=('--use-subdomain',), help='Specify whether to use indirect CNAME validation.', default=None, **enum_choice_list(['true', 'false']))
 
 register_cli_argument('storage account update', 'tags', tags_type, default=None)
 
-register_cli_argument('storage account keys renew', 'key_name', options_list=('--key',), help='The key to regenerate.', choices=list(storage_account_key_options.keys()), validator=validate_key, type=str.lower)
+register_cli_argument('storage account keys renew', 'key_name', options_list=('--key',), help='The key to regenerate.', validator=validate_key, **enum_choice_list(list(storage_account_key_options.keys())))
 register_cli_argument('storage account keys renew', 'account_name', account_name_type, id_part=None)
 
 register_cli_argument('storage blob', 'blob_name', blob_name_type, options_list=('--name', '-n'))
@@ -213,7 +213,7 @@ register_cli_argument('storage blob copy', 'container_name', container_name_type
 register_cli_argument('storage blob copy', 'blob_name', blob_name_type, options_list=('--destination-blob', '-b'), help='Name of the destination blob. If the exists, it will be overwritten.')
 register_cli_argument('storage blob copy', 'source_lease_id', arg_group='Copy Source')
 
-register_cli_argument('storage blob delete', 'delete_snapshots', choices=list(delete_snapshot_types.keys()), type=str.lower)
+register_cli_argument('storage blob delete', 'delete_snapshots', **enum_choice_list(list(delete_snapshot_types.keys())))
 
 register_cli_argument('storage blob exists', 'blob_name', required=True)
 
@@ -227,16 +227,16 @@ for item in ['download', 'upload']:
 for item in ['update', 'upload']:
     register_content_settings_argument('storage blob {}'.format(item), BlobContentSettings, item == 'update')
 
-register_cli_argument('storage blob upload', 'blob_type', help="Defaults to 'page' for *.vhd files, or 'block' otherwise.", options_list=('--type', '-t'), choices=list(blob_types.keys()), type=str.lower, validator=validate_blob_type)
+register_cli_argument('storage blob upload', 'blob_type', help="Defaults to 'page' for *.vhd files, or 'block' otherwise.", options_list=('--type', '-t'), validator=validate_blob_type, **enum_choice_list(blob_types.keys()))
 register_cli_argument('storage blob upload', 'maxsize_condition', help='The max length in bytes permitted for an append blob.')
 register_cli_argument('storage blob upload', 'validate_content', help='Specifies that an MD5 hash shall be calculated for each chunk of the blob and verified by the service when the chunk has arrived.')
 
 for item in ['file', 'blob']:
-    register_cli_argument('storage {} url'.format(item), 'protocol', help='Protocol to use.', choices=['http', 'https'], default='https', type=str.lower)
+    register_cli_argument('storage {} url'.format(item), 'protocol', help='Protocol to use.', default='https', **enum_choice_list(['http', 'https']))
     register_source_uri_arguments('storage {} copy start'.format(item))
 
 register_cli_argument('storage container', 'container_name', container_name_type, options_list=('--name', '-n'))
-register_cli_argument('storage container', 'public_access', choices=list(public_access_types.keys()), validator=validate_public_access, help='Specifies whether data in the container may be accessed publically. By default, container data is private ("off") to the account owner. Use "blob" to allow public read access for blobs. Use "container" to allow public read and list access to the entire container.')
+register_cli_argument('storage container', 'public_access', validator=validate_public_access, help='Specifies whether data in the container may be accessed publically. By default, container data is private ("off") to the account owner. Use "blob" to allow public read access for blobs. Use "container" to allow public read and list access to the entire container.', **enum_choice_list(public_access_types.keys()))
 
 register_cli_argument('storage container create', 'container_name', container_name_type, options_list=('--name', '-n'), completer=None)
 register_cli_argument('storage container create', 'fail_on_exist', help='Throw an exception if the container already exists.')
@@ -327,9 +327,9 @@ register_cli_argument('storage entity', 'entity', options_list=('--entity', '-e'
 register_cli_argument('storage entity', 'property_resolver', ignore_type)
 register_cli_argument('storage entity', 'select', nargs='+', help='Space separated list of properties to return for each entity.', validator=validate_select)
 
-register_cli_argument('storage entity insert', 'if_exists', choices=['fail', 'merge', 'replace'])
+register_cli_argument('storage entity insert', 'if_exists', **enum_choice_list(['fail', 'merge', 'replace']))
 
-register_cli_argument('storage entity query', 'accept', help='Specifies how much metadata to include in the response payload.', choices=table_payload_formats.keys(), default='minimal', validator=validate_accept)
+register_cli_argument('storage entity query', 'accept', help='Specifies how much metadata to include in the response payload.', default='minimal', validator=validate_accept, **enum_choice_list(table_payload_formats.keys()))
 
 register_cli_argument('storage queue', 'queue_name', queue_name_type, options_list=('--name', '-n'))
 
@@ -377,17 +377,17 @@ register_cli_argument('storage logging update', 'log', help='The operations for 
 register_cli_argument('storage logging update', 'retention', type=int, help='Number of days for which to retain logs. 0 to disable.')
 
 register_cli_argument('storage metrics show', 'services', help='The storage services from which to retrieve metrics info: (b)lob (f)ile (q)ueue (t)able. Can be combined.')
-register_cli_argument('storage metrics show', 'interval', help='Filter the set of metrics to retrieve by time interval.', choices=['hour', 'minute', 'both'])
+register_cli_argument('storage metrics show', 'interval', help='Filter the set of metrics to retrieve by time interval.', **enum_choice_list(['hour', 'minute', 'both']))
 
 register_cli_argument('storage metrics update', 'services', help='The storage service(s) for which to update metrics info: (b)lob (f)ile (q)ueue (t)able. Can be combined.')
-register_cli_argument('storage metrics update', 'hour', help='Update the hourly metrics.', choices=['enable', 'disable'], validator=process_metric_update_namespace)
-register_cli_argument('storage metrics update', 'minute', help='Update the by-minute metrics.', choices=['enable', 'disable'])
-register_cli_argument('storage metrics update', 'api', help='Specify whether to include API in metrics. Applies to both hour and minute metrics if both are specified. Must be specified if hour or minute metrics are enabled and being updated.', choices=['enable', 'disable'])
+register_cli_argument('storage metrics update', 'hour', help='Update the hourly metrics.', validator=process_metric_update_namespace, **enum_choice_list(['true', 'false']))
+register_cli_argument('storage metrics update', 'minute', help='Update the by-minute metrics.', **enum_choice_list(['true', 'false']))
+register_cli_argument('storage metrics update', 'api', help='Specify whether to include API in metrics. Applies to both hour and minute metrics if both are specified. Must be specified if hour or minute metrics are enabled and being updated.', **enum_choice_list(['true', 'false']))
 register_cli_argument('storage metrics update', 'retention', type=int, help='Number of days for which to retain metrics. 0 to disable. Applies to both hour and minute metrics if both are specified.')
 
 register_cli_argument('storage cors', 'max_age', type=int, help='The number of seconds the client/browser should cache a preflight response.', default="0")
 register_cli_argument('storage cors', 'origins', nargs='+', help='List of origin domains that will be allowed via CORS, or "*" to allow all domains.')
-register_cli_argument('storage cors', 'methods', nargs='+', help='List of HTTP methods allowed to be executed by the origin.', choices=['DELETE', 'GET', 'HEAD', 'MERGE', 'POST', 'OPTIONS', 'PUT'], type=str.upper)
+register_cli_argument('storage cors', 'methods', nargs='+', help='List of HTTP methods allowed to be executed by the origin.', **enum_choice_list(['DELETE', 'GET', 'HEAD', 'MERGE', 'POST', 'OPTIONS', 'PUT']))
 register_cli_argument('storage cors', 'allowed_headers', nargs='+', help='List of response headers allowed to be part of the cross-origin request.')
 register_cli_argument('storage cors', 'exposed_headers', nargs='+', help='List of response headers to expose to CORS clients.')
 
