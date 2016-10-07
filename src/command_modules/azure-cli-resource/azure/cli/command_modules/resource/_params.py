@@ -49,8 +49,7 @@ register_cli_argument('resource policy definition', 'description', help='descrip
 register_cli_argument('resource policy assignment', 'name', options_list=('--name', '-n'), completer=get_policy_assignment_completion_list, help='name of the assignment')
 register_cli_argument('resource policy assignment create', 'name', options_list=('--name', '-n'), help='name of the new assignment')
 register_cli_argument('resource policy assignment', 'scope', help='scope at which this policy assignment applies to, e.g., /subscriptions/0b1f6471-1bf0-4dda-aec3-111122223333, /subscriptions/0b1f6471-1bf0-4dda-aec3-111122223333/resourceGroups/myGroup, or /subscriptions/0b1f6471-1bf0-4dda-aec3-111122223333/resourceGroups/myGroup/providers/Microsoft.Compute/virtualMachines/myVM')
-register_cli_argument('resource policy assignment', 'show_all', action='store_true', help='show all the assignment under the current subscription')
-register_cli_argument('resource policy assignment', 'include_inherited', action='store_true', help='show assignments from parent scopes')
+register_cli_argument('resource policy assignment', 'disable_scope_strict_match', action='store_true', help='include assignment either inhertied from parent scope or at child scope')
 register_cli_argument('resource policy assignment', 'display_name', help='display name of the assignment')
 register_cli_argument('resource policy assignment', 'policy', help='policy name or fully qualified id', completer=get_policy_completion_list)
 

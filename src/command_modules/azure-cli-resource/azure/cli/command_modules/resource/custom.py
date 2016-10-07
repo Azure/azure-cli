@@ -316,12 +316,20 @@ def show_policy_assignment(name, resource_group_name=None, scope=None):
                                 resource_group_name, scope)
     return policy_client.policy_assignments.get(scope, name)
 
-def list_policy_assignment(show_all=False, include_inherited=False,
-                           resource_group_name=None, scope=None):
+def list_policy_assignment(disable_scope_strict_match=None, resource_group_name=None, scope=None):
     policy_client = _resource_policy_client_factory()
-    if show_all:
-        if resource_group_name or scope:
-            raise CLIError('group or resource id are not required when --show-all is used')
+    if scope and not is_valid_resource_id(scope):
+        parts = scope.strip('/').split('/')
+        if len(parts) == 4:
+            resource_group_name = parts[3]
+        elif len(parts) == 2:
+            #rarely used, but still verify
+            if parts[1].lower() != policy_client.config.subscription_id.lower():
+                raise CLIError("Please use current active subscription's id")
+        else:
+            err = "Invalid scope '{}', it should point to a resource group or a resource"
+            raise CLIError(err.format(scope))
+        scope = None
 
     _scope = _build_policy_scope(policy_client.config.subscription_id,
                                  resource_group_name, scope)
@@ -330,18 +338,16 @@ def list_policy_assignment(show_all=False, include_inherited=False,
     elif scope:
         #pylint: disable=redefined-builtin
         id = parse_resource_id(scope)
-        parent_resource_path = None if not id['child_name'] else (id['type'] + '/' + id['name'])
-        resource_type = id['child_type'] or id['type']
-        resource_name = id['child_name'] or id['name']
+        parent_resource_path = '' if not id.get('child_name') else (id['type'] + '/' + id['name'])
+        resource_type = id.get('child_type') or id['type']
+        resource_name = id.get('child_name') or id['name']
         result = policy_client.policy_assignments.list_for_resource(
             id['resource_group'], id['namespace'],
             parent_resource_path, resource_type, resource_name)
     else:
         result = policy_client.policy_assignments.list()
-        if show_all:
-            return result
 
-    if not include_inherited:
+    if not disable_scope_strict_match:
         result = [i for i in result if _scope.lower() == i.scope.lower()]
 
     return result

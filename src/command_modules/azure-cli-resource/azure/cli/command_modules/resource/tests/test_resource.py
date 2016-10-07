@@ -306,14 +306,14 @@ class PolicyScenarioTest(ResourceGroupVCRTestBase):
             pass
 
         # but enable --show-all works
-        self.cmd('resource policy assignment list --show-all', checks=[
+        self.cmd('resource policy assignment list --disable-scope-strict-match', checks=[
             JMESPathCheck("length([?name=='{}'])".format(policy_assignment_name), 1),
             ])
 
         # delete the assignment
         self.cmd('resource policy assignment delete -n {} -g {}'.format(
             policy_assignment_name, self.resource_group))
-        self.cmd('resource policy assignment list --show-all')
+        self.cmd('resource policy assignment list --disable-scope-strict-match')
 
         # delete the policy
         self.cmd('resource policy definition delete -n {}'.format(policy_name))

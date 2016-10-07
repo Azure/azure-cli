@@ -6,10 +6,17 @@
 from azure.cli.core.help_files import helps #pylint: disable=unused-import
 
 #pylint: disable=line-too-long
-
+helps['resource policy'] = """
+    type: group
+    short-summary: Commands to manage resource policies
+"""
+helps['resource policy definition'] = """
+    type: group
+    short-summary: manage resource policy definitions
+"""
 helps['resource policy definition create'] = """
             type: command
-            short-summary: Create a policy
+            short-summary: Creates a policy definition
             parameters:
                 - name: --rules
                   type: string
@@ -29,7 +36,38 @@ helps['resource policy definition create'] = """
                             }
                         }
             """
-
+helps['resource policy definition delete'] = """
+    type: command
+    short-summary: deletes a policy definition
+"""
+helps['resource policy definition update'] = """
+    type: command
+    short-summary: updates a policy definition
+"""
+helps['resource policy definition list'] = """
+    type: command
+    short-summary: lists policy definitions
+"""
+helps['resource policy assignment'] = """
+    type: group
+    short-summary: manage resource policy assignments
+"""
+helps['resource policy assignment create'] = """
+    type: command
+    short-summary: creates a resource policy assignment
+"""
+helps['resource policy assignment delete'] = """
+    type: command
+    short-summary: deletes a resource policy assignment
+"""
+helps['resource policy assignment show'] = """
+    type: command
+    short-summary: shows a resource policy assignment
+"""
+helps['resource policy assignment list'] = """
+    type: command
+    short-summary: list resource policy assignments
+"""
 helps['resource'] = """
     type: group
     short-summary: Generic commands to manage Azure resources
@@ -49,14 +87,6 @@ helps['resource group deployment'] = """
 helps['resource group deployment operation'] = """
     type: group
     short-summary: Commands to manage deployment operations
-"""
-helps['resource policy'] = """
-    type: group
-    short-summary: Commands to manage resource policies
-"""
-helps['resource policy assignment'] = """
-    type: group
-    short-summary: Commands to manage resource policy assignments
 """
 helps['resource provider'] = """
     type: group
