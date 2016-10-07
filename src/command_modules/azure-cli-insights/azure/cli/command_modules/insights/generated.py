@@ -17,27 +17,22 @@ def _insights_client_factory(client):
     return get_mgmt_service_client(client)
 
 cli_command('insights event list', list_events)
-cli_command('insights event list-digest-events', list_digest_events)
-cli_command('insights event tenant list-digest-events', list_tenant_digest_events)
+# list-digest and tenat list-digest are not aviailable
+#cli_command('insights event list-digest-events', list_digest_events)
+#cli_command('insights event tenant list-digest-events', list_tenant_digest_events)
 cli_command('insights event tenant list', list_tenant_events)
 
 factory = lambda _: _insights_client_factory(InsightsClient).event_categories
 cli_command('insights event list-categories', EventCategoriesOperations.list, factory)
 
 
-#factory = lambda x: _insights_client_factory(InsightsClient).usage_metric
-#cli_command('insights list-usage', UsageMetricOperations.list, factory)
+# factory = lambda x: _insights_client_factory(InsightsClient).usage_metric
+# cli_command('insights list-usage', UsageMetricOperations.list, factory)
 
-# factory = lambda x: _insights_client_factory(InsightsClient).log
-# cli_command('insights logs list', LogOperations.get, factory)
-
-# factory = lambda x: _insights_client_factory(InsightsClient).log_definition
-# cli_command('insights logs list-definitions', LogDefinitionOperations.get, factory)
-
-factory = lambda x: _insights_client_factory(InsightsClient).metric
+factory = lambda x: _insights_client_factory(InsightsClient).metrics
 cli_command('insights metrics list', MetricsOperations.list, factory)
 
-factory = lambda x: _insights_client_factory(InsightsClient).metric_definition
+factory = lambda x: _insights_client_factory(InsightsClient).metric_definitions
 cli_command('insights metrics list-definitions', MetricDefinitionsOperations.list, factory)
 
 #factory = lambda x: _insights_client_factory(InsightsManagementClient).alert
@@ -48,3 +43,10 @@ cli_command('insights metrics list-definitions', MetricDefinitionsOperations.lis
 #cli_command('insights alerts rule delete', Alert.delete_rule, factory)
 #cli_command('insights alerts rule show', Alert.get_rule, factory)
 #cli_command('insights alerts rule list', Alert.list_rules, factory)
+
+
+# factory = lambda x: _insights_client_factory(InsightsClient).log
+# cli_command('insights logs list', LogOperations.get, factory)
+
+# factory = lambda x: _insights_client_factory(InsightsClient).log_definition
+# cli_command('insights logs list-definitions', LogDefinitionOperations.get, factory)

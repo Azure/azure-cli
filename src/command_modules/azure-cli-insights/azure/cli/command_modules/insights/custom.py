@@ -147,7 +147,7 @@ def list_tenant_events(start_time=None, end_time=None, limit=50, select=None):
         with 'null' values.
         :param limit: Maximum number of events to return.
     '''
-    client =  _insights_client_factory(InsightsClient).tenant_event
+    client =  _insights_client_factory(InsightsClient).tenant_events
 
     filters = []
     # retrieve last hours worth of logs if not specified
