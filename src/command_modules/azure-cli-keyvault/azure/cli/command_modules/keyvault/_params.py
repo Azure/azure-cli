@@ -10,7 +10,7 @@ from azure.mgmt.keyvault.models.key_vault_management_client_enums import \
     (SkuName, KeyPermissions, SecretPermissions, CertificatePermissions)
 from azure.cli.core.commands.parameters import (
     get_resource_name_completion_list, resource_group_name_type,
-    tags_type, ignore_type, name_type, enum_choice_list)
+    tags_type, ignore_type, enum_choice_list)
 from azure.cli.core.commands import \
     (register_cli_argument, register_extra_cli_argument, CliArgumentType)
 import azure.cli.core.commands.arm # pylint: disable=unused-import

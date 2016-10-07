@@ -79,8 +79,6 @@ class Profile(object):
         self._subscription_finder = SubscriptionFinder(factory, self._creds_cache.adal_token_cache)
         env = get_env()
         self._management_resource_uri = env[ENDPOINT_URLS.MANAGEMENT]
-        self._graph_resource_uri = env[ENDPOINT_URLS.ACTIVE_DIRECTORY_GRAPH_RESOURCE_ID]
-        self._key_vault_resource_uri = env[ENDPOINT_URLS.KEY_VAULT]
 
     def find_subscriptions_on_login(self, #pylint: disable=too-many-arguments
                                     interactive,
