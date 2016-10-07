@@ -8,7 +8,7 @@ from azure.mgmt.web import WebSiteManagementClient
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.parameters import (resource_group_name_type, location_type,
                                                 get_resource_name_completion_list,
-                                                CliArgumentType, ignore_type)
+                                                CliArgumentType, ignore_type, enum_choice_list)
 
 # FACTORIES
 def web_client_factory(**_):
@@ -38,9 +38,8 @@ def get_hostname_completion_list(prefix, action, parsed_args, **kwargs): # pylin
 #pylint: disable=line-too-long
 # PARAMETER REGISTRATION
 name_arg_type = CliArgumentType(options_list=('--name', '-n'), metavar='NAME')
-sku_arg_type = CliArgumentType(type=str.upper,
-                               choices=['F1', 'FREE', 'D1', 'SHARED', 'B1', 'B2', 'B3', 'S1', 'S2', 'S3', 'P1', 'P2', 'P3'],
-                               help='The pricing tiers, e.g., F1(Free), D1(Shared), B1(Basic Small), B2(Basic Medium), B3(Basic Large), S1(Standard Small), P1(Premium Small), etc')
+sku_arg_type = CliArgumentType(help='The pricing tiers, e.g., F1(Free), D1(Shared), B1(Basic Small), B2(Basic Medium), B3(Basic Large), S1(Standard Small), P1(Premium Small), etc',
+                               **enum_choice_list(['F1', 'FREE', 'D1', 'SHARED', 'B1', 'B2', 'B3', 'S1', 'S2', 'S3', 'P1', 'P2', 'P3']))
 
 register_cli_argument('appservice', 'resource_group_name', arg_type=resource_group_name_type)
 register_cli_argument('appservice', 'location', arg_type=location_type)
@@ -67,20 +66,14 @@ register_cli_argument('appservice web deployment slot', 'webapp', help='Name of 
 register_cli_argument('appservice web deployment slot', 'auto_swap_slot', help='target slot to swap', default='production')
 register_cli_argument('appservice web deployment slot', 'disable', help='disable auto swap', action='store_true')
 
-two_states_switch = [True, False]
-def two_states_switch_type(value=None):
-    if value is None:
-        return None
-    if value.lower() in ['true', 'false']:
-        return value.lower() == 'true'
-    return value
+two_states_switch = ['true', 'false']
 
-register_cli_argument('appservice web log set', 'application_logging', choices=two_states_switch, type=two_states_switch_type, help='configure application logging to file system')
-register_cli_argument('appservice web log set', 'detailed_error_messages', choices=two_states_switch, type=two_states_switch_type, help='configure detailed error messages')
-register_cli_argument('appservice web log set', 'failed_request_tracing', choices=two_states_switch, type=two_states_switch_type, help='configure failed request tracing')
-register_cli_argument('appservice web log set', 'level', choices=['error', 'warning', 'information', 'verbose'], type=str.lower, help='logging level')
+register_cli_argument('appservice web log set', 'application_logging', help='configure application logging to file system', **enum_choice_list(two_states_switch))
+register_cli_argument('appservice web log set', 'detailed_error_messages', help='configure detailed error messages', **enum_choice_list(two_states_switch))
+register_cli_argument('appservice web log set', 'failed_request_tracing', help='configure failed request tracing', **enum_choice_list(two_states_switch))
+register_cli_argument('appservice web log set', 'level', help='logging level', **enum_choice_list(['error', 'warning', 'information', 'verbose']))
 server_log_switch_options = ['off', 'storage', 'filesystem']
-register_cli_argument('appservice web log set', 'web_server_logging', choices=server_log_switch_options, type=str.lower, help='configure Web server logging')
+register_cli_argument('appservice web log set', 'web_server_logging', help='configure Web server logging', **enum_choice_list(server_log_switch_options))
 
 register_cli_argument('appservice web log tail', 'provider', help="scope the live traces to certain providers/folders, for example:'application', 'http' for server log, 'kudu/trace', etc")
 register_cli_argument('appservice web log download', 'log_file', default='webapp_logs.zip', help='the downloaded zipped log file path')
@@ -88,11 +81,11 @@ register_cli_argument('appservice web log download', 'log_file', default='webapp
 register_cli_argument('appservice web config appsettings', 'settings', nargs='+', help="space separated app settings in a format of <name>=<value>")
 register_cli_argument('appservice web config appsettings', 'setting_names', nargs='+', help="space separated app setting names")
 
-register_cli_argument('appservice web config update', 'remote_debugging_enabled', choices=two_states_switch, type=two_states_switch_type, help='enable or disable remote debugging')
-register_cli_argument('appservice web config update', 'web_sockets_enabled', choices=two_states_switch, type=two_states_switch_type, help='enable or disable web sockets')
-register_cli_argument('appservice web config update', 'always_on', choices=two_states_switch, type=two_states_switch_type, help='ensure webapp gets loaded all the time, rather unloaded after been idle. Recommended when you have continuous web jobs running')
-register_cli_argument('appservice web config update', 'auto_heal_enabled', choices=two_states_switch, type=two_states_switch_type, help='enable or disable auto heal')
-register_cli_argument('appservice web config update', 'use32_bit_worker_process', options_list=('--use-32bit-worker-process',), choices=two_states_switch, type=two_states_switch_type, help='use 32 bits worker process or not')
+register_cli_argument('appservice web config update', 'remote_debugging_enabled', help='enable or disable remote debugging', **enum_choice_list(two_states_switch))
+register_cli_argument('appservice web config update', 'web_sockets_enabled', help='enable or disable web sockets', **enum_choice_list(two_states_switch))
+register_cli_argument('appservice web config update', 'always_on', help='ensure webapp gets loaded all the time, rather unloaded after been idle. Recommended when you have continuous web jobs running', **enum_choice_list(two_states_switch))
+register_cli_argument('appservice web config update', 'auto_heal_enabled', help='enable or disable auto heal', **enum_choice_list(two_states_switch))
+register_cli_argument('appservice web config update', 'use32_bit_worker_process', options_list=('--use-32bit-worker-process',), help='use 32 bits worker process or not', **enum_choice_list(two_states_switch))
 register_cli_argument('appservice web config update', 'php_version', help='The version used to run your web app if using PHP, e.g., 5.5, 5.6, 7.0')
 register_cli_argument('appservice web config update', 'python_version', help='The version used to run your web app if using Python, e.g., 2.7, 3.4')
 register_cli_argument('appservice web config update', 'net_framework_version', help="The version used to run your web app if using .NET Framework, e.g., 'v4.0' for .NET 4.6 and 'v3.0' for .NET 3.5")

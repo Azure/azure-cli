@@ -25,7 +25,7 @@ def get_location_completion_list(prefix, **kwargs):#pylint: disable=unused-argum
 def location_name_type(name):
     if ' ' in name:
         # if display name is provided, attempt to convert to short form name
-        name = next((l.name for l in get_subscription_locations() if l.display_name == name), name)
+        name = next((l.name for l in get_subscription_locations() if l.display_name.lower() == name.lower()), name)
     return name
 
 def get_one_of_subscription_locations():
@@ -68,19 +68,29 @@ def get_resource_name_completion_list(resource_type=None):
             return [r.name for r in get_resources_in_subscription(resource_type=resource_type)]
     return completer
 
-def get_enum_type_completion_list(enum_type=None):
-    ENUM_MAPPING_KEY = '_value2member_map_'
-    def completer(prefix, action, parsed_args, **kwargs): # pylint: disable=unused-argument
-        return list(enum_type.__dict__[ENUM_MAPPING_KEY].keys())
-    return completer
-
 def get_generic_completion_list(generic_list):
     def completer(prefix, action, parsed_args, **kwargs): # pylint: disable=unused-argument
         return generic_list
     return completer
 
-def get_enum_choices(enum_type):
-    return [x.value for x in enum_type]
+class CaseInsenstiveList(list): # pylint: disable=too-few-public-methods
+    def __contains__(self, other):
+        return next((True for x in self if other.lower() == x.lower()), False)
+
+def enum_choice_list(data):
+    """ Creates the argparse choices and type kwargs for a supplied enum type or list of strings. """
+    # transform enum types, otherwise assume list of string choices
+    try:
+        choices = [x.value for x in data]
+    except AttributeError:
+        choices = data
+    def _type(value):
+        return next((x for x in choices if x.lower() == value.lower()), value) if value else value
+    params = {
+        'choices': CaseInsenstiveList(choices),
+        'type': _type
+    }
+    return params
 
 class IgnoreAction(argparse.Action): # pylint: disable=too-few-public-methods
     def __call__(self, parser, namespace, values, option_string=None):
