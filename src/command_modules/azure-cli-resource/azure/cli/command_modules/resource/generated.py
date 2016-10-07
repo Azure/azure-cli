@@ -4,6 +4,8 @@
 #---------------------------------------------------------------------------------------------
 
 # pylint: disable=line-too-long
+from collections import OrderedDict
+
 from azure.mgmt.resource.features.operations.features_operations import FeaturesOperations
 from azure.mgmt.resource.resources.operations.resources_operations import ResourcesOperations
 from azure.mgmt.resource.resources.operations.providers_operations import ProvidersOperations
@@ -40,11 +42,14 @@ cli_command('resource group create', create_resource_group)
 cli_command('resource group export', export_group_as_template)
 
 # Resource commands
+def transform_resource_list(result):
+    return [OrderedDict([('Name', r['name']), ('ResourceGroup', r['resourceGroup']), \
+            ('Location', r['location']), ('Type', r['type'])]) for r in result]
 factory = lambda _: _resource_client_factory().resources
 cli_command('resource exists', ResourcesOperations.check_existence, factory)
 cli_command('resource delete', ResourcesOperations.delete, factory)
 cli_command('resource show', ResourcesOperations.get, factory)
-cli_command('resource list', list_resources)
+cli_command('resource list', list_resources, table_transformer=transform_resource_list)
 cli_command('resource tag', tag_resource)
 cli_command('resource move', move_resource)
 
