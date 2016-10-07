@@ -358,7 +358,6 @@ def _build_policy_scope(subscription_id, resource_group_name, scope):
         if resource_group_name:
             err = "Resource group '{}' is redundant because 'scope' is supplied"
             raise CLIError(err.format(resource_group_name))
-        scope = scope
     elif resource_group_name:
         scope = subscription_scope + '/resourceGroups/' + resource_group_name
     else:
