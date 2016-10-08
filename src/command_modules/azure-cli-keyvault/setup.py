@@ -51,6 +51,9 @@ setup(
     ],
     packages=[
         'azure.cli.command_modules.keyvault',
+        'azure.cli.command_modules.keyvault.keyvaultclient',
+        'azure.cli.command_modules.keyvault.convenience',
+        'azure.cli.command_modules.keyvault.keyvaultclient.models'
     ],
     install_requires=DEPENDENCIES,
 )
