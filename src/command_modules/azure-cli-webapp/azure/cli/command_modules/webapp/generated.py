@@ -4,7 +4,8 @@
 #---------------------------------------------------------------------------------------------
 
 #pylint: disable=unused-import
-from azure.mgmt.web.operations import SitesOperations, ServerFarmsOperations, ProviderOperations
+from azure.mgmt.web.operations import (SitesOperations, ServerFarmsOperations,
+                                       ProviderOperations, GlobalModelOperations)
 from azure.cli.core.commands import LongRunningOperation, cli_command
 from azure.cli.core.commands.arm import cli_generic_update_command
 
@@ -67,6 +68,8 @@ cli_generic_update_command('appservice plan update', ServerFarmsOperations.get_s
                            setter_arg_name='server_farm_envelope', factory=factory)
 cli_command('appservice plan list', ServerFarmsOperations.get_server_farms, factory)
 cli_command('appservice plan show', ServerFarmsOperations.get_server_farm, factory)
+cli_command('appservice list-locations', GlobalModelOperations.get_subscription_geo_regions,
+            factory)
 
 #Functionalities covered by better custom commands, so not exposed for now
 #cli_command('webapp get-source-control', SitesOperations.get_site_source_control, factory)

@@ -29,16 +29,25 @@ logger = _logging.get_az_logger(__name__)
 
 #workaround that app service's error doesn't comform to LRO spec
 class AppServiceLongRunningOperation(LongRunningOperation): #pylint: disable=too-few-public-methods
+
+    def __init__(self, creating_plan=False):
+        super(AppServiceLongRunningOperation, self).__init__(self)
+        self._creating_plan = creating_plan
+
     def __call__(self, poller):
         try:
             return super(AppServiceLongRunningOperation, self).__call__(poller)
         except Exception as ex:
-            raise AppServiceLongRunningOperation._get_detail_error(ex)
+            raise self._get_detail_error(ex)
 
-    @staticmethod
-    def _get_detail_error(ex):
+    def _get_detail_error(self, ex):
         try:
             detail = json.loads(ex.response.text)['Message']
+            if self._creating_plan:
+                if 'Requested features are not supported in region' in detail:
+                    detail = "Plan with linux worker is not supported in current region. Run 'az appservice list-locations --linux-workers-enabled' to cross check"
+                elif 'Not enough available reserved instance servers to satisfy this request' in detail:
+                    detail = "Plan with linux worker can only be created in a group which has never contained a windows worker. Please use a new resoruce group. Original error:" + detail
             return CLIError(detail)
         except: #pylint: disable=bare-except
             return ex
@@ -93,7 +102,8 @@ def update_site_configs(resource_group_name, name, slot=None,
                         java_version=None, java_container=None, java_container_version=None,#pylint: disable=unused-argument
                         remote_debugging_enabled=None, web_sockets_enabled=None,#pylint: disable=unused-argument
                         always_on=None, auto_heal_enabled=None,#pylint: disable=unused-argument
-                        use32_bit_worker_process=None):#pylint: disable=unused-argument
+                        use32_bit_worker_process=None,
+                        app_command_line=None):#pylint: disable=unused-argument
     configs = get_site_configs(resource_group_name, name, slot)
     import inspect
     frame = inspect.currentframe()
@@ -177,7 +187,7 @@ def enable_local_git(resource_group_name, name, slot=None):
 
     return {'url' : _get_git_url(client, resource_group_name, name, slot)}
 
-def create_app_service_plan(resource_group_name, name, sku, number_of_workers=None,
+def create_app_service_plan(resource_group_name, name, sku, is_linux, number_of_workers=None,
                             location=None):
     client = web_client_factory()
     sku = _normalize_sku(sku)
@@ -186,9 +196,10 @@ def create_app_service_plan(resource_group_name, name, sku, number_of_workers=No
 
     #the api is odd on parameter naming, have to live with it for now
     sku_def = SkuDescription(tier=_get_sku_name(sku), name=sku, capacity=number_of_workers)
-    plan_def = ServerFarmWithRichSku(location, server_farm_with_rich_sku_name=name, sku=sku_def)
+    plan_def = ServerFarmWithRichSku(location, server_farm_with_rich_sku_name=name,
+                                     sku=sku_def, reserved=(is_linux or None))
     poller = client.server_farms.create_or_update_server_farm(resource_group_name, name, plan_def)
-    return AppServiceLongRunningOperation()(poller)
+    return AppServiceLongRunningOperation(creating_plan=True)(poller)
 
 def update_app_service_plan(instance, sku=None, number_of_workers=None,
                             admin_site_name=None):

@@ -44,9 +44,11 @@ sku_arg_type = CliArgumentType(help='The pricing tiers, e.g., F1(Free), D1(Share
 register_cli_argument('appservice', 'resource_group_name', arg_type=resource_group_name_type)
 register_cli_argument('appservice', 'location', arg_type=location_type)
 
+register_cli_argument('appservice list-locations', 'linux_workers_enabled', action='store_true', help='support hosting webapp on linux worker')
 register_cli_argument('appservice plan', 'name', arg_type=name_arg_type, help='The name of the app service plan', completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'), id_part='name')
 register_cli_argument('appservice plan create', 'name', options_list=('--name', '-n'), help="Name of the new app service plan")
 register_cli_argument('appservice plan create', 'sku', arg_type=sku_arg_type, default='B1')
+register_cli_argument('appservice plan create', 'is_linux', action='store_true', help='host webapp on Linux worker')
 register_cli_argument('appservice plan update', 'sku', arg_type=sku_arg_type)
 register_cli_argument('appservice plan update', 'allow_pending_state', ignore_type)
 register_cli_argument('appservice plan', 'number_of_workers', help='Number of workers to be allocated.', type=int, default=1)
@@ -92,6 +94,7 @@ register_cli_argument('appservice web config update', 'net_framework_version', h
 register_cli_argument('appservice web config update', 'java_version', help="The version used to run your web app if using Java, e.g., '1.7' for Java 7, '1.8' for Java 8")
 register_cli_argument('appservice web config update', 'java_container', help="The java container, e.g., Tomcat, Jetty")
 register_cli_argument('appservice web config update', 'java_container_version', help="The version of the java container, e.g., '8.0.23' for Tomcat")
+register_cli_argument('appservice web config update', 'app_command_line', help="The startup file for linux hosted web apps, e.g. 'process.json' for Node.js web")
 
 register_cli_argument('appservice web config hostname', 'webapp', help="webapp name", completer=get_resource_name_completion_list('Microsoft.Web/sites'), id_part='name')
 register_cli_argument('appservice web config hostname', 'name', arg_type=name_arg_type, completer=get_hostname_completion_list, help="hostname assigned to the site, such as custom domains", id_part='child_name')
