@@ -11,6 +11,7 @@ def cli_storage_data_plane_command(name, operation, client_factory,
     """ Registers an Azure CLI Storage Data Plane command. These commands always include the
     four parameters which can be used to obtain a storage client: account-name, account-key,
     connection-string, and sas-token. """
+    # TODO-DEREK should pass in the module name here as the first argument
     command = create_command(name, operation, transform, table_transformer, client_factory)
 
     # add parameters required to create a storage client

@@ -8,7 +8,7 @@ import sys
 import os
 import uuid
 import argparse
-from azure.cli.core.parser import AzCliCommandParser
+from azure.cli.core.parser import AzCliCommandParser, enable_autocomplete
 from azure.cli.core._output import CommandResultItem
 import azure.cli.core.extensions
 import azure.cli.core._help as _help
@@ -31,13 +31,11 @@ class Configuration(object): # pylint: disable=too-few-public-methods
 
     def get_command_table(self):
         import azure.cli.core.commands as commands
-        # Find the first noun on the command line and only load commands from that
-        # module to improve startup time.
-        for a in self.argv:
-            if not a.startswith('-'):
-                return commands.get_command_table(a)
-        # No noun found, so load all commands.
-        return  commands.get_command_table()
+        return commands.get_command_table()
+
+    def load_params(self, command):
+        import azure.cli.core.commands as commands
+        commands.load_params(command)
 
 class Application(object):
 
@@ -85,6 +83,7 @@ class Application(object):
         self.raise_event(self.COMMAND_PARSER_LOADED, parser=self.parser)
 
         if len(argv) == 0:
+            enable_autocomplete(self.parser)
             az_subparser = self.parser.subparsers[tuple()]
             _help.show_welcome(az_subparser)
             log_telemetry('welcome')
@@ -92,8 +91,35 @@ class Application(object):
 
         if argv[0].lower() == 'help':
             argv[0] = '--help'
+        
+        # Rudimentary parsing to get the command
+        nouns = []
+        for noun in argv:
+            if noun[0] == '-':
+                break
+            nouns.append(noun)
+        command = ' '.join(nouns)
 
+        if argv[-1] in ('--help', '-h'):
+            # Make sure we load the params so they show in help
+            self.configuration.load_params(command)
+            self.parser.load_command_table(command_table)
+
+        if self.session['completer_active']:
+            # Make sure we load the params for tab completion then enable it
+            self.configuration.load_params(command)
+            self.parser.load_command_table(command_table)
+            enable_autocomplete(self.parser)
+
+        # Parse once so we can get the command
         args = self.parser.parse_args(argv)
+
+        # The the params configuration for the command
+        self.configuration.load_params(args.command)
+        # Load the now updated command table and parse again
+        self.parser.load_command_table(command_table)
+        args = self.parser.parse_args(argv)
+
         self.raise_event(self.COMMAND_PARSER_PARSED, command=args.command, args=args)
         results = []
         for expanded_arg in _explode_list_args(args):

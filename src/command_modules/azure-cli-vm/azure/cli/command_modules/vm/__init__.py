@@ -6,6 +6,10 @@
 # pylint: disable=unused-import
 
 import azure.cli.command_modules.vm._help
-import azure.cli.command_modules.vm._params
-import azure.cli.command_modules.vm.generated
-import azure.cli.command_modules.vm.custom
+
+def load_params(command):
+    import azure.cli.command_modules.vm._params
+
+def load_commands():
+    import azure.cli.command_modules.vm.commands
+

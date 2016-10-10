@@ -15,7 +15,7 @@ from azure.cli.core.commands.arm import resource_exists
 
 from six.moves.urllib.request import urlopen #pylint: disable=import-error
 
-from ._factory import _compute_client_factory
+from ._client_factory import _compute_client_factory
 from ._vm_utils import read_content_if_is_file
 
 class VMImageFieldAction(argparse.Action): #pylint: disable=too-few-public-methods
