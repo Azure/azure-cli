@@ -12,7 +12,7 @@ from azure.cli.core.commands.parameters import (ignore_type, resource_group_name
                                                 tags_type, get_resource_group_completion_list,
                                                 enum_choice_list)
 from .custom import (get_policy_completion_list, get_policy_assignment_completion_list,
-                     get_resource_types_completion_list)
+                     get_resource_types_completion_list, get_providers_completion_list)
 from ._validators import validate_resource_type, validate_parent, resolve_resource_parameters
 
 # BASIC PARAMETER CONFIGURATION
@@ -35,7 +35,8 @@ register_cli_argument('resource show', 'resource_type', completer=get_resource_t
 
 _PROVIDER_HELP_TEXT = 'the resource namespace, aka \'provider\''
 register_cli_argument('provider', 'top', ignore_type)
-register_cli_argument('provider', 'resource_provider_namespace', options_list=('--namespace', '-n'), help=_PROVIDER_HELP_TEXT)
+register_cli_argument('provider', 'resource_provider_namespace', options_list=('--namespace', '-n'), completer=get_providers_completion_list,
+                      help=_PROVIDER_HELP_TEXT)
 
 register_cli_argument('resource feature', 'resource_provider_namespace', options_list=('--namespace',), required=True, help=_PROVIDER_HELP_TEXT)
 register_cli_argument('resource feature list', 'resource_provider_namespace', options_list=('--namespace',), required=False, help=_PROVIDER_HELP_TEXT)

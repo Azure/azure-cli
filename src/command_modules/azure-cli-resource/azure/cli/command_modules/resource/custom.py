@@ -234,6 +234,11 @@ def tag_resource(
         if '202' not in str(ex):
             raise ex
 
+def get_providers_completion_list(prefix, **kwargs): #pylint: disable=unused-argument
+    rcf = _resource_client_factory()
+    result = rcf.providers.list()
+    return [r.namespace for r in result]
+
 def get_resource_types_completion_list(prefix, **kwargs): #pylint: disable=unused-argument
     rcf = _resource_client_factory()
     result = rcf.providers.list()
