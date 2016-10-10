@@ -10,7 +10,7 @@ import logging
 import mock
 from six import StringIO
 
-from azure.cli.core.application import Application, APPLICATION, Configuration
+from azure.cli.core.application import Application, Configuration
 from azure.cli.core.commands import \
     (CliCommand, cli_command, _update_command_definitions, command_table)
 import azure.cli.core.help_files
@@ -163,7 +163,9 @@ class HelpTest(unittest.TestCase):
             """Short Description. Long description with\nline break."""
             pass
 
-        cli_command('test', test_handler)
+        setattr(sys.modules[__name__], test_handler.__name__, test_handler)
+
+        cli_command(None, 'test', '{}#{}'.format(__name__, test_handler.__name__))
         _update_command_definitions(command_table)
 
         config = Configuration([])
@@ -567,7 +569,17 @@ Global Arguments
 
     def test_help_loads(self):
         parser_dict = {}
-        _store_parsers(APPLICATION.parser, parser_dict)
+        app = Application()
+        cmd_tbl = app.configuration.get_command_table()
+        app.parser.load_command_table(cmd_tbl)
+        for cmd in cmd_tbl:
+            try:
+                app.configuration.load_params(cmd)
+            except KeyError:
+                pass
+        app.raise_event(Application.COMMAND_TABLE_PARAMS_LOADED, command_table=cmd_tbl)
+        app.parser.load_command_table(cmd_tbl)
+        _store_parsers(app.parser, parser_dict)
 
         for name, parser in parser_dict.items():
             try:

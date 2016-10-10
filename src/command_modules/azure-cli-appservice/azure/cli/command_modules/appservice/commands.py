@@ -3,88 +3,77 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 #---------------------------------------------------------------------------------------------
 
-#pylint: disable=unused-import
-from azure.mgmt.web.operations import (SitesOperations, ServerFarmsOperations,
-                                       ProviderOperations, GlobalModelOperations)
+#pylint: disable=unused-import,line-too-long
+from azure.mgmt.web.operations import ServerFarmsOperations
 from azure.cli.core.commands import LongRunningOperation, cli_command
 from azure.cli.core.commands.arm import cli_generic_update_command
 
-from ._params import web_client_factory
-from .custom import (create_webapp, show_webapp, list_webapp,
-                     delete_webapp, stop_webapp, restart_webapp,
-                     enable_local_git, show_source_control, delete_source_control,
-                     config_source_control, sync_site_repo, set_deployment_user,
-                     view_in_browser, create_app_service_plan, list_app_service_plans,
-                     update_app_service_plan, config_diagnostics,
-                     get_streaming_log, download_historical_logs,
-                     create_webapp_slot, config_slot_auto_swap,
-                     get_site_configs, update_site_configs,
-                     get_app_settings, update_app_settings, delete_app_settings,
-                     add_hostname, list_hostnames, delete_hostname,
-                     update_container_settings, delete_container_settings,
-                     show_container_settings)
+from ._client_factory import web_client_factory
+from .custom import update_app_service_plan
 
-cli_command('appservice web create', create_webapp)
-cli_command('appservice web list', list_webapp)
-cli_command('appservice web show', show_webapp)
-cli_command('appservice web delete', delete_webapp)
-cli_command('appservice web stop', stop_webapp)
-cli_command('appservice web restart', restart_webapp)
+cli_command(__name__, 'appservice web create', 'azure.cli.command_modules.webapp.custom#create_webapp')
+cli_command(__name__, 'appservice web list', 'azure.cli.command_modules.webapp.custom#list_webapp')
+cli_command(__name__, 'appservice web show', 'azure.cli.command_modules.webapp.custom#show_webapp')
+cli_command(__name__, 'appservice web delete', 'azure.cli.command_modules.webapp.custom#delete_webapp')
+cli_command(__name__, 'appservice web stop', 'azure.cli.command_modules.webapp.custom#stop_webapp')
+cli_command(__name__, 'appservice web restart', 'azure.cli.command_modules.webapp.custom#restart_webapp')
 
-cli_command('appservice web config update', update_site_configs)
-cli_command('appservice web config show', get_site_configs)
-cli_command('appservice web config appsettings show', get_app_settings)
-cli_command('appservice web config appsettings update', update_app_settings)
-cli_command('appservice web config appsettings delete', delete_app_settings)
-cli_command('appservice web config hostname add', add_hostname)
-cli_command('appservice web config hostname list', list_hostnames)
-cli_command('appservice web config hostname delete', delete_hostname)
-cli_command('appservice web config container update', update_container_settings)
-cli_command('appservice web config container delete', delete_container_settings)
-cli_command('appservice web config container show', show_container_settings)
+cli_command(__name__, 'appservice web config update', 'azure.cli.command_modules.webapp.custom#update_site_configs')
+cli_command(__name__, 'appservice web config show', 'azure.cli.command_modules.webapp.custom#get_site_configs')
+cli_command(__name__, 'appservice web config appsettings show', 'azure.cli.command_modules.webapp.custom#get_app_settings')
+cli_command(__name__, 'appservice web config appsettings update', 'azure.cli.command_modules.webapp.custom#update_app_settings')
+cli_command(__name__, 'appservice web config appsettings delete', 'azure.cli.command_modules.webapp.custom#delete_app_settings')
+cli_command(__name__, 'appservice web config hostname add', 'azure.cli.command_modules.webapp.custom#add_hostname')
+cli_command(__name__, 'appservice web config hostname list', 'azure.cli.command_modules.webapp.custom#list_hostnames')
+cli_command(__name__, 'appservice web config hostname delete', 'azure.cli.command_modules.webapp.custom#delete_hostname')
+cli_command(__name__, 'appservice web config container update', 'azure.cli.command_modules.webapp.custom#update_container_settings')
+cli_command(__name__, 'appservice web config container delete', 'azure.cli.command_modules.webapp.custom#delete_container_settings')
+cli_command(__name__, 'appservice web config container show', 'azure.cli.command_modules.webapp.custom#show_container_settings')
 
 factory = lambda _: web_client_factory().sites
-cli_command('appservice web show-publish-profile',
-            SitesOperations.list_site_publishing_credentials, factory)
+cli_command(__name__, 'appservice web show-publish-profile',
+            'azure.mgmt.web.operations.sites_operations#SitesOperations.list_site_publishing_credentials', factory)
 
-cli_command('appservice web source-control config-local-git', enable_local_git)
-cli_command('appservice web source-control config', config_source_control)
-cli_command('appservice web source-control sync', sync_site_repo)
-cli_command('appservice web source-control show', show_source_control)
-cli_command('appservice web source-control delete', delete_source_control)
+cli_command(__name__, 'appservice web source-control config-local-git', 'azure.cli.command_modules.webapp.custom#enable_local_git')
+cli_command(__name__, 'appservice web source-control config', 'azure.cli.command_modules.webapp.custom#config_source_control')
+cli_command(__name__, 'appservice web source-control sync', 'azure.cli.command_modules.webapp.custom#sync_site_repo')
+cli_command(__name__, 'appservice web source-control show', 'azure.cli.command_modules.webapp.custom#show_source_control')
+cli_command(__name__, 'appservice web source-control delete', 'azure.cli.command_modules.webapp.custom#delete_source_control')
 
-cli_command('appservice web log tail', get_streaming_log)
-cli_command('appservice web log download', download_historical_logs)
-cli_command('appservice web log config', config_diagnostics)
-cli_command('appservice web browse', view_in_browser)
+cli_command(__name__, 'appservice web log tail', 'azure.cli.command_modules.webapp.custom#get_streaming_log')
+cli_command(__name__, 'appservice web log download', 'azure.cli.command_modules.webapp.custom#download_historical_logs')
+cli_command(__name__, 'appservice web log config', 'azure.cli.command_modules.webapp.custom#config_diagnostics')
+cli_command(__name__, 'appservice web browse', 'azure.cli.command_modules.webapp.custom#view_in_browser')
 
-cli_command('appservice web deployment slot list', SitesOperations.get_site_slots, factory)
-cli_command('appservice web deployment slot auto-swap', config_slot_auto_swap)
-cli_command('appservice web deployment slot swap', SitesOperations.swap_slots_slot, factory)
-cli_command('appservice web deployment slot create', create_webapp_slot)
-cli_command('appservice web deployment user set', set_deployment_user)
-cli_command('appservice web deployment list-site-credentials',
-            SitesOperations.list_site_publishing_credentials, factory)
+cli_command(__name__, 'appservice web deployment slot list', 'azure.mgmt.web.operations.sites_operations#SitesOperations.get_site_slots', factory)
+cli_command(__name__, 'appservice web deployment slot auto-swap', 'azure.cli.command_modules.webapp.custom#config_slot_auto_swap')
+cli_command(__name__, 'appservice web deployment slot swap', 'azure.mgmt.web.operations.sites_operations#SitesOperations.swap_slots_slot', factory)
+cli_command(__name__, 'appservice web deployment slot create', 'azure.cli.command_modules.webapp.custom#create_webapp_slot')
+cli_command(__name__, 'appservice web deployment user set', 'azure.cli.command_modules.webapp.custom#set_deployment_user')
+cli_command(__name__, 'appservice web deployment list-site-credentials',
+            'azure.mgmt.web.operations.sites_operations#SitesOperations.list_site_publishing_credentials', factory)
 
 factory = lambda _: web_client_factory().provider
-cli_command('appservice web deployment user show', ProviderOperations.get_publishing_user, factory)
+cli_command(__name__, 'appservice web deployment user show', 'azure.mgmt.web.operations.provider_operations#ProviderOperations.get_publishing_user', factory)
 
 factory = lambda _: web_client_factory().server_farms
-cli_command('appservice plan create', create_app_service_plan)
-cli_command('appservice plan delete', ServerFarmsOperations.delete_server_farm, factory)
+cli_command(__name__, 'appservice plan create', 'azure.cli.command_modules.webapp.custom#create_app_service_plan')
+cli_command(__name__, 'appservice plan delete', 'azure.mgmt.web.operations.server_farms_operations#ServerFarmsOperations.delete_server_farm', factory)
 cli_generic_update_command('appservice plan update', ServerFarmsOperations.get_server_farm,
                            ServerFarmsOperations.create_or_update_server_farm,
                            custom_function=update_app_service_plan,
                            setter_arg_name='server_farm_envelope', factory=factory)
-cli_command('appservice plan list', list_app_service_plans)
-cli_command('appservice plan show', ServerFarmsOperations.get_server_farm, factory)
-cli_command('appservice list-locations', GlobalModelOperations.get_subscription_geo_regions,
+
+cli_command(__name__, 'appservice plan list', 'azure.cli.command_modules.webapp.custom#list_app_service_plans')
+cli_command(__name__, 'appservice plan show', 'azure.mgmt.web.operations.server_farms_operations#ServerFarmsOperations.get_server_farm', factory)
+cli_command(__name__, 'appservice list-locations', 'azure.mgmt.web.operations.global_model_operations#GlobalModelOperations.get_subscription_geo_regions',
             factory)
 
 
 #Not for ignite release
-#cli_command('webapp plan update-vnet-route', ServerFarmsOperations.update_vnet_route, factory)
-#cli_command('webapp plan update-vnet-gateway',
+#cli_command(__name__, 'webapp plan update-vnet-route',
+            #   ServerFarmsOperations.update_vnet_route, factory)
+#cli_command(__name__, 'webapp plan update-vnet-gateway',
 #             ServerFarmsOperations.update_server_farm_vnet_gateway,factory)
-#cli_command('webapp plan update-vnet-route', ServerFarmsOperations.update_vnet_route, factory)
-
+#cli_command(__name__, 'webapp plan update-vnet-route',
+                # ServerFarmsOperations.update_vnet_route, factory)

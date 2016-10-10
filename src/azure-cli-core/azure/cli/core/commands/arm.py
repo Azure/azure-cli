@@ -166,9 +166,9 @@ def add_id_parameters(command_table):
     for command in command_table.values():
         command_loaded_handler(command)
 
-    APPLICATION.remove(APPLICATION.COMMAND_TABLE_LOADED, add_id_parameters)
+    APPLICATION.remove(APPLICATION.COMMAND_TABLE_PARAMS_LOADED, add_id_parameters)
 
-APPLICATION.register(APPLICATION.COMMAND_TABLE_LOADED, add_id_parameters)
+APPLICATION.register(APPLICATION.COMMAND_TABLE_PARAMS_LOADED, add_id_parameters)
 
 add_usage = '--add property.listProperty <key=value, string or JSON string>'
 set_usage = '--set property1.property2=<value>'

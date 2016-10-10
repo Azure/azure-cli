@@ -3,12 +3,12 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 #---------------------------------------------------------------------------------------------
 
-def iot_hub_service_factory(_):
+def cf_redis(_):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from azure.mgmt.iothub.iot_hub_client import IotHubClient
-    return get_mgmt_service_client(IotHubClient).iot_hub_resource
+    from azure.mgmt.redis import RedisManagementClient
+    return get_mgmt_service_client(RedisManagementClient).redis
 
-def resource_service_factory(**_):
-    from azure.mgmt.resource.resources import ResourceManagementClient
+def cf_patch_schedules(_):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    return get_mgmt_service_client(ResourceManagementClient)
+    from azure.mgmt.redis import RedisManagementClient
+    return get_mgmt_service_client(RedisManagementClient).patch_schedules

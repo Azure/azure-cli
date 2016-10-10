@@ -3,8 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 #---------------------------------------------------------------------------------------------
 
-from azure.mgmt.network import NetworkManagementClient
-from azure.cli.core.commands.client_factory import get_mgmt_service_client
-
-def _network_client_factory(**_):
-    return get_mgmt_service_client(NetworkManagementClient)
+def web_client_factory(**_):
+    from azure.mgmt.web import WebSiteManagementClient
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    return get_mgmt_service_client(WebSiteManagementClient)

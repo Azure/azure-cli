@@ -3,204 +3,153 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 #---------------------------------------------------------------------------------------------
 
-from azure.mgmt.compute.operations import (
-    AvailabilitySetsOperations,
-    VirtualMachineExtensionImagesOperations,
-    VirtualMachineExtensionsOperations,
-    VirtualMachineImagesOperations,
-    UsageOperations,
-    VirtualMachineSizesOperations,
-    VirtualMachinesOperations,
-    VirtualMachineScaleSetsOperations,
-    VirtualMachineScaleSetVMsOperations,
-    ContainerServicesOperations)
-from azure.mgmt.network.operations import NetworkInterfacesOperations
-from azure.mgmt.network import NetworkManagementClient
 from azure.cli.core.commands import DeploymentOutputLongRunningOperation, cli_command
+
 from azure.cli.core.commands.arm import cli_generic_update_command
-from azure.cli.core.commands.client_factory import get_mgmt_service_client
-from azure.cli.command_modules.vm.mgmt_avail_set.lib import (AvailSetCreationClient
-                                                             as AvailSetClient)
-from azure.cli.command_modules.vm.mgmt_avail_set.lib.operations import AvailSetOperations
-from azure.cli.command_modules.vm.mgmt_vm.lib import VmCreationClient as VMClient
-from azure.cli.command_modules.vm.mgmt_vm.lib.operations import VmOperations
-from azure.cli.command_modules.vm.mgmt_vmss.lib import VmssCreationClient as VMSSClient
-from azure.cli.command_modules.vm.mgmt_vmss.lib.operations import VmssOperations
-from azure.cli.command_modules.vm.mgmt_acs.lib import AcsCreationClient as ACSClient
-from azure.cli.command_modules.vm.mgmt_acs.lib.operations import AcsOperations
-from .custom import (
-    list_vm, resize_vm, list_vm_images, list_vm_extension_images, list_ip_addresses,
-    list_container_services,
-    attach_new_disk, attach_existing_disk, detach_disk, list_disks, capture_vm, get_instance_view,
-    vm_update_nics, vm_delete_nics, vm_add_nics, vm_open_port,
-    reset_windows_admin, set_linux_user, delete_linux_user,
-    disable_boot_diagnostics, enable_boot_diagnostics, get_boot_log,
-    list_extensions, set_extension, set_diagnostics_extension,
-    show_default_diagnostics_configuration,
-    vmss_start, vmss_restart, vmss_delete_instances, vmss_deallocate, vmss_get_instance_view,
-    vmss_stop, vmss_reimage, vmss_scale, vmss_update_instances, vmss_show, vmss_list,
-    set_vmss_diagnostics_extension, set_vmss_extension, get_vmss_extension,
-    list_vmss_extensions, delete_vmss_extension, update_acs)
 
+from azure.mgmt.compute.operations import (
+    VirtualMachinesOperations)
 
-from ._factory import _compute_client_factory
+from azure.cli.command_modules.vm._client_factory import * #pylint: disable=wildcard-import
 
-# pylint: disable=line-too-long
+#pylint: disable=line-too-long
 
 # VM
-def get_vm_client_with_shorter_polling_interval(_):
-    client = get_mgmt_service_client(VMClient)
-    client.config.long_running_operation_timeout = 5 #seconds
-    return client.vm
 
-cli_command('vm create', VmOperations.create_or_update, get_vm_client_with_shorter_polling_interval, transform=DeploymentOutputLongRunningOperation('Starting vm create'))
+cli_command(__name__, 'vm create', 'azure.cli.command_modules.vm.mgmt_vm.lib.operations.vm_operations#VmOperations.create_or_update', cf_vm_create,
+            transform=DeploymentOutputLongRunningOperation('Starting vm create'))
 
-factory = lambda _: _compute_client_factory().virtual_machines
-
-cli_command('vm delete', VirtualMachinesOperations.delete, factory)
-cli_command('vm deallocate', VirtualMachinesOperations.deallocate, factory)
-cli_command('vm generalize', VirtualMachinesOperations.generalize, factory)
-cli_command('vm show', VirtualMachinesOperations.get, factory)
-cli_command('vm list-vm-resize-options', VirtualMachinesOperations.list_available_sizes, factory)
-cli_command('vm get-instance-view', get_instance_view)
-cli_command('vm stop', VirtualMachinesOperations.power_off, factory)
-cli_command('vm restart', VirtualMachinesOperations.restart, factory)
-cli_command('vm start', VirtualMachinesOperations.start, factory)
-cli_command('vm redeploy', VirtualMachinesOperations.redeploy, factory)
-cli_command('vm list-ip-addresses', list_ip_addresses)
-cli_command('vm list', list_vm)
-cli_command('vm resize', resize_vm)
-cli_command('vm capture', capture_vm)
-cli_command('vm open-port', vm_open_port)
-cli_generic_update_command('vm update', VirtualMachinesOperations.get, VirtualMachinesOperations.create_or_update, factory)
+cli_command(__name__, 'vm delete', 'azure.mgmt.compute.operations.virtual_machines_operations#VirtualMachinesOperations.delete', cf_vm)
+cli_command(__name__, 'vm deallocate', 'azure.mgmt.compute.operations.virtual_machines_operations#VirtualMachinesOperations.deallocate', cf_vm)
+cli_command(__name__, 'vm generalize', 'azure.mgmt.compute.operations.virtual_machines_operations#VirtualMachinesOperations.generalize', cf_vm)
+cli_command(__name__, 'vm show', 'azure.mgmt.compute.operations.virtual_machines_operations#VirtualMachinesOperations.get', cf_vm)
+cli_command(__name__, 'vm list-vm-resize-options', 'azure.mgmt.compute.operations.virtual_machines_operations#VirtualMachinesOperations.list_available_sizes', cf_vm)
+cli_command(__name__, 'vm stop', 'azure.mgmt.compute.operations.virtual_machines_operations#VirtualMachinesOperations.power_off', cf_vm)
+cli_command(__name__, 'vm restart', 'azure.mgmt.compute.operations.virtual_machines_operations#VirtualMachinesOperations.restart', cf_vm)
+cli_command(__name__, 'vm start', 'azure.mgmt.compute.operations.virtual_machines_operations#VirtualMachinesOperations.start', cf_vm)
+cli_command(__name__, 'vm redeploy', 'azure.mgmt.compute.operations.virtual_machines_operations#VirtualMachinesOperations.redeploy', cf_vm)
+cli_command(__name__, 'vm list-ip-addresses', 'azure.cli.command_modules.vm.custom#list_ip_addresses')
+cli_command(__name__, 'vm get-instance-view', 'azure.cli.command_modules.vm.custom#get_instance_view')
+cli_command(__name__, 'vm list', 'azure.cli.command_modules.vm.custom#list_vm')
+cli_command(__name__, 'vm resize', 'azure.cli.command_modules.vm.custom#resize_vm')
+cli_command(__name__, 'vm capture', 'azure.cli.command_modules.vm.custom#capture_vm')
+cli_command(__name__, 'vm open-port', 'azure.cli.command_modules.vm.custom#vm_open_port')
+cli_generic_update_command('vm update', VirtualMachinesOperations.get, VirtualMachinesOperations.create_or_update, cf_vm)
 
 # VM NIC
-cli_command('vm nic add', vm_add_nics)
-cli_command('vm nic delete', vm_delete_nics)
-cli_command('vm nic update', vm_update_nics)
+cli_command(__name__, 'vm nic add', 'azure.cli.command_modules.vm.custom#vm_add_nics')
+cli_command(__name__, 'vm nic delete', 'azure.cli.command_modules.vm.custom#vm_delete_nics')
+cli_command(__name__, 'vm nic update', 'azure.cli.command_modules.vm.custom#vm_update_nics')
 
 # VMSS NIC
-# TODO: Remove hard coded api-version once https://github.com/Azure/azure-rest-api-specs/issues/570
-# is fixed.
-factory = lambda _: get_mgmt_service_client(NetworkManagementClient, api_version='2016-03-30').network_interfaces
-cli_command('vmss nic list', NetworkInterfacesOperations.list_virtual_machine_scale_set_network_interfaces, factory)
-cli_command('vmss nic list-vm-nics', NetworkInterfacesOperations.list_virtual_machine_scale_set_vm_network_interfaces, factory)
-cli_command('vmss nic show', NetworkInterfacesOperations.get_virtual_machine_scale_set_network_interface, factory)
+cli_command(__name__, 'vmss nic list', 'azure.mgmt.network.operations.network_interfaces_operations#NetworkInterfacesOperations.list_virtual_machine_scale_set_network_interfaces', cf_ni)
+cli_command(__name__, 'vmss nic list-vm-nics', 'azure.mgmt.network.operations.network_interfaces_operations#NetworkInterfacesOperations.list_virtual_machine_scale_set_vm_network_interfaces', cf_ni)
+cli_command(__name__, 'vmss nic show', 'azure.mgmt.network.operations.network_interfaces_operations#NetworkInterfacesOperations.get_virtual_machine_scale_set_network_interface', cf_ni)
 
 # VM Access
-cli_command('vm access set-linux-user', set_linux_user)
-cli_command('vm access delete-linux-user', delete_linux_user)
-cli_command('vm access reset-windows-admin', reset_windows_admin)
+cli_command(__name__, 'vm access set-linux-user', 'azure.cli.command_modules.vm.custom#set_linux_user')
+cli_command(__name__, 'vm access delete-linux-user', 'azure.cli.command_modules.vm.custom#delete_linux_user')
+cli_command(__name__, 'vm access reset-windows-admin', 'azure.cli.command_modules.vm.custom#reset_windows_admin')
 
-# VM Availability Set
-factory = lambda _: get_mgmt_service_client(AvailSetClient).avail_set
-cli_command('vm availability-set create', AvailSetOperations.create_or_update, factory)
+# # VM Availability Set
+cli_command(__name__, 'vm availability-set create', 'azure.cli.command_modules.vm.mgmt_avail_set.lib.operations.avail_set_operations#AvailSetOperations.create_or_update', cf_avail_set_create)
 
-factory = lambda _: _compute_client_factory().availability_sets
-cli_command('vm availability-set delete', AvailabilitySetsOperations.delete, factory)
-cli_command('vm availability-set show', AvailabilitySetsOperations.get, factory)
-cli_command('vm availability-set list', AvailabilitySetsOperations.list, factory)
-cli_command('vm availability-set list-sizes', AvailabilitySetsOperations.list_available_sizes, factory)
+cli_command(__name__, 'vm availability-set delete', 'azure.mgmt.compute.operations.availability_sets_operations#AvailabilitySetsOperations.delete', cf_avail_set)
+cli_command(__name__, 'vm availability-set show', 'azure.mgmt.compute.operations.availability_sets_operations#AvailabilitySetsOperations.get', cf_avail_set)
+cli_command(__name__, 'vm availability-set list', 'azure.mgmt.compute.operations.availability_sets_operations#AvailabilitySetsOperations.list', cf_avail_set)
+cli_command(__name__, 'vm availability-set list-sizes', 'azure.mgmt.compute.operations.availability_sets_operations#AvailabilitySetsOperations.list_available_sizes', cf_avail_set)
 
 # VM Boot Diagnostics
-cli_command('vm boot-diagnostics disable', disable_boot_diagnostics)
-cli_command('vm boot-diagnostics enable', enable_boot_diagnostics)
-cli_command('vm boot-diagnostics get-boot-log', get_boot_log)
+cli_command(__name__, 'vm boot-diagnostics disable', 'azure.cli.command_modules.vm.custom#disable_boot_diagnostics')
+cli_command(__name__, 'vm boot-diagnostics enable', 'azure.cli.command_modules.vm.custom#enable_boot_diagnostics')
+cli_command(__name__, 'vm boot-diagnostics get-boot-log', 'azure.cli.command_modules.vm.custom#get_boot_log')
 
-# VM Container (ACS)
-factory = lambda _: get_mgmt_service_client(ACSClient).acs
-cli_command('acs create', AcsOperations.create_or_update, factory, transform=DeploymentOutputLongRunningOperation('Starting container service create'))
+# ACS
+cli_command(__name__, 'acs create', 'azure.cli.command_modules.vm.mgmt_acs.lib.operations.acs_operations#AcsOperations.create_or_update', cf_acs_create,
+            transform=DeploymentOutputLongRunningOperation('Starting container service create'))
 
-factory = lambda _: _compute_client_factory().container_services
 #Remove the hack after https://github.com/Azure/azure-rest-api-specs/issues/352 fixed
 from azure.mgmt.compute.models import ContainerService#pylint: disable=wrong-import-position
 for a in ['id', 'name', 'type', 'location']:
     ContainerService._attribute_map[a]['type'] = 'str'#pylint: disable=protected-access
 ContainerService._attribute_map['tags']['type'] = '{str}'#pylint: disable=protected-access
 ######
-cli_command('acs show', ContainerServicesOperations.get, factory)
-cli_command('acs list', list_container_services, factory)
-cli_command('acs delete', ContainerServicesOperations.delete, factory)
-cli_command('acs scale', update_acs)
+cli_command(__name__, 'acs show', 'azure.mgmt.compute.operations.container_services_operations#ContainerServicesOperations.get', cf_acs)
+cli_command(__name__, 'acs list', 'azure.cli.command_modules.vm.custom#list_container_services', cf_acs)
+cli_command(__name__, 'acs delete', 'azure.mgmt.compute.operations.container_services_operations#ContainerServicesOperations.delete', cf_acs)
+cli_command(__name__, 'acs scale', 'azure.cli.command_modules.vm.custom#update_acs')
 #Per conversation with ACS team, hide the update till we have something meaningful to tweak
-#cli_generic_update_command('acs update', ContainerServicesOperations.get, ContainerServiceOperations.create_or_update, factory)
+# from azure.cli.command_modules.vm.custom import update_acs
+# cli_generic_update_command('acs update', ContainerServicesOperations.get, ContainerServicesOperations.create_or_update, cf_acs)
 
 # VM Diagnostics
-cli_command('vm diagnostics set', set_diagnostics_extension)
-cli_command('vm diagnostics get-default-config', show_default_diagnostics_configuration)
+cli_command(__name__, 'vm diagnostics set', 'azure.cli.command_modules.vm.custom#set_diagnostics_extension')
+cli_command(__name__, 'vm diagnostics get-default-config', 'azure.cli.command_modules.vm.custom#show_default_diagnostics_configuration')
 
 # VMSS Diagnostics
-cli_command('vmss diagnostics set', set_vmss_diagnostics_extension)
-cli_command('vmss diagnostics get-default-config', show_default_diagnostics_configuration)
+cli_command(__name__, 'vmss diagnostics set', 'azure.cli.command_modules.vm.custom#set_vmss_diagnostics_extension')
+cli_command(__name__, 'vmss diagnostics get-default-config', 'azure.cli.command_modules.vm.custom#show_default_diagnostics_configuration')
 
 # VM Disk
-cli_command('vm disk attach-new', attach_new_disk)
-cli_command('vm disk attach-existing', attach_existing_disk)
-cli_command('vm disk detach', detach_disk)
-cli_command('vm disk list', list_disks)
+cli_command(__name__, 'vm disk attach-new', 'azure.cli.command_modules.vm.custom#attach_new_disk')
+cli_command(__name__, 'vm disk attach-existing', 'azure.cli.command_modules.vm.custom#attach_existing_disk')
+cli_command(__name__, 'vm disk detach', 'azure.cli.command_modules.vm.custom#detach_disk')
+cli_command(__name__, 'vm disk list', 'azure.cli.command_modules.vm.custom#list_disks')
 
 # VM Extension
-factory = lambda _: _compute_client_factory().virtual_machine_extensions
-cli_command('vm extension delete', VirtualMachineExtensionsOperations.delete, factory)
-cli_command('vm extension show', VirtualMachineExtensionsOperations.get, factory)
-cli_command('vm extension set', set_extension)
-cli_command('vm extension list', list_extensions)
+cli_command(__name__, 'vm extension delete', 'azure.mgmt.compute.operations.virtual_machine_extensions_operations#VirtualMachineExtensionsOperations.delete', cf_vm_ext)
+cli_command(__name__, 'vm extension show', 'azure.mgmt.compute.operations.virtual_machine_extensions_operations#VirtualMachineExtensionsOperations.get', cf_vm_ext)
+cli_command(__name__, 'vm extension set', 'azure.cli.command_modules.vm.custom#set_extension')
+cli_command(__name__, 'vm extension list', 'azure.cli.command_modules.vm.custom#list_extensions')
 
 # VMSS Extension
-cli_command('vmss extension delete', delete_vmss_extension)
-cli_command('vmss extension show', get_vmss_extension)
-cli_command('vmss extension set', set_vmss_extension)
-cli_command('vmss extension list', list_vmss_extensions)
+cli_command(__name__, 'vmss extension delete', 'azure.cli.command_modules.vm.custom#delete_vmss_extension')
+cli_command(__name__, 'vmss extension show', 'azure.cli.command_modules.vm.custom#get_vmss_extension')
+cli_command(__name__, 'vmss extension set', 'azure.cli.command_modules.vm.custom#set_vmss_extension')
+cli_command(__name__, 'vmss extension list', 'azure.cli.command_modules.vm.custom#list_vmss_extensions')
 
 # VM Extension Image
-factory = lambda _: _compute_client_factory().virtual_machine_extension_images
-cli_command('vm extension image show', VirtualMachineExtensionImagesOperations.get, factory)
-cli_command('vm extension image list-names', VirtualMachineExtensionImagesOperations.list_types, factory)
-cli_command('vm extension image list-versions', VirtualMachineExtensionImagesOperations.list_versions, factory)
-cli_command('vm extension image list', list_vm_extension_images)
+cli_command(__name__, 'vm extension image show', 'azure.mgmt.compute.operations.virtual_machine_extension_images_operations#VirtualMachineExtensionImagesOperations.get', cf_vm_ext_image)
+cli_command(__name__, 'vm extension image list-names', 'azure.mgmt.compute.operations.virtual_machine_extension_images_operations#VirtualMachineExtensionImagesOperations.list_types', cf_vm_ext_image)
+cli_command(__name__, 'vm extension image list-versions', 'azure.mgmt.compute.operations.virtual_machine_extension_images_operations#VirtualMachineExtensionImagesOperations.list_versions', cf_vm_ext_image)
+cli_command(__name__, 'vm extension image list', 'azure.cli.command_modules.vm.custom#list_vm_extension_images')
 
 # VMSS Extension Image (convenience copy of VM Extension Image)
-factory = lambda _: _compute_client_factory().virtual_machine_extension_images
-cli_command('vmss extension image show', VirtualMachineExtensionImagesOperations.get, factory)
-cli_command('vmss extension image list-names', VirtualMachineExtensionImagesOperations.list_types, factory)
-cli_command('vmss extension image list-versions', VirtualMachineExtensionImagesOperations.list_versions, factory)
-cli_command('vmss extension image list', list_vm_extension_images)
+cli_command(__name__, 'vmss extension image show', 'azure.mgmt.compute.operations.virtual_machine_extension_images_operations#VirtualMachineExtensionImagesOperations.get', cf_vm_ext_image)
+cli_command(__name__, 'vmss extension image list-names', 'azure.mgmt.compute.operations.virtual_machine_extension_images_operations#VirtualMachineExtensionImagesOperations.list_types', cf_vm_ext_image)
+cli_command(__name__, 'vmss extension image list-versions', 'azure.mgmt.compute.operations.virtual_machine_extension_images_operations#VirtualMachineExtensionImagesOperations.list_versions', cf_vm_ext_image)
+cli_command(__name__, 'vmss extension image list', 'azure.cli.command_modules.vm.custom#list_vm_extension_images')
 
 # VM Image
-factory = lambda _: _compute_client_factory().virtual_machine_images
-cli_command('vm image show', VirtualMachineImagesOperations.get, factory)
-cli_command('vm image list-offers', VirtualMachineImagesOperations.list_offers, factory)
-cli_command('vm image list-publishers', VirtualMachineImagesOperations.list_publishers, factory)
-cli_command('vm image list-skus', VirtualMachineImagesOperations.list_skus, factory)
-cli_command('vm image list', list_vm_images)
+cli_command(__name__, 'vm image show', 'azure.mgmt.compute.operations.virtual_machine_images_operations#VirtualMachineImagesOperations.get', cf_vm_image)
+cli_command(__name__, 'vm image list-offers', 'azure.mgmt.compute.operations.virtual_machine_images_operations#VirtualMachineImagesOperations.list_offers', cf_vm_image)
+cli_command(__name__, 'vm image list-publishers', 'azure.mgmt.compute.operations.virtual_machine_images_operations#VirtualMachineImagesOperations.list_publishers', cf_vm_image)
+cli_command(__name__, 'vm image list-skus', 'azure.mgmt.compute.operations.virtual_machine_images_operations#VirtualMachineImagesOperations.list_skus', cf_vm_image)
+cli_command(__name__, 'vm image list', 'azure.cli.command_modules.vm.custom#list_vm_images')
 
 # VM Usage
-factory = lambda _: _compute_client_factory().usage
-cli_command('vm list-usage', UsageOperations.list, factory)
+cli_command(__name__, 'vm list-usage', 'azure.mgmt.compute.operations.usage_operations#UsageOperations.list', cf_usage)
 
-# VM ScaleSet
-factory = lambda _: get_mgmt_service_client(VMSSClient).vmss
-cli_command('vmss create', VmssOperations.create_or_update, factory, transform=DeploymentOutputLongRunningOperation('Starting vmss create'))
+# VMSS
+cli_command(__name__, 'vmss create', 'azure.cli.command_modules.vm.mgmt_vmss.lib.operations.vmss_operations#VmssOperations.create_or_update', cf_vmss_create,
+            transform=DeploymentOutputLongRunningOperation('Starting vmss create'))
 
-factory = lambda _: _compute_client_factory().virtual_machine_scale_sets
-cli_command('vmss delete', VirtualMachineScaleSetsOperations.delete, factory)
-cli_command('vmss list-skus', VirtualMachineScaleSetsOperations.list_skus, factory)
+cli_command(__name__, 'vmss delete', 'azure.mgmt.compute.operations.virtual_machine_scale_sets_operations#VirtualMachineScaleSetsOperations.delete', cf_vmss)
+cli_command(__name__, 'vmss list-skus', 'azure.mgmt.compute.operations.virtual_machine_scale_sets_operations#VirtualMachineScaleSetsOperations.list_skus', cf_vmss)
 
-factory = lambda _: _compute_client_factory().virtual_machine_scale_set_vms
-cli_command('vmss list-instances', VirtualMachineScaleSetVMsOperations.list, factory)
+cli_command(__name__, 'vmss list-instances', 'azure.mgmt.compute.operations.virtual_machine_scale_set_vms_operations#VirtualMachineScaleSetVMsOperations.list', cf_vmss_vm)
 
-cli_command('vmss deallocate', vmss_deallocate)
-cli_command('vmss delete-instances', vmss_delete_instances)
-cli_command('vmss get-instance-view', vmss_get_instance_view)
-cli_command('vmss show', vmss_show)
-cli_command('vmss list ', vmss_list)
-cli_command('vmss stop', vmss_stop)
-cli_command('vmss restart', vmss_restart)
-cli_command('vmss start', vmss_start)
-cli_command('vmss update-instances', vmss_update_instances)
-cli_command('vmss reimage', vmss_reimage)
-cli_command('vmss scale', vmss_scale)
+cli_command(__name__, 'vmss deallocate', 'azure.cli.command_modules.vm.custom#vmss_deallocate')
+cli_command(__name__, 'vmss delete-instances', 'azure.cli.command_modules.vm.custom#vmss_delete_instances')
+cli_command(__name__, 'vmss get-instance-view', 'azure.cli.command_modules.vm.custom#vmss_get_instance_view')
+cli_command(__name__, 'vmss show', 'azure.cli.command_modules.vm.custom#vmss_show')
+cli_command(__name__, 'vmss list ', 'azure.cli.command_modules.vm.custom#vmss_list')
+cli_command(__name__, 'vmss stop', 'azure.cli.command_modules.vm.custom#vmss_stop')
+cli_command(__name__, 'vmss restart', 'azure.cli.command_modules.vm.custom#vmss_restart')
+cli_command(__name__, 'vmss start', 'azure.cli.command_modules.vm.custom#vmss_start')
+cli_command(__name__, 'vmss update-instances', 'azure.cli.command_modules.vm.custom#vmss_update_instances')
+cli_command(__name__, 'vmss reimage', 'azure.cli.command_modules.vm.custom#vmss_reimage')
+cli_command(__name__, 'vmss scale', 'azure.cli.command_modules.vm.custom#vmss_scale')
 
 # VM Size
-factory = lambda _: _compute_client_factory().virtual_machine_sizes
-cli_command('vm list-sizes', VirtualMachineSizesOperations.list, factory)
+cli_command(__name__, 'vm list-sizes', 'azure.mgmt.compute.operations.virtual_machine_sizes_operations#VirtualMachineSizesOperations.list', cf_vm_sizes)

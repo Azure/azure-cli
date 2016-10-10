@@ -2,7 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 #---------------------------------------------------------------------------------------------
-
+import sys
 from collections import Counter
 from itertools import groupby
 from msrestazure.azure_exceptions import CloudError
@@ -16,12 +16,11 @@ from azure.mgmt.network.models import \
 
 from azure.cli.core.commands.arm import parse_resource_id, is_valid_resource_id, resource_id
 from azure.cli.core._util import CLIError
-from azure.cli.command_modules.network._factory import _network_client_factory
+from azure.cli.command_modules.network._client_factory import _network_client_factory
 from azure.cli.command_modules.network.mgmt_app_gateway.lib.operations.app_gateway_operations \
     import AppGatewayOperations
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
-from ._factory import _network_client_factory
 from azure.cli.command_modules.network.mgmt_nic.lib.operations.nic_operations import NicOperations
 from azure.mgmt.trafficmanager import TrafficManagerManagementClient
 from azure.mgmt.trafficmanager.models import Endpoint
@@ -39,7 +38,9 @@ def list_network_resource_property(resource, prop):
     def list_func(resource_group_name, resource_name):
         client = getattr(_network_client_factory(), resource)
         return client.get(resource_group_name, resource_name).__getattribute__(prop)
-    return list_func
+    func_name = 'list_network_resource_property_{}_{}'.format(resource, prop)
+    setattr(sys.modules[__name__], func_name, list_func)
+    return func_name
 
 def get_network_resource_property_entry(resource, prop):
     """ Factory method for creating get functions. """
@@ -53,7 +54,9 @@ def get_network_resource_property_entry(resource, prop):
                 item_name, resource, resource_name))
         else:
             return result
-    return get_func
+    func_name = 'get_network_resource_property_entry_{}_{}'.format(resource, prop)
+    setattr(sys.modules[__name__], func_name, get_func)
+    return func_name
 
 def delete_network_resource_property_entry(resource, prop):
     """ Factory method for creating delete functions. """
@@ -64,7 +67,9 @@ def delete_network_resource_property_entry(resource, prop):
             [x for x in item.__getattribute__(prop) if x.name.lower() != item_name.lower()]
         _set_param(item, prop, keep_items)
         return client.create_or_update(resource_group_name, resource_name, item)
-    return delete_func
+    func_name = 'delete_network_resource_property_entry_{}_{}'.format(resource, prop)
+    setattr(sys.modules[__name__], func_name, delete_func)
+    return func_name
 
 def _get_property(items, name):
     result = next((x for x in items if x.name.lower() == name.lower()), None)

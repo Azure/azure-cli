@@ -3,8 +3,10 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 #---------------------------------------------------------------------------------------------
 
-# pylint: disable=unused-import
+import azure.cli.command_modules.context._help # pylint: disable=unused-import
 
-import azure.cli.command_modules.context._help
-import azure.cli.command_modules.context._params
-import azure.cli.command_modules.context.commands
+def load_params(_):
+    import azure.cli.command_modules.context._params #pylint: disable=redefined-outer-name
+
+def load_commands():
+    import azure.cli.command_modules.context.commands #pylint: disable=redefined-outer-name
