@@ -8,6 +8,11 @@
 # Changes may cause incorrect behavior and will be lost if the code is
 # regenerated.
 # --------------------------------------------------------------------------
+#pylint: skip-file
+from .key_vault_client import KeyVaultClient
+from .version import VERSION
 
-VERSION = "2015-06-01"
+__all__ = ['KeyVaultClient']
+
+__version__ = VERSION
 

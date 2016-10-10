@@ -15,8 +15,12 @@ from azure.cli.core.commands._introspection import \
 from azure.cli.core._profile import Profile
 from azure.cli.core._util import CLIError
 
-from azure.cli.command_modules.keyvault.convenience import KeyVaultClient, KeyVaultAuthentication
-from azure.cli.command_modules.keyvault.keyvaultclient.models import KeyVaultErrorException
+from azure.cli.command_modules.keyvault.keyvaultclient import \
+    (KeyVaultClient, KeyVaultAuthentication)
+from azure.cli.command_modules.keyvault.keyvaultclient.generated import \
+    (KeyVaultClient as BaseKeyVaultClient)
+from azure.cli.command_modules.keyvault.keyvaultclient.generated.models import \
+    (KeyVaultErrorException)
 
 def _encode_hex(item):
     """ Recursively crawls the object structure and converts bytes or bytearrays to base64
@@ -25,7 +29,11 @@ def _encode_hex(item):
         return [_encode_hex(x) for x in item]
     elif hasattr(item, '__dict__'):
         for key, val in item.__dict__.items():
-            item.__dict__[key] = _encode_hex(val)
+            if not key.startswith('_'):
+                try:
+                    setattr(item, key, _encode_hex(val))
+                except TypeError:
+                    item.__dict__[key] = _encode_hex(val)
         return item
     elif isinstance(item, bytes) or isinstance(item, bytearray):
         return base64.b64encode(item).decode('utf-8')
@@ -41,7 +49,12 @@ def _create_key_vault_command(name, operation, transform_result, table_transform
             def get_token(server, resource, scope): # pylint: disable=unused-argument
                 return Profile().get_login_credentials(resource)[0]._token_retriever() # pylint: disable=protected-access
 
-            client = KeyVaultClient(KeyVaultAuthentication(get_token))
+            # since the convenience client can be inconvenient, we have to check and create the
+            # correct client version
+            if 'generated' in operation.__module__:
+                client = BaseKeyVaultClient(KeyVaultAuthentication(get_token))
+            else:
+                client = KeyVaultClient(KeyVaultAuthentication(get_token)) # pylint: disable=redefined-variable-type
             result = operation(client, **kwargs)
 
             # apply results transform if specified
