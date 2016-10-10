@@ -29,15 +29,13 @@ _environments = {
         ENDPOINT_URLS.MANAGEMENT: 'https://management.core.chinacloudapi.cn/',
         ENDPOINT_URLS.ACTIVE_DIRECTORY_AUTHORITY: 'https://login.chinacloudapi.cn',
         ENDPOINT_URLS.ACTIVE_DIRECTORY_GRAPH_RESOURCE_ID: 'https://graph.chinacloudapi.cn/',
-        # TODO: Verify KeyVault endpoint
-        ENDPOINT_URLS.KEY_VAULT: 'https://vault.chinacloudapi.cn'
+        ENDPOINT_URLS.KEY_VAULT: 'https://vault.azure.cn'
         },
     ENV_US_GOVERNMENT: {
         ENDPOINT_URLS.MANAGEMENT: 'https://management.core.usgovcloudapi.net/',
         ENDPOINT_URLS.ACTIVE_DIRECTORY_AUTHORITY: 'https://login.microsoftonline.com',
         ENDPOINT_URLS.ACTIVE_DIRECTORY_GRAPH_RESOURCE_ID: 'https://graph.windows.net/',
-        # TODO: Verify KeyVault endpoint
-        ENDPOINT_URLS.KEY_VAULT: 'https://vault.azure.net'
+        ENDPOINT_URLS.KEY_VAULT: 'https://vault.usgovcloudapi.net'
         }
 }
 
