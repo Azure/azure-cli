@@ -78,7 +78,7 @@ helps['resource show'] = """
     examples:
         - name: show a virtual machine
           text: >
-            az vm show -g mygroup -n mywebapp --resource-type "Microsoft.Compute/virtualMachines"
+            az vm show -g mygroup -n myvm --resource-type "Microsoft.Compute/virtualMachines"
         - name: show a webapp
           text: >
             az resource show -g mygroup -n mywebapp --resource-type "Microsoft.web/sites"
