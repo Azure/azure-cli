@@ -77,8 +77,8 @@ class Profile(object):
         factory = auth_ctx_factory or _AUTH_CTX_FACTORY
         self._creds_cache = CredsCache(factory)
         self._subscription_finder = SubscriptionFinder(factory, self._creds_cache.adal_token_cache)
-        env = get_env()
-        self._management_resource_uri = env[ENDPOINT_URLS.MANAGEMENT]
+        self.env = get_env()
+        self._management_resource_uri = self.env[ENDPOINT_URLS.MANAGEMENT]
 
     def find_subscriptions_on_login(self, #pylint: disable=too-many-arguments
                                     interactive,
