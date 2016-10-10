@@ -69,7 +69,6 @@ def _delete_file(file_path):
 class CredentialType(Enum): # pylint: disable=too-few-public-methods
     management = get_env()[ENDPOINT_URLS.MANAGEMENT]
     rbac = get_env()[ENDPOINT_URLS.ACTIVE_DIRECTORY_GRAPH_RESOURCE_ID]
-    keyvault = get_env()[ENDPOINT_URLS.KEY_VAULT]
 
 class Profile(object):
     def __init__(self, storage=None, auth_ctx_factory=None):
@@ -230,13 +229,17 @@ class Profile(object):
         account = self.get_subscription(subscription_id)
         user_type = account[_USER_ENTITY][_USER_TYPE]
         username_or_sp_id = account[_USER_ENTITY][_USER_NAME]
+        try:
+            resource = credential_type.value
+        except AttributeError:
+            resource = credential_type
         if user_type == _USER:
             token_retriever = lambda: self._creds_cache.retrieve_token_for_user(
-                username_or_sp_id, account[_TENANT_ID], credential_type.value)
+                username_or_sp_id, account[_TENANT_ID], resource)
             auth_object = AdalAuthentication(token_retriever)
         else:
             token_retriever = lambda: self._creds_cache.retrieve_token_for_service_principal(
-                username_or_sp_id, credential_type.value)
+                username_or_sp_id, resource)
             auth_object = AdalAuthentication(token_retriever)
 
         return (auth_object,

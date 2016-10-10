@@ -5,7 +5,10 @@
 
 #pylint: skip-file
 
-import urllib
+try:
+    import urllib.parse as parse
+except ImportError:
+    import urlparse as parse
 
 class HttpBearerChallenge(object):
 
@@ -37,7 +40,8 @@ class HttpBearerChallenge(object):
             raise ValueError('Invalid challenge parameters')
 
     # pylint: disable=no-self-use
-    def is_bearer_challenge(self, authentication_header):
+    @staticmethod
+    def is_bearer_challenge(authentication_header):
         """ Tests whether an authentication header is a Bearer challenge.
         :param authentication_header: the authentication header to test
         rtype: bool """
@@ -57,6 +61,10 @@ class HttpBearerChallenge(object):
             if value:
                 break
         return value
+
+    def get_resource(self):
+        """ Returns the resource if present, otherwise empty string. """
+        return self.get_value('resource') or ''
 
     def get_scope(self):
         """ Returns the scope if present, otherwise empty string. """
@@ -81,7 +89,7 @@ class HttpBearerChallenge(object):
         if not uri:
             raise ValueError('request_uri cannot be empty')
 
-        uri = urllib.parse.urlparse(uri)
+        uri = parse.urlparse(uri)
         if not uri.netloc:
             raise ValueError('request_uri must be an absolute URI')
 
