@@ -100,6 +100,8 @@ class Application(object):
             self.session['command'] = expanded_arg.command
             try:
                 _validate_arguments(expanded_arg)
+            except CLIError:
+                raise
             except: # pylint: disable=bare-except
                 err = sys.exc_info()[1]
                 getattr(expanded_arg, '_parser', self.parser).validation_error(str(err))

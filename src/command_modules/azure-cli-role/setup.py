@@ -24,7 +24,6 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
-    'azure==2.0.0rc6',
     'azure-cli-core',
     'azure-mgmt-authorization==0.30.0rc6',
     'azure-graphrbac==0.30.0rc6',

@@ -2,22 +2,28 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 #---------------------------------------------------------------------------------------------
+
 from msrestazure.azure_exceptions import CloudError
 from azure.mgmt.keyvault.models import (VaultCreateOrUpdateParameters,
                                         VaultProperties,
                                         AccessPolicyEntry,
                                         Permissions,
+                                        CertificatePermissions,
+                                        KeyPermissions,
+                                        SecretPermissions,
                                         Sku,
                                         SkuName)
 from azure.graphrbac import GraphRbacManagementClient
 
 from azure.cli.core._util import CLIError
+from azure.cli.core._profile import CredentialType
 import azure.cli.core._logging as _logging
+
+from azure.cli.command_modules.keyvault.keyvaultclient import KeyVaultClient
 
 logger = _logging.get_az_logger(__name__)
 
 def list_keyvault(client, resource_group_name=None):
-    ''' List Vaults. '''
     vault_list = client.list_by_resource_group(resource_group_name=resource_group_name) \
         if resource_group_name else client.list()
     return list(vault_list)
@@ -81,24 +87,22 @@ def create_keyvault(client, resource_group_name, vault_name, location, #pylint:d
                     tags=None):
     from azure.cli.core._profile import Profile
     profile = Profile()
-    cred, _, tenant_id = profile.get_login_credentials(for_graph_client=True)
+    cred, _, tenant_id = profile.get_login_credentials(credential_type=CredentialType.rbac)
     graph_client = GraphRbacManagementClient(cred, tenant_id)
     subscription = profile.get_subscription()
     if no_self_perms:
         access_policies = []
     else:
-        # TODO Use the enums instead of strings when new keyvault SDK is released
-        # https://github.com/Azure/azure-sdk-for-python/blob/dev/azure-mgmt-keyvault/
-        # azure/mgmt/keyvault/models/key_vault_management_client_enums.py
-        permissions = Permissions(keys=['get',
-                                        'create',
-                                        'delete',
-                                        'list',
-                                        'update',
-                                        'import',
-                                        'backup',
-                                        'restore'],
-                                  secrets=['all'])
+        permissions = Permissions(keys=[KeyPermissions.get,
+                                        KeyPermissions.create,
+                                        KeyPermissions.delete,
+                                        KeyPermissions.list,
+                                        KeyPermissions.update,
+                                        KeyPermissions.import_enum,
+                                        KeyPermissions.backup,
+                                        KeyPermissions.restore],
+                                  secrets=[SecretPermissions.all],
+                                  certificates=[CertificatePermissions.all])
         object_id = _get_current_user_object_id(graph_client)
         if not object_id:
             object_id = _get_object_id(graph_client, subscription=subscription)
@@ -124,14 +128,13 @@ def create_keyvault(client, resource_group_name, vault_name, location, #pylint:d
     return client.create_or_update(resource_group_name=resource_group_name,
                                    vault_name=vault_name,
                                    parameters=parameters)
-
 create_keyvault.__doc__ = VaultProperties.__doc__
 
 def _object_id_args_helper(object_id, spn, upn):
     if not object_id:
         from azure.cli.core._profile import Profile
         profile = Profile()
-        cred, _, tenant_id = profile.get_login_credentials(for_graph_client=True)
+        cred, _, tenant_id = profile.get_login_credentials(credential_type=CredentialType.rbac)
         graph_client = GraphRbacManagementClient(cred, tenant_id)
         object_id = _get_object_id(graph_client, spn=spn, upn=upn)
         if not object_id:
@@ -139,7 +142,8 @@ def _object_id_args_helper(object_id, spn, upn):
     return object_id
 
 def set_policy(client, resource_group_name, vault_name, #pylint:disable=too-many-arguments
-               object_id=None, spn=None, upn=None, perms_to_keys=None, perms_to_secrets=None):
+               object_id=None, spn=None, upn=None, key_permissions=None, secret_permissions=None,
+               certificate_permissions=None):
     object_id = _object_id_args_helper(object_id, spn, upn)
     vault = client.get(resource_group_name=resource_group_name,
                        vault_name=vault_name)
@@ -152,14 +156,17 @@ def set_policy(client, resource_group_name, vault_name, #pylint:disable=too-many
         vault.properties.access_policies.append(AccessPolicyEntry(
             tenant_id=vault.properties.tenant_id,
             object_id=object_id,
-            permissions=Permissions(keys=perms_to_keys,
-                                    secrets=perms_to_secrets)))
+            permissions=Permissions(keys=key_permissions,
+                                    secrets=secret_permissions,
+                                    certificates=certificate_permissions)))
     else:
         # Modify existing policy.
-        # If perms_to_keys is not set, use prev. value (similarly with perms_to_secrets).
-        keys = policy.permissions.keys if perms_to_keys is None else perms_to_keys
-        secrets = policy.permissions.secrets if perms_to_secrets is None else perms_to_secrets
-        policy.permissions = Permissions(keys=keys, secrets=secrets)
+        # If key_permissions is not set, use prev. value (similarly with secret_permissions).
+        keys = policy.permissions.keys if key_permissions is None else key_permissions
+        secrets = policy.permissions.secrets if secret_permissions is None else secret_permissions
+        certs = policy.permissions.certificates \
+            if certificate_permissions is None else certificate_permissions
+        policy.permissions = Permissions(keys=keys, secrets=secrets, certificates=certs)
     return client.create_or_update(resource_group_name=resource_group_name,
                                    vault_name=vault_name,
                                    parameters=VaultCreateOrUpdateParameters(
@@ -183,3 +190,101 @@ def delete_policy(client, resource_group_name, vault_name, object_id=None, spn=N
                                        location=vault.location,
                                        tags=vault.tags,
                                        properties=vault.properties))
+
+# pylint: disable=too-many-arguments
+def create_key(client, vault_base_url, key_name, destination, key_size=None, key_ops=None,
+               disabled=False, expires=None, not_before=None, tags=None):
+    from azure.cli.command_modules.keyvault.keyvaultclient.models import KeyAttributes
+    key_attrs = KeyAttributes(not disabled, not_before, expires)
+    return client.create_key(
+        vault_base_url, key_name, destination, key_size, key_ops, key_attrs, tags)
+create_key.__doc__ = KeyVaultClient.create_key.__doc__
+
+# pylint: disable=unused-variable,broad-except
+def _is_pem_encrypted(data):
+    # TODO: Round 2
+    try:
+        dump_data = OpenSSL.crypto.dump_certificate(OpenSSL.crypto.FILETYPE_PEM, data)
+    except Exception:
+        pass
+
+# pylint: disable=unused-variable,unused-argument
+def _decrypt_rsa_private_key(data, password):
+    # TODO: Round 2
+    pass
+
+# pylint: disable=unused-argument
+def _private_key_from_pem(data):
+    # TODO: Round 2
+    pass
+
+# pylint: disable=too-many-arguments,assignment-from-no-return,unused-variable
+def import_key(client, vault_base_url, key_name, destination, key_ops=None, disabled=False,
+               expires=None, not_before=None, tags=None, pem_file=None, pem_password=None,
+               byok_file=None):
+    # TODO: Round 2
+    from azure.cli.command_modules.keyvault.keyvaultclient.models import KeyAttributes, JsonWebKey
+    key_attrs = KeyAttributes(not disabled, not_before, expires)
+    key_obj = JsonWebKey(key_ops=key_ops)
+    if pem_file:
+        key_obj.destination = 'RSA'
+        logger.info('Reading %s', pem_file)
+        with open(pem_file, 'r') as f:
+            data = f.read()
+            if _is_pem_encrypted(data):
+                # prompt for password if not supplied?
+                key_info = _decrypt_rsa_private_key(data, pem_password)
+            else:
+                key_info = _private_key_from_pem(data)
+        logger.info('setting RSA parameters from PEM data')
+        # set rsa parameters
+        # set pem_file to key_file?
+    elif byok_file:
+        key_obj.destination = 'RSA-HSM'
+        key_obj.t = None # data from file
+
+    return client.import_key(
+        vault_base_url, key_name, key_obj, destination == 'hsm', key_attrs, tags)
+
+def certificate_policy_template():
+    from azure.cli.command_modules.keyvault.keyvaultclient.models import \
+        (CertificatePolicy, CertificateAttributes, KeyProperties, SecretProperties,
+         X509CertificateProperties, SubjectAlternativeNames, LifetimeAction, Action, Trigger,
+         IssuerParameters)
+    from azure.cli.command_modules.keyvault.keyvaultclient.models.key_vault_client_enums import \
+        (ActionType, JsonWebKeyType, KeyUsageType)
+    # create sample policy
+    template = CertificatePolicy(
+        key_properties=KeyProperties(
+            exportable=False,
+            key_type='{{ {} }}'.format(' | '.join([x.value for x in JsonWebKeyType])),
+            key_size=2048,
+            reuse_key=False),
+        secret_properties=SecretProperties('text/plain'),
+        x509_certificate_properties=X509CertificateProperties(
+            subject_alternative_names=SubjectAlternativeNames(
+                emails=['admin@mydomain.com', 'user@mydomain.com'],
+                dns_names=['www.mydomain.com'],
+                upns=['principal-name']
+            ),
+            subject='X509 Distinguished Name',
+            ekus=['ekus'],
+            key_usage=['{{ {} }}'.format(' | '.join([x.value for x in KeyUsageType]))],
+            validity_in_months=60
+        ),
+        lifetime_actions=[
+            LifetimeAction(
+                Trigger(lifetime_percentage=90, days_before_expiry=7),
+                Action(action_type='{{ {} }}'.format(' | '.join([x.value for x in ActionType])))
+            )
+        ],
+        issuer_parameters=IssuerParameters(name='issuer-name'),
+        attributes=CertificateAttributes(
+            enabled=True
+        )
+    )
+    # remove properties which are read only
+    del template.id
+    del template.attributes.created
+    del template.attributes.updated
+    return template
