@@ -72,6 +72,17 @@ helps['resource'] = """
     type: group
     short-summary: Generic commands to manage Azure resources
 """
+helps['resource show'] = """
+    type: command
+    short-summary: display a resource detail
+    examples:
+        - name: show a virtual machine
+          text: >
+            az vm show -g mygroup -n mywebapp --resource-type "Microsoft.Compute/virtualMachines"
+        - name: show a webapp
+          text: >
+            az resource show -g mygroup -n mywebapp --resource-type "Microsoft.web/sites"
+"""
 helps['resource feature'] = """
     type: group
     short-summary: Commands to manage resource provider features, such as previews
@@ -88,11 +99,18 @@ helps['resource group deployment operation'] = """
     type: group
     short-summary: Commands to manage deployment operations
 """
-helps['resource provider'] = """
+helps['provider'] = """
     type: group
-    short-summary: Commands to manage resource providers
+    short-summary: Manage resource providers
 """
-
+helps['provider register'] = """
+    type: command
+    short-summary: Register a provider
+"""
+helps['provider unregister'] = """
+    type: command
+    short-summary: Unregister a provider
+"""
 helps['tag'] = """
     type: group
     short-summary: Manage resource tags
