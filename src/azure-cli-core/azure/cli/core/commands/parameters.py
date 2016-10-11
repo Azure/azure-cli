@@ -61,7 +61,7 @@ def get_resources_in_subscription(resource_type=None):
 
 def get_resource_name_completion_list(resource_type=None):
     def completer(prefix, action, parsed_args, **kwargs):#pylint: disable=unused-argument
-        if parsed_args.resource_group_name:
+        if getattr(parsed_args, 'resource_group_name', None):
             rg = parsed_args.resource_group_name
             return [r.name for r in get_resources_in_resource_group(rg, resource_type=resource_type)]
         else:

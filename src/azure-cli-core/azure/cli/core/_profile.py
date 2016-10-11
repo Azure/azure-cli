@@ -224,15 +224,11 @@ class Profile(object):
             raise CLIError("Please run 'az account set' to select active account.")
         return result[0]
 
-    def get_login_credentials(self, credential_type=CredentialType.management,
+    def get_login_credentials(self, resource=get_env()[ENDPOINT_URLS.MANAGEMENT],
                               subscription_id=None):
         account = self.get_subscription(subscription_id)
         user_type = account[_USER_ENTITY][_USER_TYPE]
         username_or_sp_id = account[_USER_ENTITY][_USER_NAME]
-        try:
-            resource = credential_type.value
-        except AttributeError:
-            resource = credential_type
         if user_type == _USER:
             token_retriever = lambda: self._creds_cache.retrieve_token_for_user(
                 username_or_sp_id, account[_TENANT_ID], resource)

@@ -3,6 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 #---------------------------------------------------------------------------------------------
 
+import time
+
 from msrestazure.azure_exceptions import CloudError
 from azure.mgmt.keyvault.models import (VaultCreateOrUpdateParameters,
                                         VaultProperties,
@@ -15,8 +17,9 @@ from azure.mgmt.keyvault.models import (VaultCreateOrUpdateParameters,
                                         SkuName)
 from azure.graphrbac import GraphRbacManagementClient
 
+from azure.cli.core.telemetry import log_telemetry
 from azure.cli.core._util import CLIError
-from azure.cli.core._profile import CredentialType
+from azure.cli.core._azure_env import ENDPOINT_URLS, get_env
 import azure.cli.core._logging as _logging
 
 from azure.cli.command_modules.keyvault.keyvaultclient import KeyVaultClient
@@ -87,7 +90,8 @@ def create_keyvault(client, resource_group_name, vault_name, location, #pylint:d
                     tags=None):
     from azure.cli.core._profile import Profile
     profile = Profile()
-    cred, _, tenant_id = profile.get_login_credentials(credential_type=CredentialType.rbac)
+    cred, _, tenant_id = profile.get_login_credentials(
+        resource=get_env()[ENDPOINT_URLS.ACTIVE_DIRECTORY_GRAPH_RESOURCE_ID])
     graph_client = GraphRbacManagementClient(cred, tenant_id)
     subscription = profile.get_subscription()
     if no_self_perms:
@@ -134,7 +138,8 @@ def _object_id_args_helper(object_id, spn, upn):
     if not object_id:
         from azure.cli.core._profile import Profile
         profile = Profile()
-        cred, _, tenant_id = profile.get_login_credentials(credential_type=CredentialType.rbac)
+        cred, _, tenant_id = profile.get_login_credentials(
+            resource=get_env()[ENDPOINT_URLS.ACTIVE_DIRECTORY_GRAPH_RESOURCE_ID])
         graph_client = GraphRbacManagementClient(cred, tenant_id)
         object_id = _get_object_id(graph_client, spn=spn, upn=upn)
         if not object_id:
@@ -202,7 +207,7 @@ create_key.__doc__ = KeyVaultClient.create_key.__doc__
 
 # pylint: disable=unused-variable,broad-except
 def _is_pem_encrypted(data):
-    # TODO: Round 2
+    # TODO: Round 3
     try:
         dump_data = OpenSSL.crypto.dump_certificate(OpenSSL.crypto.FILETYPE_PEM, data)
     except Exception:
@@ -210,19 +215,19 @@ def _is_pem_encrypted(data):
 
 # pylint: disable=unused-variable,unused-argument
 def _decrypt_rsa_private_key(data, password):
-    # TODO: Round 2
+    # TODO: Round 3
     pass
 
 # pylint: disable=unused-argument
 def _private_key_from_pem(data):
-    # TODO: Round 2
+    # TODO: Round 3
     pass
 
 # pylint: disable=too-many-arguments,assignment-from-no-return,unused-variable
 def import_key(client, vault_base_url, key_name, destination, key_ops=None, disabled=False,
                expires=None, not_before=None, tags=None, pem_file=None, pem_password=None,
                byok_file=None):
-    # TODO: Round 2
+    # TODO: Round 3
     from azure.cli.command_modules.keyvault.keyvaultclient.models import KeyAttributes, JsonWebKey
     key_attrs = KeyAttributes(not disabled, not_before, expires)
     key_obj = JsonWebKey(key_ops=key_ops)
@@ -245,6 +250,39 @@ def import_key(client, vault_base_url, key_name, destination, key_ops=None, disa
 
     return client.import_key(
         vault_base_url, key_name, key_obj, destination == 'hsm', key_attrs, tags)
+
+def create_certificate(client, vault_base_url, certificate_name, certificate_policy,
+                       disabled=False, expires=None, not_before=None, tags=None):
+    from azure.cli.command_modules.keyvault.keyvaultclient.models import CertificateAttributes
+    cert_attrs = CertificateAttributes(not disabled, not_before, expires)
+    logger.info("Starting long running operation 'keyvault certificate create'")
+    client.create_certificate(
+        vault_base_url, certificate_name, certificate_policy, cert_attrs, tags)
+
+    while True:
+        check = client.get_certificate_operation(vault_base_url, certificate_name)
+        if check.status != 'inProgress':
+            logger.info("Long running operation 'keyvault certificate create' finished with result %s.", check) # pylint: disable=line-too-long
+            return check
+        try:
+            time.sleep(10)
+        except KeyboardInterrupt:
+            logger.info("Long running operation wait cancelled.")
+            raise
+        except Exception as client_exception:
+            log_telemetry('client exception', log_type='trace')
+            message = getattr(client_exception, 'message', client_exception)
+
+            try:
+                message = str(message) + ' ' + json.loads(client_exception.response.text) \
+                    ['error']['details'][0]['message']
+            except: #pylint: disable=bare-except
+                pass
+
+            raise CLIError('{}'.format(message))
+
+create_certificate.__doc__ = KeyVaultClient.create_certificate.__doc__
+
 
 def certificate_policy_template():
     from azure.cli.command_modules.keyvault.keyvaultclient.models import \
