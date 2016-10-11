@@ -16,22 +16,26 @@ class ENDPOINT_URLS: #pylint: disable=too-few-public-methods,old-style-class,no-
     MANAGEMENT = 'management'
     ACTIVE_DIRECTORY_AUTHORITY = 'active_directory_authority'
     ACTIVE_DIRECTORY_GRAPH_RESOURCE_ID = 'active_directory_graph_resource_id'
+    KEY_VAULT = 'key_vault'
 
 _environments = {
     ENV_DEFAULT: {
         ENDPOINT_URLS.MANAGEMENT: 'https://management.core.windows.net/',
         ENDPOINT_URLS.ACTIVE_DIRECTORY_AUTHORITY : 'https://login.microsoftonline.com',
         ENDPOINT_URLS.ACTIVE_DIRECTORY_GRAPH_RESOURCE_ID: 'https://graph.windows.net/',
+        ENDPOINT_URLS.KEY_VAULT: 'https://vault.azure.net'
         },
     ENV_CHINA: {
         ENDPOINT_URLS.MANAGEMENT: 'https://management.core.chinacloudapi.cn/',
         ENDPOINT_URLS.ACTIVE_DIRECTORY_AUTHORITY: 'https://login.chinacloudapi.cn',
         ENDPOINT_URLS.ACTIVE_DIRECTORY_GRAPH_RESOURCE_ID: 'https://graph.chinacloudapi.cn/',
+        ENDPOINT_URLS.KEY_VAULT: 'https://vault.azure.cn'
         },
     ENV_US_GOVERNMENT: {
         ENDPOINT_URLS.MANAGEMENT: 'https://management.core.usgovcloudapi.net/',
         ENDPOINT_URLS.ACTIVE_DIRECTORY_AUTHORITY: 'https://login.microsoftonline.com',
         ENDPOINT_URLS.ACTIVE_DIRECTORY_GRAPH_RESOURCE_ID: 'https://graph.windows.net/',
+        ENDPOINT_URLS.KEY_VAULT: 'https://vault.usgovcloudapi.net'
         }
 }
 
