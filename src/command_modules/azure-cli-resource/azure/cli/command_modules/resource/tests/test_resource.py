@@ -148,17 +148,17 @@ class ProviderRegistrationTest(VCRTestBase): # Not RG test base because it opera
 
     def body(self):
         provider = 'TrendMicro.DeepSecurity'
-        result = self.cmd('resource provider show -n {}'.format(provider), checks=None)
+        result = self.cmd('provider show -n {}'.format(provider), checks=None)
         if result['registrationState'] == 'Unregistered':
-            self.cmd('resource provider register -n {}'.format(provider), checks=None)
-            self.cmd('resource provider show -n {}'.format(provider), checks=[JMESPathCheck('registrationState', 'Registered')])
-            self.cmd('resource provider unregister -n {}'.format(provider), checks=None)
-            self.cmd('resource provider show -n {}'.format(provider), checks=[JMESPathCheck('registrationState', 'Unregistered')])
+            self.cmd('provider register -n {}'.format(provider), checks=None)
+            self.cmd('provider show -n {}'.format(provider), checks=[JMESPathCheck('registrationState', 'Registered')])
+            self.cmd('provider unregister -n {}'.format(provider), checks=None)
+            self.cmd('provider show -n {}'.format(provider), checks=[JMESPathCheck('registrationState', 'Unregistered')])
         else:
-            self.cmd('resource provider unregister -n {}'.format(provider), checks=None)
-            self.cmd('resource provider show -n {}'.format(provider), checks=[JMESPathCheck('registrationState', 'Unregistered')])
-            self.cmd('resource provider register -n {}'.format(provider), checks=None)
-            self.cmd('resource provider show -n {}'.format(provider), checks=[JMESPathCheck('registrationState', 'Registered')])
+            self.cmd('provider unregister -n {}'.format(provider), checks=None)
+            self.cmd('provider show -n {}'.format(provider), checks=[JMESPathCheck('registrationState', 'Unregistered')])
+            self.cmd('provider register -n {}'.format(provider), checks=None)
+            self.cmd('provider show -n {}'.format(provider), checks=[JMESPathCheck('registrationState', 'Registered')])
 
 class DeploymentTest(ResourceGroupVCRTestBase):
     def __init__(self, test_method):
