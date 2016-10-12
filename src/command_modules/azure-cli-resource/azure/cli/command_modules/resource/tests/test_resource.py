@@ -148,17 +148,17 @@ class ProviderRegistrationTest(VCRTestBase): # Not RG test base because it opera
 
     def body(self):
         provider = 'TrendMicro.DeepSecurity'
-        result = self.cmd('resource provider show -n {}'.format(provider), checks=None)
+        result = self.cmd('provider show -n {}'.format(provider), checks=None)
         if result['registrationState'] == 'Unregistered':
-            self.cmd('resource provider register -n {}'.format(provider), checks=None)
-            self.cmd('resource provider show -n {}'.format(provider), checks=[JMESPathCheck('registrationState', 'Registered')])
-            self.cmd('resource provider unregister -n {}'.format(provider), checks=None)
-            self.cmd('resource provider show -n {}'.format(provider), checks=[JMESPathCheck('registrationState', 'Unregistered')])
+            self.cmd('provider register -n {}'.format(provider), checks=None)
+            self.cmd('provider show -n {}'.format(provider), checks=[JMESPathCheck('registrationState', 'Registered')])
+            self.cmd('provider unregister -n {}'.format(provider), checks=None)
+            self.cmd('provider show -n {}'.format(provider), checks=[JMESPathCheck('registrationState', 'Unregistered')])
         else:
-            self.cmd('resource provider unregister -n {}'.format(provider), checks=None)
-            self.cmd('resource provider show -n {}'.format(provider), checks=[JMESPathCheck('registrationState', 'Unregistered')])
-            self.cmd('resource provider register -n {}'.format(provider), checks=None)
-            self.cmd('resource provider show -n {}'.format(provider), checks=[JMESPathCheck('registrationState', 'Registered')])
+            self.cmd('provider unregister -n {}'.format(provider), checks=None)
+            self.cmd('provider show -n {}'.format(provider), checks=[JMESPathCheck('registrationState', 'Unregistered')])
+            self.cmd('provider register -n {}'.format(provider), checks=None)
+            self.cmd('provider show -n {}'.format(provider), checks=[JMESPathCheck('registrationState', 'Registered')])
 
 class DeploymentTest(ResourceGroupVCRTestBase):
     def __init__(self, test_method):
@@ -265,7 +265,7 @@ class PolicyScenarioTest(ResourceGroupVCRTestBase):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         rules_file = os.path.join(curr_dir, 'sample_policy_rule.json').replace('\\', '\\\\')
         #create a policy
-        self.cmd('resource policy create -n {} --rules {} --display-name {} --description {}'.format(
+        self.cmd('resource policy definition create -n {} --rules {} --display-name {} --description {}'.format(
             policy_name, rules_file, policy_display_name, policy_description), checks=[
                 JMESPathCheck('name', policy_name),
                 JMESPathCheck('displayName', policy_display_name),
@@ -274,15 +274,15 @@ class PolicyScenarioTest(ResourceGroupVCRTestBase):
 
         #update it
         new_policy_description = policy_description + '_new'
-        self.cmd('resource policy update -n {} --description {}'.format(policy_name, new_policy_description), checks=[
+        self.cmd('resource policy definition update -n {} --description {}'.format(policy_name, new_policy_description), checks=[
             JMESPathCheck('description', new_policy_description)
             ])
 
         #list and show it
-        self.cmd('resource policy list', checks=[
+        self.cmd('resource policy definition list', checks=[
             JMESPathCheck("length([?name=='{}'])".format(policy_name), 1)
             ])
-        self.cmd('resource policy show -n {}'.format(policy_name), checks=[
+        self.cmd('resource policy definition show -n {}'.format(policy_name), checks=[
             JMESPathCheck('name', policy_name),
             JMESPathCheck('displayName', policy_display_name)
             ])
@@ -306,17 +306,17 @@ class PolicyScenarioTest(ResourceGroupVCRTestBase):
             pass
 
         # but enable --show-all works
-        self.cmd('resource policy assignment list --show-all', checks=[
+        self.cmd('resource policy assignment list --disable-scope-strict-match', checks=[
             JMESPathCheck("length([?name=='{}'])".format(policy_assignment_name), 1),
             ])
 
         # delete the assignment
         self.cmd('resource policy assignment delete -n {} -g {}'.format(
             policy_assignment_name, self.resource_group))
-        self.cmd('resource policy assignment list --show-all')
+        self.cmd('resource policy assignment list --disable-scope-strict-match')
 
         # delete the policy
-        self.cmd('resource policy delete -n {}'.format(policy_name))
+        self.cmd('resource policy definition delete -n {}'.format(policy_name))
         time.sleep(10) # ensure the policy is gone when run live.
-        self.cmd('resource policy list', checks=[
+        self.cmd('resource policy definition list', checks=[
             JMESPathCheck("length([?name=='{}'])".format(policy_name), 0)])

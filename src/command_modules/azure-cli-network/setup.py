@@ -24,10 +24,10 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
-    'azure==2.0.0rc6',
-    'azure-cli-core',
+    'azure-mgmt-network==0.30.0rc6',
     'azure-mgmt-trafficmanager==0.30.0rc6',
-    'azure-mgmt-dns==0.30.0rc6'
+    'azure-mgmt-dns==0.30.0rc6',
+    'azure-cli-core'
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:

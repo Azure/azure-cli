@@ -12,6 +12,7 @@ import dateutil.parser
 
 from azure.cli.core._util import CLIError, todict, get_file_json
 import azure.cli.core._logging as _logging
+from azure.cli.core._azure_env import ENDPOINT_URLS, get_env
 from azure.cli.core.help_files import helps
 
 from azure.cli.core.commands.client_factory import (get_mgmt_service_client,
@@ -46,7 +47,8 @@ def _auth_client_factory(scope=None):
 def _graph_client_factory(**_):
     from azure.cli.core._profile import Profile
     profile = Profile()
-    cred, _, tenant_id = profile.get_login_credentials(True)
+    cred, _, tenant_id = profile.get_login_credentials(
+        resource=get_env()[ENDPOINT_URLS.ACTIVE_DIRECTORY_GRAPH_RESOURCE_ID])
     client = GraphRbacManagementClient(cred, tenant_id)
     configure_common_settings(client)
     return client
@@ -58,7 +60,11 @@ def list_role_definitions(name=None, resource_group_name=None, scope=None,
                               definitions_client.config.subscription_id)
     return _search_role_definitions(definitions_client, name, scope, custom_role_only)
 
-helps['role create'] = """
+def get_role_definition_name_completion_list(prefix, **kwargs):#pylint: disable=unused-argument
+    definitions = list_role_definitions()
+    return [x.properties.role_name for x in list(definitions)]
+
+helps['role definition create'] = """
             type: command
             parameters: 
                 - name: --role-definition

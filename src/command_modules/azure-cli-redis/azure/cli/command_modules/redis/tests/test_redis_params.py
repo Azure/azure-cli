@@ -30,9 +30,9 @@ class Test_RedisCache(unittest.TestCase):
         args = mock_echo_args('redis create',
                               '--tenant-settings {\"hello\":1} -g wombat -n asldkj --sku-family c -l westus  --sku-capacity 1  --sku-name basic') # pylint: disable=line-too-long
         subset = set(dict(
-            sku_family='c',
+            sku_family='C',
             sku_capacity='1',
-            sku_name='basic',
+            sku_name='Basic',
             name='asldkj'
             ).items())
 

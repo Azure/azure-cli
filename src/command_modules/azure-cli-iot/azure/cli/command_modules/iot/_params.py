@@ -4,7 +4,8 @@
 #---------------------------------------------------------------------------------------------
 #pylint: disable=line-too-long
 
-from azure.cli.core.commands.parameters import (location_type, get_enum_choices, get_resource_name_completion_list)
+from azure.cli.core.commands.parameters import \
+    (location_type, enum_choice_list, get_resource_name_completion_list)
 from azure.cli.core.commands import register_cli_argument
 from azure.mgmt.iothub.models.iot_hub_client_enums import IotHubSku
 from ._factory import iot_hub_service_factory
@@ -26,10 +27,10 @@ register_cli_argument('iot hub create', 'hub_name', completer=None)
 register_cli_argument('iot hub create', 'location', location_type,
                       help='Location of your IoT Hub. Default is the location of target resource group.')
 register_cli_argument('iot hub create', 'sku',
-                      choices=get_enum_choices(IotHubSku),
                       help='Pricing tier for Azure IoT Hub. Default value is F1, which is free. '
                            'Note that only one free IoT Hub instance is allowed in each subscription. '
-                           'Exception will be thrown if free instances exceed one.')
+                           'Exception will be thrown if free instances exceed one.',
+                      **enum_choice_list(IotHubSku))
 register_cli_argument('iot hub create', 'unit', help='Units in your IoT Hub.', type=int)
 
 # Arguments for 'iot hub show-connection-string'

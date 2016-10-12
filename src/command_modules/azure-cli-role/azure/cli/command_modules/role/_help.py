@@ -19,13 +19,44 @@ helps['ad sp create-for-rbac'] = """
 
 helps['role'] = """
     type: group
-    short-summary: Commands to manage Azure Active Directory (AAD) roles
+    short-summary: Use role assignments to manage access to your Azure resources
 """
 helps['role assignment'] = """
     type: group
-    short-summary: Commands to manage AAD role assignments
+    short-summary: Manage role assignments
 """
-
+helps['role assignment create'] = """
+    type: command
+    short-summary: Create a new role assignment
+"""
+helps['role assignment delete'] = """
+    type: command
+    short-summary: Delete role assignments
+"""
+helps['role assignment list'] = """
+    type: command
+    short-summary: list role assignments
+"""
+helps['role definition'] = """
+    type: group
+    short-summary: Manage role definitions
+"""
+helps['role definition create'] = """
+    type: command
+    short-summary: Create a custom role definition
+"""
+helps['role definition delete'] = """
+    type: command
+    short-summary: Delete a role definition
+"""
+helps['role definition list'] = """
+    type: command
+    short-summary: list role definitions
+"""
+helps['role definition update'] = """
+    type: command
+    short-summary: update a role definition
+"""
 helps['ad'] = """
     type: group
     short-summary: Synchronize on-premises directories and manage Azure Active Directory (AAD) resources

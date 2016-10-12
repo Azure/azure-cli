@@ -27,7 +27,7 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
-    'azure==2.0.0rc6',
+    'azure-mgmt-keyvault==0.30.0',
     'azure-cli-core',
 ]
 
@@ -47,10 +47,14 @@ setup(
     namespace_packages = [
         'azure',
         'azure.cli',
-        'azure.cli.command_modules',
+        'azure.cli.command_modules'
     ],
     packages=[
         'azure.cli.command_modules.keyvault',
+        'azure.cli.command_modules.keyvault.keyvaultclient',
+        'azure.cli.command_modules.keyvault.convenience',
+        'azure.cli.command_modules.keyvault.convenience.http_bearer_challenge_cache',
+        'azure.cli.command_modules.keyvault.keyvaultclient.models'
     ],
     install_requires=DEPENDENCIES,
 )

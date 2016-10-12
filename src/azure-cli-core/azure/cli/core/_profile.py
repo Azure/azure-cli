@@ -8,9 +8,10 @@ import collections
 import json
 import os.path
 import errno
-from msrest.authentication import BasicTokenAuthentication
+
+from enum import Enum
+
 import adal
-from azure.mgmt.resource.subscriptions import SubscriptionClient
 from azure.cli.core._session import ACCOUNT
 from azure.cli.core._util import CLIError, get_file_json
 from azure.cli.core._azure_env import (get_authority_url, get_env, ENDPOINT_URLS,
@@ -65,15 +66,18 @@ def _delete_file(file_path):
         if e.errno != errno.ENOENT:
             raise
 
+class CredentialType(Enum): # pylint: disable=too-few-public-methods
+    management = get_env()[ENDPOINT_URLS.MANAGEMENT]
+    rbac = get_env()[ENDPOINT_URLS.ACTIVE_DIRECTORY_GRAPH_RESOURCE_ID]
+
 class Profile(object):
     def __init__(self, storage=None, auth_ctx_factory=None):
         self._storage = storage or ACCOUNT
         factory = auth_ctx_factory or _AUTH_CTX_FACTORY
         self._creds_cache = CredsCache(factory)
         self._subscription_finder = SubscriptionFinder(factory, self._creds_cache.adal_token_cache)
-        env = get_env()
-        self._management_resource_uri = env[ENDPOINT_URLS.MANAGEMENT]
-        self._graph_resource_uri = env[ENDPOINT_URLS.ACTIVE_DIRECTORY_GRAPH_RESOURCE_ID]
+        self.env = get_env()
+        self._management_resource_uri = self.env[ENDPOINT_URLS.MANAGEMENT]
 
     def find_subscriptions_on_login(self, #pylint: disable=too-many-arguments
                                     interactive,
@@ -220,11 +224,11 @@ class Profile(object):
             raise CLIError("Please run 'az account set' to select active account.")
         return result[0]
 
-    def get_login_credentials(self, for_graph_client=False, subscription_id=None):
+    def get_login_credentials(self, resource=get_env()[ENDPOINT_URLS.MANAGEMENT],
+                              subscription_id=None):
         account = self.get_subscription(subscription_id)
         user_type = account[_USER_ENTITY][_USER_TYPE]
         username_or_sp_id = account[_USER_ENTITY][_USER_NAME]
-        resource = self._graph_resource_uri if for_graph_client else self._management_resource_uri
         if user_type == _USER:
             token_retriever = lambda: self._creds_cache.retrieve_token_for_user(
                 username_or_sp_id, account[_TENANT_ID], resource)
@@ -249,6 +253,8 @@ class Profile(object):
 class SubscriptionFinder(object):
     '''finds all subscriptions for a user or service principal'''
     def __init__(self, auth_context_factory, adal_token_cache, arm_client_factory=None):
+        from azure.mgmt.resource.subscriptions import SubscriptionClient
+
         self._adal_token_cache = adal_token_cache
         self._auth_context_factory = auth_context_factory
         self.user_id = None # will figure out after log user in
@@ -291,6 +297,8 @@ class SubscriptionFinder(object):
         return self._auth_context_factory(authority, token_cache)
 
     def _find_using_common_tenant(self, access_token, resource):
+        from msrest.authentication import BasicTokenAuthentication
+
         all_subscriptions = []
         token_credential = BasicTokenAuthentication({'access_token': access_token})
         client = self._arm_client_factory(token_credential)
@@ -307,6 +315,8 @@ class SubscriptionFinder(object):
         return all_subscriptions
 
     def _find_using_specific_tenant(self, tenant, access_token):
+        from msrest.authentication import BasicTokenAuthentication
+
         token_credential = BasicTokenAuthentication({'access_token': access_token})
         client = self._arm_client_factory(token_credential)
         subscriptions = client.subscriptions.list()

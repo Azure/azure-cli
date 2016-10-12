@@ -10,7 +10,7 @@ import mock
 from azure.mgmt.resource.subscriptions.models import (SubscriptionState, Subscription,
                                                       SubscriptionPolicies, spendingLimit)
 from azure.cli.core._profile import Profile, CredsCache, SubscriptionFinder
-from azure.cli.core._azure_env import ENV_DEFAULT
+from azure.cli.core._azure_env import ENV_DEFAULT, ENDPOINT_URLS, get_env
 
 class Test_Profile(unittest.TestCase):
 
@@ -253,7 +253,8 @@ class Test_Profile(unittest.TestCase):
                                                      False, ENV_DEFAULT)
         profile._set_subscriptions(consolidated)
         #action
-        cred, _, tenant_id = profile.get_login_credentials(for_graph_client=True)
+        cred, _, tenant_id = profile.get_login_credentials(
+            resource=get_env()[ENDPOINT_URLS.ACTIVE_DIRECTORY_GRAPH_RESOURCE_ID])
         _, _ = cred._token_retriever()
         #verify
         mock_get_token.assert_called_once_with(mock.ANY, self.user1, self.tenant_id,

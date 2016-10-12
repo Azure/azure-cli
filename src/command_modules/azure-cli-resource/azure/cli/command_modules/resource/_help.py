@@ -6,10 +6,17 @@
 from azure.cli.core.help_files import helps #pylint: disable=unused-import
 
 #pylint: disable=line-too-long
-
-helps['resource policy create'] = """
+helps['resource policy'] = """
+    type: group
+    short-summary: Commands to manage resource policies
+"""
+helps['resource policy definition'] = """
+    type: group
+    short-summary: manage resource policy definitions
+"""
+helps['resource policy definition create'] = """
             type: command
-            short-summary: Create a policy
+            short-summary: Creates a policy definition
             parameters:
                 - name: --rules
                   type: string
@@ -29,10 +36,52 @@ helps['resource policy create'] = """
                             }
                         }
             """
-
+helps['resource policy definition delete'] = """
+    type: command
+    short-summary: deletes a policy definition
+"""
+helps['resource policy definition update'] = """
+    type: command
+    short-summary: updates a policy definition
+"""
+helps['resource policy definition list'] = """
+    type: command
+    short-summary: lists policy definitions
+"""
+helps['resource policy assignment'] = """
+    type: group
+    short-summary: manage resource policy assignments
+"""
+helps['resource policy assignment create'] = """
+    type: command
+    short-summary: creates a resource policy assignment
+"""
+helps['resource policy assignment delete'] = """
+    type: command
+    short-summary: deletes a resource policy assignment
+"""
+helps['resource policy assignment show'] = """
+    type: command
+    short-summary: shows a resource policy assignment
+"""
+helps['resource policy assignment list'] = """
+    type: command
+    short-summary: list resource policy assignments
+"""
 helps['resource'] = """
     type: group
     short-summary: Generic commands to manage Azure resources
+"""
+helps['resource show'] = """
+    type: command
+    short-summary: display a resource detail
+    examples:
+        - name: show a virtual machine
+          text: >
+            az vm show -g mygroup -n myvm --resource-type "Microsoft.Compute/virtualMachines"
+        - name: show a webapp
+          text: >
+            az resource show -g mygroup -n mywebapp --resource-type "Microsoft.web/sites"
 """
 helps['resource feature'] = """
     type: group
@@ -50,19 +99,18 @@ helps['resource group deployment operation'] = """
     type: group
     short-summary: Commands to manage deployment operations
 """
-helps['resource policy'] = """
+helps['provider'] = """
     type: group
-    short-summary: Commands to manage resource policies
+    short-summary: Manage resource providers
 """
-helps['resource policy assignment'] = """
-    type: group
-    short-summary: Commands to manage resource policy assignments
+helps['provider register'] = """
+    type: command
+    short-summary: Register a provider
 """
-helps['resource provider'] = """
-    type: group
-    short-summary: Commands to manage resource providers
+helps['provider unregister'] = """
+    type: command
+    short-summary: Unregister a provider
 """
-
 helps['tag'] = """
     type: group
     short-summary: Manage resource tags

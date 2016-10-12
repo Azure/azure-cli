@@ -4,6 +4,8 @@
 #---------------------------------------------------------------------------------------------
 
 # pylint: disable=line-too-long
+from collections import OrderedDict
+
 from azure.mgmt.resource.features.operations.features_operations import FeaturesOperations
 from azure.mgmt.resource.resources.operations.resources_operations import ResourcesOperations
 from azure.mgmt.resource.resources.operations.providers_operations import ProvidersOperations
@@ -40,20 +42,22 @@ cli_command('resource group create', create_resource_group)
 cli_command('resource group export', export_group_as_template)
 
 # Resource commands
+def transform_resource_list(result):
+    return [OrderedDict([('Name', r['name']), ('ResourceGroup', r['resourceGroup']), \
+            ('Location', r['location']), ('Type', r['type'])]) for r in result]
 factory = lambda _: _resource_client_factory().resources
-cli_command('resource exists', ResourcesOperations.check_existence, factory)
 cli_command('resource delete', ResourcesOperations.delete, factory)
 cli_command('resource show', ResourcesOperations.get, factory)
-cli_command('resource list', list_resources)
+cli_command('resource list', list_resources, table_transformer=transform_resource_list)
 cli_command('resource tag', tag_resource)
 cli_command('resource move', move_resource)
 
 # Resource provider commands
 factory = lambda _: _resource_client_factory().providers
-cli_command('resource provider list', ProvidersOperations.list, factory)
-cli_command('resource provider show', ProvidersOperations.get, factory)
-cli_command('resource provider register', register_provider)
-cli_command('resource provider unregister', unregister_provider)
+cli_command('provider list', ProvidersOperations.list, factory)
+cli_command('provider show', ProvidersOperations.get, factory)
+cli_command('provider register', register_provider)
+cli_command('provider unregister', unregister_provider)
 
 # Resource feature commands
 factory = lambda _: _resource_feature_client_factory().features
@@ -98,8 +102,8 @@ cli_command('resource policy assignment delete', delete_policy_assignment)
 cli_command('resource policy assignment list', list_policy_assignment)
 cli_command('resource policy assignment show', show_policy_assignment)
 factory = lambda _: _resource_policy_client_factory().policy_definitions
-cli_command('resource policy create', create_policy_definition)
-cli_command('resource policy delete', PolicyDefinitionsOperations.delete, factory)
-cli_command('resource policy list', PolicyDefinitionsOperations.list, factory)
-cli_command('resource policy show', PolicyDefinitionsOperations.get, factory)
-cli_command('resource policy update', update_policy_definition)
+cli_command('resource policy definition create', create_policy_definition)
+cli_command('resource policy definition delete', PolicyDefinitionsOperations.delete, factory)
+cli_command('resource policy definition list', PolicyDefinitionsOperations.list, factory)
+cli_command('resource policy definition show', PolicyDefinitionsOperations.get, factory)
+cli_command('resource policy definition update', update_policy_definition)
