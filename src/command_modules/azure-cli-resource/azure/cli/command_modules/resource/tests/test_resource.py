@@ -151,14 +151,18 @@ class ProviderRegistrationTest(VCRTestBase): # Not RG test base because it opera
         result = self.cmd('provider show -n {}'.format(provider), checks=None)
         if result['registrationState'] == 'Unregistered':
             self.cmd('provider register -n {}'.format(provider), checks=None)
-            self.cmd('provider show -n {}'.format(provider), checks=[JMESPathCheck('registrationState', 'Registered')])
+            result = self.cmd('provider show -n {}'.format(provider))
+            self.assertTrue(result['registrationState'] in ['Registering', 'Registered'])
             self.cmd('provider unregister -n {}'.format(provider), checks=None)
-            self.cmd('provider show -n {}'.format(provider), checks=[JMESPathCheck('registrationState', 'Unregistered')])
+            result = self.cmd('provider show -n {}'.format(provider))
+            self.assertTrue(result['registrationState'] in ['Unregistering', 'Unregistered'])
         else:
             self.cmd('provider unregister -n {}'.format(provider), checks=None)
-            self.cmd('provider show -n {}'.format(provider), checks=[JMESPathCheck('registrationState', 'Unregistered')])
+            result = self.cmd('provider show -n {}'.format(provider))
+            self.assertTrue(result['registrationState'] in ['Unregistering', 'Unregistered'])
             self.cmd('provider register -n {}'.format(provider), checks=None)
-            self.cmd('provider show -n {}'.format(provider), checks=[JMESPathCheck('registrationState', 'Registered')])
+            result = self.cmd('provider show -n {}'.format(provider))
+            self.assertTrue(result['registrationState'] in ['Registering', 'Registered'])
 
 class DeploymentTest(ResourceGroupVCRTestBase):
     def __init__(self, test_method):
