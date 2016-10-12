@@ -9,6 +9,9 @@ A great cloud needs great tools; we're excited to introduce *Azure CLI 2.0 - Pre
 Installation
 ===============
 
+Install with interactive install script
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 For OSX and Linux, you can install using curl: 
 
 .. code-block:: console
@@ -21,12 +24,21 @@ or using wget:
 
    $ wget -q -O - https://aka.ms/InstallAzureCli | bash
 
+Some prerequisites may be required. See our `Preview Install Guide <https://github.com/Azure/azure-cli/blob/master/doc/preview_install_guide.md>`__.
+
+Install with pip
+^^^^^^^^^^^^^^^^
 
 For those familiar with pip, use the following:
 
 .. code-block:: console
 
    $ pip install azure-cli
+
+Some prerequisites may be required. See our `Preview Install Guide <https://github.com/Azure/azure-cli/blob/master/doc/preview_install_guide.md>`__.
+
+Install with apt-get
+^^^^^^^^^^^^^^^^^^^^
 
 A Debian/Ubuntu package is also available. Install as follows:
 
@@ -36,6 +48,9 @@ A Debian/Ubuntu package is also available. Install as follows:
     $ sudo apt-key adv --keyserver apt-mo.trafficmanager.net --recv-keys 417A0893
     $ sudo apt-get install apt-transport-https
     $ sudo apt-get update && sudo apt-get install azure-cli
+
+Install with Docker
+^^^^^^^^^^^^^^^^^^^
 
 We also maintain a docker image preconfigured with the Azure CLI.
 
