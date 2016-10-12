@@ -17,29 +17,30 @@ from . import HttpBearerChallengeCache as ChallengeCache
 
 class KeyVaultAuthBase(AuthBase):
 
-    def __init__(self, token_callback):
-        self._callback = token_callback
+    def __init__(self, authorization_callback):
+        self._callback = authorization_callback
         self._token = None
 
     def __call__(self, request):
-        # attempt to pre-fetch token if challenge is cached
+        # attempt to pre-fetch challenge if cached
         if self._callback:
             challenge = ChallengeCache.get_challenge_for_url(request.url)
             if challenge:
                 # if challenge cached, retrieve token and update the request
-                self.set_auth_header(request, challenge)
+                self.set_authorization_header(request, challenge)
             else:
                 # send the request to retrieve the challenge, then request the token and update
                 # the request
+                # TODO: wire up commons flag for things like Fiddler, logging, etc.
                 response = requests.Session().send(request)
                 auth_header = response.headers['WWW-Authenticate']
                 if HttpBearerChallenge.is_bearer_challenge(auth_header):
                     challenge = HttpBearerChallenge(response.request.url, auth_header)
                     ChallengeCache.set_challenge_for_url(response.request.url, challenge)
-                    self.set_auth_header(request, challenge)
+                    self.set_authorization_header(request, challenge)
         return request
 
-    def set_auth_header(self, request, challenge):
+    def set_authorization_header(self, request, challenge):
         auth = self._callback(
             challenge.get_authorization_server(),
             challenge.get_resource(),
@@ -48,10 +49,10 @@ class KeyVaultAuthBase(AuthBase):
 
 class KeyVaultAuthentication(Authentication):
 
-    def __init__(self, token_callback):
+    def __init__(self, authorization_callback):
         super(KeyVaultAuthentication, self).__init__()
-        self.auth = KeyVaultAuthBase(token_callback)
-        self._callback = token_callback
+        self.auth = KeyVaultAuthBase(authorization_callback)
+        self._callback = authorization_callback
         
     def signed_session(self):
         session = super(KeyVaultAuthentication, self).signed_session()
