@@ -4,6 +4,11 @@
 #---------------------------------------------------------------------------------------------
 
 import collections
+import os
+try:
+    from urllib.parse import urlparse, urlsplit
+except ImportError:
+    from urlparse import urlparse, urlsplit # pylint: disable=import-error
 
 from azure.cli.core.parser import IncorrectUsageError
 
@@ -32,6 +37,20 @@ def validate_parent(string):
         raise IncorrectUsageError('Parameter --parent must be in <type>/<name> format.')
     ParentType = collections.namedtuple('ParentType', 'type name')
     return ParentType(type=type_comp, name=name_comp)
+
+def validate_deployment_name(namespace):
+    #If missing,try come out with a name associated with the template name
+    if namespace.deployment_name is None:
+        #if we get json content, default to a fixed name
+        if namespace.template_file_path[:1] == '{':
+            namespace.deployment_name = 'deployment1'
+        else:
+            #extract out the template base name and use it
+            template_filename = namespace.template_file_path
+            if urlparse(template_filename).scheme:
+                template_filename = urlsplit(template_filename).path
+            template_filename = os.path.basename(template_filename)
+            namespace.deployment_name = os.path.splitext(template_filename)[0]
 
 def _resolve_api_version(rcf, resource_type, parent=None):
 

@@ -13,7 +13,7 @@ from azure.cli.core.commands.parameters import (ignore_type, resource_group_name
                                                 enum_choice_list)
 from .custom import (get_policy_completion_list, get_policy_assignment_completion_list,
                      get_resource_types_completion_list, get_providers_completion_list)
-from ._validators import validate_resource_type, validate_parent, resolve_resource_parameters
+from ._validators import validate_resource_type, validate_parent, resolve_resource_parameters, validate_deployment_name
 
 # BASIC PARAMETER CONFIGURATION
 
@@ -59,9 +59,11 @@ register_cli_argument('resource policy assignment', 'policy', help='policy name 
 register_cli_argument('resource group', 'resource_group_name', resource_group_name_type, options_list=('--name', '-n'))
 register_cli_argument('resource group deployment', 'resource_group_name', arg_type=resource_group_name_type, completer=get_resource_group_completion_list)
 register_cli_argument('resource group deployment', 'deployment_name', options_list=('--name', '-n'), required=True, help='The deployment name.')
-register_cli_argument('resource group deployment', 'parameters_file_path', completer=FilesCompleter())
-register_cli_argument('resource group deployment', 'template_file_path', completer=FilesCompleter())
+register_cli_argument('resource group deployment', 'parameters_file_path', completer=FilesCompleter(), help='provide deployment parameter values, a file path, or an uri to a remote file, or json string')
+register_cli_argument('resource group deployment', 'template_file_path', completer=FilesCompleter(), help='provide deployment template, a file path, or an uri to a remote file, or json string')
 register_cli_argument('resource group deployment', 'mode', help='Incremental (only add resources to resource group) or Complete (remove extra resources from resource group)', **enum_choice_list(DeploymentMode))
+register_cli_argument('resource group deployment create', 'deployment_name', options_list=('--name', '-n'), required=False,
+                      validator=validate_deployment_name, help='The deployment name. Default to template file base name')
 register_cli_argument('resource group export', 'include_comments', action='store_true')
 register_cli_argument('resource group export', 'include_parameter_default_value', action='store_true')
 register_cli_argument('resource group create', 'resource_group_name', completer=None)

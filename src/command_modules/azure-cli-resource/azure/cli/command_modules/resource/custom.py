@@ -8,7 +8,6 @@
 from __future__ import print_function
 import json
 import os
-import time
 import uuid
 
 from msrestazure.azure_exceptions import CloudError
@@ -147,7 +146,7 @@ def list_resources(
     return list(resources)
 
 def deploy_arm_template(
-        resource_group_name, deployment_name, template_file_path,
+        resource_group_name, template_file_path, deployment_name=None,
         parameters_file_path=None, mode='incremental'):
     ''' Deploy resources with an ARM template.
         :param str resource_group_name:resource group for deployment
@@ -157,7 +156,7 @@ def deploy_arm_template(
         :param str template_file_path:path to deployment template JSON file
         :param str parameters_file_path:path to deployment parameters JSON file
     '''
-    return _deploy_arm_template_core(resource_group_name, deployment_name, template_file_path,
+    return _deploy_arm_template_core(resource_group_name, template_file_path, deployment_name,
                                      parameters_file_path, mode)
 
 def validate_arm_template(resource_group_name, template_file_path,
@@ -169,20 +168,20 @@ def validate_arm_template(resource_group_name, template_file_path,
         :param str template_file_path:path to deployment template JSON file
         :param str parameters_file_path:path to deployment parameters JSON file
     '''
-    return _deploy_arm_template_core(resource_group_name, 'deployment_dry_run', template_file_path,
+    return _deploy_arm_template_core(resource_group_name, template_file_path, 'deployment_dry_run',
                                      parameters_file_path, mode, validate_only=True)
 
-def _deploy_arm_template_core(resource_group_name, deployment_name, template_file_path,
+def _deploy_arm_template_core(resource_group_name, template_file_path, deployment_name=None,
                               parameters_file_path=None, mode='incremental', validate_only=False):
     from azure.mgmt.resource.resources.models import DeploymentProperties
 
     parameters = None
     if parameters_file_path:
-        parameters = get_file_json(parameters_file_path)
+        parameters = _load_json(parameters_file_path)
         if parameters:
             parameters = parameters.get('parameters', parameters)
 
-    template = get_file_json(template_file_path)
+    template = _load_json(template_file_path)
 
     properties = DeploymentProperties(template=template, parameters=parameters, mode=mode)
 
@@ -191,6 +190,15 @@ def _deploy_arm_template_core(resource_group_name, deployment_name, template_fil
         return smc.deployments.validate(resource_group_name, deployment_name, properties)
     else:
         return smc.deployments.create_or_update(resource_group_name, deployment_name, properties)
+
+def _load_json(location):
+    from six.moves.urllib.request import urlopen #pylint: disable=import-error
+    try:
+        txt = urlopen(location).read()
+        json_content = json.loads(txt.decode())
+    except: #pylint: disable=bare-except
+        json_content = get_file_json(location)
+    return json_content
 
 def export_deployment_as_template(resource_group_name, deployment_name):
     smc = get_mgmt_service_client(ResourceManagementClient)
@@ -255,19 +263,12 @@ def unregister_provider(resource_provider_namespace):
     _update_provider(resource_provider_namespace, registering=False)
 
 def _update_provider(namespace, registering):
-    target_state = 'Registered' if registering else 'Unregistered'
     rcf = _resource_client_factory()
     if registering:
         rcf.providers.register(namespace)
     else:
         rcf.providers.unregister(namespace)
 
-    #polling up to 3*10 seconds
-    for _ in range(0, 3):
-        provider = rcf.providers.get(namespace)
-        if provider.registration_state == target_state:#pylint: disable=no-member
-            return
-        time.sleep(10)
     #timeout'd, normal for resources with many regions, but let users know.
     action = 'Registering' if registering else 'Unregistering'
     msg_template = '%s is still on-going. You can monitor using \'az resource provider show -n %s\''
