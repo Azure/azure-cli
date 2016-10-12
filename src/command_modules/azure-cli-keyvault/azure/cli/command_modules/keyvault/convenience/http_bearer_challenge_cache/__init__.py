@@ -5,7 +5,10 @@
 
 #pylint: skip-file
 
-import urllib
+try:
+    import urllib.parse as parse
+except ImportError:
+    import urlparse as parse
 
 # TODO turn this into a thread safe Singleton
 _cache = {}
@@ -17,7 +20,7 @@ def get_challenge_for_url(url):
     if not url:
         raise ValueError('URL cannot be None')
 
-    url = urllib.parse.urlparse(url)
+    url = parse.urlparse(url)
     return _cache.get(url.netloc)
 
 def remove_challenge_for_url(url):
@@ -26,7 +29,7 @@ def remove_challenge_for_url(url):
     if not url:
         raise ValueError('URL cannot be empty')
 
-    url = urllib.parse.urlparse(url)
+    url = parse.urlparse(url)
     del _cache[url.netloc]
 
 def set_challenge_for_url(url, challenge):
@@ -39,7 +42,7 @@ def set_challenge_for_url(url, challenge):
     if not challenge:
         raise ValueError('Challenge cannot be empty')
 
-    src_url = urllib.parse.urlparse(url)
+    src_url = parse.urlparse(url)
     if src_url.netloc != challenge.source_authority:
         raise ValueError('Source URL and Challenge URL do not match')
 

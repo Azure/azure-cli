@@ -12,10 +12,10 @@ from msrestazure.azure_operation import AzureOperationPoller
 from azure.cli.core.commands import command_table, CliCommand, LongRunningOperation
 from azure.cli.core.commands._introspection import \
     (extract_full_summary_from_signature, extract_args_from_signature)
-from azure.cli.core._profile import Profile, CredentialType
+from azure.cli.core._profile import Profile
 from azure.cli.core._util import CLIError
 
-from azure.cli.command_modules.keyvault.convenience import KeyVaultClient
+from azure.cli.command_modules.keyvault.convenience import KeyVaultClient, KeyVaultAuthentication
 from azure.cli.command_modules.keyvault.keyvaultclient.models import KeyVaultErrorException
 
 def _encode_hex(item):
@@ -37,8 +37,11 @@ def _create_key_vault_command(name, operation, transform_result, table_transform
     def _execute_command(kwargs):
 
         try:
-            client = KeyVaultClient(
-                Profile().get_login_credentials(credential_type=CredentialType.keyvault)[0])
+
+            def get_token(server, resource, scope): # pylint: disable=unused-argument
+                return Profile().get_login_credentials(resource)[0]._token_retriever() # pylint: disable=protected-access
+
+            client = KeyVaultClient(KeyVaultAuthentication(get_token))
             result = operation(client, **kwargs)
 
             # apply results transform if specified

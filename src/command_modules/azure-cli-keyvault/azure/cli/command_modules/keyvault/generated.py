@@ -16,7 +16,7 @@ from azure.cli.core.commands.arm import cli_generic_update_command
 from azure.cli.command_modules.keyvault.convenience import KeyVaultClient
 from azure.cli.command_modules.keyvault._command_type import cli_keyvault_data_plane_command
 from azure.cli.command_modules.keyvault.custom import \
-    (create_key, certificate_policy_template)
+    (create_key) #, create_certificate, certificate_policy_template)
 
 def _keyvault_client_factory(**_):
     return get_mgmt_service_client(KeyVaultManagementClient)
@@ -51,7 +51,7 @@ cli_keyvault_data_plane_command('keyvault key create', create_key)
 cli_keyvault_data_plane_command('keyvault key set-attributes', KeyVaultClient.update_key)
 cli_keyvault_data_plane_command('keyvault key show', KeyVaultClient.get_key)
 cli_keyvault_data_plane_command('keyvault key delete', KeyVaultClient.delete_key)
-# TODO: Round 2
+# TODO: Round 3
 #cli_keyvault_data_plane_command('keyvault key import', import_key)
 #cli_keyvault_data_plane_command('keyvault key backup', KeyVaultClient.backup_key)
 #cli_keyvault_data_plane_command('keyvault key restore', KeyVaultClient.restore_key)
@@ -62,35 +62,44 @@ cli_keyvault_data_plane_command('keyvault secret set', KeyVaultClient.set_secret
 cli_keyvault_data_plane_command('keyvault secret set-attributes', KeyVaultClient.update_secret)
 cli_keyvault_data_plane_command('keyvault secret show', KeyVaultClient.get_secret)
 cli_keyvault_data_plane_command('keyvault secret delete', KeyVaultClient.delete_secret)
-# TODO: Round 2
+# TODO: Round 3
 #cli_keyvault_data_plane_command('keyvault secret download', dummy)
 
-# TODO: Round 2
-#cli_keyvault_data_plane_command('keyvault certificate create', KeyVaultClient.create_certificate)
+# TODO: Round 3
+
+#cli_keyvault_data_plane_command('keyvault certificate create', create_certificate)
 #cli_keyvault_data_plane_command('keyvault certificate list', KeyVaultClient.get_certificates)
-#cli_keyvault_data_plane_command('keyvault certificate list-versions', KeyVaultClient.get_certificate_versions)
+#cli_keyvault_data_plane_command('keyvault certificate list-versions',
+#   KeyVaultClient.get_certificate_versions)
 #cli_keyvault_data_plane_command('keyvault certificate show', KeyVaultClient.get_certificate)
 #cli_keyvault_data_plane_command('keyvault certificate import', KeyVaultClient.import_certificate)
 #cli_keyvault_data_plane_command('keyvault certificate merge', KeyVaultClient.merge_certificate)
-#cli_keyvault_data_plane_command('keyvault certificate set-attributes', KeyVaultClient.update_certificate)
+#cli_keyvault_data_plane_command('keyvault certificate set-attributes',
+#   KeyVaultClient.update_certificate)
 #cli_keyvault_data_plane_command('keyvault certificate delete', KeyVaultClient.delete_certificate)
 #cli_keyvault_data_plane_command('keyvault certificate download', dummy)
 
-#cli_keyvault_data_plane_command('keyvault certificate contact show', KeyVaultClient.get_certificate_contacts)
-#cli_keyvault_data_plane_command('keyvault certificate contact update', KeyVaultClient.set_certificate_contacts)
-#cli_keyvault_data_plane_command('keyvault certificate contact delete', KeyVaultClient.delete_certificate_contacts)
+#cli_keyvault_data_plane_command('keyvault certificate contact show',
+#   KeyVaultClient.get_certificate_contacts)
+#cli_keyvault_data_plane_command('keyvault certificate contact update',
+#   KeyVaultClient.set_certificate_contacts)
+#cli_keyvault_data_plane_command('keyvault certificate contact delete',
+#   KeyVaultClient.delete_certificate_contacts)
 
-#cli_keyvault_data_plane_command('keyvault certificate issuer update', KeyVaultClient.update_certificate_issuer)
-#cli_keyvault_data_plane_command('keyvault certificate issuer list', KeyVaultClient.get_certificate_issuers)
-#cli_keyvault_data_plane_command('keyvault certificate issuer set', KeyVaultClient.set_certificate_issuer)
-#cli_keyvault_data_plane_command('keyvault certificate issuer show', KeyVaultClient.get_certificate_issuer)
-#cli_keyvault_data_plane_command('keyvault certificate issuer delete', KeyVaultClient.delete_certificate_issuer)
+#cli_keyvault_data_plane_command('keyvault certificate issuer update',
+#   KeyVaultClient.update_certificate_issuer)
+#cli_keyvault_data_plane_command('keyvault certificate issuer list',
+#   KeyVaultClient.get_certificate_issuers)
+#cli_keyvault_data_plane_command('keyvault certificate issuer set',
+#   KeyVaultClient.set_certificate_issuer)
+#cli_keyvault_data_plane_command('keyvault certificate issuer show',
+#   KeyVaultClient.get_certificate_issuer)
+#cli_keyvault_data_plane_command('keyvault certificate issuer delete',
+#   KeyVaultClient.delete_certificate_issuer)
 
-#cli_keyvault_data_plane_command('keyvault certificate policy show', KeyVaultClient.get_certificate_policy)
-#cli_keyvault_data_plane_command('keyvault certificate policy update', KeyVaultClient.update_certificate_policy)
+#cli_keyvault_data_plane_command('keyvault certificate policy show',
+#   KeyVaultClient.get_certificate_policy)
+#cli_keyvault_data_plane_command('keyvault certificate policy update',
+#   KeyVaultClient.update_certificate_policy)
 
-#cli_keyvault_data_plane_command('keyvault certificate operation show', KeyVaultClient.get_certificate_operation)
-#cli_keyvault_data_plane_command('keyvault certificate operation update', KeyVaultClient.update_certificate_operation)
-#cli_keyvault_data_plane_command('keyvault certificate operation delete', KeyVaultClient.delete_certificate_operation)
-
-cli_command('keyvault certificate TEMPLATE', certificate_policy_template)
+#cli_command('keyvault certificate TEMPLATE', certificate_policy_template)

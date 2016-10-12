@@ -12,7 +12,7 @@ import dateutil.parser
 
 from azure.cli.core._util import CLIError, todict, get_file_json
 import azure.cli.core._logging as _logging
-from azure.cli.core._profile import CredentialType
+from azure.cli.core._azure_env import ENDPOINT_URLS, get_env
 from azure.cli.core.help_files import helps
 
 from azure.cli.core.commands.client_factory import (get_mgmt_service_client,
@@ -47,7 +47,8 @@ def _auth_client_factory(scope=None):
 def _graph_client_factory(**_):
     from azure.cli.core._profile import Profile
     profile = Profile()
-    cred, _, tenant_id = profile.get_login_credentials(credential_type=CredentialType.rbac)
+    cred, _, tenant_id = profile.get_login_credentials(
+        resource=get_env()[ENDPOINT_URLS.ACTIVE_DIRECTORY_GRAPH_RESOURCE_ID])
     client = GraphRbacManagementClient(cred, tenant_id)
     configure_common_settings(client)
     return client
