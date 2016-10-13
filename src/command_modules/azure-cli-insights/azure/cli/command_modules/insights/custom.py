@@ -170,10 +170,8 @@ def list_tenant_events(start_time=None, end_time=None, limit=50, select=None):
     return _limit_results(client.list(filter=filter_string, select=select_string), limit)
 
 def _generate_alerts_rule_template(location, alert_rule_resource_name, is_enabled, condition=None, actions=None):
-    condition = condition if condition else RuleCondition()
-    condition['odata.type'] = ''
-    actions = actions if actions else RuleAction()
-    actions['odata.type'] = ''
+    # condition = condition if condition else RuleCondition()
+    # actions = actions if actions else RuleAction()
     template = AlertRuleResource(location, alert_rule_resource_name, is_enabled,
                                  condition=condition, actions=actions)
     return template
