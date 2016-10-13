@@ -2,6 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 #---------------------------------------------------------------------------------------------
+from __future__ import print_function
 import datetime
 import json
 import re
@@ -514,7 +515,8 @@ def create_service_principal_for_rbac(name=None, secret=None, years=1,
     #pylint: disable=no-member
     aad_sp = _create_service_principal(aad_application.app_id, bool(scopes))
     oid = aad_sp.output.object_id if scopes else aad_sp.object_id
-    _build_output_content(name, secret, client.config.tenant_id)
+
+    _build_output_content(name, aad_application.app_id, secret, client.config.tenant_id)
 
     if scopes:
         #It is possible the SP has not been propagated to all servers, so creating assignments
@@ -559,12 +561,18 @@ def reset_service_principal_credential(name, secret=None, years=1):
 
     client.applications.patch(app.object_id, app_create_param)
 
-    _build_output_content(name, secret, client.config.tenant_id)
+    _build_output_content(name, app.app_id, secret, client.config.tenant_id)
 
-def _build_output_content(sp_name, secret, tenant):
-    logger.warning("Service principal has been configured.")
-    logger.warning("  id(client_id):           " + sp_name)
-    logger.warning("  password(client_secret): " + secret)
+def _build_output_content(sp_name, app_id, secret, tenant):
+    #this is a fairly special convinience command that the result is not associated
+    #with one api response, so it controls its own output format for easy scripting
+    #and also ensures warning (to stderr) goes after the stdout.
+    result = {
+        'app_id_uri': sp_name,
+        'client_id': app_id,
+        'client_secret': secret
+    }
+    print(json.dumps(result, indent=4))
 
     logger.warning('Useful commands to manage azure:')
     logger.warning('Assign a role:')
