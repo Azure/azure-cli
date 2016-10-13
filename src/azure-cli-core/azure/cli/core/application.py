@@ -100,24 +100,13 @@ class Application(object):
             nouns.append(noun)
         command = ' '.join(nouns)
 
-        if argv[-1] in ('--help', '-h'):
-            # Make sure we load the params so they show in help
+        if argv[-1] in ('--help', '-h') or command in command_table:
             self.configuration.load_params(command)
             self.parser.load_command_table(command_table)
 
         if self.session['completer_active']:
-            # Make sure we load the params for tab completion then enable it
-            self.configuration.load_params(command)
-            self.parser.load_command_table(command_table)
             enable_autocomplete(self.parser)
 
-        # Parse once so we can get the command
-        args = self.parser.parse_args(argv)
-
-        # The the params configuration for the command
-        self.configuration.load_params(args.command)
-        # Load the now updated command table and parse again
-        self.parser.load_command_table(command_table)
         args = self.parser.parse_args(argv)
 
         self.raise_event(self.COMMAND_PARSER_PARSED, command=args.command, args=args)

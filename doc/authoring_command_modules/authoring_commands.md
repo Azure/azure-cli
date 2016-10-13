@@ -7,14 +7,28 @@ The document provides instructions and guidelines on how to author individual co
 
 The basic process of adding commands is presented below, and elaborated upon later in this document.
 
-1. Write your command as a standard Python function.
-2. Register your command using the `cli_command` (or similar) function.
-3. Write up your command's help entry.
-4. Use the `register_cli_argument` function to add the following enhancements to your arguments, as needed:
+1. Create an __init__.py file for your command module.
+2. Write your command as a standard Python function.
+3. Register your command using the `cli_command` (or similar) function.
+4. Write up your command's help entry.
+5. Use the `register_cli_argument` function to add the following enhancements to your arguments, as needed:
     - option names, including short names
     - validators, actions or types
     - choice lists
     - completers
+
+**Create an __init__.py for your module**
+In the __init__ file, two methods need to be defined:
+  - `load_commands` - Uses the file in the 'Writing a Command' section below to load the commands.
+  - `load_params` - Uses the file in the 'Customizing Arguments' section below to load parameter customizations.
+
+```Python
+def load_params(command):
+    import azure.cli.command_modules.<module_name>._params
+
+def load_commands():
+    import azure.cli.command_modules.<module_name>.commands
+```
 
 **Writing a Command**
 
@@ -34,11 +48,13 @@ from azure.cli.commands import cli_command
 
 The signature of this method is 
 ```Python
-def cli_command(name, operation, client_factory=None, transform=None, table_transformer=None):
+def cli_command(module_name, name, operation, client_factory=None, transform=None, table_transformer=None):
 ```
 You will generally only specify `name`, `operation` and possibly `table_transformer`.
+  - `module_name` - The name of the module that is registering the command (e.g. `azure.cli.command_modules.vm.commands`). Typically this will be `__name__`.
   - `name` - String uniquely naming your command and placing it within the command hierachy. It will be the string that you would type at the command line, omitting `az` (ex: access your command at `az mypackage mycommand` using a name of `mypackage mycommand`).
-  - `operation` - Your function's name.
+  - `operation` - The handler that will be executed. Format is `<module_to_import>#<attribute_list>`
+      - For example if `operation='azure.mgmt.compute.operations.virtual_machines_operations#VirtualMachinesOperations.get'`, the CLI will import `azure.mgmt.compute.operations.virtual_machines_operations`, get the `VirtualMachinesOperations` attribute and then the `get` attribute of `VirtualMachinesOperations`.
   - `table_transformer` (optional) - Supply a callable that takes, transforms and returns a result for table output.
 
 At this point, you should be able to access your command using `az [name]` and access the built-in help with `az [name] -h/--help`. Your command will automatically be 'wired up' with the global parameters.

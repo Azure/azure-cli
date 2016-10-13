@@ -190,8 +190,6 @@ def load_params(command):
 
 def get_command_table():
     '''Loads command table(s)
-    When `module_name` is specified, only commands from that module will be loaded.
-    If the module is not found, all commands are loaded.
     '''
     installed_command_modules = []
     try:
@@ -201,8 +199,6 @@ def get_command_table():
     except ImportError:
         pass
     logger.info('Installed command modules %s', installed_command_modules)
-    logger.info('Loading command tables from all installed modules.')
-    print(installed_command_modules)
     for mod in ['vm', 'component']:
         try:
             import_module('azure.cli.command_modules.' + mod).load_commands()
@@ -228,18 +224,22 @@ def register_extra_cli_argument(command, dest, **kwargs):
     '''
     _cli_extra_argument_registry[command][dest] = CliCommandArgument(dest, **kwargs)
 
-def cli_command_with_handler(module_name, name, operation, client_factory=None, transform=None, table_transformer=None):
+def cli_command(module_name, name, operation, client_factory=None, transform=None, table_transformer=None):
     """ Registers a default Azure CLI command. These commands require no special parameters. """
     command_table[name] = create_command(module_name, name, operation, transform, table_transformer,
-                                         client_factory, op_lazy=True)
+                                         client_factory)
 
-# TODO-DEREK Deprecate this method
-def cli_command(name, operation, client_factory=None, transform=None, table_transformer=None):
-    """ Registers a default Azure CLI command. These commands require no special parameters. """
-    command_table[name] = create_command(None, name, operation, transform, table_transformer,
-                                         client_factory, op_lazy=False)
+def _get_operation_handler(operation):
+    try:
+        mod_to_import, attr_path = operation.split('#')
+        op = import_module(mod_to_import)
+        for part in attr_path.split('.'):
+            op = getattr(op, part)
+        return op
+    except (ValueError, AttributeError):
+        raise ValueError("The operation '{}' is invalid.".format(operation))
 
-def create_command(module_name, name, operation, transform_result, table_transformer, client_factory, op_lazy=False):
+def create_command(module_name, name, operation, transform_result, table_transformer, client_factory):
 
     def _execute_command(kwargs):
         from msrest.paging import Paged
@@ -249,7 +249,7 @@ def create_command(module_name, name, operation, transform_result, table_transfo
 
         client = client_factory(kwargs) if client_factory else None
         try:
-            op = operation() if op_lazy else operation
+            op = _get_operation_handler(operation)
             result = op(client, **kwargs) if client else op(**kwargs)
             # apply results transform if specified
             if transform_result:
@@ -276,8 +276,8 @@ def create_command(module_name, name, operation, transform_result, table_transfo
 
     command_module_map[name] = module_name.split('.')[3] if module_name else None
     name = ' '.join(name.split())
-    arguments_loader = lambda : extract_args_from_signature(operation())
-    description_loader = lambda : extract_full_summary_from_signature(operation())
+    arguments_loader = lambda : extract_args_from_signature(_get_operation_handler(operation))
+    description_loader = lambda : extract_full_summary_from_signature(_get_operation_handler(operation))
     cmd = CliCommand(name, _execute_command, table_transformer=table_transformer,
                      arguments_loader=arguments_loader, description_loader=description_loader)
     return cmd
