@@ -18,6 +18,7 @@ The basic process of adding commands is presented below, and elaborated upon lat
     - completers
 
 **Create an __init__.py for your module**
+
 In the __init__ file, two methods need to be defined:
   - `load_commands` - Uses the file in the 'Writing a Command' section below to load the commands.
   - `load_params` - Uses the file in the 'Customizing Arguments' section below to load parameter customizations.
