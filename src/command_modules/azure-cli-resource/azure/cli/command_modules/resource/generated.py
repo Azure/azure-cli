@@ -78,6 +78,7 @@ factory = lambda _: _resource_client_factory().deployments
 cli_command('resource group deployment create', deploy_arm_template)
 cli_command('resource group deployment list', DeploymentsOperations.list, factory)
 cli_command('resource group deployment show', DeploymentsOperations.get, factory)
+cli_command('resource group deployment delete', DeploymentsOperations.delete, factory)
 cli_command('resource group deployment validate', validate_arm_template)
 cli_command('resource group deployment export', export_deployment_as_template)
 

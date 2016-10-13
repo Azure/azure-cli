@@ -41,16 +41,16 @@ def validate_parent(string):
 def validate_deployment_name(namespace):
     #If missing,try come out with a name associated with the template name
     if namespace.deployment_name is None:
-        #if we get json content, default to a fixed name
-        if namespace.template_file_path[:1] == '{':
-            namespace.deployment_name = 'deployment1'
-        else:
-            #extract out the template base name and use it
-            template_filename = namespace.template_file_path
-            if urlparse(template_filename).scheme:
-                template_filename = urlsplit(template_filename).path
+        template_filename = None
+        if namespace.template_file and os.path.isfile(namespace.template_file):
+            template_filename = namespace.template_file
+        if namespace.template_uri and urlparse(namespace.template_uri).scheme:
+            template_filename = urlsplit(namespace.template_uri).path
+        if template_filename:
             template_filename = os.path.basename(template_filename)
             namespace.deployment_name = os.path.splitext(template_filename)[0]
+        else:
+            namespace.deployment_name = 'deployment1'
 
 def _resolve_api_version(rcf, resource_type, parent=None):
 

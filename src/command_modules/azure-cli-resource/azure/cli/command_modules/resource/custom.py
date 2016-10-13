@@ -146,44 +146,38 @@ def list_resources(
     return list(resources)
 
 def deploy_arm_template(
-        resource_group_name, template_file_path, deployment_name=None,
-        parameters_file_path=None, mode='incremental'):
-    ''' Deploy resources with an ARM template.
-        :param str resource_group_name:resource group for deployment
-        :param str location:location for deployment
-        :param str deployment_name:name for deployment
-        (use different values for simultaneous deployments)
-        :param str template_file_path:path to deployment template JSON file
-        :param str parameters_file_path:path to deployment parameters JSON file
-    '''
-    return _deploy_arm_template_core(resource_group_name, template_file_path, deployment_name,
-                                     parameters_file_path, mode)
+        resource_group_name, template_file=None, template_uri=None, deployment_name=None,
+        parameters=None, mode='incremental'):
+    return _deploy_arm_template_core(resource_group_name, template_file, template_uri,
+                                     deployment_name, parameters, mode)
 
-def validate_arm_template(resource_group_name, template_file_path,
-                          parameters_file_path=None, mode='incremental'):
-    ''' Validate an ARM template.
-        :param str resource_group_name:resource group for deployment
-        :param str location:location for deployment
-        (use different values for simultaneous deployments)
-        :param str template_file_path:path to deployment template JSON file
-        :param str parameters_file_path:path to deployment parameters JSON file
-    '''
-    return _deploy_arm_template_core(resource_group_name, template_file_path, 'deployment_dry_run',
-                                     parameters_file_path, mode, validate_only=True)
+def validate_arm_template(resource_group_name, template_file=None, template_uri=None,
+                          parameters=None, mode='incremental'):
+    return _deploy_arm_template_core(resource_group_name, template_file, template_uri,
+                                     'deployment_dry_run', parameters, mode, validate_only=True)
 
-def _deploy_arm_template_core(resource_group_name, template_file_path, deployment_name=None,
-                              parameters_file_path=None, mode='incremental', validate_only=False):
-    from azure.mgmt.resource.resources.models import DeploymentProperties
+def _deploy_arm_template_core(resource_group_name, template_file=None, template_uri=None,
+                              deployment_name=None, parameters=None, mode='incremental',
+                              validate_only=False):
+    from azure.mgmt.resource.resources.models import DeploymentProperties, TemplateLink
 
-    parameters = None
-    if parameters_file_path:
-        parameters = _load_json(parameters_file_path)
+    if bool(template_uri) == bool(template_file):
+        raise CLIError('please provide either template file path or uri, but not both')
+
+    if parameters:
+        parameters = json.loads(parameters)
         if parameters:
             parameters = parameters.get('parameters', parameters)
 
-    template = _load_json(template_file_path)
+    template = None
+    template_link = None
+    if template_uri:
+        template_link = TemplateLink(uri=template_uri)
+    else:
+        template = get_file_json(template_file)
 
-    properties = DeploymentProperties(template=template, parameters=parameters, mode=mode)
+    properties = DeploymentProperties(template=template, template_link=template_link,
+                                      parameters=parameters, mode=mode)
 
     smc = get_mgmt_service_client(ResourceManagementClient)
     if validate_only:
@@ -191,14 +185,6 @@ def _deploy_arm_template_core(resource_group_name, template_file_path, deploymen
     else:
         return smc.deployments.create_or_update(resource_group_name, deployment_name, properties)
 
-def _load_json(location):
-    from six.moves.urllib.request import urlopen #pylint: disable=import-error
-    try:
-        txt = urlopen(location).read()
-        json_content = json.loads(txt.decode())
-    except: #pylint: disable=bare-except
-        json_content = get_file_json(location)
-    return json_content
 
 def export_deployment_as_template(resource_group_name, deployment_name):
     smc = get_mgmt_service_client(ResourceManagementClient)
