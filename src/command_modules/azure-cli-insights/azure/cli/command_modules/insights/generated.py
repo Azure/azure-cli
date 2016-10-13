@@ -23,14 +23,14 @@ from azure.cli.command_modules.insights.custom import \
 def _insights_client_factory(client):
     return get_mgmt_service_client(client)
 
-cli_command('insights event list', list_events)
+cli_command('insights events list', list_events)
 # list-digest and tenat list-digest are not aviailable
-#cli_command('insights event list-digest-events', list_digest_events)
-#cli_command('insights event tenant list-digest-events', list_tenant_digest_events)
-cli_command('insights event tenant list', list_tenant_events)
+#cli_command('insights events list-digest-events', list_digest_events)
+#cli_command('insights events tenant list-digest-events', list_tenant_digest_events)
+cli_command('insights events tenant list', list_tenant_events)
 
 factory = lambda _: _insights_client_factory(InsightsClient).event_categories
-cli_command('insights event list-categories', EventCategoriesOperations.list, factory)
+cli_command('insights events list-categories', EventCategoriesOperations.list, factory)
 
 
 # factory = lambda x: _insights_client_factory(InsightsClient).usage_metric
