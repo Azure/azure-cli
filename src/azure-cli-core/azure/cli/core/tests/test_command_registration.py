@@ -50,7 +50,8 @@ class Test_command_registration(unittest.TestCase):
 
     def test_register_cli_argument(self):
         command_table.clear()
-        cli_command('test register sample-vm-get', Test_command_registration.sample_vm_get)
+        cli_command(__name__, 'test register sample-vm-get',
+                    Test_command_registration.sample_vm_get)
         register_cli_argument('test register sample-vm-get', 'vm_name', CliArgumentType(
             options_list=('--wonky-name', '-n'), metavar='VMNAME', help='Completely WONKY name...',
             required=False
@@ -75,7 +76,8 @@ class Test_command_registration(unittest.TestCase):
 
     def test_register_command(self):
         command_table.clear()
-        cli_command('test command sample-vm-get', Test_command_registration.sample_vm_get, None)
+        cli_command(__name__, 'test command sample-vm-get',
+                    Test_command_registration.sample_vm_get, None)
 
         self.assertEqual(len(command_table), 1,
                          'We expect exactly one command in the command table')
@@ -110,9 +112,11 @@ class Test_command_registration(unittest.TestCase):
         derived_vm_name_type = CliArgumentType(base_type=global_vm_name_type,
                                                help='first modification')
 
-        cli_command('test vm-get', Test_command_registration.sample_vm_get, None)
-        cli_command('test command vm-get-1', Test_command_registration.sample_vm_get, None)
-        cli_command('test command vm-get-2', Test_command_registration.sample_vm_get, None)
+        cli_command(__name__, 'test vm-get', Test_command_registration.sample_vm_get, None)
+        cli_command(__name__, 'test command vm-get-1',
+                    Test_command_registration.sample_vm_get, None)
+        cli_command(__name__, 'test command vm-get-2',
+                    Test_command_registration.sample_vm_get, None)
 
         register_cli_argument('test', 'vm_name', global_vm_name_type)
         register_cli_argument('test command', 'vm_name', derived_vm_name_type)
@@ -135,7 +139,8 @@ class Test_command_registration(unittest.TestCase):
     def test_register_extra_cli_argument(self):
         command_table.clear()
 
-        cli_command('test command sample-vm-get', Test_command_registration.sample_vm_get, None)
+        cli_command(__name__, 'test command sample-vm-get',
+                    Test_command_registration.sample_vm_get, None)
         register_extra_cli_argument(
             'test command sample-vm-get', 'added_param', options_list=('--added-param',),
             metavar='ADDED', help='Just added this right now!', required=True
@@ -174,7 +179,7 @@ class Test_command_registration(unittest.TestCase):
             nothing2.
             """
         command_table.clear()
-        cli_command('test command foo', sample_sdk_method_with_weird_docstring, None)
+        cli_command(__name__, 'test command foo', sample_sdk_method_with_weird_docstring, None)
 
         _update_command_definitions(command_table)
 
@@ -221,7 +226,7 @@ class Test_command_registration(unittest.TestCase):
             pass
 
         command_table.clear()
-        cli_command('override_using_register_cli_argument foo',
+        cli_command(__name__, 'override_using_register_cli_argument foo',
                     sample_sdk_method,
                     None)
         register_cli_argument('override_using_register_cli_argument',

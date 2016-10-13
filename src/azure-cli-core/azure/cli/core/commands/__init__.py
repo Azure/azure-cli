@@ -149,18 +149,19 @@ class CliCommand(object):
         self.handler = handler
         self.help = None
         self.description = description_loader() \
-                           if description_loader and self._should_load_description() \
+                           if description_loader and CliCommand._should_load_description() \
                            else description
         self.arguments = {}
         self.arguments_loader = arguments_loader
         self.table_transformer = table_transformer
 
+    @staticmethod
+    def _should_load_description():
+        return not APPLICATION.session['completer_active']
+
     def load_arguments(self):
         if self.arguments_loader:
             self.arguments.update(self.arguments_loader())
-
-    def _should_load_description(self):
-        return not APPLICATION.session['completer_active']
 
     def add_argument(self, param_name, *option_strings, **kwargs):
         dest = kwargs.pop('dest', None)
@@ -224,12 +225,14 @@ def register_extra_cli_argument(command, dest, **kwargs):
     '''
     _cli_extra_argument_registry[command][dest] = CliCommandArgument(dest, **kwargs)
 
-def cli_command(module_name, name, operation, client_factory=None, transform=None, table_transformer=None):
+def cli_command(module_name, name, operation,
+                client_factory=None, transform=None, table_transformer=None):
     """ Registers a default Azure CLI command. These commands require no special parameters. """
     command_table[name] = create_command(module_name, name, operation, transform, table_transformer,
                                          client_factory)
 
-def _get_operation_handler(operation):
+def _get_op_handler(operation):
+    """ Import and load the operation handler """
     try:
         mod_to_import, attr_path = operation.split('#')
         op = import_module(mod_to_import)
@@ -239,7 +242,8 @@ def _get_operation_handler(operation):
     except (ValueError, AttributeError):
         raise ValueError("The operation '{}' is invalid.".format(operation))
 
-def create_command(module_name, name, operation, transform_result, table_transformer, client_factory):
+def create_command(module_name, name, operation,
+                   transform_result, table_transformer, client_factory):
 
     def _execute_command(kwargs):
         from msrest.paging import Paged
@@ -249,7 +253,7 @@ def create_command(module_name, name, operation, transform_result, table_transfo
 
         client = client_factory(kwargs) if client_factory else None
         try:
-            op = _get_operation_handler(operation)
+            op = _get_op_handler(operation)
             result = op(client, **kwargs) if client else op(**kwargs)
             # apply results transform if specified
             if transform_result:
@@ -276,8 +280,8 @@ def create_command(module_name, name, operation, transform_result, table_transfo
 
     command_module_map[name] = module_name.split('.')[3] if module_name else None
     name = ' '.join(name.split())
-    arguments_loader = lambda : extract_args_from_signature(_get_operation_handler(operation))
-    description_loader = lambda : extract_full_summary_from_signature(_get_operation_handler(operation))
+    arguments_loader = lambda: extract_args_from_signature(_get_op_handler(operation))
+    description_loader = lambda: extract_full_summary_from_signature(_get_op_handler(operation))
     cmd = CliCommand(name, _execute_command, table_transformer=table_transformer,
                      arguments_loader=arguments_loader, description_loader=description_loader)
     return cmd

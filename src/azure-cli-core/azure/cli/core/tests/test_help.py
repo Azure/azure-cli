@@ -163,7 +163,7 @@ class HelpTest(unittest.TestCase):
             """Short Description. Long description with\nline break."""
             pass
 
-        cli_command('test', test_handler)
+        cli_command(__name__, 'test', test_handler)
         _update_command_definitions(command_table)
 
         config = Configuration([])

@@ -29,11 +29,11 @@ class Configuration(object): # pylint: disable=too-few-public-methods
         self.argv = argv or sys.argv[1:]
         self.output_format = None
 
-    def get_command_table(self):
+    def get_command_table(self): # pylint: disable=no-self-use
         import azure.cli.core.commands as commands
         return commands.get_command_table()
 
-    def load_params(self, command):
+    def load_params(self, command): # pylint: disable=no-self-use
         import azure.cli.core.commands as commands
         commands.load_params(command)
 
@@ -91,7 +91,7 @@ class Application(object):
 
         if argv[0].lower() == 'help':
             argv[0] = '--help'
-        
+
         # Rudimentary parsing to get the command
         nouns = []
         for noun in argv:
