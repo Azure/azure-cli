@@ -5,14 +5,11 @@
 
 from azure.cli.command_modules.insights.sdk.insightsclient import InsightsClient
 from azure.cli.command_modules.insights.sdk.insightsclient.operations import \
-    (UsageMetricsOperations, EventCategoriesOperations, EventsOperations,
-     TenantEventsOperations, MetricDefinitionsOperations, MetricsOperations)
+    (EventCategoriesOperations, MetricDefinitionsOperations, MetricsOperations)
 from azure.cli.command_modules.insights.sdk.insightsmanagementclient import \
      InsightsManagementClient
 from azure.cli.command_modules.insights.sdk.insightsmanagementclient.operations import \
-    (AutoscaleSettingsOperations, ServiceDiagnosticSettingsOperations,
-     AlertRulesOperations, AlertRuleIncidentsOperations, IncidentsOperations,
-     LogProfilesOperations)
+    (AlertRulesOperations, AlertRuleIncidentsOperations, IncidentsOperations)
 
 from azure.cli.core.commands import cli_command
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
@@ -25,8 +22,8 @@ def _insights_client_factory(client):
 
 cli_command('insights events list', list_events)
 # list-digest and tenat list-digest are not aviailable
-#cli_command('insights events list-digest-events', list_digest_events)
-#cli_command('insights events tenant list-digest-events', list_tenant_digest_events)
+cli_command('insights events list-digest-events', list_digest_events)
+cli_command('insights events tenant list-digest-events', list_tenant_digest_events)
 cli_command('insights events tenant list', list_tenant_events)
 
 factory = lambda _: _insights_client_factory(InsightsClient).event_categories

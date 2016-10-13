@@ -3,21 +3,19 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 #---------------------------------------------------------------------------------------------
 
-import argparse
 from datetime import datetime, timedelta
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.command_modules.insights.sdk.insightsclient import InsightsClient
-from azure.cli.command_modules.insights.sdk.insightsclient.operations import \
-    (EventsOperations)
-from azure.cli.command_modules.insights.sdk.insightsmanagementclient import \
-     InsightsManagementClient
+#pylint: disable=unused-import
 from azure.cli.command_modules.insights.sdk.insightsmanagementclient.models import \
      (AlertRuleResource, RuleCondition, RuleAction)
 from azure.cli.command_modules.insights.sdk.insightsmanagementclient.operations import \
     (AutoscaleSettingsOperations, ServiceDiagnosticSettingsOperations,
      AlertRulesOperations, AlertRuleIncidentsOperations, IncidentsOperations,
      LogProfilesOperations)
+
+from azure.cli.core._util import CLIError
 
 def _insights_client_factory(client):
     return get_mgmt_service_client(client)
@@ -31,6 +29,7 @@ def _limit_results(paged, limit):
             break
     return results
 
+#pylint: disable=too-many-arguments
 def list_events(start_time=None, end_time=None, limit=50, status=None, caller=None,
                 select=None, resource_group_name=None, correlation_id=None, resource_id=None,
                 resource_provider=None):
@@ -52,19 +51,23 @@ def list_events(start_time=None, end_time=None, limit=50, status=None, caller=No
         :param correlation_id: Filter correlation ID.
         :param limit: Maximum number of events to return.
     '''
-    client =  _insights_client_factory(InsightsClient).events
+    client = _insights_client_factory(InsightsClient).events
 
     count = 0
     for x in [correlation_id, resource_group_name, resource_id, resource_provider]:
         count = count + (1 if x else 0)
 
     if count > 1:
+        #pylint: disable=line-too-long
         raise CLIError("'--correlation-id', '--resource-group', '--resource-id' and '--resource-provider' are mutually exclusive.")
 
     filters = []
     # retrieve last hours worth of logs if not specified
-    filters.append('eventTimestamp ge {}'.format(start_time if start_time else datetime.now() - timedelta(hours=1)))
-    filters.append('eventTimestamp le {}'.format(end_time if end_time else datetime.now()))
+    filters.append('eventTimestamp ge {}'
+                   .format(start_time if start_time
+                           else datetime.now() - timedelta(hours=1)))
+    filters.append('eventTimestamp le {}'
+                   .format(end_time if end_time else datetime.now()))
     if caller:
         filters.append("caller eq '{}'".format(caller))
     if status:
@@ -78,12 +81,14 @@ def list_events(start_time=None, end_time=None, limit=50, status=None, caller=No
     if resource_provider:
         filters.append("resourceProvider eq '{}'".format(resource_provider))
     filter_string = ' and '.join(filters)
-    default_select = ['Authorization', 'Caller', 'CorrelationId', 'EventTimestamp', 'OperationName',
-                      'ResourceGroupName', 'ResourceId', 'Status', 'SubscriptionId', 'SubStatus']
+    default_select = ['Authorization', 'Caller', 'CorrelationId',
+                      'EventTimestamp', 'OperationName', 'ResourceGroupName',
+                      'ResourceId', 'Status', 'SubscriptionId', 'SubStatus']
     select_string = ','.join(select) if select else ','.join(default_select)
     if select and '*' in select:
         select_string = None
-    return _limit_results(client.list(filter=filter_string, select=select_string), limit)
+    return _limit_results(client.list(filter=filter_string,
+                                      select=select_string), limit)
 
 def list_digest_events(start_time=None, end_time=None, limit=50, select=None):
     ''' List digest events. By default, returns a subset of properties for events which occurred
@@ -99,22 +104,29 @@ def list_digest_events(start_time=None, end_time=None, limit=50, select=None):
         with 'null' values.
         :param limit: Maximum number of events to return.
     '''
-    client =  _insights_client_factory(InsightsClient).digest_event
+    client = _insights_client_factory(InsightsClient).digest_event
 
     filters = []
     # retrieve last hours worth of logs if not specified
-    filters.append('eventTimestamp ge {}'.format(start_time if start_time else datetime.now() - timedelta(hours=1)))
-    filters.append('eventTimestamp le {}'.format(end_time if end_time else datetime.now()))
+    filters.append('eventTimestamp ge {}'
+                   .format(start_time if start_time
+                           else datetime.now() - timedelta(hours=1)))
+    filters.append('eventTimestamp le {}'
+                   .format(end_time if end_time
+                           else datetime.now()))
     filter_string = ' and '.join(filters)
-    default_select = ['authorization', 'caller', 'correlationid', 'eventtimestamp', 'operationname',
-                      'resourcegroupname', 'resourceid', 'status', 'subscriptionid', 'substatus']
+    default_select = ['authorization', 'caller', 'correlationid',
+                      'eventtimestamp', 'operationname', 'resourcegroupname',
+                      'resourceid', 'status', 'subscriptionid', 'substatus']
     select_string = ','.join(select) if select else ','.join(default_select)
     if select and '*' in select:
         select_string = None
-    return _limit_results(client.list(filter=filter_string, select=select_string), limit)
+    return _limit_results(client.list(filter=filter_string,
+                                      select=select_string), limit)
 
 def list_tenant_digest_events(start_time=None, end_time=None, limit=50, select=None):
-    ''' List tenant digest events. By default, returns a subset of properties for events which occurred
+    ''' List tenant digest events. By default, returns a subset of properties
+        for events which occurred
         over the past hour.
         :param start_time: The start time of the query. Defaults to one hour before current time.
         ISO format with explicit indication of timezone: yyyy-mm-ddThh:mm:ssZ,
@@ -127,19 +139,24 @@ def list_tenant_digest_events(start_time=None, end_time=None, limit=50, select=N
         with 'null' values.
         :param limit: Maximum number of events to return.
     '''
-    client =  _insights_client_factory(InsightsClient).tenant_digest_event
+    client = _insights_client_factory(InsightsClient).tenant_digest_event
 
     filters = []
     # retrieve last hours worth of logs if not specified
-    filters.append('eventTimestamp ge {}'.format(start_time if start_time else datetime.now() - timedelta(hours=1)))
-    filters.append('eventTimestamp le {}'.format(end_time if end_time else datetime.now()))
+    filters.append('eventTimestamp ge {}'
+                   .format(start_time if start_time
+                           else datetime.now() - timedelta(hours=1)))
+    filters.append('eventTimestamp le {}'
+                   .format(end_time if end_time else datetime.now()))
     filter_string = ' and '.join(filters)
-    default_select = ['authorization', 'caller', 'correlationid', 'eventtimestamp', 'operationname',
-                      'resourcegroupname', 'resourceid', 'status', 'subscriptionid', 'substatus']
+    default_select = ['authorization', 'caller', 'correlationid',
+                      'eventtimestamp', 'operationname', 'resourcegroupname',
+                      'resourceid', 'status', 'subscriptionid', 'substatus']
     select_string = ','.join(select) if select else ','.join(default_select)
     if select and '*' in select:
         select_string = None
-    return _limit_results(client.list(filter=filter_string, select=select_string), limit)
+    return _limit_results(client.list(filter=filter_string,
+                                      select=select_string), limit)
 
 def list_tenant_events(start_time=None, end_time=None, limit=50, select=None):
     ''' List tenant events. By default, returns a subset of properties for events which occurred
@@ -155,21 +172,27 @@ def list_tenant_events(start_time=None, end_time=None, limit=50, select=None):
         with 'null' values.
         :param limit: Maximum number of events to return.
     '''
-    client =  _insights_client_factory(InsightsClient).tenant_events
+    client = _insights_client_factory(InsightsClient).tenant_events
 
     filters = []
     # retrieve last hours worth of logs if not specified
-    filters.append('eventTimestamp ge {}'.format(start_time if start_time else datetime.now() - timedelta(hours=1)))
-    filters.append('eventTimestamp le {}'.format(end_time if end_time else datetime.now()))
+    filters.append('eventTimestamp ge {}'
+                   .format(start_time if start_time
+                           else datetime.now() - timedelta(hours=1)))
+    filters.append('eventTimestamp le {}'
+                   .format(end_time if end_time else datetime.now()))
     filter_string = ' and '.join(filters)
-    default_select = ['authorization', 'caller', 'correlationid', 'eventtimestamp', 'operationname',
-                      'resourcegroupname', 'resourceid', 'status', 'subscriptionid', 'substatus']
+    default_select = ['authorization', 'caller', 'correlationid',
+                      'eventtimestamp', 'operationname', 'resourcegroupname',
+                      'resourceid', 'status', 'subscriptionid', 'substatus']
     select_string = ','.join(select) if select else ','.join(default_select)
     if select and '*' in select:
         select_string = None
-    return _limit_results(client.list(filter=filter_string, select=select_string), limit)
+    return _limit_results(client.list(filter=filter_string,
+                                      select=select_string), limit)
 
-def _generate_alerts_rule_template(location, alert_rule_resource_name, is_enabled, condition=None, actions=None):
+def _generate_alerts_rule_template(location, alert_rule_resource_name,
+                                   is_enabled, condition=None, actions=None):
     # condition = condition if condition else RuleCondition()
     # actions = actions if actions else RuleAction()
     template = AlertRuleResource(location, alert_rule_resource_name, is_enabled,

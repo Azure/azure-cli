@@ -4,6 +4,7 @@
 #---------------------------------------------------------------------------------------------
 # Add command module logic to this package.
 
+#pylint: disable=unused-import
 import azure.cli.command_modules.insights._params
 import azure.cli.command_modules.insights.generated
 import azure.cli.command_modules.insights.custom
