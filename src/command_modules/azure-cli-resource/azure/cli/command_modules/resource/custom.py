@@ -8,7 +8,6 @@
 from __future__ import print_function
 import json
 import os
-import time
 import uuid
 
 from msrestazure.azure_exceptions import CloudError
@@ -147,50 +146,45 @@ def list_resources(
     return list(resources)
 
 def deploy_arm_template(
-        resource_group_name, deployment_name, template_file_path,
-        parameters_file_path=None, mode='incremental'):
-    ''' Deploy resources with an ARM template.
-        :param str resource_group_name:resource group for deployment
-        :param str location:location for deployment
-        :param str deployment_name:name for deployment
-        (use different values for simultaneous deployments)
-        :param str template_file_path:path to deployment template JSON file
-        :param str parameters_file_path:path to deployment parameters JSON file
-    '''
-    return _deploy_arm_template_core(resource_group_name, deployment_name, template_file_path,
-                                     parameters_file_path, mode)
+        resource_group_name, template_file=None, template_uri=None, deployment_name=None,
+        parameters=None, mode='incremental'):
+    return _deploy_arm_template_core(resource_group_name, template_file, template_uri,
+                                     deployment_name, parameters, mode)
 
-def validate_arm_template(resource_group_name, template_file_path,
-                          parameters_file_path=None, mode='incremental'):
-    ''' Validate an ARM template.
-        :param str resource_group_name:resource group for deployment
-        :param str location:location for deployment
-        (use different values for simultaneous deployments)
-        :param str template_file_path:path to deployment template JSON file
-        :param str parameters_file_path:path to deployment parameters JSON file
-    '''
-    return _deploy_arm_template_core(resource_group_name, 'deployment_dry_run', template_file_path,
-                                     parameters_file_path, mode, validate_only=True)
+def validate_arm_template(resource_group_name, template_file=None, template_uri=None,
+                          parameters=None, mode='incremental'):
+    return _deploy_arm_template_core(resource_group_name, template_file, template_uri,
+                                     'deployment_dry_run', parameters, mode, validate_only=True)
 
-def _deploy_arm_template_core(resource_group_name, deployment_name, template_file_path,
-                              parameters_file_path=None, mode='incremental', validate_only=False):
-    from azure.mgmt.resource.resources.models import DeploymentProperties
+def _deploy_arm_template_core(resource_group_name, template_file=None, template_uri=None,
+                              deployment_name=None, parameters=None, mode='incremental',
+                              validate_only=False):
+    from azure.mgmt.resource.resources.models import DeploymentProperties, TemplateLink
 
-    parameters = None
-    if parameters_file_path:
-        parameters = get_file_json(parameters_file_path)
+    if bool(template_uri) == bool(template_file):
+        raise CLIError('please provide either template file path or uri, but not both')
+
+    if parameters:
+        parameters = json.loads(parameters)
         if parameters:
             parameters = parameters.get('parameters', parameters)
 
-    template = get_file_json(template_file_path)
+    template = None
+    template_link = None
+    if template_uri:
+        template_link = TemplateLink(uri=template_uri)
+    else:
+        template = get_file_json(template_file)
 
-    properties = DeploymentProperties(template=template, parameters=parameters, mode=mode)
+    properties = DeploymentProperties(template=template, template_link=template_link,
+                                      parameters=parameters, mode=mode)
 
     smc = get_mgmt_service_client(ResourceManagementClient)
     if validate_only:
         return smc.deployments.validate(resource_group_name, deployment_name, properties)
     else:
         return smc.deployments.create_or_update(resource_group_name, deployment_name, properties)
+
 
 def export_deployment_as_template(resource_group_name, deployment_name):
     smc = get_mgmt_service_client(ResourceManagementClient)
@@ -255,19 +249,12 @@ def unregister_provider(resource_provider_namespace):
     _update_provider(resource_provider_namespace, registering=False)
 
 def _update_provider(namespace, registering):
-    target_state = 'Registered' if registering else 'Unregistered'
     rcf = _resource_client_factory()
     if registering:
         rcf.providers.register(namespace)
     else:
         rcf.providers.unregister(namespace)
 
-    #polling up to 3*10 seconds
-    for _ in range(0, 3):
-        provider = rcf.providers.get(namespace)
-        if provider.registration_state == target_state:#pylint: disable=no-member
-            return
-        time.sleep(10)
     #timeout'd, normal for resources with many regions, but let users know.
     action = 'Registering' if registering else 'Unregistering'
     msg_template = '%s is still on-going. You can monitor using \'az resource provider show -n %s\''

@@ -95,6 +95,17 @@ helps['resource group deployment'] = """
     type: group
     short-summary: Commands to execute or manage ARM deployments
 """
+helps['resource group deployment create'] = """
+    type: command
+    short-summary: start a deployment
+    examples:
+        - name: create a deployment from a remote template file
+          text: >
+            az resource group deployment create -g mygroup --template-uri https://myresource/azuredeploy.json --parameters @myparameters.json
+        - name: create a deployment from a local template file and use parameter values in string 
+          text: >
+            az resource group deployment create -g mygroup --template-file azuredeploy.json --parameters "{\\"location\\": {\\"value\\": \\"westus\\"}}"
+"""
 helps['resource group deployment operation'] = """
     type: group
     short-summary: Commands to manage deployment operations
