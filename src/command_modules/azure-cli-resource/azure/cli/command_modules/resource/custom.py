@@ -145,6 +145,29 @@ def list_resources(
     resources = rcf.resources.list(filter=odata_filter)
     return list(resources)
 
+def show_resource(
+        resource_group_name=None, namespace=None, parent_resource_path=None, resource_type=None, resource_name=None, api_version=None, resource_id=None):
+    ''' Show resource
+        EXAMPLES:
+            az resource show --id /subscriptions/subId/resourceGroups/myGroup/Microsoft.Web/sites/mySite --api-version 2016-01-01
+            az resource show --resource-group-name vtest --resource-provider-namespace Microsoft.Web --resource-type serverFarms --name test --api-version 2016-03-01
+        :param str resource_id:fully qualified id of the resource
+        :param str resource_group_name:resource group
+        :param str namespace:resource provider namespace
+        :param str parent_resource_path:parent resource path
+        :param str resource_type:resource type
+        :param str resource_name:resource name
+        :param str api_version:the api version
+    '''
+    rcf = _resource_client_factory()
+    if not resource_id:
+        parent = '' if not parent_resource_path else parent_resource_path
+        resource = rcf.resources.get(resource_group_name, namespace, parent, resource_type, resource_name, api_version)
+    else:
+        if is_valid_resource_id(resource_id):
+            resource = rcf.resources.get_by_id(resource_id, api_version)
+    return resource
+
 def deploy_arm_template(
         resource_group_name, template_file=None, template_uri=None, deployment_name=None,
         parameters=None, mode='incremental'):

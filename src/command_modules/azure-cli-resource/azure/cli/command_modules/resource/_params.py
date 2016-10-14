@@ -18,15 +18,17 @@ from ._validators import validate_resource_type, validate_parent, resolve_resour
 # BASIC PARAMETER CONFIGURATION
 
 resource_name_type = CliArgumentType(options_list=('--name', '-n'), help='The resource name.')
+resource_id_type = CliArgumentType(options_list=('--id', '-i'), help='The fully qualified resource id. For example, /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myGroup/Microsoft.Web/sites/mySite')
 
 register_cli_argument('resource', 'resource_name', resource_name_type)
 register_cli_argument('resource', 'api_version', help='The api version of the resource (omit for latest)', required=False)
+register_cli_argument('resource', 'resource_id', resource_id_type)
 
 for item in ['tag', 'update', 'show', 'delete', 'exists']:
     register_cli_argument('resource {}'.format(item), 'resource_provider_namespace', ignore_type)
 
-register_cli_argument('resource', 'resource_type', help='The resource type in <namespace>/<type> format.', type=validate_resource_type, validator=resolve_resource_parameters)
-register_cli_argument('resource', 'parent_resource_path', help='The parent resource type in <type>/<name> format.', type=validate_parent, required=False, options_list=('--parent',))
+register_cli_argument('resource', 'resource_type', help='The resource type.')
+register_cli_argument('resource', 'parent_resource_path', help='The parent resource type.', required=False, options_list=('--parent',))
 register_cli_argument('resource', 'tag', tag_type)
 register_cli_argument('resource', 'tags', tags_type)
 register_cli_argument('resource list', 'name', resource_name_type)
