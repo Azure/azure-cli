@@ -91,7 +91,7 @@ def todict(obj): #pylint: disable=too-many-return-statements
         return re.sub(KEYS_CAMELCASE_PATTERN, lambda x: x.group(1).upper(), s)
 
     if isinstance(obj, dict):
-        return {k: todict(v) for (k, v) in obj.items()}
+        return {to_camelcase(k): todict(v) for (k, v) in obj.items()}
     elif isinstance(obj, list):
         return [todict(a) for a in obj]
     elif isinstance(obj, Enum):

@@ -51,6 +51,18 @@ class TestUtils(unittest.TestCase):
         expected = {'a': {'a': 'x', 'b': 'y'}}
         self.assertEqual(actual, expected)
 
+    def test_application_todict__dict_is_camelcase(self):
+        the_input = {'contents': {'thisIsCamelCasedAlready': 'a_value'}}
+        actual = todict(the_input)
+        expected = {'contents': {'thisIsCamelCasedAlready': 'a_value'}}
+        self.assertEqual(actual, expected)
+
+    def test_application_todict__dict_is_not_camelcase(self):
+        the_input = {'contents': {'this_is_not_camel_cased_already': 'a_value'}}
+        actual = todict(the_input)
+        expected = {'contents': {'thisIsNotCamelCasedAlready': 'a_value'}}
+        self.assertEqual(actual, expected)
+
     def test_load_json_from_file(self):
         _, pathname = tempfile.mkstemp()
 
