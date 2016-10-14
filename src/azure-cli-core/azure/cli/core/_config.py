@@ -7,9 +7,14 @@ from six.moves import configparser
 
 GLOBAL_CONFIG_DIR = os.path.expanduser(os.path.join('~', '.azure'))
 GLOBAL_CONFIG_PATH = os.path.join(GLOBAL_CONFIG_DIR, 'config')
-ENV_CONFIG_DIR = os.path.expanduser(os.path.join('~', '.azure', 'env_config'))
-ACTIVE_ENV_CONFIG_PATH = os.path.join(ENV_CONFIG_DIR, 'default')
 ENV_VAR_PREFIX = 'AZURE_'
+
+def active_context():
+    from azure.cli.core.context import get_active_context_name
+    return get_active_context_name()
+
+CONTEXT_CONFIG_DIR = os.path.expanduser(os.path.join('~', '.azure', 'context_config'))
+ACTIVE_CONTEXT_CONFIG_PATH = os.path.join(CONTEXT_CONFIG_DIR, active_context())
 
 _UNSET = object()
 _ENV_VAR_FORMAT = ENV_VAR_PREFIX+'{section}_{option}'
@@ -54,4 +59,4 @@ class AzConfig(object):
         return AzConfig._BOOLEAN_STATES[val.lower()] #pylint: disable=E1101
 
 az_config = AzConfig()
-az_config.config_parser.read([GLOBAL_CONFIG_PATH, ACTIVE_ENV_CONFIG_PATH])
+az_config.config_parser.read([GLOBAL_CONFIG_PATH, ACTIVE_CONTEXT_CONFIG_PATH])

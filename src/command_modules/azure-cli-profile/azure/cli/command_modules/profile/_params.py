@@ -24,3 +24,4 @@ register_cli_argument('login', 'tenant', options_list=('--tenant', '-t'), help='
 register_cli_argument('logout', 'username', help='account user, if missing, logout the current active account')
 
 register_cli_argument('account', 'subscription_name_or_id', options_list=('--name', '-n'), help='Name or ID of subscription.', completer=get_subscription_id_list)
+register_cli_argument('account list', 'list_all', options_list=('--all',), help='List all subscriptions', action='store_true')

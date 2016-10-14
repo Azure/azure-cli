@@ -14,9 +14,11 @@ from enum import Enum
 import adal
 from azure.cli.core._session import ACCOUNT
 from azure.cli.core._util import CLIError, get_file_json
-from azure.cli.core._azure_env import (get_authority_url, get_env, ENDPOINT_URLS,
-                                       CLIENT_ID, ENV_DEFAULT, COMMON_TENANT)
 from azure.cli.core.adal_authentication import AdalAuthentication
+
+from azure.cli.core.cloud import get_cloud, CloudEndpointUrl
+from azure.cli.core.context import get_active_context
+
 import azure.cli.core._logging as _logging
 logger = _logging.get_az_logger(__name__)
 
@@ -50,8 +52,15 @@ TOKEN_FIELDS_EXCLUDED_FROM_PERSISTENCE = ['familyName',
                                           'isUserIdDisplayable',
                                           'tenantId']
 
+_CLIENT_ID = '04b07795-8ddb-461a-bbee-02f9e1bf7b46'
+_COMMON_TENANT = 'common'
 
 _AUTH_CTX_FACTORY = lambda authority, cache: adal.AuthenticationContext(authority, cache=cache)
+
+CLOUD = get_cloud(get_active_context()['cloud'])
+
+def get_authority_url(tenant=None):
+    return CLOUD.endpoints[CloudEndpointUrl.ACTIVE_DIRECTORY] + '/' + (tenant or _COMMON_TENANT)
 
 def _load_tokens_from_file(file_path):
     all_entries = []
@@ -67,8 +76,8 @@ def _delete_file(file_path):
             raise
 
 class CredentialType(Enum): # pylint: disable=too-few-public-methods
-    management = get_env()[ENDPOINT_URLS.MANAGEMENT]
-    rbac = get_env()[ENDPOINT_URLS.ACTIVE_DIRECTORY_GRAPH_RESOURCE_ID]
+    management = CLOUD.endpoints[CloudEndpointUrl.MANAGEMENT]
+    rbac = CLOUD.endpoints[CloudEndpointUrl.ACTIVE_DIRECTORY_GRAPH_RESOURCE_ID]
 
 class Profile(object):
     def __init__(self, storage=None, auth_ctx_factory=None):
@@ -76,8 +85,7 @@ class Profile(object):
         factory = auth_ctx_factory or _AUTH_CTX_FACTORY
         self._creds_cache = CredsCache(factory)
         self._subscription_finder = SubscriptionFinder(factory, self._creds_cache.adal_token_cache)
-        self.env = get_env()
-        self._management_resource_uri = self.env[ENDPOINT_URLS.MANAGEMENT]
+        self._management_resource_uri = CLOUD.endpoints[CloudEndpointUrl.MANAGEMENT]
 
     def find_subscriptions_on_login(self, #pylint: disable=too-many-arguments
                                     interactive,
@@ -112,13 +120,12 @@ class Profile(object):
             self._creds_cache.persist_cached_creds()
         consolidated = Profile._normalize_properties(self._subscription_finder.user_id,
                                                      subscriptions,
-                                                     is_service_principal,
-                                                     ENV_DEFAULT)
+                                                     is_service_principal)
         self._set_subscriptions(consolidated)
         return consolidated
 
     @staticmethod
-    def _normalize_properties(user, subscriptions, is_service_principal, environment):
+    def _normalize_properties(user, subscriptions, is_service_principal):
         consolidated = []
         for s in subscriptions:
             consolidated.append({
@@ -131,7 +138,7 @@ class Profile(object):
                     },
                 _IS_DEFAULT_SUBSCRIPTION: False,
                 _TENANT_ID: s.tenant_id,
-                _ENVIRONMENT_NAME: environment
+                _ENVIRONMENT_NAME: CLOUD.name
                 })
         return consolidated
 
@@ -224,7 +231,7 @@ class Profile(object):
             raise CLIError("Please run 'az account set' to select active account.")
         return result[0]
 
-    def get_login_credentials(self, resource=get_env()[ENDPOINT_URLS.MANAGEMENT],
+    def get_login_credentials(self, resource=CLOUD.endpoints[CloudEndpointUrl.MANAGEMENT],
                               subscription_id=None):
         account = self.get_subscription(subscription_id)
         user_type = account[_USER_ENTITY][_USER_TYPE]
@@ -259,24 +266,24 @@ class SubscriptionFinder(object):
         self._auth_context_factory = auth_context_factory
         self.user_id = None # will figure out after log user in
         self._arm_client_factory = arm_client_factory or \
-             (lambda config: SubscriptionClient(config)) #pylint: disable=unnecessary-lambda
+             (lambda config: SubscriptionClient(config, base_url=CLOUD.endpoints[CloudEndpointUrl.RESOURCE_MANAGER])) #pylint: disable=unnecessary-lambda, line-too-long
 
     def find_from_user_account(self, username, password, resource):
-        context = self._create_auth_context(COMMON_TENANT)
+        context = self._create_auth_context(_COMMON_TENANT)
         token_entry = context.acquire_token_with_username_password(
             resource,
             username,
             password,
-            CLIENT_ID)
+            _CLIENT_ID)
         self.user_id = token_entry[_TOKEN_ENTRY_USER_ID]
         result = self._find_using_common_tenant(token_entry[_ACCESS_TOKEN], resource)
         return result
 
     def find_through_interactive_flow(self, resource):
-        context = self._create_auth_context(COMMON_TENANT)
-        code = context.acquire_user_code(resource, CLIENT_ID)
+        context = self._create_auth_context(_COMMON_TENANT)
+        code = context.acquire_user_code(resource, _CLIENT_ID)
         logger.warning(code['message'])
-        token_entry = context.acquire_token_with_device_code(resource, code, CLIENT_ID)
+        token_entry = context.acquire_token_with_device_code(resource, code, _CLIENT_ID)
         self.user_id = token_entry[_TOKEN_ENTRY_USER_ID]
         result = self._find_using_common_tenant(token_entry[_ACCESS_TOKEN], resource)
         return result
@@ -293,7 +300,7 @@ class SubscriptionFinder(object):
 
     def _create_auth_context(self, tenant, use_token_cache=True):
         token_cache = self._adal_token_cache if use_token_cache else None
-        authority = get_authority_url(tenant, ENV_DEFAULT)
+        authority = get_authority_url(tenant)
         return self._auth_context_factory(authority, token_cache)
 
     def _find_using_common_tenant(self, access_token, resource):
@@ -306,7 +313,7 @@ class SubscriptionFinder(object):
         for t in tenants:
             tenant_id = t.tenant_id
             temp_context = self._create_auth_context(tenant_id)
-            temp_credentials = temp_context.acquire_token(resource, self.user_id, CLIENT_ID)
+            temp_credentials = temp_context.acquire_token(resource, self.user_id, _CLIENT_ID)
             subscriptions = self._find_using_specific_tenant(
                 tenant_id,
                 temp_credentials[_ACCESS_TOKEN])
@@ -354,9 +361,9 @@ class CredsCache(object):
         self.adal_token_cache.has_state_changed = False
 
     def retrieve_token_for_user(self, username, tenant, resource):
-        authority = get_authority_url(tenant, ENV_DEFAULT)
+        authority = get_authority_url(tenant)
         context = self._auth_ctx_factory(authority, cache=self.adal_token_cache)
-        token_entry = context.acquire_token(resource, username, CLIENT_ID)
+        token_entry = context.acquire_token(resource, username, _CLIENT_ID)
         if not token_entry:
             raise CLIError("Could not retrieve token from local cache, please run 'az login'.")
 
@@ -369,7 +376,7 @@ class CredsCache(object):
         if not matched:
             raise CLIError("Please run 'az account set' to select active account.")
         cred = matched[0]
-        authority_url = get_authority_url(cred[_SERVICE_PRINCIPAL_TENANT], ENV_DEFAULT)
+        authority_url = get_authority_url(cred[_SERVICE_PRINCIPAL_TENANT])
         context = self._auth_ctx_factory(authority_url, None)
         token_entry = context.acquire_token_with_client_credentials(resource,
                                                                     sp_id,
