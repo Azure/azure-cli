@@ -567,12 +567,20 @@ def _build_output_content(sp_name, app_id, secret, tenant):
     #this is a fairly special convinience command that the result is not associated
     #with one api response, so it controls its own output format for easy scripting
     #and also ensures warning (to stderr) goes after the stdout.
-    result = {
-        'app_id_uri': sp_name,
-        'client_id': app_id,
-        'client_secret': secret
-    }
-    print(json.dumps(result, indent=4))
+    from azure.cli.core.application import APPLICATION
+
+    if APPLICATION.configuration.output_format[:4] == 'json':
+        result = {
+            'client_id': app_id,
+            'client_secret': secret,
+            'sp_name': sp_name,
+        }
+        print(json.dumps(result, indent=2))
+    else:
+        logger.warning("Service principal has been configured.")
+        logger.warning("  client_id:     " + app_id)
+        logger.warning("  client_secret: " + secret)
+        logger.warning("  sp_name:       " + sp_name)
 
     logger.warning('Useful commands to manage azure:')
     logger.warning('Assign a role:')
