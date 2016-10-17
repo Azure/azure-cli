@@ -13,7 +13,7 @@ from azure.cli.core.commands.parameters import (ignore_type, resource_group_name
                                                 enum_choice_list)
 from .custom import (get_policy_completion_list, get_policy_assignment_completion_list,
                      get_resource_types_completion_list, get_providers_completion_list)
-from ._validators import validate_resource_type, validate_parent, resolve_resource_parameters, validate_deployment_name
+from ._validators import validate_deployment_name
 
 # BASIC PARAMETER CONFIGURATION
 

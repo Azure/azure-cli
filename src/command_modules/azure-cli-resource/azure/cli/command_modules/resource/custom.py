@@ -146,10 +146,12 @@ def list_resources(
     return list(resources)
 
 def show_resource(
-        resource_group_name=None, namespace=None, parent_resource_path=None, resource_type=None, resource_name=None, api_version=None, resource_id=None):
+        resource_group_name=None, namespace=None, parent_resource_path=None,
+        resource_type=None, resource_name=None, api_version=None, resource_id=None):
     ''' Show resource
         EXAMPLES:
-            az resource show --id /subscriptions/subId/resourceGroups/myGroup/Microsoft.Web/sites/mySite --api-version 2016-01-01
+            az resource show --id /subscriptions/subId/resourceGroups/grp/Microsoft.Web/sites/site
+            --api-version 2016-01-01
             az resource show --resource-group-name vtest --resource-provider-namespace Microsoft.Web
             --resource-type serverFarms --name test --api-version 2016-03-01
         :param str resource_id:fully qualified id of the resource
@@ -163,19 +165,22 @@ def show_resource(
     rcf = _resource_client_factory()
     if not resource_id:
         parent = '' if not parent_resource_path else parent_resource_path
-        resource = rcf.resources.get(resource_group_name, namespace, parent, resource_type, resource_name, api_version)
+        resource = rcf.resources.get(resource_group_name, namespace, parent,
+                                     resource_type, resource_name, api_version)
     else:
         if is_valid_resource_id(resource_id):
             resource = rcf.resources.get_by_id(resource_id, api_version)
     return resource
 
 def delete_resource(
-        resource_group_name=None, namespace=None, parent_resource_path=None, resource_type=None, resource_name=None, api_version=None, resource_id=None):
+        resource_group_name=None, namespace=None, parent_resource_path=None,
+        resource_type=None, resource_name=None, api_version=None, resource_id=None):
     ''' Delete a resource
         EXAMPLES:
-            az resource delete --id /subscriptions/subId/resourceGroups/myGroup/Microsoft.Web/sites/mySite --api-version 2016-01-01
-            az resource delete --resource-group-name vtest --resource-provider-namespace Microsoft.Web
-            --resource-type serverFarms --name test --api-version 2016-03-01
+            az resource delete --id /subscriptions/subId/resourceGroups/grp/Microsoft.Web/sites/site
+            --api-version 2016-01-01
+            az resource delete --resource-group-name vtest --resource-provider-namespace
+            Microsoft.Web --resource-type serverFarms --name test --api-version 2016-03-01
         :param str resource_id:fully qualified id of the resource
         :param str resource_group_name:resource group
         :param str namespace:resource provider namespace
@@ -187,7 +192,8 @@ def delete_resource(
     rcf = _resource_client_factory()
     if not resource_id:
         parent = '' if not parent_resource_path else parent_resource_path
-        rcf.resources.delete(resource_group_name, namespace, parent, resource_type, resource_name, api_version)
+        rcf.resources.delete(resource_group_name, namespace, parent,
+                             resource_type, resource_name, api_version)
     else:
         if is_valid_resource_id(resource_id):
             rcf.resources.delete_by_id(resource_id, api_version)
