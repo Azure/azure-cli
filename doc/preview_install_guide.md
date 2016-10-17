@@ -183,16 +183,29 @@ docker run -it azuresdk/azure-cli-python:latest bash`
 
 The CLI is available for Windows though PIP using the steps below.  If you do not have Python/PIP installed, consider using [Docker](#docker) to access the CLI.
 
-Run the following from a command prompt
+#### Step 1: Install Python 3.5.x
+
+Visit the Python site and [download Python 3.5](https://www.python.org/downloads/release/python-352/) for your OS.  
+> **NOTE**: We recommend checking the "Add Python 3.5 to PATH" option during install.
+Once the install is complete, if you open a new command prompt, you should test your Python installation:
 
 ```shell
-    pip install azure-cli
+    C:\temp> python --version
+    Python 3.5.2
 ```
 
-Run the CLI
+#### Step 2: Install Azure CLI using PIP
+
+Run the following from a command prompt to install the Azure CLI 2.0 using the Python package manager, PIP:
 
 ```shell
-   az
+    C:\temp> pip install azure-cli
+```
+
+And after the installation complete, you can run the Azure CLI 2.0 from the command prompt:
+
+```shell
+   C:\temp> az
 ```
 
 Installation Troubleshooting
