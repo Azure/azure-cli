@@ -150,7 +150,8 @@ def show_resource(
     ''' Show resource
         EXAMPLES:
             az resource show --id /subscriptions/subId/resourceGroups/myGroup/Microsoft.Web/sites/mySite --api-version 2016-01-01
-            az resource show --resource-group-name vtest --resource-provider-namespace Microsoft.Web --resource-type serverFarms --name test --api-version 2016-03-01
+            az resource show --resource-group-name vtest --resource-provider-namespace Microsoft.Web
+            --resource-type serverFarms --name test --api-version 2016-03-01
         :param str resource_id:fully qualified id of the resource
         :param str resource_group_name:resource group
         :param str namespace:resource provider namespace
@@ -172,8 +173,9 @@ def delete_resource(
         resource_group_name=None, namespace=None, parent_resource_path=None, resource_type=None, resource_name=None, api_version=None, resource_id=None):
     ''' Delete a resource
         EXAMPLES:
-            az resource show --id /subscriptions/subId/resourceGroups/myGroup/Microsoft.Web/sites/mySite --api-version 2016-01-01
-            az resource show --resource-group-name vtest --resource-provider-namespace Microsoft.Web --resource-type serverFarms --name test --api-version 2016-03-01
+            az resource delete --id /subscriptions/subId/resourceGroups/myGroup/Microsoft.Web/sites/mySite --api-version 2016-01-01
+            az resource delete --resource-group-name vtest --resource-provider-namespace Microsoft.Web
+            --resource-type serverFarms --name test --api-version 2016-03-01
         :param str resource_id:fully qualified id of the resource
         :param str resource_group_name:resource group
         :param str namespace:resource provider namespace
