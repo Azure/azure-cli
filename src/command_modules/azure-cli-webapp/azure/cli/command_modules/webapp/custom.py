@@ -45,9 +45,13 @@ class AppServiceLongRunningOperation(LongRunningOperation): #pylint: disable=too
             detail = json.loads(ex.response.text)['Message']
             if self._creating_plan:
                 if 'Requested features are not supported in region' in detail:
-                    detail = "Plan with linux worker is not supported in current region. Run 'az appservice list-locations --linux-workers-enabled' to cross check"
-                elif 'Not enough available reserved instance servers to satisfy this request' in detail:
-                    detail = "Plan with linux worker can only be created in a group which has never contained a windows worker. Please use a new resoruce group. Original error:" + detail
+                    detail = ("Plan with linux worker is not supported in current region. " +
+                              "Run 'az appservice list-locations --linux-workers-enabled' " +
+                              "to cross check")
+                elif 'Not enough available reserved instance servers to satisfy' in detail:
+                    detail = ("Plan with linux worker can only be created in a group " +
+                              "which has never contained a windows worker. Please use " +
+                              "a new resoruce group. Original error:" + detail)
             return CLIError(detail)
         except: #pylint: disable=bare-except
             return ex
@@ -102,7 +106,7 @@ def update_site_configs(resource_group_name, name, slot=None,
                         java_version=None, java_container=None, java_container_version=None,#pylint: disable=unused-argument
                         remote_debugging_enabled=None, web_sockets_enabled=None,#pylint: disable=unused-argument
                         always_on=None, auto_heal_enabled=None,#pylint: disable=unused-argument
-                        use32_bit_worker_process=None,
+                        use32_bit_worker_process=None,#pylint: disable=unused-argument
                         app_command_line=None):#pylint: disable=unused-argument
     configs = get_site_configs(resource_group_name, name, slot)
     import inspect
@@ -136,6 +140,34 @@ def delete_app_settings(resource_group_name, name, setting_names, slot=None):
 
     return _generic_site_operation(resource_group_name, name, 'update_site_app_settings',
                                    slot, app_settings)
+
+CONTAINER_APPSETTING_NAMES = ['DOCKER_REGISTRY_SERVER_URL', 'DOCKER_REGISTRY_SERVER_USERNAME',
+                              'DOCKER_REGISTRY_SERVER_PASSWORD', 'DOCKER_CUSTOM_IMAGE_NAME']
+
+def update_container_settings(resource_group_name, name, docker_registry_server_url=None,
+                              docker_custom_image_name=None, docker_registery_server_user=None,
+                              docker_registery_server_password=None, slot=None):
+    settings = []
+    if docker_registry_server_url is not None:
+        settings.append('DOCKER_REGISTRY_SERVER_URL=' + docker_registry_server_url)
+    if docker_registery_server_user is not None:
+        settings.append('DOCKER_REGISTRY_SERVER_USERNAME=' + docker_registery_server_user)
+    if docker_registery_server_password is not None:
+        settings.append('DOCKER_REGISTRY_SERVER_PASSWORD=' + docker_registery_server_password)
+    if docker_custom_image_name is not None:
+        settings.append('DOCKER_CUSTOM_IMAGE_NAME=' + docker_custom_image_name)
+    settings = update_app_settings(resource_group_name, name, settings, slot)
+    return _filter_for_container_settings(settings)
+
+def delete_container_settings(resource_group_name, name, slot=None):
+    delete_app_settings(resource_group_name, name, CONTAINER_APPSETTING_NAMES, slot)
+
+def list_container_settings(resource_group_name, name, slot=None):
+    settings = get_app_settings(resource_group_name, name, slot)
+    return _filter_for_container_settings(settings)
+
+def _filter_for_container_settings(settings):
+    return {x: settings[x] for x in settings if x in CONTAINER_APPSETTING_NAMES}
 
 def add_hostname(resource_group_name, webapp, name, slot=None):
     client = web_client_factory()
