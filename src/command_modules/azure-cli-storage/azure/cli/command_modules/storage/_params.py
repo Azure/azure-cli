@@ -12,7 +12,6 @@ from azure.cli.core.commands.parameters import \
     (ignore_type, tags_type, get_resource_name_completion_list, enum_choice_list)
 import azure.cli.core.commands.arm # pylint: disable=unused-import
 from azure.cli.core.commands import register_cli_argument, register_extra_cli_argument, CliArgumentType
-from azure.cli.core.commands.client_factory import get_data_service_client
 
 from azure.common import AzureMissingResourceHttpError
 from azure.mgmt.storage.models import SkuName, AccessTier, Kind, EncryptionServices
@@ -26,6 +25,7 @@ from azure.storage.table import TableService, TablePayloadFormat
 from azure.storage.queue import QueueService
 from azure.storage.queue.models import QueuePermissions
 
+from ._factory import get_storage_data_service_client
 from ._validators import \
     (datetime_type, datetime_string_type, get_file_path_validator, validate_metadata,
      get_permission_validator, table_permission_validator, get_permission_help_string,
@@ -44,7 +44,11 @@ def _get_client(service, parsed_args):
     account_key = parsed_args.account_key or az_config.get('storage', 'key', None)
     connection_string = parsed_args.connection_string or az_config.get('storage', 'connection_string', None)
     sas_token = parsed_args.sas_token or az_config.get('storage', 'sas_token', None)
-    return get_data_service_client(service, account_name, account_key, connection_string, sas_token)
+    return get_storage_data_service_client(service,
+                                           account_name,
+                                           account_key,
+                                           connection_string,
+                                           sas_token)
 
 def get_storage_name_completion_list(service, func, parent=None):
     def completer(prefix, action, parsed_args, **kwargs): # pylint: disable=unused-argument

@@ -49,7 +49,9 @@ def _graph_client_factory(**_):
     profile = Profile()
     cred, _, tenant_id = profile.get_login_credentials(
         resource=CLOUD.endpoints[CloudEndpointUrl.ACTIVE_DIRECTORY_GRAPH_RESOURCE_ID])
-    client = GraphRbacManagementClient(cred, tenant_id)
+    client = GraphRbacManagementClient(cred,
+                                       tenant_id,
+                                       base_url=CLOUD.endpoints[CloudEndpointUrl.ACTIVE_DIRECTORY_GRAPH_RESOURCE_ID]) # pylint: disable=line-too-long
     configure_common_settings(client)
     return client
 

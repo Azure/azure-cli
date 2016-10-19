@@ -93,7 +93,6 @@ class Profile(object):
                                     password,
                                     is_service_principal,
                                     tenant):
-        self._creds_cache.remove_cached_creds(username)
         subscriptions = []
         if interactive:
             subscriptions = self._subscription_finder.find_through_interactive_flow(
