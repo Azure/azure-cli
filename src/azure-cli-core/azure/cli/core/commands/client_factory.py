@@ -62,17 +62,13 @@ def get_data_service_client(service_type, account_name, account_key, connection_
                             sas_token=None, endpoint_suffix=None):
     logger.info('Getting data service client service_type=%s', service_type.__name__)
     try:
+        client_kwargs = {'account_name': account_name,
+                         'account_key': account_key,
+                         'connection_string': connection_string,
+                         'sas_token': sas_token}
         if endpoint_suffix:
-            client = service_type(account_name=account_name,
-                                  account_key=account_key,
-                                  connection_string=connection_string,
-                                  sas_token=sas_token,
-                                  endpoint_suffix=endpoint_suffix)
-        else:
-            client = service_type(account_name=account_name,
-                                  account_key=account_key,
-                                  connection_string=connection_string,
-                                  sas_token=sas_token)
+            client_kwargs['endpoint_suffix'] = endpoint_suffix
+        client = service_type(**client_kwargs)
     except ValueError:
         raise CLIError('Unable to obtain data client. Check your connection parameters.')
     # TODO: enable Fiddler
