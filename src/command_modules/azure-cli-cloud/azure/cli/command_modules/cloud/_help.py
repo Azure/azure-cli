@@ -9,27 +9,27 @@ from azure.cli.core.help_files import helps #pylint: disable=unused-import
 
 helps['cloud'] = """
     type: group
-    short-summary: Manage the Azure clouds registered in the CLI
+    short-summary: Manage the Azure clouds registered
 """
 
 helps['cloud list'] = """
             type: command
-            short-summary: List the clouds registered in the CLI
+            short-summary: List the clouds registered
 """
 
 helps['cloud show'] = """
             type: command
-            short-summary: Show the endpoints and parameters for a cloud registered in the CLI
+            short-summary: Show the endpoints and parameters for a cloud registered
 """
 
 helps['cloud register'] = """
             type: command
-            short-command: Register a cloud to the CLI
+            short-command: Register a cloud
             long-summary: Register a cloud by passing in the configuration for it.
                         After a cloud is registered, it can be referenced in the context commands.
 """
 
 helps['cloud unregister'] = """
             type: command
-            short-command: Unregister a cloud in the CLI
+            short-command: Unregister a cloud
 """

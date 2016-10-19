@@ -96,7 +96,7 @@ AZURE_US_GOV_CLOUD = Cloud('AzureUSGovernment', endpoints={
     })
 
 AZURE_GERMAN_CLOUD = Cloud('AzureGermanCloud', endpoints={
-    CloudEndpointUrl.MANAGEMENT: 'https://management.core.cloudapi.de',
+    CloudEndpointUrl.MANAGEMENT: 'https://management.core.cloudapi.de/',
     CloudEndpointUrl.RESOURCE_MANAGER: 'https://management.microsoftazure.de',
     CloudEndpointUrl.SQL_MANAGEMENT: 'https://management.core.cloudapi.de:8443/',
     CloudEndpointUrl.GALLERY: 'https://gallery.cloudapi.de/',

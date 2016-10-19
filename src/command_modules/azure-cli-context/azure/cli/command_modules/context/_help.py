@@ -9,6 +9,5 @@ from azure.cli.core.help_files import helps #pylint: disable=unused-import
 
 helps['context'] = """
     type: group
-    short-summary: Manage CLI contexts
+    short-summary: Manage contexts
 """
-

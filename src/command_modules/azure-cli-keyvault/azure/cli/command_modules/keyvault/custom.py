@@ -92,7 +92,9 @@ def create_keyvault(client, resource_group_name, vault_name, location, #pylint:d
     profile = Profile()
     cred, _, tenant_id = profile.get_login_credentials(
         resource=CLOUD.endpoints[CloudEndpointUrl.ACTIVE_DIRECTORY_GRAPH_RESOURCE_ID])
-    graph_client = GraphRbacManagementClient(cred, tenant_id)
+    graph_client = GraphRbacManagementClient(cred,
+                                             tenant_id,
+                                             base_url=CLOUD.endpoints[CloudEndpointUrl.ACTIVE_DIRECTORY_GRAPH_RESOURCE_ID]) # pylint: disable=line-too-long
     subscription = profile.get_subscription()
     if no_self_perms:
         access_policies = []
@@ -141,7 +143,9 @@ def _object_id_args_helper(object_id, spn, upn):
         profile = Profile()
         cred, _, tenant_id = profile.get_login_credentials(
             resource=CLOUD.endpoints[CloudEndpointUrl.ACTIVE_DIRECTORY_GRAPH_RESOURCE_ID])
-        graph_client = GraphRbacManagementClient(cred, tenant_id)
+        graph_client = GraphRbacManagementClient(cred,
+                                                 tenant_id,
+                                                 base_url=CLOUD.endpoints[CloudEndpointUrl.ACTIVE_DIRECTORY_GRAPH_RESOURCE_ID]) # pylint: disable=line-too-long
         object_id = _get_object_id(graph_client, spn=spn, upn=upn)
         if not object_id:
             raise CLIError('Unable to get object id from principal name.')

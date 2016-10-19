@@ -4,11 +4,13 @@
 #---------------------------------------------------------------------------------------------
 
 from azure.cli.core import __version__ as core_version
-from azure.cli.core._profile import Profile
+from azure.cli.core._profile import Profile, CLOUD
 import azure.cli.core._debug as _debug
 import azure.cli.core._logging as _logging
 from azure.cli.core._util import CLIError
 from azure.cli.core.application import APPLICATION
+
+from azure.cli.core.cloud import CloudEndpointUrl
 
 logger = _logging.get_az_logger(__name__)
 
@@ -44,25 +46,33 @@ def _get_mgmt_service_client(client_type, subscription_bound=True, subscription_
     logger.info('Getting management service client client_type=%s', client_type.__name__)
     profile = Profile()
     cred, subscription_id, _ = profile.get_login_credentials(subscription_id=subscription_id)
+    client_kwargs = {'base_url': CLOUD.endpoints[CloudEndpointUrl.RESOURCE_MANAGER]}
+    if api_version:
+        client_kwargs['api_version'] = api_version
     if subscription_bound:
-        client = client_type(cred, subscription_id, api_version=api_version) \
-            if api_version else client_type(cred, subscription_id)
+        client = client_type(cred, subscription_id, **client_kwargs)
     else:
-        client = client_type(cred, api_version=api_version) \
-            if api_version else client_type(cred)
+        client = client_type(cred, **client_kwargs)
 
     configure_common_settings(client)
 
     return (client, subscription_id)
 
 def get_data_service_client(service_type, account_name, account_key, connection_string=None,
-                            sas_token=None):
+                            sas_token=None, endpoint_suffix=None):
     logger.info('Getting data service client service_type=%s', service_type.__name__)
     try:
-        client = service_type(account_name=account_name,
-                              account_key=account_key,
-                              connection_string=connection_string,
-                              sas_token=sas_token)
+        if endpoint_suffix:
+            client = service_type(account_name=account_name,
+                                  account_key=account_key,
+                                  connection_string=connection_string,
+                                  sas_token=sas_token,
+                                  endpoint_suffix=endpoint_suffix)
+        else:
+            client = service_type(account_name=account_name,
+                                  account_key=account_key,
+                                  connection_string=connection_string,
+                                  sas_token=sas_token)
     except ValueError:
         raise CLIError('Unable to obtain data client. Check your connection parameters.')
     # TODO: enable Fiddler
@@ -73,7 +83,6 @@ def get_subscription_id():
     profile = Profile()
     _, subscription_id, _ = profile.get_login_credentials()
     return subscription_id
-
 
 def _add_headers(request):
     request.headers['User-Agent'] = ' '.join((request.headers['User-Agent'], UA_AGENT))

@@ -27,6 +27,7 @@ DEPENDENCIES = [
     'azure-mgmt-compute==0.30.0rc6',
     'azure-mgmt-network==0.30.0rc6',
     'azure-mgmt-resource==0.30.0rc6',
+    'azure-storage==0.33.0',
     'azure-cli-core',
 ]
 

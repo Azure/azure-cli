@@ -118,5 +118,5 @@ def datetime_type(string):
 def vault_base_url_type(name):
     from azure.cli.core._profile import CLOUD
     from azure.cli.core.cloud import CloudParam
-    suffix = CLOUD.endpoints[CloudParam.KEYVAULT_DNS_SUFFIX]
+    suffix = CLOUD.params[CloudParam.KEYVAULT_DNS_SUFFIX]
     return 'https://{}{}'.format(name, suffix)

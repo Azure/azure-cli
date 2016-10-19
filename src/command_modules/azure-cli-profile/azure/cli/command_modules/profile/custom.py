@@ -70,7 +70,10 @@ def login(username=None, password=None, service_principal=None, tenant=None):
         raise CLIError(err)
     except requests.exceptions.ConnectionError as err:
         raise CLIError('Please ensure you have network connection. Error detail: ' + str(err))
-    return list(subscriptions)
+    all_subscriptions = list(subscriptions)
+    for sub in all_subscriptions:
+        sub['cloudName'] = sub.pop('environmentName', None)
+    return all_subscriptions
 
 def logout(username=None):
     '''Log out to remove accesses to Azure subscriptions'''
