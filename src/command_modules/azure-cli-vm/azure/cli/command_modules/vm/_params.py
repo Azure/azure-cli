@@ -69,11 +69,13 @@ register_cli_argument('vm availability-set', 'availability_set_name', name_arg_t
 register_cli_argument('vm access', 'username', options_list=('--username', '-u'), help='The user name')
 register_cli_argument('vm access', 'password', options_list=('--password', '-p'), help='The user password')
 
-register_cli_argument('vm container', 'orchestrator_type', **enum_choice_list(ContainerServiceOchestratorTypes))
-register_cli_argument('vm container', 'admin_username', admin_username_type)
-register_cli_argument('vm container', 'ssh_key_value', required=False, help='SSH key file value or key file path.', default=os.path.join(os.path.expanduser('~'), '.ssh', 'id_rsa.pub'), completer=FilesCompleter())
-register_cli_argument('vm container', 'container_service_name', options_list=('--name', '-n'), help='The name of the container service', completer=get_resource_name_completion_list('Microsoft.ContainerService/ContainerServices'))
-register_cli_argument('vm container create', 'agent_vm_size', completer=get_vm_size_completion_list)
+register_cli_argument('acs', 'name', arg_type=name_arg_type)
+register_cli_argument('acs', 'orchestrator_type', **enum_choice_list(ContainerServiceOchestratorTypes))
+register_cli_argument('acs', 'admin_username', admin_username_type)
+register_cli_argument('acs', 'ssh_key_value', required=False, help='SSH key file value or key file path.', default=os.path.join(os.path.expanduser('~'), '.ssh', 'id_rsa.pub'), completer=FilesCompleter())
+register_cli_argument('acs', 'container_service_name', options_list=('--name', '-n'), help='The name of the container service', completer=get_resource_name_completion_list('Microsoft.ContainerService/ContainerServices'))
+register_cli_argument('acs create', 'agent_vm_size', completer=get_vm_size_completion_list)
+register_cli_argument('acs update', 'agent_count', type=int, help='The number of agents for the cluster')
 
 register_cli_argument('vm capture', 'overwrite', action='store_true')
 

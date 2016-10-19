@@ -1011,3 +1011,7 @@ def vmss_set(**kwargs):
     return _compute_client_factory().virtual_machine_scale_sets.create_or_update(**kwargs)
 
 cli_generic_update_command('vmss update', vmss_get, vmss_set)
+
+def update_acs(instance, agent_count):
+    instance.agent_pool_profiles[0].count = agent_count
+    return instance
