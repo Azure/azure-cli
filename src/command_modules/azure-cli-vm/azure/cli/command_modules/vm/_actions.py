@@ -247,7 +247,7 @@ def _create_image_instance(publisher, offer, sku, version):
     }
 
 def _handle_container_ssh_file(**kwargs):
-    if kwargs['command'] != 'vm container create':
+    if kwargs['command'] != 'acs create':
         return
 
     args = kwargs['args']

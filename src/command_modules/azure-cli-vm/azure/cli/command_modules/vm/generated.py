@@ -39,7 +39,7 @@ from .custom import (
     vmss_start, vmss_restart, vmss_delete_instances, vmss_deallocate, vmss_get_instance_view,
     vmss_stop, vmss_reimage, vmss_scale, vmss_update_instances, vmss_show, vmss_list,
     set_vmss_diagnostics_extension, set_vmss_extension, get_vmss_extension,
-    list_vmss_extensions, delete_vmss_extension)
+    list_vmss_extensions, delete_vmss_extension, update_acs)
 
 
 from ._factory import _compute_client_factory
@@ -82,8 +82,6 @@ cli_command('vmss nic list', NetworkInterfacesOperations.list_virtual_machine_sc
 cli_command('vmss nic list-vm-nics', NetworkInterfacesOperations.list_virtual_machine_scale_set_vm_network_interfaces, factory)
 cli_command('vmss nic show', NetworkInterfacesOperations.get_virtual_machine_scale_set_network_interface, factory)
 
-
-
 # VM Access
 cli_command('vm access set-linux-user', set_linux_user)
 cli_command('vm access delete-linux-user', delete_linux_user)
@@ -106,7 +104,7 @@ cli_command('vm boot-diagnostics get-boot-log', get_boot_log)
 
 # VM Container (ACS)
 factory = lambda _: get_mgmt_service_client(ACSClient).acs
-cli_command('vm container create', AcsOperations.create_or_update, factory, transform=DeploymentOutputLongRunningOperation('Starting vm container create'))
+cli_command('acs create', AcsOperations.create_or_update, factory, transform=DeploymentOutputLongRunningOperation('Starting container service create'))
 
 factory = lambda _: _compute_client_factory().container_service
 #Remove the hack after https://github.com/Azure/azure-rest-api-specs/issues/352 fixed
@@ -115,10 +113,12 @@ for a in ['id', 'name', 'type', 'location']:
     ContainerService._attribute_map[a]['type'] = 'str'#pylint: disable=protected-access
 ContainerService._attribute_map['tags']['type'] = '{str}'#pylint: disable=protected-access
 ######
-cli_command('vm container show', ContainerServiceOperations.get, factory)
-cli_command('vm container list', ContainerServiceOperations.list, factory)
-cli_command('vm container delete', ContainerServiceOperations.delete, factory)
-cli_generic_update_command('vm container update', ContainerServiceOperations.get, ContainerServiceOperations.create_or_update, factory)
+cli_command('acs show', ContainerServiceOperations.get, factory)
+cli_command('acs list', ContainerServiceOperations.list, factory)
+cli_command('acs delete', ContainerServiceOperations.delete, factory)
+cli_generic_update_command('acs update', ContainerServiceOperations.get,
+                           ContainerServiceOperations.create_or_update,
+                           custom_function=update_acs, factory=factory)
 
 # VM Diagnostics
 cli_command('vm diagnostics set', set_diagnostics_extension)
