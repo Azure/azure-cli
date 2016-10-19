@@ -516,8 +516,6 @@ def create_service_principal_for_rbac(name=None, secret=None, years=1,
     aad_sp = _create_service_principal(aad_application.app_id, bool(scopes))
     oid = aad_sp.output.object_id if scopes else aad_sp.object_id
 
-    _build_output_content(name, aad_application.app_id, secret, client.config.tenant_id)
-
     if scopes:
         #It is possible the SP has not been propagated to all servers, so creating assignments
         #might fail. The reliable workaround is to call out the server where creation occurred.
@@ -525,6 +523,13 @@ def create_service_principal_for_rbac(name=None, secret=None, years=1,
         session_key = aad_sp.response.headers._store['ocp-aad-session-key'][1]
         for scope in scopes:
             _create_role_assignment(role, oid, None, scope, ocp_aad_session_key=session_key)
+
+    return {
+        'client_id': aad_application.app_id,
+        'client_secret': secret,
+        'sp_name': name,
+        'tenant': client.config.tenant_id
+        }
 
 def reset_service_principal_credential(name, secret=None, years=1):
     '''reset credential, on expiration or you forget it.
@@ -561,37 +566,12 @@ def reset_service_principal_credential(name, secret=None, years=1):
 
     client.applications.patch(app.object_id, app_create_param)
 
-    _build_output_content(name, app.app_id, secret, client.config.tenant_id)
-
-def _build_output_content(sp_name, app_id, secret, tenant):
-    #this is a fairly special convinience command that the result is not associated
-    #with one api response, so it controls its own output format for easy scripting
-    #and also ensures warning (to stderr) goes after the stdout.
-    from azure.cli.core.application import APPLICATION
-
-    if APPLICATION.configuration.output_format[:4] == 'json':
-        result = {
-            'client_id': app_id,
-            'client_secret': secret,
-            'sp_name': sp_name,
+    return {
+        'client_id': app.app_id,
+        'client_secret': secret,
+        'sp_name': name,
+        'tenant': client.config.tenant_id
         }
-        print(json.dumps(result, indent=2))
-    else:
-        logger.warning("Service principal has been configured.")
-        logger.warning("  client_id:     " + app_id)
-        logger.warning("  client_secret: " + secret)
-        logger.warning("  sp_name:       " + sp_name)
-
-    logger.warning('Useful commands to manage azure:')
-    logger.warning('Assign a role:')
-    logger.warning('    az role assignment create --assignee %s --role Contributor', sp_name)
-    logger.warning('Log in:')
-    logger.warning('    az login --service-principal -u %s -p %s --tenant %s',
-                   sp_name, secret, tenant)
-    logger.warning('Reset credentials:')
-    logger.warning('    az ad sp reset-credentials --name %s', sp_name)
-    logger.warning('Revoke:')
-    logger.warning('    az ad app delete --id %s', sp_name)
 
 def _resolve_object_id(assignee):
     client = _graph_client_factory()

@@ -15,6 +15,14 @@ helps['ad sp create-for-rbac'] = """
                   text: az ad sp create-for-rbac -n "http://my-app"
                 - name: Create role assignments at the same time
                   text: az ad sp create-for-rbac -n "http://my-app" --role contributor --scopes /subscriptions/11111111-2222-3333-4444-555555555555/resourceGroups/mygroup /subscriptions/11111111-2222-3333-4444-666666666666/resourceGroups/my-another-group
+                - name: Login with this service principal
+                  text: az login --service-principal -u <sp_name> -p <secret> --tenant <tenant>
+                - name: Reset credentials on expiration
+                  text: az ad sp reset-credentials --name <sp_name>
+                - name: Create role assignments
+                  text: az role assignment create --assignee <sp_name> --role Contributor
+                - name: Revoke the service principal when done with it
+                  text: az ad app delete --id <sp_name>
             """
 
 helps['role'] = """
