@@ -13,6 +13,9 @@ from azure.cli.core._config import az_config
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.validators import validate_key_value_pairs
 
+from azure.cli.core.cloud import CloudParam
+from azure.cli.core._profile import CLOUD
+
 from azure.mgmt.storage import StorageManagementClient
 from azure.mgmt.storage.models import CustomDomain
 from azure.storage.models import ResourceTypes, Services
@@ -106,13 +109,14 @@ def validate_source_uri(namespace):
     if snapshot:
         query_params.append(snapshot)
 
-    uri = 'https://{0}.{1}.core.windows.net/{2}/{3}{4}{5}'.format(
+    uri = 'https://{0}.{1}{6}/{2}/{3}{4}{5}'.format(
         storage_acc,
         'blob' if valid_blob_source else 'share',
         container if valid_blob_source else share,
         blob if valid_blob_source else path,
         '?' if query_params else '',
-        '&'.join(query_params))
+        '&'.join(query_params),
+        CLOUD.params[CloudParam.STORAGE_ENDPOINT_SUFFIX])
 
     namespace.copy_source = uri
 
