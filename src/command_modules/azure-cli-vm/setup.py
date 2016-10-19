@@ -47,6 +47,7 @@ setup(
         'azure',
         'azure.cli',
         'azure.cli.command_modules',
+        'Paramiko'
     ],
     packages=[
         'azure.cli.command_modules.vm',

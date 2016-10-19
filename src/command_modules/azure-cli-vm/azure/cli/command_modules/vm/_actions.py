@@ -251,7 +251,33 @@ def _handle_container_ssh_file(**kwargs):
         return
 
     args = kwargs['args']
+    string_or_file = args.ssh_key_value
+    content = string_or_file
+    if os.path.exists(string_or_file):
+        with open(string_or_file, 'r') as f:
+            content = f.read()
+    elif args.generate_missing_ssh_key_file:
+        try:
+            content = _generateSSHKey(string_or_file, _generateSSHKey + '.pub')
+        except: #TODO catch strong typed exception if we can
+            #it is possible we get a key string which will never be a valid file path. So just let it go
+            pass
+    return content
 
-    args.ssh_key_value = read_content_if_is_file(args.ssh_key_value)
+def _generateSSHKey(private_filepath, public_filepath):
+    import paramiko
+    (ssh_dir, filename) = os.path.split(os.path.expanduser(private_filepath))
+    if not os.path.exists(ssh_dir):
+      os.makedirs(ssh_dir)
+
+    key = paramiko.RSAKey.generate(1024)
+    key.write_private_key_file(os.path.expanduser(private_filepath))
+    
+    with open(os.path.expanduser(public_filepath),"w") as public:
+        public_key = "%s %s"  % (key.get_name(), key.get_base64())
+        public.write(public_key)
+    
+    return public_key
+
 
 APPLICATION.register(APPLICATION.COMMAND_PARSER_PARSED, _handle_container_ssh_file)
