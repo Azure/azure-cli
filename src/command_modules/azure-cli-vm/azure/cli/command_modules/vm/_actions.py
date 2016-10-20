@@ -256,28 +256,35 @@ def _handle_container_ssh_file(**kwargs):
     if os.path.exists(string_or_file):
         with open(string_or_file, 'r') as f:
             content = f.read()
-    elif args.generate_missing_ssh_key_file:
+    elif string_or_file[:8].lower() != 'ssh-rsa ' and args.generate_ssh_keys:
         try:
-            content = _generateSSHKey(string_or_file, _generateSSHKey + '.pub')
+            #figure out appropriate file names:
+            #'base_name'(with private keys), and 'base_name.pub'(with public keys)
+            public_key_filepath = string_or_file
+            if public_key_filepath[-4:].lower() == '.pub':
+                private_key_filepath = public_key_filepath[:-4]
+            else:
+                private_key_filepath = public_key_filepath + '.private'
+
+            content = _generate_ssh_Keys(private_key_filepath, public_key_filepath)
         except: #TODO catch strong typed exception if we can
             #it is possible we get a key string which will never be a valid file path. So just let it go
             pass
-    return content
+    args.ssh_key_value = content
 
-def _generateSSHKey(private_filepath, public_filepath):
+def _generate_ssh_Keys(private_key_filepath, public_key_filepath):
     import paramiko
-    (ssh_dir, filename) = os.path.split(os.path.expanduser(private_filepath))
+    (ssh_dir, _) = os.path.split(os.path.expanduser(private_key_filepath))
     if not os.path.exists(ssh_dir):
-      os.makedirs(ssh_dir)
+        os.makedirs(ssh_dir)
 
-    key = paramiko.RSAKey.generate(1024)
-    key.write_private_key_file(os.path.expanduser(private_filepath))
-    
-    with open(os.path.expanduser(public_filepath),"w") as public:
-        public_key = "%s %s"  % (key.get_name(), key.get_base64())
-        public.write(public_key)
-    
+    key = paramiko.RSAKey.generate(2048)
+    key.write_private_key_file(os.path.expanduser(private_key_filepath))
+
+    with open(os.path.expanduser(public_key_filepath), 'w') as public_key_file:
+        public_key = '%s %s'  % (key.get_name(), key.get_base64())
+        public_key_file.write(public_key)
+
     return public_key
-
 
 APPLICATION.register(APPLICATION.COMMAND_PARSER_PARSED, _handle_container_ssh_file)
