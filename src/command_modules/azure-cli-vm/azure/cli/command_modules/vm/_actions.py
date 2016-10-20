@@ -268,7 +268,7 @@ def _handle_container_ssh_file(**kwargs):
             private_key_filepath = public_key_filepath[:-4]
         else:
             private_key_filepath = public_key_filepath + '.private'
-        logger.info('Creating SSH key files: %s,%s', private_key_filepath, public_key_filepath)
+        logger.warning('Creating SSH key files: %s,%s', private_key_filepath, public_key_filepath)
         content = _generate_ssh_keys(private_key_filepath, public_key_filepath)
     args.ssh_key_value = content
 
@@ -291,15 +291,19 @@ def _generate_ssh_keys(private_key_filepath, public_key_filepath):
 def _is_valid_ssh_rsa_public_key(openssh_pubkey):
     #http://stackoverflow.com/questions/2494450/ssh-rsa-public-key-validation-using-a-regular-expression #pylint: disable=line-too-long
     #A "good enough" check is to see if the key starts with the correct header.
-    import base64
     import struct
+    try:
+        from base64 import decodebytes as base64_decode
+    except ImportError:
+        #deprecated and redirected to decodebytes in Python 3
+        from base64 import decodestring as base64_decode
     parts = openssh_pubkey.split()
     if len(parts) < 2:
         return False
     key_type = parts[0]
     key_string = parts[1]
 
-    data = base64.decodebytes(key_string.encode())
+    data = base64_decode(key_string.encode())#pylint:disable=deprecated-method
     int_len = 4
     str_len = struct.unpack('>I', data[:int_len])[0] # this should return 7
     return data[int_len:int_len+str_len] == key_type.encode()
