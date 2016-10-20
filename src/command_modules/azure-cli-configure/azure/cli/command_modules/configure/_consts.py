@@ -32,7 +32,7 @@ MSG_CLOSING = '\nYou\'re all set! Here are some commands to try:\n'\
                ' $ az feedback\n'
 
 MSG_GLOBAL_SETTINGS_LOCATION = 'Your global settings can be found at {}'
-MSG_ACTIVE_CONTEXT_SETTINGS_LOCATION = 'Your current context settings can be found at {}'
+MSG_ACTIVE_CONTEXT_SETTINGS_LOCATION = 'Your current settings can be found at {}'
 
 MSG_HEADING_CURRENT_CONFIG_INFO = 'Your current configuration is as follows:'
 MSG_HEADING_ENV_VARS = '\nEnvironment variables:'

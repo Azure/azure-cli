@@ -16,7 +16,7 @@ from azure.cli.core._session import ACCOUNT
 from azure.cli.core._util import CLIError, get_file_json
 from azure.cli.core.adal_authentication import AdalAuthentication
 
-from azure.cli.core.cloud import get_cloud, CloudEndpointUrl
+from azure.cli.core.cloud import get_cloud, CloudEndpoint
 from azure.cli.core.context import get_active_context
 
 import azure.cli.core._logging as _logging
@@ -60,7 +60,7 @@ _AUTH_CTX_FACTORY = lambda authority, cache: adal.AuthenticationContext(authorit
 CLOUD = get_cloud(get_active_context()['cloud'])
 
 def get_authority_url(tenant=None):
-    return CLOUD.endpoints[CloudEndpointUrl.ACTIVE_DIRECTORY] + '/' + (tenant or _COMMON_TENANT)
+    return CLOUD.endpoints[CloudEndpoint.ACTIVE_DIRECTORY] + '/' + (tenant or _COMMON_TENANT)
 
 def _load_tokens_from_file(file_path):
     all_entries = []
@@ -76,8 +76,8 @@ def _delete_file(file_path):
             raise
 
 class CredentialType(Enum): # pylint: disable=too-few-public-methods
-    management = CLOUD.endpoints[CloudEndpointUrl.MANAGEMENT]
-    rbac = CLOUD.endpoints[CloudEndpointUrl.ACTIVE_DIRECTORY_GRAPH_RESOURCE_ID]
+    management = CLOUD.endpoints[CloudEndpoint.MANAGEMENT]
+    rbac = CLOUD.endpoints[CloudEndpoint.ACTIVE_DIRECTORY_GRAPH_RESOURCE_ID]
 
 class Profile(object):
     def __init__(self, storage=None, auth_ctx_factory=None):
@@ -85,7 +85,7 @@ class Profile(object):
         factory = auth_ctx_factory or _AUTH_CTX_FACTORY
         self._creds_cache = CredsCache(factory)
         self._subscription_finder = SubscriptionFinder(factory, self._creds_cache.adal_token_cache)
-        self._management_resource_uri = CLOUD.endpoints[CloudEndpointUrl.MANAGEMENT]
+        self._management_resource_uri = CLOUD.endpoints[CloudEndpoint.MANAGEMENT]
 
     def find_subscriptions_on_login(self, #pylint: disable=too-many-arguments
                                     interactive,
@@ -230,7 +230,7 @@ class Profile(object):
             raise CLIError("Please run 'az account set' to select active account.")
         return result[0]
 
-    def get_login_credentials(self, resource=CLOUD.endpoints[CloudEndpointUrl.MANAGEMENT],
+    def get_login_credentials(self, resource=CLOUD.endpoints[CloudEndpoint.MANAGEMENT],
                               subscription_id=None):
         account = self.get_subscription(subscription_id)
         user_type = account[_USER_ENTITY][_USER_TYPE]
@@ -265,7 +265,7 @@ class SubscriptionFinder(object):
         self._auth_context_factory = auth_context_factory
         self.user_id = None # will figure out after log user in
         self._arm_client_factory = arm_client_factory or \
-             (lambda config: SubscriptionClient(config, base_url=CLOUD.endpoints[CloudEndpointUrl.RESOURCE_MANAGER])) #pylint: disable=unnecessary-lambda, line-too-long
+             (lambda config: SubscriptionClient(config, base_url=CLOUD.endpoints[CloudEndpoint.RESOURCE_MANAGER])) #pylint: disable=unnecessary-lambda, line-too-long
 
     def find_from_user_account(self, username, password, resource):
         context = self._create_auth_context(_COMMON_TENANT)

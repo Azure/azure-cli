@@ -10,7 +10,7 @@ import azure.cli.core._logging as _logging
 from azure.cli.core._util import CLIError
 from azure.cli.core.application import APPLICATION
 
-from azure.cli.core.cloud import CloudEndpointUrl
+from azure.cli.core.cloud import CloudEndpoint
 
 logger = _logging.get_az_logger(__name__)
 
@@ -46,7 +46,7 @@ def _get_mgmt_service_client(client_type, subscription_bound=True, subscription_
     logger.info('Getting management service client client_type=%s', client_type.__name__)
     profile = Profile()
     cred, subscription_id, _ = profile.get_login_credentials(subscription_id=subscription_id)
-    client_kwargs = {'base_url': CLOUD.endpoints[CloudEndpointUrl.RESOURCE_MANAGER]}
+    client_kwargs = {'base_url': CLOUD.endpoints[CloudEndpoint.RESOURCE_MANAGER]}
     if api_version:
         client_kwargs['api_version'] = api_version
     if subscription_bound:

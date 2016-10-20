@@ -27,7 +27,7 @@ class CloudAlreadyRegisteredException(Exception):
 class CannotUnregisterCloudException(Exception):
     pass
 
-class CloudEndpointUrl(object): # pylint: disable=too-few-public-methods
+class CloudEndpoint(object): # pylint: disable=too-few-public-methods
     MANAGEMENT = 'management'
     RESOURCE_MANAGER = 'resource_manager'
     SQL_MANAGEMENT = 'sql_management'
@@ -36,77 +36,77 @@ class CloudEndpointUrl(object): # pylint: disable=too-few-public-methods
     ACTIVE_DIRECTORY_RESOURCE_ID = 'active_directory_resource_id'
     ACTIVE_DIRECTORY_GRAPH_RESOURCE_ID = 'active_directory_graph_resource_id'
 
-class CloudParam(object): # pylint: disable=too-few-public-methods
-    SQL_SERVER_HOSTNAME_SUFFIX = 'sql_server_hostname_suffix'
-    STORAGE_ENDPOINT_SUFFIX = 'storage_endpoint_suffix'
-    KEYVAULT_DNS_SUFFIX = 'keyvault_dns_suffix'
-    AZURE_DATALAKE_STORE_FILE_SYSTEM_ENDPOINT_SUFFIX = 'azure_datalake_store_file_system_endpoint_suffix' #pylint: disable=line-too-long
-    AZURE_DATALAKE_ANALYTICS_CATALOG_AND_JOB_ENDPOINT_SUFFIX = 'azure_datalake_analytics_catalog_and_job_endpoint_suffix' #pylint: disable=line-too-long
+class CloudSuffix(object): # pylint: disable=too-few-public-methods
+    SQL_SERVER_HOSTNAME = 'sql_server_hostname'
+    STORAGE_ENDPOINT = 'storage_endpoint'
+    KEYVAULT_DNS = 'keyvault_dns'
+    AZURE_DATALAKE_STORE_FILE_SYSTEM_ENDPOINT = 'azure_datalake_store_file_system_endpoint' #pylint: disable=line-too-long
+    AZURE_DATALAKE_ANALYTICS_CATALOG_AND_JOB_ENDPOINT = 'azure_datalake_analytics_catalog_and_job_endpoint' #pylint: disable=line-too-long
 
 class Cloud(object): # pylint: disable=too-few-public-methods
     """ Represents an Azure Cloud instance """
 
-    def __init__(self, name, endpoints=None, params=None):
+    def __init__(self, name, endpoints=None, suffixes=None):
         self.name = name
         self.endpoints = endpoints
-        self.params = params
+        self.suffixes = suffixes
 
 AZURE_PUBLIC_CLOUD = Cloud('AzureCloud', endpoints={
-    CloudEndpointUrl.MANAGEMENT: 'https://management.core.windows.net/',
-    CloudEndpointUrl.RESOURCE_MANAGER: 'https://management.azure.com/',
-    CloudEndpointUrl.SQL_MANAGEMENT: 'https://management.core.windows.net:8443/',
-    CloudEndpointUrl.GALLERY: 'https://gallery.azure.com/',
-    CloudEndpointUrl.ACTIVE_DIRECTORY: 'https://login.microsoftonline.com',
-    CloudEndpointUrl.ACTIVE_DIRECTORY_RESOURCE_ID: 'https://management.core.windows.net/',
-    CloudEndpointUrl.ACTIVE_DIRECTORY_GRAPH_RESOURCE_ID: 'https://graph.windows.net/'
-    }, params={
-        CloudParam.SQL_SERVER_HOSTNAME_SUFFIX: '.database.windows.net',
-        CloudParam.STORAGE_ENDPOINT_SUFFIX: '.core.windows.net',
-        CloudParam.KEYVAULT_DNS_SUFFIX: '.vault.azure.net',
-        CloudParam.AZURE_DATALAKE_STORE_FILE_SYSTEM_ENDPOINT_SUFFIX: 'azuredatalakestore.net',
-        CloudParam.AZURE_DATALAKE_ANALYTICS_CATALOG_AND_JOB_ENDPOINT_SUFFIX: 'azuredatalakeanalytics.net' #pylint: disable=line-too-long
+    CloudEndpoint.MANAGEMENT: 'https://management.core.windows.net/',
+    CloudEndpoint.RESOURCE_MANAGER: 'https://management.azure.com/',
+    CloudEndpoint.SQL_MANAGEMENT: 'https://management.core.windows.net:8443/',
+    CloudEndpoint.GALLERY: 'https://gallery.azure.com/',
+    CloudEndpoint.ACTIVE_DIRECTORY: 'https://login.microsoftonline.com',
+    CloudEndpoint.ACTIVE_DIRECTORY_RESOURCE_ID: 'https://management.core.windows.net/',
+    CloudEndpoint.ACTIVE_DIRECTORY_GRAPH_RESOURCE_ID: 'https://graph.windows.net/'
+    }, suffixes={
+        CloudSuffix.SQL_SERVER_HOSTNAME: '.database.windows.net',
+        CloudSuffix.STORAGE_ENDPOINT: 'core.windows.net',
+        CloudSuffix.KEYVAULT_DNS: '.vault.azure.net',
+        CloudSuffix.AZURE_DATALAKE_STORE_FILE_SYSTEM_ENDPOINT: 'azuredatalakestore.net',
+        CloudSuffix.AZURE_DATALAKE_ANALYTICS_CATALOG_AND_JOB_ENDPOINT: 'azuredatalakeanalytics.net' #pylint: disable=line-too-long
     })
 
 AZURE_CHINA_CLOUD = Cloud('AzureChinaCloud', endpoints={
-    CloudEndpointUrl.MANAGEMENT: 'https://management.core.chinacloudapi.cn/',
-    CloudEndpointUrl.RESOURCE_MANAGER: 'https://management.chinacloudapi.cn',
-    CloudEndpointUrl.SQL_MANAGEMENT: 'https://management.core.chinacloudapi.cn:8443/',
-    CloudEndpointUrl.GALLERY: 'https://gallery.chinacloudapi.cn/',
-    CloudEndpointUrl.ACTIVE_DIRECTORY: 'https://login.chinacloudapi.cn',
-    CloudEndpointUrl.ACTIVE_DIRECTORY_RESOURCE_ID: 'https://management.core.chinacloudapi.cn/',
-    CloudEndpointUrl.ACTIVE_DIRECTORY_GRAPH_RESOURCE_ID: 'https://graph.chinacloudapi.cn/'
-    }, params={
-        CloudParam.SQL_SERVER_HOSTNAME_SUFFIX: '.database.chinacloudapi.cn',
-        CloudParam.STORAGE_ENDPOINT_SUFFIX: '.core.chinacloudapi.cn',
-        CloudParam.KEYVAULT_DNS_SUFFIX: '.vault.azure.cn'
+    CloudEndpoint.MANAGEMENT: 'https://management.core.chinacloudapi.cn/',
+    CloudEndpoint.RESOURCE_MANAGER: 'https://management.chinacloudapi.cn',
+    CloudEndpoint.SQL_MANAGEMENT: 'https://management.core.chinacloudapi.cn:8443/',
+    CloudEndpoint.GALLERY: 'https://gallery.chinacloudapi.cn/',
+    CloudEndpoint.ACTIVE_DIRECTORY: 'https://login.chinacloudapi.cn',
+    CloudEndpoint.ACTIVE_DIRECTORY_RESOURCE_ID: 'https://management.core.chinacloudapi.cn/',
+    CloudEndpoint.ACTIVE_DIRECTORY_GRAPH_RESOURCE_ID: 'https://graph.chinacloudapi.cn/'
+    }, suffixes={
+        CloudSuffix.SQL_SERVER_HOSTNAME: '.database.chinacloudapi.cn',
+        CloudSuffix.STORAGE_ENDPOINT: 'core.chinacloudapi.cn',
+        CloudSuffix.KEYVAULT_DNS: '.vault.azure.cn'
     })
 
 AZURE_US_GOV_CLOUD = Cloud('AzureUSGovernment', endpoints={
-    CloudEndpointUrl.MANAGEMENT: 'https://management.core.usgovcloudapi.net',
-    CloudEndpointUrl.RESOURCE_MANAGER: 'https://management.usgovcloudapi.net',
-    CloudEndpointUrl.SQL_MANAGEMENT: 'https://management.core.usgovcloudapi.net:8443/',
-    CloudEndpointUrl.GALLERY: 'https://gallery.usgovcloudapi.net/',
-    CloudEndpointUrl.ACTIVE_DIRECTORY: 'https://login.microsoftonline.com',
-    CloudEndpointUrl.ACTIVE_DIRECTORY_RESOURCE_ID: 'https://management.core.usgovcloudapi.net/',
-    CloudEndpointUrl.ACTIVE_DIRECTORY_GRAPH_RESOURCE_ID: 'https://graph.windows.net/'
-    }, params={
-        CloudParam.SQL_SERVER_HOSTNAME_SUFFIX: '.database.usgovcloudapi.net',
-        CloudParam.STORAGE_ENDPOINT_SUFFIX: '.core.usgovcloudapi.net',
-        CloudParam.KEYVAULT_DNS_SUFFIX: '.vault.usgovcloudapi.net'
+    CloudEndpoint.MANAGEMENT: 'https://management.core.usgovcloudapi.net',
+    CloudEndpoint.RESOURCE_MANAGER: 'https://management.usgovcloudapi.net',
+    CloudEndpoint.SQL_MANAGEMENT: 'https://management.core.usgovcloudapi.net:8443/',
+    CloudEndpoint.GALLERY: 'https://gallery.usgovcloudapi.net/',
+    CloudEndpoint.ACTIVE_DIRECTORY: 'https://login.microsoftonline.com',
+    CloudEndpoint.ACTIVE_DIRECTORY_RESOURCE_ID: 'https://management.core.usgovcloudapi.net/',
+    CloudEndpoint.ACTIVE_DIRECTORY_GRAPH_RESOURCE_ID: 'https://graph.windows.net/'
+    }, suffixes={
+        CloudSuffix.SQL_SERVER_HOSTNAME: '.database.usgovcloudapi.net',
+        CloudSuffix.STORAGE_ENDPOINT: 'core.usgovcloudapi.net',
+        CloudSuffix.KEYVAULT_DNS: '.vault.usgovcloudapi.net'
     })
 
 AZURE_GERMAN_CLOUD = Cloud('AzureGermanCloud', endpoints={
-    CloudEndpointUrl.MANAGEMENT: 'https://management.core.cloudapi.de/',
-    CloudEndpointUrl.RESOURCE_MANAGER: 'https://management.microsoftazure.de',
-    CloudEndpointUrl.SQL_MANAGEMENT: 'https://management.core.cloudapi.de:8443/',
-    CloudEndpointUrl.GALLERY: 'https://gallery.cloudapi.de/',
-    CloudEndpointUrl.ACTIVE_DIRECTORY: 'https://login.microsoftonline.de',
-    CloudEndpointUrl.ACTIVE_DIRECTORY_RESOURCE_ID: 'https://management.core.cloudapi.de/',
-    CloudEndpointUrl.ACTIVE_DIRECTORY_GRAPH_RESOURCE_ID: 'https://graph.cloudapi.de/'
-    }, params={
-        CloudParam.SQL_SERVER_HOSTNAME_SUFFIX: '.database.cloudapi.de',
-        CloudParam.STORAGE_ENDPOINT_SUFFIX: '.core.cloudapi.de',
-        CloudParam.KEYVAULT_DNS_SUFFIX: '.vault.microsoftazure.de'
+    CloudEndpoint.MANAGEMENT: 'https://management.core.cloudapi.de/',
+    CloudEndpoint.RESOURCE_MANAGER: 'https://management.microsoftazure.de',
+    CloudEndpoint.SQL_MANAGEMENT: 'https://management.core.cloudapi.de:8443/',
+    CloudEndpoint.GALLERY: 'https://gallery.cloudapi.de/',
+    CloudEndpoint.ACTIVE_DIRECTORY: 'https://login.microsoftonline.de',
+    CloudEndpoint.ACTIVE_DIRECTORY_RESOURCE_ID: 'https://management.core.cloudapi.de/',
+    CloudEndpoint.ACTIVE_DIRECTORY_GRAPH_RESOURCE_ID: 'https://graph.cloudapi.de/'
+    }, suffixes={
+        CloudSuffix.SQL_SERVER_HOSTNAME: '.database.cloudapi.de',
+        CloudSuffix.STORAGE_ENDPOINT: 'core.cloudapi.de',
+        CloudSuffix.KEYVAULT_DNS: '.vault.microsoftazure.de'
     })
 
 KNOWN_CLOUDS = [AZURE_PUBLIC_CLOUD, AZURE_CHINA_CLOUD, AZURE_US_GOV_CLOUD, AZURE_GERMAN_CLOUD]
@@ -118,12 +118,12 @@ def get_custom_clouds():
     config = configparser.SafeConfigParser()
     config.read(CUSTOM_CLOUD_CONFIG_FILE)
     for section in config.sections():
-        cloud_to_add = Cloud(section, endpoints={}, params={})
+        cloud_to_add = Cloud(section, endpoints={}, suffixes={})
         for option in config.options(section):
-            if option.startswith('endpoint_url_'):
-                cloud_to_add.endpoints[option.replace('endpoint_url_', '')] = config.get(section, option) # pylint: disable=line-too-long
-            elif option.startswith('param_'):
-                cloud_to_add.params[option.replace('param_', '')] = config.get(section, option)
+            if option.startswith('endpoint_'):
+                cloud_to_add.endpoints[option.replace('endpoint_', '')] = config.get(section, option) # pylint: disable=line-too-long
+            elif option.startswith('suffix_'):
+                cloud_to_add.suffixes[option.replace('suffix_', '')] = config.get(section, option)
         clouds.append(cloud_to_add)
     # print(clouds)
     return clouds
@@ -150,7 +150,7 @@ def add_cloud(cloud):
         raise CloudAlreadyRegisteredException(cloud.name)
     for endpoint in cloud.endpoints:
         if cloud.endpoints[endpoint]:
-            config.set(cloud.name, 'endpoint_url_{}'.format(endpoint), cloud.endpoints[endpoint])
+            config.set(cloud.name, 'endpoint_{}'.format(endpoint), cloud.endpoints[endpoint])
     for param in cloud.params:
         if cloud.params[param]:
             config.set(cloud.name, 'param_{}'.format(param), cloud.params[param])

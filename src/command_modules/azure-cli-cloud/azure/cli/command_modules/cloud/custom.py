@@ -25,6 +25,7 @@ def show_cloud(cloud_name):
 
  # pylint: disable=unused-argument
 def register_cloud(cloud_name,
+                   cloud_config=None,
                    endpoint_management=None,
                    endpoint_resource_manager=None,
                    endpoint_sql_management=None,
@@ -32,18 +33,18 @@ def register_cloud(cloud_name,
                    endpoint_active_directory=None,
                    endpoint_active_directory_resource_id=None,
                    endpoint_active_directory_graph_resource_id=None,
-                   param_sql_server_hostname_suffix=None,
-                   param_storage_endpoint_suffix=None,
-                   param_keyvault_dns_suffix=None,
-                   param_azure_datalake_store_file_system_endpoint_suffix=None,
-                   param_azure_datalake_analytics_catalog_and_job_endpoint_suffix=None):
-    method_args = locals()
-    cloud_to_add = Cloud(cloud_name, endpoints={}, params={})
-    for arg in method_args:
-        if arg.startswith('endpoint_') and method_args[arg]:
-            cloud_to_add.endpoints[arg.replace('endpoint_', '')] = method_args[arg]
-        elif arg.startswith('param_') and method_args[arg]:
-            cloud_to_add.params[arg.replace('param_', '')] = method_args[arg]
+                   suffix_sql_server_hostname=None,
+                   suffix_storage_endpoint=None,
+                   suffix_keyvault_dns=None,
+                   suffix_azure_datalake_store_file_system_endpoint=None,
+                   suffix_azure_datalake_analytics_catalog_and_job_endpoint=None):
+    cloud_args = cloud_config or locals()
+    cloud_to_add = Cloud(cloud_name, endpoints={}, suffixes={})
+    for arg in cloud_args:
+        if arg.startswith('endpoint_') and cloud_args[arg]:
+            cloud_to_add.endpoints[arg.replace('endpoint_', '')] = cloud_args[arg]
+        elif arg.startswith('suffix_') and cloud_args[arg]:
+            cloud_to_add.suffixes[arg.replace('suffix_', '')] = cloud_args[arg]
     try:
         add_cloud(cloud_to_add)
     except CloudAlreadyRegisteredException as e:

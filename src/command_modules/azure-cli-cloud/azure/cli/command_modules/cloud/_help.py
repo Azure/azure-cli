@@ -24,12 +24,12 @@ helps['cloud show'] = """
 
 helps['cloud register'] = """
             type: command
-            short-command: Register a cloud
+            short-summary: Register a cloud
             long-summary: Register a cloud by passing in the configuration for it.
                         After a cloud is registered, it can be referenced in the context commands.
 """
 
 helps['cloud unregister'] = """
             type: command
-            short-command: Unregister a cloud
+            short-summary: Unregister a cloud
 """

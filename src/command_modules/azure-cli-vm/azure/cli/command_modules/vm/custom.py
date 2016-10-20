@@ -444,7 +444,7 @@ def enable_boot_diagnostics(resource_group_name, vm_name, storage):
 def get_boot_log(resource_group_name, vm_name):
     import sys
     import io
-    from azure.cli.core.cloud import CloudParam
+    from azure.cli.core.cloud import CloudSuffix
     from azure.cli.core._profile import CLOUD
     from azure.storage.blob import BlockBlobService
 
@@ -486,7 +486,7 @@ def get_boot_log(resource_group_name, vm_name):
         BlockBlobService,
         storage_account.name,
         keys.key1,
-        endpoint_suffix=CLOUD.params[CloudParam.STORAGE_ENDPOINT_SUFFIX]) # pylint: disable=no-member
+        endpoint_suffix=CLOUD.params[CloudSuffix.STORAGE_ENDPOINT]) # pylint: disable=no-member
 
     class StreamWriter(object): # pylint: disable=too-few-public-methods
 
