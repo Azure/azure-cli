@@ -1,4 +1,6 @@
-
+branches:
+  only:
+    - master
 
 init:
   - git config --global core.autocrlf false
@@ -41,7 +43,6 @@ build_script:
           }
       }
       $fileCommitMap | ConvertTo-Json | Out-File "$env:APPVEYOR_BUILD_FOLDER\doc\sphinx\doc_commit_map.json"
-      $fileCommitMap | ConvertTo-Json
   - cd doc\sphinx 
   - make xml
   - mkdir %TEMP%\azure-cli-xml2yml
