@@ -31,7 +31,12 @@ build_script:
           $commitId = (git rev-list -1 HEAD $file)
           if($commitId -match '^[0-9a-f]{40}$')
           {
-              $fileCommitMap[$file] = $commitId
+              $date = Get-Date -Date (git log --pretty=format:%cd -n 1 --date=iso $file)
+              $date = $date.ToUniversalTime()
+              $date = Get-Date $date -format G
+              $fileCommitMap[$file] = @{}
+              $fileCommitMap[$file]["commit"] = $commitId
+              $fileCommitMap[$file]["date"] = $date
           }
           else
           {
