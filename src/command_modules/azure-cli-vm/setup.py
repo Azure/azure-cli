@@ -28,6 +28,7 @@ DEPENDENCIES = [
     'azure-mgmt-network==0.30.0rc6',
     'azure-mgmt-resource==0.30.0rc6',
     'azure-cli-core',
+    'paramiko'
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
@@ -47,7 +48,6 @@ setup(
         'azure',
         'azure.cli',
         'azure.cli.command_modules',
-        'paramiko'
     ],
     packages=[
         'azure.cli.command_modules.vm',
