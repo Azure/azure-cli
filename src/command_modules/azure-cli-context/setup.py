@@ -24,10 +24,6 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
-    'azure-mgmt-compute==0.30.0rc6',
-    'azure-mgmt-network==0.30.0rc6',
-    'azure-mgmt-resource==0.30.0rc6',
-    'azure-storage==0.33.0',
     'azure-cli-core',
 ]
 
@@ -35,38 +31,22 @@ with open('README.rst', 'r', encoding='utf-8') as f:
     README = f.read()
 
 setup(
-    name='azure-cli-vm',
+    name='azure-cli-context',
     version=VERSION,
-    description='Microsoft Azure Command-Line Tools VM Command Module',
+    description='Microsoft Azure Command-Line Tools Context Command Module',
     long_description=README,
     license='MIT',
     author='Microsoft Corporation',
     author_email='azpycli@microsoft.com',
     url='https://github.com/Azure/azure-cli',
     classifiers=CLASSIFIERS,
-    namespace_packages = [
+    namespace_packages=[
         'azure',
         'azure.cli',
         'azure.cli.command_modules',
     ],
     packages=[
-        'azure.cli.command_modules.vm',
-        'azure.cli.command_modules.vm.mgmt_vm',
-        'azure.cli.command_modules.vm.mgmt_vm.lib',
-        'azure.cli.command_modules.vm.mgmt_vm.lib.models',
-        'azure.cli.command_modules.vm.mgmt_vm.lib.operations',
-        'azure.cli.command_modules.vm.mgmt_vmss',
-        'azure.cli.command_modules.vm.mgmt_vmss.lib',
-        'azure.cli.command_modules.vm.mgmt_vmss.lib.models',
-        'azure.cli.command_modules.vm.mgmt_vmss.lib.operations',
-        'azure.cli.command_modules.vm.mgmt_avail_set',
-        'azure.cli.command_modules.vm.mgmt_avail_set.lib',
-        'azure.cli.command_modules.vm.mgmt_avail_set.lib.models',
-        'azure.cli.command_modules.vm.mgmt_avail_set.lib.operations',
-        'azure.cli.command_modules.vm.mgmt_acs',
-        'azure.cli.command_modules.vm.mgmt_acs.lib',
-        'azure.cli.command_modules.vm.mgmt_acs.lib.models',
-        'azure.cli.command_modules.vm.mgmt_acs.lib.operations',
+        'azure.cli.command_modules.context',
     ],
     install_requires=DEPENDENCIES,
 )

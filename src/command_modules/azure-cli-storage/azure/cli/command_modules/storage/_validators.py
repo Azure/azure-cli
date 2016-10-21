@@ -10,8 +10,11 @@ import os
 import re
 
 from azure.cli.core._config import az_config
-from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_data_service_client
+from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.validators import validate_key_value_pairs
+
+from azure.cli.core.cloud import CloudSuffix
+from azure.cli.core._profile import CLOUD
 
 from azure.mgmt.storage import StorageManagementClient
 from azure.mgmt.storage.models import CustomDomain
@@ -22,6 +25,8 @@ from azure.storage.blob.baseblobservice import BaseBlobService
 from azure.storage.blob.models import ContentSettings as BlobContentSettings
 from azure.storage.file import FileService
 from azure.storage.file.models import ContentSettings as FileContentSettings
+
+from ._factory import get_storage_data_service_client
 
 storage_account_key_options = {'primary': 'key1', 'secondary': 'key2'}
 
@@ -104,13 +109,14 @@ def validate_source_uri(namespace):
     if snapshot:
         query_params.append(snapshot)
 
-    uri = 'https://{0}.{1}.core.windows.net/{2}/{3}{4}{5}'.format(
+    uri = 'https://{0}.{1}.{6}/{2}/{3}{4}{5}'.format(
         storage_acc,
         'blob' if valid_blob_source else 'share',
         container if valid_blob_source else share,
         blob if valid_blob_source else path,
         '?' if query_params else '',
-        '&'.join(query_params))
+        '&'.join(query_params),
+        CLOUD.suffixes[CloudSuffix.STORAGE_ENDPOINT])
 
     namespace.copy_source = uri
 
@@ -136,13 +142,17 @@ def get_content_setting_validator(settings_class, update):
             cs = ns.get('connection_string')
             sas = ns.get('sas_token')
             if _class_name(settings_class) == _class_name(BlobContentSettings):
-                client = get_data_service_client(BaseBlobService, account, key, cs, sas)
+                client = get_storage_data_service_client(BaseBlobService,
+                                                         account,
+                                                         key,
+                                                         cs,
+                                                         sas)
                 container = ns.get('container_name')
                 blob = ns.get('blob_name')
                 lease_id = ns.get('lease_id')
                 props = client.get_blob_properties(container, blob, lease_id=lease_id).properties.content_settings # pylint: disable=line-too-long
             elif _class_name(settings_class) == _class_name(FileContentSettings):
-                client = get_data_service_client(FileService, account, key, cs, sas) # pylint: disable=redefined-variable-type
+                client = get_storage_data_service_client(FileService, account, key, cs, sas) # pylint: disable=redefined-variable-type
                 share = ns.get('share_name')
                 directory = ns.get('directory_name')
                 filename = ns.get('file_name')
@@ -299,7 +309,7 @@ def validate_public_access(namespace):
             key = ns.get('account_key')
             cs = ns.get('connection_string')
             sas = ns.get('sas_token')
-            client = get_data_service_client(BaseBlobService, account, key, cs, sas)
+            client = get_storage_data_service_client(BaseBlobService, account, key, cs, sas)
             container = ns.get('container_name')
             lease_id = ns.get('lease_id')
             ns['signed_identifiers'] = client.get_container_acl(container, lease_id=lease_id)

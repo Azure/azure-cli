@@ -7,7 +7,7 @@
 import requests
 from adal.adal_error import AdalError
 
-from azure.cli.core._profile import Profile
+from azure.cli.core._profile import Profile, CLOUD
 from azure.cli.core._util import CLIError
 import azure.cli.core._logging as _logging
 
@@ -18,12 +18,14 @@ def load_subscriptions():
     subscriptions = profile.load_cached_subscriptions()
     return subscriptions
 
-def list_subscriptions():
+def list_subscriptions(list_all=False): # pylint: disable=redefined-builtin
     '''List the imported subscriptions.'''
     subscriptions = load_subscriptions()
     if not subscriptions:
         logger.warning('Please run "az login" to access your accounts.')
-    return subscriptions
+    for sub in subscriptions:
+        sub['cloudName'] = sub.pop('environmentName', None)
+    return [sub for sub in subscriptions if list_all or sub['cloudName'] == CLOUD.name]
 
 def set_active_subscription(subscription_name_or_id):
     '''Set the current subscription'''
@@ -68,7 +70,10 @@ def login(username=None, password=None, service_principal=None, tenant=None):
         raise CLIError(err)
     except requests.exceptions.ConnectionError as err:
         raise CLIError('Please ensure you have network connection. Error detail: ' + str(err))
-    return list(subscriptions)
+    all_subscriptions = list(subscriptions)
+    for sub in all_subscriptions:
+        sub['cloudName'] = sub.pop('environmentName', None)
+    return all_subscriptions
 
 def logout(username=None):
     '''Log out to remove accesses to Azure subscriptions'''
