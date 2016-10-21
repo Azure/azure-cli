@@ -23,7 +23,7 @@ def show_cloud(cloud_name):
     except CloudNotRegisteredException as e:
         raise CLIError(e)
 
- # pylint: disable=unused-argument
+ # pylint: disable=unused-argument,too-many-arguments
 def register_cloud(cloud_name,
                    cloud_config=None,
                    endpoint_management=None,
