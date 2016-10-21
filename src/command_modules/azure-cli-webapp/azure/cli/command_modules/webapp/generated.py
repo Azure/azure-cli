@@ -50,7 +50,7 @@ cli_command('appservice web git enable-local', enable_local_git)
 cli_command('appservice web git show-url', get_git_url)
 cli_command('appservice web log tail', get_streaming_log)
 cli_command('appservice web log download', download_historical_logs)
-cli_command('appservice web log set', config_diagnostics)
+cli_command('appservice web log config', config_diagnostics)
 cli_command('appservice web browse', view_in_browser)
 
 cli_command('appservice web deployment slot list', SitesOperations.get_site_slots, factory)

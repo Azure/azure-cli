@@ -70,12 +70,12 @@ register_cli_argument('appservice web deployment slot', 'disable', help='disable
 
 two_states_switch = ['true', 'false']
 
-register_cli_argument('appservice web log set', 'application_logging', help='configure application logging to file system', **enum_choice_list(two_states_switch))
-register_cli_argument('appservice web log set', 'detailed_error_messages', help='configure detailed error messages', **enum_choice_list(two_states_switch))
-register_cli_argument('appservice web log set', 'failed_request_tracing', help='configure failed request tracing', **enum_choice_list(two_states_switch))
-register_cli_argument('appservice web log set', 'level', help='logging level', **enum_choice_list(['error', 'warning', 'information', 'verbose']))
+register_cli_argument('appservice web log config', 'application_logging', help='configure application logging to file system', **enum_choice_list(two_states_switch))
+register_cli_argument('appservice web log config', 'detailed_error_messages', help='configure detailed error messages', **enum_choice_list(two_states_switch))
+register_cli_argument('appservice web log config', 'failed_request_tracing', help='configure failed request tracing', **enum_choice_list(two_states_switch))
+register_cli_argument('appservice web log config', 'level', help='logging level', **enum_choice_list(['error', 'warning', 'information', 'verbose']))
 server_log_switch_options = ['off', 'storage', 'filesystem']
-register_cli_argument('appservice web log set', 'web_server_logging', help='configure Web server logging', **enum_choice_list(server_log_switch_options))
+register_cli_argument('appservice web log config', 'web_server_logging', help='configure Web server logging', **enum_choice_list(server_log_switch_options))
 
 register_cli_argument('appservice web log tail', 'provider', help="scope the live traces to certain providers/folders, for example:'application', 'http' for server log, 'kudu/trace', etc")
 register_cli_argument('appservice web log download', 'log_file', default='webapp_logs.zip', help='the downloaded zipped log file path')
