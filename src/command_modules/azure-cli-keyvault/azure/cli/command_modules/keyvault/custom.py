@@ -19,7 +19,6 @@ from azure.graphrbac import GraphRbacManagementClient
 
 from azure.cli.core.telemetry import log_telemetry
 from azure.cli.core._util import CLIError
-from azure.cli.core._azure_env import ENDPOINT_URLS, get_env
 import azure.cli.core._logging as _logging
 
 from azure.cli.command_modules.keyvault.keyvaultclient import KeyVaultClient
@@ -88,11 +87,14 @@ def create_keyvault(client, resource_group_name, vault_name, location, #pylint:d
                     enabled_for_template_deployment=None,
                     no_self_perms=False,
                     tags=None):
-    from azure.cli.core._profile import Profile
+    from azure.cli.core._profile import Profile, CLOUD
+    from azure.cli.core.cloud import CloudEndpoint
     profile = Profile()
     cred, _, tenant_id = profile.get_login_credentials(
-        resource=get_env()[ENDPOINT_URLS.ACTIVE_DIRECTORY_GRAPH_RESOURCE_ID])
-    graph_client = GraphRbacManagementClient(cred, tenant_id)
+        resource=CLOUD.endpoints[CloudEndpoint.ACTIVE_DIRECTORY_GRAPH_RESOURCE_ID])
+    graph_client = GraphRbacManagementClient(cred,
+                                             tenant_id,
+                                             base_url=CLOUD.endpoints[CloudEndpoint.ACTIVE_DIRECTORY_GRAPH_RESOURCE_ID]) # pylint: disable=line-too-long
     subscription = profile.get_subscription()
     if no_self_perms:
         access_policies = []
@@ -136,11 +138,14 @@ create_keyvault.__doc__ = VaultProperties.__doc__
 
 def _object_id_args_helper(object_id, spn, upn):
     if not object_id:
-        from azure.cli.core._profile import Profile
+        from azure.cli.core._profile import Profile, CLOUD
+        from azure.cli.core.cloud import CloudEndpoint
         profile = Profile()
         cred, _, tenant_id = profile.get_login_credentials(
-            resource=get_env()[ENDPOINT_URLS.ACTIVE_DIRECTORY_GRAPH_RESOURCE_ID])
-        graph_client = GraphRbacManagementClient(cred, tenant_id)
+            resource=CLOUD.endpoints[CloudEndpoint.ACTIVE_DIRECTORY_GRAPH_RESOURCE_ID])
+        graph_client = GraphRbacManagementClient(cred,
+                                                 tenant_id,
+                                                 base_url=CLOUD.endpoints[CloudEndpoint.ACTIVE_DIRECTORY_GRAPH_RESOURCE_ID]) # pylint: disable=line-too-long
         object_id = _get_object_id(graph_client, spn=spn, upn=upn)
         if not object_id:
             raise CLIError('Unable to get object id from principal name.')
