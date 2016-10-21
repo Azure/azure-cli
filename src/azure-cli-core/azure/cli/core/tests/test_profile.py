@@ -9,8 +9,8 @@ import unittest
 import mock
 from azure.mgmt.resource.subscriptions.models import (SubscriptionState, Subscription,
                                                       SubscriptionPolicies, spendingLimit)
-from azure.cli.core._profile import Profile, CredsCache, SubscriptionFinder
-from azure.cli.core._azure_env import ENV_DEFAULT, ENDPOINT_URLS, get_env
+from azure.cli.core.cloud import CloudEndpoint
+from azure.cli.core._profile import Profile, CredsCache, SubscriptionFinder, CLOUD
 
 class Test_Profile(unittest.TestCase):
 
@@ -52,8 +52,7 @@ class Test_Profile(unittest.TestCase):
     def test_normalize(self):
         consolidated = Profile._normalize_properties(self.user1,
                                                      [self.subscription1],
-                                                     False,
-                                                     ENV_DEFAULT)
+                                                     False)
         expected = {
             'environmentName': 'AzureCloud',
             'id': '1',
@@ -78,8 +77,7 @@ class Test_Profile(unittest.TestCase):
         #add the first and verify
         consolidated = Profile._normalize_properties(self.user1,
                                                      [self.subscription1],
-                                                     False,
-                                                     ENV_DEFAULT)
+                                                     False)
         profile._set_subscriptions(consolidated)
 
         self.assertEqual(len(storage_mock['subscriptions']), 1)
@@ -100,8 +98,7 @@ class Test_Profile(unittest.TestCase):
         #add the second and verify
         consolidated = Profile._normalize_properties(self.user2,
                                                      [self.subscription2],
-                                                     False,
-                                                     ENV_DEFAULT)
+                                                     False)
         profile._set_subscriptions(consolidated)
 
         self.assertEqual(len(storage_mock['subscriptions']), 2)
@@ -131,8 +128,7 @@ class Test_Profile(unittest.TestCase):
         #add one twice and verify we will have one but with new token
         consolidated = Profile._normalize_properties(self.user1,
                                                      [self.subscription1],
-                                                     False,
-                                                     ENV_DEFAULT)
+                                                     False)
         profile._set_subscriptions(consolidated)
 
         new_subscription1 = SubscriptionStub(self.id1,
@@ -141,8 +137,7 @@ class Test_Profile(unittest.TestCase):
                                              self.tenant_id)
         consolidated = Profile._normalize_properties(self.user1,
                                                      [new_subscription1],
-                                                     False,
-                                                     ENV_DEFAULT)
+                                                     False)
         profile._set_subscriptions(consolidated)
 
         self.assertEqual(len(storage_mock['subscriptions']), 1)
@@ -154,14 +149,12 @@ class Test_Profile(unittest.TestCase):
 
         consolidated = Profile._normalize_properties(self.user1,
                                                      [self.subscription1],
-                                                     False,
-                                                     ENV_DEFAULT)
+                                                     False)
         profile._set_subscriptions(consolidated)
 
         consolidated = profile._normalize_properties(self.user2,
                                                      [self.subscription2],
-                                                     False,
-                                                     ENV_DEFAULT)
+                                                     False)
         profile._set_subscriptions(consolidated)
 
         subscription1 = storage_mock['subscriptions'][0]
@@ -181,8 +174,7 @@ class Test_Profile(unittest.TestCase):
         profile = Profile(storage_mock)
         consolidated = Profile._normalize_properties(self.user1,
                                                      [self.subscription1],
-                                                     False,
-                                                     ENV_DEFAULT)
+                                                     False)
         profile._set_subscriptions(consolidated)
         #action
         user = profile.get_current_account_user()
@@ -222,8 +214,7 @@ class Test_Profile(unittest.TestCase):
         profile = Profile(storage_mock)
         consolidated = Profile._normalize_properties(self.user1,
                                                      [self.subscription1],
-                                                     False,
-                                                     ENV_DEFAULT)
+                                                     False)
         profile._set_subscriptions(consolidated)
         #action
         cred, subscription_id, _ = profile.get_login_credentials()
@@ -250,11 +241,11 @@ class Test_Profile(unittest.TestCase):
         storage_mock = {'subscriptions': None}
         profile = Profile(storage_mock)
         consolidated = Profile._normalize_properties(self.user1, [self.subscription1],
-                                                     False, ENV_DEFAULT)
+                                                     False)
         profile._set_subscriptions(consolidated)
         #action
         cred, _, tenant_id = profile.get_login_credentials(
-            resource=get_env()[ENDPOINT_URLS.ACTIVE_DIRECTORY_GRAPH_RESOURCE_ID])
+            resource=CLOUD.endpoints[CloudEndpoint.ACTIVE_DIRECTORY_GRAPH_RESOURCE_ID])
         _, _ = cred._token_retriever()
         #verify
         mock_get_token.assert_called_once_with(mock.ANY, self.user1, self.tenant_id,
@@ -271,8 +262,7 @@ class Test_Profile(unittest.TestCase):
         profile = Profile(storage_mock)
         consolidated = Profile._normalize_properties(self.user1,
                                                      [self.subscription1],
-                                                     False,
-                                                     ENV_DEFAULT)
+                                                     False)
         profile._set_subscriptions(consolidated)
         self.assertEqual(1, len(storage_mock['subscriptions']))
         #action
@@ -290,12 +280,10 @@ class Test_Profile(unittest.TestCase):
         profile = Profile(storage_mock)
         consolidated = Profile._normalize_properties(self.user1,
                                                      [self.subscription1],
-                                                     False,
-                                                     ENV_DEFAULT)
+                                                     False)
         consolidated2 = Profile._normalize_properties(self.user2,
                                                       [self.subscription2],
-                                                      False,
-                                                      ENV_DEFAULT)
+                                                      False)
         profile._set_subscriptions(consolidated + consolidated2)
 
         self.assertEqual(2, len(storage_mock['subscriptions']))

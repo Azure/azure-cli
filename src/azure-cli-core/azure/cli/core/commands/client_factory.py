@@ -58,7 +58,7 @@ def _get_mgmt_service_client(client_type, subscription_bound=True, subscription_
 
     return (client, subscription_id)
 
-def get_data_service_client(service_type, account_name, account_key, connection_string=None,
+def get_data_service_client(service_type, account_name, account_key, connection_string=None, #pylint: disable=too-many-arguments
                             sas_token=None, endpoint_suffix=None):
     logger.info('Getting data service client service_type=%s', service_type.__name__)
     try:
