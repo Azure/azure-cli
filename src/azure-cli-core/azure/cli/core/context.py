@@ -8,8 +8,6 @@ from six.moves import configparser
 
 from azure.cli.core._config import (CONTEXT_CONFIG_DIR, GLOBAL_CONFIG_DIR)
 
-from azure.cli.core.cloud import get_cloud, AZURE_PUBLIC_CLOUD
-
 class ContextNotFoundException(Exception):
     def __init__(self, context_name):
         super(ContextNotFoundException, self).__init__(context_name)
@@ -87,6 +85,7 @@ def get_context_names():
     # No contexts yet. Let's create the default one now.
     # We want to skip the exists check because checking if exists
     # involves getting the context names (which is this function)
+    from azure.cli.core.cloud import AZURE_PUBLIC_CLOUD
     create_context(DEFAULT_CONTEXT_NAME, AZURE_PUBLIC_CLOUD.name, skip_exists_check=True)
     set_active_context(DEFAULT_CONTEXT_NAME, skip_set_active_subsciption=True)
     return [DEFAULT_CONTEXT_NAME]
@@ -118,6 +117,7 @@ def delete_context(context_name):
     os.remove(get_context_file_path(context_name))
 
 def create_context(context_name, cloud_name, skip_exists_check=False):
+    from azure.cli.core.cloud import get_cloud
     if not skip_exists_check and context_exists(context_name):
         raise ContextExistsException(context_name)
     cloud = get_cloud(cloud_name)
@@ -135,6 +135,7 @@ def create_context(context_name, cloud_name, skip_exists_check=False):
         context_config.write(configfile)
 
 def modify_context(context_name, cloud_name=None, default_subscription=None):
+    from azure.cli.core.cloud import get_cloud
     if not context_exists(context_name):
         raise ContextNotFoundException(context_name)
     if cloud_name or default_subscription:
