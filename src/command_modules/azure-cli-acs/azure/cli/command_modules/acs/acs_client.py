@@ -175,7 +175,7 @@ class ACSClient(object):
             if e.errno == errno.ENOENT:
                 raise Exception('Remote file "{}" does not exist'.format(remote_file))
             else:
-                assert False, 'Error accessing remote file {}'.format(remote_file)
+                raise Exception('Error accessing remote file {}'.format(remote_file))
         finally:
             sftp.close()
     # TODO (peterj, 09/06/2016): This should be in a separate class (Marathon?)
