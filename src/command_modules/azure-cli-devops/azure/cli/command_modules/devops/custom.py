@@ -61,7 +61,7 @@ def add_release(
     _ensure_docker_compose()
 
     # Call the RP
-    _call_rp_configure_cicd(
+    return _call_rp_configure_cicd(
         name,
         resource_group_name,
         vsts_account_name,
@@ -282,7 +282,7 @@ def add_ci(
     :type registry_name: String
     """
     # Call the RP
-    _call_rp_configure_cicd(
+    return _call_rp_configure_cicd(
         name,
         resource_group_name,
         vsts_account_name,
