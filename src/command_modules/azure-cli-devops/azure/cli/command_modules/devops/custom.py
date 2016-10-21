@@ -230,6 +230,13 @@ def _ensure_docker_compose():
                         docker_compose_test_file,
                         docker_compose_expected_version))
 
+def _ensure_dockerfile():
+    """
+    1. Raises an error if there is no dockerfile present.
+    """
+    dockerfile_file = 'Dockerfile'
+    if not os.path.isfile(dockerfile_file):
+        raise CLIError('Docker file "{}" was not found.'.format(dockerfile_file))
 
 def _get_remote_url():
     """
@@ -281,6 +288,7 @@ def add_ci(
     :param registry_name: Azure container registry name. A new Azure container registry is created if omitted or does not exist.
     :type registry_name: String
     """
+    _ensure_dockerfile()
     # Call the RP
     return _call_rp_configure_cicd(
         name,
