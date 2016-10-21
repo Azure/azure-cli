@@ -486,7 +486,7 @@ def get_boot_log(resource_group_name, vm_name):
         BlockBlobService,
         storage_account.name,
         keys.key1,
-        endpoint_suffix=CLOUD.params[CloudSuffix.STORAGE_ENDPOINT]) # pylint: disable=no-member
+        endpoint_suffix=CLOUD.suffixes[CloudSuffix.STORAGE_ENDPOINT]) # pylint: disable=no-member
 
     class StreamWriter(object): # pylint: disable=too-few-public-methods
 

@@ -34,7 +34,7 @@ def get_storage_data_service_client(service, name=None, key=None, connection_str
                                    key,
                                    connection_string,
                                    sas_token,
-                                   endpoint_suffix=CLOUD.params[CloudSuffix.STORAGE_ENDPOINT])
+                                   endpoint_suffix=CLOUD.suffixes[CloudSuffix.STORAGE_ENDPOINT])
 
 def generic_data_service_factory(service, name=None, key=None, connection_string=None,
                                  sas_token=None):

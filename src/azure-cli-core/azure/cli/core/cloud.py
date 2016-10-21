@@ -151,9 +151,9 @@ def add_cloud(cloud):
     for endpoint in cloud.endpoints:
         if cloud.endpoints[endpoint]:
             config.set(cloud.name, 'endpoint_{}'.format(endpoint), cloud.endpoints[endpoint])
-    for param in cloud.params:
-        if cloud.params[param]:
-            config.set(cloud.name, 'param_{}'.format(param), cloud.params[param])
+    for suffix in cloud.suffixes:
+        if cloud.suffixes[suffix]:
+            config.set(cloud.name, 'suffix_{}'.format(suffix), cloud.suffixes[suffix])
     if not os.path.isdir(GLOBAL_CONFIG_DIR):
         os.makedirs(GLOBAL_CONFIG_DIR)
     with open(CUSTOM_CLOUD_CONFIG_FILE, 'w') as configfile:

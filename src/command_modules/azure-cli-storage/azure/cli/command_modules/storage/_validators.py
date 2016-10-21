@@ -116,7 +116,7 @@ def validate_source_uri(namespace):
         blob if valid_blob_source else path,
         '?' if query_params else '',
         '&'.join(query_params),
-        CLOUD.params[CloudSuffix.STORAGE_ENDPOINT])
+        CLOUD.suffixes[CloudSuffix.STORAGE_ENDPOINT])
 
     namespace.copy_source = uri
 
