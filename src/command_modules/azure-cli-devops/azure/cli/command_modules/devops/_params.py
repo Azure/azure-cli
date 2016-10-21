@@ -1,0 +1,62 @@
+#---------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for license information.
+#---------------------------------------------------------------------------------------------
+
+from azure.cli.core.commands import CliArgumentType, register_cli_argument
+from azure.cli.core.commands.parameters import (
+    name_type,
+    resource_group_name_type)
+
+# pylint: disable=line-too-long
+
+registry_name = CliArgumentType(
+    options_list=('--registry-name', '-r'),
+    help='Azure container registry name. A new Azure container registry is created if omitted or does not exist.'
+)
+
+registry_resource_group = CliArgumentType(
+    options_list=('--registry-resource-group',),
+    help='Azure container registry resource group name.'
+)
+
+remote_url = CliArgumentType(
+    options_list=('--remote-url', '-u'),
+    help='Remote url of the GitHub or VSTS source repository that will be built and deployed. If omitted, a source repository will be searched for in the current working directory.'
+)
+
+remote_access_token = CliArgumentType(
+    options_list=('--remote-access-token', '-t'),
+    help='GitHub personal access token (minimum permission is "repo"). Required if the source repository is in GitHub.'
+)
+
+vsts_account_name = CliArgumentType(
+    options_list=('--vsts-account-name',),
+    help='VSTS account name to create the build and release definitions. A new VSTS account is created if omitted or does not exist.'
+)
+
+vsts_project_name = CliArgumentType(
+    options_list=('--vsts-project-name',),
+    help='VSTS project name to create the build and release definitions. A new VSTS project is created if omitted or does not exist.'
+)
+
+register_cli_argument('devops release create', 'name', name_type)
+register_cli_argument('devops release create', 'resource_group_name', resource_group_name_type)
+register_cli_argument('devops release create', 'registry_name', registry_name)
+register_cli_argument('devops release create', 'registry_resource_group', registry_resource_group)
+register_cli_argument('devops release create', 'remote_url', remote_url)
+register_cli_argument('devops release create', 'remote_access_token', remote_access_token)
+register_cli_argument('devops release create', 'vsts_account_name', vsts_account_name)
+register_cli_argument('devops release create', 'vsts_project_name', vsts_project_name)
+
+register_cli_argument('devops build create', 'name', name_type)
+register_cli_argument('devops build create', 'resource_group_name', resource_group_name_type)
+register_cli_argument('devops build create', 'registry_name', registry_name)
+register_cli_argument('devops build create', 'registry_resource_group', registry_resource_group)
+register_cli_argument('devops build create', 'remote_url', remote_url)
+register_cli_argument('devops build create', 'remote_access_token', remote_access_token)
+register_cli_argument('devops build create', 'vsts_account_name', vsts_account_name)
+register_cli_argument('devops build create', 'vsts_project_name', vsts_project_name)
+
+register_cli_argument('devops release list', 'name', name_type)
+register_cli_argument('devops release list', 'resource_group_name', resource_group_name_type)
