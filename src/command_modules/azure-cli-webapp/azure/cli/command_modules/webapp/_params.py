@@ -48,7 +48,7 @@ register_cli_argument('appservice list-locations', 'linux_workers_enabled', acti
 register_cli_argument('appservice plan', 'name', arg_type=name_arg_type, help='The name of the app service plan', completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'), id_part='name')
 register_cli_argument('appservice plan create', 'name', options_list=('--name', '-n'), help="Name of the new app service plan")
 register_cli_argument('appservice plan create', 'sku', arg_type=sku_arg_type, default='B1')
-register_cli_argument('appservice plan create', 'is_linux', action='store_true', help='host webapp on Linux worker')
+register_cli_argument('appservice plan create', 'is_linux', action='store_true', required=False, help='host webapp on Linux worker')
 register_cli_argument('appservice plan update', 'sku', arg_type=sku_arg_type)
 register_cli_argument('appservice plan update', 'allow_pending_state', ignore_type)
 register_cli_argument('appservice plan', 'number_of_workers', help='Number of workers to be allocated.', type=int, default=1)
