@@ -29,6 +29,7 @@ DEPENDENCIES = [
     'azure-mgmt-resource==0.30.0rc6',
     'azure-storage==0.33.0',
     'azure-cli-core',
+    'paramiko'
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
