@@ -171,7 +171,8 @@ def get_command_table(module_name=None):
     If the module is not found, all commands are loaded.
     '''
     loaded = False
-    if module_name:
+    # TODO Remove check for acs module. Issue #1110
+    if module_name and module_name != 'acs':
         try:
             import_module('azure.cli.command_modules.' + module_name)
             logger.info("Successfully loaded command table from module '%s'.", module_name)

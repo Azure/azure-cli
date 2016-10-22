@@ -12,7 +12,6 @@ import dateutil.parser
 
 from azure.cli.core._util import CLIError, todict, get_file_json
 import azure.cli.core._logging as _logging
-from azure.cli.core._azure_env import ENDPOINT_URLS, get_env
 from azure.cli.core.help_files import helps
 
 from azure.cli.core.commands.client_factory import (get_mgmt_service_client,
@@ -45,11 +44,14 @@ def _auth_client_factory(scope=None):
     return get_mgmt_service_client(AuthorizationManagementClient, subscription_id=subscription_id)
 
 def _graph_client_factory(**_):
-    from azure.cli.core._profile import Profile
+    from azure.cli.core._profile import Profile, CLOUD
+    from azure.cli.core.cloud import CloudEndpoint
     profile = Profile()
     cred, _, tenant_id = profile.get_login_credentials(
-        resource=get_env()[ENDPOINT_URLS.ACTIVE_DIRECTORY_GRAPH_RESOURCE_ID])
-    client = GraphRbacManagementClient(cred, tenant_id)
+        resource=CLOUD.endpoints[CloudEndpoint.ACTIVE_DIRECTORY_GRAPH_RESOURCE_ID])
+    client = GraphRbacManagementClient(cred,
+                                       tenant_id,
+                                       base_url=CLOUD.endpoints[CloudEndpoint.ACTIVE_DIRECTORY_GRAPH_RESOURCE_ID]) # pylint: disable=line-too-long
     configure_common_settings(client)
     return client
 
@@ -514,7 +516,6 @@ def create_service_principal_for_rbac(name=None, secret=None, years=1,
     #pylint: disable=no-member
     aad_sp = _create_service_principal(aad_application.app_id, bool(scopes))
     oid = aad_sp.output.object_id if scopes else aad_sp.object_id
-    _build_output_content(name, secret, client.config.tenant_id)
 
     if scopes:
         #It is possible the SP has not been propagated to all servers, so creating assignments
@@ -523,6 +524,13 @@ def create_service_principal_for_rbac(name=None, secret=None, years=1,
         session_key = aad_sp.response.headers._store['ocp-aad-session-key'][1]
         for scope in scopes:
             _create_role_assignment(role, oid, None, scope, ocp_aad_session_key=session_key)
+
+    return {
+        'client_id': aad_application.app_id,
+        'client_secret': secret,
+        'sp_name': name,
+        'tenant': client.config.tenant_id
+        }
 
 def reset_service_principal_credential(name, secret=None, years=1):
     '''reset credential, on expiration or you forget it.
@@ -559,23 +567,12 @@ def reset_service_principal_credential(name, secret=None, years=1):
 
     client.applications.patch(app.object_id, app_create_param)
 
-    _build_output_content(name, secret, client.config.tenant_id)
-
-def _build_output_content(sp_name, secret, tenant):
-    logger.warning("Service principal has been configured.")
-    logger.warning("  id(client_id):           " + sp_name)
-    logger.warning("  password(client_secret): " + secret)
-
-    logger.warning('Useful commands to manage azure:')
-    logger.warning('Assign a role:')
-    logger.warning('    az role assignment create --assignee %s --role Contributor', sp_name)
-    logger.warning('Log in:')
-    logger.warning('    az login --service-principal -u %s -p %s --tenant %s',
-                   sp_name, secret, tenant)
-    logger.warning('Reset credentials:')
-    logger.warning('    az ad sp reset-credentials --name %s', sp_name)
-    logger.warning('Revoke:')
-    logger.warning('    az ad app delete --id %s', sp_name)
+    return {
+        'client_id': app.app_id,
+        'client_secret': secret,
+        'sp_name': name,
+        'tenant': client.config.tenant_id
+        }
 
 def _resolve_object_id(assignee):
     client = _graph_client_factory()

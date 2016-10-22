@@ -4,9 +4,12 @@
 #---------------------------------------------------------------------------------------------
 
 import unittest
+import mock
 from six import StringIO
 
-from azure.cli.command_modules.resource._validators import (validate_parent, validate_resource_type)
+from azure.cli.command_modules.resource._validators import (validate_parent,
+                                                            validate_resource_type,
+                                                            validate_deployment_name)
 
 class Test_resource_validators(unittest.TestCase):
 
@@ -29,8 +32,29 @@ class Test_resource_validators(unittest.TestCase):
         self.assertEqual(actual.type, 'testtype')
         self.assertEqual(actual.name, 'mytesttype')
 
-    def test_parent_invalid(self):
-        pass
+    def test_generate_deployment_name_from_file(self):
+        #verify auto-gen from uri
+        namespace = mock.MagicMock()
+        namespace.template_uri = 'https://templates/template123.json?foo=bar'
+        namespace.template_file = None
+        namespace.deployment_name = None
+        validate_deployment_name(namespace)
+        self.assertEqual('template123', namespace.deployment_name)
+
+        namespace = mock.MagicMock()
+        namespace.template_file = __file__
+        namespace.template_uri = None
+        namespace.deployment_name = None
+        validate_deployment_name(namespace)
+        self.assertEqual('test_validators', namespace.deployment_name)
+
+        #verify use default if get a file content
+        namespace = mock.MagicMock()
+        namespace.template_file = '{"foo":"bar"}'
+        namespace.template_uri = None
+        namespace.deployment_name = None
+        validate_deployment_name(namespace)
+        self.assertEqual('deployment1', namespace.deployment_name)
 
 if __name__ == '__main__':
     unittest.main()

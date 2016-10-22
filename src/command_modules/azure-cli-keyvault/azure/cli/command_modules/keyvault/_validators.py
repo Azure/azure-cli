@@ -116,8 +116,7 @@ def datetime_type(string):
     return datetime.strptime(string, date_format)
 
 def vault_base_url_type(name):
-    from azure.cli.core._profile import Profile
-    from azure.cli.core._azure_env import ENDPOINT_URLS
-    profile = Profile()
-    suffix = profile.env[ENDPOINT_URLS.KEY_VAULT].replace('https://', '.')
+    from azure.cli.core._profile import CLOUD
+    from azure.cli.core.cloud import CloudSuffix
+    suffix = CLOUD.suffixes[CloudSuffix.KEYVAULT_DNS]
     return 'https://{}{}'.format(name, suffix)
