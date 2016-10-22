@@ -46,3 +46,13 @@ class TestAcsActions(unittest.TestCase):
         #still a file name
         self.assertEqual(args3.ssh_key_value, public_key_file2)
 
+        #4 verify file naming if the pub file doesn't end with .pub
+        _, public_key_file4 = tempfile.mkstemp()
+        public_key_file4 += '1' #make it nonexisting
+        args4 = mock.MagicMock()
+        args4.ssh_key_value = public_key_file4
+        args4.generate_ssh_keys = True
+        _handle_container_ssh_file(command='acs create', args=args4)
+        self.assertTrue(os.path.isfile(public_key_file4 + '.private'))
+        self.assertTrue(os.path.isfile(public_key_file4))
+

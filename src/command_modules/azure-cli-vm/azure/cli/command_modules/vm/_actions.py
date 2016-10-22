@@ -278,6 +278,7 @@ def _generate_ssh_keys(private_key_filepath, public_key_filepath):
     ssh_dir, _ = os.path.split(private_key_filepath)
     if not os.path.exists(ssh_dir):
         os.makedirs(ssh_dir)
+        os.chmod(ssh_dir, 0o700)
 
     key = paramiko.RSAKey.generate(2048)
     key.write_private_key_file(private_key_filepath)
@@ -286,6 +287,7 @@ def _generate_ssh_keys(private_key_filepath, public_key_filepath):
     with open(public_key_filepath, 'w') as public_key_file:
         public_key = '%s %s'  % (key.get_name(), key.get_base64())
         public_key_file.write(public_key)
+    os.chmod(public_key_filepath, 0o644)
 
     return public_key
 
