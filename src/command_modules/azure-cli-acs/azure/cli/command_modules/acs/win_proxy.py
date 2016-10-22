@@ -80,10 +80,7 @@ def set_http_proxy(host, port, on=True):
     Option[1].dwOption = INTERNET_PER_CONN_PROXY_SERVER
     Option[1].Value.pszValue = setting
     Option[2].dwOption = INTERNET_PER_CONN_PROXY_BYPASS
-    Option[2].Value.pszValue = create_unicode_buffer(
-        "localhost;127.*;10.*;172.16.*;172.17.*;172.18.*;172.19.*;\
-        172.20.*;172.21.*;172.22.*;172.23.*;172.24.*;172.25.*;172.26.*;\
-        172.27.*;172.28.*;172.29.*;172.30.*;172.31.*;172.32.*;192.168.*")
+    Option[2].Value.pszValue = create_unicode_buffer('<-loopback>')
 
     List.dwSize = sizeof(INTERNET_PER_CONN_OPTION_LIST)
     List.pszConnection = None
