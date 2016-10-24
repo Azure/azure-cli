@@ -37,6 +37,8 @@ For those familiar with pip, use the following:
 
 Some prerequisites may be required. See our `Preview Install Guide <https://github.com/Azure/azure-cli/blob/master/doc/preview_install_guide.md>`__.
 
+Enable tab completion with ``source az.completion.sh``.
+
 Install with apt-get
 ^^^^^^^^^^^^^^^^^^^^
 
