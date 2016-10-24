@@ -159,7 +159,7 @@ def _call_rp_configure_cicd(
         req = requests.get(BASE_URL + req.headers['Location'], headers=headers, timeout=600)
     if req.status_code != 200:
         raise CLIError(
-            'Error: ' + str(req.status_code) + '. Could not configure CI/CD: ' + req.text)
+            'Server returned status code: ' + str(req.status_code) + '. Could not configure CI/CD: ' + req.text)
     json_request = req.json()
     return json_request
 
@@ -187,7 +187,8 @@ def list_releases(name, resource_group_name):
     headers = {'Content-type': 'application/json', 'Authorization': o_auth_token}
     req = requests.get(get_releases_url, headers=headers, timeout=600)
     if req.status_code != 200:
-        raise CLIError('Error: ' + str(req.status_code) + '. Could not list releases: ' + req.text)
+        raise CLIError(
+            'Server returned status code: ' + str(req.status_code) + '. Could not list releases: ' + req.text)
     json_request = req.json()
     return json_request
 
