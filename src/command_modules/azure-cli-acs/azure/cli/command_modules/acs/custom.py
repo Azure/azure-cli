@@ -48,14 +48,15 @@ def dcos_browse(name, resource_group_name):
     proxy.set_http_proxy('127.0.0.1', local_port)
     logger.info('Proxy running on 127.0.0.1:%s', local_port)
     logger.info('Press CTRL+C to close the tunnel...')
-    acs.create_tunnel(
-        remote_host='127.0.0.1',
-        remote_port=remote_port,
-        local_port=local_port,
-        open_url='http://localhost')
+    try:
+        acs.create_tunnel(
+            remote_host='127.0.0.1',
+            remote_port=remote_port,
+            local_port=local_port,
+            open_url='http://localhost')
+    finally:
+        proxy.disable_http_proxy()
 
-    # Turn the proxy off
-    proxy.unset_http_proxy()
     return
 
 def _get_host_name(acs_info):
