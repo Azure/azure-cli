@@ -3,7 +3,11 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 #---------------------------------------------------------------------------------------------
 
-from azure.cli.core._profile import Profile
+from azure.cli.core._profile import (
+    Profile,
+    CLOUD
+)
+from azure.cli.core.cloud import CloudEndpoint
 from azure.cli.core._config import az_config
 from azure.mgmt.resource.resources import ResourceManagementClient
 from azure.mgmt.storage import StorageManagementClient
@@ -38,7 +42,11 @@ def get_acr_service_client():
     profile = Profile()
     credentials, subscription_id, _ = profile.get_login_credentials()
 
-    config = ContainerRegistryConfiguration(subscription_id, get_acr_api_version(), credentials)
+    config = ContainerRegistryConfiguration(
+        subscription_id,
+        get_acr_api_version(),
+        credentials,
+        base_url=CLOUD.endpoints[CloudEndpoint.RESOURCE_MANAGER])
     client = ContainerRegistry(config)
 
     configure_common_settings(client)

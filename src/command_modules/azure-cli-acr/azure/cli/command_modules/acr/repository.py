@@ -41,7 +41,7 @@ def _obtain_data_from_registry(login_server, path, resultIndex, username, passwo
         else:
             response.raise_for_status()
 
-    return {resultIndex: resultList}
+    return resultList
 
 def _validate_user_credentials(registry_name, path, resultIndex, username=None, password=None):
     registry = get_registry_by_name(registry_name)
