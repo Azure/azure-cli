@@ -1018,5 +1018,6 @@ def update_acs(resource_group_name, container_service_name, new_agent_count):
     client = _compute_client_factory()
     instance = client.container_service.get(resource_group_name, container_service_name)
     instance.agent_pool_profiles[0].count = new_agent_count
-    return client.container_service.create_or_update(resource_group_name, container_service_name, instance)
+    return client.container_service.create_or_update(resource_group_name,
+                                                     container_service_name, instance)
 
