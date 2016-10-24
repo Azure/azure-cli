@@ -4,7 +4,7 @@
 #---------------------------------------------------------------------------------------------
 
 from azure.cli.core.test_utils.vcr_test_base import (ResourceGroupVCRTestBase,
-                                                     JMESPathCheck)
+                                                     JMESPathCheck, NoneCheck)
 #pylint: disable=line-too-long
 
 class WebappBasicE2ETest(ResourceGroupVCRTestBase):
@@ -57,7 +57,7 @@ class WebappBasicE2ETest(ResourceGroupVCRTestBase):
         self.assertTrue(result['url'].endswith(webapp_name + '.git'))
 
         #turn on diagnostics
-        test_cmd = ('appservice web log set -g {} -n {} --level verbose'.format(self.resource_group, webapp_name) + ' '
+        test_cmd = ('appservice web log config -g {} -n {} --level verbose'.format(self.resource_group, webapp_name) + ' '
                     '--application-logging true --detailed-error-messages true --failed-request-tracing true --web-server-logging filesystem')
         self.cmd(test_cmd)
         result = self.cmd('appservice web config show -g {} -n {}'.format(self.resource_group, webapp_name), checks=[
@@ -218,3 +218,42 @@ class AppServiceBadErrorPolishTest(ResourceGroupVCRTestBase):
         # we will try to produce an error by try creating 2 webapp with same name in different groups
         self.cmd('appservice web create -g {} -n {} --plan {}'.format(self.resource_group2, self.webapp_name, self.plan),
                  allowed_exceptions='Website with given name {} already exists'.format(self.webapp_name))
+
+#this test doesn't contain the ultimate verification which you need to manually load the frontpage in a browser
+class LinuxWebappSceanrioTest(ResourceGroupVCRTestBase):
+    def __init__(self, test_method):
+        super(LinuxWebappSceanrioTest, self).__init__(__file__, test_method)
+        self.resource_group = 'cli-webapp-linux2'
+
+    def test_linux_webapp(self):
+        self.execute()
+
+    def body(self):
+        plan = 'webapp-linux-plan'
+        webapp = 'webapp-linux'
+        self.cmd('appservice plan create -g {} -n {} --sku S1 --is-linux' .format(self.resource_group, plan), checks=[
+            JMESPathCheck('reserved', True), #this weird field means it is a linux
+            JMESPathCheck('sku.name', 'S1'),
+            ])
+        self.cmd('appservice web create -g {} -n {} --plan {}'.format(self.resource_group, webapp, plan), checks=[
+            JMESPathCheck('name', webapp),
+            ])
+        self.cmd('appservice web config update -g {} -n {} --startup-file {}'.format(self.resource_group, webapp, 'process.json'), checks=[
+            JMESPathCheck('appCommandLine', 'process.json')
+            ])
+        self.cmd('appservice web config container update -g {} -n {} --docker-custom-image-name {} --docker-registery-server-password {} --docker-registery-server-user {} --docker-registry-server-url {}'.format(
+            self.resource_group, webapp, 'foo-image', 'foo-password', 'foo-user', 'foo-url'), checks=[
+                JMESPathCheck('DOCKER_CUSTOM_IMAGE_NAME', 'foo-image'),
+                JMESPathCheck('DOCKER_REGISTRY_SERVER_URL', 'foo-url'),
+                JMESPathCheck('DOCKER_REGISTRY_SERVER_USERNAME', 'foo-user'),
+                JMESPathCheck('DOCKER_REGISTRY_SERVER_PASSWORD', 'foo-password')
+                ])
+        self.cmd('appservice web config container list -g {} -n {} '.format(self.resource_group, webapp), checks=[
+            JMESPathCheck('DOCKER_CUSTOM_IMAGE_NAME', 'foo-image'),
+            JMESPathCheck('DOCKER_REGISTRY_SERVER_URL', 'foo-url'),
+            JMESPathCheck('DOCKER_REGISTRY_SERVER_USERNAME', 'foo-user'),
+            JMESPathCheck('DOCKER_REGISTRY_SERVER_PASSWORD', 'foo-password')
+            ])
+        self.cmd('appservice web config container delete -g {} -n {}'.format(self.resource_group, webapp))
+        self.cmd('appservice web config container list -g {} -n {} '.format(self.resource_group, webapp), checks=NoneCheck())
+
