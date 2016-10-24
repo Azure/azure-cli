@@ -3,15 +3,14 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 #---------------------------------------------------------------------------------------------
 
-try:
-    from azure.cli.command_modules.acs.win_proxy import WinProxy
-except ImportError:
-    pass
-
 import platform
 import subprocess
 from abc import abstractmethod
 
+try:
+    from azure.cli.command_modules.acs.win_proxy import WinProxy
+except ImportError:
+    pass
 
 def disable_http_proxy():
     """
@@ -37,14 +36,13 @@ def __get_proxy_instance():
     """
     os_platform = platform.system()
     if os_platform == 'Darwin':
-        proxy = MacProxy()
+        return MacProxy()
     elif os_platform == 'Windows':
-        proxy = WinProxy()
+        return WinProxy()
     elif os_platform == 'Linux':
-        proxy = LinuxProxy()
+        return LinuxProxy()
     else:
         raise NotImplementedError('Not implemented yet for {}'.format(os_platform))
-    return proxy
 
 class Proxy(object):
     """
