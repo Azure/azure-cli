@@ -44,9 +44,11 @@ sku_arg_type = CliArgumentType(help='The pricing tiers, e.g., F1(Free), D1(Share
 register_cli_argument('appservice', 'resource_group_name', arg_type=resource_group_name_type)
 register_cli_argument('appservice', 'location', arg_type=location_type)
 
+register_cli_argument('appservice list-locations', 'linux_workers_enabled', action='store_true', help='get regions which support hosting webapps on Linux workers')
 register_cli_argument('appservice plan', 'name', arg_type=name_arg_type, help='The name of the app service plan', completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'), id_part='name')
 register_cli_argument('appservice plan create', 'name', options_list=('--name', '-n'), help="Name of the new app service plan")
 register_cli_argument('appservice plan create', 'sku', arg_type=sku_arg_type, default='B1')
+register_cli_argument('appservice plan create', 'is_linux', action='store_true', required=False, help='host webapp on Linux worker')
 register_cli_argument('appservice plan update', 'sku', arg_type=sku_arg_type)
 register_cli_argument('appservice plan update', 'allow_pending_state', ignore_type)
 register_cli_argument('appservice plan', 'number_of_workers', help='Number of workers to be allocated.', type=int, default=1)
@@ -68,18 +70,23 @@ register_cli_argument('appservice web deployment slot', 'disable', help='disable
 
 two_states_switch = ['true', 'false']
 
-register_cli_argument('appservice web log set', 'application_logging', help='configure application logging to file system', **enum_choice_list(two_states_switch))
-register_cli_argument('appservice web log set', 'detailed_error_messages', help='configure detailed error messages', **enum_choice_list(two_states_switch))
-register_cli_argument('appservice web log set', 'failed_request_tracing', help='configure failed request tracing', **enum_choice_list(two_states_switch))
-register_cli_argument('appservice web log set', 'level', help='logging level', **enum_choice_list(['error', 'warning', 'information', 'verbose']))
+register_cli_argument('appservice web log config', 'application_logging', help='configure application logging to file system', **enum_choice_list(two_states_switch))
+register_cli_argument('appservice web log config', 'detailed_error_messages', help='configure detailed error messages', **enum_choice_list(two_states_switch))
+register_cli_argument('appservice web log config', 'failed_request_tracing', help='configure failed request tracing', **enum_choice_list(two_states_switch))
+register_cli_argument('appservice web log config', 'level', help='logging level', **enum_choice_list(['error', 'warning', 'information', 'verbose']))
 server_log_switch_options = ['off', 'storage', 'filesystem']
-register_cli_argument('appservice web log set', 'web_server_logging', help='configure Web server logging', **enum_choice_list(server_log_switch_options))
+register_cli_argument('appservice web log config', 'web_server_logging', help='configure Web server logging', **enum_choice_list(server_log_switch_options))
 
 register_cli_argument('appservice web log tail', 'provider', help="scope the live traces to certain providers/folders, for example:'application', 'http' for server log, 'kudu/trace', etc")
 register_cli_argument('appservice web log download', 'log_file', default='webapp_logs.zip', help='the downloaded zipped log file path')
 
 register_cli_argument('appservice web config appsettings', 'settings', nargs='+', help="space separated app settings in a format of <name>=<value>")
 register_cli_argument('appservice web config appsettings', 'setting_names', nargs='+', help="space separated app setting names")
+
+register_cli_argument('appservice web config container', 'docker_registry_server_url', help='the container registry server url')
+register_cli_argument('appservice web config container', 'docker_custom_image_name', help='the container custom image name and optionally the tag name')
+register_cli_argument('appservice web config container', 'docker_registery_server_user', help='the container registry server username')
+register_cli_argument('appservice web config container', 'docker_registery_server_password', help='the container registry server password')
 
 register_cli_argument('appservice web config update', 'remote_debugging_enabled', help='enable or disable remote debugging', **enum_choice_list(two_states_switch))
 register_cli_argument('appservice web config update', 'web_sockets_enabled', help='enable or disable web sockets', **enum_choice_list(two_states_switch))
@@ -92,6 +99,7 @@ register_cli_argument('appservice web config update', 'net_framework_version', h
 register_cli_argument('appservice web config update', 'java_version', help="The version used to run your web app if using Java, e.g., '1.7' for Java 7, '1.8' for Java 8")
 register_cli_argument('appservice web config update', 'java_container', help="The java container, e.g., Tomcat, Jetty")
 register_cli_argument('appservice web config update', 'java_container_version', help="The version of the java container, e.g., '8.0.23' for Tomcat")
+register_cli_argument('appservice web config update', 'app_command_line', options_list=('--startup-file',), help="The startup file for linux hosted web apps, e.g. 'process.json' for Node.js web")
 
 register_cli_argument('appservice web config hostname', 'webapp', help="webapp name", completer=get_resource_name_completion_list('Microsoft.Web/sites'), id_part='name')
 register_cli_argument('appservice web config hostname', 'name', arg_type=name_arg_type, completer=get_hostname_completion_list, help="hostname assigned to the site, such as custom domains", id_part='child_name')
