@@ -157,10 +157,10 @@ def _call_rp_configure_cicd(
     while req.status_code == 202:  # Long-running operation
         time.sleep(10)
         req = requests.get(BASE_URL + req.headers['Location'], headers=headers, timeout=600)
-    json_request = req.json()
     if req.status_code != 200:
         raise CLIError(
             'Error: ' + str(req.status_code) + '. Could not configure CI/CD: ' + req.text)
+    json_request = req.json()
     return json_request
 
 def list_releases(name, resource_group_name):
@@ -186,11 +186,9 @@ def list_releases(name, resource_group_name):
 
     headers = {'Content-type': 'application/json', 'Authorization': o_auth_token}
     req = requests.get(get_releases_url, headers=headers, timeout=600)
-    json_request = req.json()
     if req.status_code != 200:
-        print('Error: ' + str(req.status_code) + '. Could not list releases: ' +
-              json_request["error"]["code"])
-        raise CLIError(req.text)
+        raise CLIError('Error: ' + str(req.status_code) + '. Could not list releases: ' + req.text)
+    json_request = req.json()
     return json_request
 
 def _ensure_docker_compose():

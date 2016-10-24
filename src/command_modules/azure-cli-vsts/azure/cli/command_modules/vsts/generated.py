@@ -10,7 +10,7 @@ from .custom import (
     list_releases,
     add_ci)
 
-cli_command('devops release create', add_release)
-cli_command('devops release list', list_releases)
+cli_command('vsts release create', add_release)
+cli_command('vsts release list', list_releases)
 
-cli_command('devops build create', add_ci)
+cli_command('vsts build create', add_ci)
