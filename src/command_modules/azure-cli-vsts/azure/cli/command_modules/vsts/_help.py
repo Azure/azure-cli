@@ -5,19 +5,19 @@
 
 from azure.cli.core.help_files import helps
 
-helps['devops'] = """
+helps['vsts'] = """
     type: group
     short-summary: "Set up automated builds and deployments for multi-container
         Docker applications."
 """
 
-helps['devops release'] = """
+helps['vsts release'] = """
     type: group
     short-summary: "Set up automated builds and deployments for a
         multi-container Docker application."
 """
 
-helps['devops build'] = """
+helps['vsts build'] = """
     type: group
     short-summary: "Set up automated builds for a multi-container Docker application."
 """

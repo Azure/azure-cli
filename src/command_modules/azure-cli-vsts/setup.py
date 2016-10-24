@@ -31,9 +31,9 @@ with open('README.rst', 'r', encoding='utf-8') as f:
     README = f.read()
 
 setup(
-    name='azure-cli-devops',
+    name='azure-cli-vsts',
     version=VERSION,
-    description='Microsoft Azure Command-Line Tools DevOps Command Module',
+    description='Microsoft Azure Command-Line Tools VSTS Command Module',
     long_description=README,
     license='MIT',
     author='Microsoft Corporation',
@@ -46,7 +46,7 @@ setup(
         'azure.cli.command_modules',
     ],
     packages=[
-        'azure.cli.command_modules.devops',
+        'azure.cli.command_modules.vsts',
     ],
     install_requires=DEPENDENCIES,
 )

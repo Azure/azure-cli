@@ -5,7 +5,7 @@
 
 # pylint: disable=unused-import
 
-import azure.cli.command_modules.devops.custom
-import azure.cli.command_modules.devops._params
-import azure.cli.command_modules.devops._help
-import azure.cli.command_modules.devops.generated
+import azure.cli.command_modules.vsts.custom
+import azure.cli.command_modules.vsts._params
+import azure.cli.command_modules.vsts._help
+import azure.cli.command_modules.vsts.generated
