@@ -49,9 +49,9 @@ class AppServiceLongRunningOperation(LongRunningOperation): #pylint: disable=too
                               "Run 'az appservice list-locations --linux-workers-enabled' " +
                               "to cross check")
                 elif 'Not enough available reserved instance servers to satisfy' in detail:
-                    detail = ("Plan with linux worker can only be created in a group " +
-                              "which has never contained a windows worker. Please use " +
-                              "a new resoruce group. Original error:" + detail)
+                    detail = ("Plan with Linux worker can only be created in a group " +
+                              "which has never contained a Windows worker. Please use " +
+                              "a new resource group. Original error:" + detail)
             return CLIError(detail)
         except: #pylint: disable=bare-except
             return ex
