@@ -179,9 +179,9 @@ helps['acs show'] = """
     type: command
     short-summary: show a container service
 """
-helps['acs update'] = """
+helps['acs scale'] = """
     type: command
-    short-summary: update a container service such as adding more private agents, etc.
+    short-summary: change private agent count of a container service.
 """
 helps['vm diagnostics'] = """
     type: group

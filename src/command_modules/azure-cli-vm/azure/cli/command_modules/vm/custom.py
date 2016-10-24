@@ -1014,6 +1014,9 @@ def vmss_set(**kwargs):
 
 cli_generic_update_command('vmss update', vmss_get, vmss_set)
 
-def update_acs(instance, agent_count):
-    instance.agent_pool_profiles[0].count = agent_count
-    return instance
+def update_acs(resource_group_name, container_service_name, new_agent_count):
+    client = _compute_client_factory()
+    instance = client.container_service.get(resource_group_name, container_service_name)
+    instance.agent_pool_profiles[0].count = new_agent_count
+    return client.container_service.create_or_update(resource_group_name, container_service_name, instance)
+
