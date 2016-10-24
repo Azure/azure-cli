@@ -8,7 +8,7 @@
 from codecs import open
 from setuptools import setup
 
-VERSION = '0.1.0b7'
+VERSION = '0.1.0b8'
 
 CLASSIFIERS = [
     'Development Status :: 4 - Beta',
@@ -43,7 +43,7 @@ setup(
     author_email='azpycli@microsoft.com',
     url='https://github.com/Azure/azure-cli',
     classifiers=CLASSIFIERS,
-    namespace_packages = [
+    namespace_packages=[
         'azure',
         'azure.cli',
         'azure.cli.command_modules',
