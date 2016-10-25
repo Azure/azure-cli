@@ -27,8 +27,8 @@ class CloudAlreadyRegisteredException(Exception):
 class CannotUnregisterCloudException(Exception):
     pass
 
-class CloudEndpoints(object):
-    def __init__(self,
+class CloudEndpoints(object): #pylint: disable=too-few-public-methods
+    def __init__(self, #pylint: disable=too-many-arguments
                  management=None,
                  resource_manager=None,
                  sql_management=None,
@@ -45,8 +45,8 @@ class CloudEndpoints(object):
         self.active_directory_resource_id = active_directory_resource_id
         self.active_directory_graph_resource_id = active_directory_graph_resource_id
 
-class CloudSuffixes(object):
-    def __init__(self,
+class CloudSuffixes(object): #pylint: disable=too-few-public-methods
+    def __init__(self, #pylint: disable=too-many-arguments
                  storage_endpoint=None,
                  keyvault_dns=None,
                  sql_server_hostname=None,
