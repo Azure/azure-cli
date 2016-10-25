@@ -28,15 +28,15 @@ class WinProxy(Proxy):
         Sets the HTTP proxy on Windows
         """
         setting = create_unicode_buffer(host+':'+str(port))
-        self.__set_internet_options(setting)
+        self._set_internet_options(setting)
 
     def disable_http_proxy(self):
         """
         Disables the HTTP proxy
         """
-        self.__set_internet_options(None, False)
+        self._set_internet_options(None, False)
 
-    def __set_internet_options(self, setting, on=True):
+    def _set_internet_options(self, setting, on=True):
         """
         Sets the internet options
         """

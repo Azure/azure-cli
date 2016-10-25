@@ -16,7 +16,7 @@ def disable_http_proxy():
     """
     Disables the HTTP proxy
     """
-    __get_proxy_instance().disable_http_proxy()
+    _get_proxy_instance().disable_http_proxy()
 
 def set_http_proxy(host, port):
     """
@@ -28,9 +28,9 @@ def set_http_proxy(host, port):
     if not port:
         raise ValueError('Missing port')
 
-    __get_proxy_instance().set_http_proxy(host, port)
+    _get_proxy_instance().set_http_proxy(host, port)
 
-def __get_proxy_instance():
+def _get_proxy_instance():
     """
     Gets the proxy class instance based on the OS
     """
