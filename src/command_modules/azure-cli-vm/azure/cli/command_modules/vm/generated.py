@@ -116,9 +116,9 @@ ContainerService._attribute_map['tags']['type'] = '{str}'#pylint: disable=protec
 cli_command('acs show', ContainerServiceOperations.get, factory)
 cli_command('acs list', ContainerServiceOperations.list, factory)
 cli_command('acs delete', ContainerServiceOperations.delete, factory)
-cli_generic_update_command('acs update', ContainerServiceOperations.get,
-                           ContainerServiceOperations.create_or_update,
-                           custom_function=update_acs, factory=factory)
+cli_command('acs scale', update_acs)
+#Per conversation with ACS team, hide the update till we have something meaningful to tweak
+#cli_generic_update_command('acs update', ContainerServiceOperations.get, ContainerServiceOperations.create_or_update, factory)
 
 # VM Diagnostics
 cli_command('vm diagnostics set', set_diagnostics_extension)

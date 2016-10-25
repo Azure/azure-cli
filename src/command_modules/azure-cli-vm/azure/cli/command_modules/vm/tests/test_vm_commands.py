@@ -1269,7 +1269,7 @@ class AzureContainerServiceScenarioTest(ResourceGroupVCRTestBase): #pylint: disa
             ])
 
         #scale-up
-        self.cmd('acs update -g {} -n {} --agent-count 5'.format(self.resource_group, acs_name), checks=[
+        self.cmd('acs scale -g {} -n {} --new-agent-count 5'.format(self.resource_group, acs_name), checks=[
             JMESPathCheck('agentPoolProfiles[0].count', 5),
             ])
         #show again
