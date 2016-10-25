@@ -76,7 +76,7 @@ register_cli_argument('acs', 'ssh_key_value', required=False, help='SSH key file
 register_extra_cli_argument('acs create', 'generate_ssh_keys', action='store_true', help='Generate SSH public and private key files if missing')
 register_cli_argument('acs', 'container_service_name', options_list=('--name', '-n'), help='The name of the container service', completer=get_resource_name_completion_list('Microsoft.ContainerService/ContainerServices'))
 register_cli_argument('acs create', 'agent_vm_size', completer=get_vm_size_completion_list)
-register_cli_argument('acs update', 'agent_count', type=int, help='The number of agents for the cluster')
+register_cli_argument('acs scale', 'new_agent_count', type=int, help='The number of agents for the cluster')
 
 register_cli_argument('vm capture', 'overwrite', action='store_true')
 
