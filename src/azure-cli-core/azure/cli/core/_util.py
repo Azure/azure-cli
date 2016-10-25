@@ -108,3 +108,7 @@ def todict(obj): #pylint: disable=too-many-return-statements
                      if not callable(v) and not k.startswith('_')])
     else:
         return obj
+
+def to_snake_case(s):
+    s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', s)
+    return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()

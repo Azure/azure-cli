@@ -45,13 +45,12 @@ def _auth_client_factory(scope=None):
 
 def _graph_client_factory(**_):
     from azure.cli.core._profile import Profile, CLOUD
-    from azure.cli.core.cloud import CloudEndpoint
     profile = Profile()
     cred, _, tenant_id = profile.get_login_credentials(
-        resource=CLOUD.endpoints[CloudEndpoint.ACTIVE_DIRECTORY_GRAPH_RESOURCE_ID])
+        resource=CLOUD.endpoints.active_directory_graph_resource_id)
     client = GraphRbacManagementClient(cred,
                                        tenant_id,
-                                       base_url=CLOUD.endpoints[CloudEndpoint.ACTIVE_DIRECTORY_GRAPH_RESOURCE_ID]) # pylint: disable=line-too-long
+                                       base_url=CLOUD.endpoints.active_directory_graph_resource_id)
     configure_common_settings(client)
     return client
 

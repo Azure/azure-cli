@@ -13,7 +13,6 @@ from azure.cli.core._config import az_config
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.validators import validate_key_value_pairs
 
-from azure.cli.core.cloud import CloudSuffix
 from azure.cli.core._profile import CLOUD
 
 from azure.mgmt.storage import StorageManagementClient
@@ -116,7 +115,7 @@ def validate_source_uri(namespace):
         blob if valid_blob_source else path,
         '?' if query_params else '',
         '&'.join(query_params),
-        CLOUD.suffixes[CloudSuffix.STORAGE_ENDPOINT])
+        CLOUD.suffixes.storage_endpoint)
 
     namespace.copy_source = uri
 

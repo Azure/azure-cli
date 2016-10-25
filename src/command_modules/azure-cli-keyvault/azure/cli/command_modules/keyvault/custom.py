@@ -88,13 +88,12 @@ def create_keyvault(client, resource_group_name, vault_name, location, #pylint:d
                     no_self_perms=False,
                     tags=None):
     from azure.cli.core._profile import Profile, CLOUD
-    from azure.cli.core.cloud import CloudEndpoint
     profile = Profile()
     cred, _, tenant_id = profile.get_login_credentials(
-        resource=CLOUD.endpoints[CloudEndpoint.ACTIVE_DIRECTORY_GRAPH_RESOURCE_ID])
+        resource=CLOUD.endpoints.active_directory_graph_resource_id)
     graph_client = GraphRbacManagementClient(cred,
                                              tenant_id,
-                                             base_url=CLOUD.endpoints[CloudEndpoint.ACTIVE_DIRECTORY_GRAPH_RESOURCE_ID]) # pylint: disable=line-too-long
+                                             base_url=CLOUD.endpoints.active_directory_graph_resource_id) # pylint: disable=line-too-long
     subscription = profile.get_subscription()
     if no_self_perms:
         access_policies = []
@@ -139,13 +138,12 @@ create_keyvault.__doc__ = VaultProperties.__doc__
 def _object_id_args_helper(object_id, spn, upn):
     if not object_id:
         from azure.cli.core._profile import Profile, CLOUD
-        from azure.cli.core.cloud import CloudEndpoint
         profile = Profile()
         cred, _, tenant_id = profile.get_login_credentials(
-            resource=CLOUD.endpoints[CloudEndpoint.ACTIVE_DIRECTORY_GRAPH_RESOURCE_ID])
+            resource=CLOUD.endpoints.active_directory_graph_resource_id)
         graph_client = GraphRbacManagementClient(cred,
                                                  tenant_id,
-                                                 base_url=CLOUD.endpoints[CloudEndpoint.ACTIVE_DIRECTORY_GRAPH_RESOURCE_ID]) # pylint: disable=line-too-long
+                                                 base_url=CLOUD.endpoints.active_directory_graph_resource_id) # pylint: disable=line-too-long
         object_id = _get_object_id(graph_client, spn=spn, upn=upn)
         if not object_id:
             raise CLIError('Unable to get object id from principal name.')
