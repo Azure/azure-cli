@@ -5,24 +5,18 @@
 
 import platform
 import subprocess
+from abc import abstractmethod
 
 try:
-    from azure.cli.command_modules.acs import win_proxy
+    from azure.cli.command_modules.acs.win_proxy import WinProxy
 except ImportError:
     pass
 
-# TODO (peterj, 10/11/2016): task 275567 - implement this for Linux
-def unset_http_proxy():
+def disable_http_proxy():
     """
-    Unsets/disables the HTTP proxy
+    Disables the HTTP proxy
     """
-    os_platform = platform.system()
-    if os_platform == 'Darwin':
-        subprocess.call('sudo networksetup -setwebproxystate wi-fi off', shell=True)
-    elif os_platform == 'Windows':
-        win_proxy.set_http_proxy(None, None, False)
-    else:
-        raise NotImplementedError('Not implemented yet for {}'.format(os_platform))
+    _get_proxy_instance().disable_http_proxy()
 
 def set_http_proxy(host, port):
     """
@@ -34,12 +28,76 @@ def set_http_proxy(host, port):
     if not port:
         raise ValueError('Missing port')
 
-    os_platform = platform.system()
+    _get_proxy_instance().set_http_proxy(host, port)
 
+def _get_proxy_instance():
+    """
+    Gets the proxy class instance based on the OS
+    """
+    os_platform = platform.system()
     if os_platform == 'Darwin':
-        cmd = 'sudo networksetup -setwebproxy wi-fi {} {}'.format(host, port)
-        subprocess.call(cmd, shell=True)
+        return MacProxy()
     elif os_platform == 'Windows':
-        win_proxy.set_http_proxy(host, port)
+        return WinProxy()
+    elif os_platform == 'Linux':
+        return LinuxProxy()
     else:
         raise NotImplementedError('Not implemented yet for {}'.format(os_platform))
+
+class Proxy(object):
+    """
+    Base proxy class
+    """
+    def __init__(self):
+        pass
+
+    @abstractmethod
+    def set_http_proxy(self, host, port):
+        """
+        Sets the HTTP proxy
+        """
+        pass
+
+    @abstractmethod
+    def disable_http_proxy(self):
+        """
+        Disables the HTTP proxy
+        """
+        pass
+
+class LinuxProxy(Proxy):
+    def __init__(self):
+        super(LinuxProxy, self).__init__()
+
+    def set_http_proxy(self, host, port):
+        """
+        Sets the HTTP proxy on Linux
+        """
+        subprocess.call('sudo gsettings set org.gnome.system.proxy mode \'manual\'', shell=True)
+        subprocess.call(
+            'sudo gsettings set org.gnome.system.proxy.http host \'{}\''.format(host), shell=True)
+        subprocess.call(
+            'sudo gsettings set org.gnome.system.proxy.http port {}'.format(port), shell=True)
+
+    def disable_http_proxy(self):
+        """
+        Disables the HTTP proxy
+        """
+        subprocess.call('sudo gsettings set org.gnome.system.proxy mode \'none\'', shell=True)
+
+class MacProxy(Proxy):
+    def __init__(self):
+        super(MacProxy, self).__init__()
+
+    def set_http_proxy(self, host, port):
+        """
+        Sets the HTTP proxy
+        """
+        cmd = 'sudo networksetup -setwebproxy wi-fi {} {}'.format(host, port)
+        subprocess.call(cmd, shell=True)
+
+    def disable_http_proxy(self):
+        """
+        Disables the HTTP proxy
+        """
+        subprocess.call('sudo networksetup -setwebproxystate wi-fi off', shell=True)
