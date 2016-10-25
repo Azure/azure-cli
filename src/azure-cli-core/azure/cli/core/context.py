@@ -31,7 +31,7 @@ class CannotDeleteDefaultContextException(Exception):
         return "You cannot delete the default context."
 
 ACTIVE_CONTEXT_FILE = os.path.join(GLOBAL_CONFIG_DIR, 'active_context')
-ACTIVE_CONTEXT_ENV_VAR = os.environ.get('AZURE_CONTEXT', None)
+ACTIVE_CONTEXT_ENV_VAR_NAME = 'AZURE_CONTEXT'
 DEFAULT_CONTEXT_NAME = 'default'
 
 get_active_context = lambda: get_context(get_active_context_name())
@@ -60,8 +60,9 @@ def _set_active_subscription(context):
         profile.set_active_subscription(subscription_to_use)
 
 def get_active_context_name():
-    if ACTIVE_CONTEXT_ENV_VAR:
-        return ACTIVE_CONTEXT_ENV_VAR
+    active_context_env_var = os.environ.get(ACTIVE_CONTEXT_ENV_VAR_NAME, None)
+    if active_context_env_var:
+        return active_context_env_var
     try:
         with open(ACTIVE_CONTEXT_FILE, "r") as active_context_file:
             return active_context_file.read()

@@ -27,6 +27,12 @@ class CloudAlreadyRegisteredException(Exception):
 class CannotUnregisterCloudException(Exception):
     pass
 
+class CloudEndpointNotSetException(Exception):
+    pass
+
+class CloudSuffixNotSetException(Exception):
+    pass
+
 class CloudEndpoints(object): #pylint: disable=too-few-public-methods
     def __init__(self, #pylint: disable=too-many-arguments
                  management=None,
@@ -45,6 +51,12 @@ class CloudEndpoints(object): #pylint: disable=too-few-public-methods
         self.active_directory_resource_id = active_directory_resource_id
         self.active_directory_graph_resource_id = active_directory_graph_resource_id
 
+    def __getattribute__(self, name):
+        val = object.__getattribute__(self, name)
+        if val is None:
+            raise CloudEndpointNotSetException("The endpoint '{}' for this cloud is not set but is used".format(name)) #pylint: disable=line-too-long
+        return val
+
 class CloudSuffixes(object): #pylint: disable=too-few-public-methods
     def __init__(self, #pylint: disable=too-many-arguments
                  storage_endpoint=None,
@@ -58,6 +70,12 @@ class CloudSuffixes(object): #pylint: disable=too-few-public-methods
         self.sql_server_hostname = sql_server_hostname
         self.azure_datalake_store_file_system_endpoint = azure_datalake_store_file_system_endpoint
         self.azure_datalake_analytics_catalog_and_job_endpoint = azure_datalake_analytics_catalog_and_job_endpoint #pylint: disable=line-too-long
+
+    def __getattribute__(self, name):
+        val = object.__getattribute__(self, name)
+        if val is None:
+            raise CloudSuffixNotSetException("The suffix '{}' for this cloud is not set but is used".format(name)) #pylint: disable=line-too-long
+        return val
 
 class Cloud(object): # pylint: disable=too-few-public-methods
     """ Represents an Azure Cloud instance """
