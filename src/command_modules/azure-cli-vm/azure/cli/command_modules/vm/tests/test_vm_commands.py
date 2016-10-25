@@ -1254,7 +1254,7 @@ class AzureContainerServiceScenarioTest(ResourceGroupVCRTestBase): #pylint: disa
         dns_prefix = 'myacs123'
 
         #create
-        self.cmd('acs create -g {} -n {} --dns-name-prefix {}'.format(self.resource_group, acs_name, dns_prefix), checks=[
+        self.cmd('acs create -g {} -n {} --dns-prefix {}'.format(self.resource_group, acs_name, dns_prefix), checks=[
             JMESPathCheck('masterFQDN', '{}mgmt.{}.cloudapp.azure.com'.format(dns_prefix, self.location)),
             JMESPathCheck('agentFQDN', '{}agents.{}.cloudapp.azure.com'.format(dns_prefix, self.location))
             ])

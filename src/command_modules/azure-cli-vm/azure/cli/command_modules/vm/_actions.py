@@ -268,8 +268,8 @@ def _handle_container_ssh_file(**kwargs):
             private_key_filepath = public_key_filepath[:-4]
         else:
             private_key_filepath = public_key_filepath + '.private'
-        logger.warning('Creating SSH key files: %s,%s', private_key_filepath, public_key_filepath)
         content = _generate_ssh_keys(private_key_filepath, public_key_filepath)
+        logger.warning('Created SSH key files: %s,%s', private_key_filepath, public_key_filepath)
     args.ssh_key_value = content
 
 def _generate_ssh_keys(private_key_filepath, public_key_filepath):
