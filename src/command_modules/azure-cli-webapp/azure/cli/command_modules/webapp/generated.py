@@ -12,7 +12,7 @@ from azure.cli.core.commands.arm import cli_generic_update_command
 from ._params import web_client_factory
 from .custom import (create_webapp, show_webapp, list_webapp,
                      delete_webapp, stop_webapp, restart_webapp,
-                     enable_local_git, set_deployment_user,
+                     enable_local_git, config_git, sync_site_repo, set_deployment_user,
                      get_git_url, view_in_browser, create_app_service_plan,
                      update_app_service_plan, config_diagnostics,
                      get_streaming_log, download_historical_logs,
@@ -48,6 +48,8 @@ cli_command('appservice web show-publish-profile',
 
 cli_command('appservice web git enable-local', enable_local_git)
 cli_command('appservice web git show-url', get_git_url)
+cli_command('appservice web git config', config_git)
+cli_command('appservice web git sync', sync_site_repo)
 cli_command('appservice web log tail', get_streaming_log)
 cli_command('appservice web log download', download_historical_logs)
 cli_command('appservice web log config', config_diagnostics)
@@ -78,7 +80,7 @@ cli_command('appservice list-locations', GlobalModelOperations.get_subscription_
 
 #Functionalities covered by better custom commands, so not exposed for now
 #cli_command('webapp get-source-control', SitesOperations.get_site_source_control, factory)
-#cli_command('webapp source-control list', ProviderOperations.get_source_controls, factory)
+cli_command('appservice web source-control list', SitesOperations.get_site_source_control, factory)
 
 #Not for ignite release
 #cli_command('webapp plan update-vnet-route', ServerFarmsOperations.update_vnet_route, factory)

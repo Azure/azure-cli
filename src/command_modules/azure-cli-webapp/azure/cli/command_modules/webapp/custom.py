@@ -13,7 +13,7 @@ except ImportError:
     from urlparse import urlparse # pylint: disable=import-error
 
 from azure.mgmt.web.models import (Site, SiteConfig, User, ServerFarmWithRichSku,
-                                   SkuDescription, SslState, HostNameBinding)
+                                   SkuDescription, SslState, HostNameBinding, SiteSourceControl)
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.arm import is_valid_resource_id, parse_resource_id
@@ -219,6 +219,17 @@ def enable_local_git(resource_group_name, name, slot=None):
 
     return {'url' : _get_git_url(client, resource_group_name, name, slot)}
 
+def config_git(resource_group_name, name, repo_url, branch=None, slot=None):
+    client = web_client_factory()
+    location = _get_location_from_webapp(client, resource_group_name, name)
+    source_control = SiteSourceControl(location, repo_url=repo_url, branch=None)
+    return _generic_site_operation(resource_group_name, name, 'create_or_update_site_source_control',
+                                   slot, source_control)
+
+def sync_site_repo(resource_group_name, name, slot=None):
+    return _generic_site_operation(resource_group_name, name, 'sync_site_repository',
+                                   slot)
+
 def create_app_service_plan(resource_group_name, name, sku, is_linux, number_of_workers=None,
                             location=None):
     client = web_client_factory()
@@ -287,6 +298,8 @@ def _get_location_from_app_service_plan(client, resource_group_name, plan):
     plan = client.server_farms.get_server_farm(resource_group_name, plan)
     return plan.location
 
+#TODO: need to check it is loca git or not
+#1. Rename to source control 2. to get kudu log, we should not ask for enable git! 3. workaround the LRO missong to link to git 
 def get_git_url(resource_group_name, name, slot=None):
     client = web_client_factory()
     return {'url' : _get_git_url(client, resource_group_name, name, slot)}
