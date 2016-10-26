@@ -13,6 +13,7 @@ from azure.cli.core.commands.parameters import (
 from azure.cli.core.commands import \
     (register_cli_argument, register_extra_cli_argument, CliArgumentType)
 import azure.cli.core.commands.arm # pylint: disable=unused-import
+from azure.cli.core._util import get_json_object
 
 from azure.cli.command_modules.keyvault.keyvaultclient.generated.models.key_vault_client_enums import \
     (JsonWebKeyOperation)
@@ -23,8 +24,7 @@ from azure.cli.command_modules.keyvault._validators import \
      get_attribute_validator,
      vault_base_url_type, validate_key_import_source,
      validate_key_type, validate_key_ops, validate_policy_permissions,
-     validate_principal, validate_resource_group_name,
-     json_string_type)
+     validate_principal, validate_resource_group_name)
 
 # CUSTOM CHOICE LISTS
 
@@ -98,13 +98,13 @@ register_cli_argument('keyvault certificate', 'certificate_version', options_lis
 register_attributes_argument('keyvault certificate create', 'certificate', CertificateAttributes, True)
 register_attributes_argument('keyvault certificate set-attributes', 'certificate', CertificateAttributes)
 for item in ['create', 'set-attributes']:
-    register_cli_argument('keyvault certificate {}'.format(item), 'certificate_policy', options_list=('--policy', '-p'), help='JSON encoded policy defintion. Use @{file} to load from a file.', type=json_string_type)
+    register_cli_argument('keyvault certificate {}'.format(item), 'certificate_policy', options_list=('--policy', '-p'), help='JSON encoded policy defintion. Use @{file} to load from a file.', type=get_json_object)
 
-register_cli_argument('keyvault certificate contact', 'contact_email', options_list=('--email',), help='Contact e-mail address. Must be unique.')
+register_cli_argument('keyvault certificate contact', 'contact_email', options_list=('--email',), help='Contact e-mail address. Must be unique within the vault.')
 register_cli_argument('keyvault certificate contact', 'contact_name', options_list=('--name',), help='Full contact name.')
 register_cli_argument('keyvault certificate contact', 'contact_phone', options_list=('--phone',), help='Contact phone number.')
 
-register_cli_argument('keyvault certificate issuer admin', 'email', options_list=('--email',), help='Admin e-mail address. Must be unique.')
+register_cli_argument('keyvault certificate issuer admin', 'email', options_list=('--email',), help='Admin e-mail address. Must be unique with the vault.')
 register_cli_argument('keyvault certificate issuer admin', 'name', options_list=('--name',), help='Full admin name.')
 register_cli_argument('keyvault certificate issuer admin', 'phone', options_list=('--phone',), help='Amin phone number.')
 

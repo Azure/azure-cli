@@ -5,8 +5,6 @@
 
 import argparse
 from datetime import datetime
-import json
-import re
 
 from azure.mgmt.keyvault import KeyVaultManagementClient
 from azure.mgmt.keyvault.models.key_vault_management_client_enums import \
@@ -116,28 +114,6 @@ def datetime_type(string):
     ''' Validates UTC datettime in format '%Y-%m-%d\'T\'%H:%M\'Z\''. '''
     date_format = '%Y-%m-%dT%H:%MZ'
     return datetime.strptime(string, date_format)
-
-def json_string_type(raw):
-    """ Loads a JSON string as an object and converts all keys to snake case """
-
-    regex1 = re.compile('(.)([A-Z][a-z]+)')
-    regex2 = re.compile('([a-z0-9])([A-Z])')
-
-    def _to_snake(s):
-        s1 = regex1.sub(r'\1_\2', s)
-        return regex2.sub(r'\1_\2', s1).lower()
-
-    def _convert_to_snake_case(item):
-        if isinstance(item, dict):
-            new_item = {}
-            for key, val in item.items():
-                new_item[_to_snake(key)] = _convert_to_snake_case(val)
-            return new_item
-        if isinstance(item, list):
-            return [_convert_to_snake_case(x) for x in item]
-        else:
-            return item
-    return _convert_to_snake_case(json.loads(raw))
 
 def vault_base_url_type(name):
     from azure.cli.core._profile import CLOUD

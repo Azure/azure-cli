@@ -269,7 +269,7 @@ class KeyVaultCertificateScenarioTest(ResourceGroupVCRTestBase):
             checks=JMESPathCheck('length(@)', 1))
 
         # test admin commands
-        self.cmd('keyvault certificate issuer admin add --vault-name {} --issuer-name issuer1 --email test@test.com --name "Test Admin" --phone 123-456-7890'.format(kv), checks=[
+        self.cmd('keyvault certificate issuer admin add --vault-name {} --issuer-name issuer1 --email test@test.com --first-name Test --last-name Admin --phone 123-456-7890'.format(kv), checks=[
             JMESPathCheck('newAdmin.emailAddress', 'test@test.com'),
             JMESPathCheck('newAdmin.firstName', 'Test'),
             JMESPathCheck('newAdmin.lastName', 'Admin'),

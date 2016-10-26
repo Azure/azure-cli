@@ -308,11 +308,11 @@ def delete_certificate_contact(client, vault_base_url, contact_email):
     from azure.cli.command_modules.keyvault.keyvaultclient.generated.models import \
         (Contacts, KeyVaultErrorException)
     contacts = client.get_certificate_contacts(vault_base_url).contact_list
-    new_contacts = Contacts([x for x in contacts if x.email_address != contact_email])
-    if len(contacts) == len(new_contacts.contact_list):
+    remaining = Contacts([x for x in contacts if x.email_address != contact_email])
+    if len(contacts) == len(remaining.contact_list):
         raise CLIError("contact '{}' not found in vault '{}'".format(contact_email, vault_base_url))
-    if new_contacts.contact_list:
-        return client.set_certificate_contacts(vault_base_url, new_contacts)
+    if remaining.contact_list:
+        return client.set_certificate_contacts(vault_base_url, remaining)
     else:
         return client.delete_certificate_contacts(vault_base_url)
 
@@ -378,20 +378,14 @@ def list_certificate_issuer_admins(client, vault_base_url, issuer_name):
     return client.get_certificate_issuer(
         vault_base_url, issuer_name).organization_details.admin_details
 
-def add_certificate_issuer_admin(client, vault_base_url, issuer_name, email, name=None,
-                                 phone=None):
+def add_certificate_issuer_admin(client, vault_base_url, issuer_name, email, first_name=None,
+                                 last_name=None, phone=None):
     """ Add admin details for a specified certificate issuer. """
     from azure.cli.command_modules.keyvault.keyvaultclient.generated.models import \
         (AdministratorDetails, KeyVaultErrorException)
     issuer = client.get_certificate_issuer(vault_base_url, issuer_name)
     org_details = issuer.organization_details
     admins = org_details.admin_details
-    first_name = None
-    last_name = None
-    if name:
-        name_comps = name.rsplit(' ', 1)
-        first_name = name_comps[0] if len(name_comps) > 1 else name_comps
-        last_name = name_comps[-1] if len(name_comps) > 1 else None
     if any((x for x in admins if x.email_address == email)):
         raise CLIError("admin '{}' already exists".format(email))
     new_admin = AdministratorDetails(first_name, last_name, email, phone)
