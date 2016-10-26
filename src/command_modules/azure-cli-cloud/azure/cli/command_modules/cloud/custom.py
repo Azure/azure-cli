@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 #---------------------------------------------------------------------------------------------
 
-from azure.cli.core._util import CLIError
+from azure.cli.core._util import CLIError, to_snake_case
 
 from azure.cli.core.cloud import (Cloud,
                                   get_clouds,
@@ -38,15 +38,21 @@ def register_cloud(cloud_name,
                    suffix_keyvault_dns=None,
                    suffix_azure_datalake_store_file_system_endpoint=None,
                    suffix_azure_datalake_analytics_catalog_and_job_endpoint=None):
-    cloud_args = cloud_config or locals()
-    cloud_to_add = Cloud(cloud_name, endpoints={}, suffixes={})
+    if cloud_config:
+        # Using JSON format so convert the keys to snake case
+        for key in cloud_config:
+            cloud_config[to_snake_case(key)] = cloud_config.pop(key)
+        cloud_args = cloud_config
+    else:
+        cloud_args = locals()
+    c = Cloud(cloud_name)
     for arg in cloud_args:
         if arg.startswith('endpoint_') and cloud_args[arg]:
-            cloud_to_add.endpoints[arg.replace('endpoint_', '')] = cloud_args[arg]
+            setattr(c.endpoints, arg.replace('endpoint_', ''), cloud_args[arg])
         elif arg.startswith('suffix_') and cloud_args[arg]:
-            cloud_to_add.suffixes[arg.replace('suffix_', '')] = cloud_args[arg]
+            setattr(c.suffixes, arg.replace('suffix_', ''), cloud_args[arg])
     try:
-        add_cloud(cloud_to_add)
+        add_cloud(c)
     except CloudAlreadyRegisteredException as e:
         raise CLIError(e)
 
