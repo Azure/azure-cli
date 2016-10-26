@@ -26,7 +26,6 @@ def dcos_browse(name, resource_group_name):
     :param resource_group_name:  Name of Azure container service's resource group.
     :type resource_group_name: String
     """
-
     acs_info = _get_acs_info(name, resource_group_name)
     acs = acs_client.ACSClient()
     if not acs.connect(_get_host_name(acs_info), _get_username(acs_info)):
@@ -61,32 +60,26 @@ def dcos_browse(name, resource_group_name):
 
     return
 
-def dcos_install():
+def dcos_install_cli(install_location=None):
     """
     Downloads the dcos command line from Mesosphere
     """
-    install_location = ""
-    file_url = ""
-
+    file_url = ''
     system = platform.system()
     if system == 'Windows':
-        install_location = 'C:\Program Files\dcos.exe'
         file_url = 'https://downloads.dcos.io/binaries/cli/windows/x86-64/dcos-1.8/dcos.exe'
-    elif system == 'Linux':
-        install_location = '/usr/local/bin/dcos'
+    elif system == 'Linux' or system == 'Darwin':
         file_url = 'https://downloads.dcos.io/binaries/cli/linux/x86-64/dcos-1.8/dcos'
     elif system == 'Darwin':
-        install_location = '/usr/local/bin/dcos'
         file_url = 'https://downloads.dcos.io/binaries/cli/darwin/x86-64/dcos-1.8/dcos'
     else:
-        logger.error('unknown system: %s' % system)
+        raise CLIError('Proxy server ({}) does not exist on the cluster.'.format(system))
 
-    user_location = input('dcos binary install location [%s]:' % install_location)
-    if len(user_location) == 0:
-        user_location = install_location
-
-    logger.info("Downloading client to %s\n" % user_location)
-    urllib.request.urlretrieve(file_url, user_location)
+    logger.info('Downloading client to %s', install_location)
+    try:
+        urllib.request.urlretrieve(file_url, install_location)
+    except IOError as err:
+        raise CLIError('Connection error while attempting to download client ({})'.format(err))
 
 def _get_host_name(acs_info):
     """

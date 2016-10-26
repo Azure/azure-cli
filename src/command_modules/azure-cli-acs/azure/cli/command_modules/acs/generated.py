@@ -4,12 +4,12 @@
 #---------------------------------------------------------------------------------------------
 
 from azure.cli.core.commands import cli_command
-
 from .custom import (
     dcos_browse)
 
 from .custom import (
-    dcos_install)
+    dcos_install_cli)
 
 cli_command('acs dcos browse', dcos_browse)
-cli_command('acs dcos install', dcos_install)
+cli_command('acs dcos install-cli', dcos_install_cli)
+
