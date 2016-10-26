@@ -68,7 +68,7 @@ def dcos_install_cli(install_location=None):
     system = platform.system()
     if system == 'Windows':
         file_url = 'https://downloads.dcos.io/binaries/cli/windows/x86-64/dcos-1.8/dcos.exe'
-    elif system == 'Linux' or system == 'Darwin':
+    elif system == 'Linux':
         file_url = 'https://downloads.dcos.io/binaries/cli/linux/x86-64/dcos-1.8/dcos'
     elif system == 'Darwin':
         file_url = 'https://downloads.dcos.io/binaries/cli/darwin/x86-64/dcos-1.8/dcos'
