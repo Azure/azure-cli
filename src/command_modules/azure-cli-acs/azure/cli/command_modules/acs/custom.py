@@ -3,8 +3,10 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 #---------------------------------------------------------------------------------------------
 
+import platform
 import random
 import string
+import urllib.request
 
 import azure.cli.core._logging as _logging
 from azure.cli.command_modules.acs import acs_client, proxy
@@ -58,6 +60,33 @@ def dcos_browse(name, resource_group_name):
         proxy.disable_http_proxy()
 
     return
+
+def dcos_install():
+    """
+    Downloads the dcos command line from Mesosphere
+    """
+    install_location = ""
+    file_url = ""
+
+    system = platform.system()
+    if system == 'Windows':
+        install_location = 'C:\Program Files\dcos.exe'
+        file_url = 'https://downloads.dcos.io/binaries/cli/windows/x86-64/dcos-1.8/dcos.exe'
+    elif system == 'Linux':
+        install_location = '/usr/local/bin/dcos'
+        file_url = 'https://downloads.dcos.io/binaries/cli/linux/x86-64/dcos-1.8/dcos'
+    elif system == 'Darwin':
+        install_location = '/usr/local/bin/dcos'
+        file_url = 'https://downloads.dcos.io/binaries/cli/darwin/x86-64/dcos-1.8/dcos'
+    else:
+        logger.error('unknown system: %s' % system)
+
+    user_location = input('dcos binary install location [%s]:' % install_location)
+    if len(user_location) == 0:
+        user_location = install_location
+
+    logger.info("Downloading client to %s\n" % user_location)
+    urllib.request.urlretrieve(file_url, user_location)
 
 def _get_host_name(acs_info):
     """
