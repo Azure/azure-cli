@@ -103,3 +103,5 @@ register_cli_argument('appservice web config update', 'app_command_line', option
 
 register_cli_argument('appservice web config hostname', 'webapp', help="webapp name", completer=get_resource_name_completion_list('Microsoft.Web/sites'), id_part='name')
 register_cli_argument('appservice web config hostname', 'name', arg_type=name_arg_type, completer=get_hostname_completion_list, help="hostname assigned to the site, such as custom domains", id_part='child_name')
+
+register_cli_argument('appservice web source-control', 'is_manual_integration', action='store_true')

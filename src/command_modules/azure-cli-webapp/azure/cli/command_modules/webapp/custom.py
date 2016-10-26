@@ -207,6 +207,23 @@ def create_webapp_slot(resource_group_name, webapp, slot, configuration_source=N
 
     return client.sites.create_or_update_site_slot(resource_group_name, webapp, slot_def, slot)
 
+#TODO: need to check it is local git or not
+#1. Rename to source control 2. to get kudu log, we should not ask for enable git! 3. workaround the LRO missong to link to git
+def config_source_control(resource_group_name, name, repo_url, branch=None,
+                          is_manual_integration=None, slot=None):
+    client = web_client_factory()
+    location = _get_location_from_webapp(client, resource_group_name, name)
+    source_control = SiteSourceControl(location, repo_url=repo_url, branch=branch,
+                                       is_manual_integration=is_manual_integration)
+    return _generic_site_operation(resource_group_name, name, 'create_or_update_site_source_control',
+                                   slot, source_control)
+
+def show_source_control(resource_group_name, name, slot=None):
+    return _generic_site_operation(resource_group_name, name, 'get_site_source_control', slot)
+
+def delete_source_control(resource_group_name, name, slot=None):
+    return _generic_site_operation(resource_group_name, name, 'delete_site_source_control', slot)
+
 def enable_local_git(resource_group_name, name, slot=None):
     client = web_client_factory()
     location = _get_location_from_webapp(client, resource_group_name, name)
@@ -217,14 +234,7 @@ def enable_local_git(resource_group_name, name, slot=None):
     else:
         client.sites.create_or_update_site_config_slot(resource_group_name, name, site_config, slot)
 
-    return {'url' : _get_git_url(client, resource_group_name, name, slot)}
-
-def config_git(resource_group_name, name, repo_url, branch=None, slot=None):
-    client = web_client_factory()
-    location = _get_location_from_webapp(client, resource_group_name, name)
-    source_control = SiteSourceControl(location, repo_url=repo_url, branch=None)
-    return _generic_site_operation(resource_group_name, name, 'create_or_update_site_source_control',
-                                   slot, source_control)
+    return {'url' : _get_local_git_url(client, resource_group_name, name, slot)}
 
 def sync_site_repo(resource_group_name, name, slot=None):
     return _generic_site_operation(resource_group_name, name, 'sync_site_repository',
@@ -298,26 +308,19 @@ def _get_location_from_app_service_plan(client, resource_group_name, plan):
     plan = client.server_farms.get_server_farm(resource_group_name, plan)
     return plan.location
 
-#TODO: need to check it is loca git or not
-#1. Rename to source control 2. to get kudu log, we should not ask for enable git! 3. workaround the LRO missong to link to git 
-def get_git_url(resource_group_name, name, slot=None):
-    client = web_client_factory()
-    return {'url' : _get_git_url(client, resource_group_name, name, slot)}
-
-def _get_git_url(client, resource_group_name, name, slot=None):
+def _get_local_git_url(client, resource_group_name, name, slot=None):
     user = client.provider.get_publishing_user()
-    repo_url = _get_repo_url(client, resource_group_name, name, slot)
-    parsed = urlparse(repo_url)
-    git_url = '{}://{}@{}/{}.git'.format(parsed.scheme, user.publishing_user_name,
-                                         parsed.netloc, name)
-    return git_url
+    result = _generic_site_operation(resource_group_name, name, 'get_site_source_control', slot)
+    if result.repo_url is None:
+        raise CLIError("Please config source control first through commands under 'az appservice web source-control config-local-git'")
+    parsed = urlparse(result.repo_url)
+    return '{}://{}@{}/{}.git'.format(parsed.scheme, user.publishing_user_name,
+                                      parsed.netloc, name)
 
-def _get_repo_url(client, resource_group_name, name, slot=None):
-    scc = _generic_site_operation(resource_group_name, name, 'get_site_source_control',
-                                  slot, client=client)
-    if scc.repo_url is None:
-        raise CLIError("Please enable Git deployment, say, run 'webapp git enable-local'")
-    return scc.repo_url
+def _get_scm_url(client, resource_group_name, name, slot):
+    poller = client.sites.list_site_publishing_credentials(resource_group_name, name)
+    result = poller.result()
+    return result.scm_uri
 
 def set_deployment_user(user_name, password=None):
     '''
@@ -394,14 +397,14 @@ def config_slot_auto_swap(resource_group_name, webapp, slot, auto_swap_slot=None
 
 def get_streaming_log(resource_group_name, name, provider=None, slot=None):
     client = web_client_factory()
-    repo_url = _get_repo_url(client, resource_group_name, name, slot)
-    streaming_url = repo_url + '/logstream'
+    scm_url = _get_scm_url(client, resource_group_name, name, slot)
+    streaming_url = scm_url + '/logstream'
     import time
     if provider:
         streaming_url += ('/' + provider.lstrip('/'))
 
     user, password = _get_site_credential(client, resource_group_name, name)
-    t = threading.Thread(target=_stream_trace, args=(streaming_url, user, password))
+    t = threading.Thread(target=_stream_trace, args=(streaming_url,user, password))
     t.daemon = True
     t.start()
 
@@ -414,9 +417,8 @@ def download_historical_logs(resource_group_name, name, log_file=None, slot=None
     '''
     client = web_client_factory()
     user, password = _get_site_credential(client, resource_group_name, name)
-    repo_url = _get_repo_url(client, resource_group_name, name, slot)
-    host = urlparse(repo_url).netloc
-    url = "https://{}:{}@{}/dump".format(user, password, host)
+    scm_url = _get_scm_url(client, resource_group_name, name, slot)
+    url = scm_url.rstrip('/') + '/dump'
     import requests
     r = requests.get(url, stream=True)
     with open(log_file, 'wb') as f:
