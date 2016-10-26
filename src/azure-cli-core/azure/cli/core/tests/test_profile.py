@@ -9,7 +9,6 @@ import unittest
 import mock
 from azure.mgmt.resource.subscriptions.models import (SubscriptionState, Subscription,
                                                       SubscriptionPolicies, spendingLimit)
-from azure.cli.core.cloud import CloudEndpoint
 from azure.cli.core._profile import Profile, CredsCache, SubscriptionFinder, CLOUD
 
 class Test_Profile(unittest.TestCase):
@@ -245,7 +244,7 @@ class Test_Profile(unittest.TestCase):
         profile._set_subscriptions(consolidated)
         #action
         cred, _, tenant_id = profile.get_login_credentials(
-            resource=CLOUD.endpoints[CloudEndpoint.ACTIVE_DIRECTORY_GRAPH_RESOURCE_ID])
+            resource=CLOUD.endpoints.active_directory_graph_resource_id)
         _, _ = cred._token_retriever()
         #verify
         mock_get_token.assert_called_once_with(mock.ANY, self.user1, self.tenant_id,
