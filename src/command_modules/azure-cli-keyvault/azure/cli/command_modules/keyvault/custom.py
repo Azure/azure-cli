@@ -202,7 +202,7 @@ def delete_policy(client, resource_group_name, vault_name, object_id=None, spn=N
 # pylint: disable=too-many-arguments
 def create_key(client, vault_base_url, key_name, destination, key_size=None, key_ops=None,
                disabled=False, expires=None, not_before=None, tags=None):
-    from azure.cli.command_modules.keyvault.keyvaultclient.models import KeyAttributes
+    from azure.cli.command_modules.keyvault.keyvaultclient.generated.models import KeyAttributes
     key_attrs = KeyAttributes(not disabled, not_before, expires)
     return client.create_key(
         vault_base_url, key_name, destination, key_size, key_ops, key_attrs, tags)
@@ -231,7 +231,8 @@ def import_key(client, vault_base_url, key_name, destination, key_ops=None, disa
                expires=None, not_before=None, tags=None, pem_file=None, pem_password=None,
                byok_file=None):
     # TODO: Round 3
-    from azure.cli.command_modules.keyvault.keyvaultclient.models import KeyAttributes, JsonWebKey
+    from azure.cli.command_modules.keyvault.keyvaultclient.generated.models import \
+        (KeyAttributes, JsonWebKey)
     key_attrs = KeyAttributes(not disabled, not_before, expires)
     key_obj = JsonWebKey(key_ops=key_ops)
     if pem_file:
@@ -256,7 +257,8 @@ def import_key(client, vault_base_url, key_name, destination, key_ops=None, disa
 
 def create_certificate(client, vault_base_url, certificate_name, certificate_policy,
                        disabled=False, expires=None, not_before=None, tags=None):
-    from azure.cli.command_modules.keyvault.keyvaultclient.models import CertificateAttributes
+    from azure.cli.command_modules.keyvault.keyvaultclient.generated.models import \
+        (CertificateAttributes)
     cert_attrs = CertificateAttributes(not disabled, not_before, expires)
     logger.info("Starting long running operation 'keyvault certificate create'")
     client.create_certificate(
@@ -286,14 +288,139 @@ def create_certificate(client, vault_base_url, certificate_name, certificate_pol
 
 create_certificate.__doc__ = KeyVaultClient.create_certificate.__doc__
 
+def add_certificate_contact(client, vault_base_url, contact_email, contact_name=None,
+                            contact_phone=None):
+    """ Add a contact to the specified vault to receive notifications of certificate operations. """
+    from azure.cli.command_modules.keyvault.keyvaultclient.generated.models import \
+        (Contact, Contacts, KeyVaultErrorException)
+    try:
+        contacts = client.get_certificate_contacts(vault_base_url)
+    except KeyVaultErrorException:
+        contacts = Contacts([])
+    contact = Contact(contact_email, contact_name, contact_phone)
+    if any((x for x in contacts.contact_list if x.email_address == contact_email)):
+        raise CLIError("contact '{}' already exists".format(contact_email))
+    contacts.contact_list.append(contact)
+    return client.set_certificate_contacts(vault_base_url, contacts)
+
+def delete_certificate_contact(client, vault_base_url, contact_email):
+    """ Remove a certificate contact from the specified vault. """
+    from azure.cli.command_modules.keyvault.keyvaultclient.generated.models import \
+        (Contacts, KeyVaultErrorException)
+    contacts = client.get_certificate_contacts(vault_base_url).contact_list
+    remaining = Contacts([x for x in contacts if x.email_address != contact_email])
+    if len(contacts) == len(remaining.contact_list):
+        raise CLIError("contact '{}' not found in vault '{}'".format(contact_email, vault_base_url))
+    if remaining.contact_list:
+        return client.set_certificate_contacts(vault_base_url, remaining)
+    else:
+        return client.delete_certificate_contacts(vault_base_url)
+
+def create_certificate_issuer(client, vault_base_url, issuer_name, provider_name, account_id=None,
+                              password=None, disabled=False, organization_id=None):
+    """ Create a certificate issuer record.
+    :param issuer_name: Unique identifier for the issuer settings.
+    :param provider_name: The certificate provider name. Must be registered with your
+        tenant ID and in your region.
+    :param account_id: The issuer account id/username/etc.
+    :param password: The issuer account password/secret/etc.
+    :param organization_id: The organization id.
+    """
+    from azure.cli.command_modules.keyvault.keyvaultclient.generated.models import \
+        (CertificateIssuerSetParameters, IssuerCredentials, OrganizationDetails, IssuerAttributes,
+         AdministratorDetails, KeyVaultErrorException)
+    try:
+        client.get_certificate_issuer(vault_base_url, issuer_name)
+        raise CLIError("issuer '{}' already exists".format(issuer_name))
+    except KeyVaultErrorException:
+        # ensure issuer does not already exist
+        pass
+    credentials = IssuerCredentials(account_id, password)
+    issuer_attrs = IssuerAttributes(not disabled)
+    org_details = OrganizationDetails(organization_id, admin_details=[])
+    return client.set_certificate_issuer(
+        vault_base_url, issuer_name, provider_name, credentials, org_details, issuer_attrs)
+
+def update_certificate_issuer(client, vault_base_url, issuer_name, provider_name=None,
+                              account_id=None, password=None, enabled=None, organization_id=None):
+    """ Update a certificate issuer record.
+    :param issuer_name: Unique identifier for the issuer settings.
+    :param provider_name: The certificate provider name. Must be registered with your
+        tenant ID and in your region.
+    :param account_id: The issuer account id/username/etc.
+    :param password: The issuer account password/secret/etc.
+    :param organization_id: The organization id.
+    """
+    from azure.cli.command_modules.keyvault.keyvaultclient.generated.models import \
+        (CertificateIssuerSetParameters, IssuerCredentials, OrganizationDetails, IssuerAttributes,
+         AdministratorDetails, KeyVaultErrorException)
+
+    def update(obj, prop, value, nullable=False):
+        set_value = value if value is not None else getattr(obj, prop, None)
+        if not set_value and not nullable:
+            raise CLIError("property '{}' cannot be cleared".format(prop))
+        elif not set_value and nullable:
+            set_value = None
+        setattr(obj, prop, set_value)
+
+    issuer = client.get_certificate_issuer(vault_base_url, issuer_name)
+    update(issuer.credentials, 'account_id', account_id, True)
+    update(issuer.credentials, 'password', password, True)
+    update(issuer.attributes, 'enabled', enabled)
+    update(issuer.organization_details, 'id', organization_id, True)
+    update(issuer, 'provider', provider_name)
+    return client.set_certificate_issuer(
+        vault_base_url, issuer_name, issuer.provider, issuer.credentials,
+        issuer.organization_details, issuer.attributes)
+
+def list_certificate_issuer_admins(client, vault_base_url, issuer_name):
+    """ List admins for a specified certificate issuer. """
+    return client.get_certificate_issuer(
+        vault_base_url, issuer_name).organization_details.admin_details
+
+def add_certificate_issuer_admin(client, vault_base_url, issuer_name, email, first_name=None,
+                                 last_name=None, phone=None):
+    """ Add admin details for a specified certificate issuer. """
+    from azure.cli.command_modules.keyvault.keyvaultclient.generated.models import \
+        (AdministratorDetails, KeyVaultErrorException)
+
+    issuer = client.get_certificate_issuer(vault_base_url, issuer_name)
+    org_details = issuer.organization_details
+    admins = org_details.admin_details
+    if any((x for x in admins if x.email_address == email)):
+        raise CLIError("admin '{}' already exists".format(email))
+    new_admin = AdministratorDetails(first_name, last_name, email, phone)
+    admins.append(new_admin)
+    org_details.admin_details = admins
+    result = client.set_certificate_issuer(
+        vault_base_url, issuer_name, issuer.provider, issuer.credentials, org_details,
+        issuer.attributes)
+    created_admin = next(x for x in result.organization_details.admin_details \
+        if x.email_address == email)
+    return created_admin
+
+def delete_certificate_issuer_admin(client, vault_base_url, issuer_name, email):
+    """ Remove admin details for the specified certificate issuer. """
+    from azure.cli.command_modules.keyvault.keyvaultclient.generated.models import \
+        (AdministratorDetails, KeyVaultErrorException)
+    issuer = client.get_certificate_issuer(vault_base_url, issuer_name)
+    org_details = issuer.organization_details
+    admins = org_details.admin_details
+    remaining = [x for x in admins if x.email_address != email]
+    if len(remaining) == len(admins):
+        raise CLIError("admin '{}' not found for issuer '{}'".format(email, issuer_name))
+    org_details.admin_details = remaining
+    client.set_certificate_issuer(
+        vault_base_url, issuer_name, issuer.provider, issuer.credentials, org_details,
+        issuer.attributes)
 
 def certificate_policy_template():
-    from azure.cli.command_modules.keyvault.keyvaultclient.models import \
+    from azure.cli.command_modules.keyvault.keyvaultclient.generated.models import \
         (CertificatePolicy, CertificateAttributes, KeyProperties, SecretProperties,
          X509CertificateProperties, SubjectAlternativeNames, LifetimeAction, Action, Trigger,
          IssuerParameters)
-    from azure.cli.command_modules.keyvault.keyvaultclient.models.key_vault_client_enums import \
-        (ActionType, JsonWebKeyType, KeyUsageType)
+    from azure.cli.command_modules.keyvault.keyvaultclient.generated.models.key_vault_client_enums \
+        import ActionType, JsonWebKeyType, KeyUsageType
     # create sample policy
     template = CertificatePolicy(
         key_properties=KeyProperties(

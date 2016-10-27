@@ -257,7 +257,7 @@ def _update_provider(namespace, registering):
 
     #timeout'd, normal for resources with many regions, but let users know.
     action = 'Registering' if registering else 'Unregistering'
-    msg_template = '%s is still on-going. You can monitor using \'az resource provider show -n %s\''
+    msg_template = '%s is still on-going. You can monitor using \'az provider show -n %s\''
     logger.warning(msg_template, action, namespace)
 
 def move_resource(ids, destination_group, destination_subscription_id=None):
