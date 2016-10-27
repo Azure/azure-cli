@@ -15,9 +15,11 @@ import azure.cli.core._logging as _logging
 from azure.cli.core._profile import Profile
 # pylint: disable=too-few-public-methods,too-many-arguments,no-self-use,too-many-locals,line-too-long
 from azure.cli.core._util import CLIError
+from os import listdir
+import sys
 
 logger = _logging.get_az_logger(__name__)
-BASE_URL = "https://management.azure.com"
+BASE_URL = "http://localhost:44454"
 RESOURCE_BASE_URL = "/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}"
 CONTAINER_SERVICE_BASE_URL = RESOURCE_BASE_URL + "/providers/Microsoft.ContainerService"
 CONTAINER_SERVICE_RESOURCE_URL = (CONTAINER_SERVICE_BASE_URL +
@@ -192,6 +194,14 @@ def list_releases(name, resource_group_name):
     json_request = req.json()
     return json_request
 
+def gitroot():
+    ''' returns the absolute path of the repository root '''
+    try:
+        base = check_output(['git', 'rev-parse', '--show-toplevel'])
+    except CalledProcessError:
+        raise IOError('Current working directory is not a git repository')
+    return base.decode('utf-8').strip()
+
 def _ensure_docker_compose():
     """
     1. Raises an error if there is no docker_compose_file present.
@@ -202,6 +212,12 @@ def _ensure_docker_compose():
     docker_compose_file = 'docker-compose.yml'
     docker_compose_test_file = 'docker-compose.test.yml'
     docker_compose_expected_version = '2'
+
+    print(gitroot())
+    print(os.path.isfile(docker_compose_file))
+    # all_files = [f for f in listdir(mypath) if isfile(join(mypath, f))]
+    # print(all_files)
+    sys.exit()
     if not os.path.isfile(docker_compose_file):
         raise CLIError('Docker compose file "{}" was not found.'.format(docker_compose_file))
     with open(docker_compose_file, 'r') as f:
