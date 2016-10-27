@@ -16,7 +16,14 @@ from . import HttpBearerChallenge
 from . import HttpBearerChallengeCache as ChallengeCache
 
 class KeyVaultAuthBase(AuthBase):
+    """Class used internally by KeyVaultAuthentication. Queries the challenge if
+    cached and retrieves the necessary token for the Key Vault resource to set the
+    request Authorization header.
 
+    :param authorization_callback: A callback function that accepts three parameters
+    (authorization_server, resource, scope) and returns an authorization object.
+    :type authorization_callback: function
+    """
     def __init__(self, authorization_callback):
         self._callback = authorization_callback
         self._token = None
@@ -48,7 +55,12 @@ class KeyVaultAuthBase(AuthBase):
         request.headers['Authorization'] = '{} {}'.format(auth[0], auth[1])
 
 class KeyVaultAuthentication(Authentication):
+    """Credential class used to interact with Key Vault data resources.
 
+    :param authorization_callback: A callback function that accepts three parameters
+    (authorization_server, resource, scope) and returns an authorization object.
+    :type authorization_callback: function
+    """
     def __init__(self, authorization_callback):
         super(KeyVaultAuthentication, self).__init__()
         self.auth = KeyVaultAuthBase(authorization_callback)
