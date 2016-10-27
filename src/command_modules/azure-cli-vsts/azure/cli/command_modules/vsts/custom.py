@@ -277,7 +277,6 @@ def _check_registry_information(registry_name, registry_resource_id):
     :type name: String
     Sample registry_resource_id: /subscriptions/{subscriptionId}/resourcegroups/{resourceGroup}/providers/Microsoft.ContainerRegistry/registries/{registryName}
     """
-    
     if registry_name and registry_resource_id:
         raise CLIError("Please provide only one of registry-name and registry-resource-id, not both.")
 
