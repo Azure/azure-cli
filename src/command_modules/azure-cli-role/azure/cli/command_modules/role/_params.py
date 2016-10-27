@@ -17,6 +17,7 @@ register_cli_argument('ad app', 'reply_urls', nargs='+',
                       help='space separated URIs to which Azure AD will redirect in response to an OAuth 2.0 request. The value does not need to be a physical endpoint, but must be a valid URI.')
 register_cli_argument('ad app', 'start_date', help='the start date after which password or key would be valid. Default value is current time')
 register_cli_argument('ad app', 'end_date', help='the end date till which password or key is valid. Default value is one year after current time')
+register_cli_argument('ad app', 'available_to_other_tenants', action='store_true', help='the application can be used from any Azure AD tenants')
 register_cli_argument('ad app', 'key_value', help='the value for the key credentials associated with the application')
 # TODO: Update these with **enum_choice_list(...) when SDK supports proper enums
 register_cli_argument('ad app', 'key_type', default='AsymmetricX509Cert',
