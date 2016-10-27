@@ -104,7 +104,7 @@ register_cli_argument('keyvault certificate contact', 'contact_email', options_l
 register_cli_argument('keyvault certificate contact', 'contact_name', options_list=('--name',), help='Full contact name.')
 register_cli_argument('keyvault certificate contact', 'contact_phone', options_list=('--phone',), help='Contact phone number.')
 
-register_cli_argument('keyvault certificate issuer admin', 'email', options_list=('--email',), help='Admin e-mail address. Must be unique with the vault.')
+register_cli_argument('keyvault certificate issuer admin', 'email', options_list=('--email',), help='Admin e-mail address. Must be unique within the vault.')
 register_cli_argument('keyvault certificate issuer admin', 'name', options_list=('--name',), help='Full admin name.')
 register_cli_argument('keyvault certificate issuer admin', 'phone', options_list=('--phone',), help='Amin phone number.')
 

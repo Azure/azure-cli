@@ -270,18 +270,18 @@ class KeyVaultCertificateScenarioTest(ResourceGroupVCRTestBase):
 
         # test admin commands
         self.cmd('keyvault certificate issuer admin add --vault-name {} --issuer-name issuer1 --email test@test.com --first-name Test --last-name Admin --phone 123-456-7890'.format(kv), checks=[
-            JMESPathCheck('newAdmin.emailAddress', 'test@test.com'),
-            JMESPathCheck('newAdmin.firstName', 'Test'),
-            JMESPathCheck('newAdmin.lastName', 'Admin'),
-            JMESPathCheck('newAdmin.phone', '123-456-7890'),
+            JMESPathCheck('emailAddress', 'test@test.com'),
+            JMESPathCheck('firstName', 'Test'),
+            JMESPathCheck('lastName', 'Admin'),
+            JMESPathCheck('phone', '123-456-7890'),
         ])
         with self.assertRaises(CLIError):
             self.cmd('keyvault certificate issuer admin add --vault-name {} --issuer-name issuer1 --email test@test.com'.format(kv))
         self.cmd('keyvault certificate issuer admin add --vault-name {} --issuer-name issuer1 --email test2@test.com'.format(kv), checks=[
-            JMESPathCheck('newAdmin.emailAddress', 'test2@test.com'),
-            JMESPathCheck('newAdmin.firstName', None),
-            JMESPathCheck('newAdmin.lastName', None),
-            JMESPathCheck('newAdmin.phone', None),
+            JMESPathCheck('emailAddress', 'test2@test.com'),
+            JMESPathCheck('firstName', None),
+            JMESPathCheck('lastName', None),
+            JMESPathCheck('phone', None),
         ])
         self.cmd('keyvault certificate issuer admin list --vault-name {} --issuer-name issuer1'.format(kv),
             checks=JMESPathCheck('length(@)', 2))

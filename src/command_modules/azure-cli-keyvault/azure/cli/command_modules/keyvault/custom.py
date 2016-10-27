@@ -383,6 +383,7 @@ def add_certificate_issuer_admin(client, vault_base_url, issuer_name, email, fir
     """ Add admin details for a specified certificate issuer. """
     from azure.cli.command_modules.keyvault.keyvaultclient.generated.models import \
         (AdministratorDetails, KeyVaultErrorException)
+
     issuer = client.get_certificate_issuer(vault_base_url, issuer_name)
     org_details = issuer.organization_details
     admins = org_details.admin_details
@@ -391,10 +392,12 @@ def add_certificate_issuer_admin(client, vault_base_url, issuer_name, email, fir
     new_admin = AdministratorDetails(first_name, last_name, email, phone)
     admins.append(new_admin)
     org_details.admin_details = admins
-    client.set_certificate_issuer(
+    result = client.set_certificate_issuer(
         vault_base_url, issuer_name, issuer.provider, issuer.credentials, org_details,
         issuer.attributes)
-    return {'newAdmin': new_admin}
+    created_admin = next(x for x in result.organization_details.admin_details \
+        if x.email_address == email)
+    return created_admin
 
 def delete_certificate_issuer_admin(client, vault_base_url, issuer_name, email):
     """ Remove admin details for the specified certificate issuer. """
