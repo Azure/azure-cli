@@ -22,7 +22,7 @@ from .custom import (create_webapp, show_webapp, list_webapp,
                      get_app_settings, update_app_settings, delete_app_settings,
                      add_hostname, list_hostnames, delete_hostname,
                      update_container_settings, delete_container_settings,
-                     list_container_settings)
+                     show_container_settings)
 
 cli_command('appservice web create', create_webapp)
 cli_command('appservice web list', list_webapp)
@@ -41,7 +41,7 @@ cli_command('appservice web config hostname list', list_hostnames)
 cli_command('appservice web config hostname delete', delete_hostname)
 cli_command('appservice web config container update', update_container_settings)
 cli_command('appservice web config container delete', delete_container_settings)
-cli_command('appservice web config container list', list_container_settings)
+cli_command('appservice web config container show', show_container_settings)
 
 factory = lambda _: web_client_factory().sites
 cli_command('appservice web show-publish-profile',

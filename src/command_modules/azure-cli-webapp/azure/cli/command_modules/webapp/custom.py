@@ -162,7 +162,7 @@ def update_container_settings(resource_group_name, name, docker_registry_server_
 def delete_container_settings(resource_group_name, name, slot=None):
     delete_app_settings(resource_group_name, name, CONTAINER_APPSETTING_NAMES, slot)
 
-def list_container_settings(resource_group_name, name, slot=None):
+def show_container_settings(resource_group_name, name, slot=None):
     settings = get_app_settings(resource_group_name, name, slot)
     return _filter_for_container_settings(settings)
 
@@ -208,11 +208,12 @@ def create_webapp_slot(resource_group_name, webapp, slot, configuration_source=N
     return client.sites.create_or_update_site_slot(resource_group_name, webapp, slot_def, slot)
 
 def config_source_control(resource_group_name, name, repo_url, branch=None,
-                          is_manual_integration=None, slot=None):
+                          is_manual_integration=None, is_mercurial=False, slot=None):
     client = web_client_factory()
     location = _get_location_from_webapp(client, resource_group_name, name)
     source_control = SiteSourceControl(location, repo_url=repo_url, branch=branch,
-                                       is_manual_integration=is_manual_integration)
+                                       is_manual_integration=is_manual_integration,
+                                       is_mercurial=is_mercurial)
     return _generic_site_operation(resource_group_name, name,
                                    'create_or_update_site_source_control',
                                    slot, source_control)
@@ -314,12 +315,12 @@ def _get_local_git_url(client, resource_group_name, name, slot=None):
     return '{}://{}@{}/{}.git'.format(parsed.scheme, user.publishing_user_name,
                                       parsed.netloc, name)
 
-def _get_scm_url(client, resource_group_name, name, slot):
+def _get_scm_url(client, resource_group_name, name, slot=None):
     if slot is None:
-        poller = client.sites.list_site_publishing_credentials_slot(resource_group_name, name,
-                                                                    slot)
+        poller = client.sites.list_site_publishing_credentials(resource_group_name, name,
+                                                               slot)
     else:
-        poller = client.sites.list_site_publishing_credentials(resource_group_name, name)
+        poller = client.sites.list_site_publishing_credentials_slot(resource_group_name, name)
     result = poller.result()
     return result.scm_uri
 

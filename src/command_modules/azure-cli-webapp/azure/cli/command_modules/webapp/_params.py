@@ -55,7 +55,7 @@ register_cli_argument('appservice plan', 'number_of_workers', help='Number of wo
 register_cli_argument('appservice plan', 'admin_site_name', help='The name of the admin web app.')
 
 register_cli_argument('appservice web', 'slot', help="the name of the slot. Default to the productions slot if not specified")
-register_cli_argument('appservice web', 'name', arg_type=name_arg_type, completer=get_resource_name_completion_list('Microsoft.Web/sites'), id_part='name')
+register_cli_argument('appservice web', 'name', arg_type=name_arg_type, completer=get_resource_name_completion_list('Microsoft.Web/sites'), id_part='name', help='name of the web')
 register_cli_argument('appservice web create', 'name', options_list=('--name', '-n'), help='name of the new webapp')
 register_cli_argument('appservice web create', 'plan', options_list=('--plan',), completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
                       help="name or resource id of the app service plan. Use 'appservice plan create' to get one")
@@ -105,4 +105,9 @@ register_cli_argument('appservice web config update', 'app_command_line', option
 register_cli_argument('appservice web config hostname', 'webapp', help="webapp name", completer=get_resource_name_completion_list('Microsoft.Web/sites'), id_part='name')
 register_cli_argument('appservice web config hostname', 'name', arg_type=name_arg_type, completer=get_hostname_completion_list, help="hostname assigned to the site, such as custom domains", id_part='child_name')
 
-register_cli_argument('appservice web source-control', 'is_manual_integration', action='store_true')
+register_cli_argument('appservice web source-control', 'is_manual_integration', action='store_true', help='disable automatic sync between source control and web')
+register_cli_argument('appservice web source-control', 'repo_url', help='source repository url to pull the latest source, e.g. https://github.com/foo/foo-web')
+register_cli_argument('appservice web source-control', 'branch', help='the branch name of the source repository')
+register_cli_argument('appservice web source-control', 'is_mercurial', action='store_true', help='is Mercurial repository type; rather Git')
+
+
