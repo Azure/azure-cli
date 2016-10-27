@@ -19,7 +19,7 @@ from os import listdir
 import sys
 
 logger = _logging.get_az_logger(__name__)
-BASE_URL = "http://localhost:44454"
+BASE_URL = "https://management.azure.com"
 RESOURCE_BASE_URL = "/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}"
 CONTAINER_SERVICE_BASE_URL = RESOURCE_BASE_URL + "/providers/Microsoft.ContainerService"
 CONTAINER_SERVICE_RESOURCE_URL = (CONTAINER_SERVICE_BASE_URL +
