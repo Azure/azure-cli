@@ -31,6 +31,7 @@ VISUAL_STUDIO_PROJECT_URL = VISUAL_STUDIO_ACCOUNT_URL + "/project/{vsts_project_
 RP_URL = BASE_URL + CONTAINER_SERVICE_RESOURCE_URL + "/providers/Microsoft.Mindaro"
 API_VERSION = "2016-11-01-preview"
 
+DOCKERFILE_FILE = 'Dockerfile'
 DOCKER_COMPOSE_FILE = 'docker-compose.yml'
 DOCKER_COMPOSE_TEST_FILE = 'docker-compose.test.yml'
 DOCKER_COMPOSE_EXPECTED_VERSION = '2'
@@ -261,8 +262,9 @@ def _ensure_dockerfile():
     """
     1. Raises an error if there is no dockerfile present.
     """
-    dockerfile_file = 'Dockerfile'
-    if not os.path.isfile(dockerfile_file):
+    dockerfile_file = _get_filepath_in_current_git_repo(DOCKERFILE_FILE)
+
+    if not dockerfile_file:
         raise CLIError('Docker file "{}" was not found.'.format(dockerfile_file))
 
 def _get_remote_url():
