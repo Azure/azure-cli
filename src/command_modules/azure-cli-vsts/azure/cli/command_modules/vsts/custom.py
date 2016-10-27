@@ -32,6 +32,7 @@ def add_release(
         name,
         resource_group_name,
         remote_url=None,
+        remote_branch=None,
         remote_access_token=None,
         vsts_account_name=None,
         vsts_project_name=None,
@@ -69,6 +70,7 @@ def add_release(
         registry_name,
         registry_resource_group,
         _get_valid_remote_url(remote_url, remote_access_token),
+        remote_branch,
         remote_access_token)
 
 def _get_valid_remote_url(remote_url=None, remote_access_token=None):
@@ -107,6 +109,7 @@ def _call_rp_configure_cicd(
         registry_name,
         registry_resource_group,
         remote_url,
+        remote_branch,
         remote_access_token,
         create_release=True):
     """
@@ -144,6 +147,7 @@ def _call_rp_configure_cicd(
         'registryResourceGroup': registry_resource_group,
         'remoteToken': remote_access_token,
         'remoteUrl': remote_url,
+        'remoteBranch': remote_branch,
         'createRelease' : create_release
     }
 
@@ -262,6 +266,7 @@ def add_ci(
         name,
         resource_group_name,
         remote_url=None,
+        remote_branch = None,
         remote_access_token=None,
         vsts_account_name=None,
         vsts_project_name=None,
@@ -297,5 +302,6 @@ def add_ci(
         registry_name,
         registry_resource_group,
         _get_valid_remote_url(remote_url, remote_access_token),
+        remote_branch,
         remote_access_token,
         False)
