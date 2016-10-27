@@ -16,6 +16,7 @@ from azure.cli.core._profile import Profile
 # pylint: disable=too-few-public-methods,too-many-arguments,no-self-use,too-many-locals,line-too-long
 from azure.cli.core._util import CLIError
 from os import listdir
+from os.path import isfile, join
 import sys
 
 logger = _logging.get_az_logger(__name__)
@@ -194,13 +195,20 @@ def list_releases(name, resource_group_name):
     json_request = req.json()
     return json_request
 
-def gitroot():
+def _gitroot():
     ''' returns the absolute path of the repository root '''
     try:
         base = check_output(['git', 'rev-parse', '--show-toplevel'])
     except CalledProcessError:
         raise IOError('Current working directory is not a git repository')
     return base.decode('utf-8').strip()
+
+def _file_exists_in_git_repo(filename):
+    for full_dir, dir_name, file_names in os.walk(_gitroot()):
+        for file_name in file_names:
+            if file_name == filename:
+                return True
+    return False
 
 def _ensure_docker_compose():
     """
@@ -213,11 +221,7 @@ def _ensure_docker_compose():
     docker_compose_test_file = 'docker-compose.test.yml'
     docker_compose_expected_version = '2'
 
-    print(gitroot())
-    print(os.path.isfile(docker_compose_file))
-    # all_files = [f for f in listdir(mypath) if isfile(join(mypath, f))]
-    # print(all_files)
-    sys.exit()
+
     if not os.path.isfile(docker_compose_file):
         raise CLIError('Docker compose file "{}" was not found.'.format(docker_compose_file))
     with open(docker_compose_file, 'r') as f:
