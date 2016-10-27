@@ -15,9 +15,6 @@ import azure.cli.core._logging as _logging
 from azure.cli.core._profile import Profile
 # pylint: disable=too-few-public-methods,too-many-arguments,no-self-use,too-many-locals,line-too-long
 from azure.cli.core._util import CLIError
-from os import listdir
-from os.path import isfile, join
-import sys
 
 logger = _logging.get_az_logger(__name__)
 BASE_URL = "https://management.azure.com"
@@ -206,7 +203,7 @@ def _gitroot():
     """
     try:
         base = check_output(['git', 'rev-parse', '--show-toplevel'])
-    except CalledProcessError:
+    except:
         raise IOError('Current working directory is not a git repository')
     return base.decode('utf-8').strip()
 
@@ -214,10 +211,12 @@ def _get_filepath_in_current_git_repo(filename):
     """
     retrieves the full path of the first file in the git repo that matches filename
     """
-    for cwd, dir_name, file_names in os.walk(_gitroot()):
-        for file_name in file_names:
+    FILE_NAMES = 2
+    CWD = 0
+    for walk in os.walk(_gitroot()):
+        for file_name in walk[FILE_NAMES]:
             if file_name == filename:
-                return cwd + '/' + file_name
+                return walk[CWD] + '/' + file_name
     return False
 
 def _ensure_docker_compose():
