@@ -15,9 +15,9 @@ registry_name = CliArgumentType(
     help='Azure container registry name. A new Azure container registry is created if omitted or does not exist.'
 )
 
-registry_resource_group = CliArgumentType(
-    options_list=('--registry-resource-group',),
-    help='Azure container registry resource group name.'
+registry_resource_id = CliArgumentType(
+    options_list=('--registry-resource-id',),
+    help='Azure container registry resource id. Specifies an existing Azure container registry. e.g. /subscriptions/{subscriptionId}/resourcegroups/{resourceGroup}/providers/Microsoft.ContainerRegistry/registries/{registryName}'
 )
 
 remote_url = CliArgumentType(
@@ -27,7 +27,7 @@ remote_url = CliArgumentType(
 
 remote_branch = CliArgumentType(
     options_list=('--remote-branch', '-b'),
-    help='The remote branch of the GitHub or VSTS source repository that will be built and deployed. If omitted refs/heads/master will be selected'
+    help='Remote branch of the GitHub or VSTS source repository that will be built and deployed. If omitted refs/heads/master will be selected'
 )
 
 remote_access_token = CliArgumentType(
@@ -48,7 +48,7 @@ vsts_project_name = CliArgumentType(
 register_cli_argument('vsts release create', 'name', name_type)
 register_cli_argument('vsts release create', 'resource_group_name', resource_group_name_type)
 register_cli_argument('vsts release create', 'registry_name', registry_name)
-register_cli_argument('vsts release create', 'registry_resource_group', registry_resource_group)
+register_cli_argument('vsts release create', 'registry_resource_id', registry_resource_id)
 register_cli_argument('vsts release create', 'remote_url', remote_url)
 register_cli_argument('vsts release create', 'remote_branch', remote_branch)
 register_cli_argument('vsts release create', 'remote_access_token', remote_access_token)
@@ -58,7 +58,7 @@ register_cli_argument('vsts release create', 'vsts_project_name', vsts_project_n
 register_cli_argument('vsts build create', 'name', name_type)
 register_cli_argument('vsts build create', 'resource_group_name', resource_group_name_type)
 register_cli_argument('vsts build create', 'registry_name', registry_name)
-register_cli_argument('vsts build create', 'registry_resource_group', registry_resource_group)
+register_cli_argument('vsts build create', 'registry_resource_id', registry_resource_id)
 register_cli_argument('vsts build create', 'remote_url', remote_url)
 register_cli_argument('vsts build create', 'remote_branch', remote_branch)
 register_cli_argument('vsts build create', 'remote_access_token', remote_access_token)
