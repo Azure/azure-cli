@@ -93,6 +93,7 @@ register_cli_argument('appservice web config update', 'web_sockets_enabled', hel
 register_cli_argument('appservice web config update', 'always_on', help='ensure webapp gets loaded all the time, rather unloaded after been idle. Recommended when you have continuous web jobs running', **enum_choice_list(two_states_switch))
 register_cli_argument('appservice web config update', 'auto_heal_enabled', help='enable or disable auto heal', **enum_choice_list(two_states_switch))
 register_cli_argument('appservice web config update', 'use32_bit_worker_process', options_list=('--use-32bit-worker-process',), help='use 32 bits worker process or not', **enum_choice_list(two_states_switch))
+register_cli_argument('appservice web config update', 'node_version', help='The version used to run your web app if using node, e.g., 4.4.7, 4.5.0, 6.2.2, 6.6.0')
 register_cli_argument('appservice web config update', 'php_version', help='The version used to run your web app if using PHP, e.g., 5.5, 5.6, 7.0')
 register_cli_argument('appservice web config update', 'python_version', help='The version used to run your web app if using Python, e.g., 2.7, 3.4')
 register_cli_argument('appservice web config update', 'net_framework_version', help="The version used to run your web app if using .NET Framework, e.g., 'v4.0' for .NET 4.6 and 'v3.0' for .NET 3.5")

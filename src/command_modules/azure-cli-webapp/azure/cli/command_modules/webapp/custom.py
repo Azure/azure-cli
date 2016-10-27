@@ -102,7 +102,7 @@ def get_app_settings(resource_group_name, name, slot=None):
 #in the method
 def update_site_configs(resource_group_name, name, slot=None,
                         php_version=None, python_version=None,#pylint: disable=unused-argument
-                        net_framework_version=None, #pylint: disable=unused-argument
+                        node_version=None, net_framework_version=None, #pylint: disable=unused-argument
                         java_version=None, java_container=None, java_container_version=None,#pylint: disable=unused-argument
                         remote_debugging_enabled=None, web_sockets_enabled=None,#pylint: disable=unused-argument
                         always_on=None, auto_heal_enabled=None,#pylint: disable=unused-argument
@@ -207,15 +207,14 @@ def create_webapp_slot(resource_group_name, webapp, slot, configuration_source=N
 
     return client.sites.create_or_update_site_slot(resource_group_name, webapp, slot_def, slot)
 
-#TODO: need to check it is local git or not
-#1. Rename to source control 2. to get kudu log, we should not ask for enable git! 3. workaround the LRO missong to link to git
 def config_source_control(resource_group_name, name, repo_url, branch=None,
                           is_manual_integration=None, slot=None):
     client = web_client_factory()
     location = _get_location_from_webapp(client, resource_group_name, name)
     source_control = SiteSourceControl(location, repo_url=repo_url, branch=branch,
                                        is_manual_integration=is_manual_integration)
-    return _generic_site_operation(resource_group_name, name, 'create_or_update_site_source_control',
+    return _generic_site_operation(resource_group_name, name,
+                                   'create_or_update_site_source_control',
                                    slot, source_control)
 
 def show_source_control(resource_group_name, name, slot=None):
@@ -311,14 +310,16 @@ def _get_location_from_app_service_plan(client, resource_group_name, plan):
 def _get_local_git_url(client, resource_group_name, name, slot=None):
     user = client.provider.get_publishing_user()
     result = _generic_site_operation(resource_group_name, name, 'get_site_source_control', slot)
-    if result.repo_url is None:
-        raise CLIError("Please config source control first through commands under 'az appservice web source-control config-local-git'")
     parsed = urlparse(result.repo_url)
     return '{}://{}@{}/{}.git'.format(parsed.scheme, user.publishing_user_name,
                                       parsed.netloc, name)
 
 def _get_scm_url(client, resource_group_name, name, slot):
-    poller = client.sites.list_site_publishing_credentials(resource_group_name, name)
+    if slot is None:
+        poller = client.sites.list_site_publishing_credentials_slot(resource_group_name, name,
+                                                                    slot)
+    else:
+        poller = client.sites.list_site_publishing_credentials(resource_group_name, name)
     result = poller.result()
     return result.scm_uri
 
@@ -404,7 +405,7 @@ def get_streaming_log(resource_group_name, name, provider=None, slot=None):
         streaming_url += ('/' + provider.lstrip('/'))
 
     user, password = _get_site_credential(client, resource_group_name, name)
-    t = threading.Thread(target=_stream_trace, args=(streaming_url,user, password))
+    t = threading.Thread(target=_stream_trace, args=(streaming_url, user, password))
     t.daemon = True
     t.start()
 
@@ -416,7 +417,6 @@ def download_historical_logs(resource_group_name, name, log_file=None, slot=None
     Download historical logs as a zip file
     '''
     client = web_client_factory()
-    user, password = _get_site_credential(client, resource_group_name, name)
     scm_url = _get_scm_url(client, resource_group_name, name, slot)
     url = scm_url.rstrip('/') + '/dump'
     import requests
