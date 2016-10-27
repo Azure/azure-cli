@@ -3,14 +3,11 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 #---------------------------------------------------------------------------------------------
 
-#pylint: skip-file
-
 try:
     import urllib.parse as parse
 except ImportError:
-    import urlparse as parse
+    import urlparse as parse # pylint: disable=import-error
 
-# TODO turn this into a thread safe Singleton
 _cache = {}
 
 def get_challenge_for_url(url):
@@ -50,4 +47,4 @@ def set_challenge_for_url(url, challenge):
 
 def clear():
     """ Clears the cache. """
-    _cache = {}
+    _cache.clear()

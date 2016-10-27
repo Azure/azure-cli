@@ -8,7 +8,7 @@
 try:
     import urllib.parse as parse
 except ImportError:
-    import urlparse as parse
+    import urlparse as parse # pylint: disable=import-error
 
 class HttpBearerChallenge(object):
 

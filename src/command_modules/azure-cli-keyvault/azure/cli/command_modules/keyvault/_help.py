@@ -38,3 +38,33 @@ helps['keyvault update'] = """
     type: command
     short-summary: Update properties of a Key Vault.
 """
+
+helps['keyvault key'] = """
+    type: group
+    short-summary: Manage keys.
+"""
+
+helps['keyvault secret'] = """
+    type: group
+    short-summary: Manage secrets.
+"""
+
+helps['keyvault certificate'] = """
+    type: group
+    short-summary: Manage certificates.
+"""
+
+helps['keyvault certificate contact'] = """
+    type: group
+    short-summary: Manage contacts for certificate management.
+"""
+
+helps['keyvault certificate issuer'] = """
+    type: group
+    short-summary: Manage certificate issuer information.
+"""
+
+helps['keyvault certificate issuer admin'] = """
+    type: group
+    short-summary: Manage admin information for certificate issuers.
+"""
