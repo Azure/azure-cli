@@ -199,7 +199,7 @@ def list_releases(name, resource_group_name):
 
 def _gitroot():
     """
-    returns the absolute path of the repository root
+    Gets the absolute path of the repository root
     """
     try:
         base = check_output(['git', 'rev-parse', '--show-toplevel'])
@@ -215,9 +215,9 @@ def _get_filepath_in_current_git_repo(filename):
     CWD = 0
     for walk in os.walk(_gitroot()):
         for file_name in walk[FILE_NAMES]:
-            if file_name == filename:
+            if file_name.lower(file_name) == file_name.lower(filename):
                 return walk[CWD] + '/' + file_name
-    return False
+    return None
 
 def _ensure_docker_compose():
     """
@@ -231,31 +231,24 @@ def _ensure_docker_compose():
 
     if not docker_compose_file:
         raise CLIError('Docker compose file "{}" was not found.'.format(DOCKER_COMPOSE_FILE))
-    with open(docker_compose_file, 'r') as f:
-        compose_data = yaml.load(f)
-        if 'version' not in compose_data.keys():
-            raise CLIError(
-                'Docker compose file "{}" is missing version information.'.format(
-                    DOCKER_COMPOSE_FILE))
-        if not DOCKER_COMPOSE_EXPECTED_VERSION in compose_data['version']:
-            raise CLIError(
-                'Docker compose file "{}" has incorrect version. \
-                Only version "{}" is supported.'.format(
-                    DOCKER_COMPOSE_FILE,
-                    DOCKER_COMPOSE_EXPECTED_VERSION))
+    _ensure_version(docker_compose_file, DOCKER_COMPOSE_EXPECTED_VERSION)
 
     if docker_compose_test_file:
-        with open(docker_compose_test_file, 'r') as f:
-            compose_data = yaml.load(f)
-            if 'version' not in compose_data.keys():
-                raise CLIError('Docker compose file "{}" is missing version information.'.format(
-                    docker_compose_test_file))
-            if not DOCKER_COMPOSE_EXPECTED_VERSION in compose_data['version']:
-                raise CLIError(
-                    'Docker compose file "{}" has incorrect version. \
-                    Only version "{}" is supported.'.format(
-                        docker_compose_test_file,
-                        DOCKER_COMPOSE_EXPECTED_VERSION))
+        _ensure_version(docker_compose_test_file, DOCKER_COMPOSE_EXPECTED_VERSION)
+
+def _ensure_version(absolute_filepath, expected_version):
+    with open(absolute_filepath, 'r') as f:
+        compose_data = yaml.load(f)
+        if 'version' not in compose_data.keys():
+            raise CLIError('File : "{}"\nis missing version information.'.format(
+                absolute_filepath))
+        if not expected_version in compose_data['version']:
+            raise CLIError(
+                'File : "{}"\nhas incorrect version. \
+                \n Only version "{}" is supported.'.format(
+                    absolute_filepath,
+                    expected_version))
+
 
 def _ensure_dockerfile():
     """
