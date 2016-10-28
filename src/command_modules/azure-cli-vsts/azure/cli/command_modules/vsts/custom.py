@@ -236,17 +236,17 @@ def _ensure_docker_compose():
     if docker_compose_test_file:
         _ensure_version(docker_compose_test_file, DOCKER_COMPOSE_EXPECTED_VERSION)
 
-def _ensure_version(absolute_filepath, expected_version):
-    with open(absolute_filepath, 'r') as f:
+def _ensure_version(filepath, expected_version):
+    with open(filepath, 'r') as f:
         compose_data = yaml.load(f)
         if 'version' not in compose_data.keys():
             raise CLIError('File : "{}"\nis missing version information.'.format(
-                absolute_filepath))
+                filepath))
         if not expected_version in compose_data['version']:
             raise CLIError(
                 'File : "{}"\nhas incorrect version. \
                 \n Only version "{}" is supported.'.format(
-                    absolute_filepath,
+                    filepath,
                     expected_version))
 
 
