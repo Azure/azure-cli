@@ -60,8 +60,9 @@ def add_release(
     :param registry_name: Azure container registry name. A new Azure container registry is created if omitted or does not exist.
     :type registry_name: String
     """
-    # Ensure docker-compose file is correct.
-    _ensure_docker_compose()
+    # Ensure docker-compose file is correct if no remote url provided.
+    if not remote_url:
+        _ensure_docker_compose()
 
     _check_registry_information(registry_name, registry_resource_id)
 
