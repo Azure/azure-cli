@@ -293,6 +293,10 @@ def process_ag_create_namespace(namespace):
     if not namespace.public_ip_type:
         namespace.public_ip_type = 'none'
 
+def process_auth_create_namespace(namespace):
+    from azure.mgmt.network.models import ExpressRouteCircuitAuthorization
+    namespace.authorization_parameters = ExpressRouteCircuitAuthorization()
+
 def process_lb_create_namespace(namespace):
     if namespace.public_ip_dns_name:
         namespace.dns_name_type = 'new'

@@ -12,8 +12,7 @@ from azure.mgmt.network.models import \
     (Subnet, SecurityRule, PublicIPAddress, NetworkSecurityGroup, InboundNatRule, InboundNatPool,
      FrontendIPConfiguration, BackendAddressPool, Probe, LoadBalancingRule,
      NetworkInterfaceIPConfiguration, Route, VpnClientRootCertificate, VpnClientConfiguration,
-     AddressSpace, VpnClientRevokedCertificate, ExpressRouteCircuitAuthorization, SubResource,
-     VirtualNetworkPeering)
+     AddressSpace, VpnClientRevokedCertificate, SubResource, VirtualNetworkPeering)
 
 from azure.cli.core.commands.arm import parse_resource_id, is_valid_resource_id, resource_id
 from azure.cli.core._util import CLIError
@@ -811,11 +810,39 @@ def update_network_vpn_gateway(instance, address_prefixes=None):
 
         config.vpn_client_address_pool.address_prefixes = address_prefixes
 
-def create_express_route_auth(resource_group_name, circuit_name, authorization_name,
-                              authorization_key):
-    ncf = _network_client_factory().express_route_circuit_authorizations
-    auth = ExpressRouteCircuitAuthorization(authorization_key=authorization_key)
-    return ncf.create_or_update(resource_group_name, circuit_name, authorization_name, auth)
+def create_express_route_peering(
+        client, resource_group_name, circuit_name, peering_type, peer_asn, vlan_id,
+        primary_peer_address_prefix, secondary_peer_address_prefix, shared_key=None,
+        advertised_public_prefixes=None, advertised_public_prefix_state=None, customer_asn=None,
+        routing_registry_name=None):
+    """
+    :param str peer_asn: Autonomous system number of the customer/connectivity provider.
+    :param str vlan_id: Identifier used to identify the customer.
+    :param str peering_type: BGP peering type for the circuit.
+    :param str primary_peer_address_prefix: /30 subnet used to configure IP
+        addresses for primary interface.
+    :param str secondary_peer_address_prefix: /30 subnet used to configure IP addresses
+        for secondary interface.
+    :param str shared_key: Key for generating an MD5 for the BGP session.
+    :param str advertised_public_prefixes: List of prefixes to be advertised through
+        the BGP peering.
+    :param str advertised_public_prefix_state: Configuration state of the BGP session.
+    :param str customer_asn: Autonomous system number of the customer.
+    :param str routing_registry_name: Internet Routing Registry / Regional Internet Registry
+    """
+    from azure.mgmt.network.models import \
+        (ExpressRouteCircuitPeering, ExpressRouteCircuitPeeringConfig)
+    peering_config = ExpressRouteCircuitPeeringConfig(
+        advertised_public_prefixes, advertised_public_prefix_state,
+        customer_asn, routing_registry_name) if peering_type == 'MicrosoftPeering' else None
+    peering = ExpressRouteCircuitPeering(
+        peering_type=peering_type, peer_asn=peer_asn, vlan_id=vlan_id,
+        primary_peer_address_prefix=primary_peer_address_prefix,
+        secondary_peer_address_prefix=secondary_peer_address_prefix,
+        shared_key=shared_key,
+        microsoft_peering_config=peering_config)
+    return client.create_or_update(
+        resource_group_name, circuit_name, peering_type, peering)
 
 def create_route(resource_group_name, route_table_name, route_name, next_hop_type, address_prefix,
                  next_hop_ip_address=None):
