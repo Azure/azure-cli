@@ -6,7 +6,7 @@
 import json
 import os
 import time
-from subprocess import check_output
+from subprocess import check_output, CalledProcessError
 
 import requests
 import yaml
