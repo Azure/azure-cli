@@ -250,14 +250,14 @@ class LinuxWebappSceanrioTest(ResourceGroupVCRTestBase):
                 JMESPathCheck('DOCKER_REGISTRY_SERVER_USERNAME', 'foo-user'),
                 JMESPathCheck('DOCKER_REGISTRY_SERVER_PASSWORD', 'foo-password')
                 ])
-        self.cmd('appservice web config container list -g {} -n {} '.format(self.resource_group, webapp), checks=[
+        self.cmd('appservice web config container show -g {} -n {} '.format(self.resource_group, webapp), checks=[
             JMESPathCheck('DOCKER_CUSTOM_IMAGE_NAME', 'foo-image'),
             JMESPathCheck('DOCKER_REGISTRY_SERVER_URL', 'foo-url'),
             JMESPathCheck('DOCKER_REGISTRY_SERVER_USERNAME', 'foo-user'),
             JMESPathCheck('DOCKER_REGISTRY_SERVER_PASSWORD', 'foo-password')
             ])
         self.cmd('appservice web config container delete -g {} -n {}'.format(self.resource_group, webapp))
-        self.cmd('appservice web config container list -g {} -n {} '.format(self.resource_group, webapp), checks=NoneCheck())
+        self.cmd('appservice web config container show -g {} -n {} '.format(self.resource_group, webapp), checks=NoneCheck())
 
 class WebappGitScenarioTest(ResourceGroupVCRTestBase):
     def __init__(self, test_method):
