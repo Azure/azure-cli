@@ -106,8 +106,7 @@ register_cli_argument('appservice web config hostname', 'webapp', help="webapp n
 register_cli_argument('appservice web config hostname', 'name', arg_type=name_arg_type, completer=get_hostname_completion_list, help="hostname assigned to the site, such as custom domains", id_part='child_name')
 
 register_cli_argument('appservice web source-control', 'is_manual_integration', action='store_true', help='disable automatic sync between source control and web')
-register_cli_argument('appservice web source-control', 'repo_url', help='source repository url to pull the latest source, e.g. https://github.com/foo/foo-web')
-register_cli_argument('appservice web source-control', 'branch', help='the branch name of the source repository')
-register_cli_argument('appservice web source-control', 'is_mercurial', action='store_true', help='is Mercurial repository type; rather Git')
-
+register_cli_argument('appservice web source-control', 'repo_url', help='repository url to pull the latest source from, e.g. https://github.com/foo/foo-web')
+register_cli_argument('appservice web source-control', 'branch', help='the branch name of the repository')
+register_cli_argument('appservice web source-control', 'is_mercurial', action='store_true', help='is Mercurial repository(not Git)')
 

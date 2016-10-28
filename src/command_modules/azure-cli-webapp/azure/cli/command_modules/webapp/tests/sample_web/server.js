@@ -9,5 +9,5 @@ app.get('/', function (req, res) {
   console.log('PORT is:' + process.env.PORT)
   console.error("Something wrong");
   console.log("Something normal");
-  res.send('Hello world from linux 4');
+  res.send('Hello world');
 });

@@ -74,7 +74,7 @@ helps['appservice web config hostname'] = """
 
 helps['appservice web source-control'] = """
     type: group
-    short-summary: commands to manage source controls systems
+    short-summary: commands to manage source control systems
 """
 
 helps['appservice web source-control config'] = """
