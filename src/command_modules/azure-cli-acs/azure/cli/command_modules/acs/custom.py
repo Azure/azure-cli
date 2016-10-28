@@ -6,7 +6,7 @@
 import platform
 import random
 import string
-from six.moves.urllib.request import urlretrieve
+from six.moves.urllib.request import urlretrieve #pylint: disable=import-error
 
 import azure.cli.core._logging as _logging
 from azure.cli.command_modules.acs import acs_client, proxy
@@ -67,8 +67,8 @@ def dcos_install_cli(install_location=None, client_version='1.8'):
     system = platform.system()
 
     if not install_location:
-	raise CLIError("No install location specified and it could not be determined from the current platform '{}'".format(system)
-    file_url = ''
+        raise CLIError("No install location specified and it could not be determined from the current platform '{}'".format(system))
+
     if system == 'Windows':
         file_url = 'https://downloads.dcos.io/binaries/cli/windows/x86-64/dcos-{}/dcos.exe'.format(client_version)
     elif system == 'Linux':

@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 #---------------------------------------------------------------------------------------------
 
+import os
 import platform
 
 from azure.cli.core.commands import register_cli_argument
@@ -15,7 +16,7 @@ def _get_default_install_location(exe_name):
     if system == 'Windows':
         program_files = os.environ.get('ProgramFiles')
         if not program_files:
-	    return None
+            return None
         install_location = '{}\\{}.exe'.format(program_files, exe_name)
     elif system == 'Linux' or system == 'Darwin':
         install_location = '/usr/local/bin/{}'.format(exe_name)
