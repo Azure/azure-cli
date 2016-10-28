@@ -6,7 +6,7 @@
 import json
 import os
 import time
-from subprocess import check_output
+from subprocess import check_output, CalledProcessError
 
 import requests
 import yaml
@@ -27,6 +27,11 @@ VISUAL_STUDIO_ACCOUNT_URL = VISUAL_STUDIO_BASE_URL + "/account/{vsts_account_nam
 VISUAL_STUDIO_PROJECT_URL = VISUAL_STUDIO_ACCOUNT_URL + "/project/{vsts_project_name}"
 RP_URL = BASE_URL + CONTAINER_SERVICE_RESOURCE_URL + "/providers/Microsoft.Mindaro"
 API_VERSION = "2016-11-01-preview"
+
+DOCKERFILE_FILE = 'Dockerfile'
+DOCKER_COMPOSE_FILE = 'docker-compose.yml'
+DOCKER_COMPOSE_TEST_FILE = 'docker-compose.test.yml'
+DOCKER_COMPOSE_EXPECTED_VERSION = '2'
 
 def add_release(
         name,
@@ -202,6 +207,28 @@ def list_releases(name, resource_group_name):
     json_request = req.json()
     return json_request
 
+def _gitroot():
+    """
+    Gets the absolute path of the repository root
+    """
+    try:
+        base = check_output(['git', 'rev-parse', '--show-toplevel'])
+    except OSError:
+        raise CLIError('Git is not currently installed.')
+    except CalledProcessError:
+        raise CLIError('Current working directory is not a git repository')
+    return base.decode('utf-8').strip()
+
+def _get_filepath_in_current_git_repo(file_to_search):
+    """
+    retrieves the full path of the first file in the git repo that matches filename
+    """
+    for dirpath, _, filenames in os.walk(_gitroot()):
+        for file_name in filenames:
+            if file_name.lower() == file_to_search.lower():
+                return os.path.join(dirpath, file_name)
+    return None
+
 def _ensure_docker_compose():
     """
     1. Raises an error if there is no docker_compose_file present.
@@ -209,42 +236,37 @@ def _ensure_docker_compose():
     docker_compose_version.
     3. Raises an error if docker_compose_test_file has a version other than docker_compose_version.
     """
-    docker_compose_file = 'docker-compose.yml'
-    docker_compose_test_file = 'docker-compose.test.yml'
-    docker_compose_expected_version = '2'
-    if not os.path.isfile(docker_compose_file):
-        raise CLIError('Docker compose file "{}" was not found.'.format(docker_compose_file))
-    with open(docker_compose_file, 'r') as f:
+    docker_compose_file = _get_filepath_in_current_git_repo(DOCKER_COMPOSE_FILE)
+    docker_compose_test_file = _get_filepath_in_current_git_repo(DOCKER_COMPOSE_TEST_FILE)
+
+    if not docker_compose_file:
+        raise CLIError('Docker compose file "{}" was not found.'.format(DOCKER_COMPOSE_FILE))
+    _ensure_version(docker_compose_file, DOCKER_COMPOSE_EXPECTED_VERSION)
+
+    if docker_compose_test_file:
+        _ensure_version(docker_compose_test_file, DOCKER_COMPOSE_EXPECTED_VERSION)
+
+def _ensure_version(filepath, expected_version):
+    with open(filepath, 'r') as f:
         compose_data = yaml.load(f)
         if 'version' not in compose_data.keys():
+            raise CLIError('File : "{}"\nis missing version information.'.format(
+                filepath))
+        if not expected_version in compose_data['version']:
             raise CLIError(
-                'Docker compose file "{}" is missing version information.'.format(
-                    docker_compose_file))
-        if not docker_compose_expected_version in compose_data['version']:
-            raise CLIError(
-                'Docker compose file "{}" has incorrect version. \
-                Only version "{}" is supported.'.format(
-                    docker_compose_file,
-                    docker_compose_expected_version))
-    if os.path.isfile(docker_compose_test_file):
-        with open(docker_compose_test_file, 'r') as f:
-            compose_data = yaml.load(f)
-            if 'version' not in compose_data.keys():
-                raise CLIError('Docker compose file "{}" is missing version information.'.format(
-                    docker_compose_test_file))
-            if not docker_compose_expected_version in compose_data['version']:
-                raise CLIError(
-                    'Docker compose file "{}" has incorrect version. \
-                    Only version "{}" is supported.'.format(
-                        docker_compose_test_file,
-                        docker_compose_expected_version))
+                'File : "{}"\nhas incorrect version. \
+                \n Only version "{}" is supported.'.format(
+                    filepath,
+                    expected_version))
+
 
 def _ensure_dockerfile():
     """
     1. Raises an error if there is no dockerfile present.
     """
-    dockerfile_file = 'Dockerfile'
-    if not os.path.isfile(dockerfile_file):
+    dockerfile_file = _get_filepath_in_current_git_repo(DOCKERFILE_FILE)
+
+    if not dockerfile_file:
         raise CLIError('Docker file "{}" was not found.'.format(dockerfile_file))
 
 def _get_remote_url():
