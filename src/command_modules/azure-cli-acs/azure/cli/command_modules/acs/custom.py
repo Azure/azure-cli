@@ -6,7 +6,7 @@
 import platform
 import random
 import string
-import urllib.request
+from six.moves.urllib.request import urlretrieve
 
 import azure.cli.core._logging as _logging
 from azure.cli.command_modules.acs import acs_client, proxy
@@ -60,24 +60,27 @@ def dcos_browse(name, resource_group_name):
 
     return
 
-def dcos_install_cli(install_location=None):
+def dcos_install_cli(install_location=None, client_version='1.8'):
     """
     Downloads the dcos command line from Mesosphere
     """
-    file_url = ''
     system = platform.system()
+
+    if not install_location:
+	raise CLIError("No install location specified and it could not be determined from the current platform '{}'".format(system)
+    file_url = ''
     if system == 'Windows':
-        file_url = 'https://downloads.dcos.io/binaries/cli/windows/x86-64/dcos-1.8/dcos.exe'
+        file_url = 'https://downloads.dcos.io/binaries/cli/windows/x86-64/dcos-{}/dcos.exe'.format(client_version)
     elif system == 'Linux' or system == 'Darwin':
-        file_url = 'https://downloads.dcos.io/binaries/cli/linux/x86-64/dcos-1.8/dcos'
+        file_url = 'https://downloads.dcos.io/binaries/cli/linux/x86-64/dcos-{}/dcos'.format(client_version)
     elif system == 'Darwin':
-        file_url = 'https://downloads.dcos.io/binaries/cli/darwin/x86-64/dcos-1.8/dcos'
+        file_url = 'https://downloads.dcos.io/binaries/cli/darwin/x86-64/dcos-{}/dcos'.format(client_version)
     else:
         raise CLIError('Proxy server ({}) does not exist on the cluster.'.format(system))
 
     logger.info('Downloading client to %s', install_location)
     try:
-        urllib.request.urlretrieve(file_url, install_location)
+        urlretrieve(file_url, install_location)
     except IOError as err:
         raise CLIError('Connection error while attempting to download client ({})'.format(err))
 
