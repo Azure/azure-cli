@@ -7,7 +7,6 @@ from azure.cli.core._profile import (
     Profile,
     CLOUD
 )
-from azure.cli.core.cloud import CloudEndpoint
 from azure.cli.core._config import az_config
 from azure.mgmt.resource.resources import ResourceManagementClient
 from azure.mgmt.storage import StorageManagementClient
@@ -18,8 +17,8 @@ from azure.cli.core.commands.client_factory import (
 )
 
 from azure.cli.command_modules.acr.mgmt_acr import (
-    ContainerRegistry,
-    ContainerRegistryConfiguration,
+    ContainerRegistryManagementClient,
+    ContainerRegistryManagementClientConfiguration,
     VERSION
 )
 
@@ -42,12 +41,12 @@ def get_acr_service_client():
     profile = Profile()
     credentials, subscription_id, _ = profile.get_login_credentials()
 
-    config = ContainerRegistryConfiguration(
-        subscription_id,
-        get_acr_api_version(),
+    config = ContainerRegistryManagementClientConfiguration(
         credentials,
-        base_url=CLOUD.endpoints[CloudEndpoint.RESOURCE_MANAGER])
-    client = ContainerRegistry(config)
+        subscription_id,
+        api_version=get_acr_api_version(),
+        base_url=CLOUD.endpoints.resource_manager)
+    client = ContainerRegistryManagementClient(config)
 
     configure_common_settings(client)
 

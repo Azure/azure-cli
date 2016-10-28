@@ -14,20 +14,26 @@ from msrest.serialization import Model
 
 
 class RegistryUpdateParameters(Model):
-    """RegistryUpdateParameters
+    """
+    The parameters for updating a container registry.
 
-    :param tags:
+    :param tags: Resource tags.
     :type tags: dict
-    :param properties:
-    :type properties: :class:`RegistryPropertiesCreateParameters
-     <containerregistry.models.RegistryPropertiesCreateParameters>`
+    :param admin_user_enabled: The boolean value that indicates whether admin
+     user is enabled. Default value is false.
+    :type admin_user_enabled: bool
+    :param storage_account: The storage account properties.
+    :type storage_account: :class:`StorageAccountProperties
+     <containerregistrymanagementclient.models.StorageAccountProperties>`
     """ 
 
     _attribute_map = {
         'tags': {'key': 'tags', 'type': '{str}'},
-        'properties': {'key': 'properties', 'type': 'RegistryPropertiesCreateParameters'},
+        'admin_user_enabled': {'key': 'properties.adminUserEnabled', 'type': 'bool'},
+        'storage_account': {'key': 'properties.storageAccount', 'type': 'StorageAccountProperties'},
     }
 
-    def __init__(self, tags=None, properties=None):
+    def __init__(self, tags=None, admin_user_enabled=None, storage_account=None):
         self.tags = tags
-        self.properties = properties
+        self.admin_user_enabled = admin_user_enabled
+        self.storage_account = storage_account

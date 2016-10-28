@@ -8,8 +8,7 @@ import requests
 from azure.cli.core.commands import cli_command
 
 from ._utils import (
-    get_registry_by_name,
-    registry_not_found
+    get_registry_by_name
 )
 from .credential import acr_credential_show
 
@@ -44,11 +43,8 @@ def _obtain_data_from_registry(login_server, path, resultIndex, username, passwo
     return resultList
 
 def _validate_user_credentials(registry_name, path, resultIndex, username=None, password=None):
-    registry = get_registry_by_name(registry_name)
-    if registry is None:
-        registry_not_found(registry_name)
-
-    login_server = registry.properties.login_server
+    registry, _ = get_registry_by_name(registry_name)
+    login_server = registry.login_server #pylint: disable=no-member
 
     if username:
         if not password:
@@ -58,8 +54,8 @@ def _validate_user_credentials(registry_name, path, resultIndex, username=None, 
 
     try:
         cred = acr_credential_show(registry_name)
-        username = cred.user_name
-        password = cred.pass_word
+        username = cred.username
+        password = cred.password
         return _obtain_data_from_registry(login_server, path, resultIndex, username, password)
     except: #pylint: disable=bare-except
         pass

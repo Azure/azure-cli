@@ -10,23 +10,19 @@
 # regenerated.
 # --------------------------------------------------------------------------
 
-from msrest.serialization import Model
+from msrest.paging import Paged
 
 
-class RegistryMoveRequest(Model):
-    """RegistryMoveRequest
-
-    :param target_resource_group:
-    :type target_resource_group: str
-    :param resources:
-    :type resources: list of str
-    """ 
+class RegistryPaged(Paged):
+    """
+    A paging container for iterating over a list of Registry object
+    """
 
     _attribute_map = {
-        'target_resource_group': {'key': 'targetResourceGroup', 'type': 'str'},
-        'resources': {'key': 'resources', 'type': '[str]'},
+        'next_link': {'key': 'nextLink', 'type': 'str'},
+        'current_page': {'key': 'value', 'type': '[Registry]'}
     }
 
-    def __init__(self, target_resource_group=None, resources=None):
-        self.target_resource_group = target_resource_group
-        self.resources = resources
+    def __init__(self, *args, **kwargs):
+
+        super(RegistryPaged, self).__init__(*args, **kwargs)
