@@ -211,12 +211,10 @@ def _get_filepath_in_current_git_repo(filename):
     """
     retrieves the full path of the first file in the git repo that matches filename
     """
-    FILE_NAMES = 2
-    CWD = 0
-    for walk in os.walk(_gitroot()):
-        for file_name in walk[FILE_NAMES]:
+    for dirpath, _, filenames in os.walk(_gitroot()):
+        for file_name in filenames:
             if file_name.lower() == filename.lower():
-                return walk[CWD] + '/' + file_name
+                return dirpath + '/' + file_name
     return None
 
 def _ensure_docker_compose():
