@@ -203,8 +203,10 @@ def _gitroot():
     """
     try:
         base = check_output(['git', 'rev-parse', '--show-toplevel'])
-    except:
-        raise IOError('Current working directory is not a git repository')
+    except OSError err:
+        raise CLIError('Git is not currently installed.')
+    except CalledProcessError:
+        raise CLIError('Current working directory is not a git repository')
     return base.decode('utf-8').strip()
 
 def _get_filepath_in_current_git_repo(file_to_search):
@@ -214,7 +216,7 @@ def _get_filepath_in_current_git_repo(file_to_search):
     for dirpath, _, filenames in os.walk(_gitroot()):
         for file_name in filenames:
             if file_name.lower() == file_to_search.lower():
-                return dirpath + '/' + file_name
+                return os.path.join(dirpath, file_name)
     return None
 
 def _ensure_docker_compose():
