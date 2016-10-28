@@ -203,7 +203,7 @@ def _gitroot():
     """
     try:
         base = check_output(['git', 'rev-parse', '--show-toplevel'])
-    except OSError err:
+    except OSError:
         raise CLIError('Git is not currently installed.')
     except CalledProcessError:
         raise CLIError('Current working directory is not a git repository')
