@@ -207,13 +207,13 @@ def _gitroot():
         raise IOError('Current working directory is not a git repository')
     return base.decode('utf-8').strip()
 
-def _get_filepath_in_current_git_repo(filename):
+def _get_filepath_in_current_git_repo(file_to_search):
     """
     retrieves the full path of the first file in the git repo that matches filename
     """
     for dirpath, _, filenames in os.walk(_gitroot()):
         for file_name in filenames:
-            if file_name.lower() == filename.lower():
+            if file_name.lower() == file_to_search.lower():
                 return dirpath + '/' + file_name
     return None
 
