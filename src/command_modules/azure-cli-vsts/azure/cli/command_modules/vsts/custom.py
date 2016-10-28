@@ -215,7 +215,7 @@ def _get_filepath_in_current_git_repo(filename):
     CWD = 0
     for walk in os.walk(_gitroot()):
         for file_name in walk[FILE_NAMES]:
-            if file_name.lower(file_name) == file_name.lower(filename):
+            if file_name.lower() == filename.lower():
                 return walk[CWD] + '/' + file_name
     return None
 
