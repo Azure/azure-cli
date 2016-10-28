@@ -32,10 +32,11 @@ def add_release(
         name,
         resource_group_name,
         remote_url=None,
+        remote_branch=None,
         remote_access_token=None,
         vsts_account_name=None,
         vsts_project_name=None,
-        registry_resource_group=None,
+        registry_resource_id=None,
         registry_name=None):
     """
     Creates a build definition that automates building and pushing Docker images to an Azure container registry, and creates a release definition that automates deploying container images from a container registry to an Azure container service. Source repository must define a docker-compose.yml file.
@@ -46,19 +47,23 @@ def add_release(
     :type resource_group_name: String
     :param remote_url: Remote url of the GitHub or VSTS source repository that will be built and deployed. If omitted, a source repository will be searched for in the current working directory.
     :type remote_url: String
+    :param remote_branch: Remote branch of the GitHub or VSTS source repository that will be built and deployed. If omitted refs/heads/master will be selected.
+    :type remote_branch: String
     :param remote_access_token: GitHub personal access token (minimum permission is 'repo'). Required if the source repository is in GitHub.
     :type remote_access_token: String
     :param vsts_account_name: VSTS account name to create the build and release definitions. A new VSTS account is created if omitted or does not exist.
     :type vsts_account_name: String
     :param vsts_project_name: VSTS project name to create the build and release definitions. A new VSTS project is created if omitted or does not exist.
     :type vsts_project_name: String
-    :param registry_resource_group: Azure container registry resource group name.
-    :type registry_resource_group: String
+    :param registry_resource_id: Azure container registry resource id.
+    :type registry_resource_id: String
     :param registry_name: Azure container registry name. A new Azure container registry is created if omitted or does not exist.
     :type registry_name: String
     """
     # Ensure docker-compose file is correct.
     _ensure_docker_compose()
+
+    _check_registry_information(registry_name, registry_resource_id)
 
     # Call the RP
     return _call_rp_configure_cicd(
@@ -67,8 +72,9 @@ def add_release(
         vsts_account_name,
         vsts_project_name,
         registry_name,
-        registry_resource_group,
+        registry_resource_id,
         _get_valid_remote_url(remote_url, remote_access_token),
+        remote_branch,
         remote_access_token)
 
 def _get_valid_remote_url(remote_url=None, remote_access_token=None):
@@ -105,8 +111,9 @@ def _call_rp_configure_cicd(
         vsts_account_name,
         vsts_project_name,
         registry_name,
-        registry_resource_group,
+        registry_resource_id,
         remote_url,
+        remote_branch,
         remote_access_token,
         create_release=True):
     """
@@ -118,14 +125,16 @@ def _call_rp_configure_cicd(
     :type resource_group_name: String
     :param remote_url: Remote url of the GitHub or VSTS source repository that will be built and deployed. If omitted, a source repository will be searched for in the current working directory.
     :type remote_url: String
+    :param remote_branch: Remote branch of the GitHub or VSTS source repository that will be built and deployed. If omitted refs/heads/master will be selected.
+    :type remote_branch: String
     :param remote_access_token: GitHub personal access token (minimum permission is 'repo'). Required if the source repository is in GitHub.
     :type remote_access_token: String
     :param vsts_account_name: VSTS account name to create the build and release definitions. A new VSTS account is created if omitted or does not exist.
     :type vsts_account_name: String
     :param vsts_project_name: VSTS project name to create the build and release definitions. A new VSTS project is created if omitted or does not exist.
     :type vsts_project_name: String
-    :param registry_resource_group: Azure container registry resource group name.
-    :type registry_resource_group: String
+    :param registry_resource_id: Azure container registry resource id.
+    :type registry_resource_id: String
     :param registry_name: Azure container registry name. A new Azure container registry is created if omitted or does not exist.
     :type registry_name: String
     :param create_release: Whether to create a release definition and deploy the application.
@@ -141,9 +150,10 @@ def _call_rp_configure_cicd(
         'vstsProjectName': vsts_project_name,
         'token': o_auth_token,
         'registryName': registry_name,
-        'registryResourceGroup': registry_resource_group,
+        'registryResourceId': registry_resource_id,
         'remoteToken': remote_access_token,
         'remoteUrl': remote_url,
+        'remoteBranch': remote_branch,
         'createRelease' : create_release
     }
 
@@ -258,14 +268,27 @@ def _get_remote_url():
             an 'origin' remote or specify a remote using '--remote-url'")
     return remote_url.decode()
 
+def _check_registry_information(registry_name, registry_resource_id):
+    """
+    Check that only one of registry_name and registry_resource_id is provided
+    :param registry_name: The registry name.
+    :type name: String
+    :param registry_resource_id: The registry resource id.
+    :type name: String
+    Sample registry_resource_id: /subscriptions/{subscriptionId}/resourcegroups/{resourceGroup}/providers/Microsoft.ContainerRegistry/registries/{registryName}
+    """
+    if registry_name and registry_resource_id:
+        raise CLIError("Please provide only one of registry-name and registry-resource-id, not both.")
+
 def add_ci(
         name,
         resource_group_name,
         remote_url=None,
+        remote_branch=None,
         remote_access_token=None,
         vsts_account_name=None,
         vsts_project_name=None,
-        registry_resource_group=None,
+        registry_resource_id=None,
         registry_name=None):
     """
     Creates a build definition that automates building and pushing Docker images to an Azure container registry. Source repository must define a Dockerfile.
@@ -276,18 +299,23 @@ def add_ci(
     :type resource_group_name: String
     :param remote_url: Remote url of the GitHub or VSTS source repository that will be built and deployed. If omitted, a source repository will be searched for in the current working directory.
     :type remote_url: String
+    :param remote_branch: Remote branch of the GitHub or VSTS source repository that will be built and deployed. If omitted refs/heads/master will be selected.
+    :type remote_branch: String
     :param remote_access_token: GitHub personal access token (minimum permission is 'repo'). Required if the source repository is in GitHub.
     :type remote_access_token: String
     :param vsts_account_name: VSTS account name to create the build and release definitions. A new VSTS account is created if omitted or does not exist.
     :type vsts_account_name: String
     :param vsts_project_name: VSTS project name to create the build and release definitions. A new VSTS project is created if omitted or does not exist.
     :type vsts_project_name: String
-    :param registry_resource_group: Azure container registry resource group name.
-    :type registry_resource_group: String
+    :param registry_resource_id: Azure container registry resource id.
+    :type registry_resource_id: String
     :param registry_name: Azure container registry name. A new Azure container registry is created if omitted or does not exist.
     :type registry_name: String
     """
     _ensure_dockerfile()
+
+    _check_registry_information(registry_name, registry_resource_id)
+
     # Call the RP
     return _call_rp_configure_cicd(
         name,
@@ -295,7 +323,8 @@ def add_ci(
         vsts_account_name,
         vsts_project_name,
         registry_name,
-        registry_resource_group,
+        registry_resource_id,
         _get_valid_remote_url(remote_url, remote_access_token),
+        remote_branch,
         remote_access_token,
         False)
