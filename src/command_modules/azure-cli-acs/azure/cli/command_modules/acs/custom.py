@@ -3,8 +3,10 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 #---------------------------------------------------------------------------------------------
 
+import platform
 import random
 import string
+from six.moves.urllib.request import urlretrieve #pylint: disable=import-error
 
 import azure.cli.core._logging as _logging
 from azure.cli.command_modules.acs import acs_client, proxy
@@ -24,7 +26,6 @@ def dcos_browse(name, resource_group_name):
     :param resource_group_name:  Name of Azure container service's resource group.
     :type resource_group_name: String
     """
-
     acs_info = _get_acs_info(name, resource_group_name)
     acs = acs_client.ACSClient()
     if not acs.connect(_get_host_name(acs_info), _get_username(acs_info)):
@@ -58,6 +59,30 @@ def dcos_browse(name, resource_group_name):
         proxy.disable_http_proxy()
 
     return
+
+def dcos_install_cli(install_location=None, client_version='1.8'):
+    """
+    Downloads the dcos command line from Mesosphere
+    """
+    system = platform.system()
+
+    if not install_location:
+        raise CLIError("No install location specified and it could not be determined from the current platform '{}'".format(system))
+
+    if system == 'Windows':
+        file_url = 'https://downloads.dcos.io/binaries/cli/windows/x86-64/dcos-{}/dcos.exe'.format(client_version)
+    elif system == 'Linux':
+        file_url = 'https://downloads.dcos.io/binaries/cli/linux/x86-64/dcos-{}/dcos'.format(client_version)
+    elif system == 'Darwin':
+        file_url = 'https://downloads.dcos.io/binaries/cli/darwin/x86-64/dcos-{}/dcos'.format(client_version)
+    else:
+        raise CLIError('Proxy server ({}) does not exist on the cluster.'.format(system))
+
+    logger.info('Downloading client to %s', install_location)
+    try:
+        urlretrieve(file_url, install_location)
+    except IOError as err:
+        raise CLIError('Connection error while attempting to download client ({})'.format(err))
 
 def _get_host_name(acs_info):
     """
