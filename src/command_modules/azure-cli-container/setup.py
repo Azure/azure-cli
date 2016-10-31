@@ -31,9 +31,9 @@ with open('README.rst', 'r', encoding='utf-8') as f:
     README = f.read()
 
 setup(
-    name='azure-cli-vsts',
+    name='azure-cli-container',
     version=VERSION,
-    description='Microsoft Azure Command-Line Tools VSTS Command Module',
+    description='Microsoft Azure Command-Line Tools container Command Module',
     long_description=README,
     license='MIT',
     author='Microsoft Corporation',
@@ -46,7 +46,7 @@ setup(
         'azure.cli.command_modules',
     ],
     packages=[
-        'azure.cli.command_modules.vsts',
+        'azure.cli.command_modules.container',
     ],
     install_requires=DEPENDENCIES,
 )
