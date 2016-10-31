@@ -14,17 +14,17 @@ helps['appservice'] = """
 
 helps['appservice web config'] = """
     type: group
-    short-summary: commands to configure the web
+    short-summary: commands to configure the web app
 """
 
 helps['appservice web config show'] = """
     type: command
-    short-summary: show web configurations
+    short-summary: show web app configurations
 """
 
 helps['appservice web config update'] = """
     type: command
-    short-summary: update web configurations
+    short-summary: update web app configurations
 """
 
 helps['appservice web config appsettings'] = """
@@ -84,7 +84,7 @@ helps['appservice web source-control config'] = """
 
 helps['appservice web source-control config-local-git'] = """
     type: command
-    short-summary: enable local git, you will get url to clone and later push to the web 
+    short-summary: enable local git, you will get a url to clone and later push to the web app
 """
 
 helps['appservice web source-control delete'] = """
@@ -114,12 +114,12 @@ helps['appservice plan create'] = """
 
 helps['appservice web config hostname add'] = """
     type: command
-    short-summary: bind a hostname(custom domain) to the app
+    short-summary: bind a hostname(custom domain) to the web app
 """
 
 helps['appservice web config hostname delete'] = """
     type: command
-    short-summary: unbind a hostname(custom domain) from the app
+    short-summary: unbind a hostname(custom domain) from the web app
 """
 
 helps['appservice web config hostname list'] = """
@@ -134,30 +134,30 @@ helps['appservice web browse'] = """
 
 helps['appservice web create'] = """
     type: command
-    short-summary: create a web
+    short-summary: create a web app
 """
 
 helps['appservice web delete'] = """
     type: command
-    short-summary: delete a web
+    short-summary: delete a web app
 """
 
 helps['appservice web list'] = """
     type: command
-    short-summary: list webs
+    short-summary: list web apps
 """
 
 helps['appservice web restart'] = """
     type: command
-    short-summary: restart a web
+    short-summary: restart a web app
 """
 
 helps['appservice web show'] = """
     type: command
-    short-summary: show a web
+    short-summary: show a web app
 """
 
 helps['appservice web stop'] = """
     type: command
-    short-summary: stop a web
+    short-summary: stop a web app
 """

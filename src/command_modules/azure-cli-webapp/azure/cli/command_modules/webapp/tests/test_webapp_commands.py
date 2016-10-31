@@ -298,7 +298,7 @@ class WebappGitScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck('isMercurial', False),
             JMESPathCheck('branch', 'master')
             ])
-        self.cmd('appservice web source-control config -g {} -n {} --repo-url {} --is-manual-integration'.format(self.resource_group, webapp, test_git_repo), checks=[
+        self.cmd('appservice web source-control config -g {} -n {} --repo-url {} --manual-integration'.format(self.resource_group, webapp, test_git_repo), checks=[
             JMESPathCheck('isManualIntegration', True)
             ])
         self.cmd('appservice web source-control delete -g {} -n {}'.format(self.resource_group, webapp), checks=[

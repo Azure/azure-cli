@@ -207,13 +207,13 @@ def create_webapp_slot(resource_group_name, webapp, slot, configuration_source=N
 
     return client.sites.create_or_update_site_slot(resource_group_name, webapp, slot_def, slot)
 
-def config_source_control(resource_group_name, name, repo_url, branch=None,
-                          is_manual_integration=None, is_mercurial=False, slot=None):
+def config_source_control(resource_group_name, name, repo_url, repository_type=None, branch=None,
+                          manual_integration=None, slot=None):
     client = web_client_factory()
     location = _get_location_from_webapp(client, resource_group_name, name)
     source_control = SiteSourceControl(location, repo_url=repo_url, branch=branch,
-                                       is_manual_integration=is_manual_integration,
-                                       is_mercurial=is_mercurial)
+                                       is_manual_integration=manual_integration,
+                                       is_mercurial=(repository_type != 'git'))
     return _generic_site_operation(resource_group_name, name,
                                    'create_or_update_site_source_control',
                                    slot, source_control)
