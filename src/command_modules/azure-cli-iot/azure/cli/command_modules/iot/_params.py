@@ -43,6 +43,13 @@ register_cli_argument('iot device create', 'device_id', completer=None)
 # Arguments for 'iot device list'
 register_cli_argument('iot device list', 'top', help='Maximum number of device identities to return.', type=int)
 
+# Arguments for 'iot device delete'
+register_cli_argument('iot device delete', 'etag',
+                      help='ETag of the target device. It is used for the purpose of optimistic concurrency. '
+                           'Delete operation will be performed only if the specified ETag matches the value maintained by the server, '
+                           'indicating that the device identity has not been modified since it was retrieved. '
+                           'Default value is set to wildcard character (*) to force an unconditional delete.')
+
 # Arguments for 'iot device show-connection-string'
 register_cli_argument('iot device show-connection-string', 'top',
                       help='Maximum number of connection strings to return.', type=int)

@@ -41,6 +41,11 @@ helps['iot device list'] = """
             short-summary: List devices in target Azure IoT Hub.
 """
 
+helps['iot device delete'] = """
+            type: command
+            short-summary: Delete a device from target Azure IoT Hub.
+"""
+
 helps['iot device show-connection-string'] = """
             type: command
             short-summary: Show connection string of device(s) in target Azure IoT Hub.

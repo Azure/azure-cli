@@ -63,7 +63,7 @@ def iot_hub_show_connection_string(client, hub_name=None, resource_group_name=No
         return connection_strings
     else:
         if resource_group_name is None:
-            resource_group_name = get_resource_group_by_iot_hub_name(client, hub_name)
+            resource_group_name = _get_resource_group_by_iot_hub_name(client, hub_name)
         connection_string = _get_single_iot_hub_connection_string(client, hub_name, resource_group_name, policy_name)
         return {"connectionString": connection_string}
 
@@ -85,8 +85,8 @@ def _get_single_iot_hub_connection_string(client, hub_name, resource_group_name,
 
 def iot_device_create(client, hub_name, device_id, resource_group_name=None):
     if resource_group_name is None:
-        resource_group_name = get_resource_group_by_iot_hub_name(client, hub_name)
-    device_client = get_iot_device_client(client, resource_group_name, hub_name, device_id)
+        resource_group_name = _get_resource_group_by_iot_hub_name(client, hub_name)
+    device_client = _get_iot_device_client(client, resource_group_name, hub_name, device_id)
     create_device_req = CreateDeviceRequest(device_id=device_id)
     result = device_client.create(device_id, create_device_req)
     return result
@@ -94,9 +94,16 @@ def iot_device_create(client, hub_name, device_id, resource_group_name=None):
 
 def iot_device_list(client, hub_name, resource_group_name=None, top=10):
     if resource_group_name is None:
-        resource_group_name = get_resource_group_by_iot_hub_name(client, hub_name)
-    device_client = get_iot_device_client(client, resource_group_name, hub_name, '')
+        resource_group_name = _get_resource_group_by_iot_hub_name(client, hub_name)
+    device_client = _get_iot_device_client(client, resource_group_name, hub_name, '')
     return device_client.list(top)
+
+
+def iot_device_delete(client, hub_name, device_id, resource_group_name=None, etag='*'):
+    if resource_group_name is None:
+        resource_group_name = _get_resource_group_by_iot_hub_name(client, hub_name)
+    device_client = _get_iot_device_client(client, resource_group_name, hub_name, device_id)
+    return device_client.delete(device_id, etag)
 
 
 def iot_device_show_connection_string(client, hub_name, device_id=None, resource_group_name=None, top=10):
@@ -112,15 +119,15 @@ def iot_device_show_connection_string(client, hub_name, device_id=None, resource
         return connection_strings
     else:
         if resource_group_name is None:
-            resource_group_name = get_resource_group_by_iot_hub_name(client, hub_name)
+            resource_group_name = _get_resource_group_by_iot_hub_name(client, hub_name)
         connection_string = _get_single_iot_device_connection_string(client, hub_name, device_id, resource_group_name)
         return {"connectionString": connection_string}
 
 
 def _get_single_iot_device_connection_string(client, hub_name, device_id, resource_group_name):
     if resource_group_name is None:
-        resource_group_name = get_resource_group_by_iot_hub_name(client, hub_name)
-    device_client = get_iot_device_client(client, resource_group_name, hub_name, device_id)
+        resource_group_name = _get_resource_group_by_iot_hub_name(client, hub_name)
+    device_client = _get_iot_device_client(client, resource_group_name, hub_name, device_id)
     device_desc = device_client.get(device_id)
     if device_desc is None:
         raise CLIError('Nothing found for device {}'.format(device_id))
@@ -131,7 +138,7 @@ def _get_single_iot_device_connection_string(client, hub_name, device_id, resour
     return connection_string
 
 
-def get_iot_device_client(client, resource_group_name, hub_name, device_id):
+def _get_iot_device_client(client, resource_group_name, hub_name, device_id):
     access_policies = client.list_keys(resource_group_name, hub_name).next()
     if access_policies is None:
         raise CLIError('No policy found from IoT Hub {}.'.format(hub_name))
@@ -149,7 +156,7 @@ def get_iot_device_client(client, resource_group_name, hub_name, device_id):
     return IotHubDeviceClient(creds, client.config.subscription_id, base_url='https://' + base_url).iot_hub_devices
 
 
-def get_resource_group_by_iot_hub_name(client, hub_name):
+def _get_resource_group_by_iot_hub_name(client, hub_name):
     all_hubs = iot_hub_list(client)
     if all_hubs is None:
         raise CLIError('No IoT Hub found in current subscription.')

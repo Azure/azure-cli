@@ -156,6 +156,58 @@ class IotHubDevicesOperations(object):
 
         return deserialized
 
+    def delete(
+            self, device_id, if_match, custom_headers=None, raw=False, **operation_config):
+        """Delete a device identity in the identity registry of an IoT Hub.
+
+        Delete a device identity in the identity registry of an IoT Hub.
+
+        :param device_id: The Id of the device.
+        :type device_id: str
+        :param if_match: Specify the ETag for the device identity.
+        :type if_match: str
+        :param dict custom_headers: headers that will be added to the request
+        :param bool raw: returns the direct response alongside the
+         deserialized response
+        :param operation_config: :ref:`Operation configuration
+         overrides<msrest:optionsforoperations>`.
+        :rtype: None
+        :rtype: :class:`ClientRawResponse<msrest.pipeline.ClientRawResponse>`
+         if raw=true
+        """
+        # Construct URL
+        url = '/devices/{deviceId}'
+        path_format_arguments = {
+            'deviceId': self._serialize.url("device_id", device_id, 'str', max_length=128, min_length=1)
+        }
+        url = self._client.format_url(url, **path_format_arguments)
+
+        # Construct parameters
+        query_parameters = {}
+        query_parameters['api-version'] = self._serialize.query("self.config.api_version", self.config.api_version, 'str')
+
+        # Construct headers
+        header_parameters = {}
+        header_parameters['Content-Type'] = 'application/json; charset=utf-8'
+        if self.config.generate_client_request_id:
+            header_parameters['x-ms-client-request-id'] = str(uuid.uuid1())
+        if custom_headers:
+            header_parameters.update(custom_headers)
+        header_parameters['If-Match'] = self._serialize.header("if_match", if_match, 'str')
+        if self.config.accept_language is not None:
+            header_parameters['accept-language'] = self._serialize.header("self.config.accept_language", self.config.accept_language, 'str')
+
+        # Construct and send request
+        request = self._client.delete(url, query_parameters)
+        response = self._client.send(request, header_parameters, **operation_config)
+
+        if response.status_code not in [204]:
+            raise models.ErrorDetailsException(self._deserialize, response)
+
+        if raw:
+            client_raw_response = ClientRawResponse(None, response)
+            return client_raw_response
+
     def list(
             self, top, custom_headers=None, raw=False, **operation_config):
         """List device identities from the identity registry of an IoT Hub.
