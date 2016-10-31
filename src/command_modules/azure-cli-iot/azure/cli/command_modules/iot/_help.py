@@ -41,6 +41,11 @@ helps['iot device create'] = """
             short-summary: Register a device in your Azure IoT Hub.
 """
 
+helps['iot device show'] = """
+            type: command
+            short-summary: Show metadata of a device in an IoT Hub.
+"""
+
 helps['iot device list'] = """
             type: command
             short-summary: List devices in target Azure IoT Hub.

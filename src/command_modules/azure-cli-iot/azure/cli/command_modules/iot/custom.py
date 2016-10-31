@@ -99,6 +99,13 @@ def iot_device_create(client, hub_name, device_id, resource_group_name=None):
     return result
 
 
+def iot_device_get(client, hub_name, device_id, resource_group_name=None):
+    if resource_group_name is None:
+        resource_group_name = _get_iot_hub_by_name(client, hub_name).resourcegroup
+    device_client = _get_iot_device_client(client, resource_group_name, hub_name, device_id)
+    return device_client.get(device_id)
+
+
 def iot_device_list(client, hub_name, resource_group_name=None, top=10):
     if resource_group_name is None:
         resource_group_name = _get_iot_hub_by_name(client, hub_name).resourcegroup
