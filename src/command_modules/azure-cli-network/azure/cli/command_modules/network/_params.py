@@ -33,7 +33,8 @@ from azure.cli.command_modules.network._validators import \
      validate_subnet_name_or_id, validate_public_ip_name_or_id, validate_nsg_name_or_id,
      validate_inbound_nat_rule_id_list, validate_address_pool_id_list,
      validate_inbound_nat_rule_name_or_id, validate_address_pool_name_or_id,
-     validate_servers, validate_cert, validate_address_prefixes, load_cert_file, vnet_gateway_validator)
+     validate_servers, validate_cert, validate_address_prefixes, load_cert_file,
+     vnet_gateway_validator, validate_peering_type)
 from azure.cli.command_modules.network.mgmt_nic.lib.models.nic_creation_client_enums import privateIpAddressVersion
 from azure.cli.command_modules.network.mgmt_vnet_gateway.lib.models.vnet_gateway_creation_client_enums import \
     (gatewayType, sku, vpnType)
@@ -224,7 +225,7 @@ register_cli_argument('network express-route auth create', 'authorization_parame
 
 register_cli_argument('network express-route peering', 'circuit_name', circuit_name_type)
 register_cli_argument('network express-route peering', 'peering_name', name_arg_type, id_part='child_name')
-register_cli_argument('network express-route peering', 'peering_type', **enum_choice_list(ExpressRouteCircuitPeeringType))
+register_cli_argument('network express-route peering', 'peering_type', validator=validate_peering_type, **enum_choice_list(ExpressRouteCircuitPeeringType))
 register_cli_argument('network express-route peering', 'sku_family', **enum_choice_list(ExpressRouteCircuitSkuFamily))
 register_cli_argument('network express-route peering', 'sku_tier', **enum_choice_list(ExpressRouteCircuitSkuTier))
 register_cli_argument('network express-route peering', 'advertised_public_prefix_state', arg_group='Microsoft Peering', **enum_choice_list(ExpressRouteCircuitPeeringAdvertisedPublicPrefixState))

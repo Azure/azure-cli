@@ -343,10 +343,6 @@ helps['network express-route'] = """
     type: group
     short-summary: Dedicated private network fiber connections to Azure
 """
-helps['network express-route circuit'] = """
-    type: group
-    short-summary: Manage Express Route circuits
-"""
 helps['network express-route create'] = """
     type: command
     short-summary: Create an Express Route circuit.
