@@ -53,8 +53,7 @@ DEPENDENCIES = [
     'azure-cli-resource',
     'azure-cli-role',
     'azure-cli-storage',
-    'azure-cli-vm',
-    'six',
+    'azure-cli-vm'
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
