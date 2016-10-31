@@ -52,9 +52,11 @@ class WebappBasicE2ETest(ResourceGroupVCRTestBase):
             JMESPathCheck('hostNames[0]', webapp_name + '.azurewebsites.net')
             ])
 
-        self.cmd('appservice web git enable-local -g {} -n {}'.format(self.resource_group, webapp_name))
-        result = self.cmd('appservice web git show-url -g {} -n {}'.format(self.resource_group, webapp_name))
+        result = self.cmd('appservice web source-control config-local-git -g {} -n {}'.format(self.resource_group, webapp_name))
         self.assertTrue(result['url'].endswith(webapp_name + '.git'))
+        self.cmd('appservice web source-control show -g {} -n {}'.format(self.resource_group, webapp_name), checks=[
+            JMESPathCheck('repoUrl', 'https://{}.scm.azurewebsites.net'.format(webapp_name))
+            ])
 
         #turn on diagnostics
         test_cmd = ('appservice web log config -g {} -n {} --level verbose'.format(self.resource_group, webapp_name) + ' '
@@ -248,12 +250,58 @@ class LinuxWebappSceanrioTest(ResourceGroupVCRTestBase):
                 JMESPathCheck('DOCKER_REGISTRY_SERVER_USERNAME', 'foo-user'),
                 JMESPathCheck('DOCKER_REGISTRY_SERVER_PASSWORD', 'foo-password')
                 ])
-        self.cmd('appservice web config container list -g {} -n {} '.format(self.resource_group, webapp), checks=[
+        self.cmd('appservice web config container show -g {} -n {} '.format(self.resource_group, webapp), checks=[
             JMESPathCheck('DOCKER_CUSTOM_IMAGE_NAME', 'foo-image'),
             JMESPathCheck('DOCKER_REGISTRY_SERVER_URL', 'foo-url'),
             JMESPathCheck('DOCKER_REGISTRY_SERVER_USERNAME', 'foo-user'),
             JMESPathCheck('DOCKER_REGISTRY_SERVER_PASSWORD', 'foo-password')
             ])
         self.cmd('appservice web config container delete -g {} -n {}'.format(self.resource_group, webapp))
-        self.cmd('appservice web config container list -g {} -n {} '.format(self.resource_group, webapp), checks=NoneCheck())
+        self.cmd('appservice web config container show -g {} -n {} '.format(self.resource_group, webapp), checks=NoneCheck())
+
+class WebappGitScenarioTest(ResourceGroupVCRTestBase):
+    def __init__(self, test_method):
+        super(WebappGitScenarioTest, self).__init__(__file__, test_method)
+        self.resource_group = 'cli-webapp-git4'
+
+    def test_webapp_git(self):
+        self.execute()
+
+    def body(self):
+        plan = 'webapp-git-plan5'
+        webapp = 'web-git-test'
+
+        #You can create and use any repros with the 3 files under "./sample_web"
+        test_git_repo = 'https://github.com/yugangw-msft/azure-site-test'
+
+        self.cmd('appservice plan create -g {} -n {} --sku S1'.format(self.resource_group, plan))
+        self.cmd('appservice web create -g {} -n {} --plan {}'.format(self.resource_group, webapp, plan))
+
+        self.cmd('appservice web source-control config -g {} -n {} --repo-url {} --branch {}'.format(self.resource_group, webapp, test_git_repo, 'master'), checks=[
+            JMESPathCheck('repoUrl', test_git_repo),
+            JMESPathCheck('isManualIntegration', False),
+            JMESPathCheck('isMercurial', False),
+            JMESPathCheck('branch', 'master')
+            ])
+
+        import time
+        time.sleep(30) # 30 seconds should be enough for the deployment finished(Skipped under playback mode)
+
+        import requests
+        r = requests.get('http://{}.azurewebsites.net'.format(webapp))
+        #verify the web page
+        self.assertTrue('Hello world' in str(r.content))
+
+        self.cmd('appservice web source-control show -g {} -n {}'.format(self.resource_group, webapp), checks=[
+            JMESPathCheck('repoUrl', test_git_repo),
+            JMESPathCheck('isManualIntegration', False),
+            JMESPathCheck('isMercurial', False),
+            JMESPathCheck('branch', 'master')
+            ])
+        self.cmd('appservice web source-control config -g {} -n {} --repo-url {} --manual-integration'.format(self.resource_group, webapp, test_git_repo), checks=[
+            JMESPathCheck('isManualIntegration', True)
+            ])
+        self.cmd('appservice web source-control delete -g {} -n {}'.format(self.resource_group, webapp), checks=[
+            JMESPathCheck('repoUrl', None)
+            ])
 

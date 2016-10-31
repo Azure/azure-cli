@@ -13,7 +13,7 @@ except ImportError:
     from urlparse import urlparse # pylint: disable=import-error
 
 from azure.mgmt.web.models import (Site, SiteConfig, User, ServerFarmWithRichSku,
-                                   SkuDescription, SslState, HostNameBinding)
+                                   SkuDescription, SslState, HostNameBinding, SiteSourceControl)
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.arm import is_valid_resource_id, parse_resource_id
@@ -102,7 +102,7 @@ def get_app_settings(resource_group_name, name, slot=None):
 #in the method
 def update_site_configs(resource_group_name, name, slot=None,
                         php_version=None, python_version=None,#pylint: disable=unused-argument
-                        net_framework_version=None, #pylint: disable=unused-argument
+                        node_version=None, net_framework_version=None, #pylint: disable=unused-argument
                         java_version=None, java_container=None, java_container_version=None,#pylint: disable=unused-argument
                         remote_debugging_enabled=None, web_sockets_enabled=None,#pylint: disable=unused-argument
                         always_on=None, auto_heal_enabled=None,#pylint: disable=unused-argument
@@ -162,7 +162,7 @@ def update_container_settings(resource_group_name, name, docker_registry_server_
 def delete_container_settings(resource_group_name, name, slot=None):
     delete_app_settings(resource_group_name, name, CONTAINER_APPSETTING_NAMES, slot)
 
-def list_container_settings(resource_group_name, name, slot=None):
+def show_container_settings(resource_group_name, name, slot=None):
     settings = get_app_settings(resource_group_name, name, slot)
     return _filter_for_container_settings(settings)
 
@@ -207,6 +207,23 @@ def create_webapp_slot(resource_group_name, webapp, slot, configuration_source=N
 
     return client.sites.create_or_update_site_slot(resource_group_name, webapp, slot_def, slot)
 
+def config_source_control(resource_group_name, name, repo_url, repository_type=None, branch=None,
+                          manual_integration=None, slot=None):
+    client = web_client_factory()
+    location = _get_location_from_webapp(client, resource_group_name, name)
+    source_control = SiteSourceControl(location, repo_url=repo_url, branch=branch,
+                                       is_manual_integration=manual_integration,
+                                       is_mercurial=(repository_type != 'git'))
+    return _generic_site_operation(resource_group_name, name,
+                                   'create_or_update_site_source_control',
+                                   slot, source_control)
+
+def show_source_control(resource_group_name, name, slot=None):
+    return _generic_site_operation(resource_group_name, name, 'get_site_source_control', slot)
+
+def delete_source_control(resource_group_name, name, slot=None):
+    return _generic_site_operation(resource_group_name, name, 'delete_site_source_control', slot)
+
 def enable_local_git(resource_group_name, name, slot=None):
     client = web_client_factory()
     location = _get_location_from_webapp(client, resource_group_name, name)
@@ -217,7 +234,11 @@ def enable_local_git(resource_group_name, name, slot=None):
     else:
         client.sites.create_or_update_site_config_slot(resource_group_name, name, site_config, slot)
 
-    return {'url' : _get_git_url(client, resource_group_name, name, slot)}
+    return {'url' : _get_local_git_url(client, resource_group_name, name, slot)}
+
+def sync_site_repo(resource_group_name, name, slot=None):
+    return _generic_site_operation(resource_group_name, name, 'sync_site_repository',
+                                   slot)
 
 def create_app_service_plan(resource_group_name, name, sku, is_linux, number_of_workers=None,
                             location=None):
@@ -287,24 +308,21 @@ def _get_location_from_app_service_plan(client, resource_group_name, plan):
     plan = client.server_farms.get_server_farm(resource_group_name, plan)
     return plan.location
 
-def get_git_url(resource_group_name, name, slot=None):
-    client = web_client_factory()
-    return {'url' : _get_git_url(client, resource_group_name, name, slot)}
-
-def _get_git_url(client, resource_group_name, name, slot=None):
+def _get_local_git_url(client, resource_group_name, name, slot=None):
     user = client.provider.get_publishing_user()
-    repo_url = _get_repo_url(client, resource_group_name, name, slot)
-    parsed = urlparse(repo_url)
-    git_url = '{}://{}@{}/{}.git'.format(parsed.scheme, user.publishing_user_name,
-                                         parsed.netloc, name)
-    return git_url
+    result = _generic_site_operation(resource_group_name, name, 'get_site_source_control', slot)
+    parsed = urlparse(result.repo_url)
+    return '{}://{}@{}/{}.git'.format(parsed.scheme, user.publishing_user_name,
+                                      parsed.netloc, name)
 
-def _get_repo_url(client, resource_group_name, name, slot=None):
-    scc = _generic_site_operation(resource_group_name, name, 'get_site_source_control',
-                                  slot, client=client)
-    if scc.repo_url is None:
-        raise CLIError("Please enable Git deployment, say, run 'webapp git enable-local'")
-    return scc.repo_url
+def _get_scm_url(client, resource_group_name, name, slot=None):
+    if slot is None:
+        poller = client.sites.list_site_publishing_credentials(resource_group_name, name,
+                                                               slot)
+    else:
+        poller = client.sites.list_site_publishing_credentials_slot(resource_group_name, name)
+    result = poller.result()
+    return result.scm_uri
 
 def set_deployment_user(user_name, password=None):
     '''
@@ -381,8 +399,8 @@ def config_slot_auto_swap(resource_group_name, webapp, slot, auto_swap_slot=None
 
 def get_streaming_log(resource_group_name, name, provider=None, slot=None):
     client = web_client_factory()
-    repo_url = _get_repo_url(client, resource_group_name, name, slot)
-    streaming_url = repo_url + '/logstream'
+    scm_url = _get_scm_url(client, resource_group_name, name, slot)
+    streaming_url = scm_url + '/logstream'
     import time
     if provider:
         streaming_url += ('/' + provider.lstrip('/'))
@@ -400,10 +418,8 @@ def download_historical_logs(resource_group_name, name, log_file=None, slot=None
     Download historical logs as a zip file
     '''
     client = web_client_factory()
-    user, password = _get_site_credential(client, resource_group_name, name)
-    repo_url = _get_repo_url(client, resource_group_name, name, slot)
-    host = urlparse(repo_url).netloc
-    url = "https://{}:{}@{}/dump".format(user, password, host)
+    scm_url = _get_scm_url(client, resource_group_name, name, slot)
+    url = scm_url.rstrip('/') + '/dump'
     import requests
     r = requests.get(url, stream=True)
     with open(log_file, 'wb') as f:
