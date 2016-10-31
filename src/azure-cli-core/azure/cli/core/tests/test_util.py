@@ -8,7 +8,7 @@ from collections import namedtuple
 import unittest
 import tempfile
 
-from azure.cli.core._util import get_file_json, todict
+from azure.cli.core._util import get_file_json, todict, to_snake_case
 
 class TestUtils(unittest.TestCase):
 
@@ -69,6 +69,24 @@ class TestUtils(unittest.TestCase):
             except Exception as ex: #pylint: disable=broad-except
                 self.assertTrue(str(ex).find(
                     'contains error: Expecting value: line 1 column 1 (char 0)'))
+
+    def test_to_snake_case_from_camel(self):
+        the_input = 'thisIsCamelCase'
+        expected = 'this_is_camel_case'
+        actual = to_snake_case(the_input)
+        self.assertEqual(expected, actual)
+
+    def test_to_snake_case_empty(self):
+        the_input = ''
+        expected = ''
+        actual = to_snake_case(the_input)
+        self.assertEqual(expected, actual)
+
+    def test_to_snake_case_already_snake(self):
+        the_input = 'this_is_snake_cased'
+        expected = 'this_is_snake_cased'
+        actual = to_snake_case(the_input)
+        self.assertEqual(expected, actual)
 
 if __name__ == '__main__':
     unittest.main()

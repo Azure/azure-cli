@@ -444,7 +444,6 @@ def enable_boot_diagnostics(resource_group_name, vm_name, storage):
 def get_boot_log(resource_group_name, vm_name):
     import sys
     import io
-    from azure.cli.core.cloud import CloudSuffix
     from azure.cli.core._profile import CLOUD
     from azure.storage.blob import BlockBlobService
 
@@ -486,7 +485,7 @@ def get_boot_log(resource_group_name, vm_name):
         BlockBlobService,
         storage_account.name,
         keys.key1,
-        endpoint_suffix=CLOUD.suffixes[CloudSuffix.STORAGE_ENDPOINT]) # pylint: disable=no-member
+        endpoint_suffix=CLOUD.suffixes.storage_endpoint) # pylint: disable=no-member
 
     class StreamWriter(object): # pylint: disable=too-few-public-methods
 
@@ -1014,6 +1013,10 @@ def vmss_set(**kwargs):
 
 cli_generic_update_command('vmss update', vmss_get, vmss_set)
 
-def update_acs(instance, agent_count):
-    instance.agent_pool_profiles[0].count = agent_count
-    return instance
+def update_acs(resource_group_name, container_service_name, new_agent_count):
+    client = _compute_client_factory()
+    instance = client.container_service.get(resource_group_name, container_service_name)
+    instance.agent_pool_profiles[0].count = new_agent_count
+    return client.container_service.create_or_update(resource_group_name,
+                                                     container_service_name, instance)
+

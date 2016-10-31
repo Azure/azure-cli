@@ -14,7 +14,6 @@ from azure.storage._error import _ERROR_STORAGE_MISSING_INFO
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_data_service_client
 from azure.cli.core.commands import CLIError
-from azure.cli.core.cloud import CloudSuffix
 from azure.cli.core._profile import CLOUD
 
 NO_CREDENTIALS_ERROR_MESSAGE = """
@@ -34,7 +33,7 @@ def get_storage_data_service_client(service, name=None, key=None, connection_str
                                    key,
                                    connection_string,
                                    sas_token,
-                                   endpoint_suffix=CLOUD.suffixes[CloudSuffix.STORAGE_ENDPOINT])
+                                   endpoint_suffix=CLOUD.suffixes.storage_endpoint)
 
 def generic_data_service_factory(service, name=None, key=None, connection_string=None,
                                  sas_token=None):

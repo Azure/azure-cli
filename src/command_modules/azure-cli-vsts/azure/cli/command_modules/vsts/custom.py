@@ -6,7 +6,7 @@
 import json
 import os
 import time
-from subprocess import check_output
+from subprocess import check_output, CalledProcessError
 
 import requests
 import yaml
@@ -28,14 +28,20 @@ VISUAL_STUDIO_PROJECT_URL = VISUAL_STUDIO_ACCOUNT_URL + "/project/{vsts_project_
 RP_URL = BASE_URL + CONTAINER_SERVICE_RESOURCE_URL + "/providers/Microsoft.Mindaro"
 API_VERSION = "2016-11-01-preview"
 
+DOCKERFILE_FILE = 'Dockerfile'
+DOCKER_COMPOSE_FILE = 'docker-compose.yml'
+DOCKER_COMPOSE_TEST_FILE = 'docker-compose.test.yml'
+DOCKER_COMPOSE_EXPECTED_VERSION = '2'
+
 def add_release(
         name,
         resource_group_name,
         remote_url=None,
+        remote_branch=None,
         remote_access_token=None,
         vsts_account_name=None,
         vsts_project_name=None,
-        registry_resource_group=None,
+        registry_resource_id=None,
         registry_name=None):
     """
     Creates a build definition that automates building and pushing Docker images to an Azure container registry, and creates a release definition that automates deploying container images from a container registry to an Azure container service. Source repository must define a docker-compose.yml file.
@@ -46,19 +52,24 @@ def add_release(
     :type resource_group_name: String
     :param remote_url: Remote url of the GitHub or VSTS source repository that will be built and deployed. If omitted, a source repository will be searched for in the current working directory.
     :type remote_url: String
+    :param remote_branch: Remote branch of the GitHub or VSTS source repository that will be built and deployed. If omitted refs/heads/master will be selected.
+    :type remote_branch: String
     :param remote_access_token: GitHub personal access token (minimum permission is 'repo'). Required if the source repository is in GitHub.
     :type remote_access_token: String
     :param vsts_account_name: VSTS account name to create the build and release definitions. A new VSTS account is created if omitted or does not exist.
     :type vsts_account_name: String
     :param vsts_project_name: VSTS project name to create the build and release definitions. A new VSTS project is created if omitted or does not exist.
     :type vsts_project_name: String
-    :param registry_resource_group: Azure container registry resource group name.
-    :type registry_resource_group: String
+    :param registry_resource_id: Azure container registry resource id.
+    :type registry_resource_id: String
     :param registry_name: Azure container registry name. A new Azure container registry is created if omitted or does not exist.
     :type registry_name: String
     """
-    # Ensure docker-compose file is correct.
-    _ensure_docker_compose()
+    # Ensure docker-compose file is correct if no remote url provided.
+    if not remote_url:
+        _ensure_docker_compose()
+
+    _check_registry_information(registry_name, registry_resource_id)
 
     # Call the RP
     return _call_rp_configure_cicd(
@@ -67,8 +78,9 @@ def add_release(
         vsts_account_name,
         vsts_project_name,
         registry_name,
-        registry_resource_group,
+        registry_resource_id,
         _get_valid_remote_url(remote_url, remote_access_token),
+        remote_branch,
         remote_access_token)
 
 def _get_valid_remote_url(remote_url=None, remote_access_token=None):
@@ -105,8 +117,9 @@ def _call_rp_configure_cicd(
         vsts_account_name,
         vsts_project_name,
         registry_name,
-        registry_resource_group,
+        registry_resource_id,
         remote_url,
+        remote_branch,
         remote_access_token,
         create_release=True):
     """
@@ -118,14 +131,16 @@ def _call_rp_configure_cicd(
     :type resource_group_name: String
     :param remote_url: Remote url of the GitHub or VSTS source repository that will be built and deployed. If omitted, a source repository will be searched for in the current working directory.
     :type remote_url: String
+    :param remote_branch: Remote branch of the GitHub or VSTS source repository that will be built and deployed. If omitted refs/heads/master will be selected.
+    :type remote_branch: String
     :param remote_access_token: GitHub personal access token (minimum permission is 'repo'). Required if the source repository is in GitHub.
     :type remote_access_token: String
     :param vsts_account_name: VSTS account name to create the build and release definitions. A new VSTS account is created if omitted or does not exist.
     :type vsts_account_name: String
     :param vsts_project_name: VSTS project name to create the build and release definitions. A new VSTS project is created if omitted or does not exist.
     :type vsts_project_name: String
-    :param registry_resource_group: Azure container registry resource group name.
-    :type registry_resource_group: String
+    :param registry_resource_id: Azure container registry resource id.
+    :type registry_resource_id: String
     :param registry_name: Azure container registry name. A new Azure container registry is created if omitted or does not exist.
     :type registry_name: String
     :param create_release: Whether to create a release definition and deploy the application.
@@ -141,9 +156,10 @@ def _call_rp_configure_cicd(
         'vstsProjectName': vsts_project_name,
         'token': o_auth_token,
         'registryName': registry_name,
-        'registryResourceGroup': registry_resource_group,
+        'registryResourceId': registry_resource_id,
         'remoteToken': remote_access_token,
         'remoteUrl': remote_url,
+        'remoteBranch': remote_branch,
         'createRelease' : create_release
     }
 
@@ -192,6 +208,28 @@ def list_releases(name, resource_group_name):
     json_request = req.json()
     return json_request
 
+def _gitroot():
+    """
+    Gets the absolute path of the repository root
+    """
+    try:
+        base = check_output(['git', 'rev-parse', '--show-toplevel'])
+    except OSError:
+        raise CLIError('Git is not currently installed.')
+    except CalledProcessError:
+        raise CLIError('Current working directory is not a git repository')
+    return base.decode('utf-8').strip()
+
+def _get_filepath_in_current_git_repo(file_to_search):
+    """
+    retrieves the full path of the first file in the git repo that matches filename
+    """
+    for dirpath, _, filenames in os.walk(_gitroot()):
+        for file_name in filenames:
+            if file_name.lower() == file_to_search.lower():
+                return os.path.join(dirpath, file_name)
+    return None
+
 def _ensure_docker_compose():
     """
     1. Raises an error if there is no docker_compose_file present.
@@ -199,42 +237,37 @@ def _ensure_docker_compose():
     docker_compose_version.
     3. Raises an error if docker_compose_test_file has a version other than docker_compose_version.
     """
-    docker_compose_file = 'docker-compose.yml'
-    docker_compose_test_file = 'docker-compose.test.yml'
-    docker_compose_expected_version = '2'
-    if not os.path.isfile(docker_compose_file):
-        raise CLIError('Docker compose file "{}" was not found.'.format(docker_compose_file))
-    with open(docker_compose_file, 'r') as f:
+    docker_compose_file = _get_filepath_in_current_git_repo(DOCKER_COMPOSE_FILE)
+    docker_compose_test_file = _get_filepath_in_current_git_repo(DOCKER_COMPOSE_TEST_FILE)
+
+    if not docker_compose_file:
+        raise CLIError('Docker compose file "{}" was not found.'.format(DOCKER_COMPOSE_FILE))
+    _ensure_version(docker_compose_file, DOCKER_COMPOSE_EXPECTED_VERSION)
+
+    if docker_compose_test_file:
+        _ensure_version(docker_compose_test_file, DOCKER_COMPOSE_EXPECTED_VERSION)
+
+def _ensure_version(filepath, expected_version):
+    with open(filepath, 'r') as f:
         compose_data = yaml.load(f)
         if 'version' not in compose_data.keys():
+            raise CLIError('File : "{}"\nis missing version information.'.format(
+                filepath))
+        if not expected_version in compose_data['version']:
             raise CLIError(
-                'Docker compose file "{}" is missing version information.'.format(
-                    docker_compose_file))
-        if not docker_compose_expected_version in compose_data['version']:
-            raise CLIError(
-                'Docker compose file "{}" has incorrect version. \
-                Only version "{}" is supported.'.format(
-                    docker_compose_file,
-                    docker_compose_expected_version))
-    if os.path.isfile(docker_compose_test_file):
-        with open(docker_compose_test_file, 'r') as f:
-            compose_data = yaml.load(f)
-            if 'version' not in compose_data.keys():
-                raise CLIError('Docker compose file "{}" is missing version information.'.format(
-                    docker_compose_test_file))
-            if not docker_compose_expected_version in compose_data['version']:
-                raise CLIError(
-                    'Docker compose file "{}" has incorrect version. \
-                    Only version "{}" is supported.'.format(
-                        docker_compose_test_file,
-                        docker_compose_expected_version))
+                'File : "{}"\nhas incorrect version. \
+                \n Only version "{}" is supported.'.format(
+                    filepath,
+                    expected_version))
+
 
 def _ensure_dockerfile():
     """
     1. Raises an error if there is no dockerfile present.
     """
-    dockerfile_file = 'Dockerfile'
-    if not os.path.isfile(dockerfile_file):
+    dockerfile_file = _get_filepath_in_current_git_repo(DOCKERFILE_FILE)
+
+    if not dockerfile_file:
         raise CLIError('Docker file "{}" was not found.'.format(dockerfile_file))
 
 def _get_remote_url():
@@ -258,14 +291,27 @@ def _get_remote_url():
             an 'origin' remote or specify a remote using '--remote-url'")
     return remote_url.decode()
 
+def _check_registry_information(registry_name, registry_resource_id):
+    """
+    Check that only one of registry_name and registry_resource_id is provided
+    :param registry_name: The registry name.
+    :type name: String
+    :param registry_resource_id: The registry resource id.
+    :type name: String
+    Sample registry_resource_id: /subscriptions/{subscriptionId}/resourcegroups/{resourceGroup}/providers/Microsoft.ContainerRegistry/registries/{registryName}
+    """
+    if registry_name and registry_resource_id:
+        raise CLIError("Please provide only one of registry-name and registry-resource-id, not both.")
+
 def add_ci(
         name,
         resource_group_name,
         remote_url=None,
+        remote_branch=None,
         remote_access_token=None,
         vsts_account_name=None,
         vsts_project_name=None,
-        registry_resource_group=None,
+        registry_resource_id=None,
         registry_name=None):
     """
     Creates a build definition that automates building and pushing Docker images to an Azure container registry. Source repository must define a Dockerfile.
@@ -276,18 +322,23 @@ def add_ci(
     :type resource_group_name: String
     :param remote_url: Remote url of the GitHub or VSTS source repository that will be built and deployed. If omitted, a source repository will be searched for in the current working directory.
     :type remote_url: String
+    :param remote_branch: Remote branch of the GitHub or VSTS source repository that will be built and deployed. If omitted refs/heads/master will be selected.
+    :type remote_branch: String
     :param remote_access_token: GitHub personal access token (minimum permission is 'repo'). Required if the source repository is in GitHub.
     :type remote_access_token: String
     :param vsts_account_name: VSTS account name to create the build and release definitions. A new VSTS account is created if omitted or does not exist.
     :type vsts_account_name: String
     :param vsts_project_name: VSTS project name to create the build and release definitions. A new VSTS project is created if omitted or does not exist.
     :type vsts_project_name: String
-    :param registry_resource_group: Azure container registry resource group name.
-    :type registry_resource_group: String
+    :param registry_resource_id: Azure container registry resource id.
+    :type registry_resource_id: String
     :param registry_name: Azure container registry name. A new Azure container registry is created if omitted or does not exist.
     :type registry_name: String
     """
     _ensure_dockerfile()
+
+    _check_registry_information(registry_name, registry_resource_id)
+
     # Call the RP
     return _call_rp_configure_cicd(
         name,
@@ -295,7 +346,8 @@ def add_ci(
         vsts_account_name,
         vsts_project_name,
         registry_name,
-        registry_resource_group,
+        registry_resource_id,
         _get_valid_remote_url(remote_url, remote_access_token),
+        remote_branch,
         remote_access_token,
         False)

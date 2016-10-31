@@ -52,9 +52,9 @@ setup(
     packages=[
         'azure.cli.command_modules.keyvault',
         'azure.cli.command_modules.keyvault.keyvaultclient',
-        'azure.cli.command_modules.keyvault.convenience',
-        'azure.cli.command_modules.keyvault.convenience.http_bearer_challenge_cache',
-        'azure.cli.command_modules.keyvault.keyvaultclient.models'
+        'azure.cli.command_modules.keyvault.keyvaultclient.http_bearer_challenge_cache',
+        'azure.cli.command_modules.keyvault.keyvaultclient.generated',
+        'azure.cli.command_modules.keyvault.keyvaultclient.generated.models'
     ],
     install_requires=DEPENDENCIES,
 )

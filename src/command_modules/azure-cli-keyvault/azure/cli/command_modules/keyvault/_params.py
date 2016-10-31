@@ -4,7 +4,6 @@
 #---------------------------------------------------------------------------------------------
 
 # pylint: disable=line-too-long
-import json
 
 from azure.mgmt.keyvault.models.key_vault_management_client_enums import \
     (SkuName, KeyPermissions, SecretPermissions, CertificatePermissions)
@@ -14,10 +13,11 @@ from azure.cli.core.commands.parameters import (
 from azure.cli.core.commands import \
     (register_cli_argument, register_extra_cli_argument, CliArgumentType)
 import azure.cli.core.commands.arm # pylint: disable=unused-import
+from azure.cli.core._util import get_json_object
 
-from azure.cli.command_modules.keyvault.keyvaultclient.models.key_vault_client_enums import \
+from azure.cli.command_modules.keyvault.keyvaultclient.generated.models.key_vault_client_enums import \
     (JsonWebKeyOperation)
-from azure.cli.command_modules.keyvault.keyvaultclient.models import \
+from azure.cli.command_modules.keyvault.keyvaultclient.generated.models import \
     (KeyAttributes, SecretAttributes, CertificateAttributes)
 from azure.cli.command_modules.keyvault._validators import \
     (datetime_type,
@@ -74,7 +74,7 @@ for item in ['key', 'secret', 'certificate']:
     register_cli_argument('keyvault {}'.format(item), 'vault_base_url', vault_name_type, type=vault_base_url_type, id_part=None)
 
 register_cli_argument('keyvault key', 'key_ops', options_list=('--ops',), nargs='*', help='Space separated list of permitted JSON web key operations. Possible values: {}'.format(json_web_key_op_values), validator=validate_key_ops, type=str.lower)
-register_cli_argument('keyvault key', 'key_version', options_list=('--version', '-v'), help='The key version. If omitted, uses the latest version.')
+register_cli_argument('keyvault key', 'key_version', options_list=('--version', '-v'), help='The key version. If omitted, uses the latest version.', default='', required=False)
 
 for item in ['create', 'import']:
     register_cli_argument('keyvault key {}'.format(item), 'destination', options_list=('--protection', '-p'), choices=['software', 'hsm'], help='Specifies the type of key protection.', validator=validate_key_type, type=str.lower)
@@ -89,13 +89,31 @@ register_cli_argument('keyvault key import', 'byok_file', help='BYOK file contai
 
 register_attributes_argument('keyvault key set-attributes', 'key', KeyAttributes)
 
-register_cli_argument('keyvault secret', 'secret_version', options_list=('--version', '-v'), help='The secret version. If omitted, uses the latest version.')
+register_cli_argument('keyvault secret', 'secret_version', options_list=('--version', '-v'), help='The secret version. If omitted, uses the latest version.', default='', required=False)
 
 register_attributes_argument('keyvault secret set', 'secret', SecretAttributes, create=True)
 register_attributes_argument('keyvault secret set-attributes', 'secret', SecretAttributes)
 
-register_cli_argument('keyvault certificate', 'certificate_version', options_list=('--version', '-v'), help='The certificate version. If omitted, uses the latest version.')
-
+register_cli_argument('keyvault certificate', 'certificate_version', options_list=('--version', '-v'), help='The certificate version. If omitted, uses the latest version.', default='', required=False)
+register_attributes_argument('keyvault certificate create', 'certificate', CertificateAttributes, True)
+register_attributes_argument('keyvault certificate set-attributes', 'certificate', CertificateAttributes)
 for item in ['create', 'set-attributes']:
-    register_attributes_argument('keyvault certificate {}'.format(item), 'certificate', CertificateAttributes, item == 'create')
-    register_cli_argument('keyvault certificate {}'.format(item), 'certificate_policy', options_list=('--policy', '-p'), help='JSON encoded policy defintion. Use @{file} to load from a file.', type=json.loads)
+    register_cli_argument('keyvault certificate {}'.format(item), 'certificate_policy', options_list=('--policy', '-p'), help='JSON encoded policy defintion. Use @{file} to load from a file.', type=get_json_object)
+
+register_cli_argument('keyvault certificate contact', 'contact_email', options_list=('--email',), help='Contact e-mail address. Must be unique within the vault.')
+register_cli_argument('keyvault certificate contact', 'contact_name', options_list=('--name',), help='Full contact name.')
+register_cli_argument('keyvault certificate contact', 'contact_phone', options_list=('--phone',), help='Contact phone number.')
+
+register_cli_argument('keyvault certificate issuer admin', 'email', options_list=('--email',), help='Admin e-mail address. Must be unique within the vault.')
+register_cli_argument('keyvault certificate issuer admin', 'name', options_list=('--name',), help='Full admin name.')
+register_cli_argument('keyvault certificate issuer admin', 'phone', options_list=('--phone',), help='Amin phone number.')
+
+register_cli_argument('keyvault certificate issuer', 'issuer_name', help='Certificate issuer name.')
+register_cli_argument('keyvault certificate issuer', 'disabled', action='store_true', help='Set issuer to disabled state.')
+register_cli_argument('keyvault certificate issuer', 'account_id', arg_group='Issuer Credential')
+register_cli_argument('keyvault certificate issuer', 'password', arg_group='Issuer Credential')
+register_cli_argument('keyvault certificate issuer', 'organization_id', arg_group='Organization Detail')
+register_cli_argument('keyvault certificate issuer', 'admin_first_name', arg_group='Organization Detail')
+register_cli_argument('keyvault certificate issuer', 'admin_last_name', arg_group='Organization Detail')
+register_cli_argument('keyvault certificate issuer', 'admin_email', arg_group='Organization Detail')
+register_cli_argument('keyvault certificate issuer', 'admin_phone', arg_group='Organization Detail')

@@ -10,8 +10,8 @@ from azure.mgmt.keyvault import KeyVaultManagementClient
 from azure.mgmt.keyvault.models.key_vault_management_client_enums import \
     (KeyPermissions, SecretPermissions, CertificatePermissions)
 
-from azure.cli.command_modules.keyvault.keyvaultclient.models.key_vault_client_enums import \
-    (JsonWebKeyOperation)
+from azure.cli.command_modules.keyvault.keyvaultclient.generated.models.key_vault_client_enums \
+    import JsonWebKeyOperation
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.arm import parse_resource_id
@@ -117,6 +117,5 @@ def datetime_type(string):
 
 def vault_base_url_type(name):
     from azure.cli.core._profile import CLOUD
-    from azure.cli.core.cloud import CloudSuffix
-    suffix = CLOUD.suffixes[CloudSuffix.KEYVAULT_DNS]
+    suffix = CLOUD.suffixes.keyvault_dns
     return 'https://{}{}'.format(name, suffix)
