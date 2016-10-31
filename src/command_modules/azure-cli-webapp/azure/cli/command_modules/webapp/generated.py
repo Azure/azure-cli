@@ -12,8 +12,9 @@ from azure.cli.core.commands.arm import cli_generic_update_command
 from ._params import web_client_factory
 from .custom import (create_webapp, show_webapp, list_webapp,
                      delete_webapp, stop_webapp, restart_webapp,
-                     enable_local_git, set_deployment_user,
-                     get_git_url, view_in_browser, create_app_service_plan,
+                     enable_local_git, show_source_control, delete_source_control,
+                     config_source_control, sync_site_repo, set_deployment_user,
+                     view_in_browser, create_app_service_plan,
                      update_app_service_plan, config_diagnostics,
                      get_streaming_log, download_historical_logs,
                      create_webapp_slot, config_slot_auto_swap,
@@ -21,7 +22,7 @@ from .custom import (create_webapp, show_webapp, list_webapp,
                      get_app_settings, update_app_settings, delete_app_settings,
                      add_hostname, list_hostnames, delete_hostname,
                      update_container_settings, delete_container_settings,
-                     list_container_settings)
+                     show_container_settings)
 
 cli_command('appservice web create', create_webapp)
 cli_command('appservice web list', list_webapp)
@@ -40,14 +41,18 @@ cli_command('appservice web config hostname list', list_hostnames)
 cli_command('appservice web config hostname delete', delete_hostname)
 cli_command('appservice web config container update', update_container_settings)
 cli_command('appservice web config container delete', delete_container_settings)
-cli_command('appservice web config container list', list_container_settings)
+cli_command('appservice web config container show', show_container_settings)
 
 factory = lambda _: web_client_factory().sites
 cli_command('appservice web show-publish-profile',
             SitesOperations.list_site_publishing_credentials, factory)
 
-cli_command('appservice web git enable-local', enable_local_git)
-cli_command('appservice web git show-url', get_git_url)
+cli_command('appservice web source-control config-local-git', enable_local_git)
+cli_command('appservice web source-control config', config_source_control)
+cli_command('appservice web source-control sync', sync_site_repo)
+cli_command('appservice web source-control show', show_source_control)
+cli_command('appservice web source-control delete', delete_source_control)
+
 cli_command('appservice web log tail', get_streaming_log)
 cli_command('appservice web log download', download_historical_logs)
 cli_command('appservice web log config', config_diagnostics)
@@ -76,9 +81,6 @@ cli_command('appservice plan show', ServerFarmsOperations.get_server_farm, facto
 cli_command('appservice list-locations', GlobalModelOperations.get_subscription_geo_regions,
             factory)
 
-#Functionalities covered by better custom commands, so not exposed for now
-#cli_command('webapp get-source-control', SitesOperations.get_site_source_control, factory)
-#cli_command('webapp source-control list', ProviderOperations.get_source_controls, factory)
 
 #Not for ignite release
 #cli_command('webapp plan update-vnet-route', ServerFarmsOperations.update_vnet_route, factory)

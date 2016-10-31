@@ -25,7 +25,7 @@ CLASSIFIERS = [
 
 DEPENDENCIES = [
     'azure-cli-core',
-    'azure-mgmt-web==0.30.0',
+    'azure-mgmt-web==0.30.1',
     # v1.17 breaks on wildcard cert https://github.com/shazow/urllib3/issues/981
     'urllib3[secure]==1.16'
 ]
