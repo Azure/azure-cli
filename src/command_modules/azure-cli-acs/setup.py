@@ -27,6 +27,7 @@ DEPENDENCIES = [
     'azure-mgmt-compute==0.30.0rc6',
     'paramiko',
     'pyyaml',
+    'six',
     'sshtunnel'
 ]
 
