@@ -50,7 +50,8 @@ def _run_pip(pip, pip_exec_args):
         if '[Errno 13] Permission denied' in log_output:
             raise CLIError('Permission denied. Run command with --debug for more information.\n'
                            'If executing az with sudo, you may want sudo\'s -E and -H flags.')
-        raise CLIError('An error occurred. Run command with --debug for more information.')
+        raise CLIError('An error occurred. Run command with --debug for more information.\n'
+                       'If executing az with sudo, you may want sudo\'s -E and -H flags.')
 
 def _install_or_update(package_list, link, private, pre, show_logs=False):
     import pip
