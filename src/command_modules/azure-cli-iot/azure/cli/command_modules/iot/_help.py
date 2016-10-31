@@ -16,6 +16,11 @@ helps['iot hub create'] = """
             long-summary: See https://azure.microsoft.com/en-us/services/iot-hub/ for an intro to Azure IoT Hub.
 """
 
+helps['iot hub show'] = """
+            type: command
+            short-summary: Show non-security metadata of an IoT Hub.
+"""
+
 helps['iot hub list'] = """
             type: command
             short-summary: List IoT Hubs in your subscription or resource group.
