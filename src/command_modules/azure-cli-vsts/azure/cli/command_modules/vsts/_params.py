@@ -25,9 +25,9 @@ remote_url = CliArgumentType(
     help='Remote url of the GitHub or VSTS source repository that will be built and deployed. If omitted, a source repository will be searched for in the current working directory.'
 )
 
-remote_branch = CliArgumentType(		
-    options_list=('--remote-branch', '-b'),		
-    help='Remote branch of the GitHub or VSTS source repository that will be built and deployed. If omitted refs/heads/master will be selected'		
+remote_branch = CliArgumentType(
+    options_list=('--remote-branch', '-b'),
+    help='Remote branch of the GitHub or VSTS source repository that will be built and deployed. If omitted refs/heads/master will be selected'
 )
 
 remote_access_token = CliArgumentType(
