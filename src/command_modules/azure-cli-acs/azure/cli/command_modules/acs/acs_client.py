@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 #---------------------------------------------------------------------------------------------
 
+import os.path
 import socket
 import threading
 import webbrowser
@@ -10,7 +11,19 @@ from time import sleep
 
 import paramiko
 from sshtunnel import SSHTunnelForwarder
+from scp import SCPClient
 
+def SecureCopy(user, host, src, dest):
+    home = os.path.expanduser("~")
+    ssh = paramiko.SSHClient()
+    ssh.load_system_host_keys()
+    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    ssh.connect(host, username=user, key_filename=os.path.join(home, '.ssh', 'id_rsa'))
+
+    scp = SCPClient(ssh.get_transport())
+
+    scp.get(src, dest)
+    scp.close()
 
 class ACSClient(object):
     def __init__(self, client=None):
