@@ -3,31 +3,27 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 #---------------------------------------------------------------------------------------------
 
-FROM python:3.5
+FROM python:3.5.2-alpine
 
-# Set the working directory
 WORKDIR azure-cli
-
-# bundle source code
 COPY . /azure-cli
-
-RUN pip install --upgrade pip
+RUN pip install --upgrade pip wheel
+RUN apk update && apk add bash gcc openssl-dev libffi-dev musl-dev
 
 # 1. Build packages and store in tmp dir
-# 2. Install the cli
-# 3. Install the other command modules that weren't included
-RUN TMP_PKG_DIR=$(mktemp -d); \
+# 2. Install the cli and the other command modules that weren't included
+RUN /bin/bash -c 'TMP_PKG_DIR=$(mktemp -d); \
     for d in src/azure-cli src/azure-cli-core src/command_modules/azure-cli-*/; \
-    do cd $d; python setup.py sdist -d $TMP_PKG_DIR; cd -; \
+    do cd $d; python setup.py bdist_wheel -d $TMP_PKG_DIR; cd -; \
     done; \
-    pip install azure-cli -f $TMP_PKG_DIR;\
-    for d in src/command_modules/azure-cli-*/; \
-    do MODULE_NAME=$(echo $d | cut -d '/' -f 3); \
-    pip install $MODULE_NAME -f $TMP_PKG_DIR; \
-    done;
+    MODULE_NAMES=""; \
+    for m in src/command_modules/azure-cli-*/; \
+    do MODULE_NAMES="$MODULE_NAMES $(echo $m | cut -d '/' -f 3)"; \
+    done; \
+    pip install azure-cli $MODULE_NAMES -f $TMP_PKG_DIR;'
 
-# Enable tab completion
-RUN echo "\
+# Tab completion
+RUN echo -e "\
 _python_argcomplete() {\n\
     local IFS='\v'\n\
     COMPREPLY=( \$(IFS=\"\$IFS\"                   COMP_LINE=\"\$COMP_LINE\"                   COMP_POINT=\"\$COMP_POINT\"                   _ARGCOMPLETE_COMP_WORDBREAKS=\"\$COMP_WORDBREAKS\"                   _ARGCOMPLETE=1                   \"\$1\" 8>&1 9>&2 1>/dev/null 2>/dev/null) )\n\
@@ -36,9 +32,8 @@ _python_argcomplete() {\n\
     fi\n\
 }\n\
 complete -o nospace -F _python_argcomplete \"az\"\n\
-" > /etc/az.completion
-RUN echo "\nsource '/etc/az.completion'\n" >> /etc/bash.bashrc
+" > ~/.bashrc
 
 WORKDIR /
 
-CMD az; bash
+CMD bash
