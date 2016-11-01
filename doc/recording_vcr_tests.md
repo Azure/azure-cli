@@ -7,7 +7,9 @@ Azure CLI uses the VCR.py library to record the HTTP messages exchanged during a
 
 Each command module has a `tests` folder with a file called: `test_<module>_commands.py`. This is where you will define tests. 
 
-Tests all derive from the `VCRTestBase` class found in `azure.cli.test_utils.vcr_test_base`. This class exposes the VCR tests using the standard Python `unittest` framework and allows the tests to be discovered by and debugged in Visual Studio.
+Tests all derive from the `VCRTestBase` class found in `azure.cli.core.test_utils.vcr_test_base`. This class exposes the VCR tests using the standard Python `unittest` framework and allows the tests to be discovered by and debugged in Visual Studio.
+
+The majority of tests however inherit from the `ResourceGroupVCRTestBase` class as this handles creating and tearing down the test resource group automatically, helping to ensure that tests can be recorded and cleaned up without manual creation or deletion of resources.
 
 After adding your test, run it. The test driver will automatically detect the test is unrecorded and record the HTTP requests and responses in a cassette .yaml file. If the test succeeds, the cassette will be preserved and future playthroughs of the test will come from the cassette.
 
@@ -19,11 +21,11 @@ To create a new test, simply create a class in the `test_<module>_commands.py` f
 
 ```Python
 
-class MyTestClass(VCRTestBase):
+class MyTestClass(ResourceGroupVCRTestBase): # or VCRTestBase in special circumstances
 
   def __init__(self, test_method):
     # TODO: replace MyTestClass with your class name
-    super(MyTestClass, self).__init__(__file__, test_method, debug=False, run_live=False)
+    super(MyTestClass, self).__init__(__file__, test_method, debug=False, run_live=False, skip_setup=False, skip_teardown=False)
       
   def test_my_test_class(self): # TODO: rename to 'test_<your name here>'
     self.execute()
@@ -32,15 +34,20 @@ class MyTestClass(VCRTestBase):
     # TODO: insert your test logic here
     
   def set_up(self):
+    super(MyTestClass, self).set_up() # if you need custom logic, be sure to call the base class version first
     # TODO: Optional setup logic here (will not be replayed on playback)
+    
     
   def tear_down(self):
     # TODO: Optional tear down logic here (will not be replayed on playback)
+    super(MyTestClass, self).tear_down() # if you need custom logic, call the base class version last
 ```
 
-The `debug` and `run_live` parameters in the `__init__` method are shown with their defaults and can be omitted. `debug` is the equivalent of specifying `debug=True` for all calls to `cmd` in the test (see below). Specifying `run_live=True` will cause the test to always be run with actual HTTP requests, ignoring VCR entirely.
+The `debug`, `run_live`, `skip_setup` and `skip_teardown` parameters in the `__init__` method are shown with their defaults and can be omitted. `debug` is the equivalent of specifying `debug=True` for all calls to `cmd` in the test (see below). Specifying `run_live=True` will cause the test to always be run with actual HTTP requests, ignoring VCR entirely. `skip_setup` and `skip_teardown` can be useful during test creation to avoid repeatedly creating and deleting resource groups.
 
-The `set_up` and `tear_down` methods are optional and can be omitted. A number of helper methods are available for structuring your script tests.
+The `set_up` and `tear_down` methods are optional and can be omitted. For the ResourceGroupVCRTestBase these have default implementations which set up a test resource group and tear it down after the recording completes. Any commands used in these methods are only executed during a live or recorded test. These sections are skipped during playback so your test body should not rely any logic within these methods.
+
+A number of helper methods are available for structuring your script tests.
 
 ####cmd(command_string, checks=None, allowed_exceptions=None, debug=False)
 
@@ -74,7 +81,6 @@ self.cmd('vm list-ip-addresses --resource-group myResourceGroup', checks=[
   JMESPathCheck('[0].virtualMachine.name', 'myVMName')
 ])
 ```
-
 #####NoneCheck()
 
 Use this to verify that the output contains nothing. Note that this is different from `checks=None` which will skip any validation.
