@@ -16,7 +16,7 @@ Install via pip with:
     Install additional components with:
     ```shell
         export AZURE_COMPONENT_PACKAGE_INDEX_URL=https://azureclinightly.blob.core.windows.net/packages
-        az component update --additional-component <component_name> --private
+        az component update --add <component_name> --private
     ```
     To view the list of installed packages, run `az component list`.
 
