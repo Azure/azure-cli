@@ -168,7 +168,6 @@ class Application(object):
     @staticmethod
     def _register_builtin_arguments(**kwargs):
         global_group = kwargs['global_group']
-        global_group.add_argument('--subscription', dest='_subscription_id', help=argparse.SUPPRESS)
         global_group.add_argument('--output', '-o', dest='_output_format',
                                   choices=['json', 'tsv', 'list', 'table', 'jsonc'],
                                   default=az_config.get('core', 'output', fallback='json'),
