@@ -65,7 +65,7 @@ class IoTHubTest(ResourceGroupVCRTestBase):
 
         # Test 'az iot device create'
         device_id = self.device_id
-        self.cmd('iot device create -n {0} -d {1}'.format(hub, device_id),
+        self.cmd('iot device create --hub-name {0} -d {1}'.format(hub, device_id),
                  checks=[
                      JMESPathCheck('deviceId', device_id),
                      JMESPathCheck('status', 'enabled'),
@@ -74,25 +74,25 @@ class IoTHubTest(ResourceGroupVCRTestBase):
 
         # Test 'az iot device show-connection-string'
         connection_string = 'HostName=iot-hub-for-testing.azure-devices.net;DeviceId=iot-device-for-testing;SharedAccessKey=dw93dOLBIxAcczUqoEDukwh1pVi7gzIQq65ahBS6qNw='
-        self.cmd('iot device show-connection-string -n {0} -d {1}'.format(hub, device_id), checks=[
+        self.cmd('iot device show-connection-string --hub-name {0} -d {1}'.format(hub, device_id), checks=[
             JMESPathCheck('connectionString', connection_string)
         ])
 
-        self.cmd('iot device show-connection-string -n {0}'.format(hub), checks=[
+        self.cmd('iot device show-connection-string --hub-name {0}'.format(hub), checks=[
             JMESPathCheck('length([*])', 1),
             JMESPathCheck('[0].deviceId', device_id),
             JMESPathCheck('[0].connectionString', connection_string)
         ])
 
         # Test 'az iot device show'
-        self.cmd('iot device show -n {0} -d {1}'.format(hub, device_id), checks=[
+        self.cmd('iot device show --hub-name {0} -d {1}'.format(hub, device_id), checks=[
             JMESPathCheck('deviceId', device_id),
             JMESPathCheck('status', 'enabled'),
             JMESPathCheck('connectionState', 'Disconnected')
         ])
 
         # Test 'az iot device list'
-        self.cmd('iot device list -n {0}'.format(hub), checks=[
+        self.cmd('iot device list --hub-name {0}'.format(hub), checks=[
             JMESPathCheck('length([*])', 1),
             JMESPathCheck('[0].deviceId', device_id),
             JMESPathCheck('[0].status', 'enabled'),
@@ -100,4 +100,4 @@ class IoTHubTest(ResourceGroupVCRTestBase):
         ])
 
         # Test 'az iot device delete'
-        self.cmd('iot device delete -n {0} -d {1}'.format(hub, device_id))
+        self.cmd('iot device delete --hub-name {0} -d {1}'.format(hub, device_id))
