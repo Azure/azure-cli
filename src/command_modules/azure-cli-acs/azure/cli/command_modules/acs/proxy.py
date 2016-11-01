@@ -7,11 +7,6 @@ import platform
 import subprocess
 from abc import abstractmethod
 
-try:
-    from azure.cli.command_modules.acs.win_proxy import WinProxy
-except ImportError:
-    pass
-
 def disable_http_proxy():
     """
     Disables the HTTP proxy
@@ -38,6 +33,7 @@ def _get_proxy_instance():
     if os_platform == 'Darwin':
         return MacProxy()
     elif os_platform == 'Windows':
+        from azure.cli.command_modules.acs.win_proxy import WinProxy
         return WinProxy()
     elif os_platform == 'Linux':
         return LinuxProxy()
