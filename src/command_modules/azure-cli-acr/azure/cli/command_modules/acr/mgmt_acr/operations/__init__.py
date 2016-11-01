@@ -10,12 +10,8 @@
 # regenerated.
 # --------------------------------------------------------------------------
 
-from .operation import Operation
-from .registries import Registries
-from .subscriptions import Subscriptions
+from .registries_operations import RegistriesOperations
 
 __all__ = [
-    'Operation',
-    'Registries',
-    'Subscriptions',
+    'RegistriesOperations',
 ]

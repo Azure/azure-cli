@@ -27,10 +27,10 @@
                 "description": "Name of the storage account"
             }
         },
-        "storageAccountResourceGroup": {
+        "storageAccountType": {
             "type": "string",
             "metadata": {
-                "description": "Resource group of the storage account"
+                "description": "Type of the storage account"
             }
         },
         "adminUserEnabled": {
@@ -43,20 +43,28 @@
     },
     "resources": [
         {
+            "name": "[parameters('storageAccountName')]",
+            "type": "Microsoft.Storage/storageAccounts",
+            "location": "[parameters('registryLocation')]",
+            "apiVersion": "2016-01-01",
+            "sku": {
+                "name": "[parameters('storageAccountType')]"
+            },
+            "kind": "Storage"
+        },
+        {
             "name": "[parameters('registryName')]",
             "type": "Microsoft.ContainerRegistry/registries",
             "location": "[parameters('registryLocation')]",
             "apiVersion": "[parameters('registryApiVersion')]",
-            "tags": {
-                "storageaccount": "[parameters('storageAccountName')]"
-            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"
+            ],
             "properties": {
-                "tenantId": "[subscription().tenantId]",
                 "adminUserEnabled": "[parameters('adminUserEnabled')]",
                 "storageAccount": {
                     "name": "[parameters('storageAccountName')]",
-                    "accessKey": "[listKeys(resourceId(parameters('storageAccountResourceGroup'), 'Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2016-01-01').keys[0].value]",
-                    "endPointUrl": "[reference(resourceId(parameters('storageAccountResourceGroup'), 'Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2016-01-01').primaryEndpoints.blob]"
+                    "accessKey": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2016-01-01').keys[0].value]"
                 }
             }
         }

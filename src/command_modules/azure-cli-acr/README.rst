@@ -11,9 +11,9 @@ Commands to manage Azure container registries
     Subgroups:
         credential: Manage admin user credential for Azure container registries.
         repository: Manage repositories for Azure container registries.
-        storage   : Manage storage accounts for Azure container registries.
 
     Commands:
+        check-name: Check whether the container registry name is available.
         create    : Create a container registry.
         delete    : Delete a container registry.
         list      : List container registries.
@@ -36,9 +36,9 @@ Create a container registry
 
     Examples
         Create a container registry with a new storage account
-            az acr create -n myRegistry -g myResourceGroup -l southus
+            az acr create -n myRegistry -g myResourceGroup -l southcentralus
         Create a container registry with an existing storage account
-            az acr create -n myRegistry -g myResourceGroup -l southus -s myStorageAccount
+            az acr create -n myRegistry -g myResourceGroup -l southcentralus -s myStorageAccount
 
 Delete a container registry
 -------------
@@ -86,39 +86,39 @@ Update a container registry
         az acr update: Update a container registry.
 
     Arguments
-        --name -n [Required]: Name of container registry.
-        --disable-admin     : Disable admin user.
-        --enable-admin      : Enable admin user.
-        --resource-group -g : Name of resource group.
-        --tags              : Space separated tags in 'key[=value]' format. Use "" to clear existing
-                            tags.
-        --tenant-id -t      : Tenant id for service principal login. Warning: Changing tenant id will
-                            invalidate assigned access of existing service principals.
+        --name -n      [Required]: Name of container registry.
+        --disable-admin          : Disable admin user.
+        --enable-admin           : Enable admin user.
+        --resource-group -g      : Name of resource group.
+        --storage-account-name -s: Name of an existing storage account.
+        --tags                   : Space separated tags in 'key[=value]' format. Use "" to clear
+                                 existing tags.
 
     Examples
         Update tags for a container registry
-            az acr update -n myRegistry --tags key1=value1;key2=value2
+            az acr update -n myRegistry --tags key1=value1 key2=value2
+        Update storage account for a container registry
+            az acr update -n myRegistry -s myStorageAccount
         Enable admin user for a container registry
             az acr update -n myRegistry --enable-admin
 
-Update storage account for a container registry
+Get login credentials for a container registry
 -------------
 ::
 
     Command
-        az acr storage update: Update storage account for a container registry.
+        az acr credential show: Get login credentials for a container registry.
 
     Arguments
-        --name -n                 [Required]: Name of container registry.
-        --storage-account-name -s [Required]: Name of an existing storage account.
-        --resource-group -g                 : Name of resource group.
+        --name -n [Required]: Name of container registry.
+        --resource-group -g : Name of resource group.
 
-Get admin username and password for a container registry
+Regenerate login credentials for a container registry
 -------------
 ::
 
     Command
-        az acr credential show: Get admin username and password for a container registry.
+        az acr credential renew: Regenerate login credentials for a container registry.
 
     Arguments
         --name -n [Required]: Name of container registry.

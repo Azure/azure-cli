@@ -20,3 +20,5 @@ from msrest.exceptions import (
     HttpOperationError,
     ValidationError,
 )
+
+from msrestazure.azure_exceptions import CloudError

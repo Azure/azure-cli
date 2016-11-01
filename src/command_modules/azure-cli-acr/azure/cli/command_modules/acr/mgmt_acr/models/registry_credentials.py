@@ -14,19 +14,20 @@ from msrest.serialization import Model
 
 
 class RegistryCredentials(Model):
-    """RegistryCredentials
+    """
+    The result of showing admin user credentials.
 
-    :param user_name:
-    :type user_name: str
-    :param pass_word:
-    :type pass_word: str
+    :param username: Admin username.
+    :type username: str
+    :param password: Admin password.
+    :type password: str
     """ 
 
     _attribute_map = {
-        'user_name': {'key': 'userName', 'type': 'str'},
-        'pass_word': {'key': 'passWord', 'type': 'str'},
+        'username': {'key': 'username', 'type': 'str'},
+        'password': {'key': 'password', 'type': 'str'},
     }
 
-    def __init__(self, user_name=None, pass_word=None):
-        self.user_name = user_name
-        self.pass_word = pass_word
+    def __init__(self, username=None, password=None):
+        self.username = username
+        self.password = password

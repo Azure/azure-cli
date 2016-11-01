@@ -10,47 +10,65 @@
 # regenerated.
 # --------------------------------------------------------------------------
 
-from msrest.serialization import Model
+from .resource import Resource
 
 
-class Registry(Model):
-    """Registry
+class Registry(Resource):
+    """
+    The container registry.
 
     Variables are only populated by the server, and will be ignored when
     sending a request.
 
-    :param id:
-    :type id: str
-    :param name:
-    :type name: str
-    :param location:
-    :type location: str
-    :param tags:
-    :type tags: dict
-    :ivar type:
+    :ivar id: Resource Id.
+    :vartype id: str
+    :ivar name: Resource name.
+    :vartype name: str
+    :ivar type: Resource type.
     :vartype type: str
-    :param properties:
-    :type properties: :class:`RegistryProperties
-     <containerregistry.models.RegistryProperties>`
+    :param location: Resource location. Once the resource has been created,
+     location cannot be updated.
+    :type location: str
+    :param tags: Resource tags.
+    :type tags: dict
+    :ivar login_server: The URL to log into the container registry.
+    :vartype login_server: str
+    :ivar creation_date: The creation date of the container registry in
+     ISO8601 format.
+    :vartype creation_date: datetime
+    :param admin_user_enabled: The boolean value that indicates whether admin
+     user is enabled. Default value is false. Default value: False .
+    :type admin_user_enabled: bool
+    :param storage_account: The storage account properties.
+    :type storage_account: :class:`StorageAccountProperties
+     <containerregistrymanagementclient.models.StorageAccountProperties>`
     """ 
 
     _validation = {
+        'id': {'readonly': True},
+        'name': {'readonly': True},
         'type': {'readonly': True},
+        'location': {'required': True},
+        'login_server': {'readonly': True},
+        'creation_date': {'readonly': True},
+        'storage_account': {'required': True},
     }
 
     _attribute_map = {
         'id': {'key': 'id', 'type': 'str'},
         'name': {'key': 'name', 'type': 'str'},
+        'type': {'key': 'type', 'type': 'str'},
         'location': {'key': 'location', 'type': 'str'},
         'tags': {'key': 'tags', 'type': '{str}'},
-        'type': {'key': 'type', 'type': 'str'},
-        'properties': {'key': 'properties', 'type': 'RegistryProperties'},
+        'login_server': {'key': 'properties.loginServer', 'type': 'str'},
+        'creation_date': {'key': 'properties.creationDate', 'type': 'iso-8601'},
+        'admin_user_enabled': {'key': 'properties.adminUserEnabled', 'type': 'bool'},
+        'storage_account': {'key': 'properties.storageAccount', 'type': 'StorageAccountProperties'},
     }
 
-    def __init__(self, id=None, name=None, location=None, tags=None, properties=None):
-        self.id = id
-        self.name = name
-        self.location = location
-        self.tags = tags
-        self.type = None
-        self.properties = properties
+    def __init__(self, location, storage_account, tags=None, admin_user_enabled=False):
+        super(Registry, self).__init__(location=location, tags=tags)
+        self.login_server = None
+        self.creation_date = None
+        self.admin_user_enabled = admin_user_enabled
+        self.storage_account = storage_account

@@ -14,19 +14,30 @@ from msrest.serialization import Model
 
 
 class RegistryNameCheckRequest(Model):
-    """RegistryNameCheckRequest
+    """
+    The request to check whether the container registry name is available.
 
-    :param name:
+    Variables are only populated by the server, and will be ignored when
+    sending a request.
+
+    :param name: The container registry name.
     :type name: str
-    :param type:
-    :type type: str
+    :ivar type: The container registry resource type. Default value:
+     "Microsoft.ContainerRegistry/registries" .
+    :vartype type: str
     """ 
+
+    _validation = {
+        'name': {'required': True},
+        'type': {'required': True, 'constant': True},
+    }
 
     _attribute_map = {
         'name': {'key': 'name', 'type': 'str'},
         'type': {'key': 'type', 'type': 'str'},
     }
 
-    def __init__(self, name=None, type=None):
+    type = "Microsoft.ContainerRegistry/registries"
+
+    def __init__(self, name):
         self.name = name
-        self.type = type
