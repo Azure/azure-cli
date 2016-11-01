@@ -343,21 +343,85 @@ helps['network express-route'] = """
     type: group
     short-summary: Dedicated private network fiber connections to Azure
 """
-helps['network express-route circuit'] = """
-    type: group
-    short-summary: Manage express route circuits
+helps['network express-route create'] = """
+    type: command
+    short-summary: Create an Express Route circuit.
 """
-helps['network express-route circuit-auth'] = """
-    type: group
-    short-summary: Manage express route circuit authentication
+helps['network express-route delete'] = """
+    type: command
+    short-summary: Delete an Express Route circuit.
 """
-helps['network express-route circuit-peering'] = """
-    type: group
-    short-summary: Manage express route peering
+helps['network express-route get-stats'] = """
+    type: command
+    short-summary: Show stats of an Express Route circuit.
 """
-helps['network express-route service-provider'] = """
+helps['network express-route list'] = """
+    type: command
+    short-summary: List Express Route circuits in a subscription or resource group.
+"""
+helps['network express-route list-arp-tables'] = """
+    type: command
+    short-summary: List the currently advertised ARP table of an Express Route circuit.
+"""
+helps['network express-route list-route-tables'] = """
+    type: command
+    short-summary: List the currently advertised route tables of an Express Route circuit.
+"""
+helps['network express-route show'] = """
+    type: command
+    short-summary: Show details of an Express Route circuit.
+"""
+helps['network express-route update'] = """
+    type: command
+    short-summary: Update settings of an Express Route circuit.
+"""
+helps['network express-route auth'] = """
     type: group
-    short-summary: View express route service providers
+    short-summary: Manage Express Route circuit authentication
+"""
+helps['network express-route auth create'] = """
+    type: command
+    short-summary: Create an authorization setting in an Express Route circuit.
+"""
+helps['network express-route auth delete'] = """
+    type: command
+    short-summary: Delete an authorization setting in an Express Route circuit.
+"""
+helps['network express-route auth list'] = """
+    type: command
+    short-summary: List authorization settings of an Express Route circuit.
+"""
+helps['network express-route auth show'] = """
+    type: command
+    short-summary: Show details of an authorization setting in an Express Route circuit.
+"""
+helps['network express-route peering'] = """
+    type: group
+    short-summary: Manage Express Route peering
+"""
+helps['network express-route peering create'] = """
+    type: command
+    short-summary: Create peering settings in an Express Route circuit.
+"""
+helps['network express-route peering delete'] = """
+    type: command
+    short-summary: Delete peering settings in an Express Route circuit.
+"""
+helps['network express-route peering list'] = """
+    type: command
+    short-summary: List peering settings of an Express Route circuit.
+"""
+helps['network express-route peering show'] = """
+    type: command
+    short-summary: Show peering details of an Express Route circuit.
+"""
+helps['network express-route peering update'] = """
+    type: command
+    short-summary: Update peering settings in an Express Route circuit.
+"""
+helps['network express-route list-service-providers'] = """
+    type: command
+    short-summary: List available Express Route service providers.
 """
 helps['network lb'] = """
     type: group
