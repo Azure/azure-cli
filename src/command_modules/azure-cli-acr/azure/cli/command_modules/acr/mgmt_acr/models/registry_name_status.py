@@ -14,13 +14,17 @@ from msrest.serialization import Model
 
 
 class RegistryNameStatus(Model):
-    """RegistryNameStatus
+    """
+    The result of checking name availability.
 
-    :param name_available:
+    :param name_available: The boolean value that indicates whether the name
+     is available.
     :type name_available: bool
-    :param reason:
+    :param reason: The reason that the container registry name could not be
+     used.
     :type reason: str
-    :param message:
+    :param message: The error message that explains the reason value in more
+     detail.
     :type message: str
     """ 
 

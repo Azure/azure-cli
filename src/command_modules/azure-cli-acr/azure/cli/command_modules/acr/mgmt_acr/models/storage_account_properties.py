@@ -14,27 +14,25 @@ from msrest.serialization import Model
 
 
 class StorageAccountProperties(Model):
-    """StorageAccountProperties
+    """
+    The storage account properties.
 
-    :param access_key:
-    :type access_key: str
-    :param end_point_url:
-    :type end_point_url: str
-    :param location:
-    :type location: str
-    :param name:
+    :param name: Storage account name.
     :type name: str
+    :param access_key: Storage account access key.
+    :type access_key: str
     """ 
 
-    _attribute_map = {
-        'access_key': {'key': 'accessKey', 'type': 'str'},
-        'end_point_url': {'key': 'endPointUrl', 'type': 'str'},
-        'location': {'key': 'location', 'type': 'str'},
-        'name': {'key': 'name', 'type': 'str'},
+    _validation = {
+        'name': {'required': True},
+        'access_key': {'required': True},
     }
 
-    def __init__(self, access_key=None, end_point_url=None, location=None, name=None):
-        self.access_key = access_key
-        self.end_point_url = end_point_url
-        self.location = location
+    _attribute_map = {
+        'name': {'key': 'name', 'type': 'str'},
+        'access_key': {'key': 'accessKey', 'type': 'str'},
+    }
+
+    def __init__(self, name, access_key):
         self.name = name
+        self.access_key = access_key

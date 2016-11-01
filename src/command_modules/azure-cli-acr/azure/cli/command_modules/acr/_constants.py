@@ -3,5 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 #---------------------------------------------------------------------------------------------
 
-RESOURCE_PROVIDER = 'Microsoft.ContainerRegistry'
-RESOURCE_TYPE = RESOURCE_PROVIDER + '/registries'
+ACR_RESOURCE_PROVIDER = 'Microsoft.ContainerRegistry'
+ACR_RESOURCE_TYPE = ACR_RESOURCE_PROVIDER + '/registries'
+STORAGE_RESOURCE_TYPE = 'Microsoft.Storage/storageAccounts'

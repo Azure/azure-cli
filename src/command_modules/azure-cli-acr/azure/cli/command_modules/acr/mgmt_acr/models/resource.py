@@ -13,44 +13,44 @@
 from msrest.serialization import Model
 
 
-class RegistryCreateParameters(Model):
-    """RegistryCreateParameters
+class Resource(Model):
+    """
+    Azure resource.
 
     Variables are only populated by the server, and will be ignored when
     sending a request.
 
-    :param id:
-    :type id: str
-    :param name:
-    :type name: str
-    :param location:
-    :type location: str
-    :param tags:
-    :type tags: dict
-    :ivar type:
+    :ivar id: Resource Id.
+    :vartype id: str
+    :ivar name: Resource name.
+    :vartype name: str
+    :ivar type: Resource type.
     :vartype type: str
-    :param properties:
-    :type properties: :class:`RegistryPropertiesCreateParameters
-     <containerregistry.models.RegistryPropertiesCreateParameters>`
+    :param location: Resource location. Once the resource has been created,
+     location cannot be updated.
+    :type location: str
+    :param tags: Resource tags.
+    :type tags: dict
     """ 
 
     _validation = {
+        'id': {'readonly': True},
+        'name': {'readonly': True},
         'type': {'readonly': True},
+        'location': {'required': True},
     }
 
     _attribute_map = {
         'id': {'key': 'id', 'type': 'str'},
         'name': {'key': 'name', 'type': 'str'},
+        'type': {'key': 'type', 'type': 'str'},
         'location': {'key': 'location', 'type': 'str'},
         'tags': {'key': 'tags', 'type': '{str}'},
-        'type': {'key': 'type', 'type': 'str'},
-        'properties': {'key': 'properties', 'type': 'RegistryPropertiesCreateParameters'},
     }
 
-    def __init__(self, id=None, name=None, location=None, tags=None, properties=None):
-        self.id = id
-        self.name = name
+    def __init__(self, location, tags=None):
+        self.id = None
+        self.name = None
+        self.type = None
         self.location = location
         self.tags = tags
-        self.type = None
-        self.properties = properties

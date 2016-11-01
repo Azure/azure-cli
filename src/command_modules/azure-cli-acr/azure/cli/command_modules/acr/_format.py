@@ -7,14 +7,11 @@ from collections import OrderedDict
 
 from ._utils import get_resource_group_name_by_resource_id
 
-_basic_map = {
+_registry_map = {
     'name': 'NAME',
     'resourceGroup': 'RESOURCE GROUP',
     'location': 'LOCATION',
-    'tags': 'TAGS'
-}
-
-_properties_map = {
+    'tags': 'TAGS',
     'loginServer': 'LOGIN SERVER',
     'creationDate': 'CREATION DATE',
     'adminUserEnabled': 'ADMIN USER ENABLED'
@@ -25,8 +22,8 @@ _storage_account_map = {
 }
 
 _admin_user_map = {
-    'userName': 'USERNAME',
-    'passWord': 'PASSWORD'
+    'username': 'USERNAME',
+    'password': 'PASSWORD'
 }
 
 _order_map = {
@@ -53,29 +50,22 @@ def _format_registry(item):
     '''Returns an ordered dictionary of the container registry.
     :param dict item: The container registry object
     '''
-    basic_info = {_basic_map[key]: str(item[key]) for key in item if key in _basic_map}
+    registry_info = {_registry_map[key]: str(item[key]) for key in item if key in _registry_map}
 
     if 'id' in item and item['id']:
         resource_group_name = get_resource_group_name_by_resource_id(item['id'])
-        basic_info['RESOURCE GROUP'] = resource_group_name
+        registry_info['RESOURCE GROUP'] = resource_group_name
 
-    properties_info = {}
     storage_account_info = {}
-    if 'properties' in item and item['properties']:
-        properties = item['properties']
-        properties_info = {_properties_map[key]: str(properties[key])
-                           for key in properties if key in _properties_map}
-
-        if 'storageAccount' in properties and properties['storageAccount']:
-            storage_account = properties['storageAccount']
-            storage_account_info = {_storage_account_map[key]: str(storage_account[key])
-                                    for key in storage_account if key in _storage_account_map}
+    if 'storageAccount' in item and item['storageAccount']:
+        storage_account = item['storageAccount']
+        storage_account_info = {_storage_account_map[key]: str(storage_account[key])
+                                for key in storage_account if key in _storage_account_map}
 
     admin_user_info = {_admin_user_map[key]: str(item[key])
                        for key in item if key in _admin_user_map}
 
-    all_info = basic_info.copy()
-    all_info.update(properties_info)
+    all_info = registry_info.copy()
     all_info.update(storage_account_info)
     all_info.update(admin_user_info)
 
