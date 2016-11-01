@@ -397,27 +397,27 @@ helps['network express-route auth show'] = """
 """
 helps['network express-route peering'] = """
     type: group
-    short-summary: Manage Express Route BGP peering
+    short-summary: Manage Express Route peering
 """
 helps['network express-route peering create'] = """
     type: command
-    short-summary: Create BGP peering settings in an Express Route circuit.
+    short-summary: Create peering settings in an Express Route circuit.
 """
 helps['network express-route peering delete'] = """
     type: command
-    short-summary: Delete BGP peering settings in an Express Route circuit.
+    short-summary: Delete peering settings in an Express Route circuit.
 """
 helps['network express-route peering list'] = """
     type: command
-    short-summary: List BGP peering settings of an Express Route circuit.
+    short-summary: List peering settings of an Express Route circuit.
 """
 helps['network express-route peering show'] = """
     type: command
-    short-summary: Show BGP peering details of an Express Route circuit.
+    short-summary: Show peering details of an Express Route circuit.
 """
 helps['network express-route peering update'] = """
     type: command
-    short-summary: Update BGP peering settings in an Express Route circuit.
+    short-summary: Update peering settings in an Express Route circuit.
 """
 helps['network express-route list-service-providers'] = """
     type: command

@@ -249,8 +249,9 @@ class NetworkExpressRouteScenarioTest(ResourceGroupVCRTestBase):
 
         self._test_express_route_peering()
 
+        # because the circuit isn't actually provisioned, these commands will not return anything useful
+        # so we will just verify that the command makes it through the SDK without error.
         self.cmd('network express-route list-arp-tables --resource-group {} --name {} --peering-name azureprivatepeering --path primary'.format(rg, circuit))
-
         self.cmd('network express-route list-route-tables --resource-group {} --name {} --peering-name azureprivatepeering --path primary'.format(rg, circuit))
 
         self.cmd('network express-route delete --resource-group {} --name {}'.format(rg, circuit))

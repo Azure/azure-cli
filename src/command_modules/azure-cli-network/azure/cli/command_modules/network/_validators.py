@@ -151,7 +151,7 @@ def validate_nsg_name_or_id(namespace):
                 name=namespace.network_security_group)
 
 def validate_peering_type(namespace):
-    if namespace.peering_type and namespace.peering_type.lower() == 'microsoftpeering':
+    if namespace.peering_type and namespace.peering_type == 'MicrosoftPeering':
         microsoft_params = {
             '--advertised-public-prefix-state': namespace.advertised_public_prefix_state,
             '--advertised-public-prefixes': namespace.advertised_public_prefixes,
