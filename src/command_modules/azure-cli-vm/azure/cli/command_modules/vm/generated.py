@@ -47,8 +47,13 @@ from ._factory import _compute_client_factory
 # pylint: disable=line-too-long
 
 # VM
-factory = lambda _: get_mgmt_service_client(VMClient).vm
-cli_command('vm create', VmOperations.create_or_update, factory, transform=DeploymentOutputLongRunningOperation('Starting vm create'))
+def get_vm_client_with_shorter_polling_interval(_):
+    client = get_mgmt_service_client(VMClient)
+    #remove this hack once 'azure/autorest#1558' gets fixed. We should configure the timeout through constructor
+    client.config.long_running_operation_timeout = 5
+    return client.vm
+
+cli_command('vm create', VmOperations.create_or_update, get_vm_client_with_shorter_polling_interval, transform=DeploymentOutputLongRunningOperation('Starting vm create'))
 
 factory = lambda _: _compute_client_factory().virtual_machines
 
