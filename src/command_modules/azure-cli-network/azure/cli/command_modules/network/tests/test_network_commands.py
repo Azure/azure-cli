@@ -159,78 +159,104 @@ class NetworkExpressRouteScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
         super(NetworkExpressRouteScenarioTest, self).__init__(__file__, test_method)
-        self.resource_group = 'cli_test1'
-        self.express_route_name = 'test_route'
+        self.resource_group = 'cli_test_express_route'
+        self.circuit_name = 'circuit1'
         self.resource_type = 'Microsoft.Network/expressRouteCircuits'
 
     def test_network_express_route(self):
         self.execute()
 
+    def _test_express_route_peering(self):
+        rg = self.resource_group
+        circuit = self.circuit_name
+
+        def _create_peering(peering, peer_asn, vlan, primary_prefix, seconary_prefix):
+            self.cmd('network express-route peering create -g {} --circuit-name {} --peering-type {} --peer-asn {} --vlan-id {} --primary-peer-subnet {} --secondary-peer-subnet {}'.format(rg, circuit, peering, peer_asn, vlan, primary_prefix, seconary_prefix))
+
+        # create public and private peerings
+        _create_peering('AzurePublicPeering', 10000, 100, '100.0.0.0/30', '101.0.0.0/30')
+        _create_peering('AzurePrivatePeering', 10001, 101, '102.0.0.0/30', '103.0.0.0/30')
+
+        # create MicrosoftPeering - This will result in an exception that we will allow
+        self.cmd('network express-route peering create -g {} --circuit-name {} --peering-type MicrosoftPeering --peer-asn 10002 --vlan-id 103 --primary-peer-subnet 104.0.0.0/30 --secondary-peer-subnet 105.0.0.0/30 --advertised-public-prefix-state NotConfigured --advertised-public-prefixes 104.0.0.0/30 --customer-asn 10000 --routing-registry-name level3'.format(rg, circuit),
+            allowed_exceptions='An error occured.')
+
+        self.cmd('network express-route peering show -g {} --circuit-name {} -n MicrosoftPeering'.format(rg, circuit), checks=[
+            JMESPathCheck('microsoftPeeringConfig.advertisedPublicPrefixes[0]', '104.0.0.0/30'),
+            JMESPathCheck('microsoftPeeringConfig.advertisedPublicPrefixesState', 'NotConfigured'),
+            JMESPathCheck('microsoftPeeringConfig.customerAsn', 10000),
+            JMESPathCheck('microsoftPeeringConfig.routingRegistryName', 'LEVEL3')
+        ])
+
+        self.cmd('network express-route peering delete -g {} --circuit-name {} -n MicrosoftPeering'.format(rg, circuit))
+
+        self.cmd('network express-route peering list --resource-group {} --circuit-name {}'.format(rg, circuit),
+            checks=JMESPathCheck('length(@)', 2))
+
+        self.cmd('network express-route peering update -g {} --circuit-name {} -n AzurePublicPeering --set vlanId=200'.format(rg, circuit),
+            checks=JMESPathCheck('vlanId', 200))
+
+    def _test_express_route_auth(self):
+        rg = self.resource_group
+        circuit = self.circuit_name
+
+        self.cmd('network express-route auth create -g {} --circuit-name {} -n auth1'.format(rg, circuit),
+            checks=JMESPathCheck('authorizationUseStatus', 'Available'))
+
+        self.cmd('network express-route auth list --resource-group {} --circuit-name {}'.format(rg, circuit),
+            checks=JMESPathCheck('length(@)', 1))
+
+        self.cmd('network express-route auth show -g {} --circuit-name {} -n auth1'.format(rg, circuit),
+            checks=JMESPathCheck('authorizationUseStatus', 'Available'))
+
+        self.cmd('network express-route auth delete -g {} --circuit-name {} -n auth1'.format(rg, circuit))
+
+        self.cmd('network express-route auth list --resource-group {} --circuit-name {}'.format(rg, circuit), checks=NoneCheck())
+
     def body(self):
-        self.cmd('network express-route circuit create -g {} -n {} --bandwidth-in-mbps 50 --service-provider-name "AT&T" --peering-location "Silicon Valley"'.format(
-            self.resource_group, self.express_route_name
-        ))
-        self.cmd('network express-route circuit list', checks=[
-            JMESPathCheck('type(@)', 'array'),
-            JMESPathCheck("length([?type == '{}']) == length(@)".format(self.resource_type), True)
-        ])
-        self.cmd('network express-route circuit list --resource-group {}'.format(self.resource_group), checks=[
-            JMESPathCheck('type(@)', 'array'),
-            JMESPathCheck("length([?type == '{}']) == length(@)".format(self.resource_type), True),
-            JMESPathCheck("length([?resourceGroup == '{}']) == length(@)".format(self.resource_group), True)
-        ])
-        self.cmd('network express-route circuit show --resource-group {} --name {}'.format(self.resource_group, self.express_route_name), checks=[
-            JMESPathCheck('type(@)', 'object'),
-            JMESPathCheck('type', self.resource_type),
-            JMESPathCheck('name', self.express_route_name),
-            JMESPathCheck('resourceGroup', self.resource_group),
-        ])
-        self.cmd('network express-route circuit get-stats --resource-group {} --name {}'.format(
-            self.resource_group, self.express_route_name), checks=JMESPathCheck('type(@)', 'object'))
-        self.cmd('network express-route circuit-auth list --resource-group {} --circuit-name {}'.format(
-            self.resource_group, self.express_route_name), checks=NoneCheck())
-        self.cmd('network express-route circuit-peering list --resource-group {} --circuit-name {}'.format(
-            self.resource_group, self.express_route_name), checks=NoneCheck())
-        self.cmd('network express-route service-provider list', checks=[
+
+        rg = self.resource_group
+        circuit = self.circuit_name
+
+        self.cmd('network express-route list-service-providers', checks=[
             JMESPathCheck('type(@)', 'array'),
             JMESPathCheck("length([?type == '{}']) == length(@)".format('Microsoft.Network/expressRouteServiceProviders'), True)
         ])
-        self.cmd('network express-route circuit delete --resource-group {} --name {}'.format(
-            self.resource_group, self.express_route_name), checks=NoneCheck())
+
+        self.cmd('network express-route create -g {} -n {} --bandwidth 50 --provider "Microsoft ER Test" --peering-location Area51'.format(rg, circuit))
+        self.cmd('network express-route list', checks=[
+            JMESPathCheck('type(@)', 'array'),
+            JMESPathCheck("length([?type == '{}']) == length(@)".format(self.resource_type), True)
+        ])
+        self.cmd('network express-route list --resource-group {}'.format(rg), checks=[
+            JMESPathCheck('type(@)', 'array'),
+            JMESPathCheck("length([?type == '{}']) == length(@)".format(self.resource_type), True),
+            JMESPathCheck("length([?resourceGroup == '{}']) == length(@)".format(rg), True)
+        ])
+        self.cmd('network express-route show --resource-group {} --name {}'.format(rg, circuit), checks=[
+            JMESPathCheck('type(@)', 'object'),
+            JMESPathCheck('type', self.resource_type),
+            JMESPathCheck('name', circuit),
+            JMESPathCheck('resourceGroup', rg),
+        ])
+        self.cmd('network express-route get-stats --resource-group {} --name {}'.format(rg, circuit),
+            checks=JMESPathCheck('type(@)', 'object'))
+
+        self.cmd('network express-route update -g {} -n {} --set tags.test=Test'.format(rg, circuit),
+            checks=JMESPathCheck('tags', {'test': 'Test'}))
+
+        self._test_express_route_auth()
+
+        self._test_express_route_peering()
+
+        # because the circuit isn't actually provisioned, these commands will not return anything useful
+        # so we will just verify that the command makes it through the SDK without error.
+        self.cmd('network express-route list-arp-tables --resource-group {} --name {} --peering-name azureprivatepeering --path primary'.format(rg, circuit))
+        self.cmd('network express-route list-route-tables --resource-group {} --name {} --peering-name azureprivatepeering --path primary'.format(rg, circuit))
+
+        self.cmd('network express-route delete --resource-group {} --name {}'.format(rg, circuit))
         # Expecting no results as we just deleted the only express route in the resource group
-        self.cmd('network express-route circuit list --resource-group {}'.format(self.resource_group),
-            checks=NoneCheck())
-
-class NetworkExpressRouteCircuitScenarioTest(ResourceGroupVCRTestBase):
-
-    def __init__(self, test_method):
-         # TODO The resources for this test did not exist so the commands will return 404 errors.
-         # So this test is for the command execution itself.
-        super(NetworkExpressRouteCircuitScenarioTest, self).__init__(__file__, test_method)
-        self.resource_group = 'express_route_circuit_scenario'
-        self.express_route_name = 'test_route'
-        self.placeholder_value = 'none_existent'
-
-    def test_network_express_route_circuit(self):
-        self.execute()
-
-    def body(self):
-        rg = self.resource_group
-        ern = self.express_route_name
-        pv = self.placeholder_value
-        allowed_exceptions = "The Resource 'Microsoft.Network/expressRouteCircuits/{}' under resource group '{}' was not found.".format(ern, rg)
-        self.cmd('network express-route circuit-auth show --resource-group {0} --circuit-name {1} --name {2}'.format(
-            rg, ern, pv), allowed_exceptions=allowed_exceptions)
-        self.cmd('network express-route circuit-auth delete --resource-group {0} --circuit-name {1} --name {2}'.format(
-            rg, ern, pv), allowed_exceptions=allowed_exceptions)
-        self.cmd('network express-route circuit-peering delete --resource-group {0} --circuit-name {1} --name {2}'.format(
-            rg, ern, pv), allowed_exceptions=allowed_exceptions)
-        self.cmd('network express-route circuit-peering show --resource-group {0} --circuit-name {1} --name {2}'.format(
-            rg, ern, pv), allowed_exceptions=allowed_exceptions)
-        self.cmd('network express-route circuit list-arp-tables --resource-group {0} --name {1} --peering-name {2} --device-path {2}'.format(
-            rg, ern, pv), allowed_exceptions=allowed_exceptions)
-        self.cmd('network express-route circuit list-route-tables --resource-group {0} --name {1} --peering-name {2} --device-path {2}'.format(
-            rg, ern, pv), allowed_exceptions=allowed_exceptions)
+        self.cmd('network express-route list --resource-group {}'.format(rg), checks=NoneCheck())
 
 class NetworkLoadBalancerScenarioTest(ResourceGroupVCRTestBase):
 

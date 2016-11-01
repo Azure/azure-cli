@@ -65,10 +65,6 @@ from azure.cli.command_modules.network.mgmt_express_route_circuit.lib.operations
     import ExpressRouteCircuitOperations
 from azure.cli.command_modules.network.mgmt_express_route_circuit.lib \
     import ExpressRouteCircuitCreationClient as ExpressRouteCircuitClient
-from azure.cli.command_modules.network.mgmt_express_route_peering.lib.operations \
-    import ExpressRoutePeeringOperations
-from azure.cli.command_modules.network.mgmt_express_route_peering.lib \
-    import ExpressRoutePeeringCreationClient as ExpressRoutePeeringClient
 from azure.cli.command_modules.network.mgmt_traffic_manager_profile.lib.operations \
     import TrafficManagerProfileOperations
 from azure.cli.command_modules.network.mgmt_traffic_manager_profile.lib \
@@ -108,7 +104,8 @@ from .custom import \
      list_application_gateways, list_express_route_circuits, list_lbs, list_nics, list_nsgs,
      list_public_ips, list_route_tables, list_vnet, create_vnet_peering, create_route,
      update_network_vpn_gateway, create_vpn_gateway_root_cert, delete_vpn_gateway_root_cert,
-     create_vpn_gateway_revoked_cert, delete_vpn_gateway_revoked_cert, create_express_route_auth,
+     create_vpn_gateway_revoked_cert, delete_vpn_gateway_revoked_cert,
+     create_express_route_peering,
      list_traffic_manager_profiles, create_traffic_manager_endpoint, list_dns_zones,
      create_dns_record_set, add_dns_aaaa_record, add_dns_a_record, add_dns_cname_record,
      add_dns_ns_record, add_dns_ptr_record, update_dns_soa_record, add_dns_srv_record,
@@ -162,38 +159,35 @@ cli_command('network application-gateway url-path-map rule delete', delete_ag_ur
 
 # ExpressRouteCircuitAuthorizationsOperations
 factory = lambda _: _network_client_factory().express_route_circuit_authorizations
-cli_command('network express-route circuit-auth delete', ExpressRouteCircuitAuthorizationsOperations.delete, factory)
-cli_command('network express-route circuit-auth show', ExpressRouteCircuitAuthorizationsOperations.get, factory)
-cli_command('network express-route circuit-auth list', ExpressRouteCircuitAuthorizationsOperations.list, factory)
-cli_generic_update_command('network express-route circuit-auth update', ExpressRouteCircuitAuthorizationsOperations.get, ExpressRouteCircuitAuthorizationsOperations.create_or_update, factory)
-cli_command('network express-route circuit-auth create', create_express_route_auth)
+cli_command('network express-route auth delete', ExpressRouteCircuitAuthorizationsOperations.delete, factory)
+cli_command('network express-route auth show', ExpressRouteCircuitAuthorizationsOperations.get, factory)
+cli_command('network express-route auth list', ExpressRouteCircuitAuthorizationsOperations.list, factory)
+cli_command('network express-route auth create', ExpressRouteCircuitAuthorizationsOperations.create_or_update, factory)
 
 # ExpressRouteCircuitPeeringsOperations
 factory = lambda _: _network_client_factory().express_route_circuit_peerings
-cli_command('network express-route circuit-peering delete', ExpressRouteCircuitPeeringsOperations.delete, factory)
-cli_command('network express-route circuit-peering show', ExpressRouteCircuitPeeringsOperations.get, factory)
-cli_command('network express-route circuit-peering list', ExpressRouteCircuitPeeringsOperations.list, factory)
-cli_generic_update_command('network express-route circuit-peering update', ExpressRouteCircuitPeeringsOperations.get, ExpressRouteCircuitPeeringsOperations.create_or_update, factory)
-
-factory = lambda _: get_mgmt_service_client(ExpressRoutePeeringClient).express_route_peering
-cli_command('network express-route circuit-peering create', ExpressRoutePeeringOperations.create_or_update, factory, transform=DeploymentOutputLongRunningOperation('Starting network express-route circuit-peering create'))
+cli_command('network express-route peering delete', ExpressRouteCircuitPeeringsOperations.delete, factory)
+cli_command('network express-route peering show', ExpressRouteCircuitPeeringsOperations.get, factory)
+cli_command('network express-route peering list', ExpressRouteCircuitPeeringsOperations.list, factory)
+cli_generic_update_command('network express-route peering update', ExpressRouteCircuitPeeringsOperations.get, ExpressRouteCircuitPeeringsOperations.create_or_update, factory, setter_arg_name='peering_parameters')
+cli_command('network express-route peering create', create_express_route_peering, factory)
 
 # ExpressRouteCircuitsOperations
 factory = lambda _: _network_client_factory().express_route_circuits
-cli_command('network express-route circuit delete', ExpressRouteCircuitsOperations.delete, factory)
-cli_command('network express-route circuit show', ExpressRouteCircuitsOperations.get, factory)
-cli_command('network express-route circuit get-stats', ExpressRouteCircuitsOperations.get_stats, factory)
-cli_command('network express-route circuit list-arp-tables', ExpressRouteCircuitsOperations.list_arp_table, factory)
-cli_command('network express-route circuit list-route-tables', ExpressRouteCircuitsOperations.list_routes_table, factory)
-cli_command('network express-route circuit list', list_express_route_circuits)
-cli_generic_update_command('network express-route circuit update', ExpressRouteCircuitsOperations.get, ExpressRouteCircuitsOperations.create_or_update, factory)
+cli_command('network express-route delete', ExpressRouteCircuitsOperations.delete, factory)
+cli_command('network express-route show', ExpressRouteCircuitsOperations.get, factory)
+cli_command('network express-route get-stats', ExpressRouteCircuitsOperations.get_stats, factory)
+cli_command('network express-route list-arp-tables', ExpressRouteCircuitsOperations.list_arp_table, factory)
+cli_command('network express-route list-route-tables', ExpressRouteCircuitsOperations.list_routes_table, factory)
+cli_command('network express-route list', list_express_route_circuits)
+cli_generic_update_command('network express-route update', ExpressRouteCircuitsOperations.get, ExpressRouteCircuitsOperations.create_or_update, factory)
 
 factory = lambda _: get_mgmt_service_client(ExpressRouteCircuitClient).express_route_circuit
-cli_command('network express-route circuit create', ExpressRouteCircuitOperations.create_or_update, factory, transform=DeploymentOutputLongRunningOperation('Starting network express-route circuit create'))
+cli_command('network express-route create', ExpressRouteCircuitOperations.create_or_update, factory, transform=DeploymentOutputLongRunningOperation('Starting network express-route create'))
 
 # ExpressRouteServiceProvidersOperations
 factory = lambda _: _network_client_factory().express_route_service_providers
-cli_command('network express-route service-provider list', ExpressRouteServiceProvidersOperations.list, factory)
+cli_command('network express-route list-service-providers', ExpressRouteServiceProvidersOperations.list, factory)
 
 # LoadBalancersOperations
 factory = lambda _: _network_client_factory().load_balancers
