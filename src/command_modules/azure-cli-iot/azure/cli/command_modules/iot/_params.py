@@ -20,7 +20,7 @@ hub_name_type = CliArgumentType(completer=get_resource_name_completion_list('Mic
                                 help='IoT Hub name.')
 
 register_cli_argument('iot hub', 'hub_name', hub_name_type, options_list=('--name', '-n'))
-register_cli_argument('iot device', 'hub_name', hub_name_type, options_list=('--hub-name', '--hub'))
+register_cli_argument('iot device', 'hub_name', hub_name_type)
 register_cli_argument('iot', 'device_id', options_list=('--device-id', '-d'), help='Device Id.',
                       completer=get_device_id_completion_list)
 
