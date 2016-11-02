@@ -155,9 +155,9 @@ twine upload -r cli-pypi dist/*
 
 ### Installing your published command module
 
-If you published the package publicly, simply use `az component update --additional-component example`.
+If you published the package publicly, simply use `az component update --add example`.
 
-If you published it to a private server, use `az component update --additional-component example --private`.  
+If you published it to a private server, use `az component update --add example --private`.  
 
 NOTE:
 - Don't include the `azure-cli-` prefix when installing a command module.
