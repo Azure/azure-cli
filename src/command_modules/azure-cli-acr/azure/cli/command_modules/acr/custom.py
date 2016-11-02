@@ -9,6 +9,7 @@ from azure.cli.core.commands import (
     cli_command,
     LongRunningOperation
 )
+from azure.cli.core.commands.arm import cli_generic_update_command
 
 from azure.cli.command_modules.acr.mgmt_acr.models import (
     Registry,
@@ -124,64 +125,74 @@ def acr_show(registry_name, resource_group_name=None):
 
     return client.get_properties(resource_group_name, registry_name)
 
-def acr_update(registry_name, #pylint: disable=too-many-arguments
-               resource_group_name=None,
-               storage_account_name=None,
-               tags=None,
-               enable_admin=False,
-               disable_admin=False):
-    '''Update a container registry.
-    :param str registry_name: The name of container registry
-    :param str resource_group_name: The name of resource group
-    :param str storage_account_name: The name of storage account
-    :param dict tags: The set of tags
-    :param bool enable_admin: Enable admin user
-    :param bool disable_admin: Disable admin user
-    '''
+def acr_update_set(registry_name,
+                   resource_group_name=None,
+                   parameters=None):
     registry, resource_group_name = get_registry_by_name(registry_name, resource_group_name)
 
-    # Set admin_user_enabled
-    admin_user_enabled = None
-    if disable_admin:
-        admin_user_enabled = False
-    if enable_admin:
-        admin_user_enabled = True
-
-    # Set tags
-    newTags = registry.tags #pylint: disable=no-member
-    if isinstance(tags, dict):
-        if tags:
-            for key in tags:
-                if tags[key]:
-                    newTags[key] = tags[key]
-                elif key in newTags:
-                    del newTags[key]
-        else:
-            newTags = {}
+    admin_user_enabled = parameters.admin_user_enabled if parameters.admin_user_enabled else False
 
     # Set storage account
     storage_account = None
-    if storage_account_name:
-        storage_account_key = get_access_key_by_storage_account_name(storage_account_name)
+    if parameters.storage_account_name:
+        storage_account_key = get_access_key_by_storage_account_name(parameters.storage_account_name)
         storage_account = StorageAccountProperties(
-            storage_account_name,
+            parameters.storage_account_name,
             storage_account_key
         )
+
+    # Set tags
+    tags = parameters.tags #pylint: disable=no-member
+    if not isinstance(tags, dict):
+        tags = {}
 
     client = get_acr_service_client().registries
 
     return client.update(
         resource_group_name, registry_name,
         RegistryUpdateParameters(
-            tags=newTags,
-            admin_user_enabled=admin_user_enabled,
-            storage_account=storage_account if storage_account else None
+            tags=tags,
+            storage_account=storage_account,
+            admin_user_enabled=admin_user_enabled
         )
     )
+
+def acr_update_get(registry_name,
+                   resource_group_name=None):
+    registry, resource_group_name = get_registry_by_name(registry_name, resource_group_name)
+
+    tags = registry.tags
+    admin_user_enabled = registry.admin_user_enabled
+    storage_account_name = registry.storage_account.name
+
+    return ACRUpdateParameters(
+        tags=tags,
+        admin_user_enabled=admin_user_enabled,
+        storage_account_name=storage_account_name
+    )
+
+class ACRUpdateParameters:
+    """
+    The parameters for updating a container registry.
+
+    :param tags: Resource tags.
+    :type tags: dict
+    :param admin_user_enabled: The boolean value that indicates whether admin
+     user is enabled. Default value is false.
+    :type admin_user_enabled: bool
+    :param storage_account: The storage account properties.
+    :type storage_account: str
+    """ 
+
+    def __init__(self, tags=None, admin_user_enabled=None, storage_account_name=None):
+        self.tags = tags
+        self.admin_user_enabled = admin_user_enabled
+        self.storage_account_name = storage_account_name
 
 cli_command('acr check-name', acr_check_name)
 cli_command('acr list', acr_list, table_transformer=output_format)
 cli_command('acr create', acr_create, table_transformer=output_format)
 cli_command('acr delete', acr_delete, table_transformer=output_format)
 cli_command('acr show', acr_show, table_transformer=output_format)
-cli_command('acr update', acr_update, table_transformer=output_format)
+cli_generic_update_command('acr update', acr_update_get, acr_update_set,
+                           table_transformer=output_format)

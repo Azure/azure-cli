@@ -49,13 +49,13 @@ helps['acr update'] = """
             examples:
                 - name: Update tags for a container registry
                   text:
-                    az acr update -n myRegistry --tags key1=value1 key2=value2
+                    az acr update -n myRegistry --set tags.key1=value1 tags.key2=value2
                 - name: Update storage account for a container registry
                   text:
-                    az acr update -n myRegistry -s myStorageAccount
+                    az acr update -n myRegistry --set storage_account_name=myStorageAccount
                 - name: Enable admin user for a container registry
                   text:
-                    az acr update -n myRegistry --enable-admin
+                    az acr update -n myRegistry --set admin_user_enabled=true
             """
 
 helps['acr repository list'] = """
