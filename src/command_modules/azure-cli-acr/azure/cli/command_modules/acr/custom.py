@@ -20,7 +20,6 @@ from azure.cli.command_modules.acr.mgmt_acr.models import (
 
 from ._factory import get_acr_service_client
 from ._utils import (
-    get_registry_by_name,
     get_access_key_by_storage_account_name,
     get_resource_group_name_by_registry_name,
     arm_deploy_template
@@ -125,74 +124,59 @@ def acr_show(registry_name, resource_group_name=None):
 
     return client.get_properties(resource_group_name, registry_name)
 
-def acr_update_set(registry_name,
-                   resource_group_name=None,
-                   parameters=None):
-    registry, resource_group_name = get_registry_by_name(registry_name, resource_group_name)
+def acr_update_get(client,
+                      registry_name,
+                      resource_group_name=None):
+    if resource_group_name is None:
+        resource_group_name = get_resource_group_name_by_registry_name(registry_name)
 
-    admin_user_enabled = parameters.admin_user_enabled if parameters.admin_user_enabled else False
+    props = client.get_properties(resource_group_name, registry_name)
 
-    # Set storage account
-    storage_account = None
-    if parameters.storage_account_name:
-        storage_account_key = get_access_key_by_storage_account_name(parameters.storage_account_name)
+    return RegistryUpdateParameters(
+        tags=props.tags,
+        admin_user_enabled=props.admin_user_enabled,
+        storage_account=props.storage_account
+    )
+
+def acr_update_custom(instance,
+                      admin_user_enabled=None,
+                      storage_account_name=None,
+                      tags=None):
+    if admin_user_enabled is not None:
+        instance.admin_user_enabled = admin_user_enabled == 'true'
+
+    if tags is not None:
+        instance.tags = tags
+
+    if storage_account_name is not None:
+        storage_account_key = \
+            get_access_key_by_storage_account_name(storage_account_name)
         storage_account = StorageAccountProperties(
-            parameters.storage_account_name,
+            storage_account_name,
             storage_account_key
         )
+    instance.storage_account = storage_account if storage_account_name else None
 
-    # Set tags
-    tags = parameters.tags #pylint: disable=no-member
-    if not isinstance(tags, dict):
-        tags = {}
+    return instance
 
-    client = get_acr_service_client().registries
+def acr_update_set(client,
+                      registry_name,
+                      resource_group_name=None,
+                      parameters=None):
+    if resource_group_name is None:
+        resource_group_name = get_resource_group_name_by_registry_name(registry_name)
 
-    return client.update(
-        resource_group_name, registry_name,
-        RegistryUpdateParameters(
-            tags=tags,
-            storage_account=storage_account,
-            admin_user_enabled=admin_user_enabled
-        )
-    )
-
-def acr_update_get(registry_name,
-                   resource_group_name=None):
-    registry, resource_group_name = get_registry_by_name(registry_name, resource_group_name)
-
-    tags = registry.tags
-    admin_user_enabled = registry.admin_user_enabled
-    storage_account_name = registry.storage_account.name
-
-    return ACRUpdateParameters(
-        tags=tags,
-        admin_user_enabled=admin_user_enabled,
-        storage_account_name=storage_account_name
-    )
-
-class ACRUpdateParameters:
-    """
-    The parameters for updating a container registry.
-
-    :param tags: Resource tags.
-    :type tags: dict
-    :param admin_user_enabled: The boolean value that indicates whether admin
-     user is enabled. Default value is false.
-    :type admin_user_enabled: bool
-    :param storage_account: The storage account properties.
-    :type storage_account: str
-    """ 
-
-    def __init__(self, tags=None, admin_user_enabled=None, storage_account_name=None):
-        self.tags = tags
-        self.admin_user_enabled = admin_user_enabled
-        self.storage_account_name = storage_account_name
+    return client.update(resource_group_name, registry_name, parameters)
 
 cli_command('acr check-name', acr_check_name)
 cli_command('acr list', acr_list, table_transformer=output_format)
 cli_command('acr create', acr_create, table_transformer=output_format)
 cli_command('acr delete', acr_delete, table_transformer=output_format)
 cli_command('acr show', acr_show, table_transformer=output_format)
-cli_generic_update_command('acr update', acr_update_get, acr_update_set,
+cli_generic_update_command('acr update',
+                           acr_update_get,
+                           acr_update_set,
+                           factory=lambda: get_acr_service_client().registries,
+                           setter_arg_name='parameters',
+                           custom_function=acr_update_custom,
                            table_transformer=output_format)
