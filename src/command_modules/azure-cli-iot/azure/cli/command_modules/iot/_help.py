@@ -16,6 +16,11 @@ helps['iot hub create'] = """
             long-summary: See https://azure.microsoft.com/en-us/services/iot-hub/ for an intro to Azure IoT Hub.
 """
 
+helps['iot hub show'] = """
+            type: command
+            short-summary: Show non-security metadata of an IoT Hub.
+"""
+
 helps['iot hub list'] = """
             type: command
             short-summary: List IoT Hubs in your subscription or resource group.
@@ -36,9 +41,19 @@ helps['iot device create'] = """
             short-summary: Register a device in your Azure IoT Hub.
 """
 
+helps['iot device show'] = """
+            type: command
+            short-summary: Show metadata of a device in an IoT Hub.
+"""
+
 helps['iot device list'] = """
             type: command
             short-summary: List devices in target Azure IoT Hub.
+"""
+
+helps['iot device delete'] = """
+            type: command
+            short-summary: Delete a device from target Azure IoT Hub.
 """
 
 helps['iot device show-connection-string'] = """
