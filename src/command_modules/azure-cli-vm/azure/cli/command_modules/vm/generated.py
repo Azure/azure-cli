@@ -49,8 +49,7 @@ from ._factory import _compute_client_factory
 # VM
 def get_vm_client_with_shorter_polling_interval(_):
     client = get_mgmt_service_client(VMClient)
-    #remove this hack once 'azure/autorest#1558' gets fixed. We should configure the timeout through constructor
-    client.config.long_running_operation_timeout = 5
+    client.config.long_running_operation_timeout = 5 #seconds
     return client.vm
 
 cli_command('vm create', VmOperations.create_or_update, get_vm_client_with_shorter_polling_interval, transform=DeploymentOutputLongRunningOperation('Starting vm create'))
