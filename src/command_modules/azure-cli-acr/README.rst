@@ -86,34 +86,39 @@ Update a container registry
         az acr update: Update a container registry.
     
     Arguments
-        --name -n [Required]: Name of container registry.
-        --resource-group -g : Name of resource group.
+        --name -n      [Required]: Name of container registry.
+        --admin-user-enabled -a  : Whether the admin user account is enabled.  Allowed values: false,
+                                   true.
+        --resource-group -g      : Name of resource group.
+        --storage-account-name -s: Name of an existing storage account.
+        --tags                   : Space separated tags in 'key[=value]' format. Use "" to clear
+                                   existing tags.
     
     Generic Update Arguments
-        --add               : Add an object to a list of objects by specifying a path and key value
-                              pairs.  Example: --add property.listProperty <key=value, string or JSON
-                              string>.
-        --remove            : Remove a property or an element from a list.  Example: --remove
-                              property.list <indexToRemove> OR --remove propertyToRemove.
-        --set               : Update an object by specifying a property path and value to set.  Example:
-                              --set property1.property2=<value>.
+        --add                    : Add an object to a list of objects by specifying a path and key value
+                                   pairs.  Example: --add property.listProperty <key=value, string or
+                                   JSON string>.
+        --remove                 : Remove a property or an element from a list.  Example: --remove
+                                   property.list <indexToRemove> OR --remove propertyToRemove.
+        --set                    : Update an object by specifying a property path and value to set.
+                                   Example: --set property1.property2=<value>.
     
     Global Arguments
-        --debug             : Increase logging verbosity to show all debug logs.
-        --help -h           : Show this help message and exit.
-        --output -o         : Output format.  Allowed values: json, jsonc, list, table, tsv.  Default:
-                              json.
-        --query             : JMESPath query string. See http://jmespath.org/ for more information and
-                              examples.
-        --verbose           : Increase logging verbosity. Use --debug for full debug logs.
+        --debug                  : Increase logging verbosity to show all debug logs.
+        --help -h                : Show this help message and exit.
+        --output -o              : Output format.  Allowed values: json, jsonc, list, table, tsv.
+                                   Default: json.
+        --query                  : JMESPath query string. See http://jmespath.org/ for more information
+                                   and examples.
+        --verbose                : Increase logging verbosity. Use --debug for full debug logs.
     
     Examples
         Update tags for a container registry
-            az acr update -n myRegistry --set tags.key1=value1 tags.key2=value2
+            az acr update -n myRegistry --tags key1=value1 key2=value2
         Update storage account for a container registry
-            az acr update -n myRegistry --set storage_account_name=myStorageAccount
+            az acr update -n myRegistry --storage-account-name myStorageAccount
         Enable admin user for a container registry
-            az acr update -n myRegistry --set admin_user_enabled=true
+            az acr update -n myRegistry --admin-user-enabled true
 
 Get login credentials for a container registry
 -------------
