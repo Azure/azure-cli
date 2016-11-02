@@ -16,8 +16,7 @@ from ._constants import (
     STORAGE_RESOURCE_TYPE
 )
 from ._validators import (
-    validate_resource_group_name,
-    validate_admin_user
+    validate_resource_group_name
 )
 
 register_cli_argument('acr', 'registry_name',
@@ -43,8 +42,3 @@ register_cli_argument('acr', 'password',
 register_cli_argument('acr create', 'registry_name', completer=None)
 register_cli_argument('acr create', 'resource_group_name',
                       validator=validate_resource_group_name)
-
-register_cli_argument('acr', 'enable_admin', help='Enable admin user',
-                      validator=validate_admin_user)
-register_cli_argument('acr', 'disable_admin', help='Disable admin user',
-                      validator=validate_admin_user)
