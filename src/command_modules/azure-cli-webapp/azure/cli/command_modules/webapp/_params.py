@@ -83,10 +83,10 @@ register_cli_argument('appservice web log download', 'log_file', default='webapp
 register_cli_argument('appservice web config appsettings', 'settings', nargs='+', help="space separated app settings in a format of <name>=<value>")
 register_cli_argument('appservice web config appsettings', 'setting_names', nargs='+', help="space separated app setting names")
 
-register_cli_argument('appservice web config container', 'docker_registry_server_url', help='the container registry server url')
-register_cli_argument('appservice web config container', 'docker_custom_image_name', help='the container custom image name and optionally the tag name')
-register_cli_argument('appservice web config container', 'docker_registery_server_user', help='the container registry server username')
-register_cli_argument('appservice web config container', 'docker_registery_server_password', help='the container registry server password')
+register_cli_argument('appservice web config container', 'docker_registry_server_url', options_list=('--docker-registry-server-url', '-r'), help='the container registry server url')
+register_cli_argument('appservice web config container', 'docker_custom_image_name', options_list=('--docker-custom-image-name', '-c'), help='the container custom image name and optionally the tag name')
+register_cli_argument('appservice web config container', 'docker_registery_server_user', options_list=('--docker-registery-server-user', '-u'), help='the container registry server username')
+register_cli_argument('appservice web config container', 'docker_registery_server_password', options_list=('--docker-registery-server-password', '-p'), help='the container registry server password')
 
 register_cli_argument('appservice web config update', 'remote_debugging_enabled', help='enable or disable remote debugging', **enum_choice_list(two_states_switch))
 register_cli_argument('appservice web config update', 'web_sockets_enabled', help='enable or disable web sockets', **enum_choice_list(two_states_switch))
