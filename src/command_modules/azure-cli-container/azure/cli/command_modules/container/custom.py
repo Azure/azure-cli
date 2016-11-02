@@ -182,6 +182,7 @@ def _call_rp_configure_cicd(
 def list_releases(name, resource_group_name):
     """
     Lists all the release definitions that are deployed to a given Azure container service.
+
     :param name: Name of the target Azure container service instance.
     :type name: String
     :param resource_group_name: Name of Azure container service's resource group.
