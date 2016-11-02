@@ -1,6 +1,6 @@
 # Debug in Visual Studio Code
 
-## Prerequisit
+## Prerequisite
 
 * Visual Studio Code [Link](http://code.visualstudio.com/)
 * Visual Studio Code Python Extension [Link](https://marketplace.visualstudio.com/items?itemName=donjayamanne.python)
