@@ -113,6 +113,54 @@
             }
           }
         }
+      },
+      "delete" : {
+        "tags": [
+          "IoTDevices"
+        ],
+        "summary": "Delete a device identity in the identity registry of an IoT Hub.",
+        "description": "Delete a device identity in the identity registry of an IoT Hub.",
+        "operationId": "IotHubDevices_Delete",
+        "consumes": [
+          "application/json",
+          "text/json"
+        ],
+        "produces": [
+          "application/json",
+          "text/json"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/api-version"
+          },
+          {
+            "name": "deviceId",
+            "in": "path",
+            "description": "The Id of the device.",
+            "required": true,
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "description": "Specify the ETag for the device identity.",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successfully deleted"
+          },
+          "default": {
+            "description": "DefaultErrorResponse",
+            "schema": {
+              "$ref": "#/definitions/ErrorDetails"
+            }
+          }
+        }
       }
     },
     "/devices": {
