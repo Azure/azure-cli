@@ -182,7 +182,6 @@ def _call_rp_configure_cicd(
 def list_releases(name, resource_group_name):
     """
     Lists all the release definitions that are deployed to a given Azure container service.
-
     :param name: Name of the target Azure container service instance.
     :type name: String
     :param resource_group_name: Name of Azure container service's resource group.
@@ -190,18 +189,22 @@ def list_releases(name, resource_group_name):
     """
     profile = Profile()
     cred, subscription_id, _ = profile.get_login_credentials()
+
     o_auth_token = cred.signed_session().headers['Authorization']
-    o_auth_token.replace(" ", "%20")
-    get_releases_action = '/configureCI/1/releases?api-version={version}&token={o_auth_token}'
-    get_releases_url = RP_URL.format(
+    data = {
+        'token': o_auth_token
+    }
+
+    list_releases_url = RP_URL.format(
         subscription_id=subscription_id,
         resource_group_name=resource_group_name,
-        container_service_name=name) + get_releases_action.format(
-            version=API_VERSION,
-            o_auth_token=o_auth_token)
+        container_service_name=name) + '/configureCI/1/listReleases?api-version=' + API_VERSION
 
     headers = {'Content-type': 'application/json', 'Authorization': o_auth_token}
-    req = requests.get(get_releases_url, headers=headers, timeout=600)
+    req = requests.post(list_releases_url, data=json.dumps(data), headers=headers, timeout=600)
+    while req.status_code == 202:  # Long-running operation
+        time.sleep(10)
+        req = requests.get(BASE_URL + req.headers['Location'], headers=headers, timeout=600)
     if req.status_code != 200:
         raise CLIError(
             'Server returned status code: ' + str(req.status_code) + '. Could not list releases: ' + req.text)
