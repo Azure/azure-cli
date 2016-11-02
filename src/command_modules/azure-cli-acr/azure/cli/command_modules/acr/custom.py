@@ -92,7 +92,7 @@ def acr_create(registry_name, #pylint: disable=too-many-arguments
 
     logger.warning('\nCreate a new service principal and assign access:')
     logger.warning(
-        '  az ad sp create-for-rbac --scopes %s --role Owner --secret <password>',
+        '  az ad sp create-for-rbac --scopes %s --role Owner --password <password>',
         registry.id) #pylint: disable=no-member
     logger.warning('\nUse an existing service principal and assign access:')
     logger.warning(
