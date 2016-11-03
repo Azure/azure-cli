@@ -21,8 +21,3 @@ def validate_resource_group_name(namespace):
             raise CLIError(
                 'The resource group {} does not exist in the current subscription.'\
                 .format(resource_group_name))
-
-def validate_admin_user(namespace):
-    if namespace.enable_admin:
-        if hasattr(namespace, 'disable_admin') and namespace.disable_admin:
-            raise CLIError('--disable-admin and --enable-admin should not be specified together.')

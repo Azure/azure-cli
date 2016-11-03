@@ -84,23 +84,32 @@ Update a container registry
 
     Command
         az acr update: Update a container registry.
-
+    
     Arguments
         --name -n      [Required]: Name of container registry.
-        --disable-admin          : Disable admin user.
-        --enable-admin           : Enable admin user.
+        --admin-user-enabled -a  : Whether the admin user account is enabled.  Allowed values: false,
+                                   true.
         --resource-group -g      : Name of resource group.
         --storage-account-name -s: Name of an existing storage account.
         --tags                   : Space separated tags in 'key[=value]' format. Use "" to clear
-                                 existing tags.
-
+                                   existing tags.
+    
+    Generic Update Arguments
+        --add                    : Add an object to a list of objects by specifying a path and key value
+                                   pairs.  Example: --add property.listProperty <key=value, string or
+                                   JSON string>.
+        --remove                 : Remove a property or an element from a list.  Example: --remove
+                                   property.list <indexToRemove> OR --remove propertyToRemove.
+        --set                    : Update an object by specifying a property path and value to set.
+                                   Example: --set property1.property2=<value>.
+    
     Examples
         Update tags for a container registry
             az acr update -n myRegistry --tags key1=value1 key2=value2
         Update storage account for a container registry
-            az acr update -n myRegistry -s myStorageAccount
+            az acr update -n myRegistry --storage-account-name myStorageAccount
         Enable admin user for a container registry
-            az acr update -n myRegistry --enable-admin
+            az acr update -n myRegistry --admin-user-enabled true
 
 Get login credentials for a container registry
 -------------

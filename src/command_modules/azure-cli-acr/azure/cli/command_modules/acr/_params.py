@@ -16,8 +16,7 @@ from ._constants import (
     STORAGE_RESOURCE_TYPE
 )
 from ._validators import (
-    validate_resource_group_name,
-    validate_admin_user
+    validate_resource_group_name
 )
 
 register_cli_argument('acr', 'registry_name',
@@ -25,13 +24,15 @@ register_cli_argument('acr', 'registry_name',
                       help='Name of container registry',
                       completer=get_resource_name_completion_list(ACR_RESOURCE_TYPE))
 register_cli_argument('acr', 'storage_account_name',
-                      options_list=('--storage-account-name', '-s'),
                       help='Name of an existing storage account',
                       completer=get_resource_name_completion_list(STORAGE_RESOURCE_TYPE))
 
 register_cli_argument('acr', 'resource_group_name', resource_group_name_type)
 register_cli_argument('acr', 'location', location_type)
 register_cli_argument('acr', 'tags', tags_type)
+register_cli_argument('acr', 'admin_user_enabled',
+                      help='Whether the admin user account is enabled.',
+                      choices=['true', 'false'])
 
 register_cli_argument('acr', 'username',
                       options_list=('--username', '-u'),
@@ -43,8 +44,3 @@ register_cli_argument('acr', 'password',
 register_cli_argument('acr create', 'registry_name', completer=None)
 register_cli_argument('acr create', 'resource_group_name',
                       validator=validate_resource_group_name)
-
-register_cli_argument('acr', 'enable_admin', help='Enable admin user',
-                      validator=validate_admin_user)
-register_cli_argument('acr', 'disable_admin', help='Disable admin user',
-                      validator=validate_admin_user)
