@@ -8,4 +8,4 @@
 import azure.cli.command_modules.acs.custom
 import azure.cli.command_modules.acs._params
 import azure.cli.command_modules.acs._help
-import azure.cli.command_modules.acs.generated
+import azure.cli.command_modules.acs.commands
