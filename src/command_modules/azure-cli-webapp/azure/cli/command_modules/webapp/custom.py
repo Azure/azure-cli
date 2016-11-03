@@ -150,9 +150,9 @@ def update_container_settings(resource_group_name, name, docker_registry_server_
     settings = []
     if docker_registry_server_url is not None:
         settings.append('DOCKER_REGISTRY_SERVER_URL=' + docker_registry_server_url)
-    if docker_registery_server_user is not None:
+    if docker_registry_server_user is not None:
         settings.append('DOCKER_REGISTRY_SERVER_USERNAME=' + docker_registry_server_user)
-    if docker_registery_server_password is not None:
+    if docker_registry_server_password is not None:
         settings.append('DOCKER_REGISTRY_SERVER_PASSWORD=' + docker_registry_server_password)
     if docker_custom_image_name is not None:
         settings.append('DOCKER_CUSTOM_IMAGE_NAME=' + docker_custom_image_name)
