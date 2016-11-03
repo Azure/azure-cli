@@ -43,7 +43,7 @@ CLASSIFIERS = [
 
 # TODO These dependencies should be updated to reflect only what this package needs
 DEPENDENCIES = [
-    'adal>=0.4.1',
+    'adal>=0.4.2',
     'applicationinsights',
     'argcomplete>=1.3.0',
     'azure-mgmt-trafficmanager==0.30.0rc6',
