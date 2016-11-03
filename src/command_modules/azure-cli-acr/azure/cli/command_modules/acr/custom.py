@@ -9,6 +9,7 @@ from azure.cli.core.commands import (
     cli_command,
     LongRunningOperation
 )
+from azure.cli.core.commands.arm import cli_generic_update_command
 
 from azure.cli.command_modules.acr.mgmt_acr.models import (
     Registry,
@@ -19,7 +20,6 @@ from azure.cli.command_modules.acr.mgmt_acr.models import (
 
 from ._factory import get_acr_service_client
 from ._utils import (
-    get_registry_by_name,
     get_access_key_by_storage_account_name,
     get_resource_group_name_by_registry_name,
     arm_deploy_template
@@ -91,7 +91,7 @@ def acr_create(registry_name, #pylint: disable=too-many-arguments
 
     logger.warning('\nCreate a new service principal and assign access:')
     logger.warning(
-        '  az ad sp create-for-rbac --scopes %s --role Owner --secret <password>',
+        '  az ad sp create-for-rbac --scopes %s --role Owner --password <password>',
         registry.id) #pylint: disable=no-member
     logger.warning('\nUse an existing service principal and assign access:')
     logger.warning(
@@ -124,64 +124,58 @@ def acr_show(registry_name, resource_group_name=None):
 
     return client.get_properties(resource_group_name, registry_name)
 
-def acr_update(registry_name, #pylint: disable=too-many-arguments
-               resource_group_name=None,
-               storage_account_name=None,
-               tags=None,
-               enable_admin=False,
-               disable_admin=False):
-    '''Update a container registry.
-    :param str registry_name: The name of container registry
-    :param str resource_group_name: The name of resource group
-    :param str storage_account_name: The name of storage account
-    :param dict tags: The set of tags
-    :param bool enable_admin: Enable admin user
-    :param bool disable_admin: Disable admin user
-    '''
-    registry, resource_group_name = get_registry_by_name(registry_name, resource_group_name)
+def acr_update_get(client,
+                   registry_name,
+                   resource_group_name=None):
+    if resource_group_name is None:
+        resource_group_name = get_resource_group_name_by_registry_name(registry_name)
 
-    # Set admin_user_enabled
-    admin_user_enabled = None
-    if disable_admin:
-        admin_user_enabled = False
-    if enable_admin:
-        admin_user_enabled = True
+    props = client.get_properties(resource_group_name, registry_name)
 
-    # Set tags
-    newTags = registry.tags #pylint: disable=no-member
-    if isinstance(tags, dict):
-        if tags:
-            for key in tags:
-                if tags[key]:
-                    newTags[key] = tags[key]
-                elif key in newTags:
-                    del newTags[key]
-        else:
-            newTags = {}
+    return RegistryUpdateParameters(
+        tags=props.tags,
+        admin_user_enabled=props.admin_user_enabled,
+        storage_account=props.storage_account
+    )
 
-    # Set storage account
-    storage_account = None
-    if storage_account_name:
-        storage_account_key = get_access_key_by_storage_account_name(storage_account_name)
+def acr_update_custom(instance,
+                      admin_user_enabled=None,
+                      storage_account_name=None,
+                      tags=None):
+    if admin_user_enabled is not None:
+        instance.admin_user_enabled = admin_user_enabled == 'true'
+
+    if tags is not None:
+        instance.tags = tags
+
+    if storage_account_name is not None:
+        storage_account_key = \
+            get_access_key_by_storage_account_name(storage_account_name)
         storage_account = StorageAccountProperties(
             storage_account_name,
             storage_account_key
         )
+    instance.storage_account = storage_account if storage_account_name else None
 
-    client = get_acr_service_client().registries
+    return instance
 
-    return client.update(
-        resource_group_name, registry_name,
-        RegistryUpdateParameters(
-            tags=newTags,
-            admin_user_enabled=admin_user_enabled,
-            storage_account=storage_account if storage_account else None
-        )
-    )
+def acr_update_set(client,
+                   registry_name,
+                   resource_group_name=None,
+                   parameters=None):
+    if resource_group_name is None:
+        resource_group_name = get_resource_group_name_by_registry_name(registry_name)
+
+    return client.update(resource_group_name, registry_name, parameters)
 
 cli_command('acr check-name', acr_check_name)
 cli_command('acr list', acr_list, table_transformer=output_format)
 cli_command('acr create', acr_create, table_transformer=output_format)
 cli_command('acr delete', acr_delete, table_transformer=output_format)
 cli_command('acr show', acr_show, table_transformer=output_format)
-cli_command('acr update', acr_update, table_transformer=output_format)
+cli_generic_update_command('acr update',
+                           acr_update_get,
+                           acr_update_set,
+                           factory=lambda: get_acr_service_client().registries,
+                           custom_function=acr_update_custom,
+                           table_transformer=output_format)
