@@ -29,6 +29,7 @@ CLASSIFIERS = [
 DEPENDENCIES = [
     'azure-mgmt-keyvault==0.30.0',
     'azure-cli-core',
+    'pyOpenSSL'
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:

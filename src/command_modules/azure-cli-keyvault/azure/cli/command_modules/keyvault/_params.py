@@ -92,6 +92,10 @@ register_cli_argument('keyvault key import', 'pem_file', help='PEM file containi
 register_cli_argument('keyvault key import', 'pem_password', help='Password of PEM file.', arg_group='Key Source')
 register_cli_argument('keyvault key import', 'byok_file', help='BYOK file containing the key to be imported. Must not be password protected.', arg_group='Key Source')
 
+register_cli_argument('keyvault key backup', 'file_path', options_list=('--file', '-f'), help='Local file path in which to store key backup.')
+
+register_cli_argument('keyvault key restore', 'file_path', options_list=('--file', '-f'), help='Local key backup from which to restore key.')
+
 register_attributes_argument('keyvault key set-attributes', 'key', KeyAttributes)
 
 register_cli_argument('keyvault secret', 'secret_version', options_list=('--version', '-v'), help='The secret version. If omitted, uses the latest version.', default='', required=False)

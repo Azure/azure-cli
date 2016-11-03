@@ -156,6 +156,7 @@ def _object_id_args_helper(object_id, spn, upn):
 def set_policy(client, resource_group_name, vault_name, #pylint:disable=too-many-arguments
                object_id=None, spn=None, upn=None, key_permissions=None, secret_permissions=None,
                certificate_permissions=None):
+    """ Update security policy settings for a Key Vault. """
     object_id = _object_id_args_helper(object_id, spn, upn)
     vault = client.get(resource_group_name=resource_group_name,
                        vault_name=vault_name)
@@ -187,6 +188,7 @@ def set_policy(client, resource_group_name, vault_name, #pylint:disable=too-many
                                        properties=vault.properties))
 
 def delete_policy(client, resource_group_name, vault_name, object_id=None, spn=None, upn=None): #pylint:disable=too-many-arguments
+    """ Delete security policy settings for a Key Vault. """
     object_id = _object_id_args_helper(object_id, spn, upn)
     vault = client.get(resource_group_name=resource_group_name,
                        vault_name=vault_name)
@@ -228,6 +230,8 @@ restore_key.__doc__ = KeyVaultClient.restore_key.__doc__
 def import_key(client, vault_base_url, key_name, destination=None, key_ops=None, disabled=False,
                expires=None, not_before=None, tags=None, pem_file=None, pem_password=None,
                byok_file=None):
+    """ Import a private key. Supports importing base64 encoded private keys from PEM files.
+        Supports importing BYOK keys into HSM for premium KeyVaults. """
     from azure.cli.command_modules.keyvault.keyvaultclient.generated.models import \
         (KeyAttributes, JsonWebKey)
 
