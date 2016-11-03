@@ -6,5 +6,5 @@
 
 import azure.cli.command_modules.iot._params
 import azure.cli.command_modules.iot._help
-import azure.cli.command_modules.iot.generated
+import azure.cli.command_modules.iot.commands
 import azure.cli.command_modules.iot.custom
