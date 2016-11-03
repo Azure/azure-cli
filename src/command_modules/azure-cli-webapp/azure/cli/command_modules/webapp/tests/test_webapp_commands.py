@@ -26,6 +26,9 @@ class WebappBasicE2ETest(ResourceGroupVCRTestBase):
             JMESPathCheck('[0].sku.tier', 'Basic'),
             JMESPathCheck('[0].sku.name', 'B1')
             ])
+        self.cmd('appservice plan list', checks=[
+            JMESPathCheck("length([?name=='{}'])".format(plan), 1)
+            ])
         self.cmd('appservice plan show -g {} -n {}'.format(self.resource_group, plan), checks=[
             JMESPathCheck('name', plan)
             ])
