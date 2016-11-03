@@ -4,11 +4,18 @@
 #---------------------------------------------------------------------------------------------
 
 from azure.cli.core.commands import CliArgumentType, register_cli_argument
-from azure.cli.core.commands.parameters import (
-    name_type,
-    resource_group_name_type)
 
 # pylint: disable=line-too-long
+
+target_name = CliArgumentType(
+    options_list=('--target-name', '-n'),
+    help='Name of the Azure Container Service cluster to deploy containers to.'
+)
+
+target_resource_group = CliArgumentType(
+    options_list=('--target-resource-group', '-g'),
+    help='Name of the Azure Container Service cluster\'s resource group.'
+)
 
 registry_name = CliArgumentType(
     options_list=('--registry-name', '-r'),
@@ -45,8 +52,8 @@ vsts_project_name = CliArgumentType(
     help='VSTS project name to create the build and release definitions. A new VSTS project is created if omitted or does not exist.'
 )
 
-register_cli_argument('container release create', 'name', name_type)
-register_cli_argument('container release create', 'resource_group_name', resource_group_name_type)
+register_cli_argument('container release create', 'target_name', target_name)
+register_cli_argument('container release create', 'target_resource_group', target_resource_group)
 register_cli_argument('container release create', 'registry_name', registry_name)
 register_cli_argument('container release create', 'registry_resource_id', registry_resource_id)
 register_cli_argument('container release create', 'remote_url', remote_url)
@@ -55,8 +62,8 @@ register_cli_argument('container release create', 'remote_access_token', remote_
 register_cli_argument('container release create', 'vsts_account_name', vsts_account_name)
 register_cli_argument('container release create', 'vsts_project_name', vsts_project_name)
 
-register_cli_argument('container build create', 'name', name_type)
-register_cli_argument('container build create', 'resource_group_name', resource_group_name_type)
+register_cli_argument('container build create', 'target_name', target_name)
+register_cli_argument('container build create', 'target_resource_group', target_resource_group)
 register_cli_argument('container build create', 'registry_name', registry_name)
 register_cli_argument('container build create', 'registry_resource_id', registry_resource_id)
 register_cli_argument('container build create', 'remote_url', remote_url)
@@ -65,5 +72,5 @@ register_cli_argument('container build create', 'remote_access_token', remote_ac
 register_cli_argument('container build create', 'vsts_account_name', vsts_account_name)
 register_cli_argument('container build create', 'vsts_project_name', vsts_project_name)
 
-register_cli_argument('container release list', 'name', name_type)
-register_cli_argument('container release list', 'resource_group_name', resource_group_name_type)
+register_cli_argument('container release list', 'target_name', target_name)
+register_cli_argument('container release list', 'target_resource_group', target_resource_group)

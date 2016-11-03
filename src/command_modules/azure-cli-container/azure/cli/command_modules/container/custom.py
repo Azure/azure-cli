@@ -17,15 +17,14 @@ from azure.cli.core._profile import Profile
 from azure.cli.core._util import CLIError
 
 logger = _logging.get_az_logger(__name__)
-BASE_URL = "https://management.azure.com"
-RESOURCE_BASE_URL = "/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}"
-CONTAINER_SERVICE_BASE_URL = RESOURCE_BASE_URL + "/providers/Microsoft.ContainerService"
-CONTAINER_SERVICE_RESOURCE_URL = (CONTAINER_SERVICE_BASE_URL +
-                                  "/containerServices/{container_service_name}")
-VISUAL_STUDIO_BASE_URL = RESOURCE_BASE_URL + "/providers/microsoft.visualstudio"
-VISUAL_STUDIO_ACCOUNT_URL = VISUAL_STUDIO_BASE_URL + "/account/{vsts_account_name}"
-VISUAL_STUDIO_PROJECT_URL = VISUAL_STUDIO_ACCOUNT_URL + "/project/{vsts_project_name}"
-RP_URL = BASE_URL + CONTAINER_SERVICE_RESOURCE_URL + "/providers/Microsoft.Mindaro"
+BASE_URL = "http://localhost:44454"
+SUBSCRIPTION_URL = "/subscriptions/{subscription_id}"
+RESOURCE_BASE_URL = SUBSCRIPTION_URL + "/resourceGroups/{resource_group_name}"
+CONTAINER_SERVICE_PROVIDER = "/providers/Microsoft.ContainerService"
+CONTAINER_SERVICE_RESOURCE_URL = (RESOURCE_BASE_URL + CONTAINER_SERVICE_PROVIDER + "/containerServices/{container_service_name}")
+
+RESOURCE_PROVIDER = "/providers/Microsoft.Container"
+RESOURCE_PROVIDER_URL = BASE_URL + SUBSCRIPTION_URL + RESOURCE_PROVIDER 
 API_VERSION = "2016-11-01-preview"
 
 DOCKERFILE_FILE = 'Dockerfile'
@@ -33,9 +32,14 @@ DOCKER_COMPOSE_FILE = 'docker-compose.yml'
 DOCKER_COMPOSE_TEST_FILE = 'docker-compose.test.yml'
 DOCKER_COMPOSE_EXPECTED_VERSION = '2'
 
+DOCKERFILE_FILE = 'Dockerfile'
+DOCKER_COMPOSE_FILE = 'docker-compose.yml'
+DOCKER_COMPOSE_TEST_FILE = 'docker-compose.test.yml'
+DOCKER_COMPOSE_EXPECTED_VERSION = '2'
+
 def add_release(
-        name,
-        resource_group_name,
+        target_name,
+        target_resource_group,
         remote_url=None,
         remote_branch=None,
         remote_access_token=None,
@@ -46,10 +50,10 @@ def add_release(
     """
     Creates a build definition that automates building and pushing Docker images to an Azure container registry, and creates a release definition that automates deploying container images from a container registry to an Azure container service. Source repository must define a docker-compose.yml file.
 
-    :param name: Name of the target Azure container service instance to deploy containers to.
-    :type name: String
-    :param resource_group_name: Name of Azure container service's resource group.
-    :type resource_group_name: String
+    :param target_name: Name of the target Azure container service instance to deploy containers to.
+    :type target_name: String
+    :param target_resource_group: Name of Azure container service's resource group.
+    :type target_resource_group: String
     :param remote_url: Remote url of the GitHub or VSTS source repository that will be built and deployed. If omitted, a source repository will be searched for in the current working directory.
     :type remote_url: String
     :param remote_branch: Remote branch of the GitHub or VSTS source repository that will be built and deployed. If omitted refs/heads/master will be selected.
@@ -73,8 +77,8 @@ def add_release(
 
     # Call the RP
     return _call_rp_configure_cicd(
-        name,
-        resource_group_name,
+        target_name,
+        target_resource_group,
         vsts_account_name,
         vsts_project_name,
         registry_name,
@@ -112,8 +116,8 @@ def _get_repo_type(remote_url):
     return None
 
 def _call_rp_configure_cicd(
-        name,
-        resource_group_name,
+        target_name,
+        target_resource_group,
         vsts_account_name,
         vsts_project_name,
         registry_name,
@@ -125,10 +129,10 @@ def _call_rp_configure_cicd(
     """
     Calls the RP to build and deploy the service(s) in the cluster.
 
-    :param name: Name of the target Azure container service instance to deploy containers to.
-    :type name: String
-    :param resource_group_name: Name of Azure container service's resource group.
-    :type resource_group_name: String
+    :param target_name: Name of the target Azure container service instance to deploy containers to.
+    :type target_name: String
+    :param target_resource_group: Name of Azure container service's resource group.
+    :type target_resource_group: String
     :param remote_url: Remote url of the GitHub or VSTS source repository that will be built and deployed. If omitted, a source repository will be searched for in the current working directory.
     :type remote_url: String
     :param remote_branch: Remote branch of the GitHub or VSTS source repository that will be built and deployed. If omitted refs/heads/master will be selected.
@@ -150,8 +154,9 @@ def _call_rp_configure_cicd(
     cred, subscription_id, _ = profile.get_login_credentials()
 
     o_auth_token = cred.signed_session().headers['Authorization']
-
+    container_service_resource_id = CONTAINER_SERVICE_RESOURCE_URL.format(subscription_id=subscription_id, resource_group_name=target_resource_group, container_service_name=target_name)
     data = {
+        'acsResourceId': container_service_resource_id,
         'vstsAccountName': vsts_account_name,
         'vstsProjectName': vsts_project_name,
         'token': o_auth_token,
@@ -163,10 +168,8 @@ def _call_rp_configure_cicd(
         'createRelease' : create_release
     }
 
-    configure_ci_cd_url = RP_URL.format(
-        subscription_id=subscription_id,
-        resource_group_name=resource_group_name,
-        container_service_name=name) + '/configureCI?api-version=' + API_VERSION
+    configure_ci_cd_url = RESOURCE_PROVIDER_URL.format(
+        subscription_id=subscription_id) + '/configureCI?api-version=' + API_VERSION
 
     headers = {'Content-type': 'application/json', 'Authorization': o_auth_token}
     req = requests.post(configure_ci_cd_url, data=json.dumps(data), headers=headers, timeout=600)
@@ -179,27 +182,27 @@ def _call_rp_configure_cicd(
     json_request = req.json()
     return json_request
 
-def list_releases(name, resource_group_name):
+def list_releases(target_name, target_resource_group):
     """
     Lists all the release definitions that are deployed to a given Azure container service.
 
-    :param name: Name of the target Azure container service instance.
-    :type name: String
-    :param resource_group_name: Name of Azure container service's resource group.
-    :type resource_group_name: String
+    :param target_name: Name of the target Azure container service instance.
+    :type target_name: String
+    :param target_resource_group: Name of Azure container service's resource group.
+    :type target_resource_group: String
     """
     profile = Profile()
     cred, subscription_id, _ = profile.get_login_credentials()
 
     o_auth_token = cred.signed_session().headers['Authorization']
+    container_service_resource_id = CONTAINER_SERVICE_RESOURCE_URL.format(subscription_id=subscription_id, resource_group_name=target_resource_group, container_service_name=target_name)
     data = {
+        'acsResourceId': container_service_resource_id,
         'token': o_auth_token
     }
 
-    list_releases_url = RP_URL.format(
-        subscription_id=subscription_id,
-        resource_group_name=resource_group_name,
-        container_service_name=name) + '/configureCI/1/listReleases?api-version=' + API_VERSION
+    list_releases_url = RESOURCE_PROVIDER_URL.format(
+        subscription_id=subscription_id) + '/listReleases?api-version=' + API_VERSION
 
     headers = {'Content-type': 'application/json', 'Authorization': o_auth_token}
     req = requests.post(list_releases_url, data=json.dumps(data), headers=headers, timeout=600)
@@ -308,8 +311,8 @@ def _check_registry_information(registry_name, registry_resource_id):
         raise CLIError("Please provide only one of registry-name and registry-resource-id, not both.")
 
 def add_ci(
-        name,
-        resource_group_name,
+        target_name,
+        target_resource_group,
         remote_url=None,
         remote_branch=None,
         remote_access_token=None,
@@ -345,8 +348,8 @@ def add_ci(
 
     # Call the RP
     return _call_rp_configure_cicd(
-        name,
-        resource_group_name,
+        target_name,
+        target_resource_group,
         vsts_account_name,
         vsts_project_name,
         registry_name,
