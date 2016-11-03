@@ -10,16 +10,23 @@
 # regenerated.
 # --------------------------------------------------------------------------
 
-from .error_details import ErrorDetails, ErrorDetailsException
-from .device_description import DeviceDescription
-from .authentication import Authentication
-from .symmetric_key import SymmetricKey
-from .x509_thumbprint import X509Thumbprint
+from msrest.serialization import Model
 
-__all__ = [
-    'ErrorDetails', 'ErrorDetailsException',
-    'DeviceDescription',
-    'Authentication',
-    'SymmetricKey',
-    'X509Thumbprint',
-]
+
+class X509Thumbprint(Model):
+    """X509Thumbprint.
+
+    :param primary_thumbprint: The primary thumbprint.
+    :type primary_thumbprint: str
+    :param secondary_thumbprint: The secondary thumbprint.
+    :type secondary_thumbprint: str
+    """ 
+
+    _attribute_map = {
+        'primary_thumbprint': {'key': 'primaryThumbprint', 'type': 'str'},
+        'secondary_thumbprint': {'key': 'secondaryThumbprint', 'type': 'str'},
+    }
+
+    def __init__(self, primary_thumbprint=None, secondary_thumbprint=None):
+        self.primary_thumbprint = primary_thumbprint
+        self.secondary_thumbprint = secondary_thumbprint

@@ -17,7 +17,7 @@
         ],
         "summary": "Creates a new device identity in the identity registry of an IoT Hub.",
         "description": "Creates a new device identity in the identity registry of an IoT Hub.",
-        "operationId": "IotHubDevices_Create",
+        "operationId": "IotHubDevices_CreateOrUpdate",
         "consumes": [
           "application/json",
           "text/json"
@@ -40,13 +40,21 @@
             "maxLength": 128
           },
           {
-            "name": "createDeviceRequest",
+            "name": "deviceDescription",
             "in": "body",
             "description": "request.",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/CreateDeviceRequest"
+              "$ref": "#/definitions/DeviceDescription"
             }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "description": "Specify the ETag for the device identity.",
+            "required": false,
+            "type": "string",
+            "default": "*"
           }
         ],
         "responses": {
@@ -147,7 +155,8 @@
             "in": "header",
             "description": "Specify the ETag for the device identity.",
             "required": true,
-            "type": "string"
+            "type": "string",
+            "default": "*"
           }
         ],
         "responses": {
@@ -237,28 +246,6 @@
         }
       }
     },
-    "CreateDeviceRequest": {
-      "type": "object",
-      "properties": {
-        "deviceId": {
-          "description": "Device Id. A case-sensitive string ( up to 128 char long).",
-          "type": "string",
-          "minLength": 1,
-          "maxLength": 128
-        },
-        "authorization": {
-          "$ref": "#/definitions/Authentication"
-        },
-        "status": {
-          "description": "'enabled' or 'disabled', representing status of the device",
-          "type": "string"
-        },
-        "statusReason": {
-          "description": "A string representing reason of the device status",
-          "type": "string"
-        }
-      }
-    },
     "DeviceDescription": {
       "type": "object",
       "properties": {
@@ -321,7 +308,7 @@
           "$ref": "#/definitions/SymmetricKey"
         },
         "x509Thumbprint": {
-          "type": "string"
+          "$ref": "#/definitions/X509Thumbprint"
         }
       }
     },
@@ -334,6 +321,19 @@
         },
         "secondaryKey": {
           "description": "The secondary key.",
+          "type": "string"
+        }
+      }
+    },
+    "X509Thumbprint": {
+      "type": "object",
+      "properties": {
+        "primaryThumbprint": {
+          "description": "The primary thumbprint.",
+          "type": "string"
+        },
+        "secondaryThumbprint": {
+          "description": "The secondary thumbprint.",
           "type": "string"
         }
       }
