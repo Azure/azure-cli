@@ -103,15 +103,6 @@ Update a container registry
         --set                    : Update an object by specifying a property path and value to set.
                                    Example: --set property1.property2=<value>.
     
-    Global Arguments
-        --debug                  : Increase logging verbosity to show all debug logs.
-        --help -h                : Show this help message and exit.
-        --output -o              : Output format.  Allowed values: json, jsonc, list, table, tsv.
-                                   Default: json.
-        --query                  : JMESPath query string. See http://jmespath.org/ for more information
-                                   and examples.
-        --verbose                : Increase logging verbosity. Use --debug for full debug logs.
-    
     Examples
         Update tags for a container registry
             az acr update -n myRegistry --tags key1=value1 key2=value2

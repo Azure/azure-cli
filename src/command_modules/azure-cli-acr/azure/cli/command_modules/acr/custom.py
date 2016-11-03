@@ -125,8 +125,8 @@ def acr_show(registry_name, resource_group_name=None):
     return client.get_properties(resource_group_name, registry_name)
 
 def acr_update_get(client,
-                      registry_name,
-                      resource_group_name=None):
+                   registry_name,
+                   resource_group_name=None):
     if resource_group_name is None:
         resource_group_name = get_resource_group_name_by_registry_name(registry_name)
 
@@ -160,9 +160,9 @@ def acr_update_custom(instance,
     return instance
 
 def acr_update_set(client,
-                      registry_name,
-                      resource_group_name=None,
-                      parameters=None):
+                   registry_name,
+                   resource_group_name=None,
+                   parameters=None):
     if resource_group_name is None:
         resource_group_name = get_resource_group_name_by_registry_name(registry_name)
 
@@ -177,6 +177,5 @@ cli_generic_update_command('acr update',
                            acr_update_get,
                            acr_update_set,
                            factory=lambda: get_acr_service_client().registries,
-                           setter_arg_name='parameters',
                            custom_function=acr_update_custom,
                            table_transformer=output_format)
