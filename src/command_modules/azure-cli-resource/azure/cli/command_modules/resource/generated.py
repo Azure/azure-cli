@@ -24,7 +24,7 @@ from azure.cli.command_modules.resource._factory import (_resource_client_factor
                                                          _resource_policy_client_factory)
 from azure.cli.command_modules.resource.custom import (
     list_resource_groups, create_resource_group, export_group_as_template,
-    list_resources, move_resource,
+    list_resources, move_resource, show_resource, delete_resource,
     create_policy_assignment, delete_policy_assignment, show_policy_assignment, list_policy_assignment,
     create_policy_definition, update_policy_definition,
     deploy_arm_template, validate_arm_template, tag_resource, export_deployment_as_template,
@@ -46,8 +46,8 @@ def transform_resource_list(result):
     return [OrderedDict([('Name', r['name']), ('ResourceGroup', r['resourceGroup']), \
             ('Location', r['location']), ('Type', r['type'])]) for r in result]
 factory = lambda _: _resource_client_factory().resources
-cli_command('resource delete', ResourcesOperations.delete, factory)
-cli_command('resource show', ResourcesOperations.get, factory)
+cli_command('resource delete', delete_resource)
+cli_command('resource show', show_resource)
 cli_command('resource list', list_resources, table_transformer=transform_resource_list)
 cli_command('resource tag', tag_resource)
 cli_command('resource move', move_resource)

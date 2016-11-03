@@ -84,7 +84,7 @@ class ResourceScenarioTest(ResourceGroupVCRTestBase):
         assert len(all_tagged_displayname) > len(storage_acc_tagged_displayname)
 
         # check for simple resource with tag
-        s.cmd('resource show -n {} -g {} --resource-type Microsoft.Network/virtualNetworks'.format(self.vnet_name, rg), checks=[
+        s.cmd('resource show -n {} -g {} --resource-type virtualNetworks --namespace Microsoft.Network'.format(self.vnet_name, rg), checks=[
             JMESPathCheck('name', self.vnet_name),
             JMESPathCheck('location', 'westus'),
             JMESPathCheck('resourceGroup', rg),
@@ -93,7 +93,7 @@ class ResourceScenarioTest(ResourceGroupVCRTestBase):
 
         # clear tag and verify
         s.cmd('resource tag -n {} -g {} --resource-type Microsoft.Network/virtualNetworks --tags'.format(self.vnet_name, rg))
-        s.cmd('resource show -n {} -g {} --resource-type Microsoft.Network/virtualNetworks'.format(self.vnet_name, rg),
+        s.cmd('resource show -n {} -g {} --resource-type virtualNetworks --namespace Microsoft.Network'.format(self.vnet_name, rg),
               checks=JMESPathCheck('tags', {}))
 
 class TagScenarioTest(VCRTestBase): # Not RG test base because it operates only on the subscription
