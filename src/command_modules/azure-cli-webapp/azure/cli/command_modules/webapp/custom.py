@@ -240,6 +240,13 @@ def sync_site_repo(resource_group_name, name, slot=None):
     return _generic_site_operation(resource_group_name, name, 'sync_site_repository',
                                    slot)
 
+def list_app_service_plans(resource_group_name=None):
+    client = web_client_factory()
+    if resource_group_name is None:
+        return client.global_model.get_all_server_farms()
+    else:
+        return client.server_farms.get_server_farms(resource_group_name)
+
 def create_app_service_plan(resource_group_name, name, sku, is_linux, number_of_workers=None,
                             location=None):
     client = web_client_factory()

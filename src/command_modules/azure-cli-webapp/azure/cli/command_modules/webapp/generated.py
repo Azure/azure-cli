@@ -14,7 +14,7 @@ from .custom import (create_webapp, show_webapp, list_webapp,
                      delete_webapp, stop_webapp, restart_webapp,
                      enable_local_git, show_source_control, delete_source_control,
                      config_source_control, sync_site_repo, set_deployment_user,
-                     view_in_browser, create_app_service_plan,
+                     view_in_browser, create_app_service_plan, list_app_service_plans,
                      update_app_service_plan, config_diagnostics,
                      get_streaming_log, download_historical_logs,
                      create_webapp_slot, config_slot_auto_swap,
@@ -76,7 +76,7 @@ cli_generic_update_command('appservice plan update', ServerFarmsOperations.get_s
                            ServerFarmsOperations.create_or_update_server_farm,
                            custom_function=update_app_service_plan,
                            setter_arg_name='server_farm_envelope', factory=factory)
-cli_command('appservice plan list', ServerFarmsOperations.get_server_farms, factory)
+cli_command('appservice plan list', list_app_service_plans)
 cli_command('appservice plan show', ServerFarmsOperations.get_server_farm, factory)
 cli_command('appservice list-locations', GlobalModelOperations.get_subscription_geo_regions,
             factory)
