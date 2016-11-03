@@ -10,7 +10,7 @@ To override help for a given command:
 
 1. Find the command's module, Example "az account clear"
 	1. Search code base for "account clear"
-	2. Search result: src/command_modules/azure-cli-**profile**/azure/cli/command_modules/**profile**/generated.py
+	2. Search result: src/command_modules/azure-cli-**profile**/azure/cli/command_modules/**profile**/commands.py
 	3. Result shows "account clear" is in the "profile" module
 2. Using the module name, find the YAML help file which follows the path pattern:
 	1.  src/command_modules/azure-cli-**[module name]**/azure/cli/command_modules/**[module name]**/_help.py
