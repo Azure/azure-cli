@@ -243,7 +243,7 @@ class LinuxWebappSceanrioTest(ResourceGroupVCRTestBase):
         self.cmd('appservice web config update -g {} -n {} --startup-file {}'.format(self.resource_group, webapp, 'process.json'), checks=[
             JMESPathCheck('appCommandLine', 'process.json')
             ])
-        self.cmd('appservice web config container update -g {} -n {} --docker-custom-image-name {} --docker-registery-server-password {} --docker-registery-server-user {} --docker-registry-server-url {}'.format(
+        self.cmd('appservice web config container update -g {} -n {} --docker-custom-image-name {} --docker-registry-server-password {} --docker-registry-server-user {} --docker-registry-server-url {}'.format(
             self.resource_group, webapp, 'foo-image', 'foo-password', 'foo-user', 'foo-url'), checks=[
                 JMESPathCheck('DOCKER_CUSTOM_IMAGE_NAME', 'foo-image'),
                 JMESPathCheck('DOCKER_REGISTRY_SERVER_URL', 'foo-url'),
