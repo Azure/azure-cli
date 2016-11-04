@@ -10,6 +10,7 @@ import mock
 from azure.mgmt.resource.subscriptions.models import (SubscriptionState, Subscription,
                                                       SubscriptionPolicies, spendingLimit)
 from azure.cli.core._profile import Profile, CredsCache, SubscriptionFinder, CLOUD
+from azure.cli.core._util import CLIError
 
 class Test_Profile(unittest.TestCase):
 
@@ -163,6 +164,24 @@ class Test_Profile(unittest.TestCase):
         profile.set_active_subscription(subscription1['id'])
         self.assertFalse(subscription2['isDefault'])
         self.assertTrue(subscription1['isDefault'])
+
+    def test_get_subscription(self):
+        storage_mock = {'subscriptions': None}
+        profile = Profile(storage_mock)
+
+        consolidated = Profile._normalize_properties(self.user1,
+                                                     [self.subscription1],
+                                                     False)
+        profile._set_subscriptions(consolidated)
+
+        self.assertEqual(self.display_name1, profile.get_subscription()['name'])
+        self.assertEqual(self.display_name1,
+                         profile.get_subscription(subscription=self.display_name1)['name'])
+
+        sub_id = self.id1.split('/')[-1]
+        self.assertEqual(sub_id, profile.get_subscription()['id'])
+        self.assertEqual(sub_id, profile.get_subscription(subscription=sub_id)['id'])
+        self.assertRaises(CLIError, profile.get_subscription, "random_id")
 
     @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
     def test_get_current_account_user(self, mock_read_cred_file):

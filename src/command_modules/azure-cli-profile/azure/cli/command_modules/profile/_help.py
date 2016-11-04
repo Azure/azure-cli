@@ -23,3 +23,15 @@ helps['account'] = """
     type: group
     short-summary: Manages stored and default subscriptions
 """
+
+helps['account list-locations'] = """
+    type: command
+    short-summary: list supported regions of the current subscription
+"""
+
+helps['account show'] = """
+    type: command
+    short-summary: show detail of the current subscription
+"""
+
+

@@ -11,6 +11,7 @@ from .custom import (login,
                      logout,
                      list_locations,
                      list_subscriptions,
+                     show_subscription,
                      set_active_subscription,
                      account_clear)
 
@@ -18,7 +19,9 @@ cli_command('login', login)
 cli_command('logout', logout)
 
 cli_command('account list', list_subscriptions)
+cli_command('account show', show_subscription)
 cli_command('account set', set_active_subscription)
 cli_command('account clear', account_clear)
 cli_command('account list-locations', list_locations)
+
 
