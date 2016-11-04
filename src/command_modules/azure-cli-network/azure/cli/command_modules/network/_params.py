@@ -13,7 +13,7 @@ from azure.mgmt.network.models.network_management_client_enums import \
      ApplicationGatewayTier, ApplicationGatewayProtocol,
      ApplicationGatewayRequestRoutingRuleType, ExpressRouteCircuitSkuFamily,
      ExpressRouteCircuitSkuTier, ExpressRouteCircuitPeeringType, IPVersion, LoadDistribution,
-     ProbeProtocol, TransportProtocol, ExpressRouteCircuitPeeringAdvertisedPublicPrefixState)
+     ProbeProtocol, TransportProtocol)
 from azure.mgmt.dns.models.dns_management_client_enums import RecordType
 
 from azure.cli.core.commands import \
@@ -109,7 +109,7 @@ def get_tm_endpoint_completion_list():
 name_arg_type = CliArgumentType(options_list=('--name', '-n'), metavar='NAME')
 nic_type = CliArgumentType(options_list=('--nic-name',), metavar='NIC_NAME', help='The network interface (NIC).', id_part='name', completer=get_resource_name_completion_list('Microsoft.Network/networkInterfaces'))
 nsg_name_type = CliArgumentType(options_list=('--nsg-name',), metavar='NSG', help='Name of the network security group.')
-circuit_name_type = CliArgumentType(options_list=('--circuit-name',), metavar='CIRCUIT', help='Express Route circuit name.', id_part='name', completer=get_resource_name_completion_list('Microsoft.Network/expressRouteCircuits'))
+circuit_name_type = CliArgumentType(options_list=('--circuit-name',), metavar='CIRCUIT', help='ExpressRoute circuit name.', id_part='name', completer=get_resource_name_completion_list('Microsoft.Network/expressRouteCircuits'))
 virtual_network_name_type = CliArgumentType(options_list=('--vnet-name',), metavar='VNET_NAME', help='The virtual network (VNET) name.', completer=get_resource_name_completion_list('Microsoft.Network/virtualNetworks'))
 subnet_name_type = CliArgumentType(options_list=('--subnet-name',), metavar='SUBNET_NAME', help='The subnet name.')
 load_balancer_name_type = CliArgumentType(options_list=('--lb-name',), metavar='LB_NAME', help='The load balancer name.', completer=get_resource_name_completion_list('Microsoft.Network/loadBalancers'), id_part='name')
@@ -210,7 +210,7 @@ register_cli_argument('network application-gateway url-path-map rule', 'url_path
 register_cli_argument('network application-gateway url-path-map rule', 'address_pool', help='The name or ID of the backend address pool. If not specified, the default for the map will be used.', validator=process_ag_url_path_map_rule_create_namespace, completer=get_ag_subresource_completion_list('backend_address_pools'))
 register_cli_argument('network application-gateway url-path-map rule', 'http_settings', help='The name or ID of the HTTP settings. If not specified, the default for the map will be used.', completer=get_ag_subresource_completion_list('backend_http_settings_collection'))
 
-# Express Routes
+# ExpressRoutes
 register_cli_argument('network express-route', 'circuit_name', circuit_name_type, options_list=('--name', '-n'))
 register_cli_argument('network express-route', 'sku_family', **enum_choice_list(ExpressRouteCircuitSkuFamily))
 register_cli_argument('network express-route', 'sku_tier', **enum_choice_list(ExpressRouteCircuitSkuTier))
@@ -228,7 +228,6 @@ register_cli_argument('network express-route peering', 'peering_name', name_arg_
 register_cli_argument('network express-route peering', 'peering_type', validator=validate_peering_type, **enum_choice_list(ExpressRouteCircuitPeeringType))
 register_cli_argument('network express-route peering', 'sku_family', **enum_choice_list(ExpressRouteCircuitSkuFamily))
 register_cli_argument('network express-route peering', 'sku_tier', **enum_choice_list(ExpressRouteCircuitSkuTier))
-register_cli_argument('network express-route peering', 'advertised_public_prefix_state', arg_group='Microsoft Peering', **enum_choice_list(ExpressRouteCircuitPeeringAdvertisedPublicPrefixState))
 register_cli_argument('network express-route peering', 'advertised_public_prefixes', arg_group='Microsoft Peering', nargs='+')
 register_cli_argument('network express-route peering', 'primary_peer_address_prefix', options_list=('--primary-peer-subnet',))
 register_cli_argument('network express-route peering', 'secondary_peer_address_prefix', options_list=('--secondary-peer-subnet',))
