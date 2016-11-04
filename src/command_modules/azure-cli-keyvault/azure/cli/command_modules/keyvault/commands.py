@@ -54,6 +54,13 @@ cli_keyvault_data_plane_command('keyvault secret show', 'azure.cli.command_modul
 cli_keyvault_data_plane_command('keyvault secret delete', 'azure.cli.command_modules.keyvault.keyvaultclient.key_vault_client#KeyVaultClient.delete_secret')
 # Round 4
 # cli_keyvault_data_plane_command('keyvault secret download', download_secret)
+cli_keyvault_data_plane_command('keyvault secret list', KeyVaultClient.get_secrets)
+cli_keyvault_data_plane_command('keyvault secret list-versions', KeyVaultClient.get_secret_versions)
+cli_keyvault_data_plane_command('keyvault secret set', KeyVaultClient.set_secret)
+cli_keyvault_data_plane_command('keyvault secret set-attributes', BaseKeyVaultClient.update_secret)
+cli_keyvault_data_plane_command('keyvault secret show', BaseKeyVaultClient.get_secret)
+cli_keyvault_data_plane_command('keyvault secret delete', KeyVaultClient.delete_secret)
+cli_keyvault_data_plane_command('keyvault secret download', download_secret)
 
 cli_keyvault_data_plane_command('keyvault certificate create', 'azure.cli.command_modules.keyvault.custom#create_certificate')
 cli_keyvault_data_plane_command('keyvault certificate list', 'azure.cli.command_modules.keyvault.keyvaultclient.key_vault_client#KeyVaultClient.get_certificates')
@@ -64,6 +71,14 @@ cli_keyvault_data_plane_command('keyvault certificate set-attributes', 'azure.cl
 cli_keyvault_data_plane_command('keyvault certificate import', 'azure.cli.command_modules.keyvault.keyvaultclient.key_vault_client#KeyVaultClient.import_certificate')
 # Round 4
 # cli_keyvault_data_plane_command('keyvault certificate download', download_certificate)
+cli_keyvault_data_plane_command('keyvault certificate create', create_certificate)
+cli_keyvault_data_plane_command('keyvault certificate list', KeyVaultClient.get_certificates)
+cli_keyvault_data_plane_command('keyvault certificate list-versions', KeyVaultClient.get_certificate_versions)
+cli_keyvault_data_plane_command('keyvault certificate show', BaseKeyVaultClient.get_certificate)
+cli_keyvault_data_plane_command('keyvault certificate delete', KeyVaultClient.delete_certificate)
+cli_keyvault_data_plane_command('keyvault certificate set-attributes', BaseKeyVaultClient.update_certificate)
+cli_keyvault_data_plane_command('keyvault certificate import', KeyVaultClient.import_certificate)
+cli_keyvault_data_plane_command('keyvault certificate download', download_certificate)
 
 cli_keyvault_data_plane_command('keyvault key list', 'azure.cli.command_modules.keyvault.keyvaultclient.key_vault_client#KeyVaultClient.get_keys')
 cli_keyvault_data_plane_command('keyvault key list-versions', 'azure.cli.command_modules.keyvault.keyvaultclient.key_vault_client#KeyVaultClient.get_key_versions')

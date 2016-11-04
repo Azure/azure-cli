@@ -89,7 +89,8 @@ def _create_key_vault_command(module_name, name, operation, transform_result, ta
         except ClientRequestError as ex:
             if 'Failed to establish a new connection' in str(ex.inner_exception):
                 raise CLIError('Max retries exceeded attempting to connect to vault. '
-                               'Try flushing your DNS cache or try again later.')
+                               'The vault may not exist or you may need to flush your DNS cache '
+                               'and try again later.')
             raise CLIError(ex)
 
     command_module_map[name] = module_name
