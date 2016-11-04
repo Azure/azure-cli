@@ -23,6 +23,9 @@ from .custom import (create_role_assignment, list_role_assignments, delete_role_
 def transform_definition_list(result):
     return [OrderedDict([('Name', r['properties']['roleName']), ('Type', r['properties']['type']), ('Descritpion', r['properties']['description'])]) for r in result]
 
+def transform_assignment_list(result):
+    return [OrderedDict([('Principal', r['properties']['principalName']), ('Role', r['properties']['roleDefinitionName']), ('Scope', r['properties']['scope'])]) for r in result]
+
 factory = lambda _: _auth_client_factory().role_definitions
 cli_command('role definition list', list_role_definitions, table_transformer=transform_definition_list)
 cli_command('role definition delete', delete_role_definition)
@@ -34,7 +37,7 @@ cli_generic_update_command('role definition update',
 
 factory = lambda _: _auth_client_factory().role_assignments
 cli_command('role assignment delete', delete_role_assignments)
-cli_command('role assignment list', list_role_assignments)
+cli_command('role assignment list', list_role_assignments, table_transformer=transform_assignment_list)
 cli_command('role assignment create', create_role_assignment)
 
 factory = lambda _: _graph_client_factory().applications
