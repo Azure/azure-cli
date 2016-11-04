@@ -158,7 +158,6 @@ def _call_rp_configure_cicd(
         'acsResourceId': container_service_resource_id,
         'vstsAccountName': vsts_account_name,
         'vstsProjectName': vsts_project_name,
-        'token': o_auth_token,
         'registryName': registry_name,
         'registryResourceId': registry_resource_id,
         'remoteToken': remote_access_token,
@@ -196,8 +195,7 @@ def list_releases(target_name, target_resource_group):
     o_auth_token = cred.signed_session().headers['Authorization']
     container_service_resource_id = CONTAINER_SERVICE_RESOURCE_URL.format(subscription_id=subscription_id, resource_group_name=target_resource_group, container_service_name=target_name)
     data = {
-        'acsResourceId': container_service_resource_id,
-        'token': o_auth_token
+        'acsResourceId': container_service_resource_id
     }
 
     list_releases_url = SERVICE_URL.format(
