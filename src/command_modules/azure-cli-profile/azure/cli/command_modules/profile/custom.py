@@ -27,12 +27,16 @@ def list_subscriptions(list_all=False): # pylint: disable=redefined-builtin
         sub['cloudName'] = sub.pop('environmentName', None)
     return [sub for sub in subscriptions if list_all or sub['cloudName'] == CLOUD.name]
 
-def set_active_subscription(subscription_name_or_id):
+def show_subscription(subscription=None):
+    profile = Profile()
+    return profile.get_subscription(subscription)
+
+def set_active_subscription(subscription):
     '''Set the current subscription'''
     if not id:
         raise CLIError('Please provide subscription id or unique name.')
     profile = Profile()
-    profile.set_active_subscription(subscription_name_or_id)
+    profile.set_active_subscription(subscription)
 
 def account_clear():
     '''Clear all stored subscriptions. To clear individual, use \'logout\''''
