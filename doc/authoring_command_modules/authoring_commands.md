@@ -89,3 +89,49 @@ Additionally, the following `kwargs`, supported by argparse, are supported as we
 - `required` - See https://docs.python.org/3/library/argparse.html#required. Note that this value is inferred from the function signature depending on whether or not the parameter has a default value. If specified, this will override that value.
 - `help` - See https://docs.python.org/3/library/argparse.html#help. Generally you should avoid adding help text in this way, instead opting to create a help file as described above.
 - `metavar` - See https://docs.python.org/3/library/argparse.html#metavar
+
+Generic Update Commands
+=============================
+
+The update commands within the CLI expose a set of generic update arguments: `--add`, `--remove` and `--set`. This allows the user to manipulate objects in a consistent way that may not have long option flags supported by the command. The method which exposes these arguments is `cli_generic_update_command` in the `azure.cli.core.commands.arm` package. The signature of this method is:
+
+```Python
+def cli_generic_update_command(name, getter, setter, factory=None, setter_arg_name='parameters',
+                               table_transformer=None, child_collection_prop_name=None,
+                               child_collection_key='name', child_arg_name='item_name',
+                               custom_function=None):
+```
+For many commands will only specify `name`, `getter`, `setter` and `factory`.
+  - `name` - Same as registering a command with `cli_command(...)`.
+  - `getter` - A method which returns an instance of the object being updated.
+  - `setter` - A method which takes an instance of the object and updates it.
+  - `factory` (optional) - Any client object upon which the getter and setter rely. If omitted, then the getter and setter are responsible for creating their own client objects as needed.
+  - `setter_arg_name` (optional) - The is the name for the object instance used in the setter method. By default it is `parameters` because many Azure SDK APIs use this convention. If your setter uses a different name, specify it here.
+  - `custom_function` (optional) - A method which accepts the object being updated (must be named `instance`) and returns that object. This is commonly used to process convenience options which may be added to the command by listing them in the method signature, similar to a purely custom method. The difference is that a custom command function returns the command result while a generic update custom function returns only the object being updated. A simple custom function might look like:
+  
+  ```Python
+  def my_custom_function(instance, item_name, custom_arg=None):
+    if custom_arg:
+        instance.property = custom_arg
+    return instance
+  ```
+  - `table_transformer` (optional) - Same as `cli_command(...)`
+
+**Working With Child Collections and Properties (Advanced)**
+
+Sometimes you will want to write commands that operate on child resources and it may be that these child resources don't have dedicated getters and setters. In these cases, you must rely on the getter and setter of the parent resource. For these cases, `cli_generic_update_command` has three additional parameters:
+  - `child_collection_prop_name` - the name of the child collection property. For example, if object `my_parent` has a child collection called `my_children` that you would access using `my_parent.my_children` then the name you would use is 'my_children'.
+  - `child_collection_key_name` - Most child collections in Azure are lists of objects (as opposed to dictionaries) which will have a property in them that serves as the key. This is the name of that key property. By default it is 'name'. In the above example, if an entry in the `my_children` collection has a key property called `my_identifier` then the value you would supply is 'my_identifier'.
+  - `child_arg_name` - If you want to refer the child object key (the property identified by `child_collection_key_name`) inside a custom function, you should specify the argument name you use in your custom function. By default, this is called `item_name`. In the above example, where our child object had a key called `my_identifier`, you could refer to this property within your custom function through the `item_name` property, or specify something different.
+  
+**Logic Flow**
+
+A simplified understand of the flow of the generic update is as follows:
+
+```Python
+instance = getter(...)  # retrieve the object
+if custom_function:
+    instance = custom_function(...) # apply custom logic
+instance = _process_generic_updates(...) # apply generic updates, which will overwrite custom logic in the event of a conflict
+return setter(instance)  # update the instance and return the result
+```
