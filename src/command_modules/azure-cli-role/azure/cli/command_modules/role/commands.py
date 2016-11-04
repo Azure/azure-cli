@@ -5,6 +5,7 @@
 
 # pylint: disable=line-too-long
 from __future__ import print_function
+from collections import OrderedDict
 
 from azure.mgmt.authorization.operations import RoleDefinitionsOperations
 from azure.graphrbac.operations import UsersOperations, GroupsOperations
@@ -19,8 +20,11 @@ from .custom import (create_role_assignment, list_role_assignments, delete_role_
                      create_service_principal_for_rbac, reset_service_principal_credential,
                      _auth_client_factory, _graph_client_factory)
 
+def transform_definition_list(result):
+    return [OrderedDict([('Name', r['properties']['roleName']), ('Type', r['properties']['type']), ('Descritpion', r['properties']['description'])]) for r in result]
+
 factory = lambda _: _auth_client_factory().role_definitions
-cli_command('role definition list', list_role_definitions)
+cli_command('role definition list', list_role_definitions, table_transformer=transform_definition_list)
 cli_command('role definition delete', delete_role_definition)
 cli_command('role definition create', create_role_definition)
 cli_generic_update_command('role definition update',

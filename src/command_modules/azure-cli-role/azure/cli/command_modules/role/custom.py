@@ -12,7 +12,6 @@ import dateutil.parser
 
 from azure.cli.core._util import CLIError, todict, get_file_json
 import azure.cli.core._logging as _logging
-from azure.cli.core.help_files import helps
 
 from azure.cli.core.commands.client_factory import (get_mgmt_service_client,
                                                     configure_common_settings)
