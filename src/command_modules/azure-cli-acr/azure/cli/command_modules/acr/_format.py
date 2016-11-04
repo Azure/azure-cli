@@ -11,14 +11,9 @@ _registry_map = {
     'name': 'NAME',
     'resourceGroup': 'RESOURCE GROUP',
     'location': 'LOCATION',
-    'tags': 'TAGS',
     'loginServer': 'LOGIN SERVER',
     'creationDate': 'CREATION DATE',
-    'adminUserEnabled': 'ADMIN USER ENABLED'
-}
-
-_storage_account_map = {
-    'name': 'STORAGE ACCOUNT NAME'
+    'adminUserEnabled': 'ADMIN ENABLED'
 }
 
 _admin_user_map = {
@@ -30,11 +25,9 @@ _order_map = {
     'NAME': 1,
     'RESOURCE GROUP': 2,
     'LOCATION': 3,
-    'TAGS': 4,
     'LOGIN SERVER': 11,
     'CREATION DATE': 12,
-    'ADMIN USER ENABLED': 13,
-    'STORAGE ACCOUNT NAME': 21,
+    'ADMIN ENABLED': 13,
     'USERNAME': 31,
     'PASSWORD': 32
 }
@@ -56,17 +49,10 @@ def _format_registry(item):
         resource_group_name = get_resource_group_name_by_resource_id(item['id'])
         registry_info['RESOURCE GROUP'] = resource_group_name
 
-    storage_account_info = {}
-    if 'storageAccount' in item and item['storageAccount']:
-        storage_account = item['storageAccount']
-        storage_account_info = {_storage_account_map[key]: str(storage_account[key])
-                                for key in storage_account if key in _storage_account_map}
-
     admin_user_info = {_admin_user_map[key]: str(item[key])
                        for key in item if key in _admin_user_map}
 
     all_info = registry_info.copy()
-    all_info.update(storage_account_info)
     all_info.update(admin_user_info)
 
     return OrderedDict(sorted(all_info.items(), key=lambda t: _order_map[t[0]]))
