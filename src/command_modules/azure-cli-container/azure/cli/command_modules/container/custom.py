@@ -23,8 +23,7 @@ RESOURCE_BASE_URL = SUBSCRIPTION_URL + "/resourceGroups/{resource_group_name}"
 CONTAINER_SERVICE_PROVIDER = "/providers/Microsoft.ContainerService"
 CONTAINER_SERVICE_RESOURCE_URL = (RESOURCE_BASE_URL + CONTAINER_SERVICE_PROVIDER + "/containerServices/{container_service_name}")
 
-RESOURCE_PROVIDER = "/providers/Microsoft.Container"
-RESOURCE_PROVIDER_URL = BASE_URL + SUBSCRIPTION_URL + RESOURCE_PROVIDER
+SERVICE_URL = BASE_URL + SUBSCRIPTION_URL
 API_VERSION = "2016-11-01-preview"
 
 DOCKERFILE_FILE = 'Dockerfile'
@@ -168,7 +167,7 @@ def _call_rp_configure_cicd(
         'createRelease' : create_release
     }
 
-    configure_ci_cd_url = RESOURCE_PROVIDER_URL.format(
+    configure_ci_cd_url = SERVICE_URL.format(
         subscription_id=subscription_id) + '/configureCI?api-version=' + API_VERSION
 
     headers = {'Content-type': 'application/json', 'Authorization': o_auth_token}
@@ -201,7 +200,7 @@ def list_releases(target_name, target_resource_group):
         'token': o_auth_token
     }
 
-    list_releases_url = RESOURCE_PROVIDER_URL.format(
+    list_releases_url = SERVICE_URL.format(
         subscription_id=subscription_id) + '/listReleases?api-version=' + API_VERSION
 
     headers = {'Content-type': 'application/json', 'Authorization': o_auth_token}
