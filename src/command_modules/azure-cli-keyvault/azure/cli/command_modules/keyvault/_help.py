@@ -54,6 +54,11 @@ helps['keyvault certificate'] = """
     short-summary: Manage certificates.
 """
 
+helps['keyvault certificate pending'] = """
+    type: group
+    short-summary: Manage pending certificate creation operations.
+"""
+
 helps['keyvault certificate contact'] = """
     type: group
     short-summary: Manage contacts for certificate management.

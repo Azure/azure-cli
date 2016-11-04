@@ -4,7 +4,10 @@
 #---------------------------------------------------------------------------------------------
 
 import argparse
+import base64
+import binascii
 from datetime import datetime
+import re
 
 from azure.mgmt.keyvault import KeyVaultManagementClient
 from azure.mgmt.keyvault.models.key_vault_management_client_enums import \
@@ -21,6 +24,9 @@ def _extract_version(item_id):
     return item_id.split('/')[-1]
 
 # COMMAND NAMESPACE VALIDATORS
+
+def process_certificate_cancel_namespace(namespace):
+    namespace.cancellation_requested = True
 
 # PARAMETER NAMESPACE VALIDATORS
 
@@ -61,6 +67,8 @@ def validate_key_type(ns):
             'hsm': 'RSA-HSM'
         }
         ns.destination = dest_to_type_map[ns.destination]
+        if ns.destination == 'RSA' and hasattr(ns, 'byok_file') and ns.byok_file:
+            raise CLIError('BYOK keys are hardware protected. Omit --protection')
 
 def validate_policy_permissions(ns):
     key_perms = ns.key_permissions
@@ -108,10 +116,33 @@ def validate_resource_group_name(ns):
             "The Resource 'Microsoft.KeyVault/vaults/{}'".format(vault_name) + \
             " not found within subscription")
 
+def validate_x509_certificate_chain(ns):
+    def _load_certificate_as_bytes(file_name):
+        cert_list = []
+        regex = r'-----BEGIN CERTIFICATE-----([^-]+)-----END CERTIFICATE-----'
+        with open(file_name, 'r') as f:
+            cert_data = f.read()
+            for entry in re.findall(regex, cert_data):
+                cert_list.append(base64.b64decode(entry.replace('\n', '')))
+        return cert_list
+
+    ns.x509_certificates = _load_certificate_as_bytes(ns.x509_certificates)
+
 # ARGUMENT TYPES
 
+def base64_encoded_certificate_type(string):
+    """ Loads file and outputs contents as base64 encoded string. """
+    with open(string, 'rb') as f:
+        cert_data = f.read()
+    try:
+        # for PEM files (including automatic endline conversion for Windows)
+        cert_data = cert_data.decode('utf-8').replace('\r\n', '\n')
+    except UnicodeDecodeError:
+        cert_data = binascii.b2a_base64(cert_data).decode('utf-8')
+    return cert_data
+
 def datetime_type(string):
-    ''' Validates UTC datettime in format '%Y-%m-%d\'T\'%H:%M\'Z\''. '''
+    """ Validates UTC datettime in format '%Y-%m-%d\'T\'%H:%M\'Z\''. """
     date_format = '%Y-%m-%dT%H:%MZ'
     return datetime.strptime(string, date_format)
 

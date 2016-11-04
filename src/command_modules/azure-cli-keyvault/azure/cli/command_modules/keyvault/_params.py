@@ -20,11 +20,13 @@ from azure.cli.command_modules.keyvault.keyvaultclient.generated.models.key_vaul
 from azure.cli.command_modules.keyvault.keyvaultclient.generated.models import \
     (KeyAttributes, SecretAttributes, CertificateAttributes)
 from azure.cli.command_modules.keyvault._validators import \
-    (datetime_type,
+    (datetime_type, base64_encoded_certificate_type,
      get_attribute_validator,
      vault_base_url_type, validate_key_import_source,
      validate_key_type, validate_key_ops, validate_policy_permissions,
-     validate_principal, validate_resource_group_name)
+     validate_principal, validate_resource_group_name,
+     validate_x509_certificate_chain,
+     process_certificate_cancel_namespace)
 
 # CUSTOM CHOICE LISTS
 
@@ -32,6 +34,9 @@ key_permission_values = ', '.join([x.value for x in KeyPermissions])
 secret_permission_values = ', '.join([x.value for x in SecretPermissions])
 certificate_permission_values = ', '.join([x.value for x in CertificatePermissions])
 json_web_key_op_values = ', '.join([x.value for x in JsonWebKeyOperation])
+secret_file_encoding_values = ['utf8', 'utf16le', 'ucs2', 'ascii']
+secret_file_decoding_values = ['base64', 'hex']
+certificate_file_encoding_values = ['base64']
 
 # KEY ATTRIBUTE PARAMETER REGISTRATION
 
@@ -87,6 +92,10 @@ register_cli_argument('keyvault key import', 'pem_file', help='PEM file containi
 register_cli_argument('keyvault key import', 'pem_password', help='Password of PEM file.', arg_group='Key Source')
 register_cli_argument('keyvault key import', 'byok_file', help='BYOK file containing the key to be imported. Must not be password protected.', arg_group='Key Source')
 
+register_cli_argument('keyvault key backup', 'file_path', options_list=('--file', '-f'), help='Local file path in which to store key backup.')
+
+register_cli_argument('keyvault key restore', 'file_path', options_list=('--file', '-f'), help='Local key backup from which to restore key.')
+
 register_attributes_argument('keyvault key set-attributes', 'key', KeyAttributes)
 
 register_cli_argument('keyvault secret', 'secret_version', options_list=('--version', '-v'), help='The secret version. If omitted, uses the latest version.', default='', required=False)
@@ -96,11 +105,19 @@ register_attributes_argument('keyvault secret set-attributes', 'secret', SecretA
 
 register_cli_argument('keyvault certificate', 'certificate_version', options_list=('--version', '-v'), help='The certificate version. If omitted, uses the latest version.', default='', required=False)
 register_attributes_argument('keyvault certificate create', 'certificate', CertificateAttributes, True)
+register_attributes_argument('keyvault certificate import', 'certificate', CertificateAttributes, True)
 register_attributes_argument('keyvault certificate set-attributes', 'certificate', CertificateAttributes)
-for item in ['create', 'set-attributes']:
+for item in ['create', 'set-attributes', 'import']:
     register_cli_argument('keyvault certificate {}'.format(item), 'certificate_policy', options_list=('--policy', '-p'), help='JSON encoded policy defintion. Use @{file} to load from a file.', type=get_json_object)
 
-register_cli_argument('keyvault certificate contact', 'contact_email', options_list=('--email',), help='Contact e-mail address. Must be unique within the vault.')
+register_cli_argument('keyvault certificate import', 'base64_encoded_certificate', options_list=('--file', '-f'), help='PKCS12 file or PEM file containing the certificate and private key.', type=base64_encoded_certificate_type)
+
+register_cli_argument('keyvault certificate pending merge', 'x509_certificates', options_list=('--file', '-f'), help='File containing the certificate or certificate chain to merge.', validator=validate_x509_certificate_chain)
+register_attributes_argument('keyvault certificate pending merge', 'certificate', CertificateAttributes, True)
+
+register_cli_argument('keyvault certificate pending cancel', 'cancellation_requested', ignore_type, validator=process_certificate_cancel_namespace)
+
+register_cli_argument('keyvault certificate contact', 'contact_email', options_list=('--email',), help='Contact e-mail address. Must be unique.')
 register_cli_argument('keyvault certificate contact', 'contact_name', options_list=('--name',), help='Full contact name.')
 register_cli_argument('keyvault certificate contact', 'contact_phone', options_list=('--phone',), help='Contact phone number.')
 

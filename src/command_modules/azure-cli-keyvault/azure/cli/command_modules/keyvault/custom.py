@@ -3,7 +3,11 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 #---------------------------------------------------------------------------------------------
 
+import codecs
+import re
 import time
+
+from OpenSSL import crypto
 
 from msrestazure.azure_exceptions import CloudError
 from azure.mgmt.keyvault.models import (VaultCreateOrUpdateParameters,
@@ -152,6 +156,7 @@ def _object_id_args_helper(object_id, spn, upn):
 def set_policy(client, resource_group_name, vault_name, #pylint:disable=too-many-arguments
                object_id=None, spn=None, upn=None, key_permissions=None, secret_permissions=None,
                certificate_permissions=None):
+    """ Update security policy settings for a Key Vault. """
     object_id = _object_id_args_helper(object_id, spn, upn)
     vault = client.get(resource_group_name=resource_group_name,
                        vault_name=vault_name)
@@ -183,6 +188,7 @@ def set_policy(client, resource_group_name, vault_name, #pylint:disable=too-many
                                        properties=vault.properties))
 
 def delete_policy(client, resource_group_name, vault_name, object_id=None, spn=None, upn=None): #pylint:disable=too-many-arguments
+    """ Delete security policy settings for a Key Vault. """
     object_id = _object_id_args_helper(object_id, spn, upn)
     vault = client.get(resource_group_name=resource_group_name,
                        vault_name=vault_name)
@@ -208,52 +214,103 @@ def create_key(client, vault_base_url, key_name, destination, key_size=None, key
         vault_base_url, key_name, destination, key_size, key_ops, key_attrs, tags)
 create_key.__doc__ = KeyVaultClient.create_key.__doc__
 
-# pylint: disable=unused-variable,broad-except
-def _is_pem_encrypted(data):
-    # TODO: Round 3
-    try:
-        dump_data = OpenSSL.crypto.dump_certificate(OpenSSL.crypto.FILETYPE_PEM, data)
-    except Exception:
-        pass
+def backup_key(client, vault_base_url, key_name, file_path):
+    backup = client.backup_key(vault_base_url, key_name).value
+    with open(file_path, 'wb') as output:
+        output.write(backup)
+backup_key.__doc__ = KeyVaultClient.backup_key.__doc__
 
-# pylint: disable=unused-variable,unused-argument
-def _decrypt_rsa_private_key(data, password):
-    # TODO: Round 3
-    pass
-
-# pylint: disable=unused-argument
-def _private_key_from_pem(data):
-    # TODO: Round 3
-    pass
+def restore_key(client, vault_base_url, file_path):
+    with open(file_path, 'rb') as file_in:
+        data = file_in.read()
+    return client.restore_key(vault_base_url, data)
+restore_key.__doc__ = KeyVaultClient.restore_key.__doc__
 
 # pylint: disable=too-many-arguments,assignment-from-no-return,unused-variable
-def import_key(client, vault_base_url, key_name, destination, key_ops=None, disabled=False,
+def import_key(client, vault_base_url, key_name, destination=None, key_ops=None, disabled=False,
                expires=None, not_before=None, tags=None, pem_file=None, pem_password=None,
                byok_file=None):
-    # TODO: Round 3
+    """ Import a private key. Supports importing base64 encoded private keys from PEM files.
+        Supports importing BYOK keys into HSM for premium KeyVaults. """
     from azure.cli.command_modules.keyvault.keyvaultclient.generated.models import \
         (KeyAttributes, JsonWebKey)
+
+    def _to_bytes(hex_string):
+        # zero pads and decodes a hex string
+        if len(hex_string) % 2:
+            hex_string = '0{}'.format(hex_string)
+        return codecs.decode(hex_string, 'hex_codec')
+
+    def _set_rsa_parameters(dest, src):
+        # map OpenSSL parameter names to JsonWebKey property names
+        conversion_dict = {
+            'modulus': 'n',
+            'publicExponent': 'e',
+            'privateExponent': 'd',
+            'prime1': 'p',
+            'prime2': 'q',
+            'exponent1': 'dp',
+            'exponent2': 'dq',
+            'coefficient': 'qi'
+        }
+        # regex: looks for matches that fit the following patterns:
+        #   integerPattern: 65537 (0x10001)
+        #   hexPattern:
+        #      00:a0:91:4d:00:23:4a:c6:83:b2:1b:4c:15:d5:be:
+        #      d8:87:bd:c9:59:c2:e5:7a:f5:4a:e7:34:e8:f0:07:
+        # The desired match should always be the first component of the match
+        regex = re.compile(r'([^:\s]*(:[^\:)]+\))|([^:\s]*(:\s*[0-9A-Fa-f]{2})+))')
+        # regex2: extracts the hex string from a format like: 65537 (0x10001)
+        regex2 = re.compile(r'(?<=\(0x{1})([0-9A-Fa-f]*)(?=\))')
+
+        key_params = crypto.dump_privatekey(crypto.FILETYPE_TEXT, src).decode('utf-8')
+        for match in regex.findall(key_params):
+            comps = match[0].split(':', 1)
+            name = conversion_dict.get(comps[0], None)
+            if name:
+                value = comps[1].replace(' ', '').replace('\n', '').replace(':', '')
+                try:
+                    value = _to_bytes(value)
+                except Exception as ex: # pylint:disable=broad-except
+                    # if decoding fails it is because of an integer pattern. Extract the hex
+                    # string and retry
+                    value = _to_bytes(regex2.findall(value)[0])
+                setattr(dest, name, value)
+
     key_attrs = KeyAttributes(not disabled, not_before, expires)
     key_obj = JsonWebKey(key_ops=key_ops)
     if pem_file:
-        key_obj.destination = 'RSA'
+        key_obj.kty = 'RSA'
         logger.info('Reading %s', pem_file)
         with open(pem_file, 'r') as f:
-            data = f.read()
-            if _is_pem_encrypted(data):
-                # prompt for password if not supplied?
-                key_info = _decrypt_rsa_private_key(data, pem_password)
-            else:
-                key_info = _private_key_from_pem(data)
+            pem_data = f.read()
+        # load private key and prompt for password if encrypted
+        try:
+            pem_password = str(pem_password).encode() if pem_password else None
+            # despite documentation saying password should be a string, it needs to actually
+            # be UTF-8 encoded bytes
+            pkey = crypto.load_privatekey(crypto.FILETYPE_PEM, pem_data, pem_password)
+        except crypto.Error as ex:
+            raise CLIError(
+                'Import failed: Unable to decrypt private key. --pem-password may be incorrect.')
+        except TypeError as ex:
+            raise CLIError('Invalid --pem-password.')
         logger.info('setting RSA parameters from PEM data')
-        # set rsa parameters
-        # set pem_file to key_file?
+        _set_rsa_parameters(key_obj, pkey)
     elif byok_file:
-        key_obj.destination = 'RSA-HSM'
-        key_obj.t = None # data from file
+        with open(byok_file, 'rb') as f:
+            byok_data = f.read()
+        key_obj.kty = 'RSA-HSM'
+        key_obj.t = byok_data
 
     return client.import_key(
         vault_base_url, key_name, key_obj, destination == 'hsm', key_attrs, tags)
+
+# pylint: disable=unused-argument
+def download_secret(client, vault_base_url, secret_name, file_path, file_encoding='utf8',
+                    secret_version='', decode_binary=None):
+    secret = client.keyvault.get_secret(vault_base_url, secret_name, secret_version)
+    raise CLIError('TODO: implement')
 
 def create_certificate(client, vault_base_url, certificate_name, certificate_policy,
                        disabled=False, expires=None, not_before=None, tags=None):
@@ -264,6 +321,11 @@ def create_certificate(client, vault_base_url, certificate_name, certificate_pol
     client.create_certificate(
         vault_base_url, certificate_name, certificate_policy, cert_attrs, tags)
 
+    if certificate_policy['issuer_parameters']['name'].lower() == 'unknown':
+        # return immediately for a pending certificate
+        return client.get_certificate_operation(vault_base_url, certificate_name)
+
+    # otherwise loop until the certificate creation is complete
     while True:
         check = client.get_certificate_operation(vault_base_url, certificate_name)
         if check.status != 'inProgress':
@@ -287,6 +349,13 @@ def create_certificate(client, vault_base_url, certificate_name, certificate_pol
             raise CLIError('{}'.format(message))
 
 create_certificate.__doc__ = KeyVaultClient.create_certificate.__doc__
+
+# pylint: disable=unused-argument
+def download_certificate(client, vault_base_url, certificate_name, file_path,
+                         file_encoding=None, certificate_version=''):
+    cert = client.keyvault.get_certificate(
+        vault_base_url, certificate_name, certificate_version)
+    raise CLIError('TODO: implement')
 
 def add_certificate_contact(client, vault_base_url, contact_email, contact_name=None,
                             contact_phone=None):
