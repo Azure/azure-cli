@@ -17,10 +17,10 @@ from azure.cli.core.commands.arm import (
     make_camel_case)
 
 def register_folded_cli_argument(scope, base_name, resource_type, parent_name=None, # pylint: disable=too-many-arguments
-                                 parent_type=None, type_field=None,
+                                 parent_option_flag=None, parent_type=None, type_field=None,
                                  existing_id_flag_value='existingId', new_flag_value='new',
                                  none_flag_value='none', default_value_flag='new',
-                                 **kwargs):
+                                 base_required=True, **kwargs):
     type_field_name = type_field or base_name + '_type'
 
     fold_validator = _name_id_fold(base_name,
@@ -30,8 +30,11 @@ def register_folded_cli_argument(scope, base_name, resource_type, parent_name=No
                                    new_flag_value,
                                    none_flag_value,
                                    parent_name,
-                                   parent_type)
+                                   parent_option_flag,
+                                   parent_type,
+                                   base_required)
     custom_validator = kwargs.pop('validator', None)
+    custom_help = kwargs.pop('help', None)
     if custom_validator:
         def wrapped(namespace):
             fold_validator(namespace)
@@ -40,22 +43,27 @@ def register_folded_cli_argument(scope, base_name, resource_type, parent_name=No
     else:
         validator = fold_validator
 
-    quotes = '""' if platform.system() == 'Windows' else "''"
-    quote_text = '  Use {} for none.'.format(quotes) if none_flag_value else ''
-    flag_texts = {
-        new_flag_value: '  Creates new by default.{}'.format(quote_text),
-        existing_id_flag_value: '  Uses existing resource.{}'
-                                .format(quote_text),
-        none_flag_value: '  None by default.'
-    }
-    help_text = 'Name or ID of the resource.' + flag_texts[default_value_flag]
+    if not custom_help:
+        quotes = '""' if platform.system() == 'Windows' else "''"
+        quote_text = ' Use {} for none.'.format(quotes) if none_flag_value else ''
+        parent_text = ' If name specified, must also specify {}.'.format(
+            parent_option_flag or parent_name) if parent_name else ''
+        flag_texts = {
+            new_flag_value: '  Creates new by default.{}'.format(quote_text),
+            existing_id_flag_value: '  Uses existing resource.{}{}'
+                                    .format(quote_text, parent_text),
+            none_flag_value: '  None by default.'
+        }
+        help_text = 'Name or ID of the resource.' + flag_texts[default_value_flag]
+    else:
+        help_text = custom_help
 
     register_cli_argument(scope, base_name, validator=validator, help=help_text, **kwargs)
     register_cli_argument(scope, type_field_name, help=argparse.SUPPRESS, default=None)
 
 def _name_id_fold(base_name, resource_type, type_field, #pylint: disable=too-many-arguments
                   existing_id_flag_value, new_flag_value, none_flag_value,
-                  parent_name=None, parent_type=None):
+                  parent_name=None, parent_option_flag=None, parent_type=None, base_required=True):
     def handle_folding(namespace):
         base_name_val = getattr(namespace, base_name)
         type_field_val = getattr(namespace, type_field)
@@ -79,6 +87,9 @@ def _name_id_fold(base_name, resource_type, type_field, #pylint: disable=too-man
             if is_valid_resource_id(base_name_val):
                 resource_id_parts = parse_resource_id(base_name_val)
             elif has_parent:
+                if not parent_name_val and base_required:
+                    raise CLIError("Must specify '{}' when specifying '{}' name.".format(
+                        parent_option_flag or parent_name, base_name))
                 resource_id_parts = dict(
                     name=parent_name_val,
                     resource_group=namespace.resource_group_name,
