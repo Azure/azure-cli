@@ -17,7 +17,8 @@ from azure.cli.command_modules.keyvault.keyvaultclient.generated import KeyVault
 from azure.cli.command_modules.keyvault.keyvaultclient import KeyVaultClient
 from azure.cli.command_modules.keyvault._command_type import cli_keyvault_data_plane_command
 from azure.cli.command_modules.keyvault.custom import \
-    (create_key, create_certificate,
+    (create_key, backup_key, restore_key, import_key,
+     create_certificate,
      add_certificate_contact, delete_certificate_contact,
      create_certificate_issuer, update_certificate_issuer,
      add_certificate_issuer_admin, delete_certificate_issuer_admin, list_certificate_issuer_admins)
@@ -52,10 +53,9 @@ cli_keyvault_data_plane_command('keyvault key create', create_key)
 cli_keyvault_data_plane_command('keyvault key set-attributes', BaseKeyVaultClient.update_key)
 cli_keyvault_data_plane_command('keyvault key show', BaseKeyVaultClient.get_key)
 cli_keyvault_data_plane_command('keyvault key delete', KeyVaultClient.delete_key)
-# TODO: Round 3
-#cli_keyvault_data_plane_command('keyvault key import', import_key)
-#cli_keyvault_data_plane_command('keyvault key backup', KeyVaultClient.backup_key)
-#cli_keyvault_data_plane_command('keyvault key restore', KeyVaultClient.restore_key)
+cli_keyvault_data_plane_command('keyvault key backup', backup_key)
+cli_keyvault_data_plane_command('keyvault key restore', restore_key)
+cli_keyvault_data_plane_command('keyvault key import', import_key)
 
 cli_keyvault_data_plane_command('keyvault secret list', KeyVaultClient.get_secrets)
 cli_keyvault_data_plane_command('keyvault secret list-versions', KeyVaultClient.get_secret_versions)
@@ -63,8 +63,8 @@ cli_keyvault_data_plane_command('keyvault secret set', KeyVaultClient.set_secret
 cli_keyvault_data_plane_command('keyvault secret set-attributes', BaseKeyVaultClient.update_secret)
 cli_keyvault_data_plane_command('keyvault secret show', BaseKeyVaultClient.get_secret)
 cli_keyvault_data_plane_command('keyvault secret delete', KeyVaultClient.delete_secret)
-# TODO: Round 3
-#cli_keyvault_data_plane_command('keyvault secret download', dummy)
+# Round 4
+# cli_keyvault_data_plane_command('keyvault secret download', download_secret)
 
 cli_keyvault_data_plane_command('keyvault certificate create', create_certificate)
 cli_keyvault_data_plane_command('keyvault certificate list', KeyVaultClient.get_certificates)
@@ -72,11 +72,13 @@ cli_keyvault_data_plane_command('keyvault certificate list-versions', KeyVaultCl
 cli_keyvault_data_plane_command('keyvault certificate show', BaseKeyVaultClient.get_certificate)
 cli_keyvault_data_plane_command('keyvault certificate delete', KeyVaultClient.delete_certificate)
 cli_keyvault_data_plane_command('keyvault certificate set-attributes', BaseKeyVaultClient.update_certificate)
+cli_keyvault_data_plane_command('keyvault certificate import', KeyVaultClient.import_certificate)
+# Round 4
+# cli_keyvault_data_plane_command('keyvault certificate download', download_certificate)
 
-# TODO: Round 3
-#cli_keyvault_data_plane_command('keyvault certificate import', KeyVaultClient.import_certificate)
-#cli_keyvault_data_plane_command('keyvault certificate merge', KeyVaultClient.merge_certificate)
-#cli_keyvault_data_plane_command('keyvault certificate download', dummy)
+cli_keyvault_data_plane_command('keyvault certificate pending merge', KeyVaultClient.merge_certificate)
+cli_keyvault_data_plane_command('keyvault certificate pending show', KeyVaultClient.get_certificate_operation)
+cli_keyvault_data_plane_command('keyvault certificate pending delete', KeyVaultClient.delete_certificate_operation)
 
 cli_keyvault_data_plane_command('keyvault certificate contact list', KeyVaultClient.get_certificate_contacts)
 cli_keyvault_data_plane_command('keyvault certificate contact add', add_certificate_contact)
@@ -91,5 +93,3 @@ cli_keyvault_data_plane_command('keyvault certificate issuer delete', KeyVaultCl
 cli_keyvault_data_plane_command('keyvault certificate issuer admin list', list_certificate_issuer_admins)
 cli_keyvault_data_plane_command('keyvault certificate issuer admin add', add_certificate_issuer_admin)
 cli_keyvault_data_plane_command('keyvault certificate issuer admin delete', delete_certificate_issuer_admin)
-
-#cli_command('keyvault certificate TEMPLATE', certificate_policy_template)

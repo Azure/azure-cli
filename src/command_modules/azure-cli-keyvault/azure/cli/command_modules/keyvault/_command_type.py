@@ -6,7 +6,7 @@
 import base64
 
 from msrest.paging import Paged
-from msrest.exceptions import ValidationError
+from msrest.exceptions import ValidationError, ClientRequestError
 from msrestazure.azure_operation import AzureOperationPoller
 
 from azure.cli.core.commands import command_table, CliCommand, LongRunningOperation
@@ -78,6 +78,11 @@ def _create_key_vault_command(name, operation, transform_result, table_transform
                 raise CLIError(ex.inner_exception.error.message)
             except AttributeError:
                 raise CLIError(ex)
+        except ClientRequestError as ex:
+            if 'Failed to establish a new connection' in str(ex.inner_exception):
+                raise CLIError('Max retries exceeded attempting to connect to vault. '
+                               'Try flushing your DNS cache or try again later.')
+            raise CLIError(ex)
 
     name = ' '.join(name.split())
     cmd = CliCommand(name, _execute_command, table_transformer=table_transformer)
