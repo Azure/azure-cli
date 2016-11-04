@@ -496,7 +496,7 @@ class NetworkNicScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
         super(NetworkNicScenarioTest, self).__init__(__file__, test_method)
-        self.resource_group = 'cli_test1'
+        self.resource_group = 'cli_test_nic_scenario1'
 
     def test_network_nic(self):
         self.execute()

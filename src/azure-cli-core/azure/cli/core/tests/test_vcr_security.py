@@ -35,7 +35,7 @@ class Test_vcr_security(unittest.TestCase):
                     continue
                 with open(os.path.join(path_to_recordings, name), 'r') as f:
                     for line in f:
-                        if 'grant_type=refresh_token' in line or '/oauth2/token' in line:
+                        if 'grant_type=refresh_token' in line.lower() or '/oauth2/token' in line.lower():
                             insecure_cassettes.append(name)
         self.assertFalse(insecure_cassettes, 'The following cassettes contain refresh tokens: {}'.format(insecure_cassettes))
 
