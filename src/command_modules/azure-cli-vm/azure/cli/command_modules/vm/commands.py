@@ -119,7 +119,7 @@ for a in ['id', 'name', 'type', 'location']:
 ContainerService._attribute_map['tags']['type'] = '{str}'#pylint: disable=protected-access
 ######
 cli_command('acs show', ContainerServicesOperations.get, factory)
-cli_command('acs list', list_container_services)
+cli_command('acs list', list_container_services, factory)
 cli_command('acs delete', ContainerServicesOperations.delete, factory)
 cli_command('acs scale', update_acs)
 #Per conversation with ACS team, hide the update till we have something meaningful to tweak

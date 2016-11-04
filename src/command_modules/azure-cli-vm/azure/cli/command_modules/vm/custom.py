@@ -1018,11 +1018,11 @@ def update_acs(resource_group_name, container_service_name, new_agent_count):
     instance = client.container_services.get(resource_group_name, container_service_name)
     instance.agent_pool_profiles[0].count = new_agent_count
     return client.container_services.create_or_update(resource_group_name,
-                                                     container_service_name, instance)
+                                                      container_service_name, instance)
 
-def list_container_services(resource_group_name=None):
+def list_container_services(client, resource_group_name=None):
     ''' List Container Services. '''
-    ccf = _compute_client_factory()
-    svc_list = ccf.container_services.list_by_resource_group(resource_group_name=resource_group_name) \
-        if resource_group_name else ccf.container_services.list()
+    svc_list = client.container_services.list_by_resource_group(
+        resource_group_name=resource_group_name) \
+        if resource_group_name else client.container_services.list()
     return list(svc_list)
