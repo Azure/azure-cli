@@ -12,7 +12,6 @@ import dateutil.parser
 
 from azure.cli.core._util import CLIError, todict, get_file_json
 import azure.cli.core._logging as _logging
-from azure.cli.core.help_files import helps
 
 from azure.cli.core.commands.client_factory import (get_mgmt_service_client,
                                                     configure_common_settings)
@@ -65,34 +64,6 @@ def get_role_definition_name_completion_list(prefix, **kwargs):#pylint: disable=
     definitions = list_role_definitions()
     return [x.properties.role_name for x in list(definitions)]
 
-helps['role definition create'] = """
-            type: command
-            parameters: 
-                - name: --role-definition
-                  type: string
-                  short-summary: 'JSON formatted string or a path to a file with such content'
-            examples:
-                - name: Create a role with following definition content
-                  text: |
-                        {
-                            "Name": "Contoso On-call",
-                            "Description": "Can monitor compute, network and storage, and restart virtual machines",
-                            "Actions": [
-                                "Microsoft.Compute/*/read",
-                                "Microsoft.Compute/virtualMachines/start/action",
-                                "Microsoft.Compute/virtualMachines/restart/action",
-                                "Microsoft.Network/*/read",
-                                "Microsoft.Storage/*/read",
-                                "Microsoft.Authorization/*/read",
-                                "Microsoft.Resources/subscriptions/resourceGroups/read",
-                                "Microsoft.Resources/subscriptions/resourceGroups/resources/read",
-                                "Microsoft.Insights/alertRules/*",
-                                "Microsoft.Support/*"
-                            ],
-                            "AssignableScopes": ["/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"]
-                        }
-
-            """
 def create_role_definition(role_definition):
     role_id = uuid.uuid4()
     if os.path.exists(role_definition):
