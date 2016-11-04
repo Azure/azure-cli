@@ -126,8 +126,8 @@ register_cli_argument('network', 'private_ip_address_version', **enum_choice_lis
 register_cli_argument('network', 'tags', tags_type)
 
 for item in ['lb', 'nic']:
-    register_cli_argument('network {}'.format(item), 'subnet', validator=validate_subnet_name_or_id, help='Name or ID of an existing subnet.')
-    register_cli_argument('network {}'.format(item), 'virtual_network_name', help='The virtual network (VNet) associated with the provided subnet name (Omit if supplying a subnet id).', id_part=None)
+    register_cli_argument('network {}'.format(item), 'subnet', validator=validate_subnet_name_or_id, help='Name or ID of an existing subnet. If name is specified, also specify --vnet-name.')
+    register_cli_argument('network {}'.format(item), 'virtual_network_name', help='The virtual network (VNet) associated with the subnet (Omit if supplying a subnet id).', id_part=None)
     register_cli_argument('network {}'.format(item), 'public_ip_address', validator=validate_public_ip_name_or_id)
 
 register_cli_argument('network application-gateway', 'application_gateway_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/applicationGateways'), id_part='name')
@@ -251,6 +251,7 @@ register_cli_argument('network nic create', 'use_dns_settings', help=argparse.SU
 register_folded_cli_argument('network nic create', 'public_ip_address', 'Microsoft.Network/publicIPAddresses', new_flag_value=None, default_value_flag='none', completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'))
 register_folded_cli_argument('network nic create', 'subnet', 'subnets', none_flag_value=None, new_flag_value=None, default_value_flag='existingId', parent_name='virtual_network_name', parent_type='Microsoft.Network/virtualNetworks', completer=get_subnet_completion_list())
 register_folded_cli_argument('network nic create', 'network_security_group', 'Microsoft.Network/networkSecurityGroups', new_flag_value=None, default_value_flag='none', completer=get_resource_name_completion_list('Microsoft.Network/networkSecurityGroups'))
+register_cli_argument('network nic create', 'subnet', validator=validate_subnet_name_or_id, help='Name or ID of an existing subnet. If name is specified, also specify --vnet-name.')
 
 register_cli_argument('network nic update', 'enable_ip_forwarding', options_list=('--ip-forwarding',), **enum_choice_list(['true', 'false']))
 register_cli_argument('network nic update', 'network_security_group', validator=validate_nsg_name_or_id, completer=get_resource_name_completion_list('Microsoft.Network/networkSecurityGroups'))
