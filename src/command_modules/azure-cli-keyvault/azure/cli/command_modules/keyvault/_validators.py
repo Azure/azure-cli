@@ -68,7 +68,7 @@ def validate_key_type(ns):
         }
         ns.destination = dest_to_type_map[ns.destination]
         if ns.destination == 'RSA' and hasattr(ns, 'byok_file') and ns.byok_file:
-            raise CLIError('BYOK keys are hardward protected. Omit --protection')
+            raise CLIError('BYOK keys are hardware protected. Omit --protection')
 
 def validate_policy_permissions(ns):
     key_perms = ns.key_permissions
