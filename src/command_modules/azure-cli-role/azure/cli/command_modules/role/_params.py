@@ -60,7 +60,7 @@ register_cli_argument('role definition', 'role_definition_id', options_list=('--
 register_cli_argument('role', 'resource_group_name', options_list=('--resource-group', '-g'),
                       help='use it only if the role or assignment was added at the level of a resource group')
 register_cli_argument('role definition', 'custom_role_only', action='store_true', help='custom roles only(vs. build-in ones)')
-register_cli_argument('role definition', 'role_definition', help="json formatted content which defines the new role. run 'show-create-template' to get samples")
+register_cli_argument('role definition', 'role_definition', help="json formatted content which defines the new role.")
 register_cli_argument('role definition update', 'name', arg_type=name_arg_type, completer=get_role_definition_name_completion_list, help="the role's logical name")
 
 
