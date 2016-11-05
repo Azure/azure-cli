@@ -345,83 +345,83 @@ helps['network express-route'] = """
 """
 helps['network express-route create'] = """
     type: command
-    short-summary: Create an Express Route circuit.
+    short-summary: Create an ExpressRoute circuit.
 """
 helps['network express-route delete'] = """
     type: command
-    short-summary: Delete an Express Route circuit.
+    short-summary: Delete an ExpressRoute circuit.
 """
 helps['network express-route get-stats'] = """
     type: command
-    short-summary: Show stats of an Express Route circuit.
+    short-summary: Show stats of an ExpressRoute circuit.
 """
 helps['network express-route list'] = """
     type: command
-    short-summary: List Express Route circuits in a subscription or resource group.
+    short-summary: List ExpressRoute circuits in a subscription or resource group.
 """
 helps['network express-route list-arp-tables'] = """
     type: command
-    short-summary: List the currently advertised ARP table of an Express Route circuit.
+    short-summary: List the currently advertised ARP table of an ExpressRoute circuit.
 """
 helps['network express-route list-route-tables'] = """
     type: command
-    short-summary: List the currently advertised route tables of an Express Route circuit.
+    short-summary: List the currently advertised route tables of an ExpressRoute circuit.
 """
 helps['network express-route show'] = """
     type: command
-    short-summary: Show details of an Express Route circuit.
+    short-summary: Show details of an ExpressRoute circuit.
 """
 helps['network express-route update'] = """
     type: command
-    short-summary: Update settings of an Express Route circuit.
+    short-summary: Update settings of an ExpressRoute circuit.
 """
 helps['network express-route auth'] = """
     type: group
-    short-summary: Manage Express Route circuit authentication
+    short-summary: Manage ExpressRoute circuit authentication
 """
 helps['network express-route auth create'] = """
     type: command
-    short-summary: Create an authorization setting in an Express Route circuit.
+    short-summary: Create an authorization setting in an ExpressRoute circuit.
 """
 helps['network express-route auth delete'] = """
     type: command
-    short-summary: Delete an authorization setting in an Express Route circuit.
+    short-summary: Delete an authorization setting in an ExpressRoute circuit.
 """
 helps['network express-route auth list'] = """
     type: command
-    short-summary: List authorization settings of an Express Route circuit.
+    short-summary: List authorization settings of an ExpressRoute circuit.
 """
 helps['network express-route auth show'] = """
     type: command
-    short-summary: Show details of an authorization setting in an Express Route circuit.
+    short-summary: Show details of an authorization setting in an ExpressRoute circuit.
 """
 helps['network express-route peering'] = """
     type: group
-    short-summary: Manage Express Route peering
+    short-summary: Manage ExpressRoute peering
 """
 helps['network express-route peering create'] = """
     type: command
-    short-summary: Create peering settings in an Express Route circuit.
+    short-summary: Create peering settings in an ExpressRoute circuit.
 """
 helps['network express-route peering delete'] = """
     type: command
-    short-summary: Delete peering settings in an Express Route circuit.
+    short-summary: Delete peering settings in an ExpressRoute circuit.
 """
 helps['network express-route peering list'] = """
     type: command
-    short-summary: List peering settings of an Express Route circuit.
+    short-summary: List peering settings of an ExpressRoute circuit.
 """
 helps['network express-route peering show'] = """
     type: command
-    short-summary: Show peering details of an Express Route circuit.
+    short-summary: Show peering details of an ExpressRoute circuit.
 """
 helps['network express-route peering update'] = """
     type: command
-    short-summary: Update peering settings in an Express Route circuit.
+    short-summary: Update peering settings in an ExpressRoute circuit.
 """
 helps['network express-route list-service-providers'] = """
     type: command
-    short-summary: List available Express Route service providers.
+    short-summary: List available ExpressRoute service providers.
 """
 helps['network lb'] = """
     type: group
