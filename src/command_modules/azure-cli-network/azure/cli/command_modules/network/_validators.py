@@ -152,16 +152,9 @@ def validate_nsg_name_or_id(namespace):
 
 def validate_peering_type(namespace):
     if namespace.peering_type and namespace.peering_type == 'MicrosoftPeering':
-        microsoft_params = {
-            '--advertised-public-prefix-state': namespace.advertised_public_prefix_state,
-            '--advertised-public-prefixes': namespace.advertised_public_prefixes,
-            '--customer-asn': namespace.customer_asn,
-            '--routing-registry-name': namespace.routing_registry_name
-        }
-        missing_params = [k for k, v in microsoft_params.items() if not v]
-        if any(missing_params):
-            raise CLIError('missing required MicrosoftPeering parameters: {}'.format(
-                ' '.join(missing_params)))
+        if not namespace.advertised_public_prefixes:
+            raise CLIError(
+                'missing required MicrosoftPeering parameter --advertised-public-prefixes')
 
 def validate_private_ip_address(namespace):
     if namespace.private_ip_address:

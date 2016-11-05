@@ -178,7 +178,7 @@ class NetworkExpressRouteScenarioTest(ResourceGroupVCRTestBase):
         _create_peering('AzurePrivatePeering', 10001, 101, '102.0.0.0/30', '103.0.0.0/30')
 
         # create MicrosoftPeering - This will result in an exception that we will allow
-        self.cmd('network express-route peering create -g {} --circuit-name {} --peering-type MicrosoftPeering --peer-asn 10002 --vlan-id 103 --primary-peer-subnet 104.0.0.0/30 --secondary-peer-subnet 105.0.0.0/30 --advertised-public-prefix-state NotConfigured --advertised-public-prefixes 104.0.0.0/30 --customer-asn 10000 --routing-registry-name level3'.format(rg, circuit),
+        self.cmd('network express-route peering create -g {} --circuit-name {} --peering-type MicrosoftPeering --peer-asn 10002 --vlan-id 103 --primary-peer-subnet 104.0.0.0/30 --secondary-peer-subnet 105.0.0.0/30 --advertised-public-prefixes 104.0.0.0/30 --customer-asn 10000 --routing-registry-name level3'.format(rg, circuit),
             allowed_exceptions='An error occured.')
 
         self.cmd('network express-route peering show -g {} --circuit-name {} -n MicrosoftPeering'.format(rg, circuit), checks=[
