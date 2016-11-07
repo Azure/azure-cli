@@ -1015,8 +1015,13 @@ cli_generic_update_command('vmss update', vmss_get, vmss_set)
 
 def update_acs(resource_group_name, container_service_name, new_agent_count):
     client = _compute_client_factory()
-    instance = client.container_service.get(resource_group_name, container_service_name)
+    instance = client.container_services.get(resource_group_name, container_service_name)
     instance.agent_pool_profiles[0].count = new_agent_count
-    return client.container_service.create_or_update(resource_group_name,
-                                                     container_service_name, instance)
+    return client.container_services.create_or_update(resource_group_name,
+                                                      container_service_name, instance)
 
+def list_container_services(client, resource_group_name=None):
+    ''' List Container Services. '''
+    svc_list = client.list_by_resource_group(resource_group_name=resource_group_name) \
+        if resource_group_name else client.list()
+    return list(svc_list)

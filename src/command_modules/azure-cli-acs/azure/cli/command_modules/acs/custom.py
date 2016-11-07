@@ -120,7 +120,7 @@ def _get_acs_info(name, resource_group_name):
     :type resource_group_name: String
     """
     mgmt_client = get_mgmt_service_client(ComputeManagementClient)
-    return mgmt_client.container_service.get(resource_group_name, name)
+    return mgmt_client.container_services.get(resource_group_name, name)
 
 def _rand_str(n):
     """

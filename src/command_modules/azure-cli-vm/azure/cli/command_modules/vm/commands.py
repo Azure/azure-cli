@@ -13,7 +13,7 @@ from azure.mgmt.compute.operations import (
     VirtualMachinesOperations,
     VirtualMachineScaleSetsOperations,
     VirtualMachineScaleSetVMsOperations,
-    ContainerServiceOperations)
+    ContainerServicesOperations)
 from azure.mgmt.network.operations import NetworkInterfacesOperations
 from azure.mgmt.network import NetworkManagementClient
 from azure.cli.core.commands import DeploymentOutputLongRunningOperation, cli_command
@@ -30,6 +30,7 @@ from azure.cli.command_modules.vm.mgmt_acs.lib import AcsCreationClient as ACSCl
 from azure.cli.command_modules.vm.mgmt_acs.lib.operations import AcsOperations
 from .custom import (
     list_vm, resize_vm, list_vm_images, list_vm_extension_images, list_ip_addresses,
+    list_container_services,
     attach_new_disk, attach_existing_disk, detach_disk, list_disks, capture_vm, get_instance_view,
     vm_update_nics, vm_delete_nics, vm_add_nics, vm_open_port,
     reset_windows_admin, set_linux_user, delete_linux_user,
@@ -110,19 +111,19 @@ cli_command('vm boot-diagnostics get-boot-log', get_boot_log)
 factory = lambda _: get_mgmt_service_client(ACSClient).acs
 cli_command('acs create', AcsOperations.create_or_update, factory, transform=DeploymentOutputLongRunningOperation('Starting container service create'))
 
-factory = lambda _: _compute_client_factory().container_service
+factory = lambda _: _compute_client_factory().container_services
 #Remove the hack after https://github.com/Azure/azure-rest-api-specs/issues/352 fixed
 from azure.mgmt.compute.models import ContainerService#pylint: disable=wrong-import-position
 for a in ['id', 'name', 'type', 'location']:
     ContainerService._attribute_map[a]['type'] = 'str'#pylint: disable=protected-access
 ContainerService._attribute_map['tags']['type'] = '{str}'#pylint: disable=protected-access
 ######
-cli_command('acs show', ContainerServiceOperations.get, factory)
-cli_command('acs list', ContainerServiceOperations.list, factory)
-cli_command('acs delete', ContainerServiceOperations.delete, factory)
+cli_command('acs show', ContainerServicesOperations.get, factory)
+cli_command('acs list', list_container_services, factory)
+cli_command('acs delete', ContainerServicesOperations.delete, factory)
 cli_command('acs scale', update_acs)
 #Per conversation with ACS team, hide the update till we have something meaningful to tweak
-#cli_generic_update_command('acs update', ContainerServiceOperations.get, ContainerServiceOperations.create_or_update, factory)
+#cli_generic_update_command('acs update', ContainerServicesOperations.get, ContainerServiceOperations.create_or_update, factory)
 
 # VM Diagnostics
 cli_command('vm diagnostics set', set_diagnostics_extension)
