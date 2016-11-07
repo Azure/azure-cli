@@ -19,7 +19,7 @@ target_resource_group = CliArgumentType(
 
 registry_name = CliArgumentType(
     options_list=('--registry-name', '-r'),
-    help='Azure container registry name. A new Azure container registry is created if omitted or does not exist.'
+    help='Azure Container Registry name to which container images will be pushed after each build, and pulled from to deploy container instances. If you have an existing registry at myregistry-{accountname}.azureacr.io, then set this parameter value to myregistry. A new Azure Container Registry is created if this parameter value is omitted or does not exist.'
 )
 
 registry_resource_id = CliArgumentType(
@@ -29,7 +29,7 @@ registry_resource_id = CliArgumentType(
 
 remote_url = CliArgumentType(
     options_list=('--remote-url', '-u'),
-    help='Remote url of the GitHub or VSTS source repository that will be built and deployed. If omitted, a source repository will be searched for in the current working directory.'
+    help='Remote url of the GitHub or VSTS source repository that will be built and deployed. Example: https://github.com/myaccount/myrepository.git. If omitted, a source repository will be searched for in the current working directory.'
 )
 
 remote_branch = CliArgumentType(
@@ -44,7 +44,7 @@ remote_access_token = CliArgumentType(
 
 vsts_account_name = CliArgumentType(
     options_list=('--vsts-account-name',),
-    help='VSTS account name to create the build and release definitions. A new VSTS account is created if omitted or does not exist.'
+    help='VSTS account name to create the build and release definitions. If you have an existing VSTS account at myvstsaccount.visualstudio.com, then set this parameter value to myvstsaccount. A new VSTS account is created if parameter value is omitted or does not exist.'
 )
 
 vsts_project_name = CliArgumentType(
