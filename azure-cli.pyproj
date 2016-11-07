@@ -110,6 +110,17 @@
     <Compile Include="command_modules\azure-cli-acs\azure\cli\command_modules\acs\_params.py" />
     <Compile Include="command_modules\azure-cli-acs\azure\cli\command_modules\acs\__init__.py" />
     <Compile Include="command_modules\azure-cli-acs\setup.py" />
+    <Compile Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\commands.py" />
+    <Compile Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\custom.py" />
+    <Compile Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\tests\test_webapp_commands.py" />
+    <Compile Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\tests\__init__.py" />
+    <Compile Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\_help.py" />
+    <Compile Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\_params.py" />
+    <Compile Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\__init__.py" />
+    <Compile Include="command_modules\azure-cli-appservice\azure\cli\command_modules\__init__.py" />
+    <Compile Include="command_modules\azure-cli-appservice\azure\cli\__init__.py" />
+    <Compile Include="command_modules\azure-cli-appservice\azure\__init__.py" />
+    <Compile Include="command_modules\azure-cli-appservice\setup.py" />
     <Compile Include="command_modules\azure-cli-cloud\azure\cli\command_modules\cloud\commands.py" />
     <Compile Include="command_modules\azure-cli-cloud\azure\cli\command_modules\cloud\custom.py" />
     <Compile Include="command_modules\azure-cli-cloud\azure\cli\command_modules\cloud\_help.py" />
@@ -686,15 +697,6 @@
     </Compile>
     <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\__init__.py" />
     <Compile Include="command_modules\azure-cli-vm\setup.py" />
-    <Compile Include="command_modules\azure-cli-webapp\azure\cli\command_modules\webapp\custom.py" />
-    <Compile Include="command_modules\azure-cli-webapp\azure\cli\command_modules\webapp\commands.py" />
-    <Compile Include="command_modules\azure-cli-webapp\azure\cli\command_modules\webapp\tests\test_webapp_commands.py" />
-    <Compile Include="command_modules\azure-cli-webapp\azure\cli\command_modules\webapp\_help.py">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="command_modules\azure-cli-webapp\azure\cli\command_modules\webapp\_params.py" />
-    <Compile Include="command_modules\azure-cli-webapp\azure\cli\command_modules\webapp\__init__.py" />
-    <Compile Include="command_modules\azure-cli-webapp\setup.py" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="azure-cli-core\" />
@@ -726,6 +728,14 @@
     <Folder Include="command_modules\azure-cli-acs\azure\cli\command_modules\" />
     <Folder Include="command_modules\azure-cli-acs\azure\cli\command_modules\acs\" />
     <Folder Include="command_modules\azure-cli-acs\azure\cli\command_modules\acs\tests\" />
+    <Folder Include="command_modules\azure-cli-appservice\" />
+    <Folder Include="command_modules\azure-cli-appservice\azure\" />
+    <Folder Include="command_modules\azure-cli-appservice\azure\cli\" />
+    <Folder Include="command_modules\azure-cli-appservice\azure\cli\command_modules\" />
+    <Folder Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\" />
+    <Folder Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\tests\" />
+    <Folder Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\tests\recordings\" />
+    <Folder Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\tests\sample_web\" />
     <Folder Include="command_modules\azure-cli-cloud\" />
     <Folder Include="command_modules\azure-cli-cloud\azure\" />
     <Folder Include="command_modules\azure-cli-cloud\azure\cli\" />
@@ -888,12 +898,6 @@
     <Folder Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\nested_templates\" />
     <Folder Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_avail_set\" />
     <Folder Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\tests\" />
-    <Folder Include="command_modules\azure-cli-webapp\" />
-    <Folder Include="command_modules\azure-cli-webapp\azure\" />
-    <Folder Include="command_modules\azure-cli-webapp\azure\cli\" />
-    <Folder Include="command_modules\azure-cli-webapp\azure\cli\command_modules\" />
-    <Folder Include="command_modules\azure-cli-webapp\azure\cli\command_modules\webapp\" />
-    <Folder Include="command_modules\azure-cli-webapp\azure\cli\command_modules\webapp\tests\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="azure-cli-core\setup.cfg" />
@@ -901,6 +905,18 @@
     <Content Include="azure-cli\setup.cfg" />
     <Content Include="command_modules\azure-cli-acr\requirements.txt" />
     <Content Include="command_modules\azure-cli-acs\requirements.txt" />
+    <Content Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\tests\recordings\test_appservice_error_polish.yaml" />
+    <Content Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\tests\recordings\test_linux_webapp.yaml" />
+    <Content Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\tests\recordings\test_webapp_config.yaml" />
+    <Content Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\tests\recordings\test_webapp_e2e.yaml" />
+    <Content Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\tests\recordings\test_webapp_git.yaml" />
+    <Content Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\tests\recordings\test_webapp_scale.yaml" />
+    <Content Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\tests\sample_web\.gitignore" />
+    <Content Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\tests\sample_web\package.json" />
+    <Content Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\tests\sample_web\server.js" />
+    <Content Include="command_modules\azure-cli-appservice\README.rst" />
+    <Content Include="command_modules\azure-cli-appservice\requirements.txt" />
+    <Content Include="command_modules\azure-cli-appservice\setup.cfg" />
     <Content Include="command_modules\azure-cli-component\requirements.txt" />
     <Content Include="command_modules\azure-cli-configure\requirements.txt" />
     <Content Include="command_modules\azure-cli-iot\azure\cli\command_modules\iot\mgmt_iot_hub_device\swagger_iot_hub_device_identity.json" />
@@ -993,8 +1009,6 @@
     <Content Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\swagger_create_vm.json" />
     <Content Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\tests\aliases.json" />
     <Content Include="command_modules\azure-cli-vm\requirements.txt" />
-    <Content Include="command_modules\azure-cli-webapp\README.rst" />
-    <Content Include="command_modules\azure-cli-webapp\requirements.txt" />
   </ItemGroup>
   <ItemGroup>
     <Interpreter Include="..\env\">
