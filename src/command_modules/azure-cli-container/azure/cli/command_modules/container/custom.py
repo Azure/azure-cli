@@ -31,11 +31,6 @@ DOCKERFILE_FILE = 'Dockerfile'
 DOCKER_COMPOSE_FILE = 'docker-compose.yml'
 DOCKER_COMPOSE_EXPECTED_VERSION = '2'
 
-DOCKERFILE_FILE = 'Dockerfile'
-DOCKER_COMPOSE_FILE = 'docker-compose.yml'
-DOCKER_COMPOSE_TEST_FILE = 'docker-compose.test.yml'
-DOCKER_COMPOSE_EXPECTED_VERSION = '2'
-
 def add_release(
         target_name,
         target_resource_group,
