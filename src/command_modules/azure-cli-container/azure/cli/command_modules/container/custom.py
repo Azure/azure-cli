@@ -28,7 +28,6 @@ API_VERSION = "2016-11-01-preview"
 
 DOCKERFILE_FILE = 'Dockerfile'
 DOCKER_COMPOSE_FILE = 'docker-compose.yml'
-DOCKER_COMPOSE_TEST_FILE = 'docker-compose.test.yml'
 DOCKER_COMPOSE_EXPECTED_VERSION = '2'
 
 DOCKERFILE_FILE = 'Dockerfile'
@@ -239,17 +238,12 @@ def _ensure_docker_compose():
     1. Raises an error if there is no docker_compose_file present.
     2. Raises an error if the version specified in the docker_compose_file is not
     docker_compose_version.
-    3. Raises an error if docker_compose_test_file has a version other than docker_compose_version.
     """
     docker_compose_file = _get_filepath_in_current_git_repo(DOCKER_COMPOSE_FILE)
-    docker_compose_test_file = _get_filepath_in_current_git_repo(DOCKER_COMPOSE_TEST_FILE)
 
     if not docker_compose_file:
         raise CLIError('Docker compose file "{}" was not found.'.format(DOCKER_COMPOSE_FILE))
     _ensure_version(docker_compose_file, DOCKER_COMPOSE_EXPECTED_VERSION)
-
-    if docker_compose_test_file:
-        _ensure_version(docker_compose_test_file, DOCKER_COMPOSE_EXPECTED_VERSION)
 
 def _ensure_version(filepath, expected_version):
     with open(filepath, 'r') as f:
@@ -263,7 +257,6 @@ def _ensure_version(filepath, expected_version):
                 \n Only version "{}" is supported.'.format(
                     filepath,
                     expected_version))
-
 
 def _ensure_dockerfile():
     """
