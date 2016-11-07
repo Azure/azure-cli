@@ -6,6 +6,7 @@
 import json
 import os
 import time
+import uuid
 from subprocess import check_output, CalledProcessError
 
 import requests
