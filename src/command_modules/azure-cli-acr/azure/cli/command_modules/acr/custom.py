@@ -11,11 +11,10 @@ from azure.cli.core.commands import (
 )
 from azure.cli.core.commands.arm import cli_generic_update_command
 
-from azure.cli.command_modules.acr.mgmt_acr.models import (
+from azure.mgmt.containerregistry.models import (
     Registry,
     RegistryUpdateParameters,
-    StorageAccountProperties,
-    RegistryNameCheckRequest
+    StorageAccountProperties
 )
 
 from ._factory import get_acr_service_client
@@ -36,8 +35,7 @@ def acr_check_name(registry_name):
     '''
     client = get_acr_service_client().registries
 
-    return client.check_name_availability(
-        RegistryNameCheckRequest(registry_name))
+    return client.check_name_availability(registry_name)
 
 def acr_list(resource_group_name=None):
     '''List container registries.
@@ -73,6 +71,7 @@ def acr_create(registry_name, #pylint: disable=too-many-arguments
                                 storage_account_name,
                                 enable_admin)
         )
+        registry = client.get_properties(resource_group_name, registry_name)
     else:
         storage_account_key = get_access_key_by_storage_account_name(storage_account_name)
         registry = client.create_or_update(
@@ -86,8 +85,6 @@ def acr_create(registry_name, #pylint: disable=too-many-arguments
                 admin_user_enabled=enable_admin
             )
         )
-
-    registry = client.get_properties(resource_group_name, registry_name)
 
     logger.warning('\nCreate a new service principal and assign access:')
     logger.warning(

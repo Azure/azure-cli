@@ -12,12 +12,9 @@ from ._constants import (
     STORAGE_RESOURCE_TYPE
 )
 from ._factory import (
-    get_storage_service_client,
-    get_acr_service_client
-)
-
-from ._factory import (
     get_arm_service_client,
+    get_storage_service_client,
+    get_acr_service_client,
     get_acr_api_version
 )
 
@@ -152,9 +149,11 @@ def _parameters(registry_name,
     parameters = {
         'registryName': {'value': registry_name},
         'registryLocation': {'value': location},
-        'registryApiVersion': {'value': get_acr_api_version()},
         'storageAccountName': {'value': storage_account_name},
         'storageAccountType': {'value': 'Standard_LRS'},
         'adminUserEnabled': {'value': admin_user_enabled},
     }
+    customized_api_version = get_acr_api_version()
+    if customized_api_version:
+        parameters['registryApiVersion'] = {'value': customized_api_version}
     return parameters
