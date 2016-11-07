@@ -5,6 +5,6 @@
 
 # pylint: disable=unused-import
 
-import azure.cli.command_modules.webapp._params
-import azure.cli.command_modules.webapp.commands
-import azure.cli.command_modules.webapp._help
+import azure.cli.command_modules.appservice._params
+import azure.cli.command_modules.appservice.commands
+import azure.cli.command_modules.appservice._help

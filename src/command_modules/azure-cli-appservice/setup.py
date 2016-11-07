@@ -34,9 +34,9 @@ with open('README.rst', 'r', encoding='utf-8') as f:
     README = f.read()
 
 setup(
-    name='azure-cli-webapp',
+    name='azure-cli-appservice',
     version=VERSION,
-    description='Microsoft Azure Command-Line Tools Webapp Command Module',
+    description='Microsoft Azure Command-Line Tools AppService Command Module',
     long_description=README,
     license='MIT',
     author='Microsoft Corporation',
@@ -49,7 +49,7 @@ setup(
         'azure.cli.command_modules',
     ],
     packages=[
-        'azure.cli.command_modules.webapp'
+        'azure.cli.command_modules.appservice'
     ],
     install_requires=DEPENDENCIES,
 )
