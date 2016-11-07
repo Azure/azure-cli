@@ -168,7 +168,10 @@ def _call_rp_configure_cicd(
     configure_ci_cd_url = SERVICE_URL.format(
         subscription_id=subscription_id) + '/configureCI?api-version=' + API_VERSION
 
-    headers = {'Content-type': 'application/json', 'Authorization': o_auth_token}
+    headers = {}
+    headers['Authorization'] = o_auth_token
+    headers['Content-Type'] = 'application/json; charset=utf-8'
+    headers['x-ms-client-request-id'] = str(uuid.uuid1())
     req = requests.post(configure_ci_cd_url, data=json.dumps(data), headers=headers, timeout=600)
     while req.status_code == 202:  # Long-running operation
         time.sleep(10)
@@ -200,7 +203,10 @@ def list_releases(target_name, target_resource_group):
     list_releases_url = SERVICE_URL.format(
         subscription_id=subscription_id) + '/listReleases?api-version=' + API_VERSION
 
-    headers = {'Content-type': 'application/json', 'Authorization': o_auth_token}
+    headers = {}
+    headers['Authorization'] = o_auth_token
+    headers['Content-Type'] = 'application/json; charset=utf-8'
+    headers['x-ms-client-request-id'] = str(uuid.uuid1())
     req = requests.post(list_releases_url, data=json.dumps(data), headers=headers, timeout=600)
     while req.status_code == 202:  # Long-running operation
         time.sleep(10)
