@@ -144,7 +144,7 @@ def add_id_parameters(command_table):
 
             if errors:
                 missing_required = ' '.join((arg.options_list[0] for arg in errors))
-                raise CLIError('({} | {}) are required'.format(missing_required, '--ids'))
+                raise ValueError('({} | {}) are required'.format(missing_required, '--ids'))
 
         group_name = 'Resource Id'
         for key, arg in command.arguments.items():
