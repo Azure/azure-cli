@@ -568,31 +568,34 @@ Global Arguments
         self.assertEqual(s, io.getvalue())
 
     def test_help_loads(self):
-        parser_dict = {}
         app = Application()
-        cmd_tbl = app.configuration.get_command_table()
-        app.parser.load_command_table(cmd_tbl)
-        for cmd in cmd_tbl:
-            try:
-                app.configuration.load_params(cmd)
-            except KeyError:
-                pass
-        app.raise_event(Application.COMMAND_TABLE_PARAMS_LOADED, command_table=cmd_tbl)
-        app.parser.load_command_table(cmd_tbl)
-        _store_parsers(app.parser, parser_dict)
+        with mock.patch('azure.cli.core.commands.arm.APPLICATION', app):
+            from azure.cli.core.commands.arm import add_id_parameters
+            parser_dict = {}
+            cmd_tbl = app.configuration.get_command_table()
+            app.parser.load_command_table(cmd_tbl)
+            for cmd in cmd_tbl:
+                try:
+                    app.configuration.load_params(cmd)
+                except KeyError:
+                    pass
+            app.register(app.COMMAND_TABLE_PARAMS_LOADED, add_id_parameters)
+            app.raise_event(app.COMMAND_TABLE_PARAMS_LOADED, command_table=cmd_tbl)
+            app.parser.load_command_table(cmd_tbl)
+            _store_parsers(app.parser, parser_dict)
 
-        for name, parser in parser_dict.items():
-            try:
-                help_file = _help.GroupHelpFile(name, parser) \
-                    if _is_group(parser) \
-                    else _help.CommandHelpFile(name, parser)
-                help_file.load(parser)
-            except Exception as ex:
-                raise _help.HelpAuthoringException('{}, {}'.format(name, ex))
+            for name, parser in parser_dict.items():
+                try:
+                    help_file = _help.GroupHelpFile(name, parser) \
+                        if _is_group(parser) \
+                        else _help.CommandHelpFile(name, parser)
+                    help_file.load(parser)
+                except Exception as ex:
+                    raise _help.HelpAuthoringException('{}, {}'.format(name, ex))
 
-        extras = [k for k in azure.cli.core.help_files.helps.keys() if k not in parser_dict]
-        self.assertTrue(len(extras) == 0,
-                        'Found help files that don\'t map to a command: '+ str(extras))
+            extras = [k for k in azure.cli.core.help_files.helps.keys() if k not in parser_dict]
+            self.assertTrue(len(extras) == 0,
+                            'Found help files that don\'t map to a command: '+ str(extras))
 
 def _store_parsers(parser, d):
     for s in parser.subparsers.values():

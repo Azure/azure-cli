@@ -143,7 +143,7 @@ cli_command(__name__, 'vmss deallocate', 'azure.cli.command_modules.vm.custom#vm
 cli_command(__name__, 'vmss delete-instances', 'azure.cli.command_modules.vm.custom#vmss_delete_instances')
 cli_command(__name__, 'vmss get-instance-view', 'azure.cli.command_modules.vm.custom#vmss_get_instance_view')
 cli_command(__name__, 'vmss show', 'azure.cli.command_modules.vm.custom#vmss_show')
-cli_command(__name__, 'vmss list ', 'azure.cli.command_modules.vm.custom#vmss_list')
+cli_command(__name__, 'vmss list', 'azure.cli.command_modules.vm.custom#vmss_list')
 cli_command(__name__, 'vmss stop', 'azure.cli.command_modules.vm.custom#vmss_stop')
 cli_command(__name__, 'vmss restart', 'azure.cli.command_modules.vm.custom#vmss_restart')
 cli_command(__name__, 'vmss start', 'azure.cli.command_modules.vm.custom#vmss_start')
