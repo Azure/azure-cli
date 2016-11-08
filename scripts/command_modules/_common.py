@@ -42,16 +42,15 @@ def exec_command_output(command, env=None):
     """
     Execute a command and return its output as well as the status code.
     """
-    return_code = 0
     try:
         output = check_output(
             command if isinstance(command, list) else command.split(),
             env=os.environ.copy().update(env or {}),
             stderr=subprocess.STDOUT)
+        return (output.decode('utf-8'), 0)
     except CalledProcessError as err:
-        return_code = err.returncode
+        return (err.output, err.returncode)
 
-    return (output.decode('utf-8'), return_code)
 
 def print_summary(failed_modules):
     print()

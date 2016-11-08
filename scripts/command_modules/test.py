@@ -60,11 +60,16 @@ class TestTask(Thread):
 
     def print_format(self, summary_format):
         status = 'skipped' if self.skipped else ('failed' if self.rtcode != 0 else 'passed')
-        print(summary_format.format(
-            self.name,
-            status,
-            self._started_on.strftime('%H:%M:%S') if self._started_on else '',
-            self._finished_on.strftime('%H:%M:%S') if self._finished_on else ''))
+
+        args = [self.name, status]
+        if self._started_on and self._finished_on: 
+            args.append(self._started_on.strftime('%H:%M:%S'))
+            args.append(str((self._finished_on - self._started_on).total_seconds()))
+        else:
+            args.append('')
+            args.append('')
+
+        print(summary_format.format(*args))
 
 
 def wait_all_tasks(tasks_list):
@@ -75,7 +80,7 @@ def get_print_template(tasks_list):
     max_module_name_len = max([len(t.name) for t in tasks_list])
 
     # the format: <module name>  <status> <start on> <finish on>
-    return '{0:' + str(max_module_name_len + 2) + '}{1:8}{2:10}{3:10}'
+    return '{0:' + str(max_module_name_len + 2) + '}{1:10}{2:12}{3:10}'
 
 def run_module_tests():
     print("Running tests on command modules.")
