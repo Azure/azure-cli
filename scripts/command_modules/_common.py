@@ -6,8 +6,9 @@
 from __future__ import print_function
 import os
 import sys
+import subprocess
 
-from subprocess import check_call, CalledProcessError
+from subprocess import check_call, check_output, CalledProcessError
 
 COMMAND_MODULE_PREFIX = 'azure-cli-'
 
@@ -36,6 +37,20 @@ def exec_command(command, cwd=None, stdout=None, env=None):
     except CalledProcessError as err:
         print(err, file=sys.stderr)
         return False
+
+def exec_command_output(command, env=None):
+    """
+    Execute a command and return its output as well as the status code.
+    """
+    try:
+        output = check_output(
+            command if isinstance(command, list) else command.split(),
+            env=os.environ.copy().update(env or {}),
+            stderr=subprocess.STDOUT)
+        return (output.decode('utf-8'), 0)
+    except CalledProcessError as err:
+        return (err.output, err.returncode)
+
 
 def print_summary(failed_modules):
     print()
