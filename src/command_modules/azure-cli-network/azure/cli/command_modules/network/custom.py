@@ -2,7 +2,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 #---------------------------------------------------------------------------------------------
-import sys
 from collections import Counter
 from itertools import groupby
 from msrestazure.azure_exceptions import CloudError
@@ -17,6 +16,7 @@ from azure.mgmt.network.models import \
 from azure.cli.core.commands.arm import parse_resource_id, is_valid_resource_id, resource_id
 from azure.cli.core._util import CLIError
 from azure.cli.command_modules.network._client_factory import _network_client_factory
+from azure.cli.command_modules.network._util import _get_property, _set_param
 from azure.cli.command_modules.network.mgmt_app_gateway.lib.operations.app_gateway_operations \
     import AppGatewayOperations
 
@@ -30,60 +30,6 @@ from azure.mgmt.dns.models import (RecordSet, AaaaRecord, ARecord, CnameRecord, 
 
 from azure.cli.command_modules.network.zone_file.parse_zone_file import parse_zone_file
 from azure.cli.command_modules.network.zone_file.make_zone_file import make_zone_file
-
-#region Network subresource factory methods
-
-def list_network_resource_property(resource, prop):
-    """ Factory method for creating list functions. """
-    def list_func(resource_group_name, resource_name):
-        client = getattr(_network_client_factory(), resource)
-        return client.get(resource_group_name, resource_name).__getattribute__(prop)
-    func_name = 'list_network_resource_property_{}_{}'.format(resource, prop)
-    setattr(sys.modules[__name__], func_name, list_func)
-    return func_name
-
-def get_network_resource_property_entry(resource, prop):
-    """ Factory method for creating get functions. """
-    def get_func(resource_group_name, resource_name, item_name):
-        client = getattr(_network_client_factory(), resource)
-        items = getattr(client.get(resource_group_name, resource_name), prop)
-
-        result = next((x for x in items if x.name.lower() == item_name.lower()), None)
-        if not result:
-            raise CLIError("Item '{}' does not exist on {} '{}'".format(
-                item_name, resource, resource_name))
-        else:
-            return result
-    func_name = 'get_network_resource_property_entry_{}_{}'.format(resource, prop)
-    setattr(sys.modules[__name__], func_name, get_func)
-    return func_name
-
-def delete_network_resource_property_entry(resource, prop):
-    """ Factory method for creating delete functions. """
-    def delete_func(resource_group_name, resource_name, item_name):
-        client = getattr(_network_client_factory(), resource)
-        item = client.get(resource_group_name, resource_name)
-        keep_items = \
-            [x for x in item.__getattribute__(prop) if x.name.lower() != item_name.lower()]
-        _set_param(item, prop, keep_items)
-        return client.create_or_update(resource_group_name, resource_name, item)
-    func_name = 'delete_network_resource_property_entry_{}_{}'.format(resource, prop)
-    setattr(sys.modules[__name__], func_name, delete_func)
-    return func_name
-
-def _get_property(items, name):
-    result = next((x for x in items if x.name.lower() == name.lower()), None)
-    if not result:
-        raise CLIError("Property '{}' does not exist".format(name))
-    else:
-        return result
-
-def _set_param(item, prop, value):
-    if value == '':
-        setattr(item, prop, None)
-    elif value is not None:
-        setattr(item, prop, value)
-#endregion
 
 #region Generic list commands
 def _generic_list(operation_name, resource_group_name):

@@ -21,7 +21,6 @@ from azure.mgmt.compute.models import (DataDisk,
                                        VirtualMachineScaleSetExtensionProfile)
 from azure.mgmt.compute.models.compute_management_client_enums import DiskCreateOptionTypes
 from azure.cli.core.commands import LongRunningOperation
-from azure.cli.core.commands.arm import cli_generic_update_command
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_data_service_client
 from azure.cli.core._util import CLIError
 import azure.cli.core._logging as _logging
@@ -1003,15 +1002,11 @@ def availset_get(resource_group_name, name):
 def availset_set(**kwargs):
     return _compute_client_factory().availability_sets.create_or_update(**kwargs)
 
-cli_generic_update_command('vm availability-set update', availset_get, availset_set)
-
 def vmss_get(resource_group_name, name):
     return _compute_client_factory().virtual_machine_scale_sets.get(resource_group_name, name)
 
 def vmss_set(**kwargs):
     return _compute_client_factory().virtual_machine_scale_sets.create_or_update(**kwargs)
-
-cli_generic_update_command('vmss update', vmss_get, vmss_set)
 
 def update_acs(resource_group_name, container_service_name, new_agent_count):
     client = _compute_client_factory()

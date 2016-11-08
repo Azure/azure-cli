@@ -6,8 +6,6 @@
 # pylint: disable=line-too-long
 
 
-from azure.mgmt.keyvault.operations import VaultsOperations
-
 from azure.cli.core.commands import cli_command
 from azure.cli.core.commands.arm import cli_generic_update_command
 
@@ -31,7 +29,10 @@ def keyvault_update_setter(client, resource_group_name, vault_name, parameters):
                                        location=parameters.location,
                                        properties=parameters.properties))
 
-cli_generic_update_command('keyvault update', VaultsOperations.get, keyvault_update_setter, lambda: keyvault_client_factory().vaults)
+cli_generic_update_command(__name__,
+                           'keyvault update',
+                           'azure.mgmt.keyvault.operations.vaults_operations#VaultsOperations.get',
+                           'azure.cli.command_modules.keyvault.commands#keyvault_update_setter', lambda: keyvault_client_factory().vaults)
 
 # Data Plane Commands
 

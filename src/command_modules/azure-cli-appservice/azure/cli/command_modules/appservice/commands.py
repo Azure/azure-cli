@@ -4,12 +4,10 @@
 #---------------------------------------------------------------------------------------------
 
 #pylint: disable=unused-import,line-too-long
-from azure.mgmt.web.operations import ServerFarmsOperations
 from azure.cli.core.commands import LongRunningOperation, cli_command
 from azure.cli.core.commands.arm import cli_generic_update_command
 
 from ._client_factory import web_client_factory
-from .custom import update_app_service_plan
 
 cli_command(__name__, 'appservice web create', 'azure.cli.command_modules.appservice.custom#create_webapp')
 cli_command(__name__, 'appservice web list', 'azure.cli.command_modules.appservice.custom#list_webapp')
@@ -59,13 +57,14 @@ cli_command(__name__, 'appservice web deployment user show', 'azure.mgmt.web.ope
 factory = lambda _: web_client_factory().server_farms
 cli_command(__name__, 'appservice plan create', 'azure.cli.command_modules.appservice.custom#create_app_service_plan')
 cli_command(__name__, 'appservice plan delete', 'azure.mgmt.web.operations.server_farms_operations#ServerFarmsOperations.delete_server_farm', factory)
-cli_generic_update_command('appservice plan update', ServerFarmsOperations.get_server_farm,
-                           ServerFarmsOperations.create_or_update_server_farm,
-                           custom_function=update_app_service_plan,
+cli_generic_update_command(__name__, 'appservice plan update', 'azure.mgmt.web.operations.server_farms_operations#ServerFarmsOperations.get_server_farm',
+                           'azure.mgmt.web.operations.server_farms_operations#ServerFarmsOperations.create_or_update_server_farm',
+                           custom_function_op='azure.cli.command_modules.appservice.custom#update_app_service_plan',
                            setter_arg_name='server_farm_envelope', factory=factory)
 
 cli_command(__name__, 'appservice plan list', 'azure.cli.command_modules.appservice.custom#list_app_service_plans')
 cli_command(__name__, 'appservice plan show', 'azure.mgmt.web.operations.server_farms_operations#ServerFarmsOperations.get_server_farm', factory)
+factory = lambda _: web_client_factory().global_model
 cli_command(__name__, 'appservice list-locations', 'azure.mgmt.web.operations.global_model_operations#GlobalModelOperations.get_subscription_geo_regions',
             factory)
 

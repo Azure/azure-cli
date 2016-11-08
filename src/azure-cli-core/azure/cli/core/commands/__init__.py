@@ -184,11 +184,16 @@ command_table = CommandTable()
 command_module_map = {}
 
 def load_params(command):
-    module_to_load = command_module_map.get(command, None)
-    if not module_to_load:
+    try:
+        command_table[command].load_arguments()
+    except KeyError:
         return
-    command_table[command].load_arguments()
-    import_module('azure.cli.command_modules.' + module_to_load).load_params(command)
+    command_module = command_module_map.get(command, None)
+    if not command_module:
+        logger.debug("Unable to load commands for '%s'. No module in command module map found.", command) #pylint: disable=line-too-long
+        return
+    module_to_load = command_module[:command_module.rfind('.')]
+    import_module(module_to_load).load_params(command)
     _update_command_definitions(command_table)
 
 def get_command_table():
@@ -240,7 +245,7 @@ def cli_command(module_name, name, operation,
     command_table[name] = create_command(module_name, name, operation, transform, table_transformer,
                                          client_factory)
 
-def _get_op_handler(operation):
+def get_op_handler(operation):
     """ Import and load the operation handler """
     try:
         mod_to_import, attr_path = operation.split('#')
@@ -265,7 +270,7 @@ def create_command(module_name, name, operation,
 
         client = client_factory(kwargs) if client_factory else None
         try:
-            op = _get_op_handler(operation)
+            op = get_op_handler(operation)
             result = op(client, **kwargs) if client else op(**kwargs)
             # apply results transform if specified
             if transform_result:
@@ -290,10 +295,10 @@ def create_command(module_name, name, operation,
             log_telemetry('value exception', log_type='trace')
             raise CLIError(value_error)
 
-    command_module_map[name] = module_name.split('.')[3] if module_name else None
+    command_module_map[name] = module_name
     name = ' '.join(name.split())
-    arguments_loader = lambda: extract_args_from_signature(_get_op_handler(operation))
-    description_loader = lambda: extract_full_summary_from_signature(_get_op_handler(operation))
+    arguments_loader = lambda: extract_args_from_signature(get_op_handler(operation))
+    description_loader = lambda: extract_full_summary_from_signature(get_op_handler(operation))
     cmd = CliCommand(name, _execute_command, table_transformer=table_transformer,
                      arguments_loader=arguments_loader, description_loader=description_loader)
     return cmd

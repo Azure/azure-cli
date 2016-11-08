@@ -10,7 +10,7 @@ from azure.cli.core.commands import (command_table,
                                      command_module_map,
                                      CliCommand,
                                      LongRunningOperation,
-                                     _get_op_handler)
+                                     get_op_handler)
 from azure.cli.core.commands._introspection import \
     (extract_full_summary_from_signature, extract_args_from_signature)
 
@@ -56,7 +56,7 @@ def _create_key_vault_command(module_name, name, operation, transform_result, ta
             def get_token(server, resource, scope): # pylint: disable=unused-argument
                 return Profile().get_login_credentials(resource)[0]._token_retriever() # pylint: disable=protected-access
 
-            op = _get_op_handler(operation)
+            op = get_op_handler(operation)
             # since the convenience client can be inconvenient, we have to check and create the
             # correct client version
             if 'generated' in op.__module__:
@@ -92,10 +92,10 @@ def _create_key_vault_command(module_name, name, operation, transform_result, ta
                                'Try flushing your DNS cache or try again later.')
             raise CLIError(ex)
 
-    command_module_map[name] = module_name.split('.')[3] if module_name else None
+    command_module_map[name] = module_name
     name = ' '.join(name.split())
-    arguments_loader = lambda: extract_args_from_signature(_get_op_handler(operation))
-    description_loader = lambda: extract_full_summary_from_signature(_get_op_handler(operation))
+    arguments_loader = lambda: extract_args_from_signature(get_op_handler(operation))
+    description_loader = lambda: extract_full_summary_from_signature(get_op_handler(operation))
     cmd = CliCommand(name, _execute_command, table_transformer=table_transformer,
                      arguments_loader=arguments_loader, description_loader=description_loader)
     return cmd

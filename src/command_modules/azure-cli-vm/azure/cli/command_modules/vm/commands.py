@@ -7,9 +7,6 @@ from azure.cli.core.commands import DeploymentOutputLongRunningOperation, cli_co
 
 from azure.cli.core.commands.arm import cli_generic_update_command
 
-from azure.mgmt.compute.operations import (
-    VirtualMachinesOperations)
-
 from azure.cli.command_modules.vm._client_factory import * #pylint: disable=wildcard-import
 
 #pylint: disable=line-too-long
@@ -34,7 +31,10 @@ cli_command(__name__, 'vm list', 'azure.cli.command_modules.vm.custom#list_vm')
 cli_command(__name__, 'vm resize', 'azure.cli.command_modules.vm.custom#resize_vm')
 cli_command(__name__, 'vm capture', 'azure.cli.command_modules.vm.custom#capture_vm')
 cli_command(__name__, 'vm open-port', 'azure.cli.command_modules.vm.custom#vm_open_port')
-cli_generic_update_command('vm update', VirtualMachinesOperations.get, VirtualMachinesOperations.create_or_update, cf_vm)
+cli_generic_update_command(__name__, 'vm update',
+                           'azure.mgmt.compute.operations.virtual_machines_operations#VirtualMachinesOperations.get',
+                           'azure.mgmt.compute.operations.virtual_machines_operations#VirtualMachinesOperations.create_or_update',
+                           cf_vm)
 
 # VM NIC
 cli_command(__name__, 'vm nic add', 'azure.cli.command_modules.vm.custom#vm_add_nics')
@@ -59,6 +59,13 @@ cli_command(__name__, 'vm availability-set show', 'azure.mgmt.compute.operations
 cli_command(__name__, 'vm availability-set list', 'azure.mgmt.compute.operations.availability_sets_operations#AvailabilitySetsOperations.list', cf_avail_set)
 cli_command(__name__, 'vm availability-set list-sizes', 'azure.mgmt.compute.operations.availability_sets_operations#AvailabilitySetsOperations.list_available_sizes', cf_avail_set)
 
+cli_generic_update_command(__name__, 'vm availability-set update',
+                           'azure.cli.command_modules.vm.custom#availset_get',
+                           'azure.cli.command_modules.vm.custom#availset_set')
+cli_generic_update_command(__name__, 'vmss update',
+                           'azure.cli.command_modules.vm.custom#vmss_get',
+                           'azure.cli.command_modules.vm.custom#vmss_set')
+
 # VM Boot Diagnostics
 cli_command(__name__, 'vm boot-diagnostics disable', 'azure.cli.command_modules.vm.custom#disable_boot_diagnostics')
 cli_command(__name__, 'vm boot-diagnostics enable', 'azure.cli.command_modules.vm.custom#enable_boot_diagnostics')
@@ -80,7 +87,7 @@ cli_command(__name__, 'acs delete', 'azure.mgmt.compute.operations.container_ser
 cli_command(__name__, 'acs scale', 'azure.cli.command_modules.vm.custom#update_acs')
 #Per conversation with ACS team, hide the update till we have something meaningful to tweak
 # from azure.cli.command_modules.vm.custom import update_acs
-# cli_generic_update_command('acs update', ContainerServicesOperations.get, ContainerServicesOperations.create_or_update, cf_acs)
+# cli_generic_update_command(__name__, 'acs update', ContainerServicesOperations.get, ContainerServicesOperations.create_or_update, cf_acs)
 
 # VM Diagnostics
 cli_command(__name__, 'vm diagnostics set', 'azure.cli.command_modules.vm.custom#set_diagnostics_extension')

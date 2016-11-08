@@ -5,8 +5,6 @@
 
 # pylint: disable=line-too-long
 from collections import OrderedDict
-from azure.mgmt.resource.resources.operations.resource_groups_operations import ResourceGroupsOperations
-from azure.mgmt.resource.resources.operations.resources_operations import ResourcesOperations
 
 from azure.cli.core.commands import cli_command
 from azure.cli.core.commands.arm import cli_generic_update_command
@@ -69,14 +67,14 @@ cli_command(__name__, 'resource group deployment export', 'azure.cli.command_mod
 cli_command(__name__, 'resource group deployment operation list', 'azure.mgmt.resource.resources.operations.deployment_operations_operations#DeploymentOperationsOperations.list', cf_deployment_operations)
 cli_command(__name__, 'resource group deployment operation show', 'azure.mgmt.resource.resources.operations.deployment_operations_operations#DeploymentOperationsOperations.get', cf_deployment_operations)
 
-cli_generic_update_command('resource update',
-                           ResourcesOperations.get,
-                           ResourcesOperations.create_or_update,
+cli_generic_update_command(__name__, 'resource update',
+                           'azure.mgmt.resource.resources.operations.resources_operations#ResourcesOperations.get',
+                           'azure.mgmt.resource.resources.operations.resources_operations#ResourcesOperations.create_or_update',
                            lambda: _resource_client_factory().resources)
 
-cli_generic_update_command('resource group update',
-                           ResourceGroupsOperations.get,
-                           ResourceGroupsOperations.create_or_update,
+cli_generic_update_command(__name__, 'resource group update',
+                           'azure.mgmt.resource.resources.operations.resource_groups_operations#ResourceGroupsOperations.get',
+                           'azure.mgmt.resource.resources.operations.resource_groups_operations#ResourceGroupsOperations.create_or_update',
                            lambda: _resource_client_factory().resource_groups)
 
 cli_command(__name__, 'resource policy assignment create', 'azure.cli.command_modules.resource.custom#create_policy_assignment')

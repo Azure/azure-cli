@@ -102,7 +102,7 @@ The update commands within the CLI expose a set of generic update arguments: `--
 def cli_generic_update_command(name, getter, setter, factory=None, setter_arg_name='parameters',
                                table_transformer=None, child_collection_prop_name=None,
                                child_collection_key='name', child_arg_name='item_name',
-                               custom_function=None):
+                               custom_function_op=None):
 ```
 For many commands will only specify `name`, `getter`, `setter` and `factory`.
   - `name` - Same as registering a command with `cli_command(...)`.
