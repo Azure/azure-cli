@@ -27,6 +27,7 @@ DEPENDENCIES = [
     'azure-cli-core',
     'azure-mgmt-resource==0.30.0rc6',
     'azure-mgmt-storage==0.30.0rc6',
+    'azure-mgmt-containerregistry==0.1.0',
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
@@ -49,9 +50,6 @@ setup(
     ],
     packages=[
         'azure.cli.command_modules.acr',
-        'azure.cli.command_modules.acr.mgmt_acr',
-        'azure.cli.command_modules.acr.mgmt_acr.models',
-        'azure.cli.command_modules.acr.mgmt_acr.operations',
     ],
     install_requires=DEPENDENCIES,
     package_data={'azure.cli.command_modules.acr': ['template.json']},
