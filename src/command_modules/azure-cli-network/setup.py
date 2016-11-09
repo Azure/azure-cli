@@ -106,10 +106,6 @@ setup(
         'azure.cli.command_modules.network.mgmt_traffic_manager_profile.lib',
         'azure.cli.command_modules.network.mgmt_traffic_manager_profile.lib.models',
         'azure.cli.command_modules.network.mgmt_traffic_manager_profile.lib.operations',
-        'azure.cli.command_modules.network.mgmt_dns_zone',
-        'azure.cli.command_modules.network.mgmt_dns_zone.lib',
-        'azure.cli.command_modules.network.mgmt_dns_zone.lib.models',
-        'azure.cli.command_modules.network.mgmt_dns_zone.lib.operations',
         'azure.cli.command_modules.network.zone_file'
     ],
     install_requires=DEPENDENCIES,

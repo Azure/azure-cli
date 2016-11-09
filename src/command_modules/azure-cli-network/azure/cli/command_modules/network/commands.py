@@ -382,10 +382,7 @@ cli_generic_update_command(__name__, 'network dns zone update',
 cli_command(__name__, 'network dns zone import', 'azure.cli.command_modules.network.custom#import_zone')
 cli_command(__name__, 'network dns zone export', 'azure.cli.command_modules.network.custom#export_zone')
 
-cli_command(__name__, 'network dns zone create',
-            'azure.cli.command_modules.network.mgmt_dns_zone.lib.operations.dns_zone_operations#DnsZoneOperations.create_or_update',
-            cf_dns_mgmt_dns_zone_create,
-            transform=DeploymentOutputLongRunningOperation('Starting network dns zone create'))
+cli_command(__name__, 'network dns zone create', 'azure.cli.command_modules.network.dns_zone#create_dns_zone', cf_dns_mgmt_zones)
 
 # DNS RecordSetsOperations
 cli_command(__name__, 'network dns record-set show', 'azure.mgmt.dns.operations.record_sets_operations#RecordSetsOperations.get', cf_dns_mgmt_record_sets)
