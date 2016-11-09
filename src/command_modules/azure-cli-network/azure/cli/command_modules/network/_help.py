@@ -339,6 +339,34 @@ helps['network dns zone'] = """
     type: group
     short-summary: Manage DNS zones
 """
+helps['network dns zone create'] = """
+    type: command
+    short-summary: Creates or updates DNS zone properties. Does not modify DNS records within the zone.
+"""
+helps['network dns zone delete'] = """
+    type: command
+    short-summary: Deletes a DNS zone. WARNING All DNS records in the zone will also be deleted. This operation cannot be undone.
+"""
+helps['network dns zone export'] = """
+    type: command
+    short-summary: Export a DNS zone as a DNS zone file.
+"""
+helps['network dns zone import'] = """
+    type: command
+    short-summary: Export a DNS zone as a DNS zone file.
+"""
+helps['network dns zone list'] = """
+    type: command
+    short-summary: List DNS zones in a resource group or subscription.
+"""
+helps['network dns zone show'] = """
+    type: command
+    short-summary: Gets DNS zone parameters. Does not show DNS records within the zone.
+"""
+helps['network dns zone update'] = """
+    type: command
+    short-summary: Updates DNS zone properties. Does not modify DNS records within the zone.
+"""
 helps['network express-route'] = """
     type: group
     short-summary: Dedicated private network fiber connections to Azure
