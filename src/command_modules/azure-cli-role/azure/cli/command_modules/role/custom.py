@@ -13,13 +13,8 @@ import dateutil.parser
 from azure.cli.core._util import CLIError, todict, get_file_json
 import azure.cli.core._logging as _logging
 
-from azure.cli.core.commands.client_factory import (get_mgmt_service_client,
-                                                    configure_common_settings)
-
-from azure.mgmt.authorization import AuthorizationManagementClient
 from azure.mgmt.authorization.models import (RoleAssignmentProperties, Permission, RoleDefinition,
                                              RoleDefinitionProperties)
-from azure.graphrbac import GraphRbacManagementClient
 
 from azure.graphrbac.models import (ApplicationCreateParameters,
                                     ApplicationUpdateParameters,
@@ -29,29 +24,11 @@ from azure.graphrbac.models import (ApplicationCreateParameters,
                                     PasswordProfile,
                                     ServicePrincipalCreateParameters)
 
+from ._client_factory import _auth_client_factory, _graph_client_factory
+
 logger = _logging.get_az_logger(__name__)
 
-
 _CUSTOM_RULE = 'CustomRole'
-
-def _auth_client_factory(scope=None):
-    subscription_id = None
-    if scope:
-        matched = re.match('/subscriptions/(?P<subscription>[^/]*)/', scope)
-        if matched:
-            subscription_id = matched.groupdict()['subscription']
-    return get_mgmt_service_client(AuthorizationManagementClient, subscription_id=subscription_id)
-
-def _graph_client_factory(**_):
-    from azure.cli.core._profile import Profile, CLOUD
-    profile = Profile()
-    cred, _, tenant_id = profile.get_login_credentials(
-        resource=CLOUD.endpoints.active_directory_graph_resource_id)
-    client = GraphRbacManagementClient(cred,
-                                       tenant_id,
-                                       base_url=CLOUD.endpoints.active_directory_graph_resource_id)
-    configure_common_settings(client)
-    return client
 
 def list_role_definitions(name=None, resource_group_name=None, scope=None,
                           custom_role_only=False):

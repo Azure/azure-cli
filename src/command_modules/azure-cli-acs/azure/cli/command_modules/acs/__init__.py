@@ -3,9 +3,11 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 #---------------------------------------------------------------------------------------------
 
-# pylint: disable=unused-import
 
-import azure.cli.command_modules.acs.custom
-import azure.cli.command_modules.acs._params
-import azure.cli.command_modules.acs._help
-import azure.cli.command_modules.acs.commands
+import azure.cli.command_modules.acs._help # pylint: disable=unused-import
+
+def load_params(_):
+    import azure.cli.command_modules.acs._params #pylint: disable=redefined-outer-name
+
+def load_commands():
+    import azure.cli.command_modules.acs.commands #pylint: disable=redefined-outer-name

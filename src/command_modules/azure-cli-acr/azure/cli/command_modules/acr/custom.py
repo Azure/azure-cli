@@ -6,10 +6,8 @@
 import uuid
 
 from azure.cli.core.commands import (
-    cli_command,
     LongRunningOperation
 )
-from azure.cli.core.commands.arm import cli_generic_update_command
 
 from azure.mgmt.containerregistry.models import (
     Registry,
@@ -23,8 +21,6 @@ from ._utils import (
     get_resource_group_name_by_registry_name,
     arm_deploy_template
 )
-
-from ._format import output_format
 
 import azure.cli.core._logging as _logging
 logger = _logging.get_az_logger(__name__)
@@ -164,15 +160,3 @@ def acr_update_set(client,
         resource_group_name = get_resource_group_name_by_registry_name(registry_name)
 
     return client.update(resource_group_name, registry_name, parameters)
-
-cli_command('acr check-name', acr_check_name)
-cli_command('acr list', acr_list, table_transformer=output_format)
-cli_command('acr create', acr_create, table_transformer=output_format)
-cli_command('acr delete', acr_delete, table_transformer=output_format)
-cli_command('acr show', acr_show, table_transformer=output_format)
-cli_generic_update_command('acr update',
-                           acr_update_get,
-                           acr_update_set,
-                           factory=lambda: get_acr_service_client().registries,
-                           custom_function=acr_update_custom,
-                           table_transformer=output_format)

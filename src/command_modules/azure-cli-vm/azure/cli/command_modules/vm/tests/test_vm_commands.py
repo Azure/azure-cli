@@ -8,6 +8,7 @@ import json
 import os
 import tempfile
 import platform
+import unittest
 
 from azure.cli.core.test_utils.vcr_test_base import (VCRTestBase,
                                                      ResourceGroupVCRTestBase,
@@ -1276,3 +1277,6 @@ class AzureContainerServiceScenarioTest(ResourceGroupVCRTestBase): #pylint: disa
         self.cmd('acs show -g {} -n {}'.format(self.resource_group, acs_name), checks=[
             JMESPathCheck('agentPoolProfiles[0].count', 5),
             ])
+
+if __name__ == '__main__':
+    unittest.main()

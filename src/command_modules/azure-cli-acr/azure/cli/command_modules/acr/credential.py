@@ -3,11 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 #---------------------------------------------------------------------------------------------
 
-from azure.cli.core.commands import cli_command
-
 from ._factory import get_acr_service_client
 from ._utils import get_resource_group_name_by_registry_name
-from ._format import output_format
 
 import azure.cli.core._logging as _logging
 logger = _logging.get_az_logger(__name__)
@@ -35,6 +32,3 @@ def acr_credential_renew(registry_name, resource_group_name=None):
     client = get_acr_service_client().registries
 
     return client.regenerate_credentials(resource_group_name, registry_name)
-
-cli_command('acr credential show', acr_credential_show, table_transformer=output_format)
-cli_command('acr credential renew', acr_credential_renew, table_transformer=output_format)

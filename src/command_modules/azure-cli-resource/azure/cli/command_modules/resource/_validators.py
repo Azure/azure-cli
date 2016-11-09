@@ -12,7 +12,7 @@ except ImportError:
 
 from azure.cli.core.parser import IncorrectUsageError
 
-from ._factory import _resource_client_factory
+from ._client_factory import _resource_client_factory
 
 def validate_resource_type(string):
     ''' Validates that resource type is provided in <namespace>/<type> format '''

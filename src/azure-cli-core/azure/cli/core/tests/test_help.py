@@ -10,7 +10,7 @@ import logging
 import mock
 from six import StringIO
 
-from azure.cli.core.application import Application, APPLICATION, Configuration
+from azure.cli.core.application import Application, Configuration
 from azure.cli.core.commands import \
     (CliCommand, cli_command, _update_command_definitions, command_table)
 import azure.cli.core.help_files
@@ -163,7 +163,9 @@ class HelpTest(unittest.TestCase):
             """Short Description. Long description with\nline break."""
             pass
 
-        cli_command('test', test_handler)
+        setattr(sys.modules[__name__], test_handler.__name__, test_handler)
+
+        cli_command(None, 'test', '{}#{}'.format(__name__, test_handler.__name__))
         _update_command_definitions(command_table)
 
         config = Configuration([])
@@ -566,21 +568,34 @@ Global Arguments
         self.assertEqual(s, io.getvalue())
 
     def test_help_loads(self):
-        parser_dict = {}
-        _store_parsers(APPLICATION.parser, parser_dict)
+        app = Application()
+        with mock.patch('azure.cli.core.commands.arm.APPLICATION', app):
+            from azure.cli.core.commands.arm import add_id_parameters
+            parser_dict = {}
+            cmd_tbl = app.configuration.get_command_table()
+            app.parser.load_command_table(cmd_tbl)
+            for cmd in cmd_tbl:
+                try:
+                    app.configuration.load_params(cmd)
+                except KeyError:
+                    pass
+            app.register(app.COMMAND_TABLE_PARAMS_LOADED, add_id_parameters)
+            app.raise_event(app.COMMAND_TABLE_PARAMS_LOADED, command_table=cmd_tbl)
+            app.parser.load_command_table(cmd_tbl)
+            _store_parsers(app.parser, parser_dict)
 
-        for name, parser in parser_dict.items():
-            try:
-                help_file = _help.GroupHelpFile(name, parser) \
-                    if _is_group(parser) \
-                    else _help.CommandHelpFile(name, parser)
-                help_file.load(parser)
-            except Exception as ex:
-                raise _help.HelpAuthoringException('{}, {}'.format(name, ex))
+            for name, parser in parser_dict.items():
+                try:
+                    help_file = _help.GroupHelpFile(name, parser) \
+                        if _is_group(parser) \
+                        else _help.CommandHelpFile(name, parser)
+                    help_file.load(parser)
+                except Exception as ex:
+                    raise _help.HelpAuthoringException('{}, {}'.format(name, ex))
 
-        extras = [k for k in azure.cli.core.help_files.helps.keys() if k not in parser_dict]
-        self.assertTrue(len(extras) == 0,
-                        'Found help files that don\'t map to a command: '+ str(extras))
+            extras = [k for k in azure.cli.core.help_files.helps.keys() if k not in parser_dict]
+            self.assertTrue(len(extras) == 0,
+                            'Found help files that don\'t map to a command: '+ str(extras))
 
 def _store_parsers(parser, d):
     for s in parser.subparsers.values():

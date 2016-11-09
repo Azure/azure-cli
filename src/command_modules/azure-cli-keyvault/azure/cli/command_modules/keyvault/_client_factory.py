@@ -3,10 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 #---------------------------------------------------------------------------------------------
 
-import azure.cli.command_modules.profile._help # pylint: disable=unused-import
-
-def load_params(_):
-    import azure.cli.command_modules.profile._params #pylint: disable=redefined-outer-name
-
-def load_commands():
-    import azure.cli.command_modules.profile.commands #pylint: disable=redefined-outer-name
+def keyvault_client_factory(**_):
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    from azure.mgmt.keyvault import KeyVaultManagementClient
+    return get_mgmt_service_client(KeyVaultManagementClient)

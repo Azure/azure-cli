@@ -16,7 +16,7 @@ import azure.cli.core._logging as _logging
 
 from six.moves.urllib.request import urlopen #pylint: disable=import-error
 
-from ._factory import _compute_client_factory
+from ._client_factory import _compute_client_factory
 from ._vm_utils import read_content_if_is_file
 
 logger = _logging.get_az_logger(__name__)

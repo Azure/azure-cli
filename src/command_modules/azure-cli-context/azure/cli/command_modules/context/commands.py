@@ -5,16 +5,9 @@
 
 from azure.cli.core.commands import cli_command
 
-from.custom import (list_contexts,
-                    show_contexts,
-                    activate_context,
-                    delete_context,
-                    create_context,
-                    modify_context)
-
-cli_command('context list', list_contexts)
-cli_command('context show', show_contexts)
-cli_command('context delete', delete_context)
-cli_command('context create', create_context)
-cli_command('context switch', activate_context)
-cli_command('context modify', modify_context)
+cli_command(__name__, 'context list', 'azure.cli.command_modules.context.custom#list_contexts')
+cli_command(__name__, 'context show', 'azure.cli.command_modules.context.custom#show_contexts')
+cli_command(__name__, 'context delete', 'azure.cli.command_modules.context.custom#delete_context')
+cli_command(__name__, 'context create', 'azure.cli.command_modules.context.custom#create_context')
+cli_command(__name__, 'context switch', 'azure.cli.command_modules.context.custom#activate_context')
+cli_command(__name__, 'context modify', 'azure.cli.command_modules.context.custom#modify_context')
