@@ -8,12 +8,12 @@ from azure.cli.core.commands import CliArgumentType, register_cli_argument
 # pylint: disable=line-too-long
 
 target_name = CliArgumentType(
-    options_list=('--target-name', '-n'),
+    options_list=('--target-name',),
     help='Name of the Azure Container Service cluster to deploy containers to.'
 )
 
 target_resource_group = CliArgumentType(
-    options_list=('--target-resource-group', '-g'),
+    options_list=('--target-resource-group',),
     help='Name of the Azure Container Service cluster\'s resource group.'
 )
 
