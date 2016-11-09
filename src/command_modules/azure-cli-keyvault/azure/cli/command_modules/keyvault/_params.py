@@ -43,8 +43,8 @@ def get_keyvault_name_completion_list(resource_name):
         func_name = 'get_{}s'.format(resource_name)
         vault = parsed_args.vault_base_url
         items = []
-        for x in list(getattr(client, func_name)(vault)):
-            id_val = getattr(x, 'id', None) or getattr(x, 'kid', None)
+        for y in list(getattr(client, func_name)(vault)):
+            id_val = getattr(y, 'id', None) or getattr(y, 'kid', None)
             items.append(id_val.rsplit('/', 1)[1])
         return items
     return completer
@@ -57,8 +57,8 @@ def get_keyvault_version_completion_list(resource_name):
         vault = parsed_args.vault_base_url
         name = getattr(parsed_args, '{}_name'.format(resource_name))
         items = []
-        for x in list(getattr(client, func_name)(vault, name)):
-            id_val = getattr(x, 'id', None) or getattr(x, 'kid', None)
+        for y in list(getattr(client, func_name)(vault, name)):
+            id_val = getattr(y, 'id', None) or getattr(y, 'kid', None)
             items.append(id_val.rsplit('/', 1)[1])
         return items
     return completer
