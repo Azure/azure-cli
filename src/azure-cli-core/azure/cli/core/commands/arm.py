@@ -6,8 +6,12 @@
 import argparse
 import re
 import json
+from six import string_types
 
-from azure.cli.core.commands import CliCommand, command_table as main_command_table
+from azure.cli.core.commands import (CliCommand,
+                                     get_op_handler,
+                                     command_table as main_command_table,
+                                     command_module_map as main_command_module_map)
 from azure.cli.core.commands._introspection import extract_args_from_signature
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.application import APPLICATION, IterateValue
@@ -166,9 +170,7 @@ def add_id_parameters(command_table):
     for command in command_table.values():
         command_loaded_handler(command)
 
-    APPLICATION.remove(APPLICATION.COMMAND_TABLE_LOADED, add_id_parameters)
-
-APPLICATION.register(APPLICATION.COMMAND_TABLE_LOADED, add_id_parameters)
+APPLICATION.register(APPLICATION.COMMAND_TABLE_PARAMS_LOADED, add_id_parameters)
 
 add_usage = '--add property.listProperty <key=value, string or JSON string>'
 set_usage = '--set property1.property2=<value>'
@@ -183,15 +185,32 @@ def _get_child(parent, collection_name, item_name, collection_key):
     else:
         return result
 
-def cli_generic_update_command(name, getter, setter, factory=None, setter_arg_name='parameters', # pylint: disable=too-many-arguments
+def cli_generic_update_command(module_name, name, getter_op, setter_op, factory=None, setter_arg_name='parameters', # pylint: disable=too-many-arguments, line-too-long
                                table_transformer=None, child_collection_prop_name=None,
                                child_collection_key='name', child_arg_name='item_name',
-                               custom_function=None):
+                               custom_function_op=None):
 
-    get_arguments = dict(extract_args_from_signature(getter))
-    set_arguments = dict(extract_args_from_signature(setter))
-    function_arguments = dict(extract_args_from_signature(custom_function)) \
-        if custom_function else None
+    if not isinstance(getter_op, string_types):
+        raise ValueError("Getter operation must be a string. Got '{}'".format(getter_op))
+    if not isinstance(setter_op, string_types):
+        raise ValueError("Setter operation must be a string. Got '{}'".format(setter_op))
+    if custom_function_op and not isinstance(custom_function_op, string_types):
+        raise ValueError("Custom function operation must be a string. Got '{}'".format(custom_function_op)) #pylint: disable=line-too-long
+
+    get_arguments_loader = lambda: dict(extract_args_from_signature(get_op_handler(getter_op)))
+    set_arguments_loader = lambda: dict(extract_args_from_signature(get_op_handler(setter_op)))
+    function_arguments_loader = lambda: dict(extract_args_from_signature(get_op_handler(custom_function_op))) if custom_function_op else {} #pylint: disable=line-too-long
+
+    def arguments_loader():
+        arguments = {}
+        arguments.update(set_arguments_loader())
+        arguments.update(get_arguments_loader())
+        arguments.update(function_arguments_loader())
+        arguments.pop('instance', None) # inherited from custom_function(instance, ...)
+        arguments.pop('parent', None)
+        arguments.pop('expand', None) # possibly inherited from the getter
+        arguments.pop(setter_arg_name, None)
+        return arguments
 
     def handler(args):
         from msrestazure.azure_operation import AzureOperationPoller
@@ -204,7 +223,8 @@ def cli_generic_update_command(name, getter, setter, factory=None, setter_arg_na
             client = factory(None) if factory else None
 
         getterargs = {key: val for key, val in args.items()
-                      if key in get_arguments}
+                      if key in get_arguments_loader()}
+        getter = get_op_handler(getter_op)
         if child_collection_prop_name:
             parent = getter(client, **getterargs) if client else getter(**getterargs)
             instance = _get_child(
@@ -218,8 +238,9 @@ def cli_generic_update_command(name, getter, setter, factory=None, setter_arg_na
             instance = getter(client, **getterargs) if client else getter(**getterargs)
 
         # pass instance to the custom_function, if provided
-        if custom_function:
-            custom_func_args = {k: v for k, v in args.items() if k in function_arguments}
+        if custom_function_op:
+            custom_function = get_op_handler(custom_function_op)
+            custom_func_args = {k: v for k, v in args.items() if k in function_arguments_loader()}
             if child_collection_prop_name:
                 parent = custom_function(instance, parent, **custom_func_args)
             else:
@@ -227,7 +248,7 @@ def cli_generic_update_command(name, getter, setter, factory=None, setter_arg_na
 
         # apply generic updates after custom updates
         for k in args.copy().keys():
-            if k in get_arguments or k in set_arguments \
+            if k in get_arguments_loader() or k in set_arguments_loader() \
                 or k in ('properties_to_add', 'properties_to_remove', 'properties_to_set'):
                 args.pop(k)
         for key, val in args.items():
@@ -254,6 +275,7 @@ def cli_generic_update_command(name, getter, setter, factory=None, setter_arg_na
 
         # Done... update the instance!
         getterargs[setter_arg_name] = parent if child_collection_prop_name else instance
+        setter = get_op_handler(setter_op)
         opres = setter(client, **getterargs) if client else setter(**getterargs)
         result = opres.result() if isinstance(opres, AzureOperationPoller) else opres
         if child_collection_prop_name:
@@ -272,15 +294,8 @@ def cli_generic_update_command(name, getter, setter, factory=None, setter_arg_na
                 setattr(namespace, 'ordered_arguments', [])
             namespace.ordered_arguments.append((option_string, values))
 
-    cmd = CliCommand(name, handler, table_transformer=table_transformer)
-    cmd.arguments.update(set_arguments)
-    cmd.arguments.update(get_arguments)
-    if function_arguments:
-        cmd.arguments.update(function_arguments)
-    cmd.arguments.pop('instance', None) # inherited from custom_function(instance, ...)
-    cmd.arguments.pop('parent', None)
-    cmd.arguments.pop('expand', None) # possibly inherited from the getter
-    cmd.arguments.pop(setter_arg_name, None)
+    cmd = CliCommand(name, handler, table_transformer=table_transformer,
+                     arguments_loader=arguments_loader)
     group_name = 'Generic Update'
     cmd.add_argument('properties_to_set', '--set', nargs='+', action=OrderedArgsAction, default=[],
                      help='Update an object by specifying a property path and value to set.'
@@ -295,6 +310,7 @@ def cli_generic_update_command(name, getter, setter, factory=None, setter_arg_na
                      '{}'.format(remove_usage), metavar='LIST INDEX',
                      arg_group=group_name)
     main_command_table[name] = cmd
+    main_command_module_map[name] = module_name
 
 index_or_filter_regex = re.compile(r'\[(.*)\]')
 def set_properties(instance, expression):

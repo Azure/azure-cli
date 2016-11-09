@@ -3,8 +3,10 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 #---------------------------------------------------------------------------------------------
 
-# pylint: disable=unused-import
+import azure.cli.command_modules.role._help # pylint: disable=unused-import
 
-import azure.cli.command_modules.role.commands
-import azure.cli.command_modules.role._params
-import azure.cli.command_modules.role._help
+def load_params(_):
+    import azure.cli.command_modules.role._params #pylint: disable=redefined-outer-name
+
+def load_commands():
+    import azure.cli.command_modules.role.commands #pylint: disable=redefined-outer-name

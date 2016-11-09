@@ -91,6 +91,34 @@ helps['role definition update'] = """
     type: command
     short-summary: update a role definition
 """
+helps['role definition create'] = """
+            type: command
+            parameters: 
+                - name: --role-definition
+                  type: string
+                  short-summary: 'JSON formatted string or a path to a file with such content'
+            examples:
+                - name: Create a role with following definition content
+                  text: |
+                        {
+                            "Name": "Contoso On-call",
+                            "Description": "Can monitor compute, network and storage, and restart virtual machines",
+                            "Actions": [
+                                "Microsoft.Compute/*/read",
+                                "Microsoft.Compute/virtualMachines/start/action",
+                                "Microsoft.Compute/virtualMachines/restart/action",
+                                "Microsoft.Network/*/read",
+                                "Microsoft.Storage/*/read",
+                                "Microsoft.Authorization/*/read",
+                                "Microsoft.Resources/subscriptions/resourceGroups/read",
+                                "Microsoft.Resources/subscriptions/resourceGroups/resources/read",
+                                "Microsoft.Insights/alertRules/*",
+                                "Microsoft.Support/*"
+                            ],
+                            "AssignableScopes": ["/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"]
+                        }
+
+            """
 helps['ad'] = """
     type: group
     short-summary: Synchronize on-premises directories and manage Azure Active Directory (AAD) resources

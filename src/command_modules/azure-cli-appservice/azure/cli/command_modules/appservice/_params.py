@@ -4,15 +4,11 @@
 #---------------------------------------------------------------------------------------------
 from azure.cli.core.commands import register_cli_argument
 
-from azure.mgmt.web import WebSiteManagementClient
-from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.parameters import (resource_group_name_type, location_type,
                                                 get_resource_name_completion_list,
                                                 CliArgumentType, ignore_type, enum_choice_list)
 
-# FACTORIES
-def web_client_factory(**_):
-    return get_mgmt_service_client(WebSiteManagementClient)
+from ._client_factory import web_client_factory
 
 def _generic_site_operation(resource_group_name, name, operation_name, slot=None, #pylint: disable=too-many-arguments
                             extra_parameter=None, client=None):

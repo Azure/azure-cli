@@ -3,10 +3,10 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 #---------------------------------------------------------------------------------------------
 
+#pylint: disable=line-too-long
+
 from azure.cli.core.commands import cli_command
 
-from .custom import (list_components, update, remove)
-
-cli_command('component list', list_components)
-cli_command('component update', update)
-cli_command('component remove', remove)
+cli_command(__name__, 'component list', 'azure.cli.command_modules.component.custom#list_components')
+cli_command(__name__, 'component update', 'azure.cli.command_modules.component.custom#update')
+cli_command(__name__, 'component remove', 'azure.cli.command_modules.component.custom#remove')
