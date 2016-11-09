@@ -72,6 +72,27 @@ helps['resource'] = """
     type: group
     short-summary: Generic commands to manage Azure resources
 """
+helps['resource list'] = """
+    type: command
+    short-summary: list resource
+    examples:
+        - name: list all resource in a region
+          text: >
+            az resource list --location westus
+        - name: list resource with a name
+          text: >
+            az resource list --name thename
+        - name: list resources with a tag
+          text: >
+             az resource list --tag something
+        - name: list resource with a tag with a particular prefix
+          text: >
+            az resource list --tag some*
+        - name: list resource with a tag value
+          text: >
+            az resource list --tag something=else
+"""
+
 helps['resource show'] = """
     type: command
     short-summary: display a resource detail
@@ -79,10 +100,49 @@ helps['resource show'] = """
         - name: show a virtual machine
           text: >
             az vm show -g mygroup -n myvm --resource-type "Microsoft.Compute/virtualMachines"
-        - name: show a webapp
+        - name: show a webapp using resource id
           text: >
-            az resource show -g mygroup -n mywebapp --resource-type "Microsoft.web/sites"
+            az resource show --id /subscriptions/0b1f6471-1bf0-4dda-aec3-111111111111/resourceGroups/myGroup/providers/Microsoft.Web/sites/myWebapp
+        - name: show a subnet
+          text: >
+            az resource show -g mygroup -n mysubnet --namespace microsoft.network --parent virtualnetworks/myvnet --resource-type subnets
+        - name: show a subnet using id
+          text: >
+            az resource show --id /subscriptions/0b1f6471-1bf0-4dda-aec3-111111111111/resourceGroups/myGroup/providers/Microsoft.Network/virtualNetworks/myvnet/subnets/mysubnet
 """
+
+helps['resource delete'] = """
+    type: command
+    short-summary: delete a resource
+    examples:
+        - name: delete a virtual machine
+          text: >
+            az vm delete -g mygroup -n myvm --resource-type "Microsoft.Compute/virtualMachines"
+        - name: delete a webapp using resource id
+          text: >
+            az resource delete --id /subscriptions/0b1f6471-1bf0-4dda-aec3-111111111111/resourceGroups/myGroup/providers/Microsoft.Web/sites/myWebapp
+        - name: delete a subnet using id
+          text: >
+            az resource delete --id /subscriptions/0b1f6471-1bf0-4dda-aec3-111111111111/resourceGroups/myGroup/providers/Microsoft.Network/virtualNetworks/myvnet/subnets/mysubnet
+"""
+
+helps['resource tag'] = """
+    type: command
+    short-summary: tag a resource
+    examples:
+        - name: tag a virtual machine
+          text: >
+            az resource tag --tag vmlist=vm1 -g mygroup -n myvm --resource-type "Microsoft.Compute/virtualMachines"
+        - name: tag a webapp using resource id
+          text: >
+            az resource tag --tag vmlist=vm1 --id /subscriptions/0b1f6471-1bf0-4dda-aec3-111111111111/resourceGroups/myGroup/providers/Microsoft.Web/sites/myWebapp
+"""
+
+helps['resource update'] = """
+    type: command
+    short-summary: update a resource
+"""
+
 helps['resource feature'] = """
     type: group
     short-summary: Commands to manage resource provider features, such as previews

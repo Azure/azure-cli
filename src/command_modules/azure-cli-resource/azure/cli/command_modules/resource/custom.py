@@ -27,41 +27,6 @@ from ._client_factory import _resource_client_factory, _resource_policy_client_f
 
 logger = _logging.get_az_logger(__name__)
 
-def _list_resources_odata_filter_builder(location=None, resource_type=None,
-                                         resource_group_name=None, tag=None, name=None):
-    '''Build up OData filter string from parameters
-    '''
-
-    filters = []
-
-    if resource_group_name:
-        filters.append("resourceGroup eq '{}'".format(resource_group_name))
-
-    if name:
-        filters.append("name eq '{}'".format(name))
-
-    if location:
-        filters.append("location eq '{}'".format(location))
-
-    if resource_type:
-        filters.append("resourceType eq '{}/{}'".format(
-            resource_type.namespace, resource_type.type))
-
-    if tag:
-        if name or location:
-            raise IncorrectUsageError('you cannot use the tag filter with other filters')
-
-        tag_name = list(tag.keys())[0] if isinstance(tag, dict) else tag
-        tag_value = tag[tag_name] if isinstance(tag, dict) else ''
-        if tag_name:
-            if tag_name[-1] == '*':
-                filters.append("startswith(tagname, '%s')" % tag_name[0:-1])
-            else:
-                filters.append("tagname eq '%s'" % tag_name)
-                if tag_value != '':
-                    filters.append("tagvalue eq '%s'" % tag_value)
-    return ' and '.join(filters)
-
 def list_resource_groups(tag=None): # pylint: disable=no-self-use
     ''' List resource groups, optionally filtered by a tag.
     :param str tag:tag to filter by in 'key[=value]' format
@@ -124,27 +89,6 @@ def export_group_as_template(
 
     print(json.dumps(result.template, indent=2))
 
-def list_resources(
-        location=None, resource_type=None, resource_group_name=None, tag=None, name=None):
-    ''' List resources
-        EXAMPLES:
-            az resource list --location westus
-            az resource list --name thename
-            az resource list --name thename --location westus
-            az resource list --tag something
-            az resource list --tag some*
-            az resource list --tag something=else
-        :param str location:filter by resource location
-        :param str resource_type:filter by resource type
-        :param str tag:filter by tag in 'a=b;c' format
-        :param str name:filter by resource name
-    '''
-    rcf = _resource_client_factory()
-    odata_filter = _list_resources_odata_filter_builder(
-        location, resource_type, resource_group_name, tag, name)
-    resources = rcf.resources.list(filter=odata_filter)
-    return list(resources)
-
 def deploy_arm_template(
         resource_group_name, template_file=None, template_uri=None, deployment_name=None,
         parameters=None, mode='incremental'):
@@ -191,42 +135,79 @@ def export_deployment_as_template(resource_group_name, deployment_name):
     result = smc.deployments.export_template(resource_group_name, deployment_name)
     print(json.dumps(result.template, indent=2))#pylint: disable=no-member
 
-def tag_resource(
-        resource_group_name, resource_name, resource_type, tags, parent_resource_path=None,
-        api_version=None, resource_provider_namespace=None):
+def show_resource(resource_group_name=None, resource_provider_namespace=None,
+                  parent_resource_path=None, resource_type=None, resource_name=None,
+                  resource_id=None, api_version=None):
+    res = _ResourceUtils(resource_group_name, resource_provider_namespace,
+                         parent_resource_path, resource_type, resource_name,
+                         resource_id, api_version)
+    return res.get_resource()
+
+def delete_resource(resource_group_name=None, resource_provider_namespace=None,
+                    parent_resource_path=None, resource_type=None, resource_name=None,
+                    resource_id=None, api_version=None):
+    res = _ResourceUtils(resource_group_name, resource_provider_namespace,
+                         parent_resource_path, resource_type, resource_name,
+                         resource_id, api_version)
+    res.delete()
+
+def tag_resource(tags, resource_group_name=None, resource_provider_namespace=None,
+                 parent_resource_path=None, resource_type=None, resource_name=None,
+                 resource_id=None, api_version=None):
     ''' Updates the tags on an existing resource. To clear tags, specify the --tag option
     without anything else. '''
+    res = _ResourceUtils(resource_group_name, resource_provider_namespace,
+                         parent_resource_path, resource_type, resource_name,
+                         resource_id, api_version)
+    res.tag(tags)
+
+def list_resources(resource_group_name=None, resource_provider_namespace=None,
+                   resource_type=None, name=None, tag=None, location=None):
     rcf = _resource_client_factory()
-    resource = rcf.resources.get(
-        resource_group_name,
-        resource_provider_namespace,
-        parent_resource_path,
-        resource_type,
-        resource_name,
-        api_version)
-    # pylint: disable=no-member
-    parameters = GenericResource(
-        location=resource.location,
-        tags=tags,
-        plan=resource.plan,
-        properties=resource.properties,
-        kind=resource.kind,
-        managed_by=resource.managed_by,
-        sku=resource.sku,
-        identity=resource.identity)
-    try:
-        rcf.resources.create_or_update(
-            resource_group_name,
-            resource_provider_namespace,
-            parent_resource_path,
-            resource_type,
-            resource_name,
-            api_version,
-            parameters)
-    except CloudError as ex:
-        # TODO: Remove workaround once Swagger and SDK fix is implemented (#120123723)
-        if '202' not in str(ex):
-            raise ex
+    odata_filter = _list_resources_odata_filter_builder(resource_group_name,
+                                                        resource_provider_namespace,
+                                                        resource_type, name, tag, location)
+    resources = rcf.resources.list(filter=odata_filter)
+    return list(resources)
+
+def _list_resources_odata_filter_builder(resource_group_name=None,
+                                         resource_provider_namespace=None, resource_type=None,
+                                         name=None, tag=None, location=None):
+    '''Build up OData filter string from parameters
+    '''
+    filters = []
+
+    if resource_group_name:
+        filters.append("resourceGroup eq '{}'".format(resource_group_name))
+
+    if name:
+        filters.append("name eq '{}'".format(name))
+
+    if location:
+        filters.append("location eq '{}'".format(location))
+
+    if resource_type:
+        if resource_provider_namespace:
+            f = "'{}/{}'".format(resource_provider_namespace, resource_type)
+        else:
+            #assume resource_type is <namespace>/<type>. The worst is to get a server error
+            f = "'{}'".format(resource_type)
+        filters.append("resourceType eq " + f)
+
+    if tag:
+        if name or location:
+            raise IncorrectUsageError('you cannot use the tag filter with other filters')
+
+        tag_name = list(tag.keys())[0] if isinstance(tag, dict) else tag
+        tag_value = tag[tag_name] if isinstance(tag, dict) else ''
+        if tag_name:
+            if tag_name[-1] == '*':
+                filters.append("startswith(tagname, '%s')" % tag_name[0:-1])
+            else:
+                filters.append("tagname eq '%s'" % tag_name)
+                if tag_value != '':
+                    filters.append("tagvalue eq '%s'" % tag_value)
+    return ' and '.join(filters)
 
 def get_providers_completion_list(prefix, **kwargs): #pylint: disable=unused-argument
     rcf = _resource_client_factory()
@@ -409,3 +390,129 @@ def get_policy_assignment_completion_list(prefix, **kwargs):#pylint: disable=unu
     result = policy_client.policy_assignments.list()
     return [i.name for i in result]
 
+class _ResourceUtils(object): #pylint: disable=too-many-instance-attributes
+    def __init__(self, resource_group_name=None, resource_provider_namespace=None,
+                 parent_resource_path=None, resource_type=None, resource_name=None,
+                 resource_id=None, api_version=None, rcf=None):
+        if bool(resource_id) == bool(resource_group_name or resource_type or
+                                     parent_resource_path or resource_provider_namespace or
+                                     resource_name):
+            raise IncorrectUsageError(
+                "You must specify either 'id' or other individual pieces, but not both")
+
+        #if the resouce_type is in format 'namespace/type' split it.
+        #(we don't have to do this, but commands like 'vm show' returns such values)
+        if resource_type and not resource_provider_namespace and not parent_resource_path:
+            parts = resource_type.split('/')
+            if len(parts) > 1:
+                resource_provider_namespace = parts[0]
+                resource_type = parts[1]
+
+        self.rcf = rcf or _resource_client_factory()
+        if api_version is None:
+            if resource_id:
+                parts = parse_resource_id(resource_id)
+                api_version = _ResourceUtils._resolve_api_version_by_id(self.rcf, resource_id)
+            else:
+                api_version = _ResourceUtils._resolve_api_version(self.rcf,
+                                                                  resource_provider_namespace,
+                                                                  parent_resource_path,
+                                                                  resource_type)
+
+        self.resource_group_name = resource_group_name
+        self.resource_provider_namespace = resource_provider_namespace
+        self.parent_resource_path = parent_resource_path
+        self.resource_type = resource_type
+        self.resource_name = resource_name
+        self.resource_id = resource_id
+        self.api_version = api_version
+
+    def get_resource(self):
+        if self.resource_id:
+            resource = self.rcf.resources.get_by_id(self.resource_id, self.api_version)
+        else:
+            resource = self.rcf.resources.get(self.resource_group_name,
+                                              self.resource_provider_namespace,
+                                              self.parent_resource_path or '',
+                                              self.resource_type,
+                                              self.resource_name,
+                                              self.api_version)
+        return resource
+
+    def delete(self):
+        if self.resource_id:
+            self.rcf.resources.delete_by_id(self.resource_id, self.api_version)
+        else:
+            self.rcf.resources.delete(self.resource_group_name,
+                                      self.resource_provider_namespace,
+                                      self.parent_resource_path or '',
+                                      self.resource_type,
+                                      self.resource_name,
+                                      self.api_version)
+
+    def tag(self, tags):
+        resource = self.get_resource()
+        # pylint: disable=no-member
+        parameters = GenericResource(
+            location=resource.location,
+            tags=tags,
+            plan=resource.plan,
+            properties=resource.properties,
+            kind=resource.kind,
+            managed_by=resource.managed_by,
+            sku=resource.sku,
+            identity=resource.identity)
+        try:
+            if self.resource_id:
+                self.rcf.resources.create_or_update_by_id(self.resource_id, self.api_version,
+                                                          parameters)
+            else:
+                self.rcf.resources.create_or_update(
+                    self.resource_group_name,
+                    self.resource_provider_namespace,
+                    self.parent_resource_path or '',
+                    self.resource_type,
+                    self.resource_name,
+                    self.api_version,
+                    parameters)
+        except CloudError as ex:
+            # TODO: Remove workaround once Swagger and SDK fix is implemented (#120123723)
+            if '202' not in str(ex):
+                raise ex
+
+    @staticmethod
+    def _resolve_api_version(rcf, resource_provider_namespace, parent_resource_path, resource_type):
+        provider = rcf.providers.get(resource_provider_namespace)
+
+        #If available, we will use parent resource's api-version
+        resource_type_str = (parent_resource_path.split('/')[0]
+                             if parent_resource_path else resource_type)
+
+        rt = [t for t in provider.resource_types
+              if t.resource_type.lower() == resource_type_str.lower()]
+        if not rt:
+            raise IncorrectUsageError('Resource type {} not found.'
+                                      .format(resource_type_str))
+        if len(rt) == 1 and rt[0].api_versions:
+            npv = [v for v in rt[0].api_versions if 'preview' not in v.lower()]
+            return npv[0] if npv else rt[0].api_versions[0]
+        else:
+            raise IncorrectUsageError(
+                'API version is required and could not be resolved for resource {}'
+                .format(resource_type))
+
+    @staticmethod
+    def _resolve_api_version_by_id(rcf, resource_id):
+        parts = parse_resource_id(resource_id)
+        if parts.get('grandchild_type'):
+            parent = (parts['type'] + '/' +  parts['name'] + '/' +
+                      parts['child_type'] + '/' + parts['child_name'])
+            resource_type = parts['grandchild_type']
+        elif parts.get('child_type'):
+            parent = parts['type'] + '/' +  parts['name']
+            resource_type = parts['child_type']
+        else:
+            parent = None
+            resource_type = parts['type']
+
+        return _ResourceUtils._resolve_api_version(rcf, parts['namespace'], parent, resource_type)

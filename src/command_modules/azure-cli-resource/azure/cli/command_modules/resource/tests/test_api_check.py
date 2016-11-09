@@ -10,9 +10,7 @@ except ImportError:
     from mock import MagicMock
 
 # pylint: disable=line-too-long
-from azure.cli.command_modules.resource._validators import (validate_resource_type,
-                                                            validate_parent,
-                                                            _resolve_api_version as resolve_api_version)
+from azure.cli.command_modules.resource.custom  import _ResourceUtils
 
 class TestApiCheck(unittest.TestCase):
 
@@ -32,25 +30,21 @@ class TestApiCheck(unittest.TestCase):
 
     def test_resolve_api_provider_backup(self):
         """ Verifies provider is used as backup if api-version not specified. """
-        resource_type = validate_resource_type('Mock/test')
-        self.assertEqual(resolve_api_version(self._get_mock_client(), resource_type), "2016-01-01")
+        rcf = self._get_mock_client()
+        res_utils = _ResourceUtils(resource_type='Mock/test', resource_name='vnet1', rcf=rcf)
+        self.assertEqual(res_utils.api_version, "2016-01-01")
 
     def test_resolve_api_provider_with_parent_backup(self):
         """ Verifies provider (with parent) is used as backup if api-version not specified. """
-        resource_type = validate_resource_type('Mock/bar')
-        parent = validate_parent('foo/testfoo123')
-        self.assertEqual(
-            resolve_api_version(self._get_mock_client(), resource_type, parent),
-            "1999-01-01"
-        )
+        rcf = self._get_mock_client()
+        res_utils = _ResourceUtils(parent_resource_path='foo/testfoo123', resource_type='Mock/test', resource_name='vnet1', rcf=rcf)
+        self.assertEqual(res_utils.api_version, "1999-01-01")
 
     def test_resolve_api_all_previews(self):
         """ Verifies most recent preview version returned only if there are no non-preview versions. """
-        resource_type = validate_resource_type('Mock/preview')
-        self.assertEqual(
-            resolve_api_version(self._get_mock_client(), resource_type),
-            "2005-01-01-preview"
-        )
+        rcf = self._get_mock_client()
+        res_utils = _ResourceUtils(resource_type='Mock/preview', resource_name='vnet1', rcf=rcf)
+        self.assertEqual(res_utils.api_version, "2005-01-01-preview")
 
     def _get_mock_client(self):
         client = MagicMock()
@@ -58,7 +52,7 @@ class TestApiCheck(unittest.TestCase):
         provider.resource_types = [
             self._get_mock_resource_type('skip', ['2000-01-01-preview', '2000-01-01']),
             self._get_mock_resource_type('test', ['2016-01-01-preview', '2016-01-01']),
-            self._get_mock_resource_type('foo/bar', ['1999-01-01-preview', '1999-01-01']),
+            self._get_mock_resource_type('foo', ['1999-01-01-preview', '1999-01-01']),
             self._get_mock_resource_type('preview', ['2005-01-01-preview', '2004-01-01-preview'])
         ]
         client.providers.get.return_value = provider
