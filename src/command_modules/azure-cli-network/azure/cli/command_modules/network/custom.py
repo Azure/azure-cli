@@ -344,8 +344,8 @@ def create_lb_backend_address_pool(resource_group_name, load_balancer_name, item
     ncf = _network_client_factory()
     lb = ncf.load_balancers.get(resource_group_name, load_balancer_name)
     lb.backend_address_pools.append(BackendAddressPool(name=item_name))
-
-    return ncf.load_balancers.create_or_update(resource_group_name, load_balancer_name, lb)
+    poller = ncf.load_balancers.create_or_update(resource_group_name, load_balancer_name, lb)
+    return _get_property(poller.result().backend_address_pools, item_name)
 
 def create_lb_probe(resource_group_name, load_balancer_name, item_name, protocol, port,
                     path=None, interval=None, threshold=None):
