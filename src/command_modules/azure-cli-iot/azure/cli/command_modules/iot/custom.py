@@ -121,7 +121,7 @@ def iot_device_create(client, hub_name, device_id, resource_group_name=None, x50
         if output_dir is not None and not exists(output_dir):
             raise CLIError('Directory not exist: {0}'.format(output_dir))
     else:
-        if primary_thumbprint is not None or secondary_thumbprint is not None or output_dir is not None:
+        if primary_thumbprint is not None or secondary_thumbprint is not None or valid_days is not None or output_dir is not None:
             raise CLIError('X.509 certificate parameters must be used with --x509 flag.')
 
     device_client = _get_iot_device_client(client, resource_group_name, hub_name, device_id)

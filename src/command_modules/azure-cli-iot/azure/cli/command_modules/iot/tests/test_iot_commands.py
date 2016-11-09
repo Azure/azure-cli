@@ -62,7 +62,7 @@ class IoTHubTest(ResourceGroupVCRTestBase):
         ])
 
         # Test 'az iot hub sku list'
-        self.cmd('iot hub sku list --hub-name {0}'.format(hub), checks=[
+        self.cmd('iot hub list-skus -n {0}'.format(hub), checks=[
             JMESPathCheck('length([*])', 3),
             JMESPathCheck('[0].sku.name', 'S1'),
             JMESPathCheck('[1].sku.name', 'S2'),

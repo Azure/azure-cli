@@ -26,7 +26,7 @@ cli_command('iot hub list', iot_hub_list, factory)
 
 cli_command('iot hub show-connection-string', iot_hub_show_connection_string, factory)
 
-cli_command('iot hub sku list', iot_hub_sku_list, factory)
+cli_command('iot hub list-skus', iot_hub_sku_list, factory)
 
 cli_command('iot hub consumer-group create', iot_hub_consumer_group_create, factory)
 

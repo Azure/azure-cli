@@ -81,12 +81,7 @@ helps['iot hub key show'] = """
     short-summary: Get a shared access policy of an IoT Hub.
 """
 
-helps['iot hub sku'] = """
-    type: group
-    short-summary: Manage pricing tiers of an IoT Hub.
-"""
-
-helps['iot hub sku list'] = """
+helps['iot hub list-skus'] = """
     type: command
     short-summary: List all valid pricing tiers.
 """

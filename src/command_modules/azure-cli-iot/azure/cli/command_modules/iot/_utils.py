@@ -2,7 +2,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 #---------------------------------------------------------------------------------------------
-# pylint: disable=no-self-use,too-many-arguments,no-member,line-too-long
 
 from os.path import exists, join
 from OpenSSL import crypto
@@ -25,9 +24,9 @@ def create_self_signed_certificate(device_id, valid_days, cert_output_dir):
     cert.set_pubkey(key)
     cert.sign(key, 'sha256')
 
-    cert_dump = crypto.dump_certificate(crypto.FILETYPE_PEM, cert).decode('ascii')
-    key_dump = crypto.dump_privatekey(crypto.FILETYPE_PEM, key).decode('ascii')
-    thumbprint = cert.digest('sha1').replace(b':', b'').decode('ascii')
+    cert_dump = crypto.dump_certificate(crypto.FILETYPE_PEM, cert).decode('utf-8')
+    key_dump = crypto.dump_privatekey(crypto.FILETYPE_PEM, key).decode('utf-8')
+    thumbprint = cert.digest('sha1').replace(b':', b'').decode('utf-8')
 
     if cert_output_dir is not None and exists(cert_output_dir):
         open(join(cert_output_dir, cert_file), "wt").write(cert_dump)
