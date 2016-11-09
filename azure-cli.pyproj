@@ -15,6 +15,7 @@
     <InterpreterId>{54f4b6dc-0859-46dc-99bb-b275c9d0aca3}</InterpreterId>
     <InterpreterVersion>3.5</InterpreterVersion>
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
+    <CommandLineArguments>network nic create -g nicrg -n nic1 --subnet subnet1 --vnet-name vnet1 --public-ip-address banoodle</CommandLineArguments>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'" />
   <PropertyGroup Condition="'$(Configuration)' == 'Release'" />
@@ -25,6 +26,7 @@
   <ItemGroup>
     <Compile Include="azure-cli-core\azure\cli\core\adal_authentication.py" />
     <Compile Include="azure-cli-core\azure\cli\core\application.py" />
+    <Compile Include="azure-cli-core\azure\cli\core\cloud.py" />
     <Compile Include="azure-cli-core\azure\cli\core\commands\arm.py" />
     <Compile Include="azure-cli-core\azure\cli\core\commands\client_factory.py" />
     <Compile Include="azure-cli-core\azure\cli\core\commands\parameters.py" />
@@ -32,6 +34,7 @@
     <Compile Include="azure-cli-core\azure\cli\core\commands\validators.py" />
     <Compile Include="azure-cli-core\azure\cli\core\commands\_introspection.py" />
     <Compile Include="azure-cli-core\azure\cli\core\commands\__init__.py" />
+    <Compile Include="azure-cli-core\azure\cli\core\context.py" />
     <Compile Include="azure-cli-core\azure\cli\core\extensions\experimental.py" />
     <Compile Include="azure-cli-core\azure\cli\core\extensions\query.py" />
     <Compile Include="azure-cli-core\azure\cli\core\extensions\transform.py" />
@@ -40,9 +43,11 @@
     <Compile Include="azure-cli-core\azure\cli\core\parser.py" />
     <Compile Include="azure-cli-core\azure\cli\core\tests\test_add_resourcegroup_transform.py" />
     <Compile Include="azure-cli-core\azure\cli\core\tests\test_application.py" />
+    <Compile Include="azure-cli-core\azure\cli\core\tests\test_cloud.py" />
     <Compile Include="azure-cli-core\azure\cli\core\tests\test_command_registration.py" />
     <Compile Include="azure-cli-core\azure\cli\core\tests\test_config.py" />
     <Compile Include="azure-cli-core\azure\cli\core\tests\test_connection_verify.py" />
+    <Compile Include="azure-cli-core\azure\cli\core\tests\test_context.py" />
     <Compile Include="azure-cli-core\azure\cli\core\tests\test_extensions_query.py" />
     <Compile Include="azure-cli-core\azure\cli\core\tests\test_generic_update.py" />
     <Compile Include="azure-cli-core\azure\cli\core\tests\test_help.py" />
@@ -72,24 +77,9 @@
     <Compile Include="azure-cli\azure\cli\__init__.py" />
     <Compile Include="azure-cli\azure\cli\__main__.py" />
     <Compile Include="azure-cli\setup.py" />
+    <Compile Include="command_modules\azure-cli-acr\azure\cli\command_modules\acr\commands.py" />
     <Compile Include="command_modules\azure-cli-acr\azure\cli\command_modules\acr\credential.py" />
     <Compile Include="command_modules\azure-cli-acr\azure\cli\command_modules\acr\custom.py" />
-    <Compile Include="command_modules\azure-cli-acr\azure\cli\command_modules\acr\mgmt_acr\container_registry_management_client.py" />
-    <Compile Include="command_modules\azure-cli-acr\azure\cli\command_modules\acr\mgmt_acr\credentials.py" />
-    <Compile Include="command_modules\azure-cli-acr\azure\cli\command_modules\acr\mgmt_acr\exceptions.py" />
-    <Compile Include="command_modules\azure-cli-acr\azure\cli\command_modules\acr\mgmt_acr\models\registry.py" />
-    <Compile Include="command_modules\azure-cli-acr\azure\cli\command_modules\acr\mgmt_acr\models\registry_credentials.py" />
-    <Compile Include="command_modules\azure-cli-acr\azure\cli\command_modules\acr\mgmt_acr\models\registry_name_check_request.py" />
-    <Compile Include="command_modules\azure-cli-acr\azure\cli\command_modules\acr\mgmt_acr\models\registry_name_status.py" />
-    <Compile Include="command_modules\azure-cli-acr\azure\cli\command_modules\acr\mgmt_acr\models\registry_paged.py" />
-    <Compile Include="command_modules\azure-cli-acr\azure\cli\command_modules\acr\mgmt_acr\models\registry_update_parameters.py" />
-    <Compile Include="command_modules\azure-cli-acr\azure\cli\command_modules\acr\mgmt_acr\models\resource.py" />
-    <Compile Include="command_modules\azure-cli-acr\azure\cli\command_modules\acr\mgmt_acr\models\storage_account_properties.py" />
-    <Compile Include="command_modules\azure-cli-acr\azure\cli\command_modules\acr\mgmt_acr\models\__init__.py" />
-    <Compile Include="command_modules\azure-cli-acr\azure\cli\command_modules\acr\mgmt_acr\operations\registries_operations.py" />
-    <Compile Include="command_modules\azure-cli-acr\azure\cli\command_modules\acr\mgmt_acr\operations\__init__.py" />
-    <Compile Include="command_modules\azure-cli-acr\azure\cli\command_modules\acr\mgmt_acr\version.py" />
-    <Compile Include="command_modules\azure-cli-acr\azure\cli\command_modules\acr\mgmt_acr\__init__.py" />
     <Compile Include="command_modules\azure-cli-acr\azure\cli\command_modules\acr\repository.py" />
     <Compile Include="command_modules\azure-cli-acr\azure\cli\command_modules\acr\_constants.py" />
     <Compile Include="command_modules\azure-cli-acr\azure\cli\command_modules\acr\_factory.py" />
@@ -114,6 +104,7 @@
     <Compile Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\custom.py" />
     <Compile Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\tests\test_webapp_commands.py" />
     <Compile Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\tests\__init__.py" />
+    <Compile Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\_client_factory.py" />
     <Compile Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\_help.py" />
     <Compile Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\_params.py" />
     <Compile Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\__init__.py" />
@@ -130,17 +121,27 @@
     <Compile Include="command_modules\azure-cli-component\azure\cli\command_modules\component\_help.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="command_modules\azure-cli-configure\azure\cli\command_modules\configure\commands.py" />
+    <Compile Include="command_modules\azure-cli-configure\azure\cli\command_modules\configure\custom.py" />
     <Compile Include="command_modules\azure-cli-configure\azure\cli\command_modules\configure\_consts.py" />
     <Compile Include="command_modules\azure-cli-configure\azure\cli\command_modules\configure\_help.py" />
     <Compile Include="command_modules\azure-cli-configure\azure\cli\command_modules\configure\_utils.py" />
     <Compile Include="command_modules\azure-cli-configure\azure\cli\command_modules\configure\__init__.py" />
     <Compile Include="command_modules\azure-cli-configure\setup.py" />
+    <Compile Include="command_modules\azure-cli-container\azure\cli\command_modules\container\commands.py" />
+    <Compile Include="command_modules\azure-cli-container\azure\cli\command_modules\container\custom.py" />
+    <Compile Include="command_modules\azure-cli-container\azure\cli\command_modules\container\_help.py" />
+    <Compile Include="command_modules\azure-cli-container\azure\cli\command_modules\container\_params.py" />
+    <Compile Include="command_modules\azure-cli-container\azure\cli\command_modules\container\__init__.py" />
+    <Compile Include="command_modules\azure-cli-container\setup.py" />
     <Compile Include="command_modules\azure-cli-context\azure\cli\command_modules\context\commands.py" />
     <Compile Include="command_modules\azure-cli-context\azure\cli\command_modules\context\custom.py" />
     <Compile Include="command_modules\azure-cli-context\azure\cli\command_modules\context\_help.py" />
     <Compile Include="command_modules\azure-cli-context\azure\cli\command_modules\context\_params.py" />
     <Compile Include="command_modules\azure-cli-context\azure\cli\command_modules\context\__init__.py" />
     <Compile Include="command_modules\azure-cli-context\setup.py" />
+    <Compile Include="command_modules\azure-cli-feedback\azure\cli\command_modules\feedback\commands.py" />
+    <Compile Include="command_modules\azure-cli-feedback\azure\cli\command_modules\feedback\custom.py" />
     <Compile Include="command_modules\azure-cli-feedback\azure\cli\command_modules\feedback\_help.py">
       <SubType>Code</SubType>
     </Compile>
@@ -245,6 +246,7 @@
     <Compile Include="command_modules\azure-cli-keyvault\azure\cli\command_modules\keyvault\keyvaultclient\key_vault_id.py" />
     <Compile Include="command_modules\azure-cli-keyvault\azure\cli\command_modules\keyvault\tests\test_keyvault_commands.py" />
     <Compile Include="command_modules\azure-cli-keyvault\azure\cli\command_modules\keyvault\tests\__init__.py" />
+    <Compile Include="command_modules\azure-cli-keyvault\azure\cli\command_modules\keyvault\_client_factory.py" />
     <Compile Include="command_modules\azure-cli-keyvault\azure\cli\command_modules\keyvault\_command_type.py" />
     <Compile Include="command_modules\azure-cli-keyvault\azure\cli\command_modules\keyvault\_help.py" />
     <Compile Include="command_modules\azure-cli-keyvault\azure\cli\command_modules\keyvault\_params.py" />
@@ -440,7 +442,6 @@
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\zone_file\parse_zone_file.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\zone_file\record_processors.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\zone_file\__init__.py" />
-    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\_factory.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_nsg\lib\credentials.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_nsg\lib\exceptions.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_nsg\lib\models\basic_dependency.py" />
@@ -459,9 +460,11 @@
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_nsg\lib\operations\__init__.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_nsg\lib\version.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_nsg\lib\__init__.py" />
+    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\_client_factory.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\_help.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\_util.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\_validators.py" />
     <Compile Include="command_modules\azure-cli-profile\azure\cli\command_modules\profile\_help.py">
       <SubType>Code</SubType>
@@ -470,19 +473,20 @@
     <Compile Include="command_modules\azure-cli-redis\azure\cli\command_modules\redis\commands.py" />
     <Compile Include="command_modules\azure-cli-redis\azure\cli\command_modules\redis\tests\test_redis_params.py" />
     <Compile Include="command_modules\azure-cli-redis\azure\cli\command_modules\redis\tests\__init__.py" />
+    <Compile Include="command_modules\azure-cli-redis\azure\cli\command_modules\redis\_client_factory.py" />
     <Compile Include="command_modules\azure-cli-redis\azure\cli\command_modules\redis\_help.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="command_modules\azure-cli-redis\azure\cli\command_modules\redis\_params.py" />
     <Compile Include="command_modules\azure-cli-redis\azure\cli\command_modules\redis\__init__.py" />
     <Compile Include="command_modules\azure-cli-redis\setup.py" />
-    <Compile Include="command_modules\azure-cli-resource\azure\cli\command_modules\resource\_factory.py">
-      <SubType>Code</SubType>
-    </Compile>
+    <Compile Include="command_modules\azure-cli-resource\azure\cli\command_modules\resource\tests\__init__.py" />
+    <Compile Include="command_modules\azure-cli-resource\azure\cli\command_modules\resource\_client_factory.py" />
     <Compile Include="command_modules\azure-cli-resource\azure\cli\command_modules\resource\_help.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="command_modules\azure-cli-role\azure\cli\command_modules\role\custom.py" />
+    <Compile Include="command_modules\azure-cli-role\azure\cli\command_modules\role\_client_factory.py" />
     <Compile Include="command_modules\azure-cli-role\azure\cli\command_modules\role\_help.py">
       <SubType>Code</SubType>
     </Compile>
@@ -671,6 +675,7 @@
     <Compile Include="command_modules\azure-cli-storage\setup.py" />
     <Compile Include="command_modules\azure-cli-taskhelp\azure\cli\command_modules\taskhelp\__init__.py" />
     <Compile Include="command_modules\azure-cli-taskhelp\setup.py" />
+    <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\tests\test_vm_actions.py" />
     <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\tests\test_vm_commands.py" />
     <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\tests\test_vm_defaults.py">
       <SubType>Code</SubType>
@@ -683,7 +688,7 @@
     <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\_actions.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\_factory.py" />
+    <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\_client_factory.py" />
     <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\_help.py" />
     <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\_validators.py">
       <SubType>Code</SubType>
@@ -719,9 +724,6 @@
     <Folder Include="command_modules\azure-cli-acr\azure\cli\" />
     <Folder Include="command_modules\azure-cli-acr\azure\cli\command_modules\" />
     <Folder Include="command_modules\azure-cli-acr\azure\cli\command_modules\acr\" />
-    <Folder Include="command_modules\azure-cli-acr\azure\cli\command_modules\acr\mgmt_acr\" />
-    <Folder Include="command_modules\azure-cli-acr\azure\cli\command_modules\acr\mgmt_acr\models\" />
-    <Folder Include="command_modules\azure-cli-acr\azure\cli\command_modules\acr\mgmt_acr\operations\" />
     <Folder Include="command_modules\azure-cli-acs\" />
     <Folder Include="command_modules\azure-cli-acs\azure\" />
     <Folder Include="command_modules\azure-cli-acs\azure\cli\" />
@@ -751,6 +753,11 @@
     <Folder Include="command_modules\azure-cli-configure\azure\cli\" />
     <Folder Include="command_modules\azure-cli-configure\azure\cli\command_modules\" />
     <Folder Include="command_modules\azure-cli-configure\azure\cli\command_modules\configure\" />
+    <Folder Include="command_modules\azure-cli-container\" />
+    <Folder Include="command_modules\azure-cli-container\azure\" />
+    <Folder Include="command_modules\azure-cli-container\azure\cli\" />
+    <Folder Include="command_modules\azure-cli-container\azure\cli\command_modules\" />
+    <Folder Include="command_modules\azure-cli-container\azure\cli\command_modules\container\" />
     <Folder Include="command_modules\azure-cli-context\" />
     <Folder Include="command_modules\azure-cli-context\azure\" />
     <Folder Include="command_modules\azure-cli-context\azure\cli\" />
@@ -903,6 +910,7 @@
     <Content Include="azure-cli-core\setup.cfg" />
     <Content Include="azure-cli\az.completion.sh" />
     <Content Include="azure-cli\setup.cfg" />
+    <Content Include="command_modules\azure-cli-acr\azure\cli\command_modules\acr\template.json" />
     <Content Include="command_modules\azure-cli-acr\requirements.txt" />
     <Content Include="command_modules\azure-cli-acs\requirements.txt" />
     <Content Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\tests\recordings\test_appservice_error_polish.yaml" />
@@ -919,6 +927,7 @@
     <Content Include="command_modules\azure-cli-appservice\setup.cfg" />
     <Content Include="command_modules\azure-cli-component\requirements.txt" />
     <Content Include="command_modules\azure-cli-configure\requirements.txt" />
+    <Content Include="command_modules\azure-cli-container\requirements.txt" />
     <Content Include="command_modules\azure-cli-iot\azure\cli\command_modules\iot\mgmt_iot_hub_device\swagger_iot_hub_device_identity.json" />
     <Content Include="command_modules\azure-cli-iot\requirements.txt" />
     <Content Include="command_modules\azure-cli-keyvault\requirements.txt" />
@@ -968,6 +977,7 @@
     <Content Include="command_modules\azure-cli-network\requirements.txt" />
     <Content Include="command_modules\azure-cli-profile\requirements.txt" />
     <Content Include="command_modules\azure-cli-redis\requirements.txt" />
+    <Content Include="command_modules\azure-cli-resource\azure\cli\command_modules\resource\tests\sample_policy_rule.json" />
     <Content Include="command_modules\azure-cli-resource\azure\cli\command_modules\resource\tests\simple_deploy.json" />
     <Content Include="command_modules\azure-cli-resource\azure\cli\command_modules\resource\tests\simple_deploy_parameters.json" />
     <Content Include="command_modules\azure-cli-resource\requirements.txt" />

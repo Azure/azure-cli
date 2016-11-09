@@ -31,56 +31,6 @@ from azure.mgmt.dns.models import (RecordSet, AaaaRecord, ARecord, CnameRecord, 
 from azure.cli.command_modules.network.zone_file.parse_zone_file import parse_zone_file
 from azure.cli.command_modules.network.zone_file.make_zone_file import make_zone_file
 
-#region Network subresource factory methods
-
-def list_network_resource_property(resource, prop):
-    """ Factory method for creating list functions. """
-    def list_func(resource_group_name, resource_name):
-        client = getattr(_network_client_factory(), resource)
-        return client.get(resource_group_name, resource_name).__getattribute__(prop)
-    return list_func
-
-def get_network_resource_property_entry(resource, prop):
-    """ Factory method for creating get functions. """
-    def get_func(resource_group_name, resource_name, item_name):
-        client = getattr(_network_client_factory(), resource)
-        items = getattr(client.get(resource_group_name, resource_name), prop)
-
-        result = next((x for x in items if x.name.lower() == item_name.lower()), None)
-        if not result:
-            raise CLIError("Item '{}' does not exist on {} '{}'".format(
-                item_name, resource, resource_name))
-        else:
-            return result
-    return get_func
-
-def delete_network_resource_property_entry(resource, prop):
-    """ Factory method for creating delete functions. """
-    def delete_func(resource_group_name, resource_name, item_name):
-        client = getattr(_network_client_factory(), resource)
-        item = client.get(resource_group_name, resource_name)
-        keep_items = \
-            [x for x in item.__getattribute__(prop) if x.name.lower() != item_name.lower()]
-        _set_param(item, prop, keep_items)
-        result = client.create_or_update(resource_group_name, resource_name, item).result()
-        if next((x for x in getattr(result, prop) if x.name == item_name), None):
-            raise CLIError("Failed to delete '{}' on '{}'".format(item_name, resource_name))
-    return delete_func
-
-def _get_property(items, name):
-    result = next((x for x in items if x.name.lower() == name.lower()), None)
-    if not result:
-        raise CLIError("Property '{}' does not exist".format(name))
-    else:
-        return result
-
-def _set_param(item, prop, value):
-    if value == '':
-        setattr(item, prop, None)
-    elif value is not None:
-        setattr(item, prop, value)
-#endregion
-
 #region Generic list commands
 def _generic_list(operation_name, resource_group_name):
     ncf = _network_client_factory()

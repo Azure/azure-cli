@@ -53,7 +53,9 @@ def delete_network_resource_property_entry(resource, prop):
         keep_items = \
             [x for x in item.__getattribute__(prop) if x.name.lower() != item_name.lower()]
         _set_param(item, prop, keep_items)
-        return client.create_or_update(resource_group_name, resource_name, item)
+        result = client.create_or_update(resource_group_name, resource_name, item).result()
+        if next((x for x in getattr(result, prop) if x.name.lower() == item_name.lower()), None):
+            raise CLIError("Failed to delete '{}' on '{}'".format(item_name, resource_name))
     func_name = 'delete_network_resource_property_entry_{}_{}'.format(resource, prop)
     setattr(sys.modules[__name__], func_name, delete_func)
     return func_name
