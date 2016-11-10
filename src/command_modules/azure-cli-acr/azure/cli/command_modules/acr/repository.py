@@ -69,7 +69,7 @@ def _validate_user_credentials(registry_name, path, resultIndex, username=None, 
     return _obtain_data_from_registry(login_server, path, resultIndex, username, password)
 
 def acr_repository_list(registry_name, username=None, password=None):
-    '''List repositories in a given container registry.
+    '''Lists repositories in the specified container registry.
     :param str registry_name: The name of container registry
     :param str username: The username used to log into the container registry
     :param str password: The password used to log into the container registry
@@ -78,7 +78,7 @@ def acr_repository_list(registry_name, username=None, password=None):
     return _validate_user_credentials(registry_name, path, 'repositories', username, password)
 
 def acr_repository_show_tags(registry_name, repository, username=None, password=None):
-    '''Show tags of a given repository in a given container registry.
+    '''Shows tags of a given repository in the specified container registry.
     :param str registry_name: The name of container registry
     :param str repository: The repository to obtain tags from
     :param str username: The username used to log into the container registry

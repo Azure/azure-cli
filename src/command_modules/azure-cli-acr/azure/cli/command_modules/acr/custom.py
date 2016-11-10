@@ -5,9 +5,7 @@
 
 import uuid
 
-from azure.cli.core.commands import (
-    LongRunningOperation
-)
+from azure.cli.core.commands import LongRunningOperation
 
 from azure.mgmt.containerregistry.models import (
     Registry,
@@ -26,7 +24,7 @@ import azure.cli.core._logging as _logging
 logger = _logging.get_az_logger(__name__)
 
 def acr_check_name(registry_name):
-    '''Check whether the container registry name is available.
+    '''Checks whether the container registry name is available for use.
     :param str registry_name: The name of container registry
     '''
     client = get_acr_service_client().registries
@@ -34,7 +32,7 @@ def acr_check_name(registry_name):
     return client.check_name_availability(registry_name)
 
 def acr_list(resource_group_name=None):
-    '''List container registries.
+    '''Lists all the available container registries under the current subscription.
     :param str resource_group_name: The name of resource group
     '''
     client = get_acr_service_client().registries
@@ -48,15 +46,16 @@ def acr_create(registry_name, #pylint: disable=too-many-arguments
                resource_group_name,
                location,
                storage_account_name=None,
-               enable_admin=False):
-    '''Create a container registry.
+               admin_enabled='false'):
+    '''Creates or updates a container registry with the specified parameters.
     :param str registry_name: The name of container registry
     :param str resource_group_name: The name of resource group
     :param str location: The name of location
     :param str storage_account_name: The name of storage account
-    :param bool enable_admin: Enable admin user
+    :param str admin_enabled: The value that indicates whether the admin user is enabled
     '''
     client = get_acr_service_client().registries
+    admin_user_enabled = admin_enabled == 'true'
 
     if storage_account_name is None:
         storage_account_name = str(uuid.uuid4()).replace('-', '')[:24]
@@ -65,7 +64,7 @@ def acr_create(registry_name, #pylint: disable=too-many-arguments
                                 registry_name,
                                 location,
                                 storage_account_name,
-                                enable_admin)
+                                admin_user_enabled)
         )
         registry = client.get_properties(resource_group_name, registry_name)
     else:
@@ -78,7 +77,7 @@ def acr_create(registry_name, #pylint: disable=too-many-arguments
                     storage_account_name,
                     storage_account_key
                 ),
-                admin_user_enabled=enable_admin
+                admin_user_enabled=admin_user_enabled
             )
         )
 
@@ -94,7 +93,7 @@ def acr_create(registry_name, #pylint: disable=too-many-arguments
     return registry
 
 def acr_delete(registry_name, resource_group_name=None):
-    '''Delete a container registry.
+    '''Deletes a container registry.
     :param str registry_name: The name of container registry
     :param str resource_group_name: The name of resource group
     '''
@@ -106,7 +105,7 @@ def acr_delete(registry_name, resource_group_name=None):
     return client.delete(resource_group_name, registry_name)
 
 def acr_show(registry_name, resource_group_name=None):
-    '''Get a container registry.
+    '''Gets the properties of the specified container registry.
     :param str registry_name: The name of container registry
     :param str resource_group_name: The name of resource group
     '''
@@ -132,11 +131,11 @@ def acr_update_get(client,
     )
 
 def acr_update_custom(instance,
-                      admin_user_enabled=None,
+                      admin_enabled=None,
                       storage_account_name=None,
                       tags=None):
-    if admin_user_enabled is not None:
-        instance.admin_user_enabled = admin_user_enabled == 'true'
+    if admin_enabled is not None:
+        instance.admin_user_enabled = admin_enabled == 'true'
 
     if tags is not None:
         instance.tags = tags
