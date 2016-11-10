@@ -33,17 +33,19 @@ class IotHubDevicesOperations(object):
 
         self.config = config
 
-    def create(
-            self, device_id, create_device_request, custom_headers=None, raw=False, **operation_config):
+    def create_or_update(
+            self, device_id, device_description, if_match="*", custom_headers=None, raw=False, **operation_config):
         """Creates a new device identity in the identity registry of an IoT Hub.
 
         Creates a new device identity in the identity registry of an IoT Hub.
 
         :param device_id: The Id of the device.
         :type device_id: str
-        :param create_device_request: request.
-        :type create_device_request: :class:`CreateDeviceRequest
-         <iothubdeviceclient.models.CreateDeviceRequest>`
+        :param device_description: request.
+        :type device_description: :class:`DeviceDescription
+         <iothubdeviceclient.models.DeviceDescription>`
+        :param if_match: Specify the ETag for the device identity.
+        :type if_match: str
         :param dict custom_headers: headers that will be added to the request
         :param bool raw: returns the direct response alongside the
          deserialized response
@@ -72,11 +74,13 @@ class IotHubDevicesOperations(object):
             header_parameters['x-ms-client-request-id'] = str(uuid.uuid1())
         if custom_headers:
             header_parameters.update(custom_headers)
+        if if_match is not None:
+            header_parameters['If-Match'] = self._serialize.header("if_match", if_match, 'str')
         if self.config.accept_language is not None:
             header_parameters['accept-language'] = self._serialize.header("self.config.accept_language", self.config.accept_language, 'str')
 
         # Construct body
-        body_content = self._serialize.body(create_device_request, 'CreateDeviceRequest')
+        body_content = self._serialize.body(device_description, 'DeviceDescription')
 
         # Construct and send request
         request = self._client.put(url, query_parameters)
@@ -157,7 +161,7 @@ class IotHubDevicesOperations(object):
         return deserialized
 
     def delete(
-            self, device_id, if_match, custom_headers=None, raw=False, **operation_config):
+            self, device_id, if_match="*", custom_headers=None, raw=False, **operation_config):
         """Delete a device identity in the identity registry of an IoT Hub.
 
         Delete a device identity in the identity registry of an IoT Hub.
