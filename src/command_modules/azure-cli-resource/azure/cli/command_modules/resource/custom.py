@@ -411,7 +411,6 @@ class _ResourceUtils(object): #pylint: disable=too-many-instance-attributes
         self.rcf = rcf or _resource_client_factory()
         if api_version is None:
             if resource_id:
-                parts = parse_resource_id(resource_id)
                 api_version = _ResourceUtils._resolve_api_version_by_id(self.rcf, resource_id)
             else:
                 api_version = _ResourceUtils._resolve_api_version(self.rcf,
