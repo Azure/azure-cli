@@ -10,7 +10,6 @@ import json
 import os
 import uuid
 
-from msrestazure.azure_exceptions import CloudError
 from azure.mgmt.resource.resources import ResourceManagementClient
 from azure.mgmt.resource.resources.models.resource_group import ResourceGroup
 from azure.mgmt.resource.resources.models import GenericResource
@@ -159,7 +158,7 @@ def tag_resource(tags, resource_group_name=None, resource_provider_namespace=Non
     res = _ResourceUtils(resource_group_name, resource_provider_namespace,
                          parent_resource_path, resource_type, resource_name,
                          resource_id, api_version)
-    res.tag(tags)
+    return res.tag(tags)
 
 def list_resources(resource_group_name=None, resource_provider_namespace=None,
                    resource_type=None, name=None, tag=None, location=None):
@@ -398,7 +397,7 @@ class _ResourceUtils(object): #pylint: disable=too-many-instance-attributes
                                      parent_resource_path or resource_provider_namespace or
                                      resource_name):
             raise IncorrectUsageError(
-                "You must specify either 'id' or other individual pieces, but not both")
+                "(--id ID | --resource-group RG --name NAME --namespace NAMESPACE --resource-type TYPE -n NAME)") #pylint: disable=line-too-long
 
         #if the resouce_type is in format 'namespace/type' split it.
         #(we don't have to do this, but commands like 'vm show' returns such values)
@@ -461,23 +460,19 @@ class _ResourceUtils(object): #pylint: disable=too-many-instance-attributes
             managed_by=resource.managed_by,
             sku=resource.sku,
             identity=resource.identity)
-        try:
-            if self.resource_id:
-                self.rcf.resources.create_or_update_by_id(self.resource_id, self.api_version,
-                                                          parameters)
-            else:
-                self.rcf.resources.create_or_update(
-                    self.resource_group_name,
-                    self.resource_provider_namespace,
-                    self.parent_resource_path or '',
-                    self.resource_type,
-                    self.resource_name,
-                    self.api_version,
-                    parameters)
-        except CloudError as ex:
-            # TODO: Remove workaround once Swagger and SDK fix is implemented (#120123723)
-            if '202' not in str(ex):
-                raise ex
+
+        if self.resource_id:
+            return self.rcf.resources.create_or_update_by_id(self.resource_id, self.api_version,
+                                                             parameters)
+        else:
+            return self.rcf.resources.create_or_update(
+                self.resource_group_name,
+                self.resource_provider_namespace,
+                self.parent_resource_path or '',
+                self.resource_type,
+                self.resource_name,
+                self.api_version,
+                parameters)
 
     @staticmethod
     def _resolve_api_version(rcf, resource_provider_namespace, parent_resource_path, resource_type):

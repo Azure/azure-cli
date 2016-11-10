@@ -25,14 +25,15 @@ register_cli_argument('resource', 'api_version', help='The api version of the re
 register_cli_argument('resource', 'resource_id', options_list=('--id',), help='resource id')
 register_cli_argument('resource', 'resource_provider_namespace', options_list=('--namespace',), completer=get_providers_completion_list,
                       help="resource namespaces like 'Microsoft.Network'. You can also specify it through --resource-type parameter")
-register_cli_argument('resource', 'resource_type', help="types such as 'virtualNetworks', or optional include namespace such as 'Microsoft.Network/virtualNetworks'")
+register_cli_argument('resource', 'resource_type',
+                      completer=get_resource_types_completion_list,
+                      help="types such as 'virtualNetworks', or optional include namespace such as 'Microsoft.Network/virtualNetworks'")
 register_cli_argument('resource', 'parent_resource_path', required=False, options_list=('--parent',),
-                      help="path in formats of '<parent-type>/<parent-name>' or '<grandparent-type>/<grandparent-name>/<parent-type>/<parent-name>'")
+                      help="path in formats of '<parent-type>/<parent-name>' like 'virtualnetworks/myvnet', or even '<grandparent-type>/<grandparent-name>/<parent-type>/<parent-name>'")
 register_cli_argument('resource', 'tag', tag_type)
 register_cli_argument('resource', 'tags', tags_type)
 register_cli_argument('resource list', 'name', resource_name_type)
 register_cli_argument('resource move', 'ids', nargs='+')
-register_cli_argument('resource show', 'resource_type', completer=get_resource_types_completion_list)
 
 register_cli_argument('provider', 'top', ignore_type)
 register_cli_argument('provider', 'resource_provider_namespace', options_list=('--namespace', '-n'), completer=get_providers_completion_list,

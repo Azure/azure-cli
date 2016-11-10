@@ -110,7 +110,7 @@ class ResourceIDScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
         super(ResourceIDScenarioTest, self).__init__(__file__, test_method)
-        self.resource_group = 'azure-cli-resource-id-test'
+        self.resource_group = 'azure-cli-resource-id-test3'
         self.vnet_name = 'cli-test-vnet1'
         self.subnet_name = 'cli-test-subnet1'
 
@@ -136,13 +136,13 @@ class ResourceIDScenarioTest(ResourceGroupVCRTestBase):
 
         subnet_resource_id = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(
             subscription_id, self.resource_group, self.vnet_name, self.subnet_name)
-        s.cmd('resource tag --id {} --tags {}'.format(subnet_resource_id, 'tag-subnet'))
         s.cmd('resource show --id {}'.format(subnet_resource_id), checks=[
             JMESPathCheck('name', self.subnet_name),
             JMESPathCheck('resourceGroup', self.resource_group)
         ])
 
         s.cmd('resource delete --id {}'.format(subnet_resource_id), checks=NoneCheck())
+        s.cmd('resource delete --id {}'.format(vnet_resource_id), checks=NoneCheck())
 
 class TagScenarioTest(VCRTestBase): # Not RG test base because it operates only on the subscription
 
