@@ -6,13 +6,11 @@
 # pylint: disable=line-too-long
 import argparse
 import getpass
-import os
 
 from argcomplete.completers import FilesCompleter
 
 from azure.mgmt.compute.models import (VirtualHardDisk,
                                        CachingTypes,
-                                       ContainerServiceOchestratorTypes,
                                        UpgradeMode)
 from azure.mgmt.storage.models import SkuName
 from azure.cli.core.commands import register_cli_argument, CliArgumentType, register_extra_cli_argument
@@ -70,15 +68,16 @@ register_cli_argument('vm access', 'username', options_list=('--username', '-u')
 register_cli_argument('vm access', 'password', options_list=('--password', '-p'), help='The user password')
 
 register_cli_argument('acs', 'name', arg_type=name_arg_type)
-register_cli_argument('acs', 'orchestrator_type', **enum_choice_list(ContainerServiceOchestratorTypes))
+register_cli_argument('acs', 'orchestrator_type', type=str)
 #some admin names are prohibited in acs, such as root, admin, etc. Because we have no control on the orchestrators, so default to a safe name.
 register_cli_argument('acs', 'admin_username', options_list=('--admin-username',), default='azureuser', required=False)
-register_cli_argument('acs', 'ssh_key_value', required=False, help='SSH key file value or key file path.', default=os.path.join(os.path.expanduser('~'), '.ssh', 'id_rsa.pub'), completer=FilesCompleter())
 register_cli_argument('acs', 'dns_name_prefix', options_list=('--dns-prefix', '-d'))
 register_extra_cli_argument('acs create', 'generate_ssh_keys', action='store_true', help='Generate SSH public and private key files if missing')
 register_cli_argument('acs', 'container_service_name', options_list=('--name', '-n'), help='The name of the container service', completer=get_resource_name_completion_list('Microsoft.ContainerService/ContainerServices'))
 register_cli_argument('acs create', 'agent_vm_size', completer=get_vm_size_completion_list)
 register_cli_argument('acs scale', 'new_agent_count', type=int, help='The number of agents for the cluster')
+register_cli_argument('acs create', 'service_principal', help='Service principal for making calls into Azure APIs')
+register_cli_argument('acs create', 'client_secret', help='Client secret to use with the service principal for making calls to Azure APIs')
 
 register_cli_argument('vm capture', 'overwrite', action='store_true')
 

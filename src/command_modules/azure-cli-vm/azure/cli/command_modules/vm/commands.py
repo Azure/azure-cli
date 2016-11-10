@@ -7,7 +7,7 @@ from azure.cli.core.commands import DeploymentOutputLongRunningOperation, cli_co
 
 from azure.cli.core.commands.arm import cli_generic_update_command
 
-from azure.cli.command_modules.vm._client_factory import * #pylint: disable=wildcard-import
+from azure.cli.command_modules.vm._client_factory import * #pylint: disable=wildcard-import,unused-wildcard-import
 
 #pylint: disable=line-too-long
 
@@ -72,8 +72,6 @@ cli_command(__name__, 'vm boot-diagnostics enable', 'azure.cli.command_modules.v
 cli_command(__name__, 'vm boot-diagnostics get-boot-log', 'azure.cli.command_modules.vm.custom#get_boot_log')
 
 # ACS
-cli_command(__name__, 'acs create', 'azure.cli.command_modules.vm.mgmt_acs.lib.operations.acs_operations#AcsOperations.create_or_update', cf_acs_create,
-            transform=DeploymentOutputLongRunningOperation('Starting container service create'))
 
 #Remove the hack after https://github.com/Azure/azure-rest-api-specs/issues/352 fixed
 from azure.mgmt.compute.models import ContainerService#pylint: disable=wrong-import-position
