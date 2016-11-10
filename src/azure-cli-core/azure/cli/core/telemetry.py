@@ -228,8 +228,9 @@ def _remove_cmd_chars(s):
     return s
 
 def _remove_symbols(s):
-    for c in '$%^&|':
-        s = s.replace(c, '_')
+    if isinstance(s, str):
+        for c in '$%^&|':
+            s = s.replace(c, '_')
     return s
 
 def _in_ci():
