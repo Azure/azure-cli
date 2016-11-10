@@ -20,7 +20,7 @@ hub_name_type = CliArgumentType(completer=get_resource_name_completion_list('Mic
                                 help='IoT Hub name.')
 
 register_cli_argument('iot hub', 'hub_name', hub_name_type, options_list=('--name', '-n'))
-for subgroup in ['consumer-group', 'key']:
+for subgroup in ['consumer-group', 'policy']:
     register_cli_argument('iot hub {}'.format(subgroup), 'hub_name', options_list=('--hub-name',))
 
 register_cli_argument('iot device', 'hub_name', hub_name_type)
@@ -33,8 +33,8 @@ register_cli_argument('iot hub consumer-group', 'consumer_group_name', options_l
                       help='Event hub consumer group name.')
 register_cli_argument('iot hub consumer-group', 'event_hub_name', help='Target event hub name.')
 
-# Arguments for 'iot hub key' group
-register_cli_argument('iot hub key', 'key_name', options_list=('--name', '-n'), help='Share access policy name.')
+# Arguments for 'iot hub policy' group
+register_cli_argument('iot hub policy', 'policy_name', options_list=('--name', '-n'), help='Share access policy name.')
 
 # Arguments for 'iot hub create'
 register_cli_argument('iot hub create', 'hub_name', options_list=('--name', '-n'), completer=None)
@@ -48,7 +48,7 @@ register_cli_argument('iot hub create', 'sku',
 register_cli_argument('iot hub create', 'unit', help='Units in your IoT Hub.', type=int)
 
 # Arguments for 'iot hub show-connection-string'
-register_cli_argument('iot hub show-connection-string', 'key_name', help='Name of the key to use.')
+register_cli_argument('iot hub show-connection-string', 'policy_name', help='Shared access policy to use.')
 
 # Arguments for 'iot device create'
 register_cli_argument('iot device create', 'device_id', completer=None)

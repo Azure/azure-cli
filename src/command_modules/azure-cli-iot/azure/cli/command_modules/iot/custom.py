@@ -52,25 +52,25 @@ def iot_hub_list(client, resource_group_name=None):
         return client.list_by_resource_group(resource_group_name)
 
 
-def iot_hub_show_connection_string(client, hub_name=None, resource_group_name=None, key_name='iothubowner'):
+def iot_hub_show_connection_string(client, hub_name=None, resource_group_name=None, policy_name='iothubowner'):
     if hub_name is None:
         hubs = iot_hub_list(client, resource_group_name)
         if hubs is None:
             raise CLIError('No IoT Hub found.')
         connection_strings = []
         for h in hubs:
-            connection_string = _get_single_iot_hub_connection_string(client, h.name, h.resourcegroup, key_name)
+            connection_string = _get_single_iot_hub_connection_string(client, h.name, h.resourcegroup, policy_name)
             connection_strings.append({"name": h.name,
                                        "connectionString": connection_string})
         return connection_strings
     else:
         resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
-        connection_string = _get_single_iot_hub_connection_string(client, hub_name, resource_group_name, key_name)
+        connection_string = _get_single_iot_hub_connection_string(client, hub_name, resource_group_name, policy_name)
         return {"connectionString": connection_string}
 
 
 def _get_single_iot_hub_connection_string(client, hub_name, resource_group_name, policy_name):
-    access_policy = iot_hub_key_get(client, hub_name, policy_name, resource_group_name)
+    access_policy = iot_hub_policy_get(client, hub_name, policy_name, resource_group_name)
     connection_string_template = 'HostName={}.azure-devices.net;SharedAccessKeyName={};SharedAccessKey={}'
     return connection_string_template.format(hub_name, policy_name, access_policy.primary_key)
 
@@ -100,14 +100,14 @@ def iot_hub_consumer_group_delete(client, hub_name, consumer_group_name, resourc
     return client.delete_event_hub_consumer_group(resource_group_name, hub_name, event_hub_name, consumer_group_name)
 
 
-def iot_hub_key_list(client, hub_name, resource_group_name=None):
+def iot_hub_policy_list(client, hub_name, resource_group_name=None):
     resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
     return client.list_keys(resource_group_name, hub_name)
 
 
-def iot_hub_key_get(client, hub_name, key_name, resource_group_name=None):
+def iot_hub_policy_get(client, hub_name, policy_name, resource_group_name=None):
     resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
-    return client.get_keys_for_key_name(resource_group_name, hub_name, key_name)
+    return client.get_keys_for_key_name(resource_group_name, hub_name, policy_name)
 
 
 def iot_device_create(client, hub_name, device_id, resource_group_name=None, x509=False, primary_thumbprint=None,
@@ -200,7 +200,7 @@ def _get_iot_device_client(client, resource_group_name, hub_name, device_id):
     resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
     base_url = '{0}.azure-devices.net'.format(hub_name)
     uri = '{0}/devices/{1}'.format(base_url, device_id)
-    access_policy = iot_hub_key_get(client, hub_name, 'iothubowner', resource_group_name)
+    access_policy = iot_hub_policy_get(client, hub_name, 'iothubowner', resource_group_name)
     creds = SasTokenAuthentication(uri, access_policy.key_name, access_policy.primary_key)
     return IotHubDeviceClient(creds, client.config.subscription_id, base_url='https://' + base_url).iot_hub_devices
 

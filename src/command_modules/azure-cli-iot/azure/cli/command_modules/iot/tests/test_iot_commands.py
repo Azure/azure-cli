@@ -69,15 +69,15 @@ class IoTHubTest(ResourceGroupVCRTestBase):
             JMESPathCheck('[2].sku.name', 'S3')
         ])
 
-        # Test 'az iot hub key list'
-        self.cmd('iot hub key list --hub-name {0}'.format(hub), checks=[
+        # Test 'az iot hub policy list'
+        self.cmd('iot hub policy list --hub-name {0}'.format(hub), checks=[
             JMESPathCheck('length([*])', 5)
         ])
 
-        # Test 'az iot hub key show'
-        key_name = 'service'
-        self.cmd('iot hub key show --hub-name {0} -n {1}'.format(hub, key_name), checks=[
-            JMESPathCheck('keyName', key_name),
+        # Test 'az iot hub policy show'
+        policy_name = 'service'
+        self.cmd('iot hub policy show --hub-name {0} -n {1}'.format(hub, policy_name), checks=[
+            JMESPathCheck('keyName', policy_name),
             JMESPathCheck('rights', 'ServiceConnect')
         ])
 

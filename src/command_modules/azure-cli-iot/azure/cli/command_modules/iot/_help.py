@@ -66,17 +66,17 @@ helps['iot hub consumer-group delete'] = """
     short-summary: Delete an event hub consumer group.
 """
 
-helps['iot hub key'] = """
+helps['iot hub policy'] = """
     type: group
     short-summary: Manage shared access policies of an IoT Hub.
 """
 
-helps['iot hub key list'] = """
+helps['iot hub policy list'] = """
     type: command
     short-summary: List all shared access policies of an IoT Hub.
 """
 
-helps['iot hub key show'] = """
+helps['iot hub policy show'] = """
     type: command
     short-summary: Get a shared access policy of an IoT Hub.
 """
