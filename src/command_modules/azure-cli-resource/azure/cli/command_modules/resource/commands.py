@@ -11,7 +11,6 @@ from azure.cli.core.commands.arm import cli_generic_update_command
 
 from azure.cli.command_modules.resource._client_factory import (_resource_client_factory,
                                                                 cf_resource_groups,
-                                                                cf_resources,
                                                                 cf_providers,
                                                                 cf_features,
                                                                 cf_tags,
@@ -31,8 +30,9 @@ cli_command(__name__, 'resource group export', 'azure.cli.command_modules.resour
 def transform_resource_list(result):
     return [OrderedDict([('Name', r['name']), ('ResourceGroup', r['resourceGroup']), \
             ('Location', r['location']), ('Type', r['type'])]) for r in result]
-cli_command(__name__, 'resource delete', 'azure.mgmt.resource.resources.operations.resources_operations#ResourcesOperations.delete', cf_resources)
-cli_command(__name__, 'resource show', 'azure.mgmt.resource.resources.operations.resources_operations#ResourcesOperations.get', cf_resources)
+
+cli_command(__name__, 'resource delete', 'azure.cli.command_modules.resource.custom#delete_resource')
+cli_command(__name__, 'resource show', 'azure.cli.command_modules.resource.custom#show_resource')
 cli_command(__name__, 'resource list', 'azure.cli.command_modules.resource.custom#list_resources', table_transformer=transform_resource_list)
 cli_command(__name__, 'resource tag', 'azure.cli.command_modules.resource.custom#tag_resource')
 cli_command(__name__, 'resource move', 'azure.cli.command_modules.resource.custom#move_resource')

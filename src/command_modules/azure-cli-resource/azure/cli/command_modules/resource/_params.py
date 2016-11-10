@@ -13,27 +13,28 @@ from azure.cli.core.commands.parameters import (ignore_type, resource_group_name
                                                 enum_choice_list)
 from .custom import (get_policy_completion_list, get_policy_assignment_completion_list,
                      get_resource_types_completion_list, get_providers_completion_list)
-from ._validators import validate_resource_type, validate_parent, resolve_resource_parameters, validate_deployment_name
+from ._validators import validate_deployment_name
 
 # BASIC PARAMETER CONFIGURATION
 
-resource_name_type = CliArgumentType(options_list=('--name', '-n'), help='The resource name.')
+resource_name_type = CliArgumentType(options_list=('--name', '-n'), help='The resource name. (Ex: myC)')
+_PROVIDER_HELP_TEXT = 'the resource namespace, aka \'provider\''
 
 register_cli_argument('resource', 'resource_name', resource_name_type)
 register_cli_argument('resource', 'api_version', help='The api version of the resource (omit for latest)', required=False)
-
-for item in ['tag', 'update', 'show', 'delete', 'exists']:
-    register_cli_argument('resource {}'.format(item), 'resource_provider_namespace', ignore_type)
-
-register_cli_argument('resource', 'resource_type', help='The resource type in <namespace>/<type> format.', type=validate_resource_type, validator=resolve_resource_parameters)
-register_cli_argument('resource', 'parent_resource_path', help='The parent resource type in <type>/<name> format.', type=validate_parent, required=False, options_list=('--parent',))
+register_cli_argument('resource', 'resource_id', options_list=('--id',), help='Resource ID')
+register_cli_argument('resource', 'resource_provider_namespace', options_list=('--namespace',), completer=get_providers_completion_list,
+                      help="Provider namespace (Ex: 'Microsoft.Provider')")
+register_cli_argument('resource', 'resource_type',
+                      completer=get_resource_types_completion_list,
+                      help="The resource type (Ex: 'resC'). Can also accept namespace/type format (Ex: 'Microsoft.Provider/resC')")
+register_cli_argument('resource', 'parent_resource_path', required=False, options_list=('--parent',),
+                      help="The parent path (Ex: 'resA/myA/resB/myB')")
 register_cli_argument('resource', 'tag', tag_type)
 register_cli_argument('resource', 'tags', tags_type)
 register_cli_argument('resource list', 'name', resource_name_type)
 register_cli_argument('resource move', 'ids', nargs='+')
-register_cli_argument('resource show', 'resource_type', completer=get_resource_types_completion_list)
 
-_PROVIDER_HELP_TEXT = 'the resource namespace, aka \'provider\''
 register_cli_argument('provider', 'top', ignore_type)
 register_cli_argument('provider', 'resource_provider_namespace', options_list=('--namespace', '-n'), completer=get_providers_completion_list,
                       help=_PROVIDER_HELP_TEXT)
