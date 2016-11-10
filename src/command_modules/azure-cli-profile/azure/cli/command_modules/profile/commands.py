@@ -3,25 +3,15 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 #---------------------------------------------------------------------------------------------
 
-from __future__ import print_function
+#pylint: disable=line-too-long
 
 from azure.cli.core.commands import cli_command
 
-from .custom import (login,
-                     logout,
-                     list_locations,
-                     list_subscriptions,
-                     show_subscription,
-                     set_active_subscription,
-                     account_clear)
+cli_command(__name__, 'login', 'azure.cli.command_modules.profile.custom#login')
+cli_command(__name__, 'logout', 'azure.cli.command_modules.profile.custom#logout')
 
-cli_command('login', login)
-cli_command('logout', logout)
-
-cli_command('account list', list_subscriptions)
-cli_command('account show', show_subscription)
-cli_command('account set', set_active_subscription)
-cli_command('account clear', account_clear)
-cli_command('account list-locations', list_locations)
-
-
+cli_command(__name__, 'account list', 'azure.cli.command_modules.profile.custom#list_subscriptions')
+cli_command(__name__, 'account set', 'azure.cli.command_modules.profile.custom#set_active_subscription')
+cli_command(__name__, 'account show', 'azure.cli.command_modules.profile.custom#show_subscription')
+cli_command(__name__, 'account clear', 'azure.cli.command_modules.profile.custom#account_clear')
+cli_command(__name__, 'account list-locations', 'azure.cli.command_modules.profile.custom#list_locations')

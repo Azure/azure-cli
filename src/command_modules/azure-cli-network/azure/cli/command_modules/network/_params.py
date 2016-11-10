@@ -23,7 +23,7 @@ from azure.cli.core.commands.parameters import (location_type, get_resource_name
                                                 get_generic_completion_list)
 from azure.cli.core.commands.validators import MarkSpecifiedAction
 from azure.cli.core.commands.template_create import register_folded_cli_argument
-from azure.cli.command_modules.network._factory import _network_client_factory
+from azure.cli.command_modules.network._client_factory import _network_client_factory
 from azure.cli.command_modules.network._validators import \
     (process_ag_create_namespace, process_ag_listener_create_namespace,
      process_ag_http_settings_create_namespace, process_ag_url_path_map_create_namespace,

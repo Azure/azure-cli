@@ -5,8 +5,6 @@
 
 import requests
 
-from azure.cli.core.commands import cli_command
-
 from ._utils import (
     get_registry_by_name
 )
@@ -88,6 +86,3 @@ def acr_repository_show_tags(registry_name, repository, username=None, password=
     '''
     path = '/v2/' + repository + '/tags/list'
     return _validate_user_credentials(registry_name, path, 'tags', username, password)
-
-cli_command('acr repository list', acr_repository_list)
-cli_command('acr repository show-tags', acr_repository_show_tags)

@@ -23,7 +23,7 @@ import azure.cli.core._logging as _logging
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.arm import is_valid_resource_id, parse_resource_id
 
-from ._factory import _resource_client_factory, _resource_policy_client_factory
+from ._client_factory import _resource_client_factory, _resource_policy_client_factory
 
 logger = _logging.get_az_logger(__name__)
 

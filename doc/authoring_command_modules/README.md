@@ -45,7 +45,7 @@ thrown whilst attempting to load your module.
 <a name="heading_author_command_mod"></a>Authoring command modules
 ------
 Currently, all command modules should start with `azure-cli-`.  
-When the CLI loads, it search for packages installed via pip that start with that prefix.
+When the CLI loads, it search for packages installed that start with that prefix.
 
 The `example_module_template` directory gives a basic command module with 1 command.
 
@@ -63,6 +63,20 @@ Command modules should have the following structure:
 |               `-- __init__.py
 |-- requirements.txt
 `-- setup.py
+```
+
+**Create an \_\_init__.py for your module**
+
+In the \_\_init__ file, two methods need to be defined:
+  - `load_commands` - Uses the file in the 'Writing a Command' section below to load the commands.
+  - `load_params` - Uses the file in the 'Customizing Arguments' section below to load parameter customizations.
+
+```Python
+def load_params(command):
+    import azure.cli.command_modules.<module_name>._params
+
+def load_commands():
+    import azure.cli.command_modules.<module_name>.commands
 ```
 
 ```python

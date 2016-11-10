@@ -6,16 +6,13 @@
 import uuid
 
 from azure.cli.core.commands import (
-    cli_command,
     LongRunningOperation
 )
-from azure.cli.core.commands.arm import cli_generic_update_command
 
-from azure.cli.command_modules.acr.mgmt_acr.models import (
+from azure.mgmt.containerregistry.models import (
     Registry,
     RegistryUpdateParameters,
-    StorageAccountProperties,
-    RegistryNameCheckRequest
+    StorageAccountProperties
 )
 
 from ._factory import get_acr_service_client
@@ -24,8 +21,6 @@ from ._utils import (
     get_resource_group_name_by_registry_name,
     arm_deploy_template
 )
-
-from ._format import output_format
 
 import azure.cli.core._logging as _logging
 logger = _logging.get_az_logger(__name__)
@@ -36,8 +31,7 @@ def acr_check_name(registry_name):
     '''
     client = get_acr_service_client().registries
 
-    return client.check_name_availability(
-        RegistryNameCheckRequest(registry_name))
+    return client.check_name_availability(registry_name)
 
 def acr_list(resource_group_name=None):
     '''List container registries.
@@ -73,6 +67,7 @@ def acr_create(registry_name, #pylint: disable=too-many-arguments
                                 storage_account_name,
                                 enable_admin)
         )
+        registry = client.get_properties(resource_group_name, registry_name)
     else:
         storage_account_key = get_access_key_by_storage_account_name(storage_account_name)
         registry = client.create_or_update(
@@ -86,8 +81,6 @@ def acr_create(registry_name, #pylint: disable=too-many-arguments
                 admin_user_enabled=enable_admin
             )
         )
-
-    registry = client.get_properties(resource_group_name, registry_name)
 
     logger.warning('\nCreate a new service principal and assign access:')
     logger.warning(
@@ -167,15 +160,3 @@ def acr_update_set(client,
         resource_group_name = get_resource_group_name_by_registry_name(registry_name)
 
     return client.update(resource_group_name, registry_name, parameters)
-
-cli_command('acr check-name', acr_check_name)
-cli_command('acr list', acr_list, table_transformer=output_format)
-cli_command('acr create', acr_create, table_transformer=output_format)
-cli_command('acr delete', acr_delete, table_transformer=output_format)
-cli_command('acr show', acr_show, table_transformer=output_format)
-cli_generic_update_command('acr update',
-                           acr_update_get,
-                           acr_update_set,
-                           factory=lambda: get_acr_service_client().registries,
-                           custom_function=acr_update_custom,
-                           table_transformer=output_format)

@@ -2,7 +2,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 #---------------------------------------------------------------------------------------------
-
 from collections import Counter
 from itertools import groupby
 from msrestazure.azure_exceptions import CloudError
@@ -16,12 +15,12 @@ from azure.mgmt.network.models import \
 
 from azure.cli.core.commands.arm import parse_resource_id, is_valid_resource_id, resource_id
 from azure.cli.core._util import CLIError
-from azure.cli.command_modules.network._factory import _network_client_factory
+from azure.cli.command_modules.network._client_factory import _network_client_factory
+from azure.cli.command_modules.network._util import _get_property, _set_param
 from azure.cli.command_modules.network.mgmt_app_gateway.lib.operations.app_gateway_operations \
     import AppGatewayOperations
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
-from ._factory import _network_client_factory
 from azure.cli.command_modules.network.mgmt_nic.lib.operations.nic_operations import NicOperations
 from azure.mgmt.trafficmanager import TrafficManagerManagementClient
 from azure.mgmt.trafficmanager.models import Endpoint
@@ -31,54 +30,6 @@ from azure.mgmt.dns.models import (RecordSet, AaaaRecord, ARecord, CnameRecord, 
 
 from azure.cli.command_modules.network.zone_file.parse_zone_file import parse_zone_file
 from azure.cli.command_modules.network.zone_file.make_zone_file import make_zone_file
-
-#region Network subresource factory methods
-
-def list_network_resource_property(resource, prop):
-    """ Factory method for creating list functions. """
-    def list_func(resource_group_name, resource_name):
-        client = getattr(_network_client_factory(), resource)
-        return client.get(resource_group_name, resource_name).__getattribute__(prop)
-    return list_func
-
-def get_network_resource_property_entry(resource, prop):
-    """ Factory method for creating get functions. """
-    def get_func(resource_group_name, resource_name, item_name):
-        client = getattr(_network_client_factory(), resource)
-        items = getattr(client.get(resource_group_name, resource_name), prop)
-
-        result = next((x for x in items if x.name.lower() == item_name.lower()), None)
-        if not result:
-            raise CLIError("Item '{}' does not exist on {} '{}'".format(
-                item_name, resource, resource_name))
-        else:
-            return result
-    return get_func
-
-def delete_network_resource_property_entry(resource, prop):
-    """ Factory method for creating delete functions. """
-    def delete_func(resource_group_name, resource_name, item_name):
-        client = getattr(_network_client_factory(), resource)
-        item = client.get(resource_group_name, resource_name)
-        keep_items = \
-            [x for x in item.__getattribute__(prop) if x.name.lower() != item_name.lower()]
-        _set_param(item, prop, keep_items)
-        return client.create_or_update(resource_group_name, resource_name, item)
-    return delete_func
-
-def _get_property(items, name):
-    result = next((x for x in items if x.name.lower() == name.lower()), None)
-    if not result:
-        raise CLIError("Property '{}' does not exist".format(name))
-    else:
-        return result
-
-def _set_param(item, prop, value):
-    if value == '':
-        setattr(item, prop, None)
-    elif value is not None:
-        setattr(item, prop, value)
-#endregion
 
 #region Generic list commands
 def _generic_list(operation_name, resource_group_name):
@@ -393,8 +344,8 @@ def create_lb_backend_address_pool(resource_group_name, load_balancer_name, item
     ncf = _network_client_factory()
     lb = ncf.load_balancers.get(resource_group_name, load_balancer_name)
     lb.backend_address_pools.append(BackendAddressPool(name=item_name))
-
-    return ncf.load_balancers.create_or_update(resource_group_name, load_balancer_name, lb)
+    poller = ncf.load_balancers.create_or_update(resource_group_name, load_balancer_name, lb)
+    return _get_property(poller.result().backend_address_pools, item_name)
 
 def create_lb_probe(resource_group_name, load_balancer_name, item_name, protocol, port,
                     path=None, interval=None, threshold=None):

@@ -3,13 +3,10 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 #---------------------------------------------------------------------------------------------
 
+#pylint: disable=line-too-long
+
 from azure.cli.core.commands import cli_command
-from .custom import (
-    dcos_browse)
 
-from .custom import (
-    dcos_install_cli)
-
-cli_command('acs dcos browse', dcos_browse)
-cli_command('acs dcos install-cli', dcos_install_cli)
+cli_command(__name__, 'acs dcos browse', 'azure.cli.command_modules.acs.custom#dcos_browse')
+cli_command(__name__, 'acs dcos install-cli', 'azure.cli.command_modules.acs.custom#dcos_install_cli')
 

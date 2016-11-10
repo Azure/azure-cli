@@ -403,16 +403,17 @@ class NetworkLoadBalancerSubresourceScenarioTest(ResourceGroupVCRTestBase):
         ip1_id = resource_id(subscription=subscription_id, resource_group=self.resource_group, namespace='Microsoft.Network', type='publicIPAddresses', name='publicip1')
         self.cmd('network lb frontend-ip update {} -n ipconfig1 --set publicIpAddress.id="{}"'.format(lb_rg, ip1_id),
             checks=JMESPathCheck("publicIpAddress.contains(id, 'publicip1')", True))
-        self.cmd('network lb frontend-ip delete {} -n ipconfig2'.format(lb_rg))
+        self.cmd('network lb frontend-ip delete {} -n ipconfig2'.format(lb_rg), checks=NoneCheck())
         self.cmd('network lb frontend-ip list {}'.format(lb_rg), checks=JMESPathCheck('length(@)', 2))
 
         # Test backend address pool
         for i in range(1, 4):
-            self.cmd('network lb address-pool create {} -n bap{}'.format(lb_rg, i))
+            self.cmd('network lb address-pool create {} -n bap{}'.format(lb_rg, i),
+                checks=JMESPathCheck('name', 'bap{}'.format(i)))
         self.cmd('network lb address-pool list {}'.format(lb_rg), checks=JMESPathCheck('length(@)', 4))
         self.cmd('network lb address-pool show {} -n bap1'.format(lb_rg),
             checks=JMESPathCheck('name', 'bap1'))
-        self.cmd('network lb address-pool delete {} -n bap3'.format(lb_rg))
+        self.cmd('network lb address-pool delete {} -n bap3'.format(lb_rg), checks=NoneCheck())
         self.cmd('network lb address-pool list {}'.format(lb_rg), checks=JMESPathCheck('length(@)', 3))
 
         # Test probes
