@@ -96,6 +96,7 @@ helps['resource list'] = """
 helps['resource show'] = """
     type: command
     short-summary: display a resource detail
+    long-summary: Get details of a resource like /subscriptions/0000/resourceGroups/myGroup/providers/Microsoft.Provider/resA/myA/resB/myB/resC/myC
     examples:
         - name: show a virtual machine
           text: >
@@ -109,11 +110,15 @@ helps['resource show'] = """
         - name: show a subnet using id
           text: >
             az resource show --id /subscriptions/0b1f6471-1bf0-4dda-aec3-111111111111/resourceGroups/myGroup/providers/Microsoft.Network/virtualNetworks/myvnet/subnets/mysubnet
+        - name: show an app gateway path rule
+          text: >
+            az resource show -g myGroup --namespace Microsoft.Network --parent applicationGateways/ag1/urlPathMaps/map1 --resource-type pathRules -n rule1  
 """
 
 helps['resource delete'] = """
     type: command
-    short-summary: delete a resource
+    short-summary: delete a resource. Reference the examples for help with arguments.
+    long-summary: delete a resource like /subscriptions/0000/resourceGroups/myGroup/providers/Microsoft.Provider/resA/myA/resB/myB/resC/myC
     examples:
         - name: delete a virtual machine
           text: >
@@ -128,14 +133,15 @@ helps['resource delete'] = """
 
 helps['resource tag'] = """
     type: command
-    short-summary: tag a resource
+    short-summary: tag a resource. Reference the examples for help with arguments.
+    long-summary: tag a resource like /subscriptions/0000/resourceGroups/myGroup/providers/Microsoft.Provider/resA/myA/resB/myB/resC/myC
     examples:
         - name: tag a virtual machine
           text: >
-            az resource tag --tag vmlist=vm1 -g mygroup -n myvm --resource-type "Microsoft.Compute/virtualMachines"
+            az resource tag --tags vmlist=vm1 -g mygroup -n myvm --resource-type "Microsoft.Compute/virtualMachines"
         - name: tag a webapp using resource id
           text: >
-            az resource tag --tag vmlist=vm1 --id /subscriptions/0b1f6471-1bf0-4dda-aec3-111111111111/resourceGroups/myGroup/providers/Microsoft.Web/sites/myWebapp
+            az resource tag --tags vmlist=vm1 --id /subscriptions/0b1f6471-1bf0-4dda-aec3-111111111111/resourceGroups/myGroup/providers/Microsoft.Web/sites/myWebapp
 """
 
 helps['resource update'] = """
