@@ -236,14 +236,14 @@ class KeyVaultSecretScenarioTest(ResourceGroupVCRTestBase):
         kv = self.keyvault_name
         secret_path = os.path.join(TEST_DIR, 'test_secret.txt')
         with open(secret_path, 'r') as f:
-            expected = f.read()
+            expected = f.read().replace('\r\n', '\n')
 
         def _test_set_and_download(encoding):
             self.cmd('keyvault secret set --vault-name {} -n download-{} --file "{}" --encoding {}'.format(kv, encoding, secret_path, encoding))
             dest_path = os.path.join(TEST_DIR, 'recover-{}'.format(encoding))
             self.cmd('keyvault secret download --vault-name {} -n download-{} --file "{}"'.format(kv, encoding, dest_path))
             with open(dest_path, 'r') as f:
-                actual = f.read()
+                actual = f.read().replace('\r\n', '\n')
             self.assertEqual(actual, expected)
             os.remove(dest_path)
 
@@ -419,7 +419,7 @@ class KeyVaultCertificateScenarioTest(ResourceGroupVCRTestBase):
                 downloaded_binary = base64.b64encode(f.read()).decode('utf-8')
 
             with open(dest_string, 'r') as f:
-                downloaded_string = f.read().replace('\n', '')
+                downloaded_string = f.read().replace('\r\n', '\n').replace('\n', '')
         finally:
             os.remove(dest_binary)
             os.remove(dest_string)
