@@ -28,6 +28,7 @@ DEPENDENCIES = [
     'paramiko',
     'pyyaml',
     'six',
+    'scp',
     'sshtunnel'
 ]
 
