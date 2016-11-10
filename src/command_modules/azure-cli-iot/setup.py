@@ -27,6 +27,7 @@ CLASSIFIERS = [
 
 DEPENDENCIES = [
     'azure-mgmt-iothub==0.1.0',
+    'pyOpenSSL',
     'azure-cli-core',
 ]
 
@@ -38,7 +39,7 @@ setup(
     version=VERSION,
     description='Microsoft Azure Command-Line Tools IoT Command Module',
     long_description=README,
-    license='TBD',
+    license='MIT',
     author='Microsoft Corporation',
     author_email='azpycli@microsoft.com',
     url='https://github.com/Azure/azure-cli',
