@@ -59,7 +59,8 @@ register_cli_argument('iot device create', 'primary_thumbprint', arg_group='X.50
 register_cli_argument('iot device create', 'secondary_thumbprint', arg_group='X.509 Certificate',
                       help='Secondary X.509 certificate thumbprint to authenticate device.')
 register_cli_argument('iot device create', 'valid_days', type=int, arg_group='X.509 Certificate',
-                      help='Number of days the generated self-signed X.509 certificate should be valid for.')
+                      help='Number of days the generated self-signed X.509 certificate should be valid for.'
+                           'Default validity is 365 days.')
 register_cli_argument('iot device create', 'output_dir', arg_group='X.509 Certificate',
                       help='Output directory for generated self-signed X.509 certificate. '
                            'Default is current working directory.')
