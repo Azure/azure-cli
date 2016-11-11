@@ -61,7 +61,7 @@ class ACRTest(ResourceGroupVCRTestBase):
             JMESPathCheck('adminUserEnabled', False)
         ])
         # enable admin user
-        self.cmd('acr update -n {} -g {} --admin-user-enabled true'.format(registry_name, resource_group), checks=[
+        self.cmd('acr update -n {} -g {} --admin-enabled true'.format(registry_name, resource_group), checks=[
             JMESPathCheck('name', registry_name),
             JMESPathCheck('location', location),
             JMESPathCheck('adminUserEnabled', True)
@@ -82,7 +82,7 @@ class ACRTest(ResourceGroupVCRTestBase):
         assert login_server
         self.cmd('acr repository list -n {}'.format(registry_name), checks=NoneCheck())
         # test acr update
-        self.cmd('acr update -n {} -g {} --tags foo=bar cat --admin-user-enabled false --storage-account-name {}'.format(registry_name, resource_group, storage_account_for_update), checks=[
+        self.cmd('acr update -n {} -g {} --tags foo=bar cat --admin-enabled false --storage-account-name {}'.format(registry_name, resource_group, storage_account_for_update), checks=[
             JMESPathCheck('name', registry_name),
             JMESPathCheck('location', location),
             JMESPathCheck('tags', {'cat':'', 'foo':'bar'}),
