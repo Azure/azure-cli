@@ -342,6 +342,9 @@ helps['network dns zone'] = """
 helps['network dns zone create'] = """
     type: command
     short-summary: Creates or updates DNS zone properties. Does not modify DNS records within the zone.
+    parameters:
+        - name: --if-none-match
+          short-summary: Create only if there isn't an existing DNS zone matches the given one.
 """
 helps['network dns zone delete'] = """
     type: command
