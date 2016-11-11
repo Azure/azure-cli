@@ -10,7 +10,7 @@ import azure.cli.core._logging as _logging
 logger = _logging.get_az_logger(__name__)
 
 def acr_credential_show(registry_name, resource_group_name=None):
-    '''Get login credentials for a container registry.
+    '''Gets the administrator login credentials for the specified container registry.
     :param str registry_name: The name of container registry
     :param str resource_group_name: The name of resource group
     '''
@@ -22,7 +22,7 @@ def acr_credential_show(registry_name, resource_group_name=None):
     return client.get_credentials(resource_group_name, registry_name)
 
 def acr_credential_renew(registry_name, resource_group_name=None):
-    '''Regenerate login credentials for a container registry.
+    '''Regenerates the administrator login credentials for the specified container registry.
     :param str registry_name: The name of container registry
     :param str resource_group_name: The name of resource group
     '''
