@@ -336,7 +336,10 @@ class CredsCache(object):
     also be handled
     '''
     def __init__(self, auth_ctx_factory=None):
-        self._token_file = os.path.expanduser('~/.azure/accessTokens.json')
+        if os.getenv('AZURE_CONFIG_DIR'):
+            self._token_file = os.path.join(os.getenv('AZURE_CONFIG_DIR'), 'accessTokens.json')
+        else:
+            self._token_file = os.path.expanduser('~/.azure/accessTokens.json')
         self._service_principal_creds = []
         self._auth_ctx_factory = auth_ctx_factory or _AUTH_CTX_FACTORY
         self.adal_token_cache = None

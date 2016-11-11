@@ -5,7 +5,10 @@
 import os
 from six.moves import configparser
 
-GLOBAL_CONFIG_DIR = os.path.expanduser(os.path.join('~', '.azure'))
+if os.getenv('AZURE_CONFIG_DIR'):
+    GLOBAL_CONFIG_DIR = os.getenv('AZURE_CONFIG_DIR')
+else:
+    GLOBAL_CONFIG_DIR = os.path.expanduser(os.path.join('~', '.azure'))
 GLOBAL_CONFIG_PATH = os.path.join(GLOBAL_CONFIG_DIR, 'config')
 ENV_VAR_PREFIX = 'AZURE_'
 
@@ -13,7 +16,7 @@ def active_context():
     from azure.cli.core.context import get_active_context_name
     return get_active_context_name()
 
-CONTEXT_CONFIG_DIR = os.path.expanduser(os.path.join('~', '.azure', 'context_config'))
+CONTEXT_CONFIG_DIR = os.path.expanduser(os.path.join(GLOBAL_CONFIG_DIR, 'context_config'))
 ACTIVE_CONTEXT_CONFIG_PATH = os.path.join(CONTEXT_CONFIG_DIR, active_context())
 
 _UNSET = object()

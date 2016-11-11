@@ -19,7 +19,10 @@ def main(args, file=sys.stdout): #pylint: disable=redefined-builtin
     if len(args) > 0 and args[0] == '--version':
         show_version_info_exit(file)
 
-    azure_folder = os.path.expanduser('~/.azure')
+    if os.getenv('AZURE_CONFIG_DIR'):
+        azure_folder = os.getenv('AZURE_CONFIG_DIR')
+    else:
+        azure_folder = os.path.expanduser('~/.azure')
     if not os.path.exists(azure_folder):
         os.makedirs(azure_folder)
     ACCOUNT.load(os.path.join(azure_folder, 'azureProfile.json'))

@@ -236,13 +236,20 @@ def store_acs_service_principal(client_secret, service_principal):
         obj['client_secret'] = client_secret
     if service_principal:
         obj['service_principal'] = service_principal
-    configPath = os.path.join(os.path.expanduser('~'), '.azure', 'acsServicePrincipal.json')
+
+    if os.getenv('AZURE_CONFIG_DIR'):
+        configPath = os.path.join(os.getenv('AZURE_CONFIG_DIR'), 'acsServicePrincipal.json')
+    else:
+        configPath = os.path.join(os.path.expanduser('~'), '.azure', 'acsServicePrincipal.json')
     with os.fdopen(os.open(configPath, os.O_RDWR|os.O_CREAT|os.O_TRUNC, 0o600),
                    'w+') as spFile:
         json.dump(obj, spFile)
 
 def load_acs_service_principal():
-    configPath = os.path.join(os.path.expanduser('~'), '.azure', 'acsServicePrincipal.json')
+    if os.getenv('AZURE_CONFIG_DIR'):
+        configPath = os.path.join(os.getenv('AZURE_CONFIG_DIR'), 'acsServicePrincipal.json')
+    else:
+        configPath = os.path.join(os.path.expanduser('~'), '.azure', 'acsServicePrincipal.json')
     if not os.path.exists(configPath):
         return None
     fd = os.open(configPath, os.O_RDONLY)
