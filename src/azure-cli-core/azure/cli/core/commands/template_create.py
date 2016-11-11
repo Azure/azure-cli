@@ -124,8 +124,9 @@ def _name_id_fold(base_name, resource_type, type_field, #pylint: disable=too-man
 
 # NEW STYLE
 
+# pylint: disable=line-too-long
 def get_folded_parameter_help_string(
-    display_name, allow_none=False, allow_new=False, other_required_option=None):
+        display_name, allow_none=False, allow_new=False, other_required_option=None):
     """ Assembles a parameterized help string for folded parameters. """
     quotes = '""' if platform.system() == 'Windows' else "''"
 
@@ -144,7 +145,7 @@ def get_folded_parameter_help_string(
     return help_text
 
 def _validate_name_or_id(
-    resource_group_name, property_value, property_type, parent_value, parent_type):
+        resource_group_name, property_value, property_type, parent_value, parent_type):
     from azure.cli.core.commands.client_factory import get_subscription_id
     has_parent = parent_type is not None
     if is_valid_resource_id(property_value):
@@ -170,10 +171,10 @@ def _validate_name_or_id(
         value_supplied_was_id = False
     return (resource_id_parts, value_supplied_was_id)
 
-def get_folded_parameter_validator(
-    property_name, property_type, property_option,
-    parent_name=None, parent_type=None, parent_option=None,
-    allow_none=False, allow_new=False):
+def get_folded_parameter_validator( # pylint: disable=too-many-arguments
+        property_name, property_type, property_option,
+        parent_name=None, parent_type=None, parent_option=None,
+        allow_none=False, allow_new=False):
 
     # Ensure that all parent parameters are specified if any are
     parent_params = [parent_name, parent_type, parent_option]
@@ -196,7 +197,7 @@ def get_folded_parameter_validator(
             setattr(namespace, property_name, None)
             if parent_name and parent_val:
                 logger = _logging.get_az_logger(__name__)
-                logger.info('Ignoring: {} {}'.format(parent_option, parent_val))
+                logger.info('Ignoring: %s %s', parent_option, parent_val)
                 setattr(namespace, parent_name, None)
             return # SUCCESS
 
@@ -211,7 +212,7 @@ def get_folded_parameter_validator(
             if parent_val:
                 if value_was_id:
                     logger = _logging.get_az_logger(__name__)
-                    logger.info('Ignoring: {} {}'.format(parent_option, parent_val))
+                    logger.info('Ignoring: %s %s', parent_option, parent_val)
                 setattr(namespace, parent_name, None)
             return # SUCCESS
 
@@ -227,12 +228,15 @@ def get_folded_parameter_validator(
                 else '{} NAME [{} NAME]'.format(property_option, parent_option)
             action_message = 'Specify ( {} ) to create a new resource.'.format(usage_message) if \
                 allow_new else 'Create the required resource and try again.'
-            raise CLIError('{} {} does not exist. {}'.format(property_name, property_val, action_message))
+            raise CLIError('{} {} does not exist. {}'.format(
+                property_name, property_val, action_message))
 
         # 3) try to create new resource
         if allow_new:
             setattr(namespace, type_field_name, 'new')
         else:
-            raise CLIError('{} {} does not exist. Create the required resource and try again.'.format(property_name, property_val))
+            raise CLIError(
+                '{} {} does not exist. Create the required resource and try again.'.format(
+                    property_name, property_val))
 
     return validator

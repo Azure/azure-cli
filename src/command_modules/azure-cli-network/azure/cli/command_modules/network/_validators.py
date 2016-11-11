@@ -179,7 +179,7 @@ def get_public_ip_validator(has_type_field=False, allow_none=False, allow_new=Fa
 
     def complex_validator_with_type(namespace):
         get_folded_parameter_validator(
-            'public_ip_address', 'Microsoft.Network/publicIpAddresses', '--public-ip-address',
+            'public_ip_address', 'Microsoft.Network/publicIPAddresses', '--public-ip-address',
             allow_none=allow_none, allow_new=allow_new)(namespace)
 
     return complex_validator_with_type if has_type_field else simple_validator
