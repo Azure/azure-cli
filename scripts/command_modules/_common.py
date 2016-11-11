@@ -47,7 +47,7 @@ def exec_command_output(command, env=None):
             command if isinstance(command, list) else command.split(),
             env=os.environ.copy().update(env or {}),
             stderr=subprocess.STDOUT)
-        return (output.decode('utf-8'), 0)
+        return (output, 0)
     except CalledProcessError as err:
         return (err.output, err.returncode)
 
@@ -61,3 +61,45 @@ def print_summary(failed_modules):
         print("Failed modules: " + ', '.join(failed_modules), file=sys.stderr)
     else:
         print("OK")
+
+
+def get_print_format(records):
+    """
+    Find the best format to display the given list of records in table format
+    """
+    if not isinstance(records, list):
+        return None
+    elif len(records) == 0:
+        return None
+
+    size = len(records[0])
+    max_len = [0 for i in range(size)]
+
+    col_index = list(range(size))
+    for rec in records:
+        if len(rec) != size:
+            return None
+
+        for i in col_index:
+            max_len[i] = max(max_len[i], len(rec[i]))
+
+    recommend_format = ''
+    for each in max_len:
+        recommend_format += '{:' + str(each + 2) + '}'
+
+    return (recommend_format, max_len)
+
+def print_records(records, print_format=None, title=None, foot_notes=None):
+    print_format = print_format or get_print_format(records)[0]
+    if print_format is None:
+        raise ValueError()
+
+    print()
+    print("Summary" + ': {}'.format(title) if not title is None else '')
+    print("==========================")
+    for rec in records:
+        print(print_format.format(*rec))
+    print("==========================")
+    for each in foot_notes:
+        print('* ' + each)
+
