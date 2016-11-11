@@ -311,8 +311,8 @@ def import_key(client, vault_base_url, key_name, destination=None, key_ops=None,
 def download_secret(client, vault_base_url, secret_name, file_path, encoding=None,
                     secret_version=''):
     """ Download a secret from a KeyVault. """
-    if os.path.isfile(file_path):
-        raise CLIError("File '{}' already exists.".format(file_path))
+    if os.path.isfile(file_path) or os.path.isdir(file_path):
+        raise CLIError("File or directory named '{}' already exists.".format(file_path))
 
     secret = client.keyvault.get_secret(vault_base_url, secret_name, secret_version)
     encoding = encoding or secret.tags.get('file-encoding', 'utf-8')
@@ -332,9 +332,10 @@ def download_secret(client, vault_base_url, secret_name, file_path, encoding=Non
 
             with open(file_path, 'wb') as f:
                 f.write(decoded)
-    except Exception: # pylint: disable=broad-except
+    except Exception as ex: # pylint: disable=broad-except
         if os.path.isfile(file_path):
             os.remove(file_path)
+        raise ex
 
 def create_certificate(client, vault_base_url, certificate_name, certificate_policy,
                        disabled=False, expires=None, not_before=None, tags=None):
@@ -377,8 +378,8 @@ create_certificate.__doc__ = KeyVaultClient.create_certificate.__doc__
 def download_certificate(client, vault_base_url, certificate_name, file_path,
                          encoding='binary', certificate_version=''):
     """ Download a certificate from a KeyVault. """
-    if os.path.isfile(file_path):
-        raise CLIError("File '{}' already exists.".format(file_path))
+    if os.path.isfile(file_path) or os.path.isdir(file_path):
+        raise CLIError("File or directory named '{}' already exists.".format(file_path))
 
     cert = client.keyvault.get_certificate(
         vault_base_url, certificate_name, certificate_version).cer
@@ -396,6 +397,7 @@ def download_certificate(client, vault_base_url, certificate_name, file_path,
     except Exception as ex: # pylint: disable=broad-except
         if os.path.isfile(file_path):
             os.remove(file_path)
+        raise ex
 
 def add_certificate_contact(client, vault_base_url, contact_email, contact_name=None,
                             contact_phone=None):

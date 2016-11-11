@@ -50,7 +50,7 @@ def get_keyvault_name_completion_list(resource_name):
     return completer
 
 def get_keyvault_version_completion_list(resource_name):
-    from argcomplete import warn
+
     def completer(prefix, action, parsed_args, **kwargs): # pylint: disable=unused-argument
         client = KeyVaultClient(KeyVaultAuthentication(_get_token)) # pylint: disable=redefined-variable-type
         func_name = 'get_{}_versions'.format(resource_name)
@@ -136,7 +136,7 @@ register_attributes_argument('keyvault key set-attributes', 'key', KeyAttributes
 
 register_cli_argument('keyvault secret', 'secret_version', options_list=('--version', '-v'), help='The secret version. If omitted, uses the latest version.', default='', required=False, completer=get_keyvault_version_completion_list('secret'))
 
-register_cli_argument('keyvault secret set', 'content_type', options_list=('--description',), help='Description of the secret contents (i.e. password, connection string, etc)')
+register_cli_argument('keyvault secret set', 'content_type', options_list=('--description',), help='Description of the secret contents (e.g. password, connection string, etc)')
 register_attributes_argument('keyvault secret set', 'secret', SecretAttributes, create=True)
 register_cli_argument('keyvault secret set', 'value', options_list=('--value',), help="Plain text secret value. Cannot be used with '--file' or '--encoding'", required=False, arg_group='Content Source')
 register_extra_cli_argument('keyvault secret set', 'file_path', options_list=('--file', '-f'), help="Source file for secret. Use in conjunction with '--encoding'", arg_group='Content Source')
