@@ -146,38 +146,3 @@ def cf_dns_mgmt_record_sets(_):
     from azure.mgmt.dns import DnsManagementClient
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     return get_mgmt_service_client(DnsManagementClient).record_sets
-
-def cf_dns_mgmt_dns_zone_create(_):
-    from azure.cli.command_modules.network.mgmt_dns_zone.lib import DnsZoneCreationClient
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    return get_mgmt_service_client(DnsZoneCreationClient).dns_zone
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
