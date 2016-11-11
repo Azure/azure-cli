@@ -14,24 +14,24 @@ Commands to manage Azure container registries
 
     Commands:
         check-name: Checks whether the container registry name is available for use.
-        create    : Creates or updates a container registry with the specified parameters.
+        create    : Creates a container registry.
         delete    : Deletes a container registry.
         list      : Lists all the available container registries under the current subscription.
         show      : Gets the properties of the specified container registry.
-        update    : Updates a container registry with the specified parameters.
+        update    : Updates a container registry.
 
 Create a container registry
 -------------
 ::
 
     Command
-        az acr create: Creates or updates a container registry with the specified parameters.
+        az acr create: Creates a container registry.
 
     Arguments
         --location -l       [Required]: Location.
         --name -n           [Required]: The name of the container registry.
         --resource-group -g [Required]: Name of resource group.
-        --admin-enabled               : The value that indicates whether the admin user is enabled.
+        --admin-enabled               : Indicates whether the admin user is enabled.
                                         Allowed values: false, true.  Default: false.
         --storage-account-name        : The name of an existing storage account.
 
@@ -84,12 +84,12 @@ Update a container registry
 ::
 
     Command
-        az acr update: Updates a container registry with the specified parameters.
+        az acr update: Updates a container registry.
 
     Arguments
         --name -n   [Required]: The name of the container registry.
-        --admin-enabled       : The value that indicates whether the admin user is enabled.  Allowed
-                                values: false, true.
+        --admin-enabled       : Indicates whether the admin user is enabled.
+		                        Allowed values: false, true.
         --resource-group -g   : Name of resource group.
         --storage-account-name: The name of an existing storage account.
         --tags                : Space separated tags in 'key[=value]' format. Use "" to clear existing

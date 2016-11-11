@@ -47,12 +47,12 @@ def acr_create(registry_name, #pylint: disable=too-many-arguments
                location,
                storage_account_name=None,
                admin_enabled='false'):
-    '''Creates or updates a container registry with the specified parameters.
+    '''Creates a container registry.
     :param str registry_name: The name of container registry
     :param str resource_group_name: The name of resource group
     :param str location: The name of location
     :param str storage_account_name: The name of storage account
-    :param str admin_enabled: The value that indicates whether the admin user is enabled
+    :param str admin_enabled: Indicates whether the admin user is enabled
     '''
     client = get_acr_service_client().registries
     admin_user_enabled = admin_enabled == 'true'

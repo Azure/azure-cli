@@ -46,7 +46,7 @@ helps['acr create'] = """
 
 helps['acr update'] = """
             type: command
-            short-summary: Updates a container registry with the specified parameters.
+            short-summary: Updates a container registry.
             examples:
                 - name: Update tags for a container registry
                   text:
