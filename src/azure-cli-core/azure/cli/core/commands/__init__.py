@@ -286,7 +286,7 @@ def create_command(module_name, name, operation,
         except ClientException as client_exception:
             log_telemetry('client exception', log_type='trace')
             message = getattr(client_exception, 'message', client_exception)
-            raise CLIError(message)
+            raise _polish_rp_not_registerd_error(CLIError(message))
         except AzureException as azure_exception:
             log_telemetry('azure exception', log_type='trace')
             message = re.search(r"([A-Za-z\t .])+", str(azure_exception))
@@ -294,6 +294,8 @@ def create_command(module_name, name, operation,
         except ValueError as value_error:
             log_telemetry('value exception', log_type='trace')
             raise CLIError(value_error)
+        except CLIError as cli_error:
+            raise _polish_rp_not_registerd_error(cli_error)
 
     command_module_map[name] = module_name
     name = ' '.join(name.split())
@@ -302,6 +304,23 @@ def create_command(module_name, name, operation,
     cmd = CliCommand(name, _execute_command, table_transformer=table_transformer,
                      arguments_loader=arguments_loader, description_loader=description_loader)
     return cmd
+
+def _polish_rp_not_registerd_error(cli_error):
+    msg = str(cli_error)
+    pertinent_text_namespace = 'The subscription must be registered to use namespace'
+    pertinent_text_feature = 'is not registered for feature'
+    #pylint: disable=line-too-long
+    if pertinent_text_namespace in msg:
+        reg = r".*{} '(.*)'".format(pertinent_text_namespace)
+        match = re.match(reg, msg)
+        cli_error = CLIError("Run 'az provider register -n {}' to register the namespace first".format(match.group(1)))
+    elif pertinent_text_feature in msg:
+        reg = r".*{}\s+([^\s]+)\s+".format(pertinent_text_feature)
+        match = re.match(reg, msg)
+        parts = match.group(1).split('/')
+        if len(parts) == 2:
+            cli_error = CLIError("Run 'az resource feature register --namespace {} -n {}' to enable the feature first".format(parts[0], parts[1]))
+    return cli_error
 
 def _get_cli_argument(command, argname):
     return _cli_argument_registry.get_cli_argument(command, argname)
