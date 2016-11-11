@@ -369,6 +369,9 @@ helps['network dns zone show'] = """
 helps['network dns zone update'] = """
     type: command
     short-summary: Updates DNS zone properties. Does not modify DNS records within the zone.
+    parameters:
+        - name: --if-match
+          short-summary: Update only if the resource with the same ETAG exists.
 """
 helps['network express-route'] = """
     type: group
