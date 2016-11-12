@@ -203,6 +203,7 @@ def validate_servers(namespace):
 
 def validate_subnet_name_or_id(namespace):
     """ Validates a subnet ID or, if a name is provided, formats it as an ID. """
+
     if namespace.virtual_network_name is None and namespace.subnet is None:
         return
     if namespace.subnet == '':
@@ -216,10 +217,10 @@ def validate_subnet_name_or_id(namespace):
 
     # error if vnet-name is provided along with a subnet ID
     if is_id and namespace.virtual_network_name:
-        raise argparse.ArgumentError(None, 'Please omit --vnet-name when specifying a subnet ID')
+        raise argparse.ArgumentError(None, 'Omit --vnet-name when specifying a subnet ID')
     elif not is_id and not namespace.virtual_network_name:
         raise argparse.ArgumentError(None,
-                                     'Please specify --vnet-name when specifying a subnet name')
+                                     'You must specify --vnet-name when specifying a subnet name')
     if not is_id:
         namespace.subnet = resource_id(
             subscription=get_subscription_id(),
@@ -312,6 +313,7 @@ def process_lb_create_namespace(namespace):
             None, 'Must specify a subnet OR a public IP address, not both.')
 
 def process_nic_create_namespace(namespace):
+
     if namespace.internal_dns_name_label:
         namespace.use_dns_settings = 'true'
 
