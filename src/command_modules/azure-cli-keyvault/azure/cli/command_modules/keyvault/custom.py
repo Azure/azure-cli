@@ -4,6 +4,7 @@
 #---------------------------------------------------------------------------------------------
 
 import codecs
+import os
 import re
 import time
 
@@ -26,6 +27,7 @@ from azure.cli.core._util import CLIError
 import azure.cli.core._logging as _logging
 
 from azure.cli.command_modules.keyvault.keyvaultclient import KeyVaultClient
+from azure.cli.command_modules.keyvault._validators import secret_text_encoding_values
 
 logger = _logging.get_az_logger(__name__)
 
@@ -306,11 +308,34 @@ def import_key(client, vault_base_url, key_name, destination=None, key_ops=None,
     return client.import_key(
         vault_base_url, key_name, key_obj, destination == 'hsm', key_attrs, tags)
 
-# pylint: disable=unused-argument
-def download_secret(client, vault_base_url, secret_name, file_path, file_encoding='utf8',
-                    secret_version='', decode_binary=None):
+def download_secret(client, vault_base_url, secret_name, file_path, encoding=None,
+                    secret_version=''):
+    """ Download a secret from a KeyVault. """
+    if os.path.isfile(file_path) or os.path.isdir(file_path):
+        raise CLIError("File or directory named '{}' already exists.".format(file_path))
+
     secret = client.keyvault.get_secret(vault_base_url, secret_name, secret_version)
-    raise CLIError('TODO: implement')
+    encoding = encoding or secret.tags.get('file-encoding', 'utf-8')
+    secret_value = secret.value
+
+    try:
+        if encoding in secret_text_encoding_values:
+            with open(file_path, 'w') as f:
+                f.write(secret_value)
+        else:
+            if encoding == 'base64':
+                import base64
+                decoded = base64.b64decode(secret_value)
+            elif encoding == 'hex':
+                import binascii
+                decoded = binascii.unhexlify(secret_value)
+
+            with open(file_path, 'wb') as f:
+                f.write(decoded)
+    except Exception as ex: # pylint: disable=broad-except
+        if os.path.isfile(file_path):
+            os.remove(file_path)
+        raise ex
 
 def create_certificate(client, vault_base_url, certificate_name, certificate_policy,
                        disabled=False, expires=None, not_before=None, tags=None):
@@ -350,12 +375,29 @@ def create_certificate(client, vault_base_url, certificate_name, certificate_pol
 
 create_certificate.__doc__ = KeyVaultClient.create_certificate.__doc__
 
-# pylint: disable=unused-argument
 def download_certificate(client, vault_base_url, certificate_name, file_path,
-                         file_encoding=None, certificate_version=''):
+                         encoding='binary', certificate_version=''):
+    """ Download a certificate from a KeyVault. """
+    if os.path.isfile(file_path) or os.path.isdir(file_path):
+        raise CLIError("File or directory named '{}' already exists.".format(file_path))
+
     cert = client.keyvault.get_certificate(
-        vault_base_url, certificate_name, certificate_version)
-    raise CLIError('TODO: implement')
+        vault_base_url, certificate_name, certificate_version).cer
+
+    try:
+        with open(file_path, 'wb') as f:
+            if encoding == 'binary':
+                f.write(cert)
+            else:
+                import base64
+                try:
+                    f.write(base64.encodebytes(cert))
+                except AttributeError:
+                    f.write(base64.encodestring(cert)) # pylint: disable=deprecated-method
+    except Exception as ex: # pylint: disable=broad-except
+        if os.path.isfile(file_path):
+            os.remove(file_path)
+        raise ex
 
 def add_certificate_contact(client, vault_base_url, contact_email, contact_name=None,
                             contact_phone=None):

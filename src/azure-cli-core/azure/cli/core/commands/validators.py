@@ -9,7 +9,7 @@ import random
 
 def validate_tags(ns):
     ''' Extracts multiple space-separated tags in key[=value] format '''
-    if ns.tags is not None:
+    if isinstance(ns.tags, list):
         tags_dict = {}
         for item in ns.tags:
             tags_dict.update(validate_tag(item))
