@@ -29,9 +29,6 @@ cli_command(__name__, 'appservice web config container delete', 'azure.cli.comma
 cli_command(__name__, 'appservice web config container show', 'azure.cli.command_modules.appservice.custom#show_container_settings')
 
 factory = lambda _: web_client_factory().sites
-cli_command(__name__, 'appservice web show-publish-profile',
-            'azure.mgmt.web.operations.sites_operations#SitesOperations.list_site_publishing_credentials', factory)
-
 cli_command(__name__, 'appservice web source-control config-local-git', 'azure.cli.command_modules.appservice.custom#enable_local_git')
 cli_command(__name__, 'appservice web source-control config', 'azure.cli.command_modules.appservice.custom#config_source_control')
 cli_command(__name__, 'appservice web source-control sync', 'azure.cli.command_modules.appservice.custom#sync_site_repo')
@@ -45,7 +42,7 @@ cli_command(__name__, 'appservice web browse', 'azure.cli.command_modules.appser
 
 cli_command(__name__, 'appservice web deployment slot list', 'azure.mgmt.web.operations.sites_operations#SitesOperations.get_site_slots', factory)
 cli_command(__name__, 'appservice web deployment slot auto-swap', 'azure.cli.command_modules.appservice.custom#config_slot_auto_swap')
-cli_command(__name__, 'appservice web deployment slot swap', 'azure.mgmt.web.operations.sites_operations#SitesOperations.swap_slots_slot', factory)
+cli_command(__name__, 'appservice web deployment slot swap', 'azure.cli.command_modules.appservice.custom#swap_slot')
 cli_command(__name__, 'appservice web deployment slot create', 'azure.cli.command_modules.appservice.custom#create_webapp_slot')
 cli_command(__name__, 'appservice web deployment user set', 'azure.cli.command_modules.appservice.custom#set_deployment_user')
 cli_command(__name__, 'appservice web deployment list-site-credentials',

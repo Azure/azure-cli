@@ -72,6 +72,26 @@ helps['appservice web config hostname'] = """
     short-summary: commands to configure hostnames
 """
 
+helps['appservice web log'] = """
+    type: group
+    short-summary: commands to manager logs 
+"""
+
+helps['appservice web deployment'] = """
+    type: group
+    short-summary: commands to manage deployments (slots, credentials, etc)
+"""
+
+helps['appservice web deployment user'] = """
+    type: group
+    short-summary: commands to manage deployment user credentials
+"""
+
+helps['appservice web deployment slot'] = """
+    type: group
+    short-summary: commands to manage deployment slots
+"""
+
 helps['appservice web source-control'] = """
     type: group
     short-summary: commands to manage source control systems
