@@ -46,6 +46,7 @@ _TOKEN_ENTRY_TOKEN_TYPE = 'tokenType'
 #This could mean either real access token, or client secret of a service principal
 #This naming is no good, but can't change because xplat-cli does so.
 _ACCESS_TOKEN = 'accessToken'
+_REFRESH_TOKEN = 'refreshToken'
 
 TOKEN_FIELDS_EXCLUDED_FROM_PERSISTENCE = ['familyName',
                                           'givenName',
@@ -247,6 +248,21 @@ class Profile(object):
                 str(account[_SUBSCRIPTION_ID]),
                 str(account[_TENANT_ID]))
 
+    def get_refresh_credentials(self, resource=CLOUD.endpoints.management,
+                                subscription_id=None):
+        account = self.get_subscription(subscription_id)
+        user_type = account[_USER_ENTITY][_USER_TYPE]
+        username_or_sp_id = account[_USER_ENTITY][_USER_NAME]
+
+        if user_type == _USER:
+            refresh_object = self._creds_cache.retrieve_token_entry_for_user(
+                username_or_sp_id, account[_TENANT_ID], resource)[_REFRESH_TOKEN]
+        else:
+            refresh_object = self._creds_cache \
+                .retrieve_cred_for_service_principal(username_or_sp_id)
+
+        return refresh_object
+
     def get_installation_id(self):
         installation_id = self._storage.get(_INSTALLATION_ID)
         if not installation_id:
@@ -358,7 +374,7 @@ class CredsCache(object):
 
         self.adal_token_cache.has_state_changed = False
 
-    def retrieve_token_for_user(self, username, tenant, resource):
+    def retrieve_token_entry_for_user(self, username, tenant, resource):
         authority = get_authority_url(tenant)
         context = self._auth_ctx_factory(authority, cache=self.adal_token_cache)
         token_entry = context.acquire_token(resource, username, _CLIENT_ID)
@@ -367,19 +383,29 @@ class CredsCache(object):
 
         if self.adal_token_cache.has_state_changed:
             self.persist_cached_creds()
+
+        return token_entry
+
+    def retrieve_token_for_user(self, username, tenant, resource):
+        token_entry = self.retrieve_token_entry_for_user(username, tenant, resource)
         return (token_entry[_TOKEN_ENTRY_TOKEN_TYPE], token_entry[_ACCESS_TOKEN])
 
     def retrieve_token_for_service_principal(self, sp_id, resource):
+        cred = self.retrieve_cred_for_service_principal(sp_id)
+        authority_url = get_authority_url(cred[0])
+        context = self._auth_ctx_factory(authority_url, None)
+        token_entry = context.acquire_token_with_client_credentials(resource,
+                                                                    cred[1],
+                                                                    cred[2])
+        return (token_entry[_TOKEN_ENTRY_TOKEN_TYPE], token_entry[_ACCESS_TOKEN])
+
+    def retrieve_cred_for_service_principal(self, sp_id):
         matched = [x for x in self._service_principal_creds if sp_id == x[_SERVICE_PRINCIPAL_ID]]
         if not matched:
             raise CLIError("Please run 'az account set' to select active account.")
         cred = matched[0]
-        authority_url = get_authority_url(cred[_SERVICE_PRINCIPAL_TENANT])
-        context = self._auth_ctx_factory(authority_url, None)
-        token_entry = context.acquire_token_with_client_credentials(resource,
-                                                                    sp_id,
-                                                                    cred[_ACCESS_TOKEN])
-        return (token_entry[_TOKEN_ENTRY_TOKEN_TYPE], token_entry[_ACCESS_TOKEN])
+        # (Tenant, Username, Password)
+        return (cred[_SERVICE_PRINCIPAL_TENANT], sp_id, cred[_ACCESS_TOKEN])
 
     def _load_creds(self):
         if self.adal_token_cache is not None:
