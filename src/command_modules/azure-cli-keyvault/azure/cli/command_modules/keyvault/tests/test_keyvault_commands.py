@@ -18,6 +18,7 @@ from azure.cli.core.test_utils.vcr_test_base import (ResourceGroupVCRTestBase, J
 from azure.cli.command_modules.keyvault.keyvaultclient import HttpBearerChallenge
 from azure.cli.command_modules.keyvault.keyvaultclient.key_vault_authentication import \
     (KeyVaultAuthBase)
+from azure.cli.command_modules.keyvault._params import secret_encoding_values
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
@@ -231,6 +232,24 @@ class KeyVaultSecretScenarioTest(ResourceGroupVCRTestBase):
     def test_keyvault_secret(self):
         self.execute()
 
+    def _test_download_secret(self):
+        kv = self.keyvault_name
+        secret_path = os.path.join(TEST_DIR, 'test_secret.txt')
+        with open(secret_path, 'r') as f:
+            expected = f.read().replace('\r\n', '\n')
+
+        def _test_set_and_download(encoding):
+            self.cmd('keyvault secret set --vault-name {} -n download-{} --file "{}" --encoding {}'.format(kv, encoding, secret_path, encoding))
+            dest_path = os.path.join(TEST_DIR, 'recover-{}'.format(encoding))
+            self.cmd('keyvault secret download --vault-name {} -n download-{} --file "{}"'.format(kv, encoding, dest_path))
+            with open(dest_path, 'r') as f:
+                actual = f.read().replace('\r\n', '\n')
+            self.assertEqual(actual, expected)
+            os.remove(dest_path)
+
+        for encoding in secret_encoding_values:
+            _test_set_and_download(encoding)
+
     def body(self):
         kv = self.keyvault_name
         # create a secret
@@ -244,9 +263,9 @@ class KeyVaultSecretScenarioTest(ResourceGroupVCRTestBase):
             checks=JMESPathCheck('length(@)', 1))
 
         # create a new secret version
-        secret = self.cmd('keyvault secret set --vault-name {} -n secret1 --value DEF456 --tags test=foo --content-type "test type"'.format(kv), checks=[
+        secret = self.cmd('keyvault secret set --vault-name {} -n secret1 --value DEF456 --tags test=foo --description "test type"'.format(kv), checks=[
             JMESPathCheck('value', 'DEF456'),
-            JMESPathCheck('tags', {'test':'foo'}),
+            JMESPathCheck('tags', {'file-encoding': 'utf-8', 'test':'foo'}),
             JMESPathCheck('contentType', 'test type')
         ])
         second_kid = secret['id']
@@ -274,8 +293,7 @@ class KeyVaultSecretScenarioTest(ResourceGroupVCRTestBase):
         self.cmd('keyvault secret list --vault-name {}'.format(kv),
             checks=NoneCheck())
 
-        # Round 4 COMMANDS
-        # TODO: download secret
+        self._test_download_secret()
 
 class KeyVaultCertificateScenarioTest(ResourceGroupVCRTestBase):
 
@@ -382,8 +400,37 @@ class KeyVaultCertificateScenarioTest(ResourceGroupVCRTestBase):
         self.cmd('keyvault certificate pending show --vault-name {} -n pending-cert'.format(kv),
             allowed_exceptions='Pending certificate not found')
 
+    def _test_certificate_download(self):
+        kv = self.keyvault_name
+        pem_file = os.path.join(TEST_DIR, 'import_pem_plain.pem')
+        pem_policy_path = os.path.join(TEST_DIR, 'policy_import_pem.json')
+        pem_cert = self.cmd('keyvault certificate import --vault-name {} -n pem-cert1 --file "{}" -p @"{}"'.format(kv, pem_file, pem_policy_path))
+        cert_data = pem_cert['cer']
+
+        dest_binary = os.path.join(TEST_DIR, 'download-binary')
+        dest_string = os.path.join(TEST_DIR, 'download-string')
+        self.cmd('keyvault certificate download --vault-name {} -n pem-cert1 --file "{}"'.format(kv, dest_binary))
+        self.cmd('keyvault certificate download --vault-name {} -n pem-cert1 --file "{}" -e string'.format(kv, dest_string))
+        self.cmd('keyvault certificate delete --vault-name {} -n pem-cert1'.format(kv))
+
+        try:
+            with open(dest_binary, 'rb') as f:
+                import base64
+                downloaded_binary = base64.b64encode(f.read()).decode('utf-8')
+
+            with open(dest_string, 'r') as f:
+                downloaded_string = f.read().replace('\r\n', '\n').replace('\n', '')
+        finally:
+            os.remove(dest_binary)
+            os.remove(dest_string)
+
+        self.assertEqual(cert_data, downloaded_string)
+        self.assertEqual(cert_data, downloaded_binary)
+
     def body(self):
         kv = self.keyvault_name
+
+        self._test_certificate_download()
 
         policy_path = os.path.join(TEST_DIR, 'policy.json')
         policy2_path = os.path.join(TEST_DIR, 'policy2.json')
@@ -446,6 +493,3 @@ class KeyVaultCertificateScenarioTest(ResourceGroupVCRTestBase):
         pfx_plain_file = os.path.join(TEST_DIR, 'import_pfx.pfx')
         pfx_policy_path = os.path.join(TEST_DIR, 'policy_import_pfx.json')
         self.cmd('keyvault certificate import --vault-name {} -n pfx-cert --file "{}" -p @"{}"'.format(kv, pfx_plain_file, pfx_policy_path))
-
-        # Round 4 COMMANDS
-        # TODO: download certificiate
