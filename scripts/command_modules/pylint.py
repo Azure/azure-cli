@@ -4,23 +4,32 @@
 #---------------------------------------------------------------------------------------------
 
 ## Runs pylint on the command modules ##
+
 from __future__ import print_function
+
 import os
 import sys
+from _common import get_all_command_modules
+from _task import Task, TaskDescription
 
-from _common import get_all_command_modules, exec_command, print_summary
 
-all_command_modules = get_all_command_modules()
-print("Running pylint on command modules.")
+def get_task_description(name, path):
+    path = os.path.join(path, 'azure')
+    command = 'python -m pylint -d I0013 -r n {}'.format(path)
 
-failed_module_names = []
-for name, fullpath in all_command_modules:
-    path_to_module = os.path.join(fullpath, 'azure')
-    success = exec_command("python -m pylint -d I0013 -r n "+path_to_module)
-    if not success:
-        failed_module_names.append(name)
+    return TaskDescription(name, command, None, lambda exit_code: exit_code == 0)
 
-print_summary(failed_module_names)
+if __name__ == '__main__':
+    print("Running pylint on command modules.")
 
-if failed_module_names:
-    sys.exit(1)
+    tasks = [Task(get_task_description(*m)) for m in get_all_command_modules()]
+
+    Task.wait_all_tasks(tasks)
+
+    failures = [t.name for t in tasks if not t.result.exit_code == 0]
+
+    if any(failures):
+        print('Following modules failed pyline: ' + str(failures))
+        sys.exit(1)
+    else:
+        print('All passed')
