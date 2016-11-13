@@ -9,96 +9,61 @@ from __future__ import print_function
 
 import os
 import sys
-from datetime import datetime
-from threading import Thread
-from _common import get_all_command_modules, exec_command_output, COMMAND_MODULE_PREFIX
+from _common import get_all_command_modules, COMMAND_MODULE_PREFIX, print_records
+from _task import Task, TaskDescription
 
 
-class TestTask(Thread):
+class TestModule(object):
     LOG_DIR = os.path.expanduser(os.path.join('~', '.azure', 'logs'))
 
-    """
-    Execute a test task in a separated task.
-    """
     def __init__(self, module_name, module_path):
-        Thread.__init__(self)
-        module_name = module_name.replace(COMMAND_MODULE_PREFIX, '')
-        self._path_to_module = os.path.join(
-            module_path, 'azure', 'cli', 'command_modules', module_name, 'tests')
+        self.name = module_name.replace(COMMAND_MODULE_PREFIX, '')
+        self.path = os.path.join(module_path, 'azure', 'cli', 'command_modules', self.name, 'tests')
 
-        self.name = module_name
-        self.skipped = not os.path.isdir(self._path_to_module)
-        self.rtcode = -1
-        self._started_on = None
-        self._finished_on = None
+    def exists(self):
+        return os.path.exists(self.path)
 
-        self.start()
+    def get_task_description(self):
+        return TaskDescription(self.name,
+                               self._get_command(),
+                               self._get_env(),
+                               lambda exit_code: exit_code == 0)
 
-    def run(self):
-        if self.skipped:
-            return
-
-        command = 'python -m unittest discover -s {0}'.format(self._path_to_module)
+    def _get_command(self):
+        command = 'python -m unittest discover -s {}'.format(self.path)
 
         if os.environ.get('CONTINUOUS_INTEGRATION') and os.environ.get('TRAVIS'):
             command += " --buffer"
 
+        return command
+
+    def _get_env(self):
         env = os.environ.copy()
-        env.update({'AZURE_CLI_ENABLE_LOG_FILE': '1', 'AZURE_CLI_LOG_DIR': TestTask.LOG_DIR})
+        env.update({'AZURE_CLI_ENABLE_LOG_FILE': '1', 'AZURE_CLI_LOG_DIR': TestModule.LOG_DIR})
 
-        print('Executing tests for module {0}'.format(self.name))
-
-        self._started_on = datetime.now()
-        output, self.rtcode = exec_command_output(command, env)
-        self._finished_on = datetime.now()
-
-        print('[{1}] Finish testing module {0}.'.format(
-            self.name, 'Passed' if self.rtcode == 0 else 'Failed'))
-
-        if self.rtcode != 0:
-            print(output)
-
-    def print_format(self, summary_format):
-        status = 'skipped' if self.skipped else ('failed' if self.rtcode != 0 else 'passed')
-
-        args = [self.name, status]
-        if self._started_on and self._finished_on: 
-            args.append(self._started_on.strftime('%H:%M:%S'))
-            args.append(str((self._finished_on - self._started_on).total_seconds()))
-        else:
-            args.append('')
-            args.append('')
-
-        print(summary_format.format(*args))
+        return env
 
 
-def wait_all_tasks(tasks_list):
-    for each in tasks_list:
-        each.join()
-
-def get_print_template(tasks_list):
-    max_module_name_len = max([len(t.name) for t in tasks_list])
-
-    # the format: <module name>  <status> <start on> <finish on>
-    return '{0:' + str(max_module_name_len + 2) + '}{1:10}{2:12}{3:10}'
-
-def run_module_tests():
+def run_module_tests(skip_list=None):
     print("Running tests on command modules.")
 
-    tasks = [TestTask(name, path) for name, path in get_all_command_modules()]
-    wait_all_tasks(tasks)
+    all_modules = [TestModule(name, path) for name, path in get_all_command_modules()]
+    if not skip_list is None:
+        all_modules = [desc for desc in all_modules if not desc.name in skip_list]
 
-    print()
-    print("Summary")
-    print("========================")
-    summary_format = get_print_template(tasks)
-    for t in tasks:
-        t.print_format(summary_format)
+    skipped_modules = [m.name for m in all_modules if not m.exists()]
 
-    print("========================")
-    print("* Full debug log available at '{}'.".format(TestTask.LOG_DIR))
+    tasks = [Task(m.get_task_description()) for m in all_modules if m.exists()]
 
-    if any([task.name for task in tasks if task.rtcode != 0 and not task.skipped]):
+    Task.wait_all_tasks(tasks)
+
+    print_records(
+        [t.get_summary() for t in tasks],
+        title="Test Results",
+        foot_notes=["Full debug log available at '{}'.".format(TestModule.LOG_DIR),
+                    "Skipped modules {}".format(','.join(skipped_modules))])
+
+    if any([t.name for t in tasks if not t.result.exit_code == 0]):
         sys.exit(1)
 
 if __name__ == '__main__':
