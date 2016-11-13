@@ -41,6 +41,7 @@ cli_command(__name__, 'appservice web log config', 'azure.cli.command_modules.ap
 cli_command(__name__, 'appservice web browse', 'azure.cli.command_modules.appservice.custom#view_in_browser')
 
 cli_command(__name__, 'appservice web deployment slot list', 'azure.mgmt.web.operations.sites_operations#SitesOperations.get_site_slots', factory)
+cli_command(__name__, 'appservice web deployment slot delete', 'azure.cli.command_modules.appservice.custom#delete_slot')
 cli_command(__name__, 'appservice web deployment slot auto-swap', 'azure.cli.command_modules.appservice.custom#config_slot_auto_swap')
 cli_command(__name__, 'appservice web deployment slot swap', 'azure.cli.command_modules.appservice.custom#swap_slot')
 cli_command(__name__, 'appservice web deployment slot create', 'azure.cli.command_modules.appservice.custom#create_webapp_slot')

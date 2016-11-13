@@ -415,6 +415,11 @@ def swap_slot(resource_group_name, webapp, slot, target_slot=None):
 
     return AppServiceLongRunningOperation()(poller)
 
+def delete_slot(resource_group_name, webapp, slot):
+    client = web_client_factory()
+    #TODO: once swagger finalized, expose other parameters like: delete_all_slots, etc...
+    client.sites.delete_site_slot(resource_group_name, webapp, slot)
+
 def get_streaming_log(resource_group_name, name, provider=None, slot=None):
     client = web_client_factory()
     scm_url = _get_scm_url(client, resource_group_name, name, slot)

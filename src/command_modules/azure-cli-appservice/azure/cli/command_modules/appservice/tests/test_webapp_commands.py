@@ -308,3 +308,42 @@ class WebappGitScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck('repoUrl', None)
             ])
 
+class WebappSlotScenarioTest(ResourceGroupVCRTestBase):
+    def __init__(self, test_method):
+        super(WebappSlotScenarioTest, self).__init__(__file__, test_method)
+        self.resource_group = 'cli-webapp-slot'
+        self.webapp = 'web-slot-test'
+
+    def test_webapp_slot(self):
+        self.execute()
+
+    def set_up(self):
+        super(WebappSlotScenarioTest, self).set_up()
+        plan = 'webapp-slot-plan'
+        self.cmd('appservice plan create -g {} -n {} --sku S1'.format(self.resource_group, plan))
+        self.cmd('appservice web create -g {} -n {} --plan {}'.format(self.resource_group, self.webapp, plan))
+
+    def body(self):
+        slot = 'staging'
+        #You can create and use any repros with the 3 files under "./sample_web" and with a 'staging 'branch
+        test_git_repo = 'https://github.com/yugangw-msft/azure-site-test'
+
+        self.cmd('appservice web deployment slot create -g {} --webapp {} --slot {}'.format(self.resource_group, self.webapp, slot))
+
+        self.cmd('appservice web source-control config -g {} -n {} --repo-url {} --branch {}'.format(self.resource_group, self.webapp, test_git_repo, slot), checks=[
+            JMESPathCheck('repoUrl', test_git_repo),
+            JMESPathCheck('branch', slot)
+            ])
+
+        self.cmd('az appservice web deployment slot swap -g {} --webapp {} --slot {}'.format(self.resource_group, self.webapp, slot))
+
+        import time
+        time.sleep(30) # 30 seconds should be enough for the deployment finished(Skipped under playback mode)
+
+        import requests
+        r = requests.get('http://{}.azurewebsites.net'.format(self.webapp))
+        #verify the web page contains content from the staging branch
+        self.assertTrue('Staging' in str(r.content))
+
+        self.cmd('az appservice deployment slot list -g {} --webapp {}'.format(self.resource_group, self.webapp))
+        self.cmd('az appservice deployment slot delete -g {} --webapp {} --slot {}'.format(self.resource_group, self.webapp, slot))
