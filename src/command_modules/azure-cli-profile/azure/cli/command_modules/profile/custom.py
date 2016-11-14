@@ -8,6 +8,9 @@ import requests
 from adal.adal_error import AdalError
 
 from azure.cli.core._profile import Profile, CLOUD
+from azure.cli.core.cloud import get_cloud
+from azure.cli.core.context import get_active_context
+
 from azure.cli.core._util import CLIError
 import azure.cli.core._logging as _logging
 
@@ -27,9 +30,13 @@ def list_subscriptions(list_all=False): # pylint: disable=redefined-builtin
         sub['cloudName'] = sub.pop('environmentName', None)
     return [sub for sub in subscriptions if list_all or sub['cloudName'] == CLOUD.name]
 
-def show_subscription(subscription=None):
+def show_subscription(subscription=None, show_auth_details=None):
     profile = Profile()
-    return profile.get_subscription(subscription)
+    result = profile.get_subscription(subscription)
+    if show_auth_details:
+        cloud = get_cloud(get_active_context()['cloud'])
+        result['endpoints'] = cloud.endpoints
+    return result
 
 def set_active_subscription(subscription):
     '''Set the current subscription'''

@@ -25,3 +25,4 @@ register_cli_argument('logout', 'username', help='account user, if missing, logo
 
 register_cli_argument('account', 'subscription', help='Name or ID of subscription.', completer=get_subscription_id_list)
 register_cli_argument('account list', 'list_all', options_list=('--all',), help='List all subscriptions across all cloud environments', action='store_true')
+register_cli_argument('account show', 'show_auth_details', action='store_true', help='show details ')
