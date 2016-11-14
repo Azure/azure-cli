@@ -9,6 +9,35 @@ A great cloud needs great tools; we're excited to introduce *Azure CLI 2.0 - Pre
 Installation
 ===============
 
+Install with pip
+^^^^^^^^^^^^^^^^
+
+For those familiar with pip, use the following:
+
+.. code-block:: console
+
+   $ pip install --user azure-cli
+
+You may need to modify your PATH to include the directory ``az`` is installed to:
+
+.. code-block:: console
+
+   $ export PATH=$PATH:~/.local/bin
+
+Permanently include this change by modifying your rc file:
+
+.. code-block:: console
+
+   $ echo "PATH=\$PATH:~/.local/bin" >> ~/.bashrc
+
+(On Windows, add ``%APPDATA%\Python\PythonXX\Scripts`` to your PATH, where XX is your Python version)
+
+Enable tab completion with ``source az.completion.sh``.
+
+Some prerequisites may be required. See our `Preview Install Guide <https://github.com/Azure/azure-cli/blob/master/doc/preview_install_guide.md>`__.
+
+NOTE: If in a virtual environment, you can simply use ``pip install azure-cli`` and the CLI will be installed into that virtual environment.
+
 Install with interactive install script
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -16,7 +45,7 @@ For OSX and Linux, you can install using curl:
 
 .. code-block:: console
 
-   $ curl -L https://aka.ms/InstallAzureCli | sudo bash
+   $ curl -L https://aka.ms/InstallAzureCli | bash
 
 or using wget:
 
@@ -25,19 +54,6 @@ or using wget:
    $ wget -q -O - https://aka.ms/InstallAzureCli | bash
 
 Some prerequisites may be required. See our `Preview Install Guide <https://github.com/Azure/azure-cli/blob/master/doc/preview_install_guide.md>`__.
-
-Install with pip
-^^^^^^^^^^^^^^^^
-
-For those familiar with pip, use the following:
-
-.. code-block:: console
-
-   $ pip install azure-cli
-
-Some prerequisites may be required. See our `Preview Install Guide <https://github.com/Azure/azure-cli/blob/master/doc/preview_install_guide.md>`__.
-
-Enable tab completion with ``source az.completion.sh``.
 
 Install with apt-get
 ^^^^^^^^^^^^^^^^^^^^
