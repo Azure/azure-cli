@@ -74,7 +74,7 @@ helps['appservice web config hostname'] = """
 
 helps['appservice web log'] = """
     type: group
-    short-summary: commands to manager logs 
+    short-summary: commands to manage logs 
 """
 
 helps['appservice web deployment'] = """
