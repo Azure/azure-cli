@@ -30,7 +30,7 @@ Permanently include this change by modifying your rc file:
 
    $ echo "PATH=\$PATH:~/.local/bin" >> ~/.bashrc
 
-(On Windows, add ``%APPDATA%\Python\<PYTHON_VERSION>\Scripts`` to your PATH)
+(On Windows, add ``%APPDATA%\Python\PythonXX\Scripts`` to your PATH, where XX is your Python version)
 
 Enable tab completion with ``source az.completion.sh``.
 
