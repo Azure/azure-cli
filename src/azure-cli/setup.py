@@ -44,6 +44,7 @@ CLASSIFIERS = [
 DEPENDENCIES = [
     'azure-cli-acr',
     'azure-cli-appservice',
+    'azure-cli-container',
     'azure-cli-core',
     'azure-cli-component',
     'azure-cli-cloud',
