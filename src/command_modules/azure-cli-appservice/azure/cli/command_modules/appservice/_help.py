@@ -72,6 +72,56 @@ helps['appservice web config hostname'] = """
     short-summary: commands to configure hostnames
 """
 
+helps['appservice web log'] = """
+    type: group
+    short-summary: commands to manage logs 
+"""
+
+helps['appservice web deployment'] = """
+    type: group
+    short-summary: commands to manage deployments (slots, credentials, etc)
+"""
+
+helps['appservice web deployment list-site-credentials'] = """
+    type: command
+    short-summary: show site level deployment credentials
+"""
+
+helps['appservice web deployment slot auto-swap'] = """
+    type: command
+    short-summary: configure slot auto swap
+"""
+
+helps['appservice web deployment slot create'] = """
+    type: command
+    short-summary: create a slot
+"""
+
+helps['appservice web deployment slot swap'] = """
+    type: command
+    short-summary: swap slots
+"""
+
+helps['appservice web deployment slot list'] = """
+    type: command
+    short-summary: list all slots
+"""
+
+helps['appservice web deployment slot delete'] = """
+    type: command
+    short-summary: delete a slot
+"""
+
+helps['appservice web deployment user'] = """
+    type: group
+    short-summary: commands to manage deployment user credentials
+"""
+
+helps['appservice web deployment slot'] = """
+    type: group
+    short-summary: commands to manage deployment slots
+"""
+
 helps['appservice web source-control'] = """
     type: group
     short-summary: commands to manage source control systems

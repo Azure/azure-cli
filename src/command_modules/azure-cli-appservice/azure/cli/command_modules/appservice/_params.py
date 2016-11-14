@@ -60,9 +60,12 @@ register_cli_argument('appservice web deployment user', 'user_name', help='user 
 register_cli_argument('appservice web deployment user', 'password', help='password, will prompt if not specified')
 
 register_cli_argument('appservice web deployment slot', 'slot', help='the name of the slot')
-register_cli_argument('appservice web deployment slot', 'webapp', help='Name of the webapp')
-register_cli_argument('appservice web deployment slot', 'auto_swap_slot', help='target slot to swap', default='production')
+register_cli_argument('appservice web deployment slot', 'webapp', arg_type=name_arg_type, completer=get_resource_name_completion_list('Microsoft.Web/sites'),
+                      help='Name of the webapp', id_part='name')
+register_cli_argument('appservice web deployment slot', 'auto_swap_slot', help='target slot to auto swap', default='production')
 register_cli_argument('appservice web deployment slot', 'disable', help='disable auto swap', action='store_true')
+register_cli_argument('appservice web deployment slot', 'target_slot', help="target slot to swap, default to 'production'")
+
 
 two_states_switch = ['true', 'false']
 
