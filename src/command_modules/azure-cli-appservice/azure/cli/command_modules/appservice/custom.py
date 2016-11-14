@@ -205,7 +205,9 @@ def create_webapp_slot(resource_group_name, webapp, slot, configuration_source=N
     else: # from other slot
         slot_def = client.sites.get_site_slot(resource_group_name, webapp, slot)
 
-    return client.sites.create_or_update_site_slot(resource_group_name, webapp, slot_def, slot)
+    poller = client.sites.create_or_update_site_slot(resource_group_name, webapp, slot_def, slot)
+    return AppServiceLongRunningOperation()(poller)
+
 
 def config_source_control(resource_group_name, name, repo_url, repository_type=None, branch=None,
                           manual_integration=None, slot=None):
@@ -403,6 +405,20 @@ def config_slot_auto_swap(resource_group_name, webapp, slot, auto_swap_slot=None
     site_config = client.sites.get_site_config_slot(resource_group_name, webapp, slot)
     site_config.auto_swap_slot_name = '' if disable else (auto_swap_slot or 'production')
     return client.sites.update_site_config_slot(resource_group_name, webapp, site_config, slot)
+
+def swap_slot(resource_group_name, webapp, slot, target_slot=None):
+    client = web_client_factory()
+    if target_slot is None:
+        poller = client.sites.swap_slot_with_production(resource_group_name, webapp, slot)
+    else:
+        poller = client.sites.swap_slots_slot(resource_group_name, webapp, slot, target_slot)
+
+    return AppServiceLongRunningOperation()(poller)
+
+def delete_slot(resource_group_name, webapp, slot):
+    client = web_client_factory()
+    #TODO: once swagger finalized, expose other parameters like: delete_all_slots, etc...
+    client.sites.delete_site_slot(resource_group_name, webapp, slot)
 
 def get_streaming_log(resource_group_name, name, provider=None, slot=None):
     client = web_client_factory()
