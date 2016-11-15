@@ -126,18 +126,26 @@ def _name_id_fold(base_name, resource_type, type_field, #pylint: disable=too-man
 
 # pylint: disable=line-too-long
 def get_folded_parameter_help_string(
-        display_name, allow_none=False, allow_new=False, other_required_option=None):
+        display_name, allow_none=False, allow_new=False, default_none=False,
+        other_required_option=None):
     """ Assembles a parameterized help string for folded parameters. """
     quotes = '""' if platform.system() == 'Windows' else "''"
 
-    if not allow_none and not allow_new:
+    if default_none and not allow_none:
+        raise CLIError('Cannot use default_none=True and allow_none=False')
+
+    if not allow_new and not allow_none and not default_none:
         help_text = 'Name or ID of an existing {}.'.format(display_name)
-    elif not allow_new and allow_none:
+    elif not allow_new and allow_none and not default_none:
         help_text = 'Name or ID of an existing {}, or {} for none.'.format(display_name, quotes)
-    elif allow_new and not allow_none:
+    elif allow_new and not allow_none and not default_none:
         help_text = 'Name or ID of the {}. Will create resource if it does not exist.'.format(display_name)
-    elif allow_new and allow_none:
-        help_text = 'Name or ID of the {}, or {} for none. Will create resource if it does not exist.'.format(display_name, quotes)
+    elif allow_new and allow_none and not default_none:
+        help_text = 'Name or ID of the {}, or {} for none. Uses existing resource if available or will create a new resource with defaults if omitted.'.format(display_name, quotes)
+    elif not allow_new and allow_none and default_none:
+        help_text = 'Name or ID of an existing {}, or none by default.'.format(display_name, quotes)
+    elif allow_new and allow_none and default_none:
+        help_text = 'Name or ID of a {}. Uses existing resource or creates new if specified, or none if omitted.'.format(display_name, quotes)
 
     # add parent name option string (if applicable)
     if other_required_option:
@@ -174,13 +182,16 @@ def _validate_name_or_id(
 def get_folded_parameter_validator( # pylint: disable=too-many-arguments
         property_name, property_type, property_option,
         parent_name=None, parent_type=None, parent_option=None,
-        allow_none=False, allow_new=False):
+        allow_none=False, allow_new=False, default_none=False):
 
     # Ensure that all parent parameters are specified if any are
     parent_params = [parent_name, parent_type, parent_option]
     has_parent = any(parent_params)
     if has_parent and not all(parent_params):
         raise CLIError('All parent parameters must be specified (name, type, option) if any are.')
+
+    if default_none and not allow_none:
+        raise CLIError('Cannot use default_none=True if allow_none=False')
 
     # construct the validator
     def validator(namespace):
@@ -190,14 +201,14 @@ def get_folded_parameter_validator( # pylint: disable=too-many-arguments
 
         # Check for the different scenarios (order matters)
         # 1) provided value indicates None (pair of empty quotes)
-        if property_val in ('', '""', "''") or not property_val:
+        if property_val in ('', '""', "''") or (property_val is None and default_none):
             if not allow_none:
                 raise CLIError('{} cannot be None.'.format(property_option))
             setattr(namespace, type_field_name, 'none')
             setattr(namespace, property_name, None)
             if parent_name and parent_val:
                 logger = _logging.get_az_logger(__name__)
-                logger.info('Ignoring: %s %s', parent_option, parent_val)
+                logger.warn('Ignoring: %s %s', parent_option, parent_val)
                 setattr(namespace, parent_name, None)
             return # SUCCESS
 
@@ -212,12 +223,12 @@ def get_folded_parameter_validator( # pylint: disable=too-many-arguments
             if parent_val:
                 if value_was_id:
                     logger = _logging.get_az_logger(__name__)
-                    logger.info('Ignoring: %s %s', parent_option, parent_val)
+                    logger.warn('Ignoring: %s %s', parent_option, parent_val)
                 setattr(namespace, parent_name, None)
             return # SUCCESS
 
         # if a parent name was required but not specified, raise a usage error
-        if has_parent and not value_was_id and not parent_val:
+        if has_parent and not value_was_id and not parent_val and not allow_new:
             raise ValueError('incorrect usage: {} ID | {} NAME {} NAME'.format(
                 property_option, property_option, parent_option))
 

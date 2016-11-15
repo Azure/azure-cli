@@ -184,7 +184,7 @@ def _custom_request_matcher(r1, r2):
 
     q1 = parse_qs(url1.query)
     q2 = parse_qs(url2.query)
-    shared_keys = set(q1.keys()).union(set(q2.keys()))
+    shared_keys = set(q1.keys()).intersection(set(q2.keys()))
 
     if len(shared_keys) != len(q1) or len(shared_keys) != len(q2):
         return False
@@ -213,7 +213,7 @@ class VCRTestBase(unittest.TestCase):#pylint: disable=too-many-instance-attribut
     ]
 
     # pylint: disable=too-many-arguments
-    def __init__(self, test_file, test_name, run_live=False, debug=False,
+    def __init__(self, test_file, test_name, run_live=False, debug=False, debug_vcr=False,
                  skip_setup=False, skip_teardown=False):
         super(VCRTestBase, self).__init__(test_name)
         self.test_name = test_name
@@ -231,7 +231,7 @@ class VCRTestBase(unittest.TestCase):#pylint: disable=too-many-instance-attribut
         if not self.playback and ('--buffer' in sys.argv) and not run_live:
             self.exception = CLIError('No recorded result provided for {}.'.format(self.test_name))
 
-        if debug:
+        if debug_vcr:
             logging.basicConfig()
             vcr_log = logging.getLogger('vcr')
             vcr_log.setLevel(logging.INFO)
@@ -379,7 +379,7 @@ class VCRTestBase(unittest.TestCase):#pylint: disable=too-many-instance-attribut
 
 class ResourceGroupVCRTestBase(VCRTestBase):
     # pylint: disable=too-many-arguments
-    def __init__(self, test_file, test_name, run_live=False, debug=False,
+    def __init__(self, test_file, test_name, run_live=False, debug=False, debug_vcr=False,
                  skip_setup=False, skip_teardown=False):
         super(ResourceGroupVCRTestBase, self).__init__(test_file, test_name, run_live=run_live,
                                                        debug=debug, skip_setup=skip_setup,
@@ -396,7 +396,7 @@ class ResourceGroupVCRTestBase(VCRTestBase):
 
 class StorageAccountVCRTestBase(VCRTestBase):
     # pylint: disable=too-many-arguments
-    def __init__(self, test_file, test_name, run_live=False, debug=False,
+    def __init__(self, test_file, test_name, run_live=False, debug=False, debug_vcr=False,
                  skip_setup=False, skip_teardown=False):
         super(StorageAccountVCRTestBase, self).__init__(test_file, test_name, run_live=run_live,
                                                         debug=debug, skip_setup=skip_setup,

@@ -103,14 +103,14 @@
         "description": "Specify the kind of private IP allocation."
       }
     },
-    "publicIp": {
+    "publicIpAddress": {
       "type": "string",
       "defaultValue": "[concat('PublicIP', parameters('applicationGatewayName'))]",
       "metadata": {
         "description": "The name or ID of the public IP address."
       }
     },
-    "publicIpType": {
+    "publicIpAddressType": {
       "type": "string",
       "defaultValue": "none",
       "allowedValues": [ "none", "new", "existingName", "existingId" ],
@@ -379,7 +379,7 @@
     "frontendIpProperties": {
       "publicIp": {
         "publicIpAddress": {
-          "id": "[variables('publicIpIds')[parameters('publicIpType')]]"
+          "id": "[variables('publicIpIds')[parameters('publicIpAddressType')]]"
         }
       },
       "privateIp": {
@@ -392,10 +392,10 @@
     },
     "publicIpDeploymentName": "[concat('PublicIp',parameters('applicationGatewayName'))]",
     "publicIpIds": {
-      "none": "[parameters('publicIp')]",
-      "new": "[concat('/subscriptions/',subscription().subscriptionId,'/resourceGroups/',resourceGroup().name,'/providers/Microsoft.Network/publicIpAddresses/',parameters('publicIp'))]",
-      "existingName": "[concat('/subscriptions/',subscription().subscriptionId,'/resourceGroups/',resourceGroup().name,'/providers/Microsoft.Network/publicIpAddresses/',parameters('publicIp'))]",
-      "existingId": "[parameters('publicIp')]"
+      "none": "[parameters('publicIpAddress')]",
+      "new": "[concat('/subscriptions/',subscription().subscriptionId,'/resourceGroups/',resourceGroup().name,'/providers/Microsoft.Network/publicIpAddresses/',parameters('publicIpAddress'))]",
+      "existingName": "[concat('/subscriptions/',subscription().subscriptionId,'/resourceGroups/',resourceGroup().name,'/providers/Microsoft.Network/publicIpAddresses/',parameters('publicIpAddress'))]",
+      "existingId": "[parameters('publicIpAddress')]"
     },
     "publicIpTemplateUri": "https://azuresdkci.blob.core.windows.net/templatehost/CreatePublicIp_2016-07-19/azuredeploy.json",
     "publicIpTemplateUriEmpty": "https://azuresdkci.blob.core.windows.net/templatehost/CreatePublicIp_2016-07-19/azuredeploy_empty.json",
@@ -462,12 +462,12 @@
       "properties": {
         "mode": "Incremental",
         "templateLink": {
-          "uri": "[variables('publicIpTemplateFilePaths')[parameters('publicIpType')]]",
+          "uri": "[variables('publicIpTemplateFilePaths')[parameters('publicIpAddressType')]]",
           "contentVersion": "1.0.0.0"
         },
         "parameters": {
           "location": { "value": "[parameters('location')]" },
-          "name": { "value": "[parameters('publicIp')]" },
+          "name": { "value": "[parameters('publicIpAddress')]" },
           "allocationMethod": { "value": "[parameters('publicIpAddressAllocation')]" },
           "tags": { "value": "[parameters('tags')]" }
         }

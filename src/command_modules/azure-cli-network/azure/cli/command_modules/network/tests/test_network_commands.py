@@ -113,7 +113,7 @@ class NetworkAppGatewayPublicIpScenarioTest(ResourceGroupVCRTestBase):
     def body(self):
         rg = self.resource_group
         public_ip_name = 'publicip4'
-        self.cmd('network application-gateway create -g {} -n test4 --subnet subnet1 --vnet-name vnet4 --public-ip {}'.format(rg, public_ip_name), checks=[
+        self.cmd('network application-gateway create -g {} -n test4 --subnet subnet1 --vnet-name vnet4 --public-ip-address {}'.format(rg, public_ip_name), checks=[
             JMESPathCheck("applicationGateway.frontendIPConfigurations[0].properties.publicIPAddress.contains(id, '{}')".format(public_ip_name), True),
             JMESPathCheck('applicationGateway.frontendIPConfigurations[0].properties.privateIPAllocationMethod', 'Dynamic')
         ])
@@ -261,9 +261,8 @@ class NetworkExpressRouteScenarioTest(ResourceGroupVCRTestBase):
 class NetworkLoadBalancerScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-        super(NetworkLoadBalancerScenarioTest, self).__init__(
-            __file__, test_method)
-        self.resource_group = 'lbrg'
+        super(NetworkLoadBalancerScenarioTest, self).__init__(__file__, test_method, debug=True)
+        self.resource_group = 'cli_test_load_balancer'
         self.lb_name = 'lb'
         self.resource_type = 'Microsoft.Network/loadBalancers'
 
@@ -327,8 +326,8 @@ class NetworkLoadBalancerScenarioTest(ResourceGroupVCRTestBase):
 class NetworkLoadBalancerSubresourceScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-        super(NetworkLoadBalancerSubresourceScenarioTest, self).__init__(__file__, test_method)
-        self.resource_group = 'lbsrg'
+        super(NetworkLoadBalancerSubresourceScenarioTest, self).__init__(__file__, test_method, debug=True)
+        self.resource_group = 'cli_test_load_balancer_subresource'
         self.lb_name = 'lb1'
         self.vnet_name = 'vnet1'
         self.subnet_name = 'subnet1'
@@ -978,8 +977,8 @@ class NetworkSubnetSetScenarioTest(ResourceGroupVCRTestBase):
 class NetworkVpnGatewayScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-        super(NetworkVpnGatewayScenarioTest, self).__init__(__file__, test_method)
-        self.resource_group = 'cli_vpn_gateway_test1'
+        super(NetworkVpnGatewayScenarioTest, self).__init__(__file__, test_method, debug=True, skip_teardown=True)
+        self.resource_group = 'cli_vpn_gateway_test'
 
     def test_network_vpn_gateway(self):
         self.execute()

@@ -22,8 +22,7 @@ from azure.cli.core.commands.parameters import (location_type, get_resource_name
                                                 enum_choice_list, tags_type, ignore_type,
                                                 get_generic_completion_list)
 from azure.cli.core.commands.validators import MarkSpecifiedAction
-from azure.cli.core.commands.template_create import \
-    (register_folded_cli_argument, get_folded_parameter_help_string)
+from azure.cli.core.commands.template_create import get_folded_parameter_help_string
 from azure.cli.command_modules.network._client_factory import _network_client_factory
 from azure.cli.command_modules.network._validators import \
     (process_ag_create_namespace, process_ag_listener_create_namespace,
@@ -114,36 +113,14 @@ circuit_name_type = CliArgumentType(options_list=('--circuit-name',), metavar='N
 virtual_network_name_type = CliArgumentType(options_list=('--vnet-name',), metavar='NAME', help='The virtual network (VNET) name.', completer=get_resource_name_completion_list('Microsoft.Network/virtualNetworks'))
 subnet_name_type = CliArgumentType(options_list=('--subnet-name',), metavar='NAME', help='The subnet name.')
 load_balancer_name_type = CliArgumentType(options_list=('--lb-name',), metavar='NAME', help='The load balancer name.', completer=get_resource_name_completion_list('Microsoft.Network/loadBalancers'), id_part='name')
-public_ip_address_type = CliArgumentType(options_list=('--public-ip',), metavar='NAME_OR_ID', completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'))
 private_ip_address_type = CliArgumentType(help='Static private IP address to use.', validator=validate_private_ip_address)
 cookie_based_affinity_type = CliArgumentType(**enum_choice_list(ApplicationGatewayCookieBasedAffinity))
 http_protocol_type = CliArgumentType(**enum_choice_list(ApplicationGatewayProtocol))
 
 # TODO: Refactor these into oblivion!
-
-register_folded_cli_argument('network application-gateway', 'subnet', 'subnets', parent_name='virtual_network_name', parent_option_flag='--vnet-name', parent_type='Microsoft.Network/virtualNetworks', none_flag_value=None, base_required=False, validator=validate_address_prefixes, completer=get_subnet_completion_list())
-register_folded_cli_argument('network application-gateway', 'public_ip', 'Microsoft.Network/publicIPAddresses', completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'))
-
-register_folded_cli_argument('network lb create', 'public_ip_address', 'Microsoft.Network/publicIPAddresses')
-register_folded_cli_argument('network lb create', 'subnet', 'subnets', parent_name='virtual_network_name', parent_type='Microsoft.Network/virtualNetworks', default_value_flag='none')
-
-register_folded_cli_argument('network vpn-gateway create', 'public_ip_address', 'Microsoft.Network/publicIPAddresses', default_value_flag='existingId', none_flag_value=None, new_flag_value=None, required=True)
-
-#register_cli_argument('network', 'private_ip_address_allocation', ignore_type)
-
-register_cli_argument('network application-gateway', 'virtual_network_type', ignore_type)
-register_cli_argument('network application-gateway', 'private_ip_address_allocation', ignore_type)
-register_cli_argument('network application-gateway', 'frontend_type', help=argparse.SUPPRESS, validator=process_ag_create_namespace)
-register_cli_argument('network application-gateway', 'http_listener_protocol', default=None, help=argparse.SUPPRESS)
-
 register_cli_argument('network dns', 'location', help=argparse.SUPPRESS, default='global')
-
-register_cli_argument('network lb create', 'dns_name_type', ignore_type)
-
 register_cli_argument('network public-ip create', 'dns_name_type', ignore_type)
-
 register_cli_argument('network traffic-manager profile check-dns', 'type', help=argparse.SUPPRESS, default='Microsoft.Network/trafficManagerProfiles')
-
 register_cli_argument('network vpn-connection create', 'connection_type', help=argparse.SUPPRESS, validator=vnet_gateway_validator, required=False)
 
 # ARGUMENT REGISTRATION
@@ -155,7 +132,7 @@ register_cli_argument('network', 'private_ip_address', private_ip_address_type)
 register_cli_argument('network', 'private_ip_address_version', **enum_choice_list(privateIpAddressVersion))
 register_cli_argument('network', 'tags', tags_type)
 
-for item in ['lb', 'nic']:
+for item in ['lb frontend-ip', 'nic ip-config']:
     register_cli_argument('network {}'.format(item), 'subnet', validator=get_subnet_validator(), help='Name or ID of an existing subnet. If name is specified, also specify --vnet-name.')
     register_cli_argument('network {}'.format(item), 'virtual_network_name', help='The virtual network (VNet) associated with the subnet (Omit if supplying a subnet id).', id_part=None, metavar='')
     register_cli_argument('network {}'.format(item), 'public_ip_address', validator=get_public_ip_validator())
@@ -163,15 +140,27 @@ for item in ['lb', 'nic']:
 register_cli_argument('network application-gateway', 'application_gateway_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/applicationGateways'), id_part='name')
 register_cli_argument('network application-gateway', 'sku_name', **enum_choice_list(ApplicationGatewaySkuName))
 register_cli_argument('network application-gateway', 'sku_tier', **enum_choice_list(ApplicationGatewayTier))
-register_cli_argument('network application-gateway', 'routing_rule_type', **enum_choice_list(ApplicationGatewayRequestRoutingRuleType))
 register_cli_argument('network application-gateway', 'virtual_network_name', virtual_network_name_type)
 register_cli_argument('network application-gateway', 'servers', nargs='+', validator=validate_servers)
-register_cli_argument('network application-gateway', 'cert_data', options_list=('--cert-file',), help='The path to the PFX certificate file.', validator=validate_cert)
 register_cli_argument('network application-gateway', 'http_settings_cookie_based_affinity', cookie_based_affinity_type)
 register_cli_argument('network application-gateway', 'http_settings_protocol', http_protocol_type)
-
 register_cli_argument('network application-gateway', 'subnet_address_prefix', action=MarkSpecifiedAction)
 register_cli_argument('network application-gateway', 'vnet_address_prefix', action=MarkSpecifiedAction)
+register_cli_argument('network application-gateway', 'virtual_network_type', ignore_type)
+register_cli_argument('network application-gateway', 'private_ip_address_allocation', ignore_type)
+
+register_cli_argument('network application-gateway create', 'routing_rule_type', validator=process_ag_create_namespace, **enum_choice_list(ApplicationGatewayRequestRoutingRuleType))
+register_cli_argument('network application-gateway create', 'cert_data', options_list=('--cert-file',), help='The path to the PFX certificate file.')
+register_cli_argument('network application-gateway create', 'frontend_type', ignore_type)
+register_cli_argument('network application-gateway create', 'http_listener_protocol', ignore_type)
+
+public_ip_help = get_folded_parameter_help_string('public IP address', allow_none=True, allow_new=True, default_none=True)
+register_cli_argument('network application-gateway create', 'public_ip_address', help=public_ip_help, completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'))
+register_cli_argument('network application-gateway create', 'public_ip_address_type', ignore_type)
+
+subnet_help = get_folded_parameter_help_string('subnet', other_required_option='--vnet-name', allow_new=True)
+register_cli_argument('network application-gateway create', 'subnet', help=subnet_help, completer=get_subnet_completion_list())
+register_cli_argument('network application-gateway create', 'subnet_type', ignore_type)
 
 ag_subresources = [
     {'name': 'ssl-cert', 'display': 'SSL certificate', 'ref': 'ssl_certificates'},
@@ -265,8 +254,6 @@ register_cli_argument('network local-gateway', 'local_network_gateway_name', nam
 
 register_cli_argument('network nic', 'network_interface_name', nic_type, options_list=('--name', '-n'))
 register_cli_argument('network nic', 'internal_dns_name_label', options_list=('--internal-dns-name',))
-
-
 
 register_cli_argument('network nic create', 'enable_ip_forwarding', options_list=('--ip-forwarding',), action='store_true')
 register_cli_argument('network nic create', 'network_interface_name', nic_type, options_list=('--name', '-n'), id_part=None, validator=process_nic_create_namespace)
@@ -388,8 +375,17 @@ register_cli_argument('network lb', 'idle_timeout', help='Idle timeout in minute
 register_cli_argument('network lb', 'protocol', help='', **enum_choice_list(TransportProtocol))
 
 register_cli_argument('network lb create', 'public_ip_dns_name', validator=process_lb_create_namespace)
-
 register_cli_argument('network lb create', 'public_ip_address_allocation', default='dynamic', **enum_choice_list(IPAllocationMethod))
+register_cli_argument('network lb create', 'private_ip_address_allocation', ignore_type)
+register_cli_argument('network lb create', 'dns_name_type', ignore_type)
+
+public_ip_help = get_folded_parameter_help_string('public IP address', allow_none=True, allow_new=True)
+register_cli_argument('network lb create', 'public_ip_address', help=public_ip_help, completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'))
+register_cli_argument('network lb create', 'public_ip_address_type', ignore_type)
+
+subnet_help = get_folded_parameter_help_string('subnet', other_required_option='--vnet-name', allow_new=True, allow_none=True, default_none=True)
+register_cli_argument('network lb create', 'subnet', help=subnet_help, completer=get_subnet_completion_list())
+register_cli_argument('network lb create', 'subnet_type', ignore_type)
 
 register_cli_argument('network lb frontend-ip', 'public_ip_address', help='Name or ID of the existing public IP to associate with the configuration.', validator=get_public_ip_validator())
 register_cli_argument('network lb frontend-ip', 'private_ip_address', help='Static private IP address to associate with the configuration.')
@@ -406,17 +402,27 @@ register_cli_argument('network lb rule', 'load_distribution', help='Affinity rul
 register_cli_argument('network nsg create', 'name', name_arg_type)
 
 # VPN gateway
+
 register_cli_argument('network vpn-gateway', 'virtual_network_gateway_name', options_list=('--name', '-n'), completer=get_resource_name_completion_list('Microsoft.Network/virtualNetworkGateways'), id_part='name')
+register_cli_argument('network vpn-gateway', 'cert_name', help='Root certificate name', options_list=('--name', '-n'))
+register_cli_argument('network vpn-gateway', 'gateway_name', help='Virtual network gateway name')
+
 register_cli_argument('network vpn-gateway create', 'gateway_type', **enum_choice_list(gatewayType))
 register_cli_argument('network vpn-gateway create', 'sku', **enum_choice_list(sku))
 register_cli_argument('network vpn-gateway create', 'vpn_type', **enum_choice_list(vpnType))
-register_cli_argument('network vpn-gateway', 'cert_name', help='Root certificate name', options_list=('--name', '-n'))
-register_cli_argument('network vpn-gateway', 'gateway_name', help='Virtual network gateway name')
+
+public_ip_help = get_folded_parameter_help_string('public IP address')
+register_cli_argument('network vpn-gateway create', 'public_ip_address', help=public_ip_help, completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'), validator=get_public_ip_validator(has_type_field=True))
+register_cli_argument('network vpn-gateway create', 'public_ip_address_type', ignore_type)
+
 register_cli_argument('network vpn-gateway root-cert create', 'public_cert_data', help='Base64 contents of the root certificate file or file path.', validator=load_cert_file('public_cert_data'))
-register_cli_argument('network vpn-gateway revoked-cert create', 'thumbprint', help='Certificate thumbprint.')
-register_extra_cli_argument('network vpn-gateway update', 'address_prefixes', options_list=('--address-prefixes',), help='List of address prefixes for the VPN gateway.  Prerequisite for uploading certificates.', nargs='+')
 register_cli_argument('network vpn-gateway root-cert create', 'cert_name', help='Root certificate name', options_list=('--name', '-n'))
 register_cli_argument('network vpn-gateway root-cert create', 'gateway_name', help='Virtual network gateway name')
+
+register_cli_argument('network vpn-gateway revoked-cert create', 'thumbprint', help='Certificate thumbprint.')
+
+register_extra_cli_argument('network vpn-gateway update', 'address_prefixes', options_list=('--address-prefixes',), help='List of address prefixes for the VPN gateway.  Prerequisite for uploading certificates.', nargs='+')
+
 
 # VPN connection
 register_cli_argument('network vpn-connection', 'virtual_network_gateway_connection_name', options_list=('--name', '-n'), metavar='NAME', id_part='name')

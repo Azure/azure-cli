@@ -5,6 +5,7 @@
 
 # pylint: disable=line-too-long
 from argcomplete.completers import FilesCompleter
+import argparse
 from six import u as unicode_string
 
 from azure.cli.core._config import az_config
@@ -234,6 +235,8 @@ for item in ['update', 'upload']:
 register_cli_argument('storage blob upload', 'blob_type', help="Defaults to 'page' for *.vhd files, or 'block' otherwise.", options_list=('--type', '-t'), validator=validate_blob_type, **enum_choice_list(blob_types.keys()))
 register_cli_argument('storage blob upload', 'maxsize_condition', help='The max length in bytes permitted for an append blob.')
 register_cli_argument('storage blob upload', 'validate_content', help='Specifies that an MD5 hash shall be calculated for each chunk of the blob and verified by the service when the chunk has arrived.')
+# TODO: Remove once #807 is complete. Smart Create Generation requires this parameter.
+register_extra_cli_argument('storage blob upload', '_subscription_id', options_list=('--subscription',), help=argparse.SUPPRESS)
 
 for item in ['file', 'blob']:
     register_cli_argument('storage {} url'.format(item), 'protocol', help='Protocol to use.', default='https', **enum_choice_list(['http', 'https']))
