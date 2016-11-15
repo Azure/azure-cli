@@ -107,7 +107,7 @@ def k8s_install_cli(client_version="1.4.5", install_location=None):
     elif system == 'Linux':
         file_url = 'https://storage.googleapis.com/kubernetes-release/release/v{}/bin/linux/amd64/kubectl'.format(client_version)
     elif system == 'Darwin':
-        file_url = 'https://storage.googleapis.com/kubernetes-release/release/v{}/darwin/amd64/kubectl'.format(client_version)
+        file_url = 'https://storage.googleapis.com/kubernetes-release/release/v{}/bin/darwin/amd64/kubectl'.format(client_version)
     else:
         raise CLIError('Proxy server ({}) does not exist on the cluster.'.format(system))
 
