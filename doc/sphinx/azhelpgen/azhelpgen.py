@@ -14,10 +14,11 @@ from azure.cli.core.application import APPLICATION, Configuration
 import azure.cli.core._help as _help
 
 app = APPLICATION
-try:
-    app.execute(['-h'])
-except:
-    pass
+for cmd in app.configuration.get_command_table():
+    try:
+        app.execute(cmd.split() + ['-h'])
+    except:
+        pass
 
 class AzHelpGenDirective(Directive):
     def make_rst(self):
