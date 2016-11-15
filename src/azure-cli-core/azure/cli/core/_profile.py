@@ -18,6 +18,7 @@ from azure.cli.core.adal_authentication import AdalAuthentication
 
 from azure.cli.core.cloud import get_cloud
 from azure.cli.core.context import get_active_context
+from azure.cli.core._environment import get_config_dir
 
 import azure.cli.core._logging as _logging
 logger = _logging.get_az_logger(__name__)
@@ -336,10 +337,7 @@ class CredsCache(object):
     also be handled
     '''
     def __init__(self, auth_ctx_factory=None):
-        if os.getenv('AZURE_CONFIG_DIR'):
-            self._token_file = os.path.join(os.getenv('AZURE_CONFIG_DIR'), 'accessTokens.json')
-        else:
-            self._token_file = os.path.expanduser('~/.azure/accessTokens.json')
+        self._token_file = os.path.join(get_config_dir(), 'accessTokens.json')
         self._service_principal_creds = []
         self._auth_ctx_factory = auth_ctx_factory or _AUTH_CTX_FACTORY
         self.adal_token_cache = None

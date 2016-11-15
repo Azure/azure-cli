@@ -10,11 +10,10 @@ from logging.handlers import RotatingFileHandler
 
 import colorama
 
+from azure.cli.core._environment import get_config_dir
+
 AZ_LOGFILE_NAME = 'az.log'
-if os.getenv('AZURE_CONFIG_DIR'):
-    DEFAULT_LOG_DIR = os.path.join(os.getenv('AZURE_CONFIG_DIR'), 'logs')
-else:
-    DEFAULT_LOG_DIR = os.path.expanduser(os.path.join('~', '.azure', 'logs'))
+DEFAULT_LOG_DIR = os.path.join(get_config_dir(), 'logs')
 
 ENABLE_LOG_FILE = os.environ.get('AZURE_CLI_ENABLE_LOG_FILE')
 LOG_DIR = os.environ.get('AZURE_CLI_LOG_DIR')

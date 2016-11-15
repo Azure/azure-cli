@@ -10,6 +10,7 @@ from azure.cli.core.application import APPLICATION, Configuration
 import azure.cli.core._logging as _logging
 from azure.cli.core._session import ACCOUNT, CONFIG, SESSION
 from azure.cli.core._util import (show_version_info_exit, handle_exception)
+from azure.cli.core._environment import get_config_dir
 
 logger = _logging.get_az_logger(__name__)
 
@@ -19,10 +20,7 @@ def main(args, file=sys.stdout): #pylint: disable=redefined-builtin
     if len(args) > 0 and args[0] == '--version':
         show_version_info_exit(file)
 
-    if os.getenv('AZURE_CONFIG_DIR'):
-        azure_folder = os.getenv('AZURE_CONFIG_DIR')
-    else:
-        azure_folder = os.path.expanduser('~/.azure')
+    azure_folder = get_config_dir()
     if not os.path.exists(azure_folder):
         os.makedirs(azure_folder)
     ACCOUNT.load(os.path.join(azure_folder, 'azureProfile.json'))
