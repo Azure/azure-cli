@@ -24,7 +24,7 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
-    'azure-mgmt-compute==0.32.0',
+    'azure-mgmt-compute==0.32.1',
     'paramiko',
     'pyyaml',
     'six',

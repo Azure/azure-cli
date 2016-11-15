@@ -68,7 +68,7 @@ register_cli_argument('vm access', 'username', options_list=('--username', '-u')
 register_cli_argument('vm access', 'password', options_list=('--password', '-p'), help='The user password')
 
 register_cli_argument('acs', 'name', arg_type=name_arg_type)
-register_cli_argument('acs', 'orchestrator_type', type=str)
+register_cli_argument('acs', 'orchestrator_type', **enum_choice_list(ContainerServiceOchestratorTypes))
 #some admin names are prohibited in acs, such as root, admin, etc. Because we have no control on the orchestrators, so default to a safe name.
 register_cli_argument('acs', 'admin_username', options_list=('--admin-username',), default='azureuser', required=False)
 register_cli_argument('acs', 'dns_name_prefix', options_list=('--dns-prefix', '-d'))
