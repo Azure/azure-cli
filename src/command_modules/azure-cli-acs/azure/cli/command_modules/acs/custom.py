@@ -80,13 +80,14 @@ def dcos_install_cli(install_location=None, client_version='1.8'):
 
     if not install_location:
         raise CLIError("No install location specified and it could not be determined from the current platform '{}'".format(system))
-
+    base_url = 'https://downloads.dcos.io/binaries/cli/{}/x86-64/dcos-{}/{}'
     if system == 'Windows':
-        file_url = 'https://downloads.dcos.io/binaries/cli/windows/x86-64/dcos-{}/dcos.exe'.format(client_version)
+        file_url = base_url.format('windows', client_version, 'dcos.exe')
     elif system == 'Linux':
-        file_url = 'https://downloads.dcos.io/binaries/cli/linux/x86-64/dcos-{}/dcos'.format(client_version)
+        # TODO Support ARM CPU here
+        file_url = base_url.format('linux', client_version, 'dcos')
     elif system == 'Darwin':
-        file_url = 'https://downloads.dcos.io/binaries/cli/darwin/x86-64/dcos-{}/dcos'.format(client_version)
+        file_url = base_url.format('darwin', client_version, 'dcos')
     else:
         raise CLIError('Proxy server ({}) does not exist on the cluster.'.format(system))
 
@@ -102,12 +103,14 @@ def k8s_install_cli(client_version="1.4.5", install_location=None):
     """
     file_url = ''
     system = platform.system()
+    base_url = 'https://storage.googleapis.com/kubernetes-release/release/v{}/bin/{}/amd64/{}'
     if system == 'Windows':
-        file_url = 'https://storage.googleapis.com/kubernetes-release/release/v{}/bin/windows/amd64/kubectl.exe'.format(client_version)
+        file_url = base_url.format(client_version, 'windows', 'kubectl.exe')
     elif system == 'Linux':
-        file_url = 'https://storage.googleapis.com/kubernetes-release/release/v{}/bin/linux/amd64/kubectl'.format(client_version)
+        # TODO: Support ARM CPU here
+        file_url = base_url.format(client_version, 'linux', 'kubectl')
     elif system == 'Darwin':
-        file_url = 'https://storage.googleapis.com/kubernetes-release/release/v{}/darwin/amd64/kubectl'.format(client_version)
+        file_url = base_url.format(client_version, 'darwin', 'kubectl')
     else:
         raise CLIError('Proxy server ({}) does not exist on the cluster.'.format(system))
 
