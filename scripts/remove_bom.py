@@ -1,12 +1,17 @@
 #!/usr/bin/env python
 
+# --------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for license information.
+# --------------------------------------------------------------------------------------------
+
 # Remove the UTF-8 BOM from all python files
 
 from __future__ import print_function
-from _common import get_repo_root
 
-import codecs
 import os
+import codecs
+from _common import get_repo_root
 
 def remove_bom(file_path):
     file_size = os.path.getsize(file_path)
