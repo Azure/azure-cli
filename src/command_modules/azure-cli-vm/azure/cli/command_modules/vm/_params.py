@@ -11,6 +11,7 @@ from argcomplete.completers import FilesCompleter
 
 from azure.mgmt.compute.models import (VirtualHardDisk,
                                        CachingTypes,
+                                       ContainerServiceOchestratorTypes,
                                        UpgradeMode)
 from azure.mgmt.storage.models import SkuName
 from azure.cli.core.commands import register_cli_argument, CliArgumentType, register_extra_cli_argument
