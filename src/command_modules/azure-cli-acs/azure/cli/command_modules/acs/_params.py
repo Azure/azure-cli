@@ -59,8 +59,6 @@ register_cli_argument('acs', 'ssh_key_value', required=False, help='SSH key file
 
 register_extra_cli_argument('acs create', 'generate_ssh_keys', action='store_true', help='Generate SSH public and private key files if missing')
 register_cli_argument('acs create', 'agent_vm_size', completer=get_vm_size_completion_list)
-register_cli_argument('acs create', 'service_principal', help='Service principal for making calls into Azure APIs')
-register_cli_argument('acs create', 'client_secret', help='Client secret to use with the service principal for making calls to Azure APIs')
 
 register_cli_argument('acs dcos browse', 'name', name_type)
 register_cli_argument('acs dcos browse', 'resource_group_name', resource_group_name_type)

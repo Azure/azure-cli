@@ -195,6 +195,14 @@ def acs_create(resource_group_name, deployment_name, dns_name_prefix, name, ssh_
      applications on the cluster. Possible values include: 'dcos', 'swarm'
     :type orchestrator_type: str or :class:`orchestratorType
      <Default.models.orchestratorType>`
+    :param service_principal: The service principal used for cluster authentication
+     to Azure APIs. If not specified, it is created for you and stored in the
+     ${HOME}/.azure directory.
+    :type service_principal: str
+    :param client_secret: The secret associated with the service principal. If
+     --service-principal is specified, then secret should also be specified. If
+     --service-principal is not specified, the secret is auto-generated for you
+     and stored in ${HOME}/.azure/ directory.
     :param tags: Tags object.
     :type tags: object
     :param dict custom_headers: headers that will be added to the request
