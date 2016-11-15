@@ -13,6 +13,7 @@ from random import choice
 import re
 from string import digits
 import sys
+import time
 import unittest
 try:
     import unittest.mock as mock
@@ -31,6 +32,9 @@ from azure.cli.core import __version__ as core_version
 import azure.cli.core._debug as _debug
 from azure.cli.core._profile import Profile
 from azure.cli.core._util import CLIError
+
+# Capture the sleep method before it gets mocked away
+real_sleep = time.sleep
 
 TRACK_COMMANDS = os.environ.get('AZURE_CLI_TEST_TRACK_COMMANDS')
 COMMAND_COVERAGE_FILENAME = 'command_coverage.txt'
@@ -80,7 +84,7 @@ def _mock_user_access_token(_, _1, _2, _3): #pylint: disable=unused-argument
     return ('Bearer', 'top-secret-token-for-you')
 
 def _mock_operation_delay(_):
-    # don't run time.sleep()
+    real_sleep(0.00001)
     return
 
 # TEST CHECKS

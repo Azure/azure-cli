@@ -92,9 +92,10 @@ class LongRunningOperation(object): #pylint: disable=too-few-public-methods
         correlation_message = ''
         while not poller.done():
             try:
-                correlation_message = 'Correlation ID: {}' \
-                    .format(json.loads(poller._response.__dict__['_content']) #pylint: disable=protected-access
-                            ['properties']['correlationId'])
+                if not correlation_message:
+                    correlation_message = 'Correlation ID: {}' \
+                        .format(json.loads(poller._response.__dict__['_content']) #pylint: disable=protected-access
+                                ['properties']['correlationId'])
             except: #pylint: disable=bare-except
                 pass
 
