@@ -11,9 +11,12 @@ import os.path
 import platform
 import random
 import string
+import subprocess
 import sys
 from six.moves.urllib.request import urlretrieve #pylint: disable=import-error
+import threading
 import time
+import webbrowser
 
 from msrestazure.azure_exceptions import CloudError
 
@@ -29,7 +32,30 @@ from azure.mgmt.resource.resources import ResourceManagementClient
 
 logger = _logging.get_az_logger(__name__)
 
-def dcos_browse(name, resource_group_name):
+def wait_then_open(url):
+    """
+    Waits for a bit then opens a URL.  Useful for waiting for a proxy to come up, and then open the URL.
+    """
+    # TODO: we should ping the URL instead of just sleeping.
+    time.sleep(2)
+    webbrowser.open_new_tab(url)
+
+def wait_then_open_async(url):
+    t = threading.Thread(target=wait_then_open, args=({url}))
+    t.daemon = True
+    t.start()
+
+def k8s_browse(disable_browser=False):
+    """
+    Wrapper on the 'kubectl proxy' command, for consistency with 'az dcos brows'
+    """
+    logger.info('Proxy running on 127.0.0.1:8001/ui')
+    logger.info('Press CTRL+C to close the tunnel...')
+    if not disable_browser:
+        wait_then_open_async('http://127.0.0.1:8001/ui')
+    subprocess.call(["kubectl", "proxy"])
+
+def dcos_browse(name, resource_group_name, disable_browser=False):
     """
     Creates an SSH tunnel to the Azure container service, and opens the Mesosphere DC/OS dashboard in the browser.
 
@@ -61,6 +87,8 @@ def dcos_browse(name, resource_group_name):
     proxy.set_http_proxy('127.0.0.1', local_port)
     logger.info('Proxy running on 127.0.0.1:%s', local_port)
     logger.info('Press CTRL+C to close the tunnel...')
+    if not disable_browser:
+        wait_then_open_async('http://127.0.0.1:{}'.format(local_port))
     try:
         acs.create_tunnel(
             remote_host='127.0.0.1',
