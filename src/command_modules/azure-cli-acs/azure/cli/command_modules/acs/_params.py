@@ -11,10 +11,12 @@ from argcomplete.completers import FilesCompleter
 
 from azure.cli.core.commands import register_cli_argument, CliArgumentType, register_extra_cli_argument
 from azure.cli.core.commands.parameters import (
+    enum_choice_list,
     name_type,
     resource_group_name_type,
     get_one_of_subscription_locations,
     get_resource_name_completion_list)
+from azure.mgmt.compute.models import ContainerServiceOchestratorTypes
 
 def _compute_client_factory(**_):
     from azure.mgmt.compute import ComputeManagementClient
@@ -49,7 +51,7 @@ def _get_default_install_location(exe_name):
 name_arg_type = CliArgumentType(options_list=('--name', '-n'), metavar='NAME')
 
 register_cli_argument('acs', 'name', arg_type=name_arg_type)
-register_cli_argument('acs', 'orchestrator_type', type=str)
+register_cli_argument('acs', 'orchestrator_type', **enum_choice_list(ContainerServiceOchestratorTypes))
 #some admin names are prohibited in acs, such as root, admin, etc. Because we have no control on the orchestrators, so default to a safe name.
 register_cli_argument('acs', 'admin_username', options_list=('--admin-username',), default='azureuser', required=False)
 register_cli_argument('acs', 'dns_name_prefix', options_list=('--dns-prefix', '-d'))
