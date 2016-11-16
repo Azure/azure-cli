@@ -24,7 +24,7 @@ logger = _logging.get_az_logger(__name__)
 
 
 # CUSTOM TYPE
-class KeyType(Enum):
+class KeyType(Enum):  # pylint: disable=too-few-public-methods
     primary = 'primary'
     secondary = 'secondary'
 
