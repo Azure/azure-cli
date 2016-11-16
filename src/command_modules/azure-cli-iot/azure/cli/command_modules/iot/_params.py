@@ -2,7 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-#pylint: disable=line-too-long
+# pylint: disable=line-too-long
 
 from azure.cli.core.commands.parameters import \
     (location_type, enum_choice_list, get_resource_name_completion_list, CliArgumentType)
@@ -90,10 +90,12 @@ register_cli_argument('iot device show-connection-string', 'key_type', options_l
 register_cli_argument('iot device message', 'lock_token', help='Message lock token.')
 
 # Arguments for 'iot device message send'
-register_cli_argument('iot device message send', 'message', help='Device-to-cloud message body.')
-register_cli_argument('iot device message send', 'message_id', help='Device-to-cloud message Id.')
-register_cli_argument('iot device message send', 'correlation_id', help='Device-to-cloud message correlation Id.')
-register_cli_argument('iot device message send', 'user_id', help='Device-to-cloud message user Id.')
+register_cli_argument('iot device message send', 'data', help='Device-to-cloud message body.', arg_group='Messaging')
+register_cli_argument('iot device message send', 'message_id', help='Device-to-cloud message Id.', arg_group='Messaging')
+register_cli_argument('iot device message send', 'correlation_id', help='Device-to-cloud message correlation Id.',
+                      arg_group='Messaging')
+register_cli_argument('iot device message send', 'user_id', help='Device-to-cloud message user Id.',
+                      arg_group='Messaging')
 
 # Arguments for 'iot device message receive'
 register_cli_argument('iot device message receive', 'lock_timeout',

@@ -23,14 +23,13 @@ from ._utils import create_self_signed_certificate
 logger = _logging.get_az_logger(__name__)
 
 
+# CUSTOM TYPE
 class KeyType(Enum):
     primary = 'primary'
     secondary = 'secondary'
 
 
 # CUSTOM METHODS
-
-
 def iot_hub_create(client, hub_name, resource_group_name,
                    location=None, sku=IotHubSku.f1.value, unit=1):
     name_availability = client.check_name_availability(hub_name)
@@ -38,11 +37,8 @@ def iot_hub_create(client, hub_name, resource_group_name,
     if name_availability is not None and not name_availability.name_available:
         raise CLIError(name_availability.message)
     location = _ensure_location(resource_group_name, location)
-    iot_hub_description = IotHubDescription(location=location,
-                                            sku=IotHubSkuInfo(name=sku, capacity=unit))
-    result = client.create_or_update(resource_group_name=resource_group_name, resource_name=hub_name,
-                                     iot_hub_description=iot_hub_description)
-    return result
+    iot_hub_description = IotHubDescription(location=location, sku=IotHubSkuInfo(name=sku, capacity=unit))
+    return client.create_or_update(resource_group_name, hub_name, iot_hub_description)
 
 
 def iot_hub_get(client, hub_name, resource_group_name=None):
@@ -68,22 +64,21 @@ def iot_hub_show_connection_string(client, hub_name=None, resource_group_name=No
         connection_strings = []
         for h in hubs:
             connection_string = _get_single_iot_hub_connection_string(client, h.name, h.resourcegroup, policy_name, key_type)
-            connection_strings.append({"name": h.name,
-                                       "connectionString": connection_string})
+            connection_strings.append({'name': h.name, 'connectionString': connection_string})
         return connection_strings
     else:
         resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
         connection_string = _get_single_iot_hub_connection_string(client, hub_name, resource_group_name, policy_name, key_type)
-        return {"connectionString": connection_string}
+        return {'connectionString': connection_string}
 
 
 def _get_single_iot_hub_connection_string(client, hub_name, resource_group_name, policy_name, key_type):
     access_policy = iot_hub_policy_get(client, hub_name, policy_name, resource_group_name)
     connection_string_template = 'HostName={}.azure-devices.net;SharedAccessKeyName={};SharedAccessKey={}'
-    if key_type == KeyType.primary:
-        return connection_string_template.format(hub_name, policy_name, access_policy.primary_key)
-    else:
+    if key_type == KeyType.secondary:
         return connection_string_template.format(hub_name, policy_name, access_policy.secondary_key)
+    else:
+        return connection_string_template.format(hub_name, policy_name, access_policy.primary_key)
 
 
 def iot_hub_sku_list(client, hub_name, resource_group_name=None):
@@ -217,11 +212,11 @@ def iot_device_show_connection_string(client, hub_name, device_id=None, resource
         return {'connectionString': connection_string}
 
 
-def iot_device_send_message(client, hub_name, device_id, resource_group_name=None, message='Ping from Azure CLI',
+def iot_device_send_message(client, hub_name, device_id, resource_group_name=None, data='Ping from Azure CLI',
                             message_id=None, correlation_id=None, user_id=None):
     resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
     device_client = _get_iot_device_client(client, resource_group_name, hub_name, device_id)
-    return device_client.send_message(device_id, message, message_id, correlation_id, user_id)
+    return device_client.send_message(device_id, data, message_id, correlation_id, user_id)
 
 
 def iot_device_receive_message(client, hub_name, device_id, resource_group_name=None, lock_timeout=None):
@@ -268,21 +263,22 @@ def _get_single_iot_device_connection_string(client, hub_name, device_id, resour
     if device_desc is None:
         raise CLIError('Device {} not found.'.format(device_id))
 
-    connection_string_template = 'HostName={0}.azure-devices.net;DeviceId={1};{2}'
+    connection_string_template = 'HostName={0}.azure-devices.net;DeviceId={1};{2}={3}'
     auth = device_desc.authentication
     if auth.symmetric_key.primary_key is None and auth.symmetric_key.secondary_key is None:
-        return connection_string_template.format(hub_name, device_id, 'x509=true')
+        return connection_string_template.format(hub_name, device_id, 'x509', 'true')
     else:
-        if key_type == KeyType.primary:
-            if auth.symmetric_key.primary_key is None:
-                raise CLIError('Primary key not found.')
-            return connection_string_template.format(hub_name, device_id,
-                                                     'SharedAccessKey=' + auth.symmetric_key.primary_key)
-        else:
+        if key_type == KeyType.secondary:
             if auth.symmetric_key.secondary_key is None:
                 raise CLIError('Secondary key not found.')
-            return connection_string_template.format(hub_name, device_id,
-                                                     'SharedAccessKey=' + auth.symmetric_key.secondary_key)
+            return connection_string_template.format(hub_name, device_id, 'SharedAccessKey',
+                                                     auth.symmetric_key.secondary_key)
+        else:
+            if auth.symmetric_key.primary_key is None:
+                raise CLIError('Primary key not found.')
+            return connection_string_template.format(hub_name, device_id, 'SharedAccessKey',
+                                                     auth.symmetric_key.primary_key)
+
 
 
 def _get_iot_device_client(client, resource_group_name, hub_name, device_id):
