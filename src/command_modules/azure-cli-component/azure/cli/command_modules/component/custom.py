@@ -74,12 +74,16 @@ def _install_or_update(package_list, link, private, pre, show_logs=False):
     pip_args = ['install'] + options + package_list + pkg_index_options
     _run_pip(pip, pip_args)
 
-def update(private=False, pre=False, link=None, additional_component=None, show_logs=False):
+def update(private=False, pre=False, link=None, additional_components=None, show_logs=False):
     """ Update the CLI and all installed components """
     import pip
+    # Update the CLI itself
     package_list = [CLI_PACKAGE_NAME]
+    # Update all the packages we currently have installed
     package_list += [dist.key for dist in pip.get_installed_distributions(local_only=True)
                      if dist.key.startswith(COMPONENT_PREFIX)]
-    if additional_component:
-        package_list += [COMPONENT_PREFIX + additional_component]
+    # Install/Update any new components the user requested
+    if additional_components:
+        for c in additional_components:
+            package_list += [COMPONENT_PREFIX + c]
     _install_or_update(package_list, link, private, pre, show_logs=show_logs)
