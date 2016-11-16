@@ -98,6 +98,6 @@ register_cli_argument('iot device message send', 'user_id', help='Device-to-clou
                       arg_group='Messaging')
 
 # Arguments for 'iot device message receive'
-register_cli_argument('iot device message receive', 'lock_timeout',
-                      help='In case a message returned to this call, this specifies the amount of time, '
+register_cli_argument('iot device message receive', 'lock_timeout', type=int,
+                      help='In case a message returned to this call, this specifies the amount of time in seconds, '
                            'the message will be invisible to other receive calls.')

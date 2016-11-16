@@ -219,7 +219,7 @@ def iot_device_send_message(client, hub_name, device_id, resource_group_name=Non
     return device_client.send_message(device_id, data, message_id, correlation_id, user_id)
 
 
-def iot_device_receive_message(client, hub_name, device_id, resource_group_name=None, lock_timeout=None):
+def iot_device_receive_message(client, hub_name, device_id, resource_group_name=None, lock_timeout=60):
     resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
     device_client = _get_iot_device_client(client, resource_group_name, hub_name, device_id)
     result = device_client.receive_message(device_id, lock_timeout, raw=True)
