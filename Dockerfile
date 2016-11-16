@@ -7,12 +7,16 @@ FROM python:3.5.2-alpine
 
 WORKDIR azure-cli
 COPY . /azure-cli
-# We add jpterm and jq as useful tools
+# pip wheel - required for CLI packaging
+# jmespath-terminal - we include jpterm as a useful tool
 RUN pip install --upgrade pip wheel jmespath-terminal
-RUN apk update && apk add bash gcc openssl-dev libffi-dev musl-dev jq
-
-# We also, install jp as another useful tool
-RUN apk update && apk add ca-certificates wget && update-ca-certificates
+# bash gcc openssl-dev libffi-dev musl-dev - dependencies required for CLI
+# jq - we include jq as a useful tool
+# openssh - included for ssh-keygen
+# ca-certificates 
+# wget - required for installing jp
+RUN apk update && apk add bash gcc openssl-dev libffi-dev musl-dev jq openssh ca-certificates wget openssl && update-ca-certificates
+# We also, install jp
 RUN wget https://github.com/jmespath/jp/releases/download/0.1.2/jp-linux-amd64 -qO /usr/local/bin/jp && chmod +x /usr/local/bin/jp
 
 # 1. Build packages and store in tmp dir
