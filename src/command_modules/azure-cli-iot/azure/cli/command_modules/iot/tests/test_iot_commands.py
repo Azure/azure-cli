@@ -4,7 +4,8 @@
 # --------------------------------------------------------------------------------------------
 # pylint: disable=line-too-long
 
-from azure.cli.core.test_utils.vcr_test_base import (ResourceGroupVCRTestBase, JMESPathCheck, JMESPathPatternCheck)
+from azure.cli.core.test_utils.vcr_test_base import \
+    ResourceGroupVCRTestBase, JMESPathCheck, JMESPathPatternCheck, NoneCheck
 
 
 class IoTHubTest(ResourceGroupVCRTestBase):
@@ -100,12 +101,27 @@ class IoTHubTest(ResourceGroupVCRTestBase):
         ])
 
         # Test 'az iot hub consumer-group delete'
-        self.cmd('iot hub consumer-group delete --hub-name {0} -n {1}'.format(hub, consumer_group_name))
+        self.cmd('iot hub consumer-group delete --hub-name {0} -n {1}'.format(hub, consumer_group_name),
+                 checks=NoneCheck())
 
         self.cmd('iot hub consumer-group list --hub-name {0}'.format(hub), checks=[
             JMESPathCheck('length([*])', 1),
-            JMESPathCheck('[0]', '$Default'),
+            JMESPathCheck('[0]', '$Default')
         ])
+
+        # Test 'az iot hub job list'
+        self.cmd('iot hub job list --hub-name {0}'.format(hub), checks=NoneCheck())
+
+        # Test 'az iot hub job show'
+        job_id = 'fake-job'
+        expected_exception = 'Job not found with ID'
+        self.cmd('iot hub job show --hub-name {0} --job-id {1}'.format(hub, job_id),
+                 allowed_exceptions=expected_exception)
+
+        # Test 'az iot hub job cancel'
+        expected_exception = 'JobNotFound'
+        self.cmd('iot hub job cancel --hub-name {0} --job-id {1}'.format(hub, job_id),
+                 allowed_exceptions=expected_exception)
 
         # Test 'az iot device create'
         device_1 = self.device_id_1
@@ -145,7 +161,7 @@ class IoTHubTest(ResourceGroupVCRTestBase):
         self.cmd('iot device show-connection-string --hub-name {0}'.format(hub), checks=[
             JMESPathCheck('length([*])', 2),
             JMESPathCheck('[0].deviceId', device_1),
-            JMESPathCheck('[1].deviceId', device_2),
+            JMESPathCheck('[1].deviceId', device_2)
         ])
 
         # Test 'az iot device show'
@@ -159,9 +175,45 @@ class IoTHubTest(ResourceGroupVCRTestBase):
         self.cmd('iot device list --hub-name {0}'.format(hub), checks=[
             JMESPathCheck('length([*])', 2),
             JMESPathCheck('[0].deviceId', device_1),
-            JMESPathCheck('[1].deviceId', device_2),
+            JMESPathCheck('[1].deviceId', device_2)
+        ])
+
+        # Test 'az iot device message send'
+        self.cmd('iot device message send --hub-name {0} -d {1}'.format(hub, device_1), checks=NoneCheck())
+
+        # Test 'az iot device message receive'
+        self.cmd('iot device message receive --hub-name {0} -d {1}'.format(hub, device_1), checks=NoneCheck())
+
+        # Test 'az iot device message complete'
+        lock_token = '00000000-0000-0000-0000-000000000000'
+        expected_exception = 'DeviceMessageLockLost'
+        self.cmd('iot device message complete --hub-name {0} -d {1} --lock-token {2}'.format(hub, device_1, lock_token),
+                 allowed_exceptions=expected_exception)
+
+        # Test 'az iot device message reject'
+        self.cmd('iot device message reject --hub-name {0} -d {1} --lock-token {2}'.format(hub, device_1, lock_token),
+                 allowed_exceptions=expected_exception)
+
+        # Test 'az iot device message abandon'
+        self.cmd('iot device message abandon --hub-name {0} -d {1} --lock-token {2}'.format(hub, device_1, lock_token),
+                 allowed_exceptions=expected_exception)
+
+        # Test 'az iot hub show-quota-metrics'
+        self.cmd('iot hub show-quota-metrics -n {0}'.format(hub), checks=[
+            JMESPathCheck('length([*])', 2),
+            JMESPathCheck('[0].name', 'TotalMessages'),
+            JMESPathCheck('[0].maxValue', 400000),
+            JMESPathCheck('[1].name', 'TotalDeviceCount'),
+            JMESPathCheck('[1].maxValue', 500000)
+        ])
+
+        # Test 'az iot hub show-stats'
+        self.cmd('iot hub show-stats -n {0}'.format(hub), checks=[
+            JMESPathCheck('disabledDeviceCount', 0),
+            JMESPathCheck('enabledDeviceCount', 2),
+            JMESPathCheck('totalDeviceCount', 2)
         ])
 
         # Test 'az iot device delete'
-        self.cmd('iot device delete --hub-name {0} -d {1}'.format(hub, device_1))
-        self.cmd('iot device delete --hub-name {0} -d {1}'.format(hub, device_2))
+        self.cmd('iot device delete --hub-name {0} -d {1}'.format(hub, device_1), checks=NoneCheck())
+        self.cmd('iot device delete --hub-name {0} -d {1}'.format(hub, device_2), checks=NoneCheck())

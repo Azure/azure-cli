@@ -14,7 +14,7 @@ from msrest.serialization import Model
 
 
 class Authentication(Model):
-    """Authentication.
+    """Authentication information.
 
     :param symmetric_key:
     :type symmetric_key: :class:`SymmetricKey
