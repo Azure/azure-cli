@@ -20,6 +20,8 @@ For those familiar with pip, use the following:
 
 You may need to modify your PATH to include the directory ``az`` is installed to:
 
+**On UNIX:**
+
 .. code-block:: console
 
    $ export PATH=$PATH:~/.local/bin
@@ -30,7 +32,24 @@ Permanently include this change by modifying your rc file:
 
    $ echo "PATH=\$PATH:~/.local/bin" >> ~/.bashrc
 
-(On Windows, add ``%APPDATA%\Python\PythonXX\Scripts`` to your PATH, where XX is your Python version)
+**On OS X:**
+
+.. code-block:: console
+
+   export PATH=$PATH:~/Library/Python/X.Y/bin
+
+Where X.Y is your Python version.
+
+Permanently include this change by modifying your rc file:
+
+.. code-block:: console
+
+   $ echo "PATH=\$PATH:~/Library/Python/X.Y/bin" >> ~/.bash_profile
+
+**On Windows:**
+
+Add ``%APPDATA%\Python\PythonXY\Scripts`` to your PATH.
+Where XY is your Python version.
 
 Enable tab completion with ``source az.completion.sh``.
 
