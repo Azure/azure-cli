@@ -18,7 +18,12 @@ from azure.cli.core._profile import Profile
 from azure.cli.core._util import CLIError
 
 logger = _logging.get_az_logger(__name__)
-BASE_URL = "https://westus.mindaro.microsoft.io"
+
+try:
+    BASE_URL = os.environ['AZURE_CLI_CONTAINER_SERVICE_URL']
+except KeyError:
+    BASE_URL = "https://westus.mindaro.microsoft.io"
+
 SUBSCRIPTION_URL = "/subscriptions/{subscription_id}"
 RESOURCE_BASE_URL = SUBSCRIPTION_URL + "/resourceGroups/{resource_group_name}"
 CONTAINER_SERVICE_PROVIDER = "/providers/Microsoft.ContainerService"
