@@ -47,10 +47,10 @@ def wait_then_open_async(url):
 
 def k8s_browse(disable_browser=False):
     """
-    Wrapper on the 'kubectl proxy' command, for consistency with 'az dcos brows'
+    Wrapper on the 'kubectl proxy' command, for consistency with 'az dcos browse'
     """
-    logger.info('Proxy running on 127.0.0.1:8001/ui')
-    logger.info('Press CTRL+C to close the tunnel...')
+    logger.warning('Proxy running on 127.0.0.1:8001/ui')
+    logger.warning('Press CTRL+C to close the tunnel...')
     if not disable_browser:
         wait_then_open_async('http://127.0.0.1:8001/ui')
     subprocess.call(["kubectl", "proxy"])
@@ -85,8 +85,8 @@ def dcos_browse(name, resource_group_name, disable_browser=False):
 
     # Set the proxy
     proxy.set_http_proxy('127.0.0.1', local_port)
-    logger.info('Proxy running on 127.0.0.1:%s', local_port)
-    logger.info('Press CTRL+C to close the tunnel...')
+    logger.warning('Proxy running on 127.0.0.1:%s', local_port)
+    logger.warning('Press CTRL+C to close the tunnel...')
     if not disable_browser:
         wait_then_open_async('http://127.0.0.1:{}'.format(local_port))
     try:
