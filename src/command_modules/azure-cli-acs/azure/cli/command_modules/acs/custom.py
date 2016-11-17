@@ -266,6 +266,10 @@ def acs_create(resource_group_name, deployment_name, dns_name_prefix, name, ssh_
     :raises: :class:`CloudError<msrestazure.azure_exceptions.CloudError>`
     """
     register_providers()
+    groups = _resource_client_factory().resource_groups
+    # Just do the get, we don't need the result, it will error out if the group doesn't exist.
+    groups.get(resource_group_name)
+
     if orchestrator_type == 'Kubernetes' or orchestrator_type == 'kubernetes':
         principalObj = load_acs_service_principal()
         if principalObj:
