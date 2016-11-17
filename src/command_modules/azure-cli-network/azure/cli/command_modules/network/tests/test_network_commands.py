@@ -392,7 +392,7 @@ class NetworkLoadBalancerSubresourceScenarioTest(ResourceGroupVCRTestBase):
         self.cmd('network lb frontend-ip create {} -n ipconfig1 --public-ip-address publicip1'.format(lb_rg))
         self.cmd('network lb frontend-ip create {} -n ipconfig2 --public-ip-address publicip2'.format(lb_rg))
         self.cmd('network lb frontend-ip create {} -n ipconfig3 --vnet-name {} --subnet {} --private-ip-address 10.0.0.99'.format(lb_rg, self.vnet_name, self.subnet_name),
-            allowed_exceptions="Run 'az resource feature register --namespace Microsoft.Network -n AllowMultiVipIlb' to enable the feature first")
+            allowed_exceptions=["Run 'az resource feature register --namespace Microsoft.Network -n AllowMultiVipIlb' to enable the feature first", 'is not registered for feature'])
         # Note that the ipconfig3 won't be added. The 3 that will be found are the default and two created ones
         self.cmd('network lb frontend-ip list {}'.format(lb_rg), checks=JMESPathCheck('length(@)', 3))
         self.cmd('network lb frontend-ip update {} -n ipconfig1 --public-ip-address publicip3'.format(lb_rg))
@@ -496,7 +496,7 @@ class NetworkNicScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
         super(NetworkNicScenarioTest, self).__init__(__file__, test_method)
-        self.resource_group = 'cli_test1'
+        self.resource_group = 'cli_test_nic_scenario'
 
     def test_network_nic(self):
         self.execute()
@@ -608,9 +608,9 @@ class NetworkNicSubresourceScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck('privateIpAllocationMethod', 'Dynamic')
         ])
         # TODO: Creating multiple ip-configurations per NIC currently not supported per rest-api-spec issue #305
-        expected_exception = "Run 'az resource feature register --namespace Microsoft.Network -n AllowMultipleIpConfigurationsPerNic' to enable the feature first"
+        expected_exception = ["Run 'az resource feature register --namespace Microsoft.Network -n AllowMultipleIpConfigurationsPerNic' to enable the feature first", 'is not registered for feature']
         self.cmd('network nic ip-config create -g {} --nic-name {} -n ipconfig2 --subnet {} --vnet-name {}'.format(rg, nic, subnet, vnet), allowed_exceptions=expected_exception)
-        expected_exception = 'Network interface {} must have one or more IP configurations.'.format(nic)
+        expected_exception = 'Network interface {} must have one or more IP configurations.'.format(nic) # pylint: disable=redefined-variable-type
         self.cmd('network nic ip-config delete -g {} --nic-name {} -n ipconfig1'.format(rg, nic), allowed_exceptions=expected_exception)
 
         # test various sets
