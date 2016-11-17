@@ -25,10 +25,10 @@ helps['acr repository'] = """
 helps['acr list'] = """
             type: command
             examples:
-                - name: List container registries and show result in a table
+                - name: List container registries and show result in a table.
                   text:
                     az acr list -o table
-                - name: List container registries in a resource group and show result in a table
+                - name: List container registries in a resource group and show result in a table.
                   text:
                     az acr list -g myResourceGroup -o table
             """
@@ -36,10 +36,10 @@ helps['acr list'] = """
 helps['acr create'] = """
             type: command
             examples:
-                - name: Create a container registry with a new storage account
+                - name: Create a container registry with a new storage account.
                   text:
                     az acr create -n myRegistry -g myResourceGroup -l southcentralus
-                - name: Create a container registry with an existing storage account
+                - name: Create a container registry with an existing storage account.
                   text:
                     az acr create -n myRegistry -g myResourceGroup -l southcentralus --storage-account-name myStorageAccount
             """
