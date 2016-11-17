@@ -7,23 +7,20 @@ import json
 import os
 import time
 import uuid
-from subprocess import check_output, CalledProcessError
+from subprocess import CalledProcessError, check_output
 
 import requests
 import yaml
 
 import azure.cli.core._logging as _logging
+from azure.cli.core._config import az_config
 from azure.cli.core._profile import Profile
 # pylint: disable=too-few-public-methods,too-many-arguments,no-self-use,too-many-locals,line-too-long
 from azure.cli.core._util import CLIError
 
 logger = _logging.get_az_logger(__name__)
 
-try:
-    BASE_URL = os.environ['AZURE_CLI_CONTAINER_SERVICE_URL']
-except KeyError:
-    BASE_URL = "https://westus.mindaro.microsoft.io"
-
+BASE_URL = az_config.get('container', 'service_url', fallback='https://westus.mindaro.microsoft.io')
 SUBSCRIPTION_URL = "/subscriptions/{subscription_id}"
 RESOURCE_BASE_URL = SUBSCRIPTION_URL + "/resourceGroups/{resource_group_name}"
 CONTAINER_SERVICE_PROVIDER = "/providers/Microsoft.ContainerService"
