@@ -221,7 +221,15 @@ def _is_inside_git_directory():
         is_inside_git_dir = check_output(['git', 'rev-parse', '--is-inside-git-dir'])
     except OSError:
         raise CLIError('Git is not currently installed.')
-    return is_inside_git_dir.decode('utf-8').strip()
+
+    git_result = is_inside_git_dir.decode('utf-8').strip()
+
+    if git_result == 'false':
+        return False
+    elif git_result == 'true':
+        return True
+    else:
+        raise CLIError('Unexpected value from git operation.')
 
 def _gitroot():
     """
