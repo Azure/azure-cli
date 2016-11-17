@@ -30,9 +30,10 @@ from azure.cli.command_modules.network._validators import \
      process_nic_create_namespace, process_lb_create_namespace, process_ag_rule_create_namespace,
      process_ag_url_path_map_rule_create_namespace, process_auth_create_namespace,
      process_public_ip_create_namespace, validate_private_ip_address,
+     process_lb_frontend_ip_namespace,
      validate_inbound_nat_rule_id_list, validate_address_pool_id_list,
      validate_inbound_nat_rule_name_or_id, validate_address_pool_name_or_id,
-     validate_servers, validate_cert, validate_address_prefixes, load_cert_file,
+     validate_servers, load_cert_file,
      vnet_gateway_validator, validate_peering_type,
      get_public_ip_validator, get_nsg_validator, get_subnet_validator)
 from azure.cli.command_modules.network.mgmt_nic.lib.models.nic_creation_client_enums import privateIpAddressVersion
@@ -117,12 +118,6 @@ private_ip_address_type = CliArgumentType(help='Static private IP address to use
 cookie_based_affinity_type = CliArgumentType(**enum_choice_list(ApplicationGatewayCookieBasedAffinity))
 http_protocol_type = CliArgumentType(**enum_choice_list(ApplicationGatewayProtocol))
 
-# TODO: Refactor these into oblivion!
-register_cli_argument('network dns', 'location', help=argparse.SUPPRESS, default='global')
-register_cli_argument('network public-ip create', 'dns_name_type', ignore_type)
-register_cli_argument('network traffic-manager profile check-dns', 'type', help=argparse.SUPPRESS, default='Microsoft.Network/trafficManagerProfiles')
-register_cli_argument('network vpn-connection create', 'connection_type', help=argparse.SUPPRESS, validator=vnet_gateway_validator, required=False)
-
 # ARGUMENT REGISTRATION
 
 register_cli_argument('network', 'subnet_name', subnet_name_type)
@@ -131,11 +126,6 @@ register_cli_argument('network', 'network_security_group_name', nsg_name_type, i
 register_cli_argument('network', 'private_ip_address', private_ip_address_type)
 register_cli_argument('network', 'private_ip_address_version', **enum_choice_list(privateIpAddressVersion))
 register_cli_argument('network', 'tags', tags_type)
-
-for item in ['lb frontend-ip', 'nic ip-config']:
-    register_cli_argument('network {}'.format(item), 'subnet', validator=get_subnet_validator(), help='Name or ID of an existing subnet. If name is specified, also specify --vnet-name.')
-    register_cli_argument('network {}'.format(item), 'virtual_network_name', help='The virtual network (VNet) associated with the subnet (Omit if supplying a subnet id).', id_part=None, metavar='')
-    register_cli_argument('network {}'.format(item), 'public_ip_address', validator=get_public_ip_validator())
 
 register_cli_argument('network application-gateway', 'application_gateway_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/applicationGateways'), id_part='name')
 register_cli_argument('network application-gateway', 'sku_name', **enum_choice_list(ApplicationGatewaySkuName))
@@ -260,11 +250,11 @@ register_cli_argument('network nic create', 'network_interface_name', nic_type, 
 register_cli_argument('network nic create', 'private_ip_address_allocation', ignore_type)
 register_cli_argument('network nic create', 'use_dns_settings', ignore_type)
 
-public_ip_help = get_folded_parameter_help_string('public IP address', allow_none=True)
+public_ip_help = get_folded_parameter_help_string('public IP address', allow_none=True, default_none=True)
 register_cli_argument('network nic create', 'public_ip_address', help=public_ip_help, completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'))
 register_cli_argument('network nic create', 'public_ip_address_type', ignore_type)
 
-nsg_help = get_folded_parameter_help_string('network security group', allow_none=True)
+nsg_help = get_folded_parameter_help_string('network security group', allow_none=True, default_none=True)
 register_cli_argument('network nic create', 'network_security_group', help=nsg_help, completer=get_resource_name_completion_list('Microsoft.Network/networkSecurityGroups'))
 register_cli_argument('network nic create', 'network_security_group_type', ignore_type)
 
@@ -284,6 +274,10 @@ register_cli_argument('network nic ip-config', 'network_interface_name', options
 register_cli_argument('network nic ip-config', 'ip_config_name', options_list=('--name', '-n'), metavar='IP_CONFIG_NAME', help='The name of the IP configuration.', id_part='child_name')
 register_cli_argument('network nic ip-config', 'resource_name', options_list=('--nic-name',), metavar='NIC_NAME', help='The network interface (NIC).', id_part='name', completer=get_resource_name_completion_list('Microsoft.Network/networkInterfaces'))
 register_cli_argument('network nic ip-config', 'item_name', options_list=('--name', '-n'), metavar='IP_CONFIG_NAME', help='The name of the IP configuration.', id_part='child_name')
+register_cli_argument('network nic ip-config', 'subnet', validator=get_subnet_validator(), help='Name or ID of an existing subnet. If name is specified, also specify --vnet-name.')
+register_cli_argument('network nic ip-config', 'virtual_network_name', help='The virtual network (VNet) associated with the subnet (Omit if supplying a subnet id).', id_part=None, metavar='')
+register_cli_argument('network nic ip-config', 'public_ip_address', validator=get_public_ip_validator())
+register_cli_argument('network nic ip-config', 'make_primary', action='store_true', help='Set to make this configuration the primary one for the NIC.')
 
 for item in ['address-pool', 'inbound-nat-rule']:
     register_cli_argument('network nic ip-config {}'.format(item), 'ip_config_name', options_list=('--ip-config-name', '-n'), metavar='IP_CONFIG_NAME', help='The name of the IP configuration.', id_part='child_name')
@@ -315,6 +309,7 @@ register_cli_argument('network public-ip create', 'name', completer=None)
 register_cli_argument('network public-ip create', 'dns_name', validator=process_public_ip_create_namespace)
 register_cli_argument('network public-ip create', 'allocation_method', **enum_choice_list(IPAllocationMethod))
 register_cli_argument('network public-ip create', 'version', **enum_choice_list(IPVersion))
+register_cli_argument('network public-ip create', 'dns_name_type', ignore_type)
 
 # Route Operation
 register_cli_argument('network route-table route', 'route_name', name_arg_type, id_part='child_name', help='Route name')
@@ -387,9 +382,12 @@ subnet_help = get_folded_parameter_help_string('subnet', other_required_option='
 register_cli_argument('network lb create', 'subnet', help=subnet_help, completer=get_subnet_completion_list())
 register_cli_argument('network lb create', 'subnet_type', ignore_type)
 
-register_cli_argument('network lb frontend-ip', 'public_ip_address', help='Name or ID of the existing public IP to associate with the configuration.', validator=get_public_ip_validator())
-register_cli_argument('network lb frontend-ip', 'private_ip_address', help='Static private IP address to associate with the configuration.')
-register_cli_argument('network lb frontend-ip', 'virtual_network_name', arg_type=virtual_network_name_type, help='The VNET name associated with the subnet name.')
+for item in ['create', 'update']:
+    register_cli_argument('network lb frontend-ip {}'.format(item), 'public_ip_address', help='Name or ID of the existing public IP to associate with the configuration.', validator=process_lb_frontend_ip_namespace)
+    register_cli_argument('network lb frontend-ip {}'.format(item), 'subnet', help='Name or ID of an existing subnet. If name is specified, also specify --vnet-name.')
+    register_cli_argument('network lb frontend-ip {}'.format(item), 'virtual_network_name', virtual_network_name_type, help='The virtual network (VNet) associated with the subnet (Omit if supplying a subnet id).', id_part=None, metavar='')
+    register_cli_argument('network lb frontend-ip {}'.format(item), 'private_ip_address', help='Static private IP address to associate with the configuration.')
+    register_cli_argument('network lb frontend-ip {}'.format(item), 'private_ip_address_allocation', ignore_type)
 
 register_cli_argument('network lb probe', 'interval', help='Probing time interval in seconds.')
 register_cli_argument('network lb probe', 'path', help='The endpoint to interrogate (http only).')
@@ -432,11 +430,14 @@ register_cli_argument('network vpn-connection create', 'shared_key', validator=l
 register_cli_argument('network vpn-connection shared-key', 'connection_shared_key_name', options_list=('--name', '-n'), id_part='name')
 register_cli_argument('network vpn-connection shared-key', 'virtual_network_gateway_connection_name', options_list=('--connection-name',), metavar='NAME', id_part='name')
 
+register_cli_argument('network vpn-connection create', 'connection_type', help=argparse.SUPPRESS, validator=vnet_gateway_validator, required=False)
+
 # Traffic manager profiles
 register_cli_argument('network traffic-manager profile', 'traffic_manager_profile_name', name_arg_type, id_part='name', completer=get_resource_name_completion_list('Microsoft.Network/trafficManagerProfiles'))
 register_cli_argument('network traffic-manager profile', 'profile_name', name_arg_type, id_part='name', completer=get_resource_name_completion_list('Microsoft.Network/trafficManagerProfiles'))
 register_cli_argument('network traffic-manager profile create', 'routing_method', **enum_choice_list(routingMethod))
 register_cli_argument('network traffic-manager profile check-dns', 'name', name_arg_type, help='DNS prefix to verify availability for.', required=True)
+register_cli_argument('network traffic-manager profile check-dns', 'type', help=argparse.SUPPRESS, default='Microsoft.Network/trafficManagerProfiles')
 
 # Traffic manager endpoints
 endpoint_types = ['azureEndpoints', 'externalEndpoints', 'nestedEndpoints']
@@ -445,6 +446,7 @@ register_cli_argument('network traffic-manager endpoint', 'endpoint_type', optio
 register_cli_argument('network traffic-manager endpoint', 'profile_name', help='Name of parent profile.', completer=get_resource_name_completion_list('Microsoft.Network/trafficManagerProfiles'), id_part='name')
 
 # DNS
+register_cli_argument('network dns', 'location', help=argparse.SUPPRESS, default='global')
 register_cli_argument('network dns zone', 'zone_name', name_arg_type)
 register_cli_argument('network dns', 'record_set_name', name_arg_type, help='The name of the RecordSet, relative to the name of the zone.')
 register_cli_argument('network dns', 'relative_record_set_name', name_arg_type, help='The name of the RecordSet, relative to the name of the zone.')

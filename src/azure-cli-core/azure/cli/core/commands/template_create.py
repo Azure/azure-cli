@@ -143,9 +143,9 @@ def get_folded_parameter_help_string(
     elif allow_new and allow_none and not default_none:
         help_text = 'Name or ID of the {}, or {} for none. Uses existing resource if available or will create a new resource with defaults if omitted.'.format(display_name, quotes)
     elif not allow_new and allow_none and default_none:
-        help_text = 'Name or ID of an existing {}, or none by default.'.format(display_name, quotes)
+        help_text = 'Name or ID of an existing {}, or none by default.'.format(display_name)
     elif allow_new and allow_none and default_none:
-        help_text = 'Name or ID of a {}. Uses existing resource or creates new if specified, or none if omitted.'.format(display_name, quotes)
+        help_text = 'Name or ID of a {}. Uses existing resource or creates new if specified, or none if omitted.'.format(display_name)
 
     # add parent name option string (if applicable)
     if other_required_option:
@@ -208,7 +208,7 @@ def get_folded_parameter_validator( # pylint: disable=too-many-arguments
             setattr(namespace, property_name, None)
             if parent_name and parent_val:
                 logger = _logging.get_az_logger(__name__)
-                logger.warn('Ignoring: %s %s', parent_option, parent_val)
+                logger.warning('Ignoring: %s %s', parent_option, parent_val)
                 setattr(namespace, parent_name, None)
             return # SUCCESS
 
@@ -223,7 +223,7 @@ def get_folded_parameter_validator( # pylint: disable=too-many-arguments
             if parent_val:
                 if value_was_id:
                     logger = _logging.get_az_logger(__name__)
-                    logger.warn('Ignoring: %s %s', parent_option, parent_val)
+                    logger.warning('Ignoring: %s %s', parent_option, parent_val)
                 setattr(namespace, parent_name, None)
             return # SUCCESS
 

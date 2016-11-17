@@ -733,7 +733,7 @@ class VMSSCreateNoneOptionsTest(ResourceGroupVCRTestBase): #pylint: disable=too-
         vmss_name = 'nooptvmss8'
 
         self.cmd('vmss create -n {vmss_name} -g {resource_group} --image Debian --load-balancer {quotes}'
-                 ' --ssh-key-value \'{ssh_key}\' --deployment-name {deployment_name} --public-ip-address {quotes} --tags {quotes} --debug'
+                 ' --ssh-key-value \'{ssh_key}\' --deployment-name {deployment_name} --public-ip-address {quotes} --tags {quotes}'
                  .format(vmss_name=vmss_name, resource_group=self.resource_group,
                          ssh_key=TEST_SSH_KEY_PUB, deployment_name=deployment_name,
                          quotes='""' if platform.system() == 'Windows' else "''"))
@@ -791,37 +791,36 @@ class VMScaleSetCreateExistingOptions(ResourceGroupVCRTestBase):
         self.cmd('network vnet show --name {vnet_name} -g {resource_group}'.format(resource_group=self.resource_group, vnet_name=vnet_name),
             checks=JMESPathCheck('subnets[0].ipConfigurations[0].id.contains(@, \'{vmss_name}\')'.format(vmss_name=vmss_name), True))
 
-# TODO: commented out until #956 is fixed.
-#class VMScaleSetNicScenarioTest(ResourceGroupVCRTestBase):
+class VMScaleSetNicScenarioTest(ResourceGroupVCRTestBase):
 
-#     def __init__(self, test_method):
-#         super(VMScaleSetNicScenarioTest, self).__init__(__file__, test_method)
-#         self.resource_group = 'test_vm_scaleset_nics'
-#         self.vmss_name = 'vmss1'
-#         self.instance_id = 0
+    def __init__(self, test_method):
+        super(VMScaleSetNicScenarioTest, self).__init__(__file__, test_method)
+        self.resource_group = 'test_vm_scaleset_nics'
+        self.vmss_name = 'vmss1'
+        self.instance_id = 0
 
-#     def test_vm_scaleset_nics(self):
-#         self.execute()
+    def test_vm_scaleset_nics(self):
+        self.execute()
 
-#     def set_up(self):
-#         super(VMScaleSetNicScenarioTest, self).set_up()
-#         self.cmd('vmss create -g {} -n {} --authentication-type password --admin-password PasswordPassword1!  --image Win2012R2Datacenter'.format(self.resource_group, self.vmss_name))
+    def set_up(self):
+        super(VMScaleSetNicScenarioTest, self).set_up()
+        self.cmd('vmss create -g {} -n {} --authentication-type password --admin-password PasswordPassword1!  --image Win2012R2Datacenter'.format(self.resource_group, self.vmss_name))
 
-#     def body(self):
-#         self.cmd('vmss nic list -g {} --vmss-name {}'.format(self.resource_group, self.vmss_name), checks=[
-#                 JMESPathCheck('type(@)', 'array'),
-#                 JMESPathCheck("length([?resourceGroup == '{}']) == length(@)".format(self.resource_group), True)
-#         ])
-#         nic_list = self.cmd('vmss nic list-vm-nics -g {} --vmss-name {} --instance-id {}'.format(self.resource_group, self.vmss_name, self.instance_id), checks=[
-#                 JMESPathCheck('type(@)', 'array'),
-#                 JMESPathCheck("length([?resourceGroup == '{}']) == length(@)".format(self.resource_group), True)
-#         ])
-#         nic_name = nic_list[0].get('name')
-#         self.cmd('vmss nic show --resource-group {} --vmss-name {} --instance-id {} -n {}'.format(self.resource_group, self.vmss_name, self.instance_id, nic_name), checks=[
-#                 JMESPathCheck('type(@)', 'object'),
-#                 JMESPathCheck('name', nic_name),
-#                 JMESPathCheck('resourceGroup', self.resource_group),
-#         ])
+    def body(self):
+        self.cmd('vmss nic list -g {} --vmss-name {}'.format(self.resource_group, self.vmss_name), checks=[
+            JMESPathCheck('type(@)', 'array'),
+            JMESPathCheck("length([?resourceGroup == '{}']) == length(@)".format(self.resource_group), True)
+        ])
+        nic_list = self.cmd('vmss nic list-vm-nics -g {} --vmss-name {} --instance-id {}'.format(self.resource_group, self.vmss_name, self.instance_id), checks=[
+            JMESPathCheck('type(@)', 'array'),
+            JMESPathCheck("length([?resourceGroup == '{}']) == length(@)".format(self.resource_group), True)
+        ])
+        nic_name = nic_list[0].get('name')
+        self.cmd('vmss nic show --resource-group {} --vmss-name {} --instance-id {} -n {}'.format(self.resource_group, self.vmss_name, self.instance_id, nic_name), checks=[
+            JMESPathCheck('type(@)', 'object'),
+            JMESPathCheck('name', nic_name),
+            JMESPathCheck('resourceGroup', self.resource_group),
+        ])
 
 class VMAccessAddRemoveLinuxUser(VCRTestBase):
 

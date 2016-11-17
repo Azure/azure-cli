@@ -321,7 +321,8 @@ def process_auth_create_namespace(namespace):
 def process_lb_create_namespace(namespace):
 
     if namespace.subnet and namespace.public_ip_address:
-        raise ValueError('incorrect usage: --subnet [--vnet-name] | --public-ip')
+        raise ValueError(
+            'incorrect usage: --subnet NAME_OR_ID [--vnet-name NAME] | --public-ip NAME_OR_ID')
 
     if namespace.subnet:
         # validation for an internal load balancer
@@ -339,7 +340,8 @@ def process_lb_create_namespace(namespace):
 
         if namespace.public_ip_dns_name:
             if namespace.public_ip_address_type != 'new':
-                raise CLIError('specify --public-ip-dns-name only if creating a new public IP address.')
+                raise CLIError(
+                    'specify --public-ip-dns-name only if creating a new public IP address.')
             else:
                 namespace.dns_name_type = 'new'
 
@@ -347,12 +349,23 @@ def process_lb_create_namespace(namespace):
         namespace.subnet = None
         namespace.virtual_network_name = None
 
+def process_lb_frontend_ip_namespace(namespace):
+
+    if namespace.subnet and namespace.public_ip_address:
+        raise ValueError(
+            'incorrect usage: --subnet NAME_OR_ID [--vnet-name NAME] | --public-ip NAME_OR_ID')
+
+    if namespace.subnet:
+        get_subnet_validator()(namespace)
+    else:
+        get_public_ip_validator()(namespace)
+
 def process_nic_create_namespace(namespace):
 
     # process folded parameters
     get_subnet_validator(has_type_field=True)(namespace)
-    get_public_ip_validator(has_type_field=True, allow_none=True)(namespace)
-    get_nsg_validator(has_type_field=True, allow_none=True)(namespace)
+    get_public_ip_validator(has_type_field=True, allow_none=True, default_none=True)(namespace)
+    get_nsg_validator(has_type_field=True, allow_none=True, default_none=True)(namespace)
 
     if namespace.internal_dns_name_label:
         namespace.use_dns_settings = 'true'

@@ -4,8 +4,9 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=line-too-long
-from argcomplete.completers import FilesCompleter
 import argparse
+
+from argcomplete.completers import FilesCompleter
 from six import u as unicode_string
 
 from azure.cli.core._config import az_config
