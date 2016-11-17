@@ -1,11 +1,11 @@
-#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
-#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 
 from __future__ import print_function
 
-import distutils
+from distutils import dir_util
 import os
 import re
 import shutil
@@ -20,10 +20,10 @@ from _common import get_name_from_path, get_config, to_snake_case
 def _autorest_client_name(name):
     return '{}creationclient'.format(str.lower(name))
 
-HEADER = """#---------------------------------------------------------------------------------------------
+HEADER = """# --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
-#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 #pylint: skip-file
 """
 
@@ -86,7 +86,7 @@ def generate_smart_create(*args):
                 with open(os.path.join(root, file), 'w') as modified: modified.write(HEADER + '\n' + data)
 
     # Rename the generated file directory to lib
-    distutils.dir_util.copy_tree(autorest_generated_path, os.path.join(dest, 'lib'))
+    dir_util.copy_tree(autorest_generated_path, os.path.join(dest, 'lib'))
     
     # Create the cheesy __init__.py file in <dest>
     with open(os.path.join(dest, '__init__.py'), 'w') as f:

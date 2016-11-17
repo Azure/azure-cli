@@ -1,7 +1,7 @@
-#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
-#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 
 ## Install the command modules using pip ##
 from __future__ import print_function
@@ -32,7 +32,7 @@ def build_package(path_to_package, dist_dir):
     print_heading('Building {}'.format(path_to_package))
     path_to_setup = os.path.join(path_to_package, 'setup.py')
     set_version(path_to_setup)
-    cmd_success = exec_command('python setup.py sdist -d {}'.format(dist_dir), cwd=path_to_package)
+    cmd_success = exec_command('python setup.py sdist -d {0} bdist_wheel -d {0}'.format(dist_dir), cwd=path_to_package)
     if not cmd_success:
         print_heading('Error building {}!'.format(path_to_package), f=sys.stderr)
         sys.exit(1)

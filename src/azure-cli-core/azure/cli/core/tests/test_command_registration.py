@@ -1,8 +1,9 @@
-#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
-#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 
+import sys
 import logging
 import unittest
 
@@ -50,12 +51,14 @@ class Test_command_registration(unittest.TestCase):
 
     def test_register_cli_argument(self):
         command_table.clear()
-        cli_command('test register sample-vm-get', Test_command_registration.sample_vm_get)
+        cli_command(None, 'test register sample-vm-get',
+                    '{}#Test_command_registration.sample_vm_get'.format(__name__))
         register_cli_argument('test register sample-vm-get', 'vm_name', CliArgumentType(
             options_list=('--wonky-name', '-n'), metavar='VMNAME', help='Completely WONKY name...',
             required=False
         ))
 
+        command_table['test register sample-vm-get'].load_arguments()
         _update_command_definitions(command_table)
 
         self.assertEqual(len(command_table), 1,
@@ -75,10 +78,12 @@ class Test_command_registration(unittest.TestCase):
 
     def test_register_command(self):
         command_table.clear()
-        cli_command('test command sample-vm-get', Test_command_registration.sample_vm_get, None)
+        cli_command(None, 'test command sample-vm-get',
+                    '{}#Test_command_registration.sample_vm_get'.format(__name__), None)
 
         self.assertEqual(len(command_table), 1,
                          'We expect exactly one command in the command table')
+        command_table['test command sample-vm-get'].load_arguments()
         command_metadata = command_table['test command sample-vm-get']
         self.assertEqual(len(command_metadata.arguments), 4, 'We expected exactly 4 arguments')
         some_expected_arguments = {
@@ -110,15 +115,21 @@ class Test_command_registration(unittest.TestCase):
         derived_vm_name_type = CliArgumentType(base_type=global_vm_name_type,
                                                help='first modification')
 
-        cli_command('test vm-get', Test_command_registration.sample_vm_get, None)
-        cli_command('test command vm-get-1', Test_command_registration.sample_vm_get, None)
-        cli_command('test command vm-get-2', Test_command_registration.sample_vm_get, None)
+        cli_command(None, 'test vm-get',
+                    '{}#Test_command_registration.sample_vm_get'.format(__name__), None)
+        cli_command(None, 'test command vm-get-1',
+                    '{}#Test_command_registration.sample_vm_get'.format(__name__), None)
+        cli_command(None, 'test command vm-get-2',
+                    '{}#Test_command_registration.sample_vm_get'.format(__name__), None)
 
         register_cli_argument('test', 'vm_name', global_vm_name_type)
         register_cli_argument('test command', 'vm_name', derived_vm_name_type)
         register_cli_argument('test command vm-get-2', 'vm_name', derived_vm_name_type,
                               help='second modification')
 
+        command_table['test vm-get'].load_arguments()
+        command_table['test command vm-get-1'].load_arguments()
+        command_table['test command vm-get-2'].load_arguments()
         _update_command_definitions(command_table)
 
         self.assertEqual(len(command_table), 3,
@@ -135,12 +146,14 @@ class Test_command_registration(unittest.TestCase):
     def test_register_extra_cli_argument(self):
         command_table.clear()
 
-        cli_command('test command sample-vm-get', Test_command_registration.sample_vm_get, None)
+        cli_command(None, 'test command sample-vm-get',
+                    '{}#Test_command_registration.sample_vm_get'.format(__name__), None)
         register_extra_cli_argument(
             'test command sample-vm-get', 'added_param', options_list=('--added-param',),
             metavar='ADDED', help='Just added this right now!', required=True
         )
 
+        command_table['test command sample-vm-get'].load_arguments()
         _update_command_definitions(command_table)
 
         self.assertEqual(len(command_table), 1,
@@ -174,8 +187,10 @@ class Test_command_registration(unittest.TestCase):
             nothing2.
             """
         command_table.clear()
-        cli_command('test command foo', sample_sdk_method_with_weird_docstring, None)
+        setattr(sys.modules[__name__], sample_sdk_method_with_weird_docstring.__name__, sample_sdk_method_with_weird_docstring) #pylint: disable=line-too-long
+        cli_command(None, 'test command foo', '{}#{}'.format(__name__, sample_sdk_method_with_weird_docstring.__name__), None) #pylint: disable=line-too-long
 
+        command_table['test command foo'].load_arguments()
         _update_command_definitions(command_table)
 
         command_metadata = command_table['test command foo']
@@ -221,8 +236,9 @@ class Test_command_registration(unittest.TestCase):
             pass
 
         command_table.clear()
-        cli_command('override_using_register_cli_argument foo',
-                    sample_sdk_method,
+        setattr(sys.modules[__name__], sample_sdk_method.__name__, sample_sdk_method)
+        cli_command(None, 'override_using_register_cli_argument foo',
+                    '{}#{}'.format(__name__, sample_sdk_method.__name__),
                     None)
         register_cli_argument('override_using_register_cli_argument',
                               'param_a',
@@ -231,6 +247,7 @@ class Test_command_registration(unittest.TestCase):
                               completer=test_validator_completer,
                               required=False)
 
+        command_table['override_using_register_cli_argument foo'].load_arguments()
         _update_command_definitions(command_table)
 
         command_metadata = command_table['override_using_register_cli_argument foo']

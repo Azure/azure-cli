@@ -1,15 +1,15 @@
 #!/usr/bin/env python
 
-#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
-#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 
 
 from codecs import open
 from setuptools import setup
 
-VERSION = '0.1.0b8'
+VERSION = '0.1.0b9'
 
 # The full list of classifiers is available at
 # https://pypi.python.org/pypi?%3Aaction=list_classifiers
@@ -29,6 +29,7 @@ CLASSIFIERS = [
 DEPENDENCIES = [
     'azure-mgmt-keyvault==0.30.0',
     'azure-cli-core',
+    'pyOpenSSL'
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
@@ -52,9 +53,9 @@ setup(
     packages=[
         'azure.cli.command_modules.keyvault',
         'azure.cli.command_modules.keyvault.keyvaultclient',
-        'azure.cli.command_modules.keyvault.convenience',
-        'azure.cli.command_modules.keyvault.convenience.http_bearer_challenge_cache',
-        'azure.cli.command_modules.keyvault.keyvaultclient.models'
+        'azure.cli.command_modules.keyvault.keyvaultclient.http_bearer_challenge_cache',
+        'azure.cli.command_modules.keyvault.keyvaultclient.generated',
+        'azure.cli.command_modules.keyvault.keyvaultclient.generated.models'
     ],
     install_requires=DEPENDENCIES,
 )

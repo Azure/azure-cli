@@ -1,10 +1,9 @@
-#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
-#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 
 import unittest
-import collections
 from azure.cli.command_modules.resource.custom import _list_resources_odata_filter_builder
 from azure.cli.core.parser import IncorrectUsageError
 
@@ -23,10 +22,8 @@ class TestListResources(unittest.TestCase):
         self.assertEqual(odata_filter, "tagname eq 'foo' and tagvalue eq 'bar'")
 
     def test_name_location_equals_resource_type_equals(self):
-        ResourceType = collections.namedtuple('ResourceType', 'namespace type')
         odata_filter = _list_resources_odata_filter_builder(
-            name='wonky', location='dory', resource_type=ResourceType(namespace='resource', type='type') #pylint: disable=line-too-long
-        )
+            name='wonky', location='dory', resource_provider_namespace='resource', resource_type='type') #pylint: disable=line-too-long
         self.assertEqual(odata_filter, "name eq 'wonky' and location eq 'dory' and resourceType eq 'resource/type'") #pylint: disable=line-too-long
 
     def test_name_location_equals(self):

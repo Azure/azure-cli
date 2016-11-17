@@ -1,12 +1,13 @@
-#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
-#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 
 # pylint: disable=line-too-long
 import argparse
 
-from azure.mgmt.network.models import IPAllocationMethod, RouteNextHopType
+from azure.mgmt.network.models import \
+    (IPAllocationMethod, RouteNextHopType)
 from azure.mgmt.network.models.network_management_client_enums import \
     (ApplicationGatewaySkuName, ApplicationGatewayCookieBasedAffinity,
      ApplicationGatewayTier, ApplicationGatewayProtocol,
@@ -15,29 +16,37 @@ from azure.mgmt.network.models.network_management_client_enums import \
      ProbeProtocol, TransportProtocol)
 from azure.mgmt.dns.models.dns_management_client_enums import RecordType
 
-from azure.cli.core.commands import CliArgumentType, register_cli_argument, register_extra_cli_argument
+from azure.cli.core.commands import \
+    (CliArgumentType, register_cli_argument, register_extra_cli_argument)
 from azure.cli.core.commands.parameters import (location_type, get_resource_name_completion_list,
-                                                enum_choice_list, tags_type,
+                                                enum_choice_list, tags_type, ignore_type,
                                                 get_generic_completion_list)
 from azure.cli.core.commands.validators import MarkSpecifiedAction
 from azure.cli.core.commands.template_create import register_folded_cli_argument
-from azure.cli.command_modules.network._factory import _network_client_factory
+from azure.cli.command_modules.network._client_factory import _network_client_factory
 from azure.cli.command_modules.network._validators import \
     (process_ag_create_namespace, process_ag_listener_create_namespace,
      process_ag_http_settings_create_namespace, process_ag_url_path_map_create_namespace,
      process_nic_create_namespace, process_lb_create_namespace, process_ag_rule_create_namespace,
-     process_ag_url_path_map_rule_create_namespace,
+     process_ag_url_path_map_rule_create_namespace, process_auth_create_namespace,
      process_public_ip_create_namespace, validate_public_ip_type, validate_private_ip_address,
      validate_subnet_name_or_id, validate_public_ip_name_or_id, validate_nsg_name_or_id,
      validate_inbound_nat_rule_id_list, validate_address_pool_id_list,
      validate_inbound_nat_rule_name_or_id, validate_address_pool_name_or_id,
-     validate_servers, validate_cert, validate_address_prefixes, load_cert_file, vnet_gateway_validator)
+     validate_servers, validate_cert, validate_address_prefixes, load_cert_file,
+     vnet_gateway_validator, validate_peering_type)
 from azure.cli.command_modules.network.mgmt_nic.lib.models.nic_creation_client_enums import privateIpAddressVersion
 from azure.cli.command_modules.network.mgmt_vnet_gateway.lib.models.vnet_gateway_creation_client_enums import \
     (gatewayType, sku, vpnType)
 from azure.cli.command_modules.network.mgmt_traffic_manager_profile.lib.models.traffic_manager_profile_creation_client_enums \
     import routingMethod
 from azure.cli.command_modules.network.custom import list_traffic_manager_endpoints
+
+# CHOICE LISTS
+
+# taken from Xplat. No enums in SDK
+routing_registry_values = ['ARIN', 'APNIC', 'AFRINIC', 'LACNIC', 'RIPENCC', 'RADB', 'ALTDB', 'LEVEL3']
+device_path_values = ['primary', 'secondary']
 
 # COMPLETERS
 
@@ -100,6 +109,7 @@ def get_tm_endpoint_completion_list():
 name_arg_type = CliArgumentType(options_list=('--name', '-n'), metavar='NAME')
 nic_type = CliArgumentType(options_list=('--nic-name',), metavar='NIC_NAME', help='The network interface (NIC).', id_part='name', completer=get_resource_name_completion_list('Microsoft.Network/networkInterfaces'))
 nsg_name_type = CliArgumentType(options_list=('--nsg-name',), metavar='NSG', help='Name of the network security group.')
+circuit_name_type = CliArgumentType(options_list=('--circuit-name',), metavar='CIRCUIT', help='ExpressRoute circuit name.', id_part='name', completer=get_resource_name_completion_list('Microsoft.Network/expressRouteCircuits'))
 virtual_network_name_type = CliArgumentType(options_list=('--vnet-name',), metavar='VNET_NAME', help='The virtual network (VNET) name.', completer=get_resource_name_completion_list('Microsoft.Network/virtualNetworks'))
 subnet_name_type = CliArgumentType(options_list=('--subnet-name',), metavar='SUBNET_NAME', help='The subnet name.')
 load_balancer_name_type = CliArgumentType(options_list=('--lb-name',), metavar='LB_NAME', help='The load balancer name.', completer=get_resource_name_completion_list('Microsoft.Network/loadBalancers'), id_part='name')
@@ -200,21 +210,29 @@ register_cli_argument('network application-gateway url-path-map rule', 'url_path
 register_cli_argument('network application-gateway url-path-map rule', 'address_pool', help='The name or ID of the backend address pool. If not specified, the default for the map will be used.', validator=process_ag_url_path_map_rule_create_namespace, completer=get_ag_subresource_completion_list('backend_address_pools'))
 register_cli_argument('network application-gateway url-path-map rule', 'http_settings', help='The name or ID of the HTTP settings. If not specified, the default for the map will be used.', completer=get_ag_subresource_completion_list('backend_http_settings_collection'))
 
-# Express Route Circuit Auth
-register_cli_argument('network express-route circuit-auth', 'authorization_name', name_arg_type, id_part='child_name', help='Authorization name')
-register_cli_argument('network express-route circuit-auth', 'circuit_name', completer=get_resource_name_completion_list('Microsoft.Network/expressRouteCircuits'), id_part='name', help='Circuit name.')
-register_cli_argument('network express-route circuit-auth', 'authorization_key', help='Authorization key.')
+# ExpressRoutes
+register_cli_argument('network express-route', 'circuit_name', circuit_name_type, options_list=('--name', '-n'))
+register_cli_argument('network express-route', 'sku_family', **enum_choice_list(ExpressRouteCircuitSkuFamily))
+register_cli_argument('network express-route', 'sku_tier', **enum_choice_list(ExpressRouteCircuitSkuTier))
+register_cli_argument('network express-route', 'bandwidth_in_mbps', options_list=('--bandwidth',))
+register_cli_argument('network express-route', 'service_provider_name', options_list=('--provider',))
+register_cli_argument('network express-route', 'device_path', options_list=('--path',), **enum_choice_list(device_path_values))
 
-# Express Route Circuit Peering
-register_cli_argument('network express-route circuit-peering', 'peering_name', name_arg_type, id_part='child_name')
-register_cli_argument('network express-route circuit-peering', 'peering_type', **enum_choice_list(ExpressRouteCircuitPeeringType))
-register_cli_argument('network express-route circuit-peering', 'sku_family', **enum_choice_list(ExpressRouteCircuitSkuFamily))
-register_cli_argument('network express-route circuit-peering', 'sku_tier', **enum_choice_list(ExpressRouteCircuitSkuTier))
+register_cli_argument('network express-route auth', 'circuit_name', circuit_name_type)
+register_cli_argument('network express-route auth', 'authorization_name', name_arg_type, id_part='child_name', help='Authorization name')
 
-# Express Route Circuit
-register_cli_argument('network express-route circuit', 'circuit_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/expressRouteCircuits'), id_part='name')
-register_cli_argument('network express-route circuit', 'sku_family', **enum_choice_list(ExpressRouteCircuitSkuFamily))
-register_cli_argument('network express-route circuit', 'sku_tier', **enum_choice_list(ExpressRouteCircuitSkuTier))
+register_cli_argument('network express-route auth create', 'authorization_parameters', ignore_type, validator=process_auth_create_namespace)
+
+register_cli_argument('network express-route peering', 'circuit_name', circuit_name_type)
+register_cli_argument('network express-route peering', 'peering_name', name_arg_type, id_part='child_name')
+register_cli_argument('network express-route peering', 'peering_type', validator=validate_peering_type, **enum_choice_list(ExpressRouteCircuitPeeringType))
+register_cli_argument('network express-route peering', 'sku_family', **enum_choice_list(ExpressRouteCircuitSkuFamily))
+register_cli_argument('network express-route peering', 'sku_tier', **enum_choice_list(ExpressRouteCircuitSkuTier))
+register_cli_argument('network express-route peering', 'advertised_public_prefixes', arg_group='Microsoft Peering', nargs='+')
+register_cli_argument('network express-route peering', 'primary_peer_address_prefix', options_list=('--primary-peer-subnet',))
+register_cli_argument('network express-route peering', 'secondary_peer_address_prefix', options_list=('--secondary-peer-subnet',))
+register_cli_argument('network express-route peering', 'customer_asn', arg_group='Microsoft Peering')
+register_cli_argument('network express-route peering', 'routing_registry_name', arg_group='Microsoft Peering', **enum_choice_list(routing_registry_values))
 
 # Local Gateway
 register_cli_argument('network local-gateway', 'local_network_gateway_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/localNetworkGateways'), id_part='name')
@@ -406,3 +424,4 @@ register_cli_argument('network dns record txt remove', 'value', nargs='+')
 register_cli_argument('network dns zone import', 'file_name', help='Path to the DNS zone file to import')
 register_cli_argument('network dns zone export', 'file_name', help='Path to the DNS zone file to save')
 register_cli_argument('network dns', 'location', help=argparse.SUPPRESS, default='global')
+register_cli_argument('network dns zone update', 'if_none_match', ignore_type)

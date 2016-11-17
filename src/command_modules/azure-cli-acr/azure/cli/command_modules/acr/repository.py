@@ -1,15 +1,12 @@
-#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
-#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 
 import requests
 
-from azure.cli.core.commands import cli_command
-
 from ._utils import (
-    get_registry_by_name,
-    registry_not_found
+    get_registry_by_name
 )
 from .credential import acr_credential_show
 
@@ -41,14 +38,11 @@ def _obtain_data_from_registry(login_server, path, resultIndex, username, passwo
         else:
             response.raise_for_status()
 
-    return {resultIndex: resultList}
+    return resultList
 
 def _validate_user_credentials(registry_name, path, resultIndex, username=None, password=None):
-    registry = get_registry_by_name(registry_name)
-    if registry is None:
-        registry_not_found(registry_name)
-
-    login_server = registry.properties.login_server
+    registry, _ = get_registry_by_name(registry_name)
+    login_server = registry.login_server #pylint: disable=no-member
 
     if username:
         if not password:
@@ -58,8 +52,8 @@ def _validate_user_credentials(registry_name, path, resultIndex, username=None, 
 
     try:
         cred = acr_credential_show(registry_name)
-        username = cred.user_name
-        password = cred.pass_word
+        username = cred.username
+        password = cred.password
         return _obtain_data_from_registry(login_server, path, resultIndex, username, password)
     except: #pylint: disable=bare-except
         pass
@@ -75,7 +69,7 @@ def _validate_user_credentials(registry_name, path, resultIndex, username=None, 
     return _obtain_data_from_registry(login_server, path, resultIndex, username, password)
 
 def acr_repository_list(registry_name, username=None, password=None):
-    '''List repositories in a given container registry.
+    '''Lists repositories in the specified container registry.
     :param str registry_name: The name of container registry
     :param str username: The username used to log into the container registry
     :param str password: The password used to log into the container registry
@@ -84,7 +78,7 @@ def acr_repository_list(registry_name, username=None, password=None):
     return _validate_user_credentials(registry_name, path, 'repositories', username, password)
 
 def acr_repository_show_tags(registry_name, repository, username=None, password=None):
-    '''Show tags of a given repository in a given container registry.
+    '''Shows tags of a given repository in the specified container registry.
     :param str registry_name: The name of container registry
     :param str repository: The repository to obtain tags from
     :param str username: The username used to log into the container registry
@@ -92,6 +86,3 @@ def acr_repository_show_tags(registry_name, repository, username=None, password=
     '''
     path = '/v2/' + repository + '/tags/list'
     return _validate_user_credentials(registry_name, path, 'tags', username, password)
-
-cli_command('acr repository list', acr_repository_list)
-cli_command('acr repository show-tags', acr_repository_show_tags)

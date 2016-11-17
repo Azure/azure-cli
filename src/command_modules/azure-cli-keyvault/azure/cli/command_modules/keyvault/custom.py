@@ -1,9 +1,14 @@
-#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
-#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 
+import codecs
+import os
+import re
 import time
+
+from OpenSSL import crypto
 
 from msrestazure.azure_exceptions import CloudError
 from azure.mgmt.keyvault.models import (VaultCreateOrUpdateParameters,
@@ -22,6 +27,7 @@ from azure.cli.core._util import CLIError
 import azure.cli.core._logging as _logging
 
 from azure.cli.command_modules.keyvault.keyvaultclient import KeyVaultClient
+from azure.cli.command_modules.keyvault._validators import secret_text_encoding_values
 
 logger = _logging.get_az_logger(__name__)
 
@@ -152,6 +158,7 @@ def _object_id_args_helper(object_id, spn, upn):
 def set_policy(client, resource_group_name, vault_name, #pylint:disable=too-many-arguments
                object_id=None, spn=None, upn=None, key_permissions=None, secret_permissions=None,
                certificate_permissions=None):
+    """ Update security policy settings for a Key Vault. """
     object_id = _object_id_args_helper(object_id, spn, upn)
     vault = client.get(resource_group_name=resource_group_name,
                        vault_name=vault_name)
@@ -183,6 +190,7 @@ def set_policy(client, resource_group_name, vault_name, #pylint:disable=too-many
                                        properties=vault.properties))
 
 def delete_policy(client, resource_group_name, vault_name, object_id=None, spn=None, upn=None): #pylint:disable=too-many-arguments
+    """ Delete security policy settings for a Key Vault. """
     object_id = _object_id_args_helper(object_id, spn, upn)
     vault = client.get(resource_group_name=resource_group_name,
                        vault_name=vault_name)
@@ -202,66 +210,147 @@ def delete_policy(client, resource_group_name, vault_name, object_id=None, spn=N
 # pylint: disable=too-many-arguments
 def create_key(client, vault_base_url, key_name, destination, key_size=None, key_ops=None,
                disabled=False, expires=None, not_before=None, tags=None):
-    from azure.cli.command_modules.keyvault.keyvaultclient.models import KeyAttributes
+    from azure.cli.command_modules.keyvault.keyvaultclient.generated.models import KeyAttributes
     key_attrs = KeyAttributes(not disabled, not_before, expires)
     return client.create_key(
         vault_base_url, key_name, destination, key_size, key_ops, key_attrs, tags)
 create_key.__doc__ = KeyVaultClient.create_key.__doc__
 
-# pylint: disable=unused-variable,broad-except
-def _is_pem_encrypted(data):
-    # TODO: Round 3
-    try:
-        dump_data = OpenSSL.crypto.dump_certificate(OpenSSL.crypto.FILETYPE_PEM, data)
-    except Exception:
-        pass
+def backup_key(client, vault_base_url, key_name, file_path):
+    backup = client.backup_key(vault_base_url, key_name).value
+    with open(file_path, 'wb') as output:
+        output.write(backup)
+backup_key.__doc__ = KeyVaultClient.backup_key.__doc__
 
-# pylint: disable=unused-variable,unused-argument
-def _decrypt_rsa_private_key(data, password):
-    # TODO: Round 3
-    pass
-
-# pylint: disable=unused-argument
-def _private_key_from_pem(data):
-    # TODO: Round 3
-    pass
+def restore_key(client, vault_base_url, file_path):
+    with open(file_path, 'rb') as file_in:
+        data = file_in.read()
+    return client.restore_key(vault_base_url, data)
+restore_key.__doc__ = KeyVaultClient.restore_key.__doc__
 
 # pylint: disable=too-many-arguments,assignment-from-no-return,unused-variable
-def import_key(client, vault_base_url, key_name, destination, key_ops=None, disabled=False,
+def import_key(client, vault_base_url, key_name, destination=None, key_ops=None, disabled=False,
                expires=None, not_before=None, tags=None, pem_file=None, pem_password=None,
                byok_file=None):
-    # TODO: Round 3
-    from azure.cli.command_modules.keyvault.keyvaultclient.models import KeyAttributes, JsonWebKey
+    """ Import a private key. Supports importing base64 encoded private keys from PEM files.
+        Supports importing BYOK keys into HSM for premium KeyVaults. """
+    from azure.cli.command_modules.keyvault.keyvaultclient.generated.models import \
+        (KeyAttributes, JsonWebKey)
+
+    def _to_bytes(hex_string):
+        # zero pads and decodes a hex string
+        if len(hex_string) % 2:
+            hex_string = '0{}'.format(hex_string)
+        return codecs.decode(hex_string, 'hex_codec')
+
+    def _set_rsa_parameters(dest, src):
+        # map OpenSSL parameter names to JsonWebKey property names
+        conversion_dict = {
+            'modulus': 'n',
+            'publicExponent': 'e',
+            'privateExponent': 'd',
+            'prime1': 'p',
+            'prime2': 'q',
+            'exponent1': 'dp',
+            'exponent2': 'dq',
+            'coefficient': 'qi'
+        }
+        # regex: looks for matches that fit the following patterns:
+        #   integerPattern: 65537 (0x10001)
+        #   hexPattern:
+        #      00:a0:91:4d:00:23:4a:c6:83:b2:1b:4c:15:d5:be:
+        #      d8:87:bd:c9:59:c2:e5:7a:f5:4a:e7:34:e8:f0:07:
+        # The desired match should always be the first component of the match
+        regex = re.compile(r'([^:\s]*(:[^\:)]+\))|([^:\s]*(:\s*[0-9A-Fa-f]{2})+))')
+        # regex2: extracts the hex string from a format like: 65537 (0x10001)
+        regex2 = re.compile(r'(?<=\(0x{1})([0-9A-Fa-f]*)(?=\))')
+
+        key_params = crypto.dump_privatekey(crypto.FILETYPE_TEXT, src).decode('utf-8')
+        for match in regex.findall(key_params):
+            comps = match[0].split(':', 1)
+            name = conversion_dict.get(comps[0], None)
+            if name:
+                value = comps[1].replace(' ', '').replace('\n', '').replace(':', '')
+                try:
+                    value = _to_bytes(value)
+                except Exception as ex: # pylint:disable=broad-except
+                    # if decoding fails it is because of an integer pattern. Extract the hex
+                    # string and retry
+                    value = _to_bytes(regex2.findall(value)[0])
+                setattr(dest, name, value)
+
     key_attrs = KeyAttributes(not disabled, not_before, expires)
     key_obj = JsonWebKey(key_ops=key_ops)
     if pem_file:
-        key_obj.destination = 'RSA'
+        key_obj.kty = 'RSA'
         logger.info('Reading %s', pem_file)
         with open(pem_file, 'r') as f:
-            data = f.read()
-            if _is_pem_encrypted(data):
-                # prompt for password if not supplied?
-                key_info = _decrypt_rsa_private_key(data, pem_password)
-            else:
-                key_info = _private_key_from_pem(data)
+            pem_data = f.read()
+        # load private key and prompt for password if encrypted
+        try:
+            pem_password = str(pem_password).encode() if pem_password else None
+            # despite documentation saying password should be a string, it needs to actually
+            # be UTF-8 encoded bytes
+            pkey = crypto.load_privatekey(crypto.FILETYPE_PEM, pem_data, pem_password)
+        except crypto.Error as ex:
+            raise CLIError(
+                'Import failed: Unable to decrypt private key. --pem-password may be incorrect.')
+        except TypeError as ex:
+            raise CLIError('Invalid --pem-password.')
         logger.info('setting RSA parameters from PEM data')
-        # set rsa parameters
-        # set pem_file to key_file?
+        _set_rsa_parameters(key_obj, pkey)
     elif byok_file:
-        key_obj.destination = 'RSA-HSM'
-        key_obj.t = None # data from file
+        with open(byok_file, 'rb') as f:
+            byok_data = f.read()
+        key_obj.kty = 'RSA-HSM'
+        key_obj.t = byok_data
 
     return client.import_key(
         vault_base_url, key_name, key_obj, destination == 'hsm', key_attrs, tags)
 
+def download_secret(client, vault_base_url, secret_name, file_path, encoding=None,
+                    secret_version=''):
+    """ Download a secret from a KeyVault. """
+    if os.path.isfile(file_path) or os.path.isdir(file_path):
+        raise CLIError("File or directory named '{}' already exists.".format(file_path))
+
+    secret = client.keyvault.get_secret(vault_base_url, secret_name, secret_version)
+    encoding = encoding or secret.tags.get('file-encoding', 'utf-8')
+    secret_value = secret.value
+
+    try:
+        if encoding in secret_text_encoding_values:
+            with open(file_path, 'w') as f:
+                f.write(secret_value)
+        else:
+            if encoding == 'base64':
+                import base64
+                decoded = base64.b64decode(secret_value)
+            elif encoding == 'hex':
+                import binascii
+                decoded = binascii.unhexlify(secret_value)
+
+            with open(file_path, 'wb') as f:
+                f.write(decoded)
+    except Exception as ex: # pylint: disable=broad-except
+        if os.path.isfile(file_path):
+            os.remove(file_path)
+        raise ex
+
 def create_certificate(client, vault_base_url, certificate_name, certificate_policy,
                        disabled=False, expires=None, not_before=None, tags=None):
-    from azure.cli.command_modules.keyvault.keyvaultclient.models import CertificateAttributes
+    from azure.cli.command_modules.keyvault.keyvaultclient.generated.models import \
+        (CertificateAttributes)
     cert_attrs = CertificateAttributes(not disabled, not_before, expires)
     logger.info("Starting long running operation 'keyvault certificate create'")
     client.create_certificate(
         vault_base_url, certificate_name, certificate_policy, cert_attrs, tags)
 
+    if certificate_policy['issuer_parameters']['name'].lower() == 'unknown':
+        # return immediately for a pending certificate
+        return client.get_certificate_operation(vault_base_url, certificate_name)
+
+    # otherwise loop until the certificate creation is complete
     while True:
         check = client.get_certificate_operation(vault_base_url, certificate_name)
         if check.status != 'inProgress':
@@ -286,14 +375,163 @@ def create_certificate(client, vault_base_url, certificate_name, certificate_pol
 
 create_certificate.__doc__ = KeyVaultClient.create_certificate.__doc__
 
+def download_certificate(client, vault_base_url, certificate_name, file_path,
+                         encoding='binary', certificate_version=''):
+    """ Download a certificate from a KeyVault. """
+    if os.path.isfile(file_path) or os.path.isdir(file_path):
+        raise CLIError("File or directory named '{}' already exists.".format(file_path))
+
+    cert = client.keyvault.get_certificate(
+        vault_base_url, certificate_name, certificate_version).cer
+
+    try:
+        with open(file_path, 'wb') as f:
+            if encoding == 'binary':
+                f.write(cert)
+            else:
+                import base64
+                try:
+                    f.write(base64.encodebytes(cert))
+                except AttributeError:
+                    f.write(base64.encodestring(cert)) # pylint: disable=deprecated-method
+    except Exception as ex: # pylint: disable=broad-except
+        if os.path.isfile(file_path):
+            os.remove(file_path)
+        raise ex
+
+def add_certificate_contact(client, vault_base_url, contact_email, contact_name=None,
+                            contact_phone=None):
+    """ Add a contact to the specified vault to receive notifications of certificate operations. """
+    from azure.cli.command_modules.keyvault.keyvaultclient.generated.models import \
+        (Contact, Contacts, KeyVaultErrorException)
+    try:
+        contacts = client.get_certificate_contacts(vault_base_url)
+    except KeyVaultErrorException:
+        contacts = Contacts([])
+    contact = Contact(contact_email, contact_name, contact_phone)
+    if any((x for x in contacts.contact_list if x.email_address == contact_email)):
+        raise CLIError("contact '{}' already exists".format(contact_email))
+    contacts.contact_list.append(contact)
+    return client.set_certificate_contacts(vault_base_url, contacts)
+
+def delete_certificate_contact(client, vault_base_url, contact_email):
+    """ Remove a certificate contact from the specified vault. """
+    from azure.cli.command_modules.keyvault.keyvaultclient.generated.models import \
+        (Contacts, KeyVaultErrorException)
+    contacts = client.get_certificate_contacts(vault_base_url).contact_list
+    remaining = Contacts([x for x in contacts if x.email_address != contact_email])
+    if len(contacts) == len(remaining.contact_list):
+        raise CLIError("contact '{}' not found in vault '{}'".format(contact_email, vault_base_url))
+    if remaining.contact_list:
+        return client.set_certificate_contacts(vault_base_url, remaining)
+    else:
+        return client.delete_certificate_contacts(vault_base_url)
+
+def create_certificate_issuer(client, vault_base_url, issuer_name, provider_name, account_id=None,
+                              password=None, disabled=False, organization_id=None):
+    """ Create a certificate issuer record.
+    :param issuer_name: Unique identifier for the issuer settings.
+    :param provider_name: The certificate provider name. Must be registered with your
+        tenant ID and in your region.
+    :param account_id: The issuer account id/username/etc.
+    :param password: The issuer account password/secret/etc.
+    :param organization_id: The organization id.
+    """
+    from azure.cli.command_modules.keyvault.keyvaultclient.generated.models import \
+        (CertificateIssuerSetParameters, IssuerCredentials, OrganizationDetails, IssuerAttributes,
+         AdministratorDetails, KeyVaultErrorException)
+    try:
+        client.get_certificate_issuer(vault_base_url, issuer_name)
+        raise CLIError("issuer '{}' already exists".format(issuer_name))
+    except KeyVaultErrorException:
+        # ensure issuer does not already exist
+        pass
+    credentials = IssuerCredentials(account_id, password)
+    issuer_attrs = IssuerAttributes(not disabled)
+    org_details = OrganizationDetails(organization_id, admin_details=[])
+    return client.set_certificate_issuer(
+        vault_base_url, issuer_name, provider_name, credentials, org_details, issuer_attrs)
+
+def update_certificate_issuer(client, vault_base_url, issuer_name, provider_name=None,
+                              account_id=None, password=None, enabled=None, organization_id=None):
+    """ Update a certificate issuer record.
+    :param issuer_name: Unique identifier for the issuer settings.
+    :param provider_name: The certificate provider name. Must be registered with your
+        tenant ID and in your region.
+    :param account_id: The issuer account id/username/etc.
+    :param password: The issuer account password/secret/etc.
+    :param organization_id: The organization id.
+    """
+    from azure.cli.command_modules.keyvault.keyvaultclient.generated.models import \
+        (CertificateIssuerSetParameters, IssuerCredentials, OrganizationDetails, IssuerAttributes,
+         AdministratorDetails, KeyVaultErrorException)
+
+    def update(obj, prop, value, nullable=False):
+        set_value = value if value is not None else getattr(obj, prop, None)
+        if not set_value and not nullable:
+            raise CLIError("property '{}' cannot be cleared".format(prop))
+        elif not set_value and nullable:
+            set_value = None
+        setattr(obj, prop, set_value)
+
+    issuer = client.get_certificate_issuer(vault_base_url, issuer_name)
+    update(issuer.credentials, 'account_id', account_id, True)
+    update(issuer.credentials, 'password', password, True)
+    update(issuer.attributes, 'enabled', enabled)
+    update(issuer.organization_details, 'id', organization_id, True)
+    update(issuer, 'provider', provider_name)
+    return client.set_certificate_issuer(
+        vault_base_url, issuer_name, issuer.provider, issuer.credentials,
+        issuer.organization_details, issuer.attributes)
+
+def list_certificate_issuer_admins(client, vault_base_url, issuer_name):
+    """ List admins for a specified certificate issuer. """
+    return client.get_certificate_issuer(
+        vault_base_url, issuer_name).organization_details.admin_details
+
+def add_certificate_issuer_admin(client, vault_base_url, issuer_name, email, first_name=None,
+                                 last_name=None, phone=None):
+    """ Add admin details for a specified certificate issuer. """
+    from azure.cli.command_modules.keyvault.keyvaultclient.generated.models import \
+        (AdministratorDetails, KeyVaultErrorException)
+
+    issuer = client.get_certificate_issuer(vault_base_url, issuer_name)
+    org_details = issuer.organization_details
+    admins = org_details.admin_details
+    if any((x for x in admins if x.email_address == email)):
+        raise CLIError("admin '{}' already exists".format(email))
+    new_admin = AdministratorDetails(first_name, last_name, email, phone)
+    admins.append(new_admin)
+    org_details.admin_details = admins
+    result = client.set_certificate_issuer(
+        vault_base_url, issuer_name, issuer.provider, issuer.credentials, org_details,
+        issuer.attributes)
+    created_admin = next(x for x in result.organization_details.admin_details \
+        if x.email_address == email)
+    return created_admin
+
+def delete_certificate_issuer_admin(client, vault_base_url, issuer_name, email):
+    """ Remove admin details for the specified certificate issuer. """
+    from azure.cli.command_modules.keyvault.keyvaultclient.generated.models import \
+        (AdministratorDetails, KeyVaultErrorException)
+    issuer = client.get_certificate_issuer(vault_base_url, issuer_name)
+    org_details = issuer.organization_details
+    admins = org_details.admin_details
+    remaining = [x for x in admins if x.email_address != email]
+    if len(remaining) == len(admins):
+        raise CLIError("admin '{}' not found for issuer '{}'".format(email, issuer_name))
+    org_details.admin_details = remaining
+    client.set_certificate_issuer(
+        vault_base_url, issuer_name, issuer.provider, issuer.credentials, org_details,
+        issuer.attributes)
 
 def certificate_policy_template():
-    from azure.cli.command_modules.keyvault.keyvaultclient.models import \
+    from azure.cli.command_modules.keyvault.keyvaultclient.generated.models import \
         (CertificatePolicy, CertificateAttributes, KeyProperties, SecretProperties,
          X509CertificateProperties, SubjectAlternativeNames, LifetimeAction, Action, Trigger,
          IssuerParameters)
-    from azure.cli.command_modules.keyvault.keyvaultclient.models.key_vault_client_enums import \
-        (ActionType, JsonWebKeyType, KeyUsageType)
+    from azure.cli.command_modules.keyvault.keyvaultclient.generated.models.key_vault_client_enums \
+        import ActionType, JsonWebKeyType, KeyUsageType
     # create sample policy
     template = CertificatePolicy(
         key_properties=KeyProperties(

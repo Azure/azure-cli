@@ -1,7 +1,7 @@
-#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
-#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 
 OUTPUT_LIST = [
     {'name': 'json', 'desc': 'JSON formatted output that most closely matches API responses'},
@@ -19,7 +19,7 @@ CLOUD_LIST = [
 
 LOGIN_METHOD_LIST = [
     'Device code authentication, we will provide a code you enter into a web page and log into',
-    'Username and password',
+    "Username and password (MFA enforced accounts or MSA accounts such as live-id not supported)",
     'Service Principal with secret',
     'Skip this step (login is available with the \'az login\' command)'
 ]

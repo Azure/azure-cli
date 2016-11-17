@@ -1,7 +1,7 @@
-#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
-#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 #pylint: skip-file
 # coding=utf-8
 # --------------------------------------------------------------------------
@@ -20,12 +20,13 @@ class Authentication(Model):
     :type symmetric_key: :class:`SymmetricKey
      <iothubdeviceclient.models.SymmetricKey>`
     :param x509_thumbprint:
-    :type x509_thumbprint: str
+    :type x509_thumbprint: :class:`X509Thumbprint
+     <iothubdeviceclient.models.X509Thumbprint>`
     """ 
 
     _attribute_map = {
         'symmetric_key': {'key': 'symmetricKey', 'type': 'SymmetricKey'},
-        'x509_thumbprint': {'key': 'x509Thumbprint', 'type': 'str'},
+        'x509_thumbprint': {'key': 'x509Thumbprint', 'type': 'X509Thumbprint'},
     }
 
     def __init__(self, symmetric_key=None, x509_thumbprint=None):

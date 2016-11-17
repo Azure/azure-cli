@@ -1,7 +1,7 @@
-#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
-#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 
 import argparse
 import base64
@@ -150,6 +150,12 @@ def validate_nsg_name_or_id(namespace):
                 type='networkSecurityGroups',
                 name=namespace.network_security_group)
 
+def validate_peering_type(namespace):
+    if namespace.peering_type and namespace.peering_type == 'MicrosoftPeering':
+        if not namespace.advertised_public_prefixes:
+            raise CLIError(
+                'missing required MicrosoftPeering parameter --advertised-public-prefixes')
+
 def validate_private_ip_address(namespace):
     if namespace.private_ip_address:
         namespace.private_ip_address_allocation = 'static'
@@ -292,6 +298,10 @@ def process_ag_create_namespace(namespace):
 
     if not namespace.public_ip_type:
         namespace.public_ip_type = 'none'
+
+def process_auth_create_namespace(namespace):
+    from azure.mgmt.network.models import ExpressRouteCircuitAuthorization
+    namespace.authorization_parameters = ExpressRouteCircuitAuthorization()
 
 def process_lb_create_namespace(namespace):
     if namespace.public_ip_dns_name:

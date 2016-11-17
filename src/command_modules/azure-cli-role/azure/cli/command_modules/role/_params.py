@@ -1,7 +1,7 @@
-﻿#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
-#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 #pylint: disable=line-too-long
 from azure.cli.core.commands import CliArgumentType
 from azure.cli.core.commands import register_cli_argument
@@ -17,6 +17,7 @@ register_cli_argument('ad app', 'reply_urls', nargs='+',
                       help='space separated URIs to which Azure AD will redirect in response to an OAuth 2.0 request. The value does not need to be a physical endpoint, but must be a valid URI.')
 register_cli_argument('ad app', 'start_date', help='the start date after which password or key would be valid. Default value is current time')
 register_cli_argument('ad app', 'end_date', help='the end date till which password or key is valid. Default value is one year after current time')
+register_cli_argument('ad app', 'available_to_other_tenants', action='store_true', help='the application can be used from any Azure AD tenants')
 register_cli_argument('ad app', 'key_value', help='the value for the key credentials associated with the application')
 # TODO: Update these with **enum_choice_list(...) when SDK supports proper enums
 register_cli_argument('ad app', 'key_type', default='AsymmetricX509Cert',
@@ -59,7 +60,7 @@ register_cli_argument('role definition', 'role_definition_id', options_list=('--
 register_cli_argument('role', 'resource_group_name', options_list=('--resource-group', '-g'),
                       help='use it only if the role or assignment was added at the level of a resource group')
 register_cli_argument('role definition', 'custom_role_only', action='store_true', help='custom roles only(vs. build-in ones)')
-register_cli_argument('role definition', 'role_definition', help="json formatted content which defines the new role. run 'show-create-template' to get samples")
+register_cli_argument('role definition', 'role_definition', help="json formatted content which defines the new role.")
 register_cli_argument('role definition update', 'name', arg_type=name_arg_type, completer=get_role_definition_name_completion_list, help="the role's logical name")
 
 

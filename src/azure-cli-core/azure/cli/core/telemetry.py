@@ -1,7 +1,7 @@
-#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
-#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 from __future__ import print_function
 import getpass
 import datetime
@@ -228,8 +228,9 @@ def _remove_cmd_chars(s):
     return s
 
 def _remove_symbols(s):
-    for c in '$%^&|':
-        s = s.replace(c, '_')
+    if isinstance(s, str):
+        for c in '$%^&|':
+            s = s.replace(c, '_')
     return s
 
 def _in_ci():

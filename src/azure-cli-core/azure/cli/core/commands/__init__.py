@@ -1,7 +1,7 @@
-#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
-#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 
 from __future__ import print_function
 import json
@@ -9,12 +9,15 @@ import re
 import time
 import traceback
 import pkgutil
+import timeit
 from importlib import import_module
 from collections import OrderedDict, defaultdict
+from six import string_types
 
 from azure.cli.core._util import CLIError
 import azure.cli.core._logging as _logging
 from azure.cli.core.telemetry import log_telemetry
+from azure.cli.core.application import APPLICATION
 
 from ._introspection import (extract_args_from_signature,
                              extract_full_summary_from_signature)
@@ -142,13 +145,25 @@ class CommandTable(dict):
 
 class CliCommand(object):
 
-    def __init__(self, name, handler, description=None, table_transformer=None):
+    def __init__(self, name, handler, description=None, table_transformer=None,
+                 arguments_loader=None, description_loader=None):
         self.name = name
         self.handler = handler
-        self.description = description
         self.help = None
+        self.description = description_loader() \
+                           if description_loader and CliCommand._should_load_description() \
+                           else description
         self.arguments = {}
+        self.arguments_loader = arguments_loader
         self.table_transformer = table_transformer
+
+    @staticmethod
+    def _should_load_description():
+        return not APPLICATION.session['completer_active']
+
+    def load_arguments(self):
+        if self.arguments_loader:
+            self.arguments.update(self.arguments_loader())
 
     def add_argument(self, param_name, *option_strings, **kwargs):
         dest = kwargs.pop('dest', None)
@@ -165,42 +180,50 @@ class CliCommand(object):
 
 command_table = CommandTable()
 
-def get_command_table(module_name=None):
-    '''Loads command table(s)
-    When `module_name` is specified, only commands from that module will be loaded.
-    If the module is not found, all commands are loaded.
-    '''
-    loaded = False
-    # TODO Remove check for acs module. Issue #1110
-    if module_name and module_name != 'acs':
-        try:
-            import_module('azure.cli.command_modules.' + module_name)
-            logger.info("Successfully loaded command table from module '%s'.", module_name)
-            loaded = True
-        except ImportError:
-            logger.info("Loading all installed modules as module with name '%s' not found.", module_name) #pylint: disable=line-too-long
-        except Exception: #pylint: disable=broad-except
-            pass
-    if not loaded:
-        installed_command_modules = []
-        try:
-            mods_ns_pkg = import_module('azure.cli.command_modules')
-            installed_command_modules = [modname for _, modname, _ in \
-                                        pkgutil.iter_modules(mods_ns_pkg.__path__)]
-        except ImportError:
-            pass
-        logger.info('Installed command modules %s', installed_command_modules)
-        logger.info('Loading command tables from all installed modules.')
-        for mod in installed_command_modules:
-            try:
-                import_module('azure.cli.command_modules.' + mod)
-            except Exception: #pylint: disable=broad-except
-                # Changing this error message requires updating CI script that checks for failed
-                # module loading.
-                logger.error("Error loading command module '%s'", mod)
-                log_telemetry('Error loading module', module=mod)
-                logger.debug(traceback.format_exc())
+# Map to determine what module a command was registered in
+command_module_map = {}
 
+def load_params(command):
+    try:
+        command_table[command].load_arguments()
+    except KeyError:
+        return
+    command_module = command_module_map.get(command, None)
+    if not command_module:
+        logger.debug("Unable to load commands for '%s'. No module in command module map found.", command) #pylint: disable=line-too-long
+        return
+    module_to_load = command_module[:command_module.rfind('.')]
+    import_module(module_to_load).load_params(command)
+    _update_command_definitions(command_table)
+
+def get_command_table():
+    '''Loads command table(s)
+    '''
+    installed_command_modules = []
+    try:
+        mods_ns_pkg = import_module('azure.cli.command_modules')
+        installed_command_modules = [modname for _, modname, _ in \
+                                    pkgutil.iter_modules(mods_ns_pkg.__path__)]
+    except ImportError:
+        pass
+    logger.info('Installed command modules %s', installed_command_modules)
+    cumulative_elapsed_time = 0
+    for mod in installed_command_modules:
+        try:
+            start_time = timeit.default_timer()
+            import_module('azure.cli.command_modules.' + mod).load_commands()
+            elapsed_time = timeit.default_timer() - start_time
+            logger.debug("Loaded module '%s' in %.3f seconds.", mod, elapsed_time)
+            cumulative_elapsed_time += elapsed_time
+        except Exception: #pylint: disable=broad-except
+            # Changing this error message requires updating CI script that checks for failed
+            # module loading.
+            logger.error("Error loading command module '%s'", mod)
+            log_telemetry('Error loading module', module=mod)
+            logger.debug(traceback.format_exc())
+    logger.debug("Loaded all modules in %.3f seconds. "\
+                 "(note: there's always an overhead with the first module loaded)",
+                 cumulative_elapsed_time)
     _update_command_definitions(command_table)
     ordered_commands = OrderedDict(command_table)
     return ordered_commands
@@ -216,12 +239,28 @@ def register_extra_cli_argument(command, dest, **kwargs):
     '''
     _cli_extra_argument_registry[command][dest] = CliCommandArgument(dest, **kwargs)
 
-def cli_command(name, operation, client_factory=None, transform=None, table_transformer=None):
+def cli_command(module_name, name, operation,
+                client_factory=None, transform=None, table_transformer=None):
     """ Registers a default Azure CLI command. These commands require no special parameters. """
-    command_table[name] = create_command(name, operation, transform, table_transformer,
+    command_table[name] = create_command(module_name, name, operation, transform, table_transformer,
                                          client_factory)
 
-def create_command(name, operation, transform_result, table_transformer, client_factory):
+def get_op_handler(operation):
+    """ Import and load the operation handler """
+    try:
+        mod_to_import, attr_path = operation.split('#')
+        op = import_module(mod_to_import)
+        for part in attr_path.split('.'):
+            op = getattr(op, part)
+        return op
+    except (ValueError, AttributeError):
+        raise ValueError("The operation '{}' is invalid.".format(operation))
+
+def create_command(module_name, name, operation,
+                   transform_result, table_transformer, client_factory):
+
+    if not isinstance(operation, string_types):
+        raise ValueError("Operation must be a string. Got '{}'".format(operation))
 
     def _execute_command(kwargs):
         from msrest.paging import Paged
@@ -231,7 +270,8 @@ def create_command(name, operation, transform_result, table_transformer, client_
 
         client = client_factory(kwargs) if client_factory else None
         try:
-            result = operation(client, **kwargs) if client else operation(**kwargs)
+            op = get_op_handler(operation)
+            result = op(client, **kwargs) if client else op(**kwargs)
             # apply results transform if specified
             if transform_result:
                 return transform_result(result)
@@ -246,7 +286,7 @@ def create_command(name, operation, transform_result, table_transformer, client_
         except ClientException as client_exception:
             log_telemetry('client exception', log_type='trace')
             message = getattr(client_exception, 'message', client_exception)
-            raise CLIError(message)
+            raise _polish_rp_not_registerd_error(CLIError(message))
         except AzureException as azure_exception:
             log_telemetry('azure exception', log_type='trace')
             message = re.search(r"([A-Za-z\t .])+", str(azure_exception))
@@ -254,13 +294,33 @@ def create_command(name, operation, transform_result, table_transformer, client_
         except ValueError as value_error:
             log_telemetry('value exception', log_type='trace')
             raise CLIError(value_error)
+        except CLIError as cli_error:
+            raise _polish_rp_not_registerd_error(cli_error)
 
+    command_module_map[name] = module_name
     name = ' '.join(name.split())
-    cmd = CliCommand(name, _execute_command, table_transformer=table_transformer)
-    cmd.description = extract_full_summary_from_signature(operation)
-    cmd.arguments.update(extract_args_from_signature(operation))
+    arguments_loader = lambda: extract_args_from_signature(get_op_handler(operation))
+    description_loader = lambda: extract_full_summary_from_signature(get_op_handler(operation))
+    cmd = CliCommand(name, _execute_command, table_transformer=table_transformer,
+                     arguments_loader=arguments_loader, description_loader=description_loader)
     return cmd
 
+def _polish_rp_not_registerd_error(cli_error):
+    msg = str(cli_error)
+    pertinent_text_namespace = 'The subscription must be registered to use namespace'
+    pertinent_text_feature = 'is not registered for feature'
+    #pylint: disable=line-too-long
+    if pertinent_text_namespace in msg:
+        reg = r".*{} '(.*)'".format(pertinent_text_namespace)
+        match = re.match(reg, msg)
+        cli_error = CLIError("Run 'az provider register -n {}' to register the namespace first".format(match.group(1)))
+    elif pertinent_text_feature in msg:
+        reg = r".*{}\s+([^\s]+)\s+".format(pertinent_text_feature)
+        match = re.match(reg, msg)
+        parts = match.group(1).split('/')
+        if len(parts) == 2:
+            cli_error = CLIError("Run 'az resource feature register --namespace {} -n {}' to enable the feature first".format(parts[0], parts[1]))
+    return cli_error
 
 def _get_cli_argument(command, argname):
     return _cli_argument_registry.get_cli_argument(command, argname)

@@ -1,7 +1,7 @@
-#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
-#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 
 from azure.cli.core.help_files import helps #pylint: disable=unused-import
 
@@ -23,3 +23,15 @@ helps['account'] = """
     type: group
     short-summary: Manages stored and default subscriptions
 """
+
+helps['account list-locations'] = """
+    type: command
+    short-summary: list supported regions of the current subscription
+"""
+
+helps['account show'] = """
+    type: command
+    short-summary: show detail of the current subscription
+"""
+
+

@@ -1,7 +1,7 @@
-﻿#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
-#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 
 from __future__ import print_function
 
@@ -101,14 +101,19 @@ class JMESPathCheck(object): # pylint: disable=too-few-public-methods
         self.expected_result = expected_result
 
     def compare(self, json_data):
-        if not json_data:
-            json_data = '{}'
-        json_val = json.loads(json_data)
-        actual_result = jmespath.search(
-            self.query,
-            json_val,
-            jmespath.Options(collections.OrderedDict))
+        actual_result = _search_result_by_jmespath(json_data, self.query)
         if not actual_result == self.expected_result:
+            raise JMESPathCheckAssertionError(self, actual_result, json_data)
+
+class JMESPathPatternCheck(object): # pylint: disable=too-few-public-methods
+
+    def __init__(self, query, expected_result):
+        self.query = query
+        self.expected_result = expected_result
+
+    def compare(self, json_data):
+        actual_result = _search_result_by_jmespath(json_data, self.query)
+        if not re.match(self.expected_result, actual_result, re.IGNORECASE):
             raise JMESPathCheckAssertionError(self, actual_result, json_data)
 
 class BooleanCheck(object): # pylint: disable=too-few-public-methods
@@ -153,6 +158,15 @@ class StringCheck(object): # pylint: disable=too-few-public-methods
 
 def _scrub_deployment_name(uri):
     return re.sub('/deployments/([^/?]+)', '/deployments/mock-deployment', uri)
+
+def _search_result_by_jmespath(json_data, query):
+    if not json_data:
+        json_data = '{}'
+    json_val = json.loads(json_data)
+    return jmespath.search(
+        query,
+        json_val,
+        jmespath.Options(collections.OrderedDict))
 
 # MAIN CLASS
 

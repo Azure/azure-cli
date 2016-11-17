@@ -1,7 +1,7 @@
-﻿#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
-#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 
 # pylint: disable=no-self-use,too-many-arguments,too-many-lines
 from __future__ import print_function
@@ -21,7 +21,6 @@ from azure.mgmt.compute.models import (DataDisk,
                                        VirtualMachineScaleSetExtensionProfile)
 from azure.mgmt.compute.models.compute_management_client_enums import DiskCreateOptionTypes
 from azure.cli.core.commands import LongRunningOperation
-from azure.cli.core.commands.arm import cli_generic_update_command
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_data_service_client
 from azure.cli.core._util import CLIError
 import azure.cli.core._logging as _logging
@@ -31,7 +30,7 @@ from ._vm_diagnostics_templates import get_default_diag_config
 from ._actions import (load_images_from_aliases_doc,
                        load_extension_images_thru_services,
                        load_images_thru_services)
-from ._factory import _compute_client_factory
+from ._client_factory import _compute_client_factory
 
 logger = _logging.get_az_logger(__name__)
 
@@ -1003,20 +1002,21 @@ def availset_get(resource_group_name, name):
 def availset_set(**kwargs):
     return _compute_client_factory().availability_sets.create_or_update(**kwargs)
 
-cli_generic_update_command('vm availability-set update', availset_get, availset_set)
-
 def vmss_get(resource_group_name, name):
     return _compute_client_factory().virtual_machine_scale_sets.get(resource_group_name, name)
 
 def vmss_set(**kwargs):
     return _compute_client_factory().virtual_machine_scale_sets.create_or_update(**kwargs)
 
-cli_generic_update_command('vmss update', vmss_get, vmss_set)
-
 def update_acs(resource_group_name, container_service_name, new_agent_count):
     client = _compute_client_factory()
-    instance = client.container_service.get(resource_group_name, container_service_name)
+    instance = client.container_services.get(resource_group_name, container_service_name)
     instance.agent_pool_profiles[0].count = new_agent_count
-    return client.container_service.create_or_update(resource_group_name,
-                                                     container_service_name, instance)
+    return client.container_services.create_or_update(resource_group_name,
+                                                      container_service_name, instance)
 
+def list_container_services(client, resource_group_name=None):
+    ''' List Container Services. '''
+    svc_list = client.list_by_resource_group(resource_group_name=resource_group_name) \
+        if resource_group_name else client.list()
+    return list(svc_list)

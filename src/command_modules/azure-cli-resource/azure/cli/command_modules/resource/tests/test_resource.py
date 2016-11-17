@@ -1,7 +1,7 @@
-﻿#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
-#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 
 import os
 import time
@@ -28,7 +28,7 @@ class ResourceGroupScenarioTest(VCRTestBase): # Not RG test base because it test
     def body(self):
         s = self
         rg = self.resource_group
-        s.cmd('resource group create -n {} -l westus --tag a=b;c'.format(rg), checks=[
+        s.cmd('resource group create -n {} -l westus --tag a=b c'.format(rg), checks=[
             JMESPathCheck('name', rg),
             JMESPathCheck('tags', {'a':'b', 'c':''})
         ])
@@ -61,27 +61,28 @@ class ResourceScenarioTest(ResourceGroupVCRTestBase):
 
     def set_up(self):
         super(ResourceScenarioTest, self).set_up()
-        rg = self.resource_group
-        self.cmd('network vnet create -g {} -n {} --subnet-name {} --tags cli-test=test'.format(rg, self.vnet_name, self.subnet_name))
+        self.cmd('network vnet create -g {} -n {} --subnet-name {} --tags cli-test=test'.format(self.resource_group, self.vnet_name, self.subnet_name))
 
     def body(self):
         s = self
         rg = self.resource_group
-        s.cmd('resource list')
+        s.cmd('resource list', checks=[
+            JMESPathCheck("length([?name=='{}'])".format(self.vnet_name), 1)
+            ])
         s.cmd('resource list -l centralus',
               checks=JMESPathCheck("length([?location == 'centralus']) == length(@)", True))
-        s.cmd('resource list --tag displayName=PublicIPAddress',
-              checks=JMESPathCheck("length([?type == 'Microsoft.Network/publicIPAddresses']) == length(@)", True))
-        s.cmd('resource list --resource-type Microsoft.Network/networkInterfaces',
-              checks=JMESPathCheck("length([?type == 'Microsoft.Network/networkInterfaces']) == length(@)", True))
-
-        s.cmd('resource list --name {}'.format(self.vnet_name),
-              checks=JMESPathCheck("length([?name == '{}']) == length(@)".format(self.vnet_name), True))
-
-        all_tagged_displayname = s.cmd('resource list --tag displayName')
-        storage_acc_tagged_displayname = \
-            s.cmd('resource list --tag displayName=StorageAccount')
-        assert len(all_tagged_displayname) > len(storage_acc_tagged_displayname)
+        s.cmd('resource list --resource-type Microsoft.Network/virtualNetworks', checks=[
+            JMESPathCheck("length([?name=='{}'])".format(self.vnet_name), 1)
+            ])
+        s.cmd('resource list --name {}'.format(self.vnet_name), checks=[
+            JMESPathCheck("length([?name=='{}'])".format(self.vnet_name), 1)
+            ])
+        s.cmd('resource list --tag cli-test', checks=[
+            JMESPathCheck("length([?name=='{}'])".format(self.vnet_name), 1)
+            ])
+        s.cmd('resource list --tag cli-test=test', checks=[
+            JMESPathCheck("length([?name=='{}'])".format(self.vnet_name), 1)
+            ])
 
         # check for simple resource with tag
         s.cmd('resource show -n {} -g {} --resource-type Microsoft.Network/virtualNetworks'.format(self.vnet_name, rg), checks=[
@@ -90,11 +91,58 @@ class ResourceScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck('resourceGroup', rg),
             JMESPathCheck('tags', {'cli-test': 'test'})
         ])
+        #check for child resource
+        s.cmd('resource show -n {} -g {} --namespace Microsoft.Network --parent virtualNetworks/{} --resource-type subnets'.format(
+            self.subnet_name, self.resource_group, self.vnet_name), checks=[
+                JMESPathCheck('name', self.subnet_name),
+                JMESPathCheck('resourceGroup', rg),
+            ])
 
         # clear tag and verify
         s.cmd('resource tag -n {} -g {} --resource-type Microsoft.Network/virtualNetworks --tags'.format(self.vnet_name, rg))
         s.cmd('resource show -n {} -g {} --resource-type Microsoft.Network/virtualNetworks'.format(self.vnet_name, rg),
               checks=JMESPathCheck('tags', {}))
+
+class ResourceIDScenarioTest(ResourceGroupVCRTestBase):
+
+    def test_resource_id_scenario(self):
+        self.execute()
+
+    def __init__(self, test_method):
+        super(ResourceIDScenarioTest, self).__init__(__file__, test_method)
+        self.resource_group = 'azure-cli-resource-id-test3'
+        self.vnet_name = 'cli-test-vnet1'
+        self.subnet_name = 'cli-test-subnet1'
+
+    def set_up(self):
+        super(ResourceIDScenarioTest, self).set_up()
+        self.cmd('network vnet create -g {} -n {} --subnet-name {}'.format(self.resource_group, self.vnet_name, self.subnet_name))
+
+    def body(self):
+        if self.playback:
+            subscription_id = MOCKED_SUBSCRIPTION_ID
+        else:
+            subscription_id = self.cmd('account list --query "[?isDefault].id" -o tsv')
+
+        s = self
+        vnet_resource_id = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}'.format(
+            subscription_id, self.resource_group, self.vnet_name)
+        s.cmd('resource tag --id {} --tags {}'.format(vnet_resource_id, 'tag-vnet'))
+        s.cmd('resource show --id {}'.format(vnet_resource_id), checks=[
+            JMESPathCheck('name', self.vnet_name),
+            JMESPathCheck('resourceGroup', self.resource_group),
+            JMESPathCheck('tags', {'tag-vnet': ''})
+        ])
+
+        subnet_resource_id = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(
+            subscription_id, self.resource_group, self.vnet_name, self.subnet_name)
+        s.cmd('resource show --id {}'.format(subnet_resource_id), checks=[
+            JMESPathCheck('name', self.subnet_name),
+            JMESPathCheck('resourceGroup', self.resource_group)
+        ])
+
+        s.cmd('resource delete --id {}'.format(subnet_resource_id), checks=NoneCheck())
+        s.cmd('resource delete --id {}'.format(vnet_resource_id), checks=NoneCheck())
 
 class TagScenarioTest(VCRTestBase): # Not RG test base because it operates only on the subscription
 

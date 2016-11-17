@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 
-#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
-#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 
 from codecs import open
 from setuptools import setup
 
-VERSION = '0.1.0b8'
+VERSION = '0.1.0b9'
 
 CLASSIFIERS = [
     'Development Status :: 4 - Beta',
@@ -25,8 +25,9 @@ CLASSIFIERS = [
 
 DEPENDENCIES = [
     'azure-cli-core',
-    'azure-mgmt-resource==0.30.0rc6',
+    'azure-mgmt-resource==0.30.2',
     'azure-mgmt-storage==0.30.0rc6',
+    'azure-mgmt-containerregistry==0.1.0',
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
@@ -49,10 +50,7 @@ setup(
     ],
     packages=[
         'azure.cli.command_modules.acr',
-        'azure.cli.command_modules.acr.mgmt_acr',
-        'azure.cli.command_modules.acr.mgmt_acr.models',
-        'azure.cli.command_modules.acr.mgmt_acr.operations',
     ],
     install_requires=DEPENDENCIES,
-    package_data={'azure.cli.command_modules.acr': ['template.new.json', 'template.existing.json']},
+    package_data={'azure.cli.command_modules.acr': ['template.json']},
 )

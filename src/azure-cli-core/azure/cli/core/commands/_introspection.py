@@ -1,7 +1,7 @@
-#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
-#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 
 import inspect
 import re
@@ -17,6 +17,7 @@ def extract_full_summary_from_signature(operation):
             summary = lines[:match.regs[0][0]]
         else:
             summary = lines
+    summary = summary.replace('\n', ' ').replace('\r', '')
     return summary
 
 def _option_descriptions(operation):

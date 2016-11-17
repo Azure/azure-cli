@@ -1,7 +1,7 @@
-#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
-#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 import logging
 from six import StringIO
 
@@ -48,8 +48,10 @@ def _run_pip(pip, pip_exec_args):
     log_stream.close()
     if status_code > 0:
         if '[Errno 13] Permission denied' in log_output:
-            raise CLIError('Permission denied. Run command with --debug for more information.')
-        raise CLIError('An error occurred. Run command with --debug for more information.')
+            raise CLIError('Permission denied. Run command with --debug for more information.\n'
+                           'If executing az with sudo, you may want sudo\'s -E and -H flags.')
+        raise CLIError('An error occurred. Run command with --debug for more information.\n'
+                       'If executing az with sudo, you may want sudo\'s -E and -H flags.')
 
 def _install_or_update(package_list, link, private, pre, show_logs=False):
     import pip
@@ -66,17 +68,22 @@ def _install_or_update(package_list, link, private, pre, show_logs=False):
             pkg_index_options += ['--extra-index-url', package_index_url]
         else:
             raise CLIError('AZURE_COMPONENT_PACKAGE_INDEX_URL environment variable not set and not specified in config. ' #pylint: disable=line-too-long
-                           'AZURE_COMPONENT_PACKAGE_INDEX_TRUSTED_HOST may also need to be set.') #pylint: disable=line-too-long
+                           'AZURE_COMPONENT_PACKAGE_INDEX_TRUSTED_HOST may also need to be set.\n'
+                           'If executing az with sudo, you may want sudo\'s -E and -H flags.') #pylint: disable=line-too-long
         pkg_index_options += ['--trusted-host', package_index_trusted_host] if package_index_trusted_host else [] #pylint: disable=line-too-long
     pip_args = ['install'] + options + package_list + pkg_index_options
     _run_pip(pip, pip_args)
 
-def update(private=False, pre=False, link=None, additional_component=None, show_logs=False):
+def update(private=False, pre=False, link=None, additional_components=None, show_logs=False):
     """ Update the CLI and all installed components """
     import pip
+    # Update the CLI itself
     package_list = [CLI_PACKAGE_NAME]
+    # Update all the packages we currently have installed
     package_list += [dist.key for dist in pip.get_installed_distributions(local_only=True)
                      if dist.key.startswith(COMPONENT_PREFIX)]
-    if additional_component:
-        package_list += [COMPONENT_PREFIX + additional_component]
+    # Install/Update any new components the user requested
+    if additional_components:
+        for c in additional_components:
+            package_list += [COMPONENT_PREFIX + c]
     _install_or_update(package_list, link, private, pre, show_logs=show_logs)

@@ -1,7 +1,7 @@
-#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
-#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 
 from azure.cli.core.help_files import helps #pylint: disable=unused-import
 
@@ -339,25 +339,123 @@ helps['network dns zone'] = """
     type: group
     short-summary: Manage DNS zones
 """
+helps['network dns zone create'] = """
+    type: command
+    short-summary: Creates or updates DNS zone properties. Does not modify DNS records within the zone.
+    parameters:
+        - name: --if-none-match
+          short-summary: Create only if there isn't an existing DNS zone matches the given one.
+"""
+helps['network dns zone delete'] = """
+    type: command
+    short-summary: Deletes a DNS zone. WARNING All DNS records in the zone will also be deleted. This operation cannot be undone.
+"""
+helps['network dns zone export'] = """
+    type: command
+    short-summary: Export a DNS zone as a DNS zone file.
+"""
+helps['network dns zone import'] = """
+    type: command
+    short-summary: Export a DNS zone as a DNS zone file.
+"""
+helps['network dns zone list'] = """
+    type: command
+    short-summary: List DNS zones in a resource group or subscription.
+"""
+helps['network dns zone show'] = """
+    type: command
+    short-summary: Gets DNS zone parameters. Does not show DNS records within the zone.
+"""
+helps['network dns zone update'] = """
+    type: command
+    short-summary: Updates DNS zone properties. Does not modify DNS records within the zone.
+    parameters:
+        - name: --if-match
+          short-summary: Update only if the resource with the same ETAG exists.
+"""
 helps['network express-route'] = """
     type: group
     short-summary: Dedicated private network fiber connections to Azure
 """
-helps['network express-route circuit'] = """
-    type: group
-    short-summary: Manage express route circuits
+helps['network express-route create'] = """
+    type: command
+    short-summary: Create an ExpressRoute circuit.
 """
-helps['network express-route circuit-auth'] = """
-    type: group
-    short-summary: Manage express route circuit authentication
+helps['network express-route delete'] = """
+    type: command
+    short-summary: Delete an ExpressRoute circuit.
 """
-helps['network express-route circuit-peering'] = """
-    type: group
-    short-summary: Manage express route peering
+helps['network express-route get-stats'] = """
+    type: command
+    short-summary: Show stats of an ExpressRoute circuit.
 """
-helps['network express-route service-provider'] = """
+helps['network express-route list'] = """
+    type: command
+    short-summary: List ExpressRoute circuits in a subscription or resource group.
+"""
+helps['network express-route list-arp-tables'] = """
+    type: command
+    short-summary: List the currently advertised ARP table of an ExpressRoute circuit.
+"""
+helps['network express-route list-route-tables'] = """
+    type: command
+    short-summary: List the currently advertised route tables of an ExpressRoute circuit.
+"""
+helps['network express-route show'] = """
+    type: command
+    short-summary: Show details of an ExpressRoute circuit.
+"""
+helps['network express-route update'] = """
+    type: command
+    short-summary: Update settings of an ExpressRoute circuit.
+"""
+helps['network express-route auth'] = """
     type: group
-    short-summary: View express route service providers
+    short-summary: Manage ExpressRoute circuit authentication
+"""
+helps['network express-route auth create'] = """
+    type: command
+    short-summary: Create an authorization setting in an ExpressRoute circuit.
+"""
+helps['network express-route auth delete'] = """
+    type: command
+    short-summary: Delete an authorization setting in an ExpressRoute circuit.
+"""
+helps['network express-route auth list'] = """
+    type: command
+    short-summary: List authorization settings of an ExpressRoute circuit.
+"""
+helps['network express-route auth show'] = """
+    type: command
+    short-summary: Show details of an authorization setting in an ExpressRoute circuit.
+"""
+helps['network express-route peering'] = """
+    type: group
+    short-summary: Manage ExpressRoute peering
+"""
+helps['network express-route peering create'] = """
+    type: command
+    short-summary: Create peering settings in an ExpressRoute circuit.
+"""
+helps['network express-route peering delete'] = """
+    type: command
+    short-summary: Delete peering settings in an ExpressRoute circuit.
+"""
+helps['network express-route peering list'] = """
+    type: command
+    short-summary: List peering settings of an ExpressRoute circuit.
+"""
+helps['network express-route peering show'] = """
+    type: command
+    short-summary: Show peering details of an ExpressRoute circuit.
+"""
+helps['network express-route peering update'] = """
+    type: command
+    short-summary: Update peering settings in an ExpressRoute circuit.
+"""
+helps['network express-route list-service-providers'] = """
+    type: command
+    short-summary: List available ExpressRoute service providers.
 """
 helps['network lb'] = """
     type: group

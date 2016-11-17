@@ -1,14 +1,14 @@
-#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
-#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 
 from collections import defaultdict
 import sys
 import os
 import uuid
 import argparse
-from azure.cli.core.parser import AzCliCommandParser
+from azure.cli.core.parser import AzCliCommandParser, enable_autocomplete
 from azure.cli.core._output import CommandResultItem
 import azure.cli.core.extensions
 import azure.cli.core._help as _help
@@ -29,15 +29,13 @@ class Configuration(object): # pylint: disable=too-few-public-methods
         self.argv = argv or sys.argv[1:]
         self.output_format = None
 
-    def get_command_table(self):
+    def get_command_table(self): # pylint: disable=no-self-use
         import azure.cli.core.commands as commands
-        # Find the first noun on the command line and only load commands from that
-        # module to improve startup time.
-        for a in self.argv:
-            if not a.startswith('-'):
-                return commands.get_command_table(a)
-        # No noun found, so load all commands.
-        return  commands.get_command_table()
+        return commands.get_command_table()
+
+    def load_params(self, command): # pylint: disable=no-self-use
+        import azure.cli.core.commands as commands
+        commands.load_params(command)
 
 class Application(object):
 
@@ -47,6 +45,7 @@ class Application(object):
     COMMAND_PARSER_LOADED = 'CommandParser.Loaded'
     COMMAND_PARSER_PARSED = 'CommandParser.Parsed'
     COMMAND_TABLE_LOADED = 'CommandTable.Loaded'
+    COMMAND_TABLE_PARAMS_LOADED = 'CommandTableParams.Loaded'
 
     def __init__(self, config=None):
         self._event_handlers = defaultdict(lambda: [])
@@ -85,6 +84,7 @@ class Application(object):
         self.raise_event(self.COMMAND_PARSER_LOADED, parser=self.parser)
 
         if len(argv) == 0:
+            enable_autocomplete(self.parser)
             az_subparser = self.parser.subparsers[tuple()]
             _help.show_welcome(az_subparser)
             log_telemetry('welcome')
@@ -93,7 +93,24 @@ class Application(object):
         if argv[0].lower() == 'help':
             argv[0] = '--help'
 
+        # Rudimentary parsing to get the command
+        nouns = []
+        for noun in argv:
+            if noun[0] == '-':
+                break
+            nouns.append(noun)
+        command = ' '.join(nouns)
+
+        if argv[-1] in ('--help', '-h') or command in command_table:
+            self.configuration.load_params(command)
+            self.raise_event(self.COMMAND_TABLE_PARAMS_LOADED, command_table=command_table)
+            self.parser.load_command_table(command_table)
+
+        if self.session['completer_active']:
+            enable_autocomplete(self.parser)
+
         args = self.parser.parse_args(argv)
+
         self.raise_event(self.COMMAND_PARSER_PARSED, command=args.command, args=args)
         results = []
         for expanded_arg in _explode_list_args(args):
@@ -168,7 +185,6 @@ class Application(object):
     @staticmethod
     def _register_builtin_arguments(**kwargs):
         global_group = kwargs['global_group']
-        global_group.add_argument('--subscription', dest='_subscription_id', help=argparse.SUPPRESS)
         global_group.add_argument('--output', '-o', dest='_output_format',
                                   choices=['json', 'tsv', 'list', 'table', 'jsonc'],
                                   default=az_config.get('core', 'output', fallback='json'),

@@ -1,7 +1,7 @@
-﻿#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
-#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 
 from __future__ import print_function
 import collections
@@ -167,17 +167,16 @@ class Profile(object):
 
         self._cache_subscriptions_to_local_storage(subscriptions)
 
-    def set_active_subscription(self, subscription_id_or_name):
+    def set_active_subscription(self, subscription): #take id or name
         subscriptions = self.load_cached_subscriptions()
 
-        subscription_id_or_name = subscription_id_or_name.lower()
+        subscription = subscription.lower()
         result = [x for x in subscriptions
-                  if subscription_id_or_name == x[_SUBSCRIPTION_ID].lower() or
-                  subscription_id_or_name == x[_SUBSCRIPTION_NAME].lower()]
+                  if subscription in [x[_SUBSCRIPTION_ID].lower(), x[_SUBSCRIPTION_NAME].lower()]]
 
         if len(result) != 1:
             raise CLIError('The subscription of "{}" does not exist or has more than'
-                           ' one match.'.format(subscription_id_or_name))
+                           ' one match.'.format(subscription))
 
         for s in subscriptions:
             s[_IS_DEFAULT_SUBSCRIPTION] = False
@@ -218,14 +217,14 @@ class Profile(object):
 
         return active_account[_USER_ENTITY][_USER_NAME]
 
-    def get_subscription(self, subscription_id=None):
+    def get_subscription(self, subscription=None):#take id or name
         subscriptions = self.load_cached_subscriptions()
         if not subscriptions:
             raise CLIError("Please run 'az login' to setup account.")
 
         result = [x for x in subscriptions if (
-            subscription_id is None and x.get(_IS_DEFAULT_SUBSCRIPTION)) or
-                  (subscription_id == x.get(_SUBSCRIPTION_ID))]
+            not subscription and x.get(_IS_DEFAULT_SUBSCRIPTION) or
+            subscription and subscription.lower() in [x[_SUBSCRIPTION_ID].lower(), x[_SUBSCRIPTION_NAME].lower()])] #pylint: disable=line-too-long
         if len(result) != 1:
             raise CLIError("Please run 'az account set' to select active account.")
         return result[0]

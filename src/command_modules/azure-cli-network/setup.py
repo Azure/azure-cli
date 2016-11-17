@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 
-#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
-#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 
 from codecs import open
 from setuptools import setup
 
-VERSION = '0.1.0b8'
+VERSION = '0.1.0b9'
 
 CLASSIFIERS = [
     'Development Status :: 4 - Beta',
@@ -102,18 +102,10 @@ setup(
         'azure.cli.command_modules.network.mgmt_express_route_circuit.lib',
         'azure.cli.command_modules.network.mgmt_express_route_circuit.lib.models',
         'azure.cli.command_modules.network.mgmt_express_route_circuit.lib.operations',
-        'azure.cli.command_modules.network.mgmt_express_route_peering',
-        'azure.cli.command_modules.network.mgmt_express_route_peering.lib',
-        'azure.cli.command_modules.network.mgmt_express_route_peering.lib.models',
-        'azure.cli.command_modules.network.mgmt_express_route_peering.lib.operations',
         'azure.cli.command_modules.network.mgmt_traffic_manager_profile',
         'azure.cli.command_modules.network.mgmt_traffic_manager_profile.lib',
         'azure.cli.command_modules.network.mgmt_traffic_manager_profile.lib.models',
         'azure.cli.command_modules.network.mgmt_traffic_manager_profile.lib.operations',
-        'azure.cli.command_modules.network.mgmt_dns_zone',
-        'azure.cli.command_modules.network.mgmt_dns_zone.lib',
-        'azure.cli.command_modules.network.mgmt_dns_zone.lib.models',
-        'azure.cli.command_modules.network.mgmt_dns_zone.lib.operations',
         'azure.cli.command_modules.network.zone_file'
     ],
     install_requires=DEPENDENCIES,

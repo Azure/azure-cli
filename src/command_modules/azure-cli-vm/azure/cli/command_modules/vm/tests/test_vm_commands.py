@@ -1,13 +1,14 @@
-﻿#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
-#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 
 # AZURE CLI VM TEST DEFINITIONS
 import json
 import os
 import tempfile
 import platform
+import unittest
 
 from azure.cli.core.test_utils.vcr_test_base import (VCRTestBase,
                                                      ResourceGroupVCRTestBase,
@@ -1255,8 +1256,8 @@ class AzureContainerServiceScenarioTest(ResourceGroupVCRTestBase): #pylint: disa
 
         #create
         self.cmd('acs create -g {} -n {} --dns-prefix {}'.format(self.resource_group, acs_name, dns_prefix), checks=[
-            JMESPathCheck('masterFQDN', '{}mgmt.{}.cloudapp.azure.com'.format(dns_prefix, self.location)),
-            JMESPathCheck('agentFQDN', '{}agents.{}.cloudapp.azure.com'.format(dns_prefix, self.location))
+            JMESPathCheck('properties.outputs.masterFQDN.value', '{}mgmt.{}.cloudapp.azure.com'.format(dns_prefix, self.location)),
+            JMESPathCheck('properties.outputs.agentFQDN.value', '{}agents.{}.cloudapp.azure.com'.format(dns_prefix, self.location))
             ])
         #show
         self.cmd('acs show -g {} -n {}'.format(self.resource_group, acs_name), checks=[
@@ -1276,3 +1277,6 @@ class AzureContainerServiceScenarioTest(ResourceGroupVCRTestBase): #pylint: disa
         self.cmd('acs show -g {} -n {}'.format(self.resource_group, acs_name), checks=[
             JMESPathCheck('agentPoolProfiles[0].count', 5),
             ])
+
+if __name__ == '__main__':
+    unittest.main()

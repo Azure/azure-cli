@@ -5,14 +5,12 @@ python:
   - "3.5"
   - "3.5-dev" # 3.5 development branch
 install:
-  - pip install virtualenv # used by package_verify script
+  - pip install -qqq virtualenv # used by package_verify script
   - python scripts/dev_setup.py
 script: 
   - export PYTHONPATH=$PATHONPATH:./src
   - python -m azure.cli -h
-  - pylint -r n src/azure-cli/azure
-  - pylint -r n src/azure-cli-core/azure
-  - python scripts/command_modules/pylint.py
+  - python ./scripts/run_pylint.py
   - python -m unittest discover -s src/azure-cli/azure/cli/tests --buffer
   - python -m unittest discover -s src/azure-cli-core/azure/cli/core/tests --buffer
   - python scripts/command_modules/test.py

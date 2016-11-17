@@ -1,7 +1,7 @@
-#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
-#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 #pylint: skip-file
 # coding=utf-8
 # --------------------------------------------------------------------------
@@ -11,15 +11,15 @@
 # --------------------------------------------------------------------------
 
 from .error_details import ErrorDetails, ErrorDetailsException
-from .create_device_request import CreateDeviceRequest
+from .device_description import DeviceDescription
 from .authentication import Authentication
 from .symmetric_key import SymmetricKey
-from .device_description import DeviceDescription
+from .x509_thumbprint import X509Thumbprint
 
 __all__ = [
     'ErrorDetails', 'ErrorDetailsException',
-    'CreateDeviceRequest',
+    'DeviceDescription',
     'Authentication',
     'SymmetricKey',
-    'DeviceDescription',
+    'X509Thumbprint',
 ]

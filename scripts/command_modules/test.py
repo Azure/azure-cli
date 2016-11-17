@@ -1,42 +1,70 @@
-#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
-#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 
 ## Run the tests for each command module ##
 
 from __future__ import print_function
+
 import os
 import sys
+from _common import get_all_command_modules, COMMAND_MODULE_PREFIX, print_records
+from _task import Task, TaskDescription
 
-from _common import get_all_command_modules, exec_command, print_summary, COMMAND_MODULE_PREFIX
 
-LOG_DIR = os.path.expanduser(os.path.join('~', '.azure', 'logs'))
+class TestModule(object):
+    LOG_DIR = os.path.expanduser(os.path.join('~', '.azure', 'logs'))
 
-all_command_modules = get_all_command_modules()
-print("Running tests on command modules.")
+    def __init__(self, module_name, module_path):
+        self.name = module_name.replace(COMMAND_MODULE_PREFIX, '')
+        self.path = os.path.join(module_path, 'azure', 'cli', 'command_modules', self.name, 'tests')
 
-failed_module_names = []
-skipped_modules = []
-for name, fullpath in all_command_modules:
-    path_to_module = os.path.join(fullpath, 'azure', 'cli', 'command_modules', name.replace(COMMAND_MODULE_PREFIX, ''), 'tests')
-    if not os.path.isdir(path_to_module):
-        skipped_modules.append(name)
-        continue
-    command = "python -m unittest discover -s " + path_to_module
-    # append --buffer when running on CI to ensure any unrecorded tests fail instead of hang
-    if os.environ.get('CONTINUOUS_INTEGRATION') and os.environ.get('TRAVIS'):
-        command += " --buffer"
-    success = exec_command(command, env={'AZURE_CLI_ENABLE_LOG_FILE': '1', 'AZURE_CLI_LOG_DIR': LOG_DIR})
-    if not success:
-        failed_module_names.append(name)
+    def exists(self):
+        return os.path.exists(self.path)
 
-print_summary(failed_module_names)
+    def get_task_description(self):
+        return TaskDescription(self.name,
+                               self._get_command(),
+                               self._get_env(),
+                               lambda exit_code: exit_code == 0)
 
-print("Full debug log available at '{}'.".format(LOG_DIR))
+    def _get_command(self):
+        command = 'python -m unittest discover -s {}'.format(self.path)
 
-if failed_module_names:
-    sys.exit(1)
+        if os.environ.get('CONTINUOUS_INTEGRATION') and os.environ.get('TRAVIS'):
+            command += " --buffer"
 
-if skipped_modules:
-    print("Modules skipped as no test dir found:", ', '.join(skipped_modules), file=sys.stderr)
+        return command
+
+    def _get_env(self):
+        env = os.environ.copy()
+        env.update({'AZURE_CLI_ENABLE_LOG_FILE': '1', 'AZURE_CLI_LOG_DIR': TestModule.LOG_DIR})
+
+        return env
+
+
+def run_module_tests(skip_list=None):
+    print("Running tests on command modules.")
+
+    all_modules = [TestModule(name, path) for name, path in get_all_command_modules()]
+    if not skip_list is None:
+        all_modules = [desc for desc in all_modules if not desc.name in skip_list]
+
+    skipped_modules = [m.name for m in all_modules if not m.exists()]
+
+    tasks = [Task(m.get_task_description()) for m in all_modules if m.exists()]
+
+    Task.wait_all_tasks(tasks)
+
+    print_records(
+        [t.get_summary() for t in tasks],
+        title="Test Results",
+        foot_notes=["Full debug log available at '{}'.".format(TestModule.LOG_DIR),
+                    "Skipped modules {}".format(','.join(skipped_modules))])
+
+    if any([t.name for t in tasks if not t.result.exit_code == 0]):
+        sys.exit(1)
+
+if __name__ == '__main__':
+    run_module_tests()

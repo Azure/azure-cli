@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
-#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
-#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 
 #
 # This script will install the CLI into a directory and create an executable
@@ -52,9 +52,8 @@ EXECUTABLE_NAME = 'az'
 
 DISABLE_PROMPTS = os.environ.get('AZURE_CLI_DISABLE_PROMPTS')
 
-def exec_command(command, cwd=None, env=None):
-    print('Executing: '+str(command))
-    command_list = command if isinstance(command, list) else command.split()
+def exec_command(command_list, cwd=None, env=None):
+    print('Executing: '+str(command_list))
     check_call(command_list, cwd=cwd, env=env)
 
 def create_tmp_dir():
@@ -74,23 +73,21 @@ def create_virtualenv(tmp_dir, version, install_dir):
     package_tar.close()
     virtualenv_dir_name = 'virtualenv-'+version
     working_dir = os.path.join(tmp_dir, virtualenv_dir_name)
-    exec_command('{0} virtualenv.py --python {0} {1}'.format(sys.executable, install_dir), cwd=working_dir)
+    cmd = [sys.executable, 'virtualenv.py', '--python', sys.executable, install_dir]
+    exec_command(cmd, cwd=working_dir)
 
 def install_cli(install_dir, tmp_dir):
     path_to_pip = os.path.join(install_dir, BIN_DIR_NAME, 'pip')
-    install_cmd = '{pip} install --cache-dir {cache_dir} azure-cli --upgrade'.format(
-        pip=path_to_pip,
-        cache_dir=tmp_dir
-    )
-    exec_command(install_cmd)
+    cmd = [path_to_pip, 'install', '--cache-dir', tmp_dir, 'azure-cli', '--upgrade']
+    exec_command(cmd)
 
 def create_executable(exec_dir, install_dir):
     create_dir(exec_dir)
     exec_filename = os.path.join(exec_dir, EXECUTABLE_NAME)
     with open(exec_filename, 'w') as exec_file:
         exec_file.write(AZ_DISPATCH_TEMPLATE.format(
-                        install_dir=install_dir,
-                        bin_dir_name=BIN_DIR_NAME))
+            install_dir=install_dir,
+            bin_dir_name=BIN_DIR_NAME))
     cur_stat = os.stat(exec_filename)
     os.chmod(exec_filename, cur_stat.st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
     return exec_filename

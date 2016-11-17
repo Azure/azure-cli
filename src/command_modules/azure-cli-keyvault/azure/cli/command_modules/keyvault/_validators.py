@@ -1,26 +1,87 @@
-#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
-#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 
 import argparse
+import base64
+import binascii
 from datetime import datetime
+import re
 
 from azure.mgmt.keyvault import KeyVaultManagementClient
 from azure.mgmt.keyvault.models.key_vault_management_client_enums import \
     (KeyPermissions, SecretPermissions, CertificatePermissions)
 
-from azure.cli.command_modules.keyvault.keyvaultclient.models.key_vault_client_enums import \
-    (JsonWebKeyOperation)
-
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.arm import parse_resource_id
+from azure.cli.core.commands.validators import validate_tags
 from azure.cli.core._util import CLIError
+
+from azure.cli.command_modules.keyvault.keyvaultclient.generated.models.key_vault_client_enums \
+    import JsonWebKeyOperation
+
+secret_text_encoding_values = ['utf-8', 'utf-16le', 'utf-16be', 'ascii']
+secret_binary_encoding_values = ['base64', 'hex']
 
 def _extract_version(item_id):
     return item_id.split('/')[-1]
 
 # COMMAND NAMESPACE VALIDATORS
+
+def process_certificate_cancel_namespace(namespace):
+    namespace.cancellation_requested = True
+
+def process_secret_set_namespace(namespace):
+
+    validate_tags(namespace)
+
+    content = namespace.value
+    file_path = namespace.file_path
+    encoding = namespace.encoding
+    tags = namespace.tags or {}
+
+    use_error = CLIError("incorrect usage: [Required] --value VALUE | --file PATH")
+
+    if (content and file_path) or (not content and not file_path):
+        raise use_error
+
+    encoding = encoding or 'utf-8'
+    if file_path:
+        if encoding in secret_text_encoding_values:
+            with open(file_path, 'r') as f:
+                try:
+                    content = f.read()
+                except UnicodeDecodeError:
+                    raise CLIError("Unable to decode file '{}' with '{}' encoding.".format(
+                        file_path, encoding))
+                encoded_str = content
+                encoded = content.encode(encoding)
+                decoded = encoded.decode(encoding)
+        elif encoding == 'base64':
+            with open(file_path, 'rb') as f:
+                content = f.read()
+                try:
+                    encoded = base64.encodebytes(content)
+                except AttributeError:
+                    encoded = base64.encodestring(content) # pylint: disable=deprecated-method
+                encoded_str = encoded.decode('utf-8')
+                decoded = base64.b64decode(encoded_str)
+        elif encoding == 'hex':
+            with open(file_path, 'rb') as f:
+                content = f.read()
+                encoded = binascii.b2a_hex(content)
+                encoded_str = encoded.decode('utf-8')
+                decoded = binascii.unhexlify(encoded_str)
+
+        if content != decoded:
+            raise CLIError("invalid encoding '{}'".format(encoding))
+
+        content = encoded_str
+
+    tags.update({'file-encoding': encoding})
+    namespace.tags = tags
+    namespace.value = content
 
 # PARAMETER NAMESPACE VALIDATORS
 
@@ -61,6 +122,8 @@ def validate_key_type(ns):
             'hsm': 'RSA-HSM'
         }
         ns.destination = dest_to_type_map[ns.destination]
+        if ns.destination == 'RSA' and hasattr(ns, 'byok_file') and ns.byok_file:
+            raise CLIError('BYOK keys are hardware protected. Omit --protection')
 
 def validate_policy_permissions(ns):
     key_perms = ns.key_permissions
@@ -108,10 +171,33 @@ def validate_resource_group_name(ns):
             "The Resource 'Microsoft.KeyVault/vaults/{}'".format(vault_name) + \
             " not found within subscription")
 
+def validate_x509_certificate_chain(ns):
+    def _load_certificate_as_bytes(file_name):
+        cert_list = []
+        regex = r'-----BEGIN CERTIFICATE-----([^-]+)-----END CERTIFICATE-----'
+        with open(file_name, 'r') as f:
+            cert_data = f.read()
+            for entry in re.findall(regex, cert_data):
+                cert_list.append(base64.b64decode(entry.replace('\n', '')))
+        return cert_list
+
+    ns.x509_certificates = _load_certificate_as_bytes(ns.x509_certificates)
+
 # ARGUMENT TYPES
 
+def base64_encoded_certificate_type(string):
+    """ Loads file and outputs contents as base64 encoded string. """
+    with open(string, 'rb') as f:
+        cert_data = f.read()
+    try:
+        # for PEM files (including automatic endline conversion for Windows)
+        cert_data = cert_data.decode('utf-8').replace('\r\n', '\n')
+    except UnicodeDecodeError:
+        cert_data = binascii.b2a_base64(cert_data).decode('utf-8')
+    return cert_data
+
 def datetime_type(string):
-    ''' Validates UTC datettime in format '%Y-%m-%d\'T\'%H:%M\'Z\''. '''
+    """ Validates UTC datettime in format '%Y-%m-%d\'T\'%H:%M\'Z\''. """
     date_format = '%Y-%m-%dT%H:%MZ'
     return datetime.strptime(string, date_format)
 

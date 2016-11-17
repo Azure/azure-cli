@@ -1,7 +1,7 @@
-#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
-#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 
 import argparse
 
@@ -87,7 +87,6 @@ class AzCliCommandParser(argparse.ArgumentParser):
                                         command=command_name,
                                         _validators=argument_validators,
                                         _parser=command_parser)
-        enable_autocomplete(self)
 
     def _get_subparser(self, path):
         """For each part of the path, walk down the tree of
