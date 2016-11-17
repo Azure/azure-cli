@@ -200,6 +200,8 @@ Reporting issues and feedback
 
 If you encounter any bugs with the tool please file an issue in the `Issues <https://github.com/Azure/azure-cli/issues>`__ section of our GitHub repo.
 
+Before posting an issue, please review our list of `Common Issues <https://github.com/Azure/azure-cli/issues?q=label%3AFAQ+is%3Aclosed>`__. These are issues we have closed because we cannot address them within the CLI due to platform or language limitations. 
+
 To provide feedback from the command line, try the ``az feedback`` command.
 
 Contribute Code
