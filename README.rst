@@ -12,7 +12,7 @@ Installation
 Upgrading
 ^^^^^^^^^
 
-If you have the CLI installed, run the following to update.
+If you already have the CLI installed, run the following to update:
 
 .. code-block:: console
 
