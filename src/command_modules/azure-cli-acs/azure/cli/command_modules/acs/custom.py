@@ -17,6 +17,7 @@ from six.moves.urllib.request import urlretrieve #pylint: disable=import-error
 import threading
 import time
 import webbrowser
+import yaml
 
 from msrestazure.azure_exceptions import CloudError
 
@@ -346,15 +347,50 @@ def _create_kubernetes(resource_group_name, deployment_name, dns_name_prefix, na
     smc = get_mgmt_service_client(ResourceManagementClient)
     return smc.deployments.create_or_update(resource_group_name, deployment_name, properties)
 
-def acs_get_credentials(dns_prefix, location):
-    # TODO: once we get the right swagger in here, update this to actually pull location and dns_prefix
-    #acs_info = _get_acs_info(name, resource_group_name)
-    home = os.path.expanduser('~')
+def acs_get_credentials(name=None, resource_group_name=None, dns_prefix=None, location=None):
+    if not dns_prefix or not location:
+        acs_info = _get_acs_info(name, resource_group_name)
 
+        if not dns_prefix:
+            dns_prefix = acs_info.master_profile.dns_prefix # pylint: disable=no-member
+        if not location:
+            location = acs_info.location # pylint: disable=no-member
+
+    home = os.path.expanduser('~')
     path = os.path.join(home, '.kube', 'config')
+
+    path_candidate = path
+    ix = 0
+    while os.path.exists(path_candidate):
+        ix += 1
+        path_candidate = '{}-{}-{}'.format(path, name, ix)
+
     # TODO: this only works for public cloud, need other casing for national clouds
-    acs_client.SecureCopy('azureuser', '{}-k8s-masters.{}.cloudapp.azure.com'.format(dns_prefix, location),
-                          '.kube/config', path)
+    acs_client.SecureCopy('azureuser', '{}.{}.cloudapp.azure.com'.format(dns_prefix, location),
+                          '.kube/config', path_candidate)
+
+    # merge things
+    if path_candidate != path:
+        with open(path) as stream:
+            try:
+                existing = yaml.load(stream)
+            except yaml.YAMLError as exc:
+                print(exc)
+                return
+        with open(path_candidate) as stream:
+            try:
+                addition = yaml.load(stream)
+            except yaml.YAMLError as exc:
+                print(exc)
+                return
+        # TODO: this will always add, we should only add if not present
+        existing['clusters'].extend(addition['clusters'])
+        existing['users'].extend(addition['users'])
+        existing['contexts'].extend(addition['contexts'])
+        existing['current-context'] = addition['current-context']
+
+        with open(path, 'w+') as stream:
+            yaml.dump(existing, stream, default_flow_style=True)
 
 def _get_host_name(acs_info):
     """
