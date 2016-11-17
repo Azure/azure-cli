@@ -34,6 +34,7 @@ register_cli_argument('ad sp create', 'identifier', options_list=('--id',), help
 register_cli_argument('ad sp create-for-rbac', 'name', name_arg_type)
 register_cli_argument('ad sp create-for-rbac', 'years', type=int)
 register_cli_argument('ad sp create-for-rbac', 'scopes', nargs='+')
+register_cli_argument('ad sp create-for-rbac', 'expanded_view', action='store_true', help='Once created, display more information like subscription and cloud environments')
 register_cli_argument('ad sp reset-credentials', 'name', name_arg_type)
 register_cli_argument('ad sp reset-credentials', 'years', type=int)
 

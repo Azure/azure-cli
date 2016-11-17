@@ -11,6 +11,7 @@ from dateutil.relativedelta import relativedelta
 import dateutil.parser
 
 from azure.cli.core._util import CLIError, todict, get_file_json
+from azure.cli.core._profile import Profile
 import azure.cli.core._logging as _logging
 
 from azure.mgmt.authorization.models import (RoleAssignmentProperties, Permission, RoleDefinition,
@@ -434,8 +435,8 @@ def _resolve_service_principal(client, identifier):
     except ValueError:
         raise CLIError("service principal '{}' doesn't exist".format(identifier))
 
-def create_service_principal_for_rbac(name=None, password=None, years=1,
-                                      scopes=None, role=None):
+def create_service_principal_for_rbac(name=None, password=None, years=1, #pylint:disable=too-many-arguments
+                                      scopes=None, role=None, expanded_view=None):
     '''create a service principal that can access or modify resources
     :param str name: an unique uri. If missing, the command will generate one.
     :param str password: the password used to login. If missing, command will generate one.
@@ -472,12 +473,18 @@ def create_service_principal_for_rbac(name=None, password=None, years=1,
         for scope in scopes:
             _create_role_assignment(role, oid, None, scope, ocp_aad_session_key=session_key)
 
-    return {
-        'appId': aad_application.app_id,
-        'password': password,
-        'name': name,
-        'tenant': client.config.tenant_id
-        }
+    if expanded_view:
+        profile = Profile()
+        result = profile.get_expanded_subscription_info(scopes[0].split('/')[2] if scopes else None,
+                                                        aad_application.app_id, password)
+    else:
+        result = {
+            'appId': aad_application.app_id,
+            'password': password,
+            'name': name,
+            'tenant': client.config.tenant_id
+            }
+    return result
 
 def reset_service_principal_credential(name, password=None, years=1):
     '''reset credential, on expiration or you forget it.
