@@ -310,6 +310,8 @@ def _get_remote_url():
             "A default remote was not found for the current folder. \
             Please run this command in a git repository folder with \
             an 'origin' remote or specify a remote using '--remote-url'")
+    except CalledProcessError as e:
+        raise CLIError(e)
     return remote_url.decode()
 
 def _check_registry_information(registry_name, registry_resource_id):
