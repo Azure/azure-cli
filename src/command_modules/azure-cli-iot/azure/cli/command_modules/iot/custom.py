@@ -203,8 +203,7 @@ def iot_device_show_connection_string(client, hub_name, device_id=None, resource
         for d in devices:
             connection_string = _get_single_iot_device_connection_string(client, hub_name, d.device_id,
                                                                          resource_group_name, key_type)
-            connection_strings.append({'deviceId': d.device_id,
-                                       'connectionString': connection_string})
+            connection_strings.append({'deviceId': d.device_id, 'connectionString': connection_string})
         return connection_strings
     else:
         connection_string = _get_single_iot_device_connection_string(client, hub_name, device_id, resource_group_name,
@@ -214,13 +213,11 @@ def iot_device_show_connection_string(client, hub_name, device_id=None, resource
 
 def iot_device_send_message(client, hub_name, device_id, resource_group_name=None, data='Ping from Azure CLI',
                             message_id=None, correlation_id=None, user_id=None):
-    resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
     device_client = _get_iot_device_client(client, resource_group_name, hub_name, device_id)
     return device_client.send_message(device_id, data, message_id, correlation_id, user_id)
 
 
 def iot_device_receive_message(client, hub_name, device_id, resource_group_name=None, lock_timeout=60):
-    resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
     device_client = _get_iot_device_client(client, resource_group_name, hub_name, device_id)
     result = device_client.receive_message(device_id, lock_timeout, raw=True)
     if result is not None and result.response.status_code == 200:
@@ -240,19 +237,16 @@ def iot_device_receive_message(client, hub_name, device_id, resource_group_name=
 
 
 def iot_device_complete_message(client, hub_name, device_id, lock_token, resource_group_name=None):
-    resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
     device_client = _get_iot_device_client(client, resource_group_name, hub_name, device_id)
     return device_client.complete_or_reject_message(device_id, lock_token)
 
 
 def iot_device_reject_message(client, hub_name, device_id, lock_token, resource_group_name=None):
-    resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
     device_client = _get_iot_device_client(client, resource_group_name, hub_name, device_id)
     return device_client.complete_or_reject_message(device_id, lock_token, '')
 
 
 def iot_device_abandon_message(client, hub_name, device_id, lock_token, resource_group_name=None):
-    resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
     device_client = _get_iot_device_client(client, resource_group_name, hub_name, device_id)
     return device_client.abandon_message(device_id, lock_token)
 
@@ -278,7 +272,6 @@ def _get_single_iot_device_connection_string(client, hub_name, device_id, resour
                 raise CLIError('Primary key not found.')
             return connection_string_template.format(hub_name, device_id, 'SharedAccessKey',
                                                      auth.symmetric_key.primary_key)
-
 
 
 def _get_iot_device_client(client, resource_group_name, hub_name, device_id):

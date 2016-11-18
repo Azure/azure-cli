@@ -5,14 +5,14 @@
 # pylint: disable=line-too-long
 
 from azure.cli.core.commands.parameters import \
-    (location_type, enum_choice_list, get_resource_name_completion_list, CliArgumentType)
+    location_type, enum_choice_list, get_resource_name_completion_list, CliArgumentType
 from azure.cli.core.commands import register_cli_argument
 from azure.mgmt.iothub.models.iot_hub_client_enums import IotHubSku
 from ._factory import iot_hub_service_factory
 from .custom import iot_device_list, KeyType
 
 
-def get_device_id_completion_list(prefix, action, parsed_args, **kwargs):#pylint: disable=unused-argument
+def get_device_id_completion_list(prefix, action, parsed_args, **kwargs):  # pylint: disable=unused-argument
     client = iot_hub_service_factory(kwargs)
     return [d.device_id for d in iot_device_list(client, parsed_args.hub_name, top=100)] if parsed_args.hub_name else []
 
