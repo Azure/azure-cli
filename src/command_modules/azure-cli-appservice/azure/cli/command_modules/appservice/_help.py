@@ -9,7 +9,7 @@ from azure.cli.core.help_files import helps #pylint: disable=unused-import
 
 helps['appservice'] = """
     type: group
-    short-summary: commands for managing your Azure web apps, app service plans, etc
+    short-summary: commands for managing your Azure web apps and app service plans.
 """
 
 helps['appservice web config'] = """
@@ -150,6 +150,11 @@ helps['appservice web source-control show'] = """
 helps['appservice web source-control sync'] = """
     type: command
     short-summary: synchronize from the source repository, only needed under maunal integration mode.
+"""
+
+helps['az appservice plan'] = """
+    type: group
+    short-summary: Manage appservice plans.
 """
 
 helps['appservice plan update'] = """
