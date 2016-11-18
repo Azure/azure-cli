@@ -14,7 +14,7 @@ from msrest.serialization import Model
 
 
 class SymmetricKey(Model):
-    """SymmetricKey.
+    """Symmetric keys to access device.
 
     :param primary_key: The primary key.
     :type primary_key: str
