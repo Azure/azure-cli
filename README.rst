@@ -67,6 +67,9 @@ Enable tab completion with ``source az.completion.sh``.
 
 Some prerequisites may be required. See our `Preview Install Guide <https://github.com/Azure/azure-cli/blob/master/doc/preview_install_guide.md>`__.
 
+If you run into an ``AttributeError: 'X509' object has no attribute '_x509'`` error, downgrade your version of the requests library from 2.12.1 to 2.11.1.
+Use ``pip install requests==2.11.1``.
+
 NOTE: If in a virtual environment, you can simply use ``pip install azure-cli`` and the CLI will be installed into that virtual environment.
 
 Install with interactive install script
@@ -85,6 +88,9 @@ or using wget:
    $ wget -q -O - https://aka.ms/InstallAzureCli | bash
 
 Some prerequisites may be required. See our `Preview Install Guide <https://github.com/Azure/azure-cli/blob/master/doc/preview_install_guide.md>`__.
+
+If you run into an ``AttributeError: 'X509' object has no attribute '_x509'`` error, downgrade your version of the requests library from 2.12.1 to 2.11.1.
+With the default install location, use ``/usr/local/az/bin/pip install requests==2.11.1``.
 
 Install with apt-get
 ^^^^^^^^^^^^^^^^^^^^
