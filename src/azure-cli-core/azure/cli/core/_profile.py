@@ -255,22 +255,28 @@ class Profile(object):
         if bool(name) and bool(password):
             result = {}
             result[_SUBSCRIPTION_ID] = subscription_id or account[_SUBSCRIPTION_ID]
-            result[_USER_NAME] = name
+            result['client'] = name
             result['password'] = password
             result[_TENANT_ID] = account[_TENANT_ID]
             result[_ENVIRONMENT_NAME] = CLOUD.name
+            result['subscriptionName'] = account[_SUBSCRIPTION_NAME]
         else: #has logged in through cli
             from copy import deepcopy
             result = deepcopy(account)
-            result[_USER_NAME] = account[_USER_ENTITY][_USER_NAME]
             user_type = account[_USER_ENTITY].get(_USER_TYPE)
             if user_type == _SERVICE_PRINCIPAL:
+                result['client'] = account[_USER_ENTITY][_USER_NAME]
                 result['password'] = self._creds_cache.retrieve_secret_of_service_principal(
                     account[_USER_ENTITY][_USER_NAME])
+            else:
+                result['userName'] = account[_USER_ENTITY][_USER_NAME]
+
             result.pop(_STATE)
             result.pop(_USER_ENTITY)
             result.pop(_IS_DEFAULT_SUBSCRIPTION)
+            result['subscriptionName'] = result.pop(_SUBSCRIPTION_NAME)
 
+        result['subscriptionId'] = result.pop('id')
         result['endpoints'] = CLOUD.endpoints
         return result
 

@@ -12,7 +12,7 @@ from azure.mgmt.resource.subscriptions.models import (SubscriptionState, Subscri
 from azure.cli.core._profile import Profile, CredsCache, SubscriptionFinder, CLOUD
 from azure.cli.core._util import CLIError
 
-class Test_Profile(unittest.TestCase):
+class Test_Profile(unittest.TestCase): #pylint: disable=too-many-public-methods
 
     @classmethod
     def setUpClass(cls):
@@ -182,6 +182,58 @@ class Test_Profile(unittest.TestCase):
         self.assertEqual(sub_id, profile.get_subscription()['id'])
         self.assertEqual(sub_id, profile.get_subscription(subscription=sub_id)['id'])
         self.assertRaises(CLIError, profile.get_subscription, "random_id")
+
+    def test_get_expanded_subscription_info(self):
+        storage_mock = {'subscriptions': None}
+        profile = Profile(storage_mock)
+
+        consolidated = Profile._normalize_properties(self.user1,
+                                                     [self.subscription1],
+                                                     False)
+        profile._set_subscriptions(consolidated)
+        sub_id = self.id1.split('/')[-1]
+
+        #testing dump of existing logged in account
+        extended_info = profile.get_expanded_subscription_info()
+        self.assertEqual(self.user1, extended_info['userName'])
+        self.assertEqual(sub_id, extended_info['subscriptionId'])
+        self.assertEqual(self.display_name1, extended_info['subscriptionName'])
+        self.assertEqual('https://login.microsoftonline.com',
+                         extended_info['endpoints'].active_directory)
+
+        #testing dump of service principal by 'create-for-rbac'
+        extended_info = profile.get_expanded_subscription_info(name='great-sp',
+                                                               password='verySecret-')
+        self.assertEqual(sub_id, extended_info['subscriptionId'])
+        self.assertEqual(self.display_name1, extended_info['subscriptionName'])
+        self.assertEqual('great-sp', extended_info['client'])
+        self.assertEqual('https://login.microsoftonline.com',
+                         extended_info['endpoints'].active_directory)
+
+    @mock.patch('adal.AuthenticationContext', autospec=True)
+    def test_get_expanded_subscription_info_for_logged_in_service_principal(self,
+                                                                            mock_auth_context):
+        mock_auth_context.acquire_token_with_client_credentials.return_value = self.token_entry1
+        mock_arm_client = mock.MagicMock()
+        mock_arm_client.subscriptions.list.return_value = [self.subscription1]
+        finder = SubscriptionFinder(lambda _, _2: mock_auth_context,
+                                    None,
+                                    lambda _: mock_arm_client)
+
+        storage_mock = {'subscriptions': []}
+        profile = Profile(storage_mock)
+        profile._management_resource_uri = 'https://management.core.windows.net/'
+        profile._subscription_finder = finder
+        profile.find_subscriptions_on_login(False, '1234', 'my-secret', True, self.tenant_id)
+        #action
+        extended_info = profile.get_expanded_subscription_info()
+        #assert
+        self.assertEqual(self.id1.split('/')[-1], extended_info['subscriptionId'])
+        self.assertEqual(self.display_name1, extended_info['subscriptionName'])
+        self.assertEqual('1234', extended_info['client'])
+        self.assertEqual('https://login.microsoftonline.com',
+                         extended_info['endpoints'].active_directory)
+
 
     @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
     def test_get_current_account_user(self, mock_read_cred_file):
