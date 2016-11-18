@@ -247,6 +247,39 @@ class Profile(object):
                 str(account[_SUBSCRIPTION_ID]),
                 str(account[_TENANT_ID]))
 
+    #per ask from java sdk
+    def get_expanded_subscription_info(self, subscription_id=None, name=None, password=None):
+        account = self.get_subscription(subscription_id)
+
+        # is the credential created through command like 'create-for-rbac'?
+        if bool(name) and bool(password):
+            result = {}
+            result[_SUBSCRIPTION_ID] = subscription_id or account[_SUBSCRIPTION_ID]
+            result['client'] = name
+            result['password'] = password
+            result[_TENANT_ID] = account[_TENANT_ID]
+            result[_ENVIRONMENT_NAME] = CLOUD.name
+            result['subscriptionName'] = account[_SUBSCRIPTION_NAME]
+        else: #has logged in through cli
+            from copy import deepcopy
+            result = deepcopy(account)
+            user_type = account[_USER_ENTITY].get(_USER_TYPE)
+            if user_type == _SERVICE_PRINCIPAL:
+                result['client'] = account[_USER_ENTITY][_USER_NAME]
+                result['password'] = self._creds_cache.retrieve_secret_of_service_principal(
+                    account[_USER_ENTITY][_USER_NAME])
+            else:
+                result['userName'] = account[_USER_ENTITY][_USER_NAME]
+
+            result.pop(_STATE)
+            result.pop(_USER_ENTITY)
+            result.pop(_IS_DEFAULT_SUBSCRIPTION)
+            result['subscriptionName'] = result.pop(_SUBSCRIPTION_NAME)
+
+        result['subscriptionId'] = result.pop('id')
+        result['endpoints'] = CLOUD.endpoints
+        return result
+
     def get_installation_id(self):
         installation_id = self._storage.get(_INSTALLATION_ID)
         if not installation_id:
@@ -380,6 +413,13 @@ class CredsCache(object):
                                                                     sp_id,
                                                                     cred[_ACCESS_TOKEN])
         return (token_entry[_TOKEN_ENTRY_TOKEN_TYPE], token_entry[_ACCESS_TOKEN])
+
+    def retrieve_secret_of_service_principal(self, sp_id):
+        matched = [x for x in self._service_principal_creds if sp_id == x[_SERVICE_PRINCIPAL_ID]]
+        if not matched:
+            raise CLIError("No matched service principal found")
+        cred = matched[0]
+        return cred[_ACCESS_TOKEN]
 
     def _load_creds(self):
         if self.adal_token_cache is not None:
