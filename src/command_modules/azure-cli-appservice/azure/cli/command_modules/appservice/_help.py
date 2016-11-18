@@ -9,7 +9,12 @@ from azure.cli.core.help_files import helps #pylint: disable=unused-import
 
 helps['appservice'] = """
     type: group
-    short-summary: commands for managing your Azure web apps and app service plans.
+    short-summary: commands for managing your Azure web apps and App Service plans
+"""
+
+helps['appservice web'] = """
+    type: group
+    short-summary: commands to manage web apps
 """
 
 helps['appservice web config'] = """
@@ -49,7 +54,7 @@ helps['appservice web config appsettings delete'] = """
 
 helps['appservice web config container'] = """
     type: group
-    short-summary: commands to configure container specific application settings
+    short-summary: commands to configure container-specific application settings
 """
 
 helps['appservice web config container show'] = """
@@ -72,14 +77,34 @@ helps['appservice web config hostname'] = """
     short-summary: commands to configure hostnames
 """
 
+helps['appservice web deployment'] = """
+    type: group
+    short-summary: Commands to manage web app deployments
+"""
+
+helps['appservice web deployment slot'] = """
+    type: group
+    short-summary: Commands to manage web app deployment slots
+"""
+
+helps['appservice web deployment slot auto-swap'] = """
+    type: group
+    short-summary: Enable or disable auto-swap for a web-app deployment slot
+"""
+
 helps['appservice web log'] = """
     type: group
-    short-summary: commands to manage logs 
+    short-summary: commands to manage web app logs
+"""
+
+helps['appservice web log config'] = """
+    type: command
+    short-summary: configure web app logs
 """
 
 helps['appservice web deployment'] = """
     type: group
-    short-summary: commands to manage deployments (slots, credentials, etc)
+    short-summary: commands to manage web app deployments
 """
 
 helps['appservice web deployment list-site-credentials'] = """
@@ -114,7 +139,7 @@ helps['appservice web deployment slot delete'] = """
 
 helps['appservice web deployment user'] = """
     type: group
-    short-summary: commands to manage deployment user credentials
+    short-summary: commands to manage user credentials for a deployment
 """
 
 helps['appservice web deployment slot'] = """
@@ -134,7 +159,7 @@ helps['appservice web source-control config'] = """
 
 helps['appservice web source-control config-local-git'] = """
     type: command
-    short-summary: enable local git, you will get a url to clone and later push to the web app
+    short-summary: enable local git. You will get a url to clone and later push to the web app
 """
 
 helps['appservice web source-control delete'] = """
@@ -154,27 +179,42 @@ helps['appservice web source-control sync'] = """
 
 helps['az appservice plan'] = """
     type: group
-    short-summary: Manage appservice plans.
+    short-summary: Manage App Service plans.
 """
 
 helps['appservice plan update'] = """
     type: command
-    short-summary: update plan, including 'scale up' and 'scale out'
+    short-summary: update an App Service plan
 """
 
 helps['appservice plan create'] = """
     type: command
-    short-summary: create a new plan
+    short-summary: create an App Service plan
+"""
+
+helps['appservice plan delete'] = """
+    type: command
+    short-summary: delete an App Service plan
+"""
+
+helps['appservice plan list'] = """
+    type: command
+    short-summary: list App Service plans
+"""
+
+helps['appservice plan show'] = """
+    type: command
+    short-summary: Get the App Service plans for a resource group or a set of resource groups
 """
 
 helps['appservice web config hostname add'] = """
     type: command
-    short-summary: bind a hostname(custom domain) to the web app
+    short-summary: bind a hostname (custom domain) to the web app
 """
 
 helps['appservice web config hostname delete'] = """
     type: command
-    short-summary: unbind a hostname(custom domain) from the web app
+    short-summary: unbind a hostname (custom domain) from the web app
 """
 
 helps['appservice web config hostname list'] = """
