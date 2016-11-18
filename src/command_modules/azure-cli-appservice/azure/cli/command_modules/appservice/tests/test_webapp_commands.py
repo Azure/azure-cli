@@ -19,7 +19,7 @@ class WebappBasicE2ETest(ResourceGroupVCRTestBase):
     def body(self):
         webapp_name = 'webapp-e2e'
         plan = 'webapp-e2e-plan'
-        result = self.cmd('appservice plan create -g {} -n {} --sku B1'.format(self.resource_group, plan))
+        result = self.cmd('appservice plan create -g {} -n {}'.format(self.resource_group, plan))
         self.cmd('appservice plan list -g {}'.format(self.resource_group), checks=[
             JMESPathCheck('length(@)', 1),
             JMESPathCheck('[0].name', plan),
