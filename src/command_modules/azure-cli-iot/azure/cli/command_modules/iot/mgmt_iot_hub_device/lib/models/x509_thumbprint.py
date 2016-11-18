@@ -14,7 +14,7 @@ from msrest.serialization import Model
 
 
 class X509Thumbprint(Model):
-    """X509Thumbprint.
+    """X.509 certificate thumbprint associated with device.
 
     :param primary_thumbprint: The primary thumbprint.
     :type primary_thumbprint: str
