@@ -9,6 +9,18 @@ A great cloud needs great tools; we're excited to introduce *Azure CLI 2.0 - Pre
 Installation
 ===============
 
+Upgrading
+^^^^^^^^^
+
+If you already have the CLI installed, run the following to update:
+
+.. code-block:: console
+
+   $ az component update
+
+If you don't have the CLI installed, see below.
+
+
 Install with pip
 ^^^^^^^^^^^^^^^^
 
