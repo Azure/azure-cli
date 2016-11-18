@@ -7,18 +7,20 @@ import json
 import os
 import time
 import uuid
-from subprocess import check_output, CalledProcessError
+from subprocess import CalledProcessError, check_output
 
 import requests
 import yaml
 
 import azure.cli.core._logging as _logging
+from azure.cli.core._config import az_config
 from azure.cli.core._profile import Profile
 # pylint: disable=too-few-public-methods,too-many-arguments,no-self-use,too-many-locals,line-too-long
 from azure.cli.core._util import CLIError
 
 logger = _logging.get_az_logger(__name__)
-BASE_URL = "https://westus.mindaro.microsoft.io"
+
+BASE_URL = az_config.get('container', 'service_url', fallback='https://westus.mindaro.microsoft.io')
 SUBSCRIPTION_URL = "/subscriptions/{subscription_id}"
 RESOURCE_BASE_URL = SUBSCRIPTION_URL + "/resourceGroups/{resource_group_name}"
 CONTAINER_SERVICE_PROVIDER = "/providers/Microsoft.ContainerService"
@@ -213,10 +215,30 @@ def list_releases(target_name, target_resource_group):
     json_request = req.json()
     return json_request
 
+def _is_inside_git_directory():
+    """
+    Determines if the user is inside the .git folder of a git repo
+    """
+    try:
+        is_inside_git_dir = check_output(['git', 'rev-parse', '--is-inside-git-dir'])
+    except OSError:
+        raise CLIError('Git is not currently installed.')
+
+    git_result = is_inside_git_dir.decode('utf-8').strip()
+
+    if git_result == 'false':
+        return False
+    elif git_result == 'true':
+        return True
+    else:
+        raise CLIError('Unexpected value from git operation.')
+
 def _gitroot():
     """
     Gets the absolute path of the repository root
     """
+    if _is_inside_git_directory(): # special case need to navigate to parent
+        os.chdir('..')
     try:
         base = check_output(['git', 'rev-parse', '--show-toplevel'])
     except OSError:

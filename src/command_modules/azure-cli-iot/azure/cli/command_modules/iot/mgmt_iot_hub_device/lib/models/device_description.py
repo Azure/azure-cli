@@ -14,7 +14,7 @@ from msrest.serialization import Model
 
 
 class DeviceDescription(Model):
-    """DeviceDescription.
+    """Device identity.
 
     Variables are only populated by the server, and will be ignored when
     sending a request.
