@@ -371,25 +371,28 @@ def acs_get_credentials(name=None, resource_group_name=None, dns_prefix=None, lo
 
     # merge things
     if path_candidate != path:
-        with open(path) as stream:
-            try:
-                existing = yaml.load(stream)
-            except yaml.YAMLError as exc:
-                print(exc)
-                return
-        with open(path_candidate) as stream:
-            try:
-                addition = yaml.load(stream)
-            except yaml.YAMLError as exc:
-                print(exc)
-                return
+        merge_kubernetes_configurations(path, path_candidate)
+
+def merge_kubernetes_configurations(existing_file, addition_file):
+    with open(existing_file) as stream:
+        try:
+            existing = yaml.load(stream)
+        except yaml.YAMLError as exc:
+            print(exc)
+            return
+    with open(addition_file) as stream:
+        try:
+            addition = yaml.load(stream)
+        except yaml.YAMLError as exc:
+            print(exc)
+            return
         # TODO: this will always add, we should only add if not present
         existing['clusters'].extend(addition['clusters'])
         existing['users'].extend(addition['users'])
         existing['contexts'].extend(addition['contexts'])
         existing['current-context'] = addition['current-context']
 
-        with open(path, 'w+') as stream:
+        with open(existing_file, 'w+') as stream:
             yaml.dump(existing, stream, default_flow_style=True)
 
 def _get_host_name(acs_info):
