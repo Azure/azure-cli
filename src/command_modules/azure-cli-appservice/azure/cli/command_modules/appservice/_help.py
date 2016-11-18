@@ -177,7 +177,7 @@ helps['appservice web source-control sync'] = """
     short-summary: synchronize from the source repository, only needed under maunal integration mode.
 """
 
-helps['az appservice plan'] = """
+helps['appservice plan'] = """
     type: group
     short-summary: Manage App Service plans.
 """
