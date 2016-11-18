@@ -92,6 +92,63 @@ Additionally, the following `kwargs`, supported by argparse, are supported as we
 - `required` - See https://docs.python.org/3/library/argparse.html#required. Note that this value is inferred from the function signature depending on whether or not the parameter has a default value. If specified, this will override that value.
 - `help` - See https://docs.python.org/3/library/argparse.html#help. Generally you should avoid adding help text in this way, instead opting to create a help file as described above.
 - `metavar` - See https://docs.python.org/3/library/argparse.html#metavar
+- `id_part` - See below the section on Supporting the IDs Parameter.
+
+Supporting the IDs Parameter
+=============================
+
+Most ARM resources can be identified by an ID. In many cases, for example show and delete commands, it may be more useful to copy and paste an ID to identify the target resource instead of having to specify the names of the resource group, the resource, and the parent resource (if any).
+
+Azure CLI 2.0 Preview supports exposing an `--ids` parameter that will parse a resource ID into its constituent named parts so that this parsing need not be done as part of a client script. Additionally `--ids` will accept a _list_ of space separated IDs, allowing the client to loop the command over each ID.
+
+Enabling this functionality only requires the command author specify the appropriate values for `id_part` in their calls to `register_cli_argument`.
+
+Consider the following simplified example for NIC IP config. 
+
+```Python
+def show_nic_ip_config(resource_group_name, nic_name, ip_config_name):
+    # retrieve and return the IP config
+
+register_cli_command('network nic ip-config show', ...#show_nic_ip_config, ...)
+
+register_cli_argument('network nic ip-config', 'nic_name', help='The NIC name.')
+register_cli_argument('network nic ip-config', 'ip_config_name', options_list=('--name', '-n'), help='The IP config name.')
+```
+The help output for this command would be:
+```
+ Arguments
+    --name -n          : The IP config name.
+    --nic-name         : The NIC name.
+    --resource-group -g: Name of resource group.   
+```
+
+Now let's specify values for the `id_part` kwarg in the calls to `register_cli_argument`:
+```Python
+def show_nic_ip_config(resource_group_name, nic_name, ip_config_name):
+    # retrieve and return the IP config
+
+register_cli_command('network nic ip-config show', ...#show_nic_ip_config, ...)
+
+register_cli_argument('network nic ip-config', 'nic_name', id_part='name', help='The NIC name.')
+register_cli_argument('network nic ip-config', 'ip_config_name', id_part='child_name', options_list=('--name', '-n'), help='The IP config name.')
+```
+The help output becomes:
+```
+Arguments
+
+Resource Id Arguments
+    --ids              : One or more resource IDs. If provided, no other 'Resource Id' arguments
+                         should be specified.
+    --name -n          : The IP config name.
+    --nic-name         : The NIC name.
+    --resource-group -g: Name of resource group. 
+```
+Now the user may identify the target IP config by specifying either the resource group, NIC and IP config names or by simply pasting in the ID for the IP config itself.
+
+A couple things to note:
+- Currently, `--ids` is not exposed for any command that is called 'create', even if it is configured properly.
+- The supported values for `id_part` are: name, child_name, and grandchild_name.
+
 
 Generic Update Commands
 =============================
