@@ -9,9 +9,12 @@ from collections import OrderedDict
 
 def build_table_output(result, projection):
 
-    final_list = []
-    for item in result:
+    if not isinstance(result, list):
+        result = [result]
 
+    final_list = []
+
+    for item in result:
         def _value_from_path(path):
             obj = item
             try:
@@ -34,14 +37,20 @@ def transform_container_list(result):
         ('Last Modified', 'properties.lastModified')
     ])
 
-def transform_blob_list(result):
+def transform_container_show(result):
+    return build_table_output(result, [
+        ('Name', 'name'),
+        ('Lease Status', 'properties.lease.status'),
+        ('Last Modified', 'properties.lastModified')
+    ])
+
+def transform_blob_output(result):
     return build_table_output(result, [
         ('Name', 'name'),
         ('Blob Type', 'properties.blobType'),
         ('Length', 'properties.contentLength'),
         ('Content Type', 'properties.contentSettings.contentType'),
-        ('Last Modified', 'properties.lastModified'),
-        ('Snapshot Time', 'snapshot')
+        ('Last Modified', 'properties.lastModified')
     ])
 
 def transform_share_list(result):
@@ -51,11 +60,12 @@ def transform_share_list(result):
         ('Last Modified', 'properties.lastModified')
     ])
 
-def transform_file_list(result):
+def transform_file_output(result):
     """ Transform to convert SDK file/dir list output to something that
     more clearly distinguishes between files and directories. """
     new_result = []
-    for item in result['items']:
+    
+    for item in result.get('items', [result]):
         new_entry = OrderedDict()
         item_name = item['name']
         try:
@@ -70,3 +80,29 @@ def transform_file_list(result):
         new_entry['Last Modified'] = item['properties']['lastModified'] or ' '
         new_result.append(new_entry)
     return sorted(new_result, key=lambda k: k['Name'])
+
+def transform_entity_show(result):
+    timestamp = result.pop('Timestamp')
+    result.pop('etag')
+    
+    # Reassemble the output
+    new_result = OrderedDict()
+    new_result['Partition'] = result.pop('PartitionKey')
+    new_result['Row'] = result.pop('RowKey')
+    for key in sorted(result.keys()):
+        new_result[key] = result[key]
+    new_result['Timestamp'] = timestamp
+    return new_result
+
+def transform_message_show(result):
+    ordered_result = []
+    for item in result:
+        new_result = OrderedDict()
+        new_result['MessageId'] = item.pop('id')
+        new_result['Content'] = item.pop('content')
+        new_result['InsertionTime'] = item.pop('insertionTime')
+        new_result['ExpirationTime'] = item.pop('expirationTime')
+        for key in sorted(item.keys()):
+            new_result[key] = item[key]
+        ordered_result.append(new_result)
+    return ordered_result
