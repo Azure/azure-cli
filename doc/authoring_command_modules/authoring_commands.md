@@ -147,7 +147,7 @@ Now the user may identify the target IP config by specifying either the resource
 
 A couple things to note:
 - Currently, `--ids` is not exposed for any command that is called 'create', even if it is configured properly.
-- The supported values for `id_part` are: name, child_name, and grandchild_name.
+- The supported values for `id_part` are: `name`, `child_name`, and `grandchild_name`.
 
 
 Generic Update Commands
