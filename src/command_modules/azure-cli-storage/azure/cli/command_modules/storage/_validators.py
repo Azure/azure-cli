@@ -466,10 +466,10 @@ def transform_metrics_list_output(result):
     return new_result
 
 def transform_storage_boolean_output(result):
-    return {'success': result}
+    return {'success': str(result)}
 
 def transform_storage_exists_output(result):
-    return {'exists': result}
+    return {'exists': str(result)}
 
 def transform_storage_list_output(result):
     return list(result)
