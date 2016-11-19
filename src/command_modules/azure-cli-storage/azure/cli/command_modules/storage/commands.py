@@ -12,9 +12,11 @@ from azure.cli.command_modules.storage._factory import \
      table_data_service_factory, queue_data_service_factory, cloud_storage_account_service_factory)
 from azure.cli.command_modules.storage._validators import \
     (transform_acl_list_output, transform_cors_list_output, transform_entity_query_output,
-     transform_file_list_output, transform_logging_list_output, transform_metrics_list_output,
+     transform_logging_list_output, transform_metrics_list_output,
      transform_url, transform_storage_list_output, transform_storage_exists_output,
      transform_storage_boolean_output, transform_container_permission_output)
+from azure.cli.command_modules.storage._format import \
+    (transform_container_list, transform_blob_list, transform_share_list, transform_file_list)
 
 # storage account commands
 factory = lambda kwargs: storage_client_factory().storage_accounts
@@ -32,7 +34,7 @@ cli_storage_data_plane_command('storage account generate-sas', 'azure.storage.cl
 
 # container commands
 factory = blob_data_service_factory
-cli_storage_data_plane_command('storage container list', 'azure.storage.blob.blockblobservice#BlockBlobService.list_containers', factory, transform=transform_storage_list_output)
+cli_storage_data_plane_command('storage container list', 'azure.storage.blob.blockblobservice#BlockBlobService.list_containers', factory, transform=transform_storage_list_output, table_transformer=transform_container_list)
 cli_storage_data_plane_command('storage container delete', 'azure.storage.blob.blockblobservice#BlockBlobService.delete_container', factory, transform=transform_storage_boolean_output)
 cli_storage_data_plane_command('storage container show', 'azure.storage.blob.blockblobservice#BlockBlobService.get_container_properties', factory)
 cli_storage_data_plane_command('storage container create', 'azure.storage.blob.blockblobservice#BlockBlobService.create_container', factory, transform=transform_storage_boolean_output)
@@ -54,7 +56,7 @@ cli_storage_data_plane_command('storage container policy list', 'azure.cli.comma
 cli_storage_data_plane_command('storage container policy update', 'azure.cli.command_modules.storage.custom#set_acl_policy', factory)
 
 # blob commands
-cli_storage_data_plane_command('storage blob list', 'azure.storage.blob.blockblobservice#BlockBlobService.list_blobs', factory, transform=transform_storage_list_output)
+cli_storage_data_plane_command('storage blob list', 'azure.storage.blob.blockblobservice#BlockBlobService.list_blobs', factory, transform=transform_storage_list_output, table_transformer=transform_blob_list)
 cli_storage_data_plane_command('storage blob delete', 'azure.storage.blob.blockblobservice#BlockBlobService.delete_blob', factory, transform=transform_storage_boolean_output)
 cli_storage_data_plane_command('storage blob generate-sas', 'azure.storage.blob.blockblobservice#BlockBlobService.generate_blob_shared_access_signature', factory)
 cli_storage_data_plane_command('storage blob url', 'azure.storage.blob.blockblobservice#BlockBlobService.make_blob_url', factory, transform=transform_url)
@@ -77,7 +79,7 @@ cli_storage_data_plane_command('storage blob copy cancel', 'azure.storage.blob.b
 
 # share commands
 factory = file_data_service_factory
-cli_storage_data_plane_command('storage share list', 'azure.storage.file.fileservice#FileService.list_shares', factory, transform=transform_storage_list_output)
+cli_storage_data_plane_command('storage share list', 'azure.storage.file.fileservice#FileService.list_shares', factory, transform=transform_storage_list_output, table_transformer=transform_share_list)
 cli_storage_data_plane_command('storage share create', 'azure.storage.file.fileservice#FileService.create_share', factory, transform=transform_storage_boolean_output)
 cli_storage_data_plane_command('storage share delete', 'azure.storage.file.fileservice#FileService.delete_share', factory, transform=transform_storage_boolean_output)
 cli_storage_data_plane_command('storage share generate-sas', 'azure.storage.file.fileservice#FileService.generate_share_shared_access_signature', factory)
@@ -102,7 +104,7 @@ cli_storage_data_plane_command('storage directory metadata show', 'azure.storage
 cli_storage_data_plane_command('storage directory metadata update', 'azure.storage.file.fileservice#FileService.set_directory_metadata', factory)
 
 # file commands
-cli_storage_data_plane_command('storage file list', 'azure.storage.file.fileservice#FileService.list_directories_and_files', factory, table_transformer=transform_file_list_output)
+cli_storage_data_plane_command('storage file list', 'azure.storage.file.fileservice#FileService.list_directories_and_files', factory, table_transformer=transform_file_list)
 cli_storage_data_plane_command('storage file delete', 'azure.storage.file.fileservice#FileService.delete_file', factory, transform=transform_storage_boolean_output)
 cli_storage_data_plane_command('storage file resize', 'azure.storage.file.fileservice#FileService.resize_file', factory)
 cli_storage_data_plane_command('storage file url', 'azure.storage.file.fileservice#FileService.make_file_url', factory, transform=transform_url)

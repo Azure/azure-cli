@@ -5,7 +5,7 @@
 
 from azure.cli.core.help_files import helps #pylint: disable=unused-import
 
-#pylint: disable=line-too-long
+#pylint: disable=line-too-long, too-many-lines
 
 helps['storage entity insert'] = """
     type: command
@@ -29,119 +29,148 @@ helps['storage'] = """
     type: group
     short-summary: Durable, highly available, and massively scalable cloud storage
 """
+
 helps['storage account'] = """
     type: group
-    short-summary: Commands to manage your Storage accounts
+    short-summary: Manage storage accounts.
 """
+
 helps['storage account keys'] = """
     type: group
-    short-summary: Commands to manage your Storage account keys
+    short-summary: Manage storage account keys.
 """
+
 helps['storage blob'] = """
     type: group
     short-summary: Object storage for unstructured data
 """
+
 helps['storage blob copy'] = """
     type: group
-    short-summary: Commands to manage your blob copy operations
+    short-summary: Manage blob copy operations.
 """
+
 helps['storage blob lease'] = """
     type: group
-    short-summary: Commands to manage leases of your storage blob
+    short-summary: Manage storage blob leases.
 """
+
 helps['storage blob metadata'] = """
     type: group
-    short-summary: Commands to manage your blob metadata
+    short-summary: Manage blob metadata.
 """
+
 helps['storage blob service-properties'] = """
     type: group
-    short-summary: Commands to view Storage blob service properties
+    short-summary: Manage storage blob service properties.
 """
+
 helps['storage container'] = """
     type: group
-    short-summary: Commands to manage your storage containers
+    short-summary: Manage blob storage containers.
 """
+
 helps['storage container lease'] = """
     type: group
-    short-summary: Commands to manage leases of your storage containers
+    short-summary: Manage blob storage container leases.
 """
+
 helps['storage container metadata'] = """
     type: group
-    short-summary: Commands to manage your storage container metadata
+    short-summary: Manage container metadata.
 """
+
 helps['storage container policy'] = """
     type: group
-    short-summary: Commands to manage stored access policies of your storage container
+    short-summary: Manage container stored access policies.
 """
+
 helps['storage cors'] = """
     type: group
-    short-summary: Commands to manage your Storage Cross-Orgin Resource Sharing (CORS)
+    short-summary: Manage Storage service Cross-Orgin Resource Sharing (CORS)
 """
+
 helps['storage directory'] = """
     type: group
-    short-summary: Commands to manage your Storage file directory
+    short-summary: Manage file storage directories.
 """
+
 helps['storage directory metadata'] = """
     type: group
-    short-summary: Commands to manage your Storage file directory metadata
+    short-summary: Manage file storage directory metadata.
 """
+
 helps['storage entity'] = """
     type: group
-    short-summary: Commands to manage Storage table entities
+    short-summary: Manage table storage entities.
 """
+
 helps['storage file'] = """
     type: group
-    short-summary: File shares that use the standard SMB 3.0 protocal
+    short-summary: File shares that use the standard SMB 3.0 protocol
 """
+
 helps['storage file copy'] = """
     type: group
-    short-summary: Commands to manage your file copy operations
+    short-summary: Manage file copy operations.
 """
+
 helps['storage file metadata'] = """
     type: group
-    short-summary: Commands to manage your file metadata
+    short-summary: Manage file metadata.
 """
+
 helps['storage logging'] = """
     type: group
-    short-summary: Commands to view Storage logging information
+    short-summary: Manage Storage service logging information.
 """
+
 helps['storage message'] = """
     type: group
-    short-summary: Commands to manage Storage queue messages
+    short-summary: Manage queue storage messages.
 """
+
 helps['storage metrics'] = """
     type: group
-    short-summary: Commands to manage your Storage metrics properties
+    short-summary: Manage Storage service metrics.
 """
+
 helps['storage queue'] = """
     type: group
-    short-summary: Effectively scale apps according to traffic using queues
+    short-summary: Effectively scale apps according to traffic using queues.
 """
+
 helps['storage queue metadata'] = """
     type: group
-    short-summary: Commands to manage your queue metadata
+    short-summary: Manage storage queue metadata.
 """
+
 helps['storage queue policy'] = """
     type: group
-    short-summary: Commands to manage shared access policies of your storage queue
+    short-summary: Manage storage queue shared access policies.
 """
+
 helps['storage share'] = """
     type: group
-    short-summary: Commands to manage Storage file shares
+    short-summary: Manage file shares.
 """
+
 helps['storage share metadata'] = """
     type: group
-    short-summary: Commands to manage file share metadata
+    short-summary: Manage file share metadata.
 """
+
 helps['storage share policy'] = """
     type: group
-    short-summary: Commands to manage stored access policies of your Storage file share
+    short-summary: Manage storage file share shared access policies.
 """
+
 helps['storage table'] = """
     type: group
-    short-summary: NoSQL key-value storage using semi-structured datasets
+    short-summary: NoSQL key-value storage using semi-structured datasets.
 """
+
 helps['storage table policy'] = """
     type: group
-    short-summary: Commands to manage stored access policies of your Storage table
+    short-summary: Manage storage table shared access policies.
 """
