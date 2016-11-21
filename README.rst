@@ -107,11 +107,20 @@ A Debian/Ubuntu package is also available. Install as follows:
 Install with Docker
 ^^^^^^^^^^^^^^^^^^^
 
-We also maintain a docker image preconfigured with the Azure CLI.
+We also maintain a Docker image preconfigured with the Azure CLI.
+
+Run the latest automated Docker build with:
 
 .. code-block:: console
 
-   $ docker run -it azuresdk/azure-cli-python
+   $ docker run -it azuresdk/azure-cli-python:latest
+
+Tagged Docker images are also available.
+See our `Docker tags <https://hub.docker.com/r/azuresdk/azure-cli-python/tags/>` for available versions.
+
+.. code-block:: console
+
+   $ docker run -it azuresdk/azure-cli-python:<version>
 
 For installation steps for common platforms, as well as dependency troubleshooting, please take a look at our `installation guide <http://github.com/Azure/azure-cli/blob/master/doc/preview_install_guide.md>`__.
 

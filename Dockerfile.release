@@ -4,9 +4,14 @@
 #---------------------------------------------------------------------------------------------
 
 # This Dockerfile is for releases of this CLI.
-#   Run 'docker build' with this Dockerfile file once the latest package has been published to PyPI
-#   To create a Docker image for this release.
-#   When tagging this Docke image, choose an appropriate version number.
+#   How to build:
+#    1. Create a temp directory that only contains this Dockerfile.
+#    2. Run 'docker build' with this Dockerfile file once the latest package has been published to PyPI
+#       To create a Docker image for this release.
+#       When tagging this Docker image, choose an appropriate version number.
+#         e.g.: 'sudo docker build -f Dockerfile.release -t azuresdk/azure-cli-python:<version> .'
+#    3. Push the image to the registry,
+#         e.g.: 'docker push azuresdk/azure-cli-python:<version>'
 
 FROM python:3.5.2-alpine
 
