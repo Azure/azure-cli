@@ -16,7 +16,7 @@ from azure.cli.core.commands._introspection import extract_args_from_signature
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.application import APPLICATION, IterateValue
 import azure.cli.core._logging as _logging
-from azure.cli.core._util import CLIError
+from azure.cli.core._util import CLIError, todict
 
 logger = _logging.get_az_logger(__name__)
 
@@ -172,6 +172,8 @@ def add_id_parameters(command_table):
 
 APPLICATION.register(APPLICATION.COMMAND_TABLE_PARAMS_LOADED, add_id_parameters)
 
+APPLICATION.register(APPLICATION.COMMAND_TABLE_LOADED, add_id_parameters)
+
 add_usage = '--add property.listProperty <key=value, string or JSON string>'
 set_usage = '--set property1.property2=<value>'
 remove_usage = '--remove property.list <indexToRemove> OR --remove propertyToRemove'
@@ -188,7 +190,7 @@ def _get_child(parent, collection_name, item_name, collection_key):
 def cli_generic_update_command(module_name, name, getter_op, setter_op, factory=None, setter_arg_name='parameters', # pylint: disable=too-many-arguments, line-too-long
                                table_transformer=None, child_collection_prop_name=None,
                                child_collection_key='name', child_arg_name='item_name',
-                               custom_function_op=None):
+                               custom_function_op=None, expose_no_wait=False):
 
     if not isinstance(getter_op, string_types):
         raise ValueError("Getter operation must be a string. Got '{}'".format(getter_op))
@@ -198,8 +200,9 @@ def cli_generic_update_command(module_name, name, getter_op, setter_op, factory=
         raise ValueError("Custom function operation must be a string. Got '{}'".format(custom_function_op)) #pylint: disable=line-too-long
 
     get_arguments_loader = lambda: dict(extract_args_from_signature(get_op_handler(getter_op)))
-    set_arguments_loader = lambda: dict(extract_args_from_signature(get_op_handler(setter_op)))
-    function_arguments_loader = lambda: dict(extract_args_from_signature(get_op_handler(custom_function_op))) if custom_function_op else {} #pylint: disable=line-too-long
+    set_arguments_loader = lambda: dict(extract_args_from_signature(get_op_handler(setter_op),
+                                                                    expose_raw_as_no_wait=expose_no_wait)) #pylint: disable=line-too-long
+    function_arguments_loader = lambda: dict(extract_args_from_signature(get_op_handler(custom_function_op), expose_raw_as_no_wait=expose_no_wait)) if custom_function_op else {} #pylint: disable=line-too-long
 
     def arguments_loader():
         arguments = {}
@@ -311,6 +314,100 @@ def cli_generic_update_command(module_name, name, getter_op, setter_op, factory=
                      arg_group=group_name)
     main_command_table[name] = cmd
     main_command_module_map[name] = module_name
+
+def cli_generic_wait_command(module_name, name, getter_op, factory=None, table_transformer=None):
+
+    if not isinstance(getter_op, string_types):
+        raise ValueError("Getter operation must be a string. Got '{}'".format(getter_op))
+    get_arguments_loader = lambda: dict(extract_args_from_signature(get_op_handler(getter_op)))
+
+    def arguments_loader():
+        arguments = {}
+        arguments.update(get_arguments_loader())
+        return arguments
+
+    def get_provisioning_state(instance):
+        provisioning_state = getattr(instance, 'provisioning_state', None)
+        if not provisioning_state:
+            #some SDK, like resource-group, has 'provisioning_state' under 'properties'
+            properties = getattr(instance, 'properties', None)
+            if properties:
+                provisioning_state = getattr(properties, 'provisioning_state', None)
+        return provisioning_state
+
+    def handler(args):
+        from msrest.exceptions import ClientException
+        import time
+        try:
+            client = factory() if factory else None
+        except TypeError:
+            client = factory(None) if factory else None
+
+        getterargs = {key: val for key, val in args.items()
+                      if key in get_arguments_loader()}
+
+        getter = get_op_handler(getter_op)
+
+        timeout = args.pop('timeout')
+        interval = args.pop('interval')
+        wait_for_created = args.pop('created')
+        wait_for_deleted = args.pop('deleted')
+        wait_for_updated = args.pop('updated')
+        property_condition = args.pop('property')
+        if not any([wait_for_created, wait_for_updated, wait_for_deleted, property_condition]):
+            raise CLIError("Please specify at least one flag for 'create', 'updated', 'delete', or 'property'")#pylint: disable=line-too-long
+
+        for _ in range(0, timeout, interval):
+            try:
+                instance = getter(client, **getterargs) if client else getter(**getterargs)
+                provisioning_state = get_provisioning_state(instance)
+                #untill we have any needs to wait for `Failed`, let us bail out on this
+                if provisioning_state == 'Failed':
+                    raise CLIError()
+                if wait_for_created or wait_for_updated:
+                    if provisioning_state == 'Succeeded':
+                        return
+                if property_condition and bool(verify_property(instance, property_condition)):
+                    return
+            except ClientException as ex:
+                if getattr(ex, 'status_code', None) == 404:
+                    if wait_for_deleted:
+                        return
+                    if not wait_for_created:
+                        raise
+                else:
+                    raise
+
+            time.sleep(interval)
+
+        return CLIError('Timeout')
+
+    cmd = CliCommand(name, handler, table_transformer=table_transformer,
+                     arguments_loader=arguments_loader)
+    group_name = 'Wait'
+    cmd.add_argument('timeout', '--timeout', default=3600, arg_group=group_name,
+                     help='maximum wait in seconds')
+    cmd.add_argument('interval', '--interval', default=30, arg_group=group_name,
+                     help='polling interval in seconds')
+    cmd.add_argument('deleted', '--deleted', action='store_true', arg_group=group_name,
+                     help='wait till deleted')
+    cmd.add_argument('created', '--created', action='store_true', arg_group=group_name,
+                     help="wait till created with 'provisitioningState' at 'Succeeded'")
+    cmd.add_argument('updated', '--updated', action='store_true', arg_group=group_name,
+                     help="wait till updated with provisitioningState at 'Succeeded'")
+    cmd.add_argument('property', '--property', arg_group=group_name,
+                     help=("wait till property meets the condition, using JMESPath query. E.g. "
+                           "provisioningState!='InProgress', "
+                           "instanceView.statuses[1].code=='PowerState/running'"))
+    main_command_table[name] = cmd
+    main_command_module_map[name] = module_name
+
+def verify_property(instance, condition):
+    from jmespath import compile as compile_jmespath
+    result = todict(instance)
+    jmes_query = compile_jmespath(condition)
+    value = jmes_query.search(result)
+    return value
 
 index_or_filter_regex = re.compile(r'\[(.*)\]')
 def set_properties(instance, expression):

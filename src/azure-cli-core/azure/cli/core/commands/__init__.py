@@ -143,10 +143,10 @@ class CommandTable(dict):
             return func
         return wrapped
 
-class CliCommand(object):
+class CliCommand(object): #pylint:disable=too-many-instance-attributes
 
     def __init__(self, name, handler, description=None, table_transformer=None,
-                 arguments_loader=None, description_loader=None):
+                 arguments_loader=None, description_loader=None, expose_no_wait=False):
         self.name = name
         self.handler = handler
         self.help = None
@@ -156,6 +156,7 @@ class CliCommand(object):
         self.arguments = {}
         self.arguments_loader = arguments_loader
         self.table_transformer = table_transformer
+        self.expose_no_wait = expose_no_wait
 
     @staticmethod
     def _should_load_description():
@@ -240,10 +241,10 @@ def register_extra_cli_argument(command, dest, **kwargs):
     _cli_extra_argument_registry[command][dest] = CliCommandArgument(dest, **kwargs)
 
 def cli_command(module_name, name, operation,
-                client_factory=None, transform=None, table_transformer=None):
+                client_factory=None, transform=None, table_transformer=None, expose_no_wait=False):
     """ Registers a default Azure CLI command. These commands require no special parameters. """
     command_table[name] = create_command(module_name, name, operation, transform, table_transformer,
-                                         client_factory)
+                                         client_factory, expose_no_wait)
 
 def get_op_handler(operation):
     """ Import and load the operation handler """
@@ -257,7 +258,7 @@ def get_op_handler(operation):
         raise ValueError("The operation '{}' is invalid.".format(operation))
 
 def create_command(module_name, name, operation,
-                   transform_result, table_transformer, client_factory):
+                   transform_result, table_transformer, client_factory, expose_no_wait=False):
 
     if not isinstance(operation, string_types):
         raise ValueError("Operation must be a string. Got '{}'".format(operation))
@@ -272,6 +273,10 @@ def create_command(module_name, name, operation,
         try:
             op = get_op_handler(operation)
             result = op(client, **kwargs) if client else op(**kwargs)
+
+            if expose_no_wait and kwargs.get('raw', None):
+                return None #return if --no-wait is provided at the command
+
             # apply results transform if specified
             if transform_result:
                 return transform_result(result)
@@ -299,10 +304,12 @@ def create_command(module_name, name, operation,
 
     command_module_map[name] = module_name
     name = ' '.join(name.split())
-    arguments_loader = lambda: extract_args_from_signature(get_op_handler(operation))
+    arguments_loader = lambda: extract_args_from_signature(get_op_handler(operation),
+                                                           expose_raw_as_no_wait=expose_no_wait)
     description_loader = lambda: extract_full_summary_from_signature(get_op_handler(operation))
     cmd = CliCommand(name, _execute_command, table_transformer=table_transformer,
-                     arguments_loader=arguments_loader, description_loader=description_loader)
+                     arguments_loader=arguments_loader, description_loader=description_loader,
+                     expose_no_wait=expose_no_wait)
     return cmd
 
 def _polish_rp_not_registerd_error(cli_error):

@@ -52,10 +52,10 @@ def _option_descriptions(operation):
                 index += 1
     return option_descs
 
-EXCLUDED_PARAMS = frozenset(['self', 'raw', 'custom_headers', 'operation_config',
+EXCLUDED_PARAMS = frozenset(['self', 'custom_headers', 'operation_config',
                              'content_version', 'kwargs', 'client'])
 
-def extract_args_from_signature(operation):
+def extract_args_from_signature(operation, expose_raw_as_no_wait=False):
     """ Extracts basic argument data from an operation's signature and docstring """
     from azure.cli.core.commands import CliCommandArgument
     args = []
@@ -68,7 +68,10 @@ def extract_args_from_signature(operation):
         args = sig.args
 
     arg_docstring_help = _option_descriptions(operation)
-    for arg_name in [a for a in args if not a in EXCLUDED_PARAMS]:
+    excluded_params = list(EXCLUDED_PARAMS)
+    if not expose_raw_as_no_wait:
+        excluded_params.append('raw')
+    for arg_name in [a for a in args if not a in excluded_params]:
         try:
             # this works in python3
             default = args[arg_name].default
@@ -89,10 +92,17 @@ def extract_args_from_signature(operation):
         except AttributeError:
             pass
 
+        #improve the naming to 'no_wait'
+        if arg_name == 'raw':
+            options_list = ['--no-wait']
+            help_str = 'do not wait for the long running operation to finish'
+        else:
+            options_list = ['--' + arg_name.replace('_', '-')]
+            help_str = arg_docstring_help.get(arg_name)
+
         yield (arg_name, CliCommandArgument(arg_name,
-                                            options_list=['--' + arg_name.replace('_', '-')],
+                                            options_list=options_list,
                                             required=required,
                                             default=default,
-                                            help=arg_docstring_help.get(arg_name),
+                                            help=help_str,
                                             action=action))
-

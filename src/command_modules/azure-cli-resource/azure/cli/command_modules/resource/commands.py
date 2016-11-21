@@ -7,7 +7,7 @@
 from collections import OrderedDict
 
 from azure.cli.core.commands import cli_command
-from azure.cli.core.commands.arm import cli_generic_update_command
+from azure.cli.core.commands.arm import cli_generic_update_command, cli_generic_wait_command
 
 from azure.cli.command_modules.resource._client_factory import (_resource_client_factory,
                                                                 cf_resource_groups,
@@ -22,8 +22,11 @@ from azure.cli.command_modules.resource._client_factory import (_resource_client
 def transform_resource_group_list(result):
     return [OrderedDict([('Name', r['name']), \
             ('Location', r['location']), ('Status', r['properties']['provisioningState'])]) for r in result]
-
-cli_command(__name__, 'resource group delete', 'azure.mgmt.resource.resources.operations.resource_groups_operations#ResourceGroupsOperations.delete', cf_resource_groups)
+cli_command(__name__, 'resource group delete',
+            'azure.mgmt.resource.resources.operations.resource_groups_operations#ResourceGroupsOperations.delete',
+            cf_resource_groups,
+            expose_no_wait=True)
+cli_generic_wait_command(__name__, 'resource group wait', 'azure.mgmt.resource.resources.operations.resource_groups_operations#ResourceGroupsOperations.get', cf_resource_groups)
 cli_command(__name__, 'resource group show', 'azure.mgmt.resource.resources.operations.resource_groups_operations#ResourceGroupsOperations.get', cf_resource_groups)
 cli_command(__name__, 'resource group exists', 'azure.mgmt.resource.resources.operations.resource_groups_operations#ResourceGroupsOperations.check_existence', cf_resource_groups)
 cli_command(__name__, 'resource group list', 'azure.cli.command_modules.resource.custom#list_resource_groups', table_transformer=transform_resource_group_list)
