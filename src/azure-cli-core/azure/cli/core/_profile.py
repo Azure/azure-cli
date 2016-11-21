@@ -55,7 +55,9 @@ TOKEN_FIELDS_EXCLUDED_FROM_PERSISTENCE = ['familyName',
 _CLIENT_ID = '04b07795-8ddb-461a-bbee-02f9e1bf7b46'
 _COMMON_TENANT = 'common'
 
-_AUTH_CTX_FACTORY = lambda authority, cache: adal.AuthenticationContext(authority, cache=cache)
+_AUTH_CTX_FACTORY = lambda authority, cache: adal.AuthenticationContext(authority,
+                                                                        cache=cache,
+                                                                        api_version=None)
 
 CLOUD = get_cloud(get_active_context()['cloud'])
 

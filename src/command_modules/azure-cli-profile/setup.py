@@ -24,7 +24,7 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
-    'adal>=0.4.2',
+    'adal>=0.4.3',
     'azure-cli-core',
 ]
 
