@@ -3,9 +3,10 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import adal
 import base64
 from six import string_types
+
+import adal
 
 from azure.cli.core.commands import (command_table,
                                      command_module_map,
@@ -59,9 +60,11 @@ def _create_key_vault_command(module_name, name, operation, transform_result, ta
                     return Profile().get_login_credentials(resource)[0]._token_retriever() # pylint: disable=protected-access
                 except adal.AdalError as err:
                     #pylint: disable=no-member
-                    if (hasattr(err, 'error_response') and ('error_description' in err.error_response)
+                    if (hasattr(err, 'error_response') and
+                            ('error_description' in err.error_response)
                             and ('AADSTS70008:' in err.error_response['error_description'])):
-                        raise CLIError("Credentials have expired due to inactivity. Please run 'az login'")
+                        raise CLIError(
+                            "Credentials have expired due to inactivity. Please run 'az login'")
                     raise CLIError(err)
 
             op = get_op_handler(operation)
