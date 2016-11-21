@@ -11,8 +11,6 @@ COMMAND_MODULE_PREFIX = 'azure-cli-'
 PATH_TO_COMMAND_MODULES = os.path.abspath(os.path.join(os.path.abspath(__file__),
                                                        '..', '..', 'src',#'..', '..', '..', '..',
                                                        'command_modules'))
-print('SEARCH: {}'.format(PATH_TO_COMMAND_MODULES))
-
 command_modules = []
 insecure_cassettes = []
 for name in os.listdir(PATH_TO_COMMAND_MODULES):
@@ -34,7 +32,7 @@ for name in os.listdir(PATH_TO_COMMAND_MODULES):
             t = tempfile.NamedTemporaryFile('r+')
             with open(src_path, 'r') as f:
                 for line in f:
-                    if 'authorization: [bearer' in line:
+                    if 'authorization: [bearer' in line.lower():
                         insecure_cassettes.append(name)
                     else:
                         t.write(line)
@@ -46,7 +44,7 @@ for name in os.listdir(PATH_TO_COMMAND_MODULES):
 
 insecure_cassettes = list(set(insecure_cassettes))
 if insecure_cassettes:
-    print('The following cassettes contain Bearer tokens:')
+    print('Bearer tokens removed from the following cassettes:')
     for cassette in insecure_cassettes:
         print('\t{}'.format(cassette))
 else:
