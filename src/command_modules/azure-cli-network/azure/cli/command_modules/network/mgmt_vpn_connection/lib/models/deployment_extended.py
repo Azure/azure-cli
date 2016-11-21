@@ -15,8 +15,7 @@ from msrest.serialization import Model
 
 
 class DeploymentExtended(Model):
-    """
-    Deployment information.
+    """Deployment information.
 
     :param id: Gets or sets the ID of the deployment.
     :type id: str
@@ -24,7 +23,7 @@ class DeploymentExtended(Model):
     :type name: str
     :param properties: Gets or sets deployment properties.
     :type properties: :class:`DeploymentPropertiesExtended
-     <default.models.DeploymentPropertiesExtended>`
+     <Default.models.DeploymentPropertiesExtended>`
     """ 
 
     _validation = {

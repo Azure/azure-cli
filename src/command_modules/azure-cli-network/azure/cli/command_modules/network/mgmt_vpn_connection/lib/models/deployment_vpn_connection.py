@@ -15,14 +15,13 @@ from msrest.serialization import Model
 
 
 class DeploymentVpnConnection(Model):
-    """
-    Deployment operation parameters.
+    """Deployment operation parameters.
 
     Variables are only populated by the server, and will be ignored when
     sending a request.
 
     :ivar uri: URI referencing the template. Default value:
-     "https://azuresdkci.blob.core.windows.net/templatehost/CreateVpnConnection_2016-08-08/azuredeploy.json"
+     "https://azuresdkci.blob.core.windows.net/templatehost/CreateVpnConnection_2016-11-16/azuredeploy.json"
      .
     :vartype uri: str
     :param content_version: If included it must match the ContentVersion in
@@ -31,7 +30,7 @@ class DeploymentVpnConnection(Model):
     :param connection_type: Connection type. Possible values include:
      'IPSec', 'Vnet2Vnet', 'ExpressRoute'
     :type connection_type: str or :class:`connectionType
-     <vpnconnectioncreationclient.models.connectionType>`
+     <Default.models.connectionType>`
     :param express_route_circuit2_id: Connect to this express route circuit
      from vnet gateway 1 using connection type ExpressRoute.
     :type express_route_circuit2_id: str
@@ -80,7 +79,7 @@ class DeploymentVpnConnection(Model):
         'mode': {'key': 'properties.mode', 'type': 'str'},
     }
 
-    uri = "https://azuresdkci.blob.core.windows.net/templatehost/CreateVpnConnection_2016-08-08/azuredeploy.json"
+    uri = "https://azuresdkci.blob.core.windows.net/templatehost/CreateVpnConnection_2016-11-16/azuredeploy.json"
 
     mode = "Incremental"
 

@@ -446,9 +446,18 @@ def create_nic_ip_config(resource_group_name, network_interface_name, ip_config_
                          load_balancer_backend_address_pool_ids=None,
                          load_balancer_inbound_nat_rule_ids=None,
                          private_ip_address=None, private_ip_address_allocation='dynamic',
-                         private_ip_address_version='ipv4'):
+                         private_ip_address_version='ipv4', make_primary=False):
     ncf = _network_client_factory()
     nic = ncf.network_interfaces.get(resource_group_name, network_interface_name)
+
+    if private_ip_address_version == 'ipv4' and not subnet:
+        primary_config = next(x for x in nic.ip_configurations if x.primary)
+        subnet = primary_config.subnet.id
+
+    if make_primary:
+        for config in nic.ip_configurations:
+            config.primary = False
+
     nic.ip_configurations.append(
         NetworkInterfaceIPConfiguration(
             name=ip_config_name,
@@ -458,11 +467,13 @@ def create_nic_ip_config(resource_group_name, network_interface_name, ip_config_
             load_balancer_inbound_nat_rules=load_balancer_inbound_nat_rule_ids,
             private_ip_address=private_ip_address,
             private_ip_allocation_method=private_ip_address_allocation,
-            private_ip_address_version=private_ip_address_version
+            private_ip_address_version=private_ip_address_version,
+            primary=make_primary
         )
     )
-    return ncf.network_interfaces.create_or_update(
+    poller = ncf.network_interfaces.create_or_update(
         resource_group_name, network_interface_name, nic)
+    return _get_property(poller.result().ip_configurations, ip_config_name)
 create_nic_ip_config.__doc__ = NicOperations.create_or_update.__doc__
 
 def set_nic_ip_config(instance, parent, ip_config_name, subnet=None, # pylint: disable=unused-argument
@@ -470,7 +481,12 @@ def set_nic_ip_config(instance, parent, ip_config_name, subnet=None, # pylint: d
                       load_balancer_backend_address_pool_ids=None,
                       load_balancer_inbound_nat_rule_ids=None,
                       private_ip_address=None, private_ip_address_allocation=None, # pylint: disable=unused-argument
-                      private_ip_address_version='ipv4'):
+                      private_ip_address_version='ipv4', make_primary=False):
+    if make_primary:
+        for config in parent.ip_configurations:
+            config.primary = False
+        instance.primary = True
+
     if private_ip_address == '':
         instance.private_ip_address = None
         instance.private_ip_allocation_method = 'dynamic'
@@ -792,6 +808,7 @@ def create_express_route_peering(
         secondary_peer_address_prefix=secondary_peer_address_prefix,
         shared_key=shared_key,
         microsoft_peering_config=peering_config)
+
     return client.create_or_update(
         resource_group_name, circuit_name, peering_type, peering)
 

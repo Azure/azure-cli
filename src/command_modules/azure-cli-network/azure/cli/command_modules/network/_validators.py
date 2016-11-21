@@ -10,6 +10,7 @@ import os
 
 from azure.cli.core.commands.arm import is_valid_resource_id, resource_id
 from azure.cli.core._util import CLIError
+from azure.cli.core.commands.template_create import get_folded_parameter_validator
 from azure.cli.core.commands.validators import SPECIFIED_SENTINEL
 from azure.cli.core.commands.client_factory import get_subscription_id
 
@@ -93,9 +94,6 @@ def read_base_64_file(filename):
 
 def validate_cert(namespace):
 
-    if namespace.http_listener_protocol:
-        raise argparse.ArgumentError(None, 'unrecognized arguments: --http-listener-protocol')
-
     params = [namespace.cert_data, namespace.cert_password]
     if all([not x for x in params]):
         # no cert supplied -- use HTTP
@@ -137,19 +135,6 @@ def validate_inbound_nat_rule_name_or_id(namespace):
         namespace.inbound_nat_rule = _generate_lb_subproperty_id(
             namespace, 'inboundNatRules', rule_name)
 
-def validate_nsg_name_or_id(namespace):
-    """ Validates a NSG ID or, if a name is provided, formats it as an ID. """
-    if namespace.network_security_group:
-        # determine if network_security_group is name or ID
-        is_id = is_valid_resource_id(namespace.network_security_group)
-        if not is_id:
-            namespace.network_security_group = resource_id(
-                subscription=get_subscription_id(),
-                resource_group=namespace.resource_group_name,
-                namespace='Microsoft.Network',
-                type='networkSecurityGroups',
-                name=namespace.network_security_group)
-
 def validate_peering_type(namespace):
     if namespace.peering_type and namespace.peering_type == 'MicrosoftPeering':
         if not namespace.advertised_public_prefixes:
@@ -160,35 +145,89 @@ def validate_private_ip_address(namespace):
     if namespace.private_ip_address:
         namespace.private_ip_address_allocation = 'static'
 
-def validate_public_ip_name_or_id(namespace):
-    """ Validates a public IP ID or, if a name is provided, formats it as an ID. """
-    if namespace.public_ip_address:
-        # determine if public_ip_address is name or ID
-        is_id = is_valid_resource_id(namespace.public_ip_address)
+def get_public_ip_validator(has_type_field=False, allow_none=False, allow_new=False,
+                            default_none=False):
+    """ Retrieves a validator for public IP address. Accepting all defaults will perform a check
+    for an existing name or ID with no ARM-required -type parameter. """
+    def simple_validator(namespace):
+        if namespace.public_ip_address:
+            # determine if public_ip_address is name or ID
+            is_id = is_valid_resource_id(namespace.public_ip_address)
+            if not is_id:
+                namespace.public_ip_address = resource_id(
+                    subscription=get_subscription_id(),
+                    resource_group=namespace.resource_group_name,
+                    namespace='Microsoft.Network',
+                    type='publicIPAddresses',
+                    name=namespace.public_ip_address)
+
+    def complex_validator_with_type(namespace):
+        get_folded_parameter_validator(
+            'public_ip_address', 'Microsoft.Network/publicIPAddresses', '--public-ip-address',
+            allow_none=allow_none, allow_new=allow_new, default_none=default_none)(namespace)
+
+    return complex_validator_with_type if has_type_field else simple_validator
+
+def get_subnet_validator(has_type_field=False, allow_none=False, allow_new=False,
+                         default_none=False):
+
+    def simple_validator(namespace):
+        if namespace.virtual_network_name is None and namespace.subnet is None:
+            return
+        if namespace.subnet == '':
+            return
+        usage_error = ValueError('incorrect usage: ( --subnet ID | --subnet NAME --vnet-name NAME)')
+        # error if vnet-name is provided without subnet
+        if namespace.virtual_network_name and not namespace.subnet:
+            raise usage_error
+
+        # determine if subnet is name or ID
+        is_id = is_valid_resource_id(namespace.subnet)
+
+        # error if vnet-name is provided along with a subnet ID
+        if is_id and namespace.virtual_network_name:
+            raise usage_error
+        elif not is_id and not namespace.virtual_network_name:
+            raise usage_error
+
         if not is_id:
-            namespace.public_ip_address = resource_id(
+            namespace.subnet = resource_id(
                 subscription=get_subscription_id(),
                 resource_group=namespace.resource_group_name,
                 namespace='Microsoft.Network',
-                type='publicIPAddresses',
-                name=namespace.public_ip_address)
+                type='virtualNetworks',
+                name=namespace.virtual_network_name,
+                child_type='subnets',
+                child_name=namespace.subnet)
 
-def validate_public_ip_type(namespace): # pylint: disable=unused-argument
-    if namespace.public_ip_address_type == 'none' and not namespace.subnet:
-        raise argparse.ArgumentError(None, '--subnet is required if not using --public-ip-address')
+    def complex_validator_with_type(namespace):
+        get_folded_parameter_validator(
+            'subnet', 'subnets', '--subnet',
+            'virtual_network_name', 'Microsoft.Network/virtualNetworks', '--vnet-name',
+            allow_none=allow_none, allow_new=allow_new, default_none=default_none)(namespace)
 
-    if namespace.subnet:
-        namespace.public_ip_address_type = 'none'
-        if namespace.public_ip_address:
-            raise argparse.ArgumentError(
-                None, 'Cannot specify --subnet and --public-ip-address when creating a '
-                      'load balancer.')
+    return complex_validator_with_type if has_type_field else simple_validator
 
-    if namespace.public_ip_address:
-        if namespace.public_ip_dns_name and namespace.public_ip_address_type != 'new':
-            raise argparse.ArgumentError(
-                None, 'Can only specify --public-ip-dns-name when creating a new public '
-                      'IP address.')
+def get_nsg_validator(has_type_field=False, allow_none=False, allow_new=False, default_none=False):
+
+    def simple_validator(namespace):
+        if namespace.network_security_group:
+            # determine if network_security_group is name or ID
+            is_id = is_valid_resource_id(namespace.network_security_group)
+            if not is_id:
+                namespace.network_security_group = resource_id(
+                    subscription=get_subscription_id(),
+                    resource_group=namespace.resource_group_name,
+                    namespace='Microsoft.Network',
+                    type='networkSecurityGroups',
+                    name=namespace.network_security_group)
+
+    def complex_validator_with_type(namespace):
+        get_folded_parameter_validator(
+            'network_security_group', 'Microsoft.Network/networkSecurityGroups', '--nsg',
+            allow_none=allow_none, allow_new=allow_new, default_none=default_none)(namespace)
+
+    return complex_validator_with_type if has_type_field else simple_validator
 
 def validate_servers(namespace):
     from azure.mgmt.network.models import ApplicationGatewayBackendAddress
@@ -200,35 +239,6 @@ def validate_servers(namespace):
         except socket.error: #pylint:disable=no-member
             servers.append(ApplicationGatewayBackendAddress(fqdn=item))
     namespace.servers = servers
-
-def validate_subnet_name_or_id(namespace):
-    """ Validates a subnet ID or, if a name is provided, formats it as an ID. """
-    if namespace.virtual_network_name is None and namespace.subnet is None:
-        return
-    if namespace.subnet == '':
-        return
-    # error if vnet-name is provided without subnet
-    if namespace.virtual_network_name and not namespace.subnet:
-        raise CLIError('You must specify --subnet name when using --vnet-name.')
-
-    # determine if subnet is name or ID
-    is_id = is_valid_resource_id(namespace.subnet)
-
-    # error if vnet-name is provided along with a subnet ID
-    if is_id and namespace.virtual_network_name:
-        raise argparse.ArgumentError(None, 'Please omit --vnet-name when specifying a subnet ID')
-    elif not is_id and not namespace.virtual_network_name:
-        raise argparse.ArgumentError(None,
-                                     'Please specify --vnet-name when specifying a subnet name')
-    if not is_id:
-        namespace.subnet = resource_id(
-            subscription=get_subscription_id(),
-            resource_group=namespace.resource_group_name,
-            namespace='Microsoft.Network',
-            type='virtualNetworks',
-            name=namespace.virtual_network_name,
-            child_type='subnets',
-            child_name=namespace.subnet)
 
 # COMMAND NAMESPACE VALIDATORS
 
@@ -289,37 +299,78 @@ def process_ag_url_path_map_rule_create_namespace(namespace): # pylint: disable=
 
 def process_ag_create_namespace(namespace):
 
-    if namespace.public_ip:
+    # process folded parameters
+    if namespace.subnet or namespace.virtual_network_name:
+        get_subnet_validator(has_type_field=True, allow_new=True)(namespace)
+
+    if namespace.public_ip_address:
+        get_public_ip_validator(
+            has_type_field=True, allow_none=True, allow_new=True, default_none=True)(namespace)
         namespace.frontend_type = 'publicIp'
     else:
         namespace.frontend_type = 'privateIp'
         namespace.private_ip_address_allocation = 'static' if namespace.private_ip_address \
             else 'dynamic'
 
-    if not namespace.public_ip_type:
-        namespace.public_ip_type = 'none'
+    validate_cert(namespace)
 
 def process_auth_create_namespace(namespace):
     from azure.mgmt.network.models import ExpressRouteCircuitAuthorization
     namespace.authorization_parameters = ExpressRouteCircuitAuthorization()
 
 def process_lb_create_namespace(namespace):
-    if namespace.public_ip_dns_name:
-        namespace.dns_name_type = 'new'
 
     if namespace.subnet and namespace.public_ip_address:
-        raise argparse.ArgumentError(
-            None, 'Must specify a subnet OR a public IP address, not both.')
+        raise ValueError(
+            'incorrect usage: --subnet NAME --vnet-name NAME | '
+            '--subnet ID | --public-ip NAME_OR_ID')
+
+    if namespace.subnet:
+        # validation for an internal load balancer
+        get_subnet_validator(
+            has_type_field=True, allow_new=True, allow_none=True, default_none=True)(namespace)
+
+        validate_private_ip_address(namespace)
+
+        namespace.public_ip_address_type = 'none'
+        namespace.public_ip_address = None
+
+    else:
+        # validation for internet facing load balancer
+        get_public_ip_validator(has_type_field=True, allow_none=True, allow_new=True)(namespace)
+
+        if namespace.public_ip_dns_name:
+            if namespace.public_ip_address_type != 'new':
+                raise CLIError(
+                    'specify --public-ip-dns-name only if creating a new public IP address.')
+            else:
+                namespace.dns_name_type = 'new'
+
+        namespace.subnet_type = 'none'
+        namespace.subnet = None
+        namespace.virtual_network_name = None
+
+def process_lb_frontend_ip_namespace(namespace):
+
+    if namespace.subnet and namespace.public_ip_address:
+        raise ValueError(
+            'incorrect usage: --subnet NAME --vnet-name NAME | '
+            '--subnet ID | --public-ip NAME_OR_ID')
+
+    if namespace.subnet:
+        get_subnet_validator()(namespace)
+    else:
+        get_public_ip_validator()(namespace)
 
 def process_nic_create_namespace(namespace):
+
+    # process folded parameters
+    get_subnet_validator(has_type_field=True)(namespace)
+    get_public_ip_validator(has_type_field=True, allow_none=True, default_none=True)(namespace)
+    get_nsg_validator(has_type_field=True, allow_none=True, default_none=True)(namespace)
+
     if namespace.internal_dns_name_label:
         namespace.use_dns_settings = 'true'
-
-    if not namespace.public_ip_address:
-        namespace.public_ip_address_type = 'none'
-
-    if not namespace.network_security_group:
-        namespace.network_security_group_type = 'none'
 
 def process_public_ip_create_namespace(namespace):
     if namespace.dns_name:
