@@ -45,6 +45,16 @@ helps['storage blob'] = """
     short-summary: Object storage for unstructured data
 """
 
+helps['storage blob exists'] = """
+    type: command
+    short-summary: Returns a boolean indicating whether the blob exists.
+"""
+
+helps['storage blob list'] = """
+    type: command
+    short-summary: List blobs in a given container.
+"""
+
 helps['storage blob copy'] = """
     type: group
     short-summary: Manage blob copy operations.
@@ -70,6 +80,16 @@ helps['storage container'] = """
     short-summary: Manage blob storage containers.
 """
 
+helps['storage container exists'] = """
+    type: command
+    short-summary: Returns a boolean indicating whether the container exists.
+"""
+
+helps['storage container list'] = """
+    type: command
+    short-summary: List containers in a storage account.
+"""
+
 helps['storage container lease'] = """
     type: group
     short-summary: Manage blob storage container leases.
@@ -90,9 +110,29 @@ helps['storage cors'] = """
     short-summary: Manage Storage service Cross-Orgin Resource Sharing (CORS)
 """
 
+helps['storage cors add'] = """
+    type: command
+    short-summary: Add a CORS rule to a storage account.
+"""
+
+helps['storage cors clear'] = """
+    type: command
+    short-summary: Remove all CORS rules from a storage account.
+"""
+
+helps['storage cors list'] = """
+    type: command
+    short-summary: List all CORS rules for a storage account.
+"""
+
 helps['storage directory'] = """
     type: group
     short-summary: Manage file storage directories.
+"""
+
+helps['storage directory exists'] = """
+    type: command
+    short-summary: Returns a boolean indicating whether the directory exists.
 """
 
 helps['storage directory metadata'] = """
@@ -105,9 +145,25 @@ helps['storage entity'] = """
     short-summary: Manage table storage entities.
 """
 
+helps['storage entity query'] = """
+    type: command
+    short-summary: List entities which satisfy a given query.
+"""
+
+
 helps['storage file'] = """
     type: group
     short-summary: File shares that use the standard SMB 3.0 protocol
+"""
+
+helps['storage file exists'] = """
+    type: command
+    short-summary: Returns a boolean indicating whether the file exists.
+"""
+
+helps['storage file list'] = """
+    type: command
+    short-summary: List files and directories in the specified share.
 """
 
 helps['storage file copy'] = """
@@ -125,6 +181,16 @@ helps['storage logging'] = """
     short-summary: Manage Storage service logging information.
 """
 
+helps['storage logging show'] = """
+    type: command
+    short-summary: Show logging settings for a storage account.
+"""
+
+helps['storage logging update'] = """
+    type: command
+    short-summary: Update logging settings for a storage account.
+"""
+
 helps['storage message'] = """
     type: group
     short-summary: Manage queue storage messages.
@@ -135,9 +201,24 @@ helps['storage metrics'] = """
     short-summary: Manage Storage service metrics.
 """
 
+helps['storage metrics show'] = """
+    type: command
+    short-summary: Show metrics settings for a storage account.
+"""
+
+helps['storage metrics update'] = """
+    type: command
+    short-summary: Update metrics settings for a storage account.
+"""
+
 helps['storage queue'] = """
     type: group
     short-summary: Effectively scale apps according to traffic using queues.
+"""
+
+helps['storage queue list'] = """
+    type: command
+    short-summary: List queues in a storage account.
 """
 
 helps['storage queue metadata'] = """
@@ -155,6 +236,16 @@ helps['storage share'] = """
     short-summary: Manage file shares.
 """
 
+helps['storage share exists'] = """
+    type: command
+    short-summary: Returns a boolean indicating whether the share exists.
+"""
+
+helps['storage share list'] = """
+    type: command
+    short-summary: List file shares in a storage account.
+"""
+
 helps['storage share metadata'] = """
     type: group
     short-summary: Manage file share metadata.
@@ -168,6 +259,11 @@ helps['storage share policy'] = """
 helps['storage table'] = """
     type: group
     short-summary: NoSQL key-value storage using semi-structured datasets.
+"""
+
+helps['storage table list'] = """
+    type: command
+    short-summary: List tables in a storage account.
 """
 
 helps['storage table policy'] = """

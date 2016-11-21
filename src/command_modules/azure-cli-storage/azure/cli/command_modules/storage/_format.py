@@ -16,7 +16,7 @@ def build_table_output(result, projection):
 
     for item in result:
         def _value_from_path(path):
-            obj = item
+            obj = item # pylint: disable=cell-var-from-loop
             try:
                 for part in path.split('.'):
                     obj = obj.get(part, None)
@@ -64,7 +64,7 @@ def transform_file_output(result):
     """ Transform to convert SDK file/dir list output to something that
     more clearly distinguishes between files and directories. """
     new_result = []
-    
+
     for item in result.get('items', [result]):
         new_entry = OrderedDict()
         item_name = item['name']
@@ -84,7 +84,7 @@ def transform_file_output(result):
 def transform_entity_show(result):
     timestamp = result.pop('Timestamp')
     result.pop('etag')
-    
+
     # Reassemble the output
     new_result = OrderedDict()
     new_result['Partition'] = result.pop('PartitionKey')
@@ -106,3 +106,8 @@ def transform_message_show(result):
             new_result[key] = item[key]
         ordered_result.append(new_result)
     return ordered_result
+
+def transform_boolean_for_table(result):
+    for key in result:
+        result[key] = str(result[key])
+    return result
