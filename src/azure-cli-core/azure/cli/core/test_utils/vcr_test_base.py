@@ -6,6 +6,7 @@
 from __future__ import print_function
 
 import json
+import logging
 import os
 import collections
 import shlex
@@ -13,6 +14,9 @@ from random import choice
 import re
 from string import digits
 import sys
+from six.moves.urllib.parse import urlparse, parse_qs # pylint: disable=import-error
+import tempfile
+
 import unittest
 try:
     import unittest.mock as mock
@@ -168,6 +172,30 @@ def _search_result_by_jmespath(json_data, query):
         json_val,
         jmespath.Options(collections.OrderedDict))
 
+def _custom_request_matcher(r1, r2):
+    """ Ensure method, path, and query parameters match. """
+    if r1.method != r2.method:
+        return False
+
+    url1 = urlparse(r1.uri)
+    url2 = urlparse(r2.uri)
+
+    if url1.path != url2.path:
+        return False
+
+    q1 = parse_qs(url1.query)
+    q2 = parse_qs(url2.query)
+    shared_keys = set(q1.keys()).intersection(set(q2.keys()))
+
+    if len(shared_keys) != len(q1) or len(shared_keys) != len(q2):
+        return False
+
+    for key in shared_keys:
+        if q1[key][0].lower() != q2[key][0].lower():
+            return False
+
+    return True
+
 # MAIN CLASS
 
 class VCRTestBase(unittest.TestCase):#pylint: disable=too-many-instance-attributes
@@ -186,7 +214,7 @@ class VCRTestBase(unittest.TestCase):#pylint: disable=too-many-instance-attribut
     ]
 
     # pylint: disable=too-many-arguments
-    def __init__(self, test_file, test_name, run_live=False, debug=False,
+    def __init__(self, test_file, test_name, run_live=False, debug=False, debug_vcr=False,
                  skip_setup=False, skip_teardown=False):
         super(VCRTestBase, self).__init__(test_name)
         self.test_name = test_name
@@ -204,11 +232,17 @@ class VCRTestBase(unittest.TestCase):#pylint: disable=too-many-instance-attribut
         if not self.playback and ('--buffer' in sys.argv) and not run_live:
             self.exception = CLIError('No recorded result provided for {}.'.format(self.test_name))
 
+        if debug_vcr:
+            logging.basicConfig()
+            vcr_log = logging.getLogger('vcr')
+            vcr_log.setLevel(logging.INFO)
         self.my_vcr = vcr.VCR(
             cassette_library_dir=self.recording_dir,
             before_record_request=VCRTestBase._before_record_request,
             before_record_response=VCRTestBase._before_record_response,
         )
+        self.my_vcr.register_matcher('custom', _custom_request_matcher)
+        self.my_vcr.match_on = ['custom']
 
     def _track_executed_commands(self, command):
         if not self.track_commands:
@@ -283,6 +317,19 @@ class VCRTestBase(unittest.TestCase):#pylint: disable=too-many-instance-attribut
             self.body()
         self.success = True
 
+    def _scrub_bearer_tokens(self):
+        src_path = self.cassette_path
+        t = tempfile.NamedTemporaryFile('r+')
+        with open(src_path, 'r') as f:
+            for line in f:
+                if 'authorization: [bearer' not in line.lower():
+                    t.write(line)
+        t.seek(0)
+        with open(src_path, 'w') as f:
+            for line in t:
+                f.write(line)
+        t.close()
+
     # COMMAND METHODS
 
     def cmd(self, command, checks=None, allowed_exceptions=None, debug=False): #pylint: disable=no-self-use
@@ -343,10 +390,15 @@ class VCRTestBase(unittest.TestCase):#pylint: disable=too-many-instance-attribut
             if not self.success and not self.playback and os.path.isfile(self.cassette_path):
                 print('DISCARDING RECORDING: {}'.format(self.cassette_path))
                 os.remove(self.cassette_path)
+            elif self.success and not self.playback and os.path.isfile(self.cassette_path):
+                try:
+                    self._scrub_bearer_tokens()
+                except Exception: # pylint: disable=broad-except
+                    os.remove(self.cassette_path)
 
 class ResourceGroupVCRTestBase(VCRTestBase):
     # pylint: disable=too-many-arguments
-    def __init__(self, test_file, test_name, run_live=False, debug=False,
+    def __init__(self, test_file, test_name, run_live=False, debug=False, debug_vcr=False,
                  skip_setup=False, skip_teardown=False):
         super(ResourceGroupVCRTestBase, self).__init__(test_file, test_name, run_live=run_live,
                                                        debug=debug, skip_setup=skip_setup,
@@ -363,7 +415,7 @@ class ResourceGroupVCRTestBase(VCRTestBase):
 
 class StorageAccountVCRTestBase(VCRTestBase):
     # pylint: disable=too-many-arguments
-    def __init__(self, test_file, test_name, run_live=False, debug=False,
+    def __init__(self, test_file, test_name, run_live=False, debug=False, debug_vcr=False,
                  skip_setup=False, skip_teardown=False):
         super(StorageAccountVCRTestBase, self).__init__(test_file, test_name, run_live=run_live,
                                                         debug=debug, skip_setup=skip_setup,

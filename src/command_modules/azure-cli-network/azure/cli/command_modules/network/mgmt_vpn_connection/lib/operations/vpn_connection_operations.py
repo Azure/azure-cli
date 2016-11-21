@@ -38,8 +38,7 @@ class VpnConnectionOperations(object):
 
     def create_or_update(
             self, resource_group_name, deployment_name, connection_type, virtual_network_gateway_connection_name, vnet_gateway1_id, content_version=None, express_route_circuit2_id=None, local_gateway2_id=None, location=None, routing_weight=10, shared_key="none", vnet_gateway2_id=None, custom_headers=None, raw=False, **operation_config):
-        """
-        Create or update a virtual machine.
+        """Create a new VpnConnection.
 
         :param resource_group_name: The name of the resource group. The name
          is case insensitive.
@@ -49,7 +48,7 @@ class VpnConnectionOperations(object):
         :param connection_type: Connection type. Possible values include:
          'IPSec', 'Vnet2Vnet', 'ExpressRoute'
         :type connection_type: str or :class:`connectionType
-         <vpnconnectioncreationclient.models.connectionType>`
+         <Default.models.connectionType>`
         :param virtual_network_gateway_connection_name: Connection name.
         :type virtual_network_gateway_connection_name: str
         :param vnet_gateway1_id: Connect from this gateway to another gateway
@@ -79,7 +78,7 @@ class VpnConnectionOperations(object):
         :rtype:
          :class:`AzureOperationPoller<msrestazure.azure_operation.AzureOperationPoller>`
          instance that returns :class:`DeploymentExtended
-         <default.models.DeploymentExtended>`
+         <Default.models.DeploymentExtended>`
         :rtype: :class:`ClientRawResponse<msrest.pipeline.ClientRawResponse>`
          if raw=true
         """
