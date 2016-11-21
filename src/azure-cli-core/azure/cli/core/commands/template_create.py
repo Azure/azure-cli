@@ -229,8 +229,8 @@ def get_folded_parameter_validator( # pylint: disable=too-many-arguments
 
         # if a parent name was required but not specified, raise a usage error
         if has_parent and not value_was_id and not parent_val and not allow_new:
-            raise ValueError('incorrect usage: {} ID | {} NAME {} NAME'.format(
-                property_option, property_option, parent_option))
+            raise ValueError('incorrect usage: {0} ID | {0} NAME {1} NAME'.format(
+                property_option, parent_option))
 
         # if non-existent ID was supplied, throw error depending on whether a new resource can
         # be created.
