@@ -116,7 +116,7 @@ Run the latest automated Docker build with:
    $ docker run -it azuresdk/azure-cli-python:latest
 
 Tagged Docker images are also available.
-See our `Docker tags <https://hub.docker.com/r/azuresdk/azure-cli-python/tags/>` for available versions.
+See our `Docker tags <https://hub.docker.com/r/azuresdk/azure-cli-python/tags/>`__ for available versions.
 
 .. code-block:: console
 
