@@ -109,18 +109,19 @@ Install with Docker
 
 We also maintain a Docker image preconfigured with the Azure CLI.
 
-Run the latest automated Docker build with:
-
-.. code-block:: console
-
-   $ docker run -it azuresdk/azure-cli-python:latest
-
-Tagged Docker images are also available.
+Tagged Docker images are available.
 See our `Docker tags <https://hub.docker.com/r/azuresdk/azure-cli-python/tags/>`__ for available versions.
 
 .. code-block:: console
 
    $ docker run -it azuresdk/azure-cli-python:<version>
+
+Run the latest automated Docker build with the command below.
+All command modules are included in this version as the image is built directly from the Git repository.
+
+.. code-block:: console
+
+   $ docker run -it azuresdk/azure-cli-python:latest
 
 For installation steps for common platforms, as well as dependency troubleshooting, please take a look at our `installation guide <http://github.com/Azure/azure-cli/blob/master/doc/preview_install_guide.md>`__.
 
