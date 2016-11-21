@@ -15,6 +15,7 @@ import re
 from string import digits
 import sys
 from six.moves.urllib.parse import urlparse, parse_qs # pylint: disable=import-error
+import tempfile
 
 import unittest
 try:
@@ -316,6 +317,19 @@ class VCRTestBase(unittest.TestCase):#pylint: disable=too-many-instance-attribut
             self.body()
         self.success = True
 
+    def _scrub_bearer_tokens(self):
+        src_path = self.cassette_path
+        t = tempfile.NamedTemporaryFile('r+')
+        with open(src_path, 'r') as f:
+            for line in f:
+                if 'authorization: [bearer' not in line.lower():
+                    t.write(line)
+        t.seek(0)
+        with open(src_path, 'w') as f:
+            for line in t:
+                f.write(line)
+        t.close()
+
     # COMMAND METHODS
 
     def cmd(self, command, checks=None, allowed_exceptions=None, debug=False): #pylint: disable=no-self-use
@@ -376,6 +390,11 @@ class VCRTestBase(unittest.TestCase):#pylint: disable=too-many-instance-attribut
             if not self.success and not self.playback and os.path.isfile(self.cassette_path):
                 print('DISCARDING RECORDING: {}'.format(self.cassette_path))
                 os.remove(self.cassette_path)
+            elif self.success and not self.playback and os.path.isfile(self.cassette_path):
+                try:
+                    self._scrub_bearer_tokens()
+                except Exception: # pylint: disable=broad-except
+                    os.remove(self.cassette_path)
 
 class ResourceGroupVCRTestBase(VCRTestBase):
     # pylint: disable=too-many-arguments
