@@ -321,6 +321,10 @@ def validate_select(namespace):
 
 # region COMMAND VALIDATORS
 
+def process_blob_copy_batch_namespace(namespace):
+    if namespace.prefix is None and not namespace.recursive:
+        raise ValueError('incorrect usage: --recursive | --pattern PATTERN')
+
 def process_file_download_namespace(namespace):
 
     get_file_path_validator()(namespace)
