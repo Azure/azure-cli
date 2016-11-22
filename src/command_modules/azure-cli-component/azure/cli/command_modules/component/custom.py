@@ -21,6 +21,34 @@ def list_components():
                    for dist in pip.get_installed_distributions(local_only=True)
                    if dist.key.startswith(COMPONENT_PREFIX)], key=lambda x: x['name'])
 
+def list_available_components():
+    """ List publicly available components that can be installed """
+    import pip
+    available_components = []
+    installed_component_names = [dist.key.replace(COMPONENT_PREFIX, '') \
+                                for dist in pip.get_installed_distributions(local_only=True)
+                                 if dist.key.startswith(COMPONENT_PREFIX)]
+    try:
+        import xmlrpclib
+    except ImportError:
+        import xmlrpc.client as xmlrpclib #pylint: disable=import-error
+    client = xmlrpclib.ServerProxy('https://pypi.python.org/pypi')
+    pypi_hits = client.search({'author': 'Microsoft Corporation', 'author_email': 'azpycli'})
+    logger.debug('The following components are already installed %s', installed_component_names)
+    logger.debug("Found %d result(s)", len(pypi_hits))
+    for hit in pypi_hits:
+        if hit['name'].startswith(COMPONENT_PREFIX):
+            comp_name = hit['name'].replace(COMPONENT_PREFIX, '')
+            if comp_name not in installed_component_names:
+                available_components.append({
+                    'name': comp_name,
+                    'summary': hit['summary'],
+                    'version': hit['version']
+                })
+    if not available_components:
+        logger.warning('All available components are already installed.')
+    return available_components
+
 def remove(component_name):
     """ Remove a component """
     import pip
