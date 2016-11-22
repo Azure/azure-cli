@@ -5,6 +5,7 @@
 # pylint: disable=line-too-long
 
 from azure.cli.core.commands import cli_command, LongRunningOperation
+from azure.cli.core.commands.arm import cli_generic_update_command
 from ._factory import iot_hub_service_factory as factory
 
 custom_path = 'azure.cli.command_modules.iot.custom#{0}'
@@ -32,6 +33,7 @@ cli_command(__name__, 'iot device create', custom_path.format('iot_device_create
 cli_command(__name__, 'iot device list', custom_path.format('iot_device_list'), factory)
 cli_command(__name__, 'iot device show-connection-string', custom_path.format('iot_device_show_connection_string'), factory)
 cli_command(__name__, 'iot device show', custom_path.format('iot_device_get'), factory)
+cli_generic_update_command(__name__, 'iot device update', custom_path.format('iot_device_get'), custom_path.format('iot_device_update'), factory)
 cli_command(__name__, 'iot device delete', custom_path.format('iot_device_delete'), factory)
 cli_command(__name__, 'iot device message send', custom_path.format('iot_device_send_message'), factory)
 cli_command(__name__, 'iot device message receive', custom_path.format('iot_device_receive_message'), factory)

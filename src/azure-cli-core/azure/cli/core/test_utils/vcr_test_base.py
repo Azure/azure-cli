@@ -117,7 +117,7 @@ class JMESPathPatternCheck(object): # pylint: disable=too-few-public-methods
 
     def compare(self, json_data):
         actual_result = _search_result_by_jmespath(json_data, self.query)
-        if not re.match(self.expected_result, actual_result, re.IGNORECASE):
+        if not re.match(self.expected_result, str(actual_result), re.IGNORECASE):
             raise JMESPathCheckAssertionError(self, actual_result, json_data)
 
 class BooleanCheck(object): # pylint: disable=too-few-public-methods

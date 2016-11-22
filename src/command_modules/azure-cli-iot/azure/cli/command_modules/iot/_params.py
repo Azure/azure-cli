@@ -19,7 +19,7 @@ def get_device_id_completion_list(prefix, action, parsed_args, **kwargs):  # pyl
 hub_name_type = CliArgumentType(completer=get_resource_name_completion_list('Microsoft.Devices/IotHubs'),
                                 help='IoT Hub name.')
 
-register_cli_argument('iot hub', 'hub_name', hub_name_type, options_list=('--name', '-n'))
+register_cli_argument('iot hub', 'hub_name', hub_name_type, options_list=('--name', '-n'), id_part='name')
 for subgroup in ['consumer-group', 'policy', 'job']:
     register_cli_argument('iot hub {}'.format(subgroup), 'hub_name', options_list=('--hub-name',))
 
@@ -30,14 +30,16 @@ register_cli_argument('iot', 'device_id', options_list=('--device-id', '-d'), he
 
 # Arguments for 'iot hub consumer-group' group
 register_cli_argument('iot hub consumer-group', 'consumer_group_name', options_list=('--name', '-n'),
-                      help='Event hub consumer group name.')
-register_cli_argument('iot hub consumer-group', 'event_hub_name', help='Target event hub name.')
+                      id_part='grandchild_name', help='Event hub consumer group name.')
+register_cli_argument('iot hub consumer-group', 'event_hub_name', id_part='child_name',
+                      help='Event hub endpoint name. Default is events.')
 
 # Arguments for 'iot hub policy' group
-register_cli_argument('iot hub policy', 'policy_name', options_list=('--name', '-n'), help='Share access policy name.')
+register_cli_argument('iot hub policy', 'policy_name', options_list=('--name', '-n'), id_part='child_name',
+                      help='Shared access policy name.')
 
 # Arguments for 'iot hub job' group
-register_cli_argument('iot hub job', 'job_id', help='Job Id.')
+register_cli_argument('iot hub job', 'job_id', id_part='child_name', help='Job Id.')
 
 # Arguments for 'iot hub create'
 register_cli_argument('iot hub create', 'hub_name', completer=None)
