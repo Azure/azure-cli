@@ -24,7 +24,8 @@ from azure.cli.command_modules.vm._actions import \
     (VMImageFieldAction, VMSSHFieldAction, VMDNSNameAction, load_images_from_aliases_doc,
      get_vm_sizes, PrivateIpAction, _resource_not_exists)
 from azure.cli.command_modules.vm._validators import \
-    (validate_nsg_name, validate_vm_nics, validate_default_os_disk, validate_default_vnet, validate_default_storage_account)
+    (validate_nsg_name, validate_vm_nics, validate_vm_create_nics, validate_default_os_disk,
+     validate_default_vnet, validate_default_storage_account)
 
 def get_urn_aliases_completion_list(prefix, **kwargs):#pylint: disable=unused-argument
     images = load_images_from_aliases_doc()
@@ -132,9 +133,8 @@ register_cli_argument('vm open-port', 'vm_name', name_arg_type, help='The name o
 register_cli_argument('vm open-port', 'network_security_group_name', options_list=('--nsg-name',), help='The name of the network security group to create if one does not exist. Ignored if an NSG already exists.', validator=validate_nsg_name)
 register_cli_argument('vm open-port', 'apply_to_subnet', help='Allow inbound traffic on the subnet instead of the NIC', action='store_true')
 
-register_cli_argument('vm nic', 'vm_name', existing_vm_name, id_part=None)
-register_cli_argument('vm nic', 'nic_ids', multi_ids_type)
-register_cli_argument('vm nic', 'nic_names', multi_ids_type)
+register_cli_argument('vm nic', 'vm_name', existing_vm_name, options_list=('--vm-name',), id_part=None)
+register_cli_argument('vm nic', 'nics', nargs='+', help='Names or IDs of NICs.', validator=validate_vm_nics)
 
 register_cli_argument('vmss nic', 'virtual_machine_scale_set_name', options_list=('--vmss-name',), help='Scale set name.', completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'), id_part='name')
 register_cli_argument('vmss nic', 'virtualmachine_index', options_list=('--instance-id',), id_part='child_name')
@@ -157,7 +157,7 @@ nsg_rule_type = CliArgumentType(
 )
 
 register_cli_argument('vm create', 'network_interface_type', help=argparse.SUPPRESS)
-register_cli_argument('vm create', 'network_interface_ids', options_list=('--nics',), nargs='+', help='Names or IDs of existing NICs to reference.  The first NIC will be the primary NIC.', type=lambda val: val if (not '/' in val or is_valid_resource_id(val, ValueError)) else '', validator=validate_vm_nics)
+register_cli_argument('vm create', 'network_interface_ids', options_list=('--nics',), nargs='+', help='Names or IDs of existing NICs to reference.  The first NIC will be the primary NIC.', type=lambda val: val if (not '/' in val or is_valid_resource_id(val, ValueError)) else '', validator=validate_vm_create_nics)
 register_cli_argument('vm create', 'name', name_arg_type, validator=_resource_not_exists('Microsoft.Compute/virtualMachines'))
 
 register_cli_argument('vmss create', 'name', name_arg_type)

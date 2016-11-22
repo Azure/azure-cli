@@ -21,6 +21,7 @@ from azure.mgmt.compute.models import (DataDisk,
                                        VirtualMachineScaleSetExtensionProfile)
 from azure.mgmt.compute.models.compute_management_client_enums import DiskCreateOptionTypes
 from azure.cli.core.commands import LongRunningOperation
+from azure.cli.core.commands.arm import parse_resource_id
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_data_service_client
 from azure.cli.core._util import CLIError
 import azure.cli.core._logging as _logging
@@ -58,11 +59,8 @@ def _vm_set(instance, lro_operation=None):
 def _parse_rg_name(strid):
     '''From an ID, extract the contained (resource group, name) tuple
     '''
-    parts = re.split('/', strid)
-    if parts[3] != 'resourceGroups':
-        raise KeyError()
-
-    return (parts[4], parts[8])
+    parts = parse_resource_id(strid)
+    return (parts['resource_group'], parts['name'])
 
 #Use the same name by portal, so people can update from both cli and portal
 #(VM doesn't allow multiple handlers for the same extension)
@@ -693,20 +691,37 @@ def show_default_diagnostics_configuration(is_windows_os=False):
     '''show the default config file which defines data to be collected'''
     return get_default_diag_config(is_windows_os)
 
-def vm_add_nics(resource_group_name, vm_name, nic_ids=None, nic_names=None, primary_nic=None):
-    '''add network interface configurations to the virtual machine
+def vm_show_nic(resource_group_name, vm_name, nic=None):
+    ''' Show details of a network interface configuration attached to a virtual machine '''
+    vm = _vm_get(resource_group_name, vm_name)
+    found = next((n for n in vm.network_profile.network_interfaces if nic in n.id), None) # pylint: disable=no-member
+    if found:
+        from azure.mgmt.network import NetworkManagementClient
+        network_client = get_mgmt_service_client(NetworkManagementClient)
+        nic_name = parse_resource_id(found.id)['name']
+        return network_client.network_interfaces.get(resource_group_name, nic_name)
+    else:
+        raise CLIError("NIC '{}' not found on VM '{}'".format(nic, vm_name))
+
+def vm_list_nics(resource_group_name, vm_name):
+    ''' List network interface configurations attached to a virtual machine '''
+    vm = _vm_get(resource_group_name, vm_name)
+    return vm.network_profile.network_interfaces # pylint: disable=no-member
+
+def vm_add_nics(resource_group_name, vm_name, nics, primary_nic=None):
+    ''' Add network interface configurations to the virtual machine
     :param str nic_ids: NIC resource IDs
     :param str nic_names: NIC names, assuming under the same resource group
     :param str primary_nic: name or id of the primary NIC. If missing, the first of the
     NIC list will be the primary
     '''
     vm = _vm_get(resource_group_name, vm_name)
-    new_nics = _build_nic_list(resource_group_name, nic_ids or [], nic_names or [])
+    new_nics = _build_nic_list(nics)
     existing_nics = _get_existing_nics(vm)
     return _update_vm_nics(vm, existing_nics + new_nics, primary_nic)
 
-def vm_delete_nics(resource_group_name, vm_name, nic_ids=None, nic_names=None, primary_nic=None):
-    '''remove network interface configurations from the virtual machine
+def vm_remove_nics(resource_group_name, vm_name, nics, primary_nic=None):
+    ''' Remove network interface configurations from the virtual machine
     :param str nic_ids: NIC resource IDs
     :param str nic_names: NIC names, assuming under the same resource group
     :param str primary_nic: name or id of the primary NIC. If missing, the first of the
@@ -715,20 +730,20 @@ def vm_delete_nics(resource_group_name, vm_name, nic_ids=None, nic_names=None, p
     def to_delete(nic_id):
         return [n for n in nics_to_delete if n.id.lower() == nic_id.lower()]
     vm = _vm_get(resource_group_name, vm_name)
-    nics_to_delete = _build_nic_list(resource_group_name, nic_ids or [], nic_names or [])
+    nics_to_delete = _build_nic_list(nics)
     existing_nics = _get_existing_nics(vm)
     survived = [x for x in existing_nics if not to_delete(x.id)]
     return _update_vm_nics(vm, survived, primary_nic)
 
-def vm_update_nics(resource_group_name, vm_name, nic_ids=None, nic_names=None, primary_nic=None):
-    '''update network interface configurations of the virtual machine
+def vm_set_nics(resource_group_name, vm_name, nics, primary_nic=None):
+    ''' Replace existing network interface configurations on the virtual machine
     :param str nic_ids: NIC resource IDs
     :param str nic_names: NIC names, assuming under the same resource group
     :param str primary_nic: name or id of the primary nic. If missing, the first element of
     nic list will be set to the primary
     '''
     vm = _vm_get(resource_group_name, vm_name)
-    nics = _build_nic_list(resource_group_name, nic_ids or [], nic_names or [])
+    nics = _build_nic_list(nics)
     return _update_vm_nics(vm, nics, primary_nic)
 
 # pylint: disable=no-member
@@ -757,7 +772,6 @@ def vm_open_port(resource_group_name, vm_name, network_security_group_name=None,
     if not apply_to_subnet:
         nsg = nic.network_security_group
     else:
-        from azure.cli.core.commands.arm import parse_resource_id
         subnet_id = parse_resource_id(nic.ip_configurations[0].subnet.id)
         subnet = network.subnets.get(resource_group_name,
                                      subnet_id['name'],
@@ -804,22 +818,18 @@ def vm_open_port(resource_group_name, vm_name, network_security_group_name=None,
             )
         )
 
-def _build_nic_list(resource_group_name, nic_ids, nic_names):
+def _build_nic_list(nic_ids):
     from azure.mgmt.network import NetworkManagementClient
     from azure.mgmt.compute.models import NetworkInterfaceReference
-    nics = []
-    if nic_names or nic_ids:
+    nic_list = []
+    if nic_ids:
         #pylint: disable=no-member
         network_client = get_mgmt_service_client(NetworkManagementClient)
-        for n in nic_names:
-            nic = network_client.network_interfaces.get(resource_group_name, n)
-            nics.append(NetworkInterfaceReference(nic.id, False))
-
-        for n in nic_ids:
-            rg, name = _parse_rg_name(n)
+        for nic_id in nic_ids:
+            rg, name = _parse_rg_name(nic_id)
             nic = network_client.network_interfaces.get(rg, name)
-            nics.append(NetworkInterfaceReference(nic.id, False))
-    return nics
+            nic_list.append(NetworkInterfaceReference(nic.id, False))
+    return nic_list
 
 def _get_existing_nics(vm):
     network_profile = getattr(vm, 'network_profile', None)
@@ -855,7 +865,7 @@ def _update_vm_nics(vm, nics, primary_nic):
     else:
         network_profile.network_interfaces = nics
 
-    return _vm_set(vm)
+    return _vm_set(vm).network_profile.network_interfaces
 
 def vmss_scale(resource_group_name, vm_scale_set_name, new_capacity):
     '''change the number of VMs in an virtual machine scale set

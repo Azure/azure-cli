@@ -899,38 +899,59 @@ class VMCreateUbuntuScenarioTest(ResourceGroupVCRTestBase): #pylint: disable=too
             JMESPathCheck('osProfile.linuxConfiguration.ssh.publicKeys[0].keyData', TEST_SSH_KEY_PUB),
         ])
 
-class VMCreateMultiNicTest(ResourceGroupVCRTestBase): #pylint: disable=too-many-instance-attributes
+class VMMultiNicScenarioTest(ResourceGroupVCRTestBase): #pylint: disable=too-many-instance-attributes
 
     def __init__(self, test_method):
-        super(VMCreateMultiNicTest, self).__init__(__file__, test_method)
-        self.resource_group = 'cliTestRg_VMCreate_multinic'
+        super(VMMultiNicScenarioTest, self).__init__(__file__, test_method, debug=True)
+        self.resource_group = 'cli_test_multi_nic_vm'
+        self.vm_name = 'multinicvm1'
 
-    def test_vm_create_multinic(self):
+    def test_vm_multi_nic_scenario(self):
         self.execute()
 
-    def body(self):
-        deployment_name = 'azurecli-test-deployment-vm-multinic-create'
+    def set_up(self):
+        super(VMMultiNicScenarioTest, self).set_up()
+        rg = self.resource_group
         vnet_name = 'myvnet'
         subnet_name = 'mysubnet'
-        vm_name = 'multinicvm1'
-        nic_names = ['mynic1', 'mynic2']
+        self.cmd('network vnet create -g {} -n {} --subnet-name {}'.format(rg, vnet_name, subnet_name))
+        for i in range(1, 5): # create four NICs
+            self.cmd('network nic create -g {} -n nic{} --subnet {} --vnet-name {}'.format(rg, i, subnet_name, vnet_name))
 
-        self.cmd('network vnet create -n {vnet_name} -g {resource_group} --subnet-name {subnet_name}'
-                 .format(vnet_name=vnet_name, resource_group=self.resource_group, subnet_name=subnet_name))
-        self.cmd('network nic create -n {nic_name} -g {resource_group} --subnet {subnet_name} --vnet-name {vnet_name}'
-                 .format(nic_name=nic_names[0], resource_group=self.resource_group, subnet_name=subnet_name, vnet_name=vnet_name))
-        self.cmd('network nic create -n {nic_name} -g {resource_group} --subnet {subnet_name} --vnet-name {vnet_name}'
-                 .format(nic_name=nic_names[1], resource_group=self.resource_group, subnet_name=subnet_name, vnet_name=vnet_name))
+    def body(self):
+        rg = self.resource_group
+        vm_name = self.vm_name
 
-        self.cmd('vm create -n {vm_name} -g {resource_group} --image RHEL --nics {nic_name1} {nic_name2} --size Standard_DS4'
-                 ' --ssh-key-value \'{ssh_key}\' --deployment-name {deployment_name}'
-                 .format(vm_name=vm_name, resource_group=self.resource_group, nic_name1=nic_names[0], nic_name2=nic_names[1],
-                         ssh_key=TEST_SSH_KEY_PUB, deployment_name=deployment_name))
+        self.cmd('vm create -g {} -n {} --image UbuntuLTS --nics nic1 nic2 nic3 nic4 --size Standard_DS3 --ssh-key-value \'{}\''.format(rg, vm_name, TEST_SSH_KEY_PUB))
+        self.cmd('vm show -g {} -n {}'.format(rg, vm_name), checks=[
+            JMESPathCheck("networkProfile.networkInterfaces[0].id.ends_with(@, 'nic1')", True),
+            JMESPathCheck("networkProfile.networkInterfaces[1].id.ends_with(@, 'nic2')", True),
+            JMESPathCheck("networkProfile.networkInterfaces[2].id.ends_with(@, 'nic3')", True),
+            JMESPathCheck("networkProfile.networkInterfaces[3].id.ends_with(@, 'nic4')", True),
+            JMESPathCheck('length(networkProfile.networkInterfaces)', 4)
+        ])
+        # cannot alter NICs on a running (or even stopped) VM
+        self.cmd('vm deallocate -g {} -n {}'.format(rg, vm_name))
 
-        self.cmd('vm show -n {vm_name} -g {resource_group}'.format(vm_name=vm_name, resource_group=self.resource_group), [
-            JMESPathCheck('networkProfile.networkInterfaces[0].id.ends_with(@, \'{}\')'.format(nic_names[0]), True),
-            JMESPathCheck('networkProfile.networkInterfaces[1].id.ends_with(@, \'{}\')'.format(nic_names[1]), True),
-            JMESPathCheck('length(networkProfile.networkInterfaces)', 2)
+        self.cmd('vm nic list -g {} --vm-name {}'.format(rg, vm_name), checks=[
+            JMESPathCheck('length(@)', 4),
+            JMESPathCheck('[0].primary', True)
+        ])
+        self.cmd('vm nic show -g {} --vm-name {} --nic nic1'.format(rg, vm_name))
+        self.cmd('vm nic remove -g {} --vm-name {} --nics nic4 --primary-nic nic1'.format(rg, vm_name), checks=[
+            JMESPathCheck('length(@)', 3),
+            JMESPathCheck('[0].primary', True),
+            JMESPathCheck("[0].id.contains(@, 'nic1')", True)
+        ])
+        self.cmd('vm nic add -g {} --vm-name {} --nics nic4'.format(rg, vm_name), checks=[
+            JMESPathCheck('length(@)', 4),
+            JMESPathCheck('[0].primary', True),
+            JMESPathCheck("[0].id.contains(@, 'nic1')", True)
+        ])
+        self.cmd('vm nic set -g {} --vm-name {} --nics nic1 nic2 --primary-nic nic2'.format(rg, vm_name), checks=[
+            JMESPathCheck('length(@)', 2),
+            JMESPathCheck('[1].primary', True),
+            JMESPathCheck("[1].id.contains(@, 'nic2')", True)
         ])
 
 class VMCreateNoneOptionsTest(ResourceGroupVCRTestBase): #pylint: disable=too-many-instance-attributes
