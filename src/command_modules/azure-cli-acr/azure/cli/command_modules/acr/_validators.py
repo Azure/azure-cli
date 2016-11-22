@@ -5,10 +5,23 @@
 
 from azure.cli.core._util import CLIError
 
-from ._factory import get_arm_service_client
+from ._factory import (
+    get_arm_service_client,
+    get_acr_service_client
+)
 
 import azure.cli.core._logging as _logging
 logger = _logging.get_az_logger(__name__)
+
+def validate_registry_name(namespace):
+    if namespace.registry_name:
+        client = get_acr_service_client().registries
+        registry_name = namespace.registry_name
+
+        result = client.check_name_availability(registry_name)
+
+        if not result.name_available: #pylint: disable=no-member
+            raise CLIError(result.message) #pylint: disable=no-member
 
 def validate_resource_group_name(namespace):
     if namespace.resource_group_name:
