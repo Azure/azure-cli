@@ -1,6 +1,12 @@
 Microsoft Azure CLI 2.0 - Preview
 ==================================
 
+.. image:: https://img.shields.io/pypi/v/azure-cli.svg?maxAge=2592000
+    :target: https://pypi.python.org/pypi/azure-cli
+
+.. image:: https://img.shields.io/pypi/pyversions/azure-cli.svg?maxAge=2592000
+    :target: https://pypi.python.org/pypi/azure-cli
+
 .. image:: https://travis-ci.org/Azure/azure-cli.svg?branch=master
     :target: https://travis-ci.org/Azure/azure-cli
 
