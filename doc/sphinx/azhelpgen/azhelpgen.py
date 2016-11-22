@@ -23,7 +23,7 @@ for cmd in app.configuration.get_command_table():
 class AzHelpGenDirective(Directive):
     def make_rst(self):
         INDENT = '   '
-        DOUBLEINDENT = INDENT * 2
+        DOUBLEINDENT = INDENT * 3
         parser_dict = {}
         _store_parsers(app.parser, parser_dict)
         doc_source_map = _load_doc_source_map()
