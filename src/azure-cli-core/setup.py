@@ -46,6 +46,7 @@ DEPENDENCIES = [
     'adal>=0.4.3',
     'applicationinsights',
     'argcomplete>=1.3.0',
+    'azure-cli-nspkg',
     'azure-mgmt-trafficmanager==0.30.0rc6',
     'azure-mgmt-dns==0.30.0rc6',
     'colorama',
