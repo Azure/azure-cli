@@ -5,7 +5,6 @@
 
 # pylint: disable=line-too-long
 import argparse
-
 from argcomplete.completers import FilesCompleter
 from six import u as unicode_string
 
@@ -37,7 +36,7 @@ from ._validators import \
      get_content_setting_validator, validate_encryption, validate_accept,
      validate_key, storage_account_key_options,
      process_file_download_namespace, process_logging_update_namespace,
-     process_metric_update_namespace)
+     process_metric_update_namespace, process_blob_copy_batch_namespace)
 
 # COMPLETERS
 
@@ -218,6 +217,10 @@ for source in ['destination', 'source']:
 register_cli_argument('storage blob copy', 'container_name', container_name_type, options_list=('--destination-container', '-c'))
 register_cli_argument('storage blob copy', 'blob_name', blob_name_type, options_list=('--destination-blob', '-b'), help='Name of the destination blob. If the exists, it will be overwritten.')
 register_cli_argument('storage blob copy', 'source_lease_id', arg_group='Copy Source')
+
+register_cli_argument('storage blob copy start-batch', 'prefix', validator=process_blob_copy_batch_namespace)
+# Enable after https://github.com/Azure/azure-cli/issues/1414 is fixed.
+register_cli_argument('storage blob copy start-batch', 'blob_type', ignore_type)
 
 register_cli_argument('storage blob delete', 'delete_snapshots', **enum_choice_list(list(delete_snapshot_types.keys())))
 
