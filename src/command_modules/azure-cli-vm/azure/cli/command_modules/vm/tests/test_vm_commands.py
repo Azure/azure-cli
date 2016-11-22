@@ -67,6 +67,8 @@ class VMCombinedListTest(VCRTestBase):
 
     def __init__(self, test_method):
         super(VMCombinedListTest, self).__init__(__file__, test_method)
+        if not self.playback:
+            raise Exception('TODO: modify this test to use ResourceGroupVCRTestBase')
 
     def test_vm_combined_list(self):
         self.execute()
@@ -113,6 +115,8 @@ class VMOpenPortTest(ResourceGroupVCRTestBase):
 class VMResizeTest(VCRTestBase):
     def __init__(self, test_method):
         super(VMResizeTest, self).__init__(__file__, test_method)
+        if not self.playback:
+            raise Exception('TODO: modify this test to use ResourceGroupVCRTestBase')
 
     def test_vm_resize(self):
         self.execute()
@@ -385,6 +389,8 @@ class VMAvailSetScenarioTest(VCRTestBase):
         self.resource_group = 'cliTestRg_Availset'
         self.location = 'westus'
         self.name = 'availset-test'
+        if not self.playback:
+            raise Exception('TODO: modify this test to use ResourceGroupVCRTestBase')
 
     def test_vm_availset(self):
         self.execute()
@@ -448,6 +454,8 @@ class VMExtensionsScenarioTest(VCRTestBase):
         self.location = 'westus'
         self.vm_name = 'windows-ext'
         self.extension_name = 'IaaSDiagnostics'
+        if not self.playback:
+            raise Exception('TODO: modify this test to use ResourceGroupVCRTestBase')
 
     def test_vm_extension(self):
         self.execute()
@@ -520,6 +528,8 @@ class VMScaleSetGetsScenarioTest(VCRTestBase):
         self.resource_group = 'CLI_TEST1'
         self.ss_name = 'clitestvm'
         self.location = 'westus'
+        if not self.playback:
+            raise Exception('TODO: modify this test to use ResourceGroupVCRTestBase')
 
     def test_vm_scaleset_gets(self):
         self.execute()
@@ -555,6 +565,8 @@ class VMScaleSetStatesScenarioTest(VCRTestBase):
         super(VMScaleSetStatesScenarioTest, self).__init__(__file__, test_method)
         self.resource_group = 'cliTestRg_ScaleSet1'
         self.ss_name = 'scaleset1'
+        if not self.playback:
+            raise Exception('TODO: modify this test to use ResourceGroupVCRTestBase')
 
     def test_vm_scaleset_states(self):
         self.execute()
@@ -574,6 +586,8 @@ class VMScaleSetScaleUpScenarioTest(VCRTestBase):
         super(VMScaleSetScaleUpScenarioTest, self).__init__(__file__, test_method)
         self.resource_group = 'yugangwvmss'
         self.ss_name = 'yugangwvm'
+        if not self.playback:
+            raise Exception('TODO: modify this test to use ResourceGroupVCRTestBase')
 
     def test_vm_scaleset_scaleup(self):
         self.execute()
@@ -594,6 +608,8 @@ class VMScaleSetDeleteScenarioTest(VCRTestBase):
         self.ss_name = 'yugangwvm'
         self.vm_count = 3
         self.instance_id_to_delete = 2
+        if not self.playback:
+            raise Exception('TODO: modify this test to use ResourceGroupVCRTestBase')
 
     def test_vm_scaleset_delete(self):
         self.execute()
@@ -633,6 +649,8 @@ class VMScaleSetVMsScenarioTest(VCRTestBase):
         self.ss_name = 'scaleset3'
         self.vm_count = 5
         self.instance_ids = ['1', '2', '3', '6', '7']
+        if not self.playback:
+            raise Exception('TODO: modify this test to use ResourceGroupVCRTestBase')
 
     def test_vm_scaleset_vms(self):
         self.execute()
@@ -826,6 +844,8 @@ class VMAccessAddRemoveLinuxUser(VCRTestBase):
 
     def __init__(self, test_method):
         super(VMAccessAddRemoveLinuxUser, self).__init__(__file__, test_method)
+        if not self.playback:
+            raise Exception('TODO: modify this test to use ResourceGroupVCRTestBase')
 
     def test_vm_add_remove_linux_user(self):
         self.execute()
@@ -946,6 +966,8 @@ class VMBootDiagnostics(VCRTestBase):
 
     def __init__(self, test_method):
         super(VMBootDiagnostics, self).__init__(__file__, test_method)
+        if not self.playback:
+            raise Exception('TODO: modify this test to use ResourceGroupVCRTestBase')
 
     def test_vm_enable_disable_boot_diagnostic(self):
         self.execute()
@@ -970,6 +992,8 @@ class VMExtensionInstallTest(VCRTestBase):
 
     def __init__(self, test_method):
         super(VMExtensionInstallTest, self).__init__(__file__, test_method)
+        if not self.playback:
+            raise Exception('TODO: modify this test to use ResourceGroupVCRTestBase')
 
     def test_vm_extension_install(self):
         self.execute()
@@ -997,6 +1021,8 @@ class VMSSExtensionInstallTest(VCRTestBase):
 
     def __init__(self, test_method):
         super(VMSSExtensionInstallTest, self).__init__(__file__, test_method)
+        if not self.playback:
+            raise Exception('TODO: modify this test to use ResourceGroupVCRTestBase')
 
     def test_vmss_extension_install(self):
         self.execute()
