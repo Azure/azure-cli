@@ -374,7 +374,7 @@ def _build_application_creds(password=None, key_value=None, key_type=None,#pylin
         raise CLIError('specify either --password or --key-value, but not both.')
 
     if not start_date:
-        start_date = datetime.datetime.now()
+        start_date = datetime.datetime.utcnow()
     elif isinstance(start_date, str):
         start_date = dateutil.parser.parse(start_date)
 
@@ -446,7 +446,7 @@ def create_service_principal_for_rbac(name=None, password=None, years=1, #pylint
     if bool(scopes) != bool(role):
         raise CLIError("'--scopes' and '--role' must be used together.")
     client = _graph_client_factory()
-    start_date = datetime.datetime.now()
+    start_date = datetime.datetime.utcnow()
     app_display_name = 'azure-cli-' + start_date.strftime('%Y-%m-%d-%H-%M-%S')
     if name is None:
         name = 'http://' + app_display_name # just a valid uri, no need to exist
