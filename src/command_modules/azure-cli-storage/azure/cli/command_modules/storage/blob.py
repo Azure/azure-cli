@@ -8,6 +8,7 @@ from collections import namedtuple
 from datetime import datetime
 from azure.storage.blob import BlockBlobService
 from azure.storage.blob.models import Include
+from azure.cli.core._logging import get_az_logger
 
 BlobCopyResult = namedtuple('BlobCopyResult', ['name', 'copy_id'])
 
@@ -126,7 +127,7 @@ def storage_blob_copy_batch(client, source_account, source_container, destinatio
 
 
 #pylint: disable=unused-argument
-def storage_blob_download_batch(client, source, destination, source_container_name, pattern=None):
+def storage_blob_download_batch(client, source, destination, source_container_name, pattern=None, dryrun=False):
     """
     Download blobs in a container recursively
 
@@ -138,6 +139,9 @@ def storage_blob_download_batch(client, source, destination, source_container_na
     :param str destination:
         The string represents the destination folder of this download operation. The folder must
         exist.
+
+    :param bool dryrun:
+        Show the summary of the operations to be taken instead of actually download the file(s)
 
     :param str pattern:
         The pattern is used for files globbing. The supported patterns are '*', '?', '[seq]',
@@ -166,17 +170,28 @@ def storage_blob_download_batch(client, source, destination, source_container_na
         if not any(source_blobs):
             return []
 
-    # TODO: try catch IO exception
     result = []
-    for blob in source_blobs:
-        dst = os.path.join(destination, blob)
-        dst_folder = os.path.dirname(dst)
-        if not os.path.exists(dst_folder):
-            os.makedirs(dst_folder)
+    if dryrun:
+        logger = get_az_logger(__name__)
+        logger.warning('download action: from {} to {}'.format(source, destination))
+        logger.warning('    pattern {}'.format(pattern))
+        logger.warning('  container {}'.format(source_container_name))
+        logger.warning('      total {}'.format(len(source_blobs)))
+        logger.warning(' operations')
+        for b in source_blobs or []:
+            logger.warning('  - {}'.format(b))
+    else:
+        # TODO: try catch IO exception
+        for blob in source_blobs:
+            dst = os.path.join(destination, blob)
+            dst_folder = os.path.dirname(dst)
+            if not os.path.exists(dst_folder):
+                os.makedirs(dst_folder)
 
-        result.append(client.get_blob_to_path(source_container_name, blob, dst))
+            result.append(client.get_blob_to_path(source_container_name, blob, dst))
 
     return result
+
 
 def storage_blob_upload_batch(client, source, destination, pattern=None, source_files=None,
                               destination_container_name=None, blob_type=None,
@@ -255,14 +270,15 @@ def storage_blob_upload_batch(client, source, destination, pattern=None, source_
     upload_action = _upload_blob if blob_type == 'block' or blob_type == 'page' else _append_blob
 
     if dryrun:
-        print('upload action: from {} to {}'.format(source, destination))
-        print('    pattern {}'.format(pattern))
-        print('  container {}'.format(destination_container_name))
-        print('       type {}'.format(blob_type))
-        print('      total {}'.format(len(source_files)))
-        print(' operations')
+        logger = get_az_logger(__name__)
+        logger.warning('upload action: from {} to {}'.format(source, destination))
+        logger.warning('    pattern {}'.format(pattern))
+        logger.warning('  container {}'.format(destination_container_name))
+        logger.warning('       type {}'.format(blob_type))
+        logger.warning('      total {}'.format(len(source_files)))
+        logger.warning(' operations')
         for f in source_files or []:
-            print('  - {} => {}'.format(*f))
+            logger.warning('  - {} => {}'.format(*f))
     else:
         for f in source_files or []:
             print('uploading {}'.format(f[0]))
