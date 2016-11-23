@@ -16,7 +16,7 @@ StorageUrlDescription = namedtuple('StorageUrlDescription',
                                    ['account', 'container', 'blob', 'snapshot'])
 
 
-def parse_url(url):
+def parse_storage_url(url):
     """Extract information from a container/blob url path"""
 
     def _parse_blob_path(path):
@@ -41,10 +41,7 @@ def parse_url(url):
     blob = None
     snapshot = None
 
-    if sys.version_info >= (3,):
-        from urllib.parse import urlparse # pylint: disable=no-name-in-module, import-error
-    else:
-        from urlparse import urlparse # pylint: disable=no-name-in-module, import-error
+    from six.moves.urllib.parse import urlparse
 
     parsed_url = urlparse(url)
     if not parsed_url.scheme == 'http' and not parsed_url.scheme == 'https':

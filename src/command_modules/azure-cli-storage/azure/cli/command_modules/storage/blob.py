@@ -140,7 +140,7 @@ def storage_blob_download_batch(client, source, destination, source_container_na
         exist.
 
     :param str pattern:
-        The pattern is used for files globing. The supported patterns are '*', '?', '[seq]',
+        The pattern is used for files globbing. The supported patterns are '*', '?', '[seq]',
         and '[!seq]'.
     """
     import os.path
@@ -196,7 +196,7 @@ def storage_blob_upload_batch(client, source, destination, pattern=None, source_
         account name will parsed from the URL.
 
     :param str pattern:
-        The pattern is used for files globing. The supported patterns are '*', '?', '[seq]',
+        The pattern is used for files globbing. The supported patterns are '*', '?', '[seq]',
         and '[!seq]'.
 
     :param bool dryrun:

@@ -10,6 +10,7 @@ import os
 import re
 
 from azure.cli.core._config import az_config
+from azure.cli.core._util import CLIError
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.validators import validate_key_value_pairs
 
@@ -324,20 +325,14 @@ def validate_select(namespace):
 
 def process_download_batch_parameters(namespace):
     """Process the parameters for storage blob download command"""
-    from azure.cli.command_modules.storage.storage_url_helpers import parse_url
+    from azure.cli.command_modules.storage.storage_url_helpers import parse_storage_url
 
     # 1. quick check
-    if namespace.destination is None:
-        raise ValueError('Destination parameter is missing.')
-
-    if namespace.source is None:
-        raise ValueError('Source parameter is missing.')
-
     if not os.path.exists(namespace.destination) or not os.path.isdir(namespace.destination):
         raise ValueError('Destination folder {} does not exist'.format(namespace.source))
 
     # 2. try to extract account name and container name from source string
-    storage_desc = parse_url(namespace.source)
+    storage_desc = parse_storage_url(namespace.source)
 
     if storage_desc.blob is not None:
         raise ValueError('incorrect usage: --source should be either container URL or name')
@@ -350,15 +345,9 @@ def process_download_batch_parameters(namespace):
 
 def process_upload_batch_parameters(namespace):
     """Process the source and destination of storage blob upload command"""
-    from azure.cli.command_modules.storage.storage_url_helpers import parse_url
+    from azure.cli.command_modules.storage.storage_url_helpers import parse_storage_url
 
     # 1. quick check
-    if namespace.destination is None:
-        raise ValueError('incorrect usage: --destination is missing.')
-
-    if namespace.source is None:
-        raise ValueError('incorrect usage: --source is missing.')
-
     if not os.path.exists(namespace.source):
         raise ValueError('incorrect usage: source {} does not exist'.format(namespace.source))
 
@@ -366,7 +355,7 @@ def process_upload_batch_parameters(namespace):
         raise ValueError('incorrect usage: source must be a directory')
 
     # 2. try to extract account name and container name from destination string
-    storage_desc = parse_url(namespace.destination)
+    storage_desc = parse_storage_url(namespace.destination)
 
     if storage_desc.blob is not None:
         raise ValueError('incorrect usage: destination cannot be a blob url')
@@ -386,6 +375,7 @@ def process_upload_batch_parameters(namespace):
         def _file_selector(file_path):
             return fnmatch(file_path, pattern)
     else:
+        #pylint: disable=unused-argument
         def _file_selector(_):
             return True
 
@@ -406,7 +396,7 @@ def process_upload_batch_parameters(namespace):
             namespace.blob_type = 'page'
         elif any(vhd_files):
             # source files contain vhd files but not all of them
-            raise ValueError('''Fail to guess the required blob type. Type of the files to be
+            raise CLIError('''Fail to guess the required blob type. Type of the files to be
             uploaded are not consistent. Default blob type for .vhd files is "page", while
             others are "block". You can solve this problem by either explicitly set the blob
             type or ensure the pattern matches a correct set of files.''')

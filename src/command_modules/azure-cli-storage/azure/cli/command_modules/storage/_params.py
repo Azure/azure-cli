@@ -259,7 +259,7 @@ register_cli_argument('storage blob upload-batch', 'source_files', ignore_type)
 register_cli_argument('storage blob upload-batch', 'destination_container_name', ignore_type)
 
 register_cli_argument('storage blob upload-batch', 'blob_type',
-                      help="Defaults to 'page' for *.vhd files, or 'block' otherwise.",
+                      help="Defaults to 'page' for *.vhd files, or 'block' otherwise. The setting will override blob types for every file.",
                       options_list=('--type', '-t'),
                       **enum_choice_list(blob_types.keys()))
 register_cli_argument('storage blob upload-batch', 'maxsize_condition',
@@ -276,7 +276,7 @@ register_cli_argument('storage blob upload-batch', 'content_md5', arg_group='Con
 register_cli_argument('storage blob upload-batch', 'content_type', arg_group='Content Control')
 register_cli_argument('storage blob upload-batch', 'content_cache_control', arg_group='Content Control')
 register_cli_argument('storage blob upload-batch', 'content_language', arg_group='Content Control')
-register_cli_argument('storage blob upload-batch', 'max_connections', type=int, arg_group='Content Control')
+register_cli_argument('storage blob upload-batch', 'max_connections', type=int)
 
 for item in ['file', 'blob']:
     register_cli_argument('storage {} url'.format(item), 'protocol', help='Protocol to use.', default='https', **enum_choice_list(['http', 'https']))
