@@ -84,6 +84,14 @@ cli_storage_data_plane_command('storage blob copy start', 'azure.storage.blob.bl
 cli_storage_data_plane_command('storage blob copy start-batch', 'azure.cli.command_modules.storage.blob#storage_blob_copy_batch', factory)
 cli_storage_data_plane_command('storage blob copy cancel', 'azure.storage.blob.blockblobservice#BlockBlobService.abort_copy_blob', factory)
 
+cli_storage_data_plane_command('storage blob upload-batch',
+                               'azure.cli.command_modules.storage.blob#storage_blob_upload_batch',
+                               factory)
+
+cli_storage_data_plane_command('storage blob download-batch',
+                               'azure.cli.command_modules.storage.blob#storage_blob_download_batch',
+                               factory)
+
 # share commands
 factory = file_data_service_factory
 cli_storage_data_plane_command('storage share list', 'azure.storage.file.fileservice#FileService.list_shares', factory, transform=transform_storage_list_output, table_transformer=transform_share_list)
