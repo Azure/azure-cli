@@ -6,6 +6,7 @@
 from collections import defaultdict
 import sys
 import os
+import re
 import uuid
 import argparse
 from azure.cli.core.parser import AzCliCommandParser, enable_autocomplete
@@ -197,9 +198,23 @@ class Application(object):
                                   help='Increase logging verbosity to show all debug logs.')
 
     @staticmethod
+    def _maybe_load_file(arg):
+        ix = arg.find('@')
+        if ix == -1:
+            return arg
+
+        if ix == 0:
+            return Application._load_file(arg[1:])
+
+        res = re.match('(\\-\\-?[a-zA-Z0-9]+[\\-a-zA-Z0-9]*\\=)\\"?@([^\\"]*)\\"?', arg)
+        if not res:
+            return arg
+        return res.group(1) + Application._load_file(res.group(2))
+
+    @staticmethod
     def _expand_file_prefixed_files(argv):
         return list(
-            [Application._load_file(arg[1:]) if arg.startswith('@') else arg for arg in argv]
+            [Application._maybe_load_file(arg) for arg in argv]
             )
 
     @staticmethod
