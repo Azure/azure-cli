@@ -19,17 +19,22 @@ from azure.cli.command_modules.resource._client_factory import (_resource_client
                                                                 cf_policy_definitions)
 
 # Resource group commands
+def transform_resource_group_list(result):
+    return [OrderedDict([('Name', r['name']), \
+            ('Location', r['location']), ('Status', r['properties']['provisioningState'])]) for r in result]
+
 cli_command(__name__, 'resource group delete', 'azure.mgmt.resource.resources.operations.resource_groups_operations#ResourceGroupsOperations.delete', cf_resource_groups)
 cli_command(__name__, 'resource group show', 'azure.mgmt.resource.resources.operations.resource_groups_operations#ResourceGroupsOperations.get', cf_resource_groups)
 cli_command(__name__, 'resource group exists', 'azure.mgmt.resource.resources.operations.resource_groups_operations#ResourceGroupsOperations.check_existence', cf_resource_groups)
-cli_command(__name__, 'resource group list', 'azure.cli.command_modules.resource.custom#list_resource_groups')
+cli_command(__name__, 'resource group list', 'azure.cli.command_modules.resource.custom#list_resource_groups', table_transformer=transform_resource_group_list)
 cli_command(__name__, 'resource group create', 'azure.cli.command_modules.resource.custom#create_resource_group')
 cli_command(__name__, 'resource group export', 'azure.cli.command_modules.resource.custom#export_group_as_template')
 
 # Resource commands
+
 def transform_resource_list(result):
     return [OrderedDict([('Name', r['name']), ('ResourceGroup', r['resourceGroup']), \
-            ('Location', r['location']), ('Type', r['type'])]) for r in result]
+            ('Location', r['location']), ('Type', r['type']), ('Status', r['properties']['provisioningState'])]) for r in result]
 
 cli_command(__name__, 'resource delete', 'azure.cli.command_modules.resource.custom#delete_resource')
 cli_command(__name__, 'resource show', 'azure.cli.command_modules.resource.custom#show_resource')
