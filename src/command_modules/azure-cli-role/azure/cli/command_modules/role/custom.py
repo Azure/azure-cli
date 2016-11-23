@@ -513,7 +513,7 @@ def reset_service_principal_credential(name, password=None, years=1):
 
     #build a new password credential and patch it
     password = password or str(uuid.uuid4())
-    start_date = datetime.datetime.now()
+    start_date = datetime.datetime.utcnow()
     end_date = start_date + relativedelta(years=years)
     key_id = str(uuid.uuid4())
     app_cred = PasswordCredential(start_date, end_date, key_id, password)
