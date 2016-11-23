@@ -902,7 +902,7 @@ class VMCreateUbuntuScenarioTest(ResourceGroupVCRTestBase): #pylint: disable=too
 class VMMultiNicScenarioTest(ResourceGroupVCRTestBase): #pylint: disable=too-many-instance-attributes
 
     def __init__(self, test_method):
-        super(VMMultiNicScenarioTest, self).__init__(__file__, test_method, debug=True)
+        super(VMMultiNicScenarioTest, self).__init__(__file__, test_method)
         self.resource_group = 'cli_test_multi_nic_vm'
         self.vm_name = 'multinicvm1'
 

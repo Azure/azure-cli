@@ -691,10 +691,12 @@ def show_default_diagnostics_configuration(is_windows_os=False):
     '''show the default config file which defines data to be collected'''
     return get_default_diag_config(is_windows_os)
 
-def vm_show_nic(resource_group_name, vm_name, nic=None):
+def vm_show_nic(resource_group_name, vm_name, nic):
     ''' Show details of a network interface configuration attached to a virtual machine '''
     vm = _vm_get(resource_group_name, vm_name)
-    found = next((n for n in vm.network_profile.network_interfaces if nic in n.id), None) # pylint: disable=no-member
+    found = next(
+        (n for n in vm.network_profile.network_interfaces if nic.lower() == n.id.lower()), None # pylint: disable=no-member
+    )
     if found:
         from azure.mgmt.network import NetworkManagementClient
         network_client = get_mgmt_service_client(NetworkManagementClient)
