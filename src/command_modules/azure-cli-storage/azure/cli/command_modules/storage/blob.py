@@ -127,7 +127,8 @@ def storage_blob_copy_batch(client, source_account, source_container, destinatio
 
 
 #pylint: disable=unused-argument
-def storage_blob_download_batch(client, source, destination, source_container_name, pattern=None, dryrun=False):
+def storage_blob_download_batch(client, source, destination, source_container_name, pattern=None,
+                                dryrun=False):
     """
     Download blobs in a container recursively
 
@@ -173,13 +174,13 @@ def storage_blob_download_batch(client, source, destination, source_container_na
     result = []
     if dryrun:
         logger = get_az_logger(__name__)
-        logger.warning('download action: from {} to {}'.format(source, destination))
-        logger.warning('    pattern {}'.format(pattern))
-        logger.warning('  container {}'.format(source_container_name))
-        logger.warning('      total {}'.format(len(source_blobs)))
+        logger.warning('download action: from %s to %s', source, destination)
+        logger.warning('    pattern %s', pattern)
+        logger.warning('  container %s', source_container_name)
+        logger.warning('      total %d', len(source_blobs))
         logger.warning(' operations')
         for b in source_blobs or []:
-            logger.warning('  - {}'.format(b))
+            logger.warning('  - %s', b)
     else:
         # TODO: try catch IO exception
         for blob in source_blobs:
@@ -196,7 +197,7 @@ def storage_blob_download_batch(client, source, destination, source_container_na
 def storage_blob_upload_batch(client, source, destination, pattern=None, source_files=None,
                               destination_container_name=None, blob_type=None,
                               content_settings=None, metadata=None, validate_content=False,
-                              maxsize_condition=None, max_connections=2, lease_id=None,
+                              maxsize_condition=None, max_connections=1, lease_id=None,
                               if_modified_since=None, if_unmodified_since=None, if_match=None,
                               if_none_match=None, timeout=None, dryrun=False):
     """
@@ -271,14 +272,14 @@ def storage_blob_upload_batch(client, source, destination, pattern=None, source_
 
     if dryrun:
         logger = get_az_logger(__name__)
-        logger.warning('upload action: from {} to {}'.format(source, destination))
-        logger.warning('    pattern {}'.format(pattern))
-        logger.warning('  container {}'.format(destination_container_name))
-        logger.warning('       type {}'.format(blob_type))
-        logger.warning('      total {}'.format(len(source_files)))
+        logger.warning('upload action: from %s to %s', source, destination)
+        logger.warning('    pattern %s', pattern)
+        logger.warning('  container %s', destination_container_name)
+        logger.warning('       type %s', blob_type)
+        logger.warning('      total %d', len(source_files))
         logger.warning(' operations')
         for f in source_files or []:
-            logger.warning('  - {} => {}'.format(*f))
+            logger.warning('  - %s => %s', *f)
     else:
         for f in source_files or []:
             print('uploading {}'.format(f[0]))
