@@ -8,7 +8,6 @@ Help functions to extract storage account, container name, blob name and other i
 container and/or blob URL.
 """
 
-import sys
 from collections import namedtuple
 from azure.cli.core._profile import CLOUD
 
@@ -41,7 +40,7 @@ def parse_storage_url(url):
     blob = None
     snapshot = None
 
-    from six.moves.urllib.parse import urlparse
+    from six.moves.urllib.parse import urlparse #pylint: disable=import-error
 
     parsed_url = urlparse(url)
     if not parsed_url.scheme == 'http' and not parsed_url.scheme == 'https':
