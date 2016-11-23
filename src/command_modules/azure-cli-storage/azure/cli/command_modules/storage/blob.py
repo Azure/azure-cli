@@ -124,3 +124,147 @@ def storage_blob_copy_batch(client, source_account, source_container, destinatio
 
     return [BlobCopyResult(b.name, _copy_single_blob(b).id) for b in source_blobs]
 
+
+#pylint: disable=unused-argument
+def storage_blob_download_batch(client, source, destination, source_container_name, pattern=None):
+    """
+    Download blobs in a container recursively
+
+    :param str source:
+        The string represents the source of this download operation. The source can be the
+        container URL or the container name. When the source is the container URL, the storage
+        account name will parsed from the URL.
+
+    :param str destination:
+        The string represents the destination folder of this download operation. The folder must
+        exist.
+
+    :param str pattern:
+        The pattern is used for files globing. The supported patterns are '*', '?', '[seq]',
+        and '[!seq]'.
+    """
+    import os.path
+    from fnmatch import fnmatch
+
+    def _pattern_has_wildcards(p):
+        return not p or p.find('*') != -1 or p.find('?') != -1 or p.find('[') != -1
+
+    source_blobs = []
+    if not _pattern_has_wildcards(pattern):
+        source_blobs.append(pattern)
+    else:
+        # IDEA:
+        # 1. Listing is slow. It can be done in parallel with copying.
+        # 2. Use the prefix parameter to reduce the returned blobs list size
+        source_blobs = client.list_blobs(source_container_name)
+
+        if pattern:
+            source_blobs = [blob.name for blob in source_blobs if fnmatch(blob.name, pattern)]
+        else:
+            source_blobs = [blob.name for blob in source_blobs]
+
+        if not any(source_blobs):
+            return []
+
+    # TODO: try catch IO exception
+    result = []
+    for blob in source_blobs:
+        dst = os.path.join(destination, blob)
+        dst_folder = os.path.dirname(dst)
+        if not os.path.exists(dst_folder):
+            os.makedirs(dst_folder)
+
+        result.append(client.get_blob_to_path(source_container_name, blob, dst))
+
+    return result
+
+def storage_blob_upload_batch(client, source, destination, pattern=None, source_files=None,
+                              destination_container_name=None, blob_type=None,
+                              content_settings=None, metadata=None, validate_content=False,
+                              maxsize_condition=None, max_connections=2, lease_id=None,
+                              if_modified_since=None, if_unmodified_since=None, if_match=None,
+                              if_none_match=None, timeout=None, dryrun=False):
+    """
+    Upload files to storage container as blobs
+
+    :param str source:
+        The directory where the files to be uploaded.
+
+    :param str destination:
+        The string represents the destination of this upload operation. The source can be the
+        container URL or the container name. When the source is the container URL, the storage
+        account name will parsed from the URL.
+
+    :param str pattern:
+        The pattern is used for files globing. The supported patterns are '*', '?', '[seq]',
+        and '[!seq]'.
+
+    :param bool dryrun:
+        Show the summary of the operations to be taken instead of actually upload the file(s)
+
+    :param string if_match:
+        An ETag value, or the wildcard character (*). Specify this header to perform the operation
+        only if the resource's ETag matches the value specified.
+
+    :param string if_none_match:
+        An ETag value, or the wildcard character (*). Specify this header to perform the
+        operation only if the resource's ETag does not match the value specified. Specify the
+        wildcard character (*) to perform the operation only if the resource does not exist,
+        and fail the operation if it does exist.
+    """
+    def _append_blob(file_path, blob_name):
+        if not client.exists(destination_container_name, blob_name):
+            client.create_blob(
+                container_name=destination_container_name,
+                blob_name=blob_name,
+                content_settings=content_settings,
+                metadata=metadata,
+                lease_id=lease_id,
+                if_modified_since=if_modified_since,
+                if_match=if_match,
+                if_none_match=if_none_match,
+                timeout=timeout)
+
+        return client.append_blob_from_path(
+            container_name=destination_container_name,
+            blob_name=blob_name,
+            file_path=file_path,
+            progress_callback=lambda c, t: None,
+            validate_content=validate_content,
+            maxsize_condition=maxsize_condition,
+            lease_id=lease_id,
+            timeout=timeout)
+
+    def _upload_blob(file_path, blob_name):
+        return client.create_blob_from_path(
+            container_name=destination_container_name,
+            blob_name=blob_name,
+            file_path=file_path,
+            progress_callback=lambda c, t: None,
+            content_settings=content_settings,
+            metadata=metadata,
+            validate_content=validate_content,
+            max_connections=max_connections,
+            lease_id=lease_id,
+            if_modified_since=if_modified_since,
+            if_unmodified_since=if_unmodified_since,
+            if_match=if_match,
+            if_none_match=if_none_match,
+            timeout=timeout)
+
+    upload_action = _upload_blob if blob_type == 'block' or blob_type == 'page' else _append_blob
+
+    if dryrun:
+        print('upload action: from {} to {}'.format(source, destination))
+        print('    pattern {}'.format(pattern))
+        print('  container {}'.format(destination_container_name))
+        print('       type {}'.format(blob_type))
+        print('      total {}'.format(len(source_files)))
+        print(' operations')
+        for f in source_files or []:
+            print('  - {} => {}'.format(*f))
+    else:
+        for f in source_files or []:
+            print('uploading {}'.format(f[0]))
+            upload_action(*f)
+
