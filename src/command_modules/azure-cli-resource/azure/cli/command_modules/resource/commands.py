@@ -61,8 +61,13 @@ cli_command(__name__, 'tag add-value', 'azure.mgmt.resource.resources.operations
 cli_command(__name__, 'tag remove-value', 'azure.mgmt.resource.resources.operations.tags_operations#TagsOperations.delete_value', cf_tags)
 
 # Resource group deployment commands
+def transform_deployments_list(result):
+    sort_list = sorted(result, key=lambda deployment: deployment['properties']['timestamp'])
+    return [OrderedDict([('Name', r['name']), \
+            ('Timestamp', r['properties']['timestamp']), ('State', r['properties']['provisioningState'])]) for r in sort_list]
+
 cli_command(__name__, 'resource group deployment create', 'azure.cli.command_modules.resource.custom#deploy_arm_template')
-cli_command(__name__, 'resource group deployment list', 'azure.mgmt.resource.resources.operations.deployments_operations#DeploymentsOperations.list', cf_deployments)
+cli_command(__name__, 'resource group deployment list', 'azure.mgmt.resource.resources.operations.deployments_operations#DeploymentsOperations.list', cf_deployments, table_transformer=transform_deployments_list)
 cli_command(__name__, 'resource group deployment show', 'azure.mgmt.resource.resources.operations.deployments_operations#DeploymentsOperations.get', cf_deployments)
 cli_command(__name__, 'resource group deployment delete', 'azure.mgmt.resource.resources.operations.deployments_operations#DeploymentsOperations.delete', cf_deployments)
 cli_command(__name__, 'resource group deployment validate', 'azure.cli.command_modules.resource.custom#validate_arm_template')
