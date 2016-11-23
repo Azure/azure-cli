@@ -37,9 +37,9 @@ def output_format(result):
     :param list/dict result: The (list of) container registry object(s)
     '''
     obj_list = result if isinstance(result, list) else [result]
-    return [_format_registry(item) for item in obj_list]
+    return [_format_group(item) for item in obj_list]
 
-def _format_registry(item):
+def _format_group(item):
     '''Returns an ordered dictionary of the container registry.
     :param dict item: The container registry object
     '''
