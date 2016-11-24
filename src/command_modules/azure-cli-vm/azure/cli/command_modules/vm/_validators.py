@@ -16,7 +16,7 @@ def validate_nsg_name(namespace):
     namespace.network_security_group_name = namespace.network_security_group_name \
         or '{}NSG{}'.format(namespace.vm_name, random.randint(1, 999))
 
-def validate_vm_nics(namespace):
+def validate_vm_create_nics(namespace):
     from azure.cli.core.commands.client_factory import get_subscription_id
     nics_value = namespace.network_interface_ids
     nics = []
@@ -46,6 +46,36 @@ def validate_vm_nics(namespace):
     namespace.network_interface_type = 'existing'
 
     namespace.public_ip_address_type = 'none'
+
+def _get_nic_id(val, resource_group, subscription):
+    from azure.cli.core.commands.arm import is_valid_resource_id
+    if is_valid_resource_id(val):
+        return val
+    else:
+        return resource_id(
+            name=val,
+            resource_group=resource_group,
+            namespace='Microsoft.Network',
+            type='networkInterfaces',
+            subscription=subscription)
+
+def validate_vm_nic(namespace):
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    namespace.nic = _get_nic_id(namespace.nic, namespace.resource_group_name, get_subscription_id())
+
+def validate_vm_nics(namespace):
+    from azure.cli.core.commands.client_factory import get_subscription_id
+
+    subscription = get_subscription_id()
+    rg = namespace.resource_group_name
+    nic_ids = []
+
+    for n in namespace.nics:
+        nic_ids.append(_get_nic_id(n, rg, subscription))
+    namespace.nics = nic_ids
+
+    if hasattr(namespace, 'primary_nic') and namespace.primary_nic:
+        namespace.primary_nic = _get_nic_id(namespace.primary_nic, rg, subscription)
 
 def validate_default_vnet(namespace):
     ns = namespace
