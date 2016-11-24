@@ -240,6 +240,7 @@ class VCRTestBase(unittest.TestCase):#pylint: disable=too-many-instance-attribut
             cassette_library_dir=self.recording_dir,
             before_record_request=VCRTestBase._before_record_request,
             before_record_response=VCRTestBase._before_record_response,
+            decode_compressed_response=True
         )
         self.my_vcr.register_matcher('custom', _custom_request_matcher)
         self.my_vcr.match_on = ['custom']
@@ -278,6 +279,19 @@ class VCRTestBase(unittest.TestCase):#pylint: disable=too-many-instance-attribut
         for key in VCRTestBase.FILTER_HEADERS:
             if key in response['headers']:
                 del response['headers'][key]
+
+        def _scrub_body_parameters(value):
+            value = re.sub('/subscriptions/([^/]+)/',
+                           '/subscriptions/{}/'.format(MOCKED_SUBSCRIPTION_ID), value)
+            return value
+
+        for key in response['body']:
+            value = response['body'][key].decode('utf-8')
+            value = _scrub_body_parameters(value)
+            try:
+                response['body'][key] = bytes(value, 'utf-8')
+            except TypeError:
+                response['body'][key] = value.encode('utf-8')
         return response
 
     @mock.patch('azure.cli.main.handle_exception', _mock_handle_exceptions)
