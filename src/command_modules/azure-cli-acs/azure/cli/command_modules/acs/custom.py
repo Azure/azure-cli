@@ -29,6 +29,7 @@ from azure.cli.command_modules.vm.mgmt_acs.lib import \
     AcsCreationClient as ACSClient
 # pylint: disable=too-few-public-methods,too-many-arguments,no-self-use,line-too-long
 from azure.cli.core._util import CLIError
+from azure.cli.core._profile import Profile
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.mgmt.compute import ComputeManagementClient
 from azure.cli.core._environment import get_config_dir
@@ -271,6 +272,11 @@ def acs_create(resource_group_name, deployment_name, dns_name_prefix, name, ssh_
      if raw=true
     :raises: :class:`CloudError<msrestazure.azure_exceptions.CloudError>`
     """
+    if not dns_name_prefix:
+        # Use subscription id to provide uniqueness and prevent DNS name clashes
+        _, subscription_id, _ = Profile().get_login_credentials(subscription_id=None)
+        dns_name_prefix = '{}-{}'.format(name, subscription_id[0:6])
+
     register_providers()
     groups = _resource_client_factory().resource_groups
     # Just do the get, we don't need the result, it will error out if the group doesn't exist.

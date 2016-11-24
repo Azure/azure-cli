@@ -52,7 +52,7 @@ register_cli_argument('acs', 'name', arg_type=name_arg_type, help='ACS cluster n
 register_cli_argument('acs', 'orchestrator_type', **enum_choice_list(ContainerServiceOchestratorTypes))
 #some admin names are prohibited in acs, such as root, admin, etc. Because we have no control on the orchestrators, so default to a safe name.
 register_cli_argument('acs', 'admin_username', options_list=('--admin-username',), default='azureuser', required=False)
-register_cli_argument('acs', 'dns_name_prefix', options_list=('--dns-prefix', '-d'))
+register_cli_argument('acs', 'dns_name_prefix', options_list=('--dns-prefix', '-d'), default=None, required=False)
 register_cli_argument('acs', 'container_service_name', options_list=('--name', '-n'), help='The name of the container service', completer=get_resource_name_completion_list('Microsoft.ContainerService/ContainerServices'))
 
 register_cli_argument('acs', 'ssh_key_value', required=False, help='SSH key file value or key file path.', default=os.path.join(os.path.expanduser('~'), '.ssh', 'id_rsa.pub'), completer=FilesCompleter())
