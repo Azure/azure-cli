@@ -11,6 +11,7 @@ import os.path
 import platform
 import random
 import stat
+import socket
 import string
 import subprocess
 import sys
@@ -336,14 +337,14 @@ def _create_kubernetes(resource_group_name, deployment_name, dns_name_prefix, na
                     },
                     "masterProfile": {
                         "count": 1,
-                        "dnsPrefix": dns_name_prefix + '-k8s-masters'
+                        "dnsPrefix": dns_name_prefix
                     },
                     "agentPoolProfiles": [
                         {
                             "name": "agentpools",
                             "count": agent_count,
                             "vmSize": agent_vm_size,
-                            "dnsPrefix": dns_name_prefix + '-k8s-agents',
+                            "dnsPrefix": dns_name_prefix + '-k8s-agents'
                         }
                     ],
                     "linuxProfile": {
@@ -393,6 +394,7 @@ def acs_get_credentials(name=None, resource_group_name=None, dns_prefix=None, lo
 
     # TODO: this only works for public cloud, need other casing for national clouds
     acs_client.SecureCopy('azureuser', '{}.{}.cloudapp.azure.com'.format(dns_prefix, location),
+<<<<<<< effe31657f98b7722ec8107e784d5721bfd54b89
                           '.kube/config', path_candidate)
 
     # merge things
