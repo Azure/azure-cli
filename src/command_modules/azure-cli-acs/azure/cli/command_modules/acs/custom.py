@@ -10,6 +10,7 @@ import os
 import os.path
 import platform
 import random
+import stat
 import string
 import subprocess
 import sys
@@ -140,6 +141,7 @@ def dcos_install_cli(install_location=None, client_version='1.8'):
     logger.info('Downloading client to %s', install_location)
     try:
         urlretrieve(file_url, install_location)
+        os.chmod(install_location, os.stat(install_location).st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
     except IOError as err:
         raise CLIError('Connection error while attempting to download client ({})'.format(err))
 
@@ -163,6 +165,7 @@ def k8s_install_cli(client_version="1.4.5", install_location=None):
     logger.info('Downloading client to %s', install_location)
     try:
         urlretrieve(file_url, install_location)
+        os.chmod(install_location, os.stat(install_location).st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
     except IOError as err:
         raise CLIError('Connection error while attempting to download client ({})'.format(err))
 
