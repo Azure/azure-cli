@@ -353,15 +353,19 @@ def cli_generic_wait_command(module_name, name, getter_op, factory=None, table_t
         wait_for_created = args.pop('created')
         wait_for_deleted = args.pop('deleted')
         wait_for_updated = args.pop('updated')
+        wait_for_exists = args.pop('exists')
         property_condition = args.pop('property')
-        if not any([wait_for_created, wait_for_updated, wait_for_deleted, property_condition]):
-            raise CLIError("Please specify at least one flag for 'create', 'updated', 'delete', or 'property'")#pylint: disable=line-too-long
+        if not any([wait_for_created, wait_for_updated, wait_for_deleted,
+                    wait_for_exists, property_condition]):
+            raise CLIError("Please specify at least one flag from 'create', 'updated', 'delete', 'exits', or 'property'")#pylint: disable=line-too-long
 
         for _ in range(0, timeout, interval):
             try:
                 instance = getter(client, **getterargs) if client else getter(**getterargs)
+                if wait_for_exists:
+                    return
                 provisioning_state = get_provisioning_state(instance)
-                #untill we have any needs to wait for `Failed`, let us bail out on this
+                #until we have any needs to wait for 'Failed', let us bail out on this
                 if provisioning_state == 'Failed':
                     raise CLIError()
                 if wait_for_created or wait_for_updated:
@@ -373,7 +377,7 @@ def cli_generic_wait_command(module_name, name, getter_op, factory=None, table_t
                 if getattr(ex, 'status_code', None) == 404:
                     if wait_for_deleted:
                         return
-                    if not wait_for_created:
+                    if not wait_for_created and not wait_for_exists:
                         raise
                 else:
                     raise
@@ -395,10 +399,12 @@ def cli_generic_wait_command(module_name, name, getter_op, factory=None, table_t
                      help="wait till created with 'provisitioningState' at 'Succeeded'")
     cmd.add_argument('updated', '--updated', action='store_true', arg_group=group_name,
                      help="wait till updated with provisitioningState at 'Succeeded'")
+    cmd.add_argument('exists', '--exists', action='store_true', arg_group=group_name,
+                     help="wait till the resource exists")
     cmd.add_argument('property', '--property', arg_group=group_name,
                      help=("wait till property meets the condition, using JMESPath query. E.g. "
                            "provisioningState!='InProgress', "
-                           "instanceView.statuses[1].code=='PowerState/running'"))
+                           "instanceView.statuses[?code=='PowerState/running']"))
     main_command_table[name] = cmd
     main_command_module_map[name] = module_name
 
