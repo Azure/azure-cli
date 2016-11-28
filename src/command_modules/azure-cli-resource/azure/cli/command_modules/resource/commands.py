@@ -33,8 +33,16 @@ cli_command(__name__, 'resource group export', 'azure.cli.command_modules.resour
 # Resource commands
 
 def transform_resource_list(result):
-    return [OrderedDict([('Name', r['name']), ('ResourceGroup', r['resourceGroup']), \
-            ('Location', r['location']), ('Type', r['type']), ('Status', r['properties']['provisioningState'])]) for r in result]
+    transformed = []
+    for r in result:
+        res = OrderedDict([('Name', r['name']), ('ResourceGroup', r['resourceGroup']), \
+            ('Location', r['location']), ('Type', r['type'])])
+        try:
+            res['Status'] = r['properties']['provisioningStatus']
+        except TypeError:
+            res['Status'] = ' '
+        transformed.append(res)
+    return transformed
 
 cli_command(__name__, 'resource delete', 'azure.cli.command_modules.resource.custom#delete_resource')
 cli_command(__name__, 'resource show', 'azure.cli.command_modules.resource.custom#show_resource')
