@@ -836,6 +836,37 @@ def create_vpn_gateway_root_cert(resource_group_name, gateway_name, public_cert_
     return ncf.create_or_update(resource_group_name, gateway_name, gateway)
 #endregion
 
+#region Local Gateway commands
+
+def update_local_gateway(instance, gateway_ip_address=None, local_address_prefix=None, asn=None,
+                         bgp_peering_address=None, peer_weight=None, tags=None):
+
+    if any([asn, bgp_peering_address, peer_weight]):
+        if instance.bgp_settings is not None:
+            # update existing parameters selectively
+            if asn is not None:
+                instance.bgp_settings.asn = asn
+            if peer_weight is not None:
+                instance.bgp_settings.peer_weight = peer_weight
+            if bgp_peering_address is not None:
+                instance.bgp_settings.bgp_peering_address = bgp_peering_address
+        elif asn and bgp_peering_address:
+            from azure.mgmt.network.models import BgpSettings
+            instance.bgp_settings = BgpSettings(asn, bgp_peering_address, peer_weight)
+        else:
+            raise CLIError(
+                'incorrect usage: --asn ASN --bgp-peering-address IP [--peer-weight WEIGHT]')
+
+    if gateway_ip_address is not None:
+        instance.gateway_ip_address = gateway_ip_address
+    if local_address_prefix is not None:
+        instance.local_address_prefix = local_address_prefix
+    if tags is not None:
+        instance.tags = tags
+    return instance
+
+#endregion
+
 #region Traffic Manager Commands
 def list_traffic_manager_profiles(resource_group_name=None):
     ncf = get_mgmt_service_client(TrafficManagerManagementClient).profiles

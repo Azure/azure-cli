@@ -161,7 +161,8 @@ cli_command(__name__, 'network local-gateway list', 'azure.mgmt.network.operatio
 cli_generic_update_command(__name__, 'network local-gateway update',
                            'azure.mgmt.network.operations.local_network_gateways_operations#LocalNetworkGatewaysOperations.get',
                            'azure.mgmt.network.operations.local_network_gateways_operations#LocalNetworkGatewaysOperations.create_or_update',
-                           cf_local_network_gateways)
+                           cf_local_network_gateways,
+                           custom_function_op='azure.cli.command_modules.network.custom#update_local_gateway')
 
 cli_command(__name__, 'network local-gateway create',
             'azure.cli.command_modules.network.mgmt_local_gateway.lib.operations.local_gateway_operations#LocalGatewayOperations.create_or_update',

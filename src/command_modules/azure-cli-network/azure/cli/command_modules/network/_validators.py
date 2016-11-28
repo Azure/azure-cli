@@ -362,6 +362,13 @@ def process_lb_frontend_ip_namespace(namespace):
     else:
         get_public_ip_validator()(namespace)
 
+def process_local_gateway_create_namespace(namespace):
+    ns = namespace
+    ns.use_bgp_settings = any([ns.asn or ns.bgp_peering_address or ns.peer_weight])
+    if ns.use_bgp_settings and (not ns.asn or not ns.bgp_peering_address):
+        raise ValueError(
+            'incorrect usage: --bgp-peering-address IP --asn ASN [--peer-weight WEIGHT]')
+
 def process_nic_create_namespace(namespace):
 
     # process folded parameters
