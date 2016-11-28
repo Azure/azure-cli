@@ -26,7 +26,6 @@ If you already have the CLI installed, run the following to update:
 
 If you don't have the CLI installed, see below.
 
-
 Install with pip
 ^^^^^^^^^^^^^^^^
 
@@ -78,26 +77,6 @@ Use ``pip install requests==2.11.1``.
 
 NOTE: If in a virtual environment, you can simply use ``pip install azure-cli`` and the CLI will be installed into that virtual environment.
 
-Install with interactive install script
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-For OSX and Linux, you can install using curl: 
-
-.. code-block:: console
-
-   $ curl -L https://aka.ms/InstallAzureCli | bash
-
-or using wget:
-
-.. code-block:: console
-
-   $ wget -q -O - https://aka.ms/InstallAzureCli | bash
-
-Some prerequisites may be required. See our `Preview Install Guide <https://github.com/Azure/azure-cli/blob/master/doc/preview_install_guide.md>`__.
-
-If you run into an ``AttributeError: 'X509' object has no attribute '_x509'`` error, downgrade your version of the requests library from 2.12.1 to 2.11.1.
-With the default install location, use ``/usr/local/az/bin/pip install requests==2.11.1``.
-
 Install with apt-get
 ^^^^^^^^^^^^^^^^^^^^
 
@@ -120,16 +99,37 @@ See our `Docker tags <https://hub.docker.com/r/azuresdk/azure-cli-python/tags/>`
 
 .. code-block:: console
 
-   $ docker run -it azuresdk/azure-cli-python:<version>
+   $ docker run -v $HOME:/root -it azuresdk/azure-cli-python:<version>
 
 Run the latest automated Docker build with the command below.
 All command modules are included in this version as the image is built directly from the Git repository.
 
 .. code-block:: console
 
-   $ docker run -it azuresdk/azure-cli-python:latest
+   $ docker run -v $HOME:/root -it azuresdk/azure-cli-python:latest
 
 For installation steps for common platforms, as well as dependency troubleshooting, please take a look at our `installation guide <http://github.com/Azure/azure-cli/blob/master/doc/preview_install_guide.md>`__.
+
+
+Install with interactive install script
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+For OSX and Linux, you can install using curl: 
+
+.. code-block:: console
+
+   $ curl -L https://aka.ms/InstallAzureCli | bash
+
+or using wget:
+
+.. code-block:: console
+
+   $ wget -q -O - https://aka.ms/InstallAzureCli | bash
+
+Some prerequisites may be required. See our `Preview Install Guide <https://github.com/Azure/azure-cli/blob/master/doc/preview_install_guide.md>`__.
+
+If you run into an ``AttributeError: 'X509' object has no attribute '_x509'`` error, downgrade your version of the requests library from 2.12.1 to 2.11.1.
+With the default install location, use ``/usr/local/az/bin/pip install requests==2.11.1``.
 
 Usage
 =====
