@@ -27,9 +27,12 @@ def list_subscriptions(list_all=False): # pylint: disable=redefined-builtin
         sub['cloudName'] = sub.pop('environmentName', None)
     return [sub for sub in subscriptions if list_all or sub['cloudName'] == CLOUD.name]
 
-def show_subscription(subscription=None):
+def show_subscription(subscription=None, expanded_view=None):
     profile = Profile()
-    return profile.get_subscription(subscription)
+    if not expanded_view:
+        return profile.get_subscription(subscription)
+    else:
+        return profile.get_expanded_subscription_info(subscription)
 
 def set_active_subscription(subscription):
     '''Set the current subscription'''

@@ -9,6 +9,7 @@ import argcomplete
 
 import azure.cli.core._help as _help
 from azure.cli.core._util import CLIError
+from azure.cli.core._pkg_util import handle_module_not_installed
 
 class IncorrectUsageError(CLIError):
     '''Raised when a command is incorrectly used and the usage should be
@@ -113,6 +114,16 @@ class AzCliCommandParser(argparse.ArgumentParser):
                 self.subparsers[tuple(path[0:length])] = parent_subparser
         return parent_subparser
 
+    def _handle_command_package_error(self, err_msg): #pylint: disable=no-self-use
+        if err_msg and err_msg.startswith('argument _command_package: invalid choice:'):
+            import re
+            try:
+                possible_module = re.search("argument _command_package: invalid choice: '(.+?)'",
+                                            err_msg).group(1)
+                handle_module_not_installed(possible_module)
+            except AttributeError:
+                pass
+
     def validation_error(self, message):
         from azure.cli.core.telemetry import log_telemetry
         log_telemetry('validation error', log_type='trace', prog=self.prog)
@@ -121,6 +132,7 @@ class AzCliCommandParser(argparse.ArgumentParser):
     def error(self, message):
         from azure.cli.core.telemetry import log_telemetry
         log_telemetry('parse error', message=message, prog=self.prog)
+        self._handle_command_package_error(message)
         return super(AzCliCommandParser, self).error(message)
 
     def format_help(self):

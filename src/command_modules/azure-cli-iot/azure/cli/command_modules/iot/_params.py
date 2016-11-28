@@ -2,17 +2,17 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-#pylint: disable=line-too-long
+# pylint: disable=line-too-long
 
 from azure.cli.core.commands.parameters import \
-    (location_type, enum_choice_list, get_resource_name_completion_list, CliArgumentType)
+    location_type, enum_choice_list, get_resource_name_completion_list, CliArgumentType
 from azure.cli.core.commands import register_cli_argument
 from azure.mgmt.iothub.models.iot_hub_client_enums import IotHubSku
 from ._factory import iot_hub_service_factory
-from .custom import iot_device_list
+from .custom import iot_device_list, KeyType
 
 
-def get_device_id_completion_list(prefix, action, parsed_args, **kwargs):#pylint: disable=unused-argument
+def get_device_id_completion_list(prefix, action, parsed_args, **kwargs):  # pylint: disable=unused-argument
     client = iot_hub_service_factory(kwargs)
     return [d.device_id for d in iot_device_list(client, parsed_args.hub_name, top=100)] if parsed_args.hub_name else []
 
@@ -20,7 +20,7 @@ hub_name_type = CliArgumentType(completer=get_resource_name_completion_list('Mic
                                 help='IoT Hub name.')
 
 register_cli_argument('iot hub', 'hub_name', hub_name_type, options_list=('--name', '-n'))
-for subgroup in ['consumer-group', 'policy']:
+for subgroup in ['consumer-group', 'policy', 'job']:
     register_cli_argument('iot hub {}'.format(subgroup), 'hub_name', options_list=('--hub-name',))
 
 register_cli_argument('iot device', 'hub_name', hub_name_type)
@@ -36,8 +36,11 @@ register_cli_argument('iot hub consumer-group', 'event_hub_name', help='Target e
 # Arguments for 'iot hub policy' group
 register_cli_argument('iot hub policy', 'policy_name', options_list=('--name', '-n'), help='Share access policy name.')
 
+# Arguments for 'iot hub job' group
+register_cli_argument('iot hub job', 'job_id', help='Job Id.')
+
 # Arguments for 'iot hub create'
-register_cli_argument('iot hub create', 'hub_name', options_list=('--name', '-n'), completer=None)
+register_cli_argument('iot hub create', 'hub_name', completer=None)
 register_cli_argument('iot hub create', 'location', location_type,
                       help='Location of your IoT Hub. Default is the location of target resource group.')
 register_cli_argument('iot hub create', 'sku',
@@ -49,6 +52,8 @@ register_cli_argument('iot hub create', 'unit', help='Units in your IoT Hub.', t
 
 # Arguments for 'iot hub show-connection-string'
 register_cli_argument('iot hub show-connection-string', 'policy_name', help='Shared access policy to use.')
+register_cli_argument('iot hub show-connection-string', 'key_type', options_list=('--key',), help='The key to use.',
+                      **enum_choice_list(KeyType))
 
 # Arguments for 'iot device create'
 register_cli_argument('iot device create', 'device_id', completer=None)
@@ -76,5 +81,23 @@ register_cli_argument('iot device delete', 'etag',
                            'Default value is set to wildcard character (*) to force an unconditional delete.')
 
 # Arguments for 'iot device show-connection-string'
-register_cli_argument('iot device show-connection-string', 'top',
-                      help='Maximum number of connection strings to return.', type=int)
+register_cli_argument('iot device show-connection-string', 'top', type=int,
+                      help='Maximum number of connection strings to return.')
+register_cli_argument('iot device show-connection-string', 'key_type', options_list=('--key',), help='The key to use.',
+                      **enum_choice_list(KeyType))
+
+# Arguments for 'iot device message' group
+register_cli_argument('iot device message', 'lock_token', help='Message lock token.')
+
+# Arguments for 'iot device message send'
+register_cli_argument('iot device message send', 'data', help='Device-to-cloud message body.', arg_group='Messaging')
+register_cli_argument('iot device message send', 'message_id', help='Device-to-cloud message Id.', arg_group='Messaging')
+register_cli_argument('iot device message send', 'correlation_id', help='Device-to-cloud message correlation Id.',
+                      arg_group='Messaging')
+register_cli_argument('iot device message send', 'user_id', help='Device-to-cloud message user Id.',
+                      arg_group='Messaging')
+
+# Arguments for 'iot device message receive'
+register_cli_argument('iot device message receive', 'lock_timeout', type=int,
+                      help='In case a message returned to this call, this specifies the amount of time in seconds, '
+                           'the message will be invisible to other receive calls.')

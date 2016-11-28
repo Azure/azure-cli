@@ -86,6 +86,36 @@ helps['iot hub list-skus'] = """
     short-summary: List all valid pricing tiers.
 """
 
+helps['iot hub job'] = """
+    type: group
+    short-summary: Manage jobs in an IoT Hub.
+"""
+
+helps['iot hub job list'] = """
+    type: command
+    short-summary: List all jobs in an IoT Hub.
+"""
+
+helps['iot hub job show'] = """
+    type: command
+    short-summary: Show a job in an IoT Hub.
+"""
+
+helps['iot hub job cancel'] = """
+    type: command
+    short-summary: Cancel a job in an IoT Hub.
+"""
+
+helps['iot hub show-quota-metrics'] = """
+    type: command
+    short-summary: Show quota metrics for an IoT Hub.
+"""
+
+helps['iot hub show-stats'] = """
+    type: command
+    short-summary: Show stats of an IoT Hub.
+"""
+
 helps['iot device'] = """
     type: group
     short-summary: Manage devices attached to an IoT Hub.
@@ -111,7 +141,7 @@ helps['iot device create'] = """
         - name: Create a device authenticating with self-signed X.509 certificate,
                 which will be generated and output to specified directory.
           text: >
-            az iot device create --hub-name my-iot-hub --device-id my-device --x509 --output-directory /path/to/output
+            az iot device create --hub-name my-iot-hub --device-id my-device --x509 --output-dir /path/to/output
 """
 
 helps['iot device show'] = """
@@ -134,4 +164,34 @@ helps['iot device show-connection-string'] = """
     short-summary: Show connection string of device(s) in an IoT Hub.
     long-summary: If device id is not provided, connection strings for all devices in your IoT Hub will be returned.
                 Otherwise, connection string of target device will be returned.
+"""
+
+helps['iot device message'] = """
+    type: group
+    short-summary: IoT device messaging commands.
+"""
+
+helps['iot device message send'] = """
+    type: command
+    short-summary: Send a device-to-cloud message.
+"""
+
+helps['iot device message receive'] = """
+    type: command
+    short-summary: Receive a cloud-to-device message.
+"""
+
+helps['iot device message complete'] = """
+    type: command
+    short-summary: Complete a cloud-to-device message.
+"""
+
+helps['iot device message reject'] = """
+    type: command
+    short-summary: Reject a cloud-to-device message.
+"""
+
+helps['iot device message abandon'] = """
+    type: command
+    short-summary: Abandon a cloud-to-device message.
 """

@@ -10,6 +10,7 @@ import os
 import os.path
 import platform
 import random
+import stat
 import string
 import subprocess
 import sys
@@ -28,9 +29,27 @@ from azure.cli.command_modules.vm.mgmt_acs.lib import \
 from azure.cli.core._util import CLIError
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.mgmt.compute import ComputeManagementClient
-from azure.mgmt.resource.resources import ResourceManagementClient
 
 logger = _logging.get_az_logger(__name__)
+
+def _resource_client_factory():
+    from azure.mgmt.resource.resources import ResourceManagementClient
+    return get_mgmt_service_client(ResourceManagementClient)
+
+def cf_providers():
+    return _resource_client_factory().providers
+
+def register_providers():
+    providers = cf_providers()
+
+    namespaces = ['Microsoft.Network', 'Microsoft.Compute', 'Microsoft.Storage']
+    for namespace in namespaces:
+        state = providers.get(resource_provider_namespace=namespace)
+        if state.registration_state != 'Registered': # pylint: disable=no-member
+            logger.info('registering %s', namespace)
+            providers.register(resource_provider_namespace=namespace)
+        else:
+            logger.info('%s is already registered', namespace)
 
 def wait_then_open(url):
     """
@@ -122,6 +141,7 @@ def dcos_install_cli(install_location=None, client_version='1.8'):
     logger.info('Downloading client to %s', install_location)
     try:
         urlretrieve(file_url, install_location)
+        os.chmod(install_location, os.stat(install_location).st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
     except IOError as err:
         raise CLIError('Connection error while attempting to download client ({})'.format(err))
 
@@ -145,6 +165,7 @@ def k8s_install_cli(client_version="1.4.5", install_location=None):
     logger.info('Downloading client to %s', install_location)
     try:
         urlretrieve(file_url, install_location)
+        os.chmod(install_location, os.stat(install_location).st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
     except IOError as err:
         raise CLIError('Connection error while attempting to download client ({})'.format(err))
 
@@ -247,6 +268,7 @@ def acs_create(resource_group_name, deployment_name, dns_name_prefix, name, ssh_
      if raw=true
     :raises: :class:`CloudError<msrestazure.azure_exceptions.CloudError>`
     """
+    register_providers()
     if orchestrator_type == 'Kubernetes' or orchestrator_type == 'kubernetes':
         principalObj = load_acs_service_principal()
         if principalObj:
@@ -343,7 +365,7 @@ def _create_kubernetes(resource_group_name, deployment_name, dns_name_prefix, na
 
     properties = DeploymentProperties(template=template, template_link=None,
                                       parameters=None, mode='incremental')
-    smc = get_mgmt_service_client(ResourceManagementClient)
+    smc = _resource_client_factory()
     return smc.deployments.create_or_update(resource_group_name, deployment_name, properties)
 
 def acs_get_credentials(dns_prefix, location):

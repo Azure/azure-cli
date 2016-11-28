@@ -54,10 +54,13 @@ def show_storage_account_connection_string(
         resource_group_name, account_name, protocol='https', blob_endpoint=None,
         file_endpoint=None, queue_endpoint=None, table_endpoint=None, key_name='primary'):
     """ Generate connection string for a storage account."""
+    from azure.cli.core._profile import CLOUD
     scf = storage_client_factory()
     keys = scf.storage_accounts.list_keys(resource_group_name, account_name).keys #pylint: disable=no-member
-    connection_string = 'DefaultEndpointsProtocol={};AccountName={};AccountKey={}'.format(
+    endpoint_suffix = CLOUD.suffixes.storage_endpoint
+    connection_string = 'DefaultEndpointsProtocol={};EndpointSuffix={};AccountName={};AccountKey={}'.format(
         protocol,
+        endpoint_suffix,
         account_name,
         keys[0].value if key_name == 'primary' else keys[1].value) #pylint: disable=no-member
     connection_string = '{}{}'.format(connection_string, ';BlobEndpoint={}'.format(blob_endpoint) if blob_endpoint else '')
