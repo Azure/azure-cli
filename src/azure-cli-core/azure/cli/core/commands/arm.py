@@ -123,7 +123,8 @@ def add_id_parameters(command_table):
                                     "Property '%s=%s' being overriden by value '%s' from IDs parameter.", # pylint: disable=line-too-long
                                     arg.name, existing_values, parts[arg.id_part]
                                 )
-                                existing_values = [parts[arg.id_part]] # pylint: disable=redefined-variable-type
+                                existing_values = IterateValue()
+                                existing_values.append(parts[arg.id_part])
                             setattr(namespace, arg.name, existing_values)
                 except Exception as ex:
                     raise ValueError(ex)
