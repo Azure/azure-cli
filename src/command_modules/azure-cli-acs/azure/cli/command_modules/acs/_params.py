@@ -47,7 +47,6 @@ def _get_default_install_location(exe_name):
         install_location = None
     return install_location
 
-
 name_arg_type = CliArgumentType(options_list=('--name', '-n'), metavar='NAME')
 
 register_cli_argument('acs', 'name', arg_type=name_arg_type, help='ACS cluster name', completer=get_resource_name_completion_list('Microsoft.ContainerService/ContainerServices'))
