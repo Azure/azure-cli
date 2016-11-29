@@ -1,7 +1,7 @@
-#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
-#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 
 from __future__ import print_function
  # pylint: disable=protected-access, bad-continuation, too-many-public-methods, trailing-whitespace
@@ -35,6 +35,19 @@ class TestOutput(unittest.TestCase):
         """
         output_producer = OutputProducer(formatter=format_json, file=self.io)
         output_producer.out(CommandResultItem({'active': True, 'id': '0b1f6472'}))
+        self.assertEqual(util.normalize_newlines(self.io.getvalue()), util.normalize_newlines(
+"""{
+  "active": true,
+  "id": "0b1f6472"
+}
+"""))
+   
+    def test_out_json_from_ordered_dict(self):
+        """
+        The JSON output when the input is OrderedDict should be serialized to JSON
+        """
+        output_producer = OutputProducer(formatter=format_json, file=self.io)
+        output_producer.out(CommandResultItem(OrderedDict({'active': True, 'id': '0b1f6472'})))
         self.assertEqual(util.normalize_newlines(self.io.getvalue()), util.normalize_newlines(
 """{
   "active": true,

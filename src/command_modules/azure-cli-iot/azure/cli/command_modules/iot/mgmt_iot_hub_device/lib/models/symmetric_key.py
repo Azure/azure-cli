@@ -1,7 +1,7 @@
-#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
-#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 #pylint: skip-file
 # coding=utf-8
 # --------------------------------------------------------------------------
@@ -14,7 +14,7 @@ from msrest.serialization import Model
 
 
 class SymmetricKey(Model):
-    """SymmetricKey.
+    """Symmetric keys to access device.
 
     :param primary_key: The primary key.
     :type primary_key: str

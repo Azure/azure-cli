@@ -1,7 +1,7 @@
-#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
-#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 
 from __future__ import print_function
 import binascii
@@ -10,10 +10,14 @@ import os
 import os.path
 import platform
 import random
+import stat
 import string
+import subprocess
 import sys
 from six.moves.urllib.request import urlretrieve #pylint: disable=import-error
+import threading
 import time
+import webbrowser
 
 from msrestazure.azure_exceptions import CloudError
 
@@ -25,12 +29,53 @@ from azure.cli.command_modules.vm.mgmt_acs.lib import \
 from azure.cli.core._util import CLIError
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.mgmt.compute import ComputeManagementClient
-from azure.mgmt.resource.resources import ResourceManagementClient
 from azure.cli.core._environment import get_config_dir
 
 logger = _logging.get_az_logger(__name__)
 
-def dcos_browse(name, resource_group_name):
+def _resource_client_factory():
+    from azure.mgmt.resource.resources import ResourceManagementClient
+    return get_mgmt_service_client(ResourceManagementClient)
+
+def cf_providers():
+    return _resource_client_factory().providers
+
+def register_providers():
+    providers = cf_providers()
+
+    namespaces = ['Microsoft.Network', 'Microsoft.Compute', 'Microsoft.Storage']
+    for namespace in namespaces:
+        state = providers.get(resource_provider_namespace=namespace)
+        if state.registration_state != 'Registered': # pylint: disable=no-member
+            logger.info('registering %s', namespace)
+            providers.register(resource_provider_namespace=namespace)
+        else:
+            logger.info('%s is already registered', namespace)
+
+def wait_then_open(url):
+    """
+    Waits for a bit then opens a URL.  Useful for waiting for a proxy to come up, and then open the URL.
+    """
+    # TODO: we should ping the URL instead of just sleeping.
+    time.sleep(2)
+    webbrowser.open_new_tab(url)
+
+def wait_then_open_async(url):
+    t = threading.Thread(target=wait_then_open, args=({url}))
+    t.daemon = True
+    t.start()
+
+def k8s_browse(disable_browser=False):
+    """
+    Wrapper on the 'kubectl proxy' command, for consistency with 'az dcos browse'
+    """
+    logger.warning('Proxy running on 127.0.0.1:8001/ui')
+    logger.warning('Press CTRL+C to close the tunnel...')
+    if not disable_browser:
+        wait_then_open_async('http://127.0.0.1:8001/ui')
+    subprocess.call(["kubectl", "proxy"])
+
+def dcos_browse(name, resource_group_name, disable_browser=False):
     """
     Creates an SSH tunnel to the Azure container service, and opens the Mesosphere DC/OS dashboard in the browser.
 
@@ -60,8 +105,10 @@ def dcos_browse(name, resource_group_name):
 
     # Set the proxy
     proxy.set_http_proxy('127.0.0.1', local_port)
-    logger.info('Proxy running on 127.0.0.1:%s', local_port)
-    logger.info('Press CTRL+C to close the tunnel...')
+    logger.warning('Proxy running on 127.0.0.1:%s', local_port)
+    logger.warning('Press CTRL+C to close the tunnel...')
+    if not disable_browser:
+        wait_then_open_async('http://127.0.0.1:{}'.format(local_port))
     try:
         acs.create_tunnel(
             remote_host='127.0.0.1',
@@ -81,19 +128,21 @@ def dcos_install_cli(install_location=None, client_version='1.8'):
 
     if not install_location:
         raise CLIError("No install location specified and it could not be determined from the current platform '{}'".format(system))
-
+    base_url = 'https://downloads.dcos.io/binaries/cli/{}/x86-64/dcos-{}/{}'
     if system == 'Windows':
-        file_url = 'https://downloads.dcos.io/binaries/cli/windows/x86-64/dcos-{}/dcos.exe'.format(client_version)
+        file_url = base_url.format('windows', client_version, 'dcos.exe')
     elif system == 'Linux':
-        file_url = 'https://downloads.dcos.io/binaries/cli/linux/x86-64/dcos-{}/dcos'.format(client_version)
+        # TODO Support ARM CPU here
+        file_url = base_url.format('linux', client_version, 'dcos')
     elif system == 'Darwin':
-        file_url = 'https://downloads.dcos.io/binaries/cli/darwin/x86-64/dcos-{}/dcos'.format(client_version)
+        file_url = base_url.format('darwin', client_version, 'dcos')
     else:
         raise CLIError('Proxy server ({}) does not exist on the cluster.'.format(system))
 
     logger.info('Downloading client to %s', install_location)
     try:
         urlretrieve(file_url, install_location)
+        os.chmod(install_location, os.stat(install_location).st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
     except IOError as err:
         raise CLIError('Connection error while attempting to download client ({})'.format(err))
 
@@ -103,18 +152,21 @@ def k8s_install_cli(client_version="1.4.5", install_location=None):
     """
     file_url = ''
     system = platform.system()
+    base_url = 'https://storage.googleapis.com/kubernetes-release/release/v{}/bin/{}/amd64/{}'
     if system == 'Windows':
-        file_url = 'https://storage.googleapis.com/kubernetes-release/release/v{}/bin/windows/amd64/kubectl.exe'.format(client_version)
+        file_url = base_url.format(client_version, 'windows', 'kubectl.exe')
     elif system == 'Linux':
-        file_url = 'https://storage.googleapis.com/kubernetes-release/release/v{}/bin/linux/amd64/kubectl'.format(client_version)
+        # TODO: Support ARM CPU here
+        file_url = base_url.format(client_version, 'linux', 'kubectl')
     elif system == 'Darwin':
-        file_url = 'https://storage.googleapis.com/kubernetes-release/release/v{}/darwin/amd64/kubectl'.format(client_version)
+        file_url = base_url.format(client_version, 'darwin', 'kubectl')
     else:
         raise CLIError('Proxy server ({}) does not exist on the cluster.'.format(system))
 
     logger.info('Downloading client to %s', install_location)
     try:
         urlretrieve(file_url, install_location)
+        os.chmod(install_location, os.stat(install_location).st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
     except IOError as err:
         raise CLIError('Connection error while attempting to download client ({})'.format(err))
 
@@ -196,6 +248,14 @@ def acs_create(resource_group_name, deployment_name, dns_name_prefix, name, ssh_
      applications on the cluster. Possible values include: 'dcos', 'swarm'
     :type orchestrator_type: str or :class:`orchestratorType
      <Default.models.orchestratorType>`
+    :param service_principal: The service principal used for cluster authentication
+     to Azure APIs. If not specified, it is created for you and stored in the
+     ${HOME}/.azure directory.
+    :type service_principal: str
+    :param client_secret: The secret associated with the service principal. If
+     --service-principal is specified, then secret should also be specified. If
+     --service-principal is not specified, the secret is auto-generated for you
+     and stored in ${HOME}/.azure/ directory.
     :param tags: Tags object.
     :type tags: object
     :param dict custom_headers: headers that will be added to the request
@@ -209,6 +269,7 @@ def acs_create(resource_group_name, deployment_name, dns_name_prefix, name, ssh_
      if raw=true
     :raises: :class:`CloudError<msrestazure.azure_exceptions.CloudError>`
     """
+    register_providers()
     if orchestrator_type == 'Kubernetes' or orchestrator_type == 'kubernetes':
         principalObj = load_acs_service_principal()
         if principalObj:
@@ -306,7 +367,7 @@ def _create_kubernetes(resource_group_name, deployment_name, dns_name_prefix, na
 
     properties = DeploymentProperties(template=template, template_link=None,
                                       parameters=None, mode='incremental')
-    smc = get_mgmt_service_client(ResourceManagementClient)
+    smc = _resource_client_factory()
     return smc.deployments.create_or_update(resource_group_name, deployment_name, properties)
 
 def acs_get_credentials(dns_prefix, location):

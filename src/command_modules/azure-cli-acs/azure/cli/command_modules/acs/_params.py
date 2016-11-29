@@ -1,7 +1,7 @@
-#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
-#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 
 # pylint: disable=line-too-long
 import os
@@ -11,10 +11,12 @@ from argcomplete.completers import FilesCompleter
 
 from azure.cli.core.commands import register_cli_argument, CliArgumentType, register_extra_cli_argument
 from azure.cli.core.commands.parameters import (
+    enum_choice_list,
     name_type,
     resource_group_name_type,
     get_one_of_subscription_locations,
     get_resource_name_completion_list)
+from azure.mgmt.compute.models import ContainerServiceOchestratorTypes
 
 def _compute_client_factory(**_):
     from azure.mgmt.compute import ComputeManagementClient
@@ -49,7 +51,7 @@ def _get_default_install_location(exe_name):
 name_arg_type = CliArgumentType(options_list=('--name', '-n'), metavar='NAME')
 
 register_cli_argument('acs', 'name', arg_type=name_arg_type)
-register_cli_argument('acs', 'orchestrator_type', type=str)
+register_cli_argument('acs', 'orchestrator_type', **enum_choice_list(ContainerServiceOchestratorTypes))
 #some admin names are prohibited in acs, such as root, admin, etc. Because we have no control on the orchestrators, so default to a safe name.
 register_cli_argument('acs', 'admin_username', options_list=('--admin-username',), default='azureuser', required=False)
 register_cli_argument('acs', 'dns_name_prefix', options_list=('--dns-prefix', '-d'))
@@ -59,9 +61,8 @@ register_cli_argument('acs', 'ssh_key_value', required=False, help='SSH key file
 
 register_extra_cli_argument('acs create', 'generate_ssh_keys', action='store_true', help='Generate SSH public and private key files if missing')
 register_cli_argument('acs create', 'agent_vm_size', completer=get_vm_size_completion_list)
-register_cli_argument('acs create', 'service_principal', help='Service principal for making calls into Azure APIs')
-register_cli_argument('acs create', 'client_secret', help='Client secret to use with the service principal for making calls to Azure APIs')
 
+register_cli_argument('acs', 'disable_browser', help='Do not open browser after opening a proxy to the cluster web user interface')
 register_cli_argument('acs dcos browse', 'name', name_type)
 register_cli_argument('acs dcos browse', 'resource_group_name', resource_group_name_type)
 register_cli_argument('acs dcos install-cli', 'install_location',

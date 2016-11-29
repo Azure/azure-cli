@@ -1,7 +1,7 @@
-﻿#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
-#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 
 from azure.cli.core.test_utils.vcr_test_base import (ResourceGroupVCRTestBase,
                                                      JMESPathCheck, NoneCheck)
@@ -19,7 +19,7 @@ class WebappBasicE2ETest(ResourceGroupVCRTestBase):
     def body(self):
         webapp_name = 'webapp-e2e'
         plan = 'webapp-e2e-plan'
-        result = self.cmd('appservice plan create -g {} -n {} --sku B1'.format(self.resource_group, plan))
+        result = self.cmd('appservice plan create -g {} -n {}'.format(self.resource_group, plan))
         self.cmd('appservice plan list -g {}'.format(self.resource_group), checks=[
             JMESPathCheck('length(@)', 1),
             JMESPathCheck('[0].name', plan),
@@ -308,3 +308,48 @@ class WebappGitScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck('repoUrl', None)
             ])
 
+class WebappSlotScenarioTest(ResourceGroupVCRTestBase):
+    def __init__(self, test_method):
+        super(WebappSlotScenarioTest, self).__init__(__file__, test_method)
+        self.resource_group = 'cli-webapp-slot2'
+        self.webapp = 'web-slot-test'
+
+    def test_webapp_slot(self):
+        self.execute()
+
+    def body(self):
+        slot = 'staging'
+        #You can create and use any repros with the 3 files under "./sample_web" and with a 'staging 'branch
+        test_git_repo = 'https://github.com/yugangw-msft/azure-site-test'
+
+        self.cmd('appservice web deployment slot create -g {} -n {} --slot {}'.format(self.resource_group, self.webapp, slot), checks=[
+            JMESPathCheck('name', self.webapp + '/' + slot),
+            JMESPathCheck('siteName', '{}({})'.format(self.webapp, slot))
+            ])
+
+        self.cmd('appservice web source-control config -g {} -n {} --repo-url {} --branch {} --slot {}'.format(self.resource_group, self.webapp, test_git_repo, slot, slot), checks=[
+            JMESPathCheck('repoUrl', test_git_repo),
+            JMESPathCheck('branch', slot)
+            ])
+
+        import time
+        time.sleep(30) # 30 seconds should be enough for the deployment finished(Skipped under playback mode)
+
+        import requests
+        r = requests.get('http://{}-{}.azurewebsites.net'.format(self.webapp, slot))
+        #verify the web page contains content from the staging branch
+        self.assertTrue('Staging' in str(r.content))
+
+        self.cmd('appservice web deployment slot swap -g {} -n {} --slot {}'.format(self.resource_group, self.webapp, slot))
+
+        time.sleep(30) # 30 seconds should be enough for the slot swap finished(Skipped under playback mode)
+
+        r = requests.get('http://{}.azurewebsites.net'.format(self.webapp))
+        #verify the web page contains content from the staging branch
+        self.assertTrue('Staging' in str(r.content))
+
+        self.cmd('appservice web deployment slot list -g {} -n {}'.format(self.resource_group, self.webapp), checks=[
+            JMESPathCheck("length([])", 1),
+            JMESPathCheck('[0].name', self.webapp + '/' + slot),
+            ])
+        self.cmd('appservice web deployment slot delete -g {} -n {} --slot {}'.format(self.resource_group, self.webapp, slot), checks=NoneCheck())

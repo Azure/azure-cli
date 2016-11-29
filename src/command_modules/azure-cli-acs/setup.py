@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 
-#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
-#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 
 from codecs import open
 from setuptools import setup
 
-VERSION = '0.1.0b8'
+VERSION = '0.1.0b10'
 
 CLASSIFIERS = [
     'Development Status :: 4 - Beta',
@@ -24,7 +24,7 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
-    'azure-mgmt-compute==0.32.0',
+    'azure-mgmt-compute==0.32.1',
     'paramiko',
     'pyyaml',
     'six',

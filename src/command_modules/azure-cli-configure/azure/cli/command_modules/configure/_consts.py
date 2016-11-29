@@ -1,7 +1,7 @@
-#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
-#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 
 OUTPUT_LIST = [
     {'name': 'json', 'desc': 'JSON formatted output that most closely matches API responses'},

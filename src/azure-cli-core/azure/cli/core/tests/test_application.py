@@ -1,14 +1,18 @@
-#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
-#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 
 import unittest
+
+import os
+import tempfile
 
 from six import StringIO
 
 from azure.cli.core.application import Application, Configuration, IterateAction
 from azure.cli.core.commands import CliCommand
+from azure.cli.core._util import CLIError
 
 class TestApplication(unittest.TestCase):
 
@@ -79,6 +83,32 @@ class TestApplication(unittest.TestCase):
         self.assertEqual(hellos[0]['something'], 'else')
         self.assertEqual(hellos[1]['hello'], 'sir')
         self.assertEqual(hellos[1]['something'], 'else')
+
+    def test_expand_file_prefixed_files(self):
+        f = tempfile.NamedTemporaryFile(delete=False)
+        f.close()
+
+        with open(f.name, 'w+') as stream:
+            stream.write('foo')
+
+        cases = [
+            [['bar=baz'], ['bar=baz']],
+            [['bar', 'baz'], ['bar', 'baz']],
+            [['bar=@{}'.format(f.name)], ['bar=foo']],
+            [['bar', '@{}'.format(f.name)], ['bar', 'foo']],
+            [['bar', f.name], ['bar', f.name]],
+            [['bar=name@company.com'], ['bar=name@company.com']],
+            [['bar', 'name@company.com'], ['bar', 'name@company.com']],
+        ]
+
+        for test_case in cases:
+            try:
+                args = Application._expand_file_prefixed_files(test_case[0]) #pylint: disable=protected-access
+                self.assertEqual(args, test_case[1], 'Failed for: {}'.format(test_case[0]))
+            except CLIError as ex:
+                self.fail('Unexpected error for {} ({}): {}'.format(test_case[0], args, ex))
+
+        os.remove(f.name)
 
 if __name__ == '__main__':
     unittest.main()

@@ -1,7 +1,7 @@
-#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
-#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 
 from collections import defaultdict
 import sys
@@ -197,9 +197,23 @@ class Application(object):
                                   help='Increase logging verbosity to show all debug logs.')
 
     @staticmethod
+    def _maybe_load_file(arg):
+        ix = arg.find('@')
+        if ix == -1:
+            return arg
+
+        if ix == 0:
+            return Application._load_file(arg[1:])
+
+        if arg[ix - 1] == '=':
+            return arg[:ix] + Application._load_file(arg[ix + 1:])
+
+        return arg
+
+    @staticmethod
     def _expand_file_prefixed_files(argv):
         return list(
-            [Application._load_file(arg[1:]) if arg.startswith('@') else arg for arg in argv]
+            [Application._maybe_load_file(arg) for arg in argv]
             )
 
     @staticmethod

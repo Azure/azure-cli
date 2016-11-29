@@ -1,7 +1,7 @@
-#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
-#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 #pylint: skip-file
 
 # coding=utf-8
@@ -24,7 +24,7 @@ class LocalGatewayCreationClientConfiguration(AzureConfiguration):
     Note that all parameters used to create this instance are saved as instance
     attributes.
 
-    :param credentials: Gets Azure subscription credentials.
+    :param credentials: Credentials needed for the client to connect to Azure.
     :type credentials: :mod:`A msrestazure Credentials
      object<msrestazure.azure_active_directory>`
     :param subscription_id: Gets subscription credentials which uniquely
@@ -85,7 +85,7 @@ class LocalGatewayCreationClient(object):
     :ivar local_gateway: LocalGateway operations
     :vartype local_gateway: .operations.LocalGatewayOperations
 
-    :param credentials: Gets Azure subscription credentials.
+    :param credentials: Credentials needed for the client to connect to Azure.
     :type credentials: :mod:`A msrestazure Credentials
      object<msrestazure.azure_active_directory>`
     :param subscription_id: Gets subscription credentials which uniquely

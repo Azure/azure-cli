@@ -1,7 +1,7 @@
-#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
-#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 #pylint: skip-file
 # coding=utf-8
 # --------------------------------------------------------------------------
@@ -14,7 +14,7 @@ from msrest.serialization import Model
 
 
 class X509Thumbprint(Model):
-    """X509Thumbprint.
+    """X.509 certificate thumbprint associated with device.
 
     :param primary_thumbprint: The primary thumbprint.
     :type primary_thumbprint: str

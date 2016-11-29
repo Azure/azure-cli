@@ -1,7 +1,7 @@
-#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
-#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 #pylint: skip-file
 
 # coding=utf-8
@@ -15,8 +15,7 @@ from msrest.serialization import Model
 
 
 class BasicDependency(Model):
-    """
-    Deployment dependency information.
+    """Deployment dependency information.
 
     :param id: Gets or sets the ID of the dependency.
     :type id: str

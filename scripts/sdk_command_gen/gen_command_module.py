@@ -1,7 +1,7 @@
-#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
-#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 
 """
 Generate a command module using the SDK.
@@ -34,7 +34,7 @@ i.e. 'az {command_module_name}'
 
 SETUP_TEMPLATE = """#!/usr/bin/env python
 
-#-------------------------------------------------------------------------
+# ------------------------------------------------------------------------
 # Copyright (c) Microsoft.  All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -47,7 +47,7 @@ SETUP_TEMPLATE = """#!/usr/bin/env python
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#--------------------------------------------------------------------------
+# -------------------------------------------------------------------------
 
 from codecs import open
 from setuptools import setup

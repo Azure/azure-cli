@@ -1,7 +1,7 @@
-﻿#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
-#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 
 # pylint: disable=line-too-long
 
@@ -12,6 +12,8 @@ from ._client_factory import * #pylint: disable=wildcard-import
 from ._util import (list_network_resource_property,
                     get_network_resource_property_entry,
                     delete_network_resource_property_entry)
+from ._format import \
+    (transform_local_gateway_table_output)
 
 # Application gateways
 cli_command(__name__, 'network application-gateway delete', 'azure.mgmt.network.operations.application_gateways_operations#ApplicationGatewaysOperations.delete', cf_application_gateways)
@@ -157,11 +159,12 @@ cli_generic_update_command(__name__, 'network lb probe update',
 # LocalNetworkGatewaysOperations
 cli_command(__name__, 'network local-gateway delete', 'azure.mgmt.network.operations.local_network_gateways_operations#LocalNetworkGatewaysOperations.delete', cf_local_network_gateways)
 cli_command(__name__, 'network local-gateway show', 'azure.mgmt.network.operations.local_network_gateways_operations#LocalNetworkGatewaysOperations.get', cf_local_network_gateways)
-cli_command(__name__, 'network local-gateway list', 'azure.mgmt.network.operations.local_network_gateways_operations#LocalNetworkGatewaysOperations.list', cf_local_network_gateways)
+cli_command(__name__, 'network local-gateway list', 'azure.mgmt.network.operations.local_network_gateways_operations#LocalNetworkGatewaysOperations.list', cf_local_network_gateways, table_transformer=transform_local_gateway_table_output)
 cli_generic_update_command(__name__, 'network local-gateway update',
                            'azure.mgmt.network.operations.local_network_gateways_operations#LocalNetworkGatewaysOperations.get',
                            'azure.mgmt.network.operations.local_network_gateways_operations#LocalNetworkGatewaysOperations.create_or_update',
-                           cf_local_network_gateways)
+                           cf_local_network_gateways,
+                           custom_function_op='azure.cli.command_modules.network.custom#update_local_gateway')
 
 cli_command(__name__, 'network local-gateway create',
             'azure.cli.command_modules.network.mgmt_local_gateway.lib.operations.local_gateway_operations#LocalGatewayOperations.create_or_update',

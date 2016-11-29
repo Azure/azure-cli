@@ -1,7 +1,7 @@
-#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
-#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 
 from __future__ import print_function
 
@@ -40,7 +40,9 @@ def _dump_command_table(**kwargs):
     param_dict = {k : [] for k in param_names} if param_names else {}
     if param_names:
         for cmd_name in cmd_list:
-            cmd_args = list(cmd_table[cmd_name].arguments.keys())
+            table_entry = cmd_table[cmd_name]
+            table_entry.arguments.update(table_entry.arguments_loader())
+            cmd_args = list(table_entry.arguments.keys())
             for arg in cmd_args:
                 if arg in param_names:
                     param_dict[arg].append(cmd_name)
@@ -52,6 +54,7 @@ def _dump_command_table(**kwargs):
     table_entries = []
     for cmd_name in filtered_cmd_list:
         table_entry = cmd_table[cmd_name]
+        table_entry.arguments.update(table_entry.arguments_loader())
         table_entries.append(_format_entry(cmd_table[cmd_name]))
     
     # output results to STDOUT
@@ -128,7 +131,7 @@ param_names = [_dashed_to_camel(x) for x in args.params or []]
 hide_nulls = args.hide_nulls
 
 PRIMITIVES = (str, int, bool, float)
-IGNORE_ARGS = ['help', 'help_file', 'base_type']
+IGNORE_ARGS = ['help', 'help_file', 'base_type', 'arguments_loader']
 
 APPLICATION.register(Application.COMMAND_PARSER_LOADED, _dump_command_table)
 APPLICATION.execute([])

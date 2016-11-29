@@ -1,7 +1,7 @@
-#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
-#---------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 from azure.cli.core.commands import register_cli_argument
 
 from azure.cli.core.commands.parameters import (resource_group_name_type, location_type,
@@ -43,7 +43,7 @@ register_cli_argument('appservice', 'location', arg_type=location_type)
 register_cli_argument('appservice list-locations', 'linux_workers_enabled', action='store_true', help='get regions which support hosting webapps on Linux workers')
 register_cli_argument('appservice plan', 'name', arg_type=name_arg_type, help='The name of the app service plan', completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'), id_part='name')
 register_cli_argument('appservice plan create', 'name', options_list=('--name', '-n'), help="Name of the new app service plan")
-register_cli_argument('appservice plan create', 'sku', arg_type=sku_arg_type, default='B1')
+register_cli_argument('appservice plan create', 'sku', arg_type=sku_arg_type)
 register_cli_argument('appservice plan create', 'is_linux', action='store_true', required=False, help='host webapp on Linux worker')
 register_cli_argument('appservice plan update', 'sku', arg_type=sku_arg_type)
 register_cli_argument('appservice plan update', 'allow_pending_state', ignore_type)
@@ -53,16 +53,19 @@ register_cli_argument('appservice plan', 'admin_site_name', help='The name of th
 register_cli_argument('appservice web', 'slot', help="the name of the slot. Default to the productions slot if not specified")
 register_cli_argument('appservice web', 'name', arg_type=name_arg_type, completer=get_resource_name_completion_list('Microsoft.Web/sites'), id_part='name', help='name of the web')
 register_cli_argument('appservice web create', 'name', options_list=('--name', '-n'), help='name of the new webapp')
-register_cli_argument('appservice web create', 'plan', options_list=('--plan',), completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
+register_cli_argument('appservice web create', 'plan', options_list=('--plan', '-p'), completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
                       help="name or resource id of the app service plan. Use 'appservice plan create' to get one")
 
 register_cli_argument('appservice web deployment user', 'user_name', help='user name')
 register_cli_argument('appservice web deployment user', 'password', help='password, will prompt if not specified')
 
 register_cli_argument('appservice web deployment slot', 'slot', help='the name of the slot')
-register_cli_argument('appservice web deployment slot', 'webapp', help='Name of the webapp')
-register_cli_argument('appservice web deployment slot', 'auto_swap_slot', help='target slot to swap', default='production')
+register_cli_argument('appservice web deployment slot', 'webapp', arg_type=name_arg_type, completer=get_resource_name_completion_list('Microsoft.Web/sites'),
+                      help='Name of the webapp', id_part='name')
+register_cli_argument('appservice web deployment slot', 'auto_swap_slot', help='target slot to auto swap', default='production')
 register_cli_argument('appservice web deployment slot', 'disable', help='disable auto swap', action='store_true')
+register_cli_argument('appservice web deployment slot', 'target_slot', help="target slot to swap, default to 'production'")
+
 
 two_states_switch = ['true', 'false']
 
