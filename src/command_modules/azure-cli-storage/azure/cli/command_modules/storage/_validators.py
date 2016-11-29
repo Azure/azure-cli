@@ -329,7 +329,7 @@ def process_blob_download_batch_parameters(namespace):
 
     # 1. quick check
     if not os.path.exists(namespace.destination) or not os.path.isdir(namespace.destination):
-        raise ValueError('incorrect usage: --destination must be an existing directory')
+        raise ValueError('incorrect usage: destination must be an existing directory')
 
     # 2. try to extract account name and container name from source string
     from .storage_url_helpers import StorageResourceIdentifier
@@ -338,7 +338,7 @@ def process_blob_download_batch_parameters(namespace):
     if not identifier.is_url():
         namespace.source_container_name = namespace.source
     elif identifier.blob:
-        raise ValueError('incorrect usage: --source should be either container URL or name')
+        raise ValueError('incorrect usage: source should be either container URL or name')
     else:
         namespace.source_container_name = identifier.container
         if namespace.account_name is None:
@@ -431,7 +431,7 @@ def process_file_download_batch_parameters(namespace):
 
     # 1. quick check
     if not os.path.exists(namespace.destination) or not os.path.isdir(namespace.destination):
-        raise ValueError('incorrect usage: --destination must be an existing directory')
+        raise ValueError('incorrect usage: destination must be an existing directory')
 
     # 2. try to extract account name and share name from source string
     from .storage_url_helpers import StorageResourceIdentifier
@@ -439,7 +439,7 @@ def process_file_download_batch_parameters(namespace):
     if not identifier.is_url():
         namespace.source_share_name = namespace.source
     elif identifier.filename or identifier.directory:
-        raise ValueError('incorrect usage: --source should be either share URL or name')
+        raise ValueError('incorrect usage: source should be either share URL or name')
     else:
         namespace.source_share_name = identifier.share
 
