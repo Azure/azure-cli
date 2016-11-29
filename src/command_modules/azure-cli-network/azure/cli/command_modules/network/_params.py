@@ -310,14 +310,19 @@ register_cli_argument('network nsg rule', 'network_security_group_name', options
 register_cli_argument('network nsg rule create', 'priority', default=1000)
 
 # Public IP
-register_cli_argument('network public-ip', 'public_ip_address_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'), id_part='name')
-register_cli_argument('network public-ip', 'name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'))
+register_cli_argument('network public-ip', 'public_ip_address_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'), id_part='name', help='The name of the public IP address.')
+register_cli_argument('network public-ip', 'name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'), help='The name of the public IP address.')
+register_cli_argument('network public-ip', 'reverse_fqdn', help='Reverse FQDN (fully qualified domain name).')
+register_cli_argument('network public-ip', 'dns_name', help='Globally unique DNS entry.')
+register_cli_argument('network public-ip', 'idle_timeout', help='Idle timeout in minutes.')
 
 register_cli_argument('network public-ip create', 'name', completer=None)
 register_cli_argument('network public-ip create', 'dns_name', validator=process_public_ip_create_namespace)
-register_cli_argument('network public-ip create', 'allocation_method', **enum_choice_list(IPAllocationMethod))
-register_cli_argument('network public-ip create', 'version', **enum_choice_list(IPVersion))
 register_cli_argument('network public-ip create', 'dns_name_type', ignore_type)
+
+for item in ['create', 'update']:
+    register_cli_argument('network public-ip {}'.format(item), 'allocation_method', help='IP address allocation method', **enum_choice_list(IPAllocationMethod))
+    register_cli_argument('network public-ip {}'.format(item), 'version', help='IP address type.', **enum_choice_list(IPVersion))
 
 # Route Operation
 register_cli_argument('network route-table route', 'route_name', name_arg_type, id_part='child_name', help='Route name')
