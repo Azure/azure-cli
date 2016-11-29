@@ -150,10 +150,20 @@ def _parameters(registry_name,
         'registryName': {'value': registry_name},
         'registryLocation': {'value': location},
         'storageAccountName': {'value': storage_account_name},
-        'storageAccountType': {'value': 'Standard_LRS'},
         'adminUserEnabled': {'value': admin_user_enabled},
     }
     customized_api_version = get_acr_api_version()
     if customized_api_version:
         parameters['registryApiVersion'] = {'value': customized_api_version}
     return parameters
+
+def random_storage_account_name(registry_name):
+    from datetime import datetime
+
+    client = get_storage_service_client().storage_accounts
+
+    while True:
+        time_stamp_suffix = datetime.utcnow().strftime('%H%M%S')
+        storage_account_name = ''.join([registry_name[:18], time_stamp_suffix])[:24]
+        if client.check_name_availability(storage_account_name).name_available: #pylint: disable=no-member
+            return storage_account_name
