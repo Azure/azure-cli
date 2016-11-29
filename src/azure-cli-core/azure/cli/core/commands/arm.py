@@ -215,7 +215,7 @@ def cli_generic_update_command(module_name, name, getter_op, setter_op, factory=
         arguments.pop(setter_arg_name, None)
         return arguments
 
-    def handler(args):
+    def handler(args):#pylint: disable=too-many-branches,too-many-statements
         from msrestazure.azure_operation import AzureOperationPoller
 
         ordered_arguments = args.pop('ordered_arguments') if 'ordered_arguments' in args else []
@@ -250,8 +250,9 @@ def cli_generic_update_command(module_name, name, getter_op, setter_op, factory=
                 instance = custom_function(instance, **custom_func_args)
 
         # apply generic updates after custom updates
+        setterargs = set_arguments_loader()
         for k in args.copy().keys():
-            if k in get_arguments_loader() or k in set_arguments_loader() \
+            if k in get_arguments_loader() or k in setterargs \
                 or k in ('properties_to_add', 'properties_to_remove', 'properties_to_set'):
                 args.pop(k)
         for key, val in args.items():
@@ -279,7 +280,15 @@ def cli_generic_update_command(module_name, name, getter_op, setter_op, factory=
         # Done... update the instance!
         getterargs[setter_arg_name] = parent if child_collection_prop_name else instance
         setter = get_op_handler(setter_op)
+        no_wait = expose_no_wait and setterargs.get('raw', None)
+        if no_wait:
+            getterargs['raw'] = True
+
         opres = setter(client, **getterargs) if client else setter(**getterargs)
+
+        if no_wait:
+            return None
+
         result = opres.result() if isinstance(opres, AzureOperationPoller) else opres
         if child_collection_prop_name:
             return _get_child(
@@ -377,7 +386,7 @@ def cli_generic_wait_command(module_name, name, getter_op, factory=None, table_t
                 if getattr(ex, 'status_code', None) == 404:
                     if wait_for_deleted:
                         return
-                    if not wait_for_created and not wait_for_exists:
+                    if not any([wait_for_created, wait_for_exists, property_condition]):
                         raise
                 else:
                     raise
@@ -389,9 +398,9 @@ def cli_generic_wait_command(module_name, name, getter_op, factory=None, table_t
     cmd = CliCommand(name, handler, table_transformer=table_transformer,
                      arguments_loader=arguments_loader)
     group_name = 'Wait'
-    cmd.add_argument('timeout', '--timeout', default=3600, arg_group=group_name,
+    cmd.add_argument('timeout', '--timeout', default=3600, arg_group=group_name, type=int,
                      help='maximum wait in seconds')
-    cmd.add_argument('interval', '--interval', default=30, arg_group=group_name,
+    cmd.add_argument('interval', '--interval', default=30, arg_group=group_name, type=int,
                      help='polling interval in seconds')
     cmd.add_argument('deleted', '--deleted', action='store_true', arg_group=group_name,
                      help='wait till deleted')

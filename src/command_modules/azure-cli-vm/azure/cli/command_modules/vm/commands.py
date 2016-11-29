@@ -39,7 +39,8 @@ cli_command(__name__, 'vm open-port', custom_path.format('vm_open_port'))
 cli_generic_update_command(__name__, 'vm update',
                            mgmt_path.format(op_var, op_class, 'get'),
                            mgmt_path.format(op_var, op_class, 'create_or_update'),
-                           cf_vm)
+                           cf_vm,
+                           expose_no_wait=True)
 cli_generic_wait_command(__name__, 'vm wait', 'azure.cli.command_modules.vm.custom#get_instance_view')
 
 # VM NIC

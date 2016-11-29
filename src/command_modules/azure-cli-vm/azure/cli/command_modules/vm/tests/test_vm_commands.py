@@ -382,6 +382,28 @@ class VMCreateAndStateModificationsScenarioTest(ResourceGroupVCRTestBase): #pyli
         # Expecting no results
         self.cmd('vm list --resource-group {}'.format(self.resource_group), checks=NoneCheck())
 
+class VMNoWaitScenarioTest(ResourceGroupVCRTestBase):
+    def __init__(self, test_method):
+        super(VMNoWaitScenarioTest, self).__init__(__file__, test_method)
+        self.resource_group = 'cli_rg_vm_no_wait2'
+        self.location = 'westus'
+        self.name = 'vmnowait2'
+
+    def test_create_vm_no_wait(self):
+        self.execute()
+
+    def body(self):
+        self.cmd('vm create -g {} -n {} --image UbuntuLTS --no-wait'.format(self.resource_group, self.name), checks=NoneCheck())
+        self.cmd('vm wait -g {} -n {} --property "{}"'.format(self.resource_group, self.name, "instanceView.statuses[?code=='PowerState/running']"), checks=NoneCheck())
+        self.cmd('vm get-instance-view -g {} -n {}'.format(self.resource_group, self.name), checks=[
+            JMESPathCheck("length(instanceView.statuses[?code=='PowerState/running'])", 1)
+            ])
+        self.cmd('vm update -g {} -n {} --set tags.mytag=tagvalue1 --no-wait'.format(self.resource_group, self.name), checks=NoneCheck())
+        self.cmd('vm wait -g {} -n {} --updated'.format(self.resource_group, self.name), checks=NoneCheck())
+        self.cmd('vm show -g {} -n {}'.format(self.resource_group, self.name), checks=[
+            JMESPathCheck("tags.mytag", 'tagvalue1')
+            ])
+
 class VMAvailSetScenarioTest(VCRTestBase):
 
     def __init__(self, test_method):

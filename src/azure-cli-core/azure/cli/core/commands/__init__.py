@@ -275,7 +275,7 @@ def create_command(module_name, name, operation,
             result = op(client, **kwargs) if client else op(**kwargs)
 
             if expose_no_wait and kwargs.get('raw', None):
-                return None #return if --no-wait is provided at the command
+                return None #return None for 'no-wait'
 
             # apply results transform if specified
             if transform_result:
