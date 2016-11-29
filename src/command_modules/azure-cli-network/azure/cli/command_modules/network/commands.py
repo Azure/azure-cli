@@ -227,7 +227,8 @@ cli_command(__name__, 'network public-ip list', 'azure.cli.command_modules.netwo
 cli_generic_update_command(__name__, 'network public-ip update',
                            'azure.mgmt.network.operations.public_ip_addresses_operations#PublicIPAddressesOperations.get',
                            'azure.mgmt.network.operations.public_ip_addresses_operations#PublicIPAddressesOperations.create_or_update',
-                           cf_public_ip_addresses)
+                           cf_public_ip_addresses,
+                           custom_function_op='azure.cli.command_modules.network.custom#update_public_ip')
 
 cli_command(__name__, 'network public-ip create',
             'azure.cli.command_modules.network.mgmt_public_ip.lib.operations.public_ip_operations#PublicIpOperations.create_or_update',
