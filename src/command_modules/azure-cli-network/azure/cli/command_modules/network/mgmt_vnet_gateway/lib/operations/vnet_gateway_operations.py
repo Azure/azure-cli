@@ -37,9 +37,8 @@ class VnetGatewayOperations(object):
         self.config = config
 
     def create_or_update(
-            self, resource_group_name, deployment_name, subnet_id, virtual_network_gateway_name, enable_bgp=False, content_version=None, gateway_type="Vpn", location=None, public_ip_address=None, public_ip_address_type="existingId", sku="Basic", tags=None, vpn_type="RouteBased", custom_headers=None, raw=False, **operation_config):
-        """
-        Create or update a virtual machine.
+            self, resource_group_name, deployment_name, public_ip_address, virtual_network, virtual_network_gateway_name, enable_bgp=False, content_version=None, gateway_type="Vpn", location=None, public_ip_address_type="existingId", sku="Basic", tags=None, virtual_network_type="existingId", vpn_type="RouteBased", custom_headers=None, raw=False, **operation_config):
+        """Create a new VnetGateway.
 
         :param resource_group_name: The name of the resource group. The name
          is case insensitive.
@@ -48,9 +47,11 @@ class VnetGatewayOperations(object):
         :type deployment_name: str
         :param enable_bgp: Enable BGP (Border Gateway Protocol).
         :type enable_bgp: bool
-        :param subnet_id: Subnet ID for the VPN gateway. Subnet must be named
-         GatewaySubnet.
-        :type subnet_id: str
+        :param public_ip_address: Name or ID of public IP address to use.
+        :type public_ip_address: str
+        :param virtual_network: Name or ID of a virtual network that contains
+         a subnet named 'GatewaySubnet'.
+        :type virtual_network: str
         :param virtual_network_gateway_name: Gateway name.
         :type virtual_network_gateway_name: str
         :param content_version: If included it must match the ContentVersion
@@ -59,36 +60,37 @@ class VnetGatewayOperations(object):
         :param gateway_type: Gateway type. Possible values include: 'Vpn',
          'ExpressRoute'
         :type gateway_type: str or :class:`gatewayType
-         <vnetgatewaycreationclient.models.gatewayType>`
+         <Default.models.gatewayType>`
         :param location: Location for resources.
         :type location: str
-        :param public_ip_address: Name or ID of public IP address to use.
-        :type public_ip_address: str
         :param public_ip_address_type: Type of Public IP Address to associate
-         with the load balancer. Possible values include: 'existingName',
+         with the VPN gateway. Possible values include: 'existingName',
          'existingId'
         :type public_ip_address_type: str or :class:`publicIpAddressType
-         <vnetgatewaycreationclient.models.publicIpAddressType>`
+         <Default.models.publicIpAddressType>`
         :param sku: VPN Gateway SKU. Possible values include: 'Basic',
          'Standard', 'HighPerformance'
-        :type sku: str or :class:`sku <vnetgatewaycreationclient.models.sku>`
+        :type sku: str or :class:`sku <Default.models.sku>`
         :param tags: Tags object.
         :type tags: object
+        :param virtual_network_type: Type of virtual network to supply to the
+         VPN gateway. Possible values include: 'existingId', 'existingName'
+        :type virtual_network_type: str or :class:`virtualNetworkType
+         <Default.models.virtualNetworkType>`
         :param vpn_type: VPN gateway type. Possible values include:
          'RouteBased', 'PolicyBased'
-        :type vpn_type: str or :class:`vpnType
-         <vnetgatewaycreationclient.models.vpnType>`
+        :type vpn_type: str or :class:`vpnType <Default.models.vpnType>`
         :param dict custom_headers: headers that will be added to the request
         :param bool raw: returns the direct response alongside the
          deserialized response
         :rtype:
          :class:`AzureOperationPoller<msrestazure.azure_operation.AzureOperationPoller>`
          instance that returns :class:`DeploymentExtended
-         <default.models.DeploymentExtended>`
+         <Default.models.DeploymentExtended>`
         :rtype: :class:`ClientRawResponse<msrest.pipeline.ClientRawResponse>`
          if raw=true
         """
-        parameters = models.DeploymentVnetGateway(content_version=content_version, enable_bgp=enable_bgp, gateway_type=gateway_type, location=location, public_ip_address=public_ip_address, public_ip_address_type=public_ip_address_type, sku=sku, subnet_id=subnet_id, tags=tags, virtual_network_gateway_name=virtual_network_gateway_name, vpn_type=vpn_type)
+        parameters = models.DeploymentVnetGateway(content_version=content_version, enable_bgp=enable_bgp, gateway_type=gateway_type, location=location, public_ip_address=public_ip_address, public_ip_address_type=public_ip_address_type, sku=sku, tags=tags, virtual_network=virtual_network, virtual_network_gateway_name=virtual_network_gateway_name, virtual_network_type=virtual_network_type, vpn_type=vpn_type)
 
         # Construct URL
         url = '/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Resources/deployments/{deploymentName}'

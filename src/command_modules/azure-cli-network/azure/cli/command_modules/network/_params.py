@@ -35,7 +35,8 @@ from azure.cli.command_modules.network._validators import \
      validate_inbound_nat_rule_name_or_id, validate_address_pool_name_or_id,
      validate_servers, load_cert_file,
      vnet_gateway_validator, validate_peering_type,
-     get_public_ip_validator, get_nsg_validator, get_subnet_validator)
+     get_public_ip_validator, get_nsg_validator, get_subnet_validator,
+     get_virtual_network_validator)
 from azure.cli.command_modules.network.mgmt_nic.lib.models.nic_creation_client_enums import privateIpAddressVersion
 from azure.cli.command_modules.network.mgmt_vnet_gateway.lib.models.vnet_gateway_creation_client_enums import \
     (gatewayType, sku, vpnType)
@@ -417,14 +418,21 @@ register_cli_argument('network nsg create', 'name', name_arg_type)
 register_cli_argument('network vpn-gateway', 'virtual_network_gateway_name', options_list=('--name', '-n'), completer=get_resource_name_completion_list('Microsoft.Network/virtualNetworkGateways'), id_part='name')
 register_cli_argument('network vpn-gateway', 'cert_name', help='Root certificate name', options_list=('--name', '-n'))
 register_cli_argument('network vpn-gateway', 'gateway_name', help='Virtual network gateway name')
+register_cli_argument('network vpn-gateway', 'gateway_type', help='The gateway type.', **enum_choice_list(gatewayType))
+register_cli_argument('network vpn-gateway', 'sku', help='VPN gateway SKU.', **enum_choice_list(sku))
+register_cli_argument('network vpn-gateway', 'vpn_type', help='VPN gateway type.', **enum_choice_list(vpnType))
 
-register_cli_argument('network vpn-gateway create', 'gateway_type', **enum_choice_list(gatewayType))
-register_cli_argument('network vpn-gateway create', 'sku', **enum_choice_list(sku))
-register_cli_argument('network vpn-gateway create', 'vpn_type', **enum_choice_list(vpnType))
+register_cli_argument('network vpn-gateway update', 'enable_bgp', help='Enable BGP (Border Gateway Protocol)', **enum_choice_list(['true', 'false']))
+register_cli_argument('network vpn-gateway update', 'public_ip_address', help='Name or ID of a public IP address.', validator=get_public_ip_validator())
+register_cli_argument('network vpn-gateway update', 'virtual_network', virtual_network_name_type, options_list=('--vnet',), help="Name or ID of a virtual network that contains a subnet named 'GatewaySubnet'.", validator=get_virtual_network_validator())
 
 public_ip_help = get_folded_parameter_help_string('public IP address')
-register_cli_argument('network vpn-gateway create', 'public_ip_address', help=public_ip_help, completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'), validator=get_public_ip_validator(has_type_field=True))
+register_cli_argument('network vpn-gateway create', 'public_ip_address', options_list=('--public-ip',), help=public_ip_help, completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'), validator=get_public_ip_validator(has_type_field=True))
 register_cli_argument('network vpn-gateway create', 'public_ip_address_type', ignore_type)
+
+vnet_help = "Name or ID of an existing virtual network which has a subnet named 'GatewaySubnet'."
+register_cli_argument('network vpn-gateway create', 'virtual_network', options_list=('--vnet',), help=vnet_help, validator=get_virtual_network_validator(has_type_field=True))
+register_cli_argument('network vpn-gateway create', 'virtual_network_type', ignore_type)
 
 register_cli_argument('network vpn-gateway root-cert create', 'public_cert_data', help='Base64 contents of the root certificate file or file path.', validator=load_cert_file('public_cert_data'))
 register_cli_argument('network vpn-gateway root-cert create', 'cert_name', help='Root certificate name', options_list=('--name', '-n'))

@@ -33,6 +33,12 @@ class sku(Enum):
     high_performance = "HighPerformance"
 
 
+class virtualNetworkType(Enum):
+
+    existing_id = "existingId"
+    existing_name = "existingName"
+
+
 class vpnType(Enum):
 
     route_based = "RouteBased"
