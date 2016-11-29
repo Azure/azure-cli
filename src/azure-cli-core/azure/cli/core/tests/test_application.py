@@ -92,14 +92,13 @@ class TestApplication(unittest.TestCase):
             stream.write('foo')
 
         cases = [
-            [['--bar=baz'], ['--bar=baz']],
-            [['--bar', 'baz'], ['--bar', 'baz']],
-            [['--bar=@{}'.format(f.name)], ['--bar=foo']],
-            [['--bar', '@{}'.format(f.name)], ['--bar', 'foo']],
-            [['--bar', f.name], ['--bar', f.name]],
-            [['--bar="@{}"'.format(f.name)], ['--bar=foo']],
-            [['--bar=name@company.com'], ['--bar=name@company.com']],
-            [['--bar', 'name@company.com'], ['--bar', 'name@company.com']],
+            [['bar=baz'], ['bar=baz']],
+            [['bar', 'baz'], ['bar', 'baz']],
+            [['bar=@{}'.format(f.name)], ['bar=foo']],
+            [['bar', '@{}'.format(f.name)], ['bar', 'foo']],
+            [['bar', f.name], ['bar', f.name]],
+            [['bar=name@company.com'], ['bar=name@company.com']],
+            [['bar', 'name@company.com'], ['bar', 'name@company.com']],
         ]
 
         for test_case in cases:
