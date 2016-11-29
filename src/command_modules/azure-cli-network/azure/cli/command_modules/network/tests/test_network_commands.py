@@ -121,7 +121,7 @@ class NetworkAppGatewayPublicIpScenarioTest(ResourceGroupVCRTestBase):
 class NetworkPublicIpScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-        super(NetworkPublicIpScenarioTest, self).__init__(__file__, test_method, debug=True)
+        super(NetworkPublicIpScenarioTest, self).__init__(__file__, test_method)
         self.resource_group = 'cli_test_public_ip'
 
     def test_network_public_ip(self):
@@ -129,21 +129,21 @@ class NetworkPublicIpScenarioTest(ResourceGroupVCRTestBase):
 
     def body(self):
         s = self
-        pip_dns = 'pubipdns'
-        pip_no_dns = 'pubipnodns'
+        public_ip_dns = 'pubipdns'
+        public_ip_no_dns = 'pubipnodns'
         dns = 'woot'
         rg = s.resource_group
-        s.cmd('network public-ip create -g {} -n {} --dns-name {} --allocation-method static'.format(rg, pip_dns, dns), checks=[
+        s.cmd('network public-ip create -g {} -n {} --dns-name {} --allocation-method static'.format(rg, public_ip_dns, dns), checks=[
             JMESPathCheck('publicIp.provisioningState', 'Succeeded'),
             JMESPathCheck('publicIp.publicIPAllocationMethod', 'Static'),
             JMESPathCheck('publicIp.dnsSettings.domainNameLabel', dns)
         ])
-        s.cmd('network public-ip create -g {} -n {}'.format(rg, pip_no_dns), checks=[
+        s.cmd('network public-ip create -g {} -n {}'.format(rg, public_ip_no_dns), checks=[
             JMESPathCheck('publicIp.provisioningState', 'Succeeded'),
             JMESPathCheck('publicIp.publicIPAllocationMethod', 'Dynamic'),
             JMESPathCheck('publicIp.dnsSettings', None)
         ])
-        s.cmd('network public-ip update -g {} -n {} --allocation-method static --dns-name wowza --idle-timeout 10'.format(rg, pip_no_dns), checks=[
+        s.cmd('network public-ip update -g {} -n {} --allocation-method static --dns-name wowza --idle-timeout 10'.format(rg, public_ip_no_dns), checks=[
             JMESPathCheck('publicIpAllocationMethod', 'Static'),
             JMESPathCheck('dnsSettings.domainNameLabel', 'wowza'),
             JMESPathCheck('idleTimeoutInMinutes', 10)
@@ -154,15 +154,15 @@ class NetworkPublicIpScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck("length([?resourceGroup == '{}']) == length(@)".format(rg), True)
         ])
 
-        s.cmd('network public-ip show -g {} -n {}'.format(rg, pip_dns), checks=[
+        s.cmd('network public-ip show -g {} -n {}'.format(rg, public_ip_dns), checks=[
             JMESPathCheck('type(@)', 'object'),
-            JMESPathCheck('name', pip_dns),
+            JMESPathCheck('name', public_ip_dns),
             JMESPathCheck('resourceGroup', rg),
         ])
 
-        s.cmd('network public-ip delete -g {} -n {}'.format(rg, pip_dns))
+        s.cmd('network public-ip delete -g {} -n {}'.format(rg, public_ip_dns))
         s.cmd('network public-ip list -g {}'.format(rg),
-            checks=JMESPathCheck("length[?name == '{}']".format(pip_dns), None))
+            checks=JMESPathCheck("length[?name == '{}']".format(public_ip_dns), None))
 
 class NetworkExpressRouteScenarioTest(ResourceGroupVCRTestBase):
 
