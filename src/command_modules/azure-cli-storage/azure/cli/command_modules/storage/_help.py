@@ -181,20 +181,20 @@ helps['storage file upload-batch'] = """
     parameters:
         - name: --source -s
           type: string
-          short-summary: The directory where the files to be uploaded.
+          short-summary: The directory from which the files should to be uploaded.
         - name: --destination -d
           type: string
-          short-summary: The string represents the destination of this upload operation. The source
-                         can be the container URL or the container name. When the source is the
-                         container URL, the storage account name will parsed from the URL.
+          short-summary: The string represents the destination of this upload operation. The
+                         destination can be the file share URL or the share name. When the source
+                         is the share URL, the storage account name will parsed from the URL.
         - name: --pattern
           type: string
           short-summary: The pattern is used for files globbing. The supported patterns are '*',
                          '?', '[seq', and '[!seq]'.
         - name: --dryrun
           type: bool
-          short-summary: Show the details of the operations to be taken instead of actually
-                         uploading the file(s)
+          short-summary: Output the list of files which would be uploaded. No actual data transfer
+                         will occur.
         - name: --max-connections
           type: integer
           short-summary: Maximum number of parallel connections to use. Default value is 1.
@@ -213,9 +213,9 @@ helps['storage file download-batch'] = """
     parameters:
         - name: --source -s
           type: string
-          short-summary: The string represents the destination of this upload operation. The source
-                         can be the container URL or the container name. When the source is the
-                         container URL, the storage account name will parsed from the URL.
+          short-summary: The string represents the destination of this file download operation. The
+                         source can be the file share URL or the share name. When the source is
+                         the share URL, the storage account name will parsed from the URL.
         - name: --destination -d
           type: string
           short-summary: The directory where the files to be downloaded. The directory must exist.
@@ -225,8 +225,8 @@ helps['storage file download-batch'] = """
                          '?', '[seq', and '[!seq]'.
         - name: --dryrun
           type: bool
-          short-summary: Show the details of the operations to be taken instead of actually
-                         uploading the file(s)
+          short-summary: Output the list of files which would be downloaded. No actual data transfer
+                         will occur.
         - name: --max-connections
           type: integer
           short-summary: Maximum number of parallel connections to use. Default value is 1.
