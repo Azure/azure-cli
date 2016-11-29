@@ -242,7 +242,7 @@ register_cli_argument('network local-gateway', 'local_network_gateway_name', nam
 register_cli_argument('network local-gateway', 'asn', arg_group='BGP Peering', help='Autonomous System Number to use for the BGP settings.')
 register_cli_argument('network local-gateway', 'bgp_peering_address', arg_group='BGP Peering', help='IP address from the OnPremise VPN\'s subnet to use for BGP peering.')
 register_cli_argument('network local-gateway', 'peer_weight', arg_group='BGP Peering', help='Weight (0-100) added to routes learned through BGP peering.')
-register_cli_argument('network local-gateway', 'local_address_prefix', nargs='+', help='List of CIDR block prefixes representing the address space of the OnPremise VPN\'s subnet.')
+register_cli_argument('network local-gateway', 'local_address_prefix', nargs='+', options_list=('--local-address-prefixes',), help='List of CIDR block prefixes representing the address space of the OnPremise VPN\'s subnet.')
 register_cli_argument('network local-gateway', 'gateway_ip_address', help='Gateway\'s public IP address. (e.g. 10.1.1.1).')
 
 register_cli_argument('network local-gateway create', 'use_bgp_settings', ignore_type)
