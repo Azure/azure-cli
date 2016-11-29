@@ -15,8 +15,7 @@ from msrest.serialization import Model
 
 
 class Provider(Model):
-    """
-    Resource provider information.
+    """Resource provider information.
 
     :param id: Gets or sets the provider id.
     :type id: str
@@ -28,7 +27,7 @@ class Provider(Model):
     :param resource_types: Gets or sets the collection of provider resource
      types.
     :type resource_types: list of :class:`ProviderResourceType
-     <default.models.ProviderResourceType>`
+     <Default.models.ProviderResourceType>`
     """ 
 
     _attribute_map = {
