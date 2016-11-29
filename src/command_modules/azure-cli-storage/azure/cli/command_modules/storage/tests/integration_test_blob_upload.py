@@ -10,8 +10,6 @@ The tests require environment variable 'test_connection_string' to set to the co
 of the storage account they will be run on.
 """
 
-import os
-import os.path
 from unittest import TestCase
 from azure.cli.main import main as cli_main
 from .integration_test_base import StorageIntegrationTestBase
@@ -34,12 +32,6 @@ class StorageBlobUploadIntegrationTests(StorageIntegrationTestBase):
             return
 
         self._blob_service.delete_container(self._test_container_name)
-
-    def _get_test_resource_file(self, file_name):
-        result = os.path.join(self._resource_folder, file_name)
-        assert os.path.exists(result)
-
-        return result
 
     def test_blob_upload_multiple_files_no_pattern(self):
         url = 'http://{}/{}'.format(self._blob_service.primary_endpoint, self._test_container_name)

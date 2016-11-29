@@ -48,7 +48,7 @@ def run_module_tests(skip_list=None):
     print("Running tests on command modules.")
 
     all_modules = [TestModule(name, path) for name, path in get_all_command_modules()]
-    if not skip_list is None:
+    if skip_list is not None:
         all_modules = [desc for desc in all_modules if not desc.name in skip_list]
 
     skipped_modules = [m.name for m in all_modules if not m.exists()]

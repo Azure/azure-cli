@@ -27,6 +27,7 @@ from azure.storage.file import FileService
 from azure.storage.file.models import ContentSettings as FileContentSettings
 
 from ._factory import get_storage_data_service_client
+from .files_helpers import glob_files_locally
 
 storage_account_key_options = {'primary': 'key1', 'secondary': 'key2'}
 
@@ -323,29 +324,29 @@ def validate_select(namespace):
 # region COMMAND VALIDATORS
 
 
-def process_download_batch_parameters(namespace):
+def process_blob_download_batch_parameters(namespace):
     """Process the parameters for storage blob download command"""
-    from azure.cli.command_modules.storage.storage_url_helpers import parse_storage_url
 
     # 1. quick check
     if not os.path.exists(namespace.destination) or not os.path.isdir(namespace.destination):
-        raise ValueError('Destination folder {} does not exist'.format(namespace.source))
+        raise ValueError('incorrect usage: --destination must be an existing directory')
 
     # 2. try to extract account name and container name from source string
-    storage_desc = parse_storage_url(namespace.source)
+    from .storage_url_helpers import StorageResourceIdentifier
+    identifier = StorageResourceIdentifier(namespace.source)
 
-    if storage_desc.blob is not None:
+    if not identifier.is_url():
+        namespace.source_container_name = namespace.source
+    elif identifier.blob:
         raise ValueError('incorrect usage: --source should be either container URL or name')
+    else:
+        namespace.source_container_name = identifier.container
+        if namespace.account_name is None:
+            namespace.account_name = identifier.account_name
 
-    if namespace.account_name is None:
-        namespace.account_name = storage_desc.account
 
-    namespace.source_container_name = storage_desc.container
-
-
-def process_upload_batch_parameters(namespace):
+def process_blob_upload_batch_parameters(namespace):
     """Process the source and destination of storage blob upload command"""
-    from azure.cli.command_modules.storage.storage_url_helpers import parse_storage_url
 
     # 1. quick check
     if not os.path.exists(namespace.source):
@@ -355,43 +356,26 @@ def process_upload_batch_parameters(namespace):
         raise ValueError('incorrect usage: source must be a directory')
 
     # 2. try to extract account name and container name from destination string
-    storage_desc = parse_storage_url(namespace.destination)
+    from .storage_url_helpers import StorageResourceIdentifier
+    identifier = StorageResourceIdentifier(namespace.destination)
 
-    if storage_desc.blob is not None:
+    if not identifier.is_url():
+        namespace.destination_container_name = namespace.destination
+    elif identifier.blob is not None:
         raise ValueError('incorrect usage: destination cannot be a blob url')
-
-    namespace.destination_container_name = storage_desc.container
-
-    if not namespace.account_name:
-        namespace.account_name = storage_desc.account
+    else:
+        namespace.destination_container_name = identifier.container
+        if not namespace.account_name:
+            namespace.account_name = identifier.account_name
 
     # 3. collect the files to be uploaded
     namespace.source = os.path.realpath(namespace.source)
+    namespace.source_files = [c for c in glob_files_locally(namespace.source, namespace.pattern)]
 
-    if namespace.pattern:
-        from fnmatch import fnmatch
-        pattern = os.path.join(namespace.source, namespace.pattern.lstrip('/'))
-
-        def _file_selector(file_path):
-            return fnmatch(file_path, pattern)
-    else:
-        #pylint: disable=unused-argument
-        def _file_selector(_):
-            return True
-
-    source_files = []
-
-    from os import walk
-    for root, _, files in walk(namespace.source):
-        #pylint: disable=bad-builtin
-        filtered = filter(_file_selector, (os.path.join(root, f) for f in files))
-        source_files += [(path, path[len(namespace.source) + 1:]) for path in filtered]
-
-    namespace.source_files = source_files
-
+    # 4. determine blob type
     if namespace.blob_type is None:
-        vhd_files = [f for f in source_files if f[0].endswith('.vhd')]
-        if any(vhd_files) and len(vhd_files) == len(source_files):
+        vhd_files = [f for f in namespace.source_files if f[0].endswith('.vhd')]
+        if any(vhd_files) and len(vhd_files) == len(namespace.source_files):
             # when all the listed files are vhd files use page
             namespace.blob_type = 'page'
         elif any(vhd_files):
@@ -407,6 +391,64 @@ def process_upload_batch_parameters(namespace):
 def process_blob_copy_batch_namespace(namespace):
     if namespace.prefix is None and not namespace.recursive:
         raise ValueError('incorrect usage: --recursive | --pattern PATTERN')
+
+
+def process_file_upload_batch_parameters(namespace):
+    """Process the parameters of storage file batch upload command"""
+
+    # 1. quick check
+    if not os.path.exists(namespace.source):
+        raise ValueError('incorrect usage: source {} does not exist'.format(namespace.source))
+
+    if not os.path.isdir(namespace.source):
+        raise ValueError('incorrect usage: source must be a directory')
+
+    # 2. try to extract account name and container name from destination string
+    from .storage_url_helpers import StorageResourceIdentifier
+    identifier = StorageResourceIdentifier(namespace.destination)
+    if not identifier.is_url():
+        namespace.destination_share_name = namespace.destination
+    elif identifier.filename or identifier.directory:
+        raise ValueError('incorrect usage: destination must be a file share url')
+    else:
+        namespace.destination_share_name = identifier.share
+
+    if not namespace.account_name:
+        namespace.account_name = identifier.account_name
+
+    # 3. collect the files to upload
+    namespace.source = os.path.realpath(namespace.source)
+    namespace.source_files = [c for c in glob_files_locally(namespace.source, namespace.pattern)]
+
+    # 4. clean up
+    del namespace.destination
+    del namespace.source
+    del namespace.pattern
+
+
+def process_file_download_batch_parameters(namespace):
+    """Process the parameters for storage file batch download command"""
+
+    # 1. quick check
+    if not os.path.exists(namespace.destination) or not os.path.isdir(namespace.destination):
+        raise ValueError('incorrect usage: --destination must be an existing directory')
+
+    # 2. try to extract account name and share name from source string
+    from .storage_url_helpers import StorageResourceIdentifier
+    identifier = StorageResourceIdentifier(namespace.source)
+    if not identifier.is_url():
+        namespace.source_share_name = namespace.source
+    elif identifier.filename or identifier.directory:
+        raise ValueError('incorrect usage: --source should be either share URL or name')
+    else:
+        namespace.source_share_name = identifier.share
+
+        if namespace.account_name is None:
+            namespace.account_name = identifier.account_name
+
+    # 3. clean up namespace
+    del namespace.source
+
 
 def process_file_download_namespace(namespace):
 
