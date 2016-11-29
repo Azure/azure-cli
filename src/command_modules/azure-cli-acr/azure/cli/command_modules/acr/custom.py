@@ -3,8 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import uuid
-
 from azure.cli.core.commands import LongRunningOperation
 
 from azure.mgmt.containerregistry.models import (
@@ -17,7 +15,8 @@ from ._factory import get_acr_service_client
 from ._utils import (
     get_access_key_by_storage_account_name,
     get_resource_group_name_by_registry_name,
-    arm_deploy_template
+    arm_deploy_template,
+    random_storage_account_name
 )
 
 import azure.cli.core._logging as _logging
@@ -58,7 +57,7 @@ def acr_create(registry_name, #pylint: disable=too-many-arguments
     admin_user_enabled = admin_enabled == 'true'
 
     if storage_account_name is None:
-        storage_account_name = str(uuid.uuid4()).replace('-', '')[:24]
+        storage_account_name = random_storage_account_name(registry_name)
         LongRunningOperation()(
             arm_deploy_template(resource_group_name,
                                 registry_name,
