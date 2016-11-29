@@ -48,6 +48,31 @@ class ResourceGroupScenarioTest(VCRTestBase): # Not RG test base because it test
         if self.cmd('resource group exists -n {}'.format(self.resource_group)):
             self.cmd('resource group delete -n {}'.format(self.resource_group))
 
+class ResourceGroupNoWaitScenarioTest(VCRTestBase): # Not RG test base because it tests the actual deletion of a resource group
+
+    def test_resource_group_no_wait(self):
+        self.execute()
+
+    def __init__(self, test_method):
+        self.resource_group = 'cli_rg_nowait_test'
+        super(ResourceGroupNoWaitScenarioTest, self).__init__(__file__, test_method)
+
+    def set_up(self):
+        if self.cmd('resource group exists -n {}'.format(self.resource_group)):
+            self.cmd('resource group delete -n {}'.format(self.resource_group))
+
+    def body(self):
+        s = self
+        rg = self.resource_group
+        s.cmd('resource group create -n {} -l westus'.format(rg), checks=[
+            JMESPathCheck('name', rg),
+        ])
+        s.cmd('resource group exists -n {}'.format(rg), checks=BooleanCheck(True))
+        s.cmd('resource group wait --exists -n {}'.format(rg), checks=NoneCheck())
+        s.cmd('resource group delete -n {} --no-wait'.format(rg), checks=NoneCheck())
+        s.cmd('resource group wait --deleted -n {}'.format(rg), checks=NoneCheck())
+        s.cmd('resource group exists -n {}'.format(rg), checks=NoneCheck())
+
 class ResourceScenarioTest(ResourceGroupVCRTestBase):
 
     def test_resource_scenario(self):
