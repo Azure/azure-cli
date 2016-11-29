@@ -99,14 +99,14 @@ See our `Docker tags <https://hub.docker.com/r/azuresdk/azure-cli-python/tags/>`
 
 .. code-block:: console
 
-   $ docker run -v $HOME:/root -it azuresdk/azure-cli-python:<version>
+   $ docker run -v ${HOME}:/root -it azuresdk/azure-cli-python:<version>
 
 Run the latest automated Docker build with the command below.
 All command modules are included in this version as the image is built directly from the Git repository.
 
 .. code-block:: console
 
-   $ docker run -v $HOME:/root -it azuresdk/azure-cli-python:latest
+   $ docker run -v ${HOME}:/root -it azuresdk/azure-cli-python:latest
 
 For installation steps for common platforms, as well as dependency troubleshooting, please take a look at our `installation guide <http://github.com/Azure/azure-cli/blob/master/doc/preview_install_guide.md>`__.
 
