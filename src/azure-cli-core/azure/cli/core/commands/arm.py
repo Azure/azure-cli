@@ -363,10 +363,10 @@ def cli_generic_wait_command(module_name, name, getter_op, factory=None, table_t
         wait_for_deleted = args.pop('deleted')
         wait_for_updated = args.pop('updated')
         wait_for_exists = args.pop('exists')
-        property_condition = args.pop('property')
+        custom_condition = args.pop('custom')
         if not any([wait_for_created, wait_for_updated, wait_for_deleted,
-                    wait_for_exists, property_condition]):
-            raise CLIError("Please specify at least one flag from 'create', 'updated', 'delete', 'exits', or 'property'")#pylint: disable=line-too-long
+                    wait_for_exists, custom_condition]):
+            raise CLIError("Please specify at least one flag from 'create', 'updated', 'delete', 'exits', or 'custom'")#pylint: disable=line-too-long
 
         for _ in range(0, timeout, interval):
             try:
@@ -376,28 +376,28 @@ def cli_generic_wait_command(module_name, name, getter_op, factory=None, table_t
                 provisioning_state = get_provisioning_state(instance)
                 #until we have any needs to wait for 'Failed', let us bail out on this
                 if provisioning_state == 'Failed':
-                    raise CLIError()
+                    raise CLIError('The operation failed')
                 if wait_for_created or wait_for_updated:
                     if provisioning_state == 'Succeeded':
                         return
-                if property_condition and bool(verify_property(instance, property_condition)):
+                if custom_condition and bool(verify_property(instance, custom_condition)):
                     return
             except ClientException as ex:
                 if getattr(ex, 'status_code', None) == 404:
                     if wait_for_deleted:
                         return
-                    if not any([wait_for_created, wait_for_exists, property_condition]):
+                    if not any([wait_for_created, wait_for_exists, custom_condition]):
                         raise
                 else:
                     raise
 
             time.sleep(interval)
 
-        return CLIError('Timeout')
+        return CLIError('Wait operation timed-out after {} seconds'.format(timeout))
 
     cmd = CliCommand(name, handler, table_transformer=table_transformer,
                      arguments_loader=arguments_loader)
-    group_name = 'Wait'
+    group_name = 'Wait Condition'
     cmd.add_argument('timeout', '--timeout', default=3600, arg_group=group_name, type=int,
                      help='maximum wait in seconds')
     cmd.add_argument('interval', '--interval', default=30, arg_group=group_name, type=int,
@@ -405,13 +405,13 @@ def cli_generic_wait_command(module_name, name, getter_op, factory=None, table_t
     cmd.add_argument('deleted', '--deleted', action='store_true', arg_group=group_name,
                      help='wait till deleted')
     cmd.add_argument('created', '--created', action='store_true', arg_group=group_name,
-                     help="wait till created with 'provisitioningState' at 'Succeeded'")
+                     help="wait till created with 'provisioningState' at 'Succeeded'")
     cmd.add_argument('updated', '--updated', action='store_true', arg_group=group_name,
-                     help="wait till updated with provisitioningState at 'Succeeded'")
+                     help="wait till updated with provisioningState at 'Succeeded'")
     cmd.add_argument('exists', '--exists', action='store_true', arg_group=group_name,
                      help="wait till the resource exists")
-    cmd.add_argument('property', '--property', arg_group=group_name,
-                     help=("wait till property meets the condition, using JMESPath query. E.g. "
+    cmd.add_argument('custom', '--custom', arg_group=group_name,
+                     help=("Wait until the condition satisfies a custom JMESPath query. E.g. "
                            "provisioningState!='InProgress', "
                            "instanceView.statuses[?code=='PowerState/running']"))
     main_command_table[name] = cmd

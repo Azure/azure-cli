@@ -393,8 +393,8 @@ class VMNoWaitScenarioTest(ResourceGroupVCRTestBase):
         self.execute()
 
     def body(self):
-        self.cmd('vm create -g {} -n {} --image UbuntuLTS --no-wait'.format(self.resource_group, self.name), checks=NoneCheck())
-        self.cmd('vm wait -g {} -n {} --property "{}"'.format(self.resource_group, self.name, "instanceView.statuses[?code=='PowerState/running']"), checks=NoneCheck())
+        self.cmd('vm create -g {} -n {} --admin-username user12 --admin-password VerySecret! --authentication-type password --image UbuntuLTS --no-wait'.format(self.resource_group, self.name), checks=NoneCheck())
+        self.cmd('vm wait -g {} -n {} --custom "{}"'.format(self.resource_group, self.name, "instanceView.statuses[?code=='PowerState/running']"), checks=NoneCheck())
         self.cmd('vm get-instance-view -g {} -n {}'.format(self.resource_group, self.name), checks=[
             JMESPathCheck("length(instanceView.statuses[?code=='PowerState/running'])", 1)
             ])
