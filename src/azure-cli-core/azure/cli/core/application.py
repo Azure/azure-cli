@@ -6,7 +6,6 @@
 from collections import defaultdict
 import sys
 import os
-import re
 import uuid
 import argparse
 from azure.cli.core.parser import AzCliCommandParser, enable_autocomplete
@@ -206,10 +205,10 @@ class Application(object):
         if ix == 0:
             return Application._load_file(arg[1:])
 
-        res = re.match('(\\-\\-?[a-zA-Z0-9]+[\\-a-zA-Z0-9]*\\=)\\"?@([^\\"]*)\\"?', arg)
-        if not res:
-            return arg
-        return res.group(1) + Application._load_file(res.group(2))
+        if arg[ix - 1] == '=':
+            return arg[:ix] + Application._load_file(arg[ix + 1:])
+
+        return arg
 
     @staticmethod
     def _expand_file_prefixed_files(argv):
