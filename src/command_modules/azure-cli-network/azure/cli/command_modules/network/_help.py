@@ -1011,6 +1011,32 @@ helps['network local-gateway'] = """
     type: group
     short-summary: Manage local gateways
 """
+
+helps['network local-gateway create'] = """
+    type: command
+    short-summary: Create a new local VPN gateway.
+"""
+
+helps['network local-gateway delete'] = """
+    type: command
+    short-summary: Delete a local VPN gateway.
+"""
+helps['network local-gateway list'] = """
+    type: command
+    short-summary: List local VPN gateways in a resource group.
+"""
+helps['network local-gateway show'] = """
+    type: command
+    short-summary: Show details of a local VPN gateway.
+"""
+
+helps['network local-gateway update'] = """
+    type: command
+    short-summary: Update an existing local VPN gateway.
+"""
+
+# Network Security Group (NSG)
+
 helps['network nsg'] = """
     type: group
     short-summary: Manage Network Security Groups (NSG)
