@@ -620,6 +620,31 @@ def update_nsg_rule(instance, protocol=None, source_address_prefix=None,
 update_nsg_rule.__doc__ = SecurityRule.__doc__
 #endregion
 
+#region Public IP commands
+
+def update_public_ip(instance, dns_name=None, allocation_method=None, version=None,
+                     idle_timeout=None, reverse_fqdn=None, tags=None):
+    if dns_name is not None or reverse_fqdn is not None:
+        from azure.mgmt.network.models import PublicIPAddressDnsSettings
+        if instance.dns_settings:
+            if dns_name is not None:
+                instance.dns_settings.domain_name_label = dns_name
+            if reverse_fqdn is not None:
+                instance.dns_settings.reverse_fqdn = reverse_fqdn
+        else:
+            instance.dns_settings = PublicIPAddressDnsSettings(dns_name, None, reverse_fqdn)
+    if allocation_method is not None:
+        instance.public_ip_allocation_method = allocation_method
+    if version is not None:
+        instance.public_ip_address_version = version
+    if idle_timeout is not None:
+        instance.idle_timeout_in_minutes = idle_timeout
+    if tags is not None:
+        instance.tags = tags
+    return instance
+
+#endregion
+
 #region Vnet Peering commands
 
 def create_vnet_peering(resource_group_name, virtual_network_name, virtual_network_peering_name,
