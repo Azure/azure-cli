@@ -12,7 +12,8 @@ from azure.cli.core.commands import (CliCommand,
                                      get_op_handler,
                                      command_table as main_command_table,
                                      command_module_map as main_command_module_map)
-from azure.cli.core.commands._introspection import extract_args_from_signature
+from azure.cli.core.commands._introspection import (extract_args_from_signature,
+                                                    SDK_RAW_PARAM_NAME)
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.application import APPLICATION, IterateValue
 import azure.cli.core._logging as _logging
@@ -190,8 +191,10 @@ def _get_child(parent, collection_name, item_name, collection_key):
 def cli_generic_update_command(module_name, name, getter_op, setter_op, factory=None, setter_arg_name='parameters', # pylint: disable=too-many-arguments, line-too-long
                                table_transformer=None, child_collection_prop_name=None,
                                child_collection_key='name', child_arg_name='item_name',
-                               custom_function_op=None, expose_no_wait=False):
-
+                               custom_function_op=None, expose_no_wait=False, no_wait_param=None):
+    if not expose_no_wait and no_wait_param:
+        raise ValueError("'no_wait_param' is only appliable when 'expose_no_wait' is on")
+    no_wait_param = (no_wait_param or SDK_RAW_PARAM_NAME) if expose_no_wait else None
     if not isinstance(getter_op, string_types):
         raise ValueError("Getter operation must be a string. Got '{}'".format(getter_op))
     if not isinstance(setter_op, string_types):
@@ -201,8 +204,8 @@ def cli_generic_update_command(module_name, name, getter_op, setter_op, factory=
 
     get_arguments_loader = lambda: dict(extract_args_from_signature(get_op_handler(getter_op)))
     set_arguments_loader = lambda: dict(extract_args_from_signature(get_op_handler(setter_op),
-                                                                    expose_raw_as_no_wait=expose_no_wait)) #pylint: disable=line-too-long
-    function_arguments_loader = lambda: dict(extract_args_from_signature(get_op_handler(custom_function_op), expose_raw_as_no_wait=expose_no_wait)) if custom_function_op else {} #pylint: disable=line-too-long
+                                                                    no_wait_param=no_wait_param)) #pylint: disable=line-too-long
+    function_arguments_loader = lambda: dict(extract_args_from_signature(get_op_handler(custom_function_op), no_wait_param=no_wait_param)) if custom_function_op else {} #pylint: disable=line-too-long
 
     def arguments_loader():
         arguments = {}
@@ -280,9 +283,9 @@ def cli_generic_update_command(module_name, name, getter_op, setter_op, factory=
         # Done... update the instance!
         getterargs[setter_arg_name] = parent if child_collection_prop_name else instance
         setter = get_op_handler(setter_op)
-        no_wait = expose_no_wait and setterargs.get('raw', None)
+        no_wait = no_wait_param and setterargs.get(no_wait_param, None)
         if no_wait:
-            getterargs['raw'] = True
+            getterargs[no_wait_param] = True
 
         opres = setter(client, **getterargs) if client else setter(**getterargs)
 

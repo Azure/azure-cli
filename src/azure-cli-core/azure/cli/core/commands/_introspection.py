@@ -52,11 +52,14 @@ def _option_descriptions(operation):
                 index += 1
     return option_descs
 
-EXCLUDED_PARAMS = frozenset(['self', 'custom_headers', 'operation_config',
+SDK_RAW_PARAM_NAME = 'raw'
+EXCLUDED_PARAMS = frozenset(['self', SDK_RAW_PARAM_NAME, 'custom_headers', 'operation_config',
                              'content_version', 'kwargs', 'client'])
 
-def extract_args_from_signature(operation, expose_raw_as_no_wait=False):
-    """ Extracts basic argument data from an operation's signature and docstring """
+def extract_args_from_signature(operation, no_wait_param=None):
+    """ Extracts basic argument data from an operation's signature and docstring
+        no_wait_param: SDK parameter which disables LRO polling. For now it is 'raw'
+    """
     from azure.cli.core.commands import CliCommandArgument
     args = []
     try:
@@ -69,10 +72,8 @@ def extract_args_from_signature(operation, expose_raw_as_no_wait=False):
 
     arg_docstring_help = _option_descriptions(operation)
     excluded_params = list(EXCLUDED_PARAMS)
-    if not expose_raw_as_no_wait:
-        excluded_params.append('raw')
-    elif not 'raw' in args:
-        raise ValueError("There is no 'raw' argument exposed for no-wait")
+    if no_wait_param:
+        excluded_params.remove(no_wait_param)
 
     for arg_name in [a for a in args if not a in excluded_params]:
         try:
@@ -96,7 +97,7 @@ def extract_args_from_signature(operation, expose_raw_as_no_wait=False):
             pass
 
         #improve the naming to 'no_wait'
-        if arg_name == 'raw':
+        if arg_name == no_wait_param:
             options_list = ['--no-wait']
             help_str = 'do not wait for the long running operation to finish'
         else:

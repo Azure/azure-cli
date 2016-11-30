@@ -20,7 +20,8 @@ from azure.cli.core.telemetry import log_telemetry
 from azure.cli.core.application import APPLICATION
 
 from ._introspection import (extract_args_from_signature,
-                             extract_full_summary_from_signature)
+                             extract_full_summary_from_signature,
+                             SDK_RAW_PARAM_NAME)
 
 logger = _logging.get_az_logger(__name__)
 
@@ -146,7 +147,7 @@ class CommandTable(dict):
 class CliCommand(object): #pylint:disable=too-many-instance-attributes
 
     def __init__(self, name, handler, description=None, table_transformer=None,
-                 arguments_loader=None, description_loader=None, expose_no_wait=False):
+                 arguments_loader=None, description_loader=None):
         self.name = name
         self.handler = handler
         self.help = None
@@ -156,7 +157,6 @@ class CliCommand(object): #pylint:disable=too-many-instance-attributes
         self.arguments = {}
         self.arguments_loader = arguments_loader
         self.table_transformer = table_transformer
-        self.expose_no_wait = expose_no_wait
 
     @staticmethod
     def _should_load_description():
@@ -241,10 +241,11 @@ def register_extra_cli_argument(command, dest, **kwargs):
     _cli_extra_argument_registry[command][dest] = CliCommandArgument(dest, **kwargs)
 
 def cli_command(module_name, name, operation,
-                client_factory=None, transform=None, table_transformer=None, expose_no_wait=False):
+                client_factory=None, transform=None, table_transformer=None,
+                expose_no_wait=False, no_wait_param=None):
     """ Registers a default Azure CLI command. These commands require no special parameters. """
     command_table[name] = create_command(module_name, name, operation, transform, table_transformer,
-                                         client_factory, expose_no_wait)
+                                         client_factory, expose_no_wait, no_wait_param)
 
 def get_op_handler(operation):
     """ Import and load the operation handler """
@@ -258,7 +259,11 @@ def get_op_handler(operation):
         raise ValueError("The operation '{}' is invalid.".format(operation))
 
 def create_command(module_name, name, operation,
-                   transform_result, table_transformer, client_factory, expose_no_wait=False):
+                   transform_result, table_transformer, client_factory,
+                   expose_no_wait=False, no_wait_param=None):
+    if not expose_no_wait and no_wait_param:
+        raise ValueError("'no_wait_param' is only appliable when 'expose_no_wait' is on")
+    no_wait_param = (no_wait_param or SDK_RAW_PARAM_NAME) if expose_no_wait else None
 
     if not isinstance(operation, string_types):
         raise ValueError("Operation must be a string. Got '{}'".format(operation))
@@ -274,7 +279,7 @@ def create_command(module_name, name, operation,
             op = get_op_handler(operation)
             result = op(client, **kwargs) if client else op(**kwargs)
 
-            if expose_no_wait and kwargs.get('raw', None):
+            if no_wait_param and kwargs.get(no_wait_param, None):
                 return None #return None for 'no-wait'
 
             # apply results transform if specified
@@ -305,11 +310,10 @@ def create_command(module_name, name, operation,
     command_module_map[name] = module_name
     name = ' '.join(name.split())
     arguments_loader = lambda: extract_args_from_signature(get_op_handler(operation),
-                                                           expose_raw_as_no_wait=expose_no_wait)
+                                                           no_wait_param=no_wait_param)
     description_loader = lambda: extract_full_summary_from_signature(get_op_handler(operation))
     cmd = CliCommand(name, _execute_command, table_transformer=table_transformer,
-                     arguments_loader=arguments_loader, description_loader=description_loader,
-                     expose_no_wait=expose_no_wait)
+                     arguments_loader=arguments_loader, description_loader=description_loader)
     return cmd
 
 def _polish_rp_not_registerd_error(cli_error):
