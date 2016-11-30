@@ -72,7 +72,7 @@ def extract_args_from_signature(operation, no_wait_param=None):
 
     arg_docstring_help = _option_descriptions(operation)
     excluded_params = list(EXCLUDED_PARAMS)
-    if no_wait_param:
+    if no_wait_param in excluded_params:
         excluded_params.remove(no_wait_param)
 
     for arg_name in [a for a in args if not a in excluded_params]:
