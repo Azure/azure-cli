@@ -14,7 +14,7 @@ from ._util import (list_network_resource_property,
                     delete_network_resource_property_entry)
 
 # Application gateways
-cli_command(__name__, 'network application-gateway delete', 'azure.mgmt.network.operations.application_gateways_operations#ApplicationGatewaysOperations.delete', no_wait_param='raw')
+cli_command(__name__, 'network application-gateway delete', 'azure.mgmt.network.operations.application_gateways_operations#ApplicationGatewaysOperations.delete', cf_application_gateways, no_wait_param='raw')
 cli_command(__name__, 'network application-gateway show', 'azure.mgmt.network.operations.application_gateways_operations#ApplicationGatewaysOperations.get', cf_application_gateways)
 cli_command(__name__, 'network application-gateway list', 'azure.cli.command_modules.network.custom#list_application_gateways')
 cli_command(__name__, 'network application-gateway start', 'azure.mgmt.network.operations.application_gateways_operations#ApplicationGatewaysOperations.start', cf_application_gateways)

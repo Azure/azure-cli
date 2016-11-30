@@ -201,7 +201,7 @@ def cli_generic_update_command(module_name, name, getter_op, setter_op, factory=
     get_arguments_loader = lambda: dict(extract_args_from_signature(get_op_handler(getter_op)))
     set_arguments_loader = lambda: dict(extract_args_from_signature(get_op_handler(setter_op),
                                                                     no_wait_param=no_wait_param)) #pylint: disable=line-too-long
-    function_arguments_loader = lambda: dict(extract_args_from_signature(get_op_handler(custom_function_op), no_wait_param=no_wait_param)) if custom_function_op else {} #pylint: disable=line-too-long
+    function_arguments_loader = lambda: dict(extract_args_from_signature(get_op_handler(custom_function_op))) if custom_function_op else {} #pylint: disable=line-too-long
 
     def arguments_loader():
         arguments = {}

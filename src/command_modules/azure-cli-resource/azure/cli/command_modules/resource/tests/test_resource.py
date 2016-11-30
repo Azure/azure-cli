@@ -272,6 +272,29 @@ class DeploymentTest(ResourceGroupVCRTestBase):
             JMESPathCheck('[0].resourceGroup', self.resource_group)
             ])
 
+class DeploymentnoWaitTest(ResourceGroupVCRTestBase):
+    def __init__(self, test_method):
+        super(DeploymentnoWaitTest, self).__init__(__file__, test_method)
+        self.resource_group = 'azure-cli-deployment-test'
+
+    def test_group_deployment_no_wait(self):
+        self.execute()
+
+    def body(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        template_file = os.path.join(curr_dir, 'simple_deploy.json').replace('\\', '\\\\')
+        parameters_file = os.path.join(curr_dir, 'simple_deploy_parameters.json').replace('\\', '\\\\')
+        deployment_name = 'azure-cli-deployment'
+
+        self.cmd('resource group deployment create -g {} -n {} --template-file {} --parameters @{} --no-wait'.format(
+            self.resource_group, deployment_name, template_file, parameters_file), checks=NoneCheck())
+
+        self.cmd('resource group deployment wait -g {} -n {} --created'.format(self.resource_group, deployment_name), checks=NoneCheck())
+
+        self.cmd('resource group deployment show -g {} -n {}'.format(self.resource_group, deployment_name), checks=[
+            JMESPathCheck('properties.provisioningState', 'Succeeded')
+            ])
+
 class DeploymentThruUriTest(ResourceGroupVCRTestBase):
     def __init__(self, test_method):
         super(DeploymentThruUriTest, self).__init__(__file__, test_method)

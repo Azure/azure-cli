@@ -77,7 +77,7 @@ def transform_deployments_list(result):
     return [OrderedDict([('Name', r['name']), \
             ('Timestamp', r['properties']['timestamp']), ('State', r['properties']['provisioningState'])]) for r in sort_list]
 
-cli_command(__name__, 'resource group deployment create', 'azure.cli.command_modules.resource.custom#deploy_arm_template', no_wait_param='raw')
+cli_command(__name__, 'resource group deployment create', 'azure.cli.command_modules.resource.custom#deploy_arm_template', no_wait_param='no_wait')
 cli_generic_wait_command(__name__, 'resource group deployment wait', 'azure.mgmt.resource.resources.operations.deployments_operations#DeploymentsOperations.get', cf_deployments)
 cli_command(__name__, 'resource group deployment list', 'azure.mgmt.resource.resources.operations.deployments_operations#DeploymentsOperations.list', cf_deployments, table_transformer=transform_deployments_list)
 cli_command(__name__, 'resource group deployment show', 'azure.mgmt.resource.resources.operations.deployments_operations#DeploymentsOperations.get', cf_deployments)
