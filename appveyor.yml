@@ -63,5 +63,6 @@ on_success:
   - if exist %TEMP%\azure-cli-content\%YML_OUTPUT_FOLDER% ((cd %TEMP%\azure-cli-content\%YML_OUTPUT_FOLDER%) & (del %FILES_TO_DELETE% /f /q) & (for /d %%p IN (*) do rmdir "%%p" /s /q))
   - cd %TEMP%\azure-cli-content
   - SETLOCAL EnableDelayedExpansion & robocopy %TEMP%\azure-cli-xml2yml\yml-output %TEMP%\azure-cli-content\%YML_OUTPUT_FOLDER% /e & IF !ERRORLEVEL! EQU 1 (exit 0) ELSE (IF !ERRORLEVEL! EQU 3 (exit 0) ELSE (exit 1))
+  - ps: .\merge-toc.ps1 "$env:YML_OUTPUT_FOLDER" "$env:CONCEPTUAL_DOC_FOLDER"
   - git add -A
   - git diff --quiet --exit-code --cached || git commit -m "Update Document Content" && git push origin %TARGET_BRANCH% && appveyor AddMessage "Document Updated"
