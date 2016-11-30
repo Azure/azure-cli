@@ -3,6 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from collections import OrderedDict
+
 from azure.cli.core.commands import DeploymentOutputLongRunningOperation, cli_command
 
 from azure.cli.core.commands.arm import cli_generic_update_command
@@ -82,6 +84,15 @@ cli_command(__name__, 'vm boot-diagnostics get-boot-log', custom_path.format('ge
 
 # ACS
 
+def transform_acs_list(result):
+    transformed = []
+    for r in result:
+        res = OrderedDict([('Name', r['name']), ('ResourceGroup', r['resourceGroup']), \
+            ('Orchestrator', r['orchestratorProfile']['orchestratorType']),
+            ('Location', r['location']), ('ProvisioningState', r['provisioningState'])])
+        transformed.append(res)
+    return transformed
+
 #Remove the hack after https://github.com/Azure/azure-rest-api-specs/issues/352 fixed
 from azure.mgmt.compute.models import ContainerService#pylint: disable=wrong-import-position
 for a in ['id', 'name', 'type', 'location']:
@@ -91,7 +102,7 @@ ContainerService._attribute_map['tags']['type'] = '{str}'#pylint: disable=protec
 op_var = 'container_services_operations'
 op_class = 'ContainerServicesOperations'
 cli_command(__name__, 'acs show', mgmt_path.format(op_var, op_class, 'get'), cf_acs)
-cli_command(__name__, 'acs list', custom_path.format('list_container_services'), cf_acs)
+cli_command(__name__, 'acs list', custom_path.format('list_container_services'), cf_acs, table_transformer=transform_acs_list)
 cli_command(__name__, 'acs delete', mgmt_path.format(op_var, op_class, 'delete'), cf_acs)
 cli_command(__name__, 'acs scale', custom_path.format('update_acs'))
 #Per conversation with ACS team, hide the update till we have something meaningful to tweak
