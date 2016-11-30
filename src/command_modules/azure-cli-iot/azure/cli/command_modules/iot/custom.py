@@ -82,30 +82,22 @@ def iot_hub_sku_list(client, hub_name, resource_group_name=None):
     return client.get_valid_skus(resource_group_name, hub_name)
 
 
-def iot_hub_consumer_group_create(client, hub_name, consumer_group_name, resource_group_name=None, event_hub_name=None):
-    if event_hub_name is None:
-        event_hub_name = 'events'
+def iot_hub_consumer_group_create(client, hub_name, consumer_group_name, resource_group_name=None, event_hub_name='events'):
     resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
     return client.create_event_hub_consumer_group(resource_group_name, hub_name, event_hub_name, consumer_group_name)
 
 
-def iot_hub_consumer_group_list(client, hub_name, resource_group_name=None, event_hub_name=None):
-    if event_hub_name is None:
-        event_hub_name = 'events'
+def iot_hub_consumer_group_list(client, hub_name, resource_group_name=None, event_hub_name='events'):
     resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
     return client.list_event_hub_consumer_groups(resource_group_name, hub_name, event_hub_name)
 
 
-def iot_hub_consumer_group_get(client, hub_name, consumer_group_name, resource_group_name=None, event_hub_name=None):
-    if event_hub_name is None:
-        event_hub_name = 'events'
+def iot_hub_consumer_group_get(client, hub_name, consumer_group_name, resource_group_name=None, event_hub_name='events'):
     resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
     return client.get_event_hub_consumer_group(resource_group_name, hub_name, event_hub_name, consumer_group_name)
 
 
-def iot_hub_consumer_group_delete(client, hub_name, consumer_group_name, resource_group_name=None, event_hub_name=None):
-    if event_hub_name is None:
-        event_hub_name = 'events'
+def iot_hub_consumer_group_delete(client, hub_name, consumer_group_name, resource_group_name=None, event_hub_name='events'):
     resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
     return client.delete_event_hub_consumer_group(resource_group_name, hub_name, event_hub_name, consumer_group_name)
 

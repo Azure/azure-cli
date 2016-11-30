@@ -32,7 +32,7 @@ register_cli_argument('iot', 'device_id', options_list=('--device-id', '-d'), he
 register_cli_argument('iot hub consumer-group', 'consumer_group_name', options_list=('--name', '-n'),
                       id_part='grandchild_name', help='Event hub consumer group name.')
 register_cli_argument('iot hub consumer-group', 'event_hub_name', id_part='child_name',
-                      help='Event hub endpoint name. Default is events.')
+                      help='Event hub endpoint name.')
 
 # Arguments for 'iot hub policy' group
 register_cli_argument('iot hub policy', 'policy_name', options_list=('--name', '-n'), id_part='child_name',
