@@ -420,7 +420,9 @@ register_cli_argument('network vpn-gateway', 'cert_name', help='Root certificate
 register_cli_argument('network vpn-gateway', 'gateway_name', help='Virtual network gateway name')
 register_cli_argument('network vpn-gateway', 'gateway_type', help='The gateway type.', **enum_choice_list(gatewayType))
 register_cli_argument('network vpn-gateway', 'sku', help='VPN gateway SKU.', **enum_choice_list(sku))
-register_cli_argument('network vpn-gateway', 'vpn_type', help='VPN gateway type.', **enum_choice_list(vpnType))
+
+for dest in ['vpn_type', 'vpn_gateway_type']:
+    register_cli_argument('network vpn-gateway', dest, help='VPN gateway type.', **enum_choice_list(vpnType))
 
 register_cli_argument('network vpn-gateway update', 'enable_bgp', help='Enable BGP (Border Gateway Protocol)', **enum_choice_list(['true', 'false']))
 register_cli_argument('network vpn-gateway update', 'public_ip_address', help='Name or ID of a public IP address.', validator=get_public_ip_validator())
