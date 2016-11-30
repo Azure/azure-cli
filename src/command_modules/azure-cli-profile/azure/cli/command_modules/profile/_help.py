@@ -8,12 +8,13 @@ from azure.cli.core.help_files import helps #pylint: disable=unused-import
 #pylint: disable=line-too-long
 helps['login'] = """
             examples:
-                - name: Log in interactively (work for all user account types).
+                - name: Log in interactively.
                   text: >
                     az login
-                - name: Log in with user name and password(doesn't work with two-factor authentication enabled accounts or Microsoft accounts, like live id).                  text: >
+                - name: Log in with user name and password. This doesn't work with Microsoft accounts or accounts that have two-factor authentication enabled.
+                  text: >
                     az login -u johndoe@contoso.com -p VerySecret
-                - name: Log in with service principal.
+                - name: Log in with a service principal.
                   text: >
                     az login --service-principal -u http://azure-cli-2016-08-05-14-31-15 -p VerySecret --tenant contoso.onmicrosoft.com
             """
@@ -30,7 +31,7 @@ helps['account list-locations'] = """
 
 helps['account show'] = """
     type: command
-    short-summary: show detail of the current subscription
+    short-summary: show details of the current subscription
 """
 
 
