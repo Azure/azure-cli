@@ -14,7 +14,7 @@ from ._util import (list_network_resource_property,
                     delete_network_resource_property_entry)
 
 # Application gateways
-cli_command(__name__, 'network application-gateway delete', 'azure.mgmt.network.operations.application_gateways_operations#ApplicationGatewaysOperations.delete', cf_application_gateways, expose_no_wait=True)
+cli_command(__name__, 'network application-gateway delete', 'azure.mgmt.network.operations.application_gateways_operations#ApplicationGatewaysOperations.delete', no_wait_param='raw')
 cli_command(__name__, 'network application-gateway show', 'azure.mgmt.network.operations.application_gateways_operations#ApplicationGatewaysOperations.get', cf_application_gateways)
 cli_command(__name__, 'network application-gateway list', 'azure.cli.command_modules.network.custom#list_application_gateways')
 cli_command(__name__, 'network application-gateway start', 'azure.mgmt.network.operations.application_gateways_operations#ApplicationGatewaysOperations.start', cf_application_gateways)
@@ -22,7 +22,7 @@ cli_command(__name__, 'network application-gateway stop', 'azure.mgmt.network.op
 cli_generic_update_command(__name__, 'network application-gateway update',
                            'azure.mgmt.network.operations.application_gateways_operations#ApplicationGatewaysOperations.get',
                            'azure.mgmt.network.operations.application_gateways_operations#ApplicationGatewaysOperations.create_or_update',
-                           cf_application_gateways, expose_no_wait=True)
+                           cf_application_gateways, no_wait_param='raw')
 cli_generic_wait_command(__name__, 'network application-gateway wait',
                          'azure.mgmt.network.operations.application_gateways_operations#ApplicationGatewaysOperations.get', cf_application_gateways)
 
@@ -30,7 +30,7 @@ cli_command(__name__, 'network application-gateway create',
             'azure.cli.command_modules.network.mgmt_app_gateway.lib.operations.app_gateway_operations#AppGatewayOperations.create_or_update',
             cf_application_gateway_create,
             transform=DeploymentOutputLongRunningOperation('Starting network application-gateway create'),
-            expose_no_wait=True)
+            no_wait_param='raw')
 
 property_map = {
     'ssl_certificates': 'ssl-cert',
@@ -315,14 +315,14 @@ cli_generic_update_command(__name__, 'network vpn-gateway update',
                            'azure.mgmt.network.operations.virtual_network_gateways_operations#VirtualNetworkGatewaysOperations.create_or_update',
                            cf_virtual_network_gateways,
                            custom_function_op='azure.cli.command_modules.network.custom#update_network_vpn_gateway',
-                           expose_no_wait=True)
+                           no_wait_param='raw')
 cli_command(__name__, 'network vpn-gateway root-cert create', 'azure.cli.command_modules.network.custom#create_vpn_gateway_root_cert')
 cli_command(__name__, 'network vpn-gateway root-cert delete', 'azure.cli.command_modules.network.custom#delete_vpn_gateway_root_cert')
 cli_command(__name__, 'network vpn-gateway revoked-cert create', 'azure.cli.command_modules.network.custom#create_vpn_gateway_revoked_cert')
 cli_command(__name__, 'network vpn-gateway revoked-cert delete', 'azure.cli.command_modules.network.custom#delete_vpn_gateway_revoked_cert')
 
 cli_command(__name__, 'network vpn-gateway create', 'azure.cli.command_modules.network.mgmt_vnet_gateway.lib.operations.vnet_gateway_operations#VnetGatewayOperations.create_or_update', cf_vnet_gateway_create, transform=DeploymentOutputLongRunningOperation('Starting network vnet-gateway create'),
-            expose_no_wait=True)
+            no_wait_param='raw')
 cli_generic_wait_command(__name__, 'network vpn-gateway wait', 'azure.mgmt.network.operations.virtual_network_gateways_operations#VirtualNetworkGatewaysOperations.get', cf_virtual_network_gateways)
 
 # VirtualNetworksOperations

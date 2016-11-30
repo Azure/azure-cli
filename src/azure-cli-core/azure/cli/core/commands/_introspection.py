@@ -52,8 +52,7 @@ def _option_descriptions(operation):
                 index += 1
     return option_descs
 
-SDK_RAW_PARAM_NAME = 'raw'
-EXCLUDED_PARAMS = frozenset(['self', SDK_RAW_PARAM_NAME, 'custom_headers', 'operation_config',
+EXCLUDED_PARAMS = frozenset(['self', 'raw', 'custom_headers', 'operation_config',
                              'content_version', 'kwargs', 'client'])
 
 def extract_args_from_signature(operation, no_wait_param=None):
@@ -74,6 +73,7 @@ def extract_args_from_signature(operation, no_wait_param=None):
     excluded_params = list(EXCLUDED_PARAMS)
     if no_wait_param in excluded_params:
         excluded_params.remove(no_wait_param)
+    found_no_wait_param = False
 
     for arg_name in [a for a in args if not a in excluded_params]:
         try:
@@ -98,6 +98,9 @@ def extract_args_from_signature(operation, no_wait_param=None):
 
         #improve the naming to 'no_wait'
         if arg_name == no_wait_param:
+            if not isinstance(args[arg_name].default, bool):
+                raise ValueError("The type of '{}' must be boolean to enable for no_wait".format(no_wait_param))#pylint: disable=line-too-long
+            found_no_wait_param = True
             options_list = ['--no-wait']
             help_str = 'do not wait for the long running operation to finish'
         else:
@@ -110,3 +113,5 @@ def extract_args_from_signature(operation, no_wait_param=None):
                                             default=default,
                                             help=help_str,
                                             action=action))
+    if no_wait_param and not found_no_wait_param:
+        raise ValueError("Command authoring error: unable to enable no-wait option. Operation '{}' does not have a '{}' parameter.".format(operation, no_wait_param))#pylint: disable=line-too-long

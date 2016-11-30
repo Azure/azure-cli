@@ -20,8 +20,7 @@ from azure.cli.core.telemetry import log_telemetry
 from azure.cli.core.application import APPLICATION
 
 from ._introspection import (extract_args_from_signature,
-                             extract_full_summary_from_signature,
-                             SDK_RAW_PARAM_NAME)
+                             extract_full_summary_from_signature)
 
 logger = _logging.get_az_logger(__name__)
 
@@ -242,10 +241,10 @@ def register_extra_cli_argument(command, dest, **kwargs):
 
 def cli_command(module_name, name, operation,
                 client_factory=None, transform=None, table_transformer=None,
-                expose_no_wait=False, no_wait_param=None):
+                no_wait_param=None):
     """ Registers a default Azure CLI command. These commands require no special parameters. """
     command_table[name] = create_command(module_name, name, operation, transform, table_transformer,
-                                         client_factory, expose_no_wait, no_wait_param)
+                                         client_factory, no_wait_param)
 
 def get_op_handler(operation):
     """ Import and load the operation handler """
@@ -260,11 +259,7 @@ def get_op_handler(operation):
 
 def create_command(module_name, name, operation,
                    transform_result, table_transformer, client_factory,
-                   expose_no_wait=False, no_wait_param=None):
-    if not expose_no_wait and no_wait_param:
-        raise ValueError("'no_wait_param' is only appliable when 'expose_no_wait' is on")
-    no_wait_param = (no_wait_param or SDK_RAW_PARAM_NAME) if expose_no_wait else None
-
+                   no_wait_param=None):
     if not isinstance(operation, string_types):
         raise ValueError("Operation must be a string. Got '{}'".format(operation))
 

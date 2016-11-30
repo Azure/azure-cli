@@ -25,7 +25,7 @@ def transform_resource_group_list(result):
 cli_command(__name__, 'resource group delete',
             'azure.mgmt.resource.resources.operations.resource_groups_operations#ResourceGroupsOperations.delete',
             cf_resource_groups,
-            expose_no_wait=True)
+            no_wait_param='raw')
 cli_generic_wait_command(__name__, 'resource group wait', 'azure.mgmt.resource.resources.operations.resource_groups_operations#ResourceGroupsOperations.get', cf_resource_groups)
 cli_command(__name__, 'resource group show', 'azure.mgmt.resource.resources.operations.resource_groups_operations#ResourceGroupsOperations.get', cf_resource_groups)
 cli_command(__name__, 'resource group exists', 'azure.mgmt.resource.resources.operations.resource_groups_operations#ResourceGroupsOperations.check_existence', cf_resource_groups)
@@ -77,7 +77,7 @@ def transform_deployments_list(result):
     return [OrderedDict([('Name', r['name']), \
             ('Timestamp', r['properties']['timestamp']), ('State', r['properties']['provisioningState'])]) for r in sort_list]
 
-cli_command(__name__, 'resource group deployment create', 'azure.cli.command_modules.resource.custom#deploy_arm_template', expose_no_wait=True)
+cli_command(__name__, 'resource group deployment create', 'azure.cli.command_modules.resource.custom#deploy_arm_template', no_wait_param='raw')
 cli_generic_wait_command(__name__, 'resource group deployment wait', 'azure.mgmt.resource.resources.operations.deployments_operations#DeploymentsOperations.get', cf_deployments)
 cli_command(__name__, 'resource group deployment list', 'azure.mgmt.resource.resources.operations.deployments_operations#DeploymentsOperations.list', cf_deployments, table_transformer=transform_deployments_list)
 cli_command(__name__, 'resource group deployment show', 'azure.mgmt.resource.resources.operations.deployments_operations#DeploymentsOperations.get', cf_deployments)
