@@ -159,7 +159,8 @@ helps['appservice web source-control config'] = """
 
 helps['appservice web source-control config-local-git'] = """
     type: command
-    short-summary: enable local git. You will get a url to clone and later push to the web app
+    short-summary: enable local git
+    long-summary: enable local git. You will get a url to clone and later push to the web app
 """
 
 helps['appservice web source-control delete'] = """
