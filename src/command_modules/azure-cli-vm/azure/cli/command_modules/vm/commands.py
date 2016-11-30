@@ -87,9 +87,13 @@ cli_command(__name__, 'vm boot-diagnostics get-boot-log', custom_path.format('ge
 def transform_acs_list(result):
     transformed = []
     for r in result:
+        orchestratorType = 'Unknown'
+        orchestratorProfile = r.get('orchestratorProfile')
+        if orchestratorProfile:
+            orchestratorType = orchestratorProfile.get('orchestratorType')
         res = OrderedDict([('Name', r['name']), ('ResourceGroup', r['resourceGroup']), \
-            ('Orchestrator', r['orchestratorProfile']['orchestratorType']),
-            ('Location', r['location']), ('ProvisioningState', r['provisioningState'])])
+            ('Orchestrator', orchestratorType), ('Location', r['location']), \
+            ('ProvisioningState', r['provisioningState'])])
         transformed.append(res)
     return transformed
 
