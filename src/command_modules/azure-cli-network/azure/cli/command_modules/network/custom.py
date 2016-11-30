@@ -932,26 +932,22 @@ def update_traffic_manager_profile(instance, profile_status=None, routing_method
     if tags is not None:
         instance.tags = tags
     if profile_status is not None:
-        instance.properties.profile_status = profile_status
+        instance.profile_status = profile_status # TODO: Needs choice list Enabled/Disabled
     if routing_method is not None:
-        instance.properties.traffic_routing_method = routing_method
+        instance.traffic_routing_method = routing_method
     if ttl is not None:
-        instance.properties.dns_config.ttl = ttl
+        instance.dns_config.ttl = ttl
 
-    if any([x for x in [monitor_protocol, monitor_port, monitor_path, monitor_status] is not None]):
-        if instance.monitor_config:
-            if monitor_status is not None:
-                instance.properties.monitor_config.profile_monitor_status = monitor_status
-            if monitor_protocol is not None:
-                instance.properties.monitor_config.protocol = monitor_protocol
-            if monitor_port is not None:
-                instance.properties.monitor_config.port = monitor_port
-            if monitor_path is not None:
-                instance.properties.monitor_config.path = monitor_path
-        else:
-            from azure.mgmt.trafficmanager.models import MonitorConfig
-            instance.properties.monitor_config = MonitorConfig(
-                monitor_status, monitor_protocol, monitor_port, monitor_path)
+    monitor_params = [monitor_protocol, monitor_port, monitor_path, monitor_status]
+    if any([x for x in monitor_params if x is not None]):
+        if monitor_status is not None:
+            instance.monitor_config.profile_monitor_status = monitor_status  # TODO: DOESN'T SEEM TO WORK?
+        if monitor_protocol is not None:
+            instance.monitor_config.protocol = monitor_protocol
+        if monitor_port is not None:
+            instance.monitor_config.port = monitor_port
+        if monitor_path is not None:
+            instance.monitor_config.path = monitor_path
 
     return instance
 
@@ -978,21 +974,21 @@ def update_traffic_manager_endpoint(instance, endpoint_type=None, endpoint_locat
     if endpoint_type is not None:
         instance.type = endpoint_type
     if endpoint_location is not None:
-        instance.properties.endpoint_location = endpoint_location
+        instance.endpoint_location = endpoint_location
     if endpoint_status is not None:
-        instance.properties.endpoint_status = endpoint_status
+        instance.endpoint_status = endpoint_status
     if endpoint_monitor_status is not None:
-        instance.properties.endpoint_monitor_status = endpoint_monitor_status
+        instance.endpoint_monitor_status = endpoint_monitor_status
     if priority is not None:
-        instance.properties.priority = priority
+        instance.priority = priority
     if target is not None:
-        instance.properties.target = target
+        instance.target = target
     if target_resource_id is not None:
-        instance.properties.target_resource_id = target_resource_id
+        instance.target_resource_id = target_resource_id
     if weight is not None:
-        instance.properties.weight = weight
+        instance.weight = weight
     if min_child_endpoints is not None:
-        instance.properties.min_child_endpoints = min_child_endpoints
+        instance.min_child_endpoints = min_child_endpoints
 
     return instance
 
