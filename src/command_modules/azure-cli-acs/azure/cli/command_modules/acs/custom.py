@@ -376,7 +376,7 @@ def _create_kubernetes(resource_group_name, deployment_name, dns_name_prefix, na
     smc = _resource_client_factory()
     return smc.deployments.create_or_update(resource_group_name, deployment_name, properties)
 
-def k8s_get_credentials(name=None, resource_group_name=None, dns_prefix=None, location=None, user=None):
+def k8s_get_credentials(name=None, resource_group_name=None, dns_prefix=None, location=None, user=None, path=None):
     if not dns_prefix or not location:
         acs_info = _get_acs_info(name, resource_group_name)
 
@@ -387,8 +387,6 @@ def k8s_get_credentials(name=None, resource_group_name=None, dns_prefix=None, lo
         if not user:
             user = acs_info.linux_profile.admin_username # pylint: disable=no-member
 
-    home = os.path.expanduser('~')
-    path = os.path.join(home, '.kube', 'config')
     _mkdir_p(os.path.dirname(path))
 
     path_candidate = path
