@@ -30,6 +30,7 @@ from azure.cli.command_modules.vm.mgmt_acs.lib import \
 from azure.cli.core._util import CLIError
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.mgmt.compute import ComputeManagementClient
+from azure.cli.core._environment import get_config_dir
 
 logger = _logging.get_az_logger(__name__)
 
@@ -302,13 +303,14 @@ def store_acs_service_principal(client_secret, service_principal):
         obj['client_secret'] = client_secret
     if service_principal:
         obj['service_principal'] = service_principal
-    configPath = os.path.join(os.path.expanduser('~'), '.azure', 'acsServicePrincipal.json')
+
+    configPath = os.path.join(get_config_dir(), 'acsServicePrincipal.json')
     with os.fdopen(os.open(configPath, os.O_RDWR|os.O_CREAT|os.O_TRUNC, 0o600),
                    'w+') as spFile:
         json.dump(obj, spFile)
 
 def load_acs_service_principal():
-    configPath = os.path.join(os.path.expanduser('~'), '.azure', 'acsServicePrincipal.json')
+    configPath = os.path.join(get_config_dir(), 'acsServicePrincipal.json')
     if not os.path.exists(configPath):
         return None
     fd = os.open(configPath, os.O_RDONLY)
