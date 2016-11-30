@@ -406,24 +406,16 @@ def process_file_upload_batch_parameters(namespace):
     # 2. try to extract account name and container name from destination string
     from .storage_url_helpers import StorageResourceIdentifier
     identifier = StorageResourceIdentifier(namespace.destination)
-    if not identifier.is_url():
-        namespace.destination_share_name = namespace.destination
-    elif identifier.filename or identifier.directory:
-        raise ValueError('incorrect usage: destination must be a file share url')
-    else:
-        namespace.destination_share_name = identifier.share
+    if identifier.is_url():
+        if identifier.filename or identifier.directory:
+            raise ValueError('incorrect usage: destination must be a file share url')
 
-    if not namespace.account_name:
-        namespace.account_name = identifier.account_name
+        namespace.destination = identifier.share
 
-    # 3. collect the files to upload
+        if not namespace.account_name:
+            namespace.account_name = identifier.account_name
+
     namespace.source = os.path.realpath(namespace.source)
-    namespace.source_files = [c for c in glob_files_locally(namespace.source, namespace.pattern)]
-
-    # 4. clean up
-    del namespace.destination
-    del namespace.source
-    del namespace.pattern
 
 
 def process_file_download_batch_parameters(namespace):
@@ -436,18 +428,14 @@ def process_file_download_batch_parameters(namespace):
     # 2. try to extract account name and share name from source string
     from .storage_url_helpers import StorageResourceIdentifier
     identifier = StorageResourceIdentifier(namespace.source)
-    if not identifier.is_url():
-        namespace.source_share_name = namespace.source
-    elif identifier.filename or identifier.directory:
-        raise ValueError('incorrect usage: source should be either share URL or name')
-    else:
-        namespace.source_share_name = identifier.share
+    if identifier.is_url():
+        if identifier.filename or identifier.directory:
+            raise ValueError('incorrect usage: source should be either share URL or name')
 
-        if namespace.account_name is None:
+        namespace.source = identifier.share
+
+        if not namespace.account_name:
             namespace.account_name = identifier.account_name
-
-    # 3. clean up namespace
-    del namespace.source
 
 
 def process_file_download_namespace(namespace):

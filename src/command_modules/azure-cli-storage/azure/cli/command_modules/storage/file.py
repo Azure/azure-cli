@@ -13,18 +13,21 @@ import os.path
 from azure.cli.core._logging import get_az_logger
 
 
-def storage_file_upload_batch(client, destination_share_name, source_files=None, dryrun=False,
+def storage_file_upload_batch(client, destination, source, pattern=None, dryrun=False,
                               validate_content=False, content_settings=None, max_connections=1,
                               metadata=None):
     """
     Upload local files to Azure Storage File Share in batch
     """
 
+    from .files_helpers import glob_files_locally
+    source_files = [c for c in glob_files_locally(source, pattern)]
+
     if dryrun:
         logger = get_az_logger(__name__)
         logger.warning('upload files to file share')
         logger.warning('    account %s', client.account_name)
-        logger.warning('      share %s', destination_share_name)
+        logger.warning('      share %s', destination)
         logger.warning('      total %d', len(source_files or []))
         logger.warning(' operations')
         for f in source_files or []:
@@ -39,11 +42,11 @@ def storage_file_upload_batch(client, destination_share_name, source_files=None,
         dir_name = os.path.dirname(source_pair[1])
         file_name = os.path.basename(source_pair[1])
         if dir_name and len(dir_name) > 0:
-            client.create_directory(share_name=destination_share_name,
+            client.create_directory(share_name=destination,
                                     directory_name=dir_name,
                                     fail_on_exist=False)
 
-        client.create_file_from_path(share_name=destination_share_name,
+        client.create_file_from_path(share_name=destination,
                                      directory_name=dir_name,
                                      file_name=file_name,
                                      local_file_path=source_pair[0],
@@ -52,12 +55,12 @@ def storage_file_upload_batch(client, destination_share_name, source_files=None,
                                      max_connections=max_connections,
                                      validate_content=validate_content)
 
-        return client.make_file_url(destination_share_name, dir_name, file_name)
+        return client.make_file_url(destination, dir_name, file_name)
 
     return list(_upload_action(f) for f in source_files)
 
 
-def storage_file_download_batch(client, source_share_name, destination, pattern=None, dryrun=False,
+def storage_file_download_batch(client, source, destination, pattern=None, dryrun=False,
                                 validate_content=False, max_connections=1):
     """
     Download files from file share to local directory in batch
@@ -65,7 +68,7 @@ def storage_file_download_batch(client, source_share_name, destination, pattern=
 
     from .files_helpers import glob_files_remotely, mkdir_p
 
-    source_files = glob_files_remotely(client, source_share_name, pattern)
+    source_files = glob_files_remotely(client, source, pattern)
 
     if dryrun:
         source_files_list = list(source_files)
@@ -73,7 +76,7 @@ def storage_file_download_batch(client, source_share_name, destination, pattern=
         logger = get_az_logger(__name__)
         logger.warning('upload files to file share')
         logger.warning('    account %s', client.account_name)
-        logger.warning('      share %s', source_share_name)
+        logger.warning('      share %s', source)
         logger.warning('destination %s', destination)
         logger.warning('    pattern %s', pattern)
         logger.warning('      total %d', len(source_files_list))
@@ -86,12 +89,12 @@ def storage_file_download_batch(client, source_share_name, destination, pattern=
     def _download_action(pair):
         destination_dir = os.path.join(destination, pair[0])
         mkdir_p(destination_dir)
-        client.get_file_to_path(source_share_name,
+        client.get_file_to_path(source,
                                 directory_name=pair[0],
                                 file_name=pair[1],
                                 file_path=os.path.join(destination, *pair),
                                 validate_content=validate_content,
                                 max_connections=max_connections)
-        return client.make_file_url(source_share_name, *pair)
+        return client.make_file_url(source, *pair)
 
     return list(_download_action(f) for f in source_files)

@@ -287,9 +287,6 @@ register_extra_cli_argument('storage file upload-batch', 'source',
 register_extra_cli_argument('storage file upload-batch', 'destination',
                             options_list=('--destination', '-d'),
                             required=True)
-register_extra_cli_argument('storage file upload-batch', 'pattern')
-register_cli_argument('storage file upload-batch', 'source_files', ignore_type)
-register_cli_argument('storage file upload-batch', 'destination_share_name', ignore_type)
 register_cli_argument('storage file upload-batch', 'validate_content', arg_group='Download Control')
 register_cli_argument('storage file upload-batch', 'max_connections', arg_group='Download Control')
 register_content_settings_argument('storage file upload-batch', FileContentSettings,
@@ -303,7 +300,6 @@ register_extra_cli_argument('storage file download-batch', 'source',
 register_cli_argument('storage file download-batch', 'destination',
                       options_list=('--destination', '-d'),
                       required=True)
-register_cli_argument('storage file download-batch', 'source_share_name', ignore_type)
 register_cli_argument('storage file download-batch', 'validate_content',
                       arg_group='Download Control')
 register_cli_argument('storage file download-batch', 'max_connections',
