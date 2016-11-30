@@ -375,7 +375,7 @@ def _create_kubernetes(resource_group_name, deployment_name, dns_name_prefix, na
     smc = _resource_client_factory()
     return smc.deployments.create_or_update(resource_group_name, deployment_name, properties)
 
-def acs_get_credentials(name=None, resource_group_name=None, dns_prefix=None, location=None):
+def acs_get_credentials(name=None, resource_group_name=None, dns_prefix=None, location=None, user=None):
     if not dns_prefix or not location:
         acs_info = _get_acs_info(name, resource_group_name)
 
@@ -383,6 +383,8 @@ def acs_get_credentials(name=None, resource_group_name=None, dns_prefix=None, lo
             dns_prefix = acs_info.master_profile.dns_prefix # pylint: disable=no-member
         if not location:
             location = acs_info.location # pylint: disable=no-member
+        if not user:
+            user = acs_info.linux_profile.admin_username # pylint: disable=no-member
 
     home = os.path.expanduser('~')
     path = os.path.join(home, '.kube', 'config')
@@ -394,7 +396,8 @@ def acs_get_credentials(name=None, resource_group_name=None, dns_prefix=None, lo
         path_candidate = '{}-{}-{}'.format(path, name, ix)
 
     # TODO: this only works for public cloud, need other casing for national clouds
-    acs_client.SecureCopy('azureuser', '{}.{}.cloudapp.azure.com'.format(dns_prefix, location),
+
+    acs_client.SecureCopy(user, '{}.{}.cloudapp.azure.com'.format(dns_prefix, location),
                           '.kube/config', path_candidate)
 
     # merge things
