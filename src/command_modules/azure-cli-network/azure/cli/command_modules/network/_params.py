@@ -427,7 +427,7 @@ register_cli_argument('network vpn-gateway update', 'public_ip_address', help='N
 register_cli_argument('network vpn-gateway update', 'virtual_network', virtual_network_name_type, options_list=('--vnet',), help="Name or ID of a virtual network that contains a subnet named 'GatewaySubnet'.", validator=get_virtual_network_validator())
 
 public_ip_help = get_folded_parameter_help_string('public IP address')
-register_cli_argument('network vpn-gateway create', 'public_ip_address', options_list=('--public-ip',), help=public_ip_help, completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'), validator=get_public_ip_validator(has_type_field=True))
+register_cli_argument('network vpn-gateway create', 'public_ip_address', help=public_ip_help, completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'), validator=get_public_ip_validator(has_type_field=True))
 register_cli_argument('network vpn-gateway create', 'public_ip_address_type', ignore_type)
 
 vnet_help = "Name or ID of an existing virtual network which has a subnet named 'GatewaySubnet'."

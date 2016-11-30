@@ -1012,7 +1012,7 @@ class NetworkSubnetSetScenarioTest(ResourceGroupVCRTestBase):
 class NetworkVpnGatewayScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-        super(NetworkVpnGatewayScenarioTest, self).__init__(__file__, test_method, debug=True)
+        super(NetworkVpnGatewayScenarioTest, self).__init__(__file__, test_method)
         self.resource_group = 'cli_test_vpn_gateway'
         self.vnet1_name = 'myvnet1'
         self.vnet2_name = 'myvnet2'
@@ -1039,16 +1039,16 @@ class NetworkVpnGatewayScenarioTest(ResourceGroupVCRTestBase):
             if self.playback \
             else self.cmd('account list --query "[?isDefault].id" -o tsv')
 
-        subnet1_id = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/GatewaySubnet'.format(subscription_id, rg, self.vnet1_name)
-        subnet2_id = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/GatewaySubnet'.format(subscription_id, rg, self.vnet2_name)
+        vnet1_id = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}'.format(subscription_id, rg, self.vnet1_name)
+        vnet2_id = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}'.format(subscription_id, rg, self.vnet2_name)
 
-        self.cmd('network vpn-gateway create -g {} -n {} --vnet {} --public-ip {}'.format(rg, self.gateway1_name, subnet1_id, self.ip1_name))
-        self.cmd('network vpn-gateway create -g {} -n {} --vnet {} --public-ip {}'.format(rg, self.gateway2_name, subnet2_id, self.ip2_name))
+        self.cmd('network vpn-gateway create -g {} -n {} --vnet {} --public-ip-address {}'.format(rg, self.gateway1_name, vnet1_id, self.ip1_name))
+        self.cmd('network vpn-gateway create -g {} -n {} --vnet {} --public-ip-address {}'.format(rg, self.gateway2_name, vnet2_id, self.ip2_name))
 
         gateway1_id = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworkGateways/{}'.format(subscription_id, rg, self.gateway1_name)
         gateway2_id = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworkGateways/{}'.format(subscription_id, rg, self.gateway2_name)
 
-        self.cmd('network vpn-connection create -n myconnection -g {} --shared-key 123 --vnet-gateway1-id {} --vnet-gateway2-id {}'.format(rg, self.gateway1_id, self.gateway2_id))
+        self.cmd('network vpn-connection create -n myconnection -g {} --shared-key 123 --vnet-gateway1-id {} --vnet-gateway2-id {}'.format(rg, gateway1_id, gateway2_id))
 
 class NetworkTrafficManagerScenarioTest(ResourceGroupVCRTestBase):
 
