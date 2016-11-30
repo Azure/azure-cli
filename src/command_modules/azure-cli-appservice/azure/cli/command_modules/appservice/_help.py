@@ -89,7 +89,7 @@ helps['appservice web deployment slot'] = """
 
 helps['appservice web deployment slot auto-swap'] = """
     type: group
-    short-summary: Enable or disable auto-swap for a web-app deployment slot
+    short-summary: Commands to enable or disable auto-swap for a web-app deployment slot
 """
 
 helps['appservice web log'] = """
@@ -179,7 +179,7 @@ helps['appservice web source-control sync'] = """
 
 helps['appservice plan'] = """
     type: group
-    short-summary: Manage App Service plans.
+    short-summary: Commands to manage App Service plans.
 """
 
 helps['appservice plan update'] = """
