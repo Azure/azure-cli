@@ -185,8 +185,9 @@ helps['storage file upload-batch'] = """
         - name: --destination -d
           type: string
           short-summary: The string represents the destination of this upload operation. The
-                         destination can be the file share URL or the share name. When the source
-                         is the share URL, the storage account name will parsed from the URL.
+                         destination can be the file share URL or the share name. When the 
+                         destination is the share URL, the storage account name will parsed
+                         from the URL.
         - name: --pattern
           type: string
           short-summary: The pattern is used for files globbing. The supported patterns are '*',
@@ -213,7 +214,7 @@ helps['storage file download-batch'] = """
     parameters:
         - name: --source -s
           type: string
-          short-summary: The string represents the destination of this file download operation. The
+          short-summary: The string represents the source of this file download operation. The
                          source can be the file share URL or the share name. When the source is
                          the share URL, the storage account name will parsed from the URL.
         - name: --destination -d
