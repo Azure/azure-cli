@@ -162,6 +162,25 @@ def tag_resource(tags, resource_group_name=None, resource_provider_namespace=Non
                          resource_id, api_version)
     return res.tag(tags)
 
+def get_deployments(client, resource_group_name, deployment_name, operation_ids=None):
+    """Gets a deployments operation.
+    :param resource_group_name: The name of the resource group. The name
+     is case insensitive.
+    :type resource_group_name: str
+    :param deployment_name: The name of the deployment.
+    :type deployment_name: str
+    :param operation_ids: A comma separated list of ids to get.
+    :type operation_ids: str
+    """
+    if not operation_ids:
+        return client.get(resource_group_name, deployment_name, None)
+    parts = operation_ids.split(',')
+    result = []
+    for id in parts:
+        dep = client.get(resource_group_name, deployment_name, id)
+        result.append(dep)
+    return result
+
 def list_resources(resource_group_name=None, resource_provider_namespace=None,
                    resource_type=None, name=None, tag=None, location=None):
     rcf = _resource_client_factory()
