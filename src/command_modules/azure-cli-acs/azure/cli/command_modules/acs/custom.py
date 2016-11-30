@@ -11,7 +11,6 @@ import os.path
 import platform
 import random
 import stat
-import socket
 import string
 import subprocess
 import sys
@@ -286,7 +285,7 @@ def acs_create(resource_group_name, deployment_name, dns_name_prefix, name, ssh_
                 client_secret = binascii.b2a_hex(os.urandom(10)).decode('utf-8')
             store_acs_service_principal(client_secret, None)
             salt = binascii.b2a_hex(os.urandom(3)).decode('utf-8')
-            url = 'http://{}.{}-k8s-masters.{}.cloudapp.azure.com'.format(salt, dns_name_prefix, location)
+            url = 'http://{}.{}.{}.cloudapp.azure.com'.format(salt, dns_name_prefix, location)
 
             service_principal = _build_service_principal(name, url, client_secret)
             logger.info('Created a service principal: %s', service_principal)
@@ -394,7 +393,6 @@ def acs_get_credentials(name=None, resource_group_name=None, dns_prefix=None, lo
 
     # TODO: this only works for public cloud, need other casing for national clouds
     acs_client.SecureCopy('azureuser', '{}.{}.cloudapp.azure.com'.format(dns_prefix, location),
-<<<<<<< effe31657f98b7722ec8107e784d5721bfd54b89
                           '.kube/config', path_candidate)
 
     # merge things
