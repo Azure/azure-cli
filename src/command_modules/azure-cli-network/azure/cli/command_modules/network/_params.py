@@ -458,7 +458,14 @@ register_cli_argument('network vpn-connection create', 'connection_type', help=a
 # Traffic manager profiles
 register_cli_argument('network traffic-manager profile', 'traffic_manager_profile_name', name_arg_type, id_part='name', completer=get_resource_name_completion_list('Microsoft.Network/trafficManagerProfiles'))
 register_cli_argument('network traffic-manager profile', 'profile_name', name_arg_type, id_part='name', completer=get_resource_name_completion_list('Microsoft.Network/trafficManagerProfiles'))
-register_cli_argument('network traffic-manager profile create', 'routing_method', **enum_choice_list(routingMethod))
+register_cli_argument('network traffic-manager profile', 'monitor_path', help='Path to monitor.')
+register_cli_argument('network traffic-manager profile', 'monitor_port', help='Port to monitor.')
+register_cli_argument('network traffic-manager profile', 'monitor_protocol', help='Monitor protocol.')
+register_cli_argument('network traffic-manager profile', 'monitor_status', help='The monitoring status of the profile.')
+register_cli_argument('network traffic-manager profile', 'profile_status', options_list=('--status',), help='Status of the Traffic Manager profile.')
+register_cli_argument('network traffic-manager profile', 'routing_method', help='Routing method.', **enum_choice_list(routingMethod))
+register_cli_argument('network traffic-manager profile', 'ttl', help='DNS config time-to-live in seconds.')
+
 register_cli_argument('network traffic-manager profile check-dns', 'name', name_arg_type, help='DNS prefix to verify availability for.', required=True)
 register_cli_argument('network traffic-manager profile check-dns', 'type', help=argparse.SUPPRESS, default='Microsoft.Network/trafficManagerProfiles')
 
@@ -467,6 +474,14 @@ endpoint_types = ['azureEndpoints', 'externalEndpoints', 'nestedEndpoints']
 register_cli_argument('network traffic-manager endpoint', 'endpoint_name', name_arg_type, id_part='child_name', help='Endpoint name.', completer=get_tm_endpoint_completion_list())
 register_cli_argument('network traffic-manager endpoint', 'endpoint_type', options_list=('--type',), help='Endpoint type.  Values include: {}.'.format(', '.join(endpoint_types)), completer=get_generic_completion_list(endpoint_types))
 register_cli_argument('network traffic-manager endpoint', 'profile_name', help='Name of parent profile.', completer=get_resource_name_completion_list('Microsoft.Network/trafficManagerProfiles'), id_part='name')
+register_cli_argument('network traffic-manager endpoint', 'endpoint_location', help="Location of the external or nested endpoints when using the 'Performance' routing method.")
+register_cli_argument('network traffic-manager endpoint', 'endpoint_monitor_status', help='The monitoring status of the endpoint.')
+register_cli_argument('network traffic-manager endpoint', 'endpoint_status', help="The status of the endpoint. If enabled the endpoint is probed for endpoint health and included in the traffic routing method.")
+register_cli_argument('network traffic-manager endpoint', 'min_child_endpoints', help="The minimum number of endpoints that must be available in the child profile for the parent profile to be considered available. Only applicable to an endpoint of type 'NestedEndpoints'.")
+register_cli_argument('network traffic-manager endpoint', 'priority', help="Priority of the endpoint when using the 'Priority' traffic routing method. Values range from 1 to 1000, with lower values representing higher priority.")
+register_cli_argument('network traffic-manager endpoint', 'target', help='Fully-qualified DNS name of the endpoint.')
+register_cli_argument('network traffic-manager endpoint', 'target_resource_id', help="The Azure Resource URI of the endpoint. Not applicable for endpoints of type 'ExternalEndpoints'.")
+register_cli_argument('network traffic-manager endpoint', 'weight', help="Weight of the endpoint when using the 'Weighted' traffic routing method. Values range from 1 to 1000.")
 
 # DNS
 register_cli_argument('network dns', 'location', help=argparse.SUPPRESS, default='global')
