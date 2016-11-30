@@ -37,9 +37,8 @@ class LocalGatewayOperations(object):
         self.config = config
 
     def create_or_update(
-            self, resource_group_name, deployment_name, gateway_ip_address, local_network_gateway_name, content_version=None, local_address_prefix="192.168.0.0/16", tags=None, custom_headers=None, raw=False, **operation_config):
-        """
-        Create or update a virtual machine.
+            self, resource_group_name, deployment_name, gateway_ip_address, local_network_gateway_name, use_bgp_settings=False, content_version=None, asn=None, bgp_peering_address=None, local_address_prefix=None, peer_weight=None, tags=None, custom_headers=None, raw=False, **operation_config):
+        """Create a new LocalGateway.
 
         :param resource_group_name: The name of the resource group. The name
          is case insensitive.
@@ -51,12 +50,22 @@ class LocalGatewayOperations(object):
         :type gateway_ip_address: str
         :param local_network_gateway_name: Gateway name.
         :type local_network_gateway_name: str
+        :param use_bgp_settings: Flag to enable BGP settings.
+        :type use_bgp_settings: bool
         :param content_version: If included it must match the ContentVersion
          in the template.
         :type content_version: str
-        :param local_address_prefix: CIDR block representing the address
-         space of the OnPremise VPN network's Subnet.
-        :type local_address_prefix: str
+        :param asn: Autonomous System Number to use for the BGP settings.
+        :type asn: str
+        :param bgp_peering_address: IP address from the OnPremise VPN's
+         subnet to use for BGP peering.
+        :type bgp_peering_address: str
+        :param local_address_prefix: List of CIDR block prefixes representing
+         the address space of the OnPremise VPN's subnet.
+        :type local_address_prefix: list of object
+        :param peer_weight: Weight added to routes learned through BGP
+         peering.
+        :type peer_weight: str
         :param tags: Tags object.
         :type tags: object
         :param dict custom_headers: headers that will be added to the request
@@ -65,11 +74,11 @@ class LocalGatewayOperations(object):
         :rtype:
          :class:`AzureOperationPoller<msrestazure.azure_operation.AzureOperationPoller>`
          instance that returns :class:`DeploymentExtended
-         <default.models.DeploymentExtended>`
+         <Default.models.DeploymentExtended>`
         :rtype: :class:`ClientRawResponse<msrest.pipeline.ClientRawResponse>`
          if raw=true
         """
-        parameters = models.DeploymentLocalGateway(content_version=content_version, gateway_ip_address=gateway_ip_address, local_address_prefix=local_address_prefix, local_network_gateway_name=local_network_gateway_name, tags=tags)
+        parameters = models.DeploymentLocalGateway(content_version=content_version, asn=asn, bgp_peering_address=bgp_peering_address, gateway_ip_address=gateway_ip_address, local_address_prefix=local_address_prefix, local_network_gateway_name=local_network_gateway_name, peer_weight=peer_weight, tags=tags, use_bgp_settings=use_bgp_settings)
 
         # Construct URL
         url = '/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Resources/deployments/{deploymentName}'

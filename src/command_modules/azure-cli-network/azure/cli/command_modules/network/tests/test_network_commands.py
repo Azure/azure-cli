@@ -113,7 +113,7 @@ class NetworkAppGatewayPublicIpScenarioTest(ResourceGroupVCRTestBase):
     def body(self):
         rg = self.resource_group
         public_ip_name = 'publicip4'
-        self.cmd('network application-gateway create -g {} -n test4 --subnet subnet1 --vnet-name vnet4 --public-ip {}'.format(rg, public_ip_name), checks=[
+        self.cmd('network application-gateway create -g {} -n test4 --subnet subnet1 --vnet-name vnet4 --public-ip-address {}'.format(rg, public_ip_name), checks=[
             JMESPathCheck("applicationGateway.frontendIPConfigurations[0].properties.publicIPAddress.contains(id, '{}')".format(public_ip_name), True),
             JMESPathCheck('applicationGateway.frontendIPConfigurations[0].properties.privateIPAllocationMethod', 'Dynamic')
         ])
@@ -122,38 +122,47 @@ class NetworkPublicIpScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
         super(NetworkPublicIpScenarioTest, self).__init__(__file__, test_method)
-        self.public_ip_name = 'pubipdns'
-        self.public_ip_no_dns_name = 'pubipnodns'
-        self.dns = 'woot'
+        self.resource_group = 'cli_test_public_ip'
 
     def test_network_public_ip(self):
         self.execute()
 
     def body(self):
         s = self
+        public_ip_dns = 'pubipdns'
+        public_ip_no_dns = 'pubipnodns'
+        dns = 'woot'
         rg = s.resource_group
-        s.cmd('network public-ip create -g {} -n {} --dns-name {} --allocation-method static'.format(rg, s.public_ip_name, s.dns), checks=[
+        s.cmd('network public-ip create -g {} -n {} --dns-name {} --allocation-method static'.format(rg, public_ip_dns, dns), checks=[
             JMESPathCheck('publicIp.provisioningState', 'Succeeded'),
             JMESPathCheck('publicIp.publicIPAllocationMethod', 'Static'),
-            JMESPathCheck('publicIp.dnsSettings.domainNameLabel', s.dns)
+            JMESPathCheck('publicIp.dnsSettings.domainNameLabel', dns)
         ])
-        s.cmd('network public-ip create -g {} -n {}'.format(rg, s.public_ip_no_dns_name), checks=[
+        s.cmd('network public-ip create -g {} -n {}'.format(rg, public_ip_no_dns), checks=[
             JMESPathCheck('publicIp.provisioningState', 'Succeeded'),
             JMESPathCheck('publicIp.publicIPAllocationMethod', 'Dynamic'),
             JMESPathCheck('publicIp.dnsSettings', None)
         ])
-        s.cmd('network public-ip list', checks=JMESPathCheck('type(@)', 'array'))
-        ip_list = s.cmd('network public-ip list -g {}'.format(rg))
-        assert not [x for x in ip_list if x['resourceGroup'].lower() != rg]
+        s.cmd('network public-ip update -g {} -n {} --allocation-method static --dns-name wowza --idle-timeout 10'.format(rg, public_ip_no_dns), checks=[
+            JMESPathCheck('publicIpAllocationMethod', 'Static'),
+            JMESPathCheck('dnsSettings.domainNameLabel', 'wowza'),
+            JMESPathCheck('idleTimeoutInMinutes', 10)
+        ])
 
-        s.cmd('network public-ip show -g {} -n {}'.format(rg, s.public_ip_name), checks=[
+        s.cmd('network public-ip list -g {}'.format(rg), checks=[
+            JMESPathCheck('type(@)', 'array'),
+            JMESPathCheck("length([?resourceGroup == '{}']) == length(@)".format(rg), True)
+        ])
+
+        s.cmd('network public-ip show -g {} -n {}'.format(rg, public_ip_dns), checks=[
             JMESPathCheck('type(@)', 'object'),
-            JMESPathCheck('name', s.public_ip_name),
+            JMESPathCheck('name', public_ip_dns),
             JMESPathCheck('resourceGroup', rg),
         ])
-        s.cmd('network public-ip delete -g {} -n {}'.format(rg, s.public_ip_name))
+
+        s.cmd('network public-ip delete -g {} -n {}'.format(rg, public_ip_dns))
         s.cmd('network public-ip list -g {}'.format(rg),
-            checks=JMESPathCheck("length[?name == '{}']".format(s.public_ip_name), None))
+            checks=JMESPathCheck("length[?name == '{}']".format(public_ip_dns), None))
 
 class NetworkExpressRouteScenarioTest(ResourceGroupVCRTestBase):
 
@@ -261,9 +270,8 @@ class NetworkExpressRouteScenarioTest(ResourceGroupVCRTestBase):
 class NetworkLoadBalancerScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-        super(NetworkLoadBalancerScenarioTest, self).__init__(
-            __file__, test_method)
-        self.resource_group = 'lbrg'
+        super(NetworkLoadBalancerScenarioTest, self).__init__(__file__, test_method)
+        self.resource_group = 'cli_test_load_balancer'
         self.lb_name = 'lb'
         self.resource_type = 'Microsoft.Network/loadBalancers'
 
@@ -324,14 +332,62 @@ class NetworkLoadBalancerScenarioTest(ResourceGroupVCRTestBase):
         # Expecting no results as we just deleted the only lb in the resource group
         self.cmd('network lb list --resource-group {}'.format(self.resource_group), checks=JMESPathCheck('length(@)', 3))
 
+class NetworkLoadBalancerIpConfigScenarioTest(ResourceGroupVCRTestBase):
+
+    def __init__(self, test_method):
+        super(NetworkLoadBalancerIpConfigScenarioTest, self).__init__(__file__, test_method)
+        self.resource_group = 'cli_test_load_balancer_ip_config'
+
+    def test_network_load_balancer_ip_config(self):
+        self.execute()
+
+    def set_up(self):
+        super(NetworkLoadBalancerIpConfigScenarioTest, self).set_up()
+
+        rg = self.resource_group
+
+        for i in range(1, 4): # create 3 public IPs to use for the test
+            self.cmd('network public-ip create -g {} -n publicip{}'.format(rg, i))
+
+        # create internet-facing LB with public IP (lb1)
+        self.cmd('network lb create -g {} -n lb1 --public-ip-address publicip1'.format(rg))
+
+        # create internal LB (lb2)
+        self.cmd('network vnet create -g {} -n vnet1 --subnet-name subnet1'.format(rg))
+        self.cmd('network vnet subnet create -g {} --vnet-name vnet1 -n subnet2 --address-prefix 10.0.1.0/24'.format(rg))
+        self.cmd('network lb create -g {} -n lb2 --subnet subnet1 --vnet-name vnet1'.format(rg))
+
+    def body(self):
+        rg = self.resource_group
+
+        # Test frontend IP configuration for internet-facing LB
+        self.cmd('network lb frontend-ip create -g {} --lb-name lb1 -n ipconfig1 --public-ip-address publicip2'.format(rg))
+        self.cmd('network lb frontend-ip list -g {} --lb-name lb1'.format(rg), checks=JMESPathCheck('length(@)', 2))
+        self.cmd('network lb frontend-ip update -g {} --lb-name lb1 -n ipconfig1 --public-ip-address publicip3'.format(rg))
+        self.cmd('network lb frontend-ip show -g {} --lb-name lb1 -n ipconfig1'.format(rg),
+            checks=JMESPathCheck("publicIpAddress.contains(id, 'publicip3')", True))
+
+        # test generic update
+        subscription_id = MOCKED_SUBSCRIPTION_ID if self.playback else get_subscription_id()
+        ip2_id = resource_id(subscription=subscription_id, resource_group=self.resource_group, namespace='Microsoft.Network', type='publicIPAddresses', name='publicip2')
+        self.cmd('network lb frontend-ip update -g {} --lb-name lb1 -n ipconfig1 --set publicIpAddress.id="{}"'.format(rg, ip2_id),
+            checks=JMESPathCheck("publicIpAddress.contains(id, 'publicip2')", True))
+        self.cmd('network lb frontend-ip delete -g {} --lb-name lb1 -n ipconfig1'.format(rg))
+        self.cmd('network lb frontend-ip list -g {} --lb-name lb1'.format(rg), checks=JMESPathCheck('length(@)', 1))
+
+        # Test frontend IP configuration for internal LB
+        self.cmd('network lb frontend-ip create -g {} --lb-name lb2 -n ipconfig2 --vnet-name vnet1 --subnet subnet1 --private-ip-address 10.0.0.99'.format(rg))
+        self.cmd('network lb frontend-ip list -g {} --lb-name lb2'.format(rg), checks=JMESPathCheck('length(@)', 2))
+        self.cmd('network lb frontend-ip update -g {} --lb-name lb2 -n ipconfig2 --subnet subnet2 --vnet-name vnet1 --private-ip-address 10.0.1.100'.format(rg))
+        self.cmd('network lb frontend-ip show -g {} --lb-name lb2 -n ipconfig2'.format(rg))#,
+            #checks=JMESPathCheck("subnet.contains(id, 'subnet2')", True))
+
 class NetworkLoadBalancerSubresourceScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
         super(NetworkLoadBalancerSubresourceScenarioTest, self).__init__(__file__, test_method)
-        self.resource_group = 'lbsrg'
+        self.resource_group = 'cli_test_load_balancer_subresource'
         self.lb_name = 'lb1'
-        self.vnet_name = 'vnet1'
-        self.subnet_name = 'subnet1'
 
     def test_network_load_balancer_subresources(self):
         self.execute()
@@ -340,9 +396,6 @@ class NetworkLoadBalancerSubresourceScenarioTest(ResourceGroupVCRTestBase):
         super(NetworkLoadBalancerSubresourceScenarioTest, self).set_up()
         rg = self.resource_group
         lb = self.lb_name
-        self.cmd('network vnet create -g {} -n {} --subnet-name {}'.format(rg, self.vnet_name, self.subnet_name))
-        for i in range(1, 4):
-            self.cmd('network public-ip create -g {} -n publicip{}'.format(rg, i))
         self.cmd('network lb create -g {} -n {}'.format(rg, lb))
 
     def body(self): # pylint: disable=too-many-statements
@@ -388,24 +441,6 @@ class NetworkLoadBalancerSubresourceScenarioTest(ResourceGroupVCRTestBase):
         self.cmd('network lb inbound-nat-pool list {}'.format(lb_rg),
             checks=JMESPathCheck('length(@)', 0))
 
-        # Test frontend IP configuration
-        self.cmd('network lb frontend-ip create {} -n ipconfig1 --public-ip-address publicip1'.format(lb_rg))
-        self.cmd('network lb frontend-ip create {} -n ipconfig2 --public-ip-address publicip2'.format(lb_rg))
-        self.cmd('network lb frontend-ip create {} -n ipconfig3 --vnet-name {} --subnet {} --private-ip-address 10.0.0.99'.format(lb_rg, self.vnet_name, self.subnet_name),
-            allowed_exceptions="Run 'az resource feature register --namespace Microsoft.Network -n AllowMultiVipIlb' to enable the feature first")
-        # Note that the ipconfig3 won't be added. The 3 that will be found are the default and two created ones
-        self.cmd('network lb frontend-ip list {}'.format(lb_rg), checks=JMESPathCheck('length(@)', 3))
-        self.cmd('network lb frontend-ip update {} -n ipconfig1 --public-ip-address publicip3'.format(lb_rg))
-        self.cmd('network lb frontend-ip show {} -n ipconfig1'.format(lb_rg),
-            checks=JMESPathCheck("publicIpAddress.contains(id, 'publicip3')", True))
-        # test generic update
-        subscription_id = MOCKED_SUBSCRIPTION_ID if self.playback else get_subscription_id()
-        ip1_id = resource_id(subscription=subscription_id, resource_group=self.resource_group, namespace='Microsoft.Network', type='publicIPAddresses', name='publicip1')
-        self.cmd('network lb frontend-ip update {} -n ipconfig1 --set publicIpAddress.id="{}"'.format(lb_rg, ip1_id),
-            checks=JMESPathCheck("publicIpAddress.contains(id, 'publicip1')", True))
-        self.cmd('network lb frontend-ip delete {} -n ipconfig2'.format(lb_rg), checks=NoneCheck())
-        self.cmd('network lb frontend-ip list {}'.format(lb_rg), checks=JMESPathCheck('length(@)', 2))
-
         # Test backend address pool
         for i in range(1, 4):
             self.cmd('network lb address-pool create {} -n bap{}'.format(lb_rg, i),
@@ -444,7 +479,7 @@ class NetworkLoadBalancerSubresourceScenarioTest(ResourceGroupVCRTestBase):
         self.cmd('network lb rule create {} -n rule2 --frontend-ip-name LoadBalancerFrontEnd --frontend-port 60 --backend-pool-name bap1 --backend-port 60 --protocol tcp'.format(lb_rg))
         self.cmd('network lb rule list {}'.format(lb_rg), checks=JMESPathCheck('length(@)', 2))
         self.cmd('network lb rule update {} -n rule1 --floating-ip true --idle-timeout 20 --load-distribution sourceip --protocol udp'.format(lb_rg))
-        self.cmd('network lb rule update {} -n rule2 --frontend-ip-name ipconfig1 --backend-pool-name bap2 --load-distribution sourceipprotocol'.format(lb_rg))
+        self.cmd('network lb rule update {} -n rule2 --backend-pool-name bap2 --load-distribution sourceipprotocol'.format(lb_rg))
         self.cmd('network lb rule show {} -n rule1'.format(lb_rg), checks=[
             JMESPathCheck('enableFloatingIp', True),
             JMESPathCheck('idleTimeoutInMinutes', 20),
@@ -457,7 +492,6 @@ class NetworkLoadBalancerSubresourceScenarioTest(ResourceGroupVCRTestBase):
 
         self.cmd('network lb rule show {} -n rule2'.format(lb_rg), checks=[
             JMESPathCheck("backendAddressPool.contains(id, 'bap2')", True),
-            JMESPathCheck("frontendIpConfiguration.contains(id, 'ipconfig1')", True),
             JMESPathCheck('loadDistribution', 'SourceIPProtocol')
         ])
         self.cmd('network lb rule delete {} -n rule1'.format(lb_rg))
@@ -496,7 +530,7 @@ class NetworkNicScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
         super(NetworkNicScenarioTest, self).__init__(__file__, test_method)
-        self.resource_group = 'cli_test1'
+        self.resource_group = 'cli_test_nic_scenario'
 
     def test_network_nic(self):
         self.execute()
@@ -588,7 +622,7 @@ class NetworkNicSubresourceScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
         super(NetworkNicSubresourceScenarioTest, self).__init__(__file__, test_method)
-        self.resource_group = 'cli_test1_nic_subresource'
+        self.resource_group = 'cli_test_nic_subresource'
 
     def test_network_nic_subresources(self):
         self.execute()
@@ -596,22 +630,22 @@ class NetworkNicSubresourceScenarioTest(ResourceGroupVCRTestBase):
     def body(self):
         rg = self.resource_group
         nic = 'nic1'
-        subnet = 'subnet1'
-        vnet = 'vnet1'
 
-        self.cmd('network vnet create -g {} -n {} --subnet-name {}'.format(rg, vnet, subnet))
-        self.cmd('network nic create -g {} -n {} --subnet {} --vnet-name {}'.format(rg, nic, subnet, vnet))
+        self.cmd('network vnet create -g {} -n vnet1 --subnet-name subnet1'.format(rg))
+        self.cmd('network nic create -g {} -n {} --subnet subnet1 --vnet-name vnet1'.format(rg, nic))
         self.cmd('network nic ip-config list -g {} --nic-name {}'.format(rg, nic),
             checks=JMESPathCheck('length(@)', 1))
         self.cmd('network nic ip-config show -g {} --nic-name {} -n ipconfig1'.format(rg, nic), checks=[
             JMESPathCheck('name', 'ipconfig1'),
             JMESPathCheck('privateIpAllocationMethod', 'Dynamic')
         ])
-        # TODO: Creating multiple ip-configurations per NIC currently not supported per rest-api-spec issue #305
-        expected_exception = "Run 'az resource feature register --namespace Microsoft.Network -n AllowMultipleIpConfigurationsPerNic' to enable the feature first"
-        self.cmd('network nic ip-config create -g {} --nic-name {} -n ipconfig2 --subnet {} --vnet-name {}'.format(rg, nic, subnet, vnet), allowed_exceptions=expected_exception)
-        expected_exception = 'Network interface {} must have one or more IP configurations.'.format(nic)
-        self.cmd('network nic ip-config delete -g {} --nic-name {} -n ipconfig1'.format(rg, nic), allowed_exceptions=expected_exception)
+        self.cmd('network nic ip-config create -g {} --nic-name {} -n ipconfig2 --make-primary'.format(rg, nic), checks=[
+            JMESPathCheck('primary', True)
+        ])
+        self.cmd('network nic ip-config update -g {} --nic-name {} -n ipconfig1 --make-primary'.format(rg, nic), checks=[
+            JMESPathCheck('primary', True)
+        ])
+        self.cmd('network nic ip-config delete -g {} --nic-name {} -n ipconfig2'.format(rg, nic))
 
         # test various sets
         vnet = 'vnet2'
@@ -979,7 +1013,7 @@ class NetworkVpnGatewayScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
         super(NetworkVpnGatewayScenarioTest, self).__init__(__file__, test_method)
-        self.resource_group = 'cli_vpn_gateway_test1'
+        self.resource_group = 'cli_vpn_gateway_test'
 
     def test_network_vpn_gateway(self):
         self.execute()
@@ -999,8 +1033,8 @@ class NetworkVpnGatewayScenarioTest(ResourceGroupVCRTestBase):
 
         self.cmd('network public-ip create -n {} -g {}'.format(ip1_name, rg))
         self.cmd('network public-ip create -n {} -g {}'.format(ip2_name, rg))
-        self.cmd('network vnet create -g {} -n {} --subnet-name GatewaySubnet'.format(rg, vnet1_name))
-        self.cmd('network vnet create -g {} -n {} --subnet-name GatewaySubnet --subnet-prefix 10.0.1.0/24'.format(rg, vnet2_name))
+        self.cmd('network vnet create -g {} -n {} --subnet-name GatewaySubnet --address-prefix 10.0.0.0/16 --subnet-prefix 10.0.0.0/24'.format(rg, vnet1_name))
+        self.cmd('network vnet create -g {} -n {} --subnet-name GatewaySubnet --address-prefix 10.1.0.0/16 --subnet-prefix 10.1.0.0/24'.format(rg, vnet2_name))
 
         subnet1_id = '/subscriptions/{subscription_id}/resourceGroups' \
             '/{rg}/providers/Microsoft.Network/virtualNetworks/{vnet1}/subnets/GatewaySubnet' \

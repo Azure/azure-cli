@@ -67,6 +67,8 @@ class VMCombinedListTest(VCRTestBase):
 
     def __init__(self, test_method):
         super(VMCombinedListTest, self).__init__(__file__, test_method)
+        if not self.playback:
+            raise Exception('TODO: modify this test to use ResourceGroupVCRTestBase')
 
     def test_vm_combined_list(self):
         self.execute()
@@ -113,6 +115,8 @@ class VMOpenPortTest(ResourceGroupVCRTestBase):
 class VMResizeTest(VCRTestBase):
     def __init__(self, test_method):
         super(VMResizeTest, self).__init__(__file__, test_method)
+        if not self.playback:
+            raise Exception('TODO: modify this test to use ResourceGroupVCRTestBase')
 
     def test_vm_resize(self):
         self.execute()
@@ -385,6 +389,8 @@ class VMAvailSetScenarioTest(VCRTestBase):
         self.resource_group = 'cliTestRg_Availset'
         self.location = 'westus'
         self.name = 'availset-test'
+        if not self.playback:
+            raise Exception('TODO: modify this test to use ResourceGroupVCRTestBase')
 
     def test_vm_availset(self):
         self.execute()
@@ -448,6 +454,8 @@ class VMExtensionsScenarioTest(VCRTestBase):
         self.location = 'westus'
         self.vm_name = 'windows-ext'
         self.extension_name = 'IaaSDiagnostics'
+        if not self.playback:
+            raise Exception('TODO: modify this test to use ResourceGroupVCRTestBase')
 
     def test_vm_extension(self):
         self.execute()
@@ -520,6 +528,8 @@ class VMScaleSetGetsScenarioTest(VCRTestBase):
         self.resource_group = 'CLI_TEST1'
         self.ss_name = 'clitestvm'
         self.location = 'westus'
+        if not self.playback:
+            raise Exception('TODO: modify this test to use ResourceGroupVCRTestBase')
 
     def test_vm_scaleset_gets(self):
         self.execute()
@@ -555,6 +565,8 @@ class VMScaleSetStatesScenarioTest(VCRTestBase):
         super(VMScaleSetStatesScenarioTest, self).__init__(__file__, test_method)
         self.resource_group = 'cliTestRg_ScaleSet1'
         self.ss_name = 'scaleset1'
+        if not self.playback:
+            raise Exception('TODO: modify this test to use ResourceGroupVCRTestBase')
 
     def test_vm_scaleset_states(self):
         self.execute()
@@ -574,6 +586,8 @@ class VMScaleSetScaleUpScenarioTest(VCRTestBase):
         super(VMScaleSetScaleUpScenarioTest, self).__init__(__file__, test_method)
         self.resource_group = 'yugangwvmss'
         self.ss_name = 'yugangwvm'
+        if not self.playback:
+            raise Exception('TODO: modify this test to use ResourceGroupVCRTestBase')
 
     def test_vm_scaleset_scaleup(self):
         self.execute()
@@ -594,6 +608,8 @@ class VMScaleSetDeleteScenarioTest(VCRTestBase):
         self.ss_name = 'yugangwvm'
         self.vm_count = 3
         self.instance_id_to_delete = 2
+        if not self.playback:
+            raise Exception('TODO: modify this test to use ResourceGroupVCRTestBase')
 
     def test_vm_scaleset_delete(self):
         self.execute()
@@ -633,6 +649,8 @@ class VMScaleSetVMsScenarioTest(VCRTestBase):
         self.ss_name = 'scaleset3'
         self.vm_count = 5
         self.instance_ids = ['1', '2', '3', '6', '7']
+        if not self.playback:
+            raise Exception('TODO: modify this test to use ResourceGroupVCRTestBase')
 
     def test_vm_scaleset_vms(self):
         self.execute()
@@ -733,7 +751,7 @@ class VMSSCreateNoneOptionsTest(ResourceGroupVCRTestBase): #pylint: disable=too-
         vmss_name = 'nooptvmss8'
 
         self.cmd('vmss create -n {vmss_name} -g {resource_group} --image Debian --load-balancer {quotes}'
-                 ' --ssh-key-value \'{ssh_key}\' --deployment-name {deployment_name} --public-ip-address {quotes} --tags {quotes} --debug'
+                 ' --ssh-key-value \'{ssh_key}\' --deployment-name {deployment_name} --public-ip-address {quotes} --tags {quotes}'
                  .format(vmss_name=vmss_name, resource_group=self.resource_group,
                          ssh_key=TEST_SSH_KEY_PUB, deployment_name=deployment_name,
                          quotes='""' if platform.system() == 'Windows' else "''"))
@@ -791,42 +809,43 @@ class VMScaleSetCreateExistingOptions(ResourceGroupVCRTestBase):
         self.cmd('network vnet show --name {vnet_name} -g {resource_group}'.format(resource_group=self.resource_group, vnet_name=vnet_name),
             checks=JMESPathCheck('subnets[0].ipConfigurations[0].id.contains(@, \'{vmss_name}\')'.format(vmss_name=vmss_name), True))
 
-# TODO: commented out until #956 is fixed.
-#class VMScaleSetNicScenarioTest(ResourceGroupVCRTestBase):
+class VMScaleSetNicScenarioTest(ResourceGroupVCRTestBase):
 
-#     def __init__(self, test_method):
-#         super(VMScaleSetNicScenarioTest, self).__init__(__file__, test_method)
-#         self.resource_group = 'test_vm_scaleset_nics'
-#         self.vmss_name = 'vmss1'
-#         self.instance_id = 0
+    def __init__(self, test_method):
+        super(VMScaleSetNicScenarioTest, self).__init__(__file__, test_method)
+        self.resource_group = 'test_vm_scaleset_nics'
+        self.vmss_name = 'vmss1'
+        self.instance_id = 0
 
-#     def test_vm_scaleset_nics(self):
-#         self.execute()
+    def test_vm_scaleset_nics(self):
+        self.execute()
 
-#     def set_up(self):
-#         super(VMScaleSetNicScenarioTest, self).set_up()
-#         self.cmd('vmss create -g {} -n {} --authentication-type password --admin-password PasswordPassword1!  --image Win2012R2Datacenter'.format(self.resource_group, self.vmss_name))
+    def set_up(self):
+        super(VMScaleSetNicScenarioTest, self).set_up()
+        self.cmd('vmss create -g {} -n {} --authentication-type password --admin-password PasswordPassword1!  --image Win2012R2Datacenter'.format(self.resource_group, self.vmss_name))
 
-#     def body(self):
-#         self.cmd('vmss nic list -g {} --vmss-name {}'.format(self.resource_group, self.vmss_name), checks=[
-#                 JMESPathCheck('type(@)', 'array'),
-#                 JMESPathCheck("length([?resourceGroup == '{}']) == length(@)".format(self.resource_group), True)
-#         ])
-#         nic_list = self.cmd('vmss nic list-vm-nics -g {} --vmss-name {} --instance-id {}'.format(self.resource_group, self.vmss_name, self.instance_id), checks=[
-#                 JMESPathCheck('type(@)', 'array'),
-#                 JMESPathCheck("length([?resourceGroup == '{}']) == length(@)".format(self.resource_group), True)
-#         ])
-#         nic_name = nic_list[0].get('name')
-#         self.cmd('vmss nic show --resource-group {} --vmss-name {} --instance-id {} -n {}'.format(self.resource_group, self.vmss_name, self.instance_id, nic_name), checks=[
-#                 JMESPathCheck('type(@)', 'object'),
-#                 JMESPathCheck('name', nic_name),
-#                 JMESPathCheck('resourceGroup', self.resource_group),
-#         ])
+    def body(self):
+        self.cmd('vmss nic list -g {} --vmss-name {}'.format(self.resource_group, self.vmss_name), checks=[
+            JMESPathCheck('type(@)', 'array'),
+            JMESPathCheck("length([?resourceGroup == '{}']) == length(@)".format(self.resource_group), True)
+        ])
+        nic_list = self.cmd('vmss nic list-vm-nics -g {} --vmss-name {} --instance-id {}'.format(self.resource_group, self.vmss_name, self.instance_id), checks=[
+            JMESPathCheck('type(@)', 'array'),
+            JMESPathCheck("length([?resourceGroup == '{}']) == length(@)".format(self.resource_group), True)
+        ])
+        nic_name = nic_list[0].get('name')
+        self.cmd('vmss nic show --resource-group {} --vmss-name {} --instance-id {} -n {}'.format(self.resource_group, self.vmss_name, self.instance_id, nic_name), checks=[
+            JMESPathCheck('type(@)', 'object'),
+            JMESPathCheck('name', nic_name),
+            JMESPathCheck('resourceGroup', self.resource_group),
+        ])
 
 class VMAccessAddRemoveLinuxUser(VCRTestBase):
 
     def __init__(self, test_method):
         super(VMAccessAddRemoveLinuxUser, self).__init__(__file__, test_method)
+        if not self.playback:
+            raise Exception('TODO: modify this test to use ResourceGroupVCRTestBase')
 
     def test_vm_add_remove_linux_user(self):
         self.execute()
@@ -880,38 +899,59 @@ class VMCreateUbuntuScenarioTest(ResourceGroupVCRTestBase): #pylint: disable=too
             JMESPathCheck('osProfile.linuxConfiguration.ssh.publicKeys[0].keyData', TEST_SSH_KEY_PUB),
         ])
 
-class VMCreateMultiNicTest(ResourceGroupVCRTestBase): #pylint: disable=too-many-instance-attributes
+class VMMultiNicScenarioTest(ResourceGroupVCRTestBase): #pylint: disable=too-many-instance-attributes
 
     def __init__(self, test_method):
-        super(VMCreateMultiNicTest, self).__init__(__file__, test_method)
-        self.resource_group = 'cliTestRg_VMCreate_multinic'
+        super(VMMultiNicScenarioTest, self).__init__(__file__, test_method)
+        self.resource_group = 'cli_test_multi_nic_vm'
+        self.vm_name = 'multinicvm1'
 
-    def test_vm_create_multinic(self):
+    def test_vm_multi_nic_scenario(self):
         self.execute()
 
-    def body(self):
-        deployment_name = 'azurecli-test-deployment-vm-multinic-create'
+    def set_up(self):
+        super(VMMultiNicScenarioTest, self).set_up()
+        rg = self.resource_group
         vnet_name = 'myvnet'
         subnet_name = 'mysubnet'
-        vm_name = 'multinicvm1'
-        nic_names = ['mynic1', 'mynic2']
+        self.cmd('network vnet create -g {} -n {} --subnet-name {}'.format(rg, vnet_name, subnet_name))
+        for i in range(1, 5): # create four NICs
+            self.cmd('network nic create -g {} -n nic{} --subnet {} --vnet-name {}'.format(rg, i, subnet_name, vnet_name))
 
-        self.cmd('network vnet create -n {vnet_name} -g {resource_group} --subnet-name {subnet_name}'
-                 .format(vnet_name=vnet_name, resource_group=self.resource_group, subnet_name=subnet_name))
-        self.cmd('network nic create -n {nic_name} -g {resource_group} --subnet {subnet_name} --vnet-name {vnet_name}'
-                 .format(nic_name=nic_names[0], resource_group=self.resource_group, subnet_name=subnet_name, vnet_name=vnet_name))
-        self.cmd('network nic create -n {nic_name} -g {resource_group} --subnet {subnet_name} --vnet-name {vnet_name}'
-                 .format(nic_name=nic_names[1], resource_group=self.resource_group, subnet_name=subnet_name, vnet_name=vnet_name))
+    def body(self):
+        rg = self.resource_group
+        vm_name = self.vm_name
 
-        self.cmd('vm create -n {vm_name} -g {resource_group} --image RHEL --nics {nic_name1} {nic_name2} --size Standard_DS4'
-                 ' --ssh-key-value \'{ssh_key}\' --deployment-name {deployment_name}'
-                 .format(vm_name=vm_name, resource_group=self.resource_group, nic_name1=nic_names[0], nic_name2=nic_names[1],
-                         ssh_key=TEST_SSH_KEY_PUB, deployment_name=deployment_name))
+        self.cmd('vm create -g {} -n {} --image UbuntuLTS --nics nic1 nic2 nic3 nic4 --size Standard_DS3 --ssh-key-value \'{}\''.format(rg, vm_name, TEST_SSH_KEY_PUB))
+        self.cmd('vm show -g {} -n {}'.format(rg, vm_name), checks=[
+            JMESPathCheck("networkProfile.networkInterfaces[0].id.ends_with(@, 'nic1')", True),
+            JMESPathCheck("networkProfile.networkInterfaces[1].id.ends_with(@, 'nic2')", True),
+            JMESPathCheck("networkProfile.networkInterfaces[2].id.ends_with(@, 'nic3')", True),
+            JMESPathCheck("networkProfile.networkInterfaces[3].id.ends_with(@, 'nic4')", True),
+            JMESPathCheck('length(networkProfile.networkInterfaces)', 4)
+        ])
+        # cannot alter NICs on a running (or even stopped) VM
+        self.cmd('vm deallocate -g {} -n {}'.format(rg, vm_name))
 
-        self.cmd('vm show -n {vm_name} -g {resource_group}'.format(vm_name=vm_name, resource_group=self.resource_group), [
-            JMESPathCheck('networkProfile.networkInterfaces[0].id.ends_with(@, \'{}\')'.format(nic_names[0]), True),
-            JMESPathCheck('networkProfile.networkInterfaces[1].id.ends_with(@, \'{}\')'.format(nic_names[1]), True),
-            JMESPathCheck('length(networkProfile.networkInterfaces)', 2)
+        self.cmd('vm nic list -g {} --vm-name {}'.format(rg, vm_name), checks=[
+            JMESPathCheck('length(@)', 4),
+            JMESPathCheck('[0].primary', True)
+        ])
+        self.cmd('vm nic show -g {} --vm-name {} --nic nic1'.format(rg, vm_name))
+        self.cmd('vm nic remove -g {} --vm-name {} --nics nic4 --primary-nic nic1'.format(rg, vm_name), checks=[
+            JMESPathCheck('length(@)', 3),
+            JMESPathCheck('[0].primary', True),
+            JMESPathCheck("[0].id.contains(@, 'nic1')", True)
+        ])
+        self.cmd('vm nic add -g {} --vm-name {} --nics nic4'.format(rg, vm_name), checks=[
+            JMESPathCheck('length(@)', 4),
+            JMESPathCheck('[0].primary', True),
+            JMESPathCheck("[0].id.contains(@, 'nic1')", True)
+        ])
+        self.cmd('vm nic set -g {} --vm-name {} --nics nic1 nic2 --primary-nic nic2'.format(rg, vm_name), checks=[
+            JMESPathCheck('length(@)', 2),
+            JMESPathCheck('[1].primary', True),
+            JMESPathCheck("[1].id.contains(@, 'nic2')", True)
         ])
 
 class VMCreateNoneOptionsTest(ResourceGroupVCRTestBase): #pylint: disable=too-many-instance-attributes
@@ -947,6 +987,8 @@ class VMBootDiagnostics(VCRTestBase):
 
     def __init__(self, test_method):
         super(VMBootDiagnostics, self).__init__(__file__, test_method)
+        if not self.playback:
+            raise Exception('TODO: modify this test to use ResourceGroupVCRTestBase')
 
     def test_vm_enable_disable_boot_diagnostic(self):
         self.execute()
@@ -971,6 +1013,8 @@ class VMExtensionInstallTest(VCRTestBase):
 
     def __init__(self, test_method):
         super(VMExtensionInstallTest, self).__init__(__file__, test_method)
+        if not self.playback:
+            raise Exception('TODO: modify this test to use ResourceGroupVCRTestBase')
 
     def test_vm_extension_install(self):
         self.execute()
@@ -998,6 +1042,8 @@ class VMSSExtensionInstallTest(VCRTestBase):
 
     def __init__(self, test_method):
         super(VMSSExtensionInstallTest, self).__init__(__file__, test_method)
+        if not self.playback:
+            raise Exception('TODO: modify this test to use ResourceGroupVCRTestBase')
 
     def test_vmss_extension_install(self):
         self.execute()

@@ -15,7 +15,8 @@
     <InterpreterId>{54f4b6dc-0859-46dc-99bb-b275c9d0aca3}</InterpreterId>
     <InterpreterVersion>3.5</InterpreterVersion>
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
-    <CommandLineArguments>network nic create -g nicrg -n nic1 --subnet subnet1 --vnet-name vnet1 --public-ip-address banoodle</CommandLineArguments>
+    <CommandLineArguments>
+    </CommandLineArguments>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'" />
   <PropertyGroup Condition="'$(Configuration)' == 'Release'" />
@@ -272,24 +273,6 @@
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_app_gateway\lib\operations\__init__.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_app_gateway\lib\version.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_app_gateway\lib\__init__.py" />
-    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_dns_zone\lib\credentials.py" />
-    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_dns_zone\lib\dns_zone_creation_client.py" />
-    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_dns_zone\lib\exceptions.py" />
-    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_dns_zone\lib\models\basic_dependency.py" />
-    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_dns_zone\lib\models\dependency.py" />
-    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_dns_zone\lib\models\deployment_dns_zone.py" />
-    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_dns_zone\lib\models\deployment_extended.py" />
-    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_dns_zone\lib\models\deployment_properties_extended.py" />
-    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_dns_zone\lib\models\dns_zone_creation_client_enums.py" />
-    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_dns_zone\lib\models\parameters_link.py" />
-    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_dns_zone\lib\models\provider.py" />
-    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_dns_zone\lib\models\provider_resource_type.py" />
-    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_dns_zone\lib\models\template_link.py" />
-    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_dns_zone\lib\models\__init__.py" />
-    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_dns_zone\lib\operations\dns_zone_operations.py" />
-    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_dns_zone\lib\operations\__init__.py" />
-    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_dns_zone\lib\version.py" />
-    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_dns_zone\lib\__init__.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_express_route_circuit\lib\credentials.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_express_route_circuit\lib\exceptions.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_express_route_circuit\lib\express_route_circuit_creation_client.py" />
@@ -494,6 +477,9 @@
     <Compile Include="command_modules\azure-cli-role\azure\cli\command_modules\role\tests\test_graph.py" />
     <Compile Include="command_modules\azure-cli-storage\azure\cli\command_modules\storage\_command_type.py" />
     <Compile Include="command_modules\azure-cli-storage\azure\cli\command_modules\storage\_factory.py" />
+    <Compile Include="command_modules\azure-cli-storage\azure\cli\command_modules\storage\_format.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="command_modules\azure-cli-storage\azure\cli\command_modules\storage\_help.py">
       <SubType>Code</SubType>
     </Compile>
@@ -795,9 +781,6 @@
     <Folder Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_app_gateway\lib\" />
     <Folder Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_app_gateway\lib\models\" />
     <Folder Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_app_gateway\lib\operations\" />
-    <Folder Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_dns_zone\lib\" />
-    <Folder Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_dns_zone\lib\models\" />
-    <Folder Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_dns_zone\lib\operations\" />
     <Folder Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_express_route_circuit\lib\" />
     <Folder Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_express_route_circuit\lib\models\" />
     <Folder Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_express_route_circuit\lib\operations\" />
@@ -833,7 +816,6 @@
     <Folder Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_vpn_connection\lib\operations\" />
     <Folder Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_express_route_circuit\" />
     <Folder Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_traffic_manager_profile\" />
-    <Folder Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_dns_zone\" />
     <Folder Include="command_modules\azure-cli-network\azure\cli\command_modules\network\zone_file\" />
     <Folder Include="command_modules\azure-cli-redis\" />
     <Folder Include="command_modules\azure-cli-redis\azure\" />
@@ -915,7 +897,6 @@
     <Content Include="azure-cli\setup.cfg" />
     <Content Include="command_modules\azure-cli-acr\azure\cli\command_modules\acr\template.json" />
     <Content Include="command_modules\azure-cli-acr\azure\cli\command_modules\acr\tests\recordings\test_acr.yaml" />
-    <Content Include="command_modules\azure-cli-acr\azure\README.rst" />
     <Content Include="command_modules\azure-cli-acr\requirements.txt" />
     <Content Include="command_modules\azure-cli-acs\requirements.txt" />
     <Content Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\tests\recordings\test_appservice_error_polish.yaml" />
@@ -942,8 +923,6 @@
     </Content>
     <Content Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_app_gateway\swagger_create_app_gateway.json" />
     <Content Include="command_modules\azure-cli-feedback\requirements.txt" />
-    <Content Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_dns_zone\azuredeploy.json" />
-    <Content Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_dns_zone\swagger_create_dns_zone.json" />
     <Content Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_express_route_circuit\azuredeploy.json" />
     <Content Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_express_route_circuit\swagger_create_express_route_circuit.json" />
     <Content Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_lb\azuredeploy_empty.json" />

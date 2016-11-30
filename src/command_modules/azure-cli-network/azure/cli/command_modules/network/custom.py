@@ -446,9 +446,18 @@ def create_nic_ip_config(resource_group_name, network_interface_name, ip_config_
                          load_balancer_backend_address_pool_ids=None,
                          load_balancer_inbound_nat_rule_ids=None,
                          private_ip_address=None, private_ip_address_allocation='dynamic',
-                         private_ip_address_version='ipv4'):
+                         private_ip_address_version='ipv4', make_primary=False):
     ncf = _network_client_factory()
     nic = ncf.network_interfaces.get(resource_group_name, network_interface_name)
+
+    if private_ip_address_version == 'ipv4' and not subnet:
+        primary_config = next(x for x in nic.ip_configurations if x.primary)
+        subnet = primary_config.subnet.id
+
+    if make_primary:
+        for config in nic.ip_configurations:
+            config.primary = False
+
     nic.ip_configurations.append(
         NetworkInterfaceIPConfiguration(
             name=ip_config_name,
@@ -458,11 +467,13 @@ def create_nic_ip_config(resource_group_name, network_interface_name, ip_config_
             load_balancer_inbound_nat_rules=load_balancer_inbound_nat_rule_ids,
             private_ip_address=private_ip_address,
             private_ip_allocation_method=private_ip_address_allocation,
-            private_ip_address_version=private_ip_address_version
+            private_ip_address_version=private_ip_address_version,
+            primary=make_primary
         )
     )
-    return ncf.network_interfaces.create_or_update(
+    poller = ncf.network_interfaces.create_or_update(
         resource_group_name, network_interface_name, nic)
+    return _get_property(poller.result().ip_configurations, ip_config_name)
 create_nic_ip_config.__doc__ = NicOperations.create_or_update.__doc__
 
 def set_nic_ip_config(instance, parent, ip_config_name, subnet=None, # pylint: disable=unused-argument
@@ -470,7 +481,12 @@ def set_nic_ip_config(instance, parent, ip_config_name, subnet=None, # pylint: d
                       load_balancer_backend_address_pool_ids=None,
                       load_balancer_inbound_nat_rule_ids=None,
                       private_ip_address=None, private_ip_address_allocation=None, # pylint: disable=unused-argument
-                      private_ip_address_version='ipv4'):
+                      private_ip_address_version='ipv4', make_primary=False):
+    if make_primary:
+        for config in parent.ip_configurations:
+            config.primary = False
+        instance.primary = True
+
     if private_ip_address == '':
         instance.private_ip_address = None
         instance.private_ip_allocation_method = 'dynamic'
@@ -602,6 +618,31 @@ def update_nsg_rule(instance, protocol=None, source_address_prefix=None,
     instance.priority = priority if priority is not None else instance.priority
     return instance
 update_nsg_rule.__doc__ = SecurityRule.__doc__
+#endregion
+
+#region Public IP commands
+
+def update_public_ip(instance, dns_name=None, allocation_method=None, version=None,
+                     idle_timeout=None, reverse_fqdn=None, tags=None):
+    if dns_name is not None or reverse_fqdn is not None:
+        from azure.mgmt.network.models import PublicIPAddressDnsSettings
+        if instance.dns_settings:
+            if dns_name is not None:
+                instance.dns_settings.domain_name_label = dns_name
+            if reverse_fqdn is not None:
+                instance.dns_settings.reverse_fqdn = reverse_fqdn
+        else:
+            instance.dns_settings = PublicIPAddressDnsSettings(dns_name, None, reverse_fqdn)
+    if allocation_method is not None:
+        instance.public_ip_allocation_method = allocation_method
+    if version is not None:
+        instance.public_ip_address_version = version
+    if idle_timeout is not None:
+        instance.idle_timeout_in_minutes = idle_timeout
+    if tags is not None:
+        instance.tags = tags
+    return instance
+
 #endregion
 
 #region Vnet Peering commands
@@ -792,6 +833,7 @@ def create_express_route_peering(
         secondary_peer_address_prefix=secondary_peer_address_prefix,
         shared_key=shared_key,
         microsoft_peering_config=peering_config)
+
     return client.create_or_update(
         resource_group_name, circuit_name, peering_type, peering)
 
@@ -817,6 +859,37 @@ def create_vpn_gateway_root_cert(resource_group_name, gateway_name, public_cert_
     config.vpn_client_root_certificates.append(cert)
 
     return ncf.create_or_update(resource_group_name, gateway_name, gateway)
+#endregion
+
+#region Local Gateway commands
+
+def update_local_gateway(instance, gateway_ip_address=None, local_address_prefix=None, asn=None,
+                         bgp_peering_address=None, peer_weight=None, tags=None):
+
+    if any([asn, bgp_peering_address, peer_weight]):
+        if instance.bgp_settings is not None:
+            # update existing parameters selectively
+            if asn is not None:
+                instance.bgp_settings.asn = asn
+            if peer_weight is not None:
+                instance.bgp_settings.peer_weight = peer_weight
+            if bgp_peering_address is not None:
+                instance.bgp_settings.bgp_peering_address = bgp_peering_address
+        elif asn and bgp_peering_address:
+            from azure.mgmt.network.models import BgpSettings
+            instance.bgp_settings = BgpSettings(asn, bgp_peering_address, peer_weight)
+        else:
+            raise CLIError(
+                'incorrect usage: --asn ASN --bgp-peering-address IP [--peer-weight WEIGHT]')
+
+    if gateway_ip_address is not None:
+        instance.gateway_ip_address = gateway_ip_address
+    if local_address_prefix is not None:
+        instance.local_address_prefix = local_address_prefix
+    if tags is not None:
+        instance.tags = tags
+    return instance
+
 #endregion
 
 #region Traffic Manager Commands

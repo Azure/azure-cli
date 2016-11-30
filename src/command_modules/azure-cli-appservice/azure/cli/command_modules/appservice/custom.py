@@ -249,7 +249,7 @@ def list_app_service_plans(resource_group_name=None):
     else:
         return client.server_farms.get_server_farms(resource_group_name)
 
-def create_app_service_plan(resource_group_name, name, sku, is_linux, number_of_workers=None,
+def create_app_service_plan(resource_group_name, name, is_linux, sku='B1', number_of_workers=None,
                             location=None):
     client = web_client_factory()
     sku = _normalize_sku(sku)

@@ -1,6 +1,12 @@
 Microsoft Azure CLI 2.0 - Preview
 ==================================
 
+.. image:: https://img.shields.io/pypi/v/azure-cli.svg?maxAge=2592000
+    :target: https://pypi.python.org/pypi/azure-cli
+
+.. image:: https://img.shields.io/pypi/pyversions/azure-cli.svg?maxAge=2592000
+    :target: https://pypi.python.org/pypi/azure-cli
+
 .. image:: https://travis-ci.org/Azure/azure-cli.svg?branch=master
     :target: https://travis-ci.org/Azure/azure-cli
 
@@ -19,7 +25,6 @@ If you already have the CLI installed, run the following to update:
    $ az component update
 
 If you don't have the CLI installed, see below.
-
 
 Install with pip
 ^^^^^^^^^^^^^^^^
@@ -72,6 +77,40 @@ Use ``pip install requests==2.11.1``.
 
 NOTE: If in a virtual environment, you can simply use ``pip install azure-cli`` and the CLI will be installed into that virtual environment.
 
+Install with apt-get
+^^^^^^^^^^^^^^^^^^^^
+
+A Debian/Ubuntu package is also available. Install as follows:
+
+.. code-block:: console
+
+    $ echo "deb https://apt-mo.trafficmanager.net/repos/azure-cli/ wheezy main" | sudo tee /etc/apt/sources.list.d/azure-cli.list
+    $ sudo apt-key adv --keyserver apt-mo.trafficmanager.net --recv-keys 417A0893
+    $ sudo apt-get install apt-transport-https
+    $ sudo apt-get update && sudo apt-get install azure-cli
+
+Install with Docker
+^^^^^^^^^^^^^^^^^^^
+
+We also maintain a Docker image preconfigured with the Azure CLI.
+
+Tagged Docker images are available.
+See our `Docker tags <https://hub.docker.com/r/azuresdk/azure-cli-python/tags/>`__ for available versions.
+
+.. code-block:: console
+
+   $ docker run -v ${HOME}:/root -it azuresdk/azure-cli-python:<version>
+
+Run the latest automated Docker build with the command below.
+All command modules are included in this version as the image is built directly from the Git repository.
+
+.. code-block:: console
+
+   $ docker run -v ${HOME}:/root -it azuresdk/azure-cli-python:latest
+
+For installation steps for common platforms, as well as dependency troubleshooting, please take a look at our `installation guide <http://github.com/Azure/azure-cli/blob/master/doc/preview_install_guide.md>`__.
+
+
 Install with interactive install script
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -91,29 +130,6 @@ Some prerequisites may be required. See our `Preview Install Guide <https://gith
 
 If you run into an ``AttributeError: 'X509' object has no attribute '_x509'`` error, downgrade your version of the requests library from 2.12.1 to 2.11.1.
 With the default install location, use ``/usr/local/az/bin/pip install requests==2.11.1``.
-
-Install with apt-get
-^^^^^^^^^^^^^^^^^^^^
-
-A Debian/Ubuntu package is also available. Install as follows:
-
-.. code-block:: console
-
-    $ echo "deb https://apt-mo.trafficmanager.net/repos/azure-cli/ wheezy main" | sudo tee /etc/apt/sources.list.d/azure-cli.list
-    $ sudo apt-key adv --keyserver apt-mo.trafficmanager.net --recv-keys 417A0893
-    $ sudo apt-get install apt-transport-https
-    $ sudo apt-get update && sudo apt-get install azure-cli
-
-Install with Docker
-^^^^^^^^^^^^^^^^^^^
-
-We also maintain a docker image preconfigured with the Azure CLI.
-
-.. code-block:: console
-
-   $ docker run -it azuresdk/azure-cli-python
-
-For installation steps for common platforms, as well as dependency troubleshooting, please take a look at our `installation guide <http://github.com/Azure/azure-cli/blob/master/doc/preview_install_guide.md>`__.
 
 Usage
 =====

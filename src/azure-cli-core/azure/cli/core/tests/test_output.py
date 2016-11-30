@@ -41,6 +41,19 @@ class TestOutput(unittest.TestCase):
   "id": "0b1f6472"
 }
 """))
+   
+    def test_out_json_from_ordered_dict(self):
+        """
+        The JSON output when the input is OrderedDict should be serialized to JSON
+        """
+        output_producer = OutputProducer(formatter=format_json, file=self.io)
+        output_producer.out(CommandResultItem(OrderedDict({'active': True, 'id': '0b1f6472'})))
+        self.assertEqual(util.normalize_newlines(self.io.getvalue()), util.normalize_newlines(
+"""{
+  "active": true,
+  "id": "0b1f6472"
+}
+"""))
 
     def test_out_json_byte(self):
         output_producer = OutputProducer(formatter=format_json, file=self.io)

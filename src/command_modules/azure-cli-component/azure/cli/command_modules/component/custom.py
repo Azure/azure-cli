@@ -21,7 +21,35 @@ def list_components():
                    for dist in pip.get_installed_distributions(local_only=True)
                    if dist.key.startswith(COMPONENT_PREFIX)], key=lambda x: x['name'])
 
-def remove(component_name, show_logs=False):
+def list_available_components():
+    """ List publicly available components that can be installed """
+    import pip
+    available_components = []
+    installed_component_names = [dist.key.replace(COMPONENT_PREFIX, '') \
+                                for dist in pip.get_installed_distributions(local_only=True)
+                                 if dist.key.startswith(COMPONENT_PREFIX)]
+    try:
+        import xmlrpclib
+    except ImportError:
+        import xmlrpc.client as xmlrpclib #pylint: disable=import-error
+    client = xmlrpclib.ServerProxy('https://pypi.python.org/pypi')
+    pypi_hits = client.search({'author': 'Microsoft Corporation', 'author_email': 'azpycli'})
+    logger.debug('The following components are already installed %s', installed_component_names)
+    logger.debug("Found %d result(s)", len(pypi_hits))
+    for hit in pypi_hits:
+        if hit['name'].startswith(COMPONENT_PREFIX):
+            comp_name = hit['name'].replace(COMPONENT_PREFIX, '')
+            if comp_name not in installed_component_names:
+                available_components.append({
+                    'name': comp_name,
+                    'summary': hit['summary'],
+                    'version': hit['version']
+                })
+    if not available_components:
+        logger.warning('All available components are already installed.')
+    return available_components
+
+def remove(component_name):
     """ Remove a component """
     import pip
     full_component_name = COMPONENT_PREFIX + component_name
@@ -29,7 +57,6 @@ def remove(component_name, show_logs=False):
                   if dist.key == full_component_name])
     if found:
         options = ['--isolated', '--yes']
-        options += [] if show_logs else ['--quiet']
         pip_args = ['uninstall'] + options + ['--disable-pip-version-check', full_component_name]
         _run_pip(pip, pip_args)
     else:
@@ -53,13 +80,11 @@ def _run_pip(pip, pip_exec_args):
         raise CLIError('An error occurred. Run command with --debug for more information.\n'
                        'If executing az with sudo, you may want sudo\'s -E and -H flags.')
 
-def _install_or_update(package_list, link, private, pre, show_logs=False):
+def _install_or_update(package_list, link, private, pre):
     import pip
     options = ['--isolated', '--disable-pip-version-check', '--upgrade']
     if pre:
         options.append('--pre')
-    if not show_logs:
-        options.append('--quiet')
     pkg_index_options = ['--find-links', link] if link else []
     if private:
         package_index_url = az_config.get('component', 'package_index_url', fallback=None)
@@ -74,7 +99,7 @@ def _install_or_update(package_list, link, private, pre, show_logs=False):
     pip_args = ['install'] + options + package_list + pkg_index_options
     _run_pip(pip, pip_args)
 
-def update(private=False, pre=False, link=None, additional_components=None, show_logs=False):
+def update(private=False, pre=False, link=None, additional_components=None):
     """ Update the CLI and all installed components """
     import pip
     # Update the CLI itself
@@ -86,4 +111,4 @@ def update(private=False, pre=False, link=None, additional_components=None, show
     if additional_components:
         for c in additional_components:
             package_list += [COMPONENT_PREFIX + c]
-    _install_or_update(package_list, link, private, pre, show_logs=show_logs)
+    _install_or_update(package_list, link, private, pre)

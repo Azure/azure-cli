@@ -10,6 +10,7 @@ import os
 import os.path
 import platform
 import random
+import stat
 import string
 import subprocess
 import sys
@@ -17,6 +18,7 @@ from six.moves.urllib.request import urlretrieve #pylint: disable=import-error
 import threading
 import time
 import webbrowser
+import yaml
 
 from msrestazure.azure_exceptions import CloudError
 
@@ -28,9 +30,28 @@ from azure.cli.command_modules.vm.mgmt_acs.lib import \
 from azure.cli.core._util import CLIError
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.mgmt.compute import ComputeManagementClient
-from azure.mgmt.resource.resources import ResourceManagementClient
+from azure.cli.core._environment import get_config_dir
 
 logger = _logging.get_az_logger(__name__)
+
+def _resource_client_factory():
+    from azure.mgmt.resource.resources import ResourceManagementClient
+    return get_mgmt_service_client(ResourceManagementClient)
+
+def cf_providers():
+    return _resource_client_factory().providers
+
+def register_providers():
+    providers = cf_providers()
+
+    namespaces = ['Microsoft.Network', 'Microsoft.Compute', 'Microsoft.Storage']
+    for namespace in namespaces:
+        state = providers.get(resource_provider_namespace=namespace)
+        if state.registration_state != 'Registered': # pylint: disable=no-member
+            logger.info('registering %s', namespace)
+            providers.register(resource_provider_namespace=namespace)
+        else:
+            logger.info('%s is already registered', namespace)
 
 def wait_then_open(url):
     """
@@ -122,6 +143,7 @@ def dcos_install_cli(install_location=None, client_version='1.8'):
     logger.info('Downloading client to %s', install_location)
     try:
         urlretrieve(file_url, install_location)
+        os.chmod(install_location, os.stat(install_location).st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
     except IOError as err:
         raise CLIError('Connection error while attempting to download client ({})'.format(err))
 
@@ -145,6 +167,7 @@ def k8s_install_cli(client_version="1.4.5", install_location=None):
     logger.info('Downloading client to %s', install_location)
     try:
         urlretrieve(file_url, install_location)
+        os.chmod(install_location, os.stat(install_location).st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
     except IOError as err:
         raise CLIError('Connection error while attempting to download client ({})'.format(err))
 
@@ -247,6 +270,11 @@ def acs_create(resource_group_name, deployment_name, dns_name_prefix, name, ssh_
      if raw=true
     :raises: :class:`CloudError<msrestazure.azure_exceptions.CloudError>`
     """
+    register_providers()
+    groups = _resource_client_factory().resource_groups
+    # Just do the get, we don't need the result, it will error out if the group doesn't exist.
+    groups.get(resource_group_name)
+
     if orchestrator_type == 'Kubernetes' or orchestrator_type == 'kubernetes':
         principalObj = load_acs_service_principal()
         if principalObj:
@@ -275,13 +303,14 @@ def store_acs_service_principal(client_secret, service_principal):
         obj['client_secret'] = client_secret
     if service_principal:
         obj['service_principal'] = service_principal
-    configPath = os.path.join(os.path.expanduser('~'), '.azure', 'acsServicePrincipal.json')
+
+    configPath = os.path.join(get_config_dir(), 'acsServicePrincipal.json')
     with os.fdopen(os.open(configPath, os.O_RDWR|os.O_CREAT|os.O_TRUNC, 0o600),
                    'w+') as spFile:
         json.dump(obj, spFile)
 
 def load_acs_service_principal():
-    configPath = os.path.join(os.path.expanduser('~'), '.azure', 'acsServicePrincipal.json')
+    configPath = os.path.join(get_config_dir(), 'acsServicePrincipal.json')
     if not os.path.exists(configPath):
         return None
     fd = os.open(configPath, os.O_RDONLY)
@@ -343,18 +372,57 @@ def _create_kubernetes(resource_group_name, deployment_name, dns_name_prefix, na
 
     properties = DeploymentProperties(template=template, template_link=None,
                                       parameters=None, mode='incremental')
-    smc = get_mgmt_service_client(ResourceManagementClient)
+    smc = _resource_client_factory()
     return smc.deployments.create_or_update(resource_group_name, deployment_name, properties)
 
-def acs_get_credentials(dns_prefix, location):
-    # TODO: once we get the right swagger in here, update this to actually pull location and dns_prefix
-    #acs_info = _get_acs_info(name, resource_group_name)
-    home = os.path.expanduser('~')
+def acs_get_credentials(name=None, resource_group_name=None, dns_prefix=None, location=None, user=None):
+    if not dns_prefix or not location:
+        acs_info = _get_acs_info(name, resource_group_name)
 
+        if not dns_prefix:
+            dns_prefix = acs_info.master_profile.dns_prefix # pylint: disable=no-member
+        if not location:
+            location = acs_info.location # pylint: disable=no-member
+        if not user:
+            user = acs_info.linux_profile.admin_username # pylint: disable=no-member
+
+    home = os.path.expanduser('~')
     path = os.path.join(home, '.kube', 'config')
+
+    path_candidate = path
+    ix = 0
+    while os.path.exists(path_candidate):
+        ix += 1
+        path_candidate = '{}-{}-{}'.format(path, name, ix)
+
     # TODO: this only works for public cloud, need other casing for national clouds
-    acs_client.SecureCopy('azureuser', '{}-k8s-masters.{}.cloudapp.azure.com'.format(dns_prefix, location),
-                          '.kube/config', path)
+
+    acs_client.SecureCopy(user, '{}.{}.cloudapp.azure.com'.format(dns_prefix, location),
+                          '.kube/config', path_candidate)
+
+    # merge things
+    if path_candidate != path:
+        try:
+            merge_kubernetes_configurations(path, path_candidate)
+        except yaml.YAMLError as exc:
+            logger.warning('Failed to merge credentials to kube config file: %s', exc)
+            logger.warning('The credentials have been saved to %s', path_candidate)
+
+def merge_kubernetes_configurations(existing_file, addition_file):
+    with open(existing_file) as stream:
+        existing = yaml.load(stream)
+
+    with open(addition_file) as stream:
+        addition = yaml.load(stream)
+
+    # TODO: this will always add, we should only add if not present
+    existing['clusters'].extend(addition['clusters'])
+    existing['users'].extend(addition['users'])
+    existing['contexts'].extend(addition['contexts'])
+    existing['current-context'] = addition['current-context']
+
+    with open(existing_file, 'w+') as stream:
+        yaml.dump(existing, stream, default_flow_style=True)
 
 def _get_host_name(acs_info):
     """

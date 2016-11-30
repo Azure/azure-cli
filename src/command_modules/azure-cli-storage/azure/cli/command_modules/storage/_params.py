@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=line-too-long
+import argparse
 from argcomplete.completers import FilesCompleter
 from six import u as unicode_string
 
@@ -32,10 +33,11 @@ from ._validators import \
      resource_type_type, services_type, ipv4_range_type, validate_entity,
      validate_select, validate_source_uri, validate_blob_type, validate_included_datasets,
      validate_custom_domain, validate_public_access, public_access_types,
+     process_upload_batch_parameters, process_download_batch_parameters,
      get_content_setting_validator, validate_encryption, validate_accept,
      validate_key, storage_account_key_options,
      process_file_download_namespace, process_logging_update_namespace,
-     process_metric_update_namespace)
+     process_metric_update_namespace, process_blob_copy_batch_namespace)
 
 # COMPLETERS
 
@@ -217,6 +219,10 @@ register_cli_argument('storage blob copy', 'container_name', container_name_type
 register_cli_argument('storage blob copy', 'blob_name', blob_name_type, options_list=('--destination-blob', '-b'), help='Name of the destination blob. If the exists, it will be overwritten.')
 register_cli_argument('storage blob copy', 'source_lease_id', arg_group='Copy Source')
 
+register_cli_argument('storage blob copy start-batch', 'prefix', validator=process_blob_copy_batch_namespace)
+# Enable after https://github.com/Azure/azure-cli/issues/1414 is fixed.
+register_cli_argument('storage blob copy start-batch', 'blob_type', ignore_type)
+
 register_cli_argument('storage blob delete', 'delete_snapshots', **enum_choice_list(list(delete_snapshot_types.keys())))
 
 register_cli_argument('storage blob exists', 'blob_name', required=True)
@@ -228,12 +234,49 @@ for item in ['download', 'upload']:
     register_cli_argument('storage blob {}'.format(item), 'max_connections', type=int)
     register_cli_argument('storage blob {}'.format(item), 'validate_content', action='store_true')
 
-for item in ['update', 'upload']:
+for item in ['update', 'upload', 'upload-batch']:
     register_content_settings_argument('storage blob {}'.format(item), BlobContentSettings, item == 'update')
 
 register_cli_argument('storage blob upload', 'blob_type', help="Defaults to 'page' for *.vhd files, or 'block' otherwise.", options_list=('--type', '-t'), validator=validate_blob_type, **enum_choice_list(blob_types.keys()))
 register_cli_argument('storage blob upload', 'maxsize_condition', help='The max length in bytes permitted for an append blob.')
 register_cli_argument('storage blob upload', 'validate_content', help='Specifies that an MD5 hash shall be calculated for each chunk of the blob and verified by the service when the chunk has arrived.')
+# TODO: Remove once #807 is complete. Smart Create Generation requires this parameter.
+register_extra_cli_argument('storage blob upload', '_subscription_id', options_list=('--subscription',), help=argparse.SUPPRESS)
+
+# BLOB DOWNLOAD PARAMETERS
+register_cli_argument('storage blob download-batch', 'destination', options_list=('--destination', '-d'))
+register_cli_argument('storage blob download-batch', 'source', options_list=('--source', '-s'),
+                      validator=process_download_batch_parameters)
+
+register_cli_argument('storage blob download-batch', 'source_container_name', ignore_type)
+
+# BLOB UPLOAD PARAMETERS
+register_cli_argument('storage blob upload-batch', 'destination', options_list=('--destination', '-d'))
+register_cli_argument('storage blob upload-batch', 'source', options_list=('--source', '-s'),
+                      validator=process_upload_batch_parameters)
+
+register_cli_argument('storage blob upload-batch', 'source_files', ignore_type)
+register_cli_argument('storage blob upload-batch', 'destination_container_name', ignore_type)
+
+register_cli_argument('storage blob upload-batch', 'blob_type',
+                      help="Defaults to 'page' for *.vhd files, or 'block' otherwise. The setting will override blob types for every file.",
+                      options_list=('--type', '-t'),
+                      **enum_choice_list(blob_types.keys()))
+register_cli_argument('storage blob upload-batch', 'maxsize_condition',
+                      help='The max length in bytes permitted for an append blob.',
+                      arg_group='Content Control')
+register_cli_argument('storage blob upload-batch', 'validate_content',
+                      help='Specifies that an MD5 hash shall be calculated for each chunk of the blob and verified by' +
+                      ' the service when the chunk has arrived.',
+                      arg_group='Content Control')
+register_cli_argument('storage blob upload-batch', 'lease_id', help='Required if the blob has an active lease')
+register_cli_argument('storage blob upload-batch', 'content_encoding', arg_group='Content Control')
+register_cli_argument('storage blob upload-batch', 'content_disposition', arg_group='Content Control')
+register_cli_argument('storage blob upload-batch', 'content_md5', arg_group='Content Control')
+register_cli_argument('storage blob upload-batch', 'content_type', arg_group='Content Control')
+register_cli_argument('storage blob upload-batch', 'content_cache_control', arg_group='Content Control')
+register_cli_argument('storage blob upload-batch', 'content_language', arg_group='Content Control')
+register_cli_argument('storage blob upload-batch', 'max_connections', type=int)
 
 for item in ['file', 'blob']:
     register_cli_argument('storage {} url'.format(item), 'protocol', help='Protocol to use.', default='https', **enum_choice_list(['http', 'https']))
@@ -247,7 +290,6 @@ register_cli_argument('storage container create', 'fail_on_exist', help='Throw a
 
 register_cli_argument('storage container delete', 'fail_not_exist', help='Throw an exception if the container does not exist.')
 
-register_cli_argument('storage container exists', 'blob_name', ignore_type)
 register_cli_argument('storage container exists', 'blob_name', ignore_type)
 register_cli_argument('storage container exists', 'snapshot', ignore_type)
 

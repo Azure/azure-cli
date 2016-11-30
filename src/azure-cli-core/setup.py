@@ -9,7 +9,7 @@ from __future__ import print_function
 from codecs import open
 from setuptools import setup
 
-VERSION = "0.1.0b9"
+VERSION = "0.1.0b10"
 
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
@@ -43,7 +43,7 @@ CLASSIFIERS = [
 
 # TODO These dependencies should be updated to reflect only what this package needs
 DEPENDENCIES = [
-    'adal>=0.4.2',
+    'adal>=0.4.3',
     'applicationinsights',
     'argcomplete>=1.3.0',
     'azure-mgmt-trafficmanager==0.30.0rc6',
