@@ -84,7 +84,7 @@ def _run_pip(pip, pip_exec_args):
 
 def _install_or_update(package_list, link, private, pre):
     import pip
-    options = ['--isolated', '--disable-pip-version-check', '--upgrade']
+    options = ['--isolated', '--disable-pip-version-check', '--upgrade', '--ignore-installed']
     if pre:
         options.append('--pre')
     pkg_index_options = ['--find-links', link] if link else []
