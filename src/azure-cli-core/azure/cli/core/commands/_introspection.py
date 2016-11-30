@@ -71,6 +71,9 @@ def extract_args_from_signature(operation, expose_raw_as_no_wait=False):
     excluded_params = list(EXCLUDED_PARAMS)
     if not expose_raw_as_no_wait:
         excluded_params.append('raw')
+    elif not 'raw' in args:
+        raise ValueError("There is no 'raw' argument exposed for no-wait")
+
     for arg_name in [a for a in args if not a in excluded_params]:
         try:
             # this works in python3

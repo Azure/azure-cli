@@ -324,10 +324,10 @@ def cli_generic_update_command(module_name, name, getter_op, setter_op, factory=
     main_command_table[name] = cmd
     main_command_module_map[name] = module_name
 
-def cli_generic_wait_command(module_name, name, getter_op, factory=None, table_transformer=None):
+def cli_generic_wait_command(module_name, name, getter_op, factory=None):
 
     if not isinstance(getter_op, string_types):
-        raise ValueError("Getter operation must be a string. Got '{}'".format(getter_op))
+        raise ValueError("Getter operation must be a string. Got '{}'".format(type(getter_op)))
     get_arguments_loader = lambda: dict(extract_args_from_signature(get_op_handler(getter_op)))
 
     def arguments_loader():
@@ -395,8 +395,7 @@ def cli_generic_wait_command(module_name, name, getter_op, factory=None, table_t
 
         return CLIError('Wait operation timed-out after {} seconds'.format(timeout))
 
-    cmd = CliCommand(name, handler, table_transformer=table_transformer,
-                     arguments_loader=arguments_loader)
+    cmd = CliCommand(name, handler, arguments_loader=arguments_loader)
     group_name = 'Wait Condition'
     cmd.add_argument('timeout', '--timeout', default=3600, arg_group=group_name, type=int,
                      help='maximum wait in seconds')
