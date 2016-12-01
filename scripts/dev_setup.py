@@ -26,6 +26,7 @@ print('Running dev setup...')
 print('Root directory \'{}\'\n'.format(root_dir))
 
 # command modules have dependency on azure-cli-core so install this first
+exec_command('pip install -e src/azure-cli-nspkg')
 exec_command('pip install -e src/azure-cli-core')
 exec_command('python scripts/command_modules/install.py')
 

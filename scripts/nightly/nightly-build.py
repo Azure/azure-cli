@@ -14,6 +14,7 @@ from azure.storage.blob import BlockBlobService, ContentSettings
 PATH_TO_COMMAND_MODULES = '/azure-cli/src/command_modules'
 PATH_TO_AZURE_CLI = '/azure-cli/src/azure-cli'
 PATH_TO_AZURE_CLI_CORE = '/azure-cli/src/azure-cli-core'
+PATH_TO_AZURE_CLI_NSPKG = '/azure-cli/src/azure-cli-nspkg'
 BLOB_SERVICE_CONNECTION_STRING = os.environ.get('AZURE_STORAGE_CONNECTION_STRING')
 CONTAINER_NAME = 'packages'
 PATTERN_PKG_NAME = re.compile(r"([a-z\-]*)-([0-9])")
@@ -84,6 +85,7 @@ pkg_dir = tempfile.mkdtemp()
 # Build the packages
 build_package(PATH_TO_AZURE_CLI, pkg_dir)
 build_package(PATH_TO_AZURE_CLI_CORE, pkg_dir)
+build_package(PATH_TO_AZURE_CLI_NSPKG, pkg_dir)
 for name, fullpath in all_command_modules:
     build_package(fullpath, pkg_dir)
 

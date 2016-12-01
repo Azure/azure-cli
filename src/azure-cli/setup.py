@@ -53,6 +53,7 @@ DEPENDENCIES = [
     'azure-cli-configure',
     'azure-cli-feedback',
     'azure-cli-network',
+    'azure-cli-nspkg',
     'azure-cli-profile',
     'azure-cli-resource',
     'azure-cli-role',
@@ -80,11 +81,11 @@ setup(
         'az.bat',
     ],
     namespace_packages=[
-        'azure'
+        'azure',
+        'azure.cli',
     ],
     packages=[
         'azure.cli',
-        'azure.cli.command_modules',
     ],
     install_requires=DEPENDENCIES
 )
