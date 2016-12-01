@@ -21,7 +21,7 @@ from azure.cli.main import main as cli_main
 class StorageBlobDownloadPlainTests(TestCase):
     def test_blob_download_help(self):
         with self.assertRaises(SystemExit):
-            cli_main('storage blob upload -h'.split())
+            cli_main('storage blob upload-batch -h'.split())
 
 
 class StorageBlobDownloadIntegrationTests(StorageIntegrationTestBase):
@@ -51,38 +51,35 @@ class StorageBlobDownloadIntegrationTests(StorageIntegrationTestBase):
 
         os.mkdir(self._test_folder)
 
-    def test_download_files_recursively_without_pattern(self):
-        command = 'storage blob download-batch -s {} -d {} --account-name {} --account-key {}'\
+    def test_blob_download_recursively_without_pattern(self):
+        cmd = 'storage blob download-batch -s {} -d {} --account-name {} --account-key {}'\
             .format(self._test_source_container, self._test_folder,
                     self._blob_service.account_name, self._blob_service.account_key)
 
-        cli_main(command.split())
+        cli_main(cmd.split())
         assert sum(len(f) for r, d, f in os.walk(self._test_folder)) == 31
 
-    def test_download_files_recursively_with_pattern_1(self):
-        #pylint: disable=line-too-long
-        command = 'storage blob download-batch -s https://{}/{} -d {} --pattern {} --account-key {}'\
+    def test_blob_download_recursively_with_pattern_1(self):
+        cmd = 'storage blob download-batch -s https://{}/{} -d {} --pattern {} --account-key {}'\
             .format(self._blob_service.primary_endpoint, self._test_source_container,
                     self._test_folder, '*', self._blob_service.account_key)
 
-        cli_main(command.split())
+        cli_main(cmd.split())
         assert sum(len(f) for r, d, f in os.walk(self._test_folder)) == 31
 
-    def test_download_files_recursively_with_pattern_2(self):
-        #pylint: disable=line-too-long
-        command = 'storage blob download-batch -s https://{}/{} -d {} --pattern {} --account-key {}'\
+    def test_blob_download_recursively_with_pattern_2(self):
+        cmd = 'storage blob download-batch -s https://{}/{} -d {} --pattern {} --account-key {}'\
             .format(self._blob_service.primary_endpoint, self._test_source_container,
                     self._test_folder, 'alpha/*', self._blob_service.account_key)
 
-        cli_main(command.split())
+        cli_main(cmd.split())
         assert sum(len(f) for r, d, f in os.walk(self._test_folder)) == 10
 
-    def test_download_files_recursively_with_pattern_3(self):
-        #pylint: disable=line-too-long
-        command = 'storage blob download-batch -s https://{}/{} -d {} --pattern {} --account-key {}'\
+    def test_blob_download_recursively_with_pattern_3(self):
+        cmd = 'storage blob download-batch -s https://{}/{} -d {} --pattern {} --account-key {}'\
             .format(self._blob_service.primary_endpoint, self._test_source_container,
                     self._test_folder, '*/file_0', self._blob_service.account_key)
 
-        cli_main(command.split())
+        cli_main(cmd.split())
         assert sum(len(f) for r, d, f in os.walk(self._test_folder)) == 3
 
