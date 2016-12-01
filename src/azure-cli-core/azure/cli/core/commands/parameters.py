@@ -141,6 +141,12 @@ tag_type = CliArgumentType(
     const=''
 )
 
+no_wait_type = CliArgumentType(
+    options_list=('--no-wait', ),
+    help='do not wait for the long running operation to finish',
+    action='store_true'
+)
+
 register_cli_argument('', 'resource_group_name', resource_group_name_type)
 register_cli_argument('', 'location', location_type)
 register_cli_argument('', 'deployment_name', deployment_name_type)

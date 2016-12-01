@@ -7,7 +7,7 @@ from collections import OrderedDict
 
 from azure.cli.core.commands import DeploymentOutputLongRunningOperation, cli_command
 
-from azure.cli.core.commands.arm import cli_generic_update_command
+from azure.cli.core.commands.arm import cli_generic_update_command, cli_generic_wait_command
 
 from azure.cli.command_modules.vm._client_factory import * #pylint: disable=wildcard-import,unused-wildcard-import
 
@@ -19,7 +19,7 @@ mgmt_path = 'azure.mgmt.compute.operations.{}#{}.{}'
 # VM
 
 cli_command(__name__, 'vm create', 'azure.cli.command_modules.vm.mgmt_vm.lib.operations.vm_operations#VmOperations.create_or_update', cf_vm_create,
-            transform=DeploymentOutputLongRunningOperation('Starting vm create'))
+            transform=DeploymentOutputLongRunningOperation('Starting vm create'), no_wait_param='raw')
 
 op_var = 'virtual_machines_operations'
 op_class = 'VirtualMachinesOperations'
@@ -41,7 +41,9 @@ cli_command(__name__, 'vm open-port', custom_path.format('vm_open_port'))
 cli_generic_update_command(__name__, 'vm update',
                            mgmt_path.format(op_var, op_class, 'get'),
                            mgmt_path.format(op_var, op_class, 'create_or_update'),
-                           cf_vm)
+                           cf_vm,
+                           no_wait_param='raw')
+cli_generic_wait_command(__name__, 'vm wait', 'azure.cli.command_modules.vm.custom#get_instance_view')
 
 # VM NIC
 cli_command(__name__, 'vm nic add', custom_path.format('vm_add_nics'))

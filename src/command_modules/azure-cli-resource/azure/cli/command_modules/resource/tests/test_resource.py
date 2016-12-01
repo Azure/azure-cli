@@ -48,6 +48,31 @@ class ResourceGroupScenarioTest(VCRTestBase): # Not RG test base because it test
         if self.cmd('resource group exists -n {}'.format(self.resource_group)):
             self.cmd('resource group delete -n {}'.format(self.resource_group))
 
+class ResourceGroupNoWaitScenarioTest(VCRTestBase): # Not RG test base because it tests the actual deletion of a resource group
+
+    def test_resource_group_no_wait(self):
+        self.execute()
+
+    def __init__(self, test_method):
+        self.resource_group = 'cli_rg_nowait_test'
+        super(ResourceGroupNoWaitScenarioTest, self).__init__(__file__, test_method)
+
+    def set_up(self):
+        if self.cmd('resource group exists -n {}'.format(self.resource_group)):
+            self.cmd('resource group delete -n {}'.format(self.resource_group))
+
+    def body(self):
+        s = self
+        rg = self.resource_group
+        s.cmd('resource group create -n {} -l westus'.format(rg), checks=[
+            JMESPathCheck('name', rg),
+        ])
+        s.cmd('resource group exists -n {}'.format(rg), checks=BooleanCheck(True))
+        s.cmd('resource group wait --exists -n {}'.format(rg), checks=NoneCheck())
+        s.cmd('resource group delete -n {} --no-wait'.format(rg), checks=NoneCheck())
+        s.cmd('resource group wait --deleted -n {}'.format(rg), checks=NoneCheck())
+        s.cmd('resource group exists -n {}'.format(rg), checks=NoneCheck())
+
 class ResourceScenarioTest(ResourceGroupVCRTestBase):
 
     def test_resource_scenario(self):
@@ -245,6 +270,29 @@ class DeploymentTest(ResourceGroupVCRTestBase):
         self.cmd('resource group deployment operation list -g {} -n {}'.format(self.resource_group, deployment_name), checks=[
             JMESPathCheck('length([])', 2),
             JMESPathCheck('[0].resourceGroup', self.resource_group)
+            ])
+
+class DeploymentnoWaitTest(ResourceGroupVCRTestBase):
+    def __init__(self, test_method):
+        super(DeploymentnoWaitTest, self).__init__(__file__, test_method)
+        self.resource_group = 'azure-cli-deployment-test'
+
+    def test_group_deployment_no_wait(self):
+        self.execute()
+
+    def body(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        template_file = os.path.join(curr_dir, 'simple_deploy.json').replace('\\', '\\\\')
+        parameters_file = os.path.join(curr_dir, 'simple_deploy_parameters.json').replace('\\', '\\\\')
+        deployment_name = 'azure-cli-deployment'
+
+        self.cmd('resource group deployment create -g {} -n {} --template-file {} --parameters @{} --no-wait'.format(
+            self.resource_group, deployment_name, template_file, parameters_file), checks=NoneCheck())
+
+        self.cmd('resource group deployment wait -g {} -n {} --created'.format(self.resource_group, deployment_name), checks=NoneCheck())
+
+        self.cmd('resource group deployment show -g {} -n {}'.format(self.resource_group, deployment_name), checks=[
+            JMESPathCheck('properties.provisioningState', 'Succeeded')
             ])
 
 class DeploymentThruUriTest(ResourceGroupVCRTestBase):
