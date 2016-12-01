@@ -17,7 +17,7 @@ helps['iot device'] """
 
 helps['iot hub'] = """
     type: group
-    short-summary: Commands to anage IoT Hubs.
+    short-summary: Commands to manage IoT Hubs.
 """
 
 helps['iot hub create'] = """
