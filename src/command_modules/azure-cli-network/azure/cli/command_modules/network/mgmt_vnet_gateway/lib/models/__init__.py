@@ -24,6 +24,7 @@ from .vnet_gateway_creation_client_enums import (
     gatewayType,
     publicIpAddressType,
     sku,
+    virtualNetworkType,
     vpnType,
     DeploymentMode,
 )
@@ -41,6 +42,7 @@ __all__ = [
     'gatewayType',
     'publicIpAddressType',
     'sku',
+    'virtualNetworkType',
     'vpnType',
     'DeploymentMode',
 ]

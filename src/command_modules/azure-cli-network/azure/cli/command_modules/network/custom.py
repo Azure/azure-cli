@@ -788,19 +788,45 @@ def _prep_cert_create(gateway_name, resource_group_name):
 
     return config, gateway, ncf
 
-def update_network_vpn_gateway(instance, address_prefixes=None):
-    if address_prefixes:
-        gateway = instance
-        if not gateway.vpn_client_configuration:
-            gateway.vpn_client_configuration = VpnClientConfiguration()
-        config = gateway.vpn_client_configuration
+def update_network_vpn_gateway(instance, address_prefixes=None, sku=None, vpn_gateway_type=None,
+                               public_ip_address=None, gateway_type=None, enable_bgp=None,
+                               virtual_network=None, tags=None):
+
+    if address_prefixes is not None:
+        if not instance.vpn_client_configuration:
+            instance.vpn_client_configuration = VpnClientConfiguration()
+        config = instance.vpn_client_configuration
 
         if not config.vpn_client_address_pool:
             config.vpn_client_address_pool = AddressSpace()
         if not config.vpn_client_address_pool.address_prefixes:
             config.vpn_client_address_pool.address_prefixes = []
-
         config.vpn_client_address_pool.address_prefixes = address_prefixes
+
+    if sku is not None:
+        instance.sku.name = sku
+        instance.sku.tier = sku
+
+    if vpn_gateway_type is not None:
+        instance.vpn_type = vpn_gateway_type
+
+    if tags is not None:
+        instance.tags = tags
+
+    if public_ip_address is not None:
+        instance.ip_configurations[0].public_ip_address.id = public_ip_address
+
+    if gateway_type is not None:
+        instance.gateway_type = gateway_type
+
+    if enable_bgp is not None:
+        instance.enable_bgp = enable_bgp
+
+    if virtual_network is not None:
+        instance.ip_configurations[0].subnet.id = \
+            '{}/subnets/GatewaySubnet'.format(virtual_network)
+
+    return instance
 
 def create_express_route_peering(
         client, resource_group_name, circuit_name, peering_type, peer_asn, vlan_id,

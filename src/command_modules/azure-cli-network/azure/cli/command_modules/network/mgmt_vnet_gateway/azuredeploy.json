@@ -29,7 +29,6 @@
     },
     "publicIpAddress": {
       "type": "string",
-      "defaultValue": "[concat(parameters('virtualNetworkGatewayName'), 'PublicIP')]",
       "metadata": {
         "description": "Name or ID of public IP address to use."
       }
@@ -42,7 +41,7 @@
         "existingId"
       ],
       "metadata": {
-        "description": "Type of Public IP Address to associate with the load balancer."
+        "description": "Type of Public IP Address to associate with the VPN gateway."
       }
     },
     "sku": {
@@ -57,12 +56,6 @@
         "description": "VPN Gateway SKU."
       }
     },
-    "subnetId": {
-      "type": "string",
-      "metadata": {
-        "description": "Subnet ID for the VPN gateway. Subnet must be named GatewaySubnet."
-      }
-    },
     "tags": {
       "type": "object",
       "defaultValue": { },
@@ -74,6 +67,23 @@
       "type": "string",
       "metadata": {
         "description": "Gateway name."
+      }
+    },
+    "virtualNetwork": {
+      "type": "string",
+      "metadata": {
+        "description": "Name or ID of a virtual network that contains a subnet named 'GatewaySubnet'."
+      }
+    },
+    "virtualNetworkType": {
+      "type": "string",
+      "defaultValue": "existingId",
+      "allowedValues": [
+        "existingId",
+        "existingName"
+      ],
+      "metadata": {
+        "description": "Type of virtual network to supply to the VPN gateway."
       }
     },
     "vpnType": {
@@ -92,6 +102,10 @@
     "pubIpIds": {
       "existingName": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/publicIPAddresses/', parameters('publicIpAddress'))]",
       "existingId": "[parameters('publicIpAddress')]"
+    },
+    "subnetIds": {
+      "existingName": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/virtualNetworks/', parameters('virtualNetwork'), '/subnets/GatewaySubnet')]",
+      "existingId": "[concat(parameters('virtualNetwork'), '/subnets/GatewaySubnet')]"
     }
   },
   "resources": [
@@ -107,7 +121,7 @@
             "properties": {
               "privateIPAllocationMethod": "Dynamic",
               "subnet": {
-                "id": "[parameters('subnetId')]"
+                "id": "[variables('subnetIds')[parameters('virtualNetworkType')]]"
               },
               "publicIPAddress": {
                 "id": "[variables('pubIpIds')[parameters('publicIpAddressType')]]"
