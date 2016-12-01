@@ -9,35 +9,35 @@ from azure.cli.core.help_files import helps #pylint: disable=unused-import
 
 helps['context'] = """
     type: group
-    short-summary: Manage contexts
+    short-summary: Manage storage contexts
 """
 
 helps['context create'] = """
     type: command
-    short-summary: Create a new context
+    short-summary: Create a storage context
 """
 
 helps['context delete'] = """
     type: command
-    short-summary: Delete an existing context
+    short-summary: Delete a storage context
 """
 
 helps['context list'] = """
     type: command
-    short-summary: List all contexts
+    short-summary: List all storage contexts
 """
 
 helps['context modify'] = """
     type: command
-    short-summary: Modify a context
+    short-summary: Modify a storage context
 """
 
 helps['context show'] = """
     type: command
-    short-summary: Show the details of a context
+    short-summary: Show the details of a storage context
 """
 
 helps['context switch'] = """
     type: command
-    short-summary: Switch your active context
+    short-summary: Switch your active storage context
 """
