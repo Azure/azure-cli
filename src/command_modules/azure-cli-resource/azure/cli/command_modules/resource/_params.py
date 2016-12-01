@@ -10,7 +10,7 @@ from azure.mgmt.resource.resources.models import DeploymentMode
 from azure.cli.core.commands import register_cli_argument, CliArgumentType
 from azure.cli.core.commands.parameters import (ignore_type, resource_group_name_type, tag_type,
                                                 tags_type, get_resource_group_completion_list,
-                                                enum_choice_list)
+                                                enum_choice_list, no_wait_type)
 from .custom import (get_policy_completion_list, get_policy_assignment_completion_list,
                      get_resource_types_completion_list, get_providers_completion_list)
 from ._validators import validate_deployment_name
@@ -19,7 +19,7 @@ from ._validators import validate_deployment_name
 
 resource_name_type = CliArgumentType(options_list=('--name', '-n'), help='The resource name. (Ex: myC)')
 _PROVIDER_HELP_TEXT = 'the resource namespace, aka \'provider\''
-
+register_cli_argument('resource', 'no_wait', no_wait_type)
 register_cli_argument('resource', 'resource_name', resource_name_type)
 register_cli_argument('resource', 'api_version', help='The api version of the resource (omit for latest)', required=False)
 register_cli_argument('resource', 'resource_id', options_list=('--id',), help='Resource ID')
