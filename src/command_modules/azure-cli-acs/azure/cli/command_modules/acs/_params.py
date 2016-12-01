@@ -78,3 +78,7 @@ register_cli_argument('acs kubernetes install-cli', 'client_version',
 # TODO: Make this derive from the cluster object, instead of just preset values
 register_cli_argument('acs kubernetes get-credentials', 'dns_prefix')
 register_cli_argument('acs kubernetes get-credentials', 'location')
+register_cli_argument('acs kubernetes get-credentials', 'path',
+                      options_list=('--file', '-f',),
+                      default=os.path.join(os.path.expanduser('~'), '.kube', 'config'),
+                      completer=FilesCompleter())

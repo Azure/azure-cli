@@ -5,6 +5,7 @@
 
 from __future__ import print_function
 import binascii
+import errno
 import json
 import os
 import os.path
@@ -375,7 +376,7 @@ def _create_kubernetes(resource_group_name, deployment_name, dns_name_prefix, na
     smc = _resource_client_factory()
     return smc.deployments.create_or_update(resource_group_name, deployment_name, properties)
 
-def acs_get_credentials(name=None, resource_group_name=None, dns_prefix=None, location=None, user=None):
+def k8s_get_credentials(name=None, resource_group_name=None, dns_prefix=None, location=None, user=None, path=None):
     if not dns_prefix or not location:
         acs_info = _get_acs_info(name, resource_group_name)
 
@@ -386,8 +387,7 @@ def acs_get_credentials(name=None, resource_group_name=None, dns_prefix=None, lo
         if not user:
             user = acs_info.linux_profile.admin_username # pylint: disable=no-member
 
-    home = os.path.expanduser('~')
-    path = os.path.join(home, '.kube', 'config')
+    _mkdir_p(os.path.dirname(path))
 
     path_candidate = path
     ix = 0
@@ -468,3 +468,13 @@ def _rand_str(n):
     """
     choices = string.ascii_lowercase + string.digits
     return ''.join(random.SystemRandom().choice(choices) for _ in range(n))
+
+def _mkdir_p(path):
+    # http://stackoverflow.com/a/600612
+    try:
+        os.makedirs(path)
+    except OSError as exc:  # Python >2.5
+        if exc.errno == errno.EEXIST and os.path.isdir(path):
+            pass
+        else:
+            raise
