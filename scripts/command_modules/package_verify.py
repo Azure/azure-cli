@@ -16,6 +16,7 @@ from _common import get_all_command_modules, exec_command, COMMAND_MODULE_PREFIX
 
 PATH_TO_AZURE_CLI = os.path.abspath(os.path.join(os.path.abspath(__file__), '..', '..', '..', 'src', 'azure-cli'))
 PATH_TO_AZURE_CLI_CORE = os.path.abspath(os.path.join(os.path.abspath(__file__), '..', '..', '..', 'src', 'azure-cli-core'))
+PATH_TO_AZURE_CLI_NSPKG = os.path.abspath(os.path.join(os.path.abspath(__file__), '..', '..', '..', 'src', 'azure-cli-nspkg'))
 
 all_command_modules = get_all_command_modules()
 
@@ -40,7 +41,7 @@ def build_package(path_to_package, dist_dir):
 
 def install_package(path_to_package, package_name, dist_dir):
     print_heading('Installing {}'.format(path_to_package))
-    cmd = 'python -m pip install {} --find-links file://{}'.format(package_name, dist_dir)
+    cmd = 'python -m pip install --upgrade {} --find-links file://{}'.format(package_name, dist_dir)
     cmd_success = exec_command(cmd)
     if not cmd_success:
         print_heading('Error installing {}!'.format(path_to_package), f=sys.stderr)
@@ -53,6 +54,7 @@ built_packages_dir = tempfile.mkdtemp()
 # STEP 1:: Build the packages
 build_package(PATH_TO_AZURE_CLI, built_packages_dir)
 build_package(PATH_TO_AZURE_CLI_CORE, built_packages_dir)
+build_package(PATH_TO_AZURE_CLI_NSPKG, built_packages_dir)
 for name, fullpath in all_command_modules:
     build_package(fullpath, built_packages_dir)
 

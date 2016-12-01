@@ -51,6 +51,8 @@ def list_available_components():
 
 def remove(component_name):
     """ Remove a component """
+    if component_name in ['nspkg', 'core']:
+        raise CLIError("This component cannot be removed, it is required for the CLI to function.")
     import pip
     full_component_name = COMPONENT_PREFIX + component_name
     found = bool([dist for dist in pip.get_installed_distributions(local_only=True)
@@ -82,7 +84,7 @@ def _run_pip(pip, pip_exec_args):
 
 def _install_or_update(package_list, link, private, pre):
     import pip
-    options = ['--isolated', '--disable-pip-version-check', '--upgrade']
+    options = ['--isolated', '--disable-pip-version-check', '--upgrade', '--ignore-installed']
     if pre:
         options.append('--pre')
     pkg_index_options = ['--find-links', link] if link else []
