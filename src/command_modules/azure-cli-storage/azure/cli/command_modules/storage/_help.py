@@ -175,6 +175,71 @@ helps['storage file metadata'] = """
     short-summary: Manage file metadata.
 """
 
+helps['storage file upload-batch'] = """
+    type: command
+    short-summary: Upload files from local directory to Azure Storage File Share in batch
+    parameters:
+        - name: --source -s
+          type: string
+          short-summary: The directory from which the files should to be uploaded.
+        - name: --destination -d
+          type: string
+          short-summary: The string represents the destination of this upload operation. The
+                         destination can be the file share URL or the share name. When the 
+                         destination is the share URL, the storage account name will parsed
+                         from the URL.
+        - name: --pattern
+          type: string
+          short-summary: The pattern is used for files globbing. The supported patterns are '*',
+                         '?', '[seq', and '[!seq]'.
+        - name: --dryrun
+          type: bool
+          short-summary: Output the list of files which would be uploaded. No actual data transfer
+                         will occur.
+        - name: --max-connections
+          type: integer
+          short-summary: Maximum number of parallel connections to use. Default value is 1.
+        - name: --validate-content
+          type: bool
+          short-summary: If set, calculates an MD5 hash for each range of the file. The storage
+                         service checks the hash of the content that has arrived with the hash that
+                         was sent. This is primarily valuable for detecting bitflips on the wire if
+                         using http instead of https as https (the default) will already validate.
+                         Note that this MD5 hash is not stored with the file.
+"""
+
+helps['storage file download-batch'] = """
+    type: command
+    short-summary: Download files from Azure Storage File Share to a local directory in batch
+    parameters:
+        - name: --source -s
+          type: string
+          short-summary: The string represents the source of this file download operation. The
+                         source can be the file share URL or the share name. When the source is
+                         the share URL, the storage account name will parsed from the URL.
+        - name: --destination -d
+          type: string
+          short-summary: The directory where the files to be downloaded. The directory must exist.
+        - name: --pattern
+          type: string
+          short-summary: The pattern is used for files globbing. The supported patterns are '*',
+                         '?', '[seq', and '[!seq]'.
+        - name: --dryrun
+          type: bool
+          short-summary: Output the list of files which would be downloaded. No actual data transfer
+                         will occur.
+        - name: --max-connections
+          type: integer
+          short-summary: Maximum number of parallel connections to use. Default value is 1.
+        - name: --validate-content
+          type: bool
+          short-summary: If set, calculates an MD5 hash for each range of the file. The storage
+                         service checks the hash of the content that has arrived with the hash that
+                         was sent. This is primarily valuable for detecting bitflips on the wire if
+                         using http instead of https as https (the default) will already validate.
+                         Note that this MD5 hash is not stored with the file.
+"""
+
 helps['storage logging'] = """
     type: group
     short-summary: Manage Storage service logging information.

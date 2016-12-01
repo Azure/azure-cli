@@ -134,6 +134,14 @@ cli_storage_data_plane_command('storage file metadata update', 'azure.storage.fi
 cli_storage_data_plane_command('storage file copy start', 'azure.storage.file.fileservice#FileService.copy_file', factory)
 cli_storage_data_plane_command('storage file copy cancel', 'azure.storage.file.fileservice#FileService.abort_copy_file', factory)
 
+cli_storage_data_plane_command('storage file upload-batch',
+                               'azure.cli.command_modules.storage.file#storage_file_upload_batch',
+                               factory)
+
+cli_storage_data_plane_command('storage file download-batch',
+                               'azure.cli.command_modules.storage.file#storage_file_download_batch',
+                               factory)
+
 # table commands
 factory = table_data_service_factory
 cli_storage_data_plane_command('storage table generate-sas', 'azure.storage.table.tableservice#TableService.generate_table_shared_access_signature', factory)
