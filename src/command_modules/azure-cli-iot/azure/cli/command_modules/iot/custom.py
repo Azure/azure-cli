@@ -146,13 +146,7 @@ def iot_device_create(client, hub_name, device_id, resource_group_name=None, x50
     if x509 is True:
         device.authentication = _construct_x509_auth(device_id, primary_thumbprint, secondary_thumbprint, valid_days, output_dir)
 
-    results = device_client.create_or_update(device_id, device, if_match=None)
-
-    # TODO: This is a work-around because thumbprint is not returned by IoT Device Registry REST API.
-    #       Remove the following once this issue is fixed.
-    if x509 is True:
-        results.authentication.x509_thumbprint = device.authentication.x509_thumbprint
-    return results
+    return device_client.create_or_update(device_id, device, if_match=None)
 
 
 def _validate_x509_parameters(x509, primary_thumbprint, secondary_thumbprint, valid_days, output_dir):
@@ -181,6 +175,11 @@ def _construct_x509_auth(device_id, primary_thumbprint, secondary_thumbprint, va
 def iot_device_get(client, hub_name, device_id, resource_group_name=None):
     device_client = _get_device_client(client, resource_group_name, hub_name, device_id)
     return device_client.get(device_id)
+
+
+def iot_device_update(client, hub_name, device_id, parameters, resource_group_name=None):
+    device_client = _get_device_client(client, resource_group_name, hub_name, device_id)
+    return device_client.create_or_update(device_id, parameters)
 
 
 def iot_device_list(client, hub_name, resource_group_name=None, top=20):

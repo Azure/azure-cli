@@ -240,6 +240,27 @@ def validate_servers(namespace):
             servers.append(ApplicationGatewayBackendAddress(fqdn=item))
     namespace.servers = servers
 
+def get_virtual_network_validator(has_type_field=False, allow_none=False, allow_new=False,
+                                  default_none=False):
+
+    def simple_validator(namespace):
+        # determine if vnet is name or ID
+        is_id = is_valid_resource_id(namespace.virtual_network)
+        if not is_id:
+            namespace.virtual_network = resource_id(
+                subscription=get_subscription_id(),
+                resource_group=namespace.resource_group_name,
+                namespace='Microsoft.Network',
+                type='virtualNetworks',
+                name=namespace.virtual_network)
+
+    def complex_validator_with_type(namespace):
+        get_folded_parameter_validator(
+            'virtual_network', 'Microsoft.Network/virtualNetworks', '--vnet',
+            allow_none=allow_none, allow_new=allow_new, default_none=default_none)(namespace)
+
+    return complex_validator_with_type if has_type_field else simple_validator
+
 # COMMAND NAMESPACE VALIDATORS
 
 def process_ag_listener_create_namespace(namespace): # pylint: disable=unused-argument

@@ -8,17 +8,54 @@ Help functions to extract storage account, container name, blob name and other i
 container and/or blob URL.
 """
 
-from collections import namedtuple
-from azure.cli.core._profile import CLOUD
 
-StorageUrlDescription = namedtuple('StorageUrlDescription',
-                                   ['account', 'container', 'blob', 'snapshot'])
+# pylint: disable=too-few-public-methods, too-many-instance-attributes
+class StorageResourceIdentifier(object):
+    def __init__(self, moniker):
+        self.is_valid = False
+        self.account_name = None
+        self.container = None
+        self.blob = None
+        self.share = None
+        self.directory = None
+        self.filename = None
+        self.snapshot = None
 
+        from six.moves.urllib.parse import urlparse # pylint: disable=import-error
+        url = urlparse(moniker)
 
-def parse_storage_url(url):
-    """Extract information from a container/blob url path"""
+        self._is_url = (url.scheme == 'http' or url.scheme == 'https')
+        if not self._is_url:
+            return
 
-    def _parse_blob_path(path):
+        if url.path is None:
+            return
+
+        from azure.cli.core._profile import CLOUD
+        self.account_name, type_name = url.netloc[:0 - len(CLOUD.suffixes.storage_endpoint) - 1]\
+            .split('.', maxsplit=2)
+
+        if type_name == 'blob':
+            self.container, self.blob = self._separate_path_l(url.path)
+        elif type_name == 'file':
+            self.share, file_path = self._separate_path_l(url.path)
+            self.directory, self.filename = self._separate_path_r(file_path)
+            if self.filename is None:
+                self.filename = self.directory
+                self.directory = ''
+        else:
+            self.account_name = None
+
+    @classmethod
+    def _separate_path_l(cls, path):
+        return cls._separate_path(path, lambda p: p.find('/'))
+
+    @classmethod
+    def _separate_path_r(cls, path):
+        return cls._separate_path(path, lambda p: p.rfind('/'))
+
+    @classmethod
+    def _separate_path(cls, path, find_method):
         if path is None:
             return None, None
 
@@ -26,45 +63,11 @@ def parse_storage_url(url):
         if len(path) == 0:
             return None, None
 
-        idx = path.find('/')
+        idx = find_method(path)
         if idx == -1:
             return path, None
         else:
             return path[:idx], path[idx + 1:]
 
-    if url is None:
-        raise ValueError('parameter url is None')
-
-    account_name = None
-    container = None
-    blob = None
-    snapshot = None
-
-    from six.moves.urllib.parse import urlparse #pylint: disable=import-error
-
-    parsed_url = urlparse(url)
-    if not parsed_url.scheme == 'http' and not parsed_url.scheme == 'https':
-        # the source string is not a url, regards it as a container name
-        container = url
-    else:
-        container, blob = _parse_blob_path(parsed_url.path)
-        if container is None:
-            raise ValueError('Failed to parse container name from the URL {}'.format(url))
-
-        blob_suffix = '.blob.%s' % CLOUD.suffixes.storage_endpoint
-        if parsed_url.netloc.endswith(blob_suffix):
-            # it is not a custom domain
-            account_name = parsed_url.netloc[:len(parsed_url.netloc) - len(blob_suffix)]
-
-    if parsed_url.query:
-        q = parsed_url.query
-        i = q.find('snapshot=')
-        if i != -1:
-            q = q[i:]
-            j = q.find('&')
-            if j == -1:
-                snapshot = q
-            else:
-                snapshot = q[:j]
-
-    return StorageUrlDescription(account_name, container, blob, snapshot)
+    def is_url(self):
+        return self._is_url

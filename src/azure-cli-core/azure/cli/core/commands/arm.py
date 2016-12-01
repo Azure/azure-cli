@@ -16,7 +16,7 @@ from azure.cli.core.commands._introspection import extract_args_from_signature
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.application import APPLICATION, IterateValue
 import azure.cli.core._logging as _logging
-from azure.cli.core._util import CLIError
+from azure.cli.core._util import CLIError, todict
 
 logger = _logging.get_az_logger(__name__)
 
@@ -179,6 +179,8 @@ def add_id_parameters(command_table):
 
 APPLICATION.register(APPLICATION.COMMAND_TABLE_PARAMS_LOADED, add_id_parameters)
 
+APPLICATION.register(APPLICATION.COMMAND_TABLE_LOADED, add_id_parameters)
+
 add_usage = '--add property.listProperty <key=value, string or JSON string>'
 set_usage = '--set property1.property2=<value>'
 remove_usage = '--remove property.list <indexToRemove> OR --remove propertyToRemove'
@@ -195,8 +197,7 @@ def _get_child(parent, collection_name, item_name, collection_key):
 def cli_generic_update_command(module_name, name, getter_op, setter_op, factory=None, setter_arg_name='parameters', # pylint: disable=too-many-arguments, line-too-long
                                table_transformer=None, child_collection_prop_name=None,
                                child_collection_key='name', child_arg_name='item_name',
-                               custom_function_op=None):
-
+                               custom_function_op=None, no_wait_param=None):
     if not isinstance(getter_op, string_types):
         raise ValueError("Getter operation must be a string. Got '{}'".format(getter_op))
     if not isinstance(setter_op, string_types):
@@ -205,7 +206,8 @@ def cli_generic_update_command(module_name, name, getter_op, setter_op, factory=
         raise ValueError("Custom function operation must be a string. Got '{}'".format(custom_function_op)) #pylint: disable=line-too-long
 
     get_arguments_loader = lambda: dict(extract_args_from_signature(get_op_handler(getter_op)))
-    set_arguments_loader = lambda: dict(extract_args_from_signature(get_op_handler(setter_op)))
+    set_arguments_loader = lambda: dict(extract_args_from_signature(get_op_handler(setter_op),
+                                                                    no_wait_param=no_wait_param)) #pylint: disable=line-too-long
     function_arguments_loader = lambda: dict(extract_args_from_signature(get_op_handler(custom_function_op))) if custom_function_op else {} #pylint: disable=line-too-long
 
     def arguments_loader():
@@ -219,7 +221,7 @@ def cli_generic_update_command(module_name, name, getter_op, setter_op, factory=
         arguments.pop(setter_arg_name, None)
         return arguments
 
-    def handler(args):
+    def handler(args):#pylint: disable=too-many-branches,too-many-statements
         from msrestazure.azure_operation import AzureOperationPoller
 
         ordered_arguments = args.pop('ordered_arguments') if 'ordered_arguments' in args else []
@@ -254,8 +256,9 @@ def cli_generic_update_command(module_name, name, getter_op, setter_op, factory=
                 instance = custom_function(instance, **custom_func_args)
 
         # apply generic updates after custom updates
+        setterargs = set_arguments_loader()
         for k in args.copy().keys():
-            if k in get_arguments_loader() or k in set_arguments_loader() \
+            if k in get_arguments_loader() or k in setterargs \
                 or k in ('properties_to_add', 'properties_to_remove', 'properties_to_set'):
                 args.pop(k)
         for key, val in args.items():
@@ -283,7 +286,15 @@ def cli_generic_update_command(module_name, name, getter_op, setter_op, factory=
         # Done... update the instance!
         getterargs[setter_arg_name] = parent if child_collection_prop_name else instance
         setter = get_op_handler(setter_op)
+        no_wait = no_wait_param and setterargs.get(no_wait_param, None)
+        if no_wait:
+            getterargs[no_wait_param] = True
+
         opres = setter(client, **getterargs) if client else setter(**getterargs)
+
+        if no_wait:
+            return None
+
         result = opres.result() if isinstance(opres, AzureOperationPoller) else opres
         if child_collection_prop_name:
             return _get_child(
@@ -318,6 +329,105 @@ def cli_generic_update_command(module_name, name, getter_op, setter_op, factory=
                      arg_group=group_name)
     main_command_table[name] = cmd
     main_command_module_map[name] = module_name
+
+def cli_generic_wait_command(module_name, name, getter_op, factory=None):
+
+    if not isinstance(getter_op, string_types):
+        raise ValueError("Getter operation must be a string. Got '{}'".format(type(getter_op)))
+    get_arguments_loader = lambda: dict(extract_args_from_signature(get_op_handler(getter_op)))
+
+    def arguments_loader():
+        arguments = {}
+        arguments.update(get_arguments_loader())
+        return arguments
+
+    def get_provisioning_state(instance):
+        provisioning_state = getattr(instance, 'provisioning_state', None)
+        if not provisioning_state:
+            #some SDK, like resource-group, has 'provisioning_state' under 'properties'
+            properties = getattr(instance, 'properties', None)
+            if properties:
+                provisioning_state = getattr(properties, 'provisioning_state', None)
+        return provisioning_state
+
+    def handler(args):
+        from msrest.exceptions import ClientException
+        import time
+        try:
+            client = factory() if factory else None
+        except TypeError:
+            client = factory(None) if factory else None
+
+        getterargs = {key: val for key, val in args.items()
+                      if key in get_arguments_loader()}
+
+        getter = get_op_handler(getter_op)
+
+        timeout = args.pop('timeout')
+        interval = args.pop('interval')
+        wait_for_created = args.pop('created')
+        wait_for_deleted = args.pop('deleted')
+        wait_for_updated = args.pop('updated')
+        wait_for_exists = args.pop('exists')
+        custom_condition = args.pop('custom')
+        if not any([wait_for_created, wait_for_updated, wait_for_deleted,
+                    wait_for_exists, custom_condition]):
+            raise CLIError("incorrect usage: --created | --updated | --deleted | --exists | --custom JMESPATH")#pylint: disable=line-too-long
+
+        for _ in range(0, timeout, interval):
+            try:
+                instance = getter(client, **getterargs) if client else getter(**getterargs)
+                if wait_for_exists:
+                    return
+                provisioning_state = get_provisioning_state(instance)
+                #until we have any needs to wait for 'Failed', let us bail out on this
+                if provisioning_state == 'Failed':
+                    raise CLIError('The operation failed')
+                if wait_for_created or wait_for_updated:
+                    if provisioning_state == 'Succeeded':
+                        return
+                if custom_condition and bool(verify_property(instance, custom_condition)):
+                    return
+            except ClientException as ex:
+                if getattr(ex, 'status_code', None) == 404:
+                    if wait_for_deleted:
+                        return
+                    if not any([wait_for_created, wait_for_exists, custom_condition]):
+                        raise
+                else:
+                    raise
+
+            time.sleep(interval)
+
+        return CLIError('Wait operation timed-out after {} seconds'.format(timeout))
+
+    cmd = CliCommand(name, handler, arguments_loader=arguments_loader)
+    group_name = 'Wait Condition'
+    cmd.add_argument('timeout', '--timeout', default=3600, arg_group=group_name, type=int,
+                     help='maximum wait in seconds')
+    cmd.add_argument('interval', '--interval', default=30, arg_group=group_name, type=int,
+                     help='polling interval in seconds')
+    cmd.add_argument('deleted', '--deleted', action='store_true', arg_group=group_name,
+                     help='wait till deleted')
+    cmd.add_argument('created', '--created', action='store_true', arg_group=group_name,
+                     help="wait till created with 'provisioningState' at 'Succeeded'")
+    cmd.add_argument('updated', '--updated', action='store_true', arg_group=group_name,
+                     help="wait till updated with provisioningState at 'Succeeded'")
+    cmd.add_argument('exists', '--exists', action='store_true', arg_group=group_name,
+                     help="wait till the resource exists")
+    cmd.add_argument('custom', '--custom', arg_group=group_name,
+                     help=("Wait until the condition satisfies a custom JMESPath query. E.g. "
+                           "provisioningState!='InProgress', "
+                           "instanceView.statuses[?code=='PowerState/running']"))
+    main_command_table[name] = cmd
+    main_command_module_map[name] = module_name
+
+def verify_property(instance, condition):
+    from jmespath import compile as compile_jmespath
+    result = todict(instance)
+    jmes_query = compile_jmespath(condition)
+    value = jmes_query.search(result)
+    return value
 
 index_or_filter_regex = re.compile(r'\[(.*)\]')
 def set_properties(instance, expression):

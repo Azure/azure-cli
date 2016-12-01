@@ -2,7 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-# pylint: disable=line-too-long
+# pylint: disable=line-too-long,too-many-statements
 
 from azure.cli.core.test_utils.vcr_test_base import \
     ResourceGroupVCRTestBase, JMESPathCheck, JMESPathPatternCheck, NoneCheck
@@ -34,15 +34,15 @@ class IoTHubTest(ResourceGroupVCRTestBase):
                  ])
 
         # Test 'az iot hub show-connection-string'
-        connection_string_pattern = r'^HostName={0}\.azure-devices\.net;SharedAccessKeyName=iothubowner;SharedAccessKey='.format(hub)
+        conn_str_pattern = r'^HostName={0}\.azure-devices\.net;SharedAccessKeyName=iothubowner;SharedAccessKey='.format(hub)
         self.cmd('iot hub show-connection-string -n {0}'.format(hub), checks=[
-            JMESPathPatternCheck('connectionString', connection_string_pattern)
+            JMESPathPatternCheck('connectionString', conn_str_pattern)
         ])
 
         self.cmd('iot hub show-connection-string -g {0}'.format(rg), checks=[
             JMESPathCheck('length([*])', 1),
             JMESPathCheck('[0].name', hub),
-            JMESPathPatternCheck('[0].connectionString', connection_string_pattern)
+            JMESPathPatternCheck('[0].connectionString', conn_str_pattern)
         ])
 
         # Test 'az iot hub show'
@@ -129,6 +129,7 @@ class IoTHubTest(ResourceGroupVCRTestBase):
                  checks=[
                      JMESPathCheck('deviceId', device_1),
                      JMESPathCheck('status', 'enabled'),
+                     JMESPathCheck('statusReason', None),
                      JMESPathCheck('connectionState', 'Disconnected')
                  ])
 
@@ -140,6 +141,7 @@ class IoTHubTest(ResourceGroupVCRTestBase):
                  checks=[
                      JMESPathCheck('deviceId', device_2),
                      JMESPathCheck('status', 'enabled'),
+                     JMESPathCheck('statusReason', None),
                      JMESPathCheck('connectionState', 'Disconnected'),
                      JMESPathCheck('authentication.symmetricKey.primaryKey', None),
                      JMESPathCheck('authentication.symmetricKey.secondaryKey', None),
@@ -148,9 +150,9 @@ class IoTHubTest(ResourceGroupVCRTestBase):
                  ])
 
         # Test 'az iot device show-connection-string'
-        connection_string_pattern = r'^HostName={0}\.azure-devices\.net;DeviceId={1};SharedAccessKey='.format(hub, device_1)
+        conn_str_pattern = r'^HostName={0}\.azure-devices\.net;DeviceId={1};SharedAccessKey='.format(hub, device_1)
         self.cmd('iot device show-connection-string --hub-name {0} -d {1}'.format(hub, device_1), checks=[
-            JMESPathPatternCheck('connectionString', connection_string_pattern)
+            JMESPathPatternCheck('connectionString', conn_str_pattern)
         ])
 
         connection_string = 'HostName={0}.azure-devices.net;DeviceId={1};x509=true'.format(hub, device_2)
@@ -158,24 +160,40 @@ class IoTHubTest(ResourceGroupVCRTestBase):
             JMESPathCheck('connectionString', connection_string)
         ])
 
+        device_id_pattern = r'^test\-device\-\d$'
         self.cmd('iot device show-connection-string --hub-name {0}'.format(hub), checks=[
             JMESPathCheck('length([*])', 2),
-            JMESPathCheck('[0].deviceId', device_1),
-            JMESPathCheck('[1].deviceId', device_2)
+            JMESPathPatternCheck('[0].deviceId', device_id_pattern),
+            JMESPathPatternCheck('[1].deviceId', device_id_pattern)
         ])
 
         # Test 'az iot device show'
         self.cmd('iot device show --hub-name {0} -d {1}'.format(hub, device_1), checks=[
             JMESPathCheck('deviceId', device_1),
             JMESPathCheck('status', 'enabled'),
+            JMESPathCheck('statusReason', None),
             JMESPathCheck('connectionState', 'Disconnected')
         ])
+
+        # Test 'az iot device update'
+        status_reason = 'TestReason'
+        self.cmd('iot device update --hub-name {0} -d {1} --set statusReason={2}'.format(hub, device_2, status_reason),
+                 checks=[
+                     JMESPathCheck('deviceId', device_2),
+                     JMESPathCheck('status', 'enabled'),
+                     JMESPathCheck('statusReason', status_reason),
+                     JMESPathCheck('connectionState', 'Disconnected'),
+                     JMESPathCheck('authentication.symmetricKey.primaryKey', None),
+                     JMESPathCheck('authentication.symmetricKey.secondaryKey', None),
+                     JMESPathCheck('authentication.x509Thumbprint.primaryThumbprint', primary_thumbprint),
+                     JMESPathCheck('authentication.x509Thumbprint.secondaryThumbprint', secondary_thumbprint),
+                 ])
 
         # Test 'az iot device list'
         self.cmd('iot device list --hub-name {0}'.format(hub), checks=[
             JMESPathCheck('length([*])', 2),
-            JMESPathCheck('[0].deviceId', device_1),
-            JMESPathCheck('[1].deviceId', device_2)
+            JMESPathPatternCheck('[0].deviceId', device_id_pattern),
+            JMESPathPatternCheck('[1].deviceId', device_id_pattern)
         ])
 
         # Test 'az iot device message send'
@@ -186,7 +204,7 @@ class IoTHubTest(ResourceGroupVCRTestBase):
 
         # Test 'az iot device message complete'
         lock_token = '00000000-0000-0000-0000-000000000000'
-        expected_exception = 'DeviceMessageLockLost'
+        expected_exception = 'PreconditionFailed'
         self.cmd('iot device message complete --hub-name {0} -d {1} --lock-token {2}'.format(hub, device_1, lock_token),
                  allowed_exceptions=expected_exception)
 
@@ -208,10 +226,11 @@ class IoTHubTest(ResourceGroupVCRTestBase):
         ])
 
         # Test 'az iot hub show-stats'
+        device_count_pattern = r'^\d$'
         self.cmd('iot hub show-stats -n {0}'.format(hub), checks=[
-            JMESPathCheck('disabledDeviceCount', 0),
-            JMESPathCheck('enabledDeviceCount', 2),
-            JMESPathCheck('totalDeviceCount', 2)
+            JMESPathPatternCheck('disabledDeviceCount', device_count_pattern),
+            JMESPathPatternCheck('enabledDeviceCount', device_count_pattern),
+            JMESPathPatternCheck('totalDeviceCount', device_count_pattern)
         ])
 
         # Test 'az iot device delete'
