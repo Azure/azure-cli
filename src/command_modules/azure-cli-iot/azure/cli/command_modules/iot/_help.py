@@ -10,7 +10,7 @@ helps['iot'] = """
     short-summary: Commands to connect, monitor, and control millions of IoT assets
 """
 
-helps['iot device'] """
+helps['iot device'] = """
     type: group
     short-summary: Commands to manage devices in your IoT hub
 """
