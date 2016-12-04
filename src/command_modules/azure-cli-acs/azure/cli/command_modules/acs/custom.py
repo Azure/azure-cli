@@ -287,7 +287,7 @@ def acs_create(resource_group_name, deployment_name, dns_name_prefix, name, ssh_
                 client_secret = binascii.b2a_hex(os.urandom(10)).decode('utf-8')
             store_acs_service_principal(client_secret, None)
             salt = binascii.b2a_hex(os.urandom(3)).decode('utf-8')
-            url = 'http://{}.{}-k8s-masters.{}.cloudapp.azure.com'.format(salt, dns_name_prefix, location)
+            url = 'http://{}.{}.{}.cloudapp.azure.com'.format(salt, dns_name_prefix, location)
 
             service_principal = _build_service_principal(name, url, client_secret)
             logger.info('Created a service principal: %s', service_principal)
@@ -339,14 +339,14 @@ def _create_kubernetes(resource_group_name, deployment_name, dns_name_prefix, na
                     },
                     "masterProfile": {
                         "count": 1,
-                        "dnsPrefix": dns_name_prefix + '-k8s-masters'
+                        "dnsPrefix": dns_name_prefix
                     },
                     "agentPoolProfiles": [
                         {
                             "name": "agentpools",
                             "count": agent_count,
                             "vmSize": agent_vm_size,
-                            "dnsPrefix": dns_name_prefix + '-k8s-agents',
+                            "dnsPrefix": dns_name_prefix + '-k8s-agents'
                         }
                     ],
                     "linuxProfile": {
