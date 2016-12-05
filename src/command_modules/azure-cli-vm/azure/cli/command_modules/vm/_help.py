@@ -256,4 +256,7 @@ helps['vm generalize'] = """
                     az vm capture -g my_rg -n my_vm_name --vhd-name-prefix my_prefix\n\r
                     """
 
-
+helps[`vm wait`] = """
+    type: command
+    short-summary: Place the VM in a waiting state until a condition is met.
+"""
