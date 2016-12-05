@@ -37,7 +37,7 @@ For those familiar with pip, use the following:
 
 You may need to modify your PATH to include the directory ``az`` is installed to:
 
-**On UNIX:**
+**On Linux:**
 
 .. code-block:: console
 
