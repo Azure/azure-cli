@@ -42,5 +42,5 @@ helps['account set'] = """
 helps['account show'] = """
     type: command
     short-summary: Show the details of a subscription
-    long-summary: If the subscription isn't specified, shows the details of the default suscription
+    long-summary: If the subscription isn't specified, shows the details of the default subscription
 """
