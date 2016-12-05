@@ -34,4 +34,13 @@ helps['account show'] = """
     short-summary: show details of the current subscription
 """
 
+helps['account set'] = """
+    type: command
+    short-summary: Sets the active (default) subscription
+"""
 
+helps['account show'] = """
+    type: command
+    short-summary: Show the details of a subscription
+    long-summary: If the subscription isn't specified, shows the details of the default subscription
+"""
