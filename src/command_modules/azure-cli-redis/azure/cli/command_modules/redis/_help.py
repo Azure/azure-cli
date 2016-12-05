@@ -16,3 +16,17 @@ helps['redis patch-schedule'] = """
     type: group
     short-summary: Commands to manage redis patch schedules
 """
+
+helps['redis export'] = """
+    type: command
+    short-summary: Export data stored in a redis cache. 
+"""
+
+helps['redis import-method'] = """
+    type: command
+    short-summary: Import data into a redis cache.
+"""
+
+helps['redis update-settings'] = """
+    type: command
+    short-summary: Update the settings of a redis cache.
