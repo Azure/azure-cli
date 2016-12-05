@@ -70,7 +70,13 @@ helps['vmss create'] = """
 
 helps['vm availability-set create'] = """
             type: command
+            short-summary: Create an availability set
             long-summary: For more info, see https://blogs.technet.microsoft.com/yungchou/2013/05/14/window-azure-fault-domain-and-upgrade-domain-explained-explained-reprised/
+            """
+
+helps['vm availability-set update'] = """
+            type: command
+            short-summary: Update an availability set
             """
 
 helps['vm extension set'] = """
