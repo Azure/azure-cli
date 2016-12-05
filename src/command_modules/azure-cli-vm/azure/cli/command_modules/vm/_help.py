@@ -159,6 +159,14 @@ helps['vm boot-diagnostics'] = """
     type: group
     short-summary: Troubleshoot virtual machine start-up
 """
+helps['vm boot-diagnostics disable`] = """
+    type: command
+    short-summary: Disable boot diagnostics 
+"""
+helps['vm boot-diagnostics get-boot-log`] = """
+    type: command
+    short-summary: Get the boot diagnostics log 
+"""
 helps['acs'] = """
     type: group
     short-summary: Manage Azure container services
@@ -194,6 +202,10 @@ helps['vm disk'] = """
 helps['vm extension'] = """
     type: group
     short-summary: Extend the functionality of your VMs with vm extensions
+"""
+helps['vm extension list'] = """
+    type: command
+    short-summary: Get a list of extensions for a VM in a resource group
 """
 helps['vm extension image'] = """
     type: group
