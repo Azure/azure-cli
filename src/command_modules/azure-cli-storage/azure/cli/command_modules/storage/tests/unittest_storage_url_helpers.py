@@ -88,3 +88,17 @@ def test_default_value():
     assert i.share is None
     assert i.directory is None
     assert i.filename is None
+
+
+def test_get_sas_token():
+    def _test(moniker, expected_sas=None):
+        i = StorageResourceIdentifier(moniker)
+        assert i.sas_token == expected_sas
+
+    yield _test, \
+          'https://momba.blob.core.windows.net/blob?sv=2015-04-05&ss=bfqt&srt=sco&sp=rwdlacup&se=2016-12-05T23:02:02Z&st=2016-12-05T15:02:02Z&spr=https&sig=e0xYWg%2F142F5uUsPBflsUVQqL33Pr0v3Fs5VIjsUL6A%3D', \
+          'sv=2015-04-05&ss=bfqt&srt=sco&sp=rwdlacup&se=2016-12-05T23:02:02Z&st=2016-12-05T15:02:02Z&spr=https&sig=e0xYWg%2F142F5uUsPBflsUVQqL33Pr0v3Fs5VIjsUL6A%3D'
+
+    yield _test, \
+          'https://momba.blob.core.windows.net/blob?sv=2015-04-05&ss=bfqt&srt=sco&sp=rwdlacup&se=2016-12-05T23:02:02Z&st=2016-12-05T15:02:02Z&spr=https&sig=e0xYWg%2F142F5uUsPBflsUVQqL33Pr0v3Fs5VIjsUL6A%3D&snapshot=2016-12-05T23:12:03.1181304Z', \
+          'sv=2015-04-05&ss=bfqt&srt=sco&sp=rwdlacup&se=2016-12-05T23:02:02Z&st=2016-12-05T15:02:02Z&spr=https&sig=e0xYWg%2F142F5uUsPBflsUVQqL33Pr0v3Fs5VIjsUL6A%3D'

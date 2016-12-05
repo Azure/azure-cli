@@ -142,6 +142,10 @@ cli_storage_data_plane_command('storage file download-batch',
                                'azure.cli.command_modules.storage.file#storage_file_download_batch',
                                factory)
 
+cli_storage_data_plane_command('storage file copy start-batch',
+                               'azure.cli.command_modules.storage.file#storage_file_copy_batch',
+                               factory)
+
 # table commands
 factory = table_data_service_factory
 cli_storage_data_plane_command('storage table generate-sas', 'azure.storage.table.tableservice#TableService.generate_table_shared_access_signature', factory)

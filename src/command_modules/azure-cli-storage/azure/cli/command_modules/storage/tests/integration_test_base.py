@@ -38,7 +38,7 @@ class StorageIntegrationTestBase(TestCase):
         with open(os.path.join(cls._resource_folder, 'sample_file.txt'), 'w') as f:
             f.write('storage blob test sample file')
 
-        for folder_name in ['alpha', 'bravo', 'charlie']:
+        for folder_name in ['apple', 'butter', 'butter/charlie', 'duff/edward']:
             for file_index in range(10):
                 file_path = os.path.join(cls._resource_folder, folder_name, 'file_%s' % file_index)
                 if not os.path.exists(os.path.dirname(file_path)):

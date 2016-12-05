@@ -36,10 +36,10 @@ class StorageFileDownloadIntegrationTests(StorageIntegrationTestBase):
                          cls._test_connection_string)
                  .split())
 
-        from ..files_helpers import glob_files_remotely
+        from ..util import glob_files_remotely
         test_files = [f for f in glob_files_remotely(cls._file_service, cls._test_source_share,
                                                      pattern=None)]
-        assert len(test_files) == 31
+        assert len(test_files) == 41
 
     @classmethod
     def tearDownClass(cls):
@@ -58,7 +58,7 @@ class StorageFileDownloadIntegrationTests(StorageIntegrationTestBase):
                     self._file_service.account_name, self._file_service.account_key)
 
         cli_main(cmd.split())
-        assert sum(len(f) for r, d, f in os.walk(self._test_folder)) == 31
+        assert sum(len(f) for r, d, f in os.walk(self._test_folder)) == 41
 
     def test_file_download_recursively_with_pattern_1(self):
         cmd = 'storage file download-batch -s https://{}/{} -d {} --pattern {} --account-key {}'\
@@ -66,12 +66,12 @@ class StorageFileDownloadIntegrationTests(StorageIntegrationTestBase):
                     self._test_folder, '*', self._file_service.account_key)
 
         cli_main(cmd.split())
-        assert sum(len(f) for r, d, f in os.walk(self._test_folder)) == 31
+        assert sum(len(f) for r, d, f in os.walk(self._test_folder)) == 41
 
     def test_file_download_recursively_with_pattern_2(self):
         cmd = 'storage file download-batch -s https://{}/{} -d {} --pattern {} --account-key {}'\
             .format(self._file_service.primary_endpoint, self._test_source_share,
-                    self._test_folder, 'alpha/*', self._file_service.account_key)
+                    self._test_folder, 'apple/*', self._file_service.account_key)
 
         cli_main(cmd.split())
         assert sum(len(f) for r, d, f in os.walk(self._test_folder)) == 10
@@ -82,4 +82,4 @@ class StorageFileDownloadIntegrationTests(StorageIntegrationTestBase):
                     self._test_folder, '*/file_0', self._file_service.account_key)
 
         cli_main(cmd.split())
-        assert sum(len(f) for r, d, f in os.walk(self._test_folder)) == 3
+        assert sum(len(f) for r, d, f in os.walk(self._test_folder)) == 4

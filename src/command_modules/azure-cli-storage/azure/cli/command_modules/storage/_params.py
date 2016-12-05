@@ -40,6 +40,51 @@ from ._validators import \
      process_file_download_namespace, process_logging_update_namespace,
      process_metric_update_namespace, process_blob_copy_batch_namespace)
 
+# UTILITY
+
+
+class CommandContext(object):
+    def __init__(self, scope):
+        self._scope = scope
+
+    def reg_arg(self, *args, **kwargs):
+        return register_cli_argument(self._scope, *args, **kwargs)
+
+    def reg_extra_arg(self, *args, **kwargs):
+        return register_extra_cli_argument(self._scope, *args, **kwargs)
+
+    def ignore(self, argument):
+        return register_cli_argument(self._scope, argument, ignore_type)
+
+    def arg_group(self, name):
+        return ArgumentGroupContext(self._scope, name)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        pass
+
+
+class ArgumentGroupContext(CommandContext):
+    def __init__(self, scope, name):
+        CommandContext.__init__(self, scope)
+        self._name = name
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        pass
+
+    def reg_arg(self, *args, **kwargs):
+        kwargs['arg_group'] = self._name
+        return CommandContext.reg_arg(self, *args, **kwargs)
+
+    def reg_extra_arg(self, *args, **kwargs):
+        kwargs['arg_group'] = self._name
+        return CommandContext.reg_extra_arg(self, *args, **kwargs)
+
 # COMPLETERS
 
 def _get_client(service, parsed_args):
@@ -280,23 +325,23 @@ register_cli_argument('storage blob upload-batch', 'content_language', arg_group
 register_cli_argument('storage blob upload-batch', 'max_connections', type=int)
 
 # FILE UPLOAD-BATCH PARAMETERS
-register_extra_cli_argument('storage file upload-batch', 'source',
-                            options_list=('--source', '-s'),
-                            required=True,
-                            validator=process_file_upload_batch_parameters)
-register_extra_cli_argument('storage file upload-batch', 'destination',
-                            options_list=('--destination', '-d'),
-                            required=True)
+register_cli_argument('storage file upload-batch', 'source',
+                      options_list=('--source', '-s'),
+                      required=True,
+                      validator=process_file_upload_batch_parameters)
+register_cli_argument('storage file upload-batch', 'destination',
+                      options_list=('--destination', '-d'),
+                      required=True)
 register_cli_argument('storage file upload-batch', 'validate_content', arg_group='Download Control')
 register_cli_argument('storage file upload-batch', 'max_connections', arg_group='Download Control')
 register_content_settings_argument('storage file upload-batch', FileContentSettings,
                                    update=False, arg_group='Content Settings')
 
 # FILE DOWNLOAD-BATCH PARAMETERS
-register_extra_cli_argument('storage file download-batch', 'source',
-                            options_list=('--source', '-s'),
-                            required=True,
-                            validator=process_file_download_batch_parameters)
+register_cli_argument('storage file download-batch', 'source',
+                      options_list=('--source', '-s'),
+                      required=True,
+                      validator=process_file_download_batch_parameters)
 register_cli_argument('storage file download-batch', 'destination',
                       options_list=('--destination', '-d'),
                       required=True)
@@ -305,6 +350,18 @@ register_cli_argument('storage file download-batch', 'validate_content',
 register_cli_argument('storage file download-batch', 'max_connections',
                       arg_group='Download Control')
 
+# FILE COPY-BATCH PARAMETERS
+with CommandContext('storage file copy start-batch') as c:
+    from ._validators import get_source_file_or_blob_service_client
+    c.reg_arg('source_client', ignore_type, validator=get_source_file_or_blob_service_client)
+
+    with c.arg_group('Copy Source Arguments') as group:
+        group.reg_extra_arg('source_account')
+        group.reg_extra_arg('source_key')
+        group.reg_extra_arg('source_uri')
+        group.reg_arg('source_sas')
+        group.reg_arg('source_container')
+        group.reg_arg('source_share')
 
 for item in ['file', 'blob']:
     register_cli_argument('storage {} url'.format(item), 'protocol', help='Protocol to use.', default='https', **enum_choice_list(['http', 'https']))
