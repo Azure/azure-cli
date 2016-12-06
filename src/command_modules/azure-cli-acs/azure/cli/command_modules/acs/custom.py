@@ -25,7 +25,8 @@ from msrestazure.azure_exceptions import CloudError
 
 import azure.cli.core._logging as _logging
 from azure.cli.command_modules.acs import acs_client, proxy
-from azure.cli.command_modules.vm.mgmt_acs.lib import \
+from azure.cli.command_modules.acs.commands import cf_acs
+from azure.cli.command_modules.acs.mgmt_acs.lib import \
     AcsCreationClient as ACSClient
 # pylint: disable=too-few-public-methods,too-many-arguments,no-self-use,line-too-long
 from azure.cli.core._util import CLIError
@@ -554,3 +555,15 @@ def _mkdir_p(path):
             pass
         else:
             raise
+
+def update_acs(resource_group_name, container_service_name, new_agent_count):
+    client = cf_acs(None)
+    instance = client.get(resource_group_name, container_service_name)
+    instance.agent_pool_profiles[0].count = new_agent_count # pylint: disable=no-member
+    return client.create_or_update(resource_group_name, container_service_name, instance)
+
+def list_container_services(client, resource_group_name=None):
+    ''' List Container Services. '''
+    svc_list = client.list_by_resource_group(resource_group_name=resource_group_name) \
+        if resource_group_name else client.list()
+    return list(svc_list)

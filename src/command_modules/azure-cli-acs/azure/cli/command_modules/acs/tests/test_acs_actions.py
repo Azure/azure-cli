@@ -8,8 +8,8 @@ import tempfile
 import unittest
 import mock
 
-from azure.cli.command_modules.vm._actions import (_handle_container_ssh_file,
-                                                   _is_valid_ssh_rsa_public_key)
+from azure.cli.command_modules.acs._actions import (_handle_container_ssh_file,
+                                                    _is_valid_ssh_rsa_public_key)
 
 class TestAcsActions(unittest.TestCase):
     def test_generate_specfied_ssh_key_files(self):
