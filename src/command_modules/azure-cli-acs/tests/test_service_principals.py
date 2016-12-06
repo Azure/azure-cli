@@ -10,7 +10,8 @@ import mock
 
 from azure.cli.core.util import CLIError
 from azure.cli.command_modules.acs.custom import _validate_service_principal, \
-    load_acs_service_principal, store_acs_service_principal
+    load_acs_service_principal, store_acs_service_principal, \
+    _build_service_principal
 
 
 class AcsServicePrincipalTest(unittest.TestCase):
@@ -69,6 +70,8 @@ class AcsServicePrincipalTest(unittest.TestCase):
 
         os.remove(store_file.name)
 
+
+class AcsServicePrincipalTest(unittest.TestCase):
     def test_validate_service_principal_ok(self):
         client = mock.MagicMock()
         client.service_principals = mock.Mock()
@@ -89,3 +92,26 @@ class AcsServicePrincipalTest(unittest.TestCase):
         client.service_principals.list.side_effect = KeyError('foo')
         with self.assertRaises(CLIError):
             _validate_service_principal(client, '27497b5e-7ea6-4ff2-a883-b3db4e08d937')
+
+    def test_build_service_principal(self):
+        app_id = '27497b5e-7ea6-4ff2-a883-b3db4e08d937'
+
+        client = mock.MagicMock()
+        client.service_principals = mock.Mock()
+        client.applications = mock.Mock()
+        client.applications.create.return_value.app_id = app_id
+        client.applications.list.return_value = []
+
+        name = "foo"
+        url = "http://contuso.com"
+        secret = "notASecret"
+        _build_service_principal(client, name, url, secret)
+
+        self.assertTrue(client.applications.create.called)
+        self.assertTrue(client.applications.list.called)
+
+        expected_calls = [
+            mock.call(
+                filter="appId eq '{}'".format(app_id))
+        ]
+        client.applications.list.assert_has_calls(expected_calls)
