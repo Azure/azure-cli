@@ -173,26 +173,24 @@ def k8s_install_cli(client_version="1.4.5", install_location=None):
     except IOError as err:
         raise CLIError('Connection error while attempting to download client ({})'.format(err))
 
-def _validate_service_principal(sp_id):
+def _validate_service_principal(client, sp_id):
     from azure.cli.command_modules.role.custom import (
-        _graph_client_factory,
         show_service_principal,
     )
     # discard the result, we're trusting this to throw if it can't find something
     try:
-        show_service_principal(_graph_client_factory().service_principals, sp_id)
+        show_service_principal(client.service_principals, sp_id)
     except: #pylint: disable=bare-except
         raise CLIError('Failed to validate service principal, if this persists try deleting $HOME/.azure/acsServicePrincipal.json')
 
-def _build_service_principal(name, url, client_secret):
+def _build_service_principal(client, name, url, client_secret):
     from azure.cli.command_modules.role.custom import (
-        _graph_client_factory,
         create_application,
         create_service_principal,
     )
 
     sys.stdout.write('creating service principal')
-    result = create_application(_graph_client_factory().applications, name, url, [url], password=client_secret)
+    result = create_application(client.applications, name, url, [url], password=client_secret)
     service_principal = result.app_id #pylint: disable=no-member
     for x in range(0, 10):
         try:
@@ -294,14 +292,16 @@ def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_na
     groups.get(resource_group_name)
 
     if orchestrator_type == 'Kubernetes' or orchestrator_type == 'kubernetes':
+        from azure.cli.command_modules.role.custom import _graph_client_factory
         # TODO: This really needs to be broken out and unit tested.
+        client = _graph_client_factory()
         if not service_principal:
             # --service-principal not specified, try to load it from local disk
             principalObj = load_acs_service_principal()
             if principalObj:
                 service_principal = principalObj.get('service_principal')
                 client_secret = principalObj.get('client_secret')
-                _validate_service_principal(service_principal)
+                _validate_service_principal(client, service_principal)
             else:
                 # Nothing to load, make one.
                 if not client_secret:
@@ -309,7 +309,7 @@ def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_na
                 salt = binascii.b2a_hex(os.urandom(3)).decode('utf-8')
                 url = 'http://{}.{}.{}.cloudapp.azure.com'.format(salt, dns_name_prefix, location)
 
-                service_principal = _build_service_principal(name, url, client_secret)
+                service_principal = _build_service_principal(client, name, url, client_secret)
                 logger.info('Created a service principal: %s', service_principal)
                 store_acs_service_principal(client_secret, service_principal)
             # Either way, update the role assignment, this fixes things if we fail part-way through
@@ -318,7 +318,7 @@ def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_na
             # --service-principal specfied, validate --client-secret was too
             if not client_secret:
                 raise CLIError('--client-secret is required if --service-principal is specified')
-            _validate_service_principal(service_principal)
+            _validate_service_principal(client, service_principal)
         return _create_kubernetes(resource_group_name, deployment_name, dns_name_prefix, name, ssh_key_value, admin_username=admin_username, agent_count=agent_count, agent_vm_size=agent_vm_size, location=location, service_principal=service_principal, client_secret=client_secret)
 
     ops = get_mgmt_service_client(ACSClient).acs
