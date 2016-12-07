@@ -928,7 +928,7 @@ def list_traffic_manager_profiles(resource_group_name=None):
 
 def update_traffic_manager_profile(instance, profile_status=None, routing_method=None, tags=None,
                                    monitor_protocol=None, monitor_port=None, monitor_path=None,
-                                   monitor_status=None, ttl=None):
+                                   ttl=None):
     if tags is not None:
         instance.tags = tags
     if profile_status is not None:
@@ -938,10 +938,8 @@ def update_traffic_manager_profile(instance, profile_status=None, routing_method
     if ttl is not None:
         instance.dns_config.ttl = ttl
 
-    monitor_params = [monitor_protocol, monitor_port, monitor_path, monitor_status]
+    monitor_params = [monitor_protocol, monitor_port, monitor_path]
     if any([x for x in monitor_params if x is not None]):
-        if monitor_status is not None:
-            instance.monitor_config.profile_monitor_status = monitor_status  # TODO: DOESN'T SEEM TO WORK?
         if monitor_protocol is not None:
             instance.monitor_config.protocol = monitor_protocol
         if monitor_port is not None:

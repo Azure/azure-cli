@@ -41,7 +41,7 @@ from azure.cli.command_modules.network.mgmt_nic.lib.models.nic_creation_client_e
 from azure.cli.command_modules.network.mgmt_vnet_gateway.lib.models.vnet_gateway_creation_client_enums import \
     (gatewayType, sku, vpnType)
 from azure.cli.command_modules.network.mgmt_traffic_manager_profile.lib.models.traffic_manager_profile_creation_client_enums \
-    import routingMethod
+    import routingMethod, status
 from azure.cli.command_modules.network.custom import list_traffic_manager_endpoints
 
 # CHOICE LISTS
@@ -461,10 +461,11 @@ register_cli_argument('network traffic-manager profile', 'profile_name', name_ar
 register_cli_argument('network traffic-manager profile', 'monitor_path', help='Path to monitor.')
 register_cli_argument('network traffic-manager profile', 'monitor_port', help='Port to monitor.')
 register_cli_argument('network traffic-manager profile', 'monitor_protocol', help='Monitor protocol.')
-register_cli_argument('network traffic-manager profile', 'monitor_status', help='The monitoring status of the profile.')
-register_cli_argument('network traffic-manager profile', 'profile_status', options_list=('--status',), help='Status of the Traffic Manager profile.')
+register_cli_argument('network traffic-manager profile', 'profile_status', options_list=('--status',), help='Status of the Traffic Manager profile.', **enum_choice_list(['Enabled', 'Disabled']))
 register_cli_argument('network traffic-manager profile', 'routing_method', help='Routing method.', **enum_choice_list(routingMethod))
 register_cli_argument('network traffic-manager profile', 'ttl', help='DNS config time-to-live in seconds.')
+
+register_cli_argument('network traffic-manager profile create', 'status', **enum_choice_list(status))
 
 register_cli_argument('network traffic-manager profile check-dns', 'name', name_arg_type, help='DNS prefix to verify availability for.', required=True)
 register_cli_argument('network traffic-manager profile check-dns', 'type', help=argparse.SUPPRESS, default='Microsoft.Network/trafficManagerProfiles')
