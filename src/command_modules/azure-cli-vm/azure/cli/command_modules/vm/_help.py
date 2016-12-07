@@ -165,7 +165,7 @@ helps['vm boot-diagnostics'] = """
     type: group
     short-summary: Troubleshoot virtual machine start-up
 """
-helps['vm boot-diagnostics disable`] = """
+helps['vm boot-diagnostics disable'] = """
     type: command
     short-summary: Disable boot diagnostics 
 """
