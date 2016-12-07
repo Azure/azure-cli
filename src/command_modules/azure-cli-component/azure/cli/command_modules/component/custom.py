@@ -2,6 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+import site
 import logging
 from six import StringIO
 
@@ -80,6 +81,7 @@ def _run_pip(pip, pip_exec_args):
     pip.logger.addHandler(log_handler)
     # Don't propagate to root logger as we catch the pip logs in our own log stream
     pip.logger.propagate = False
+    logger.debug('Running pip: %s %s', pip, pip_exec_args)
     status_code = pip.main(pip_exec_args)
     log_output = log_stream.getvalue()
     logger.debug(log_output)
@@ -91,11 +93,19 @@ def _run_pip(pip, pip_exec_args):
         raise CLIError('An error occurred. Run command with --debug for more information.\n'
                        'If executing az with sudo, you may want sudo\'s -E and -H flags.')
 
+def _installed_in_user():
+    try:
+        return __file__.startswith(site.getusersitepackages())
+    except (TypeError, AttributeError):
+        return False
+
 def _install_or_update(package_list, link, private, pre):
     import pip
     options = ['--isolated', '--disable-pip-version-check', '--upgrade', '--ignore-installed']
     if pre:
         options.append('--pre')
+    if _installed_in_user():
+        options.append('--user')
     pkg_index_options = ['--find-links', link] if link else []
     if private:
         package_index_url = az_config.get('component', 'package_index_url', fallback=None)
