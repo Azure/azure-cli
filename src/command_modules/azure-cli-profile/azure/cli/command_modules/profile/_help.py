@@ -21,7 +21,18 @@ helps['login'] = """
 
 helps['account'] = """
     type: group
-    short-summary: Manages stored and default subscriptions
+    short-summary: Commands to manage subscriptions
+"""
+
+helps['account clear'] = """
+    type: command
+    short-summary: Clears all subscription from the CLI's local cache
+    long-summary: To clear the current subscription, use az logout
+"""
+
+helps['account list'] = """
+    type: command
+    short-summary: Get a list of subscriptions for the account
 """
 
 helps['account list-locations'] = """
@@ -31,12 +42,13 @@ helps['account list-locations'] = """
 
 helps['account show'] = """
     type: command
-    short-summary: show details of the current subscription
+    short-summary: show details of a subscription
+    long-summary: if no subscription is specified, shows the current subscription
 """
 
 helps['account set'] = """
     type: command
-    short-summary: Sets the active (default) subscription
+    short-summary: Makes a subscription the current subscription
 """
 
 helps['account show'] = """
