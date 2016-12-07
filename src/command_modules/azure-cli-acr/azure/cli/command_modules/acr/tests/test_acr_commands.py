@@ -15,10 +15,9 @@ from azure.cli.core.test_utils.vcr_test_base import (
 class ACRTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-        super(ACRTest, self).__init__(__file__, test_method)
+        super(ACRTest, self).__init__(__file__, test_method, resource_group='acr_resource_group')
         self.registry_name_1 = 'acrtestregistry1'
         self.registry_name_2 = 'acrtestregistry2'
-        self.resource_group = 'acr_resource_group'
         self.storage_account_1 = 'acrstorageaccount1'
         self.storage_account_2 = 'acrstorageaccount2'
         self.location = 'southcentralus'

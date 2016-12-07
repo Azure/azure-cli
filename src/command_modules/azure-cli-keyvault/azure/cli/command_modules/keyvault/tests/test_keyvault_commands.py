@@ -64,8 +64,7 @@ def _create_keyvault(test, vault_name, resource_group, location, retry_wait=30, 
 class KeyVaultMgmtScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-        super(KeyVaultMgmtScenarioTest, self).__init__(__file__, test_method)
-        self.resource_group = 'cli-test-keyvault-mgmt'
+        super(KeyVaultMgmtScenarioTest, self).__init__(__file__, test_method, resource_group='cli-test-keyvault-mgmt')
         self.keyvault_names = ['cli-keyvault-12345-0',
                                'cli-keyvault-12345-1',
                                'cli-keyvault-12345-2',
@@ -138,11 +137,10 @@ class KeyVaultMgmtScenarioTest(ResourceGroupVCRTestBase):
 class KeyVaultKeyScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-        super(KeyVaultKeyScenarioTest, self).__init__(__file__, test_method)
+        super(KeyVaultKeyScenarioTest, self).__init__(__file__, test_method, resource_group='cli-test-keyvault-key')
         self.my_vcr.before_record_response = _before_record_response
         if self.playback:
             KeyVaultAuthBase.__call__ = _mock_key_vault_auth_base
-        self.resource_group = 'cli-test-keyvault-key'
         self.keyvault_name = 'cli-keyvault-test-key'
         self.location = 'westus'
 
@@ -217,11 +215,10 @@ class KeyVaultKeyScenarioTest(ResourceGroupVCRTestBase):
 class KeyVaultSecretScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-        super(KeyVaultSecretScenarioTest, self).__init__(__file__, test_method)
+        super(KeyVaultSecretScenarioTest, self).__init__(__file__, test_method, resource_group='cli-test-keyvault-secret')
         self.my_vcr.before_record_response = _before_record_response
         if self.playback:
             KeyVaultAuthBase.__call__ = _mock_key_vault_auth_base
-        self.resource_group = 'cli-test-keyvault-secret'
         self.keyvault_name = 'cli-test-keyvault-secret'
         self.location = 'westus'
 
@@ -298,11 +295,10 @@ class KeyVaultSecretScenarioTest(ResourceGroupVCRTestBase):
 class KeyVaultCertificateScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-        super(KeyVaultCertificateScenarioTest, self).__init__(__file__, test_method)
+        super(KeyVaultCertificateScenarioTest, self).__init__(__file__, test_method, resource_group='cli-test-keyvault-cert')
         self.my_vcr.before_record_response = _before_record_response
         if self.playback:
             KeyVaultAuthBase.__call__ = _mock_key_vault_auth_base
-        self.resource_group = 'cli-test-keyvault-cert'
         self.keyvault_name = 'cli-test-keyvault-cert'
         self.location = 'westus'
 
