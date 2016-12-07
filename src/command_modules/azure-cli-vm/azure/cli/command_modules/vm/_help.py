@@ -211,7 +211,7 @@ helps['vm extension'] = """
 """
 helps['vm extension list'] = """
     type: command
-    short-summary: Get a list of extensions for a VM in a resource group
+    short-summary:  List extensions attached to a VM in a resource group
 """
 helps['vm extension image'] = """
     type: group
