@@ -500,8 +500,7 @@ def create_service_principal_for_rbac(name=None, password=None, years=1, #pylint
         session_key = aad_sp.response.headers._store['ocp-aad-session-key'][1]
         sp_created = True
 
-    #It is possible the SP has not been propagated to all servers, so creating assignments
-    #might fail. The reliable workaround is to call out the server where creation occurred.
+    #Again, use retry while replicate latency is being investigated
     for scope in scopes:
         for _ in range(1, 24):
             try:
