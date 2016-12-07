@@ -448,6 +448,7 @@ def create_service_principal_for_rbac(name=None, password=None, years=1, #pylint
            Defaults to the root of the current subscription.
     :param str role: role the service principal has on the resources.
     '''
+    import time
     graph_client = _graph_client_factory()
     role_client = _auth_client_factory().role_assignments
     role = role or 'contributor'
@@ -482,13 +483,13 @@ def create_service_principal_for_rbac(name=None, password=None, years=1, #pylint
         #pylint: disable=no-member
         app_id = aad_application.app_id
         #retry while the root cause is being investigated by AAD service team
+        #And the 'session_key' will not be used as well.
         for _ in range(1, 12):
             try:
                 aad_sp = _create_service_principal(app_id, bool(scopes), resolve_app=False)
                 break
             except Exception as ex: #pylint: disable=broad-except
                 #pylint: disable=line-too-long
-                import time
                 if 'The appId of the service principal does not reference a valid application object' in str(ex):
                     time.sleep(5)
                 else:
@@ -502,18 +503,22 @@ def create_service_principal_for_rbac(name=None, password=None, years=1, #pylint
     #It is possible the SP has not been propagated to all servers, so creating assignments
     #might fail. The reliable workaround is to call out the server where creation occurred.
     for scope in scopes:
-        try:
-            _create_role_assignment(role, sp_oid, None, scope, ocp_aad_session_key=session_key,
-                                    resolve_assignee=False)
-        except Exception as ex:
-            if sp_created:
-                #dump out history for diagnoses
-                logger.warning('Role assignment creation failed. Traces followed:\n')
-                logger.warning('Service principal response: %s\n', aad_sp.response.headers)
-                logger.warning('Use ocp-aad-session-key: %s\n', session_key)
-                if getattr(ex, 'response', None) is not None:
-                    logger.warning('role assignment response: %s\n', ex.response.headers) #pylint: disable=no-member
-            raise
+        for _ in range(1, 24):
+            try:
+                _create_role_assignment(role, sp_oid, None, scope, resolve_assignee=False)
+                break
+            except Exception as ex:
+                if ' does not exist in the directory ' in str(ex):
+                    time.sleep(5)
+                    continue
+                elif sp_created:
+                    #dump out history for diagnoses
+                    logger.warning('Role assignment creation failed. Traces followed:\n')
+                    logger.warning('Service principal response: %s\n', aad_sp.response.headers)
+                    logger.warning('Use ocp-aad-session-key: %s\n', session_key)
+                    if getattr(ex, 'response', None) is not None:
+                        logger.warning('role assignment response: %s\n', ex.response.headers) #pylint: disable=no-member
+                raise
 
     if expanded_view:
         from azure.cli.core._profile import Profile
