@@ -214,7 +214,7 @@ def _add_role_assignment(role, service_principal):
             time.sleep(2 + 2 * x)
     print('done')
 
-def acs_create(resource_group_name, deployment_name, dns_name_prefix, name, ssh_key_value, content_version=None, admin_username="azureuser", agent_count="3", agent_vm_size="Standard_D2_v2", location=None, master_count="3", orchestrator_type="dcos", service_principal=None, client_secret=None, tags=None, custom_headers=None, raw=False, **operation_config):
+def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_name_prefix=None, content_version=None, admin_username="azureuser", agent_count="3", agent_vm_size="Standard_D2_v2", location=None, master_count="3", orchestrator_type="dcos", service_principal=None, client_secret=None, tags=None, custom_headers=None, raw=False, **operation_config):
     """Create a new Acs.
     :param resource_group_name: The name of the resource group. The name
      is case insensitive.
@@ -275,7 +275,7 @@ def acs_create(resource_group_name, deployment_name, dns_name_prefix, name, ssh_
     if not dns_name_prefix:
         # Use subscription id to provide uniqueness and prevent DNS name clashes
         _, subscription_id, _ = Profile().get_login_credentials(subscription_id=None)
-        dns_name_prefix = '{}-{}'.format(name, subscription_id[0:6])
+        dns_name_prefix = '{}-{}-{}'.format(name, resource_group_name, subscription_id[0:6])
 
     register_providers()
     groups = _resource_client_factory().resource_groups
