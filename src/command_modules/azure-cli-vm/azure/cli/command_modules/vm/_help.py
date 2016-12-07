@@ -276,5 +276,5 @@ helps['vm generalize'] = """
 
 helps[`vm wait`] = """
     type: command
-    short-summary: Place the VM in a waiting state until a condition is met.
+    short-summary: Place the CLI in a waiting state until the a condition of the VM is met.
 """
