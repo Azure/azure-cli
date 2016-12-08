@@ -1,6 +1,6 @@
 interactions:
 - request:
-    body: '{"name": "myfoobar1", "type": "Microsoft.Network/trafficManagerProfiles"}'
+    body: '{"type": "Microsoft.Network/trafficManagerProfiles", "name": "myfoobar1"}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -11,7 +11,7 @@ interactions:
           msrest_azure/0.4.5 trafficmanagermanagementclient/0.30.0rc6 Azure-SDK-For-Python
           AZURECLI/TEST/0.1.0b10+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [6ce0ca54-bd6d-11e6-9836-a0b3ccf7272a]
+      x-ms-client-request-id: [9f6a085a-bd96-11e6-b6f4-a0b3ccf7272a]
     method: POST
     uri: https://management.azure.com/providers/Microsoft.Network/checkTrafficManagerNameAvailability?api-version=2015-11-01
   response:
@@ -19,7 +19,7 @@ interactions:
     headers:
       Cache-Control: [private]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Thu, 08 Dec 2016 17:40:35 GMT']
+      Date: ['Thu, 08 Dec 2016 22:35:29 GMT']
       Server: [Microsoft-IIS/8.5]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
       Transfer-Encoding: [chunked]
@@ -31,12 +31,12 @@ interactions:
       x-ms-ratelimit-remaining-tenant-writes: ['1199']
     status: {code: 200, message: OK}
 - request:
-    body: '{"properties": {"parameters": {"monitorPort": {"value": 80}, "routingMethod":
-      {"value": "weighted"}, "ttl": {"value": 30}, "location": {"value": "global"},
-      "uniqueDnsName": {"value": "mytrafficmanager001100a"}, "status": {"value": "enabled"},
-      "monitorProtocol": {"value": "http"}, "trafficManagerProfileName": {"value":
-      "mytmprofile"}, "monitorPath": {"value": "/"}}, "mode": "Incremental", "templateLink":
-      {"uri": "https://azuresdkci.blob.core.windows.net/templatehost/CreateTrafficManagerProfile_2016-08-08/azuredeploy.json"}}}'
+    body: '{"properties": {"templateLink": {"uri": "https://azuresdkci.blob.core.windows.net/templatehost/CreateTrafficManagerProfile_2016-08-08/azuredeploy.json"},
+      "parameters": {"uniqueDnsName": {"value": "mytrafficmanager001100a"}, "monitorProtocol":
+      {"value": "http"}, "status": {"value": "enabled"}, "location": {"value": "global"},
+      "routingMethod": {"value": "weighted"}, "ttl": {"value": 30}, "monitorPort":
+      {"value": 80}, "monitorPath": {"value": "/"}, "trafficManagerProfileName": {"value":
+      "mytmprofile"}}, "mode": "Incremental"}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -47,17 +47,17 @@ interactions:
           msrest_azure/0.4.5 trafficmanagerprofilecreationclient/2015-11-01 Azure-SDK-For-Python
           AZURECLI/TEST/0.1.0b10+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [6d819d78-bd6d-11e6-889c-a0b3ccf7272a]
+      x-ms-client-request-id: [9ff4993a-bd96-11e6-8514-a0b3ccf7272a]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_traffic_manager_test/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2015-11-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_traffic_manager_test1/providers/Microsoft.Resources/deployments/azurecli1481218836.75846824014","name":"azurecli1481218836.75846824014","properties":{"templateLink":{"uri":"https://azuresdkci.blob.core.windows.net/templatehost/CreateTrafficManagerProfile_2016-08-08/azuredeploy.json","contentVersion":"1.0.0.0"},"parameters":{"location":{"type":"String","value":"global"},"monitorPath":{"type":"String","value":"/"},"monitorPort":{"type":"Int","value":80},"monitorProtocol":{"type":"String","value":"http"},"routingMethod":{"type":"String","value":"weighted"},"status":{"type":"String","value":"enabled"},"trafficManagerProfileName":{"type":"String","value":"mytmprofile"},"ttl":{"type":"Int","value":30},"uniqueDnsName":{"type":"String","value":"mytrafficmanager001100a"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2016-12-08T17:40:38.4602671Z","duration":"PT0.438253S","correlationId":"b29af7c1-b4c2-4c4e-b7cd-1b9797893e11","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"trafficManagerProfiles","locations":["global"]}]}],"dependencies":[]}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_traffic_manager_test_9hvn_/providers/Microsoft.Resources/deployments/azurecli1481236530.764017329962","name":"azurecli1481236530.764017329962","properties":{"templateLink":{"uri":"https://azuresdkci.blob.core.windows.net/templatehost/CreateTrafficManagerProfile_2016-08-08/azuredeploy.json","contentVersion":"1.0.0.0"},"parameters":{"location":{"type":"String","value":"global"},"monitorPath":{"type":"String","value":"/"},"monitorPort":{"type":"Int","value":80},"monitorProtocol":{"type":"String","value":"http"},"routingMethod":{"type":"String","value":"weighted"},"status":{"type":"String","value":"enabled"},"trafficManagerProfileName":{"type":"String","value":"mytmprofile"},"ttl":{"type":"Int","value":30},"uniqueDnsName":{"type":"String","value":"mytrafficmanager001100a"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2016-12-08T22:35:32.1712917Z","duration":"PT0.5216899S","correlationId":"a98055b4-20b8-4e8e-8104-9f8a8510b680","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"trafficManagerProfiles","locations":["global"]}]}],"dependencies":[]}}'}
     headers:
-      Azure-AsyncOperation: ['https://management.azure.com/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourcegroups/cli_traffic_manager_test1/providers/Microsoft.Resources/deployments/azurecli1481218836.75846824014/operationStatuses/08587203880474556516?api-version=2015-11-01']
+      Azure-AsyncOperation: ['https://management.azure.com/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourcegroups/cli_traffic_manager_test_9hvn_/providers/Microsoft.Resources/deployments/azurecli1481236530.764017329962/operationStatuses/08587203703538280659?api-version=2015-11-01']
       Cache-Control: [no-cache]
-      Content-Length: ['1177']
+      Content-Length: ['1185']
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Thu, 08 Dec 2016 17:40:37 GMT']
+      Date: ['Thu, 08 Dec 2016 22:35:31 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
@@ -74,19 +74,15 @@ interactions:
           msrest_azure/0.4.5 trafficmanagerprofilecreationclient/2015-11-01 Azure-SDK-For-Python
           AZURECLI/TEST/0.1.0b10+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [6d819d78-bd6d-11e6-889c-a0b3ccf7272a]
+      x-ms-client-request-id: [9ff4993a-bd96-11e6-8514-a0b3ccf7272a]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_traffic_manager_test1/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587203880474556516?api-version=2015-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_traffic_manager_test/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587203703538280659?api-version=2015-11-01
   response:
-    body:
-      string: !!binary |
-        H4sIAAAAAAAEAO29B2AcSZYlJi9tynt/SvVK1+B0oQiAYBMk2JBAEOzBiM3mkuwdaUcjKasqgcpl
-        VmVdZhZAzO2dvPfee++999577733ujudTif33/8/XGZkAWz2zkrayZ4hgKrIHz9+fB8/In7xR02b
-        tevmo0cfvV5Pp3k+y2cf/ZL/ByCIe+QWAAAA
+    body: {string: '{"status":"Succeeded"}'}
     headers:
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Thu, 08 Dec 2016 17:41:08 GMT']
+      Date: ['Thu, 08 Dec 2016 22:36:02 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
@@ -104,20 +100,20 @@ interactions:
           msrest_azure/0.4.5 trafficmanagerprofilecreationclient/2015-11-01 Azure-SDK-For-Python
           AZURECLI/TEST/0.1.0b10+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [6d819d78-bd6d-11e6-889c-a0b3ccf7272a]
+      x-ms-client-request-id: [9ff4993a-bd96-11e6-8514-a0b3ccf7272a]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_traffic_manager_test/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2015-11-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_traffic_manager_test1/providers/Microsoft.Resources/deployments/azurecli1481218836.75846824014","name":"azurecli1481218836.75846824014","properties":{"templateLink":{"uri":"https://azuresdkci.blob.core.windows.net/templatehost/CreateTrafficManagerProfile_2016-08-08/azuredeploy.json","contentVersion":"1.0.0.0"},"parameters":{"location":{"type":"String","value":"global"},"monitorPath":{"type":"String","value":"/"},"monitorPort":{"type":"Int","value":80},"monitorProtocol":{"type":"String","value":"http"},"routingMethod":{"type":"String","value":"weighted"},"status":{"type":"String","value":"enabled"},"trafficManagerProfileName":{"type":"String","value":"mytmprofile"},"ttl":{"type":"Int","value":30},"uniqueDnsName":{"type":"String","value":"mytrafficmanager001100a"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2016-12-08T17:40:44.8946202Z","duration":"PT6.8726061S","correlationId":"b29af7c1-b4c2-4c4e-b7cd-1b9797893e11","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"trafficManagerProfiles","locations":["global"]}]}],"dependencies":[],"outputs":{"trafficManagerProfile":{"type":"Object","value":{"profileStatus":"Enabled","trafficRoutingMethod":"Weighted","dnsConfig":{"relativeName":"mytrafficmanager001100a","fqdn":"mytrafficmanager001100a.trafficmanager.net","ttl":30},"monitorConfig":{"profileMonitorStatus":"Inactive","protocol":"HTTP","port":80,"path":"/"},"endpoints":[]}}},"outputResources":[{"id":"Microsoft.Network/trafficManagerProfiles/mytmprofile"}]}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_traffic_manager_test_9hvn_/providers/Microsoft.Resources/deployments/azurecli1481236530.764017329962","name":"azurecli1481236530.764017329962","properties":{"templateLink":{"uri":"https://azuresdkci.blob.core.windows.net/templatehost/CreateTrafficManagerProfile_2016-08-08/azuredeploy.json","contentVersion":"1.0.0.0"},"parameters":{"location":{"type":"String","value":"global"},"monitorPath":{"type":"String","value":"/"},"monitorPort":{"type":"Int","value":80},"monitorProtocol":{"type":"String","value":"http"},"routingMethod":{"type":"String","value":"weighted"},"status":{"type":"String","value":"enabled"},"trafficManagerProfileName":{"type":"String","value":"mytmprofile"},"ttl":{"type":"Int","value":30},"uniqueDnsName":{"type":"String","value":"mytrafficmanager001100a"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2016-12-08T22:35:35.7613663Z","duration":"PT4.1117645S","correlationId":"a98055b4-20b8-4e8e-8104-9f8a8510b680","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"trafficManagerProfiles","locations":["global"]}]}],"dependencies":[],"outputs":{"trafficManagerProfile":{"type":"Object","value":{"profileStatus":"Enabled","trafficRoutingMethod":"Weighted","dnsConfig":{"relativeName":"mytrafficmanager001100a","fqdn":"mytrafficmanager001100a.trafficmanager.net","ttl":30},"monitorConfig":{"profileMonitorStatus":"Inactive","protocol":"HTTP","port":80,"path":"/"},"endpoints":[]}}},"outputResources":[{"id":"Microsoft.Network/trafficManagerProfiles/mytmprofile"}]}}'}
     headers:
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Thu, 08 Dec 2016 17:41:09 GMT']
+      Date: ['Thu, 08 Dec 2016 22:36:02 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
       Vary: [Accept-Encoding]
-      content-length: ['1607']
+      content-length: ['1614']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -130,15 +126,15 @@ interactions:
           msrest_azure/0.4.5 trafficmanagermanagementclient/0.30.0rc6 Azure-SDK-For-Python
           AZURECLI/TEST/0.1.0b10+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [81658b6e-bd6d-11e6-8c4d-a0b3ccf7272a]
+      x-ms-client-request-id: [b3d74a46-bd96-11e6-9ee1-a0b3ccf7272a]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_traffic_manager_test/providers/Microsoft.Network/trafficmanagerprofiles/mytmprofile?api-version=2015-11-01
   response:
-    body: {string: '{"id":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_traffic_manager_test1\/providers\/Microsoft.Network\/trafficManagerProfiles\/mytmprofile","name":"mytmprofile","type":"Microsoft.Network\/trafficManagerProfiles","location":"global","properties":{"profileStatus":"Enabled","trafficRoutingMethod":"Weighted","dnsConfig":{"relativeName":"mytrafficmanager001100a","fqdn":"mytrafficmanager001100a.trafficmanager.net","ttl":30},"monitorConfig":{"profileMonitorStatus":"Inactive","protocol":"HTTP","port":80,"path":"\/"},"endpoints":[]}}'}
+    body: {string: '{"id":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_traffic_manager_test_9hvn_\/providers\/Microsoft.Network\/trafficManagerProfiles\/mytmprofile","name":"mytmprofile","type":"Microsoft.Network\/trafficManagerProfiles","location":"global","properties":{"profileStatus":"Enabled","trafficRoutingMethod":"Weighted","dnsConfig":{"relativeName":"mytrafficmanager001100a","fqdn":"mytrafficmanager001100a.trafficmanager.net","ttl":30},"monitorConfig":{"profileMonitorStatus":"Inactive","protocol":"HTTP","port":80,"path":"\/"},"endpoints":[]}}'}
     headers:
       Cache-Control: [private]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Thu, 08 Dec 2016 17:41:09 GMT']
+      Date: ['Thu, 08 Dec 2016 22:36:04 GMT']
       Server: [Microsoft-IIS/8.5]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
       Transfer-Encoding: [chunked]
@@ -146,7 +142,7 @@ interactions:
       X-AspNet-Version: [4.0.30319]
       X-Content-Type-Options: [nosniff]
       X-Powered-By: [ASP.NET]
-      content-length: ['562']
+      content-length: ['567']
       x-ms-ratelimit-remaining-subscription-resource-requests: ['10799']
     status: {code: 200, message: OK}
 - request:
@@ -160,15 +156,15 @@ interactions:
           msrest_azure/0.4.5 trafficmanagermanagementclient/0.30.0rc6 Azure-SDK-For-Python
           AZURECLI/TEST/0.1.0b10+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [81ecb0ca-bd6d-11e6-b758-a0b3ccf7272a]
+      x-ms-client-request-id: [b4588cbe-bd96-11e6-aea8-a0b3ccf7272a]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_traffic_manager_test1/providers/Microsoft.Network/trafficmanagerprofiles/mytmprofile?api-version=2015-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_traffic_manager_test/providers/Microsoft.Network/trafficmanagerprofiles/mytmprofile?api-version=2015-11-01
   response:
-    body: {string: '{"id":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_traffic_manager_test1\/providers\/Microsoft.Network\/trafficManagerProfiles\/mytmprofile","name":"mytmprofile","type":"Microsoft.Network\/trafficManagerProfiles","location":"global","properties":{"profileStatus":"Enabled","trafficRoutingMethod":"Weighted","dnsConfig":{"relativeName":"mytrafficmanager001100a","fqdn":"mytrafficmanager001100a.trafficmanager.net","ttl":30},"monitorConfig":{"profileMonitorStatus":"Inactive","protocol":"HTTP","port":80,"path":"\/"},"endpoints":[]}}'}
+    body: {string: '{"id":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_traffic_manager_test_9hvn_\/providers\/Microsoft.Network\/trafficManagerProfiles\/mytmprofile","name":"mytmprofile","type":"Microsoft.Network\/trafficManagerProfiles","location":"global","properties":{"profileStatus":"Enabled","trafficRoutingMethod":"Weighted","dnsConfig":{"relativeName":"mytrafficmanager001100a","fqdn":"mytrafficmanager001100a.trafficmanager.net","ttl":30},"monitorConfig":{"profileMonitorStatus":"Inactive","protocol":"HTTP","port":80,"path":"\/"},"endpoints":[]}}'}
     headers:
       Cache-Control: [private]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Thu, 08 Dec 2016 17:41:11 GMT']
+      Date: ['Thu, 08 Dec 2016 22:36:04 GMT']
       Server: [Microsoft-IIS/8.5]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
       Transfer-Encoding: [chunked]
@@ -176,8 +172,8 @@ interactions:
       X-AspNet-Version: [4.0.30319]
       X-Content-Type-Options: [nosniff]
       X-Powered-By: [ASP.NET]
-      content-length: ['562']
-      x-ms-ratelimit-remaining-subscription-resource-requests: ['10791']
+      content-length: ['567']
+      x-ms-ratelimit-remaining-subscription-resource-requests: ['10799']
     status: {code: 200, message: OK}
 - request:
     body: '{"properties": {"weight": 50, "target": "www.microsoft.com"}}'
@@ -191,22 +187,22 @@ interactions:
           msrest_azure/0.4.5 trafficmanagermanagementclient/0.30.0rc6 Azure-SDK-For-Python
           AZURECLI/TEST/0.1.0b10+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [82360f0c-bd6d-11e6-9415-a0b3ccf7272a]
+      x-ms-client-request-id: [b4a8798c-bd96-11e6-ae2e-a0b3ccf7272a]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_traffic_manager_test/providers/Microsoft.Network/trafficmanagerprofiles/mytmprofile/externalEndpoints/myendpoint?api-version=2015-11-01
   response:
-    body: {string: '{"id":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_traffic_manager_test1\/providers\/Microsoft.Network\/trafficManagerProfiles\/mytmprofile\/externalEndpoints\/myendpoint","name":"myendpoint","type":"Microsoft.Network\/trafficManagerProfiles\/externalEndpoints","properties":{"endpointStatus":"Enabled","endpointMonitorStatus":"CheckingEndpoint","target":"www.microsoft.com","weight":50,"priority":1,"endpointLocation":null}}'}
+    body: {string: '{"id":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_traffic_manager_test_9hvn_\/providers\/Microsoft.Network\/trafficManagerProfiles\/mytmprofile\/externalEndpoints\/myendpoint","name":"myendpoint","type":"Microsoft.Network\/trafficManagerProfiles\/externalEndpoints","properties":{"endpointStatus":"Enabled","endpointMonitorStatus":"CheckingEndpoint","target":"www.microsoft.com","weight":50,"priority":1,"endpointLocation":null}}'}
     headers:
       Cache-Control: [private]
-      Content-Length: ['456']
+      Content-Length: ['461']
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Thu, 08 Dec 2016 17:41:11 GMT']
+      Date: ['Thu, 08 Dec 2016 22:36:06 GMT']
       Server: [Microsoft-IIS/8.5]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
       X-AspNet-Version: [4.0.30319]
       X-Content-Type-Options: [nosniff]
       X-Powered-By: [ASP.NET]
-      x-ms-ratelimit-remaining-subscription-writes: ['1197']
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
     status: {code: 201, message: Created}
 - request:
     body: null
@@ -219,15 +215,15 @@ interactions:
           msrest_azure/0.4.5 trafficmanagermanagementclient/0.30.0rc6 Azure-SDK-For-Python
           AZURECLI/TEST/0.1.0b10+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [82f3816c-bd6d-11e6-bfa7-a0b3ccf7272a]
+      x-ms-client-request-id: [b55f3e8a-bd96-11e6-82eb-a0b3ccf7272a]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_traffic_manager_test/providers/Microsoft.Network/trafficmanagerprofiles/mytmprofile/externalEndpoints/myendpoint?api-version=2015-11-01
   response:
-    body: {string: '{"id":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_traffic_manager_test1\/providers\/Microsoft.Network\/trafficManagerProfiles\/mytmprofile\/externalEndpoints\/myendpoint","name":"myendpoint","type":"Microsoft.Network\/trafficManagerProfiles\/externalEndpoints","properties":{"endpointStatus":"Enabled","endpointMonitorStatus":"CheckingEndpoint","target":"www.microsoft.com","weight":50,"priority":1,"endpointLocation":null}}'}
+    body: {string: '{"id":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_traffic_manager_test_9hvn_\/providers\/Microsoft.Network\/trafficManagerProfiles\/mytmprofile\/externalEndpoints\/myendpoint","name":"myendpoint","type":"Microsoft.Network\/trafficManagerProfiles\/externalEndpoints","properties":{"endpointStatus":"Enabled","endpointMonitorStatus":"CheckingEndpoint","target":"www.microsoft.com","weight":50,"priority":1,"endpointLocation":null}}'}
     headers:
       Cache-Control: [private]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Thu, 08 Dec 2016 17:41:12 GMT']
+      Date: ['Thu, 08 Dec 2016 22:36:06 GMT']
       Server: [Microsoft-IIS/8.5]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
       Transfer-Encoding: [chunked]
@@ -235,6 +231,6 @@ interactions:
       X-AspNet-Version: [4.0.30319]
       X-Content-Type-Options: [nosniff]
       X-Powered-By: [ASP.NET]
-      content-length: ['456']
+      content-length: ['461']
     status: {code: 200, message: OK}
 version: 1

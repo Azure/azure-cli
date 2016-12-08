@@ -919,6 +919,7 @@ def update_local_gateway(instance, gateway_ip_address=None, local_address_prefix
 #endregion
 
 #region Traffic Manager Commands
+
 def list_traffic_manager_profiles(resource_group_name=None):
     ncf = get_mgmt_service_client(TrafficManagerManagementClient).profiles
     if resource_group_name:
@@ -932,20 +933,18 @@ def update_traffic_manager_profile(instance, profile_status=None, routing_method
     if tags is not None:
         instance.tags = tags
     if profile_status is not None:
-        instance.profile_status = profile_status # TODO: Needs choice list Enabled/Disabled
+        instance.profile_status = profile_status
     if routing_method is not None:
         instance.traffic_routing_method = routing_method
     if ttl is not None:
         instance.dns_config.ttl = ttl
 
-    monitor_params = [monitor_protocol, monitor_port, monitor_path]
-    if any([x for x in monitor_params if x is not None]):
-        if monitor_protocol is not None:
-            instance.monitor_config.protocol = monitor_protocol
-        if monitor_port is not None:
-            instance.monitor_config.port = monitor_port
-        if monitor_path is not None:
-            instance.monitor_config.path = monitor_path
+    if monitor_protocol is not None:
+        instance.monitor_config.protocol = monitor_protocol
+    if monitor_port is not None:
+        instance.monitor_config.port = monitor_port
+    if monitor_path is not None:
+        instance.monitor_config.path = monitor_path
 
     return instance
 
