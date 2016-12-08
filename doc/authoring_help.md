@@ -8,13 +8,13 @@ The YAML syntax is described [here](http://www.yaml.org/spec/1.2/spec.html "here
 
 To override help for a given command:
 
-1. Find the command's module, Example "az account clear"
-	1. Search code base for "account clear"
-	2. Search result: src/command_modules/azure-cli-**profile**/azure/cli/command_modules/**profile**/commands.py
-	3. Result shows "account clear" is in the "profile" module
+1. Find the command's module, Example "az account clear".
+	1. Search code base for "account clear".
+	2. Search result: src/command_modules/azure-cli-**profile**/azure/cli/command_modules/**profile**/commands.py.
+	3. Result shows "account clear" is in the "profile" module.
 2. Using the module name, find the YAML help file which follows the path pattern:
-	1.  src/command_modules/azure-cli-**[module name]**/azure/cli/command_modules/**[module name]**/_help.py
-	2.  If the file doesn't exist, it can be created
+	1.  src/command_modules/azure-cli-**[module name]**/azure/cli/command_modules/**[module name]**/_help.py.
+	2.  If the file doesn't exist, it can be created.
 3.  Find or create a help entry with the name of the command/group you want to document.  See example below.
 
 ### Example YAML help file, _help.py ###
@@ -68,6 +68,16 @@ helps['account'] = """
                   text: az account set...
             """
 </pre>
+
+# Tips to write effective help for your command
+
+- Make sure the doc contains all the details that someone unfamiliar with the API needs to use the command.
+- Examples are worth a thousand words. Provide examples that cover common use cases.
+- Don't use "etc". Sometimes it makes sense to spell out a list completely. Sometimes it works to say "like ..." instead of "..., etc".
+- The short summary for a group should start with "Commands to...".
+- Use active voice. For example, say "Update web app configurations" instead of "Updates web app congfigurations" or "Updating web app configurations".
+- Refer to the CLI as "Azure CLI 2.0 (Preview)". We'll drop "(Preview)" when the CLI GAs.
+- Don't use highly formal language. If you imagine that another dev sat down with you and you were telling him what he needs to know to use the command, that's exactly what you need to write, in those words.
 
 # Testing Authored Help #
 
