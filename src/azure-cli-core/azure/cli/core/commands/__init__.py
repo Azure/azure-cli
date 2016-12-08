@@ -325,7 +325,7 @@ def _polish_rp_not_registerd_error(cli_error):
         match = re.match(reg, msg)
         parts = match.group(1).split('/')
         if len(parts) == 2:
-            cli_error = CLIError("Run 'az resource feature register --namespace {} -n {}' to enable the feature first".format(parts[0], parts[1]))
+            cli_error = CLIError("Run 'az feature register --namespace {} -n {}' to enable the feature first".format(parts[0], parts[1]))
     return cli_error
 
 def _get_cli_argument(command, argname):

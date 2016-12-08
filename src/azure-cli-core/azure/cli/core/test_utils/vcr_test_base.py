@@ -432,11 +432,11 @@ class ResourceGroupVCRTestBase(VCRTestBase):
         self.location = 'westus'
 
     def set_up(self):
-        self.cmd('resource group create --location {} --name {} --tags use=az-test'.format(
+        self.cmd('group create --location {} --name {} --tags use=az-test'.format(
             self.location, self.resource_group))
 
     def tear_down(self):
-        self.cmd('resource group delete --name {} --no-wait'.format(self.resource_group))
+        self.cmd('group delete --name {} --no-wait'.format(self.resource_group))
 
 class StorageAccountVCRTestBase(VCRTestBase):
     # pylint: disable=too-many-arguments
@@ -455,11 +455,11 @@ class StorageAccountVCRTestBase(VCRTestBase):
         self.location = 'westus'
 
     def set_up(self):
-        self.cmd('resource group create --location {} --name {} --tags use=az-test'.format(
+        self.cmd('group create --location {} --name {} --tags use=az-test'.format(
             self.location, self.resource_group))
         self.cmd('storage account create --sku Standard_LRS -l westus -n {} -g {}'.format(
             self.account, self.resource_group))
 
     def tear_down(self):
         self.cmd('storage account delete -g {} -n {}'.format(self.resource_group, self.account))
-        self.cmd('resource group delete --name {} --no-wait'.format(self.resource_group))
+        self.cmd('group delete --name {} --no-wait'.format(self.resource_group))

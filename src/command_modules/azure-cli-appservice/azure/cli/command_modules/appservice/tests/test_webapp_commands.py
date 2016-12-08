@@ -205,14 +205,14 @@ class AppServiceBadErrorPolishTest(ResourceGroupVCRTestBase):
 
     def set_up(self):
         super(AppServiceBadErrorPolishTest, self).set_up()
-        self.cmd('resource group create -n {} -l westus'.format(self.resource_group2))
+        self.cmd('group create -n {} -l westus'.format(self.resource_group2))
         self.cmd('appservice plan create -g {} -n {} --sku b1'.format(self.resource_group, self.plan))
         self.cmd('appservice web create -g {} -n {} --plan {}'.format(self.resource_group, self.webapp_name, self.plan))
         self.cmd('appservice plan create -g {} -n {} --sku b1'.format(self.resource_group2, self.plan))
 
     def tear_down(self):
         super(AppServiceBadErrorPolishTest, self).tear_down()
-        self.cmd('resource group delete -n {}'.format(self.resource_group2))
+        self.cmd('group delete -n {}'.format(self.resource_group2))
 
     def body(self):
         # we will try to produce an error by try creating 2 webapp with same name in different groups
