@@ -9,7 +9,7 @@ from azure.cli.core.help_files import helps #pylint: disable=unused-import
 
 helps['appservice'] = """
     type: group
-    short-summary: commands for managing your Azure web apps and App Service plans
+    short-summary: commands to manage your Azure web apps and App Service plans
 """
 
 helps['appservice web'] = """

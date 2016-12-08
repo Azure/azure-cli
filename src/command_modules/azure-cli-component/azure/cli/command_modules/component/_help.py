@@ -9,7 +9,7 @@ from azure.cli.core.help_files import helps #pylint: disable=unused-import
 
 helps['component'] = """
     type: group
-    short-summary: Manages and updates Azure CLI 2.0 (Preview) components
+    short-summary: Commands to manage and update Azure CLI 2.0 (Preview) components
 """
 
 helps['component list'] = """
