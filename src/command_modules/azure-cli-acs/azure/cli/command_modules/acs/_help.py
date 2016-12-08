@@ -5,11 +5,6 @@
 
 from azure.cli.core.help_files import helps
 
-helps['acs'] = """
-    type: group
-    short-summary: Commands to manage an Azure container service.
-"""
-
 helps['acs dcos'] = """
     type: group
     short-summary: Commands to manage a DCOS orchestrated Azure container service.

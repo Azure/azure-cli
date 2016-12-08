@@ -175,7 +175,7 @@ helps['vm boot-diagnostics get-boot-log'] = """
 """
 helps['acs'] = """
     type: group
-    short-summary: Manage Azure container services
+    short-summary: Commands to manage Azure container services
 """
 helps['acs create'] = """
     type: command
