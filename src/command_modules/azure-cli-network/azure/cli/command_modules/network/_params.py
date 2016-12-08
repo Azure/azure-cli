@@ -31,6 +31,7 @@ from azure.cli.command_modules.network._validators import \
      process_ag_url_path_map_rule_create_namespace, process_auth_create_namespace,
      process_public_ip_create_namespace, validate_private_ip_address,
      process_lb_frontend_ip_namespace, process_local_gateway_create_namespace,
+     process_tm_endpoint_create_namespace,
      validate_inbound_nat_rule_id_list, validate_address_pool_id_list,
      validate_inbound_nat_rule_name_or_id, validate_address_pool_name_or_id,
      validate_servers, load_cert_file,
@@ -483,6 +484,8 @@ register_cli_argument('network traffic-manager endpoint', 'priority', help="Prio
 register_cli_argument('network traffic-manager endpoint', 'target', help='Fully-qualified DNS name of the endpoint.')
 register_cli_argument('network traffic-manager endpoint', 'target_resource_id', help="The Azure Resource URI of the endpoint. Not applicable for endpoints of type 'ExternalEndpoints'.")
 register_cli_argument('network traffic-manager endpoint', 'weight', help="Weight of the endpoint when using the 'Weighted' traffic routing method. Values range from 1 to 1000.")
+
+register_cli_argument('network traffic-manager endpoint create', 'target', help='Fully-qualified DNS name of the endpoint.', validator=process_tm_endpoint_create_namespace)
 
 # DNS
 register_cli_argument('network dns', 'location', help=argparse.SUPPRESS, default='global')

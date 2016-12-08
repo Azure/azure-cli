@@ -1073,7 +1073,6 @@ class NetworkTrafficManagerScenarioTest(ResourceGroupVCRTestBase):
                  .format(tm_name=tm_name, resource_group=self.resource_group, unique_dns_name=unique_dns_name), checks=[
                      JMESPathCheck('trafficManagerProfile.trafficRoutingMethod', 'Weighted')
                      ])
-        # TODO: TEST UPDATE
         self.cmd('network traffic-manager profile show -g {resource_group} -n {tm_name}'
                  .format(resource_group=self.resource_group, tm_name=tm_name), checks=[
                      JMESPathCheck('dnsConfig.relativeName', unique_dns_name)
@@ -1088,7 +1087,6 @@ class NetworkTrafficManagerScenarioTest(ResourceGroupVCRTestBase):
                  .format(tm_name=tm_name, endpoint_name=endpoint_name, resource_group=self.resource_group), checks=[
                      JMESPathCheck('target', 'www.microsoft.com')
                      ])
-        # TODO: TEST UPDATE
 
 class NetworkDnsScenarioTest(ResourceGroupVCRTestBase):
 
