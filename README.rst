@@ -146,7 +146,7 @@ Usage
 Getting Started
 =====================
 
-After installation, use the ``az configure`` command to help setup your environment and get you logged in.
+After installation, use the ``az configure`` command to help set up your environment and get you logged in.
 
 .. code-block:: console
 
