@@ -1088,18 +1088,81 @@ helps['network route-table route'] = """
     type: group
     short-summary: Manage route table routes
 """
+
+# Traffic Manager
+
 helps['network traffic-manager'] = """
     type: group
     short-summary: Route incoming traffic for high performance and availability
 """
+
 helps['network traffic-manager endpoint'] = """
     type: group
     short-summary: Manage traffic manager end points
 """
+
 helps['network traffic-manager profile'] = """
     type: group
     short-summary: Manage traffic manager profiles
 """
+
+helps['network traffic-manager profile check-dns'] = """
+    type: command
+    short-summary: Check the availability of a Traffic Manager relative DNS name.
+"""
+
+helps['network traffic-manager profile create'] = """
+    type: command
+    short-summary: Create a new Traffic Manager profile.
+"""
+
+helps['network traffic-manager profile delete'] = """
+    type: command
+    short-summary: Delete a Traffic Manager profile.
+"""
+
+helps['network traffic-manager profile list'] = """
+    type: command
+    short-summary: List Traffic Manager profiles in a resource group or subscription.
+"""
+
+helps['network traffic-manager profile show'] = """
+    type: command
+    short-summary: Show details of a Traffic Manager profile.
+"""
+
+helps['network traffic-manager profile update'] = """
+    type: command
+    short-summary: Update an existing Traffic Manager profile.
+"""
+
+helps['network traffic-manager endpoint create'] = """
+    type: command
+    short-summary: Create a new Traffic Manager endpoint.
+"""
+
+helps['network traffic-manager endpoint delete'] = """
+    type: command
+    short-summary: Delete a Traffic Manager endpoint.
+"""
+
+helps['network traffic-manager endpoint list'] = """
+    type: command
+    short-summary: List Traffic Manager endpoints in a resource group.
+"""
+
+helps['network traffic-manager endpoint show'] = """
+    type: command
+    short-summary: Show details of a Traffic Manager endpoint.
+"""
+
+helps['network traffic-manager endpoint update'] = """
+    type: command
+    short-summary: Update an existing Traffic Manager endpoint.
+"""
+
+# Virtual Network (VNET)
+
 helps['network vnet'] = """
     type: group
     short-summary: Provision private networks

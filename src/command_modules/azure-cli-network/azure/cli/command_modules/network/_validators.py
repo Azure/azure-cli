@@ -404,6 +404,60 @@ def process_public_ip_create_namespace(namespace):
     if namespace.dns_name:
         namespace.dns_name_type = 'new'
 
+def process_tm_endpoint_create_namespace(namespace):
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    from azure.mgmt.trafficmanager import TrafficManagerManagementClient
+
+    client = get_mgmt_service_client(TrafficManagerManagementClient).profiles
+    profile = client.get(namespace.resource_group_name, namespace.profile_name)
+
+    routing_type = profile.traffic_routing_method # pylint: disable=no-member
+    endpoint_type = namespace.endpoint_type
+    all_options = \
+        ['target_resource_id', 'target', 'min_child_endpoints', 'priority', 'weight', \
+         'endpoint_location']
+    props_to_options = {
+        'target_resource_id': '--target-resource-id',
+        'target': '--target',
+        'min_child_endpoints': '--min-child-endpoints',
+        'priority': '--priority',
+        'weight': '--weight',
+        'endpoint_location': '--endpoint-location'
+    }
+    required_options = []
+
+    # determine which options are required based on profile and routing method
+    if endpoint_type.lower() == 'externalendpoints':
+        required_options.append('target')
+    else:
+        required_options.append('target_resource_id')
+
+    if routing_type.lower() == 'weighted':
+        required_options.append('weight')
+    elif routing_type.lower() == 'priority':
+        required_options.append('priority')
+
+    if endpoint_type.lower() == 'nestedendpoints':
+        required_options.append('min_child_endpoints')
+
+    if endpoint_type.lower() in ['nestedendpoints', 'externalendpoints'] and \
+        routing_type.lower() == 'performance':
+        required_options.append('endpoint_location')
+
+    # ensure required options are provided
+    missing_options = [props_to_options[x] for x in required_options \
+        if getattr(namespace, x, None) is None]
+    extra_options = [props_to_options[x] for x in all_options if getattr(namespace, x, None) \
+        is not None and x not in required_options]
+
+    if missing_options or extra_options:
+        error_message = "Incorrect options for profile routing method '{}' and endpoint type '{}'.".format(routing_type, endpoint_type) # pylint: disable=line-too-long
+        if missing_options:
+            error_message = '{}\nSupply the following: {}'.format(error_message, ', '.join(missing_options)) # pylint: disable=line-too-long
+        if extra_options:
+            error_message = '{}\nOmit the following: {}'.format(error_message, ', '.join(extra_options)) # pylint: disable=line-too-long
+        raise CLIError(error_message)
+
 def load_cert_file(param_name):
     def load_cert_validator(namespace):
         attr = getattr(namespace, param_name)
