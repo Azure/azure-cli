@@ -451,7 +451,6 @@ def create_service_principal_for_rbac(name=None, password=None, years=1, #pylint
     import time
     graph_client = _graph_client_factory()
     role_client = _auth_client_factory().role_assignments
-    role = role or 'contributor'
     scopes = scopes or ['/subscriptions/' + role_client.config.subscription_id]
     session_key = None
     sp_oid = None
@@ -484,7 +483,7 @@ def create_service_principal_for_rbac(name=None, password=None, years=1, #pylint
         app_id = aad_application.app_id
         #retry while the root cause is being investigated by AAD service team
         #And the 'session_key' will not be used as well.
-        for _ in range(1, 12):
+        for l in range(1, 12):
             try:
                 aad_sp = _create_service_principal(app_id, bool(scopes), resolve_app=False)
                 break
@@ -492,6 +491,7 @@ def create_service_principal_for_rbac(name=None, password=None, years=1, #pylint
                 #pylint: disable=line-too-long
                 if 'The appId of the service principal does not reference a valid application object' in str(ex):
                     time.sleep(5)
+                    logger.warning('Retrying service principal creation: %s/12', l)
                 else:
                     logger.warning("Creating service principal failed for appid '%s'. Trace followed:\n%s",
                                    name, ex.response.headers) #pylint: disable=no-member
@@ -502,13 +502,14 @@ def create_service_principal_for_rbac(name=None, password=None, years=1, #pylint
 
     #Again, use retry while replicate latency is being investigated
     for scope in scopes:
-        for _ in range(1, 24):
+        for l in range(1, 24):
             try:
                 _create_role_assignment(role, sp_oid, None, scope, resolve_assignee=False)
                 break
             except Exception as ex:
                 if ' does not exist in the directory ' in str(ex):
                     time.sleep(5)
+                    logger.warning('Retrying role assignment creation: %s/24', l)
                     continue
                 elif sp_created:
                     #dump out history for diagnoses
