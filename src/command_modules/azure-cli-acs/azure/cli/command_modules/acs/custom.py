@@ -353,6 +353,14 @@ def _create_kubernetes(resource_group_name, deployment_name, dns_name_prefix, na
     template = {
         "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
         "contentVersion": "1.0.0.0",
+        "parameters": {
+            "clientSecret": {
+                "type": "secureString",
+                "metadata": {
+                    "description": "The client secret for the service principal"
+                }
+            }
+        },
         "resources": [
             {
                 "apiVersion": "2016-09-30",
@@ -361,7 +369,7 @@ def _create_kubernetes(resource_group_name, deployment_name, dns_name_prefix, na
                 "name": name,
                 "properties": {
                     "orchestratorProfile": {
-                        "orchestratorType": "Custom"
+                        "orchestratorType": "kubernetes"
                     },
                     "masterProfile": {
                         "count": 1,
@@ -387,18 +395,19 @@ def _create_kubernetes(resource_group_name, deployment_name, dns_name_prefix, na
                     },
                     "servicePrincipalProfile": {
                         "ClientId": service_principal,
-                        "Secret": client_secret
-                    },
-                    "customProfile": {
-                        "orchestrator": "kubernetes"
+                        "Secret": "[parameters('clientSecret')]"
                     }
                 }
             }
         ]
     }
-
+    params = {
+        "clientSecret": {
+            "value": client_secret
+        }
+    }
     properties = DeploymentProperties(template=template, template_link=None,
-                                      parameters=None, mode='incremental')
+                                      parameters=params, mode='incremental')
     smc = _resource_client_factory()
     return smc.deployments.create_or_update(resource_group_name, deployment_name, properties)
 
