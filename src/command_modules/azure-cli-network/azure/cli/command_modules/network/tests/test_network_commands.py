@@ -1068,16 +1068,25 @@ class NetworkTrafficManagerScenarioTest(ResourceGroupVCRTestBase):
         unique_dns_name = 'mytrafficmanager001100a'
 
         self.cmd('network traffic-manager profile check-dns -n myfoobar1')
-        self.cmd('network traffic-manager profile create -n {} -g {} --routing-method weighted --unique-dns-name {}'.format(tm_name, self.resource_group, unique_dns_name),
-            checks=JMESPathCheck('trafficManagerProfile.trafficRoutingMethod', 'Weighted'))
-        self.cmd('network traffic-manager profile show -g {} -n {}'.format(self.resource_group, tm_name),
-            checks=JMESPathCheck('dnsConfig.relativeName', unique_dns_name))
-        # TODO: Test update
-        self.cmd('network traffic-manager endpoint create -n {} --profile-name {} -g {} --type externalEndpoints --weight 50 --target www.microsoft.com'.format(endpoint_name, tm_name, self.resource_group),
-            checks=JMESPathCheck('type', 'Microsoft.Network/trafficManagerProfiles/externalEndpoints'))
-        self.cmd('network traffic-manager endpoint show --profile-name {} --type  externalEndpoints -n {} -g {}'.format(tm_name, endpoint_name, self.resource_group),
-            checks=JMESPathCheck('target', 'www.microsoft.com'))
-        # TODO: Test update
+        self.cmd('network traffic-manager profile create -n {tm_name} -g {resource_group}'
+                 ' --routing-method weighted --unique-dns-name {unique_dns_name}'
+                 .format(tm_name=tm_name, resource_group=self.resource_group, unique_dns_name=unique_dns_name), checks=[
+                     JMESPathCheck('trafficManagerProfile.trafficRoutingMethod', 'Weighted')
+                     ])
+        self.cmd('network traffic-manager profile show -g {resource_group} -n {tm_name}'
+                 .format(resource_group=self.resource_group, tm_name=tm_name), checks=[
+                     JMESPathCheck('dnsConfig.relativeName', unique_dns_name)
+                     ])
+        self.cmd('network traffic-manager endpoint create -n {endpoint_name} --profile-name {tm_name} -g {resource_group}'
+                 ' --type externalEndpoints --weight 50 --target www.microsoft.com'
+                 .format(endpoint_name=endpoint_name, tm_name=tm_name, resource_group=self.resource_group), checks=[
+                     JMESPathCheck('type', 'Microsoft.Network/trafficManagerProfiles/externalEndpoints')
+                     ])
+        self.cmd('network traffic-manager endpoint show --profile-name {tm_name} --type  externalEndpoints'
+                 ' -n {endpoint_name} -g {resource_group}'
+                 .format(tm_name=tm_name, endpoint_name=endpoint_name, resource_group=self.resource_group), checks=[
+                     JMESPathCheck('target', 'www.microsoft.com')
+                     ])
 
 class NetworkDnsScenarioTest(ResourceGroupVCRTestBase):
 

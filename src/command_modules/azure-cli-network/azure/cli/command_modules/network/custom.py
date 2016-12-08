@@ -919,12 +919,34 @@ def update_local_gateway(instance, gateway_ip_address=None, local_address_prefix
 #endregion
 
 #region Traffic Manager Commands
+
 def list_traffic_manager_profiles(resource_group_name=None):
     ncf = get_mgmt_service_client(TrafficManagerManagementClient).profiles
     if resource_group_name:
         return ncf.list_all_in_resource_group(resource_group_name)
     else:
         return ncf.list_all()
+
+def update_traffic_manager_profile(instance, profile_status=None, routing_method=None, tags=None,
+                                   monitor_protocol=None, monitor_port=None, monitor_path=None,
+                                   ttl=None):
+    if tags is not None:
+        instance.tags = tags
+    if profile_status is not None:
+        instance.profile_status = profile_status
+    if routing_method is not None:
+        instance.traffic_routing_method = routing_method
+    if ttl is not None:
+        instance.dns_config.ttl = ttl
+
+    if monitor_protocol is not None:
+        instance.monitor_config.protocol = monitor_protocol
+    if monitor_port is not None:
+        instance.monitor_config.port = monitor_port
+    if monitor_path is not None:
+        instance.monitor_config.path = monitor_path
+
+    return instance
 
 def create_traffic_manager_endpoint(resource_group_name, profile_name, endpoint_type, endpoint_name,
                                     target_resource_id=None, target=None,
@@ -942,7 +964,30 @@ def create_traffic_manager_endpoint(resource_group_name, profile_name, endpoint_
     return ncf.create_or_update(resource_group_name, profile_name, endpoint_type, endpoint_name,
                                 endpoint)
 
-create_traffic_manager_endpoint.__doc__ = Endpoint.__doc__
+def update_traffic_manager_endpoint(instance, endpoint_type=None, endpoint_location=None,
+                                    endpoint_status=None, endpoint_monitor_status=None,
+                                    priority=None, target=None, target_resource_id=None,
+                                    weight=None, min_child_endpoints=None):
+    if endpoint_type is not None:
+        instance.type = endpoint_type
+    if endpoint_location is not None:
+        instance.endpoint_location = endpoint_location
+    if endpoint_status is not None:
+        instance.endpoint_status = endpoint_status
+    if endpoint_monitor_status is not None:
+        instance.endpoint_monitor_status = endpoint_monitor_status
+    if priority is not None:
+        instance.priority = priority
+    if target is not None:
+        instance.target = target
+    if target_resource_id is not None:
+        instance.target_resource_id = target_resource_id
+    if weight is not None:
+        instance.weight = weight
+    if min_child_endpoints is not None:
+        instance.min_child_endpoints = min_child_endpoints
+
+    return instance
 
 def list_traffic_manager_endpoints(resource_group_name, profile_name, endpoint_type=None):
     ncf = get_mgmt_service_client(TrafficManagerManagementClient).profiles
