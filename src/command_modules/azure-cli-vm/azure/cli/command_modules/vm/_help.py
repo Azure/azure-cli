@@ -169,7 +169,7 @@ helps['vm boot-diagnostics disable'] = """
     type: command
     short-summary: Disable boot diagnostics 
 """
-helps['vm boot-diagnostics get-boot-log`] = """
+helps['vm boot-diagnostics get-boot-log'] = """
     type: command
     short-summary: Get the boot diagnostics log 
 """
