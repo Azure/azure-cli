@@ -10,6 +10,7 @@ from azure.storage.blob import BlockBlobService
 from azure.storage.blob.models import Include
 from azure.cli.core._logging import get_az_logger
 
+
 BlobCopyResult = namedtuple('BlobCopyResult', ['name', 'copy_id'])
 
 
@@ -162,9 +163,8 @@ def storage_blob_download_batch(client, source, destination, source_container_na
             logger.warning('  - %s', b)
         return []
     else:
-        from functools import partial
-        action_download_blob = partial(_download_blob, client, source_container_name, destination)
-        return list(map(action_download_blob, source_blobs))
+        return list(_download_blob(client, source_container_name, destination, blob) for blob in
+                    source_blobs)
 
 
 def storage_blob_upload_batch(client, source, destination, pattern=None, source_files=None,
@@ -272,5 +272,3 @@ def _download_blob(blob_service, container, destination_folder, blob_name):
 
     blob = blob_service.get_blob_to_path(container, blob_name, destination_path)
     return blob.name
-
-

@@ -3,9 +3,9 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import os
 import os.path
 from fnmatch import fnmatch
-from functools import partial
 
 
 def collect_blobs(blob_service, container, pattern=None):
@@ -22,12 +22,11 @@ def collect_blobs(blob_service, container, pattern=None):
     if not container:
         raise ValueError('missing parameter container')
 
-    _match = partial(_match_path, pattern)
-
     if not _pattern_has_wildcards(pattern):
         return [pattern]
     else:
-        return filter(_match, (blob.name for blob in blob_service.list_blobs(container)))
+        return (blob.name for blob in blob_service.list_blobs(container)
+                if _match_path(pattern, blob.name))
 
 
 def collect_files(file_service, share, pattern=None):
@@ -67,8 +66,6 @@ def filter_none(iterable):
 
 def glob_files_locally(folder_path, pattern):
     """glob files in local folder based on the given pattern"""
-    import os.path
-    from fnmatch import fnmatch
     pattern = os.path.join(folder_path, pattern.lstrip('/')) if pattern else None
 
     from os import walk
@@ -84,8 +81,6 @@ def glob_files_locally(folder_path, pattern):
 
 def glob_files_remotely(client, share_name, pattern):
     """glob the files in remote file share based on the given pattern"""
-    import os.path
-    from fnmatch import fnmatch
     from collections import deque
     from azure.storage.file.models import Directory, File
 
@@ -103,7 +98,6 @@ def glob_files_remotely(client, share_name, pattern):
 
 def mkdir_p(path):
     import errno
-    import os
     try:
         os.makedirs(path)
     except OSError as exc:  # Python <= 2.5

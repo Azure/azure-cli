@@ -4,10 +4,11 @@
 # --------------------------------------------------------------------------------------------
 
 import os
+from datetime import datetime, timedelta
 from .integration_test_base import StorageIntegrationTestBase
 from ..util import glob_files_remotely
 from azure.storage.blob.models import BlobPermissions
-from datetime import datetime, timedelta
+from azure.storage.file.models import FilePermissions
 
 
 def _cli_main(command, *args):
@@ -55,7 +56,6 @@ class StorageFileCopyIntegrationTests(StorageIntegrationTestBase):
         else:
             cls._clear_test_source_share = False
 
-        from ..util import glob_files_remotely
         test_files = [f for f in glob_files_remotely(cls._file_service, cls._test_source_share,
                                                      pattern=None)]
         assert len(test_files) == 41
@@ -172,19 +172,15 @@ class StorageFileCopyIntegrationTests(StorageIntegrationTestBase):
 
     @classmethod
     def _create_read_sas(cls, client, share=None, container=None):
-        from datetime import datetime, timedelta
-
         if (share and container) or (not share and not container):
             raise ValueError('set either share or container')
 
         if share:
-            from azure.storage.file.models import FilePermissions
             return client.generate_share_shared_access_signature(
                 share,
                 FilePermissions(read=True),
                 datetime.utcnow() + timedelta(minutes=15))
         elif container:
-            from azure.storage.blob.models import BlobPermissions
             return client.generate_container_shared_access_signature(
                 container,
                 BlobPermissions(read=True),

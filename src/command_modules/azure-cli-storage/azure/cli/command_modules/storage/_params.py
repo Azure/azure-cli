@@ -38,7 +38,8 @@ from ._validators import \
      get_content_setting_validator, validate_encryption, validate_accept,
      validate_key, storage_account_key_options,
      process_file_download_namespace, process_logging_update_namespace,
-     process_metric_update_namespace, process_blob_copy_batch_namespace)
+     process_metric_update_namespace, process_blob_copy_batch_namespace,
+     get_source_file_or_blob_service_client)
 
 # UTILITY
 
@@ -352,7 +353,6 @@ register_cli_argument('storage file download-batch', 'max_connections',
 
 # FILE COPY-BATCH PARAMETERS
 with CommandContext('storage file copy start-batch') as c:
-    from ._validators import get_source_file_or_blob_service_client
     c.reg_arg('source_client', ignore_type, validator=get_source_file_or_blob_service_client)
 
     with c.arg_group('Copy Source Arguments') as group:

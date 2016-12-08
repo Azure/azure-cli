@@ -5,6 +5,8 @@
 
 from ..storage_url_helpers import StorageResourceIdentifier
 
+# pylint: disable=line-too-long
+
 
 def test_is_url():
     def _check_is_url(moniker, expectation):

@@ -10,7 +10,6 @@ Commands for storage file share operations
 # pylint: disable=too-many-arguments
 
 import os.path
-from functools import partial
 from azure.cli.core._logging import get_az_logger
 from azure.cli.core._util import CLIError
 from azure.common import AzureException, AzureHttpError
@@ -138,8 +137,8 @@ def storage_file_copy_batch(client, source_client,
                     blob_name, destination_dir=destination_path, metadata=metadata, timeout=timeout,
                     existing_dirs=existing_dirs)
 
-        return list(filter_none(map(action_blob_copy,
-                                    collect_blobs(source_client, source_container, pattern))))
+        return list(filter_none(action_blob_copy(blob) for blob in
+                                collect_blobs(source_client, source_container, pattern)))
 
     elif source_share:
         # copy files from share to share
@@ -162,8 +161,8 @@ def storage_file_copy_batch(client, source_client,
                     file_name, destination_dir=destination_path, metadata=metadata,
                     timeout=timeout, existing_dirs=existing_dirs)
 
-        return list(filter_none(map(action_file_copy,
-                                    collect_files(source_client, source_share, pattern))))
+        return list(filter_none(action_file_copy(file) for file in
+                                collect_files(source_client, source_share, pattern)))
     else:
         # won't happen, the validator should ensure either source_container or source_share is set
         raise ValueError('Fail to find source. Neither blob container or file share is specified.')
