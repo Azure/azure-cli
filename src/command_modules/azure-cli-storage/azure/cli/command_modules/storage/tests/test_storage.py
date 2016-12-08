@@ -35,9 +35,8 @@ def _get_connection_string(test):
 class StorageAccountScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-        super(StorageAccountScenarioTest, self).__init__(__file__, test_method)
+        super(StorageAccountScenarioTest, self).__init__(__file__, test_method, resource_group='test_storage_account_scenario')
         self.account = 'testcreatedelete'
-        self.resource_group = 'test_storage_account_scenario'
 
     def test_storage_account_scenario(self):
         self.execute()
@@ -97,8 +96,7 @@ class StorageAccountScenarioTest(ResourceGroupVCRTestBase):
 class StorageBlobScenarioTest(StorageAccountVCRTestBase):
 
     def __init__(self, test_method):
-        super(StorageBlobScenarioTest, self).__init__(__file__, test_method)
-        self.resource_group = 'test_blob_scenario_test'
+        super(StorageBlobScenarioTest, self).__init__(__file__, test_method, resource_group='test_blob_scenario_test')
         self.container = 'cont1'
         self.proposed_lease_id = 'abcdabcd-abcd-abcd-abcd-abcdabcdabcd'
         self.new_lease_id = 'dcbadcba-dcba-dcba-dcba-dcbadcbadcba'
@@ -261,8 +259,7 @@ class StorageBlobScenarioTest(StorageAccountVCRTestBase):
 class StorageBlobCopyScenarioTest(StorageAccountVCRTestBase):
 
     def __init__(self, test_method):
-        super(StorageBlobCopyScenarioTest, self).__init__(__file__, test_method)
-        self.resource_group = 'test_storage_blob_copy'
+        super(StorageBlobCopyScenarioTest, self).__init__(__file__, test_method, resource_group='test_storage_blob_copy')
         self.src_container = 'testcopyblob1'
         self.src_blob = 'src_blob'
         self.dest_container = 'testcopyblob2'
@@ -304,8 +301,7 @@ class StorageBlobCopyScenarioTest(StorageAccountVCRTestBase):
 class StorageFileScenarioTest(StorageAccountVCRTestBase):
 
     def __init__(self, test_method):
-        super(StorageFileScenarioTest, self).__init__(__file__, test_method)
-        self.resource_group = 'test_file_scenario'
+        super(StorageFileScenarioTest, self).__init__(__file__, test_method, resource_group='test_file_scenario')
         self.share1 = 'testshare01'
         self.share2 = 'testshare02'
         self.initialized = False
@@ -459,8 +455,7 @@ class StorageFileScenarioTest(StorageAccountVCRTestBase):
 class StorageFileCopyScenarioTest(StorageAccountVCRTestBase):
 
     def __init__(self, test_method):
-        super(StorageFileCopyScenarioTest, self).__init__(__file__, test_method)
-        self.resource_group = 'test_file_copy_scenario'
+        super(StorageFileCopyScenarioTest, self).__init__(__file__, test_method, resource_group='test_file_copy_scenario')
         self.src_share = 'testcopyfile1'
         self.src_dir = 'testdir'
         self.src_file = 'src_file.txt'
@@ -521,8 +516,7 @@ class StorageFileCopyScenarioTest(StorageAccountVCRTestBase):
 class StorageTableScenarioTest(StorageAccountVCRTestBase):
 
     def __init__(self, test_method):
-        super(StorageTableScenarioTest, self).__init__(__file__, test_method)
-        self.resource_group = 'test_table_scenario_test'
+        super(StorageTableScenarioTest, self).__init__(__file__, test_method, resource_group='test_table_scenario_test')
         self.table = 'table1'
 
     def test_storage_table_scenario(self):
@@ -609,8 +603,7 @@ class StorageTableScenarioTest(StorageAccountVCRTestBase):
 class StorageQueueScenarioTest(StorageAccountVCRTestBase):
 
     def __init__(self, test_method):
-        super(StorageQueueScenarioTest, self).__init__(__file__, test_method)
-        self.resource_group = 'test_queue_scenario_test'
+        super(StorageQueueScenarioTest, self).__init__(__file__, test_method, resource_group='test_queue_scenario_test')
         self.queue = 'queue1'
 
     def test_storage_queue_scenario(self):

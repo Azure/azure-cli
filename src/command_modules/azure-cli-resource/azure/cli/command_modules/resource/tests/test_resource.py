@@ -79,8 +79,7 @@ class ResourceScenarioTest(ResourceGroupVCRTestBase):
         self.execute()
 
     def __init__(self, test_method):
-        super(ResourceScenarioTest, self).__init__(__file__, test_method)
-        self.resource_group = 'azure-cli-resource-test'
+        super(ResourceScenarioTest, self).__init__(__file__, test_method, resource_group='azure-cli-resource-test')
         self.vnet_name = 'cli-test-vnet1'
         self.subnet_name = 'cli-test-subnet1'
 
@@ -134,8 +133,7 @@ class ResourceIDScenarioTest(ResourceGroupVCRTestBase):
         self.execute()
 
     def __init__(self, test_method):
-        super(ResourceIDScenarioTest, self).__init__(__file__, test_method)
-        self.resource_group = 'azure-cli-resource-id-test3'
+        super(ResourceIDScenarioTest, self).__init__(__file__, test_method, resource_group='azure-cli-resource-id-test3')
         self.vnet_name = 'cli-test-vnet1'
         self.subnet_name = 'cli-test-subnet1'
 
@@ -238,8 +236,7 @@ class ProviderRegistrationTest(VCRTestBase): # Not RG test base because it opera
 
 class DeploymentTest(ResourceGroupVCRTestBase):
     def __init__(self, test_method):
-        super(DeploymentTest, self).__init__(__file__, test_method)
-        self.resource_group = 'azure-cli-deployment-test'
+        super(DeploymentTest, self).__init__(__file__, test_method, resource_group='azure-cli-deployment-test')
 
     def test_group_deployment(self):
         self.execute()
@@ -274,8 +271,7 @@ class DeploymentTest(ResourceGroupVCRTestBase):
 
 class DeploymentnoWaitTest(ResourceGroupVCRTestBase):
     def __init__(self, test_method):
-        super(DeploymentnoWaitTest, self).__init__(__file__, test_method)
-        self.resource_group = 'azure-cli-deployment-test'
+        super(DeploymentnoWaitTest, self).__init__(__file__, test_method, resource_group='azure-cli-deployment-test')
 
     def test_group_deployment_no_wait(self):
         self.execute()
@@ -297,8 +293,7 @@ class DeploymentnoWaitTest(ResourceGroupVCRTestBase):
 
 class DeploymentThruUriTest(ResourceGroupVCRTestBase):
     def __init__(self, test_method):
-        super(DeploymentThruUriTest, self).__init__(__file__, test_method)
-        self.resource_group = 'azure-cli-deployment-uri-test'
+        super(DeploymentThruUriTest, self).__init__(__file__, test_method, resource_group='azure-cli-deployment-uri-test')
 
     def test_group_deployment_thru_uri(self):
         self.execute()
@@ -383,8 +378,7 @@ class FeatureScenarioTest(VCRTestBase): # Not RG test base because it operates o
 class PolicyScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-        super(PolicyScenarioTest, self).__init__(__file__, test_method)
-        self.resource_group = 'azure-cli-policy-test-group'
+        super(PolicyScenarioTest, self).__init__(__file__, test_method, resource_group='azure-cli-policy-test-group')
 
     def test_resource_policy(self):
         self.execute()
