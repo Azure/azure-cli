@@ -44,7 +44,7 @@ def storage_file_upload_batch(client, destination, source, pattern=None, dryrun=
         dir_name = os.path.dirname(source_pair[1])
         file_name = os.path.basename(source_pair[1])
 
-        _make_directory_in_files_hare(client, destination, dir_name)
+        _make_directory_in_files_share(client, destination, dir_name)
         client.create_file_from_path(share_name=destination,
                                      directory_name=dir_name,
                                      file_name=file_name,
@@ -179,7 +179,7 @@ def _create_file_and_directory_from_blob(file_service, blob_service, share, cont
     full_path = os.path.join(destination_dir, blob_name) if destination_dir else blob_name
     file_name = os.path.basename(full_path)
     dir_name = os.path.dirname(full_path)
-    _make_directory_in_files_hare(file_service, share, dir_name, existing_dirs)
+    _make_directory_in_files_share(file_service, share, dir_name, existing_dirs)
 
     try:
         file_service.copy_file(share, dir_name, file_name, blob_url, metadata, timeout)
@@ -203,7 +203,7 @@ def _create_file_and_directory_from_file(file_service, source_file_service, shar
         if destination_dir else os.path.join(source_file_dir, source_file_name)
     file_name = os.path.basename(full_path)
     dir_name = os.path.dirname(full_path)
-    _make_directory_in_files_hare(file_service, share, dir_name, existing_dirs)
+    _make_directory_in_files_share(file_service, share, dir_name, existing_dirs)
 
     try:
         file_service.copy_file(share, dir_name, file_name, file_url, metadata, timeout)
@@ -214,7 +214,7 @@ def _create_file_and_directory_from_file(file_service, source_file_service, shar
         raise CLIError(error_template.format(file_name, source_share, share))
 
 
-def _make_directory_in_files_hare(file_service, file_share, directory_path, existing_dirs=None):
+def _make_directory_in_files_share(file_service, file_share, directory_path, existing_dirs=None):
     """
     Create directories recursively.
 
