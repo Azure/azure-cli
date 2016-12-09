@@ -698,9 +698,9 @@ def _set_route_table(ncf, resource_group_name, route_table, subnet):
         subnet.route_table = None
 
 def create_subnet(resource_group_name, virtual_network_name, subnet_name,
-                  address_prefix='10.0.0.0/24', network_security_group=None,
+                  address_prefix='10.0.1.0/24', network_security_group=None,
                   route_table=None):
-    '''Create a virtual network (VNet) subnet
+    '''Create a virtual network (VNet) subnet.
     :param str address_prefix: address prefix in CIDR format.
     :param str network_security_group: Name or ID of network security
         group to associate with the subnet.
