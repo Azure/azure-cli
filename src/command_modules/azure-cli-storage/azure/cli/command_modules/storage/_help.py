@@ -240,6 +240,51 @@ helps['storage file download-batch'] = """
                          Note that this MD5 hash is not stored with the file.
 """
 
+helps['storage file copy start-batch'] = """
+    type: command
+    short-summary: Copy multiple files to file share asynchronously.
+    parameters:
+        - name: --destination-share
+          type: string
+          short-summary: The file share where the specified source files or blobs to be copied to.
+        - name: --destination-path
+          type: string
+          short-summary: The directory where the specified source files or blobs to be copied to. If
+                         omitted, the files or blobs will be copied to the root directory.
+        - name: --pattern
+          type: string
+          short-summary: The pattern is used for globbing files or blobs in the source. The
+                         supported patterns are '*', '?', '[seq', and '[!seq]'.
+        - name: --dryrun
+          type: bool
+          short-summary: Output the list of files or blobs which would be uploaded. No actual data
+                         transfer will occur.
+        - name: --source-account
+          type: string
+          short-summary: The source storage account from which the files or blobs will be copied to
+                         the destination. If omitted, it is assumed that source is in the same
+                         storage account as destination
+        - name: --source-key
+          type: string
+          short-summary: The account key for the source storage account.
+        - name: --source-container
+          type: string
+          short-summary: The source container from which the blobs will be copied to the destination
+        - name: --source-share
+          type: string
+          short-summary: The source share from which the files will be copied to the destination
+        - name: --source-uri
+          type: string
+          short-summary: A URI specifies an file share or blob container from which the files or
+                         blobs will be copied to the destination. If the source is in another
+                         account, the source must either be public or must be authenticated via a
+                         shared access signature. If the source is public, no authentication is
+                         required.
+        - name: --source-sas
+          type: string
+          short-summary: The shared access signature for the source storage account.
+"""
+
 helps['storage logging'] = """
     type: group
     short-summary: Manage Storage service logging information.

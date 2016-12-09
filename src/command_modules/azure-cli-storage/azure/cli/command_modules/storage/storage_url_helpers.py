@@ -20,6 +20,7 @@ class StorageResourceIdentifier(object):
         self.directory = None
         self.filename = None
         self.snapshot = None
+        self.sas_token = None
 
         from six.moves.urllib.parse import urlparse # pylint: disable=import-error
         url = urlparse(moniker)
@@ -45,6 +46,16 @@ class StorageResourceIdentifier(object):
                 self.directory = ''
         else:
             self.account_name = None
+
+        if 'snapshot=' not in url.query:
+            self.sas_token = url.query
+        else:
+            parts = url.query.split('&')
+            for p in parts:
+                if p.startswith('snapshot='):
+                    parts.remove(p)
+                    self.snapshot = p[9:]
+                self.sas_token = '&'.join(parts)
 
     @classmethod
     def _separate_path_l(cls, path):

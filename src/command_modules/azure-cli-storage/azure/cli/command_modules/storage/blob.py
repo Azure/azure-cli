@@ -10,10 +10,11 @@ from azure.storage.blob import BlockBlobService
 from azure.storage.blob.models import Include
 from azure.cli.core._logging import get_az_logger
 
+
 BlobCopyResult = namedtuple('BlobCopyResult', ['name', 'copy_id'])
 
 
-#pylint: disable=too-many-arguments
+# pylint: disable=too-many-arguments
 def storage_blob_copy_batch(client, source_account, source_container, destination_container,
                             source_sas=None, prefix=None, recursive=False, snapshots=False,
                             exclude_old=False, exclude_new=False):
@@ -126,7 +127,7 @@ def storage_blob_copy_batch(client, source_account, source_container, destinatio
     return [BlobCopyResult(b.name, _copy_single_blob(b).id) for b in source_blobs]
 
 
-#pylint: disable=unused-argument
+# pylint: disable=unused-argument
 def storage_blob_download_batch(client, source, destination, source_container_name, pattern=None,
                                 dryrun=False):
     """
@@ -148,30 +149,9 @@ def storage_blob_download_batch(client, source, destination, source_container_na
         The pattern is used for files globbing. The supported patterns are '*', '?', '[seq]',
         and '[!seq]'.
     """
-    import os.path
-    from fnmatch import fnmatch
+    from .util import collect_blobs
+    source_blobs = collect_blobs(client, source_container_name, pattern)
 
-    def _pattern_has_wildcards(p):
-        return not p or p.find('*') != -1 or p.find('?') != -1 or p.find('[') != -1
-
-    source_blobs = []
-    if not _pattern_has_wildcards(pattern):
-        source_blobs.append(pattern)
-    else:
-        # IDEA:
-        # 1. Listing is slow. It can be done in parallel with copying.
-        # 2. Use the prefix parameter to reduce the returned blobs list size
-        source_blobs = client.list_blobs(source_container_name)
-
-        if pattern:
-            source_blobs = [blob.name for blob in source_blobs if fnmatch(blob.name, pattern)]
-        else:
-            source_blobs = [blob.name for blob in source_blobs]
-
-        if not any(source_blobs):
-            return []
-
-    result = []
     if dryrun:
         logger = get_az_logger(__name__)
         logger.warning('download action: from %s to %s', source, destination)
@@ -181,17 +161,10 @@ def storage_blob_download_batch(client, source, destination, source_container_na
         logger.warning(' operations')
         for b in source_blobs or []:
             logger.warning('  - %s', b)
+        return []
     else:
-        # TODO: try catch IO exception
-        for blob in source_blobs:
-            dst = os.path.join(destination, blob)
-            dst_folder = os.path.dirname(dst)
-            if not os.path.exists(dst_folder):
-                os.makedirs(dst_folder)
-
-            result.append(client.get_blob_to_path(source_container_name, blob, dst))
-
-    return result
+        return list(_download_blob(client, source_container_name, destination, blob) for blob in
+                    source_blobs)
 
 
 def storage_blob_upload_batch(client, source, destination, pattern=None, source_files=None,
@@ -285,3 +258,17 @@ def storage_blob_upload_batch(client, source, destination, pattern=None, source_
             print('uploading {}'.format(f[0]))
             upload_action(*f)
 
+
+def _download_blob(blob_service, container, destination_folder, blob_name):
+    # TODO: try catch IO exception
+
+    import os.path
+    from .util import mkdir_p
+
+    destination_path = os.path.join(destination_folder, blob_name)
+    destination_folder = os.path.dirname(destination_path)
+    if not os.path.exists(destination_folder):
+        mkdir_p(destination_folder)
+
+    blob = blob_service.get_blob_to_path(container, blob_name, destination_path)
+    return blob.name
