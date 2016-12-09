@@ -49,7 +49,7 @@ def acs_browse(resource_group, name, disable_browser=False):
     """
     Opens a browser to the web interface for the cluster orchestrator
 
-    :param name: name: Name of the target Azure container service instance.
+    :param name: Name of the target Azure container service instance.
     :type name: String
     :param resource_group_name:  Name of Azure container service's resource group.
     :type resource_group_name: String
@@ -58,6 +58,7 @@ def acs_browse(resource_group, name, disable_browser=False):
     """
     acs_info = _get_acs_info(name, resource_group)
     orchestrator_type = acs_info.orchestrator_profile.orchestrator_type # pylint: disable=no-member
+
     if  orchestrator_type == 'kubernetes':
         return k8s_browse(disable_browser)
     elif orchestrator_type == 'dcos':
@@ -130,18 +131,13 @@ def _dcos_browse_internal(acs_info, disable_browser):
 def acs_install_cli(resource_group, name, install_location=None, client_version=None):
     acs_info = _get_acs_info(name, resource_group)
     orchestrator_type = acs_info.orchestrator_profile.orchestrator_type  # pylint: disable=no-member
+    kwargs = {'install_location': install_location}
+    if client_version:
+        kwargs['client_version'] = client_version
     if  orchestrator_type == 'kubernetes':
-        # TODO: is there a more python idiomatic way to do this?
-        if client_version:
-            return k8s_install_cli(client_version=client_version, install_location=install_location)
-        else:
-            return k8s_install_cli(install_location=install_location)
+        return k8s_install_cli(**kwargs)
     elif orchestrator_type == 'dcos':
-        # TODO: is there a more python idiomatic way to do this?
-        if client_version:
-            return dcos_install_cli(client_version=client_version, install_location=install_location)
-        else:
-            return dcos_install_cli(install_location=install_location)
+        return dcos_install_cli(**kwargs)
     else:
         raise CLIError('Unsupported orchestrator type {} for install-cli'.format(orchestrator_type))
 
