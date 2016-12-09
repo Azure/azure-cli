@@ -223,7 +223,7 @@ def _add_role_assignment(role, service_principal):
             time.sleep(2 + 2 * x)
     print('done')
 
-def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_name_prefix=None, content_version=None, admin_username="azureuser", agent_count="3", agent_vm_size="Standard_D2_v2", location=None, master_count="3", orchestrator_type="dcos", service_principal=None, client_secret=None, tags=None, custom_headers=None, raw=False, **operation_config):
+def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_name_prefix=None, content_version=None, admin_username="azureuser", agent_count="3", agent_vm_size="Standard_D2_v2", location=None, master_count="3", orchestrator_type="dcos", service_principal=None, client_secret=None, tags=None, custom_headers=None, raw=False, **operation_config): #pylint: disable=too-many-locals
     """Create a new Acs.
     :param resource_group_name: The name of the resource group. The name
      is case insensitive.
