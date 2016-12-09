@@ -5,7 +5,7 @@ The following commands showcase how to perform some common operations available 
 $ az login
 
 # Create a resource group
-$ az resource group create -l westus -n demo100
+$ az group create -l westus -n demo100
 
 # Find common vm images 
 $ az vm image list
@@ -26,7 +26,7 @@ $ az vm create -g Demo100 -n Demo100VM --image UbuntuLTS
 $ az vm list-ip-addresses -g Demo100 
 
 # Export a resource group to an ARM template
-$ az resource group export -n Demo100 > template.json
+$ az group export -n Demo100 > template.json
 $ cat template.json | less
   
 # learning to query with JPTerm (OSX: brew install jpterm)
