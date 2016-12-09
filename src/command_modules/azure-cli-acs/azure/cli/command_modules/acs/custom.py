@@ -68,9 +68,32 @@ def wait_then_open_async(url):
     t.daemon = True
     t.start()
 
+def acs_browse(resource_group, name, disable_browser=False):
+    """
+    Opens a browser to the web interface for the cluster orchestrator
+
+    :param name: Name of the target Azure container service instance.
+    :type name: String
+    :param resource_group_name:  Name of Azure container service's resource group.
+    :type resource_group_name: String
+    :param disable_browser: If true, don't launch a web browser after estabilishing the proxy
+    :type disable_browser: bool
+    """
+    acs_info = _get_acs_info(name, resource_group)
+    orchestrator_type = acs_info.orchestrator_profile.orchestrator_type # pylint: disable=no-member
+
+    if  orchestrator_type == 'kubernetes':
+        return k8s_browse(disable_browser)
+    elif orchestrator_type == 'dcos':
+        return _dcos_browse_internal(acs_info, disable_browser)
+    else:
+        raise CLIError('Unsupported orchestrator type {} for browse'.format(orchestrator_type))
+
 def k8s_browse(disable_browser=False):
     """
     Wrapper on the 'kubectl proxy' command, for consistency with 'az dcos browse'
+    :param disable_browser: If true, don't launch a web browser after estabilishing the proxy
+    :type disable_browser: bool
     """
     logger.warning('Proxy running on 127.0.0.1:8001/ui')
     logger.warning('Press CTRL+C to close the tunnel...')
@@ -86,8 +109,13 @@ def dcos_browse(name, resource_group_name, disable_browser=False):
     :type name: String
     :param resource_group_name:  Name of Azure container service's resource group.
     :type resource_group_name: String
+    :param disable_browser: If true, don't launch a web browser after estabilishing the proxy
+    :type disable_browser: bool
     """
     acs_info = _get_acs_info(name, resource_group_name)
+    _dcos_browse_internal(acs_info, disable_browser)
+
+def _dcos_browse_internal(acs_info, disable_browser):
     acs = acs_client.ACSClient()
     if not acs.connect(_get_host_name(acs_info), _get_username(acs_info)):
         raise CLIError('Error connecting to ACS: {}'.format(_get_host_name(acs_info)))
@@ -122,6 +150,19 @@ def dcos_browse(name, resource_group_name, disable_browser=False):
         proxy.disable_http_proxy()
 
     return
+
+def acs_install_cli(resource_group, name, install_location=None, client_version=None):
+    acs_info = _get_acs_info(name, resource_group)
+    orchestrator_type = acs_info.orchestrator_profile.orchestrator_type  # pylint: disable=no-member
+    kwargs = {'install_location': install_location}
+    if client_version:
+        kwargs['client_version'] = client_version
+    if  orchestrator_type == 'kubernetes':
+        return k8s_install_cli(**kwargs)
+    elif orchestrator_type == 'dcos':
+        return dcos_install_cli(**kwargs)
+    else:
+        raise CLIError('Unsupported orchestrator type {} for install-cli'.format(orchestrator_type))
 
 def dcos_install_cli(install_location=None, client_version='1.8'):
     """
