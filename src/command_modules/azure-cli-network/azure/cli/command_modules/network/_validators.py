@@ -489,13 +489,19 @@ def load_cert_file(param_name):
 
     def _validate_name_or_id(namespace, value, resource_type):
         if not is_valid_resource_id(value):
+            subscription = getattr(namespace, 'subscription', get_subscription_id())
             return resource_id(
-                subscription=namespace.subscription or get_subscription_id(),
+                subscription=subscription,
                 resource_group=namespace.resource_group_name,
                 namespace='Microsoft.Network',
                 type=resource_type,
                 name=value)
+        return value
 
+    namespace.vnet_gateway1_id = \
+        _validate_name_or_id(namespace, namespace.vnet_gateway1_id, 'virtualNetworkGateways')
+
+    # TODO: Check for existence to preclude wonkiness
     if namespace.express_route_circuit2_id:
         namespace.express_route_circuit2_id = \
             _validate_name_or_id(

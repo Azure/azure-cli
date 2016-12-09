@@ -742,6 +742,23 @@ def update_vpn_connection(instance, routing_weight=None):
         instance.routing_weight = routing_weight
     return instance
 
+def _validate_bgp_peering(instance, asn, bgp_peering_address, peer_weight):
+    if any([asn, bgp_peering_address, peer_weight]):
+        if instance.bgp_settings is not None:
+            # update existing parameters selectively
+            if asn is not None:
+                instance.bgp_settings.asn = asn
+            if peer_weight is not None:
+                instance.bgp_settings.peer_weight = peer_weight
+            if bgp_peering_address is not None:
+                instance.bgp_settings.bgp_peering_address = bgp_peering_address
+        elif asn and bgp_peering_address:
+            from azure.mgmt.network.models import BgpSettings
+            instance.bgp_settings = BgpSettings(asn, bgp_peering_address, peer_weight)
+        else:
+            raise CLIError(
+                'incorrect usage: --asn ASN --bgp-peering-address IP [--peer-weight WEIGHT]')
+
 # region VNet Gateway Commands
 
 def create_vnet_gateway_root_cert(resource_group_name, gateway_name, public_cert_data, cert_name):
@@ -813,7 +830,8 @@ def _prep_cert_create(gateway_name, resource_group_name):
 
 def update_vnet_gateway(instance, address_prefixes=None, sku=None, vpn_gateway_type=None,
                         public_ip_address=None, gateway_type=None, enable_bgp=None,
-                        virtual_network=None, tags=None):
+                        asn=None, bgp_peering_address=None, peer_weight=None, virtual_network=None,
+                        tags=None):
 
     if address_prefixes is not None:
         if not instance.vpn_client_configuration:
@@ -844,6 +862,8 @@ def update_vnet_gateway(instance, address_prefixes=None, sku=None, vpn_gateway_t
 
     if enable_bgp is not None:
         instance.enable_bgp = enable_bgp
+
+    _validate_bgp_peering(instance, asn, bgp_peering_address, peer_weight)
 
     if virtual_network is not None:
         instance.ip_configurations[0].subnet.id = \
@@ -905,21 +925,7 @@ create_route.__doc__ = Route.__doc__
 def update_local_gateway(instance, gateway_ip_address=None, local_address_prefix=None, asn=None,
                          bgp_peering_address=None, peer_weight=None, tags=None):
 
-    if any([asn, bgp_peering_address, peer_weight]):
-        if instance.bgp_settings is not None:
-            # update existing parameters selectively
-            if asn is not None:
-                instance.bgp_settings.asn = asn
-            if peer_weight is not None:
-                instance.bgp_settings.peer_weight = peer_weight
-            if bgp_peering_address is not None:
-                instance.bgp_settings.bgp_peering_address = bgp_peering_address
-        elif asn and bgp_peering_address:
-            from azure.mgmt.network.models import BgpSettings
-            instance.bgp_settings = BgpSettings(asn, bgp_peering_address, peer_weight)
-        else:
-            raise CLIError(
-                'incorrect usage: --asn ASN --bgp-peering-address IP [--peer-weight WEIGHT]')
+    _validate_bgp_peering(instance, asn, bgp_peering_address, peer_weight)
 
     if gateway_ip_address is not None:
         instance.gateway_ip_address = gateway_ip_address

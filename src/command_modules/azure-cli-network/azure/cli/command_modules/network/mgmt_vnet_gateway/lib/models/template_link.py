@@ -21,7 +21,7 @@ class TemplateLink(Model):
     sending a request.
 
     :ivar uri: URI referencing the template. Default value:
-     "https://azuresdkci.blob.core.windows.net/templatehost/CreateVnetGateway_2016-11-29/azuredeploy.json"
+     "https://azuresdkci.blob.core.windows.net/templatehost/CreateVnetGateway_2016-12-9/azuredeploy.json"
      .
     :vartype uri: str
     :param content_version: If included it must match the ContentVersion in
@@ -38,7 +38,7 @@ class TemplateLink(Model):
         'content_version': {'key': 'contentVersion', 'type': 'str'},
     }
 
-    uri = "https://azuresdkci.blob.core.windows.net/templatehost/CreateVnetGateway_2016-11-29/azuredeploy.json"
+    uri = "https://azuresdkci.blob.core.windows.net/templatehost/CreateVnetGateway_2016-12-9/azuredeploy.json"
 
     def __init__(self, content_version=None):
         self.content_version = content_version

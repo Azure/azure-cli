@@ -263,13 +263,22 @@ class VCRTestBase(unittest.TestCase):#pylint: disable=too-many-instance-attribut
                              '/graph.windows.net/{}/'.format(MOCKED_TENANT_ID), request.uri)
         request.uri = re.sub('/sig=([^/]+)&', '/sig=0000&', request.uri)
         request.uri = _scrub_deployment_name(request.uri)
-        # remove randomized portion from resource group name
-        resource_group_name = re.search('resource[Gg]roups/([^/]+_)/', request.uri)
+        # remove randomized portion from resource group name that is part of the URI
+        uri_rg_pattern = 'resource[Gg]roups/([^/]+_)/'
+        resource_group_name = re.search(uri_rg_pattern, request.uri)
         if resource_group_name:
             resource_group_name = resource_group_name.group(0)
             resource_group_name = resource_group_name.rsplit('_', 2)[0]
-            request.uri = re.sub('resource[Gg]roups/([^/]+_)/',
-                                 '{}/'.format(resource_group_name), request.uri)
+            request.uri = re.sub(uri_rg_pattern, '{}/'.format(resource_group_name), request.uri)
+
+        # remove randomized portion from resource group name that is part of a filter
+        filter_rg_pattern = 'resource[Gg]roup[s]*%20eq%20%27([^%]+_)%'
+        resource_group_name = re.search(filter_rg_pattern, request.uri)
+        if resource_group_name:
+            resource_group_name = resource_group_name.group(0)
+            resource_group_name = resource_group_name.rsplit('_', 2)[0]
+            request.uri = re.sub(filter_rg_pattern, '{}%'.format(resource_group_name), request.uri)
+
         # replace random storage account name with dummy name
         request.uri = re.sub('/vcrstorage([\\d]+).',
                              '/{}.'.format(MOCKED_STORAGE_ACCOUNT), request.uri)

@@ -21,14 +21,17 @@ class DeploymentVnetGateway(Model):
     sending a request.
 
     :ivar uri: URI referencing the template. Default value:
-     "https://azuresdkci.blob.core.windows.net/templatehost/CreateVnetGateway_2016-11-29/azuredeploy.json"
+     "https://azuresdkci.blob.core.windows.net/templatehost/CreateVnetGateway_2016-12-9/azuredeploy.json"
      .
     :vartype uri: str
     :param content_version: If included it must match the ContentVersion in
      the template.
     :type content_version: str
-    :param enable_bgp: Enable BGP (Border Gateway Protocol). Default value:
-     False .
+    :param asn: Autonomous System Number to use for the BGP settings.
+    :type asn: str
+    :param bgp_peering_address: IP address to use for BGP peering.
+    :type bgp_peering_address: str
+    :param enable_bgp: Flag to enable BGP settings. Default value: False .
     :type enable_bgp: bool
     :param gateway_type: Gateway type. Possible values include: 'Vpn',
      'ExpressRoute'. Default value: "Vpn" .
@@ -36,6 +39,8 @@ class DeploymentVnetGateway(Model):
      <Default.models.gatewayType>`
     :param location: Location for resources.
     :type location: str
+    :param peer_weight: Weight added to routes learned through BGP peering.
+    :type peer_weight: str
     :param public_ip_address: Name or ID of public IP address to use.
     :type public_ip_address: str
     :param public_ip_address_type: Type of Public IP Address to associate
@@ -44,8 +49,11 @@ class DeploymentVnetGateway(Model):
     :type public_ip_address_type: str or :class:`publicIpAddressType
      <Default.models.publicIpAddressType>`
     :param sku: VPN Gateway SKU. Possible values include: 'Basic',
-     'Standard', 'HighPerformance'. Default value: "Basic" .
+     'Standard', 'HighPerformance', 'UltraPerformance'. Default value:
+     "Basic" .
     :type sku: str or :class:`sku <Default.models.sku>`
+    :param sku_capacity: SKU capacity. Default value: 2 .
+    :type sku_capacity: int
     :param tags: Tags object.
     :type tags: object
     :param virtual_network: Name or ID of a virtual network that contains a
@@ -58,9 +66,10 @@ class DeploymentVnetGateway(Model):
      value: "existingId" .
     :type virtual_network_type: str or :class:`virtualNetworkType
      <Default.models.virtualNetworkType>`
-    :param vpn_type: VPN gateway type. Possible values include: 'RouteBased',
-     'PolicyBased'. Default value: "RouteBased" .
-    :type vpn_type: str or :class:`vpnType <Default.models.vpnType>`
+    :param vpn_gateway_type: VPN gateway type. Possible values include:
+     'RouteBased', 'PolicyBased'. Default value: "RouteBased" .
+    :type vpn_gateway_type: str or :class:`vpnGatewayType
+     <Default.models.vpnGatewayType>`
     :ivar mode: Gets or sets the deployment mode. Default value:
      "Incremental" .
     :vartype mode: str
@@ -78,34 +87,42 @@ class DeploymentVnetGateway(Model):
     _attribute_map = {
         'uri': {'key': 'properties.templateLink.uri', 'type': 'str'},
         'content_version': {'key': 'properties.templateLink.contentVersion', 'type': 'str'},
+        'asn': {'key': 'properties.parameters.asn.value', 'type': 'str'},
+        'bgp_peering_address': {'key': 'properties.parameters.bgpPeeringAddress.value', 'type': 'str'},
         'enable_bgp': {'key': 'properties.parameters.enableBgp.value', 'type': 'bool'},
         'gateway_type': {'key': 'properties.parameters.gatewayType.value', 'type': 'gatewayType'},
         'location': {'key': 'properties.parameters.location.value', 'type': 'str'},
+        'peer_weight': {'key': 'properties.parameters.peerWeight.value', 'type': 'str'},
         'public_ip_address': {'key': 'properties.parameters.publicIpAddress.value', 'type': 'str'},
         'public_ip_address_type': {'key': 'properties.parameters.publicIpAddressType.value', 'type': 'publicIpAddressType'},
         'sku': {'key': 'properties.parameters.sku.value', 'type': 'sku'},
+        'sku_capacity': {'key': 'properties.parameters.skuCapacity.value', 'type': 'int'},
         'tags': {'key': 'properties.parameters.tags.value', 'type': 'object'},
         'virtual_network': {'key': 'properties.parameters.virtualNetwork.value', 'type': 'str'},
         'virtual_network_gateway_name': {'key': 'properties.parameters.virtualNetworkGatewayName.value', 'type': 'str'},
         'virtual_network_type': {'key': 'properties.parameters.virtualNetworkType.value', 'type': 'virtualNetworkType'},
-        'vpn_type': {'key': 'properties.parameters.vpnType.value', 'type': 'vpnType'},
+        'vpn_gateway_type': {'key': 'properties.parameters.vpnGatewayType.value', 'type': 'vpnGatewayType'},
         'mode': {'key': 'properties.mode', 'type': 'str'},
     }
 
-    uri = "https://azuresdkci.blob.core.windows.net/templatehost/CreateVnetGateway_2016-11-29/azuredeploy.json"
+    uri = "https://azuresdkci.blob.core.windows.net/templatehost/CreateVnetGateway_2016-12-9/azuredeploy.json"
 
     mode = "Incremental"
 
-    def __init__(self, public_ip_address, virtual_network, virtual_network_gateway_name, content_version=None, enable_bgp=False, gateway_type="Vpn", location=None, public_ip_address_type="existingId", sku="Basic", tags=None, virtual_network_type="existingId", vpn_type="RouteBased"):
+    def __init__(self, public_ip_address, virtual_network, virtual_network_gateway_name, content_version=None, asn=None, bgp_peering_address=None, enable_bgp=False, gateway_type="Vpn", location=None, peer_weight=None, public_ip_address_type="existingId", sku="Basic", sku_capacity=2, tags=None, virtual_network_type="existingId", vpn_gateway_type="RouteBased"):
         self.content_version = content_version
+        self.asn = asn
+        self.bgp_peering_address = bgp_peering_address
         self.enable_bgp = enable_bgp
         self.gateway_type = gateway_type
         self.location = location
+        self.peer_weight = peer_weight
         self.public_ip_address = public_ip_address
         self.public_ip_address_type = public_ip_address_type
         self.sku = sku
+        self.sku_capacity = sku_capacity
         self.tags = tags
         self.virtual_network = virtual_network
         self.virtual_network_gateway_name = virtual_network_gateway_name
         self.virtual_network_type = virtual_network_type
-        self.vpn_type = vpn_type
+        self.vpn_gateway_type = vpn_gateway_type

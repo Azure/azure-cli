@@ -997,7 +997,7 @@ class NetworkSubnetSetScenarioTest(ResourceGroupVCRTestBase):
             self.resource_group, self.vnet_name, vnet_addr_prefix, subnet_name, subnet_addr_prefix))
         self.cmd('network nsg create --resource-group {} --name {}'.format(self.resource_group, nsg_name))
 
-        #Test we can update the address space and nsg
+        # Test we can update the address space and nsg
         self.cmd('network vnet subnet update --resource-group {} --vnet-name {} --name {} --address-prefix {} --network-security-group {}'.format(self.resource_group, self.vnet_name, subnet_name, subnet_addr_prefix_new, nsg_name), checks=[
             JMESPathCheck('addressPrefix', subnet_addr_prefix_new),
             JMESPathCheck('ends_with(@.networkSecurityGroup.id, `{}`)'.format('/' + nsg_name), True)
@@ -1017,7 +1017,7 @@ class NetworkSubnetSetScenarioTest(ResourceGroupVCRTestBase):
 class NetworkVpnGatewayScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-        super(NetworkVpnGatewayScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_vpn_gateway')
+        super(NetworkVpnGatewayScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_vpn_gateway', debug=True)
         self.vnet1_name = 'myvnet1'
         self.vnet2_name = 'myvnet2'
         self.gateway1_name = 'gateway1'
@@ -1046,13 +1046,18 @@ class NetworkVpnGatewayScenarioTest(ResourceGroupVCRTestBase):
         vnet1_id = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}'.format(subscription_id, rg, self.vnet1_name)
         vnet2_id = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}'.format(subscription_id, rg, self.vnet2_name)
 
-        self.cmd('network vnet-gateway create -g {} -n {} --vnet {} --public-ip-address {}'.format(rg, self.gateway1_name, vnet1_id, self.ip1_name))
-        self.cmd('network vnet-gateway create -g {} -n {} --vnet {} --public-ip-address {}'.format(rg, self.gateway2_name, vnet2_id, self.ip2_name))
+        self.cmd('network vnet-gateway create -g {} -n {} --vnet {} --public-ip-address {} --no-wait'.format(rg, self.gateway1_name, vnet1_id, self.ip1_name))
+        self.cmd('network vnet-gateway create -g {} -n {} --vnet {} --public-ip-address {} --no-wait'.format(rg, self.gateway2_name, vnet2_id, self.ip2_name))
+
+        self.cmd('network vnet-gateway wait -g {} -n {} --created'.format(rg, self.gateway1_name))
+        self.cmd('network vnet-gateway wait -g {} -n {} --created'.format(rg, self.gateway2_name))
+
+        # TEST UPDATE METHODS
 
         gateway1_id = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworkGateways/{}'.format(subscription_id, rg, self.gateway1_name)
-        gateway2_id = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworkGateways/{}'.format(subscription_id, rg, self.gateway2_name)
-
-        self.cmd('network vpn-connection create -n myconnection -g {} --shared-key 123 --vnet-gateway1-id {} --vnet-gateway2-id {}'.format(rg, gateway1_id, gateway2_id))
+        self.cmd('network vpn-connection create -n myconnection -g {} --shared-key 123 --vnet-gateway1 {} --vnet-gateway2 {}'.format(rg, gateway1_id, self.gateway2_name))
+        self.cmd('network vpn-connection update -n myconnection -g {} --routing-weight 25'.format(rg),
+            checks=JMESPathCheck('routingWeight', 25))
 
 class NetworkTrafficManagerScenarioTest(ResourceGroupVCRTestBase):
 
