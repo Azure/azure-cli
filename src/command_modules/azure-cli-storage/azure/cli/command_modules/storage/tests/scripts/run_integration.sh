@@ -18,5 +18,5 @@ command -v coverage >/dev/null 2>&1 || {
 
 export test_connection_string=$(az storage account show-connection-string -n $1 -g $2 --query 'connectionString' | tr -d '"')
 
-nosetests -v -i integration_test_* --cover-html --with-coverage
+nosetests -v -i integration_test_*
 

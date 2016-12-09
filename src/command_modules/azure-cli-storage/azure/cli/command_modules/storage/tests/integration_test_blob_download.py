@@ -38,7 +38,7 @@ class StorageBlobDownloadIntegrationTests(StorageIntegrationTestBase):
                  .split())
 
         test_blobs = [b.name for b in cls._blob_service.list_blobs(cls._test_source_container)]
-        assert len(test_blobs) == 31
+        assert len(test_blobs) == 41
 
     @classmethod
     def tearDownClass(cls):
@@ -57,7 +57,7 @@ class StorageBlobDownloadIntegrationTests(StorageIntegrationTestBase):
                     self._blob_service.account_name, self._blob_service.account_key)
 
         cli_main(cmd.split())
-        assert sum(len(f) for r, d, f in os.walk(self._test_folder)) == 31
+        assert sum(len(f) for r, d, f in os.walk(self._test_folder)) == 41
 
     def test_blob_download_recursively_with_pattern_1(self):
         cmd = 'storage blob download-batch -s https://{}/{} -d {} --pattern {} --account-key {}'\
@@ -65,12 +65,12 @@ class StorageBlobDownloadIntegrationTests(StorageIntegrationTestBase):
                     self._test_folder, '*', self._blob_service.account_key)
 
         cli_main(cmd.split())
-        assert sum(len(f) for r, d, f in os.walk(self._test_folder)) == 31
+        assert sum(len(f) for r, d, f in os.walk(self._test_folder)) == 41
 
     def test_blob_download_recursively_with_pattern_2(self):
         cmd = 'storage blob download-batch -s https://{}/{} -d {} --pattern {} --account-key {}'\
             .format(self._blob_service.primary_endpoint, self._test_source_container,
-                    self._test_folder, 'alpha/*', self._blob_service.account_key)
+                    self._test_folder, 'apple/*', self._blob_service.account_key)
 
         cli_main(cmd.split())
         assert sum(len(f) for r, d, f in os.walk(self._test_folder)) == 10
@@ -81,5 +81,5 @@ class StorageBlobDownloadIntegrationTests(StorageIntegrationTestBase):
                     self._test_folder, '*/file_0', self._blob_service.account_key)
 
         cli_main(cmd.split())
-        assert sum(len(f) for r, d, f in os.walk(self._test_folder)) == 3
+        assert sum(len(f) for r, d, f in os.walk(self._test_folder)) == 4
 

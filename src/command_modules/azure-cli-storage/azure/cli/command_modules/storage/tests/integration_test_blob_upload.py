@@ -41,7 +41,7 @@ class StorageBlobUploadIntegrationTests(StorageIntegrationTestBase):
         cli_main(command.split())
 
         blobs = [b.name for b in self._blob_service.list_blobs(self._test_container_name)]
-        assert len(blobs) == 31
+        assert len(blobs) == 41
 
     def test_blob_upload_multiple_files_dry_run(self):
         url = 'http://{}/{}'.format(self._blob_service.primary_endpoint, self._test_container_name)
@@ -58,10 +58,10 @@ class StorageBlobUploadIntegrationTests(StorageIntegrationTestBase):
         self._keep_test_context = True
 
     def test_blob_upload_multiple_files_patterns_1(self):
-        self._test_blob_upload_multiple_files_patterns('alpha/*', 10)
+        self._test_blob_upload_multiple_files_patterns('apple/*', 10)
 
     def test_blob_upload_multiple_files_patterns_2(self):
-        self._test_blob_upload_multiple_files_patterns('*/file_0', 3)
+        self._test_blob_upload_multiple_files_patterns('*/file_0', 4)
 
     def test_blob_upload_multiple_files_patterns_3(self):
         self._test_blob_upload_multiple_files_patterns('nonexists/*', 0)

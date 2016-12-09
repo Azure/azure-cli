@@ -27,7 +27,7 @@ from azure.storage.file import FileService
 from azure.storage.file.models import ContentSettings as FileContentSettings
 
 from ._factory import get_storage_data_service_client
-from .files_helpers import glob_files_locally
+from .util import glob_files_locally
 
 storage_account_key_options = {'primary': 'key1', 'secondary': 'key2'}
 
@@ -318,6 +318,85 @@ def validate_public_access(namespace):
 def validate_select(namespace):
     if namespace.select:
         namespace.select = ','.join(namespace.select)
+
+
+def get_source_file_or_blob_service_client(namespace):
+    """
+    Create the second file service or blob service client for batch copy command, which is used to
+    list the source files or blobs. If both the source account and source URI are omitted, it
+    indicates that user want to copy files or blobs in the same storage account, therefore the
+    destination client will be set None hence the command will use destination client.
+    """
+    usage_string = 'invalid usage: supply only one of the following argument sets:' + \
+                   '\n\t   --source-uri' + \
+                   '\n\tOR --source-container [--source-account] [--source-key] [--source-sas]' + \
+                   '\n\tOR --source-share [--source-account] [--source-key] [--source-sas]'
+    ns = vars(namespace)
+    source_account = ns.pop('source_account', None)
+    source_uri = ns.pop('source_uri', None)
+    source_key = ns.pop('source_key', None)
+    source_sas = ns.get('source_sas', None)
+    source_container = ns.get('source_container', None)
+    source_share = ns.get('source_share', None)
+
+    if source_account and source_uri:
+        raise ValueError(usage_string)
+
+    elif (not source_account) and (not source_uri):
+        # Set the source_client to None if neither source_account or source_uri is given. This
+        # indicates the command that the source files share or blob container is in the same storage
+        # account as the destination file share.
+        #
+        # The command itself should create the source service client since the validator can't
+        # access the destination client through the namespace.
+        #
+        # A few arguments check will be made as well so as not to cause ambiguity.
+
+        if source_key:
+            raise ValueError('invalid usage: --source-key is set but --source-account is missing.')
+
+        if source_container and source_share:
+            raise ValueError(usage_string)
+
+        if not source_container and not source_share:
+            raise ValueError(usage_string)
+
+        ns['source_client'] = None
+
+    elif source_account:
+        if ('source_container' in ns) and ('source_share' in ns):
+            raise ValueError(usage_string)
+
+        if 'source_container' in ns:
+            from azure.storage.blob.blockblobservice import BlockBlobService
+            ns['source_client'] = BlockBlobService(account_name=source_account,
+                                                   account_key=source_key,
+                                                   sas_token=source_sas)
+        elif 'source_share' in ns:
+            ns['source_client'] = FileService(account_name=source_account,
+                                              account_key=source_key,
+                                              sas_token=source_sas)
+        else:
+            raise ValueError(usage_string)
+
+    elif source_uri:
+        if source_sas or source_key or ('source_container' in ns) or ('source_share' in ns):
+            raise ValueError(usage_string)
+
+        from .storage_url_helpers import StorageResourceIdentifier
+        identifier = StorageResourceIdentifier(source_uri)
+        if not identifier.is_url():
+            raise ValueError('incorrect usage: --source-uri expects a URI')
+        elif identifier.blob or identifier.directory or identifier.filename or \
+             (not identifier.container and not identifier.share):
+            raise ValueError('incorrect usage: --source-uri has to be blob container or file share')
+        elif identifier.container:
+            from azure.storage.blob.blockblobservice import BlockBlobService
+            ns['source_client'] = BlockBlobService(account_name=identifier.account_name,
+                                                   sas_token=identifier.sas_token)
+        elif identifier.share:
+            ns['source_client'] = FileService(account_name=identifier.account_name,
+                                              sas_token=identifier.sas_token)
 
 # endregion
 
