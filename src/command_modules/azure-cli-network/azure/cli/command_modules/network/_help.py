@@ -232,8 +232,8 @@ helps['network vnet check-ip-address'] = """
 helps['network vnet create'] = """
     type: command
     short-summary: Create a virtual network.
-    long-summary: By default, the created network will have a prefix of '10.0.0.0/16' and a single
-        subnet named 'default' with a prefix of '10.0.0.0/24', unless otherwise specified.
+    long-summary: You may also create a subnet at the same time by specifying a subnet name and
+        (optionally) an address prefix.
 """
 
 helps['network vnet delete'] = """

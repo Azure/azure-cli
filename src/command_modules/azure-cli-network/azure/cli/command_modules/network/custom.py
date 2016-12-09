@@ -698,7 +698,7 @@ def _set_route_table(ncf, resource_group_name, route_table, subnet):
         subnet.route_table = None
 
 def create_subnet(resource_group_name, virtual_network_name, subnet_name,
-                  address_prefix='10.0.1.0/24', network_security_group=None,
+                  address_prefix=None, network_security_group=None,
                   route_table=None):
     '''Create a virtual network (VNet) subnet.
     :param str address_prefix: address prefix in CIDR format.
@@ -706,8 +706,16 @@ def create_subnet(resource_group_name, virtual_network_name, subnet_name,
         group to associate with the subnet.
     '''
     ncf = _network_client_factory()
+    if not address_prefix:
+        vnet = ncf.virtual_networks.get(resource_group_name, virtual_network_name)
+        prefix_components = vnet.address_space.address_prefixes[0].split('/', 1)
+        address = prefix_components[0]
+        bit_mask = int(prefix_components[1])
+        residual_bits = 32 - bit_mask
+        subnet_mask = 32 - int(residual_bits / 2)
+        address_prefix = '{}/{}'.format(address, subnet_mask)
+
     subnet = Subnet(name=subnet_name, address_prefix=address_prefix)
-    subnet.address_prefix = address_prefix
 
     if network_security_group:
         subnet.network_security_group = NetworkSecurityGroup(network_security_group)
