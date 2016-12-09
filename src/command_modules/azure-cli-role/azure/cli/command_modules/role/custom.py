@@ -94,7 +94,7 @@ def create_role_assignment(role, assignee, resource_group_name=None, scope=None)
     return _create_role_assignment(role, assignee, resource_group_name, scope)
 
 def _create_role_assignment(role, assignee, resource_group_name=None, scope=None, #pylint: disable=too-many-arguments
-                            ocp_aad_session_key=None, resolve_assignee=True):
+                            resolve_assignee=True):
     factory = _auth_client_factory(scope)
     assignments_client = factory.role_assignments
     definitions_client = factory.role_definitions
@@ -107,9 +107,6 @@ def _create_role_assignment(role, assignee, resource_group_name=None, scope=None
     properties = RoleAssignmentProperties(role_id, object_id)
     assignment_name = uuid.uuid4()
     custom_headers = None
-    if ocp_aad_session_key:
-        custom_headers = {'ocp-aad-session-key': ocp_aad_session_key}
-
     return assignments_client.create(scope, assignment_name, properties,
                                      custom_headers=custom_headers)
 
@@ -399,7 +396,7 @@ def _build_application_creds(password=None, key_value=None, key_type=None,#pylin
 def create_service_principal(identifier):
     return _create_service_principal(identifier)
 
-def _create_service_principal(identifier, retain_raw_response=False, resolve_app=True):
+def _create_service_principal(identifier, resolve_app=True):
     client = _graph_client_factory()
 
     if resolve_app:
@@ -416,8 +413,7 @@ def _create_service_principal(identifier, retain_raw_response=False, resolve_app
     else:
         app_id = identifier
 
-    return client.service_principals.create(ServicePrincipalCreateParameters(app_id, True),
-                                            raw=retain_raw_response)
+    return client.service_principals.create(ServicePrincipalCreateParameters(app_id, True))
 
 def show_service_principal(client, identifier):
     object_id = _resolve_service_principal(client, identifier)
@@ -452,9 +448,9 @@ def create_service_principal_for_rbac(name=None, password=None, years=1, #pylint
     graph_client = _graph_client_factory()
     role_client = _auth_client_factory().role_assignments
     scopes = scopes or ['/subscriptions/' + role_client.config.subscription_id]
-    session_key = None
     sp_oid = None
     sp_created = False
+    _RETRY_TIMES = 24
     if name:
         query_exp = 'servicePrincipalNames/any(x:x eq \'{}\')'.format(name)
         aad_sps = list(graph_client.service_principals.list(filter=query_exp))
@@ -481,41 +477,38 @@ def create_service_principal_for_rbac(name=None, password=None, years=1, #pylint
                                              end_date=end_date)
         #pylint: disable=no-member
         app_id = aad_application.app_id
-        #retry while the root cause is being investigated by AAD service team
-        #And the 'session_key' will not be used as well.
-        for l in range(1, 12):
+        #retry till server replication is done
+        for l in range(0, _RETRY_TIMES):
             try:
-                aad_sp = _create_service_principal(app_id, bool(scopes), resolve_app=False)
+                aad_sp = _create_service_principal(app_id, resolve_app=False)
                 break
             except Exception as ex: #pylint: disable=broad-except
                 #pylint: disable=line-too-long
-                if 'The appId of the service principal does not reference a valid application object' in str(ex):
+                if l < _RETRY_TIMES and 'The appId of the service principal does not reference a valid application object' in str(ex):
                     time.sleep(5)
-                    logger.warning('Retrying service principal creation: %s/12', l)
+                    logger.warning('Retrying service principal creation: %s/%s', l+1, _RETRY_TIMES)
                 else:
                     logger.warning("Creating service principal failed for appid '%s'. Trace followed:\n%s",
                                    name, ex.response.headers) #pylint: disable=no-member
                     raise
-        sp_oid = aad_sp.output.object_id if scopes else aad_sp.object_id
-        session_key = aad_sp.response.headers._store['ocp-aad-session-key'][1]
+        sp_oid = aad_sp.object_id
         sp_created = True
 
-    #Again, use retry while replicate latency is being investigated
+    #retry while server replication is done
     for scope in scopes:
-        for l in range(1, 24):
+        for l in range(0, _RETRY_TIMES):
             try:
                 _create_role_assignment(role, sp_oid, None, scope, resolve_assignee=False)
                 break
             except Exception as ex:
-                if ' does not exist in the directory ' in str(ex):
+                if l < _RETRY_TIMES and ' does not exist in the directory ' in str(ex):
                     time.sleep(5)
-                    logger.warning('Retrying role assignment creation: %s/24', l)
+                    logger.warning('Retrying role assignment creation: %s/%s', l+1, _RETRY_TIMES)
                     continue
                 elif sp_created:
                     #dump out history for diagnoses
                     logger.warning('Role assignment creation failed. Traces followed:\n')
                     logger.warning('Service principal response: %s\n', aad_sp.response.headers)
-                    logger.warning('Use ocp-aad-session-key: %s\n', session_key)
                     if getattr(ex, 'response', None) is not None:
                         logger.warning('role assignment response: %s\n', ex.response.headers) #pylint: disable=no-member
                 raise
