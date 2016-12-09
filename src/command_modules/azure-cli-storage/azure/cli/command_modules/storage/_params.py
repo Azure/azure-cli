@@ -326,30 +326,25 @@ register_cli_argument('storage blob upload-batch', 'content_language', arg_group
 register_cli_argument('storage blob upload-batch', 'max_connections', type=int)
 
 # FILE UPLOAD-BATCH PARAMETERS
-register_cli_argument('storage file upload-batch', 'source',
-                      options_list=('--source', '-s'),
-                      required=True,
-                      validator=process_file_upload_batch_parameters)
-register_cli_argument('storage file upload-batch', 'destination',
-                      options_list=('--destination', '-d'),
-                      required=True)
-register_cli_argument('storage file upload-batch', 'validate_content', arg_group='Download Control')
-register_cli_argument('storage file upload-batch', 'max_connections', arg_group='Download Control')
+with CommandContext('storage file upload-batch') as c:
+    c.reg_arg('source', options_list=('--source', '-s'), validator=process_file_upload_batch_parameters)
+    c.reg_arg('destination', options_list=('--destination', '-d'))
+
+    with c.arg_group('Download Control') as group:
+        group.reg_arg('validate_content')
+        group.reg_arg('max_connections')
+
 register_content_settings_argument('storage file upload-batch', FileContentSettings,
                                    update=False, arg_group='Content Settings')
 
 # FILE DOWNLOAD-BATCH PARAMETERS
-register_cli_argument('storage file download-batch', 'source',
-                      options_list=('--source', '-s'),
-                      required=True,
-                      validator=process_file_download_batch_parameters)
-register_cli_argument('storage file download-batch', 'destination',
-                      options_list=('--destination', '-d'),
-                      required=True)
-register_cli_argument('storage file download-batch', 'validate_content',
-                      arg_group='Download Control')
-register_cli_argument('storage file download-batch', 'max_connections',
-                      arg_group='Download Control')
+with CommandContext('storage file download-batch') as c:
+    c.reg_arg('source', options_list=('--source', '-s'), validator=process_file_download_batch_parameters)
+    c.reg_arg('destination', options_list=('--destination', '-d'))
+
+    with c.arg_group('Download Control') as group:
+        group.reg_arg('validate_content')
+        group.reg_arg('max_connections')
 
 # FILE COPY-BATCH PARAMETERS
 with CommandContext('storage file copy start-batch') as c:
