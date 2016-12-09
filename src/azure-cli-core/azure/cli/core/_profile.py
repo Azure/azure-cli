@@ -46,6 +46,7 @@ _TOKEN_ENTRY_TOKEN_TYPE = 'tokenType'
 # This could mean either real access token, or client secret of a service principal
 # This naming is no good, but can't change because xplat-cli does so.
 _ACCESS_TOKEN = 'accessToken'
+_REFRESH_TOKEN = 'refreshToken'
 
 TOKEN_FIELDS_EXCLUDED_FROM_PERSISTENCE = ['familyName',
                                           'givenName',
@@ -370,6 +371,21 @@ class Profile(object):
         result['subscriptionId'] = result.pop('id')
         result['endpoints'] = CLOUD.endpoints
         return result
+
+    def get_refresh_credentials(self, resource=CLOUD.endpoints.management,
+                                subscription_id=None):
+        account = self.get_subscription(subscription_id)
+        user_type = account[_USER_ENTITY][_USER_TYPE]
+        username_or_sp_id = account[_USER_ENTITY][_USER_NAME]
+
+        if user_type == _USER:
+            refresh_object = self._creds_cache.retrieve_token_entry_for_user(
+                username_or_sp_id, account[_TENANT_ID], resource)[_REFRESH_TOKEN]
+        else:
+            refresh_object = self._creds_cache \
+                .retrieve_cred_for_service_principal(username_or_sp_id)
+
+        return refresh_object
 
     def get_installation_id(self):
         installation_id = self._storage.get(_INSTALLATION_ID)

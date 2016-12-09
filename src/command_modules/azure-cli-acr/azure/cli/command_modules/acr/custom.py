@@ -175,3 +175,11 @@ def acr_update_set(client,
         resource_group_name = get_resource_group_name_by_registry_name(registry_name)
 
     return client.update(resource_group_name, registry_name, parameters)
+
+def acr_login(registry_name):
+    '''Login to a container registry through Docker.
+    :param str registry_name: The name of container registry
+    '''
+    registry, _ = get_registry_by_name(registry_name)
+    login_server = registry.login_server #pylint: disable=no-member
+    docker_login_to_registry(login_server)

@@ -3,7 +3,14 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.util import CLIError
+
+from urllib.parse import urlencode, urlparse, urlunparse
+from subprocess import call
+from json import loads
+import requests
+
+from azure.cli.core._profile import Profile
+from azure.cli.core._util import CLIError
 from azure.cli.core.commands.parameters import get_resources_in_subscription
 
 from ._constants import (
