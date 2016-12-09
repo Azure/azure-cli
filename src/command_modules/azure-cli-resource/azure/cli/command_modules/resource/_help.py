@@ -6,15 +6,15 @@
 from azure.cli.core.help_files import helps #pylint: disable=unused-import
 
 #pylint: disable=line-too-long
-helps['resource policy'] = """
+helps['policy'] = """
     type: group
     short-summary: Commands to manage resource policies
 """
-helps['resource policy definition'] = """
+helps['policy definition'] = """
     type: group
     short-summary: manage resource policy definitions
 """
-helps['resource policy definition create'] = """
+helps['policy definition create'] = """
             type: command
             short-summary: Creates a policy definition
             parameters:
@@ -36,35 +36,35 @@ helps['resource policy definition create'] = """
                             }
                         }
             """
-helps['resource policy definition delete'] = """
+helps['policy definition delete'] = """
     type: command
     short-summary: deletes a policy definition
 """
-helps['resource policy definition update'] = """
+helps['policy definition update'] = """
     type: command
     short-summary: updates a policy definition
 """
-helps['resource policy definition list'] = """
+helps['policy definition list'] = """
     type: command
     short-summary: lists policy definitions
 """
-helps['resource policy assignment'] = """
+helps['policy assignment'] = """
     type: group
     short-summary: manage resource policy assignments
 """
-helps['resource policy assignment create'] = """
+helps['policy assignment create'] = """
     type: command
     short-summary: creates a resource policy assignment
 """
-helps['resource policy assignment delete'] = """
+helps['policy assignment delete'] = """
     type: command
     short-summary: deletes a resource policy assignment
 """
-helps['resource policy assignment show'] = """
+helps['policy assignment show'] = """
     type: command
     short-summary: shows a resource policy assignment
 """
-helps['resource policy assignment list'] = """
+helps['policy assignment list'] = """
     type: command
     short-summary: list resource policy assignments
 """
@@ -149,30 +149,30 @@ helps['resource update'] = """
     short-summary: update a resource
 """
 
-helps['resource feature'] = """
+helps['feature'] = """
     type: group
     short-summary: Commands to manage resource provider features, such as previews
 """
-helps['resource group'] = """
+helps['group'] = """
     type: group
     short-summary: Commands to manage resource groups
 """
-helps['resource group deployment'] = """
+helps['group deployment'] = """
     type: group
     short-summary: Commands to execute or manage ARM deployments
 """
-helps['resource group deployment create'] = """
+helps['group deployment create'] = """
     type: command
     short-summary: start a deployment
     examples:
         - name: create a deployment from a remote template file
           text: >
-            az resource group deployment create -g mygroup --template-uri https://myresource/azuredeploy.json --parameters @myparameters.json
+            az group deployment create -g mygroup --template-uri https://myresource/azuredeploy.json --parameters @myparameters.json
         - name: create a deployment from a local template file and use parameter values in string 
           text: >
-            az resource group deployment create -g mygroup --template-file azuredeploy.json --parameters "{\\"location\\": {\\"value\\": \\"westus\\"}}"
+            az group deployment create -g mygroup --template-file azuredeploy.json --parameters "{\\"location\\": {\\"value\\": \\"westus\\"}}"
 """
-helps['resource group deployment operation'] = """
+helps['group deployment operation'] = """
     type: group
     short-summary: Commands to manage deployment operations
 """
