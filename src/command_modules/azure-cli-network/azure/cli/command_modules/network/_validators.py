@@ -469,8 +469,7 @@ def process_vnet_create_namespace(namespace):
         prefix_components = namespace.virtual_network_prefix.split('/', 1)
         address = prefix_components[0]
         bit_mask = int(prefix_components[1])
-        residual_bits = 32 - bit_mask
-        subnet_mask = 32 - int(residual_bits / 2)
+        subnet_mask = 24 if bit_mask < 24 else bit_mask
         namespace.subnet_prefix = '{}/{}'.format(address, subnet_mask)
 
 def load_cert_file(param_name):
