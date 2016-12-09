@@ -22,16 +22,16 @@ from azure.cli.command_modules.resource._client_factory import (_resource_client
 def transform_resource_group_list(result):
     return [OrderedDict([('Name', r['name']), \
             ('Location', r['location']), ('Status', r['properties']['provisioningState'])]) for r in result]
-cli_command(__name__, 'resource group delete',
+cli_command(__name__, 'group delete',
             'azure.mgmt.resource.resources.operations.resource_groups_operations#ResourceGroupsOperations.delete',
             cf_resource_groups,
             no_wait_param='raw')
-cli_generic_wait_command(__name__, 'resource group wait', 'azure.mgmt.resource.resources.operations.resource_groups_operations#ResourceGroupsOperations.get', cf_resource_groups)
-cli_command(__name__, 'resource group show', 'azure.mgmt.resource.resources.operations.resource_groups_operations#ResourceGroupsOperations.get', cf_resource_groups)
-cli_command(__name__, 'resource group exists', 'azure.mgmt.resource.resources.operations.resource_groups_operations#ResourceGroupsOperations.check_existence', cf_resource_groups)
-cli_command(__name__, 'resource group list', 'azure.cli.command_modules.resource.custom#list_resource_groups', table_transformer=transform_resource_group_list)
-cli_command(__name__, 'resource group create', 'azure.cli.command_modules.resource.custom#create_resource_group')
-cli_command(__name__, 'resource group export', 'azure.cli.command_modules.resource.custom#export_group_as_template')
+cli_generic_wait_command(__name__, 'group wait', 'azure.mgmt.resource.resources.operations.resource_groups_operations#ResourceGroupsOperations.get', cf_resource_groups)
+cli_command(__name__, 'group show', 'azure.mgmt.resource.resources.operations.resource_groups_operations#ResourceGroupsOperations.get', cf_resource_groups)
+cli_command(__name__, 'group exists', 'azure.mgmt.resource.resources.operations.resource_groups_operations#ResourceGroupsOperations.check_existence', cf_resource_groups)
+cli_command(__name__, 'group list', 'azure.cli.command_modules.resource.custom#list_resource_groups', table_transformer=transform_resource_group_list)
+cli_command(__name__, 'group create', 'azure.cli.command_modules.resource.custom#create_resource_group')
+cli_command(__name__, 'group export', 'azure.cli.command_modules.resource.custom#export_group_as_template')
 
 # Resource commands
 
@@ -60,9 +60,9 @@ cli_command(__name__, 'provider register', 'azure.cli.command_modules.resource.c
 cli_command(__name__, 'provider unregister', 'azure.cli.command_modules.resource.custom#unregister_provider')
 
 # Resource feature commands
-cli_command(__name__, 'resource feature list', 'azure.cli.command_modules.resource.custom#list_features', cf_features)
-cli_command(__name__, 'resource feature show', 'azure.mgmt.resource.features.operations.features_operations#FeaturesOperations.get', cf_features)
-cli_command(__name__, 'resource feature register', 'azure.mgmt.resource.features.operations.features_operations#FeaturesOperations.register', cf_features)
+cli_command(__name__, 'feature list', 'azure.cli.command_modules.resource.custom#list_features', cf_features)
+cli_command(__name__, 'feature show', 'azure.mgmt.resource.features.operations.features_operations#FeaturesOperations.get', cf_features)
+cli_command(__name__, 'feature register', 'azure.mgmt.resource.features.operations.features_operations#FeaturesOperations.register', cf_features)
 
 # Tag commands
 cli_command(__name__, 'tag list', 'azure.mgmt.resource.resources.operations.tags_operations#TagsOperations.list', cf_tags)
@@ -77,35 +77,35 @@ def transform_deployments_list(result):
     return [OrderedDict([('Name', r['name']), \
             ('Timestamp', r['properties']['timestamp']), ('State', r['properties']['provisioningState'])]) for r in sort_list]
 
-cli_command(__name__, 'resource group deployment create', 'azure.cli.command_modules.resource.custom#deploy_arm_template', no_wait_param='no_wait')
-cli_generic_wait_command(__name__, 'resource group deployment wait', 'azure.mgmt.resource.resources.operations.deployments_operations#DeploymentsOperations.get', cf_deployments)
-cli_command(__name__, 'resource group deployment list', 'azure.mgmt.resource.resources.operations.deployments_operations#DeploymentsOperations.list', cf_deployments, table_transformer=transform_deployments_list)
-cli_command(__name__, 'resource group deployment show', 'azure.mgmt.resource.resources.operations.deployments_operations#DeploymentsOperations.get', cf_deployments)
-cli_command(__name__, 'resource group deployment delete', 'azure.mgmt.resource.resources.operations.deployments_operations#DeploymentsOperations.delete', cf_deployments)
-cli_command(__name__, 'resource group deployment validate', 'azure.cli.command_modules.resource.custom#validate_arm_template')
-cli_command(__name__, 'resource group deployment export', 'azure.cli.command_modules.resource.custom#export_deployment_as_template')
+cli_command(__name__, 'group deployment create', 'azure.cli.command_modules.resource.custom#deploy_arm_template', no_wait_param='no_wait')
+cli_generic_wait_command(__name__, 'group deployment wait', 'azure.mgmt.resource.resources.operations.deployments_operations#DeploymentsOperations.get', cf_deployments)
+cli_command(__name__, 'group deployment list', 'azure.mgmt.resource.resources.operations.deployments_operations#DeploymentsOperations.list', cf_deployments, table_transformer=transform_deployments_list)
+cli_command(__name__, 'group deployment show', 'azure.mgmt.resource.resources.operations.deployments_operations#DeploymentsOperations.get', cf_deployments)
+cli_command(__name__, 'group deployment delete', 'azure.mgmt.resource.resources.operations.deployments_operations#DeploymentsOperations.delete', cf_deployments)
+cli_command(__name__, 'group deployment validate', 'azure.cli.command_modules.resource.custom#validate_arm_template')
+cli_command(__name__, 'group deployment export', 'azure.cli.command_modules.resource.custom#export_deployment_as_template')
 
 # Resource group deployment operations commands
-cli_command(__name__, 'resource group deployment operation list', 'azure.mgmt.resource.resources.operations.deployment_operations_operations#DeploymentOperationsOperations.list', cf_deployment_operations)
-cli_command(__name__, 'resource group deployment operation show', 'azure.mgmt.resource.resources.operations.deployment_operations_operations#DeploymentOperationsOperations.get', cf_deployment_operations)
+cli_command(__name__, 'group deployment operation list', 'azure.mgmt.resource.resources.operations.deployment_operations_operations#DeploymentOperationsOperations.list', cf_deployment_operations)
+cli_command(__name__, 'group deployment operation show', 'azure.mgmt.resource.resources.operations.deployment_operations_operations#DeploymentOperationsOperations.get', cf_deployment_operations)
 
 cli_generic_update_command(__name__, 'resource update',
                            'azure.mgmt.resource.resources.operations.resources_operations#ResourcesOperations.get',
                            'azure.mgmt.resource.resources.operations.resources_operations#ResourcesOperations.create_or_update',
                            lambda: _resource_client_factory().resources)
 
-cli_generic_update_command(__name__, 'resource group update',
+cli_generic_update_command(__name__, 'group update',
                            'azure.mgmt.resource.resources.operations.resource_groups_operations#ResourceGroupsOperations.get',
                            'azure.mgmt.resource.resources.operations.resource_groups_operations#ResourceGroupsOperations.create_or_update',
                            lambda: _resource_client_factory().resource_groups)
 
-cli_command(__name__, 'resource policy assignment create', 'azure.cli.command_modules.resource.custom#create_policy_assignment')
-cli_command(__name__, 'resource policy assignment delete', 'azure.cli.command_modules.resource.custom#delete_policy_assignment')
-cli_command(__name__, 'resource policy assignment list', 'azure.cli.command_modules.resource.custom#list_policy_assignment')
-cli_command(__name__, 'resource policy assignment show', 'azure.cli.command_modules.resource.custom#show_policy_assignment')
+cli_command(__name__, 'policy assignment create', 'azure.cli.command_modules.resource.custom#create_policy_assignment')
+cli_command(__name__, 'policy assignment delete', 'azure.cli.command_modules.resource.custom#delete_policy_assignment')
+cli_command(__name__, 'policy assignment list', 'azure.cli.command_modules.resource.custom#list_policy_assignment')
+cli_command(__name__, 'policy assignment show', 'azure.cli.command_modules.resource.custom#show_policy_assignment')
 
-cli_command(__name__, 'resource policy definition create', 'azure.cli.command_modules.resource.custom#create_policy_definition')
-cli_command(__name__, 'resource policy definition delete', 'azure.mgmt.resource.policy.operations#PolicyDefinitionsOperations.delete', cf_policy_definitions)
-cli_command(__name__, 'resource policy definition list', 'azure.mgmt.resource.policy.operations#PolicyDefinitionsOperations.list', cf_policy_definitions)
-cli_command(__name__, 'resource policy definition show', 'azure.mgmt.resource.policy.operations#PolicyDefinitionsOperations.get', cf_policy_definitions)
-cli_command(__name__, 'resource policy definition update', 'azure.cli.command_modules.resource.custom#update_policy_definition')
+cli_command(__name__, 'policy definition create', 'azure.cli.command_modules.resource.custom#create_policy_definition')
+cli_command(__name__, 'policy definition delete', 'azure.mgmt.resource.policy.operations#PolicyDefinitionsOperations.delete', cf_policy_definitions)
+cli_command(__name__, 'policy definition list', 'azure.mgmt.resource.policy.operations#PolicyDefinitionsOperations.list', cf_policy_definitions)
+cli_command(__name__, 'policy definition show', 'azure.mgmt.resource.policy.operations#PolicyDefinitionsOperations.get', cf_policy_definitions)
+cli_command(__name__, 'policy definition update', 'azure.cli.command_modules.resource.custom#update_policy_definition')

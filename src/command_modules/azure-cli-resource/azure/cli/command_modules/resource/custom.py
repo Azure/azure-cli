@@ -47,7 +47,7 @@ def create_resource_group(resource_group_name, location, tags=None):
     ''' Create a new resource group.
     :param str resource_group_name:the desired resource group name
     :param str location:the resource group location
-    :param str tags:tags in 'a=b;c' format
+    :param str tags:tags in 'a=b c' format
     '''
     rcf = _resource_client_factory()
 
