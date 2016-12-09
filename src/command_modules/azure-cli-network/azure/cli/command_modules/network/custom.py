@@ -737,14 +737,29 @@ update_nsg_rule.__doc__ = SecurityRule.__doc__
 
 # endregion
 
-# region VPN Gateway Commands
-
 def update_vpn_connection(instance, routing_weight=None):
     if routing_weight is not None:
         instance.routing_weight = routing_weight
     return instance
 
-def delete_vpn_gateway_root_cert(resource_group_name, gateway_name, cert_name):
+# region VNet Gateway Commands
+
+def create_vnet_gateway_root_cert(resource_group_name, gateway_name, public_cert_data, cert_name):
+    ncf = _network_client_factory().virtual_network_gateways
+    gateway = ncf.get(resource_group_name, gateway_name)
+    if not gateway.vpn_client_configuration:
+        gateway.vpn_client_configuration = VpnClientConfiguration()
+    config = gateway.vpn_client_configuration
+
+    if config.vpn_client_root_certificates is None:
+        config.vpn_client_root_certificates = []
+
+    cert = VpnClientRootCertificate(name=cert_name, public_cert_data=public_cert_data)
+    config.vpn_client_root_certificates.append(cert)
+
+    return ncf.create_or_update(resource_group_name, gateway_name, gateway)
+
+def delete_vnet_gateway_root_cert(resource_group_name, gateway_name, cert_name):
     ncf = _network_client_factory().virtual_network_gateways
     gateway = ncf.get(resource_group_name, gateway_name)
     config = gateway.vpn_client_configuration
@@ -757,7 +772,7 @@ def delete_vpn_gateway_root_cert(resource_group_name, gateway_name, cert_name):
 
     return ncf.create_or_update(resource_group_name, gateway_name, gateway)
 
-def create_vpn_gateway_revoked_cert(resource_group_name, gateway_name, thumbprint, cert_name):
+def create_vnet_gateway_revoked_cert(resource_group_name, gateway_name, thumbprint, cert_name):
     config, gateway, ncf = _prep_cert_create(gateway_name, resource_group_name)
 
     cert = VpnClientRevokedCertificate(name=cert_name, thumbprint=thumbprint)
@@ -765,7 +780,7 @@ def create_vpn_gateway_revoked_cert(resource_group_name, gateway_name, thumbprin
 
     return ncf.create_or_update(resource_group_name, gateway_name, gateway)
 
-def delete_vpn_gateway_revoked_cert(resource_group_name, gateway_name, cert_name):
+def delete_vnet_gateway_revoked_cert(resource_group_name, gateway_name, cert_name):
     ncf = _network_client_factory().virtual_network_gateways
     gateway = ncf.get(resource_group_name, gateway_name)
     config = gateway.vpn_client_configuration
@@ -796,9 +811,9 @@ def _prep_cert_create(gateway_name, resource_group_name):
 
     return config, gateway, ncf
 
-def update_network_vpn_gateway(instance, address_prefixes=None, sku=None, vpn_gateway_type=None,
-                               public_ip_address=None, gateway_type=None, enable_bgp=None,
-                               virtual_network=None, tags=None):
+def update_vnet_gateway(instance, address_prefixes=None, sku=None, vpn_gateway_type=None,
+                        public_ip_address=None, gateway_type=None, enable_bgp=None,
+                        virtual_network=None, tags=None):
 
     if address_prefixes is not None:
         if not instance.vpn_client_configuration:
@@ -835,6 +850,10 @@ def update_network_vpn_gateway(instance, address_prefixes=None, sku=None, vpn_ga
             '{}/subnets/GatewaySubnet'.format(virtual_network)
 
     return instance
+
+# endregion
+
+# region Express Route commands
 
 def create_express_route_peering(
         client, resource_group_name, circuit_name, peering_type, peer_asn, vlan_id,
@@ -879,20 +898,6 @@ def create_route(resource_group_name, route_table_name, route_name, next_hop_typ
 
 create_route.__doc__ = Route.__doc__
 
-def create_vpn_gateway_root_cert(resource_group_name, gateway_name, public_cert_data, cert_name):
-    ncf = _network_client_factory().virtual_network_gateways
-    gateway = ncf.get(resource_group_name, gateway_name)
-    if not gateway.vpn_client_configuration:
-        gateway.vpn_client_configuration = VpnClientConfiguration()
-    config = gateway.vpn_client_configuration
-
-    if config.vpn_client_root_certificates is None:
-        config.vpn_client_root_certificates = []
-
-    cert = VpnClientRootCertificate(name=cert_name, public_cert_data=public_cert_data)
-    config.vpn_client_root_certificates.append(cert)
-
-    return ncf.create_or_update(resource_group_name, gateway_name, gateway)
 #endregion
 
 #region Local Gateway commands

@@ -319,12 +319,12 @@ cli_generic_update_command(__name__, 'network vnet-gateway update',
                            'azure.mgmt.network.operations.virtual_network_gateways_operations#VirtualNetworkGatewaysOperations.get',
                            'azure.mgmt.network.operations.virtual_network_gateways_operations#VirtualNetworkGatewaysOperations.create_or_update',
                            cf_virtual_network_gateways,
-                           custom_function_op='azure.cli.command_modules.network.custom#update_network_vpn_gateway',
+                           custom_function_op='azure.cli.command_modules.network.custom#update_vnet_gateway',
                            no_wait_param='raw')
-cli_command(__name__, 'network vnet-gateway root-cert create', 'azure.cli.command_modules.network.custom#create_vpn_gateway_root_cert')
-cli_command(__name__, 'network vnet-gateway root-cert delete', 'azure.cli.command_modules.network.custom#delete_vpn_gateway_root_cert')
-cli_command(__name__, 'network vnet-gateway revoked-cert create', 'azure.cli.command_modules.network.custom#create_vpn_gateway_revoked_cert')
-cli_command(__name__, 'network vnet-gateway revoked-cert delete', 'azure.cli.command_modules.network.custom#delete_vpn_gateway_revoked_cert')
+cli_command(__name__, 'network vnet-gateway root-cert create', 'azure.cli.command_modules.network.custom#create_vnet_gateway_root_cert')
+cli_command(__name__, 'network vnet-gateway root-cert delete', 'azure.cli.command_modules.network.custom#delete_vnet_gateway_root_cert')
+cli_command(__name__, 'network vnet-gateway revoked-cert create', 'azure.cli.command_modules.network.custom#create_vnet_gateway_revoked_cert')
+cli_command(__name__, 'network vnet-gateway revoked-cert delete', 'azure.cli.command_modules.network.custom#delete_vnet_gateway_revoked_cert')
 
 cli_command(__name__, 'network vnet-gateway create', 'azure.cli.command_modules.network.mgmt_vnet_gateway.lib.operations.vnet_gateway_operations#VnetGatewayOperations.create_or_update', cf_vnet_gateway_create, transform=DeploymentOutputLongRunningOperation('Starting network vnet-gateway create'),
             no_wait_param='raw')

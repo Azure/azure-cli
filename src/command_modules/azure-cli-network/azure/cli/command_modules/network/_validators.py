@@ -487,14 +487,27 @@ def load_cert_file(param_name):
         raise ValueError('usage error: --vnet-gateway2 NAME_OR_ID | --local-gateway2 NAME_OR_ID '
                          '| --express-route-circuit2 NAME_OR_ID')
 
+    def _validate_name_or_id(namespace, value, resource_type):
+        if not is_valid_resource_id(value):
+            return resource_id(
+                subscription=namespace.subscription or get_subscription_id(),
+                resource_group=namespace.resource_group_name,
+                namespace='Microsoft.Network',
+                type=resource_type,
+                name=value)
+
     if namespace.express_route_circuit2_id:
-        # TODO: Validate name or id
+        namespace.express_route_circuit2_id = \
+            _validate_name_or_id(
+                namespace, namespace.express_route_circuit2_id, 'expressRouteCircuits')
         namespace.connection_type = 'ExpressRoute'
     elif namespace.local_gateway2_id:
-        # TODO: Validate name or id
+        namespace.local_gateway2_id = \
+            _validate_name_or_id(namespace, namespace.local_gateway2_id, 'localNetworkGateways')
         namespace.connection_type = 'IPSec'
     elif namespace.vnet_gateway2_id:
-        # TODO: Validate name or id
+        namespace.vnet_gateway2_id = \
+            _validate_name_or_id(namespace, namespace.vnet_gateway2_id, 'virtualNetworkGateways')
         namespace.connection_type = 'Vnet2Vnet'
 
 def load_cert_file(param_name):
