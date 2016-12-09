@@ -15,6 +15,11 @@ A great cloud needs great tools; we're excited to introduce *Azure CLI 2.0 - Pre
 Installation
 ===============
 
+Developer Setup
+^^^^^^^^^
+If you would like to setup a development environment and contribute to the CLI, see the following document:
+https://github.com/Azure/azure-cli/blob/master/doc/configuring_your_machine.md
+
 Upgrading
 ^^^^^^^^^
 
@@ -141,7 +146,7 @@ Usage
 Getting Started
 =====================
 
-After installation, use the ``az configure`` command to help setup your environment and get you logged in.
+After installation, use the ``az configure`` command to help set up your environment and get you logged in.
 
 .. code-block:: console
 
