@@ -479,21 +479,30 @@ def load_cert_file(param_name):
             setattr(namespace, param_name, read_base_64_file(attr))
     return load_cert_validator
 
-def vnet_gateway_validator(namespace):
     args = [a for a in [namespace.express_route_circuit2_id,
                         namespace.local_gateway2_id,
                         namespace.vnet_gateway2_id]
             if a]
     if len(args) != 1:
-        raise argparse.ArgumentError(None, 'Specify only one option for express-route-circuit2,'
-                                     ' local-gateway2-id or vnet-gateway2-id')
+        raise ValueError('usage error: --vnet-gateway2 NAME_OR_ID | --local-gateway2 NAME_OR_ID '
+                         '| --express-route-circuit2 NAME_OR_ID')
 
     if namespace.express_route_circuit2_id:
+        # TODO: Validate name or id
         namespace.connection_type = 'ExpressRoute'
     elif namespace.local_gateway2_id:
+        # TODO: Validate name or id
         namespace.connection_type = 'IPSec'
     elif namespace.vnet_gateway2_id:
+        # TODO: Validate name or id
         namespace.connection_type = 'Vnet2Vnet'
+
+def load_cert_file(param_name):
+    def load_cert_validator(namespace):
+        attr = getattr(namespace, param_name)
+        if attr and os.path.isfile(attr):
+            setattr(namespace, param_name, read_base_64_file(attr))
+    return load_cert_validator
 
 # ACTIONS
 

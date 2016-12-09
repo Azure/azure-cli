@@ -944,7 +944,7 @@ class NetworkVNetPeeringScenarioTest(ResourceGroupVCRTestBase):
         ip_id = self.cmd('network public-ip show -g {} -n ip1 --query id'.format(rg))
         subnet_id = self.cmd('network vnet subnet show -g {} -n GatewaySubnet --vnet-name vnet2 --query id'.format(rg))
         # create the gateway on vnet2
-        self.cmd('network vpn-gateway create -g {} -n gateway1 --public-ip-address {} --subnet-id {}'.format(rg, ip_id, subnet_id))
+        self.cmd('network vnet-gateway create -g {} -n gateway1 --public-ip-address {} --subnet-id {}'.format(rg, ip_id, subnet_id))
 
     def body(self):
         rg = self.resource_group
@@ -976,7 +976,7 @@ class NetworkVNetPeeringScenarioTest(ResourceGroupVCRTestBase):
         self.cmd('network vnet peering list -g {} --vnet-name vnet1'.format(rg), checks=NoneCheck())
         # must delete the second peering and the gateway or the resource group delete will fail
         self.cmd('network vnet peering delete -g {} -n peering2 --vnet-name vnet2'.format(rg))
-        self.cmd('network vpn-gateway delete -g {} -n gateway1'.format(rg))
+        self.cmd('network vnet-gateway delete -g {} -n gateway1'.format(rg))
 
 class NetworkSubnetSetScenarioTest(ResourceGroupVCRTestBase):
     def __init__(self, test_method):
@@ -1046,8 +1046,8 @@ class NetworkVpnGatewayScenarioTest(ResourceGroupVCRTestBase):
         vnet1_id = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}'.format(subscription_id, rg, self.vnet1_name)
         vnet2_id = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}'.format(subscription_id, rg, self.vnet2_name)
 
-        self.cmd('network vpn-gateway create -g {} -n {} --vnet {} --public-ip-address {}'.format(rg, self.gateway1_name, vnet1_id, self.ip1_name))
-        self.cmd('network vpn-gateway create -g {} -n {} --vnet {} --public-ip-address {}'.format(rg, self.gateway2_name, vnet2_id, self.ip2_name))
+        self.cmd('network vnet-gateway create -g {} -n {} --vnet {} --public-ip-address {}'.format(rg, self.gateway1_name, vnet1_id, self.ip1_name))
+        self.cmd('network vnet-gateway create -g {} -n {} --vnet {} --public-ip-address {}'.format(rg, self.gateway2_name, vnet2_id, self.ip2_name))
 
         gateway1_id = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworkGateways/{}'.format(subscription_id, rg, self.gateway1_name)
         gateway2_id = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworkGateways/{}'.format(subscription_id, rg, self.gateway2_name)

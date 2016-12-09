@@ -735,6 +735,15 @@ def update_subnet(instance, resource_group_name, address_prefix=None, network_se
     return instance
 update_nsg_rule.__doc__ = SecurityRule.__doc__
 
+# endregion
+
+# region VPN Gateway Commands
+
+def update_vpn_connection(instance, routing_weight=None):
+    if routing_weight is not None:
+        instance.routing_weight = routing_weight
+    return instance
+
 def delete_vpn_gateway_root_cert(resource_group_name, gateway_name, cert_name):
     ncf = _network_client_factory().virtual_network_gateways
     gateway = ncf.get(resource_group_name, gateway_name)
