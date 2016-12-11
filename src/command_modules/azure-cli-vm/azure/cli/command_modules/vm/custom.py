@@ -481,7 +481,7 @@ def get_boot_log(resource_group_name, vm_name):
     storage_client = get_data_service_client(
         BlockBlobService,
         storage_account.name,
-        keys.keys[0],
+        keys.keys[0].value,
         endpoint_suffix=CLOUD.suffixes.storage_endpoint) # pylint: disable=no-member
 
     class StreamWriter(object): # pylint: disable=too-few-public-methods
