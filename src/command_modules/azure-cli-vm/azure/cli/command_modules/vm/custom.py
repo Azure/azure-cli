@@ -295,9 +295,7 @@ def capture_vm(resource_group_name, vm_name, vhd_name_prefix,
     '''
     client = _compute_client_factory()
     parameter = VirtualMachineCaptureParameters(vhd_name_prefix, storage_container, overwrite)
-    poller = client.virtual_machines.capture(resource_group_name, vm_name, parameter)
-    result = LongRunningOperation()(poller)
-    print(json.dumps(result.output, indent=2)) # pylint: disable=no-member
+    return client.virtual_machines.capture(resource_group_name, vm_name, parameter)
 
 def reset_windows_admin(
         resource_group_name, vm_name, username, password):
