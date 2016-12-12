@@ -232,6 +232,8 @@ helps['network vnet check-ip-address'] = """
 helps['network vnet create'] = """
     type: command
     short-summary: Create a virtual network.
+    long-summary: You may also create a subnet at the same time by specifying a subnet name and
+        (optionally) an address prefix.
 """
 
 helps['network vnet delete'] = """

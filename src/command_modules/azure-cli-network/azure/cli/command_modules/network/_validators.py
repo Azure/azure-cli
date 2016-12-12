@@ -458,6 +458,20 @@ def process_tm_endpoint_create_namespace(namespace):
             error_message = '{}\nOmit the following: {}'.format(error_message, ', '.join(extra_options)) # pylint: disable=line-too-long
         raise CLIError(error_message)
 
+def process_vnet_create_namespace(namespace):
+
+    if namespace.subnet_prefix and not namespace.subnet_name:
+        raise ValueError('incorrect usage: --subnet-name NAME [--subnet-prefix PREFIX]')
+
+    namespace.create_subnet = bool(namespace.subnet_name)
+
+    if namespace.create_subnet and not namespace.subnet_prefix:
+        prefix_components = namespace.virtual_network_prefix.split('/', 1)
+        address = prefix_components[0]
+        bit_mask = int(prefix_components[1])
+        subnet_mask = 24 if bit_mask < 24 else bit_mask
+        namespace.subnet_prefix = '{}/{}'.format(address, subnet_mask)
+
 def load_cert_file(param_name):
     def load_cert_validator(namespace):
         attr = getattr(namespace, param_name)
