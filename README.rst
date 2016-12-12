@@ -82,9 +82,12 @@ Install with apt-get
 
 A Debian/Ubuntu package is also available. Install as follows:
 
+On a 32 bit system: ``$ echo "deb https://apt-mo.trafficmanager.net/repos/azure-cli/ wheezy main" | sudo tee /etc/apt/sources.list.d/azure-cli.list``  
+
+On a 64 bit system: ``$ echo "deb [arch=amd64] https://apt-mo.trafficmanager.net/repos/azure-cli/ wheezy main" | sudo tee /etc/apt/sources.list.d/azure-cli.list``  
+
 .. code-block:: console
 
-    $ echo "deb [arch=amd64] https://apt-mo.trafficmanager.net/repos/azure-cli/ wheezy main" | sudo tee /etc/apt/sources.list.d/azure-cli.list
     $ sudo apt-key adv --keyserver apt-mo.trafficmanager.net --recv-keys 417A0893
     $ sudo apt-get install apt-transport-https
     $ sudo apt-get update && sudo apt-get install azure-cli
