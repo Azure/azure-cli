@@ -205,11 +205,6 @@
           "$ref": "#/definitions/DeploymentParameter_sku",
           "x-ms-client-flatten": true
         },
-        "skuCapacity": {
-          "type": "object",
-          "$ref": "#/definitions/DeploymentParameter_skuCapacity",
-          "x-ms-client-flatten": true
-        },
         "tags": {
           "type": "object",
           "$ref": "#/definitions/DeploymentParameter_tags",
@@ -237,10 +232,10 @@
         }
       },
       "required": [
-        "virtualNetwork",
-        "publicIpAddress",
         "enableBgp",
-        "virtualNetworkGatewayName"
+        "virtualNetworkGatewayName",
+        "virtualNetwork",
+        "publicIpAddress"
       ]
     },
     "DeploymentParameter_asn": {
@@ -357,16 +352,6 @@
             "modelAsString": false
           },
           "default": "Basic"
-        }
-      }
-    },
-    "DeploymentParameter_skuCapacity": {
-      "properties": {
-        "value": {
-          "type": "integer",
-          "description": "SKU capacity.",
-          "x-ms-client-name": "skuCapacity",
-          "default": "2"
         }
       }
     },

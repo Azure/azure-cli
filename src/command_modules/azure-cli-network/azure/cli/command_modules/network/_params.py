@@ -424,8 +424,8 @@ register_cli_argument('network vnet-gateway', 'virtual_network_gateway_name', op
 register_cli_argument('network vnet-gateway', 'cert_name', help='Root certificate name', options_list=('--name', '-n'))
 register_cli_argument('network vnet-gateway', 'gateway_name', help='Virtual network gateway name')
 register_cli_argument('network vnet-gateway', 'gateway_type', help='The gateway type.', **enum_choice_list(gatewayType))
-register_cli_argument('network vnet-gateway', 'sku', help='VPN gateway SKU.', **enum_choice_list(sku))
-register_cli_argument('network vnet-gateway', 'vpn_gateway_type', help='VPN gateway type.', **enum_choice_list(vpnGatewayType))
+register_cli_argument('network vnet-gateway', 'sku', help='VNet gateway SKU.', **enum_choice_list(sku))
+register_cli_argument('network vnet-gateway', 'vpn_gateway_type', help='VNet gateway type.', **enum_choice_list(vpnGatewayType))
 
 register_cli_argument('network vnet-gateway update', 'enable_bgp', help='Enable BGP (Border Gateway Protocol)', **enum_choice_list(['true', 'false']))
 register_cli_argument('network vnet-gateway update', 'public_ip_address', help='Name or ID of a public IP address.', validator=get_public_ip_validator())

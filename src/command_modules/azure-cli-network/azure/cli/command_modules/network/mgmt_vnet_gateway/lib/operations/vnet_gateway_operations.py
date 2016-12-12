@@ -37,7 +37,7 @@ class VnetGatewayOperations(object):
         self.config = config
 
     def create_or_update(
-            self, resource_group_name, deployment_name, public_ip_address, virtual_network, virtual_network_gateway_name, enable_bgp=False, content_version=None, asn=None, bgp_peering_address=None, gateway_type="Vpn", location=None, peer_weight=None, public_ip_address_type="existingId", sku="Basic", sku_capacity=2, tags=None, virtual_network_type="existingId", vpn_gateway_type="RouteBased", custom_headers=None, raw=False, **operation_config):
+            self, resource_group_name, deployment_name, public_ip_address, virtual_network, virtual_network_gateway_name, enable_bgp=False, content_version=None, asn=None, bgp_peering_address=None, gateway_type="Vpn", location=None, peer_weight=None, public_ip_address_type="existingId", sku="Basic", tags=None, virtual_network_type="existingId", vpn_gateway_type="RouteBased", custom_headers=None, raw=False, **operation_config):
         """Create a new VnetGateway.
 
         :param resource_group_name: The name of the resource group. The name
@@ -78,8 +78,6 @@ class VnetGatewayOperations(object):
         :param sku: VPN Gateway SKU. Possible values include: 'Basic',
          'Standard', 'HighPerformance', 'UltraPerformance'
         :type sku: str or :class:`sku <Default.models.sku>`
-        :param sku_capacity: SKU capacity.
-        :type sku_capacity: int
         :param tags: Tags object.
         :type tags: object
         :param virtual_network_type: Type of virtual network to supply to the
@@ -100,7 +98,7 @@ class VnetGatewayOperations(object):
         :rtype: :class:`ClientRawResponse<msrest.pipeline.ClientRawResponse>`
          if raw=true
         """
-        parameters = models.DeploymentVnetGateway(content_version=content_version, asn=asn, bgp_peering_address=bgp_peering_address, enable_bgp=enable_bgp, gateway_type=gateway_type, location=location, peer_weight=peer_weight, public_ip_address=public_ip_address, public_ip_address_type=public_ip_address_type, sku=sku, sku_capacity=sku_capacity, tags=tags, virtual_network=virtual_network, virtual_network_gateway_name=virtual_network_gateway_name, virtual_network_type=virtual_network_type, vpn_gateway_type=vpn_gateway_type)
+        parameters = models.DeploymentVnetGateway(content_version=content_version, asn=asn, bgp_peering_address=bgp_peering_address, enable_bgp=enable_bgp, gateway_type=gateway_type, location=location, peer_weight=peer_weight, public_ip_address=public_ip_address, public_ip_address_type=public_ip_address_type, sku=sku, tags=tags, virtual_network=virtual_network, virtual_network_gateway_name=virtual_network_gateway_name, virtual_network_type=virtual_network_type, vpn_gateway_type=vpn_gateway_type)
 
         # Construct URL
         url = '/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Resources/deployments/{deploymentName}'

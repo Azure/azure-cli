@@ -472,12 +472,7 @@ def process_vnet_create_namespace(namespace):
         subnet_mask = 24 if bit_mask < 24 else bit_mask
         namespace.subnet_prefix = '{}/{}'.format(address, subnet_mask)
 
-def load_cert_file(param_name):
-    def load_cert_validator(namespace):
-        attr = getattr(namespace, param_name)
-        if attr and os.path.isfile(attr):
-            setattr(namespace, param_name, read_base_64_file(attr))
-    return load_cert_validator
+def process_vpn_connection_create_namespace(namespace):
 
     args = [a for a in [namespace.express_route_circuit2_id,
                         namespace.local_gateway2_id,

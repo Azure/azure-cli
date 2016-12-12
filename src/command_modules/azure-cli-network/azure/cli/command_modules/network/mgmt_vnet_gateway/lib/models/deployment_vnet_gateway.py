@@ -52,8 +52,6 @@ class DeploymentVnetGateway(Model):
      'Standard', 'HighPerformance', 'UltraPerformance'. Default value:
      "Basic" .
     :type sku: str or :class:`sku <Default.models.sku>`
-    :param sku_capacity: SKU capacity. Default value: 2 .
-    :type sku_capacity: int
     :param tags: Tags object.
     :type tags: object
     :param virtual_network: Name or ID of a virtual network that contains a
@@ -96,7 +94,6 @@ class DeploymentVnetGateway(Model):
         'public_ip_address': {'key': 'properties.parameters.publicIpAddress.value', 'type': 'str'},
         'public_ip_address_type': {'key': 'properties.parameters.publicIpAddressType.value', 'type': 'publicIpAddressType'},
         'sku': {'key': 'properties.parameters.sku.value', 'type': 'sku'},
-        'sku_capacity': {'key': 'properties.parameters.skuCapacity.value', 'type': 'int'},
         'tags': {'key': 'properties.parameters.tags.value', 'type': 'object'},
         'virtual_network': {'key': 'properties.parameters.virtualNetwork.value', 'type': 'str'},
         'virtual_network_gateway_name': {'key': 'properties.parameters.virtualNetworkGatewayName.value', 'type': 'str'},
@@ -109,7 +106,7 @@ class DeploymentVnetGateway(Model):
 
     mode = "Incremental"
 
-    def __init__(self, public_ip_address, virtual_network, virtual_network_gateway_name, content_version=None, asn=None, bgp_peering_address=None, enable_bgp=False, gateway_type="Vpn", location=None, peer_weight=None, public_ip_address_type="existingId", sku="Basic", sku_capacity=2, tags=None, virtual_network_type="existingId", vpn_gateway_type="RouteBased"):
+    def __init__(self, public_ip_address, virtual_network, virtual_network_gateway_name, content_version=None, asn=None, bgp_peering_address=None, enable_bgp=False, gateway_type="Vpn", location=None, peer_weight=None, public_ip_address_type="existingId", sku="Basic", tags=None, virtual_network_type="existingId", vpn_gateway_type="RouteBased"):
         self.content_version = content_version
         self.asn = asn
         self.bgp_peering_address = bgp_peering_address
@@ -120,7 +117,6 @@ class DeploymentVnetGateway(Model):
         self.public_ip_address = public_ip_address
         self.public_ip_address_type = public_ip_address_type
         self.sku = sku
-        self.sku_capacity = sku_capacity
         self.tags = tags
         self.virtual_network = virtual_network
         self.virtual_network_gateway_name = virtual_network_gateway_name

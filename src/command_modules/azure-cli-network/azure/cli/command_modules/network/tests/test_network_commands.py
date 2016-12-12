@@ -1017,7 +1017,7 @@ class NetworkSubnetSetScenarioTest(ResourceGroupVCRTestBase):
 class NetworkVpnGatewayScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-        super(NetworkVpnGatewayScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_vpn_gateway', debug=True)
+        super(NetworkVpnGatewayScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_vpn_gateway')
         self.vnet1_name = 'myvnet1'
         self.vnet2_name = 'myvnet2'
         self.gateway1_name = 'gateway1'
