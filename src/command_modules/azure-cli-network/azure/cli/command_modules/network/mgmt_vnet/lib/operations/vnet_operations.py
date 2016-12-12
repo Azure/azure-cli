@@ -37,15 +37,16 @@ class VnetOperations(object):
         self.config = config
 
     def create_or_update(
-            self, resource_group_name, deployment_name, virtual_network_name, content_version=None, dns_servers=None, location=None, subnet_name="Subnet1", subnet_prefix="10.0.0.0/24", tags=None, virtual_network_prefix="10.0.0.0/16", custom_headers=None, raw=False, **operation_config):
-        """
-        Create or update a virtual machine.
+            self, resource_group_name, deployment_name, virtual_network_name, create_subnet=False, content_version=None, dns_servers=None, location=None, subnet_name=None, subnet_prefix=None, tags=None, virtual_network_prefix="10.0.0.0/16", custom_headers=None, raw=False, **operation_config):
+        """Create a new Vnet.
 
         :param resource_group_name: The name of the resource group. The name
          is case insensitive.
         :type resource_group_name: str
         :param deployment_name: The name of the deployment.
         :type deployment_name: str
+        :param create_subnet: Flag to create a new subnet.
+        :type create_subnet: bool
         :param virtual_network_name: Name of the virtual network.
         :type virtual_network_name: str
         :param content_version: If included it must match the ContentVersion
@@ -55,9 +56,9 @@ class VnetOperations(object):
         :type dns_servers: list of object
         :param location: Virtual network location.
         :type location: str
-        :param subnet_name: Name of the subnet.
+        :param subnet_name: Name of a new subnet to create within the VNet.
         :type subnet_name: str
-        :param subnet_prefix: IP address for the subnet.
+        :param subnet_prefix: IP address prefix for the new subnet.
         :type subnet_prefix: str
         :param tags: Tags object.
         :type tags: object
@@ -70,11 +71,11 @@ class VnetOperations(object):
         :rtype:
          :class:`AzureOperationPoller<msrestazure.azure_operation.AzureOperationPoller>`
          instance that returns :class:`DeploymentExtended
-         <default.models.DeploymentExtended>`
+         <Default.models.DeploymentExtended>`
         :rtype: :class:`ClientRawResponse<msrest.pipeline.ClientRawResponse>`
          if raw=true
         """
-        parameters = models.DeploymentVnet(content_version=content_version, dns_servers=dns_servers, location=location, subnet_name=subnet_name, subnet_prefix=subnet_prefix, tags=tags, virtual_network_name=virtual_network_name, virtual_network_prefix=virtual_network_prefix)
+        parameters = models.DeploymentVnet(content_version=content_version, create_subnet=create_subnet, dns_servers=dns_servers, location=location, subnet_name=subnet_name, subnet_prefix=subnet_prefix, tags=tags, virtual_network_name=virtual_network_name, virtual_network_prefix=virtual_network_prefix)
 
         # Construct URL
         url = '/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Resources/deployments/{deploymentName}'

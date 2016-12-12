@@ -31,7 +31,7 @@ from azure.cli.command_modules.network._validators import \
      process_ag_url_path_map_rule_create_namespace, process_auth_create_namespace,
      process_public_ip_create_namespace, validate_private_ip_address,
      process_lb_frontend_ip_namespace, process_local_gateway_create_namespace,
-     process_tm_endpoint_create_namespace,
+     process_tm_endpoint_create_namespace, process_vnet_create_namespace,
      validate_inbound_nat_rule_id_list, validate_address_pool_id_list,
      validate_inbound_nat_rule_name_or_id, validate_address_pool_name_or_id,
      validate_servers, load_cert_file,
@@ -338,11 +338,12 @@ register_cli_argument('network route-table', 'route_table_name', name_arg_type, 
 register_cli_argument('network vnet', 'virtual_network_name', virtual_network_name_type, options_list=('--name', '-n'), id_part='name')
 
 register_cli_argument('network vnet create', 'location', location_type)
-register_cli_argument('network vnet create', 'subnet_prefix', options_list=('--subnet-prefix',), metavar='SUBNET_PREFIX', default='10.0.0.0/24')
-register_cli_argument('network vnet create', 'subnet_name', options_list=('--subnet-name',), metavar='SUBNET_NAME', default='Subnet1')
-register_cli_argument('network vnet create', 'virtual_network_prefix', options_list=('--address-prefix',), metavar='PREFIX', default='10.0.0.0/16')
+register_cli_argument('network vnet create', 'subnet_prefix', help='IP address prefix for the new subnet. If omitted, automatically reserves a portion of the VNet address space.')
+register_cli_argument('network vnet create', 'subnet_name', help='Name of a new subnet to create within the VNet.')
+register_cli_argument('network vnet create', 'virtual_network_prefix', options_list=('--address-prefix',), metavar='PREFIX')
 register_cli_argument('network vnet create', 'virtual_network_name', virtual_network_name_type, options_list=('--name', '-n'), required=True, completer=None)
-register_cli_argument('network vnet create', 'dns_servers', nargs='+')
+register_cli_argument('network vnet create', 'dns_servers', nargs='+', validator=process_vnet_create_namespace)
+register_cli_argument('network vnet create', 'create_subnet', ignore_type)
 
 register_cli_argument('network vnet subnet', 'subnet_name', arg_type=subnet_name_type, options_list=('--name', '-n'), id_part='child_name')
 register_cli_argument('network vnet update', 'address_prefixes', nargs='+')

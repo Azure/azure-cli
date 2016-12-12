@@ -2,6 +2,13 @@
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
+    "createSubnet": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Flag to create a new subnet."
+      }
+    },
     "dnsServers": {
       "type": "array",
       "defaultValue": [ ],
@@ -18,16 +25,16 @@
     },
     "subnetName": {
       "type": "string",
-      "defaultValue": "Subnet1",
+      "defaultValue": "",
       "metadata": {
-        "description": "Name of the subnet."
+        "description": "Name of a new subnet to create within the VNet."
       }
     },
     "subnetPrefix": {
       "type": "string",
-      "defaultValue": "10.0.0.0/24",
+      "defaultValue": "",
       "metadata": {
-        "description": "IP address prefix for the subnet."
+        "description": "IP address prefix for the new subnet."
       }
     },
     "tags": {
@@ -52,14 +59,25 @@
     }
   },
   "variables": {
-    "NewVNetName": "[parameters('virtualNetworkName')]",
-    "NewVNetPrefix": "[parameters('virtualNetworkPrefix')]",
-    "NewVNetSubnet1Name": "[parameters('subnetName')]",
-    "NewVNetSubnet1Prefix": "[parameters('subnetPrefix')]"
+    "subnetProperties": {
+      "true": {
+        "value": [
+          {
+            "name": "[parameters('subnetName')]",
+            "properties": {
+              "addressPrefix": "[parameters('subnetPrefix')]"
+            }
+          }
+        ]
+      },
+      "false": {
+        "value": null
+      }
+    }
   },
   "resources": [
     {
-      "name": "[variables('NewVNetName')]",
+      "name": "[parameters('virtualNetworkName')]",
       "type": "Microsoft.Network/virtualNetworks",
       "location": "[parameters('location')]",
       "apiVersion": "2015-06-15",
@@ -68,27 +86,20 @@
       "properties": {
         "addressSpace": {
           "addressPrefixes": [
-            "[variables('NewVNetPrefix')]"
+            "[parameters('virtualNetworkPrefix')]"
           ]
         },
         "dhcpOptions": {
           "dnsServers": "[parameters('dnsServers')]"
         },
-        "subnets": [
-          {
-            "name": "[variables('NewVNetSubnet1Name')]",
-            "properties": {
-              "addressPrefix": "[variables('NewVNetSubnet1Prefix')]"
-            }
-          }
-        ]
+        "subnets": "[variables('subnetProperties')[concat(parameters('createSubnet'))]['value']]"
       }
     }
   ],
   "outputs": {
     "NewVNet": {
       "type": "object",
-      "value": "[reference(variables('NewVNetName'))]"
+      "value": "[reference(parameters('virtualNetworkName'))]"
     }
   }
 }
