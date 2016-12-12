@@ -356,7 +356,7 @@ register_cli_argument('network vnet peering create', 'allow_gateway_transit', ac
 register_cli_argument('network vnet peering create', 'allow_forwarded_traffic', action='store_true', help='Allows forwarded traffic from the VMs in the remote VNET.')
 register_cli_argument('network vnet peering create', 'use_remote_gateways', action='store_true', help='Allows VNET to use the remote VNET\'s gateway. Remote VNET gateway must have --allow-gateway-transit enabled for remote peering. Only 1 peering can have this flag enabled. Cannot be set if the VNET already has a gateway.')
 
-register_cli_argument('network vnet subnet', 'address_prefix', metavar='PREFIX', help='the address prefix in CIDR format. If omitted, automatically reserves a portion of the VNet address space.')
+register_cli_argument('network vnet subnet', 'address_prefix', metavar='PREFIX', help='the address prefix in CIDR format.')
 register_cli_argument('network vnet subnet', 'virtual_network_name', virtual_network_name_type)
 register_cli_argument('network vnet subnet', 'network_security_group', validator=get_nsg_validator())
 register_cli_argument('network vnet subnet', 'route_table', help='Name or ID of a route table to associate with the subnet.')
