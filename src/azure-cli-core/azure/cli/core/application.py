@@ -76,7 +76,7 @@ class Application(object):
     def initialize(self, configuration):
         self.configuration = configuration
 
-    def execute(self, unexpanded_argv):
+    def execute(self, unexpanded_argv): # pylint: disable=too-many-statements
         argv = Application._expand_file_prefixed_files(unexpanded_argv)
         command_table = self.configuration.get_command_table()
         self.raise_event(self.COMMAND_TABLE_LOADED, command_table=command_table)
@@ -96,8 +96,11 @@ class Application(object):
         # Rudimentary parsing to get the command
         nouns = []
         for noun in argv:
-            if noun[0] == '-':
-                break
+            try:
+                if noun[0] == '-':
+                    break
+            except IndexError:
+                pass
             nouns.append(noun)
         command = ' '.join(nouns)
 
