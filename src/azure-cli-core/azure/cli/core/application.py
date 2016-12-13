@@ -96,8 +96,11 @@ class Application(object):
         # Rudimentary parsing to get the command
         nouns = []
         for noun in argv:
-            if noun[0] == '-':
-                break
+            try:
+                if noun[0] == '-':
+                    break
+            except IndexError:
+                pass
             nouns.append(noun)
         command = ' '.join(nouns)
 
