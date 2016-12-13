@@ -27,7 +27,7 @@ DEPENDENCIES = [
     'azure-cli-core',
     'azure-mgmt-resource==0.30.2',
     'azure-mgmt-storage==0.30.0rc6',
-    'azure-mgmt-containerregistry==0.1.0',
+    'azure-mgmt-containerregistry==0.1.1',
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
