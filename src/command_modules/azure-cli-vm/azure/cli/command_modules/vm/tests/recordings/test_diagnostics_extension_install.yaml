@@ -6,51 +6,48 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.1 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.4
-          msrest_azure/0.4.6 computemanagementclient/0.32.1 Azure-SDK-For-Python AZURECLI/TEST/0.1.1b2+dev]
+      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.7
+          computemanagementclient/0.33.0 Azure-SDK-For-Python AZURECLI/TEST/0.1.1b2+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [4d3c9be8-e3f9-11e6-98f1-a0b3ccf7272a]
+      x-ms-client-request-id: [d87e732e-e75c-11e6-afb1-64510658e3b3]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_vmss_diagnostics_extension/providers/Microsoft.Compute/virtualMachineScaleSets/testdiagvmss?api-version=2016-03-30
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_vmss_diagnostics_extension/providers/Microsoft.Compute/virtualMachineScaleSets/testdiagvmss?api-version=2016-04-30-preview
   response:
     body: {string: "{\r\n  \"sku\": {\r\n    \"name\": \"Standard_D1_v2\",\r\n   \
         \ \"tier\": \"Standard\",\r\n    \"capacity\": 2\r\n  },\r\n  \"properties\"\
-        : {\r\n    \"largeScaleEnabled\": true,\r\n    \"upgradePolicy\": {\r\n  \
-        \    \"mode\": \"Manual\"\r\n    },\r\n    \"virtualMachineProfile\": {\r\n\
-        \      \"osProfile\": {\r\n        \"computerNamePrefix\": \"testdh2vd\",\r\
-        \n        \"adminUsername\": \"trpresco\",\r\n        \"linuxConfiguration\"\
+        : {\r\n    \"singlePlacementGroup\": true,\r\n    \"upgradePolicy\": {\r\n\
+        \      \"mode\": \"Manual\"\r\n    },\r\n    \"virtualMachineProfile\": {\r\
+        \n      \"osProfile\": {\r\n        \"computerNamePrefix\": \"testdngy5\"\
+        ,\r\n        \"adminUsername\": \"yugangw\",\r\n        \"linuxConfiguration\"\
         : {\r\n          \"disablePasswordAuthentication\": false\r\n        },\r\n\
         \        \"secrets\": []\r\n      },\r\n      \"storageProfile\": {\r\n  \
-        \      \"osDisk\": {\r\n          \"vhdContainers\": [\r\n            \"https://testdh2vd0.blob.core.windows.net/vhds\"\
-        ,\r\n            \"https://testdh2vd1.blob.core.windows.net/vhds\",\r\n  \
-        \          \"https://testdh2vd2.blob.core.windows.net/vhds\",\r\n        \
-        \    \"https://testdh2vd3.blob.core.windows.net/vhds\",\r\n            \"\
-        https://testdh2vd4.blob.core.windows.net/vhds\"\r\n          ],\r\n      \
-        \    \"name\": \"osdiskimage\",\r\n          \"createOption\": \"FromImage\"\
-        ,\r\n          \"caching\": \"ReadOnly\"\r\n        },\r\n        \"imageReference\"\
-        : {\r\n          \"publisher\": \"Canonical\",\r\n          \"offer\": \"\
-        UbuntuServer\",\r\n          \"sku\": \"14.04.4-LTS\",\r\n          \"version\"\
-        : \"latest\"\r\n        }\r\n      },\r\n      \"networkProfile\": {\"networkInterfaceConfigurations\"\
-        :[{\"name\":\"testdh2vdNic\",\"properties\":{\"primary\":true,\"ipConfigurations\"\
-        :[{\"name\":\"testdh2vdIPConfig\",\"properties\":{\"subnet\":{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_vmss_diagnostics_extension/providers/Microsoft.Network/virtualNetworks/testdiagvmssVNET/subnets/testdiagvmssSubnet\"\
+        \      \"osDisk\": {\r\n          \"createOption\": \"FromImage\",\r\n   \
+        \       \"caching\": \"ReadOnly\",\r\n          \"managedDisk\": {\r\n   \
+        \         \"storageAccountType\": \"Standard_LRS\"\r\n          }\r\n    \
+        \    },\r\n        \"imageReference\": {\r\n          \"publisher\": \"Canonical\"\
+        ,\r\n          \"offer\": \"UbuntuServer\",\r\n          \"sku\": \"14.04.4-LTS\"\
+        ,\r\n          \"version\": \"latest\"\r\n        }\r\n      },\r\n      \"\
+        networkProfile\": {\"networkInterfaceConfigurations\":[{\"name\":\"testdngy5Nic\"\
+        ,\"properties\":{\"primary\":true,\"ipConfigurations\":[{\"name\":\"testdngy5IPConfig\"\
+        ,\"properties\":{\"subnet\":{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_vmss_diagnostics_extension/providers/Microsoft.Network/virtualNetworks/testdiagvmssVNET/subnets/testdiagvmssSubnet\"\
         },\"loadBalancerBackendAddressPools\":[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_vmss_diagnostics_extension/providers/Microsoft.Network/loadBalancers/testdiagvmssLB/backendAddressPools/testdiagvmssLBBEPool\"\
         }],\"loadBalancerInboundNatPools\":[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_vmss_diagnostics_extension/providers/Microsoft.Network/loadBalancers/testdiagvmssLB/inboundNatPools/testdiagvmssLBNatPool\"\
         }]}}]}}]}\r\n    },\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"\
-        overprovision\": true,\r\n    \"uniqueId\": \"8c6d97ca-4604-48f3-a45f-d4530a414131\"\
+        overprovision\": true,\r\n    \"uniqueId\": \"c096eec7-4a82-4065-8a27-316c264c5d52\"\
         \r\n  },\r\n  \"type\": \"Microsoft.Compute/virtualMachineScaleSets\",\r\n\
         \  \"location\": \"westus\",\r\n  \"tags\": {},\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_vmss_diagnostics_extension/providers/Microsoft.Compute/virtualMachineScaleSets/testdiagvmss\"\
         ,\r\n  \"name\": \"testdiagvmss\"\r\n}"}
     headers:
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Thu, 26 Jan 2017 18:57:36 GMT']
+      Date: ['Tue, 31 Jan 2017 02:27:43 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
       Transfer-Encoding: [chunked]
       Vary: [Accept-Encoding]
-      content-length: ['2525']
+      content-length: ['2232']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -59,163 +56,156 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.1 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.4
-          msrest_azure/0.4.6 computemanagementclient/0.32.1 Azure-SDK-For-Python AZURECLI/TEST/0.1.1b2+dev]
+      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.7
+          computemanagementclient/0.33.0 Azure-SDK-For-Python AZURECLI/TEST/0.1.1b2+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [4d5ea5fe-e3f9-11e6-8af8-a0b3ccf7272a]
+      x-ms-client-request-id: [d8bfd480-e75c-11e6-a354-64510658e3b3]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_vmss_diagnostics_extension/providers/Microsoft.Compute/virtualMachineScaleSets/testdiagvmss?api-version=2016-03-30
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_vmss_diagnostics_extension/providers/Microsoft.Compute/virtualMachineScaleSets/testdiagvmss?api-version=2016-04-30-preview
   response:
     body: {string: "{\r\n  \"sku\": {\r\n    \"name\": \"Standard_D1_v2\",\r\n   \
         \ \"tier\": \"Standard\",\r\n    \"capacity\": 2\r\n  },\r\n  \"properties\"\
-        : {\r\n    \"largeScaleEnabled\": true,\r\n    \"upgradePolicy\": {\r\n  \
-        \    \"mode\": \"Manual\"\r\n    },\r\n    \"virtualMachineProfile\": {\r\n\
-        \      \"osProfile\": {\r\n        \"computerNamePrefix\": \"testdh2vd\",\r\
-        \n        \"adminUsername\": \"trpresco\",\r\n        \"linuxConfiguration\"\
+        : {\r\n    \"singlePlacementGroup\": true,\r\n    \"upgradePolicy\": {\r\n\
+        \      \"mode\": \"Manual\"\r\n    },\r\n    \"virtualMachineProfile\": {\r\
+        \n      \"osProfile\": {\r\n        \"computerNamePrefix\": \"testdngy5\"\
+        ,\r\n        \"adminUsername\": \"yugangw\",\r\n        \"linuxConfiguration\"\
         : {\r\n          \"disablePasswordAuthentication\": false\r\n        },\r\n\
         \        \"secrets\": []\r\n      },\r\n      \"storageProfile\": {\r\n  \
-        \      \"osDisk\": {\r\n          \"vhdContainers\": [\r\n            \"https://testdh2vd0.blob.core.windows.net/vhds\"\
-        ,\r\n            \"https://testdh2vd1.blob.core.windows.net/vhds\",\r\n  \
-        \          \"https://testdh2vd2.blob.core.windows.net/vhds\",\r\n        \
-        \    \"https://testdh2vd3.blob.core.windows.net/vhds\",\r\n            \"\
-        https://testdh2vd4.blob.core.windows.net/vhds\"\r\n          ],\r\n      \
-        \    \"name\": \"osdiskimage\",\r\n          \"createOption\": \"FromImage\"\
-        ,\r\n          \"caching\": \"ReadOnly\"\r\n        },\r\n        \"imageReference\"\
-        : {\r\n          \"publisher\": \"Canonical\",\r\n          \"offer\": \"\
-        UbuntuServer\",\r\n          \"sku\": \"14.04.4-LTS\",\r\n          \"version\"\
-        : \"latest\"\r\n        }\r\n      },\r\n      \"networkProfile\": {\"networkInterfaceConfigurations\"\
-        :[{\"name\":\"testdh2vdNic\",\"properties\":{\"primary\":true,\"ipConfigurations\"\
-        :[{\"name\":\"testdh2vdIPConfig\",\"properties\":{\"subnet\":{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_vmss_diagnostics_extension/providers/Microsoft.Network/virtualNetworks/testdiagvmssVNET/subnets/testdiagvmssSubnet\"\
+        \      \"osDisk\": {\r\n          \"createOption\": \"FromImage\",\r\n   \
+        \       \"caching\": \"ReadOnly\",\r\n          \"managedDisk\": {\r\n   \
+        \         \"storageAccountType\": \"Standard_LRS\"\r\n          }\r\n    \
+        \    },\r\n        \"imageReference\": {\r\n          \"publisher\": \"Canonical\"\
+        ,\r\n          \"offer\": \"UbuntuServer\",\r\n          \"sku\": \"14.04.4-LTS\"\
+        ,\r\n          \"version\": \"latest\"\r\n        }\r\n      },\r\n      \"\
+        networkProfile\": {\"networkInterfaceConfigurations\":[{\"name\":\"testdngy5Nic\"\
+        ,\"properties\":{\"primary\":true,\"ipConfigurations\":[{\"name\":\"testdngy5IPConfig\"\
+        ,\"properties\":{\"subnet\":{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_vmss_diagnostics_extension/providers/Microsoft.Network/virtualNetworks/testdiagvmssVNET/subnets/testdiagvmssSubnet\"\
         },\"loadBalancerBackendAddressPools\":[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_vmss_diagnostics_extension/providers/Microsoft.Network/loadBalancers/testdiagvmssLB/backendAddressPools/testdiagvmssLBBEPool\"\
         }],\"loadBalancerInboundNatPools\":[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_vmss_diagnostics_extension/providers/Microsoft.Network/loadBalancers/testdiagvmssLB/inboundNatPools/testdiagvmssLBNatPool\"\
         }]}}]}}]}\r\n    },\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"\
-        overprovision\": true,\r\n    \"uniqueId\": \"8c6d97ca-4604-48f3-a45f-d4530a414131\"\
+        overprovision\": true,\r\n    \"uniqueId\": \"c096eec7-4a82-4065-8a27-316c264c5d52\"\
         \r\n  },\r\n  \"type\": \"Microsoft.Compute/virtualMachineScaleSets\",\r\n\
         \  \"location\": \"westus\",\r\n  \"tags\": {},\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_vmss_diagnostics_extension/providers/Microsoft.Compute/virtualMachineScaleSets/testdiagvmss\"\
         ,\r\n  \"name\": \"testdiagvmss\"\r\n}"}
     headers:
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Thu, 26 Jan 2017 18:57:36 GMT']
+      Date: ['Tue, 31 Jan 2017 02:27:43 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
       Transfer-Encoding: [chunked]
       Vary: [Accept-Encoding]
-      content-length: ['2525']
+      content-length: ['2232']
     status: {code: 200, message: OK}
 - request:
-    body: '{"properties": {"upgradePolicy": {"mode": "Manual"}, "virtualMachineProfile":
-      {"extensionProfile": {"extensions": [{"properties": {"publisher": "Microsoft.OSTCExtensions",
-      "protectedSettings": {"storageAccountName": "diagextensionsa", "storageAccountEndPoint":
-      "https://diagextensionsa.blob.core.windows.net/", "storageAccountKey": "123"},
-      "typeHandlerVersion": "2.3", "autoUpgradeMinorVersion": true, "type": "LinuxDiagnostic",
-      "settings": {"storageAccount": "diagextensionsa", "ladCfg": {"diagnosticMonitorConfiguration":
-      {"performanceCounters": {"performanceCounterConfiguration": [{"namespace": "root/scx",
-      "counterSpecifier": "AvailableMemory", "class": "Memory", "table": "LinuxMemory"},
-      {"namespace": "root/scx", "counterSpecifier": "PercentAvailableMemory", "class":
-      "Memory", "table": "LinuxMemory"}, {"namespace": "root/scx", "counterSpecifier":
-      "UsedMemory", "class": "Memory", "table": "LinuxMemory"}, {"namespace": "root/scx",
-      "counterSpecifier": "PercentUsedMemory", "class": "Memory", "table": "LinuxMemory"},
-      {"namespace": "root/scx", "counterSpecifier": "PercentUsedByCache", "class":
-      "Memory", "table": "LinuxMemory"}, {"namespace": "root/scx", "counterSpecifier":
-      "PagesPerSec", "class": "Memory", "table": "LinuxMemory"}, {"namespace": "root/scx",
-      "counterSpecifier": "PagesReadPerSec", "class": "Memory", "table": "LinuxMemory"},
-      {"namespace": "root/scx", "counterSpecifier": "PagesWrittenPerSec", "class":
-      "Memory", "table": "LinuxMemory"}, {"namespace": "root/scx", "counterSpecifier":
-      "AvailableSwap", "class": "Memory", "table": "LinuxMemory"}, {"namespace": "root/scx",
-      "counterSpecifier": "PercentAvailableSwap", "class": "Memory", "table": "LinuxMemory"},
-      {"namespace": "root/scx", "counterSpecifier": "UsedSwap", "class": "Memory",
-      "table": "LinuxMemory"}, {"namespace": "root/scx", "counterSpecifier": "PercentUsedSwap",
-      "class": "Memory", "table": "LinuxMemory"}, {"namespace": "root/scx", "counterSpecifier":
-      "PercentIdleTime", "class": "Processor", "table": "LinuxProcessor"}, {"namespace":
-      "root/scx", "counterSpecifier": "PercentUserTime", "class": "Processor", "table":
-      "LinuxProcessor"}, {"namespace": "root/scx", "counterSpecifier": "PercentNiceTime",
-      "class": "Processor", "table": "LinuxProcessor"}, {"namespace": "root/scx",
-      "counterSpecifier": "PercentPrivilegedTime", "class": "Processor", "table":
-      "LinuxProcessor"}, {"namespace": "root/scx", "counterSpecifier": "PercentInterruptTime",
-      "class": "Processor", "table": "LinuxProcessor"}, {"namespace": "root/scx",
-      "counterSpecifier": "PercentDPCTime", "class": "Processor", "table": "LinuxProcessor"},
-      {"namespace": "root/scx", "counterSpecifier": "PercentProcessorTime", "class":
-      "Processor", "table": "LinuxProcessor"}, {"namespace": "root/scx", "counterSpecifier":
-      "PercentIOWaitTime", "class": "Processor", "table": "LinuxProcessor"}, {"namespace":
-      "root/scx", "counterSpecifier": "BytesPerSecond", "class": "PhysicalDisk", "table":
-      "LinuxPhysicalDisk"}, {"namespace": "root/scx", "counterSpecifier": "ReadBytesPerSecond",
-      "class": "PhysicalDisk", "table": "LinuxPhysicalDisk"}, {"namespace": "root/scx",
-      "counterSpecifier": "WriteBytesPerSecond", "class": "PhysicalDisk", "table":
-      "LinuxPhysicalDisk"}, {"namespace": "root/scx", "counterSpecifier": "TransfersPerSecond",
-      "class": "PhysicalDisk", "table": "LinuxPhysicalDisk"}, {"namespace": "root/scx",
-      "counterSpecifier": "ReadsPerSecond", "class": "PhysicalDisk", "table": "LinuxPhysicalDisk"},
-      {"namespace": "root/scx", "counterSpecifier": "WritesPerSecond", "class": "PhysicalDisk",
-      "table": "LinuxPhysicalDisk"}, {"namespace": "root/scx", "counterSpecifier":
-      "AverageReadTime", "class": "PhysicalDisk", "table": "LinuxPhysicalDisk"}, {"namespace":
-      "root/scx", "counterSpecifier": "AverageWriteTime", "class": "PhysicalDisk",
-      "table": "LinuxPhysicalDisk"}, {"namespace": "root/scx", "counterSpecifier":
-      "AverageTransferTime", "class": "PhysicalDisk", "table": "LinuxPhysicalDisk"},
-      {"namespace": "root/scx", "counterSpecifier": "AverageDiskQueueLength", "class":
-      "PhysicalDisk", "table": "LinuxPhysicalDisk"}, {"namespace": "root/scx", "counterSpecifier":
-      "BytesTransmitted", "class": "NetworkInterface", "table": "LinuxNetworkInterface"},
-      {"namespace": "root/scx", "counterSpecifier": "BytesReceived", "class": "NetworkInterface",
-      "table": "LinuxNetworkInterface"}, {"namespace": "root/scx", "counterSpecifier":
-      "PacketsTransmitted", "class": "NetworkInterface", "table": "LinuxNetworkInterface"},
-      {"namespace": "root/scx", "counterSpecifier": "PacketsReceived", "class": "NetworkInterface",
-      "table": "LinuxNetworkInterface"}, {"namespace": "root/scx", "counterSpecifier":
-      "BytesTotal", "class": "NetworkInterface", "table": "LinuxNetworkInterface"},
-      {"namespace": "root/scx", "counterSpecifier": "TotalRxErrors", "class": "NetworkInterface",
-      "table": "LinuxNetworkInterface"}, {"namespace": "root/scx", "counterSpecifier":
-      "TotalTxErrors", "class": "NetworkInterface", "table": "LinuxNetworkInterface"},
-      {"namespace": "root/scx", "counterSpecifier": "TotalCollisions", "class": "NetworkInterface",
-      "table": "LinuxNetworkInterface"}]}, "metrics": {"resourceId": "[variables(''ladMetricsResourceId'')]",
-      "metricAggregation": [{"scheduledTransferPeriod": "PT1H"}, {"scheduledTransferPeriod":
-      "PT1M"}]}}}}}, "name": "LinuxDiagnostic"}]}, "osProfile": {"secrets": [], "computerNamePrefix":
-      "testdh2vd", "linuxConfiguration": {"disablePasswordAuthentication": false},
-      "adminUsername": "trpresco"}, "networkProfile": {"networkInterfaceConfigurations":
-      [{"properties": {"ipConfigurations": [{"properties": {"subnet": {"id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/cli_test_vm_vmss_diagnostics_extension/providers/Microsoft.Network/virtualNetworks/testdiagvmssVNET/subnets/testdiagvmssSubnet"},
-      "loadBalancerBackendAddressPools": [{"id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/cli_test_vm_vmss_diagnostics_extension/providers/Microsoft.Network/loadBalancers/testdiagvmssLB/backendAddressPools/testdiagvmssLBBEPool"}],
+    body: '{"location": "westus", "sku": {"capacity": 2, "tier": "Standard", "name":
+      "Standard_D1_v2"}, "properties": {"overprovision": true, "singlePlacementGroup":
+      true, "upgradePolicy": {"mode": "Manual"}, "virtualMachineProfile": {"extensionProfile":
+      {"extensions": [{"properties": {"settings": {"storageAccount": "diagextensionsa",
+      "ladCfg": {"diagnosticMonitorConfiguration": {"metrics": {"metricAggregation":
+      [{"scheduledTransferPeriod": "PT1H"}, {"scheduledTransferPeriod": "PT1M"}],
+      "resourceId": "[variables(''ladMetricsResourceId'')]"}, "performanceCounters":
+      {"performanceCounterConfiguration": [{"counterSpecifier": "AvailableMemory",
+      "namespace": "root/scx", "class": "Memory", "table": "LinuxMemory"}, {"counterSpecifier":
+      "PercentAvailableMemory", "namespace": "root/scx", "class": "Memory", "table":
+      "LinuxMemory"}, {"counterSpecifier": "UsedMemory", "namespace": "root/scx",
+      "class": "Memory", "table": "LinuxMemory"}, {"counterSpecifier": "PercentUsedMemory",
+      "namespace": "root/scx", "class": "Memory", "table": "LinuxMemory"}, {"counterSpecifier":
+      "PercentUsedByCache", "namespace": "root/scx", "class": "Memory", "table": "LinuxMemory"},
+      {"counterSpecifier": "PagesPerSec", "namespace": "root/scx", "class": "Memory",
+      "table": "LinuxMemory"}, {"counterSpecifier": "PagesReadPerSec", "namespace":
+      "root/scx", "class": "Memory", "table": "LinuxMemory"}, {"counterSpecifier":
+      "PagesWrittenPerSec", "namespace": "root/scx", "class": "Memory", "table": "LinuxMemory"},
+      {"counterSpecifier": "AvailableSwap", "namespace": "root/scx", "class": "Memory",
+      "table": "LinuxMemory"}, {"counterSpecifier": "PercentAvailableSwap", "namespace":
+      "root/scx", "class": "Memory", "table": "LinuxMemory"}, {"counterSpecifier":
+      "UsedSwap", "namespace": "root/scx", "class": "Memory", "table": "LinuxMemory"},
+      {"counterSpecifier": "PercentUsedSwap", "namespace": "root/scx", "class": "Memory",
+      "table": "LinuxMemory"}, {"counterSpecifier": "PercentIdleTime", "namespace":
+      "root/scx", "class": "Processor", "table": "LinuxProcessor"}, {"counterSpecifier":
+      "PercentUserTime", "namespace": "root/scx", "class": "Processor", "table": "LinuxProcessor"},
+      {"counterSpecifier": "PercentNiceTime", "namespace": "root/scx", "class": "Processor",
+      "table": "LinuxProcessor"}, {"counterSpecifier": "PercentPrivilegedTime", "namespace":
+      "root/scx", "class": "Processor", "table": "LinuxProcessor"}, {"counterSpecifier":
+      "PercentInterruptTime", "namespace": "root/scx", "class": "Processor", "table":
+      "LinuxProcessor"}, {"counterSpecifier": "PercentDPCTime", "namespace": "root/scx",
+      "class": "Processor", "table": "LinuxProcessor"}, {"counterSpecifier": "PercentProcessorTime",
+      "namespace": "root/scx", "class": "Processor", "table": "LinuxProcessor"}, {"counterSpecifier":
+      "PercentIOWaitTime", "namespace": "root/scx", "class": "Processor", "table":
+      "LinuxProcessor"}, {"counterSpecifier": "BytesPerSecond", "namespace": "root/scx",
+      "class": "PhysicalDisk", "table": "LinuxPhysicalDisk"}, {"counterSpecifier":
+      "ReadBytesPerSecond", "namespace": "root/scx", "class": "PhysicalDisk", "table":
+      "LinuxPhysicalDisk"}, {"counterSpecifier": "WriteBytesPerSecond", "namespace":
+      "root/scx", "class": "PhysicalDisk", "table": "LinuxPhysicalDisk"}, {"counterSpecifier":
+      "TransfersPerSecond", "namespace": "root/scx", "class": "PhysicalDisk", "table":
+      "LinuxPhysicalDisk"}, {"counterSpecifier": "ReadsPerSecond", "namespace": "root/scx",
+      "class": "PhysicalDisk", "table": "LinuxPhysicalDisk"}, {"counterSpecifier":
+      "WritesPerSecond", "namespace": "root/scx", "class": "PhysicalDisk", "table":
+      "LinuxPhysicalDisk"}, {"counterSpecifier": "AverageReadTime", "namespace": "root/scx",
+      "class": "PhysicalDisk", "table": "LinuxPhysicalDisk"}, {"counterSpecifier":
+      "AverageWriteTime", "namespace": "root/scx", "class": "PhysicalDisk", "table":
+      "LinuxPhysicalDisk"}, {"counterSpecifier": "AverageTransferTime", "namespace":
+      "root/scx", "class": "PhysicalDisk", "table": "LinuxPhysicalDisk"}, {"counterSpecifier":
+      "AverageDiskQueueLength", "namespace": "root/scx", "class": "PhysicalDisk",
+      "table": "LinuxPhysicalDisk"}, {"counterSpecifier": "BytesTransmitted", "namespace":
+      "root/scx", "class": "NetworkInterface", "table": "LinuxNetworkInterface"},
+      {"counterSpecifier": "BytesReceived", "namespace": "root/scx", "class": "NetworkInterface",
+      "table": "LinuxNetworkInterface"}, {"counterSpecifier": "PacketsTransmitted",
+      "namespace": "root/scx", "class": "NetworkInterface", "table": "LinuxNetworkInterface"},
+      {"counterSpecifier": "PacketsReceived", "namespace": "root/scx", "class": "NetworkInterface",
+      "table": "LinuxNetworkInterface"}, {"counterSpecifier": "BytesTotal", "namespace":
+      "root/scx", "class": "NetworkInterface", "table": "LinuxNetworkInterface"},
+      {"counterSpecifier": "TotalRxErrors", "namespace": "root/scx", "class": "NetworkInterface",
+      "table": "LinuxNetworkInterface"}, {"counterSpecifier": "TotalTxErrors", "namespace":
+      "root/scx", "class": "NetworkInterface", "table": "LinuxNetworkInterface"},
+      {"counterSpecifier": "TotalCollisions", "namespace": "root/scx", "class": "NetworkInterface",
+      "table": "LinuxNetworkInterface"}]}}}}, "publisher": "Microsoft.OSTCExtensions",
+      "autoUpgradeMinorVersion": true, "protectedSettings": {"storageAccountEndPoint":
+      "https://diagextensionsa.blob.core.windows.net/", "storageAccountName": "diagextensionsa",
+      "storageAccountKey": "123"}, "type": "LinuxDiagnostic", "typeHandlerVersion":
+      "2.3"}, "name": "LinuxDiagnostic"}]}, "storageProfile": {"osDisk": {"caching":
+      "ReadOnly", "managedDisk": {"storageAccountType": "Standard_LRS"}, "createOption":
+      "fromImage"}, "imageReference": {"version": "latest", "sku": "14.04.4-LTS",
+      "publisher": "Canonical", "offer": "UbuntuServer"}}, "networkProfile": {"networkInterfaceConfigurations":
+      [{"properties": {"ipConfigurations": [{"properties": {"loadBalancerBackendAddressPools":
+      [{"id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/cli_test_vm_vmss_diagnostics_extension/providers/Microsoft.Network/loadBalancers/testdiagvmssLB/backendAddressPools/testdiagvmssLBBEPool"}],
+      "subnet": {"id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/cli_test_vm_vmss_diagnostics_extension/providers/Microsoft.Network/virtualNetworks/testdiagvmssVNET/subnets/testdiagvmssSubnet"},
       "loadBalancerInboundNatPools": [{"id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/cli_test_vm_vmss_diagnostics_extension/providers/Microsoft.Network/loadBalancers/testdiagvmssLB/inboundNatPools/testdiagvmssLBNatPool"}]},
-      "name": "testdh2vdIPConfig"}], "primary": true}, "name": "testdh2vdNic"}]},
-      "storageProfile": {"osDisk": {"createOption": "fromImage", "caching": "ReadOnly",
-      "name": "osdiskimage", "vhdContainers": ["https://testdh2vd0.blob.core.windows.net/vhds",
-      "https://testdh2vd1.blob.core.windows.net/vhds", "https://testdh2vd2.blob.core.windows.net/vhds",
-      "https://testdh2vd3.blob.core.windows.net/vhds", "https://testdh2vd4.blob.core.windows.net/vhds"]},
-      "imageReference": {"publisher": "Canonical", "sku": "14.04.4-LTS", "offer":
-      "UbuntuServer", "version": "latest"}}}, "overprovision": true}, "sku": {"name":
-      "Standard_D1_v2", "capacity": 2, "tier": "Standard"}, "tags": {}, "location":
-      "westus"}'
+      "name": "testdngy5IPConfig"}], "primary": true}, "name": "testdngy5Nic"}]},
+      "osProfile": {"computerNamePrefix": "testdngy5", "linuxConfiguration": {"disablePasswordAuthentication":
+      false}, "secrets": [], "adminUsername": "yugangw"}}}, "tags": {}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
-      Content-Length: ['6971']
+      Content-Length: ['6768']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.1 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.4
-          msrest_azure/0.4.6 computemanagementclient/0.32.1 Azure-SDK-For-Python AZURECLI/TEST/0.1.1b2+dev]
+      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.7
+          computemanagementclient/0.33.0 Azure-SDK-For-Python AZURECLI/TEST/0.1.1b2+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [4d844426-e3f9-11e6-bfb7-a0b3ccf7272a]
+      x-ms-client-request-id: [d8e94352-e75c-11e6-87c1-64510658e3b3]
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_vmss_diagnostics_extension/providers/Microsoft.Compute/virtualMachineScaleSets/testdiagvmss?api-version=2016-03-30
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_vmss_diagnostics_extension/providers/Microsoft.Compute/virtualMachineScaleSets/testdiagvmss?api-version=2016-04-30-preview
   response:
     body: {string: "{\r\n  \"sku\": {\r\n    \"name\": \"Standard_D1_v2\",\r\n   \
         \ \"tier\": \"Standard\",\r\n    \"capacity\": 2\r\n  },\r\n  \"properties\"\
-        : {\r\n    \"largeScaleEnabled\": true,\r\n    \"upgradePolicy\": {\r\n  \
-        \    \"mode\": \"Manual\"\r\n    },\r\n    \"virtualMachineProfile\": {\r\n\
-        \      \"osProfile\": {\r\n        \"computerNamePrefix\": \"testdh2vd\",\r\
-        \n        \"adminUsername\": \"trpresco\",\r\n        \"linuxConfiguration\"\
+        : {\r\n    \"singlePlacementGroup\": true,\r\n    \"upgradePolicy\": {\r\n\
+        \      \"mode\": \"Manual\"\r\n    },\r\n    \"virtualMachineProfile\": {\r\
+        \n      \"osProfile\": {\r\n        \"computerNamePrefix\": \"testdngy5\"\
+        ,\r\n        \"adminUsername\": \"yugangw\",\r\n        \"linuxConfiguration\"\
         : {\r\n          \"disablePasswordAuthentication\": false\r\n        },\r\n\
         \        \"secrets\": []\r\n      },\r\n      \"storageProfile\": {\r\n  \
-        \      \"osDisk\": {\r\n          \"vhdContainers\": [\r\n            \"https://testdh2vd0.blob.core.windows.net/vhds\"\
-        ,\r\n            \"https://testdh2vd1.blob.core.windows.net/vhds\",\r\n  \
-        \          \"https://testdh2vd2.blob.core.windows.net/vhds\",\r\n        \
-        \    \"https://testdh2vd3.blob.core.windows.net/vhds\",\r\n            \"\
-        https://testdh2vd4.blob.core.windows.net/vhds\"\r\n          ],\r\n      \
-        \    \"name\": \"osdiskimage\",\r\n          \"createOption\": \"FromImage\"\
-        ,\r\n          \"caching\": \"ReadOnly\"\r\n        },\r\n        \"imageReference\"\
-        : {\r\n          \"publisher\": \"Canonical\",\r\n          \"offer\": \"\
-        UbuntuServer\",\r\n          \"sku\": \"14.04.4-LTS\",\r\n          \"version\"\
-        : \"latest\"\r\n        }\r\n      },\r\n      \"networkProfile\": {\"networkInterfaceConfigurations\"\
-        :[{\"name\":\"testdh2vdNic\",\"properties\":{\"primary\":true,\"ipConfigurations\"\
-        :[{\"name\":\"testdh2vdIPConfig\",\"properties\":{\"subnet\":{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_vmss_diagnostics_extension/providers/Microsoft.Network/virtualNetworks/testdiagvmssVNET/subnets/testdiagvmssSubnet\"\
+        \      \"osDisk\": {\r\n          \"createOption\": \"FromImage\",\r\n   \
+        \       \"caching\": \"ReadOnly\",\r\n          \"managedDisk\": {\r\n   \
+        \         \"storageAccountType\": \"Standard_LRS\"\r\n          }\r\n    \
+        \    },\r\n        \"imageReference\": {\r\n          \"publisher\": \"Canonical\"\
+        ,\r\n          \"offer\": \"UbuntuServer\",\r\n          \"sku\": \"14.04.4-LTS\"\
+        ,\r\n          \"version\": \"latest\"\r\n        }\r\n      },\r\n      \"\
+        networkProfile\": {\"networkInterfaceConfigurations\":[{\"name\":\"testdngy5Nic\"\
+        ,\"properties\":{\"primary\":true,\"ipConfigurations\":[{\"name\":\"testdngy5IPConfig\"\
+        ,\"properties\":{\"subnet\":{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_vmss_diagnostics_extension/providers/Microsoft.Network/virtualNetworks/testdiagvmssVNET/subnets/testdiagvmssSubnet\"\
         },\"loadBalancerBackendAddressPools\":[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_vmss_diagnostics_extension/providers/Microsoft.Network/loadBalancers/testdiagvmssLB/backendAddressPools/testdiagvmssLBBEPool\"\
         }],\"loadBalancerInboundNatPools\":[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_vmss_diagnostics_extension/providers/Microsoft.Network/loadBalancers/testdiagvmssLB/inboundNatPools/testdiagvmssLBNatPool\"\
         }]}}]}}]},\r\n      \"extensionProfile\": {\r\n        \"extensions\": [\r\
@@ -223,89 +213,90 @@ interactions:
         : \"Microsoft.OSTCExtensions\",\r\n              \"type\": \"LinuxDiagnostic\"\
         ,\r\n              \"typeHandlerVersion\": \"2.3\",\r\n              \"autoUpgradeMinorVersion\"\
         : true,\r\n              \"settings\": {\"storageAccount\":\"diagextensionsa\"\
-        ,\"ladCfg\":{\"diagnosticMonitorConfiguration\":{\"performanceCounters\":{\"\
-        performanceCounterConfiguration\":[{\"namespace\":\"root/scx\",\"counterSpecifier\"\
-        :\"AvailableMemory\",\"class\":\"Memory\",\"table\":\"LinuxMemory\"},{\"namespace\"\
-        :\"root/scx\",\"counterSpecifier\":\"PercentAvailableMemory\",\"class\":\"\
-        Memory\",\"table\":\"LinuxMemory\"},{\"namespace\":\"root/scx\",\"counterSpecifier\"\
-        :\"UsedMemory\",\"class\":\"Memory\",\"table\":\"LinuxMemory\"},{\"namespace\"\
-        :\"root/scx\",\"counterSpecifier\":\"PercentUsedMemory\",\"class\":\"Memory\"\
-        ,\"table\":\"LinuxMemory\"},{\"namespace\":\"root/scx\",\"counterSpecifier\"\
-        :\"PercentUsedByCache\",\"class\":\"Memory\",\"table\":\"LinuxMemory\"},{\"\
-        namespace\":\"root/scx\",\"counterSpecifier\":\"PagesPerSec\",\"class\":\"\
-        Memory\",\"table\":\"LinuxMemory\"},{\"namespace\":\"root/scx\",\"counterSpecifier\"\
-        :\"PagesReadPerSec\",\"class\":\"Memory\",\"table\":\"LinuxMemory\"},{\"namespace\"\
-        :\"root/scx\",\"counterSpecifier\":\"PagesWrittenPerSec\",\"class\":\"Memory\"\
-        ,\"table\":\"LinuxMemory\"},{\"namespace\":\"root/scx\",\"counterSpecifier\"\
-        :\"AvailableSwap\",\"class\":\"Memory\",\"table\":\"LinuxMemory\"},{\"namespace\"\
-        :\"root/scx\",\"counterSpecifier\":\"PercentAvailableSwap\",\"class\":\"Memory\"\
-        ,\"table\":\"LinuxMemory\"},{\"namespace\":\"root/scx\",\"counterSpecifier\"\
-        :\"UsedSwap\",\"class\":\"Memory\",\"table\":\"LinuxMemory\"},{\"namespace\"\
-        :\"root/scx\",\"counterSpecifier\":\"PercentUsedSwap\",\"class\":\"Memory\"\
-        ,\"table\":\"LinuxMemory\"},{\"namespace\":\"root/scx\",\"counterSpecifier\"\
-        :\"PercentIdleTime\",\"class\":\"Processor\",\"table\":\"LinuxProcessor\"\
-        },{\"namespace\":\"root/scx\",\"counterSpecifier\":\"PercentUserTime\",\"\
-        class\":\"Processor\",\"table\":\"LinuxProcessor\"},{\"namespace\":\"root/scx\"\
-        ,\"counterSpecifier\":\"PercentNiceTime\",\"class\":\"Processor\",\"table\"\
-        :\"LinuxProcessor\"},{\"namespace\":\"root/scx\",\"counterSpecifier\":\"PercentPrivilegedTime\"\
-        ,\"class\":\"Processor\",\"table\":\"LinuxProcessor\"},{\"namespace\":\"root/scx\"\
-        ,\"counterSpecifier\":\"PercentInterruptTime\",\"class\":\"Processor\",\"\
-        table\":\"LinuxProcessor\"},{\"namespace\":\"root/scx\",\"counterSpecifier\"\
-        :\"PercentDPCTime\",\"class\":\"Processor\",\"table\":\"LinuxProcessor\"},{\"\
-        namespace\":\"root/scx\",\"counterSpecifier\":\"PercentProcessorTime\",\"\
-        class\":\"Processor\",\"table\":\"LinuxProcessor\"},{\"namespace\":\"root/scx\"\
-        ,\"counterSpecifier\":\"PercentIOWaitTime\",\"class\":\"Processor\",\"table\"\
-        :\"LinuxProcessor\"},{\"namespace\":\"root/scx\",\"counterSpecifier\":\"BytesPerSecond\"\
-        ,\"class\":\"PhysicalDisk\",\"table\":\"LinuxPhysicalDisk\"},{\"namespace\"\
-        :\"root/scx\",\"counterSpecifier\":\"ReadBytesPerSecond\",\"class\":\"PhysicalDisk\"\
-        ,\"table\":\"LinuxPhysicalDisk\"},{\"namespace\":\"root/scx\",\"counterSpecifier\"\
-        :\"WriteBytesPerSecond\",\"class\":\"PhysicalDisk\",\"table\":\"LinuxPhysicalDisk\"\
-        },{\"namespace\":\"root/scx\",\"counterSpecifier\":\"TransfersPerSecond\"\
-        ,\"class\":\"PhysicalDisk\",\"table\":\"LinuxPhysicalDisk\"},{\"namespace\"\
-        :\"root/scx\",\"counterSpecifier\":\"ReadsPerSecond\",\"class\":\"PhysicalDisk\"\
-        ,\"table\":\"LinuxPhysicalDisk\"},{\"namespace\":\"root/scx\",\"counterSpecifier\"\
-        :\"WritesPerSecond\",\"class\":\"PhysicalDisk\",\"table\":\"LinuxPhysicalDisk\"\
-        },{\"namespace\":\"root/scx\",\"counterSpecifier\":\"AverageReadTime\",\"\
-        class\":\"PhysicalDisk\",\"table\":\"LinuxPhysicalDisk\"},{\"namespace\":\"\
-        root/scx\",\"counterSpecifier\":\"AverageWriteTime\",\"class\":\"PhysicalDisk\"\
-        ,\"table\":\"LinuxPhysicalDisk\"},{\"namespace\":\"root/scx\",\"counterSpecifier\"\
-        :\"AverageTransferTime\",\"class\":\"PhysicalDisk\",\"table\":\"LinuxPhysicalDisk\"\
-        },{\"namespace\":\"root/scx\",\"counterSpecifier\":\"AverageDiskQueueLength\"\
-        ,\"class\":\"PhysicalDisk\",\"table\":\"LinuxPhysicalDisk\"},{\"namespace\"\
-        :\"root/scx\",\"counterSpecifier\":\"BytesTransmitted\",\"class\":\"NetworkInterface\"\
-        ,\"table\":\"LinuxNetworkInterface\"},{\"namespace\":\"root/scx\",\"counterSpecifier\"\
-        :\"BytesReceived\",\"class\":\"NetworkInterface\",\"table\":\"LinuxNetworkInterface\"\
-        },{\"namespace\":\"root/scx\",\"counterSpecifier\":\"PacketsTransmitted\"\
-        ,\"class\":\"NetworkInterface\",\"table\":\"LinuxNetworkInterface\"},{\"namespace\"\
-        :\"root/scx\",\"counterSpecifier\":\"PacketsReceived\",\"class\":\"NetworkInterface\"\
-        ,\"table\":\"LinuxNetworkInterface\"},{\"namespace\":\"root/scx\",\"counterSpecifier\"\
-        :\"BytesTotal\",\"class\":\"NetworkInterface\",\"table\":\"LinuxNetworkInterface\"\
-        },{\"namespace\":\"root/scx\",\"counterSpecifier\":\"TotalRxErrors\",\"class\"\
-        :\"NetworkInterface\",\"table\":\"LinuxNetworkInterface\"},{\"namespace\"\
-        :\"root/scx\",\"counterSpecifier\":\"TotalTxErrors\",\"class\":\"NetworkInterface\"\
-        ,\"table\":\"LinuxNetworkInterface\"},{\"namespace\":\"root/scx\",\"counterSpecifier\"\
-        :\"TotalCollisions\",\"class\":\"NetworkInterface\",\"table\":\"LinuxNetworkInterface\"\
-        }]},\"metrics\":{\"resourceId\":\"[variables('ladMetricsResourceId')]\",\"\
-        metricAggregation\":[{\"scheduledTransferPeriod\":\"PT1H\"},{\"scheduledTransferPeriod\"\
-        :\"PT1M\"}]}}}}\r\n            },\r\n            \"name\": \"LinuxDiagnostic\"\
-        \r\n          }\r\n        ]\r\n      }\r\n    },\r\n    \"provisioningState\"\
-        : \"Updating\",\r\n    \"overprovision\": true,\r\n    \"uniqueId\": \"8c6d97ca-4604-48f3-a45f-d4530a414131\"\
+        ,\"ladCfg\":{\"diagnosticMonitorConfiguration\":{\"metrics\":{\"metricAggregation\"\
+        :[{\"scheduledTransferPeriod\":\"PT1H\"},{\"scheduledTransferPeriod\":\"PT1M\"\
+        }],\"resourceId\":\"[variables('ladMetricsResourceId')]\"},\"performanceCounters\"\
+        :{\"performanceCounterConfiguration\":[{\"counterSpecifier\":\"AvailableMemory\"\
+        ,\"namespace\":\"root/scx\",\"class\":\"Memory\",\"table\":\"LinuxMemory\"\
+        },{\"counterSpecifier\":\"PercentAvailableMemory\",\"namespace\":\"root/scx\"\
+        ,\"class\":\"Memory\",\"table\":\"LinuxMemory\"},{\"counterSpecifier\":\"\
+        UsedMemory\",\"namespace\":\"root/scx\",\"class\":\"Memory\",\"table\":\"\
+        LinuxMemory\"},{\"counterSpecifier\":\"PercentUsedMemory\",\"namespace\":\"\
+        root/scx\",\"class\":\"Memory\",\"table\":\"LinuxMemory\"},{\"counterSpecifier\"\
+        :\"PercentUsedByCache\",\"namespace\":\"root/scx\",\"class\":\"Memory\",\"\
+        table\":\"LinuxMemory\"},{\"counterSpecifier\":\"PagesPerSec\",\"namespace\"\
+        :\"root/scx\",\"class\":\"Memory\",\"table\":\"LinuxMemory\"},{\"counterSpecifier\"\
+        :\"PagesReadPerSec\",\"namespace\":\"root/scx\",\"class\":\"Memory\",\"table\"\
+        :\"LinuxMemory\"},{\"counterSpecifier\":\"PagesWrittenPerSec\",\"namespace\"\
+        :\"root/scx\",\"class\":\"Memory\",\"table\":\"LinuxMemory\"},{\"counterSpecifier\"\
+        :\"AvailableSwap\",\"namespace\":\"root/scx\",\"class\":\"Memory\",\"table\"\
+        :\"LinuxMemory\"},{\"counterSpecifier\":\"PercentAvailableSwap\",\"namespace\"\
+        :\"root/scx\",\"class\":\"Memory\",\"table\":\"LinuxMemory\"},{\"counterSpecifier\"\
+        :\"UsedSwap\",\"namespace\":\"root/scx\",\"class\":\"Memory\",\"table\":\"\
+        LinuxMemory\"},{\"counterSpecifier\":\"PercentUsedSwap\",\"namespace\":\"\
+        root/scx\",\"class\":\"Memory\",\"table\":\"LinuxMemory\"},{\"counterSpecifier\"\
+        :\"PercentIdleTime\",\"namespace\":\"root/scx\",\"class\":\"Processor\",\"\
+        table\":\"LinuxProcessor\"},{\"counterSpecifier\":\"PercentUserTime\",\"namespace\"\
+        :\"root/scx\",\"class\":\"Processor\",\"table\":\"LinuxProcessor\"},{\"counterSpecifier\"\
+        :\"PercentNiceTime\",\"namespace\":\"root/scx\",\"class\":\"Processor\",\"\
+        table\":\"LinuxProcessor\"},{\"counterSpecifier\":\"PercentPrivilegedTime\"\
+        ,\"namespace\":\"root/scx\",\"class\":\"Processor\",\"table\":\"LinuxProcessor\"\
+        },{\"counterSpecifier\":\"PercentInterruptTime\",\"namespace\":\"root/scx\"\
+        ,\"class\":\"Processor\",\"table\":\"LinuxProcessor\"},{\"counterSpecifier\"\
+        :\"PercentDPCTime\",\"namespace\":\"root/scx\",\"class\":\"Processor\",\"\
+        table\":\"LinuxProcessor\"},{\"counterSpecifier\":\"PercentProcessorTime\"\
+        ,\"namespace\":\"root/scx\",\"class\":\"Processor\",\"table\":\"LinuxProcessor\"\
+        },{\"counterSpecifier\":\"PercentIOWaitTime\",\"namespace\":\"root/scx\",\"\
+        class\":\"Processor\",\"table\":\"LinuxProcessor\"},{\"counterSpecifier\"\
+        :\"BytesPerSecond\",\"namespace\":\"root/scx\",\"class\":\"PhysicalDisk\"\
+        ,\"table\":\"LinuxPhysicalDisk\"},{\"counterSpecifier\":\"ReadBytesPerSecond\"\
+        ,\"namespace\":\"root/scx\",\"class\":\"PhysicalDisk\",\"table\":\"LinuxPhysicalDisk\"\
+        },{\"counterSpecifier\":\"WriteBytesPerSecond\",\"namespace\":\"root/scx\"\
+        ,\"class\":\"PhysicalDisk\",\"table\":\"LinuxPhysicalDisk\"},{\"counterSpecifier\"\
+        :\"TransfersPerSecond\",\"namespace\":\"root/scx\",\"class\":\"PhysicalDisk\"\
+        ,\"table\":\"LinuxPhysicalDisk\"},{\"counterSpecifier\":\"ReadsPerSecond\"\
+        ,\"namespace\":\"root/scx\",\"class\":\"PhysicalDisk\",\"table\":\"LinuxPhysicalDisk\"\
+        },{\"counterSpecifier\":\"WritesPerSecond\",\"namespace\":\"root/scx\",\"\
+        class\":\"PhysicalDisk\",\"table\":\"LinuxPhysicalDisk\"},{\"counterSpecifier\"\
+        :\"AverageReadTime\",\"namespace\":\"root/scx\",\"class\":\"PhysicalDisk\"\
+        ,\"table\":\"LinuxPhysicalDisk\"},{\"counterSpecifier\":\"AverageWriteTime\"\
+        ,\"namespace\":\"root/scx\",\"class\":\"PhysicalDisk\",\"table\":\"LinuxPhysicalDisk\"\
+        },{\"counterSpecifier\":\"AverageTransferTime\",\"namespace\":\"root/scx\"\
+        ,\"class\":\"PhysicalDisk\",\"table\":\"LinuxPhysicalDisk\"},{\"counterSpecifier\"\
+        :\"AverageDiskQueueLength\",\"namespace\":\"root/scx\",\"class\":\"PhysicalDisk\"\
+        ,\"table\":\"LinuxPhysicalDisk\"},{\"counterSpecifier\":\"BytesTransmitted\"\
+        ,\"namespace\":\"root/scx\",\"class\":\"NetworkInterface\",\"table\":\"LinuxNetworkInterface\"\
+        },{\"counterSpecifier\":\"BytesReceived\",\"namespace\":\"root/scx\",\"class\"\
+        :\"NetworkInterface\",\"table\":\"LinuxNetworkInterface\"},{\"counterSpecifier\"\
+        :\"PacketsTransmitted\",\"namespace\":\"root/scx\",\"class\":\"NetworkInterface\"\
+        ,\"table\":\"LinuxNetworkInterface\"},{\"counterSpecifier\":\"PacketsReceived\"\
+        ,\"namespace\":\"root/scx\",\"class\":\"NetworkInterface\",\"table\":\"LinuxNetworkInterface\"\
+        },{\"counterSpecifier\":\"BytesTotal\",\"namespace\":\"root/scx\",\"class\"\
+        :\"NetworkInterface\",\"table\":\"LinuxNetworkInterface\"},{\"counterSpecifier\"\
+        :\"TotalRxErrors\",\"namespace\":\"root/scx\",\"class\":\"NetworkInterface\"\
+        ,\"table\":\"LinuxNetworkInterface\"},{\"counterSpecifier\":\"TotalTxErrors\"\
+        ,\"namespace\":\"root/scx\",\"class\":\"NetworkInterface\",\"table\":\"LinuxNetworkInterface\"\
+        },{\"counterSpecifier\":\"TotalCollisions\",\"namespace\":\"root/scx\",\"\
+        class\":\"NetworkInterface\",\"table\":\"LinuxNetworkInterface\"}]}}}}\r\n\
+        \            },\r\n            \"name\": \"LinuxDiagnostic\"\r\n         \
+        \ }\r\n        ]\r\n      }\r\n    },\r\n    \"provisioningState\": \"Updating\"\
+        ,\r\n    \"overprovision\": true,\r\n    \"uniqueId\": \"c096eec7-4a82-4065-8a27-316c264c5d52\"\
         \r\n  },\r\n  \"type\": \"Microsoft.Compute/virtualMachineScaleSets\",\r\n\
         \  \"location\": \"westus\",\r\n  \"tags\": {},\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_vmss_diagnostics_extension/providers/Microsoft.Compute/virtualMachineScaleSets/testdiagvmss\"\
         ,\r\n  \"name\": \"testdiagvmss\"\r\n}"}
     headers:
-      Azure-AsyncOperation: ['https://management.azure.com/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/providers/Microsoft.Compute/locations/westus/operations/b0095410-9dd6-4cab-b525-55d6e92dfe7d?api-version=2016-03-30']
+      Azure-AsyncOperation: ['https://management.azure.com/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/providers/Microsoft.Compute/locations/westus/operations/9d2e5737-1af4-4c86-bde2-042e4f86a0fb?api-version=2016-04-30-preview']
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Thu, 26 Jan 2017 18:57:36 GMT']
+      Date: ['Tue, 31 Jan 2017 02:27:44 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
       Transfer-Encoding: [chunked]
       Vary: [Accept-Encoding]
-      content-length: ['7422']
-      x-ms-ratelimit-remaining-subscription-writes: ['1194']
+      content-length: ['7129']
+      x-ms-ratelimit-remaining-subscription-writes: ['1195']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -314,20 +305,20 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.1 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.4
-          msrest_azure/0.4.6 computemanagementclient/0.32.1 Azure-SDK-For-Python AZURECLI/TEST/0.1.1b2+dev]
+      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.7
+          computemanagementclient/0.33.0 Azure-SDK-For-Python AZURECLI/TEST/0.1.1b2+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [4d844426-e3f9-11e6-bfb7-a0b3ccf7272a]
+      x-ms-client-request-id: [d8e94352-e75c-11e6-87c1-64510658e3b3]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/b0095410-9dd6-4cab-b525-55d6e92dfe7d?api-version=2016-03-30
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/9d2e5737-1af4-4c86-bde2-042e4f86a0fb?api-version=2016-04-30-preview
   response:
-    body: {string: "{\r\n  \"startTime\": \"2017-01-26T18:57:38.6377927+00:00\",\r\
-        \n  \"endTime\": \"2017-01-26T18:57:38.8878163+00:00\",\r\n  \"status\": \"\
-        Succeeded\",\r\n  \"name\": \"b0095410-9dd6-4cab-b525-55d6e92dfe7d\"\r\n}"}
+    body: {string: "{\r\n  \"startTime\": \"2017-01-31T02:27:44.3865213+00:00\",\r\
+        \n  \"endTime\": \"2017-01-31T02:27:44.5427764+00:00\",\r\n  \"status\": \"\
+        Succeeded\",\r\n  \"name\": \"9d2e5737-1af4-4c86-bde2-042e4f86a0fb\"\r\n}"}
     headers:
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Thu, 26 Jan 2017 18:58:07 GMT']
+      Date: ['Tue, 31 Jan 2017 02:28:14 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
@@ -343,33 +334,30 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.1 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.4
-          msrest_azure/0.4.6 computemanagementclient/0.32.1 Azure-SDK-For-Python AZURECLI/TEST/0.1.1b2+dev]
+      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.7
+          computemanagementclient/0.33.0 Azure-SDK-For-Python AZURECLI/TEST/0.1.1b2+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [4d844426-e3f9-11e6-bfb7-a0b3ccf7272a]
+      x-ms-client-request-id: [d8e94352-e75c-11e6-87c1-64510658e3b3]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_vmss_diagnostics_extension/providers/Microsoft.Compute/virtualMachineScaleSets/testdiagvmss?api-version=2016-03-30
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_vmss_diagnostics_extension/providers/Microsoft.Compute/virtualMachineScaleSets/testdiagvmss?api-version=2016-04-30-preview
   response:
     body: {string: "{\r\n  \"sku\": {\r\n    \"name\": \"Standard_D1_v2\",\r\n   \
         \ \"tier\": \"Standard\",\r\n    \"capacity\": 2\r\n  },\r\n  \"properties\"\
-        : {\r\n    \"largeScaleEnabled\": true,\r\n    \"upgradePolicy\": {\r\n  \
-        \    \"mode\": \"Manual\"\r\n    },\r\n    \"virtualMachineProfile\": {\r\n\
-        \      \"osProfile\": {\r\n        \"computerNamePrefix\": \"testdh2vd\",\r\
-        \n        \"adminUsername\": \"trpresco\",\r\n        \"linuxConfiguration\"\
+        : {\r\n    \"singlePlacementGroup\": true,\r\n    \"upgradePolicy\": {\r\n\
+        \      \"mode\": \"Manual\"\r\n    },\r\n    \"virtualMachineProfile\": {\r\
+        \n      \"osProfile\": {\r\n        \"computerNamePrefix\": \"testdngy5\"\
+        ,\r\n        \"adminUsername\": \"yugangw\",\r\n        \"linuxConfiguration\"\
         : {\r\n          \"disablePasswordAuthentication\": false\r\n        },\r\n\
         \        \"secrets\": []\r\n      },\r\n      \"storageProfile\": {\r\n  \
-        \      \"osDisk\": {\r\n          \"vhdContainers\": [\r\n            \"https://testdh2vd0.blob.core.windows.net/vhds\"\
-        ,\r\n            \"https://testdh2vd1.blob.core.windows.net/vhds\",\r\n  \
-        \          \"https://testdh2vd2.blob.core.windows.net/vhds\",\r\n        \
-        \    \"https://testdh2vd3.blob.core.windows.net/vhds\",\r\n            \"\
-        https://testdh2vd4.blob.core.windows.net/vhds\"\r\n          ],\r\n      \
-        \    \"name\": \"osdiskimage\",\r\n          \"createOption\": \"FromImage\"\
-        ,\r\n          \"caching\": \"ReadOnly\"\r\n        },\r\n        \"imageReference\"\
-        : {\r\n          \"publisher\": \"Canonical\",\r\n          \"offer\": \"\
-        UbuntuServer\",\r\n          \"sku\": \"14.04.4-LTS\",\r\n          \"version\"\
-        : \"latest\"\r\n        }\r\n      },\r\n      \"networkProfile\": {\"networkInterfaceConfigurations\"\
-        :[{\"name\":\"testdh2vdNic\",\"properties\":{\"primary\":true,\"ipConfigurations\"\
-        :[{\"name\":\"testdh2vdIPConfig\",\"properties\":{\"subnet\":{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_vmss_diagnostics_extension/providers/Microsoft.Network/virtualNetworks/testdiagvmssVNET/subnets/testdiagvmssSubnet\"\
+        \      \"osDisk\": {\r\n          \"createOption\": \"FromImage\",\r\n   \
+        \       \"caching\": \"ReadOnly\",\r\n          \"managedDisk\": {\r\n   \
+        \         \"storageAccountType\": \"Standard_LRS\"\r\n          }\r\n    \
+        \    },\r\n        \"imageReference\": {\r\n          \"publisher\": \"Canonical\"\
+        ,\r\n          \"offer\": \"UbuntuServer\",\r\n          \"sku\": \"14.04.4-LTS\"\
+        ,\r\n          \"version\": \"latest\"\r\n        }\r\n      },\r\n      \"\
+        networkProfile\": {\"networkInterfaceConfigurations\":[{\"name\":\"testdngy5Nic\"\
+        ,\"properties\":{\"primary\":true,\"ipConfigurations\":[{\"name\":\"testdngy5IPConfig\"\
+        ,\"properties\":{\"subnet\":{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_vmss_diagnostics_extension/providers/Microsoft.Network/virtualNetworks/testdiagvmssVNET/subnets/testdiagvmssSubnet\"\
         },\"loadBalancerBackendAddressPools\":[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_vmss_diagnostics_extension/providers/Microsoft.Network/loadBalancers/testdiagvmssLB/backendAddressPools/testdiagvmssLBBEPool\"\
         }],\"loadBalancerInboundNatPools\":[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_vmss_diagnostics_extension/providers/Microsoft.Network/loadBalancers/testdiagvmssLB/inboundNatPools/testdiagvmssLBNatPool\"\
         }]}}]}}]},\r\n      \"extensionProfile\": {\r\n        \"extensions\": [\r\
@@ -377,87 +365,88 @@ interactions:
         : \"Microsoft.OSTCExtensions\",\r\n              \"type\": \"LinuxDiagnostic\"\
         ,\r\n              \"typeHandlerVersion\": \"2.3\",\r\n              \"autoUpgradeMinorVersion\"\
         : true,\r\n              \"settings\": {\"storageAccount\":\"diagextensionsa\"\
-        ,\"ladCfg\":{\"diagnosticMonitorConfiguration\":{\"performanceCounters\":{\"\
-        performanceCounterConfiguration\":[{\"namespace\":\"root/scx\",\"counterSpecifier\"\
-        :\"AvailableMemory\",\"class\":\"Memory\",\"table\":\"LinuxMemory\"},{\"namespace\"\
-        :\"root/scx\",\"counterSpecifier\":\"PercentAvailableMemory\",\"class\":\"\
-        Memory\",\"table\":\"LinuxMemory\"},{\"namespace\":\"root/scx\",\"counterSpecifier\"\
-        :\"UsedMemory\",\"class\":\"Memory\",\"table\":\"LinuxMemory\"},{\"namespace\"\
-        :\"root/scx\",\"counterSpecifier\":\"PercentUsedMemory\",\"class\":\"Memory\"\
-        ,\"table\":\"LinuxMemory\"},{\"namespace\":\"root/scx\",\"counterSpecifier\"\
-        :\"PercentUsedByCache\",\"class\":\"Memory\",\"table\":\"LinuxMemory\"},{\"\
-        namespace\":\"root/scx\",\"counterSpecifier\":\"PagesPerSec\",\"class\":\"\
-        Memory\",\"table\":\"LinuxMemory\"},{\"namespace\":\"root/scx\",\"counterSpecifier\"\
-        :\"PagesReadPerSec\",\"class\":\"Memory\",\"table\":\"LinuxMemory\"},{\"namespace\"\
-        :\"root/scx\",\"counterSpecifier\":\"PagesWrittenPerSec\",\"class\":\"Memory\"\
-        ,\"table\":\"LinuxMemory\"},{\"namespace\":\"root/scx\",\"counterSpecifier\"\
-        :\"AvailableSwap\",\"class\":\"Memory\",\"table\":\"LinuxMemory\"},{\"namespace\"\
-        :\"root/scx\",\"counterSpecifier\":\"PercentAvailableSwap\",\"class\":\"Memory\"\
-        ,\"table\":\"LinuxMemory\"},{\"namespace\":\"root/scx\",\"counterSpecifier\"\
-        :\"UsedSwap\",\"class\":\"Memory\",\"table\":\"LinuxMemory\"},{\"namespace\"\
-        :\"root/scx\",\"counterSpecifier\":\"PercentUsedSwap\",\"class\":\"Memory\"\
-        ,\"table\":\"LinuxMemory\"},{\"namespace\":\"root/scx\",\"counterSpecifier\"\
-        :\"PercentIdleTime\",\"class\":\"Processor\",\"table\":\"LinuxProcessor\"\
-        },{\"namespace\":\"root/scx\",\"counterSpecifier\":\"PercentUserTime\",\"\
-        class\":\"Processor\",\"table\":\"LinuxProcessor\"},{\"namespace\":\"root/scx\"\
-        ,\"counterSpecifier\":\"PercentNiceTime\",\"class\":\"Processor\",\"table\"\
-        :\"LinuxProcessor\"},{\"namespace\":\"root/scx\",\"counterSpecifier\":\"PercentPrivilegedTime\"\
-        ,\"class\":\"Processor\",\"table\":\"LinuxProcessor\"},{\"namespace\":\"root/scx\"\
-        ,\"counterSpecifier\":\"PercentInterruptTime\",\"class\":\"Processor\",\"\
-        table\":\"LinuxProcessor\"},{\"namespace\":\"root/scx\",\"counterSpecifier\"\
-        :\"PercentDPCTime\",\"class\":\"Processor\",\"table\":\"LinuxProcessor\"},{\"\
-        namespace\":\"root/scx\",\"counterSpecifier\":\"PercentProcessorTime\",\"\
-        class\":\"Processor\",\"table\":\"LinuxProcessor\"},{\"namespace\":\"root/scx\"\
-        ,\"counterSpecifier\":\"PercentIOWaitTime\",\"class\":\"Processor\",\"table\"\
-        :\"LinuxProcessor\"},{\"namespace\":\"root/scx\",\"counterSpecifier\":\"BytesPerSecond\"\
-        ,\"class\":\"PhysicalDisk\",\"table\":\"LinuxPhysicalDisk\"},{\"namespace\"\
-        :\"root/scx\",\"counterSpecifier\":\"ReadBytesPerSecond\",\"class\":\"PhysicalDisk\"\
-        ,\"table\":\"LinuxPhysicalDisk\"},{\"namespace\":\"root/scx\",\"counterSpecifier\"\
-        :\"WriteBytesPerSecond\",\"class\":\"PhysicalDisk\",\"table\":\"LinuxPhysicalDisk\"\
-        },{\"namespace\":\"root/scx\",\"counterSpecifier\":\"TransfersPerSecond\"\
-        ,\"class\":\"PhysicalDisk\",\"table\":\"LinuxPhysicalDisk\"},{\"namespace\"\
-        :\"root/scx\",\"counterSpecifier\":\"ReadsPerSecond\",\"class\":\"PhysicalDisk\"\
-        ,\"table\":\"LinuxPhysicalDisk\"},{\"namespace\":\"root/scx\",\"counterSpecifier\"\
-        :\"WritesPerSecond\",\"class\":\"PhysicalDisk\",\"table\":\"LinuxPhysicalDisk\"\
-        },{\"namespace\":\"root/scx\",\"counterSpecifier\":\"AverageReadTime\",\"\
-        class\":\"PhysicalDisk\",\"table\":\"LinuxPhysicalDisk\"},{\"namespace\":\"\
-        root/scx\",\"counterSpecifier\":\"AverageWriteTime\",\"class\":\"PhysicalDisk\"\
-        ,\"table\":\"LinuxPhysicalDisk\"},{\"namespace\":\"root/scx\",\"counterSpecifier\"\
-        :\"AverageTransferTime\",\"class\":\"PhysicalDisk\",\"table\":\"LinuxPhysicalDisk\"\
-        },{\"namespace\":\"root/scx\",\"counterSpecifier\":\"AverageDiskQueueLength\"\
-        ,\"class\":\"PhysicalDisk\",\"table\":\"LinuxPhysicalDisk\"},{\"namespace\"\
-        :\"root/scx\",\"counterSpecifier\":\"BytesTransmitted\",\"class\":\"NetworkInterface\"\
-        ,\"table\":\"LinuxNetworkInterface\"},{\"namespace\":\"root/scx\",\"counterSpecifier\"\
-        :\"BytesReceived\",\"class\":\"NetworkInterface\",\"table\":\"LinuxNetworkInterface\"\
-        },{\"namespace\":\"root/scx\",\"counterSpecifier\":\"PacketsTransmitted\"\
-        ,\"class\":\"NetworkInterface\",\"table\":\"LinuxNetworkInterface\"},{\"namespace\"\
-        :\"root/scx\",\"counterSpecifier\":\"PacketsReceived\",\"class\":\"NetworkInterface\"\
-        ,\"table\":\"LinuxNetworkInterface\"},{\"namespace\":\"root/scx\",\"counterSpecifier\"\
-        :\"BytesTotal\",\"class\":\"NetworkInterface\",\"table\":\"LinuxNetworkInterface\"\
-        },{\"namespace\":\"root/scx\",\"counterSpecifier\":\"TotalRxErrors\",\"class\"\
-        :\"NetworkInterface\",\"table\":\"LinuxNetworkInterface\"},{\"namespace\"\
-        :\"root/scx\",\"counterSpecifier\":\"TotalTxErrors\",\"class\":\"NetworkInterface\"\
-        ,\"table\":\"LinuxNetworkInterface\"},{\"namespace\":\"root/scx\",\"counterSpecifier\"\
-        :\"TotalCollisions\",\"class\":\"NetworkInterface\",\"table\":\"LinuxNetworkInterface\"\
-        }]},\"metrics\":{\"resourceId\":\"[variables('ladMetricsResourceId')]\",\"\
-        metricAggregation\":[{\"scheduledTransferPeriod\":\"PT1H\"},{\"scheduledTransferPeriod\"\
-        :\"PT1M\"}]}}}}\r\n            },\r\n            \"name\": \"LinuxDiagnostic\"\
-        \r\n          }\r\n        ]\r\n      }\r\n    },\r\n    \"provisioningState\"\
-        : \"Succeeded\",\r\n    \"overprovision\": true,\r\n    \"uniqueId\": \"8c6d97ca-4604-48f3-a45f-d4530a414131\"\
+        ,\"ladCfg\":{\"diagnosticMonitorConfiguration\":{\"metrics\":{\"metricAggregation\"\
+        :[{\"scheduledTransferPeriod\":\"PT1H\"},{\"scheduledTransferPeriod\":\"PT1M\"\
+        }],\"resourceId\":\"[variables('ladMetricsResourceId')]\"},\"performanceCounters\"\
+        :{\"performanceCounterConfiguration\":[{\"counterSpecifier\":\"AvailableMemory\"\
+        ,\"namespace\":\"root/scx\",\"class\":\"Memory\",\"table\":\"LinuxMemory\"\
+        },{\"counterSpecifier\":\"PercentAvailableMemory\",\"namespace\":\"root/scx\"\
+        ,\"class\":\"Memory\",\"table\":\"LinuxMemory\"},{\"counterSpecifier\":\"\
+        UsedMemory\",\"namespace\":\"root/scx\",\"class\":\"Memory\",\"table\":\"\
+        LinuxMemory\"},{\"counterSpecifier\":\"PercentUsedMemory\",\"namespace\":\"\
+        root/scx\",\"class\":\"Memory\",\"table\":\"LinuxMemory\"},{\"counterSpecifier\"\
+        :\"PercentUsedByCache\",\"namespace\":\"root/scx\",\"class\":\"Memory\",\"\
+        table\":\"LinuxMemory\"},{\"counterSpecifier\":\"PagesPerSec\",\"namespace\"\
+        :\"root/scx\",\"class\":\"Memory\",\"table\":\"LinuxMemory\"},{\"counterSpecifier\"\
+        :\"PagesReadPerSec\",\"namespace\":\"root/scx\",\"class\":\"Memory\",\"table\"\
+        :\"LinuxMemory\"},{\"counterSpecifier\":\"PagesWrittenPerSec\",\"namespace\"\
+        :\"root/scx\",\"class\":\"Memory\",\"table\":\"LinuxMemory\"},{\"counterSpecifier\"\
+        :\"AvailableSwap\",\"namespace\":\"root/scx\",\"class\":\"Memory\",\"table\"\
+        :\"LinuxMemory\"},{\"counterSpecifier\":\"PercentAvailableSwap\",\"namespace\"\
+        :\"root/scx\",\"class\":\"Memory\",\"table\":\"LinuxMemory\"},{\"counterSpecifier\"\
+        :\"UsedSwap\",\"namespace\":\"root/scx\",\"class\":\"Memory\",\"table\":\"\
+        LinuxMemory\"},{\"counterSpecifier\":\"PercentUsedSwap\",\"namespace\":\"\
+        root/scx\",\"class\":\"Memory\",\"table\":\"LinuxMemory\"},{\"counterSpecifier\"\
+        :\"PercentIdleTime\",\"namespace\":\"root/scx\",\"class\":\"Processor\",\"\
+        table\":\"LinuxProcessor\"},{\"counterSpecifier\":\"PercentUserTime\",\"namespace\"\
+        :\"root/scx\",\"class\":\"Processor\",\"table\":\"LinuxProcessor\"},{\"counterSpecifier\"\
+        :\"PercentNiceTime\",\"namespace\":\"root/scx\",\"class\":\"Processor\",\"\
+        table\":\"LinuxProcessor\"},{\"counterSpecifier\":\"PercentPrivilegedTime\"\
+        ,\"namespace\":\"root/scx\",\"class\":\"Processor\",\"table\":\"LinuxProcessor\"\
+        },{\"counterSpecifier\":\"PercentInterruptTime\",\"namespace\":\"root/scx\"\
+        ,\"class\":\"Processor\",\"table\":\"LinuxProcessor\"},{\"counterSpecifier\"\
+        :\"PercentDPCTime\",\"namespace\":\"root/scx\",\"class\":\"Processor\",\"\
+        table\":\"LinuxProcessor\"},{\"counterSpecifier\":\"PercentProcessorTime\"\
+        ,\"namespace\":\"root/scx\",\"class\":\"Processor\",\"table\":\"LinuxProcessor\"\
+        },{\"counterSpecifier\":\"PercentIOWaitTime\",\"namespace\":\"root/scx\",\"\
+        class\":\"Processor\",\"table\":\"LinuxProcessor\"},{\"counterSpecifier\"\
+        :\"BytesPerSecond\",\"namespace\":\"root/scx\",\"class\":\"PhysicalDisk\"\
+        ,\"table\":\"LinuxPhysicalDisk\"},{\"counterSpecifier\":\"ReadBytesPerSecond\"\
+        ,\"namespace\":\"root/scx\",\"class\":\"PhysicalDisk\",\"table\":\"LinuxPhysicalDisk\"\
+        },{\"counterSpecifier\":\"WriteBytesPerSecond\",\"namespace\":\"root/scx\"\
+        ,\"class\":\"PhysicalDisk\",\"table\":\"LinuxPhysicalDisk\"},{\"counterSpecifier\"\
+        :\"TransfersPerSecond\",\"namespace\":\"root/scx\",\"class\":\"PhysicalDisk\"\
+        ,\"table\":\"LinuxPhysicalDisk\"},{\"counterSpecifier\":\"ReadsPerSecond\"\
+        ,\"namespace\":\"root/scx\",\"class\":\"PhysicalDisk\",\"table\":\"LinuxPhysicalDisk\"\
+        },{\"counterSpecifier\":\"WritesPerSecond\",\"namespace\":\"root/scx\",\"\
+        class\":\"PhysicalDisk\",\"table\":\"LinuxPhysicalDisk\"},{\"counterSpecifier\"\
+        :\"AverageReadTime\",\"namespace\":\"root/scx\",\"class\":\"PhysicalDisk\"\
+        ,\"table\":\"LinuxPhysicalDisk\"},{\"counterSpecifier\":\"AverageWriteTime\"\
+        ,\"namespace\":\"root/scx\",\"class\":\"PhysicalDisk\",\"table\":\"LinuxPhysicalDisk\"\
+        },{\"counterSpecifier\":\"AverageTransferTime\",\"namespace\":\"root/scx\"\
+        ,\"class\":\"PhysicalDisk\",\"table\":\"LinuxPhysicalDisk\"},{\"counterSpecifier\"\
+        :\"AverageDiskQueueLength\",\"namespace\":\"root/scx\",\"class\":\"PhysicalDisk\"\
+        ,\"table\":\"LinuxPhysicalDisk\"},{\"counterSpecifier\":\"BytesTransmitted\"\
+        ,\"namespace\":\"root/scx\",\"class\":\"NetworkInterface\",\"table\":\"LinuxNetworkInterface\"\
+        },{\"counterSpecifier\":\"BytesReceived\",\"namespace\":\"root/scx\",\"class\"\
+        :\"NetworkInterface\",\"table\":\"LinuxNetworkInterface\"},{\"counterSpecifier\"\
+        :\"PacketsTransmitted\",\"namespace\":\"root/scx\",\"class\":\"NetworkInterface\"\
+        ,\"table\":\"LinuxNetworkInterface\"},{\"counterSpecifier\":\"PacketsReceived\"\
+        ,\"namespace\":\"root/scx\",\"class\":\"NetworkInterface\",\"table\":\"LinuxNetworkInterface\"\
+        },{\"counterSpecifier\":\"BytesTotal\",\"namespace\":\"root/scx\",\"class\"\
+        :\"NetworkInterface\",\"table\":\"LinuxNetworkInterface\"},{\"counterSpecifier\"\
+        :\"TotalRxErrors\",\"namespace\":\"root/scx\",\"class\":\"NetworkInterface\"\
+        ,\"table\":\"LinuxNetworkInterface\"},{\"counterSpecifier\":\"TotalTxErrors\"\
+        ,\"namespace\":\"root/scx\",\"class\":\"NetworkInterface\",\"table\":\"LinuxNetworkInterface\"\
+        },{\"counterSpecifier\":\"TotalCollisions\",\"namespace\":\"root/scx\",\"\
+        class\":\"NetworkInterface\",\"table\":\"LinuxNetworkInterface\"}]}}}}\r\n\
+        \            },\r\n            \"name\": \"LinuxDiagnostic\"\r\n         \
+        \ }\r\n        ]\r\n      }\r\n    },\r\n    \"provisioningState\": \"Succeeded\"\
+        ,\r\n    \"overprovision\": true,\r\n    \"uniqueId\": \"c096eec7-4a82-4065-8a27-316c264c5d52\"\
         \r\n  },\r\n  \"type\": \"Microsoft.Compute/virtualMachineScaleSets\",\r\n\
         \  \"location\": \"westus\",\r\n  \"tags\": {},\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_vmss_diagnostics_extension/providers/Microsoft.Compute/virtualMachineScaleSets/testdiagvmss\"\
         ,\r\n  \"name\": \"testdiagvmss\"\r\n}"}
     headers:
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Thu, 26 Jan 2017 18:58:07 GMT']
+      Date: ['Tue, 31 Jan 2017 02:28:15 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
       Transfer-Encoding: [chunked]
       Vary: [Accept-Encoding]
-      content-length: ['7423']
+      content-length: ['7130']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -466,33 +455,30 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.1 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.4
-          msrest_azure/0.4.6 computemanagementclient/0.32.1 Azure-SDK-For-Python AZURECLI/TEST/0.1.1b2+dev]
+      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.7
+          computemanagementclient/0.33.0 Azure-SDK-For-Python AZURECLI/TEST/0.1.1b2+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [60dbea64-e3f9-11e6-9b8c-a0b3ccf7272a]
+      x-ms-client-request-id: [ec307108-e75c-11e6-818c-64510658e3b3]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_vmss_diagnostics_extension/providers/Microsoft.Compute/virtualMachineScaleSets/testdiagvmss?api-version=2016-03-30
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_vmss_diagnostics_extension/providers/Microsoft.Compute/virtualMachineScaleSets/testdiagvmss?api-version=2016-04-30-preview
   response:
     body: {string: "{\r\n  \"sku\": {\r\n    \"name\": \"Standard_D1_v2\",\r\n   \
         \ \"tier\": \"Standard\",\r\n    \"capacity\": 2\r\n  },\r\n  \"properties\"\
-        : {\r\n    \"largeScaleEnabled\": true,\r\n    \"upgradePolicy\": {\r\n  \
-        \    \"mode\": \"Manual\"\r\n    },\r\n    \"virtualMachineProfile\": {\r\n\
-        \      \"osProfile\": {\r\n        \"computerNamePrefix\": \"testdh2vd\",\r\
-        \n        \"adminUsername\": \"trpresco\",\r\n        \"linuxConfiguration\"\
+        : {\r\n    \"singlePlacementGroup\": true,\r\n    \"upgradePolicy\": {\r\n\
+        \      \"mode\": \"Manual\"\r\n    },\r\n    \"virtualMachineProfile\": {\r\
+        \n      \"osProfile\": {\r\n        \"computerNamePrefix\": \"testdngy5\"\
+        ,\r\n        \"adminUsername\": \"yugangw\",\r\n        \"linuxConfiguration\"\
         : {\r\n          \"disablePasswordAuthentication\": false\r\n        },\r\n\
         \        \"secrets\": []\r\n      },\r\n      \"storageProfile\": {\r\n  \
-        \      \"osDisk\": {\r\n          \"vhdContainers\": [\r\n            \"https://testdh2vd0.blob.core.windows.net/vhds\"\
-        ,\r\n            \"https://testdh2vd1.blob.core.windows.net/vhds\",\r\n  \
-        \          \"https://testdh2vd2.blob.core.windows.net/vhds\",\r\n        \
-        \    \"https://testdh2vd3.blob.core.windows.net/vhds\",\r\n            \"\
-        https://testdh2vd4.blob.core.windows.net/vhds\"\r\n          ],\r\n      \
-        \    \"name\": \"osdiskimage\",\r\n          \"createOption\": \"FromImage\"\
-        ,\r\n          \"caching\": \"ReadOnly\"\r\n        },\r\n        \"imageReference\"\
-        : {\r\n          \"publisher\": \"Canonical\",\r\n          \"offer\": \"\
-        UbuntuServer\",\r\n          \"sku\": \"14.04.4-LTS\",\r\n          \"version\"\
-        : \"latest\"\r\n        }\r\n      },\r\n      \"networkProfile\": {\"networkInterfaceConfigurations\"\
-        :[{\"name\":\"testdh2vdNic\",\"properties\":{\"primary\":true,\"ipConfigurations\"\
-        :[{\"name\":\"testdh2vdIPConfig\",\"properties\":{\"subnet\":{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_vmss_diagnostics_extension/providers/Microsoft.Network/virtualNetworks/testdiagvmssVNET/subnets/testdiagvmssSubnet\"\
+        \      \"osDisk\": {\r\n          \"createOption\": \"FromImage\",\r\n   \
+        \       \"caching\": \"ReadOnly\",\r\n          \"managedDisk\": {\r\n   \
+        \         \"storageAccountType\": \"Standard_LRS\"\r\n          }\r\n    \
+        \    },\r\n        \"imageReference\": {\r\n          \"publisher\": \"Canonical\"\
+        ,\r\n          \"offer\": \"UbuntuServer\",\r\n          \"sku\": \"14.04.4-LTS\"\
+        ,\r\n          \"version\": \"latest\"\r\n        }\r\n      },\r\n      \"\
+        networkProfile\": {\"networkInterfaceConfigurations\":[{\"name\":\"testdngy5Nic\"\
+        ,\"properties\":{\"primary\":true,\"ipConfigurations\":[{\"name\":\"testdngy5IPConfig\"\
+        ,\"properties\":{\"subnet\":{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_vmss_diagnostics_extension/providers/Microsoft.Network/virtualNetworks/testdiagvmssVNET/subnets/testdiagvmssSubnet\"\
         },\"loadBalancerBackendAddressPools\":[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_vmss_diagnostics_extension/providers/Microsoft.Network/loadBalancers/testdiagvmssLB/backendAddressPools/testdiagvmssLBBEPool\"\
         }],\"loadBalancerInboundNatPools\":[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_vmss_diagnostics_extension/providers/Microsoft.Network/loadBalancers/testdiagvmssLB/inboundNatPools/testdiagvmssLBNatPool\"\
         }]}}]}}]},\r\n      \"extensionProfile\": {\r\n        \"extensions\": [\r\
@@ -500,87 +486,88 @@ interactions:
         : \"Microsoft.OSTCExtensions\",\r\n              \"type\": \"LinuxDiagnostic\"\
         ,\r\n              \"typeHandlerVersion\": \"2.3\",\r\n              \"autoUpgradeMinorVersion\"\
         : true,\r\n              \"settings\": {\"storageAccount\":\"diagextensionsa\"\
-        ,\"ladCfg\":{\"diagnosticMonitorConfiguration\":{\"performanceCounters\":{\"\
-        performanceCounterConfiguration\":[{\"namespace\":\"root/scx\",\"counterSpecifier\"\
-        :\"AvailableMemory\",\"class\":\"Memory\",\"table\":\"LinuxMemory\"},{\"namespace\"\
-        :\"root/scx\",\"counterSpecifier\":\"PercentAvailableMemory\",\"class\":\"\
-        Memory\",\"table\":\"LinuxMemory\"},{\"namespace\":\"root/scx\",\"counterSpecifier\"\
-        :\"UsedMemory\",\"class\":\"Memory\",\"table\":\"LinuxMemory\"},{\"namespace\"\
-        :\"root/scx\",\"counterSpecifier\":\"PercentUsedMemory\",\"class\":\"Memory\"\
-        ,\"table\":\"LinuxMemory\"},{\"namespace\":\"root/scx\",\"counterSpecifier\"\
-        :\"PercentUsedByCache\",\"class\":\"Memory\",\"table\":\"LinuxMemory\"},{\"\
-        namespace\":\"root/scx\",\"counterSpecifier\":\"PagesPerSec\",\"class\":\"\
-        Memory\",\"table\":\"LinuxMemory\"},{\"namespace\":\"root/scx\",\"counterSpecifier\"\
-        :\"PagesReadPerSec\",\"class\":\"Memory\",\"table\":\"LinuxMemory\"},{\"namespace\"\
-        :\"root/scx\",\"counterSpecifier\":\"PagesWrittenPerSec\",\"class\":\"Memory\"\
-        ,\"table\":\"LinuxMemory\"},{\"namespace\":\"root/scx\",\"counterSpecifier\"\
-        :\"AvailableSwap\",\"class\":\"Memory\",\"table\":\"LinuxMemory\"},{\"namespace\"\
-        :\"root/scx\",\"counterSpecifier\":\"PercentAvailableSwap\",\"class\":\"Memory\"\
-        ,\"table\":\"LinuxMemory\"},{\"namespace\":\"root/scx\",\"counterSpecifier\"\
-        :\"UsedSwap\",\"class\":\"Memory\",\"table\":\"LinuxMemory\"},{\"namespace\"\
-        :\"root/scx\",\"counterSpecifier\":\"PercentUsedSwap\",\"class\":\"Memory\"\
-        ,\"table\":\"LinuxMemory\"},{\"namespace\":\"root/scx\",\"counterSpecifier\"\
-        :\"PercentIdleTime\",\"class\":\"Processor\",\"table\":\"LinuxProcessor\"\
-        },{\"namespace\":\"root/scx\",\"counterSpecifier\":\"PercentUserTime\",\"\
-        class\":\"Processor\",\"table\":\"LinuxProcessor\"},{\"namespace\":\"root/scx\"\
-        ,\"counterSpecifier\":\"PercentNiceTime\",\"class\":\"Processor\",\"table\"\
-        :\"LinuxProcessor\"},{\"namespace\":\"root/scx\",\"counterSpecifier\":\"PercentPrivilegedTime\"\
-        ,\"class\":\"Processor\",\"table\":\"LinuxProcessor\"},{\"namespace\":\"root/scx\"\
-        ,\"counterSpecifier\":\"PercentInterruptTime\",\"class\":\"Processor\",\"\
-        table\":\"LinuxProcessor\"},{\"namespace\":\"root/scx\",\"counterSpecifier\"\
-        :\"PercentDPCTime\",\"class\":\"Processor\",\"table\":\"LinuxProcessor\"},{\"\
-        namespace\":\"root/scx\",\"counterSpecifier\":\"PercentProcessorTime\",\"\
-        class\":\"Processor\",\"table\":\"LinuxProcessor\"},{\"namespace\":\"root/scx\"\
-        ,\"counterSpecifier\":\"PercentIOWaitTime\",\"class\":\"Processor\",\"table\"\
-        :\"LinuxProcessor\"},{\"namespace\":\"root/scx\",\"counterSpecifier\":\"BytesPerSecond\"\
-        ,\"class\":\"PhysicalDisk\",\"table\":\"LinuxPhysicalDisk\"},{\"namespace\"\
-        :\"root/scx\",\"counterSpecifier\":\"ReadBytesPerSecond\",\"class\":\"PhysicalDisk\"\
-        ,\"table\":\"LinuxPhysicalDisk\"},{\"namespace\":\"root/scx\",\"counterSpecifier\"\
-        :\"WriteBytesPerSecond\",\"class\":\"PhysicalDisk\",\"table\":\"LinuxPhysicalDisk\"\
-        },{\"namespace\":\"root/scx\",\"counterSpecifier\":\"TransfersPerSecond\"\
-        ,\"class\":\"PhysicalDisk\",\"table\":\"LinuxPhysicalDisk\"},{\"namespace\"\
-        :\"root/scx\",\"counterSpecifier\":\"ReadsPerSecond\",\"class\":\"PhysicalDisk\"\
-        ,\"table\":\"LinuxPhysicalDisk\"},{\"namespace\":\"root/scx\",\"counterSpecifier\"\
-        :\"WritesPerSecond\",\"class\":\"PhysicalDisk\",\"table\":\"LinuxPhysicalDisk\"\
-        },{\"namespace\":\"root/scx\",\"counterSpecifier\":\"AverageReadTime\",\"\
-        class\":\"PhysicalDisk\",\"table\":\"LinuxPhysicalDisk\"},{\"namespace\":\"\
-        root/scx\",\"counterSpecifier\":\"AverageWriteTime\",\"class\":\"PhysicalDisk\"\
-        ,\"table\":\"LinuxPhysicalDisk\"},{\"namespace\":\"root/scx\",\"counterSpecifier\"\
-        :\"AverageTransferTime\",\"class\":\"PhysicalDisk\",\"table\":\"LinuxPhysicalDisk\"\
-        },{\"namespace\":\"root/scx\",\"counterSpecifier\":\"AverageDiskQueueLength\"\
-        ,\"class\":\"PhysicalDisk\",\"table\":\"LinuxPhysicalDisk\"},{\"namespace\"\
-        :\"root/scx\",\"counterSpecifier\":\"BytesTransmitted\",\"class\":\"NetworkInterface\"\
-        ,\"table\":\"LinuxNetworkInterface\"},{\"namespace\":\"root/scx\",\"counterSpecifier\"\
-        :\"BytesReceived\",\"class\":\"NetworkInterface\",\"table\":\"LinuxNetworkInterface\"\
-        },{\"namespace\":\"root/scx\",\"counterSpecifier\":\"PacketsTransmitted\"\
-        ,\"class\":\"NetworkInterface\",\"table\":\"LinuxNetworkInterface\"},{\"namespace\"\
-        :\"root/scx\",\"counterSpecifier\":\"PacketsReceived\",\"class\":\"NetworkInterface\"\
-        ,\"table\":\"LinuxNetworkInterface\"},{\"namespace\":\"root/scx\",\"counterSpecifier\"\
-        :\"BytesTotal\",\"class\":\"NetworkInterface\",\"table\":\"LinuxNetworkInterface\"\
-        },{\"namespace\":\"root/scx\",\"counterSpecifier\":\"TotalRxErrors\",\"class\"\
-        :\"NetworkInterface\",\"table\":\"LinuxNetworkInterface\"},{\"namespace\"\
-        :\"root/scx\",\"counterSpecifier\":\"TotalTxErrors\",\"class\":\"NetworkInterface\"\
-        ,\"table\":\"LinuxNetworkInterface\"},{\"namespace\":\"root/scx\",\"counterSpecifier\"\
-        :\"TotalCollisions\",\"class\":\"NetworkInterface\",\"table\":\"LinuxNetworkInterface\"\
-        }]},\"metrics\":{\"resourceId\":\"[variables('ladMetricsResourceId')]\",\"\
-        metricAggregation\":[{\"scheduledTransferPeriod\":\"PT1H\"},{\"scheduledTransferPeriod\"\
-        :\"PT1M\"}]}}}}\r\n            },\r\n            \"name\": \"LinuxDiagnostic\"\
-        \r\n          }\r\n        ]\r\n      }\r\n    },\r\n    \"provisioningState\"\
-        : \"Succeeded\",\r\n    \"overprovision\": true,\r\n    \"uniqueId\": \"8c6d97ca-4604-48f3-a45f-d4530a414131\"\
+        ,\"ladCfg\":{\"diagnosticMonitorConfiguration\":{\"metrics\":{\"metricAggregation\"\
+        :[{\"scheduledTransferPeriod\":\"PT1H\"},{\"scheduledTransferPeriod\":\"PT1M\"\
+        }],\"resourceId\":\"[variables('ladMetricsResourceId')]\"},\"performanceCounters\"\
+        :{\"performanceCounterConfiguration\":[{\"counterSpecifier\":\"AvailableMemory\"\
+        ,\"namespace\":\"root/scx\",\"class\":\"Memory\",\"table\":\"LinuxMemory\"\
+        },{\"counterSpecifier\":\"PercentAvailableMemory\",\"namespace\":\"root/scx\"\
+        ,\"class\":\"Memory\",\"table\":\"LinuxMemory\"},{\"counterSpecifier\":\"\
+        UsedMemory\",\"namespace\":\"root/scx\",\"class\":\"Memory\",\"table\":\"\
+        LinuxMemory\"},{\"counterSpecifier\":\"PercentUsedMemory\",\"namespace\":\"\
+        root/scx\",\"class\":\"Memory\",\"table\":\"LinuxMemory\"},{\"counterSpecifier\"\
+        :\"PercentUsedByCache\",\"namespace\":\"root/scx\",\"class\":\"Memory\",\"\
+        table\":\"LinuxMemory\"},{\"counterSpecifier\":\"PagesPerSec\",\"namespace\"\
+        :\"root/scx\",\"class\":\"Memory\",\"table\":\"LinuxMemory\"},{\"counterSpecifier\"\
+        :\"PagesReadPerSec\",\"namespace\":\"root/scx\",\"class\":\"Memory\",\"table\"\
+        :\"LinuxMemory\"},{\"counterSpecifier\":\"PagesWrittenPerSec\",\"namespace\"\
+        :\"root/scx\",\"class\":\"Memory\",\"table\":\"LinuxMemory\"},{\"counterSpecifier\"\
+        :\"AvailableSwap\",\"namespace\":\"root/scx\",\"class\":\"Memory\",\"table\"\
+        :\"LinuxMemory\"},{\"counterSpecifier\":\"PercentAvailableSwap\",\"namespace\"\
+        :\"root/scx\",\"class\":\"Memory\",\"table\":\"LinuxMemory\"},{\"counterSpecifier\"\
+        :\"UsedSwap\",\"namespace\":\"root/scx\",\"class\":\"Memory\",\"table\":\"\
+        LinuxMemory\"},{\"counterSpecifier\":\"PercentUsedSwap\",\"namespace\":\"\
+        root/scx\",\"class\":\"Memory\",\"table\":\"LinuxMemory\"},{\"counterSpecifier\"\
+        :\"PercentIdleTime\",\"namespace\":\"root/scx\",\"class\":\"Processor\",\"\
+        table\":\"LinuxProcessor\"},{\"counterSpecifier\":\"PercentUserTime\",\"namespace\"\
+        :\"root/scx\",\"class\":\"Processor\",\"table\":\"LinuxProcessor\"},{\"counterSpecifier\"\
+        :\"PercentNiceTime\",\"namespace\":\"root/scx\",\"class\":\"Processor\",\"\
+        table\":\"LinuxProcessor\"},{\"counterSpecifier\":\"PercentPrivilegedTime\"\
+        ,\"namespace\":\"root/scx\",\"class\":\"Processor\",\"table\":\"LinuxProcessor\"\
+        },{\"counterSpecifier\":\"PercentInterruptTime\",\"namespace\":\"root/scx\"\
+        ,\"class\":\"Processor\",\"table\":\"LinuxProcessor\"},{\"counterSpecifier\"\
+        :\"PercentDPCTime\",\"namespace\":\"root/scx\",\"class\":\"Processor\",\"\
+        table\":\"LinuxProcessor\"},{\"counterSpecifier\":\"PercentProcessorTime\"\
+        ,\"namespace\":\"root/scx\",\"class\":\"Processor\",\"table\":\"LinuxProcessor\"\
+        },{\"counterSpecifier\":\"PercentIOWaitTime\",\"namespace\":\"root/scx\",\"\
+        class\":\"Processor\",\"table\":\"LinuxProcessor\"},{\"counterSpecifier\"\
+        :\"BytesPerSecond\",\"namespace\":\"root/scx\",\"class\":\"PhysicalDisk\"\
+        ,\"table\":\"LinuxPhysicalDisk\"},{\"counterSpecifier\":\"ReadBytesPerSecond\"\
+        ,\"namespace\":\"root/scx\",\"class\":\"PhysicalDisk\",\"table\":\"LinuxPhysicalDisk\"\
+        },{\"counterSpecifier\":\"WriteBytesPerSecond\",\"namespace\":\"root/scx\"\
+        ,\"class\":\"PhysicalDisk\",\"table\":\"LinuxPhysicalDisk\"},{\"counterSpecifier\"\
+        :\"TransfersPerSecond\",\"namespace\":\"root/scx\",\"class\":\"PhysicalDisk\"\
+        ,\"table\":\"LinuxPhysicalDisk\"},{\"counterSpecifier\":\"ReadsPerSecond\"\
+        ,\"namespace\":\"root/scx\",\"class\":\"PhysicalDisk\",\"table\":\"LinuxPhysicalDisk\"\
+        },{\"counterSpecifier\":\"WritesPerSecond\",\"namespace\":\"root/scx\",\"\
+        class\":\"PhysicalDisk\",\"table\":\"LinuxPhysicalDisk\"},{\"counterSpecifier\"\
+        :\"AverageReadTime\",\"namespace\":\"root/scx\",\"class\":\"PhysicalDisk\"\
+        ,\"table\":\"LinuxPhysicalDisk\"},{\"counterSpecifier\":\"AverageWriteTime\"\
+        ,\"namespace\":\"root/scx\",\"class\":\"PhysicalDisk\",\"table\":\"LinuxPhysicalDisk\"\
+        },{\"counterSpecifier\":\"AverageTransferTime\",\"namespace\":\"root/scx\"\
+        ,\"class\":\"PhysicalDisk\",\"table\":\"LinuxPhysicalDisk\"},{\"counterSpecifier\"\
+        :\"AverageDiskQueueLength\",\"namespace\":\"root/scx\",\"class\":\"PhysicalDisk\"\
+        ,\"table\":\"LinuxPhysicalDisk\"},{\"counterSpecifier\":\"BytesTransmitted\"\
+        ,\"namespace\":\"root/scx\",\"class\":\"NetworkInterface\",\"table\":\"LinuxNetworkInterface\"\
+        },{\"counterSpecifier\":\"BytesReceived\",\"namespace\":\"root/scx\",\"class\"\
+        :\"NetworkInterface\",\"table\":\"LinuxNetworkInterface\"},{\"counterSpecifier\"\
+        :\"PacketsTransmitted\",\"namespace\":\"root/scx\",\"class\":\"NetworkInterface\"\
+        ,\"table\":\"LinuxNetworkInterface\"},{\"counterSpecifier\":\"PacketsReceived\"\
+        ,\"namespace\":\"root/scx\",\"class\":\"NetworkInterface\",\"table\":\"LinuxNetworkInterface\"\
+        },{\"counterSpecifier\":\"BytesTotal\",\"namespace\":\"root/scx\",\"class\"\
+        :\"NetworkInterface\",\"table\":\"LinuxNetworkInterface\"},{\"counterSpecifier\"\
+        :\"TotalRxErrors\",\"namespace\":\"root/scx\",\"class\":\"NetworkInterface\"\
+        ,\"table\":\"LinuxNetworkInterface\"},{\"counterSpecifier\":\"TotalTxErrors\"\
+        ,\"namespace\":\"root/scx\",\"class\":\"NetworkInterface\",\"table\":\"LinuxNetworkInterface\"\
+        },{\"counterSpecifier\":\"TotalCollisions\",\"namespace\":\"root/scx\",\"\
+        class\":\"NetworkInterface\",\"table\":\"LinuxNetworkInterface\"}]}}}}\r\n\
+        \            },\r\n            \"name\": \"LinuxDiagnostic\"\r\n         \
+        \ }\r\n        ]\r\n      }\r\n    },\r\n    \"provisioningState\": \"Succeeded\"\
+        ,\r\n    \"overprovision\": true,\r\n    \"uniqueId\": \"c096eec7-4a82-4065-8a27-316c264c5d52\"\
         \r\n  },\r\n  \"type\": \"Microsoft.Compute/virtualMachineScaleSets\",\r\n\
         \  \"location\": \"westus\",\r\n  \"tags\": {},\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_vmss_diagnostics_extension/providers/Microsoft.Compute/virtualMachineScaleSets/testdiagvmss\"\
         ,\r\n  \"name\": \"testdiagvmss\"\r\n}"}
     headers:
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Thu, 26 Jan 2017 18:58:09 GMT']
+      Date: ['Tue, 31 Jan 2017 02:28:16 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
       Transfer-Encoding: [chunked]
       Vary: [Accept-Encoding]
-      content-length: ['7423']
+      content-length: ['7130']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -589,24 +576,24 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.1 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.4
-          msrest_azure/0.4.6 computemanagementclient/0.32.1 Azure-SDK-For-Python AZURECLI/TEST/0.1.1b2+dev]
+      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.7
+          computemanagementclient/0.33.0 Azure-SDK-For-Python AZURECLI/TEST/0.1.1b2+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [61406606-e3f9-11e6-9497-a0b3ccf7272a]
+      x-ms-client-request-id: [ecb89b5e-e75c-11e6-8e15-64510658e3b3]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_vmss_diagnostics_extension/providers/Microsoft.Compute/virtualMachines/testdiagvm?api-version=2016-03-30
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_vmss_diagnostics_extension/providers/Microsoft.Compute/virtualMachines/testdiagvm?api-version=2016-04-30-preview
   response:
-    body: {string: "{\r\n  \"properties\": {\r\n    \"vmId\": \"c5abab84-2aec-437d-8b3d-a7717505cf4c\"\
+    body: {string: "{\r\n  \"properties\": {\r\n    \"vmId\": \"86cc85bc-1e50-47b5-aead-585d80b8b0b4\"\
         ,\r\n    \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1\"\r\n\
         \    },\r\n    \"storageProfile\": {\r\n      \"imageReference\": {\r\n  \
         \      \"publisher\": \"Canonical\",\r\n        \"offer\": \"UbuntuServer\"\
         ,\r\n        \"sku\": \"14.04.4-LTS\",\r\n        \"version\": \"latest\"\r\
         \n      },\r\n      \"osDisk\": {\r\n        \"osType\": \"Linux\",\r\n  \
-        \      \"name\": \"osdisk_4ceUr4aq20\",\r\n        \"createOption\": \"FromImage\"\
-        ,\r\n        \"vhd\": {\r\n          \"uri\": \"https://vhdstorage3qgxkufmp5x50g.blob.core.windows.net/vhds/osdisk_4ceUr4aq20.vhd\"\
+        \      \"name\": \"osdisk_oSCKe4j7up\",\r\n        \"createOption\": \"FromImage\"\
+        ,\r\n        \"vhd\": {\r\n          \"uri\": \"https://diagextensionsa.blob.core.windows.net/vhds/osdisk_oSCKe4j7up.vhd\"\
         \r\n        },\r\n        \"caching\": \"ReadWrite\"\r\n      },\r\n     \
         \ \"dataDisks\": []\r\n    },\r\n    \"osProfile\": {\r\n      \"computerName\"\
-        : \"testdiagvm\",\r\n      \"adminUsername\": \"trpresco\",\r\n      \"linuxConfiguration\"\
+        : \"testdiagvm\",\r\n      \"adminUsername\": \"yugangw\",\r\n      \"linuxConfiguration\"\
         : {\r\n        \"disablePasswordAuthentication\": false\r\n      },\r\n  \
         \    \"secrets\": []\r\n    },\r\n    \"networkProfile\": {\"networkInterfaces\"\
         :[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_vmss_diagnostics_extension/providers/Microsoft.Network/networkInterfaces/testdiagvmVMNic\"\
@@ -617,14 +604,14 @@ interactions:
     headers:
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Thu, 26 Jan 2017 18:58:09 GMT']
+      Date: ['Tue, 31 Jan 2017 02:28:16 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
       Transfer-Encoding: [chunked]
       Vary: [Accept-Encoding]
-      content-length: ['1438']
+      content-length: ['1428']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -633,24 +620,24 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.1 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.4
-          msrest_azure/0.4.6 computemanagementclient/0.32.1 Azure-SDK-For-Python AZURECLI/TEST/0.1.1b2+dev]
+      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.7
+          computemanagementclient/0.33.0 Azure-SDK-For-Python AZURECLI/TEST/0.1.1b2+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [616fbc8c-e3f9-11e6-8b7c-a0b3ccf7272a]
+      x-ms-client-request-id: [ecfdbc02-e75c-11e6-92ec-64510658e3b3]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_vmss_diagnostics_extension/providers/Microsoft.Compute/virtualMachines/testdiagvm?api-version=2016-03-30
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_vmss_diagnostics_extension/providers/Microsoft.Compute/virtualMachines/testdiagvm?api-version=2016-04-30-preview
   response:
-    body: {string: "{\r\n  \"properties\": {\r\n    \"vmId\": \"c5abab84-2aec-437d-8b3d-a7717505cf4c\"\
+    body: {string: "{\r\n  \"properties\": {\r\n    \"vmId\": \"86cc85bc-1e50-47b5-aead-585d80b8b0b4\"\
         ,\r\n    \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1\"\r\n\
         \    },\r\n    \"storageProfile\": {\r\n      \"imageReference\": {\r\n  \
         \      \"publisher\": \"Canonical\",\r\n        \"offer\": \"UbuntuServer\"\
         ,\r\n        \"sku\": \"14.04.4-LTS\",\r\n        \"version\": \"latest\"\r\
         \n      },\r\n      \"osDisk\": {\r\n        \"osType\": \"Linux\",\r\n  \
-        \      \"name\": \"osdisk_4ceUr4aq20\",\r\n        \"createOption\": \"FromImage\"\
-        ,\r\n        \"vhd\": {\r\n          \"uri\": \"https://vhdstorage3qgxkufmp5x50g.blob.core.windows.net/vhds/osdisk_4ceUr4aq20.vhd\"\
+        \      \"name\": \"osdisk_oSCKe4j7up\",\r\n        \"createOption\": \"FromImage\"\
+        ,\r\n        \"vhd\": {\r\n          \"uri\": \"https://diagextensionsa.blob.core.windows.net/vhds/osdisk_oSCKe4j7up.vhd\"\
         \r\n        },\r\n        \"caching\": \"ReadWrite\"\r\n      },\r\n     \
         \ \"dataDisks\": []\r\n    },\r\n    \"osProfile\": {\r\n      \"computerName\"\
-        : \"testdiagvm\",\r\n      \"adminUsername\": \"trpresco\",\r\n      \"linuxConfiguration\"\
+        : \"testdiagvm\",\r\n      \"adminUsername\": \"yugangw\",\r\n      \"linuxConfiguration\"\
         : {\r\n        \"disablePasswordAuthentication\": false\r\n      },\r\n  \
         \    \"secrets\": []\r\n    },\r\n    \"networkProfile\": {\"networkInterfaces\"\
         :[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_vmss_diagnostics_extension/providers/Microsoft.Network/networkInterfaces/testdiagvmVMNic\"\
@@ -661,270 +648,168 @@ interactions:
     headers:
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Thu, 26 Jan 2017 18:58:09 GMT']
+      Date: ['Tue, 31 Jan 2017 02:28:18 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
       Transfer-Encoding: [chunked]
       Vary: [Accept-Encoding]
-      content-length: ['1438']
+      content-length: ['1428']
     status: {code: 200, message: OK}
 - request:
-    body: '{"properties": {"publisher": "Microsoft.OSTCExtensions", "type": "LinuxDiagnostic",
-      "typeHandlerVersion": "2.3", "protectedSettings": {"storageAccountName": "diagextensionsa",
-      "storageAccountEndPoint": "https://diagextensionsa.blob.core.windows.net/",
-      "storageAccountKey": "123"}, "autoUpgradeMinorVersion": true, "settings": {"storageAccount":
-      "diagextensionsa", "ladCfg": {"diagnosticMonitorConfiguration": {"performanceCounters":
-      {"performanceCounterConfiguration": [{"namespace": "root/scx", "counterSpecifier":
-      "AvailableMemory", "class": "Memory", "table": "LinuxMemory"}, {"namespace":
-      "root/scx", "counterSpecifier": "PercentAvailableMemory", "class": "Memory",
-      "table": "LinuxMemory"}, {"namespace": "root/scx", "counterSpecifier": "UsedMemory",
-      "class": "Memory", "table": "LinuxMemory"}, {"namespace": "root/scx", "counterSpecifier":
-      "PercentUsedMemory", "class": "Memory", "table": "LinuxMemory"}, {"namespace":
-      "root/scx", "counterSpecifier": "PercentUsedByCache", "class": "Memory", "table":
-      "LinuxMemory"}, {"namespace": "root/scx", "counterSpecifier": "PagesPerSec",
-      "class": "Memory", "table": "LinuxMemory"}, {"namespace": "root/scx", "counterSpecifier":
-      "PagesReadPerSec", "class": "Memory", "table": "LinuxMemory"}, {"namespace":
-      "root/scx", "counterSpecifier": "PagesWrittenPerSec", "class": "Memory", "table":
-      "LinuxMemory"}, {"namespace": "root/scx", "counterSpecifier": "AvailableSwap",
-      "class": "Memory", "table": "LinuxMemory"}, {"namespace": "root/scx", "counterSpecifier":
-      "PercentAvailableSwap", "class": "Memory", "table": "LinuxMemory"}, {"namespace":
-      "root/scx", "counterSpecifier": "UsedSwap", "class": "Memory", "table": "LinuxMemory"},
-      {"namespace": "root/scx", "counterSpecifier": "PercentUsedSwap", "class": "Memory",
-      "table": "LinuxMemory"}, {"namespace": "root/scx", "counterSpecifier": "PercentIdleTime",
-      "class": "Processor", "table": "LinuxProcessor"}, {"namespace": "root/scx",
-      "counterSpecifier": "PercentUserTime", "class": "Processor", "table": "LinuxProcessor"},
-      {"namespace": "root/scx", "counterSpecifier": "PercentNiceTime", "class": "Processor",
-      "table": "LinuxProcessor"}, {"namespace": "root/scx", "counterSpecifier": "PercentPrivilegedTime",
-      "class": "Processor", "table": "LinuxProcessor"}, {"namespace": "root/scx",
-      "counterSpecifier": "PercentInterruptTime", "class": "Processor", "table": "LinuxProcessor"},
-      {"namespace": "root/scx", "counterSpecifier": "PercentDPCTime", "class": "Processor",
-      "table": "LinuxProcessor"}, {"namespace": "root/scx", "counterSpecifier": "PercentProcessorTime",
-      "class": "Processor", "table": "LinuxProcessor"}, {"namespace": "root/scx",
-      "counterSpecifier": "PercentIOWaitTime", "class": "Processor", "table": "LinuxProcessor"},
-      {"namespace": "root/scx", "counterSpecifier": "BytesPerSecond", "class": "PhysicalDisk",
-      "table": "LinuxPhysicalDisk"}, {"namespace": "root/scx", "counterSpecifier":
-      "ReadBytesPerSecond", "class": "PhysicalDisk", "table": "LinuxPhysicalDisk"},
-      {"namespace": "root/scx", "counterSpecifier": "WriteBytesPerSecond", "class":
-      "PhysicalDisk", "table": "LinuxPhysicalDisk"}, {"namespace": "root/scx", "counterSpecifier":
-      "TransfersPerSecond", "class": "PhysicalDisk", "table": "LinuxPhysicalDisk"},
-      {"namespace": "root/scx", "counterSpecifier": "ReadsPerSecond", "class": "PhysicalDisk",
-      "table": "LinuxPhysicalDisk"}, {"namespace": "root/scx", "counterSpecifier":
-      "WritesPerSecond", "class": "PhysicalDisk", "table": "LinuxPhysicalDisk"}, {"namespace":
-      "root/scx", "counterSpecifier": "AverageReadTime", "class": "PhysicalDisk",
-      "table": "LinuxPhysicalDisk"}, {"namespace": "root/scx", "counterSpecifier":
-      "AverageWriteTime", "class": "PhysicalDisk", "table": "LinuxPhysicalDisk"},
-      {"namespace": "root/scx", "counterSpecifier": "AverageTransferTime", "class":
-      "PhysicalDisk", "table": "LinuxPhysicalDisk"}, {"namespace": "root/scx", "counterSpecifier":
-      "AverageDiskQueueLength", "class": "PhysicalDisk", "table": "LinuxPhysicalDisk"},
-      {"namespace": "root/scx", "counterSpecifier": "BytesTransmitted", "class": "NetworkInterface",
-      "table": "LinuxNetworkInterface"}, {"namespace": "root/scx", "counterSpecifier":
-      "BytesReceived", "class": "NetworkInterface", "table": "LinuxNetworkInterface"},
-      {"namespace": "root/scx", "counterSpecifier": "PacketsTransmitted", "class":
-      "NetworkInterface", "table": "LinuxNetworkInterface"}, {"namespace": "root/scx",
-      "counterSpecifier": "PacketsReceived", "class": "NetworkInterface", "table":
-      "LinuxNetworkInterface"}, {"namespace": "root/scx", "counterSpecifier": "BytesTotal",
-      "class": "NetworkInterface", "table": "LinuxNetworkInterface"}, {"namespace":
-      "root/scx", "counterSpecifier": "TotalRxErrors", "class": "NetworkInterface",
-      "table": "LinuxNetworkInterface"}, {"namespace": "root/scx", "counterSpecifier":
-      "TotalTxErrors", "class": "NetworkInterface", "table": "LinuxNetworkInterface"},
-      {"namespace": "root/scx", "counterSpecifier": "TotalCollisions", "class": "NetworkInterface",
-      "table": "LinuxNetworkInterface"}]}, "metrics": {"resourceId": "[variables(''ladMetricsResourceId'')]",
-      "metricAggregation": [{"scheduledTransferPeriod": "PT1H"}, {"scheduledTransferPeriod":
-      "PT1M"}]}}}}}, "location": "westus"}'
+    body: '{"location": "westus", "properties": {"settings": {"storageAccount": "diagextensionsa",
+      "ladCfg": {"diagnosticMonitorConfiguration": {"metrics": {"metricAggregation":
+      [{"scheduledTransferPeriod": "PT1H"}, {"scheduledTransferPeriod": "PT1M"}],
+      "resourceId": "[variables(''ladMetricsResourceId'')]"}, "performanceCounters":
+      {"performanceCounterConfiguration": [{"counterSpecifier": "AvailableMemory",
+      "namespace": "root/scx", "class": "Memory", "table": "LinuxMemory"}, {"counterSpecifier":
+      "PercentAvailableMemory", "namespace": "root/scx", "class": "Memory", "table":
+      "LinuxMemory"}, {"counterSpecifier": "UsedMemory", "namespace": "root/scx",
+      "class": "Memory", "table": "LinuxMemory"}, {"counterSpecifier": "PercentUsedMemory",
+      "namespace": "root/scx", "class": "Memory", "table": "LinuxMemory"}, {"counterSpecifier":
+      "PercentUsedByCache", "namespace": "root/scx", "class": "Memory", "table": "LinuxMemory"},
+      {"counterSpecifier": "PagesPerSec", "namespace": "root/scx", "class": "Memory",
+      "table": "LinuxMemory"}, {"counterSpecifier": "PagesReadPerSec", "namespace":
+      "root/scx", "class": "Memory", "table": "LinuxMemory"}, {"counterSpecifier":
+      "PagesWrittenPerSec", "namespace": "root/scx", "class": "Memory", "table": "LinuxMemory"},
+      {"counterSpecifier": "AvailableSwap", "namespace": "root/scx", "class": "Memory",
+      "table": "LinuxMemory"}, {"counterSpecifier": "PercentAvailableSwap", "namespace":
+      "root/scx", "class": "Memory", "table": "LinuxMemory"}, {"counterSpecifier":
+      "UsedSwap", "namespace": "root/scx", "class": "Memory", "table": "LinuxMemory"},
+      {"counterSpecifier": "PercentUsedSwap", "namespace": "root/scx", "class": "Memory",
+      "table": "LinuxMemory"}, {"counterSpecifier": "PercentIdleTime", "namespace":
+      "root/scx", "class": "Processor", "table": "LinuxProcessor"}, {"counterSpecifier":
+      "PercentUserTime", "namespace": "root/scx", "class": "Processor", "table": "LinuxProcessor"},
+      {"counterSpecifier": "PercentNiceTime", "namespace": "root/scx", "class": "Processor",
+      "table": "LinuxProcessor"}, {"counterSpecifier": "PercentPrivilegedTime", "namespace":
+      "root/scx", "class": "Processor", "table": "LinuxProcessor"}, {"counterSpecifier":
+      "PercentInterruptTime", "namespace": "root/scx", "class": "Processor", "table":
+      "LinuxProcessor"}, {"counterSpecifier": "PercentDPCTime", "namespace": "root/scx",
+      "class": "Processor", "table": "LinuxProcessor"}, {"counterSpecifier": "PercentProcessorTime",
+      "namespace": "root/scx", "class": "Processor", "table": "LinuxProcessor"}, {"counterSpecifier":
+      "PercentIOWaitTime", "namespace": "root/scx", "class": "Processor", "table":
+      "LinuxProcessor"}, {"counterSpecifier": "BytesPerSecond", "namespace": "root/scx",
+      "class": "PhysicalDisk", "table": "LinuxPhysicalDisk"}, {"counterSpecifier":
+      "ReadBytesPerSecond", "namespace": "root/scx", "class": "PhysicalDisk", "table":
+      "LinuxPhysicalDisk"}, {"counterSpecifier": "WriteBytesPerSecond", "namespace":
+      "root/scx", "class": "PhysicalDisk", "table": "LinuxPhysicalDisk"}, {"counterSpecifier":
+      "TransfersPerSecond", "namespace": "root/scx", "class": "PhysicalDisk", "table":
+      "LinuxPhysicalDisk"}, {"counterSpecifier": "ReadsPerSecond", "namespace": "root/scx",
+      "class": "PhysicalDisk", "table": "LinuxPhysicalDisk"}, {"counterSpecifier":
+      "WritesPerSecond", "namespace": "root/scx", "class": "PhysicalDisk", "table":
+      "LinuxPhysicalDisk"}, {"counterSpecifier": "AverageReadTime", "namespace": "root/scx",
+      "class": "PhysicalDisk", "table": "LinuxPhysicalDisk"}, {"counterSpecifier":
+      "AverageWriteTime", "namespace": "root/scx", "class": "PhysicalDisk", "table":
+      "LinuxPhysicalDisk"}, {"counterSpecifier": "AverageTransferTime", "namespace":
+      "root/scx", "class": "PhysicalDisk", "table": "LinuxPhysicalDisk"}, {"counterSpecifier":
+      "AverageDiskQueueLength", "namespace": "root/scx", "class": "PhysicalDisk",
+      "table": "LinuxPhysicalDisk"}, {"counterSpecifier": "BytesTransmitted", "namespace":
+      "root/scx", "class": "NetworkInterface", "table": "LinuxNetworkInterface"},
+      {"counterSpecifier": "BytesReceived", "namespace": "root/scx", "class": "NetworkInterface",
+      "table": "LinuxNetworkInterface"}, {"counterSpecifier": "PacketsTransmitted",
+      "namespace": "root/scx", "class": "NetworkInterface", "table": "LinuxNetworkInterface"},
+      {"counterSpecifier": "PacketsReceived", "namespace": "root/scx", "class": "NetworkInterface",
+      "table": "LinuxNetworkInterface"}, {"counterSpecifier": "BytesTotal", "namespace":
+      "root/scx", "class": "NetworkInterface", "table": "LinuxNetworkInterface"},
+      {"counterSpecifier": "TotalRxErrors", "namespace": "root/scx", "class": "NetworkInterface",
+      "table": "LinuxNetworkInterface"}, {"counterSpecifier": "TotalTxErrors", "namespace":
+      "root/scx", "class": "NetworkInterface", "table": "LinuxNetworkInterface"},
+      {"counterSpecifier": "TotalCollisions", "namespace": "root/scx", "class": "NetworkInterface",
+      "table": "LinuxNetworkInterface"}]}}}}, "autoUpgradeMinorVersion": true, "protectedSettings":
+      {"storageAccountEndPoint": "https://diagextensionsa.blob.core.windows.net/",
+      "storageAccountName": "diagextensionsa", "storageAccountKey": "123"}, "type":
+      "LinuxDiagnostic", "typeHandlerVersion": "2.3", "publisher": "Microsoft.OSTCExtensions"}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Length: ['5162']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.1 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.4
-          msrest_azure/0.4.6 computemanagementclient/0.32.1 Azure-SDK-For-Python AZURECLI/TEST/0.1.1b2+dev]
+      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.7
+          computemanagementclient/0.33.0 Azure-SDK-For-Python AZURECLI/TEST/0.1.1b2+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [618bd570-e3f9-11e6-8b7b-a0b3ccf7272a]
+      x-ms-client-request-id: [ed3e4682-e75c-11e6-b837-64510658e3b3]
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_vmss_diagnostics_extension/providers/Microsoft.Compute/virtualMachines/testdiagvm/extensions/LinuxDiagnostic?api-version=2016-03-30
-  response:
-    body: {string: '{"error":{"code":"MultipleErrorsOccurred","message":"Multiple
-        error occurred: . Please see details.","details":[{"code":"InternalServerError","message":"Encountered
-        internal server error. Diagnostic information: timestamp ''20170126T185823Z'',
-        subscription id ''0b1f6471-1bf0-4dda-aec3-cb9272f09590'', tracking id ''a734455e-0b19-43d4-bb60-9debb526afab'',
-        request correlation id ''a734455e-0b19-43d4-bb60-9debb526afab''."},{"code":"InternalServerError","message":"Encountered
-        internal server error. Diagnostic information: timestamp ''20170126T185823Z'',
-        subscription id ''0b1f6471-1bf0-4dda-aec3-cb9272f09590'', tracking id ''a734455e-0b19-43d4-bb60-9debb526afab'',
-        request correlation id ''a734455e-0b19-43d4-bb60-9debb526afab''."},{"code":"InternalServerError","message":"Encountered
-        internal server error. Diagnostic information: timestamp ''20170126T185823Z'',
-        subscription id ''0b1f6471-1bf0-4dda-aec3-cb9272f09590'', tracking id ''a734455e-0b19-43d4-bb60-9debb526afab'',
-        request correlation id ''a734455e-0b19-43d4-bb60-9debb526afab''."},{"code":"InternalServerError","message":"Encountered
-        internal server error. Diagnostic information: timestamp ''20170126T185823Z'',
-        subscription id ''0b1f6471-1bf0-4dda-aec3-cb9272f09590'', tracking id ''a734455e-0b19-43d4-bb60-9debb526afab'',
-        request correlation id ''a734455e-0b19-43d4-bb60-9debb526afab''."}]}}'}
-    headers:
-      Cache-Control: [no-cache]
-      Connection: [close]
-      Content-Length: ['1326']
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Thu, 26 Jan 2017 18:58:23 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      x-ms-failure-cause: [gateway]
-    status: {code: 500, message: Internal Server Error}
-- request:
-    body: '{"properties": {"publisher": "Microsoft.OSTCExtensions", "type": "LinuxDiagnostic",
-      "typeHandlerVersion": "2.3", "protectedSettings": {"storageAccountName": "diagextensionsa",
-      "storageAccountEndPoint": "https://diagextensionsa.blob.core.windows.net/",
-      "storageAccountKey": "123"}, "autoUpgradeMinorVersion": true, "settings": {"storageAccount":
-      "diagextensionsa", "ladCfg": {"diagnosticMonitorConfiguration": {"performanceCounters":
-      {"performanceCounterConfiguration": [{"namespace": "root/scx", "counterSpecifier":
-      "AvailableMemory", "class": "Memory", "table": "LinuxMemory"}, {"namespace":
-      "root/scx", "counterSpecifier": "PercentAvailableMemory", "class": "Memory",
-      "table": "LinuxMemory"}, {"namespace": "root/scx", "counterSpecifier": "UsedMemory",
-      "class": "Memory", "table": "LinuxMemory"}, {"namespace": "root/scx", "counterSpecifier":
-      "PercentUsedMemory", "class": "Memory", "table": "LinuxMemory"}, {"namespace":
-      "root/scx", "counterSpecifier": "PercentUsedByCache", "class": "Memory", "table":
-      "LinuxMemory"}, {"namespace": "root/scx", "counterSpecifier": "PagesPerSec",
-      "class": "Memory", "table": "LinuxMemory"}, {"namespace": "root/scx", "counterSpecifier":
-      "PagesReadPerSec", "class": "Memory", "table": "LinuxMemory"}, {"namespace":
-      "root/scx", "counterSpecifier": "PagesWrittenPerSec", "class": "Memory", "table":
-      "LinuxMemory"}, {"namespace": "root/scx", "counterSpecifier": "AvailableSwap",
-      "class": "Memory", "table": "LinuxMemory"}, {"namespace": "root/scx", "counterSpecifier":
-      "PercentAvailableSwap", "class": "Memory", "table": "LinuxMemory"}, {"namespace":
-      "root/scx", "counterSpecifier": "UsedSwap", "class": "Memory", "table": "LinuxMemory"},
-      {"namespace": "root/scx", "counterSpecifier": "PercentUsedSwap", "class": "Memory",
-      "table": "LinuxMemory"}, {"namespace": "root/scx", "counterSpecifier": "PercentIdleTime",
-      "class": "Processor", "table": "LinuxProcessor"}, {"namespace": "root/scx",
-      "counterSpecifier": "PercentUserTime", "class": "Processor", "table": "LinuxProcessor"},
-      {"namespace": "root/scx", "counterSpecifier": "PercentNiceTime", "class": "Processor",
-      "table": "LinuxProcessor"}, {"namespace": "root/scx", "counterSpecifier": "PercentPrivilegedTime",
-      "class": "Processor", "table": "LinuxProcessor"}, {"namespace": "root/scx",
-      "counterSpecifier": "PercentInterruptTime", "class": "Processor", "table": "LinuxProcessor"},
-      {"namespace": "root/scx", "counterSpecifier": "PercentDPCTime", "class": "Processor",
-      "table": "LinuxProcessor"}, {"namespace": "root/scx", "counterSpecifier": "PercentProcessorTime",
-      "class": "Processor", "table": "LinuxProcessor"}, {"namespace": "root/scx",
-      "counterSpecifier": "PercentIOWaitTime", "class": "Processor", "table": "LinuxProcessor"},
-      {"namespace": "root/scx", "counterSpecifier": "BytesPerSecond", "class": "PhysicalDisk",
-      "table": "LinuxPhysicalDisk"}, {"namespace": "root/scx", "counterSpecifier":
-      "ReadBytesPerSecond", "class": "PhysicalDisk", "table": "LinuxPhysicalDisk"},
-      {"namespace": "root/scx", "counterSpecifier": "WriteBytesPerSecond", "class":
-      "PhysicalDisk", "table": "LinuxPhysicalDisk"}, {"namespace": "root/scx", "counterSpecifier":
-      "TransfersPerSecond", "class": "PhysicalDisk", "table": "LinuxPhysicalDisk"},
-      {"namespace": "root/scx", "counterSpecifier": "ReadsPerSecond", "class": "PhysicalDisk",
-      "table": "LinuxPhysicalDisk"}, {"namespace": "root/scx", "counterSpecifier":
-      "WritesPerSecond", "class": "PhysicalDisk", "table": "LinuxPhysicalDisk"}, {"namespace":
-      "root/scx", "counterSpecifier": "AverageReadTime", "class": "PhysicalDisk",
-      "table": "LinuxPhysicalDisk"}, {"namespace": "root/scx", "counterSpecifier":
-      "AverageWriteTime", "class": "PhysicalDisk", "table": "LinuxPhysicalDisk"},
-      {"namespace": "root/scx", "counterSpecifier": "AverageTransferTime", "class":
-      "PhysicalDisk", "table": "LinuxPhysicalDisk"}, {"namespace": "root/scx", "counterSpecifier":
-      "AverageDiskQueueLength", "class": "PhysicalDisk", "table": "LinuxPhysicalDisk"},
-      {"namespace": "root/scx", "counterSpecifier": "BytesTransmitted", "class": "NetworkInterface",
-      "table": "LinuxNetworkInterface"}, {"namespace": "root/scx", "counterSpecifier":
-      "BytesReceived", "class": "NetworkInterface", "table": "LinuxNetworkInterface"},
-      {"namespace": "root/scx", "counterSpecifier": "PacketsTransmitted", "class":
-      "NetworkInterface", "table": "LinuxNetworkInterface"}, {"namespace": "root/scx",
-      "counterSpecifier": "PacketsReceived", "class": "NetworkInterface", "table":
-      "LinuxNetworkInterface"}, {"namespace": "root/scx", "counterSpecifier": "BytesTotal",
-      "class": "NetworkInterface", "table": "LinuxNetworkInterface"}, {"namespace":
-      "root/scx", "counterSpecifier": "TotalRxErrors", "class": "NetworkInterface",
-      "table": "LinuxNetworkInterface"}, {"namespace": "root/scx", "counterSpecifier":
-      "TotalTxErrors", "class": "NetworkInterface", "table": "LinuxNetworkInterface"},
-      {"namespace": "root/scx", "counterSpecifier": "TotalCollisions", "class": "NetworkInterface",
-      "table": "LinuxNetworkInterface"}]}, "metrics": {"resourceId": "[variables(''ladMetricsResourceId'')]",
-      "metricAggregation": [{"scheduledTransferPeriod": "PT1H"}, {"scheduledTransferPeriod":
-      "PT1M"}]}}}}}, "location": "westus"}'
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      Content-Length: ['5162']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.1 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.4
-          msrest_azure/0.4.6 computemanagementclient/0.32.1 Azure-SDK-For-Python AZURECLI/TEST/0.1.1b2+dev]
-      accept-language: [en-US]
-      x-ms-client-request-id: [618bd570-e3f9-11e6-8b7b-a0b3ccf7272a]
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_vmss_diagnostics_extension/providers/Microsoft.Compute/virtualMachines/testdiagvm/extensions/LinuxDiagnostic?api-version=2016-03-30
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_vmss_diagnostics_extension/providers/Microsoft.Compute/virtualMachines/testdiagvm/extensions/LinuxDiagnostic?api-version=2016-04-30-preview
   response:
     body: {string: "{\r\n  \"properties\": {\r\n    \"publisher\": \"Microsoft.OSTCExtensions\"\
         ,\r\n    \"type\": \"LinuxDiagnostic\",\r\n    \"typeHandlerVersion\": \"\
         2.3\",\r\n    \"autoUpgradeMinorVersion\": true,\r\n    \"settings\": {\"\
         storageAccount\":\"diagextensionsa\",\"ladCfg\":{\"diagnosticMonitorConfiguration\"\
-        :{\"performanceCounters\":{\"performanceCounterConfiguration\":[{\"namespace\"\
-        :\"root/scx\",\"counterSpecifier\":\"AvailableMemory\",\"class\":\"Memory\"\
-        ,\"table\":\"LinuxMemory\"},{\"namespace\":\"root/scx\",\"counterSpecifier\"\
-        :\"PercentAvailableMemory\",\"class\":\"Memory\",\"table\":\"LinuxMemory\"\
-        },{\"namespace\":\"root/scx\",\"counterSpecifier\":\"UsedMemory\",\"class\"\
-        :\"Memory\",\"table\":\"LinuxMemory\"},{\"namespace\":\"root/scx\",\"counterSpecifier\"\
-        :\"PercentUsedMemory\",\"class\":\"Memory\",\"table\":\"LinuxMemory\"},{\"\
-        namespace\":\"root/scx\",\"counterSpecifier\":\"PercentUsedByCache\",\"class\"\
-        :\"Memory\",\"table\":\"LinuxMemory\"},{\"namespace\":\"root/scx\",\"counterSpecifier\"\
-        :\"PagesPerSec\",\"class\":\"Memory\",\"table\":\"LinuxMemory\"},{\"namespace\"\
-        :\"root/scx\",\"counterSpecifier\":\"PagesReadPerSec\",\"class\":\"Memory\"\
-        ,\"table\":\"LinuxMemory\"},{\"namespace\":\"root/scx\",\"counterSpecifier\"\
-        :\"PagesWrittenPerSec\",\"class\":\"Memory\",\"table\":\"LinuxMemory\"},{\"\
-        namespace\":\"root/scx\",\"counterSpecifier\":\"AvailableSwap\",\"class\"\
-        :\"Memory\",\"table\":\"LinuxMemory\"},{\"namespace\":\"root/scx\",\"counterSpecifier\"\
-        :\"PercentAvailableSwap\",\"class\":\"Memory\",\"table\":\"LinuxMemory\"},{\"\
-        namespace\":\"root/scx\",\"counterSpecifier\":\"UsedSwap\",\"class\":\"Memory\"\
-        ,\"table\":\"LinuxMemory\"},{\"namespace\":\"root/scx\",\"counterSpecifier\"\
-        :\"PercentUsedSwap\",\"class\":\"Memory\",\"table\":\"LinuxMemory\"},{\"namespace\"\
-        :\"root/scx\",\"counterSpecifier\":\"PercentIdleTime\",\"class\":\"Processor\"\
-        ,\"table\":\"LinuxProcessor\"},{\"namespace\":\"root/scx\",\"counterSpecifier\"\
-        :\"PercentUserTime\",\"class\":\"Processor\",\"table\":\"LinuxProcessor\"\
-        },{\"namespace\":\"root/scx\",\"counterSpecifier\":\"PercentNiceTime\",\"\
-        class\":\"Processor\",\"table\":\"LinuxProcessor\"},{\"namespace\":\"root/scx\"\
-        ,\"counterSpecifier\":\"PercentPrivilegedTime\",\"class\":\"Processor\",\"\
-        table\":\"LinuxProcessor\"},{\"namespace\":\"root/scx\",\"counterSpecifier\"\
-        :\"PercentInterruptTime\",\"class\":\"Processor\",\"table\":\"LinuxProcessor\"\
-        },{\"namespace\":\"root/scx\",\"counterSpecifier\":\"PercentDPCTime\",\"class\"\
-        :\"Processor\",\"table\":\"LinuxProcessor\"},{\"namespace\":\"root/scx\",\"\
-        counterSpecifier\":\"PercentProcessorTime\",\"class\":\"Processor\",\"table\"\
-        :\"LinuxProcessor\"},{\"namespace\":\"root/scx\",\"counterSpecifier\":\"PercentIOWaitTime\"\
-        ,\"class\":\"Processor\",\"table\":\"LinuxProcessor\"},{\"namespace\":\"root/scx\"\
-        ,\"counterSpecifier\":\"BytesPerSecond\",\"class\":\"PhysicalDisk\",\"table\"\
-        :\"LinuxPhysicalDisk\"},{\"namespace\":\"root/scx\",\"counterSpecifier\":\"\
-        ReadBytesPerSecond\",\"class\":\"PhysicalDisk\",\"table\":\"LinuxPhysicalDisk\"\
-        },{\"namespace\":\"root/scx\",\"counterSpecifier\":\"WriteBytesPerSecond\"\
-        ,\"class\":\"PhysicalDisk\",\"table\":\"LinuxPhysicalDisk\"},{\"namespace\"\
-        :\"root/scx\",\"counterSpecifier\":\"TransfersPerSecond\",\"class\":\"PhysicalDisk\"\
-        ,\"table\":\"LinuxPhysicalDisk\"},{\"namespace\":\"root/scx\",\"counterSpecifier\"\
-        :\"ReadsPerSecond\",\"class\":\"PhysicalDisk\",\"table\":\"LinuxPhysicalDisk\"\
-        },{\"namespace\":\"root/scx\",\"counterSpecifier\":\"WritesPerSecond\",\"\
-        class\":\"PhysicalDisk\",\"table\":\"LinuxPhysicalDisk\"},{\"namespace\":\"\
-        root/scx\",\"counterSpecifier\":\"AverageReadTime\",\"class\":\"PhysicalDisk\"\
-        ,\"table\":\"LinuxPhysicalDisk\"},{\"namespace\":\"root/scx\",\"counterSpecifier\"\
-        :\"AverageWriteTime\",\"class\":\"PhysicalDisk\",\"table\":\"LinuxPhysicalDisk\"\
-        },{\"namespace\":\"root/scx\",\"counterSpecifier\":\"AverageTransferTime\"\
-        ,\"class\":\"PhysicalDisk\",\"table\":\"LinuxPhysicalDisk\"},{\"namespace\"\
-        :\"root/scx\",\"counterSpecifier\":\"AverageDiskQueueLength\",\"class\":\"\
-        PhysicalDisk\",\"table\":\"LinuxPhysicalDisk\"},{\"namespace\":\"root/scx\"\
-        ,\"counterSpecifier\":\"BytesTransmitted\",\"class\":\"NetworkInterface\"\
-        ,\"table\":\"LinuxNetworkInterface\"},{\"namespace\":\"root/scx\",\"counterSpecifier\"\
-        :\"BytesReceived\",\"class\":\"NetworkInterface\",\"table\":\"LinuxNetworkInterface\"\
-        },{\"namespace\":\"root/scx\",\"counterSpecifier\":\"PacketsTransmitted\"\
-        ,\"class\":\"NetworkInterface\",\"table\":\"LinuxNetworkInterface\"},{\"namespace\"\
-        :\"root/scx\",\"counterSpecifier\":\"PacketsReceived\",\"class\":\"NetworkInterface\"\
-        ,\"table\":\"LinuxNetworkInterface\"},{\"namespace\":\"root/scx\",\"counterSpecifier\"\
-        :\"BytesTotal\",\"class\":\"NetworkInterface\",\"table\":\"LinuxNetworkInterface\"\
-        },{\"namespace\":\"root/scx\",\"counterSpecifier\":\"TotalRxErrors\",\"class\"\
-        :\"NetworkInterface\",\"table\":\"LinuxNetworkInterface\"},{\"namespace\"\
-        :\"root/scx\",\"counterSpecifier\":\"TotalTxErrors\",\"class\":\"NetworkInterface\"\
-        ,\"table\":\"LinuxNetworkInterface\"},{\"namespace\":\"root/scx\",\"counterSpecifier\"\
-        :\"TotalCollisions\",\"class\":\"NetworkInterface\",\"table\":\"LinuxNetworkInterface\"\
-        }]},\"metrics\":{\"resourceId\":\"[variables('ladMetricsResourceId')]\",\"\
-        metricAggregation\":[{\"scheduledTransferPeriod\":\"PT1H\"},{\"scheduledTransferPeriod\"\
-        :\"PT1M\"}]}}}},\r\n    \"provisioningState\": \"Creating\"\r\n  },\r\n  \"\
-        type\": \"Microsoft.Compute/virtualMachines/extensions\",\r\n  \"location\"\
-        : \"westus\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_vmss_diagnostics_extension/providers/Microsoft.Compute/virtualMachines/testdiagvm/extensions/LinuxDiagnostic\"\
+        :{\"metrics\":{\"metricAggregation\":[{\"scheduledTransferPeriod\":\"PT1H\"\
+        },{\"scheduledTransferPeriod\":\"PT1M\"}],\"resourceId\":\"[variables('ladMetricsResourceId')]\"\
+        },\"performanceCounters\":{\"performanceCounterConfiguration\":[{\"counterSpecifier\"\
+        :\"AvailableMemory\",\"namespace\":\"root/scx\",\"class\":\"Memory\",\"table\"\
+        :\"LinuxMemory\"},{\"counterSpecifier\":\"PercentAvailableMemory\",\"namespace\"\
+        :\"root/scx\",\"class\":\"Memory\",\"table\":\"LinuxMemory\"},{\"counterSpecifier\"\
+        :\"UsedMemory\",\"namespace\":\"root/scx\",\"class\":\"Memory\",\"table\"\
+        :\"LinuxMemory\"},{\"counterSpecifier\":\"PercentUsedMemory\",\"namespace\"\
+        :\"root/scx\",\"class\":\"Memory\",\"table\":\"LinuxMemory\"},{\"counterSpecifier\"\
+        :\"PercentUsedByCache\",\"namespace\":\"root/scx\",\"class\":\"Memory\",\"\
+        table\":\"LinuxMemory\"},{\"counterSpecifier\":\"PagesPerSec\",\"namespace\"\
+        :\"root/scx\",\"class\":\"Memory\",\"table\":\"LinuxMemory\"},{\"counterSpecifier\"\
+        :\"PagesReadPerSec\",\"namespace\":\"root/scx\",\"class\":\"Memory\",\"table\"\
+        :\"LinuxMemory\"},{\"counterSpecifier\":\"PagesWrittenPerSec\",\"namespace\"\
+        :\"root/scx\",\"class\":\"Memory\",\"table\":\"LinuxMemory\"},{\"counterSpecifier\"\
+        :\"AvailableSwap\",\"namespace\":\"root/scx\",\"class\":\"Memory\",\"table\"\
+        :\"LinuxMemory\"},{\"counterSpecifier\":\"PercentAvailableSwap\",\"namespace\"\
+        :\"root/scx\",\"class\":\"Memory\",\"table\":\"LinuxMemory\"},{\"counterSpecifier\"\
+        :\"UsedSwap\",\"namespace\":\"root/scx\",\"class\":\"Memory\",\"table\":\"\
+        LinuxMemory\"},{\"counterSpecifier\":\"PercentUsedSwap\",\"namespace\":\"\
+        root/scx\",\"class\":\"Memory\",\"table\":\"LinuxMemory\"},{\"counterSpecifier\"\
+        :\"PercentIdleTime\",\"namespace\":\"root/scx\",\"class\":\"Processor\",\"\
+        table\":\"LinuxProcessor\"},{\"counterSpecifier\":\"PercentUserTime\",\"namespace\"\
+        :\"root/scx\",\"class\":\"Processor\",\"table\":\"LinuxProcessor\"},{\"counterSpecifier\"\
+        :\"PercentNiceTime\",\"namespace\":\"root/scx\",\"class\":\"Processor\",\"\
+        table\":\"LinuxProcessor\"},{\"counterSpecifier\":\"PercentPrivilegedTime\"\
+        ,\"namespace\":\"root/scx\",\"class\":\"Processor\",\"table\":\"LinuxProcessor\"\
+        },{\"counterSpecifier\":\"PercentInterruptTime\",\"namespace\":\"root/scx\"\
+        ,\"class\":\"Processor\",\"table\":\"LinuxProcessor\"},{\"counterSpecifier\"\
+        :\"PercentDPCTime\",\"namespace\":\"root/scx\",\"class\":\"Processor\",\"\
+        table\":\"LinuxProcessor\"},{\"counterSpecifier\":\"PercentProcessorTime\"\
+        ,\"namespace\":\"root/scx\",\"class\":\"Processor\",\"table\":\"LinuxProcessor\"\
+        },{\"counterSpecifier\":\"PercentIOWaitTime\",\"namespace\":\"root/scx\",\"\
+        class\":\"Processor\",\"table\":\"LinuxProcessor\"},{\"counterSpecifier\"\
+        :\"BytesPerSecond\",\"namespace\":\"root/scx\",\"class\":\"PhysicalDisk\"\
+        ,\"table\":\"LinuxPhysicalDisk\"},{\"counterSpecifier\":\"ReadBytesPerSecond\"\
+        ,\"namespace\":\"root/scx\",\"class\":\"PhysicalDisk\",\"table\":\"LinuxPhysicalDisk\"\
+        },{\"counterSpecifier\":\"WriteBytesPerSecond\",\"namespace\":\"root/scx\"\
+        ,\"class\":\"PhysicalDisk\",\"table\":\"LinuxPhysicalDisk\"},{\"counterSpecifier\"\
+        :\"TransfersPerSecond\",\"namespace\":\"root/scx\",\"class\":\"PhysicalDisk\"\
+        ,\"table\":\"LinuxPhysicalDisk\"},{\"counterSpecifier\":\"ReadsPerSecond\"\
+        ,\"namespace\":\"root/scx\",\"class\":\"PhysicalDisk\",\"table\":\"LinuxPhysicalDisk\"\
+        },{\"counterSpecifier\":\"WritesPerSecond\",\"namespace\":\"root/scx\",\"\
+        class\":\"PhysicalDisk\",\"table\":\"LinuxPhysicalDisk\"},{\"counterSpecifier\"\
+        :\"AverageReadTime\",\"namespace\":\"root/scx\",\"class\":\"PhysicalDisk\"\
+        ,\"table\":\"LinuxPhysicalDisk\"},{\"counterSpecifier\":\"AverageWriteTime\"\
+        ,\"namespace\":\"root/scx\",\"class\":\"PhysicalDisk\",\"table\":\"LinuxPhysicalDisk\"\
+        },{\"counterSpecifier\":\"AverageTransferTime\",\"namespace\":\"root/scx\"\
+        ,\"class\":\"PhysicalDisk\",\"table\":\"LinuxPhysicalDisk\"},{\"counterSpecifier\"\
+        :\"AverageDiskQueueLength\",\"namespace\":\"root/scx\",\"class\":\"PhysicalDisk\"\
+        ,\"table\":\"LinuxPhysicalDisk\"},{\"counterSpecifier\":\"BytesTransmitted\"\
+        ,\"namespace\":\"root/scx\",\"class\":\"NetworkInterface\",\"table\":\"LinuxNetworkInterface\"\
+        },{\"counterSpecifier\":\"BytesReceived\",\"namespace\":\"root/scx\",\"class\"\
+        :\"NetworkInterface\",\"table\":\"LinuxNetworkInterface\"},{\"counterSpecifier\"\
+        :\"PacketsTransmitted\",\"namespace\":\"root/scx\",\"class\":\"NetworkInterface\"\
+        ,\"table\":\"LinuxNetworkInterface\"},{\"counterSpecifier\":\"PacketsReceived\"\
+        ,\"namespace\":\"root/scx\",\"class\":\"NetworkInterface\",\"table\":\"LinuxNetworkInterface\"\
+        },{\"counterSpecifier\":\"BytesTotal\",\"namespace\":\"root/scx\",\"class\"\
+        :\"NetworkInterface\",\"table\":\"LinuxNetworkInterface\"},{\"counterSpecifier\"\
+        :\"TotalRxErrors\",\"namespace\":\"root/scx\",\"class\":\"NetworkInterface\"\
+        ,\"table\":\"LinuxNetworkInterface\"},{\"counterSpecifier\":\"TotalTxErrors\"\
+        ,\"namespace\":\"root/scx\",\"class\":\"NetworkInterface\",\"table\":\"LinuxNetworkInterface\"\
+        },{\"counterSpecifier\":\"TotalCollisions\",\"namespace\":\"root/scx\",\"\
+        class\":\"NetworkInterface\",\"table\":\"LinuxNetworkInterface\"}]}}}},\r\n\
+        \    \"provisioningState\": \"Creating\"\r\n  },\r\n  \"type\": \"Microsoft.Compute/virtualMachines/extensions\"\
+        ,\r\n  \"location\": \"westus\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_vmss_diagnostics_extension/providers/Microsoft.Compute/virtualMachines/testdiagvm/extensions/LinuxDiagnostic\"\
         ,\r\n  \"name\": \"LinuxDiagnostic\"\r\n}"}
     headers:
-      Azure-AsyncOperation: ['https://management.azure.com/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/providers/Microsoft.Compute/locations/westus/operations/52f6e98c-903e-4546-b965-4ef753a32461?api-version=2016-03-30']
+      Azure-AsyncOperation: ['https://management.azure.com/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/providers/Microsoft.Compute/locations/westus/operations/10f1d54f-32f4-4f52-a882-25368ca1ced1?api-version=2016-04-30-preview']
       Cache-Control: [no-cache]
       Content-Length: ['5049']
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Thu, 26 Jan 2017 18:58:22 GMT']
+      Date: ['Tue, 31 Jan 2017 02:28:22 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
@@ -938,20 +823,20 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.1 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.4
-          msrest_azure/0.4.6 computemanagementclient/0.32.1 Azure-SDK-For-Python AZURECLI/TEST/0.1.1b2+dev]
+      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.7
+          computemanagementclient/0.33.0 Azure-SDK-For-Python AZURECLI/TEST/0.1.1b2+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [618bd570-e3f9-11e6-8b7b-a0b3ccf7272a]
+      x-ms-client-request-id: [ed3e4682-e75c-11e6-b837-64510658e3b3]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/52f6e98c-903e-4546-b965-4ef753a32461?api-version=2016-03-30
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/10f1d54f-32f4-4f52-a882-25368ca1ced1?api-version=2016-04-30-preview
   response:
-    body: {string: "{\r\n  \"startTime\": \"2017-01-26T18:58:25.3562391+00:00\",\r\
-        \n  \"status\": \"InProgress\",\r\n  \"name\": \"52f6e98c-903e-4546-b965-4ef753a32461\"\
+    body: {string: "{\r\n  \"startTime\": \"2017-01-31T02:28:22.3723736+00:00\",\r\
+        \n  \"status\": \"InProgress\",\r\n  \"name\": \"10f1d54f-32f4-4f52-a882-25368ca1ced1\"\
         \r\n}"}
     headers:
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Thu, 26 Jan 2017 18:58:54 GMT']
+      Date: ['Tue, 31 Jan 2017 02:28:53 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
@@ -967,20 +852,20 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.1 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.4
-          msrest_azure/0.4.6 computemanagementclient/0.32.1 Azure-SDK-For-Python AZURECLI/TEST/0.1.1b2+dev]
+      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.7
+          computemanagementclient/0.33.0 Azure-SDK-For-Python AZURECLI/TEST/0.1.1b2+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [618bd570-e3f9-11e6-8b7b-a0b3ccf7272a]
+      x-ms-client-request-id: [ed3e4682-e75c-11e6-b837-64510658e3b3]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/52f6e98c-903e-4546-b965-4ef753a32461?api-version=2016-03-30
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/10f1d54f-32f4-4f52-a882-25368ca1ced1?api-version=2016-04-30-preview
   response:
-    body: {string: "{\r\n  \"startTime\": \"2017-01-26T18:58:25.3562391+00:00\",\r\
-        \n  \"status\": \"InProgress\",\r\n  \"name\": \"52f6e98c-903e-4546-b965-4ef753a32461\"\
+    body: {string: "{\r\n  \"startTime\": \"2017-01-31T02:28:22.3723736+00:00\",\r\
+        \n  \"status\": \"InProgress\",\r\n  \"name\": \"10f1d54f-32f4-4f52-a882-25368ca1ced1\"\
         \r\n}"}
     headers:
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Thu, 26 Jan 2017 18:59:24 GMT']
+      Date: ['Tue, 31 Jan 2017 02:29:23 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
@@ -996,107 +881,20 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.1 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.4
-          msrest_azure/0.4.6 computemanagementclient/0.32.1 Azure-SDK-For-Python AZURECLI/TEST/0.1.1b2+dev]
+      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.7
+          computemanagementclient/0.33.0 Azure-SDK-For-Python AZURECLI/TEST/0.1.1b2+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [618bd570-e3f9-11e6-8b7b-a0b3ccf7272a]
+      x-ms-client-request-id: [ed3e4682-e75c-11e6-b837-64510658e3b3]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/52f6e98c-903e-4546-b965-4ef753a32461?api-version=2016-03-30
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/10f1d54f-32f4-4f52-a882-25368ca1ced1?api-version=2016-04-30-preview
   response:
-    body: {string: "{\r\n  \"startTime\": \"2017-01-26T18:58:25.3562391+00:00\",\r\
-        \n  \"status\": \"InProgress\",\r\n  \"name\": \"52f6e98c-903e-4546-b965-4ef753a32461\"\
-        \r\n}"}
+    body: {string: "{\r\n  \"startTime\": \"2017-01-31T02:28:22.3723736+00:00\",\r\
+        \n  \"endTime\": \"2017-01-31T02:29:44.7510941+00:00\",\r\n  \"status\": \"\
+        Succeeded\",\r\n  \"name\": \"10f1d54f-32f4-4f52-a882-25368ca1ced1\"\r\n}"}
     headers:
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Thu, 26 Jan 2017 18:59:55 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
-      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      Transfer-Encoding: [chunked]
-      Vary: [Accept-Encoding]
-      content-length: ['134']
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.1 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.4
-          msrest_azure/0.4.6 computemanagementclient/0.32.1 Azure-SDK-For-Python AZURECLI/TEST/0.1.1b2+dev]
-      accept-language: [en-US]
-      x-ms-client-request-id: [618bd570-e3f9-11e6-8b7b-a0b3ccf7272a]
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/52f6e98c-903e-4546-b965-4ef753a32461?api-version=2016-03-30
-  response:
-    body: {string: "{\r\n  \"startTime\": \"2017-01-26T18:58:25.3562391+00:00\",\r\
-        \n  \"status\": \"InProgress\",\r\n  \"name\": \"52f6e98c-903e-4546-b965-4ef753a32461\"\
-        \r\n}"}
-    headers:
-      Cache-Control: [no-cache]
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Thu, 26 Jan 2017 19:00:24 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
-      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      Transfer-Encoding: [chunked]
-      Vary: [Accept-Encoding]
-      content-length: ['134']
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.1 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.4
-          msrest_azure/0.4.6 computemanagementclient/0.32.1 Azure-SDK-For-Python AZURECLI/TEST/0.1.1b2+dev]
-      accept-language: [en-US]
-      x-ms-client-request-id: [618bd570-e3f9-11e6-8b7b-a0b3ccf7272a]
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/52f6e98c-903e-4546-b965-4ef753a32461?api-version=2016-03-30
-  response:
-    body: {string: "{\r\n  \"startTime\": \"2017-01-26T18:58:25.3562391+00:00\",\r\
-        \n  \"status\": \"InProgress\",\r\n  \"name\": \"52f6e98c-903e-4546-b965-4ef753a32461\"\
-        \r\n}"}
-    headers:
-      Cache-Control: [no-cache]
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Thu, 26 Jan 2017 19:00:55 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
-      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      Transfer-Encoding: [chunked]
-      Vary: [Accept-Encoding]
-      content-length: ['134']
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.1 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.4
-          msrest_azure/0.4.6 computemanagementclient/0.32.1 Azure-SDK-For-Python AZURECLI/TEST/0.1.1b2+dev]
-      accept-language: [en-US]
-      x-ms-client-request-id: [618bd570-e3f9-11e6-8b7b-a0b3ccf7272a]
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/52f6e98c-903e-4546-b965-4ef753a32461?api-version=2016-03-30
-  response:
-    body: {string: "{\r\n  \"startTime\": \"2017-01-26T18:58:25.3562391+00:00\",\r\
-        \n  \"endTime\": \"2017-01-26T19:01:13.3877167+00:00\",\r\n  \"status\": \"\
-        Succeeded\",\r\n  \"name\": \"52f6e98c-903e-4546-b965-4ef753a32461\"\r\n}"}
-    headers:
-      Cache-Control: [no-cache]
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Thu, 26 Jan 2017 19:01:25 GMT']
+      Date: ['Tue, 31 Jan 2017 02:29:53 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
@@ -1112,89 +910,88 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.1 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.4
-          msrest_azure/0.4.6 computemanagementclient/0.32.1 Azure-SDK-For-Python AZURECLI/TEST/0.1.1b2+dev]
+      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.7
+          computemanagementclient/0.33.0 Azure-SDK-For-Python AZURECLI/TEST/0.1.1b2+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [618bd570-e3f9-11e6-8b7b-a0b3ccf7272a]
+      x-ms-client-request-id: [ed3e4682-e75c-11e6-b837-64510658e3b3]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_vmss_diagnostics_extension/providers/Microsoft.Compute/virtualMachines/testdiagvm/extensions/LinuxDiagnostic?api-version=2016-03-30
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_vmss_diagnostics_extension/providers/Microsoft.Compute/virtualMachines/testdiagvm/extensions/LinuxDiagnostic?api-version=2016-04-30-preview
   response:
     body: {string: "{\r\n  \"properties\": {\r\n    \"publisher\": \"Microsoft.OSTCExtensions\"\
         ,\r\n    \"type\": \"LinuxDiagnostic\",\r\n    \"typeHandlerVersion\": \"\
         2.3\",\r\n    \"autoUpgradeMinorVersion\": true,\r\n    \"settings\": {\"\
         storageAccount\":\"diagextensionsa\",\"ladCfg\":{\"diagnosticMonitorConfiguration\"\
-        :{\"performanceCounters\":{\"performanceCounterConfiguration\":[{\"namespace\"\
-        :\"root/scx\",\"counterSpecifier\":\"AvailableMemory\",\"class\":\"Memory\"\
-        ,\"table\":\"LinuxMemory\"},{\"namespace\":\"root/scx\",\"counterSpecifier\"\
-        :\"PercentAvailableMemory\",\"class\":\"Memory\",\"table\":\"LinuxMemory\"\
-        },{\"namespace\":\"root/scx\",\"counterSpecifier\":\"UsedMemory\",\"class\"\
-        :\"Memory\",\"table\":\"LinuxMemory\"},{\"namespace\":\"root/scx\",\"counterSpecifier\"\
-        :\"PercentUsedMemory\",\"class\":\"Memory\",\"table\":\"LinuxMemory\"},{\"\
-        namespace\":\"root/scx\",\"counterSpecifier\":\"PercentUsedByCache\",\"class\"\
-        :\"Memory\",\"table\":\"LinuxMemory\"},{\"namespace\":\"root/scx\",\"counterSpecifier\"\
-        :\"PagesPerSec\",\"class\":\"Memory\",\"table\":\"LinuxMemory\"},{\"namespace\"\
-        :\"root/scx\",\"counterSpecifier\":\"PagesReadPerSec\",\"class\":\"Memory\"\
-        ,\"table\":\"LinuxMemory\"},{\"namespace\":\"root/scx\",\"counterSpecifier\"\
-        :\"PagesWrittenPerSec\",\"class\":\"Memory\",\"table\":\"LinuxMemory\"},{\"\
-        namespace\":\"root/scx\",\"counterSpecifier\":\"AvailableSwap\",\"class\"\
-        :\"Memory\",\"table\":\"LinuxMemory\"},{\"namespace\":\"root/scx\",\"counterSpecifier\"\
-        :\"PercentAvailableSwap\",\"class\":\"Memory\",\"table\":\"LinuxMemory\"},{\"\
-        namespace\":\"root/scx\",\"counterSpecifier\":\"UsedSwap\",\"class\":\"Memory\"\
-        ,\"table\":\"LinuxMemory\"},{\"namespace\":\"root/scx\",\"counterSpecifier\"\
-        :\"PercentUsedSwap\",\"class\":\"Memory\",\"table\":\"LinuxMemory\"},{\"namespace\"\
-        :\"root/scx\",\"counterSpecifier\":\"PercentIdleTime\",\"class\":\"Processor\"\
-        ,\"table\":\"LinuxProcessor\"},{\"namespace\":\"root/scx\",\"counterSpecifier\"\
-        :\"PercentUserTime\",\"class\":\"Processor\",\"table\":\"LinuxProcessor\"\
-        },{\"namespace\":\"root/scx\",\"counterSpecifier\":\"PercentNiceTime\",\"\
-        class\":\"Processor\",\"table\":\"LinuxProcessor\"},{\"namespace\":\"root/scx\"\
-        ,\"counterSpecifier\":\"PercentPrivilegedTime\",\"class\":\"Processor\",\"\
-        table\":\"LinuxProcessor\"},{\"namespace\":\"root/scx\",\"counterSpecifier\"\
-        :\"PercentInterruptTime\",\"class\":\"Processor\",\"table\":\"LinuxProcessor\"\
-        },{\"namespace\":\"root/scx\",\"counterSpecifier\":\"PercentDPCTime\",\"class\"\
-        :\"Processor\",\"table\":\"LinuxProcessor\"},{\"namespace\":\"root/scx\",\"\
-        counterSpecifier\":\"PercentProcessorTime\",\"class\":\"Processor\",\"table\"\
-        :\"LinuxProcessor\"},{\"namespace\":\"root/scx\",\"counterSpecifier\":\"PercentIOWaitTime\"\
-        ,\"class\":\"Processor\",\"table\":\"LinuxProcessor\"},{\"namespace\":\"root/scx\"\
-        ,\"counterSpecifier\":\"BytesPerSecond\",\"class\":\"PhysicalDisk\",\"table\"\
-        :\"LinuxPhysicalDisk\"},{\"namespace\":\"root/scx\",\"counterSpecifier\":\"\
-        ReadBytesPerSecond\",\"class\":\"PhysicalDisk\",\"table\":\"LinuxPhysicalDisk\"\
-        },{\"namespace\":\"root/scx\",\"counterSpecifier\":\"WriteBytesPerSecond\"\
-        ,\"class\":\"PhysicalDisk\",\"table\":\"LinuxPhysicalDisk\"},{\"namespace\"\
-        :\"root/scx\",\"counterSpecifier\":\"TransfersPerSecond\",\"class\":\"PhysicalDisk\"\
-        ,\"table\":\"LinuxPhysicalDisk\"},{\"namespace\":\"root/scx\",\"counterSpecifier\"\
-        :\"ReadsPerSecond\",\"class\":\"PhysicalDisk\",\"table\":\"LinuxPhysicalDisk\"\
-        },{\"namespace\":\"root/scx\",\"counterSpecifier\":\"WritesPerSecond\",\"\
-        class\":\"PhysicalDisk\",\"table\":\"LinuxPhysicalDisk\"},{\"namespace\":\"\
-        root/scx\",\"counterSpecifier\":\"AverageReadTime\",\"class\":\"PhysicalDisk\"\
-        ,\"table\":\"LinuxPhysicalDisk\"},{\"namespace\":\"root/scx\",\"counterSpecifier\"\
-        :\"AverageWriteTime\",\"class\":\"PhysicalDisk\",\"table\":\"LinuxPhysicalDisk\"\
-        },{\"namespace\":\"root/scx\",\"counterSpecifier\":\"AverageTransferTime\"\
-        ,\"class\":\"PhysicalDisk\",\"table\":\"LinuxPhysicalDisk\"},{\"namespace\"\
-        :\"root/scx\",\"counterSpecifier\":\"AverageDiskQueueLength\",\"class\":\"\
-        PhysicalDisk\",\"table\":\"LinuxPhysicalDisk\"},{\"namespace\":\"root/scx\"\
-        ,\"counterSpecifier\":\"BytesTransmitted\",\"class\":\"NetworkInterface\"\
-        ,\"table\":\"LinuxNetworkInterface\"},{\"namespace\":\"root/scx\",\"counterSpecifier\"\
-        :\"BytesReceived\",\"class\":\"NetworkInterface\",\"table\":\"LinuxNetworkInterface\"\
-        },{\"namespace\":\"root/scx\",\"counterSpecifier\":\"PacketsTransmitted\"\
-        ,\"class\":\"NetworkInterface\",\"table\":\"LinuxNetworkInterface\"},{\"namespace\"\
-        :\"root/scx\",\"counterSpecifier\":\"PacketsReceived\",\"class\":\"NetworkInterface\"\
-        ,\"table\":\"LinuxNetworkInterface\"},{\"namespace\":\"root/scx\",\"counterSpecifier\"\
-        :\"BytesTotal\",\"class\":\"NetworkInterface\",\"table\":\"LinuxNetworkInterface\"\
-        },{\"namespace\":\"root/scx\",\"counterSpecifier\":\"TotalRxErrors\",\"class\"\
-        :\"NetworkInterface\",\"table\":\"LinuxNetworkInterface\"},{\"namespace\"\
-        :\"root/scx\",\"counterSpecifier\":\"TotalTxErrors\",\"class\":\"NetworkInterface\"\
-        ,\"table\":\"LinuxNetworkInterface\"},{\"namespace\":\"root/scx\",\"counterSpecifier\"\
-        :\"TotalCollisions\",\"class\":\"NetworkInterface\",\"table\":\"LinuxNetworkInterface\"\
-        }]},\"metrics\":{\"resourceId\":\"[variables('ladMetricsResourceId')]\",\"\
-        metricAggregation\":[{\"scheduledTransferPeriod\":\"PT1H\"},{\"scheduledTransferPeriod\"\
-        :\"PT1M\"}]}}}},\r\n    \"provisioningState\": \"Succeeded\"\r\n  },\r\n \
-        \ \"type\": \"Microsoft.Compute/virtualMachines/extensions\",\r\n  \"location\"\
-        : \"westus\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_vmss_diagnostics_extension/providers/Microsoft.Compute/virtualMachines/testdiagvm/extensions/LinuxDiagnostic\"\
+        :{\"metrics\":{\"metricAggregation\":[{\"scheduledTransferPeriod\":\"PT1H\"\
+        },{\"scheduledTransferPeriod\":\"PT1M\"}],\"resourceId\":\"[variables('ladMetricsResourceId')]\"\
+        },\"performanceCounters\":{\"performanceCounterConfiguration\":[{\"counterSpecifier\"\
+        :\"AvailableMemory\",\"namespace\":\"root/scx\",\"class\":\"Memory\",\"table\"\
+        :\"LinuxMemory\"},{\"counterSpecifier\":\"PercentAvailableMemory\",\"namespace\"\
+        :\"root/scx\",\"class\":\"Memory\",\"table\":\"LinuxMemory\"},{\"counterSpecifier\"\
+        :\"UsedMemory\",\"namespace\":\"root/scx\",\"class\":\"Memory\",\"table\"\
+        :\"LinuxMemory\"},{\"counterSpecifier\":\"PercentUsedMemory\",\"namespace\"\
+        :\"root/scx\",\"class\":\"Memory\",\"table\":\"LinuxMemory\"},{\"counterSpecifier\"\
+        :\"PercentUsedByCache\",\"namespace\":\"root/scx\",\"class\":\"Memory\",\"\
+        table\":\"LinuxMemory\"},{\"counterSpecifier\":\"PagesPerSec\",\"namespace\"\
+        :\"root/scx\",\"class\":\"Memory\",\"table\":\"LinuxMemory\"},{\"counterSpecifier\"\
+        :\"PagesReadPerSec\",\"namespace\":\"root/scx\",\"class\":\"Memory\",\"table\"\
+        :\"LinuxMemory\"},{\"counterSpecifier\":\"PagesWrittenPerSec\",\"namespace\"\
+        :\"root/scx\",\"class\":\"Memory\",\"table\":\"LinuxMemory\"},{\"counterSpecifier\"\
+        :\"AvailableSwap\",\"namespace\":\"root/scx\",\"class\":\"Memory\",\"table\"\
+        :\"LinuxMemory\"},{\"counterSpecifier\":\"PercentAvailableSwap\",\"namespace\"\
+        :\"root/scx\",\"class\":\"Memory\",\"table\":\"LinuxMemory\"},{\"counterSpecifier\"\
+        :\"UsedSwap\",\"namespace\":\"root/scx\",\"class\":\"Memory\",\"table\":\"\
+        LinuxMemory\"},{\"counterSpecifier\":\"PercentUsedSwap\",\"namespace\":\"\
+        root/scx\",\"class\":\"Memory\",\"table\":\"LinuxMemory\"},{\"counterSpecifier\"\
+        :\"PercentIdleTime\",\"namespace\":\"root/scx\",\"class\":\"Processor\",\"\
+        table\":\"LinuxProcessor\"},{\"counterSpecifier\":\"PercentUserTime\",\"namespace\"\
+        :\"root/scx\",\"class\":\"Processor\",\"table\":\"LinuxProcessor\"},{\"counterSpecifier\"\
+        :\"PercentNiceTime\",\"namespace\":\"root/scx\",\"class\":\"Processor\",\"\
+        table\":\"LinuxProcessor\"},{\"counterSpecifier\":\"PercentPrivilegedTime\"\
+        ,\"namespace\":\"root/scx\",\"class\":\"Processor\",\"table\":\"LinuxProcessor\"\
+        },{\"counterSpecifier\":\"PercentInterruptTime\",\"namespace\":\"root/scx\"\
+        ,\"class\":\"Processor\",\"table\":\"LinuxProcessor\"},{\"counterSpecifier\"\
+        :\"PercentDPCTime\",\"namespace\":\"root/scx\",\"class\":\"Processor\",\"\
+        table\":\"LinuxProcessor\"},{\"counterSpecifier\":\"PercentProcessorTime\"\
+        ,\"namespace\":\"root/scx\",\"class\":\"Processor\",\"table\":\"LinuxProcessor\"\
+        },{\"counterSpecifier\":\"PercentIOWaitTime\",\"namespace\":\"root/scx\",\"\
+        class\":\"Processor\",\"table\":\"LinuxProcessor\"},{\"counterSpecifier\"\
+        :\"BytesPerSecond\",\"namespace\":\"root/scx\",\"class\":\"PhysicalDisk\"\
+        ,\"table\":\"LinuxPhysicalDisk\"},{\"counterSpecifier\":\"ReadBytesPerSecond\"\
+        ,\"namespace\":\"root/scx\",\"class\":\"PhysicalDisk\",\"table\":\"LinuxPhysicalDisk\"\
+        },{\"counterSpecifier\":\"WriteBytesPerSecond\",\"namespace\":\"root/scx\"\
+        ,\"class\":\"PhysicalDisk\",\"table\":\"LinuxPhysicalDisk\"},{\"counterSpecifier\"\
+        :\"TransfersPerSecond\",\"namespace\":\"root/scx\",\"class\":\"PhysicalDisk\"\
+        ,\"table\":\"LinuxPhysicalDisk\"},{\"counterSpecifier\":\"ReadsPerSecond\"\
+        ,\"namespace\":\"root/scx\",\"class\":\"PhysicalDisk\",\"table\":\"LinuxPhysicalDisk\"\
+        },{\"counterSpecifier\":\"WritesPerSecond\",\"namespace\":\"root/scx\",\"\
+        class\":\"PhysicalDisk\",\"table\":\"LinuxPhysicalDisk\"},{\"counterSpecifier\"\
+        :\"AverageReadTime\",\"namespace\":\"root/scx\",\"class\":\"PhysicalDisk\"\
+        ,\"table\":\"LinuxPhysicalDisk\"},{\"counterSpecifier\":\"AverageWriteTime\"\
+        ,\"namespace\":\"root/scx\",\"class\":\"PhysicalDisk\",\"table\":\"LinuxPhysicalDisk\"\
+        },{\"counterSpecifier\":\"AverageTransferTime\",\"namespace\":\"root/scx\"\
+        ,\"class\":\"PhysicalDisk\",\"table\":\"LinuxPhysicalDisk\"},{\"counterSpecifier\"\
+        :\"AverageDiskQueueLength\",\"namespace\":\"root/scx\",\"class\":\"PhysicalDisk\"\
+        ,\"table\":\"LinuxPhysicalDisk\"},{\"counterSpecifier\":\"BytesTransmitted\"\
+        ,\"namespace\":\"root/scx\",\"class\":\"NetworkInterface\",\"table\":\"LinuxNetworkInterface\"\
+        },{\"counterSpecifier\":\"BytesReceived\",\"namespace\":\"root/scx\",\"class\"\
+        :\"NetworkInterface\",\"table\":\"LinuxNetworkInterface\"},{\"counterSpecifier\"\
+        :\"PacketsTransmitted\",\"namespace\":\"root/scx\",\"class\":\"NetworkInterface\"\
+        ,\"table\":\"LinuxNetworkInterface\"},{\"counterSpecifier\":\"PacketsReceived\"\
+        ,\"namespace\":\"root/scx\",\"class\":\"NetworkInterface\",\"table\":\"LinuxNetworkInterface\"\
+        },{\"counterSpecifier\":\"BytesTotal\",\"namespace\":\"root/scx\",\"class\"\
+        :\"NetworkInterface\",\"table\":\"LinuxNetworkInterface\"},{\"counterSpecifier\"\
+        :\"TotalRxErrors\",\"namespace\":\"root/scx\",\"class\":\"NetworkInterface\"\
+        ,\"table\":\"LinuxNetworkInterface\"},{\"counterSpecifier\":\"TotalTxErrors\"\
+        ,\"namespace\":\"root/scx\",\"class\":\"NetworkInterface\",\"table\":\"LinuxNetworkInterface\"\
+        },{\"counterSpecifier\":\"TotalCollisions\",\"namespace\":\"root/scx\",\"\
+        class\":\"NetworkInterface\",\"table\":\"LinuxNetworkInterface\"}]}}}},\r\n\
+        \    \"provisioningState\": \"Succeeded\"\r\n  },\r\n  \"type\": \"Microsoft.Compute/virtualMachines/extensions\"\
+        ,\r\n  \"location\": \"westus\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_vmss_diagnostics_extension/providers/Microsoft.Compute/virtualMachines/testdiagvm/extensions/LinuxDiagnostic\"\
         ,\r\n  \"name\": \"LinuxDiagnostic\"\r\n}"}
     headers:
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Thu, 26 Jan 2017 19:01:26 GMT']
+      Date: ['Tue, 31 Jan 2017 02:29:53 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
@@ -1210,24 +1007,24 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.1 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.4
-          msrest_azure/0.4.6 computemanagementclient/0.32.1 Azure-SDK-For-Python AZURECLI/TEST/0.1.1b2+dev]
+      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.7
+          computemanagementclient/0.33.0 Azure-SDK-For-Python AZURECLI/TEST/0.1.1b2+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [d6d69eb0-e3f9-11e6-9874-a0b3ccf7272a]
+      x-ms-client-request-id: [26b8761c-e75d-11e6-ac60-64510658e3b3]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_vmss_diagnostics_extension/providers/Microsoft.Compute/virtualMachines/testdiagvm?api-version=2016-03-30
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_vmss_diagnostics_extension/providers/Microsoft.Compute/virtualMachines/testdiagvm?api-version=2016-04-30-preview
   response:
-    body: {string: "{\r\n  \"properties\": {\r\n    \"vmId\": \"c5abab84-2aec-437d-8b3d-a7717505cf4c\"\
+    body: {string: "{\r\n  \"properties\": {\r\n    \"vmId\": \"86cc85bc-1e50-47b5-aead-585d80b8b0b4\"\
         ,\r\n    \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1\"\r\n\
         \    },\r\n    \"storageProfile\": {\r\n      \"imageReference\": {\r\n  \
         \      \"publisher\": \"Canonical\",\r\n        \"offer\": \"UbuntuServer\"\
         ,\r\n        \"sku\": \"14.04.4-LTS\",\r\n        \"version\": \"latest\"\r\
         \n      },\r\n      \"osDisk\": {\r\n        \"osType\": \"Linux\",\r\n  \
-        \      \"name\": \"osdisk_4ceUr4aq20\",\r\n        \"createOption\": \"FromImage\"\
-        ,\r\n        \"vhd\": {\r\n          \"uri\": \"https://vhdstorage3qgxkufmp5x50g.blob.core.windows.net/vhds/osdisk_4ceUr4aq20.vhd\"\
+        \      \"name\": \"osdisk_oSCKe4j7up\",\r\n        \"createOption\": \"FromImage\"\
+        ,\r\n        \"vhd\": {\r\n          \"uri\": \"https://diagextensionsa.blob.core.windows.net/vhds/osdisk_oSCKe4j7up.vhd\"\
         \r\n        },\r\n        \"caching\": \"ReadWrite\"\r\n      },\r\n     \
         \ \"dataDisks\": []\r\n    },\r\n    \"osProfile\": {\r\n      \"computerName\"\
-        : \"testdiagvm\",\r\n      \"adminUsername\": \"trpresco\",\r\n      \"linuxConfiguration\"\
+        : \"testdiagvm\",\r\n      \"adminUsername\": \"yugangw\",\r\n      \"linuxConfiguration\"\
         : {\r\n        \"disablePasswordAuthentication\": false\r\n      },\r\n  \
         \    \"secrets\": []\r\n    },\r\n    \"networkProfile\": {\"networkInterfaces\"\
         :[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_vmss_diagnostics_extension/providers/Microsoft.Network/networkInterfaces/testdiagvmVMNic\"\
@@ -1236,73 +1033,73 @@ interactions:
         ,\r\n        \"type\": \"LinuxDiagnostic\",\r\n        \"typeHandlerVersion\"\
         : \"2.3\",\r\n        \"autoUpgradeMinorVersion\": true,\r\n        \"settings\"\
         : {\"storageAccount\":\"diagextensionsa\",\"ladCfg\":{\"diagnosticMonitorConfiguration\"\
-        :{\"performanceCounters\":{\"performanceCounterConfiguration\":[{\"namespace\"\
-        :\"root/scx\",\"counterSpecifier\":\"AvailableMemory\",\"class\":\"Memory\"\
-        ,\"table\":\"LinuxMemory\"},{\"namespace\":\"root/scx\",\"counterSpecifier\"\
-        :\"PercentAvailableMemory\",\"class\":\"Memory\",\"table\":\"LinuxMemory\"\
-        },{\"namespace\":\"root/scx\",\"counterSpecifier\":\"UsedMemory\",\"class\"\
-        :\"Memory\",\"table\":\"LinuxMemory\"},{\"namespace\":\"root/scx\",\"counterSpecifier\"\
-        :\"PercentUsedMemory\",\"class\":\"Memory\",\"table\":\"LinuxMemory\"},{\"\
-        namespace\":\"root/scx\",\"counterSpecifier\":\"PercentUsedByCache\",\"class\"\
-        :\"Memory\",\"table\":\"LinuxMemory\"},{\"namespace\":\"root/scx\",\"counterSpecifier\"\
-        :\"PagesPerSec\",\"class\":\"Memory\",\"table\":\"LinuxMemory\"},{\"namespace\"\
-        :\"root/scx\",\"counterSpecifier\":\"PagesReadPerSec\",\"class\":\"Memory\"\
-        ,\"table\":\"LinuxMemory\"},{\"namespace\":\"root/scx\",\"counterSpecifier\"\
-        :\"PagesWrittenPerSec\",\"class\":\"Memory\",\"table\":\"LinuxMemory\"},{\"\
-        namespace\":\"root/scx\",\"counterSpecifier\":\"AvailableSwap\",\"class\"\
-        :\"Memory\",\"table\":\"LinuxMemory\"},{\"namespace\":\"root/scx\",\"counterSpecifier\"\
-        :\"PercentAvailableSwap\",\"class\":\"Memory\",\"table\":\"LinuxMemory\"},{\"\
-        namespace\":\"root/scx\",\"counterSpecifier\":\"UsedSwap\",\"class\":\"Memory\"\
-        ,\"table\":\"LinuxMemory\"},{\"namespace\":\"root/scx\",\"counterSpecifier\"\
-        :\"PercentUsedSwap\",\"class\":\"Memory\",\"table\":\"LinuxMemory\"},{\"namespace\"\
-        :\"root/scx\",\"counterSpecifier\":\"PercentIdleTime\",\"class\":\"Processor\"\
-        ,\"table\":\"LinuxProcessor\"},{\"namespace\":\"root/scx\",\"counterSpecifier\"\
-        :\"PercentUserTime\",\"class\":\"Processor\",\"table\":\"LinuxProcessor\"\
-        },{\"namespace\":\"root/scx\",\"counterSpecifier\":\"PercentNiceTime\",\"\
-        class\":\"Processor\",\"table\":\"LinuxProcessor\"},{\"namespace\":\"root/scx\"\
-        ,\"counterSpecifier\":\"PercentPrivilegedTime\",\"class\":\"Processor\",\"\
-        table\":\"LinuxProcessor\"},{\"namespace\":\"root/scx\",\"counterSpecifier\"\
-        :\"PercentInterruptTime\",\"class\":\"Processor\",\"table\":\"LinuxProcessor\"\
-        },{\"namespace\":\"root/scx\",\"counterSpecifier\":\"PercentDPCTime\",\"class\"\
-        :\"Processor\",\"table\":\"LinuxProcessor\"},{\"namespace\":\"root/scx\",\"\
-        counterSpecifier\":\"PercentProcessorTime\",\"class\":\"Processor\",\"table\"\
-        :\"LinuxProcessor\"},{\"namespace\":\"root/scx\",\"counterSpecifier\":\"PercentIOWaitTime\"\
-        ,\"class\":\"Processor\",\"table\":\"LinuxProcessor\"},{\"namespace\":\"root/scx\"\
-        ,\"counterSpecifier\":\"BytesPerSecond\",\"class\":\"PhysicalDisk\",\"table\"\
-        :\"LinuxPhysicalDisk\"},{\"namespace\":\"root/scx\",\"counterSpecifier\":\"\
-        ReadBytesPerSecond\",\"class\":\"PhysicalDisk\",\"table\":\"LinuxPhysicalDisk\"\
-        },{\"namespace\":\"root/scx\",\"counterSpecifier\":\"WriteBytesPerSecond\"\
-        ,\"class\":\"PhysicalDisk\",\"table\":\"LinuxPhysicalDisk\"},{\"namespace\"\
-        :\"root/scx\",\"counterSpecifier\":\"TransfersPerSecond\",\"class\":\"PhysicalDisk\"\
-        ,\"table\":\"LinuxPhysicalDisk\"},{\"namespace\":\"root/scx\",\"counterSpecifier\"\
-        :\"ReadsPerSecond\",\"class\":\"PhysicalDisk\",\"table\":\"LinuxPhysicalDisk\"\
-        },{\"namespace\":\"root/scx\",\"counterSpecifier\":\"WritesPerSecond\",\"\
-        class\":\"PhysicalDisk\",\"table\":\"LinuxPhysicalDisk\"},{\"namespace\":\"\
-        root/scx\",\"counterSpecifier\":\"AverageReadTime\",\"class\":\"PhysicalDisk\"\
-        ,\"table\":\"LinuxPhysicalDisk\"},{\"namespace\":\"root/scx\",\"counterSpecifier\"\
-        :\"AverageWriteTime\",\"class\":\"PhysicalDisk\",\"table\":\"LinuxPhysicalDisk\"\
-        },{\"namespace\":\"root/scx\",\"counterSpecifier\":\"AverageTransferTime\"\
-        ,\"class\":\"PhysicalDisk\",\"table\":\"LinuxPhysicalDisk\"},{\"namespace\"\
-        :\"root/scx\",\"counterSpecifier\":\"AverageDiskQueueLength\",\"class\":\"\
-        PhysicalDisk\",\"table\":\"LinuxPhysicalDisk\"},{\"namespace\":\"root/scx\"\
-        ,\"counterSpecifier\":\"BytesTransmitted\",\"class\":\"NetworkInterface\"\
-        ,\"table\":\"LinuxNetworkInterface\"},{\"namespace\":\"root/scx\",\"counterSpecifier\"\
-        :\"BytesReceived\",\"class\":\"NetworkInterface\",\"table\":\"LinuxNetworkInterface\"\
-        },{\"namespace\":\"root/scx\",\"counterSpecifier\":\"PacketsTransmitted\"\
-        ,\"class\":\"NetworkInterface\",\"table\":\"LinuxNetworkInterface\"},{\"namespace\"\
-        :\"root/scx\",\"counterSpecifier\":\"PacketsReceived\",\"class\":\"NetworkInterface\"\
-        ,\"table\":\"LinuxNetworkInterface\"},{\"namespace\":\"root/scx\",\"counterSpecifier\"\
-        :\"BytesTotal\",\"class\":\"NetworkInterface\",\"table\":\"LinuxNetworkInterface\"\
-        },{\"namespace\":\"root/scx\",\"counterSpecifier\":\"TotalRxErrors\",\"class\"\
-        :\"NetworkInterface\",\"table\":\"LinuxNetworkInterface\"},{\"namespace\"\
-        :\"root/scx\",\"counterSpecifier\":\"TotalTxErrors\",\"class\":\"NetworkInterface\"\
-        ,\"table\":\"LinuxNetworkInterface\"},{\"namespace\":\"root/scx\",\"counterSpecifier\"\
-        :\"TotalCollisions\",\"class\":\"NetworkInterface\",\"table\":\"LinuxNetworkInterface\"\
-        }]},\"metrics\":{\"resourceId\":\"[variables('ladMetricsResourceId')]\",\"\
-        metricAggregation\":[{\"scheduledTransferPeriod\":\"PT1H\"},{\"scheduledTransferPeriod\"\
-        :\"PT1M\"}]}}}},\r\n        \"provisioningState\": \"Succeeded\"\r\n     \
-        \ },\r\n      \"type\": \"Microsoft.Compute/virtualMachines/extensions\",\r\
-        \n      \"location\": \"westus\",\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_vmss_diagnostics_extension/providers/Microsoft.Compute/virtualMachines/testdiagvm/extensions/LinuxDiagnostic\"\
+        :{\"metrics\":{\"metricAggregation\":[{\"scheduledTransferPeriod\":\"PT1H\"\
+        },{\"scheduledTransferPeriod\":\"PT1M\"}],\"resourceId\":\"[variables('ladMetricsResourceId')]\"\
+        },\"performanceCounters\":{\"performanceCounterConfiguration\":[{\"counterSpecifier\"\
+        :\"AvailableMemory\",\"namespace\":\"root/scx\",\"class\":\"Memory\",\"table\"\
+        :\"LinuxMemory\"},{\"counterSpecifier\":\"PercentAvailableMemory\",\"namespace\"\
+        :\"root/scx\",\"class\":\"Memory\",\"table\":\"LinuxMemory\"},{\"counterSpecifier\"\
+        :\"UsedMemory\",\"namespace\":\"root/scx\",\"class\":\"Memory\",\"table\"\
+        :\"LinuxMemory\"},{\"counterSpecifier\":\"PercentUsedMemory\",\"namespace\"\
+        :\"root/scx\",\"class\":\"Memory\",\"table\":\"LinuxMemory\"},{\"counterSpecifier\"\
+        :\"PercentUsedByCache\",\"namespace\":\"root/scx\",\"class\":\"Memory\",\"\
+        table\":\"LinuxMemory\"},{\"counterSpecifier\":\"PagesPerSec\",\"namespace\"\
+        :\"root/scx\",\"class\":\"Memory\",\"table\":\"LinuxMemory\"},{\"counterSpecifier\"\
+        :\"PagesReadPerSec\",\"namespace\":\"root/scx\",\"class\":\"Memory\",\"table\"\
+        :\"LinuxMemory\"},{\"counterSpecifier\":\"PagesWrittenPerSec\",\"namespace\"\
+        :\"root/scx\",\"class\":\"Memory\",\"table\":\"LinuxMemory\"},{\"counterSpecifier\"\
+        :\"AvailableSwap\",\"namespace\":\"root/scx\",\"class\":\"Memory\",\"table\"\
+        :\"LinuxMemory\"},{\"counterSpecifier\":\"PercentAvailableSwap\",\"namespace\"\
+        :\"root/scx\",\"class\":\"Memory\",\"table\":\"LinuxMemory\"},{\"counterSpecifier\"\
+        :\"UsedSwap\",\"namespace\":\"root/scx\",\"class\":\"Memory\",\"table\":\"\
+        LinuxMemory\"},{\"counterSpecifier\":\"PercentUsedSwap\",\"namespace\":\"\
+        root/scx\",\"class\":\"Memory\",\"table\":\"LinuxMemory\"},{\"counterSpecifier\"\
+        :\"PercentIdleTime\",\"namespace\":\"root/scx\",\"class\":\"Processor\",\"\
+        table\":\"LinuxProcessor\"},{\"counterSpecifier\":\"PercentUserTime\",\"namespace\"\
+        :\"root/scx\",\"class\":\"Processor\",\"table\":\"LinuxProcessor\"},{\"counterSpecifier\"\
+        :\"PercentNiceTime\",\"namespace\":\"root/scx\",\"class\":\"Processor\",\"\
+        table\":\"LinuxProcessor\"},{\"counterSpecifier\":\"PercentPrivilegedTime\"\
+        ,\"namespace\":\"root/scx\",\"class\":\"Processor\",\"table\":\"LinuxProcessor\"\
+        },{\"counterSpecifier\":\"PercentInterruptTime\",\"namespace\":\"root/scx\"\
+        ,\"class\":\"Processor\",\"table\":\"LinuxProcessor\"},{\"counterSpecifier\"\
+        :\"PercentDPCTime\",\"namespace\":\"root/scx\",\"class\":\"Processor\",\"\
+        table\":\"LinuxProcessor\"},{\"counterSpecifier\":\"PercentProcessorTime\"\
+        ,\"namespace\":\"root/scx\",\"class\":\"Processor\",\"table\":\"LinuxProcessor\"\
+        },{\"counterSpecifier\":\"PercentIOWaitTime\",\"namespace\":\"root/scx\",\"\
+        class\":\"Processor\",\"table\":\"LinuxProcessor\"},{\"counterSpecifier\"\
+        :\"BytesPerSecond\",\"namespace\":\"root/scx\",\"class\":\"PhysicalDisk\"\
+        ,\"table\":\"LinuxPhysicalDisk\"},{\"counterSpecifier\":\"ReadBytesPerSecond\"\
+        ,\"namespace\":\"root/scx\",\"class\":\"PhysicalDisk\",\"table\":\"LinuxPhysicalDisk\"\
+        },{\"counterSpecifier\":\"WriteBytesPerSecond\",\"namespace\":\"root/scx\"\
+        ,\"class\":\"PhysicalDisk\",\"table\":\"LinuxPhysicalDisk\"},{\"counterSpecifier\"\
+        :\"TransfersPerSecond\",\"namespace\":\"root/scx\",\"class\":\"PhysicalDisk\"\
+        ,\"table\":\"LinuxPhysicalDisk\"},{\"counterSpecifier\":\"ReadsPerSecond\"\
+        ,\"namespace\":\"root/scx\",\"class\":\"PhysicalDisk\",\"table\":\"LinuxPhysicalDisk\"\
+        },{\"counterSpecifier\":\"WritesPerSecond\",\"namespace\":\"root/scx\",\"\
+        class\":\"PhysicalDisk\",\"table\":\"LinuxPhysicalDisk\"},{\"counterSpecifier\"\
+        :\"AverageReadTime\",\"namespace\":\"root/scx\",\"class\":\"PhysicalDisk\"\
+        ,\"table\":\"LinuxPhysicalDisk\"},{\"counterSpecifier\":\"AverageWriteTime\"\
+        ,\"namespace\":\"root/scx\",\"class\":\"PhysicalDisk\",\"table\":\"LinuxPhysicalDisk\"\
+        },{\"counterSpecifier\":\"AverageTransferTime\",\"namespace\":\"root/scx\"\
+        ,\"class\":\"PhysicalDisk\",\"table\":\"LinuxPhysicalDisk\"},{\"counterSpecifier\"\
+        :\"AverageDiskQueueLength\",\"namespace\":\"root/scx\",\"class\":\"PhysicalDisk\"\
+        ,\"table\":\"LinuxPhysicalDisk\"},{\"counterSpecifier\":\"BytesTransmitted\"\
+        ,\"namespace\":\"root/scx\",\"class\":\"NetworkInterface\",\"table\":\"LinuxNetworkInterface\"\
+        },{\"counterSpecifier\":\"BytesReceived\",\"namespace\":\"root/scx\",\"class\"\
+        :\"NetworkInterface\",\"table\":\"LinuxNetworkInterface\"},{\"counterSpecifier\"\
+        :\"PacketsTransmitted\",\"namespace\":\"root/scx\",\"class\":\"NetworkInterface\"\
+        ,\"table\":\"LinuxNetworkInterface\"},{\"counterSpecifier\":\"PacketsReceived\"\
+        ,\"namespace\":\"root/scx\",\"class\":\"NetworkInterface\",\"table\":\"LinuxNetworkInterface\"\
+        },{\"counterSpecifier\":\"BytesTotal\",\"namespace\":\"root/scx\",\"class\"\
+        :\"NetworkInterface\",\"table\":\"LinuxNetworkInterface\"},{\"counterSpecifier\"\
+        :\"TotalRxErrors\",\"namespace\":\"root/scx\",\"class\":\"NetworkInterface\"\
+        ,\"table\":\"LinuxNetworkInterface\"},{\"counterSpecifier\":\"TotalTxErrors\"\
+        ,\"namespace\":\"root/scx\",\"class\":\"NetworkInterface\",\"table\":\"LinuxNetworkInterface\"\
+        },{\"counterSpecifier\":\"TotalCollisions\",\"namespace\":\"root/scx\",\"\
+        class\":\"NetworkInterface\",\"table\":\"LinuxNetworkInterface\"}]}}}},\r\n\
+        \        \"provisioningState\": \"Succeeded\"\r\n      },\r\n      \"type\"\
+        : \"Microsoft.Compute/virtualMachines/extensions\",\r\n      \"location\"\
+        : \"westus\",\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_vmss_diagnostics_extension/providers/Microsoft.Compute/virtualMachines/testdiagvm/extensions/LinuxDiagnostic\"\
         ,\r\n      \"name\": \"LinuxDiagnostic\"\r\n    }\r\n  ],\r\n  \"type\": \"\
         Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"westus\",\r\n  \"\
         tags\": {},\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_vmss_diagnostics_extension/providers/Microsoft.Compute/virtualMachines/testdiagvm\"\
@@ -1310,13 +1107,13 @@ interactions:
     headers:
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Thu, 26 Jan 2017 19:01:27 GMT']
+      Date: ['Tue, 31 Jan 2017 02:29:54 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
       Transfer-Encoding: [chunked]
       Vary: [Accept-Encoding]
-      content-length: ['6570']
+      content-length: ['6560']
     status: {code: 200, message: OK}
 version: 1

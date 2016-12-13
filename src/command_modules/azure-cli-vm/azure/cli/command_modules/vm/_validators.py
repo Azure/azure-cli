@@ -7,7 +7,9 @@ import os
 import re
 
 from azure.cli.core.commands.arm import resource_id, parse_resource_id, is_valid_resource_id
+from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core._util import CLIError
+from ._client_factory import _compute_client_factory
 from azure.cli.command_modules.vm._vm_utils import random_string, check_existence
 from azure.cli.command_modules.vm._template_builder import StorageProfile
 import azure.cli.core.azlogging as azlogging
@@ -20,36 +22,37 @@ def validate_nsg_name(namespace):
         or '{}_NSG_{}'.format(namespace.vm_name, random_string(8))
 
 
-def _get_nic_id(val, resource_group, subscription):
+def _get_ressource_id(val, resource_group, resource_type, resource_namespace):
     if is_valid_resource_id(val):
         return val
     else:
         return resource_id(
             name=val,
             resource_group=resource_group,
-            namespace='Microsoft.Network',
-            type='networkInterfaces',
-            subscription=subscription)
+            namespace=resource_namespace,
+            type=resource_type,
+            subscription=get_subscription_id())
+
+
+def _get_nic_id(val, resource_group):
+    return _get_ressource_id(val, resource_group,
+                             'networkInterfaces', 'Microsoft.Network')
 
 
 def validate_vm_nic(namespace):
-    from azure.cli.core.commands.client_factory import get_subscription_id
-    namespace.nic = _get_nic_id(namespace.nic, namespace.resource_group_name, get_subscription_id())
+    namespace.nic = _get_nic_id(namespace.nic, namespace.resource_group_name)
 
 
 def validate_vm_nics(namespace):
-    from azure.cli.core.commands.client_factory import get_subscription_id
-
-    subscription = get_subscription_id()
     rg = namespace.resource_group_name
     nic_ids = []
 
     for n in namespace.nics:
-        nic_ids.append(_get_nic_id(n, rg, subscription))
+        nic_ids.append(_get_nic_id(n, rg))
     namespace.nics = nic_ids
 
     if hasattr(namespace, 'primary_nic') and namespace.primary_nic:
-        namespace.primary_nic = _get_nic_id(namespace.primary_nic, rg, subscription)
+        namespace.primary_nic = _get_nic_id(namespace.primary_nic, rg)
 
 
 def validate_location(namespace):
@@ -63,18 +66,49 @@ def validate_location(namespace):
 
 # region VM Create Validators
 
-def _validate_vm_create_storage_profile(namespace):
+def _validate_vm_create_storage_profile(namespace, for_scale_set=False):  # pylint: disable=too-many-branches, too-many-statements
 
     from azure.cli.command_modules.vm._actions import load_images_from_aliases_doc
 
-    image = namespace.image
+    image = namespace.image or ''
 
-    # 1 - Create native disk with VHD URI
+    # do VM specific validating
+    if not for_scale_set:
+        if namespace.managed_os_disk:
+            if namespace.image:
+                raise CLIError("'--image' is not applicable when attach to an existing os disk")
+            if not namespace.os_type:
+                raise CLIError('--os-type TYPE is required when attach to an existing os disk')
+        else:
+            if not image:
+                raise CLIError("Please provide parameter value to '--image'")
+
     if image.lower().endswith('.vhd'):
-        namespace.storage_profile = StorageProfile.SACustomImage
         if not namespace.os_type:
             raise CLIError('--os-type TYPE is required for a native OS VHD disk.')
-        return
+
+    valid_managed_skus = ['premium_lrs', 'standard_lrs']
+    valid_unmanaged_skus = valid_managed_skus + ['standard_grs', 'standard_ragrs', 'standard_zrs']
+
+    if namespace.use_unmanaged_disk:
+        if namespace.storage_sku.lower() not in valid_unmanaged_skus:
+            raise CLIError("Invalid storage sku '{}', please choose from '{}'".format(
+                namespace.storage_sku, valid_unmanaged_skus))
+        if namespace.data_disk_sizes_gb:
+            raise CLIError("'--data-disk-sizes-gb' is only applicable when use managed disks")
+        if '/images/' in namespace.image.lower():
+            raise CLIError("VM/VMSS created from a managed custom image must use managed disks")
+        if not for_scale_set and namespace.managed_os_disk:
+            raise CLIError("'--use-unmanaged-disk' is ignored when attach to a managed os disk")
+    else:
+        if namespace.storage_sku.lower() not in valid_managed_skus:
+            err = "invalid storage sku '{}' to use for managed os disks, please choose from '{}'"
+            raise CLIError(err.format(namespace.storage_sku, valid_managed_skus))
+        if for_scale_set and namespace.os_disk_name:
+            raise CLIError("'--os-disk-name' is not allowed for scale sets using managed disks")
+        if not for_scale_set and namespace.storage_account:
+            raise CLIError("'--storage-account' is only applicable when use unmanaged disk."
+                           " Please either remove it or turn on '--use-unmanaged-disk'")
 
     # attempt to parse an URN
     urn_match = re.match('([^:]*):([^:]*):([^:]*):([^:]*)', image)
@@ -83,21 +117,59 @@ def _validate_vm_create_storage_profile(namespace):
         namespace.os_offer = urn_match.group(2)
         namespace.os_sku = urn_match.group(3)
         namespace.os_version = urn_match.group(4)
+        namespace.storage_profile = (StorageProfile.SAPirImage
+                                     if namespace.use_unmanaged_disk
+                                     else StorageProfile.ManagedPirImage)
+    elif is_valid_resource_id(image):
+        namespace.storage_profile = StorageProfile.ManagedCustomImage
+    elif image.lower().endswith('.vhd'):
+        # pylint: disable=redefined-variable-type
+        namespace.storage_profile = StorageProfile.SACustomImage
+    elif not for_scale_set and namespace.managed_os_disk:
+        res = parse_resource_id(namespace.managed_os_disk)
+        name = res['name']
+        rg = res.get('resource_group', namespace.resource_group_name)
+        namespace.managed_os_disk = resource_id(
+            subscription=get_subscription_id(),
+            resource_group=rg,
+            namespace='Microsoft.Compute',
+            type='disks',
+            name=name)
+        namespace.storage_profile = StorageProfile.ManagedSpecializedOSDisk
     else:
         images = load_images_from_aliases_doc()
         matched = next((x for x in images if x['urnAlias'].lower() == image.lower()), None)
-        if matched is None:
-            raise CLIError('Invalid image "{}". Please pick one from {}'.format(
-                image, [x['urnAlias'] for x in images]))
-        namespace.os_publisher = matched['publisher']
-        namespace.os_offer = matched['offer']
-        namespace.os_sku = matched['sku']
-        namespace.os_version = matched['version']
+        if matched:
+            namespace.os_publisher = matched['publisher']
+            namespace.os_offer = matched['offer']
+            namespace.os_sku = matched['sku']
+            namespace.os_version = matched['version']
+            namespace.storage_profile = (StorageProfile.SAPirImage
+                                         if namespace.use_unmanaged_disk
+                                         else StorageProfile.ManagedPirImage)
+        else:
+            # last try: is it a custom image name?
+            from msrestazure.azure_exceptions import CloudError
+            compute_client = _compute_client_factory()
+            try:
+                compute_client.images.get(namespace.resource_group_name, image)
+                image = namespace.image = _get_ressource_id(image, namespace.resource_group_name,
+                                                            'images', 'Microsoft.Compute')
+                namespace.storage_profile = StorageProfile.ManagedCustomImage
+            except CloudError:
+                err = 'Invalid image "{}". Use a custom image name, id, or pick one from {}'
+                raise CLIError(err.format(image, [x['urnAlias'] for x in images]))
 
-    namespace.os_type = 'windows' if 'windows' in namespace.os_offer.lower() else 'linux'
+    if namespace.storage_profile == StorageProfile.ManagedCustomImage:
+        res = parse_resource_id(image)
+        compute_client = _compute_client_factory()
+        image_info = compute_client.images.get(res['resource_group'], res['name'])
+        # pylint: disable=no-member
+        namespace.os_type = image_info.storage_profile.os_disk.os_type.value
+        namespace.image_data_disks = image_info.storage_profile.data_disks
 
-    # 2 - Create native disk from PIR image
-    namespace.storage_profile = StorageProfile.SAPirImage  # pylint: disable=redefined-variable-type
+    if not namespace.os_type:
+        namespace.os_type = 'windows' if 'windows' in namespace.os_offer.lower() else 'linux'
 
 
 def _validate_vm_create_storage_account(namespace):
@@ -141,7 +213,6 @@ def _validate_vm_create_availability_set(namespace):
         if not check_existence(name, rg, 'Microsoft.Compute', 'availabilitySets'):
             raise CLIError("Availability set '{}' does not exist.".format(name))
 
-        from azure.cli.core.commands.client_factory import get_subscription_id
         namespace.availability_set = resource_id(
             subscription=get_subscription_id(),
             resource_group=rg,
@@ -193,9 +264,24 @@ def _validate_vm_create_vnet(namespace):
             # 2 - user specified existing vnet/subnet
             namespace.vnet_type = 'existing'
             return
-
     # 3 - create a new vnet/subnet
     namespace.vnet_type = 'new'
+
+
+def _validate_vmss_create_subnet(namespace):
+    # TODO: we can consider for non-new sceanrio there are user asks
+    if namespace.vnet_type == 'new':
+        if namespace.subnet_address_prefix is None:
+            cidr = namespace.vnet_address_prefix.split('/', 1)[0]
+            i = 0
+            for i in range(8, 32, 1):
+                if 2 << i > namespace.instance_count:
+                    break
+                i = i + 1
+            if i > 32:
+                err = "instance count '{}' is out of range of 32 bits IP addresses'"
+                raise CLIError(err.format(namespace.instance_count))
+            namespace.subnet_address_prefix = '{}/{}'.format(cidr, 32 - i)
 
 
 def _validate_vm_create_nsg(namespace):
@@ -225,8 +311,16 @@ def _validate_vm_create_public_ip(namespace):
         namespace.public_ip_type = 'new'
 
 
+def _validate_vmss_create_public_ip(namespace):
+    if namespace.load_balancer_type is None:
+        if namespace.public_ip_address:
+            raise CLIError('--public-ip-address is not applicable when there is no load-balancer '
+                           'attached, or implictly disabled due to 100+ instance count')
+        namespace.public_ip_address = ''
+    _validate_vm_create_public_ip(namespace)
+
+
 def _validate_vm_create_nics(namespace):
-    from azure.cli.core.commands.client_factory import get_subscription_id
     nics_value = namespace.nics
     nics = []
 
@@ -255,6 +349,8 @@ def _validate_vm_create_nics(namespace):
 
 
 def _validate_vm_create_auth(namespace):
+    if namespace.storage_profile == StorageProfile.ManagedSpecializedOSDisk:
+        return
 
     if len(namespace.admin_username) < 6 or namespace.admin_username.lower() == 'root':
         # prompt for admin username if inadequate
@@ -373,7 +469,10 @@ def _is_valid_ssh_rsa_public_key(openssh_pubkey):
 def process_vm_create_namespace(namespace):
     validate_location(namespace)
     _validate_vm_create_storage_profile(namespace)
-    _validate_vm_create_storage_account(namespace)
+    if namespace.storage_profile in [StorageProfile.SACustomImage,
+                                     StorageProfile.SAPirImage]:
+        _validate_vm_create_storage_account(namespace)
+
     _validate_vm_create_availability_set(namespace)
     _validate_vm_create_vnet(namespace)
     _validate_vm_create_nsg(namespace)
@@ -388,6 +487,18 @@ def process_vm_create_namespace(namespace):
 
 
 def _validate_vmss_create_load_balancer(namespace):
+    # convert the single_placement_group to boolean for simpler logic beyond
+    if namespace.single_placement_group is None:
+        namespace.single_placement_group = namespace.instance_count <= 100
+    else:
+        namespace.single_placement_group = (namespace.single_placement_group == 'true')
+
+    if not namespace.single_placement_group:
+        if namespace.load_balancer:
+            raise CLIError('--load-balancer is not applicable when --single-placement-group is '
+                           'explictly turned off or implictly turned off for 100+ instance count')
+        namespace.load_balancer = ''
+
     if namespace.load_balancer:
         if check_existence(namespace.load_balancer, namespace.resource_group_name,
                            'Microsoft.Network', 'loadBalancers'):
@@ -402,10 +513,81 @@ def _validate_vmss_create_load_balancer(namespace):
 
 def process_vmss_create_namespace(namespace):
     validate_location(namespace)
-    _validate_vm_create_storage_profile(namespace)
+    _validate_vm_create_storage_profile(namespace, for_scale_set=True)
     _validate_vmss_create_load_balancer(namespace)
     _validate_vm_create_vnet(namespace)
-    _validate_vm_create_public_ip(namespace)
+    _validate_vmss_create_subnet(namespace)
+    _validate_vmss_create_public_ip(namespace)
     _validate_vm_create_auth(namespace)
+
+# endregion
+
+# region disk, snapshot, image validators
+
+
+def validate_vm_disk(namespace):
+    namespace.disk = _get_ressource_id(namespace.disk, namespace.resource_group_name,
+                                       'disks', 'Microsoft.Compute')
+
+
+def process_disk_or_snapshot_create_namespace(namespace):
+    temp = [namespace.source_disk, namespace.source_snapshot, namespace.source_blob_uri]
+    if sum([1 for t in temp if t]) > 1:
+        raise CLIError('Only one source can be specified: --source-disk | --source-snapshot | '
+                       '--source-blob-uri')
+
+    if namespace.source_disk:
+        namespace.source_disk = _get_ressource_id(namespace.source_disk,
+                                                  namespace.resource_group_name,
+                                                  'disks', 'Microsoft.Compute')
+    elif namespace.source_snapshot:
+        namespace.source_snapshot = _get_ressource_id(namespace.source_snapshot,
+                                                      namespace.resource_group_name,
+                                                      'snapshots', 'Microsoft.Compute')
+
+
+def process_image_create_namespace(namespace):
+    temp = [namespace.os_disk, namespace.os_snapshot,
+            namespace.os_blob_uri, namespace.source_virtual_machine]
+    if sum([1 for t in temp if t]) > 1:
+        raise CLIError('Only one os disk source can be specified: --os-disk | --os-snapshot | '
+                       '--os-blob-uri | --source-virtual-machine')
+
+    if namespace.os_disk:
+        namespace.os_disk = _get_ressource_id(namespace.os_disk, namespace.resource_group_name,
+                                              'disks', 'Microsoft.Compute')
+    if namespace.os_snapshot:
+        namespace.os_snapshot = _get_ressource_id(namespace.os_snapshot,
+                                                  namespace.resource_group_name,
+                                                  'snapshots', 'Microsoft.Compute')
+
+    if namespace.data_disks:
+        ids = []
+        for d in namespace.data_disks:
+            ids.append(_get_ressource_id(d, namespace.resource_group_name,
+                                         'disks', 'Microsoft.Compute'))
+        namespace.data_disks = ids
+
+    if namespace.data_snapshots:
+        ids = []
+        for d in namespace.data_snapshots:
+            ids.append(_get_ressource_id(d, namespace.resource_group_name,
+                                         'snapshots', 'Microsoft.Compute'))
+        namespace.data_snapshots = ids
+
+    if namespace.source_virtual_machine:
+        namespace.source_virtual_machine = _get_ressource_id(namespace.source_virtual_machine,
+                                                             namespace.resource_group_name,
+                                                             'virtualMachines',
+                                                             'Microsoft.Compute')
+        if not namespace.os_type:
+            compute_client = _compute_client_factory()
+            res = parse_resource_id(namespace.source_virtual_machine)
+            vm_info = compute_client.virtual_machines.get(res['resource_group'], res['name'])
+            # pylint: disable=no-member
+            namespace.os_type = vm_info.storage_profile.os_disk.os_type.value
+    elif not namespace.os_type:
+        raise CLIError('Please provide --os-type')
+
 
 # endregion

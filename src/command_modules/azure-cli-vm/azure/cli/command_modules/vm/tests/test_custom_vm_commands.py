@@ -10,8 +10,8 @@ from azure.cli.command_modules.vm.custom import (_get_access_extension_upgrade_i
                                                  _LINUX_ACCESS_EXT,
                                                  _WINDOWS_ACCESS_EXT)
 from azure.cli.command_modules.vm.custom import \
-    (attach_new_disk, attach_existing_disk, detach_disk)
-from azure.mgmt.compute.models import NetworkProfile, StorageProfile, DataDisk, VirtualHardDisk
+    (attach_unmanaged_data_disk, detach_unmanaged_data_disk)
+from azure.mgmt.compute.models import NetworkProfile, StorageProfile, DataDisk
 from azure.mgmt.compute.models.compute_management_client_enums import (DiskCreateOptionTypes,
                                                                        CachingTypes)
 
@@ -105,7 +105,7 @@ class Test_Vm_Custom(unittest.TestCase):
         mock_vm_get.return_value = vm
 
         # execute
-        attach_new_disk('rg1', 'vm1', VirtualHardDisk(faked_vhd_uri))
+        attach_unmanaged_data_disk('rg1', 'vm1', True, faked_vhd_uri)
 
         # assert
         self.assertTrue(mock_vm_get.called)
@@ -116,7 +116,7 @@ class Test_Vm_Custom(unittest.TestCase):
         self.assertEqual(data_disk.create_option, DiskCreateOptionTypes.empty)
         self.assertIsNone(data_disk.image)
         self.assertEqual(data_disk.lun, 0)
-        self.assertEqual(data_disk.name, 'd1')
+        self.assertTrue(data_disk.name.startswith('vm1-'))
         self.assertEqual(data_disk.vhd.uri, faked_vhd_uri)
 
     @mock.patch('azure.cli.command_modules.vm.custom.get_vm', autospec=True)
@@ -127,13 +127,12 @@ class Test_Vm_Custom(unittest.TestCase):
         faked_vhd_uri2 = 'https://your_stoage_account_name.blob.core.windows.net/vhds/d2.vhd'
 
         # stub to get the vm which has no datadisks
-        vhd = VirtualHardDisk(faked_vhd_uri)
-        existing_disk = DataDisk(lun=1, vhd=vhd, name='d1', create_option=DiskCreateOptionTypes.empty)
+        existing_disk = DataDisk(lun=1, vhd=faked_vhd_uri, name='d1', create_option=DiskCreateOptionTypes.empty)
         vm = FakedVM(None, [existing_disk])
         mock_vm_get.return_value = vm
 
         # execute
-        attach_new_disk('rg1', 'vm1', VirtualHardDisk(faked_vhd_uri2), None, 'd2', 512, CachingTypes.read_write)
+        attach_unmanaged_data_disk('rg1', 'vm1', True, faked_vhd_uri2, None, 'd2', 512, CachingTypes.read_write)
 
         # assert
         self.assertTrue(mock_vm_get.called)
@@ -157,8 +156,7 @@ class Test_Vm_Custom(unittest.TestCase):
         mock_vm_get.return_value = vm
 
         # execute
-        vhd = VirtualHardDisk(faked_vhd_uri)
-        attach_existing_disk('rg1', 'vm1', vhd, caching=CachingTypes.read_only)
+        attach_unmanaged_data_disk('rg1', 'vm1', False, faked_vhd_uri, disk_name='d1', caching=CachingTypes.read_only)
 
         # assert
         self.assertTrue(mock_vm_get.called)
@@ -178,12 +176,12 @@ class Test_Vm_Custom(unittest.TestCase):
         # pylint: disable=line-too-long
         # stub to get the vm which has no datadisks
         faked_vhd_uri = 'https://your_stoage_account_name.blob.core.windows.net/vhds/d1.vhd'
-        existing_disk = DataDisk(lun=1, vhd=VirtualHardDisk(faked_vhd_uri), name='d1', create_option=DiskCreateOptionTypes.empty)
+        existing_disk = DataDisk(lun=1, vhd=faked_vhd_uri, name='d1', create_option=DiskCreateOptionTypes.empty)
         vm = FakedVM(None, [existing_disk])
         mock_vm_get.return_value = vm
 
         # execute
-        detach_disk('rg1', 'vm1', 'd1')
+        detach_unmanaged_data_disk('rg1', 'vm1', 'd1')
 
         # assert
         self.assertTrue(mock_vm_get.called)
