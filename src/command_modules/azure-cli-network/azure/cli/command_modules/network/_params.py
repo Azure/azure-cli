@@ -32,7 +32,7 @@ from azure.cli.command_modules.network._validators import \
      process_public_ip_create_namespace, validate_private_ip_address,
      process_lb_frontend_ip_namespace, process_local_gateway_create_namespace,
      process_tm_endpoint_create_namespace, process_vnet_create_namespace,
-     process_vpn_connection_create_namespace,
+     process_vnet_gateway_create_namespace, process_vpn_connection_create_namespace,
      validate_inbound_nat_rule_id_list, validate_address_pool_id_list,
      validate_inbound_nat_rule_name_or_id, validate_address_pool_name_or_id,
      validate_servers, load_cert_file,
@@ -244,13 +244,14 @@ register_cli_argument('network express-route peering', 'routing_registry_name', 
 register_cli_argument('network local-gateway', 'local_network_gateway_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/localNetworkGateways'), id_part='name')
 register_cli_argument('network local-gateway', 'local_address_prefix', nargs='+', options_list=('--local-address-prefixes',), help='List of CIDR block prefixes representing the address space of the OnPremise VPN\'s subnet.')
 register_cli_argument('network local-gateway', 'gateway_ip_address', help='Gateway\'s public IP address. (e.g. 10.1.1.1).')
+register_cli_argument('network local-gateway', 'bgp_peering_address', arg_group='BGP Peering', help='IP address from the OnPremise VPN\'s subnet to use for BGP peering.')
 
 register_cli_argument('network local-gateway create', 'use_bgp_settings', ignore_type)
 register_cli_argument('network local-gateway create', 'asn', validator=process_local_gateway_create_namespace)
 
+
 for item in ['local-gateway', 'vnet-gateway']:
     register_cli_argument('network {}'.format(item), 'asn', arg_group='BGP Peering', help='Autonomous System Number to use for the BGP settings.')
-    register_cli_argument('network {}'.format(item), 'bgp_peering_address', arg_group='BGP Peering', help='IP address from the OnPremise VPN\'s subnet to use for BGP peering.')
     register_cli_argument('network {}'.format(item), 'peer_weight', arg_group='BGP Peering', help='Weight (0-100) added to routes learned through BGP peering.')
 
 # NIC
@@ -426,12 +427,14 @@ register_cli_argument('network vnet-gateway', 'gateway_name', help='Virtual netw
 register_cli_argument('network vnet-gateway', 'gateway_type', help='The gateway type.', **enum_choice_list(gatewayType))
 register_cli_argument('network vnet-gateway', 'sku', help='VNet gateway SKU.', **enum_choice_list(sku))
 register_cli_argument('network vnet-gateway', 'vpn_gateway_type', help='VNet gateway type.', **enum_choice_list(vpnGatewayType))
+register_cli_argument('network vnet-gateway', 'bgp_peering_address', arg_group='BGP Peering', help='IP address to use for BGP peering.')
 
-register_cli_argument('network vnet-gateway update', 'enable_bgp', help='Enable BGP (Border Gateway Protocol)', **enum_choice_list(['true', 'false']))
+register_cli_argument('network vnet-gateway create', 'enable_bgp', ignore_type)
+register_cli_argument('network vnet-gateway create', 'asn', validator=process_vnet_gateway_create_namespace)
+
+register_cli_argument('network vnet-gateway update', 'enable_bgp', help='Enable BGP (Border Gateway Protocol)', arg_group='BGP Peering', **enum_choice_list(['true', 'false']))
 register_cli_argument('network vnet-gateway update', 'public_ip_address', help='Name or ID of a public IP address.', validator=get_public_ip_validator())
 register_cli_argument('network vnet-gateway update', 'virtual_network', virtual_network_name_type, options_list=('--vnet',), help="Name or ID of a virtual network that contains a subnet named 'GatewaySubnet'.", validator=get_virtual_network_validator())
-
-register_cli_argument('network vnet-gateway create', 'enable_bgp', arg_group='BGP Peering')
 
 public_ip_help = get_folded_parameter_help_string('public IP address')
 register_cli_argument('network vnet-gateway create', 'public_ip_address', help=public_ip_help, completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'), validator=get_public_ip_validator(has_type_field=True))

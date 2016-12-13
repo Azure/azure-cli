@@ -244,18 +244,16 @@ def get_virtual_network_validator(has_type_field=False, allow_none=False, allow_
                                   default_none=False):
 
     def simple_validator(namespace):
-        if namespace.virtual_network is None:
-            return
-
-        # determine if vnet is name or ID
-        is_id = is_valid_resource_id(namespace.virtual_network)
-        if not is_id:
-            namespace.virtual_network = resource_id(
-                subscription=get_subscription_id(),
-                resource_group=namespace.resource_group_name,
-                namespace='Microsoft.Network',
-                type='virtualNetworks',
-                name=namespace.virtual_network)
+        if namespace.virtual_network:
+            # determine if vnet is name or ID
+            is_id = is_valid_resource_id(namespace.virtual_network)
+            if not is_id:
+                namespace.virtual_network = resource_id(
+                    subscription=get_subscription_id(),
+                    resource_group=namespace.resource_group_name,
+                    namespace='Microsoft.Network',
+                    type='virtualNetworks',
+                    name=namespace.virtual_network)
 
     def complex_validator_with_type(namespace):
         get_folded_parameter_validator(
@@ -474,6 +472,13 @@ def process_vnet_create_namespace(namespace):
         bit_mask = int(prefix_components[1])
         subnet_mask = 24 if bit_mask < 24 else bit_mask
         namespace.subnet_prefix = '{}/{}'.format(address, subnet_mask)
+
+def process_vnet_gateway_create_namespace(namespace):
+    ns = namespace
+    ns.enable_bgp = any([ns.asn or ns.bgp_peering_address or ns.peer_weight])
+    if ns.use_bgp_settings and (not ns.asn or not ns.bgp_peering_address):
+        raise ValueError(
+            'incorrect usage: --bgp-peering-address IP --asn ASN [--peer-weight WEIGHT]')
 
 def process_vpn_connection_create_namespace(namespace):
 

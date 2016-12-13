@@ -861,7 +861,7 @@ def update_vnet_gateway(instance, address_prefixes=None, sku=None, vpn_gateway_t
         instance.gateway_type = gateway_type
 
     if enable_bgp is not None:
-        instance.enable_bgp = enable_bgp
+        instance.enable_bgp = enable_bgp.lower() == 'true'
 
     _validate_bgp_peering(instance, asn, bgp_peering_address, peer_weight)
 
