@@ -10,8 +10,7 @@ from azure.cli.core.test_utils.vcr_test_base import \
 
 class IoTHubTest(ResourceGroupVCRTestBase):
     def __init__(self, test_method):
-        super(IoTHubTest, self).__init__(__file__, test_method)
-        self.resource_group = 'iot-hub-test-rg'
+        super(IoTHubTest, self).__init__(__file__, test_method, resource_group='iot-hub-test-rg')
         self.hub_name = 'iot-hub-for-test'
         self.device_id_1 = 'test-device-1'
         self.device_id_2 = 'test-device-2'

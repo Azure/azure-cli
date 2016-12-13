@@ -68,9 +68,32 @@ def wait_then_open_async(url):
     t.daemon = True
     t.start()
 
+def acs_browse(resource_group, name, disable_browser=False):
+    """
+    Opens a browser to the web interface for the cluster orchestrator
+
+    :param name: Name of the target Azure container service instance.
+    :type name: String
+    :param resource_group_name:  Name of Azure container service's resource group.
+    :type resource_group_name: String
+    :param disable_browser: If true, don't launch a web browser after estabilishing the proxy
+    :type disable_browser: bool
+    """
+    acs_info = _get_acs_info(name, resource_group)
+    orchestrator_type = acs_info.orchestrator_profile.orchestrator_type # pylint: disable=no-member
+
+    if  orchestrator_type == 'kubernetes':
+        return k8s_browse(disable_browser)
+    elif orchestrator_type == 'dcos':
+        return _dcos_browse_internal(acs_info, disable_browser)
+    else:
+        raise CLIError('Unsupported orchestrator type {} for browse'.format(orchestrator_type))
+
 def k8s_browse(disable_browser=False):
     """
     Wrapper on the 'kubectl proxy' command, for consistency with 'az dcos browse'
+    :param disable_browser: If true, don't launch a web browser after estabilishing the proxy
+    :type disable_browser: bool
     """
     logger.warning('Proxy running on 127.0.0.1:8001/ui')
     logger.warning('Press CTRL+C to close the tunnel...')
@@ -86,8 +109,13 @@ def dcos_browse(name, resource_group_name, disable_browser=False):
     :type name: String
     :param resource_group_name:  Name of Azure container service's resource group.
     :type resource_group_name: String
+    :param disable_browser: If true, don't launch a web browser after estabilishing the proxy
+    :type disable_browser: bool
     """
     acs_info = _get_acs_info(name, resource_group_name)
+    _dcos_browse_internal(acs_info, disable_browser)
+
+def _dcos_browse_internal(acs_info, disable_browser):
     acs = acs_client.ACSClient()
     if not acs.connect(_get_host_name(acs_info), _get_username(acs_info)):
         raise CLIError('Error connecting to ACS: {}'.format(_get_host_name(acs_info)))
@@ -122,6 +150,19 @@ def dcos_browse(name, resource_group_name, disable_browser=False):
         proxy.disable_http_proxy()
 
     return
+
+def acs_install_cli(resource_group, name, install_location=None, client_version=None):
+    acs_info = _get_acs_info(name, resource_group)
+    orchestrator_type = acs_info.orchestrator_profile.orchestrator_type  # pylint: disable=no-member
+    kwargs = {'install_location': install_location}
+    if client_version:
+        kwargs['client_version'] = client_version
+    if  orchestrator_type == 'kubernetes':
+        return k8s_install_cli(**kwargs)
+    elif orchestrator_type == 'dcos':
+        return dcos_install_cli(**kwargs)
+    else:
+        raise CLIError('Unsupported orchestrator type {} for install-cli'.format(orchestrator_type))
 
 def dcos_install_cli(install_location=None, client_version='1.8'):
     """
@@ -172,6 +213,17 @@ def k8s_install_cli(client_version="1.4.5", install_location=None):
         os.chmod(install_location, os.stat(install_location).st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
     except IOError as err:
         raise CLIError('Connection error while attempting to download client ({})'.format(err))
+
+def _validate_service_principal(sp_id):
+    from azure.cli.command_modules.role.custom import (
+        _graph_client_factory,
+        show_service_principal,
+    )
+    # discard the result, we're trusting this to throw if it can't find something
+    try:
+        show_service_principal(_graph_client_factory().service_principals, sp_id)
+    except: #pylint: disable=bare-except
+        raise CLIError('Failed to validate service principal, if this persists try deleting $HOME/.azure/acsServicePrincipal.json')
 
 def _build_service_principal(name, url, client_secret):
     from azure.cli.command_modules.role.custom import (
@@ -283,22 +335,31 @@ def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_na
     groups.get(resource_group_name)
 
     if orchestrator_type == 'Kubernetes' or orchestrator_type == 'kubernetes':
-        principalObj = load_acs_service_principal()
-        if principalObj:
-            service_principal = principalObj.get('service_principal')
-            client_secret = principalObj.get('client_secret')
-
+        # TODO: This really needs to be broken out and unit tested.
         if not service_principal:
-            if not client_secret:
-                client_secret = binascii.b2a_hex(os.urandom(10)).decode('utf-8')
-            store_acs_service_principal(client_secret, None)
-            salt = binascii.b2a_hex(os.urandom(3)).decode('utf-8')
-            url = 'http://{}.{}.{}.cloudapp.azure.com'.format(salt, dns_name_prefix, location)
+            # --service-principal not specified, try to load it from local disk
+            principalObj = load_acs_service_principal()
+            if principalObj:
+                service_principal = principalObj.get('service_principal')
+                client_secret = principalObj.get('client_secret')
+                _validate_service_principal(service_principal)
+            else:
+                # Nothing to load, make one.
+                if not client_secret:
+                    client_secret = binascii.b2a_hex(os.urandom(10)).decode('utf-8')
+                salt = binascii.b2a_hex(os.urandom(3)).decode('utf-8')
+                url = 'http://{}.{}.{}.cloudapp.azure.com'.format(salt, dns_name_prefix, location)
 
-            service_principal = _build_service_principal(name, url, client_secret)
-            logger.info('Created a service principal: %s', service_principal)
-        store_acs_service_principal(client_secret, service_principal)
-        _add_role_assignment('Owner', service_principal)
+                service_principal = _build_service_principal(name, url, client_secret)
+                logger.info('Created a service principal: %s', service_principal)
+                store_acs_service_principal(client_secret, service_principal)
+            # Either way, update the role assignment, this fixes things if we fail part-way through
+            _add_role_assignment('Owner', service_principal)
+        else:
+            # --service-principal specfied, validate --client-secret was too
+            if not client_secret:
+                raise CLIError('--client-secret is required if --service-principal is specified')
+            _validate_service_principal(service_principal)
         return _create_kubernetes(resource_group_name, deployment_name, dns_name_prefix, name, ssh_key_value, admin_username=admin_username, agent_count=agent_count, agent_vm_size=agent_vm_size, location=location, service_principal=service_principal, client_secret=client_secret)
 
     ops = get_mgmt_service_client(ACSClient).acs
@@ -333,6 +394,14 @@ def _create_kubernetes(resource_group_name, deployment_name, dns_name_prefix, na
     template = {
         "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
         "contentVersion": "1.0.0.0",
+        "parameters": {
+            "clientSecret": {
+                "type": "secureString",
+                "metadata": {
+                    "description": "The client secret for the service principal"
+                }
+            }
+        },
         "resources": [
             {
                 "apiVersion": "2016-09-30",
@@ -341,7 +410,7 @@ def _create_kubernetes(resource_group_name, deployment_name, dns_name_prefix, na
                 "name": name,
                 "properties": {
                     "orchestratorProfile": {
-                        "orchestratorType": "Custom"
+                        "orchestratorType": "kubernetes"
                     },
                     "masterProfile": {
                         "count": 1,
@@ -367,18 +436,19 @@ def _create_kubernetes(resource_group_name, deployment_name, dns_name_prefix, na
                     },
                     "servicePrincipalProfile": {
                         "ClientId": service_principal,
-                        "Secret": client_secret
-                    },
-                    "customProfile": {
-                        "orchestrator": "kubernetes"
+                        "Secret": "[parameters('clientSecret')]"
                     }
                 }
             }
         ]
     }
-
+    params = {
+        "clientSecret": {
+            "value": client_secret
+        }
+    }
     properties = DeploymentProperties(template=template, template_link=None,
-                                      parameters=None, mode='incremental')
+                                      parameters=params, mode='incremental')
     smc = _resource_client_factory()
     return smc.deployments.create_or_update(resource_group_name, deployment_name, properties)
 

@@ -30,7 +30,7 @@ def validate_resource_group_name(namespace):
 
         if not client.resource_groups.check_existence(resource_group_name):
             logger.warning('Command to create a resource group:')
-            logger.warning('  az resource group create -n <name> -l <location>')
+            logger.warning('  az group create -n <name> -l <location>')
             raise CLIError(
                 'The resource group {} does not exist in the current subscription.'\
                 .format(resource_group_name))

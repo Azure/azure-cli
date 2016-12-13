@@ -13,7 +13,7 @@ of the storage account they will run on.
 from unittest import TestCase
 from azure.cli.main import main as cli_main
 from .integration_test_base import StorageIntegrationTestBase
-from ..files_helpers import glob_files_remotely
+from ..util import glob_files_remotely
 
 
 class StorageFileUploadPlainTests(TestCase):
@@ -42,7 +42,7 @@ class StorageFileUploadIntegrationTests(StorageIntegrationTestBase):
         cli_main(cmd.split())
 
         files = list(glob_files_remotely(self._file_service, self._test_share_name, pattern=None))
-        assert len(files) == 31
+        assert len(files) == 41
 
     def test_file_upload_multiple_files_dry_run(self):
         url = 'https://{}/{}'.format(self._file_service.primary_endpoint, self._test_share_name)
@@ -56,10 +56,10 @@ class StorageFileUploadIntegrationTests(StorageIntegrationTestBase):
         assert len(files) == 0
 
     def test_file_upload_multiple_files_patterns_1(self):
-        self._test_file_upload_multiple_files_patterns('alpha/*', 10)
+        self._test_file_upload_multiple_files_patterns('apple/*', 10)
 
     def test_file_upload_multiple_files_patterns_2(self):
-        self._test_file_upload_multiple_files_patterns('*/file_0', 3)
+        self._test_file_upload_multiple_files_patterns('*/file_0', 4)
 
     def test_file_upload_multiple_files_patterns_3(self):
         self._test_file_upload_multiple_files_patterns('nonexists/*', 0)

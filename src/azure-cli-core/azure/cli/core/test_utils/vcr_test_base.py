@@ -6,13 +6,12 @@
 from __future__ import print_function
 
 import json
-import logging
 import os
 import collections
 import shlex
 from random import choice
 import re
-from string import digits
+from string import digits, ascii_lowercase
 import sys
 from six.moves.urllib.parse import urlparse, parse_qs # pylint: disable=import-error
 import tempfile
@@ -62,8 +61,9 @@ def _mock_get_mgmt_service_client(client_type, subscription_bound=True, subscrip
 
     return (client, subscription_id)
 
-def _mock_generate_deployment_name(value):
-    return value if value != '_GENERATE_' else 'mock-deployment'
+def _mock_generate_deployment_name(namespace):
+    if not namespace.deployment_name:
+        namespace.deployment_name = 'mock-deployment'
 
 def _mock_handle_exceptions(ex):
     raise ex
@@ -233,6 +233,7 @@ class VCRTestBase(unittest.TestCase):#pylint: disable=too-many-instance-attribut
             self.exception = CLIError('No recorded result provided for {}.'.format(self.test_name))
 
         if debug_vcr:
+            import logging
             logging.basicConfig()
             vcr_log = logging.getLogger('vcr')
             vcr_log.setLevel(logging.INFO)
@@ -262,6 +263,13 @@ class VCRTestBase(unittest.TestCase):#pylint: disable=too-many-instance-attribut
                              '/graph.windows.net/{}/'.format(MOCKED_TENANT_ID), request.uri)
         request.uri = re.sub('/sig=([^/]+)&', '/sig=0000&', request.uri)
         request.uri = _scrub_deployment_name(request.uri)
+        # remove randomized portion from resource group name
+        resource_group_name = re.search('resource[Gg]roups/([^/]+_)/', request.uri)
+        if resource_group_name:
+            resource_group_name = resource_group_name.group(0)
+            resource_group_name = resource_group_name.rsplit('_', 2)[0]
+            request.uri = re.sub('resource[Gg]roups/([^/]+_)/',
+                                 '{}/'.format(resource_group_name), request.uri)
         # replace random storage account name with dummy name
         request.uri = re.sub('/vcrstorage([\\d]+).',
                              '/{}.'.format(MOCKED_STORAGE_ACCOUNT), request.uri)
@@ -323,7 +331,7 @@ class VCRTestBase(unittest.TestCase):#pylint: disable=too-many-instance-attribut
     @mock.patch('msrestazure.azure_operation.AzureOperationPoller._delay', _mock_operation_delay)
     @mock.patch('time.sleep', _mock_operation_delay)
     @mock.patch('azure.cli.core.commands.LongRunningOperation._delay', _mock_operation_delay)
-    @mock.patch('azure.cli.core.commands.parameters.generate_deployment_name',
+    @mock.patch('azure.cli.core.commands.validators.generate_deployment_name',
                 _mock_generate_deployment_name)
     def _execute_playback(self):
         # pylint: disable=no-member
@@ -412,39 +420,46 @@ class VCRTestBase(unittest.TestCase):#pylint: disable=too-many-instance-attribut
 
 class ResourceGroupVCRTestBase(VCRTestBase):
     # pylint: disable=too-many-arguments
-    def __init__(self, test_file, test_name, run_live=False, debug=False, debug_vcr=False,
-                 skip_setup=False, skip_teardown=False):
+    def __init__(self, test_file, test_name, resource_group='vcr_resource_group', run_live=False,
+                 debug=False, debug_vcr=False, skip_setup=False, skip_teardown=False):
         super(ResourceGroupVCRTestBase, self).__init__(test_file, test_name, run_live=run_live,
-                                                       debug=debug, skip_setup=skip_setup,
+                                                       debug=debug, debug_vcr=debug_vcr,
+                                                       skip_setup=skip_setup,
                                                        skip_teardown=skip_teardown)
-        self.resource_group = 'vcr_resource_group'
+        self.resource_group_original = resource_group
+        random_tag = '_{}_'.format(''.join((choice(ascii_lowercase + digits) for _ in range(4))))
+        self.resource_group = '{}{}'.format(resource_group, '' if self.playback else random_tag)
         self.location = 'westus'
 
     def set_up(self):
-        self.cmd('resource group create --location {} --name {}'.format(
+        self.cmd('group create --location {} --name {} --tags use=az-test'.format(
             self.location, self.resource_group))
 
     def tear_down(self):
-        self.cmd('resource group delete --name {}'.format(self.resource_group))
+        self.cmd('group delete --name {} --no-wait'.format(self.resource_group))
 
 class StorageAccountVCRTestBase(VCRTestBase):
     # pylint: disable=too-many-arguments
-    def __init__(self, test_file, test_name, run_live=False, debug=False, debug_vcr=False,
-                 skip_setup=False, skip_teardown=False):
+    def __init__(self, test_file, test_name, resource_group='vcr_resource_group', run_live=False,
+                 debug=False, debug_vcr=False, skip_setup=False, skip_teardown=False):
         super(StorageAccountVCRTestBase, self).__init__(test_file, test_name, run_live=run_live,
-                                                        debug=debug, skip_setup=skip_setup,
+                                                        debug=debug, debug_vcr=debug_vcr,
+                                                        skip_setup=skip_setup,
                                                         skip_teardown=skip_teardown)
-        self.resource_group = 'vcr_resource_group'
+        self.resource_group_original = resource_group
+        random_tag = '_{}_'.format(''.join((choice(ascii_lowercase + digits) for _ in range(4))))
+        self.resource_group = '{}{}'.format(resource_group, '' if self.playback else random_tag)
+
         self.account = MOCKED_STORAGE_ACCOUNT if self.playback else \
             'vcrstorage{}'.format(''.join(choice(digits) for i in range(12)))
         self.location = 'westus'
 
     def set_up(self):
-        self.cmd('resource group create --location {} --name {}'.format(
+        self.cmd('group create --location {} --name {} --tags use=az-test'.format(
             self.location, self.resource_group))
         self.cmd('storage account create --sku Standard_LRS -l westus -n {} -g {}'.format(
             self.account, self.resource_group))
 
     def tear_down(self):
         self.cmd('storage account delete -g {} -n {}'.format(self.resource_group, self.account))
-        self.cmd('resource group delete --name {}'.format(self.resource_group))
+        self.cmd('group delete --name {} --no-wait'.format(self.resource_group))

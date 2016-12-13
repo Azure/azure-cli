@@ -32,8 +32,7 @@ class NetworkUsageListScenarioTest(VCRTestBase):
 class NetworkAppGatewayDefaultScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-        super(NetworkAppGatewayDefaultScenarioTest, self).__init__(__file__, test_method)
-        self.resource_group = 'ag1rg'
+        super(NetworkAppGatewayDefaultScenarioTest, self).__init__(__file__, test_method, resource_group='ag1rg')
 
     def test_network_app_gateway_with_defaults(self):
         self.execute()
@@ -67,8 +66,7 @@ class NetworkAppGatewayDefaultScenarioTest(ResourceGroupVCRTestBase):
 class NetworkAppGatewayExistingSubnetScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-        super(NetworkAppGatewayExistingSubnetScenarioTest, self).__init__(__file__, test_method)
-        self.resource_group = 'ag2rg'
+        super(NetworkAppGatewayExistingSubnetScenarioTest, self).__init__(__file__, test_method, resource_group='ag2rg')
 
     def test_network_app_gateway_with_existing_subnet(self):
         self.execute()
@@ -85,8 +83,7 @@ class NetworkAppGatewayExistingSubnetScenarioTest(ResourceGroupVCRTestBase):
 class NetworkAppGatewayNoWaitScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-        super(NetworkAppGatewayNoWaitScenarioTest, self).__init__(__file__, test_method)
-        self.resource_group = 'cli_ag_no_wait'
+        super(NetworkAppGatewayNoWaitScenarioTest, self).__init__(__file__, test_method, resource_group='cli_ag_no_wait')
 
     def test_network_app_gateway_no_wait(self):
         self.execute()
@@ -106,12 +103,10 @@ class NetworkAppGatewayNoWaitScenarioTest(ResourceGroupVCRTestBase):
         self.cmd('network application-gateway delete -g {} -n ag2 --no-wait'.format(rg))
         self.cmd('network application-gateway wait -g {} -n ag2 --deleted'.format(rg))
 
-
 class NetworkAppGatewayPrivateIpScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-        super(NetworkAppGatewayPrivateIpScenarioTest, self).__init__(__file__, test_method)
-        self.resource_group = 'ag3rg'
+        super(NetworkAppGatewayPrivateIpScenarioTest, self).__init__(__file__, test_method, resource_group='ag3rg')
 
     def test_network_app_gateway_with_private_ip(self):
         self.execute()
@@ -129,8 +124,7 @@ class NetworkAppGatewayPrivateIpScenarioTest(ResourceGroupVCRTestBase):
 class NetworkAppGatewayPublicIpScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-        super(NetworkAppGatewayPublicIpScenarioTest, self).__init__(__file__, test_method)
-        self.resource_group = 'ag4rg'
+        super(NetworkAppGatewayPublicIpScenarioTest, self).__init__(__file__, test_method, resource_group='ag4rg')
 
     def test_network_app_gateway_with_public_ip(self):
         self.execute()
@@ -146,8 +140,7 @@ class NetworkAppGatewayPublicIpScenarioTest(ResourceGroupVCRTestBase):
 class NetworkPublicIpScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-        super(NetworkPublicIpScenarioTest, self).__init__(__file__, test_method)
-        self.resource_group = 'cli_test_public_ip'
+        super(NetworkPublicIpScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_public_ip')
 
     def test_network_public_ip(self):
         self.execute()
@@ -192,8 +185,7 @@ class NetworkPublicIpScenarioTest(ResourceGroupVCRTestBase):
 class NetworkExpressRouteScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-        super(NetworkExpressRouteScenarioTest, self).__init__(__file__, test_method)
-        self.resource_group = 'cli_test_express_route'
+        super(NetworkExpressRouteScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_express_route')
         self.circuit_name = 'circuit1'
         self.resource_type = 'Microsoft.Network/expressRouteCircuits'
 
@@ -295,8 +287,7 @@ class NetworkExpressRouteScenarioTest(ResourceGroupVCRTestBase):
 class NetworkLoadBalancerScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-        super(NetworkLoadBalancerScenarioTest, self).__init__(__file__, test_method)
-        self.resource_group = 'cli_test_load_balancer'
+        super(NetworkLoadBalancerScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_load_balancer')
         self.lb_name = 'lb'
         self.resource_type = 'Microsoft.Network/loadBalancers'
 
@@ -360,8 +351,7 @@ class NetworkLoadBalancerScenarioTest(ResourceGroupVCRTestBase):
 class NetworkLoadBalancerIpConfigScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-        super(NetworkLoadBalancerIpConfigScenarioTest, self).__init__(__file__, test_method)
-        self.resource_group = 'cli_test_load_balancer_ip_config'
+        super(NetworkLoadBalancerIpConfigScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_load_balancer_ip_config')
 
     def test_network_load_balancer_ip_config(self):
         self.execute()
@@ -404,14 +394,13 @@ class NetworkLoadBalancerIpConfigScenarioTest(ResourceGroupVCRTestBase):
         self.cmd('network lb frontend-ip create -g {} --lb-name lb2 -n ipconfig2 --vnet-name vnet1 --subnet subnet1 --private-ip-address 10.0.0.99'.format(rg))
         self.cmd('network lb frontend-ip list -g {} --lb-name lb2'.format(rg), checks=JMESPathCheck('length(@)', 2))
         self.cmd('network lb frontend-ip update -g {} --lb-name lb2 -n ipconfig2 --subnet subnet2 --vnet-name vnet1 --private-ip-address 10.0.1.100'.format(rg))
-        self.cmd('network lb frontend-ip show -g {} --lb-name lb2 -n ipconfig2'.format(rg))#,
-            #checks=JMESPathCheck("subnet.contains(id, 'subnet2')", True))
+        self.cmd('network lb frontend-ip show -g {} --lb-name lb2 -n ipconfig2'.format(rg),
+            checks=JMESPathCheck("subnet.contains(id, 'subnet2')", True))
 
 class NetworkLoadBalancerSubresourceScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-        super(NetworkLoadBalancerSubresourceScenarioTest, self).__init__(__file__, test_method)
-        self.resource_group = 'cli_test_load_balancer_subresource'
+        super(NetworkLoadBalancerSubresourceScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_load_balancer_subresource')
         self.lb_name = 'lb1'
 
     def test_network_load_balancer_subresources(self):
@@ -526,8 +515,7 @@ class NetworkLoadBalancerSubresourceScenarioTest(ResourceGroupVCRTestBase):
 class NetworkLocalGatewayScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-        super(NetworkLocalGatewayScenarioTest, self).__init__(__file__, test_method)
-        self.resource_group = 'local_gateway_scenario'
+        super(NetworkLocalGatewayScenarioTest, self).__init__(__file__, test_method, resource_group='local_gateway_scenario')
         self.name = 'cli-test-loc-gateway'
         self.resource_type = 'Microsoft.Network/localNetworkGateways'
 
@@ -554,8 +542,7 @@ class NetworkLocalGatewayScenarioTest(ResourceGroupVCRTestBase):
 class NetworkNicScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-        super(NetworkNicScenarioTest, self).__init__(__file__, test_method)
-        self.resource_group = 'cli_test_nic_scenario'
+        super(NetworkNicScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_nic_scenario')
 
     def test_network_nic(self):
         self.execute()
@@ -646,8 +633,7 @@ class NetworkNicScenarioTest(ResourceGroupVCRTestBase):
 class NetworkNicSubresourceScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-        super(NetworkNicSubresourceScenarioTest, self).__init__(__file__, test_method)
-        self.resource_group = 'cli_test_nic_subresource'
+        super(NetworkNicSubresourceScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_nic_subresource')
 
     def test_network_nic_subresources(self):
         self.execute()
@@ -723,8 +709,7 @@ class NetworkNicSubresourceScenarioTest(ResourceGroupVCRTestBase):
 class NetworkNicConvenienceCommandsScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-        super(NetworkNicConvenienceCommandsScenarioTest, self).__init__(__file__, test_method)
-        self.resource_group = 'cli_nic_convenience_test'
+        super(NetworkNicConvenienceCommandsScenarioTest, self).__init__(__file__, test_method, resource_group='cli_nic_convenience_test')
         self.vm_name = 'conveniencevm1'
 
     def test_network_nic_convenience_commands(self):
@@ -748,8 +733,7 @@ class NetworkNicConvenienceCommandsScenarioTest(ResourceGroupVCRTestBase):
 class NetworkSecurityGroupScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-        super(NetworkSecurityGroupScenarioTest, self).__init__(__file__, test_method)
-        self.resource_group = 'cli_nsg_test1'
+        super(NetworkSecurityGroupScenarioTest, self).__init__(__file__, test_method, resource_group='cli_nsg_test1')
         self.nsg_name = 'test-nsg1'
         self.nsg_rule_name = 'web'
         self.resource_type = 'Microsoft.Network/networkSecurityGroups'
@@ -827,8 +811,7 @@ class NetworkSecurityGroupScenarioTest(ResourceGroupVCRTestBase):
 class NetworkRouteTableOperationScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-        super(NetworkRouteTableOperationScenarioTest, self).__init__(__file__, test_method)
-        self.resource_group = 'cli_route_table_test1'
+        super(NetworkRouteTableOperationScenarioTest, self).__init__(__file__, test_method, resource_group='cli_route_table_test1')
         self.route_table_name = 'cli-test-route-table'
         self.route_name = 'my-route'
         self.resource_type = 'Microsoft.Network/routeTables'
@@ -874,8 +857,7 @@ class NetworkRouteTableOperationScenarioTest(ResourceGroupVCRTestBase):
 class NetworkVNetScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-        super(NetworkVNetScenarioTest, self).__init__(__file__, test_method)
-        self.resource_group = 'cli_vnet_test1'
+        super(NetworkVNetScenarioTest, self).__init__(__file__, test_method, resource_group='cli_vnet_test1')
         self.vnet_name = 'test-vnet'
         self.vnet_subnet_name = 'test-subnet1'
         self.resource_type = 'Microsoft.Network/virtualNetworks'
@@ -946,8 +928,7 @@ class NetworkVNetScenarioTest(ResourceGroupVCRTestBase):
 
 class NetworkVNetPeeringScenarioTest(ResourceGroupVCRTestBase):
     def __init__(self, test_method):
-        super(NetworkVNetPeeringScenarioTest, self).__init__(__file__, test_method)
-        self.resource_group = 'cli_vnet_peering_test'
+        super(NetworkVNetPeeringScenarioTest, self).__init__(__file__, test_method, resource_group='cli_vnet_peering_test')
 
     def test_network_vnet_peering(self):
         self.execute()
@@ -999,8 +980,7 @@ class NetworkVNetPeeringScenarioTest(ResourceGroupVCRTestBase):
 
 class NetworkSubnetSetScenarioTest(ResourceGroupVCRTestBase):
     def __init__(self, test_method):
-        super(NetworkSubnetSetScenarioTest, self).__init__(__file__, test_method)
-        self.resource_group = 'cli_subnet_set_test'
+        super(NetworkSubnetSetScenarioTest, self).__init__(__file__, test_method, resource_group='cli_subnet_set_test')
         self.vnet_name = 'test-vnet2'
 
     def test_network_subnet_set(self):
@@ -1037,8 +1017,7 @@ class NetworkSubnetSetScenarioTest(ResourceGroupVCRTestBase):
 class NetworkVpnGatewayScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-        super(NetworkVpnGatewayScenarioTest, self).__init__(__file__, test_method)
-        self.resource_group = 'cli_test_vpn_gateway'
+        super(NetworkVpnGatewayScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_vpn_gateway')
         self.vnet1_name = 'myvnet1'
         self.vnet2_name = 'myvnet2'
         self.gateway1_name = 'gateway1'
@@ -1078,8 +1057,7 @@ class NetworkVpnGatewayScenarioTest(ResourceGroupVCRTestBase):
 class NetworkTrafficManagerScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-        super(NetworkTrafficManagerScenarioTest, self).__init__(__file__, test_method)
-        self.resource_group = 'cli_traffic_manager_test1'
+        super(NetworkTrafficManagerScenarioTest, self).__init__(__file__, test_method, resource_group='cli_traffic_manager_test')
 
     def test_network_traffic_manager(self):
         self.execute()
@@ -1113,8 +1091,7 @@ class NetworkTrafficManagerScenarioTest(ResourceGroupVCRTestBase):
 class NetworkDnsScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-        super(NetworkDnsScenarioTest, self).__init__(__file__, test_method)
-        self.resource_group = 'cli_dns_test1'
+        super(NetworkDnsScenarioTest, self).__init__(__file__, test_method, resource_group='cli_dns_test1')
 
     def test_network_dns(self):
         self.execute()
@@ -1186,8 +1163,7 @@ class NetworkDnsScenarioTest(ResourceGroupVCRTestBase):
 class NetworkZoneImportExportTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-        super(NetworkZoneImportExportTest, self).__init__(__file__, test_method)
-        self.resource_group = 'cli_dns_zone_import_export'
+        super(NetworkZoneImportExportTest, self).__init__(__file__, test_method, resource_group='cli_dns_zone_import_export')
 
     def test_network_dns_zone_import_export(self):
         self.execute()

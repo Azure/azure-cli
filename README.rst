@@ -15,6 +15,11 @@ A great cloud needs great tools; we're excited to introduce *Azure CLI 2.0 - Pre
 Installation
 ===============
 
+Developer Setup
+^^^^^^^^^
+If you would like to setup a development environment and contribute to the CLI, see the following document:
+https://github.com/Azure/azure-cli/blob/master/doc/configuring_your_machine.md
+
 Upgrading
 ^^^^^^^^^
 
@@ -25,6 +30,26 @@ If you already have the CLI installed, run the following to update:
    $ az component update
 
 If you don't have the CLI installed, see below.
+
+Install with interactive install script
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+For OSX and Linux, you can install using curl: 
+
+.. code-block:: console
+
+   $ curl -L https://aka.ms/InstallAzureCli | bash
+
+or using wget:
+
+.. code-block:: console
+
+   $ wget -q -O - https://aka.ms/InstallAzureCli | bash
+
+Some prerequisites may be required. See our `Preview Install Guide <https://github.com/Azure/azure-cli/blob/master/doc/preview_install_guide.md>`__.
+
+If you run into an ``AttributeError: 'X509' object has no attribute '_x509'`` error, downgrade your version of the requests library from 2.12.1 to 2.11.1.
+With the default install location, use ``/usr/local/az/bin/pip install requests==2.11.1``.
 
 Install with pip
 ^^^^^^^^^^^^^^^^
@@ -82,9 +107,12 @@ Install with apt-get
 
 A Debian/Ubuntu package is also available. Install as follows:
 
+On a 32 bit system: ``$ echo "deb https://apt-mo.trafficmanager.net/repos/azure-cli/ wheezy main" | sudo tee /etc/apt/sources.list.d/azure-cli.list``  
+
+On a 64 bit system: ``$ echo "deb [arch=amd64] https://apt-mo.trafficmanager.net/repos/azure-cli/ wheezy main" | sudo tee /etc/apt/sources.list.d/azure-cli.list``  
+
 .. code-block:: console
 
-    $ echo "deb https://apt-mo.trafficmanager.net/repos/azure-cli/ wheezy main" | sudo tee /etc/apt/sources.list.d/azure-cli.list
     $ sudo apt-key adv --keyserver apt-mo.trafficmanager.net --recv-keys 417A0893
     $ sudo apt-get install apt-transport-https
     $ sudo apt-get update && sudo apt-get install azure-cli
@@ -111,26 +139,6 @@ All command modules are included in this version as the image is built directly 
 For installation steps for common platforms, as well as dependency troubleshooting, please take a look at our `installation guide <http://github.com/Azure/azure-cli/blob/master/doc/preview_install_guide.md>`__.
 
 
-Install with interactive install script
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-For OSX and Linux, you can install using curl: 
-
-.. code-block:: console
-
-   $ curl -L https://aka.ms/InstallAzureCli | bash
-
-or using wget:
-
-.. code-block:: console
-
-   $ wget -q -O - https://aka.ms/InstallAzureCli | bash
-
-Some prerequisites may be required. See our `Preview Install Guide <https://github.com/Azure/azure-cli/blob/master/doc/preview_install_guide.md>`__.
-
-If you run into an ``AttributeError: 'X509' object has no attribute '_x509'`` error, downgrade your version of the requests library from 2.12.1 to 2.11.1.
-With the default install location, use ``/usr/local/az/bin/pip install requests==2.11.1``.
-
 Usage
 =====
 .. code-block:: console
@@ -141,7 +149,7 @@ Usage
 Getting Started
 =====================
 
-After installation, use the ``az configure`` command to help setup your environment and get you logged in.
+After installation, use the ``az configure`` command to help set up your environment and get you logged in.
 
 .. code-block:: console
 
@@ -205,7 +213,7 @@ The following block creates a new resource group in the 'westus' region, then cr
 
 .. code-block:: console
 
-   $ az resource group create -l westus -n MyGroup
+   $ az group create -l westus -n MyGroup
    Name     Location
    -------  ----------
    MyGroup  westus

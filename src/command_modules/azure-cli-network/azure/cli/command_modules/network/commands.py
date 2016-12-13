@@ -364,7 +364,8 @@ cli_command(__name__, 'network traffic-manager profile list', 'azure.cli.command
 cli_generic_update_command(__name__, 'network traffic-manager profile update',
                            'azure.mgmt.trafficmanager.operations.profiles_operations#ProfilesOperations.get',
                            'azure.mgmt.trafficmanager.operations.profiles_operations#ProfilesOperations.create_or_update',
-                           cf_traffic_manager_mgmt_profiles)
+                           cf_traffic_manager_mgmt_profiles,
+                           custom_function_op='azure.cli.command_modules.network.custom#update_traffic_manager_profile')
 
 cli_command(__name__, 'network traffic-manager profile create',
             'azure.cli.command_modules.network.mgmt_traffic_manager_profile.lib.operations.traffic_manager_profile_operations#TrafficManagerProfileOperations.create_or_update',
@@ -379,7 +380,8 @@ cli_command(__name__, 'network traffic-manager endpoint list', 'azure.cli.comman
 cli_generic_update_command(__name__, 'network traffic-manager endpoint update',
                            'azure.mgmt.trafficmanager.operations.endpoints_operations#EndpointsOperations.get',
                            'azure.mgmt.trafficmanager.operations.endpoints_operations#EndpointsOperations.create_or_update',
-                           cf_traffic_manager_mgmt_endpoints)
+                           cf_traffic_manager_mgmt_endpoints,
+                           custom_function_op='azure.cli.command_modules.network.custom#update_traffic_manager_endpoint')
 
 # DNS ZonesOperations
 cli_command(__name__, 'network dns zone show', 'azure.mgmt.dns.operations.zones_operations#ZonesOperations.get', cf_dns_mgmt_zones)
