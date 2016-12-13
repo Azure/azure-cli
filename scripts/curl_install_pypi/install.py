@@ -275,18 +275,18 @@ def verify_native_dependencies():
     verify_cmd_args = None
     install_cmd_args = None
     dep_list = None
-    if distname in ['ubuntu', 'debian']:
+    if any(x in distname for x in ['ubuntu', 'debian']):
         verify_cmd_args = ['dpkg', '-s']
         install_cmd_args = ['apt-get', 'update', '&&', 'apt-get', 'install', '-y']
         if distname == 'ubuntu' and version in ['12.04', '14.04'] or distname == 'debian' and version.startswith('7'):
             dep_list = ['libssl-dev', 'libffi-dev', 'python-dev']
         elif distname == 'ubuntu' and version in ['15.10', '16.04']or distname == 'debian' and version.startswith('8'):
             dep_list = ['libssl-dev', 'libffi-dev', 'python-dev', 'build-essential']
-    elif distname in ['centos', 'rhel']:
+    elif any(x in distname for x in ['centos', 'rhel', 'red hat']):
         verify_cmd_args = ['rpm', '-q']
-        install_cmd_args = ['yum', 'check-update', '&&', 'yum', 'install', '-y']
-        dep_list = ['libffi-devel', 'python-devel', 'openssl-devel']
-    elif distname in ['opensuse', 'suse']:
+        install_cmd_args = ['yum', 'check-update', ';', 'yum', 'install', '-y']
+        dep_list = ['gcc', 'libffi-devel', 'python-devel', 'openssl-devel']
+    elif any(x in distname for x in ['opensuse', 'suse']):
         verify_cmd_args = ['rpm', '-q']
         install_cmd_args = ['zypper', 'refresh', '&&', 'zypper', '--non-interactive', 'install']
         dep_list = ['gcc', 'libffi-devel', 'python-devel', 'openssl-devel']
