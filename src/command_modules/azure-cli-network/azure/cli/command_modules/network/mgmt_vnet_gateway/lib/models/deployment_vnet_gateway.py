@@ -64,10 +64,9 @@ class DeploymentVnetGateway(Model):
      value: "existingId" .
     :type virtual_network_type: str or :class:`virtualNetworkType
      <Default.models.virtualNetworkType>`
-    :param vpn_gateway_type: VPN gateway type. Possible values include:
-     'RouteBased', 'PolicyBased'. Default value: "RouteBased" .
-    :type vpn_gateway_type: str or :class:`vpnGatewayType
-     <Default.models.vpnGatewayType>`
+    :param vpn_type: VPN routing type. Possible values include: 'RouteBased',
+     'PolicyBased', 'Dedicated'. Default value: "RouteBased" .
+    :type vpn_type: str or :class:`vpnType <Default.models.vpnType>`
     :ivar mode: Gets or sets the deployment mode. Default value:
      "Incremental" .
     :vartype mode: str
@@ -98,7 +97,7 @@ class DeploymentVnetGateway(Model):
         'virtual_network': {'key': 'properties.parameters.virtualNetwork.value', 'type': 'str'},
         'virtual_network_gateway_name': {'key': 'properties.parameters.virtualNetworkGatewayName.value', 'type': 'str'},
         'virtual_network_type': {'key': 'properties.parameters.virtualNetworkType.value', 'type': 'virtualNetworkType'},
-        'vpn_gateway_type': {'key': 'properties.parameters.vpnGatewayType.value', 'type': 'vpnGatewayType'},
+        'vpn_type': {'key': 'properties.parameters.vpnType.value', 'type': 'vpnType'},
         'mode': {'key': 'properties.mode', 'type': 'str'},
     }
 
@@ -106,7 +105,7 @@ class DeploymentVnetGateway(Model):
 
     mode = "Incremental"
 
-    def __init__(self, public_ip_address, virtual_network, virtual_network_gateway_name, content_version=None, asn=None, bgp_peering_address=None, enable_bgp=False, gateway_type="Vpn", location=None, peer_weight=None, public_ip_address_type="existingId", sku="Basic", tags=None, virtual_network_type="existingId", vpn_gateway_type="RouteBased"):
+    def __init__(self, public_ip_address, virtual_network, virtual_network_gateway_name, content_version=None, asn=None, bgp_peering_address=None, enable_bgp=False, gateway_type="Vpn", location=None, peer_weight=None, public_ip_address_type="existingId", sku="Basic", tags=None, virtual_network_type="existingId", vpn_type="RouteBased"):
         self.content_version = content_version
         self.asn = asn
         self.bgp_peering_address = bgp_peering_address
@@ -121,4 +120,4 @@ class DeploymentVnetGateway(Model):
         self.virtual_network = virtual_network
         self.virtual_network_gateway_name = virtual_network_gateway_name
         self.virtual_network_type = virtual_network_type
-        self.vpn_gateway_type = vpn_gateway_type
+        self.vpn_type = vpn_type

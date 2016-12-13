@@ -108,15 +108,16 @@
         "description": "Type of virtual network to supply to the VPN gateway."
       }
     },
-    "vpnGatewayType": {
+    "vpnType": {
       "type": "string",
       "metadata": {
-        "description": "VPN gateway type."
+        "description": "VPN routing type."
       },
       "defaultValue": "RouteBased",
       "allowedValues": [
         "RouteBased",
-        "PolicyBased"
+        "PolicyBased",
+        "Dedicated"
       ]
     }
   },
@@ -166,7 +167,7 @@
           "tier": "[parameters('sku')]"
         },
         "gatewayType": "[parameters('gatewayType')]",
-        "vpnType": "[parameters('vpnGatewayType')]",
+        "vpnType": "[parameters('vpnType')]",
         "enableBgp": "[parameters('enableBgp')]"
       }
     }

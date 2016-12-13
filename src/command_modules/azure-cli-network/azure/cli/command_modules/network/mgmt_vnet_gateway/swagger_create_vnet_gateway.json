@@ -225,16 +225,16 @@
           "$ref": "#/definitions/DeploymentParameter_virtualNetworkType",
           "x-ms-client-flatten": true
         },
-        "vpnGatewayType": {
+        "vpnType": {
           "type": "object",
-          "$ref": "#/definitions/DeploymentParameter_vpnGatewayType",
+          "$ref": "#/definitions/DeploymentParameter_vpnType",
           "x-ms-client-flatten": true
         }
       },
       "required": [
         "enableBgp",
-        "virtualNetworkGatewayName",
         "virtualNetwork",
+        "virtualNetworkGatewayName",
         "publicIpAddress"
       ]
     },
@@ -406,18 +406,19 @@
         }
       }
     },
-    "DeploymentParameter_vpnGatewayType": {
+    "DeploymentParameter_vpnType": {
       "properties": {
         "value": {
           "type": "string",
-          "description": "VPN gateway type.",
-          "x-ms-client-name": "vpnGatewayType",
+          "description": "VPN routing type.",
+          "x-ms-client-name": "vpnType",
           "enum": [
             "RouteBased",
-            "PolicyBased"
+            "PolicyBased",
+            "Dedicated"
           ],
           "x-ms-enum": {
-            "name": "vpnGatewayType",
+            "name": "vpnType",
             "modelAsString": false
           },
           "default": "RouteBased"

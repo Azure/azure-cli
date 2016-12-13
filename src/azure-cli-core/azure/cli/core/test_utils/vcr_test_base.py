@@ -239,8 +239,8 @@ class VCRTestBase(unittest.TestCase):#pylint: disable=too-many-instance-attribut
             vcr_log.setLevel(logging.INFO)
         self.my_vcr = vcr.VCR(
             cassette_library_dir=self.recording_dir,
-            before_record_request=VCRTestBase._before_record_request,
-            before_record_response=VCRTestBase._before_record_response,
+            before_record_request=self._before_record_request,
+            before_record_response=self._before_record_response,
             decode_compressed_response=True
         )
         self.my_vcr.register_matcher('custom', _custom_request_matcher)
@@ -254,8 +254,7 @@ class VCRTestBase(unittest.TestCase):#pylint: disable=too-many-instance-attribut
             f.write(' '.join(command))
             f.write('\n')
 
-    @staticmethod
-    def _before_record_request(request):
+    def _before_record_request(self, request):
         # scrub subscription from the uri
         request.uri = re.sub('/subscriptions/([^/]+)/',
                              '/subscriptions/{}/'.format(MOCKED_SUBSCRIPTION_ID), request.uri)
@@ -263,21 +262,6 @@ class VCRTestBase(unittest.TestCase):#pylint: disable=too-many-instance-attribut
                              '/graph.windows.net/{}/'.format(MOCKED_TENANT_ID), request.uri)
         request.uri = re.sub('/sig=([^/]+)&', '/sig=0000&', request.uri)
         request.uri = _scrub_deployment_name(request.uri)
-        # remove randomized portion from resource group name that is part of the URI
-        uri_rg_pattern = 'resource[Gg]roups/([^/]+_)/'
-        resource_group_name = re.search(uri_rg_pattern, request.uri)
-        if resource_group_name:
-            resource_group_name = resource_group_name.group(0)
-            resource_group_name = resource_group_name.rsplit('_', 2)[0]
-            request.uri = re.sub(uri_rg_pattern, '{}/'.format(resource_group_name), request.uri)
-
-        # remove randomized portion from resource group name that is part of a filter
-        filter_rg_pattern = 'resource[Gg]roup[s]*%20eq%20%27([^%]+_)%'
-        resource_group_name = re.search(filter_rg_pattern, request.uri)
-        if resource_group_name:
-            resource_group_name = resource_group_name.group(0)
-            resource_group_name = resource_group_name.rsplit('_', 2)[0]
-            request.uri = re.sub(filter_rg_pattern, '{}%'.format(resource_group_name), request.uri)
 
         # replace random storage account name with dummy name
         request.uri = re.sub('/vcrstorage([\\d]+).',
@@ -291,8 +275,7 @@ class VCRTestBase(unittest.TestCase):#pylint: disable=too-many-instance-attribut
             request = None
         return request
 
-    @staticmethod
-    def _before_record_response(response):
+    def _before_record_response(self, response):
         for key in VCRTestBase.FILTER_HEADERS:
             if key in response['headers']:
                 del response['headers'][key]
@@ -309,6 +292,7 @@ class VCRTestBase(unittest.TestCase):#pylint: disable=too-many-instance-attribut
                 response['body'][key] = bytes(value, 'utf-8')
             except TypeError:
                 response['body'][key] = value.encode('utf-8')
+
         return response
 
     @mock.patch('azure.cli.main.handle_exception', _mock_handle_exceptions)
@@ -348,11 +332,20 @@ class VCRTestBase(unittest.TestCase):#pylint: disable=too-many-instance-attribut
             self.body()
         self.success = True
 
-    def _scrub_bearer_tokens(self):
+    def _post_recording_scrub(self):
+        """ Perform post-recording cleanup on the YAML file that can't be accomplished with the
+        VCR recording hooks. """
         src_path = self.cassette_path
+        rg_name = getattr(self, 'resource_group', None)
+        rg_original = getattr(self, 'resource_group_original', None)
+
         t = tempfile.NamedTemporaryFile('r+')
         with open(src_path, 'r') as f:
             for line in f:
+                # scrub resource group names
+                if rg_name != rg_original:
+                    line = line.replace(rg_name, rg_original)
+                # omit bearer tokens
                 if 'authorization: [bearer' not in line.lower():
                     t.write(line)
         t.seek(0)
@@ -423,7 +416,7 @@ class VCRTestBase(unittest.TestCase):#pylint: disable=too-many-instance-attribut
                 os.remove(self.cassette_path)
             elif self.success and not self.playback and os.path.isfile(self.cassette_path):
                 try:
-                    self._scrub_bearer_tokens()
+                    self._post_recording_scrub()
                 except Exception: # pylint: disable=broad-except
                     os.remove(self.cassette_path)
 

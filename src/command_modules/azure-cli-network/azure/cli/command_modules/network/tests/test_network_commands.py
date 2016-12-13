@@ -309,7 +309,7 @@ class NetworkLoadBalancerScenarioTest(ResourceGroupVCRTestBase):
         # test internal load balancer create (existing subnet ID)
         vnet_name = 'mytestvnet'
         private_ip = '10.0.0.15'
-        vnet = self.cmd('network vnet create -n {} -g {}'.format(vnet_name, self.resource_group))
+        vnet = self.cmd('network vnet create -n {} -g {} --subnet-name default'.format(vnet_name, self.resource_group))
         subnet_id = vnet['newVNet']['subnets'][0]['id']
         self.cmd('network lb create -n {}3 -g {} --vnet-name {} --subnet {} --private-ip-address {}'.format(
             self.lb_name, self.resource_group, vnet_name, subnet_id, private_ip), checks=[
@@ -866,7 +866,7 @@ class NetworkVNetScenarioTest(ResourceGroupVCRTestBase):
         self.execute()
 
     def body(self):
-        self.cmd('network vnet create --resource-group {} --name {}'.format(self.resource_group, self.vnet_name), checks=[
+        self.cmd('network vnet create --resource-group {} --name {} --subnet-name default'.format(self.resource_group, self.vnet_name), checks=[
             JMESPathCheck('newVNet.provisioningState', 'Succeeded'), # verify the deployment result
             JMESPathCheck('newVNet.addressSpace.addressPrefixes[0]', '10.0.0.0/16')
         ])
@@ -1020,10 +1020,13 @@ class NetworkVpnGatewayScenarioTest(ResourceGroupVCRTestBase):
         super(NetworkVpnGatewayScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_vpn_gateway')
         self.vnet1_name = 'myvnet1'
         self.vnet2_name = 'myvnet2'
+        self.vnet3_name = 'myvnet3'
         self.gateway1_name = 'gateway1'
         self.gateway2_name = 'gateway2'
+        self.gateway3_name = 'gateway3'
         self.ip1_name = 'pubip1'
         self.ip2_name = 'pubip2'
+        self.ip3_name = 'pubip3'
 
     def test_network_vpn_gateway(self):
         self.execute()
@@ -1033,8 +1036,10 @@ class NetworkVpnGatewayScenarioTest(ResourceGroupVCRTestBase):
         rg = self.resource_group
         self.cmd('network public-ip create -n {} -g {}'.format(self.ip1_name, rg))
         self.cmd('network public-ip create -n {} -g {}'.format(self.ip2_name, rg))
+        self.cmd('network public-ip create -n {} -g {}'.format(self.ip3_name, rg))
         self.cmd('network vnet create -g {} -n {} --subnet-name GatewaySubnet --address-prefix 10.0.0.0/16 --subnet-prefix 10.0.0.0/24'.format(rg, self.vnet1_name))
-        self.cmd('network vnet create -g {} -n {} --subnet-name GatewaySubnet --address-prefix 10.1.0.0/16 --subnet-prefix 10.1.0.0/24'.format(rg, self.vnet2_name))
+        self.cmd('network vnet create -g {} -n {} --subnet-name GatewaySubnet --address-prefix 10.1.0.0/16'.format(rg, self.vnet2_name))
+        self.cmd('network vnet create -g {} -n {} --subnet-name GatewaySubnet --address-prefix 10.2.0.0/16'.format(rg, self.vnet3_name))
 
     def body(self):
         rg = self.resource_group
@@ -1048,11 +1053,13 @@ class NetworkVpnGatewayScenarioTest(ResourceGroupVCRTestBase):
 
         self.cmd('network vnet-gateway create -g {} -n {} --vnet {} --public-ip-address {} --no-wait'.format(rg, self.gateway1_name, vnet1_id, self.ip1_name))
         self.cmd('network vnet-gateway create -g {} -n {} --vnet {} --public-ip-address {} --no-wait'.format(rg, self.gateway2_name, vnet2_id, self.ip2_name))
+        self.cmd('network vnet-gateway create -g {} -n {} --vnet {} --public-ip-address {} --no-wait --sku standard --asn 12345 --bgp-peering-address 10.2.250.250 --peer-weight 50'.format(rg, self.gateway3_name, self.vnet3_name, self.ip3_name))
 
         self.cmd('network vnet-gateway wait -g {} -n {} --created'.format(rg, self.gateway1_name))
         self.cmd('network vnet-gateway wait -g {} -n {} --created'.format(rg, self.gateway2_name))
+        self.cmd('network vnet-gateway wait -g {} -n {} --created'.format(rg, self.gateway3_name))
 
-        # TEST UPDATE METHODS
+        # TODO: TEST UPDATE METHODS
 
         gateway1_id = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworkGateways/{}'.format(subscription_id, rg, self.gateway1_name)
         self.cmd('network vpn-connection create -n myconnection -g {} --shared-key 123 --vnet-gateway1 {} --vnet-gateway2 {}'.format(rg, gateway1_id, self.gateway2_name))

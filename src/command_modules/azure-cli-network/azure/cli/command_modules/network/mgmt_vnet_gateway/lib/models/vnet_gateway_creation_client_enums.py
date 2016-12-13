@@ -40,10 +40,11 @@ class virtualNetworkType(Enum):
     existing_name = "existingName"
 
 
-class vpnGatewayType(Enum):
+class vpnType(Enum):
 
     route_based = "RouteBased"
     policy_based = "PolicyBased"
+    dedicated = "Dedicated"
 
 
 class DeploymentMode(Enum):

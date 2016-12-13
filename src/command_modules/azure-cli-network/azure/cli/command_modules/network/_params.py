@@ -41,7 +41,7 @@ from azure.cli.command_modules.network._validators import \
      get_virtual_network_validator)
 from azure.cli.command_modules.network.mgmt_nic.lib.models.nic_creation_client_enums import privateIpAddressVersion
 from azure.cli.command_modules.network.mgmt_vnet_gateway.lib.models.vnet_gateway_creation_client_enums import \
-    (gatewayType, sku, vpnGatewayType)
+    (gatewayType, sku, vpnType)
 from azure.cli.command_modules.network.mgmt_traffic_manager_profile.lib.models.traffic_manager_profile_creation_client_enums \
     import routingMethod, status
 from azure.cli.command_modules.network.custom import list_traffic_manager_endpoints
@@ -426,7 +426,7 @@ register_cli_argument('network vnet-gateway', 'cert_name', help='Root certificat
 register_cli_argument('network vnet-gateway', 'gateway_name', help='Virtual network gateway name')
 register_cli_argument('network vnet-gateway', 'gateway_type', help='The gateway type.', **enum_choice_list(gatewayType))
 register_cli_argument('network vnet-gateway', 'sku', help='VNet gateway SKU.', **enum_choice_list(sku))
-register_cli_argument('network vnet-gateway', 'vpn_gateway_type', help='VNet gateway type.', **enum_choice_list(vpnGatewayType))
+register_cli_argument('network vnet-gateway', 'vpn_type', help='VPN routing type.', **enum_choice_list(vpnType))
 register_cli_argument('network vnet-gateway', 'bgp_peering_address', arg_group='BGP Peering', help='IP address to use for BGP peering.')
 
 register_cli_argument('network vnet-gateway create', 'enable_bgp', ignore_type)

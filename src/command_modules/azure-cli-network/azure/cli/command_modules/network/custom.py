@@ -828,7 +828,7 @@ def _prep_cert_create(gateway_name, resource_group_name):
 
     return config, gateway, ncf
 
-def update_vnet_gateway(instance, address_prefixes=None, sku=None, vpn_gateway_type=None,
+def update_vnet_gateway(instance, address_prefixes=None, sku=None, vpn_type=None,
                         public_ip_address=None, gateway_type=None, enable_bgp=None,
                         asn=None, bgp_peering_address=None, peer_weight=None, virtual_network=None,
                         tags=None):
@@ -848,8 +848,8 @@ def update_vnet_gateway(instance, address_prefixes=None, sku=None, vpn_gateway_t
         instance.sku.name = sku
         instance.sku.tier = sku
 
-    if vpn_gateway_type is not None:
-        instance.vpn_type = vpn_gateway_type
+    if vpn_type is not None:
+        instance.vpn_type = vpn_type
 
     if tags is not None:
         instance.tags = tags
