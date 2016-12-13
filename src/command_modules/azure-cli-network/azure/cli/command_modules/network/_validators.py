@@ -244,6 +244,9 @@ def get_virtual_network_validator(has_type_field=False, allow_none=False, allow_
                                   default_none=False):
 
     def simple_validator(namespace):
+        if namespace.virtual_network is None:
+            return
+
         # determine if vnet is name or ID
         is_id = is_valid_resource_id(namespace.virtual_network)
         if not is_id:
