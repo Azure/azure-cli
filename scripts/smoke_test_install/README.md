@@ -26,8 +26,8 @@ This is so that the resource group will remain after the tests have executed.
 With this, you can ssh into the VMs and do any required debugging then delete the resource group afterwards.
 
 ```
-az resource group create -l <LOCATION> -n <NAME>
-az resource group delete -n <NAME>
+az group create -l <LOCATION> -n <NAME>
+az group delete -n <NAME>
 ```
 
 NOTE: Keep resource group names short and the test names short.
