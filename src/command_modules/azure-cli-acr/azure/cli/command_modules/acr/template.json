@@ -54,7 +54,17 @@
             "sku": {
                 "name": "[parameters('storageAccountType')]"
             },
-            "kind": "Storage"
+            "kind": "Storage",
+            "properties": {
+                "encryption": {
+                    "services": {
+                        "blob": {
+                            "enabled": true
+                        }
+                    },
+                    "keySource": "Microsoft.Storage"
+                }
+            }
         },
         {
             "name": "[parameters('registryName')]",
