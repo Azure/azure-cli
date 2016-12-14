@@ -8,9 +8,11 @@ from __future__ import print_function
 from os.path import exists
 from enum import Enum
 from azure.cli.core._util import CLIError
+from azure.cli.core.commands import LongRunningOperation
 from azure.mgmt.iothub.models.iot_hub_client_enums import IotHubSku
 from azure.mgmt.iothub.models.iot_hub_description import IotHubDescription
 from azure.mgmt.iothub.models.iot_hub_sku_info import IotHubSkuInfo
+from azure.mgmt.iothub.models.shared_access_signature_authorization_rule import SharedAccessSignatureAuthorizationRule
 from azure.cli.command_modules.iot.mgmt_iot_hub_device.lib.iot_hub_device_client import IotHubDeviceClient
 from azure.cli.command_modules.iot.mgmt_iot_hub_device.lib.models.authentication import Authentication
 from azure.cli.command_modules.iot.mgmt_iot_hub_device.lib.models.device_description import DeviceDescription
@@ -30,7 +32,8 @@ class KeyType(Enum):  # pylint: disable=too-few-public-methods
 def iot_hub_create(client, hub_name, resource_group_name, location=None, sku=IotHubSku.f1.value, unit=1):
     _check_name_availability(client, hub_name)
     location = _ensure_location(resource_group_name, location)
-    hub_description = IotHubDescription(location=location, sku=IotHubSkuInfo(name=sku, capacity=unit))
+    hub_description = IotHubDescription(location, client.config.subscription_id, resource_group_name,
+                                        IotHubSkuInfo(name=sku, capacity=unit))
     return client.create_or_update(resource_group_name, hub_name, hub_description)
 
 
@@ -52,6 +55,29 @@ def iot_hub_list(client, resource_group_name=None):
         return client.list_by_subscription()
     else:
         return client.list_by_resource_group(resource_group_name)
+
+
+def iot_hub_update(client, hub_name, parameters, resource_group_name=None):
+    resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
+    return client.create_or_update(resource_group_name, hub_name, parameters, {'IF-MATCH': parameters.etag})
+
+
+def iot_hub_delete(client, hub_name, resource_group_name=None):
+    resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
+    return client.delete(resource_group_name, hub_name)
+
+
+# Deleting IoT Hub is a long running operation. Due to API implementation issue, 404 error will be thrown during
+# deletion of an IoT Hub.
+# This is a work around to suppress the 404 error. It should be removed after API is fixed.
+class HubDeleteResultTransform(LongRunningOperation):  # pylint: disable=too-few-public-methods
+    def __call__(self, poller):
+        try:
+            super(HubDeleteResultTransform, self).__call__(poller)
+        except CLIError as e:
+            if 'not found' not in str(e):
+                raise e
+        return None
 
 
 def iot_hub_show_connection_string(client, hub_name=None, resource_group_name=None, policy_name='iothubowner',
@@ -110,6 +136,38 @@ def iot_hub_policy_list(client, hub_name, resource_group_name=None):
 def iot_hub_policy_get(client, hub_name, policy_name, resource_group_name=None):
     resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
     return client.get_keys_for_key_name(resource_group_name, hub_name, policy_name)
+
+
+def iot_hub_policy_create(client, hub_name, policy_name, permissions, resource_group_name=None):
+    hub = iot_hub_get(client, hub_name, resource_group_name)
+    policies = iot_hub_policy_list(client, hub_name, hub.resourcegroup)
+    if _is_policy_existed(policies, policy_name):
+        raise CLIError('Policy {0} already existed.'.format(policy_name))
+    updated_policies = []
+    updated_policies.extend(policies)
+    updated_policies.append(SharedAccessSignatureAuthorizationRule(policy_name, permissions))
+    hub.properties.authorization_policies = updated_policies
+    return client.create_or_update(hub.resourcegroup, hub_name, hub, {'IF-MATCH': hub.etag})
+
+
+def iot_hub_policy_delete(client, hub_name, policy_name, resource_group_name=None):
+    hub = iot_hub_get(client, hub_name, resource_group_name)
+    policies = iot_hub_policy_list(client, hub_name, hub.resourcegroup)
+    if not _is_policy_existed(policies, policy_name):
+        raise CLIError('Policy {0} not found.'.format(policy_name))
+    updated_policies = [p for p in policies if p.key_name.lower() != policy_name.lower()]
+    hub.properties.authorization_policies = updated_policies
+    return client.create_or_update(hub.resourcegroup, hub_name, hub, {'IF-MATCH': hub.etag})
+
+
+def _is_policy_existed(policies, policy_name):
+    return any(p for p in policies if p.key_name.lower() == policy_name.lower())
+
+
+class PolicyUpdateResultTransform(LongRunningOperation):  # pylint: disable=too-few-public-methods
+    def __call__(self, poller):
+        result = super(PolicyUpdateResultTransform, self).__call__(poller)
+        return result.properties.authorization_policies
 
 
 def iot_hub_job_list(client, hub_name, resource_group_name=None):
@@ -246,6 +304,16 @@ def iot_device_reject_message(client, hub_name, device_id, lock_token, resource_
 def iot_device_abandon_message(client, hub_name, device_id, lock_token, resource_group_name=None):
     device_client = _get_device_client(client, resource_group_name, hub_name, device_id)
     return device_client.abandon_message(device_id, lock_token)
+
+
+def iot_device_export(client, hub_name, blob_container_uri, include_keys=False, resource_group_name=None):
+    resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
+    return client.export_devices(resource_group_name, hub_name, blob_container_uri, not include_keys)
+
+
+def iot_device_import(client, hub_name, input_blob_container_uri, output_blob_container_uri, resource_group_name=None):
+    resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
+    return client.import_devices(resource_group_name, hub_name, input_blob_container_uri, output_blob_container_uri)
 
 
 def _get_single_device_connection_string(client, hub_name, device_id, resource_group_name, key_type):

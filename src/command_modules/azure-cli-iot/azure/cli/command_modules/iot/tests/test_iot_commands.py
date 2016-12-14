@@ -44,12 +44,25 @@ class IoTHubTest(ResourceGroupVCRTestBase):
             JMESPathPatternCheck('[0].connectionString', conn_str_pattern)
         ])
 
+        # Test 'az iot hub update'
+        property_to_update = 'properties.operationsMonitoringProperties.events.DeviceTelemetry'
+        updated_value = 'Error, Information'
+        self.cmd('iot hub update -n {0} --set {1}="{2}"'.format(hub, property_to_update, updated_value),
+                 checks=[
+                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('location', location),
+                     JMESPathCheck('name', hub),
+                     JMESPathCheck('sku.name', 'S1'),
+                     JMESPathCheck(property_to_update, updated_value)
+                 ])
+
         # Test 'az iot hub show'
         self.cmd('iot hub show -n {0}'.format(hub), checks=[
             JMESPathCheck('resourceGroup', rg),
             JMESPathCheck('location', location),
             JMESPathCheck('name', hub),
-            JMESPathCheck('sku.name', 'S1')
+            JMESPathCheck('sku.name', 'S1'),
+            JMESPathCheck(property_to_update, updated_value)
         ])
 
         # Test 'az iot hub list'
@@ -69,16 +82,27 @@ class IoTHubTest(ResourceGroupVCRTestBase):
             JMESPathCheck('[2].sku.name', 'S3')
         ])
 
+        # Test 'az iot hub policy create'
+        policy_name = 'test_policy'
+        permissions = 'RegistryWrite, ServiceConnect, DeviceConnect'
+        self.cmd('iot hub policy create --hub-name {0} -n {1} --permissions "{2}"'.format(hub, policy_name, permissions),
+                 checks=NoneCheck())
+
         # Test 'az iot hub policy list'
         self.cmd('iot hub policy list --hub-name {0}'.format(hub), checks=[
-            JMESPathCheck('length([*])', 5)
+            JMESPathCheck('length([*])', 6)
         ])
 
         # Test 'az iot hub policy show'
-        policy_name = 'service'
         self.cmd('iot hub policy show --hub-name {0} -n {1}'.format(hub, policy_name), checks=[
             JMESPathCheck('keyName', policy_name),
-            JMESPathCheck('rights', 'ServiceConnect')
+            JMESPathCheck('rights', permissions)
+        ])
+
+        # Test 'az iot hub policy delete'
+        self.cmd('iot hub policy delete --hub-name {0} -n {1}'.format(hub, policy_name), checks=NoneCheck())
+        self.cmd('iot hub policy list --hub-name {0}'.format(hub), checks=[
+            JMESPathCheck('length([*])', 5)
         ])
 
         # Test 'az iot hub consumer-group create'
@@ -235,3 +259,6 @@ class IoTHubTest(ResourceGroupVCRTestBase):
         # Test 'az iot device delete'
         self.cmd('iot device delete --hub-name {0} -d {1}'.format(hub, device_1), checks=NoneCheck())
         self.cmd('iot device delete --hub-name {0} -d {1}'.format(hub, device_2), checks=NoneCheck())
+
+        # Test 'az iot hub delete'
+        self.cmd('iot hub delete -n {0}'.format(hub), checks=NoneCheck())
