@@ -94,17 +94,17 @@ class ResourceScenarioTest(ResourceGroupVCRTestBase):
         vnet_count += 1
 
         s.cmd('resource list',
-            checks=JMESPathCheck("length([?name=='{}'])".format(self.vnet_name), vnet_count))
+              checks=JMESPathCheck("length([?name=='{}'])".format(self.vnet_name), vnet_count))
         s.cmd('resource list -l centralus',
-            checks=JMESPathCheck("length([?location == 'centralus']) == length(@)", True))
+              checks=JMESPathCheck("length([?location == 'centralus']) == length(@)", True))
         s.cmd('resource list --resource-type Microsoft.Network/virtualNetworks',
-            checks=JMESPathCheck("length([?name=='{}'])".format(self.vnet_name), vnet_count))
+              checks=JMESPathCheck("length([?name=='{}'])".format(self.vnet_name), vnet_count))
         s.cmd('resource list --name {}'.format(self.vnet_name),
-            checks=JMESPathCheck("length([?name=='{}'])".format(self.vnet_name), vnet_count))
+              checks=JMESPathCheck("length([?name=='{}'])".format(self.vnet_name), vnet_count))
         s.cmd('resource list --tag cli-test',
-            checks=JMESPathCheck("length([?name=='{}'])".format(self.vnet_name), vnet_count))
+              checks=JMESPathCheck("length([?name=='{}'])".format(self.vnet_name), vnet_count))
         s.cmd('resource list --tag cli-test=test',
-            checks=JMESPathCheck("length([?name=='{}'])".format(self.vnet_name), vnet_count))
+              checks=JMESPathCheck("length([?name=='{}'])".format(self.vnet_name), vnet_count))
 
         # check for simple resource with tag
         s.cmd('resource show -n {} -g {} --resource-type Microsoft.Network/virtualNetworks'.format(self.vnet_name, rg), checks=[
