@@ -34,7 +34,7 @@ Click on your OS for steps:
 
 ## OS X
 ```
-curl -L https://aka.ms/InstallAzureCli | sudo bash
+curl -L https://aka.ms/InstallAzureCli | bash
 ```
 
 ## Ubuntu 12.04 LTS
@@ -42,10 +42,8 @@ On a fresh Ubuntu 12.04 VM, install the CLI by executing the following.
 Python 2.7.3 should be already on the machine.
 
 ```
-sudo apt-get update
-sudo apt-get install -y libssl-dev libffi-dev
-sudo apt-get install -y python-dev
-curl -L https://aka.ms/InstallAzureCli | sudo bash
+sudo apt-get update && sudo apt-get install -y libssl-dev libffi-dev python-dev
+curl -L https://aka.ms/InstallAzureCli | bash
 ```
 
 **Known warnings**
@@ -57,72 +55,41 @@ You may see the following warning message during install and execution of `az`.
 ```
 See also https://github.com/pypa/pip/issues/1074.
 
-
-Use the defaults for the install location and location of the executable.
-
-This will install the CLI globally on the system.
-
 ## Ubuntu 14.04 LTS and BASH on Windows (Build 14362+)
 Python 2.7.6 should be already on the machine.
 
 ```
-sudo apt-get update
-sudo apt-get install -y libssl-dev libffi-dev
-sudo apt-get install -y python-dev
-curl -L https://aka.ms/InstallAzureCli | sudo bash
+sudo apt-get update && sudo apt-get install -y libssl-dev libffi-dev python-dev
+curl -L https://aka.ms/InstallAzureCli | bash
 ```
-
-Use the defaults for the install location and location of the executable.
-
-This will install the CLI globally on the system.
 
 ## Ubuntu 15.10
 Python 2.7.10 should be already on the machine.
 ```
-sudo apt-get update
-sudo apt-get install -y libssl-dev libffi-dev
-sudo apt-get install -y python-dev
-sudo apt-get install -y build-essential
-curl -L https://aka.ms/InstallAzureCli | sudo bash
+sudo apt-get update && sudo apt-get install -y libssl-dev libffi-dev python-dev build-essential
+curl -L https://aka.ms/InstallAzureCli | bash
 ```
-
-Use the defaults for the install location and location of the executable.
-
-This will install the CLI globally on the system.
 
 ## Ubuntu 16.04 LTS
 Python 2.7.11 should be already on the machine.
 ```
-sudo apt-get update
-sudo apt-get install -y libssl-dev libffi-dev
-sudo apt-get install -y python-dev
-sudo apt-get install -y build-essential
-curl -L https://aka.ms/InstallAzureCli | sudo bash
+sudo apt-get update && sudo apt-get install -y libssl-dev libffi-dev python-dev build-essential
+curl -L https://aka.ms/InstallAzureCli | bash
 ```
 
 ## Debian 7
 Python 2.7.3 should be already on the machine.
 ```
-sudo apt-get update
-sudo apt-get install -y libssl-dev libffi-dev
-sudo apt-get install -y python-dev
-curl -L https://aka.ms/InstallAzureCli | sudo bash
+sudo apt-get update && sudo apt-get install -y libssl-dev libffi-dev python-dev
+curl -L https://aka.ms/InstallAzureCli | bash
 ```
-
-Tab completion gets set up for the root user, not all users if installed globally.
 
 ## Debian 8
 Python 2.7.9 should be already on the machine.
 ```
-sudo apt-get update
-sudo apt-get install -y libssl-dev libffi-dev
-sudo apt-get install -y python-dev
-sudo apt-get install -y build-essential
-curl -L https://aka.ms/InstallAzureCli | sudo bash
+sudo apt-get update && sudo apt-get install -y libssl-dev libffi-dev python-dev build-essential
+curl -L https://aka.ms/InstallAzureCli | bash
 ```
-
-Tab completion gets set up for the root user, not all users if installed globally.
-
 
 ## CentOS 6.5 / 6.6 / 6.7
 
@@ -131,15 +98,9 @@ Not supported with the default version of Python (2.6.6) on the machine.  We rec
 ## CentOS 7.1 / 7.2
 Python 2.7.5 should be already on the machine.
 ```
-sudo yum check-update
-sudo yum install -y gcc libffi-devel python-devel openssl-devel
-curl -L https://aka.ms/InstallAzureCli | sudo bash
+sudo yum check-update; sudo yum install -y gcc libffi-devel python-devel openssl-devel
+curl -L https://aka.ms/InstallAzureCli | bash
 ```
-
-Tab completion gets set up for the root user, not all users if installed globally.
-
-/usr/local/bin is not in root's path so if you become root, you have to run /usr/local/bin/az to get it to work.
-https://bugs.centos.org/view.php?id=5707
 
 ## RedHat RHEL 6.7
 
@@ -148,22 +109,15 @@ Not supported with the default version of Python (2.6.6) on the machine.  We rec
 ## RedHat RHEL 7.2
 Python 2.7.5 should be already on the machine.
 ```
-sudo yum check-update
-sudo yum install -y gcc libffi-devel python-devel openssl-devel
-curl -L https://aka.ms/InstallAzureCli | sudo bash
+sudo yum check-update; sudo yum install -y gcc libffi-devel python-devel openssl-devel
+curl -L https://aka.ms/InstallAzureCli | bash
 ```
-
-Tab completion gets set up for the root user, not all users if installed globally.
-
-/usr/local/bin is not in root's path so if you become root, you have to run /usr/local/bin/az to get it to work.
-https://bugs.centos.org/view.php?id=5707
 
 ## SUSE OpenSUSE 13.2
 Python 2.7.8 should be already on the machine.
 ```
-sudo zypper refresh
-sudo zypper --non-interactive install gcc libffi-devel python-devel openssl-devel
-curl -L https://aka.ms/InstallAzureCli | sudo bash
+sudo zypper refresh && sudo zypper --non-interactive install gcc libffi-devel python-devel openssl-devel
+curl -L https://aka.ms/InstallAzureCli | bash
 ```
 
 ## CoreOS Stable-899.15.0 / Beta-1010.1.0 / Alpha-1010.1.0
@@ -184,6 +138,8 @@ docker run -it azuresdk/azure-cli-python:latest bash`
 The CLI is available for Windows though PIP using the steps below.  If you do not have Python/PIP installed, consider using [Docker](#docker) to access the CLI.
 
 #### Step 1: Install Python 3.5.x
+
+If Python 2.7, 3.4 or 3.5 is already installed, skip to step 2.
 
 Visit the Python site and [download Python 3.5](https://www.python.org/downloads/release/python-352/) for your OS.  
 > **NOTE**: We recommend checking the "Add Python 3.5 to PATH" option during install.
@@ -216,7 +172,7 @@ Installation Troubleshooting
 If you get an error with the curl command regarding the `-L` parameter or an error saying `Object Moved`, try using the full url instead of the aka.ms url:
 ```shell
 # If you see this:
-$ curl -L https://aka.ms/InstallAzureCli | sudo bash
+$ curl -L https://aka.ms/InstallAzureCli | bash
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
 100   175  100   175    0     0    562      0 --:--:-- --:--:-- --:--:--   560
@@ -224,7 +180,7 @@ bash: line 1: syntax error near unexpected token `<'
 'ash: line 1: `<html><head><title>Object moved</title></head><body>
 
 # Try this instead:
-$ curl https://azurecliprod.blob.core.windows.net/install | sudo bash
+$ curl https://azurecliprod.blob.core.windows.net/install | bash
 ```
 
 
