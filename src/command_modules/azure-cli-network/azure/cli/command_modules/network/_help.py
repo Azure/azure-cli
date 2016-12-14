@@ -1228,78 +1228,78 @@ helps['network vpn-connection shared-key update'] = """
     short-summary: Update a VPN connection shared key.
 """
 
-# VPN Gateway
+# VNET Gateway
 
-helps['network vpn-gateway'] = """
+helps['network vnet-gateway'] = """
     type: group
     short-summary: Establish secure, cross-premises connectivity
 """
 
-helps['network vpn-gateway create'] = """
+helps['network vnet-gateway create'] = """
     type: command
-    short-summary: Create a VPN gateway.
+    short-summary: Create a VNet gateway.
 """
 
-helps['network vpn-gateway create'] = """
+helps['network vnet-gateway create'] = """
     type: command
-    short-summary: Create a VPN gateway.
+    short-summary: Create a VNet gateway.
 """
 
-helps['network vpn-gateway delete'] = """
+helps['network vnet-gateway delete'] = """
     type: command
-    short-summary: Delete a VPN gateway.
+    short-summary: Delete a VNet gateway.
 """
 
-helps['network vpn-gateway list'] = """
+helps['network vnet-gateway list'] = """
     type: command
-    short-summary: List VPN gateways in a resource group or subscription.
+    short-summary: List VNet gateways in a resource group or subscription.
 """
 
-helps['network vpn-gateway reset'] = """
+helps['network vnet-gateway reset'] = """
     type: command
-    short-summary: Reset a VPN gateway.
+    short-summary: Reset a VNet gateway.
 """
 
-helps['network vpn-gateway show'] = """
+helps['network vnet-gateway show'] = """
     type: command
-    short-summary: Show details of a VPN gateway.
+    short-summary: Show details of a VNet gateway.
 """
 
-helps['network vpn-gateway update'] = """
+helps['network vnet-gateway update'] = """
     type: command
-    short-summary: Update a VPN gateway.
+    short-summary: Update a VNet gateway.
 """
 
 # VPN Gateway Revoke Cert
 
-helps['network vpn-gateway revoked-cert'] = """
+helps['network vnet-gateway revoked-cert'] = """
     type: group
-    short-summary: Manage VPN gateway revoked certificates
+    short-summary: Manage VNet gateway revoked certificates
 """
 
-helps['network vpn-gateway revoked-cert create'] = """
+helps['network vnet-gateway revoked-cert create'] = """
     type: command
-    short-summary: Revoke a VPN gateway certficate.
+    short-summary: Revoke a VNet gateway certficate.
 """
 
-helps['network vpn-gateway revoked-cert delete'] = """
+helps['network vnet-gateway revoked-cert delete'] = """
     type: command
-    short-summary: Delete a revoked VPN gateway certificate.
+    short-summary: Delete a revoked VNet gateway certificate.
 """
 
 # VPN Gateway Root Cert
 
-helps['network vpn-gateway root-cert'] = """
+helps['network vnet-gateway root-cert'] = """
     type: group
-    short-summary: Manage VPN gateway root certificates
+    short-summary: Manage VNet gateway root certificates
 """
 
-helps['network vpn-gateway root-cert create'] = """
+helps['network vnet-gateway root-cert create'] = """
     type: command
-    short-summary: Upload a VPN gateway root certificate.
+    short-summary: Upload a VNet gateway root certificate.
 """
 
-helps['network vpn-gateway root-cert delete'] = """
+helps['network vnet-gateway root-cert delete'] = """
     type: command
-    short-summary: Delete a VPN gateway root certificate.
+    short-summary: Delete a VNet gateway root certificate.
 """
