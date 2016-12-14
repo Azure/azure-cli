@@ -22,8 +22,8 @@ class AzureCli2 < Formula
   #     2. Run git diff to get the patch: $ git diff src/command_modules/azure-cli-component/azure/cli/command_modules/component/custom.py
   #     3. Publish the patch publicly and include the link here.
   patch do
-    url "https://gist.githubusercontent.com/derekbekoe/b753179bff1b25343cbf38fc90c8c170/raw/e72ae0b0741fa10269fcde6e46c91122acbd5090/azure_cli_patch_component_010b11_custom.diff"
-    sha256 "7657927127349eda7ae0d8116739d397b115624151cf05d3ed4df017b34d1c72"
+    url "https://gist.githubusercontent.com/derekbekoe/b753179bff1b25343cbf38fc90c8c170/raw/d67fd273447dbfdf0ba0f709bbf6cc95f497f21c/azure_cli_patch_component_010b11_custom.diff"
+    sha256 "72691d97d0c7bb090ab7c51f6c2e3e1dec57dc9c17a90a3821218c7380a1584e"
   end
 
   def completion_script; <<-EOS.undent
