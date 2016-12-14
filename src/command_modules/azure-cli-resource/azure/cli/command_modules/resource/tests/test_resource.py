@@ -79,34 +79,32 @@ class ResourceScenarioTest(ResourceGroupVCRTestBase):
         self.execute()
 
     def __init__(self, test_method):
-        super(ResourceScenarioTest, self).__init__(__file__, test_method, resource_group='azure-cli-resource-test')
+        super(ResourceScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_resource_scenario', debug=True)
         self.vnet_name = 'cli-test-vnet1'
         self.subnet_name = 'cli-test-subnet1'
 
     def set_up(self):
         super(ResourceScenarioTest, self).set_up()
-        self.cmd('network vnet create -g {} -n {} --subnet-name {} --tags cli-test=test'.format(self.resource_group, self.vnet_name, self.subnet_name))
 
     def body(self):
         s = self
         rg = self.resource_group
-        s.cmd('resource list', checks=[
-            JMESPathCheck("length([?name=='{}'])".format(self.vnet_name), 1)
-            ])
+        vnet_count = s.cmd("resource list --query \"length([?name=='{}'])\"".format(self.vnet_name)) or 0
+        self.cmd('network vnet create -g {} -n {} --subnet-name {} --tags cli-test=test'.format(self.resource_group, self.vnet_name, self.subnet_name))
+        vnet_count += 1
+
+        s.cmd('resource list',
+              checks=JMESPathCheck("length([?name=='{}'])".format(self.vnet_name), vnet_count))
         s.cmd('resource list -l centralus',
               checks=JMESPathCheck("length([?location == 'centralus']) == length(@)", True))
-        s.cmd('resource list --resource-type Microsoft.Network/virtualNetworks', checks=[
-            JMESPathCheck("length([?name=='{}'])".format(self.vnet_name), 1)
-            ])
-        s.cmd('resource list --name {}'.format(self.vnet_name), checks=[
-            JMESPathCheck("length([?name=='{}'])".format(self.vnet_name), 1)
-            ])
-        s.cmd('resource list --tag cli-test', checks=[
-            JMESPathCheck("length([?name=='{}'])".format(self.vnet_name), 1)
-            ])
-        s.cmd('resource list --tag cli-test=test', checks=[
-            JMESPathCheck("length([?name=='{}'])".format(self.vnet_name), 1)
-            ])
+        s.cmd('resource list --resource-type Microsoft.Network/virtualNetworks',
+              checks=JMESPathCheck("length([?name=='{}'])".format(self.vnet_name), vnet_count))
+        s.cmd('resource list --name {}'.format(self.vnet_name),
+              checks=JMESPathCheck("length([?name=='{}'])".format(self.vnet_name), vnet_count))
+        s.cmd('resource list --tag cli-test',
+              checks=JMESPathCheck("length([?name=='{}'])".format(self.vnet_name), vnet_count))
+        s.cmd('resource list --tag cli-test=test',
+              checks=JMESPathCheck("length([?name=='{}'])".format(self.vnet_name), vnet_count))
 
         # check for simple resource with tag
         s.cmd('resource show -n {} -g {} --resource-type Microsoft.Network/virtualNetworks'.format(self.vnet_name, rg), checks=[
@@ -133,9 +131,9 @@ class ResourceIDScenarioTest(ResourceGroupVCRTestBase):
         self.execute()
 
     def __init__(self, test_method):
-        super(ResourceIDScenarioTest, self).__init__(__file__, test_method, resource_group='azure-cli-resource-id-test3')
-        self.vnet_name = 'cli-test-vnet1'
-        self.subnet_name = 'cli-test-subnet1'
+        super(ResourceIDScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_resource_id')
+        self.vnet_name = 'cli_test_resource_id_vnet'
+        self.subnet_name = 'cli_test_resource_id_subnet'
 
     def set_up(self):
         super(ResourceIDScenarioTest, self).set_up()

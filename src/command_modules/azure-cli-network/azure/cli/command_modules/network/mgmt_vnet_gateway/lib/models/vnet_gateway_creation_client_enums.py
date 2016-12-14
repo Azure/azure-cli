@@ -31,6 +31,7 @@ class sku(Enum):
     basic = "Basic"
     standard = "Standard"
     high_performance = "HighPerformance"
+    ultra_performance = "UltraPerformance"
 
 
 class virtualNetworkType(Enum):
@@ -43,6 +44,7 @@ class vpnType(Enum):
 
     route_based = "RouteBased"
     policy_based = "PolicyBased"
+    dedicated = "Dedicated"
 
 
 class DeploymentMode(Enum):
