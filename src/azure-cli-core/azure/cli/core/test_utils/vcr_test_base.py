@@ -254,7 +254,7 @@ class VCRTestBase(unittest.TestCase):#pylint: disable=too-many-instance-attribut
             f.write(' '.join(command))
             f.write('\n')
 
-    def _before_record_request(self, request):
+    def _before_record_request(self, request): # pylint: disable=no-self-use
         # scrub subscription from the uri
         request.uri = re.sub('/subscriptions/([^/]+)/',
                              '/subscriptions/{}/'.format(MOCKED_SUBSCRIPTION_ID), request.uri)
@@ -275,7 +275,7 @@ class VCRTestBase(unittest.TestCase):#pylint: disable=too-many-instance-attribut
             request = None
         return request
 
-    def _before_record_response(self, response):
+    def _before_record_response(self, response): # pylint: disable=no-self-use
         for key in VCRTestBase.FILTER_HEADERS:
             if key in response['headers']:
                 del response['headers'][key]
