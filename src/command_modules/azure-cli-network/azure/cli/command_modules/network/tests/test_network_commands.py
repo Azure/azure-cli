@@ -1059,7 +1059,27 @@ class NetworkVpnGatewayScenarioTest(ResourceGroupVCRTestBase):
         self.cmd('network vnet-gateway wait -g {} -n {} --created'.format(rg, self.gateway2_name))
         self.cmd('network vnet-gateway wait -g {} -n {} --created'.format(rg, self.gateway3_name))
 
-        # TODO: TEST UPDATE METHODS
+        self.cmd('network vnet-gateway show -g {} -n {}'.format(rg, self.gateway1_name), checks=[
+            JMESPathCheck('gatewayType', 'Vpn'),
+            JMESPathCheck('sku.capacity', 2),
+            JMESPathCheck('sku.name', 'Basic'),
+            JMESPathCheck('vpnType', 'RouteBased'),
+            JMESPathCheck('enableBgp', False)
+        ])
+        self.cmd('network vnet-gateway show -g {} -n {}'.format(rg, self.gateway2_name), checks=[
+            JMESPathCheck('gatewayType', 'Vpn'),
+            JMESPathCheck('sku.capacity', 2),
+            JMESPathCheck('sku.name', 'Basic'),
+            JMESPathCheck('vpnType', 'RouteBased'),
+            JMESPathCheck('enableBgp', False)
+        ])
+        self.cmd('network vnet-gateway show -g {} -n {}'.format(rg, self.gateway3_name), checks=[
+            JMESPathCheck('sku.name', 'Standard'),
+            JMESPathCheck('enableBgp', True),
+            JMESPathCheck('bgpSettings.asn', 12345),
+            JMESPathCheck('bgpSettings.bgpPeeringAddress', '10.2.250.250'),
+            JMESPathCheck('bgpSettings.peerWeight', 50)
+        ])
 
         gateway1_id = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworkGateways/{}'.format(subscription_id, rg, self.gateway1_name)
         self.cmd('network vpn-connection create -n myconnection -g {} --shared-key 123 --vnet-gateway1 {} --vnet-gateway2 {}'.format(rg, gateway1_id, self.gateway2_name))
