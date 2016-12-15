@@ -137,6 +137,7 @@ def validate_inbound_nat_rule_name_or_id(namespace):
 
 def validate_peering_type(namespace):
     if namespace.peering_type and namespace.peering_type == 'MicrosoftPeering':
+
         if not namespace.advertised_public_prefixes:
             raise CLIError(
                 'missing required MicrosoftPeering parameter --advertised-public-prefixes')
@@ -504,7 +505,6 @@ def process_vpn_connection_create_namespace(namespace):
     namespace.vnet_gateway1_id = \
         _validate_name_or_id(namespace, namespace.vnet_gateway1_id, 'virtualNetworkGateways')
 
-    # TODO: Check for existence to preclude wonkiness
     if namespace.express_route_circuit2_id:
         namespace.express_route_circuit2_id = \
             _validate_name_or_id(
