@@ -202,13 +202,15 @@ class Application(object):
     @staticmethod
     def _maybe_load_file(arg):
         ix = arg.find('@')
-        if ix == -1:
+        if ix == -1: # not found
+            return arg
+
+        if ix == len(arg) - 1: # allow simply the value '@' (used by DNS for example)
             return arg
 
         if ix == 0:
             return Application._load_file(arg[1:])
-
-        if arg[ix - 1] == '=':
+        elif arg[ix - 1] == '=':
             return arg[:ix] + Application._load_file(arg[ix + 1:])
 
         return arg
