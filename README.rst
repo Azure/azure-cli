@@ -12,7 +12,7 @@ A great cloud needs great tools; we're excited to introduce *Azure CLI 2.0 - Pre
 Installation
 ===============
 
-A list of common install issues and their resolutions are available at `Install Troubleshooting <https://github.com/Azure/azure-cli/blob/master/doc/install_troubleshooting.md>`__.
+A list of common install issues and their resolutions are available at `install troubleshooting <https://github.com/Azure/azure-cli/blob/master/doc/install_troubleshooting.md>`__.
 
 **How would you like to install?**
 
