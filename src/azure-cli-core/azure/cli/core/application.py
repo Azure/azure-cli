@@ -225,7 +225,7 @@ class Application(object):
             if path == '-':
                 content = sys.stdin.read()
             else:
-                with open(path, 'r') as input_file:
+                with open(os.path.expanduser(path), 'r') as input_file:
                     content = input_file.read()
 
             return content[0:-1] if content[-1] == '\n' else content
