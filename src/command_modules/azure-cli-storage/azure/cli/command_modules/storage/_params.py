@@ -325,6 +325,10 @@ register_cli_argument('storage blob upload-batch', 'content_cache_control', arg_
 register_cli_argument('storage blob upload-batch', 'content_language', arg_group='Content Control')
 register_cli_argument('storage blob upload-batch', 'max_connections', type=int)
 
+# TODO: Remove workaround when Python storage SDK issue #190 is fixed.
+for item in ['upload', 'upload-batch']:
+    register_cli_argument('storage blob {}'.format(item), 'max_connections', type=int, help='Maximum number of parallel connections to use when the blob size exceeds 64MB.', default=1)
+
 # FILE UPLOAD-BATCH PARAMETERS
 with CommandContext('storage file upload-batch') as c:
     c.reg_arg('source', options_list=('--source', '-s'), validator=process_file_upload_batch_parameters)
