@@ -170,7 +170,7 @@ def storage_blob_download_batch(client, source, destination, source_container_na
 def storage_blob_upload_batch(client, source, destination, pattern=None, source_files=None,
                               destination_container_name=None, blob_type=None,
                               content_settings=None, metadata=None, validate_content=False,
-                              maxsize_condition=None, max_connections=1, lease_id=None,
+                              maxsize_condition=None, max_connections=2, lease_id=None,
                               if_modified_since=None, if_unmodified_since=None, if_match=None,
                               if_none_match=None, timeout=None, dryrun=False):
     """
