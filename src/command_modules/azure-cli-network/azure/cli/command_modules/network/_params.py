@@ -223,6 +223,7 @@ register_cli_argument('network express-route', 'sku_tier', **enum_choice_list(Ex
 register_cli_argument('network express-route', 'bandwidth_in_mbps', options_list=('--bandwidth',))
 register_cli_argument('network express-route', 'service_provider_name', options_list=('--provider',))
 register_cli_argument('network express-route', 'device_path', options_list=('--path',), **enum_choice_list(device_path_values))
+register_cli_argument('network express-route', 'vlan_id', type=int)
 
 register_cli_argument('network express-route auth', 'circuit_name', circuit_name_type)
 register_cli_argument('network express-route auth', 'authorization_name', name_arg_type, id_part='child_name', help='Authorization name')
