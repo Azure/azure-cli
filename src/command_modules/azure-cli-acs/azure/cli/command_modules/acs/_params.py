@@ -49,6 +49,8 @@ def _get_default_install_location(exe_name):
 name_arg_type = CliArgumentType(options_list=('--name', '-n'), metavar='NAME')
 
 register_cli_argument('acs', 'name', arg_type=name_arg_type, help='ACS cluster name', completer=get_resource_name_completion_list('Microsoft.ContainerService/ContainerServices'))
+register_cli_argument('acs', 'resource_group', arg_type=resource_group_name_type, help='Name of the Azure resource group')
+
 register_cli_argument('acs', 'orchestrator_type', **enum_choice_list(ContainerServiceOchestratorTypes))
 #some admin names are prohibited in acs, such as root, admin, etc. Because we have no control on the orchestrators, so default to a safe name.
 register_cli_argument('acs', 'admin_username', options_list=('--admin-username',), default='azureuser', required=False)
@@ -62,7 +64,6 @@ register_cli_argument('acs create', 'agent_vm_size', completer=get_vm_size_compl
 
 register_cli_argument('acs', 'disable_browser', help='Do not open browser after opening a proxy to the cluster web user interface')
 register_cli_argument('acs dcos browse', 'name', name_arg_type)
-register_cli_argument('acs dcos browse', 'resource_group_name', resource_group_name_type)
 register_cli_argument('acs dcos install-cli', 'install_location',
                       options_list=('--install-location',),
                       default=_get_default_install_location('dcos'))
