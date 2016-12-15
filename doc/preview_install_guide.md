@@ -143,7 +143,7 @@ If Python 2.7, 3.4 or 3.5 is already installed, skip to step 2.
 
 Visit the Python site and [download Python 3.5](https://www.python.org/downloads/release/python-352/) for your OS.  
 > **NOTE**: We recommend checking the "Add Python 3.5 to PATH" option during install.
-Once the install is complete, if you open a new command prompt, you should test your Python installation:
+Once the install is complete, test your Python installation in a command prompt:
 
 ```shell
     C:\temp> python --version
@@ -152,7 +152,7 @@ Once the install is complete, if you open a new command prompt, you should test 
 
 #### Step 2: Install Azure CLI using PIP
 
-Run the following from a command prompt to install the Azure CLI 2.0 using the Python package manager, PIP:
+Run the following from an administrator command prompt to install the Azure CLI 2.0 using the Python package manager, PIP:
 
 ```shell
     C:\temp> pip install azure-cli
