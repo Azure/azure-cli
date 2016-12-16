@@ -10,13 +10,13 @@ from azure.cli.core.test_utils.vcr_test_base import (ResourceGroupVCRTestBase,
 class WebappBasicE2ETest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-        super(WebappBasicE2ETest, self).__init__(__file__, test_method, resource_group='azurecli-webapp-e2e')
+        super(WebappBasicE2ETest, self).__init__(__file__, test_method, resource_group='azurecli-webapp-e2e2')
 
     def test_webapp_e2e(self):
         self.execute()
 
     def body(self):
-        webapp_name = 'webapp-e2e'
+        webapp_name = 'webapp-e2e3'
         plan = 'webapp-e2e-plan'
         result = self.cmd('appservice plan create -g {} -n {}'.format(self.resource_group, plan))
         self.cmd('appservice plan list -g {}'.format(self.resource_group), checks=[
@@ -39,7 +39,6 @@ class WebappBasicE2ETest(ResourceGroupVCRTestBase):
             ])
 
         result = self.cmd('appservice web create -g {} -n {} --plan {}'.format(self.resource_group, webapp_name, plan), checks=[
-            JMESPathCheck('resourceGroup', self.resource_group),
             JMESPathCheck('state', 'Running'),
             JMESPathCheck('name', webapp_name),
             JMESPathCheck('hostNames[0]', webapp_name + '.azurewebsites.net')
@@ -77,6 +76,13 @@ class WebappBasicE2ETest(ResourceGroupVCRTestBase):
             JMESPathCheck('state', 'Stopped'),
             JMESPathCheck('name', webapp_name)
             ])
+
+        self.cmd('appservice web start -g {} -n {}'.format(self.resource_group, webapp_name))
+        self.cmd('appservice web show -g {} -n {}'.format(self.resource_group, webapp_name), checks=[
+            JMESPathCheck('state', 'Running'),
+            JMESPathCheck('name', webapp_name)
+            ])
+
         self.cmd('appservice web delete -g {} -n {}'.format(self.resource_group, webapp_name))
         #test empty service plan should be automatically deleted.
         result = self.cmd('appservice plan list -g {}'.format(self.resource_group), checks=[

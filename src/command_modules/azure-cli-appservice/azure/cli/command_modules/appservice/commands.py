@@ -14,6 +14,7 @@ cli_command(__name__, 'appservice web list', 'azure.cli.command_modules.appservi
 cli_command(__name__, 'appservice web show', 'azure.cli.command_modules.appservice.custom#show_webapp')
 cli_command(__name__, 'appservice web delete', 'azure.cli.command_modules.appservice.custom#delete_webapp')
 cli_command(__name__, 'appservice web stop', 'azure.cli.command_modules.appservice.custom#stop_webapp')
+cli_command(__name__, 'appservice web start', 'azure.cli.command_modules.appservice.custom#start_webapp')
 cli_command(__name__, 'appservice web restart', 'azure.cli.command_modules.appservice.custom#restart_webapp')
 
 cli_command(__name__, 'appservice web config update', 'azure.cli.command_modules.appservice.custom#update_site_configs')
