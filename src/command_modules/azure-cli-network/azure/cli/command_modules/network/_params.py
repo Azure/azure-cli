@@ -25,7 +25,8 @@ from azure.cli.core.commands.validators import MarkSpecifiedAction
 from azure.cli.core.commands.template_create import get_folded_parameter_help_string
 from azure.cli.command_modules.network._client_factory import _network_client_factory
 from azure.cli.command_modules.network._validators import \
-    (process_ag_create_namespace, process_ag_listener_create_namespace,
+    (dns_zone_name_type,
+     process_ag_create_namespace, process_ag_listener_create_namespace,
      process_ag_http_settings_create_namespace, process_ag_url_path_map_create_namespace,
      process_nic_create_namespace, process_lb_create_namespace, process_ag_rule_create_namespace,
      process_ag_url_path_map_rule_create_namespace, process_auth_create_namespace,
@@ -506,7 +507,7 @@ register_cli_argument('network traffic-manager endpoint create', 'target', help=
 register_cli_argument('network dns', 'location', help=argparse.SUPPRESS, default='global')
 register_cli_argument('network dns', 'record_set_name', name_arg_type, help='The name of the record set, relative to the name of the zone.')
 register_cli_argument('network dns', 'relative_record_set_name', name_arg_type, help='The name of the record set, relative to the name of the zone.')
-register_cli_argument('network dns', 'zone_name', options_list=('--zone-name', '-z'), help='The name of the zone without a terminating dot.')
+register_cli_argument('network dns', 'zone_name', options_list=('--zone-name', '-z'), help='The name of the zone.', type=dns_zone_name_type)
 register_cli_argument('network dns', 'metadata', nargs='+', help='Metadata in space-separated key=value pairs. This overwrites any existing metadata.', validator=validate_metadata)
 
 register_cli_argument('network dns', 'record_type', modified_record_type)

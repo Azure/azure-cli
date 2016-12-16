@@ -405,7 +405,8 @@ cli_command(__name__, 'network dns record-set create', 'azure.cli.command_module
 cli_generic_update_command(__name__, 'network dns record-set update',
                            'azure.mgmt.dns.operations.record_sets_operations#RecordSetsOperations.get',
                            'azure.mgmt.dns.operations.record_sets_operations#RecordSetsOperations.create_or_update',
-                           cf_dns_mgmt_record_sets)
+                           cf_dns_mgmt_record_sets,
+                           custom_function_op='azure.cli.command_modules.network.custom#update_dns_record_set')
 
 # DNS RecordOperations
 cli_command(__name__, 'network dns record aaaa add', 'azure.cli.command_modules.network.custom#add_dns_aaaa_record')
