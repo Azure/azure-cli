@@ -135,6 +135,10 @@ def validate_inbound_nat_rule_name_or_id(namespace):
         namespace.inbound_nat_rule = _generate_lb_subproperty_id(
             namespace, 'inboundNatRules', rule_name)
 
+def validate_metadata(namespace):
+    if namespace.metadata:
+        namespace.metadata = dict(x.split('=', 1) for x in namespace.metadata)
+
 def validate_peering_type(namespace):
     if namespace.peering_type and namespace.peering_type == 'MicrosoftPeering':
 

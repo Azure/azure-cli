@@ -25,6 +25,7 @@ from azure.cli.command_modules.network.mgmt_nic.lib.operations.nic_operations im
 from azure.mgmt.trafficmanager import TrafficManagerManagementClient
 from azure.mgmt.trafficmanager.models import Endpoint
 from azure.mgmt.dns import DnsManagementClient
+from azure.mgmt.dns.operations import RecordSetsOperations
 from azure.mgmt.dns.models import (RecordSet, AaaaRecord, ARecord, CnameRecord, MxRecord,
                                    NsRecord, PtrRecord, SoaRecord, SrvRecord, TxtRecord, Zone)
 
@@ -1038,11 +1039,13 @@ def list_dns_zones(resource_group_name=None):
         return ncf.list_in_subscription()
 
 def create_dns_record_set(resource_group_name, zone_name, record_set_name, record_set_type,
-                          ttl=None):
+                          metadata=None, if_match=None, if_none_match=None, ttl=3600):
     ncf = get_mgmt_service_client(DnsManagementClient).record_sets
-    record_set = RecordSet(name=record_set_name, type=record_set_type, ttl=ttl)
+    record_set = RecordSet(name=record_set_name, type=record_set_type, ttl=ttl, metadata=metadata)
     return ncf.create_or_update(resource_group_name, zone_name, record_set_name,
-                                record_set_type, record_set)
+                                record_set_type, record_set, if_match=if_match,
+                                if_none_match='*' if if_none_match else None)
+create_dns_record_set.__doc__ = RecordSetsOperations.create_or_update.__doc__
 
 def export_zone(resource_group_name, zone_name, file_name):
     client = get_mgmt_service_client(DnsManagementClient)
