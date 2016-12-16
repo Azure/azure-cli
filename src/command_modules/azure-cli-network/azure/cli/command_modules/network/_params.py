@@ -120,6 +120,7 @@ load_balancer_name_type = CliArgumentType(options_list=('--lb-name',), metavar='
 private_ip_address_type = CliArgumentType(help='Static private IP address to use.', validator=validate_private_ip_address)
 cookie_based_affinity_type = CliArgumentType(**enum_choice_list(ApplicationGatewayCookieBasedAffinity))
 http_protocol_type = CliArgumentType(**enum_choice_list(ApplicationGatewayProtocol))
+modified_record_type = CliArgumentType(options_list=('--type', '-t'), help='The type of DNS records in the record set.', **enum_choice_list([x.value for x in RecordType if x.value != 'SOA']))
 
 # ARGUMENT REGISTRATION
 
@@ -503,13 +504,12 @@ register_cli_argument('network traffic-manager endpoint create', 'target', help=
 
 # DNS
 register_cli_argument('network dns', 'location', help=argparse.SUPPRESS, default='global')
-register_cli_argument('network dns', 'record_set_name', name_arg_type, help='The name of the RecordSet, relative to the name of the zone.')
-register_cli_argument('network dns', 'relative_record_set_name', name_arg_type, help='The name of the RecordSet, relative to the name of the zone.')
+register_cli_argument('network dns', 'record_set_name', name_arg_type, help='The name of the record set, relative to the name of the zone.')
+register_cli_argument('network dns', 'relative_record_set_name', name_arg_type, help='The name of the record set, relative to the name of the zone.')
 register_cli_argument('network dns', 'zone_name', options_list=('--zone-name', '-z'), help='The name of the zone without a terminating dot.')
 register_cli_argument('network dns', 'metadata', nargs='+', help='Metadata in space-separated key=value pairs. This overwrites any existing metadata.', validator=validate_metadata)
 
-modified_record_type = [x.value for x in RecordType if x.value != 'SOA']
-register_cli_argument('network dns', 'record_type', options_list=('--type', '-t'), **enum_choice_list(modified_record_type))
+register_cli_argument('network dns', 'record_type', modified_record_type)
 register_cli_argument('network dns', 'location', help=argparse.SUPPRESS, default='global')
 
 register_cli_argument('network dns zone', 'zone_name', name_arg_type)
@@ -523,7 +523,7 @@ register_cli_argument('network dns record', 'record_set_name', options_list=('--
 register_cli_argument('network dns record txt add', 'value', nargs='+')
 register_cli_argument('network dns record txt remove', 'value', nargs='+')
 
-register_cli_argument('network dns record-set create', 'record_set_type', options_list=('--type', '-t'), help='The type of DNS records in the record set.', **enum_choice_list(modified_record_type))
+register_cli_argument('network dns record-set create', 'record_set_type', modified_record_type)
 register_cli_argument('network dns record-set create', 'ttl', help='Record set TTL (time-to-live)')
 register_cli_argument('network dns record-set create', 'if_none_match', help='Create the record set only if it does not already exist.', action='store_true')
 
