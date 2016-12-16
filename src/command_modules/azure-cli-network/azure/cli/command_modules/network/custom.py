@@ -1031,6 +1031,20 @@ def list_traffic_manager_endpoints(resource_group_name, profile_name, endpoint_t
 #endregion
 
 #region DNS Commands
+
+def create_dns_zone(client, resource_group_name, zone_name, location='global', tags=None,
+                    if_none_match=False):
+    kwargs = {
+        'resource_group_name':resource_group_name,
+        'zone_name': zone_name,
+        'parameters': Zone(location, tags=tags)
+    }
+
+    if if_none_match:
+        kwargs['if_none_match'] = '*'
+
+    return client.create_or_update(**kwargs)
+
 def list_dns_zones(resource_group_name=None):
     ncf = get_mgmt_service_client(DnsManagementClient).zones
     if resource_group_name:

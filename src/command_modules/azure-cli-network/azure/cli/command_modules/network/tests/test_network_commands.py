@@ -1112,7 +1112,7 @@ class NetworkTrafficManagerScenarioTest(ResourceGroupVCRTestBase):
 class NetworkDnsScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-        super(NetworkDnsScenarioTest, self).__init__(__file__, test_method, resource_group='cli_dns_test1')
+        super(NetworkDnsScenarioTest, self).__init__(__file__, test_method, resource_group='cli_dns_test1', debug=True)
 
     def test_network_dns(self):
         self.execute()
@@ -1173,7 +1173,7 @@ class NetworkDnsScenarioTest(ResourceGroupVCRTestBase):
                      .format('a', rg, zone_name, '--ipv4-address 10.0.0.11'))
         self.cmd('network dns record-set show -n myrs{0} -g {1} --type {0} --zone-name {2}'
                  .format('a', rg, zone_name), checks=[
-                     JMESPathCheck('length(arecords)', 0)
+                     JMESPathCheck('arecords', None)
                      ])
 
         self.cmd('network dns record-set delete -n myrs{0} -g {1} --type {0} --zone-name {2}'

@@ -13,7 +13,7 @@ from ._util import (list_network_resource_property,
                     get_network_resource_property_entry,
                     delete_network_resource_property_entry)
 from ._format import \
-    (transform_local_gateway_table_output)
+    (transform_local_gateway_table_output, transform_dns_record_set_output)
 
 # Application gateways
 cli_command(__name__, 'network application-gateway delete', 'azure.mgmt.network.operations.application_gateways_operations#ApplicationGatewaysOperations.delete', cf_application_gateways, no_wait_param='raw')
@@ -394,19 +394,19 @@ cli_generic_update_command(__name__, 'network dns zone update',
                            cf_dns_mgmt_zones)
 cli_command(__name__, 'network dns zone import', 'azure.cli.command_modules.network.custom#import_zone')
 cli_command(__name__, 'network dns zone export', 'azure.cli.command_modules.network.custom#export_zone')
-
-cli_command(__name__, 'network dns zone create', 'azure.cli.command_modules.network.dns_zone#create_dns_zone', cf_dns_mgmt_zones)
+cli_command(__name__, 'network dns zone create', 'azure.cli.command_modules.network.custom#create_dns_zone', cf_dns_mgmt_zones)
 
 # DNS RecordSetsOperations
-cli_command(__name__, 'network dns record-set show', 'azure.mgmt.dns.operations.record_sets_operations#RecordSetsOperations.get', cf_dns_mgmt_record_sets)
+cli_command(__name__, 'network dns record-set show', 'azure.mgmt.dns.operations.record_sets_operations#RecordSetsOperations.get', cf_dns_mgmt_record_sets, transform=transform_dns_record_set_output)
 cli_command(__name__, 'network dns record-set delete', 'azure.mgmt.dns.operations.record_sets_operations#RecordSetsOperations.delete', cf_dns_mgmt_record_sets)
-cli_command(__name__, 'network dns record-set list', 'azure.mgmt.dns.operations.record_sets_operations#RecordSetsOperations.list_all_in_resource_group', cf_dns_mgmt_record_sets)
-cli_command(__name__, 'network dns record-set create', 'azure.cli.command_modules.network.custom#create_dns_record_set')
+cli_command(__name__, 'network dns record-set list', 'azure.mgmt.dns.operations.record_sets_operations#RecordSetsOperations.list_all_in_resource_group', cf_dns_mgmt_record_sets, transform=transform_dns_record_set_output)
+cli_command(__name__, 'network dns record-set create', 'azure.cli.command_modules.network.custom#create_dns_record_set', transform=transform_dns_record_set_output)
 cli_generic_update_command(__name__, 'network dns record-set update',
                            'azure.mgmt.dns.operations.record_sets_operations#RecordSetsOperations.get',
                            'azure.mgmt.dns.operations.record_sets_operations#RecordSetsOperations.create_or_update',
                            cf_dns_mgmt_record_sets,
-                           custom_function_op='azure.cli.command_modules.network.custom#update_dns_record_set')
+                           custom_function_op='azure.cli.command_modules.network.custom#update_dns_record_set',
+                           transform=transform_dns_record_set_output)
 
 # DNS RecordOperations
 cli_command(__name__, 'network dns record aaaa add', 'azure.cli.command_modules.network.custom#add_dns_aaaa_record')
