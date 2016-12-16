@@ -19,7 +19,7 @@ A list of common install issues and their resolutions are available at `install 
 - `Interactive install script <#interactive-install-script>`__
 - `Pip <#pip>`__
 - `Apt-get <#apt-get>`__
-- `Docker <#docker>`__
+- `Docker <#docker-versioned>`__
 - `Nightly Builds <#nightly-builds>`__
 - `Developer Setup <#developer-setup>`__
 
