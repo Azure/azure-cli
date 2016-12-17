@@ -162,21 +162,9 @@ def tag_resource(tags, resource_group_name=None, resource_provider_namespace=Non
                          resource_id, api_version)
     return res.tag(tags)
 
-def get_deployment_operations(client, resource_group_name, deployment_name, operation_id=None,
-                              operation_ids=None):
-    """Gets a deployments operation.
-    :param resource_group_name: The name of the resource group. The name
-     is case insensitive.
-    :type resource_group_name: str
-    :param deployment_name: The name of the deployment.
-    :type deployment_name: str
-    :param operation_ids: A comma separated list of ids to get.
-    :type operation_ids: str
+def get_deployment_operations(client, resource_group_name, deployment_name, operation_ids):
+    """get a deployment's operation.
     """
-    if not operation_id and not operation_ids:
-        raise CLIError('one of --operation-id or --operation-ids is required.')
-    if not operation_ids:
-        operation_ids = [operation_id]
     result = []
     for op_id in operation_ids:
         dep = client.get(resource_group_name, deployment_name, op_id)
