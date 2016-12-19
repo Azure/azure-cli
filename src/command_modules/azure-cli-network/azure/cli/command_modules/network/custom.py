@@ -67,7 +67,18 @@ def list_application_gateways(resource_group_name=None):
 
 #endregion
 
-#region Application Gateway subresource commands
+#region Application Gateway commands
+
+def update_application_gateway(instance, sku_name=None, sku_tier=None, capacity=None, tags=None):
+    if sku_name is not None:
+        instance.sku.name = sku_name
+    if sku_tier is not None:
+        instance.sku.tier = sku_tier
+    if capacity is not None:
+        instance.sku.capacity = capacity
+    if tags is not None:
+        instance.tags = tags
+    return instance
 
 def create_ag_address_pool(resource_group_name, application_gateway_name, item_name, servers):
     from azure.mgmt.network.models import ApplicationGatewayBackendAddressPool

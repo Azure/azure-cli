@@ -136,7 +136,7 @@ register_cli_argument('network application-gateway', 'application_gateway_name',
 register_cli_argument('network application-gateway', 'sku_name', **enum_choice_list(ApplicationGatewaySkuName))
 register_cli_argument('network application-gateway', 'sku_tier', **enum_choice_list(ApplicationGatewayTier))
 register_cli_argument('network application-gateway', 'virtual_network_name', virtual_network_name_type)
-register_cli_argument('network application-gateway', 'servers', nargs='+', validator=validate_servers)
+register_cli_argument('network application-gateway', 'servers', nargs='+', help='Space separated list of IP addresses or DNS names corresponding to backend servers.', validator=validate_servers)
 register_cli_argument('network application-gateway', 'http_settings_cookie_based_affinity', cookie_based_affinity_type)
 register_cli_argument('network application-gateway', 'http_settings_protocol', http_protocol_type)
 register_cli_argument('network application-gateway', 'subnet_address_prefix', action=MarkSpecifiedAction)
@@ -349,7 +349,7 @@ register_cli_argument('network vnet create', 'subnet_prefix', help='IP address p
 register_cli_argument('network vnet create', 'subnet_name', help='Name of a new subnet to create within the VNet.')
 register_cli_argument('network vnet create', 'virtual_network_prefix', options_list=('--address-prefix',), metavar='PREFIX')
 register_cli_argument('network vnet create', 'virtual_network_name', virtual_network_name_type, options_list=('--name', '-n'), required=True, completer=None)
-register_cli_argument('network vnet create', 'dns_servers', nargs='+', validator=process_vnet_create_namespace)
+register_cli_argument('network vnet create', 'dns_servers', nargs='+', help='Space separated list of DNS server IP addresses.', validator=process_vnet_create_namespace)
 register_cli_argument('network vnet create', 'create_subnet', ignore_type)
 
 register_cli_argument('network vnet subnet', 'subnet_name', arg_type=subnet_name_type, options_list=('--name', '-n'), id_part='child_name')
