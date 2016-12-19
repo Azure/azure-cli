@@ -16,6 +16,10 @@ from azure.cli.core.commands.client_factory import get_subscription_id
 
 # PARAMETER VALIDATORS
 
+def dns_zone_name_type(value):
+    if value:
+        return value[:-1] if value[-1] == '.' else value
+
 def _generate_ag_subproperty_id(namespace, child_type, child_name, subscription=None):
     return resource_id(
         subscription=subscription or get_subscription_id(),

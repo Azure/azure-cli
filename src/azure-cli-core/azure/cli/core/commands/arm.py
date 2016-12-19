@@ -197,7 +197,7 @@ def _get_child(parent, collection_name, item_name, collection_key):
 def cli_generic_update_command(module_name, name, getter_op, setter_op, factory=None, setter_arg_name='parameters', # pylint: disable=too-many-arguments, line-too-long
                                table_transformer=None, child_collection_prop_name=None,
                                child_collection_key='name', child_arg_name='item_name',
-                               custom_function_op=None, no_wait_param=None):
+                               custom_function_op=None, no_wait_param=None, transform=None):
     if not isinstance(getter_op, string_types):
         raise ValueError("Getter operation must be a string. Got '{}'".format(getter_op))
     if not isinstance(setter_op, string_types):
@@ -297,14 +297,18 @@ def cli_generic_update_command(module_name, name, getter_op, setter_op, factory=
 
         result = opres.result() if isinstance(opres, AzureOperationPoller) else opres
         if child_collection_prop_name:
-            return _get_child(
+            result = _get_child(
                 result,
                 child_collection_prop_name,
                 args.get(child_arg_name),
                 child_collection_key
             )
-        else:
-            return result
+
+        # apply results transform if specified
+        if transform:
+            return transform(result)
+
+        return result
 
     class OrderedArgsAction(argparse.Action): #pylint:disable=too-few-public-methods
         def __call__(self, parser, namespace, values, option_string=None):
