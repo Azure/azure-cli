@@ -1031,6 +1031,20 @@ def list_traffic_manager_endpoints(resource_group_name, profile_name, endpoint_t
 #endregion
 
 #region DNS Commands
+
+def create_dns_zone(client, resource_group_name, zone_name, location='global', tags=None,
+                    if_none_match=False):
+    kwargs = {
+        'resource_group_name':resource_group_name,
+        'zone_name': zone_name,
+        'parameters': Zone(location, tags=tags)
+    }
+
+    if if_none_match:
+        kwargs['if_none_match'] = '*'
+
+    return client.create_or_update(**kwargs)
+
 def list_dns_zones(resource_group_name=None):
     ncf = get_mgmt_service_client(DnsManagementClient).zones
     if resource_group_name:
@@ -1046,6 +1060,11 @@ def create_dns_record_set(resource_group_name, zone_name, record_set_name, recor
                                 record_set_type, record_set, if_match=if_match,
                                 if_none_match='*' if if_none_match else None)
 create_dns_record_set.__doc__ = RecordSetsOperations.create_or_update.__doc__
+
+def update_dns_record_set(instance, metadata=None):
+    if metadata is not None:
+        instance.metadata = metadata
+    return instance
 
 def export_zone(resource_group_name, zone_name, file_name):
     client = get_mgmt_service_client(DnsManagementClient)
