@@ -23,6 +23,7 @@ cli_command(__name__, 'network application-gateway show', 'azure.mgmt.network.op
 cli_command(__name__, 'network application-gateway list', custom_path.format('list_application_gateways'))
 cli_command(__name__, 'network application-gateway start', 'azure.mgmt.network.operations.application_gateways_operations#ApplicationGatewaysOperations.start', cf_application_gateways)
 cli_command(__name__, 'network application-gateway stop', 'azure.mgmt.network.operations.application_gateways_operations#ApplicationGatewaysOperations.stop', cf_application_gateways)
+cli_command(__name__, 'network application-gateway show-backend-health', 'azure.mgmt.network.operations.application_gateways_operations#ApplicationGatewaysOperations.backend_health', cf_application_gateways)
 cli_generic_update_command(__name__, 'network application-gateway update',
                            'azure.mgmt.network.operations.application_gateways_operations#ApplicationGatewaysOperations.get',
                            'azure.mgmt.network.operations.application_gateways_operations#ApplicationGatewaysOperations.create_or_update',
