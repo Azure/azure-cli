@@ -308,6 +308,10 @@ def process_ag_rule_create_namespace(namespace): # pylint: disable=unused-argume
         namespace.url_path_map = _generate_ag_subproperty_id(
             namespace, 'urlPathMaps', namespace.url_path_map)
 
+def process_ag_ssl_policy_set_namespace(namespace):
+    if namespace.disabled_ssl_protocols and namespace.clear:
+        raise ValueError('incorrect usage: --disabled-ssl-protocols PROTOCOL [...] | --clear')
+
 def process_ag_url_path_map_create_namespace(namespace): # pylint: disable=unused-argument
     if namespace.default_address_pool and not is_valid_resource_id(namespace.default_address_pool):
         namespace.default_address_pool = _generate_ag_subproperty_id(

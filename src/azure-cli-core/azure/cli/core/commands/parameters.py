@@ -77,7 +77,7 @@ class CaseInsenstiveList(list): # pylint: disable=too-few-public-methods
     def __contains__(self, other):
         return next((True for x in self if other.lower() == x.lower()), False)
 
-def enum_choice_list(data):
+def enum_choice_list(data, allow_empty=False):
     """ Creates the argparse choices and type kwargs for a supplied enum type or list of strings. """
     # transform enum types, otherwise assume list of string choices
     try:

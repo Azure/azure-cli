@@ -79,6 +79,13 @@ def update_application_gateway(instance, sku_name=None, sku_tier=None, capacity=
     if tags is not None:
         instance.tags = tags
     return instance
+update_application_gateway.__doc__ = AppGatewayOperations.create_or_update.__doc__
+
+def create_ag_authentication_certificate(resource_group_name, application_gateway_name, item_name):
+    raise CLIError('Under construction!')
+
+def update_ag_authentication_certificate(resource_group_name, application_gateway_name, item_name):
+    raise CLIError('Under construction!')
 
 def create_ag_backend_address_pool(resource_group_name, application_gateway_name, item_name, servers):
     from azure.mgmt.network.models import ApplicationGatewayBackendAddressPool
@@ -122,6 +129,7 @@ def update_ag_frontend_ip_configuration(instance, parent, item_name, public_ip_a
         instance.private_ip_address = private_ip_address
         instance.private_ip_address_allocation = 'static'
     return parent
+update_ag_frontend_ip_configuration.__doc__ = AppGatewayOperations.create_or_update.__doc__
 
 def create_ag_frontend_port(resource_group_name, application_gateway_name, item_name, port):
     from azure.mgmt.network.models import ApplicationGatewayFrontendPort
@@ -276,6 +284,18 @@ def update_ag_ssl_certificate(instance, parent, item_name, cert_data=None, cert_
     if cert_password is not None:
         instance.password = cert_password
     return parent
+update_ag_ssl_certificate.__doc__ = AppGatewayOperations.create_or_update.__doc__
+
+def set_ag_ssl_policy(resource_group_name, application_gateway_name, disabled_ssl_protocols=None, clear=False, raw=False):
+    from azure.mgmt.network.models import ApplicationGatewaySslPolicy
+    ncf = _network_client_factory().application_gateways
+    ag = ncf.get(resource_group_name, application_gateway_name)
+    ag.ssl_policy = None if clear else ApplicationGatewaySslPolicy(disabled_ssl_protocols)
+    return ncf.create_or_update(resource_group_name, application_gateway_name, ag, raw=raw)
+
+def show_ag_ssl_policy(resource_group_name, application_gateway_name):
+    return _network_client_factory().application_gateways.get(
+        resource_group_name, application_gateway_name).ssl_policy
 
 def create_ag_url_path_map(resource_group_name, application_gateway_name, item_name,
                            paths, address_pool, http_settings, rule_name='default',
