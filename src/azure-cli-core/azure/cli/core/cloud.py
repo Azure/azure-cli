@@ -119,8 +119,8 @@ AZURE_CHINA_CLOUD = Cloud('AzureChinaCloud',
 
 AZURE_US_GOV_CLOUD = Cloud('AzureUSGovernment',
                            endpoints=CloudEndpoints(
-                               management='https://management.core.usgovcloudapi.net',
-                               resource_manager='https://management.usgovcloudapi.net',
+                               management='https://management.core.usgovcloudapi.net/',
+                               resource_manager='https://management.usgovcloudapi.net/',
                                sql_management='https://management.core.usgovcloudapi.net:8443/',
                                gallery='https://gallery.usgovcloudapi.net/',
                                active_directory='https://login.microsoftonline.com',
