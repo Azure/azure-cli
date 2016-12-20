@@ -48,20 +48,24 @@ property_map = {
     'probes': 'probe',
     'url_path_maps': 'url-path-map'
 }
+def _make_singular(value):
+    try:
+        return value[:-1] if value.endswith('s') else value
+    except AttributeError:
+        return value
+
 for subresource, alias in property_map.items():
     cli_command(__name__, 'network application-gateway {} list'.format(alias), 'azure.cli.command_modules.network._util#{}'.format(list_network_resource_property('application_gateways', subresource)))
     cli_command(__name__, 'network application-gateway {} show'.format(alias), 'azure.cli.command_modules.network._util#{}'.format(get_network_resource_property_entry('application_gateways', subresource)))
     cli_command(__name__, 'network application-gateway {} delete'.format(alias), 'azure.cli.command_modules.network._util#{}'.format(delete_network_resource_property_entry('application_gateways', subresource)))
+    cli_command(__name__, 'network application-gateway {} create'.format(alias), custom_path.format('create_ag_{}'.format(_make_singular(subresource))))
+    cli_generic_update_command(__name__, 'network application-gateway {} update'.format(alias),
+                               'azure.mgmt.network.operations.application_gateways_operations#ApplicationGatewaysOperations.get',
+                               'azure.mgmt.network.operations.application_gateways_operations#ApplicationGatewaysOperations.create_or_update',
+                               cf_application_gateways, no_wait_param='raw',
+                               custom_function_op=custom_path.format('update_ag_{}'.format(_make_singular(subresource))),
+                               child_collection_prop_name=subresource)
 
-cli_command(__name__, 'network application-gateway address-pool create', custom_path.format('create_ag_address_pool'))
-cli_command(__name__, 'network application-gateway frontend-ip create', custom_path.format('create_ag_frontend_ip'))
-cli_command(__name__, 'network application-gateway frontend-port create', custom_path.format('create_ag_frontend_port'))
-cli_command(__name__, 'network application-gateway http-listener create', custom_path.format('create_ag_http_listener'))
-cli_command(__name__, 'network application-gateway http-settings create', custom_path.format('create_ag_http_settings'))
-cli_command(__name__, 'network application-gateway probe create', custom_path.format('create_ag_probe'))
-cli_command(__name__, 'network application-gateway rule create', custom_path.format('create_ag_rule'))
-cli_command(__name__, 'network application-gateway ssl-cert create', custom_path.format('create_ag_ssl_cert'))
-cli_command(__name__, 'network application-gateway url-path-map create', custom_path.format('create_ag_url_path_map'))
 cli_command(__name__, 'network application-gateway url-path-map rule create', custom_path.format('create_ag_url_path_map_rule'))
 cli_command(__name__, 'network application-gateway url-path-map rule delete', custom_path.format('delete_ag_url_path_map_rule'))
 
