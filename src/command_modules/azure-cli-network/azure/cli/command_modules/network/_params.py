@@ -25,17 +25,19 @@ from azure.cli.core.commands.validators import MarkSpecifiedAction
 from azure.cli.core.commands.template_create import get_folded_parameter_help_string
 from azure.cli.command_modules.network._client_factory import _network_client_factory
 from azure.cli.command_modules.network._validators import \
-    (process_ag_create_namespace, process_ag_listener_create_namespace,
+    (dns_zone_name_type,
+     process_ag_create_namespace, process_ag_listener_create_namespace,
      process_ag_http_settings_create_namespace, process_ag_url_path_map_create_namespace,
      process_nic_create_namespace, process_lb_create_namespace, process_ag_rule_create_namespace,
      process_ag_url_path_map_rule_create_namespace, process_auth_create_namespace,
      process_public_ip_create_namespace, validate_private_ip_address,
      process_lb_frontend_ip_namespace, process_local_gateway_create_namespace,
      process_tm_endpoint_create_namespace, process_vnet_create_namespace,
+     process_vnet_gateway_create_namespace, process_vpn_connection_create_namespace,
      validate_inbound_nat_rule_id_list, validate_address_pool_id_list,
      validate_inbound_nat_rule_name_or_id, validate_address_pool_name_or_id,
-     validate_servers, load_cert_file,
-     vnet_gateway_validator, validate_peering_type,
+     validate_servers, load_cert_file, validate_metadata,
+     validate_peering_type,
      get_public_ip_validator, get_nsg_validator, get_subnet_validator,
      get_virtual_network_validator)
 from azure.cli.command_modules.network.mgmt_nic.lib.models.nic_creation_client_enums import privateIpAddressVersion
@@ -119,6 +121,7 @@ load_balancer_name_type = CliArgumentType(options_list=('--lb-name',), metavar='
 private_ip_address_type = CliArgumentType(help='Static private IP address to use.', validator=validate_private_ip_address)
 cookie_based_affinity_type = CliArgumentType(**enum_choice_list(ApplicationGatewayCookieBasedAffinity))
 http_protocol_type = CliArgumentType(**enum_choice_list(ApplicationGatewayProtocol))
+modified_record_type = CliArgumentType(options_list=('--type', '-t'), help='The type of DNS records in the record set.', **enum_choice_list([x.value for x in RecordType if x.value != 'SOA']))
 
 # ARGUMENT REGISTRATION
 
@@ -222,6 +225,7 @@ register_cli_argument('network express-route', 'sku_tier', **enum_choice_list(Ex
 register_cli_argument('network express-route', 'bandwidth_in_mbps', options_list=('--bandwidth',))
 register_cli_argument('network express-route', 'service_provider_name', options_list=('--provider',))
 register_cli_argument('network express-route', 'device_path', options_list=('--path',), **enum_choice_list(device_path_values))
+register_cli_argument('network express-route', 'vlan_id', type=int)
 
 register_cli_argument('network express-route auth', 'circuit_name', circuit_name_type)
 register_cli_argument('network express-route auth', 'authorization_name', name_arg_type, id_part='child_name', help='Authorization name')
@@ -241,14 +245,17 @@ register_cli_argument('network express-route peering', 'routing_registry_name', 
 
 # Local Gateway
 register_cli_argument('network local-gateway', 'local_network_gateway_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/localNetworkGateways'), id_part='name')
-register_cli_argument('network local-gateway', 'asn', arg_group='BGP Peering', help='Autonomous System Number to use for the BGP settings.')
-register_cli_argument('network local-gateway', 'bgp_peering_address', arg_group='BGP Peering', help='IP address from the OnPremise VPN\'s subnet to use for BGP peering.')
-register_cli_argument('network local-gateway', 'peer_weight', arg_group='BGP Peering', help='Weight (0-100) added to routes learned through BGP peering.')
 register_cli_argument('network local-gateway', 'local_address_prefix', nargs='+', options_list=('--local-address-prefixes',), help='List of CIDR block prefixes representing the address space of the OnPremise VPN\'s subnet.')
 register_cli_argument('network local-gateway', 'gateway_ip_address', help='Gateway\'s public IP address. (e.g. 10.1.1.1).')
+register_cli_argument('network local-gateway', 'bgp_peering_address', arg_group='BGP Peering', help='IP address from the OnPremise VPN\'s subnet to use for BGP peering.')
 
 register_cli_argument('network local-gateway create', 'use_bgp_settings', ignore_type)
 register_cli_argument('network local-gateway create', 'asn', validator=process_local_gateway_create_namespace)
+
+
+for item in ['local-gateway', 'vnet-gateway']:
+    register_cli_argument('network {}'.format(item), 'asn', arg_group='BGP Peering', help='Autonomous System Number to use for the BGP settings.')
+    register_cli_argument('network {}'.format(item), 'peer_weight', arg_group='BGP Peering', help='Weight (0-100) added to routes learned through BGP peering.')
 
 # NIC
 
@@ -415,47 +422,55 @@ register_cli_argument('network lb rule', 'load_distribution', help='Affinity rul
 
 register_cli_argument('network nsg create', 'name', name_arg_type)
 
-# VPN gateway
+# VNET gateway
 
-register_cli_argument('network vpn-gateway', 'virtual_network_gateway_name', options_list=('--name', '-n'), completer=get_resource_name_completion_list('Microsoft.Network/virtualNetworkGateways'), id_part='name')
-register_cli_argument('network vpn-gateway', 'cert_name', help='Root certificate name', options_list=('--name', '-n'))
-register_cli_argument('network vpn-gateway', 'gateway_name', help='Virtual network gateway name')
-register_cli_argument('network vpn-gateway', 'gateway_type', help='The gateway type.', **enum_choice_list(gatewayType))
-register_cli_argument('network vpn-gateway', 'sku', help='VPN gateway SKU.', **enum_choice_list(sku))
+register_cli_argument('network vnet-gateway', 'virtual_network_gateway_name', options_list=('--name', '-n'), completer=get_resource_name_completion_list('Microsoft.Network/virtualNetworkGateways'), id_part='name')
+register_cli_argument('network vnet-gateway', 'cert_name', help='Root certificate name', options_list=('--name', '-n'))
+register_cli_argument('network vnet-gateway', 'gateway_name', help='Virtual network gateway name')
+register_cli_argument('network vnet-gateway', 'gateway_type', help='The gateway type.', **enum_choice_list(gatewayType))
+register_cli_argument('network vnet-gateway', 'sku', help='VNet gateway SKU.', **enum_choice_list(sku))
+register_cli_argument('network vnet-gateway', 'vpn_type', help='VPN routing type.', **enum_choice_list(vpnType))
+register_cli_argument('network vnet-gateway', 'bgp_peering_address', arg_group='BGP Peering', help='IP address to use for BGP peering.')
 
-for dest in ['vpn_type', 'vpn_gateway_type']:
-    register_cli_argument('network vpn-gateway', dest, help='VPN gateway type.', **enum_choice_list(vpnType))
+register_cli_argument('network vnet-gateway create', 'enable_bgp', ignore_type)
+register_cli_argument('network vnet-gateway create', 'asn', validator=process_vnet_gateway_create_namespace)
 
-register_cli_argument('network vpn-gateway update', 'enable_bgp', help='Enable BGP (Border Gateway Protocol)', **enum_choice_list(['true', 'false']))
-register_cli_argument('network vpn-gateway update', 'public_ip_address', help='Name or ID of a public IP address.', validator=get_public_ip_validator())
-register_cli_argument('network vpn-gateway update', 'virtual_network', virtual_network_name_type, options_list=('--vnet',), help="Name or ID of a virtual network that contains a subnet named 'GatewaySubnet'.", validator=get_virtual_network_validator())
+register_cli_argument('network vnet-gateway update', 'enable_bgp', help='Enable BGP (Border Gateway Protocol)', arg_group='BGP Peering', **enum_choice_list(['true', 'false']))
+register_cli_argument('network vnet-gateway update', 'public_ip_address', help='Name or ID of a public IP address.', validator=get_public_ip_validator())
+register_cli_argument('network vnet-gateway update', 'virtual_network', virtual_network_name_type, options_list=('--vnet',), help="Name or ID of a virtual network that contains a subnet named 'GatewaySubnet'.", validator=get_virtual_network_validator())
 
 public_ip_help = get_folded_parameter_help_string('public IP address')
-register_cli_argument('network vpn-gateway create', 'public_ip_address', help=public_ip_help, completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'), validator=get_public_ip_validator(has_type_field=True))
-register_cli_argument('network vpn-gateway create', 'public_ip_address_type', ignore_type)
+register_cli_argument('network vnet-gateway create', 'public_ip_address', help=public_ip_help, completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'), validator=get_public_ip_validator(has_type_field=True))
+register_cli_argument('network vnet-gateway create', 'public_ip_address_type', ignore_type)
 
 vnet_help = "Name or ID of an existing virtual network which has a subnet named 'GatewaySubnet'."
-register_cli_argument('network vpn-gateway create', 'virtual_network', options_list=('--vnet',), help=vnet_help, validator=get_virtual_network_validator(has_type_field=True))
-register_cli_argument('network vpn-gateway create', 'virtual_network_type', ignore_type)
+register_cli_argument('network vnet-gateway create', 'virtual_network', options_list=('--vnet',), help=vnet_help, validator=get_virtual_network_validator(has_type_field=True))
+register_cli_argument('network vnet-gateway create', 'virtual_network_type', ignore_type)
 
-register_cli_argument('network vpn-gateway root-cert create', 'public_cert_data', help='Base64 contents of the root certificate file or file path.', validator=load_cert_file('public_cert_data'))
-register_cli_argument('network vpn-gateway root-cert create', 'cert_name', help='Root certificate name', options_list=('--name', '-n'))
-register_cli_argument('network vpn-gateway root-cert create', 'gateway_name', help='Virtual network gateway name')
+register_cli_argument('network vnet-gateway root-cert create', 'public_cert_data', help='Base64 contents of the root certificate file or file path.', validator=load_cert_file('public_cert_data'))
+register_cli_argument('network vnet-gateway root-cert create', 'cert_name', help='Root certificate name', options_list=('--name', '-n'))
+register_cli_argument('network vnet-gateway root-cert create', 'gateway_name', help='Virtual network gateway name')
 
-register_cli_argument('network vpn-gateway revoked-cert create', 'thumbprint', help='Certificate thumbprint.')
+register_cli_argument('network vnet-gateway revoked-cert create', 'thumbprint', help='Certificate thumbprint.')
 
-register_extra_cli_argument('network vpn-gateway update', 'address_prefixes', options_list=('--address-prefixes',), help='List of address prefixes for the VPN gateway.  Prerequisite for uploading certificates.', nargs='+')
+register_extra_cli_argument('network vnet-gateway update', 'address_prefixes', options_list=('--address-prefixes',), help='List of address prefixes for the VPN gateway.  Prerequisite for uploading certificates.', nargs='+')
 
 
 # VPN connection
 register_cli_argument('network vpn-connection', 'virtual_network_gateway_connection_name', options_list=('--name', '-n'), metavar='NAME', id_part='name')
+
+register_cli_argument('network vpn-connection create', 'vnet_gateway1_id', options_list=('--vnet-gateway1',), validator=process_vpn_connection_create_namespace)
+register_cli_argument('network vpn-connection create', 'vnet_gateway2_id', options_list=('--vnet-gateway2',))
+register_cli_argument('network vpn-connection create', 'express_route_circuit2_id', options_list=('--express-route-circuit2',))
+register_cli_argument('network vpn-connection create', 'local_gateway2_id', options_list=('--local-gateway2',))
 register_cli_argument('network vpn-connection create', 'shared_key', validator=load_cert_file('shared_key'), help='Shared IPSec key, base64 contents of the certificate file or file path.')
+register_cli_argument('network vpn-connection create', 'connection_type', ignore_type)
+
+register_cli_argument('network vpn-connection update', 'routing_weight', type=int, help='Connection routing weight')
 
 # VPN connection shared key
 register_cli_argument('network vpn-connection shared-key', 'connection_shared_key_name', options_list=('--name', '-n'), id_part='name')
 register_cli_argument('network vpn-connection shared-key', 'virtual_network_gateway_connection_name', options_list=('--connection-name',), metavar='NAME', id_part='name')
-
-register_cli_argument('network vpn-connection create', 'connection_type', help=argparse.SUPPRESS, validator=vnet_gateway_validator, required=False)
 
 # Traffic manager profiles
 register_cli_argument('network traffic-manager profile', 'traffic_manager_profile_name', name_arg_type, id_part='name', completer=get_resource_name_completion_list('Microsoft.Network/trafficManagerProfiles'))
@@ -490,17 +505,28 @@ register_cli_argument('network traffic-manager endpoint create', 'target', help=
 
 # DNS
 register_cli_argument('network dns', 'location', help=argparse.SUPPRESS, default='global')
+register_cli_argument('network dns', 'record_set_name', name_arg_type, help='The name of the record set, relative to the name of the zone.')
+register_cli_argument('network dns', 'relative_record_set_name', name_arg_type, help='The name of the record set, relative to the name of the zone.')
+register_cli_argument('network dns', 'zone_name', options_list=('--zone-name', '-z'), help='The name of the zone.', type=dns_zone_name_type)
+register_cli_argument('network dns', 'metadata', nargs='+', help='Metadata in space-separated key=value pairs. This overwrites any existing metadata.', validator=validate_metadata)
+
+register_cli_argument('network dns', 'record_type', modified_record_type)
+register_cli_argument('network dns', 'location', help=argparse.SUPPRESS, default='global')
+
 register_cli_argument('network dns zone', 'zone_name', name_arg_type)
-register_cli_argument('network dns', 'record_set_name', name_arg_type, help='The name of the RecordSet, relative to the name of the zone.')
-register_cli_argument('network dns', 'relative_record_set_name', name_arg_type, help='The name of the RecordSet, relative to the name of the zone.')
-register_cli_argument('network dns', 'zone_name', help='The name of the zone without a terminating dot.')
-register_cli_argument('network dns record-set create', 'record_set_type', options_list=('--type',), **enum_choice_list(RecordType))
-register_cli_argument('network dns record-set create', 'ttl', default=3600)
-register_cli_argument('network dns', 'record_type', options_list=('--type',), **enum_choice_list(RecordType))
-register_cli_argument('network dns record', 'record_set_name', options_list=('--record-set-name',))
-register_cli_argument('network dns record txt add', 'value', nargs='+')
-register_cli_argument('network dns record txt remove', 'value', nargs='+')
+
 register_cli_argument('network dns zone import', 'file_name', help='Path to the DNS zone file to import')
 register_cli_argument('network dns zone export', 'file_name', help='Path to the DNS zone file to save')
-register_cli_argument('network dns', 'location', help=argparse.SUPPRESS, default='global')
 register_cli_argument('network dns zone update', 'if_none_match', ignore_type)
+
+register_cli_argument('network dns record', 'record_set_name', options_list=('--record-set-name',))
+
+register_cli_argument('network dns record txt add', 'value', nargs='+')
+register_cli_argument('network dns record txt remove', 'value', nargs='+')
+
+register_cli_argument('network dns record-set create', 'record_set_type', modified_record_type)
+register_cli_argument('network dns record-set create', 'ttl', help='Record set TTL (time-to-live)')
+register_cli_argument('network dns record-set create', 'if_none_match', help='Create the record set only if it does not already exist.', action='store_true')
+
+for item in ['list', 'show']:
+    register_cli_argument('network dns record-set {}'.format(item), 'record_type', options_list=('--type', '-t'), **enum_choice_list(RecordType))

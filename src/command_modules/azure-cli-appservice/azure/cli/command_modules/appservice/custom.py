@@ -88,6 +88,9 @@ def delete_webapp(resource_group_name, name, slot=None):
 def stop_webapp(resource_group_name, name, slot=None):
     return _generic_site_operation(resource_group_name, name, 'stop_site', slot)
 
+def start_webapp(resource_group_name, name, slot=None):
+    return _generic_site_operation(resource_group_name, name, 'start_site', slot)
+
 def restart_webapp(resource_group_name, name, slot=None):
     return _generic_site_operation(resource_group_name, name, 'restart_site', slot)
 

@@ -68,7 +68,7 @@ The following block creates a new resource group in the 'westus' region, then cr
 
 .. code-block:: console
 
-   $ az resource group create -l westus -n MyGroup
+   $ az group create -l westus -n MyGroup
    Name     Location
    -------  ----------
    MyGroup  westus

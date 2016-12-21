@@ -25,6 +25,7 @@ from azure.cli.command_modules.network.mgmt_nic.lib.operations.nic_operations im
 from azure.mgmt.trafficmanager import TrafficManagerManagementClient
 from azure.mgmt.trafficmanager.models import Endpoint
 from azure.mgmt.dns import DnsManagementClient
+from azure.mgmt.dns.operations import RecordSetsOperations
 from azure.mgmt.dns.models import (RecordSet, AaaaRecord, ARecord, CnameRecord, MxRecord,
                                    NsRecord, PtrRecord, SoaRecord, SrvRecord, TxtRecord, Zone)
 
@@ -735,7 +736,48 @@ def update_subnet(instance, resource_group_name, address_prefix=None, network_se
     return instance
 update_nsg_rule.__doc__ = SecurityRule.__doc__
 
-def delete_vpn_gateway_root_cert(resource_group_name, gateway_name, cert_name):
+# endregion
+
+def update_vpn_connection(instance, routing_weight=None):
+    if routing_weight is not None:
+        instance.routing_weight = routing_weight
+    return instance
+
+def _validate_bgp_peering(instance, asn, bgp_peering_address, peer_weight):
+    if any([asn, bgp_peering_address, peer_weight]):
+        if instance.bgp_settings is not None:
+            # update existing parameters selectively
+            if asn is not None:
+                instance.bgp_settings.asn = asn
+            if peer_weight is not None:
+                instance.bgp_settings.peer_weight = peer_weight
+            if bgp_peering_address is not None:
+                instance.bgp_settings.bgp_peering_address = bgp_peering_address
+        elif asn and bgp_peering_address:
+            from azure.mgmt.network.models import BgpSettings
+            instance.bgp_settings = BgpSettings(asn, bgp_peering_address, peer_weight)
+        else:
+            raise CLIError(
+                'incorrect usage: --asn ASN --bgp-peering-address IP [--peer-weight WEIGHT]')
+
+# region VNet Gateway Commands
+
+def create_vnet_gateway_root_cert(resource_group_name, gateway_name, public_cert_data, cert_name):
+    ncf = _network_client_factory().virtual_network_gateways
+    gateway = ncf.get(resource_group_name, gateway_name)
+    if not gateway.vpn_client_configuration:
+        gateway.vpn_client_configuration = VpnClientConfiguration()
+    config = gateway.vpn_client_configuration
+
+    if config.vpn_client_root_certificates is None:
+        config.vpn_client_root_certificates = []
+
+    cert = VpnClientRootCertificate(name=cert_name, public_cert_data=public_cert_data)
+    config.vpn_client_root_certificates.append(cert)
+
+    return ncf.create_or_update(resource_group_name, gateway_name, gateway)
+
+def delete_vnet_gateway_root_cert(resource_group_name, gateway_name, cert_name):
     ncf = _network_client_factory().virtual_network_gateways
     gateway = ncf.get(resource_group_name, gateway_name)
     config = gateway.vpn_client_configuration
@@ -748,7 +790,7 @@ def delete_vpn_gateway_root_cert(resource_group_name, gateway_name, cert_name):
 
     return ncf.create_or_update(resource_group_name, gateway_name, gateway)
 
-def create_vpn_gateway_revoked_cert(resource_group_name, gateway_name, thumbprint, cert_name):
+def create_vnet_gateway_revoked_cert(resource_group_name, gateway_name, thumbprint, cert_name):
     config, gateway, ncf = _prep_cert_create(gateway_name, resource_group_name)
 
     cert = VpnClientRevokedCertificate(name=cert_name, thumbprint=thumbprint)
@@ -756,7 +798,7 @@ def create_vpn_gateway_revoked_cert(resource_group_name, gateway_name, thumbprin
 
     return ncf.create_or_update(resource_group_name, gateway_name, gateway)
 
-def delete_vpn_gateway_revoked_cert(resource_group_name, gateway_name, cert_name):
+def delete_vnet_gateway_revoked_cert(resource_group_name, gateway_name, cert_name):
     ncf = _network_client_factory().virtual_network_gateways
     gateway = ncf.get(resource_group_name, gateway_name)
     config = gateway.vpn_client_configuration
@@ -787,9 +829,10 @@ def _prep_cert_create(gateway_name, resource_group_name):
 
     return config, gateway, ncf
 
-def update_network_vpn_gateway(instance, address_prefixes=None, sku=None, vpn_gateway_type=None,
-                               public_ip_address=None, gateway_type=None, enable_bgp=None,
-                               virtual_network=None, tags=None):
+def update_vnet_gateway(instance, address_prefixes=None, sku=None, vpn_type=None,
+                        public_ip_address=None, gateway_type=None, enable_bgp=None,
+                        asn=None, bgp_peering_address=None, peer_weight=None, virtual_network=None,
+                        tags=None):
 
     if address_prefixes is not None:
         if not instance.vpn_client_configuration:
@@ -806,8 +849,8 @@ def update_network_vpn_gateway(instance, address_prefixes=None, sku=None, vpn_ga
         instance.sku.name = sku
         instance.sku.tier = sku
 
-    if vpn_gateway_type is not None:
-        instance.vpn_type = vpn_gateway_type
+    if vpn_type is not None:
+        instance.vpn_type = vpn_type
 
     if tags is not None:
         instance.tags = tags
@@ -819,13 +862,19 @@ def update_network_vpn_gateway(instance, address_prefixes=None, sku=None, vpn_ga
         instance.gateway_type = gateway_type
 
     if enable_bgp is not None:
-        instance.enable_bgp = enable_bgp
+        instance.enable_bgp = enable_bgp.lower() == 'true'
+
+    _validate_bgp_peering(instance, asn, bgp_peering_address, peer_weight)
 
     if virtual_network is not None:
         instance.ip_configurations[0].subnet.id = \
             '{}/subnets/GatewaySubnet'.format(virtual_network)
 
     return instance
+
+# endregion
+
+# region Express Route commands
 
 def create_express_route_peering(
         client, resource_group_name, circuit_name, peering_type, peer_asn, vlan_id,
@@ -847,11 +896,26 @@ def create_express_route_peering(
     """
     from azure.mgmt.network.models import \
         (ExpressRouteCircuitPeering, ExpressRouteCircuitPeeringConfig)
+    from azure.mgmt.network.models import ExpressRouteCircuitPeeringType as PeeringType
+    from azure.mgmt.network.models import ExpressRouteCircuitSkuTier as SkuTier
+
+    # TODO: Remove workaround when issue #1574 is fixed in the service
+    # region Issue #1574 workaround
+    circuit = _network_client_factory().express_route_circuits.get(
+        resource_group_name, circuit_name)
+    if peering_type == PeeringType.microsoft_peering and circuit.sku.tier == SkuTier.standard:
+        raise CLIError("MicrosoftPeering cannot be created on a 'Standard' SKU circuit")
+    for peering in circuit.peerings:
+        if peering.vlan_id == vlan_id:
+            raise CLIError(
+                "VLAN ID '{}' already in use by peering '{}'".format(vlan_id, peering.name))
+    #endregion
+
     peering_config = ExpressRouteCircuitPeeringConfig(
         advertised_public_prefixes=advertised_public_prefixes,
         customer_asn=customer_asn,
         routing_registry_name=routing_registry_name) \
-            if peering_type == 'MicrosoftPeering' else None
+            if peering_type == PeeringType.microsoft_peering else None
     peering = ExpressRouteCircuitPeering(
         peering_type=peering_type, peer_asn=peer_asn, vlan_id=vlan_id,
         primary_peer_address_prefix=primary_peer_address_prefix,
@@ -870,20 +934,6 @@ def create_route(resource_group_name, route_table_name, route_name, next_hop_typ
 
 create_route.__doc__ = Route.__doc__
 
-def create_vpn_gateway_root_cert(resource_group_name, gateway_name, public_cert_data, cert_name):
-    ncf = _network_client_factory().virtual_network_gateways
-    gateway = ncf.get(resource_group_name, gateway_name)
-    if not gateway.vpn_client_configuration:
-        gateway.vpn_client_configuration = VpnClientConfiguration()
-    config = gateway.vpn_client_configuration
-
-    if config.vpn_client_root_certificates is None:
-        config.vpn_client_root_certificates = []
-
-    cert = VpnClientRootCertificate(name=cert_name, public_cert_data=public_cert_data)
-    config.vpn_client_root_certificates.append(cert)
-
-    return ncf.create_or_update(resource_group_name, gateway_name, gateway)
 #endregion
 
 #region Local Gateway commands
@@ -891,21 +941,7 @@ def create_vpn_gateway_root_cert(resource_group_name, gateway_name, public_cert_
 def update_local_gateway(instance, gateway_ip_address=None, local_address_prefix=None, asn=None,
                          bgp_peering_address=None, peer_weight=None, tags=None):
 
-    if any([asn, bgp_peering_address, peer_weight]):
-        if instance.bgp_settings is not None:
-            # update existing parameters selectively
-            if asn is not None:
-                instance.bgp_settings.asn = asn
-            if peer_weight is not None:
-                instance.bgp_settings.peer_weight = peer_weight
-            if bgp_peering_address is not None:
-                instance.bgp_settings.bgp_peering_address = bgp_peering_address
-        elif asn and bgp_peering_address:
-            from azure.mgmt.network.models import BgpSettings
-            instance.bgp_settings = BgpSettings(asn, bgp_peering_address, peer_weight)
-        else:
-            raise CLIError(
-                'incorrect usage: --asn ASN --bgp-peering-address IP [--peer-weight WEIGHT]')
+    _validate_bgp_peering(instance, asn, bgp_peering_address, peer_weight)
 
     if gateway_ip_address is not None:
         instance.gateway_ip_address = gateway_ip_address
@@ -995,6 +1031,20 @@ def list_traffic_manager_endpoints(resource_group_name, profile_name, endpoint_t
 #endregion
 
 #region DNS Commands
+
+def create_dns_zone(client, resource_group_name, zone_name, location='global', tags=None,
+                    if_none_match=False):
+    kwargs = {
+        'resource_group_name':resource_group_name,
+        'zone_name': zone_name,
+        'parameters': Zone(location, tags=tags)
+    }
+
+    if if_none_match:
+        kwargs['if_none_match'] = '*'
+
+    return client.create_or_update(**kwargs)
+
 def list_dns_zones(resource_group_name=None):
     ncf = get_mgmt_service_client(DnsManagementClient).zones
     if resource_group_name:
@@ -1003,11 +1053,18 @@ def list_dns_zones(resource_group_name=None):
         return ncf.list_in_subscription()
 
 def create_dns_record_set(resource_group_name, zone_name, record_set_name, record_set_type,
-                          ttl=None):
+                          metadata=None, if_match=None, if_none_match=None, ttl=3600):
     ncf = get_mgmt_service_client(DnsManagementClient).record_sets
-    record_set = RecordSet(name=record_set_name, type=record_set_type, ttl=ttl)
+    record_set = RecordSet(name=record_set_name, type=record_set_type, ttl=ttl, metadata=metadata)
     return ncf.create_or_update(resource_group_name, zone_name, record_set_name,
-                                record_set_type, record_set)
+                                record_set_type, record_set, if_match=if_match,
+                                if_none_match='*' if if_none_match else None)
+create_dns_record_set.__doc__ = RecordSetsOperations.create_or_update.__doc__
+
+def update_dns_record_set(instance, metadata=None):
+    if metadata is not None:
+        instance.metadata = metadata
+    return instance
 
 def export_zone(resource_group_name, zone_name, file_name):
     client = get_mgmt_service_client(DnsManagementClient)

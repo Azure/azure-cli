@@ -16,6 +16,10 @@ from azure.cli.core.commands.client_factory import get_subscription_id
 
 # PARAMETER VALIDATORS
 
+def dns_zone_name_type(value):
+    if value:
+        return value[:-1] if value[-1] == '.' else value
+
 def _generate_ag_subproperty_id(namespace, child_type, child_name, subscription=None):
     return resource_id(
         subscription=subscription or get_subscription_id(),
@@ -135,8 +139,13 @@ def validate_inbound_nat_rule_name_or_id(namespace):
         namespace.inbound_nat_rule = _generate_lb_subproperty_id(
             namespace, 'inboundNatRules', rule_name)
 
+def validate_metadata(namespace):
+    if namespace.metadata:
+        namespace.metadata = dict(x.split('=', 1) for x in namespace.metadata)
+
 def validate_peering_type(namespace):
     if namespace.peering_type and namespace.peering_type == 'MicrosoftPeering':
+
         if not namespace.advertised_public_prefixes:
             raise CLIError(
                 'missing required MicrosoftPeering parameter --advertised-public-prefixes')
@@ -244,15 +253,16 @@ def get_virtual_network_validator(has_type_field=False, allow_none=False, allow_
                                   default_none=False):
 
     def simple_validator(namespace):
-        # determine if vnet is name or ID
-        is_id = is_valid_resource_id(namespace.virtual_network)
-        if not is_id:
-            namespace.virtual_network = resource_id(
-                subscription=get_subscription_id(),
-                resource_group=namespace.resource_group_name,
-                namespace='Microsoft.Network',
-                type='virtualNetworks',
-                name=namespace.virtual_network)
+        if namespace.virtual_network:
+            # determine if vnet is name or ID
+            is_id = is_valid_resource_id(namespace.virtual_network)
+            if not is_id:
+                namespace.virtual_network = resource_id(
+                    subscription=get_subscription_id(),
+                    resource_group=namespace.resource_group_name,
+                    namespace='Microsoft.Network',
+                    type='virtualNetworks',
+                    name=namespace.virtual_network)
 
     def complex_validator_with_type(namespace):
         get_folded_parameter_validator(
@@ -472,28 +482,57 @@ def process_vnet_create_namespace(namespace):
         subnet_mask = 24 if bit_mask < 24 else bit_mask
         namespace.subnet_prefix = '{}/{}'.format(address, subnet_mask)
 
+def process_vnet_gateway_create_namespace(namespace):
+    ns = namespace
+    ns.enable_bgp = any([ns.asn or ns.bgp_peering_address or ns.peer_weight])
+    if ns.enable_bgp and (not ns.asn or not ns.bgp_peering_address):
+        raise ValueError(
+            'incorrect usage: --bgp-peering-address IP --asn ASN [--peer-weight WEIGHT]')
+
+def process_vpn_connection_create_namespace(namespace):
+
+    args = [a for a in [namespace.express_route_circuit2_id,
+                        namespace.local_gateway2_id,
+                        namespace.vnet_gateway2_id]
+            if a]
+    if len(args) != 1:
+        raise ValueError('usage error: --vnet-gateway2 NAME_OR_ID | --local-gateway2 NAME_OR_ID '
+                         '| --express-route-circuit2 NAME_OR_ID')
+
+    def _validate_name_or_id(namespace, value, resource_type):
+        if not is_valid_resource_id(value):
+            subscription = getattr(namespace, 'subscription', get_subscription_id())
+            return resource_id(
+                subscription=subscription,
+                resource_group=namespace.resource_group_name,
+                namespace='Microsoft.Network',
+                type=resource_type,
+                name=value)
+        return value
+
+    namespace.vnet_gateway1_id = \
+        _validate_name_or_id(namespace, namespace.vnet_gateway1_id, 'virtualNetworkGateways')
+
+    if namespace.express_route_circuit2_id:
+        namespace.express_route_circuit2_id = \
+            _validate_name_or_id(
+                namespace, namespace.express_route_circuit2_id, 'expressRouteCircuits')
+        namespace.connection_type = 'ExpressRoute'
+    elif namespace.local_gateway2_id:
+        namespace.local_gateway2_id = \
+            _validate_name_or_id(namespace, namespace.local_gateway2_id, 'localNetworkGateways')
+        namespace.connection_type = 'IPSec'
+    elif namespace.vnet_gateway2_id:
+        namespace.vnet_gateway2_id = \
+            _validate_name_or_id(namespace, namespace.vnet_gateway2_id, 'virtualNetworkGateways')
+        namespace.connection_type = 'Vnet2Vnet'
+
 def load_cert_file(param_name):
     def load_cert_validator(namespace):
         attr = getattr(namespace, param_name)
         if attr and os.path.isfile(attr):
             setattr(namespace, param_name, read_base_64_file(attr))
     return load_cert_validator
-
-def vnet_gateway_validator(namespace):
-    args = [a for a in [namespace.express_route_circuit2_id,
-                        namespace.local_gateway2_id,
-                        namespace.vnet_gateway2_id]
-            if a]
-    if len(args) != 1:
-        raise argparse.ArgumentError(None, 'Specify only one option for express-route-circuit2,'
-                                     ' local-gateway2-id or vnet-gateway2-id')
-
-    if namespace.express_route_circuit2_id:
-        namespace.connection_type = 'ExpressRoute'
-    elif namespace.local_gateway2_id:
-        namespace.connection_type = 'IPSec'
-    elif namespace.vnet_gateway2_id:
-        namespace.connection_type = 'Vnet2Vnet'
 
 # ACTIONS
 

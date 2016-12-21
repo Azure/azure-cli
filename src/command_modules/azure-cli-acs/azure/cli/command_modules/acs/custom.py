@@ -15,7 +15,8 @@ import stat
 import string
 import subprocess
 import sys
-from six.moves.urllib.request import urlretrieve #pylint: disable=import-error
+from six.moves.urllib.request import (urlretrieve, urlopen) #pylint: disable=import-error
+from six.moves.urllib.error import URLError #pylint: disable=import-error
 import threading
 import time
 import webbrowser
@@ -35,6 +36,21 @@ from azure.mgmt.compute import ComputeManagementClient
 from azure.cli.core._environment import get_config_dir
 
 logger = _logging.get_az_logger(__name__)
+
+def which(binary):
+    pathVar = os.getenv('PATH')
+    if platform.system() == 'Windows':
+        binary = binary + '.exe'
+        parts = pathVar.split(';')
+    else:
+        parts = pathVar.split(':')
+
+    for part in parts:
+        bin_path = os.path.join(part, binary)
+        if os.path.exists(bin_path) and os.path.isfile(bin_path) and os.access(bin_path, os.X_OK):
+            return bin_path
+
+    return None
 
 def _resource_client_factory():
     from azure.mgmt.resource.resources import ResourceManagementClient
@@ -59,8 +75,12 @@ def wait_then_open(url):
     """
     Waits for a bit then opens a URL.  Useful for waiting for a proxy to come up, and then open the URL.
     """
-    # TODO: we should ping the URL instead of just sleeping.
-    time.sleep(2)
+    for _ in range(1, 10):
+        try:
+            urlopen(url)
+        except URLError:
+            time.sleep(1)
+        break
     webbrowser.open_new_tab(url)
 
 def wait_then_open_async(url):
@@ -82,26 +102,38 @@ def acs_browse(resource_group, name, disable_browser=False):
     acs_info = _get_acs_info(name, resource_group)
     orchestrator_type = acs_info.orchestrator_profile.orchestrator_type # pylint: disable=no-member
 
-    if  orchestrator_type == 'kubernetes':
-        return k8s_browse(disable_browser)
+    if  orchestrator_type == 'kubernetes' or (acs_info.custom_profile and acs_info.custom_profile.orchestrator == 'kubernetes'): # pylint: disable=no-member
+        return k8s_browse(name, resource_group, disable_browser)
     elif orchestrator_type == 'dcos':
         return _dcos_browse_internal(acs_info, disable_browser)
     else:
         raise CLIError('Unsupported orchestrator type {} for browse'.format(orchestrator_type))
 
-def k8s_browse(disable_browser=False):
+def k8s_browse(name, resource_group, disable_browser=False):
     """
     Wrapper on the 'kubectl proxy' command, for consistency with 'az dcos browse'
     :param disable_browser: If true, don't launch a web browser after estabilishing the proxy
     :type disable_browser: bool
     """
+    acs_info = _get_acs_info(name, resource_group)
+    _k8s_browse_internal(acs_info, disable_browser)
+
+def _k8s_browse_internal(acs_info, disable_browser):
+    if not which('kubectl'):
+        raise CLIError('Can not find kubectl executable in PATH')
+    browse_path = os.path.join(get_config_dir(), 'acsBrowseConfig.yaml')
+    if os.path.exists(browse_path):
+        os.remove(browse_path)
+
+    k8s_get_credentials(acs_info=acs_info, path=browse_path)
+
     logger.warning('Proxy running on 127.0.0.1:8001/ui')
     logger.warning('Press CTRL+C to close the tunnel...')
     if not disable_browser:
         wait_then_open_async('http://127.0.0.1:8001/ui')
-    subprocess.call(["kubectl", "proxy"])
+    subprocess.call(["kubectl", "--kubeconfig", browse_path, "proxy"])
 
-def dcos_browse(name, resource_group_name, disable_browser=False):
+def dcos_browse(name, resource_group, disable_browser=False):
     """
     Creates an SSH tunnel to the Azure container service, and opens the Mesosphere DC/OS dashboard in the browser.
 
@@ -112,7 +144,7 @@ def dcos_browse(name, resource_group_name, disable_browser=False):
     :param disable_browser: If true, don't launch a web browser after estabilishing the proxy
     :type disable_browser: bool
     """
-    acs_info = _get_acs_info(name, resource_group_name)
+    acs_info = _get_acs_info(name, resource_group)
     _dcos_browse_internal(acs_info, disable_browser)
 
 def _dcos_browse_internal(acs_info, disable_browser):
@@ -214,26 +246,24 @@ def k8s_install_cli(client_version="1.4.5", install_location=None):
     except IOError as err:
         raise CLIError('Connection error while attempting to download client ({})'.format(err))
 
-def _validate_service_principal(sp_id):
+def _validate_service_principal(client, sp_id):
     from azure.cli.command_modules.role.custom import (
-        _graph_client_factory,
         show_service_principal,
     )
     # discard the result, we're trusting this to throw if it can't find something
     try:
-        show_service_principal(_graph_client_factory().service_principals, sp_id)
+        show_service_principal(client.service_principals, sp_id)
     except: #pylint: disable=bare-except
         raise CLIError('Failed to validate service principal, if this persists try deleting $HOME/.azure/acsServicePrincipal.json')
 
-def _build_service_principal(name, url, client_secret):
+def _build_service_principal(client, name, url, client_secret):
     from azure.cli.command_modules.role.custom import (
-        _graph_client_factory,
         create_application,
         create_service_principal,
     )
 
     sys.stdout.write('creating service principal')
-    result = create_application(_graph_client_factory().applications, name, url, [url], password=client_secret)
+    result = create_application(client.applications, name, url, [url], password=client_secret)
     service_principal = result.app_id #pylint: disable=no-member
     for x in range(0, 10):
         try:
@@ -266,7 +296,7 @@ def _add_role_assignment(role, service_principal):
             time.sleep(2 + 2 * x)
     print('done')
 
-def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_name_prefix=None, content_version=None, admin_username="azureuser", agent_count="3", agent_vm_size="Standard_D2_v2", location=None, master_count="3", orchestrator_type="dcos", service_principal=None, client_secret=None, tags=None, custom_headers=None, raw=False, **operation_config):
+def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_name_prefix=None, content_version=None, admin_username="azureuser", agent_count="3", agent_vm_size="Standard_D2_v2", location=None, master_count="3", orchestrator_type="dcos", service_principal=None, client_secret=None, tags=None, custom_headers=None, raw=False, **operation_config): #pylint: disable=too-many-locals
     """Create a new Acs.
     :param resource_group_name: The name of the resource group. The name
      is case insensitive.
@@ -335,14 +365,16 @@ def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_na
     groups.get(resource_group_name)
 
     if orchestrator_type == 'Kubernetes' or orchestrator_type == 'kubernetes':
+        from azure.cli.command_modules.role.custom import _graph_client_factory
         # TODO: This really needs to be broken out and unit tested.
+        client = _graph_client_factory()
         if not service_principal:
             # --service-principal not specified, try to load it from local disk
             principalObj = load_acs_service_principal()
             if principalObj:
                 service_principal = principalObj.get('service_principal')
                 client_secret = principalObj.get('client_secret')
-                _validate_service_principal(service_principal)
+                _validate_service_principal(client, service_principal)
             else:
                 # Nothing to load, make one.
                 if not client_secret:
@@ -350,7 +382,7 @@ def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_na
                 salt = binascii.b2a_hex(os.urandom(3)).decode('utf-8')
                 url = 'http://{}.{}.{}.cloudapp.azure.com'.format(salt, dns_name_prefix, location)
 
-                service_principal = _build_service_principal(name, url, client_secret)
+                service_principal = _build_service_principal(client, name, url, client_secret)
                 logger.info('Created a service principal: %s', service_principal)
                 store_acs_service_principal(client_secret, service_principal)
             # Either way, update the role assignment, this fixes things if we fail part-way through
@@ -359,7 +391,7 @@ def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_na
             # --service-principal specfied, validate --client-secret was too
             if not client_secret:
                 raise CLIError('--client-secret is required if --service-principal is specified')
-            _validate_service_principal(service_principal)
+            _validate_service_principal(client, service_principal)
         return _create_kubernetes(resource_group_name, deployment_name, dns_name_prefix, name, ssh_key_value, admin_username=admin_username, agent_count=agent_count, agent_vm_size=agent_vm_size, location=location, service_principal=service_principal, client_secret=client_secret)
 
     ops = get_mgmt_service_client(ACSClient).acs
@@ -452,9 +484,11 @@ def _create_kubernetes(resource_group_name, deployment_name, dns_name_prefix, na
     smc = _resource_client_factory()
     return smc.deployments.create_or_update(resource_group_name, deployment_name, properties)
 
-def k8s_get_credentials(name=None, resource_group_name=None, dns_prefix=None, location=None, user=None, path=None):
+def k8s_get_credentials(name=None, resource_group_name=None, dns_prefix=None, location=None, user=None,
+                        path=os.path.join(os.path.expanduser('~'), '.kube', 'config'), acs_info=None):
     if not dns_prefix or not location:
-        acs_info = _get_acs_info(name, resource_group_name)
+        if not acs_info:
+            acs_info = _get_acs_info(name, resource_group_name)
 
         if not dns_prefix:
             dns_prefix = acs_info.master_profile.dns_prefix # pylint: disable=no-member

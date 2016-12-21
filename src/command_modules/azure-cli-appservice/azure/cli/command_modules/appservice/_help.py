@@ -248,6 +248,11 @@ helps['appservice web restart'] = """
     short-summary: restart a web app
 """
 
+helps['appservice web start'] = """
+    type: command
+    short-summary: start a web app
+"""
+
 helps['appservice web show'] = """
     type: command
     short-summary: show a web app

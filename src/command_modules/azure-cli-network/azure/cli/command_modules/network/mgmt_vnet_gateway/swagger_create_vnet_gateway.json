@@ -145,7 +145,7 @@
           "type": "string",
           "description": "URI referencing the template.",
           "enum": [
-            "https://azuresdkci.blob.core.windows.net/templatehost/CreateVnetGateway_2016-11-29/azuredeploy.json"
+            "https://azuresdkci.blob.core.windows.net/templatehost/CreateVnetGateway_2016-12-9/azuredeploy.json"
           ]
         },
         "contentVersion": {
@@ -160,6 +160,16 @@
     },
     "VnetGatewayParameters": {
       "properties": {
+        "asn": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_asn",
+          "x-ms-client-flatten": true
+        },
+        "bgpPeeringAddress": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_bgpPeeringAddress",
+          "x-ms-client-flatten": true
+        },
         "enableBgp": {
           "type": "object",
           "$ref": "#/definitions/DeploymentParameter_enableBgp",
@@ -173,6 +183,11 @@
         "location": {
           "type": "object",
           "$ref": "#/definitions/DeploymentParameter_location",
+          "x-ms-client-flatten": true
+        },
+        "peerWeight": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_peerWeight",
           "x-ms-client-flatten": true
         },
         "publicIpAddress": {
@@ -217,17 +232,35 @@
         }
       },
       "required": [
-        "virtualNetwork",
         "enableBgp",
-        "publicIpAddress",
-        "virtualNetworkGatewayName"
+        "virtualNetwork",
+        "virtualNetworkGatewayName",
+        "publicIpAddress"
       ]
+    },
+    "DeploymentParameter_asn": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "Autonomous System Number to use for the BGP settings.",
+          "x-ms-client-name": "asn"
+        }
+      }
+    },
+    "DeploymentParameter_bgpPeeringAddress": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "IP address to use for BGP peering.",
+          "x-ms-client-name": "bgpPeeringAddress"
+        }
+      }
     },
     "DeploymentParameter_enableBgp": {
       "properties": {
         "value": {
           "type": "boolean",
-          "description": "Enable BGP (Border Gateway Protocol).",
+          "description": "Flag to enable BGP settings.",
           "x-ms-client-name": "enableBgp",
           "default": "False"
         }
@@ -260,6 +293,15 @@
           "type": "string",
           "description": "Location for resources.",
           "x-ms-client-name": "location"
+        }
+      }
+    },
+    "DeploymentParameter_peerWeight": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "Weight added to routes learned through BGP peering.",
+          "x-ms-client-name": "peerWeight"
         }
       }
     },
@@ -302,7 +344,8 @@
           "enum": [
             "Basic",
             "Standard",
-            "HighPerformance"
+            "HighPerformance",
+            "UltraPerformance"
           ],
           "x-ms-enum": {
             "name": "sku",
@@ -367,11 +410,12 @@
       "properties": {
         "value": {
           "type": "string",
-          "description": "VPN gateway type.",
+          "description": "VPN routing type.",
           "x-ms-client-name": "vpnType",
           "enum": [
             "RouteBased",
-            "PolicyBased"
+            "PolicyBased",
+            "Dedicated"
           ],
           "x-ms-enum": {
             "name": "vpnType",
