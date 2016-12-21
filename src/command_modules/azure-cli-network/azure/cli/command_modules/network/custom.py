@@ -11,7 +11,8 @@ from azure.mgmt.network.models import \
     (Subnet, SecurityRule, PublicIPAddress, NetworkSecurityGroup, InboundNatRule, InboundNatPool,
      FrontendIPConfiguration, BackendAddressPool, Probe, LoadBalancingRule,
      NetworkInterfaceIPConfiguration, Route, VpnClientRootCertificate, VpnClientConfiguration,
-     AddressSpace, VpnClientRevokedCertificate, SubResource, VirtualNetworkPeering)
+     AddressSpace, VpnClientRevokedCertificate, SubResource, VirtualNetworkPeering,
+     ApplicationGatewayFirewallMode)
 
 from azure.cli.core.commands.arm import parse_resource_id, is_valid_resource_id, resource_id
 from azure.cli.core._util import CLIError
@@ -81,11 +82,17 @@ def update_application_gateway(instance, sku_name=None, sku_tier=None, capacity=
     return instance
 update_application_gateway.__doc__ = AppGatewayOperations.create_or_update.__doc__
 
-def create_ag_authentication_certificate(resource_group_name, application_gateway_name, item_name, raw=False):
-    raise CLIError('Under construction!')
+def create_ag_authentication_certificate(resource_group_name, application_gateway_name, item_name,
+                                         cert_data, no_wait=False):
+    from azure.mgmt.network.models import ApplicationGatewayAuthenticationCertificate as AuthCert
+    ncf = _network_client_factory().application_gateways
+    ag = ncf.get(resource_group_name, application_gateway_name)
+    ag.authentication_certificates.append(AuthCert(data=cert_data, name=item_name))
+    return ncf.create_or_update(resource_group_name, application_gateway_name, ag, raw=no_wait)
 
-def update_ag_authentication_certificate(resource_group_name, application_gateway_name, item_name, raw=False):
-    raise CLIError('Under construction!')
+def update_ag_authentication_certificate(instance, parent, item_name, cert_data):
+    instance.data = cert_data
+    return parent
 
 def create_ag_backend_address_pool(resource_group_name, application_gateway_name, item_name, servers):
     from azure.mgmt.network.models import ApplicationGatewayBackendAddressPool
@@ -286,12 +293,13 @@ def update_ag_ssl_certificate(instance, parent, item_name, cert_data=None, cert_
     return parent
 update_ag_ssl_certificate.__doc__ = AppGatewayOperations.create_or_update.__doc__
 
-def set_ag_ssl_policy(resource_group_name, application_gateway_name, disabled_ssl_protocols=None, clear=False, raw=False):
+def set_ag_ssl_policy(resource_group_name, application_gateway_name, disabled_ssl_protocols=None,
+                      clear=False, no_wait=False):
     from azure.mgmt.network.models import ApplicationGatewaySslPolicy
     ncf = _network_client_factory().application_gateways
     ag = ncf.get(resource_group_name, application_gateway_name)
     ag.ssl_policy = None if clear else ApplicationGatewaySslPolicy(disabled_ssl_protocols)
-    return ncf.create_or_update(resource_group_name, application_gateway_name, ag, raw=raw)
+    return ncf.create_or_update(resource_group_name, application_gateway_name, ag, raw=no_wait)
 
 def show_ag_ssl_policy(resource_group_name, application_gateway_name):
     return _network_client_factory().application_gateways.get(
@@ -355,13 +363,14 @@ def delete_ag_url_path_map_rule(resource_group_name, application_gateway_name, u
     return ncf.application_gateways.create_or_update(
         resource_group_name, application_gateway_name, ag)
 
-def set_ag_waf_config(resource_group_name, application_gateway_name, enabled, firewall_mode):
+def set_ag_waf_config(resource_group_name, application_gateway_name, enabled,
+                      firewall_mode=ApplicationGatewayFirewallMode.detection.value, no_wait=False):
     from azure.mgmt.network.models import ApplicationGatewayWebApplicationFirewallConfiguration
     ncf = _network_client_factory().application_gateways
     ag = ncf.get(resource_group_name, application_gateway_name)
     ag.web_application_firewall_configuration = \
-        ApplicationGatewayWebApplicationFirewallConfiguration(enabled, firewall_mode)
-    return ncf.create_or_update(resource_group_name, application_gateway_name, ag)
+        ApplicationGatewayWebApplicationFirewallConfiguration(enabled == 'true', firewall_mode)
+    return ncf.create_or_update(resource_group_name, application_gateway_name, ag, raw=no_wait)
 
 def show_ag_waf_config(resource_group_name, application_gateway_name):
     return _network_client_factory().application_gateways.get(

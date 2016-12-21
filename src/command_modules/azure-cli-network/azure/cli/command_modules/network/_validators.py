@@ -96,6 +96,9 @@ def read_base_64_file(filename):
         except UnicodeDecodeError:
             return str(base64_data)
 
+def validate_auth_cert(namespace):
+    namespace.cert_data = read_base_64_file(namespace.cert_data)
+
 def validate_cert(namespace):
 
     params = [namespace.cert_data, namespace.cert_password]
@@ -346,6 +349,8 @@ def process_ag_create_namespace(namespace):
         namespace.frontend_type = 'privateIp'
         namespace.private_ip_address_allocation = 'static' if namespace.private_ip_address \
             else 'dynamic'
+
+    namespace.sku_tier = namespace.sku_name.split('_', 1)[0]
 
     validate_cert(namespace)
 

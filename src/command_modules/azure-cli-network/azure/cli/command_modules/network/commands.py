@@ -59,8 +59,8 @@ def _make_singular(value):
 for subresource, alias in property_map.items():
     cli_command(__name__, 'network application-gateway {} list'.format(alias), 'azure.cli.command_modules.network._util#{}'.format(list_network_resource_property('application_gateways', subresource)))
     cli_command(__name__, 'network application-gateway {} show'.format(alias), 'azure.cli.command_modules.network._util#{}'.format(get_network_resource_property_entry('application_gateways', subresource)))
-    cli_command(__name__, 'network application-gateway {} delete'.format(alias), 'azure.cli.command_modules.network._util#{}'.format(delete_network_resource_property_entry('application_gateways', subresource)))
-    cli_command(__name__, 'network application-gateway {} create'.format(alias), custom_path.format('create_ag_{}'.format(_make_singular(subresource))), no_wait_param='raw')
+    cli_command(__name__, 'network application-gateway {} delete'.format(alias), 'azure.cli.command_modules.network._util#{}'.format(delete_network_resource_property_entry('application_gateways', subresource)), no_wait_param='no_wait')
+    cli_command(__name__, 'network application-gateway {} create'.format(alias), custom_path.format('create_ag_{}'.format(_make_singular(subresource))), no_wait_param='no_wait')
     cli_generic_update_command(__name__, 'network application-gateway {} update'.format(alias),
                                'azure.mgmt.network.operations.application_gateways_operations#ApplicationGatewaysOperations.get',
                                'azure.mgmt.network.operations.application_gateways_operations#ApplicationGatewaysOperations.create_or_update',
@@ -68,13 +68,13 @@ for subresource, alias in property_map.items():
                                custom_function_op=custom_path.format('update_ag_{}'.format(_make_singular(subresource))),
                                child_collection_prop_name=subresource)
 
-cli_command(__name__, 'network application-gateway ssl-policy set', custom_path.format('set_ag_ssl_policy'), no_wait_param='raw')
+cli_command(__name__, 'network application-gateway ssl-policy set', custom_path.format('set_ag_ssl_policy'), no_wait_param='no_wait')
 cli_command(__name__, 'network application-gateway ssl-policy show', custom_path.format('show_ag_ssl_policy'))
 
 cli_command(__name__, 'network application-gateway url-path-map rule create', custom_path.format('create_ag_url_path_map_rule'))
 cli_command(__name__, 'network application-gateway url-path-map rule delete', custom_path.format('delete_ag_url_path_map_rule'))
 
-cli_command(__name__, 'network application-gateway waf-config set', custom_path.format('set_ag_waf_config'))
+cli_command(__name__, 'network application-gateway waf-config set', custom_path.format('set_ag_waf_config'), no_wait_param='no_wait')
 cli_command(__name__, 'network application-gateway waf-config show', custom_path.format('show_ag_waf_config'))
 
 # ExpressRouteCircuitAuthorizationsOperations

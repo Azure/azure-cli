@@ -10,7 +10,7 @@ from azure.mgmt.network.models import \
     (IPAllocationMethod, RouteNextHopType)
 from azure.mgmt.network.models.network_management_client_enums import \
     (ApplicationGatewaySkuName, ApplicationGatewayCookieBasedAffinity,
-     ApplicationGatewayTier, ApplicationGatewayProtocol,
+     ApplicationGatewayFirewallMode, ApplicationGatewayProtocol,
      ApplicationGatewayRequestRoutingRuleType, ExpressRouteCircuitSkuFamily,
      ExpressRouteCircuitSkuTier, ExpressRouteCircuitPeeringType, IPVersion, LoadDistribution,
      ProbeProtocol, TransportProtocol)
@@ -35,9 +35,9 @@ from azure.cli.command_modules.network._validators import \
      process_tm_endpoint_create_namespace, process_vnet_create_namespace,
      process_vnet_gateway_create_namespace, process_vpn_connection_create_namespace,
      process_ag_ssl_policy_set_namespace,
-     validate_cert, validate_inbound_nat_rule_id_list, validate_address_pool_id_list,
-     validate_inbound_nat_rule_name_or_id, validate_address_pool_name_or_id,
-     validate_servers, load_cert_file, validate_metadata,
+     validate_auth_cert, validate_cert, validate_inbound_nat_rule_id_list,
+     validate_address_pool_id_list, validate_inbound_nat_rule_name_or_id,
+     validate_address_pool_name_or_id, validate_servers, load_cert_file, validate_metadata,
      validate_peering_type,
      get_public_ip_validator, get_nsg_validator, get_subnet_validator,
      get_virtual_network_validator)
@@ -135,8 +135,8 @@ register_cli_argument('network', 'private_ip_address_version', **enum_choice_lis
 register_cli_argument('network', 'tags', tags_type)
 
 register_cli_argument('network application-gateway', 'application_gateway_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/applicationGateways'), id_part='name')
-register_cli_argument('network application-gateway', 'sku_name', **enum_choice_list(ApplicationGatewaySkuName))
-register_cli_argument('network application-gateway', 'sku_tier', **enum_choice_list(ApplicationGatewayTier))
+register_cli_argument('network application-gateway', 'sku_name', options_list=('--sku',), **enum_choice_list(ApplicationGatewaySkuName))
+register_cli_argument('network application-gateway', 'sku_tier', ignore_type)
 register_cli_argument('network application-gateway', 'virtual_network_name', virtual_network_name_type)
 register_cli_argument('network application-gateway', 'servers', nargs='+', help='Space separated list of IP addresses or DNS names corresponding to backend servers.', validator=validate_servers)
 register_cli_argument('network application-gateway', 'http_settings_cookie_based_affinity', cookie_based_affinity_type)
@@ -160,6 +160,7 @@ register_cli_argument('network application-gateway create', 'subnet', help=subne
 register_cli_argument('network application-gateway create', 'subnet_type', ignore_type)
 
 ag_subresources = [
+    {'name': 'auth-cert', 'display': 'authentication certificate', 'ref': 'authentication_certificates'},
     {'name': 'ssl-cert', 'display': 'SSL certificate', 'ref': 'ssl_certificates'},
     {'name': 'frontend-ip', 'display': 'frontend IP configuration', 'ref': 'frontend_ip_configurations'},
     {'name': 'frontend-port', 'display': 'frontend port', 'ref': 'frontend_ports'},
@@ -175,7 +176,9 @@ for item in ag_subresources:
     register_cli_argument('network application-gateway {} create'.format(item['name']), 'item_name', options_list=('--name', '-n'), help='The name of the {}.'.format(item['display']), completer=None)
     register_cli_argument('network application-gateway {}'.format(item['name']), 'resource_name', options_list=('--gateway-name',), help='The name of the application gateway.')
     register_cli_argument('network application-gateway {}'.format(item['name']), 'application_gateway_name', options_list=('--gateway-name',), help='The name of the application gateway.')
-    register_cli_argument('network application-gateway {} list'.format(item['name']), 'resource_name', options_list=('--name', '-n'))
+    register_cli_argument('network application-gateway {} list'.format(item['name']), 'resource_name', options_list=('--gateway-name',))
+
+register_cli_argument('network application-gateway auth-cert', 'cert_data', options_list=('--cert-file',), validator=validate_auth_cert)
 
 register_cli_argument('network application-gateway frontend-ip', 'subnet', validator=get_subnet_validator())
 register_cli_argument('network application-gateway frontend-ip', 'public_ip_address', validator=get_public_ip_validator(), help='The name or ID of the public IP address.', completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'))
@@ -225,6 +228,12 @@ register_cli_argument('network application-gateway url-path-map rule create', 'i
 register_cli_argument('network application-gateway url-path-map rule', 'url_path_map_name', options_list=('--path-map-name',), help='The name of the URL path map.', completer=get_ag_subresource_completion_list('url_path_maps'), id_part='child_name')
 register_cli_argument('network application-gateway url-path-map rule', 'address_pool', help='The name or ID of the backend address pool. If not specified, the default for the map will be used.', validator=process_ag_url_path_map_rule_create_namespace, completer=get_ag_subresource_completion_list('backend_address_pools'))
 register_cli_argument('network application-gateway url-path-map rule', 'http_settings', help='The name or ID of the HTTP settings. If not specified, the default for the map will be used.', completer=get_ag_subresource_completion_list('backend_http_settings_collection'))
+
+register_cli_argument('network application-gateway waf-config', 'enabled', help='Specify whether the application firewall is enabled.', **enum_choice_list(['true', 'false']))
+register_cli_argument('network application-gateway waf-config', 'firewall_mode', help='Web application firewall mode.', **enum_choice_list(ApplicationGatewayFirewallMode))
+
+for item in ['ssl-policy', 'waf-config']:
+    register_cli_argument('network application-gateway {}'.format(item), 'application_gateway_name', options_list=('--gateway-name',), help='The name of the application gateway.')
 
 # ExpressRoutes
 register_cli_argument('network express-route', 'circuit_name', circuit_name_type, options_list=('--name', '-n'))

@@ -96,6 +96,11 @@ helps['network application-gateway address-pool show'] = """
     type: command
     short-summary: Show details of an application gateway backend address pool.
 """
+
+helps['network application-gateway address-pool update'] = """
+    type: command
+    short-summary: Update an application gateway backend address pool.
+"""
 # endregion
 
 # region Application Gateway Authorization Cert
@@ -156,6 +161,11 @@ helps['network application-gateway frontend-ip show'] = """
     type: command
     short-summary: Show details of an application gateway front-end IP address.
 """
+
+helps['network application-gateway frontend-ip update'] = """
+    type: command
+    short-summary: Update an application gateway front-end IP address.
+"""
 #endregion
 
 # region Application Gateway frontend port
@@ -183,6 +193,11 @@ helps['network application-gateway frontend-port list'] = """
 helps['network application-gateway frontend-port show'] = """
     type: command
     short-summary: Show details of an application gateway front-end port.
+"""
+
+helps['network application-gateway frontend-port update'] = """
+    type: command
+    short-summary: Update an application gateway front-end port.
 """
 #endregion
 
@@ -212,6 +227,11 @@ helps['network application-gateway http-listener show'] = """
     type: command
     short-summary: Show details of an application gateway HTTP listener.
 """
+
+helps['network application-gateway http-listener update'] = """
+    type: command
+    short-summary: Update an application gateway HTTP listener.
+"""
 #endregion
 
 # region Application Gateway HTTP settings
@@ -240,6 +260,11 @@ helps['network application-gateway http-settings show'] = """
     type: command
     short-summary: Show details of an application gateway HTTP settings.
 """
+
+helps['network application-gateway http-settings update'] = """
+    type: command
+    short-summary: Update an application gateway HTTP settings.
+"""
 #endregion
 
 # region Application Gateway probe
@@ -267,6 +292,11 @@ helps['network application-gateway probe show'] = """
     type: command
     short-summary: Show details of an application gateway probe.
 """
+
+helps['network application-gateway probe update'] = """
+    type: command
+    short-summary: Update an application gateway probe.
+"""
 #endregion
 
 # region Application Gateway rules
@@ -275,6 +305,7 @@ helps['network application-gateway rule'] = """
     type: group
     short-summary: Evaluate probe information and define routing rules
 """
+
 helps['network application-gateway rule create'] = """
     type: command
     short-summary: Create a new application gateway rule.
@@ -293,6 +324,11 @@ helps['network application-gateway rule list'] = """
 helps['network application-gateway rule show'] = """
     type: command
     short-summary: Show details of an application gateway rule.
+"""
+
+helps['network application-gateway rule update'] = """
+    type: command
+    short-summary: Update an application gateway rule.
 """
 #endregion
 
@@ -320,6 +356,11 @@ helps['network application-gateway ssl-cert list'] = """
 helps['network application-gateway ssl-cert show'] = """
     type: command
     short-summary: Show details of an application gateway SSL certificate.
+"""
+
+helps['network application-gateway ssl-cert update'] = """
+    type: command
+    short-summary: Update an application gateway SSL certificate.
 """
 #endregion
 
@@ -364,6 +405,11 @@ helps['network application-gateway url-path-map list'] = """
 helps['network application-gateway url-path-map show'] = """
     type: command
     short-summary: Show details of an application gateway URL path map.
+"""
+
+helps['network application-gateway url-path-map update'] = """
+    type: command
+    short-summary: Update an application gateway URL path map.
 """
 #endregion
 
