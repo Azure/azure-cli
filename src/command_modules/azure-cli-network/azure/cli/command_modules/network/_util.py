@@ -47,7 +47,7 @@ def get_network_resource_property_entry(resource, prop):
 
 def delete_network_resource_property_entry(resource, prop):
     """ Factory method for creating delete functions. """
-    def delete_func(resource_group_name, resource_name, item_name, no_wait=False):
+    def delete_func(resource_group_name, resource_name, item_name, no_wait=False): # pylint: disable=unused-argument
         client = getattr(_network_client_factory(), resource)
         item = client.get(resource_group_name, resource_name)
         keep_items = \

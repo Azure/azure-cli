@@ -161,8 +161,8 @@ class NetworkAppGatewayWafScenarioTest(ResourceGroupVCRTestBase):
         rg = self.resource_group
         public_ip_name = 'pip1'
         self.cmd('network application-gateway create -g {} -n ag1 --subnet subnet1 --vnet-name vnet4 --public-ip-address {} --sku WAF_Medium'.format(rg, public_ip_name), checks=[
-            JMESPathCheck("applicationGateway.frontendIpConfigurations[0].properties.publicIpAddress.contains(id, '{}')".format(public_ip_name), True),
-            JMESPathCheck('applicationGateway.frontendIpConfigurations[0].properties.privateIpAllocationMethod', 'Dynamic')
+            JMESPathCheck("applicationGateway.frontendIPConfigurations[0].properties.publicIPAddress.contains(id, '{}')".format(public_ip_name), True),
+            JMESPathCheck('applicationGateway.frontendIPConfigurations[0].properties.privateIPAllocationMethod', 'Dynamic')
         ])
         self.cmd('network application-gateway waf-config set -g {} --gateway-name ag1 --enabled true --firewall-mode detection --no-wait'.format(rg))
         self.cmd('network application-gateway waf-config show -g {} --gateway-name ag1'.format(rg), checks=[
