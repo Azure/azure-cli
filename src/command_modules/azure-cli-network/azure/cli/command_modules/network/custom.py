@@ -81,10 +81,10 @@ def update_application_gateway(instance, sku_name=None, sku_tier=None, capacity=
     return instance
 update_application_gateway.__doc__ = AppGatewayOperations.create_or_update.__doc__
 
-def create_ag_authentication_certificate(resource_group_name, application_gateway_name, item_name):
+def create_ag_authentication_certificate(resource_group_name, application_gateway_name, item_name, raw=False):
     raise CLIError('Under construction!')
 
-def update_ag_authentication_certificate(resource_group_name, application_gateway_name, item_name):
+def update_ag_authentication_certificate(resource_group_name, application_gateway_name, item_name, raw=False):
     raise CLIError('Under construction!')
 
 def create_ag_backend_address_pool(resource_group_name, application_gateway_name, item_name, servers):
@@ -354,6 +354,18 @@ def delete_ag_url_path_map_rule(resource_group_name, application_gateway_name, u
         [x for x in url_map.path_rules if x.name.lower() != item_name.lower()]
     return ncf.application_gateways.create_or_update(
         resource_group_name, application_gateway_name, ag)
+
+def set_ag_waf_config(resource_group_name, application_gateway_name, enabled, firewall_mode):
+    from azure.mgmt.network.models import ApplicationGatewayWebApplicationFirewallConfiguration
+    ncf = _network_client_factory().application_gateways
+    ag = ncf.get(resource_group_name, application_gateway_name)
+    ag.web_application_firewall_configuration = \
+        ApplicationGatewayWebApplicationFirewallConfiguration(enabled, firewall_mode)
+    return ncf.create_or_update(resource_group_name, application_gateway_name, ag)
+
+def show_ag_waf_config(resource_group_name, application_gateway_name):
+    return _network_client_factory().application_gateways.get(
+        resource_group_name, application_gateway_name).web_application_firewall_configuration
 
 #endregion
 

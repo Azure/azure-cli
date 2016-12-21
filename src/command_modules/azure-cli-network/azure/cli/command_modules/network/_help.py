@@ -58,6 +58,16 @@ helps['network application-gateway update'] = """
     type: command
     short-summary: Update an application gateway.
 """
+
+helps['network application-gateway show-backend-health'] = """
+    type: command
+    short-summary: Show details on the backend health of the application gateway.
+"""
+
+helps['network application-gateway wait'] = """
+    type: command
+    short-summary: Place the CLI in a waiting state until a condition of the Application Gateway is met.
+"""
 #endregion
 
 # region Application Gateway Address Pool
@@ -85,6 +95,38 @@ helps['network application-gateway address-pool list'] = """
 helps['network application-gateway address-pool show'] = """
     type: command
     short-summary: Show details of an application gateway backend address pool.
+"""
+# endregion
+
+# region Application Gateway Authorization Cert
+helps['network application-gateway auth-cert'] = """
+    type: group
+    short-summary: Manage application gateway authorization certificates.
+"""
+
+helps['network application-gateway auth-cert create'] = """
+    type: command
+    short-summary: Create a new application gateway authorization certificate.
+"""
+
+helps['network application-gateway auth-cert delete'] = """
+    type: command
+    short-summary: Delete an application gateway authorization certificate.
+"""
+
+helps['network application-gateway auth-cert list'] = """
+    type: command
+    short-summary: List authorization certificates of an application gateway.
+"""
+
+helps['network application-gateway auth-cert show'] = """
+    type: command
+    short-summary: Show details of an application gateway authorization certificate.
+"""
+
+helps['network application-gateway auth-cert update'] = """
+    type: command
+    short-summary: Update an application gateway authorization certificate.
 """
 # endregion
 
@@ -281,6 +323,23 @@ helps['network application-gateway ssl-cert show'] = """
 """
 #endregion
 
+# region Application Gateway SSL Policy
+helps['network application-gateway ssl-policy'] = """
+    type: group
+    short-summary: Manage the SSL policy of an application gateway.
+"""
+
+helps['network application-gateway ssl-policy set'] = """
+    type: command
+    short-summary: Update or clear SSL policy settings.
+"""
+
+helps['network application-gateway ssl-policy show'] = """
+    type: command
+    short-summary: Show the SSL policy settings.
+"""
+# endregion
+
 # region Application Gateway URL path map
 
 helps['network application-gateway url-path-map'] = """
@@ -325,6 +384,24 @@ helps['network application-gateway url-path-map rule delete'] = """
     short-summary: Delete an application gateway URL path map rule.
 """
 #endregion
+
+# region Application Gateway WAF Config
+helps['network application-gateway waf-config'] = """
+    type: group
+    short-summary: Configure web application firewall settings of an application gateway.
+    long-summary: Only applicable to gateways with SKU type WAF.
+"""
+
+helps['network application-gateway waf-config set'] = """
+    type: command
+    short-summary: Update web application firewall configuration.
+"""
+
+helps['network application-gateway waf-config show'] = """
+    type: command
+    short-summary: Show the web application firewall configuration.
+"""
+# endregion
 
 # region DNS record-set
 

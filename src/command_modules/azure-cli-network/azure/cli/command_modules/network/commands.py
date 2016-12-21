@@ -48,7 +48,7 @@ property_map = {
     'http_listeners': 'http-listener',
     'request_routing_rules': 'rule',
     'probes': 'probe',
-    'url_path_maps': 'url-path-map'
+    'url_path_maps': 'url-path-map',
 }
 def _make_singular(value):
     try:
@@ -73,6 +73,9 @@ cli_command(__name__, 'network application-gateway ssl-policy show', custom_path
 
 cli_command(__name__, 'network application-gateway url-path-map rule create', custom_path.format('create_ag_url_path_map_rule'))
 cli_command(__name__, 'network application-gateway url-path-map rule delete', custom_path.format('delete_ag_url_path_map_rule'))
+
+cli_command(__name__, 'network application-gateway waf-config set', custom_path.format('set_ag_waf_config'))
+cli_command(__name__, 'network application-gateway waf-config show', custom_path.format('show_ag_waf_config'))
 
 # ExpressRouteCircuitAuthorizationsOperations
 cli_command(__name__, 'network express-route auth delete', 'azure.mgmt.network.operations.express_route_circuit_authorizations_operations#ExpressRouteCircuitAuthorizationsOperations.delete', cf_express_route_circuit_authorizations)
