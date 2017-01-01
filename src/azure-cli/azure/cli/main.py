@@ -38,6 +38,9 @@ def main(args, file=sys.stdout): #pylint: disable=redefined-builtin
             from azure.cli.core._output import OutputProducer
             formatter = OutputProducer.get_formatter(APPLICATION.configuration.output_format)
             OutputProducer(formatter=formatter, file=file).out(cmd_result)
+    except KeyboardInterrupt:
+        logger.warning('KeyboardInterrupt')
+        sys.exit(1)
     except Exception as ex: # pylint: disable=broad-except
         from azure.cli.core.telemetry import log_telemetry
         log_telemetry('Error', log_type='trace')
