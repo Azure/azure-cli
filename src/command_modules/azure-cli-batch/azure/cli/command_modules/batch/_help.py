@@ -44,7 +44,7 @@ helps['batch application'] = """
 
 helps['batch application package'] = """
     type: group
-    short-summary: Commands to manage your Batch application package.
+    short-summary: Commands to manage your Batch application packages.
 """
 
 helps['batch location'] = """

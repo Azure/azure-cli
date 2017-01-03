@@ -17,7 +17,7 @@ mgmt_path = 'azure.mgmt.batch.operations.{}_operations#{}'
 # Mgmt Account Operations
 
 factory = lambda args: batch_client_factory(**args).batch_account
-cli_command(__name__, 'batch account list', custom_path.format('list_account'), factory)
+cli_command(__name__, 'batch account list', custom_path.format('list_accounts'), factory)
 cli_command(__name__, 'batch account show', mgmt_path.format('batch_account', 'BatchAccountOperations.get'), factory)
 cli_command(__name__, 'batch account create', custom_path.format('create_account'), factory)
 cli_command(__name__, 'batch account set', mgmt_path.format('batch_account', 'BatchAccountOperations.update'), factory)

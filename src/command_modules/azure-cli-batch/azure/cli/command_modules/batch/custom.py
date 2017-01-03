@@ -18,7 +18,7 @@ from azure.storage.blob import BlockBlobService
 
 logger = _logging.get_az_logger(__name__)
 
-def list_account(client, resource_group_name=None):
+def list_accounts(client, resource_group_name=None):
     acct_list = client.list_by_resource_group(resource_group_name=resource_group_name) \
         if resource_group_name else client.list()
     return list(acct_list)
