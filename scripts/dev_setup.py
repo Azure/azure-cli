@@ -25,6 +25,9 @@ def exec_command(command):
 print('Running dev setup...')
 print('Root directory \'{}\'\n'.format(root_dir))
 
+# install general requirements
+exec_command('pip install -r requirements.txt')
+
 # command modules have dependency on azure-cli-core so install this first
 exec_command('pip install -e src/azure-cli-nspkg')
 exec_command('pip install -e src/azure-cli-core')
@@ -32,6 +35,5 @@ exec_command('python scripts/command_modules/install.py')
 
 # azure cli has dependencies on the above packages so install this one last
 exec_command('pip install -e src/azure-cli')
-exec_command('pip install -r requirements.txt')
 
 print('Finished dev setup.')
