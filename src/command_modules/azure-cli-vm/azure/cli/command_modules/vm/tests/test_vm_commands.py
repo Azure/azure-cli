@@ -1064,9 +1064,6 @@ class VMSSExtensionInstallTest(VCRTestBase):
         user_name = 'myadmin'
         config_file = _write_config_file(user_name)
 
-        if not os.path.exists(config_file):
-            raise Exception("Failed to generate private_config.json at {}".format(config_file))
-
         try:
             self.cmd('vmss extension set -n {} --publisher {} --version 1.4  --vmss-name {} --resource-group {} --protected-settings "{}"'
                 .format(extension_name, publisher, vmss_name, resource_group, config_file))
@@ -1075,11 +1072,7 @@ class VMSSExtensionInstallTest(VCRTestBase):
                 JMESPathCheck('name', extension_name)
             ])
         finally:
-            try:
-                os.remove(config_file)
-            except OSError:
-                # swallow the io error
-                pass
+            os.remove(config_file)
 
 def _write_config_file(user_name):
     public_key = ('ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC8InHIPLAu6lMc0d+5voyXqigZfT5r6fAM1+FQAi+mkPDdk2hNq1BG0Bwfc88G'
