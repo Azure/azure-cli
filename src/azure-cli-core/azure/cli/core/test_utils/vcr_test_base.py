@@ -346,7 +346,7 @@ class VCRTestBase(unittest.TestCase):#pylint: disable=too-many-instance-attribut
                 if rg_name != rg_original:
                     line = line.replace(rg_name, rg_original)
                 # omit bearer tokens
-                if 'authorization: [bearer' not in line.lower():
+                if 'authorization:' not in line.lower():
                     t.write(line)
         t.seek(0)
         with open(src_path, 'w') as f:
