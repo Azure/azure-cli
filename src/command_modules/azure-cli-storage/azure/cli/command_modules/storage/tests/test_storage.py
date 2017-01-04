@@ -260,10 +260,6 @@ class StorageBlobCopyScenarioTest(StorageAccountVCRTestBase):
 
     def __init__(self, test_method):
         super(StorageBlobCopyScenarioTest, self).__init__(__file__, test_method, resource_group='test_storage_blob_copy')
-        self.src_container = 'testcopyblob1'
-        self.src_blob = 'src_blob'
-        self.dest_container = 'testcopyblob2'
-        self.dest_blob = 'dest_blob'
 
     def test_storage_blob_copy_scenario(self):
         self.execute()
@@ -274,29 +270,45 @@ class StorageBlobCopyScenarioTest(StorageAccountVCRTestBase):
         
     def body(self):
         s = self
-        src_cont = s.src_container
-        src_blob = s.src_blob
-        dst_cont = s.dest_container
-        dst_blob = s.dest_blob
         rg = s.resource_group
+
+        cont1 = 'cont1'
+        cont2 = 'cont2'
+
         _get_connection_string(self)
-        s.cmd('storage container create --name {} --fail-on-exist'.format(src_cont))
-        s.cmd('storage container create -n {} --fail-on-exist'.format(dst_cont))
+        s.cmd('storage container create --name {} --fail-on-exist'.format(cont1))
+        s.cmd('storage container create -n {} --fail-on-exist'.format(cont2))
 
-        s.cmd('storage blob upload -n {} -c {} --type block --file "{}"'.format(src_blob, src_cont, os.path.join(TEST_DIR, 'testfile.rst')))
-        s.cmd('storage blob exists -n {} -c {}'.format(src_blob, src_cont), checks=JMESPathCheck('exists', True))
+        blob_uri = 'blob1'
+        blob_names = 'blob2'
 
-        # test that a blob can be successfully copied
-        src_uri = s.cmd('storage blob url -n {} -c {}'.format(src_blob, src_cont))
-        copy_status = s.cmd('storage blob copy start -c {0} -b {1} -u {2}'.format(
-            dst_cont, dst_blob, src_uri))
+        s.cmd('storage blob upload -n {} -c {} --type block --file "{}"'.format(blob_uri, cont1, os.path.join(TEST_DIR, 'testfile.rst')))
+        s.cmd('storage blob upload -n {} -c {} --type block --file "{}"'.format(blob_names, cont1, os.path.join(TEST_DIR, 'testfile.rst')))
+
+        # test that a blob can be successfully copied by URI or names
+        src_uri = s.cmd('storage blob url -n {} -c {}'.format(blob_uri, cont1))
+        copy_status = s.cmd('storage blob copy start -c {0} -b {1} -u {2}'.format(cont2, blob_uri, src_uri))
+
         assert copy_status['status'] == 'success'
         copy_id = copy_status['id']
-        s.cmd('storage blob show -c {} -n {}'.format(dst_cont, dst_blob), checks=[
-            JMESPathCheck('name', dst_blob),
+
+        s.cmd('storage blob show -c {} -n {}'.format(cont2, blob_uri), checks=[
+            JMESPathCheck('name', blob_uri),
             JMESPathCheck('properties.copy.id', copy_id),
             JMESPathCheck('properties.copy.status', 'success')
         ])
+
+        copy_status = s.cmd('storage blob copy start -c {0} -b {1} --source-container {2} --source-blob {1}'.format(cont2, blob_names, cont1))
+
+        assert copy_status['status'] == 'success'
+        copy_id = copy_status['id']
+
+        s.cmd('storage blob show -c {} -n {}'.format(cont2, blob_names), checks=[
+            JMESPathCheck('name', blob_names),
+            JMESPathCheck('properties.copy.id', copy_id),
+            JMESPathCheck('properties.copy.status', 'success')
+        ])
+
 
 class StorageFileScenarioTest(StorageAccountVCRTestBase):
 
@@ -456,12 +468,6 @@ class StorageFileCopyScenarioTest(StorageAccountVCRTestBase):
 
     def __init__(self, test_method):
         super(StorageFileCopyScenarioTest, self).__init__(__file__, test_method, resource_group='test_file_copy_scenario')
-        self.src_share = 'testcopyfile1'
-        self.src_dir = 'testdir'
-        self.src_file = 'src_file.txt'
-        self.dest_share = 'testcopyfile2'
-        self.dest_dir = 'mydir'
-        self.dest_file = 'dest_file.txt'
 
     def test_storage_file_copy_scenario(self):
         self.execute()
@@ -472,46 +478,53 @@ class StorageFileCopyScenarioTest(StorageAccountVCRTestBase):
         
     def body(self):
         s = self
-        src_share = s.src_share
-        src_dir = s.src_dir
-        src_file = s.src_file
-        dst_share = s.dest_share
-        dst_dir = s.dest_dir
-        dst_file = s.dest_file
         rg = s.resource_group
 
         _get_connection_string(self)
-        s.cmd('storage share create --name {} --fail-on-exist'.format(src_share))
-        s.cmd('storage share create --name {} --fail-on-exist'.format(dst_share))
-        s.cmd('storage directory create --share-name {} -n {}'.format(src_share, src_dir))
-        s.cmd('storage directory create --share-name {} -n {}'.format(dst_share, dst_dir))
 
-        s.cmd('storage file upload -p "{}/{}" --share-name {} --source "{}"'.format(src_dir, src_file, src_share, os.path.join(TEST_DIR, 'testfile.rst')))
-        s.cmd('storage file exists -p "{}/{}" --share-name {}'.format(src_dir, src_file, src_share),
+        share1 = 'share1'
+        share2 = 'share2'
+
+        s.cmd('storage share create --name {} --fail-on-exist'.format(share1))
+        s.cmd('storage share create --name {} --fail-on-exist'.format(share2))
+
+        dir1 = 'dir1'
+        dir2 = 'dir2'
+
+        s.cmd('storage directory create --share-name {} -n {}'.format(share1, dir1))
+        s.cmd('storage directory create --share-name {} -n {}'.format(share2, dir2))
+
+        src_file = 'src_file.txt'
+        dst_file = 'dest_file.txt'
+
+        s.cmd('storage file upload -p "{}/{}" --share-name {} --source "{}"'.format(dir1, src_file, share1, os.path.join(TEST_DIR, 'testfile.rst')))
+        s.cmd('storage file exists -p "{}/{}" --share-name {}'.format(dir1, src_file, share1),
             checks=JMESPathCheck('exists', True))
 
         # test that a file can be successfully copied to root
-        src_uri = s.cmd('storage file url -p "{}" -s {}'.format(os.path.join(src_dir, src_file), src_share))
-        copy_status = s.cmd('storage file copy start -s {} -p "{}" -u {}'.format(
-            dst_share, dst_file, src_uri))
+        src_uri = s.cmd('storage file url -p "{}" -s {}'.format(os.path.join(dir1, src_file), share1))
+        copy_status = s.cmd('storage file copy start -s {} -p "{}" -u {}'.format(share2, dst_file, src_uri))
         assert copy_status['status'] == 'success'
         copy_id = copy_status['id']
-        s.cmd('storage file show --share-name {} -p "{}"'.format(dst_share, dst_file), checks=[
+        s.cmd('storage file show --share-name {} -p "{}"'.format(share2, dst_file), checks=[
             JMESPathCheck('name', dst_file),
             JMESPathCheck('properties.copy.id', copy_id),
             JMESPathCheck('properties.copy.status', 'success')
         ])
 
         # test that a file can be successfully copied to a directory
-        copy_status = s.cmd('storage file copy start -s {} -p "{}/{}" -u {}'.format(
-            dst_share, dst_dir, dst_file, src_uri))
+        copy_status = s.cmd('storage file copy start -s {} -p "{}/{}" -u {}'.format(share2, dir2, dst_file, src_uri))
         assert copy_status['status'] == 'success'
         copy_id = copy_status['id']
-        s.cmd('storage file show --share-name {} -p "{}/{}"'.format(dst_share, dst_dir, dst_file),  checks=[
+        s.cmd('storage file show --share-name {} -p "{}/{}"'.format(share2, dir2, dst_file),  checks=[
             JMESPathCheck('name', dst_file),
             JMESPathCheck('properties.copy.id', copy_id),
             JMESPathCheck('properties.copy.status', 'success')
         ])
+
+        # test that a file can be successfully copied by name components
+        copy_status = s.cmd('storage file copy start -s {} -p "{}" --source-share {} --source-path "{}"'.format(share2, dst_file, share1, os.path.join(dir1, src_file)))
+        assert copy_status['status'] == 'success'
 
 class StorageTableScenarioTest(StorageAccountVCRTestBase):
 
