@@ -3,9 +3,11 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from collections import OrderedDict
+
 from azure.cli.core.commands import DeploymentOutputLongRunningOperation, cli_command
 
-from azure.cli.core.commands.arm import cli_generic_update_command
+from azure.cli.core.commands.arm import cli_generic_update_command, cli_generic_wait_command
 
 from azure.cli.command_modules.vm._client_factory import * #pylint: disable=wildcard-import,unused-wildcard-import
 
@@ -17,7 +19,7 @@ mgmt_path = 'azure.mgmt.compute.operations.{}#{}.{}'
 # VM
 
 cli_command(__name__, 'vm create', 'azure.cli.command_modules.vm.mgmt_vm.lib.operations.vm_operations#VmOperations.create_or_update', cf_vm_create,
-            transform=DeploymentOutputLongRunningOperation('Starting vm create'))
+            transform=DeploymentOutputLongRunningOperation('Starting vm create'), no_wait_param='raw')
 
 op_var = 'virtual_machines_operations'
 op_class = 'VirtualMachinesOperations'
@@ -39,7 +41,9 @@ cli_command(__name__, 'vm open-port', custom_path.format('vm_open_port'))
 cli_generic_update_command(__name__, 'vm update',
                            mgmt_path.format(op_var, op_class, 'get'),
                            mgmt_path.format(op_var, op_class, 'create_or_update'),
-                           cf_vm)
+                           cf_vm,
+                           no_wait_param='raw')
+cli_generic_wait_command(__name__, 'vm wait', 'azure.cli.command_modules.vm.custom#get_instance_view')
 
 # VM NIC
 cli_command(__name__, 'vm nic add', custom_path.format('vm_add_nics'))
@@ -82,6 +86,19 @@ cli_command(__name__, 'vm boot-diagnostics get-boot-log', custom_path.format('ge
 
 # ACS
 
+def transform_acs_list(result):
+    transformed = []
+    for r in result:
+        orchestratorType = 'Unknown'
+        orchestratorProfile = r.get('orchestratorProfile')
+        if orchestratorProfile:
+            orchestratorType = orchestratorProfile.get('orchestratorType')
+        res = OrderedDict([('Name', r['name']), ('ResourceGroup', r['resourceGroup']), \
+            ('Orchestrator', orchestratorType), ('Location', r['location']), \
+            ('ProvisioningState', r['provisioningState'])])
+        transformed.append(res)
+    return transformed
+
 #Remove the hack after https://github.com/Azure/azure-rest-api-specs/issues/352 fixed
 from azure.mgmt.compute.models import ContainerService#pylint: disable=wrong-import-position
 for a in ['id', 'name', 'type', 'location']:
@@ -91,7 +108,7 @@ ContainerService._attribute_map['tags']['type'] = '{str}'#pylint: disable=protec
 op_var = 'container_services_operations'
 op_class = 'ContainerServicesOperations'
 cli_command(__name__, 'acs show', mgmt_path.format(op_var, op_class, 'get'), cf_acs)
-cli_command(__name__, 'acs list', custom_path.format('list_container_services'), cf_acs)
+cli_command(__name__, 'acs list', custom_path.format('list_container_services'), cf_acs, table_transformer=transform_acs_list)
 cli_command(__name__, 'acs delete', mgmt_path.format(op_var, op_class, 'delete'), cf_acs)
 cli_command(__name__, 'acs scale', custom_path.format('update_acs'))
 #Per conversation with ACS team, hide the update till we have something meaningful to tweak

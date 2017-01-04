@@ -10,14 +10,13 @@ from azure.cli.core.test_utils.vcr_test_base import (ResourceGroupVCRTestBase,
 class WebappBasicE2ETest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-        super(WebappBasicE2ETest, self).__init__(__file__, test_method)
-        self.resource_group = 'azurecli-webapp-e2e'
+        super(WebappBasicE2ETest, self).__init__(__file__, test_method, resource_group='azurecli-webapp-e2e2')
 
     def test_webapp_e2e(self):
         self.execute()
 
     def body(self):
-        webapp_name = 'webapp-e2e'
+        webapp_name = 'webapp-e2e3'
         plan = 'webapp-e2e-plan'
         result = self.cmd('appservice plan create -g {} -n {}'.format(self.resource_group, plan))
         self.cmd('appservice plan list -g {}'.format(self.resource_group), checks=[
@@ -40,7 +39,6 @@ class WebappBasicE2ETest(ResourceGroupVCRTestBase):
             ])
 
         result = self.cmd('appservice web create -g {} -n {} --plan {}'.format(self.resource_group, webapp_name, plan), checks=[
-            JMESPathCheck('resourceGroup', self.resource_group),
             JMESPathCheck('state', 'Running'),
             JMESPathCheck('name', webapp_name),
             JMESPathCheck('hostNames[0]', webapp_name + '.azurewebsites.net')
@@ -78,6 +76,13 @@ class WebappBasicE2ETest(ResourceGroupVCRTestBase):
             JMESPathCheck('state', 'Stopped'),
             JMESPathCheck('name', webapp_name)
             ])
+
+        self.cmd('appservice web start -g {} -n {}'.format(self.resource_group, webapp_name))
+        self.cmd('appservice web show -g {} -n {}'.format(self.resource_group, webapp_name), checks=[
+            JMESPathCheck('state', 'Running'),
+            JMESPathCheck('name', webapp_name)
+            ])
+
         self.cmd('appservice web delete -g {} -n {}'.format(self.resource_group, webapp_name))
         #test empty service plan should be automatically deleted.
         result = self.cmd('appservice plan list -g {}'.format(self.resource_group), checks=[
@@ -87,8 +92,7 @@ class WebappBasicE2ETest(ResourceGroupVCRTestBase):
 class WebappConfigureTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-        super(WebappConfigureTest, self).__init__(__file__, test_method)
-        self.resource_group = 'azurecli-webapp-config'
+        super(WebappConfigureTest, self).__init__(__file__, test_method, resource_group='azurecli-webapp-config')
         self.webapp_name = 'webapp-config-test'
 
     def test_webapp_config(self):
@@ -154,12 +158,10 @@ class WebappConfigureTest(ResourceGroupVCRTestBase):
             JMESPathCheck('[0].name', '{0}/{0}.azurewebsites.net'.format(self.webapp_name))
             ])
 
-
 class WebappScaleTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-        super(WebappScaleTest, self).__init__(__file__, test_method)
-        self.resource_group = 'azurecli-webapp-scale'
+        super(WebappScaleTest, self).__init__(__file__, test_method, resource_group='azurecli-webapp-scale')
 
     def test_webapp_scale(self):
         self.execute()
@@ -199,8 +201,7 @@ class WebappScaleTest(ResourceGroupVCRTestBase):
 
 class AppServiceBadErrorPolishTest(ResourceGroupVCRTestBase):
     def __init__(self, test_method):
-        super(AppServiceBadErrorPolishTest, self).__init__(__file__, test_method)
-        self.resource_group = 'clitest-error'
+        super(AppServiceBadErrorPolishTest, self).__init__(__file__, test_method, resource_group='clitest-error')
         self.resource_group2 = 'clitest-error2'
         self.webapp_name = 'webapp-error-test123'
         self.plan = 'webapp-error-plan'
@@ -210,14 +211,14 @@ class AppServiceBadErrorPolishTest(ResourceGroupVCRTestBase):
 
     def set_up(self):
         super(AppServiceBadErrorPolishTest, self).set_up()
-        self.cmd('resource group create -n {} -l westus'.format(self.resource_group2))
+        self.cmd('group create -n {} -l westus'.format(self.resource_group2))
         self.cmd('appservice plan create -g {} -n {} --sku b1'.format(self.resource_group, self.plan))
         self.cmd('appservice web create -g {} -n {} --plan {}'.format(self.resource_group, self.webapp_name, self.plan))
         self.cmd('appservice plan create -g {} -n {} --sku b1'.format(self.resource_group2, self.plan))
 
     def tear_down(self):
         super(AppServiceBadErrorPolishTest, self).tear_down()
-        self.cmd('resource group delete -n {}'.format(self.resource_group2))
+        self.cmd('group delete -n {}'.format(self.resource_group2))
 
     def body(self):
         # we will try to produce an error by try creating 2 webapp with same name in different groups
@@ -227,8 +228,7 @@ class AppServiceBadErrorPolishTest(ResourceGroupVCRTestBase):
 #this test doesn't contain the ultimate verification which you need to manually load the frontpage in a browser
 class LinuxWebappSceanrioTest(ResourceGroupVCRTestBase):
     def __init__(self, test_method):
-        super(LinuxWebappSceanrioTest, self).__init__(__file__, test_method)
-        self.resource_group = 'cli-webapp-linux2'
+        super(LinuxWebappSceanrioTest, self).__init__(__file__, test_method, resource_group='cli-webapp-linux2')
 
     def test_linux_webapp(self):
         self.execute()
@@ -264,8 +264,7 @@ class LinuxWebappSceanrioTest(ResourceGroupVCRTestBase):
 
 class WebappGitScenarioTest(ResourceGroupVCRTestBase):
     def __init__(self, test_method):
-        super(WebappGitScenarioTest, self).__init__(__file__, test_method)
-        self.resource_group = 'cli-webapp-git4'
+        super(WebappGitScenarioTest, self).__init__(__file__, test_method, resource_group='cli-webapp-git4')
 
     def test_webapp_git(self):
         self.execute()
@@ -310,8 +309,7 @@ class WebappGitScenarioTest(ResourceGroupVCRTestBase):
 
 class WebappSlotScenarioTest(ResourceGroupVCRTestBase):
     def __init__(self, test_method):
-        super(WebappSlotScenarioTest, self).__init__(__file__, test_method)
-        self.resource_group = 'cli-webapp-slot2'
+        super(WebappSlotScenarioTest, self).__init__(__file__, test_method, resource_group='cli-webapp-slot2')
         self.webapp = 'web-slot-test'
 
     def test_webapp_slot(self):

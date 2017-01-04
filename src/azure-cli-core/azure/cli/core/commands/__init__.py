@@ -143,7 +143,7 @@ class CommandTable(dict):
             return func
         return wrapped
 
-class CliCommand(object):
+class CliCommand(object): #pylint:disable=too-many-instance-attributes
 
     def __init__(self, name, handler, description=None, table_transformer=None,
                  arguments_loader=None, description_loader=None):
@@ -240,10 +240,11 @@ def register_extra_cli_argument(command, dest, **kwargs):
     _cli_extra_argument_registry[command][dest] = CliCommandArgument(dest, **kwargs)
 
 def cli_command(module_name, name, operation,
-                client_factory=None, transform=None, table_transformer=None):
+                client_factory=None, transform=None, table_transformer=None,
+                no_wait_param=None):
     """ Registers a default Azure CLI command. These commands require no special parameters. """
     command_table[name] = create_command(module_name, name, operation, transform, table_transformer,
-                                         client_factory)
+                                         client_factory, no_wait_param)
 
 def get_op_handler(operation):
     """ Import and load the operation handler """
@@ -257,8 +258,8 @@ def get_op_handler(operation):
         raise ValueError("The operation '{}' is invalid.".format(operation))
 
 def create_command(module_name, name, operation,
-                   transform_result, table_transformer, client_factory):
-
+                   transform_result, table_transformer, client_factory,
+                   no_wait_param=None):
     if not isinstance(operation, string_types):
         raise ValueError("Operation must be a string. Got '{}'".format(operation))
 
@@ -272,6 +273,10 @@ def create_command(module_name, name, operation,
         try:
             op = get_op_handler(operation)
             result = op(client, **kwargs) if client else op(**kwargs)
+
+            if no_wait_param and kwargs.get(no_wait_param, None):
+                return None #return None for 'no-wait'
+
             # apply results transform if specified
             if transform_result:
                 return transform_result(result)
@@ -299,7 +304,8 @@ def create_command(module_name, name, operation,
 
     command_module_map[name] = module_name
     name = ' '.join(name.split())
-    arguments_loader = lambda: extract_args_from_signature(get_op_handler(operation))
+    arguments_loader = lambda: extract_args_from_signature(get_op_handler(operation),
+                                                           no_wait_param=no_wait_param)
     description_loader = lambda: extract_full_summary_from_signature(get_op_handler(operation))
     cmd = CliCommand(name, _execute_command, table_transformer=table_transformer,
                      arguments_loader=arguments_loader, description_loader=description_loader)
@@ -319,7 +325,7 @@ def _polish_rp_not_registerd_error(cli_error):
         match = re.match(reg, msg)
         parts = match.group(1).split('/')
         if len(parts) == 2:
-            cli_error = CLIError("Run 'az resource feature register --namespace {} -n {}' to enable the feature first".format(parts[0], parts[1]))
+            cli_error = CLIError("Run 'az feature register --namespace {} -n {}' to enable the feature first".format(parts[0], parts[1]))
     return cli_error
 
 def _get_cli_argument(command, argname):

@@ -7,6 +7,7 @@ import os
 from unittest import TestCase, skipIf
 from datetime import datetime
 from azure.storage.blob.baseblobservice import BaseBlobService
+from azure.storage.file.fileservice import FileService
 
 
 @skipIf(os.environ.get('Travis', 'false') == 'true', 'Integration tests are skipped in Travis CI')
@@ -20,6 +21,8 @@ class StorageIntegrationTestBase(TestCase):
 
         cls._blob_service = BaseBlobService(connection_string=cls._test_connection_string)
         assert cls._blob_service
+
+        cls._file_service = FileService(connection_string=cls._test_connection_string)
 
         cls._test_account_key = cls._blob_service.account_key
 
@@ -35,7 +38,7 @@ class StorageIntegrationTestBase(TestCase):
         with open(os.path.join(cls._resource_folder, 'sample_file.txt'), 'w') as f:
             f.write('storage blob test sample file')
 
-        for folder_name in ['alpha', 'bravo', 'charlie']:
+        for folder_name in ['apple', 'butter', 'butter/charlie', 'duff/edward']:
             for file_index in range(10):
                 file_path = os.path.join(cls._resource_folder, folder_name, 'file_%s' % file_index)
                 if not os.path.exists(os.path.dirname(file_path)):
@@ -47,3 +50,13 @@ class StorageIntegrationTestBase(TestCase):
     def generate_new_container_name(cls):
         return 'blob-test-{}'.format(datetime.utcnow().strftime('%Y%m%d%H%M%S'))
 
+    @classmethod
+    def generate_new_share_name(cls):
+        return 'file-test-{}'.format(datetime.utcnow().strftime('%Y%m%d%H%M%S'))
+
+    @classmethod
+    def _get_test_resource_file(cls, file_name):
+        result = os.path.join(cls._resource_folder, file_name)
+        assert os.path.exists(result)
+
+        return result

@@ -7,18 +7,33 @@ from azure.cli.core.help_files import helps
 
 helps['iot'] = """
     type: group
-    short-summary: Connect, monitor, and control millions of IoT assets
+    short-summary: Commands to connect, monitor, and control millions of IoT assets
+"""
+
+helps['iot device'] = """
+    type: group
+    short-summary: Commands to manage devices in your IoT hub
 """
 
 helps['iot hub'] = """
     type: group
-    short-summary: Manage IoT Hubs.
+    short-summary: Commands to manage IoT Hubs.
 """
 
 helps['iot hub create'] = """
     type: command
     short-summary: Create an Azure IoT Hub.
     long-summary: See https://azure.microsoft.com/en-us/services/iot-hub/ for an intro to Azure IoT Hub.
+    examples:
+        - name: Create an IoT Hub with free pricing tier F1, in the region of resource group.
+          text: >
+            az iot hub create --resource-group my-resource-group --name my-iot-hub
+        - name: Create an IoT Hub with standard pricing tier S1, in the region of resource group.
+          text: >
+            az iot hub create --resource-group my-resource-group --name my-iot-hub --sku S1
+        - name: Create an IoT Hub with free pricing tier F1, in `westus` region.
+          text: >
+            az iot hub create --resource-group my-resource-group --name my-iot-hub --location westus
 """
 
 helps['iot hub show'] = """
@@ -39,6 +54,19 @@ helps['iot hub show-connection-string'] = """
     long-summary: If resource group and IoT Hub name are not provided, connection strings for all IoT Hubs in your subscription will be returned.
                 If only resource group is provided, connection strings for all IoT Hubs in the resource group will be returned.
                 If both resource group and IoT Hub name are provided, connection string of the IoT Hub will be returned.
+    examples:
+        - name: Show connection string of an IoT Hub using default policy (`iothubowner`) and primary key.
+          text: >
+            az iot hub show-connection-string --name my-iot-hub
+        - name: Show connection string of an IoT Hub using policy `service` and secondary key.
+          text: >
+            az iot hub show-connection-string --name my-iot-hub --policy-name service --key secondary
+        - name: Show connection strings of all IoT Hubs in a resource group.
+          text: >
+            az iot hub show-connection-string --resource-group my-resource-group
+        - name: Show connection strings of all IoT Hubs in current subscription.
+          text: >
+            az iot hub show-connection-string
 """
 
 helps['iot hub consumer-group'] = """
@@ -49,6 +77,13 @@ helps['iot hub consumer-group'] = """
 helps['iot hub consumer-group create'] = """
     type: command
     short-summary: Create an event hub consumer group.
+    examples:
+        - name: Create new consumer group `cg1` in default event hub endpoint `events`.
+          text: >
+            az iot hub consumer-group create --hub-name my-iot-hub --name cg1
+        - name: Create new consumer group `cg1` in operation monitoring event hub endpoint `operationsMonitoringEvents`.
+          text: >
+            az iot hub consumer-group create --hub-name my-iot-hub --event-hub-name operationsMonitoringEvents --name cg1
 """
 
 helps['iot hub consumer-group list'] = """
@@ -149,6 +184,15 @@ helps['iot device show'] = """
     short-summary: Show metadata of a device in an IoT Hub.
 """
 
+helps['iot device update'] = """
+    type: command
+    short-summary: Update metadata of a device in an IoT Hub.
+    examples:
+        - name: Disable a device.
+          text: >
+            az iot device update --hub-name my-iot-hub --device-id my-device --set status=disabled
+"""
+
 helps['iot device list'] = """
     type: command
     short-summary: List devices in an IoT Hub.
@@ -164,6 +208,19 @@ helps['iot device show-connection-string'] = """
     short-summary: Show connection string of device(s) in an IoT Hub.
     long-summary: If device id is not provided, connection strings for all devices in your IoT Hub will be returned.
                 Otherwise, connection string of target device will be returned.
+    examples:
+        - name: Show connection string of a device in an IoT Hub using primary key.
+          text: >
+            az iot device show-connection-string --hub-name my-iot-hub --device-id my-device
+        - name: Show connection string of a device in an IoT Hub using secondary key.
+          text: >
+            az iot device show-connection-string --hub-name my-iot-hub --device-id my-device --key secondary
+        - name: Show connection strings of default number of devices in an IoT Hub using primary key.
+          text: >
+            az iot device show-connection-string --hub-name my-iot-hub
+        - name: Show connection strings of top 100 devices in an IoT Hub using primary key.
+          text: >
+            az iot device show-connection-string --hub-name my-iot-hub --top 100
 """
 
 helps['iot device message'] = """
@@ -174,11 +231,25 @@ helps['iot device message'] = """
 helps['iot device message send'] = """
     type: command
     short-summary: Send a device-to-cloud message.
+    examples:
+        - name: Send a device-to-cloud message to IoT Hub with default message.
+          text: >
+            az iot device message send --hub-name my-iot-hub --device-id my-device
+        - name: Send a device-to-cloud message to IoT Hub with custom message.
+          text: >
+            az iot device message send --hub-name my-iot-hub --device-id my-device --data "Custom Message"
 """
 
 helps['iot device message receive'] = """
     type: command
     short-summary: Receive a cloud-to-device message.
+    examples:
+        - name: Receive a cloud-to-device message from IoT Hub with default lock timeout.
+          text: >
+            az iot device message receive --hub-name my-iot-hub --device-id my-device
+        - name: Receive a cloud-to-device message from IoT Hub with lock timeout of 300 seconds.
+          text: >
+            az iot device message receive --hub-name my-iot-hub --device-id my-device --lock-timeout 300
 """
 
 helps['iot device message complete'] = """

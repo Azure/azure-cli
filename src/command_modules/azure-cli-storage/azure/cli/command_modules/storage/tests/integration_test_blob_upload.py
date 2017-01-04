@@ -10,8 +10,6 @@ The tests require environment variable 'test_connection_string' to set to the co
 of the storage account they will be run on.
 """
 
-import os
-import os.path
 from unittest import TestCase
 from azure.cli.main import main as cli_main
 from .integration_test_base import StorageIntegrationTestBase
@@ -35,12 +33,6 @@ class StorageBlobUploadIntegrationTests(StorageIntegrationTestBase):
 
         self._blob_service.delete_container(self._test_container_name)
 
-    def _get_test_resource_file(self, file_name):
-        result = os.path.join(self._resource_folder, file_name)
-        assert os.path.exists(result)
-
-        return result
-
     def test_blob_upload_multiple_files_no_pattern(self):
         url = 'http://{}/{}'.format(self._blob_service.primary_endpoint, self._test_container_name)
         command = 'storage blob upload-batch -s {} -d {} --account-key {}'\
@@ -49,7 +41,7 @@ class StorageBlobUploadIntegrationTests(StorageIntegrationTestBase):
         cli_main(command.split())
 
         blobs = [b.name for b in self._blob_service.list_blobs(self._test_container_name)]
-        assert len(blobs) == 31
+        assert len(blobs) == 41
 
     def test_blob_upload_multiple_files_dry_run(self):
         url = 'http://{}/{}'.format(self._blob_service.primary_endpoint, self._test_container_name)
@@ -66,10 +58,10 @@ class StorageBlobUploadIntegrationTests(StorageIntegrationTestBase):
         self._keep_test_context = True
 
     def test_blob_upload_multiple_files_patterns_1(self):
-        self._test_blob_upload_multiple_files_patterns('alpha/*', 10)
+        self._test_blob_upload_multiple_files_patterns('apple/*', 10)
 
     def test_blob_upload_multiple_files_patterns_2(self):
-        self._test_blob_upload_multiple_files_patterns('*/file_0', 3)
+        self._test_blob_upload_multiple_files_patterns('*/file_0', 4)
 
     def test_blob_upload_multiple_files_patterns_3(self):
         self._test_blob_upload_multiple_files_patterns('nonexists/*', 0)

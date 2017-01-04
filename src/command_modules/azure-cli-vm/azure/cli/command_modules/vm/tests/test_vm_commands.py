@@ -80,8 +80,7 @@ class VMCombinedListTest(VCRTestBase):
 
 class VMOpenPortTest(ResourceGroupVCRTestBase):
     def __init__(self, test_method):
-        super(VMOpenPortTest, self).__init__(__file__, test_method)
-        self.resource_group = 'open_port_test_rg1'
+        super(VMOpenPortTest, self).__init__(__file__, test_method, resource_group='open_port_test_rg1')
         self.vm_name = 'vm1'
 
     def set_up(self):
@@ -132,9 +131,8 @@ class VMResizeTest(VCRTestBase):
 class VMShowListSizesListIPAddressesScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-        super(VMShowListSizesListIPAddressesScenarioTest, self).__init__(__file__, test_method)
+        super(VMShowListSizesListIPAddressesScenarioTest, self).__init__(__file__, test_method, resource_group='cliTestRg_VmListIpAddresses')
         self.deployment_name = 'azurecli-test-deployment-vm-list-ips'
-        self.resource_group = 'cliTestRg_VmListIpAddresses'
         self.location = 'westus'
         self.vm_name = 'vm-with-public-ip'
         self.ip_allocation_method = 'dynamic'
@@ -263,9 +261,8 @@ class VMImageShowScenarioTest(VCRTestBase):
 class VMGeneralizeScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-        super(VMGeneralizeScenarioTest, self).__init__(__file__, test_method)
+        super(VMGeneralizeScenarioTest, self).__init__(__file__, test_method, resource_group='cliTestRg_VmGeneralize')
         self.deployment_name = 'azurecli-test-deployment-vm-generalize'
-        self.resource_group = 'cliTestRg_VmGeneralize'
         self.location = 'westus'
         self.vm_name = 'vm-generalize'
 
@@ -288,9 +285,8 @@ class VMGeneralizeScenarioTest(ResourceGroupVCRTestBase):
 class VMCreateAndStateModificationsScenarioTest(ResourceGroupVCRTestBase): #pylint:disable=too-many-instance-attributes
 
     def __init__(self, test_method):
-        super(VMCreateAndStateModificationsScenarioTest, self).__init__(__file__, test_method)
+        super(VMCreateAndStateModificationsScenarioTest, self).__init__(__file__, test_method, resource_group='cliTestRg_VmStateMod2')
         self.deployment_name = 'azurecli-test-deployment-vm-state-mod2'
-        self.resource_group = 'cliTestRg_VmStateMod2'
         self.location = 'eastus'
         self.vm_name = 'vm-state-mod'
         self.nsg_name = 'mynsg'
@@ -382,6 +378,27 @@ class VMCreateAndStateModificationsScenarioTest(ResourceGroupVCRTestBase): #pyli
         # Expecting no results
         self.cmd('vm list --resource-group {}'.format(self.resource_group), checks=NoneCheck())
 
+class VMNoWaitScenarioTest(ResourceGroupVCRTestBase):
+    def __init__(self, test_method):
+        super(VMNoWaitScenarioTest, self).__init__(__file__, test_method, resource_group='cli_rg_vm_no_wait2')
+        self.location = 'westus'
+        self.name = 'vmnowait2'
+
+    def test_create_vm_no_wait(self):
+        self.execute()
+
+    def body(self):
+        self.cmd('vm create -g {} -n {} --admin-username user12 --admin-password VerySecret! --authentication-type password --image UbuntuLTS --no-wait'.format(self.resource_group, self.name), checks=NoneCheck())
+        self.cmd('vm wait -g {} -n {} --custom "{}"'.format(self.resource_group, self.name, "instanceView.statuses[?code=='PowerState/running']"), checks=NoneCheck())
+        self.cmd('vm get-instance-view -g {} -n {}'.format(self.resource_group, self.name), checks=[
+            JMESPathCheck("length(instanceView.statuses[?code=='PowerState/running'])", 1)
+            ])
+        self.cmd('vm update -g {} -n {} --set tags.mytag=tagvalue1 --no-wait'.format(self.resource_group, self.name), checks=NoneCheck())
+        self.cmd('vm wait -g {} -n {} --updated'.format(self.resource_group, self.name), checks=NoneCheck())
+        self.cmd('vm show -g {} -n {}'.format(self.resource_group, self.name), checks=[
+            JMESPathCheck("tags.mytag", 'tagvalue1')
+            ])
+
 class VMAvailSetScenarioTest(VCRTestBase):
 
     def __init__(self, test_method):
@@ -422,8 +439,7 @@ class VMAvailSetScenarioTest(VCRTestBase):
 class VMExtensionAutoUpgradeTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-        super(VMExtensionAutoUpgradeTest, self).__init__(__file__, test_method)
-        self.resource_group = 'clitest_upgrade_vmext'
+        super(VMExtensionAutoUpgradeTest, self).__init__(__file__, test_method, resource_group='clitest_upgrade_vmext')
         self.vm_name = 'autoupgradevm1'
 
     def set_up(self):
@@ -690,8 +706,7 @@ class VMScaleSetVMsScenarioTest(VCRTestBase):
 
 class VMScaleSetCreateSimple(ResourceGroupVCRTestBase):
     def __init__(self, test_method):
-        super(VMScaleSetCreateSimple, self).__init__(__file__, test_method)
-        self.resource_group = 'scaleset_create_simple_rg'
+        super(VMScaleSetCreateSimple, self).__init__(__file__, test_method, resource_group='scaleset_create_simple_rg')
 
     def test_vm_scaleset_create_simple(self):
         self.execute()
@@ -708,8 +723,7 @@ class VMScaleSetCreateSimple(ResourceGroupVCRTestBase):
 class VMScaleSetCreateOptions(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-        super(VMScaleSetCreateOptions, self).__init__(__file__, test_method)
-        self.resource_group = 'scaleset_create_options_rg'
+        super(VMScaleSetCreateOptions, self).__init__(__file__, test_method, resource_group='scaleset_create_options_rg')
 
     def test_vm_scaleset_create_options(self):
         self.execute()
@@ -740,8 +754,7 @@ class VMScaleSetCreateOptions(ResourceGroupVCRTestBase):
 
 class VMSSCreateNoneOptionsTest(ResourceGroupVCRTestBase): #pylint: disable=too-many-instance-attributes
     def __init__(self, test_method):
-        super(VMSSCreateNoneOptionsTest, self).__init__(__file__, test_method)
-        self.resource_group = 'cliTestRg_VMSSCreate_none_options'
+        super(VMSSCreateNoneOptionsTest, self).__init__(__file__, test_method, resource_group='cliTestRg_VMSSCreate_none_options')
 
     def test_vmss_create_none_options(self):
         self.execute()
@@ -767,8 +780,7 @@ class VMSSCreateNoneOptionsTest(ResourceGroupVCRTestBase): #pylint: disable=too-
 
 class VMScaleSetCreateExistingOptions(ResourceGroupVCRTestBase):
     def __init__(self, test_method):
-        super(VMScaleSetCreateExistingOptions, self).__init__(__file__, test_method)
-        self.resource_group = 'scaleset_create_existing_options_rg2'
+        super(VMScaleSetCreateExistingOptions, self).__init__(__file__, test_method, resource_group='scaleset_create_existing_options_rg2')
 
     def test_vm_scaleset_create_existing_options(self):
         self.execute()
@@ -812,8 +824,7 @@ class VMScaleSetCreateExistingOptions(ResourceGroupVCRTestBase):
 class VMScaleSetNicScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-        super(VMScaleSetNicScenarioTest, self).__init__(__file__, test_method)
-        self.resource_group = 'test_vm_scaleset_nics'
+        super(VMScaleSetNicScenarioTest, self).__init__(__file__, test_method, resource_group='test_vm_scaleset_nics')
         self.vmss_name = 'vmss1'
         self.instance_id = 0
 
@@ -860,9 +871,8 @@ class VMAccessAddRemoveLinuxUser(VCRTestBase):
 class VMCreateUbuntuScenarioTest(ResourceGroupVCRTestBase): #pylint: disable=too-many-instance-attributes
 
     def __init__(self, test_method):
-        super(VMCreateUbuntuScenarioTest, self).__init__(__file__, test_method)
+        super(VMCreateUbuntuScenarioTest, self).__init__(__file__, test_method, resource_group='cliTestRg_VMCreate_Ubuntu2')
         self.deployment_name = 'azurecli-test-deployment-vm-create-ubuntu2'
-        self.resource_group = 'cliTestRg_VMCreate_Ubuntu2'
         self.admin_username = 'ubuntu'
         self.location = 'westus'
         self.vm_names = ['cli-test-vm2']
@@ -902,8 +912,7 @@ class VMCreateUbuntuScenarioTest(ResourceGroupVCRTestBase): #pylint: disable=too
 class VMMultiNicScenarioTest(ResourceGroupVCRTestBase): #pylint: disable=too-many-instance-attributes
 
     def __init__(self, test_method):
-        super(VMMultiNicScenarioTest, self).__init__(__file__, test_method)
-        self.resource_group = 'cli_test_multi_nic_vm'
+        super(VMMultiNicScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_multi_nic_vm')
         self.vm_name = 'multinicvm1'
 
     def test_vm_multi_nic_scenario(self):
@@ -957,8 +966,7 @@ class VMMultiNicScenarioTest(ResourceGroupVCRTestBase): #pylint: disable=too-man
 class VMCreateNoneOptionsTest(ResourceGroupVCRTestBase): #pylint: disable=too-many-instance-attributes
 
     def __init__(self, test_method):
-        super(VMCreateNoneOptionsTest, self).__init__(__file__, test_method)
-        self.resource_group = 'cliTestRg_VMCreate_none_options' # create resource group in westus...
+        super(VMCreateNoneOptionsTest, self).__init__(__file__, test_method, resource_group='cliTestRg_VMCreate_none_options') # create resource group in westus...
 
     def test_vm_create_none_options(self):
         self.execute()
@@ -1084,8 +1092,7 @@ def _write_config_file(user_name):
 class DiagnosticsExtensionInstallTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-        super(DiagnosticsExtensionInstallTest, self).__init__(__file__, test_method)
-        self.resource_group = 'clitestdiagext'
+        super(DiagnosticsExtensionInstallTest, self).__init__(__file__, test_method, resource_group='clitestdiagext')
         self.storage_account = 'diagextstorage'
         self.vm = 'testdiagvm'
         self.vmss = 'testdiagvmss'
@@ -1144,8 +1151,7 @@ class DiagnosticsExtensionInstallTest(ResourceGroupVCRTestBase):
 
 class VMCreateExistingOptions(ResourceGroupVCRTestBase):
     def __init__(self, test_method):
-        super(VMCreateExistingOptions, self).__init__(__file__, test_method)
-        self.resource_group = 'vm_create_existing_options_rg'
+        super(VMCreateExistingOptions, self).__init__(__file__, test_method, resource_group='vm_create_existing_options_rg')
 
     def test_vm_create_existing_options(self):
         self.execute()
@@ -1192,8 +1198,7 @@ class VMCreateExistingOptions(ResourceGroupVCRTestBase):
 class VMCreateCustomIP(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-        super(VMCreateCustomIP, self).__init__(__file__, test_method)
-        self.resource_group = 'vm_create_custom_ip_rg3'
+        super(VMCreateCustomIP, self).__init__(__file__, test_method, resource_group='vm_create_custom_ip_rg3')
 
     def test_vm_create_custom_ip(self):
         self.execute()
@@ -1217,9 +1222,8 @@ class VMCreateCustomIP(ResourceGroupVCRTestBase):
 class VMDataDiskVCRTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-        super(VMDataDiskVCRTest, self).__init__(__file__, test_method)
+        super(VMDataDiskVCRTest, self).__init__(__file__, test_method, resource_group='cliTestRg_datadisk')
         self.deployment_name = 'azurecli-test-datadisk'
-        self.resource_group = 'cliTestRg_datadisk'
         self.location = 'westus'
         self.vm_name = 'vm-datadisk-test'
 
@@ -1290,8 +1294,7 @@ class VMDataDiskVCRTest(ResourceGroupVCRTestBase):
 class AzureContainerServiceScenarioTest(ResourceGroupVCRTestBase): #pylint: disable=too-many-instance-attributes
 
     def __init__(self, test_method):
-        super(AzureContainerServiceScenarioTest, self).__init__(__file__, test_method)
-        self.resource_group = 'cliTestRg_Acs'
+        super(AzureContainerServiceScenarioTest, self).__init__(__file__, test_method, resource_group='cliTestRg_Acs')
 
     def test_acs_create_update(self):
         self.execute()

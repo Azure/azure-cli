@@ -9,7 +9,7 @@ from __future__ import print_function
 from codecs import open
 from setuptools import setup
 
-VERSION = "0.1.0b10"
+VERSION = "0.1.0b11+dev"
 
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
@@ -53,6 +53,7 @@ DEPENDENCIES = [
     'azure-cli-configure',
     'azure-cli-feedback',
     'azure-cli-network',
+    'azure-cli-nspkg',
     'azure-cli-profile',
     'azure-cli-resource',
     'azure-cli-role',
@@ -80,11 +81,11 @@ setup(
         'az.bat',
     ],
     namespace_packages=[
-        'azure'
+        'azure',
+        'azure.cli',
     ],
     packages=[
         'azure.cli',
-        'azure.cli.command_modules',
     ],
     install_requires=DEPENDENCIES
 )

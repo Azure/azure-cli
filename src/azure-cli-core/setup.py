@@ -9,7 +9,7 @@ from __future__ import print_function
 from codecs import open
 from setuptools import setup
 
-VERSION = "0.1.0b10"
+VERSION = "0.1.0b11+dev"
 
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
@@ -46,6 +46,7 @@ DEPENDENCIES = [
     'adal>=0.4.3',
     'applicationinsights',
     'argcomplete>=1.3.0',
+    'azure-cli-nspkg',
     'azure-mgmt-trafficmanager==0.30.0rc6',
     'azure-mgmt-dns==0.30.0rc6',
     'colorama',

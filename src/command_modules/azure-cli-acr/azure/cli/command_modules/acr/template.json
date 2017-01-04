@@ -29,6 +29,7 @@
         },
         "storageAccountType": {
             "type": "string",
+            "defaultValue": "Standard_LRS",
             "metadata": {
                 "description": "Type of the storage account"
             }
@@ -47,10 +48,23 @@
             "type": "Microsoft.Storage/storageAccounts",
             "location": "[parameters('registryLocation')]",
             "apiVersion": "2016-01-01",
+            "tags": {
+                "containerregistry": "[parameters('registryName')]"
+            },
             "sku": {
                 "name": "[parameters('storageAccountType')]"
             },
-            "kind": "Storage"
+            "kind": "Storage",
+            "properties": {
+                "encryption": {
+                    "services": {
+                        "blob": {
+                            "enabled": true
+                        }
+                    },
+                    "keySource": "Microsoft.Storage"
+                }
+            }
         },
         {
             "name": "[parameters('registryName')]",

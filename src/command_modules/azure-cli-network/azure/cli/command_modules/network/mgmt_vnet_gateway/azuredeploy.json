@@ -2,11 +2,25 @@
   "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
   "contentVersion": "1.0.0.0",
   "parameters": {
+    "asn": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Autonomous System Number to use for the BGP settings."
+      }
+    },
+    "bgpPeeringAddress": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "IP address to use for BGP peering."
+      }
+    },
     "enableBgp": {
       "type": "bool",
       "defaultValue": false,
       "metadata": {
-        "description": "Enable BGP (Border Gateway Protocol)."
+        "description": "Flag to enable BGP settings."
       }
     },
     "gatewayType": {
@@ -27,9 +41,15 @@
         "description": "Location for resources."
       }
     },
+    "peerWeight": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Weight added to routes learned through BGP peering."
+      }
+    },
     "publicIpAddress": {
       "type": "string",
-      "defaultValue": "[concat(parameters('virtualNetworkGatewayName'), 'PublicIP')]",
       "metadata": {
         "description": "Name or ID of public IP address to use."
       }
@@ -42,7 +62,7 @@
         "existingId"
       ],
       "metadata": {
-        "description": "Type of Public IP Address to associate with the load balancer."
+        "description": "Type of Public IP Address to associate with the VPN gateway."
       }
     },
     "sku": {
@@ -51,16 +71,11 @@
       "allowedValues": [
         "Basic",
         "Standard",
-        "HighPerformance"
+        "HighPerformance",
+        "UltraPerformance"
       ],
       "metadata": {
         "description": "VPN Gateway SKU."
-      }
-    },
-    "subnetId": {
-      "type": "string",
-      "metadata": {
-        "description": "Subnet ID for the VPN gateway. Subnet must be named GatewaySubnet."
       }
     },
     "tags": {
@@ -76,22 +91,52 @@
         "description": "Gateway name."
       }
     },
+    "virtualNetwork": {
+      "type": "string",
+      "metadata": {
+        "description": "Name or ID of a virtual network that contains a subnet named 'GatewaySubnet'."
+      }
+    },
+    "virtualNetworkType": {
+      "type": "string",
+      "defaultValue": "existingId",
+      "allowedValues": [
+        "existingId",
+        "existingName"
+      ],
+      "metadata": {
+        "description": "Type of virtual network to supply to the VPN gateway."
+      }
+    },
     "vpnType": {
       "type": "string",
       "metadata": {
-        "description": "VPN gateway type."
+        "description": "VPN routing type."
       },
       "defaultValue": "RouteBased",
       "allowedValues": [
         "RouteBased",
-        "PolicyBased"
+        "PolicyBased",
+        "Dedicated"
       ]
     }
   },
   "variables": {
+    "bgpProperties": {
+      "true": {
+        "asn": "[parameters('asn')]",
+        "bgpPeeringAddress": "[parameters('bgpPeeringAddress')]",
+        "peerWeight": "[parameters('peerWeight')]"
+      },
+      "false": null
+    },
     "pubIpIds": {
       "existingName": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/publicIPAddresses/', parameters('publicIpAddress'))]",
       "existingId": "[parameters('publicIpAddress')]"
+    },
+    "subnetIds": {
+      "existingName": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/virtualNetworks/', parameters('virtualNetwork'), '/subnets/GatewaySubnet')]",
+      "existingId": "[concat(parameters('virtualNetwork'), '/subnets/GatewaySubnet')]"
     }
   },
   "resources": [
@@ -102,12 +147,13 @@
       "location": "[parameters('location')]",
       "tags": "[parameters('tags')]",
       "properties": {
+        "bgpSettings": "[variables('bgpProperties')[concat(parameters('enableBgp'))]]",
         "ipConfigurations": [
           {
             "properties": {
               "privateIPAllocationMethod": "Dynamic",
               "subnet": {
-                "id": "[parameters('subnetId')]"
+                "id": "[variables('subnetIds')[parameters('virtualNetworkType')]]"
               },
               "publicIPAddress": {
                 "id": "[variables('pubIpIds')[parameters('publicIpAddressType')]]"

@@ -47,7 +47,7 @@ def create_resource_group(resource_group_name, location, tags=None):
     ''' Create a new resource group.
     :param str resource_group_name:the desired resource group name
     :param str location:the resource group location
-    :param str tags:tags in 'a=b;c' format
+    :param str tags:tags in 'a=b c' format
     '''
     rcf = _resource_client_factory()
 
@@ -90,9 +90,9 @@ def export_group_as_template(
 
 def deploy_arm_template(
         resource_group_name, template_file=None, template_uri=None, deployment_name=None,
-        parameters=None, mode='incremental'):
+        parameters=None, mode='incremental', no_wait=False):
     return _deploy_arm_template_core(resource_group_name, template_file, template_uri,
-                                     deployment_name, parameters, mode)
+                                     deployment_name, parameters, mode, no_wait=no_wait)
 
 def validate_arm_template(resource_group_name, template_file=None, template_uri=None,
                           parameters=None, mode='incremental'):
@@ -101,7 +101,7 @@ def validate_arm_template(resource_group_name, template_file=None, template_uri=
 
 def _deploy_arm_template_core(resource_group_name, template_file=None, template_uri=None,
                               deployment_name=None, parameters=None, mode='incremental',
-                              validate_only=False):
+                              validate_only=False, no_wait=False):
     from azure.mgmt.resource.resources.models import DeploymentProperties, TemplateLink
 
     if bool(template_uri) == bool(template_file):
@@ -124,9 +124,11 @@ def _deploy_arm_template_core(resource_group_name, template_file=None, template_
 
     smc = get_mgmt_service_client(ResourceManagementClient)
     if validate_only:
-        return smc.deployments.validate(resource_group_name, deployment_name, properties)
+        return smc.deployments.validate(resource_group_name, deployment_name,
+                                        properties, raw=no_wait)
     else:
-        return smc.deployments.create_or_update(resource_group_name, deployment_name, properties)
+        return smc.deployments.create_or_update(resource_group_name, deployment_name,
+                                                properties, raw=no_wait)
 
 
 def export_deployment_as_template(resource_group_name, deployment_name):
@@ -159,6 +161,15 @@ def tag_resource(tags, resource_group_name=None, resource_provider_namespace=Non
                          parent_resource_path, resource_type, resource_name,
                          resource_id, api_version)
     return res.tag(tags)
+
+def get_deployment_operations(client, resource_group_name, deployment_name, operation_ids):
+    """get a deployment's operation.
+    """
+    result = []
+    for op_id in operation_ids:
+        dep = client.get(resource_group_name, deployment_name, op_id)
+        result.append(dep)
+    return result
 
 def list_resources(resource_group_name=None, resource_provider_namespace=None,
                    resource_type=None, name=None, tag=None, location=None):

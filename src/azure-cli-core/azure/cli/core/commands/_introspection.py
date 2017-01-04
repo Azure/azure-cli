@@ -55,8 +55,10 @@ def _option_descriptions(operation):
 EXCLUDED_PARAMS = frozenset(['self', 'raw', 'custom_headers', 'operation_config',
                              'content_version', 'kwargs', 'client'])
 
-def extract_args_from_signature(operation):
-    """ Extracts basic argument data from an operation's signature and docstring """
+def extract_args_from_signature(operation, no_wait_param=None):
+    """ Extracts basic argument data from an operation's signature and docstring
+        no_wait_param: SDK parameter which disables LRO polling. For now it is 'raw'
+    """
     from azure.cli.core.commands import CliCommandArgument
     args = []
     try:
@@ -68,7 +70,12 @@ def extract_args_from_signature(operation):
         args = sig.args
 
     arg_docstring_help = _option_descriptions(operation)
-    for arg_name in [a for a in args if not a in EXCLUDED_PARAMS]:
+    excluded_params = list(EXCLUDED_PARAMS)
+    if no_wait_param in excluded_params:
+        excluded_params.remove(no_wait_param)
+    found_no_wait_param = False
+
+    for arg_name in [a for a in args if not a in excluded_params]:
         try:
             # this works in python3
             default = args[arg_name].default
@@ -89,10 +96,22 @@ def extract_args_from_signature(operation):
         except AttributeError:
             pass
 
+        #improve the naming to 'no_wait'
+        if arg_name == no_wait_param:
+            if not isinstance(default, bool):
+                raise ValueError("The type of '{}' must be boolean to enable for no_wait".format(no_wait_param))#pylint: disable=line-too-long
+            found_no_wait_param = True
+            options_list = ['--no-wait']
+            help_str = 'do not wait for the long running operation to finish'
+        else:
+            options_list = ['--' + arg_name.replace('_', '-')]
+            help_str = arg_docstring_help.get(arg_name)
+
         yield (arg_name, CliCommandArgument(arg_name,
-                                            options_list=['--' + arg_name.replace('_', '-')],
+                                            options_list=options_list,
                                             required=required,
                                             default=default,
-                                            help=arg_docstring_help.get(arg_name),
+                                            help=help_str,
                                             action=action))
-
+    if no_wait_param and not found_no_wait_param:
+        raise ValueError("Command authoring error: unable to enable no-wait option. Operation '{}' does not have a '{}' parameter.".format(operation, no_wait_param))#pylint: disable=line-too-long

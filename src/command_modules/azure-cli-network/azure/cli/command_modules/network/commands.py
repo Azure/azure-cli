@@ -5,7 +5,7 @@
 
 # pylint: disable=line-too-long
 
-from azure.cli.core.commands.arm import cli_generic_update_command
+from azure.cli.core.commands.arm import cli_generic_update_command, cli_generic_wait_command
 from azure.cli.core.commands import DeploymentOutputLongRunningOperation, cli_command
 from ._client_factory import * #pylint: disable=wildcard-import
 
@@ -13,10 +13,10 @@ from ._util import (list_network_resource_property,
                     get_network_resource_property_entry,
                     delete_network_resource_property_entry)
 from ._format import \
-    (transform_local_gateway_table_output)
+    (transform_local_gateway_table_output, transform_dns_record_set_output)
 
 # Application gateways
-cli_command(__name__, 'network application-gateway delete', 'azure.mgmt.network.operations.application_gateways_operations#ApplicationGatewaysOperations.delete', cf_application_gateways)
+cli_command(__name__, 'network application-gateway delete', 'azure.mgmt.network.operations.application_gateways_operations#ApplicationGatewaysOperations.delete', cf_application_gateways, no_wait_param='raw')
 cli_command(__name__, 'network application-gateway show', 'azure.mgmt.network.operations.application_gateways_operations#ApplicationGatewaysOperations.get', cf_application_gateways)
 cli_command(__name__, 'network application-gateway list', 'azure.cli.command_modules.network.custom#list_application_gateways')
 cli_command(__name__, 'network application-gateway start', 'azure.mgmt.network.operations.application_gateways_operations#ApplicationGatewaysOperations.start', cf_application_gateways)
@@ -24,12 +24,15 @@ cli_command(__name__, 'network application-gateway stop', 'azure.mgmt.network.op
 cli_generic_update_command(__name__, 'network application-gateway update',
                            'azure.mgmt.network.operations.application_gateways_operations#ApplicationGatewaysOperations.get',
                            'azure.mgmt.network.operations.application_gateways_operations#ApplicationGatewaysOperations.create_or_update',
-                           cf_application_gateways)
+                           cf_application_gateways, no_wait_param='raw')
+cli_generic_wait_command(__name__, 'network application-gateway wait',
+                         'azure.mgmt.network.operations.application_gateways_operations#ApplicationGatewaysOperations.get', cf_application_gateways)
 
 cli_command(__name__, 'network application-gateway create',
             'azure.cli.command_modules.network.mgmt_app_gateway.lib.operations.app_gateway_operations#AppGatewayOperations.create_or_update',
             cf_application_gateway_create,
-            transform=DeploymentOutputLongRunningOperation('Starting network application-gateway create'))
+            transform=DeploymentOutputLongRunningOperation('Starting network application-gateway create'),
+            no_wait_param='raw')
 
 property_map = {
     'ssl_certificates': 'ssl-cert',
@@ -227,7 +230,8 @@ cli_command(__name__, 'network public-ip list', 'azure.cli.command_modules.netwo
 cli_generic_update_command(__name__, 'network public-ip update',
                            'azure.mgmt.network.operations.public_ip_addresses_operations#PublicIPAddressesOperations.get',
                            'azure.mgmt.network.operations.public_ip_addresses_operations#PublicIPAddressesOperations.create_or_update',
-                           cf_public_ip_addresses)
+                           cf_public_ip_addresses,
+                           custom_function_op='azure.cli.command_modules.network.custom#update_public_ip')
 
 cli_command(__name__, 'network public-ip create',
             'azure.cli.command_modules.network.mgmt_public_ip.lib.operations.public_ip_operations#PublicIpOperations.create_or_update',
@@ -292,7 +296,8 @@ cli_command(__name__, 'network vpn-connection list', 'azure.mgmt.network.operati
 cli_generic_update_command(__name__, 'network vpn-connection update',
                            'azure.mgmt.network.operations.virtual_network_gateway_connections_operations#VirtualNetworkGatewayConnectionsOperations.get',
                            'azure.mgmt.network.operations.virtual_network_gateway_connections_operations#VirtualNetworkGatewayConnectionsOperations.create_or_update',
-                           cf_virtual_network_gateway_connections)
+                           cf_virtual_network_gateway_connections,
+                           custom_function_op='azure.cli.command_modules.network.custom#update_vpn_connection')
 cli_command(__name__, 'network vpn-connection shared-key show', 'azure.mgmt.network.operations.virtual_network_gateway_connections_operations#VirtualNetworkGatewayConnectionsOperations.get_shared_key', cf_virtual_network_gateway_connections)
 cli_command(__name__, 'network vpn-connection shared-key reset', 'azure.mgmt.network.operations.virtual_network_gateway_connections_operations#VirtualNetworkGatewayConnectionsOperations.reset_shared_key', cf_virtual_network_gateway_connections)
 cli_generic_update_command(__name__, 'network vpn-connection shared-key update',
@@ -306,21 +311,24 @@ cli_command(__name__, 'network vpn-connection create',
             transform=DeploymentOutputLongRunningOperation('Starting network vpn-connection create'))
 
 # VirtualNetworkGatewaysOperations
-cli_command(__name__, 'network vpn-gateway delete', 'azure.mgmt.network.operations.virtual_network_gateways_operations#VirtualNetworkGatewaysOperations.delete', cf_virtual_network_gateways)
-cli_command(__name__, 'network vpn-gateway show', 'azure.mgmt.network.operations.virtual_network_gateways_operations#VirtualNetworkGatewaysOperations.get', cf_virtual_network_gateways)
-cli_command(__name__, 'network vpn-gateway list', 'azure.mgmt.network.operations.virtual_network_gateways_operations#VirtualNetworkGatewaysOperations.list', cf_virtual_network_gateways)
-cli_command(__name__, 'network vpn-gateway reset', 'azure.mgmt.network.operations.virtual_network_gateways_operations#VirtualNetworkGatewaysOperations.reset', cf_virtual_network_gateways)
-cli_generic_update_command(__name__, 'network vpn-gateway update',
+cli_command(__name__, 'network vnet-gateway delete', 'azure.mgmt.network.operations.virtual_network_gateways_operations#VirtualNetworkGatewaysOperations.delete', cf_virtual_network_gateways)
+cli_command(__name__, 'network vnet-gateway show', 'azure.mgmt.network.operations.virtual_network_gateways_operations#VirtualNetworkGatewaysOperations.get', cf_virtual_network_gateways)
+cli_command(__name__, 'network vnet-gateway list', 'azure.mgmt.network.operations.virtual_network_gateways_operations#VirtualNetworkGatewaysOperations.list', cf_virtual_network_gateways)
+cli_command(__name__, 'network vnet-gateway reset', 'azure.mgmt.network.operations.virtual_network_gateways_operations#VirtualNetworkGatewaysOperations.reset', cf_virtual_network_gateways)
+cli_generic_update_command(__name__, 'network vnet-gateway update',
                            'azure.mgmt.network.operations.virtual_network_gateways_operations#VirtualNetworkGatewaysOperations.get',
                            'azure.mgmt.network.operations.virtual_network_gateways_operations#VirtualNetworkGatewaysOperations.create_or_update',
                            cf_virtual_network_gateways,
-                           custom_function_op='azure.cli.command_modules.network.custom#update_network_vpn_gateway')
-cli_command(__name__, 'network vpn-gateway root-cert create', 'azure.cli.command_modules.network.custom#create_vpn_gateway_root_cert')
-cli_command(__name__, 'network vpn-gateway root-cert delete', 'azure.cli.command_modules.network.custom#delete_vpn_gateway_root_cert')
-cli_command(__name__, 'network vpn-gateway revoked-cert create', 'azure.cli.command_modules.network.custom#create_vpn_gateway_revoked_cert')
-cli_command(__name__, 'network vpn-gateway revoked-cert delete', 'azure.cli.command_modules.network.custom#delete_vpn_gateway_revoked_cert')
+                           custom_function_op='azure.cli.command_modules.network.custom#update_vnet_gateway',
+                           no_wait_param='raw')
+cli_command(__name__, 'network vnet-gateway root-cert create', 'azure.cli.command_modules.network.custom#create_vnet_gateway_root_cert')
+cli_command(__name__, 'network vnet-gateway root-cert delete', 'azure.cli.command_modules.network.custom#delete_vnet_gateway_root_cert')
+cli_command(__name__, 'network vnet-gateway revoked-cert create', 'azure.cli.command_modules.network.custom#create_vnet_gateway_revoked_cert')
+cli_command(__name__, 'network vnet-gateway revoked-cert delete', 'azure.cli.command_modules.network.custom#delete_vnet_gateway_revoked_cert')
 
-cli_command(__name__, 'network vpn-gateway create', 'azure.cli.command_modules.network.mgmt_vnet_gateway.lib.operations.vnet_gateway_operations#VnetGatewayOperations.create_or_update', cf_vnet_gateway_create, transform=DeploymentOutputLongRunningOperation('Starting network vnet-gateway create'))
+cli_command(__name__, 'network vnet-gateway create', 'azure.cli.command_modules.network.mgmt_vnet_gateway.lib.operations.vnet_gateway_operations#VnetGatewayOperations.create_or_update', cf_vnet_gateway_create, transform=DeploymentOutputLongRunningOperation('Starting network vnet-gateway create'),
+            no_wait_param='raw')
+cli_generic_wait_command(__name__, 'network vnet-gateway wait', 'azure.mgmt.network.operations.virtual_network_gateways_operations#VirtualNetworkGatewaysOperations.get', cf_virtual_network_gateways)
 
 # VirtualNetworksOperations
 cli_command(__name__, 'network vnet delete', 'azure.mgmt.network.operations.virtual_networks_operations#VirtualNetworksOperations.delete', cf_virtual_networks)
@@ -357,7 +365,8 @@ cli_command(__name__, 'network traffic-manager profile list', 'azure.cli.command
 cli_generic_update_command(__name__, 'network traffic-manager profile update',
                            'azure.mgmt.trafficmanager.operations.profiles_operations#ProfilesOperations.get',
                            'azure.mgmt.trafficmanager.operations.profiles_operations#ProfilesOperations.create_or_update',
-                           cf_traffic_manager_mgmt_profiles)
+                           cf_traffic_manager_mgmt_profiles,
+                           custom_function_op='azure.cli.command_modules.network.custom#update_traffic_manager_profile')
 
 cli_command(__name__, 'network traffic-manager profile create',
             'azure.cli.command_modules.network.mgmt_traffic_manager_profile.lib.operations.traffic_manager_profile_operations#TrafficManagerProfileOperations.create_or_update',
@@ -372,7 +381,8 @@ cli_command(__name__, 'network traffic-manager endpoint list', 'azure.cli.comman
 cli_generic_update_command(__name__, 'network traffic-manager endpoint update',
                            'azure.mgmt.trafficmanager.operations.endpoints_operations#EndpointsOperations.get',
                            'azure.mgmt.trafficmanager.operations.endpoints_operations#EndpointsOperations.create_or_update',
-                           cf_traffic_manager_mgmt_endpoints)
+                           cf_traffic_manager_mgmt_endpoints,
+                           custom_function_op='azure.cli.command_modules.network.custom#update_traffic_manager_endpoint')
 
 # DNS ZonesOperations
 cli_command(__name__, 'network dns zone show', 'azure.mgmt.dns.operations.zones_operations#ZonesOperations.get', cf_dns_mgmt_zones)
@@ -384,18 +394,19 @@ cli_generic_update_command(__name__, 'network dns zone update',
                            cf_dns_mgmt_zones)
 cli_command(__name__, 'network dns zone import', 'azure.cli.command_modules.network.custom#import_zone')
 cli_command(__name__, 'network dns zone export', 'azure.cli.command_modules.network.custom#export_zone')
-
-cli_command(__name__, 'network dns zone create', 'azure.cli.command_modules.network.dns_zone#create_dns_zone', cf_dns_mgmt_zones)
+cli_command(__name__, 'network dns zone create', 'azure.cli.command_modules.network.custom#create_dns_zone', cf_dns_mgmt_zones)
 
 # DNS RecordSetsOperations
-cli_command(__name__, 'network dns record-set show', 'azure.mgmt.dns.operations.record_sets_operations#RecordSetsOperations.get', cf_dns_mgmt_record_sets)
+cli_command(__name__, 'network dns record-set show', 'azure.mgmt.dns.operations.record_sets_operations#RecordSetsOperations.get', cf_dns_mgmt_record_sets, transform=transform_dns_record_set_output)
 cli_command(__name__, 'network dns record-set delete', 'azure.mgmt.dns.operations.record_sets_operations#RecordSetsOperations.delete', cf_dns_mgmt_record_sets)
-cli_command(__name__, 'network dns record-set list', 'azure.mgmt.dns.operations.record_sets_operations#RecordSetsOperations.list_all_in_resource_group', cf_dns_mgmt_record_sets)
-cli_command(__name__, 'network dns record-set create', 'azure.cli.command_modules.network.custom#create_dns_record_set')
+cli_command(__name__, 'network dns record-set list', 'azure.mgmt.dns.operations.record_sets_operations#RecordSetsOperations.list_all_in_resource_group', cf_dns_mgmt_record_sets, transform=transform_dns_record_set_output)
+cli_command(__name__, 'network dns record-set create', 'azure.cli.command_modules.network.custom#create_dns_record_set', transform=transform_dns_record_set_output)
 cli_generic_update_command(__name__, 'network dns record-set update',
                            'azure.mgmt.dns.operations.record_sets_operations#RecordSetsOperations.get',
                            'azure.mgmt.dns.operations.record_sets_operations#RecordSetsOperations.create_or_update',
-                           cf_dns_mgmt_record_sets)
+                           cf_dns_mgmt_record_sets,
+                           custom_function_op='azure.cli.command_modules.network.custom#update_dns_record_set',
+                           transform=transform_dns_record_set_output)
 
 # DNS RecordOperations
 cli_command(__name__, 'network dns record aaaa add', 'azure.cli.command_modules.network.custom#add_dns_aaaa_record')

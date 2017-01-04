@@ -6,13 +6,12 @@
 from __future__ import print_function
 
 import json
-import logging
 import os
 import collections
 import shlex
 from random import choice
 import re
-from string import digits
+from string import digits, ascii_lowercase
 import sys
 from six.moves.urllib.parse import urlparse, parse_qs # pylint: disable=import-error
 import tempfile
@@ -62,8 +61,9 @@ def _mock_get_mgmt_service_client(client_type, subscription_bound=True, subscrip
 
     return (client, subscription_id)
 
-def _mock_generate_deployment_name(value):
-    return value if value != '_GENERATE_' else 'mock-deployment'
+def _mock_generate_deployment_name(namespace):
+    if not namespace.deployment_name:
+        namespace.deployment_name = 'mock-deployment'
 
 def _mock_handle_exceptions(ex):
     raise ex
@@ -117,7 +117,7 @@ class JMESPathPatternCheck(object): # pylint: disable=too-few-public-methods
 
     def compare(self, json_data):
         actual_result = _search_result_by_jmespath(json_data, self.query)
-        if not re.match(self.expected_result, actual_result, re.IGNORECASE):
+        if not re.match(self.expected_result, str(actual_result), re.IGNORECASE):
             raise JMESPathCheckAssertionError(self, actual_result, json_data)
 
 class BooleanCheck(object): # pylint: disable=too-few-public-methods
@@ -233,13 +233,14 @@ class VCRTestBase(unittest.TestCase):#pylint: disable=too-many-instance-attribut
             self.exception = CLIError('No recorded result provided for {}.'.format(self.test_name))
 
         if debug_vcr:
+            import logging
             logging.basicConfig()
             vcr_log = logging.getLogger('vcr')
             vcr_log.setLevel(logging.INFO)
         self.my_vcr = vcr.VCR(
             cassette_library_dir=self.recording_dir,
-            before_record_request=VCRTestBase._before_record_request,
-            before_record_response=VCRTestBase._before_record_response,
+            before_record_request=self._before_record_request,
+            before_record_response=self._before_record_response,
             decode_compressed_response=True
         )
         self.my_vcr.register_matcher('custom', _custom_request_matcher)
@@ -253,8 +254,7 @@ class VCRTestBase(unittest.TestCase):#pylint: disable=too-many-instance-attribut
             f.write(' '.join(command))
             f.write('\n')
 
-    @staticmethod
-    def _before_record_request(request):
+    def _before_record_request(self, request): # pylint: disable=no-self-use
         # scrub subscription from the uri
         request.uri = re.sub('/subscriptions/([^/]+)/',
                              '/subscriptions/{}/'.format(MOCKED_SUBSCRIPTION_ID), request.uri)
@@ -262,6 +262,7 @@ class VCRTestBase(unittest.TestCase):#pylint: disable=too-many-instance-attribut
                              '/graph.windows.net/{}/'.format(MOCKED_TENANT_ID), request.uri)
         request.uri = re.sub('/sig=([^/]+)&', '/sig=0000&', request.uri)
         request.uri = _scrub_deployment_name(request.uri)
+
         # replace random storage account name with dummy name
         request.uri = re.sub('/vcrstorage([\\d]+).',
                              '/{}.'.format(MOCKED_STORAGE_ACCOUNT), request.uri)
@@ -274,8 +275,7 @@ class VCRTestBase(unittest.TestCase):#pylint: disable=too-many-instance-attribut
             request = None
         return request
 
-    @staticmethod
-    def _before_record_response(response):
+    def _before_record_response(self, response): # pylint: disable=no-self-use
         for key in VCRTestBase.FILTER_HEADERS:
             if key in response['headers']:
                 del response['headers'][key]
@@ -292,6 +292,7 @@ class VCRTestBase(unittest.TestCase):#pylint: disable=too-many-instance-attribut
                 response['body'][key] = bytes(value, 'utf-8')
             except TypeError:
                 response['body'][key] = value.encode('utf-8')
+
         return response
 
     @mock.patch('azure.cli.main.handle_exception', _mock_handle_exceptions)
@@ -323,7 +324,7 @@ class VCRTestBase(unittest.TestCase):#pylint: disable=too-many-instance-attribut
     @mock.patch('msrestazure.azure_operation.AzureOperationPoller._delay', _mock_operation_delay)
     @mock.patch('time.sleep', _mock_operation_delay)
     @mock.patch('azure.cli.core.commands.LongRunningOperation._delay', _mock_operation_delay)
-    @mock.patch('azure.cli.core.commands.parameters.generate_deployment_name',
+    @mock.patch('azure.cli.core.commands.validators.generate_deployment_name',
                 _mock_generate_deployment_name)
     def _execute_playback(self):
         # pylint: disable=no-member
@@ -331,12 +332,21 @@ class VCRTestBase(unittest.TestCase):#pylint: disable=too-many-instance-attribut
             self.body()
         self.success = True
 
-    def _scrub_bearer_tokens(self):
+    def _post_recording_scrub(self):
+        """ Perform post-recording cleanup on the YAML file that can't be accomplished with the
+        VCR recording hooks. """
         src_path = self.cassette_path
+        rg_name = getattr(self, 'resource_group', None)
+        rg_original = getattr(self, 'resource_group_original', None)
+
         t = tempfile.NamedTemporaryFile('r+')
         with open(src_path, 'r') as f:
             for line in f:
-                if 'authorization: [bearer' not in line.lower():
+                # scrub resource group names
+                if rg_name != rg_original:
+                    line = line.replace(rg_name, rg_original)
+                # omit bearer tokens
+                if 'authorization:' not in line.lower():
                     t.write(line)
         t.seek(0)
         with open(src_path, 'w') as f:
@@ -406,45 +416,52 @@ class VCRTestBase(unittest.TestCase):#pylint: disable=too-many-instance-attribut
                 os.remove(self.cassette_path)
             elif self.success and not self.playback and os.path.isfile(self.cassette_path):
                 try:
-                    self._scrub_bearer_tokens()
+                    self._post_recording_scrub()
                 except Exception: # pylint: disable=broad-except
                     os.remove(self.cassette_path)
 
 class ResourceGroupVCRTestBase(VCRTestBase):
     # pylint: disable=too-many-arguments
-    def __init__(self, test_file, test_name, run_live=False, debug=False, debug_vcr=False,
-                 skip_setup=False, skip_teardown=False):
+    def __init__(self, test_file, test_name, resource_group='vcr_resource_group', run_live=False,
+                 debug=False, debug_vcr=False, skip_setup=False, skip_teardown=False):
         super(ResourceGroupVCRTestBase, self).__init__(test_file, test_name, run_live=run_live,
-                                                       debug=debug, skip_setup=skip_setup,
+                                                       debug=debug, debug_vcr=debug_vcr,
+                                                       skip_setup=skip_setup,
                                                        skip_teardown=skip_teardown)
-        self.resource_group = 'vcr_resource_group'
+        self.resource_group_original = resource_group
+        random_tag = '_{}_'.format(''.join((choice(ascii_lowercase + digits) for _ in range(4))))
+        self.resource_group = '{}{}'.format(resource_group, '' if self.playback else random_tag)
         self.location = 'westus'
 
     def set_up(self):
-        self.cmd('resource group create --location {} --name {}'.format(
+        self.cmd('group create --location {} --name {} --tags use=az-test'.format(
             self.location, self.resource_group))
 
     def tear_down(self):
-        self.cmd('resource group delete --name {}'.format(self.resource_group))
+        self.cmd('group delete --name {} --no-wait'.format(self.resource_group))
 
 class StorageAccountVCRTestBase(VCRTestBase):
     # pylint: disable=too-many-arguments
-    def __init__(self, test_file, test_name, run_live=False, debug=False, debug_vcr=False,
-                 skip_setup=False, skip_teardown=False):
+    def __init__(self, test_file, test_name, resource_group='vcr_resource_group', run_live=False,
+                 debug=False, debug_vcr=False, skip_setup=False, skip_teardown=False):
         super(StorageAccountVCRTestBase, self).__init__(test_file, test_name, run_live=run_live,
-                                                        debug=debug, skip_setup=skip_setup,
+                                                        debug=debug, debug_vcr=debug_vcr,
+                                                        skip_setup=skip_setup,
                                                         skip_teardown=skip_teardown)
-        self.resource_group = 'vcr_resource_group'
+        self.resource_group_original = resource_group
+        random_tag = '_{}_'.format(''.join((choice(ascii_lowercase + digits) for _ in range(4))))
+        self.resource_group = '{}{}'.format(resource_group, '' if self.playback else random_tag)
+
         self.account = MOCKED_STORAGE_ACCOUNT if self.playback else \
             'vcrstorage{}'.format(''.join(choice(digits) for i in range(12)))
         self.location = 'westus'
 
     def set_up(self):
-        self.cmd('resource group create --location {} --name {}'.format(
+        self.cmd('group create --location {} --name {} --tags use=az-test'.format(
             self.location, self.resource_group))
         self.cmd('storage account create --sku Standard_LRS -l westus -n {} -g {}'.format(
             self.account, self.resource_group))
 
     def tear_down(self):
         self.cmd('storage account delete -g {} -n {}'.format(self.resource_group, self.account))
-        self.cmd('resource group delete --name {}'.format(self.resource_group))
+        self.cmd('group delete --name {} --no-wait'.format(self.resource_group))

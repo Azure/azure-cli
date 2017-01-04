@@ -33,11 +33,58 @@ from ._validators import \
      resource_type_type, services_type, ipv4_range_type, validate_entity,
      validate_select, validate_source_uri, validate_blob_type, validate_included_datasets,
      validate_custom_domain, validate_public_access, public_access_types,
-     process_upload_batch_parameters, process_download_batch_parameters,
+     process_blob_upload_batch_parameters, process_blob_download_batch_parameters,
+     process_file_upload_batch_parameters, process_file_download_batch_parameters,
      get_content_setting_validator, validate_encryption, validate_accept,
      validate_key, storage_account_key_options,
      process_file_download_namespace, process_logging_update_namespace,
-     process_metric_update_namespace, process_blob_copy_batch_namespace)
+     process_metric_update_namespace, process_blob_copy_batch_namespace,
+     get_source_file_or_blob_service_client)
+
+# UTILITY
+
+
+class CommandContext(object):
+    def __init__(self, scope):
+        self._scope = scope
+
+    def reg_arg(self, *args, **kwargs):
+        return register_cli_argument(self._scope, *args, **kwargs)
+
+    def reg_extra_arg(self, *args, **kwargs):
+        return register_extra_cli_argument(self._scope, *args, **kwargs)
+
+    def ignore(self, argument):
+        return register_cli_argument(self._scope, argument, ignore_type)
+
+    def arg_group(self, name):
+        return ArgumentGroupContext(self._scope, name)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        pass
+
+
+class ArgumentGroupContext(CommandContext):
+    def __init__(self, scope, name):
+        CommandContext.__init__(self, scope)
+        self._name = name
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        pass
+
+    def reg_arg(self, *args, **kwargs):
+        kwargs['arg_group'] = self._name
+        return CommandContext.reg_arg(self, *args, **kwargs)
+
+    def reg_extra_arg(self, *args, **kwargs):
+        kwargs['arg_group'] = self._name
+        return CommandContext.reg_extra_arg(self, *args, **kwargs)
 
 # COMPLETERS
 
@@ -120,14 +167,14 @@ def register_path_argument(scope, default_file_param=None, options_list=None):
 
 # EXTRA PARAMETER SET REGISTRATION
 
-def register_content_settings_argument(scope, settings_class, update):
-    register_cli_argument(scope, 'content_settings', ignore_type, validator=get_content_setting_validator(settings_class, update))
-    register_extra_cli_argument(scope, 'content_type', default=None, help='The content MIME type.')
-    register_extra_cli_argument(scope, 'content_encoding', default=None, help='The content encoding type.')
-    register_extra_cli_argument(scope, 'content_language', default=None, help='The content language.')
-    register_extra_cli_argument(scope, 'content_disposition', default=None, help='Conveys additional information about how to process the response payload, and can also be used to attach additional metadata.')
-    register_extra_cli_argument(scope, 'content_cache_control', default=None, help='The cache control string.')
-    register_extra_cli_argument(scope, 'content_md5', default=None, help='The content\'s MD5 hash.')
+def register_content_settings_argument(scope, settings_class, update, arg_group=None):
+    register_cli_argument(scope, 'content_settings', ignore_type, validator=get_content_setting_validator(settings_class, update), arg_group=arg_group)
+    register_extra_cli_argument(scope, 'content_type', default=None, help='The content MIME type.', arg_group=arg_group)
+    register_extra_cli_argument(scope, 'content_encoding', default=None, help='The content encoding type.', arg_group=arg_group)
+    register_extra_cli_argument(scope, 'content_language', default=None, help='The content language.', arg_group=arg_group)
+    register_extra_cli_argument(scope, 'content_disposition', default=None, help='Conveys additional information about how to process the response payload, and can also be used to attach additional metadata.', arg_group=arg_group)
+    register_extra_cli_argument(scope, 'content_cache_control', default=None, help='The cache control string.', arg_group=arg_group)
+    register_extra_cli_argument(scope, 'content_md5', default=None, help='The content\'s MD5 hash.', arg_group=arg_group)
 
 def register_source_uri_arguments(scope):
     register_cli_argument(scope, 'copy_source', options_list=('--source-uri', '-u'), validator=validate_source_uri, required=False, arg_group='Copy Source')
@@ -243,17 +290,17 @@ register_cli_argument('storage blob upload', 'validate_content', help='Specifies
 # TODO: Remove once #807 is complete. Smart Create Generation requires this parameter.
 register_extra_cli_argument('storage blob upload', '_subscription_id', options_list=('--subscription',), help=argparse.SUPPRESS)
 
-# BLOB DOWNLOAD PARAMETERS
+# BLOB DOWNLOAD-BATCH PARAMETERS
 register_cli_argument('storage blob download-batch', 'destination', options_list=('--destination', '-d'))
 register_cli_argument('storage blob download-batch', 'source', options_list=('--source', '-s'),
-                      validator=process_download_batch_parameters)
+                      validator=process_blob_download_batch_parameters)
 
 register_cli_argument('storage blob download-batch', 'source_container_name', ignore_type)
 
-# BLOB UPLOAD PARAMETERS
+# BLOB UPLOAD-BATCH PARAMETERS
 register_cli_argument('storage blob upload-batch', 'destination', options_list=('--destination', '-d'))
 register_cli_argument('storage blob upload-batch', 'source', options_list=('--source', '-s'),
-                      validator=process_upload_batch_parameters)
+                      validator=process_blob_upload_batch_parameters)
 
 register_cli_argument('storage blob upload-batch', 'source_files', ignore_type)
 register_cli_argument('storage blob upload-batch', 'destination_container_name', ignore_type)
@@ -277,6 +324,43 @@ register_cli_argument('storage blob upload-batch', 'content_type', arg_group='Co
 register_cli_argument('storage blob upload-batch', 'content_cache_control', arg_group='Content Control')
 register_cli_argument('storage blob upload-batch', 'content_language', arg_group='Content Control')
 register_cli_argument('storage blob upload-batch', 'max_connections', type=int)
+
+# TODO: Remove workaround when Python storage SDK issue #190 is fixed.
+for item in ['upload', 'upload-batch']:
+    register_cli_argument('storage blob {}'.format(item), 'max_connections', type=int, help='Maximum number of parallel connections to use when the blob size exceeds 64MB.', default=1)
+
+# FILE UPLOAD-BATCH PARAMETERS
+with CommandContext('storage file upload-batch') as c:
+    c.reg_arg('source', options_list=('--source', '-s'), validator=process_file_upload_batch_parameters)
+    c.reg_arg('destination', options_list=('--destination', '-d'))
+
+    with c.arg_group('Download Control') as group:
+        group.reg_arg('validate_content')
+        group.reg_arg('max_connections')
+
+register_content_settings_argument('storage file upload-batch', FileContentSettings,
+                                   update=False, arg_group='Content Settings')
+
+# FILE DOWNLOAD-BATCH PARAMETERS
+with CommandContext('storage file download-batch') as c:
+    c.reg_arg('source', options_list=('--source', '-s'), validator=process_file_download_batch_parameters)
+    c.reg_arg('destination', options_list=('--destination', '-d'))
+
+    with c.arg_group('Download Control') as group:
+        group.reg_arg('validate_content')
+        group.reg_arg('max_connections')
+
+# FILE COPY-BATCH PARAMETERS
+with CommandContext('storage file copy start-batch') as c:
+    c.reg_arg('source_client', ignore_type, validator=get_source_file_or_blob_service_client)
+
+    with c.arg_group('Copy Source Arguments') as group:
+        group.reg_extra_arg('source_account')
+        group.reg_extra_arg('source_key')
+        group.reg_extra_arg('source_uri')
+        group.reg_arg('source_sas')
+        group.reg_arg('source_container')
+        group.reg_arg('source_share')
 
 for item in ['file', 'blob']:
     register_cli_argument('storage {} url'.format(item), 'protocol', help='Protocol to use.', default='https', **enum_choice_list(['http', 'https']))

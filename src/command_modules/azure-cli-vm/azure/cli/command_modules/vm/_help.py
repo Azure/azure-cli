@@ -70,7 +70,13 @@ helps['vmss create'] = """
 
 helps['vm availability-set create'] = """
             type: command
+            short-summary: Create an availability set
             long-summary: For more info, see https://blogs.technet.microsoft.com/yungchou/2013/05/14/window-azure-fault-domain-and-upgrade-domain-explained-explained-reprised/
+            """
+
+helps['vm availability-set update'] = """
+            type: command
+            short-summary: Update an availability set
             """
 
 helps['vm extension set'] = """
@@ -159,9 +165,17 @@ helps['vm boot-diagnostics'] = """
     type: group
     short-summary: Troubleshoot virtual machine start-up
 """
+helps['vm boot-diagnostics disable'] = """
+    type: command
+    short-summary: Disable boot diagnostics 
+"""
+helps['vm boot-diagnostics get-boot-log'] = """
+    type: command
+    short-summary: Get the boot diagnostics log 
+"""
 helps['acs'] = """
     type: group
-    short-summary: Manage Azure container services
+    short-summary: Commands to manage Azure container services
 """
 helps['acs create'] = """
     type: command
@@ -194,6 +208,10 @@ helps['vm disk'] = """
 helps['vm extension'] = """
     type: group
     short-summary: Extend the functionality of your VMs with vm extensions
+"""
+helps['vm extension list'] = """
+    type: command
+    short-summary:  List extensions attached to a VM in a resource group
 """
 helps['vm extension image'] = """
     type: group
@@ -256,4 +274,7 @@ helps['vm generalize'] = """
                     az vm capture -g my_rg -n my_vm_name --vhd-name-prefix my_prefix\n\r
                     """
 
-
+helps['vm wait'] = """
+    type: command
+    short-summary: Place the CLI in a waiting state until the a condition of the VM is met.
+"""
