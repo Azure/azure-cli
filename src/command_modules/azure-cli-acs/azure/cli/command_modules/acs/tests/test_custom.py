@@ -4,14 +4,36 @@
 # --------------------------------------------------------------------------------------------
 
 #pylint: skip-file
-import unittest
+import mock
 import os
 import tempfile
+import unittest
 import yaml
 
-from azure.cli.command_modules.acs.custom import merge_kubernetes_configurations
+from azure.cli.command_modules.acs.custom import merge_kubernetes_configurations, _acs_browse_internal
+from azure.mgmt.compute.models import ContainerServiceOchestratorTypes, ContainerService, ContainerServiceOrchestratorProfile
 
 class AcsCustomCommandTest(unittest.TestCase):
+    @mock.patch('azure.cli.command_modules.acs.custom._get_subscription_id')
+    def test_browse_k8s(self, get_subscription_id):
+        acs_info = ContainerService("location", {}, {}, {})
+        acs_info.orchestrator_profile = ContainerServiceOrchestratorProfile(ContainerServiceOchestratorTypes.kubernetes)
+        
+        with mock.patch('azure.cli.command_modules.acs.custom._get_acs_info', return_value=acs_info) as get_acs_info:
+            with mock.patch('azure.cli.command_modules.acs.custom._k8s_browse_internal') as k8s_browse:
+                _acs_browse_internal(acs_info, 'resource-group', 'name', False)
+                get_acs_info.assert_called_with('name', 'resource-group')
+                k8s_browse.assert_called_with(acs_info, False)
+
+    @mock.patch('azure.cli.command_modules.acs.custom._get_subscription_id')
+    def test_browse_dcos(self, get_subscription_id):
+        acs_info = ContainerService("location", {}, {}, {})
+        acs_info.orchestrator_profile = ContainerServiceOrchestratorProfile(ContainerServiceOchestratorTypes.dcos)
+        
+        with mock.patch('azure.cli.command_modules.acs.custom._dcos_browse_internal') as dcos_browse:
+            _acs_browse_internal(acs_info, 'resource-group', 'name', False)
+            dcos_browse.assert_called_with(acs_info, False)
+
     def test_merge_credentials(self):
         existing = tempfile.NamedTemporaryFile(delete=False)
         existing.close()
