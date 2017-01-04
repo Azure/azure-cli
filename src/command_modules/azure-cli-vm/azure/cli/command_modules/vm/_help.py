@@ -97,11 +97,6 @@ helps['vm access reset-windows-admin'] = """
             long-summary: Note, this resets the admin's credentials. You can't add a new admin.
             """
 
-helps['acs create'] = """
-            type: command
-            long-summary: See https://azure.microsoft.com/en-us/documentation/articles/container-service-intro/ for an intro to Container Service.
-"""
-
 generic_update_help = """
                 - name: Add or update a tag
                   text: az <command> -n name -g group --set tags.tagName=tagValue
@@ -172,30 +167,6 @@ helps['vm boot-diagnostics disable'] = """
 helps['vm boot-diagnostics get-boot-log'] = """
     type: command
     short-summary: Get the boot diagnostics log 
-"""
-helps['acs'] = """
-    type: group
-    short-summary: Commands to manage Azure container services
-"""
-helps['acs create'] = """
-    type: command
-    short-summary: Create a container service with your preferred orchestrator
-"""
-helps['acs delete'] = """
-    type: command
-    short-summary: delete a container service
-"""
-helps['acs list'] = """
-    type: command
-    short-summary: list container services
-"""
-helps['acs show'] = """
-    type: command
-    short-summary: show a container service
-"""
-helps['acs scale'] = """
-    type: command
-    short-summary: change private agent count of a container service.
 """
 helps['vm diagnostics'] = """
     type: group
