@@ -68,6 +68,7 @@ register_cli_argument('group deployment', 'template_uri', completer=FilesComplet
 register_cli_argument('group deployment', 'mode', help='Incremental (only add resources to resource group) or Complete (remove extra resources from resource group)', **enum_choice_list(DeploymentMode))
 register_cli_argument('group deployment create', 'deployment_name', options_list=('--name', '-n'), required=False,
                       validator=validate_deployment_name, help='The deployment name. Default to template file base name')
+register_cli_argument('group deployment operation show', 'operation_ids', nargs='+', help='A list of operation ids to show')
 register_cli_argument('group export', 'include_comments', action='store_true')
 register_cli_argument('group export', 'include_parameter_default_value', action='store_true')
 register_cli_argument('group create', 'resource_group_name', completer=None)

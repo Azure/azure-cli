@@ -162,6 +162,15 @@ def tag_resource(tags, resource_group_name=None, resource_provider_namespace=Non
                          resource_id, api_version)
     return res.tag(tags)
 
+def get_deployment_operations(client, resource_group_name, deployment_name, operation_ids):
+    """get a deployment's operation.
+    """
+    result = []
+    for op_id in operation_ids:
+        dep = client.get(resource_group_name, deployment_name, op_id)
+        result.append(dep)
+    return result
+
 def list_resources(resource_group_name=None, resource_provider_namespace=None,
                    resource_type=None, name=None, tag=None, location=None):
     rcf = _resource_client_factory()
