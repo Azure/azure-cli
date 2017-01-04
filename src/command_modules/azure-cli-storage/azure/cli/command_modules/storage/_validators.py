@@ -112,7 +112,7 @@ def validate_source_uri(namespace):
 
     uri = 'https://{0}.{1}.{6}/{2}/{3}{4}{5}'.format(
         storage_acc,
-        'blob' if valid_blob_source else 'share',
+        'blob' if valid_blob_source else 'file',
         container if valid_blob_source else share,
         blob if valid_blob_source else path,
         '?' if query_params else '',
