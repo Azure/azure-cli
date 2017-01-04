@@ -86,16 +86,20 @@ cli_command(__name__, 'vm boot-diagnostics get-boot-log', custom_path.format('ge
 
 # ACS
 
+def transform_acs(r):
+    orchestratorType = 'Unknown'
+    orchestratorProfile = r.get('orchestratorProfile')
+    if orchestratorProfile:
+        orchestratorType = orchestratorProfile.get('orchestratorType')
+    res = OrderedDict([('Name', r['name']), ('ResourceGroup', r['resourceGroup']), \
+        ('Orchestrator', orchestratorType), ('Location', r['location']), \
+        ('ProvisioningState', r['provisioningState'])])
+    return res
+
 def transform_acs_list(result):
     transformed = []
     for r in result:
-        orchestratorType = 'Unknown'
-        orchestratorProfile = r.get('orchestratorProfile')
-        if orchestratorProfile:
-            orchestratorType = orchestratorProfile.get('orchestratorType')
-        res = OrderedDict([('Name', r['name']), ('ResourceGroup', r['resourceGroup']), \
-            ('Orchestrator', orchestratorType), ('Location', r['location']), \
-            ('ProvisioningState', r['provisioningState'])])
+        res = transform_acs(r)
         transformed.append(res)
     return transformed
 
@@ -107,7 +111,7 @@ ContainerService._attribute_map['tags']['type'] = '{str}'#pylint: disable=protec
 ######
 op_var = 'container_services_operations'
 op_class = 'ContainerServicesOperations'
-cli_command(__name__, 'acs show', mgmt_path.format(op_var, op_class, 'get'), cf_acs)
+cli_command(__name__, 'acs show', mgmt_path.format(op_var, op_class, 'get'), cf_acs, table_transformer=transform_acs)
 cli_command(__name__, 'acs list', custom_path.format('list_container_services'), cf_acs, table_transformer=transform_acs_list)
 cli_command(__name__, 'acs delete', mgmt_path.format(op_var, op_class, 'delete'), cf_acs)
 cli_command(__name__, 'acs scale', custom_path.format('update_acs'))
