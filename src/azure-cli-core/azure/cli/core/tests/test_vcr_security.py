@@ -38,7 +38,7 @@ class Test_vcr_security(unittest.TestCase):
                         lower_line = line.lower()
                         if 'grant_type=refresh_token' in lower_line or \
                             '/oauth2/token' in lower_line or \
-                            'authorization: [bearer' in lower_line:
+                            'authorization:' in lower_line:
                             insecure_cassettes.append(name)
                             break
         self.assertFalse(insecure_cassettes, 'The following cassettes contain tokens: {}'.format(insecure_cassettes))
