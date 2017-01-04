@@ -67,7 +67,7 @@ class NetworkAppGatewayDefaultScenarioTest(ResourceGroupVCRTestBase):
 class NetworkAppGatewayExistingSubnetScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-        super(NetworkAppGatewayExistingSubnetScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_ag_existing_subnet')
+        super(NetworkAppGatewayExistingSubnetScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_ag_existing_subnet', debug=True)
 
     def test_network_app_gateway_with_existing_subnet(self):
         self.execute()
@@ -76,7 +76,7 @@ class NetworkAppGatewayExistingSubnetScenarioTest(ResourceGroupVCRTestBase):
         rg = self.resource_group
         vnet = self.cmd('network vnet create -g {} -n vnet2 --subnet-name subnet1'.format(rg))
         subnet_id = vnet['newVNet']['subnets'][0]['id']
-        self.cmd('network application-gateway create -g {} -n ag2 --subnet {}'.format(rg, subnet_id), checks=[
+        self.cmd('network application-gateway create -g {} -n ag2 --subnet {} --servers 172.0.0.1 www.mydomain.com'.format(rg, subnet_id), checks=[
             JMESPathCheck('applicationGateway.frontendIPConfigurations[0].properties.privateIPAllocationMethod', 'Dynamic'),
             JMESPathCheck('applicationGateway.frontendIPConfigurations[0].properties.subnet.id', subnet_id)
         ])
