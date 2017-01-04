@@ -277,8 +277,8 @@ def _build_service_principal(client, name, url, client_secret):
     return service_principal
 
 def _add_role_assignment(role, service_principal):
-    # AAD can have delays in propogating data, so sleep and retry
-    sys.stdout.write('waiting for AAD role to propogate.')
+    # AAD can have delays in propagating data, so sleep and retry
+    sys.stdout.write('waiting for AAD role to propagate.')
     for x in range(0, 10):
         from azure.cli.command_modules.role.custom import create_role_assignment
         try:
