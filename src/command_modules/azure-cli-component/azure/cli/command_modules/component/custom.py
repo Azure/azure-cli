@@ -101,7 +101,7 @@ def _installed_in_user():
 
 def _install_or_update(package_list, link, private, pre):
     import pip
-    options = ['--isolated', '--disable-pip-version-check', '--upgrade', '--ignore-installed']
+    options = ['--isolated', '--disable-pip-version-check', '--upgrade']
     if pre:
         options.append('--pre')
     if _installed_in_user():
