@@ -79,7 +79,7 @@ class ResourceScenarioTest(ResourceGroupVCRTestBase):
         self.execute()
 
     def __init__(self, test_method):
-        super(ResourceScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_resource_scenario', debug=True)
+        super(ResourceScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_resource_scenario')
         self.vnet_name = 'cli-test-vnet1'
         self.subnet_name = 'cli-test-subnet1'
 
