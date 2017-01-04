@@ -103,7 +103,7 @@ The repo has a launch.json file that will launch the version of Python that is f
 
   To test the core of the CLI:
   ```BatchFile
-  python -m unittest discover -s src/azure/cli/tests
+  python -m unittest discover -s src/azure-cli/azure/cli/tests
   ```
  
   To test the command modules:
