@@ -202,24 +202,29 @@ class Application(object):
     @staticmethod
     def _maybe_load_file(arg):
         ix = arg.find('@')
-        if ix == -1: # not found
+        if ix == -1: # no @ found
             return arg
 
-        if ix == len(arg) - 1: # allow simply the value '@' (used by DNS for example)
+        poss_file = arg[ix + 1:]
+        if not poss_file: # if nothing after @ then it can't be a file
+            return arg
+        elif ix == 0:
+            return Application._load_file(poss_file)
+        else: # if @ not at the start it can't be a file
             return arg
 
-        if ix == 0:
-            return Application._load_file(arg[1:])
-        elif arg[ix - 1] == '=':
-            return arg[:ix] + Application._load_file(arg[ix + 1:])
-
-        return arg
+    @staticmethod
+    def _expand_file_prefix(arg):
+        arg_split = arg.split('=', 1)
+        try:
+            return '='.join([arg_split[0], Application._maybe_load_file(arg_split[1])])
+        except IndexError:
+            return Application._maybe_load_file(arg_split[0])
 
     @staticmethod
     def _expand_file_prefixed_files(argv):
-        return list(
-            [Application._maybe_load_file(arg) for arg in argv]
-            )
+        test = list([Application._expand_file_prefix(arg) for arg in argv])
+        return test
 
     @staticmethod
     def _load_file(path):
