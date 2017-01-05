@@ -145,7 +145,7 @@
           "type": "string",
           "description": "URI referencing the template.",
           "enum": [
-            "https://azuresdkci.blob.core.windows.net/templatehost/CreateVnetGateway_2016-12-9/azuredeploy.json"
+            "https://azuresdkci.blob.core.windows.net/templatehost/CreateVnetGateway_2017-1-4/azuredeploy.json"
           ]
         },
         "contentVersion": {
@@ -160,6 +160,11 @@
     },
     "VnetGatewayParameters": {
       "properties": {
+        "addressPrefixes": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_addressPrefixes",
+          "x-ms-client-flatten": true
+        },
         "asn": {
           "type": "object",
           "$ref": "#/definitions/DeploymentParameter_asn",
@@ -168,6 +173,11 @@
         "bgpPeeringAddress": {
           "type": "object",
           "$ref": "#/definitions/DeploymentParameter_bgpPeeringAddress",
+          "x-ms-client-flatten": true
+        },
+        "createClientConfiguration": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_createClientConfiguration",
           "x-ms-client-flatten": true
         },
         "enableBgp": {
@@ -232,11 +242,24 @@
         }
       },
       "required": [
-        "enableBgp",
+        "publicIpAddress",
         "virtualNetwork",
         "virtualNetworkGatewayName",
-        "publicIpAddress"
+        "createClientConfiguration",
+        "enableBgp"
       ]
+    },
+    "DeploymentParameter_addressPrefixes": {
+      "properties": {
+        "value": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          },
+          "description": "Space separated list of address prefixes to associate with the VNET gateway.",
+          "x-ms-client-name": "addressPrefixes"
+        }
+      }
     },
     "DeploymentParameter_asn": {
       "properties": {
@@ -255,6 +278,19 @@
           "x-ms-client-name": "bgpPeeringAddress"
         }
       }
+    },
+    "DeploymentParameter_createClientConfiguration": {
+      "properties": {
+        "value": {
+          "type": "boolean",
+          "description": "Flag to create VPN client configuration.",
+          "x-ms-client-name": "createClientConfiguration",
+          "default": "False"
+        }
+      },
+      "required": [
+        "value"
+      ]
     },
     "DeploymentParameter_enableBgp": {
       "properties": {

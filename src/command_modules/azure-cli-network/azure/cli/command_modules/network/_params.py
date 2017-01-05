@@ -452,7 +452,9 @@ register_cli_argument('network vnet-gateway', 'gateway_type', help='The gateway 
 register_cli_argument('network vnet-gateway', 'sku', help='VNet gateway SKU.', **enum_choice_list(sku))
 register_cli_argument('network vnet-gateway', 'vpn_type', help='VPN routing type.', **enum_choice_list(vpnType))
 register_cli_argument('network vnet-gateway', 'bgp_peering_address', arg_group='BGP Peering', help='IP address to use for BGP peering.')
+register_cli_argument('network vnet-gateway', 'address_prefixes', nargs='+')
 
+register_cli_argument('network vnet-gateway create', 'create_client_configuration', ignore_type)
 register_cli_argument('network vnet-gateway create', 'enable_bgp', ignore_type)
 register_cli_argument('network vnet-gateway create', 'asn', validator=process_vnet_gateway_create_namespace)
 
