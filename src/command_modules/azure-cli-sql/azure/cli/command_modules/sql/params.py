@@ -18,10 +18,13 @@ with ParametersContext(command='sql server create') as c:
     # - Due to issue https://github.com/Azure/azure-cli/issues/1644, the description of version
     # can't be correctly extracted
     #
-    c.expand('parameters', Server, patches={
+    c.expand('parameters', Server, group_name='Creating', patches={
         'administrator_login': patch_arg_make_required,
-        'administrator_login_password': patch_arg_make_required,
-        'version': patch_arg_update_description(
-            "The version of the server, possible values include: '2.0', '12.0'.")
+        'administrator_login_password': patch_arg_make_required
     })
+
+with ParametersContext(command='sql database create') as c:
+    from azure.mgmt.sql.models.database import Database
+
+    c.expand('parameters', Database, group_name='Creating')
 
