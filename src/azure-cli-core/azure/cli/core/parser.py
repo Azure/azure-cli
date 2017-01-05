@@ -80,8 +80,15 @@ class AzCliCommandParser(argparse.ArgumentParser):
                     param = group.add_argument(
                         *arg.options_list, **arg.options)
                 else:
-                    param = command_parser.add_argument(
-                        *arg.options_list, **arg.options)
+                    try:
+                        param = command_parser.add_argument(
+                            *arg.options_list, **arg.options)
+                    except argparse.ArgumentError:
+                        dest = arg.options['dest']
+                        if dest in ['no_wait', 'raw']:
+                            pass
+                        else:
+                            raise
                 param.completer = arg.completer
 
             command_parser.set_defaults(func=metadata.handler,

@@ -227,9 +227,12 @@ class Application(object):
             if path == '-':
                 content = sys.stdin.read()
             else:
-                with open(os.path.expanduser(path), 'r') as input_file:
-                    content = input_file.read()
-
+                try:
+                    with open(os.path.expanduser(path), 'r') as input_file:
+                        content = input_file.read()
+                except UnicodeDecodeError:
+                    with open(os.path.expanduser(path), 'rb') as input_file:
+                        content = input_file.read()
             return content[0:-1] if content[-1] == '\n' else content
         except:
             raise CLIError('Failed to open file {}'.format(path))
