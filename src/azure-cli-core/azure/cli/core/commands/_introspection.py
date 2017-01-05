@@ -9,7 +9,7 @@ import re
 def extract_full_summary_from_signature(operation):
     """ Extract the summary from the doccomments of the command. """
     lines = inspect.getdoc(operation)
-    regex = r'\s*(:param)\s+(.+)\s*:(.*)'
+    regex = r'\s*(:param)\s+(.+?)\s*:(.*)'
     summary = ''
     if lines:
         match = re.search(regex, lines)
