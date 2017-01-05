@@ -122,7 +122,7 @@ def validate_source_uri(namespace):
     namespace.copy_source = uri
 
 def validate_blob_type(namespace):
-    if namespace.blob_type is None:
+    if not namespace.blob_type:
         namespace.blob_type = 'page' if namespace.file_path.endswith('.vhd') else 'block'
 
 def get_content_setting_validator(settings_class, update):
