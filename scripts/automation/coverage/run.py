@@ -75,7 +75,7 @@ def run_command_coverage(output_file='command_coverage.txt', output_dir=None):
 
 class CoverageContext(object):
     def __init__(self):
-        self._cov = Coverage(cover_pylib=False)#data_suffix='azure', cover_pylib=False)
+        self._cov = Coverage(cover_pylib=False)
         self._cov.start()
 
     def __enter__(self):
@@ -103,20 +103,8 @@ def run_code_coverage():
             run_nose(name, test_path)
 
         import shutil
-        shutil.move('.coverage', os.path.join(test_results_folder, '.covarege.{}'.format(name)))
-
-
-    # HTML annotation
-    # html_report = os.path.join(test_results_folder, 'code_coverage_report')
-    # make_dirs(html_report)
-
-    # from subprocess import check_call
-    # Coverage().html_report(directory=html_report, omit='env*')
-    # check_call('coverage html -d {} --omit=\"env*\"'.format(html_report).split())
-
+        shutil.move('.coverage', os.path.join(test_results_folder, '.coverage.{}'.format(name)))
 
 
 if __name__ == '__main__':
     run_code_coverage()
-    # Coverage().html_report(directory='c:\\tmp\\')
-
