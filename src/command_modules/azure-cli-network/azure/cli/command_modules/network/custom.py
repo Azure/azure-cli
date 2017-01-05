@@ -918,7 +918,8 @@ def create_vnet_gateway_root_cert(resource_group_name, gateway_name, public_cert
     ncf = _network_client_factory().virtual_network_gateways
     gateway = ncf.get(resource_group_name, gateway_name)
     if not gateway.vpn_client_configuration:
-        gateway.vpn_client_configuration = VpnClientConfiguration()
+        raise CLIError("Must add address prefixes to gateway '{}' prior to adding a root cert."
+                       .format(gateway_name))
     config = gateway.vpn_client_configuration
 
     if config.vpn_client_root_certificates is None:
