@@ -9,7 +9,7 @@ from azure.cli.core.help_files import helps
 
 helps['sql'] = """
             type: group
-            short-summary: Commands to manage Azure SQL Servers.
+            short-summary: Commands to manage Azure SQL databases.
             """
 helps['sql server'] = """
             type: group
@@ -21,11 +21,11 @@ helps['sql server create'] = """
             """
 helps['sql server list'] = """
             type: command
-            short-summary: List the SQL Server belongs to given resource group.
+            short-summary: List the SQL servers belong to given resource group.
             """
 helps['sql server update'] = """
             type: command
-            short-summary: Update a Azure SQL server.
+            short-summary: Update an Azure SQL server.
             """
 helps['sql server firewall'] = """
             type: group
@@ -49,33 +49,33 @@ helps['sql server firewall list'] = """
             """
 helps['sql server service-objective'] = """
             type: group
-            short-summary: Commands to manage Azure SQL server's service objectives
+            short-summary: Commands to show Azure SQL server's service objectives
             """
-helps['sql database'] = """
+helps['sql db'] = """
             type: group
             short-summary: Commands to manage databases
             """
-helps['sql database create'] = """
+helps['sql db create'] = """
             type: command
-            short-summary: Create a Azure SQL database
+            short-summary: Create an Azure SQL database
             """
-helps['sql database rl'] = """
+helps['sql db replication-link'] = """
             type: group
             short-summary: Manage database replication links
             """
-helps['sql database dw'] = """
+helps['sql db data-warehouse'] = """
             type: group
             short-summary: Manage database data warehouse
             """
-helps['sql database rp'] = """
+helps['sql db restore-point'] = """
             type: group
             short-summary: Manage database restore points
             """
-helps['sql database tpe'] = """
+helps['sql db transparent-data-encryption'] = """
             type: group
             short-summary: Manage database transparent data encryption
             """
-helps['sql database sta'] = """
+helps['sql db service-tier-advisor'] = """
             type: group
             short-summary: Manage database service tier advisors
             """
