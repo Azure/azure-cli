@@ -223,8 +223,7 @@ class Application(object):
 
     @staticmethod
     def _expand_file_prefixed_files(argv):
-        test = list([Application._expand_file_prefix(arg) for arg in argv])
-        return test
+        return list([Application._expand_file_prefix(arg) for arg in argv])
 
     @staticmethod
     def _load_file(path):
