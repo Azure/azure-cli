@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from ._util import ParametersContext, patch_arg_make_required, patch_arg_update_description
+from ._util import ParametersContext, patch_arg_make_required
 
 
 with ParametersContext(command='sql server create') as c:
