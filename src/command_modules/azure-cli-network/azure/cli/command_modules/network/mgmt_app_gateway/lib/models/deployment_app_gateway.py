@@ -12,7 +12,7 @@
 # --------------------------------------------------------------------------
 
 from msrest.serialization import Model
-
+from azure.mgmt.network.models import ApplicationGatewayBackendAddress
 
 class DeploymentAppGateway(Model):
     """Deployment operation parameters.
@@ -149,7 +149,7 @@ class DeploymentAppGateway(Model):
         'public_ip_address_allocation': {'key': 'properties.parameters.publicIpAddressAllocation.value', 'type': 'publicIpAddressAllocation'},
         'public_ip_address_type': {'key': 'properties.parameters.publicIpAddressType.value', 'type': 'publicIpAddressType'},
         'routing_rule_type': {'key': 'properties.parameters.routingRuleType.value', 'type': 'routingRuleType'},
-        'servers': {'key': 'properties.parameters.servers.value', 'type': '[object]'},
+        'servers': {'key': 'properties.parameters.servers.value', 'type': '[ApplicationGatewayBackendAddress]'},
         'sku_name': {'key': 'properties.parameters.skuName.value', 'type': 'str'},
         'sku_tier': {'key': 'properties.parameters.skuTier.value', 'type': 'str'},
         'subnet': {'key': 'properties.parameters.subnet.value', 'type': 'str'},
