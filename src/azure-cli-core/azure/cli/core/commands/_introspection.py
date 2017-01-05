@@ -9,7 +9,7 @@ import re
 def extract_full_summary_from_signature(operation):
     """ Extract the summary from the doccomments of the command. """
     lines = inspect.getdoc(operation)
-    regex = r'\s*(:param)\s+(.+)\s*:(.*)'
+    regex = r'\s*(:param)\s+(.+?)\s*:(.*)'
     summary = ''
     if lines:
         match = re.search(regex, lines)
@@ -99,7 +99,7 @@ def extract_args_from_signature(operation, no_wait_param=None):
         #improve the naming to 'no_wait'
         if arg_name == no_wait_param:
             if not isinstance(default, bool):
-                raise ValueError("The type of '{}' must be boolean to enable for no_wait".format(no_wait_param))#pylint: disable=line-too-long
+                raise ValueError("The type of '{}' must be boolean to enable no_wait".format(no_wait_param))#pylint: disable=line-too-long
             found_no_wait_param = True
             options_list = ['--no-wait']
             help_str = 'do not wait for the long running operation to finish'

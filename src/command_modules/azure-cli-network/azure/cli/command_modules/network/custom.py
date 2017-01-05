@@ -11,7 +11,8 @@ from azure.mgmt.network.models import \
     (Subnet, SecurityRule, PublicIPAddress, NetworkSecurityGroup, InboundNatRule, InboundNatPool,
      FrontendIPConfiguration, BackendAddressPool, Probe, LoadBalancingRule,
      NetworkInterfaceIPConfiguration, Route, VpnClientRootCertificate, VpnClientConfiguration,
-     AddressSpace, VpnClientRevokedCertificate, SubResource, VirtualNetworkPeering)
+     AddressSpace, VpnClientRevokedCertificate, SubResource, VirtualNetworkPeering,
+     ApplicationGatewayFirewallMode)
 
 from azure.cli.core.commands.arm import parse_resource_id, is_valid_resource_id, resource_id
 from azure.cli.core._util import CLIError
@@ -67,21 +68,52 @@ def list_application_gateways(resource_group_name=None):
 
 #endregion
 
-#region Application Gateway subresource commands
+#region Application Gateway commands
 
-def create_ag_address_pool(resource_group_name, application_gateway_name, item_name, servers):
+def update_application_gateway(instance, sku_name=None, sku_tier=None, capacity=None, tags=None):
+    if sku_name is not None:
+        instance.sku.name = sku_name
+    if sku_tier is not None:
+        instance.sku.tier = sku_tier
+    if capacity is not None:
+        instance.sku.capacity = capacity
+    if tags is not None:
+        instance.tags = tags
+    return instance
+update_application_gateway.__doc__ = AppGatewayOperations.create_or_update.__doc__
+
+def create_ag_authentication_certificate(resource_group_name, application_gateway_name, item_name,
+                                         cert_data, no_wait=False):
+    from azure.mgmt.network.models import ApplicationGatewayAuthenticationCertificate as AuthCert
+    ncf = _network_client_factory().application_gateways
+    ag = ncf.get(resource_group_name, application_gateway_name)
+    ag.authentication_certificates.append(AuthCert(data=cert_data, name=item_name))
+    return ncf.create_or_update(resource_group_name, application_gateway_name, ag, raw=no_wait)
+
+def update_ag_authentication_certificate(instance, parent, item_name, cert_data): # pylint: disable=unused-argument
+    instance.data = cert_data
+    return parent
+
+def create_ag_backend_address_pool(resource_group_name, application_gateway_name, item_name,
+                                   servers, no_wait=False):
     from azure.mgmt.network.models import ApplicationGatewayBackendAddressPool
     ncf = _network_client_factory()
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
     ag.backend_address_pools.append(ApplicationGatewayBackendAddressPool(
         name=item_name, backend_addresses=servers))
     return ncf.application_gateways.create_or_update(
-        resource_group_name, application_gateway_name, ag)
-create_ag_address_pool.__doc__ = AppGatewayOperations.create_or_update.__doc__
+        resource_group_name, application_gateway_name, ag, raw=no_wait)
+create_ag_backend_address_pool.__doc__ = AppGatewayOperations.create_or_update.__doc__
 
-def create_ag_frontend_ip(resource_group_name, application_gateway_name, item_name,
-                          public_ip_address=None, subnet=None, virtual_network_name=None, # pylint: disable=unused-argument
-                          private_ip_address=None, private_ip_address_allocation=None): # pylint: disable=unused-argument
+def update_ag_backend_address_pool(instance, parent, item_name, servers=None): # pylint: disable=unused-argument
+    if servers is not None:
+        instance.servers = servers
+    return parent
+
+def create_ag_frontend_ip_configuration(resource_group_name, application_gateway_name, item_name,
+                                        public_ip_address=None, subnet=None,
+                                        virtual_network_name=None, private_ip_address=None, # pylint: disable=unused-argument
+                                        private_ip_address_allocation=None, no_wait=False): # pylint: disable=unused-argument
     from azure.mgmt.network.models import ApplicationGatewayFrontendIPConfiguration
     ncf = _network_client_factory()
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
@@ -92,19 +124,38 @@ def create_ag_frontend_ip(resource_group_name, application_gateway_name, item_na
         public_ip_address=SubResource(public_ip_address) if public_ip_address else None,
         subnet=SubResource(subnet) if subnet else None))
     return ncf.application_gateways.create_or_update(
-        resource_group_name, application_gateway_name, ag)
-create_ag_frontend_ip.__doc__ = AppGatewayOperations.create_or_update.__doc__
+        resource_group_name, application_gateway_name, ag, raw=no_wait)
+create_ag_frontend_ip_configuration.__doc__ = AppGatewayOperations.create_or_update.__doc__
 
-def create_ag_frontend_port(resource_group_name, application_gateway_name, item_name, port):
+def update_ag_frontend_ip_configuration(instance, parent, item_name, public_ip_address=None, # pylint: disable=unused-argument
+                                        subnet=None, virtual_network_name=None, # pylint: disable=unused-argument
+                                        private_ip_address=None):
+    if public_ip_address is not None:
+        instance.public_ip_address = SubResource(public_ip_address)
+    if subnet is not None:
+        instance.subnet = SubResource(subnet)
+    if private_ip_address is not None:
+        instance.private_ip_address = private_ip_address
+        instance.private_ip_address_allocation = 'static'
+    return parent
+update_ag_frontend_ip_configuration.__doc__ = AppGatewayOperations.create_or_update.__doc__
+
+def create_ag_frontend_port(resource_group_name, application_gateway_name, item_name, port,
+                            no_wait=False):
     from azure.mgmt.network.models import ApplicationGatewayFrontendPort
     ncf = _network_client_factory()
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
     ag.frontend_ports.append(ApplicationGatewayFrontendPort(name=item_name, port=port))
     return ncf.application_gateways.create_or_update(
-        resource_group_name, application_gateway_name, ag)
+        resource_group_name, application_gateway_name, ag, raw=no_wait)
+
+def update_ag_frontend_port(instance, parent, item_name, port=None): # pylint: disable=unused-argument
+    if port is not None:
+        instance.port = port
+    return parent
 
 def create_ag_http_listener(resource_group_name, application_gateway_name, item_name,
-                            frontend_ip, frontend_port, ssl_cert=None):
+                            frontend_ip, frontend_port, ssl_cert=None, no_wait=False):
     from azure.mgmt.network.models import ApplicationGatewayHttpListener
     ncf = _network_client_factory()
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
@@ -115,11 +166,24 @@ def create_ag_http_listener(resource_group_name, application_gateway_name, item_
         protocol='https' if ssl_cert else 'http',
         ssl_certificate=SubResource(ssl_cert) if ssl_cert else None))
     return ncf.application_gateways.create_or_update(
-        resource_group_name, application_gateway_name, ag)
+        resource_group_name, application_gateway_name, ag, raw=no_wait)
 
-def create_ag_http_settings(resource_group_name, application_gateway_name, item_name,
-                            port, probe=None, protocol='http', cookie_based_affinity=None,
-                            timeout=None):
+def update_ag_http_listener(instance, parent, item_name, frontend_ip=None, frontend_port=None, # pylint: disable=unused-argument
+                            protocol=None, ssl_cert=None):
+    if frontend_ip is not None:
+        instance.frontend_ip_configuration = SubResource(frontend_ip)
+    if frontend_port is not None:
+        instance.frontend_port = SubResource(frontend_port)
+    if protocol is not None:
+        instance.protocol = protocol
+    if ssl_cert is not None:
+        instance.ssl_certificate = SubResource(ssl_cert)
+    return parent
+
+def create_ag_backend_http_settings_collection(resource_group_name, application_gateway_name,
+                                               item_name, port, probe=None, protocol='http',
+                                               cookie_based_affinity=None, timeout=None,
+                                               no_wait=False):
     from azure.mgmt.network.models import ApplicationGatewayBackendHttpSettings
     ncf = _network_client_factory()
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
@@ -132,10 +196,25 @@ def create_ag_http_settings(resource_group_name, application_gateway_name, item_
         name=item_name
     ))
     return ncf.application_gateways.create_or_update(
-        resource_group_name, application_gateway_name, ag)
+        resource_group_name, application_gateway_name, ag, raw=no_wait)
+
+def update_ag_backend_http_settings_collection(instance, parent, item_name, port=None, probe=None, # pylint: disable=unused-argument
+                                               protocol=None, cookie_based_affinity=None,
+                                               timeout=None):
+    if port is not None:
+        instance.port = port
+    if probe is not None:
+        instance.probe = SubResource(probe)
+    if protocol is not None:
+        instance.protocol = protocol
+    if cookie_based_affinity is not None:
+        instance.cookie_based_affinity = cookie_based_affinity
+    if timeout is not None:
+        instance.timeout = timeout
+    return parent
 
 def create_ag_probe(resource_group_name, application_gateway_name, item_name, protocol, host,
-                    path, interval=30, timeout=120, threshold=8):
+                    path, interval=30, timeout=120, threshold=8, no_wait=False):
     from azure.mgmt.network.models import ApplicationGatewayProbe
     ncf = _network_client_factory()
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
@@ -149,11 +228,27 @@ def create_ag_probe(resource_group_name, application_gateway_name, item_name, pr
         unhealthy_threshold=threshold
     ))
     return ncf.application_gateways.create_or_update(
-        resource_group_name, application_gateway_name, ag)
+        resource_group_name, application_gateway_name, ag, raw=no_wait)
 
-def create_ag_rule(resource_group_name, application_gateway_name, item_name,
-                   address_pool, http_settings, http_listener, url_path_map=None,
-                   rule_type='Basic'):
+def update_ag_probe(instance, parent, item_name, protocol=None, host=None, path=None, # pylint: disable=unused-argument
+                    interval=None, timeout=None, threshold=None):
+    if protocol is not None:
+        instance.protocol = protocol
+    if host is not None:
+        instance.host = host
+    if path is not None:
+        instance.path = path
+    if interval is not None:
+        instance.interval = interval
+    if timeout is not None:
+        instance.timeout = timeout
+    if threshold is None:
+        instance.threshold = threshold
+    return parent
+
+def create_ag_request_routing_rule(resource_group_name, application_gateway_name, item_name,
+                                   address_pool, http_settings, http_listener, url_path_map=None,
+                                   rule_type='Basic', no_wait=False):
     from azure.mgmt.network.models import ApplicationGatewayRequestRoutingRule
     ncf = _network_client_factory()
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
@@ -166,22 +261,57 @@ def create_ag_rule(resource_group_name, application_gateway_name, item_name,
         url_path_map=SubResource(url_path_map) if url_path_map else None
     ))
     return ncf.application_gateways.create_or_update(
-        resource_group_name, application_gateway_name, ag)
+        resource_group_name, application_gateway_name, ag, raw=no_wait)
 
-def create_ag_ssl_cert(resource_group_name, application_gateway_name, item_name, cert_data,
-                       cert_password):
+def update_ag_request_routing_rule(instance, parent, item_name, address_pool=None, # pylint: disable=unused-argument
+                                   http_settings=None, http_listener=None, url_path_map=None,
+                                   rule_type=None):
+    if address_pool is not None:
+        instance.backend_address_pool = SubResource(address_pool)
+    if http_settings is not None:
+        instance.backend_http_settings = SubResource(http_settings)
+    if http_listener is not None:
+        instance.http_listener = SubResource(http_listener)
+    if url_path_map is not None:
+        instance.url_path_map = SubResource(url_path_map)
+    if rule_type is not None:
+        instance.rule_type = rule_type
+    return parent
+
+def create_ag_ssl_certificate(resource_group_name, application_gateway_name, item_name, cert_data,
+                              cert_password, no_wait=False):
     from azure.mgmt.network.models import ApplicationGatewaySslCertificate
     ncf = _network_client_factory()
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
     ag.ssl_certificates.append(ApplicationGatewaySslCertificate(
         name=item_name, data=cert_data, password=cert_password))
     return ncf.application_gateways.create_or_update(
-        resource_group_name, application_gateway_name, ag)
-create_ag_ssl_cert.__doc__ = AppGatewayOperations.create_or_update.__doc__
+        resource_group_name, application_gateway_name, ag, raw=no_wait)
+create_ag_ssl_certificate.__doc__ = AppGatewayOperations.create_or_update.__doc__
+
+def update_ag_ssl_certificate(instance, parent, item_name, cert_data=None, cert_password=None): # pylint: disable=unused-argument
+    if cert_data is not None:
+        instance.data = cert_data
+    if cert_password is not None:
+        instance.password = cert_password
+    return parent
+update_ag_ssl_certificate.__doc__ = AppGatewayOperations.create_or_update.__doc__
+
+def set_ag_ssl_policy(resource_group_name, application_gateway_name, disabled_ssl_protocols=None,
+                      clear=False, no_wait=False):
+    from azure.mgmt.network.models import ApplicationGatewaySslPolicy
+    ncf = _network_client_factory().application_gateways
+    ag = ncf.get(resource_group_name, application_gateway_name)
+    ag.ssl_policy = None if clear else ApplicationGatewaySslPolicy(disabled_ssl_protocols)
+    return ncf.create_or_update(resource_group_name, application_gateway_name, ag, raw=no_wait)
+
+def show_ag_ssl_policy(resource_group_name, application_gateway_name):
+    return _network_client_factory().application_gateways.get(
+        resource_group_name, application_gateway_name).ssl_policy
 
 def create_ag_url_path_map(resource_group_name, application_gateway_name, item_name,
                            paths, address_pool, http_settings, rule_name='default',
-                           default_address_pool=None, default_http_settings=None):
+                           default_address_pool=None, default_http_settings=None, no_wait=False): # pylint: disable=unused-argument
     from azure.mgmt.network.models import ApplicationGatewayUrlPathMap, ApplicationGatewayPathRule
     ncf = _network_client_factory()
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
@@ -199,10 +329,19 @@ def create_ag_url_path_map(resource_group_name, application_gateway_name, item_n
         )]
     ))
     return ncf.application_gateways.create_or_update(
-        resource_group_name, application_gateway_name, ag)
+        resource_group_name, application_gateway_name, ag, raw=no_wait)
+
+def update_ag_url_path_map(instance, parent, item_name, default_address_pool=None, # pylint: disable=unused-argument
+                           default_http_settings=None, no_wait=False): # pylint: disable=unused-argument
+    if default_address_pool is not None:
+        instance.default_backend_address_pool = SubResource(default_address_pool)
+    if default_http_settings is not None:
+        instance.default_backend_http_settings = SubResource(default_http_settings)
+    return parent
 
 def create_ag_url_path_map_rule(resource_group_name, application_gateway_name, url_path_map_name,
-                                item_name, paths, address_pool=None, http_settings=None):
+                                item_name, paths, address_pool=None, http_settings=None,
+                                no_wait=False):
     from azure.mgmt.network.models import ApplicationGatewayPathRule
     ncf = _network_client_factory()
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
@@ -218,7 +357,7 @@ def create_ag_url_path_map_rule(resource_group_name, application_gateway_name, u
             if http_settings else SubResource(url_map.default_backend_http_settings.id)
     ))
     return ncf.application_gateways.create_or_update(
-        resource_group_name, application_gateway_name, ag)
+        resource_group_name, application_gateway_name, ag, raw=no_wait)
 
 def delete_ag_url_path_map_rule(resource_group_name, application_gateway_name, url_path_map_name,
                                 item_name):
@@ -231,6 +370,19 @@ def delete_ag_url_path_map_rule(resource_group_name, application_gateway_name, u
         [x for x in url_map.path_rules if x.name.lower() != item_name.lower()]
     return ncf.application_gateways.create_or_update(
         resource_group_name, application_gateway_name, ag)
+
+def set_ag_waf_config(resource_group_name, application_gateway_name, enabled,
+                      firewall_mode=ApplicationGatewayFirewallMode.detection.value, no_wait=False):
+    from azure.mgmt.network.models import ApplicationGatewayWebApplicationFirewallConfiguration
+    ncf = _network_client_factory().application_gateways
+    ag = ncf.get(resource_group_name, application_gateway_name)
+    ag.web_application_firewall_configuration = \
+        ApplicationGatewayWebApplicationFirewallConfiguration(enabled == 'true', firewall_mode)
+    return ncf.create_or_update(resource_group_name, application_gateway_name, ag, raw=no_wait)
+
+def show_ag_waf_config(resource_group_name, application_gateway_name):
+    return _network_client_factory().application_gateways.get(
+        resource_group_name, application_gateway_name).web_application_firewall_configuration
 
 #endregion
 
@@ -766,7 +918,8 @@ def create_vnet_gateway_root_cert(resource_group_name, gateway_name, public_cert
     ncf = _network_client_factory().virtual_network_gateways
     gateway = ncf.get(resource_group_name, gateway_name)
     if not gateway.vpn_client_configuration:
-        gateway.vpn_client_configuration = VpnClientConfiguration()
+        raise CLIError("Must add address prefixes to gateway '{}' prior to adding a root cert."
+                       .format(gateway_name))
     config = gateway.vpn_client_configuration
 
     if config.vpn_client_root_certificates is None:

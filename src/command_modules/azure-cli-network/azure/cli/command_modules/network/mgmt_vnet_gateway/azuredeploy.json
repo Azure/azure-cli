@@ -2,6 +2,13 @@
   "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
   "contentVersion": "1.0.0.0",
   "parameters": {
+    "addressPrefixes": {
+      "type": "array",
+      "defaultValue": [ ],
+      "metadata": {
+        "description": "Space separated list of address prefixes to associate with the VNET gateway."
+      }
+    },
     "asn": {
       "type": "string",
       "defaultValue": "",
@@ -14,6 +21,13 @@
       "defaultValue": "",
       "metadata": {
         "description": "IP address to use for BGP peering."
+      }
+    },
+    "createClientConfiguration": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Flag to create VPN client configuration."
       }
     },
     "enableBgp": {
@@ -137,6 +151,16 @@
     "subnetIds": {
       "existingName": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/virtualNetworks/', parameters('virtualNetwork'), '/subnets/GatewaySubnet')]",
       "existingId": "[concat(parameters('virtualNetwork'), '/subnets/GatewaySubnet')]"
+    },
+    "vpnClientConfiguration": {
+      "true": {
+        "vpnClientAddressPool": {
+          "addressPrefixes": "[parameters('addressPrefixes')]"
+        },
+        "vpnClientRevokedCertificates": [ ],
+        "vpnClientRootCertificates": [ ]
+      },
+      "false": null
     }
   },
   "resources": [
@@ -168,8 +192,15 @@
         },
         "gatewayType": "[parameters('gatewayType')]",
         "vpnType": "[parameters('vpnType')]",
+        "vpnClientConfiguration": "[variables('vpnClientConfiguration')[concat(parameters('createClientConfiguration'))]]",
         "enableBgp": "[parameters('enableBgp')]"
       }
     }
-  ]
+  ],
+  "outputs": {
+    "vnetGateway": {
+      "type": "object",
+      "value": "[reference(parameters('virtualNetworkGatewayName'))]"
+    }
+  }
 }
