@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 
-def fix_pip8(directory):
+def fix_p2p8(directory):
     import autopep8
     import multiprocessing
 
@@ -26,4 +26,4 @@ if __name__ == '__main__':
         print('usage: python automation.style.pep8 <directory>')
         sys.exit(1)
 
-    fix_pip8(sys.argv[1])
+    fix_p2p8(sys.argv[1])
