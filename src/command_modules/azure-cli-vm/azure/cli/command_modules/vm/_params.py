@@ -19,13 +19,14 @@ from azure.cli.core.commands.arm import is_valid_resource_id
 from azure.cli.core.commands.template_create import register_folded_cli_argument
 from azure.cli.core.commands.parameters import \
     (location_type, get_location_completion_list, get_one_of_subscription_locations,
-     get_resource_name_completion_list, tags_type, enum_choice_list)
+     get_resource_name_completion_list, tags_type, enum_choice_list, ignore_type)
 from azure.cli.command_modules.vm._actions import \
     (VMImageFieldAction, VMSSHFieldAction, VMDNSNameAction, load_images_from_aliases_doc,
      get_vm_sizes, PrivateIpAction, _resource_not_exists)
 from azure.cli.command_modules.vm._validators import \
     (validate_nsg_name, validate_vm_nics, validate_vm_nic, validate_vm_create_nics,
-     validate_default_os_disk, validate_default_vnet, validate_default_storage_account)
+     validate_default_os_disk, validate_default_vnet, validate_default_storage_account,
+     validate_storage_suffix)
 
 def get_urn_aliases_completion_list(prefix, **kwargs):#pylint: disable=unused-argument
     images = load_images_from_aliases_doc()
@@ -180,6 +181,7 @@ for scope in ['vm create', 'vmss create']:
     register_cli_argument(scope, 'dns_name_type', help=argparse.SUPPRESS)
     register_cli_argument(scope, 'admin_username', admin_username_type)
     register_cli_argument(scope, 'storage_type', help='The VM storage type.', **enum_choice_list(SkuName))
+    register_cli_argument(scope, 'storage_suffix', ignore_type, validator=validate_storage_suffix)
     register_cli_argument(scope, 'subnet_name', help='The subnet name.  Creates if creating a new VNet, references if referencing an existing VNet.')
     register_cli_argument(scope, 'admin_password', help='Password for the Virtual Machine if Authentication Type is Password.')
     register_cli_argument(scope, 'ssh_key_value', action=VMSSHFieldAction)

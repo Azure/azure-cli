@@ -15,14 +15,13 @@ from msrest.serialization import Model
 
 
 class DeploymentVmss(Model):
-    """
-    Deployment operation parameters.
+    """Deployment operation parameters.
 
     Variables are only populated by the server, and will be ignored when
     sending a request.
 
     :ivar uri: URI referencing the template. Default value:
-     "https://azuresdkci.blob.core.windows.net/templatehost/CreateVmss_2016-09-20/azuredeploy.json"
+     "https://azuresdkci.blob.core.windows.net/templatehost/CreateVmss_2017-1-5/azuredeploy.json"
      .
     :vartype uri: str
     :param content_version: If included it must match the ContentVersion in
@@ -30,7 +29,7 @@ class DeploymentVmss(Model):
     :type content_version: str
     :ivar _artifacts_location: Container URI of of the template. Default
      value:
-     "https://azuresdkci.blob.core.windows.net/templatehost/CreateVmss_2016-09-20"
+     "https://azuresdkci.blob.core.windows.net/templatehost/CreateVmss_2017-1-5"
      .
     :vartype _artifacts_location: str
     :param admin_password: Password for the Virtual Machine.  Required if SSH
@@ -41,11 +40,11 @@ class DeploymentVmss(Model):
     :param authentication_type: Password or SSH Public Key authentication.
      Possible values include: 'password', 'ssh'. Default value: "password" .
     :type authentication_type: str or :class:`authenticationType
-     <vmsscreationclient.models.authenticationType>`
+     <Default.models.authenticationType>`
     :param custom_os_disk_type: Custom image OS type. Possible values
      include: 'windows', 'linux'. Default value: "windows" .
     :type custom_os_disk_type: str or :class:`customOsDiskType
-     <vmsscreationclient.models.customOsDiskType>`
+     <Default.models.customOsDiskType>`
     :param custom_os_disk_uri: URI to a custom disk image.
     :type custom_os_disk_uri: str
     :param dns_name_for_public_ip: Globally unique DNS Name for the Public IP
@@ -55,7 +54,7 @@ class DeploymentVmss(Model):
     :param dns_name_type: Associate VMs with a public IP address to a DNS
      name. Possible values include: 'none', 'new'. Default value: "none" .
     :type dns_name_type: str or :class:`dnsNameType
-     <vmsscreationclient.models.dnsNameType>`
+     <Default.models.dnsNameType>`
     :param instance_count: Number of VMs in scale set. Default value: 2 .
     :type instance_count: int
     :param load_balancer: Name or ID of load balancer.
@@ -69,7 +68,7 @@ class DeploymentVmss(Model):
      create a new one, or use no load balancer. Possible values include:
      'new', 'existingName', 'existingId', 'none'. Default value: "new" .
     :type load_balancer_type: str or :class:`loadBalancerType
-     <vmsscreationclient.models.loadBalancerType>`
+     <Default.models.loadBalancerType>`
     :param location: Location for VM resources.
     :type location: str
     :param name: The VM name.
@@ -83,8 +82,7 @@ class DeploymentVmss(Model):
     :param os_disk_type: Use a custom image URI from the OS Disk URI
      parameter or use a provider's image. Possible values include:
      'provided', 'custom'. Default value: "provided" .
-    :type os_disk_type: str or :class:`osDiskType
-     <vmsscreationclient.models.osDiskType>`
+    :type os_disk_type: str or :class:`osDiskType <Default.models.osDiskType>`
     :param os_offer: The OS Offer to install. Default value: "WindowsServer" .
     :type os_offer: str
     :param os_publisher: The OS publisher of the OS image. Default value:
@@ -97,7 +95,7 @@ class DeploymentVmss(Model):
      with the osPublisher, osOffer, osSKU, and osVersion parameters. Possible
      values include: 'Win2012R2Datacenter', 'Win2012Datacenter',
      'Win2008R2SP1', 'Custom'. Default value: "Win2012R2Datacenter" .
-    :type os_type: str or :class:`osType <vmsscreationclient.models.osType>`
+    :type os_type: str or :class:`osType <Default.models.osType>`
     :param os_version: The OS version to install. Default value: "latest" .
     :type os_version: str
     :param overprovision: Overprovision option (see
@@ -110,12 +108,12 @@ class DeploymentVmss(Model):
      Possible values include: 'dynamic', 'static'. Default value: "dynamic" .
     :type public_ip_address_allocation: str or
      :class:`publicIpAddressAllocation
-     <vmsscreationclient.models.publicIpAddressAllocation>`
+     <Default.models.publicIpAddressAllocation>`
     :param public_ip_address_type: Use a public IP Address for the VM Nic.
      Possible values include: 'none', 'new', 'existingName', 'existingId'.
      Default value: "new" .
     :type public_ip_address_type: str or :class:`publicIpAddressType
-     <vmsscreationclient.models.publicIpAddressType>`
+     <Default.models.publicIpAddressType>`
     :param ssh_dest_key_path: Destination file path on VM for SSH key.
     :type ssh_dest_key_path: str
     :param ssh_key_value: SSH key file data.
@@ -123,10 +121,13 @@ class DeploymentVmss(Model):
     :param storage_caching: Storage caching type. Possible values include:
      'ReadOnly', 'ReadWrite'. Default value: "ReadOnly" .
     :type storage_caching: str or :class:`storageCaching
-     <vmsscreationclient.models.storageCaching>`
+     <Default.models.storageCaching>`
     :param storage_container_name: Name of storage container for the VM OS
      disk. Default value: "vhds" .
     :type storage_container_name: str
+    :param storage_suffix: The storage suffix for the cloud environment the
+     VM is being created on.
+    :type storage_suffix: str
     :param storage_type: The VM storage type (Standard_LRS, Standard_GRS,
      Standard_RAGRS). Default value: "Standard_LRS" .
     :type storage_type: str
@@ -140,7 +141,7 @@ class DeploymentVmss(Model):
     :param upgrade_policy_mode: Manual or Automatic upgrade mode. Possible
      values include: 'manual', 'automatic'. Default value: "manual" .
     :type upgrade_policy_mode: str or :class:`upgradePolicyMode
-     <vmsscreationclient.models.upgradePolicyMode>`
+     <Default.models.upgradePolicyMode>`
     :param virtual_network: Name or ID of virtual network.
     :type virtual_network: str
     :param virtual_network_ip_address_prefix: The virtual network IP address
@@ -150,7 +151,7 @@ class DeploymentVmss(Model):
      new one. Possible values include: 'new', 'existingName', 'existingId'.
      Default value: "new" .
     :type virtual_network_type: str or :class:`virtualNetworkType
-     <vmsscreationclient.models.virtualNetworkType>`
+     <Default.models.virtualNetworkType>`
     :param vm_sku: Size of VMs in the VM Scale Set.  See
      https://azure.microsoft.com/en-us/pricing/details/virtual-machines/ for
      size info. Default value: "Standard_D1_v2" .
@@ -165,6 +166,7 @@ class DeploymentVmss(Model):
         '_artifacts_location': {'required': True, 'constant': True},
         'admin_username': {'required': True},
         'name': {'required': True},
+        'storage_suffix': {'required': True},
         'mode': {'required': True, 'constant': True},
     }
 
@@ -202,6 +204,7 @@ class DeploymentVmss(Model):
         'ssh_key_value': {'key': 'properties.parameters.sshKeyValue.value', 'type': 'str'},
         'storage_caching': {'key': 'properties.parameters.storageCaching.value', 'type': 'storageCaching'},
         'storage_container_name': {'key': 'properties.parameters.storageContainerName.value', 'type': 'str'},
+        'storage_suffix': {'key': 'properties.parameters.storageSuffix.value', 'type': 'str'},
         'storage_type': {'key': 'properties.parameters.storageType.value', 'type': 'str'},
         'subnet_ip_address_prefix': {'key': 'properties.parameters.subnetIpAddressPrefix.value', 'type': 'str'},
         'subnet_name': {'key': 'properties.parameters.subnetName.value', 'type': 'str'},
@@ -214,13 +217,13 @@ class DeploymentVmss(Model):
         'mode': {'key': 'properties.mode', 'type': 'str'},
     }
 
-    uri = "https://azuresdkci.blob.core.windows.net/templatehost/CreateVmss_2016-09-20/azuredeploy.json"
+    uri = "https://azuresdkci.blob.core.windows.net/templatehost/CreateVmss_2017-1-5/azuredeploy.json"
 
-    _artifacts_location = "https://azuresdkci.blob.core.windows.net/templatehost/CreateVmss_2016-09-20"
+    _artifacts_location = "https://azuresdkci.blob.core.windows.net/templatehost/CreateVmss_2017-1-5"
 
     mode = "Incremental"
 
-    def __init__(self, admin_username, name, content_version=None, admin_password=None, authentication_type="password", custom_os_disk_type="windows", custom_os_disk_uri=None, dns_name_for_public_ip=None, dns_name_type="none", instance_count=2, load_balancer=None, load_balancer_backend_pool_name=None, load_balancer_nat_pool_name=None, load_balancer_type="new", location=None, nat_backend_port=22, os_disk_name="osdiskimage", os_disk_type="provided", os_offer="WindowsServer", os_publisher="MicrosoftWindowsServer", os_sku="2012-R2-Datacenter", os_type="Win2012R2Datacenter", os_version="latest", overprovision=False, public_ip_address=None, public_ip_address_allocation="dynamic", public_ip_address_type="new", ssh_dest_key_path=None, ssh_key_value=None, storage_caching="ReadOnly", storage_container_name="vhds", storage_type="Standard_LRS", subnet_ip_address_prefix="10.0.0.0/24", subnet_name=None, tags=None, upgrade_policy_mode="manual", virtual_network=None, virtual_network_ip_address_prefix="10.0.0.0/16", virtual_network_type="new", vm_sku="Standard_D1_v2"):
+    def __init__(self, admin_username, name, storage_suffix, content_version=None, admin_password=None, authentication_type="password", custom_os_disk_type="windows", custom_os_disk_uri=None, dns_name_for_public_ip=None, dns_name_type="none", instance_count=2, load_balancer=None, load_balancer_backend_pool_name=None, load_balancer_nat_pool_name=None, load_balancer_type="new", location=None, nat_backend_port=22, os_disk_name="osdiskimage", os_disk_type="provided", os_offer="WindowsServer", os_publisher="MicrosoftWindowsServer", os_sku="2012-R2-Datacenter", os_type="Win2012R2Datacenter", os_version="latest", overprovision=False, public_ip_address=None, public_ip_address_allocation="dynamic", public_ip_address_type="new", ssh_dest_key_path=None, ssh_key_value=None, storage_caching="ReadOnly", storage_container_name="vhds", storage_type="Standard_LRS", subnet_ip_address_prefix="10.0.0.0/24", subnet_name=None, tags=None, upgrade_policy_mode="manual", virtual_network=None, virtual_network_ip_address_prefix="10.0.0.0/16", virtual_network_type="new", vm_sku="Standard_D1_v2"):
         self.content_version = content_version
         self.admin_password = admin_password
         self.admin_username = admin_username
@@ -252,6 +255,7 @@ class DeploymentVmss(Model):
         self.ssh_key_value = ssh_key_value
         self.storage_caching = storage_caching
         self.storage_container_name = storage_container_name
+        self.storage_suffix = storage_suffix
         self.storage_type = storage_type
         self.subnet_ip_address_prefix = subnet_ip_address_prefix
         self.subnet_name = subnet_name

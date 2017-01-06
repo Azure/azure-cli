@@ -173,7 +173,7 @@
     },
     "osDiskUri": {
       "type": "string",
-      "defaultValue": "[concat('https://', split(parameters('storageAccount'), '/')[sub(length(split(parameters('storageAccount'), '/')), 1)], '.blob.core.windows.net/', parameters('storageContainerName'), '/', parameters('osDiskName'), '.vhd')]",
+      "defaultValue": "[concat('https://', split(parameters('storageAccount'), '/')[sub(length(split(parameters('storageAccount'), '/')), 1)], '.blob.', parameters('storageSuffix'), '/', parameters('storageContainerName'), '/', parameters('osDiskName'), '.vhd')]",
       "metadata": {
         "description": "URI for a custom VHD image."
       }
@@ -324,6 +324,12 @@
       "defaultValue": "vhds",
       "metadata": {
         "description": "Name of storage container for the VM OS disk."
+      }
+    },
+    "storageSuffix": {
+      "type": "string",
+      "metadata": {
+        "description": "The storage suffix for the cloud environment the VM is being created on."
       }
     },
     "storageType": {

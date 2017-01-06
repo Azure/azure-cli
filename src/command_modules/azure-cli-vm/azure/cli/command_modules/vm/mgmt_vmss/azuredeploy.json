@@ -260,6 +260,12 @@
         "description": "Name of storage container for the VM OS disk."
       }
     },
+    "storageSuffix": {
+      "type": "string",
+      "metadata": {
+        "description": "The storage suffix for the cloud environment the VM is being created on."
+      }
+    },
     "storageType": {
       "type": "string",
       "defaultValue": "Standard_LRS",
@@ -540,11 +546,11 @@
       "none": "[variables('natTemplateUriEmpty')]"
     },
     "vhdContainers": [
-      "[concat('https://', variables('uniqueStringArray')[0], variables('newStorageAccountSuffix'), '.blob.core.windows.net/', variables('vhdContainerName'))]",
-      "[concat('https://', variables('uniqueStringArray')[1], variables('newStorageAccountSuffix'), '.blob.core.windows.net/', variables('vhdContainerName'))]",
-      "[concat('https://', variables('uniqueStringArray')[2], variables('newStorageAccountSuffix'), '.blob.core.windows.net/', variables('vhdContainerName'))]",
-      "[concat('https://', variables('uniqueStringArray')[3], variables('newStorageAccountSuffix'), '.blob.core.windows.net/', variables('vhdContainerName'))]",
-      "[concat('https://', variables('uniqueStringArray')[4], variables('newStorageAccountSuffix'), '.blob.core.windows.net/', variables('vhdContainerName'))]"
+      "[concat('https://', variables('uniqueStringArray')[0], variables('newStorageAccountSuffix'), '.blob.', parameters('storageSuffix'), '/', variables('vhdContainerName'))]",
+      "[concat('https://', variables('uniqueStringArray')[1], variables('newStorageAccountSuffix'), '.blob.', parameters('storageSuffix'), '/', variables('vhdContainerName'))]",
+      "[concat('https://', variables('uniqueStringArray')[2], variables('newStorageAccountSuffix'), '.blob.', parameters('storageSuffix'), '/', variables('vhdContainerName'))]",
+      "[concat('https://', variables('uniqueStringArray')[3], variables('newStorageAccountSuffix'), '.blob.', parameters('storageSuffix'), '/', variables('vhdContainerName'))]",
+      "[concat('https://', variables('uniqueStringArray')[4], variables('newStorageAccountSuffix'), '.blob.', parameters('storageSuffix'), '/', variables('vhdContainerName'))]"
     ],
     "storageProfilesCustomImage": {
       "custom": {
