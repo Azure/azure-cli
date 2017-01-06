@@ -312,7 +312,7 @@ def _get_remote_url():
             Please run this command in a git repository folder with \
             an 'origin' remote or specify a remote using '--remote-url'")
     except CalledProcessError as e:
-        raise CLIError(e)
+        raise CLIError('Please ensure git version 2.7.0 or greater is installed.\n' + e)
     return remote_url.decode()
 
 def _check_registry_information(registry_name, registry_resource_id):
