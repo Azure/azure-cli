@@ -128,3 +128,7 @@ def validate_default_storage_account(namespace):
 def validate_default_os_disk(namespace):
     if not namespace.os_disk_name:
         namespace.os_disk_name = 'osdisk{}'.format(generate_guid())
+
+def validate_storage_suffix(namespace):
+    from azure.cli.core._profile import CLOUD
+    namespace.storage_suffix = CLOUD.suffixes.storage_endpoint

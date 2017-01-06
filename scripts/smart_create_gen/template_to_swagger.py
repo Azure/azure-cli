@@ -245,7 +245,7 @@ swagger_template_master = '''{{
       "required": [
         "uri"
       ],
-      "description": "Entity representing the reference to the deployment paramaters."
+      "description": "Entity representing the reference to the deployment parameters."
     }},
     "ProviderResourceType": {{
       "properties": {{

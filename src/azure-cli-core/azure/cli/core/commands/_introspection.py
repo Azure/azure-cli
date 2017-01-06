@@ -30,7 +30,7 @@ def _option_descriptions(operation):
         index = 0
         while index < len(lines):
             l = lines[index]
-            regex = r'\s*(:param)\s+(.+)\s*:(.*)'
+            regex = r'\s*(:param)\s+(.+?)\s*:(.*)'
             match = re.search(regex, l)
             if match:
                 # 'arg name' portion might have type info, we don't need it
