@@ -20,7 +20,7 @@ factory = lambda args: batch_client_factory(**args).batch_account
 cli_command(__name__, 'batch account list', custom_path.format('list_accounts'), factory)
 cli_command(__name__, 'batch account show', mgmt_path.format('batch_account', 'BatchAccountOperations.get'), factory)
 cli_command(__name__, 'batch account create', custom_path.format('create_account'), factory)
-cli_command(__name__, 'batch account set', mgmt_path.format('batch_account', 'BatchAccountOperations.update'), factory)
+cli_command(__name__, 'batch account set', custom_path.format('update_account'), factory)
 cli_command(__name__, 'batch account delete', mgmt_path.format('batch_account', 'BatchAccountOperations.delete'), factory)
 cli_command(__name__, 'batch account autostorage-keys sync', mgmt_path.format('batch_account', 'BatchAccountOperations.synchronize_auto_storage_keys'), factory)
 

@@ -4,9 +4,9 @@
 # --------------------------------------------------------------------------------------------
 
 try:
- from urlparse import urlsplit
+    from urllib.parse import urlsplit
 except ImportError:
- from urllib.parse import urlsplit
+    from urlparse import urlsplit # pylint: disable=import-error
 
 from azure.mgmt.batch.models import (BatchAccountCreateParameters,
                                      AutoStorageBaseProperties,
@@ -25,6 +25,7 @@ def list_accounts(client, resource_group_name=None):
 
 def create_account(client, resource_group_name, account_name, location, #pylint:disable=too-many-arguments
                    tags=None, storage_account_id=None):
+    # TODO: get storage_account_id by search storage account name
     if storage_account_id:
         properties = AutoStorageBaseProperties(storage_account_id=storage_account_id)
     else:
@@ -38,6 +39,19 @@ def create_account(client, resource_group_name, account_name, location, #pylint:
                          account_name=account_name,
                          parameters=parameters)
 create_account.__doc__ = AutoStorageBaseProperties.__doc__
+
+def update_account(client, resource_group_name, account_name,  #pylint:disable=too-many-arguments
+                   tags=None, storage_account_id=None):
+    if storage_account_id:
+        properties = AutoStorageBaseProperties(storage_account_id=storage_account_id)
+    else:
+        properties = None
+
+    return client.update(resource_group_name=resource_group_name,
+                         account_name=account_name,
+                         tags=tags,
+                         auto_storage=properties)
+update_account.__doc__ = AutoStorageBaseProperties.__doc__
 
 def update_application(client, resource_group_name, account_name, application_id, #pylint:disable=too-many-arguments
                        allow_updates=None, display_name=None, default_version=None):
