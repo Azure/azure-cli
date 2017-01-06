@@ -97,7 +97,7 @@ class BatchMgmtAccountScenarioTest(ResourceGroupVCRTestBase):
 
         self.cmd('batch location quotas show -l {}'.format(loc), checks=[
             JMESPathCheck('accountQuota', 1)
-        ]) 
+        ])
 
 class BatchMgmtApplicationScenarioTest(ResourceGroupVCRTestBase):
 
@@ -118,9 +118,8 @@ class BatchMgmtApplicationScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck('location', loc),
             JMESPathCheck('resourceGroup', rg)
         ])
-        self.storage_account_id = result['id']
 
-        self.cmd('batch account create -g {} -n {} -l {} --storage-account-id {}'.format(rg, name, loc, self.storage_account_id), checks=[
+        self.cmd('batch account create -g {} -n {} -l {} --storage-account-id {}'.format(rg, name, loc, result['id']), checks=[
             JMESPathCheck('name', name),
             JMESPathCheck('location', loc),
             JMESPathCheck('resourceGroup', rg)
@@ -133,10 +132,8 @@ class BatchMgmtApplicationScenarioTest(ResourceGroupVCRTestBase):
         name = self.account_name
         self.cmd('storage account delete -g {} -n {}'.format(rg, sname))
         self.cmd('batch account delete -g {} -n {}'.format(rg, name))
-        try:
+        if os.path.exists(self.package_file_name):
             os.remove(self.package_file_name)
-        except:
-            pass
 
     def __init__(self, test_method):
         super(BatchMgmtApplicationScenarioTest, self).__init__(__file__, test_method)
@@ -144,7 +141,6 @@ class BatchMgmtApplicationScenarioTest(ResourceGroupVCRTestBase):
         self.account_name = 'clibatchtest7'
         self.location = 'brazilsouth'
         self.storage_account_name = 'clibatchteststorage7'
-        self.storage_account_id = None
         self.application_name = 'testapp'
         self.application_package_name = '1.0'
         self.package_file_name = os.path.join(os.getcwd(), 'samplepackage.zip')
