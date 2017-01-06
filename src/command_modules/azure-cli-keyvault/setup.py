@@ -28,6 +28,7 @@ CLASSIFIERS = [
 
 DEPENDENCIES = [
     'azure-mgmt-keyvault==0.30.0',
+    'azure-keyvault',
     'azure-cli-core',
     'pyOpenSSL'
 ]
@@ -51,11 +52,7 @@ setup(
         'azure.cli.command_modules'
     ],
     packages=[
-        'azure.cli.command_modules.keyvault',
-        'azure.cli.command_modules.keyvault.keyvaultclient',
-        'azure.cli.command_modules.keyvault.keyvaultclient.http_bearer_challenge_cache',
-        'azure.cli.command_modules.keyvault.keyvaultclient.generated',
-        'azure.cli.command_modules.keyvault.keyvaultclient.generated.models'
+        'azure.cli.command_modules.keyvault'
     ],
     install_requires=DEPENDENCIES,
 )
