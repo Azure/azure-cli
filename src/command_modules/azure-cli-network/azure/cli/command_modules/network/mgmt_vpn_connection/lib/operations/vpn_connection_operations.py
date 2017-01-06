@@ -37,7 +37,7 @@ class VpnConnectionOperations(object):
         self.config = config
 
     def create_or_update(
-            self, resource_group_name, deployment_name, connection_type, virtual_network_gateway_connection_name, vnet_gateway1_id, content_version=None, express_route_circuit2_id=None, local_gateway2_id=None, location=None, routing_weight=10, shared_key="none", vnet_gateway2_id=None, custom_headers=None, raw=False, **operation_config):
+            self, resource_group_name, deployment_name, connection_type, virtual_network_gateway_connection_name, vnet_gateway1_id, enable_bgp=False, content_version=None, authorization_key=None, express_route_circuit2_id=None, local_gateway2_id=None, location=None, routing_weight=10, shared_key="none", tags=None, vnet_gateway2_id=None, custom_headers=None, raw=False, **operation_config):
         """Create a new VpnConnection.
 
         :param resource_group_name: The name of the resource group. The name
@@ -49,6 +49,8 @@ class VpnConnectionOperations(object):
          'IPSec', 'Vnet2Vnet', 'ExpressRoute'
         :type connection_type: str or :class:`connectionType
          <Default.models.connectionType>`
+        :param enable_bgp: Enable BGP for this VPN connection.
+        :type enable_bgp: bool
         :param virtual_network_gateway_connection_name: Connection name.
         :type virtual_network_gateway_connection_name: str
         :param vnet_gateway1_id: Connect from this gateway to another gateway
@@ -57,6 +59,9 @@ class VpnConnectionOperations(object):
         :param content_version: If included it must match the ContentVersion
          in the template.
         :type content_version: str
+        :param authorization_key: The authorization key for the VPN
+         connection.
+        :type authorization_key: str
         :param express_route_circuit2_id: Connect to this express route
          circuit from vnet gateway 1 using connection type ExpressRoute.
         :type express_route_circuit2_id: str
@@ -69,6 +74,8 @@ class VpnConnectionOperations(object):
         :type routing_weight: int
         :param shared_key: IPSec shared key.
         :type shared_key: str
+        :param tags: Tags object.
+        :type tags: object
         :param vnet_gateway2_id: Connect to this vnet gateway from vnet
          gateway 1 using connection type Vnet2Vnet.
         :type vnet_gateway2_id: str
@@ -82,7 +89,7 @@ class VpnConnectionOperations(object):
         :rtype: :class:`ClientRawResponse<msrest.pipeline.ClientRawResponse>`
          if raw=true
         """
-        parameters = models.DeploymentVpnConnection(content_version=content_version, connection_type=connection_type, express_route_circuit2_id=express_route_circuit2_id, local_gateway2_id=local_gateway2_id, location=location, routing_weight=routing_weight, shared_key=shared_key, virtual_network_gateway_connection_name=virtual_network_gateway_connection_name, vnet_gateway1_id=vnet_gateway1_id, vnet_gateway2_id=vnet_gateway2_id)
+        parameters = models.DeploymentVpnConnection(content_version=content_version, authorization_key=authorization_key, connection_type=connection_type, enable_bgp=enable_bgp, express_route_circuit2_id=express_route_circuit2_id, local_gateway2_id=local_gateway2_id, location=location, routing_weight=routing_weight, shared_key=shared_key, tags=tags, virtual_network_gateway_connection_name=virtual_network_gateway_connection_name, vnet_gateway1_id=vnet_gateway1_id, vnet_gateway2_id=vnet_gateway2_id)
 
         # Construct URL
         url = '/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Resources/deployments/{deploymentName}'

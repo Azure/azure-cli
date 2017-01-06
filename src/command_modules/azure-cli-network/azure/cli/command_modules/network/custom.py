@@ -890,9 +890,35 @@ update_nsg_rule.__doc__ = SecurityRule.__doc__
 
 # endregion
 
-def update_vpn_connection(instance, routing_weight=None):
+def update_vpn_connection(instance, resource_group_name, routing_weight=None, shared_key=None,
+                          tags=None, enable_bgp=None):
+
+    ncf = _network_client_factory()
+
     if routing_weight is not None:
         instance.routing_weight = routing_weight
+
+    if shared_key is not None:
+        instance.shared_key = shared_key
+
+    if tags is not None:
+        instance.tags = tags
+
+    if enable_bgp is not None:
+        instance.enable_bgp = enable_bgp
+
+    # TODO: Remove these when issue #1615 is fixed
+    instance.virtual_network_gateway1 = ncf.virtual_network_gateways.get(
+        resource_group_name, instance.virtual_network_gateway1.id.rsplit('/')[-1])
+
+    if instance.virtual_network_gateway2:
+        instance.virtual_network_gateway2 = ncf.virtual_network_gateways.get(
+            resource_group_name, instance.virtual_network_gateway2.id.rsplit('/')[-1])
+
+    if instance.local_network_gateway2:
+        instance.local_network_gateway2 = ncf.local_network_gateways.get(
+            resource_group_name, instance.local_network_gateway2.id.rsplit('/')[-1])
+
     return instance
 
 def _validate_bgp_peering(instance, asn, bgp_peering_address, peer_weight):

@@ -520,6 +520,12 @@ def process_vpn_connection_create_namespace(namespace):
                 name=value)
         return value
 
+    if namespace.local_gateway2_id or namespace.vnet_gateway2_id and not namespace.shared_key:
+        raise CLIError('--shared-key is required for VNET-to-VNET or Site-to-Site connections.')
+
+    if namespace.express_route_circuit2_id and namespace.shared_key:
+        raise CLIError('--shared-key cannot be used with an ExpressRoute connection.')
+
     namespace.vnet_gateway1_id = \
         _validate_name_or_id(namespace, namespace.vnet_gateway1_id, 'virtualNetworkGateways')
 

@@ -481,15 +481,16 @@ register_extra_cli_argument('network vnet-gateway update', 'address_prefixes', o
 
 # VPN connection
 register_cli_argument('network vpn-connection', 'virtual_network_gateway_connection_name', options_list=('--name', '-n'), metavar='NAME', id_part='name')
+register_cli_argument('network vpn-connection', 'shared_key', validator=load_cert_file('shared_key'), help='Shared IPSec key, base64 contents of the certificate file or file path.')
 
 register_cli_argument('network vpn-connection create', 'vnet_gateway1_id', options_list=('--vnet-gateway1',), validator=process_vpn_connection_create_namespace)
 register_cli_argument('network vpn-connection create', 'vnet_gateway2_id', options_list=('--vnet-gateway2',))
 register_cli_argument('network vpn-connection create', 'express_route_circuit2_id', options_list=('--express-route-circuit2',))
 register_cli_argument('network vpn-connection create', 'local_gateway2_id', options_list=('--local-gateway2',))
-register_cli_argument('network vpn-connection create', 'shared_key', validator=load_cert_file('shared_key'), help='Shared IPSec key, base64 contents of the certificate file or file path.')
 register_cli_argument('network vpn-connection create', 'connection_type', ignore_type)
 
 register_cli_argument('network vpn-connection update', 'routing_weight', type=int, help='Connection routing weight')
+register_cli_argument('network vpn-connection update', 'enable_bgp', help='Enable BGP (Border Gateway Protocol)', **enum_choice_list(['true', 'false']))
 
 # VPN connection shared key
 register_cli_argument('network vpn-connection shared-key', 'connection_shared_key_name', options_list=('--name', '-n'), id_part='name')
