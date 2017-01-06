@@ -37,9 +37,8 @@ class VmssOperations(object):
         self.config = config
 
     def create_or_update(
-            self, resource_group_name, deployment_name, admin_username, name, content_version=None, admin_password=None, authentication_type="password", custom_os_disk_type="windows", custom_os_disk_uri=None, dns_name_for_public_ip=None, dns_name_type="none", instance_count=2, load_balancer=None, load_balancer_backend_pool_name=None, load_balancer_nat_pool_name=None, load_balancer_type="new", location=None, nat_backend_port=22, os_disk_name="osdiskimage", os_disk_type="provided", os_offer="WindowsServer", os_publisher="MicrosoftWindowsServer", os_sku="2012-R2-Datacenter", os_type="Win2012R2Datacenter", os_version="latest", overprovision=False, public_ip_address=None, public_ip_address_allocation="dynamic", public_ip_address_type="new", ssh_dest_key_path=None, ssh_key_value=None, storage_caching="ReadOnly", storage_container_name="vhds", storage_type="Standard_LRS", subnet_ip_address_prefix="10.0.0.0/24", subnet_name=None, tags=None, upgrade_policy_mode="manual", virtual_network=None, virtual_network_ip_address_prefix="10.0.0.0/16", virtual_network_type="new", vm_sku="Standard_D1_v2", custom_headers=None, raw=False, **operation_config):
-        """
-        Create a new Vmss.
+            self, resource_group_name, deployment_name, admin_username, name, storage_suffix, content_version=None, admin_password=None, authentication_type="password", custom_os_disk_type="windows", custom_os_disk_uri=None, dns_name_for_public_ip=None, dns_name_type="none", instance_count=2, load_balancer=None, load_balancer_backend_pool_name=None, load_balancer_nat_pool_name=None, load_balancer_type="new", location=None, nat_backend_port=22, os_disk_name="osdiskimage", os_disk_type="provided", os_offer="WindowsServer", os_publisher="MicrosoftWindowsServer", os_sku="2012-R2-Datacenter", os_type="Win2012R2Datacenter", os_version="latest", overprovision=False, public_ip_address=None, public_ip_address_allocation="dynamic", public_ip_address_type="new", ssh_dest_key_path=None, ssh_key_value=None, storage_caching="ReadOnly", storage_container_name="vhds", storage_type="Standard_LRS", subnet_ip_address_prefix="10.0.0.0/24", subnet_name=None, tags=None, upgrade_policy_mode="manual", virtual_network=None, virtual_network_ip_address_prefix="10.0.0.0/16", virtual_network_type="new", vm_sku="Standard_D1_v2", custom_headers=None, raw=False, **operation_config):
+        """Create a new Vmss.
 
         :param resource_group_name: The name of the resource group. The name
          is case insensitive.
@@ -50,6 +49,9 @@ class VmssOperations(object):
         :type admin_username: str
         :param name: The VM name.
         :type name: str
+        :param storage_suffix: The storage suffix for the cloud environment
+         the VM is being created on.
+        :type storage_suffix: str
         :param content_version: If included it must match the ContentVersion
          in the template.
         :type content_version: str
@@ -59,11 +61,11 @@ class VmssOperations(object):
         :param authentication_type: Password or SSH Public Key
          authentication. Possible values include: 'password', 'ssh'
         :type authentication_type: str or :class:`authenticationType
-         <vmsscreationclient.models.authenticationType>`
+         <Default.models.authenticationType>`
         :param custom_os_disk_type: Custom image OS type. Possible values
          include: 'windows', 'linux'
         :type custom_os_disk_type: str or :class:`customOsDiskType
-         <vmsscreationclient.models.customOsDiskType>`
+         <Default.models.customOsDiskType>`
         :param custom_os_disk_uri: URI to a custom disk image.
         :type custom_os_disk_uri: str
         :param dns_name_for_public_ip: Globally unique DNS Name for the
@@ -73,7 +75,7 @@ class VmssOperations(object):
         :param dns_name_type: Associate VMs with a public IP address to a DNS
          name. Possible values include: 'none', 'new'
         :type dns_name_type: str or :class:`dnsNameType
-         <vmsscreationclient.models.dnsNameType>`
+         <Default.models.dnsNameType>`
         :param instance_count: Number of VMs in scale set.
         :type instance_count: int
         :param load_balancer: Name or ID of load balancer.
@@ -87,7 +89,7 @@ class VmssOperations(object):
          create a new one, or use no load balancer. Possible values include:
          'new', 'existingName', 'existingId', 'none'
         :type load_balancer_type: str or :class:`loadBalancerType
-         <vmsscreationclient.models.loadBalancerType>`
+         <Default.models.loadBalancerType>`
         :param location: Location for VM resources.
         :type location: str
         :param nat_backend_port: Backend port to open with NAT rules.
@@ -98,7 +100,7 @@ class VmssOperations(object):
          parameter or use a provider's image. Possible values include:
          'provided', 'custom'
         :type os_disk_type: str or :class:`osDiskType
-         <vmsscreationclient.models.osDiskType>`
+         <Default.models.osDiskType>`
         :param os_offer: The OS Offer to install.
         :type os_offer: str
         :param os_publisher: The OS publisher of the OS image.
@@ -109,8 +111,7 @@ class VmssOperations(object):
          image with the osPublisher, osOffer, osSKU, and osVersion
          parameters. Possible values include: 'Win2012R2Datacenter',
          'Win2012Datacenter', 'Win2008R2SP1', 'Custom'
-        :type os_type: str or :class:`osType
-         <vmsscreationclient.models.osType>`
+        :type os_type: str or :class:`osType <Default.models.osType>`
         :param os_version: The OS version to install.
         :type os_version: str
         :param overprovision: Overprovision option (see
@@ -123,12 +124,12 @@ class VmssOperations(object):
          method. Possible values include: 'dynamic', 'static'
         :type public_ip_address_allocation: str or
          :class:`publicIpAddressAllocation
-         <vmsscreationclient.models.publicIpAddressAllocation>`
+         <Default.models.publicIpAddressAllocation>`
         :param public_ip_address_type: Use a public IP Address for the VM
          Nic. Possible values include: 'none', 'new', 'existingName',
          'existingId'
         :type public_ip_address_type: str or :class:`publicIpAddressType
-         <vmsscreationclient.models.publicIpAddressType>`
+         <Default.models.publicIpAddressType>`
         :param ssh_dest_key_path: Destination file path on VM for SSH key.
         :type ssh_dest_key_path: str
         :param ssh_key_value: SSH key file data.
@@ -136,7 +137,7 @@ class VmssOperations(object):
         :param storage_caching: Storage caching type. Possible values
          include: 'ReadOnly', 'ReadWrite'
         :type storage_caching: str or :class:`storageCaching
-         <vmsscreationclient.models.storageCaching>`
+         <Default.models.storageCaching>`
         :param storage_container_name: Name of storage container for the VM
          OS disk.
         :type storage_container_name: str
@@ -153,7 +154,7 @@ class VmssOperations(object):
         :param upgrade_policy_mode: Manual or Automatic upgrade mode.
          Possible values include: 'manual', 'automatic'
         :type upgrade_policy_mode: str or :class:`upgradePolicyMode
-         <vmsscreationclient.models.upgradePolicyMode>`
+         <Default.models.upgradePolicyMode>`
         :param virtual_network: Name or ID of virtual network.
         :type virtual_network: str
         :param virtual_network_ip_address_prefix: The virtual network IP
@@ -163,7 +164,7 @@ class VmssOperations(object):
          create a new one. Possible values include: 'new', 'existingName',
          'existingId'
         :type virtual_network_type: str or :class:`virtualNetworkType
-         <vmsscreationclient.models.virtualNetworkType>`
+         <Default.models.virtualNetworkType>`
         :param vm_sku: Size of VMs in the VM Scale Set.  See
          https://azure.microsoft.com/en-us/pricing/details/virtual-machines/
          for size info.
@@ -174,11 +175,11 @@ class VmssOperations(object):
         :rtype:
          :class:`AzureOperationPoller<msrestazure.azure_operation.AzureOperationPoller>`
          instance that returns :class:`DeploymentExtended
-         <default.models.DeploymentExtended>`
+         <Default.models.DeploymentExtended>`
         :rtype: :class:`ClientRawResponse<msrest.pipeline.ClientRawResponse>`
          if raw=true
         """
-        parameters = models.DeploymentVmss(content_version=content_version, admin_password=admin_password, admin_username=admin_username, authentication_type=authentication_type, custom_os_disk_type=custom_os_disk_type, custom_os_disk_uri=custom_os_disk_uri, dns_name_for_public_ip=dns_name_for_public_ip, dns_name_type=dns_name_type, instance_count=instance_count, load_balancer=load_balancer, load_balancer_backend_pool_name=load_balancer_backend_pool_name, load_balancer_nat_pool_name=load_balancer_nat_pool_name, load_balancer_type=load_balancer_type, location=location, name=name, nat_backend_port=nat_backend_port, os_disk_name=os_disk_name, os_disk_type=os_disk_type, os_offer=os_offer, os_publisher=os_publisher, os_sku=os_sku, os_type=os_type, os_version=os_version, overprovision=overprovision, public_ip_address=public_ip_address, public_ip_address_allocation=public_ip_address_allocation, public_ip_address_type=public_ip_address_type, ssh_dest_key_path=ssh_dest_key_path, ssh_key_value=ssh_key_value, storage_caching=storage_caching, storage_container_name=storage_container_name, storage_type=storage_type, subnet_ip_address_prefix=subnet_ip_address_prefix, subnet_name=subnet_name, tags=tags, upgrade_policy_mode=upgrade_policy_mode, virtual_network=virtual_network, virtual_network_ip_address_prefix=virtual_network_ip_address_prefix, virtual_network_type=virtual_network_type, vm_sku=vm_sku)
+        parameters = models.DeploymentVmss(content_version=content_version, admin_password=admin_password, admin_username=admin_username, authentication_type=authentication_type, custom_os_disk_type=custom_os_disk_type, custom_os_disk_uri=custom_os_disk_uri, dns_name_for_public_ip=dns_name_for_public_ip, dns_name_type=dns_name_type, instance_count=instance_count, load_balancer=load_balancer, load_balancer_backend_pool_name=load_balancer_backend_pool_name, load_balancer_nat_pool_name=load_balancer_nat_pool_name, load_balancer_type=load_balancer_type, location=location, name=name, nat_backend_port=nat_backend_port, os_disk_name=os_disk_name, os_disk_type=os_disk_type, os_offer=os_offer, os_publisher=os_publisher, os_sku=os_sku, os_type=os_type, os_version=os_version, overprovision=overprovision, public_ip_address=public_ip_address, public_ip_address_allocation=public_ip_address_allocation, public_ip_address_type=public_ip_address_type, ssh_dest_key_path=ssh_dest_key_path, ssh_key_value=ssh_key_value, storage_caching=storage_caching, storage_container_name=storage_container_name, storage_suffix=storage_suffix, storage_type=storage_type, subnet_ip_address_prefix=subnet_ip_address_prefix, subnet_name=subnet_name, tags=tags, upgrade_policy_mode=upgrade_policy_mode, virtual_network=virtual_network, virtual_network_ip_address_prefix=virtual_network_ip_address_prefix, virtual_network_type=virtual_network_type, vm_sku=vm_sku)
 
         # Construct URL
         url = '/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Resources/deployments/{deploymentName}'
