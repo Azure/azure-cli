@@ -12,11 +12,4 @@ install:
   - pip install -qqq virtualenv # used by package_verify script
   - python scripts/dev_setup.py
 script: 
-  - export PYTHONPATH=$PATHONPATH:./src
-  - python -m azure.cli -h
-  - python ./scripts/run_pylint.py
-  - nosetests -v --processes=-1 --process-timeout=600 -w src/azure-cli/azure/cli/tests
-  - nosetests -v --processes=-1 --process-timeout=600 -w src/azure-cli-core/azure/cli/core/tests
-  - python scripts/command_modules/test.py
-  - sh scripts/package_verify.sh
-  - python scripts/license/verify.py
+  - ./scripts/build_in_travis.sh

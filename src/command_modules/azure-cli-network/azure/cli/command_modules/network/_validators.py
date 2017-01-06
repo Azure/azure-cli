@@ -96,6 +96,9 @@ def read_base_64_file(filename):
         except UnicodeDecodeError:
             return str(base64_data)
 
+def validate_auth_cert(namespace):
+    namespace.cert_data = read_base_64_file(namespace.cert_data)
+
 def validate_cert(namespace):
 
     params = [namespace.cert_data, namespace.cert_password]
@@ -308,6 +311,10 @@ def process_ag_rule_create_namespace(namespace): # pylint: disable=unused-argume
         namespace.url_path_map = _generate_ag_subproperty_id(
             namespace, 'urlPathMaps', namespace.url_path_map)
 
+def process_ag_ssl_policy_set_namespace(namespace):
+    if namespace.disabled_ssl_protocols and namespace.clear:
+        raise ValueError('incorrect usage: --disabled-ssl-protocols PROTOCOL [...] | --clear')
+
 def process_ag_url_path_map_create_namespace(namespace): # pylint: disable=unused-argument
     if namespace.default_address_pool and not is_valid_resource_id(namespace.default_address_pool):
         namespace.default_address_pool = _generate_ag_subproperty_id(
@@ -342,6 +349,8 @@ def process_ag_create_namespace(namespace):
         namespace.frontend_type = 'privateIp'
         namespace.private_ip_address_allocation = 'static' if namespace.private_ip_address \
             else 'dynamic'
+
+    namespace.sku_tier = namespace.sku_name.split('_', 1)[0]
 
     validate_cert(namespace)
 
@@ -485,6 +494,7 @@ def process_vnet_create_namespace(namespace):
 def process_vnet_gateway_create_namespace(namespace):
     ns = namespace
     ns.enable_bgp = any([ns.asn or ns.bgp_peering_address or ns.peer_weight])
+    ns.create_client_configuration = any(ns.address_prefixes or [])
     if ns.enable_bgp and (not ns.asn or not ns.bgp_peering_address):
         raise ValueError(
             'incorrect usage: --bgp-peering-address IP --asn ASN [--peer-weight WEIGHT]')

@@ -12,6 +12,7 @@ from subprocess import check_call, check_output, CalledProcessError
 
 COMMAND_MODULE_PREFIX = 'azure-cli-'
 
+
 def get_all_command_modules():
     # The prefix for the command module folders
     PATH_TO_COMMAND_MODULES = os.path.abspath(os.path.join(os.path.abspath(__file__), '..', '..', '..', 'src' , 'command_modules'))
@@ -23,6 +24,7 @@ def get_all_command_modules():
     print(str(len(all_command_modules))+" command module(s) found...")
     print([name for name, fullpath in all_command_modules])
     return all_command_modules
+
 
 def exec_command(command, cwd=None, stdout=None, env=None):
     '''Returns True in the command was executed successfully'''
@@ -37,6 +39,7 @@ def exec_command(command, cwd=None, stdout=None, env=None):
     except CalledProcessError as err:
         print(err, file=sys.stderr)
         return False
+
 
 def exec_command_output(command, env=None):
     """
@@ -88,6 +91,7 @@ def get_print_format(records):
         recommend_format += '{:' + str(each + 2) + '}'
 
     return (recommend_format, max_len)
+
 
 def print_records(records, print_format=None, title=None, foot_notes=None):
     print_format = print_format or get_print_format(records)[0]

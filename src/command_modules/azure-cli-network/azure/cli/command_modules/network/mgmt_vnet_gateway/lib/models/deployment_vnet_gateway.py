@@ -21,16 +21,22 @@ class DeploymentVnetGateway(Model):
     sending a request.
 
     :ivar uri: URI referencing the template. Default value:
-     "https://azuresdkci.blob.core.windows.net/templatehost/CreateVnetGateway_2016-12-9/azuredeploy.json"
+     "https://azuresdkci.blob.core.windows.net/templatehost/CreateVnetGateway_2017-1-4/azuredeploy.json"
      .
     :vartype uri: str
     :param content_version: If included it must match the ContentVersion in
      the template.
     :type content_version: str
+    :param address_prefixes: Space separated list of address prefixes to
+     associate with the VNET gateway.
+    :type address_prefixes: list of object
     :param asn: Autonomous System Number to use for the BGP settings.
     :type asn: str
     :param bgp_peering_address: IP address to use for BGP peering.
     :type bgp_peering_address: str
+    :param create_client_configuration: Flag to create VPN client
+     configuration. Default value: False .
+    :type create_client_configuration: bool
     :param enable_bgp: Flag to enable BGP settings. Default value: False .
     :type enable_bgp: bool
     :param gateway_type: Gateway type. Possible values include: 'Vpn',
@@ -74,6 +80,7 @@ class DeploymentVnetGateway(Model):
 
     _validation = {
         'uri': {'required': True, 'constant': True},
+        'create_client_configuration': {'required': True},
         'enable_bgp': {'required': True},
         'public_ip_address': {'required': True},
         'virtual_network': {'required': True},
@@ -84,8 +91,10 @@ class DeploymentVnetGateway(Model):
     _attribute_map = {
         'uri': {'key': 'properties.templateLink.uri', 'type': 'str'},
         'content_version': {'key': 'properties.templateLink.contentVersion', 'type': 'str'},
+        'address_prefixes': {'key': 'properties.parameters.addressPrefixes.value', 'type': '[object]'},
         'asn': {'key': 'properties.parameters.asn.value', 'type': 'str'},
         'bgp_peering_address': {'key': 'properties.parameters.bgpPeeringAddress.value', 'type': 'str'},
+        'create_client_configuration': {'key': 'properties.parameters.createClientConfiguration.value', 'type': 'bool'},
         'enable_bgp': {'key': 'properties.parameters.enableBgp.value', 'type': 'bool'},
         'gateway_type': {'key': 'properties.parameters.gatewayType.value', 'type': 'gatewayType'},
         'location': {'key': 'properties.parameters.location.value', 'type': 'str'},
@@ -101,14 +110,16 @@ class DeploymentVnetGateway(Model):
         'mode': {'key': 'properties.mode', 'type': 'str'},
     }
 
-    uri = "https://azuresdkci.blob.core.windows.net/templatehost/CreateVnetGateway_2016-12-9/azuredeploy.json"
+    uri = "https://azuresdkci.blob.core.windows.net/templatehost/CreateVnetGateway_2017-1-4/azuredeploy.json"
 
     mode = "Incremental"
 
-    def __init__(self, public_ip_address, virtual_network, virtual_network_gateway_name, content_version=None, asn=None, bgp_peering_address=None, enable_bgp=False, gateway_type="Vpn", location=None, peer_weight=None, public_ip_address_type="existingId", sku="Basic", tags=None, virtual_network_type="existingId", vpn_type="RouteBased"):
+    def __init__(self, public_ip_address, virtual_network, virtual_network_gateway_name, content_version=None, address_prefixes=None, asn=None, bgp_peering_address=None, create_client_configuration=False, enable_bgp=False, gateway_type="Vpn", location=None, peer_weight=None, public_ip_address_type="existingId", sku="Basic", tags=None, virtual_network_type="existingId", vpn_type="RouteBased"):
         self.content_version = content_version
+        self.address_prefixes = address_prefixes
         self.asn = asn
         self.bgp_peering_address = bgp_peering_address
+        self.create_client_configuration = create_client_configuration
         self.enable_bgp = enable_bgp
         self.gateway_type = gateway_type
         self.location = location

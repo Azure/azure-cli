@@ -37,7 +37,7 @@ class VnetGatewayOperations(object):
         self.config = config
 
     def create_or_update(
-            self, resource_group_name, deployment_name, public_ip_address, virtual_network, virtual_network_gateway_name, enable_bgp=False, content_version=None, asn=None, bgp_peering_address=None, gateway_type="Vpn", location=None, peer_weight=None, public_ip_address_type="existingId", sku="Basic", tags=None, virtual_network_type="existingId", vpn_type="RouteBased", custom_headers=None, raw=False, **operation_config):
+            self, resource_group_name, deployment_name, public_ip_address, virtual_network, virtual_network_gateway_name, create_client_configuration=False, enable_bgp=False, content_version=None, address_prefixes=None, asn=None, bgp_peering_address=None, gateway_type="Vpn", location=None, peer_weight=None, public_ip_address_type="existingId", sku="Basic", tags=None, virtual_network_type="existingId", vpn_type="RouteBased", custom_headers=None, raw=False, **operation_config):
         """Create a new VnetGateway.
 
         :param resource_group_name: The name of the resource group. The name
@@ -45,6 +45,9 @@ class VnetGatewayOperations(object):
         :type resource_group_name: str
         :param deployment_name: The name of the deployment.
         :type deployment_name: str
+        :param create_client_configuration: Flag to create VPN client
+         configuration.
+        :type create_client_configuration: bool
         :param enable_bgp: Flag to enable BGP settings.
         :type enable_bgp: bool
         :param public_ip_address: Name or ID of public IP address to use.
@@ -57,6 +60,9 @@ class VnetGatewayOperations(object):
         :param content_version: If included it must match the ContentVersion
          in the template.
         :type content_version: str
+        :param address_prefixes: Space separated list of address prefixes to
+         associate with the VNET gateway.
+        :type address_prefixes: list of object
         :param asn: Autonomous System Number to use for the BGP settings.
         :type asn: str
         :param bgp_peering_address: IP address to use for BGP peering.
@@ -97,7 +103,7 @@ class VnetGatewayOperations(object):
         :rtype: :class:`ClientRawResponse<msrest.pipeline.ClientRawResponse>`
          if raw=true
         """
-        parameters = models.DeploymentVnetGateway(content_version=content_version, asn=asn, bgp_peering_address=bgp_peering_address, enable_bgp=enable_bgp, gateway_type=gateway_type, location=location, peer_weight=peer_weight, public_ip_address=public_ip_address, public_ip_address_type=public_ip_address_type, sku=sku, tags=tags, virtual_network=virtual_network, virtual_network_gateway_name=virtual_network_gateway_name, virtual_network_type=virtual_network_type, vpn_type=vpn_type)
+        parameters = models.DeploymentVnetGateway(content_version=content_version, address_prefixes=address_prefixes, asn=asn, bgp_peering_address=bgp_peering_address, create_client_configuration=create_client_configuration, enable_bgp=enable_bgp, gateway_type=gateway_type, location=location, peer_weight=peer_weight, public_ip_address=public_ip_address, public_ip_address_type=public_ip_address_type, sku=sku, tags=tags, virtual_network=virtual_network, virtual_network_gateway_name=virtual_network_gateway_name, virtual_network_type=virtual_network_type, vpn_type=vpn_type)
 
         # Construct URL
         url = '/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Resources/deployments/{deploymentName}'

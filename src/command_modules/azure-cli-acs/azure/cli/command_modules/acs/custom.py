@@ -33,6 +33,7 @@ from azure.cli.core._util import CLIError
 from azure.cli.core._profile import Profile
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.mgmt.compute import ComputeManagementClient
+from azure.mgmt.compute.models import ContainerServiceOchestratorTypes
 from azure.cli.core._environment import get_config_dir
 
 logger = _logging.get_az_logger(__name__)
@@ -99,12 +100,14 @@ def acs_browse(resource_group, name, disable_browser=False):
     :param disable_browser: If true, don't launch a web browser after estabilishing the proxy
     :type disable_browser: bool
     """
-    acs_info = _get_acs_info(name, resource_group)
+    _acs_browse_internal(_get_acs_info(name, resource_group), resource_group, name, disable_browser)
+
+def _acs_browse_internal(acs_info, resource_group, name, disable_browser):
     orchestrator_type = acs_info.orchestrator_profile.orchestrator_type # pylint: disable=no-member
 
-    if  orchestrator_type == 'kubernetes' or (acs_info.custom_profile and acs_info.custom_profile.orchestrator == 'kubernetes'): # pylint: disable=no-member
+    if  orchestrator_type == 'kubernetes' or orchestrator_type == ContainerServiceOchestratorTypes.kubernetes or (acs_info.custom_profile and acs_info.custom_profile.orchestrator == 'kubernetes'): # pylint: disable=no-member
         return k8s_browse(name, resource_group, disable_browser)
-    elif orchestrator_type == 'dcos':
+    elif orchestrator_type == 'dcos' or orchestrator_type == ContainerServiceOchestratorTypes.dcos:
         return _dcos_browse_internal(acs_info, disable_browser)
     else:
         raise CLIError('Unsupported orchestrator type {} for browse'.format(orchestrator_type))
@@ -277,8 +280,8 @@ def _build_service_principal(client, name, url, client_secret):
     return service_principal
 
 def _add_role_assignment(role, service_principal):
-    # AAD can have delays in propogating data, so sleep and retry
-    sys.stdout.write('waiting for AAD role to propogate.')
+    # AAD can have delays in propagating data, so sleep and retry
+    sys.stdout.write('waiting for AAD role to propagate.')
     for x in range(0, 10):
         from azure.cli.command_modules.role.custom import create_role_assignment
         try:
@@ -295,6 +298,10 @@ def _add_role_assignment(role, service_principal):
             sys.stdout.write('.')
             time.sleep(2 + 2 * x)
     print('done')
+
+def _get_subscription_id():
+    _, sub_id, _ = Profile().get_login_credentials(subscription_id=None)
+    return sub_id
 
 def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_name_prefix=None, content_version=None, admin_username="azureuser", agent_count="3", agent_vm_size="Standard_D2_v2", location=None, master_count="3", orchestrator_type="dcos", service_principal=None, client_secret=None, tags=None, custom_headers=None, raw=False, **operation_config): #pylint: disable=too-many-locals
     """Create a new Acs.
@@ -356,7 +363,7 @@ def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_na
     """
     if not dns_name_prefix:
         # Use subscription id to provide uniqueness and prevent DNS name clashes
-        _, subscription_id, _ = Profile().get_login_credentials(subscription_id=None)
+        subscription_id = _get_subscription_id()
         dns_name_prefix = '{}-{}-{}'.format(name, resource_group_name, subscription_id[0:6])
 
     register_providers()

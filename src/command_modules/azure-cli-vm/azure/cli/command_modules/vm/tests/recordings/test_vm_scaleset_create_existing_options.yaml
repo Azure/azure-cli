@@ -1,29 +1,30 @@
 interactions:
 - request:
-    body: '{"properties": {"mode": "Incremental", "parameters": {"subnetName": {"value":
-      "vrfsubnet"}, "subnetPrefix": {"value": "10.0.0.0/24"}, "virtualNetworkPrefix":
-      {"value": "10.0.0.0/16"}, "virtualNetworkName": {"value": "vrfvnet"}}, "templateLink":
-      {"uri": "https://azuresdkci.blob.core.windows.net/templatehost/CreateVnet_2016-09-07/azuredeploy.json"}}}'
+    body: '{"properties": {"parameters": {"subnetPrefix": {"value": "10.0.0.0/24"},
+      "createSubnet": {"value": true}, "subnetName": {"value": "vrfsubnet"}, "virtualNetworkName":
+      {"value": "vrfvnet"}, "virtualNetworkPrefix": {"value": "10.0.0.0/16"}}, "templateLink":
+      {"uri": "https://azuresdkci.blob.core.windows.net/templatehost/CreateVnet_2016-12-9/azuredeploy.json"},
+      "mode": "Incremental"}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
-      Content-Length: ['350']
+      Content-Length: ['382']
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.1 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.4
-          msrest_azure/0.4.3 vnetcreationclient/2015-11-01 Azure-SDK-For-Python AZURECLI/TEST/0.1.0b9]
+          msrest_azure/0.4.6 vnetcreationclient/2015-11-01 Azure-SDK-For-Python AZURECLI/TEST/0.1.0b11+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [0c24f6ae-adb2-11e6-b0a6-a0b3ccf7272a]
+      x-ms-client-request-id: [9abbd17e-d37c-11e6-a7a1-a0b3ccf7272a]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/scaleset_create_existing_options_rg2/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2015-11-01
   response:
-    body: {string: '{"id":"/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/scaleset_create_existing_options_rg2/providers/Microsoft.Resources/deployments/azurecli1479489090.082172954216","name":"azurecli1479489090.082172954216","properties":{"templateLink":{"uri":"https://azuresdkci.blob.core.windows.net/templatehost/CreateVnet_2016-09-07/azuredeploy.json","contentVersion":"1.0.0.0"},"parameters":{"dnsServers":{"type":"Array","value":[]},"location":{"type":"String","value":"westus"},"subnetName":{"type":"String","value":"vrfsubnet"},"subnetPrefix":{"type":"String","value":"10.0.0.0/24"},"tags":{"type":"Object","value":{}},"virtualNetworkName":{"type":"String","value":"vrfvnet"},"virtualNetworkPrefix":{"type":"String","value":"10.0.0.0/16"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2016-11-18T17:11:31.8058315Z","duration":"PT0.6268685S","correlationId":"b6adf580-6ca1-49a6-a1a2-e169d6f70a12","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["westus"]}]}],"dependencies":[]}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/scaleset_create_existing_options_rg2/providers/Microsoft.Resources/deployments/azurecli1483644280.669432487847","name":"azurecli1483644280.669432487847","properties":{"templateLink":{"uri":"https://azuresdkci.blob.core.windows.net/templatehost/CreateVnet_2016-12-9/azuredeploy.json","contentVersion":"1.0.0.0"},"parameters":{"createSubnet":{"type":"Bool","value":true},"dnsServers":{"type":"Array","value":[]},"location":{"type":"String","value":"westus"},"subnetName":{"type":"String","value":"vrfsubnet"},"subnetPrefix":{"type":"String","value":"10.0.0.0/24"},"tags":{"type":"Object","value":{}},"virtualNetworkName":{"type":"String","value":"vrfvnet"},"virtualNetworkPrefix":{"type":"String","value":"10.0.0.0/16"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2017-01-05T19:24:49.358975Z","duration":"PT7.6713728S","correlationId":"a7208bae-aa23-46ff-b76a-24276324e0b6","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["westus"]}]}],"dependencies":[]}}'}
     headers:
-      Azure-AsyncOperation: ['https://management.azure.com/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourcegroups/scaleset_create_existing_options_rg2/providers/Microsoft.Resources/deployments/azurecli1479489090.082172954216/operationStatuses/08587221177942987068?api-version=2015-11-01']
+      Azure-AsyncOperation: ['https://management.azure.com/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourcegroups/scaleset_create_existing_options_rg2/providers/Microsoft.Resources/deployments/azurecli1483644280.669432487847/operationStatuses/08587179626037900527?api-version=2015-11-01']
       Cache-Control: [no-cache]
-      Content-Length: ['1069']
+      Content-Length: ['1117']
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Fri, 18 Nov 2016 17:11:31 GMT']
+      Date: ['Thu, 05 Jan 2017 19:24:48 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
@@ -37,27 +38,22 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.1 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.4
-          msrest_azure/0.4.3 vnetcreationclient/2015-11-01 Azure-SDK-For-Python AZURECLI/TEST/0.1.0b9]
+          msrest_azure/0.4.6 vnetcreationclient/2015-11-01 Azure-SDK-For-Python AZURECLI/TEST/0.1.0b11+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [0c24f6ae-adb2-11e6-b0a6-a0b3ccf7272a]
+      x-ms-client-request-id: [9abbd17e-d37c-11e6-a7a1-a0b3ccf7272a]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/scaleset_create_existing_options_rg2/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587221177942987068?api-version=2015-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/scaleset_create_existing_options_rg2/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587179626037900527?api-version=2015-11-01
   response:
-    body:
-      string: !!binary |
-        H4sIAAAAAAAEAO29B2AcSZYlJi9tynt/SvVK1+B0oQiAYBMk2JBAEOzBiM3mkuwdaUcjKasqgcpl
-        VmVdZhZAzO2dvPfee++999577733ujudTif33/8/XGZkAWz2zkrayZ4hgKrIHz9+fB8/In7xR02b
-        tevmo0cfvV5Pp3k+y2cf/ZL/ByCIe+QWAAAA
+    body: {string: '{"status":"Succeeded"}'}
     headers:
       Cache-Control: [no-cache]
-      Content-Encoding: [gzip]
-      Content-Length: ['141']
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Fri, 18 Nov 2016 17:12:02 GMT']
+      Date: ['Thu, 05 Jan 2017 19:25:19 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
       Vary: [Accept-Encoding]
+      content-length: ['22']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -67,41 +63,22 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.1 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.4
-          msrest_azure/0.4.3 vnetcreationclient/2015-11-01 Azure-SDK-For-Python AZURECLI/TEST/0.1.0b9]
+          msrest_azure/0.4.6 vnetcreationclient/2015-11-01 Azure-SDK-For-Python AZURECLI/TEST/0.1.0b11+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [0c24f6ae-adb2-11e6-b0a6-a0b3ccf7272a]
+      x-ms-client-request-id: [9abbd17e-d37c-11e6-a7a1-a0b3ccf7272a]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/scaleset_create_existing_options_rg2/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2015-11-01
   response:
-    body:
-      string: !!binary |
-        H4sIAAAAAAAEAO29B2AcSZYlJi9tynt/SvVK1+B0oQiAYBMk2JBAEOzBiM3mkuwdaUcjKasqgcpl
-        VmVdZhZAzO2dvPfee++999577733ujudTif33/8/XGZkAWz2zkrayZ4hgKrIHz9+fB8/In7xR8Xs
-        o0cf3W3Wk2ZaF6u2qJbN3Z3J7vmn+w92t3cn5zvb+7NZtp3l03vb08nDvQd75zsP7z/cuVvnTbWu
-        p/nndbVeNXebaVbmTd7+/tM6z9r898/fFU1bLC9+/0qA/v71xd7dVV1dFrO8bu5+UUzrqqnO2/Er
-        hdPcneWrsrpe5Mu2uZv9YF3n07LY3X/wcP/g4c7DnfHOwd7ug72H9/f3dj/9aPTRMlvkhPrNDanT
-        VV63Rd589OgXf9Tmi1VJCD4vlm/x97ouCMq8bVfNo7vSbTN7Oy3Gk7KajKdVnY+viuWsumrGy7y9
-        a16fV01794SH+pP0+e+/t7P76fbOw+2dBwJDxjL+6aZaEgrTatnSsH6SRk60oP52x4TmeOejX0Lo
-        ZTWNpKWvgM5s2bzO60v9q71eYYzHdZ1dE5jLrFzT39/7Pr1WVtMMhPWavW5rIrhr99FV3rTrBp3Q
-        /BKWLzKQbLj9ZX0uDd0rL+v8vHi36aVdGgf+u7u3j9fa7MJH/cvJT+fT1jX/xb+E2lwWdbvOyhd5
-        e1XVb2+B1SVhAuDhi++BGzECOl5UM3x8tiQmBZ9lJTUm/rgsMC/07uuWJpRavF5PpzlN4oy+b4sF
-        0TFbrOhznuZdEoyDN7sPHu3uPrq/Nz7Y2b3/YP/eT1HT2brWSfno5Zu93fGne3uf7u7ee01fESfV
-        OXEOfXsGkZt8ms3O7x/sbH86zXa39x9mn25nu9nedr776cPZp+cPdrLdPXqNkYPE0LT/Yub5ZpVN
-        gaKTICUHtSbeZVl6Q/SQN/xP6KWQgA29YvgIzQ3DfP+X0H80mnyVL2f5csqi8z36pFq3q3VLfxAq
-        +dVPEhj8qtTvTbUgv4GyBrnP16yFpvnDe/n0UyIwNM5+du/e9sGn+9PtBw/38r2DnQcP7j18SG9l
-        sxm92LwWOvxi87dwA2MazDuEZTafrr4UPYQ3fCFjYRJex180sAzsCK6TT6lHxu4u/flzpSOJ0Jiv
-        u53pu0tIQjTuEmr0g/+WXwnpnCSR0P7u3d/3o/uT3YNPp3v3t/eJV7f396Y58dpkf3s3y7L7O3sP
-        JrMHn/6+H9E71LenKumvjdMXEJ6+s1SHJiAWgsQJx1gdzxRmct56cB8B0v8Db2OHQqgGAAA=
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/scaleset_create_existing_options_rg2/providers/Microsoft.Resources/deployments/azurecli1483644280.669432487847","name":"azurecli1483644280.669432487847","properties":{"templateLink":{"uri":"https://azuresdkci.blob.core.windows.net/templatehost/CreateVnet_2016-12-9/azuredeploy.json","contentVersion":"1.0.0.0"},"parameters":{"createSubnet":{"type":"Bool","value":true},"dnsServers":{"type":"Array","value":[]},"location":{"type":"String","value":"westus"},"subnetName":{"type":"String","value":"vrfsubnet"},"subnetPrefix":{"type":"String","value":"10.0.0.0/24"},"tags":{"type":"Object","value":{}},"virtualNetworkName":{"type":"String","value":"vrfvnet"},"virtualNetworkPrefix":{"type":"String","value":"10.0.0.0/16"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2017-01-05T19:24:53.9172349Z","duration":"PT12.2296327S","correlationId":"a7208bae-aa23-46ff-b76a-24276324e0b6","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["westus"]}]}],"dependencies":[],"outputs":{"newVNet":{"type":"Object","value":{"provisioningState":"Succeeded","resourceGuid":"81f7a4bd-c981-4293-9d61-774615528077","addressSpace":{"addressPrefixes":["10.0.0.0/16"]},"dhcpOptions":{"dnsServers":[]},"subnets":[{"name":"vrfsubnet","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/scaleset_create_existing_options_rg2/providers/Microsoft.Network/virtualNetworks/vrfvnet/subnets/vrfsubnet","etag":"W/\"2c8756e9-c04a-451e-ba77-5d28bfa78541\"","properties":{"provisioningState":"Succeeded","addressPrefix":"10.0.0.0/24"}}]}}},"outputResources":[{"id":"Microsoft.Network/virtualNetworks/vrfvnet"}]}}'}
     headers:
       Cache-Control: [no-cache]
-      Content-Encoding: [gzip]
-      Content-Length: ['965']
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Fri, 18 Nov 2016 17:12:02 GMT']
+      Date: ['Thu, 05 Jan 2017 19:25:19 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
       Vary: [Accept-Encoding]
+      content-length: ['1759']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -111,38 +88,34 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.1 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.4
-          msrest_azure/0.4.3 resourcemanagementclient/0.30.2 Azure-SDK-For-Python
-          AZURECLI/TEST/0.1.0b9]
+          msrest_azure/0.4.6 resourcemanagementclient/0.30.2 Azure-SDK-For-Python
+          AZURECLI/TEST/0.1.0b11+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [200edc66-adb2-11e6-b98d-a0b3ccf7272a]
+      x-ms-client-request-id: [b2d68166-d37c-11e6-8bcc-a0b3ccf7272a]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?$filter=resourceGroup%20eq%20%27scaleset_create_existing_options_rg2%27%20and%20name%20eq%20%27None%27%20and%20resourceType%20eq%20%27Microsoft.Network%2FpublicIPAddresses%27&api-version=2016-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?api-version=2016-09-01&$filter=resourceGroup%20eq%20%27scaleset_create_existing_options_rg2%27%20and%20name%20eq%20%27None%27%20and%20resourceType%20eq%20%27Microsoft.Network%2FpublicIPAddresses%27
   response:
-    body:
-      string: !!binary |
-        H4sIAAAAAAAEAO29B2AcSZYlJi9tynt/SvVK1+B0oQiAYBMk2JBAEOzBiM3mkuwdaUcjKasqgcpl
-        VmVdZhZAzO2dvPfee++999577733ujudTif33/8/XGZkAWz2zkrayZ4hgKrIHz9+fB8/In7xR5dZ
-        uc4/evS97/+S/wdC6kBEDAAAAA==
+    body: {string: '{"value":[]}'}
     headers:
       Cache-Control: [no-cache]
-      Content-Encoding: [gzip]
-      Content-Length: ['133']
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Fri, 18 Nov 2016 17:12:03 GMT']
+      Date: ['Thu, 05 Jan 2017 19:25:20 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
       Vary: [Accept-Encoding]
+      content-length: ['12']
     status: {code: 200, message: OK}
 - request:
-    body: '{"properties": {"mode": "Incremental", "parameters": {"subnetType": {"value":
-      "none"}, "publicIpAddressAllocation": {"value": "dynamic"}, "backendPoolName":
-      {"value": "mybepool"}, "publicIpAddressType": {"value": "new"}, "subnetAddressPrefix":
-      {"value": "10.0.0.0/24"}, "privateIpAddressAllocation": {"value": "dynamic"},
-      "dnsNameType": {"value": "none"}, "vnetAddressPrefix": {"value": "10.0.0.0/16"},
+    body: '{"properties": {"parameters": {"publicIpAddressType": {"value": "new"},
       "_artifactsLocation": {"value": "https://azuresdkci.blob.core.windows.net/templatehost/CreateLb_2016-07-19"},
-      "frontendIpName": {"value": "LoadBalancerFrontEnd"}, "loadBalancerName": {"value":
-      "vrflb"}}, "templateLink": {"uri": "https://azuresdkci.blob.core.windows.net/templatehost/CreateLb_2016-07-19/azuredeploy.json"}}}'
+      "backendPoolName": {"value": "mybepool"}, "privateIpAddressAllocation": {"value":
+      "dynamic"}, "dnsNameType": {"value": "none"}, "subnetAddressPrefix": {"value":
+      "10.0.0.0/24"}, "subnetType": {"value": "none"}, "loadBalancerName": {"value":
+      "vrflb"}, "frontendIpName": {"value": "LoadBalancerFrontEnd"}, "vnetAddressPrefix":
+      {"value": "10.0.0.0/16"}, "publicIpAddressAllocation": {"value": "dynamic"}},
+      "templateLink": {"uri": "https://azuresdkci.blob.core.windows.net/templatehost/CreateLb_2016-07-19/azuredeploy.json"},
+      "mode": "Incremental"}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -150,23 +123,23 @@ interactions:
       Content-Length: ['726']
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.1 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.4
-          msrest_azure/0.4.3 lbcreationclient/2015-11-01 Azure-SDK-For-Python AZURECLI/TEST/0.1.0b9]
+          msrest_azure/0.4.6 lbcreationclient/2015-11-01 Azure-SDK-For-Python AZURECLI/TEST/0.1.0b11+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [203221ee-adb2-11e6-9b57-a0b3ccf7272a]
+      x-ms-client-request-id: [b30fa3c2-d37c-11e6-9030-a0b3ccf7272a]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/scaleset_create_existing_options_rg2/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2015-11-01
   response:
-    body: {string: '{"id":"/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/scaleset_create_existing_options_rg2/providers/Microsoft.Resources/deployments/azurecli1479489123.722909537915","name":"azurecli1479489123.722909537915","properties":{"templateLink":{"uri":"https://azuresdkci.blob.core.windows.net/templatehost/CreateLb_2016-07-19/azuredeploy.json","contentVersion":"1.0.0.0"},"parameters":{"_artifactsLocation":{"type":"String","value":"https://azuresdkci.blob.core.windows.net/templatehost/CreateLb_2016-07-19"},"backendPoolName":{"type":"String","value":"mybepool"},"dnsNameType":{"type":"String","value":"none"},"frontendIpName":{"type":"String","value":"LoadBalancerFrontEnd"},"loadBalancerName":{"type":"String","value":"vrflb"},"location":{"type":"String","value":"westus"},"privateIpAddress":{"type":"String","value":""},"privateIpAddressAllocation":{"type":"String","value":"dynamic"},"publicIpAddress":{"type":"String","value":"PublicIPvrflb"},"publicIpAddressAllocation":{"type":"String","value":"dynamic"},"publicIpAddressType":{"type":"String","value":"new"},"publicIpDnsName":{"type":"String","value":""},"subnet":{"type":"String","value":""},"subnetAddressPrefix":{"type":"String","value":"10.0.0.0/24"},"subnetType":{"type":"String","value":"none"},"tags":{"type":"Object","value":{}},"virtualNetworkName":{"type":"String","value":""},"vnetAddressPrefix":{"type":"String","value":"10.0.0.0/16"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2016-11-18T17:12:05.3489487Z","duration":"PT0.5264815S","correlationId":"c1643401-1b03-4323-b781-4fddd2e49d12","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"loadBalancers","locations":["westus"]}]},{"namespace":"Microsoft.Resources","resourceTypes":[{"resourceType":"deployments","locations":[null]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/scaleset_create_existing_options_rg2/providers/Microsoft.Resources/deployments/IPvrflb","resourceType":"Microsoft.Resources/deployments","resourceName":"IPvrflb"},{"id":"/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/scaleset_create_existing_options_rg2/providers/Microsoft.Resources/deployments/Subnetvrflb","resourceType":"Microsoft.Resources/deployments","resourceName":"Subnetvrflb"}],"id":"/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/scaleset_create_existing_options_rg2/providers/Microsoft.Network/loadBalancers/vrflb","resourceType":"Microsoft.Network/loadBalancers","resourceName":"vrflb"}]}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/scaleset_create_existing_options_rg2/providers/Microsoft.Resources/deployments/azurecli1483644321.11064824722","name":"azurecli1483644321.11064824722","properties":{"templateLink":{"uri":"https://azuresdkci.blob.core.windows.net/templatehost/CreateLb_2016-07-19/azuredeploy.json","contentVersion":"1.0.0.0"},"parameters":{"_artifactsLocation":{"type":"String","value":"https://azuresdkci.blob.core.windows.net/templatehost/CreateLb_2016-07-19"},"backendPoolName":{"type":"String","value":"mybepool"},"dnsNameType":{"type":"String","value":"none"},"frontendIpName":{"type":"String","value":"LoadBalancerFrontEnd"},"loadBalancerName":{"type":"String","value":"vrflb"},"location":{"type":"String","value":"westus"},"privateIpAddress":{"type":"String","value":""},"privateIpAddressAllocation":{"type":"String","value":"dynamic"},"publicIpAddress":{"type":"String","value":"PublicIPvrflb"},"publicIpAddressAllocation":{"type":"String","value":"dynamic"},"publicIpAddressType":{"type":"String","value":"new"},"publicIpDnsName":{"type":"String","value":""},"subnet":{"type":"String","value":""},"subnetAddressPrefix":{"type":"String","value":"10.0.0.0/24"},"subnetType":{"type":"String","value":"none"},"tags":{"type":"Object","value":{}},"virtualNetworkName":{"type":"String","value":""},"vnetAddressPrefix":{"type":"String","value":"10.0.0.0/16"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2017-01-05T19:25:23.2549344Z","duration":"PT0.5965472S","correlationId":"65b9e371-d402-40ef-8304-348626adf10a","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"loadBalancers","locations":["westus"]}]},{"namespace":"Microsoft.Resources","resourceTypes":[{"resourceType":"deployments","locations":[null]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/scaleset_create_existing_options_rg2/providers/Microsoft.Resources/deployments/IPvrflb","resourceType":"Microsoft.Resources/deployments","resourceName":"IPvrflb"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/scaleset_create_existing_options_rg2/providers/Microsoft.Resources/deployments/Subnetvrflb","resourceType":"Microsoft.Resources/deployments","resourceName":"Subnetvrflb"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/scaleset_create_existing_options_rg2/providers/Microsoft.Network/loadBalancers/vrflb","resourceType":"Microsoft.Network/loadBalancers","resourceName":"vrflb"}]}}'}
     headers:
-      Azure-AsyncOperation: ['https://management.azure.com/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourcegroups/scaleset_create_existing_options_rg2/providers/Microsoft.Resources/deployments/azurecli1479489123.722909537915/operationStatuses/08587221177606552520?api-version=2015-11-01']
+      Azure-AsyncOperation: ['https://management.azure.com/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourcegroups/scaleset_create_existing_options_rg2/providers/Microsoft.Resources/deployments/azurecli1483644321.11064824722/operationStatuses/08587179625628193316?api-version=2015-11-01']
       Cache-Control: [no-cache]
-      Content-Length: ['2568']
+      Content-Length: ['2590']
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Fri, 18 Nov 2016 17:12:04 GMT']
+      Date: ['Thu, 05 Jan 2017 19:25:22 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-ms-ratelimit-remaining-subscription-writes: ['1195']
     status: {code: 201, message: Created}
 - request:
     body: null
@@ -176,27 +149,22 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.1 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.4
-          msrest_azure/0.4.3 lbcreationclient/2015-11-01 Azure-SDK-For-Python AZURECLI/TEST/0.1.0b9]
+          msrest_azure/0.4.6 lbcreationclient/2015-11-01 Azure-SDK-For-Python AZURECLI/TEST/0.1.0b11+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [203221ee-adb2-11e6-9b57-a0b3ccf7272a]
+      x-ms-client-request-id: [b30fa3c2-d37c-11e6-9030-a0b3ccf7272a]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/scaleset_create_existing_options_rg2/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587221177606552520?api-version=2015-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/scaleset_create_existing_options_rg2/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587179625628193316?api-version=2015-11-01
   response:
-    body:
-      string: !!binary |
-        H4sIAAAAAAAEAO29B2AcSZYlJi9tynt/SvVK1+B0oQiAYBMk2JBAEOzBiM3mkuwdaUcjKasqgcpl
-        VmVdZhZAzO2dvPfee++999577733ujudTif33/8/XGZkAWz2zkrayZ4hgKrIHz9+fB8/In7xR02b
-        tevmo0cfvV5Pp3k+y2cf/ZL/ByCIe+QWAAAA
+    body: {string: '{"status":"Succeeded"}'}
     headers:
       Cache-Control: [no-cache]
-      Content-Encoding: [gzip]
-      Content-Length: ['141']
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Fri, 18 Nov 2016 17:12:35 GMT']
+      Date: ['Thu, 05 Jan 2017 19:25:53 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
       Vary: [Accept-Encoding]
+      content-length: ['22']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -206,46 +174,22 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.1 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.4
-          msrest_azure/0.4.3 lbcreationclient/2015-11-01 Azure-SDK-For-Python AZURECLI/TEST/0.1.0b9]
+          msrest_azure/0.4.6 lbcreationclient/2015-11-01 Azure-SDK-For-Python AZURECLI/TEST/0.1.0b11+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [203221ee-adb2-11e6-9b57-a0b3ccf7272a]
+      x-ms-client-request-id: [b30fa3c2-d37c-11e6-9030-a0b3ccf7272a]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/scaleset_create_existing_options_rg2/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2015-11-01
   response:
-    body:
-      string: !!binary |
-        H4sIAAAAAAAEAO29B2AcSZYlJi9tynt/SvVK1+B0oQiAYBMk2JBAEOzBiM3mkuwdaUcjKasqgcpl
-        VmVdZhZAzO2dvPfee++999577733ujudTif33/8/XGZkAWz2zkrayZ4hgKrIHz9+fB8/In7xR8Xs
-        o0cf3W3Wk2ZaF6u2qJbN3Z3J7vmn+w92t3cn5zvb+7NZtp3l03vb08nDvQd75zsP7z/cuVvnTbWu
-        p/nndbVeNXebaVbmTd7+/tM6z9r898/fFU1bLC9+/0qA/v71xd7dVV1dFrO8bu5+UUzrqqnO2/Er
-        hdPcneWrsrpe5Mu2uZv9YF3n07LY3X/wcP/g4e7evfGDvb2H1PW9Bw937380+miZLXJC/eaG1Okq
-        r9sibz569Is/avPFqiQEnxfLt/h7XRcEZd62q+bRXem2mb2dFuNJWU3G06rOx1fFclZdNeNl3t41
-        r8+rpr17wkN9Pvn993Z2P93eebC9+1AgyEjGP91US0JgWi1bGtRP0riJEtTb7ngH/330Swi5rKZx
-        tPQVkPn9M8LzPJu2zfNqmoFu+LS9XmGkr9ua6EnwLrNyjQ++MaSByCSbvs2Xs5dVVb7IQNnhfhfX
-        k3xF7fDabNmg+RtuOvzKslrmaH5eMy1mZyu8temN51U2e5KV2XKa18/w1ulyBgil9/lNMC7r83Ii
-        L91Mzau8adcNWq/q4pJIdLY6ns2IsDwzQ2/F2h+Xt+lvdk0cXEwZwHpSFlP7/qa3XkrTl3ZonXc/
-        tO8bJzK/8t96KtO/6Q00J/VCfHi7VorIyzo/L95temWXRAj/3d3bd2/fiL8yYptd+HT+cvLT+bR1
-        7X7xL6E2l0XdrrPyRd5eVfXb24zzkjB4f/x3P/0I3S2qGT4+W5IGhRLMSmpMyuuygNqgd1+3xGXU
-        4vV6Os1Jx8zo+7ZYEN9mixV9zgK9S1r74M3ug0e7e4/u7YwffLpDmvH+T1HT2bpWxvjo5Zu9++OH
-        9x58erBz7zV9RRqjzklD0LdnsAfT3U/37+3vEKjJzr3t/Xt797YnDw52t/fPZ7PZXr7/cLa7R68x
-        clDnHz363i9mhdyssilQdOpdqUetiSqs6DFF8ob/Cb3ki3ZDLxhORmMjnt//Jd//JaOhvqwpoZd9
-        2ADQ6010NAiN5n5fy3VZop/vE83yFWmrfDll60FA5IPmS6Ii/fX/UuNp1ENIBUL1hhe9F4TbPzKQ
-        QPP/lw72Ncu9oOnw/7oD9qGBAX7OB63yczcQjruCoMO+N9zoa94LOlyBg4FW63a1bonJfzHJgnsH
-        f6sC6+lIkf8Nysl09vmayfjg4eT803uf5tv5fn6+vf9wf7Z9MNk/387Op9Pz/ftTctcyesv6CC9P
-        quV5caFqi1AjiYPgE6iod/D/7tm6OzSuuwODyclG0XC+e/f3/ejh/Z2Dewf3dshd2yPKPfh0tj2Z
-        7E+2700eHtzLz/NPH+7c/30/oncIJ8/Xpb82zo9xXF46r+GLvJ1XoOJTdRGoldj6l2rYAPj/NXTu
-        4JY3dzsO0i8Bb6tvq43g4tIoHDNZf/b/5QwUGcZdD/efbX5hUjq8qM2rNQ2SKEmf06sT83uxnFTr
-        5exF1noNSL9EPnVNeTj4kKaMW5M2sjqbPlemuxWlnLnqN7+RY77/S37J/wMx193KFg8AAA==
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/scaleset_create_existing_options_rg2/providers/Microsoft.Resources/deployments/azurecli1483644321.11064824722","name":"azurecli1483644321.11064824722","properties":{"templateLink":{"uri":"https://azuresdkci.blob.core.windows.net/templatehost/CreateLb_2016-07-19/azuredeploy.json","contentVersion":"1.0.0.0"},"parameters":{"_artifactsLocation":{"type":"String","value":"https://azuresdkci.blob.core.windows.net/templatehost/CreateLb_2016-07-19"},"backendPoolName":{"type":"String","value":"mybepool"},"dnsNameType":{"type":"String","value":"none"},"frontendIpName":{"type":"String","value":"LoadBalancerFrontEnd"},"loadBalancerName":{"type":"String","value":"vrflb"},"location":{"type":"String","value":"westus"},"privateIpAddress":{"type":"String","value":""},"privateIpAddressAllocation":{"type":"String","value":"dynamic"},"publicIpAddress":{"type":"String","value":"PublicIPvrflb"},"publicIpAddressAllocation":{"type":"String","value":"dynamic"},"publicIpAddressType":{"type":"String","value":"new"},"publicIpDnsName":{"type":"String","value":""},"subnet":{"type":"String","value":""},"subnetAddressPrefix":{"type":"String","value":"10.0.0.0/24"},"subnetType":{"type":"String","value":"none"},"tags":{"type":"Object","value":{}},"virtualNetworkName":{"type":"String","value":""},"vnetAddressPrefix":{"type":"String","value":"10.0.0.0/16"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2017-01-05T19:25:39.5016004Z","duration":"PT16.8432132S","correlationId":"65b9e371-d402-40ef-8304-348626adf10a","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"loadBalancers","locations":["westus"]}]},{"namespace":"Microsoft.Resources","resourceTypes":[{"resourceType":"deployments","locations":[null]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/scaleset_create_existing_options_rg2/providers/Microsoft.Resources/deployments/IPvrflb","resourceType":"Microsoft.Resources/deployments","resourceName":"IPvrflb"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/scaleset_create_existing_options_rg2/providers/Microsoft.Resources/deployments/Subnetvrflb","resourceType":"Microsoft.Resources/deployments","resourceName":"Subnetvrflb"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/scaleset_create_existing_options_rg2/providers/Microsoft.Network/loadBalancers/vrflb","resourceType":"Microsoft.Network/loadBalancers","resourceName":"vrflb"}],"outputs":{"loadBalancer":{"type":"Object","value":{"provisioningState":"Succeeded","resourceGuid":"5eaa584b-9b84-47d9-9378-3622d6857afd","frontendIPConfigurations":[{"name":"LoadBalancerFrontEnd","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/scaleset_create_existing_options_rg2/providers/Microsoft.Network/loadBalancers/vrflb/frontendIPConfigurations/LoadBalancerFrontEnd","etag":"W/\"8aa243f6-841f-4a8b-998e-ca43c1f7221e\"","properties":{"provisioningState":"Succeeded","privateIPAllocationMethod":"Dynamic","publicIPAddress":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/scaleset_create_existing_options_rg2/providers/Microsoft.Network/publicIPAddresses/PublicIPvrflb"}}}],"backendAddressPools":[{"name":"mybepool","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/scaleset_create_existing_options_rg2/providers/Microsoft.Network/loadBalancers/vrflb/backendAddressPools/mybepool","etag":"W/\"8aa243f6-841f-4a8b-998e-ca43c1f7221e\"","properties":{"provisioningState":"Succeeded"}}],"loadBalancingRules":[],"probes":[],"inboundNatRules":[],"outboundNatRules":[],"inboundNatPools":[]}}},"outputResources":[{"id":"Microsoft.Network/loadBalancers/vrflb"},{"id":"Microsoft.Network/publicIPAddresses/PublicIPvrflb"}]}}'}
     headers:
       Cache-Control: [no-cache]
-      Content-Encoding: [gzip]
-      Content-Length: ['1249']
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Fri, 18 Nov 2016 17:12:36 GMT']
+      Date: ['Thu, 05 Jan 2017 19:25:54 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
       Vary: [Accept-Encoding]
+      content-length: ['3902']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -300,22 +244,22 @@ interactions:
       Content-Length: ['2297']
       Content-Security-Policy: [default-src 'none'; style-src 'unsafe-inline']
       Content-Type: [text/plain; charset=utf-8]
-      Date: ['Fri, 18 Nov 2016 17:12:37 GMT']
+      Date: ['Thu, 05 Jan 2017 19:25:56 GMT']
       ETag: ['"db78eb36618a060181b32ac2de91b1733f382e01"']
-      Expires: ['Fri, 18 Nov 2016 17:17:37 GMT']
-      Source-Age: ['0']
+      Expires: ['Thu, 05 Jan 2017 19:30:56 GMT']
+      Source-Age: ['69']
       Strict-Transport-Security: [max-age=31536000]
       Vary: ['Authorization,Accept-Encoding']
       Via: [1.1 varnish]
-      X-Cache: [MISS]
-      X-Cache-Hits: ['0']
+      X-Cache: [HIT]
+      X-Cache-Hits: ['1']
       X-Content-Type-Options: [nosniff]
-      X-Fastly-Request-ID: [5dfc0cf908ae151fa179c947fa4f75044f542e78]
+      X-Fastly-Request-ID: [acbd25da5bb75956b704cda51e18dbdd4498bec8]
       X-Frame-Options: [deny]
       X-Geo-Block-List: ['']
-      X-GitHub-Request-Id: ['17EB2F14:0866:1B8D440:582F3684']
-      X-Served-By: [cache-sjc3621-SJC]
-      X-Timer: ['S1479489157.353104,VS0,VE93']
+      X-GitHub-Request-Id: ['C71B4E14:6EAC:182765C:586E9D7E']
+      X-Served-By: [cache-den6021-DEN]
+      X-Timer: ['S1483644356.161585,VS0,VE0']
       X-XSS-Protection: [1; mode=block]
     status: {code: 200, message: OK}
 - request:
@@ -326,43 +270,46 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.1 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.4
-          msrest_azure/0.4.3 subscriptionclient/0.30.2 Azure-SDK-For-Python AZURECLI/TEST/0.1.0b9]
+          msrest_azure/0.4.6 subscriptionclient/0.30.2 Azure-SDK-For-Python AZURECLI/TEST/0.1.0b11+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [343a1c00-adb2-11e6-bf10-a0b3ccf7272a]
+      x-ms-client-request-id: [c7b5e954-d37c-11e6-8bc3-a0b3ccf7272a]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/locations?api-version=2016-06-01
   response:
-    body:
-      string: !!binary |
-        H4sIAAAAAAAEAO29B2AcSZYlJi9tynt/SvVK1+B0oQiAYBMk2JBAEOzBiM3mkuwdaUcjKasqgcpl
-        VmVdZhZAzO2dvPfee++999577733ujudTif33/8/XGZkAWz2zkrayZ4hgKrIHz9+fB8/In7xR5dZ
-        uc4/evS9X/xRMfvo0Ud3m/WkmdbFqi2qZXN3Z7J7/un+g93t3cn5zvb+bJZtZ/n03vZ08nDvwd75
-        zsP7D3fultU0k+Z51rRZU2QfjT5aZgsC+5H3yaxoVmV2/UK+OKUv0mP5pqyWF0W7nuHz3d398e7B
-        AT4loPrh3t5479MHH/2S0TeCZVOt27mHmKLa/TjE97X5Nor0zr3xwb17+JT6MB+O9w7ufVM4T/Nl
-        W2fluqE+FF//oxDXE/km/eo1feXjuf3w3vjTvZ0Odfd3x9TZwTeFKojESCme9u8QSWaAPoYPHo4P
-        dj/dx8cETz+992B878Huw28Wwz3qI0ARH0RxTPFNiOXB+N7BwUN8TDD103ufjj/99GD3m8LyKgdS
-        1IUiaf8OcfwufUw40ucBhrskM/u7D/AxwdNPiY4PvjmeXFZ1O/e5UBHtfR4i/AJfp8M8evCAePRB
-        n0cPDr45DmBZ91FU1Hufh6izEtiA+sOD8X18Rr3oR3sPaRa+OdXFpM3XdbXKqR9FOvwwxFiIfWq+
-        DLD9dLx3/2GHQ+7fG9/bJ+J/Q/iCZy1mim7wWYgt83IU2f1xR9ju743vffrNEfans1W2BGbUi+Lp
-        fxSi+R18kwJZ+srHcvfe/fH9nT1WFwRYP723P/704b1vjHcZL2gs6sVHVT+KoQo9Rl+FqD4cP+hM
-        PmH/6Tc29ZM6+0FRskBRL4po+GGI6hP+LmUZoy99ZLf3SbV27ev23r3x/fvfFLrZuoFQF5mSURHu
-        fhyifGy+jVL4PnkAOw87pmz7HrkKn37jWDNJFccu6v53Q/gz1bVNMIh9krxP7+3iY+pTP90mQ3Kw
-        e+8bGwZjWCxn7Fgp+sFnIdqMbHqm3/noHuyMdz8lvOhTAq0f7u6NHx6QUH5DyKp5MKgpup1PQ4SN
-        xYih/ODe+OFuVw3vkiH5BlGGFjOYKb7+RyGy0GtxTPeIczt2effheIe89W8Iz2m2zGaZkpI6Uly7
-        H4f4nvC3xirT1z7O8CfvHXQ0xz55wfe/MTdIsFPZCTDWz6LoRhTG9gNSGF2XjTTfAX32DeG6fsti
-        RV0oou6DEMuvfi9RCfRFgOLO+MHDriXeGT/c/8a83vVbcCb1YBHUv3v4gU/p8wC9e8SNHYVLHs3+
-        3jdGQCCjjMj+oWLZ/ThEFpga/ox4jbu7O+O9ex2093fGBw93vkm0JcDxEJYPIqjGIp5dkvSD+/wx
-        wdRP9x8Q4iRI3/8l/w+CNAjTSRAAAA==
+    body: {string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/locations/eastasia","name":"eastasia","displayName":"East
+        Asia","longitude":"114.188","latitude":"22.267"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/locations/southeastasia","name":"southeastasia","displayName":"Southeast
+        Asia","longitude":"103.833","latitude":"1.283"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/locations/centralus","name":"centralus","displayName":"Central
+        US","longitude":"-93.6208","latitude":"41.5908"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/locations/eastus","name":"eastus","displayName":"East
+        US","longitude":"-79.8164","latitude":"37.3719"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/locations/eastus2","name":"eastus2","displayName":"East
+        US 2","longitude":"-78.3889","latitude":"36.6681"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/locations/westus","name":"westus","displayName":"West
+        US","longitude":"-122.417","latitude":"37.783"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/locations/northcentralus","name":"northcentralus","displayName":"North
+        Central US","longitude":"-87.6278","latitude":"41.8819"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/locations/southcentralus","name":"southcentralus","displayName":"South
+        Central US","longitude":"-98.5","latitude":"29.4167"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/locations/northeurope","name":"northeurope","displayName":"North
+        Europe","longitude":"-6.2597","latitude":"53.3478"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/locations/westeurope","name":"westeurope","displayName":"West
+        Europe","longitude":"4.9","latitude":"52.3667"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/locations/japanwest","name":"japanwest","displayName":"Japan
+        West","longitude":"135.5022","latitude":"34.6939"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/locations/japaneast","name":"japaneast","displayName":"Japan
+        East","longitude":"139.77","latitude":"35.68"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/locations/brazilsouth","name":"brazilsouth","displayName":"Brazil
+        South","longitude":"-46.633","latitude":"-23.55"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/locations/australiaeast","name":"australiaeast","displayName":"Australia
+        East","longitude":"151.2094","latitude":"-33.86"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/locations/australiasoutheast","name":"australiasoutheast","displayName":"Australia
+        Southeast","longitude":"144.9631","latitude":"-37.8136"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/locations/southindia","name":"southindia","displayName":"South
+        India","longitude":"80.1636","latitude":"12.9822"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/locations/centralindia","name":"centralindia","displayName":"Central
+        India","longitude":"73.9197","latitude":"18.5822"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/locations/westindia","name":"westindia","displayName":"West
+        India","longitude":"72.868","latitude":"19.088"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/locations/canadacentral","name":"canadacentral","displayName":"Canada
+        Central","longitude":"-79.383","latitude":"43.653"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/locations/canadaeast","name":"canadaeast","displayName":"Canada
+        East","longitude":"-71.217","latitude":"46.817"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/locations/uksouth","name":"uksouth","displayName":"UK
+        South","longitude":"-0.799","latitude":"50.941"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/locations/ukwest","name":"ukwest","displayName":"UK
+        West","longitude":"-3.084","latitude":"53.427"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/locations/westcentralus","name":"westcentralus","displayName":"West
+        Central US","longitude":"-110.234","latitude":"40.890"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/locations/westus2","name":"westus2","displayName":"West
+        US 2","longitude":"-119.852","latitude":"47.233"}]}'}
     headers:
       Cache-Control: [no-cache]
-      Content-Encoding: [gzip]
-      Content-Length: ['1048']
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Fri, 18 Nov 2016 17:12:36 GMT']
+      Date: ['Thu, 05 Jan 2017 19:25:56 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
       Vary: [Accept-Encoding]
+      content-length: ['4169']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -372,31 +319,23 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.1 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.4
-          msrest_azure/0.4.3 resourcemanagementclient/0.30.2 Azure-SDK-For-Python
-          AZURECLI/TEST/0.1.0b9]
+          msrest_azure/0.4.6 resourcemanagementclient/0.30.2 Azure-SDK-For-Python
+          AZURECLI/TEST/0.1.0b11+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [345e732c-adb2-11e6-ae80-a0b3ccf7272a]
+      x-ms-client-request-id: [c7e7fe98-d37c-11e6-ad97-a0b3ccf7272a]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?$filter=resourceGroup%20eq%20%27scaleset_create_existing_options_rg2%27%20and%20name%20eq%20%27vrfvnet%27%20and%20resourceType%20eq%20%27Microsoft.Network%2FvirtualNetworks%27&api-version=2016-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?api-version=2016-09-01&$filter=resourceGroup%20eq%20%27scaleset_create_existing_options_rg2%27%20and%20name%20eq%20%27vrflb%27%20and%20resourceType%20eq%20%27Microsoft.Network%2FloadBalancers%27
   response:
-    body:
-      string: !!binary |
-        H4sIAAAAAAAEAO29B2AcSZYlJi9tynt/SvVK1+B0oQiAYBMk2JBAEOzBiM3mkuwdaUcjKasqgcpl
-        VmVdZhZAzO2dvPfee++999577733ujudTif33/8/XGZkAWz2zkrayZ4hgKrIHz9+fB8/In7xR5dZ
-        uc4/evS9X/xRMfvo0Ud3m/WkmdbFqi2qZXN3Z7J7/un+g93t3cn5zvb+bJZtZ/n03vZ08nDvwd75
-        zsP7D3fu1nlTretp/nldrVfN3WaalXmTt7//tM6zNv/983dF0xbLi9+/EqC/f32xd3dVV5fFLK+b
-        u18U07pqqvN2/CJvr6r67d3Lom7XWal/Nncv6/PLZd5+NPpomS0I14/cB+31Ch/cCIOaltU0Q//U
-        /Cpv2jU+a7OL5qNHv/iX/JLv/5L/ByZHP28KAQAA
+    body: {string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/scaleset_create_existing_options_rg2/providers/Microsoft.Network/loadBalancers/vrflb","name":"vrflb","type":"Microsoft.Network/loadBalancers","location":"westus","tags":{}}]}'}
     headers:
       Cache-Control: [no-cache]
-      Content-Encoding: [gzip]
-      Content-Length: ['315']
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Fri, 18 Nov 2016 17:12:37 GMT']
+      Date: ['Thu, 05 Jan 2017 19:25:55 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
       Vary: [Accept-Encoding]
+      content-length: ['264']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -406,80 +345,73 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.1 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.4
-          msrest_azure/0.4.3 resourcemanagementclient/0.30.2 Azure-SDK-For-Python
-          AZURECLI/TEST/0.1.0b9]
+          msrest_azure/0.4.6 resourcemanagementclient/0.30.2 Azure-SDK-For-Python
+          AZURECLI/TEST/0.1.0b11+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [34a48902-adb2-11e6-b515-a0b3ccf7272a]
+      x-ms-client-request-id: [c822d602-d37c-11e6-b915-a0b3ccf7272a]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?$filter=resourceGroup%20eq%20%27scaleset_create_existing_options_rg2%27%20and%20name%20eq%20%27vrflb%27%20and%20resourceType%20eq%20%27Microsoft.Network%2FloadBalancers%27&api-version=2016-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?api-version=2016-09-01&$filter=resourceGroup%20eq%20%27scaleset_create_existing_options_rg2%27%20and%20name%20eq%20%27vrfvnet%27%20and%20resourceType%20eq%20%27Microsoft.Network%2FvirtualNetworks%27
   response:
-    body:
-      string: !!binary |
-        H4sIAAAAAAAEAO29B2AcSZYlJi9tynt/SvVK1+B0oQiAYBMk2JBAEOzBiM3mkuwdaUcjKasqgcpl
-        VmVdZhZAzO2dvPfee++999577733ujudTif33/8/XGZkAWz2zkrayZ4hgKrIHz9+fB8/In7xR5dZ
-        uc4/evS9X/xRMfvo0Ud3m/WkmdbFqi2qZXN3Z7J7/un+g93t3cn5zvb+bJZtZ/n03vZ08nDvwd75
-        zsP7D3fu1nlTretp/nldrVfN3WaalXmTt7//tM6zNv/983dF0xbLi9+/EqC/f32xd3dVV5fFLK+b
-        u18U07pqqvN2/CJvr6r67d2yymZPsjJbTvH9ZX1eTj4afbTMFoTnR+bP9nqFP294mxqW1TRDv9T4
-        Km/aNT5rs4vmo0e/+Jf8ku//kv8HLWexoQIBAAA=
+    body: {string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/scaleset_create_existing_options_rg2/providers/Microsoft.Network/virtualNetworks/vrfvnet","name":"vrfvnet","type":"Microsoft.Network/virtualNetworks","location":"westus","tags":{}}]}'}
     headers:
       Cache-Control: [no-cache]
-      Content-Encoding: [gzip]
-      Content-Length: ['314']
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Fri, 18 Nov 2016 17:12:38 GMT']
+      Date: ['Thu, 05 Jan 2017 19:25:56 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
       Vary: [Accept-Encoding]
+      content-length: ['272']
     status: {code: 200, message: OK}
 - request:
-    body: '{"properties": {"mode": "Incremental", "parameters": {"osDiskType": {"value":
-      "provided"}, "instanceCount": {"value": 2}, "sshKeyValue": {"value": "ssh-rsa
-      AAAAB3NzaC1yc2EAAAADAQABAAACAQCbIg1guRHbI0lV11wWDt1r2cUdcNd27CJsg+SfgC7miZeubtwUhbsPdhMQsfDyhOWHq1+ZL0M+nJZV63d/1dhmhtgyOqejUwrPlzKhydsbrsdUor+JmNJDdW01v7BXHyuymT8G4s09jCasNOwiufbP/qp72ruu0bIA1nySsvlf9pCQAuFkAnVnf/rFhUlOkhtRpwcq8SUNY2zRHR/EKb/4NWY1JzR4sa3q2fWIJdrrX0DvLoa5g9bIEd4Df79ba7v+yiUBOS0zT2ll+z4g9izHK3EO5d8hL4jYxcjKs+wcslSYRWrascfscLgMlMGh0CdKeNTDjHpGPncaf3Z+FwwwjWeuiNBxv7bJo13/8B/098KlVDl4GZqsoBCEjPyJfV6hO0y/LkRGkk7oHWKgeWAfKtfLItRp00eZ4fcJNK9kCaSMmEugoZWcI7NGbZXzqFWqbpRI7NcDP9+WIQ+i9U5vqWsqd/zng4kbuAJ6UuKqIzB0upYrLShfQE3SAck8oaLhJqqq56VfDuASNpJKidV+zq27HfSBmbXnkR/5AK337dc3MXKJypoK/QPMLKUAP5XLPbs+NddJQV7EZXd29DLgp+fRIg3edpKdO7ZErWhv7d+3Kws+e1Y+ypmR2WIVSwVyBEUfgv2C8Ts9gnTF4pNcEY/S2aBicz5Ew2+jdyGNQQ==
-      test@example.com\n"}, "loadBalancerBackendPoolName": {"value": "mybepool"},
-      "storageType": {"value": "Standard_LRS"}, "virtualNetworkIpAddressPrefix": {"value":
-      "10.0.0.0/16"}, "location": {"value": "westus"}, "osType": {"value": "Custom"},
-      "authenticationType": {"value": "ssh"}, "subnetName": {"value": "vrfsubnet"},
-      "adminUsername": {"value": "trpresco"}, "natBackendPort": {"value": 22}, "loadBalancer":
+    body: '{"properties": {"parameters": {"virtualNetworkIpAddressPrefix": {"value":
+      "10.0.0.0/16"}, "virtualNetworkType": {"value": "existingId"}, "osPublisher":
+      {"value": "OpenLogic"}, "osType": {"value": "Custom"}, "storageCaching": {"value":
+      "ReadOnly"}, "adminUsername": {"value": "trpresco"}, "virtualNetwork": {"value":
+      "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/scaleset_create_existing_options_rg2/providers/Microsoft.Network/virtualNetworks/vrfvnet"},
+      "publicIpAddressAllocation": {"value": "dynamic"}, "loadBalancerBackendPoolName":
+      {"value": "mybepool"}, "dnsNameType": {"value": "none"}, "osVersion": {"value":
+      "latest"}, "location": {"value": "westus"}, "subnetIpAddressPrefix": {"value":
+      "10.0.0.0/24"}, "storageSuffix": {"value": "core.windows.net"}, "osOffer": {"value":
+      "CentOS"}, "name": {"value": "vrfvmss"}, "upgradePolicyMode": {"value": "manual"},
+      "osDiskType": {"value": "provided"}, "authenticationType": {"value": "ssh"},
+      "storageContainerName": {"value": "vrfcontainer"}, "osDiskName": {"value": "vrfosdisk"},
+      "loadBalancerNatPoolName": {"value": "mynatpool"}, "natBackendPort": {"value":
+      22}, "osSKU": {"value": "7.2"}, "instanceCount": {"value": 2}, "sshKeyValue":
+      {"value": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCbIg1guRHbI0lV11wWDt1r2cUdcNd27CJsg+SfgC7miZeubtwUhbsPdhMQsfDyhOWHq1+ZL0M+nJZV63d/1dhmhtgyOqejUwrPlzKhydsbrsdUor+JmNJDdW01v7BXHyuymT8G4s09jCasNOwiufbP/qp72ruu0bIA1nySsvlf9pCQAuFkAnVnf/rFhUlOkhtRpwcq8SUNY2zRHR/EKb/4NWY1JzR4sa3q2fWIJdrrX0DvLoa5g9bIEd4Df79ba7v+yiUBOS0zT2ll+z4g9izHK3EO5d8hL4jYxcjKs+wcslSYRWrascfscLgMlMGh0CdKeNTDjHpGPncaf3Z+FwwwjWeuiNBxv7bJo13/8B/098KlVDl4GZqsoBCEjPyJfV6hO0y/LkRGkk7oHWKgeWAfKtfLItRp00eZ4fcJNK9kCaSMmEugoZWcI7NGbZXzqFWqbpRI7NcDP9+WIQ+i9U5vqWsqd/zng4kbuAJ6UuKqIzB0upYrLShfQE3SAck8oaLhJqqq56VfDuASNpJKidV+zq27HfSBmbXnkR/5AK337dc3MXKJypoK/QPMLKUAP5XLPbs+NddJQV7EZXd29DLgp+fRIg3edpKdO7ZErWhv7d+3Kws+e1Y+ypmR2WIVSwVyBEUfgv2C8Ts9gnTF4pNcEY/S2aBicz5Ew2+jdyGNQQ==
+      test@example.com\n"}, "subnetName": {"value": "vrfsubnet"}, "loadBalancer":
       {"value": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/scaleset_create_existing_options_rg2/providers/Microsoft.Network/loadBalancers/vrflb"},
-      "osPublisher": {"value": "OpenLogic"}, "dnsNameType": {"value": "none"}, "loadBalancerNatPoolName":
-      {"value": "mynatpool"}, "loadBalancerType": {"value": "existingId"}, "virtualNetworkType":
-      {"value": "existingId"}, "storageCaching": {"value": "ReadOnly"}, "subnetIpAddressPrefix":
-      {"value": "10.0.0.0/24"}, "osDiskName": {"value": "vrfosdisk"}, "virtualNetwork":
-      {"value": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/scaleset_create_existing_options_rg2/providers/Microsoft.Network/virtualNetworks/vrfvnet"},
-      "osSKU": {"value": "7.2"}, "storageContainerName": {"value": "vrfcontainer"},
-      "customOsDiskType": {"value": "windows"}, "publicIpAddressAllocation": {"value":
-      "dynamic"}, "osVersion": {"value": "latest"}, "_artifactsLocation": {"value":
-      "https://azuresdkci.blob.core.windows.net/templatehost/CreateVmss_2016-09-20"},
-      "upgradePolicyMode": {"value": "manual"}, "name": {"value": "vrfvmss"}, "osOffer":
-      {"value": "CentOS"}, "vmSku": {"value": "Standard_A3"}}, "templateLink": {"uri":
-      "https://azuresdkci.blob.core.windows.net/templatehost/CreateVmss_2016-09-20/azuredeploy.json"}}}'
+      "loadBalancerType": {"value": "existingId"}, "storageType": {"value": "Standard_LRS"},
+      "customOsDiskType": {"value": "windows"}, "vmSku": {"value": "Standard_A3"},
+      "_artifactsLocation": {"value": "https://azuresdkci.blob.core.windows.net/templatehost/CreateVmss_2017-1-5"}},
+      "templateLink": {"uri": "https://azuresdkci.blob.core.windows.net/templatehost/CreateVmss_2017-1-5/azuredeploy.json"},
+      "mode": "Incremental"}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
-      Content-Length: ['2559']
+      Content-Length: ['2615']
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.1 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.4
-          msrest_azure/0.4.3 vmsscreationclient/2015-11-01 Azure-SDK-For-Python AZURECLI/TEST/0.1.0b9]
+          msrest_azure/0.4.6 vmsscreationclient/2015-11-01 Azure-SDK-For-Python AZURECLI/TEST/0.1.0b11+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [34dd561e-adb2-11e6-bc22-a0b3ccf7272a]
+      x-ms-client-request-id: [c859fdc6-d37c-11e6-b8b3-a0b3ccf7272a]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/scaleset_create_existing_options_rg2/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2015-11-01
   response:
-    body: {string: '{"id":"/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/scaleset_create_existing_options_rg2/providers/Microsoft.Resources/deployments/azurecli1479489158.400343420370","name":"azurecli1479489158.400343420370","properties":{"templateLink":{"uri":"https://azuresdkci.blob.core.windows.net/templatehost/CreateVmss_2016-09-20/azuredeploy.json","contentVersion":"1.0.0.0"},"parameters":{"_artifactsLocation":{"type":"String","value":"https://azuresdkci.blob.core.windows.net/templatehost/CreateVmss_2016-09-20"},"adminPassword":{"type":"SecureString"},"adminUsername":{"type":"String","value":"trpresco"},"authenticationType":{"type":"String","value":"ssh"},"customOsDiskType":{"type":"String","value":"windows"},"customOsDiskUri":{"type":"String","value":""},"dnsNameForPublicIP":{"type":"String","value":""},"dnsNameType":{"type":"String","value":"none"},"instanceCount":{"type":"Int","value":2},"loadBalancer":{"type":"String","value":"/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/scaleset_create_existing_options_rg2/providers/Microsoft.Network/loadBalancers/vrflb"},"loadBalancerBackendPoolName":{"type":"String","value":"mybepool"},"loadBalancerNatPoolName":{"type":"String","value":"mynatpool"},"loadBalancerType":{"type":"String","value":"existingId"},"location":{"type":"String","value":"westus"},"name":{"type":"String","value":"vrfvmss"},"natBackendPort":{"type":"Int","value":22},"osDiskName":{"type":"String","value":"vrfosdisk"},"osDiskType":{"type":"String","value":"provided"},"osOffer":{"type":"String","value":"CentOS"},"osPublisher":{"type":"String","value":"OpenLogic"},"osSKU":{"type":"String","value":"7.2"},"osType":{"type":"String","value":"Custom"},"osVersion":{"type":"String","value":"latest"},"overprovision":{"type":"Bool","value":true},"publicIpAddress":{"type":"String","value":"vrfvmssPublicIP"},"publicIpAddressAllocation":{"type":"String","value":"dynamic"},"publicIpAddressType":{"type":"String","value":"new"},"sshDestKeyPath":{"type":"String","value":"/home/trpresco/.ssh/authorized_keys"},"sshKeyValue":{"type":"String","value":"ssh-rsa
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/scaleset_create_existing_options_rg2/providers/Microsoft.Resources/deployments/azurecli1483644356.44841152898","name":"azurecli1483644356.44841152898","properties":{"templateLink":{"uri":"https://azuresdkci.blob.core.windows.net/templatehost/CreateVmss_2017-1-5/azuredeploy.json","contentVersion":"1.0.0.0"},"parameters":{"_artifactsLocation":{"type":"String","value":"https://azuresdkci.blob.core.windows.net/templatehost/CreateVmss_2017-1-5"},"adminPassword":{"type":"SecureString"},"adminUsername":{"type":"String","value":"trpresco"},"authenticationType":{"type":"String","value":"ssh"},"customOsDiskType":{"type":"String","value":"windows"},"customOsDiskUri":{"type":"String","value":""},"dnsNameForPublicIP":{"type":"String","value":""},"dnsNameType":{"type":"String","value":"none"},"instanceCount":{"type":"Int","value":2},"loadBalancer":{"type":"String","value":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/scaleset_create_existing_options_rg2/providers/Microsoft.Network/loadBalancers/vrflb"},"loadBalancerBackendPoolName":{"type":"String","value":"mybepool"},"loadBalancerNatPoolName":{"type":"String","value":"mynatpool"},"loadBalancerType":{"type":"String","value":"existingId"},"location":{"type":"String","value":"westus"},"name":{"type":"String","value":"vrfvmss"},"natBackendPort":{"type":"Int","value":22},"osDiskName":{"type":"String","value":"vrfosdisk"},"osDiskType":{"type":"String","value":"provided"},"osOffer":{"type":"String","value":"CentOS"},"osPublisher":{"type":"String","value":"OpenLogic"},"osSKU":{"type":"String","value":"7.2"},"osType":{"type":"String","value":"Custom"},"osVersion":{"type":"String","value":"latest"},"overprovision":{"type":"Bool","value":true},"publicIpAddress":{"type":"String","value":"vrfvmssPublicIP"},"publicIpAddressAllocation":{"type":"String","value":"dynamic"},"publicIpAddressType":{"type":"String","value":"new"},"sshDestKeyPath":{"type":"String","value":"/home/trpresco/.ssh/authorized_keys"},"sshKeyValue":{"type":"String","value":"ssh-rsa
         AAAAB3NzaC1yc2EAAAADAQABAAACAQCbIg1guRHbI0lV11wWDt1r2cUdcNd27CJsg+SfgC7miZeubtwUhbsPdhMQsfDyhOWHq1+ZL0M+nJZV63d/1dhmhtgyOqejUwrPlzKhydsbrsdUor+JmNJDdW01v7BXHyuymT8G4s09jCasNOwiufbP/qp72ruu0bIA1nySsvlf9pCQAuFkAnVnf/rFhUlOkhtRpwcq8SUNY2zRHR/EKb/4NWY1JzR4sa3q2fWIJdrrX0DvLoa5g9bIEd4Df79ba7v+yiUBOS0zT2ll+z4g9izHK3EO5d8hL4jYxcjKs+wcslSYRWrascfscLgMlMGh0CdKeNTDjHpGPncaf3Z+FwwwjWeuiNBxv7bJo13/8B/098KlVDl4GZqsoBCEjPyJfV6hO0y/LkRGkk7oHWKgeWAfKtfLItRp00eZ4fcJNK9kCaSMmEugoZWcI7NGbZXzqFWqbpRI7NcDP9+WIQ+i9U5vqWsqd/zng4kbuAJ6UuKqIzB0upYrLShfQE3SAck8oaLhJqqq56VfDuASNpJKidV+zq27HfSBmbXnkR/5AK337dc3MXKJypoK/QPMLKUAP5XLPbs+NddJQV7EZXd29DLgp+fRIg3edpKdO7ZErWhv7d+3Kws+e1Y+ypmR2WIVSwVyBEUfgv2C8Ts9gnTF4pNcEY/S2aBicz5Ew2+jdyGNQQ==
-        test@example.com\n"},"storageCaching":{"type":"String","value":"ReadOnly"},"storageContainerName":{"type":"String","value":"vrfcontainer"},"storageType":{"type":"String","value":"Standard_LRS"},"subnetIpAddressPrefix":{"type":"String","value":"10.0.0.0/24"},"subnetName":{"type":"String","value":"vrfsubnet"},"tags":{"type":"Object","value":{}},"upgradePolicyMode":{"type":"String","value":"manual"},"virtualNetwork":{"type":"String","value":"/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/scaleset_create_existing_options_rg2/providers/Microsoft.Network/virtualNetworks/vrfvnet"},"virtualNetworkIpAddressPrefix":{"type":"String","value":"10.0.0.0/16"},"virtualNetworkType":{"type":"String","value":"existingId"},"vmSku":{"type":"String","value":"Standard_A3"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2016-11-18T17:12:41.5976611Z","duration":"PT0.8900072S","correlationId":"7b67b15e-44c8-4cfb-ad54-6b5dc5fde9e3","providers":[{"namespace":"Microsoft.Resources","resourceTypes":[{"resourceType":"deployments","locations":[null]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachineScaleSets","locations":["westus"]}]},{"namespace":"Microsoft.Storage","resourceTypes":[{"resourceType":"storageAccounts","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/scaleset_create_existing_options_rg2/providers/Microsoft.Resources/deployments/vrfvmssIP","resourceType":"Microsoft.Resources/deployments","resourceName":"vrfvmssIP"}],"id":"/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/scaleset_create_existing_options_rg2/providers/Microsoft.Resources/deployments/vrfvmssLB","resourceType":"Microsoft.Resources/deployments","resourceName":"vrfvmssLB"},{"dependsOn":[{"id":"/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/scaleset_create_existing_options_rg2/providers/Microsoft.Storage/storageAccounts/ju3dpgrnafx54vrfvmssucsa","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"ju3dpgrnafx54vrfvmssucsa"},{"id":"/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/scaleset_create_existing_options_rg2/providers/Microsoft.Storage/storageAccounts/ffv5423pfifz4vrfvmssucsa","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"ffv5423pfifz4vrfvmssucsa"},{"id":"/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/scaleset_create_existing_options_rg2/providers/Microsoft.Storage/storageAccounts/vpwqqa7c2rgncvrfvmssucsa","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"vpwqqa7c2rgncvrfvmssucsa"},{"id":"/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/scaleset_create_existing_options_rg2/providers/Microsoft.Storage/storageAccounts/x6nk33orkuqlgvrfvmssucsa","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"x6nk33orkuqlgvrfvmssucsa"},{"id":"/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/scaleset_create_existing_options_rg2/providers/Microsoft.Storage/storageAccounts/2kzftlnyvlflmvrfvmssucsa","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"2kzftlnyvlflmvrfvmssucsa"},{"id":"/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/scaleset_create_existing_options_rg2/providers/Microsoft.Resources/deployments/vrfvmssLB","resourceType":"Microsoft.Resources/deployments","resourceName":"vrfvmssLB"},{"id":"/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/scaleset_create_existing_options_rg2/providers/Microsoft.Resources/deployments/vrfvmssVNet","resourceType":"Microsoft.Resources/deployments","resourceName":"vrfvmssVNet"}],"id":"/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/scaleset_create_existing_options_rg2/providers/Microsoft.Compute/virtualMachineScaleSets/vrfvmss","resourceType":"Microsoft.Compute/virtualMachineScaleSets","resourceName":"vrfvmss"}]}}'}
+        test@example.com\n"},"storageCaching":{"type":"String","value":"ReadOnly"},"storageContainerName":{"type":"String","value":"vrfcontainer"},"storageSuffix":{"type":"String","value":"core.windows.net"},"storageType":{"type":"String","value":"Standard_LRS"},"subnetIpAddressPrefix":{"type":"String","value":"10.0.0.0/24"},"subnetName":{"type":"String","value":"vrfsubnet"},"tags":{"type":"Object","value":{}},"upgradePolicyMode":{"type":"String","value":"manual"},"virtualNetwork":{"type":"String","value":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/scaleset_create_existing_options_rg2/providers/Microsoft.Network/virtualNetworks/vrfvnet"},"virtualNetworkIpAddressPrefix":{"type":"String","value":"10.0.0.0/16"},"virtualNetworkType":{"type":"String","value":"existingId"},"vmSku":{"type":"String","value":"Standard_A3"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2017-01-05T19:25:59.4309877Z","duration":"PT0.8694632S","correlationId":"d30c8cc2-c5ea-4231-9928-3f939625db72","providers":[{"namespace":"Microsoft.Resources","resourceTypes":[{"resourceType":"deployments","locations":[null]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachineScaleSets","locations":["westus"]}]},{"namespace":"Microsoft.Storage","resourceTypes":[{"resourceType":"storageAccounts","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/scaleset_create_existing_options_rg2/providers/Microsoft.Resources/deployments/vrfvmssIP","resourceType":"Microsoft.Resources/deployments","resourceName":"vrfvmssIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/scaleset_create_existing_options_rg2/providers/Microsoft.Resources/deployments/vrfvmssLB","resourceType":"Microsoft.Resources/deployments","resourceName":"vrfvmssLB"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/scaleset_create_existing_options_rg2/providers/Microsoft.Storage/storageAccounts/uqf6rt4f4u2javrfvmssndsa","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"uqf6rt4f4u2javrfvmssndsa"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/scaleset_create_existing_options_rg2/providers/Microsoft.Storage/storageAccounts/heqvpdodiiwcwvrfvmssndsa","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"heqvpdodiiwcwvrfvmssndsa"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/scaleset_create_existing_options_rg2/providers/Microsoft.Storage/storageAccounts/khgj2nc7jacfsvrfvmssndsa","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"khgj2nc7jacfsvrfvmssndsa"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/scaleset_create_existing_options_rg2/providers/Microsoft.Storage/storageAccounts/nkiubt3tnbdjqvrfvmssndsa","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"nkiubt3tnbdjqvrfvmssndsa"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/scaleset_create_existing_options_rg2/providers/Microsoft.Storage/storageAccounts/fposedgg7jh2evrfvmssndsa","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"fposedgg7jh2evrfvmssndsa"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/scaleset_create_existing_options_rg2/providers/Microsoft.Resources/deployments/vrfvmssLB","resourceType":"Microsoft.Resources/deployments","resourceName":"vrfvmssLB"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/scaleset_create_existing_options_rg2/providers/Microsoft.Resources/deployments/vrfvmssVNet","resourceType":"Microsoft.Resources/deployments","resourceName":"vrfvmssVNet"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/scaleset_create_existing_options_rg2/providers/Microsoft.Compute/virtualMachineScaleSets/vrfvmss","resourceType":"Microsoft.Compute/virtualMachineScaleSets","resourceName":"vrfvmss"}]}}'}
     headers:
-      Azure-AsyncOperation: ['https://management.azure.com/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourcegroups/scaleset_create_existing_options_rg2/providers/Microsoft.Resources/deployments/azurecli1479489158.400343420370/operationStatuses/08587221177247701034?api-version=2015-11-01']
+      Azure-AsyncOperation: ['https://management.azure.com/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourcegroups/scaleset_create_existing_options_rg2/providers/Microsoft.Resources/deployments/azurecli1483644356.44841152898/operationStatuses/08587179625269162236?api-version=2015-11-01']
       Cache-Control: [no-cache]
-      Content-Length: ['6777']
+      Content-Length: ['6910']
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Fri, 18 Nov 2016 17:12:41 GMT']
+      Date: ['Thu, 05 Jan 2017 19:25:59 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-ms-ratelimit-remaining-subscription-writes: ['1195']
     status: {code: 201, message: Created}
 - request:
     body: null
@@ -489,27 +421,22 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.1 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.4
-          msrest_azure/0.4.3 vmsscreationclient/2015-11-01 Azure-SDK-For-Python AZURECLI/TEST/0.1.0b9]
+          msrest_azure/0.4.6 vmsscreationclient/2015-11-01 Azure-SDK-For-Python AZURECLI/TEST/0.1.0b11+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [34dd561e-adb2-11e6-bc22-a0b3ccf7272a]
+      x-ms-client-request-id: [c859fdc6-d37c-11e6-b8b3-a0b3ccf7272a]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/scaleset_create_existing_options_rg2/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587221177247701034?api-version=2015-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/scaleset_create_existing_options_rg2/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587179625269162236?api-version=2015-11-01
   response:
-    body:
-      string: !!binary |
-        H4sIAAAAAAAEAO29B2AcSZYlJi9tynt/SvVK1+B0oQiAYBMk2JBAEOzBiM3mkuwdaUcjKasqgcpl
-        VmVdZhZAzO2dvPfee++999577733ujudTif33/8/XGZkAWz2zkrayZ4hgKrIHz9+fB8/In7xR02b
-        tevmo0cfvVovl8Xy4qNf8v8Aicy9SRQAAAA=
+    body: {string: '{"status":"Running"}'}
     headers:
       Cache-Control: [no-cache]
-      Content-Encoding: [gzip]
-      Content-Length: ['140']
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Fri, 18 Nov 2016 17:13:11 GMT']
+      Date: ['Thu, 05 Jan 2017 19:26:29 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
       Vary: [Accept-Encoding]
+      content-length: ['20']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -519,27 +446,22 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.1 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.4
-          msrest_azure/0.4.3 vmsscreationclient/2015-11-01 Azure-SDK-For-Python AZURECLI/TEST/0.1.0b9]
+          msrest_azure/0.4.6 vmsscreationclient/2015-11-01 Azure-SDK-For-Python AZURECLI/TEST/0.1.0b11+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [34dd561e-adb2-11e6-bc22-a0b3ccf7272a]
+      x-ms-client-request-id: [c859fdc6-d37c-11e6-b8b3-a0b3ccf7272a]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/scaleset_create_existing_options_rg2/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587221177247701034?api-version=2015-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/scaleset_create_existing_options_rg2/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587179625269162236?api-version=2015-11-01
   response:
-    body:
-      string: !!binary |
-        H4sIAAAAAAAEAO29B2AcSZYlJi9tynt/SvVK1+B0oQiAYBMk2JBAEOzBiM3mkuwdaUcjKasqgcpl
-        VmVdZhZAzO2dvPfee++999577733ujudTif33/8/XGZkAWz2zkrayZ4hgKrIHz9+fB8/In7xR02b
-        tevmo0cfvVovl8Xy4qNf8v8Aicy9SRQAAAA=
+    body: {string: '{"status":"Running"}'}
     headers:
       Cache-Control: [no-cache]
-      Content-Encoding: [gzip]
-      Content-Length: ['140']
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Fri, 18 Nov 2016 17:13:41 GMT']
+      Date: ['Thu, 05 Jan 2017 19:26:59 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
       Vary: [Accept-Encoding]
+      content-length: ['20']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -549,27 +471,22 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.1 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.4
-          msrest_azure/0.4.3 vmsscreationclient/2015-11-01 Azure-SDK-For-Python AZURECLI/TEST/0.1.0b9]
+          msrest_azure/0.4.6 vmsscreationclient/2015-11-01 Azure-SDK-For-Python AZURECLI/TEST/0.1.0b11+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [34dd561e-adb2-11e6-bc22-a0b3ccf7272a]
+      x-ms-client-request-id: [c859fdc6-d37c-11e6-b8b3-a0b3ccf7272a]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/scaleset_create_existing_options_rg2/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587221177247701034?api-version=2015-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/scaleset_create_existing_options_rg2/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587179625269162236?api-version=2015-11-01
   response:
-    body:
-      string: !!binary |
-        H4sIAAAAAAAEAO29B2AcSZYlJi9tynt/SvVK1+B0oQiAYBMk2JBAEOzBiM3mkuwdaUcjKasqgcpl
-        VmVdZhZAzO2dvPfee++999577733ujudTif33/8/XGZkAWz2zkrayZ4hgKrIHz9+fB8/In7xR02b
-        tevmo0cfvVovl8Xy4qNf8v8Aicy9SRQAAAA=
+    body: {string: '{"status":"Running"}'}
     headers:
       Cache-Control: [no-cache]
-      Content-Encoding: [gzip]
-      Content-Length: ['140']
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Fri, 18 Nov 2016 17:14:11 GMT']
+      Date: ['Thu, 05 Jan 2017 19:27:29 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
       Vary: [Accept-Encoding]
+      content-length: ['20']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -579,27 +496,22 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.1 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.4
-          msrest_azure/0.4.3 vmsscreationclient/2015-11-01 Azure-SDK-For-Python AZURECLI/TEST/0.1.0b9]
+          msrest_azure/0.4.6 vmsscreationclient/2015-11-01 Azure-SDK-For-Python AZURECLI/TEST/0.1.0b11+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [34dd561e-adb2-11e6-bc22-a0b3ccf7272a]
+      x-ms-client-request-id: [c859fdc6-d37c-11e6-b8b3-a0b3ccf7272a]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/scaleset_create_existing_options_rg2/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587221177247701034?api-version=2015-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/scaleset_create_existing_options_rg2/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587179625269162236?api-version=2015-11-01
   response:
-    body:
-      string: !!binary |
-        H4sIAAAAAAAEAO29B2AcSZYlJi9tynt/SvVK1+B0oQiAYBMk2JBAEOzBiM3mkuwdaUcjKasqgcpl
-        VmVdZhZAzO2dvPfee++999577733ujudTif33/8/XGZkAWz2zkrayZ4hgKrIHz9+fB8/In7xR02b
-        tevmo0cfvVovl8Xy4qNf8v8Aicy9SRQAAAA=
+    body: {string: '{"status":"Running"}'}
     headers:
       Cache-Control: [no-cache]
-      Content-Encoding: [gzip]
-      Content-Length: ['140']
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Fri, 18 Nov 2016 17:14:41 GMT']
+      Date: ['Thu, 05 Jan 2017 19:28:00 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
       Vary: [Accept-Encoding]
+      content-length: ['20']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -609,27 +521,22 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.1 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.4
-          msrest_azure/0.4.3 vmsscreationclient/2015-11-01 Azure-SDK-For-Python AZURECLI/TEST/0.1.0b9]
+          msrest_azure/0.4.6 vmsscreationclient/2015-11-01 Azure-SDK-For-Python AZURECLI/TEST/0.1.0b11+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [34dd561e-adb2-11e6-bc22-a0b3ccf7272a]
+      x-ms-client-request-id: [c859fdc6-d37c-11e6-b8b3-a0b3ccf7272a]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/scaleset_create_existing_options_rg2/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587221177247701034?api-version=2015-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/scaleset_create_existing_options_rg2/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587179625269162236?api-version=2015-11-01
   response:
-    body:
-      string: !!binary |
-        H4sIAAAAAAAEAO29B2AcSZYlJi9tynt/SvVK1+B0oQiAYBMk2JBAEOzBiM3mkuwdaUcjKasqgcpl
-        VmVdZhZAzO2dvPfee++999577733ujudTif33/8/XGZkAWz2zkrayZ4hgKrIHz9+fB8/In7xR02b
-        tevmo0cfvVovl8Xy4qNf8v8Aicy9SRQAAAA=
+    body: {string: '{"status":"Running"}'}
     headers:
       Cache-Control: [no-cache]
-      Content-Encoding: [gzip]
-      Content-Length: ['140']
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Fri, 18 Nov 2016 17:15:12 GMT']
+      Date: ['Thu, 05 Jan 2017 19:28:31 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
       Vary: [Accept-Encoding]
+      content-length: ['20']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -639,27 +546,22 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.1 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.4
-          msrest_azure/0.4.3 vmsscreationclient/2015-11-01 Azure-SDK-For-Python AZURECLI/TEST/0.1.0b9]
+          msrest_azure/0.4.6 vmsscreationclient/2015-11-01 Azure-SDK-For-Python AZURECLI/TEST/0.1.0b11+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [34dd561e-adb2-11e6-bc22-a0b3ccf7272a]
+      x-ms-client-request-id: [c859fdc6-d37c-11e6-b8b3-a0b3ccf7272a]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/scaleset_create_existing_options_rg2/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587221177247701034?api-version=2015-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/scaleset_create_existing_options_rg2/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587179625269162236?api-version=2015-11-01
   response:
-    body:
-      string: !!binary |
-        H4sIAAAAAAAEAO29B2AcSZYlJi9tynt/SvVK1+B0oQiAYBMk2JBAEOzBiM3mkuwdaUcjKasqgcpl
-        VmVdZhZAzO2dvPfee++999577733ujudTif33/8/XGZkAWz2zkrayZ4hgKrIHz9+fB8/In7xR02b
-        tevmo0cfvVovl8Xy4qNf8v8Aicy9SRQAAAA=
+    body: {string: '{"status":"Succeeded"}'}
     headers:
       Cache-Control: [no-cache]
-      Content-Encoding: [gzip]
-      Content-Length: ['140']
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Fri, 18 Nov 2016 17:15:42 GMT']
+      Date: ['Thu, 05 Jan 2017 19:29:01 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
       Vary: [Accept-Encoding]
+      content-length: ['22']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -669,97 +571,24 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.1 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.4
-          msrest_azure/0.4.3 vmsscreationclient/2015-11-01 Azure-SDK-For-Python AZURECLI/TEST/0.1.0b9]
+          msrest_azure/0.4.6 vmsscreationclient/2015-11-01 Azure-SDK-For-Python AZURECLI/TEST/0.1.0b11+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [34dd561e-adb2-11e6-bc22-a0b3ccf7272a]
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/scaleset_create_existing_options_rg2/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587221177247701034?api-version=2015-11-01
-  response:
-    body:
-      string: !!binary |
-        H4sIAAAAAAAEAO29B2AcSZYlJi9tynt/SvVK1+B0oQiAYBMk2JBAEOzBiM3mkuwdaUcjKasqgcpl
-        VmVdZhZAzO2dvPfee++999577733ujudTif33/8/XGZkAWz2zkrayZ4hgKrIHz9+fB8/In7xR02b
-        tevmo0cfvV5Pp3k+y2cf/ZL/ByCIe+QWAAAA
-    headers:
-      Cache-Control: [no-cache]
-      Content-Encoding: [gzip]
-      Content-Length: ['141']
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Fri, 18 Nov 2016 17:16:12 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      Vary: [Accept-Encoding]
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.1 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.4
-          msrest_azure/0.4.3 vmsscreationclient/2015-11-01 Azure-SDK-For-Python AZURECLI/TEST/0.1.0b9]
-      accept-language: [en-US]
-      x-ms-client-request-id: [34dd561e-adb2-11e6-bc22-a0b3ccf7272a]
+      x-ms-client-request-id: [c859fdc6-d37c-11e6-b8b3-a0b3ccf7272a]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/scaleset_create_existing_options_rg2/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2015-11-01
   response:
-    body:
-      string: !!binary |
-        H4sIAAAAAAAEAO29B2AcSZYlJi9tynt/SvVK1+B0oQiAYBMk2JBAEOzBiM3mkuwdaUcjKasqgcpl
-        VmVdZhZAzO2dvPfee++999577733ujudTif33/8/XGZkAWz2zkrayZ4hgKrIHz9+fB8/In7xR8Xs
-        o0cf3W3Wk2ZaF6u2qJbN3Z3J7vmn+w92t3cn5zvb+7NZtp3l03vb08nDvQd75zsP7z/cuVvnTbWu
-        p/nndbVeNXebaVbmTd7+/tM6z9r898/fFU1bLC9+/0qA/v71xd7dVV1dFrO8bu5+UUzrqqnO2/Er
-        hdPcneWrsrpe5Mu2uZv9YF3n07LY3X/wcP/g4e79g/H+zs69/Xv7ezv3Hux8NPpomS1yQv3mhtTp
-        Kq/bIm8+evSLP2rzxaokBJ8Xy7f4e10XBGXetqvm0V3ptpm9nRbjSVlNxtOqzsdXxXJWXTXjZd7e
-        Na/Pq6a9e8JD/clF0/z+ezu7n27vPNze2xEYMpbxTzfVklCYVsuWhvWTNHKiBfW3O97Bfx/9EkIv
-        q2kkLX0FdH7/jDA9z6Zt87yaZqAcPm2vVxjr67YmihK8y6xc44NvEG2gks0WxfJl1jRXVU1s4frN
-        pwRfezftvmryWubAtZMWDr+2XhFe04pfWrdzokEho3rDbwy/2TRzvDRdN221+LJ5WjRvb3pFx9t9
-        7StM8PBbaD5bNi+yRf6sql+uJ2UxPXt5yzduQmlZLXM0L5ZNmy2n+Um1XrbeC2f0l229Rw3LKps9
-        yUq0rb12PcB3fw4F9kXeEn+8vevj2ty9rM/LCcbqf/wkm77Nl7OXVVWCXJtGtLie5Ctq1wXxImtv
-        9/oya2Pv3zRFZthnM3lT2HPTG1d5066ZzW5if6LJJUmZNG0tMephFgAPVMy2Nw2YYFfNjBoCurxy
-        01B1MnmgVfPl+flmHjshaf3ytTRmuWjmm1/4cpUvn1cXxVTeef17fbWp9YPxnrS7Ce0TFmZpazXo
-        cHOouabl5pc56R8ac+eVJ2AT+0Jbr3NqvMIIp2er49mMBIV1sTbv9UCkx7QyTaAr+m8fl7dhpBnx
-        7EKo1Xn/JpIs8yu8RUryKY3198qvX2btfNMLd+fVIr9r1PHdMb15Fwq5qosf5LPf/21+zVxKHxOw
-        n5SXhqFRs+26ydJjep7ce/GD7GT3erp3Sn8dPz3+ieMn9PPk+CdOJmcXuxfrV9+enO2UP7m7e/Xd
-        p+1uvTf9ajZ9Mdt7cPKd5uKT1+cXJw8WxU/l60l79dV80ryczb/4ieb86fX8y+9++xftfvJTz3e+
-        +GT5nZ/6yU/vze7uzuaLeXtx/eUvyn/6q6v6ZfmD32t+PWsmdTP7qqo/+c7ixXeezr67s3v54Mnv
-        /e3r9fXizcHn+83Ow58+yZoXX14V6/PJy7u/aPVgr16vdyZnx7vL69fNZXn+cHXyE8frZ2+Plz+5
-        PL9bP5t/VX75dt6+Wl1Nf9HB669e/D57P3j17Vd3T3+vyd39F9/9fXa/84NX+0127xftnX/37Duz
-        uv69d55ePq+y+xcPJ2ens/2n5w8eTrIHl59cF189+fL1zg/e7JXlJz/Yv3hY/ODbv9e90y/vzw7m
-        z/d/+vd5N/3p36v55GralK9/n1ffrbNmet5Mn198UX7x+XznZPZ75S/ePP3pb68+f7mcZuf3fuqT
-        Z1dXVz/93XxdvHjy7vLB5DvV7r27B0/u7jw8+L3Kn3xa7n/+U7+oqZ6cnP70y+vvnP/kp/Mvd67v
-        Pn/76vO3bx9U3/7u73WRf/f4/Pdqz5+f0dB2dvKf2j+ffufF7/Xw7Un2+ovF6fqi+qnvTs8evPh8
-        8lO/9w9+0bPv/qLJ6hX9OX368uEn3z37iU+Kh1/dv/xF321+0ezuD5YX+28n6+PvfPrV+vf6RWc/
-        eLKzXv0+9fPX8/OfOL33+nj69qDKns+/84t+0S+6/+lPnj9dH79+sfrO71XMfvKTH/yivQffPn/9
-        ZDH5vZdvX929f/x73bv3YDa998Xv/Xt953pV/V53f+LlF89/r6+OX97/vZ+/nDSfvJjNvvMTP/ng
-        9Kd+79new6fPL1afnL86u7iXz1a/1+zLBz91Wn93fvlg9sm93+uq+STf/X0+uV4tXu199+wnX1/9
-        5PWT06/OLy73Tg7eNA8vlm+e7a9eTE9/n7uv97InxfQH90+v9j756dn15y9+4ic++yyF1vg983cZ
-        OUo5OVCL33fJEtFWdXaRn2TTOWRgg1C8yrPZl8vy2n+L3L6sWMKI3ajM4SJyW+/9m9TAa3IqZlk9
-        +/2fv2I9TU4BOXtWi7ys8/Pi3SYAu+SD4r+7e/vu/VsgKw3xSptd+Lryy8lP51PPoP3iX0Jt1quL
-        OpvlLytScddfVDN8bl7oQV9ky3XGVvyyqFv69YW4G5veuUv4/Fx7QyG27A9dKo3Cr77O9Ox+2odz
-        E3OYEYhjc7l4/Xa9qbnlpeN7H2HSFjxP5J4QQRCS0ZyQmQIBYE3pXXqhRYvX6+k0p3hnRt+3xYKk
-        iESIPufQYpcm4eDN7oNHu/cf7e+Pdx9+em/3wcFPUdPZulYD+dHLN/e+uDfePzj49NN7D1/TdxS+
-        1DnZcfqasCdXYfLpg8nu/Xx7f396sL0/PZ9sZ7P7+9ufTu7PpvfPZ/nD/B69xthhej569L1fTB4X
-        4bLKpsDRTZeNNqk9TQL/DkrKO/4n9JoEcRg9mhuTjqbLdVl+/5d8/5eMhvo5qRarNdHnFr3otH7B
-        KiZ/DUZ8nfd6NG7nxl5fi96gV/0+8HqvV1Uxx9MpYpJNvX2fJisn126WL6ccRBMw+aD5kqaP/vp/
-        aQ4BIkh+GnloIT0I2Rte9V4QbQilp7BAj/93D/j5Ew//DxwwwQK7UdP/N8238vndDhPf/en1vRkZ
-        m2V2/u7+vo5gPW0yb3g9egzA8l5RigwCB4H+X0uS8/PL+/t791bnxfkPAqzd+L4+SQaB/7+aJJer
-        q1/0i7IH0736Yjn1sXbj+/okGQT+/2qSvPt0+fbePfIq1r+ovPCxduP7+iQZBP7/apLsvf3BeVsu
-        ryk+LBc+1m58X58kg8D/X0GSqIn4WbQu/+8e8E+Sw+2N4AOHzND+X+FDqItqIpeu/2mG742kN/Qb
-        QHivhkRgAlTrll621HOexa3hWxQtE7lXicyIku5qZu2lBl25fclL3/VeHpDjYZ3wHjButpk3w7jZ
-        FbkZxs2G6mYYw5r9+7/kl/w/dpOm+FwcAAA=
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/scaleset_create_existing_options_rg2/providers/Microsoft.Resources/deployments/azurecli1483644356.44841152898","name":"azurecli1483644356.44841152898","properties":{"templateLink":{"uri":"https://azuresdkci.blob.core.windows.net/templatehost/CreateVmss_2017-1-5/azuredeploy.json","contentVersion":"1.0.0.0"},"parameters":{"_artifactsLocation":{"type":"String","value":"https://azuresdkci.blob.core.windows.net/templatehost/CreateVmss_2017-1-5"},"adminPassword":{"type":"SecureString"},"adminUsername":{"type":"String","value":"trpresco"},"authenticationType":{"type":"String","value":"ssh"},"customOsDiskType":{"type":"String","value":"windows"},"customOsDiskUri":{"type":"String","value":""},"dnsNameForPublicIP":{"type":"String","value":""},"dnsNameType":{"type":"String","value":"none"},"instanceCount":{"type":"Int","value":2},"loadBalancer":{"type":"String","value":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/scaleset_create_existing_options_rg2/providers/Microsoft.Network/loadBalancers/vrflb"},"loadBalancerBackendPoolName":{"type":"String","value":"mybepool"},"loadBalancerNatPoolName":{"type":"String","value":"mynatpool"},"loadBalancerType":{"type":"String","value":"existingId"},"location":{"type":"String","value":"westus"},"name":{"type":"String","value":"vrfvmss"},"natBackendPort":{"type":"Int","value":22},"osDiskName":{"type":"String","value":"vrfosdisk"},"osDiskType":{"type":"String","value":"provided"},"osOffer":{"type":"String","value":"CentOS"},"osPublisher":{"type":"String","value":"OpenLogic"},"osSKU":{"type":"String","value":"7.2"},"osType":{"type":"String","value":"Custom"},"osVersion":{"type":"String","value":"latest"},"overprovision":{"type":"Bool","value":true},"publicIpAddress":{"type":"String","value":"vrfvmssPublicIP"},"publicIpAddressAllocation":{"type":"String","value":"dynamic"},"publicIpAddressType":{"type":"String","value":"new"},"sshDestKeyPath":{"type":"String","value":"/home/trpresco/.ssh/authorized_keys"},"sshKeyValue":{"type":"String","value":"ssh-rsa
+        AAAAB3NzaC1yc2EAAAADAQABAAACAQCbIg1guRHbI0lV11wWDt1r2cUdcNd27CJsg+SfgC7miZeubtwUhbsPdhMQsfDyhOWHq1+ZL0M+nJZV63d/1dhmhtgyOqejUwrPlzKhydsbrsdUor+JmNJDdW01v7BXHyuymT8G4s09jCasNOwiufbP/qp72ruu0bIA1nySsvlf9pCQAuFkAnVnf/rFhUlOkhtRpwcq8SUNY2zRHR/EKb/4NWY1JzR4sa3q2fWIJdrrX0DvLoa5g9bIEd4Df79ba7v+yiUBOS0zT2ll+z4g9izHK3EO5d8hL4jYxcjKs+wcslSYRWrascfscLgMlMGh0CdKeNTDjHpGPncaf3Z+FwwwjWeuiNBxv7bJo13/8B/098KlVDl4GZqsoBCEjPyJfV6hO0y/LkRGkk7oHWKgeWAfKtfLItRp00eZ4fcJNK9kCaSMmEugoZWcI7NGbZXzqFWqbpRI7NcDP9+WIQ+i9U5vqWsqd/zng4kbuAJ6UuKqIzB0upYrLShfQE3SAck8oaLhJqqq56VfDuASNpJKidV+zq27HfSBmbXnkR/5AK337dc3MXKJypoK/QPMLKUAP5XLPbs+NddJQV7EZXd29DLgp+fRIg3edpKdO7ZErWhv7d+3Kws+e1Y+ypmR2WIVSwVyBEUfgv2C8Ts9gnTF4pNcEY/S2aBicz5Ew2+jdyGNQQ==
+        test@example.com\n"},"storageCaching":{"type":"String","value":"ReadOnly"},"storageContainerName":{"type":"String","value":"vrfcontainer"},"storageSuffix":{"type":"String","value":"core.windows.net"},"storageType":{"type":"String","value":"Standard_LRS"},"subnetIpAddressPrefix":{"type":"String","value":"10.0.0.0/24"},"subnetName":{"type":"String","value":"vrfsubnet"},"tags":{"type":"Object","value":{}},"upgradePolicyMode":{"type":"String","value":"manual"},"virtualNetwork":{"type":"String","value":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/scaleset_create_existing_options_rg2/providers/Microsoft.Network/virtualNetworks/vrfvnet"},"virtualNetworkIpAddressPrefix":{"type":"String","value":"10.0.0.0/16"},"virtualNetworkType":{"type":"String","value":"existingId"},"vmSku":{"type":"String","value":"Standard_A3"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2017-01-05T19:28:44.0602555Z","duration":"PT2M45.498731S","correlationId":"d30c8cc2-c5ea-4231-9928-3f939625db72","providers":[{"namespace":"Microsoft.Resources","resourceTypes":[{"resourceType":"deployments","locations":[null]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachineScaleSets","locations":["westus"]}]},{"namespace":"Microsoft.Storage","resourceTypes":[{"resourceType":"storageAccounts","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/scaleset_create_existing_options_rg2/providers/Microsoft.Resources/deployments/vrfvmssIP","resourceType":"Microsoft.Resources/deployments","resourceName":"vrfvmssIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/scaleset_create_existing_options_rg2/providers/Microsoft.Resources/deployments/vrfvmssLB","resourceType":"Microsoft.Resources/deployments","resourceName":"vrfvmssLB"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/scaleset_create_existing_options_rg2/providers/Microsoft.Storage/storageAccounts/uqf6rt4f4u2javrfvmssndsa","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"uqf6rt4f4u2javrfvmssndsa"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/scaleset_create_existing_options_rg2/providers/Microsoft.Storage/storageAccounts/heqvpdodiiwcwvrfvmssndsa","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"heqvpdodiiwcwvrfvmssndsa"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/scaleset_create_existing_options_rg2/providers/Microsoft.Storage/storageAccounts/khgj2nc7jacfsvrfvmssndsa","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"khgj2nc7jacfsvrfvmssndsa"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/scaleset_create_existing_options_rg2/providers/Microsoft.Storage/storageAccounts/nkiubt3tnbdjqvrfvmssndsa","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"nkiubt3tnbdjqvrfvmssndsa"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/scaleset_create_existing_options_rg2/providers/Microsoft.Storage/storageAccounts/fposedgg7jh2evrfvmssndsa","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"fposedgg7jh2evrfvmssndsa"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/scaleset_create_existing_options_rg2/providers/Microsoft.Resources/deployments/vrfvmssLB","resourceType":"Microsoft.Resources/deployments","resourceName":"vrfvmssLB"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/scaleset_create_existing_options_rg2/providers/Microsoft.Resources/deployments/vrfvmssVNet","resourceType":"Microsoft.Resources/deployments","resourceName":"vrfvmssVNet"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/scaleset_create_existing_options_rg2/providers/Microsoft.Compute/virtualMachineScaleSets/vrfvmss","resourceType":"Microsoft.Compute/virtualMachineScaleSets","resourceName":"vrfvmss"}],"outputResources":[{"id":"Microsoft.Compute/virtualMachineScaleSets/vrfvmss"},{"id":"Microsoft.Network/publicIPAddresses/vrfvmssPublicIP"},{"id":"Microsoft.Storage/storageAccounts/fposedgg7jh2evrfvmssndsa"},{"id":"Microsoft.Storage/storageAccounts/heqvpdodiiwcwvrfvmssndsa"},{"id":"Microsoft.Storage/storageAccounts/khgj2nc7jacfsvrfvmssndsa"},{"id":"Microsoft.Storage/storageAccounts/nkiubt3tnbdjqvrfvmssndsa"},{"id":"Microsoft.Storage/storageAccounts/uqf6rt4f4u2javrfvmssndsa"}]}}'}
     headers:
       Cache-Control: [no-cache]
-      Content-Encoding: [gzip]
-      Content-Length: ['2420']
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Fri, 18 Nov 2016 17:16:12 GMT']
+      Date: ['Thu, 05 Jan 2017 19:29:01 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
       Vary: [Accept-Encoding]
+      content-length: ['7393']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -769,58 +598,55 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.1 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.4
-          msrest_azure/0.4.3 computemanagementclient/0.32.0 Azure-SDK-For-Python AZURECLI/TEST/0.1.0b9]
+          msrest_azure/0.4.6 computemanagementclient/0.32.1 Azure-SDK-For-Python AZURECLI/TEST/0.1.0b11+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [b6060c8a-adb2-11e6-8c83-a0b3ccf7272a]
+      x-ms-client-request-id: [377b3eba-d37d-11e6-8a06-a0b3ccf7272a]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/scaleset_create_existing_options_rg2/providers/Microsoft.Compute/virtualMachineScaleSets/vrfvmss?api-version=2016-03-30
   response:
-    body:
-      string: !!binary |
-        H4sIAAAAAAAEAO29B2AcSZYlJi9tynt/SvVK1+B0oQiAYBMk2JBAEOzBiM3mkuwdaUcjKasqgcpl
-        VmVdZhZAzO2dvPfee++999577733ujudTif33/8/XGZkAWz2zkrayZ4hgKrIHz9+fB8/In7xb5yk
-        6UfN2/VHj1L+nf5aZouc/vzodZstZ1k9+/2P73000u/aIq/97+wX02yVTYv2mr7cw0e/hL/4aFVX
-        q7ymtxr6wnSwXl3U2Sx/WZXFFC/o5/TNoppx119ky3VWfiSfCyj69rKoW/r4i2w6L5b5y7o6L0o0
-        d+9XTeRT+nxaLVbrNq9f0NBe1vl58Y4afHRZn18ummY9NaPA81E2WxTLr5q8NnRo61WdN9MqaFUW
-        y/W7k2p5Xlys66wtqiU19bqkJrOiySZl/jJrmquqnh2v23m+bIupad3W69wDSW80zZw+D6DQp6v1
-        hAj1e+XXoOH3wi/Tbms8H62yFoA+ujuvFvldg//dMcG/mxEaVV38IJ/9/m8BMsBAno/oi6dZmwEE
-        vbJdN1l6TM+Tey9+kJ3sXk/3Tumv46fHP3H8hH6eHP/EyeTsYvdi/erbk7Od8id3d6+++7Tdrfem
-        X82mL2Z7D06+01x88vr84uTBovipfD1pr76aT5qXs/kXP9GcP72ef/ndb/+i3U9+6vnOF58sv/NT
-        P/npvdnd3dl8MW8vrr/8RflPf3VVvyx/8HvNr2fNpG5mX1X1J99ZvPjO09l3d3YvHzz5vb99vb5e
-        vDn4fL/ZefjTJ1nz4surYn0+eXn3F60e7NXr9c7k7Hh3ef26uSzPH65OfuJ4/ezt8fInl+d362fz
-        r8ov387bV6ur6S86eP3Vi99n7wevvv3q7unvNbm7/+K7v8/ud37war/J7v2ivfPvnn1nVte/987T
-        y+dVdv/i4eTsdLb/9PzBw0n24PKT6+KrJ1++3vnBm72y/OQH+xcPix98+/e6d/rl/dnB/Pn+T/8+
-        76Y//Xs1n1xNm/L17/Pqu3XWTM+b6fOLL8ovPp/vnMx+r/zFm6c//e3V5y+X0+z83k998uzq6uqn
-        v5uvixdP3l0+mHyn2r139+DJ3Z2HB79X+ZNPy/3Pf+oXNdWTk9Offnn9nfOf/HT+5c713edvX33+
-        9u2D6tvf/b0u8u8en/9e7fnzMxrazk7+U/vn0++8+L0evj3JXn+xOF1fVD/13enZgxefT37q9/7B
-        L3r23V80Wb2iP6dPXz785LtnP/FJ8fCr+5e/6LvNL5rd/cHyYv/tZH38nU+/Wv9ev+jsB0921qvf
-        p37+en7+E6f3Xh9P3x5U2fP5d37RL/pF9z/9yfOn6+PXL1bf+b2K2U9+8oNftPfg2+evnywmv/fy
-        7au7949/r3v3Hsym9774vX+v71yvqt/r7k+8/OL57/XV8cv7v/fzl5Pmkxez2Xd+4icfnP7U7z3b
-        e/j0+cXqk/NXZxf38tnq95p9+eCnTuvvzi8fzD6593tdNZ/ku7/PJ9erxau975795Ourn7x+cvrV
-        +cXl3snBm+bhxfLNs/3Vi+np73P39V72pJj+4P7p1d4nPz27/vzFT/zEZ5+lbd60v2f+LlusynxM
-        uuH3Xaqqcc8vCT/4vv+n953RTXg+avJpnbcspba9a/BR01Z1dkH6J6ahquZp0bwNP6SPL+czUjJt
-        RvquZsD+t/T9vG1XzaO7d396fW9GWnWZnb+7v2/1WpONJ2U1oSHW+fiqWM6qq2a8zNu71GJqwHY1
-        gIV5fn55f3/v3uq8OP/BNwXzcnX1i35R9mC6V18sp/TGNwHz3afLt/fuVfXb9S8qL+iNbwLm3tsf
-        nLfl8po0RrmgN94Hpg/y+0EH1rRS+6oh+/A2ROAj4p+szb9cqYX46FldLc4WxDTddmwCL9DkVZ7N
-        vlyW1163jueoaYHXX+XneZ0vp+g8ZDA2Ls2c0CZYX67y5fPqoggMIjWqzul1NDghA/bl68634j18
-        9GC81/niknhWB1LSsJrWx9H86pD9iChJhvKtJyDmo7MlGe/zbJqTMDiLSwLxPWrCNAVJZZKWQD9w
-        PH4x/UVkqMnXYJv7UbG6BZxiRVNKjXrAmvWE0MJvxYxeuEt/N9O64Elr7u5Mds8/3X+wu707Od/Z
-        3p/Nsu0sn97bnk4e7j3YO995eP/hzl2yx9W6nuaf19V61dxtplmZN3n7+8v8//75u6JpaX5//0qA
-        /v71xd5dQuKymBFJ735RTOuqqc7b8Qshz131jPTPBvx4STjeJdToB/8tv370S0YflVU2e5KVGbFD
-        /SSbvs2Xs+PZjFBqXlZVSUMkYvy/ZmQ+sjyOcnJ30kf67uJ6kq/ot49+yfd/ifxP2MqwF+bwsgA7
-        Uu/kvbY01+TGrqfTPJ/lzo+tiGltU2rCDKPfrZfFL1rnZ0Sa9COyZAf7ezv3tncePpgRMXay7ck0
-        z7bvP5zl9/Y/3dn7NMuZ3QWBj9rrFffoRngiPqmZO/VqX4Ngr2nOBCOaLOsvfnRFIrQ2X7TZBU1V
-        +osVPiaMHL6fwxm7YTyYOwiWoi/SRjpCP/2Nk1/y/wDIENozjAwAAA==
+    body: {string: "{\r\n  \"sku\": {\r\n    \"name\": \"Standard_A3\",\r\n    \"\
+        tier\": \"Standard\",\r\n    \"capacity\": 2\r\n  },\r\n  \"properties\":\
+        \ {\r\n    \"largeScaleEnabled\": true,\r\n    \"upgradePolicy\": {\r\n  \
+        \    \"mode\": \"Manual\"\r\n    },\r\n    \"virtualMachineProfile\": {\r\n\
+        \      \"osProfile\": {\r\n        \"computerNamePrefix\": \"vrfvmssnd\",\r\
+        \n        \"adminUsername\": \"trpresco\",\r\n        \"linuxConfiguration\"\
+        : {\r\n          \"disablePasswordAuthentication\": true,\r\n          \"\
+        ssh\": {\r\n            \"publicKeys\": [\r\n              {\r\n         \
+        \       \"path\": \"/home/trpresco/.ssh/authorized_keys\",\r\n           \
+        \     \"keyData\": \"ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCbIg1guRHbI0lV11wWDt1r2cUdcNd27CJsg+SfgC7miZeubtwUhbsPdhMQsfDyhOWHq1+ZL0M+nJZV63d/1dhmhtgyOqejUwrPlzKhydsbrsdUor+JmNJDdW01v7BXHyuymT8G4s09jCasNOwiufbP/qp72ruu0bIA1nySsvlf9pCQAuFkAnVnf/rFhUlOkhtRpwcq8SUNY2zRHR/EKb/4NWY1JzR4sa3q2fWIJdrrX0DvLoa5g9bIEd4Df79ba7v+yiUBOS0zT2ll+z4g9izHK3EO5d8hL4jYxcjKs+wcslSYRWrascfscLgMlMGh0CdKeNTDjHpGPncaf3Z+FwwwjWeuiNBxv7bJo13/8B/098KlVDl4GZqsoBCEjPyJfV6hO0y/LkRGkk7oHWKgeWAfKtfLItRp00eZ4fcJNK9kCaSMmEugoZWcI7NGbZXzqFWqbpRI7NcDP9+WIQ+i9U5vqWsqd/zng4kbuAJ6UuKqIzB0upYrLShfQE3SAck8oaLhJqqq56VfDuASNpJKidV+zq27HfSBmbXnkR/5AK337dc3MXKJypoK/QPMLKUAP5XLPbs+NddJQV7EZXd29DLgp+fRIg3edpKdO7ZErWhv7d+3Kws+e1Y+ypmR2WIVSwVyBEUfgv2C8Ts9gnTF4pNcEY/S2aBicz5Ew2+jdyGNQQ==\
+        \ test@example.com\\n\"\r\n              }\r\n            ]\r\n          }\r\
+        \n        },\r\n        \"secrets\": []\r\n      },\r\n      \"storageProfile\"\
+        : {\r\n        \"osDisk\": {\r\n          \"vhdContainers\": [\r\n       \
+        \     \"https://uqf6rt4f4u2javrfvmssndsa.blob.core.windows.net/vrfcontainer\"\
+        ,\r\n            \"https://heqvpdodiiwcwvrfvmssndsa.blob.core.windows.net/vrfcontainer\"\
+        ,\r\n            \"https://khgj2nc7jacfsvrfvmssndsa.blob.core.windows.net/vrfcontainer\"\
+        ,\r\n            \"https://nkiubt3tnbdjqvrfvmssndsa.blob.core.windows.net/vrfcontainer\"\
+        ,\r\n            \"https://fposedgg7jh2evrfvmssndsa.blob.core.windows.net/vrfcontainer\"\
+        \r\n          ],\r\n          \"name\": \"vrfosdisk\",\r\n          \"createOption\"\
+        : \"FromImage\",\r\n          \"caching\": \"ReadOnly\"\r\n        },\r\n\
+        \        \"imageReference\": {\r\n          \"publisher\": \"OpenLogic\",\r\
+        \n          \"offer\": \"CentOS\",\r\n          \"sku\": \"7.2\",\r\n    \
+        \      \"version\": \"latest\"\r\n        }\r\n      },\r\n      \"networkProfile\"\
+        : {\"networkInterfaceConfigurations\":[{\"name\":\"vrfvmssndnic\",\"properties\"\
+        :{\"primary\":true,\"ipConfigurations\":[{\"name\":\"vrfvmssndipconfig\",\"\
+        properties\":{\"subnet\":{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/scaleset_create_existing_options_rg2/providers/Microsoft.Network/virtualNetworks/vrfvnet/subnets/vrfsubnet\"\
+        },\"loadBalancerBackendAddressPools\":[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/scaleset_create_existing_options_rg2/providers/Microsoft.Network/loadBalancers/vrflb/backendAddressPools/mybepool\"\
+        }]}}]}}]}\r\n    },\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"\
+        overprovision\": true,\r\n    \"uniqueId\": \"3dcf585a-0d68-4529-9527-b87dd7a503c6\"\
+        \r\n  },\r\n  \"type\": \"Microsoft.Compute/virtualMachineScaleSets\",\r\n\
+        \  \"location\": \"westus\",\r\n  \"tags\": {},\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/scaleset_create_existing_options_rg2/providers/Microsoft.Compute/virtualMachineScaleSets/vrfvmss\"\
+        ,\r\n  \"name\": \"vrfvmss\"\r\n}"}
     headers:
       Cache-Control: [no-cache]
-      Content-Encoding: [gzip]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Fri, 18 Nov 2016 17:16:15 GMT']
+      Date: ['Thu, 05 Jan 2017 19:29:03 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      Transfer-Encoding: [chunked]
       Vary: [Accept-Encoding]
+      content-length: ['3262']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -830,40 +656,48 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.1 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.4
-          msrest_azure/0.4.3 networkmanagementclient/0.30.0rc6 Azure-SDK-For-Python
-          AZURECLI/TEST/0.1.0b9]
+          msrest_azure/0.4.6 networkmanagementclient/0.30.0 Azure-SDK-For-Python AZURECLI/TEST/0.1.0b11+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [b65ca000-adb2-11e6-be41-a0b3ccf7272a]
+      x-ms-client-request-id: [380bffe2-d37d-11e6-a6b1-a0b3ccf7272a]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/scaleset_create_existing_options_rg2/providers/Microsoft.Network/loadBalancers/vrflb?api-version=2016-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/scaleset_create_existing_options_rg2/providers/Microsoft.Network/loadBalancers/vrflb?api-version=2016-09-01
   response:
-    body:
-      string: !!binary |
-        H4sIAAAAAAAEAO29B2AcSZYlJi9tynt/SvVK1+B0oQiAYBMk2JBAEOzBiM3mkuwdaUcjKasqgcpl
-        VmVdZhZAzO2dvPfee++999577733ujudTif33/8/XGZkAWz2zkrayZ4hgKrIHz9+fB8/In7xb5yk
-        6UfLbJF/9Cj96LI+LycfjfizYoZP7jbrSTOti1VbVMvm7s5k9/zT/Qe727uT853t/dks287y6b3t
-        6eTh3oO9852H9x/u3K3zplrX0/zzulqvmrvNNCvzJm9//2mdZ23+++fviqYtlhe/fyVAf//6Yu/u
-        qq4ui1leN3e/KKZ11VTn7fhF3l5V9du7ZZXNnmRltpziex/HvM0ugOV37/6+H80+/XTyaTZ9uJ2d
-        Z3vb+w937m9P7t+bbOcH9+7t35/eu38w+/T3/UhfbK9XPOAbOtPWZTXNgCreuMqbdm2+oO4b+vAX
-        /xL5kwaxyuu2yPlDfCQfXhYNvU1Dft0SAei7j16vp9M8n+UzAUTNLNHWQvgHDyfnn977NN/O9/Nz
-        Gs7+bPtgsn9Oo5tOz2k8D3fvZ/bl87patvlydvbypFqeFxfrmvEFGt+TJqnBB4+d7+feYJ8BxunS
-        YoTn/91McHdo2HdvHNfXZRx5MKe9iZYHX91iuuWhxsUlNTl7eVwaHvsib+cVU/3pNU1TMe2+sp6U
-        xZTemM2IxL3+qcX/e+asg2ve3H2pn/D8feQj/kvcH/ZX/eX7SoGPJtn0LU23gntZVSXGv5HDF9eT
-        fEUNfSr+v4hCMa6OjPJudBj/L2FixbcrhPSKnRl5gj7w/L9gIk6qxWrd5ncvi7pdZ+UX2XReLPPX
-        APc6b3lKLhcN/Qy+JyTvLmUKz0gD1efZlD7TtuvpspjeLVYhOdy3xWrK3wTsT8weUPX/X9Ta/RG1
-        LDVuptbej6hlqXEzte5989Ty//y++8N+rr9Yu+S0OA301ZrGT8T8nv2aRjvpfFQsJ9V6OXuRtf3m
-        1bod/tK9yIaBv8NXhNIv+X8ACoG1B8wLAAA=
+    body: {string: "{\r\n  \"name\": \"vrflb\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/scaleset_create_existing_options_rg2/providers/Microsoft.Network/loadBalancers/vrflb\"\
+        ,\r\n  \"etag\": \"W/\\\"f5fd4e37-9386-49d0-a6e4-83a611d2d8bf\\\"\",\r\n \
+        \ \"type\": \"Microsoft.Network/loadBalancers\",\r\n  \"location\": \"westus\"\
+        ,\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\":\
+        \ \"Succeeded\",\r\n    \"resourceGuid\": \"5eaa584b-9b84-47d9-9378-3622d6857afd\"\
+        ,\r\n    \"frontendIPConfigurations\": [\r\n      {\r\n        \"name\": \"\
+        LoadBalancerFrontEnd\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/scaleset_create_existing_options_rg2/providers/Microsoft.Network/loadBalancers/vrflb/frontendIPConfigurations/LoadBalancerFrontEnd\"\
+        ,\r\n        \"etag\": \"W/\\\"f5fd4e37-9386-49d0-a6e4-83a611d2d8bf\\\"\"\
+        ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Succeeded\"\
+        ,\r\n          \"privateIPAllocationMethod\": \"Dynamic\",\r\n          \"\
+        publicIPAddress\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/scaleset_create_existing_options_rg2/providers/Microsoft.Network/publicIPAddresses/PublicIPvrflb\"\
+        \r\n          }\r\n        }\r\n      }\r\n    ],\r\n    \"backendAddressPools\"\
+        : [\r\n      {\r\n        \"name\": \"mybepool\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/scaleset_create_existing_options_rg2/providers/Microsoft.Network/loadBalancers/vrflb/backendAddressPools/mybepool\"\
+        ,\r\n        \"etag\": \"W/\\\"f5fd4e37-9386-49d0-a6e4-83a611d2d8bf\\\"\"\
+        ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Succeeded\"\
+        ,\r\n          \"backendIPConfigurations\": [\r\n            {\r\n       \
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/scaleset_create_existing_options_rg2/providers/Microsoft.Compute/virtualMachineScaleSets/vrfvmss/virtualMachines/0/networkInterfaces/vrfvmssndnic/ipConfigurations/vrfvmssndipconfig\"\
+        \r\n            },\r\n            {\r\n              \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/scaleset_create_existing_options_rg2/providers/Microsoft.Compute/virtualMachineScaleSets/vrfvmss/virtualMachines/1/networkInterfaces/vrfvmssndnic/ipConfigurations/vrfvmssndipconfig\"\
+        \r\n            },\r\n            {\r\n              \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/scaleset_create_existing_options_rg2/providers/Microsoft.Compute/virtualMachineScaleSets/vrfvmss/virtualMachines/2/networkInterfaces/vrfvmssndnic/ipConfigurations/vrfvmssndipconfig\"\
+        \r\n            },\r\n            {\r\n              \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/scaleset_create_existing_options_rg2/providers/Microsoft.Compute/virtualMachineScaleSets/vrfvmss/virtualMachines/3/networkInterfaces/vrfvmssndnic/ipConfigurations/vrfvmssndipconfig\"\
+        \r\n            }\r\n          ]\r\n        }\r\n      }\r\n    ],\r\n   \
+        \ \"loadBalancingRules\": [],\r\n    \"probes\": [],\r\n    \"inboundNatRules\"\
+        : [],\r\n    \"outboundNatRules\": [],\r\n    \"inboundNatPools\": []\r\n\
+        \  }\r\n}"}
     headers:
       Cache-Control: [no-cache]
-      Content-Encoding: [gzip]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Fri, 18 Nov 2016 17:16:15 GMT']
-      ETag: [W/"d66b6ac9-afa2-4905-b53b-e83345c358d6"]
+      Date: ['Thu, 05 Jan 2017 19:29:04 GMT']
+      ETag: [W/"f5fd4e37-9386-49d0-a6e4-83a611d2d8bf"]
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      Transfer-Encoding: [chunked]
       Vary: [Accept-Encoding]
+      content-length: ['3068']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -873,38 +707,42 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.1 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.4
-          msrest_azure/0.4.3 networkmanagementclient/0.30.0rc6 Azure-SDK-For-Python
-          AZURECLI/TEST/0.1.0b9]
+          msrest_azure/0.4.6 networkmanagementclient/0.30.0 Azure-SDK-For-Python AZURECLI/TEST/0.1.0b11+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [b6b6b686-adb2-11e6-9f6f-a0b3ccf7272a]
+      x-ms-client-request-id: [3889f8fe-d37d-11e6-b587-a0b3ccf7272a]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/scaleset_create_existing_options_rg2/providers/Microsoft.Network/virtualNetworks/vrfvnet?api-version=2016-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/scaleset_create_existing_options_rg2/providers/Microsoft.Network/virtualNetworks/vrfvnet?api-version=2016-09-01
   response:
-    body:
-      string: !!binary |
-        H4sIAAAAAAAEAO29B2AcSZYlJi9tynt/SvVK1+B0oQiAYBMk2JBAEOzBiM3mkuwdaUcjKasqgcpl
-        VmVdZhZAzO2dvPfee++999577733ujudTif33/8/XGZkAWz2zkrayZ4hgKrIHz9+fB8/In7xb5yk
-        6UfLbJF/9Cj96LI+v1zm7Ucj/rSY4bO7zXrSTOti1RbVsrm7M9k9/3T/we727uR8Z3t/Nsu2s3x6
-        b3s6ebj3YO985+H9hzt367yp1vU0/7yu1qvmbjPNyrzJ299/WudZm//++buiaYvlxe9fCdDfv77Y
-        u7uqq8tiltfN3S+KaV011Xk7fpG3V1X99u5lUbfrrNQ/m7shnnmbXQDT7979fT/Kd+/v7E4fTrbv
-        neeE3iSfbR883Nnbzg/2Dj598PBgmk/2ft+P9MX2esXDvrFDbV9W0wwI452rvGnX5gtCoKEPf/Ev
-        kT9pKKu8boucP8RH8uFl0dDbNPDXLZGBvvvo9Xo6zfNZPhNA1MySbi3kn+YP7+XTTz/d3gWp97N7
-        97YPPt2fbj94uJfvHew8eHDv4UP7cjab0fvN61U2BXjt2n3xss7Pi3eM1vfMd/Tt7s6Y/7u7++lH
-        5uPvyy8yImozm09XX8p00dsO8mzZvM7rS5o3+vh73beId2ie+Cv5JHWv0tce30lLMxI8/+/nv7uE
-        Gv3gv+XXAP+vy5fygGF6XCQPvroFL8kTzj0a2une2+80LVYn1fK8uFjXzOfo2M6bPAEeeP5fMEsn
-        1WK1bnMzS19k03mxzF8D3GudnctFQz+D7wnJuzRjmNCzZZvX5yQz1EbarqfLYnq3Sw73bbGa8jdW
-        XOQxfG+e/z9Ra/dH1LLUuJlaez+ilqXGzdS6981Ty/9TrRIe+7n+8n2l6keKkqr4l3le04BZAfLb
-        1PyX/D/Y7qXFLAkAAA==
+    body: {string: "{\r\n  \"name\": \"vrfvnet\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/scaleset_create_existing_options_rg2/providers/Microsoft.Network/virtualNetworks/vrfvnet\"\
+        ,\r\n  \"etag\": \"W/\\\"94c914a4-99a0-410d-aba6-31a7667a5653\\\"\",\r\n \
+        \ \"type\": \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\"\
+        ,\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\":\
+        \ \"Succeeded\",\r\n    \"resourceGuid\": \"81f7a4bd-c981-4293-9d61-774615528077\"\
+        ,\r\n    \"addressSpace\": {\r\n      \"addressPrefixes\": [\r\n        \"\
+        10.0.0.0/16\"\r\n      ]\r\n    },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\"\
+        : []\r\n    },\r\n    \"subnets\": [\r\n      {\r\n        \"name\": \"vrfsubnet\"\
+        ,\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/scaleset_create_existing_options_rg2/providers/Microsoft.Network/virtualNetworks/vrfvnet/subnets/vrfsubnet\"\
+        ,\r\n        \"etag\": \"W/\\\"94c914a4-99a0-410d-aba6-31a7667a5653\\\"\"\
+        ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Succeeded\"\
+        ,\r\n          \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"ipConfigurations\"\
+        : [\r\n            {\r\n              \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/scaleset_create_existing_options_rg2/providers/Microsoft.Compute/virtualMachineScaleSets/vrfvmss/virtualMachines/0/networkInterfaces/vrfvmssndnic/ipConfigurations/vrfvmssndipconfig\"\
+        \r\n            },\r\n            {\r\n              \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/scaleset_create_existing_options_rg2/providers/Microsoft.Compute/virtualMachineScaleSets/vrfvmss/virtualMachines/1/networkInterfaces/vrfvmssndnic/ipConfigurations/vrfvmssndipconfig\"\
+        \r\n            },\r\n            {\r\n              \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/scaleset_create_existing_options_rg2/providers/Microsoft.Compute/virtualMachineScaleSets/vrfvmss/virtualMachines/2/networkInterfaces/vrfvmssndnic/ipConfigurations/vrfvmssndipconfig\"\
+        \r\n            },\r\n            {\r\n              \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/scaleset_create_existing_options_rg2/providers/Microsoft.Compute/virtualMachineScaleSets/vrfvmss/virtualMachines/3/networkInterfaces/vrfvmssndnic/ipConfigurations/vrfvmssndipconfig\"\
+        \r\n            }\r\n          ],\r\n          \"serviceTunnels\": []\r\n\
+        \        }\r\n      }\r\n    ],\r\n    \"virtualNetworkPeerings\": []\r\n\
+        \  }\r\n}"}
     headers:
       Cache-Control: [no-cache]
-      Content-Encoding: [gzip]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Fri, 18 Nov 2016 17:16:16 GMT']
-      ETag: [W/"e1501c9b-3fe0-4bed-8902-e8286798ceb2"]
+      Date: ['Thu, 05 Jan 2017 19:29:05 GMT']
+      ETag: [W/"94c914a4-99a0-410d-aba6-31a7667a5653"]
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      Transfer-Encoding: [chunked]
       Vary: [Accept-Encoding]
+      content-length: ['2417']
     status: {code: 200, message: OK}
 version: 1

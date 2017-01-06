@@ -14,7 +14,8 @@ from azure.cli.core._environment import get_config_dir
 
 logger = _logging.get_az_logger(__name__)
 
-def main(args, file=sys.stdout): #pylint: disable=redefined-builtin
+
+def main(args, file=sys.stdout):  # pylint: disable=redefined-builtin
     _logging.configure_logging(args)
 
     if len(args) > 0 and args[0] == '--version':
@@ -38,9 +39,8 @@ def main(args, file=sys.stdout): #pylint: disable=redefined-builtin
             from azure.cli.core._output import OutputProducer
             formatter = OutputProducer.get_formatter(APPLICATION.configuration.output_format)
             OutputProducer(formatter=formatter, file=file).out(cmd_result)
-    except Exception as ex: # pylint: disable=broad-except
+    except Exception as ex:  # pylint: disable=broad-except
         from azure.cli.core.telemetry import log_telemetry
         log_telemetry('Error', log_type='trace')
         error_code = handle_exception(ex)
         return error_code
-
