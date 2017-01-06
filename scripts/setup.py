@@ -29,7 +29,7 @@ DEPENDENCIES = [
 ]
 
 setup(
-    name='automation',
+    name='azure-cli-utility-automation',
     version=VERSION,
     description='Microsoft Azure Command-Line Tools - Automation Utility',
     long_description='',
