@@ -14,6 +14,7 @@ from azure.cli.core.application import Application, Configuration, IterateAction
 from azure.cli.core.commands import CliCommand
 from azure.cli.core._util import CLIError
 
+
 class TestApplication(unittest.TestCase):
 
     @classmethod
@@ -36,7 +37,7 @@ class TestApplication(unittest.TestCase):
         def handler(**kwargs):
             kwargs['args'][0] = True
 
-        def other_handler(**kwargs): # pylint: disable=unused-variable
+        def other_handler(**kwargs):  # pylint: disable=unused-variable
             self.assertEqual(kwargs['args'], 'secret sauce')
 
         config = Configuration([])
@@ -58,8 +59,6 @@ class TestApplication(unittest.TestCase):
         self.assertTrue(handler_called[0], "Handler didn't get called")
 
         app.raise_event('other_handler_called', args='secret sauce')
-
-
 
     def test_list_value_parameter(self):
         hellos = []
@@ -104,12 +103,13 @@ class TestApplication(unittest.TestCase):
 
         for test_case in cases:
             try:
-                args = Application._expand_file_prefixed_files(test_case[0]) #pylint: disable=protected-access
+                args = Application._expand_file_prefixed_files(test_case[0])  # pylint: disable=protected-access
                 self.assertEqual(args, test_case[1], 'Failed for: {}'.format(test_case[0]))
             except CLIError as ex:
                 self.fail('Unexpected error for {} ({}): {}'.format(test_case[0], args, ex))
 
         os.remove(f.name)
+
 
 if __name__ == '__main__':
     unittest.main()

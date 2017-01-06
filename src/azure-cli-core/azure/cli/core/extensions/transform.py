@@ -5,8 +5,10 @@
 
 import re
 
+
 def register(application):
     application.register(application.TRANSFORM_RESULT, _resource_group_transform)
+
 
 def _parse_id(strid):
     parsed = {}
@@ -17,6 +19,7 @@ def _parse_id(strid):
     parsed['resource-group'] = parts[4]
     parsed['name'] = parts[8]
     return parsed
+
 
 def _add_resource_group(obj):
     if isinstance(obj, list):
@@ -32,6 +35,6 @@ def _add_resource_group(obj):
         for item_key in obj:
             _add_resource_group(obj[item_key])
 
+
 def _resource_group_transform(**kwargs):
     _add_resource_group(kwargs['event_data']['result'])
-

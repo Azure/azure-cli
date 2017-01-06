@@ -10,6 +10,7 @@ import tempfile
 
 from azure.cli.core._util import get_file_json, todict, to_snake_case
 
+
 class TestUtils(unittest.TestCase):
 
     def test_application_todict_none(self):
@@ -54,19 +55,19 @@ class TestUtils(unittest.TestCase):
     def test_load_json_from_file(self):
         _, pathname = tempfile.mkstemp()
 
-        #test good case
+        # test good case
         with open(pathname, 'w') as good_file:
             good_file.write('{"key1":"value1", "key2":"value2"}')
         result = get_file_json(pathname)
         self.assertEqual('value2', result['key2'])
 
-        #test error case
+        # test error case
         with open(pathname, 'w') as bad_file:
             try:
                 bad_file.write('{"key1":"value1" "key2":"value2"}')
                 get_file_json(pathname)
                 self.fail('expect throw on reading from badly formatted file')
-            except Exception as ex: #pylint: disable=broad-except
+            except Exception as ex:  # pylint: disable=broad-except
                 self.assertTrue(str(ex).find(
                     'contains error: Expecting value: line 1 column 1 (char 0)'))
 
@@ -87,6 +88,7 @@ class TestUtils(unittest.TestCase):
         expected = 'this_is_snake_cased'
         actual = to_snake_case(the_input)
         self.assertEqual(expected, actual)
+
 
 if __name__ == '__main__':
     unittest.main()

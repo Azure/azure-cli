@@ -8,36 +8,59 @@ from six.moves import configparser
 
 from azure.cli.core._config import (CONTEXT_CONFIG_DIR, GLOBAL_CONFIG_DIR)
 
+
 class ContextNotFoundException(Exception):
+
     def __init__(self, context_name):
         super(ContextNotFoundException, self).__init__(context_name)
         self.context_name = context_name
+
     def __str__(self):
         return "The context '{}' does not exist.".format(self.context_name)
 
+
 class ContextExistsException(Exception):
+
     def __init__(self, context_name):
         super(ContextExistsException, self).__init__(context_name)
         self.context_name = context_name
+
     def __str__(self):
         return "The context '{}' already exists.".format(self.context_name)
 
+
 class CannotDeleteActiveContextException(Exception):
+
     def __str__(self):
         return "You cannot delete the current active context"
 
+
 class CannotDeleteDefaultContextException(Exception):
+
     def __str__(self):
         return "You cannot delete the default context."
+
 
 ACTIVE_CONTEXT_FILE = os.path.join(GLOBAL_CONFIG_DIR, 'active_context')
 ACTIVE_CONTEXT_ENV_VAR_NAME = 'AZURE_CONTEXT'
 DEFAULT_CONTEXT_NAME = 'default'
 
-get_active_context = lambda: get_context(get_active_context_name())
-context_exists = lambda n: any([x for x in get_context_names() if x == n])
-get_context_file_path = lambda n: os.path.join(CONTEXT_CONFIG_DIR, n)
-get_contexts = lambda: [get_context(context_name) for context_name in get_context_names()]
+
+def get_active_context():
+    return get_context(get_active_context_name())
+
+
+def context_exists(n):
+    return any([x for x in get_context_names() if x == n])
+
+
+def get_context_file_path(n):
+    return os.path.join(CONTEXT_CONFIG_DIR, n)
+
+
+def get_contexts():
+    return [get_context(context_name) for context_name in get_context_names()]
+
 
 def _set_active_subscription(context):
     ''' Set the active subscription used by Profile '''
@@ -59,6 +82,7 @@ def _set_active_subscription(context):
     if subscription_to_use:
         profile.set_active_subscription(subscription_to_use)
 
+
 def get_active_context_name():
     active_context_env_var = os.environ.get(ACTIVE_CONTEXT_ENV_VAR_NAME, None)
     if active_context_env_var:
@@ -69,6 +93,7 @@ def get_active_context_name():
     except (OSError, IOError):
         return DEFAULT_CONTEXT_NAME
 
+
 def set_active_context(context_name, skip_set_active_subsciption=False):
     if not context_exists(context_name):
         raise ContextNotFoundException(context_name)
@@ -77,10 +102,11 @@ def set_active_context(context_name, skip_set_active_subsciption=False):
     if not skip_set_active_subsciption:
         _set_active_subscription(get_active_context())
 
+
 def get_context_names():
     if os.path.isdir(CONTEXT_CONFIG_DIR):
-        contexts = [f for f in os.listdir(CONTEXT_CONFIG_DIR) \
-               if os.path.isfile(os.path.join(CONTEXT_CONFIG_DIR, f))]
+        contexts = [f for f in os.listdir(CONTEXT_CONFIG_DIR)
+                    if os.path.isfile(os.path.join(CONTEXT_CONFIG_DIR, f))]
         if contexts:
             return contexts
     # No contexts yet. Let's create the default one now.
@@ -90,6 +116,7 @@ def get_context_names():
     create_context(DEFAULT_CONTEXT_NAME, AZURE_PUBLIC_CLOUD.name, skip_exists_check=True)
     set_active_context(DEFAULT_CONTEXT_NAME, skip_set_active_subsciption=True)
     return [DEFAULT_CONTEXT_NAME]
+
 
 def get_context(context_name):
     if not context_exists(context_name):
@@ -108,6 +135,7 @@ def get_context(context_name):
         pass
     return context
 
+
 def delete_context(context_name):
     if not context_exists(context_name):
         raise ContextNotFoundException(context_name)
@@ -116,6 +144,7 @@ def delete_context(context_name):
     if context_name == get_active_context_name():
         raise CannotDeleteActiveContextException()
     os.remove(get_context_file_path(context_name))
+
 
 def create_context(context_name, cloud_name, skip_exists_check=False):
     from azure.cli.core.cloud import get_cloud
@@ -134,6 +163,7 @@ def create_context(context_name, cloud_name, skip_exists_check=False):
         os.makedirs(CONTEXT_CONFIG_DIR)
     with open(context_file_path, 'w') as configfile:
         context_config.write(configfile)
+
 
 def modify_context(context_name, cloud_name=None, default_subscription=None):
     from azure.cli.core.cloud import get_cloud

@@ -11,32 +11,41 @@ import azure.cli.core._help as _help
 from azure.cli.core._util import CLIError
 from azure.cli.core._pkg_util import handle_module_not_installed
 
+
 class IncorrectUsageError(CLIError):
     '''Raised when a command is incorrectly used and the usage should be
     displayed to the user.
     '''
     pass
 
-class CaseInsensitiveChoicesCompleter(argcomplete.completers.ChoicesCompleter): #pylint: disable=too-few-public-methods
+
+class CaseInsensitiveChoicesCompleter(argcomplete.completers.ChoicesCompleter):  # pylint: disable=too-few-public-methods
+
     def __call__(self, prefix, **kwargs):
         return (c for c in self.choices if c.lower().startswith(prefix.lower()))
+
 
 # Override the choices completer with one that is case insensitive
 argcomplete.completers.ChoicesCompleter = CaseInsensitiveChoicesCompleter
 
+
 class EmptyDefaultCompletionFinder(argcomplete.CompletionFinder):
+
     def __init__(self, *args, **kwargs):
         super(EmptyDefaultCompletionFinder, self).__init__(*args, default_completer=lambda _: (),
                                                            **kwargs)
+
 
 def enable_autocomplete(parser):
     argcomplete.autocomplete = EmptyDefaultCompletionFinder()
     argcomplete.autocomplete(parser, validator=lambda c, p: c.lower().startswith(p.lower()))
 
+
 class AzCliCommandParser(argparse.ArgumentParser):
     """ArgumentParser implementation specialized for the
     Azure CLI utility.
     """
+
     def __init__(self, **kwargs):
         self.subparsers = {}
         self.parents = kwargs.get('parents', [])
@@ -121,7 +130,7 @@ class AzCliCommandParser(argparse.ArgumentParser):
                 self.subparsers[tuple(path[0:length])] = parent_subparser
         return parent_subparser
 
-    def _handle_command_package_error(self, err_msg): #pylint: disable=no-self-use
+    def _handle_command_package_error(self, err_msg):  # pylint: disable=no-self-use
         if err_msg and err_msg.startswith('argument _command_package: invalid choice:'):
             import re
             try:
