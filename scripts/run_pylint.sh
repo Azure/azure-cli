@@ -5,5 +5,4 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-export PYTHONPATH=${PYTHONPATH}:$(cd $(dirname $0); pwd)
 python -m automation.style.run
