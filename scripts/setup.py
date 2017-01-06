@@ -5,10 +5,9 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from codecs import open
 from setuptools import setup
 
-VERSION = '0.1.0b12+dev'
+VERSION = "0.1.0"
 
 CLASSIFIERS = [
     'Development Status :: 4 - Beta',
@@ -24,30 +23,28 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
-    'azure-cli-core',
-    'pip',
+    'autopep8==1.2.4',
+    'coverage==4.2',
+    'pycodestyle==2.2.0'
 ]
 
-with open('README.rst', 'r', encoding='utf-8') as f:
-    README = f.read()
-
 setup(
-    name='azure-cli-component',
+    name='azure-cli-utility-automation',
     version=VERSION,
-    description='Microsoft Azure Command-Line Tools Component Command Module',
-    long_description=README,
+    description='Microsoft Azure Command-Line Tools - Automation Utility',
+    long_description='',
     license='MIT',
     author='Microsoft Corporation',
     author_email='azpycli@microsoft.com',
     url='https://github.com/Azure/azure-cli',
-    classifiers=CLASSIFIERS,
     namespace_packages=[
-        'azure',
-        'azure.cli',
-        'azure.cli.command_modules',
     ],
     packages=[
-        'azure.cli.command_modules.component',
+        'automation',
+        'automation.style',
+        'automation.tests',
+        'automation.setup',
+        'automation.coverage'
     ],
-    install_requires=DEPENDENCIES,
+    install_requires=DEPENDENCIES
 )
