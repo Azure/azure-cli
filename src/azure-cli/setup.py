@@ -19,7 +19,8 @@ try:
 except OSError:
     pass
 else:
-    import re, sys
+    import re
+    import sys
     m = re.search(r'__version__\s*=\s*[\'"](.+?)[\'"]', content)
     if not m:
         print('Could not find __version__ in azure/cli/__init__.py')

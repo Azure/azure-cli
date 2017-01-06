@@ -15,7 +15,7 @@ try:
     try:
         if user_agrees_to_telemetry():
             init_telemetry()
-    except Exception: #pylint: disable=broad-except
+    except Exception:  # pylint: disable=broad-except
         pass
 
     args = sys.argv[1:]
@@ -35,5 +35,5 @@ finally:
     try:
         if user_agrees_to_telemetry():
             telemetry_flush()
-    except Exception: #pylint: disable=broad-except
+    except Exception:  # pylint: disable=broad-except
         pass
