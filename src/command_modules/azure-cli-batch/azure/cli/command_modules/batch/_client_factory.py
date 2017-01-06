@@ -7,8 +7,5 @@ from azure.mgmt.batch import BatchManagementClient
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 
-import azure.cli.core._logging as _logging
-logger = _logging.get_az_logger(__name__)
-
 def batch_client_factory(**_):
     return get_mgmt_service_client(BatchManagementClient)

@@ -11,10 +11,10 @@ except ImportError:
 from azure.mgmt.batch.models import (BatchAccountCreateParameters,
                                      AutoStorageBaseProperties,
                                      UpdateApplicationParameters)
-
 from azure.mgmt.batch.operations import (ApplicationPackageOperations)
-import azure.cli.core._logging as _logging
 from azure.storage.blob import BlockBlobService
+
+import azure.cli.core._logging as _logging
 
 logger = _logging.get_az_logger(__name__)
 
@@ -38,6 +38,7 @@ def create_account(client, resource_group_name, account_name, location, #pylint:
     return client.create(resource_group_name=resource_group_name,
                          account_name=account_name,
                          parameters=parameters)
+
 create_account.__doc__ = AutoStorageBaseProperties.__doc__
 
 def update_account(client, resource_group_name, account_name,  #pylint:disable=too-many-arguments
@@ -51,6 +52,7 @@ def update_account(client, resource_group_name, account_name,  #pylint:disable=t
                          account_name=account_name,
                          tags=tags,
                          auto_storage=properties)
+
 update_account.__doc__ = AutoStorageBaseProperties.__doc__
 
 def update_application(client, resource_group_name, account_name, application_id, #pylint:disable=too-many-arguments
@@ -62,6 +64,7 @@ def update_application(client, resource_group_name, account_name, application_id
                          account_name=account_name,
                          application_id=application_id,
                          parameters=parameters)
+
 update_application.__doc__ = UpdateApplicationParameters.__doc__
 
 def _upload_package_blob(package_file, url):
@@ -93,4 +96,5 @@ def create_application_package(client, resource_group_name, account_name, #pylin
     logger.info('Uploading %s to storage blob %s...', package_file, result.storage_url)
     _upload_package_blob(package_file, result.storage_url)
     return result
+
 create_application_package.__doc__ = ApplicationPackageOperations.create.__doc__

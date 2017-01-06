@@ -10,7 +10,8 @@ from azure.cli.core.commands.client_factory import get_mgmt_service_client
 # COMMAND NAMESPACE VALIDATORS
 
 def application_enabled(namespace):
-    ''' Validates account has auto-storage enabled'''
+    """ Validates account has auto-storage enabled"""
+
     client = get_mgmt_service_client(BatchManagementClient)
     acc = client.batch_account.get(namespace.resource_group_name, namespace.account_name)
     if not acc:
@@ -18,6 +19,4 @@ def application_enabled(namespace):
     if not acc.auto_storage or not acc.auto_storage.storage_account_id: #pylint: disable=no-member
         raise ValueError("Batch account '{}' needs auto-storage enabled.".
                          format(namespace.account_name))
-
-# ARGUMENT TYPES
 

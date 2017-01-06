@@ -3,8 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=line-too-long
-
 from argcomplete.completers import FilesCompleter
 from azure.mgmt.batch.models.batch_management_client_enums import \
     (AccountKeyType)
@@ -12,14 +10,17 @@ from azure.mgmt.batch.models.batch_management_client_enums import \
 from azure.cli.core.commands import \
     (register_cli_argument, CliArgumentType)
 from azure.cli.core.commands.parameters import \
-    (tags_type, location_type, resource_group_name_type, get_resource_name_completion_list, enum_choice_list)
+    (tags_type, location_type, resource_group_name_type,
+     get_resource_name_completion_list, enum_choice_list)
 
 from ._validators import \
     (application_enabled)
 
+# pylint: disable=line-too-long
 # ARGUMENT DEFINITIONS
 
 batch_name_type = CliArgumentType(help='Name of the Batch account.', options_list=('--account_name',), completer=get_resource_name_completion_list('Microsoft.Batch/batchAccounts'), id_part=None)
+
 
 # PARAMETER REGISTRATIONS
 
