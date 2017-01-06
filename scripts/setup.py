@@ -7,7 +7,7 @@
 
 from setuptools import setup
 
-VERSION = "0.1.0"
+VERSION = "0.1.1"
 
 CLASSIFIERS = [
     'Development Status :: 4 - Beta',
@@ -38,6 +38,10 @@ setup(
     author_email='azpycli@microsoft.com',
     url='https://github.com/Azure/azure-cli',
     namespace_packages=[
+    ],
+    scripts=[
+        "check_style",
+        "check_style.bat"
     ],
     packages=[
         'automation',
