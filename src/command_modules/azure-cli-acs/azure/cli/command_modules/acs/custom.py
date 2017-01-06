@@ -361,9 +361,9 @@ def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_na
      if raw=true
     :raises: :class:`CloudError<msrestazure.azure_exceptions.CloudError>`
     """
+    subscription_id = _get_subscription_id()
     if not dns_name_prefix:
         # Use subscription id to provide uniqueness and prevent DNS name clashes
-        subscription_id = _get_subscription_id()
         dns_name_prefix = '{}-{}-{}'.format(name, resource_group_name, subscription_id[0:6])
 
     register_providers()
@@ -377,7 +377,7 @@ def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_na
         client = _graph_client_factory()
         if not service_principal:
             # --service-principal not specified, try to load it from local disk
-            principalObj = load_acs_service_principal()
+            principalObj = load_acs_service_principal(subscription_id)
             if principalObj:
                 service_principal = principalObj.get('service_principal')
                 client_secret = principalObj.get('client_secret')
@@ -391,7 +391,7 @@ def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_na
 
                 service_principal = _build_service_principal(client, name, url, client_secret)
                 logger.info('Created a service principal: %s', service_principal)
-                store_acs_service_principal(client_secret, service_principal)
+                store_acs_service_principal(subscription_id, client_secret, service_principal)
             # Either way, update the role assignment, this fixes things if we fail part-way through
             _add_role_assignment('Owner', service_principal)
         else:
@@ -404,25 +404,35 @@ def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_na
     ops = get_mgmt_service_client(ACSClient).acs
     return ops.create_or_update(resource_group_name, deployment_name, dns_name_prefix, name, ssh_key_value, content_version=content_version, admin_username=admin_username, agent_count=agent_count, agent_vm_size=agent_vm_size, location=location, master_count=master_count, orchestrator_type=orchestrator_type, tags=tags, custom_headers=custom_headers, raw=raw, operation_config=operation_config)
 
-def store_acs_service_principal(client_secret, service_principal):
+def store_acs_service_principal(subscription_id, client_secret, service_principal, config_path=os.path.join(get_config_dir(), 'acsServicePrincipal.json')):
     obj = {}
     if client_secret:
         obj['client_secret'] = client_secret
     if service_principal:
         obj['service_principal'] = service_principal
 
-    configPath = os.path.join(get_config_dir(), 'acsServicePrincipal.json')
-    with os.fdopen(os.open(configPath, os.O_RDWR|os.O_CREAT|os.O_TRUNC, 0o600),
-                   'w+') as spFile:
-        json.dump(obj, spFile)
+    fullConfig = load_acs_service_principals(config_path=config_path)
+    if not fullConfig:
+        fullConfig = {}
+    fullConfig[subscription_id] = obj
 
-def load_acs_service_principal():
-    configPath = os.path.join(get_config_dir(), 'acsServicePrincipal.json')
-    if not os.path.exists(configPath):
+    with os.fdopen(os.open(config_path, os.O_RDWR|os.O_CREAT|os.O_TRUNC, 0o600),
+                   'w+') as spFile:
+        json.dump(fullConfig, spFile)
+
+def load_acs_service_principal(subscription_id, config_path=os.path.join(get_config_dir(), 'acsServicePrincipal.json')):
+    config = load_acs_service_principals(config_path)
+    if not config:
         return None
-    fd = os.open(configPath, os.O_RDONLY)
+    return config.get(subscription_id)
+
+def load_acs_service_principals(config_path):
+    if not os.path.exists(config_path):
+        return None
+    fd = os.open(config_path, os.O_RDONLY)
     try:
-        return json.loads(os.fdopen(fd).read())
+        with os.fdopen(fd) as f:
+            return json.loads(f.read())
     except: #pylint: disable=bare-except
         return None
 
